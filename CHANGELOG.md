@@ -1,3 +1,47 @@
+## [13.0.11](https://github.com/johannesjo/super-productivity/compare/v13.0.10...v13.0.11) (2025-06-09)
+
+### Bug Fixes
+
+- add missing translation ([cd966bb](https://github.com/johannesjo/super-productivity/commit/cd966bb83885a1317646baab5ef5f466baaa209e))
+- adding task from issue provider with no default project leading to modelvalidaiton error ([96f5acd](https://github.com/johannesjo/super-productivity/commit/96f5acd34c462e8b27c5ca488babfc5418659642))
+- autofix for global config to always use default if possible ([74d28b3](https://github.com/johannesjo/super-productivity/commit/74d28b3f9b8fe4a73b5a102fab6b35442b8082f2))
+- autofix for global config to always use default if possible 2 ([530e88a](https://github.com/johannesjo/super-productivity/commit/530e88a9223b17dca9fed291302b269b29b27fe0))
+- autofix to default config if wrong value ([4cffd83](https://github.com/johannesjo/super-productivity/commit/4cffd83cb004cbfaa1b49bfd9ab93a7d517b4385))
+- cannot read properties of undefined [#4493](https://github.com/johannesjo/super-productivity/issues/4493) ([15d4c99](https://github.com/johannesjo/super-productivity/commit/15d4c9971290032ce71260e7aa5c2c24db05353d))
+- cleaning value and ctrl+v not working on windows [#4520](https://github.com/johannesjo/super-productivity/issues/4520) ([18d3929](https://github.com/johannesjo/super-productivity/commit/18d39291a1ee94c5139bb69ea29eda69ecc4f7a8))
+- default project setting not working anymore [#4442](https://github.com/johannesjo/super-productivity/issues/4442) ([f9c91ef](https://github.com/johannesjo/super-productivity/commit/f9c91ef8a23b86bbd55f901e56491d77e7a436ff))
+- Error Invalid param given to UpdateProjectOrder when inbox project is hidden [#4416](https://github.com/johannesjo/super-productivity/issues/4416) ([ca45037](https://github.com/johannesjo/super-productivity/commit/ca4503764aae522840b8545cac07253eea296287))
+- error when entering invalid value [#4452](https://github.com/johannesjo/super-productivity/issues/4452) ([bc7b3a6](https://github.com/johannesjo/super-productivity/commit/bc7b3a666382f64bf90247a28af23f4fc3c8c7f1))
+- error with new task creation when there is no default estimate [#4423](https://github.com/johannesjo/super-productivity/issues/4423) ([4d59024](https://github.com/johannesjo/super-productivity/commit/4d59024c7820a84e993b14fe23a3cc7ca77d9bdc))
+- **i18n:** avoid error "Parameter 'key' required" [#4133](https://github.com/johannesjo/super-productivity/issues/4133) ([a06d88e](https://github.com/johannesjo/super-productivity/commit/a06d88eddf468c2f8b8b942d8bfa73c810441ef9))
+- **i18n:** avoid error "Parameter 'key' required" 2 [#4133](https://github.com/johannesjo/super-productivity/issues/4133) ([1f9138e](https://github.com/johannesjo/super-productivity/commit/1f9138ea3376b23d9cab0e05aeeef26ee17dfdff))
+- lint ([5e9e2a2](https://github.com/johannesjo/super-productivity/commit/5e9e2a2d89e3b1496812ff3ae43793683345d08c))
+- prevent model validation error ([83ce535](https://github.com/johannesjo/super-productivity/commit/83ce535e0b3c708cd3224c10761b7f3dca31d6b3))
+- re-enable reload ([9a23b5e](https://github.com/johannesjo/super-productivity/commit/9a23b5e9af34db1e1443b5c45e1b728448ca386c))
+- remove alert ([66954d7](https://github.com/johannesjo/super-productivity/commit/66954d74f312916d9bd9e79900032add4910e097))
+- **sync:** make android error handling more robust ([4d8fdf5](https://github.com/johannesjo/super-productivity/commit/4d8fdf59da8969c2cd9225cbfcc43d12f4c9757d))
+- **sync:** prevent multiple sync config dialogs on android ([c3b0d2e](https://github.com/johannesjo/super-productivity/commit/c3b0d2e8e8130c4327b54075cad3caca22c5bfe3))
+
+### Features
+
+- add 'isTrayShowCurrentCountdown' setting and corresponding translations ([ca18ffa](https://github.com/johannesjo/super-productivity/commit/ca18ffa7c20970282b79000efe924c317015dd98))
+- add 'isTrayShowCurrentCountdown' setting and corresponding translations ([73f74f9](https://github.com/johannesjo/super-productivity/commit/73f74f944554ece9bb50848c8643f1ce4cc08fd1))
+- Add due date for gitlab sync ([7bf9080](https://github.com/johannesjo/super-productivity/commit/7bf9080c200a740c26fe8069d7131d1c79398aa8))
+- also log validation errors for validation error ([9ca4fab](https://github.com/johannesjo/super-productivity/commit/9ca4fabdccb1f7bc5661722c0040457303b9feec))
+- **i18n:** add missing translation for domina mode [#4133](https://github.com/johannesjo/super-productivity/issues/4133) ([202bb36](https://github.com/johannesjo/super-productivity/commit/202bb3652ab109becd1acdeb64faff595467126d))
+- integrate 'isTrayShowCurrentCountdown' setting into tray message logic ([15815b3](https://github.com/johannesjo/super-productivity/commit/15815b3abffd9906788ca7add94b2eb5c0023ca2))
+- move setting down ([8f01367](https://github.com/johannesjo/super-productivity/commit/8f013675fce844e2105f370e406e395b26b7f421))
+- move setting down ([00bbe70](https://github.com/johannesjo/super-productivity/commit/00bbe7030208b35d8babe98acd45e6311eac6fa8))
+- **saf-droid:** outline ([ea2ca8e](https://github.com/johannesjo/super-productivity/commit/ea2ca8e622bb844f534f80a502f5ccb7d16d24b0))
+- **sync:** add base directory for android ([a73d4f1](https://github.com/johannesjo/super-productivity/commit/a73d4f177843997c0686ad69e8b682a8096f76ef))
+- **sync:** improve decrypt error dialog ([1adf94f](https://github.com/johannesjo/super-productivity/commit/1adf94f12dcd0fa38219d277398e55d844625139))
+- **sync:** make android folder selection work again [#4390](https://github.com/johannesjo/super-productivity/issues/4390) ([8e91360](https://github.com/johannesjo/super-productivity/commit/8e91360305a37b76852066626210c8849578f460))
+- **sync:** make file sync base more robust ([6c06eb0](https://github.com/johannesjo/super-productivity/commit/6c06eb05f82d2c36cd227a8f62d7759e12109b34))
+- **sync:** make local file sync work as it should ([0d0eb84](https://github.com/johannesjo/super-productivity/commit/0d0eb842378867e5d3cffde5666643e95e15ada7))
+- **sync:** minor adjustments ([9dc8f30](https://github.com/johannesjo/super-productivity/commit/9dc8f3069fe550046502c67b7295c3512eef80f5))
+- **sync:** simplify cfg [#4390](https://github.com/johannesjo/super-productivity/issues/4390) ([67e6434](https://github.com/johannesjo/super-productivity/commit/67e643490233c33e8cda8f4e62d45e50ed6390e8))
+- **sync:** use idb instead of capacitor preferences for saving config stuff [#4390](https://github.com/johannesjo/super-productivity/issues/4390) ([81572ec](https://github.com/johannesjo/super-productivity/commit/81572ec63c93f0396afb698502157e86f2f95085))
+
 ## [13.0.10](https://github.com/johannesjo/super-productivity/compare/v13.0.9...v13.0.10) (2025-05-16)
 
 ### Bug Fixes

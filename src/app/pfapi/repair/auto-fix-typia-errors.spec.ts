@@ -58,7 +58,7 @@ describe('autoFixTypiaErrors', () => {
     } as any);
   });
 
-  it('should do nothing for non expected values', () => {
+  it('should use defaults for globalConfig if no other value could be added', () => {
     const d = {
       globalConfig: {
         misc: {
@@ -70,7 +70,7 @@ describe('autoFixTypiaErrors', () => {
     expect(validateResult.success).toBe(false);
     const result = autoFixTypiaErrors(d, (validateResult as any).errors);
     expect(result.globalConfig.misc.startOfNextDay).not.toEqual(111);
-    expect(result.globalConfig.misc.startOfNextDay).toEqual(undefined as any);
+    expect(result.globalConfig.misc.startOfNextDay).toEqual(0 as any);
   });
 
   it('should sanitize null to undefined if model requests it', () => {

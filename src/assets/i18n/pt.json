@@ -610,7 +610,9 @@
         "MARK_AS_CHECKED": "Marcar atualizações como marcadas",
         "STATUS": "Status",
         "SUMMARY": "Resumo",
-        "TYPE": "Tipo"
+        "TYPE": "Tipo",
+        "ATTACHMENTS": "Anexos",
+        "UPLOAD_ATTACHMENT": "Carregar para a tarefa"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "Pacote de trabalho",
@@ -621,7 +623,8 @@
         "POST_TIME_SUCCESS": "OpenProject: entrada de hora criada com sucesso para {{issueTitle}}",
         "TRANSITION": "OpenProject: Atualizar tarefa \"{{issueKey}}\" para \"{{name}}\"",
         "TRANSITION_SUCCESS": "OpenProject: Tarefa {{issueKey}} atualizada para <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Transições carregadas. Utilize os campos abaixo para associá-las"
+        "TRANSITIONS_LOADED": "Transições carregadas. Utilize os campos abaixo para associá-las",
+        "ERR_NO_FILE": "Nenhum ficheiro selecionado"
       }
     },
     "PLANNER": {

@@ -2,15 +2,12 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   addReminderIdToTask,
-  deleteTask,
-  deleteTasks,
-  moveToArchive_,
   removeReminderFromTask,
   reScheduleTaskWithTime,
   scheduleTaskWithTime,
   unScheduleTask,
-  updateTask,
 } from './task.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { concatMap, filter, first, map, mergeMap, tap } from 'rxjs/operators';
 import { ReminderService } from '../../reminder/reminder.service';
 import { truncate } from '../../../util/truncate';
@@ -136,7 +133,7 @@ export class TaskReminderEffects {
   clearRemindersOnDelete$ = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(deleteTask),
+        ofType(TaskSharedActions.deleteTask),
         tap(({ task }) => {
           const deletedTaskIds = [task.id, ...task.subTaskIds];
           deletedTaskIds.forEach((id) => {
@@ -150,7 +147,7 @@ export class TaskReminderEffects {
   clearRemindersForArchivedTasks$ = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(moveToArchive_),
+        ofType(TaskSharedActions.moveToArchive),
         tap(({ tasks }) => {
           const flatTasks = flattenTasks(tasks);
           if (!flatTasks.length) {
@@ -168,7 +165,7 @@ export class TaskReminderEffects {
   clearMultipleReminders = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(deleteTasks),
+        ofType(TaskSharedActions.deleteTasks),
         tap(({ taskIds }) => {
           this._reminderService.removeRemindersByRelatedIds(taskIds);
         }),
@@ -179,7 +176,7 @@ export class TaskReminderEffects {
   unscheduleDoneTask$ = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(updateTask),
+        ofType(TaskSharedActions.updateTask),
         filter(({ task }) => !!task.changes.isDone),
         concatMap(({ task }) => this._taskService.getByIdOnce$(task.id as string)),
         tap((task) => {

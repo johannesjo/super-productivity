@@ -11,7 +11,9 @@ import { WorkContextType } from '../work-context/work-context.model';
 import { addTask, addSubTask, scheduleTaskWithTime } from '../tasks/store/task.actions';
 import { SubTaskRepeatTemplate } from './task-repeat-cfg.model';
 import { DEFAULT_TASK_REPEAT_CFG } from './task-repeat-cfg.model';
+import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import 'jasmine';
+
 
 describe('Task Repeat Config Tests', () => {
   let service: TaskRepeatCfgService;
@@ -182,6 +184,8 @@ describe('Task Repeat Config Tests', () => {
 
       expect(error).toBeDefined();
       expect(error?.message).toBe('No taskRepeatCfg.id');
+      expect(result.length).toBeGreaterThan(0);
+      expect(result[0].type).toEqual(TaskSharedActions.addTask.type);
     });
   });
 });

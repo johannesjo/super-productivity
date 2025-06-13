@@ -610,7 +610,9 @@
         "MARK_AS_CHECKED": "Merk oppdateringer som sjekket",
         "STATUS": "Status",
         "SUMMARY": "Sammendrag",
-        "TYPE": "Type"
+        "TYPE": "Type",
+        "ATTACHMENTS": "Vedlegg",
+        "UPLOAD_ATTACHMENT": "Last opp til oppgave"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "arbeidspakke",
@@ -621,7 +623,8 @@
         "POST_TIME_SUCCESS": "OpenProject: Vellykket opprettet tidsoppføring for {{issueTitle}}",
         "TRANSITION": "OpenProject: Sett problem \"{{issueKey}}\" til \"{{name}}\"",
         "TRANSITION_SUCCESS": "OpenProject: Sett problem {{issueKey}} til <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Overganger lastet inn. Bruk valgene nedenfor for å tilordne dem"
+        "TRANSITIONS_LOADED": "Overganger lastet inn. Bruk valgene nedenfor for å tilordne dem",
+        "ERR_NO_FILE": "Ingen fil valgt"
       }
     },
     "PLANNER": {

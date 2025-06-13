@@ -1,6 +1,14 @@
 import { inject, Injectable } from '@angular/core';
 import { createEffect } from '@ngrx/effects';
-import { filter, first, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import {
+  debounceTime,
+  filter,
+  first,
+  map,
+  switchMap,
+  tap,
+  withLatestFrom,
+} from 'rxjs/operators';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { removeTasksFromTodayTag } from '../../tag/store/tag.actions';
 import { Store } from '@ngrx/store';
@@ -21,8 +29,17 @@ export class TaskDueEffects {
   private _dayChangeAfterInit$ =
     this._dataInitStateService.isAllDataLoadedInitially$.pipe(
       switchMap(() => this._globalTrackingIntervalService.todayDateStr$),
-      // we wait to till the current sync is done
       switchMap(() => this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$),
+      // Add debounce to ensure sync has fully completed and status is updated
+      debounceTime(1000),
+      // Ensure we're not in the middle of another sync
+      switchMap((dateStr) =>
+        this._syncWrapperService.isSyncInProgress$.pipe(
+          filter((inProgress) => !inProgress),
+          first(),
+          map(() => dateStr),
+        ),
+      ),
     );
 
   // NOTE: this gets a lot of interference from tagEffect.preventParentAndSubTaskInTodayList$:

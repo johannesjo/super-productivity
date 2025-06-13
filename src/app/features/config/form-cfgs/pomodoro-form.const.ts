@@ -100,6 +100,7 @@ export const POMODORO_FORM_CFG: ConfigFormSection<PomodoroConfig> = {
         label: T.GCF.POMODORO.CYCLES_BEFORE_LONGER_BREAK,
         type: 'number',
         min: 1,
+        required: true,
       },
     },
   ],

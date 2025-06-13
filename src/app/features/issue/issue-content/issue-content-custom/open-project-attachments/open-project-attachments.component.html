@@ -1,0 +1,47 @@
+<div class="open-project-attachments">
+  @if (isUploading()) {
+    <div class="loading-wrapper">
+      <mat-progress-bar
+        color="primary"
+        mode="indeterminate"
+      ></mat-progress-bar>
+    </div>
+  } @else {
+    <button
+      mat-stroked-button
+      color="primary"
+      (click)="openProjectFileInput.click()"
+      class="upload-btn"
+    >
+      <mat-icon>cloud_upload</mat-icon>
+      {{ 'F.OPEN_PROJECT.ISSUE_CONTENT.UPLOAD_ATTACHMENT' | translate }}
+    </button>
+  }
+
+  <input
+    type="file"
+    #openProjectFileInput
+    hidden
+    (change)="onFileUpload($event)"
+  />
+
+  @if (allAttachments(); as attachments) {
+    @if (attachments && attachments.length > 0) {
+      <div class="attachment-dl-list">
+        @for (attachment of attachments; track attachment.id) {
+          <div class="attachment">
+            <a
+              [href]="attachment.path"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="attachment-inner"
+            >
+              <mat-icon class="attachment-icon">{{ attachment.icon }}</mat-icon>
+              <span class="attachment-title">{{ attachment.title }}</span>
+            </a>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

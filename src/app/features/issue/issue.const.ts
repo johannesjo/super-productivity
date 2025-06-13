@@ -30,6 +30,8 @@ import {
   DEFAULT_CALENDAR_CFG,
 } from './providers/calendar/calendar.const';
 
+export const DELAY_BEFORE_ISSUE_POLLING = 8000;
+
 export const GITLAB_TYPE: IssueProviderKey = 'GITLAB';
 export const GITHUB_TYPE: IssueProviderKey = 'GITHUB';
 export const JIRA_TYPE: IssueProviderKey = 'JIRA';

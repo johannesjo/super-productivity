@@ -77,6 +77,7 @@ function initListeners(): void {
       const mainWin = getWin();
       getSettings(mainWin, (settings: GlobalConfigState) => {
         const isTrayShowCurrentTask = settings.misc.isTrayShowCurrentTask;
+        const isTrayShowCurrentCountdown = settings.misc.isTrayShowCurrentCountdown;
 
         const msg =
           isTrayShowCurrentTask && currentTask
@@ -84,6 +85,7 @@ function initListeners(): void {
                 currentTask,
                 isPomodoroEnabled,
                 currentPomodoroSessionTime,
+                isTrayShowCurrentCountdown,
               )
             : '';
 
@@ -124,6 +126,7 @@ function createIndicatorMessage(
   task: TaskCopy,
   isPomodoroEnabled: boolean,
   currentPomodoroSessionTime: number,
+  isTrayShowCurrentCountdown: boolean,
 ): string {
   if (task && task.title) {
     let title = task.title;
@@ -132,18 +135,21 @@ function createIndicatorMessage(
       title = title.substring(0, 37) + '...';
     }
 
-    if (task.timeEstimate) {
-      const restOfTime = Math.max(task.timeEstimate - task.timeSpent, 0);
-      timeStr = getCountdownMessage(restOfTime);
-    } else if (task.timeSpent) {
-      timeStr = getCountdownMessage(task.timeSpent);
+    if (isTrayShowCurrentCountdown) {
+      if (task.timeEstimate) {
+        const restOfTime = Math.max(task.timeEstimate - task.timeSpent, 0);
+        timeStr = getCountdownMessage(restOfTime);
+      } else if (task.timeSpent) {
+        timeStr = getCountdownMessage(task.timeSpent);
+      }
+
+      if (isPomodoroEnabled) {
+        timeStr = getCountdownMessage(currentPomodoroSessionTime);
+      }
+      return `${title} ${timeStr}`;
     }
 
-    if (isPomodoroEnabled) {
-      timeStr = getCountdownMessage(currentPomodoroSessionTime);
-    }
-
-    return `${title} ${timeStr}`;
+    return title;
   }
 
   // NOTE: we need to make sure that this is always a string

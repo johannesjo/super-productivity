@@ -15,6 +15,7 @@ import {
 import { pfLog } from '../../../util/log';
 import { SyncProviderServiceInterface } from '../../sync-provider.interface';
 import { SyncProviderId } from '../../../pfapi.const';
+import { tryCatchInlineAsync } from '../../../../../util/try-catch-inline';
 
 interface DropboxApiOptions {
   method: HttpMethod;
@@ -149,7 +150,8 @@ export class DropboxApi {
         },
       });
 
-      const result = await response.json();
+      // with 429 response (Too many request) json is already parsed (sometimes?)
+      const result = await tryCatchInlineAsync(() => response.json(), response);
 
       if (!result.rev) {
         throw new NoRevAPIError();

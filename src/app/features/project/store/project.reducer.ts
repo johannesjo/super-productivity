@@ -5,14 +5,7 @@ import {
   WorkContextAdvancedCfg,
   WorkContextType,
 } from '../../work-context/work-context.model';
-import {
-  addTask,
-  convertToMainTask,
-  deleteTask,
-  moveToArchive_,
-  moveToOtherProject,
-  restoreTask,
-} from '../../tasks/store/task.actions';
+import { moveToOtherProject } from '../../tasks/store/task.actions';
 import {
   moveTaskDownInTodayList,
   moveTaskInTodayList,
@@ -31,12 +24,10 @@ import {
   arrayMoveToStart,
 } from '../../../util/array-move';
 import { filterOutId } from '../../../util/filter-out-id';
-import { unique } from '../../../util/unique';
 
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { migrateProjectState } from '../migrate-projects-state.util';
 import { MODEL_VERSION_KEY } from '../../../app.constants';
-import { Task } from '../../tasks/task.model';
 import { devError } from '../../../util/dev-error';
 import {
   addProject,
@@ -230,23 +221,38 @@ export const projectReducer = createReducer<ProjectState>(
   }),
 
   on(updateProjectOrder, (state, { ids }) => {
-    const currentIds = state.ids.filter((id) => id !== INBOX_PROJECT.id) as string[];
-    let newIds: string[] = ids;
-    if (ids.length !== currentIds.length) {
-      const allP = currentIds.map((id) => state.entities[id]) as Project[];
+    const existingIds = state.ids.filter((id) => id !== INBOX_PROJECT.id) as string[];
+    let newIds: string[] = ids.filter((id) => id !== INBOX_PROJECT.id) as string[];
+
+    if (newIds.length !== existingIds.length) {
+      const allP = existingIds.map((id) => state.entities[id]) as Project[];
       const archivedIds = allP.filter((p) => p.isArchived).map((p) => p.id);
       const unarchivedIds = allP.filter((p) => !p.isArchived).map((p) => p.id);
+      const hiddenIds = allP.filter((p) => p.isHiddenFromMenu).map((p) => p.id);
+      const visibleUnarchivedIds = allP
+        .filter((p) => !p.isArchived && !p.isHiddenFromMenu)
+        .map((p) => p.id);
+
       if (
-        ids.length === unarchivedIds.length &&
-        ids.length > 0 &&
+        newIds.length === visibleUnarchivedIds.length &&
+        newIds.length > 0 &&
+        visibleUnarchivedIds.includes(ids[0])
+      ) {
+        // Reordering visible unarchived projects - add back archived and hidden
+        newIds = [...ids, ...archivedIds, ...hiddenIds];
+      } else if (
+        newIds.length === unarchivedIds.length &&
+        newIds.length > 0 &&
         unarchivedIds.includes(ids[0])
       ) {
+        // Reordering all unarchived projects (including hidden) - add back archived
         newIds = [...ids, ...archivedIds];
       } else if (
-        ids.length === archivedIds.length &&
-        ids.length > 0 &&
+        newIds.length === archivedIds.length &&
+        newIds.length > 0 &&
         archivedIds.includes(ids[0])
       ) {
+        // Reordering archived projects - add back unarchived
         newIds = [...unarchivedIds, ...ids];
       } else {
         throw new Error('Invalid param given to UpdateProjectOrder');
@@ -545,101 +551,7 @@ export const projectReducer = createReducer<ProjectState>(
 
   // Task Actions
   // ------------
-  on(addTask, (state, { task, isAddToBottom, isAddToBacklog }) => {
-    const affectedProject = task.projectId && state.entities[task.projectId];
-    if (!affectedProject) return state; // if there is no projectId, no changes are needed
 
-    const prop: 'backlogTaskIds' | 'taskIds' =
-      isAddToBacklog && affectedProject.isEnableBacklog ? 'backlogTaskIds' : 'taskIds';
-
-    const changes: { [x: string]: any[] } = {};
-    if (isAddToBottom) {
-      changes[prop] = [...affectedProject[prop], task.id];
-    } else {
-      // TODO #1382 get the currentTaskId from a different part of the state tree or via payload or _taskService
-      // const currentTaskId = payload.currentTaskId || this._taskService.currentTaskId
-      // const isAfterRunningTask = prop==='taskIds' && currentTaskId
-      // console.log('isAfterRunningTask?',isAfterRunningTask,'currentTaskId',currentTaskId);
-      // if (isAfterRunningTask) add the new task in the list after currentTaskId
-      // else { // add to the top
-      changes[prop] = [task.id, ...affectedProject[prop]];
-      //}
-    }
-    return projectAdapter.updateOne(
-      {
-        id: task.projectId as string,
-        changes,
-      },
-      state,
-    );
-  }),
-
-  on(convertToMainTask, (state, { task }) => {
-    const affectedEntity = task.projectId && state.entities[task.projectId];
-    return affectedEntity
-      ? projectAdapter.updateOne(
-          {
-            id: task.projectId as string,
-            changes: {
-              taskIds: [task.id, ...affectedEntity.taskIds],
-            },
-          },
-          state,
-        )
-      : state;
-  }),
-
-  on(deleteTask, (state, { task }) => {
-    const project = task.projectId && (state.entities[task.projectId] as Project);
-    return project
-      ? projectAdapter.updateOne(
-          {
-            id: task.projectId as string,
-            changes: {
-              taskIds: project.taskIds.filter((ptId) => ptId !== task.id),
-              backlogTaskIds: project.backlogTaskIds.filter((ptId) => ptId !== task.id),
-            },
-          },
-          state,
-        )
-      : state;
-  }),
-
-  on(moveToArchive_, (state, { tasks }) => {
-    const taskIdsToMoveToArchive = tasks.map((t: Task) => t.id);
-    const projectIds = unique<string>(
-      tasks
-        .map((t: Task) => t.projectId || null)
-        .filter((pid: string | null) => !!pid) as string[],
-    );
-    const updates: Update<Project>[] = projectIds.map((pid: string) => ({
-      id: pid,
-      changes: {
-        taskIds: (state.entities[pid] as Project).taskIds.filter(
-          (taskId) => !taskIdsToMoveToArchive.includes(taskId),
-        ),
-        backlogTaskIds: (state.entities[pid] as Project).backlogTaskIds.filter(
-          (taskId) => !taskIdsToMoveToArchive.includes(taskId),
-        ),
-      },
-    }));
-    return projectAdapter.updateMany(updates, state);
-  }),
-  on(restoreTask, (state, { task }) => {
-    if (!task.projectId) {
-      return state;
-    }
-
-    return projectAdapter.updateOne(
-      {
-        id: task.projectId,
-        changes: {
-          taskIds: [...(state.entities[task.projectId] as Project).taskIds, task.id],
-        },
-      },
-      state,
-    );
-  }),
   on(moveToOtherProject, (state, { task, targetProjectId }) => {
     const srcProjectId = task.projectId;
     const updates: Update<Project>[] = [];

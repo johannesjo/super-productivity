@@ -4,7 +4,7 @@ import { ConfigFormSection, SyncConfig } from '../global-config.model';
 import { LegacySyncProvider } from '../../../imex/sync/legacy-sync-provider.model';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { IS_ELECTRON } from '../../../app.constants';
-import { fileSyncElectron } from '../../../pfapi/pfapi-config';
+import { fileSyncDroid, fileSyncElectron } from '../../../pfapi/pfapi-config';
 
 export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
   title: T.F.SYNC.FORM.TITLE,
@@ -42,7 +42,6 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
     {
       hideExpression: (m, v, field) =>
         field?.parent?.model.syncProvider !== LegacySyncProvider.LocalFile ||
-        // hide for android
         IS_ANDROID_WEB_VIEW,
       key: 'localFileSync',
       fieldGroup: [
@@ -59,6 +58,27 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         },
       ],
     },
+    {
+      hideExpression: (m, v, field) =>
+        field?.parent?.model.syncProvider !== LegacySyncProvider.LocalFile ||
+        !IS_ANDROID_WEB_VIEW,
+      key: 'localFileSync',
+      fieldGroup: [
+        {
+          type: 'btn',
+          key: 'safFolderUri',
+          templateOptions: {
+            text: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FOLDER_PATH,
+            required: true,
+            onClick: () => {
+              // NOTE: this actually sets the value in the model
+              return fileSyncDroid.setupSaf();
+            },
+          },
+        },
+      ],
+    },
+
     {
       hideExpression: (m, v, field) =>
         field?.parent?.model.syncProvider !== LegacySyncProvider.WebDAV,

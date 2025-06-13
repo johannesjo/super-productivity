@@ -8,7 +8,7 @@ import {
   MatDialogActions,
 } from '@angular/material/dialog';
 import { SnackService } from '../../../../../../core/snack/snack.service';
-import { JiraIssue } from '../../jira-issue/jira-issue.model';
+import { JiraIssue } from '../../jira-issue.model';
 import { Task } from '../../../../../tasks/task.model';
 import { T } from '../../../../../../t.const';
 import moment from 'moment';

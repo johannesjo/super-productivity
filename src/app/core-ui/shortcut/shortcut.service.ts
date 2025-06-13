@@ -140,7 +140,7 @@ export class ShortcutService {
       // } else if (checkKeyCombo(ev, keys.goToFocusMode)) {
       //   this._router.navigate(['/focus-view']);
     } else if (checkKeyCombo(ev, keys.showSearchBar)) {
-      this._layoutService.toggleSearchBar();
+      this._router.navigate(['/search']);
       ev.preventDefault();
     } else if (checkKeyCombo(ev, keys.toggleSideNav)) {
       this._layoutService.toggleSideNav();

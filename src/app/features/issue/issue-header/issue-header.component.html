@@ -1,21 +1,7 @@
-@if (task?.issueType === JIRA_TYPE) {
-  <jira-issue-header [task]="task"></jira-issue-header>
+@if (task().issueWasUpdated) {
+  <mat-icon>update</mat-icon>
+} @else {
+  <mat-icon [svgIcon]="ISSUE_PROVIDER_ICON_MAP[task().issueType!]"></mat-icon>
 }
-@if (task?.issueType === GITHUB_TYPE) {
-  <github-issue-header [task]="task"></github-issue-header>
-}
-@if (task?.issueType === REDMINE_TYPE) {
-  <redmine-issue-header [task]="task"></redmine-issue-header>
-}
-@if (task?.issueType === GITLAB_TYPE) {
-  <gitlab-issue-header [task]="task"></gitlab-issue-header>
-}
-@if (task?.issueType === CALDAV_TYPE) {
-  <caldav-issue-header [task]="task"></caldav-issue-header>
-}
-@if (task?.issueType === OPEN_PROJECT_TYPE) {
-  <open-project-issue-header [task]="task"></open-project-issue-header>
-}
-@if (task?.issueType === GITEA_TYPE) {
-  <gitea-issue-header [task]="task"></gitea-issue-header>
-}
+
+<span>{{ ISSUE_PROVIDER_HUMANIZED[task().issueType!] }}</span>

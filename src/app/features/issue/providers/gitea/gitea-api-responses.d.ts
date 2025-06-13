@@ -1,4 +1,4 @@
-import { GiteaIssueStateOptions } from './gitea-issue/gitea-issue.model';
+import { GiteaIssueStateOptions } from './gitea-issue.model';
 
 export type GiteaIssueState =
   | GiteaIssueStateOptions.open

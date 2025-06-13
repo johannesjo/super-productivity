@@ -1,4 +1,4 @@
-import { GiteaIssue } from './gitea-issue/gitea-issue.model';
+import { GiteaIssue } from './gitea-issue.model';
 import { truncate } from '../../../../util/truncate';
 
 export const formatGiteaIssueTitle = ({ number, title }: GiteaIssue): string => {

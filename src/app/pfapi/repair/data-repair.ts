@@ -70,6 +70,7 @@ export const dataRepair = (
   dataOut = _createInboxProjectIfNecessary(dataOut);
   dataOut = _fixOrphanedNotes(dataOut);
   dataOut = _removeNonExistentProjectIdsFromTasks(dataOut);
+  dataOut = _removeNonExistentTagsFromTasks(dataOut);
   dataOut = _addInboxProjectIdIfNecessary(dataOut);
   dataOut = autoFixTypiaErrors(dataOut, errors);
 
@@ -422,6 +423,74 @@ const _removeNonExistentProjectIdsFromTasks = (
       delete t.projectId;
     }
   });
+
+  return data;
+};
+
+const _removeNonExistentTagsFromTasks = (
+  data: AppDataCompleteNew,
+): AppDataCompleteNew => {
+  const { task, tag, archiveYoung } = data;
+  const tagIds: string[] = tag.ids as string[];
+  const taskIds: string[] = task.ids;
+  const taskArchiveIds: string[] = archiveYoung.task.ids as string[];
+  let removedCount = 0;
+
+  // Helper function to filter valid tags
+  // Note: We exclude TODAY_TAG.id as it's handled separately and removed elsewhere
+  const filterValidTags = (taskTagIds: string[]): string[] => {
+    return taskTagIds.filter((tagId) => {
+      // Skip TODAY_TAG as it's handled elsewhere
+      if (tagId === TODAY_TAG.id) {
+        return false;
+      }
+      return tagIds.includes(tagId);
+    });
+  };
+
+  // Fix tasks in main task state
+  taskIds.forEach((id) => {
+    const t = task.entities[id] as TaskCopy;
+    if (t.tagIds && t.tagIds.length > 0) {
+      const validTagIds = filterValidTags(t.tagIds);
+      if (validTagIds.length !== t.tagIds.length) {
+        const removedTags = t.tagIds.filter(
+          (tagId) => !tagIds.includes(tagId) && tagId !== TODAY_TAG.id,
+        );
+        if (removedTags.length > 0) {
+          console.log(
+            `Removing non-existent tags from task ${t.id}: ${removedTags.join(', ')}`,
+          );
+          removedCount += removedTags.length;
+        }
+        t.tagIds = validTagIds;
+      }
+    }
+  });
+
+  // Fix tasks in archive
+  taskArchiveIds.forEach((id) => {
+    const t = archiveYoung.task.entities[id] as TaskCopy;
+    if (t.tagIds && t.tagIds.length > 0) {
+      const validTagIds = filterValidTags(t.tagIds);
+      if (validTagIds.length !== t.tagIds.length) {
+        const removedTags = t.tagIds.filter(
+          (tagId) => !tagIds.includes(tagId) && tagId !== TODAY_TAG.id,
+        );
+        if (removedTags.length > 0) {
+          console.log(
+            `Removing non-existent tags from archive task ${t.id}: ${removedTags.join(', ')}`,
+          );
+          removedCount += removedTags.length;
+        }
+        t.tagIds = validTagIds;
+      }
+    }
+  });
+
+  if (removedCount > 0) {
+    console.log(`Total non-existent tags removed from tasks: ${removedCount}`);
+  }
 
   return data;
 };

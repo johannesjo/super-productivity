@@ -21,6 +21,7 @@ export type MiscConfig = Readonly<{
   isDisableAnimations: boolean;
   // optional because it was added later
   isShowTipLonger?: boolean;
+  isTrayShowCurrentCountdown?: boolean;
 }>;
 
 export type ShortSyntaxConfig = Readonly<{
