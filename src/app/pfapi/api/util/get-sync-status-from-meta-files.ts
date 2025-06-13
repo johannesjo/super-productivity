@@ -7,6 +7,7 @@ import {
   SyncInvalidTimeValuesError,
 } from '../errors/errors';
 import { pfLog } from './log';
+import { devError } from '../../../util/dev-error';
 
 // TODO unit test the hell out of this
 export const getSyncStatusFromMetaFiles = (
@@ -70,8 +71,17 @@ export const getSyncStatusFromMetaFiles = (
             local,
             remote,
           });
+          // NOTE this is so unlikely that we can safely resume, that data is in sync even though
+          // lastSync was not properly saved
+          if (local.lastUpdate === remote.lastUpdate) {
+            devError('lastSyncedUpdate is not up to date but timestamps match');
+            return {
+              status: SyncStatus.InSync,
+            };
+          }
+
           return {
-            status: SyncStatus.InSync,
+            status: SyncStatus.Conflict,
           };
         default:
           throw new ImpossibleError();
@@ -168,6 +178,11 @@ const _checkForUpdate = (params: {
     } else if (hasLocalChanges) {
       // Local has changes and remote doesn't
       return UpdateCheckResult.RemoteUpdateRequired;
+    } else if (lastSync === local) {
+      // This is an impossible scenario - we can't have synced at the exact same time
+      // as our local update while the remote is older. This indicates corruption/conflict.
+      pfLog(0, 'CONFLICT: local > remote but lastSync === local (impossible scenario)');
+      return UpdateCheckResult.DataDiverged;
     } else {
       // This shouldn't happen - local is newer but no changes since sync
       return UpdateCheckResult.LastSyncNotUpToDate;
