@@ -6,7 +6,7 @@
   "minSupVersion": "13.0.0",
   "description": "A minimal test plugin for e2e upload testing",
   "hooks": ["taskComplete"],
-  "permissions": ["PluginAPI.showSnack", "PluginAPI.getTasks"],
+  "permissions": ["showSnack", "getTasks"],
   "iFrame": false,
   "isSkipMenuEntry": true,
   "type": "standard",
