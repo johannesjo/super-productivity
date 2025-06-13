@@ -33,13 +33,25 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
 
   async isReady(): Promise<boolean> {
     const privateCfg = await this.privateCfg.load();
-    return !!(
+    const isConfigured = !!(
       privateCfg &&
       privateCfg.userName &&
       privateCfg.baseUrl &&
       privateCfg.syncFolderPath &&
       privateCfg.password
     );
+
+    if (isConfigured) {
+      // Ensure the sync folder structure exists
+      try {
+        await this._ensureSyncFolderExists(privateCfg);
+      } catch (e) {
+        pfLog(0, `${Webdav.L}.isReady() failed to ensure sync folder exists`, e);
+        // Don't fail isReady check, this will be handled during actual sync
+      }
+    }
+
+    return isConfigured;
   }
 
   async setPrivateCfg(privateCfg: WebdavPrivateCfg): Promise<void> {
@@ -56,6 +68,14 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
       const meta = await this._api.getFileMeta(filePath, localRev);
       return { rev: meta.etag };
     } catch (e) {
+      // For metadata files, we expect them to not exist initially
+      if (e instanceof RemoteFileNotFoundAPIError && targetPath === '__meta_') {
+        pfLog(
+          2,
+          `${Webdav.L}.getFileRev() metadata file not found (expected for initial sync)`,
+        );
+        throw e;
+      }
       await this._handleDirectoryCreationOnError(e, targetPath, cfg, 'getFileRev');
       throw e;
     }
@@ -112,17 +132,52 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
     localRev: string,
   ): Promise<{ rev: string; dataStr: string }> {
     const { filePath } = await this._getConfigAndPath(targetPath);
-    const { rev, dataStr } = await this._api.download({
-      path: filePath,
-      localRev,
-    });
-    if (!dataStr) {
-      throw new InvalidDataSPError(targetPath);
+
+    try {
+      // For initial sync, we might have a localRev but the remote file doesn't exist yet
+      // In this case, we should try to download without the localRev first
+      let downloadResult;
+
+      try {
+        downloadResult = await this._api.download({
+          path: filePath,
+          localRev,
+        });
+      } catch (e: any) {
+        // If we get a "not modified" error but it's the meta file, try without localRev
+        // This handles the case where local has a rev but remote doesn't exist
+        if (e?.message?.includes('not modified') && targetPath === '__meta_') {
+          pfLog(
+            2,
+            `${Webdav.L}.downloadFile() retrying metadata download without localRev`,
+          );
+          downloadResult = await this._api.download({
+            path: filePath,
+            localRev: null,
+          });
+        } else {
+          throw e;
+        }
+      }
+
+      const { rev, dataStr } = downloadResult;
+      if (!dataStr) {
+        throw new InvalidDataSPError(targetPath);
+      }
+      if (typeof rev !== 'string') {
+        throw new NoRevAPIError();
+      }
+      return { rev, dataStr };
+    } catch (e) {
+      // For metadata files, we expect them to not exist initially
+      if (e instanceof RemoteFileNotFoundAPIError && targetPath === '__meta_') {
+        pfLog(
+          2,
+          `${Webdav.L}.downloadFile() metadata file not found (expected for initial sync)`,
+        );
+      }
+      throw e;
     }
-    if (typeof rev !== 'string') {
-      throw new NoRevAPIError();
-    }
-    return { rev, dataStr };
   }
 
   async removeFile(targetPath: string): Promise<void> {
@@ -266,6 +321,47 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
           pfLog(
             1,
             `${Webdav.L}._ensureFolderExists() ignoring error for ${currentPath}`,
+            error,
+          );
+        }
+      }
+    }
+  }
+
+  private async _ensureSyncFolderExists(cfg: WebdavPrivateCfg): Promise<void> {
+    // Parse the sync folder path to get all directory levels
+    const syncPath = cfg.syncFolderPath;
+    const pathParts = syncPath.split('/').filter((part) => part.length > 0);
+
+    // If we have an extra path (e.g., 'DEV'), add it to the parts
+    if (this._extraPath) {
+      pathParts.push(...this._extraPath.split('/').filter((part) => part.length > 0));
+    }
+
+    // Create each directory level progressively
+    for (let i = 1; i <= pathParts.length; i++) {
+      const currentPath = pathParts.slice(0, i).join('/');
+
+      try {
+        const exists = await this._api.checkFolderExists(currentPath);
+        if (!exists) {
+          pfLog(
+            2,
+            `${Webdav.L}._ensureSyncFolderExists() creating folder: ${currentPath}`,
+          );
+          await this._api.createFolder({ folderPath: currentPath });
+        }
+      } catch (error: any) {
+        if (error?.status === 405 || error?.status === 409) {
+          // Directory might already exist or MKCOL not supported
+          pfLog(
+            2,
+            `${Webdav.L}._ensureSyncFolderExists() folder might already exist: ${currentPath}`,
+          );
+        } else {
+          pfLog(
+            0,
+            `${Webdav.L}._ensureSyncFolderExists() error creating folder: ${currentPath}`,
             error,
           );
         }
