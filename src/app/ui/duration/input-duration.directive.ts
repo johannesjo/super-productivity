@@ -118,7 +118,10 @@ export class InputDurationDirective implements ControlValueAccessor, Validator, 
 
     // Apply built-in validation
     const value = control.value;
-    if (value === null || value === undefined || Number.isNaN(value) || value === 0) {
+
+    // For duration fields, we only validate that the value is a valid number
+    // 0 is a valid duration (0 minutes, 0 hours, etc.)
+    if (value === null || value === undefined || Number.isNaN(value)) {
       return {
         duration: {
           invalid: true,
