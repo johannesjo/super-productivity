@@ -67,7 +67,7 @@ export class PluginSecurityService {
     ];
 
     // Generate permission strings
-    return permissibleMethods.map((method) => `PluginAPI.${String(method)}`);
+    return permissibleMethods.map((method) => String(method));
   }
 
   /**
