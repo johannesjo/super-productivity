@@ -32,13 +32,139 @@ import { PlannerActions } from '../../features/planner/store/planner.actions';
 
 type ProjectTaskList = 'backlogTaskIds' | 'taskIds';
 type TaskEntity = { id: string; projectId?: string | null; tagIds?: string[] };
-type TaskWithTags = Task & {
-  tagIds: string[];
-};
+type TaskWithTags = Task & { tagIds: string[] };
+type ActionHandler = (state: RootState) => RootState;
+type ActionHandlerMap = Record<string, ActionHandler>;
 
 // =============================================================================
 // MAIN ACTION HANDLERS
 // =============================================================================
+
+// Organized action handler mappings by domain
+const createActionHandlers = (state: RootState, action: Action): ActionHandlerMap => ({
+  // Task Management
+  [TaskSharedActions.addTask.type]: () => {
+    const { task, isAddToBottom, isAddToBacklog } = action as ReturnType<
+      typeof TaskSharedActions.addTask
+    >;
+    return handleAddTask(state, task, isAddToBottom, isAddToBacklog);
+  },
+  [TaskSharedActions.convertToMainTask.type]: () => {
+    const { task, parentTagIds, isPlanForToday } = action as ReturnType<
+      typeof TaskSharedActions.convertToMainTask
+    >;
+    return handleConvertToMainTask(state, task, parentTagIds, isPlanForToday);
+  },
+  [TaskSharedActions.deleteTask.type]: () => {
+    const { task } = action as ReturnType<typeof TaskSharedActions.deleteTask>;
+    return handleDeleteTask(state, task);
+  },
+  [TaskSharedActions.deleteTasks.type]: () => {
+    const { taskIds } = action as ReturnType<typeof TaskSharedActions.deleteTasks>;
+    return handleDeleteTasks(state, taskIds);
+  },
+  [TaskSharedActions.updateTask.type]: () => {
+    const { task, isIgnoreShortSyntax } = action as ReturnType<
+      typeof TaskSharedActions.updateTask
+    >;
+    return handleUpdateTask(state, task, isIgnoreShortSyntax);
+  },
+
+  // Task Lifecycle
+  [TaskSharedActions.moveToArchive.type]: () => {
+    const { tasks } = action as ReturnType<typeof TaskSharedActions.moveToArchive>;
+    return handleMoveToArchive(state, tasks);
+  },
+  [TaskSharedActions.restoreTask.type]: () => {
+    const { task, subTasks } = action as ReturnType<typeof TaskSharedActions.restoreTask>;
+    return handleRestoreTask(state, task, subTasks);
+  },
+
+  // Task Scheduling
+  [TaskSharedActions.scheduleTaskWithTime.type]: () => {
+    const { task, dueWithTime } = action as ReturnType<
+      typeof TaskSharedActions.scheduleTaskWithTime
+    >;
+    return handleScheduleTaskWithTime(state, task, dueWithTime);
+  },
+  [TaskSharedActions.reScheduleTaskWithTime.type]: () => {
+    const { task, dueWithTime } = action as ReturnType<
+      typeof TaskSharedActions.reScheduleTaskWithTime
+    >;
+    return handleScheduleTaskWithTime(state, task, dueWithTime);
+  },
+  [TaskSharedActions.unscheduleTask.type]: () => {
+    const { id } = action as ReturnType<typeof TaskSharedActions.unscheduleTask>;
+    return handleUnScheduleTask(state, id);
+  },
+
+  // Project Management
+  [TaskSharedActions.moveToOtherProject.type]: () => {
+    const { task, targetProjectId } = action as ReturnType<
+      typeof TaskSharedActions.moveToOtherProject
+    >;
+    return handleMoveToOtherProject(state, task, targetProjectId);
+  },
+  [TaskSharedActions.deleteProject.type]: () => {
+    const { allTaskIds } = action as ReturnType<typeof TaskSharedActions.deleteProject>;
+    return handleDeleteProject(state, allTaskIds);
+  },
+
+  // Today Tag Management
+  [TaskSharedActions.planTasksForToday.type]: () => {
+    const { taskIds, parentTaskMap = {} } = action as ReturnType<
+      typeof TaskSharedActions.planTasksForToday
+    >;
+    return handlePlanTasksForToday(state, taskIds, parentTaskMap);
+  },
+  [TaskSharedActions.removeTasksFromTodayTag.type]: () => {
+    const { taskIds } = action as ReturnType<
+      typeof TaskSharedActions.removeTasksFromTodayTag
+    >;
+    return handleRemoveTasksFromTodayTag(state, taskIds);
+  },
+  [TaskSharedActions.moveTaskInTodayTagList.type]: () => {
+    const { toTaskId, fromTaskId } = action as ReturnType<
+      typeof TaskSharedActions.moveTaskInTodayTagList
+    >;
+    return handleMoveTaskInTodayTagList(state, toTaskId, fromTaskId);
+  },
+
+  // Tag Management
+  [TaskSharedActions.removeTagsForAllTasks.type]: () => {
+    const { tagIdsToRemove } = action as ReturnType<
+      typeof TaskSharedActions.removeTagsForAllTasks
+    >;
+    return handleRemoveTagsForAllTasks(state, tagIdsToRemove);
+  },
+
+  // Planner Actions
+  [PlannerActions.transferTask.type]: () => {
+    const { task, today, targetIndex, newDay, prevDay, targetTaskId } =
+      action as ReturnType<typeof PlannerActions.transferTask>;
+    return handleTransferTask(
+      state,
+      task,
+      today,
+      targetIndex,
+      newDay,
+      prevDay,
+      targetTaskId,
+    );
+  },
+  [PlannerActions.planTaskForDay.type]: () => {
+    const { task, day, isAddToTop } = action as ReturnType<
+      typeof PlannerActions.planTaskForDay
+    >;
+    return handlePlanTaskForDay(state, task, day, isAddToTop || false);
+  },
+  [PlannerActions.moveBeforeTask.type]: () => {
+    const { fromTask, toTaskId } = action as ReturnType<
+      typeof PlannerActions.moveBeforeTask
+    >;
+    return handleMoveBeforeTask(state, fromTask, toTaskId);
+  },
+});
 
 /**
  * Meta-reducer that handles cross-cutting concerns for task, project, and tag state updates
@@ -47,128 +173,10 @@ export const taskSharedMetaReducer: MetaReducer = (
   reducer: ActionReducer<any, Action>,
 ) => {
   return (state: unknown, action: Action) => {
-    if (!state) {
-      return reducer(state, action);
-    }
+    if (!state) return reducer(state, action);
 
-    // Type guard to ensure we have a RootState-like object
     const rootState = state as RootState;
-    const actionHandlers: Record<string, (state: RootState) => RootState> = {
-      [TaskSharedActions.addTask.type]: () => {
-        const { task, isAddToBottom, isAddToBacklog } = action as ReturnType<
-          typeof TaskSharedActions.addTask
-        >;
-        return handleAddTask(rootState, task, isAddToBottom, isAddToBacklog);
-      },
-      [TaskSharedActions.convertToMainTask.type]: () => {
-        const { task, parentTagIds, isPlanForToday } = action as ReturnType<
-          typeof TaskSharedActions.convertToMainTask
-        >;
-        return handleConvertToMainTask(rootState, task, parentTagIds, isPlanForToday);
-      },
-      [TaskSharedActions.deleteTask.type]: () => {
-        const { task } = action as ReturnType<typeof TaskSharedActions.deleteTask>;
-        return handleDeleteTask(rootState, task);
-      },
-      [TaskSharedActions.deleteTasks.type]: () => {
-        const { taskIds } = action as ReturnType<typeof TaskSharedActions.deleteTasks>;
-        return handleDeleteTasks(rootState, taskIds);
-      },
-      [TaskSharedActions.moveToArchive.type]: () => {
-        const { tasks } = action as ReturnType<typeof TaskSharedActions.moveToArchive>;
-        return handleMoveToArchive(rootState, tasks);
-      },
-      [TaskSharedActions.restoreTask.type]: () => {
-        const { task, subTasks } = action as ReturnType<
-          typeof TaskSharedActions.restoreTask
-        >;
-        return handleRestoreTask(rootState, task, subTasks);
-      },
-      [TaskSharedActions.scheduleTaskWithTime.type]: () => {
-        const { task, dueWithTime } = action as ReturnType<
-          typeof TaskSharedActions.scheduleTaskWithTime
-        >;
-        return handleScheduleTaskWithTime(rootState, task, dueWithTime);
-      },
-      [TaskSharedActions.reScheduleTaskWithTime.type]: () => {
-        const { task, dueWithTime } = action as ReturnType<
-          typeof TaskSharedActions.reScheduleTaskWithTime
-        >;
-        return handleScheduleTaskWithTime(rootState, task, dueWithTime);
-      },
-      [TaskSharedActions.unscheduleTask.type]: () => {
-        const { id } = action as ReturnType<typeof TaskSharedActions.unscheduleTask>;
-        return handleUnScheduleTask(rootState, id);
-      },
-      [TaskSharedActions.updateTask.type]: () => {
-        const { task, isIgnoreShortSyntax } = action as ReturnType<
-          typeof TaskSharedActions.updateTask
-        >;
-        return handleUpdateTask(rootState, task, isIgnoreShortSyntax);
-      },
-      [TaskSharedActions.moveToOtherProject.type]: () => {
-        const { task, targetProjectId } = action as ReturnType<
-          typeof TaskSharedActions.moveToOtherProject
-        >;
-        return handleMoveToOtherProject(rootState, task, targetProjectId);
-      },
-      [TaskSharedActions.deleteProject.type]: () => {
-        const { allTaskIds } = action as ReturnType<
-          typeof TaskSharedActions.deleteProject
-        >;
-        return handleDeleteProject(rootState, allTaskIds);
-      },
-      [TaskSharedActions.planTasksForToday.type]: () => {
-        const { taskIds, parentTaskMap = {} } = action as ReturnType<
-          typeof TaskSharedActions.planTasksForToday
-        >;
-        return handlePlanTasksForToday(rootState, taskIds, parentTaskMap);
-      },
-      [TaskSharedActions.removeTasksFromTodayTag.type]: () => {
-        const { taskIds } = action as ReturnType<
-          typeof TaskSharedActions.removeTasksFromTodayTag
-        >;
-        return handleRemoveTasksFromTodayTag(rootState, taskIds);
-      },
-      [TaskSharedActions.removeTagsForAllTasks.type]: () => {
-        const { tagIdsToRemove } = action as ReturnType<
-          typeof TaskSharedActions.removeTagsForAllTasks
-        >;
-        return handleRemoveTagsForAllTasks(rootState, tagIdsToRemove);
-      },
-      [PlannerActions.transferTask.type]: () => {
-        const { task, today, targetIndex, newDay, prevDay, targetTaskId } =
-          action as ReturnType<typeof PlannerActions.transferTask>;
-        return handleTransferTask(
-          rootState,
-          task,
-          today,
-          targetIndex,
-          newDay,
-          prevDay,
-          targetTaskId,
-        );
-      },
-      [PlannerActions.planTaskForDay.type]: () => {
-        const { task, day, isAddToTop } = action as ReturnType<
-          typeof PlannerActions.planTaskForDay
-        >;
-        return handlePlanTaskForDay(rootState, task, day, isAddToTop || false);
-      },
-      [PlannerActions.moveBeforeTask.type]: () => {
-        const { fromTask, toTaskId } = action as ReturnType<
-          typeof PlannerActions.moveBeforeTask
-        >;
-        return handleMoveBeforeTask(rootState, fromTask, toTaskId);
-      },
-      [TaskSharedActions.moveTaskInTodayTagList.type]: () => {
-        const { toTaskId, fromTaskId } = action as ReturnType<
-          typeof TaskSharedActions.moveTaskInTodayTagList
-        >;
-        return handleMoveTaskInTodayTagList(rootState, toTaskId, fromTaskId);
-      },
-    };
-
+    const actionHandlers = createActionHandlers(rootState, action);
     const handler = actionHandlers[action.type];
     const updatedState = handler ? handler(rootState) : rootState;
 
@@ -910,9 +918,11 @@ const handleMoveTaskInTodayTagList = (
   ]);
 };
 
-/**
- * Helper to update project state with adapter
- */
+// =============================================================================
+// SHARED HELPER FUNCTIONS
+// =============================================================================
+
+// State update helpers
 const updateProject = (
   state: RootState,
   projectId: string,
@@ -925,37 +935,41 @@ const updateProject = (
   ),
 });
 
-/**
- * Helper to update tags state with adapter
- */
 const updateTags = (state: RootState, updates: Update<Tag>[]): RootState => ({
   ...state,
   [TAG_FEATURE_NAME]: tagAdapter.updateMany(updates, state[TAG_FEATURE_NAME]),
 });
 
-/**
- * Helper to get tag entity safely
- */
+// Entity getters
 const getTag = (state: RootState, tagId: string): Tag =>
   state[TAG_FEATURE_NAME].entities[tagId] as Tag;
 
-/**
- * Helper to get project entity safely
- */
 const getProject = (state: RootState, projectId: string): Project =>
   state[PROJECT_FEATURE_NAME].entities[projectId] as Project;
 
-/**
- * Helper to add task to list (top or bottom)
- */
+// List manipulation helpers
 const addTaskToList = (
   taskIds: string[],
   taskId: string,
   isAddToBottom: boolean,
 ): string[] => (isAddToBottom ? [...taskIds, taskId] : [taskId, ...taskIds]);
 
-/**
- * Helper to remove tasks from list
- */
 const removeTasksFromList = (taskIds: string[], toRemove: string[]): string[] =>
   taskIds.filter((id) => !toRemove.includes(id));
+
+// Today tag specific helpers (currently unused but kept for potential future use)
+// const addTaskToTodayTag = (state: RootState, taskId: string, isAddToTop = false): RootState => {
+//   const todayTag = getTag(state, TODAY_TAG.id);
+//   const newTaskIds = isAddToTop
+//     ? addToTopOfList(todayTag.taskIds, taskId)
+//     : addToBottomOfList(todayTag.taskIds, taskId);
+//   return updateTodayTag(state, newTaskIds);
+// };
+
+// const removeTaskFromTodayTag = (state: RootState, taskId: string): RootState => {
+//   const todayTag = getTag(state, TODAY_TAG.id);
+//   return updateTodayTag(state, removeTasksFromList(todayTag.taskIds, [taskId]));
+// };
+
+// const isTaskInTodayTag = (state: RootState, taskId: string): boolean =>
+//   getTag(state, TODAY_TAG.id).taskIds.includes(taskId);
