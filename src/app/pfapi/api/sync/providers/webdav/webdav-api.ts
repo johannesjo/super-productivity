@@ -7,6 +7,7 @@ import {
   RemoteFileNotFoundAPIError,
 } from '../../../errors/errors';
 import { pfLog } from '../../../util/log';
+import { IS_ANDROID_WEB_VIEW } from '../../../../../util/is-android-web-view';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
@@ -207,6 +208,45 @@ export class WebdavApi {
   }
 
   async getFileMeta(path: string, localRev: string | null): Promise<FileMeta> {
+    // Use HEAD request directly on Android since CapacitorHttp doesn't support PROPFIND
+    if (IS_ANDROID_WEB_VIEW) {
+      try {
+        const headResponse = await this._makeRequest({
+          method: 'HEAD',
+          path,
+          ifNoneMatch: localRev,
+        });
+
+        const headers = this._responseHeadersToObject(headResponse);
+        const etag = this._findEtagInHeaders(headers);
+        const contentLength = headers['content-length'] || '0';
+        const lastModified = headers['last-modified'] || '';
+        const contentType = headers['content-type'] || '';
+
+        return {
+          filename: path.split('/').pop() || '',
+          basename: path.split('/').pop() || '',
+          lastmod: lastModified,
+          size: parseInt(contentLength, 10),
+          type: 'file',
+          etag: this._cleanRev(etag),
+          data: {
+            'content-type': contentType,
+            'content-length': contentLength,
+            'last-modified': lastModified,
+            etag: etag,
+            href: path,
+          },
+        };
+      } catch (headError: any) {
+        if (headError?.status === 404) {
+          throw new RemoteFileNotFoundAPIError(path);
+        }
+        throw headError;
+      }
+    }
+
+    // Use PROPFIND for non-Android platforms
     try {
       const response = await this._makeRequest({
         method: 'PROPFIND',
@@ -870,6 +910,25 @@ export class WebdavApi {
   }
 
   async checkFolderExists(folderPath: string): Promise<boolean> {
+    // Use HEAD request on Android since CapacitorHttp doesn't support PROPFIND
+    if (IS_ANDROID_WEB_VIEW) {
+      try {
+        await this._makeRequest({
+          method: 'HEAD',
+          path: folderPath,
+        });
+        // If HEAD succeeds, assume it's a valid path (could be file or folder)
+        // WebDAV doesn't always provide clear directory distinction via HEAD
+        return true;
+      } catch (e: any) {
+        if (e?.status === 404) {
+          return false;
+        }
+        throw e;
+      }
+    }
+
+    // Use PROPFIND for non-Android platforms
     try {
       const response = await this._makeRequest({
         method: 'PROPFIND',
@@ -893,6 +952,17 @@ export class WebdavApi {
   }
 
   async listFolder(folderPath: string): Promise<FileMeta[]> {
+    // Return empty array on Android since CapacitorHttp doesn't support PROPFIND
+    // Folder listing is not critical for sync functionality
+    if (IS_ANDROID_WEB_VIEW) {
+      pfLog(
+        1,
+        `${WebdavApi.L}.listFolder() PROPFIND not supported on Android, returning empty list`,
+      );
+      return [];
+    }
+
+    // Use PROPFIND for non-Android platforms
     try {
       const response = await this._makeRequest({
         method: 'PROPFIND',
