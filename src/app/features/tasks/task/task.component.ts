@@ -82,7 +82,7 @@ import { TagToggleMenuListComponent } from '../../tag/tag-toggle-menu-list/tag-t
 import { Store } from '@ngrx/store';
 import { selectTodayTagTaskIds } from '../../tag/store/tag.reducer';
 import { planTasksForToday } from '../../tag/store/tag.actions';
-import { unScheduleTask } from '../store/task.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { environment } from '../../../../environments/environment';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
@@ -507,7 +507,10 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   unschedule(): void {
     this._store.dispatch(
-      unScheduleTask({ id: this.task().id, reminderId: this.task().reminderId }),
+      TaskSharedActions.unscheduleTask({
+        id: this.task().id,
+        reminderId: this.task().reminderId,
+      }),
     );
   }
 

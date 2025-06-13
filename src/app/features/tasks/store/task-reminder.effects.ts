@@ -1,10 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import {
-  addReminderIdToTask,
-  removeReminderFromTask,
-  unScheduleTask,
-} from './task.actions';
+import { addReminderIdToTask, removeReminderFromTask } from './task.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { concatMap, filter, first, map, mergeMap, tap } from 'rxjs/operators';
 import { ReminderService } from '../../reminder/reminder.service';
@@ -181,7 +177,7 @@ export class TaskReminderEffects {
           if (task.reminderId) {
             // TODO refactor to map with dispatch
             this._store.dispatch(
-              unScheduleTask({
+              TaskSharedActions.unscheduleTask({
                 id: task.id,
                 reminderId: task.reminderId,
               }),
@@ -249,7 +245,7 @@ export class TaskReminderEffects {
   );
   removeTaskReminderTrigger2$ = createEffect(() =>
     this._actions$.pipe(
-      ofType(unScheduleTask),
+      ofType(TaskSharedActions.unscheduleTask),
       filter(({ reminderId }) => !!reminderId),
       map(({ id, reminderId }) => {
         return removeReminderFromTask({

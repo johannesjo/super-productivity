@@ -24,7 +24,8 @@ import { PlannerActions } from '../store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { DatePipe } from '@angular/common';
 import { SnackService } from '../../../core/snack/snack.service';
-import { removeReminderFromTask, unScheduleTask } from '../../tasks/store/task.actions';
+import { removeReminderFromTask } from '../../tasks/store/task.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { truncate } from '../../../util/truncate';
 import { TASK_REMINDER_OPTIONS } from './task-reminder-options.const';
 import { FormsModule } from '@angular/forms';
@@ -237,7 +238,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     // TODO simplify
     if (this.data.task.reminderId) {
       this._store.dispatch(
-        unScheduleTask({
+        TaskSharedActions.unscheduleTask({
           id: this.data.task.id,
           reminderId: this.data.task.reminderId,
         }),
@@ -245,7 +246,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     } else if (this.plannedDayForTask === getWorklogStr()) {
       // to cover edge cases
       this._store.dispatch(
-        unScheduleTask({
+        TaskSharedActions.unscheduleTask({
           id: this.data.task.id,
           reminderId: this.data.task.reminderId,
           isSkipToast: true,
@@ -259,7 +260,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       });
     } else {
       this._store.dispatch(
-        unScheduleTask({
+        TaskSharedActions.unscheduleTask({
           id: this.data.task.id,
           reminderId: this.data.task.reminderId,
           isSkipToast: true,

@@ -5,7 +5,7 @@ import {
   WorkContextAdvancedCfg,
   WorkContextType,
 } from '../../work-context/work-context.model';
-import { moveToOtherProject } from '../../tasks/store/task.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import {
   moveTaskDownInTodayList,
   moveTaskInTodayList,
@@ -552,7 +552,7 @@ export const projectReducer = createReducer<ProjectState>(
   // Task Actions
   // ------------
 
-  on(moveToOtherProject, (state, { task, targetProjectId }) => {
+  on(TaskSharedActions.moveToOtherProject, (state, { task, targetProjectId }) => {
     const srcProjectId = task.projectId;
     const updates: Update<Project>[] = [];
 
