@@ -74,7 +74,13 @@ export const getSyncStatusFromMetaFiles = (
           // NOTE this is so unlikely that we can safely resume, that data is in sync even though
           // lastSync was not properly saved
           if (local.lastUpdate === remote.lastUpdate) {
-            devError('lastSyncedUpdate is not up to date but timestamps match');
+            devError(
+              'LastSyncedUpdate is not up to date but timestamps match - treating as InSync',
+            );
+            pfLog(
+              1,
+              'WARN: lastSyncedUpdate is not up to date but timestamps match - treating as InSync',
+            );
             return {
               status: SyncStatus.InSync,
             };
