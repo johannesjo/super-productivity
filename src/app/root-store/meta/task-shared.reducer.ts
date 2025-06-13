@@ -421,20 +421,36 @@ const handleScheduleTaskWithTime = (
   task: { id: string },
   dueWithTime: number,
 ): RootState => {
-  const todayTag = getTag(state, TODAY_TAG.id);
+  // First, update the task entity with the scheduling data
+  const updatedState = {
+    ...state,
+    [TASK_FEATURE_NAME]: taskAdapter.updateOne(
+      {
+        id: task.id,
+        changes: {
+          dueWithTime,
+          dueDay: undefined,
+        },
+      },
+      state[TASK_FEATURE_NAME],
+    ),
+  };
+
+  // Then, handle today tag updates
+  const todayTag = getTag(updatedState, TODAY_TAG.id);
   const isScheduledForToday = isToday(dueWithTime);
   const isCurrentlyInToday = todayTag.taskIds.includes(task.id);
 
-  // No change needed
+  // No tag change needed
   if (isScheduledForToday === isCurrentlyInToday) {
-    return state;
+    return updatedState;
   }
 
   const newTaskIds = isScheduledForToday
     ? unique([task.id, ...todayTag.taskIds]) // Add to top, prevent duplicates
     : todayTag.taskIds.filter((id) => id !== task.id); // Remove
 
-  return updateTags(state, [
+  return updateTags(updatedState, [
     {
       id: TODAY_TAG.id,
       changes: { taskIds: newTaskIds },
@@ -443,13 +459,29 @@ const handleScheduleTaskWithTime = (
 };
 
 const handleUnScheduleTask = (state: RootState, taskId: string): RootState => {
-  const todayTag = getTag(state, TODAY_TAG.id);
+  // First, update the task entity to clear scheduling data
+  const updatedState = {
+    ...state,
+    [TASK_FEATURE_NAME]: taskAdapter.updateOne(
+      {
+        id: taskId,
+        changes: {
+          dueDay: undefined,
+          dueWithTime: undefined,
+        },
+      },
+      state[TASK_FEATURE_NAME],
+    ),
+  };
+
+  // Then, handle today tag updates
+  const todayTag = getTag(updatedState, TODAY_TAG.id);
 
   if (!todayTag.taskIds.includes(taskId)) {
-    return state;
+    return updatedState;
   }
 
-  return updateTags(state, [
+  return updateTags(updatedState, [
     {
       id: TODAY_TAG.id,
       changes: {
