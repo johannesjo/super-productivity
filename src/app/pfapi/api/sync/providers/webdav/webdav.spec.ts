@@ -260,7 +260,7 @@ describe('Webdav', () => {
     });
 
     it('should handle 304 Not Modified response', async () => {
-      const notModifiedError = new Error('Not Modified');
+      const notModifiedError = new Error('File not modified: /sync/test.txt');
       (notModifiedError as any).status = 304;
 
       const mockResponse = {
@@ -268,10 +268,15 @@ describe('Webdav', () => {
         dataStr: 'file content',
       };
 
-      mockWebdavApi.download.and
-        .returnValue(Promise.reject(notModifiedError))
-        .withArgs({ path: '/sync/test.txt', localRev: null })
-        .and.returnValue(Promise.resolve(mockResponse));
+      // Setup spy to reject first call and resolve second call
+      mockWebdavApi.download.and.callFake((params: any) => {
+        if (params.localRev === 'local-rev') {
+          return Promise.reject(notModifiedError);
+        } else if (params.localRev === null) {
+          return Promise.resolve(mockResponse);
+        }
+        return Promise.reject(new Error('Unexpected call'));
+      });
 
       const result = await webdav.downloadFile('test.txt', 'local-rev');
 

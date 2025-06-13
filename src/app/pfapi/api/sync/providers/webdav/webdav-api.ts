@@ -241,6 +241,45 @@ export class WebdavApi {
       if (e?.status === 404) {
         throw new RemoteFileNotFoundAPIError(path);
       }
+
+      // Fallback to HEAD request if PROPFIND fails
+      if (e?.message?.includes('PROPFIND')) {
+        try {
+          const headResponse = await this._makeRequest({
+            method: 'HEAD',
+            path,
+            ifNoneMatch: localRev,
+          });
+
+          const headers = this._responseHeadersToObject(headResponse);
+          const etag = this._findEtagInHeaders(headers);
+          const contentLength = headers['content-length'] || '0';
+          const lastModified = headers['last-modified'] || '';
+          const contentType = headers['content-type'] || '';
+
+          return {
+            filename: path.split('/').pop() || '',
+            basename: path.split('/').pop() || '',
+            lastmod: lastModified,
+            size: parseInt(contentLength, 10),
+            type: 'file',
+            etag: this._cleanRev(etag),
+            data: {
+              'content-type': contentType,
+              'content-length': contentLength,
+              'last-modified': lastModified,
+              etag: etag,
+              href: path,
+            },
+          };
+        } catch (headError: any) {
+          if (headError?.status === 404) {
+            throw new RemoteFileNotFoundAPIError(path);
+          }
+          throw headError;
+        }
+      }
+
       throw e;
     }
   }
@@ -289,7 +328,10 @@ export class WebdavApi {
       // Handle different response statuses
       if (response.status === 304) {
         // Not Modified - file hasn't changed
-        throw new Error(`File not modified: ${path}`);
+        const error = new Error(`File not modified: ${path}`);
+        (error as any).status = 304;
+        (error as any).localRev = localRev;
+        throw error;
       }
 
       if (response.status === 206) {
@@ -451,14 +493,13 @@ export class WebdavApi {
       pfLog(0, `${WebdavApi.L}.remove() error`, { path, error: e });
 
       // Enhanced error handling for WebDAV DELETE
+      if (e instanceof RemoteFileNotFoundAPIError || e?.status === 404) {
+        // Not Found - resource doesn't exist, consider this success
+        pfLog(2, `${WebdavApi.L}.remove() resource not found (already deleted): ${path}`);
+        return;
+      }
+
       switch (e?.status) {
-        case 404:
-          // Not Found - resource doesn't exist, consider this success
-          pfLog(
-            2,
-            `${WebdavApi.L}.remove() resource not found (already deleted): ${path}`,
-          );
-          return;
         case 412:
           // Precondition Failed - etag mismatch
           if (expectedEtag) {
@@ -654,8 +695,10 @@ export class WebdavApi {
         206, // Partial Content
         207, // Multi-Status
         304, // Not Modified (for conditional requests)
+        405, // Method Not Allowed (let calling methods handle this)
         409, // Conflict (let calling methods handle this)
         412, // Precondition Failed (let calling methods handle this)
+        416, // Range Not Satisfiable (let calling methods handle this)
         423, // Locked (let calling methods handle this)
       ];
 
@@ -850,18 +893,26 @@ export class WebdavApi {
   }
 
   async listFolder(folderPath: string): Promise<FileMeta[]> {
-    const response = await this._makeRequest({
-      method: 'PROPFIND',
-      path: folderPath,
-      body: WebdavApi.PROPFIND_XML,
-      headers: {
-        'Content-Type': 'application/xml',
-        Depth: '1', // Get immediate children
-      },
-    });
+    try {
+      const response = await this._makeRequest({
+        method: 'PROPFIND',
+        path: folderPath,
+        body: WebdavApi.PROPFIND_XML,
+        headers: {
+          'Content-Type': 'application/xml',
+          Depth: '1', // Get immediate children
+        },
+      });
 
-    const xmlText = await response.text();
-    return this._parseMultiplePropsFromXml(xmlText, folderPath);
+      const xmlText = await response.text();
+      return this._parseMultiplePropsFromXml(xmlText, folderPath);
+    } catch (e: any) {
+      // Return empty array if PROPFIND is not supported
+      if (e?.message?.includes('PROPFIND')) {
+        return [];
+      }
+      throw e;
+    }
   }
 
   private _parseMultiplePropsFromXml(xmlText: string, basePath: string): FileMeta[] {

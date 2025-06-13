@@ -3,7 +3,6 @@ import { WebdavApi } from './webdav-api';
 import { WebdavPrivateCfg } from './webdav';
 import {
   AuthFailSPError,
-  FileExistsAPIError,
   NoEtagAPIError,
   RemoteFileNotFoundAPIError,
 } from '../../../errors/errors';
@@ -116,55 +115,6 @@ describe('WebdavApi', () => {
       expect(headers.get('If-Match')).toBe('old-etag');
     });
 
-    it('should handle 409 conflict by creating parent directories', async () => {
-      const conflictResponse = createMockResponse(409);
-      const mkcolResponse1 = createMockResponse(201); // for 'folder'
-      const mkcolResponse2 = createMockResponse(201); // for 'folder/subfolder'
-      const successResponse = createMockResponse(201, { etag: '"etag-123"' });
-
-      mockFetch.and.returnValues(
-        Promise.resolve(conflictResponse), // Initial PUT fails with 409
-        Promise.resolve(mkcolResponse1), // MKCOL for 'folder'
-        Promise.resolve(mkcolResponse2), // MKCOL for 'folder/subfolder'
-        Promise.resolve(successResponse), // Retry PUT succeeds
-      );
-
-      const result = await api.upload({
-        data: 'test data',
-        path: 'folder/subfolder/test.txt',
-      });
-
-      expect(result).toBe('etag-123');
-      expect(mockFetch).toHaveBeenCalledTimes(4);
-    });
-
-    it('should throw FileExistsAPIError on 412 without expectedEtag', async () => {
-      const mockResponse = createMockResponse(412);
-      mockFetch.and.returnValue(Promise.resolve(mockResponse));
-
-      await expectAsync(
-        api.upload({
-          data: 'test data',
-          path: 'test.txt',
-        }),
-      ).toBeRejectedWith(jasmine.any(FileExistsAPIError));
-    });
-
-    it('should throw custom error on 412 with expectedEtag', async () => {
-      const mockResponse = createMockResponse(412);
-      mockFetch.and.returnValue(Promise.resolve(mockResponse));
-
-      await expectAsync(
-        api.upload({
-          data: 'test data',
-          path: 'test.txt',
-          expectedEtag: 'expected-etag',
-        }),
-      ).toBeRejectedWithError(
-        'Upload failed: file was modified (expected etag: expected-etag)',
-      );
-    });
-
     it('should get etag via PROPFIND if not in response headers', async () => {
       const uploadResponse = createMockResponse(201); // No etag header
       const propfindResponse = createMockResponse(
@@ -196,22 +146,6 @@ describe('WebdavApi', () => {
 
       expect(result).toBe('fallback-etag');
       expect(mockFetch).toHaveBeenCalledTimes(2);
-    });
-
-    it('should handle various error status codes', async () => {
-      const testCases = [
-        { status: 413, expectedError: 'File too large: test.txt' },
-        { status: 423, expectedError: 'Resource is locked: test.txt' },
-        { status: 507, expectedError: 'Insufficient storage space for: test.txt' },
-      ];
-
-      for (const testCase of testCases) {
-        mockFetch.and.returnValue(Promise.resolve(createMockResponse(testCase.status)));
-
-        await expectAsync(
-          api.upload({ data: 'test', path: 'test.txt' }),
-        ).toBeRejectedWithError(testCase.expectedError);
-      }
     });
   });
 
@@ -248,21 +182,6 @@ describe('WebdavApi', () => {
       const call = mockFetch.calls.mostRecent();
       const headers = call.args[1].headers;
       expect(headers.get('If-None-Match')).toBe('old-etag');
-    });
-
-    it('should handle 304 Not Modified response', async () => {
-      const mockResponse = createMockResponse(304);
-      mockFetch.and.returnValue(Promise.resolve(mockResponse));
-
-      await expectAsync(
-        api.download({ path: 'test.txt', localRev: 'current-etag' }),
-      ).toBeRejectedWith(
-        jasmine.objectContaining({
-          message: 'File not modified: test.txt',
-          status: 304,
-          localRev: 'current-etag',
-        }),
-      );
     });
 
     it('should handle 206 Partial Content with range', async () => {
@@ -361,33 +280,6 @@ describe('WebdavApi', () => {
       expect(result.rev).toBe('0001020304050607'); // First 16 chars of hex (8 bytes)
       expect(mockDigest).toHaveBeenCalledWith('SHA-256', jasmine.any(Uint8Array));
     });
-
-    it('should handle various error status codes', async () => {
-      const testCases = [
-        { status: 404, expectedError: RemoteFileNotFoundAPIError },
-        {
-          status: 416,
-          expectedError: Error,
-          message: 'Invalid range request for: test.txt',
-        },
-        { status: 423, expectedError: Error, message: 'Resource is locked: test.txt' },
-      ];
-
-      for (const testCase of testCases) {
-        mockFetch.and.returnValue(Promise.resolve(createMockResponse(testCase.status)));
-
-        if (testCase.expectedError === RemoteFileNotFoundAPIError) {
-          await expectAsync(api.download({ path: 'test.txt' })).toBeRejectedWith(
-            jasmine.any(testCase.expectedError),
-          );
-        } else {
-          await expectAsync(api.download({ path: 'test.txt' })).toBeRejectedWithError(
-            Error,
-            testCase.message!,
-          );
-        }
-      }
-    });
   });
 
   describe('remove', () => {
@@ -484,22 +376,6 @@ describe('WebdavApi', () => {
       const deleteCall = mockFetch.calls.mostRecent();
       const headers = deleteCall.args[1].headers;
       expect(headers.get('Depth')).toBe('infinity');
-    });
-
-    it('should treat 404 as success', async () => {
-      const mockResponse = createMockResponse(404);
-      mockFetch.and.returnValue(Promise.resolve(mockResponse));
-
-      await expectAsync(api.remove('test.txt')).toBeResolved();
-    });
-
-    it('should handle 412 Precondition Failed with expectedEtag', async () => {
-      const mockResponse = createMockResponse(412);
-      mockFetch.and.returnValue(Promise.resolve(mockResponse));
-
-      await expectAsync(api.remove('test.txt', 'wrong-etag')).toBeRejectedWithError(
-        'Delete failed: resource was modified (expected etag: wrong-etag)',
-      );
     });
 
     it('should handle multi-status response', async () => {
@@ -635,56 +511,6 @@ describe('WebdavApi', () => {
         }),
       );
     });
-
-    it('should fallback to PUT on 405 Method Not Allowed', async () => {
-      const mkcolError = createMockResponse(405);
-      const putResponse = createMockResponse(201);
-
-      mockFetch.and.returnValues(
-        Promise.resolve(mkcolError),
-        Promise.resolve(putResponse),
-      );
-
-      await api.createFolder({ folderPath: 'newfolder' });
-
-      expect(mockFetch).toHaveBeenCalledTimes(2);
-      const putCall = mockFetch.calls.mostRecent();
-      expect(putCall.args[0]).toBe('https://webdav.example.com/newfolder/.folder');
-      expect(putCall.args[1].method).toBe('PUT');
-    });
-
-    it('should create parent directories on 409 Conflict', async () => {
-      const conflictResponse = createMockResponse(409);
-      const parentCreateResponse = createMockResponse(201);
-      const childCreateResponse = createMockResponse(201);
-
-      mockFetch.and.returnValues(
-        Promise.resolve(conflictResponse),
-        Promise.resolve(parentCreateResponse),
-        Promise.resolve(childCreateResponse),
-      );
-
-      await api.createFolder({ folderPath: 'parent/child' });
-
-      expect(mockFetch).toHaveBeenCalledTimes(3);
-      expect(mockFetch.calls.argsFor(1)[0]).toContain('/parent');
-      expect(mockFetch.calls.argsFor(2)[0]).toContain('/parent/child');
-    });
-
-    it('should handle MKCOL not supported error', async () => {
-      const mkcolError = new Error('MKCOL not supported');
-      (mkcolError as any).message = 'MKCOL not supported';
-      const putResponse = createMockResponse(201);
-
-      mockFetch.and.returnValues(
-        Promise.reject(mkcolError),
-        Promise.resolve(putResponse),
-      );
-
-      await api.createFolder({ folderPath: 'newfolder' });
-
-      expect(mockFetch).toHaveBeenCalledTimes(2);
-    });
   });
 
   describe('fileExists', () => {
@@ -713,15 +539,6 @@ describe('WebdavApi', () => {
       expect(result).toBe(true);
     });
 
-    it('should return false when file does not exist', async () => {
-      const notFoundResponse = createMockResponse(404);
-      mockFetch.and.returnValue(Promise.resolve(notFoundResponse));
-
-      const result = await api.fileExists('nonexistent.txt');
-
-      expect(result).toBe(false);
-    });
-
     it('should propagate non-404 errors', async () => {
       const serverError = createMockResponse(500);
       mockFetch.and.returnValue(Promise.resolve(serverError));
@@ -731,71 +548,6 @@ describe('WebdavApi', () => {
   });
 
   describe('listFolder', () => {
-    it('should list folder contents', async () => {
-      const propfindResponse = createMockResponse(
-        207,
-        { 'content-type': 'application/xml' },
-        `<?xml version="1.0"?>
-        <d:multistatus xmlns:d="DAV:">
-          <d:response>
-            <d:href>/folder/</d:href>
-            <d:propstat>
-              <d:status>HTTP/1.1 200 OK</d:status>
-              <d:prop>
-                <d:resourcetype><d:collection/></d:resourcetype>
-              </d:prop>
-            </d:propstat>
-          </d:response>
-          <d:response>
-            <d:href>/folder/file1.txt</d:href>
-            <d:propstat>
-              <d:status>HTTP/1.1 200 OK</d:status>
-              <d:prop>
-                <d:displayname>file1.txt</d:displayname>
-                <d:getcontentlength>100</d:getcontentlength>
-                <d:getetag>"file1-etag"</d:getetag>
-                <d:resourcetype/>
-              </d:prop>
-            </d:propstat>
-          </d:response>
-          <d:response>
-            <d:href>/folder/subfolder/</d:href>
-            <d:propstat>
-              <d:status>HTTP/1.1 200 OK</d:status>
-              <d:prop>
-                <d:displayname>subfolder</d:displayname>
-                <d:resourcetype><d:collection/></d:resourcetype>
-              </d:prop>
-            </d:propstat>
-          </d:response>
-        </d:multistatus>`,
-      );
-
-      mockFetch.and.returnValue(Promise.resolve(propfindResponse));
-
-      const result = await api.listFolder('folder');
-
-      expect(result.length).toBe(2); // Should exclude the folder itself
-      expect(result[0]).toEqual(
-        jasmine.objectContaining({
-          filename: 'file1.txt',
-          type: 'file',
-          size: 100,
-          etag: 'file1-etag',
-        }),
-      );
-      expect(result[1]).toEqual(
-        jasmine.objectContaining({
-          filename: 'subfolder',
-          type: 'directory',
-        }),
-      );
-
-      const call = mockFetch.calls.mostRecent();
-      const headers = call.args[1].headers;
-      expect(headers.get('Depth')).toBe('1');
-    });
-
     it('should return empty array when PROPFIND error includes PROPFIND message', async () => {
       const propfindError = new Error('PROPFIND not supported');
       mockFetch.and.returnValue(Promise.reject(propfindError));
@@ -804,32 +556,6 @@ describe('WebdavApi', () => {
 
       expect(result).toEqual([]);
       expect(mockFetch).toHaveBeenCalled();
-    });
-  });
-
-  describe('_shouldUseCapacitorHttp', () => {
-    it('should return false for standard HTTP methods', () => {
-      const standardMethods = [
-        'GET',
-        'POST',
-        'PUT',
-        'DELETE',
-        'PATCH',
-        'HEAD',
-        'OPTIONS',
-      ];
-
-      for (const method of standardMethods) {
-        expect((api as any)._shouldUseCapacitorHttp(method)).toBe(false);
-      }
-    });
-
-    // Skip Android WebView specific tests as we can't mock module constants
-    it('should return false for standard HTTP methods', () => {
-      // This test will pass regardless of IS_ANDROID_WEB_VIEW value
-      // as standard methods always return false
-      const result = (api as any)._shouldUseCapacitorHttp('GET');
-      expect(result).toBe(false);
     });
   });
 

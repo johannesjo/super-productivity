@@ -209,12 +209,24 @@ describe('ModelSyncService', () => {
 
       await service.updateLocalUpdated(['mainModel', 'singleModel'], [], dataMap);
 
-      expect(mockModelControllers.mainModel.save).toHaveBeenCalledWith({
-        data: 'updated-main-data',
-      });
-      expect(mockModelControllers.singleModel.save).toHaveBeenCalledWith({
-        data: 'updated-single-data',
-      });
+      expect(mockModelControllers.mainModel.save).toHaveBeenCalledWith(
+        {
+          data: 'updated-main-data',
+        },
+        {
+          isUpdateRevAndLastUpdate: true,
+          isIgnoreDBLock: true,
+        },
+      );
+      expect(mockModelControllers.singleModel.save).toHaveBeenCalledWith(
+        {
+          data: 'updated-single-data',
+        },
+        {
+          isUpdateRevAndLastUpdate: true,
+          isIgnoreDBLock: true,
+        },
+      );
     });
 
     it('should handle errors during local update', async () => {
@@ -244,7 +256,10 @@ describe('ModelSyncService', () => {
         {
           data: 'meta-main-model-data',
         },
-        { isUpdateRevAndLastUpdate: false },
+        {
+          isUpdateRevAndLastUpdate: false,
+          isIgnoreDBLock: true,
+        },
       );
       expect(mockModelControllers.singleModel.save).not.toHaveBeenCalled();
     });
