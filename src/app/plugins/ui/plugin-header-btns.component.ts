@@ -4,14 +4,7 @@ import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { PluginBridgeService } from '../plugin-bridge.service';
-
-export interface PluginHeaderBtnCfg {
-  label: string;
-  icon: string;
-  onClick: () => void;
-  pluginId: string;
-  color?: 'primary' | 'accent' | 'warn';
-}
+import { PluginHeaderBtnCfg } from '../plugin-api.model';
 
 @Component({
   selector: 'plugin-header-btns',
