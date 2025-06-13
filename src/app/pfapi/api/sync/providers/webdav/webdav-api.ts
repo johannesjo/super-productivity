@@ -259,7 +259,9 @@ export class WebdavApi {
     try {
       const headers: Record<string, string> = {};
 
-      // Add conditional headers for efficient downloading
+      // NOTE: We currently use If-None-Match which can return 304 responses
+      // Future optimization: Implement caching to handle 304 responses efficiently
+      // For now, the sync service expects actual data, so we handle 304 as an error
       if (localRev) {
         // Use If-None-Match to avoid downloading if file hasn't changed
         headers['If-None-Match'] = localRev;
