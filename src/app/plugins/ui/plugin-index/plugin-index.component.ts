@@ -1,17 +1,26 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
   inject,
-  OnInit,
   OnDestroy,
-  ViewChild,
+  OnInit,
   signal,
-  ChangeDetectionStrategy,
+  ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { PluginService } from '../../plugin.service';
 import { PluginBridgeService } from '../../plugin-bridge.service';
+import {
+  SnackCfgLimited,
+  NotifyCfg,
+  DialogCfg,
+  CreateTaskData,
+  TaskCopy,
+  ProjectCopy,
+  TagCopy,
+} from '../../plugin-api.model';
 import { CommonModule } from '@angular/common';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -28,6 +37,7 @@ import {
   templateUrl: './plugin-index.component.html',
   styleUrls: ['./plugin-index.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
   imports: [
     CommonModule,
     MatButton,
@@ -106,6 +116,12 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
 
   private _setupIframeCommunication(pluginId: string): void {
     this._messageListener = (event: MessageEvent) => {
+      // Security: Verify origin for data URLs
+      if (event.origin !== 'null' && !event.origin.startsWith('data:')) {
+        console.warn('Received message from unexpected origin:', event.origin);
+        return;
+      }
+
       // Only handle messages from our iframe
       if (
         !this.iframeRef?.nativeElement.contentWindow ||
@@ -115,7 +131,11 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
       }
 
       // Handle plugin API calls from iframe
-      if (event.data && event.data.type === 'PLUGIN_API_CALL') {
+      if (
+        event.data &&
+        typeof event.data === 'object' &&
+        event.data.type === 'PLUGIN_API_CALL'
+      ) {
         this._handlePluginApiCall(pluginId, event.data);
       }
     };
@@ -130,24 +150,33 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
     // Data URLs don't need to be revoked like blob URLs
   }
 
-  private async _handlePluginApiCall(pluginId: string, message: any): Promise<void> {
+  private async _handlePluginApiCall(
+    pluginId: string,
+    message: { method: string; args: unknown[]; callId: string },
+  ): Promise<void> {
+    // Validate message structure
+    if (!message.method || !Array.isArray(message.args) || !message.callId) {
+      console.error('Invalid plugin API call structure:', message);
+      return;
+    }
+
     try {
       // Set the plugin context for secure API calls
       this._pluginBridge._setCurrentPlugin(pluginId);
 
       const { method, args, callId } = message;
-      let result: any;
+      let result: unknown;
 
       // Map API method calls to bridge methods
       switch (method) {
         case 'showSnack':
-          result = this._pluginBridge.showSnack(args[0]);
+          result = this._pluginBridge.showSnack(args[0] as SnackCfgLimited);
           break;
         case 'notify':
-          result = await this._pluginBridge.notify(args[0]);
+          result = await this._pluginBridge.notify(args[0] as NotifyCfg);
           break;
         case 'openDialog':
-          result = await this._pluginBridge.openDialog(args[0]);
+          result = await this._pluginBridge.openDialog(args[0] as DialogCfg);
           break;
         case 'getTasks':
           result = await this._pluginBridge.getTasks();
@@ -159,31 +188,40 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
           result = await this._pluginBridge.getCurrentContextTasks();
           break;
         case 'updateTask':
-          result = await this._pluginBridge.updateTask(args[0], args[1]);
+          result = await this._pluginBridge.updateTask(
+            args[0] as string,
+            args[1] as Partial<TaskCopy>,
+          );
           break;
         case 'addTask':
-          result = await this._pluginBridge.addTask(args[0]);
+          result = await this._pluginBridge.addTask(args[0] as CreateTaskData);
           break;
         case 'getAllProjects':
           result = await this._pluginBridge.getAllProjects();
           break;
         case 'addProject':
-          result = await this._pluginBridge.addProject(args[0]);
+          result = await this._pluginBridge.addProject(args[0] as Partial<ProjectCopy>);
           break;
         case 'updateProject':
-          result = await this._pluginBridge.updateProject(args[0], args[1]);
+          result = await this._pluginBridge.updateProject(
+            args[0] as string,
+            args[1] as Partial<ProjectCopy>,
+          );
           break;
         case 'getAllTags':
           result = await this._pluginBridge.getAllTags();
           break;
         case 'addTag':
-          result = await this._pluginBridge.addTag(args[0]);
+          result = await this._pluginBridge.addTag(args[0] as Partial<TagCopy>);
           break;
         case 'updateTag':
-          result = await this._pluginBridge.updateTag(args[0], args[1]);
+          result = await this._pluginBridge.updateTag(
+            args[0] as string,
+            args[1] as Partial<TagCopy>,
+          );
           break;
         case 'persistDataSynced':
-          result = await this._pluginBridge.persistDataSynced(args[0]);
+          result = await this._pluginBridge.persistDataSynced(args[0] as string);
           break;
         case 'loadPersistedData':
           result = await this._pluginBridge.loadPersistedData();
@@ -192,45 +230,36 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
           throw new Error(`Unknown API method: ${method}`);
       }
 
-      // Send result back to iframe
-      this.iframeRef?.nativeElement.contentWindow?.postMessage(
-        {
-          type: 'PLUGIN_API_RESPONSE',
-          callId,
-          result,
-        },
-        '*',
-      );
+      // Send result back to iframe with targetOrigin for security
+      if (this.iframeRef?.nativeElement.contentWindow) {
+        this.iframeRef.nativeElement.contentWindow.postMessage(
+          {
+            type: 'PLUGIN_API_RESPONSE',
+            callId,
+            result,
+          },
+          '*', // Data URLs require '*' as targetOrigin
+        );
+      }
     } catch (error) {
       // Send error back to iframe
-      this.iframeRef?.nativeElement.contentWindow?.postMessage(
-        {
-          type: 'PLUGIN_API_ERROR',
-          callId: message.callId,
-          error: error instanceof Error ? error.message : 'Unknown error',
-        },
-        '*',
-      );
+      console.error(`Plugin API call failed for ${message.method}:`, error);
+      if (this.iframeRef?.nativeElement.contentWindow) {
+        this.iframeRef.nativeElement.contentWindow.postMessage(
+          {
+            type: 'PLUGIN_API_ERROR',
+            callId: message.callId,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          },
+          '*', // Data URLs require '*' as targetOrigin
+        );
+      }
     }
   }
 
   onIframeLoad(): void {
-    // Inject the Plugin API into the iframe
-    this._injectPluginApi();
-  }
-
-  private _injectPluginApi(): void {
-    const iframe = this.iframeRef?.nativeElement;
-    if (!iframe || !iframe.contentWindow) {
-      return;
-    }
-
-    // Inject Plugin API script into iframe
-    const script = iframe.contentDocument?.createElement('script');
-    if (script) {
-      script.textContent = this._getPluginApiScript();
-      iframe.contentDocument?.head.appendChild(script);
-    }
+    // The API is already injected via the data URL, no need to inject again
+    console.log('Plugin iframe loaded for plugin:', this.pluginId());
   }
 
   private _getPluginApiScript(): string {
@@ -242,14 +271,14 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
 
         // Listen for responses from parent window
         window.addEventListener('message', function(event) {
-          if (event.data.type === 'PLUGIN_API_RESPONSE') {
+          if (event.data && event.data.type === 'PLUGIN_API_RESPONSE') {
             const { callId: responseCallId, result } = event.data;
             const resolver = pendingCalls.get(responseCallId);
             if (resolver) {
               pendingCalls.delete(responseCallId);
               resolver.resolve(result);
             }
-          } else if (event.data.type === 'PLUGIN_API_ERROR') {
+          } else if (event.data && event.data.type === 'PLUGIN_API_ERROR') {
             const { callId: responseCallId, error } = event.data;
             const resolver = pendingCalls.get(responseCallId);
             if (resolver) {
@@ -266,8 +295,8 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
 
             window.parent.postMessage({
               type: 'PLUGIN_API_CALL',
-              method,
-              args,
+              method: method,
+              args: args || [],
               callId: currentCallId
             }, '*');
 

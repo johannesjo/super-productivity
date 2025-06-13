@@ -182,16 +182,57 @@ export class PluginSecurityService {
   }
 
   /**
-   * Sanitize HTML content from plugins
+   * Sanitize HTML content from plugins with comprehensive security measures
    */
   sanitizeHtml(html: string): string {
-    // Basic HTML sanitization - in production, use a library like DOMPurify
-    return html
-      .replace(/<script[^>]*>.*?<\/script>/gi, '')
-      .replace(/<iframe[^>]*>.*?<\/iframe>/gi, '')
-      .replace(/on\w+\s*=\s*"[^"]*"/gi, '')
-      .replace(/on\w+\s*=\s*'[^']*'/gi, '')
-      .replace(/javascript:/gi, '');
+    // Comprehensive HTML sanitization
+    return (
+      html
+        // Remove dangerous elements completely
+        .replace(/<script[^>]*>.*?<\/script>/gis, '')
+        .replace(/<iframe[^>]*>.*?<\/iframe>/gis, '')
+        .replace(/<object[^>]*>.*?<\/object>/gis, '')
+        .replace(/<embed[^>]*>/gi, '')
+        .replace(/<applet[^>]*>.*?<\/applet>/gis, '')
+        .replace(/<meta[^>]*>/gi, '')
+        .replace(/<link[^>]*>/gi, '')
+        .replace(/<base[^>]*>/gi, '')
+        // .replace(/<form[^>]*>.*?<\/form>/gis, '')
+        // .replace(/<input[^>]*>/gi, '')
+        // .replace(/<textarea[^>]*>.*?<\/textarea>/gis, '')
+        // .replace(/<select[^>]*>.*?<\/select>/gis, '')
+        // .replace(/<style[^>]*>.*?<\/style>/gis, '')
+
+        // Remove event handlers
+        .replace(/\son\w+\s*=\s*["'][^"']*["']/gi, '')
+        .replace(/\son\w+\s*=\s*[^>\s]+/gi, '')
+
+        // Remove dangerous URLs
+        .replace(/javascript\s*:/gi, 'removed:')
+        .replace(/data\s*:/gi, 'removed:')
+        .replace(/vbscript\s*:/gi, 'removed:')
+        .replace(/livescript\s*:/gi, 'removed:')
+        .replace(/mocha\s*:/gi, 'removed:')
+
+        // Remove dangerous attributes
+        .replace(/\bsrc\s*=\s*["']javascript[^"']*["']/gi, '')
+        .replace(/\bhref\s*=\s*["']javascript[^"']*["']/gi, '')
+        .replace(/\baction\s*=\s*["'][^"']*["']/gi, '')
+        .replace(/\bformaction\s*=\s*["'][^"']*["']/gi, '')
+
+        // Sanitize style attributes to prevent CSS injection
+        .replace(/\bstyle\s*=\s*["']([^"']*)["']/gi, (match, styleContent) => {
+          const sanitizedStyle = styleContent
+            .replace(/expression\s*\(/gi, 'removed(')
+            .replace(/javascript\s*:/gi, 'removed:')
+            .replace(/vbscript\s*:/gi, 'removed:')
+            .replace(/@import/gi, 'removed')
+            .replace(/behavior\s*:/gi, 'removed:')
+            .replace(/-moz-binding/gi, 'removed')
+            .replace(/url\s*\(\s*["']?javascript/gi, 'url("removed');
+          return `style="${sanitizedStyle}"`;
+        })
+    );
   }
 
   /**
