@@ -124,6 +124,10 @@ export class PluginManagementComponent implements OnInit {
         false,
       );
 
+      // Update the plugin state immediately
+      plugin.isEnabled = false;
+      plugin.loaded = false;
+
       // Unload the plugin (this will unregister hooks and remove from loaded plugins)
       this._pluginService.unloadPlugin(plugin.manifest.id);
 
