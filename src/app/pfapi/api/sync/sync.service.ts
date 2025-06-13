@@ -202,7 +202,12 @@ export class SyncService<const MD extends ModelCfgs> {
           // Will be assigned later
           mainModelData: {},
         },
-        { ...local, revMap: this._fakeFullRevMap() },
+        {
+          ...local,
+          revMap: this._fakeFullRevMap(),
+          // Ensure lastSyncedUpdate matches lastUpdate to prevent false conflicts
+          lastSyncedUpdate: local.lastUpdate,
+        },
         null,
       );
     } catch (e) {
