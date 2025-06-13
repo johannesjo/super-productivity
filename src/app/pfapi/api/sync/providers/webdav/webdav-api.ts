@@ -7,6 +7,8 @@ import {
   RemoteFileNotFoundAPIError,
 } from '../../../errors/errors';
 import { pfLog } from '../../../util/log';
+import { IS_ANDROID_WEB_VIEW } from '../../../../../util/is-android-web-view';
+import { CapacitorHttp } from '@capacitor/core';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
@@ -43,6 +45,115 @@ export class WebdavApi {
 </D:propfind>`;
 
   constructor(private _getCfgOrError: () => Promise<WebdavPrivateCfg>) {}
+
+  /**
+   * Check if we should use CapacitorHttp for non-standard HTTP methods on mobile
+   */
+  private _shouldUseCapacitorHttp(method: string): boolean {
+    if (!IS_ANDROID_WEB_VIEW) {
+      return false;
+    }
+
+    // Check if method is non-standard (not supported natively by mobile browsers)
+    const standardMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'];
+    const shouldUse = !standardMethods.includes(method.toUpperCase());
+
+    pfLog(1, `${WebdavApi.L}._shouldUseCapacitorHttp() method check`, {
+      method,
+      isAndroidWebView: IS_ANDROID_WEB_VIEW,
+      isStandard: standardMethods.includes(method.toUpperCase()),
+      shouldUseCapacitor: shouldUse,
+    });
+
+    return shouldUse;
+  }
+
+  /**
+   * Make HTTP request using CapacitorHttp for non-standard methods on mobile
+   */
+  private async _makeCapacitorHttpRequest({
+    method,
+    path,
+    body = null,
+    headers = {},
+    ifNoneMatch = null,
+    cfg,
+  }: WebDavRequestOptions & { cfg: any }): Promise<Response> {
+    const requestHeaders: Record<string, string> = {
+      Authorization: this._getAuthHeader(cfg),
+      ...headers,
+    };
+
+    if (ifNoneMatch) {
+      requestHeaders['If-None-Match'] = ifNoneMatch;
+    }
+
+    const url = this._getUrl(path, cfg);
+
+    pfLog(2, `${WebdavApi.L}._makeCapacitorHttpRequest() using CapacitorHttp`, {
+      method,
+      url,
+      headers: Object.keys(requestHeaders),
+    });
+
+    try {
+      const capacitorResponse = await CapacitorHttp.request({
+        url,
+        method,
+        headers: requestHeaders,
+        data: body,
+      });
+
+      // Convert Capacitor response to standard Response object
+      const response = new Response(capacitorResponse.data, {
+        status: capacitorResponse.status,
+        statusText: capacitorResponse.status.toString(),
+        headers: new Headers(capacitorResponse.headers || {}),
+      });
+
+      // Handle 404 specifically to throw RemoteFileNotFoundAPIError consistently
+      if (response.status === 404) {
+        pfLog(2, `${WebdavApi.L}._makeCapacitorHttpRequest() 404 Not Found`, {
+          method,
+          path,
+        });
+        throw new RemoteFileNotFoundAPIError(path);
+      }
+
+      // WebDAV specific status codes handling
+      const validWebDavStatuses = [
+        200, // OK
+        201, // Created
+        204, // No Content
+        206, // Partial Content
+        207, // Multi-Status
+        304, // Not Modified (for conditional requests)
+        409, // Conflict (let calling methods handle this)
+        412, // Precondition Failed (let calling methods handle this)
+        423, // Locked (let calling methods handle this)
+      ];
+
+      if (!validWebDavStatuses.includes(response.status)) {
+        pfLog(0, `${WebdavApi.L}._makeCapacitorHttpRequest() HTTP error`, {
+          method,
+          path,
+          status: response.status,
+          statusText: response.statusText,
+        });
+        throw new HttpNotOkAPIError(response);
+      }
+
+      return response;
+    } catch (e) {
+      pfLog(0, `${WebdavApi.L}._makeCapacitorHttpRequest() error`, {
+        method,
+        path,
+        error: e,
+      });
+      this._checkCommonErrors(e, path);
+      throw e;
+    }
+  }
 
   // Utility methods to reduce duplication
   private _responseHeadersToObject(response: Response): Record<string, string> {
@@ -115,11 +226,23 @@ export class WebdavApi {
     isOverwrite?: boolean;
     expectedEtag?: string | null;
   }): Promise<string | undefined> {
+    pfLog(1, `${WebdavApi.L}.upload() starting upload`, {
+      path,
+      dataLength: data.length,
+      isOverwrite,
+      expectedEtag,
+    });
+
     const headers: Record<string, string> = {
       'Content-Type': 'application/octet-stream',
       'Content-Length': new Blob([data]).size.toString(),
       ...this._createConditionalHeaders(isOverwrite, expectedEtag),
     };
+
+    pfLog(1, `${WebdavApi.L}.upload() about to make PUT request`, {
+      path,
+      headers: Object.keys(headers),
+    });
 
     try {
       // Ensure parent directory exists before upload
@@ -128,6 +251,11 @@ export class WebdavApi {
         path,
         body: data,
         headers,
+      });
+
+      pfLog(1, `${WebdavApi.L}.upload() PUT request completed`, {
+        path,
+        status: response.status,
       });
 
       // Extract etag from response headers
@@ -239,6 +367,81 @@ export class WebdavApi {
       if (e?.status === 404) {
         throw new RemoteFileNotFoundAPIError(path);
       }
+
+      // If PROPFIND fails (especially on Android), try HEAD as fallback
+      pfLog(1, `${WebdavApi.L}.getFileMeta() PROPFIND failed, trying HEAD fallback`, e);
+
+      // Only use HEAD fallback if the error suggests method not supported
+      if (IS_ANDROID_WEB_VIEW || e?.message?.includes('PROPFIND')) {
+        return this._getFileMetaWithHead(path, localRev);
+      }
+
+      throw e;
+    }
+  }
+
+  /**
+   * Get file metadata using HEAD request (fallback for Android WebView)
+   */
+  private async _getFileMetaWithHead(
+    path: string,
+    localRev: string | null,
+  ): Promise<FileMeta> {
+    try {
+      const headers: Record<string, string> = {};
+      if (localRev) {
+        headers['If-None-Match'] = localRev;
+      }
+
+      const response = await this._makeRequest({
+        method: 'HEAD',
+        path,
+        headers,
+      });
+
+      const responseHeaders = this._responseHeadersToObject(response);
+      const etag = this._findEtagInHeaders(responseHeaders);
+
+      if (!etag) {
+        pfLog(1, `${WebdavApi.L}._getFileMetaWithHead() no etag in response headers`, {
+          path,
+          headers: responseHeaders,
+        });
+        // Generate a basic etag using content length and last modified if available
+        const contentLength = responseHeaders['content-length'] || '0';
+        const lastModified = responseHeaders['last-modified'] || Date.now().toString();
+        const basicEtag = `${contentLength}-${lastModified}`.replace(/[^a-zA-Z0-9]/g, '');
+
+        pfLog(1, `${WebdavApi.L}._getFileMetaWithHead() generated basic etag`, {
+          path,
+          basicEtag,
+          contentLength,
+          lastModified,
+        });
+      }
+
+      // Extract filename from path
+      const filename = path.split('/').pop() || '';
+
+      return {
+        filename,
+        basename: filename,
+        lastmod: responseHeaders['last-modified'] || '',
+        size: parseInt(responseHeaders['content-length'] || '0', 10),
+        type: 'file', // HEAD doesn't distinguish directories
+        etag: etag || `${responseHeaders['content-length'] || '0'}-${Date.now()}`,
+        data: {
+          'content-type': responseHeaders['content-type'] || '',
+          'content-length': responseHeaders['content-length'] || '0',
+          'last-modified': responseHeaders['last-modified'] || '',
+          etag: etag || '',
+          href: path,
+        },
+      };
+    } catch (e: any) {
+      if (e?.status === 404) {
+        throw new RemoteFileNotFoundAPIError(path);
+      }
       throw e;
     }
   }
@@ -254,15 +457,28 @@ export class WebdavApi {
     rangeStart?: number;
     rangeEnd?: number;
   }): Promise<{ rev: string; dataStr: string }> {
+    pfLog(1, `${WebdavApi.L}.download() starting`, {
+      path,
+      localRev,
+      hasLocalRev: !!localRev,
+    });
+
     try {
       const headers: Record<string, string> = {};
 
-      // NOTE: We currently use If-None-Match which can return 304 responses
-      // Future optimization: Implement caching to handle 304 responses efficiently
-      // For now, the sync service expects actual data, so we handle 304 as an error
+      // Only use conditional headers if we have a local revision to compare against
+      // This prevents 304 responses during full downloads when localRev is null
       if (localRev) {
         // Use If-None-Match to avoid downloading if file hasn't changed
         headers['If-None-Match'] = localRev;
+        pfLog(1, `${WebdavApi.L}.download() using conditional headers`, {
+          path,
+          localRev,
+        });
+      } else {
+        pfLog(1, `${WebdavApi.L}.download() no conditional headers (fresh download)`, {
+          path,
+        });
       }
 
       // Add Range header for partial content requests (useful for large files)
@@ -289,7 +505,15 @@ export class WebdavApi {
       // Handle different response statuses
       if (response.status === 304) {
         // Not Modified - file hasn't changed
-        throw new Error(`File not modified: ${path}`);
+        pfLog(1, `${WebdavApi.L}.download() 304 Not Modified - file unchanged`, {
+          path,
+          localRev,
+        });
+
+        const notModifiedError = new Error(`File not modified: ${path}`);
+        (notModifiedError as any).status = 304;
+        (notModifiedError as any).localRev = localRev;
+        throw notModifiedError;
       }
 
       if (response.status === 206) {
@@ -560,7 +784,7 @@ export class WebdavApi {
       pfLog(0, `${WebdavApi.L}.createFolder() MKCOL error`, { folderPath, error: e });
 
       // Handle different error scenarios
-      if (e?.status === 405) {
+      if (e?.status === 405 || (IS_ANDROID_WEB_VIEW && e?.message?.includes('MKCOL'))) {
         // Method not allowed - MKCOL not supported
         pfLog(
           2,
@@ -619,6 +843,32 @@ export class WebdavApi {
     ifNoneMatch = null,
   }: WebDavRequestOptions): Promise<Response> {
     const cfg = await this._getCfgOrError();
+
+    pfLog(1, `${WebdavApi.L}._makeRequest() starting`, {
+      method,
+      path: path.substring(0, 50),
+    });
+
+    // Check if we should use Capacitor HTTP for this request
+    const shouldUseCapacitor = this._shouldUseCapacitorHttp(method);
+    pfLog(1, `${WebdavApi.L}._makeRequest() routing decision`, {
+      method,
+      shouldUseCapacitor,
+    });
+
+    if (shouldUseCapacitor) {
+      pfLog(1, `${WebdavApi.L}._makeRequest() using Capacitor HTTP`);
+      return this._makeCapacitorHttpRequest({
+        method,
+        path,
+        body,
+        headers,
+        ifNoneMatch,
+        cfg,
+      });
+    }
+
+    pfLog(1, `${WebdavApi.L}._makeRequest() using regular fetch`);
 
     const requestHeaders = new Headers();
     requestHeaders.append('Authorization', this._getAuthHeader(cfg));
@@ -845,23 +1095,56 @@ export class WebdavApi {
       if (e?.status === 404) {
         return false;
       }
+
+      // If PROPFIND fails (especially on Android), try HEAD fallback
+      if (IS_ANDROID_WEB_VIEW || e?.message?.includes('PROPFIND')) {
+        try {
+          await this._makeRequest({
+            method: 'HEAD',
+            path: folderPath,
+          });
+          // If HEAD succeeds, assume it's a folder (we can't easily distinguish on Android)
+          return true;
+        } catch (headError: any) {
+          if (headError?.status === 404) {
+            return false;
+          }
+          throw headError;
+        }
+      }
+
       throw e;
     }
   }
 
   async listFolder(folderPath: string): Promise<FileMeta[]> {
-    const response = await this._makeRequest({
-      method: 'PROPFIND',
-      path: folderPath,
-      body: WebdavApi.PROPFIND_XML,
-      headers: {
-        'Content-Type': 'application/xml',
-        Depth: '1', // Get immediate children
-      },
-    });
+    try {
+      const response = await this._makeRequest({
+        method: 'PROPFIND',
+        path: folderPath,
+        body: WebdavApi.PROPFIND_XML,
+        headers: {
+          'Content-Type': 'application/xml',
+          Depth: '1', // Get immediate children
+        },
+      });
 
-    const xmlText = await response.text();
-    return this._parseMultiplePropsFromXml(xmlText, folderPath);
+      const xmlText = await response.text();
+      return this._parseMultiplePropsFromXml(xmlText, folderPath);
+    } catch (e: any) {
+      pfLog(0, `${WebdavApi.L}.listFolder() PROPFIND failed`, e);
+
+      // On Android WebView or if PROPFIND fails, return empty array
+      if (IS_ANDROID_WEB_VIEW || e?.message?.includes('PROPFIND')) {
+        pfLog(
+          1,
+          `${WebdavApi.L}.listFolder() fallback - returning empty list for Android or PROPFIND error`,
+        );
+        return [];
+      }
+
+      throw e;
+    }
   }
 
   private _parseMultiplePropsFromXml(xmlText: string, basePath: string): FileMeta[] {
