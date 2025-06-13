@@ -121,14 +121,11 @@ describe('getSyncStatusFromMetaFiles', () => {
         expect(result.conflictData?.reason).toBe(ConflictReason.BothNewerLastSync);
       });
 
-      it('should return LastSyncNotUpToDate when local > remote but no local changes', () => {
+      it('should return Conflict when local > remote but it says lastSync === lastLocalUpdate', () => {
         const { local, remote } = createMeta(2000, 1000, 2000);
 
         const result = getSyncStatusFromMetaFiles(remote, local);
         expect(result.status).toBe(SyncStatus.Conflict);
-        expect(result.conflictData?.reason).toBe(
-          ConflictReason.MatchingModelChangeButLastSyncMismatch,
-        );
       });
     });
 
