@@ -10,6 +10,8 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { Subscription } from 'rxjs';
+import { trigger, transition, style, animate } from '@angular/animations';
 import { PluginService } from '../../plugin.service';
 import { PluginBridgeService } from '../../plugin-bridge.service';
 import {
@@ -48,6 +50,18 @@ import {
     MatCardHeader,
     MatCardTitle,
   ],
+  animations: [
+    trigger('pluginSwitch', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateX(20px)' }),
+        animate('300ms ease-in-out', style({ opacity: 1, transform: 'translateX(0)' })),
+      ]),
+      transition('* => *', [
+        style({ opacity: 0, transform: 'translateX(-20px)' }),
+        animate('300ms ease-in-out', style({ opacity: 1, transform: 'translateX(0)' })),
+      ]),
+    ]),
+  ],
 })
 export class PluginIndexComponent implements OnInit, OnDestroy {
   @ViewChild('iframe', { static: false }) iframeRef?: ElementRef<HTMLIFrameElement>;
@@ -64,29 +78,62 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
   readonly iframeSrc = signal<SafeResourceUrl | null>(null);
 
   private _messageListener?: (event: MessageEvent) => void;
+  private _routeSubscription?: Subscription;
 
   async ngOnInit(): Promise<void> {
-    const pluginId = this._route.snapshot.paramMap.get('pluginId');
-    if (!pluginId) {
-      this.error.set('Plugin ID not provided');
-      this.isLoading.set(false);
-      return;
+    // Subscribe to route parameter changes to handle navigation between plugins
+    this._routeSubscription = this._route.paramMap.subscribe(async (params) => {
+      const pluginId = params.get('pluginId');
+      if (!pluginId) {
+        this.error.set('Plugin ID not provided');
+        this.isLoading.set(false);
+        return;
+      }
+
+      // Reset state when navigating to a different plugin
+      this.isLoading.set(true);
+      this.error.set(null);
+      this.iframeSrc.set(null);
+      this.pluginId.set(pluginId);
+
+      // Clean up previous iframe communication
+      this._cleanupIframeCommunication();
+
+      // Wait for plugin system to be initialized
+      await this._waitForPluginSystem();
+
+      try {
+        await this._loadPluginIndex(pluginId);
+        this._setupIframeCommunication(pluginId);
+      } catch (err) {
+        console.error('Failed to load plugin index:', err);
+        this.error.set(err instanceof Error ? err.message : 'Failed to load plugin');
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  private async _waitForPluginSystem(): Promise<void> {
+    // Wait up to 10 seconds for plugin system initialization
+    const maxWaitTime = 10000;
+    const checkInterval = 100;
+    let waitedTime = 0;
+
+    while (!this._pluginService.isInitialized() && waitedTime < maxWaitTime) {
+      await new Promise((resolve) => setTimeout(resolve, checkInterval));
+      waitedTime += checkInterval;
     }
 
-    this.pluginId.set(pluginId);
-
-    try {
-      await this._loadPluginIndex(pluginId);
-      this._setupIframeCommunication(pluginId);
-    } catch (err) {
-      console.error('Failed to load plugin index:', err);
-      this.error.set(err instanceof Error ? err.message : 'Failed to load plugin');
-      this.isLoading.set(false);
+    if (!this._pluginService.isInitialized()) {
+      throw new Error('Plugin system failed to initialize after 10 seconds');
     }
   }
 
   ngOnDestroy(): void {
     this._cleanupIframeCommunication();
+    if (this._routeSubscription) {
+      this._routeSubscription.unsubscribe();
+    }
   }
 
   goBack(): void {
