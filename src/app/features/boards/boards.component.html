@@ -25,8 +25,13 @@
       </ng-template>
     </mat-tab>
     <mat-menu #contextMenu="matMenu">
+      <button
+        mat-menu-item
+        (click)="duplicateBoard()"
+      >
+        Duplicate
+      </button>
       <button mat-menu-item>Rename</button>
-      <button mat-menu-item>Duplicate</button>
     </mat-menu>
   }
 

@@ -15,6 +15,7 @@ import { Store } from '@ngrx/store';
 import { T } from '../../t.const';
 import { MatIcon } from '@angular/material/icon';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
+import { nanoid } from 'nanoid';
 import { BoardComponent } from './board/board.component';
 import { CdkScrollable } from '@angular/cdk/overlay';
 import { CdkDropListGroup } from '@angular/cdk/drag-drop';
@@ -24,6 +25,7 @@ import { LS } from '../../core/persistence/storage-keys.const';
 import { TranslatePipe } from '@ngx-translate/core';
 import { BoardEditComponent } from './board-edit/board-edit.component';
 import { DEFAULT_BOARD_CFG } from './boards.const';
+import { BoardsActions } from './store/boards.actions';
 
 @Component({
   selector: 'boards',
@@ -105,5 +107,27 @@ export class BoardsComponent implements AfterViewInit, OnDestroy {
       // Open context menu
       this.contextMenuTriggers()[activeTabIdx].openMenu();
     }
+  }
+
+  duplicateBoard(): void {
+    const selectedTabId = this.selectedTabIndex();
+    const boardToDuplicate = this.boards()?.[selectedTabId];
+    if (!boardToDuplicate) {
+      console.warn('No board selected to duplicate');
+      return;
+    }
+    this.store.dispatch(
+      BoardsActions.addBoard({
+        board: {
+          cols: boardToDuplicate.cols,
+          id: nanoid(),
+          panels: boardToDuplicate.panels.map((panel) => ({
+            ...panel,
+            taskIds: [],
+          })),
+          title: `${boardToDuplicate.title} (copy)`,
+        },
+      }),
+    );
   }
 }
