@@ -4,7 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { SnackService } from '../core/snack/snack.service';
 import { NotifyService } from '../core/notify/notify.service';
 import {
-  CreateTaskData,
+  PluginCreateTaskData,
   DialogCfg,
   Hooks,
   NotifyCfg,
@@ -211,8 +211,8 @@ export class PluginBridgeService {
   /**
    * Add a new task
    */
-  async addTask(taskData: CreateTaskData): Promise<string> {
-    typia.assert<CreateTaskData>(taskData);
+  async addTask(taskData: PluginCreateTaskData): Promise<string> {
+    typia.assert<PluginCreateTaskData>(taskData);
 
     // Validate that referenced project, tags, and parent task exist
     await this._validateTaskReferences(

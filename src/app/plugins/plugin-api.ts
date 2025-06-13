@@ -1,5 +1,5 @@
 import {
-  CreateTaskData,
+  PluginCreateTaskData,
   DialogCfg,
   Hooks,
   NotifyCfg,
@@ -105,7 +105,7 @@ export class PluginAPI implements IPluginAPI {
     return this._pluginBridge.updateTask(taskId, updates);
   }
 
-  async addTask(taskData: CreateTaskData): Promise<string> {
+  async addTask(taskData: PluginCreateTaskData): Promise<string> {
     console.log(`Plugin ${this._pluginId} requested to add task:`, taskData);
     return this._pluginBridge.addTask(taskData);
   }
