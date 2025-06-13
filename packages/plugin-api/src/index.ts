@@ -15,11 +15,21 @@ export type {
   DialogCfg,
   DialogButtonCfg,
   SnackCfg,
+  SnackCfgLimited,
   NotifyCfg,
   PluginMenuEntryCfg,
   PluginShortcutCfg,
   PluginHeaderBtnCfg,
+  PluginHookHandler,
+  PluginInstance,
+  PluginHookHandlerRegistration,
+  TaskCopy,
+  ProjectCopy,
+  TagCopy,
 } from './types';
 
 // Re-export enums as values (not just types) so they can be used
 export { PluginHooks, type Hooks } from './types';
+
+// Export app-specific types that extend the plugin-api versions
+export type { PluginMenuEntryCfg as PluginMenuEntryCfgApp } from './types';
