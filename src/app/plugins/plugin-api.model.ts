@@ -103,7 +103,7 @@ export interface PluginAPI {
 
   updateTask(taskId: string, updates: Partial<TaskCopy>): Promise<void>;
 
-  addTask(taskData: CreateTaskData): Promise<string>;
+  addTask(taskData: PluginCreateTaskData): Promise<string>;
 
   // projects
   getAllProjects(): Promise<ProjectCopy[]>;
@@ -143,7 +143,7 @@ export interface PluginHookHandlerRegistration {
   handler: PluginHookHandler;
 }
 
-export interface CreateTaskData {
+export interface PluginCreateTaskData {
   title: string;
   projectId?: string | null;
   tagIds?: string[];

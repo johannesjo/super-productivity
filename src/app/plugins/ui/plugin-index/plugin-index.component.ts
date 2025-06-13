@@ -16,7 +16,7 @@ import {
   SnackCfgLimited,
   NotifyCfg,
   DialogCfg,
-  CreateTaskData,
+  PluginCreateTaskData,
   TaskCopy,
   ProjectCopy,
   TagCopy,
@@ -194,7 +194,7 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
           );
           break;
         case 'addTask':
-          result = await this._pluginBridge.addTask(args[0] as CreateTaskData);
+          result = await this._pluginBridge.addTask(args[0] as PluginCreateTaskData);
           break;
         case 'getAllProjects':
           result = await this._pluginBridge.getAllProjects();
