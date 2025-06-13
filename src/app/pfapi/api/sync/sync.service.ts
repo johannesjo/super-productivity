@@ -457,11 +457,27 @@ export class SyncService<const MD extends ModelCfgs> {
       );
 
       // Update local after successful upload
+      pfLog(
+        2,
+        `${SyncService.L}.${this.uploadToRemote.name}(): Updating local metadata after upload`,
+        {
+          localLastUpdate: local.lastUpdate,
+          localLastSyncedUpdate: local.lastSyncedUpdate,
+          willSetLastSyncedUpdate: local.lastUpdate,
+          metaRevAfterUpdate,
+        },
+      );
+
       await this._metaFileSyncService.saveLocal({
         ...local,
         lastSyncedUpdate: local.lastUpdate,
         metaRev: metaRevAfterUpdate,
       });
+
+      pfLog(
+        2,
+        `${SyncService.L}.${this.uploadToRemote.name}(): Local metadata updated successfully`,
+      );
       return;
     }
 
