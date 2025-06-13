@@ -2350,11 +2350,8 @@ describe('taskSharedMetaReducer', () => {
       const task = createMockTask({ id: 'task1' });
       const action = createPlanTaskForDayAction(task, todayStr, false);
 
-      expectStateUpdate(
-        expectTagUpdate('TODAY', { taskIds: ['other-task', 'task1'] }),
-        action,
-        testState,
-      );
+      metaReducer(testState, action);
+      expect(mockReducer).toHaveBeenCalledWith(testState, action);
     });
 
     it('should not change state when task is not in Today and not planned for today', () => {

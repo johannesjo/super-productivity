@@ -505,6 +505,24 @@ const handleScheduleTaskWithTime = (
   task: { id: string },
   dueWithTime: number,
 ): RootState => {
+  // Check if task already has the same dueWithTime
+  const currentTask = state[TASK_FEATURE_NAME].entities[task.id] as Task;
+  if (!currentTask) {
+    return state;
+  }
+
+  const todayTag = getTag(state, TODAY_TAG.id);
+  const isScheduledForToday = isToday(dueWithTime);
+  const isCurrentlyInToday = todayTag.taskIds.includes(task.id);
+
+  // If task is already correctly scheduled, don't change state
+  if (
+    currentTask.dueWithTime === dueWithTime &&
+    isScheduledForToday === isCurrentlyInToday
+  ) {
+    return state;
+  }
+
   // First, update the task entity with the scheduling data
   const updatedState = {
     ...state,
@@ -519,11 +537,6 @@ const handleScheduleTaskWithTime = (
       state[TASK_FEATURE_NAME],
     ),
   };
-
-  // Then, handle today tag updates
-  const todayTag = getTag(updatedState, TODAY_TAG.id);
-  const isScheduledForToday = isToday(dueWithTime);
-  const isCurrentlyInToday = todayTag.taskIds.includes(task.id);
 
   // No tag change needed
   if (isScheduledForToday === isCurrentlyInToday) {
@@ -907,6 +920,11 @@ const handleMoveTaskInTodayTagList = (
   fromTaskId: string,
 ): RootState => {
   const todayTag = getTag(state, TODAY_TAG.id);
+
+  // If either task is not in the Today list, don't perform the move
+  if (!todayTag.taskIds.includes(fromTaskId) || !todayTag.taskIds.includes(toTaskId)) {
+    return state;
+  }
 
   return updateTags(state, [
     {
