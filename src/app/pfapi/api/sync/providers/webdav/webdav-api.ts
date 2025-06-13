@@ -7,8 +7,6 @@ import {
   RemoteFileNotFoundAPIError,
 } from '../../../errors/errors';
 import { pfLog } from '../../../util/log';
-import { IS_ANDROID_WEB_VIEW } from '../../../../../util/is-android-web-view';
-import { CapacitorHttp } from '@capacitor/core';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
@@ -46,81 +44,6 @@ export class WebdavApi {
 
   constructor(private _getCfgOrError: () => Promise<WebdavPrivateCfg>) {}
 
-  private _shouldUseCapacitorHttp(method: string): boolean {
-    if (!IS_ANDROID_WEB_VIEW) return false;
-
-    const standardMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'];
-    const shouldUse = !standardMethods.includes(method.toUpperCase());
-
-    pfLog(1, `${WebdavApi.L}._shouldUseCapacitorHttp() method check`, {
-      method,
-      isAndroidWebView: IS_ANDROID_WEB_VIEW,
-      isStandard: !shouldUse,
-      shouldUseCapacitor: shouldUse,
-    });
-
-    return shouldUse;
-  }
-
-  private async _makeCapacitorHttpRequest({
-    method,
-    path,
-    body = null,
-    headers = {},
-    ifNoneMatch = null,
-    cfg,
-  }: WebDavRequestOptions & { cfg: any }): Promise<Response> {
-    const requestHeaders: Record<string, string> = {
-      Authorization: this._getAuthHeader(cfg),
-      ...headers,
-    };
-
-    if (ifNoneMatch) {
-      requestHeaders['If-None-Match'] = ifNoneMatch;
-    }
-
-    const url = this._getUrl(path, cfg);
-
-    pfLog(2, `${WebdavApi.L}._makeCapacitorHttpRequest() using CapacitorHttp`, {
-      method,
-      url,
-      headers: Object.keys(requestHeaders),
-    });
-
-    try {
-      const capacitorResponse = await CapacitorHttp.request({
-        url,
-        method,
-        headers: requestHeaders,
-        data: body,
-      });
-
-      // Handle undefined response for testing
-      if (!capacitorResponse) {
-        throw new Error('CapacitorHttp returned undefined response');
-      }
-
-      // Convert Capacitor response to standard Response object
-      const response = new Response(capacitorResponse.data, {
-        status: capacitorResponse.status,
-        statusText: capacitorResponse.status.toString(),
-        headers: new Headers(capacitorResponse.headers || {}),
-      });
-
-      this._validateWebDavResponse(response, method, path);
-
-      return response;
-    } catch (e) {
-      pfLog(0, `${WebdavApi.L}._makeCapacitorHttpRequest() error`, {
-        method,
-        path,
-        error: e,
-      });
-      this._checkCommonErrors(e, path);
-      throw e;
-    }
-  }
-
   // Utility methods to reduce duplication
   private _responseHeadersToObject(response: Response): Record<string, string> {
     const headers: Record<string, string> = {};
@@ -156,6 +79,31 @@ export class WebdavApi {
     );
   }
 
+  private _handleWebDavError(error: any, operation: string, path: string): void {
+    const status = error?.status;
+    pfLog(0, `${WebdavApi.L}.${operation}() error`, { path, error });
+
+    switch (status) {
+      case 401:
+      case 403:
+        throw new AuthFailSPError(`WebDAV ${status}`, path);
+      case 404:
+        throw new RemoteFileNotFoundAPIError(path);
+      case 409:
+        throw new Error(`Conflict: ${path} (parent directory may not exist)`);
+      case 412:
+        throw new Error(`Precondition failed: ${path} (file was modified)`);
+      case 413:
+        throw new Error(`File too large: ${path}`);
+      case 423:
+        throw new Error(`Resource is locked: ${path}`);
+      case 507:
+        throw new Error(`Insufficient storage space for: ${path}`);
+      default:
+        throw error;
+    }
+  }
+
   async upload({
     data,
     path,
@@ -167,42 +115,22 @@ export class WebdavApi {
     isOverwrite?: boolean;
     expectedEtag?: string | null;
   }): Promise<string | undefined> {
-    pfLog(1, `${WebdavApi.L}.upload() starting upload`, {
-      path,
-      dataLength: data.length,
-      isOverwrite,
-      expectedEtag,
-    });
-
     const headers: Record<string, string> = {
       'Content-Type': 'application/octet-stream',
       'Content-Length': new Blob([data]).size.toString(),
       ...this._createConditionalHeaders(isOverwrite, expectedEtag),
     };
 
-    pfLog(1, `${WebdavApi.L}.upload() about to make PUT request`, {
-      path,
-      headers: Object.keys(headers),
-    });
-
     try {
       // Ensure parent directory exists before upload
+      await this._ensureParentDirectoryExists(path);
+
       const response = await this._makeRequest({
         method: 'PUT',
         path,
         body: data,
         headers,
       });
-
-      pfLog(1, `${WebdavApi.L}.upload() PUT request completed`, {
-        path,
-        status: response.status,
-      });
-
-      // Check if we got a 409 response (conflict - parent directory doesn't exist)
-      if (response.status === 409) {
-        return this._handleUploadConflict(path, data, headers);
-      }
 
       // Extract etag from response headers
       const responseHeaderObj = this._responseHeadersToObject(response);
@@ -226,25 +154,55 @@ export class WebdavApi {
     } catch (e: any) {
       pfLog(0, `${WebdavApi.L}.upload() error`, { path, error: e });
 
-      // Check if it's an HttpNotOkAPIError first
-      if (e instanceof HttpNotOkAPIError) {
-        const status = e.response?.status;
-
-        // Handle 409 conflict by creating parent directories
-        if (status === 409) {
-          return this._handleUploadConflict(path, data, headers);
-        }
-
-        // Handle other WebDAV-specific status codes
-        this._handleUploadError(e, path, expectedEtag);
-      }
-
       // Enhanced error handling for WebDAV-specific scenarios
-      if (e?.status === 409) {
-        return this._handleUploadConflict(path, data, headers);
-      }
+      switch (e?.status) {
+        case 409:
+          // Conflict - parent directory doesn't exist or other conflict
+          // Try one more time to create parent directories and retry
+          try {
+            pfLog(
+              1,
+              `${WebdavApi.L}.upload() 409 conflict, attempting directory creation for ${path}`,
+            );
+            await this._ensureParentDirectoryExists(path);
 
-      this._handleUploadError(e, path, expectedEtag);
+            // Retry the upload once
+            const retryResponse = await this._makeRequest({
+              method: 'PUT',
+              path,
+              body: data,
+              headers,
+            });
+
+            const retryHeaderObj = this._responseHeadersToObject(retryResponse);
+            return this._findEtagInHeaders(retryHeaderObj);
+          } catch (retryError: any) {
+            pfLog(0, `${WebdavApi.L}.upload() retry after 409 also failed`, retryError);
+            throw new Error(
+              `Upload failed: ${retryError?.message || 'Directory creation or upload conflict'}`,
+            );
+          }
+        case 412:
+          // Precondition Failed - conditional header failed
+          if (expectedEtag) {
+            throw new Error(
+              `Upload failed: file was modified (expected etag: ${expectedEtag})`,
+            );
+          } else {
+            throw new FileExistsAPIError();
+          }
+        case 413:
+          // Payload Too Large
+          throw new Error(`File too large: ${path}`);
+        case 507:
+          // Insufficient Storage
+          throw new Error(`Insufficient storage space for: ${path}`);
+        case 423:
+          // Locked
+          throw new Error(`Resource is locked: ${path}`);
+        default:
+          throw e;
+      }
     }
   }
 
@@ -283,75 +241,6 @@ export class WebdavApi {
       if (e?.status === 404) {
         throw new RemoteFileNotFoundAPIError(path);
       }
-
-      // If PROPFIND fails, try HEAD as fallback
-      pfLog(1, `${WebdavApi.L}.getFileMeta() PROPFIND failed, trying HEAD fallback`, e);
-      return this._getFileMetaWithHead(path, localRev);
-    }
-  }
-
-  /**
-   * Get file metadata using HEAD request (fallback for Android WebView)
-   */
-  private async _getFileMetaWithHead(
-    path: string,
-    localRev: string | null,
-  ): Promise<FileMeta> {
-    try {
-      const headers: Record<string, string> = {};
-      if (localRev) {
-        headers['If-None-Match'] = localRev;
-      }
-
-      const response = await this._makeRequest({
-        method: 'HEAD',
-        path,
-        headers,
-      });
-
-      const responseHeaders = this._responseHeadersToObject(response);
-      const etag = this._findEtagInHeaders(responseHeaders);
-
-      if (!etag) {
-        pfLog(1, `${WebdavApi.L}._getFileMetaWithHead() no etag in response headers`, {
-          path,
-          headers: responseHeaders,
-        });
-        // Generate a basic etag using content length and last modified if available
-        const contentLength = responseHeaders['content-length'] || '0';
-        const lastModified = responseHeaders['last-modified'] || Date.now().toString();
-        const basicEtag = `${contentLength}-${lastModified}`.replace(/[^a-zA-Z0-9]/g, '');
-
-        pfLog(1, `${WebdavApi.L}._getFileMetaWithHead() generated basic etag`, {
-          path,
-          basicEtag,
-          contentLength,
-          lastModified,
-        });
-      }
-
-      // Extract filename from path
-      const filename = path.split('/').pop() || '';
-
-      return {
-        filename,
-        basename: filename,
-        lastmod: responseHeaders['last-modified'] || '',
-        size: parseInt(responseHeaders['content-length'] || '0', 10),
-        type: 'file', // HEAD doesn't distinguish directories
-        etag: etag || `${responseHeaders['content-length'] || '0'}-${Date.now()}`,
-        data: {
-          'content-type': responseHeaders['content-type'] || '',
-          'content-length': responseHeaders['content-length'] || '0',
-          'last-modified': responseHeaders['last-modified'] || '',
-          etag: etag || '',
-          href: path,
-        },
-      };
-    } catch (e: any) {
-      if (e?.status === 404) {
-        throw new RemoteFileNotFoundAPIError(path);
-      }
       throw e;
     }
   }
@@ -367,28 +256,13 @@ export class WebdavApi {
     rangeStart?: number;
     rangeEnd?: number;
   }): Promise<{ rev: string; dataStr: string }> {
-    pfLog(1, `${WebdavApi.L}.download() starting`, {
-      path,
-      localRev,
-      hasLocalRev: !!localRev,
-    });
-
     try {
       const headers: Record<string, string> = {};
 
-      // Only use conditional headers if we have a local revision to compare against
-      // This prevents 304 responses during full downloads when localRev is null
+      // Add conditional headers for efficient downloading
       if (localRev) {
         // Use If-None-Match to avoid downloading if file hasn't changed
         headers['If-None-Match'] = localRev;
-        pfLog(1, `${WebdavApi.L}.download() using conditional headers`, {
-          path,
-          localRev,
-        });
-      } else {
-        pfLog(1, `${WebdavApi.L}.download() no conditional headers (fresh download)`, {
-          path,
-        });
       }
 
       // Add Range header for partial content requests (useful for large files)
@@ -415,15 +289,7 @@ export class WebdavApi {
       // Handle different response statuses
       if (response.status === 304) {
         // Not Modified - file hasn't changed
-        pfLog(1, `${WebdavApi.L}.download() 304 Not Modified - file unchanged`, {
-          path,
-          localRev,
-        });
-
-        const notModifiedError = new Error(`File not modified: ${path}`);
-        (notModifiedError as any).status = 304;
-        (notModifiedError as any).localRev = localRev;
-        throw notModifiedError;
+        throw new Error(`File not modified: ${path}`);
       }
 
       if (response.status === 206) {
@@ -506,7 +372,24 @@ export class WebdavApi {
       };
     } catch (e: any) {
       pfLog(0, `${WebdavApi.L}.download() error`, { path, error: e });
-      this._handleDownloadError(e, path);
+
+      // Enhanced error handling
+      switch (e?.status) {
+        case 304:
+          // Not Modified - rethrow as is since this might be expected
+          throw e;
+        case 404:
+          // Not Found - file doesn't exist
+          throw new RemoteFileNotFoundAPIError(path);
+        case 416:
+          // Range Not Satisfiable
+          throw new Error(`Invalid range request for: ${path}`);
+        case 423:
+          // Locked
+          throw new Error(`Resource is locked: ${path}`);
+        default:
+          throw e;
+      }
     }
   }
 
@@ -526,10 +409,7 @@ export class WebdavApi {
         const meta = await this.getFileMeta(path, null);
         resourceType = meta.type;
       } catch (checkError: any) {
-        if (
-          checkError instanceof RemoteFileNotFoundAPIError ||
-          checkError?.status === 404
-        ) {
+        if (checkError?.status === 404) {
           // Resource doesn't exist, consider deletion successful
           pfLog(2, `${WebdavApi.L}.remove() resource already doesn't exist: ${path}`);
           return;
@@ -559,9 +439,7 @@ export class WebdavApi {
 
       // Check for multi-status response (207) which might contain partial failures
       if (response.status === 207) {
-        // Clone the response to avoid consuming the body twice
-        const clonedResponse = response.clone();
-        const xmlText = await clonedResponse.text();
+        const xmlText = await response.text();
         const hasErrors = await this._checkDeleteMultiStatusResponse(xmlText, path);
         if (hasErrors) {
           throw new Error(`Partial deletion failure for: ${path}`);
@@ -572,12 +450,35 @@ export class WebdavApi {
     } catch (e: any) {
       pfLog(0, `${WebdavApi.L}.remove() error`, { path, error: e });
 
-      // Check if it's an HttpNotOkAPIError first
-      if (e instanceof HttpNotOkAPIError) {
-        this._handleRemoveError(e, path, expectedEtag);
+      // Enhanced error handling for WebDAV DELETE
+      switch (e?.status) {
+        case 404:
+          // Not Found - resource doesn't exist, consider this success
+          pfLog(
+            2,
+            `${WebdavApi.L}.remove() resource not found (already deleted): ${path}`,
+          );
+          return;
+        case 412:
+          // Precondition Failed - etag mismatch
+          if (expectedEtag) {
+            throw new Error(
+              `Delete failed: resource was modified (expected etag: ${expectedEtag})`,
+            );
+          }
+          throw e;
+        case 423:
+          // Locked
+          throw new Error(`Cannot delete locked resource: ${path}`);
+        case 424:
+          // Failed Dependency
+          throw new Error(`Delete failed due to dependency: ${path}`);
+        case 409:
+          // Conflict - might be non-empty directory
+          throw new Error(`Delete conflict (non-empty directory?): ${path}`);
+        default:
+          throw e;
       }
-
-      this._handleRemoveError(e, path, expectedEtag);
     }
   }
 
@@ -626,7 +527,7 @@ export class WebdavApi {
       await this.getFileMeta(path, null);
       return true;
     } catch (e: any) {
-      if (e instanceof RemoteFileNotFoundAPIError || e?.status === 404) {
+      if (e?.status === 404) {
         return false;
       }
       throw e;
@@ -651,52 +552,15 @@ export class WebdavApi {
 
   async createFolder({ folderPath }: { folderPath: string }): Promise<void> {
     try {
-      const response = await this._makeRequest({
+      await this._makeRequest({
         method: 'MKCOL',
         path: folderPath,
       });
-
-      // Check if we got a 405 response (method not allowed)
-      if (response.status === 405) {
-        pfLog(
-          2,
-          `${WebdavApi.L}.createFolder() MKCOL not supported (405), trying PUT fallback`,
-        );
-        await this._makeRequest({
-          method: 'PUT',
-          path: `${folderPath}/.folder`,
-          body: '',
-          headers: { 'Content-Type': 'application/octet-stream' },
-        });
-      } else if (response.status === 409) {
-        // Conflict - parent directory doesn't exist
-        pfLog(
-          2,
-          `${WebdavApi.L}.createFolder() 409 conflict, creating parent directories`,
-        );
-        const parentPath = folderPath.split('/').slice(0, -1).join('/');
-        if (parentPath && parentPath !== folderPath) {
-          await this.createFolder({ folderPath: parentPath });
-          // Try again after creating parent
-          await this._makeRequest({
-            method: 'MKCOL',
-            path: folderPath,
-          });
-        } else {
-          throw new Error(`Cannot create folder: ${folderPath}`);
-        }
-      }
     } catch (e: any) {
       pfLog(0, `${WebdavApi.L}.createFolder() MKCOL error`, { folderPath, error: e });
 
       // Handle different error scenarios
-      const status = e instanceof HttpNotOkAPIError ? e.response?.status : e?.status;
-      const errorMessage = e?.message || '';
-
-      if (
-        errorMessage.includes('MKCOL') ||
-        (IS_ANDROID_WEB_VIEW && errorMessage.includes('MKCOL'))
-      ) {
+      if (e?.status === 405) {
         // Method not allowed - MKCOL not supported
         pfLog(
           2,
@@ -728,7 +592,7 @@ export class WebdavApi {
           },
         );
         throw e;
-      } else if (status === 409) {
+      } else if (e?.status === 409) {
         // Conflict - parent directory doesn't exist, try to create it recursively
         const parentPath = folderPath.split('/').slice(0, -1).join('/');
         if (parentPath && parentPath !== folderPath) {
@@ -756,32 +620,6 @@ export class WebdavApi {
   }: WebDavRequestOptions): Promise<Response> {
     const cfg = await this._getCfgOrError();
 
-    pfLog(1, `${WebdavApi.L}._makeRequest() starting`, {
-      method,
-      path: path.substring(0, 50),
-    });
-
-    // Check if we should use Capacitor HTTP for this request
-    const shouldUseCapacitor = this._shouldUseCapacitorHttp(method);
-    pfLog(1, `${WebdavApi.L}._makeRequest() routing decision`, {
-      method,
-      shouldUseCapacitor,
-    });
-
-    if (shouldUseCapacitor) {
-      pfLog(1, `${WebdavApi.L}._makeRequest() using Capacitor HTTP`);
-      return this._makeCapacitorHttpRequest({
-        method,
-        path,
-        body,
-        headers,
-        ifNoneMatch,
-        cfg,
-      });
-    }
-
-    pfLog(1, `${WebdavApi.L}._makeRequest() using regular fetch`);
-
     const requestHeaders = new Headers();
     requestHeaders.append('Authorization', this._getAuthHeader(cfg));
     if (ifNoneMatch) {
@@ -799,7 +637,37 @@ export class WebdavApi {
         body,
       });
 
-      this._validateWebDavResponse(response, method, path);
+      // Handle 404 specifically to throw RemoteFileNotFoundAPIError consistently
+      if (response.status === 404) {
+        pfLog(2, `${WebdavApi.L}._makeRequest() 404 Not Found`, {
+          method,
+          path,
+        });
+        throw new RemoteFileNotFoundAPIError(path);
+      }
+
+      // WebDAV specific status codes handling
+      const validWebDavStatuses = [
+        200, // OK
+        201, // Created
+        204, // No Content
+        206, // Partial Content
+        207, // Multi-Status
+        304, // Not Modified (for conditional requests)
+        409, // Conflict (let calling methods handle this)
+        412, // Precondition Failed (let calling methods handle this)
+        423, // Locked (let calling methods handle this)
+      ];
+
+      if (!validWebDavStatuses.includes(response.status)) {
+        pfLog(0, `${WebdavApi.L}._makeRequest() HTTP error`, {
+          method,
+          path,
+          status: response.status,
+          statusText: response.statusText,
+        });
+        throw new HttpNotOkAPIError(response);
+      }
       return response;
     } catch (e) {
       pfLog(0, `${WebdavApi.L}._makeRequest() network error`, {
@@ -818,7 +686,9 @@ export class WebdavApi {
   }
 
   private _findEtagKeyInObject(obj: Record<string, any>): string | undefined {
+    // Standard etag headers (case-insensitive search)
     const possibleEtagKeys = ['etag', 'oc-etag', 'oc:etag', 'getetag', 'x-oc-etag'];
+
     return Object.keys(obj).find((key) => possibleEtagKeys.includes(key.toLowerCase()));
   }
 
@@ -830,13 +700,18 @@ export class WebdavApi {
       .replace(/"/g, '')
       .replace(/&quot;/g, '')
       .trim();
+
     pfLog(3, `${WebdavApi.L}.cleanRev() "${rev}" -> "${result}"`);
     return result;
   }
 
   private _getUrl(path: string, cfg: WebdavPrivateCfg): string {
+    // Ensure base URL ends with a trailing slash
     const baseUrl = cfg.baseUrl.endsWith('/') ? cfg.baseUrl : `${cfg.baseUrl}/`;
+
+    // Remove leading slash from path if it exists
     const normalizedPath = path.startsWith('/') ? path.substring(1) : path;
+
     return new URL(normalizedPath, baseUrl).toString();
   }
 
@@ -970,56 +845,23 @@ export class WebdavApi {
       if (e?.status === 404) {
         return false;
       }
-
-      // If PROPFIND fails (especially on Android), try HEAD fallback
-      if (IS_ANDROID_WEB_VIEW || e?.message?.includes('PROPFIND')) {
-        try {
-          await this._makeRequest({
-            method: 'HEAD',
-            path: folderPath,
-          });
-          // If HEAD succeeds, assume it's a folder (we can't easily distinguish on Android)
-          return true;
-        } catch (headError: any) {
-          if (headError?.status === 404) {
-            return false;
-          }
-          throw headError;
-        }
-      }
-
       throw e;
     }
   }
 
   async listFolder(folderPath: string): Promise<FileMeta[]> {
-    try {
-      const response = await this._makeRequest({
-        method: 'PROPFIND',
-        path: folderPath,
-        body: WebdavApi.PROPFIND_XML,
-        headers: {
-          'Content-Type': 'application/xml',
-          Depth: '1', // Get immediate children
-        },
-      });
+    const response = await this._makeRequest({
+      method: 'PROPFIND',
+      path: folderPath,
+      body: WebdavApi.PROPFIND_XML,
+      headers: {
+        'Content-Type': 'application/xml',
+        Depth: '1', // Get immediate children
+      },
+    });
 
-      const xmlText = await response.text();
-      return this._parseMultiplePropsFromXml(xmlText, folderPath);
-    } catch (e: any) {
-      pfLog(0, `${WebdavApi.L}.listFolder() PROPFIND failed`, e);
-
-      // On Android WebView or if PROPFIND fails, return empty array
-      if (IS_ANDROID_WEB_VIEW || e?.message?.includes('PROPFIND')) {
-        pfLog(
-          1,
-          `${WebdavApi.L}.listFolder() fallback - returning empty list for Android or PROPFIND error`,
-        );
-        return [];
-      }
-
-      throw e;
-    }
+    const xmlText = await response.text();
+    return this._parseMultiplePropsFromXml(xmlText, folderPath);
   }
 
   private _parseMultiplePropsFromXml(xmlText: string, basePath: string): FileMeta[] {
@@ -1047,16 +889,7 @@ export class WebdavApi {
         const decodedHref = decodeURIComponent(href);
 
         // Skip the base path itself (we only want children)
-        // Need to handle both absolute paths and relative paths
-        const normalizedHref = decodedHref.replace(/\/$/, '');
-        const normalizedBasePath = basePath.replace(/\/$/, '');
-
-        // Check if it's the folder itself by comparing the end of the path
-        if (
-          normalizedHref === normalizedBasePath ||
-          normalizedHref.endsWith('/' + normalizedBasePath) ||
-          normalizedHref === '/' + normalizedBasePath
-        ) {
+        if (decodedHref.replace(/\/$/, '') === basePath.replace(/\/$/, '')) {
           continue;
         }
 
@@ -1085,7 +918,7 @@ export class WebdavApi {
     const dirParts = pathParts.slice(0, -1);
 
     // Create directories progressively from root to parent
-    // This is only called when we get a 409 error, so we know directories are missing
+    // Use optimistic creation - just try to create each directory
     for (let i = 1; i <= dirParts.length; i++) {
       const currentPath = dirParts.slice(0, i).join('/');
 
@@ -1138,152 +971,20 @@ export class WebdavApi {
     }
   }
 
-  private _validateWebDavResponse(
-    response: Response,
-    method: string,
-    path: string,
-  ): void {
-    // Don't validate if response is undefined (for testing)
-    if (!response) {
-      return;
-    }
-
-    if (response.status === 404) {
-      pfLog(2, `${WebdavApi.L}._validateWebDavResponse() 404 Not Found`, {
-        method,
-        path,
-      });
-      throw new RemoteFileNotFoundAPIError(path);
-    }
-
-    // These statuses are valid for WebDAV operations
-    const validWebDavStatuses = [200, 201, 204, 206, 207, 304, 405, 409];
-
-    if (!validWebDavStatuses.includes(response.status)) {
-      pfLog(0, `${WebdavApi.L}._validateWebDavResponse() HTTP error`, {
-        method,
-        path,
-        status: response.status,
-        statusText: response.statusText,
-      });
-      throw new HttpNotOkAPIError(response);
-    }
-  }
-
   private _checkCommonErrors(e: any, targetPath: string): void {
     pfLog(0, `${WebdavApi.L} API error for ${targetPath}`, e);
 
     const status = e?.status || e?.response?.status;
-    if (status === 401 || status === 403) {
-      throw new AuthFailSPError(`WebDAV ${status}`, targetPath);
+    // Handle common HTTP error codes
+    switch (status) {
+      case 401:
+      case 403:
+        throw new AuthFailSPError(`WebDAV ${e.status}`, targetPath);
+      case 207:
+        // Multi-Status is normal for WebDAV PROPFIND responses
+        break;
+      // Note: Removed automatic 404 handling to let calling methods decide
+      // how to handle "Not Found" responses (some may expect them)
     }
-  }
-
-  private async _handleUploadConflict(
-    path: string,
-    data: string,
-    headers: Record<string, string>,
-  ): Promise<string | undefined> {
-    try {
-      pfLog(
-        1,
-        `${WebdavApi.L}.upload() 409 conflict, attempting directory creation for ${path}`,
-      );
-      await this._ensureParentDirectoryExists(path);
-
-      const retryResponse = await this._makeRequest({
-        method: 'PUT',
-        path,
-        body: data,
-        headers,
-      });
-
-      const retryHeaderObj = this._responseHeadersToObject(retryResponse);
-      return this._findEtagInHeaders(retryHeaderObj);
-    } catch (retryError: any) {
-      pfLog(0, `${WebdavApi.L}.upload() retry after 409 also failed`, retryError);
-      throw new Error(
-        `Upload failed: ${retryError?.message || 'Directory creation or upload conflict'}`,
-      );
-    }
-  }
-
-  private _handleUploadError(e: any, path: string, expectedEtag?: string | null): never {
-    const status =
-      e?.status || (e instanceof HttpNotOkAPIError ? e.response?.status : undefined);
-
-    const errorMessages: Record<number, string | (() => never)> = {
-      412: () => {
-        if (expectedEtag) {
-          throw new Error(
-            `Upload failed: file was modified (expected etag: ${expectedEtag})`,
-          );
-        } else {
-          throw new FileExistsAPIError();
-        }
-      },
-      413: `File too large: ${path}`,
-      423: `Resource is locked: ${path}`,
-      507: `Insufficient storage space for: ${path}`,
-    };
-
-    const errorHandler = errorMessages[status];
-    if (typeof errorHandler === 'function') {
-      errorHandler();
-    } else if (errorHandler) {
-      throw new Error(errorHandler);
-    }
-    throw e;
-  }
-
-  private _handleDownloadError(e: any, path: string): never {
-    const status =
-      e?.status || (e instanceof HttpNotOkAPIError ? e.response?.status : undefined);
-
-    const errorMessages: Record<number, string | Error> = {
-      304: e, // Not Modified - rethrow as is
-      404: new RemoteFileNotFoundAPIError(path),
-      416: new Error(`Invalid range request for: ${path}`),
-      423: new Error(`Resource is locked: ${path}`),
-    };
-
-    const error = errorMessages[status];
-    if (error) {
-      throw error;
-    }
-    throw e;
-  }
-
-  private _handleRemoveError(e: any, path: string, expectedEtag?: string): void {
-    const status =
-      e?.status || (e instanceof HttpNotOkAPIError ? e.response?.status : undefined);
-
-    if (status === 404) {
-      // Not Found - resource doesn't exist, consider this success
-      pfLog(2, `${WebdavApi.L}.remove() resource not found (already deleted): ${path}`);
-      return;
-    }
-
-    const errorMessages: Record<number, string | (() => never)> = {
-      412: () => {
-        if (expectedEtag) {
-          throw new Error(
-            `Delete failed: resource was modified (expected etag: ${expectedEtag})`,
-          );
-        }
-        throw e;
-      },
-      423: `Cannot delete locked resource: ${path}`,
-      424: `Delete failed due to dependency: ${path}`,
-      409: `Delete conflict (non-empty directory?): ${path}`,
-    };
-
-    const errorHandler = errorMessages[status];
-    if (typeof errorHandler === 'function') {
-      errorHandler();
-    } else if (errorHandler) {
-      throw new Error(errorHandler);
-    }
-    throw e;
   }
 }
