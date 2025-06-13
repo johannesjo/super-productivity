@@ -61,7 +61,6 @@ import { ShortTime2Pipe } from './app/ui/pipes/short-time2.pipe';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { BackgroundTask } from '@capawesome/capacitor-background-task';
 import { promiseTimeout } from './app/util/promise-timeout';
-import { initializePlugins } from './app/plugins/plugin-initializer';
 
 if (environment.production || environment.stage) {
   enableProdMode();
@@ -174,14 +173,6 @@ bootstrapApplication(AppComponent, {
     provideRouter(APP_ROUTES, withHashLocation(), withPreloading(PreloadAllModules)),
   ],
 }).then(async (appRef) => {
-  // Initialize plugins after app is fully bootstrapped
-  try {
-    await initializePlugins(appRef.injector);
-    console.log('Plugins initialized successfully');
-  } catch (error) {
-    console.error('Failed to initialize plugins:', error);
-  }
-
   // TODO make asset caching work for electron
   if (
     'serviceWorker' in navigator &&

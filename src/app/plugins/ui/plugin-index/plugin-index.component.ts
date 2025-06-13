@@ -95,9 +95,21 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
 
   private async _loadPluginIndex(pluginId: string): Promise<void> {
     // Get the plugin index.html content
-    const indexContent = await this._pluginService.getPluginIndexHtml(pluginId);
+    const indexContent = this._pluginService.getPluginIndexHtml(pluginId);
     if (!indexContent) {
-      throw new Error('Plugin does not have an index.html file');
+      // Try to get the plugin instance to check if it should have an index.html
+      const plugins = await this._pluginService.getAllPlugins();
+      const plugin = plugins.find((p) => p.manifest.id === pluginId);
+
+      if (!plugin) {
+        throw new Error('Plugin not found');
+      }
+
+      if (!plugin.manifest.iFrame) {
+        throw new Error('Plugin does not support iframe view');
+      }
+
+      throw new Error('Plugin index.html not loaded. Please reload the plugin.');
     }
 
     // Inject the PluginAPI script directly into the HTML content before the closing </body> tag
@@ -117,7 +129,11 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
   private _setupIframeCommunication(pluginId: string): void {
     this._messageListener = (event: MessageEvent) => {
       // Security: Verify origin for data URLs
-      if (event.origin !== 'null' && !event.origin.startsWith('data:')) {
+      // In development, localhost origins are common due to dev server
+      const isDevOrigin = event.origin.startsWith('http://localhost:');
+      const isDataUrlOrigin = event.origin === 'null' || event.origin.startsWith('data:');
+
+      if (!isDataUrlOrigin && !isDevOrigin) {
         console.warn('Received message from unexpected origin:', event.origin);
         return;
       }
