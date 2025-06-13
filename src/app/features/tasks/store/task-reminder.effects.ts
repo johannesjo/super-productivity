@@ -2,7 +2,6 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   addReminderIdToTask,
-  moveToArchive_,
   removeReminderFromTask,
   reScheduleTaskWithTime,
   scheduleTaskWithTime,
@@ -148,7 +147,7 @@ export class TaskReminderEffects {
   clearRemindersForArchivedTasks$ = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(moveToArchive_),
+        ofType(TaskSharedActions.moveToArchive),
         tap(({ tasks }) => {
           const flatTasks = flattenTasks(tasks);
           if (!flatTasks.length) {

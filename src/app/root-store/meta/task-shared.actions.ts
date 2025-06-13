@@ -37,6 +37,7 @@ export const TaskSharedActions = createActionGroup({
       taskIds: string[];
     }>(),
 
+    // TODO rename to `moveTaskToArchive__` to indicate it should not be called directly
     moveToArchive: props<{
       tasks: TaskWithSubTasks[];
     }>(),

@@ -2,7 +2,6 @@ import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   addSubTask,
-  moveToArchive_,
   setCurrentTask,
   toggleStart,
   unsetCurrentTask,
@@ -98,7 +97,7 @@ export class TaskInternalEffects {
         toggleStart,
         TaskSharedActions.updateTask,
         TaskSharedActions.deleteTask,
-        moveToArchive_,
+        TaskSharedActions.moveToArchive,
 
         moveProjectTaskToBacklogList.type,
         moveProjectTaskToBacklogListAuto.type,
@@ -159,7 +158,7 @@ export class TaskInternalEffects {
 
           // NOTE: currently no solution for this, but we're probably fine, as the current task
           // gets unset every time we go to the finish day view
-          // case moveToArchive_: {}
+          // case TaskSharedActions.moveToArchive: {}
         }
 
         if (nextId === 'NO_UPDATE') {

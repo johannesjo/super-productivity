@@ -52,11 +52,6 @@ export const toggleTaskHideSubTasks = createAction(
   props<{ taskId: string; isShowLess: boolean; isEndless: boolean }>(),
 );
 
-export const updateTasks = createAction(
-  '[Task] Update Tasks',
-  props<{ tasks: Update<Task>[] }>(),
-);
-
 export const undoDeleteTask = createAction('[Task] Undo Delete Task');
 
 export const moveSubTask = createAction(
@@ -77,7 +72,6 @@ export const moveSubTaskUp = createAction(
 
 export const moveSubTaskDown = createAction(
   '[Task] Move down',
-
   props<{ id: string; parentId: string }>(),
 );
 
@@ -156,13 +150,6 @@ export const convertToMainTask = createAction(
   '[Task] Convert SubTask to main task',
 
   props<{ task: Task; parentTagIds: string[]; isPlanForToday?: boolean }>(),
-);
-
-// the _ indicates that it should not be used directly, but always over the service instead
-export const moveToArchive_ = createAction(
-  '[Task] Move to archive',
-
-  props<{ tasks: TaskWithSubTasks[] }>(),
 );
 
 export const moveToOtherProject = createAction(

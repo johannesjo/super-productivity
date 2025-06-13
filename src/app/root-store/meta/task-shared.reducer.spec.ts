@@ -720,7 +720,7 @@ describe('taskSharedMetaReducer', () => {
     });
   });
 
-  describe('moveToArchive_ action', () => {
+  describe('moveToArchive action', () => {
     const createArchiveAction = (tasks: Partial<TaskWithSubTasks>[] = []) =>
       TaskSharedActions.moveToArchive({
         tasks: tasks.map(
@@ -780,6 +780,254 @@ describe('taskSharedMetaReducer', () => {
           }),
         },
         action,
+      );
+    });
+
+    it('should remove tasks and subtasks from all associated tags', () => {
+      const testState = createStateWithExistingTasks(
+        ['parent-task', 'subtask1', 'subtask2', 'keep-task'],
+        [],
+        ['parent-task', 'subtask1', 'subtask2', 'keep-task'],
+        ['parent-task', 'subtask1', 'keep-task'],
+      );
+
+      // Add another tag
+      testState[TAG_FEATURE_NAME].entities.tag2 = createMockTag({
+        id: 'tag2',
+        title: 'Tag 2',
+        taskIds: ['subtask2', 'keep-task'],
+      });
+      (testState[TAG_FEATURE_NAME].ids as string[]) = [
+        ...(testState[TAG_FEATURE_NAME].ids as string[]),
+        'tag2',
+      ];
+
+      const action = createArchiveAction([
+        {
+          id: 'parent-task',
+          tagIds: ['tag1'],
+          subTaskIds: ['subtask1', 'subtask2'],
+          subTasks: [
+            { id: 'subtask1', tagIds: ['tag1'] } as Task,
+            { id: 'subtask2', tagIds: ['tag1', 'tag2'] } as Task,
+          ],
+        },
+      ]);
+
+      expectStateUpdate(
+        {
+          ...expectProjectUpdate('project1', {
+            taskIds: ['keep-task'],
+          }),
+          ...expectTagUpdates({
+            tag1: { taskIds: ['keep-task'] },
+            tag2: { taskIds: ['keep-task'] },
+            TODAY: { taskIds: ['keep-task'] },
+          }),
+        },
+        action,
+        testState,
+      );
+    });
+
+    it('should handle tasks without projectId', () => {
+      const testState = createStateWithExistingTasks(
+        [],
+        [],
+        ['task1', 'task2'],
+        ['task1'],
+      );
+
+      // Create tasks without projectId
+      testState[TASK_FEATURE_NAME].entities.task1 = createMockTask({
+        id: 'task1',
+        projectId: undefined,
+        tagIds: ['tag1'],
+      });
+      testState[TASK_FEATURE_NAME].entities.task2 = createMockTask({
+        id: 'task2',
+        projectId: undefined,
+        tagIds: ['tag1'],
+      });
+
+      const action = createArchiveAction([
+        {
+          id: 'task1',
+          projectId: undefined,
+          tagIds: ['tag1'],
+        },
+      ]);
+
+      expectStateUpdate(
+        {
+          ...expectTagUpdates({
+            tag1: { taskIds: ['task2'] },
+            TODAY: { taskIds: [] },
+          }),
+        },
+        action,
+        testState,
+      );
+    });
+
+    it('should handle mixed tasks with and without projects', () => {
+      const testState = createStateWithExistingTasks(
+        ['project-task'],
+        [],
+        ['project-task', 'orphan-task'],
+        ['project-task', 'orphan-task'],
+      );
+
+      // Create orphan task without projectId
+      testState[TASK_FEATURE_NAME].entities['orphan-task'] = createMockTask({
+        id: 'orphan-task',
+        projectId: undefined,
+        tagIds: ['tag1'],
+      });
+
+      const action = createArchiveAction([
+        {
+          id: 'project-task',
+          projectId: 'project1',
+          tagIds: ['tag1'],
+        },
+        {
+          id: 'orphan-task',
+          projectId: undefined,
+          tagIds: ['tag1'],
+        },
+      ]);
+
+      expectStateUpdate(
+        {
+          ...expectProjectUpdate('project1', {
+            taskIds: [],
+          }),
+          ...expectTagUpdates({
+            tag1: { taskIds: [] },
+            TODAY: { taskIds: [] },
+          }),
+        },
+        action,
+        testState,
+      );
+    });
+
+    it('should always update TODAY tag even if no tasks are in it', () => {
+      const testState = createStateWithExistingTasks(
+        ['task1'],
+        [],
+        ['task1'],
+        [], // No tasks in TODAY
+      );
+
+      const action = createArchiveAction([
+        {
+          id: 'task1',
+          tagIds: ['tag1'],
+        },
+      ]);
+
+      expectStateUpdate(
+        {
+          ...expectTagUpdates({
+            tag1: { taskIds: [] },
+            TODAY: { taskIds: [] }, // Should still be updated
+          }),
+        },
+        action,
+        testState,
+      );
+    });
+
+    it('should handle archiving tasks from multiple projects', () => {
+      const testState = createStateWithExistingTasks(
+        ['task1'],
+        [],
+        ['task1', 'task2'],
+        [],
+      );
+
+      // Add second project
+      testState[PROJECT_FEATURE_NAME].entities.project2 = createMockProject({
+        id: 'project2',
+        title: 'Project 2',
+        taskIds: ['task2'],
+      });
+      (testState[PROJECT_FEATURE_NAME].ids as string[]) = [
+        ...(testState[PROJECT_FEATURE_NAME].ids as string[]),
+        'project2',
+      ];
+
+      // Update task2 to be in project2
+      testState[TASK_FEATURE_NAME].entities.task2 = createMockTask({
+        id: 'task2',
+        projectId: 'project2',
+        tagIds: ['tag1'],
+      });
+
+      const action = createArchiveAction([
+        {
+          id: 'task1',
+          projectId: 'project1',
+          tagIds: ['tag1'],
+        },
+        {
+          id: 'task2',
+          projectId: 'project2',
+          tagIds: ['tag1'],
+        },
+      ]);
+
+      expectStateUpdate(
+        {
+          ...expectProjectUpdate('project1', {
+            taskIds: [],
+          }),
+          ...expectProjectUpdate('project2', {
+            taskIds: [],
+          }),
+          ...expectTagUpdates({
+            tag1: { taskIds: [] },
+          }),
+        },
+        action,
+        testState,
+      );
+    });
+
+    it('should handle tasks with deeply nested subtasks', () => {
+      const testState = createStateWithExistingTasks(
+        ['parent', 'sub1', 'sub2', 'sub3'],
+        [],
+        ['parent', 'sub1', 'sub2', 'sub3'],
+        [],
+      );
+
+      const action = createArchiveAction([
+        {
+          id: 'parent',
+          tagIds: ['tag1'],
+          subTaskIds: ['sub1', 'sub2', 'sub3'],
+          subTasks: [
+            { id: 'sub1', tagIds: ['tag1'] } as Task,
+            { id: 'sub2', tagIds: ['tag1'] } as Task,
+            { id: 'sub3', tagIds: ['tag1'] } as Task,
+          ],
+        },
+      ]);
+
+      expectStateUpdate(
+        {
+          ...expectProjectUpdate('project1', {
+            taskIds: [],
+          }),
+          ...expectTagUpdates({
+            tag1: { taskIds: [] },
+          }),
+        },
+        action,
+        testState,
       );
     });
   });
