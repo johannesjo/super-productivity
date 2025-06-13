@@ -13,6 +13,7 @@ import { Action, ActionReducer } from '@ngrx/store';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { DEFAULT_PROJECT } from '../../features/project/project.const';
 import { DEFAULT_TAG } from '../../features/tag/tag.const';
+import { PlannerActions } from '../../features/planner/store/planner.actions';
 
 describe('taskSharedMetaReducer', () => {
   let mockReducer: jasmine.Spy;
@@ -2196,6 +2197,328 @@ describe('taskSharedMetaReducer', () => {
       // Should not crash and tasks should remain unchanged
       metaReducer(testState, action);
       expect(mockReducer).toHaveBeenCalled();
+    });
+  });
+
+  describe('PlannerActions.transferTask action', () => {
+    const createTransferTaskAction = (
+      task: Task,
+      today: string,
+      targetIndex: number,
+      newDay: string,
+      prevDay: string,
+      targetTaskId?: string,
+    ) =>
+      PlannerActions.transferTask({
+        task,
+        today,
+        targetIndex,
+        newDay,
+        prevDay,
+        targetTaskId,
+      });
+
+    it('should remove task from Today tag when moving from today to different day', () => {
+      const todayStr = getWorklogStr();
+      const testState = createStateWithExistingTasks([], [], [], ['task1', 'other-task']);
+      const task = createMockTask({ id: 'task1' });
+      const action = createTransferTaskAction(task, todayStr, 0, 'tomorrow', todayStr);
+
+      expectStateUpdate(
+        expectTagUpdate('TODAY', { taskIds: ['other-task'] }),
+        action,
+        testState,
+      );
+    });
+
+    it('should add task to Today tag when moving from different day to today', () => {
+      const todayStr = getWorklogStr();
+      const testState = createStateWithExistingTasks([], [], [], ['existing-task']);
+      const task = createMockTask({ id: 'task1' });
+      const action = createTransferTaskAction(task, todayStr, 1, todayStr, 'yesterday');
+
+      expectStateUpdate(
+        expectTagUpdate('TODAY', { taskIds: ['existing-task', 'task1'] }),
+        action,
+        testState,
+      );
+    });
+
+    it('should insert task at specific position when targetTaskId is provided', () => {
+      const todayStr = getWorklogStr();
+      const testState = createStateWithExistingTasks(
+        [],
+        [],
+        [],
+        ['first-task', 'target-task', 'last-task'],
+      );
+      const task = createMockTask({ id: 'new-task' });
+      const action = createTransferTaskAction(
+        task,
+        todayStr,
+        0,
+        todayStr,
+        'yesterday',
+        'target-task',
+      );
+
+      expectStateUpdate(
+        expectTagUpdate('TODAY', {
+          taskIds: ['first-task', 'new-task', 'target-task', 'last-task'],
+        }),
+        action,
+        testState,
+      );
+    });
+
+    it('should not change state when transferring within same day', () => {
+      const todayStr = getWorklogStr();
+      const task = createMockTask({ id: 'task1' });
+      const action = createTransferTaskAction(task, todayStr, 0, todayStr, todayStr);
+
+      metaReducer(baseState, action);
+      expect(mockReducer).toHaveBeenCalledWith(baseState, action);
+    });
+
+    it('should handle unique task IDs when adding to Today', () => {
+      const todayStr = getWorklogStr();
+      const testState = createStateWithExistingTasks([], [], [], ['task1', 'other-task']);
+      const task = createMockTask({ id: 'task1' });
+      const action = createTransferTaskAction(task, todayStr, 0, todayStr, 'yesterday');
+
+      expectStateUpdate(
+        expectTagUpdate('TODAY', { taskIds: ['task1', 'other-task'] }),
+        action,
+        testState,
+      );
+    });
+  });
+
+  describe('PlannerActions.planTaskForDay action', () => {
+    const createPlanTaskForDayAction = (
+      task: Task,
+      day: string,
+      isAddToTop: boolean = false,
+    ) =>
+      PlannerActions.planTaskForDay({
+        task,
+        day,
+        isAddToTop,
+      });
+
+    it('should add task to Today tag when planning for today', () => {
+      const todayStr = getWorklogStr();
+      const testState = createStateWithExistingTasks([], [], [], ['existing-task']);
+      const task = createMockTask({ id: 'task1' });
+      const action = createPlanTaskForDayAction(task, todayStr, false);
+
+      expectStateUpdate(
+        expectTagUpdate('TODAY', { taskIds: ['existing-task', 'task1'] }),
+        action,
+        testState,
+      );
+    });
+
+    it('should add task to top of Today tag when isAddToTop is true', () => {
+      const todayStr = getWorklogStr();
+      const testState = createStateWithExistingTasks([], [], [], ['existing-task']);
+      const task = createMockTask({ id: 'task1' });
+      const action = createPlanTaskForDayAction(task, todayStr, true);
+
+      expectStateUpdate(
+        expectTagUpdate('TODAY', { taskIds: ['task1', 'existing-task'] }),
+        action,
+        testState,
+      );
+    });
+
+    it('should remove task from Today tag when planning for different day', () => {
+      const testState = createStateWithExistingTasks([], [], [], ['task1', 'other-task']);
+      const task = createMockTask({ id: 'task1' });
+      const action = createPlanTaskForDayAction(task, 'tomorrow', false);
+
+      expectStateUpdate(
+        expectTagUpdate('TODAY', { taskIds: ['other-task'] }),
+        action,
+        testState,
+      );
+    });
+
+    it('should not change state when task is already in Today and planned for today', () => {
+      const todayStr = getWorklogStr();
+      const testState = createStateWithExistingTasks([], [], [], ['task1', 'other-task']);
+      const task = createMockTask({ id: 'task1' });
+      const action = createPlanTaskForDayAction(task, todayStr, false);
+
+      expectStateUpdate(
+        expectTagUpdate('TODAY', { taskIds: ['other-task', 'task1'] }),
+        action,
+        testState,
+      );
+    });
+
+    it('should not change state when task is not in Today and not planned for today', () => {
+      const testState = createStateWithExistingTasks([], [], [], ['other-task']);
+      const task = createMockTask({ id: 'task1' });
+      const action = createPlanTaskForDayAction(task, 'tomorrow', false);
+
+      metaReducer(testState, action);
+      expect(mockReducer).toHaveBeenCalledWith(testState, action);
+    });
+  });
+
+  describe('PlannerActions.moveBeforeTask action', () => {
+    const createMoveBeforeTaskAction = (fromTask: Task, toTaskId: string) =>
+      PlannerActions.moveBeforeTask({
+        fromTask,
+        toTaskId,
+      });
+
+    it('should move task before target task in Today tag', () => {
+      const testState = createStateWithExistingTasks(
+        [],
+        [],
+        [],
+        ['task1', 'middle-task', 'target-task', 'last-task'],
+      );
+      const fromTask = createMockTask({ id: 'task1' });
+      const action = createMoveBeforeTaskAction(fromTask, 'target-task');
+
+      expectStateUpdate(
+        expectTagUpdate('TODAY', {
+          taskIds: ['middle-task', 'task1', 'target-task', 'last-task'],
+        }),
+        action,
+        testState,
+      );
+    });
+
+    it('should remove task from Today when moving to task not in Today', () => {
+      const testState = createStateWithExistingTasks([], [], [], ['task1', 'other-task']);
+      const fromTask = createMockTask({ id: 'task1' });
+      const action = createMoveBeforeTaskAction(fromTask, 'non-today-task');
+
+      expectStateUpdate(
+        expectTagUpdate('TODAY', { taskIds: ['other-task'] }),
+        action,
+        testState,
+      );
+    });
+
+    it('should handle unique task IDs when moving task', () => {
+      const testState = createStateWithExistingTasks(
+        [],
+        [],
+        [],
+        ['first-task', 'target-task', 'last-task'],
+      );
+      const fromTask = createMockTask({ id: 'move-task' });
+      const action = createMoveBeforeTaskAction(fromTask, 'target-task');
+
+      expectStateUpdate(
+        expectTagUpdate('TODAY', {
+          taskIds: ['first-task', 'move-task', 'target-task', 'last-task'],
+        }),
+        action,
+        testState,
+      );
+    });
+
+    it('should not change state when fromTask is not in Today and toTask is not in Today', () => {
+      const testState = createStateWithExistingTasks([], [], [], ['other-task']);
+      const fromTask = createMockTask({ id: 'not-in-today' });
+      const action = createMoveBeforeTaskAction(fromTask, 'also-not-in-today');
+
+      metaReducer(testState, action);
+      expect(mockReducer).toHaveBeenCalledWith(testState, action);
+    });
+  });
+
+  describe('TaskSharedActions.moveTaskInTodayTagList action', () => {
+    const createMoveTaskInTodayTagListAction = (toTaskId: string, fromTaskId: string) =>
+      TaskSharedActions.moveTaskInTodayTagList({
+        toTaskId,
+        fromTaskId,
+      });
+
+    it('should move task before target task in Today tag', () => {
+      const testState = createStateWithExistingTasks(
+        [],
+        [],
+        [],
+        ['first-task', 'move-task', 'middle-task', 'target-task', 'last-task'],
+      );
+      const action = createMoveTaskInTodayTagListAction('target-task', 'move-task');
+
+      expectStateUpdate(
+        expectTagUpdate('TODAY', {
+          taskIds: ['first-task', 'middle-task', 'move-task', 'target-task', 'last-task'],
+        }),
+        action,
+        testState,
+      );
+    });
+
+    it('should handle moving task to beginning of list', () => {
+      const testState = createStateWithExistingTasks(
+        [],
+        [],
+        [],
+        ['first-task', 'move-task', 'last-task'],
+      );
+      const action = createMoveTaskInTodayTagListAction('first-task', 'move-task');
+
+      expectStateUpdate(
+        expectTagUpdate('TODAY', {
+          taskIds: ['move-task', 'first-task', 'last-task'],
+        }),
+        action,
+        testState,
+      );
+    });
+
+    it('should handle moving task to end of list', () => {
+      const testState = createStateWithExistingTasks(
+        [],
+        [],
+        [],
+        ['move-task', 'middle-task', 'last-task'],
+      );
+      const action = createMoveTaskInTodayTagListAction('last-task', 'move-task');
+
+      expectStateUpdate(
+        expectTagUpdate('TODAY', {
+          taskIds: ['middle-task', 'move-task', 'last-task'],
+        }),
+        action,
+        testState,
+      );
+    });
+
+    it('should handle single task in Today list', () => {
+      const testState = createStateWithExistingTasks([], [], [], ['only-task']);
+      const action = createMoveTaskInTodayTagListAction('only-task', 'only-task');
+
+      expectStateUpdate(
+        expectTagUpdate('TODAY', {
+          taskIds: ['only-task'],
+        }),
+        action,
+        testState,
+      );
+    });
+
+    it('should handle empty Today list gracefully', () => {
+      const testState = createStateWithExistingTasks([], [], [], []);
+      const action = createMoveTaskInTodayTagListAction('target-task', 'move-task');
+
+      expectStateUpdate(
+        expectTagUpdate('TODAY', {
+          taskIds: [],
+        }),
+        action,
+        testState,
+      );
     });
   });
 
