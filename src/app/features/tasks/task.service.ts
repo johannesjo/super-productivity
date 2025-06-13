@@ -18,18 +18,14 @@ import {
 import { select, Store } from '@ngrx/store';
 import {
   addSubTask,
-  convertToMainTask,
   moveSubTask,
   moveSubTaskDown,
   moveSubTaskToBottom,
   moveSubTaskToTop,
   moveSubTaskUp,
-  removeTagsForAllTasks,
   removeTimeSpent,
   reScheduleTaskWithTime,
-  restoreTask,
   roundTimeSpentForDay,
-  scheduleTaskWithTime,
   setCurrentTask,
   setSelectedTask,
   toggleStart,
@@ -347,7 +343,7 @@ export class TaskService {
 
   removeTagsForAllTask(tagsToRemove: string[]): void {
     this._store.dispatch(
-      removeTagsForAllTasks({
+      TaskSharedActions.removeTagsForAllTasks({
         tagIdsToRemove: tagsToRemove,
       }),
     );
@@ -712,7 +708,7 @@ export class TaskService {
   }
 
   restoreTask(task: Task, subTasks: Task[]): void {
-    this._store.dispatch(restoreTask({ task, subTasks }));
+    this._store.dispatch(TaskSharedActions.restoreTask({ task, subTasks }));
   }
 
   async roundTimeSpentForDayEverywhere({
@@ -765,7 +761,7 @@ export class TaskService {
     isMoveToBacklog: boolean = false,
   ): void {
     this._store.dispatch(
-      scheduleTaskWithTime({
+      TaskSharedActions.scheduleTaskWithTime({
         task,
         dueWithTime: due,
         remindAt: remindOptionToMilliseconds(due, remindCfg),
@@ -865,7 +861,7 @@ export class TaskService {
   async convertToMainTask(task: Task): Promise<void> {
     const parent = await this.getByIdOnce$(task.parentId as string).toPromise();
     this._store.dispatch(
-      convertToMainTask({
+      TaskSharedActions.convertToMainTask({
         task,
         parentTagIds: parent.tagIds,
         isPlanForToday: this._workContextService.activeWorkContextId === TODAY_TAG.id,
