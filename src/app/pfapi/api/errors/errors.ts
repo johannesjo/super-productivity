@@ -170,10 +170,6 @@ export class ModelIdWithoutCtrlError extends AdditionalLogErrorBase {
   override name = 'ModelIdWithoutCtrlError';
 }
 
-export class ModelValidationError extends AdditionalLogErrorBase {
-  override name = 'ModelValidationError';
-}
-
 export class ModelMigrationError extends AdditionalLogErrorBase {
   override name = 'ModelMigrationError';
 }
@@ -192,6 +188,39 @@ export class InvalidModelCfgError extends AdditionalLogErrorBase {
 
 export class InvalidSyncProviderError extends Error {
   override name = 'InvalidSyncProviderError';
+}
+
+export class ModelValidationError extends Error {
+  override name = 'ModelValidationError';
+  additionalLog?: string;
+
+  constructor(params: {
+    id: string;
+    data: unknown;
+    validationResult?: IValidation<any>;
+    e?: unknown;
+  }) {
+    super('ModelValidationError');
+    console.log(`ModelValidationError for model ${params.id}:`, params);
+
+    if (params.validationResult) {
+      console.log('validation result: ', params.validationResult);
+
+      try {
+        if ('errors' in params.validationResult) {
+          const str = JSON.stringify(params.validationResult.errors);
+          console.log('validation errors: ' + str);
+          this.additionalLog = `Model: ${params.id}, Errors: ${str.substring(0, 400)}`;
+        }
+      } catch (e) {
+        console.error('Error stringifying validation errors:', e);
+      }
+    }
+
+    if (params.e) {
+      console.log('Additional error:', params.e);
+    }
+  }
 }
 
 export class DataValidationFailedError extends Error {
