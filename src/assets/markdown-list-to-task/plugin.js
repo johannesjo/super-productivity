@@ -68,36 +68,37 @@ function parseMarkdownList(text) {
   return tasks;
 }
 
-function createTasksFromParsedData(tasks) {
-  const createdTasks = [];
-
-  tasks.forEach((taskData) => {
-    const taskConfig = {
-      title: taskData.title,
-      subTasks: [],
-    };
-
-    if (taskData.deepNotes.length > 0) {
-      taskConfig.notes = taskData.deepNotes.join('\n');
-    }
-
-    if (taskData.subTasks.length > 0) {
-      taskData.subTasks.forEach((subTask) => {
-        const subTaskConfig = {
-          title: subTask.title,
-        };
-        if (subTask.deepNotes.length > 0) {
-          subTaskConfig.notes = subTask.deepNotes.join('\n');
-        }
-        taskConfig.subTasks.push(subTaskConfig);
-      });
-    }
-
-    createdTasks.push(taskConfig);
-  });
-
-  return createdTasks;
-}
+// This function is no longer needed as we create tasks directly in convertMarkdownToTasks
+// function createTasksFromParsedData(tasks) {
+//   const createdTasks = [];
+//
+//   tasks.forEach((taskData) => {
+//     const taskConfig = {
+//       title: taskData.title,
+//       subTasks: [],
+//     };
+//
+//     if (taskData.deepNotes.length > 0) {
+//       taskConfig.notes = taskData.deepNotes.join('\n');
+//     }
+//
+//     if (taskData.subTasks.length > 0) {
+//       taskData.subTasks.forEach((subTask) => {
+//         const subTaskConfig = {
+//           title: subTask.title,
+//         };
+//         if (subTask.deepNotes.length > 0) {
+//           subTaskConfig.notes = subTask.deepNotes.join('\n');
+//         }
+//         taskConfig.subTasks.push(subTaskConfig);
+//       });
+//     }
+//
+//     createdTasks.push(taskConfig);
+//   });
+//
+//   return createdTasks;
+// }
 
 async function convertMarkdownToTasks(text) {
   try {
@@ -111,22 +112,47 @@ async function convertMarkdownToTasks(text) {
       return;
     }
 
-    const tasksToCreate = createTasksFromParsedData(parsedTasks);
-    let createdCount = 0;
+    let totalCreatedCount = 0;
 
-    for (const taskConfig of tasksToCreate) {
-      await PluginAPI.addTask(taskConfig);
-      createdCount++;
+    for (const taskData of parsedTasks) {
+      // Create parent task
+      const parentTaskConfig = {
+        title: taskData.title,
+      };
+
+      if (taskData.deepNotes.length > 0) {
+        parentTaskConfig.notes = taskData.deepNotes.join('\n');
+      }
+
+      const parentTaskId = await PluginAPI.addTask(parentTaskConfig);
+      totalCreatedCount++;
+
+      // Create subtasks with parentId
+      if (taskData.subTasks.length > 0) {
+        for (const subTask of taskData.subTasks) {
+          const subTaskConfig = {
+            title: subTask.title,
+            parentId: parentTaskId,
+          };
+
+          if (subTask.deepNotes.length > 0) {
+            subTaskConfig.notes = subTask.deepNotes.join('\n');
+          }
+
+          await PluginAPI.addTask(subTaskConfig);
+          totalCreatedCount++;
+        }
+      }
     }
 
     if (hasDeepNesting) {
       PluginAPI.showSnack({
-        msg: `Created ${createdCount} tasks. Warning: Items nested deeper than 2 levels were added as notes.`,
+        msg: `Created ${totalCreatedCount} tasks. Warning: Items nested deeper than 2 levels were added as notes.`,
         type: 'CUSTOM',
       });
     } else {
       PluginAPI.showSnack({
-        msg: `Successfully created ${createdCount} tasks`,
+        msg: `Successfully created ${totalCreatedCount} tasks`,
         type: 'SUCCESS',
       });
     }
