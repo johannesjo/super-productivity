@@ -47,19 +47,9 @@ export class WebdavApi {
   constructor(private _getCfgOrError: () => Promise<WebdavPrivateCfg>) {}
 
   private _shouldUseCapacitorHttp(method: string): boolean {
-    if (!IS_ANDROID_WEB_VIEW) return false;
-
-    const standardMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'];
-    const shouldUse = !standardMethods.includes(method.toUpperCase());
-
-    pfLog(1, `${WebdavApi.L}._shouldUseCapacitorHttp() method check`, {
-      method,
-      isAndroidWebView: IS_ANDROID_WEB_VIEW,
-      isStandard: !shouldUse,
-      shouldUseCapacitor: shouldUse,
-    });
-
-    return shouldUse;
+    // Disable CapacitorHttp for now as it doesn't support PROPFIND/MKCOL
+    // and causes issues with the fetch interceptor
+    return false;
   }
 
   private async _makeCapacitorHttpRequest({
@@ -798,7 +788,10 @@ export class WebdavApi {
     });
 
     try {
-      const response = await fetch(this._getUrl(path, cfg), {
+      // Use the original fetch function if available (bypasses Capacitor interceptor)
+      const fetchFunc = (globalThis as any).CapacitorWebFetch || fetch;
+
+      const response = await fetchFunc(this._getUrl(path, cfg), {
         method,
         headers: requestHeaders,
         body,
