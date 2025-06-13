@@ -9,6 +9,7 @@ export const autoFixTypiaErrors = (
   if (!errors || errors.length === 0) {
     return data;
   }
+
   errors.forEach((error) => {
     if (error.path.startsWith('$input')) {
       const path = error.path.replace('$input.', '');
@@ -31,12 +32,22 @@ export const autoFixTypiaErrors = (
         );
       } else if (error.expected.includes('undefined') && value === null) {
         setValueByPath(data, keys, undefined);
+        console.warn(`Fixed: ${path} from null to undefined`);
+      } else if (error.expected.includes('null') && value === 'null') {
+        setValueByPath(data, keys, null);
+        console.warn(`Fixed: ${path} from string null to null`);
+      } else if (error.expected.includes('undefined') && value === 'null') {
+        setValueByPath(data, keys, undefined);
+        console.warn(`Fixed: ${path} from string null to null`);
       } else if (error.expected.includes('null') && value === undefined) {
         setValueByPath(data, keys, null);
+        console.warn(`Fixed: ${path} from undefined to null`);
       } else if (error.expected.includes('boolean') && !value) {
         setValueByPath(data, keys, false);
+        console.warn(`Fixed: ${path} to false (was ${value})`);
       } else if (keys[0] === 'task' && error.expected.includes('number')) {
         setValueByPath(data, keys, 0);
+        console.warn(`Fixed: ${path} to 0 (was ${value})`);
       }
     }
   });
