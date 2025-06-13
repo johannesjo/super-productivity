@@ -8,7 +8,6 @@ import {
   moveSubTaskToBottom,
   moveSubTaskToTop,
   moveSubTaskUp,
-  moveToArchive_,
   removeReminderFromTask,
   removeTagsForAllTasks,
   removeTimeSpent,
@@ -36,6 +35,7 @@ import {
   updateTimeSpentForTask,
 } from './task.reducer.util';
 import { taskAdapter } from './task.adapter';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 
 export { taskAdapter };
 import { moveItemInList } from '../../work-context/store/work-context-meta.helper';
@@ -487,8 +487,7 @@ export const taskReducer = createReducer<TaskState>(
 
   // TASK ARCHIVE STUFF
   // ------------------
-  // TODO fix
-  on(moveToArchive_, (state, { tasks }) => {
+  on(TaskSharedActions.moveToArchive, (state, { tasks }) => {
     let copyState = state;
     tasks.forEach((task) => {
       copyState = deleteTaskHelper(copyState, task);

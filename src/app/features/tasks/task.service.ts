@@ -24,7 +24,6 @@ import {
   moveSubTaskToBottom,
   moveSubTaskToTop,
   moveSubTaskUp,
-  moveToArchive_,
   moveToOtherProject,
   removeTagsForAllTasks,
   removeTimeSpent,
@@ -679,7 +678,9 @@ export class TaskService {
         );
       });
     }
-    this._store.dispatch(moveToArchive_({ tasks: tasks.filter((t) => !t.parentId) }));
+    this._store.dispatch(
+      TaskSharedActions.moveToArchive({ tasks: tasks.filter((t) => !t.parentId) }),
+    );
     this._archiveService.moveTasksToArchiveAndFlushArchiveIfDue(tasks);
   }
 
