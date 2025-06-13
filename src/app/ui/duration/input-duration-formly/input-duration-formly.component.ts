@@ -41,6 +41,19 @@ export class InputDurationFormlyComponent
     this._updateValue(val);
   }
 
+  onKeyDown(ev: KeyboardEvent): void {
+    if (ev.key === 'Enter') {
+      // Clear any pending timeout to prevent race conditions
+      window.clearTimeout(this._timeout);
+
+      const val = (ev.target as HTMLInputElement).value;
+      // Update immediately on Enter key press to avoid race conditions
+      this.formControl.setValue(val ? stringToMs(val) : null);
+      // Prevent form submission
+      ev.preventDefault();
+    }
+  }
+
   private _updateValue(val: string): void {
     this._timeout = window.setTimeout(() => {
       this.formControl.setValue(val ? stringToMs(val) : null);
