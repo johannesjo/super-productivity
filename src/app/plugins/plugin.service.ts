@@ -64,7 +64,7 @@ export class PluginService {
   }
 
   private async _loadBuiltInPlugins(): Promise<void> {
-    const pluginPaths = ['assets/example-plugin'];
+    const pluginPaths = ['assets/example-plugin', 'assets/yesterday-tasks-plugin'];
     await this._loadPluginsFromPaths(pluginPaths, 'built-in');
   }
 
@@ -79,10 +79,8 @@ export class PluginService {
           this._pluginPaths.set(cachedPlugin.id, `uploaded://${cachedPlugin.id}`);
 
           // Load the cached plugin
-          const pluginInstance = await this._loadUploadedPlugin(cachedPlugin.id);
-          if (!pluginInstance.loaded && !pluginInstance.isEnabled) {
-            this._loadedPlugins.push(pluginInstance);
-          }
+          await this._loadUploadedPlugin(cachedPlugin.id);
+          // The plugin instance is already added to _loadedPlugins in _loadUploadedPlugin if loaded successfully
         } catch (error) {
           console.error(`Failed to load cached plugin ${cachedPlugin.id}:`, error);
           // Continue loading other plugins even if one fails
@@ -198,12 +196,13 @@ export class PluginService {
         throw new Error('Failed to load plugin manifest');
       }
 
-      const { pluginCode } = await this._validateAndLoadPluginFiles(manifest, pluginPath);
-
       // Check if plugin should be loaded based on persisted enabled state
       const isPluginEnabled = await this._pluginMetaPersistenceService.isPluginEnabled(
         manifest.id,
       );
+
+      // Always validate and load files to get index.html if present
+      const { pluginCode } = await this._validateAndLoadPluginFiles(manifest, pluginPath);
 
       // If plugin is disabled, create a placeholder instance without loading code
       if (!isPluginEnabled) {
@@ -228,7 +227,16 @@ export class PluginService {
       );
 
       if (pluginInstance.loaded) {
-        this._loadedPlugins.push(pluginInstance);
+        // Check if plugin is already in the list to prevent duplicates
+        const existingIndex = this._loadedPlugins.findIndex(
+          (p) => p.manifest.id === manifest.id,
+        );
+        if (existingIndex === -1) {
+          this._loadedPlugins.push(pluginInstance);
+        } else {
+          // Replace existing instance
+          this._loadedPlugins[existingIndex] = pluginInstance;
+        }
         this._pluginPaths.set(manifest.id, pluginPath); // Store the path
 
         // Ensure plugin is marked as enabled since we loaded it
@@ -460,7 +468,16 @@ export class PluginService {
           error: undefined,
         };
         this._pluginPaths.set(manifest.id, uploadedPluginPath);
-        this._loadedPlugins.push(placeholderInstance); // Add to list so it shows in management UI
+        // Check if plugin is already in the list to prevent duplicates
+        const existingIndexDisabled = this._loadedPlugins.findIndex(
+          (p) => p.manifest.id === manifest.id,
+        );
+        if (existingIndexDisabled === -1) {
+          this._loadedPlugins.push(placeholderInstance);
+        } else {
+          // Replace existing instance
+          this._loadedPlugins[existingIndexDisabled] = placeholderInstance;
+        }
 
         console.log(`Uploaded plugin ${manifest.id} is disabled, skipping load`);
         return placeholderInstance;
@@ -476,7 +493,16 @@ export class PluginService {
       );
 
       if (pluginInstance.loaded) {
-        this._loadedPlugins.push(pluginInstance);
+        // Check if plugin is already in the list to prevent duplicates
+        const existingIndexLoaded = this._loadedPlugins.findIndex(
+          (p) => p.manifest.id === manifest.id,
+        );
+        if (existingIndexLoaded === -1) {
+          this._loadedPlugins.push(pluginInstance);
+        } else {
+          // Replace existing instance
+          this._loadedPlugins[existingIndexLoaded] = pluginInstance;
+        }
         this._pluginPaths.set(manifest.id, uploadedPluginPath);
 
         console.log(`Uploaded plugin ${manifest.id} loaded successfully`);
@@ -657,10 +683,17 @@ export class PluginService {
         true, // Plugin is enabled if we reach this point
       );
 
-      // Always add plugin to loaded plugins list for management UI
-      this._loadedPlugins.push(pluginInstance);
-
       if (pluginInstance.loaded) {
+        // Check if plugin is already in the list to prevent duplicates
+        const existingIndex = this._loadedPlugins.findIndex(
+          (p) => p.manifest.id === manifest.id,
+        );
+        if (existingIndex === -1) {
+          this._loadedPlugins.push(pluginInstance);
+        } else {
+          // Replace existing instance
+          this._loadedPlugins[existingIndex] = pluginInstance;
+        }
         console.log(`Uploaded plugin ${manifest.id} reloaded successfully`);
       } else {
         console.error(

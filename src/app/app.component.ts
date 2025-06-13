@@ -64,6 +64,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogPleaseRateComponent } from './features/dialog-please-rate/dialog-please-rate.component';
 import { getWorklogStr } from './util/get-work-log-str';
+import { PluginService } from './plugins/plugin.service';
 import { MarkdownPasteService } from './features/tasks/markdown-paste.service';
 import { TaskService } from './features/tasks/task.service';
 
@@ -117,6 +118,7 @@ export class AppComponent implements OnDestroy {
   private _matDialog = inject(MatDialog);
   private _markdownPasteService = inject(MarkdownPasteService);
   private _taskService = inject(TaskService);
+  private _pluginService = inject(PluginService);
 
   readonly syncTriggerService = inject(SyncTriggerService);
   readonly imexMetaService = inject(ImexViewService);
@@ -180,7 +182,15 @@ export class AppComponent implements OnDestroy {
     this._requestPersistence();
 
     // deferred init
-    window.setTimeout(() => {
+    window.setTimeout(async () => {
+      // Initialize plugin system
+      try {
+        await this._pluginService.initializePlugins();
+        console.log('Plugin system initialized');
+      } catch (error) {
+        console.error('Failed to initialize plugin system:', error);
+      }
+
       this._startTrackingReminderService.init();
       this._checkAvailableStorage();
       // init offline banner in lack of a better place for it
