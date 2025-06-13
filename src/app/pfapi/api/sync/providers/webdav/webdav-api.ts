@@ -338,7 +338,10 @@ export class WebdavApi {
             dataStr,
           };
         } catch (metaError) {
-          // If PROPFIND also fails, generate a hash-based revision
+          // If PROPFIND also fails, don't try to generate hash for non-existent files
+          if (metaError instanceof RemoteFileNotFoundAPIError) {
+            throw metaError;
+          }
           pfLog(0, `${WebdavApi.L}.download() PROPFIND fallback failed`, metaError);
           // Use content-based hash as last resort
           const crypto = globalThis.crypto || (globalThis as any).msCrypto;
@@ -634,6 +637,15 @@ export class WebdavApi {
         body,
       });
 
+      // Handle 404 specifically to throw RemoteFileNotFoundAPIError consistently
+      if (response.status === 404) {
+        pfLog(2, `${WebdavApi.L}._makeRequest() 404 Not Found`, {
+          method,
+          path,
+        });
+        throw new RemoteFileNotFoundAPIError(path);
+      }
+
       // WebDAV specific status codes handling
       const validWebDavStatuses = [
         200, // OK
@@ -642,7 +654,6 @@ export class WebdavApi {
         206, // Partial Content
         207, // Multi-Status
         304, // Not Modified (for conditional requests)
-        404, // Not Found (let calling methods handle this)
         409, // Conflict (let calling methods handle this)
         412, // Precondition Failed (let calling methods handle this)
         423, // Locked (let calling methods handle this)
@@ -757,6 +768,21 @@ export class WebdavApi {
 
   private _parsePropsFromXml(xmlText: string, requestPath: string): FileMeta | null {
     try {
+      // Check if xmlText is empty or not valid XML
+      if (!xmlText || xmlText.trim() === '') {
+        pfLog(0, `${WebdavApi.L}._parsePropsFromXml() Empty XML response`);
+        return null;
+      }
+
+      // Check if response is HTML instead of XML
+      if (this._isHtmlResponse(xmlText)) {
+        pfLog(0, `${WebdavApi.L}._parsePropsFromXml() Received HTML instead of XML`, {
+          requestPath,
+          responseSnippet: xmlText.substring(0, 200),
+        });
+        return null;
+      }
+
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
 
