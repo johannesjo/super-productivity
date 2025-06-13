@@ -188,6 +188,29 @@ export const taskReducer = createReducer<TaskState>(
 
   // Task Actions
   // ------------
+  on(addTask, (state, { task }) => {
+    console.log('DEBUG: addTask reducer called', {
+      taskId: task.id,
+      subTaskIds: task.subTaskIds,
+    });
+    const newTask = {
+      ...task,
+      timeSpent: calcTotalTimeSpent(task.timeSpentOnDay),
+    };
+    return taskAdapter.addOne(newTask, state);
+  }),
+
+  on(updateTask, (state, { task }) => {
+    let stateCopy = state;
+    const id = task.id as string;
+    const { timeSpentOnDay, timeEstimate } = task.changes;
+    stateCopy = timeSpentOnDay
+      ? updateTimeSpentForTask(id, timeSpentOnDay, stateCopy)
+      : stateCopy;
+    stateCopy = updateTimeEstimateForTask(task, timeEstimate, stateCopy);
+    stateCopy = updateDoneOnForTask(task, stateCopy);
+    return taskAdapter.updateOne(task, stateCopy);
+  }),
   on(__updateMultipleTaskSimple, (state, { taskUpdates }) => {
     return taskAdapter.updateMany(taskUpdates, state);
   }),
@@ -359,6 +382,11 @@ export const taskReducer = createReducer<TaskState>(
   }),
 
   on(addSubTask, (state, { task, parentId }) => {
+    console.log('DEBUG: addSubTask reducer called', {
+      taskId: task.id,
+      parentId,
+      parentTaskExists: !!state.entities[parentId],
+    });
     const parentTask = getTaskById(parentId, state);
 
     // add item1

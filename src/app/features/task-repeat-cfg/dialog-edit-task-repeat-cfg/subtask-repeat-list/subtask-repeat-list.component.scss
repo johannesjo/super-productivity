@@ -1,0 +1,61 @@
+@import '../../../../../variables';
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.subtask-list {
+  margin-bottom: $s * 2;
+}
+
+.subtask-item {
+  margin-bottom: $s;
+  position: relative;
+
+  mat-card {
+    padding: $s;
+  }
+}
+
+.subtask-form {
+  display: flex;
+  flex-direction: column;
+  gap: $s;
+}
+
+.subtask-form-row {
+  display: flex;
+  gap: $s;
+  align-items: flex-start;
+
+  mat-form-field {
+    flex: 1;
+  }
+
+  &.title-row {
+    align-items: flex-end;
+  }
+}
+
+.time-estimate-field {
+  max-width: 150px;
+  min-width: 120px;
+}
+
+.remove-btn {
+  margin-top: $s;
+  align-self: flex-start;
+}
+
+.add-subtask-btn {
+  width: 100%;
+  margin-top: $s;
+}
+
+.empty-state {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: $s * 2;
+}

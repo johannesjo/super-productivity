@@ -220,4 +220,11 @@ export const TASK_REPEAT_CFG_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
       rows: 4,
     },
   },
+  {
+    key: 'subTasks',
+    type: 'subtask-repeat-list',
+    templateOptions: {
+      label: T.F.TASK_REPEAT.F.SUB_TASKS || 'Sub Tasks',
+    },
+  },
 ];

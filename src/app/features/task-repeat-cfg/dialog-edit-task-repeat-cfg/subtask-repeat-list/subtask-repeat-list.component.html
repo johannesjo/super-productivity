@@ -1,0 +1,71 @@
+<div class="subtask-list">
+  @if (subTasks.length === 0) {
+    <div class="empty-state">
+      {{ T.F.TASK_REPEAT.F.SUB_TASKS_EMPTY | translate }}
+    </div>
+  }
+
+  @for (subTask of subTasks; track trackByIndex($index); let i = $index) {
+    <mat-card class="subtask-item">
+      <mat-card-content>
+        <div class="subtask-form">
+          <div class="subtask-form-row title-row">
+            <mat-form-field>
+              <mat-label>{{ T.G.TITLE | translate }}</mat-label>
+              <input
+                matInput
+                [value]="subTask.title"
+                (input)="updateSubTask(i, 'title', $event.target.value)"
+                [placeholder]="T.F.TASK_REPEAT.F.SUB_TASK_TITLE_PLACEHOLDER | translate"
+              />
+            </mat-form-field>
+            <button
+              mat-icon-button
+              color="warn"
+              class="remove-btn"
+              (click)="removeSubTask(i)"
+              [attr.aria-label]="T.F.TASK_REPEAT.F.REMOVE_SUB_TASK | translate"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+
+          <div class="subtask-form-row">
+            <mat-form-field>
+              <mat-label>{{ T.F.TASK.ADDITIONAL_INFO.NOTES | translate }}</mat-label>
+              <input
+                matInput
+                [value]="subTask.notes || ''"
+                (input)="updateSubTask(i, 'notes', $event.target.value)"
+                [placeholder]="T.F.TASK_REPEAT.F.SUB_TASK_NOTES_PLACEHOLDER | translate"
+              />
+            </mat-form-field>
+
+            <mat-form-field class="time-estimate-field">
+              <mat-label>{{ T.F.METRIC.CMP.TIME_ESTIMATED | translate }}</mat-label>
+              <input
+                matInput
+                type="number"
+                min="0"
+                [value]="subTask.timeEstimate || 0"
+                (input)="updateSubTask(i, 'timeEstimate', +$event.target.value)"
+                placeholder="0"
+              />
+            </mat-form-field>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>
+
+<button
+  type="button"
+  mat-stroked-button
+  color="primary"
+  class="add-subtask-btn"
+  (click)="addSubTask()"
+>
+  <mat-icon>add</mat-icon>
+  {{ T.F.TASK_REPEAT.F.ADD_SUB_TASK | translate }}
+</button>

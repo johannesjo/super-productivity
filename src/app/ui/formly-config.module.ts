@@ -20,6 +20,7 @@ import { RepeatSectionTypeComponent } from '../features/config/repeat-section-ty
 import { FormlyMatSliderModule } from '@ngx-formly/material/slider';
 import { FormlyTagSelectionComponent } from './formly-tag-selection/formly-tag-selection.component';
 import { FormlyBtnComponent } from './formly-button/formly-btn.component';
+import { SubtaskRepeatListComponent } from '../features/task-repeat-cfg/dialog-edit-task-repeat-cfg/subtask-repeat-list/subtask-repeat-list.component';
 
 @NgModule({
   imports: [
@@ -73,6 +74,11 @@ import { FormlyBtnComponent } from './formly-button/formly-btn.component';
           name: 'repeat',
           component: RepeatSectionTypeComponent,
         },
+        {
+          name: 'subtask-repeat-list',
+          component: SubtaskRepeatListComponent,
+          wrappers: ['form-field'],
+        },
       ],
       extras: {
         immutable: true,
@@ -85,6 +91,7 @@ import { FormlyBtnComponent } from './formly-button/formly-btn.component';
     // might be needed for formly to pick up on directives
     ValidationModule,
     FormlyLinkWidgetComponent,
+    SubtaskRepeatListComponent,
   ],
   exports: [
     FormlyMaterialModule,
