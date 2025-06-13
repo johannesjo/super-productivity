@@ -24,7 +24,6 @@ import {
   moveSubTaskToTop,
   moveSubTaskUp,
   removeTimeSpent,
-  reScheduleTaskWithTime,
   roundTimeSpentForDay,
   setCurrentTask,
   setSelectedTask,
@@ -782,7 +781,7 @@ export class TaskService {
     isMoveToBacklog: boolean;
   }): void {
     this._store.dispatch(
-      reScheduleTaskWithTime({
+      TaskSharedActions.reScheduleTaskWithTime({
         task,
         dueWithTime: due,
         remindAt: remindOptionToMilliseconds(due, remindCfg),

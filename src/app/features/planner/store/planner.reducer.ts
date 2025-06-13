@@ -4,7 +4,8 @@ import { moveItemInArray } from '../../../util/move-item-in-array';
 import { ADD_TASK_PANEL_ID, OVERDUE_LIST_ID } from '../planner.model';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { unique } from '../../../util/unique';
-import { scheduleTaskWithTime, unScheduleTask } from '../../tasks/store/task.actions';
+import { unScheduleTask } from '../../tasks/store/task.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { planTasksForToday } from '../../tag/store/tag.actions';
 
@@ -48,7 +49,7 @@ export const plannerReducer = createReducer(
     };
   }),
 
-  on(scheduleTaskWithTime, (state, action) => {
+  on(TaskSharedActions.scheduleTaskWithTime, (state, action) => {
     const daysCopy = { ...state.days };
     Object.keys(daysCopy).forEach((day) => {
       const filtered = daysCopy[day].filter((id) => id !== action.task.id);

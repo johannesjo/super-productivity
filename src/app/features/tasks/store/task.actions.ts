@@ -93,30 +93,6 @@ export const removeTimeSpent = createAction(
   props<{ id: string; date: string; duration: number }>(),
 );
 
-// Reminder Actions
-export const scheduleTaskWithTime = createAction(
-  '[Task] Schedule with time',
-
-  props<{
-    task: Task;
-    dueWithTime: number;
-    remindAt?: number;
-    isMoveToBacklog: boolean;
-    isSkipAutoRemoveFromToday?: boolean;
-  }>(),
-);
-
-export const reScheduleTaskWithTime = createAction(
-  '[Task] ReSchedule',
-
-  props<{
-    task: Task;
-    dueWithTime: number;
-    isMoveToBacklog: boolean;
-    remindAt?: number;
-  }>(),
-);
-
 export const unScheduleTask = createAction(
   '[Task] UnSchedule',
 

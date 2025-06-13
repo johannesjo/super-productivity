@@ -87,6 +87,12 @@ export const taskSharedMetaReducer: MetaReducer = (
         >;
         return handleScheduleTaskWithTime(rootState, task, dueWithTime);
       },
+      [TaskSharedActions.reScheduleTaskWithTime.type]: () => {
+        const { task, dueWithTime } = action as ReturnType<
+          typeof TaskSharedActions.reScheduleTaskWithTime
+        >;
+        return handleScheduleTaskWithTime(rootState, task, dueWithTime);
+      },
       [TaskSharedActions.unscheduleTask.type]: () => {
         const { id } = action as ReturnType<typeof TaskSharedActions.unscheduleTask>;
         return handleUnScheduleTask(rootState, id);

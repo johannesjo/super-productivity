@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { addNewTagsFromShortSyntax, scheduleTaskWithTime } from './task.actions';
+import { addNewTagsFromShortSyntax } from './task.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import {
   catchError,
@@ -154,7 +154,7 @@ export class ShortSyntaxEffects {
             });
             actions.push(plan);
           } else {
-            const schedule = scheduleTaskWithTime({
+            const schedule = TaskSharedActions.scheduleTaskWithTime({
               task,
               dueWithTime: dueWithTime,
               remindAt: remindOptionToMilliseconds(
