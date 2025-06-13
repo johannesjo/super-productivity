@@ -10,15 +10,12 @@ import {
   moveSubTaskUp,
   removeReminderFromTask,
   removeTimeSpent,
-  reScheduleTaskWithTime,
   restoreTask,
   roundTimeSpentForDay,
-  scheduleTaskWithTime,
   setCurrentTask,
   setSelectedTask,
   toggleStart,
   toggleTaskHideSubTasks,
-  unScheduleTask,
   unsetCurrentTask,
   updateTaskUi,
 } from './task.actions';
@@ -624,44 +621,6 @@ export const taskReducer = createReducer<TaskState>(
         id: taskId,
         changes: {
           reminderId,
-        },
-      },
-      state,
-    );
-  }),
-  on(scheduleTaskWithTime, (state, { task, dueWithTime }) => {
-    return taskAdapter.updateOne(
-      {
-        id: task.id,
-        changes: {
-          dueWithTime,
-          dueDay: undefined,
-        },
-      },
-      state,
-    );
-  }),
-
-  on(reScheduleTaskWithTime, (state, { task, dueWithTime }) => {
-    return taskAdapter.updateOne(
-      {
-        id: task.id,
-        changes: {
-          dueWithTime,
-          dueDay: undefined,
-        },
-      },
-      state,
-    );
-  }),
-
-  on(unScheduleTask, (state, { id }) => {
-    return taskAdapter.updateOne(
-      {
-        id,
-        changes: {
-          dueDay: undefined,
-          dueWithTime: undefined,
         },
       },
       state,

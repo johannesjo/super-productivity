@@ -3,8 +3,6 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   addReminderIdToTask,
   removeReminderFromTask,
-  reScheduleTaskWithTime,
-  scheduleTaskWithTime,
   unScheduleTask,
 } from './task.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
@@ -34,7 +32,7 @@ export class TaskReminderEffects {
   snack$ = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(scheduleTaskWithTime),
+        ofType(TaskSharedActions.scheduleTaskWithTime),
         tap(({ task, remindAt, dueWithTime }) => {
           const formattedDate = this._datePipe.transform(dueWithTime, 'short');
           this._snackService.open({
@@ -53,7 +51,7 @@ export class TaskReminderEffects {
 
   createReminderAndAddToTask$ = createEffect(() =>
     this._actions$.pipe(
-      ofType(scheduleTaskWithTime),
+      ofType(TaskSharedActions.scheduleTaskWithTime),
       filter(({ task, remindAt }) => typeof remindAt === 'number'),
       map(({ task, remindAt }) => {
         const reminderId = this._reminderService.addReminder(
@@ -74,7 +72,7 @@ export class TaskReminderEffects {
 
   autoMoveToBacklog$ = createEffect(() =>
     this._actions$.pipe(
-      ofType(scheduleTaskWithTime),
+      ofType(TaskSharedActions.scheduleTaskWithTime),
       filter(({ isMoveToBacklog }) => isMoveToBacklog),
       map(({ task }) => {
         if (!task.projectId) {
@@ -90,7 +88,7 @@ export class TaskReminderEffects {
 
   updateTaskReminder$ = createEffect(() =>
     this._actions$.pipe(
-      ofType(reScheduleTaskWithTime),
+      ofType(TaskSharedActions.reScheduleTaskWithTime),
       filter(({ task, remindAt }) => typeof remindAt === 'number' && !!task.reminderId),
       tap(({ task, remindAt }) => {
         this._reminderService.updateReminder(task.reminderId as string, {

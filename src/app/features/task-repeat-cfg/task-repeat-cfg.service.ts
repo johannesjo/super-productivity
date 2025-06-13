@@ -28,7 +28,6 @@ import { T } from '../../t.const';
 import { first, take } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { Task } from '../tasks/task.model';
-import { scheduleTaskWithTime } from '../tasks/store/task.actions';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { WorkContextService } from '../work-context/work-context.service';
 import { WorkContextType } from '../work-context/work-context.model';
@@ -160,7 +159,7 @@ export class TaskRepeatCfgService {
     (
       | ReturnType<typeof TaskSharedActions.addTask>
       | ReturnType<typeof updateTaskRepeatCfg>
-      | ReturnType<typeof scheduleTaskWithTime>
+      | ReturnType<typeof TaskSharedActions.scheduleTaskWithTime>
     )[]
   > {
     // NOTE: there might be multiple configs in case something went wrong
@@ -194,7 +193,7 @@ export class TaskRepeatCfgService {
     const createNewActions: (
       | ReturnType<typeof TaskSharedActions.addTask>
       | ReturnType<typeof updateTaskRepeatCfg>
-      | ReturnType<typeof scheduleTaskWithTime>
+      | ReturnType<typeof TaskSharedActions.scheduleTaskWithTime>
     )[] = [
       TaskSharedActions.addTask({
         task: {
@@ -227,7 +226,7 @@ export class TaskRepeatCfgService {
         targetDayDate,
       );
       createNewActions.push(
-        scheduleTaskWithTime({
+        TaskSharedActions.scheduleTaskWithTime({
           task,
           dueWithTime: dateTime,
           remindAt: remindOptionToMilliseconds(dateTime, taskRepeatCfg.remindAt),
