@@ -47,9 +47,19 @@ export class WebdavApi {
   constructor(private _getCfgOrError: () => Promise<WebdavPrivateCfg>) {}
 
   private _shouldUseCapacitorHttp(method: string): boolean {
-    // Disable CapacitorHttp for now as it doesn't support PROPFIND/MKCOL
-    // and causes issues with the fetch interceptor
-    return false;
+    if (!IS_ANDROID_WEB_VIEW) return false;
+
+    const standardMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'];
+    const shouldUse = !standardMethods.includes(method.toUpperCase());
+
+    pfLog(1, `${WebdavApi.L}._shouldUseCapacitorHttp() method check`, {
+      method,
+      isAndroidWebView: IS_ANDROID_WEB_VIEW,
+      isStandard: !shouldUse,
+      shouldUseCapacitor: shouldUse,
+    });
+
+    return shouldUse;
   }
 
   private async _makeCapacitorHttpRequest({
@@ -274,14 +284,9 @@ export class WebdavApi {
         throw new RemoteFileNotFoundAPIError(path);
       }
 
-      // If PROPFIND fails (especially on Android), try HEAD as fallback
+      // If PROPFIND fails, try HEAD as fallback
       pfLog(1, `${WebdavApi.L}.getFileMeta() PROPFIND failed, trying HEAD fallback`, e);
-
-      if (IS_ANDROID_WEB_VIEW || e?.message?.includes('PROPFIND')) {
-        return this._getFileMetaWithHead(path, localRev);
-      }
-
-      throw e;
+      return this._getFileMetaWithHead(path, localRev);
     }
   }
 
@@ -788,10 +793,7 @@ export class WebdavApi {
     });
 
     try {
-      // Use the original fetch function if available (bypasses Capacitor interceptor)
-      const fetchFunc = (globalThis as any).CapacitorWebFetch || fetch;
-
-      const response = await fetchFunc(this._getUrl(path, cfg), {
+      const response = await fetch(this._getUrl(path, cfg), {
         method,
         headers: requestHeaders,
         body,
