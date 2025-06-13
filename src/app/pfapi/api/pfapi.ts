@@ -361,9 +361,7 @@ export class Pfapi<const MD extends ModelCfgs> {
         });
       });
       await Promise.all(promises);
-      this.db.unlock();
     } catch (e) {
-      this.db.unlock();
       const backup = await this.tmpBackupService.load();
       // isBackupImport is used to prevent endless loop
       if (backup && !isBackupImport) {
@@ -379,6 +377,8 @@ export class Pfapi<const MD extends ModelCfgs> {
         }
       }
       throw e;
+    } finally {
+      this.db.unlock();
     }
 
     if (isBackupData) {
