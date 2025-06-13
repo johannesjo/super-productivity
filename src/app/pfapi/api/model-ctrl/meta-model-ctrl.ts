@@ -106,7 +106,12 @@ export class MetaModelCtrl {
    * @throws {InvalidMetaError} When metamodel is invalid
    */
   save(metaModel: LocalMeta, isIgnoreDBLock = false): Promise<unknown> {
-    pfLog(2, `${MetaModelCtrl.L}.${this.save.name}()`, metaModel);
+    pfLog(2, `${MetaModelCtrl.L}.${this.save.name}()`, {
+      metaModel,
+      lastSyncedUpdate: metaModel.lastSyncedUpdate,
+      lastUpdate: metaModel.lastUpdate,
+      isIgnoreDBLock,
+    });
     if (typeof metaModel.lastUpdate !== 'number') {
       throw new InvalidMetaError(
         `${MetaModelCtrl.L}.${this.save.name}()`,
@@ -136,12 +141,22 @@ export class MetaModelCtrl {
     }
 
     const data = (await this._db.load(MetaModelCtrl.META_MODEL_ID)) as LocalMeta;
+
+    // Add debug logging
+    pfLog(2, `${MetaModelCtrl.L}.${this.load.name}() loaded from DB:`, {
+      data,
+      hasData: !!data,
+      lastSyncedUpdate: data?.lastSyncedUpdate,
+      lastUpdate: data?.lastUpdate,
+    });
+
     // Initialize if not found
     if (!data) {
       this._metaModelInMemory = {
         ...DEFAULT_META_MODEL,
         crossModelVersion: this.crossModelVersion,
       };
+      pfLog(2, `${MetaModelCtrl.L}.${this.load.name}() initialized with defaults`);
       return this._metaModelInMemory;
     }
     if (!data.revMap) {

@@ -106,6 +106,12 @@ export class SyncWrapperService {
           return r.status;
 
         case SyncStatus.Conflict:
+          console.log('Sync conflict detected:', {
+            remote: r.conflictData?.remote.lastUpdate,
+            local: r.conflictData?.local.lastUpdate,
+            lastSync: r.conflictData?.local.lastSyncedUpdate,
+            conflictData: r.conflictData,
+          });
           const res = await this._openConflictDialog$({
             remote: r.conflictData?.remote.lastUpdate as number,
             local: r.conflictData?.local.lastUpdate as number,
@@ -113,7 +119,10 @@ export class SyncWrapperService {
           }).toPromise();
 
           if (res === 'USE_LOCAL') {
-            await this._pfapiService.pf.uploadAll();
+            console.log('User chose USE_LOCAL, calling uploadAll(true) with force');
+            // Use force upload to skip the meta file check and ensure lastUpdate is updated
+            await this._pfapiService.pf.uploadAll(true);
+            console.log('uploadAll(true) completed');
             return SyncStatus.UpdateRemoteAll;
           } else if (res === 'USE_REMOTE') {
             await this._pfapiService.pf.downloadAll();

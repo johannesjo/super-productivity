@@ -19,8 +19,8 @@
     <tr>
       <td>{{ T.F.SYNC.D_CONFLICT.LOCAL_REMOTE | translate }}</td>
       <td>{{ T.F.SYNC.D_CONFLICT.LAST_SYNC | translate }}</td>
-      <td>{{ lastDate | date: 'shortDate' }}</td>
-      <td>{{ lastTime | date: 'shortTime' }}</td>
+      <td>{{ lastDate ? (lastDate | date: 'shortDate') : 'Never' }}</td>
+      <td>{{ lastTime ? (lastTime | date: 'shortTime') : '-' }}</td>
     </tr>
   </table>
 </mat-dialog-content>
