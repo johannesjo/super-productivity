@@ -1,4 +1,9 @@
-import { addTaskRepeatCfgToTask, updateTaskRepeatCfg, updateTaskRepeatCfgs, deleteTaskRepeatCfg } from './task-repeat-cfg.actions';
+import {
+  addTaskRepeatCfgToTask,
+  updateTaskRepeatCfg,
+  updateTaskRepeatCfgs,
+  deleteTaskRepeatCfg,
+} from './task-repeat-cfg.actions';
 import { TaskRepeatCfg } from '../task-repeat-cfg.model';
 import { DEFAULT_TASK_REPEAT_CFG } from '../task-repeat-cfg.model';
 
@@ -9,11 +14,13 @@ describe('TaskRepeatCfg Actions', () => {
     id: 'testRepeatCfgId',
     title: 'Test Repeatable Task',
     tagIds: [],
-    subTasks: [{
-      title: 'Test Subtask',
-      notes: 'Test Notes',
-      timeEstimate: 1000,
-    }],
+    subTasks: [
+      {
+        title: 'Test Subtask',
+        notes: 'Test Notes',
+        timeEstimate: 1000,
+      },
+    ],
   };
 
   it('should create addTaskRepeatCfgToTask action', () => {
