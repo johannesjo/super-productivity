@@ -10,6 +10,7 @@ import {
 } from '../errors/errors';
 import { validateLocalMeta } from '../util/validate-local-meta';
 import { PFEventEmitter } from '../util/events';
+import { devError } from '../../../util/dev-error';
 
 export const DEFAULT_META_MODEL: LocalMeta = {
   crossModelVersion: 1,
@@ -124,7 +125,38 @@ export class MetaModelCtrl {
     this._ev.emit('metaModelChange', metaModel);
     this._ev.emit('syncStatusChange', 'UNKNOWN_OR_CHANGED');
 
-    return this._db.save(MetaModelCtrl.META_MODEL_ID, metaModel, isIgnoreDBLock);
+    // Add detailed logging before saving
+    pfLog(2, `${MetaModelCtrl.L}.${this.save.name}() about to save to DB:`, {
+      id: MetaModelCtrl.META_MODEL_ID,
+      lastSyncedUpdate: metaModel.lastSyncedUpdate,
+      lastUpdate: metaModel.lastUpdate,
+      willMatch: metaModel.lastSyncedUpdate === metaModel.lastUpdate,
+    });
+
+    const savePromise = this._db.save(
+      MetaModelCtrl.META_MODEL_ID,
+      metaModel,
+      isIgnoreDBLock,
+    );
+
+    // Log after save completes
+    savePromise
+      .then(() => {
+        pfLog(
+          2,
+          `${MetaModelCtrl.L}.${this.save.name}() DB save completed successfully`,
+          {
+            lastSyncedUpdate: metaModel.lastSyncedUpdate,
+            lastUpdate: metaModel.lastUpdate,
+          },
+        );
+      })
+      .catch((error) => {
+        devError('DB save for meta file failed');
+        pfLog(0, `${MetaModelCtrl.L}.${this.save.name}() DB save failed`, error);
+      });
+
+    return savePromise;
   }
 
   /**
@@ -162,6 +194,15 @@ export class MetaModelCtrl {
     if (!data.revMap) {
       throw new InvalidMetaError('loadMetaModel: revMap not found');
     }
+
+    // Log the loaded data
+    pfLog(2, `${MetaModelCtrl.L}.${this.load.name}() loaded valid data:`, {
+      lastUpdate: data.lastUpdate,
+      lastSyncedUpdate: data.lastSyncedUpdate,
+      metaRev: data.metaRev,
+      hasRevMap: !!data.revMap,
+      revMapKeys: Object.keys(data.revMap || {}),
+    });
 
     this._metaModelInMemory = data;
     return data;

@@ -32,7 +32,16 @@ export class MetaSyncService {
    * @returns Promise resolving when save is complete
    */
   async saveLocal(localMetaFileContent: LocalMeta): Promise<unknown> {
-    return this._metaModelCtrl.save(localMetaFileContent);
+    pfLog(2, `${MetaSyncService.L}.${this.saveLocal.name}()`, {
+      localMetaFileContent,
+      lastUpdate: localMetaFileContent.lastUpdate,
+      lastSyncedUpdate: localMetaFileContent.lastSyncedUpdate,
+      willMatch:
+        localMetaFileContent.lastUpdate === localMetaFileContent.lastSyncedUpdate,
+    });
+    // Pass isIgnoreDBLock = true since we're saving during sync operations
+    // and the database is locked by _wrapSyncAction
+    return this._metaModelCtrl.save(localMetaFileContent, true);
   }
 
   /**

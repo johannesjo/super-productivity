@@ -62,8 +62,14 @@ export const getSyncStatusFromMetaFiles = (
             },
           };
         case UpdateCheckResult.LastSyncNotUpToDate:
-          // Data is in sync but lastSyncedUpdate needs to be updated
-          // This is not a conflict, just a metadata sync issue
+          // When timestamps match but lastSync is different, this means
+          // the data is in sync but metadata needs updating.
+          // This happens after uploads when lastSyncedUpdate hasn't been persisted yet.
+          pfLog(2, 'LastSyncNotUpToDate - treating as InSync to update metadata', {
+            reason: ConflictReason.MatchingModelChangeButLastSyncMismatch,
+            local,
+            remote,
+          });
           return {
             status: SyncStatus.InSync,
           };
@@ -80,6 +86,10 @@ export const getSyncStatusFromMetaFiles = (
 
       // If both timestamps are identical, we're very likely in sync
       if (local.lastUpdate === remote.lastUpdate) {
+        pfLog(2, 'No lastSyncedUpdate but timestamps match - treating as InSync', {
+          local,
+          remote,
+        });
         return {
           status: SyncStatus.InSync,
         };
