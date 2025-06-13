@@ -465,11 +465,11 @@ export class PluginBridgeService {
   }
 
   /**
-   * Execute a shortcut by its ID (pluginId:label)
+   * Execute a shortcut by its ID (pluginId:id)
    */
   async executeShortcut(shortcutId: string): Promise<boolean> {
     const shortcuts = this.shortcuts$.value;
-    const shortcut = shortcuts.find((s) => `${s.pluginId}:${s.label}` === shortcutId);
+    const shortcut = shortcuts.find((s) => `${s.pluginId}:${s.id}` === shortcutId);
 
     if (shortcut) {
       try {

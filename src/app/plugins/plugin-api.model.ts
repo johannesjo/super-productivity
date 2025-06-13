@@ -83,7 +83,9 @@ export interface PluginAPI {
 
   registerMenuEntry(menuEntryCfg: Omit<PluginMenuEntryCfg, 'pluginId'>): void;
 
-  registerShortcut(shortcutCfg: Omit<PluginShortcutCfg, 'pluginId'>): void;
+  registerShortcut(
+    shortcutCfg: Omit<PluginShortcutCfg, 'pluginId'> & { id?: string },
+  ): void;
 
   // ui bridge
   showSnack(snackCfg: SnackCfgLimited): void;
@@ -154,6 +156,7 @@ export interface PluginCreateTaskData {
 
 export interface PluginShortcutCfg {
   pluginId: string;
+  id: string;
   label: string;
   onExec: () => void;
 }

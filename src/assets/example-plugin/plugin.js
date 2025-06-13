@@ -41,6 +41,7 @@ PluginAPI.registerHeaderButton({
 
 // Register a keyboard shortcut
 PluginAPI.registerShortcut({
+  id: 'hello_msg',
   label: 'Show Hello Message',
   onExec: function () {
     console.log('Hello World Plugin: Shortcut triggered!');
@@ -73,6 +74,7 @@ PluginAPI.registerShortcut({
 
 // Register another shortcut for quick task creation
 PluginAPI.registerShortcut({
+  id: 'create_task',
   label: 'Create Example Task',
   onExec: async function () {
     try {
