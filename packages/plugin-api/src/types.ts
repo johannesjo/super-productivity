@@ -46,6 +46,8 @@ export interface SnackCfg {
   ico?: string;
 }
 
+export type SnackCfgLimited = SnackCfg;
+
 export interface NotifyCfg {
   title: string;
   body: string;
@@ -84,6 +86,8 @@ export interface TaskData {
   updated?: number;
 }
 
+export type TaskCopy = TaskData;
+
 export interface ProjectData {
   id: string;
   title: string;
@@ -93,6 +97,8 @@ export interface ProjectData {
   updated?: number;
 }
 
+export type ProjectCopy = ProjectData;
+
 export interface TagData {
   id: string;
   title: string;
@@ -101,11 +107,14 @@ export interface TagData {
   updated?: number;
 }
 
+export type TagCopy = TagData;
+
 export interface PluginHeaderBtnCfg {
   pluginId: string;
   label: string;
   icon?: string;
   onClick: () => void;
+  color?: 'primary' | 'accent' | 'warn';
 }
 
 export interface PluginAPI {

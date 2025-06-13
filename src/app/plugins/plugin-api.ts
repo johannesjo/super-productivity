@@ -13,9 +13,9 @@ import {
   SnackCfgLimited,
   TagCopy,
   TaskCopy,
+  PluginHeaderBtnCfg,
 } from './plugin-api.model';
 import { PluginBridgeService } from './plugin-bridge.service';
-import { PluginHeaderBtnCfg } from './ui/plugin-header-btns.component';
 
 /**
  * PluginAPI implementation that uses direct bridge service injection
