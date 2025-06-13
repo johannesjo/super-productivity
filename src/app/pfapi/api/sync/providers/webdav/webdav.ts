@@ -84,10 +84,12 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
     // For metadata file, don't send localRev if it might not exist remotely
     const effectiveLocalRev = targetPath === '__meta_' && localRev ? null : localRev;
 
-    try {
+    const download = async (
+      useLocalRev: string | null,
+    ): Promise<{ rev: string; dataStr: string }> => {
       const { rev, dataStr } = await this._api.download({
         path: filePath,
-        localRev: effectiveLocalRev,
+        localRev: useLocalRev,
       });
 
       if (!dataStr && dataStr !== '') {
@@ -98,24 +100,14 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
       }
 
       return { rev, dataStr };
+    };
+
+    try {
+      return await download(effectiveLocalRev);
     } catch (e: any) {
-      // Handle 304 Not Modified responses
+      // Handle 304 Not Modified responses by downloading without conditional headers
       if (e?.status === 304) {
-        // File hasn't changed - download without conditional headers to get actual content
-        // This ensures the sync service gets the data it expects
-        const { rev, dataStr } = await this._api.download({
-          path: filePath,
-          localRev: null, // Force download without conditional headers
-        });
-
-        if (!dataStr && dataStr !== '') {
-          throw new InvalidDataSPError(targetPath);
-        }
-        if (typeof rev !== 'string') {
-          throw new NoRevAPIError();
-        }
-
-        return { rev, dataStr };
+        return await download(null);
       }
       throw e;
     }
@@ -147,7 +139,6 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
     targetPath: string,
   ): Promise<{ cfg: WebdavPrivateCfg; filePath: string }> {
     const cfg = await this._cfgOrError();
-    const filePath = this._getFilePath(targetPath, cfg);
-    return { cfg, filePath };
+    return { cfg, filePath: this._getFilePath(targetPath, cfg) };
   }
 }
