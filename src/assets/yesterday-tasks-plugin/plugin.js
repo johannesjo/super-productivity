@@ -1,5 +1,13 @@
 console.log("Yesterday's Tasks Plugin loaded");
 
+// Register a menu entry to show the plugin view (no icon provided, will use SVG)
+PluginAPI.registerMenuEntry({
+  label: "Yesterday's Tasks",
+  onClick: function () {
+    PluginAPI.showIndexHtmlAsView();
+  },
+});
+
 // Register a keyboard shortcut
 PluginAPI.registerShortcut({
   id: 'show_yesterday',

@@ -4,6 +4,7 @@ import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { PluginBridgeService } from '../plugin-bridge.service';
 import { MatMenuItem } from '@angular/material/menu';
+import { PluginIconComponent } from './plugin-icon/plugin-icon.component';
 
 @Component({
   selector: 'plugin-menu',
@@ -14,7 +15,15 @@ import { MatMenuItem } from '@angular/material/menu';
         class="plugin-menu-entry"
         (click)="menuEntry.onClick()"
       >
-        <mat-icon>{{ menuEntry.icon }}</mat-icon>
+        @if (menuEntry.icon && menuEntry.icon.length > 0) {
+          <mat-icon>{{ menuEntry.icon }}</mat-icon>
+        } @else {
+          <plugin-icon
+            [pluginId]="menuEntry.pluginId"
+            [size]="24"
+            fallbackIcon="extension"
+          ></plugin-icon>
+        }
         <span>{{ menuEntry.label }}</span>
       </button>
     }
@@ -33,7 +42,7 @@ import { MatMenuItem } from '@angular/material/menu';
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatButton, MatIcon, MatMenuItem],
+  imports: [CommonModule, MatButton, MatIcon, MatMenuItem, PluginIconComponent],
 })
 export class PluginMenuComponent {
   private readonly _pluginBridge = inject(PluginBridgeService);
