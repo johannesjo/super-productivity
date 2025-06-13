@@ -630,7 +630,7 @@ export class PluginService {
     await this._pluginUserPersistenceService.removePluginUserData(pluginId);
     await this._pluginMetaPersistenceService.removePluginMetadata(pluginId);
 
-    // Remove from loaded plugins (handles both loaded and placeholder instances)
+    // Remove from loaded plugins completely (not just unload)
     const index = this._loadedPlugins.findIndex((p) => p.manifest.id === pluginId);
     if (index !== -1) {
       this._loadedPlugins.splice(index, 1);
@@ -652,7 +652,17 @@ export class PluginService {
   unloadPlugin(pluginId: string): boolean {
     const index = this._loadedPlugins.findIndex((p) => p.manifest.id === pluginId);
     if (index !== -1) {
-      this._loadedPlugins.splice(index, 1);
+      const plugin = this._loadedPlugins[index];
+
+      // Instead of removing, replace with a disabled placeholder
+      // This ensures the plugin remains in the list for re-enabling
+      this._loadedPlugins[index] = {
+        manifest: plugin.manifest,
+        loaded: false,
+        isEnabled: false,
+        error: undefined,
+      };
+
       this._pluginHooks.unregisterPluginHooks(pluginId);
       // Don't remove from _pluginPaths or _pluginIndexHtml for reload functionality
       return this._pluginRunner.unloadPlugin(pluginId);
