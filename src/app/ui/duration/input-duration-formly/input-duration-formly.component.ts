@@ -33,10 +33,6 @@ export class InputDurationFormlyComponent
 
   readonly input = viewChild.required('inputEl', { read: ElementRef });
 
-  onDestroy(): void {
-    window.clearTimeout(this._timeout);
-  }
-
   // @ViewChild(MatInput, {static: true}) formFieldControl?: MatInput;
   onInputValueChange(ev: Event): void {
     const val = (ev.target as HTMLInputElement).value;
@@ -47,8 +43,14 @@ export class InputDurationFormlyComponent
 
   onKeyDown(ev: KeyboardEvent): void {
     if (ev.key === 'Enter') {
+      // Clear any pending timeout to prevent race conditions
+      window.clearTimeout(this._timeout);
+
       const val = (ev.target as HTMLInputElement).value;
-      this._updateValue(val);
+      // Update immediately on Enter key press to avoid race conditions
+      this.formControl.setValue(val ? stringToMs(val) : null);
+      // Prevent form submission
+      ev.preventDefault();
     }
   }
 
