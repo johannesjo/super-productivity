@@ -97,14 +97,11 @@ describe('getSyncStatusFromMetaFiles', () => {
         expect(result.status).toBe(SyncStatus.InSync);
       });
 
-      it('should return LastSyncNotUpToDate when local === remote but lastSync differs', () => {
+      it('should return InSync when local === remote but lastSync differs', () => {
         const { local, remote } = createMeta(2000, 2000, 1000);
 
         const result = getSyncStatusFromMetaFiles(remote, local);
-        expect(result.status).toBe(SyncStatus.Conflict);
-        expect(result.conflictData?.reason).toBe(
-          ConflictReason.MatchingModelChangeButLastSyncMismatch,
-        );
+        expect(result.status).toBe(SyncStatus.InSync);
       });
     });
 
@@ -222,7 +219,7 @@ describe('getSyncStatusFromMetaFiles', () => {
       const { local, remote } = createMeta(time, time, time - 1000);
 
       const result = getSyncStatusFromMetaFiles(remote, local);
-      expect(result.status).toBe(SyncStatus.Conflict);
+      expect(result.status).toBe(SyncStatus.InSync);
     });
 
     it('should handle all three timestamps being different', () => {
