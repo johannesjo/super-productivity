@@ -18,6 +18,7 @@ import { showFocusOverlay } from '../../features/focus-mode/store/focus-mode.act
 import { SyncWrapperService } from '../../imex/sync/sync-wrapper.service';
 import { first, mapTo, switchMap } from 'rxjs/operators';
 import { fromEvent, merge, Observable, of } from 'rxjs';
+import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
 
 @Injectable({
   providedIn: 'root',
@@ -36,6 +37,7 @@ export class ShortcutService {
   private _syncWrapperService = inject(SyncWrapperService);
   private _ngZone = inject(NgZone);
   private _store = inject(Store);
+  private _pluginBridgeService = inject(PluginBridgeService);
 
   isCtrlPressed$: Observable<boolean> = fromEvent(document, 'keydown').pipe(
     switchMap((ev: Event) => {
@@ -174,6 +176,20 @@ export class ShortcutService {
       document.activeElement.getAttribute('routerlink') === '/procrastination'
     ) {
       throw new Error('Intentional Error Fun (dont worry)');
+    }
+
+    // Check plugin shortcuts
+    const pluginShortcuts = this._pluginBridgeService.shortcuts$.getValue();
+    for (const shortcut of pluginShortcuts) {
+      const shortcutKey = `plugin_${shortcut.pluginId}:${shortcut.label}`;
+      const shortcutKeyCombo = (keys as any)[shortcutKey];
+      if (shortcutKeyCombo && checkKeyCombo(ev, shortcutKeyCombo)) {
+        ev.preventDefault();
+        this._pluginBridgeService.executeShortcut(
+          `${shortcut.pluginId}:${shortcut.label}`,
+        );
+        return;
+      }
     }
 
     // special hidden dev tools combo to use them for production

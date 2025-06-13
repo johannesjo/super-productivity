@@ -44,6 +44,9 @@ import { GlobalThemeService } from '../../core/theme/global-theme.service';
 import { AsyncPipe } from '@angular/common';
 import { PluginManagementComponent } from '../../plugins/ui/plugin-management/plugin-management.component';
 import { CollapsibleComponent } from '../../ui/collapsible/collapsible.component';
+import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
+import { createPluginShortcutFormItems } from '../../features/config/form-cfgs/plugin-keyboard-shortcuts';
+import { PluginService } from '../../plugins/plugin.service';
 
 @Component({
   selector: 'config-page',
@@ -68,6 +71,10 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   readonly configService = inject(GlobalConfigService);
   readonly syncSettingsService = inject(SyncConfigService);
   readonly globalThemeService = inject(GlobalThemeService);
+  private readonly _pluginBridgeService = inject(PluginBridgeService);
+  private readonly _pluginService = inject(PluginService);
+
+  private _pluginShortcutsAugmented = false;
 
   T: typeof T = T;
   globalConfigFormCfg: ConfigFormConfig;
@@ -128,6 +135,67 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
         // this._cd.detectChanges();
       }),
     );
+
+    // Try to augment keyboard form with plugin shortcuts immediately
+    this._augmentKeyboardFormWithPluginShortcuts();
+
+    // If plugins aren't initialized yet, wait for them
+    if (!this._pluginService.isInitialized()) {
+      console.log('Plugins not initialized yet, waiting...');
+      const checkInterval = setInterval(() => {
+        if (this._pluginService.isInitialized() && !this._pluginShortcutsAugmented) {
+          console.log('Plugins now initialized, adding shortcuts to form');
+          this._augmentKeyboardFormWithPluginShortcuts();
+          clearInterval(checkInterval);
+        }
+      }, 500);
+
+      // Clean up interval on destroy (max 30 seconds)
+      setTimeout(() => clearInterval(checkInterval), 30000);
+      this._subs.add({
+        unsubscribe: () => clearInterval(checkInterval),
+      } as any);
+    }
+  }
+
+  private _augmentKeyboardFormWithPluginShortcuts(): void {
+    // Skip if already augmented
+    if (this._pluginShortcutsAugmented) {
+      return;
+    }
+
+    const pluginShortcuts = this._pluginBridgeService.shortcuts$.getValue();
+    console.log('Plugin shortcuts found:', { pluginShortcuts });
+
+    if (pluginShortcuts.length > 0) {
+      // Find keyboard form section
+      const keyboardFormIndex = this.globalConfigFormCfg.findIndex(
+        (section) => section.key === 'keyboard',
+      );
+
+      if (keyboardFormIndex !== -1) {
+        const keyboardSection = this.globalConfigFormCfg[keyboardFormIndex];
+        const pluginShortcutItems = createPluginShortcutFormItems(pluginShortcuts);
+
+        // Add plugin shortcuts to the end of keyboard items
+        keyboardSection.items = [
+          ...(keyboardSection.items || []),
+          ...pluginShortcutItems,
+        ];
+
+        this._pluginShortcutsAugmented = true;
+        console.log('Plugin shortcuts added to keyboard form');
+
+        // Trigger change detection
+        this._cd.detectChanges();
+      }
+    } else {
+      if (this._pluginService.isInitialized()) {
+        console.log('Plugins are initialized but no shortcuts registered yet');
+      } else {
+        console.log('No plugin shortcuts found yet, plugins may still be loading...');
+      }
+    }
   }
 
   ngOnDestroy(): void {
