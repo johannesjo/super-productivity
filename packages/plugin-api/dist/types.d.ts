@@ -8,6 +8,7 @@ export declare enum PluginHooks {
   TASK_COMPLETE = 'taskComplete',
   TASK_UPDATE = 'taskUpdate',
   TASK_DELETE = 'taskDelete',
+  CURRENT_TASK_CHANGE = 'currentTaskChange',
   FINISH_DAY = 'finishDay',
   LANGUAGE_CHANGE = 'languageChange',
   PERSISTED_DATA_UPDATE = 'persistedDataUpdate',
