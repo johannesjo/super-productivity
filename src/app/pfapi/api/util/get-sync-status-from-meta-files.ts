@@ -62,19 +62,30 @@ export const getSyncStatusFromMetaFiles = (
             },
           };
         case UpdateCheckResult.LastSyncNotUpToDate:
+          // Data is in sync but lastSyncedUpdate needs to be updated
+          // This is not a conflict, just a metadata sync issue
           return {
-            status: SyncStatus.Conflict,
-            conflictData: {
-              reason: ConflictReason.MatchingModelChangeButLastSyncMismatch,
-              remote,
-              local,
-            },
+            status: SyncStatus.InSync,
           };
         default:
           throw new ImpossibleError();
       }
     } else {
-      // when there is no value for last sync, but both local and remote have a value for lastSyncModelUpdate, we have conflict
+      // when there is no value for last sync, check if timestamps match
+      pfLog(2, 'No lastSyncedUpdate found, checking timestamps', {
+        localLastUpdate: local.lastUpdate,
+        remoteLastUpdate: remote.lastUpdate,
+        areEqual: local.lastUpdate === remote.lastUpdate,
+      });
+
+      // If both timestamps are identical, we're very likely in sync
+      if (local.lastUpdate === remote.lastUpdate) {
+        return {
+          status: SyncStatus.InSync,
+        };
+      }
+
+      // Only report conflict if we truly can't determine the state
       return {
         status: SyncStatus.Conflict,
         conflictData: {
@@ -131,6 +142,12 @@ const _checkForUpdate = (params: {
     if (local === lastSync) {
       return UpdateCheckResult.InSync;
     } else {
+      pfLog(2, 'Timestamps match but lastSync is outdated', {
+        local,
+        remote,
+        lastSync,
+        delta: local - lastSync,
+      });
       return UpdateCheckResult.LastSyncNotUpToDate;
     }
   } else if (local > remote) {

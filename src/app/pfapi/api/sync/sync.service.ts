@@ -78,10 +78,21 @@ export class SyncService<const MD extends ModelCfgs> {
       }
       const localMeta0 = await this._metaModelCtrl.load();
 
+      pfLog(2, `${SyncService.L}.${this.sync.name}(): Initial meta check`, {
+        lastUpdate: localMeta0.lastUpdate,
+        lastSyncedUpdate: localMeta0.lastSyncedUpdate,
+        metaRev: localMeta0.metaRev,
+        isInSync: localMeta0.lastSyncedUpdate === localMeta0.lastUpdate,
+      });
+
       // Quick pre-check for all synced
       if (localMeta0.lastSyncedUpdate === localMeta0.lastUpdate) {
         const metaRev = await this._metaFileSyncService.getRev(localMeta0.metaRev);
         if (metaRev === localMeta0.metaRev) {
+          pfLog(
+            2,
+            `${SyncService.L}.${this.sync.name}(): Early return - already in sync`,
+          );
           return { status: SyncStatus.InSync };
         }
       }
@@ -139,6 +150,18 @@ export class SyncService<const MD extends ModelCfgs> {
           await this.uploadToRemote(remoteMeta, localMeta, remoteMetaRev);
           return { status };
         case SyncStatus.InSync:
+          // Ensure lastSyncedUpdate is set even when already in sync
+          if (localMeta.lastSyncedUpdate !== localMeta.lastUpdate) {
+            pfLog(2, 'InSync but lastSyncedUpdate needs update', {
+              lastSyncedUpdate: localMeta.lastSyncedUpdate,
+              lastUpdate: localMeta.lastUpdate,
+            });
+            await this._metaFileSyncService.saveLocal({
+              ...localMeta,
+              lastSyncedUpdate: localMeta.lastUpdate,
+              metaRev: remoteMetaRev,
+            });
+          }
           return { status };
         case SyncStatus.Conflict:
           return { status, conflictData };
