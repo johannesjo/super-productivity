@@ -1,11 +1,15 @@
 import { Injectable } from '@angular/core';
-import { Hooks, PluginHookHandler } from './plugin-api.model';
+import {
+  Hooks,
+  PluginHookHandler,
+  PluginHookHandlerRegistration,
+} from './plugin-api.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PluginHooksService {
-  private _hookHandlers: PluginHookHandler[] = [];
+  private _hookHandlers: PluginHookHandlerRegistration[] = [];
 
   constructor() {}
 
@@ -25,13 +29,45 @@ export class PluginHooksService {
       return;
     }
 
-    // Execute all handlers
-    const promises = handlersToCall.map(async ({ pluginId, handler }) => {
+    // Execute all handlers with comprehensive error handling
+    const promises = handlersToCall.map(async (registration) => {
       try {
-        await handler(payload);
-        console.log(`Hook ${hookName} executed successfully for plugin ${pluginId}`);
+        // Set a timeout for plugin hook execution to prevent hanging
+        const timeoutPromise = new Promise<void>((_, reject) => {
+          setTimeout(() => reject(new Error('Plugin hook execution timeout')), 10000); // 10 second timeout
+        });
+
+        const executionPromise = Promise.resolve(registration.handler(payload));
+
+        await Promise.race([executionPromise, timeoutPromise]);
+        console.log(
+          `Hook ${hookName} executed successfully for plugin ${registration.pluginId}`,
+        );
       } catch (error) {
-        console.error(`Hook ${hookName} failed for plugin ${pluginId}:`, error);
+        console.error(
+          `Hook ${hookName} failed for plugin ${registration.pluginId}:`,
+          error,
+        );
+        // Log detailed error information for debugging
+        const errorDetails = {
+          pluginId: registration.pluginId,
+          hookName,
+          error:
+            error instanceof Error
+              ? {
+                  message: error.message,
+                  stack: error.stack,
+                  name: error.name,
+                }
+              : error,
+          timestamp: new Date().toISOString(),
+        };
+
+        console.warn('Plugin hook error details:', errorDetails);
+
+        // TODO: Could emit an event here for error tracking/reporting
+        // this._errorReportingService.reportPluginError(errorDetails);
+
         // Continue with other handlers even if one fails
       }
     });
@@ -43,12 +79,8 @@ export class PluginHooksService {
   /**
    * Register a hook handler (called by plugins via PluginAPI)
    */
-  registerHookHandler(
-    pluginId: string,
-    hook: Hooks,
-    handler: (...args: any[]) => void | Promise<void>,
-  ): void {
-    const hookHandler: PluginHookHandler = {
+  registerHookHandler(pluginId: string, hook: Hooks, handler: PluginHookHandler): void {
+    const hookHandler: PluginHookHandlerRegistration = {
       pluginId,
       hook,
       handler,
@@ -76,21 +108,21 @@ export class PluginHooksService {
   /**
    * Get all registered hook handlers for debugging
    */
-  getAllHookHandlers(): PluginHookHandler[] {
+  getAllHookHandlers(): PluginHookHandlerRegistration[] {
     return [...this._hookHandlers];
   }
 
   /**
    * Get hook handlers for a specific hook
    */
-  getHandlersForHook(hook: Hooks): PluginHookHandler[] {
+  getHandlersForHook(hook: Hooks): PluginHookHandlerRegistration[] {
     return this._hookHandlers.filter((handler) => handler.hook === hook);
   }
 
   /**
    * Get hook handlers for a specific plugin
    */
-  getHandlersForPlugin(pluginId: string): PluginHookHandler[] {
+  getHandlersForPlugin(pluginId: string): PluginHookHandlerRegistration[] {
     return this._hookHandlers.filter((handler) => handler.pluginId === pluginId);
   }
 
