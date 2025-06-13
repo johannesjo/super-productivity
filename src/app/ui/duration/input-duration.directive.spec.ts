@@ -1,5 +1,5 @@
 import { InputDurationDirective } from './input-duration.directive';
-import { ElementRef } from '@angular/core';
+import { ElementRef, Renderer2 } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { TranslateService } from '@ngx-translate/core';
 import { FormControl } from '@angular/forms';
@@ -10,6 +10,7 @@ describe('InputDurationDirective', () => {
   let directive: InputDurationDirective;
   let mockElementRef: ElementRef;
   let mockTranslateService: jasmine.SpyObj<TranslateService>;
+  let mockRenderer: jasmine.SpyObj<Renderer2>;
 
   beforeEach(() => {
     mockElementRef = {
@@ -19,6 +20,16 @@ describe('InputDurationDirective', () => {
     mockTranslateService = jasmine.createSpyObj('TranslateService', ['instant']);
     mockTranslateService.instant.and.returnValue('Duration is required');
 
+    mockRenderer = jasmine.createSpyObj('Renderer2', [
+      'setProperty',
+      'setAttribute',
+      'removeAttribute',
+      'addClass',
+      'removeClass',
+      'setStyle',
+      'removeStyle',
+    ]);
+
     TestBed.configureTestingModule({
       providers: [
         InputDurationDirective,
@@ -26,6 +37,7 @@ describe('InputDurationDirective', () => {
         MsToStringPipe,
         { provide: ElementRef, useValue: mockElementRef },
         { provide: TranslateService, useValue: mockTranslateService },
+        { provide: Renderer2, useValue: mockRenderer },
       ],
     });
 
