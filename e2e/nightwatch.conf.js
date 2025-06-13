@@ -15,6 +15,7 @@ module.exports = {
 
   test_settings: {
     default: {
+      attempts: 2,
       persist_globals: true,
       launch_url: 'https://0.0.0.0:4200',
       desiredCapabilities: {
