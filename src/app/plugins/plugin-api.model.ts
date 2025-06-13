@@ -1,9 +1,31 @@
+// Import all types from the plugin-api package
+export {
+  PluginHooks,
+  Hooks,
+  PluginBaseCfg,
+  DialogButtonCfg,
+  DialogCfg,
+  NotifyCfg,
+  PluginManifest,
+  PluginHookHandler,
+  PluginInstance,
+  PluginHookHandlerRegistration,
+  PluginCreateTaskData,
+  PluginShortcutCfg,
+  // Note: We don't import PluginAPI, TaskData, ProjectData, TagData as we use custom versions
+} from '@super-productivity/plugin-api';
+
+// Import app-specific types
 import { SnackParams } from '../core/snack/snack.model';
 import { TaskCopy } from '../features/tasks/task.model';
 import { ProjectCopy } from '../features/project/project.model';
 import { TagCopy } from '../features/tag/tag.model';
 import { PluginHeaderBtnCfg } from './ui/plugin-header-btns.component';
 
+// Re-export app-specific types
+export { TaskCopy, ProjectCopy, TagCopy, PluginHeaderBtnCfg };
+
+// App-specific type that extends the plugin-api version
 export interface PluginMenuEntryCfg {
   pluginId: string;
   label: string;
@@ -11,71 +33,13 @@ export interface PluginMenuEntryCfg {
   onClick: () => void;
 }
 
-export { TaskCopy, ProjectCopy, TagCopy };
-
-export enum PluginHooks {
-  TASK_COMPLETE = 'taskComplete',
-  TASK_UPDATE = 'taskUpdate',
-  TASK_DELETE = 'taskDelete',
-  CURRENT_TASK_CHANGE = 'currentTaskChange',
-  FINISH_DAY = 'finishDay',
-  LANGUAGE_CHANGE = 'languageChange',
-  PERSISTED_DATA_UPDATE = 'persistedDataUpdate',
-  ACTION = 'action',
-
-  // ISSUE_TASK_UPDATE = 'ISSUE_TASK_UPDATE',
-  // ISSUE_PROVIDER_SETTINGS_UPDATE = 'ISSUE_PROVIDER_SETTINGS_UPDATE',
-}
-
-export type Hooks = PluginHooks;
-
-export interface PluginBaseCfg {
-  theme: 'light' | 'dark';
-  appVersion: string;
-  platform: 'web' | 'desktop' | 'android' | 'ios';
-  isDev: boolean;
-}
-
-export interface DialogButtonCfg {
-  label: string;
-  icon?: string;
-  onClick: () => void | Promise<void>;
-  color?: 'primary' | 'warn';
-}
-
-export interface DialogCfg {
-  htmlContent?: string;
-  buttons?: DialogButtonCfg[];
-}
-
+// App-specific types that differ from the plugin-api package
 export type SnackCfgLimited = Omit<
   SnackParams,
   'actionFn' | 'actionStr' | 'actionPayload'
 >;
 
-export interface NotifyCfg {
-  title: string;
-  body: string;
-}
-
-export interface PluginManifest {
-  name: string;
-  id: string;
-  manifestVersion: number;
-  version: string;
-  minSupVersion: string;
-  description?: string;
-  hooks: Hooks[];
-  permissions: string[];
-  iFrame?: boolean;
-  isSkipMenuEntry?: boolean;
-  type?: 'standard'; // 'issueProvider'
-  assets?: string[];
-  icon?: string; // Path to SVG icon file relative to plugin root
-}
-
-export type PluginHookHandler = (...args: unknown[]) => void | Promise<void>;
-
+// Custom PluginAPI interface that uses TaskCopy instead of TaskData
 export interface PluginAPI {
   cfg: PluginBaseCfg;
 
@@ -132,33 +96,4 @@ export interface PluginAPI {
 
   // Potentially later
   // addActionBeforeCloseApp(action: () => Promise<void>): void;
-}
-
-export interface PluginInstance {
-  manifest: PluginManifest;
-  loaded: boolean;
-  isEnabled: boolean;
-  error?: string;
-}
-
-export interface PluginHookHandlerRegistration {
-  pluginId: string;
-  hook: Hooks;
-  handler: PluginHookHandler;
-}
-
-export interface PluginCreateTaskData {
-  title: string;
-  projectId?: string | null;
-  tagIds?: string[];
-  notes?: string;
-  timeEstimate?: number;
-  parentId?: string | null;
-}
-
-export interface PluginShortcutCfg {
-  pluginId: string;
-  id: string;
-  label: string;
-  onExec: () => void;
 }
