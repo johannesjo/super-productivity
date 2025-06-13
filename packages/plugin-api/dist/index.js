@@ -32,4 +32,13 @@ var __exportStar =
         __createBinding(exports, m, p);
   };
 Object.defineProperty(exports, '__esModule', { value: true });
+exports.PluginHooks = void 0;
 __exportStar(require('./types'), exports);
+// Re-export enums as values (not just types) so they can be used
+var types_1 = require('./types');
+Object.defineProperty(exports, 'PluginHooks', {
+  enumerable: true,
+  get: function () {
+    return types_1.PluginHooks;
+  },
+});

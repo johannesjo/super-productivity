@@ -8,6 +8,7 @@ var PluginHooks;
   PluginHooks['TASK_COMPLETE'] = 'taskComplete';
   PluginHooks['TASK_UPDATE'] = 'taskUpdate';
   PluginHooks['TASK_DELETE'] = 'taskDelete';
+  PluginHooks['CURRENT_TASK_CHANGE'] = 'currentTaskChange';
   PluginHooks['FINISH_DAY'] = 'finishDay';
   PluginHooks['LANGUAGE_CHANGE'] = 'languageChange';
   PluginHooks['PERSISTED_DATA_UPDATE'] = 'persistedDataUpdate';
