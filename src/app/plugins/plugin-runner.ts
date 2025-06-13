@@ -44,7 +44,7 @@ export class PluginRunner {
 
         const menuEntry: Omit<PluginMenuEntryCfg, 'pluginId'> = {
           label: manifest.name,
-          icon: 'extension', // Default icon for plugins
+          // No icon specified - let the plugin-icon component handle SVG icons with 'extension' fallback
           onClick: () => {
             // Set plugin context when menu is clicked
             this._pluginBridge._setCurrentPlugin(manifest.id);

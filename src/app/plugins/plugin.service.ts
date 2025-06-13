@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { take } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
@@ -37,6 +37,7 @@ export class PluginService {
   private _pluginPaths: Map<string, string> = new Map(); // Store plugin ID -> path mapping
   private _pluginIndexHtml: Map<string, string> = new Map(); // Store plugin ID -> index.html content
   private _pluginIcons: Map<string, string> = new Map(); // Store plugin ID -> SVG icon content
+  private _pluginIconsSignal = signal<Map<string, string>>(new Map());
 
   async initializePlugins(): Promise<void> {
     if (this._isInitialized) {
@@ -181,7 +182,7 @@ export class PluginService {
 
           if (iconContent) {
             this._pluginIcons.set(manifest.id, iconContent);
-            console.log(`Loaded icon for plugin ${manifest.id}`);
+            this._pluginIconsSignal.set(new Map(this._pluginIcons));
           }
         } catch (error) {
           console.log(`Failed to load icon for plugin ${manifest.id}:`, error);
@@ -354,6 +355,13 @@ export class PluginService {
     return this._pluginIcons.get(pluginId) || null;
   }
 
+  /**
+   * Get reactive signal for plugin icons
+   */
+  getPluginIconsSignal(): import('@angular/core').Signal<ReadonlyMap<string, string>> {
+    return this._pluginIconsSignal.asReadonly();
+  }
+
   async dispatchHook(hookName: Hooks, payload?: unknown): Promise<void> {
     if (!this._isInitialized) {
       console.warn('Plugin system not initialized, skipping hook dispatch');
@@ -496,6 +504,7 @@ export class PluginService {
         manifestText,
         pluginCode,
         indexHtml || undefined,
+        iconContent || undefined,
       );
 
       // Store index.html content if it exists
@@ -506,6 +515,7 @@ export class PluginService {
       // Store icon content if it exists
       if (iconContent) {
         this._pluginIcons.set(manifest.id, iconContent);
+        this._pluginIconsSignal.set(new Map(this._pluginIcons));
       }
 
       // If plugin is disabled, create a placeholder instance without loading code
@@ -625,6 +635,7 @@ export class PluginService {
 
     // Remove icon content
     this._pluginIcons.delete(pluginId);
+    this._pluginIconsSignal.set(new Map(this._pluginIcons));
 
     console.log(`Uploaded plugin ${pluginId} removed completely`);
   }
@@ -691,6 +702,12 @@ export class PluginService {
       // Store index.html content if it exists in cache
       if (cachedPlugin.indexHtml) {
         this._pluginIndexHtml.set(manifest.id, cachedPlugin.indexHtml);
+      }
+
+      // Store icon content if it exists in cache
+      if (cachedPlugin.icon) {
+        this._pluginIcons.set(manifest.id, cachedPlugin.icon);
+        this._pluginIconsSignal.set(new Map(this._pluginIcons));
       }
 
       // Validate manifest

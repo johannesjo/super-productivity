@@ -57,7 +57,10 @@ export class PluginIconComponent {
   readonly fallbackIcon = input<string>('extension');
 
   readonly sanitizedSvg = computed(() => {
-    const iconContent = this._pluginService.getPluginIcon(this.pluginId());
+    const pluginId = this.pluginId();
+    const iconsMap = this._pluginService.getPluginIconsSignal()();
+    const iconContent = iconsMap.get(pluginId);
+
     if (!iconContent) {
       return null;
     }
