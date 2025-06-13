@@ -1,10 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import {
-  addNewTagsFromShortSyntax,
-  moveToOtherProject,
-  scheduleTaskWithTime,
-} from './task.actions';
+import { addNewTagsFromShortSyntax, scheduleTaskWithTime } from './task.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import {
   catchError,
@@ -125,7 +121,7 @@ export class ShortSyntaxEffects {
         if (!r) {
           if (isAddDefaultProjectIfNecessary) {
             return [
-              moveToOtherProject({
+              TaskSharedActions.moveToOtherProject({
                 task,
                 targetProjectId: defaultProjectId as string,
               }),
@@ -178,7 +174,7 @@ export class ShortSyntaxEffects {
             });
           } else {
             actions.push(
-              moveToOtherProject({
+              TaskSharedActions.moveToOtherProject({
                 task,
                 targetProjectId: r.projectId,
               }),
@@ -186,7 +182,7 @@ export class ShortSyntaxEffects {
           }
         } else if (isAddDefaultProjectIfNecessary) {
           actions.push(
-            moveToOtherProject({
+            TaskSharedActions.moveToOtherProject({
               task,
               targetProjectId: defaultProjectId as string,
             }),
