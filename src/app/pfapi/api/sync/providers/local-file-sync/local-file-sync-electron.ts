@@ -3,11 +3,7 @@ import { LocalFileSyncBase } from './local-file-sync-base';
 import { IS_ELECTRON } from '../../../../../app.constants';
 import { pfLog } from '../../../util/log';
 import { ElectronFileAdapter } from './electron-file-adapter';
-import { SyncProviderPrivateCfgBase } from '../../../pfapi.model';
-
-export interface LocalFileSyncElectronPrivateCfg extends SyncProviderPrivateCfgBase {
-  syncFolderPath: string;
-}
+import { LocalFileSyncPrivateCfg } from '../../../pfapi.model';
 
 export class LocalFileSyncElectron extends LocalFileSyncBase {
   private static readonly L = 'LocalFileSyncElectron';
@@ -24,7 +20,7 @@ export class LocalFileSyncElectron extends LocalFileSyncBase {
     return !!privateCfg?.syncFolderPath;
   }
 
-  async setPrivateCfg(privateCfg: LocalFileSyncElectronPrivateCfg): Promise<void> {
+  async setPrivateCfg(privateCfg: LocalFileSyncPrivateCfg): Promise<void> {
     await this.privateCfg.save(privateCfg);
   }
 

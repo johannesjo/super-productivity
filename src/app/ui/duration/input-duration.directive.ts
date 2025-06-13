@@ -118,7 +118,10 @@ export class InputDurationDirective implements ControlValueAccessor, Validator, 
 
     // Apply built-in validation
     const value = control.value;
-    if (value === null || value === undefined || Number.isNaN(value) || value === 0) {
+
+    // For duration fields, we only validate that the value is a valid number
+    // 0 is a valid duration (0 minutes, 0 hours, etc.)
+    if (value === null || value === undefined || Number.isNaN(value)) {
       return {
         duration: {
           invalid: true,
@@ -135,8 +138,12 @@ export class InputDurationDirective implements ControlValueAccessor, Validator, 
       // Convert input string to milliseconds
       const ms = strVal ? this._strToMs(strVal) : 0;
 
+      // Special handling for zero values with units (e.g., "0m", "0h")
+      const isZeroWithUnit = /^0+[smhd]$/i.test(strVal.trim());
+
       // don't interrupt typing for input without unit e.g. "32", "2h 32"
-      if (strVal !== this._msToStr(ms)) {
+      // but allow zero values with units to pass through
+      if (!isZeroWithUnit && strVal !== this._msToStr(ms)) {
         return;
       }
 

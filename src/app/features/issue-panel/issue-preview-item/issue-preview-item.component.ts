@@ -11,7 +11,6 @@ import { MatIcon } from '@angular/material/icon';
 import { SearchResultItem } from '../../issue/issue.model';
 import { isIssueDone } from '../../issue/mapping-helper/is-issue-done';
 import { IssueService } from '../../issue/issue.service';
-import { first } from 'rxjs/operators';
 import { ICAL_TYPE } from '../../issue/issue.const';
 
 @Component({
@@ -38,14 +37,11 @@ export class IssuePreviewItemComponent {
   customTitleStr = input<string | undefined>();
 
   async openIssue(): Promise<void> {
-    const url = await this._issueService
-      .issueLink$(
-        this.itemData().issueType,
-        this.itemData().issueData.id,
-        this.issueProviderId(),
-      )
-      .pipe(first())
-      .toPromise();
+    const url = await this._issueService.issueLink(
+      this.itemData().issueType,
+      this.itemData().issueData.id,
+      this.issueProviderId(),
+    );
     window.open(url, '_blank');
   }
 }

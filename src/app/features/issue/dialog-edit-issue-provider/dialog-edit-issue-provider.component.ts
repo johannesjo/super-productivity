@@ -47,6 +47,7 @@ import { FormlyModule } from '@ngx-formly/core';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
+import { devError } from '../../../util/dev-error';
 
 @Component({
   selector: 'dialog-edit-issue-provider',
@@ -152,31 +153,51 @@ export class DialogEditIssueProviderComponent {
   }
 
   updateModel(model: Partial<IssueProvider>): void {
-    Object.keys(model).forEach((key) => {
-      if (key !== 'isEnabled') {
-        this.model![key] = model[key];
-      }
-    });
+    // NOTE: this currently throws an error when loading issue point stuff for jira
+    try {
+      Object.keys(model).forEach((key) => {
+        if (key !== 'isEnabled') {
+          this.model![key] = model[key];
+        }
+      });
+    } catch (e) {
+      devError(e);
+      const updates: any = {};
+      Object.keys(model).forEach((key) => {
+        if (key !== 'isEnabled') {
+          updates[key] = model[key as keyof IssueProvider];
+        }
+      });
+      this.model = { ...this.model, ...updates };
+    }
+
     this.isConnectionWorks.set(false);
   }
 
-  testConnection(): void {
-    this._issueService
-      .testConnection$(this.model as IssueProvider)
-      .subscribe((isSuccess) => {
-        this.isConnectionWorks.set(isSuccess);
-        if (isSuccess) {
-          this._snackService.open({
-            type: 'SUCCESS',
-            msg: 'Connection works!',
-          });
-        } else {
-          this._snackService.open({
-            type: 'ERROR',
-            msg: 'Connection failed',
-          });
-        }
+  async testConnection(): Promise<void> {
+    try {
+      const isSuccess = await this._issueService.testConnection(
+        this.model as IssueProvider,
+      );
+      this.isConnectionWorks.set(isSuccess);
+      if (isSuccess) {
+        this._snackService.open({
+          type: 'SUCCESS',
+          msg: 'Connection works!',
+        });
+      } else {
+        this._snackService.open({
+          type: 'ERROR',
+          msg: 'Connection failed',
+        });
+      }
+    } catch (error) {
+      this.isConnectionWorks.set(false);
+      this._snackService.open({
+        type: 'ERROR',
+        msg: 'Connection failed',
       });
+    }
   }
 
   remove(): void {

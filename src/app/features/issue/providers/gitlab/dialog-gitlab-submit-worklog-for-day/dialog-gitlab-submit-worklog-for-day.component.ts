@@ -17,7 +17,7 @@ import { SnackService } from '../../../../../core/snack/snack.service';
 import { Store } from '@ngrx/store';
 import { IssueProviderService } from '../../../issue-provider.service';
 import { msToString, MsToStringPipe } from '../../../../../ui/duration/ms-to-string.pipe';
-import { updateTask } from '../../../../tasks/store/task.actions';
+import { TaskSharedActions } from '../../../../../root-store/meta/task-shared.actions';
 import { assertTruthy } from '../../../../../util/assert-truthy';
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
@@ -185,7 +185,7 @@ export class DialogGitlabSubmitWorklogForDayComponent {
               first(),
               tap(() =>
                 this._store.dispatch(
-                  updateTask({
+                  TaskSharedActions.updateTask({
                     task: {
                       id: t.id,
                       changes: {

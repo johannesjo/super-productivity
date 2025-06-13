@@ -8,7 +8,7 @@ import { TaskRepeatCfg } from './task-repeat-cfg.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import { TaskCopy } from '../tasks/task.model';
 import { WorkContextType } from '../work-context/work-context.model';
-import { addTask } from '../tasks/store/task.actions';
+import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 
 describe('TaskRepeatCfgService', () => {
   let service: TaskRepeatCfgService;
@@ -91,7 +91,7 @@ describe('TaskRepeatCfgService', () => {
       const result = await service.getActionsForTaskRepeatCfg(taskRepeatCfg);
 
       expect(result.length).toBeGreaterThan(0);
-      expect(result[0].type).toEqual(addTask.type);
+      expect(result[0].type).toEqual(TaskSharedActions.addTask.type);
     });
   });
 });

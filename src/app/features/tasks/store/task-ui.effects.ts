@@ -1,12 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import {
-  addTask,
-  deleteTask,
-  moveToOtherProject,
-  undoDeleteTask,
-  updateTask,
-} from './task.actions';
+import { undoDeleteTask } from './task.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { select, Store } from '@ngrx/store';
 import {
   distinctUntilChanged,
@@ -53,7 +48,7 @@ export class TaskUiEffects {
   taskCreatedSnack$: any = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(addTask),
+        ofType(TaskSharedActions.addTask),
         tap(({ task }) =>
           this._snackService.open({
             type: 'SUCCESS',
@@ -71,7 +66,7 @@ export class TaskUiEffects {
   snackDelete$: any = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(deleteTask),
+        ofType(TaskSharedActions.deleteTask),
         tap(({ task }) => {
           this._snackService.open({
             translateParams: {
@@ -146,7 +141,7 @@ export class TaskUiEffects {
   taskDoneSound$: any = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(updateTask),
+        ofType(TaskSharedActions.updateTask),
         filter(({ task: { changes } }) => !!changes.isDone),
         withLatestFrom(
           this._workContextService.flatDoneTodayNr$,
@@ -161,7 +156,7 @@ export class TaskUiEffects {
   goToProjectSnack$ = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(moveToOtherProject),
+        ofType(TaskSharedActions.moveToOtherProject),
         filter(
           ({ targetProjectId }) =>
             targetProjectId !== this._workContextService.activeWorkContextId,
@@ -198,7 +193,7 @@ export class TaskUiEffects {
   goToProjectOnCreation$ = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(addTask),
+        ofType(TaskSharedActions.addTask),
         filter(
           ({ task }) =>
             !!task.projectId &&

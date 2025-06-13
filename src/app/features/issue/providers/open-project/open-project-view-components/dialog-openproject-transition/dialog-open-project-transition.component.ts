@@ -18,7 +18,7 @@ import { T } from 'src/app/t.const';
 import { Task } from '../../../../../tasks/task.model';
 import { OpenProjectOriginalStatus } from '../../open-project-api-responses';
 import { OpenProjectApiService } from '../../open-project-api.service';
-import { OpenProjectWorkPackage } from '../../open-project-issue/open-project-issue.model';
+import { OpenProjectWorkPackage } from '../../open-project-issue.model';
 import { IssueProviderService } from 'src/app/features/issue/issue-provider.service';
 import { assertTruthy } from '../../../../../../util/assert-truthy';
 import { FormsModule } from '@angular/forms';

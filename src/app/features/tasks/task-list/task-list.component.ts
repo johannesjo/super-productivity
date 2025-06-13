@@ -24,7 +24,8 @@ import {
   moveProjectTaskToBacklogList,
   moveProjectTaskToRegularList,
 } from '../../project/store/project.actions';
-import { moveSubTask, updateTask } from '../store/task.actions';
+import { moveSubTask } from '../store/task.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { Store } from '@ngrx/store';
 import { moveItemBeforeItem } from '../../../util/move-item-before-item';
@@ -263,7 +264,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       );
       if (target === 'DONE') {
         this._store.dispatch(
-          updateTask({
+          TaskSharedActions.updateTask({
             task: { id: taskId, changes: { isDone: true } },
           }),
         );

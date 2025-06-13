@@ -1,6 +1,6 @@
 {
   "name": "superProductivity",
-  "version": "13.0.10",
+  "version": "13.0.11",
   "description": "ToDo list and Time Tracking",
   "keywords": [
     "ToDo",
@@ -90,7 +90,8 @@
     "test": "cross-env TZ='Europe/Berlin' ng test --watch=false",
     "test:watch": "cross-env TZ='Europe/Berlin' ng test --browsers ChromeHeadless",
     "version": "npm run prebuild && npm run release.changelog && node ./tools/bump-android-version.js && git add -A",
-    "prepare": "ts-patch install"
+    "prepare": "ts-patch install",
+    "prettier": "pretty-quick"
   },
   "resolutions": {
     "sass": "1.32.6"
@@ -126,11 +127,11 @@
     "@angular/platform-server": "^19.2.10",
     "@angular/router": "^19.2.10",
     "@angular/service-worker": "^19.2.10",
-    "@capacitor/android": "^7.2.0",
+    "@capacitor/android": "^7.3.0",
     "@capacitor/app": "^7.0.1",
-    "@capacitor/cli": "^7.2.0",
-    "@capacitor/core": "^7.2.0",
-    "@capacitor/filesystem": "^7.0.1",
+    "@capacitor/cli": "^7.3.0",
+    "@capacitor/core": "^7.3.0",
+    "@capacitor/filesystem": "^7.1.1",
     "@capacitor/local-notifications": "^7.0.1",
     "@capawesome/capacitor-android-dark-mode-support": "^7.0.0",
     "@capawesome/capacitor-background-task": "^7.0.1",
@@ -166,14 +167,14 @@
     "canvas-confetti": "^1.9.3",
     "chai": "^5.1.2",
     "chart.js": "^4.4.7",
-    "chromedriver": "^135.0.4",
+    "chromedriver": "^137.0.3",
     "chrono-node": "^2.8.0",
     "clipboard": "^2.0.11",
     "conventional-changelog-cli": "^5.0.0",
     "core-js": "^3.39.0",
     "cross-env": "^7.0.3",
     "detect-it": "^4.0.1",
-    "electron": "^36.2.0",
+    "electron": "^36.4.0",
     "electron-builder": "^26.0.12",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.1.1",

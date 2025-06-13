@@ -610,7 +610,9 @@
         "MARK_AS_CHECKED": "체크 된대로 업데이트 표시",
         "STATUS": "상태",
         "SUMMARY": "개요",
-        "TYPE": "유형"
+        "TYPE": "유형",
+        "ATTACHMENTS": "첨부파일",
+        "UPLOAD_ATTACHMENT": "작업에 업로드"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "작업 패키지",
@@ -621,7 +623,8 @@
         "POST_TIME_SUCCESS": "OpenProject: {{issueTitle}}에 대한 시간 항목을 성공적으로 생성했습니다.",
         "TRANSITION": "OpenProject: 문제 \"{{issueKey}}\"를 \"{{name}}\"로 설정합니다. \"",
         "TRANSITION_SUCCESS": "OpenProject: 문제 {{issueKey}} 을(를) <strong>로 설정 {{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "전환이 로드되었습니다. 아래 선택 항목을 사용하여 할당합니다."
+        "TRANSITIONS_LOADED": "전환이 로드되었습니다. 아래 선택 항목을 사용하여 할당합니다.",
+        "ERR_NO_FILE": "선택된 파일이 없습니다"
       }
     },
     "PLANNER": {

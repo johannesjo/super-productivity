@@ -20,7 +20,7 @@ import { getDateRangeForWeek } from '../../util/get-date-range-for-week';
 import { fadeAnimation, fadeInSlowAnimation } from '../../ui/animations/fade.ani';
 import { T } from '../../t.const';
 import { WorkContextService } from '../work-context/work-context.service';
-import { SearchQueryParams } from '../search-bar/search-bar.model';
+import { SearchQueryParams } from '../../pages/search-page/search-page.model';
 import { Subscription } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { selectAllProjectColorsAndTitles } from '../project/store/project.selectors';

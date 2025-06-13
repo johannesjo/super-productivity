@@ -610,7 +610,9 @@
         "MARK_AS_CHECKED": "Позначити оновлення як відмічені",
         "STATUS": "Статус",
         "SUMMARY": "Підсумок",
-        "TYPE": "Тип"
+        "TYPE": "Тип",
+        "ATTACHMENTS": "Вкладення",
+        "UPLOAD_ATTACHMENT": "Завантажити в завдання"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "робочий пакет",
@@ -621,7 +623,8 @@
         "POST_TIME_SUCCESS": "OpenProject: Успішно створено запис часу для {{issueTitle}}",
         "TRANSITION": "OpenProject: Встановлено завдання \"{{issueKey}}\" на \"{{name}}\"",
         "TRANSITION_SUCCESS": "OpenProject: Встановлено завдання {{issueKey}} на <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Переходи завантажено. Використовуйте вибір нижче, щоб призначити їх"
+        "TRANSITIONS_LOADED": "Переходи завантажено. Використовуйте вибір нижче, щоб призначити їх",
+        "ERR_NO_FILE": "Файл не вибрано"
       }
     },
     "PLANNER": {

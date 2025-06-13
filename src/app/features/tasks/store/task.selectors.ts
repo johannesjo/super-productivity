@@ -60,10 +60,14 @@ export const mapSubTasksToTask = (
 export const flattenTasks = (tasksIN: TaskWithSubTasks[]): TaskWithSubTasks[] => {
   let flatTasks: TaskWithSubTasks[] = [];
   tasksIN.forEach((task) => {
+    if (!task) {
+      return;
+    }
     flatTasks.push(task);
-    if (task.subTasks) {
+    if (task.subTasks && task.subTasks.length > 0) {
       // NOTE: in order for the model to be identical we add an empty subTasks array
-      flatTasks = flatTasks.concat(task.subTasks.map((t) => ({ ...t, subTasks: [] })));
+      const validSubTasks = task.subTasks.filter((t) => t !== null && t !== undefined);
+      flatTasks = flatTasks.concat(validSubTasks.map((t) => ({ ...t, subTasks: [] })));
     }
   });
   return flatTasks;

@@ -66,14 +66,15 @@ export const timeTrackingReducer = createReducer(
 
   on(TimeTrackingActions.updateWorkContextData, (state, { ctx, date, updates }) => {
     const prop = ctx.type === 'TAG' ? 'tag' : 'project';
+
     return {
       ...state,
       [prop]: {
         ...state[prop],
         [ctx.id]: {
-          ...state[prop][ctx.id],
+          ...(state[prop]?.[ctx.id] || {}),
           [date]: {
-            ...state[prop][ctx.id][date],
+            ...(state[prop]?.[ctx.id]?.[date] || {}),
             ...updates,
           },
         },

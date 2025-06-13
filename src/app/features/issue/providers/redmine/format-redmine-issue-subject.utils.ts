@@ -1,4 +1,4 @@
-import { RedmineIssue } from './redmine-issue/redmine-issue.model';
+import { RedmineIssue } from './redmine-issue.model';
 import { truncate } from '../../../../util/truncate';
 
 export const formatRedmineIssueSubject = ({ id, subject }: RedmineIssue): string => {

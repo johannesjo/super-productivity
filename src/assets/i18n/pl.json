@@ -610,7 +610,9 @@
         "MARK_AS_CHECKED": "Oznacz aktualizacje jako sprawdzone",
         "STATUS": "Status",
         "SUMMARY": "Podsumowanie",
-        "TYPE": "Typ"
+        "TYPE": "Typ",
+        "ATTACHMENTS": "Załączniki",
+        "UPLOAD_ATTACHMENT": "Prześlij do zadania"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "pakiet roboczy",
@@ -621,7 +623,8 @@
         "POST_TIME_SUCCESS": "OpenProject: Pomyślnie utworzono wpis czasu dla {{issueTitle}}",
         "TRANSITION": "OpenProject: Ustaw wydanie \"{{issueKey}}\" na \"{{name}}\"",
         "TRANSITION_SUCCESS": "OpenProject: Ustaw wydanie {{issueKey}} na <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Załadowane przejścia. Użyj poniższych opcji wyboru, aby je przypisać"
+        "TRANSITIONS_LOADED": "Załadowane przejścia. Użyj poniższych opcji wyboru, aby je przypisać",
+        "ERR_NO_FILE": "Nie wybrano pliku"
       }
     },
     "PLANNER": {
