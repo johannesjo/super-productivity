@@ -636,6 +636,63 @@ export class WebdavApi {
     }
   }
 
+  async checkFolderExists(path: string): Promise<boolean> {
+    try {
+      const meta = await this.getFileMeta(path, null);
+      return meta.type === 'directory';
+    } catch (e: any) {
+      if (e?.status === 404 || e instanceof RemoteFileNotFoundAPIError) {
+        return false;
+      }
+      // Some servers return 405 for PROPFIND on non-existent folders
+      if (e?.status === 405) {
+        return false;
+      }
+      throw e;
+    }
+  }
+
+  async testConnection(): Promise<{ success: boolean; message: string; details?: any }> {
+    const cfg = await this._getCfgOrError();
+    try {
+      // Try to check if root exists
+      pfLog(1, `${WebdavApi.L}.testConnection() testing WebDAV connection`, {
+        baseUrl: cfg.baseUrl,
+      });
+
+      // Try a simple PROPFIND on the root
+      const response = await this._makeRequest({
+        method: 'PROPFIND',
+        path: '',
+        body: WebdavApi.PROPFIND_XML,
+        headers: {
+          'Content-Type': 'application/xml',
+          Depth: '0',
+        },
+      });
+
+      return {
+        success: true,
+        message: 'WebDAV connection successful',
+        details: {
+          baseUrl: cfg.baseUrl,
+          status: response.status,
+        },
+      };
+    } catch (error: any) {
+      pfLog(0, `${WebdavApi.L}.testConnection() failed`, { error });
+      return {
+        success: false,
+        message: `WebDAV connection failed: ${error?.message || 'Unknown error'}`,
+        details: {
+          baseUrl: cfg.baseUrl,
+          error: error?.message,
+          status: error?.status,
+        },
+      };
+    }
+  }
+
   getRevFromMetaHelper(fileMeta: unknown | Headers): string {
     const d = (fileMeta as any)?.data || fileMeta;
 
@@ -709,11 +766,46 @@ export class WebdavApi {
             message: putError?.message,
           });
 
-          // If PUT also fails with 404, it might mean we need to check if the folder exists differently
+          // If PUT also fails with 404, it might mean the parent path doesn't exist
           if (
             putError?.status === 404 ||
             putError instanceof RemoteFileNotFoundAPIError
           ) {
+            // Check if we need to create parent directories first
+            const pathParts = folderPath.split('/').filter((p) => p);
+            if (pathParts.length > 1) {
+              pfLog(
+                2,
+                `${WebdavApi.L}.createFolder() trying to create parent directories first`,
+                {
+                  folderPath,
+                  pathParts,
+                },
+              );
+
+              // Try to create parent directories one by one
+              let currentPath = '';
+              for (let i = 0; i < pathParts.length - 1; i++) {
+                currentPath = currentPath
+                  ? `${currentPath}/${pathParts[i]}`
+                  : pathParts[i];
+                try {
+                  const exists = await this.checkFolderExists(currentPath);
+                  if (!exists) {
+                    pfLog(2, `${WebdavApi.L}.createFolder() creating parent`, {
+                      currentPath,
+                    });
+                    await this.createFolder({ folderPath: currentPath });
+                  }
+                } catch (parentError) {
+                  pfLog(0, `${WebdavApi.L}.createFolder() failed to create parent`, {
+                    currentPath,
+                    error: parentError,
+                  });
+                }
+              }
+            }
+
             // Try one more time with a different approach - create a .gitkeep file
             try {
               const gitkeepPath = `${folderPath}/.gitkeep`;
@@ -940,12 +1032,13 @@ export class WebdavApi {
     // Construct the URL
     const url = new URL(normalizedPath, baseUrl).toString();
 
-    // Log for debugging
-    pfLog(3, `${WebdavApi.L}._getUrl() constructed URL`, {
+    // Log for debugging - increased log level for better visibility
+    pfLog(1, `${WebdavApi.L}._getUrl() constructed URL`, {
       baseUrl,
       path,
       normalizedPath,
       result: url,
+      baseUrlConfig: cfg.baseUrl,
     });
 
     return url;
@@ -1059,93 +1152,6 @@ export class WebdavApi {
     } catch (error) {
       pfLog(0, `${WebdavApi.L}._parsePropsFromXml() parsing error`, error);
       return null;
-    }
-  }
-
-  async testConnection(): Promise<boolean> {
-    pfLog(2, `${WebdavApi.L}.testConnection() testing WebDAV connection`);
-
-    try {
-      // Try to list the root directory
-      const response = await this._makeRequest({
-        method: 'PROPFIND',
-        path: '',
-        body: WebdavApi.PROPFIND_XML,
-        headers: {
-          'Content-Type': 'application/xml',
-          Depth: '0',
-        },
-      });
-
-      const xmlText = await response.text();
-
-      // Check if response is HTML (error page)
-      if (this._isHtmlResponse(xmlText)) {
-        pfLog(
-          0,
-          `${WebdavApi.L}.testConnection() received HTML response, connection failed`,
-        );
-        return false;
-      }
-
-      pfLog(2, `${WebdavApi.L}.testConnection() connection successful`);
-      return true;
-    } catch (e: any) {
-      pfLog(0, `${WebdavApi.L}.testConnection() connection failed`, {
-        status: e?.status,
-        message: e?.message,
-      });
-      return false;
-    }
-  }
-
-  async checkFolderExists(folderPath: string): Promise<boolean> {
-    pfLog(2, `${WebdavApi.L}.checkFolderExists() checking`, { folderPath });
-
-    try {
-      const response = await this._makeRequest({
-        method: 'PROPFIND',
-        path: folderPath,
-        body: WebdavApi.PROPFIND_XML,
-        headers: {
-          'Content-Type': 'application/xml',
-          Depth: '0',
-        },
-      });
-
-      const xmlText = await response.text();
-      const meta = this._parsePropsFromXml(xmlText, folderPath);
-      const exists = meta?.type === 'directory';
-
-      pfLog(2, `${WebdavApi.L}.checkFolderExists() result`, {
-        folderPath,
-        exists,
-        type: meta?.type,
-      });
-
-      return exists;
-    } catch (e: any) {
-      pfLog(1, `${WebdavApi.L}.checkFolderExists() error`, {
-        folderPath,
-        status: e?.status,
-        message: e?.message,
-      });
-
-      if (e?.status === 404 || e instanceof RemoteFileNotFoundAPIError) {
-        return false;
-      }
-
-      // For other errors, we might want to handle them differently
-      // For example, 405 Method Not Allowed might mean PROPFIND is not supported
-      if (e?.status === 405) {
-        pfLog(
-          1,
-          `${WebdavApi.L}.checkFolderExists() PROPFIND not supported, assuming folder doesn't exist`,
-        );
-        return false;
-      }
-
-      throw e;
     }
   }
 
