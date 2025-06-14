@@ -34,16 +34,26 @@
   <!--    </mat-menu>-->
   <!--  </div>-->
 
-  <div class="days">
-    <div class="filler"><!--for time --></div>
+  <div
+    class="days"
+    [class.month-view]="isMonthView$ | async"
+  >
+    @if (!(isMonthView$ | async)) {
+      <div class="filler"><!--for time --></div>
+      @for (day of daysToShow; track $index) {
+        <div class="day">
+          @if ($index === 0) {
+            <mat-icon>wb_sunny</mat-icon>
+          }
+          <div class="day-num">{{ day | date: 'd' }}</div>
+          <div class="day-day">{{ day | date: 'EEE' }}</div>
+        </div>
+      }
+    }
 
-    @for (day of daysToShow; track $index) {
-      <div class="day">
-        @if ($index === 0) {
-          <mat-icon>wb_sunny</mat-icon>
-        }
-        <div class="day-num">{{ day | date: 'd' }}</div>
-        <div class="day-day">{{ day | date: 'EEE' }}</div>
+    @if (isMonthView$ | async) {
+      <div class="month-header">
+        <div class="month-title">{{ daysToShow[14] | date: 'MMMM yyyy' }}</div>
       </div>
     }
   </div>
@@ -53,140 +63,192 @@
 <div
   #gridContainer
   class="main-grid-container {{ containerExtraClass }}"
+  [class.month-view]="isMonthView$ | async"
+  [class.week-view]="!(isMonthView$ | async)"
   [class.isCtrlKeyPressed]="shortcutService.isCtrlPressed$ | async"
   (click)="onGridClick($event)"
   (mousemove)="onMoveOverGrid($event)"
 >
-  <!-- Time -->
-  @for (time of times; track $index) {
-    <div
-      class="time"
-      style="grid-row: {{ $index * FH + 1 }}"
-    >
-      {{ time }}
-    </div>
-  }
-  <!-- Grid Rows -->
-  @for (row of rowsByNr; track $index) {
-    <div
-      class="row"
-      style="grid-row: {{ row + 1 }}"
-    ></div>
-  }
-
-  <!-- Grid Cols -->
-  @for (day of daysToShow; track $index) {
-    <div
-      class="col"
-      [attr.data-day]="day"
-      style="grid-column: {{ $index + 2 }}; grid-row: 1 / span {{
-        ($index === 0 ? currentTimeRow : endOfDayColRowStart) - 1
-      }}"
-    >
-      <div class="drop-label">{{ T.F.SCHEDULE.PLAN_START_DAY | translate }}</div>
-    </div>
-    <div
-      class="col end-of-day"
-      [attr.data-day]="day"
-      style="grid-column: {{ $index + 2 }}; grid-row: {{
-        $index === 0 ? currentTimeRow : endOfDayColRowStart
-      }} / span {{ totalRows - ($index === 0 ? currentTimeRow : endOfDayColRowStart) }}"
-    >
-      <div class="drop-label">{{ T.F.SCHEDULE.PLAN_END_DAY | translate }}</div>
-    </div>
-  }
-
-  <!-- Work Start and End -->
-  @if (workStartEnd) {
-    <div
-      class="work-start"
-      style="grid-row: {{ workStartEnd.workStartRow }}"
-    >
-      <div>{{ T.F.SCHEDULE.START | translate }}</div>
-    </div>
-    <div
-      class="work-end"
-      style="grid-row: {{ workStartEnd.workEndRow }}"
-    >
-      <div>{{ T.F.SCHEDULE.END | translate }}</div>
-    </div>
-  }
-
-  <!-- Events -->
-  @for (ev of events$ | async; track ev.id) {
-    <!-- -->
-    @if (
-      ev.type === SVEType.Task ||
-      ev.type === SVEType.SplitTask ||
-      ev.type === SVEType.TaskPlannedForDay ||
-      ev.type === SVEType.SplitTaskPlannedForDay
-    ) {
-      <schedule-event
-        class="draggable"
-        cdkDrag
-        [cdkDragData]="ev"
-        (cdkDragMoved)="dragMoved($event)"
-        (cdkDragStarted)="dragStarted($event)"
-        (cdkDragReleased)="dragReleased($event)"
-        [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? 75 : 0"
-        [event]="ev"
-      ></schedule-event>
-    } @else {
-      <schedule-event [event]="ev"></schedule-event>
-    }
-  }
-
-  <!-- Excess tasks planned for day -->
-  @for (beyondBudgetDay of beyondBudget$ | async; track i; let i = $index) {
-    <!-- -->
-    @if (beyondBudgetDay.length > 0) {
+  @if (!(isMonthView$ | async)) {
+    <!-- Time -->
+    @for (time of times; track $index) {
       <div
-        class="excess-entries"
-        style="grid-column: {{ i + 2 }}"
+        class="time"
+        style="grid-row: {{ $index * FH + 1 }}"
       >
-        <div
-          class="excess-entries-header"
-          [matTooltipPosition]="'above'"
-          [matTooltip]="
-            'Tasks planned for day, but that are beyond the available time budget'
-          "
-        >
-          <mat-icon>hourglass_disabled</mat-icon>
-          {{ beyondBudgetDay.length }}
-        </div>
-        @for (ev of beyondBudgetDay; track ev.id) {
-          <schedule-event
-            [event]="ev"
-            class="draggable"
-            cdkDrag
-            [cdkDragData]="ev"
-            (cdkDragMoved)="dragMoved($event)"
-            (cdkDragStarted)="dragStarted($event)"
-            (cdkDragReleased)="dragReleased($event)"
-            [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? DRAG_DELAY_FOR_TOUCH : 0"
-          ></schedule-event>
-        }
+        {{ time }}
       </div>
     }
-    <!-- -->
+    <!-- Grid Rows -->
+    @for (row of rowsByNr; track $index) {
+      <div
+        class="row"
+        style="grid-row: {{ row + 1 }}"
+      ></div>
+    }
+
+    <!-- Grid Cols -->
+    @for (day of daysToShow; track $index) {
+      <div
+        class="col"
+        [attr.data-day]="day"
+        style="grid-column: {{ $index + 2 }}; grid-row: 1 / span {{
+          ($index === 0 ? currentTimeRow : endOfDayColRowStart) - 1
+        }}"
+      >
+        <div class="drop-label">{{ T.F.SCHEDULE.PLAN_START_DAY | translate }}</div>
+      </div>
+      <div
+        class="col end-of-day"
+        [attr.data-day]="day"
+        style="grid-column: {{ $index + 2 }}; grid-row: {{
+          $index === 0 ? currentTimeRow : endOfDayColRowStart
+        }} / span {{ totalRows - ($index === 0 ? currentTimeRow : endOfDayColRowStart) }}"
+      >
+        <div class="drop-label">{{ T.F.SCHEDULE.PLAN_END_DAY | translate }}</div>
+      </div>
+    }
+
+    <!-- Work Start and End -->
+    @if (workStartEnd) {
+      <div
+        class="work-start"
+        style="grid-row: {{ workStartEnd.workStartRow }}"
+      >
+        <div>{{ T.F.SCHEDULE.START | translate }}</div>
+      </div>
+      <div
+        class="work-end"
+        style="grid-row: {{ workStartEnd.workEndRow }}"
+      >
+        <div>{{ T.F.SCHEDULE.END | translate }}</div>
+      </div>
+    }
+
+    <div
+      class="current-time"
+      style="grid-column: 2;  grid-row: {{ currentTimeRow }} / span 1"
+    >
+      <div class="circle"></div>
+    </div>
   }
 
-  <div
-    class="current-time"
-    style="grid-column: 2;  grid-row: {{ currentTimeRow }} / span 1"
-  >
-    <div class="circle"></div>
-  </div>
+  @if (isMonthView$ | async) {
+    <div class="weekday-header">Sun</div>
+    <div class="weekday-header">Mon</div>
+    <div class="weekday-header">Tue</div>
+    <div class="weekday-header">Wed</div>
+    <div class="weekday-header">Thu</div>
+    <div class="weekday-header">Fri</div>
+    <div class="weekday-header">Sat</div>
+
+    @for (day of daysToShow; track $index) {
+      @let weekIndex = Math.floor($index / 7);
+      @let dayIndex = $index % 7;
+      @if (weekIndex < weeksToShow) {
+        <div
+          class="month-day-cell {{ getDayClass(day) }}"
+          [attr.data-day]="day"
+          style="grid-row: {{ weekIndex + 2 }}; grid-column: {{ dayIndex + 1 }}"
+        >
+          <div class="month-day-header">
+            <span class="month-day-number">{{ day | date: 'd' }}</span>
+            @if (hasEventsForDay(day, events$ | async)) {
+              <span class="event-dot"></span>
+            }
+          </div>
+          <div class="month-day-events">
+            @for (ev of events$ | async; track ev.id) {
+              @if (getEventDayStr(ev) === day) {
+                <div
+                  class="month-event"
+                  [class]="ev.type"
+                >
+                  <schedule-event
+                    [event]="ev"
+                    [isMonthView]="true"
+                    class="month-schedule-event"
+                  ></schedule-event>
+                </div>
+              }
+            }
+          </div>
+        </div>
+      }
+    }
+  }
+  <!-- Events -->
+  @if (!(isMonthView$ | async)) {
+    @for (ev of events$ | async; track ev.id) {
+      <!-- -->
+      @if (
+        ev.type === SVEType.Task ||
+        ev.type === SVEType.SplitTask ||
+        ev.type === SVEType.TaskPlannedForDay ||
+        ev.type === SVEType.SplitTaskPlannedForDay
+      ) {
+        <schedule-event
+          class="draggable"
+          cdkDrag
+          [cdkDragData]="ev"
+          (cdkDragMoved)="dragMoved($event)"
+          (cdkDragStarted)="dragStarted($event)"
+          (cdkDragReleased)="dragReleased($event)"
+          [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? 75 : 0"
+          [event]="ev"
+        ></schedule-event>
+      } @else {
+        <schedule-event [event]="ev"></schedule-event>
+      }
+    }
+
+    <!-- Excess tasks planned for day -->
+    @for (beyondBudgetDay of beyondBudget$ | async; track i; let i = $index) {
+      <!-- -->
+      @if (beyondBudgetDay.length > 0) {
+        <div
+          class="excess-entries"
+          style="grid-column: {{ i + 2 }}"
+        >
+          <div
+            class="excess-entries-header"
+            [matTooltipPosition]="'above'"
+            [matTooltip]="
+              'Tasks planned for day, but that are beyond the available time budget'
+            "
+          >
+            <mat-icon>hourglass_disabled</mat-icon>
+            {{ beyondBudgetDay.length }}
+          </div>
+          @for (ev of beyondBudgetDay; track ev.id) {
+            <schedule-event
+              [event]="ev"
+              class="draggable"
+              cdkDrag
+              [cdkDragData]="ev"
+              (cdkDragMoved)="dragMoved($event)"
+              (cdkDragStarted)="dragStarted($event)"
+              (cdkDragReleased)="dragReleased($event)"
+              [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? DRAG_DELAY_FOR_TOUCH : 0"
+            ></schedule-event>
+          }
+        </div>
+      }
+      <!-- -->
+    }
+  }
 
   @if (newTaskPlaceholder$ | async; as newTaskPlaceholder) {
-    <create-task-placeholder
-      [isEditMode]="isCreateTaskActive"
-      [time]="newTaskPlaceholder.time"
-      [date]="newTaskPlaceholder.date"
-      (editEnd)="isCreateTaskActive = false; this.newTaskPlaceholder$.next(null)"
-      [style]="newTaskPlaceholder.style"
-    >
-    </create-task-placeholder>
+    @if (!(isMonthView$ | async)) {
+      <create-task-placeholder
+        [isEditMode]="isCreateTaskActive"
+        [time]="newTaskPlaceholder.time"
+        [date]="newTaskPlaceholder.date"
+        (editEnd)="isCreateTaskActive = false; this.newTaskPlaceholder$.next(null)"
+        [style]="newTaskPlaceholder.style"
+      >
+      </create-task-placeholder>
+    }
   }
 </div>
 <!--</div>-->

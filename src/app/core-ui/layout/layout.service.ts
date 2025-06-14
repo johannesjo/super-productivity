@@ -39,6 +39,9 @@ export class LayoutService {
   private _workContextService = inject(WorkContextService);
   private _breakPointObserver = inject(BreakpointObserver);
 
+  private _selectedTimeView$ = new BehaviorSubject<'week' | 'month'>('week');
+  readonly selectedTimeView$ = this._selectedTimeView$.asObservable();
+
   isScreenXs$: Observable<boolean> = this._breakPointObserver
     .observe([`(max-width: ${XS_MAX}px)`])
     .pipe(map((result) => result.matches));
@@ -85,6 +88,8 @@ export class LayoutService {
   isShowIssuePanel$: Observable<boolean> = this._isShowIssuePanel$.pipe();
 
   constructor() {
+    this.setTimeView('week');
+
     this.isNavOver$
       .pipe(
         switchMap((isNavOver) =>
@@ -138,5 +143,13 @@ export class LayoutService {
 
   hideAddTaskPanel(): void {
     this._store$.dispatch(hideIssuePanel());
+  }
+
+  getSelectedTimeView(): 'week' | 'month' {
+    return this._selectedTimeView$.value;
+  }
+
+  setTimeView(view: 'week' | 'month'): void {
+    this._selectedTimeView$.next(view);
   }
 }

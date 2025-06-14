@@ -14,6 +14,7 @@ $total-rows: 24 * $fr;
 :host {
   //background: $light-theme-bg;
   --nr-of-days: 5;
+  --nr-of-weeks: 6;
 
   @include darkTheme() {
     background: $dark-theme-bg;
@@ -413,4 +414,370 @@ schedule-event.cdk-drag-dragging + schedule-event {
 
 .cdk-drag-animating {
   transition: none !important;
+}
+
+.main-grid-container.month-view {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: auto repeat(var(--nr-of-weeks), 1fr);
+  gap: 1px;
+  height: calc(100vh - 120px);
+  background: $grid-color;
+
+  @include darkTheme() {
+    background: $grid-color-dark;
+  }
+
+  .cdk-drag-dragging {
+    z-index: 1000;
+    transform: rotate(2deg);
+  }
+
+  .cdk-drag-placeholder {
+    opacity: 0.3;
+  }
+
+  .time,
+  .row,
+  .work-start,
+  .work-end,
+  .current-time,
+  .excess-entries {
+    display: none;
+  }
+}
+
+.days.month-view {
+  display: block;
+  grid-template-columns: none;
+  padding-bottom: 6px;
+
+  .month-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+
+    .month-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 6px;
+
+      @include mq(xs, max) {
+        font-size: 16px;
+        margin-bottom: 3px;
+      }
+    }
+  }
+
+  @include mq(xs, max) {
+    padding-bottom: 3px;
+
+    .month-header {
+      padding: 6px 12px;
+    }
+  }
+}
+
+.weekday-header {
+  text-align: center;
+  font-weight: 600;
+  padding: 6px;
+  background: $light-theme-bg;
+  color: $light-theme-text-color;
+  border: 1px solid $grid-color;
+  grid-row: 1;
+
+  @include darkTheme() {
+    background: $dark-theme-bg-lighter;
+    color: $dark-theme-text-color;
+    border-color: $grid-color-dark;
+  }
+
+  @include mq(xs, max) {
+    padding: 3px;
+    font-size: 11px;
+  }
+
+  &:nth-child(8) {
+    grid-column: 1;
+  } // Sun
+  &:nth-child(9) {
+    grid-column: 2;
+  } // Mon
+  &:nth-child(10) {
+    grid-column: 3;
+  } // Tue
+  &:nth-child(11) {
+    grid-column: 4;
+  } // Wed
+  &:nth-child(12) {
+    grid-column: 5;
+  } // Thu
+  &:nth-child(13) {
+    grid-column: 6;
+  } // Fri
+  &:nth-child(14) {
+    grid-column: 7;
+  } // Sat
+}
+
+.month-day-cell {
+  background: $light-theme-bg;
+  border: 1px solid $grid-color;
+  display: flex;
+  flex-direction: column;
+  min-height: 80px;
+  position: relative;
+
+  @include darkTheme() {
+    background: $dark-theme-bg;
+    border-color: $grid-color-dark;
+  }
+
+  :host[style*='--nr-of-weeks: 3'] & {
+    min-height: 120px;
+  }
+
+  :host[style*='--nr-of-weeks: 4'] & {
+    min-height: 100px;
+  }
+
+  :host[style*='--nr-of-weeks: 5'] & {
+    min-height: 85px;
+  }
+
+  :host[style*='--nr-of-weeks: 6'] & {
+    min-height: 70px;
+  }
+
+  @include mq(xs, max) {
+    min-height: 50px;
+
+    :host[style*='--nr-of-weeks: 3'] & {
+      min-height: 80px;
+    }
+
+    :host[style*='--nr-of-weeks: 4'] & {
+      min-height: 65px;
+    }
+
+    :host[style*='--nr-of-weeks: 5'] & {
+      min-height: 55px;
+    }
+
+    :host[style*='--nr-of-weeks: 6'] & {
+      min-height: 50px;
+    }
+  }
+
+  &.other-month {
+    opacity: 0.4;
+    background: lighten($light-theme-bg, 3%);
+
+    @include darkTheme() {
+      background: darken($dark-theme-bg, 2%);
+    }
+  }
+
+  &.today {
+    .month-day-number {
+      background: $c-primary;
+      color: white;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      @include mq(xs, max) {
+        width: 20px;
+        height: 20px;
+        font-size: 12px;
+      }
+    }
+  }
+
+  // Hover effect
+  &:hover {
+    background: lighten($light-theme-bg, 1%);
+
+    @include darkTheme() {
+      background: lighten($dark-theme-bg, 5%);
+    }
+  }
+
+  // Drag over effect
+  &.drag-over {
+    background: mat-css-vars.mat-css-color-primary($opacity: 0.1);
+    border-color: mat-css-vars.mat-css-color-primary();
+  }
+}
+
+.month-day-header {
+  padding: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid $grid-color;
+
+  @include darkTheme() {
+    border-color: $grid-color-dark;
+  }
+
+  @include mq(xs, max) {
+    padding: 4px;
+  }
+
+  .month-day-number {
+    font-weight: 600;
+    font-size: 14px;
+
+    @include mq(xs, max) {
+      font-size: 12px;
+    }
+  }
+}
+
+.month-day-events {
+  flex: 1;
+  padding: 4px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: calc(100% - 35px);
+
+  @include mq(xs, max) {
+    padding: 2px;
+    max-height: calc(100% - 25px);
+  }
+
+  :host[style*='--nr-of-weeks: 3'] & .month-event:nth-child(n + 8) {
+    display: none;
+  }
+
+  :host[style*='--nr-of-weeks: 4'] & .month-event:nth-child(n + 6) {
+    display: none;
+  }
+
+  :host[style*='--nr-of-weeks: 5'] & .month-event:nth-child(n + 4) {
+    display: none;
+  }
+
+  :host[style*='--nr-of-weeks: 6'] & .month-event:nth-child(n + 3) {
+    display: none;
+  }
+
+  @include mq(xs, max) {
+    :host[style*='--nr-of-weeks: 3'] & .month-event:nth-child(n + 4) {
+      display: none;
+    }
+
+    :host[style*='--nr-of-weeks: 4'] & .month-event:nth-child(n + 3) {
+      display: none;
+    }
+
+    :host[style*='--nr-of-weeks: 5'] & .month-event:nth-child(n + 2) {
+      display: none;
+    }
+
+    :host[style*='--nr-of-weeks: 6'] & .month-event:nth-child(n + 2) {
+      display: none;
+    }
+  }
+
+  .month-event:nth-child(n + 4) {
+    display: none;
+
+    @media (min-height: 800px) {
+      display: block;
+    }
+
+    @media (min-height: 800px) and (max-width: 768px) {
+      &:nth-child(n + 3) {
+        display: none;
+      }
+    }
+  }
+
+  &::after {
+    content: attr(data-more-events);
+    display: none;
+    font-size: 10px;
+    color: rgba(0, 0, 0, 0.54);
+    padding: 2px;
+
+    @include darkTheme() {
+      color: rgba(255, 255, 255, 0.54);
+    }
+  }
+}
+
+.month-event {
+  margin-bottom: 2px;
+
+  .month-schedule-event {
+    font-size: 11px;
+    padding: 2px 4px;
+    border-radius: 3px;
+    cursor: pointer;
+    display: block;
+    width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+
+    @include mq(xs, max) {
+      font-size: 10px;
+      padding: 1px 2px;
+    }
+
+    &.Task {
+      background: mat-css-vars.mat-css-color-primary($opacity: 0.2);
+      border-left: 3px solid mat-css-vars.mat-css-color-primary();
+    }
+
+    &.SplitTask {
+      background: mat-css-vars.mat-css-color-accent($opacity: 0.2);
+      border-left: 3px solid mat-css-vars.mat-css-color-accent();
+    }
+
+    &.TaskPlannedForDay {
+      background: mat-css-vars.mat-css-color-warn($opacity: 0.2);
+      border-left: 3px solid mat-css-vars.mat-css-color-warn();
+    }
+
+    // Hover effect
+    &:hover {
+      opacity: 0.8;
+      transform: scale(1.02);
+      transition: all 0.2s ease;
+    }
+  }
+}
+
+@include mq(xs, max) {
+  .main-grid-container.month-view {
+    height: calc(100vh - 150px);
+    gap: 0.5px;
+  }
+
+  .month-day-cell {
+    min-height: 60px;
+  }
+
+  .month-day-events .month-event:nth-child(n + 3) {
+    display: none;
+  }
+}
+
+.event-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: $c-accent;
+  border-radius: 50%;
+  margin-left: 4px;
+  vertical-align: middle;
 }

@@ -74,8 +74,12 @@
     ...
     <!-- -->
   } @else {
-    {{ title }}
-    {{ task?.dueDay }}
+    @if (isMonthView) {
+      {{ title }}
+    } @else {
+      {{ title }}
+      {{ task?.dueDay }}
+    }
   }
 </div>
 
