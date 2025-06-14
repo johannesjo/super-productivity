@@ -1172,8 +1172,16 @@ describe('taskSharedMetaReducer', () => {
     });
 
     it('should not change state when task is already correctly scheduled', () => {
+      const now = Date.now();
       const testState = createStateWithExistingTasks([], [], [], ['task1']);
-      const action = createScheduleAction({}, Date.now());
+      // Update the task to already have the correct dueWithTime
+      const task1 = testState[TASK_FEATURE_NAME].entities.task1 as Task;
+      testState[TASK_FEATURE_NAME].entities.task1 = {
+        ...task1,
+        dueWithTime: now,
+        dueDay: undefined,
+      } as Task;
+      const action = createScheduleAction({}, now);
 
       metaReducer(testState, action);
       expect(mockReducer).toHaveBeenCalledWith(testState, action);
