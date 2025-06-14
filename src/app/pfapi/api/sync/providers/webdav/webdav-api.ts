@@ -124,9 +124,6 @@ export class WebdavApi {
     };
 
     try {
-      // Ensure parent directory exists before upload
-      await this._ensureParentDirectoryExists(path);
-
       const response = await this._makeRequest({
         method: 'PUT',
         path,
@@ -156,19 +153,66 @@ export class WebdavApi {
     } catch (e: any) {
       pfLog(0, `${WebdavApi.L}.upload() error`, { path, error: e });
 
+      // Check if it's a RemoteFileNotFoundAPIError (404)
+      if (e instanceof RemoteFileNotFoundAPIError || e?.status === 404) {
+        // Not found - parent directory might not exist (some WebDAV servers return 404 instead of 409)
+        pfLog(
+          1,
+          `${WebdavApi.L}.upload() 404 not found, attempting to create parent directories`,
+          { path },
+        );
+        try {
+          await this._ensureParentDirectoryExists(path);
+
+          // Retry the upload
+          const retryResponse = await this._makeRequest({
+            method: 'PUT',
+            path,
+            body: data,
+            headers,
+          });
+
+          const retryHeaderObj = this._responseHeadersToObject(retryResponse);
+          const retryEtag = this._findEtagInHeaders(retryHeaderObj);
+
+          if (!retryEtag) {
+            try {
+              const meta = await this.getFileMeta(path, null);
+              return meta.etag;
+            } catch (metaError) {
+              pfLog(
+                0,
+                `${WebdavApi.L}.upload() failed to get etag after retry`,
+                metaError,
+              );
+            }
+          }
+
+          return retryEtag;
+        } catch (retryError: any) {
+          pfLog(0, `${WebdavApi.L}.upload() retry after 404 failed`, retryError);
+          if (retryError instanceof RemoteFileNotFoundAPIError) {
+            throw retryError;
+          }
+          throw new Error(
+            `Upload failed after creating directories: ${retryError?.message || 'Unknown error'}`,
+          );
+        }
+      }
+
       // Enhanced error handling for WebDAV-specific scenarios
       switch (e?.status) {
         case 409:
-          // Conflict - parent directory doesn't exist or other conflict
-          // Try one more time to create parent directories and retry
+          // Conflict - parent directory doesn't exist
+          pfLog(
+            1,
+            `${WebdavApi.L}.upload() 409 conflict, attempting to create parent directories`,
+            { path },
+          );
           try {
-            pfLog(
-              1,
-              `${WebdavApi.L}.upload() 409 conflict, attempting directory creation for ${path}`,
-            );
             await this._ensureParentDirectoryExists(path);
 
-            // Retry the upload once
+            // Retry the upload
             const retryResponse = await this._makeRequest({
               method: 'PUT',
               path,
@@ -177,9 +221,24 @@ export class WebdavApi {
             });
 
             const retryHeaderObj = this._responseHeadersToObject(retryResponse);
-            return this._findEtagInHeaders(retryHeaderObj);
+            const retryEtag = this._findEtagInHeaders(retryHeaderObj);
+
+            if (!retryEtag) {
+              try {
+                const meta = await this.getFileMeta(path, null);
+                return meta.etag;
+              } catch (metaError) {
+                pfLog(
+                  0,
+                  `${WebdavApi.L}.upload() failed to get etag after retry`,
+                  metaError,
+                );
+              }
+            }
+
+            return retryEtag;
           } catch (retryError: any) {
-            pfLog(0, `${WebdavApi.L}.upload() retry after 409 also failed`, retryError);
+            pfLog(0, `${WebdavApi.L}.upload() retry after 409 failed`, retryError);
             throw new Error(
               `Upload failed: ${retryError?.message || 'Directory creation or upload conflict'}`,
             );
@@ -594,59 +653,98 @@ export class WebdavApi {
   }
 
   async createFolder({ folderPath }: { folderPath: string }): Promise<void> {
+    pfLog(2, `${WebdavApi.L}.createFolder() attempting to create folder`, { folderPath });
+
     try {
       await this._makeRequest({
         method: 'MKCOL',
         path: folderPath,
       });
+      pfLog(2, `${WebdavApi.L}.createFolder() successfully created folder with MKCOL`, {
+        folderPath,
+      });
     } catch (e: any) {
-      pfLog(0, `${WebdavApi.L}.createFolder() MKCOL error`, { folderPath, error: e });
+      pfLog(0, `${WebdavApi.L}.createFolder() MKCOL error`, {
+        folderPath,
+        error: e,
+        status: e?.status,
+        message: e?.message,
+      });
 
-      // Handle different error scenarios
-      if (e?.status === 405) {
-        // Method not allowed - MKCOL not supported
+      // If MKCOL is not supported (including on Android where CapacitorHttp doesn't support it)
+      // OR if we get a 404 (which might mean the parent doesn't exist in Nextcloud)
+      if (
+        e?.message?.includes('Method not allowed') ||
+        e?.status === 405 ||
+        e?.status === 404 ||
+        e?.message?.includes('Expected one of') ||
+        e?.message?.includes('MKCOL') ||
+        e instanceof RemoteFileNotFoundAPIError
+      ) {
         pfLog(
           2,
-          `${WebdavApi.L}.createFolder() MKCOL not supported, trying PUT fallback`,
+          `${WebdavApi.L}.createFolder() MKCOL failed with status ${e?.status}, trying PUT fallback`,
         );
         try {
+          const putPath = `${folderPath}/.folder`;
+          pfLog(2, `${WebdavApi.L}.createFolder() attempting PUT to`, { putPath });
+
           await this._makeRequest({
             method: 'PUT',
-            path: `${folderPath}/.folder`,
+            path: putPath,
             body: '',
-            headers: { 'Content-Type': 'application/octet-stream' },
+            headers: {
+              'Content-Type': 'text/plain',
+              'Content-Length': '0',
+            },
           });
-        } catch (putError) {
+          pfLog(2, `${WebdavApi.L}.createFolder() successfully created folder with PUT`, {
+            folderPath,
+          });
+        } catch (putError: any) {
           pfLog(0, `${WebdavApi.L}.createFolder() PUT fallback failed`, {
             folderPath,
             error: putError,
+            status: putError?.status,
+            message: putError?.message,
           });
+
+          // If PUT also fails with 404, it might mean we need to check if the folder exists differently
+          if (
+            putError?.status === 404 ||
+            putError instanceof RemoteFileNotFoundAPIError
+          ) {
+            // Try one more time with a different approach - create a .gitkeep file
+            try {
+              const gitkeepPath = `${folderPath}/.gitkeep`;
+              pfLog(2, `${WebdavApi.L}.createFolder() trying .gitkeep approach`, {
+                gitkeepPath,
+              });
+
+              await this._makeRequest({
+                method: 'PUT',
+                path: gitkeepPath,
+                body: '',
+                headers: {
+                  'Content-Type': 'text/plain',
+                  'Content-Length': '0',
+                },
+              });
+              pfLog(
+                2,
+                `${WebdavApi.L}.createFolder() successfully created folder with .gitkeep`,
+                { folderPath },
+              );
+              return;
+            } catch (gitkeepError) {
+              pfLog(0, `${WebdavApi.L}.createFolder() .gitkeep approach also failed`, {
+                folderPath,
+                error: gitkeepError,
+              });
+            }
+          }
+
           throw putError;
-        }
-      } else if (e?.status === 403) {
-        // Forbidden - might be a permissions issue or the directory already exists
-        pfLog(
-          0,
-          `${WebdavApi.L}.createFolder() 403 Forbidden - check WebDAV permissions and path`,
-          {
-            folderPath,
-            baseUrl: (await this._getCfgOrError()).baseUrl,
-            error: e,
-          },
-        );
-        throw e;
-      } else if (e?.status === 409) {
-        // Conflict - parent directory doesn't exist, try to create it recursively
-        const parentPath = folderPath.split('/').slice(0, -1).join('/');
-        if (parentPath && parentPath !== folderPath) {
-          await this.createFolder({ folderPath: parentPath });
-          // Try again after creating parent
-          await this._makeRequest({
-            method: 'MKCOL',
-            path: folderPath,
-          });
-        } else {
-          throw e;
         }
       } else {
         throw e;
@@ -839,7 +937,18 @@ export class WebdavApi {
     // Remove leading slash from path if it exists
     const normalizedPath = path.startsWith('/') ? path.substring(1) : path;
 
-    return new URL(normalizedPath, baseUrl).toString();
+    // Construct the URL
+    const url = new URL(normalizedPath, baseUrl).toString();
+
+    // Log for debugging
+    pfLog(3, `${WebdavApi.L}._getUrl() constructed URL`, {
+      baseUrl,
+      path,
+      normalizedPath,
+      result: url,
+    });
+
+    return url;
   }
 
   private _getAuthHeader(cfg: WebdavPrivateCfg): string {
@@ -953,7 +1062,46 @@ export class WebdavApi {
     }
   }
 
+  async testConnection(): Promise<boolean> {
+    pfLog(2, `${WebdavApi.L}.testConnection() testing WebDAV connection`);
+
+    try {
+      // Try to list the root directory
+      const response = await this._makeRequest({
+        method: 'PROPFIND',
+        path: '',
+        body: WebdavApi.PROPFIND_XML,
+        headers: {
+          'Content-Type': 'application/xml',
+          Depth: '0',
+        },
+      });
+
+      const xmlText = await response.text();
+
+      // Check if response is HTML (error page)
+      if (this._isHtmlResponse(xmlText)) {
+        pfLog(
+          0,
+          `${WebdavApi.L}.testConnection() received HTML response, connection failed`,
+        );
+        return false;
+      }
+
+      pfLog(2, `${WebdavApi.L}.testConnection() connection successful`);
+      return true;
+    } catch (e: any) {
+      pfLog(0, `${WebdavApi.L}.testConnection() connection failed`, {
+        status: e?.status,
+        message: e?.message,
+      });
+      return false;
+    }
+  }
+
   async checkFolderExists(folderPath: string): Promise<boolean> {
+    pfLog(2, `${WebdavApi.L}.checkFolderExists() checking`, { folderPath });
+
     try {
       const response = await this._makeRequest({
         method: 'PROPFIND',
@@ -967,11 +1115,36 @@ export class WebdavApi {
 
       const xmlText = await response.text();
       const meta = this._parsePropsFromXml(xmlText, folderPath);
-      return meta?.type === 'directory';
+      const exists = meta?.type === 'directory';
+
+      pfLog(2, `${WebdavApi.L}.checkFolderExists() result`, {
+        folderPath,
+        exists,
+        type: meta?.type,
+      });
+
+      return exists;
     } catch (e: any) {
-      if (e?.status === 404) {
+      pfLog(1, `${WebdavApi.L}.checkFolderExists() error`, {
+        folderPath,
+        status: e?.status,
+        message: e?.message,
+      });
+
+      if (e?.status === 404 || e instanceof RemoteFileNotFoundAPIError) {
         return false;
       }
+
+      // For other errors, we might want to handle them differently
+      // For example, 405 Method Not Allowed might mean PROPFIND is not supported
+      if (e?.status === 405) {
+        pfLog(
+          1,
+          `${WebdavApi.L}.checkFolderExists() PROPFIND not supported, assuming folder doesn't exist`,
+        );
+        return false;
+      }
+
       throw e;
     }
   }
@@ -1042,15 +1215,24 @@ export class WebdavApi {
   }
 
   private async _ensureParentDirectoryExists(filePath: string): Promise<void> {
+    pfLog(2, `${WebdavApi.L}._ensureParentDirectoryExists() called for`, { filePath });
+
     const pathParts = filePath.split('/').filter((part) => part.length > 0);
 
     // Don't process if it's a root-level file
     if (pathParts.length <= 1) {
+      pfLog(
+        2,
+        `${WebdavApi.L}._ensureParentDirectoryExists() no parent directory needed for root-level file`,
+      );
       return;
     }
 
     // Remove the filename to get directory path parts
     const dirParts = pathParts.slice(0, -1);
+    pfLog(2, `${WebdavApi.L}._ensureParentDirectoryExists() directory parts`, {
+      dirParts,
+    });
 
     // Create directories progressively from root to parent
     // Use optimistic creation - just try to create each directory
@@ -1071,37 +1253,28 @@ export class WebdavApi {
         pfLog(
           1,
           `${WebdavApi.L}._ensureParentDirectoryExists() error creating directory: ${currentPath}`,
-          error,
+          {
+            error,
+            status: error?.status,
+            message: error?.message,
+          },
         );
 
-        // Handle specific error cases
-        if (error?.status === 403 || error?.status === 401) {
-          // Permission errors - don't continue
-          throw new Error(`Permission denied creating directory: ${currentPath}`);
-        } else if (error?.status === 405) {
-          // Method not allowed - MKCOL not supported, this is handled in createFolder
+        // Check if it's a 404 error, which might indicate the parent doesn't exist
+        if (error?.status === 404 || error instanceof RemoteFileNotFoundAPIError) {
           pfLog(
-            2,
-            `${WebdavApi.L}._ensureParentDirectoryExists() MKCOL not supported for ${currentPath}`,
-          );
-        } else if (
-          error?.message?.includes('already exists') ||
-          error?.status === 409 ||
-          error?.status === 405
-        ) {
-          // Directory already exists or conflict, continue
-          pfLog(
-            2,
-            `${WebdavApi.L}._ensureParentDirectoryExists() directory exists or conflict for: ${currentPath}`,
-          );
-        } else {
-          // Other errors - log but continue, let the final PUT operation fail with a clearer error
-          pfLog(
-            1,
-            `${WebdavApi.L}._ensureParentDirectoryExists() ignoring error for ${currentPath}`,
-            error,
+            0,
+            `${WebdavApi.L}._ensureParentDirectoryExists() got 404 for directory creation, this might indicate a path issue`,
+            { currentPath },
           );
         }
+
+        // Log the error but continue - let the actual upload operation fail with a clearer error
+        pfLog(
+          1,
+          `${WebdavApi.L}._ensureParentDirectoryExists() ignoring error for ${currentPath}`,
+          error,
+        );
       }
     }
   }
