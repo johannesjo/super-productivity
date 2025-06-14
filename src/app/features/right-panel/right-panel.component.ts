@@ -17,6 +17,7 @@ import { BetterDrawerContainerComponent } from '../../ui/better-drawer/better-dr
 import { IssuePanelComponent } from '../issue-panel/issue-panel.component';
 import { NotesComponent } from '../note/notes/notes.component';
 import { TaskDetailPanelComponent } from '../tasks/task-detail-panel/task-detail-panel.component';
+import { TaskViewCustomizerPanelComponent } from '../task-view-customizer/task-view-customizer-panel/task-view-customizer-panel.component';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
@@ -34,6 +35,7 @@ import { AsyncPipe } from '@angular/common';
     IssuePanelComponent,
     NotesComponent,
     TaskDetailPanelComponent,
+    TaskViewCustomizerPanelComponent,
     AsyncPipe,
   ],
 })
@@ -50,35 +52,57 @@ export class RightPanelComponent implements OnDestroy {
       switchMap((task) => (task ? of(task) : of(null).pipe(delay(200)))),
     );
 
-  panelContent$: Observable<'NOTES' | 'TASK' | 'ADD_TASK_PANEL' | undefined> =
-    combineLatest([
-      this.layoutService.isShowNotes$,
-      this.taskService.selectedTask$,
-      this.layoutService.isShowIssuePanel$,
-    ]).pipe(
-      map(([isShowNotes, selectedTask, isShowAddTaskPanel]) => {
+  panelContent$: Observable<
+    'NOTES' | 'TASK' | 'ADD_TASK_PANEL' | 'TASK_VIEW_CUSTOMIZER_PANEL' | undefined
+  > = combineLatest([
+    this.layoutService.isShowNotes$,
+    this.taskService.selectedTask$,
+    this.layoutService.isShowIssuePanel$,
+    this.layoutService.isShowTaskViewCustomizerPanel$,
+  ]).pipe(
+    map(
+      ([
+        isShowNotes,
+        selectedTask,
+        isShowAddTaskPanel,
+        isShowTaskViewCustomizerPanel,
+      ]) => {
         if (selectedTask) {
           return 'TASK';
         } else if (isShowNotes) {
           return 'NOTES';
         } else if (isShowAddTaskPanel) {
           return 'ADD_TASK_PANEL';
+        } else if (isShowTaskViewCustomizerPanel) {
+          return 'TASK_VIEW_CUSTOMIZER_PANEL';
         }
         return undefined;
-      }),
-      distinctUntilChanged(),
-    );
+      },
+    ),
+    distinctUntilChanged(),
+  );
 
   isOpen$: Observable<boolean> = combineLatest([
     this.taskService.selectedTask$,
     this.taskService.taskDetailPanelTargetPanel$,
     this.layoutService.isShowNotes$,
     this.layoutService.isShowIssuePanel$,
+    this.layoutService.isShowTaskViewCustomizerPanel$,
   ]).pipe(
     map(
-      ([selectedTask, targetPanel, isShowNotes, isShowAddTaskPanel]) =>
-        !!(selectedTask || isShowNotes || isShowAddTaskPanel) &&
-        targetPanel !== TaskDetailTargetPanel.DONT_OPEN_PANEL,
+      ([
+        selectedTask,
+        targetPanel,
+        isShowNotes,
+        isShowAddTaskPanel,
+        isShowTaskViewCustomizerPanel,
+      ]) =>
+        !!(
+          selectedTask ||
+          isShowNotes ||
+          isShowAddTaskPanel ||
+          isShowTaskViewCustomizerPanel
+        ) && targetPanel !== TaskDetailTargetPanel.DONT_OPEN_PANEL,
     ),
     distinctUntilChanged(),
   );

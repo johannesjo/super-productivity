@@ -26,6 +26,7 @@ import { SyncWrapperService } from '../../imex/sync/sync-wrapper.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { GlobalConfigService } from '../../features/config/global-config.service';
+import { TaskViewCustomizerService } from 'src/app/features/task-view-customizer/task-view-customizer.service';
 import { KeyboardConfig } from 'src/app/features/config/keyboard-config.model';
 import { MatIconButton, MatMiniFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -75,6 +76,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   readonly projectService = inject(ProjectService);
   readonly matDialog = inject(MatDialog);
   readonly workContextService = inject(WorkContextService);
+  readonly taskViewCustomizerService = inject(TaskViewCustomizerService);
   readonly taskService = inject(TaskService);
   readonly pomodoroService = inject(PomodoroService);
   readonly layoutService = inject(LayoutService);
