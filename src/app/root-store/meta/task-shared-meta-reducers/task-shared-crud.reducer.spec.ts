@@ -1064,6 +1064,252 @@ describe('taskSharedCrudMetaReducer', () => {
     });
   });
 
+  describe('parent/sub-task tag conflict resolution', () => {
+    describe('addTask action', () => {
+      it('should remove parent from tag when adding sub-task to same tag', () => {
+        // Setup: parent task already in tag
+        const testState = createStateWithExistingTasks(
+          ['parent-task'],
+          [],
+          ['parent-task'],
+        );
+
+        // Create sub-task that will be added to the same tag
+        const subTask = createMockTask({
+          id: 'sub-task',
+          parentId: 'parent-task',
+          tagIds: ['tag1'],
+        });
+
+        const action = TaskSharedActions.addTask({
+          task: subTask,
+          workContextId: 'project1',
+          workContextType: WorkContextType.PROJECT,
+          isAddToBottom: false,
+          isAddToBacklog: false,
+        });
+
+        metaReducer(testState, action);
+
+        // Parent should be removed from tag, and tag removed from parent
+        expectStateUpdate(
+          {
+            ...expectTaskUpdate('parent-task', {
+              tagIds: [], // Tag should be removed from parent
+            }),
+            ...expectTagUpdate('tag1', {
+              taskIds: ['sub-task'], // Only sub-task should remain
+            }),
+          },
+          action,
+          mockReducer,
+          testState,
+        );
+      });
+
+      it('should remove sub-tasks from tag when adding parent to same tag', () => {
+        // Setup: sub-tasks already in tag
+        const testState = createStateWithExistingTasks(
+          ['sub1', 'sub2', 'other-task'],
+          [],
+          ['sub1', 'sub2', 'other-task'],
+        );
+
+        // Update sub-tasks to have parentId
+        testState[TASK_FEATURE_NAME].entities.sub1 = createMockTask({
+          id: 'sub1',
+          parentId: 'parent-task',
+          tagIds: ['tag1'],
+        });
+        testState[TASK_FEATURE_NAME].entities.sub2 = createMockTask({
+          id: 'sub2',
+          parentId: 'parent-task',
+          tagIds: ['tag1'],
+        });
+
+        // Create parent task with sub-tasks
+        const parentTask = createMockTask({
+          id: 'parent-task',
+          subTaskIds: ['sub1', 'sub2'],
+          tagIds: ['tag1'],
+        });
+
+        const action = TaskSharedActions.addTask({
+          task: parentTask,
+          workContextId: 'project1',
+          workContextType: WorkContextType.PROJECT,
+          isAddToBottom: false,
+          isAddToBacklog: false,
+        });
+
+        metaReducer(testState, action);
+
+        // Sub-tasks should be removed from tag, and tag removed from sub-tasks
+        expectStateUpdate(
+          {
+            ...expectTaskUpdate('sub1', {
+              tagIds: [], // Tag should be removed
+            }),
+            ...expectTaskUpdate('sub2', {
+              tagIds: [], // Tag should be removed
+            }),
+            ...expectTagUpdate('tag1', {
+              taskIds: ['parent-task', 'other-task'], // Only parent and other-task
+            }),
+          },
+          action,
+          mockReducer,
+          testState,
+        );
+      });
+    });
+
+    describe('updateTask action', () => {
+      it('should remove parent from tag when adding tag to sub-task', () => {
+        // Setup: parent task in tag, sub-task without tag
+        const testState = createStateWithExistingTasks(
+          ['parent-task', 'sub-task'],
+          [],
+          ['parent-task'],
+        );
+
+        testState[TASK_FEATURE_NAME].entities['sub-task'] = createMockTask({
+          id: 'sub-task',
+          parentId: 'parent-task',
+          tagIds: [],
+        });
+
+        const action = TaskSharedActions.updateTask({
+          task: {
+            id: 'sub-task',
+            changes: { tagIds: ['tag1'] },
+          },
+        });
+
+        metaReducer(testState, action);
+
+        expectStateUpdate(
+          {
+            ...expectTaskUpdate('parent-task', {
+              tagIds: [], // Tag removed from parent
+            }),
+            ...expectTaskUpdate('sub-task', {
+              tagIds: ['tag1'], // Tag added to sub-task
+            }),
+            ...expectTagUpdate('tag1', {
+              taskIds: ['sub-task'], // Only sub-task in tag
+            }),
+          },
+          action,
+          mockReducer,
+          testState,
+        );
+      });
+
+      it('should remove sub-tasks from tag when adding tag to parent', () => {
+        // Setup: sub-tasks in tag, parent without tag
+        const testState = createStateWithExistingTasks(
+          ['parent-task', 'sub1', 'sub2'],
+          [],
+          ['sub1', 'sub2'],
+        );
+
+        testState[TASK_FEATURE_NAME].entities['parent-task'] = createMockTask({
+          id: 'parent-task',
+          subTaskIds: ['sub1', 'sub2'],
+          tagIds: [],
+        });
+        testState[TASK_FEATURE_NAME].entities.sub1 = createMockTask({
+          id: 'sub1',
+          parentId: 'parent-task',
+          tagIds: ['tag1'],
+        });
+        testState[TASK_FEATURE_NAME].entities.sub2 = createMockTask({
+          id: 'sub2',
+          parentId: 'parent-task',
+          tagIds: ['tag1'],
+        });
+
+        const action = TaskSharedActions.updateTask({
+          task: {
+            id: 'parent-task',
+            changes: { tagIds: ['tag1'] },
+          },
+        });
+
+        metaReducer(testState, action);
+
+        expectStateUpdate(
+          {
+            ...expectTaskUpdate('parent-task', {
+              tagIds: ['tag1'], // Tag added to parent
+            }),
+            ...expectTaskUpdate('sub1', {
+              tagIds: [], // Tag removed from sub-task
+            }),
+            ...expectTaskUpdate('sub2', {
+              tagIds: [], // Tag removed from sub-task
+            }),
+            ...expectTagUpdate('tag1', {
+              taskIds: ['parent-task'], // Only parent in tag
+            }),
+          },
+          action,
+          mockReducer,
+          testState,
+        );
+      });
+    });
+
+    describe('convertToMainTask action', () => {
+      it('should remove parent from tag when converting sub-task to main task with same tag', () => {
+        // Setup: parent and sub-task exist, parent is in tag
+        const testState = createStateWithExistingTasks(
+          ['parent-task', 'sub-task'],
+          [],
+          ['parent-task'],
+        );
+
+        testState[TASK_FEATURE_NAME].entities['parent-task'] = createMockTask({
+          id: 'parent-task',
+          subTaskIds: ['sub-task'],
+          tagIds: ['tag1'],
+        });
+        testState[TASK_FEATURE_NAME].entities['sub-task'] = createMockTask({
+          id: 'sub-task',
+          parentId: 'parent-task',
+          tagIds: [],
+        });
+
+        const action = TaskSharedActions.convertToMainTask({
+          task: testState[TASK_FEATURE_NAME].entities['sub-task'] as Task,
+          parentTagIds: ['tag1'],
+          isPlanForToday: false,
+        });
+
+        metaReducer(testState, action);
+
+        expectStateUpdate(
+          {
+            ...expectTaskUpdate('parent-task', {
+              tagIds: [], // Tag removed from parent
+            }),
+            ...expectTaskUpdate('sub-task', {
+              parentId: undefined, // No longer a sub-task
+              tagIds: ['tag1'], // Inherited parent's tag
+            }),
+            ...expectTagUpdate('tag1', {
+              taskIds: ['sub-task'], // Only converted task in tag
+            }),
+          },
+          action,
+          mockReducer,
+          testState,
+        );
+      });
+    });
+  });
+
   describe('other actions', () => {
     it('should pass through other actions to the reducer', () => {
       const action = { type: 'SOME_OTHER_ACTION' };
