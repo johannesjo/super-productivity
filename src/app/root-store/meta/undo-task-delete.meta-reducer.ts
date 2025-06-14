@@ -14,191 +14,229 @@ import { Project } from '../../features/project/project.model';
 import { Action, ActionReducer } from '@ngrx/store/src/models';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 
-export interface UndoTaskDeleteState {
+interface UndoTaskDeleteState {
+  // Project context
   projectId?: string;
-  taskIdsForProjectBacklog?: string[];
   taskIdsForProject?: string[];
+  taskIdsForProjectBacklog?: string[];
 
-  tagTaskIdMap?: {
-    [key: string]: string[];
-  };
-
+  // Parent-child relationship
   parentTaskId?: string;
   subTaskIds?: string[];
 
+  // Tag associations (tagId -> taskIds)
+  tagTaskIdMap: Record<string, string[]>;
+
+  // Deleted tasks data
   deletedTaskEntities: Dictionary<Task>;
 }
 
-let U_STORE: UndoTaskDeleteState;
+let undoState: UndoTaskDeleteState | null = null;
 
 export const undoTaskDeleteMetaReducer = (
   reducer: ActionReducer<any, any>,
 ): ActionReducer<any, any> => {
   return (state: RootState, action: Action) => {
     switch (action.type) {
-      case TaskSharedActions.deleteTask.type:
-        U_STORE = _createTaskDeleteState(
-          state,
-          (action as ReturnType<typeof TaskSharedActions.deleteTask>).task,
-        );
+      case TaskSharedActions.deleteTask.type: {
+        const { task } = action as ReturnType<typeof TaskSharedActions.deleteTask>;
+        undoState = captureTaskDeleteState(state, task);
         return reducer(state, action);
+      }
 
-      case undoDeleteTask.type:
-        let updatedState = state;
-        const tasksToRestore: Task[] = Object.keys(U_STORE.deletedTaskEntities)
-          .map((id: string) => U_STORE.deletedTaskEntities[id])
-          .filter((t) => !!t) as Task[];
-
-        updatedState = {
-          ...updatedState,
-          [TASK_FEATURE_NAME]: taskAdapter.addMany(
-            tasksToRestore,
-            updatedState[TASK_FEATURE_NAME],
-          ),
-        };
-
-        if (U_STORE.parentTaskId) {
-          updatedState = {
-            ...updatedState,
-            [TASK_FEATURE_NAME]: taskAdapter.updateOne(
-              {
-                id: U_STORE.parentTaskId,
-                changes: {
-                  subTaskIds: U_STORE.subTaskIds,
-                },
-              },
-              updatedState[TASK_FEATURE_NAME],
-            ),
-          };
+      case undoDeleteTask.type: {
+        if (!undoState) {
+          return reducer(state, action);
         }
 
-        if (U_STORE.tagTaskIdMap) {
-          updatedState = {
-            ...updatedState,
-            [TAG_FEATURE_NAME]: tagAdapter.updateMany(
-              Object.keys(U_STORE.tagTaskIdMap).map((id) => {
-                if (!U_STORE.tagTaskIdMap) {
-                  throw new Error(
-                    'Task Restore Error: Missing tagTaskIdMap data for restoring task',
-                  );
-                }
-                if (!U_STORE.tagTaskIdMap[id]) {
-                  throw new Error(
-                    'Task Restore Error: Missing tag data for restoring task',
-                  );
-                }
-                return {
-                  id,
-                  changes: {
-                    taskIds: U_STORE.tagTaskIdMap[id],
-                  },
-                };
-              }),
-              updatedState[TAG_FEATURE_NAME],
-            ),
-          };
-        }
+        const restoredState = restoreDeletedTasks(state, undoState);
+        undoState = null; // Clear after use
+        return reducer(restoredState, action);
+      }
 
-        if (U_STORE.projectId) {
-          updatedState = {
-            ...updatedState,
-            [PROJECT_FEATURE_NAME]: projectAdapter.updateOne(
-              {
-                id: U_STORE.projectId,
-                changes: {
-                  ...(U_STORE.taskIdsForProject
-                    ? { taskIds: U_STORE.taskIdsForProject }
-                    : {}),
-                  ...(U_STORE.taskIdsForProjectBacklog
-                    ? { backlogTaskIds: U_STORE.taskIdsForProjectBacklog }
-                    : {}),
-                },
-              },
-              updatedState[PROJECT_FEATURE_NAME],
-            ),
-          };
-        }
-
-        return reducer(updatedState, action);
+      default:
+        return reducer(state, action);
     }
-
-    return reducer(state, action);
   };
 };
 
-const _createTaskDeleteState = (
-  state: RootState,
-  task: TaskWithSubTasks,
-): UndoTaskDeleteState => {
-  const deletedTaskEntities: Dictionary<Task> = {
+// =============================================================================
+// Helper Functions
+// =============================================================================
+
+/**
+ * Creates a dictionary of all tasks to be deleted (main task + subtasks)
+ */
+const createDeletedTaskEntities = (task: TaskWithSubTasks): Dictionary<Task> => {
+  return {
     [task.id]: task,
-    ...task.subTasks.reduce(
-      (acc, subTask) => ({
-        ...acc,
-        [subTask.id]: subTask,
-      }),
+    ...task.subTasks.reduce<Dictionary<Task>>(
+      (acc, subTask) => ({ ...acc, [subTask.id]: subTask }),
       {},
     ),
   };
+};
 
-  // Build tag map for ALL deleted tasks (main task + subtasks)
+/**
+ * Builds a map of tag IDs to their task arrays for all deleted tasks
+ */
+const buildTagTaskIdMap = (
+  state: RootState,
+  allDeletedTasks: Task[],
+): Record<string, string[]> => {
   const tagState = state[TAG_FEATURE_NAME];
-  const allDeletedTasks = [task, ...task.subTasks];
-  const tagTaskIdMap = allDeletedTasks.reduce(
-    (acc, deletedTask) => {
-      const tagIds = [TODAY_TAG.id, ...(deletedTask.tagIds || [])];
+  const tagMap: Record<string, string[]> = {};
 
-      tagIds.forEach((tagId) => {
-        const tag = tagState.entities[tagId];
-        if (tag && tag.taskIds.includes(deletedTask.id)) {
-          // If we haven't stored this tag's taskIds yet, store them
-          if (!acc[tagId]) {
-            acc[tagId] = tag.taskIds;
-          }
-        }
-      });
+  for (const task of allDeletedTasks) {
+    const tagIds = [TODAY_TAG.id, ...(task.tagIds || [])];
 
-      return acc;
-    },
-    {} as { [key: string]: string[] },
-  );
-
-  // SUB TASK CASE
-  // Note: should work independent as sub tasks dont show up in tag or project lists
-  if (task.parentId) {
-    return {
-      projectId: task.projectId,
-      parentTaskId: task.parentId,
-      subTaskIds: state[TASK_FEATURE_NAME].entities[task.parentId]?.subTaskIds || [],
-      tagTaskIdMap,
-      deletedTaskEntities,
-    };
-  } else {
-    // PROJECT CASE
-    const project: Project | undefined =
-      state[PROJECT_FEATURE_NAME].entities[task.projectId as string];
-    const isProjectTask = task.projectId !== null && project !== undefined;
-
-    let taskIdsForProjectBacklog: string[] | undefined;
-    let taskIdsForProject: string[] | undefined;
-    if (isProjectTask) {
-      taskIdsForProjectBacklog = (project as Project).backlogTaskIds;
-      taskIdsForProject = (project as Project).taskIds;
-      if (!taskIdsForProject || !taskIdsForProjectBacklog) {
-        console.log('------ERR_ADDITIONAL_INFO------');
-        console.log('project', project);
-        console.log('taskIdsForProject', taskIdsForProject);
-        console.log('taskIdsForProjectBacklog', taskIdsForProjectBacklog);
-        throw new Error('Invalid project data');
+    for (const tagId of tagIds) {
+      const tag = tagState.entities[tagId];
+      if (tag?.taskIds.includes(task.id) && !tagMap[tagId]) {
+        tagMap[tagId] = tag.taskIds;
       }
     }
+  }
 
+  return tagMap;
+};
+
+/**
+ * Captures project-specific data for a task deletion
+ */
+const captureProjectData = (
+  state: RootState,
+  projectId: string | null,
+): Pick<
+  UndoTaskDeleteState,
+  'projectId' | 'taskIdsForProject' | 'taskIdsForProjectBacklog'
+> => {
+  if (!projectId) {
+    return {};
+  }
+
+  const project = state[PROJECT_FEATURE_NAME].entities[projectId] as Project | undefined;
+  if (!project) {
+    return {};
+  }
+
+  if (!project.taskIds || !project.backlogTaskIds) {
+    console.error('Invalid project data:', { projectId, project });
+    throw new Error('Invalid project data');
+  }
+
+  return {
+    projectId,
+    taskIdsForProject: project.taskIds,
+    taskIdsForProjectBacklog: project.backlogTaskIds,
+  };
+};
+
+/**
+ * Captures the complete state needed to undo a task deletion
+ */
+const captureTaskDeleteState = (
+  state: RootState,
+  task: TaskWithSubTasks,
+): UndoTaskDeleteState => {
+  const deletedTaskEntities = createDeletedTaskEntities(task);
+  const allDeletedTasks = [task, ...task.subTasks];
+  const tagTaskIdMap = buildTagTaskIdMap(state, allDeletedTasks);
+
+  // Handle subtask deletion
+  if (task.parentId) {
+    const parentTask = state[TASK_FEATURE_NAME].entities[task.parentId];
     return {
-      projectId: task.projectId,
-      taskIdsForProjectBacklog,
-      taskIdsForProject,
+      parentTaskId: task.parentId,
+      subTaskIds: parentTask?.subTaskIds || [],
       tagTaskIdMap,
       deletedTaskEntities,
     };
   }
+
+  // Handle main task deletion
+  return {
+    ...captureProjectData(state, task.projectId),
+    tagTaskIdMap,
+    deletedTaskEntities,
+  };
+};
+
+/**
+ * Restores deleted tasks to the state
+ */
+const restoreDeletedTasks = (
+  state: RootState,
+  savedState: UndoTaskDeleteState,
+): RootState => {
+  let updatedState = state;
+
+  // 1. Restore task entities
+  const tasksToRestore = Object.values(savedState.deletedTaskEntities).filter(
+    (task): task is Task => !!task,
+  );
+
+  updatedState = {
+    ...updatedState,
+    [TASK_FEATURE_NAME]: taskAdapter.addMany(
+      tasksToRestore,
+      updatedState[TASK_FEATURE_NAME],
+    ),
+  };
+
+  // 2. Restore parent-child relationships
+  if (savedState.parentTaskId && savedState.subTaskIds) {
+    updatedState = {
+      ...updatedState,
+      [TASK_FEATURE_NAME]: taskAdapter.updateOne(
+        {
+          id: savedState.parentTaskId,
+          changes: { subTaskIds: savedState.subTaskIds },
+        },
+        updatedState[TASK_FEATURE_NAME],
+      ),
+    };
+  }
+
+  // 3. Restore tag associations
+  const tagUpdates = Object.entries(savedState.tagTaskIdMap).map(([tagId, taskIds]) => ({
+    id: tagId,
+    changes: { taskIds },
+  }));
+
+  if (tagUpdates.length > 0) {
+    updatedState = {
+      ...updatedState,
+      [TAG_FEATURE_NAME]: tagAdapter.updateMany(
+        tagUpdates,
+        updatedState[TAG_FEATURE_NAME],
+      ),
+    };
+  }
+
+  // 4. Restore project associations
+  if (savedState.projectId) {
+    const projectChanges: { taskIds?: string[]; backlogTaskIds?: string[] } = {};
+    if (savedState.taskIdsForProject) {
+      projectChanges.taskIds = savedState.taskIdsForProject;
+    }
+    if (savedState.taskIdsForProjectBacklog) {
+      projectChanges.backlogTaskIds = savedState.taskIdsForProjectBacklog;
+    }
+
+    if (Object.keys(projectChanges).length > 0) {
+      updatedState = {
+        ...updatedState,
+        [PROJECT_FEATURE_NAME]: projectAdapter.updateOne(
+          {
+            id: savedState.projectId,
+            changes: projectChanges,
+          },
+          updatedState[PROJECT_FEATURE_NAME],
+        ),
+      };
+    }
+  }
+
+  return updatedState;
 };
