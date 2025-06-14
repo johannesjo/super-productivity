@@ -106,6 +106,7 @@ bootstrapApplication(AppComponent, {
       // NOTE: both need to be present to use forFeature stores
       StoreModule.forRoot(reducers, {
         metaReducers: [
+          undoTaskDeleteMetaReducer,
           taskSharedCrudMetaReducer,
           taskSharedLifecycleMetaReducer,
           taskSharedSchedulingMetaReducer,
