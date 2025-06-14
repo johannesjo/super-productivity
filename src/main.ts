@@ -113,7 +113,6 @@ bootstrapApplication(AppComponent, {
           projectSharedMetaReducer,
           tagSharedMetaReducer,
           plannerSharedMetaReducer,
-          undoTaskDeleteMetaReducer,
           actionLoggerReducer,
         ],
         ...(environment.production
