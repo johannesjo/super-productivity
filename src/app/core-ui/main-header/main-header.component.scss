@@ -93,6 +93,11 @@ button {
   cursor: pointer;
 }
 
+button.active {
+  background-color: $success-green;
+  transition: background-color $transition-standard;
+}
+
 .action-nav {
   margin-right: 0px;
   margin-left: auto;

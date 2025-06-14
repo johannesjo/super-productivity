@@ -1152,6 +1152,45 @@
         "TOGGLE_DONE": "un-/mark as done"
       }
     },
+    "TASK_VIEW": {
+      "CUSTOMIZER": {
+        "TITLE": "Customize Task View",
+        "SORT_BY": "Sort By",
+        "GROUP_BY": "Group By",
+        "FILTER_BY": "Filter By",
+        "SORT_DEFAULT": "Default",
+        "SORT_NAME": "Name",
+        "SORT_SCHEDULED_DATE": "Scheduled Date",
+        "SORT_CREATION_DATE": "Creation Date",
+        "ESTIMATED_TIME": "Estimated Time",
+        "TIME_SPENT": "Time Spent",
+        "GROUP_DEFAULT": "No Group",
+        "GROUP_TAG": "Tag",
+        "GROUP_PROJECT": "Project",
+        "GROUP_SCHEDULED_DATE": "Scheduled Date",
+        "FILTER_DEFAULT": "No Filter",
+        "FILTER_TAG": "Tag",
+        "FILTER_PROJECT": "Project",
+        "FILTER_SCHEDULED_DATE": "Scheduled Date",
+        "FILTER_ESTIMATED_TIME": "Estimated Time",
+        "FILTER_TIME_SPENT": "Time Spent",
+        "SCHEDULED_DEFAULT": "Any Date",
+        "SCHEDULED_TODAY": "Today",
+        "SCHEDULED_TOMORROW": "Tomorrow",
+        "SCHEDULED_THIS_WEEK": "This Week",
+        "SCHEDULED_NEXT_WEEK": "Next Week",
+        "SCHEDULED_THIS_MONTH": "This Month",
+        "SCHEDULED_NEXT_MONTH": "Next Month",
+        "TIME_DEFAULT": "Any Duration",
+        "TIME_10MIN": "> 10 Minutes",
+        "TIME_30MIN": "> 30 Minutes",
+        "TIME_1HOUR": "> 1 Hour",
+        "TIME_2HOUR": "> 2 Hours",
+        "RESET_ALL": "Reset All",
+        "ENTER_TAG": "Enter tag",
+        "ENTER_PROJECT": "Enter project"
+      }
+    },
     "TASK_REPEAT": {
       "ADD_INFO_PANEL": {
         "CUSTOM": "Custom repeat config",

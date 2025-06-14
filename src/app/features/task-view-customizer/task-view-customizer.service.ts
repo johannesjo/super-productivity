@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, combineLatest } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
+import { Observable, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { TaskWithSubTasks } from '../tasks/task.model';
 import { selectAllProjects } from '../project/store/project.selectors';
@@ -7,13 +7,23 @@ import { selectAllTags } from './../tag/store/tag.reducer';
 import { Store } from '@ngrx/store';
 import { Project } from '../project/project.model';
 import { Tag } from '../tag/tag.model';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { computed } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
 export class TaskViewCustomizerService {
-  public selectedSort$ = new BehaviorSubject<string>('default');
-  public selectedGroup$ = new BehaviorSubject<string>('default');
-  public selectedFilter$ = new BehaviorSubject<string>('default');
-  public filterInputValue$ = new BehaviorSubject<string>('');
+  public selectedSort = signal<string>('default');
+  public selectedGroup = signal<string>('default');
+  public selectedFilter = signal<string>('default');
+  public filterInputValue = signal<string>('');
+
+  isCustomized = computed(
+    () =>
+      this.selectedSort() !== 'default' ||
+      this.selectedGroup() !== 'default' ||
+      this.selectedFilter() !== 'default' ||
+      !!this.filterInputValue(),
+  );
 
   constructor(private store: Store) {
     this._initProjects();
@@ -48,10 +58,10 @@ export class TaskViewCustomizerService {
   ): Observable<{ list: TaskWithSubTasks[]; grouped?: any }> {
     return combineLatest([
       undoneTasks$,
-      this.selectedSort$,
-      this.selectedGroup$,
-      this.selectedFilter$,
-      this.filterInputValue$,
+      toObservable(this.selectedSort),
+      toObservable(this.selectedGroup),
+      toObservable(this.selectedFilter),
+      toObservable(this.filterInputValue),
     ]).pipe(
       map(([undone, sort, group, filter, filterVal]) => {
         const filtered = this.applyFilter(undone, filter, filterVal);
@@ -230,26 +240,23 @@ export class TaskViewCustomizerService {
   }
 
   setSort(val: string): void {
-    this.selectedSort$.next(val);
+    this.selectedSort.set(val);
   }
   setGroup(val: string): void {
-    this.selectedGroup$.next(val);
+    this.selectedGroup.set(val);
   }
-  setFilter(val: string, input: string): void {
-    this.selectedFilter$.next(val);
-    this.filterInputValue$.next(input);
+  setFilter(val: string): void {
+    this.selectedFilter.set(val);
+    this.filterInputValue.set('');
+  }
+  setFilterInputValue(val: string): void {
+    this.filterInputValue.set(val);
   }
 
-  getSort(): string {
-    return this.selectedSort$.getValue();
-  }
-  getGroup(): string {
-    return this.selectedGroup$.getValue();
-  }
-  getFilter(): string {
-    return this.selectedFilter$.getValue();
-  }
-  getFilterInputValue(): string {
-    return this.filterInputValue$.getValue();
+  resetAll(): void {
+    this.setSort('default');
+    this.setGroup('default');
+    this.setFilter('default');
+    this.setFilterInputValue('');
   }
 }

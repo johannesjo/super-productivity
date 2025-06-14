@@ -148,4 +148,18 @@ describe('TaskViewCustomizerService', () => {
     expect(grouped['Tag Two'][0].id).toBe('task2');
     expect(grouped['Tag Two'][1].id).toBe('task3');
   });
+
+  it('should reset all customizer values to default', () => {
+    service.selectedSort.set('name');
+    service.selectedGroup.set('tag');
+    service.selectedFilter.set('project');
+    service.filterInputValue.set('something');
+
+    service.resetAll();
+
+    expect(service.selectedSort()).toBe('default');
+    expect(service.selectedGroup()).toBe('default');
+    expect(service.selectedFilter()).toBe('default');
+    expect(service.filterInputValue()).toBe('');
+  });
 });

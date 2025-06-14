@@ -1152,6 +1152,45 @@
         "TOGGLE_DONE": "Desmarcar/Marcar como concluído"
       }
     },
+    "TASK_VIEW": {
+      "CUSTOMIZER": {
+        "TITLE": "Personalizar Visualização de Tarefas",
+        "SORT_BY": "Ordenar por",
+        "GROUP_BY": "Agrupar por",
+        "FILTER_BY": "Filtrar por",
+        "SORT_DEFAULT": "Padrão",
+        "SORT_NAME": "Nome",
+        "SORT_SCHEDULED_DATE": "Data Agendada",
+        "SORT_CREATION_DATE": "Data de Criação",
+        "ESTIMATED_TIME": "Tempo Estimado",
+        "TIME_SPENT": "Tempo Gasto",
+        "GROUP_DEFAULT": "Sem Grupo",
+        "GROUP_TAG": "Tag",
+        "GROUP_PROJECT": "Projeto",
+        "GROUP_SCHEDULED_DATE": "Data Agendada",
+        "FILTER_DEFAULT": "Sem Filtro",
+        "FILTER_TAG": "Tag",
+        "FILTER_PROJECT": "Projeto",
+        "FILTER_SCHEDULED_DATE": "Data Agendada",
+        "FILTER_ESTIMATED_TIME": "Tempo Estimado",
+        "FILTER_TIME_SPENT": "Tempo Gasto",
+        "SCHEDULED_DEFAULT": "Qualquer Data",
+        "SCHEDULED_TODAY": "Hoje",
+        "SCHEDULED_TOMORROW": "Amanhã",
+        "SCHEDULED_THIS_WEEK": "Esta Semana",
+        "SCHEDULED_NEXT_WEEK": "Próxima Semana",
+        "SCHEDULED_THIS_MONTH": "Este Mês",
+        "SCHEDULED_NEXT_MONTH": "Próximo Mês",
+        "TIME_DEFAULT": "Qualquer Duração",
+        "TIME_10MIN": "> 10 Minutos",
+        "TIME_30MIN": "> 30 Minutos",
+        "TIME_1HOUR": "> 1 Hora",
+        "TIME_2HOUR": "> 2 Horas",
+        "RESET_ALL": "Redefinir Tudo",
+        "ENTER_TAG": "Insira a tag",
+        "ENTER_PROJECT": "Insira o projeto"
+      }
+    },
     "TASK_REPEAT": {
       "ADD_INFO_PANEL": {
         "CUSTOM": "Configurar repetição personalizada",
