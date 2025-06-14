@@ -18,10 +18,10 @@ import { TODAY_TAG } from '../../../features/tag/tag.const';
 import { unique } from '../../../util/unique';
 import {
   ActionHandlerMap,
-  TaskEntity,
   getProject,
   getTag,
   removeTasksFromList,
+  TaskEntity,
   updateTags,
 } from './task-shared-helpers';
 
