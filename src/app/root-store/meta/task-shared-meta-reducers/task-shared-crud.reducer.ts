@@ -34,6 +34,74 @@ import {
 } from './task-shared-helpers';
 
 // =============================================================================
+// HELPER FUNCTIONS
+// =============================================================================
+
+/**
+ * Removes parent or sub-tasks from a tag's task list to maintain the constraint
+ * that parent and sub-tasks should never be in the same tag list.
+ * Also removes the tag from the conflicting tasks.
+ *
+ * @param state - The current state
+ * @param taskId - The task being added
+ * @param tagId - The tag to check
+ * @returns Updated state with conflicts resolved
+ */
+const removeConflictingTasksFromTag = (
+  state: RootState,
+  taskId: string,
+  tagId: string,
+): RootState => {
+  const task = state[TASK_FEATURE_NAME].entities[taskId] as Task;
+  if (!task) return state;
+
+  const tag = getTag(state, tagId);
+  const conflictingTaskIds: string[] = [];
+
+  // If this is a sub-task, check if parent is in the tag
+  if (task.parentId && tag.taskIds.includes(task.parentId)) {
+    conflictingTaskIds.push(task.parentId);
+  }
+
+  // If this is a parent task, check if any sub-tasks are in the tag
+  if (task.subTaskIds && task.subTaskIds.length > 0) {
+    const subTasksInTag = task.subTaskIds.filter((subId) => tag.taskIds.includes(subId));
+    conflictingTaskIds.push(...subTasksInTag);
+  }
+
+  if (conflictingTaskIds.length === 0) {
+    return state;
+  }
+
+  // Update the conflicting tasks to remove the tag
+  const taskUpdates: Update<Task>[] = conflictingTaskIds.map((conflictingTaskId) => {
+    const conflictingTask = state[TASK_FEATURE_NAME].entities[conflictingTaskId] as Task;
+    return {
+      id: conflictingTaskId,
+      changes: {
+        tagIds: conflictingTask.tagIds.filter((id) => id !== tagId),
+      },
+    };
+  });
+
+  // Update the task state
+  const updatedState = {
+    ...state,
+    [TASK_FEATURE_NAME]: taskAdapter.updateMany(taskUpdates, state[TASK_FEATURE_NAME]),
+  };
+
+  // Update the tag to remove conflicting tasks
+  const tagUpdate: Update<Tag> = {
+    id: tagId,
+    changes: {
+      taskIds: tag.taskIds.filter((id) => !conflictingTaskIds.includes(id)),
+    },
+  };
+
+  return updateTags(updatedState, [tagUpdate]);
+};
+
+// =============================================================================
 // ACTION HANDLERS
 // =============================================================================
 
@@ -74,11 +142,21 @@ const handleAddTask = (
     ...(task.dueDay === getWorklogStr() ? [TODAY_TAG.id] : []),
   ].filter((tagId) => state[TAG_FEATURE_NAME].entities[tagId]);
 
+  // First, handle conflicts for all tags
+  for (const tagId of tagIdsToUpdate) {
+    updatedState = removeConflictingTasksFromTag(updatedState, task.id, tagId);
+  }
+
+  // Then add the task to all its tags
   const tagUpdates = tagIdsToUpdate.map(
     (tagId): Update<Tag> => ({
       id: tagId,
       changes: {
-        taskIds: addTaskToList(getTag(state, tagId).taskIds, task.id, isAddToBottom),
+        taskIds: addTaskToList(
+          getTag(updatedState, tagId).taskIds,
+          task.id,
+          isAddToBottom,
+        ),
       },
     }),
   );
@@ -134,6 +212,56 @@ const handleConvertToMainTask = (
     ...parentTagIds,
     ...(isPlanForToday ? [TODAY_TAG.id] : []),
   ].filter((tagId) => state[TAG_FEATURE_NAME].entities[tagId]);
+
+  // For convertToMainTask, we need to manually check if parent is in the tags
+  // since the parent-child relationship was already cleaned up
+  const parentTaskId = task.parentId;
+  if (parentTaskId) {
+    // Remove parent from all tags that the converted task will be in
+    const parentTaskUpdates: Update<Task>[] = [];
+    const tagUpdatesForParent: Update<Tag>[] = [];
+
+    for (const tagId of tagIdsToUpdate) {
+      const tag = getTag(updatedState, tagId);
+      if (tag.taskIds.includes(parentTaskId)) {
+        // Remove tag from parent task
+        const currentParent = updatedState[TASK_FEATURE_NAME].entities[
+          parentTaskId
+        ] as Task;
+        if (currentParent && currentParent.tagIds.includes(tagId)) {
+          parentTaskUpdates.push({
+            id: parentTaskId,
+            changes: {
+              tagIds: currentParent.tagIds.filter((id) => id !== tagId),
+            },
+          });
+        }
+        // Remove parent from tag
+        tagUpdatesForParent.push({
+          id: tagId,
+          changes: {
+            taskIds: tag.taskIds.filter((id) => id !== parentTaskId),
+          },
+        });
+      }
+    }
+
+    if (parentTaskUpdates.length > 0) {
+      updatedState = {
+        ...updatedState,
+        [TASK_FEATURE_NAME]: taskAdapter.updateMany(
+          parentTaskUpdates,
+          updatedState[TASK_FEATURE_NAME],
+        ),
+      };
+    }
+
+    if (tagUpdatesForParent.length > 0) {
+      updatedState = updateTags(updatedState, tagUpdatesForParent);
+    }
+  }
+
+  // Then add the task to all its tags at the beginning
   const tagUpdates = tagIdsToUpdate.map(
     (tagId): Update<Tag> => ({
       id: tagId,
@@ -295,11 +423,18 @@ const handleTagUpdates = (
     .filter((newId) => !oldTagIds.includes(newId))
     .filter((tagId) => state[TAG_FEATURE_NAME].entities[tagId]); // Only existing tags
 
+  let updatedState = state;
+
+  // First, handle conflicts for all tags we're adding to
+  for (const tagId of tagsToAddTo) {
+    updatedState = removeConflictingTasksFromTag(updatedState, taskId, tagId);
+  }
+
   const removeUpdates = tagsToRemoveFrom.map(
     (tagId): Update<Tag> => ({
       id: tagId,
       changes: {
-        taskIds: getTag(state, tagId).taskIds.filter((id) => id !== taskId),
+        taskIds: getTag(updatedState, tagId).taskIds.filter((id) => id !== taskId),
       },
     }),
   );
@@ -308,12 +443,12 @@ const handleTagUpdates = (
     (tagId): Update<Tag> => ({
       id: tagId,
       changes: {
-        taskIds: unique([taskId, ...getTag(state, tagId).taskIds]),
+        taskIds: unique([taskId, ...getTag(updatedState, tagId).taskIds]),
       },
     }),
   );
 
-  return updateTags(state, [...removeUpdates, ...addUpdates]);
+  return updateTags(updatedState, [...removeUpdates, ...addUpdates]);
 };
 
 // =============================================================================
