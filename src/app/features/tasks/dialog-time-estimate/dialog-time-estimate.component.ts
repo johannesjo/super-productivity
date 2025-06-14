@@ -32,6 +32,8 @@ import { InputDurationDirective } from '../../../ui/duration/input-duration.dire
 import { MatInput } from '@angular/material/input';
 import { KeysPipe } from '../../../ui/pipes/keys.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
+import { PlannerService } from '../../planner/planner.service';
+import { first } from 'rxjs/operators';
 
 @Component({
   selector: 'dialog-time-estimate',
@@ -62,6 +64,7 @@ export class DialogTimeEstimateComponent implements AfterViewInit {
   private _matDialogRef = inject<MatDialogRef<DialogTimeEstimateComponent>>(MatDialogRef);
   private _matDialog = inject(MatDialog);
   private _taskService = inject(TaskService);
+  private _plannerService = inject(PlannerService);
   private _cd = inject(ChangeDetectorRef);
   private _el = inject(ElementRef);
   data = inject(MAT_DIALOG_DATA);
@@ -88,14 +91,26 @@ export class DialogTimeEstimateComponent implements AfterViewInit {
     }
   }
 
-  submit(): void {
+  async submit(): Promise<void> {
+    const plannerTaskMap = await this._plannerService.plannedTaskDayMap$
+      .pipe(first())
+      .toPromise();
+    const plannedDayForTask = plannerTaskMap[this.task.id];
+
+    const updatedTimeSpentOnPlannedDay = { ...this.timeSpentOnDayCopy };
+    if (this.todayStr > plannedDayForTask) {
+      updatedTimeSpentOnPlannedDay[plannedDayForTask] =
+        this.timeSpentOnDayCopy[this.todayStr];
+      delete updatedTimeSpentOnPlannedDay[this.todayStr];
+    }
+
     this._taskService.update(this.taskCopy.id, {
       timeEstimate: this.taskCopy.timeEstimate,
-      timeSpentOnDay: this.timeSpentOnDayCopy,
+      timeSpentOnDay: updatedTimeSpentOnPlannedDay,
     });
     this._matDialogRef.close({
       timeEstimate: this.taskCopy.timeEstimate,
-      timeSpentOnDay: this.timeSpentOnDayCopy,
+      timeSpentOnDay: updatedTimeSpentOnPlannedDay,
     });
   }
 
