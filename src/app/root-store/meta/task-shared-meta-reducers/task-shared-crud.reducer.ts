@@ -23,12 +23,12 @@ import { getWorklogStr } from '../../../util/get-work-log-str';
 import { unique } from '../../../util/unique';
 import {
   ActionHandlerMap,
-  ProjectTaskList,
-  TaskWithTags,
   addTaskToList,
   getProject,
   getTag,
+  ProjectTaskList,
   removeTasksFromList,
+  TaskWithTags,
   updateProject,
   updateTags,
 } from './task-shared-helpers';
