@@ -163,11 +163,7 @@ const _createTaskDeleteState = (
     if (isProjectTask) {
       taskIdsForProjectBacklog = (project as Project).backlogTaskIds;
       taskIdsForProject = (project as Project).taskIds;
-      if (
-        !taskIdsForProject ||
-        !taskIdsForProjectBacklog ||
-        (!taskIdsForProjectBacklog.length && !taskIdsForProject.length)
-      ) {
+      if (!taskIdsForProject || !taskIdsForProjectBacklog) {
         console.log('------ERR_ADDITIONAL_INFO------');
         console.log('project', project);
         console.log('taskIdsForProject', taskIdsForProject);
