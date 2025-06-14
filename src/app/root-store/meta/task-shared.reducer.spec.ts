@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type,@typescript-eslint/naming-convention */
-import { taskSharedMetaReducer } from './task-shared.reducer';
+import { createCombinedTaskSharedMetaReducer } from './task-shared-meta-reducers/test-helpers';
 import { TaskSharedActions } from './task-shared.actions';
 import { RootState } from '../root-state';
 import { TASK_FEATURE_NAME } from '../../features/tasks/store/task.reducer';
@@ -191,7 +191,7 @@ describe('taskSharedMetaReducer', () => {
 
   beforeEach(() => {
     mockReducer = jasmine.createSpy('reducer').and.callFake((state, action) => state);
-    metaReducer = taskSharedMetaReducer(mockReducer);
+    metaReducer = createCombinedTaskSharedMetaReducer(mockReducer);
 
     const mockProject = createMockProject();
     const mockTag = createMockTag();
