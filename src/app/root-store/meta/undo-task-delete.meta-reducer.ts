@@ -141,6 +141,28 @@ const _createTaskDeleteState = (
     ),
   };
 
+  // Build tag map for ALL deleted tasks (main task + subtasks)
+  const tagState = state[TAG_FEATURE_NAME];
+  const allDeletedTasks = [task, ...task.subTasks];
+  const tagTaskIdMap = allDeletedTasks.reduce(
+    (acc, deletedTask) => {
+      const tagIds = [TODAY_TAG.id, ...(deletedTask.tagIds || [])];
+
+      tagIds.forEach((tagId) => {
+        const tag = tagState.entities[tagId];
+        if (tag && tag.taskIds.includes(deletedTask.id)) {
+          // If we haven't stored this tag's taskIds yet, store them
+          if (!acc[tagId]) {
+            acc[tagId] = tag.taskIds;
+          }
+        }
+      });
+
+      return acc;
+    },
+    {} as { [key: string]: string[] },
+  );
+
   // SUB TASK CASE
   // Note: should work independent as sub tasks dont show up in tag or project lists
   if (task.parentId) {
@@ -148,6 +170,7 @@ const _createTaskDeleteState = (
       projectId: task.projectId,
       parentTaskId: task.parentId,
       subTaskIds: state[TASK_FEATURE_NAME].entities[task.parentId]?.subTaskIds || [],
+      tagTaskIdMap,
       deletedTaskEntities,
     };
   } else {
@@ -169,27 +192,6 @@ const _createTaskDeleteState = (
         throw new Error('Invalid project data');
       }
     }
-
-    const tagState = state[TAG_FEATURE_NAME];
-    const tagTaskIdMap = [TODAY_TAG.id, ...task.tagIds].reduce((acc, id) => {
-      const tag = tagState.entities[id];
-      if (!tag) {
-        console.log('------ERR_ADDITIONAL_INFO------');
-        console.log('id', id);
-        console.log('tagState', tagState);
-        console.log('tagTaskIdMap', tagTaskIdMap);
-        throw new Error('Task Restore Error: Missing tag');
-      }
-
-      if (tag.taskIds.includes(task.id)) {
-        return {
-          ...acc,
-          [id]: tag.taskIds,
-        };
-      } else {
-        return acc;
-      }
-    }, {});
 
     return {
       projectId: task.projectId,
