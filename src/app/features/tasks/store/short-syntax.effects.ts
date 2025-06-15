@@ -1,14 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { addNewTagsFromShortSyntax } from './task.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import {
-  addNewTagsFromShortSyntax,
-  addTask,
-  moveToOtherProject,
-  scheduleTaskWithTime,
-  updateTask,
-  updateTaskTags,
-} from './task.actions';
-import {
+  catchError,
   concatMap,
   filter,
   map,
@@ -38,6 +33,7 @@ import { getWorklogStr } from '../../../util/get-work-log-str';
 import { WorkContextService } from '../../work-context/work-context.service';
 
 import { INBOX_PROJECT } from '../../project/project.const';
+import { devError } from '../../../util/dev-error';
 
 @Injectable()
 export class ShortSyntaxEffects {
@@ -53,12 +49,12 @@ export class ShortSyntaxEffects {
 
   shortSyntax$: any = createEffect(() =>
     this._actions$.pipe(
-      ofType(addTask, updateTask),
+      ofType(TaskSharedActions.addTask, TaskSharedActions.updateTask),
       filter((action): boolean => {
         if (action.isIgnoreShortSyntax) {
           return false;
         }
-        if (action.type !== updateTask.type) {
+        if (action.type !== TaskSharedActions.updateTask.type) {
           return true;
         }
         const changeProps = Object.keys(action.task.changes);
@@ -79,10 +75,14 @@ export class ShortSyntaxEffects {
         this._projectService.list$,
         this._globalConfigService.misc$.pipe(
           map((misc) => misc.defaultProjectId),
-          // TODO re-check
-          filter(() => this._workContextService.activeWorkContextId !== INBOX_PROJECT.id),
-          concatMap((defaultProjectId) =>
-            defaultProjectId
+
+          concatMap((defaultProjectId) => {
+            if (this._workContextService.activeWorkContextId === INBOX_PROJECT.id) {
+              // if we are in the INBOX project, we do not need to fetch the default project, since it is not used in this context
+              return of(null);
+            }
+
+            return defaultProjectId
               ? this._projectService.getByIdOnce$(defaultProjectId).pipe(
                   tap((project) => {
                     if (!project) {
@@ -91,9 +91,13 @@ export class ShortSyntaxEffects {
                     }
                   }),
                   mapTo(defaultProjectId),
+                  catchError(() => {
+                    devError('Default Project not found, using null instead');
+                    return of(null);
+                  }),
                 )
-              : of(defaultProjectId),
-          ),
+              : of(null);
+          }),
         ),
       ),
       mergeMap(([{ task, originalAction }, tags, projects, defaultProjectId]) => {
@@ -112,12 +116,12 @@ export class ShortSyntaxEffects {
           !task.projectId &&
           !task.parentId &&
           task.projectId !== defaultProjectId &&
-          originalAction.type === addTask.type;
+          originalAction.type === TaskSharedActions.addTask.type;
 
         if (!r) {
           if (isAddDefaultProjectIfNecessary) {
             return [
-              moveToOtherProject({
+              TaskSharedActions.moveToOtherProject({
                 task,
                 targetProjectId: defaultProjectId as string,
               }),
@@ -131,7 +135,7 @@ export class ShortSyntaxEffects {
         const { taskChanges } = r;
 
         actions.push(
-          updateTask({
+          TaskSharedActions.updateTask({
             task: {
               id: task.id,
               changes: r.taskChanges,
@@ -150,7 +154,7 @@ export class ShortSyntaxEffects {
             });
             actions.push(plan);
           } else {
-            const schedule = scheduleTaskWithTime({
+            const schedule = TaskSharedActions.scheduleTaskWithTime({
               task,
               dueWithTime: dueWithTime,
               remindAt: remindOptionToMilliseconds(
@@ -170,7 +174,7 @@ export class ShortSyntaxEffects {
             });
           } else {
             actions.push(
-              moveToOtherProject({
+              TaskSharedActions.moveToOtherProject({
                 task,
                 targetProjectId: r.projectId,
               }),
@@ -178,7 +182,7 @@ export class ShortSyntaxEffects {
           }
         } else if (isAddDefaultProjectIfNecessary) {
           actions.push(
-            moveToOtherProject({
+            TaskSharedActions.moveToOtherProject({
               task,
               targetProjectId: defaultProjectId as string,
             }),
@@ -198,9 +202,13 @@ export class ShortSyntaxEffects {
           }
           if (!isEqualTags) {
             actions.push(
-              updateTaskTags({
-                task,
-                newTagIds: unique(tagIds),
+              TaskSharedActions.updateTask({
+                task: {
+                  id: task.id,
+                  changes: {
+                    tagIds: unique(tagIds),
+                  },
+                },
               }),
             );
           }
@@ -254,9 +262,13 @@ export class ShortSyntaxEffects {
                   newTagIds.push(id);
                 });
                 actions.push(
-                  updateTaskTags({
-                    task,
-                    newTagIds: unique(newTagIds),
+                  TaskSharedActions.updateTask({
+                    task: {
+                      id: task.id,
+                      changes: {
+                        tagIds: unique(newTagIds),
+                      },
+                    },
                   }),
                 );
               }

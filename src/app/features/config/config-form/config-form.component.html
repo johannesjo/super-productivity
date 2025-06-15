@@ -1,4 +1,7 @@
-<form [formGroup]="form">
+<form
+  [formGroup]="form"
+  (submit)="$event.preventDefault()"
+>
   <formly-form
     (modelChange)="updateCfg($event)"
     [fields]="fields"

@@ -327,7 +327,7 @@ There are several ways to help.
 
 If you don't want or cannot use Codespaces for any reason, here are the instructions for local development.
 
-To run the development server you need to have Node installed at least in the version 14. Go to https://nodejs.org for installation instructions.
+To run the development server you need to have Node installed (version 20 or higher required). Go to https://nodejs.org for installation instructions.
 
 **Clone repo**
 
@@ -424,6 +424,10 @@ docker compose up -d
 ```
 
 Additionally to accessing the web app from your browser at `http://localhost`, you can set up WebDAV synchronization with base url `http://localhost/webdav/`.
+
+### Other configuration of docker container
+
+You can provide the default values for WebDAV settings in the "Sync" section of the "Settings" page, via setting some environment variables of the docker container. This could be used for single user instances. Check out `docker-compose.yaml` in this repository for available environment variables.
 
 ## Custom themes (desktop only)
 

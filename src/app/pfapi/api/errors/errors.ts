@@ -170,10 +170,6 @@ export class ModelIdWithoutCtrlError extends AdditionalLogErrorBase {
   override name = 'ModelIdWithoutCtrlError';
 }
 
-export class ModelValidationError extends AdditionalLogErrorBase {
-  override name = 'ModelValidationError';
-}
-
 export class ModelMigrationError extends AdditionalLogErrorBase {
   override name = 'ModelMigrationError';
 }
@@ -194,15 +190,52 @@ export class InvalidSyncProviderError extends Error {
   override name = 'InvalidSyncProviderError';
 }
 
+export class ModelValidationError extends Error {
+  override name = 'ModelValidationError';
+  additionalLog?: string;
+
+  constructor(params: {
+    id: string;
+    data: unknown;
+    validationResult?: IValidation<any>;
+    e?: unknown;
+  }) {
+    super('ModelValidationError');
+    console.log(`ModelValidationError for model ${params.id}:`, params);
+
+    if (params.validationResult) {
+      console.log('validation result: ', params.validationResult);
+
+      try {
+        if ('errors' in params.validationResult) {
+          const str = JSON.stringify(params.validationResult.errors);
+          console.log('validation errors: ' + str);
+          this.additionalLog = `Model: ${params.id}, Errors: ${str.substring(0, 400)}`;
+        }
+      } catch (e) {
+        console.error('Error stringifying validation errors:', e);
+      }
+    }
+
+    if (params.e) {
+      console.log('Additional error:', params.e);
+    }
+  }
+}
+
 export class DataValidationFailedError extends Error {
   override name = 'DataValidationFailedError';
+  additionalLog?: string;
 
   constructor(validationResult: IValidation<AllModelData<any>>) {
     super('DataValidationFailedError');
     console.log('validation result: ', validationResult);
+
     try {
       if ('errors' in validationResult) {
-        console.log('validation errors_: ' + JSON.stringify(validationResult.errors));
+        const str = JSON.stringify(validationResult.errors);
+        console.log('validation errors_: ' + str);
+        this.additionalLog = str.substring(0, 400);
       }
       console.log('validation result_: ' + JSON.stringify(validationResult));
     } catch (e) {}
@@ -215,7 +248,7 @@ export class ModelVersionToImportNewerThanLocalError extends AdditionalLogErrorB
 
 // --------------OTHER--------------
 
-export class InvalidFilePrefixError extends Error {
+export class InvalidFilePrefixError extends AdditionalLogErrorBase {
   override name = 'InvalidFilePrefixError';
 }
 

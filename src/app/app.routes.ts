@@ -21,6 +21,15 @@ export const APP_ROUTES: Routes = [
     canActivate: [FocusOverlayOpenGuard],
   },
   {
+    path: 'search',
+    loadComponent: () =>
+      import('./pages/search-page/search-page.component').then(
+        (m) => m.SearchPageComponent,
+      ),
+    data: { page: 'search' },
+    canActivate: [FocusOverlayOpenGuard],
+  },
+  {
     path: 'scheduled-list',
     loadComponent: () =>
       import('./pages/scheduled-list-page/scheduled-list-page.component').then(

@@ -1,42 +1,177 @@
-@if (task?.issueType === JIRA_TYPE) {
-  <jira-issue-content
-    [issue]="issueData()"
-    [task]="task"
-  ></jira-issue-content>
-}
-@if (task?.issueType === GITHUB_TYPE) {
-  <github-issue-content
-    [issue]="issueData()"
-    [task]="task"
-  ></github-issue-content>
-}
-@if (task?.issueType === REDMINE_TYPE) {
-  <redmine-issue-content
-    [issue]="issueData()"
-    [task]="task"
-  ></redmine-issue-content>
-}
-@if (task?.issueType === GITLAB_TYPE) {
-  <gitlab-issue-content
-    [issue]="issueData()"
-    [task]="task"
-  ></gitlab-issue-content>
-}
-@if (task?.issueType === CALDAV_TYPE) {
-  <caldav-issue-content
-    [issue]="issueData()"
-    [task]="task"
-  ></caldav-issue-content>
-}
-@if (task?.issueType === OPEN_PROJECT_TYPE) {
-  <open-project-issue-content
-    [issue]="issueData()"
-    [task]="task"
-  ></open-project-issue-content>
-}
-@if (task?.issueType === GITEA_TYPE) {
-  <gitea-issue-content
-    [issue]="issueData()"
-    [task]="task"
-  ></gitea-issue-content>
-}
+<ng-container>
+  @if (currentTask()?.issueWasUpdated) {
+    <div
+      @expand
+      style="text-align: center"
+    >
+      <button
+        (click)="hideUpdates()"
+        color="accent"
+        mat-raised-button
+      >
+        {{ T.F.ISSUE.ISSUE_CONTENT.MARK_AS_CHECKED | translate }}
+      </button>
+    </div>
+  }
+
+  @if (config(); as cfg) {
+    <div class="table-wrapper">
+      <table class="issue-table">
+        @for (field of visibleFields(); track trackByIndex($index)) {
+          <tr [class.description-row]="field.type === IssueFieldType.MARKDOWN">
+            <th>{{ field.label | translate }}</th>
+            <td
+              [class.markdown]="field.type === IssueFieldType.MARKDOWN"
+              [class.full-width]="field.isFullWidth"
+            >
+              @switch (field.type) {
+                @case (IssueFieldType.TEXT) {
+                  {{ getFieldValue(field, currentIssue()) }}
+                }
+                @case (IssueFieldType.LINK) {
+                  @if (getFieldLink(field, currentIssue()); as link) {
+                    <a
+                      [href]="link"
+                      target="_blank"
+                    >
+                      <strong>{{ getFieldValue(field, currentIssue()) }}</strong>
+                    </a>
+                  } @else {
+                    <strong>{{ getFieldValue(field, currentIssue()) }}</strong>
+                  }
+                }
+                @case (IssueFieldType.CHIPS) {
+                  <mat-chip-listbox [selectable]="false">
+                    @for (chip of getFieldValue(field, currentIssue()); track $index) {
+                      <mat-chip-option [title]="chip.description || ''">
+                        {{ chip.name || chip }}
+                      </mat-chip-option>
+                    }
+                  </mat-chip-listbox>
+                }
+                @case (IssueFieldType.MARKDOWN) {
+                  @if (!isCollapsedIssueSummary()) {
+                    <div
+                      [data]="getFieldValue(field, currentIssue())"
+                      class="markdown"
+                      markdown
+                    ></div>
+                  }
+                }
+                @case (IssueFieldType.CUSTOM) {
+                  <issue-content-custom
+                    [field]="field"
+                    [issue]="currentIssue()!"
+                    [config]="cfg"
+                    [task]="currentTask()"
+                  ></issue-content-custom>
+                }
+              }
+            </td>
+          </tr>
+        }
+      </table>
+
+      @if (hasComments()) {
+        <div>
+          @if (isCollapsedIssueComments() && cfg.hasCollapsingComments) {
+            <div style="text-align: center">
+              <button
+                mat-stroked-button
+                class="load-comments-and-all-data"
+                (click)="showAllContent()"
+              >
+                <mat-icon>download</mat-icon>
+                @if (isCollapsedIssueSummary()) {
+                  <span
+                    style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap"
+                  >
+                    {{
+                      T.F.ISSUE.ISSUE_CONTENT.LOAD_DESCRIPTION_AND_ALL_COMMENTS
+                        | translate
+                    }}
+                  </span>
+                } @else {
+                  {{
+                    T.F.ISSUE.ISSUE_CONTENT.LOAD_ALL_COMMENTS
+                      | translate: { nr: commentsLength() }
+                  }}
+                }
+              </button>
+            </div>
+            @if (lastComment()) {
+              <h3 class="last-comment-headline">
+                {{ T.F.ISSUE.ISSUE_CONTENT.LAST_COMMENT | translate }}
+              </h3>
+              <div class="comment isLastComment">
+                @if (getCommentAvatar(lastComment(), cfg); as avatar) {
+                  <img
+                    [src]="avatar"
+                    class="author-avatar"
+                  />
+                }
+                <div class="name-and-comment-content">
+                  <div>
+                    <span class="author-name">{{
+                      getCommentAuthor(lastComment(), cfg)
+                    }}</span>
+                    <span class="when">
+                      {{ T.F.GITHUB.ISSUE_CONTENT.AT | translate }}
+                      {{ getCommentCreated(lastComment(), cfg) | date: 'short' }}
+                    </span>
+                  </div>
+                  @if (getCommentBody(lastComment(), cfg); as body) {
+                    @if (cfg.issueType === 'JIRA') {
+                      <div
+                        [innerHTML]="body | jiraToMarkdown | markdown | async"
+                        class="markdown"
+                      ></div>
+                    } @else {
+                      <div
+                        [innerHTML]="body | markdown | async"
+                        class="markdown"
+                      ></div>
+                    }
+                  }
+                </div>
+              </div>
+            }
+          } @else {
+            @for (comment of comments() | sort: cfg.comments?.sortField; track $index) {
+              <div class="comment">
+                @if (getCommentAvatar(comment, cfg); as avatar) {
+                  <img
+                    [src]="avatar"
+                    class="author-avatar"
+                  />
+                }
+                <div class="name-and-comment-content">
+                  <div>
+                    <span class="author-name">{{ getCommentAuthor(comment, cfg) }}</span>
+                    <span class="when">
+                      {{ T.F.ISSUE.ISSUE_CONTENT.AT | translate }}
+                      {{ getCommentCreated(comment, cfg) | date: 'short' }}
+                    </span>
+                  </div>
+                  @if (getCommentBody(comment, cfg); as body) {
+                    @if (cfg.issueType === 'JIRA') {
+                      <div
+                        [innerHTML]="body | jiraToMarkdown | markdown | async"
+                        class="markdown"
+                      ></div>
+                    } @else {
+                      <div
+                        [innerHTML]="body | markdown | async"
+                        class="markdown"
+                      ></div>
+                    }
+                  }
+                </div>
+              </div>
+            }
+          }
+        </div>
+      }
+    </div>
+  }
+</ng-container>

@@ -7,7 +7,7 @@ import {
   MatDialogActions,
 } from '@angular/material/dialog';
 import { IssueLocalState, IssueProviderJira } from '../../../../issue.model';
-import { JiraIssueReduced } from '../../jira-issue/jira-issue.model';
+import { JiraIssueReduced } from '../../jira-issue.model';
 import { Observable, of } from 'rxjs';
 import { JiraApiService } from '../../jira-api.service';
 import { JiraOriginalTransition } from '../../jira-api-responses';

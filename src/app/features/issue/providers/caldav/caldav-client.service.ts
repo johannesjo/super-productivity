@@ -8,7 +8,7 @@ import Calendar from 'cdav-library/models/calendar';
 import ICAL from 'ical.js';
 
 import { from, Observable, throwError } from 'rxjs';
-import { CaldavIssue } from './caldav-issue/caldav-issue.model';
+import { CaldavIssue } from './caldav-issue.model';
 import { CALDAV_TYPE, ISSUE_PROVIDER_HUMANIZED } from '../../issue.const';
 import { SearchResultItem } from '../../issue.model';
 import { SnackService } from '../../../../core/snack/snack.service';

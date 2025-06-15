@@ -582,7 +582,9 @@
         "MARK_AS_CHECKED": "Marcar atualizações como verificadas",
         "STATUS": "Status",
         "SUMMARY": "Resumo",
-        "TYPE": "Tipo"
+        "TYPE": "Tipo",
+        "ATTACHMENTS": "Anexos",
+        "UPLOAD_ATTACHMENT": "Fazer upload para a tarefa"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "pacote de trabalho",
@@ -593,7 +595,8 @@
         "POST_TIME_SUCCESS": "OpenProject: Entrada de tempo criada com sucesso para {{issueTitle}}",
         "TRANSITION": "OpenProject: Defina o problema \" {{issueKey}}\" como \" {{name}}\"",
         "TRANSITION_SUCCESS": "OpenProject: Defina o problema {{issueKey}} como <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Transições carregadas. Use as seleções abaixo para atribuí-las"
+        "TRANSITIONS_LOADED": "Transições carregadas. Use as seleções abaixo para atribuí-las",
+        "ERR_NO_FILE": "Nenhum arquivo selecionado"
       }
     },
     "PLANNER": {

@@ -10,6 +10,7 @@ import {
 } from '../errors/errors';
 import { validateLocalMeta } from '../util/validate-local-meta';
 import { PFEventEmitter } from '../util/events';
+import { devError } from '../../../util/dev-error';
 
 export const DEFAULT_META_MODEL: LocalMeta = {
   crossModelVersion: 1,
@@ -106,7 +107,12 @@ export class MetaModelCtrl {
    * @throws {InvalidMetaError} When metamodel is invalid
    */
   save(metaModel: LocalMeta, isIgnoreDBLock = false): Promise<unknown> {
-    pfLog(2, `${MetaModelCtrl.L}.${this.save.name}()`, metaModel);
+    pfLog(2, `${MetaModelCtrl.L}.${this.save.name}()`, {
+      metaModel,
+      lastSyncedUpdate: metaModel.lastSyncedUpdate,
+      lastUpdate: metaModel.lastUpdate,
+      isIgnoreDBLock,
+    });
     if (typeof metaModel.lastUpdate !== 'number') {
       throw new InvalidMetaError(
         `${MetaModelCtrl.L}.${this.save.name}()`,
@@ -119,7 +125,38 @@ export class MetaModelCtrl {
     this._ev.emit('metaModelChange', metaModel);
     this._ev.emit('syncStatusChange', 'UNKNOWN_OR_CHANGED');
 
-    return this._db.save(MetaModelCtrl.META_MODEL_ID, metaModel, isIgnoreDBLock);
+    // Add detailed logging before saving
+    pfLog(2, `${MetaModelCtrl.L}.${this.save.name}() about to save to DB:`, {
+      id: MetaModelCtrl.META_MODEL_ID,
+      lastSyncedUpdate: metaModel.lastSyncedUpdate,
+      lastUpdate: metaModel.lastUpdate,
+      willMatch: metaModel.lastSyncedUpdate === metaModel.lastUpdate,
+    });
+
+    const savePromise = this._db.save(
+      MetaModelCtrl.META_MODEL_ID,
+      metaModel,
+      isIgnoreDBLock,
+    );
+
+    // Log after save completes
+    savePromise
+      .then(() => {
+        pfLog(
+          2,
+          `${MetaModelCtrl.L}.${this.save.name}() DB save completed successfully`,
+          {
+            lastSyncedUpdate: metaModel.lastSyncedUpdate,
+            lastUpdate: metaModel.lastUpdate,
+          },
+        );
+      })
+      .catch((error) => {
+        devError('DB save for meta file failed');
+        pfLog(0, `${MetaModelCtrl.L}.${this.save.name}() DB save failed`, error);
+      });
+
+    return savePromise;
   }
 
   /**
@@ -136,17 +173,36 @@ export class MetaModelCtrl {
     }
 
     const data = (await this._db.load(MetaModelCtrl.META_MODEL_ID)) as LocalMeta;
+
+    // Add debug logging
+    pfLog(2, `${MetaModelCtrl.L}.${this.load.name}() loaded from DB:`, {
+      data,
+      hasData: !!data,
+      lastSyncedUpdate: data?.lastSyncedUpdate,
+      lastUpdate: data?.lastUpdate,
+    });
+
     // Initialize if not found
     if (!data) {
       this._metaModelInMemory = {
         ...DEFAULT_META_MODEL,
         crossModelVersion: this.crossModelVersion,
       };
+      pfLog(2, `${MetaModelCtrl.L}.${this.load.name}() initialized with defaults`);
       return this._metaModelInMemory;
     }
     if (!data.revMap) {
       throw new InvalidMetaError('loadMetaModel: revMap not found');
     }
+
+    // Log the loaded data
+    pfLog(2, `${MetaModelCtrl.L}.${this.load.name}() loaded valid data:`, {
+      lastUpdate: data.lastUpdate,
+      lastSyncedUpdate: data.lastSyncedUpdate,
+      metaRev: data.metaRev,
+      hasRevMap: !!data.revMap,
+      revMapKeys: Object.keys(data.revMap || {}),
+    });
 
     this._metaModelInMemory = data;
     return data;

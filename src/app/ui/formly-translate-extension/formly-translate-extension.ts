@@ -12,9 +12,21 @@ export class TranslateExtension {
     const to = field.templateOptions || {};
     if (Array.isArray(to.options)) {
       const options = to.options;
-      to.options = this.translate
-        .stream(options.map((o) => o.label))
-        .pipe(map((labels) => options.map((o) => ({ ...o, label: labels[o.label] }))));
+      // Filter out options without valid labels to prevent "Parameter key required" error
+      const validOptions = options.filter((o) => o && o.label);
+      if (validOptions.length > 0) {
+        to.options = this.translate.stream(validOptions.map((o) => o.label)).pipe(
+          map((labels) =>
+            options.map((o) => {
+              // Skip translation for items with invalid labels
+              if (!o || !o.label) {
+                return o;
+              }
+              return { ...o, label: labels[o.label] };
+            }),
+          ),
+        );
+      }
     }
 
     const validators = field.validators || {};
@@ -27,11 +39,13 @@ export class TranslateExtension {
 
     field.expressionProperties = {
       ...(field.expressionProperties || {}),
-      ...(to.label ? { 'templateOptions.label': this.translate.stream(to.label) } : {}),
-      ...(to.description
+      ...(typeof to.label === 'string' && to.label.length
+        ? { 'templateOptions.label': this.translate.stream(to.label) }
+        : {}),
+      ...(typeof to.description === 'string' && to.description.length
         ? { 'templateOptions.description': this.translate.stream(to.description) }
         : {}),
-      ...(to.placeholder
+      ...(typeof to.placeholder === 'string' && to.placeholder.length
         ? { 'templateOptions.placeholder': this.translate.stream(to.placeholder) }
         : {}),
     };

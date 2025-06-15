@@ -1,5 +1,6 @@
 import { DatabaseAdapter } from './database-adapter.model';
 import { pfLog } from '../util/log';
+import { devError } from '../../../util/dev-error';
 
 export class Database {
   private static readonly L = 'Database';
@@ -48,7 +49,19 @@ export class Database {
   async save<T>(key: string, data: T, isIgnoreDBLock = false): Promise<void> {
     this._lastParams = { a: 'save', key, data };
     if (this._isLocked && !isIgnoreDBLock) {
-      pfLog(2, 'Blocking write during lock');
+      devError('Attempting to write DB while locked');
+      pfLog(0, `${Database.L}.save() BLOCKED!!! - Database is locked!`, {
+        key,
+        isLocked: this._isLocked,
+        isIgnoreDBLock,
+        dataPreview:
+          key === 'META_MODEL'
+            ? {
+                lastUpdate: (data as any)?.lastUpdate,
+                lastSyncedUpdate: (data as any)?.lastSyncedUpdate,
+              }
+            : undefined,
+      });
       return;
     }
     try {

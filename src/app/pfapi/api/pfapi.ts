@@ -131,12 +131,16 @@ export class Pfapi<const MD extends ModelCfgs> {
   }
 
   private async _wrapSyncAction<T>(logPrefix: string, fn: () => Promise<T>): Promise<T> {
+    // Lock the database during sync to prevent concurrent modifications
+    this.db.lock();
+
     try {
       pfLog(2, `${logPrefix}`);
       this.ev.emit('syncStatusChange', 'SYNCING');
       const result = await fn();
       pfLog(2, `${logPrefix} result:`, result);
       this.ev.emit('syncDone', result);
+      // Keep lock until after status change to prevent race conditions
       this.ev.emit('syncStatusChange', 'IN_SYNC');
       return result;
     } catch (e) {
@@ -144,6 +148,9 @@ export class Pfapi<const MD extends ModelCfgs> {
       this.ev.emit('syncDone', e);
       this.ev.emit('syncStatusChange', 'ERROR');
       throw e;
+    } finally {
+      // Always unlock the database, even on error
+      this.db.unlock();
     }
   }
 
@@ -354,9 +361,7 @@ export class Pfapi<const MD extends ModelCfgs> {
         });
       });
       await Promise.all(promises);
-      this.db.unlock();
     } catch (e) {
-      this.db.unlock();
       const backup = await this.tmpBackupService.load();
       // isBackupImport is used to prevent endless loop
       if (backup && !isBackupImport) {
@@ -372,6 +377,8 @@ export class Pfapi<const MD extends ModelCfgs> {
         }
       }
       throw e;
+    } finally {
+      this.db.unlock();
     }
 
     if (isBackupData) {

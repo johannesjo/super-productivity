@@ -40,11 +40,11 @@ export class DialogSyncConflictComponent {
 
   remoteDate: number = this.data.remote;
   localDate: number = this.data.local;
-  lastDate: number = this.data.lastSync;
+  lastDate: number | null = this.data.lastSync;
 
   remoteTime: number = this.data.remote;
   localTime: number = this.data.local;
-  lastTime: number = this.data.lastSync;
+  lastTime: number | null = this.data.lastSync;
 
   isHighlightRemote: boolean = this.data.remote >= this.data.local;
   isHighlightLocal: boolean = this.data.local >= this.data.remote;

@@ -1,38 +1,46 @@
 <mat-dialog-content>
   <div class="content">
     <p>{{ T.F.SYNC.D_DECRYPT_ERROR.P1 | translate }}</p>
-  </div>
 
-  <form
-    #formEl="ngForm"
-    (ngSubmit)="formEl.valid && updatePwAndResync()"
-  >
-    <mat-form-field>
-      <mat-label>{{ 'Password' | translate }}</mat-label>
-      <input
-        [(ngModel)]="passwordVal"
-        name="txtVal"
-        matInput
-        required
-        type="password"
-      />
-    </mat-form-field>
-  </form>
-
-  <div
-    class="content"
-    style="margin-top: 24px"
-  >
     <p>{{ T.F.SYNC.D_DECRYPT_ERROR.P2 | translate }}</p>
-
-    <button
-      mat-stroked-button
-      color="warn"
-      type="button"
-      (click)="updatePWAndForceUpload()"
+    <form
+      #formEl="ngForm"
+      (ngSubmit)="formEl.valid && updatePwAndResync()"
     >
-      {{ T.F.SYNC.D_DECRYPT_ERROR.BTN_OVER_WRITE_REMOTE | translate }}
-    </button>
+      <mat-form-field>
+        <mat-label>{{ T.F.SYNC.D_DECRYPT_ERROR.PASSWORD | translate }}</mat-label>
+        <input
+          [(ngModel)]="passwordVal"
+          name="txtVal"
+          matInput
+          type="password"
+        />
+      </mat-form-field>
+
+      <div style="text-align: center; margin-top: 16px">
+        <button
+          class="btn btn-primary submit-button"
+          color="primary"
+          mat-stroked-button
+          (click)="formEl.valid && updatePwAndResync()"
+        >
+          <mat-icon>save</mat-icon>
+          {{ T.F.SYNC.D_DECRYPT_ERROR.CHANGE_PW_AND_DECRYPT | translate }}
+        </button>
+      </div>
+    </form>
+
+    <div style="text-align: center; margin-top: 16px">
+      <button
+        mat-stroked-button
+        color="warn"
+        type="button"
+        (click)="updatePWAndForceUpload()"
+      >
+        <mat-icon>cloud_upload</mat-icon>
+        {{ T.F.SYNC.D_DECRYPT_ERROR.BTN_OVER_WRITE_REMOTE | translate }}
+      </button>
+    </div>
   </div>
 </mat-dialog-content>
 
@@ -46,16 +54,6 @@
     >
       <mat-icon>close</mat-icon>
       {{ T.G.CANCEL | translate }}
-    </button>
-
-    <button
-      class="btn btn-primary submit-button"
-      color="primary"
-      mat-stroked-button
-      (click)="formEl.valid && updatePwAndResync()"
-    >
-      <mat-icon>check</mat-icon>
-      {{ T.G.SAVE | translate }}
     </button>
   </div>
 </mat-dialog-actions>

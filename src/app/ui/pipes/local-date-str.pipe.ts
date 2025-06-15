@@ -3,8 +3,12 @@ import { dateStrToUtcDate } from '../../util/date-str-to-utc-date';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from 'src/app/t.const';
 import { getWorklogStr } from '../../util/get-work-log-str';
+import { formatMonthDay } from '../../util/format-month-day.util';
 
-@Pipe({ name: 'localDateStr', standalone: true })
+@Pipe({
+  name: 'localDateStr',
+  standalone: true,
+})
 export class LocalDateStrPipe implements PipeTransform {
   private locale = inject(LOCALE_ID);
   private translateService = inject(TranslateService);
@@ -24,15 +28,6 @@ export class LocalDateStrPipe implements PipeTransform {
     }
 
     const d = dateStrToUtcDate(value);
-    return `${d.toLocaleDateString(this.locale, {
-      month: 'numeric',
-      day: 'numeric',
-    })}`;
-
-    // NOTE: not needed?
-    // const lastChar = str.slice(-1);
-    // if (isNaN(lastChar as any)) {
-    //   return str.slice(0, -1);
-    // }
+    return formatMonthDay(d, this.locale);
   }
 }

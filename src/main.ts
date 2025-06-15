@@ -48,6 +48,14 @@ import { StoreModule } from '@ngrx/store';
 import { reducers } from './app/root-store';
 import { undoTaskDeleteMetaReducer } from './app/root-store/meta/undo-task-delete.meta-reducer';
 import { actionLoggerReducer } from './app/root-store/meta/action-logger.reducer';
+import {
+  taskSharedCrudMetaReducer,
+  taskSharedLifecycleMetaReducer,
+  taskSharedSchedulingMetaReducer,
+  projectSharedMetaReducer,
+  tagSharedMetaReducer,
+  plannerSharedMetaReducer,
+} from './app/root-store/meta/task-shared-meta-reducers';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -97,7 +105,16 @@ bootstrapApplication(AppComponent, {
       HammerModule,
       // NOTE: both need to be present to use forFeature stores
       StoreModule.forRoot(reducers, {
-        metaReducers: [undoTaskDeleteMetaReducer, actionLoggerReducer],
+        metaReducers: [
+          undoTaskDeleteMetaReducer,
+          taskSharedCrudMetaReducer,
+          taskSharedLifecycleMetaReducer,
+          taskSharedSchedulingMetaReducer,
+          projectSharedMetaReducer,
+          tagSharedMetaReducer,
+          plannerSharedMetaReducer,
+          actionLoggerReducer,
+        ],
         ...(environment.production
           ? {
               runtimeChecks: {

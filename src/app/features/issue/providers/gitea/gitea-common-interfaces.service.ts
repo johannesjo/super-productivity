@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, of, timer } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
 import { Task, TaskCopy } from '../../../tasks/task.model';
 import { IssueServiceInterface } from '../../issue-service-interface';
@@ -9,7 +9,7 @@ import {
   IssueProviderGitea,
   SearchResultItem,
 } from '../../issue.model';
-import { GITEA_INITIAL_POLL_DELAY, GITEA_POLL_INTERVAL } from './gitea.const';
+import { GITEA_POLL_INTERVAL } from './gitea.const';
 import {
   formatGiteaIssueTitle,
   formatGiteaIssueTitleForSnack,
@@ -17,7 +17,7 @@ import {
 import { GiteaCfg } from './gitea.model';
 import { isGiteaEnabled } from './is-gitea-enabled.util';
 import { GiteaApiService } from '../gitea/gitea-api.service';
-import { GiteaIssue } from './gitea-issue/gitea-issue.model';
+import { GiteaIssue } from './gitea-issue.model';
 import { IssueProviderService } from '../../issue-provider.service';
 
 @Injectable({
@@ -27,31 +27,44 @@ export class GiteaCommonInterfacesService implements IssueServiceInterface {
   private readonly _giteaApiService = inject(GiteaApiService);
   private readonly _issueProviderService = inject(IssueProviderService);
 
-  pollTimer$: Observable<number> = timer(GITEA_INITIAL_POLL_DELAY, GITEA_POLL_INTERVAL);
+  pollInterval: number = GITEA_POLL_INTERVAL;
 
   isEnabled(cfg: GiteaCfg): boolean {
     return isGiteaEnabled(cfg);
   }
 
-  testConnection$(cfg: GiteaCfg): Observable<boolean> {
-    return this._giteaApiService.searchIssueForRepo$('', cfg).pipe(
-      map((res) => Array.isArray(res)),
-      first(),
-    );
+  testConnection(cfg: GiteaCfg): Promise<boolean> {
+    return this._giteaApiService
+      .searchIssueForRepo$('', cfg)
+      .pipe(
+        map((res) => Array.isArray(res)),
+        first(),
+      )
+      .toPromise()
+      .then((result) => result ?? false);
   }
 
-  issueLink$(issueNumber: string | number, issueProviderId: string): Observable<string> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      map((cfg) => `${cfg.host}/${cfg.repoFullname}/issues/${issueNumber}`),
-    );
+  issueLink(issueNumber: string | number, issueProviderId: string): Promise<string> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(map((cfg) => `${cfg.host}/${cfg.repoFullname}/issues/${issueNumber}`))
+      .toPromise()
+      .then((result) => result ?? '');
   }
 
-  getById$(id: string | number, issueProviderId: string): Observable<IssueData> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      switchMap((giteaCfg: GiteaCfg) =>
-        this._giteaApiService.getById$(id as number, giteaCfg),
-      ),
-    );
+  getById(id: string | number, issueProviderId: string): Promise<IssueData> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        switchMap((giteaCfg: GiteaCfg) =>
+          this._giteaApiService.getById$(id as number, giteaCfg),
+        ),
+      )
+      .toPromise()
+      .then((result) => {
+        if (!result) {
+          throw new Error('Failed to get Gitea issue');
+        }
+        return result;
+      });
   }
 
   getAddTaskData(issue: GiteaIssue): Partial<Readonly<TaskCopy>> & { title: string } {
@@ -62,17 +75,17 @@ export class GiteaCommonInterfacesService implements IssueServiceInterface {
     };
   }
 
-  searchIssues$(
-    searchTerm: string,
-    issueProviderId: string,
-  ): Observable<SearchResultItem[]> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      switchMap((giteaCfg) =>
-        this.isEnabled(giteaCfg)
-          ? this._giteaApiService.searchIssueForRepo$(searchTerm, giteaCfg)
-          : of([]),
-      ),
-    );
+  searchIssues(searchTerm: string, issueProviderId: string): Promise<SearchResultItem[]> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        switchMap((giteaCfg) =>
+          this.isEnabled(giteaCfg)
+            ? this._giteaApiService.searchIssueForRepo$(searchTerm, giteaCfg)
+            : of([]),
+        ),
+      )
+      .toPromise()
+      .then((result) => result ?? []);
   }
 
   async getFreshDataForIssueTask(task: Task): Promise<{

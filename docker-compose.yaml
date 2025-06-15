@@ -4,10 +4,21 @@ services:
     ports:
       - 80:80
     environment:
-      - WEBDAV_BACKEND=http://webdav # Optional
+      # WebDAV backend served at `/webdav/` subdirectory (Optional)
+      #   Used with "webdav" container below
+      - WEBDAV_BACKEND=http://webdav
 
-  # Optional: WebDAV backend server
-  # (used with the WEBDAV_BACKEND environment variable)
+      # Default values in "Sync" section in "Settings" page (Optional)
+      #   Useful for single user instances
+      - WEBDAV_BASE_URL=<base-url>
+      - WEBDAV_USERNAME=<username>
+      - WEBDAV_SYNC_FOLDER_PATH=<sync-folder-path>
+      - SYNC_INTERVAL=<integer-in-minutes>
+      - IS_COMPRESSION_ENABLED=<true-or-false>
+      - IS_ENCRYPTION_ENABLED=<true-or-false>
+
+  # WebDAV backend server (Optional)
+  #   Used with the WEBDAV_BACKEND environment variable
   webdav:
     image: hacdias/webdav:latest
     volumes:

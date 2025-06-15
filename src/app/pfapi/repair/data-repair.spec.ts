@@ -1758,4 +1758,91 @@ describe('dataRepair()', () => {
       },
     });
   });
+
+  it('should remove non-existent tags from tasks and archive tasks', () => {
+    const tagState = {
+      ...mock.tag,
+      ...fakeEntityStateFromArray<Tag>([
+        {
+          ...DEFAULT_TAG,
+          id: 'VALID_TAG',
+          title: 'Valid Tag',
+        },
+      ]),
+    } as any;
+
+    const taskState = {
+      ...mock.task,
+      ...fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'TASK1',
+          title: 'Task 1',
+          tagIds: ['VALID_TAG', 'NON_EXISTENT_TAG', 'ANOTHER_MISSING_TAG'],
+          projectId: FAKE_PROJECT_ID,
+        },
+        {
+          ...DEFAULT_TASK,
+          id: 'TASK2',
+          title: 'Task 2',
+          tagIds: ['VALID_TAG'],
+          projectId: FAKE_PROJECT_ID,
+        },
+        {
+          ...DEFAULT_TASK,
+          id: 'TASK3',
+          title: 'Task 3',
+          tagIds: ['NON_EXISTENT_TAG'],
+          projectId: FAKE_PROJECT_ID,
+        },
+        {
+          ...DEFAULT_TASK,
+          id: 'TASK4',
+          title: 'Task 4',
+          tagIds: [TODAY_TAG.id, 'NON_EXISTENT_TAG'],
+          projectId: FAKE_PROJECT_ID,
+        },
+      ]),
+    } as any;
+
+    const taskArchiveState = {
+      ...mock.archiveYoung.task,
+      ...fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'ARCHIVE_TASK1',
+          title: 'Archive Task 1',
+          tagIds: ['VALID_TAG', 'NON_EXISTENT_ARCHIVE_TAG'],
+          projectId: FAKE_PROJECT_ID,
+        },
+        {
+          ...DEFAULT_TASK,
+          id: 'ARCHIVE_TASK2',
+          title: 'Archive Task 2',
+          tagIds: [TODAY_TAG.id, 'MISSING_TAG'],
+          projectId: FAKE_PROJECT_ID,
+        },
+      ]),
+    } as any;
+
+    const result = dataRepair({
+      ...mock,
+      tag: tagState,
+      task: taskState,
+      archiveYoung: {
+        lastTimeTrackingFlush: 0,
+        timeTracking: mock.archiveYoung.timeTracking,
+        task: taskArchiveState,
+      },
+    });
+
+    expect(result.task.entities['TASK1']?.tagIds).toEqual(['VALID_TAG']);
+    expect(result.task.entities['TASK2']?.tagIds).toEqual(['VALID_TAG']);
+    expect(result.task.entities['TASK3']?.tagIds).toEqual([]);
+    expect(result.task.entities['TASK4']?.tagIds).toEqual([]);
+    expect(result.archiveYoung.task.entities['ARCHIVE_TASK1']?.tagIds).toEqual([
+      'VALID_TAG',
+    ]);
+    expect(result.archiveYoung.task.entities['ARCHIVE_TASK2']?.tagIds).toEqual([]);
+  });
 });
