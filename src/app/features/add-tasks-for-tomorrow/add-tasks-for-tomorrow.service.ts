@@ -41,15 +41,14 @@ export class AddTasksForTomorrowService {
   private _dueWithTimeForTomorrow$: Observable<TaskWithDueTime[]> =
     this._tomorrowDate$.pipe(
       switchMap((dt) =>
-        this._store.select(
-          selectTasksWithDueTimeForRange,
-          getDateRangeForDay(dt.getTime()),
-        ),
+        this._store.select(selectTasksWithDueTimeForRange, {
+          ...getDateRangeForDay(dt.getTime()),
+        }),
       ),
     );
 
   private _dueForDayForTomorrow$: Observable<TaskWithDueDay[]> = this._tomorrowDate$.pipe(
-    switchMap((d) => this._store.select(selectTasksDueForDay, getWorklogStr(d))),
+    switchMap((d) => this._store.select(selectTasksDueForDay, { day: getWorklogStr(d) })),
   );
 
   nrOfPlannerItemsForTomorrow$: Observable<number> = combineLatest([
@@ -133,11 +132,10 @@ export class AddTasksForTomorrowService {
 
     // Get tasks due for today
     const [dueWithTime, dueWithDay] = await combineLatest([
-      this._store.select(
-        selectTasksWithDueTimeForRange,
-        getDateRangeForDay(todayDate.getTime()),
-      ),
-      this._store.select(selectTasksDueForDay, getWorklogStr(todayDate)),
+      this._store.select(selectTasksWithDueTimeForRange, {
+        ...getDateRangeForDay(todayDate.getTime()),
+      }),
+      this._store.select(selectTasksDueForDay, { day: getWorklogStr(todayDate) }),
     ])
       .pipe(first())
       .toPromise();
