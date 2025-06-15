@@ -55,7 +55,7 @@ jobs:
           echo "${{ secrets.DROID_KEYSTORE_BASE_64 }}" | base64 --decode > keystore.jks
 
       - name: Build
-        run: npm run dist:android:prod
+        run: npm run dist:android:pro
         env:
           RELEASE_KEYSTORE_PASSWORD: ${{ secrets.DROID_KEYSTORE_PASSWORD }}
           RELEASE_KEYSTORE_ALIAS: ${{ secrets.DROID_KEYSTORE_ALIAS }}
@@ -70,8 +70,8 @@ jobs:
 
       # APK is now signed automatically by Gradle using signingConfig
 
-      - name: 'Upload Artifact'
+      - name: 'Upload APK files'
         uses: actions/upload-artifact@v4
         with:
           name: sup-android-release
-          path: android/app/build/outputs/*/*
+          path: android/app/build/outputs/apk/**/*.apk
