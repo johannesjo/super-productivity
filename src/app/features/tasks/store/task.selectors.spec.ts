@@ -285,30 +285,45 @@ describe('Task Selectors', () => {
   // Due date and time selectors
   describe('Due date and time selectors', () => {
     it('should select tasks due for day', () => {
-      const result = fromSelectors.selectTasksDueForDay(mockState, today);
+      // For parameterized selectors, projector expects (result1, result2, props)
+      const allTasks = Object.values(mockTasks);
+      const result = fromSelectors.selectTasksDueForDay.projector(allTasks, today, today);
       expect(result.length).toBe(1);
       expect(result[0].id).toBe('task3');
     });
 
     it('should select tasks due and overdue for day', () => {
-      const result = fromSelectors.selectTasksDueAndOverdueForDay(mockState, today);
+      const allTasks = Object.values(mockTasks);
+      const result = fromSelectors.selectTasksDueAndOverdueForDay.projector(
+        allTasks,
+        today,
+        today,
+      );
       expect(result.map((r) => r.id)).toEqual(['task3', 'task6']); // task3 (today), task6 (yesterday)
     });
 
     it('should select tasks with due time for range', () => {
       const start = Date.now();
       const end = Date.now() + 7200000; // 2 hours
-      const result = fromSelectors.selectTasksWithDueTimeForRange(mockState, {
-        start,
-        end,
-      });
+      const allTasks = Object.values(mockTasks);
+      const params = { start, end };
+      const result = fromSelectors.selectTasksWithDueTimeForRange.projector(
+        allTasks,
+        params,
+        params,
+      );
       expect(result.length).toBe(1);
       expect(result[0].id).toBe('task5');
     });
 
     it('should select tasks with due time until', () => {
       const end = Date.now() + 7200000; // 2 hours
-      const result = fromSelectors.selectTasksWithDueTimeUntil(mockState, end);
+      const allTasks = Object.values(mockTasks);
+      const result = fromSelectors.selectTasksWithDueTimeUntil.projector(
+        allTasks,
+        end,
+        end,
+      );
       expect(result.length).toBe(1);
       expect(result[0].id).toBe('task5');
     });
