@@ -42,10 +42,11 @@ describe('TaskDueEffects', () => {
     const dataInitStateServiceSpy = jasmine.createSpyObj('DataInitStateService', [], {
       isAllDataLoadedInitially$: of(true),
     });
-    const syncWrapperServiceSpy = jasmine.createSpyObj('SyncWrapperService', [], {
+    // Create a mock object with configurable properties
+    const syncWrapperServiceSpy = {
       afterCurrentSyncDoneOrSyncDisabled$: of(undefined),
       isSyncInProgress$: of(false),
-    });
+    } as any;
     const addTasksForTomorrowServiceSpy = jasmine.createSpyObj(
       'AddTasksForTomorrowService',
       ['addAllDueToday'],
@@ -92,12 +93,9 @@ describe('TaskDueEffects', () => {
       const syncSubject = new ReplaySubject<any>(1);
       const syncInProgressSubject = new ReplaySubject<boolean>(1);
 
-      Object.defineProperty(syncWrapperService, 'afterCurrentSyncDoneOrSyncDisabled$', {
-        get: () => syncSubject.asObservable(),
-      });
-      Object.defineProperty(syncWrapperService, 'isSyncInProgress$', {
-        get: () => syncInProgressSubject.asObservable(),
-      });
+      // Directly assign the observables
+      syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$ = syncSubject.asObservable();
+      syncWrapperService.isSyncInProgress$ = syncInProgressSubject.asObservable();
 
       effects.createRepeatableTasksAndAddDueToday$.subscribe(() => {
         expect(addTasksForTomorrowService.addAllDueToday).toHaveBeenCalled();
@@ -118,12 +116,9 @@ describe('TaskDueEffects', () => {
       const syncSubject = new ReplaySubject<any>(1);
       const syncInProgressSubject = new ReplaySubject<boolean>(1);
 
-      Object.defineProperty(syncWrapperService, 'afterCurrentSyncDoneOrSyncDisabled$', {
-        get: () => syncSubject.asObservable(),
-      });
-      Object.defineProperty(syncWrapperService, 'isSyncInProgress$', {
-        get: () => syncInProgressSubject.asObservable(),
-      });
+      // Directly assign the observables
+      syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$ = syncSubject.asObservable();
+      syncWrapperService.isSyncInProgress$ = syncInProgressSubject.asObservable();
 
       let effectFired = false;
       effects.createRepeatableTasksAndAddDueToday$.subscribe(() => {
@@ -151,12 +146,9 @@ describe('TaskDueEffects', () => {
       const syncSubject = new ReplaySubject<any>(1);
       const syncInProgressSubject = new ReplaySubject<boolean>(1);
 
-      Object.defineProperty(syncWrapperService, 'afterCurrentSyncDoneOrSyncDisabled$', {
-        get: () => syncSubject.asObservable(),
-      });
-      Object.defineProperty(syncWrapperService, 'isSyncInProgress$', {
-        get: () => syncInProgressSubject.asObservable(),
-      });
+      // Directly assign the observables
+      syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$ = syncSubject.asObservable();
+      syncWrapperService.isSyncInProgress$ = syncInProgressSubject.asObservable();
 
       effects.createRepeatableTasksAndAddDueToday$.subscribe(() => {
         expect(addTasksForTomorrowService.addAllDueToday).toHaveBeenCalledTimes(1);
@@ -213,12 +205,9 @@ describe('TaskDueEffects', () => {
       const syncSubject = new ReplaySubject<any>(1);
       const syncInProgressSubject = new ReplaySubject<boolean>(1);
 
-      Object.defineProperty(syncWrapperService, 'afterCurrentSyncDoneOrSyncDisabled$', {
-        get: () => syncSubject.asObservable(),
-      });
-      Object.defineProperty(syncWrapperService, 'isSyncInProgress$', {
-        get: () => syncInProgressSubject.asObservable(),
-      });
+      // Directly assign the observables
+      syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$ = syncSubject.asObservable();
+      syncWrapperService.isSyncInProgress$ = syncInProgressSubject.asObservable();
 
       const overdueTask: Task = { ...mockTask, id: 'overdue1', dueDay: '2023-06-12' };
       store.overrideSelector(selectOverdueTasksOnToday, [overdueTask]);
