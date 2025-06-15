@@ -66,7 +66,6 @@ import { showFocusOverlay } from '../../../focus-mode/store/focus-mode.actions';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TagService } from '../../../tag/tag.service';
 import { DialogPromptComponent } from '../../../../ui/dialog-prompt/dialog-prompt.component';
-import { planTasksForToday } from '../../../tag/store/tag.actions';
 import { TaskSharedActions } from '../../../../root-store/meta/task-shared.actions';
 import { selectTodayTagTaskIds } from '../../../tag/store/tag.reducer';
 import { isToday } from '../../../../util/is-today.util';
@@ -325,7 +324,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
   addToMyDay(): void {
     this._store.dispatch(
-      planTasksForToday({ taskIds: [this.task.id], isShowSnack: true }),
+      TaskSharedActions.planTasksForToday({ taskIds: [this.task.id], isShowSnack: true }),
     );
   }
 
