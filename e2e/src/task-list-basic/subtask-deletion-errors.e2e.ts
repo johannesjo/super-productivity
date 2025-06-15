@@ -20,27 +20,26 @@ module.exports = {
 
   'should create a task with multiple subtasks (as top-level tasks)': (
     browser: NBrowser,
-  ) =>
+  ) => {
     browser
       .addTask('Main Task for Deletion Test')
       .waitForElementVisible(TASK_SEL)
-      .assert.valueContains(TASK_TEXTAREA, 'Main Task for Deletion Test')
-      // Add tasks that would be subtasks
-      .addTask('Subtask One')
-      .pause(500)
-      .addTask('Subtask Two')
-      .pause(500)
-      .addTask('Subtask Three')
-      .pause(500)
-      // Verify we have 4 tasks total (newest first)
-      .assert.elementPresent(FIRST_TASK)
+      .assert.valueContains(TASK_TEXTAREA, 'Main Task for Deletion Test');
+    // Add tasks that would be subtasks
+    browser.addTask('Subtask One').pause(500);
+    browser.addTask('Subtask Two').pause(500);
+    browser.addTask('Subtask Three').pause(500);
+    // Verify we have 4 tasks total (newest first)
+    return browser.assert
+      .elementPresent(FIRST_TASK)
       .assert.elementPresent(SECOND_TASK)
       .assert.elementPresent(THIRD_TASK)
       .assert.elementPresent(FOURTH_TASK)
       .assert.valueContains(FIRST_TASK_TEXTAREA, 'Subtask Three')
       .assert.valueContains(SECOND_TASK_TEXTAREA, 'Subtask Two')
       .assert.valueContains(THIRD_TASK_TEXTAREA, 'Subtask One')
-      .assert.valueContains(FOURTH_TASK_TEXTAREA, 'Main Task for Deletion Test'),
+      .assert.valueContains(FOURTH_TASK_TEXTAREA, 'Main Task for Deletion Test');
+  },
 
   'should delete a subtask and check for errors': (browser: NBrowser) =>
     browser
