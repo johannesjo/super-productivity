@@ -60,7 +60,7 @@ import {
 import { CollapsibleComponent } from '../../ui/collapsible/collapsible.component';
 import { SnackService } from '../../core/snack/snack.service';
 import { Store } from '@ngrx/store';
-import { planTasksForToday } from '../tag/store/tag.actions';
+import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { TODAY_TAG } from '../tag/tag.const';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { CommonModule } from '@angular/common';
@@ -267,7 +267,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   addAllOverdueToMyDay(): void {
     const overdueTasks = this.overdueTasks();
     this._store.dispatch(
-      planTasksForToday({
+      TaskSharedActions.planTasksForToday({
         taskIds: overdueTasks.map((t) => t.id),
       }),
     );

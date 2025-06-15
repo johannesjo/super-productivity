@@ -13,7 +13,6 @@ import { moveProjectTaskToBacklogListAuto } from '../../project/store/project.ac
 import { flattenTasks } from './task.selectors';
 import { Store } from '@ngrx/store';
 import { PlannerActions } from '../../planner/store/planner.actions';
-import { planTasksForToday } from '../../tag/store/tag.actions';
 import { DatePipe } from '@angular/common';
 
 @Injectable()
@@ -227,7 +226,7 @@ export class TaskReminderEffects {
   );
   removeTaskReminderTrigger1$ = createEffect(() =>
     this._actions$.pipe(
-      ofType(planTasksForToday),
+      ofType(TaskSharedActions.planTasksForToday),
       filter(({ isSkipRemoveReminder }) => !isSkipRemoveReminder),
       concatMap(({ taskIds }) => this._taskService.getByIdsLive$(taskIds).pipe(first())),
       mergeMap((tasks) =>

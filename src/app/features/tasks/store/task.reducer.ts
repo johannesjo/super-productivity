@@ -602,6 +602,14 @@ export const taskReducer = createReducer<TaskState>(
     return taskAdapter.updateMany(updates, state);
   }),
 
+  on(TaskSharedActions.removeTasksFromTodayTag, (state, { taskIds }) => {
+    return {
+      ...state,
+      // we do this to maintain the order of tasks when they are moved to overdue
+      ids: [...taskIds, ...state.ids.filter((id) => !taskIds.includes(id))],
+    };
+  }),
+
   // REMINDER STUFF
   // --------------
   on(addReminderIdToTask, (state, { taskId, reminderId }) => {
