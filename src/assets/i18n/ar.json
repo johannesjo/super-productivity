@@ -31,10 +31,7 @@
     "RESTORE_FILE_BACKUP_ANDROID": "يبدو أنه لا توجد بيانات ، ولكن هناك نسخة احتياطية متاحة. هل تريد تحميلها؟",
     "RESTORE_STRAY_BACKUP": "قد يكون هناك خطأ ما أثناء المزامنة الأخيرة. هل تريد استعادة آخر نسخة احتياطية؟"
   },
-  "DATETIME_INPUT": {
-    "IN": "في {{time}}",
-    "TOMORROW": "غداً {{time}}"
-  },
+  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "لاحقا اليوم",
     "NEXT_WEEK": "الاسبوع القادم",

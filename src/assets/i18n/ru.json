@@ -31,10 +31,7 @@
     "RESTORE_FILE_BACKUP_ANDROID": "Данных не найдено, но есть резервная копия. Вы хотите её загрузить?",
     "RESTORE_STRAY_BACKUP": "Во время последней синхронизации могла произойти ошибка. Вы хотите восстановить последнюю резервную копию?"
   },
-  "DATETIME_INPUT": {
-    "IN": "через {{time}}",
-    "TOMORROW": "завтра {{time}}"
-  },
+  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Позже сегодня",
     "NEXT_WEEK": "На след. неделе",

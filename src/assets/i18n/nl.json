@@ -31,10 +31,7 @@
     "RESTORE_FILE_BACKUP_ANDROID": "Er lijken GEEN GEGEVENS te zijn, maar er is een back-up beschikbaar. Wil je hem laden?",
     "RESTORE_STRAY_BACKUP": "Tijdens de laatste synchronisatie is er mogelijk een fout opgetreden. Wilt u de laatste back-up herstellen?"
   },
-  "DATETIME_INPUT": {
-    "IN": "op {{time}}",
-    "TOMORROW": "morgen {{time}}"
-  },
+  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Later vandaag",
     "NEXT_WEEK": "Volgende week",

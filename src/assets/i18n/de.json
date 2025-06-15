@@ -31,10 +31,7 @@
     "RESTORE_FILE_BACKUP_ANDROID": "Es scheint KEINE DATEN zu geben, aber es ist ein Backup verfügbar. Möchten Sie es laden?",
     "RESTORE_STRAY_BACKUP": "Bei der letzten Synchronisierung ist möglicherweise ein Fehler aufgetreten. Möchten Sie das letzte Backup wiederherstellen?"
   },
-  "DATETIME_INPUT": {
-    "IN": "in {{time}}",
-    "TOMORROW": "morgen {{time}}"
-  },
+  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Im Laufe des Tages",
     "NEXT_WEEK": "Nächste Woche",

@@ -31,10 +31,7 @@
     "RESTORE_FILE_BACKUP_ANDROID": "データがないようですが、利用可能なバックアップがあります。ロードしますか？",
     "RESTORE_STRAY_BACKUP": "最後の同期中に、エラーが発生した可能性があります。最後のバックアップを復元しますか？"
   },
-  "DATETIME_INPUT": {
-    "IN": " {{time}}に",
-    "TOMORROW": "明日 {{time}}"
-  },
+  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "今日あとで",
     "NEXT_WEEK": "来週",

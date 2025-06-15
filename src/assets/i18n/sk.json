@@ -31,10 +31,7 @@
     "RESTORE_FILE_BACKUP_ANDROID": "Zdá sa, že neexistujú žiadne údaje, ale je k dispozícii záloha. Chcete ju načítať?",
     "RESTORE_STRAY_BACKUP": "Počas poslednej synchronizácie mohlo dôjsť k nejakej chybe. Chcete obnoviť poslednú zálohu?"
   },
-  "DATETIME_INPUT": {
-    "IN": "v {{time}}",
-    "TOMORROW": "zajtra {{time}}"
-  },
+  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Later Today",
     "NEXT_WEEK": "Budúci týždeň",

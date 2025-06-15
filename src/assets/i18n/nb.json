@@ -31,10 +31,7 @@
     "RESTORE_FILE_BACKUP_ANDROID": "Det ser ut til å være INGEN DATA, men det er en sikkerhetskopi tilgjengelig. Vil du laste den inn?",
     "RESTORE_STRAY_BACKUP": "Under siste synkronisering kan det ha oppstått en feil. Vil du gjenopprette den siste sikkerhetskopien?"
   },
-  "DATETIME_INPUT": {
-    "IN": "om {{time}}",
-    "TOMORROW": "i morgen {{time}}"
-  },
+  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Senere i dag",
     "NEXT_WEEK": "Neste uke",

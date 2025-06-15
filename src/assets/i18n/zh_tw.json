@@ -20,10 +20,7 @@
     "RESTORE_FILE_BACKUP_ANDROID": "似乎沒有資料，但是有可用備份。是否要從備份載入？",
     "RESTORE_STRAY_BACKUP": "在上次同步期間，可能有一些錯誤。您要還原上一個備份嗎？"
   },
-  "DATETIME_INPUT": {
-    "IN": "在 {{time}}",
-    "TOMORROW": "明天 {{time}}"
-  },
+  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "今天稍晚",
     "NEXT_WEEK": "下周",

@@ -31,10 +31,7 @@
     "RESTORE_FILE_BACKUP_ANDROID": "Wygląda na to, że NIE MA DANYCH, ale dostępna jest kopia zapasowa. Czy chcesz ją załadować?",
     "RESTORE_STRAY_BACKUP": "Ostatnia synchronizacja zawiera błąd. Czy chcesz odtworzyć ostatnią kopię zapasową?"
   },
-  "DATETIME_INPUT": {
-    "IN": "w {{time}}",
-    "TOMORROW": "jutro o {{time}}"
-  },
+  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Później dzisiaj",
     "NEXT_WEEK": "Następny tydzień",
