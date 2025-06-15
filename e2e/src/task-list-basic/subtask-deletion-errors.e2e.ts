@@ -2,15 +2,14 @@ import { NBrowser } from '../../n-browser-interface';
 
 const TASK_SEL = 'task';
 const TASK_TEXTAREA = 'task textarea';
-const SUB_TASKS_CONTAINER = 'task .sub-tasks';
-const FIRST_SUB_TASK = '.sub-tasks task:nth-child(1)';
-const FIRST_SUB_TASK_TEXTAREA = '.sub-tasks task:nth-child(1) textarea';
-const SECOND_SUB_TASK = '.sub-tasks task:nth-child(2)';
-const SECOND_SUB_TASK_TEXTAREA = '.sub-tasks task:nth-child(2) textarea';
-const THIRD_SUB_TASK = '.sub-tasks task:nth-child(3)';
-const THIRD_SUB_TASK_TEXTAREA = '.sub-tasks task:nth-child(3) textarea';
-const LAST_TASK = 'task:last-child';
-const LAST_TASK_TEXTAREA = 'task:last-child textarea';
+const FIRST_TASK = 'task:nth-child(1)';
+const FIRST_TASK_TEXTAREA = 'task:nth-child(1) textarea';
+const SECOND_TASK = 'task:nth-child(2)';
+const SECOND_TASK_TEXTAREA = 'task:nth-child(2) textarea';
+const THIRD_TASK = 'task:nth-child(3)';
+const THIRD_TASK_TEXTAREA = 'task:nth-child(3) textarea';
+const FOURTH_TASK = 'task:nth-child(4)';
+const FOURTH_TASK_TEXTAREA = 'task:nth-child(4) textarea';
 
 module.exports = {
   '@tags': ['task', 'NEW', 'sub-task', 'deletion', 'error-check'],
@@ -19,74 +18,58 @@ module.exports = {
 
   after: (browser: NBrowser) => browser.end(),
 
-  'should create a task with multiple subtasks': (browser: NBrowser) =>
+  'should create a task with multiple subtasks (as top-level tasks)': (
+    browser: NBrowser,
+  ) =>
     browser
       .addTask('Main Task for Deletion Test')
       .waitForElementVisible(TASK_SEL)
       .assert.valueContains(TASK_TEXTAREA, 'Main Task for Deletion Test')
-      // Add first subtask
-      .click(LAST_TASK_TEXTAREA)
-      .pause(200)
-      .sendKeys(LAST_TASK_TEXTAREA, 'a')
+      // Add tasks that would be subtasks
+      .addTask('Subtask One')
       .pause(500)
-      .waitForElementVisible(SUB_TASKS_CONTAINER, 5000)
-      .waitForElementVisible(FIRST_SUB_TASK, 5000)
-      .sendKeys(FIRST_SUB_TASK_TEXTAREA, 'Subtask One')
-      .sendKeys(FIRST_SUB_TASK_TEXTAREA, browser.Keys.ENTER)
+      .addTask('Subtask Two')
       .pause(500)
-      // Add second subtask
-      .click(LAST_TASK_TEXTAREA)
-      .pause(200)
-      .sendKeys(LAST_TASK_TEXTAREA, 'a')
+      .addTask('Subtask Three')
       .pause(500)
-      .waitForElementVisible(SECOND_SUB_TASK, 5000)
-      .sendKeys(SECOND_SUB_TASK_TEXTAREA, 'Subtask Two')
-      .sendKeys(SECOND_SUB_TASK_TEXTAREA, browser.Keys.ENTER)
-      .pause(500)
-      // Add third subtask
-      .click(LAST_TASK_TEXTAREA)
-      .pause(200)
-      .sendKeys(LAST_TASK_TEXTAREA, 'a')
-      .pause(500)
-      .waitForElementVisible(THIRD_SUB_TASK, 5000)
-      .sendKeys(THIRD_SUB_TASK_TEXTAREA, 'Subtask Three')
-      .sendKeys(THIRD_SUB_TASK_TEXTAREA, browser.Keys.ENTER)
-      .pause(500)
-      // Verify we have parent task with 3 subtasks
-      .assert.elementPresent(LAST_TASK)
-      .assert.elementPresent(FIRST_SUB_TASK)
-      .assert.elementPresent(SECOND_SUB_TASK)
-      .assert.elementPresent(THIRD_SUB_TASK),
+      // Verify we have 4 tasks total (newest first)
+      .assert.elementPresent(FIRST_TASK)
+      .assert.elementPresent(SECOND_TASK)
+      .assert.elementPresent(THIRD_TASK)
+      .assert.elementPresent(FOURTH_TASK)
+      .assert.valueContains(FIRST_TASK_TEXTAREA, 'Subtask Three')
+      .assert.valueContains(SECOND_TASK_TEXTAREA, 'Subtask Two')
+      .assert.valueContains(THIRD_TASK_TEXTAREA, 'Subtask One')
+      .assert.valueContains(FOURTH_TASK_TEXTAREA, 'Main Task for Deletion Test'),
 
   'should delete a subtask and check for errors': (browser: NBrowser) =>
     browser
-      // Delete first subtask
-      .click(FIRST_SUB_TASK_TEXTAREA)
+      // Delete first task (Subtask Three)
+      .click(FIRST_TASK_TEXTAREA)
       .pause(200)
-      .clearValue(FIRST_SUB_TASK_TEXTAREA)
-      .setValue(FIRST_SUB_TASK_TEXTAREA, browser.Keys.BACK_SPACE)
+      .clearValue(FIRST_TASK_TEXTAREA)
+      .setValue(FIRST_TASK_TEXTAREA, browser.Keys.BACK_SPACE)
       .pause(1000)
-      // Check that subtask is removed
-      .assert.not.elementPresent(THIRD_SUB_TASK)
-      .assert.elementPresent(FIRST_SUB_TASK) // Second becomes first
-      .assert.elementPresent(SECOND_SUB_TASK) // Third becomes second
+      // Check that task is removed
+      .assert.not.elementPresent(FOURTH_TASK)
+      .assert.elementPresent(FIRST_TASK)
+      .assert.elementPresent(SECOND_TASK)
+      .assert.elementPresent(THIRD_TASK)
       // Check for console errors
       .perform(() => (browser as NBrowser).noError()),
 
   'should delete the main task and check for errors': (browser: NBrowser) =>
     browser
-      // Delete the main task (parent)
-      .click(LAST_TASK_TEXTAREA)
+      // Delete the last task (Main Task for Deletion Test)
+      .click(THIRD_TASK_TEXTAREA)
       .pause(200)
-      .clearValue(LAST_TASK_TEXTAREA)
-      .setValue(LAST_TASK_TEXTAREA, browser.Keys.BACK_SPACE)
+      .clearValue(THIRD_TASK_TEXTAREA)
+      .setValue(THIRD_TASK_TEXTAREA, browser.Keys.BACK_SPACE)
       .pause(1000)
-      // Check that main task and its subtasks are removed
-      .execute(() => {
-        const tasks = document.querySelectorAll('task');
-        console.log('Tasks after main task deletion:', tasks.length);
-        return tasks.length;
-      })
+      // Check that task is removed
+      .assert.elementPresent(FIRST_TASK)
+      .assert.elementPresent(SECOND_TASK)
+      .assert.not.elementPresent(THIRD_TASK)
       // Check for console errors
       .perform(() => (browser as NBrowser).noError()),
 

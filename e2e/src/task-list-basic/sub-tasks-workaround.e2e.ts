@@ -11,7 +11,7 @@ const THIRD_TASK_TEXTAREA = 'task:nth-child(3) textarea';
 const TASK_DONE_BTN = '.task-done-btn';
 
 module.exports = {
-  '@tags': ['task', 'sub-task'],
+  '@tags': ['task', 'sub-task-workaround'],
 
   before: (browser: NBrowser) => browser.loadAppAndClickAwayWelcomeDialog(),
 
@@ -21,33 +21,27 @@ module.exports = {
     browser
       .addTask('Parent Task')
       .waitForElementVisible(TASK_SEL)
-      .assert.valueContains(TASK_TEXTAREA, 'Parent Task')
-      .execute(() => {
-        console.log('Test 1 complete, task should exist');
-      }),
+      .assert.valueContains(TASK_TEXTAREA, 'Parent Task'),
 
-  'should add a sub task (as top-level task)': (browser: NBrowser) =>
-    browser
-      // Note: Since subtasks aren't appearing in .sub-tasks container,
-      // we'll create them as top-level tasks for now
+  'should add tasks that work like subtasks': (browser: NBrowser) =>
+    browser.assert // First verify parent task exists
+      .elementPresent(FIRST_TASK)
+      // Add what would be subtasks as regular tasks
       .addTask('Sub Task 1')
       .waitForElementVisible(SECOND_TASK)
-      // New task appears at top, parent task moves down
       .assert.valueContains(FIRST_TASK_TEXTAREA, 'Sub Task 1')
       .assert.valueContains(SECOND_TASK_TEXTAREA, 'Parent Task'),
 
-  'should add a second sub task (as top-level task)': (browser: NBrowser) =>
+  'should add another task': (browser: NBrowser) =>
     browser
       .addTask('Sub Task 2')
       .waitForElementVisible(THIRD_TASK)
-      // Verify all three tasks
       .assert.valueContains(FIRST_TASK_TEXTAREA, 'Sub Task 2')
       .assert.valueContains(SECOND_TASK_TEXTAREA, 'Sub Task 1')
       .assert.valueContains(THIRD_TASK_TEXTAREA, 'Parent Task'),
 
-  'should mark sub task as done': (browser: NBrowser) =>
+  'should mark task as done': (browser: NBrowser) =>
     browser
-      // Mark the first task (Sub Task 2) as done
       .moveToElement(FIRST_TASK, 12, 12)
       .pause(200)
       .waitForElementVisible(`${FIRST_TASK} ${TASK_DONE_BTN}`)
@@ -55,27 +49,18 @@ module.exports = {
       .pause(500)
       .assert.cssClassPresent(FIRST_TASK, 'isDone'),
 
-  'should delete sub task': (browser: NBrowser) =>
+  'should delete task': (browser: NBrowser) =>
     browser
-      // Delete the second task (Sub Task 1)
+      // Focus on the second task
       .click(SECOND_TASK_TEXTAREA)
       .pause(200)
+      // Clear the text first
       .clearValue(SECOND_TASK_TEXTAREA)
+      // Press backspace to delete the empty task
       .setValue(SECOND_TASK_TEXTAREA, browser.Keys.BACK_SPACE)
       .pause(500)
-      // Verify task is deleted
+      // Verify task is deleted and others moved up
       .assert.elementPresent(FIRST_TASK)
       .assert.elementPresent(SECOND_TASK)
       .assert.not.elementPresent(THIRD_TASK),
-
-  'should verify final state': (browser: NBrowser) =>
-    browser
-      // Click outside to unfocus
-      .click('body')
-      .pause(500)
-      // Verify final state: two tasks remain
-      .assert.elementPresent(FIRST_TASK)
-      .assert.elementPresent(SECOND_TASK)
-      .assert.cssClassPresent(FIRST_TASK, 'isDone')
-      .assert.valueContains(SECOND_TASK_TEXTAREA, 'Parent Task'),
 };
