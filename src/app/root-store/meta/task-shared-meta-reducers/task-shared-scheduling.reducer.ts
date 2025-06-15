@@ -139,8 +139,8 @@ const handlePlanTasksForToday = (
     [TASK_FEATURE_NAME]: taskAdapter.updateMany(taskUpdates, state[TASK_FEATURE_NAME]),
   };
 
-  // Then, update the today tag
-  return updateTags(updatedState, [
+  // Update the today tag
+  const stateWithTodayTag = updateTags(updatedState, [
     {
       id: TODAY_TAG.id,
       changes: {
@@ -148,6 +148,23 @@ const handlePlanTasksForToday = (
       },
     },
   ]);
+
+  // Remove taskIds from planner days
+  const plannerDaysCopy = { ...stateWithTodayTag.planner.days };
+  Object.keys(plannerDaysCopy).forEach((day) => {
+    const filtered = plannerDaysCopy[day].filter((id) => !taskIds.includes(id));
+    if (filtered.length !== plannerDaysCopy[day].length) {
+      plannerDaysCopy[day] = filtered;
+    }
+  });
+
+  return {
+    ...stateWithTodayTag,
+    planner: {
+      ...stateWithTodayTag.planner,
+      days: plannerDaysCopy,
+    },
+  };
 };
 
 const handleRemoveTasksFromTodayTag = (

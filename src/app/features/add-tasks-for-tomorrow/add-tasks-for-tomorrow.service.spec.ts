@@ -7,7 +7,7 @@
 // import { provideMockStore, MockStore } from '@ngrx/store/testing';
 // import { TaskRepeatCfg } from '../task-repeat-cfg/task-repeat-cfg.model';
 // import { TaskWithDueTime, TaskWithDueDay, TaskCopy } from '../tasks/task.model';
-// import { planTasksForToday } from '../tag/store/tag.actions';
+// import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 // import {
 //   selectTasksDueForDay,
 //   selectTasksWithDueTimeForRange,
@@ -286,7 +286,7 @@
 //       // The service may order tasks differently based on the sorting algorithm
 //       expect(dispatchSpy).toHaveBeenCalled();
 //       const actualCall = dispatchSpy.calls.first().args[0] as any;
-//       expect(actualCall.type).toBe('[Tag] Plan tasks for Today');
+//       expect(actualCall.type).toBe('[Task Shared] Plan tasks for Today');
 //       expect(actualCall.isSkipRemoveReminder).toBe(true);
 //       expect(actualCall.taskIds.length).toBe(2);
 //       expect(actualCall.taskIds).toContain('task1');
@@ -327,8 +327,9 @@
 //       const result = await service.addAllDueTomorrow();
 //
 //       expect(dispatchSpy).toHaveBeenCalledWith(
-//         planTasksForToday({
+//         TaskSharedActions.planTasksForToday({
 //           taskIds: ['task2'], // Only task2
+//           parentTaskMap: {},
 //           isSkipRemoveReminder: true,
 //         }),
 //       );
@@ -372,7 +373,7 @@
 //       // The service may order tasks differently based on the sorting algorithm
 //       expect(dispatchSpy).toHaveBeenCalled();
 //       const actualCall = dispatchSpy.calls.first().args[0] as any;
-//       expect(actualCall.type).toBe('[Tag] Plan tasks for Today');
+//       expect(actualCall.type).toBe('[Task Shared] Plan tasks for Today');
 //       expect(actualCall.isSkipRemoveReminder).toBe(true);
 //       expect(actualCall.taskIds.length).toBe(2);
 //       expect(actualCall.taskIds).toContain('task3');
@@ -485,7 +486,7 @@
 //       // The service may order tasks differently based on the sorting algorithm
 //       expect(dispatchSpy).toHaveBeenCalled();
 //       const actualCall = dispatchSpy.calls.first().args[0] as any;
-//       expect(actualCall.type).toBe('[Tag] Plan tasks for Today');
+//       expect(actualCall.type).toBe('[Task Shared] Plan tasks for Today');
 //       expect(actualCall.isSkipRemoveReminder).toBe(true);
 //       expect(actualCall.taskIds.length).toBe(2);
 //       expect(actualCall.taskIds).toContain('task1');
