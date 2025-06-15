@@ -251,10 +251,10 @@ const createActionHandlers = (state: RootState, action: Action): ActionHandlerMa
 });
 
 export const taskSharedSchedulingMetaReducer: MetaReducer = (
-  reducer: ActionReducer<any, Action>,
+  reducer: ActionReducer<RootState, Action>,
 ) => {
   return (state: unknown, action: Action) => {
-    if (!state) return reducer(state, action);
+    if (!state) return reducer(state as RootState | undefined, action);
 
     const rootState = state as RootState;
     const actionHandlers = createActionHandlers(rootState, action);
