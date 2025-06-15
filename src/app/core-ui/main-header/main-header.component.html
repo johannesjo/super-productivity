@@ -39,6 +39,29 @@
     </mat-menu>
   }
 
+  @if (isScheduleSection) {
+    <div class="week-month-selector">
+      <button
+        (click)="selectTimeView('week')"
+        [class.active]="(selectedTimeView$ | async) === 'week'"
+        class="week-month-btn week-btn"
+        matTooltip="View Week"
+        mat-button
+      >
+        {{ 'GCF.SCHEDULE.WEEK' | translate }}
+      </button>
+      <button
+        (click)="selectTimeView('month')"
+        [class.active]="(selectedTimeView$ | async) === 'month'"
+        class="week-month-btn month-btn"
+        matTooltip="View Month"
+        mat-button
+      >
+        {{ 'GCF.SCHEDULE.MONTH' | translate }}
+      </button>
+    </div>
+  }
+
   <nav class="action-nav">
     <button
       (click)="layoutService.showAddTaskBar()"
