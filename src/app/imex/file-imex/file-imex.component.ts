@@ -6,6 +6,7 @@ import {
   viewChild,
   OnInit,
 } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
 import { SnackService } from '../../core/snack/snack.service';
 import { download } from '../../util/download';
@@ -40,6 +41,7 @@ export class FileImexComponent implements OnInit {
   private _pfapiService = inject(PfapiService);
   private _activatedRoute = inject(ActivatedRoute);
   private _matDialog = inject(MatDialog);
+  private _http = inject(HttpClient);
 
   readonly fileInputRef = viewChild<ElementRef>('fileInput');
   T: typeof T = T;
@@ -120,23 +122,19 @@ export class FileImexComponent implements OnInit {
     }
 
     try {
-      const response = await fetch(url, {
-        headers: {
-          Accept: 'application/json',
-        },
-      });
+      const textData = await this._http
+        .get(url, {
+          headers: {
+            Accept: 'application/json',
+          },
+          responseType: 'text',
+        })
+        .toPromise();
 
-      if (!response.ok) {
-        // Handle non-successful HTTP responses (e.g., 404, 500)
-        console.error(`HTTP error! status: ${response.status} for URL: ${url}`);
-        this._snackService.open({ type: 'ERROR', msg: T.FILE_IMEX.S_ERR_NETWORK });
-        return;
-      }
-      const textData = await response.text();
       await this._processAndImportData(textData);
     } catch (error) {
-      // Handle network errors (e.g., fetch failed to connect)
-      console.error('Network error or other issue fetching from URL:', error);
+      // Handle network errors and HTTP errors
+      console.error('Network error or HTTP error fetching from URL:', error);
       this._snackService.open({ type: 'ERROR', msg: T.FILE_IMEX.S_ERR_NETWORK });
     }
   }

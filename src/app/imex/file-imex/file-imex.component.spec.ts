@@ -1,4 +1,9 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of } from 'rxjs';
@@ -21,6 +26,7 @@ describe('FileImexComponent', () => {
   let mockPfapiService: jasmine.SpyObj<PfapiService>;
   let mockActivatedRoute: any;
   let mockMatDialog: jasmine.SpyObj<MatDialog>;
+  let httpTestingController: HttpTestingController;
 
   const mockAppData = createAppDataCompleteMock();
 
@@ -55,6 +61,8 @@ describe('FileImexComponent', () => {
     await TestBed.configureTestingModule({
       imports: [FileImexComponent, TranslateModule.forRoot()],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: SnackService, useValue: snackServiceSpy },
         { provide: Router, useValue: routerSpy },
         { provide: PfapiService, useValue: pfapiServiceSpy },
@@ -69,6 +77,7 @@ describe('FileImexComponent', () => {
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     mockPfapiService = TestBed.inject(PfapiService) as jasmine.SpyObj<PfapiService>;
     mockMatDialog = TestBed.inject(MatDialog) as jasmine.SpyObj<MatDialog>;
+    httpTestingController = TestBed.inject(HttpTestingController);
   });
 
   it('should create', () => {
@@ -198,27 +207,27 @@ describe('FileImexComponent', () => {
 
   describe('importFromUrlHandler', () => {
     beforeEach(() => {
-      spyOn(window, 'fetch');
       spyOn(component, '_processAndImportData' as any).and.returnValue(Promise.resolve());
     });
 
+    afterEach(() => {
+      httpTestingController.verify();
+    });
+
     it('should import data from valid URL', async () => {
-      const mockResponse = {
-        ok: true,
-        text: jasmine
-          .createSpy()
-          .and.returnValue(Promise.resolve('{"imported": "data"}')),
-      };
-      (window.fetch as jasmine.Spy).and.returnValue(Promise.resolve(mockResponse));
+      const testUrl = 'https://example.com/backup.json';
+      const mockData = '{"imported": "data"}';
 
-      await component.importFromUrlHandler('https://example.com/backup.json');
+      const promise = component.importFromUrlHandler(testUrl);
 
-      expect(window.fetch).toHaveBeenCalledWith('https://example.com/backup.json', {
-        headers: { Accept: 'application/json' },
-      });
-      expect(component['_processAndImportData']).toHaveBeenCalledWith(
-        '{"imported": "data"}',
-      );
+      const req = httpTestingController.expectOne(testUrl);
+      expect(req.request.method).toBe('GET');
+      expect(req.request.headers.get('Accept')).toBe('application/json');
+
+      req.flush(mockData);
+      await promise;
+
+      expect(component['_processAndImportData']).toHaveBeenCalledWith(mockData);
     });
 
     it('should handle empty URL', async () => {
@@ -228,17 +237,18 @@ describe('FileImexComponent', () => {
         type: 'ERROR',
         msg: T.FILE_IMEX.S_ERR_INVALID_URL,
       });
-      expect(window.fetch).not.toHaveBeenCalled();
+      httpTestingController.expectNone(() => true);
     });
 
     it('should handle HTTP error responses', async () => {
-      const mockResponse = {
-        ok: false,
-        status: 404,
-      };
-      (window.fetch as jasmine.Spy).and.returnValue(Promise.resolve(mockResponse));
+      const testUrl = 'https://example.com/backup.json';
 
-      await component.importFromUrlHandler('https://example.com/backup.json');
+      const promise = component.importFromUrlHandler(testUrl);
+
+      const req = httpTestingController.expectOne(testUrl);
+      req.flush('Not Found', { status: 404, statusText: 'Not Found' });
+
+      await promise;
 
       expect(mockSnackService.open).toHaveBeenCalledWith({
         type: 'ERROR',
@@ -247,11 +257,14 @@ describe('FileImexComponent', () => {
     });
 
     it('should handle network errors', async () => {
-      (window.fetch as jasmine.Spy).and.returnValue(
-        Promise.reject(new Error('Network error')),
-      );
+      const testUrl = 'https://example.com/backup.json';
 
-      await component.importFromUrlHandler('https://example.com/backup.json');
+      const promise = component.importFromUrlHandler(testUrl);
+
+      const req = httpTestingController.expectOne(testUrl);
+      req.error(new ErrorEvent('Network error'));
+
+      await promise;
 
       expect(mockSnackService.open).toHaveBeenCalledWith({
         type: 'ERROR',
