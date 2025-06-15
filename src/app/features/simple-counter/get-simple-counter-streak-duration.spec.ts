@@ -274,4 +274,158 @@ describe('getSimpleCounterStreakDuration()', () => {
       expect(getSimpleCounterStreakDuration(sc as SimpleCounterCopy)).toBe(13);
     });
   });
+
+  const T6: Partial<SimpleCounterCopy>[] = [
+    {
+      id: '1',
+      countOnDay: {
+        [getWorklogStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))]: 0,
+        [getWorklogStr(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 4 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 5 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 8 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 9 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 10 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 11 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 12 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 13 * 24 * 60 * 60 * 1000))]: 1,
+      },
+      isTrackStreaks: true,
+      streakMinValue: 1,
+      streakWeekDays: {
+        0: true,
+        1: true,
+        2: true,
+        3: true,
+        4: true,
+        5: true,
+        6: true,
+      },
+    },
+    {
+      id: '1',
+      countOnDay: {
+        [getWorklogStr()]: 1,
+        [getWorklogStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))]: 0,
+        [getWorklogStr(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 4 * 24 * 60 * 60 * 1000))]: 0,
+        [getWorklogStr(new Date(Date.now() - 5 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 8 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 9 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 10 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 11 * 24 * 60 * 60 * 1000))]: 0,
+        [getWorklogStr(new Date(Date.now() - 12 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 13 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 14 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 15 * 24 * 60 * 60 * 1000))]: 2,
+      },
+      isTrackStreaks: true,
+      streakMinValue: 2,
+      streakWeekDays: {
+        0: true,
+        1: true,
+        2: true,
+        3: true,
+        4: true,
+        5: true,
+        6: true,
+        ...{ [new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).getDay()]: false },
+      },
+    },
+  ];
+
+  T6.forEach((sc: Partial<SimpleCounterCopy>) => {
+    it('should return 0 if streak, and 13 when edited', () => {
+      expect(getSimpleCounterStreakDuration(sc as SimpleCounterCopy)).toBe(0);
+
+      (sc as SimpleCounterCopy).countOnDay[
+        getWorklogStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))
+      ] = 2;
+
+      expect(getSimpleCounterStreakDuration(sc as SimpleCounterCopy)).toBe(13);
+    });
+  });
+
+  const T7: Partial<SimpleCounterCopy>[] = [
+    {
+      id: '1',
+      countOnDay: {
+        [getWorklogStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 4 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 5 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 8 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 9 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 10 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 11 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 12 * 24 * 60 * 60 * 1000))]: 1,
+        [getWorklogStr(new Date(Date.now() - 13 * 24 * 60 * 60 * 1000))]: 1,
+      },
+      isTrackStreaks: true,
+      streakMinValue: 1,
+      streakWeekDays: {
+        0: true,
+        1: true,
+        2: true,
+        3: true,
+        4: true,
+        5: true,
+        6: true,
+      },
+    },
+    {
+      id: '1',
+      countOnDay: {
+        [getWorklogStr()]: 1,
+        [getWorklogStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 4 * 24 * 60 * 60 * 1000))]: 0,
+        [getWorklogStr(new Date(Date.now() - 5 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 8 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 9 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 10 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 11 * 24 * 60 * 60 * 1000))]: 0,
+        [getWorklogStr(new Date(Date.now() - 12 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 13 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 14 * 24 * 60 * 60 * 1000))]: 2,
+        [getWorklogStr(new Date(Date.now() - 15 * 24 * 60 * 60 * 1000))]: 2,
+      },
+      isTrackStreaks: true,
+      streakMinValue: 2,
+      streakWeekDays: {
+        0: true,
+        1: true,
+        2: true,
+        3: true,
+        4: true,
+        5: true,
+        6: true,
+        ...{ [new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).getDay()]: false },
+      },
+    },
+  ];
+
+  T7.forEach((sc: Partial<SimpleCounterCopy>) => {
+    it('should return 13 if streak, and 0 when edited', () => {
+      expect(getSimpleCounterStreakDuration(sc as SimpleCounterCopy)).toBe(13);
+
+      (sc as SimpleCounterCopy).countOnDay[
+        getWorklogStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))
+      ] = 0;
+
+      expect(getSimpleCounterStreakDuration(sc as SimpleCounterCopy)).toBe(0);
+    });
+  });
 });
