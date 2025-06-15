@@ -23,14 +23,16 @@ module.exports = {
       .waitForElementVisible(TASK_SEL)
       .assert.valueContains(TASK_TEXTAREA, 'Parent Task'),
 
-  'should add tasks that work like subtasks': (browser: NBrowser) =>
-    browser.assert // First verify parent task exists
-      .elementPresent(FIRST_TASK)
-      // Add what would be subtasks as regular tasks
+  'should add tasks that work like subtasks': (browser: NBrowser) => {
+    // First verify parent task exists
+    browser.assert.elementPresent(FIRST_TASK);
+    // Add what would be subtasks as regular tasks
+    return browser
       .addTask('Sub Task 1')
       .waitForElementVisible(SECOND_TASK)
       .assert.valueContains(FIRST_TASK_TEXTAREA, 'Sub Task 1')
-      .assert.valueContains(SECOND_TASK_TEXTAREA, 'Parent Task'),
+      .assert.valueContains(SECOND_TASK_TEXTAREA, 'Parent Task');
+  },
 
   'should add another task': (browser: NBrowser) =>
     browser
