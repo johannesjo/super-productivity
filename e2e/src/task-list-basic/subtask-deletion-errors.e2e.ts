@@ -2,14 +2,15 @@ import { NBrowser } from '../../n-browser-interface';
 
 const TASK_SEL = 'task';
 const TASK_TEXTAREA = 'task textarea';
-const SUB_TASK_INPUT = 'add-task-bar input';
-const SUB_TASK_ADD_BTN = 'add-task-bar .switch-add-to-btn';
-const FIRST_TASK = 'task:nth-child(1)';
-const FIRST_TASK_TEXTAREA = 'task:nth-child(1) textarea';
-const SECOND_TASK = 'task:nth-child(2)';
-const SECOND_TASK_TEXTAREA = 'task:nth-child(2) textarea';
-const THIRD_TASK = 'task:nth-child(3)';
-// const THIRD_TASK_TEXTAREA = 'task:nth-child(3) textarea';
+const SUB_TASKS_CONTAINER = 'task .sub-tasks';
+const FIRST_SUB_TASK = '.sub-tasks task:nth-child(1)';
+const FIRST_SUB_TASK_TEXTAREA = '.sub-tasks task:nth-child(1) textarea';
+const SECOND_SUB_TASK = '.sub-tasks task:nth-child(2)';
+const SECOND_SUB_TASK_TEXTAREA = '.sub-tasks task:nth-child(2) textarea';
+const THIRD_SUB_TASK = '.sub-tasks task:nth-child(3)';
+const THIRD_SUB_TASK_TEXTAREA = '.sub-tasks task:nth-child(3) textarea';
+const LAST_TASK = 'task:last-child';
+const LAST_TASK_TEXTAREA = 'task:last-child textarea';
 
 module.exports = {
   '@tags': ['task', 'NEW', 'sub-task', 'deletion', 'error-check'],
@@ -24,85 +25,67 @@ module.exports = {
       .waitForElementVisible(TASK_SEL)
       .assert.valueContains(TASK_TEXTAREA, 'Main Task for Deletion Test')
       // Add first subtask
-      .click(TASK_TEXTAREA)
+      .click(LAST_TASK_TEXTAREA)
       .pause(200)
-      .sendKeys(TASK_TEXTAREA, browser.Keys.ESCAPE)
-      .pause(200)
-      .perform(() => (browser as NBrowser).sendKeysToActiveEl('a'))
+      .sendKeys(LAST_TASK_TEXTAREA, 'a')
       .pause(500)
-      .waitForElementVisible(SUB_TASK_INPUT, 10000)
-      .setValue(SUB_TASK_INPUT, 'Subtask One')
-      .click(SUB_TASK_ADD_BTN)
+      .waitForElementVisible(SUB_TASKS_CONTAINER, 5000)
+      .waitForElementVisible(FIRST_SUB_TASK, 5000)
+      .sendKeys(FIRST_SUB_TASK_TEXTAREA, 'Subtask One')
+      .sendKeys(FIRST_SUB_TASK_TEXTAREA, browser.Keys.ENTER)
       .pause(500)
       // Add second subtask
-      .perform(() => (browser as NBrowser).sendKeysToActiveEl('a'))
+      .click(LAST_TASK_TEXTAREA)
+      .pause(200)
+      .sendKeys(LAST_TASK_TEXTAREA, 'a')
       .pause(500)
-      .waitForElementVisible(SUB_TASK_INPUT, 10000)
-      .setValue(SUB_TASK_INPUT, 'Subtask Two')
-      .click(SUB_TASK_ADD_BTN)
+      .waitForElementVisible(SECOND_SUB_TASK, 5000)
+      .sendKeys(SECOND_SUB_TASK_TEXTAREA, 'Subtask Two')
+      .sendKeys(SECOND_SUB_TASK_TEXTAREA, browser.Keys.ENTER)
       .pause(500)
       // Add third subtask
-      .perform(() => (browser as NBrowser).sendKeysToActiveEl('a'))
+      .click(LAST_TASK_TEXTAREA)
+      .pause(200)
+      .sendKeys(LAST_TASK_TEXTAREA, 'a')
       .pause(500)
-      .waitForElementVisible(SUB_TASK_INPUT, 10000)
-      .setValue(SUB_TASK_INPUT, 'Subtask Three')
-      .click(SUB_TASK_ADD_BTN)
+      .waitForElementVisible(THIRD_SUB_TASK, 5000)
+      .sendKeys(THIRD_SUB_TASK_TEXTAREA, 'Subtask Three')
+      .sendKeys(THIRD_SUB_TASK_TEXTAREA, browser.Keys.ENTER)
       .pause(500)
-      // Verify we have 4 tasks total
-      .waitForElementVisible(FIRST_TASK)
-      .waitForElementVisible(SECOND_TASK)
-      .waitForElementVisible(THIRD_TASK)
-      .waitForElementVisible('task:nth-child(4)'),
+      // Verify we have parent task with 3 subtasks
+      .assert.elementPresent(LAST_TASK)
+      .assert.elementPresent(FIRST_SUB_TASK)
+      .assert.elementPresent(SECOND_SUB_TASK)
+      .assert.elementPresent(THIRD_SUB_TASK),
 
   'should delete a subtask and check for errors': (browser: NBrowser) =>
     browser
-      // Delete second task (Subtask One)
-      .click(SECOND_TASK_TEXTAREA)
+      // Delete first subtask
+      .click(FIRST_SUB_TASK_TEXTAREA)
       .pause(200)
-      .clearValue(SECOND_TASK_TEXTAREA)
-      .setValue(SECOND_TASK_TEXTAREA, browser.Keys.BACK_SPACE)
+      .clearValue(FIRST_SUB_TASK_TEXTAREA)
+      .setValue(FIRST_SUB_TASK_TEXTAREA, browser.Keys.BACK_SPACE)
       .pause(1000)
-      // Check that task is removed
-      .execute(() => {
-        const tasks = document.querySelectorAll('task');
-        console.log('Tasks after deletion:', tasks.length);
-        tasks.forEach((task, i) => {
-          const textarea = task.querySelector('textarea') as HTMLTextAreaElement;
-          console.log(`Task ${i}:`, textarea?.value || 'no value');
-        });
-      })
+      // Check that subtask is removed
+      .assert.not.elementPresent(THIRD_SUB_TASK)
+      .assert.elementPresent(FIRST_SUB_TASK) // Second becomes first
+      .assert.elementPresent(SECOND_SUB_TASK) // Third becomes second
       // Check for console errors
       .perform(() => (browser as NBrowser).noError()),
 
   'should delete the main task and check for errors': (browser: NBrowser) =>
     browser
-      // Find and delete the main task (it should be last now)
-      .execute(() => {
-        const tasks = document.querySelectorAll('task');
-        let mainTaskIndex = -1;
-        tasks.forEach((task, i) => {
-          const textarea = task.querySelector('textarea') as HTMLTextAreaElement;
-          if (textarea?.value?.includes('Main Task for Deletion Test')) {
-            mainTaskIndex = i;
-            console.log('Found main task at index:', i);
-          }
-        });
-        return mainTaskIndex;
-      })
-      // Click on the last task (main task)
-      .click('task:last-child textarea')
+      // Delete the main task (parent)
+      .click(LAST_TASK_TEXTAREA)
       .pause(200)
-      .clearValue('task:last-child textarea')
-      .setValue('task:last-child textarea', browser.Keys.BACK_SPACE)
+      .clearValue(LAST_TASK_TEXTAREA)
+      .setValue(LAST_TASK_TEXTAREA, browser.Keys.BACK_SPACE)
       .pause(1000)
-      // Check remaining tasks
+      // Check that main task and its subtasks are removed
       .execute(() => {
         const tasks = document.querySelectorAll('task');
         console.log('Tasks after main task deletion:', tasks.length);
-        tasks.forEach((task, i) => {
-          const textarea = task.querySelector('textarea') as HTMLTextAreaElement;
-          console.log(`Task ${i}:`, textarea?.value || 'no value');
-        });
+        return tasks.length;
       })
       // Check for console errors
       .perform(() => (browser as NBrowser).noError()),
@@ -131,15 +114,18 @@ module.exports = {
 
   'should interact with remaining tasks without errors': (browser: NBrowser) =>
     browser
-      // Try to edit a remaining task
-      .click(FIRST_TASK_TEXTAREA)
+      // Add a new task to test interaction
+      .addTask('New Task After Deletions')
+      .waitForElementVisible(TASK_SEL)
+      // Try to edit the new task
+      .click(TASK_TEXTAREA)
       .pause(200)
-      .clearValue(FIRST_TASK_TEXTAREA)
-      .setValue(FIRST_TASK_TEXTAREA, 'Edited Task After Deletion')
-      .sendKeys(FIRST_TASK_TEXTAREA, browser.Keys.ESCAPE)
+      .clearValue(TASK_TEXTAREA)
+      .setValue(TASK_TEXTAREA, 'Edited Task After Deletion')
+      .sendKeys(TASK_TEXTAREA, browser.Keys.ESCAPE)
       .pause(500)
       // Verify the edit was saved
-      .assert.valueContains(FIRST_TASK_TEXTAREA, 'Edited Task After Deletion')
+      .assert.valueContains(TASK_TEXTAREA, 'Edited Task After Deletion')
       // Final error check
       .perform(() => (browser as NBrowser).noError()),
 };
