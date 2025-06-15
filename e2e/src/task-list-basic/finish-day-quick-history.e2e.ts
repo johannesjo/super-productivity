@@ -4,11 +4,11 @@ const TASK_SEL = 'task';
 const TASK_TEXTAREA = 'task textarea';
 const FINISH_DAY_BTN = '.e2e-finish-day';
 const SAVE_AND_GO_HOME_BTN = 'button[mat-flat-button][color="primary"]:last-of-type';
-const SIDE_NAV_TODAY = 'side-nav section.main side-nav-item:first-of-type button';
-const TABLE_CAPTION = 'quick-history  h3';
+const TABLE_CAPTION = 'quick-history h3';
+const TABLE_ROWS = 'table tr';
 
 module.exports = {
-  '@tags': ['task', 'NEW', 'finish-day', 'quick-history'],
+  '@tags': ['task', 'finish-day', 'quick-history'],
 
   before: (browser: NBrowser) => browser.loadAppAndClickAwayWelcomeDialog(),
 
@@ -22,7 +22,11 @@ module.exports = {
 
   'should mark task as done': (browser: NBrowser) =>
     browser
-      // Skip marking as done for now - focus on testing quick history
+      .waitForElementVisible(TASK_SEL)
+      .pause(100)
+      .moveToElement(TASK_SEL, 12, 12)
+      .waitForElementVisible(`${TASK_SEL} .task-done-btn`)
+      .click(`${TASK_SEL} .task-done-btn`)
       .pause(500),
 
   'should click Finish Day button': (browser: NBrowser) =>
@@ -38,16 +42,6 @@ module.exports = {
       .click(SAVE_AND_GO_HOME_BTN)
       .pause(1000),
 
-  'should verify task is in Today list': (browser: NBrowser) =>
-    browser
-      // Navigate to Today view
-      .waitForElementVisible(SIDE_NAV_TODAY)
-      .click(SIDE_NAV_TODAY)
-      .pause(500)
-      .waitForElementVisible('task-list')
-      // Verify task is still present (since not marked as done)
-      .assert.elementPresent(TASK_SEL),
-
   'should navigate to quick history via left-hand menu': (browser: NBrowser) =>
     browser
       .rightClick('side-nav > section.main > side-nav-item.g-multi-btn-wrapper')
@@ -62,6 +56,17 @@ module.exports = {
   'should confirm quick history page loads': (browser: NBrowser) =>
     browser.assert // Verify we're on the quick history page
       .elementPresent('quick-history'),
+
+  'should confirm task is in the table': (browser: NBrowser) =>
+    browser
+      .waitForElementVisible(TABLE_ROWS)
+      .assert.elementPresent(TABLE_ROWS)
+      .waitForElementVisible('table > tr:nth-child(1) > td.title > span')
+      // Verify the task title is present in the table
+      .assert.textContains(
+        'table > tr:nth-child(1) > td.title > span',
+        'Task for Quick History',
+      ),
 
   'should confirm no errors in console': (browser: NBrowser) => browser.noError(),
 };
