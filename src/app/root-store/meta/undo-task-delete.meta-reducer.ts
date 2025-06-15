@@ -70,10 +70,10 @@ export const undoTaskDeleteMetaReducer = (
 const createDeletedTaskEntities = (task: TaskWithSubTasks): Dictionary<Task> => {
   return {
     [task.id]: task,
-    ...task.subTasks.reduce<Dictionary<Task>>(
+    ...(task.subTasks?.reduce<Dictionary<Task>>(
       (acc, subTask) => ({ ...acc, [subTask.id]: subTask }),
       {},
-    ),
+    ) || {}),
   };
 };
 
@@ -140,7 +140,7 @@ const captureTaskDeleteState = (
   task: TaskWithSubTasks,
 ): UndoTaskDeleteState => {
   const deletedTaskEntities = createDeletedTaskEntities(task);
-  const allDeletedTasks = [task, ...task.subTasks];
+  const allDeletedTasks = [task, ...(task.subTasks || [])];
   const tagTaskIdMap = buildTagTaskIdMap(state, allDeletedTasks);
 
   // Handle subtask deletion

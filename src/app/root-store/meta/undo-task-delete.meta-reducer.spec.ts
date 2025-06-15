@@ -126,6 +126,47 @@ describe('undoTaskDeleteMetaReducer', () => {
       expect(() => metaReducer(state, action)).not.toThrow();
     });
 
+    it('should handle task with undefined subTasks', () => {
+      const taskWithUndefinedSubTasks = {
+        ...createMockTask(),
+        subTasks: undefined,
+      } as any as TaskWithSubTasks;
+      const action = TaskSharedActions.deleteTask({ task: taskWithUndefinedSubTasks });
+
+      expect(() => metaReducer(baseState, action)).not.toThrow();
+      expect(mockReducer).toHaveBeenCalledWith(baseState, action);
+    });
+
+    it('should handle task with undefined subTasks in complex scenario', () => {
+      const state = createMockState({
+        tagEntities: {
+          tag1: createMockTag({ taskIds: ['task1', 'task2'] }),
+          tag2: createMockTag({ id: 'tag2', taskIds: ['task1'] }),
+          [TODAY_TAG.id]: { ...TODAY_TAG, taskIds: ['task1', 'task2'] },
+        },
+        projectEntities: {
+          project1: createMockProject({
+            taskIds: ['task1', 'task2'],
+            backlogTaskIds: ['task3'],
+          }),
+        },
+      });
+
+      const taskWithUndefinedSubTasks = {
+        ...createMockTask({
+          id: 'task1',
+          tagIds: ['tag1', 'tag2'],
+          projectId: 'project1',
+        }),
+        subTasks: undefined,
+      } as any as TaskWithSubTasks;
+
+      const action = TaskSharedActions.deleteTask({ task: taskWithUndefinedSubTasks });
+
+      expect(() => metaReducer(state, action)).not.toThrow();
+      expect(mockReducer).toHaveBeenCalledWith(state, action);
+    });
+
     it('should handle deletion of task from INBOX_PROJECT with empty arrays', () => {
       const state = createMockState({
         taskEntities: {
@@ -425,6 +466,79 @@ describe('undoTaskDeleteMetaReducer', () => {
     it('should not fail when undoing without prior delete', () => {
       const undoAction = undoDeleteTask();
       expect(() => metaReducer(baseState, undoAction)).not.toThrow();
+    });
+
+    it('should restore task with undefined subTasks correctly', () => {
+      const taskWithUndefinedSubTasks = {
+        ...createMockTask({ id: 'taskNoSubs', projectId: 'project1', tagIds: ['tag1'] }),
+        subTasks: undefined,
+      } as any as TaskWithSubTasks;
+
+      const state = createMockState({
+        taskEntities: {
+          task1: createMockTask(),
+          taskNoSubs: taskWithUndefinedSubTasks,
+        },
+        projectEntities: {
+          project1: createMockProject({ taskIds: ['task1', 'taskNoSubs'] }),
+        },
+        tagEntities: {
+          tag1: createMockTag({ taskIds: ['task1', 'taskNoSubs'] }),
+          [TODAY_TAG.id]: { ...TODAY_TAG, taskIds: ['task1', 'taskNoSubs'] },
+        },
+      });
+
+      const deleteAction = TaskSharedActions.deleteTask({
+        task: taskWithUndefinedSubTasks,
+      });
+      const stateAfterDelete = {
+        ...state,
+        [TASK_FEATURE_NAME]: {
+          ...state[TASK_FEATURE_NAME],
+          entities: {
+            task1: createMockTask(),
+          },
+          ids: ['task1'],
+        },
+        [PROJECT_FEATURE_NAME]: {
+          ...state[PROJECT_FEATURE_NAME],
+          entities: {
+            ...state[PROJECT_FEATURE_NAME].entities,
+            project1: { ...createMockProject(), taskIds: ['task1'], backlogTaskIds: [] },
+          },
+        },
+        [TAG_FEATURE_NAME]: {
+          ...state[TAG_FEATURE_NAME],
+          entities: {
+            ...state[TAG_FEATURE_NAME].entities,
+            tag1: { ...createMockTag(), taskIds: ['task1'] },
+            [TODAY_TAG.id]: { ...TODAY_TAG, taskIds: ['task1'] },
+          },
+        },
+      };
+
+      // First delete the task
+      metaReducer(state, deleteAction);
+      mockReducer.calls.reset();
+
+      // Then restore it
+      const undoAction = undoDeleteTask();
+      metaReducer(stateAfterDelete, undoAction);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+      // Check task is restored
+      expect(updatedState[TASK_FEATURE_NAME].entities.taskNoSubs).toBeDefined();
+      // Check project association is restored
+      expect(updatedState[PROJECT_FEATURE_NAME].entities.project1.taskIds).toContain(
+        'taskNoSubs',
+      );
+      // Check tag associations are restored
+      expect(updatedState[TAG_FEATURE_NAME].entities.tag1.taskIds).toContain(
+        'taskNoSubs',
+      );
+      expect(updatedState[TAG_FEATURE_NAME].entities[TODAY_TAG.id].taskIds).toContain(
+        'taskNoSubs',
+      );
     });
   });
 
