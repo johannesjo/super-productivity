@@ -1330,7 +1330,22 @@
     "PRIVACY_EXPORT": "Esporta dati anonimizzati (da inviare a contact@super-productivity.com per il debug)",
     "S_BACKUP_DOWNLOADED": "Fai backup dei download nella cartella dei documenti di Android",
     "S_ERR_IMPORT_FAILED": "Importazione dei dati fallita",
-    "S_ERR_INVALID_DATA": "Importazione fallita: JSON non valido"
+    "S_ERR_INVALID_DATA": "Importazione fallita: JSON non valido",
+    "S_ERR_INVALID_URL": "Importazione fallita: URL fornito non valido",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "Errore: impossibile decodificare il parametro URL per l'importazione. Assicurati che sia formattato correttamente.",
+    "S_ERR_NETWORK": "Importazione fallita: errore di rete durante il recupero dei dati dall'URL",
+    "IMPORT_FROM_URL": "Importa da URL",
+    "URL_PLACEHOLDER": "Inserisci l'URL da cui importare",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "Importa da URL",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Inserisci l'URL completo del file di backup JSON di Super Productivity che desideri importare.",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "Importa da URL",
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "TITLE": "Conferma importazione dati da URL",
+      "INITIATED_MSG": "È stata avviata un'importazione automatica dei dati.",
+      "SOURCE_URL_DOMAIN": "Dominio di origine",
+      "WARNING_TITLE": "Avviso",
+      "WARNING_MSG": "Proseguendo, i dati e la configurazione attuali dell'applicazione verranno sovrascritti con il contenuto dell'URL specificato. Questa azione non può essere annullata."
+    }
   },
   "G": {
     "ADD": "Aggiungi",

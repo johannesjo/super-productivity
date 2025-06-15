@@ -1329,7 +1329,22 @@
     "PRIVACY_EXPORT": "صادر کردن داده های ناشناس (برای ارسال به contact@super-productivity.com برای اشکال زدایی)",
     "S_BACKUP_DOWNLOADED": "پشتیبان گیری در پوشه اسناد اندروید دانلود شده است",
     "S_ERR_IMPORT_FAILED": "وارد کردن داده ها انجام نشد",
-    "S_ERR_INVALID_DATA": "وارد کردن انجام نشد: JSON نامعتبر"
+    "S_ERR_INVALID_DATA": "وارد کردن انجام نشد: JSON نامعتبر",
+    "S_ERR_INVALID_URL": "وارد کردن ناموفق: نشانی وب ارائه‌شده نامعتبر است",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "خطا: نمی‌توان پارامتر URL را برای وارد کردن رمزگشایی کرد. لطفاً اطمینان حاصل کنید که به‌درستی قالب‌بندی شده است.",
+    "S_ERR_NETWORK": "وارد کردن ناموفق: خطای شبکه هنگام واکشی داده‌ها از URL",
+    "IMPORT_FROM_URL": "وارد کردن از URL",
+    "URL_PLACEHOLDER": "نشانی وب برای وارد کردن را وارد کنید",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "وارد کردن از URL",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "لطفاً نشانی کامل فایل پشتیبان JSON از Super Productivity را که می‌خواهید وارد کنید، وارد نمایید.",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "وارد کردن از URL",
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "TITLE": "تأیید وارد کردن داده‌ها از URL",
+      "INITIATED_MSG": "وارد کردن خودکار داده‌ها آغاز شده است.",
+      "SOURCE_URL_DOMAIN": "دامنه منبع",
+      "WARNING_TITLE": "هشدار",
+      "WARNING_MSG": "ادامه دادن باعث بازنویسی داده‌ها و پیکربندی فعلی برنامه شما با محتوای URL مشخص‌شده خواهد شد. این عمل قابل بازگشت نیست."
+    }
   },
   "G": {
     "ADD": "اضافه کردن",

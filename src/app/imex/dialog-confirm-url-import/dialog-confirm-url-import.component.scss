@@ -1,0 +1,9 @@
+.warning-text {
+  color: var(--palette-warn-700); // Using CSS variable for theme consistency
+  font-weight: bold;
+}
+
+.domain-link {
+  word-break: break-all;
+  margin-left: 0.5rem;
+}

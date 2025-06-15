@@ -1329,7 +1329,22 @@
     "PRIVACY_EXPORT": "匿名化されたデータをエクスポートする（デバッグ用に contact@super-productivity.com に送信する）。",
     "S_BACKUP_DOWNLOADED": "バックアップをAndroidドキュメントフォルダにダウンロードしました",
     "S_ERR_IMPORT_FAILED": "データのインポートに失敗しました",
-    "S_ERR_INVALID_DATA": "インポートに失敗しました：無効なJSON"
+    "S_ERR_INVALID_DATA": "インポートに失敗しました：無効なJSON",
+    "S_ERR_INVALID_URL": "インポートに失敗しました：無効なURLが指定されました",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "エラー：インポート用のURLパラメータをデコードできませんでした。正しくフォーマットされていることを確認してください。",
+    "S_ERR_NETWORK": "インポートに失敗しました：URLからデータを取得中にネットワークエラーが発生しました",
+    "IMPORT_FROM_URL": "URLからインポート",
+    "URL_PLACEHOLDER": "インポートするURLを入力してください",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "URLからインポート",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "インポートしたいSuper ProductivityのバックアップJSONファイルの完全なURLを入力してください。",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "URLからインポート",
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "TITLE": "URLからのデータインポートを確認",
+      "INITIATED_MSG": "自動データインポートが開始されました。",
+      "SOURCE_URL_DOMAIN": "ソースドメイン",
+      "WARNING_TITLE": "警告",
+      "WARNING_MSG": "続行すると、指定されたURLの内容で現在のアプリケーションデータと設定が上書きされます。この操作は元に戻せません。"
+    }
   },
   "G": {
     "ADD": "追加",

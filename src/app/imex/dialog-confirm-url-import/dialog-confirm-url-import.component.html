@@ -1,0 +1,36 @@
+<h1 mat-dialog-title>{{ T.FILE_IMEX.DIALOG_CONFIRM_URL_IMPORT.TITLE | translate }}</h1>
+<mat-dialog-content>
+  <p>{{ T.FILE_IMEX.DIALOG_CONFIRM_URL_IMPORT.INITIATED_MSG | translate }}</p>
+  <p>
+    <strong
+      >{{ T.FILE_IMEX.DIALOG_CONFIRM_URL_IMPORT.SOURCE_URL_DOMAIN | translate }}:</strong
+    >
+    <a
+      class="domain-link"
+      [href]="data.domain"
+      target="_blank"
+      rel="noopener noreferrer"
+      >{{ data.domain }}</a
+    >
+  </p>
+  <p class="warning-text">
+    <strong>{{ T.FILE_IMEX.DIALOG_CONFIRM_URL_IMPORT.WARNING_TITLE | translate }}</strong
+    >:
+    {{ T.FILE_IMEX.DIALOG_CONFIRM_URL_IMPORT.WARNING_MSG | translate }}
+  </p>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button
+    mat-stroked-button
+    (click)="onCancel()"
+  >
+    {{ T.G.CANCEL | translate }}
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="onConfirm()"
+  >
+    {{ T.G.SUBMIT | translate }}
+  </button>
+</mat-dialog-actions>

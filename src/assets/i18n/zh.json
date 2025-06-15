@@ -1169,7 +1169,22 @@
     "EXPORT_DATA": "导出数据",
     "IMPORT_FROM_FILE": "从文件导入",
     "PRIVACY_EXPORT": "导出匿名数据 (可发送给 contact@super-productivity.com 用于排查错误)",
-    "S_ERR_INVALID_DATA": "导入失败：无效的JSON"
+    "S_ERR_INVALID_DATA": "导入失败：无效的JSON",
+    "S_ERR_INVALID_URL": "导入失败：提供的URL无效",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "错误：无法解码用于导入的URL参数。请确保其格式正确。",
+    "S_ERR_NETWORK": "导入失败：从URL获取数据时发生网络错误",
+    "IMPORT_FROM_URL": "从URL导入",
+    "URL_PLACEHOLDER": "输入要导入的URL",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "从URL导入",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "请输入您要导入的Super Productivity备份JSON文件的完整URL。",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "从URL导入",
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "TITLE": "确认从URL导入数据",
+      "INITIATED_MSG": "已启动自动数据导入。",
+      "SOURCE_URL_DOMAIN": "源域名",
+      "WARNING_TITLE": "警告",
+      "WARNING_MSG": "继续操作将使用指定URL的内容覆盖您当前的应用程序数据和配置。此操作无法撤销。"
+    }
   },
   "G": {
     "CANCEL": "取消",
