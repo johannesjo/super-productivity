@@ -18,23 +18,23 @@ module.exports = {
 
   after: (browser: NBrowser) => browser.end(),
 
-  'should create a task with two subtasks (as top-level tasks)': (browser: NBrowser) =>
+  'should create a task with two subtasks (as top-level tasks)': (browser: NBrowser) => {
     browser
       .addTask('Main Task with Subtasks')
       .waitForElementVisible(TASK_SEL)
-      .assert.valueContains(TASK_TEXTAREA, 'Main Task with Subtasks')
-      // Add tasks that would be subtasks as top-level tasks
-      .addTask('First Subtask')
-      .pause(500)
-      .addTask('Second Subtask')
-      .pause(500)
-      // Verify we have three tasks (newest first)
-      .assert.elementPresent(FIRST_TASK)
+      .assert.valueContains(TASK_TEXTAREA, 'Main Task with Subtasks');
+    // Add tasks that would be subtasks as top-level tasks
+    browser.addTask('First Subtask').pause(500);
+    browser.addTask('Second Subtask').pause(500);
+    // Verify we have three tasks (newest first)
+    return browser.assert
+      .elementPresent(FIRST_TASK)
       .assert.elementPresent(SECOND_TASK)
       .assert.elementPresent(THIRD_TASK)
       .assert.valueContains(`${FIRST_TASK} textarea`, 'Second Subtask')
       .assert.valueContains(`${SECOND_TASK} textarea`, 'First Subtask')
-      .assert.valueContains(`${THIRD_TASK} textarea`, 'Main Task with Subtasks'),
+      .assert.valueContains(`${THIRD_TASK} textarea`, 'Main Task with Subtasks');
+  },
 
   'should mark all tasks as done': (browser: NBrowser) =>
     browser

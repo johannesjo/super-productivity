@@ -22,19 +22,20 @@ module.exports = {
 
   after: (browser: NBrowser) => browser.end(),
 
-  'should create a task with sub tasks (as top-level tasks)': (browser: NBrowser) =>
+  'should create a task with sub tasks (as top-level tasks)': (browser: NBrowser) => {
     browser
       .addTask('Main Task with Subtasks')
       .waitForElementVisible(TASK_SEL, 5000)
-      .assert.valueContains(TASK_TEXTAREA, 'Main Task with Subtasks')
-      // Add a task that would be a subtask
-      .addTask('First Subtask')
-      .pause(500)
-      // Verify both tasks exist
+      .assert.valueContains(TASK_TEXTAREA, 'Main Task with Subtasks');
+    // Add a task that would be a subtask
+    browser.addTask('First Subtask').pause(500);
+    // Verify both tasks exist
+    return browser
       .waitForElementVisible(FIRST_TASK, 5000)
       .waitForElementVisible(SECOND_TASK, 5000)
       .assert.valueContains(FIRST_TASK_TEXTAREA, 'First Subtask')
-      .assert.valueContains(SECOND_TASK_TEXTAREA, 'Main Task with Subtasks'),
+      .assert.valueContains(SECOND_TASK_TEXTAREA, 'Main Task with Subtasks');
+  },
 
   'should add a tag to the sub task': (browser: NBrowser) =>
     browser
