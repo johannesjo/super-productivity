@@ -334,6 +334,7 @@ export const selectTasksWorkedOnOrDoneFlat = createSelector(
 
 export const selectTasksDueForDay = createSelector(
   selectAllTasks,
+  (_: any, day: string) => day,
   (tasks: Task[], day: string): TaskWithDueDay[] => {
     return tasks.filter((task) => task.dueDay === day) as TaskWithDueDay[];
   },
@@ -341,6 +342,7 @@ export const selectTasksDueForDay = createSelector(
 
 export const selectTasksDueAndOverdueForDay = createSelector(
   selectAllTasks,
+  (_: any, day: string) => day,
   (tasks: Task[], day: string): TaskWithDueDay[] => {
     const dayDate = new Date(day);
     return tasks.filter(
@@ -351,12 +353,13 @@ export const selectTasksDueAndOverdueForDay = createSelector(
 
 export const selectTasksWithDueTimeForRange = createSelector(
   selectAllTasks,
-  (tasks: Task[], { start, end }: { start: number; end: number }): TaskWithDueTime[] => {
+  (_: any, params: { start: number; end: number }) => params,
+  (tasks: Task[], params: { start: number; end: number }): TaskWithDueTime[] => {
     return tasks.filter(
       (task) =>
         typeof task.dueWithTime === 'number' &&
-        task.dueWithTime >= start &&
-        task.dueWithTime <= end,
+        task.dueWithTime >= params.start &&
+        task.dueWithTime <= params.end,
     ) as TaskWithDueTime[];
   },
 );
@@ -381,6 +384,7 @@ export const selectAllTasksWithDueTimeSorted = createSelector(
 
 export const selectTasksWithDueTimeUntil = createSelector(
   selectAllTasks,
+  (_: any, end: number) => end,
   (tasks: Task[], end: number): TaskWithDueTime[] => {
     return tasks.filter(
       (task) => typeof task.dueWithTime === 'number' && task.dueWithTime <= end,
