@@ -55,7 +55,7 @@ jobs:
           echo "${{ secrets.DROID_KEYSTORE_BASE_64 }}" | base64 --decode > keystore.jks
 
       - name: Build
-        run: npm run dist:android:pro
+        run: npm run dist:android:prod
         env:
           RELEASE_KEYSTORE_PASSWORD: ${{ secrets.DROID_KEYSTORE_PASSWORD }}
           RELEASE_KEYSTORE_ALIAS: ${{ secrets.DROID_KEYSTORE_ALIAS }}
