@@ -5,11 +5,11 @@ const TASK_TEXTAREA = 'task textarea';
 const CONTEXT_MENU_TRIGGER = '.drag-handle';
 const CONTEXT_MENU = 'mat-menu-panel';
 const CONTEXT_MENU_MOVE_TO = '[aria-label*="Move to"]';
-const PROJECT_DIALOG = 'dialog-add-project';
+const PROJECT_DIALOG = 'dialog-create-project';
 const PROJECT_TITLE_INPUT = 'input[name="projectTitle"]';
 const PROJECT_SUBMIT_BTN = 'button[type="submit"]';
 const SIDE_NAV_PROJECTS_SECTION = 'side-nav section.projects';
-const SIDE_NAV_PROJECTS_EXPAND = 'side-nav section.projects button.expand-btn';
+// const SIDE_NAV_PROJECTS_EXPAND = 'side-nav section.projects button.expand-btn';
 const SIDE_NAV_TODAY = 'side-nav section.main side-nav-item:first-of-type button';
 
 module.exports = {
@@ -27,14 +27,34 @@ module.exports = {
 
   'should create a project': (browser: NBrowser) =>
     browser
+      // Check if any overlay is present and wait for it to disappear
+      .pause(500)
+      .execute(() => {
+        const overlay = document.querySelector('.cdk-overlay-backdrop');
+        if (overlay) {
+          console.log('Overlay found, clicking to dismiss');
+          (overlay as HTMLElement).click();
+        }
+      })
+      .pause(300)
       // Open projects section
       .waitForElementVisible(SIDE_NAV_PROJECTS_SECTION, 5000)
-      .click(SIDE_NAV_PROJECTS_EXPAND)
+      // Click expand if not already expanded
+      .execute(() => {
+        const expandBtn = document.querySelector(
+          'side-nav section.projects button.expand-btn',
+        ) as HTMLElement;
+        if (expandBtn && !expandBtn.classList.contains('isExpanded')) {
+          expandBtn.click();
+          return true;
+        }
+        return false;
+      })
       .pause(300)
       // Click add project button
       .waitForElementVisible('.e2e-add-project-btn', 5000)
       .click('.e2e-add-project-btn')
-      .pause(300)
+      .pause(500)
       // Fill project form
       .waitForElementVisible(PROJECT_DIALOG, 5000)
       .waitForElementVisible(PROJECT_TITLE_INPUT, 5000)

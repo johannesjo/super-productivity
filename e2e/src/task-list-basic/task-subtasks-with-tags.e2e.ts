@@ -2,9 +2,11 @@ import { NBrowser } from '../../n-browser-interface';
 
 const TASK_SEL = 'task';
 const TASK_TEXTAREA = 'task textarea';
-const SUB_TASK_INPUT = 'add-task-bar input';
+const SUB_TASKS_CONTAINER = 'task .sub-tasks';
 const FIRST_SUB_TASK = '.sub-tasks task:nth-child(1)';
 const FIRST_SUB_TASK_TEXTAREA = '.sub-tasks task:nth-child(1) textarea';
+const LAST_TASK = 'task:last-child';
+const LAST_TASK_TEXTAREA = 'task:last-child textarea';
 const TAG_INPUT = 'input[placeholder="Type to add tags"]';
 const TAG_AUTOCOMPLETE = 'mat-autocomplete';
 const TAG_OPTION_CREATE = 'mat-option.add-item-option';
@@ -26,16 +28,19 @@ module.exports = {
       .addTask('Main Task with Subtasks')
       .waitForElementVisible(TASK_SEL, 5000)
       .assert.valueContains(TASK_TEXTAREA, 'Main Task with Subtasks')
-      // Focus on task and add subtask by typing 'a'
-      .click(TASK_TEXTAREA)
+      // Click on the parent task to focus it
+      .click(LAST_TASK_TEXTAREA)
       .pause(200)
-      .setValue('body', 'a') // Press 'a' to add sub-task
-      .pause(300)
-      .waitForElementVisible(SUB_TASK_INPUT, 5000)
-      .setValue(SUB_TASK_INPUT, 'First Subtask')
-      .setValue(SUB_TASK_INPUT, browser.Keys.ENTER)
-      .pause(300)
+      // Press 'a' to add a subtask
+      .sendKeys(LAST_TASK_TEXTAREA, 'a')
+      .pause(500)
+      // Wait for subtasks container and new empty task
+      .waitForElementVisible(SUB_TASKS_CONTAINER, 5000)
       .waitForElementVisible(FIRST_SUB_TASK, 5000)
+      // Type directly into the new subtask
+      .sendKeys(FIRST_SUB_TASK_TEXTAREA, 'First Subtask')
+      .sendKeys(FIRST_SUB_TASK_TEXTAREA, browser.Keys.ENTER)
+      .pause(500)
       .assert.valueContains(FIRST_SUB_TASK_TEXTAREA, 'First Subtask'),
 
   'should add a tag to the sub task': (browser: NBrowser) =>
@@ -94,13 +99,13 @@ module.exports = {
 
   'should add the same tag to the main task': (browser: NBrowser) =>
     browser
-      // Click on main task
-      .click(TASK_TEXTAREA)
+      // Click on main task (which should be the last task)
+      .click(LAST_TASK_TEXTAREA)
       .pause(200)
       // Open task detail panel
-      .moveToElement(TASK_SEL, 10, 10)
+      .moveToElement(LAST_TASK, 10, 10)
       .pause(200)
-      .click(`${TASK_SEL} .show-additional-info-btn`)
+      .click(`${LAST_TASK} .show-additional-info-btn`)
       .waitForElementVisible(TASK_DETAIL_PANEL, 5000)
       .pause(500)
       // Add tag
@@ -114,8 +119,8 @@ module.exports = {
       .click('mat-option:not(.add-item-option)')
       .pause(500)
       // Verify tag was added
-      .assert.elementPresent(`${TASK_SEL} > .inner-wrapper tag`)
-      .assert.textContains(`${TASK_SEL} > .inner-wrapper tag .tag-title`, 'TestTag'),
+      .assert.elementPresent(`${LAST_TASK} > .inner-wrapper tag`)
+      .assert.textContains(`${LAST_TASK} > .inner-wrapper tag .tag-title`, 'TestTag'),
 
   'should verify main task appears in tag list with nested sub task': (
     browser: NBrowser,
