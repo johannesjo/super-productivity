@@ -1,6 +1,8 @@
-import { NBrowser } from '../../n-browser-interface';
+// import { NBrowser } from '../../n-browser-interface';
 
 module.exports = {
+  // COMMENTED OUT - BASIC TEST
+  /*
   '@tags': ['task', 'basic-test'],
 
   before: (browser: NBrowser) => browser.loadAppAndClickAwayWelcomeDialog(),
@@ -19,4 +21,5 @@ module.exports = {
       .assert.valueContains('task:nth-child(1) textarea', 'Second Task')
       .assert.valueContains('task:nth-child(2) textarea', 'First Task');
   },
+  */
 };

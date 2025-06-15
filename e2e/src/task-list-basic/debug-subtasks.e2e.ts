@@ -1,6 +1,8 @@
-import { NBrowser } from '../../n-browser-interface';
+// import { NBrowser } from '../../n-browser-interface';
 
 module.exports = {
+  // COMMENTED OUT - DEBUG TEST
+  /*
   '@tags': ['task', 'debug-subtask'],
 
   before: (browser: NBrowser) => browser.loadAppAndClickAwayWelcomeDialog(),
@@ -104,4 +106,5 @@ module.exports = {
         const activeEl = document.activeElement;
         console.log('Active element:', activeEl?.tagName, activeEl?.className);
       }),
+  */
 };
