@@ -1,0 +1,753 @@
+{
+  "ANDROID": {
+    "NOTIFICATIONS": {
+      "SYNC_CONFLICT_MSG": "Vänligen kontrollera den och avgör vad du ska göra.",
+      "SYNC_CONFLICT_TITLE": "En synkroniseringskonflikt uppstod"
+    },
+    "PERMANENT_NOTIFICATION_MSGS": {
+      "INITIAL": "Appen kör i bakgrunden för att möjliggöra synkronisering om sådan är aktiverad",
+      "NO_ACTIVE_TASKS": "Inga aktiva uppgifter",
+      "SYNCING": "Synkronisering"
+    }
+  },
+  "APP": {
+    "B_INSTALL": {
+      "IGNORE": "Ignorera",
+      "INSTALL": "Installera",
+      "MSG": "Vill du installera Super Productivity som en PWA?"
+    },
+    "UPDATE_WEB_APP": "Ny version tillgänglig. Ladda in ny version?"
+  },
+  "BL": {
+    "NO_TASKS": "Det finns för närvarande inga eftersläpande uppgifter"
+  },
+  "CONFIRM": {
+    "AUTO_FIX": "Dina data verkar vara skadade (\"{{validityError}}\"). Vill du försöka reparera dem automatiskt? Detta kan leda till partiell dataförlust.",
+    "DELETE_STRAY_BACKUP": "Vill du radera säkerhetskopian för att slippa se denna dialog?",
+    "RESTORE_STRAY_BACKUP": "Under den senaste synkroniseringen kan det ha uppstått ett fel. Vill du återställa från den senaste säkerhetskopian?"
+  },
+  "DATETIME_INPUT": {
+    "IN": "om {{time}}",
+    "TOMORROW": "imorgon {{time}}"
+  },
+  "DATETIME_SCHEDULE": {
+    "LATER_TODAY": "Senare idag",
+    "NEXT_WEEK": "Nästa vecka",
+    "PLACEHOLDER": "Välj ett datum",
+    "PRESS_ENTER_AGAIN": "Tryck på Enter igen för att spara",
+    "TOMORROW": "Imorgon"
+  },
+  "F": {
+    "ATTACHMENT": {
+      "DIALOG_EDIT": {
+        "ADD_ATTACHMENT": "Lägg till bilaga",
+        "EDIT_ATTACHMENT": "Redigera bilaga",
+        "LABELS": {
+          "FILE": "Filsökväg",
+          "IMG": "Bild",
+          "LINK": "URL"
+        },
+        "SELECT_TYPE": "Välj en typ",
+        "TYPES": {
+          "FILE": "Fil (öppnad av systemets standardapp)",
+          "IMG": "Bild (visas som miniatyr)",
+          "LINK": "Länk (öppnas i webbläsare)"
+        }
+      }
+    },
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "Klar",
+        "EISENHAUER_MATRIX": "Eisenhauer-matris",
+        "IMPORTANT": "Viktigt",
+        "IN_PROGRESS": "Pågående",
+        "KANBAN": "Kanban",
+        "NOT_URGENT_IMPORTANT": "Ej brådskande & Viktiga",
+        "NOT_URGENT_NOT_IMPORTANT": "Ej brådskande & Ej viktiga",
+        "URGENT": "Brådskande",
+        "URGENT_IMPORTANT": "Brådskande & Viktiga",
+        "URGENT_NOT_IMPORTANT": "Brådskande & Ej viktiga"
+      },
+      "FORM": {
+        "ADD_NEW_PANEL": "Lägg till ny panel",
+        "COLUMNS": "Kolumner",
+        "TASK_DONE_STATE_ALL": "Alla",
+        "TASK_DONE_STATE_DONE": "Klar"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "Lägg till ny tavla",
+        "CONFIRM_DELETE": "Vill du verkligen radera denna tavla?",
+        "EDIT_BOARD": "Redigera tavla",
+        "NO_PANELS_BTN": "Konfigurera tavla",
+        "NO_PANELS_MSG": "Denna tavla har inga konfigurerade paneler. Lägg till några paneler på den."
+      }
+    },
+    "BOOKMARK": {
+      "BAR": {
+        "ADD": "Lägg till bokmärke",
+        "DROP": "Släpp här för att lägga till ett bokmärke",
+        "EDIT": "Redigera bokmärken",
+        "NO_BOOKMARKS": "Du har inga projektbokmärken. Lägg till ett med dra-och-släpp eller genom att klicka på plusknappen."
+      },
+      "DIALOG_EDIT": {
+        "ADD_BOOKMARK": "Lägg till bokmärke",
+        "EDIT_BOOKMARK": "Redigera bokmärke",
+        "LABELS": {
+          "COMMAND": "Kommando",
+          "FILE": "Filsökväg",
+          "IMG": "Bild",
+          "LINK": "URL"
+        },
+        "SELECT_ICON": "Välj en ikon",
+        "SELECT_TYPE": "Välj en typ",
+        "TYPES": {
+          "COMMAND": "Kommando (anpassat skalkommando)",
+          "FILE": "Fil (öppnad av systemets standardapp)",
+          "IMG": "Bild (visad som miniatyr)",
+          "LINK": "Länk (öppnas i webbläsare)"
+        }
+      }
+    },
+    "CALDAV": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Konfigurera CalDav för projektet"
+      },
+      "FORM": {
+        "CALDAV_PASSWORD": "Ditt CalDav-lösenord",
+        "CALDAV_RESOURCE": "Namnet på CalDav-resursen (kalendern)",
+        "CALDAV_URL": "CalDav-URL (grund-URL:en)",
+        "CALDAV_USER": "Ditt CalDav-användarnamn"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Här kan du konfigurera SuperProductivity till att lista icke slutförda CalDav-uppgifter för ett specifikt projekt på panelen för uppgiftsskapande i den dagliga planeringsvyn. De kommer att listas som förslag och kommer att länka till uppgiften samt mer information om den.</p> <p>Dessutom kan du automatiskt lägga till och synkronisera alla icke slutförda uppgifter med din lista med eftersläpande uppgifter.</p><p>För att det ska fungera med Nextcloud i webbappen kan du behöva vitlista \"https://app.super-productivity.com\" via Nextcloud-appen <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>.</p>",
+        "TITLE": "CalDav"
+      },
+      "ISSUE_CONTENT": {
+        "DESCRIPTION": "Beskrivning",
+        "LABELS": "Kategorier",
+        "STATUS": "Status",
+        "SUMMARY": "Sammanfattning"
+      },
+      "S": {
+        "CALENDAR_NOT_FOUND": "CalDav: Kunde inte hitta kalendern \"{{calendarName}}\"",
+        "CALENDAR_READ_ONLY": "CalDav: Kalendern \"{{calendarName}}\" är skrivskyddad"
+      }
+    },
+    "CALENDARS": {
+      "BANNER": {
+        "ADD_AS_TASK": "Lägg till som uppgift",
+        "FOCUS_TASK": "Fokusuppgift",
+        "TXT": "<strong>{{title}}</strong> börjar vid <strong>{{start}}</strong>!",
+        "TXT_PAST": "<strong>{{title}}</strong> started at <strong>{{start}}</strong>!"
+      }
+    },
+    "CONFIG": {
+      "S": {
+        "UPDATE_SECTION": "Uppdaterade inställningar för <strong>{{sectionKey}}</strong>"
+      }
+    },
+    "DOMINA_MODE": {
+      "FORM": {
+        "HELP": "Upprepar den konfigurerade frasen varje X när du loggar tid för en uppgift.",
+        "L_INTERVAL": "Intervall för att upprepa frasen",
+        "L_TEXT": "Text",
+        "L_TEXT_DESCRIPTION": "T.ex.: \"Jobba med ${currentTaskTitle}!\""
+      }
+    },
+    "FOCUS_MODE": {
+      "BACK_TO_PLANNING": "Tillbaka till Planering",
+      "COUNTDOWN": "Nedräkning",
+      "FINISH_TASK_AND_SELECT_NEXT": "Slutför uppgiften och välj nästa",
+      "FOR_TASK": "för uppgift",
+      "GOGOGO": "Kör, kör, kör!!!",
+      "NEXT": "Nästa",
+      "ON": "på",
+      "POMODORO_BACK": "Tillbaka",
+      "POMODORO_DISABLE": "Inaktivera Pomodoro",
+      "PREP_GET_MENTALLY_READY": "Gör dig mentalt redo för att vara fokuserad och produktiv",
+      "PREP_SIT_UPRIGHT": "Sitt (eller stå) upprätt",
+      "PREP_STRETCH": "Gör lite mild stretching",
+      "SELECT_ANOTHER_TASK": "Välj en annan uppgift",
+      "SELECT_TASK": "Välj uppgift att fokusera på",
+      "WORKED_FOR": "Du jobbade i"
+    },
+    "GITEA": {
+      "FORM": {
+        "FILTER_USER": "Användarnamn (t.ex. för att filtrera ut ändringar du själv har gjort)",
+        "HOST": "Värd (t.ex. https://try.gitea.io)",
+        "REPO_FULL_NAME": "Användarnamn eller organisationsnamn/projekt",
+        "REPO_FULL_NAME_DESCRIPTION": "Kan finnas som del av URL:en när projektet visas i webbläsaren",
+        "SCOPE_ALL": "Alla",
+        "SCOPE_ASSIGNED": "Ålagda mig",
+        "SCOPE_CREATED": "Skapade av mig"
+      },
+      "FORM_SECTION": {
+        "TITLE": "Gitea"
+      },
+      "ISSUE_CONTENT": {
+        "DESCRIPTION": "Beskrivning",
+        "LABELS": "Etiketter",
+        "PROJECT": "Projekt",
+        "STATUS": "Status",
+        "SUMMARY": "Sammanfattning",
+        "WRITE_A_COMMENT": "Skriv en kommentar"
+      }
+    },
+    "GITHUB": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Konfigurera GitHub för projektet"
+      },
+      "FORM_SECTION": {
+        "TITLE": "GitHub"
+      },
+      "ISSUE_CONTENT": {
+        "DESCRIPTION": "Beskrivning",
+        "LABELS": "Etiketter",
+        "LAST_COMMENT": "Senaste kommentar",
+        "LOAD_ALL_COMMENTS": "Läs in alla {{nr}} kommentarer",
+        "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "Läs in beskrivning och alla kommentarer",
+        "MARK_AS_CHECKED": "Markera uppdateringar som avbockade",
+        "STATUS": "Status",
+        "SUMMARY": "Sammanfattning",
+        "WRITE_A_COMMENT": "Skriv en kommentar"
+      }
+    },
+    "GITLAB": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Konfigurera GitLab för projektet"
+      },
+      "DIALOG_SUBMIT_WORKLOG": {
+        "T_TITLE": "Titel"
+      },
+      "FORM": {
+        "FILTER": "Anpassat filter",
+        "FILTER_DESCRIPTION": "Se https://docs.gitlab.com/ee/api/issues.html#list-issues. Flera kan kombineras med &.",
+        "FILTER_USER": "Filtrera användarnamn",
+        "PROJECT_HINT": "t.ex. johannesjo/super-productivity",
+        "SCOPE_ALL": "Alla",
+        "SOURCE": "Källa",
+        "SOURCE_GLOBAL": "Alla",
+        "SOURCE_GROUP": "Grupp",
+        "SOURCE_PROJECT": "Projekt",
+        "SUBMIT_TIMELOGS": "Skicka in tidsloggar till GitLab"
+      },
+      "FORM_SECTION": {
+        "TITLE": "GitLab"
+      },
+      "ISSUE_CONTENT": {
+        "DESCRIPTION": "Beskrivning",
+        "LABELS": "Etiketter",
+        "PROJECT": "Projekt",
+        "STATUS": "Status",
+        "SUMMARY": "Sammanfattning",
+        "WRITE_A_COMMENT": "Skriv en kommentar"
+      }
+    },
+    "ISSUE": {
+      "S": {
+        "ISSUE_DELETED_OR_CLOSED": "{{issueProviderName}}: {{issueStrC}} \"{{issueTitle}}\" verkar vara raderad eller stängd",
+        "ISSUE_NO_UPDATE_REQUIRED": "{{issueProviderName}}: Ingen uppdatering nödvändig",
+        "ISSUE_UPDATE_MULTIPLE": "{{issueProviderName}}: Uppdaterade data för {{nr}} {{issuesStr}}",
+        "ISSUE_UPDATE_SINGLE": "{{issueProviderName}}: Uppdaterade data för \"{{issueTitle}}\"",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "{{issueProviderName}}: Uppdaterade data för \"{{issueTitle}}\"",
+        "NEW_COMMENT": "{{issueProviderName}}: Ny kommentar till \"{{issueTitle}}\""
+      }
+    },
+    "JIRA": {
+      "CFG_CMP": {
+        "ALWAYS_ASK": "Öppna alltid dialogrutan",
+        "ENABLE": "Aktivera Jira-integrering",
+        "LOAD_SUGGESTIONS": "Ladda förslag"
+      },
+      "DIALOG_CONFIRM_ASSIGNMENT": {
+        "OK": "Gör det!"
+      },
+      "DIALOG_INITIAL": {
+        "TITLE": "Konfigurera Jira för projektet"
+      },
+      "DIALOG_TRANSITION": {
+        "CHOOSE_STATUS": "Välj status du vill tilldela",
+        "CURRENT_STATUS": "Nuvarande status:",
+        "TASK_NAME": "Uppgiftens namn:",
+        "TITLE": "Jira: Uppdatera status",
+        "UPDATE_STATUS": "Uppdatera status"
+      },
+      "DIALOG_WORKLOG": {
+        "CHECKBOXES": {
+          "ALL_TIME": "Använd alltid all tid som lagts på uppgiften som standard"
+        },
+        "INVALID_DATE": "Det angivna värdet är inte ett datum!",
+        "SAVE_WORKLOG": "Spara arbetsloggen",
+        "STARTED": "Startad",
+        "SUBMIT_WORKLOG_FOR": "Skicka in en arbetslogg till Jira för",
+        "TIME_SPENT": "Använd tid",
+        "TIME_SPENT_TOOLTIP": "Lägg till olika tider",
+        "TITLE": "Jira: Skicka in arbetslogg"
+      },
+      "FORM_ADV": {
+        "WORKLOG_DEFAULT_ALL_TIME": "Fyll i all tid som har lagts på uppgiften",
+        "WORKLOG_DEFAULT_TIME_MODE": "Standardtidsvärde för dialogrutan",
+        "WORKLOG_DEFAULT_TODAY": "Fyll bara i tid använd idag",
+        "WORKLOG_DEFAULT_YESTERDAY": "Fyll bara i tiden du använde igår"
+      },
+      "FORM_CRED": {
+        "ALLOW_SELF_SIGNED": "Tillåt självsignerat certifikat",
+        "HOST": "Värd (t.ex.: http://my-host.de:1234)",
+        "USER_NAME": "E-post / användarnamn"
+      },
+      "FORM_SECTION": {
+        "ADV_CFG": "Avancerad konfiguration",
+        "HELP_ARR": {
+          "H1": "Grundläggande konfiguration",
+          "H2": "Inställningar för arbetslogg"
+        }
+      },
+      "ISSUE_CONTENT": {
+        "ATTACHMENTS": "Bilagor",
+        "CHANGED": "ändrad",
+        "COMMENTS": "Kommentarer",
+        "COMPONENTS": "Komponenter",
+        "DESCRIPTION": "Beskrivning",
+        "LIST_OF_CHANGES": "Lista över ändringar",
+        "RELATED": "Relaterad",
+        "STATUS": "Status",
+        "SUB_TASKS": "Deluppgifter",
+        "SUMMARY": "Sammanfattning",
+        "WRITE_A_COMMENT": "Skriv en kommentar"
+      },
+      "S": {
+        "INVALID_RESPONSE": "Jira: Svaret innehöll ogiltig data",
+        "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: Uppdaterade data för \"{{issueText}}\""
+      },
+      "STEPPER": {
+        "CREDENTIALS": "Inloggningsuppgifter",
+        "DONE": "Du är klar nu.",
+        "LOGIN_SUCCESS": "Inloggning lyckades!",
+        "WELCOME_USER": "Välkommen {{user}}!"
+      }
+    },
+    "METRIC": {
+      "BANNER": {
+        "CHECK": "Jag gjorde det!"
+      },
+      "CMP": {
+        "COUNTING_SUBTASKS": "(räknar deluppgifter)",
+        "DAYS_WORKED": "Arbetade dagar",
+        "IMPROVEMENT_SELECTION_COUNT": "Antal gånger en förbättringsfaktor valdes",
+        "MOOD_PRODUCTIVITY_OVER_TIME": "Humör och produktivitet över tid",
+        "OBSTRUCTION_SELECTION_COUNT": "Antal gånger en hindrande faktor valdes",
+        "SIMPLE_COUNTERS": "Enkla räknare & vaneloggning",
+        "TASKS_DONE_CREATED": "Uppgifter (avklarade/skapade)",
+        "TIME_ESTIMATED": "Anslagen tid",
+        "TIME_SPENT": "Använd tid"
+      },
+      "EVAL_FORM": {
+        "DISABLE_REPEAT_EVERY_DAY": "Inaktivera daglig upprepning",
+        "ENABLE_REPEAT_EVERY_DAY": "Upprepa varje dag",
+        "HELP_H1": "Varför ska jag bry mig?",
+        "HELP_P1": "Dags för lite självutvärdering! Dina svar här sparas och erbjuder dig, i mätningsavdelningen, lite statistik över hur du arbetar. Dessutom kommer förslagen för imorgon dyka upp över din lista med uppgifter nästa dag.",
+        "IMPROVEMENTS": "Vad förbättrade din produktivitet?",
+        "IMPROVEMENTS_TOMORROW": "Vad skulle du kunna göra för att förbättra den imorgon?",
+        "MOOD": "Hur mår du?",
+        "MOOD_HINT": "1: Förfärligt - 10: Fantastiskt",
+        "NOTES": "Anteckningar för imorgon",
+        "OBSTRUCTIONS": "Vad hindrade din produktivitet?",
+        "PRODUCTIVITY": "Hur effektivt arbetade du?",
+        "PRODUCTIVITY_HINT": "1: Har inte ens börjat – 10: Enormt effektivt"
+      }
+    },
+    "NOTE": {
+      "NOTES_CMP": {
+        "ADD_BTN": "Lägg till ny anteckning",
+        "DROP_TO_ADD": "Släpp här för att lägga till ny anteckning",
+        "NO_NOTES": "Det finns för närvarande inga anteckningar"
+      }
+    },
+    "OPEN_PROJECT": {
+      "CFG_CMP": {
+        "ALWAYS_ASK": "Öppna alltid dialogruta",
+        "TRANSITION": "Hantering av övergångar"
+      },
+      "DIALOG_INITIAL": {
+        "TITLE": "Konfigurera OpenProjet för projektet"
+      },
+      "DIALOG_TRACK_TIME": {
+        "ACTIVITY": "Aktivitet",
+        "CURRENTLY_LOGGED": "För närvarande loggad tid:",
+        "INVALID_DATE": "Det angivna värdet är inte ett datum!",
+        "STARTED": "Startad",
+        "TIME_SPENT": "Använd tid"
+      },
+      "DIALOG_TRANSITION": {
+        "CHOOSE_STATUS": "Välj status som ska tilldelas",
+        "CURRENT_STATUS": "Nuvarande status:",
+        "TASK_NAME": "Uppgiftsnamn:",
+        "UPDATE_STATUS": "Uppdatera status"
+      },
+      "FORM": {
+        "FILTER_USER": "Filtrera användarnamn",
+        "HOST": "Värd (t.ex.: https://www.openproject.org/)",
+        "PROJECT_ID": "Projekt-ID",
+        "SCOPE_ALL": "Alla"
+      },
+      "ISSUE_CONTENT": {
+        "DESCRIPTION": "Beskrivning",
+        "STATUS": "Status",
+        "SUMMARY": "Sammanfattning",
+        "TYPE": "Typ"
+      }
+    },
+    "PLANNER": {
+      "D": {
+        "PLAN_FOR_DAY": {
+          "REMOVE_PLAN_DATE": "Ta bort planeringsdatum",
+          "TITLE": "Planera dagens uppgifter"
+        }
+      },
+      "EDIT_REPEATED_TASK": "Redigera den upprepade uppgiften '{{taskName}}'",
+      "NO_TASKS": "Inga uppgifter",
+      "S": {
+        "REMOVED_PLAN_DATE": "Tog bort planeringsdatum för uppgiften '{{taskTitle}}'",
+        "TASK_ALREADY_PLANNED": "Uppgiften är redan planerad till {{date}}."
+      }
+    },
+    "POMODORO": {
+      "BACK_TO_WORK": "Tillbaka till arbetet!",
+      "SKIP_BREAK": "Hoppa över rasten",
+      "START_BREAK": "Börja rasten"
+    },
+    "PROCRASTINATION": {
+      "BACK_TO_WORK": "Tillbaka till arbetet!",
+      "COMP": {
+        "INTRO": "Människor som ofta prokrastinerar",
+        "L2": "Försök att lyssna på tankarna och känslorna som uppstår",
+        "TITLE": "Självmedkänsla"
+      },
+      "CUR": {
+        "L3": "Vad påminner de dig om?",
+        "TITLE": "Nyfikenhet"
+      },
+      "H1": "Var inte så sträng mot dig själv!",
+      "INTRO": {
+        "AVOIDING": "Att undvika uppgiften",
+        "FEAR": "Rädsla att misslyckas",
+        "STRESSED": "Stressad över att inte få saker gjorda",
+        "TITLE": "Introduktion"
+      },
+      "SPLIT_UP": {
+        "TITLE": "Dela upp den!"
+      }
+    },
+    "PROJECT": {
+      "D_CREATE": {
+        "CREATE": "Skapa projekt",
+        "EDIT": "Redigera projekt",
+        "SETUP_CALDAV": "Konfigurera CalDav-integrering",
+        "SETUP_GIT": "Konfigurera GitHub-integrering",
+        "SETUP_GITEA_PROJECT": "Konfigurera Gitea-integrering",
+        "SETUP_GITLAB": "Konfigurera GitLab-integrering",
+        "SETUP_JIRA": "Konfigurera Jira-integrering",
+        "SETUP_OPEN_PROJECT": "Konfigurera OpenProject-integrering",
+        "SETUP_REDMINE_PROJECT": "Konfigurera Redmine-integrering"
+      },
+      "D_DELETE": {
+        "MSG": "Är du säker på att du vill radera projektet \"{{title}}\"?"
+      },
+      "FORM_BASIC": {
+        "L_IS_HIDDEN_FROM_MENU": "Dölj projektet i menyn",
+        "L_TITLE": "Projektnamn",
+        "TITLE": "Grundläggande inställningar"
+      },
+      "FORM_THEME": {
+        "D_IS_DARK_THEME": "Kommer ej användas om ditt system har stöd för globalt mörkt läge.",
+        "HELP": "Temainställningar för ditt projekt.",
+        "L_BACKGROUND_IMAGE_DARK": "URL för bakgrundsbild (mörkt tema)",
+        "L_BACKGROUND_IMAGE_LIGHT": "URL för bakgrundsbild (ljust tema)",
+        "L_THEME_COLOR": "Temafärg",
+        "L_TITLE": "Titel",
+        "TITLE": "Tema"
+      },
+      "S": {
+        "ARCHIVED": "Arkiverat projekt",
+        "DELETED": "Raderat projekt",
+        "E_EXISTS": "Projektet \"{{title}}\" existerar redan",
+        "ISSUE_PROVIDER_UPDATED": "Uppdaterade projektinställningar för <strong>{{issueProviderKey}}</strong>",
+        "UNARCHIVED": "Icke arkiverat projekt",
+        "UPDATED": "Uppdaterade projektinställningar"
+      }
+    },
+    "REDMINE": {
+      "FORM": {
+        "PROJECT_ID": "Projektidentifikator",
+        "SCOPE_ALL": "Alla"
+      },
+      "ISSUE_CONTENT": {
+        "AUTHOR": "Författare",
+        "DESCRIPTION": "Beskrivning",
+        "PRIORITY": "Prioritet",
+        "STATUS": "Status"
+      }
+    },
+    "REMINDER": {
+      "COUNTDOWN_BANNER": {
+        "HIDE": "Dölj",
+        "START_NOW": "Börja nu"
+      }
+    },
+    "SCHEDULE": {
+      "LUNCH_BREAK": "Lunchrast",
+      "NOW": "Nu"
+    },
+    "SIMPLE_COUNTER": {
+      "D_CONFIRM_REMOVE": {
+        "OK": "Gör det!"
+      },
+      "D_EDIT": {
+        "DAYS": "Dagar"
+      },
+      "FORM": {
+        "L_ICON": "Ikon",
+        "L_IS_ENABLED": "Aktiverad",
+        "L_TITLE": "Titel",
+        "L_TYPE": "Typ",
+        "TYPE_STOPWATCH": "Tidtagningsur"
+      },
+      "S": {
+        "GOAL_REACHED_1": "Du har uppnått ditt mål för idag!"
+      }
+    },
+    "SYNC": {
+      "D_INCOMPLETE_SYNC": {
+        "T3": "Du har två alternativ:"
+      },
+      "FORM": {
+        "LOCAL_FILE": {
+          "L_SYNC_FOLDER_PATH": "Sökväg till synkroniseringsmapp"
+        },
+        "TITLE": "Synkronisera",
+        "WEB_DAV": {
+          "L_PASSWORD": "Lösenord",
+          "L_USER_NAME": "Användarnamn"
+        }
+      },
+      "S": {
+        "ALREADY_IN_SYNC": "Redan synkroniserad",
+        "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "Inga lokala ändringar - redan synkroniserad",
+        "ERROR_FALLBACK_TO_BACKUP": "Något gick fel under importen av datan. Återgår till lokal säkerhetskopia.",
+        "ERROR_INVALID_DATA": "Fel under synkronisering. Ogiltig data",
+        "IMPORTING": "Importerar data"
+      }
+    },
+    "TAG": {
+      "FORM_BASIC": {
+        "L_ICON": "Ikon",
+        "TITLE": "Grundläggande inställningar"
+      }
+    },
+    "TASK": {
+      "ADD_TASK_BAR": {
+        "ADD_EXISTING_TASK": "Lägg till den existerande uppgiften \"{{taskTitle}}\"",
+        "ADD_TASK_TO_BOTTOM_OF_TODAY": "Lägg till uppgift nederst i listan",
+        "ADD_TASK_TO_TOP_OF_TODAY": "Lägg till uppgift överst i listan",
+        "CREATE_TASK": "Skapa ny uppgift"
+      },
+      "ADDITIONAL_INFO": {
+        "ADD_ATTACHMENT": "Lägg till bilaga",
+        "ADD_SUB_TASK": "Lägg till underuppgift",
+        "ATTACHMENTS": "Bilagor ({{nr}})",
+        "NOTES": "Beskrivning",
+        "REMINDER": "Påminnelse",
+        "REPEAT": "Upprepa",
+        "TIME": "Tid",
+        "TITLE_PLACEHOLDER": "Ange en titel"
+      },
+      "B": {
+        "ADD_HALF_HOUR": "Lägg till ½ timme"
+      },
+      "CMP": {
+        "ADD_SUB_TASK": "Lägg till underuppgift",
+        "CONVERT_TO_PARENT_TASK": "Konvertera till huvuduppgift",
+        "DELETE": "Radera uppgift",
+        "EDIT_SCHEDULED": "Planera om",
+        "EDIT_TASK_TITLE": "Redigera titel",
+        "MARK_DONE": "Markera som klar",
+        "OPEN_ISSUE": "Öppna i webbläsare",
+        "REPEAT_EDIT": "Redigera konfiguration för återkommande uppgifter",
+        "SCHEDULE": "Planera uppgiften",
+        "SHOW_UPDATES": "Visa uppdateringar",
+        "TOGGLE_ATTACHMENTS": "Visa/dölj bilagor",
+        "TOGGLE_DETAIL_PANEL": "Visa/dölj ytterligare information",
+        "TOGGLE_SUB_TASK_VISIBILITY": "Byt synlighet för underuppgift"
+      },
+      "D_REMINDER_VIEW": {
+        "DISMISS": "Avvisa påminnelse",
+        "DISMISS_ALL": "Avvisa alla",
+        "DONE": "Klar"
+      },
+      "D_SCHEDULE_TASK": {
+        "RO_NEVER": "Aldrig",
+        "RO_START": "när den börjar"
+      },
+      "D_TIME": {
+        "TIME_SPENT": "Använd tid"
+      },
+      "D_TIME_FOR_DAY": {
+        "TINE_SPENT": "Använd tid"
+      },
+      "S": {
+        "CREATED_FOR_PROJECT_ACTION": "Gå till projekt",
+        "DELETED": "Raderade uppgiften \"{{title}}\"",
+        "MOVED_TO_PROJECT": "Flyttade uppgiften \"{{taskTitle}}\" till projektet \"{{projectTitle}}\"",
+        "MOVED_TO_PROJECT_ACTION": "Gå till projekt",
+        "REMINDER_DELETED": "Raderade påminnelse för uppgift",
+        "REMINDER_UPDATED": "Uppdaterade påminnelse för uppgiften \"{{title}}\"",
+        "TASK_CREATED": "Skapade uppgiften \"{{title}}\""
+      },
+      "SELECT_OR_CREATE": "Välj eller skapa uppgift",
+      "SUMMARY_TABLE": {
+        "SPENT_TODAY": "Använd idag",
+        "SPENT_TOTAL": "Använd totalt",
+        "TASK": "Uppgift"
+      }
+    },
+    "TASK_REPEAT": {
+      "ADD_INFO_PANEL": {
+        "MONDAY_TO_FRIDAY": "mån-fre",
+        "MONDAY_TO_FRIDAY_AND_TIME": "mån-fre, {{timeStr}}",
+        "WEEKLY_CURRENT_WEEKDAY": "Veckovis på {{weekdayStr}}",
+        "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "Veckovis på {{weekdayStr}}, {{timeStr}}",
+        "YEARLY_CURRENT_DATE": "Årligen den {{dayAndMonthStr}}",
+        "YEARLY_CURRENT_DATE_AND_TIME": "Årligen den {{dayAndMonthStr}}, {{timeStr}}"
+      },
+      "D_CONFIRM_REMOVE": {
+        "OK": "Radera helt"
+      },
+      "D_CONFIRM_UPDATE_INSTANCES": {
+        "CANCEL": "Bara framtida uppgifter"
+      },
+      "D_EDIT": {
+        "ADVANCED_CFG": "Avancerad konfiguration"
+      },
+      "F": {
+        "C_DAY": "Dag",
+        "C_MONTH": "Månad",
+        "C_WEEK": "Vecka",
+        "C_YEAR": "År",
+        "FRIDAY": "fredag",
+        "MONDAY": "måndag",
+        "Q_DAILY": "Varje dag",
+        "Q_MONDAY_TO_FRIDAY": "Varje måndag till fredag",
+        "SATURDAY": "lördag",
+        "SUNDAY": "söndag",
+        "THURSDAY": "torsdag",
+        "TUESDAY": "tisdag",
+        "WEDNESDAY": "onsdag"
+      }
+    },
+    "TIME_TRACKING": {
+      "B": {
+        "ALREADY_DID": "Det har jag redan gjort"
+      },
+      "D_IDLE": {
+        "SIMPLE_CONFIRM_COUNTER_CANCEL": "Hoppa över",
+        "SKIP": "Hoppa över"
+      }
+    },
+    "WORKLOG": {
+      "CMP": {
+        "TASKS": "Uppgifter",
+        "TOTAL_TIME": "Total använd tid:",
+        "WEEK_NR": "Vecka {{nr}}",
+        "WORKED": "Arbetad"
+      }
+    }
+  },
+  "GCF": {
+    "AUTO_BACKUPS": {
+      "LOCATION_INFO": "Säkerhetskopior sparas i:"
+    },
+    "CALENDARS": {
+      "CAL_PATH": "iCal-källans URL"
+    },
+    "EVALUATION": {
+      "TITLE": "Utvärdering & mätvärden"
+    },
+    "IMEX": {
+      "TITLE": "Importera/exportera"
+    },
+    "KEYBOARD": {
+      "ADD_NEW_NOTE": "Lägg till ny anteckning",
+      "ADD_NEW_TASK": "Lägg till ny uppgift"
+    },
+    "MISC": {
+      "FIRST_DAY_OF_WEEK": "Veckans första dag",
+      "IS_DISABLE_ANIMATIONS": "Inaktivera alla animationer",
+      "TITLE": "Diverse inställningar"
+    },
+    "POMODORO": {
+      "BREAK_DURATION": "Varaktighet för korta raster",
+      "IS_PLAY_SOUND_AFTER_BREAK": "Spela upp ljud när rasten är slut",
+      "LONGER_BREAK_DURATION": "Varaktighet för längre raster"
+    },
+    "SCHEDULE": {
+      "L_WORK_END": "Arbetsdagens slut",
+      "L_WORK_START": "Arbetsdagens början",
+      "LUNCH_BREAK_START_END_DESCRIPTION": "t.ex. 13:00",
+      "WORK_START_END_DESCRIPTION": "t.ex. 17:00"
+    },
+    "SOUND": {
+      "TITLE": "Ljud",
+      "VOLUME": "Volym"
+    },
+    "TAKE_A_BREAK": {
+      "ADD_NEW_IMG": "Lägg till motiverande bild",
+      "NOTIFICATION_TITLE": "Ta en rast!"
+    }
+  },
+  "GPB": {
+    "WEB_DAV_DOWNLOAD": "WebDAV: Laddar ned data...",
+    "WEB_DAV_UPLOAD": "WebDAV: Laddar upp data..."
+  },
+  "MH": {
+    "ADD_NEW_TASK": "Lägg till ny uppgift",
+    "CREATE_PROJECT": "Skapa projekt",
+    "DELETE_PROJECT": "Radera projekt",
+    "HELP": "Hjälp",
+    "HM": {
+      "CONTRIBUTE": "Bidra",
+      "REPORT_A_PROBLEM": "Rapportera ett problem"
+    },
+    "PROJECT_MENU": "Projektmeny",
+    "PROJECT_SETTINGS": "Projektinställningar",
+    "PROJECTS": "Projekt",
+    "SETTINGS": "Inställningar",
+    "TASKS": "Uppgifter",
+    "WORKLOG": "Arbetslogg"
+  },
+  "PDS": {
+    "BACK": "Vänta, jag glömde något!",
+    "EVALUATE_DAY": "Utvärdera",
+    "SAVE_AND_GO_HOME": "Spara och gå hem",
+    "TASKS_COMPLETED": "Uppgift slutförd",
+    "WEEK": "Vecka"
+  },
+  "PM": {
+    "TITLE": "Projektstatistik"
+  },
+  "PS": {
+    "GLOBAL_SETTINGS": "Globala inställningar"
+  },
+  "THEMES": {
+    "blue": "blått",
+    "blue-grey": "blågrått",
+    "green": "grönt",
+    "indigo": "indigo",
+    "light-blue": "ljusblått",
+    "light-green": "ljusgrönt",
+    "lime": "lime",
+    "pink": "rosa",
+    "purple": "lila",
+    "SELECT_THEME": "Välj färgtema",
+    "yellow": "gult"
+  }
+}
