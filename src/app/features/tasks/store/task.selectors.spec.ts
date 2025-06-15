@@ -287,18 +287,18 @@ describe('Task Selectors', () => {
     it('should select tasks due for day', () => {
       // For parameterized selectors, projector expects (result1, result2, props)
       const allTasks = Object.values(mockTasks);
-      const result = fromSelectors.selectTasksDueForDay.projector(allTasks, today, today);
+      const result = fromSelectors.selectTasksDueForDay.projector(allTasks, {
+        day: today,
+      });
       expect(result.length).toBe(1);
       expect(result[0].id).toBe('task3');
     });
 
     it('should select tasks due and overdue for day', () => {
       const allTasks = Object.values(mockTasks);
-      const result = fromSelectors.selectTasksDueAndOverdueForDay.projector(
-        allTasks,
-        today,
-        today,
-      );
+      const result = fromSelectors.selectTasksDueAndOverdueForDay.projector(allTasks, {
+        day: today,
+      });
       expect(result.map((r) => r.id)).toEqual(['task3', 'task6']); // task3 (today), task6 (yesterday)
     });
 
@@ -310,7 +310,6 @@ describe('Task Selectors', () => {
       const result = fromSelectors.selectTasksWithDueTimeForRange.projector(
         allTasks,
         params,
-        params,
       );
       expect(result.length).toBe(1);
       expect(result[0].id).toBe('task5');
@@ -319,11 +318,9 @@ describe('Task Selectors', () => {
     it('should select tasks with due time until', () => {
       const end = Date.now() + 7200000; // 2 hours
       const allTasks = Object.values(mockTasks);
-      const result = fromSelectors.selectTasksWithDueTimeUntil.projector(
-        allTasks,
+      const result = fromSelectors.selectTasksWithDueTimeUntil.projector(allTasks, {
         end,
-        end,
-      );
+      });
       expect(result.length).toBe(1);
       expect(result[0].id).toBe('task5');
     });
