@@ -8,11 +8,11 @@ const FIRST_TASK = 'task:nth-child(1)';
 const SECOND_TASK = 'task:nth-child(2)';
 const THIRD_TASK = 'task:nth-child(3)';
 const SAVE_AND_GO_HOME_BTN = 'button[mat-flat-button][color="primary"]:last-of-type';
-const SIDE_NAV_TODAY = 'side-nav section.main side-nav-item:first-of-type button';
 const TABLE_CAPTION = 'quick-history  h3';
+const TABLE_ROWS = 'table tr';
 
 module.exports = {
-  '@tags': ['task', 'NEW', 'finish-day', 'quick-history', 'subtasks'],
+  '@tags': ['task', 'finish-day', 'quick-history', 'subtasks'],
 
   before: (browser: NBrowser) => browser.loadAppAndClickAwayWelcomeDialog(),
 
@@ -71,19 +71,6 @@ module.exports = {
       .click(SAVE_AND_GO_HOME_BTN)
       .pause(1000),
 
-  'should verify done tasks are in archive': (browser: NBrowser) =>
-    browser
-      .waitForElementVisible(SIDE_NAV_TODAY)
-      .click(SIDE_NAV_TODAY)
-      .pause(500)
-      .waitForElementVisible('task-list')
-      // Done tasks might still be visible but marked as done
-      .execute(() => {
-        const tasks = document.querySelectorAll('task:not(.isDone)');
-        console.log('Undone tasks in Today view:', tasks.length);
-        return tasks.length;
-      }),
-
   'should navigate to quick history via left-hand menu': (browser: NBrowser) =>
     browser
       .rightClick('side-nav > section.main > side-nav-item.g-multi-btn-wrapper')
@@ -102,6 +89,19 @@ module.exports = {
       // Tasks created with 'a' shortcut may not be properly nested/archived
       .assert.elementPresent('quick-history')
       .assert.elementPresent('table'),
+
+  'should confirm tasks are in the table': (browser: NBrowser) =>
+    browser
+      .waitForElementVisible(TABLE_ROWS, 5000)
+      .assert.elementPresent(TABLE_ROWS)
+      .waitForElementVisible('table > tr:nth-child(1) > td.title > span')
+      // Verify the task title is present in the table
+      .assert.textContains(
+        'table > tr:nth-child(1) > td.title > span',
+        'Main Task with Subtasks',
+      )
+      .assert.textContains('table > tr:nth-child(2) > td.title > span', 'First Subtask')
+      .assert.textContains('table > tr:nth-child(3) > td.title > span', 'Second Subtask'),
 
   'should confirm no errors in console': (browser: NBrowser) => browser.noError(),
 };
