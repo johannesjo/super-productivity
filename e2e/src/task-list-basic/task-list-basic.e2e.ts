@@ -5,7 +5,7 @@ const TODAY_TASKS = 'task-list task';
 const TODAY_TASK_1 = `${TODAY_TASKS}:first-of-type`;
 
 module.exports = {
-  '@tags': ['task', 'basic'],
+  '@tags': ['task', 'NEW', 'basic'],
   before: (browser: NBrowser) => browser.loadAppAndClickAwayWelcomeDialog(),
   after: (browser: NBrowser) => browser.end(),
 
@@ -13,10 +13,10 @@ module.exports = {
     browser
       .addTask('0 C task')
       .moveToElement('task', 20, 20)
-      .click('.tour-playBtn')
+      .click('.play-btn.tour-playBtn')
       .pause(50)
       .assert.hasClass(TODAY_TASK_1, 'isCurrent')
-      .click('.tour-playBtn')
+      .click('.play-btn.tour-playBtn')
       .pause(50)
       .assert.not.hasClass(TODAY_TASK_1, 'isCurrent'),
 };

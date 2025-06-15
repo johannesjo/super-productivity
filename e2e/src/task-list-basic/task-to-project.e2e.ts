@@ -13,7 +13,7 @@ const SIDE_NAV_PROJECTS_EXPAND = 'side-nav section.projects button.expand-btn';
 const SIDE_NAV_TODAY = 'side-nav section.main side-nav-item:first-of-type button';
 
 module.exports = {
-  '@tags': ['task', 'project', 'context-menu'],
+  '@tags': ['task', 'NEW', 'project', 'context-menu'],
 
   before: (browser: NBrowser) => browser.loadAppAndClickAwayWelcomeDialog(),
 

@@ -22,7 +22,7 @@ module.exports = {
         browserName: 'chrome',
         chromeOptions: {
           args: [
-            '--headless',
+            // '--headless',
             '--disable-gpu',
             '--window-size=1280,800',
             '--no-sandbox',
