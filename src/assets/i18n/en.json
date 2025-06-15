@@ -31,10 +31,7 @@
     "RESTORE_FILE_BACKUP_ANDROID": "There seems to be NO DATA, but there is a backup available. Do you want to load it?",
     "RESTORE_STRAY_BACKUP": "During last sync there might have been some error. Do you want to restore the last backup?"
   },
-  "DATETIME_INPUT": {
-    "IN": "in {{time}}",
-    "TOMORROW": "tomorrow {{time}}"
-  },
+  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Later Today",
     "NEXT_WEEK": "Next Week",
@@ -125,7 +122,6 @@
         "CHANGED": "changed",
         "COMMENTS": "Comments",
         "COMPONENTS": "Components",
-        "DESCRIPTION": "Description",
         "LIST_OF_CHANGES": "List of changes",
         "MARK_AS_CHECKED": "Mark updates as checked",
         "ON": "on",
@@ -135,10 +131,7 @@
         "SUB_TASKS": "Subtasks",
         "SUMMARY": "Summary",
         "WORKLOG": "Worklog",
-        "WRITE_A_COMMENT": "Write a comment",
-        "MARK_AS_CHECKED": "Mark updates as checked",
-        "STATUS": "Status",
-        "SUMMARY": "Summary"
+        "WRITE_A_COMMENT": "Write a comment"
       },
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav: Calendar \"{{calendarName}}\" not found",
@@ -406,7 +399,6 @@
         "POLLING_CHANGES": "{{issueProviderName}}: Polling Changes for {{issuesStr}}"
       }
     },
-
     "JIRA": {
       "BANNER": {
         "BLOCK_ACCESS_MSG": "Jira: To prevent shut out from api, access has been blocked by Super Productivity. You probably should check your jira settings!",

@@ -31,10 +31,7 @@
     "RESTORE_FILE_BACKUP_ANDROID": "데이터가 없는 것 같지만 사용 가능한 백업이 있습니다. 로드하시겠습니까?",
     "RESTORE_STRAY_BACKUP": "마지막 동기화 중에 오류가 발생했을 수 있습니다. 마지막 백업을 복원 하시겠습니까?"
   },
-  "DATETIME_INPUT": {
-    "IN": " {{time}}에",
-    "TOMORROW": "내일 {{time}}"
-  },
+  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "나중에 오늘",
     "NEXT_WEEK": "다음 주",

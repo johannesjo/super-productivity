@@ -31,10 +31,7 @@
     "RESTORE_FILE_BACKUP_ANDROID": "HİÇ VERİ yok gibi görünüyor, ancak bir yedek mevcut. Yüklemek istiyor musun?",
     "RESTORE_STRAY_BACKUP": "Son senkronizasyon sırasında bazı hatalar olabilir. Son yedeği geri yüklemek istiyor musunuz?"
   },
-  "DATETIME_INPUT": {
-    "IN": "{{time}} içinde",
-    "TOMORROW": "yarın {{time}}"
-  },
+  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Bugün Daha Sonra",
     "NEXT_WEEK": "Gelecek Hafta",

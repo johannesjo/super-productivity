@@ -31,10 +31,7 @@
     "RESTORE_FILE_BACKUP_ANDROID": "Схоже, ДАНИХ НЕМАЄ, але є резервна копія. Бажаєте завантажити її?",
     "RESTORE_STRAY_BACKUP": "Під час останньої синхронізації могла виникнути помилка. Бажаєте відновити останню резервну копію?"
   },
-  "DATETIME_INPUT": {
-    "IN": "через {{time}}",
-    "TOMORROW": "завтра {{time}}"
-  },
+  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Пізніше сьогодні",
     "NEXT_WEEK": "Наступного тижня",

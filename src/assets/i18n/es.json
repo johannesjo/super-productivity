@@ -31,10 +31,7 @@
     "RESTORE_FILE_BACKUP_ANDROID": "Parece que NO HAY DATOS, pero hay una copia de seguridad disponible. ¿Quieres cargarla?",
     "RESTORE_STRAY_BACKUP": "Durante la última sincronización puede que haya habido algún error. ¿Quieres restaurar la última copia de seguridad?"
   },
-  "DATETIME_INPUT": {
-    "IN": "en {{time}}",
-    "TOMORROW": "mañana {{time}}"
-  },
+  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Mas tarde, hoy",
     "NEXT_WEEK": "La próxima semana",

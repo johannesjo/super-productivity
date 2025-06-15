@@ -31,10 +31,7 @@
     "RESTORE_FILE_BACKUP_ANDROID": "به نظر می رسد هیچ داده ای وجود ندارد ، اما نسخه پشتیبان موجود است. آیا می خواهید آن را بارگیری کنید؟",
     "RESTORE_STRAY_BACKUP": "در آخرین همگام سازی ممکن است خطایی رخ داده باشد. آیا می خواهید آخرین نسخه پشتیبان را بازیابی کنید؟"
   },
-  "DATETIME_INPUT": {
-    "IN": "در {{time}}",
-    "TOMORROW": "فردا {{time}}"
-  },
+  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "امروز بعد",
     "NEXT_WEEK": "هفته بعد",

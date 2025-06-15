@@ -31,10 +31,7 @@
     "RESTORE_FILE_BACKUP_ANDROID": "Sepertinya TIDAK ADA DATA, tetapi ada cadangan yang tersedia. Apakah Anda ingin memuatnya?",
     "RESTORE_STRAY_BACKUP": "Selama sinkronisasi terakhir mungkin ada beberapa kesalahan. Apakah Anda ingin memulihkan cadangan terakhir?"
   },
-  "DATETIME_INPUT": {
-    "IN": "di {{time}}",
-    "TOMORROW": "besok {{time}}"
-  },
+  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Nanti hari ini",
     "NEXT_WEEK": "Minggu depan",

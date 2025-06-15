@@ -31,10 +31,7 @@
     "RESTORE_FILE_BACKUP_ANDROID": "Čini se da NEMA PODATAKA, međutim postoji sigirnosna kopija. Želiš li je učitati?",
     "RESTORE_STRAY_BACKUP": "Tijekom zadnje sinkronizacije je možda došlo do greške. Želiš li obnoviti zadnju sigurnosnu kopiju?"
   },
-  "DATETIME_INPUT": {
-    "IN": "za {{time}}",
-    "TOMORROW": "sutra {{time}}"
-  },
+  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Kasnije danas",
     "NEXT_WEEK": "Sljedeći tjedan",
