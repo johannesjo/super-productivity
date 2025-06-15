@@ -2,7 +2,7 @@ import { NBrowser } from '../../n-browser-interface';
 
 const TASK_SEL = 'task';
 const TASK_TEXTAREA = 'task textarea';
-const SUB_TASK_TEXTAREA = 'task .sub-tasks textarea';
+const SUB_TASK_INPUT = 'add-task-bar input';
 const FIRST_SUB_TASK = '.sub-tasks task:nth-child(1)';
 const FIRST_SUB_TASK_TEXTAREA = '.sub-tasks task:nth-child(1) textarea';
 const TAG_INPUT = 'input[placeholder="Type to add tags"]';
@@ -15,7 +15,7 @@ const SIDE_NAV_TAGS_EXPAND = 'side-nav section.tags button.expand-btn';
 const TASK_DETAIL_PANEL = '.right-panel';
 
 module.exports = {
-  '@tags': ['task', 'sub-task', 'tags'],
+  '@tags': ['task', 'NEW', 'sub-task', 'tags'],
 
   before: (browser: NBrowser) => browser.loadAppAndClickAwayWelcomeDialog(),
 
@@ -31,9 +31,9 @@ module.exports = {
       .pause(200)
       .setValue('body', 'a') // Press 'a' to add sub-task
       .pause(300)
-      .waitForElementVisible(SUB_TASK_TEXTAREA, 5000)
-      .setValue(SUB_TASK_TEXTAREA, 'First Subtask')
-      .setValue(SUB_TASK_TEXTAREA, browser.Keys.ENTER)
+      .waitForElementVisible(SUB_TASK_INPUT, 5000)
+      .setValue(SUB_TASK_INPUT, 'First Subtask')
+      .setValue(SUB_TASK_INPUT, browser.Keys.ENTER)
       .pause(300)
       .waitForElementVisible(FIRST_SUB_TASK, 5000)
       .assert.valueContains(FIRST_SUB_TASK_TEXTAREA, 'First Subtask'),
