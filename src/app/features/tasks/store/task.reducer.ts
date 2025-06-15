@@ -31,8 +31,6 @@ import {
   updateTimeSpentForTask,
 } from './task.reducer.util';
 import { taskAdapter } from './task.adapter';
-import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
-
 export { taskAdapter };
 import { moveItemInList } from '../../work-context/store/work-context-meta.helper';
 import {
@@ -57,7 +55,7 @@ import { MODEL_VERSION_KEY } from '../../../app.constants';
 import { MODEL_VERSION } from '../../../core/model-version';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-import { deleteProject } from '../../project/store/project.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
 
 export const TASK_FEATURE_NAME = 'tasks';
@@ -94,7 +92,7 @@ export const taskReducer = createReducer<TaskState>(
       : state,
   ),
 
-  on(deleteProject, (state, { project, allTaskIds }) => {
+  on(TaskSharedActions.deleteProject, (state, { project, allTaskIds }) => {
     return taskAdapter.removeMany(allTaskIds, {
       ...state,
       currentTaskId:
@@ -593,7 +591,7 @@ export const taskReducer = createReducer<TaskState>(
     );
   }),
 
-  on(planTasksForToday, (state, { taskIds }) => {
+  on(TaskSharedActions.planTasksForToday, (state, { taskIds }) => {
     const today = getWorklogStr();
     const updates: Update<Task>[] = taskIds.map((taskId) => ({
       id: taskId,
