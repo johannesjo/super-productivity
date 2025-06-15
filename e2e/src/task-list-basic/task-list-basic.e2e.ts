@@ -9,11 +9,14 @@ module.exports = {
   before: (browser: NBrowser) => browser.loadAppAndClickAwayWelcomeDialog(),
   after: (browser: NBrowser) => browser.end(),
 
-  'should start single task': (browser: NBrowser) =>
+  'should start and stop single task': (browser: NBrowser) =>
     browser
       .addTask('0 C task')
       .moveToElement('task', 20, 20)
       .click('.tour-playBtn')
-      .pause(100)
-      .assert.hasClass(TODAY_TASK_1, 'isCurrent'),
+      .pause(50)
+      .assert.hasClass(TODAY_TASK_1, 'isCurrent')
+      .click('.tour-playBtn')
+      .pause(50)
+      .assert.not.hasClass(TODAY_TASK_1, 'isCurrent'),
 };
