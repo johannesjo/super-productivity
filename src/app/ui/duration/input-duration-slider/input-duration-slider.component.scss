@@ -1,11 +1,11 @@
-@import '../../../../variables';
+@import '../../../../common';
 
 $this-size: 130px;
 $this-handle-size: 20px;
 $this-extra-touch-space: $this-handle-size * 0.5;
 $this-margin: $this-extra-touch-space;
 $this-handle-scale: 2;
-$this-handle-color: $c-accent;
+$this-handle-color: var(--c-accent);
 $this-circle-width: 2px;
 $this-dot-size: 14px;
 
@@ -37,8 +37,7 @@ $this-dot-size: 14px;
   -webkit-user-select: none; /* Safari */
   width: $this-size + $this-margin * 2;
   min-width: $this-size + $this-margin * 2;
-  @include standardThemeTextColor();
-
+  color: var(--theme-text-color);
   &.is-dragging .circle {
     cursor: grabbing;
   }
@@ -64,9 +63,7 @@ $this-dot-size: 14px;
   box-shadow: 1px 2px 2px 0 rgba(0, 0, 0, 0.26);
   cursor: grab;
 
-  @include darkTheme() {
-    border-color: transparent;
-  }
+  border-color: transparent;
 
   // touch spacer
   &:after {
@@ -87,11 +84,8 @@ $this-dot-size: 14px;
     left: $this-circle-width;
     bottom: $this-circle-width;
     border-radius: 100%;
-    background: #ffffff;
-    @include darkTheme() {
-      background: $dark-theme-bg-darker;
-      border-color: transparent;
-    }
+    background: var(--theme-bg-darker);
+    border-color: transparent;
   }
 
   .dots {
@@ -107,12 +101,12 @@ $this-dot-size: 14px;
   }
 
   .dot {
-    box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+    box-shadow: 1px 1px 1px var(--theme-separator-alpha);
     height: 8px;
     width: 8px;
     border-radius: 100%;
     cursor: grabbing;
-    background: $c-primary-300;
+    background: var(--palette-primary-300);
     @include onCircle(12, $this-size - $this-circle-width, $this-dot-size);
   }
 }
@@ -128,7 +122,7 @@ $this-handle-border-width: 4px;
   bottom: 0;
   pointer-events: none;
   z-index: 2;
-  transition: $transition-duration-m $ani-standard-timing;
+  transition: var(--transition-duration-m) var(--ani-standard-timing);
 
   &:after {
     content: '';
@@ -154,7 +148,7 @@ $this-stroke-width: 4px;
 
   // actual handle
   &:after {
-    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: 1px 1px 2px var(--theme-separator-alpha);
     content: '';
     top: -$this-handle-size * 0.5 + $this-circle-width * 0.5;
     background: $this-handle-color;
@@ -186,14 +180,13 @@ $this-stroke-width: 4px;
   line-height: 16px;
   padding: 0;
   cursor: text;
-  transition: all $transition-duration-m $ani-leave-timing;
+  transition: all var(--transition-duration-m) var(--ani-leave-timing);
   transition-property: opacity, transform;
   display: block;
   position: relative;
   overflow: visible;
   user-select: none;
   -webkit-user-select: none; /* Safari */
-  caret-color: #000000;
   backface-visibility: hidden;
   transform: translateZ(0);
   z-index: 4;
@@ -201,12 +194,9 @@ $this-stroke-width: 4px;
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
   background-color: transparent;
-  color: inherit;
 
-  @include darkTheme() {
-    caret-color: #ffffff;
-    color: $dark-theme-text-color-most-intense;
-  }
+  caret-color: var(--theme-text-color-most-intense);
+  color: var(--theme-text-color-most-intense);
 
   &:focus {
     @include inlineEditElevation();
@@ -220,7 +210,7 @@ $this-stroke-width: 4px;
       opacity: 1;
     }
 
-    @media (max-width: $layout-xs) {
+    @media (max-width: var(--layout-xs)) {
       transform: scale(1.05);
     }
   }

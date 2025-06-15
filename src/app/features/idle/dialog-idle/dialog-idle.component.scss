@@ -1,4 +1,4 @@
-@import '../../../../variables';
+@import '../../../../common';
 
 .dialog-content {
   @include mq(xs) {
@@ -16,22 +16,18 @@
 .time {
   font-size: 20px;
   font-weight: bold;
-  margin-bottom: $s;
+  margin-bottom: var(--s);
 }
 
 .track-to-label {
-  padding-top: $s * 3;
-  margin: $s $s * -3 $s;
+  padding-top: var(--s3);
+  margin: var(--s) calc(var(--s) * -3) var(--s);
   font-size: 22px;
-  border-top: 1px solid $dark-theme-extra-border-color;
-
-  @include lightTheme() {
-    border-color: $light-theme-extra-border-color;
-  }
+  border-top: 1px solid var(--theme-extra-border-color);
 }
 
 .simple-counter {
-  margin: 0 $s * 0.5;
+  margin: 0 var(--s-half);
   box-shadow: none !important;
 
   &.mat-primary {

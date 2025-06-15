@@ -1,7 +1,7 @@
-@import '../../../../variables';
+@import '../../../../common';
 
-$z-this-content: $z-side-panel-task-and-notes + 1;
-$z-this-backdrop: -1 + $z-task-side-bar-over;
+$z-this-content: calc(var(--z-side-panel-task-and-notes) + 1);
+$z-this-backdrop: calc(var(--z-task-side-bar-over) - 1);
 
 :host {
   display: flex;
@@ -23,8 +23,8 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
   // because then there would be none
 
   position: relative;
-  z-index: $z-side-panel-task-and-notes;
-  transition: $transition-leave;
+  z-index: var(--z-side-panel-task-and-notes);
+  transition: var(--transition-leave);
   transition-property: opacity, margin-right, right, transform;
   // NOTE: if this value is to big it might mess, with the push out logic, as
   // the width is not really 40% any more
@@ -35,7 +35,7 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
   //border: 1px solid;
   //border-right: 0;
   //border-bottom: 0;
-  //box-shadow: 0px 8px 10px -5px rgba(0, 0, 0, 0.2), 0px 16px 24px 2px rgba(0, 0, 0, 0.14), 0px 6px 30px 5px rgba(0, 0, 0, 0.12) !important;
+  //box-shadow: 0px 8px 10px -5px var(--color-overlay-dark-20), 0px 16px 24px 2px rgba(0, 0, 0, 0.14), 0px 6px 30px 5px var(--theme-divider-color) !important;
 
   @include mq(sm, max) {
     // NOTE: prevents overlapping with nav when open
@@ -46,23 +46,15 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
     max-width: 100%;
   }
 
-  @include lightTheme() {
-    background: $light-theme-selected-task-bg-color;
-    //border-color: rgba(0, 0, 0, 0.12);
-  }
-
-  @include darkTheme() {
-    background: $dark-theme-bg-slightly-lighter;
-    background: $dark6;
-    //border-color: $dark-theme-extra-border-color;
-  }
+  background: var(--theme-selected-task-bg-color);
+  //border-color: var(--theme-extra-border-color);
 
   :host.isOver & {
     position: fixed;
     width: 80vw !important;
     top: 0;
     bottom: 0;
-    z-index: $z-task-side-bar-over;
+    z-index: var(--z-task-side-bar-over);
     right: 0;
 
     @include mq(xs, max) {
@@ -71,9 +63,9 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
   }
 
   :host.isOpen.isOpen.isOpen & {
-    box-shadow: $whiteframe-shadow-2dp;
+    box-shadow: var(--whiteframe-shadow-2dp);
     opacity: 1;
-    transition: $transition-enter;
+    transition: var(--transition-enter);
   }
 }
 
@@ -101,12 +93,11 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
   text-align: center;
   line-height: 46px;
   position: absolute;
-  background: inherit;
   z-index: 23;
   top: 5px;
   cursor: pointer;
-  right: $s;
-  box-shadow: $whiteframe-shadow-2dp;
+  right: var(--s);
+  box-shadow: var(--whiteframe-shadow-2dp);
   border-radius: 50%;
   border: 1px solid;
 
@@ -114,7 +105,7 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
     top: 0;
     border-radius: 0;
     right: 100%;
-    box-shadow: $whiteframe-shadow-1dp;
+    box-shadow: var(--whiteframe-shadow-1dp);
     border: 1px solid;
   }
 
@@ -124,19 +115,12 @@ $z-this-backdrop: -1 + $z-task-side-bar-over;
     outline: none;
   }
 
-  @include lightTheme() {
-    background: $light-theme-bg-darker;
-    border-color: rgba(0, 0, 0, 0.12);
-  }
+  color: var(--theme-text-color);
+  background: var(--theme-bg-lightest);
+  border-color: var(--theme-extra-border-color);
 
-  @include darkTheme() {
-    color: $dark-theme-text-color;
-    background: $dark-theme-bg-lightest;
-    border-color: $dark-theme-extra-border-color;
-
-    @include mq(xs) {
-      background: $dark-theme-bg-slightly-lighter;
-    }
+  @include mq(xs) {
+    background: var(--theme-bg-slightly-lighter);
   }
 
   :host.isOver.isOpen & {

@@ -1,4 +1,4 @@
-@import '../../../_variables';
+@import '../../../common';
 
 :host {
   display: block;
@@ -15,13 +15,13 @@
   border: none;
   overflow: auto;
   position: relative;
-  transition: height $transition-fast;
+  transition: height var(--transition-fast);
   transform-origin: top;
   @include scrollY;
 
   .resize-to-fit {
     position: absolute;
-    right: $s * 2;
+    right: var(--s2);
     top: 0;
     cursor: pointer;
   }
@@ -35,7 +35,7 @@
 .markdown-parsed {
   //transition: height 1.3s;
   border: 0;
-  padding: $s $s * 2;
+  padding: var(--s) var(--s2);
   margin: 0;
   width: 100%;
   box-sizing: border-box;
@@ -59,7 +59,7 @@ textarea {
   bottom: 0;
   right: 0;
   opacity: 0;
-  transition: $transition-standard;
+  transition: var(--transition-standard);
 
   :host:hover & {
     opacity: 1;

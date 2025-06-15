@@ -1,4 +1,4 @@
-@import '../../../../variables';
+@import '../../../../common';
 
 :host {
   @include mq(xxs) {
@@ -47,11 +47,8 @@
 
   .tpl hr {
     margin-bottom: 32px;
-    border-color: $light-theme-separator-color;
 
-    @include darkTheme() {
-      border-color: $dark-theme-separator-color;
-    }
+    border-color: var(--theme-separator-color);
   }
 
   .sub-section-heading {

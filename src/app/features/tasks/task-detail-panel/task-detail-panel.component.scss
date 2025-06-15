@@ -1,11 +1,11 @@
-@import '../../../../variables';
+@import '../../../../common';
 @import '../task/task.component.mixins';
 
 :host {
   position: relative;
   z-index: 1;
   display: block;
-  padding-bottom: $s;
+  padding-bottom: var(--s);
 
   task-list {
     padding: 0;
@@ -19,40 +19,33 @@ progress-bar {
 }
 
 .wrapper {
-  transition: $transition-standard;
+  transition: var(--transition-standard);
 
-  @media (max-width: $layout-xs) {
-    margin: $s * 0.5;
-    margin-bottom: $s;
+  @media (max-width: #{$layout-xs}) {
+    margin: var(--s-half);
+    margin-bottom: var(--s);
   }
 }
 
 .task-title-wrapper {
-  min-height: $bar-height;
+  min-height: var(--bar-height);
   display: flex;
   align-items: center;
   position: sticky;
-  background: inherit;
   top: 0;
-  padding: 0 $s;
+  padding: 0 var(--s);
   // NOTE make space for close button
   padding-right: 50px;
   z-index: 44;
-  border-bottom: 2px solid $c-primary !important;
+  border-bottom: 2px solid var(--c-primary) !important;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
 
-  @include lightTheme() {
-    background: #fff;
-    //border-bottom: 1px solid $c-primary;
-  }
-  @include darkTheme() {
-    background: $dark-theme-bg-slightly-lighter;
-    //border-bottom: 1px solid $c-primary;
-  }
+  background: var(--theme-card-bg);
+  //border-bottom: 1px solid var(--c-primary);
 
   @include mq(xs) {
-    padding: 0 $s;
+    padding: 0 var(--s);
   }
 
   ::ng-deep textarea {
@@ -64,18 +57,15 @@ progress-bar {
     padding-top: 4px;
     padding-bottom: 4px;
     margin-top: 0;
-    color: $light-theme-text-color;
 
-    @include darkTheme() {
-      color: $dark-theme-text-color;
-    }
+    color: var(--theme-text-color);
   }
 }
 
 .task-title.task-title {
   font-weight: bold;
   transform-origin: top center;
-  padding: $s;
+  padding: var(--s);
   font-size: 17px;
   margin: 0;
   flex-grow: 1;
@@ -97,19 +87,16 @@ progress-bar {
 
 .created,
 .date-info {
-  padding: $s;
+  padding: var(--s);
   opacity: 0.5;
   text-align: center;
-  color: $light-theme-text-color-muted;
-  @include darkTheme() {
-    color: $dark-theme-text-color-muted;
-  }
+  color: var(--theme-text-color-muted);
 }
 
 .drag-over-msg {
   pointer-events: none;
   position: absolute;
-  top: -$s;
+  top: calc(-1 * var(--s));
   right: 0;
   left: 0;
   bottom: 0;

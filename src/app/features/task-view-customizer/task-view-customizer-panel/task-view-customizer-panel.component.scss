@@ -10,7 +10,7 @@
 
   h3 {
     text-align: center;
-    color: white;
+    color: var(--theme-text-color);
     margin-bottom: 20px;
   }
 
@@ -21,7 +21,7 @@
 
     label {
       margin-bottom: 5px;
-      color: white;
+      color: var(--theme-text-color);
     }
 
     mat-form-field {

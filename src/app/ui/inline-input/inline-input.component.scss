@@ -1,4 +1,4 @@
-@import '../../../_variables.scss';
+@import '../../../_common';
 
 :host {
   display: inline-block;
@@ -38,10 +38,10 @@ input {
   top: 50%;
   transform: translate(-50%, -50%) scaleX(0);
   opacity: 0;
-  //transition: $transition-fast;
-  background: #fff;
-  color: $light-theme-text-color;
-  padding: $s * 0.5 $s * 0.5;
+  //transition: var(--transition-fast);
+  background: var(--theme-card-bg);
+  color: var(--theme-text-color);
+  padding: var(--s-half) var(--s-half);
   text-align: center;
   font-size: 14px;
   min-height: 100%;

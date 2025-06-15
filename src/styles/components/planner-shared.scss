@@ -1,4 +1,4 @@
-@import '../../variables';
+@import '../../common';
 
 // to share between planner-task and planner-calendar-event
 .planner-time-remaining-shared {
@@ -10,15 +10,12 @@
   font-weight: 300;
   line-height: 1;
   margin-left: auto;
-  font-size: $planner-font-size-mobile;
-  color: $light-theme-text-color-muted;
+  font-size: var(--planner-font-size-mobile);
 
   @include mq(xs) {
-    font-size: $planner-font-size;
+    font-size: var(--planner-font-size);
   }
-  @include darkTheme(true) {
-    color: $dark-theme-text-color-muted;
-  }
+  color: var(--theme-text-color-muted);
 
   mat-icon {
     vertical-align: middle;
@@ -27,19 +24,15 @@
 
     @include mq(xs) {
       height: 16px !important;
-      font-size: $planner-font-size;
+      font-size: var(--planner-font-size);
     }
   }
 }
 
 .planner-drag-place-holder-shared {
-  min-height: $planner-item-height;
+  min-height: var(--planner-item-height);
   margin-bottom: 4px;
   border-radius: 6px;
   // NOTE bg color is set in material overwrite file since otherwise it does not seem to work
-  background: rgba(0, 0, 0, 0.05);
-
-  @include darkTheme(true) {
-    background: rgba(255, 255, 255, 0.05) !important;
-  }
+  background: var(--color-overlay-light-05) !important;
 }

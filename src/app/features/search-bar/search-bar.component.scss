@@ -1,13 +1,13 @@
-@import '../../../variables';
-
 :host {
+  --short-syntax-bar-height: 28px;
+
   display: block;
   //overflow: hidden;
   text-align: start;
   position: fixed;
-  top: $s;
-  left: $s;
-  right: $s;
+  top: var(--s);
+  left: var(--s);
+  right: var(--s);
   overflow: visible;
   transform-origin: left top;
 
@@ -19,7 +19,7 @@
     margin-top: 20px;
     max-width: 632px;
     width: 80%;
-    top: $s * 6;
+    top: var(--s6);
     left: 50%;
     right: auto;
     transform: translateX(-50%);
@@ -28,20 +28,16 @@
 
 :host-context(.isTouchOnly).global {
   top: auto;
-  bottom: $s;
+  bottom: var(--s);
 }
 
-$short-syntax-bar-height: 28px;
 .search-form {
   width: 100%;
   position: relative;
-  color: #000000;
-  border-radius: $card-border-radius;
+  border-radius: var(--card-border-radius);
   overflow: hidden;
 
-  @include darkTheme {
-    color: #eeeeee;
-  }
+  color: var(--theme-text-color);
 
   .search-icon {
     position: absolute;
@@ -55,7 +51,7 @@ $short-syntax-bar-height: 28px;
   }
 
   input {
-    padding-bottom: $short-syntax-bar-height;
+    padding-bottom: var(--short-syntax-bar-height);
 
     display: block;
     width: 100%;
@@ -64,19 +60,15 @@ $short-syntax-bar-height: 28px;
     border-style: solid;
     border-width: 0;
     outline: 0;
-    border-color: $c-primary;
+    border-color: var(--c-primary);
 
     padding-right: 48px !important;
     padding-left: 48px !important;
     line-height: 42px;
+    background: var(--theme-card-bg);
 
-    color: #000000;
-    background: #ffffff;
-
-    @include darkTheme {
-      background-color: $dark-theme-bg-lightest;
-      color: $dark-theme-text-color-most-intense;
-    }
+    background-color: var(--theme-bg-lightest);
+    color: var(--theme-text-color-most-intense);
   }
 }
 
@@ -102,7 +94,7 @@ $short-syntax-bar-height: 28px;
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
-    margin-right: $s * 3;
+    margin-right: var(--s3);
     flex-grow: 1;
   }
 
@@ -114,12 +106,12 @@ $short-syntax-bar-height: 28px;
 
 .switch-add-to-btn {
   position: absolute;
-  left: $s;
+  left: var(--s);
   top: 50%;
   transform: translateY(-50%);
   z-index: 2;
   opacity: 0.4;
-  margin-top: -0.5 * $short-syntax-bar-height;
+  margin-top: calc(-0.5 * var(--short-syntax-bar-height));
 
   &:hover {
     opacity: 1;
@@ -128,12 +120,12 @@ $short-syntax-bar-height: 28px;
 
 .close-btn {
   position: absolute;
-  right: $s * 0.5;
+  right: var(--s-half);
   top: 50%;
   transform: translateY(-50%);
   z-index: 2;
   opacity: 0.4;
-  margin-top: -0.5 * $short-syntax-bar-height;
+  margin-top: calc(-0.5 * var(--short-syntax-bar-height));
 
   &:hover {
     opacity: 1;
@@ -146,24 +138,19 @@ $short-syntax-bar-height: 28px;
 }
 
 .info-bar {
-  padding: 0 1.75 * $s;
-  height: $short-syntax-bar-height;
-  line-height: $short-syntax-bar-height;
-  margin-top: -1 * $short-syntax-bar-height;
-  color: $light-theme-text-color-muted;
-  background: #ffffff;
-  border-top: 1px dashed $light-theme-extra-border-color;
+  padding: 0 calc(1.75 * var(--s));
+  height: var(--short-syntax-bar-height);
+  line-height: var(--short-syntax-bar-height);
+  margin-top: calc(-1 * var(--short-syntax-bar-height));
+  border-top: 1px dashed var(--theme-extra-border-color);
   position: relative;
   z-index: 1;
-  //border-bottom-left-radius: $card-border-radius;
-  //border-bottom-right-radius: $card-border-radius;
+  //border-bottom-left-radius: var(--card-border-radius);
+  //border-bottom-right-radius: var(--card-border-radius);
   pointer-events: none;
 
-  @include darkTheme {
-    background-color: $dark-theme-bg-lightest;
-    border-color: $dark-theme-extra-border-color;
-    color: $dark-theme-text-color-muted;
-  }
+  background-color: var(--theme-bg-lightest);
+  color: var(--theme-text-color-muted);
 }
 
 .info-text {

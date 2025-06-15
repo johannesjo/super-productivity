@@ -1,8 +1,8 @@
-@import '../../../variables';
+@import '../../../common';
 
 :host {
   display: block;
-  padding-bottom: $s * 5;
+  padding-bottom: var(--s5);
 
   h1,
   h2 {
@@ -10,16 +10,14 @@
   }
 
   h1 {
-    margin-top: $s * 2;
+    margin-top: var(--s2);
   }
 
   h2 {
-    margin: $s * 3 0 $s;
-    border-bottom: 1px solid $dark-theme-extra-border-color;
+    margin: var(--s3) 0 var(--s);
+    border-bottom: 1px solid var(--theme-extra-border-color);
 
-    @include lightTheme() {
-      border-color: $light-theme-extra-border-color;
-    }
+    border-color: var(--theme-extra-border-color);
   }
 }
 
@@ -41,7 +39,7 @@ $this-border-radius: 8px;
 .day {
   vertical-align: top;
   display: inline-block;
-  margin: $s;
+  margin: var(--s);
   width: 100%;
 
   @include mq(xs) {
@@ -69,7 +67,7 @@ $this-border-radius: 8px;
   -webkit-user-select: none; /* Safari */
 
   .spacer {
-    width: $s * 1.5;
+    width: calc(var(--s) * 1.5);
   }
 
   em,
@@ -81,17 +79,17 @@ $this-border-radius: 8px;
   }
 
   > div {
-    padding: $s 0;
+    padding: var(--s) 0;
     font-weight: bold;
     flex-basis: 20%;
 
     &:first-child {
-      padding-left: $s * 2;
+      padding-left: var(--s2);
       text-align: left;
     }
 
     &:last-child {
-      padding-right: $s * 2;
+      padding-right: var(--s2);
       text-align: right;
     }
   }
@@ -134,7 +132,7 @@ $this-border-radius: 8px;
     text-align: left;
     white-space: normal;
     line-height: 16px;
-    padding: $s $s * 1.5;
+    padding: var(--s) calc(var(--s) * 1.5);
     vertical-align: middle;
 
     &.with-icon {
@@ -142,7 +140,7 @@ $this-border-radius: 8px;
     }
 
     &.title {
-      padding-left: $s * 2;
+      padding-left: var(--s2);
       padding-right: 0;
       width: 100%;
       // prevent overflow for looooong words
@@ -155,14 +153,14 @@ $this-border-radius: 8px;
       padding: 0;
 
       ::ng-deep .inline-input-wrapper {
-        padding: $s $s * 1.5;
+        padding: var(--s) calc(var(--s) * 1.5);
       }
     }
 
     &.isSubTask {
       .task-title {
         font-style: italic;
-        padding-left: $s * 2;
+        padding-left: var(--s2);
         position: relative;
         display: inline-block;
 
@@ -185,13 +183,13 @@ $this-border-radius: 8px;
   align-items: center;
   // NOTE: give them a bit of extra space
   // MAGIC NUMBER ALERT!!!
-  margin-left: -4 * $s;
-  margin-right: -4 * $s;
-  //margin-top: $s;
+  margin-left: calc(-1 * var(--s4));
+  margin-right: calc(-1 * var(--s4));
+  //margin-top: var(--s);
 }
 
 .simple-counter-item {
-  margin: 0 $s * 0.5;
+  margin: 0 var(--s-half);
   display: inline-flex;
   flex-direction: row;
   align-items: center;

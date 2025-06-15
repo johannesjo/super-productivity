@@ -6,7 +6,7 @@
 @import '../node_modules/@fontsource/roboto/300.css';
 @import './styles/font/material-icons';
 
-@import '_variables';
+@import './styles/_css-variables';
 @import './styles/themes';
 @import './styles/page';
 @import './styles/util';
@@ -34,13 +34,4 @@ body.isDisableAnimations {
     transition: none !important;
     animation: none !important;
   }
-}
-
-// css variables
-body {
-  --extra-border-color: #{$light-theme-extra-border-color};
-}
-
-body.isDarkTheme {
-  --extra-border-color: #{$dark-theme-extra-border-color};
 }

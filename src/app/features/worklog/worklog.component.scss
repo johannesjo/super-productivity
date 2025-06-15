@@ -1,53 +1,45 @@
-@import '../../../variables';
+@import '../../../common';
 
 :host {
   text-align: center;
 }
 
 .total-time {
-  margin-top: $s * 4;
+  margin-top: var(--s4);
 }
 
 .year {
-  border-top: 1px dashed $dark-theme-separator-color;
-
-  @include lightTheme() {
-    border-color: $light-theme-separator-color;
-  }
+  border-top: 1px dashed var(--theme-separator-color);
 
   &-title {
-    margin-top: 3 * $s;
+    margin-top: var(--s3);
   }
 
   &-time-spent {
     font-size: 20px;
     line-height: 26px;
-    margin-bottom: $s * 4;
+    margin-bottom: var(--s4);
   }
 }
 
 .month {
-  margin-top: 3 * $s;
+  margin-top: calc(3 * var(--s));
   margin-bottom: 0;
-  border-top: 1px dashed $dark-theme-separator-color;
-  padding-top: $s * 2;
-
-  @include lightTheme() {
-    border-color: $light-theme-separator-color;
-  }
+  border-top: 1px dashed var(--theme-separator-color);
+  padding-top: var(--s2);
 
   &-title {
-    margin-bottom: $s;
+    margin-bottom: var(--s);
 
     button {
-      margin-left: $s;
+      margin-left: var(--s);
     }
   }
 
   &-time-spent {
     font-size: 18px;
     line-height: 22px;
-    margin-bottom: $s * 3;
+    margin-bottom: var(--s3);
   }
 }
 
@@ -61,20 +53,20 @@
   }
 }
 
-$this-table-outer-padding-left-right: $s * 6;
 .week {
-  margin: $s * 4 0;
+  --table-outer-padding-left-right: var(--s6);
+  margin: var(--s4) 0;
   display: flex;
   align-items: center;
   flex-direction: column;
 
   &-header {
     display: flex;
-    margin-bottom: $s * 2;
+    margin-bottom: var(--s2);
     align-self: center;
 
     button {
-      margin-left: $s;
+      margin-left: var(--s);
     }
   }
 
@@ -93,7 +85,7 @@ $this-table-outer-padding-left-right: $s * 6;
       > tr.week-row > {
         th,
         td {
-          padding: $s * 0.5 $s;
+          padding: var(--s-half) var(--s);
           white-space: nowrap;
           vertical-align: middle;
 
@@ -102,14 +94,14 @@ $this-table-outer-padding-left-right: $s * 6;
           }
 
           &:first-child {
-            padding-left: $this-table-outer-padding-left-right;
+            padding-left: var(--table-outer-padding-left-right);
             text-align: left;
-            border-top-left-radius: $card-border-radius;
+            border-top-left-radius: var(--card-border-radius);
           }
 
           &:last-child {
-            padding-right: $this-table-outer-padding-left-right;
-            border-top-right-radius: $card-border-radius;
+            padding-right: var(--table-outer-padding-left-right);
+            border-top-right-radius: var(--card-border-radius);
 
             mat-icon {
               // prevent table recalculation on icon change
@@ -131,12 +123,10 @@ $this-table-outer-padding-left-right: $s * 6;
           > td {
             // bold without respacing
             text-shadow: 0.01px 0 0.01px;
-            background: #fff;
-            box-shadow: $whiteframe-shadow-2dp;
+            background: var(--theme-card-bg);
+            box-shadow: var(--whiteframe-shadow-2dp);
 
-            @include darkTheme {
-              background-color: $dark-theme-bg-lighter;
-            }
+            background-color: var(--theme-bg-lighter);
           }
         }
       }
@@ -173,7 +163,7 @@ $this-table-outer-padding-left-right: $s * 6;
 .summary-table-wrapper {
   display: inline-block;
   width: 100%;
-  margin-bottom: $s;
+  margin-bottom: var(--s);
   border: none;
   // position above parent table shadow
   position: relative;
@@ -205,7 +195,7 @@ $this-table-outer-padding-left-right: $s * 6;
 
   > table > tr:focus {
     outline: none;
-    box-shadow: 0px 0px 0px 1px $c-focus-border;
+    box-shadow: 0px 0px 0px 1px var(--palette-primary-400);
     border-radius: 3px;
   }
 
@@ -217,11 +207,11 @@ $this-table-outer-padding-left-right: $s * 6;
     text-align: left;
     white-space: normal;
     line-height: 16px;
-    padding: $s $s * 1.5;
+    padding: var(--s) calc(var(--s) * 1.5);
     vertical-align: middle;
 
     &.title {
-      padding-left: $s * 2;
+      padding-left: var(--s2);
       padding-right: 0;
     }
 
@@ -231,7 +221,7 @@ $this-table-outer-padding-left-right: $s * 6;
       padding: 0;
 
       ::ng-deep .inline-input-wrapper {
-        padding: $s $s * 1.5;
+        padding: var(--s) calc(var(--s) * 1.5);
       }
     }
 
@@ -242,7 +232,7 @@ $this-table-outer-padding-left-right: $s * 6;
     &.isSubTask {
       .task-title {
         font-style: italic;
-        padding-left: $s * 2;
+        padding-left: var(--s2);
         position: relative;
         display: inline-block;
         // prevent overflow for looooong words
@@ -272,6 +262,6 @@ $this-table-outer-padding-left-right: $s * 6;
   width: 15px;
   height: 15px;
   border-radius: 50%;
-  margin-right: $s;
+  margin-right: var(--s);
   vertical-align: middle;
 }

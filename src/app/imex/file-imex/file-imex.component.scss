@@ -1,19 +1,17 @@
-@import '../../../variables';
-
 .import-text-area {
   width: 100%;
   display: block;
-  margin-top: $s * 2;
+  margin-top: var(--s2);
   min-height: 90px;
-  margin-bottom: $s;
+  margin-bottom: var(--s);
 }
 
 a,
 button {
-  margin-bottom: $s;
-  margin-right: $s;
+  margin-bottom: var(--s);
+  margin-right: var(--s);
 }
 
 section {
-  margin-top: $s * 2;
+  margin-top: var(--s2);
 }

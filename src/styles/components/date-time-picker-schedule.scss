@@ -1,41 +1,17 @@
-@import '../../variables';
+@import '../../common';
 
-$owl-accent-color: $c-primary;
-$owl-accent-contrast-color: $c-contrast;
+$owl-accent-color: var(--c-primary);
+$owl-accent-contrast-color: var(--palette-primary-contrast-500);
 $owl-bg: transparent;
 $owl-shadow: none;
-$owl-today-not-selected: $c-primary;
-
-// dark theme
-$owl-dark-text-color-strong: rgba(255, 255, 255, 0.9);
-$owl-dark-text-color: rgba(255, 255, 255, 0.75);
-$owl-dark-text-color-less-intense: rgba(255, 255, 255, 0.5);
-$owl-dark-text-color-muted: rgba(255, 255, 255, 0.15);
-
-$owl-dark-light-selected-bg: rgba(49, 49, 49, 1);
-
-$owl-dark-divider-color: rgba(255, 255, 255, 0.12);
-
-$owl-dark-inp-bg-color: rgba(255, 255, 255, 0.08);
-$owl-dark-inp-fg-color: $owl-dark-text-color-strong;
-$owl-dark-arrow-color: $owl-dark-text-color-strong;
-
-// light (default) theme
-$owl-text-color-strong: rgba(0, 0, 0, 0.9);
-$owl-text-color: rgba(0, 0, 0, 0.75);
-$owl-text-color-less-intense: rgba(0, 0, 0, 0.5);
-$owl-text-color-muted: rgba(0, 0, 0, 0.15);
-
-$owl-light-selected-bg: rgb(238, 238, 238);
-
-$owl-divider-color: rgba(0, 0, 0, 0.12);
-
-$owl-inp-bg-color: rgba(0, 0, 0, 0.04);
-
-$owl-inp-fg-color: $owl-text-color-strong;
-$owl-arrow-color: $owl-text-color-strong;
-
-$owl-missing: $owl-light-selected-bg !default;
+$owl-today-not-selected: var(--c-primary);
+$owl-missing: var(--owl-light-selected-bg) !default;
+// Date picker variables that need owl prefix
+$owl-inp-fg-color: var(--owl-text-color-strong);
+$owl-arrow-color: var(--owl-text-color-strong);
+$owl-dark-inp-fg-color: var(--owl-text-color-strong);
+$owl-dark-arrow-color: var(--owl-text-color-strong);
+$owl-missing: var(--owl-light-selected-bg) !default;
 
 .owl-dialog-container {
   position: relative;
@@ -50,11 +26,8 @@ $owl-missing: $owl-light-selected-bg !default;
   width: 100%;
   height: 100%;
   outline: none;
-  color: $owl-text-color;
 
-  @include darkTheme(true) {
-    color: $owl-dark-text-color;
-  }
+  color: var(--owl-text-color);
 }
 
 .owl-dt-container,
@@ -71,11 +44,9 @@ $owl-missing: $owl-light-selected-bg !default;
 }
 
 .owl-dt-container-row {
-  border-bottom: 1px solid $owl-divider-color;
+  border-bottom: 1px solid var(--owl-divider-color);
 
-  @include darkTheme(true) {
-    border-color: $owl-dark-divider-color;
-  }
+  border-color: var(--owl-divider-color);
 
   &:last-child {
     border-bottom: none;
@@ -83,7 +54,6 @@ $owl-missing: $owl-light-selected-bg !default;
 }
 
 .owl-dt-calendar {
-  display: -webkit-box;
   display: flex;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
@@ -92,23 +62,18 @@ $owl-missing: $owl-light-selected-bg !default;
 }
 
 .owl-dt-calendar-control {
-  display: -webkit-box;
   display: flex;
   -webkit-box-align: center;
   align-items: center;
   font-size: 1em;
   width: 100%;
   padding: 0.5em;
-  color: $owl-text-color-strong;
 
-  @include darkTheme(true) {
-    color: $owl-dark-text-color-strong;
-  }
+  color: var(--owl-text-color-strong);
 
   .owl-dt-calendar-control-content {
     -webkit-box-flex: 1;
     flex: 1 1 auto;
-    display: -webkit-box;
     display: flex;
     -webkit-box-pack: center;
     justify-content: center;
@@ -126,7 +91,6 @@ $owl-missing: $owl-light-selected-bg !default;
 }
 
 .owl-dt-calendar-main {
-  display: -webkit-box;
   display: flex;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
@@ -144,7 +108,6 @@ $owl-missing: $owl-light-selected-bg !default;
 }
 
 .owl-dt-calendar-multi-year-view {
-  display: -webkit-box;
   display: flex;
   -webkit-box-align: center;
   align-items: center;
@@ -164,12 +127,9 @@ $owl-missing: $owl-light-selected-bg !default;
   border-spacing: 0;
 
   .owl-dt-calendar-header {
-    color: $owl-text-color-less-intense;
     border: 0;
 
-    @include darkTheme(true) {
-      color: $owl-dark-text-color-less-intense;
-    }
+    color: var(--owl-text-color-less-intense);
 
     .owl-dt-weekdays {
       th {
@@ -192,11 +152,8 @@ $owl-missing: $owl-light-selected-bg !default;
         left: 0;
         right: 0;
         height: 1px;
-        background: $owl-divider-color;
 
-        @include darkTheme(true) {
-          background: $owl-dark-divider-color;
-        }
+        background: var(--owl-divider-color);
       }
     }
   }
@@ -207,22 +164,18 @@ $owl-missing: $owl-light-selected-bg !default;
     line-height: 0;
     text-align: center;
     outline: 0;
-    color: $owl-text-color;
     -webkit-appearance: none;
     padding-top: 1em;
     padding-bottom: 1em;
     -webkit-tap-highlight-color: transparent;
 
-    @include darkTheme(true) {
-      color: $owl-dark-text-color;
-    }
+    color: var(--owl-text-color);
   }
 
   .owl-dt-calendar-cell-content {
     position: absolute;
     top: 5%;
     left: 5%;
-    display: -webkit-box;
     display: flex;
     -webkit-box-align: center;
     align-items: center;
@@ -260,11 +213,7 @@ $owl-missing: $owl-light-selected-bg !default;
     cursor: default;
 
     & > .owl-dt-calendar-cell-content:not(.owl-dt-calendar-cell-selected) {
-      color: $owl-text-color-muted;
-
-      @include darkTheme(true) {
-        color: $owl-dark-text-color-muted;
-      }
+      color: var(--owl-text-color-muted);
     }
 
     & > .owl-dt-calendar-cell-content.owl-dt-calendar-cell-selected {
@@ -280,11 +229,7 @@ $owl-missing: $owl-light-selected-bg !default;
     > .owl-dt-calendar-cell-content:not(.owl-dt-calendar-cell-selected),
   :not(.owl-dt-calendar-cell-disabled):hover
     > .owl-dt-calendar-cell-content:not(.owl-dt-calendar-cell-selected) {
-    background-color: $owl-light-selected-bg;
-
-    @include darkTheme(true) {
-      background-color: $owl-dark-light-selected-bg;
-    }
+    background-color: var(--owl-light-selected-bg);
   }
 
   .owl-dt-calendar-cell-in-range {
@@ -303,7 +248,6 @@ $owl-missing: $owl-light-selected-bg !default;
 }
 
 .owl-dt-timer {
-  display: -webkit-box;
   display: flex;
   -webkit-box-pack: center;
   justify-content: center;
@@ -328,7 +272,6 @@ $owl-missing: $owl-light-selected-bg !default;
 .owl-dt-timer-content {
   -webkit-box-flex: 1;
   flex: 1 1 auto;
-  display: -webkit-box;
   display: flex;
   -webkit-box-pack: center;
   justify-content: center;
@@ -341,19 +284,13 @@ $owl-missing: $owl-light-selected-bg !default;
     display: block;
     width: 2em;
     text-align: center;
-    border: 1px solid $owl-divider-color;
+    border: 1px solid var(--owl-divider-color);
     color: $owl-inp-fg-color;
     border-radius: 3px;
     outline: medium none;
     font-size: 1.2em;
     padding: 0.2em;
-    background: $owl-inp-bg-color;
-
-    @include darkTheme(true) {
-      border-color: $owl-dark-divider-color;
-      color: $owl-dark-inp-fg-color;
-      background: $owl-dark-inp-bg-color;
-    }
+    background: var(--owl-inp-bg-color);
   }
 }
 
@@ -362,13 +299,10 @@ $owl-missing: $owl-light-selected-bg !default;
   align-self: flex-end;
   position: absolute;
   width: 0.6em;
-  color: $owl-text-color-strong;
   height: 100%;
   left: -0.3em;
 
-  @include darkTheme(true) {
-    color: $owl-dark-text-color-strong;
-  }
+  color: var(--owl-text-color-strong);
 
   &:before,
   &:after {
@@ -433,15 +367,10 @@ $owl-missing: $owl-light-selected-bg !default;
   }
 
   &:hover > .owl-dt-control-button-content {
-    background-color: $owl-light-selected-bg;
-
-    @include darkTheme(true) {
-      background-color: $owl-dark-light-selected-bg;
-    }
+    background-color: var(--owl-light-selected-bg);
   }
 
   .owl-dt-control-button-arrow {
-    display: -webkit-box;
     display: flex;
     -webkit-box-pack: center;
     justify-content: center;
@@ -453,20 +382,11 @@ $owl-missing: $owl-light-selected-bg !default;
     transition: transform 200ms ease;
     color: $owl-arrow-color;
     fill: $owl-arrow-color;
-
-    @include darkTheme(true) {
-      color: $owl-dark-arrow-color;
-      fill: $owl-dark-arrow-color;
-    }
   }
 }
 
 .owl-dt-control-arrow-button {
   color: $owl-arrow-color;
-
-  @include darkTheme(true) {
-    color: $owl-dark-arrow-color;
-  }
 
   .owl-dt-control-button-content {
     padding: 0;
@@ -477,11 +397,8 @@ $owl-missing: $owl-light-selected-bg !default;
 
   &[disabled] {
     cursor: default;
-    color: $owl-text-color-muted;
 
-    @include darkTheme(true) {
-      color: $owl-dark-text-color-muted;
-    }
+    color: var(--owl-text-color-muted);
   }
 
   svg {
@@ -541,7 +458,6 @@ $owl-missing: $owl-light-selected-bg !default;
 }
 
 .owl-dt-container-buttons {
-  display: -webkit-box;
   display: flex;
   width: 100%;
   height: 2em;
@@ -577,7 +493,6 @@ $owl-missing: $owl-light-selected-bg !default;
     outline: none;
 
     .owl-dt-container-range-content {
-      display: -webkit-box;
       display: flex;
       -webkit-box-pack: justify;
       justify-content: space-between;
@@ -586,11 +501,9 @@ $owl-missing: $owl-light-selected-bg !default;
     }
 
     &:last-child {
-      border-top: 1px solid $owl-divider-color;
+      border-top: 1px solid var(--owl-divider-color);
 
-      @include darkTheme(true) {
-        border-color: $owl-dark-divider-color;
-      }
+      border-color: var(--owl-divider-color);
     }
   }
 
@@ -608,7 +521,6 @@ $owl-missing: $owl-light-selected-bg !default;
 }
 
 .owl-dt-timer-hour12 {
-  display: -webkit-box;
   display: flex;
   -webkit-box-pack: center;
   justify-content: center;
@@ -679,22 +591,18 @@ $owl-missing: $owl-light-selected-bg !default;
 
 .owl-header-wrapper {
   display: flex;
-  border-bottom: 1px solid $owl-divider-color;
+  border-bottom: 1px solid var(--owl-divider-color);
   align-items: stretch;
 
-  @include darkTheme(true) {
-    border-color: $owl-dark-divider-color;
-  }
+  border-color: var(--owl-divider-color);
 
   > * {
     flex: 1;
 
     &:first-child {
-      border-right: 1px solid $owl-divider-color;
+      border-right: 1px solid var(--owl-divider-color);
 
-      @include darkTheme(true) {
-        border-color: $owl-dark-divider-color;
-      }
+      border-color: var(--owl-divider-color);
     }
   }
 }
@@ -716,7 +624,6 @@ $owl-missing: $owl-light-selected-bg !default;
   align-items: center;
   min-height: 36px;
   border-left: 4px solid transparent;
-  color: $owl-text-color-strong;
   opacity: 0.9;
   text-align: left;
 
@@ -725,46 +632,35 @@ $owl-missing: $owl-light-selected-bg !default;
     min-height: 44px;
   }
 
-  @include darkTheme(true) {
-    color: $owl-dark-text-color-strong;
-  }
+  color: var(--owl-text-color-strong);
 
   &:hover {
     outline: none;
-    background: $owl-light-selected-bg;
     opacity: 1;
 
-    @include darkTheme(true) {
-      background: $owl-dark-light-selected-bg;
-    }
+    background: var(--owl-light-selected-bg);
   }
 
   &:focus {
-    border-color: $c-primary !important;
+    border-color: var(--c-primary) !important;
     outline: none;
-    background: $owl-light-selected-bg;
     opacity: 1;
 
-    @include darkTheme(true) {
-      background: $owl-dark-light-selected-bg;
-    }
+    background: var(--owl-light-selected-bg);
   }
 
   &.isActive {
-    background: $c-primary !important;
-    color: $c-contrast;
+    background: var(--c-primary) !important;
+    color: var(--palette-primary-contrast-500);
     outline: none;
-    border-color: $owl-light-selected-bg;
-    @include darkTheme(true) {
-      border-color: $owl-dark-light-selected-bg;
-    }
+    border-color: var(--owl-light-selected-bg);
   }
 }
 
 $ico-size: 24px;
 $ico-size-real: 20px;
 .owl-dt-schedule-item--icon {
-  margin-right: $s * 0.5;
+  margin-right: var(--s-half);
   opacity: 0.85;
   width: $ico-size;
   height: $ico-size;
@@ -774,8 +670,8 @@ $ico-size-real: 20px;
   font-size: 0;
 
   @include mq(xs, max) {
-    margin-left: $s;
-    margin-right: $s;
+    margin-left: var(--s);
+    margin-right: var(--s);
   }
 
   &:after {
@@ -799,11 +695,9 @@ $ico-size-real: 20px;
 }
 
 .owl-top-input {
-  border-bottom: 1px solid $owl-divider-color;
+  border-bottom: 1px solid var(--owl-divider-color);
 
-  @include darkTheme(true) {
-    border-color: $owl-dark-divider-color;
-  }
+  border-color: var(--owl-divider-color);
 
   input {
     border: none;
@@ -812,18 +706,13 @@ $ico-size-real: 20px;
     line-height: 36px;
     padding: 0 0.5em;
     color: $owl-inp-fg-color;
-    background: $owl-inp-bg-color;
-
-    @include darkTheme(true) {
-      color: $owl-dark-inp-fg-color;
-      background: $owl-dark-inp-bg-color;
-    }
+    background: var(--owl-inp-bg-color);
   }
 }
 
 .owl-enter-message {
   position: absolute;
-  top: $s * 0.5;
+  top: var(--s-half);
   left: 50%;
   max-width: 96%;
   width: 280px;
@@ -833,13 +722,9 @@ $ico-size-real: 20px;
   border-radius: 4px;
   z-index: 999;
   text-align: center;
-  color: $owl-text-color-strong;
-  background: $owl-light-selected-bg;
 
-  @include darkTheme(true) {
-    color: $owl-dark-text-color-strong;
-    background: $owl-dark-light-selected-bg;
-  }
+  color: var(--owl-text-color-strong);
+  background: var(--owl-light-selected-bg);
 }
 
 .owl-wrap-cal {
@@ -852,15 +737,12 @@ $ico-size-real: 20px;
   height: 100%;
   font-size: 1.3em;
   font-family: inherit;
-  color: $owl-text-color-strong;
   -webkit-appearance: none;
   background: none;
   // NOTE: center for android
   width: auto;
 
-  @include darkTheme(true) {
-    color: $owl-dark-text-color-strong;
-  }
+  color: var(--owl-text-color-strong);
 
   &:focus {
     outline: none;
@@ -881,16 +763,11 @@ $ico-size-real: 20px;
 
 .owl-dt-calendar-cell-active:focus > {
   .owl-dt-calendar-cell-content.owl-dt-calendar-cell-selected {
-    color: $owl-text-color-strong;
-    background: $owl-light-selected-bg;
-
     &.owl-dt-calendar-cell-today {
       border-color: $owl-accent-color;
     }
 
-    @include darkTheme(true) {
-      color: $owl-dark-text-color-strong;
-      background: $owl-dark-light-selected-bg;
-    }
+    color: var(--owl-text-color-strong);
+    background: var(--owl-light-selected-bg);
   }
 }

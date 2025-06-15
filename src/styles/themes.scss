@@ -8,15 +8,15 @@
 @include mat-css-vars.init-material-css-vars();
 
 .bg-card {
-  background: #fff;
+  background: var(--theme-card-bg);
 
   .isDarkTheme & {
-    background: $dark-theme-card-bg;
+    background: var(--theme-card-bg);
   }
 }
 
 .bg-primary {
-  background-color: $c-primary;
+  background-color: var(--c-primary);
 }
 
 .bgc-primary {
@@ -24,7 +24,7 @@
 }
 
 .bg-accent {
-  background-color: $c-accent;
+  background-color: var(--c-accent);
 }
 
 .bgc-accent {
@@ -33,15 +33,15 @@
 }
 
 .bg-100 {
-  background-color: $c-primary-100;
+  background-color: var(--palette-primary-100);
 }
 
 .bg-200 {
-  background-color: $c-primary-200;
+  background-color: var(--palette-primary-200);
 }
 
 .bg-400 {
-  background-color: $c-primary-400;
+  background-color: var(--palette-primary-400);
 }
 
 .bgc-400 {
@@ -49,7 +49,7 @@
 }
 
 .bg-600 {
-  background-color: $c-primary-600;
+  background-color: var(--palette-primary-600);
 }
 
 .bgc-600 {
@@ -57,11 +57,11 @@
 }
 
 .cc-600 {
-  color: $c-contrast-600;
+  color: var(--palette-primary-contrast-600);
 }
 
 .bg-600i {
-  background-color: $c-primary-600 !important;
+  background-color: var(--palette-primary-600) !important;
 }
 
 .bgc-800 {
@@ -80,32 +80,32 @@
 }
 
 .color-contrast {
-  color: $c-contrast;
+  color: var(--palette-primary-contrast-500);
 }
 
 .color-primary {
-  color: $c-primary;
-  stroke: $c-primary;
+  color: var(--c-primary);
+  stroke: var(--c-primary);
 }
 
 .color-warn-i {
-  color: $c-warn !important;
-  stroke: $c-warn !important;
+  color: var(--c-warn) !important;
+  stroke: var(--c-warn) !important;
 }
 
 .border-color-primary {
-  border-color: $c-primary !important;
+  border-color: var(--c-primary) !important;
 }
 
 // Traffic light colors for progress bars
 .bg-success {
-  background-color: #4caf50;
+  background-color: var(--color-success);
 }
 
 .bg-warning {
-  background-color: #ff9800;
+  background-color: var(--color-warning);
 }
 
 .bg-danger {
-  background-color: #f44336;
+  background-color: var(--color-danger);
 }

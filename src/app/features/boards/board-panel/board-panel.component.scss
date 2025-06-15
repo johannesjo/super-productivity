@@ -1,8 +1,8 @@
-@import '../../../../variables';
+@import '../../../../common';
 
 :host {
-  //border: 1px solid rgba(255, 255, 255, 0.2);
-  border: 1px solid $light-theme-extra-border-color;
+  //border: 1px solid var(--color-overlay-light-20);
+  border: 1px solid var(--theme-extra-border-color);
   border-radius: 8px;
   min-height: 200px;
   min-width: 280px;
@@ -18,9 +18,7 @@
     min-height: 300px;
   }
 
-  @include darkTheme() {
-    border-color: $dark-theme-extra-border-color;
-  }
+  border-color: var(--theme-extra-border-color);
 
   planner-task {
     margin-bottom: 8px;
@@ -80,13 +78,13 @@ header {
   border-radius: 8px;
   min-height: 100px;
   flex-grow: 1;
-  //border-color: $light-theme-extra-border-color;
+  //border-color: var(--theme-extra-border-color);
 }
 
 .empty {
   text-align: center;
   font-style: italic;
-  line-height: $planner-item-height;
+  line-height: var(--planner-item-height);
 }
 
 .schedule-btn {
@@ -95,11 +93,11 @@ header {
   margin-top: auto;
   margin-bottom: auto;
   height: 100% !important;
-  border-radius: $card-border-radius;
+  border-radius: var(--card-border-radius);
 
   ::ng-deep {
     .mat-mdc-button-persistent-ripple {
-      border-radius: $card-border-radius;
+      border-radius: var(--card-border-radius);
     }
   }
 
@@ -119,18 +117,15 @@ header {
   line-height: 1;
   text-align: center;
   padding: 1px 2px 0;
-  border: 1px solid $light-theme-extra-border-color;
-  background: #fff;
-  border-radius: $card-border-radius;
+  border: 1px solid var(--theme-extra-border-color);
+  border-radius: var(--card-border-radius);
   white-space: nowrap;
 
   // avoid affecting drag handle
   pointer-events: none;
 
-  @include darkTheme() {
-    border-color: $dark-theme-extra-border-color;
-    background: $dark-theme-bg-lighter;
-  }
+  border-color: var(--theme-extra-border-color);
+  background: var(--theme-bg-lighter);
 
   ::ng-deep span {
     font-size: 10px;

@@ -1,4 +1,4 @@
-@import '../../../../variables';
+@import '../../../../common';
 
 :host {
   button .badge {
@@ -17,18 +17,15 @@
       font-size: 10px;
       min-width: 18px;
       padding: 1px 4px 0;
-      border: 1px solid $light-theme-extra-border-color;
-      background: #fff;
+      border: 1px solid var(--theme-extra-border-color);
       border-radius: 12px;
       margin-right: -49px;
 
       // avoid affecting drag handle
       pointer-events: none;
 
-      @include darkTheme() {
-        border-color: $dark-theme-extra-border-color;
-        background: $dark-theme-bg-lighter;
-      }
+      border-color: var(--theme-extra-border-color);
+      background: var(--theme-bg-lighter);
     }
   }
 
@@ -44,8 +41,8 @@
     left: 0;
     top: 0;
     bottom: 0;
-    width: $s * 0.5;
-    background-color: $c-primary;
+    width: var(--s-half);
+    background-color: var(--c-primary);
   }
 
   .color-bar {
@@ -72,19 +69,19 @@
 
   &.isActiveRoute {
     font-weight: bold;
-    color: $c-primary-800;
-
-    @include darkTheme() {
-      color: $c-primary;
-    }
+    color: var(--palette-primary-800);
 
     mat-icon {
-      color: $c-primary-800;
-
-      @include darkTheme() {
-        color: $c-primary;
-      }
+      color: var(--palette-primary-800);
     }
+  }
+}
+
+body.isDarkTheme :host.isActiveContext button.isActiveRoute {
+  color: var(--c-primary);
+
+  mat-icon {
+    color: var(--c-primary);
   }
 }
 
@@ -96,9 +93,9 @@
   &:after {
     content: '';
     position: absolute;
-    top: -$s;
-    left: -$s;
-    right: -$s;
-    bottom: -$s;
+    top: calc(-1 * var(--s));
+    left: calc(-1 * var(--s));
+    right: calc(-1 * var(--s));
+    bottom: calc(-1 * var(--s));
   }
 }
