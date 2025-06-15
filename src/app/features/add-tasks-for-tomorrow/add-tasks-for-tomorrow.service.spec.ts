@@ -16,11 +16,17 @@ import { selectTodayTaskIds } from '../work-context/store/work-context.selectors
 import { selectTasksForPlannerDay } from '../planner/store/planner.selectors';
 import { getWorklogStr } from '../../util/get-work-log-str';
 
+// Helper to access private methods for testing
+type PrivateService = {
+  _sortAll(tasks: TaskCopy[]): TaskCopy[];
+  _movePlannedTasksToToday(tasks: TaskCopy[]): void;
+};
+
 describe('AddTasksForTomorrowService', () => {
   let service: AddTasksForTomorrowService;
   let store: MockStore;
   let taskRepeatCfgServiceMock: jasmine.SpyObj<TaskRepeatCfgService>;
-  let globalTrackingIntervalServiceMock: any;
+  let globalTrackingIntervalServiceMock: { todayDateStr$: BehaviorSubject<string> };
 
   // Sample test data
   const today = new Date();
@@ -285,7 +291,11 @@ describe('AddTasksForTomorrowService', () => {
 
       // The service may order tasks differently based on the sorting algorithm
       expect(dispatchSpy).toHaveBeenCalled();
-      const actualCall = dispatchSpy.calls.first().args[0] as any;
+      const actualCall = dispatchSpy.calls.first().args[0] as unknown as {
+        type: string;
+        isSkipRemoveReminder: boolean;
+        taskIds: string[];
+      };
       expect(actualCall.type).toBe('[Task Shared] planTasksForToday');
       expect(actualCall.isSkipRemoveReminder).toBe(true);
       expect(actualCall.taskIds.length).toBe(2);
@@ -371,7 +381,11 @@ describe('AddTasksForTomorrowService', () => {
 
       // The service may order tasks differently based on the sorting algorithm
       expect(dispatchSpy).toHaveBeenCalled();
-      const actualCall = dispatchSpy.calls.first().args[0] as any;
+      const actualCall = dispatchSpy.calls.first().args[0] as unknown as {
+        type: string;
+        isSkipRemoveReminder: boolean;
+        taskIds: string[];
+      };
       expect(actualCall.type).toBe('[Task Shared] planTasksForToday');
       expect(actualCall.isSkipRemoveReminder).toBe(true);
       expect(actualCall.taskIds.length).toBe(2);
@@ -401,8 +415,12 @@ describe('AddTasksForTomorrowService', () => {
         dueWithTime: Date.now() + 1000 * 60 * 60 * 18, // 6 PM
       };
 
-      // Access private method via array access notation
-      const sorted = (service as any)._sortAll([task1, task2, task3]);
+      // Access private method for testing
+      const sorted = (service as unknown as PrivateService)._sortAll([
+        task1,
+        task2,
+        task3,
+      ]);
 
       expect(sorted[0].id).toBe('task2');
       expect(sorted[1].id).toBe('task1');
@@ -425,7 +443,7 @@ describe('AddTasksForTomorrowService', () => {
         dueDay: undefined,
       };
 
-      const sorted = (service as any)._sortAll([
+      const sorted = (service as unknown as PrivateService)._sortAll([
         taskWithoutDue,
         taskWithTime,
         taskWithDay,
@@ -450,7 +468,10 @@ describe('AddTasksForTomorrowService', () => {
         dueDay: undefined,
       };
 
-      const sorted = (service as any)._sortAll([taskWithTime, taskWithDay]);
+      const sorted = (service as unknown as PrivateService)._sortAll([
+        taskWithTime,
+        taskWithDay,
+      ]);
 
       expect(sorted[0].id).toBe(taskWithDay.id);
       expect(sorted[1].id).toBe(taskWithTime.id);
@@ -468,7 +489,7 @@ describe('AddTasksForTomorrowService', () => {
         dueDay: '2024-01-01',
       };
 
-      const sorted = (service as any)._sortAll([task1, task2]);
+      const sorted = (service as unknown as PrivateService)._sortAll([task1, task2]);
 
       expect(sorted[0].id).toBe('task2');
       expect(sorted[1].id).toBe(task1.id);
@@ -480,11 +501,15 @@ describe('AddTasksForTomorrowService', () => {
       const dispatchSpy = spyOn(store, 'dispatch');
       const tasks = [mockTaskWithDueTimeTomorrow, mockTaskWithDueDayTomorrow];
 
-      (service as any)._movePlannedTasksToToday(tasks);
+      (service as unknown as PrivateService)._movePlannedTasksToToday(tasks);
 
       // The service may order tasks differently based on the sorting algorithm
       expect(dispatchSpy).toHaveBeenCalled();
-      const actualCall = dispatchSpy.calls.first().args[0] as any;
+      const actualCall = dispatchSpy.calls.first().args[0] as unknown as {
+        type: string;
+        isSkipRemoveReminder: boolean;
+        taskIds: string[];
+      };
       expect(actualCall.type).toBe('[Task Shared] planTasksForToday');
       expect(actualCall.isSkipRemoveReminder).toBe(true);
       expect(actualCall.taskIds.length).toBe(2);
@@ -495,7 +520,7 @@ describe('AddTasksForTomorrowService', () => {
     it('should not dispatch when empty array', () => {
       const dispatchSpy = spyOn(store, 'dispatch');
 
-      (service as any)._movePlannedTasksToToday([]);
+      (service as unknown as PrivateService)._movePlannedTasksToToday([]);
 
       expect(dispatchSpy).not.toHaveBeenCalled();
     });
