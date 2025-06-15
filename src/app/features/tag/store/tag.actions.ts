@@ -28,8 +28,3 @@ export const updateAdvancedConfigForTag = createAction(
   '[Tag] Update Advanced Config',
   props<{ tagId: string; sectionKey: WorkContextAdvancedCfgKey; data: any }>(),
 );
-
-export const moveTaskInTodayTagList = createAction(
-  '[Tag] Switch places of taskIds in Today Tag list',
-  props<{ fromTaskId: string; toTaskId: string }>(),
-);
