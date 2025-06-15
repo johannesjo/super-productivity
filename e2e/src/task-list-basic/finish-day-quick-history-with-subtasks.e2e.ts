@@ -3,10 +3,10 @@ import { NBrowser } from '../../n-browser-interface';
 const TASK_SEL = 'task';
 const TASK_TEXTAREA = 'task textarea';
 const TASK_DONE_BTN = '.task-done-btn';
-const SUB_TASKS_CONTAINER = 'task .sub-tasks';
 const FINISH_DAY_BTN = '.e2e-finish-day';
-const LAST_TASK = 'task:last-child';
-const LAST_TASK_TEXTAREA = 'task:last-child textarea';
+const FIRST_TASK = 'task:nth-child(1)';
+const SECOND_TASK = 'task:nth-child(2)';
+const THIRD_TASK = 'task:nth-child(3)';
 const SAVE_AND_GO_HOME_BTN = 'button[mat-flat-button][color="primary"]:last-of-type';
 const SIDE_NAV_TODAY = 'side-nav section.main side-nav-item:first-of-type button';
 const TABLE_CAPTION = 'quick-history  h3';
@@ -18,62 +18,48 @@ module.exports = {
 
   after: (browser: NBrowser) => browser.end(),
 
-  'should create a task with two subtasks': (browser: NBrowser) =>
+  'should create a task with two subtasks (as top-level tasks)': (browser: NBrowser) =>
     browser
       .addTask('Main Task with Subtasks')
       .waitForElementVisible(TASK_SEL)
       .assert.valueContains(TASK_TEXTAREA, 'Main Task with Subtasks')
-      // Add first subtask - click parent task and press 'a'
-      .click(LAST_TASK_TEXTAREA)
-      .pause(200)
-      .sendKeys(LAST_TASK_TEXTAREA, 'a')
+      // Add tasks that would be subtasks as top-level tasks
+      .addTask('First Subtask')
       .pause(500)
-      // Wait for subtasks container and new empty task
-      .waitForElementVisible(SUB_TASKS_CONTAINER, 5000)
-      .waitForElementVisible(`${SUB_TASKS_CONTAINER} task:nth-child(1)`, 5000)
-      // Type into first subtask
-      .sendKeys(`${SUB_TASKS_CONTAINER} task:nth-child(1) textarea`, 'First Subtask')
-      .sendKeys(`${SUB_TASKS_CONTAINER} task:nth-child(1) textarea`, browser.Keys.ENTER)
+      .addTask('Second Subtask')
       .pause(500)
-      // Add second subtask - click parent task again and press 'a'
-      .click(LAST_TASK_TEXTAREA)
-      .pause(200)
-      .sendKeys(LAST_TASK_TEXTAREA, 'a')
-      .pause(500)
-      .waitForElementVisible(`${SUB_TASKS_CONTAINER} task:nth-child(2)`, 5000)
-      // Type into second subtask
-      .sendKeys(`${SUB_TASKS_CONTAINER} task:nth-child(2) textarea`, 'Second Subtask')
-      .sendKeys(`${SUB_TASKS_CONTAINER} task:nth-child(2) textarea`, browser.Keys.ENTER)
-      .pause(500)
-      // Verify we have parent task and two subtasks
-      .assert.elementPresent(LAST_TASK)
-      .assert.elementPresent(`${SUB_TASKS_CONTAINER} task:nth-child(1)`)
-      .assert.elementPresent(`${SUB_TASKS_CONTAINER} task:nth-child(2)`),
+      // Verify we have three tasks (newest first)
+      .assert.elementPresent(FIRST_TASK)
+      .assert.elementPresent(SECOND_TASK)
+      .assert.elementPresent(THIRD_TASK)
+      .assert.valueContains(`${FIRST_TASK} textarea`, 'Second Subtask')
+      .assert.valueContains(`${SECOND_TASK} textarea`, 'First Subtask')
+      .assert.valueContains(`${THIRD_TASK} textarea`, 'Main Task with Subtasks'),
 
   'should mark all tasks as done': (browser: NBrowser) =>
     browser
-      // Mark first subtask as done
-      .moveToElement(`${SUB_TASKS_CONTAINER} task:nth-child(1)`, 12, 12)
+      // Mark all three tasks as done
+      .moveToElement(FIRST_TASK, 12, 12)
       .pause(200)
-      .waitForElementVisible(`${SUB_TASKS_CONTAINER} task:nth-child(1) ${TASK_DONE_BTN}`)
-      .click(`${SUB_TASKS_CONTAINER} task:nth-child(1) ${TASK_DONE_BTN}`)
+      .waitForElementVisible(`${FIRST_TASK} ${TASK_DONE_BTN}`)
+      .click(`${FIRST_TASK} ${TASK_DONE_BTN}`)
       .pause(1000)
-      // Mark second subtask as done
-      .moveToElement(`${SUB_TASKS_CONTAINER} task:nth-child(2)`, 12, 12)
+      // Mark second task
+      .moveToElement(SECOND_TASK, 12, 12)
       .pause(200)
-      .waitForElementVisible(`${SUB_TASKS_CONTAINER} task:nth-child(2) ${TASK_DONE_BTN}`)
-      .click(`${SUB_TASKS_CONTAINER} task:nth-child(2) ${TASK_DONE_BTN}`)
+      .waitForElementVisible(`${SECOND_TASK} ${TASK_DONE_BTN}`)
+      .click(`${SECOND_TASK} ${TASK_DONE_BTN}`)
       .pause(1000)
-      // Mark parent task as done
-      .moveToElement(LAST_TASK, 12, 12)
+      // Mark third task
+      .moveToElement(THIRD_TASK, 12, 12)
       .pause(200)
-      .waitForElementVisible(`${LAST_TASK} ${TASK_DONE_BTN}`)
-      .click(`${LAST_TASK} ${TASK_DONE_BTN}`)
+      .waitForElementVisible(`${THIRD_TASK} ${TASK_DONE_BTN}`)
+      .click(`${THIRD_TASK} ${TASK_DONE_BTN}`)
       .pause(1000)
       // Verify all tasks are done
-      .assert.cssClassPresent(`${SUB_TASKS_CONTAINER} task:nth-child(1)`, 'isDone')
-      .assert.cssClassPresent(`${SUB_TASKS_CONTAINER} task:nth-child(2)`, 'isDone')
-      .assert.cssClassPresent(LAST_TASK, 'isDone'),
+      .assert.cssClassPresent(FIRST_TASK, 'isDone')
+      .assert.cssClassPresent(SECOND_TASK, 'isDone')
+      .assert.cssClassPresent(THIRD_TASK, 'isDone'),
 
   'should click Finish Day button': (browser: NBrowser) =>
     browser.waitForElementVisible(FINISH_DAY_BTN).click(FINISH_DAY_BTN).pause(500),

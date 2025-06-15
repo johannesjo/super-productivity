@@ -39,20 +39,35 @@ module.exports = {
       .pause(300)
       // Open projects section
       .waitForElementVisible(SIDE_NAV_PROJECTS_SECTION, 5000)
-      // Click expand if not already expanded
+      // Ensure projects section is expanded by clicking it
       .execute(() => {
-        const expandBtn = document.querySelector(
-          'side-nav section.projects button.expand-btn',
+        const projectsSection = document.querySelector('side-nav section.projects');
+        const expandBtn = projectsSection?.querySelector(
+          'button.expand-btn',
         ) as HTMLElement;
-        if (expandBtn && !expandBtn.classList.contains('isExpanded')) {
+        // Force click the expand button
+        if (expandBtn) {
           expandBtn.click();
-          return true;
+          console.log('Clicked expand button');
         }
-        return false;
+        // Also try clicking the section header if needed
+        const sectionHeader = projectsSection?.querySelector(
+          '.section-title',
+        ) as HTMLElement;
+        if (sectionHeader && !document.querySelector('.e2e-add-project-btn')) {
+          sectionHeader.click();
+          console.log('Clicked section header');
+        }
       })
-      .pause(300)
+      .pause(1000) // Give more time for expansion
+      // Now the add project button should be visible
+      .execute(() => {
+        const btn = document.querySelector('.e2e-add-project-btn');
+        console.log('Add project button visible:', !!btn);
+        return !!btn;
+      })
       // Click add project button
-      .waitForElementVisible('.e2e-add-project-btn', 5000)
+      .waitForElementVisible('.e2e-add-project-btn', 10000)
       .click('.e2e-add-project-btn')
       .pause(500)
       // Fill project form
