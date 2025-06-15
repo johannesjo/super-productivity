@@ -299,6 +299,37 @@ describe('projectSharedMetaReducer', () => {
       );
     });
 
+    it('should remove the project entity from state', () => {
+      const projectToDelete = createMockProject({ id: 'project-to-delete' });
+      const testState = {
+        ...createStateWithExistingTasks(['task1'], [], []),
+        [PROJECT_FEATURE_NAME]: {
+          ...createStateWithExistingTasks(['task1'], [], [])[PROJECT_FEATURE_NAME],
+          ids: ['default-project', 'project-to-delete'],
+          entities: {
+            'default-project': createMockProject({ id: 'default-project' }),
+            'project-to-delete': projectToDelete,
+          },
+        },
+      };
+
+      const action = TaskSharedActions.deleteProject({
+        project: projectToDelete,
+        allTaskIds: ['task1'],
+      });
+
+      metaReducer(testState, action);
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+
+      expect(updatedState[PROJECT_FEATURE_NAME].ids).toEqual(['default-project']);
+      expect(
+        updatedState[PROJECT_FEATURE_NAME].entities['project-to-delete'],
+      ).toBeUndefined();
+      expect(
+        updatedState[PROJECT_FEATURE_NAME].entities['default-project'],
+      ).toBeDefined();
+    });
+
     it('should handle empty project task lists', () => {
       const action = TaskSharedActions.deleteProject({
         project: createMockProject(),

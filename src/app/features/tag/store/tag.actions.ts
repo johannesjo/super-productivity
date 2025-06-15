@@ -24,27 +24,7 @@ export const updateTagOrder = createAction(
   props<{ ids: string[] }>(),
 );
 
-export const planTasksForToday = createAction(
-  '[Tag] Plan tasks for Today',
-  props<{
-    taskIds: string[];
-    parentTaskMap?: { [taskId: string]: string | undefined };
-    isShowSnack?: boolean;
-    isSkipRemoveReminder?: boolean;
-  }>(),
-);
-
-export const removeTasksFromTodayTag = createAction(
-  '[Tag] Remove Tasks from Today Tag',
-  props<{ taskIds: string[] }>(),
-);
-
 export const updateAdvancedConfigForTag = createAction(
   '[Tag] Update Advanced Config',
   props<{ tagId: string; sectionKey: WorkContextAdvancedCfgKey; data: any }>(),
-);
-
-export const moveTaskInTodayTagList = createAction(
-  '[Tag] Switch places of taskIds in Today Tag list',
-  props<{ fromTaskId: string; toTaskId: string }>(),
 );

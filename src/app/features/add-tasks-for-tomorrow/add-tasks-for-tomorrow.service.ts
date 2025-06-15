@@ -13,7 +13,7 @@ import { getDateRangeForDay } from '../../util/get-date-range-for-day';
 import { first, map, switchMap, withLatestFrom } from 'rxjs/operators';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 import { getWorklogStr } from '../../util/get-work-log-str';
-import { planTasksForToday } from '../tag/store/tag.actions';
+import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { selectTodayTaskIds } from '../work-context/store/work-context.selectors';
 import { selectTasksForPlannerDay } from '../planner/store/planner.selectors';
 
@@ -41,15 +41,14 @@ export class AddTasksForTomorrowService {
   private _dueWithTimeForTomorrow$: Observable<TaskWithDueTime[]> =
     this._tomorrowDate$.pipe(
       switchMap((dt) =>
-        this._store.select(
-          selectTasksWithDueTimeForRange,
-          getDateRangeForDay(dt.getTime()),
-        ),
+        this._store.select(selectTasksWithDueTimeForRange, {
+          ...getDateRangeForDay(dt.getTime()),
+        }),
       ),
     );
 
   private _dueForDayForTomorrow$: Observable<TaskWithDueDay[]> = this._tomorrowDate$.pipe(
-    switchMap((d) => this._store.select(selectTasksDueForDay, getWorklogStr(d))),
+    switchMap((d) => this._store.select(selectTasksDueForDay, { day: getWorklogStr(d) })),
   );
 
   nrOfPlannerItemsForTomorrow$: Observable<number> = combineLatest([
@@ -133,11 +132,10 @@ export class AddTasksForTomorrowService {
 
     // Get tasks due for today
     const [dueWithTime, dueWithDay] = await combineLatest([
-      this._store.select(
-        selectTasksWithDueTimeForRange,
-        getDateRangeForDay(todayDate.getTime()),
-      ),
-      this._store.select(selectTasksDueForDay, getWorklogStr(todayDate)),
+      this._store.select(selectTasksWithDueTimeForRange, {
+        ...getDateRangeForDay(todayDate.getTime()),
+      }),
+      this._store.select(selectTasksDueForDay, { day: getWorklogStr(todayDate) }),
     ])
       .pipe(first())
       .toPromise();
@@ -179,7 +177,7 @@ export class AddTasksForTomorrowService {
   private _movePlannedTasksToToday(plannedTasks: TaskCopy[]): void {
     if (plannedTasks.length) {
       this._store.dispatch(
-        planTasksForToday({
+        TaskSharedActions.planTasksForToday({
           taskIds: plannedTasks.map((t) => t.id),
           isSkipRemoveReminder: true,
         }),

@@ -8,7 +8,7 @@ import { DataInitStateService } from '../../../core/data-init/data-init-state.se
 import { SyncWrapperService } from '../../../imex/sync/sync-wrapper.service';
 import { AddTasksForTomorrowService } from '../../add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
 import { Action } from '@ngrx/store';
-import { removeTasksFromTodayTag } from '../../tag/store/tag.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { selectOverdueTasksOnToday } from './task.selectors';
 import { selectTodayTaskIds } from '../../work-context/store/work-context.selectors';
 import { Task } from '../task.model';
@@ -184,7 +184,7 @@ describe('TaskDueEffects', () => {
 
       effects.removeOverdueFormToday$.subscribe((action) => {
         expect(action).toEqual(
-          removeTasksFromTodayTag({
+          TaskSharedActions.removeTasksFromTodayTag({
             taskIds: ['overdue1', 'overdue2'],
           }),
         );
@@ -226,7 +226,7 @@ describe('TaskDueEffects', () => {
 
       effects.removeOverdueFormToday$.subscribe((action) => {
         expect(action).toEqual(
-          removeTasksFromTodayTag({
+          TaskSharedActions.removeTasksFromTodayTag({
             taskIds: ['overdue1'],
           }),
         );

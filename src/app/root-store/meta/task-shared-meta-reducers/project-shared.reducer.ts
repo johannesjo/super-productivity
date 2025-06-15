@@ -72,7 +72,11 @@ const handleMoveToOtherProject = (
   return updatedState;
 };
 
-const handleDeleteProject = (state: RootState, allTaskIds: string[]): RootState => {
+const handleDeleteProject = (
+  state: RootState,
+  project: { id: string },
+  allTaskIds: string[],
+): RootState => {
   const tagUpdates = (state[TAG_FEATURE_NAME].ids as string[]).map(
     (tagId): Update<Tag> => ({
       id: tagId,
@@ -82,7 +86,25 @@ const handleDeleteProject = (state: RootState, allTaskIds: string[]): RootState 
     }),
   );
 
-  return updateTags(state, tagUpdates);
+  // First update tags
+  const stateWithUpdatedTags = updateTags(state, tagUpdates);
+
+  // Then remove the project entity
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { [project.id]: _, ...remainingEntities } =
+    stateWithUpdatedTags[PROJECT_FEATURE_NAME].entities;
+  const remainingIds = (
+    stateWithUpdatedTags[PROJECT_FEATURE_NAME].ids as string[]
+  ).filter((id) => id !== project.id);
+
+  return {
+    ...stateWithUpdatedTags,
+    [PROJECT_FEATURE_NAME]: {
+      ...stateWithUpdatedTags[PROJECT_FEATURE_NAME],
+      ids: remainingIds,
+      entities: remainingEntities,
+    },
+  };
 };
 
 // =============================================================================
@@ -97,8 +119,10 @@ const createActionHandlers = (state: RootState, action: Action): ActionHandlerMa
     return handleMoveToOtherProject(state, task, targetProjectId);
   },
   [TaskSharedActions.deleteProject.type]: () => {
-    const { allTaskIds } = action as ReturnType<typeof TaskSharedActions.deleteProject>;
-    return handleDeleteProject(state, allTaskIds);
+    const { project, allTaskIds } = action as ReturnType<
+      typeof TaskSharedActions.deleteProject
+    >;
+    return handleDeleteProject(state, project, allTaskIds);
   },
 });
 

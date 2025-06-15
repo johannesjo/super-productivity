@@ -125,4 +125,27 @@ describe('Task Reducer', () => {
       expect(state.lastCurrentTaskId).toBe('task1');
     });
   });
+
+  describe('removeTasksFromTodayTag action', () => {
+    it('should maintain task order by moving removed tasks to the beginning', () => {
+      const stateWithOrderedTasks: TaskState = {
+        ...initialTaskState,
+        ids: ['task1', 'task2', 'task3', 'task4'],
+        entities: {
+          task1: createTask('task1'),
+          task2: createTask('task2'),
+          task3: createTask('task3'),
+          task4: createTask('task4'),
+        },
+      };
+
+      const action = TaskSharedActions.removeTasksFromTodayTag({
+        taskIds: ['task2', 'task4'],
+      });
+      const state = taskReducer(stateWithOrderedTasks, action);
+
+      // The removed tasks should be moved to the beginning while maintaining their relative order
+      expect(state.ids).toEqual(['task2', 'task4', 'task1', 'task3']);
+    });
+  });
 });

@@ -68,7 +68,11 @@ export const createBaseState = (): RootState => {
       ids: ['project1'],
       entities: { project1: mockProject },
     },
-  } as any as RootState;
+    planner: {
+      days: {},
+      addPlannedTasksDialogLastShown: undefined,
+    },
+  } as Partial<RootState> as RootState;
 };
 
 export const createStateWithExistingTasks = (
@@ -136,7 +140,7 @@ export const createStateWithExistingTasks = (
 };
 
 export const expectStateUpdate = (
-  expectedState: any,
+  expectedState: Record<string, unknown>,
   action: Action,
   mockReducer: jasmine.Spy,
   testState: RootState,

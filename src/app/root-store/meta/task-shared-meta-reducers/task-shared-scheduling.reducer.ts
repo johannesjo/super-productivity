@@ -139,8 +139,8 @@ const handlePlanTasksForToday = (
     [TASK_FEATURE_NAME]: taskAdapter.updateMany(taskUpdates, state[TASK_FEATURE_NAME]),
   };
 
-  // Then, update the today tag
-  return updateTags(updatedState, [
+  // Update the today tag
+  const stateWithTodayTag = updateTags(updatedState, [
     {
       id: TODAY_TAG.id,
       changes: {
@@ -148,6 +148,27 @@ const handlePlanTasksForToday = (
       },
     },
   ]);
+
+  // Remove taskIds from planner days if planner state exists
+  if (stateWithTodayTag.planner?.days) {
+    const plannerDaysCopy = { ...stateWithTodayTag.planner.days };
+    Object.keys(plannerDaysCopy).forEach((day) => {
+      const filtered = plannerDaysCopy[day].filter((id) => !taskIds.includes(id));
+      if (filtered.length !== plannerDaysCopy[day].length) {
+        plannerDaysCopy[day] = filtered;
+      }
+    });
+
+    return {
+      ...stateWithTodayTag,
+      planner: {
+        ...stateWithTodayTag.planner,
+        days: plannerDaysCopy,
+      },
+    };
+  }
+
+  return stateWithTodayTag;
 };
 
 const handleRemoveTasksFromTodayTag = (
@@ -230,10 +251,10 @@ const createActionHandlers = (state: RootState, action: Action): ActionHandlerMa
 });
 
 export const taskSharedSchedulingMetaReducer: MetaReducer = (
-  reducer: ActionReducer<any, Action>,
+  reducer: ActionReducer<RootState, Action>,
 ) => {
   return (state: unknown, action: Action) => {
-    if (!state) return reducer(state, action);
+    if (!state) return reducer(state as RootState | undefined, action);
 
     const rootState = state as RootState;
     const actionHandlers = createActionHandlers(rootState, action);

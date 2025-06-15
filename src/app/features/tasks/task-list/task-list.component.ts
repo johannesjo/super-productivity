@@ -36,7 +36,6 @@ import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { TaskComponent } from '../task/task.component';
 import { AsyncPipe } from '@angular/common';
-import { planTasksForToday } from '../../tag/store/tag.actions';
 
 export type TaskListId = 'PARENT' | 'SUB';
 export type ListModelId = DropListModelSource | string;
@@ -278,7 +277,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     } else if (src === 'OVERDUE' && (target === 'UNDONE' || target === 'DONE')) {
       const workContextType = this._workContextService
         .activeWorkContextType as WorkContextType;
-      this._store.dispatch(planTasksForToday({ taskIds: [taskId] }));
+      this._store.dispatch(TaskSharedActions.planTasksForToday({ taskIds: [taskId] }));
       this._store.dispatch(
         moveTaskInTodayList({
           taskId,

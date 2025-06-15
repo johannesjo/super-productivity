@@ -39,7 +39,7 @@ import {
 import { TIME_TRACKING_TO_DB_INTERVAL } from '../../app.constants';
 import { environment } from '../../../environments/environment';
 import { selectTimeTrackingState } from '../../features/time-tracking/store/time-tracking.selectors';
-import { removeTasksFromTodayTag } from '../../features/tag/store/tag.actions';
+import { TaskSharedActions } from '../meta/task-shared.actions';
 import { loadAllData } from '../meta/load-all-data.action';
 import { clearHiddenImprovements } from '../../features/metric/improvement/store/improvement.actions';
 
@@ -91,7 +91,7 @@ export class SaveToDbEffects {
     toggleTaskHideSubTasks.type,
     unsetCurrentTask.type,
     toggleStart.type,
-    removeTasksFromTodayTag.type,
+    TaskSharedActions.removeTasksFromTodayTag.type,
   ]);
 
   updateTaskAuditTime$ = createEffect(
