@@ -591,17 +591,6 @@ export const taskReducer = createReducer<TaskState>(
     );
   }),
 
-  on(TaskSharedActions.planTasksForToday, (state, { taskIds }) => {
-    const today = getWorklogStr();
-    const updates: Update<Task>[] = taskIds.map((taskId) => ({
-      id: taskId,
-      changes: {
-        dueDay: today,
-      },
-    }));
-    return taskAdapter.updateMany(updates, state);
-  }),
-
   on(TaskSharedActions.removeTasksFromTodayTag, (state, { taskIds }) => {
     return {
       ...state,
