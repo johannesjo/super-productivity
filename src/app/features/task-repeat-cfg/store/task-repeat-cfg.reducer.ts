@@ -15,7 +15,7 @@ import { isSameDay } from '../../../util/is-same-day';
 import { MODEL_VERSION_KEY } from '../../../app.constants';
 import { MODEL_VERSION } from '../../../core/model-version';
 import { getNewestPossibleDueDate } from './get-newest-possible-due-date.util';
-import { deleteProject } from '../../project/store/project.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 
 export const TASK_REPEAT_CFG_FEATURE_NAME = 'taskRepeatCfg';
 
@@ -168,7 +168,7 @@ export const taskRepeatCfgReducer = createReducer<TaskRepeatCfgState>(
   ),
 
   // delete all project tasks from tags on project delete
-  on(deleteProject, (state, { project, allTaskIds }) => {
+  on(TaskSharedActions.deleteProject, (state, { project, allTaskIds }) => {
     const taskRepeatCfgs = state.ids.map((id) => state.entities[id] as TaskRepeatCfg);
     const allCfgIdsForProject = taskRepeatCfgs.filter(
       (cfg) => cfg.projectId === project.id,

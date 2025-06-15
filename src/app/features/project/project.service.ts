@@ -16,7 +16,6 @@ import { WorkContextService } from '../work-context/work-context.service';
 import {
   addProject,
   archiveProject,
-  deleteProject,
   moveProjectTaskToBacklogList,
   moveProjectTaskToBacklogListAuto,
   moveProjectTaskToRegularListAuto,
@@ -25,6 +24,7 @@ import {
   updateProjectOrder,
   upsertProject,
 } from './store/project.actions';
+import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { DEFAULT_PROJECT } from './project.const';
 import {
   selectArchivedProjects,
@@ -182,7 +182,7 @@ export class ProjectService {
       ...project.backlogTaskIds,
       ...subTaskIdsForProject,
     ];
-    this._store$.dispatch(deleteProject({ project, allTaskIds }));
+    this._store$.dispatch(TaskSharedActions.deleteProject({ project, allTaskIds }));
   }
 
   update(projectId: string, changedFields: Partial<Project>): void {
