@@ -155,6 +155,29 @@ describe('taskSharedSchedulingMetaReducer', () => {
         testState,
       );
     });
+
+    it('should remove tasks from planner days when adding to Today', () => {
+      const testState = {
+        ...createStateWithExistingTasks([], [], [], []),
+        planner: {
+          ...createStateWithExistingTasks([], [], [], []).planner,
+          days: {
+            '2024-01-01': ['task1', 'task2', 'keep-task'],
+            '2024-01-02': ['task2', 'other-task'],
+          },
+        },
+      };
+      const action = TaskSharedActions.planTasksForToday({
+        taskIds: ['task1', 'task2'],
+        parentTaskMap: {},
+      });
+
+      metaReducer(testState, action);
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+
+      expect(updatedState.planner.days['2024-01-01']).toEqual(['keep-task']);
+      expect(updatedState.planner.days['2024-01-02']).toEqual(['other-task']);
+    });
   });
 
   describe('removeTasksFromTodayTag action', () => {
