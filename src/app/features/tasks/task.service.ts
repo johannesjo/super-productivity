@@ -86,7 +86,6 @@ import { TODAY_TAG } from '../tag/tag.const';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { INBOX_PROJECT } from '../project/project.const';
-import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { GlobalConfigService } from '../config/global-config.service';
 
 @Injectable({

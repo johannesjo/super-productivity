@@ -28,7 +28,6 @@ import { Store } from '@ngrx/store';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-import { planTasksForToday } from '../../tag/store/tag.actions';
 import { selectTodayTagTaskIds } from '../../tag/store/tag.reducer';
 
 const M = 1000 * 60;
@@ -129,7 +128,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
 
   async addToToday(task: TaskWithReminderData): Promise<void> {
     this._store.dispatch(
-      planTasksForToday({
+      TaskSharedActions.planTasksForToday({
         taskIds: [task.id],
         parentTaskMap: {
           [task.id]: task.parentId,
@@ -243,7 +242,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     const tasksToAdd = selectedTasks;
 
     this._store.dispatch(
-      planTasksForToday({
+      TaskSharedActions.planTasksForToday({
         taskIds: tasksToAdd.map((t) => t.id),
         parentTaskMap: tasksToAdd.reduce((acc, next: Task) => {
           return { ...acc, [next.id as string]: next.parentId };
