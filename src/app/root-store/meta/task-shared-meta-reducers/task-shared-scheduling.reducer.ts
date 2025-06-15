@@ -149,22 +149,26 @@ const handlePlanTasksForToday = (
     },
   ]);
 
-  // Remove taskIds from planner days
-  const plannerDaysCopy = { ...stateWithTodayTag.planner.days };
-  Object.keys(plannerDaysCopy).forEach((day) => {
-    const filtered = plannerDaysCopy[day].filter((id) => !taskIds.includes(id));
-    if (filtered.length !== plannerDaysCopy[day].length) {
-      plannerDaysCopy[day] = filtered;
-    }
-  });
+  // Remove taskIds from planner days if planner state exists
+  if (stateWithTodayTag.planner?.days) {
+    const plannerDaysCopy = { ...stateWithTodayTag.planner.days };
+    Object.keys(plannerDaysCopy).forEach((day) => {
+      const filtered = plannerDaysCopy[day].filter((id) => !taskIds.includes(id));
+      if (filtered.length !== plannerDaysCopy[day].length) {
+        plannerDaysCopy[day] = filtered;
+      }
+    });
 
-  return {
-    ...stateWithTodayTag,
-    planner: {
-      ...stateWithTodayTag.planner,
-      days: plannerDaysCopy,
-    },
-  };
+    return {
+      ...stateWithTodayTag,
+      planner: {
+        ...stateWithTodayTag.planner,
+        days: plannerDaysCopy,
+      },
+    };
+  }
+
+  return stateWithTodayTag;
 };
 
 const handleRemoveTasksFromTodayTag = (

@@ -68,6 +68,10 @@ export const createBaseState = (): RootState => {
       ids: ['project1'],
       entities: { project1: mockProject },
     },
+    planner: {
+      days: {},
+      addPlannedTasksDialogLastShown: undefined,
+    },
   } as any as RootState;
 };
 
