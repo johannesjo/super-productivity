@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   HttpTestingController,
   provideHttpClientTesting,
@@ -85,7 +85,7 @@ describe('FileImexComponent', () => {
   });
 
   describe('ngOnInit', () => {
-    it('should handle importFromUrl query parameter', fakeAsync(() => {
+    it('should handle importFromUrl query parameter', async () => {
       const mockUrl = 'https://example.com/backup.json';
       mockActivatedRoute.queryParams = of({ importFromUrl: mockUrl });
 
@@ -97,7 +97,9 @@ describe('FileImexComponent', () => {
       spyOn(component, 'importFromUrlHandler');
 
       component.ngOnInit();
-      tick();
+
+      // Allow async operations to complete
+      await fixture.whenStable();
 
       expect(mockRouter.navigate).toHaveBeenCalledWith([], {
         relativeTo: mockActivatedRoute,
@@ -113,30 +115,34 @@ describe('FileImexComponent', () => {
       expect(component.importFromUrlHandler).toHaveBeenCalledWith(
         'https://example.com/backup.json',
       );
-    }));
+    });
 
-    it('should handle malformed URL in importFromUrl parameter', fakeAsync(() => {
+    it('should handle malformed URL in importFromUrl parameter', async () => {
       const malformedUrl = '%invalid%url%';
       mockActivatedRoute.queryParams = of({ importFromUrl: malformedUrl });
 
       component.ngOnInit();
-      tick();
+
+      // Allow async operations to complete
+      await fixture.whenStable();
 
       expect(mockSnackService.open).toHaveBeenCalledWith({
         type: 'ERROR',
         msg: T.FILE_IMEX.S_IMPORT_FROM_URL_ERR_DECODE,
       });
-    }));
+    });
 
-    it('should do nothing when no importFromUrl parameter', fakeAsync(() => {
+    it('should do nothing when no importFromUrl parameter', async () => {
       mockActivatedRoute.queryParams = of({});
 
       component.ngOnInit();
-      tick();
+
+      // Allow async operations to complete
+      await fixture.whenStable();
 
       expect(mockRouter.navigate).not.toHaveBeenCalled();
       expect(mockMatDialog.open).not.toHaveBeenCalled();
-    }));
+    });
   });
 
   describe('handleFileInput', () => {

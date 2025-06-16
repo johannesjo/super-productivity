@@ -1,4 +1,4 @@
-import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TaskViewCustomizerPanelComponent } from './task-view-customizer-panel.component';
 import { TranslateModule, TranslateService, TranslateStore } from '@ngx-translate/core';
 import { RootState } from 'src/app/root-store/root-state';
@@ -22,8 +22,8 @@ describe('TaskViewCustomizerPanelComponent', () => {
     filterInputValue: () => '',
   };
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [TaskViewCustomizerPanelComponent, TranslateModule.forRoot()],
       providers: [
         provideMockStore<Partial<RootState>>({
@@ -38,7 +38,7 @@ describe('TaskViewCustomizerPanelComponent', () => {
         { provide: TaskViewCustomizerService, useValue: taskViewCustomizerServiceSpy },
       ],
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TaskViewCustomizerPanelComponent);
