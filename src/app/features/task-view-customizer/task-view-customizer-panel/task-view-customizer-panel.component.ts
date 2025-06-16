@@ -77,7 +77,7 @@ export class TaskViewCustomizerPanelComponent implements OnInit {
     { value: '7200000', label: T.F.TASK_VIEW.CUSTOMIZER.TIME_2HOUR },
   ];
 
-  constructor(private customizerService: TaskViewCustomizerService) {}
+  constructor(public customizerService: TaskViewCustomizerService) {}
 
   ngOnInit(): void {
     this.selectedSort = this.customizerService.selectedSort();
