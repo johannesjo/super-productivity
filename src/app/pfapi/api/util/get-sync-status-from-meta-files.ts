@@ -90,6 +90,7 @@ export const getSyncStatusFromMetaFiles = (
       }
     }
 
+    // TODO remove later once it is likely that all running apps have lamport clocks
     // Fall back to timestamp-based checking
     if (typeof local.lastSyncedUpdate === 'number') {
       const r = _checkForUpdate({

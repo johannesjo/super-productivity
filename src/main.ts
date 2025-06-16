@@ -69,6 +69,7 @@ import { ShortTime2Pipe } from './app/ui/pipes/short-time2.pipe';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { BackgroundTask } from '@capawesome/capacitor-background-task';
 import { promiseTimeout } from './app/util/promise-timeout';
+import { initializeMatMenuTouchFix } from './app/features/tasks/task-context-menu/mat-menu-touch-monkey-patch';
 
 if (environment.production || environment.stage) {
   enableProdMode();
@@ -175,17 +176,18 @@ bootstrapApplication(AppComponent, {
     ShortTime2Pipe,
     provideCharts(withDefaultRegisterables()),
     provideMarkdown(),
-    { provide: ErrorHandler, useClass: GlobalErrorHandler },
     {
       provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
       useValue: { appearance: 'fill', subscriptSizing: 'dynamic' },
     },
-    { provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig },
     provideAnimations(),
     provideRouter(APP_ROUTES, withHashLocation(), withPreloading(PreloadAllModules)),
     provideExperimentalZonelessChangeDetection(),
   ],
 }).then(() => {
+  // Initialize touch fix for Material menus
+  initializeMatMenuTouchFix();
+
   // TODO make asset caching work for electron
   if (
     'serviceWorker' in navigator &&

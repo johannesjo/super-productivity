@@ -69,6 +69,7 @@ import { DialogPromptComponent } from '../../../../ui/dialog-prompt/dialog-promp
 import { TaskSharedActions } from '../../../../root-store/meta/task-shared.actions';
 import { selectTodayTagTaskIds } from '../../../tag/store/tag.reducer';
 import { isToday } from '../../../../util/is-today.util';
+import { MenuTouchFixDirective } from '../menu-touch-fix.directive';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -83,6 +84,7 @@ import { isToday } from '../../../../util/is-today.util';
     MatIconButton,
     MatTooltip,
     IssueIconPipe,
+    MenuTouchFixDirective,
   ],
   templateUrl: './task-context-menu-inner.component.html',
   styleUrl: './task-context-menu-inner.component.scss',
