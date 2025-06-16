@@ -150,10 +150,8 @@ export class MetaModelCtrl {
         pfLog(
           2,
           `${MetaModelCtrl.L}.${this.save.name}() DB save completed successfully`,
-          {
-            lastSyncedUpdate: metaModel.lastSyncedUpdate,
-            lastUpdate: metaModel.lastUpdate,
-          },
+          metaModel.localLamport,
+          metaModel,
         );
       })
       .catch((error) => {

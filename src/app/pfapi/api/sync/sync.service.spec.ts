@@ -963,8 +963,8 @@ describe('SyncService', () => {
 
         expect(mockMetaSyncService.saveLocal).toHaveBeenCalledWith(
           jasmine.objectContaining({
-            localLamport: 16, // max(10, 15) + 1
-            lastSyncedLamport: 16,
+            localLamport: 15, // max(10, 15) - no increment on download
+            lastSyncedLamport: 15,
           }),
         );
       });

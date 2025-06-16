@@ -420,9 +420,10 @@ export class SyncService<const MD extends ModelCfgs> {
       metaRev: remoteRev,
       lastSyncedUpdate: remote.lastUpdate,
       lastUpdate: remote.lastUpdate,
-      // Lamport clock: take max of local and remote, then increment
-      localLamport: Math.max(local.localLamport || 0, remote.localLamport || 0) + 1,
-      lastSyncedLamport: Math.max(local.localLamport || 0, remote.localLamport || 0) + 1,
+      // Don't increment localLamport during download - only take the max
+      // localLamport tracks LOCAL changes only
+      localLamport: Math.max(local.localLamport || 0, remote.localLamport || 0),
+      lastSyncedLamport: Math.max(local.localLamport || 0, remote.localLamport || 0),
       revMap: validateRevMap({
         ...local.revMap,
         ...realRemoteRevMap,
