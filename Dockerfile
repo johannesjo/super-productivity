@@ -44,12 +44,14 @@ COPY --from=build /app/dist/browser /usr/share/nginx/html
 # copy nginx config
 COPY ./nginx/default.conf.template /etc/nginx/templates/default.conf.template
 
-# copy entrypoint script
+# copy our custom entrypoint script
 COPY ./docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 # expose port: defaults to 80
 EXPOSE $PORT
 
-# run docker-entrypoint.sh
+# set working directory
 WORKDIR /usr/share/nginx/html
-CMD ["docker-entrypoint.sh"]
+
+# use our custom entrypoint script, to provide extra steps
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
