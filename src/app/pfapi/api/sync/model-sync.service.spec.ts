@@ -1,6 +1,6 @@
 import { ModelSyncService } from './model-sync.service';
 import { MiniObservable } from '../util/mini-observable';
-import { ModelCfg } from '../pfapi.model';
+import { ModelCfg, RemoteMeta } from '../pfapi.model';
 import { Pfapi } from '../pfapi';
 import { SyncProviderServiceInterface } from './sync-provider.interface';
 import {
@@ -250,7 +250,11 @@ describe('ModelSyncService', () => {
         },
       };
 
-      await service.updateLocalMainModelsFromRemoteMetaFile(remoteMeta);
+      await service.updateLocalMainModelsFromRemoteMetaFile({
+        ...remoteMeta,
+        localLamport: 0,
+        lastSyncedLamport: null,
+      } as RemoteMeta);
 
       expect(mockModelControllers.mainModel.save).toHaveBeenCalledWith(
         {
@@ -272,7 +276,11 @@ describe('ModelSyncService', () => {
         mainModelData: {},
       };
 
-      await service.updateLocalMainModelsFromRemoteMetaFile(remoteMeta);
+      await service.updateLocalMainModelsFromRemoteMetaFile({
+        ...remoteMeta,
+        localLamport: 0,
+        lastSyncedLamport: null,
+      } as RemoteMeta);
 
       expect(mockModelControllers.mainModel.save).not.toHaveBeenCalled();
       expect(mockModelControllers.singleModel.save).not.toHaveBeenCalled();

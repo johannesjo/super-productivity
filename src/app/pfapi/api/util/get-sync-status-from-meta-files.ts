@@ -32,6 +32,65 @@ export const getSyncStatusFromMetaFiles = (
       status: SyncStatus.UpdateRemote,
     };
   } else {
+    // Special case: When timestamps match exactly, we're in sync
+    // This overrides any Lamport timestamp mismatches which only indicate metadata is out of sync
+    if (local.lastUpdate === remote.lastUpdate) {
+      pfLog(2, 'Timestamps match exactly - treating as InSync', {
+        local,
+        remote,
+      });
+      return {
+        status: SyncStatus.InSync,
+      };
+    }
+
+    // Try to use Lamport timestamps first if available
+    if (
+      typeof local.localLamport === 'number' &&
+      typeof remote.localLamport === 'number' &&
+      typeof local.lastSyncedLamport === 'number'
+    ) {
+      const lamportResult = _checkForUpdateLamport({
+        remoteLocalLamport: remote.localLamport,
+        localLamport: local.localLamport,
+        lastSyncedLamport: local.lastSyncedLamport,
+      });
+
+      pfLog(2, 'Using Lamport timestamps for sync status', {
+        localLamport: local.localLamport,
+        remoteLocalLamport: remote.localLamport,
+        lastSyncedLamport: local.lastSyncedLamport,
+        result: lamportResult,
+        hasLocalChanges: local.localLamport > local.lastSyncedLamport,
+        hasRemoteChanges: remote.localLamport > local.lastSyncedLamport,
+      });
+
+      switch (lamportResult) {
+        case UpdateCheckResult.InSync:
+          return {
+            status: SyncStatus.InSync,
+          };
+        case UpdateCheckResult.LocalUpdateRequired:
+          return {
+            status: SyncStatus.UpdateLocal,
+          };
+        case UpdateCheckResult.RemoteUpdateRequired:
+          return {
+            status: SyncStatus.UpdateRemote,
+          };
+        case UpdateCheckResult.DataDiverged:
+          return {
+            status: SyncStatus.Conflict,
+            conflictData: {
+              reason: ConflictReason.BothNewerLastSync,
+              remote,
+              local,
+            },
+          };
+      }
+    }
+
+    // Fall back to timestamp-based checking
     if (typeof local.lastSyncedUpdate === 'number') {
       const r = _checkForUpdate({
         remote: remote.lastUpdate,
@@ -127,6 +186,37 @@ enum UpdateCheckResult {
   DataDiverged = 'DataDiverged',
   LastSyncNotUpToDate = 'LastSyncNotUpToDate',
 }
+
+const _checkForUpdateLamport = (params: {
+  remoteLocalLamport: number;
+  localLamport: number;
+  lastSyncedLamport: number;
+}): UpdateCheckResult => {
+  const { remoteLocalLamport, localLamport, lastSyncedLamport } = params;
+
+  pfLog(2, 'Lamport timestamp check', {
+    localLamport,
+    remoteLocalLamport,
+    lastSyncedLamport,
+    hasLocalChanges: localLamport > lastSyncedLamport,
+    hasRemoteChanges: remoteLocalLamport > lastSyncedLamport,
+  });
+
+  // Check if there have been changes since last sync
+  const hasLocalChanges = localLamport > lastSyncedLamport;
+  const hasRemoteChanges = remoteLocalLamport > lastSyncedLamport;
+
+  if (!hasLocalChanges && !hasRemoteChanges) {
+    return UpdateCheckResult.InSync;
+  } else if (hasLocalChanges && !hasRemoteChanges) {
+    return UpdateCheckResult.RemoteUpdateRequired;
+  } else if (!hasLocalChanges && hasRemoteChanges) {
+    return UpdateCheckResult.LocalUpdateRequired;
+  } else {
+    // Both have changes - conflict
+    return UpdateCheckResult.DataDiverged;
+  }
+};
 
 const _checkForUpdate = (params: {
   remote: number;

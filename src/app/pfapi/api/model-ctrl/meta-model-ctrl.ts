@@ -18,6 +18,8 @@ export const DEFAULT_META_MODEL: LocalMeta = {
   lastUpdate: 0,
   metaRev: null,
   lastSyncedUpdate: null,
+  localLamport: 0,
+  lastSyncedLamport: null,
 };
 
 /**
@@ -82,6 +84,7 @@ export class MetaModelCtrl {
       {
         ...metaModel,
         lastUpdate: timestamp,
+        localLamport: this._incrementLamport(metaModel.localLamport || 0),
 
         ...(modelCfg.isMainFileModel
           ? {}
@@ -114,9 +117,11 @@ export class MetaModelCtrl {
       isIgnoreDBLock,
     });
     if (typeof metaModel.lastUpdate !== 'number') {
-      throw new InvalidMetaError(
-        `${MetaModelCtrl.L}.${this.save.name}()`,
-        'lastUpdate not found',
+      return Promise.reject(
+        new InvalidMetaError(
+          `${MetaModelCtrl.L}.${this.save.name}()`,
+          'lastUpdate not found',
+        ),
       );
     }
 
@@ -204,6 +209,14 @@ export class MetaModelCtrl {
       revMapKeys: Object.keys(data.revMap || {}),
     });
 
+    // Ensure Lamport fields are initialized for old data
+    if (data.localLamport === undefined) {
+      data.localLamport = 0;
+    }
+    if (data.lastSyncedLamport === undefined) {
+      data.lastSyncedLamport = null;
+    }
+
     this._metaModelInMemory = data;
     return data;
   }
@@ -279,5 +292,20 @@ export class MetaModelCtrl {
   private _generateClientId(): string {
     pfLog(2, `${MetaModelCtrl.L}.${this._generateClientId.name}()`);
     return getEnvironmentId() + '_' + Date.now();
+  }
+
+  /**
+   * Safely increments Lamport timestamp with overflow protection
+   *
+   * @param current Current Lamport value
+   * @returns Incremented value
+   */
+  private _incrementLamport(current: number): number {
+    // Reset if approaching max safe integer
+    if (current >= Number.MAX_SAFE_INTEGER - 1000) {
+      pfLog(1, `${MetaModelCtrl.L} Lamport counter overflow protection triggered`);
+      return 1;
+    }
+    return current + 1;
   }
 }
