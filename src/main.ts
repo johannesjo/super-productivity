@@ -4,6 +4,7 @@ import {
   importProvidersFrom,
   LOCALE_ID,
   SecurityContext,
+  provideExperimentalZonelessChangeDetection,
 } from '@angular/core';
 
 import { environment } from './environments/environment';
@@ -130,14 +131,13 @@ bootstrapApplication(AppComponent, {
                 strictActionImmutability: true,
                 strictStateSerializability: true,
                 strictActionSerializability: true,
-                strictActionWithinNgZone: true,
                 strictActionTypeUniqueness: true,
               },
             }),
       }),
       EffectsModule.forRoot([]),
       !environment.production && !environment.stage
-        ? StoreDevtoolsModule.instrument({ connectInZone: true })
+        ? StoreDevtoolsModule.instrument()
         : [],
       ReactiveFormsModule,
       ServiceWorkerModule.register('ngsw-worker.js', {
@@ -183,6 +183,7 @@ bootstrapApplication(AppComponent, {
     { provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig },
     provideAnimations(),
     provideRouter(APP_ROUTES, withHashLocation(), withPreloading(PreloadAllModules)),
+    provideExperimentalZonelessChangeDetection(),
   ],
 }).then(() => {
   // TODO make asset caching work for electron
