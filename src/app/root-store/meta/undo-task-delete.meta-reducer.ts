@@ -47,12 +47,7 @@ export const undoTaskDeleteMetaReducer = (
         let updatedState = state;
         const tasksToRestore: Task[] = Object.keys(U_STORE.deletedTaskEntities)
           .map((id: string) => U_STORE.deletedTaskEntities[id])
-          .filter((t) => {
-            if (!t) {
-              throw new Error('Task Restore Error: Missing task data when restoruii');
-            }
-            return true;
-          }) as Task[];
+          .filter((t) => !!t) as Task[];
 
         updatedState = {
           ...updatedState,
@@ -135,13 +130,16 @@ const _createTaskDeleteState = (
   state: RootState,
   task: TaskWithSubTasks,
 ): UndoTaskDeleteState => {
-  const taskEntities = state[TASK_FEATURE_NAME].entities;
-  const deletedTaskEntities = [task.id, ...task.subTaskIds].reduce((acc, id) => {
-    return {
-      ...acc,
-      [id]: taskEntities[id],
-    };
-  }, {});
+  const deletedTaskEntities: Dictionary<Task> = {
+    [task.id]: task,
+    ...task.subTasks.reduce(
+      (acc, subTask) => ({
+        ...acc,
+        [subTask.id]: subTask,
+      }),
+      {},
+    ),
+  };
 
   // SUB TASK CASE
   // Note: should work independent as sub tasks dont show up in tag or project lists
@@ -149,7 +147,7 @@ const _createTaskDeleteState = (
     return {
       projectId: task.projectId,
       parentTaskId: task.parentId,
-      subTaskIds: (taskEntities[task.parentId] as Task).subTaskIds,
+      subTaskIds: state[TASK_FEATURE_NAME].entities[task.parentId]?.subTaskIds || [],
       deletedTaskEntities,
     };
   } else {
@@ -158,8 +156,8 @@ const _createTaskDeleteState = (
       state[PROJECT_FEATURE_NAME].entities[task.projectId as string];
     const isProjectTask = task.projectId !== null && project !== undefined;
 
-    let taskIdsForProjectBacklog;
-    let taskIdsForProject;
+    let taskIdsForProjectBacklog: string[] | undefined;
+    let taskIdsForProject: string[] | undefined;
     if (isProjectTask) {
       taskIdsForProjectBacklog = (project as Project).backlogTaskIds;
       taskIdsForProject = (project as Project).taskIds;
