@@ -1329,7 +1329,22 @@
     "PRIVACY_EXPORT": "Anonimleştirilmiş verileri dışa aktarın (hata ayıklama için contact@super-productivity.com adresine göndermek üzere)",
     "S_BACKUP_DOWNLOADED": "Android belgeler klasörüne indirilen yedekleme",
     "S_ERR_IMPORT_FAILED": "Verileri içeri aktarma başarısız oldu",
-    "S_ERR_INVALID_DATA": "İçe aktarma başarısız oldu: Geçersiz JSON"
+    "S_ERR_INVALID_DATA": "İçe aktarma başarısız oldu: Geçersiz JSON",
+    "S_ERR_INVALID_URL": "İçe aktarma başarısız oldu: Geçersiz URL sağlandı",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "Hata: İçe aktarma için URL parametresi çözümlenemedi. Lütfen doğru biçimlendirildiğinden emin olun.",
+    "S_ERR_NETWORK": "İçe aktarma başarısız oldu: URL'den veri alınırken ağ hatası oluştu",
+    "IMPORT_FROM_URL": "URL'den İçe Aktar",
+    "URL_PLACEHOLDER": "İçe aktarmak için URL girin",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "URL'den İçe Aktar",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Lütfen içe aktarmak istediğiniz Super Productivity yedek JSON dosyasının tam URL'sini girin.",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "URL'den İçe Aktar",
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "TITLE": "URL'den Veri İçe Aktarmayı Onayla",
+      "INITIATED_MSG": "Otomatik veri içe aktarma başlatıldı.",
+      "SOURCE_URL_DOMAIN": "Kaynak Alan Adı",
+      "WARNING_TITLE": "Uyarı",
+      "WARNING_MSG": "Devam etmek, mevcut uygulama verilerinizi ve yapılandırmanızı belirtilen URL'deki içerikle üzerine yazacaktır. Bu işlem geri alınamaz."
+    }
   },
   "G": {
     "ADD": "Ekle",

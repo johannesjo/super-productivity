@@ -1329,7 +1329,22 @@
     "PRIVACY_EXPORT": "Экспортировать обезличенные данные (отправить contact@super-productivity.com для отладки)",
     "S_BACKUP_DOWNLOADED": "Резервная копия загружена в папку с документами Android",
     "S_ERR_IMPORT_FAILED": "Ошибка импорта данных",
-    "S_ERR_INVALID_DATA": "Ошибка импорта: неверный JSON"
+    "S_ERR_INVALID_DATA": "Ошибка импорта: неверный JSON",
+    "S_ERR_INVALID_URL": "Ошибка импорта: указан недопустимый URL",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "Ошибка: не удалось декодировать параметр URL для импорта. Пожалуйста, убедитесь, что он правильно отформатирован.",
+    "S_ERR_NETWORK": "Ошибка импорта: ошибка сети при получении данных с URL",
+    "IMPORT_FROM_URL": "Импорт из URL",
+    "URL_PLACEHOLDER": "Введите URL для импорта",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "Импорт из URL",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Пожалуйста, введите полный URL файла резервной копии JSON Super Productivity, который вы хотите импортировать.",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "Импорт из URL",
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "TITLE": "Подтвердите импорт данных из URL",
+      "INITIATED_MSG": "Автоматический импорт данных был инициирован.",
+      "SOURCE_URL_DOMAIN": "Исходный домен",
+      "WARNING_TITLE": "Предупреждение",
+      "WARNING_MSG": "Продолжение приведет к перезаписи ваших текущих данных и конфигурации приложения содержимым из указанного URL. Это действие невозможно отменить."
+    }
   },
   "G": {
     "ADD": "Добавить",

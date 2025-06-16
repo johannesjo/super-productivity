@@ -1329,7 +1329,22 @@
     "PRIVACY_EXPORT": "Export anonymized data (to send to contact@super-productivity.com for debugging)",
     "S_BACKUP_DOWNLOADED": "Záloha stiahnutá do priečinka dokumentov Android",
     "S_ERR_IMPORT_FAILED": "Import údajov zlyhal",
-    "S_ERR_INVALID_DATA": "Import failed: Invalid JSON"
+    "S_ERR_INVALID_DATA": "Import failed: Invalid JSON",
+    "S_ERR_INVALID_URL": "Import zlyhal: Zadaná URL adresa je neplatná",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "Chyba: Nepodarilo sa dekódovať parameter URL pre import. Uistite sa, že je správne naformátovaný.",
+    "S_ERR_NETWORK": "Import zlyhal: Chyba siete pri získavaní údajov z URL",
+    "IMPORT_FROM_URL": "Importovať z URL",
+    "URL_PLACEHOLDER": "Zadajte URL pre import",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "Importovať z URL",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Prosím, zadajte úplnú URL zálohovacieho súboru JSON zo Super Productivity, ktorý chcete importovať.",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "Importovať z URL",
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "TITLE": "Potvrdiť import údajov z URL",
+      "INITIATED_MSG": "Automatický import údajov bol spustený.",
+      "SOURCE_URL_DOMAIN": "Zdrojová doména",
+      "WARNING_TITLE": "Upozornenie",
+      "WARNING_MSG": "Pokračovaním prepíšete svoje aktuálne údaje a konfiguráciu aplikácie obsahom zo zadanej URL. Táto akcia sa nedá vrátiť späť."
+    }
   },
   "G": {
     "ADD": "Pridať",

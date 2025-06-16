@@ -1215,7 +1215,22 @@
     "EXPORT_DATA": "Exportovat data",
     "IMPORT_FROM_FILE": "Importovat ze souboru",
     "PRIVACY_EXPORT": "Exportovat anonymizovaná data (pro odeslání na contact@super-productivity.com pro ladění)",
-    "S_ERR_INVALID_DATA": "Import selhal: Neplatný formát JSON"
+    "S_ERR_INVALID_DATA": "Import selhal: Neplatný formát JSON",
+    "S_ERR_INVALID_URL": "Import se nezdařil: Neplatná URL adresa",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "Chyba: Nelze dekódovat parametr URL pro import. Ujistěte se, že je správně naformátován.",
+    "S_ERR_NETWORK": "Import se nezdařil: Chyba sítě při získávání dat z URL",
+    "IMPORT_FROM_URL": "Importovat z URL",
+    "URL_PLACEHOLDER": "Zadejte URL pro import",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "Importovat z URL",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Zadejte úplnou URL adresu záložního JSON souboru ze Super Productivity, který chcete importovat.",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "Importovat z URL",
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "TITLE": "Potvrdit import dat z URL",
+      "INITIATED_MSG": "Automatický import dat byl zahájen.",
+      "SOURCE_URL_DOMAIN": "Zdrojová doména",
+      "WARNING_TITLE": "Varování",
+      "WARNING_MSG": "Pokračování přepíše aktuální data a nastavení aplikace obsahem z dané URL. Tuto akci nelze vrátit zpět."
+    }
   },
   "G": {
     "CANCEL": "Zrušit",

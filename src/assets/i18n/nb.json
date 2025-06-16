@@ -1329,7 +1329,22 @@
     "PRIVACY_EXPORT": "Eksporter anonymiserte data (for å sende til contact@super-productivity.com for feilsøking)",
     "S_BACKUP_DOWNLOADED": "Sikkerhetskopi lastet ned til Android-dokumentmappe",
     "S_ERR_IMPORT_FAILED": "Import av data mislyktes",
-    "S_ERR_INVALID_DATA": "Import mislyktes: Ugyldig JSON"
+    "S_ERR_INVALID_DATA": "Import mislyktes: Ugyldig JSON",
+    "S_ERR_INVALID_URL": "Import mislyktes: Ugyldig URL oppgitt",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "Feil: Kunne ikke dekode URL-parameteren for import. Vennligst sørg for at den er riktig formatert.",
+    "S_ERR_NETWORK": "Import mislyktes: Nettverksfeil ved henting av data fra URL",
+    "IMPORT_FROM_URL": "Importer fra URL",
+    "URL_PLACEHOLDER": "Skriv inn URL for import",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "Importer fra URL",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Vennligst skriv inn den fullstendige URL-en til Super Productivity sikkerhetskopi JSON-filen du ønsker å importere.",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "Importer fra URL",
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "TITLE": "Bekreft dataimport fra URL",
+      "INITIATED_MSG": "En automatisk dataimport er igangsatt.",
+      "SOURCE_URL_DOMAIN": "Kildedomene",
+      "WARNING_TITLE": "Advarsel",
+      "WARNING_MSG": "Å fortsette vil overskrive dine nåværende applikasjonsdata og konfigurasjon med innholdet fra den angitte URL-en. Denne handlingen kan ikke angres."
+    }
   },
   "G": {
     "ADD": "ADD",

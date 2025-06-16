@@ -1329,7 +1329,22 @@
     "PRIVACY_EXPORT": "Експорт анонімізованих даних (для надсилання на contact@super-productivity.com для налагодження)",
     "S_BACKUP_DOWNLOADED": "Резервна копія завантажена в папку з документами Android",
     "S_ERR_IMPORT_FAILED": "Не вдалося імпортувати дані",
-    "S_ERR_INVALID_DATA": "Імпорт не вдався: Недійсний JSON"
+    "S_ERR_INVALID_DATA": "Імпорт не вдався: Недійсний JSON",
+    "S_ERR_INVALID_URL": "Помилка імпорту: вказано недійсний URL",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "Помилка: не вдалося декодувати параметр URL для імпорту. Переконайтеся, що він правильно відформатований.",
+    "S_ERR_NETWORK": "Помилка імпорту: помилка мережі під час отримання даних з URL",
+    "IMPORT_FROM_URL": "Імпортувати з URL",
+    "URL_PLACEHOLDER": "Введіть URL для імпорту",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "Імпортувати з URL",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Будь ласка, введіть повний URL резервної JSON-файлу Super Productivity, який ви хочете імпортувати.",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "Імпортувати з URL",
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "TITLE": "Підтвердити імпорт даних з URL",
+      "INITIATED_MSG": "Автоматичний імпорт даних розпочато.",
+      "SOURCE_URL_DOMAIN": "Домен джерела",
+      "WARNING_TITLE": "Попередження",
+      "WARNING_MSG": "Продовження призведе до перезапису ваших поточних даних та налаштувань додатку вмістом із вказаного URL. Цю дію неможливо скасувати."
+    }
   },
   "G": {
     "ADD": "Додати",
