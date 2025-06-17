@@ -48,6 +48,17 @@ export const autoFixTypiaErrors = (
       } else if (keys[0] === 'task' && error.expected.includes('number')) {
         setValueByPath(data, keys, 0);
         console.warn(`Fixed: ${path} to 0 (was ${value})`);
+      } else if (
+        keys[0] === 'simpleCounter' &&
+        keys[1] === 'entities' &&
+        keys.length >= 5 &&
+        keys[3] === 'countOnDay' &&
+        error.expected.includes('number') &&
+        value === null
+      ) {
+        // Fix for issue #4593: simpleCounter countOnDay null value
+        setValueByPath(data, keys, 0);
+        console.warn(`Fixed: ${path} from null to 0 for simpleCounter`);
       }
     }
   });
@@ -65,8 +76,14 @@ const parsePath = (path: string): (string | number)[] => {
 
   for (const part of pathParts) {
     if (part.includes('[')) {
-      const partsInner = part.replace(/\]/g, '').replace(/\"/g, '').split('[');
-      partsInner.forEach((innerPart) => keys.push(innerPart));
+      const partsInner = part
+        .replace(/\]/g, '')
+        .replace(/\"/g, '')
+        .replace(/'/g, '')
+        .split('[');
+      partsInner.forEach((innerPart) => {
+        if (innerPart) keys.push(innerPart);
+      });
     } else {
       keys.push(part);
     }
