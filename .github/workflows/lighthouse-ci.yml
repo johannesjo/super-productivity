@@ -4,6 +4,10 @@ on:
     branches:
       - master
       - main
+  workflow_dispatch:
+    inputs: {}
+  release:
+    types: [published]
 
 jobs:
   lighthouse:
