@@ -42,6 +42,10 @@ export class SyncConfigService {
               return {
                 ...baseConfig,
                 ...defaultOverride,
+                webDav: {
+                  ...baseConfig.webDav,
+                  ...defaultOverride.webDav,
+                },
                 encryptKey: '',
               };
             })
