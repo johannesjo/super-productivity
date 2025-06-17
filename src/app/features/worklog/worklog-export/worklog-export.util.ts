@@ -1,6 +1,6 @@
-import moment from 'moment';
 import { msToClockString } from '../../../ui/duration/ms-to-clock-string.pipe';
 import { msToString } from '../../../ui/duration/ms-to-string.pipe';
+import { formatTimeHHmm } from '../../../util/format-time-hhmm';
 import { roundDuration } from '../../../util/round-duration';
 import { roundTime } from '../../../util/round-time';
 import { unique } from '../../../util/unique';
@@ -267,19 +267,19 @@ export const formatRows = (
         case 'START':
           const workStart = !row.workStart ? 0 : row.workStart;
           return workStart
-            ? moment(
+            ? formatTimeHHmm(
                 options.roundStartTimeTo
                   ? roundTime(workStart, options.roundStartTimeTo)
                   : workStart,
-              ).format('HH:mm')
+              )
             : EMPTY_VAL;
         case 'END':
           return row.workEnd
-            ? moment(
+            ? formatTimeHHmm(
                 options.roundEndTimeTo && row.workEnd
                   ? roundTime(row.workEnd, options.roundEndTimeTo)
                   : row.workEnd,
-              ).format('HH:mm')
+              )
             : EMPTY_VAL;
         case 'TITLES':
           return row.titles.join(options.separateTasksBy || '<br>');

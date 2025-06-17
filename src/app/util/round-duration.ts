@@ -1,15 +1,20 @@
-import moment from 'moment';
-import { Duration } from 'moment';
 import { RoundTimeOption } from '../features/project/project.model';
 
+// Simple Duration interface to replace moment.Duration
+export interface SimpleDuration {
+  asMilliseconds(): number;
+}
+
 export const roundDuration = (
-  val: Duration | number,
+  val: SimpleDuration | number,
   roundTo: RoundTimeOption,
   isRoundUp: boolean = false,
-): Duration => {
+): SimpleDuration => {
   const value = typeof val === 'number' ? val : val.asMilliseconds();
   const roundedMs = roundDurationVanilla(value, roundTo, isRoundUp);
-  return moment.duration({ millisecond: roundedMs });
+  return {
+    asMilliseconds: () => roundedMs,
+  };
 };
 
 export const roundMinutes = (

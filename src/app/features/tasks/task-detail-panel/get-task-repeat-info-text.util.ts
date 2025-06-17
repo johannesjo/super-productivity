@@ -2,10 +2,10 @@ import {
   TASK_REPEAT_WEEKDAY_MAP,
   TaskRepeatCfg,
 } from '../../task-repeat-cfg/task-repeat-cfg.model';
-import moment from 'moment';
 import { T } from '../../../t.const';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
+import { getWeekdaysMin } from '../../../util/get-weekdays-min';
 
 export const getTaskRepeatInfoText = (
   repeatCfg: TaskRepeatCfg,
@@ -70,7 +70,7 @@ export const getTaskRepeatInfoText = (
       ];
 
     case 'WEEKLY':
-      const localWeekDays = moment.weekdaysMin();
+      const localWeekDays = getWeekdaysMin(locale);
       const enabledDays = TASK_REPEAT_WEEKDAY_MAP.filter((day) => repeatCfg[day]);
 
       if (enabledDays.length === 1) {

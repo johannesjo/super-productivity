@@ -11,7 +11,6 @@ import {
   viewChild,
 } from '@angular/core';
 import { nanoid } from 'nanoid';
-import moment from 'moment';
 import { dotAnimation } from './dot.ani';
 import { T } from '../../../t.const';
 import { InputDurationDirective } from '../input-duration.directive';
@@ -199,13 +198,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
       minutesFromDegrees = 0;
     }
 
-    let hours = Math.floor(
-      moment
-        .duration({
-          milliseconds: this._model,
-        })
-        .asHours(),
-    );
+    let hours = Math.floor(this._model / (1000 * 60 * 60));
 
     const minuteDelta = minutesFromDegrees - this.minutesBefore;
 
@@ -225,12 +218,8 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
 
     this.minutesBefore = minutesFromDegrees;
     this.setDots(hours);
-    this._model = moment
-      .duration({
-        hours,
-        minutes: minutesFromDegrees,
-      })
-      .asMilliseconds();
+    // eslint-disable-next-line no-mixed-operators
+    this._model = hours * 60 * 60 * 1000 + minutesFromDegrees * 60 * 1000;
 
     this.modelChange.emit(this._model);
     this._cd.detectChanges();
@@ -243,12 +232,11 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   }
 
   setRotationFromValue(val: number = this._model): void {
-    const momentVal = moment.duration({
-      milliseconds: val,
-    });
+    const totalMinutes = Math.floor(val / (1000 * 60));
+    const minutes = totalMinutes % 60;
+    const hours = Math.floor(val / (1000 * 60 * 60));
 
-    const minutes = momentVal.minutes();
-    this.setDots(Math.floor(momentVal.asHours()));
+    this.setDots(hours);
     const degrees = (minutes * 360) / 60;
     this.minutesBefore = minutes;
     this.setCircleRotation(degrees);

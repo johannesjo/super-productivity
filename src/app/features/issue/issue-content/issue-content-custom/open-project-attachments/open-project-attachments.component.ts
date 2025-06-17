@@ -16,7 +16,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslateModule } from '@ngx-translate/core';
 import { TaskService } from '../../../../tasks/task.service';
-import moment from 'moment';
+import { formatDateTimeForFilename } from '../../../../../util/format-date-time-for-filename';
 import { SnackService } from '../../../../../core/snack/snack.service';
 import { OpenProjectWorkPackage } from '../../../providers/open-project/open-project-issue.model';
 import { mapOpenProjectAttachmentToTaskAttachment } from '../../../providers/open-project/open-project-issue-map.util';
@@ -99,7 +99,7 @@ export class OpenProjectAttachmentsComponent {
         .getCfgOnce$(currentTask.issueProviderId, 'OPEN_PROJECT')
         .toPromise();
 
-      const dateTime = moment().format('YYYYMMDD_HHmmss');
+      const dateTime = formatDateTimeForFilename();
       const fileExtension = file?.name.split('.').pop();
 
       let fileName = `${dateTime}_${currentTask.issueId}.${fileExtension}`;

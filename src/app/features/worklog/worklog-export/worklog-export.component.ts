@@ -10,7 +10,6 @@ import {
 } from '@angular/core';
 import { combineLatest, from, Subscription } from 'rxjs';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-import 'moment-duration-format';
 // @ts-ignore
 import Clipboard from 'clipboard';
 import { SnackService } from '../../../core/snack/snack.service';

@@ -30,7 +30,6 @@ import { DatePipe } from '@angular/common';
 import { MarkdownModule, MARKED_OPTIONS, provideMarkdown } from 'ngx-markdown';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { FeatureStoresModule } from './app/root-store/feature-stores.module';
-import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { MatNativeDateModule } from '@angular/material/core';
 import { FormlyConfigModule } from './app/ui/formly-config.module';
 import { markedOptionsFactory } from './app/ui/marked-options-factory';
@@ -88,7 +87,6 @@ bootstrapApplication(AppComponent, {
   providers: [
     importProvidersFrom(
       FeatureStoresModule,
-      MatMomentDateModule,
       MatNativeDateModule,
       FormlyConfigModule,
       MarkdownModule.forRoot({

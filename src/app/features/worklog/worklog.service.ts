@@ -28,7 +28,6 @@ import { getCompleteStateForWorkContext } from './util/get-complete-state-for-wo
 import { NavigationEnd, Router } from '@angular/router';
 import { WorklogTask } from '../tasks/task.model';
 import { mapArchiveToWorklogWeeks } from './util/map-archive-to-worklog-weeks';
-import moment from 'moment';
 import { DateAdapter } from '@angular/material/core';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { DataInitStateService } from '../../core/data-init/data-init-state.service';
@@ -178,8 +177,8 @@ export class WorklogService {
     return this.worklogTasks$.pipe(
       map((tasks) => {
         tasks = tasks.filter((task: WorklogTask) => {
-          // NOTE: we need to use moment here as otherwise the dates might be off for other time zones
-          const taskDate = moment(task.dateStr).toDate();
+          // NOTE: parsing date string to Date object
+          const taskDate = new Date(task.dateStr);
           return (
             (!isProjectIdProvided || task.projectId === projectId) &&
             taskDate >= rangeStart &&
@@ -191,8 +190,8 @@ export class WorklogService {
           tasks = tasks.map((task): WorklogTask => {
             const timeSpentOnDay: any = {};
             Object.keys(task.timeSpentOnDay).forEach((dateStr) => {
-              // NOTE: we need to use moment here as otherwise the dates might be off for other time zones
-              const date = moment(dateStr).toDate();
+              // NOTE: parsing date string to Date object
+              const date = new Date(dateStr);
 
               if (date >= rangeStart && date <= rangeEnd) {
                 timeSpentOnDay[dateStr] = task.timeSpentOnDay[dateStr];

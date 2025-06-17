@@ -1702,6 +1702,34 @@
     "RUNNING_X": "Running \"{{str}}\".",
     "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} pressed, but open bookmarks shortcut is only available when in project context."
   },
+  "GLOBAL_RELATIVE_TIME": {
+    "PAST": {
+      "FEW_SECONDS": "a few seconds ago",
+      "A_MINUTE": "a minute ago",
+      "MINUTES": "{{count}} minutes ago",
+      "AN_HOUR": "an hour ago",
+      "HOURS": "{{count}} hours ago",
+      "A_DAY": "a day ago",
+      "DAYS": "{{count}} days ago",
+      "A_MONTH": "a month ago",
+      "MONTHS": "{{count}} months ago",
+      "A_YEAR": "a year ago",
+      "YEARS": "{{count}} years ago"
+    },
+    "FUTURE": {
+      "FEW_SECONDS": "in a few seconds",
+      "A_MINUTE": "in a minute",
+      "MINUTES": "in {{count}} minutes",
+      "AN_HOUR": "in an hour",
+      "HOURS": "in {{count}} hours",
+      "A_DAY": "in a day",
+      "DAYS": "in {{count}} days",
+      "A_MONTH": "in a month",
+      "MONTHS": "in {{count}} months",
+      "A_YEAR": "in a year",
+      "YEARS": "in {{count}} years"
+    }
+  },
   "GPB": {
     "ASSETS": "Loading assets...",
     "DBX_DOWNLOAD": "Dropbox: Download file...",
