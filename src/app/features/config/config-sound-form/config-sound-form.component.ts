@@ -1,4 +1,4 @@
-import { Component, Input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, output } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { GlobalConfigSectionKey, SoundConfig } from '../global-config.model';
 import { ProjectCfgFormKey } from '../../project/project.model';
@@ -23,6 +23,7 @@ const sectionKey = 'sound';
   selector: 'config-sound-form',
   templateUrl: './config-sound-form.component.html',
   styleUrls: ['./config-sound-form.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CollapsibleComponent,
     FormsModule,
