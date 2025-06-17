@@ -3,19 +3,20 @@
 ### build ###
 
 # base image
-FROM --platform=$BUILDPLATFORM node:20 as build
-
-# add app
-COPY . /app
+FROM --platform=$BUILDPLATFORM node:20 AS build
 
 # set working directory
 WORKDIR /app
 
-# add `/app/node_modules/.bin` to $PATH
-ENV PATH /app/node_modules/.bin:$PATH
+# install dependencies
+COPY package*.json /app
+RUN (npm ci || npm i) && npm i -g @angular/cli
 
-RUN npm i
-RUN npm i -g @angular/cli
+# add `/app/node_modules/.bin` to $PATH
+ENV PATH=/app/node_modules/.bin:$PATH
+
+# add app
+COPY . /app
 
 # run linter
 RUN npm run lint
