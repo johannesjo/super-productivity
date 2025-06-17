@@ -37,6 +37,7 @@ export const mapArchiveToWorklog = (
   noRestoreIds: string[] = [],
   startEnd: { workStart: WorkStartEnd; workEnd: WorkStartEnd },
   firstDayOfWeek: number = 1,
+  locale: string,
 ): { worklog: Worklog; totalTimeSpent: number } => {
   const entities = taskState.entities;
   const worklog: Worklog = {};
@@ -71,7 +72,7 @@ export const mapArchiveToWorklog = (
           timeSpent: 0,
           logEntries: [],
           dateStr,
-          dayStr: formatDayStr(dateStr),
+          dayStr: formatDayStr(dateStr, locale),
           workStart: startEnd.workStart && startEnd.workStart[dateStr],
           workEnd: startEnd.workEnd && startEnd.workEnd[dateStr],
         };

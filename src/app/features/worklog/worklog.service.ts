@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, LOCALE_ID } from '@angular/core';
 import {
   Worklog,
   WorklogDay,
@@ -44,6 +44,7 @@ export class WorklogService {
   private readonly _router = inject(Router);
   private _dateAdapter = inject<DateAdapter<unknown>>(DateAdapter);
   private _taskArchiveService = inject(TaskArchiveService);
+  private _locale = inject(LOCALE_ID);
 
   // treated as private but needs to be assigned first
   archiveUpdateManualTrigger$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
@@ -232,6 +233,7 @@ export class WorklogService {
         nonArchiveTaskIds,
         workStartEndForWorkContext,
         this._dateAdapter.getFirstDayOfWeek(),
+        this._locale,
       );
       return {
         worklog,
@@ -266,6 +268,7 @@ export class WorklogService {
         nonArchiveTaskIds,
         workStartEndForWorkContext,
         this._dateAdapter.getFirstDayOfWeek(),
+        this._locale,
       );
     }
     return null;

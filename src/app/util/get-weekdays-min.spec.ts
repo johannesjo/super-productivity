@@ -7,7 +7,7 @@ describe('getWeekdaysMin', () => {
   });
 
   it('should return 7 weekday names', () => {
-    const weekdays = getWeekdaysMin();
+    const weekdays = getWeekdaysMin('en-US');
     expect(weekdays.length).toBe(7);
   });
 

@@ -1,12 +1,22 @@
+import { DatePipe } from '@angular/common';
+
 /**
- * Formats a date as day string with short date (e.g., 'Mon 15.1.')
+ * Formats a date as day string with short date in locale-aware format
  * @param dateStr - The date string in YYYY-MM-DD format
- * @returns The formatted day and date string
+ * @param locale - The locale string (e.g., 'en-US', 'de-DE')
+ * @returns The formatted day and date string in the specified locale
  */
-export const formatDayMonthStr = (dateStr: string): string => {
+export const formatDayMonthStr = (dateStr: string, locale: string): string => {
   const date = new Date(dateStr);
-  const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-  const day = date.getDate();
-  const month = date.getMonth() + 1;
-  return `${dayName} ${day}.${month}.`;
+  const dayName = date.toLocaleDateString(locale, { weekday: 'short' });
+
+  // Use Angular's DatePipe for locale-aware date formatting
+  const datePipe = new DatePipe(locale);
+  const shortDate = datePipe.transform(date, 'shortDate') || '';
+
+  // Remove year from the date (same logic as formatMonthDay)
+  let dateOnly = shortDate.replace(/[/.\-\s]+\d{2,4}\.?$/, '');
+  dateOnly = dateOnly.replace(/^\d{4}[/.\-\s]+/, '');
+
+  return `${dayName} ${dateOnly}`;
 };

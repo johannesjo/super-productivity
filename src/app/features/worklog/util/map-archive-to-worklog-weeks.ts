@@ -29,6 +29,7 @@ export const mapArchiveToWorklogWeeks = (
   noRestoreIds: string[] = [],
   startEnd: { workStart: WorkStartEnd; workEnd: WorkStartEnd },
   firstDayOfWeek: number = 1,
+  locale: string,
 ): WorklogYearsWithWeeks => {
   const entities = taskState.entities;
   const worklogYearsWithSimpleWeeks: WorklogYearsWithWeeks = {};
@@ -61,7 +62,7 @@ export const mapArchiveToWorklogWeeks = (
           timeSpent: 0,
           logEntries: [],
           dateStr,
-          dayStr: formatDayMonthStr(dateStr),
+          dayStr: formatDayMonthStr(dateStr, locale),
           workStart: startEnd.workStart && startEnd.workStart[dateStr],
           workEnd: startEnd.workEnd && startEnd.workEnd[dateStr],
         };
