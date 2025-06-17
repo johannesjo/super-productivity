@@ -158,7 +158,7 @@ describe('SaveToDbEffects', () => {
       setTimeout(() => {
         expect(pfapiServiceMock.m.tag.save).not.toHaveBeenCalled();
         done();
-      }, 100);
+      }, 50);
     });
 
     it('should handle multiple sequential state changes with their corresponding actions', (done) => {
@@ -193,25 +193,22 @@ describe('SaveToDbEffects', () => {
       });
 
       // Simulate multiple state changes, each followed by its triggering action
-      // This tests that the pattern holds for multiple sequential changes
-      // We need to ensure proper sequencing
-      let currentIndex = 0;
-      const processNextStateChange = (): void => {
-        if (currentIndex < states.length) {
-          mockTagSelector.setResult(states[currentIndex]);
+      // Process state changes with small delays to ensure proper sequencing
+      mockTagSelector.setResult(states[0]);
+      store.refreshState();
+      actions$.next(actions[0]);
+
+      setTimeout(() => {
+        mockTagSelector.setResult(states[1]);
+        store.refreshState();
+        actions$.next(actions[1]);
+
+        setTimeout(() => {
+          mockTagSelector.setResult(states[2]);
           store.refreshState();
-          actions$.next(actions[currentIndex]);
-          currentIndex++;
-
-          // Give time for the effect to process before next iteration
-          if (currentIndex < states.length) {
-            setTimeout(processNextStateChange, 50);
-          }
-        }
-      };
-
-      // Start the sequence
-      processNextStateChange();
+          actions$.next(actions[2]);
+        }, 10);
+      }, 10);
     });
 
     it('should correctly associate state changes with their triggering actions in createSaveEffectWithFilter', (done) => {

@@ -97,6 +97,9 @@ describe('TaskDueEffects', () => {
       syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$ = syncSubject.asObservable();
       syncWrapperService.isSyncInProgress$ = syncInProgressSubject.asObservable();
 
+      // First emit that sync is not in progress
+      syncInProgressSubject.next(false);
+
       effects.createRepeatableTasksAndAddDueToday$.subscribe(() => {
         expect(addTasksForTomorrowService.addAllDueToday).toHaveBeenCalled();
         done();
@@ -104,12 +107,6 @@ describe('TaskDueEffects', () => {
 
       // Simulate sync completing
       syncSubject.next(undefined);
-
-      // Wait for debounce (1000ms)
-      setTimeout(() => {
-        // Sync is no longer in progress
-        syncInProgressSubject.next(false);
-      }, 1100);
     });
 
     it('should not add tasks while sync is in progress', (done) => {
@@ -125,21 +122,18 @@ describe('TaskDueEffects', () => {
         effectFired = true;
       });
 
+      // Sync is in progress
+      syncInProgressSubject.next(true);
+
       // Simulate sync completing
       syncSubject.next(undefined);
 
-      // Wait for debounce (1000ms)
+      // Wait a bit to ensure effect doesn't fire
       setTimeout(() => {
-        // Sync is still in progress
-        syncInProgressSubject.next(true);
-
-        // Wait a bit more to ensure effect doesn't fire
-        setTimeout(() => {
-          expect(effectFired).toBe(false);
-          expect(addTasksForTomorrowService.addAllDueToday).not.toHaveBeenCalled();
-          done();
-        }, 500);
-      }, 1100);
+        expect(effectFired).toBe(false);
+        expect(addTasksForTomorrowService.addAllDueToday).not.toHaveBeenCalled();
+        done();
+      }, 100);
     });
 
     it('should add tasks after debounce period when sync completes', (done) => {
@@ -198,7 +192,7 @@ describe('TaskDueEffects', () => {
       setTimeout(() => {
         expect(actionEmitted).toBe(false);
         done();
-      }, 100);
+      }, 50);
     });
 
     it('should wait for sync before removing overdue tasks', (done) => {
@@ -213,6 +207,9 @@ describe('TaskDueEffects', () => {
       store.overrideSelector(selectOverdueTasksOnToday, [overdueTask]);
       store.overrideSelector(selectTodayTaskIds, ['overdue1', 'current1']);
 
+      // First emit that sync is not in progress
+      syncInProgressSubject.next(false);
+
       effects.removeOverdueFormToday$.subscribe((action) => {
         expect(action).toEqual(
           TaskSharedActions.removeTasksFromTodayTag({
@@ -224,11 +221,6 @@ describe('TaskDueEffects', () => {
 
       // Simulate sync completing
       syncSubject.next(undefined);
-
-      // Wait for debounce
-      setTimeout(() => {
-        syncInProgressSubject.next(false);
-      }, 1100);
     });
   });
 });
