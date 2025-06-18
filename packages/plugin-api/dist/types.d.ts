@@ -49,7 +49,7 @@ export interface PluginNodeScriptConfig {
 export interface PluginNodeScriptRequest {
   script: string;
   timeout?: number;
-  args?: any[];
+  args?: unknown[];
 }
 export interface PluginNodeScriptError {
   code:
@@ -68,7 +68,7 @@ export interface PluginNodeScriptError {
 }
 export interface PluginNodeScriptResult {
   success: boolean;
-  result?: any;
+  result?: unknown;
   error?: string | PluginNodeScriptError;
   executionTime?: number;
   resourceUsage?: {

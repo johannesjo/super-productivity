@@ -8,11 +8,12 @@ import { IPC } from './shared-with-frontend/ipc-events.const';
 import {
   PluginNodeScriptRequest,
   PluginNodeScriptResult,
+  PluginManifest,
 } from '../packages/plugin-api/dist/types';
 
 interface PluginNodeExecutionContext {
   pluginId: string;
-  manifest: any; // PluginManifest type from plugin-api
+  manifest: PluginManifest;
   userDataPath: string;
 }
 
@@ -47,7 +48,7 @@ class PluginNodeExecutor {
 
     ipcMain.on(
       IPC.PLUGIN_REGISTER_FOR_NODE,
-      (event, pluginId: string, manifest: any, userDataPath: string) => {
+      (event, pluginId: string, manifest: PluginManifest, userDataPath: string) => {
         this.registerPlugin(pluginId, manifest, userDataPath);
       },
     );
@@ -57,7 +58,11 @@ class PluginNodeExecutor {
     });
   }
 
-  public registerPlugin(pluginId: string, manifest: any, userDataPath: string): void {
+  public registerPlugin(
+    pluginId: string,
+    manifest: PluginManifest,
+    userDataPath: string,
+  ): void {
     this.executionContexts.set(pluginId, {
       pluginId,
       manifest,
@@ -162,7 +167,7 @@ class PluginNodeExecutor {
     }
   }
 
-  private wrapScript(script: string, args?: any[]): string {
+  private wrapScript(script: string, args?: unknown[]): string {
     // Wrap the script in a function to isolate scope and provide controlled environment
     return `
 'use strict';
@@ -261,7 +266,7 @@ const safeProcess = {
     context: PluginNodeExecutionContext,
     timeout: number,
     memoryLimit: string,
-  ): Promise<{ result: any; resourceUsage?: any }> {
+  ): Promise<{ result: unknown; resourceUsage?: { peakMemoryMB: number } }> {
     return new Promise((resolve, reject) => {
       const memoryLimitMB = this.parseMemoryLimit(memoryLimit);
 
@@ -335,10 +340,16 @@ const safeProcess = {
             if (parsed.__error) {
               // Try to extract line number from stack trace
               const errorMatch = parsed.__stack?.match(/at.*:(\d+):(\d+)/);
-              const error: any = new Error(parsed.__error);
+              const error = new Error(parsed.__error);
               if (errorMatch) {
-                error.line = parseInt(errorMatch[1], 10);
-                error.column = parseInt(errorMatch[2], 10);
+                (error as Error & { line?: number; column?: number }).line = parseInt(
+                  errorMatch[1],
+                  10,
+                );
+                (error as Error & { line?: number; column?: number }).column = parseInt(
+                  errorMatch[2],
+                  10,
+                );
               }
               reject(error);
             } else if (parsed.__result !== undefined) {
