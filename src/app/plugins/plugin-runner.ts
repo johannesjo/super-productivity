@@ -7,7 +7,6 @@ import {
 } from './plugin-api.model';
 import { PluginAPI } from './plugin-api';
 import { PluginBridgeService } from './plugin-bridge.service';
-import '../core/window-ea';
 
 @Injectable({
   providedIn: 'root',
