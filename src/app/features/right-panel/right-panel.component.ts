@@ -151,6 +151,7 @@ export class RightPanelComponent implements OnDestroy {
   close(): void {
     this.taskService.setSelectedId(null);
     this.layoutService.hideNotes();
+    this.pluginService.setActiveSidePanelPlugin(null);
     this.onClose();
   }
 

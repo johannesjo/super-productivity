@@ -59,6 +59,21 @@ export class PluginRunner {
       // Execute plugin code in a sandboxed environment
       await this._executePluginCode(pluginCode, pluginAPI, manifest);
 
+      // Automatically register side panel button for plugins with sidePanel flag
+      if (manifest.sidePanel) {
+        // Ensure plugin context is set before registering button
+        this._pluginBridge._setCurrentPlugin(manifest.id);
+
+        pluginAPI.registerSidePanelButton({
+          label: manifest.name,
+          icon: manifest.icon,
+          onClick: () => {
+            // This onClick is handled by the component to toggle the panel
+            console.log(`Side panel button clicked for plugin ${manifest.id}`);
+          },
+        });
+      }
+
       // Automatically register menu entry unless isSkipMenuEntry is true or sidePanel is true
       if (!manifest.isSkipMenuEntry && manifest.iFrame && !manifest.sidePanel) {
         // Ensure plugin context is set before registering menu entry
