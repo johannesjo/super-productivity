@@ -12,10 +12,14 @@ import { AppDataCompleteNew } from '../src/app/pfapi/pfapi-config';
 import {
   PluginNodeScriptRequest,
   PluginNodeScriptResult,
+  PluginManifest,
 } from '../packages/plugin-api/dist/types';
 
 export interface ElectronAPI {
-  on(channel: string, listener: (event: IpcRendererEvent, ...args: any[]) => void): void;
+  on(
+    channel: string,
+    listener: (event: IpcRendererEvent, ...args: unknown[]) => void,
+  ): void;
 
   // INVOKE
   // ------
@@ -128,7 +132,11 @@ export interface ElectronAPI {
     request: PluginNodeScriptRequest,
   ): Promise<PluginNodeScriptResult>;
 
-  pluginRegisterForNode(pluginId: string, manifest: any, userDataPath: string): void;
+  pluginRegisterForNode(
+    pluginId: string,
+    manifest: PluginManifest,
+    userDataPath: string,
+  ): void;
 
   pluginUnregisterForNode(pluginId: string): void;
 }
