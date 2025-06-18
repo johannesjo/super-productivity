@@ -24,7 +24,7 @@ import {
   PluginNodeConsentDialogComponent,
   PluginNodeConsentDialogData,
 } from './ui/plugin-node-consent-dialog/plugin-node-consent-dialog.component';
-import { firstValueFrom } from 'rxjs';
+import { first } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -915,36 +915,36 @@ export class PluginService {
     }
 
     // First confirmation dialog
-    const firstConfirmation = await firstValueFrom(
-      this._dialog
-        .open(PluginNodeConsentDialogComponent, {
-          data: {
-            manifest,
-            isFirstConfirmation: true,
-          } as PluginNodeConsentDialogData,
-          disableClose: false,
-          width: '600px',
-        })
-        .afterClosed(),
-    );
+    const firstConfirmation = await this._dialog
+      .open(PluginNodeConsentDialogComponent, {
+        data: {
+          manifest,
+          isFirstConfirmation: true,
+        } as PluginNodeConsentDialogData,
+        disableClose: false,
+        width: '600px',
+      })
+      .afterClosed()
+      .pipe(first())
+      .toPromise();
 
     if (!firstConfirmation) {
       return false;
     }
 
     // Second confirmation dialog
-    const secondConfirmation = await firstValueFrom(
-      this._dialog
-        .open(PluginNodeConsentDialogComponent, {
-          data: {
-            manifest,
-            isFirstConfirmation: false,
-          } as PluginNodeConsentDialogData,
-          disableClose: false,
-          width: '600px',
-        })
-        .afterClosed(),
-    );
+    const secondConfirmation = await this._dialog
+      .open(PluginNodeConsentDialogComponent, {
+        data: {
+          manifest,
+          isFirstConfirmation: false,
+        } as PluginNodeConsentDialogData,
+        disableClose: false,
+        width: '600px',
+      })
+      .afterClosed()
+      .pipe(first())
+      .toPromise();
 
     if (secondConfirmation) {
       // Store consent for future sessions

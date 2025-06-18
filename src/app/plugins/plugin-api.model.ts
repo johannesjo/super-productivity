@@ -14,6 +14,9 @@ import {
   PluginShortcutCfg,
   PluginMenuEntryCfg,
   PluginHeaderBtnCfg,
+  PluginNodeScriptRequest,
+  PluginNodeScriptResult,
+  PluginSidePanelBtnCfg,
 } from '@super-productivity/plugin-api';
 
 // Re-export plugin-api types
@@ -32,6 +35,9 @@ export {
   PluginShortcutCfg,
   PluginMenuEntryCfg,
   PluginHeaderBtnCfg,
+  PluginNodeScriptRequest,
+  PluginNodeScriptResult,
+  PluginSidePanelBtnCfg,
 };
 
 // Import app-specific types
@@ -103,6 +109,14 @@ export interface PluginAPI {
   loadSyncedData(): Promise<string | null>;
 
   __getHookHandlers(): Map<string, Map<Hooks, Array<PluginHookHandler>>>;
+
+  // Node execution (only available in Electron with nodeExecution permission)
+  executeNodeScript?(request: PluginNodeScriptRequest): Promise<PluginNodeScriptResult>;
+
+  // Side panel button registration
+  registerSidePanelButton?(
+    sidePanelBtnCfg: Omit<PluginSidePanelBtnCfg, 'pluginId'>,
+  ): void;
 
   // Potentially later
   // addActionBeforeCloseApp(action: () => Promise<void>): void;
