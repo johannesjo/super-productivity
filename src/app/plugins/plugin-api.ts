@@ -3,28 +3,36 @@ import {
   DialogCfg,
   Hooks,
   NotifyCfg,
-  PluginAPI as IPluginAPI,
   PluginBaseCfg,
   PluginHookHandler,
   PluginHooks,
   PluginMenuEntryCfg,
   PluginShortcutCfg,
-  ProjectCopy,
-  SnackCfgLimited,
-  TagCopy,
-  TaskCopy,
   PluginHeaderBtnCfg,
   PluginNodeScriptRequest,
   PluginNodeScriptResult,
   PluginSidePanelBtnCfg,
-} from './plugin-api.model';
+  TaskData,
+  ProjectData,
+  TagData,
+  SnackCfg,
+  PluginAPI as PluginAPIInterface,
+} from '@super-productivity/plugin-api';
 import { PluginBridgeService } from './plugin-bridge.service';
+import {
+  taskCopyToTaskData,
+  projectCopyToProjectData,
+  tagCopyToTagData,
+  taskDataToPartialTaskCopy,
+  projectDataToPartialProjectCopy,
+  tagDataToPartialTagCopy,
+} from './plugin-api-mapper';
 
 /**
  * PluginAPI implementation that uses direct bridge service injection
  * This provides a clean intermediary layer between plugins and app services
  */
-export class PluginAPI implements IPluginAPI {
+export class PluginAPI implements PluginAPIInterface {
   readonly Hooks = PluginHooks;
   private _hookHandlers = new Map<string, Map<Hooks, Array<PluginHookHandler>>>();
   private _headerButtons: Array<PluginHeaderBtnCfg> = [];
@@ -107,24 +115,28 @@ export class PluginAPI implements IPluginAPI {
     return this._pluginBridge.showIndexHtmlAsView();
   }
 
-  async getTasks(): Promise<TaskCopy[]> {
+  async getTasks(): Promise<TaskData[]> {
     console.log(`Plugin ${this._pluginId} requested all tasks`);
-    return this._pluginBridge.getTasks();
+    const tasks = await this._pluginBridge.getTasks();
+    return tasks.map(taskCopyToTaskData);
   }
 
-  async getArchivedTasks(): Promise<TaskCopy[]> {
+  async getArchivedTasks(): Promise<TaskData[]> {
     console.log(`Plugin ${this._pluginId} requested archived tasks`);
-    return this._pluginBridge.getArchivedTasks();
+    const tasks = await this._pluginBridge.getArchivedTasks();
+    return tasks.map(taskCopyToTaskData);
   }
 
-  async getCurrentContextTasks(): Promise<TaskCopy[]> {
+  async getCurrentContextTasks(): Promise<TaskData[]> {
     console.log(`Plugin ${this._pluginId} requested current context tasks`);
-    return this._pluginBridge.getCurrentContextTasks();
+    const tasks = await this._pluginBridge.getCurrentContextTasks();
+    return tasks.map(taskCopyToTaskData);
   }
 
-  async updateTask(taskId: string, updates: Partial<TaskCopy>): Promise<void> {
+  async updateTask(taskId: string, updates: Partial<TaskData>): Promise<void> {
     console.log(`Plugin ${this._pluginId} requested to update task ${taskId}:`, updates);
-    return this._pluginBridge.updateTask(taskId, updates);
+    const taskCopyUpdates = taskDataToPartialTaskCopy(updates);
+    return this._pluginBridge.updateTask(taskId, taskCopyUpdates);
   }
 
   async addTask(taskData: PluginCreateTaskData): Promise<string> {
@@ -132,40 +144,46 @@ export class PluginAPI implements IPluginAPI {
     return this._pluginBridge.addTask(taskData);
   }
 
-  async getAllProjects(): Promise<ProjectCopy[]> {
+  async getAllProjects(): Promise<ProjectData[]> {
     console.log(`Plugin ${this._pluginId} requested all projects`);
-    return this._pluginBridge.getAllProjects();
+    const projects = await this._pluginBridge.getAllProjects();
+    return projects.map(projectCopyToProjectData);
   }
 
-  async addProject(projectData: Partial<ProjectCopy>): Promise<string> {
+  async addProject(projectData: Partial<ProjectData>): Promise<string> {
     console.log(`Plugin ${this._pluginId} requested to add project:`, projectData);
-    return this._pluginBridge.addProject(projectData);
+    const projectCopyData = projectDataToPartialProjectCopy(projectData);
+    return this._pluginBridge.addProject(projectCopyData);
   }
 
-  async updateProject(projectId: string, updates: Partial<ProjectCopy>): Promise<void> {
+  async updateProject(projectId: string, updates: Partial<ProjectData>): Promise<void> {
     console.log(
       `Plugin ${this._pluginId} requested to update project ${projectId}:`,
       updates,
     );
-    return this._pluginBridge.updateProject(projectId, updates);
+    const projectCopyUpdates = projectDataToPartialProjectCopy(updates);
+    return this._pluginBridge.updateProject(projectId, projectCopyUpdates);
   }
 
-  async getAllTags(): Promise<TagCopy[]> {
+  async getAllTags(): Promise<TagData[]> {
     console.log(`Plugin ${this._pluginId} requested all tags`);
-    return this._pluginBridge.getAllTags();
+    const tags = await this._pluginBridge.getAllTags();
+    return tags.map(tagCopyToTagData);
   }
 
-  async addTag(tagData: Partial<TagCopy>): Promise<string> {
+  async addTag(tagData: Partial<TagData>): Promise<string> {
     console.log(`Plugin ${this._pluginId} requested to add tag:`, tagData);
-    return this._pluginBridge.addTag(tagData);
+    const tagCopyData = tagDataToPartialTagCopy(tagData);
+    return this._pluginBridge.addTag(tagCopyData);
   }
 
-  async updateTag(tagId: string, updates: Partial<TagCopy>): Promise<void> {
+  async updateTag(tagId: string, updates: Partial<TagData>): Promise<void> {
     console.log(`Plugin ${this._pluginId} requested to update tag ${tagId}:`, updates);
-    return this._pluginBridge.updateTag(tagId, updates);
+    const tagCopyUpdates = tagDataToPartialTagCopy(updates);
+    return this._pluginBridge.updateTag(tagId, tagCopyUpdates);
   }
 
-  showSnack(snackCfg: SnackCfgLimited): void {
+  showSnack(snackCfg: SnackCfg): void {
     this._pluginBridge.showSnack(snackCfg);
   }
 
