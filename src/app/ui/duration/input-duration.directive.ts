@@ -135,6 +135,11 @@ export class InputDurationDirective implements ControlValueAccessor, Validator, 
 
   private _processInput(strVal: string): void {
     try {
+      const digitWithTimeUnitRegex = /(^\d+h(?: \d+m)?$)|(^\d+m$)/i;
+      // If input is without unit like 1h, 2m, 3h 30m, etc, return
+      if (!digitWithTimeUnitRegex.test(strVal.trim())) {
+        return;
+      }
       // Convert input string to milliseconds
       const ms = strVal ? this._strToMs(strVal) : 0;
 
