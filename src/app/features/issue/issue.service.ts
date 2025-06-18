@@ -8,7 +8,7 @@ import {
   SearchResultItemWithProviderId,
 } from './issue.model';
 import { TaskAttachment } from '../tasks/task-attachment/task-attachment.model';
-import { forkJoin, merge, Observable, of, Subject } from 'rxjs';
+import { forkJoin, from, merge, Observable, of, Subject } from 'rxjs';
 import {
   CALDAV_TYPE,
   GITEA_TYPE,
@@ -80,54 +80,55 @@ export class IssueService {
     [ICAL_TYPE]: this._calendarCommonInterfaceService,
   };
 
-  // NOTE: in theory we might need to clean this up on project change, but it's unlikely to matter
-  ISSUE_REFRESH_MAP: { [key: string]: { [key: string]: Subject<IssueData> } } = {
-    [GITLAB_TYPE]: {},
-    [GITHUB_TYPE]: {},
-    [REDMINE_TYPE]: {},
-    [JIRA_TYPE]: {},
-    [CALDAV_TYPE]: {},
-    [OPEN_PROJECT_TYPE]: {},
-    [GITEA_TYPE]: {},
-    [REDMINE_TYPE]: {},
-    [ICAL_TYPE]: {},
-  };
+  ISSUE_REFRESH_MAP: {
+    [issueProviderId: string]: { [issueId: string]: Subject<IssueData> };
+  } = {};
 
-  testConnection$(issueProviderCfg: IssueProvider): Observable<boolean> {
-    return this.ISSUE_SERVICE_MAP[issueProviderCfg.issueProviderKey].testConnection$(
+  testConnection(issueProviderCfg: IssueProvider): Promise<boolean> {
+    return this.ISSUE_SERVICE_MAP[issueProviderCfg.issueProviderKey].testConnection(
       issueProviderCfg,
     );
   }
 
+  getById(
+    issueType: IssueProviderKey,
+    id: string | number,
+    issueProviderId: string,
+  ): Promise<IssueData | null> {
+    return this.ISSUE_SERVICE_MAP[issueType].getById(id, issueProviderId);
+  }
+
+  // Keep Observable version for components that need real-time updates via refresh
   getById$(
     issueType: IssueProviderKey,
     id: string | number,
     issueProviderId: string,
   ): Observable<IssueData | null> {
     // account for (manual) issue refreshing
-    if (!this.ISSUE_REFRESH_MAP[issueType][id]) {
-      this.ISSUE_REFRESH_MAP[issueType][id] = new Subject<IssueData>();
+    if (!this.ISSUE_REFRESH_MAP[issueProviderId]) {
+      this.ISSUE_REFRESH_MAP[issueProviderId] = {};
     }
-    return this.ISSUE_SERVICE_MAP[issueType]
-      .getById$(id, issueProviderId)
-      .pipe(
-        switchMap((issue) =>
-          merge<IssueData | null>(of(issue), this.ISSUE_REFRESH_MAP[issueType][id]),
-        ),
-      );
+    if (!this.ISSUE_REFRESH_MAP[issueProviderId][id]) {
+      this.ISSUE_REFRESH_MAP[issueProviderId][id] = new Subject<IssueData>();
+    }
+    return from(this.ISSUE_SERVICE_MAP[issueType].getById(id, issueProviderId)).pipe(
+      switchMap((issue) =>
+        merge<IssueData | null>(of(issue), this.ISSUE_REFRESH_MAP[issueProviderId][id]),
+      ),
+    );
   }
 
-  searchIssues$(
+  searchIssues(
     searchTerm: string,
     issueProviderId: string,
     issueProviderKey: IssueProviderKey,
     isEmptySearch = false,
-  ): Observable<SearchResultItem[]> {
+  ): Promise<SearchResultItem[]> {
     // check if text is more than just special chars
     if (searchTerm.replace(/[\W_]+/g, '').trim().length === 0 && !isEmptySearch) {
-      return of([]);
+      return Promise.resolve([]);
     }
-    return this.ISSUE_SERVICE_MAP[issueProviderKey].searchIssues$(
+    return this.ISSUE_SERVICE_MAP[issueProviderKey].searchIssues(
       searchTerm,
       issueProviderId,
     );
@@ -139,7 +140,9 @@ export class IssueService {
     return this._store.select(selectEnabledIssueProviders).pipe(
       switchMap((enabledProviders) => {
         const searchObservables = enabledProviders.map((provider) =>
-          this.searchIssues$(searchTerm, provider.id, provider.issueProviderKey).pipe(
+          from(
+            this.searchIssues(searchTerm, provider.id, provider.issueProviderKey),
+          ).pipe(
             map((results) =>
               results.map((result) => ({
                 ...result,
@@ -165,16 +168,16 @@ export class IssueService {
     );
   }
 
-  issueLink$(
+  issueLink(
     issueType: IssueProviderKey,
     issueId: string | number,
     issueProviderId: string,
-  ): Observable<string> {
-    return this.ISSUE_SERVICE_MAP[issueType].issueLink$(issueId, issueProviderId);
+  ): Promise<string> {
+    return this.ISSUE_SERVICE_MAP[issueType].issueLink(issueId, issueProviderId);
   }
 
-  getPollTimer$(providerKey: IssueProviderKey): Observable<number> {
-    return this.ISSUE_SERVICE_MAP[providerKey].pollTimer$;
+  getPollInterval(providerKey: IssueProviderKey): number {
+    return this.ISSUE_SERVICE_MAP[providerKey].pollInterval;
   }
 
   getMappedAttachments(
@@ -275,8 +278,8 @@ export class IssueService {
     )(task, isNotifySuccess, isNotifyNoUpdateRequired);
 
     if (update) {
-      if (this.ISSUE_REFRESH_MAP[issueType][issueId]) {
-        this.ISSUE_REFRESH_MAP[issueType][issueId].next(update.issue);
+      if (this.ISSUE_REFRESH_MAP[issueProviderId]?.[issueId]) {
+        this.ISSUE_REFRESH_MAP[issueProviderId][issueId].next(update.issue);
       }
       this._taskService.update(task.id, update.taskChanges);
 
@@ -347,8 +350,8 @@ export class IssueService {
 
       if (updates.length > 0) {
         for (const update of updates) {
-          if (this.ISSUE_REFRESH_MAP[providerKey][update.task.issueId as string]) {
-            this.ISSUE_REFRESH_MAP[providerKey][update.task.issueId as string].next(
+          if (this.ISSUE_REFRESH_MAP[issueProvider.id]?.[update.task.issueId as string]) {
+            this.ISSUE_REFRESH_MAP[issueProvider.id][update.task.issueId as string].next(
               update.issue,
             );
           }

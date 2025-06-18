@@ -1,0 +1,95 @@
+/**
+ * Touch-specific fixes for Angular Material menu submenu issues
+ * Issue: https://github.com/johannesjo/super-productivity/issues/4436
+ */
+
+// Only apply these styles on touch devices
+@media (hover: none) and (pointer: coarse) {
+  // Add delay to submenu opening on touch devices
+  .mat-mdc-menu-panel {
+    // Delay pointer events briefly when menu opens
+    &.mat-mdc-menu-panel-animating {
+      .mat-mdc-menu-item {
+        pointer-events: none !important;
+      }
+    }
+  }
+
+  // For nested/submenu triggers, add touch-action to prevent immediate selection
+  .mat-mdc-menu-item[matMenuTriggerFor] {
+    touch-action: manipulation;
+
+    // Add a slight delay before the submenu can receive touch events
+    &:active + .mat-mdc-menu-panel,
+    &:focus + .mat-mdc-menu-panel {
+      .mat-mdc-menu-content {
+        pointer-events: none;
+        animation: enablePointerEvents 0.3s forwards;
+      }
+    }
+  }
+
+  // Specifically for the project menu
+  #projectMenu {
+    .mat-mdc-menu-content {
+      // Add padding to prevent edge touches
+      padding: 8px 0;
+
+      .mat-mdc-menu-item {
+        // Add delay to touch responsiveness
+        transition: background-color 0.15s ease-in-out;
+
+        &:first-child {
+          // Extra padding on first item to prevent accidental selection
+          margin-top: 8px;
+        }
+      }
+    }
+  }
+}
+
+// Animation to re-enable pointer events after delay
+@keyframes enablePointerEvents {
+  0% {
+    pointer-events: none;
+  }
+  99% {
+    pointer-events: none;
+  }
+  100% {
+    pointer-events: auto;
+  }
+}
+
+// Additional fix for menu positioning near edges
+.cdk-overlay-pane {
+  // Ensure menus have some distance from screen edges on mobile
+  @media (hover: none) and (pointer: coarse) {
+    // Add margins to prevent menus from touching screen edges
+    margin: 16px !important;
+
+    &.mat-mdc-menu-panel-below {
+      margin-top: 8px !important;
+    }
+
+    &.mat-mdc-menu-panel-above {
+      margin-bottom: 8px !important;
+    }
+
+    // Add safe area insets for devices with notches/rounded corners
+    padding: env(safe-area-inset-top) env(safe-area-inset-right)
+      env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+}
+
+// Ensure the overlay container respects screen boundaries
+.cdk-overlay-container {
+  @media (hover: none) and (pointer: coarse) {
+    .cdk-overlay-connected-position-bounding-box {
+      // Prevent menus from going off-screen
+      max-width: calc(100vw - 32px) !important;
+      max-height: calc(100vh - 32px) !important;
+      margin: 0 16px !important;
+    }
+  }
+}

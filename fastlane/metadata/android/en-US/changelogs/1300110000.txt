@@ -1,0 +1,41 @@
+
+### Bug Fixes
+
+* add missing translation
+* adding task from issue provider with no default project leading to modelvalidaiton error
+* autofix for global config to always use default if possible
+* autofix for global config to always use default if possible 2
+* autofix to default config if wrong value
+* cannot read properties of undefined #4493
+* cleaning value and ctrl+v not working on windows #4520
+* default project setting not working anymore #4442
+* Error Invalid param given to UpdateProjectOrder when inbox project is hidden #4416
+* error when entering invalid value #4452
+* error with new task creation when there is no default estimate #4423
+* **i18n:** avoid error "Parameter 'key' required" #4133
+* **i18n:** avoid error "Parameter 'key' required" 2 #4133
+* lint
+* prevent model validation error
+* re-enable reload
+* remove alert
+* **sync:** make android error handling more robust
+* **sync:** prevent multiple sync config dialogs on android
+### Features
+
+* add 'isTrayShowCurrentCountdown' setting and corresponding translations
+* add 'isTrayShowCurrentCountdown' setting and corresponding translations
+* Add due date for gitlab sync
+* also log validation errors for validation error
+* **i18n:** add missing translation for domina mode #4133
+* integrate 'isTrayShowCurrentCountdown' setting into tray message logic
+* move setting down
+* move setting down
+* **saf-droid:** outline
+* **sync:** add base directory for android
+* **sync:** improve decrypt error dialog
+* **sync:** make android folder selection work again #4390
+* **sync:** make file sync base more robust
+* **sync:** make local file sync work as it should
+* **sync:** minor adjustments
+* **sync:** simplify cfg #4390
+* **sync:** use idb instead of capacitor preferences for saving config stuff #4390

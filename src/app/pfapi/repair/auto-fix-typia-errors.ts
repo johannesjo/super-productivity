@@ -1,5 +1,6 @@
 import { AppDataCompleteNew } from '../pfapi-config';
 import { IValidation } from 'typia';
+import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-config.const';
 
 export const autoFixTypiaErrors = (
   data: AppDataCompleteNew,
@@ -8,25 +9,56 @@ export const autoFixTypiaErrors = (
   if (!errors || errors.length === 0) {
     return data;
   }
+
   errors.forEach((error) => {
     if (error.path.startsWith('$input')) {
       const path = error.path.replace('$input.', '');
       const keys = parsePath(path);
       const value = getValueByPath(data, keys);
-      console.warn('Auto-fixing error:', error);
-      if (error.expected.includes('number') && typeof value === 'string') {
+      console.warn('Auto-fixing error:', error, keys, value);
+
+      if (
+        error.expected.includes('number') &&
+        typeof value === 'string' &&
+        !isNaN(parseFloat(value))
+      ) {
         const parsedValue = parseFloat(value);
-        if (!isNaN(parsedValue)) {
-          setValueByPath(data, keys, parsedValue);
-        }
+        setValueByPath(data, keys, parsedValue);
+      } else if (keys[0] === 'globalConfig') {
+        const defaultValue = getValueByPath(DEFAULT_GLOBAL_CONFIG, keys.slice(1));
+        setValueByPath(data, keys, defaultValue);
+        alert(
+          `Warning: ${path} had an invalid value and was set to default: ${defaultValue}`,
+        );
       } else if (error.expected.includes('undefined') && value === null) {
         setValueByPath(data, keys, undefined);
+        console.warn(`Fixed: ${path} from null to undefined`);
+      } else if (error.expected.includes('null') && value === 'null') {
+        setValueByPath(data, keys, null);
+        console.warn(`Fixed: ${path} from string null to null`);
+      } else if (error.expected.includes('undefined') && value === 'null') {
+        setValueByPath(data, keys, undefined);
+        console.warn(`Fixed: ${path} from string null to null`);
       } else if (error.expected.includes('null') && value === undefined) {
         setValueByPath(data, keys, null);
+        console.warn(`Fixed: ${path} from undefined to null`);
       } else if (error.expected.includes('boolean') && !value) {
         setValueByPath(data, keys, false);
+        console.warn(`Fixed: ${path} to false (was ${value})`);
       } else if (keys[0] === 'task' && error.expected.includes('number')) {
         setValueByPath(data, keys, 0);
+        console.warn(`Fixed: ${path} to 0 (was ${value})`);
+      } else if (
+        keys[0] === 'simpleCounter' &&
+        keys[1] === 'entities' &&
+        keys.length >= 5 &&
+        keys[3] === 'countOnDay' &&
+        error.expected.includes('number') &&
+        value === null
+      ) {
+        // Fix for issue #4593: simpleCounter countOnDay null value
+        setValueByPath(data, keys, 0);
+        console.warn(`Fixed: ${path} from null to 0 for simpleCounter`);
       }
     }
   });
@@ -44,8 +76,14 @@ const parsePath = (path: string): (string | number)[] => {
 
   for (const part of pathParts) {
     if (part.includes('[')) {
-      const partsInner = part.replace(/\]/g, '').replace(/\"/g, '').split('[');
-      partsInner.forEach((innerPart) => keys.push(innerPart));
+      const partsInner = part
+        .replace(/\]/g, '')
+        .replace(/\"/g, '')
+        .replace(/'/g, '')
+        .split('[');
+      partsInner.forEach((innerPart) => {
+        if (innerPart) keys.push(innerPart);
+      });
     } else {
       keys.push(part);
     }

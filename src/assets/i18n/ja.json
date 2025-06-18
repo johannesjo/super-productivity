@@ -31,10 +31,7 @@
     "RESTORE_FILE_BACKUP_ANDROID": "データがないようですが、利用可能なバックアップがあります。ロードしますか？",
     "RESTORE_STRAY_BACKUP": "最後の同期中に、エラーが発生した可能性があります。最後のバックアップを復元しますか？"
   },
-  "DATETIME_INPUT": {
-    "IN": " {{time}}に",
-    "TOMORROW": "明日 {{time}}"
-  },
+  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "今日あとで",
     "NEXT_WEEK": "来週",
@@ -610,7 +607,9 @@
         "MARK_AS_CHECKED": "更新をチェック済みとしてマーク",
         "STATUS": "状態",
         "SUMMARY": "概要",
-        "TYPE": "タイプ"
+        "TYPE": "タイプ",
+        "ATTACHMENTS": "添付ファイル",
+        "UPLOAD_ATTACHMENT": "タスクにアップロード"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "ワークパッケージ",
@@ -621,7 +620,8 @@
         "POST_TIME_SUCCESS": "OpenProject： {{issueTitle}}の時間エントリが正常に作成されました",
         "TRANSITION": "OpenProject：issue「{{issueKey}}」を「{{name}}」に設定します。\"",
         "TRANSITION_SUCCESS": "OpenProject：課題 {{issueKey}} を <strong>に設定 {{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "トランジションがロードされました。以下のセレクトを使用して割り当てます。"
+        "TRANSITIONS_LOADED": "トランジションがロードされました。以下のセレクトを使用して割り当てます。",
+        "ERR_NO_FILE": "ファイルが選択されていません"
       }
     },
     "PLANNER": {
@@ -1329,7 +1329,22 @@
     "PRIVACY_EXPORT": "匿名化されたデータをエクスポートする（デバッグ用に contact@super-productivity.com に送信する）。",
     "S_BACKUP_DOWNLOADED": "バックアップをAndroidドキュメントフォルダにダウンロードしました",
     "S_ERR_IMPORT_FAILED": "データのインポートに失敗しました",
-    "S_ERR_INVALID_DATA": "インポートに失敗しました：無効なJSON"
+    "S_ERR_INVALID_DATA": "インポートに失敗しました：無効なJSON",
+    "S_ERR_INVALID_URL": "インポートに失敗しました：無効なURLが指定されました",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "エラー：インポート用のURLパラメータをデコードできませんでした。正しくフォーマットされていることを確認してください。",
+    "S_ERR_NETWORK": "インポートに失敗しました：URLからデータを取得中にネットワークエラーが発生しました",
+    "IMPORT_FROM_URL": "URLからインポート",
+    "URL_PLACEHOLDER": "インポートするURLを入力してください",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "URLからインポート",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "インポートしたいSuper ProductivityのバックアップJSONファイルの完全なURLを入力してください。",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "URLからインポート",
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "TITLE": "URLからのデータインポートを確認",
+      "INITIATED_MSG": "自動データインポートが開始されました。",
+      "SOURCE_URL_DOMAIN": "ソースドメイン",
+      "WARNING_TITLE": "警告",
+      "WARNING_MSG": "続行すると、指定されたURLの内容で現在のアプリケーションデータと設定が上書きされます。この操作は元に戻せません。"
+    }
   },
   "G": {
     "ADD": "追加",

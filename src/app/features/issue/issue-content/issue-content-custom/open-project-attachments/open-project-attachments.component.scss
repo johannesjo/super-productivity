@@ -1,0 +1,46 @@
+.open-project-attachments {
+  .loading-wrapper {
+    margin: 16px 0;
+  }
+
+  .upload-btn {
+    margin: 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .attachment-dl-list {
+    margin-top: 16px;
+
+    .attachment {
+      margin-bottom: 8px;
+
+      .attachment-inner {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--palette-primary-main);
+        text-decoration: none;
+        padding: 8px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+
+        &:hover {
+          background-color: var(--palette-background-hover);
+          text-decoration: none;
+        }
+
+        .attachment-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+
+        .attachment-title {
+          font-weight: 500;
+        }
+      }
+    }
+  }
+}

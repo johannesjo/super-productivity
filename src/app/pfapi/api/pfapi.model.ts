@@ -3,7 +3,6 @@ import { ModelCtrl } from './model-ctrl/model-ctrl';
 import { ConflictReason, SyncProviderId, SyncStatus } from './pfapi.const';
 import { DropboxPrivateCfg } from './sync/providers/dropbox/dropbox';
 import { WebdavPrivateCfg } from './sync/providers/webdav/webdav';
-import { LocalFileSyncElectronPrivateCfg } from './sync/providers/local-file-sync/local-file-sync-electron';
 import { IValidation } from 'typia';
 
 type JSONPrimitive = string | number | boolean | null;
@@ -91,6 +90,8 @@ export interface MetaFileBase {
   lastUpdate: number;
   revMap: RevMap;
   crossModelVersion: number;
+  localLamport: number;
+  lastSyncedLamport: number | null;
 }
 
 export interface RemoteMeta extends MetaFileBase {
@@ -150,15 +151,23 @@ export interface SyncProviderPrivateCfgBase {
   encryptKey?: string;
 }
 
+// Local file sync config that works for both platforms
+export interface LocalFileSyncPrivateCfg extends SyncProviderPrivateCfgBase {
+  // Electron specific
+  syncFolderPath?: string;
+  // Android SAF specific
+  safFolderUri?: string;
+}
+
 // TODO better dynamic typing
 export type SyncProviderPrivateCfg =
   | DropboxPrivateCfg
   | WebdavPrivateCfg
-  | LocalFileSyncElectronPrivateCfg;
+  | LocalFileSyncPrivateCfg;
 
 export type PrivateCfgByProviderId<T extends SyncProviderId> =
   T extends SyncProviderId.LocalFile
-    ? LocalFileSyncElectronPrivateCfg
+    ? LocalFileSyncPrivateCfg
     : T extends SyncProviderId.WebDAV
       ? WebdavPrivateCfg
       : T extends SyncProviderId.Dropbox

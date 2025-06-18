@@ -3,19 +3,20 @@
 ### build ###
 
 # base image
-FROM --platform=$BUILDPLATFORM node:20 as build
-
-# add app
-COPY . /app
+FROM --platform=$BUILDPLATFORM node:20 AS build
 
 # set working directory
 WORKDIR /app
 
-# add `/app/node_modules/.bin` to $PATH
-ENV PATH /app/node_modules/.bin:$PATH
+# install dependencies
+COPY package*.json /app
+RUN (npm ci || npm i) && npm i -g @angular/cli
 
-RUN npm i
-RUN npm i -g @angular/cli
+# add `/app/node_modules/.bin` to $PATH
+ENV PATH=/app/node_modules/.bin:$PATH
+
+# add app
+COPY . /app
 
 # run linter
 RUN npm run lint
@@ -34,14 +35,24 @@ FROM --platform=$TARGETPLATFORM nginx:1-alpine
 # environmental variables
 ENV PORT=80
 
+# install dependencies
+RUN apk update \
+  && apk add --no-cache jq=1.7.1-r0
+
 # copy artifact build from the 'build environment'
 COPY --from=build /app/dist/browser /usr/share/nginx/html
 
 # copy nginx config
 COPY ./nginx/default.conf.template /etc/nginx/templates/default.conf.template
 
+# copy our custom entrypoint script
+COPY ./docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+
 # expose port: defaults to 80
 EXPOSE $PORT
 
-# run nginx
-CMD ["nginx", "-g", "daemon off;"]
+# set working directory
+WORKDIR /usr/share/nginx/html
+
+# use our custom entrypoint script, to provide extra steps
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

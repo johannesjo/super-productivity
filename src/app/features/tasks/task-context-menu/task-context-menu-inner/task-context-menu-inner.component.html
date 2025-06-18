@@ -281,6 +281,7 @@
   <button
     [matMenuTriggerFor]="tagMenu"
     mat-menu-item
+    menuTouchFix
   >
     <span class="menuItemLeft">
       <mat-icon>label</mat-icon>
@@ -293,6 +294,7 @@
     <button
       [matMenuTriggerFor]="projectMenu"
       mat-menu-item
+      menuTouchFix
     >
       <span class="menuItemLeft">
         <mat-icon>forward</mat-icon>
@@ -344,6 +346,7 @@
       <button
         (click)="moveTaskToProject(project.id)"
         mat-menu-item
+        menuTouchFix
       >
         {{ project.title }}
       </button>
@@ -360,6 +363,7 @@
       <button
         (click)="toggleTag(tag.id)"
         mat-menu-item
+        menuTouchFix
       >
         @if (task.tagIds.includes(tag.id)) {
           <mat-icon class="check-ico">check_box</mat-icon>
@@ -377,6 +381,7 @@
     <button
       mat-menu-item
       (click)="openAddNewTag()"
+      menuTouchFix
     >
       <mat-icon>add</mat-icon>
       {{ T.F.TAG.TTL.ADD_NEW_TAG | translate }}

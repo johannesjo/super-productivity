@@ -31,10 +31,7 @@
     "RESTORE_FILE_BACKUP_ANDROID": "Es scheint KEINE DATEN zu geben, aber es ist ein Backup verfügbar. Möchten Sie es laden?",
     "RESTORE_STRAY_BACKUP": "Bei der letzten Synchronisierung ist möglicherweise ein Fehler aufgetreten. Möchten Sie das letzte Backup wiederherstellen?"
   },
-  "DATETIME_INPUT": {
-    "IN": "in {{time}}",
-    "TOMORROW": "morgen {{time}}"
-  },
+  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Im Laufe des Tages",
     "NEXT_WEEK": "Nächste Woche",
@@ -610,7 +607,9 @@
         "MARK_AS_CHECKED": "Updates als erledigt markieren",
         "STATUS": "Status",
         "SUMMARY": "Zusammenfassung",
-        "TYPE": "Typ"
+        "TYPE": "Typ",
+        "ATTACHMENTS": "Anhänge",
+        "UPLOAD_ATTACHMENT": "Hochladen zur Aufgabe"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "Arbeitspaket",
@@ -621,7 +620,8 @@
         "POST_TIME_SUCCESS": "OpenProject: Zeiteintrag für {{issueTitle}}erfolgreich erstellt",
         "TRANSITION": "OpenProject: Setzen Sie das Issue „ {{issueKey}}“ auf „ {{name}}“",
         "TRANSITION_SUCCESS": "OpenProject: Das Issue {{issueKey}} wurde auf <strong>{{chosenTransition}}</strong> gesetzt",
-        "TRANSITIONS_LOADED": "Übergänge geladen. Verwenden Sie die Auswahl unten, um sie zuzuweisen"
+        "TRANSITIONS_LOADED": "Übergänge geladen. Verwenden Sie die Auswahl unten, um sie zuzuweisen",
+        "ERR_NO_FILE": "Keine Datei ausgewählt"
       }
     },
     "PLANNER": {
@@ -1329,7 +1329,22 @@
     "PRIVACY_EXPORT": "Exportiere anonymisierte Daten (zum Senden an contact@super-productivity.com zur Fehlersuche)",
     "S_BACKUP_DOWNLOADED": "Backup in den Android-Dokumentenordner heruntergeladen",
     "S_ERR_IMPORT_FAILED": "Datenimport fehlgeschlagen",
-    "S_ERR_INVALID_DATA": "Import fehlgeschlagen: Ungültiger JSON"
+    "S_ERR_INVALID_DATA": "Import fehlgeschlagen: Ungültiger JSON",
+    "S_ERR_INVALID_URL": "Import fehlgeschlagen: Ungültige URL angegeben",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "Fehler: Die URL-Parameter für den Import konnten nicht dekodiert werden. Bitte stellen Sie sicher, dass sie korrekt formatiert sind.",
+    "S_ERR_NETWORK": "Import fehlgeschlagen: Netzwerkfehler beim Abrufen von Daten von der URL",
+    "IMPORT_FROM_URL": "Aus URL importieren",
+    "URL_PLACEHOLDER": "URL zum Importieren eingeben",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "Aus URL importieren",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Bitte geben Sie die vollständige URL der Super Productivity-Backup-JSON-Datei ein, die Sie importieren möchten.",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "Aus URL importieren",
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "TITLE": "Datenimport von URL bestätigen",
+      "INITIATED_MSG": "Ein automatischer Datenimport wurde gestartet.",
+      "SOURCE_URL_DOMAIN": "Quell-Domain",
+      "WARNING_TITLE": "Warnung",
+      "WARNING_MSG": "Das Fortfahren überschreibt Ihre aktuellen Anwendungsdaten und -konfiguration mit dem Inhalt der angegebenen URL. Diese Aktion kann nicht rückgängig gemacht werden."
+    }
   },
   "G": {
     "ADD": "Hinzufügen",

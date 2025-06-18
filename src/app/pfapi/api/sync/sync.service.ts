@@ -78,10 +78,21 @@ export class SyncService<const MD extends ModelCfgs> {
       }
       const localMeta0 = await this._metaModelCtrl.load();
 
+      pfLog(2, `${SyncService.L}.${this.sync.name}(): Initial meta check`, {
+        lastUpdate: localMeta0.lastUpdate,
+        lastSyncedUpdate: localMeta0.lastSyncedUpdate,
+        metaRev: localMeta0.metaRev,
+        isInSync: localMeta0.lastSyncedUpdate === localMeta0.lastUpdate,
+      });
+
       // Quick pre-check for all synced
       if (localMeta0.lastSyncedUpdate === localMeta0.lastUpdate) {
         const metaRev = await this._metaFileSyncService.getRev(localMeta0.metaRev);
         if (metaRev === localMeta0.metaRev) {
+          pfLog(
+            2,
+            `${SyncService.L}.${this.sync.name}(): Early return - already in sync`,
+          );
           return { status: SyncStatus.InSync };
         }
       }
@@ -139,6 +150,24 @@ export class SyncService<const MD extends ModelCfgs> {
           await this.uploadToRemote(remoteMeta, localMeta, remoteMetaRev);
           return { status };
         case SyncStatus.InSync:
+          // Ensure lastSyncedUpdate is set even when already in sync
+          if (
+            localMeta.lastSyncedUpdate !== localMeta.lastUpdate ||
+            localMeta.lastSyncedLamport !== localMeta.localLamport
+          ) {
+            pfLog(2, 'InSync but lastSyncedUpdate/Lamport needs update', {
+              lastSyncedUpdate: localMeta.lastSyncedUpdate,
+              lastUpdate: localMeta.lastUpdate,
+              lastSyncedLamport: localMeta.lastSyncedLamport,
+              localLamport: localMeta.localLamport,
+            });
+            await this._metaFileSyncService.saveLocal({
+              ...localMeta,
+              lastSyncedUpdate: localMeta.lastUpdate,
+              lastSyncedLamport: localMeta.localLamport || 0,
+              metaRev: remoteMetaRev,
+            });
+          }
           return { status };
         case SyncStatus.Conflict:
           return { status, conflictData };
@@ -201,8 +230,16 @@ export class SyncService<const MD extends ModelCfgs> {
           revMap: {},
           // Will be assigned later
           mainModelData: {},
+          localLamport: local.localLamport || 0,
+          lastSyncedLamport: null,
         },
-        { ...local, revMap: this._fakeFullRevMap() },
+        {
+          ...local,
+          revMap: this._fakeFullRevMap(),
+          // Ensure lastSyncedUpdate matches lastUpdate to prevent false conflicts
+          lastSyncedUpdate: local.lastUpdate,
+          lastSyncedLamport: local.localLamport || 0,
+        },
         null,
       );
     } catch (e) {
@@ -233,6 +270,8 @@ export class SyncService<const MD extends ModelCfgs> {
       lastSyncedUpdate: null,
       metaRev: null,
       revMap: {},
+      localLamport: 0,
+      lastSyncedLamport: null,
     };
 
     return await this.downloadToLocal(
@@ -276,9 +315,8 @@ export class SyncService<const MD extends ModelCfgs> {
 
     // If nothing to update or provider limited to single file sync
     if (
-      !isDownloadAll &&
-      ((toUpdate.length === 0 && toDelete.length === 0) ||
-        this._currentSyncProvider$.getOrError().isLimitedToSingleFileSync)
+      (!isDownloadAll && toUpdate.length === 0 && toDelete.length === 0) ||
+      this._currentSyncProvider$.getOrError().isLimitedToSingleFileSync
     ) {
       await this._modelSyncService.updateLocalMainModelsFromRemoteMetaFile(remote);
       pfLog(3, 'RevMap comparison', {
@@ -292,8 +330,12 @@ export class SyncService<const MD extends ModelCfgs> {
         lastUpdate: remote.lastUpdate,
         crossModelVersion: remote.crossModelVersion,
         revMap: remote.revMap,
+        // Lamport clock: take max of local and remote, then increment
+        localLamport: Math.max(local.localLamport || 0, remote.localLamport || 0) + 1,
         // local meta
         lastSyncedUpdate: remote.lastUpdate,
+        lastSyncedLamport:
+          Math.max(local.localLamport || 0, remote.localLamport || 0) + 1,
         metaRev: remoteRev,
       });
       return;
@@ -378,6 +420,10 @@ export class SyncService<const MD extends ModelCfgs> {
       metaRev: remoteRev,
       lastSyncedUpdate: remote.lastUpdate,
       lastUpdate: remote.lastUpdate,
+      // Don't increment localLamport during download - only take the max
+      // localLamport tracks LOCAL changes only
+      localLamport: Math.max(local.localLamport || 0, remote.localLamport || 0),
+      lastSyncedLamport: Math.max(local.localLamport || 0, remote.localLamport || 0),
       revMap: validateRevMap({
         ...local.revMap,
         ...realRemoteRevMap,
@@ -424,17 +470,36 @@ export class SyncService<const MD extends ModelCfgs> {
           lastUpdate: local.lastUpdate,
           crossModelVersion: local.crossModelVersion,
           mainModelData,
+          localLamport: local.localLamport || 0,
+          lastSyncedLamport: null,
           ...(syncProvider.isLimitedToSingleFileSync ? { isFullData: true } : {}),
         },
         lastRemoteRev,
       );
 
       // Update local after successful upload
+      pfLog(
+        2,
+        `${SyncService.L}.${this.uploadToRemote.name}(): Updating local metadata after upload`,
+        {
+          localLastUpdate: local.lastUpdate,
+          localLastSyncedUpdate: local.lastSyncedUpdate,
+          willSetLastSyncedUpdate: local.lastUpdate,
+          metaRevAfterUpdate,
+        },
+      );
+
       await this._metaFileSyncService.saveLocal({
         ...local,
         lastSyncedUpdate: local.lastUpdate,
+        lastSyncedLamport: local.localLamport || 0,
         metaRev: metaRevAfterUpdate,
       });
+
+      pfLog(
+        2,
+        `${SyncService.L}.${this.uploadToRemote.name}(): Local metadata updated successfully`,
+      );
       return;
     }
 
@@ -501,6 +566,8 @@ export class SyncService<const MD extends ModelCfgs> {
       crossModelVersion: local.crossModelVersion,
       mainModelData:
         await this._modelSyncService.getMainFileModelDataForUpload(completeData),
+      localLamport: local.localLamport || 0,
+      lastSyncedLamport: null,
     });
 
     // Update local after successful upload
@@ -508,9 +575,11 @@ export class SyncService<const MD extends ModelCfgs> {
       // leave as is basically
       lastUpdate: local.lastUpdate,
       crossModelVersion: local.crossModelVersion,
+      localLamport: local.localLamport || 0,
 
       // actual updates
       lastSyncedUpdate: local.lastUpdate,
+      lastSyncedLamport: local.localLamport || 0,
       revMap: validatedRevMap,
       metaRev: metaRevAfterUpload,
     });

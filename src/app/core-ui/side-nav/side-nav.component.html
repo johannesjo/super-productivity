@@ -192,6 +192,17 @@
     #menuEntry
     class="route-link"
     mat-menu-item
+    routerLink="search"
+    routerLinkActive="isActiveRoute"
+  >
+    <mat-icon>search</mat-icon>
+    <span class="text">{{ T.MH.SEARCH | translate }}</span>
+  </button>
+
+  <button
+    #menuEntry
+    class="route-link"
+    mat-menu-item
     routerLink="scheduled-list"
     routerLinkActive="isActiveRoute"
   >

@@ -28,11 +28,7 @@ import { TaskService } from '../../tasks/task.service';
 import { BoardsActions } from '../store/boards.actions';
 import { moveItemInArray } from '../../../util/move-item-in-array';
 import { unique } from '../../../util/unique';
-import {
-  moveToOtherProject,
-  unScheduleTask,
-  updateTask,
-} from '../../tasks/store/task.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { LocalDateStrPipe } from '../../../ui/pipes/local-date-str.pipe';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
@@ -226,7 +222,7 @@ export class BoardPanelComponent {
         .toPromise();
 
       this.store.dispatch(
-        moveToOtherProject({
+        TaskSharedActions.moveToOtherProject({
           task: taskWithSubTasks,
           targetProjectId: panelCfg.projectId,
         }),
@@ -234,7 +230,9 @@ export class BoardPanelComponent {
     }
 
     if (Object.keys(updates).length > 0) {
-      this.store.dispatch(updateTask({ task: { id: task.id, changes: updates } }));
+      this.store.dispatch(
+        TaskSharedActions.updateTask({ task: { id: task.id, changes: updates } }),
+      );
     }
 
     this.store.dispatch(
@@ -296,7 +294,7 @@ export class BoardPanelComponent {
         .toPromise();
 
       this.store.dispatch(
-        unScheduleTask({
+        TaskSharedActions.unscheduleTask({
           id: taskId,
           reminderId: task.reminderId,
           isSkipToast: false,

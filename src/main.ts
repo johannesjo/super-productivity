@@ -4,6 +4,7 @@ import {
   importProvidersFrom,
   LOCALE_ID,
   SecurityContext,
+  provideExperimentalZonelessChangeDetection,
 } from '@angular/core';
 
 import { environment } from './environments/environment';
@@ -48,6 +49,14 @@ import { StoreModule } from '@ngrx/store';
 import { reducers } from './app/root-store';
 import { undoTaskDeleteMetaReducer } from './app/root-store/meta/undo-task-delete.meta-reducer';
 import { actionLoggerReducer } from './app/root-store/meta/action-logger.reducer';
+import {
+  taskSharedCrudMetaReducer,
+  taskSharedLifecycleMetaReducer,
+  taskSharedSchedulingMetaReducer,
+  projectSharedMetaReducer,
+  tagSharedMetaReducer,
+  plannerSharedMetaReducer,
+} from './app/root-store/meta/task-shared-meta-reducers';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -60,6 +69,7 @@ import { ShortTime2Pipe } from './app/ui/pipes/short-time2.pipe';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { BackgroundTask } from '@capawesome/capacitor-background-task';
 import { promiseTimeout } from './app/util/promise-timeout';
+import { initializeMatMenuTouchFix } from './app/features/tasks/task-context-menu/mat-menu-touch-monkey-patch';
 
 if (environment.production || environment.stage) {
   enableProdMode();
@@ -97,7 +107,16 @@ bootstrapApplication(AppComponent, {
       HammerModule,
       // NOTE: both need to be present to use forFeature stores
       StoreModule.forRoot(reducers, {
-        metaReducers: [undoTaskDeleteMetaReducer, actionLoggerReducer],
+        metaReducers: [
+          undoTaskDeleteMetaReducer,
+          taskSharedCrudMetaReducer,
+          taskSharedLifecycleMetaReducer,
+          taskSharedSchedulingMetaReducer,
+          projectSharedMetaReducer,
+          tagSharedMetaReducer,
+          plannerSharedMetaReducer,
+          actionLoggerReducer,
+        ],
         ...(environment.production
           ? {
               runtimeChecks: {
@@ -113,14 +132,13 @@ bootstrapApplication(AppComponent, {
                 strictActionImmutability: true,
                 strictStateSerializability: true,
                 strictActionSerializability: true,
-                strictActionWithinNgZone: true,
                 strictActionTypeUniqueness: true,
               },
             }),
       }),
       EffectsModule.forRoot([]),
       !environment.production && !environment.stage
-        ? StoreDevtoolsModule.instrument({ connectInZone: true })
+        ? StoreDevtoolsModule.instrument()
         : [],
       ReactiveFormsModule,
       ServiceWorkerModule.register('ngsw-worker.js', {
@@ -158,16 +176,18 @@ bootstrapApplication(AppComponent, {
     ShortTime2Pipe,
     provideCharts(withDefaultRegisterables()),
     provideMarkdown(),
-    { provide: ErrorHandler, useClass: GlobalErrorHandler },
     {
       provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
       useValue: { appearance: 'fill', subscriptSizing: 'dynamic' },
     },
-    { provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig },
     provideAnimations(),
     provideRouter(APP_ROUTES, withHashLocation(), withPreloading(PreloadAllModules)),
+    provideExperimentalZonelessChangeDetection(),
   ],
 }).then(() => {
+  // Initialize touch fix for Material menus
+  initializeMatMenuTouchFix();
+
   // TODO make asset caching work for electron
   if (
     'serviceWorker' in navigator &&

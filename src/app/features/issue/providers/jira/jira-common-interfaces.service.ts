@@ -1,16 +1,16 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, of, timer } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
 import { first, map, switchMap, tap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { JiraApiService } from './jira-api.service';
 import { IssueProviderJira, SearchResultItem } from '../../issue.model';
-import { JiraIssue, JiraIssueReduced } from './jira-issue/jira-issue.model';
+import { JiraIssue, JiraIssueReduced } from './jira-issue.model';
 import { TaskAttachment } from '../../../tasks/task-attachment/task-attachment.model';
-import { mapJiraAttachmentToAttachment } from './jira-issue/jira-issue-map.util';
+import { mapJiraAttachmentToAttachment } from './jira-issue-map.util';
 import { JiraCfg } from './jira.model';
 import { isJiraEnabled } from './is-jira-enabled.util';
-import { JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL } from './jira.const';
+import { JIRA_POLL_INTERVAL } from './jira.const';
 import { IssueProviderService } from '../../issue-provider.service';
 import { assertTruthy } from '../../../../util/assert-truthy';
 
@@ -21,42 +21,54 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
   private readonly _jiraApiService = inject(JiraApiService);
   private readonly _issueProviderService = inject(IssueProviderService);
 
-  pollTimer$: Observable<number> = timer(JIRA_INITIAL_POLL_DELAY, JIRA_POLL_INTERVAL);
+  pollInterval: number = JIRA_POLL_INTERVAL;
 
   isEnabled(cfg: JiraCfg): boolean {
     return isJiraEnabled(cfg);
   }
 
-  testConnection$(cfg: JiraCfg): Observable<boolean> {
-    return this._jiraApiService.issuePicker$('', cfg).pipe(
-      map((res) => Array.isArray(res)),
-      first(),
-    );
+  testConnection(cfg: JiraCfg): Promise<boolean> {
+    return this._jiraApiService
+      .issuePicker$('', cfg)
+      .pipe(
+        map((res) => Array.isArray(res)),
+        first(),
+      )
+      .toPromise()
+      .then((result) => result ?? false);
   }
 
   // NOTE: we're using the issueKey instead of the real issueId
-  getById$(issueId: string | number, issueProviderId: string): Observable<JiraIssue> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      switchMap((jiraCfg) =>
-        this._jiraApiService.getIssueById$(assertTruthy(issueId).toString(), jiraCfg),
-      ),
-    );
+  getById(issueId: string | number, issueProviderId: string): Promise<JiraIssue> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        switchMap((jiraCfg) =>
+          this._jiraApiService.getIssueById$(assertTruthy(issueId).toString(), jiraCfg),
+        ),
+      )
+      .toPromise()
+      .then((result) => {
+        if (!result) {
+          throw new Error('Failed to get Jira issue');
+        }
+        return result;
+      });
   }
 
   // NOTE: this gives back issueKey instead of issueId
-  searchIssues$(
-    searchTerm: string,
-    issueProviderId: string,
-  ): Observable<SearchResultItem[]> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      switchMap((jiraCfg) =>
-        this.isEnabled(jiraCfg)
-          ? this._jiraApiService
-              .issuePicker$(searchTerm, jiraCfg)
-              .pipe(tap((v) => console.log('jira.issuePicker$', v)))
-          : of([]),
-      ),
-    );
+  searchIssues(searchTerm: string, issueProviderId: string): Promise<SearchResultItem[]> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        switchMap((jiraCfg) =>
+          this.isEnabled(jiraCfg)
+            ? this._jiraApiService
+                .issuePicker$(searchTerm, jiraCfg)
+                .pipe(tap((v) => console.log('jira.issuePicker$', v)))
+            : of([]),
+        ),
+      )
+      .toPromise()
+      .then((result) => result ?? []);
   }
 
   async getFreshDataForIssueTask(task: Task): Promise<{
@@ -130,15 +142,18 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
     };
   }
 
-  issueLink$(issueId: string | number, issueProviderId: string): Observable<string> {
+  issueLink(issueId: string | number, issueProviderId: string): Promise<string> {
     if (!issueId || !issueProviderId) {
       throw new Error('No issueId or no issueProviderId');
     }
     // const isIssueKey = isNaN(Number(issueId));
-    return this._getCfgOnce$(issueProviderId).pipe(
-      first(),
-      map((jiraCfg) => jiraCfg.host + '/browse/' + issueId),
-    );
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        first(),
+        map((jiraCfg) => jiraCfg.host + '/browse/' + issueId),
+      )
+      .toPromise()
+      .then((result) => result ?? '');
   }
 
   async getNewIssuesToAddToBacklog(

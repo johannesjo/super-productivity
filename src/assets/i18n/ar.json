@@ -31,10 +31,7 @@
     "RESTORE_FILE_BACKUP_ANDROID": "يبدو أنه لا توجد بيانات ، ولكن هناك نسخة احتياطية متاحة. هل تريد تحميلها؟",
     "RESTORE_STRAY_BACKUP": "قد يكون هناك خطأ ما أثناء المزامنة الأخيرة. هل تريد استعادة آخر نسخة احتياطية؟"
   },
-  "DATETIME_INPUT": {
-    "IN": "في {{time}}",
-    "TOMORROW": "غداً {{time}}"
-  },
+  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "لاحقا اليوم",
     "NEXT_WEEK": "الاسبوع القادم",
@@ -610,7 +607,9 @@
         "MARK_AS_CHECKED": "وضع علامة على التحديثات على أنها محددة",
         "STATUS": "الحالة",
         "SUMMARY": "ملخص",
-        "TYPE": "نوع"
+        "TYPE": "نوع",
+        "ATTACHMENTS": "المرفقات",
+        "UPLOAD_ATTACHMENT": "تحميل إلى المهمة"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "حزمة العمل",
@@ -621,7 +620,8 @@
         "POST_TIME_SUCCESS": "OpenProject: تم إنشاء إدخال الوقت بنجاح لـ {{issueTitle}}",
         "TRANSITION": "OpenProject: تعيين المشكلة \"{{issueKey}}\" إلى \"{{name}}\"",
         "TRANSITION_SUCCESS": "OpenProject: تعيين المشكلة {{issueKey}} إلى <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "تم تحميل الانتقالات. استخدم التحديدات أدناه لتعيينها"
+        "TRANSITIONS_LOADED": "تم تحميل الانتقالات. استخدم التحديدات أدناه لتعيينها",
+        "ERR_NO_FILE": "لم يتم تحديد ملف"
       }
     },
     "PLANNER": {
@@ -1329,7 +1329,22 @@
     "PRIVACY_EXPORT": "تصدير البيانات مجهولة المصدر (لإرسالها إلى contact@super-productivity.com للتصحيح)",
     "S_BACKUP_DOWNLOADED": "تم تنزيل النسخة الاحتياطية إلى مجلد مستندات android",
     "S_ERR_IMPORT_FAILED": "فشل استيراد البيانات",
-    "S_ERR_INVALID_DATA": "فشل الاستيراد: غير صالح JSON"
+    "S_ERR_INVALID_DATA": "فشل الاستيراد: غير صالح JSON",
+    "S_ERR_INVALID_URL": "فشل الاستيراد: تم توفير عنوان URL غير صالح",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "خطأ: تعذر فك تشفير معلمة URL للاستيراد. يرجى التأكد من تنسيقها بشكل صحيح.",
+    "S_ERR_NETWORK": "فشل الاستيراد: خطأ في الشبكة أثناء جلب البيانات من URL",
+    "IMPORT_FROM_URL": "الاستيراد من URL",
+    "URL_PLACEHOLDER": "أدخل عنوان URL للاستيراد منه",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "الاستيراد من URL",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "يرجى إدخال عنوان URL الكامل لملف نسخ Super Productivity الاحتياطي بتنسيق JSON الذي تريد استيراده.",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "الاستيراد من URL",
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "TITLE": "تأكيد استيراد البيانات من URL",
+      "INITIATED_MSG": "تم بدء استيراد البيانات تلقائيًا.",
+      "SOURCE_URL_DOMAIN": "النطاق المصدر",
+      "WARNING_TITLE": "تحذير",
+      "WARNING_MSG": "المتابعة ستؤدي إلى استبدال بيانات التطبيق الحالية والإعدادات بالمحتوى من عنوان URL المحدد. لا يمكن التراجع عن هذا الإجراء."
+    }
   },
   "G": {
     "ADD": "يضيف",

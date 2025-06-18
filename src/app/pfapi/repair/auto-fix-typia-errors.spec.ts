@@ -58,7 +58,7 @@ describe('autoFixTypiaErrors', () => {
     } as any);
   });
 
-  it('should do nothing for non expected values', () => {
+  it('should use defaults for globalConfig if no other value could be added', () => {
     const d = {
       globalConfig: {
         misc: {
@@ -70,7 +70,7 @@ describe('autoFixTypiaErrors', () => {
     expect(validateResult.success).toBe(false);
     const result = autoFixTypiaErrors(d, (validateResult as any).errors);
     expect(result.globalConfig.misc.startOfNextDay).not.toEqual(111);
-    expect(result.globalConfig.misc.startOfNextDay).toEqual(undefined as any);
+    expect(result.globalConfig.misc.startOfNextDay).toEqual(0 as any);
   });
 
   it('should sanitize null to undefined if model requests it', () => {
@@ -136,5 +136,45 @@ describe('autoFixTypiaErrors', () => {
 
     expect((result as any).task.entities['task-1'].timeEstimate).toEqual(0);
     expect((result as any).task.entities['task-1'].timeSpent).toEqual(0);
+  });
+
+  it('should fix null simpleCounter countOnDay values to 0', () => {
+    const mockData = createAppDataCompleteMock();
+    // Add simpleCounter data with null countOnDay value
+    (mockData as any).simpleCounter = {
+      ids: ['BpYFLFtlIGGgTNfZB-t2-'],
+      entities: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'BpYFLFtlIGGgTNfZB-t2-': {
+          id: 'BpYFLFtlIGGgTNfZB-t2-',
+          title: 'Test Counter',
+          countOnDay: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            '2025-06-15': 5,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            '2025-06-16': null, // This should be fixed to 0
+          },
+        },
+      },
+    };
+
+    const errors = [
+      {
+        path: "$input.simpleCounter.entities['BpYFLFtlIGGgTNfZB-t2-'].countOnDay['2025-06-16']",
+        expected: 'number',
+        value: null,
+      },
+    ];
+
+    const result = autoFixTypiaErrors(mockData, errors as any);
+
+    expect(
+      (result as any).simpleCounter.entities['BpYFLFtlIGGgTNfZB-t2-'].countOnDay[
+        '2025-06-16'
+      ],
+    ).toBe(0);
+    expect(warnSpy).toHaveBeenCalledWith(
+      "Fixed: simpleCounter.entities['BpYFLFtlIGGgTNfZB-t2-'].countOnDay['2025-06-16'] from null to 0 for simpleCounter",
+    );
   });
 });

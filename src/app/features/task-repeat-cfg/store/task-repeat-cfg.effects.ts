@@ -17,7 +17,7 @@ import {
   updateTaskRepeatCfg,
 } from './task-repeat-cfg.actions';
 import { Task, TaskCopy } from '../../tasks/task.model';
-import { updateTask } from '../../tasks/store/task.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { TaskService } from '../../tasks/task.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
 import { TaskRepeatCfgCopy } from '../task-repeat-cfg.model';
@@ -45,7 +45,7 @@ export class TaskRepeatCfgEffects {
       filter((tasks) => tasks && !!tasks.length),
       mergeMap((tasks: Task[]) =>
         tasks.map((task) =>
-          updateTask({
+          TaskSharedActions.updateTask({
             task: {
               id: task.id,
               changes: { repeatCfgId: undefined },

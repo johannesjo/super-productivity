@@ -120,7 +120,7 @@ export class CalendarIntegrationService {
     }
   }
 
-  testConnection$(cfg: CalendarProviderCfg): Observable<boolean> {
+  testConnection(cfg: CalendarProviderCfg): Promise<boolean> {
     //  simple http get request
     return this._http
       .get(cfg.icalUrl, {
@@ -135,7 +135,9 @@ export class CalendarIntegrationService {
           console.error(err);
           return of(false);
         }),
-      );
+      )
+      .toPromise()
+      .then((result) => result ?? false);
   }
 
   skipCalendarEvent(evId: string): void {

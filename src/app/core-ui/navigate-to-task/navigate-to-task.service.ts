@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { SearchQueryParams } from '../../features/search-bar/search-bar.model';
+import { SearchQueryParams } from '../../pages/search-page/search-page.model';
 import { first } from 'rxjs/operators';
 import { devError } from '../../util/dev-error';
 import { TaskService } from '../../features/tasks/task.service';

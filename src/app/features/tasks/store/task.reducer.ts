@@ -2,32 +2,21 @@ import {
   __updateMultipleTaskSimple,
   addReminderIdToTask,
   addSubTask,
-  addTask,
   convertToMainTask,
-  deleteTask,
-  deleteTasks,
   moveSubTask,
   moveSubTaskDown,
   moveSubTaskToBottom,
   moveSubTaskToTop,
   moveSubTaskUp,
-  moveToArchive_,
-  moveToOtherProject,
   removeReminderFromTask,
-  removeTagsForAllTasks,
   removeTimeSpent,
-  reScheduleTaskWithTime,
   restoreTask,
   roundTimeSpentForDay,
-  scheduleTaskWithTime,
   setCurrentTask,
   setSelectedTask,
   toggleStart,
   toggleTaskHideSubTasks,
-  unScheduleTask,
   unsetCurrentTask,
-  updateTask,
-  updateTaskTags,
   updateTaskUi,
 } from './task.actions';
 import { Task, TaskDetailTargetPanel, TaskState } from '../task.model';
@@ -39,11 +28,10 @@ import {
   reCalcTimesForParentIfParent,
   reCalcTimeSpentForParentIfParent,
   removeTaskFromParentSideEffects,
-  updateDoneOnForTask,
-  updateTimeEstimateForTask,
   updateTimeSpentForTask,
 } from './task.reducer.util';
 import { taskAdapter } from './task.adapter';
+export { taskAdapter };
 import { moveItemInList } from '../../work-context/store/work-context-meta.helper';
 import {
   arrayMoveLeft,
@@ -66,11 +54,9 @@ import { createReducer, on } from '@ngrx/store';
 import { MODEL_VERSION_KEY } from '../../../app.constants';
 import { MODEL_VERSION } from '../../../core/model-version';
 import { PlannerActions } from '../../planner/store/planner.actions';
-import { TODAY_TAG } from '../../tag/tag.const';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-import { deleteProject } from '../../project/store/project.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
-import { planTasksForToday, removeTasksFromTodayTag } from '../../tag/store/tag.actions';
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -106,7 +92,7 @@ export const taskReducer = createReducer<TaskState>(
       : state,
   ),
 
-  on(deleteProject, (state, { project, allTaskIds }) => {
+  on(TaskSharedActions.deleteProject, (state, { project, allTaskIds }) => {
     return taskAdapter.removeMany(allTaskIds, {
       ...state,
       currentTaskId:
@@ -196,67 +182,12 @@ export const taskReducer = createReducer<TaskState>(
 
   // Task Actions
   // ------------
-  on(addTask, (state, { task }) => {
-    const newTask = {
-      ...task,
-      timeSpent: calcTotalTimeSpent(task.timeSpentOnDay),
-    };
-    return taskAdapter.addOne(newTask, state);
-  }),
-
-  on(updateTask, (state, { task }) => {
-    let stateCopy = state;
-    const id = task.id as string;
-    const { timeSpentOnDay, timeEstimate } = task.changes;
-    stateCopy = timeSpentOnDay
-      ? updateTimeSpentForTask(id, timeSpentOnDay, stateCopy)
-      : stateCopy;
-    stateCopy = updateTimeEstimateForTask(task, timeEstimate, stateCopy);
-    stateCopy = updateDoneOnForTask(task, stateCopy);
-    return taskAdapter.updateOne(task, stateCopy);
-  }),
-
   on(__updateMultipleTaskSimple, (state, { taskUpdates }) => {
     return taskAdapter.updateMany(taskUpdates, state);
   }),
 
   on(updateTaskUi, (state, { task }) => {
     return taskAdapter.updateOne(task, state);
-  }),
-
-  on(updateTaskTags, (state, { task, newTagIds }) => {
-    if (newTagIds.includes(TODAY_TAG.id)) {
-      throw new Error('We dont do this anymore!');
-    }
-    return taskAdapter.updateOne(
-      {
-        id: task.id,
-        changes: {
-          tagIds: newTagIds,
-        },
-      },
-      state,
-    );
-  }),
-
-  on(removeTasksFromTodayTag, (state, { taskIds }) => {
-    return {
-      ...state,
-      // we do this to maintain the order of tasks when they are moved to overdue
-      ids: [...taskIds, ...state.ids.filter((id) => !taskIds.includes(id))],
-    };
-  }),
-
-  on(removeTagsForAllTasks, (state, { tagIdsToRemove }) => {
-    const updates: Update<Task>[] = state.ids.map((taskId) => ({
-      id: taskId,
-      changes: {
-        tagIds: getTaskById(taskId, state).tagIds.filter(
-          (tagId) => !tagIdsToRemove.includes(tagId),
-        ),
-      },
-    }));
-    return taskAdapter.updateMany(updates, state);
   }),
 
   // TODO simplify
@@ -300,23 +231,6 @@ export const taskReducer = createReducer<TaskState>(
       },
       state,
     );
-  }),
-
-  on(deleteTask, (state, { task }) => {
-    return deleteTaskHelper(state, task);
-  }),
-
-  on(deleteTasks, (state, { taskIds }) => {
-    const allIds = taskIds.reduce((acc: string[], id: string) => {
-      return [...acc, id, ...getTaskById(id, state).subTaskIds];
-    }, []);
-    const newState = taskAdapter.removeMany(allIds, state);
-    return state.currentTaskId && taskIds.includes(state.currentTaskId)
-      ? {
-          ...newState,
-          currentTaskId: null,
-        }
-      : newState;
   }),
 
   on(moveSubTask, (state, { taskId, srcTaskId, targetTaskId, newOrderedIds }) => {
@@ -503,16 +417,6 @@ export const taskReducer = createReducer<TaskState>(
     return state;
   }),
 
-  on(moveToOtherProject, (state, { targetProjectId, task }) => {
-    const updates: Update<Task>[] = [task.id, ...task.subTaskIds].map((id) => ({
-      id,
-      changes: {
-        projectId: targetProjectId,
-      },
-    }));
-    return taskAdapter.updateMany(updates, state);
-  }),
-
   on(roundTimeSpentForDay, (state, { day, taskIds, isRoundUp, roundTo, projectId }) => {
     const isLimitToProject: boolean = !!projectId || projectId === null;
 
@@ -556,8 +460,7 @@ export const taskReducer = createReducer<TaskState>(
 
   // TASK ARCHIVE STUFF
   // ------------------
-  // TODO fix
-  on(moveToArchive_, (state, { tasks }) => {
+  on(TaskSharedActions.moveToArchive, (state, { tasks }) => {
     let copyState = state;
     tasks.forEach((task) => {
       copyState = deleteTaskHelper(copyState, task);
@@ -688,15 +591,12 @@ export const taskReducer = createReducer<TaskState>(
     );
   }),
 
-  on(planTasksForToday, (state, { taskIds }) => {
-    const today = getWorklogStr();
-    const updates: Update<Task>[] = taskIds.map((taskId) => ({
-      id: taskId,
-      changes: {
-        dueDay: today,
-      },
-    }));
-    return taskAdapter.updateMany(updates, state);
+  on(TaskSharedActions.removeTasksFromTodayTag, (state, { taskIds }) => {
+    return {
+      ...state,
+      // we do this to maintain the order of tasks when they are moved to overdue
+      ids: [...taskIds, ...state.ids.filter((id) => !taskIds.includes(id))],
+    };
   }),
 
   // REMINDER STUFF
@@ -707,44 +607,6 @@ export const taskReducer = createReducer<TaskState>(
         id: taskId,
         changes: {
           reminderId,
-        },
-      },
-      state,
-    );
-  }),
-  on(scheduleTaskWithTime, (state, { task, dueWithTime }) => {
-    return taskAdapter.updateOne(
-      {
-        id: task.id,
-        changes: {
-          dueWithTime,
-          dueDay: undefined,
-        },
-      },
-      state,
-    );
-  }),
-
-  on(reScheduleTaskWithTime, (state, { task, dueWithTime }) => {
-    return taskAdapter.updateOne(
-      {
-        id: task.id,
-        changes: {
-          dueWithTime,
-          dueDay: undefined,
-        },
-      },
-      state,
-    );
-  }),
-
-  on(unScheduleTask, (state, { id }) => {
-    return taskAdapter.updateOne(
-      {
-        id,
-        changes: {
-          dueDay: undefined,
-          dueWithTime: undefined,
         },
       },
       state,

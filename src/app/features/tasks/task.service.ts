@@ -18,30 +18,18 @@ import {
 import { select, Store } from '@ngrx/store';
 import {
   addSubTask,
-  addTask,
-  convertToMainTask,
-  deleteTask,
-  deleteTasks,
   moveSubTask,
   moveSubTaskDown,
   moveSubTaskToBottom,
   moveSubTaskToTop,
   moveSubTaskUp,
-  moveToArchive_,
-  moveToOtherProject,
-  removeTagsForAllTasks,
   removeTimeSpent,
-  reScheduleTaskWithTime,
-  restoreTask,
   roundTimeSpentForDay,
-  scheduleTaskWithTime,
   setCurrentTask,
   setSelectedTask,
   toggleStart,
   toggleTaskHideSubTasks,
   unsetCurrentTask,
-  updateTask,
-  updateTaskTags,
   updateTaskUi,
 } from './store/task.actions';
 import { IssueProviderKey } from '../issue/issue.model';
@@ -95,9 +83,10 @@ import { TimeTrackingActions } from '../time-tracking/store/time-tracking.action
 import { ArchiveService } from '../time-tracking/archive.service';
 import { TaskArchiveService } from '../time-tracking/task-archive.service';
 import { TODAY_TAG } from '../tag/tag.const';
-import { planTasksForToday } from '../tag/store/tag.actions';
+import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { INBOX_PROJECT } from '../project/project.const';
+import { GlobalConfigService } from '../config/global-config.service';
 
 @Injectable({
   providedIn: 'root',
@@ -111,6 +100,7 @@ export class TaskService {
   private readonly _router = inject(Router);
   private readonly _archiveService = inject(ArchiveService);
   private readonly _taskArchiveService = inject(TaskArchiveService);
+  private readonly _globalConfigService = inject(GlobalConfigService);
 
   // Currently used in idle service TODO remove
   currentTaskId: string | null = null;
@@ -294,8 +284,10 @@ export class TaskService {
       workContextId,
     });
 
+    console.log(task, additional);
+
     this._store.dispatch(
-      addTask({
+      TaskSharedActions.addTask({
         task,
         workContextId,
         workContextType,
@@ -319,16 +311,16 @@ export class TaskService {
   }
 
   remove(task: TaskWithSubTasks): void {
-    this._store.dispatch(deleteTask({ task }));
+    this._store.dispatch(TaskSharedActions.deleteTask({ task }));
   }
 
   removeMultipleTasks(taskIds: string[]): void {
-    this._store.dispatch(deleteTasks({ taskIds }));
+    this._store.dispatch(TaskSharedActions.deleteTasks({ taskIds }));
   }
 
   update(id: string, changedFields: Partial<Task>): void {
     this._store.dispatch(
-      updateTask({
+      TaskSharedActions.updateTask({
         task: { id, changes: changedFields },
       }),
     );
@@ -336,16 +328,20 @@ export class TaskService {
 
   updateTags(task: Task, newTagIds: string[]): void {
     this._store.dispatch(
-      updateTaskTags({
-        task,
-        newTagIds: unique(newTagIds),
+      TaskSharedActions.updateTask({
+        task: {
+          id: task.id,
+          changes: {
+            tagIds: unique(newTagIds),
+          },
+        },
       }),
     );
   }
 
   removeTagsForAllTask(tagsToRemove: string[]): void {
     this._store.dispatch(
-      removeTagsForAllTasks({
+      TaskSharedActions.removeTagsForAllTasks({
         tagIdsToRemove: tagsToRemove,
       }),
     );
@@ -675,7 +671,9 @@ export class TaskService {
         );
       });
     }
-    this._store.dispatch(moveToArchive_({ tasks: tasks.filter((t) => !t.parentId) }));
+    this._store.dispatch(
+      TaskSharedActions.moveToArchive({ tasks: tasks.filter((t) => !t.parentId) }),
+    );
     this._archiveService.moveTasksToArchiveAndFlushArchiveIfDue(tasks);
   }
 
@@ -683,13 +681,15 @@ export class TaskService {
     if (!!task.parentId) {
       throw new Error('Wrong task model');
     }
-    this._store.dispatch(moveToOtherProject({ task, targetProjectId: projectId }));
+    this._store.dispatch(
+      TaskSharedActions.moveToOtherProject({ task, targetProjectId: projectId }),
+    );
   }
 
   moveToCurrentWorkContext(task: TaskWithSubTasks | Task): void {
     if (this._workContextService.activeWorkContextType === WorkContextType.TAG) {
       if (this._workContextService.activeWorkContextId === TODAY_TAG.id) {
-        this._store.dispatch(planTasksForToday({ taskIds: [task.id] }));
+        this._store.dispatch(TaskSharedActions.planTasksForToday({ taskIds: [task.id] }));
       } else {
         this.updateTags(task, [this._workContextService.activeWorkContextId as string]);
       }
@@ -706,7 +706,7 @@ export class TaskService {
   }
 
   restoreTask(task: Task, subTasks: Task[]): void {
-    this._store.dispatch(restoreTask({ task, subTasks }));
+    this._store.dispatch(TaskSharedActions.restoreTask({ task, subTasks }));
   }
 
   async roundTimeSpentForDayEverywhere({
@@ -759,7 +759,7 @@ export class TaskService {
     isMoveToBacklog: boolean = false,
   ): void {
     this._store.dispatch(
-      scheduleTaskWithTime({
+      TaskSharedActions.scheduleTaskWithTime({
         task,
         dueWithTime: due,
         remindAt: remindOptionToMilliseconds(due, remindCfg),
@@ -780,7 +780,7 @@ export class TaskService {
     isMoveToBacklog: boolean;
   }): void {
     this._store.dispatch(
-      reScheduleTaskWithTime({
+      TaskSharedActions.reScheduleTaskWithTime({
         task,
         dueWithTime: due,
         remindAt: remindOptionToMilliseconds(due, remindCfg),
@@ -859,7 +859,7 @@ export class TaskService {
   async convertToMainTask(task: Task): Promise<void> {
     const parent = await this.getByIdOnce$(task.parentId as string).toPromise();
     this._store.dispatch(
-      convertToMainTask({
+      TaskSharedActions.convertToMainTask({
         task,
         parentTagIds: parent.tagIds,
         isPlanForToday: this._workContextService.activeWorkContextId === TODAY_TAG.id,
@@ -1019,7 +1019,7 @@ export class TaskService {
     workContextType?: WorkContextType;
     workContextId?: string;
   }): Task {
-    return {
+    const d1 = {
       // NOTE needs to be created every time
       ...DEFAULT_TASK,
       created: Date.now(),
@@ -1028,7 +1028,10 @@ export class TaskService {
 
       ...(workContextType === WorkContextType.PROJECT
         ? { projectId: workContextId }
-        : { projectId: INBOX_PROJECT.id }),
+        : {
+            projectId:
+              this._globalConfigService.cfg?.misc.defaultProjectId || INBOX_PROJECT.id,
+          }),
 
       tagIds:
         workContextType === WorkContextType.TAG &&
@@ -1043,5 +1046,10 @@ export class TaskService {
 
       ...additional,
     };
+
+    if (d1.projectId === undefined) {
+      return { ...d1, projectId: INBOX_PROJECT.id };
+    }
+    return d1;
   }
 }

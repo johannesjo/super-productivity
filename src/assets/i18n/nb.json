@@ -31,10 +31,7 @@
     "RESTORE_FILE_BACKUP_ANDROID": "Det ser ut til å være INGEN DATA, men det er en sikkerhetskopi tilgjengelig. Vil du laste den inn?",
     "RESTORE_STRAY_BACKUP": "Under siste synkronisering kan det ha oppstått en feil. Vil du gjenopprette den siste sikkerhetskopien?"
   },
-  "DATETIME_INPUT": {
-    "IN": "om {{time}}",
-    "TOMORROW": "i morgen {{time}}"
-  },
+  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Senere i dag",
     "NEXT_WEEK": "Neste uke",
@@ -610,7 +607,9 @@
         "MARK_AS_CHECKED": "Merk oppdateringer som sjekket",
         "STATUS": "Status",
         "SUMMARY": "Sammendrag",
-        "TYPE": "Type"
+        "TYPE": "Type",
+        "ATTACHMENTS": "Vedlegg",
+        "UPLOAD_ATTACHMENT": "Last opp til oppgave"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "arbeidspakke",
@@ -621,7 +620,8 @@
         "POST_TIME_SUCCESS": "OpenProject: Vellykket opprettet tidsoppføring for {{issueTitle}}",
         "TRANSITION": "OpenProject: Sett problem \"{{issueKey}}\" til \"{{name}}\"",
         "TRANSITION_SUCCESS": "OpenProject: Sett problem {{issueKey}} til <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Overganger lastet inn. Bruk valgene nedenfor for å tilordne dem"
+        "TRANSITIONS_LOADED": "Overganger lastet inn. Bruk valgene nedenfor for å tilordne dem",
+        "ERR_NO_FILE": "Ingen fil valgt"
       }
     },
     "PLANNER": {
@@ -1329,7 +1329,22 @@
     "PRIVACY_EXPORT": "Eksporter anonymiserte data (for å sende til contact@super-productivity.com for feilsøking)",
     "S_BACKUP_DOWNLOADED": "Sikkerhetskopi lastet ned til Android-dokumentmappe",
     "S_ERR_IMPORT_FAILED": "Import av data mislyktes",
-    "S_ERR_INVALID_DATA": "Import mislyktes: Ugyldig JSON"
+    "S_ERR_INVALID_DATA": "Import mislyktes: Ugyldig JSON",
+    "S_ERR_INVALID_URL": "Import mislyktes: Ugyldig URL oppgitt",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "Feil: Kunne ikke dekode URL-parameteren for import. Vennligst sørg for at den er riktig formatert.",
+    "S_ERR_NETWORK": "Import mislyktes: Nettverksfeil ved henting av data fra URL",
+    "IMPORT_FROM_URL": "Importer fra URL",
+    "URL_PLACEHOLDER": "Skriv inn URL for import",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "Importer fra URL",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Vennligst skriv inn den fullstendige URL-en til Super Productivity sikkerhetskopi JSON-filen du ønsker å importere.",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "Importer fra URL",
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "TITLE": "Bekreft dataimport fra URL",
+      "INITIATED_MSG": "En automatisk dataimport er igangsatt.",
+      "SOURCE_URL_DOMAIN": "Kildedomene",
+      "WARNING_TITLE": "Advarsel",
+      "WARNING_MSG": "Å fortsette vil overskrive dine nåværende applikasjonsdata og konfigurasjon med innholdet fra den angitte URL-en. Denne handlingen kan ikke angres."
+    }
   },
   "G": {
     "ADD": "ADD",

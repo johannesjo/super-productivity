@@ -96,11 +96,15 @@ button .btn-spinner {
 button .btn-spinner:not(:required) {
   margin-left: -22px;
   opacity: 0;
-  transition: 0.4s margin ease-out, 0.2s opacity ease-out;
+  transition:
+    0.4s margin ease-out,
+    0.2s opacity ease-out;
 }
 
 button.is-loading .btn-spinner {
-  transition: 0.2s margin ease-in, 0.4s opacity ease-in;
+  transition:
+    0.2s margin ease-in,
+    0.4s opacity ease-in;
   margin-left: 5px;
   opacity: 1;
 }

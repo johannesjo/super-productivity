@@ -212,9 +212,6 @@ const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
     if ((syncProvider as any) === 'GoogleDrive') {
       syncProvider = null;
     }
-    if ((config.sync as any).googleDriveSync) {
-      delete (config.sync as any).googleDriveSync;
-    }
 
     if (!config.sync.localFileSync || !config.sync.webDav) {
       console.warn(

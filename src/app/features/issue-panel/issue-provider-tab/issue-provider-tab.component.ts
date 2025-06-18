@@ -36,7 +36,7 @@ import {
   tap,
 } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
-import { Observable, of } from 'rxjs';
+import { from, Observable, of } from 'rxjs';
 import { selectAllTaskIssueIdsForIssueProvider } from '../../tasks/store/task.selectors';
 import { DialogEditIssueProviderComponent } from '../../issue/dialog-edit-issue-provider/dialog-edit-issue-provider.component';
 import { MatDialog } from '@angular/material/dialog';
@@ -155,22 +155,26 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
           tap(() => this.isLoading.set(true)),
 
           switchMap(([searchText, issueProvider]: [string, IssueProvider]) =>
-            this._issueService
-              .searchIssues$(searchText, issueProvider.id, issueProvider.issueProviderKey)
-              .pipe(
-                catchError((e) => {
-                  this.error.set(getErrorTxt(e));
-                  this.isLoading.set(false);
-                  return of(true);
-                }),
-                map((trueOnErrorOrItems) => {
-                  if (trueOnErrorOrItems === true) {
-                    return [];
-                  }
-                  this.error.set(undefined);
-                  return trueOnErrorOrItems as SearchResultItem[];
-                }),
+            from(
+              this._issueService.searchIssues(
+                searchText,
+                issueProvider.id,
+                issueProvider.issueProviderKey,
               ),
+            ).pipe(
+              catchError((e) => {
+                this.error.set(getErrorTxt(e));
+                this.isLoading.set(false);
+                return of(true);
+              }),
+              map((trueOnErrorOrItems) => {
+                if (trueOnErrorOrItems === true) {
+                  return [];
+                }
+                this.error.set(undefined);
+                return trueOnErrorOrItems as SearchResultItem[];
+              }),
+            ),
           ),
 
           switchMap((items) =>

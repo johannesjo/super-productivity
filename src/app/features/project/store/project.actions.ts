@@ -43,11 +43,6 @@ export const updateProjectAdvancedCfg = createAction(
   }>(),
 );
 
-export const deleteProject = createAction(
-  '[Project] Delete Project',
-  props<{ project: Project; allTaskIds: string[] }>(),
-);
-
 // export const deleteProjects = createAction(
 //   '[Project] Delete Projects',
 //   props<{ ids: string[] }>(),

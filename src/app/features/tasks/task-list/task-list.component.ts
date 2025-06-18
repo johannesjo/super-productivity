@@ -24,7 +24,8 @@ import {
   moveProjectTaskToBacklogList,
   moveProjectTaskToRegularList,
 } from '../../project/store/project.actions';
-import { moveSubTask, updateTask } from '../store/task.actions';
+import { moveSubTask } from '../store/task.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { Store } from '@ngrx/store';
 import { moveItemBeforeItem } from '../../../util/move-item-before-item';
@@ -35,7 +36,7 @@ import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { TaskComponent } from '../task/task.component';
 import { AsyncPipe } from '@angular/common';
-import { planTasksForToday } from '../../tag/store/tag.actions';
+import { TaskViewCustomizerService } from '../../task-view-customizer/task-view-customizer.service';
 
 export type TaskListId = 'PARENT' | 'SUB';
 export type ListModelId = DropListModelSource | string;
@@ -67,6 +68,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
   private _workContextService = inject(WorkContextService);
   private _store = inject(Store);
   private _issueService = inject(IssueService);
+  private _taskViewCustomizerService = inject(TaskViewCustomizerService);
   dropListService = inject(DropListService);
 
   tasks = input<TaskWithSubTasks[]>([]);
@@ -180,13 +182,40 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
 
     const newIds =
       targetTask && targetTask.id !== draggedTask.id
-        ? [
-            ...moveItemBeforeItem(
-              targetListData.filteredTasks,
-              draggedTask,
-              targetTask as TaskWithSubTasks,
-            ),
-          ]
+        ? (() => {
+            const currentDraggedIndex = targetListData.filteredTasks.findIndex(
+              (t) => t.id === draggedTask.id,
+            );
+            const currentTargetIndex = targetListData.filteredTasks.findIndex(
+              (t) => t.id === targetTask.id,
+            );
+
+            // If dragging from a different list or new item, use target index
+            const isDraggingDown =
+              currentDraggedIndex !== -1 && currentDraggedIndex < currentTargetIndex;
+
+            if (isDraggingDown) {
+              // When dragging down, place AFTER the target item
+              const filtered = targetListData.filteredTasks.filter(
+                (t) => t.id !== draggedTask.id,
+              );
+              const targetIndexInFiltered = filtered.findIndex(
+                (t) => t.id === targetTask.id,
+              );
+              const result = [...filtered];
+              result.splice(targetIndexInFiltered + 1, 0, draggedTask);
+              return result;
+            } else {
+              // When dragging up or from another list, place BEFORE the target item
+              return [
+                ...moveItemBeforeItem(
+                  targetListData.filteredTasks,
+                  draggedTask,
+                  targetTask as TaskWithSubTasks,
+                ),
+              ];
+            }
+          })()
         : [
             ...targetListData.filteredTasks.filter((t) => t.id !== draggedTask.id),
             draggedTask,
@@ -204,6 +233,8 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       targetListData.listModelId,
       newIds.map((p) => p.id),
     );
+
+    this._taskViewCustomizerService.setSort('default');
   }
 
   async _addFromIssuePanel(
@@ -250,7 +281,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     } else if (src === 'OVERDUE' && (target === 'UNDONE' || target === 'DONE')) {
       const workContextType = this._workContextService
         .activeWorkContextType as WorkContextType;
-      this._store.dispatch(planTasksForToday({ taskIds: [taskId] }));
+      this._store.dispatch(TaskSharedActions.planTasksForToday({ taskIds: [taskId] }));
       this._store.dispatch(
         moveTaskInTodayList({
           taskId,
@@ -263,7 +294,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       );
       if (target === 'DONE') {
         this._store.dispatch(
-          updateTask({
+          TaskSharedActions.updateTask({
             task: { id: taskId, changes: { isDone: true } },
           }),
         );

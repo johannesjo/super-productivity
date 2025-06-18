@@ -1,15 +1,13 @@
 import {
   hideAddTaskBar,
   hideNotesAndAddTaskPanel,
-  hideSearchBar,
   hideSideNav,
   showAddTaskBar,
-  showSearchBar,
   toggleAddTaskBar,
   toggleIssuePanel,
-  toggleSearchBar,
   toggleShowNotes,
   toggleSideNav,
+  toggleTaskViewCustomizerPanel,
 } from './layout.actions';
 import {
   Action,
@@ -25,18 +23,18 @@ export interface LayoutState {
   isShowAddTaskBar: boolean;
   isShowNotes: boolean;
   isShowIssuePanel: boolean;
-  isShowSearchBar: boolean;
   isShowSideNav: boolean;
   isShowCelebrate: boolean;
+  isShowTaskViewCustomizerPanel: boolean;
 }
 
 const _initialLayoutState: LayoutState = {
   isShowAddTaskBar: false,
   isShowSideNav: false,
-  isShowSearchBar: false,
   isShowNotes: false,
   isShowIssuePanel: false,
   isShowCelebrate: false,
+  isShowTaskViewCustomizerPanel: false,
 };
 
 export const selectLayoutFeatureState =
@@ -57,14 +55,14 @@ export const selectIsShowNotes = createSelector(
   (state) => state.isShowNotes,
 );
 
+export const selectIsShowTaskViewCustomizerPanel = createSelector(
+  selectLayoutFeatureState,
+  (state) => state.isShowTaskViewCustomizerPanel,
+);
+
 export const selectIsShowIssuePanel = createSelector(
   selectLayoutFeatureState,
   (state) => state.isShowIssuePanel,
-);
-
-export const selectIsShowSearchBar = createSelector(
-  selectLayoutFeatureState,
-  (state) => state.isShowSearchBar,
 );
 
 export const selectIsShowCelebrate = createSelector(
@@ -84,15 +82,6 @@ const _reducer = createReducer<LayoutState>(
     isShowAddTaskBar: !state.isShowAddTaskBar,
   })),
 
-  on(showSearchBar, (state) => ({ ...state, isShowSearchBar: true })),
-
-  on(hideSearchBar, (state) => ({ ...state, isShowSearchBar: false })),
-
-  on(toggleSearchBar, (state) => ({
-    ...state,
-    isShowSearchBar: !state.isShowSearchBar,
-  })),
-
   on(hideSideNav, (state) => ({ ...state, isShowSideNav: false })),
 
   on(toggleSideNav, (state) => ({ ...state, isShowSideNav: !state.isShowSideNav })),
@@ -103,10 +92,18 @@ const _reducer = createReducer<LayoutState>(
     isShowIssuePanel: false,
   })),
 
+  on(toggleTaskViewCustomizerPanel, (state) => ({
+    ...state,
+    isShowTaskViewCustomizerPanel: !state.isShowTaskViewCustomizerPanel,
+    isShowIssuePanel: false,
+    isShowNotes: false,
+  })),
+
   on(hideNotesAndAddTaskPanel, (state) => ({
     ...state,
     isShowNotes: false,
     isShowIssuePanel: false,
+    isShowTaskViewCustomizerPanel: false,
   })),
 
   on(toggleIssuePanel, (state) => ({

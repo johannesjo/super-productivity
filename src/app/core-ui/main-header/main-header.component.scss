@@ -93,6 +93,11 @@ button {
   cursor: pointer;
 }
 
+button.isActive2 {
+  background-color: $c-accent;
+  transition: background-color $transition-standard;
+}
+
 .action-nav {
   margin-right: 0px;
   margin-left: auto;

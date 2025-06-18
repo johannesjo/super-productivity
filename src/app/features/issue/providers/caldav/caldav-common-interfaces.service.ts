@@ -1,15 +1,15 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, of, timer } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { IssueProviderCaldav, SearchResultItem } from '../../issue.model';
-import { CaldavIssue, CaldavIssueReduced } from './caldav-issue/caldav-issue.model';
+import { CaldavIssue, CaldavIssueReduced } from './caldav-issue.model';
 import { CaldavClientService } from './caldav-client.service';
 import { CaldavCfg } from './caldav.model';
 import { concatMap, first, map, switchMap } from 'rxjs/operators';
 import { truncate } from '../../../../util/truncate';
 import { isCaldavEnabled } from './is-caldav-enabled.util';
-import { CALDAV_INITIAL_POLL_DELAY, CALDAV_POLL_INTERVAL } from './caldav.const';
+import { CALDAV_POLL_INTERVAL } from './caldav.const';
 import { IssueProviderService } from '../../issue-provider.service';
 
 @Injectable({
@@ -23,17 +23,21 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
     return truncate(title);
   }
 
-  pollTimer$: Observable<number> = timer(CALDAV_INITIAL_POLL_DELAY, CALDAV_POLL_INTERVAL);
+  pollInterval: number = CALDAV_POLL_INTERVAL;
 
   isEnabled(cfg: CaldavCfg): boolean {
     return isCaldavEnabled(cfg);
   }
 
-  testConnection$(cfg: CaldavCfg): Observable<boolean> {
-    return this._caldavClientService.searchOpenTasks$('', cfg).pipe(
-      map((res) => Array.isArray(res)),
-      first(),
-    );
+  testConnection(cfg: CaldavCfg): Promise<boolean> {
+    return this._caldavClientService
+      .searchOpenTasks$('', cfg)
+      .pipe(
+        map((res) => Array.isArray(res)),
+        first(),
+      )
+      .toPromise()
+      .then((result) => result ?? false);
   }
 
   getAddTaskData(issueData: CaldavIssueReduced): Partial<Task> & { title: string } {
@@ -43,14 +47,20 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
     };
   }
 
-  getById$(id: string | number, issueProviderId: string): Observable<CaldavIssue> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      concatMap((caldavCfg) => this._caldavClientService.getById$(id, caldavCfg)),
-    );
+  getById(id: string | number, issueProviderId: string): Promise<CaldavIssue> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(concatMap((caldavCfg) => this._caldavClientService.getById$(id, caldavCfg)))
+      .toPromise()
+      .then((result) => {
+        if (!result) {
+          throw new Error('Failed to get CalDAV issue');
+        }
+        return result;
+      });
   }
 
-  issueLink$(issueId: string | number, issueProviderId: string): Observable<string> {
-    return of('');
+  issueLink(issueId: string | number, issueProviderId: string): Promise<string> {
+    return Promise.resolve('');
   }
 
   async getFreshDataForIssueTask(task: Task): Promise<{
@@ -125,17 +135,17 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
       });
   }
 
-  searchIssues$(
-    searchTerm: string,
-    issueProviderId: string,
-  ): Observable<SearchResultItem[]> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      switchMap((caldavCfg) =>
-        this.isEnabled(caldavCfg)
-          ? this._caldavClientService.searchOpenTasks$(searchTerm, caldavCfg)
-          : of([]),
-      ),
-    );
+  searchIssues(searchTerm: string, issueProviderId: string): Promise<SearchResultItem[]> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        switchMap((caldavCfg) =>
+          this.isEnabled(caldavCfg)
+            ? this._caldavClientService.searchOpenTasks$(searchTerm, caldavCfg)
+            : of([]),
+        ),
+      )
+      .toPromise()
+      .then((result) => result ?? []);
   }
 
   async getNewIssuesToAddToBacklog(

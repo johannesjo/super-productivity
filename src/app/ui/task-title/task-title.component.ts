@@ -10,6 +10,7 @@ import {
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { T } from 'src/app/t.const';
 import { TranslateModule } from '@ngx-translate/core';
+import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 
 @Component({
   selector: 'task-title',
@@ -85,7 +86,8 @@ export class TaskTitleComponent {
   }
 
   onTextInput(ev: Event): void {
-    if ((ev as InputEvent)?.data?.slice(-1) === '\n') {
+    // TODO not really clear if this is needed. was apparently added to prevent the android web view enter key from submitting
+    if (IS_ANDROID_WEB_VIEW && (ev as InputEvent)?.data?.slice(-1) === '\n') {
       console.log('android enter key press');
       this._forceBlur();
       ev.preventDefault();
@@ -112,6 +114,6 @@ export class TaskTitleComponent {
   }
 
   private _cleanValue(value: string = ''): string {
-    return value?.replace(/\r\n|\n|\r/g, '').trim();
+    return value?.replace(/\n|\r/g, '').trim();
   }
 }

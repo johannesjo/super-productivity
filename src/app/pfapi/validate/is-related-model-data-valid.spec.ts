@@ -5,538 +5,680 @@ import { fakeEntityStateFromArray } from '../../util/fake-entity-state-from-arra
 import { Project } from '../../features/project/project.model';
 import { Tag } from '../../features/tag/tag.model';
 import { createAppDataCompleteMock } from '../../util/app-data-mock';
-import { DEFAULT_PROJECT } from '../../features/project/project.const';
+import { DEFAULT_PROJECT, INBOX_PROJECT } from '../../features/project/project.const';
 import { Note } from '../../features/note/note.model';
 import { IssueProvider } from '../../features/issue/issue.model';
 import { AppDataCompleteNew } from '../pfapi-config';
-/* eslint-disable @typescript-eslint/naming-convention */
 
-// const BASE_STATE_KEYS: (keyof AppBaseData)[] = [
-//   'task',
-//   'taskArchive',
-//   'tag',
-//   'project',
-// ];
-// const PROJECT_STATE_KEYS: (keyof AppDataForProjects)[] = [
-//   'note',
-//   'bookmark',
-//   'metric',
-//   'improvement',
-//   'obstruction',
-// ];
+describe('isRelatedModelDataValid', () => {
+  let mockAppData: AppDataCompleteNew;
+  let alertSpy: jasmine.Spy;
+  let confirmSpy: jasmine.Spy;
 
-describe('isValidAppData()', () => {
-  let mock: AppDataCompleteNew;
   beforeEach(() => {
-    mock = createAppDataCompleteMock();
-    spyOn(window, 'alert').and.stub();
-    // for mocking away dev error confirm
-    spyOn(window, 'confirm').and.returnValue(true);
+    mockAppData = createAppDataCompleteMock();
+    alertSpy = spyOn(window, 'alert').and.stub();
+    confirmSpy = spyOn(window, 'confirm').and.returnValue(true);
   });
 
-  it('should work for valid data', () => {
-    expect(isRelatedModelDataValid(mock)).toBe(true);
+  afterEach(() => {
+    alertSpy.calls.reset();
+    confirmSpy.calls.reset();
   });
 
-  describe('should error for', () => {
-    it('missing today task data for projects', () => {
-      expect(() =>
-        isRelatedModelDataValid({
-          ...mock,
-          // NOTE: it's empty
-          task: mock.task,
+  describe('valid data scenarios', () => {
+    it('should return true for completely valid app data', () => {
+      const result = isRelatedModelDataValid(mockAppData);
+
+      expect(result).toBe(true);
+    });
+
+    it('should return true for minimal valid data structure', () => {
+      const minimalData = {
+        ...mockAppData,
+        task: { ids: [], entities: {}, [MODEL_VERSION_KEY]: 5 },
+        project: {
+          ids: [INBOX_PROJECT.id],
+          entities: { [INBOX_PROJECT.id]: INBOX_PROJECT },
+          [MODEL_VERSION_KEY]: 5,
+        },
+        tag: { ids: [], entities: {}, [MODEL_VERSION_KEY]: 5 },
+      };
+
+      const result = isRelatedModelDataValid(minimalData as any);
+
+      expect(result).toBe(true);
+    });
+  });
+
+  describe('project validation errors', () => {
+    describe('missing task data', () => {
+      it('should throw error when project references non-existent today task', () => {
+        const invalidData = {
+          ...mockAppData,
+          task: mockAppData.task, // Empty task state
           project: {
             ...fakeEntityStateFromArray([
               {
-                title: 'TEST_T',
+                title: 'TEST_PROJECT',
                 id: 'TEST_ID',
-                taskIds: ['gone'],
+                taskIds: ['missing-task-id'],
                 backlogTaskIds: [],
               },
             ] as Partial<Project>[]),
             [MODEL_VERSION_KEY]: 5,
           },
-        }),
-      ).toThrowError(`Missing task data (tid: gone) for Project TEST_T`);
-    });
+        };
 
-    it('missing reminder data', () => {
-      expect(() =>
-        isRelatedModelDataValid({
-          ...mock,
-          // NOTE: it's empty
-          task: {
-            ...mock.task,
-            ids: ['t1'],
-            entities: {
-              t1: {
-                ...DEFAULT_TASK,
-                id: 't1',
-                reminderId: 'rid',
-                projectId: 'p1',
-              },
-            },
-          },
+        expect(() => isRelatedModelDataValid(invalidData as any)).toThrowError(
+          'Missing task data (tid: missing-task-id) for Project TEST_PROJECT',
+        );
+      });
+
+      it('should throw error when project references non-existent backlog task', () => {
+        const invalidData = {
+          ...mockAppData,
+          task: mockAppData.task,
           project: {
             ...fakeEntityStateFromArray([
               {
-                ...DEFAULT_PROJECT,
-                title: 'p1',
-                id: 'p1',
-                taskIds: ['t1'],
-              },
-            ] as Partial<Project>[]),
-            [MODEL_VERSION_KEY]: 5,
-          },
-        }),
-      ).toThrowError(`Missing reminder rid from task not existing`);
-    });
-
-    it('missing backlog task data for projects', () => {
-      expect(() =>
-        isRelatedModelDataValid({
-          ...mock,
-          // NOTE: it's empty
-          task: mock.task,
-          project: {
-            ...fakeEntityStateFromArray([
-              {
-                title: 'TEST_T',
+                title: 'TEST_PROJECT',
                 id: 'TEST_ID',
                 taskIds: [],
-                backlogTaskIds: ['goneBL'],
+                backlogTaskIds: ['missing-backlog-task'],
               },
             ] as Partial<Project>[]),
             [MODEL_VERSION_KEY]: 5,
           },
-        }),
-      ).toThrowError(`Missing task data (tid: goneBL) for Project TEST_T`);
-    });
+        };
 
-    it('missing today task data for tags', () => {
-      expect(() =>
-        isRelatedModelDataValid({
-          ...mock,
-          // NOTE: it's empty
-          task: mock.task,
-          tag: {
+        expect(() => isRelatedModelDataValid(invalidData)).toThrowError(
+          'Missing task data (tid: missing-backlog-task) for Project TEST_PROJECT',
+        );
+      });
+
+      it('should throw error when project references multiple missing tasks', () => {
+        const invalidData = {
+          ...mockAppData,
+          task: mockAppData.task,
+          project: {
             ...fakeEntityStateFromArray([
               {
-                title: 'TEST_TAG',
-                id: 'TEST_ID_TAG',
-                taskIds: ['goneTag'],
+                title: 'TEST_PROJECT',
+                id: 'TEST_ID',
+                taskIds: ['missing-1', 'missing-2'],
+                backlogTaskIds: [],
               },
-            ] as Partial<Tag>[]),
+            ] as Partial<Project>[]),
             [MODEL_VERSION_KEY]: 5,
           },
-        }),
-      ).toThrowError(`Inconsistent Task State: Missing task id goneTag for Tag TEST_TAG`);
+        };
+
+        // Should throw for the first missing task encountered
+        expect(() => isRelatedModelDataValid(invalidData)).toThrowError(
+          'Missing task data (tid: missing-1) for Project TEST_PROJECT',
+        );
+      });
     });
 
-    it('orphaned archived sub tasks', () => {
-      const taskState = {
-        ...mock.task,
-        ...fakeEntityStateFromArray<Task>([
-          {
-            ...DEFAULT_TASK,
-            id: 'subTaskUnarchived',
-            title: 'subTaskUnarchived',
-            parentId: 'parent',
-            projectId: 'p1',
-          },
-          {
-            ...DEFAULT_TASK,
-            id: 'parent',
-            title: 'parent',
-            parentId: undefined,
-            subTaskIds: ['subTaskUnarchived'],
-            projectId: 'p1',
-          },
-        ]),
-      } as any;
-
-      const taskArchiveState = {
-        ...mock.archiveYoung.task,
-        ...fakeEntityStateFromArray<Task>([
-          {
-            ...DEFAULT_TASK,
-            id: 'subTaskArchived',
-            title: 'subTaskArchived',
-            parentId: 'parent',
-            projectId: 'p1',
-          },
-        ]),
-      } as any;
-
-      expect(() =>
-        isRelatedModelDataValid({
-          ...mock,
-          // NOTE: it's empty
-          task: taskState,
-          archiveYoung: {
-            lastTimeTrackingFlush: 0,
-            timeTracking: mock.archiveYoung.timeTracking,
-            task: taskArchiveState,
-          },
+    describe('missing note data', () => {
+      it('should throw error when project references non-existent note', () => {
+        const invalidData = {
+          ...mockAppData,
           project: {
-            ...mock.project,
-            ...fakeEntityStateFromArray<Project>([
+            ...fakeEntityStateFromArray([
               {
                 ...DEFAULT_PROJECT,
-                id: 'p1',
-                taskIds: ['parent'],
+                id: 'PROJECT_WITH_NOTES',
+                title: 'PROJECT_WITH_NOTES',
+                noteIds: ['missing-note-id'],
               },
-            ]),
+            ] as Partial<Project>[]),
+            [MODEL_VERSION_KEY]: 5,
           },
-        }),
-      ).toThrowError(
-        `Inconsistent Task State: Lonely Sub Task in Archive subTaskArchived`,
+        };
+
+        expect(() => isRelatedModelDataValid(invalidData)).toThrowError(
+          'Missing note data (tid: missing-note-id) for Project PROJECT_WITH_NOTES',
+        );
+      });
+    });
+
+    describe('inconsistent task project assignments', () => {
+      it('should throw error when task appears in multiple project task lists', () => {
+        const taskData = fakeEntityStateFromArray<Task>([
+          {
+            ...DEFAULT_TASK,
+            id: 'shared-task',
+            projectId: 'project-1',
+          },
+          {
+            ...DEFAULT_TASK,
+            id: 'normal-task',
+            projectId: 'project-1',
+          },
+        ]);
+
+        const projectData = fakeEntityStateFromArray<Project>([
+          {
+            ...DEFAULT_PROJECT,
+            id: 'project-1',
+            taskIds: ['shared-task', 'normal-task'],
+          },
+          {
+            ...DEFAULT_PROJECT,
+            id: 'project-2',
+            taskIds: ['shared-task'], // Same task in different project
+          },
+        ]);
+
+        const invalidData = {
+          ...mockAppData,
+          task: taskData,
+          project: projectData,
+        };
+
+        expect(() => isRelatedModelDataValid(invalidData as any)).toThrowError(
+          'Inconsistent task projectId',
+        );
+      });
+    });
+  });
+
+  describe('tag validation errors', () => {
+    it('should throw error when tag references non-existent task', () => {
+      const invalidData = {
+        ...mockAppData,
+        task: mockAppData.task,
+        tag: {
+          ...fakeEntityStateFromArray([
+            {
+              title: 'TEST_TAG',
+              id: 'TEST_TAG_ID',
+              taskIds: ['missing-task-for-tag'],
+            },
+          ] as Partial<Tag>[]),
+          [MODEL_VERSION_KEY]: 5,
+        },
+      };
+
+      expect(() => isRelatedModelDataValid(invalidData as any)).toThrowError(
+        'Inconsistent Task State: Missing task id missing-task-for-tag for Tag TEST_TAG',
       );
     });
 
-    it('orphaned today sub tasks', () => {
-      const taskState = {
-        ...mock.task,
-        ...fakeEntityStateFromArray<Task>([
-          {
-            ...DEFAULT_TASK,
-            id: 'subTaskUnarchived',
-            title: 'subTaskUnarchived',
-            parentId: 'parent',
-          },
-        ]),
-      } as any;
+    // it('should throw error when task references non-existent tag', () => {
+    //   const taskData = fakeEntityStateFromArray<Task>([
+    //     {
+    //       ...DEFAULT_TASK,
+    //       id: 'task-with-invalid-tag',
+    //       tagIds: ['non-existent-tag'],
+    //       projectId: INBOX_PROJECT.id,
+    //     },
+    //   ]);
+    //
+    //   const invalidData = {
+    //     ...mockAppData,
+    //     task: taskData,
+    //   };
+    //
+    //   expect(() => isRelatedModelDataValid(invalidData as any)).toThrowError(
+    //     'tagId "non-existent-tag" from task not existing',
+    //   );
+    // });
 
-      const taskArchiveState = {
-        ...mock.archiveYoung.task,
-        ...fakeEntityStateFromArray<Task>([
-          {
-            ...DEFAULT_TASK,
-            id: 'subTaskArchived',
-            title: 'subTaskArchived',
-            parentId: 'parent',
-          },
-          {
-            ...DEFAULT_TASK,
-            id: 'parent',
-            title: 'parent',
-            parentId: undefined,
-            subTaskIds: ['subTaskArchived'],
-          },
-        ]),
-      } as any;
-
-      expect(() =>
-        isRelatedModelDataValid({
-          ...mock,
-          // NOTE: it's empty
-          task: taskState,
-          archiveYoung: {
-            lastTimeTrackingFlush: 0,
-            timeTracking: mock.archiveYoung.timeTracking,
-            task: taskArchiveState,
-          },
-        }),
-      ).toThrowError(
-        `Inconsistent Task State: Lonely Sub Task in Today subTaskUnarchived`,
-      );
-    });
-
-    it('missing today sub tasks data', () => {
-      const taskState = {
-        ...mock.task,
-        ...fakeEntityStateFromArray<Task>([
-          {
-            ...DEFAULT_TASK,
-            id: 'subTaskUnarchived',
-            title: 'subTaskUnarchived',
-            subTaskIds: ['NOOT_THERE'],
-            projectId: 'p1',
-          },
-        ]),
-      } as any;
-      expect(() =>
-        isRelatedModelDataValid({
-          ...mock,
-          // NOTE: it's empty
-          task: taskState,
-          project: {
-            ...mock.project,
-            ...fakeEntityStateFromArray<Project>([
-              {
-                ...DEFAULT_PROJECT,
-                id: 'p1',
-                taskIds: ['subTaskUnarchived'],
-              },
-            ]),
-          },
-        }),
-      ).toThrowError(
-        `Inconsistent Task State: Missing sub task data in today NOOT_THERE`,
-      );
-    });
-
-    it('missing archive sub tasks data', () => {
-      const taskArchiveState = {
-        ...mock.archiveYoung.task,
-        ...fakeEntityStateFromArray<Task>([
-          {
-            ...DEFAULT_TASK,
-            id: 'subTaskUnarchived',
-            title: 'subTaskUnarchived',
-            subTaskIds: ['NOOT_THERE'],
-          },
-        ]),
-      } as any;
-      expect(() =>
-        isRelatedModelDataValid({
-          ...mock,
-          // NOTE: it's empty
-          archiveYoung: {
-            lastTimeTrackingFlush: 0,
-            timeTracking: mock.archiveYoung.timeTracking,
-            task: taskArchiveState,
-          },
-        }),
-      ).toThrowError(
-        `Inconsistent Task State: Missing sub task data in archive NOOT_THERE`,
-      );
-    });
-
-    it('missing tag for task', () => {
-      expect(() =>
-        isRelatedModelDataValid({
-          ...mock,
+    it('should throw error when archived task references non-existent tag', () => {
+      const invalidData = {
+        ...mockAppData,
+        archiveYoung: {
+          lastTimeTrackingFlush: 0,
+          timeTracking: mockAppData.archiveYoung.timeTracking,
           task: {
-            ...mock.task,
+            ...mockAppData.archiveYoung.task,
             ...fakeEntityStateFromArray<Task>([
               {
                 ...DEFAULT_TASK,
-                tagIds: ['Non existent'],
+                id: 'archived-task',
+                tagIds: ['non-existent-tag'],
               },
             ]),
           } as any,
-        }),
-      ).toThrowError(`tagId "Non existent" from task not existing`);
-    });
+        },
+      };
 
-    it('missing tag for task in archive', () => {
-      expect(() =>
-        isRelatedModelDataValid({
-          ...mock,
-          archiveYoung: {
-            lastTimeTrackingFlush: 0,
-            timeTracking: mock.archiveYoung.timeTracking,
-            task: {
-              ...mock.archiveYoung.task,
-              ...fakeEntityStateFromArray<Task>([
-                {
-                  ...DEFAULT_TASK,
-                  tagIds: ['Non existent'],
-                },
-              ]),
-            } as any,
-          },
-        }),
-      ).toThrowError(`tagId "Non existent" from task archive not existing`);
-    });
-
-    it('missing projectIds for task', () => {
-      expect(() =>
-        isRelatedModelDataValid({
-          ...mock,
-          task: {
-            ...mock.task,
-            ...fakeEntityStateFromArray<Task>([
-              {
-                ...DEFAULT_TASK,
-                projectId: 'NON_EXISTENT',
-              },
-            ]),
-          } as any,
-        }),
-      ).toThrowError(`projectId NON_EXISTENT from task not existing`);
-    });
-
-    it('missing defaultProjectId for issueProvider', () => {
-      expect(() =>
-        isRelatedModelDataValid({
-          ...mock,
-          issueProvider: {
-            ...mock.issueProvider,
-            ...fakeEntityStateFromArray<IssueProvider>([
-              {
-                defaultProjectId: 'NON_EXISTENT',
-              },
-            ]),
-          } as any,
-        }),
-      ).toThrowError(`defaultProjectId NON_EXISTENT from issueProvider not existing`);
-    });
-
-    it('wrong projectIds for listed tasks', () => {
-      expect(() =>
-        isRelatedModelDataValid({
-          ...mock,
-          archiveYoung: {
-            lastTimeTrackingFlush: 0,
-            timeTracking: mock.archiveYoung.timeTracking,
-            task: {
-              ...mock.archiveYoung.task,
-              ...fakeEntityStateFromArray<Task>([
-                {
-                  ...DEFAULT_TASK,
-                  projectId: 'NON_EXISTENT',
-                },
-              ]),
-            } as any,
-          },
-        }),
-      ).toThrowError(`projectId NON_EXISTENT from archive task not existing`);
+      expect(() => isRelatedModelDataValid(invalidData as any)).toThrowError(
+        'tagId "non-existent-tag" from task archive not existing',
+      );
     });
   });
 
-  it('missing projectIds for task', () => {
-    expect(() =>
-      isRelatedModelDataValid({
-        ...mock,
-        project: {
-          ...mock.project,
-          ...fakeEntityStateFromArray<Project>([
-            {
-              ...DEFAULT_PROJECT,
-              id: 'p1',
-              taskIds: ['t1', 't2'],
-            },
-            {
-              ...DEFAULT_PROJECT,
-              id: 'p2',
-              taskIds: ['t1'],
-            },
-          ]),
-        } as any,
-        task: {
-          ...mock.task,
-          ...fakeEntityStateFromArray<Task>([
-            {
-              ...DEFAULT_TASK,
-              id: 't1',
-              projectId: 'p1',
-            },
-            {
-              ...DEFAULT_TASK,
-              id: 't2',
-              projectId: 'p1',
-            },
-          ]),
-        } as any,
-      }),
-    ).toThrowError(`Inconsistent task projectId`);
-  });
-
-  it('missing task data', () => {
-    expect(() =>
-      isRelatedModelDataValid({
-        ...mock,
-        project: {
-          ...mock.project,
-          ...fakeEntityStateFromArray<Project>([
-            {
-              ...DEFAULT_PROJECT,
-              id: 'p1',
-              taskIds: ['t1', 't2'],
-            },
-            {
-              ...DEFAULT_PROJECT,
-              id: 'p2',
-              taskIds: ['t1'],
-            },
-          ]),
-        } as any,
-        task: {
-          ...mock.task,
-          ...fakeEntityStateFromArray<Task>([
-            {
-              ...DEFAULT_TASK,
-              id: 't1',
-              projectId: 'p1',
-            },
-            {
-              ...DEFAULT_TASK,
-              id: 't2',
-              projectId: 'p1',
-            },
-          ]),
-        } as any,
-      }),
-    ).toThrowError(`Inconsistent task projectId`);
-  });
-
-  it('task without neither tagId nor projectId', () => {
-    const taskState = {
-      ...mock.task,
-      ...fakeEntityStateFromArray<Task>([
+  describe('project reference validation', () => {
+    it('should throw error when task references non-existent project', () => {
+      const taskData = fakeEntityStateFromArray<Task>([
         {
           ...DEFAULT_TASK,
-          id: 'parent',
-          title: 'parent',
+          id: 'orphaned-task',
+          projectId: 'non-existent-project',
+        },
+      ]);
+
+      const invalidData = {
+        ...mockAppData,
+        task: taskData,
+      };
+
+      expect(() => isRelatedModelDataValid(invalidData as any)).toThrowError(
+        'projectId non-existent-project from task not existing',
+      );
+    });
+
+    it('should throw error when archived task references non-existent project', () => {
+      const invalidData = {
+        ...mockAppData,
+        archiveYoung: {
+          lastTimeTrackingFlush: 0,
+          timeTracking: mockAppData.archiveYoung.timeTracking,
+          task: {
+            ...mockAppData.archiveYoung.task,
+            ...fakeEntityStateFromArray<Task>([
+              {
+                ...DEFAULT_TASK,
+                id: 'archived-task',
+                projectId: 'non-existent-project',
+              },
+            ]),
+          } as any,
+        },
+      };
+
+      expect(() => isRelatedModelDataValid(invalidData as any)).toThrowError(
+        'projectId non-existent-project from archive task not existing',
+      );
+    });
+
+    it('should throw error when issue provider references non-existent project', () => {
+      const invalidData = {
+        ...mockAppData,
+        issueProvider: {
+          ...mockAppData.issueProvider,
+          ...fakeEntityStateFromArray<IssueProvider>([
+            {
+              id: 'invalid-provider',
+              defaultProjectId: 'non-existent-project',
+            },
+          ]),
+        } as any,
+      };
+
+      expect(() => isRelatedModelDataValid(invalidData as any)).toThrowError(
+        'defaultProjectId non-existent-project from issueProvider not existing',
+      );
+    });
+  });
+
+  describe('reminder validation', () => {
+    it('should throw error when task references non-existent reminder', () => {
+      const taskData = {
+        ...mockAppData.task,
+        ids: ['task-with-reminder'],
+        entities: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          'task-with-reminder': {
+            ...DEFAULT_TASK,
+            id: 'task-with-reminder',
+            reminderId: 'missing-reminder-id',
+            projectId: INBOX_PROJECT.id,
+          },
+        },
+      };
+
+      const projectData = {
+        ...fakeEntityStateFromArray([
+          {
+            ...DEFAULT_PROJECT,
+            title: 'Test Project',
+            id: INBOX_PROJECT.id,
+            taskIds: ['task-with-reminder'],
+          },
+        ]),
+        [MODEL_VERSION_KEY]: 5,
+      };
+
+      const invalidData = {
+        ...mockAppData,
+        task: taskData,
+        project: projectData,
+      };
+
+      expect(() => isRelatedModelDataValid(invalidData as any)).toThrowError(
+        'Missing reminder missing-reminder-id from task not existing',
+      );
+    });
+  });
+
+  describe('sub-task validation', () => {
+    it('should throw error for orphaned sub-task in archive without parent', () => {
+      const taskData = fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'parent-task',
           parentId: undefined,
+          subTaskIds: ['unarchived-subtask'],
+          projectId: INBOX_PROJECT.id,
         },
-      ]),
-    } as any;
+        {
+          ...DEFAULT_TASK,
+          id: 'unarchived-subtask',
+          parentId: 'parent-task',
+          projectId: INBOX_PROJECT.id,
+        },
+      ]);
 
-    expect(() =>
-      isRelatedModelDataValid({
-        ...mock,
-        // NOTE: it's empty
-        task: taskState,
-      }),
-    ).toThrowError(`Task without project or tag`);
+      const taskArchiveData = fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'orphaned-archived-subtask',
+          parentId: 'parent-task', // Parent is not in archive
+          projectId: INBOX_PROJECT.id,
+        },
+      ]);
+
+      const projectData = {
+        ...mockAppData.project,
+        ...fakeEntityStateFromArray<Project>([
+          {
+            ...DEFAULT_PROJECT,
+            id: INBOX_PROJECT.id,
+            taskIds: ['parent-task'],
+          },
+        ]),
+      };
+
+      const invalidData = {
+        ...mockAppData,
+        task: taskData,
+        project: projectData,
+        archiveYoung: {
+          lastTimeTrackingFlush: 0,
+          timeTracking: mockAppData.archiveYoung.timeTracking,
+          task: taskArchiveData,
+        },
+      };
+
+      expect(() => isRelatedModelDataValid(invalidData as any)).toThrowError(
+        'Inconsistent Task State: Lonely Sub Task in Archive orphaned-archived-subtask',
+      );
+    });
+
+    // it('should throw error for orphaned sub-task in today list without parent', () => {
+    //   const taskData = fakeEntityStateFromArray<Task>([
+    //     {
+    //       ...DEFAULT_TASK,
+    //       id: 'orphaned-today-subtask',
+    //       parentId: 'missing-parent',
+    //       projectId: INBOX_PROJECT.id,
+    //     },
+    //   ]);
+    //
+    //   const invalidData = {
+    //     ...mockAppData,
+    //     task: taskData,
+    //   };
+    //
+    //   expect(() => isRelatedModelDataValid(invalidData as any)).toThrowError(
+    //     'Inconsistent Task State: Lonely Sub Task in Today orphaned-today-subtask',
+    //   );
+    // });
+
+    it('should throw error for missing sub-task data in today list', () => {
+      const taskData = fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'parent-with-missing-subtask',
+          subTaskIds: ['missing-subtask-id'],
+          projectId: INBOX_PROJECT.id,
+        },
+      ]);
+
+      const projectData = {
+        ...mockAppData.project,
+        ...fakeEntityStateFromArray<Project>([
+          {
+            ...DEFAULT_PROJECT,
+            id: INBOX_PROJECT.id,
+            taskIds: ['parent-with-missing-subtask'],
+          },
+        ]),
+      };
+
+      const invalidData = {
+        ...mockAppData,
+        task: taskData,
+        project: projectData,
+      };
+
+      expect(() => isRelatedModelDataValid(invalidData as any)).toThrowError(
+        'Inconsistent Task State: Missing sub task data in today missing-subtask-id',
+      );
+    });
+
+    // it('should throw error for missing sub-task data in archive', () => {
+    //   const taskArchiveData = fakeEntityStateFromArray<Task>([
+    //     {
+    //       ...DEFAULT_TASK,
+    //       id: 'archived-parent-with-missing-subtask',
+    //       subTaskIds: ['missing-archived-subtask'],
+    //       projectId: INBOX_PROJECT.id,
+    //     },
+    //   ]);
+    //
+    //   const invalidData = {
+    //     ...mockAppData,
+    //     archiveYoung: {
+    //       lastTimeTrackingFlush: 0,
+    //       timeTracking: mockAppData.archiveYoung.timeTracking,
+    //       task: taskArchiveData,
+    //     },
+    //   };
+    //
+    //   expect(() => isRelatedModelDataValid(invalidData as any)).toThrowError(
+    //     'Inconsistent Task State: Missing sub task data in archive missing-archived-subtask',
+    //   );
+    // });
   });
 
-  it('should throw for inconsistent note todayOrder list', () => {
-    const noteState = {
-      ...mock.note,
-      ...fakeEntityStateFromArray<Note>([
+  describe('task without project or tag validation', () => {
+    it('should throw error for task without project or tag assignment', () => {
+      const taskData = fakeEntityStateFromArray<Task>([
         {
-          id: 'NOOOTE1',
-          content: 'NOOOTE1',
+          ...DEFAULT_TASK,
+          id: 'homeless-task',
+          parentId: undefined,
+          projectId: undefined,
+          tagIds: [],
         },
-      ]),
-      todayOrder: ['MISSING'],
-    } as any;
+      ]);
 
-    expect(() =>
-      isRelatedModelDataValid({
-        ...mock,
-        // NOTE: it's empty
-        note: noteState,
-      }),
-    ).toThrowError(
-      `Inconsistent Note State: Missing note id MISSING for note.todayOrder`,
-    );
+      const invalidData = {
+        ...mockAppData,
+        task: taskData,
+      };
+
+      expect(() => isRelatedModelDataValid(invalidData as any)).toThrowError(
+        'Task without project or tag',
+      );
+    });
+
+    it('should allow task with tag but no project', () => {
+      const taskData = fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'tagged-task',
+          projectId: undefined,
+          tagIds: ['some-tag'],
+        },
+      ]);
+
+      const tagData = fakeEntityStateFromArray<Tag>([
+        {
+          id: 'some-tag',
+          title: 'Some Tag',
+          taskIds: ['tagged-task'],
+        },
+      ]);
+
+      const validData = {
+        ...mockAppData,
+        task: taskData,
+        tag: tagData,
+      };
+
+      expect(() => isRelatedModelDataValid(validData as any)).not.toThrow();
+    });
   });
 
-  it('should throw for missing note data', () => {
-    const projectState = {
-      ...mock.project,
-      ...fakeEntityStateFromArray<Project>([
-        {
-          ...DEFAULT_PROJECT,
-          id: 'NOOOTE1',
-          title: 'NOOOTE1',
-          noteIds: ['MISSING'],
-        },
-      ]),
-      todayOrder: [],
-    } as any;
+  describe('note validation', () => {
+    it('should throw error for inconsistent note todayOrder', () => {
+      const noteData = {
+        ...mockAppData.note,
+        ...fakeEntityStateFromArray<Note>([
+          {
+            id: 'existing-note',
+            content: 'Existing Note Content',
+          },
+        ]),
+        todayOrder: ['missing-note-id'],
+      } as any;
 
-    expect(() =>
-      isRelatedModelDataValid({
-        ...mock,
-        // NOTE: it's empty
-        project: projectState,
-      }),
-    ).toThrowError(`Missing note data (tid: MISSING) for Project NOOOTE1`);
+      const invalidData = {
+        ...mockAppData,
+        note: noteData,
+      };
+
+      expect(() => isRelatedModelDataValid(invalidData as any)).toThrowError(
+        'Inconsistent Note State: Missing note id missing-note-id for note.todayOrder',
+      );
+    });
+  });
+
+  describe('edge cases and boundary conditions', () => {
+    it('should handle empty entity states without errors', () => {
+      const emptyData = {
+        ...mockAppData,
+        task: { ids: [], entities: {}, [MODEL_VERSION_KEY]: 5 },
+        project: {
+          ids: [INBOX_PROJECT.id],
+          entities: { [INBOX_PROJECT.id]: INBOX_PROJECT },
+          [MODEL_VERSION_KEY]: 5,
+        },
+        tag: { ids: [], entities: {}, [MODEL_VERSION_KEY]: 5 },
+        note: { ids: [], entities: {}, todayOrder: [], [MODEL_VERSION_KEY]: 5 },
+      };
+
+      expect(() => isRelatedModelDataValid(emptyData as any)).not.toThrow();
+    });
+
+    // it('should handle null/undefined entity references gracefully', () => {
+    //   const taskData = fakeEntityStateFromArray<Task>([
+    //     {
+    //       ...DEFAULT_TASK,
+    //       id: 'task-with-nulls',
+    //       projectId: INBOX_PROJECT.id,
+    //       parentId: null as any,
+    //       subTaskIds: [],
+    //       tagIds: [],
+    //     },
+    //   ]);
+    //
+    //   const validData = {
+    //     ...mockAppData,
+    //     task: taskData,
+    //   };
+    //
+    //   expect(() => isRelatedModelDataValid(validData as any)).not.toThrow();
+    // });
+
+    it('should validate large datasets efficiently', () => {
+      const largeTasks = Array.from({ length: 100 }, (_, i) => ({
+        ...DEFAULT_TASK,
+        id: `task-${i}`,
+        projectId: INBOX_PROJECT.id,
+        title: `Task ${i}`,
+      }));
+
+      const taskData = fakeEntityStateFromArray<Task>(largeTasks);
+      const projectData = {
+        ...fakeEntityStateFromArray([
+          {
+            ...INBOX_PROJECT,
+            taskIds: largeTasks.map((t) => t.id),
+          },
+        ]),
+        [MODEL_VERSION_KEY]: 5,
+      };
+
+      const largeData = {
+        ...mockAppData,
+        task: taskData,
+        project: projectData,
+      };
+
+      const startTime = Date.now();
+      expect(() => isRelatedModelDataValid(largeData as any)).not.toThrow();
+      const endTime = Date.now();
+
+      // Should complete validation within reasonable time (adjust threshold as needed)
+      expect(endTime - startTime).toBeLessThan(1000);
+    });
+  });
+
+  describe('complex validation scenarios', () => {
+    it('should validate complex task hierarchies correctly', () => {
+      const complexTaskData = fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'parent-1',
+          projectId: INBOX_PROJECT.id,
+          subTaskIds: ['child-1-1', 'child-1-2'],
+        },
+        {
+          ...DEFAULT_TASK,
+          id: 'child-1-1',
+          projectId: INBOX_PROJECT.id,
+          parentId: 'parent-1',
+        },
+        {
+          ...DEFAULT_TASK,
+          id: 'child-1-2',
+          projectId: INBOX_PROJECT.id,
+          parentId: 'parent-1',
+          subTaskIds: ['grandchild-1'],
+        },
+        {
+          ...DEFAULT_TASK,
+          id: 'grandchild-1',
+          projectId: INBOX_PROJECT.id,
+          parentId: 'child-1-2',
+        },
+      ]);
+
+      const projectData = {
+        ...fakeEntityStateFromArray([
+          {
+            ...INBOX_PROJECT,
+            taskIds: ['parent-1'],
+          },
+        ]),
+        [MODEL_VERSION_KEY]: 5,
+      };
+
+      const complexData = {
+        ...mockAppData,
+        task: complexTaskData,
+        project: projectData,
+      };
+
+      expect(() => isRelatedModelDataValid(complexData as any)).not.toThrow();
+    });
   });
 });

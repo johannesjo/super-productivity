@@ -31,10 +31,7 @@
     "RESTORE_FILE_BACKUP_ANDROID": "Parece não haver NENHUM DADO, mas há um backup disponível. Você quer carregá-lo?",
     "RESTORE_STRAY_BACKUP": "Durante a última sincronização, pode ter ocorrido algum erro. Você quer restaurar o último backup?"
   },
-  "DATETIME_INPUT": {
-    "IN": "em {{time}}",
-    "TOMORROW": "amanhã {{time}}"
-  },
+  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Hoje mais tarde",
     "NEXT_WEEK": "Semana que vem",
@@ -610,7 +607,9 @@
         "MARK_AS_CHECKED": "Marcar atualizações como marcadas",
         "STATUS": "Status",
         "SUMMARY": "Resumo",
-        "TYPE": "Tipo"
+        "TYPE": "Tipo",
+        "ATTACHMENTS": "Anexos",
+        "UPLOAD_ATTACHMENT": "Carregar para a tarefa"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "Pacote de trabalho",
@@ -621,7 +620,8 @@
         "POST_TIME_SUCCESS": "OpenProject: entrada de hora criada com sucesso para {{issueTitle}}",
         "TRANSITION": "OpenProject: Atualizar tarefa \"{{issueKey}}\" para \"{{name}}\"",
         "TRANSITION_SUCCESS": "OpenProject: Tarefa {{issueKey}} atualizada para <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Transições carregadas. Utilize os campos abaixo para associá-las"
+        "TRANSITIONS_LOADED": "Transições carregadas. Utilize os campos abaixo para associá-las",
+        "ERR_NO_FILE": "Nenhum ficheiro selecionado"
       }
     },
     "PLANNER": {
@@ -1152,6 +1152,45 @@
         "TOGGLE_DONE": "Desmarcar/Marcar como concluído"
       }
     },
+    "TASK_VIEW": {
+      "CUSTOMIZER": {
+        "TITLE": "Personalizar Visualização de Tarefas",
+        "SORT_BY": "Ordenar por",
+        "GROUP_BY": "Agrupar por",
+        "FILTER_BY": "Filtrar por",
+        "SORT_DEFAULT": "Padrão",
+        "SORT_NAME": "Nome",
+        "SORT_SCHEDULED_DATE": "Data Agendada",
+        "SORT_CREATION_DATE": "Data de Criação",
+        "ESTIMATED_TIME": "Tempo Estimado",
+        "TIME_SPENT": "Tempo Gasto",
+        "GROUP_DEFAULT": "Sem Grupo",
+        "GROUP_TAG": "Tag",
+        "GROUP_PROJECT": "Projeto",
+        "GROUP_SCHEDULED_DATE": "Data Agendada",
+        "FILTER_DEFAULT": "Sem Filtro",
+        "FILTER_TAG": "Tag",
+        "FILTER_PROJECT": "Projeto",
+        "FILTER_SCHEDULED_DATE": "Data Agendada",
+        "FILTER_ESTIMATED_TIME": "Tempo Estimado",
+        "FILTER_TIME_SPENT": "Tempo Gasto",
+        "SCHEDULED_DEFAULT": "Qualquer Data",
+        "SCHEDULED_TODAY": "Hoje",
+        "SCHEDULED_TOMORROW": "Amanhã",
+        "SCHEDULED_THIS_WEEK": "Esta Semana",
+        "SCHEDULED_NEXT_WEEK": "Próxima Semana",
+        "SCHEDULED_THIS_MONTH": "Este Mês",
+        "SCHEDULED_NEXT_MONTH": "Próximo Mês",
+        "TIME_DEFAULT": "Qualquer Duração",
+        "TIME_10MIN": "> 10 Minutos",
+        "TIME_30MIN": "> 30 Minutos",
+        "TIME_1HOUR": "> 1 Hora",
+        "TIME_2HOUR": "> 2 Horas",
+        "RESET_ALL": "Redefinir Tudo",
+        "ENTER_TAG": "Insira a tag",
+        "ENTER_PROJECT": "Insira o projeto"
+      }
+    },
     "TASK_REPEAT": {
       "ADD_INFO_PANEL": {
         "CUSTOM": "Configurar repetição personalizada",
@@ -1329,7 +1368,22 @@
     "PRIVACY_EXPORT": "Exportar dados anonimizados (para enviar para contact@super-productivity.com para depuração)",
     "S_BACKUP_DOWNLOADED": "Backup baixado para a pasta de documentos do Android",
     "S_ERR_IMPORT_FAILED": "Falha na importação de dados",
-    "S_ERR_INVALID_DATA": "Falha na importação: JSON inválido"
+    "S_ERR_INVALID_DATA": "Falha na importação: JSON inválido",
+    "S_ERR_INVALID_URL": "Falha na importação: URL fornecido inválido",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "Erro: Não foi possível decodificar o parâmetro URL para importação. Certifique-se de que está corretamente formatado.",
+    "S_ERR_NETWORK": "Falha na importação: Erro de rede ao buscar dados do URL",
+    "IMPORT_FROM_URL": "Importar de URL",
+    "URL_PLACEHOLDER": "Insira o URL para importar",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "Importar de URL",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Por favor, insira o URL completo do arquivo de backup JSON do Super Productivity que deseja importar.",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "Importar de URL",
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "TITLE": "Confirmar importação de dados do URL",
+      "INITIATED_MSG": "Uma importação automática de dados foi iniciada.",
+      "SOURCE_URL_DOMAIN": "Domínio de origem",
+      "WARNING_TITLE": "Aviso",
+      "WARNING_MSG": "Prosseguir irá sobrescrever seus dados e configurações atuais do aplicativo com o conteúdo do URL especificado. Esta ação não pode ser desfeita."
+    }
   },
   "G": {
     "ADD": "Adicionar",

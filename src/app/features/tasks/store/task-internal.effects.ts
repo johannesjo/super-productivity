@@ -2,14 +2,11 @@ import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   addSubTask,
-  addTask,
-  deleteTask,
-  moveToArchive_,
   setCurrentTask,
   toggleStart,
   unsetCurrentTask,
-  updateTask,
 } from './task.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { select, Store } from '@ngrx/store';
 import { filter, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 import { selectTaskFeatureState } from './task.selectors';
@@ -33,7 +30,7 @@ export class TaskInternalEffects {
 
   onAllSubTasksDone$: any = createEffect(() =>
     this._actions$.pipe(
-      ofType(updateTask),
+      ofType(TaskSharedActions.updateTask),
       withLatestFrom(
         this._store$.pipe(select(selectMiscConfig)),
         this._store$.pipe(select(selectTaskFeatureState)),
@@ -58,7 +55,7 @@ export class TaskInternalEffects {
         return undoneSubTasks.length === 0;
       }),
       map(([action, miscCfg, state]) =>
-        updateTask({
+        TaskSharedActions.updateTask({
           task: {
             id: (state.entities[action.task.id] as Task).parentId as string,
             changes: { isDone: true },
@@ -70,7 +67,7 @@ export class TaskInternalEffects {
 
   setDefaultEstimateIfNonGiven$: any = createEffect(() =>
     this._actions$.pipe(
-      ofType(addTask, addSubTask),
+      ofType(TaskSharedActions.addTask, addSubTask),
       filter(({ task }) => !task.timeEstimate),
       withLatestFrom(this._store$.pipe(select(selectConfigFeatureState))),
       map(([action, cfg]) => ({
@@ -82,7 +79,7 @@ export class TaskInternalEffects {
       })),
       filter(({ timeEstimate }) => timeEstimate > 0),
       map(({ task, timeEstimate }) =>
-        updateTask({
+        TaskSharedActions.updateTask({
           task: {
             id: task.id,
             changes: {
@@ -98,9 +95,9 @@ export class TaskInternalEffects {
     this._actions$.pipe(
       ofType(
         toggleStart,
-        updateTask,
-        deleteTask,
-        moveToArchive_,
+        TaskSharedActions.updateTask,
+        TaskSharedActions.deleteTask,
+        TaskSharedActions.moveToArchive,
 
         moveProjectTaskToBacklogList.type,
         moveProjectTaskToBacklogListAuto.type,
@@ -128,7 +125,7 @@ export class TaskInternalEffects {
             break;
           }
 
-          case updateTask.type: {
+          case TaskSharedActions.updateTask.type: {
             // TODO fix typing here
             const a = action as any;
             const { isDone } = a.task.changes;
@@ -152,7 +149,7 @@ export class TaskInternalEffects {
 
           // QUICK FIX FOR THE ISSUE
           // TODO better solution
-          case deleteTask.type: {
+          case TaskSharedActions.deleteTask.type: {
             nextId = state.currentTaskId;
             break;
           }
@@ -161,7 +158,7 @@ export class TaskInternalEffects {
 
           // NOTE: currently no solution for this, but we're probably fine, as the current task
           // gets unset every time we go to the finish day view
-          // case moveToArchive_: {}
+          // case TaskSharedActions.moveToArchive: {}
         }
 
         if (nextId === 'NO_UPDATE') {

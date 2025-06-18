@@ -3,8 +3,8 @@
  * You can add your own extra polyfills to this file.
  *
  * This file is divided into 2 sections:
- *   1. Browser polyfills. These are applied before loading ZoneJS and are sorted by browsers.
- *   2. Application imports. Files imported after ZoneJS that should be loaded before your main
+ *   1. Browser polyfills. These are applied before loading Angular and are sorted by browsers.
+ *   2. Application imports. Files imported after Angular that should be loaded before your main
  *      file.
  *
  * The current setup is for so-called "evergreen" browsers; the last versions of browsers that
@@ -37,29 +37,11 @@ import 'core-js/es/set';*/
 // Used for reflect-metadata in JIT. If you use AOT (and only Angular decorators), you can remove.
 // import 'core-js/es/reflect';
 /***************************************************************************************************
- * Zone JS is required by default for Angular itself.
+ * Zone JS is no longer required as we're using zoneless change detection.
  */
-import 'zone.js'; // Included with Angular CLI.
 
 /** IE10 and IE11 requires the following for the Reflect API. */
 // import 'core-js/es/reflect';
-
-/**
- * By default, zone.js will patch all possible macroTask and DomEvents
- * user can disable parts of macroTask/DomEvents patch by setting following flags
- */
-
-// (window as any).__Zone_disable_requestAnimationFrame = true; // disable patch requestAnimationFrame
-// (window as any).__Zone_disable_on_property = true; // disable patch onProperty such as onclick
-// (window as any).__zone_symbol__BLACK_LISTED_EVENTS = ['scroll', 'mousemove']; // disable patch specified eventNames
-
-/*
- * in IE/Edge developer tools, the addEventListener will also be wrapped by zone.js
- * with the following flag, it will bypass `zone.js` patch for IE/Edge
- */
-// (window as any).__Zone_enable_cross_context_check = true;
-
-// import 'zone.js/mix';
 
 /***************************************************************************************************
  * APPLICATION IMPORTS

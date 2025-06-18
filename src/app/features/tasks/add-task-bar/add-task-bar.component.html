@@ -21,6 +21,7 @@
 
     <input
       #inputEl
+      class="e2e-add-task-input"
       [tabindex]="tabindex()"
       (blur)="onBlur($event)"
       [formControl]="taskSuggestionsCtrl"
@@ -161,7 +162,6 @@
     #autoEl="matAutocomplete"
     (optionActivated)="onOptionActivated($event?.option?.value)"
     (optionSelected)="addTask()"
-    [displayWith]="displayWith"
   >
     @for (
       item of filteredIssueSuggestions$ | async;

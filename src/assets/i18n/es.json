@@ -31,10 +31,7 @@
     "RESTORE_FILE_BACKUP_ANDROID": "Parece que NO HAY DATOS, pero hay una copia de seguridad disponible. ¿Quieres cargarla?",
     "RESTORE_STRAY_BACKUP": "Durante la última sincronización puede que haya habido algún error. ¿Quieres restaurar la última copia de seguridad?"
   },
-  "DATETIME_INPUT": {
-    "IN": "en {{time}}",
-    "TOMORROW": "mañana {{time}}"
-  },
+  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Mas tarde, hoy",
     "NEXT_WEEK": "La próxima semana",
@@ -610,7 +607,9 @@
         "MARK_AS_CHECKED": "Marcar actualizaciones como verificadas",
         "STATUS": "Estado",
         "SUMMARY": "Resumen",
-        "TYPE": "Tipo"
+        "TYPE": "Tipo",
+        "ATTACHMENTS": "Archivos adjuntos",
+        "UPLOAD_ATTACHMENT": "Subir a la tarea"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "Paquete de trabajo",
@@ -621,7 +620,8 @@
         "POST_TIME_SUCCESS": "OpenProject: entrada de tiempo creada correctamente para {{issueTitle}}",
         "TRANSITION": "OpenProject: Establecer el problema \"{{issueKey}}\" en \"{{name}}\"",
         "TRANSITION_SUCCESS": "OpenProject: Establecer el problema {{issueKey}} en <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Transiciones cargadas. Utilice las siguientes opciones para asignarlas"
+        "TRANSITIONS_LOADED": "Transiciones cargadas. Utilice las siguientes opciones para asignarlas",
+        "ERR_NO_FILE": "No se seleccionó ningún archivo"
       }
     },
     "PLANNER": {
@@ -1329,7 +1329,22 @@
     "PRIVACY_EXPORT": "Exportación de datos anonimizados (para enviarlos a contact@super-productivity.com para su depuración)",
     "S_BACKUP_DOWNLOADED": "Copia de seguridad descargada en la carpeta de documentos de Android",
     "S_ERR_IMPORT_FAILED": "Error en la importación de datos",
-    "S_ERR_INVALID_DATA": "Falló la importación: JSON no válido"
+    "S_ERR_INVALID_DATA": "Falló la importación: JSON no válido",
+    "S_ERR_INVALID_URL": "Importación fallida: URL proporcionada no válida",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "Error: No se pudo decodificar el parámetro de URL para la importación. Por favor, asegúrese de que esté correctamente formateado.",
+    "S_ERR_NETWORK": "Importación fallida: Error de red al obtener datos de la URL",
+    "IMPORT_FROM_URL": "Importar desde URL",
+    "URL_PLACEHOLDER": "Ingrese la URL desde la cual importar",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "Importar desde URL",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Por favor, ingrese la URL completa del archivo de respaldo JSON de Super Productivity que desea importar.",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "Importar desde URL",
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "TITLE": "Confirmar importación de datos desde URL",
+      "INITIATED_MSG": "Se ha iniciado una importación automática de datos.",
+      "SOURCE_URL_DOMAIN": "Dominio de origen",
+      "WARNING_TITLE": "Advertencia",
+      "WARNING_MSG": "Al continuar, se sobrescribirán sus datos y configuraciones actuales de la aplicación con el contenido de la URL especificada. Esta acción no se puede deshacer."
+    }
   },
   "G": {
     "ADD": "Agregar",

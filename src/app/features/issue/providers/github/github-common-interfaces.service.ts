@@ -1,16 +1,16 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, of, timer } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
 import { concatMap, first, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { GithubApiService } from './github-api.service';
 import { IssueProviderGithub, SearchResultItem } from '../../issue.model';
 import { GithubCfg } from './github.model';
-import { GithubIssue, GithubIssueReduced } from './github-issue/github-issue.model';
+import { GithubIssue, GithubIssueReduced } from './github-issue.model';
 import { truncate } from '../../../../util/truncate';
 import { getTimestamp } from '../../../../util/get-timestamp';
 import { isGithubEnabled } from './is-github-enabled.util';
-import { GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL } from './github.const';
+import { GITHUB_POLL_INTERVAL } from './github.const';
 import { IssueProviderService } from '../../issue-provider.service';
 
 @Injectable({
@@ -20,42 +20,53 @@ export class GithubCommonInterfacesService implements IssueServiceInterface {
   private readonly _githubApiService = inject(GithubApiService);
   private readonly _issueProviderService = inject(IssueProviderService);
 
-  pollTimer$: Observable<number> = timer(GITHUB_INITIAL_POLL_DELAY, GITHUB_POLL_INTERVAL);
+  pollInterval: number = GITHUB_POLL_INTERVAL;
 
   isEnabled(cfg: GithubCfg): boolean {
     return isGithubEnabled(cfg);
   }
 
-  testConnection$(cfg: GithubCfg): Observable<boolean> {
-    return this._githubApiService.searchIssueForRepo$('', cfg).pipe(
-      map((res) => Array.isArray(res)),
-      first(),
-    );
+  testConnection(cfg: GithubCfg): Promise<boolean> {
+    return this._githubApiService
+      .searchIssueForRepo$('', cfg)
+      .pipe(
+        map((res) => Array.isArray(res)),
+        first(),
+      )
+      .toPromise()
+      .then((result) => result ?? false);
   }
 
-  issueLink$(issueId: number, issueProviderId: string): Observable<string> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      map((cfg) => `https://github.com/${cfg.repo}/issues/${issueId}`),
-    );
+  issueLink(issueId: number, issueProviderId: string): Promise<string> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(map((cfg) => `https://github.com/${cfg.repo}/issues/${issueId}`))
+      .toPromise()
+      .then((result) => result ?? '');
   }
 
-  getById$(issueId: number, issueProviderId: string): Observable<GithubIssue> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      concatMap((githubCfg) => this._githubApiService.getById$(issueId, githubCfg)),
-    );
+  getById(issueId: number, issueProviderId: string): Promise<GithubIssue> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(concatMap((githubCfg) => this._githubApiService.getById$(issueId, githubCfg)))
+      .toPromise()
+      .then((result) => {
+        if (!result) {
+          throw new Error('Failed to get GitHub issue');
+        }
+        return result;
+      });
   }
 
-  searchIssues$(
-    searchTerm: string,
-    issueProviderId: string,
-  ): Observable<SearchResultItem[]> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      switchMap((githubCfg) =>
-        this.isEnabled(githubCfg)
-          ? this._githubApiService.searchIssueForRepo$(searchTerm, githubCfg)
-          : of([]),
-      ),
-    );
+  searchIssues(searchTerm: string, issueProviderId: string): Promise<SearchResultItem[]> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        switchMap((githubCfg) =>
+          this.isEnabled(githubCfg)
+            ? this._githubApiService.searchIssueForRepo$(searchTerm, githubCfg)
+            : of([]),
+        ),
+      )
+      .toPromise()
+      .then((result) => result ?? []);
   }
 
   async getFreshDataForIssueTask(task: Task): Promise<{

@@ -207,6 +207,7 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
 } as const;
 
 export const fileSyncElectron = new LocalFileSyncElectron();
+export const fileSyncDroid = new LocalFileSyncAndroid();
 
 export const PFAPI_SYNC_PROVIDERS = [
   new Dropbox({
@@ -215,7 +216,7 @@ export const PFAPI_SYNC_PROVIDERS = [
   }),
   new Webdav(environment.production ? undefined : `/DEV`),
   ...(IS_ELECTRON ? [fileSyncElectron] : []),
-  ...(IS_ANDROID_WEB_VIEW ? [new LocalFileSyncAndroid()] : []),
+  ...(IS_ANDROID_WEB_VIEW ? [fileSyncDroid] : []),
 ];
 
 export const PFAPI_CFG: PfapiBaseCfg<PfapiAllModelCfg> = {

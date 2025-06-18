@@ -10,7 +10,7 @@ import { Store } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
 import { TaskService } from '../../tasks/task.service';
 import { ReminderService } from '../../reminder/reminder.service';
-import { moveTaskInTodayTagList } from '../../tag/store/tag.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { DateService } from '../../../core/date/date.service';
 import { DialogScheduleTaskComponent } from '../dialog-schedule-task/dialog-schedule-task.component';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
@@ -95,9 +95,9 @@ export class PlannerDayComponent {
       if (ev.previousContainer === ev.container) {
         if (this.day.isToday) {
           this._store.dispatch(
-            moveTaskInTodayTagList({
-              fromTaskId: task.id,
+            TaskSharedActions.moveTaskInTodayTagList({
               toTaskId: allItems[ev.currentIndex].id,
+              fromTaskId: task.id,
             }),
           );
         } else {

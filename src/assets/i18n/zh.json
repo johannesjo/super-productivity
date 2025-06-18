@@ -31,10 +31,7 @@
     "RESTORE_FILE_BACKUP_ANDROID": "似乎没有数据，但有可用的备份。你想加载它吗？",
     "RESTORE_STRAY_BACKUP": "在上次同步期间，可能有一些错误。您要还原上一个备份吗？"
   },
-  "DATETIME_INPUT": {
-    "IN": "在 {{time}}",
-    "TOMORROW": "明天 {{time}}"
-  },
+  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "今天稍后",
     "NEXT_WEEK": "下周",
@@ -526,7 +523,9 @@
         "MARK_AS_CHECKED": "将更新标记为已选中",
         "STATUS": "状态",
         "SUMMARY": "摘要",
-        "TYPE": "类型"
+        "TYPE": "类型",
+        "ATTACHMENTS": "附件",
+        "UPLOAD_ATTACHMENT": "上传到任务"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "工作包",
@@ -534,7 +533,8 @@
       },
       "S": {
         "ERR_UNKNOWN": "OpenProject：未知错误 {{statusCode}} {{errorMsg}}。是否为服务器正确配置了 CORS？",
-        "POST_TIME_SUCCESS": "OpenProject：已成功为 {{issueTitle}}创建时间条目"
+        "POST_TIME_SUCCESS": "OpenProject：已成功为 {{issueTitle}}创建时间条目",
+        "ERR_NO_FILE": "未选择文件"
       }
     },
     "PLANNER": {
@@ -1169,7 +1169,22 @@
     "EXPORT_DATA": "导出数据",
     "IMPORT_FROM_FILE": "从文件导入",
     "PRIVACY_EXPORT": "导出匿名数据 (可发送给 contact@super-productivity.com 用于排查错误)",
-    "S_ERR_INVALID_DATA": "导入失败：无效的JSON"
+    "S_ERR_INVALID_DATA": "导入失败：无效的JSON",
+    "S_ERR_INVALID_URL": "导入失败：提供的URL无效",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "错误：无法解码用于导入的URL参数。请确保其格式正确。",
+    "S_ERR_NETWORK": "导入失败：从URL获取数据时发生网络错误",
+    "IMPORT_FROM_URL": "从URL导入",
+    "URL_PLACEHOLDER": "输入要导入的URL",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "从URL导入",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "请输入您要导入的Super Productivity备份JSON文件的完整URL。",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "从URL导入",
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "TITLE": "确认从URL导入数据",
+      "INITIATED_MSG": "已启动自动数据导入。",
+      "SOURCE_URL_DOMAIN": "源域名",
+      "WARNING_TITLE": "警告",
+      "WARNING_MSG": "继续操作将使用指定URL的内容覆盖您当前的应用程序数据和配置。此操作无法撤销。"
+    }
   },
   "G": {
     "CANCEL": "取消",

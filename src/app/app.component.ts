@@ -37,7 +37,6 @@ import { IS_MOBILE } from './util/is-mobile';
 import { warpAnimation, warpInAnimation } from './ui/animations/warp.ani';
 import { GlobalConfigState } from './features/config/global-config.model';
 import { AddTaskBarComponent } from './features/tasks/add-task-bar/add-task-bar.component';
-import { SearchBarComponent } from './features/search-bar/search-bar.component';
 import {
   MatSidenav,
   MatSidenavContainer,
@@ -83,7 +82,6 @@ const productivityTip: string[] = w.productivityTips && w.productivityTips[w.ran
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     AddTaskBarComponent,
-    SearchBarComponent,
     MatSidenavContainer,
     Dir,
     MatSidenav,

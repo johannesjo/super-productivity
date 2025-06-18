@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, of, timer } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
 import { Task, TaskCopy } from '../../../tasks/task.model';
 import { IssueServiceInterface } from '../../issue-service-interface';
@@ -9,7 +9,7 @@ import {
   IssueProviderRedmine,
   SearchResultItem,
 } from '../../issue.model';
-import { REDMINE_INITIAL_POLL_DELAY, REDMINE_POLL_INTERVAL } from './redmine.const';
+import { REDMINE_POLL_INTERVAL } from './redmine.const';
 import {
   formatRedmineIssueSubject,
   formatRedmineIssueSubjectForSnack,
@@ -17,7 +17,7 @@ import {
 import { RedmineCfg } from './redmine.model';
 import { isRedmineEnabled } from './is-redmine-enabled.util';
 import { RedmineApiService } from '../redmine/redmine-api.service';
-import { RedmineIssue } from './redmine-issue/redmine-issue.model';
+import { RedmineIssue } from './redmine-issue.model';
 import { IssueProviderService } from '../../issue-provider.service';
 
 @Injectable({
@@ -31,28 +31,40 @@ export class RedmineCommonInterfacesService implements IssueServiceInterface {
     return isRedmineEnabled(cfg);
   }
 
-  testConnection$(cfg: RedmineCfg): Observable<boolean> {
-    return this._redmineApiService.searchIssuesInProject$('', cfg).pipe(
-      map((res) => Array.isArray(res)),
-      first(),
-    );
+  testConnection(cfg: RedmineCfg): Promise<boolean> {
+    return this._redmineApiService
+      .searchIssuesInProject$('', cfg)
+      .pipe(
+        map((res) => Array.isArray(res)),
+        first(),
+      )
+      .toPromise()
+      .then((result) => result ?? false);
   }
 
-  pollTimer$: Observable<number> = timer(
-    REDMINE_INITIAL_POLL_DELAY,
-    REDMINE_POLL_INTERVAL,
-  );
+  pollInterval: number = REDMINE_POLL_INTERVAL;
 
-  issueLink$(issueId: number, issueProviderId: string): Observable<string> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      map((cfg) => `${cfg.host}/issues/${issueId}`),
-    );
+  issueLink(issueId: number, issueProviderId: string): Promise<string> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(map((cfg) => `${cfg.host}/issues/${issueId}`))
+      .toPromise()
+      .then((result) => result ?? '');
   }
 
-  getById$(id: number, issueProviderId: string): Observable<IssueData> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      switchMap((cfg: RedmineCfg) => this._redmineApiService.getById$(id as number, cfg)),
-    );
+  getById(id: number, issueProviderId: string): Promise<IssueData> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        switchMap((cfg: RedmineCfg) =>
+          this._redmineApiService.getById$(id as number, cfg),
+        ),
+      )
+      .toPromise()
+      .then((result) => {
+        if (!result) {
+          throw new Error('Failed to get Redmine issue');
+        }
+        return result;
+      });
   }
 
   getAddTaskData(issue: RedmineIssue): Partial<Readonly<TaskCopy>> & { title: string } {
@@ -63,14 +75,17 @@ export class RedmineCommonInterfacesService implements IssueServiceInterface {
     };
   }
 
-  searchIssues$(query: string, issueProviderId: string): Observable<SearchResultItem[]> {
-    return this._getCfgOnce$(issueProviderId).pipe(
-      switchMap((cfg) =>
-        this.isEnabled(cfg)
-          ? this._redmineApiService.searchIssuesInProject$(query, cfg)
-          : of([]),
-      ),
-    );
+  searchIssues(query: string, issueProviderId: string): Promise<SearchResultItem[]> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        switchMap((cfg) =>
+          this.isEnabled(cfg)
+            ? this._redmineApiService.searchIssuesInProject$(query, cfg)
+            : of([]),
+        ),
+      )
+      .toPromise()
+      .then((result) => result ?? []);
   }
 
   async getFreshDataForIssueTask(task: Task): Promise<{

@@ -15,6 +15,7 @@ import {
 import { pfLog } from '../../../util/log';
 import { SyncProviderServiceInterface } from '../../sync-provider.interface';
 import { SyncProviderId } from '../../../pfapi.const';
+import { tryCatchInlineAsync } from '../../../../../util/try-catch-inline';
 
 interface DropboxApiOptions {
   method: HttpMethod;
@@ -59,7 +60,9 @@ export class DropboxApi {
         url: 'https://api.dropboxapi.com/2/files/get_metadata',
         headers: {
           'Content-Type': 'application/json',
-          ...(localRev ? { 'If-None-Match': localRev } : {}),
+          // NOTE: Dropbox ignores If-None-Match for metadata requests
+          // We keep localRev parameter for API consistency but don't use it
+          // ...(localRev ? { 'If-None-Match': localRev } : {}),
         },
         data: { path },
       });
@@ -73,6 +76,10 @@ export class DropboxApi {
 
   /**
    * Download a file from Dropbox
+   *
+   * NOTE: We don't use If-None-Match for downloads to ensure we always get content
+   * when requested. Future optimization could implement caching and handle 304 responses,
+   * but current sync architecture expects actual data from downloadFile() calls.
    */
   async download<T>({
     path,
@@ -88,7 +95,9 @@ export class DropboxApi {
         headers: {
           'Dropbox-API-Arg': JSON.stringify({ path }),
           'Content-Type': 'application/octet-stream',
-          ...(localRev ? { 'If-None-Match': localRev } : {}),
+          // Don't send If-None-Match - always download full content
+          // localRev parameter kept for API consistency but not used
+          // ...(localRev ? { 'If-None-Match': localRev } : {}),
         },
       });
 
@@ -149,7 +158,8 @@ export class DropboxApi {
         },
       });
 
-      const result = await response.json();
+      // with 429 response (Too many request) json is already parsed (sometimes?)
+      const result = await tryCatchInlineAsync(() => response.json(), response);
 
       if (!result.rev) {
         throw new NoRevAPIError();

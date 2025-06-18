@@ -31,10 +31,7 @@
     "RESTORE_FILE_BACKUP_ANDROID": "There seems to be NO DATA, but there is a backup available. Do you want to load it?",
     "RESTORE_STRAY_BACKUP": "During last sync there might have been some error. Do you want to restore the last backup?"
   },
-  "DATETIME_INPUT": {
-    "IN": "in {{time}}",
-    "TOMORROW": "tomorrow {{time}}"
-  },
+  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Later Today",
     "NEXT_WEEK": "Next Week",
@@ -119,9 +116,22 @@
       "ISSUE_CONTENT": {
         "DESCRIPTION": "Description",
         "LABELS": "Categories",
+        "ASSIGNEE": "Assignee",
+        "AT": "at",
+        "ATTACHMENTS": "Attachments",
+        "CHANGED": "changed",
+        "COMMENTS": "Comments",
+        "COMPONENTS": "Components",
+        "LIST_OF_CHANGES": "List of changes",
         "MARK_AS_CHECKED": "Mark updates as checked",
+        "ON": "on",
+        "RELATED": "Related",
         "STATUS": "Status",
-        "SUMMARY": "Summary"
+        "STORY_POINTS": "Story Points",
+        "SUB_TASKS": "Subtasks",
+        "SUMMARY": "Summary",
+        "WORKLOG": "Worklog",
+        "WRITE_A_COMMENT": "Write a comment"
       },
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav: Calendar \"{{calendarName}}\" not found",
@@ -159,7 +169,9 @@
         "L_INTERVAL": "Interval to repeat phrase",
         "L_TEXT": "Text",
         "L_TEXT_DESCRIPTION": "E.g.: \"Work on ${currentTaskTitle}!\"",
-        "TITLE": "Domina Mode"
+        "TITLE": "Domina Mode",
+        "L_VOICE": "Select a Voice",
+        "L_VOICE_DESCRIPTION": "Choose a voice"
       }
     },
     "DROPBOX": {
@@ -337,6 +349,39 @@
       "DEFAULT_PROJECT_DESCRIPTION": "Project assigned to tasks created from issues.",
       "DEFAULT_PROJECT_LABEL": "Default Super Productivity Project",
       "HOW_TO_GET_A_TOKEN": "How to get a token?",
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Assignee",
+        "AUTHOR": "Author",
+        "AT": "at",
+        "ATTACHMENTS": "Attachments",
+        "CATEGORY": "Category",
+        "CHANGED": "changed",
+        "COMMENTS": "Comments",
+        "COMPONENTS": "Components",
+        "DESCRIPTION": "Description",
+        "DONE_RATIO": "Done Ratio",
+        "DUE_DATE": "Due Date",
+        "LABELS": "Labels",
+        "LAST_COMMENT": "Last comment",
+        "LIST_OF_CHANGES": "List of changes",
+        "LOAD_ALL_COMMENTS": "Load all {{nr}} comments",
+        "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "Load description & all comments",
+        "LOCATION": "Location",
+        "MARK_AS_CHECKED": "Mark updates as checked",
+        "ON": "on",
+        "PRIORITY": "Priority",
+        "RELATED": "Related",
+        "START": "Start",
+        "STATUS": "Status",
+        "STORY_POINTS": "Story Points",
+        "SUB_TASKS": "Subtasks",
+        "SUMMARY": "Summary",
+        "TIME_SPENT": "Time Spent",
+        "TYPE": "Type",
+        "VERSION": "Version",
+        "WORKLOG": "Worklog",
+        "WRITE_A_COMMENT": "Write a comment"
+      },
       "S": {
         "ERR_GENERIC": "{{issueProviderName}} Error: {{errTxt}}",
         "ERR_NETWORK": "{{issueProviderName}}: Request failed because of a client side network error",
@@ -610,7 +655,9 @@
         "MARK_AS_CHECKED": "Mark updates as checked",
         "STATUS": "Status",
         "SUMMARY": "Summary",
-        "TYPE": "Type"
+        "TYPE": "Type",
+        "ATTACHMENTS": "Attachments",
+        "UPLOAD_ATTACHMENT": "Upload to Task"
       },
       "ISSUE_STRINGS": {
         "ISSUE_STR": "work package",
@@ -621,7 +668,8 @@
         "POST_TIME_SUCCESS": "OpenProject: Successfully created time entry for {{issueTitle}}",
         "TRANSITION": "OpenProject: Set issue \"{{issueKey}}\" to \"{{name}}\"",
         "TRANSITION_SUCCESS": "OpenProject: Set issue {{issueKey}} to <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Transitions loaded. Use the selects below to assign them"
+        "TRANSITIONS_LOADED": "Transitions loaded. Use the selects below to assign them",
+        "ERR_NO_FILE": "No file selected"
       }
     },
     "PLANNER": {
@@ -817,8 +865,9 @@
       "TASK_PROJECTION_INFO": "Future projection of a scheduled repeatable task"
     },
     "SEARCH_BAR": {
-      "INFO": "Click on the list icon to search for archived tasks",
+      "INFO": "Start typing to search for tasks",
       "INFO_ARCHIVED": "Click on the archive icon to search for normal tasks",
+      "NO_RESULTS": "No tasks found matching your search",
       "PLACEHOLDER": "Search for task or task description",
       "PLACEHOLDER_ARCHIVED": "Search for archived tasks",
       "TOO_MANY_RESULTS": "Too many results, please narrow your search"
@@ -889,9 +938,11 @@
         "USE_REMOTE": "Keep remote"
       },
       "D_DECRYPT_ERROR": {
-        "BTN_OVER_WRITE_REMOTE": "Change and overwrite remote",
-        "P1": "Your data is encrypted and decryption failed. Please enter the correct password!",
-        "P2": "You can also change your password, which will overwrite all remote data."
+        "BTN_OVER_WRITE_REMOTE": "Change & Overwrite Remote",
+        "CHANGE_PW_AND_DECRYPT": "Change & Attempt Decrypt",
+        "P1": "Your remote data is encrypted and decryption failed. Please enter the correct password!",
+        "P2": "Or you can also change your password, which will overwrite all remote data.",
+        "PASSWORD": "Password"
       },
       "D_INCOMPLETE_SYNC": {
         "BTN_CLOSE_APP": "Close App",
@@ -1152,6 +1203,45 @@
         "TOGGLE_DONE": "un-/mark as done"
       }
     },
+    "TASK_VIEW": {
+      "CUSTOMIZER": {
+        "TITLE": "Customize Task View",
+        "SORT_BY": "Sort By",
+        "GROUP_BY": "Group By",
+        "FILTER_BY": "Filter By",
+        "SORT_DEFAULT": "Default",
+        "SORT_NAME": "Name",
+        "SORT_SCHEDULED_DATE": "Scheduled Date",
+        "SORT_CREATION_DATE": "Creation Date",
+        "ESTIMATED_TIME": "Estimated Time",
+        "TIME_SPENT": "Time Spent",
+        "GROUP_DEFAULT": "No Group",
+        "GROUP_TAG": "Tag",
+        "GROUP_PROJECT": "Project",
+        "GROUP_SCHEDULED_DATE": "Scheduled Date",
+        "FILTER_DEFAULT": "No Filter",
+        "FILTER_TAG": "Tag",
+        "FILTER_PROJECT": "Project",
+        "FILTER_SCHEDULED_DATE": "Scheduled Date",
+        "FILTER_ESTIMATED_TIME": "Estimated Time",
+        "FILTER_TIME_SPENT": "Time Spent",
+        "SCHEDULED_DEFAULT": "Any Date",
+        "SCHEDULED_TODAY": "Today",
+        "SCHEDULED_TOMORROW": "Tomorrow",
+        "SCHEDULED_THIS_WEEK": "This Week",
+        "SCHEDULED_NEXT_WEEK": "Next Week",
+        "SCHEDULED_THIS_MONTH": "This Month",
+        "SCHEDULED_NEXT_MONTH": "Next Month",
+        "TIME_DEFAULT": "Any Duration",
+        "TIME_10MIN": "> 10 Minutes",
+        "TIME_30MIN": "> 30 Minutes",
+        "TIME_1HOUR": "> 1 Hour",
+        "TIME_2HOUR": "> 2 Hours",
+        "RESET_ALL": "Reset All",
+        "ENTER_TAG": "Enter tag",
+        "ENTER_PROJECT": "Enter project"
+      }
+    },
     "TASK_REPEAT": {
       "ADD_INFO_PANEL": {
         "CUSTOM": "Custom repeat config",
@@ -1329,7 +1419,22 @@
     "PRIVACY_EXPORT": "Export anonymized data (to send to contact@super-productivity.com for debugging)",
     "S_BACKUP_DOWNLOADED": "Backup downloaded to android documents folder",
     "S_ERR_IMPORT_FAILED": "Importing data failed",
-    "S_ERR_INVALID_DATA": "Import failed: Invalid JSON"
+    "S_ERR_INVALID_DATA": "Import failed: Invalid JSON",
+    "S_ERR_INVALID_URL": "Import failed: Invalid URL provided",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "Error: Could not decode the URL parameter for import. Please ensure it is correctly formatted.",
+    "S_ERR_NETWORK": "Import failed: Network error while fetching data from URL",
+    "IMPORT_FROM_URL": "Import from URL",
+    "URL_PLACEHOLDER": "Enter URL to import from",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "Import from URL",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Please enter the full URL of the Super Productivity backup JSON file you want to import.",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "Import from URL",
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "TITLE": "Confirm Data Import from URL",
+      "INITIATED_MSG": "An automatic data import has been initiated.",
+      "SOURCE_URL_DOMAIN": "Source Domain",
+      "WARNING_TITLE": "Warning",
+      "WARNING_MSG": "Proceeding will overwrite your current application data and configuration with the content from the specified URL. This action cannot be undone."
+    }
   },
   "G": {
     "ADD": "Add",
@@ -1501,6 +1606,7 @@
       "IS_MINIMIZE_TO_TRAY": "Minimize to tray (desktop only)",
       "IS_SHOW_TIP_LONGER": "Show productivity tip on app start a little longer",
       "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop mac/windows only)",
+      "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Show current countdown in the tray / status menu (desktop mac only)",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for task notes",
       "IS_USE_MINIMAL_SIDE_NAV": "Use minimal navigation bar (show only icons)",
       "START_OF_NEXT_DAY": "Start time of the next day",
@@ -1617,6 +1723,7 @@
     "CREATE_TAG": "Create Tag",
     "DELETE_PROJECT": "Delete Project",
     "DELETE_TAG": "Delete Tag",
+    "ENTER_FOCUS_MODE": "Enter Focus Mode",
     "GO_TO_TASK_LIST": "Go to task list",
     "HELP": "Help",
     "HM": {
@@ -1641,6 +1748,7 @@
     "PROJECTS": "Projects",
     "QUICK_HISTORY": "Quick History",
     "SCHEDULE": "Schedule",
+    "SEARCH": "Search",
     "SETTINGS": "Settings",
     "SHOW_SEARCH_BAR": "Show Search Bar",
     "TAGS": "Tags",

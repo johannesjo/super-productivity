@@ -68,17 +68,10 @@ jobs:
           ls -la android/app/build/outputs/apk/play
           ls -la android/app/build/outputs/apk/play/release
 
-      - name: Sign APK
-        run: |
-          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
-            -keystore keystore.jks \
-            -storepass ${{ secrets.DROID_KEYSTORE_PASSWORD }} \
-            -keypass ${{ secrets.DROID_KEY_PASSWORD }} \
-            android/app/build/outputs/apk/play/release/app-play-release-unsigned.apk \
-            ${{ secrets.DROID_KEYSTORE_ALIAS }}
+      # APK is now signed automatically by Gradle using signingConfig
 
-      - name: 'Upload Artifact'
+      - name: 'Upload APK files'
         uses: actions/upload-artifact@v4
         with:
           name: sup-android-release
-          path: android/app/build/outputs/*/*
+          path: android/app/build/outputs/apk/**/*.apk

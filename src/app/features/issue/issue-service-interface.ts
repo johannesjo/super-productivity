@@ -1,4 +1,3 @@
-import { Observable } from 'rxjs';
 import {
   IssueData,
   IssueDataReduced,
@@ -13,20 +12,17 @@ export interface IssueServiceInterface {
   // ---------
   isEnabled(cfg: IssueIntegrationCfg): boolean;
 
-  testConnection$(cfg: IssueIntegrationCfg): Observable<boolean>;
+  testConnection(cfg: IssueIntegrationCfg): Promise<boolean>;
 
-  pollTimer$: Observable<number>;
+  pollInterval: number; // 0 means no polling
 
-  issueLink$(issueId: string | number, issueProviderId: string): Observable<string>;
+  issueLink(issueId: string | number, issueProviderId: string): Promise<string>;
 
-  getById$(id: string | number, issueProviderId: string): Observable<IssueData | null>;
+  getById(id: string | number, issueProviderId: string): Promise<IssueData | null>;
 
   getAddTaskData(issueData: IssueDataReduced): Partial<Task> & { title: string };
 
-  searchIssues$(
-    searchTerm: string,
-    issueProviderId: string,
-  ): Observable<SearchResultItem[]>;
+  searchIssues(searchTerm: string, issueProviderId: string): Promise<SearchResultItem[]>;
 
   // also used to determine if task is done
   getFreshDataForIssueTask(task: Task): Promise<{
@@ -51,4 +47,7 @@ export interface IssueServiceInterface {
     issueProviderId: string,
     allExistingIssueIds: number[] | string[],
   ): Promise<IssueDataReduced[]>;
+
+  // TODO could be called when task is updated from issue, whenever task is updated
+  updateIssueFromTask?(task: Task): Promise<void>;
 }
