@@ -19,6 +19,8 @@ import { NotesComponent } from '../note/notes/notes.component';
 import { TaskDetailPanelComponent } from '../tasks/task-detail-panel/task-detail-panel.component';
 import { TaskViewCustomizerPanelComponent } from '../task-view-customizer/task-view-customizer-panel/task-view-customizer-panel.component';
 import { AsyncPipe } from '@angular/common';
+import { PluginService } from '../../plugins/plugin.service';
+import { PluginPanelContainerComponent } from '../../plugins/ui/plugin-panel-container/plugin-panel-container.component';
 
 @Component({
   selector: 'right-panel',
@@ -37,11 +39,13 @@ import { AsyncPipe } from '@angular/common';
     TaskDetailPanelComponent,
     TaskViewCustomizerPanelComponent,
     AsyncPipe,
+    PluginPanelContainerComponent,
   ],
 })
 export class RightPanelComponent implements OnDestroy {
   taskService = inject(TaskService);
   layoutService = inject(LayoutService);
+  pluginService = inject(PluginService);
 
   // NOTE: used for debugging
   readonly isAlwaysOver = input<boolean>(false);
@@ -53,12 +57,18 @@ export class RightPanelComponent implements OnDestroy {
     );
 
   panelContent$: Observable<
-    'NOTES' | 'TASK' | 'ADD_TASK_PANEL' | 'TASK_VIEW_CUSTOMIZER_PANEL' | undefined
+    | 'NOTES'
+    | 'TASK'
+    | 'ADD_TASK_PANEL'
+    | 'TASK_VIEW_CUSTOMIZER_PANEL'
+    | 'PLUGIN'
+    | undefined
   > = combineLatest([
     this.layoutService.isShowNotes$,
     this.taskService.selectedTask$,
     this.layoutService.isShowIssuePanel$,
     this.layoutService.isShowTaskViewCustomizerPanel$,
+    this.pluginService.activeSidePanelPlugin$,
   ]).pipe(
     map(
       ([
@@ -66,6 +76,7 @@ export class RightPanelComponent implements OnDestroy {
         selectedTask,
         isShowAddTaskPanel,
         isShowTaskViewCustomizerPanel,
+        activeSidePanelPlugin,
       ]) => {
         if (selectedTask) {
           return 'TASK';
@@ -75,6 +86,8 @@ export class RightPanelComponent implements OnDestroy {
           return 'ADD_TASK_PANEL';
         } else if (isShowTaskViewCustomizerPanel) {
           return 'TASK_VIEW_CUSTOMIZER_PANEL';
+        } else if (activeSidePanelPlugin) {
+          return 'PLUGIN';
         }
         return undefined;
       },
@@ -88,6 +101,7 @@ export class RightPanelComponent implements OnDestroy {
     this.layoutService.isShowNotes$,
     this.layoutService.isShowIssuePanel$,
     this.layoutService.isShowTaskViewCustomizerPanel$,
+    this.pluginService.activeSidePanelPlugin$,
   ]).pipe(
     map(
       ([
@@ -96,12 +110,14 @@ export class RightPanelComponent implements OnDestroy {
         isShowNotes,
         isShowAddTaskPanel,
         isShowTaskViewCustomizerPanel,
+        activeSidePanelPlugin,
       ]) =>
         !!(
           selectedTask ||
           isShowNotes ||
           isShowAddTaskPanel ||
-          isShowTaskViewCustomizerPanel
+          isShowTaskViewCustomizerPanel ||
+          activeSidePanelPlugin
         ) && targetPanel !== TaskDetailTargetPanel.DONT_OPEN_PANEL,
     ),
     distinctUntilChanged(),

@@ -20,6 +20,9 @@
       @if (panelContent === 'TASK_VIEW_CUSTOMIZER_PANEL') {
         <task-view-customizer-panel [@slideInFromRight]></task-view-customizer-panel>
       }
+      @if (panelContent === 'PLUGIN') {
+        <plugin-panel-container [@slideInFromRight]></plugin-panel-container>
+      }
       @if (selectedTaskWithDelayForNone$ | async; as selectedTaskWithDelayForNone) {
         <task-detail-panel
           [isOver]="isAlwaysOver() || (layoutService.isRightPanelOver$ | async)"
