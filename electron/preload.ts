@@ -3,16 +3,24 @@ import { ElectronAPI } from './electronAPI.d';
 import { IPCEventValue } from './shared-with-frontend/ipc-events.const';
 import { LocalBackupMeta } from '../src/app/imex/local-backup/local-backup.model';
 import { SyncGetRevResult } from '../src/app/imex/sync/sync.model';
+import {
+  PluginNodeScriptRequest,
+  PluginNodeScriptResult,
+  PluginManifest,
+} from '../packages/plugin-api/dist/types';
 
-const _send: (channel: IPCEventValue, ...args: any[]) => void = (channel, ...args) =>
+const _send: (channel: IPCEventValue, ...args: unknown[]) => void = (channel, ...args) =>
   ipcRenderer.send(channel, ...args);
-const _invoke: (channel: IPCEventValue, ...args: any[]) => Promise<unknown> = (
+const _invoke: (channel: IPCEventValue, ...args: unknown[]) => Promise<unknown> = (
   channel,
   ...args
 ) => ipcRenderer.invoke(channel, ...args);
 
 const ea: ElectronAPI = {
-  on: (channel: string, listener: (event: IpcRendererEvent, ...args: any[]) => void) => {
+  on: (
+    channel: string,
+    listener: (event: IpcRendererEvent, ...args: unknown[]) => void,
+  ) => {
     // NOTE: there is no proper way to unsubscribe apart from unsubscribing all
     ipcRenderer.on(channel, listener);
   },
@@ -89,10 +97,17 @@ const ea: ElectronAPI = {
   exec: (command: string) => _send('EXEC', command),
 
   // Plugin API
-  pluginExecNodeScript: (pluginId: string, request: any) =>
-    _invoke('PLUGIN_EXEC_NODE_SCRIPT', pluginId, request) as Promise<any>,
-  pluginRegisterForNode: (pluginId: string, manifest: any, userDataPath: string) =>
-    _send('PLUGIN_REGISTER_FOR_NODE', pluginId, manifest, userDataPath),
+  pluginExecNodeScript: (pluginId: string, request: PluginNodeScriptRequest) =>
+    _invoke(
+      'PLUGIN_EXEC_NODE_SCRIPT',
+      pluginId,
+      request,
+    ) as Promise<PluginNodeScriptResult>,
+  pluginRegisterForNode: (
+    pluginId: string,
+    manifest: PluginManifest,
+    userDataPath: string,
+  ) => _send('PLUGIN_REGISTER_FOR_NODE', pluginId, manifest, userDataPath),
   pluginUnregisterForNode: (pluginId: string) =>
     _send('PLUGIN_UNREGISTER_FOR_NODE', pluginId),
 };

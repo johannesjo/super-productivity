@@ -7,6 +7,7 @@ import {
 } from './plugin-api.model';
 import { PluginAPI } from './plugin-api';
 import { PluginBridgeService } from './plugin-bridge.service';
+import '../core/window-ea';
 
 @Injectable({
   providedIn: 'root',
@@ -34,8 +35,8 @@ export class PluginRunner {
         };
 
         // Register plugin with Electron for Node.js execution
-        if ((window as any).ea?.pluginRegisterForNode) {
-          const userDataPath = await (window as any).ea.getUserDataPath();
+        if (window.ea?.pluginRegisterForNode) {
+          const userDataPath = await window.ea.getUserDataPath();
           // Validate plugin ID to prevent path traversal
           const sanitizedPluginId = manifest.id.replace(/[^a-zA-Z0-9_-]/g, '');
           if (sanitizedPluginId !== manifest.id) {
@@ -44,7 +45,7 @@ export class PluginRunner {
             );
           }
           const pluginDataPath = `${userDataPath}/plugins/${sanitizedPluginId}`;
-          (window as any).ea.pluginRegisterForNode(manifest.id, manifest, pluginDataPath);
+          window.ea.pluginRegisterForNode(manifest.id, manifest, pluginDataPath);
         }
       }
 
@@ -176,8 +177,8 @@ export class PluginRunner {
 
       // Unregister from Node.js execution if it had permission
       if (plugin.manifest && this._hasNodeExecutionPermission(plugin.manifest)) {
-        if ((window as any).ea?.pluginUnregisterForNode) {
-          (window as any).ea.pluginUnregisterForNode(pluginId);
+        if (window.ea?.pluginUnregisterForNode) {
+          window.ea.pluginUnregisterForNode(pluginId);
         }
       }
 
