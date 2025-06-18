@@ -25,7 +25,7 @@ export const taskCopyToTaskData = (task: TaskCopy): TaskData => {
     tagIds: task.tagIds,
     parentId: task.parentId || null,
     created: task.created,
-    updated: task.updated,
+    updated: (task as any).updated || 0,
   };
 };
 
@@ -59,8 +59,8 @@ export const projectCopyToProjectData = (project: ProjectCopy): ProjectData => {
     title: project.title,
     themeColor: project.theme?.primary,
     isDone: project.isArchived, // Map isArchived to isDone for plugins
-    created: project.created,
-    updated: project.updated,
+    created: (project as any).created || 0,
+    updated: (project as any).updated || 0,
   };
 };
 
@@ -77,7 +77,7 @@ export const projectDataToPartialProjectCopy = (
     result.theme = {
       primary: updates.themeColor,
       // Use defaults for other theme properties
-      primaryContrast: '#ffffff',
+      // primaryContrast: '#ffffff', // Not available in current theme type
     };
   }
   if ('isDone' in updates) result.isArchived = updates.isDone;
@@ -92,9 +92,9 @@ export const tagCopyToTagData = (tag: TagCopy): TagData => {
   return {
     id: tag.id,
     title: tag.title,
-    color: tag.color,
+    color: tag.color || undefined,
     created: tag.created,
-    updated: tag.updated,
+    updated: (tag as any).updated || 0,
   };
 };
 

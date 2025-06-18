@@ -14,6 +14,7 @@ import { Subscription } from 'rxjs';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { PluginService } from '../../plugin.service';
 import { PluginBridgeService } from '../../plugin-bridge.service';
+import { PluginCleanupService } from '../../plugin-cleanup.service';
 import {
   SnackCfgLimited,
   NotifyCfg,
@@ -71,6 +72,7 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
   private readonly _sanitizer = inject(DomSanitizer);
   private readonly _pluginService = inject(PluginService);
   private readonly _pluginBridge = inject(PluginBridgeService);
+  private readonly _cleanupService = inject(PluginCleanupService);
 
   readonly pluginId = signal<string>('');
   readonly isLoading = signal<boolean>(true);
@@ -174,6 +176,9 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
   }
 
   private _setupIframeCommunication(pluginId: string): void {
+    // Clean up any existing listener first
+    this._cleanupIframeCommunication();
+
     this._messageListener = (event: MessageEvent) => {
       // Security: Verify origin for data URLs
       // In development, localhost origins are common due to dev server
@@ -204,11 +209,24 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
     };
 
     window.addEventListener('message', this._messageListener);
+    // Track the listener for cleanup
+    this._cleanupService.registerEventListener(
+      pluginId,
+      window,
+      'message',
+      this._messageListener,
+    );
   }
 
   private _cleanupIframeCommunication(): void {
     if (this._messageListener) {
       window.removeEventListener('message', this._messageListener);
+      this._messageListener = undefined;
+    }
+    // Clean up tracked resources for the current plugin
+    const currentPluginId = this.pluginId();
+    if (currentPluginId) {
+      this._cleanupService.cleanupPlugin(currentPluginId);
     }
     // Data URLs don't need to be revoked like blob URLs
   }

@@ -1,15 +1,18 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject, OnDestroy } from '@angular/core';
 import {
   Hooks,
   PluginHookHandler,
   PluginHookHandlerRegistration,
 } from './plugin-api.model';
+import { PluginCleanupService } from './plugin-cleanup.service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class PluginHooksService {
+export class PluginHooksService implements OnDestroy {
   private _hookHandlers: PluginHookHandlerRegistration[] = [];
+  private _cleanupService = inject(PluginCleanupService);
+  private _hookTimeouts = new Map<string, Set<any>>();
 
   constructor() {}
 
@@ -32,12 +35,26 @@ export class PluginHooksService {
     // Execute all handlers with comprehensive error handling
     const promises = handlersToCall.map(async (registration) => {
       try {
+        // Create execution promise first
+        const executionPromise = Promise.resolve(registration.handler(payload));
+
         // Set a timeout for plugin hook execution to prevent hanging
         const timeoutPromise = new Promise<void>((_, reject) => {
-          setTimeout(() => reject(new Error('Plugin hook execution timeout')), 10000); // 10 second timeout
+          const timeoutId: any = setTimeout(
+            () => reject(new Error('Plugin hook execution timeout')),
+            10000,
+          ); // 10 second timeout
+          // Track timeout for cleanup
+          if (!this._hookTimeouts.has(registration.pluginId)) {
+            this._hookTimeouts.set(registration.pluginId, new Set());
+          }
+          this._hookTimeouts.get(registration.pluginId)!.add(timeoutId);
+          // Clean up timeout when done
+          executionPromise.finally(() => {
+            clearTimeout(timeoutId);
+            this._hookTimeouts.get(registration.pluginId)?.delete(timeoutId);
+          });
         });
-
-        const executionPromise = Promise.resolve(registration.handler(payload));
 
         await Promise.race([executionPromise, timeoutPromise]);
         console.log(
@@ -131,5 +148,25 @@ export class PluginHooksService {
    */
   hasHandlersForHook(hook: Hooks): boolean {
     return this._hookHandlers.some((handler) => handler.hook === hook);
+  }
+
+  /**
+   * Clean up all resources when service is destroyed
+   */
+  ngOnDestroy(): void {
+    console.log('PluginHooksService: Cleaning up resources');
+
+    // Clear all hook timeouts
+    this._hookTimeouts.forEach((timeouts, pluginId) => {
+      timeouts.forEach((timeoutId) => {
+        clearTimeout(timeoutId);
+      });
+    });
+    this._hookTimeouts.clear();
+
+    // Clear all hook handlers
+    this._hookHandlers = [];
+
+    console.log('PluginHooksService: Cleanup complete');
   }
 }
