@@ -116,71 +116,191 @@ export class PluginRunner {
     manifest: PluginManifest,
   ): Promise<void> {
     try {
-      // Create a sandboxed execution environment with restricted globals
-      const sandboxGlobals = {
-        PluginAPI: pluginAPI,
-        manifest: manifest,
-        console: {
-          log: console.log.bind(console),
-          warn: console.warn.bind(console),
-          error: console.error.bind(console),
-        },
-        setTimeout: (fn: () => void, delay: number) =>
-          setTimeout(fn, Math.min(delay, 5000)), // Max 5 second delay
-        setInterval: undefined, // Disable setInterval for security
-        clearTimeout: (id: number) => clearTimeout(id),
-        Promise: Promise,
-        JSON: JSON,
-        Math: Math,
-        Date: Date,
-        // Explicitly exclude dangerous globals
-        window: undefined,
-        document: undefined,
-        global: undefined,
-        process: undefined,
-        require: undefined,
-        __dirname: undefined,
-        __filename: undefined,
-      };
-
-      // Create a sandboxed function with restricted scope
-      const sandboxKeys = Object.keys(sandboxGlobals);
-      const sandboxValues = Object.values(sandboxGlobals);
-
-      // Additional security: wrap in an IIFE to isolate scope
-      const wrappedCode = `
-        (function() {
-          "use strict";
-          try {
-            // Shadow dangerous globals with undefined values
-            var window = undefined;
-            var document = undefined;
-            var global = undefined;
-            var process = undefined;
-            var require = undefined;
-            var XMLHttpRequest = undefined;
-            var fetch = undefined;
-            var WebSocket = undefined;
-            var Worker = undefined;
-            var importScripts = undefined;
-            
-            ${pluginCode}
-          } catch (e) {
-            console.error('Plugin runtime error:', e);
-            throw e;
-          }
-        }).call(this);
-      `;
-
-      const sandboxedFunction = new Function(...sandboxKeys, wrappedCode);
-
-      // Execute the plugin code with sandboxed globals
-      await sandboxedFunction(...sandboxValues);
+      // Enhanced security: Execute plugin in a more secure sandbox
+      await this._executeInSecureSandbox(pluginCode, pluginAPI, manifest);
     } catch (error) {
       // Clean up error message to avoid exposing internal details
       const safeError =
         error instanceof Error ? error.message : 'Plugin execution failed';
       throw new Error(`Plugin execution failed: ${safeError}`);
+    }
+  }
+
+  /**
+   * Execute plugin code in a secure sandbox environment
+   * This method implements multiple layers of security to prevent sandbox escape
+   */
+  private async _executeInSecureSandbox(
+    pluginCode: string,
+    pluginAPI: PluginAPI,
+    manifest: PluginManifest,
+  ): Promise<void> {
+    // Freeze prototypes to prevent prototype pollution
+    this._freezePrototypes();
+
+    // Create sandboxed globals with limited access
+    const sandboxGlobals = this._createSandboxGlobals(pluginAPI, manifest);
+
+    // Execute in enhanced function sandbox
+    await this._executeInFunctionSandbox(pluginCode, sandboxGlobals);
+  }
+
+  /**
+   * Freeze critical prototypes to prevent prototype pollution attacks
+   */
+  private _freezePrototypes(): void {
+    try {
+      // Freeze core prototypes
+      Object.freeze(Object.prototype);
+      Object.freeze(Array.prototype);
+      Object.freeze(Function.prototype);
+      Object.freeze(String.prototype);
+      Object.freeze(Number.prototype);
+      Object.freeze(Boolean.prototype);
+    } catch (error) {
+      console.warn('Failed to freeze prototypes:', error);
+    }
+  }
+
+  /**
+   * Create sandboxed globals with controlled access
+   */
+  private _createSandboxGlobals(
+    pluginAPI: PluginAPI,
+    manifest: PluginManifest,
+  ): Record<string, unknown> {
+    return {
+      PluginAPI: pluginAPI,
+      manifest: manifest,
+      console: {
+        log: console.log.bind(console),
+        warn: console.warn.bind(console),
+        error: console.error.bind(console),
+        info: console.info.bind(console),
+      },
+      setTimeout: (fn: () => void, delay: number) => {
+        if (typeof fn !== 'function') {
+          throw new Error('setTimeout callback must be a function');
+        }
+        return setTimeout(fn, Math.min(delay, 5000)); // Max 5 second delay
+      },
+      clearTimeout: (id: number) => clearTimeout(id),
+      Promise: Promise,
+      JSON: JSON,
+      Math: Math,
+      Date: Date,
+      // Controlled globals - explicitly set to prevent access
+      window: null,
+      document: null,
+      global: null,
+      process: null,
+      require: null,
+      eval: null,
+      Function: null,
+      constructor: null,
+    };
+  }
+
+  /**
+   * Execute plugin code in an enhanced function sandbox
+   */
+  private async _executeInFunctionSandbox(
+    pluginCode: string,
+    sandboxGlobals: Record<string, unknown>,
+  ): Promise<void> {
+    // Validate plugin code before execution
+    this._validatePluginCodeSafety(pluginCode);
+
+    const sandboxKeys = Object.keys(sandboxGlobals);
+    const sandboxValues = Object.values(sandboxGlobals);
+
+    // Create a more secure wrapper that prevents common escape techniques
+    const secureWrapper = `
+      (function() {
+        "use strict";
+        
+        // Override dangerous globals at runtime
+        var window = null;
+        var document = null;
+        var global = null;
+        var process = null;
+        var require = null;
+        var eval = null;
+        var Function = null;
+        var constructor = null;
+        var XMLHttpRequest = null;
+        var fetch = null;
+        var WebSocket = null;
+        var Worker = null;
+        var importScripts = null;
+        var location = null;
+        var navigator = null;
+        
+        try {
+          // Execute plugin code in strict mode
+          ${pluginCode}
+        } catch (e) {
+          console.error('Plugin runtime error:', e);
+          throw e;
+        }
+      }).call(Object.create(null));
+    `;
+
+    // Create function in isolated scope
+    const sandboxFunction = new Function(...sandboxKeys, secureWrapper);
+
+    // Execute with timeout protection
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => {
+        reject(new Error('Plugin execution timeout (5 seconds)'));
+      }, 5000);
+    });
+
+    const executionPromise = Promise.resolve(sandboxFunction(...sandboxValues));
+
+    await Promise.race([executionPromise, timeoutPromise]);
+  }
+
+  /**
+   * Validate plugin code for obvious security issues
+   */
+  private _validatePluginCodeSafety(pluginCode: string): void {
+    const dangerousPatterns = [
+      /constructor\s*\(/i,
+      /\.constructor\s*\(/i,
+      /\[\s*["']constructor["']\s*\]/i,
+      /\beval\s*\(/i,
+      /Function\s*\(/i,
+      /\bwith\s*\(/i,
+      /\bdelete\s+/i,
+      /\b__proto__\b/i,
+      /\bprototype\s*\[/i,
+      /Object\.defineProperty/i,
+      /Object\.create\s*\(/i,
+    ];
+
+    for (const pattern of dangerousPatterns) {
+      if (pattern.test(pluginCode)) {
+        throw new Error(
+          `Plugin code contains potentially dangerous pattern: ${pattern.source}`,
+        );
+      }
+    }
+
+    // Check for suspicious string concatenation that might be used to bypass filters
+    const suspiciousStringPatterns = [
+      /["']\s*\+\s*["']/g, // String concatenation
+      /\[\s*["']\w+["']\s*\+\s*["']\w+["']\s*\]/g, // Bracket notation with concatenation
+    ];
+
+    for (const pattern of suspiciousStringPatterns) {
+      const matches = pluginCode.match(pattern);
+      if (matches && matches.length > 3) {
+        // Allow some string concatenation, but not excessive amounts
+        console.warn(
+          `Plugin code contains suspicious string concatenation patterns: ${matches.length} occurrences`,
+        );
+      }
     }
   }
 
