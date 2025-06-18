@@ -132,14 +132,13 @@ export class InputDurationDirective implements ControlValueAccessor, Validator, 
 
   private _processInput(strVal: string): void {
     try {
-      // Convert input string to milliseconds
-      const ms = strVal ? this._strToMs(strVal) : 0;
-
-      // don't interrupt typing for input without unit e.g. "32", "2h 32"
-      if (strVal !== this._msToStr(ms)) {
+      const regex = /(^\d+h(?: \d+m)?$)|(^\d+m$)/;
+      // If input is without unit like 1h, 2m, 3h 30m, etc, return
+      if (!regex.test(strVal)) {
         return;
       }
-
+      // Convert input string to milliseconds
+      const ms = strVal ? this._strToMs(strVal) : 0;
       // Update internal state and notify form control
       this._msValue = ms;
       if (!this._previousMsValue || this._previousMsValue !== this._msValue) {
