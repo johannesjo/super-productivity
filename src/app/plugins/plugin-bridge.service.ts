@@ -16,6 +16,8 @@ import {
   TaskCopy,
   ProjectCopy,
   TagCopy,
+  PluginNodeScriptRequest,
+  PluginNodeScriptResult,
 } from './plugin-api.model';
 import { PluginHooksService } from './plugin-hooks';
 import { TaskService } from '../features/tasks/task.service';
@@ -28,6 +30,7 @@ import { PluginUserPersistenceService } from './plugin-user-persistence.service'
 import { TaskArchiveService } from '../features/time-tracking/task-archive.service';
 import { Router } from '@angular/router';
 import { PluginDialogComponent } from './ui/plugin-dialog/plugin-dialog.component';
+import { IS_ELECTRON } from '../app.constants';
 
 /**
  * PluginBridge acts as an intermediary layer between plugins and the main application services.
@@ -558,6 +561,45 @@ export class PluginBridgeService {
     // Throw error if any validation failed
     if (errors.length > 0) {
       throw new Error(`Validation failed: ${errors.join('; ')}`);
+    }
+  }
+
+  /**
+   * Execute Node.js script (only available in Electron)
+   */
+  async executeNodeScript(
+    request: PluginNodeScriptRequest,
+  ): Promise<PluginNodeScriptResult> {
+    if (!IS_ELECTRON) {
+      return {
+        success: false,
+        error: 'Node.js execution is only available in the desktop version',
+      };
+    }
+
+    if (!this._currentPluginId) {
+      return {
+        success: false,
+        error: 'No plugin context set for Node.js execution',
+      };
+    }
+
+    try {
+      typia.assert<PluginNodeScriptRequest>(request);
+
+      // Call Electron main process via IPC
+      const result = await (window as any).ea.pluginExecNodeScript(
+        this._currentPluginId,
+        request,
+      );
+
+      return result;
+    } catch (error) {
+      console.error('PluginBridge: Failed to execute Node.js script:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to execute script',
+      };
     }
   }
 }

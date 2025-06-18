@@ -18,6 +18,12 @@ import {
   MAX_PLUGIN_MANIFEST_SIZE,
   MAX_PLUGIN_ZIP_SIZE,
 } from './plugin.const';
+import { MatDialog } from '@angular/material/dialog';
+import {
+  PluginNodeConsentDialogComponent,
+  PluginNodeConsentDialogData,
+} from './ui/plugin-node-consent-dialog/plugin-node-consent-dialog.component';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -31,6 +37,7 @@ export class PluginService {
   private readonly _pluginMetaPersistenceService = inject(PluginMetaPersistenceService);
   private readonly _pluginUserPersistenceService = inject(PluginUserPersistenceService);
   private readonly _pluginCacheService = inject(PluginCacheService);
+  private readonly _dialog = inject(MatDialog);
 
   private _isInitialized = false;
   private _loadedPlugins: PluginInstance[] = [];
@@ -143,6 +150,14 @@ export class PluginService {
       throw new Error(
         `Plugin manifest validation failed: ${manifestValidation.errors.join(', ')}`,
       );
+    }
+
+    // Check for dangerous permissions and require consent
+    if (this._pluginSecurity.requiresDangerousPermissions(manifest)) {
+      const hasConsent = await this._getNodeExecutionConsent(manifest);
+      if (!hasConsent) {
+        throw new Error('User declined to grant Node.js execution permission');
+      }
     }
 
     let pluginCode: string;
@@ -788,5 +803,76 @@ export class PluginService {
       console.error(`Failed to reload uploaded plugin ${pluginId}:`, error);
       throw error;
     }
+  }
+
+  /**
+   * Check if a plugin requires and has consent for Node.js execution
+   */
+  async checkNodeExecutionPermission(manifest: PluginManifest): Promise<boolean> {
+    // Check if plugin has nodeExecution permission
+    if (!manifest.permissions.includes('nodeExecution')) {
+      return true; // No node execution permission needed
+    }
+
+    // Only check consent in Electron environment
+    if (!IS_ELECTRON) {
+      console.warn(
+        `Plugin ${manifest.id} requires nodeExecution permission which is not available in web environment`,
+      );
+      return false;
+    }
+
+    return this._getNodeExecutionConsent(manifest);
+  }
+
+  /**
+   * Get consent for Node.js execution permissions
+   */
+  private async _getNodeExecutionConsent(manifest: PluginManifest): Promise<boolean> {
+    // Check if consent was already given and stored
+    const storedConsent =
+      await this._pluginMetaPersistenceService.getNodeExecutionConsent(manifest.id);
+    if (storedConsent === true) {
+      return true;
+    }
+
+    // First confirmation dialog
+    const firstConfirmation = await firstValueFrom(
+      this._dialog
+        .open(PluginNodeConsentDialogComponent, {
+          data: {
+            manifest,
+            isFirstConfirmation: true,
+          } as PluginNodeConsentDialogData,
+          disableClose: false,
+          width: '600px',
+        })
+        .afterClosed(),
+    );
+
+    if (!firstConfirmation) {
+      return false;
+    }
+
+    // Second confirmation dialog
+    const secondConfirmation = await firstValueFrom(
+      this._dialog
+        .open(PluginNodeConsentDialogComponent, {
+          data: {
+            manifest,
+            isFirstConfirmation: false,
+          } as PluginNodeConsentDialogData,
+          disableClose: false,
+          width: '600px',
+        })
+        .afterClosed(),
+    );
+
+    if (secondConfirmation) {
+      // Store consent for future sessions
+      await this._pluginMetaPersistenceService.setNodeExecutionConsent(manifest.id, true);
+    }
+
+    return secondConfirmation === true;
   }
 }

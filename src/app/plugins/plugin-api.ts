@@ -14,6 +14,8 @@ import {
   TagCopy,
   TaskCopy,
   PluginHeaderBtnCfg,
+  PluginNodeScriptRequest,
+  PluginNodeScriptResult,
 } from './plugin-api.model';
 import { PluginBridgeService } from './plugin-bridge.service';
 
@@ -27,6 +29,9 @@ export class PluginAPI implements IPluginAPI {
   private _headerButtons: Array<PluginHeaderBtnCfg> = [];
   private _menuEntries: Array<PluginMenuEntryCfg> = [];
   private _shortcuts: Array<PluginShortcutCfg> = [];
+  executeNodeScript?: (
+    request: PluginNodeScriptRequest,
+  ) => Promise<PluginNodeScriptResult>;
 
   constructor(
     public cfg: PluginBaseCfg,
