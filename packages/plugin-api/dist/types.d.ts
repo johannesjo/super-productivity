@@ -51,11 +51,30 @@ export interface PluginNodeScriptRequest {
   timeout?: number;
   args?: any[];
 }
+export interface PluginNodeScriptError {
+  code:
+    | 'TIMEOUT'
+    | 'MEMORY_LIMIT'
+    | 'SCRIPT_ERROR'
+    | 'PERMISSION_DENIED'
+    | 'INVALID_SCRIPT'
+    | 'NO_CONSENT';
+  message: string;
+  details?: {
+    line?: number;
+    column?: number;
+    scriptSnippet?: string;
+  };
+}
 export interface PluginNodeScriptResult {
   success: boolean;
   result?: any;
-  error?: string;
+  error?: string | PluginNodeScriptError;
   executionTime?: number;
+  resourceUsage?: {
+    peakMemoryMB?: number;
+    cpuTime?: number;
+  };
 }
 export interface PluginManifest {
   name: string;
