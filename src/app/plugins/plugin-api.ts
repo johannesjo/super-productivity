@@ -211,4 +211,24 @@ export class PluginAPI implements PluginAPIInterface {
   __getHookHandlers(): Map<string, Map<Hooks, Array<PluginHookHandler>>> {
     return this._hookHandlers;
   }
+
+  /**
+   * Clean up all resources associated with this plugin API instance
+   * Called when the plugin is being unloaded
+   */
+  cleanup(): void {
+    console.log(`Cleaning up PluginAPI for plugin ${this._pluginId}`);
+
+    // Clear all hook handlers
+    this._hookHandlers.clear();
+
+    // Clear all UI registrations
+    this._headerButtons.length = 0;
+    this._menuEntries.length = 0;
+    this._shortcuts.length = 0;
+    this._sidePanelButtons.length = 0;
+
+    // Notify bridge service to clean up its registrations
+    // This is handled by the plugin runner calling unregisterPluginHooks
+  }
 }

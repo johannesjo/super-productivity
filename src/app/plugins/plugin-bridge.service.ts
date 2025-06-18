@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { SnackService } from '../core/snack/snack.service';
@@ -45,7 +45,7 @@ import { IS_ELECTRON } from '../app.constants';
 @Injectable({
   providedIn: 'root',
 })
-export class PluginBridgeService {
+export class PluginBridgeService implements OnDestroy {
   private _snackService = inject(SnackService);
   private _notifyService = inject(NotifyService);
   private _dialog = inject(MatDialog);
@@ -654,5 +654,20 @@ export class PluginBridgeService {
         error: error instanceof Error ? error.message : 'Failed to execute script',
       };
     }
+  }
+
+  /**
+   * Clean up all resources when service is destroyed
+   */
+  ngOnDestroy(): void {
+    console.log('PluginBridgeService: Cleaning up resources');
+
+    // Complete all BehaviorSubjects
+    this._headerButtons$.complete();
+    this._menuEntries$.complete();
+    this.shortcuts$.complete();
+    this._sidePanelButtons$.complete();
+
+    console.log('PluginBridgeService: Cleanup complete');
   }
 }

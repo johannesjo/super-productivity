@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal, OnDestroy } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { take } from 'rxjs/operators';
@@ -25,11 +25,12 @@ import {
   PluginNodeConsentDialogData,
 } from './ui/plugin-node-consent-dialog/plugin-node-consent-dialog.component';
 import { first } from 'rxjs/operators';
+import { PluginCleanupService } from './plugin-cleanup.service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class PluginService {
+export class PluginService implements OnDestroy {
   private readonly _http = inject(HttpClient);
   private readonly _pluginRunner = inject(PluginRunner);
   private readonly _pluginHooks = inject(PluginHooksService);
@@ -39,6 +40,7 @@ export class PluginService {
   private readonly _pluginUserPersistenceService = inject(PluginUserPersistenceService);
   private readonly _pluginCacheService = inject(PluginCacheService);
   private readonly _dialog = inject(MatDialog);
+  private readonly _cleanupService = inject(PluginCleanupService);
 
   private _isInitialized = false;
   private _loadedPlugins: PluginInstance[] = [];
@@ -952,5 +954,36 @@ export class PluginService {
     }
 
     return secondConfirmation === true;
+  }
+
+  /**
+   * Clean up all resources when service is destroyed
+   */
+  ngOnDestroy(): void {
+    console.log('PluginService: Cleaning up all resources');
+
+    // Complete the side panel subject
+    this._activeSidePanelPlugin$.complete();
+
+    // Unload all plugins first
+    const pluginIds = [...this._loadedPlugins.map((p) => p.manifest.id)];
+    pluginIds.forEach((pluginId) => {
+      try {
+        this.unloadPlugin(pluginId);
+      } catch (error) {
+        console.error(`Error unloading plugin ${pluginId} during cleanup:`, error);
+      }
+    });
+
+    // Clear all internal maps
+    this._pluginPaths.clear();
+    this._pluginIndexHtml.clear();
+    this._pluginIcons.clear();
+    this._loadedPlugins = [];
+
+    // Clean up any remaining resources
+    this._cleanupService.cleanupAll();
+
+    console.log('PluginService: Cleanup complete');
   }
 }

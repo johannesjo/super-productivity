@@ -7,6 +7,7 @@ import {
 } from './plugin-api.model';
 import { PluginAPI } from './plugin-api';
 import { PluginBridgeService } from './plugin-bridge.service';
+import { PluginCleanupService } from './plugin-cleanup.service';
 
 @Injectable({
   providedIn: 'root',
@@ -14,6 +15,8 @@ import { PluginBridgeService } from './plugin-bridge.service';
 export class PluginRunner {
   private _loadedPlugins = new Map<string, PluginInstance>();
   private _pluginBridge = inject(PluginBridgeService);
+  private _cleanupService = inject(PluginCleanupService);
+  private _pluginApis = new Map<string, PluginAPI>();
 
   constructor() {}
 
@@ -54,6 +57,9 @@ export class PluginRunner {
         loaded: false,
         isEnabled, // Use the passed enabled state
       };
+
+      // Store the API instance for cleanup later
+      this._pluginApis.set(manifest.id, pluginAPI);
 
       // Execute plugin code in a sandboxed environment
       await this._executePluginCode(pluginCode, pluginAPI, manifest);
@@ -181,9 +187,32 @@ export class PluginRunner {
         if (typeof fn !== 'function') {
           throw new Error('setTimeout callback must be a function');
         }
-        return setTimeout(fn, Math.min(delay, 5000)); // Max 5 second delay
+        const timerId: any = setTimeout(
+          () => {
+            fn();
+            this._cleanupService.unregisterTimer(manifest.id, timerId);
+          },
+          Math.min(delay, 5000),
+        ); // Max 5 second delay
+        this._cleanupService.registerTimer(manifest.id, timerId);
+        return timerId;
       },
-      clearTimeout: (id: number) => clearTimeout(id),
+      clearTimeout: (id: number) => {
+        clearTimeout(id);
+        this._cleanupService.unregisterTimer(manifest.id, id);
+      },
+      setInterval: (fn: () => void, delay: number) => {
+        if (typeof fn !== 'function') {
+          throw new Error('setInterval callback must be a function');
+        }
+        const intervalId: any = setInterval(fn, Math.min(delay, 5000)); // Max 5 second delay
+        this._cleanupService.registerInterval(manifest.id, intervalId);
+        return intervalId;
+      },
+      clearInterval: (id: number) => {
+        clearInterval(id);
+        this._cleanupService.unregisterTimer(manifest.id, id);
+      },
       Promise: Promise,
       JSON: JSON,
       Math: Math,
@@ -306,6 +335,16 @@ export class PluginRunner {
   unloadPlugin(pluginId: string): boolean {
     const plugin = this._loadedPlugins.get(pluginId);
     if (plugin) {
+      // Clean up the plugin API instance
+      const pluginApi = this._pluginApis.get(pluginId);
+      if (pluginApi && typeof pluginApi.cleanup === 'function') {
+        pluginApi.cleanup();
+      }
+      this._pluginApis.delete(pluginId);
+
+      // Clean up all resources tracked by cleanup service
+      this._cleanupService.cleanupPlugin(pluginId);
+
       this._loadedPlugins.delete(pluginId);
       this._pluginBridge.unregisterPluginHooks(pluginId);
 
