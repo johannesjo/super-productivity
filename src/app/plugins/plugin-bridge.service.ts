@@ -11,7 +11,6 @@ import {
   PluginHookHandler,
   PluginMenuEntryCfg,
   PluginShortcutCfg,
-  SnackCfgLimited,
   PluginHeaderBtnCfg,
   PluginSidePanelBtnCfg,
   TaskCopy,
@@ -20,6 +19,8 @@ import {
   PluginNodeScriptRequest,
   PluginNodeScriptResult,
 } from './plugin-api.model';
+import { SnackCfg } from '@super-productivity/plugin-api';
+import { snackCfgToSnackParams } from './plugin-api-mapper';
 import { PluginHooksService } from './plugin-hooks';
 import { TaskService } from '../features/tasks/task.service';
 import { WorkContextService } from '../features/work-context/work-context.service';
@@ -85,9 +86,10 @@ export class PluginBridgeService {
   /**
    * Show a snack message to the user
    */
-  showSnack(snackCfg: SnackCfgLimited): void {
-    typia.assert<SnackCfgLimited>(snackCfg);
-    this._snackService.open(snackCfg);
+  showSnack(snackCfg: SnackCfg): void {
+    typia.assert<SnackCfg>(snackCfg);
+    const snackParams = snackCfgToSnackParams(snackCfg);
+    this._snackService.open(snackParams);
   }
 
   /**
