@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { PluginAPI, PluginHooks, PluginManifest } from './plugin-api.model';
+import { PluginHooks, PluginManifest } from './plugin-api.model';
+import { PluginAPI } from '@super-productivity/plugin-api';
 
 // TODO should be simple util functions maybe
 @Injectable({
