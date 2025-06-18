@@ -1,17 +1,30 @@
 import { PluginBridgeService } from '../plugin-bridge.service';
 import { PluginBaseCfg, PluginManifest } from '../plugin-api.model';
 
+/**
+ * Configuration for creating a plugin iframe
+ */
 export interface PluginIframeConfig {
+  /** The unique identifier of the plugin */
   pluginId: string;
+  /** The plugin's manifest containing metadata */
   manifest: PluginManifest;
+  /** The HTML content to render in the iframe */
   indexHtml: string;
+  /** Base configuration passed to the plugin (theme, platform, etc.) */
   baseCfg: PluginBaseCfg;
+  /** Bridge service for plugin-to-app communication */
   pluginBridge: PluginBridgeService;
-  onMessage?: (data: any) => void;
+  /** Optional callback for custom message handling */
+  onMessage?: (data: unknown) => void;
 }
 
 /**
- * Creates the PluginAPI script to inject into the iframe
+ * Creates the PluginAPI script to inject into the iframe.
+ * This script sets up the global PluginAPI object that plugins use to interact with the app.
+ *
+ * @param config - Configuration containing plugin metadata and bridge service
+ * @returns JavaScript code as a string to be injected into the iframe
  */
 export const createPluginApiScript = (config: PluginIframeConfig): string => {
   return `
@@ -103,7 +116,11 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
 };
 
 /**
- * Creates a data URL for the plugin iframe
+ * Creates a data URL for the plugin iframe by injecting the PluginAPI script into the HTML.
+ * This allows plugins to run in an isolated context while still having access to the API.
+ *
+ * @param config - Configuration containing plugin HTML and metadata
+ * @returns Base64-encoded data URL containing the modified HTML
  */
 export const createPluginIframeUrl = (config: PluginIframeConfig): string => {
   const apiScript = createPluginApiScript(config);
@@ -128,7 +145,11 @@ export const createPluginIframeUrl = (config: PluginIframeConfig): string => {
 };
 
 /**
- * Handles iframe message events
+ * Creates a message handler for iframe postMessage communication.
+ * Handles plugin API calls and forwards them to the appropriate bridge methods.
+ *
+ * @param config - Configuration containing plugin metadata and bridge service
+ * @returns Async event handler function for message events
  */
 export const createIframeMessageHandler = (
   config: PluginIframeConfig,
@@ -140,24 +161,34 @@ export const createIframeMessageHandler = (
     }
 
     const data = event.data;
-    if (!data || typeof data !== 'object') {
+    if (!data || typeof data !== 'object' || data === null) {
       return;
     }
 
-    // Handle plugin API calls
-    if (data.type === 'plugin-api-call' && data.messageId) {
+    // Type guard for plugin API calls
+    if ('type' in data && data.type === 'plugin-api-call' && 'messageId' in data) {
       try {
         // Set current plugin context
         config.pluginBridge._setCurrentPlugin(config.pluginId);
 
-        // Get the method to call
-        const method = (config.pluginBridge as any)[data.method];
-        if (typeof method !== 'function') {
-          throw new Error(`Method ${data.method} not found`);
+        // Get the method to call with proper type checking
+        const bridgeAny = config.pluginBridge as any;
+        const methodName = String(data.method);
+
+        // Security: Only allow calling public methods (not starting with _)
+        if (methodName.startsWith('_')) {
+          throw new Error(`Access denied: Cannot call private method ${methodName}`);
         }
 
-        // Call the method
-        const result = await method.apply(config.pluginBridge, data.args || []);
+        const method = bridgeAny[methodName];
+
+        if (typeof method !== 'function') {
+          throw new Error(`Method ${methodName} not found on plugin bridge`);
+        }
+
+        // Call the method with arguments
+        const args = Array.isArray(data.args) ? data.args : [];
+        const result = await method.apply(config.pluginBridge, args);
 
         // Send response back to iframe
         event.source?.postMessage(
@@ -181,8 +212,13 @@ export const createIframeMessageHandler = (
       }
     }
 
-    // Handle plugin ready event
-    if (data.type === 'plugin-ready' && data.pluginId === config.pluginId) {
+    // Type guard for plugin ready event
+    if (
+      'type' in data &&
+      data.type === 'plugin-ready' &&
+      'pluginId' in data &&
+      data.pluginId === config.pluginId
+    ) {
       console.log(`Plugin ${config.pluginId} iframe is ready`);
     }
 
