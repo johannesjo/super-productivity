@@ -36,7 +36,14 @@ export class PluginRunner {
         // Register plugin with Electron for Node.js execution
         if ((window as any).ea?.pluginRegisterForNode) {
           const userDataPath = await (window as any).ea.getUserDataPath();
-          const pluginDataPath = `${userDataPath}/plugins/${manifest.id}`;
+          // Validate plugin ID to prevent path traversal
+          const sanitizedPluginId = manifest.id.replace(/[^a-zA-Z0-9_-]/g, '');
+          if (sanitizedPluginId !== manifest.id) {
+            console.warn(
+              `Plugin ID contains invalid characters, using sanitized version: ${sanitizedPluginId}`,
+            );
+          }
+          const pluginDataPath = `${userDataPath}/plugins/${sanitizedPluginId}`;
           (window as any).ea.pluginRegisterForNode(manifest.id, manifest, pluginDataPath);
         }
       }

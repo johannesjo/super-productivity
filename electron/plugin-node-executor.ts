@@ -67,6 +67,33 @@ class PluginNodeExecutor {
 
   public unregisterPlugin(pluginId: string): void {
     this.executionContexts.delete(pluginId);
+    // Clean up plugin resources
+    this.cleanup(pluginId).catch((err) =>
+      console.error(`Failed to cleanup plugin ${pluginId}:`, err),
+    );
+  }
+
+  private validateScriptRequest(request: PluginNodeScriptRequest): void {
+    if (!request.script || typeof request.script !== 'string') {
+      throw new Error('Script must be a non-empty string');
+    }
+
+    if (request.script.length > 100000) {
+      throw new Error('Script too large (max 100KB)');
+    }
+
+    if (request.timeout !== undefined) {
+      if (typeof request.timeout !== 'number' || request.timeout < 0) {
+        throw new Error('Timeout must be a positive number');
+      }
+      if (request.timeout > MAX_TIMEOUT) {
+        throw new Error(`Timeout exceeds maximum allowed (${MAX_TIMEOUT}ms)`);
+      }
+    }
+
+    if (request.args !== undefined && !Array.isArray(request.args)) {
+      throw new Error('Args must be an array');
+    }
   }
 
   private async executeScript(
@@ -74,6 +101,18 @@ class PluginNodeExecutor {
     request: PluginNodeScriptRequest,
   ): Promise<PluginNodeScriptResult> {
     const startTime = Date.now();
+
+    // Validate request
+    try {
+      this.validateScriptRequest(request);
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Invalid script request',
+        executionTime: Date.now() - startTime,
+      };
+    }
+
     const tempDir = path.join(os.tmpdir(), 'sup-plugin-exec', context.pluginId);
     const scriptFile = path.join(tempDir, `${uuidv4()}.js`);
 
@@ -94,12 +133,18 @@ class PluginNodeExecutor {
         context.manifest.nodeScriptConfig?.memoryLimit || DEFAULT_MEMORY_LIMIT;
 
       // Execute the script
-      const result = await this.runScript(scriptFile, context, timeout, memoryLimit);
+      const { result, resourceUsage } = await this.runScript(
+        scriptFile,
+        context,
+        timeout,
+        memoryLimit,
+      );
 
       return {
         success: true,
         result: result,
         executionTime: Date.now() - startTime,
+        resourceUsage,
       };
     } catch (error) {
       return {
@@ -121,6 +166,11 @@ class PluginNodeExecutor {
     // Wrap the script in a function to isolate scope and provide controlled environment
     return `
 'use strict';
+
+// Freeze prototypes to prevent pollution
+Object.freeze(Object.prototype);
+Object.freeze(Array.prototype);
+Object.freeze(Function.prototype);
 
 // Remove dangerous globals
 const dangerousGlobals = [
@@ -146,6 +196,19 @@ const dangerousGlobals = [
   'tty',
   'v8',
   'vm',
+  'fs',
+  'http',
+  'https',
+  'crypto',
+  'os',
+  'path',
+  'url',
+  'util',
+  'stream',
+  'events',
+  'Buffer',
+  'setImmediate',
+  'clearImmediate',
 ];
 
 for (const globalName of dangerousGlobals) {
@@ -158,6 +221,10 @@ for (const globalName of dangerousGlobals) {
     delete global[globalName];
   }
 }
+
+// Prevent reconstruction via constructor chain
+delete Function.prototype.constructor;
+delete Object.prototype.constructor;
 
 // Limited process object
 const safeProcess = {
@@ -194,7 +261,7 @@ const safeProcess = {
     context: PluginNodeExecutionContext,
     timeout: number,
     memoryLimit: string,
-  ): Promise<any> {
+  ): Promise<{ result: any; resourceUsage?: any }> {
     return new Promise((resolve, reject) => {
       const memoryLimitMB = this.parseMemoryLimit(memoryLimit);
 
@@ -221,6 +288,7 @@ const safeProcess = {
       let stdout = '';
       let stderr = '';
       let killed = false;
+      let peakMemoryUsage = 0;
 
       // Set timeout
       const timer = setTimeout(() => {
@@ -228,6 +296,16 @@ const safeProcess = {
         child.kill('SIGTERM');
         reject(new Error(`Script execution timed out after ${timeout}ms`));
       }, timeout);
+
+      // Monitor memory usage
+      const memoryMonitor = setInterval(() => {
+        try {
+          const usage = process.memoryUsage();
+          peakMemoryUsage = Math.max(peakMemoryUsage, usage.heapUsed);
+        } catch (e) {
+          // Ignore monitoring errors
+        }
+      }, 100);
 
       child.stdout.on('data', (data) => {
         stdout += data.toString();
@@ -239,10 +317,15 @@ const safeProcess = {
 
       child.on('close', (code) => {
         clearTimeout(timer);
+        clearInterval(memoryMonitor);
 
         if (killed) {
           return;
         }
+
+        const resourceUsage = {
+          peakMemoryMB: Math.round((peakMemoryUsage / 1024 / 1024) * 100) / 100,
+        };
 
         try {
           // Parse the result
@@ -250,16 +333,30 @@ const safeProcess = {
           if (output) {
             const parsed = JSON.parse(output);
             if (parsed.__error) {
-              reject(new Error(parsed.__error));
+              // Try to extract line number from stack trace
+              const errorMatch = parsed.__stack?.match(/at.*:(\d+):(\d+)/);
+              const error: any = new Error(parsed.__error);
+              if (errorMatch) {
+                error.line = parseInt(errorMatch[1], 10);
+                error.column = parseInt(errorMatch[2], 10);
+              }
+              reject(error);
             } else if (parsed.__result !== undefined) {
-              resolve(parsed.__result);
+              resolve({ result: parsed.__result, resourceUsage });
             } else {
-              resolve(undefined);
+              resolve({ result: undefined, resourceUsage });
             }
           } else if (code !== 0) {
-            reject(new Error(stderr || `Process exited with code ${code}`));
+            // Check for specific error types
+            let errorMessage = stderr || `Process exited with code ${code}`;
+            if (stderr.includes('JavaScript heap out of memory')) {
+              errorMessage = 'Script exceeded memory limit';
+            } else if (stderr.includes('Maximum call stack')) {
+              errorMessage = 'Script exceeded maximum call stack size';
+            }
+            reject(new Error(errorMessage));
           } else {
-            resolve(undefined);
+            resolve({ result: undefined, resourceUsage });
           }
         } catch (e) {
           reject(new Error(`Failed to parse script output: ${e}`));
@@ -291,6 +388,35 @@ const safeProcess = {
         return value * 1024;
       default:
         return 128;
+    }
+  }
+
+  /**
+   * Clean up resources for a specific plugin or all plugins
+   */
+  public async cleanup(pluginId?: string): Promise<void> {
+    if (pluginId) {
+      // Clean up specific plugin
+      this.executionContexts.delete(pluginId);
+
+      // Remove plugin's temp directory
+      const tempDir = path.join(os.tmpdir(), 'sup-plugin-exec', pluginId);
+      try {
+        await fs.rm(tempDir, { recursive: true, force: true });
+      } catch (e) {
+        // Ignore cleanup errors
+      }
+    } else {
+      // Clean up all plugins
+      this.executionContexts.clear();
+
+      // Remove all temp directories
+      const tempDir = path.join(os.tmpdir(), 'sup-plugin-exec');
+      try {
+        await fs.rm(tempDir, { recursive: true, force: true });
+      } catch (e) {
+        // Ignore cleanup errors
+      }
     }
   }
 }
