@@ -16,6 +16,7 @@ import {
   PluginHeaderBtnCfg,
   PluginNodeScriptRequest,
   PluginNodeScriptResult,
+  PluginSidePanelBtnCfg,
 } from './plugin-api.model';
 import { PluginBridgeService } from './plugin-bridge.service';
 
@@ -29,6 +30,7 @@ export class PluginAPI implements IPluginAPI {
   private _headerButtons: Array<PluginHeaderBtnCfg> = [];
   private _menuEntries: Array<PluginMenuEntryCfg> = [];
   private _shortcuts: Array<PluginShortcutCfg> = [];
+  private _sidePanelButtons: Array<PluginSidePanelBtnCfg> = [];
   executeNodeScript?: (
     request: PluginNodeScriptRequest,
   ) => Promise<PluginNodeScriptResult>;
@@ -90,6 +92,14 @@ export class PluginAPI implements IPluginAPI {
 
     // Register shortcut with bridge
     this._pluginBridge.registerShortcut(shortcut);
+  }
+
+  registerSidePanelButton(
+    sidePanelBtnCfg: Omit<PluginSidePanelBtnCfg, 'pluginId'>,
+  ): void {
+    this._sidePanelButtons.push({ ...sidePanelBtnCfg, pluginId: this._pluginId });
+    console.log(`Plugin ${this._pluginId} registered side panel button`, sidePanelBtnCfg);
+    this._pluginBridge.registerSidePanelButton(sidePanelBtnCfg);
   }
 
   showIndexHtmlAsView(): void {

@@ -59,8 +59,8 @@ export class PluginRunner {
       // Execute plugin code in a sandboxed environment
       await this._executePluginCode(pluginCode, pluginAPI, manifest);
 
-      // Automatically register menu entry unless isSkipMenuEntry is true
-      if (!manifest.isSkipMenuEntry && manifest.iFrame) {
+      // Automatically register menu entry unless isSkipMenuEntry is true or sidePanel is true
+      if (!manifest.isSkipMenuEntry && manifest.iFrame && !manifest.sidePanel) {
         // Ensure plugin context is set before registering menu entry
         this._pluginBridge._setCurrentPlugin(manifest.id);
 

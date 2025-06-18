@@ -13,6 +13,7 @@ import {
   PluginShortcutCfg,
   SnackCfgLimited,
   PluginHeaderBtnCfg,
+  PluginSidePanelBtnCfg,
   TaskCopy,
   ProjectCopy,
   TagCopy,
@@ -70,6 +71,10 @@ export class PluginBridgeService {
 
   // Track shortcuts registered by plugins
   shortcuts$ = new BehaviorSubject<PluginShortcutCfg[]>([]);
+
+  // Track side panel buttons registered by plugins
+  private _sidePanelButtons$ = new BehaviorSubject<PluginSidePanelBtnCfg[]>([]);
+  public readonly sidePanelButtons$ = this._sidePanelButtons$.asObservable();
 
   /**
    * Set the current plugin context for secure operations
@@ -370,6 +375,7 @@ export class PluginBridgeService {
     this._pluginHooksService.unregisterPluginHooks(pluginId);
     this._removePluginHeaderButtons(pluginId);
     this._removePluginMenuEntries(pluginId);
+    this._removePluginSidePanelButtons(pluginId);
     this.unregisterPluginShortcuts(pluginId);
 
     console.log('PluginBridge: All hooks unregistered for plugin', { pluginId });
@@ -453,6 +459,51 @@ export class PluginBridgeService {
     this._menuEntries$.next(filteredEntries);
 
     console.log('PluginBridge: Menu entries removed for plugin', { pluginId });
+  }
+
+  /**
+   * Register a side panel button for a plugin
+   */
+  registerSidePanelButton(
+    sidePanelBtnCfg: Omit<PluginSidePanelBtnCfg, 'pluginId'>,
+  ): void {
+    if (!this._currentPluginId) {
+      throw new Error('No plugin context set for side panel button registration');
+    }
+
+    // Validate required fields
+    if (!sidePanelBtnCfg.label || typeof sidePanelBtnCfg.label !== 'string') {
+      throw new Error('Side panel button must have a valid label string');
+    }
+    if (!sidePanelBtnCfg.onClick || typeof sidePanelBtnCfg.onClick !== 'function') {
+      throw new Error('Side panel button must have a valid onClick function');
+    }
+
+    const newButton: PluginSidePanelBtnCfg = {
+      ...sidePanelBtnCfg,
+      pluginId: this._currentPluginId,
+    };
+
+    const currentButtons = this._sidePanelButtons$.value;
+    this._sidePanelButtons$.next([...currentButtons, newButton]);
+
+    console.log('PluginBridge: Side panel button registered', {
+      pluginId: this._currentPluginId,
+      sidePanelBtnCfg,
+    });
+  }
+
+  /**
+   * Remove all side panel buttons for a specific plugin
+   */
+  private _removePluginSidePanelButtons(pluginId: string): void {
+    const currentButtons = this._sidePanelButtons$.value;
+    const filteredButtons = currentButtons.filter(
+      (button) => button.pluginId !== pluginId,
+    );
+    this._sidePanelButtons$.next(filteredButtons);
+
+    console.log('PluginBridge: Side panel buttons removed for plugin', { pluginId });
   }
 
   /**

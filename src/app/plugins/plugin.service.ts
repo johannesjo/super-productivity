@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
 import { inject, Injectable, signal } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { take } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
@@ -46,6 +47,10 @@ export class PluginService {
   private _pluginIcons: Map<string, string> = new Map(); // Store plugin ID -> SVG icon content
   private _pluginIconsSignal = signal<Map<string, string>>(new Map());
 
+  // Track active side panel plugin
+  private _activeSidePanelPlugin$ = new BehaviorSubject<PluginInstance | null>(null);
+  public readonly activeSidePanelPlugin$ = this._activeSidePanelPlugin$.asObservable();
+
   async initializePlugins(): Promise<void> {
     if (this._isInitialized) {
       console.warn('Plugin system already initialized');
@@ -77,6 +82,7 @@ export class PluginService {
       'assets/example-plugin',
       'assets/yesterday-tasks-plugin',
       'assets/markdown-list-to-task',
+      'assets/test-side-panel-plugin',
     ];
     await this._loadPluginsFromPaths(pluginPaths, 'built-in');
   }
@@ -384,6 +390,56 @@ export class PluginService {
    */
   getPluginIconsSignal(): import('@angular/core').Signal<ReadonlyMap<string, string>> {
     return this._pluginIconsSignal.asReadonly();
+  }
+
+  /**
+   * Set the active side panel plugin
+   */
+  setActiveSidePanelPlugin(pluginId: string | null): void {
+    if (!pluginId) {
+      this._activeSidePanelPlugin$.next(null);
+      return;
+    }
+
+    const plugin = this._loadedPlugins.find(
+      (p) => p.manifest.id === pluginId && p.loaded,
+    );
+    if (plugin) {
+      this._activeSidePanelPlugin$.next(plugin);
+    } else {
+      console.warn(`Plugin ${pluginId} not found or not loaded`);
+      this._activeSidePanelPlugin$.next(null);
+    }
+  }
+
+  /**
+   * Get the base configuration for plugins
+   */
+  async getBaseCfg(): Promise<PluginBaseCfg> {
+    return this._getBaseCfg();
+  }
+
+  /**
+   * Load plugin index.html content
+   */
+  async loadPluginIndexHtml(pluginId: string): Promise<string | null> {
+    // First check if we already have it cached
+    const cached = this._pluginIndexHtml.get(pluginId);
+    if (cached) {
+      return cached;
+    }
+
+    // Try to load from cache if it's an uploaded plugin
+    const pluginPath = this._pluginPaths.get(pluginId);
+    if (pluginPath?.startsWith('uploaded://')) {
+      const cachedPlugin = await this._pluginCacheService.getPlugin(pluginId);
+      if (cachedPlugin?.indexHtml) {
+        this._pluginIndexHtml.set(pluginId, cachedPlugin.indexHtml);
+        return cachedPlugin.indexHtml;
+      }
+    }
+
+    return null;
   }
 
   async dispatchHook(hookName: Hooks, payload?: unknown): Promise<void> {

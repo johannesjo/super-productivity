@@ -1,0 +1,13 @@
+{
+  "name": "Side Panel Test Plugin",
+  "id": "test-side-panel-plugin",
+  "manifestVersion": 1,
+  "version": "1.0.0",
+  "minSupVersion": "10.0.0",
+  "description": "A test plugin that demonstrates the side panel functionality",
+  "hooks": [],
+  "permissions": [],
+  "iFrame": true,
+  "sidePanel": true,
+  "icon": "icon.svg"
+}
