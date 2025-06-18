@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { PluginService } from '../../plugin.service';
 import { PluginBridgeService } from '../../plugin-bridge.service';
+import { PluginCleanupService } from '../../plugin-cleanup.service';
 import { Subscription, filter } from 'rxjs';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import {
@@ -97,6 +98,7 @@ export class PluginPanelContainerComponent implements OnInit, OnDestroy {
   private _pluginService = inject(PluginService);
   private _pluginBridge = inject(PluginBridgeService);
   private _sanitizer = inject(DomSanitizer);
+  private _cleanupService = inject(PluginCleanupService);
 
   iframeUrl = signal<SafeResourceUrl | null>(null);
   isLoading = signal<boolean>(true);
@@ -149,6 +151,13 @@ export class PluginPanelContainerComponent implements OnInit, OnDestroy {
             // Set up message handler
             this._messageHandler = createIframeMessageHandler(config);
             window.addEventListener('message', this._messageHandler);
+            // Track the listener for cleanup
+            this._cleanupService.registerEventListener(
+              plugin.id,
+              window,
+              'message',
+              this._messageHandler,
+            );
           } catch (error) {
             console.error('Failed to load plugin in side panel:', error);
             this.error.set(
@@ -160,11 +169,28 @@ export class PluginPanelContainerComponent implements OnInit, OnDestroy {
     );
   }
 
-  ngOnDestroy(): void {
-    this._subs.unsubscribe();
+  /**
+   * Clean up resources for the current plugin
+   */
+  private _cleanupCurrentPlugin(): void {
+    // Remove message handler
     if (this._messageHandler) {
       window.removeEventListener('message', this._messageHandler);
+      this._messageHandler = undefined;
     }
+
+    // Clear iframe URL to release resources
+    const currentPlugin = this._pluginService.getActiveSidePanelPluginId();
+    if (currentPlugin && this.iframeUrl()) {
+      // Note: The actual iframe element cleanup is handled by the cleanup service
+      // when the plugin is unloaded
+      this.iframeUrl.set(null);
+    }
+  }
+
+  ngOnDestroy(): void {
+    this._subs.unsubscribe();
+    this._cleanupCurrentPlugin();
   }
 
   onIframeLoad(): void {
