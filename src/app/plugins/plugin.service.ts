@@ -2,7 +2,6 @@
 import { inject, Injectable, signal, OnDestroy } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { take } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { PluginRunner } from './plugin-runner';
 import { PluginHooksService } from './plugin-hooks';
@@ -26,6 +25,7 @@ import {
 } from './ui/plugin-node-consent-dialog/plugin-node-consent-dialog.component';
 import { first } from 'rxjs/operators';
 import { PluginCleanupService } from './plugin-cleanup.service';
+import { PluginLoaderService } from './plugin-loader.service';
 
 @Injectable({
   providedIn: 'root',
@@ -41,6 +41,7 @@ export class PluginService implements OnDestroy {
   private readonly _pluginCacheService = inject(PluginCacheService);
   private readonly _dialog = inject(MatDialog);
   private readonly _cleanupService = inject(PluginCleanupService);
+  private readonly _pluginLoader = inject(PluginLoaderService);
 
   private _isInitialized = false;
   private _loadedPlugins: PluginInstance[] = [];
@@ -86,6 +87,11 @@ export class PluginService implements OnDestroy {
       'assets/markdown-list-to-task',
       'assets/test-side-panel-plugin',
     ];
+
+    // Preload critical plugins
+    await this._pluginLoader.preloadPlugins(pluginPaths);
+
+    // Then load all plugins
     await this._loadPluginsFromPaths(pluginPaths, 'built-in');
   }
 
@@ -145,107 +151,19 @@ export class PluginService implements OnDestroy {
     await Promise.allSettled(promises);
   }
 
-  /**
-   * Validate and load plugin files (code, manifest, assets)
-   */
-  private async _validateAndLoadPluginFiles(
-    manifest: PluginManifest,
-    pluginPath?: string,
-  ): Promise<{ pluginCode: string; indexHtml?: string }> {
-    // Validate manifest
-    const manifestValidation = this._pluginSecurity.validatePluginManifest(manifest);
-    if (!manifestValidation.isValid) {
-      throw new Error(
-        `Plugin manifest validation failed: ${manifestValidation.errors.join(', ')}`,
-      );
-    }
-
-    // Check for dangerous permissions and require consent
-    if (this._pluginSecurity.requiresDangerousPermissions(manifest)) {
-      const hasConsent = await this._getNodeExecutionConsent(manifest);
-      if (!hasConsent) {
-        throw new Error('User declined to grant Node.js execution permission');
-      }
-    }
-
-    let pluginCode: string;
-    let indexHtml: string | undefined;
-
-    if (pluginPath) {
-      // Load from file system path
-      const pluginCodeUrl = `${pluginPath}/plugin.js`;
-      pluginCode =
-        (await this._http
-          .get(pluginCodeUrl, { responseType: 'text' })
-          .pipe(take(1))
-          .toPromise()) || '';
-
-      if (!pluginCode) {
-        throw new Error('Failed to load plugin code');
-      }
-
-      // Only try to load index.html if manifest.iFrame is true
-      if (manifest.iFrame) {
-        const indexHtmlUrl = `${pluginPath}/index.html`;
-        try {
-          indexHtml =
-            (await this._http
-              .get(indexHtmlUrl, { responseType: 'text' })
-              .pipe(take(1))
-              .toPromise()) || undefined;
-
-          if (indexHtml) {
-            this._pluginIndexHtml.set(manifest.id, indexHtml);
-            console.log(`Loaded index.html for plugin ${manifest.id}`);
-          }
-        } catch (error) {
-          console.log(`No index.html found for plugin ${manifest.id} (optional)`);
-        }
-      }
-
-      // Try to load icon if specified in manifest
-      if (manifest.icon) {
-        const iconUrl = `${pluginPath}/${manifest.icon}`;
-        try {
-          const iconContent = await this._http
-            .get(iconUrl, { responseType: 'text' })
-            .pipe(take(1))
-            .toPromise();
-
-          if (iconContent) {
-            this._pluginIcons.set(manifest.id, iconContent);
-            this._pluginIconsSignal.set(new Map(this._pluginIcons));
-          }
-        } catch (error) {
-          console.log(`Failed to load icon for plugin ${manifest.id}:`, error);
-        }
-      }
-    } else {
-      throw new Error('Plugin path is required for file loading');
-    }
-
-    // Validate plugin code
-    const codeValidation = this._pluginSecurity.validatePluginCode(pluginCode);
-    if (!codeValidation.isValid) {
-      throw new Error(
-        `Plugin code validation failed: ${codeValidation.errors.join(', ')}`,
-      );
-    }
-
-    return { pluginCode, indexHtml };
-  }
-
   private async _loadPlugin(pluginPath: string): Promise<PluginInstance> {
     try {
-      // Load manifest
-      const manifestUrl = `${pluginPath}/manifest.json`;
-      const manifest = await this._http
-        .get<PluginManifest>(manifestUrl)
-        .pipe(take(1))
-        .toPromise();
+      // Use the loader service for lazy loading
+      const assets = await this._pluginLoader.loadPluginAssets(pluginPath);
+      const { manifest, code: pluginCode, indexHtml, icon } = assets;
 
-      if (!manifest) {
-        throw new Error('Failed to load plugin manifest');
+      // Store assets if loaded
+      if (indexHtml) {
+        this._pluginIndexHtml.set(manifest.id, indexHtml);
+      }
+      if (icon) {
+        this._pluginIcons.set(manifest.id, icon);
+        this._pluginIconsSignal.set(new Map(this._pluginIcons));
       }
 
       // Check if plugin should be loaded based on persisted enabled state
@@ -253,8 +171,29 @@ export class PluginService implements OnDestroy {
         manifest.id,
       );
 
-      // Always validate and load files to get index.html if present
-      const { pluginCode } = await this._validateAndLoadPluginFiles(manifest, pluginPath);
+      // Validate manifest and code
+      const manifestValidation = this._pluginSecurity.validatePluginManifest(manifest);
+      if (!manifestValidation.isValid) {
+        throw new Error(
+          `Plugin manifest validation failed: ${manifestValidation.errors.join(', ')}`,
+        );
+      }
+
+      // Check for dangerous permissions
+      if (this._pluginSecurity.requiresDangerousPermissions(manifest)) {
+        const hasConsent = await this._getNodeExecutionConsent(manifest);
+        if (!hasConsent) {
+          throw new Error('User declined to grant Node.js execution permission');
+        }
+      }
+
+      // Validate plugin code
+      const codeValidation = this._pluginSecurity.validatePluginCode(pluginCode);
+      if (!codeValidation.isValid) {
+        throw new Error(
+          `Plugin code validation failed: ${codeValidation.errors.join(', ')}`,
+        );
+      }
 
       // If plugin is disabled, create a placeholder instance without loading code
       if (!isPluginEnabled) {
@@ -797,23 +736,16 @@ export class PluginService implements OnDestroy {
 
   private async _loadUploadedPlugin(pluginId: string): Promise<PluginInstance> {
     try {
-      // Load cached plugin files
-      const cachedPlugin = await this._pluginCacheService.getPlugin(pluginId);
-      if (!cachedPlugin) {
-        throw new Error(`Cached files not found for uploaded plugin ${pluginId}`);
+      // Use the loader service for uploaded plugins
+      const assets = await this._pluginLoader.loadUploadedPluginAssets(pluginId);
+      const { manifest, code: pluginCode, indexHtml, icon } = assets;
+
+      // Store assets if loaded
+      if (indexHtml) {
+        this._pluginIndexHtml.set(manifest.id, indexHtml);
       }
-
-      const manifest: PluginManifest = JSON.parse(cachedPlugin.manifest);
-      const pluginCode: string = cachedPlugin.code;
-
-      // Store index.html content if it exists in cache
-      if (cachedPlugin.indexHtml) {
-        this._pluginIndexHtml.set(manifest.id, cachedPlugin.indexHtml);
-      }
-
-      // Store icon content if it exists in cache
-      if (cachedPlugin.icon) {
-        this._pluginIcons.set(manifest.id, cachedPlugin.icon);
+      if (icon) {
+        this._pluginIcons.set(manifest.id, icon);
         this._pluginIconsSignal.set(new Map(this._pluginIcons));
       }
 
@@ -983,6 +915,9 @@ export class PluginService implements OnDestroy {
 
     // Clean up any remaining resources
     this._cleanupService.cleanupAll();
+
+    // Clear loader caches
+    this._pluginLoader.clearAllCaches();
 
     console.log('PluginService: Cleanup complete');
   }

@@ -1,4 +1,10 @@
 import { Injectable } from '@angular/core';
+import {
+  compressPlugin,
+  decompressPlugin,
+  shouldCompress,
+  CompressedPlugin,
+} from './plugin-compression.util';
 
 export interface CachedPlugin {
   id: string;
@@ -8,6 +14,8 @@ export interface CachedPlugin {
   icon?: string; // Optional SVG icon content
   uploadDate: number;
   lastAccessed: number;
+  compressed?: boolean; // Whether the plugin is compressed
+  compressionRatio?: number; // Compression ratio if compressed
 }
 
 /**
@@ -53,7 +61,7 @@ export class PluginCacheService {
   }
 
   /**
-   * Store a plugin in the cache
+   * Store a plugin in the cache with optional compression
    */
   async storePlugin(
     pluginId: string,
@@ -66,15 +74,53 @@ export class PluginCacheService {
     const transaction = db.transaction([this.STORE_NAME], 'readwrite');
     const store = transaction.objectStore(this.STORE_NAME);
 
-    const cachedPlugin: CachedPlugin = {
-      id: pluginId,
-      manifest,
-      code,
-      indexHtml,
-      icon,
-      uploadDate: Date.now(),
-      lastAccessed: Date.now(),
-    };
+    let cachedPlugin: CachedPlugin;
+
+    // Check if compression would be beneficial
+    if (shouldCompress(code) || (indexHtml && shouldCompress(indexHtml))) {
+      try {
+        const compressed = await compressPlugin(manifest, code, indexHtml, icon);
+        cachedPlugin = {
+          id: pluginId,
+          manifest: compressed.manifest,
+          code: compressed.code,
+          indexHtml: compressed.indexHtml,
+          icon: compressed.icon,
+          uploadDate: Date.now(),
+          lastAccessed: Date.now(),
+          compressed: true,
+          compressionRatio: compressed.compressionRatio,
+        };
+        console.log(
+          `Plugin ${pluginId} compressed with ratio ${compressed.compressionRatio?.toFixed(2)}x`,
+        );
+      } catch (error) {
+        console.warn('Failed to compress plugin, storing uncompressed:', error);
+        // Fall back to uncompressed storage
+        cachedPlugin = {
+          id: pluginId,
+          manifest,
+          code,
+          indexHtml,
+          icon,
+          uploadDate: Date.now(),
+          lastAccessed: Date.now(),
+          compressed: false,
+        };
+      }
+    } else {
+      // Store uncompressed for small plugins
+      cachedPlugin = {
+        id: pluginId,
+        manifest,
+        code,
+        indexHtml,
+        icon,
+        uploadDate: Date.now(),
+        lastAccessed: Date.now(),
+        compressed: false,
+      };
+    }
 
     return new Promise((resolve, reject) => {
       const request = store.put(cachedPlugin);
@@ -91,7 +137,7 @@ export class PluginCacheService {
   }
 
   /**
-   * Retrieve a plugin from the cache
+   * Retrieve a plugin from the cache and decompress if needed
    */
   async getPlugin(pluginId: string): Promise<CachedPlugin | null> {
     const db = await this._getDB();
@@ -101,13 +147,44 @@ export class PluginCacheService {
     return new Promise((resolve, reject) => {
       const request = store.get(pluginId);
 
-      request.onsuccess = () => {
+      request.onsuccess = async () => {
         const result = request.result as CachedPlugin | undefined;
 
         if (result) {
           // Update last accessed time
           result.lastAccessed = Date.now();
           store.put(result);
+
+          // Decompress if needed
+          if (result.compressed) {
+            try {
+              const compressed: CompressedPlugin = {
+                manifest: result.manifest,
+                code: result.code,
+                indexHtml: result.indexHtml,
+                icon: result.icon,
+                compressed: true,
+              };
+              const decompressed = await decompressPlugin(compressed);
+
+              // Return decompressed plugin
+              const decompressedPlugin: CachedPlugin = {
+                ...result,
+                manifest: decompressed.manifest,
+                code: decompressed.code,
+                indexHtml: decompressed.indexHtml,
+                icon: decompressed.icon,
+              };
+              console.log(`Plugin ${pluginId} retrieved and decompressed from cache`);
+              resolve(decompressedPlugin);
+              return;
+            } catch (error) {
+              console.error('Failed to decompress plugin:', error);
+              reject(new Error(`Failed to decompress plugin ${pluginId}`));
+              return;
+            }
+          }
+
           console.log(`Plugin ${pluginId} retrieved from cache`);
         }
 
