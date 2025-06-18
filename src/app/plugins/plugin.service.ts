@@ -413,6 +413,14 @@ export class PluginService {
   }
 
   /**
+   * Get the current active side panel plugin ID
+   */
+  getActiveSidePanelPluginId(): string | null {
+    const activePlugin = this._activeSidePanelPlugin$.value;
+    return activePlugin?.manifest.id || null;
+  }
+
+  /**
    * Get the base configuration for plugins
    */
   async getBaseCfg(): Promise<PluginBaseCfg> {
@@ -684,6 +692,13 @@ export class PluginService {
   }
 
   async removeUploadedPlugin(pluginId: string): Promise<void> {
+    // Check if this plugin is active in the side panel
+    const activePluginId = this.getActiveSidePanelPluginId();
+    if (activePluginId === pluginId) {
+      // Close the side panel if this plugin is active
+      this.setActiveSidePanelPlugin(null);
+    }
+
     // First disable and unload the plugin if it's currently loaded
     const pluginInstance = this._loadedPlugins.find((p) => p.manifest.id === pluginId);
     if (pluginInstance && pluginInstance.loaded) {
@@ -724,6 +739,13 @@ export class PluginService {
     const index = this._loadedPlugins.findIndex((p) => p.manifest.id === pluginId);
     if (index !== -1) {
       const plugin = this._loadedPlugins[index];
+
+      // Check if this plugin is active in the side panel
+      const activePluginId = this.getActiveSidePanelPluginId();
+      if (activePluginId === pluginId) {
+        // Close the side panel if this plugin is active
+        this.setActiveSidePanelPlugin(null);
+      }
 
       // Instead of removing, replace with a disabled placeholder
       // This ensures the plugin remains in the list for re-enabling
