@@ -36,9 +36,26 @@ export interface SnackCfg {
   type?: 'SUCCESS' | 'ERROR' | 'WARNING' | 'INFO';
   ico?: string;
 }
+export type SnackCfgLimited = SnackCfg;
 export interface NotifyCfg {
   title: string;
   body: string;
+}
+export interface PluginNodeScriptConfig {
+  timeout?: number;
+  memoryLimit?: string;
+  allowedPaths?: string[];
+}
+export interface PluginNodeScriptRequest {
+  script: string;
+  timeout?: number;
+  args?: any[];
+}
+export interface PluginNodeScriptResult {
+  success: boolean;
+  result?: any;
+  error?: string;
+  executionTime?: number;
 }
 export interface PluginManifest {
   name: string;
@@ -54,6 +71,7 @@ export interface PluginManifest {
   type?: 'standard';
   assets?: string[];
   icon?: string;
+  nodeScriptConfig?: PluginNodeScriptConfig;
 }
 export type PluginHookHandler = (...args: unknown[]) => void | Promise<void>;
 export interface TaskData {
@@ -69,6 +87,7 @@ export interface TaskData {
   created?: number;
   updated?: number;
 }
+export type TaskCopy = TaskData;
 export interface ProjectData {
   id: string;
   title: string;
@@ -77,6 +96,7 @@ export interface ProjectData {
   created?: number;
   updated?: number;
 }
+export type ProjectCopy = ProjectData;
 export interface TagData {
   id: string;
   title: string;
@@ -84,11 +104,13 @@ export interface TagData {
   created?: number;
   updated?: number;
 }
+export type TagCopy = TagData;
 export interface PluginHeaderBtnCfg {
   pluginId: string;
   label: string;
   icon?: string;
   onClick: () => void;
+  color?: 'primary' | 'accent' | 'warn';
 }
 export interface PluginAPI {
   cfg: PluginBaseCfg;
@@ -117,6 +139,7 @@ export interface PluginAPI {
   updateTag(tagId: string, updates: Partial<TagData>): Promise<void>;
   persistDataSynced(dataStr: string): Promise<void>;
   loadSyncedData(): Promise<string | null>;
+  executeNodeScript?(request: PluginNodeScriptRequest): Promise<PluginNodeScriptResult>;
 }
 export interface PluginInstance {
   manifest: PluginManifest;

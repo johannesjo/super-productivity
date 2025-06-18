@@ -94,4 +94,41 @@ export class PluginMetaPersistenceService {
       isUpdateRevAndLastUpdate: true,
     });
   }
+
+  /**
+   * Set Node.js execution consent for a plugin
+   */
+  async setNodeExecutionConsent(pluginId: string, hasConsent: boolean): Promise<void> {
+    const currentState = await this._pfapiService.pf.m.pluginMetadata.load();
+    const existingIndex = currentState.findIndex((item) => item.id === pluginId);
+    const updatedState: PluginMetaDataState = [...currentState];
+
+    if (existingIndex >= 0) {
+      // Update existing entry
+      updatedState[existingIndex] = {
+        ...updatedState[existingIndex],
+        nodeExecutionConsent: hasConsent,
+      };
+    } else {
+      // Create new entry for this plugin
+      updatedState.push({
+        id: pluginId,
+        isEnabled: false, // Default to disabled
+        nodeExecutionConsent: hasConsent,
+      });
+    }
+
+    await this._pfapiService.pf.m.pluginMetadata.save(updatedState, {
+      isUpdateRevAndLastUpdate: true,
+    });
+  }
+
+  /**
+   * Get Node.js execution consent for a plugin
+   */
+  async getNodeExecutionConsent(pluginId: string): Promise<boolean | undefined> {
+    const currentState = await this._pfapiService.pf.m.pluginMetadata.load();
+    const pluginMetadata = currentState.find((item) => item.id === pluginId);
+    return pluginMetadata?.nodeExecutionConsent;
+  }
 }
