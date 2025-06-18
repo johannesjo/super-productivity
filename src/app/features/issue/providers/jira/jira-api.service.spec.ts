@@ -1,33 +1,28 @@
-import moment from 'moment';
-import { JIRA_DATETIME_FORMAT } from './jira.const';
+import { formatJiraDate } from '../../../../util/format-jira-date';
 
 describe('JiraApiService', () => {
   describe('addWorklog$ date formatting', () => {
-    it('should format date correctly using moment', () => {
+    it('should format date correctly using formatJiraDate', () => {
       const testDate = '2024-01-15T10:30:00.000Z';
-      const result = moment(testDate).locale('en').format(JIRA_DATETIME_FORMAT);
+      const result = formatJiraDate(testDate);
 
-      // Moment format: YYYY-MM-DDTHH:mm:ss.SSZZ produces timezone without colon
+      // JIRA format: YYYY-MM-DDTHH:mm:ss.SSZZ produces timezone without colon
       expect(result).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{2}[+-]\d{4}$/);
     });
 
-    it('should understand the moment format ZZ vs Z', () => {
+    it('should understand the Jira format ZZ (timezone without colon)', () => {
       const testDate = '2024-01-15T10:30:00.000Z';
-      // JIRA_DATETIME_FORMAT uses 'ZZ' which outputs +0100 (without colon)
-      const zzFormat = moment(testDate).locale('en').format('YYYY-MM-DDTHH:mm:ss.SSZZ');
-      // Using 'Z' outputs +01:00 (with colon)
-      const zFormat = moment(testDate).locale('en').format('YYYY-MM-DDTHH:mm:ss.SSZ');
+      const result = formatJiraDate(testDate);
 
-      expect(zzFormat).toMatch(/[+-]\d{4}$/); // Ends with +0100 format
-      expect(zFormat).toMatch(/[+-]\d{2}:\d{2}$/); // Ends with +01:00 format
+      expect(result).toMatch(/[+-]\d{4}$/); // Ends with +0100 format (no colon)
     });
 
     it('should format date for Jira worklog', () => {
       const testDate = '2024-01-15T10:30:00.000Z';
-      const momentResult = moment(testDate).locale('en').format(JIRA_DATETIME_FORMAT);
+      const result = formatJiraDate(testDate);
       const date = new Date(testDate);
 
-      // Build the format that matches moment's output with ZZ (no colon in timezone)
+      // Build the format that matches the expected output with ZZ (no colon in timezone)
       const pad = (num: number, length = 2): string => String(num).padStart(length, '0');
       const year = date.getFullYear();
       const month = pad(date.getMonth() + 1);
@@ -37,7 +32,7 @@ describe('JiraApiService', () => {
       const seconds = pad(date.getSeconds());
       const milliseconds = String(date.getMilliseconds())
         .padStart(3, '0')
-        .substring(0, 2); // moment uses 2 digits
+        .substring(0, 2); // Jira uses 2 digits
 
       // Timezone offset without colon (to match ZZ format)
       const offsetMinutes = date.getTimezoneOffset();
@@ -46,9 +41,9 @@ describe('JiraApiService', () => {
       const offsetSign = offsetMinutes <= 0 ? '+' : '-';
       const offsetFormatted = `${offsetSign}${pad(offsetHours)}${pad(offsetMinPart)}`;
 
-      const nativeResult = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}${offsetFormatted}`;
+      const expectedResult = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}${offsetFormatted}`;
 
-      expect(momentResult).toBe(nativeResult);
+      expect(result).toBe(expectedResult);
     });
   });
 });
