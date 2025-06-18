@@ -9,3 +9,12 @@ export const initializePlugins = async (injector: Injector): Promise<void> => {
   const pluginService = injector.get(PluginService);
   await pluginService.initializePlugins();
 };
+
+/**
+ * Provider for plugin initialization
+ */
+export const PLUGIN_INITIALIZER_PROVIDER = {
+  provide: 'PLUGIN_INITIALIZER',
+  useFactory: () => initializePlugins,
+  multi: true,
+};

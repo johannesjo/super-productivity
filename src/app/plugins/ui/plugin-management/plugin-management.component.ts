@@ -100,6 +100,20 @@ export class PluginManagementComponent implements OnInit {
     console.log('Enabling plugin:', plugin.manifest.id);
 
     try {
+      // Check if plugin requires Node.js execution consent
+      const hasConsent = await this._pluginService.checkNodeExecutionPermission(
+        plugin.manifest,
+      );
+      if (!hasConsent) {
+        console.log(
+          'User denied Node.js execution permission for plugin:',
+          plugin.manifest.id,
+        );
+        // Reset the toggle state
+        await this.loadPlugins();
+        return;
+      }
+
       // Set plugin as enabled in persistence
       await this._pluginMetaPersistenceService.setPluginEnabled(plugin.manifest.id, true);
 

@@ -64,10 +64,15 @@ export class PluginSecurityService {
       'registerHeaderButton',
       'registerMenuEntry',
       'registerShortcut',
+      // Node execution (requires special handling)
+      'executeNodeScript',
     ];
 
     // Generate permission strings
-    return permissibleMethods.map((method) => String(method));
+    // Add alias for nodeExecution permission
+    const permissions = permissibleMethods.map((method) => String(method));
+    permissions.push('nodeExecution'); // Alias for executeNodeScript
+    return permissions;
   }
 
   /**
@@ -140,6 +145,37 @@ export class PluginSecurityService {
     for (const hook of manifest.hooks) {
       if (!allowedHooks.includes(hook)) {
         errors.push(`Unknown hook requested: ${hook}`);
+      }
+    }
+
+    // Validate nodeScriptConfig if present
+    if (manifest.nodeScriptConfig) {
+      // Check for nodeExecution permission
+      const hasNodePermission =
+        manifest.permissions.includes('nodeExecution') ||
+        manifest.permissions.includes('executeNodeScript');
+      if (!hasNodePermission) {
+        errors.push('nodeScriptConfig requires nodeExecution permission');
+      }
+
+      // Validate timeout
+      if (manifest.nodeScriptConfig.timeout !== undefined) {
+        if (
+          manifest.nodeScriptConfig.timeout < 100 ||
+          manifest.nodeScriptConfig.timeout > 300000
+        ) {
+          errors.push(
+            'nodeScriptConfig.timeout must be between 100ms and 300000ms (5 minutes)',
+          );
+        }
+      }
+
+      // Validate memory limit format
+      if (manifest.nodeScriptConfig.memoryLimit) {
+        const memoryRegex = /^\d+[KMG]B$/i;
+        if (!memoryRegex.test(manifest.nodeScriptConfig.memoryLimit)) {
+          errors.push('nodeScriptConfig.memoryLimit must be in format: 128MB, 1GB, etc.');
+        }
       }
     }
 
@@ -241,5 +277,23 @@ export class PluginSecurityService {
    */
   getAvailablePermissions(): string[] {
     return [...this.ALLOWED_PERMISSIONS];
+  }
+
+  /**
+   * Check if a plugin requires dangerous permissions
+   */
+  requiresDangerousPermissions(manifest: PluginManifest): boolean {
+    const dangerousPermissions = ['nodeExecution', 'executeNodeScript'];
+    return manifest.permissions.some((p) => dangerousPermissions.includes(p));
+  }
+
+  /**
+   * Check if plugin has node execution permission
+   */
+  hasNodeExecutionPermission(manifest: PluginManifest): boolean {
+    return (
+      manifest.permissions.includes('nodeExecution') ||
+      manifest.permissions.includes('executeNodeScript')
+    );
   }
 }

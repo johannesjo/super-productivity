@@ -87,6 +87,14 @@ const ea: ElectronAPI = {
     _send('CURRENT_TASK_UPDATED', task, isPomodoroEnabled, currentPomodoroSessionTime),
 
   exec: (command: string) => _send('EXEC', command),
+
+  // Plugin API
+  pluginExecNodeScript: (pluginId: string, request: any) =>
+    _invoke('PLUGIN_EXEC_NODE_SCRIPT', pluginId, request) as Promise<any>,
+  pluginRegisterForNode: (pluginId: string, manifest: any, userDataPath: string) =>
+    _send('PLUGIN_REGISTER_FOR_NODE', pluginId, manifest, userDataPath),
+  pluginUnregisterForNode: (pluginId: string) =>
+    _send('PLUGIN_UNREGISTER_FOR_NODE', pluginId),
 };
 contextBridge.exposeInMainWorld('ea', ea);
 

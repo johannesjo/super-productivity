@@ -53,6 +53,25 @@ export interface NotifyCfg {
   body: string;
 }
 
+export interface PluginNodeScriptConfig {
+  timeout?: number; // Max execution time in milliseconds (default: 30000)
+  memoryLimit?: string; // Max memory usage (e.g., '128MB', default: '128MB')
+  allowedPaths?: string[]; // Specific paths the script can access
+}
+
+export interface PluginNodeScriptRequest {
+  script: string;
+  timeout?: number;
+  args?: any[];
+}
+
+export interface PluginNodeScriptResult {
+  success: boolean;
+  result?: any;
+  error?: string;
+  executionTime?: number;
+}
+
 export interface PluginManifest {
   name: string;
   id: string;
@@ -67,6 +86,7 @@ export interface PluginManifest {
   type?: 'standard';
   assets?: string[];
   icon?: string; // Path to SVG icon file relative to plugin root
+  nodeScriptConfig?: PluginNodeScriptConfig;
 }
 
 export type PluginHookHandler = (...args: unknown[]) => void | Promise<void>;
@@ -168,6 +188,9 @@ export interface PluginAPI {
   persistDataSynced(dataStr: string): Promise<void>;
 
   loadSyncedData(): Promise<string | null>;
+
+  // node execution (only available in Electron with nodeExecution permission)
+  executeNodeScript?(request: PluginNodeScriptRequest): Promise<PluginNodeScriptResult>;
 }
 
 export interface PluginInstance {

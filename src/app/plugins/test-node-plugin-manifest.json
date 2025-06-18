@@ -1,0 +1,16 @@
+{
+  "name": "Node.js Test Plugin",
+  "id": "node-test-plugin",
+  "manifestVersion": 1,
+  "version": "1.0.0",
+  "minSupVersion": "10.0.0",
+  "description": "Test plugin for Node.js script execution",
+  "hooks": [],
+  "permissions": ["nodeExecution"],
+  "iFrame": false,
+  "isSkipMenuEntry": false,
+  "nodeScriptConfig": {
+    "timeout": 10000,
+    "memoryLimit": "256MB"
+  }
+}
