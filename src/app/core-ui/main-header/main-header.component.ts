@@ -47,6 +47,7 @@ import { Store } from '@ngrx/store';
 import { showFocusOverlay } from '../../features/focus-mode/store/focus-mode.actions';
 import { SyncStatus } from '../../pfapi/api';
 import { PluginHeaderBtnsComponent } from '../../plugins/ui/plugin-header-btns.component';
+import { PluginSidePanelBtnsComponent } from '../../plugins/ui/plugin-side-panel-btns.component';
 
 @Component({
   selector: 'main-header',
@@ -72,6 +73,7 @@ import { PluginHeaderBtnsComponent } from '../../plugins/ui/plugin-header-btns.c
     SimpleCounterButtonComponent,
     LongPressDirective,
     PluginHeaderBtnsComponent,
+    PluginSidePanelBtnsComponent,
   ],
 })
 export class MainHeaderComponent implements OnInit, OnDestroy {

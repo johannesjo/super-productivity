@@ -91,6 +91,7 @@ export interface PluginManifest {
   assets?: string[];
   icon?: string;
   nodeScriptConfig?: PluginNodeScriptConfig;
+  sidePanel?: boolean;
 }
 export type PluginHookHandler = (...args: unknown[]) => void | Promise<void>;
 export interface TaskData {
@@ -131,6 +132,12 @@ export interface PluginHeaderBtnCfg {
   onClick: () => void;
   color?: 'primary' | 'accent' | 'warn';
 }
+export interface PluginSidePanelBtnCfg {
+  pluginId: string;
+  label: string;
+  icon?: string;
+  onClick: () => void;
+}
 export interface PluginAPI {
   cfg: PluginBaseCfg;
   registerHook(hook: Hooks, fn: PluginHookHandler): void;
@@ -141,6 +148,7 @@ export interface PluginAPI {
       id?: string;
     },
   ): void;
+  registerSidePanelButton(sidePanelBtnCfg: Omit<PluginSidePanelBtnCfg, 'pluginId'>): void;
   showSnack(snackCfg: SnackCfg): void;
   notify(notifyCfg: NotifyCfg): Promise<void>;
   showIndexHtmlAsView(): void;

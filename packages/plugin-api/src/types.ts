@@ -107,6 +107,7 @@ export interface PluginManifest {
   assets?: string[];
   icon?: string; // Path to SVG icon file relative to plugin root
   nodeScriptConfig?: PluginNodeScriptConfig;
+  sidePanel?: boolean; // If true, plugin loads in right panel instead of route
 }
 
 export type PluginHookHandler = (...args: unknown[]) => void | Promise<void>;
@@ -157,6 +158,13 @@ export interface PluginHeaderBtnCfg {
   color?: 'primary' | 'accent' | 'warn';
 }
 
+export interface PluginSidePanelBtnCfg {
+  pluginId: string;
+  label: string;
+  icon?: string;
+  onClick: () => void;
+}
+
 export interface PluginAPI {
   cfg: PluginBaseCfg;
 
@@ -169,6 +177,8 @@ export interface PluginAPI {
   registerShortcut(
     shortcutCfg: Omit<PluginShortcutCfg, 'pluginId'> & { id?: string },
   ): void;
+
+  registerSidePanelButton(sidePanelBtnCfg: Omit<PluginSidePanelBtnCfg, 'pluginId'>): void;
 
   // ui bridge
   showSnack(snackCfg: SnackCfg): void;
