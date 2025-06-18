@@ -193,10 +193,4 @@ export interface PluginShortcutCfg {
   label: string;
   onExec: () => void;
 }
-declare global {
-  interface Window {
-    PluginAPI: PluginAPI;
-  }
-  const PluginAPI: PluginAPI;
-}
 //# sourceMappingURL=types.d.ts.map

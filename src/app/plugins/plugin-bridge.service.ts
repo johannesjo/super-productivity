@@ -32,7 +32,6 @@ import { TaskArchiveService } from '../features/time-tracking/task-archive.servi
 import { Router } from '@angular/router';
 import { PluginDialogComponent } from './ui/plugin-dialog/plugin-dialog.component';
 import { IS_ELECTRON } from '../app.constants';
-import '../core/window-ea';
 
 /**
  * PluginBridge acts as an intermediary layer between plugins and the main application services.

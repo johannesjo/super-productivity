@@ -253,11 +253,12 @@ export interface PluginShortcutCfg {
 }
 
 // Global PluginAPI interface for runtime use
-declare global {
-  interface Window {
-    PluginAPI: PluginAPI;
-  }
-
-  // For plugin development without window reference
-  const PluginAPI: PluginAPI;
-}
+// Note: This is commented out to avoid conflicts with node_modules version
+// declare global {
+//   interface Window {
+//     PluginAPI: PluginAPI;
+//   }
+//
+//   // For plugin development without window reference
+//   const PluginAPI: PluginAPI;
+// }

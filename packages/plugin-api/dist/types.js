@@ -14,3 +14,13 @@ var PluginHooks;
   PluginHooks['PERSISTED_DATA_UPDATE'] = 'persistedDataUpdate';
   PluginHooks['ACTION'] = 'action';
 })(PluginHooks || (exports.PluginHooks = PluginHooks = {}));
+// Global PluginAPI interface for runtime use
+// Note: This is commented out to avoid conflicts with node_modules version
+// declare global {
+//   interface Window {
+//     PluginAPI: PluginAPI;
+//   }
+//
+//   // For plugin development without window reference
+//   const PluginAPI: PluginAPI;
+// }
