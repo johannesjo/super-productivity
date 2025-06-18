@@ -1441,6 +1441,7 @@
     "ADVANCED_CFG": "Advanced Config",
     "CANCEL": "Cancel",
     "CLOSE": "Close",
+    "CONFIRM": "Confirm",
     "DELETE": "Delete",
     "DISMISS": "Dismiss",
     "DO_IT": "Do it!",
@@ -1454,6 +1455,13 @@
     "INBOX_PROJECT_TITLE": "Inbox",
     "LOGIN": "Login",
     "LOGOUT": "Logout",
+    "MARKDOWN_PASTE": {
+      "CONFIRM_PARENT_TASKS": "Create {{tasksCount}} new tasks from the pasted markdown list?",
+      "CONFIRM_PARENT_TASKS_WITH_SUBS": "Create {{tasksCount}} new tasks and {{subTasksCount}} sub-tasks from the pasted markdown list?",
+      "CONFIRM_SUB_TASKS": "Create {{tasksCount}} new sub-tasks from the pasted markdown list?",
+      "CONFIRM_SUB_TASKS_WITH_PARENT": "Create {{tasksCount}} new sub-tasks under \"{{parentTaskTitle}}\" from the pasted markdown list?",
+      "CONFIRM_ADD_TO_SUB_TASK_NOTES": "Add the pasted markdown list to the notes of sub-task \"{{parentTaskTitle}}\"?"
+    },
     "MINUTES": "{{m}} minutes",
     "MOVE_BACKWARD": "Move Backward",
     "MOVE_FORWARD": "Move Forward",
