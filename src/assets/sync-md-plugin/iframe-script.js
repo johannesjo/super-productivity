@@ -71,14 +71,30 @@
 
   async function loadConfig() {
     try {
-      const dataStr = await pluginAPI.loadPersistedData();
+      const dataStr = await pluginAPI.loadSyncedData();
+      console.log('[Sync.md UI] Loaded data string:', dataStr);
       if (dataStr) {
-        const config = JSON.parse(dataStr);
+        const data = typeof dataStr === 'string' ? JSON.parse(dataStr) : dataStr;
+        const config = data.syncMdConfig || data;
         currentConfig = config;
-        document.getElementById('filePath').value = config.filePath || '';
-        document.getElementById('projectId').value = config.projectId || '';
-        document.getElementById('syncDirection').value =
-          config.syncDirection || 'bidirectional';
+
+        if (config.filePath) {
+          document.getElementById('filePath').value = config.filePath;
+        }
+
+        // Wait a bit for projects to load, then set the selected project
+        setTimeout(() => {
+          if (config.projectId) {
+            const projectSelect = document.getElementById('projectId');
+            if (projectSelect) {
+              projectSelect.value = config.projectId;
+            }
+          }
+        }, 500);
+
+        if (config.syncDirection) {
+          document.getElementById('syncDirection').value = config.syncDirection;
+        }
 
         // Show sync info if configured
         if (config.filePath && config.projectId) {
@@ -125,25 +141,24 @@
     }
 
     try {
-      // Save config through plugin API
-      await pluginAPI.persistDataSynced(JSON.stringify(config));
+      // Save config through plugin API - wrap in object
+      const dataToSave = JSON.stringify({ syncMdConfig: config });
+      await pluginAPI.persistDataSynced(dataToSave);
 
       // Notify plugin through parent window message
-      window.parent.postMessage(
-        {
-          type: 'PLUGIN_MESSAGE',
-          data: {
-            type: 'configUpdated',
-            config: config,
-          },
-        },
-        '*',
-      );
+      const result = await sendMessageToPlugin({
+        type: 'configUpdated',
+        config: config,
+      });
 
-      currentConfig = config;
-      showStatus('Configuration saved successfully', 'success');
-      document.getElementById('syncInfo').style.display = 'block';
-      updateSyncInfo();
+      if (result && result.success) {
+        currentConfig = config;
+        showStatus('Configuration saved successfully', 'success');
+        document.getElementById('syncInfo').style.display = 'block';
+        updateSyncInfo();
+      } else {
+        showStatus('Configuration saved but watcher failed to start', 'error');
+      }
     } catch (error) {
       console.error('[Sync.md UI] Error saving config:', error);
       showStatus('Error saving configuration', 'error');
