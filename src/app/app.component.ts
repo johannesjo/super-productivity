@@ -66,6 +66,7 @@ import { DialogPleaseRateComponent } from './features/dialog-please-rate/dialog-
 import { getWorklogStr } from './util/get-work-log-str';
 import { MarkdownPasteService } from './features/tasks/markdown-paste.service';
 import { TaskService } from './features/tasks/task.service';
+// Note: WaylandIdleHelperService is deprecated - idle detection now handled in Electron main process
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
