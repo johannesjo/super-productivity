@@ -198,7 +198,7 @@
                 </div>
                 <h2 class="no-tasks-label">
                   @if (
-                    hasDoneTasks() || (workContextService.doneTodayArchived$ | async) > 0
+                    hasDoneTasks() || (workContextService.doneTodayArchived$ | async)
                   ) {
                     {{ T.WW.NO_PLANNED_TASK_ALL_DONE | translate }}
                   } @else {

@@ -10,7 +10,6 @@ import { T } from '../../t.const';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { TranslatePipe } from '@ngx-translate/core';
-import { IssueIconPipe } from '../../features/issue/issue-icon/issue-icon.pipe';
 
 @Component({
   selector: 'dialog-confirm',
@@ -23,7 +22,6 @@ import { IssueIconPipe } from '../../features/issue/issue-icon/issue-icon.pipe';
     MatButton,
     MatIcon,
     TranslatePipe,
-    IssueIconPipe,
     MatDialogTitle,
   ],
 })

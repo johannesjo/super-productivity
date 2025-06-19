@@ -17,7 +17,7 @@ import { TaskService } from '../tasks/task.service';
 import { expandAnimation, expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { TakeABreakService } from '../take-a-break/take-a-break.service';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import {
   from,
   fromEvent,
@@ -50,7 +50,7 @@ import { AddScheduledTodayOrTomorrowBtnComponent } from '../add-tasks-for-tomorr
 import { TaskListComponent } from '../tasks/task-list/task-list.component';
 import { SplitComponent } from './split/split.component';
 import { BacklogComponent } from './backlog/backlog.component';
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, CommonModule } from '@angular/common';
 import { MsToStringPipe } from '../../ui/duration/ms-to-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 import {
@@ -63,7 +63,6 @@ import { Store } from '@ngrx/store';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { TODAY_TAG } from '../tag/tag.const';
 import { LS } from '../../core/persistence/storage-keys.const';
-import { CommonModule } from '@angular/common';
 import { FinishDayBtnComponent } from './finish-day-btn/finish-day-btn.component';
 
 @Component({
@@ -86,7 +85,6 @@ import { FinishDayBtnComponent } from './finish-day-btn/finish-day-btn.component
     MatMiniFabButton,
     ImprovementBannerComponent,
     MatButton,
-    RouterLink,
     AddTaskBarComponent,
     AddScheduledTodayOrTomorrowBtnComponent,
     TaskListComponent,
