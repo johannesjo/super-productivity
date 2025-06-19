@@ -3,7 +3,10 @@
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
     "outDir": "../out-tsc/spec",
-    "types": ["jasmine", "node"]
+    "types": ["jasmine", "node"],
+    "paths": {
+      "@super-productivity/plugin-api": ["../packages/plugin-api/dist/index.d.ts"]
+    }
   },
   "files": ["test.ts", "polyfills.ts"],
   "include": ["**/*.spec.ts"]
