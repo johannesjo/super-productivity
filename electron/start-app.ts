@@ -20,6 +20,7 @@ import { lazySetInterval } from './shared-with-frontend/lazy-set-interval';
 import { initIndicator } from './indicator';
 import { quitApp, showOrFocus } from './various-shared';
 import { createWindow } from './main-window';
+import { IdleTimeHandler } from './idle-time-handler';
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
@@ -46,6 +47,7 @@ interface MyApp extends App {
 const appIN: MyApp = app;
 
 let mainWin: BrowserWindow;
+let idleTimeHandler: IdleTimeHandler;
 
 export const startApp = (): void => {
   // LOAD IPC STUFF
@@ -183,6 +185,9 @@ export const startApp = (): void => {
   });
 
   appIN.on('ready', () => {
+    // Initialize idle time handler
+    idleTimeHandler = new IdleTimeHandler();
+
     let suspendStart: number;
     const sendIdleMsgIfOverMin = (idleTime: number): void => {
       // sometimes when starting a second instance we get here although we don't want to
@@ -199,8 +204,16 @@ export const startApp = (): void => {
       }
     };
 
-    const checkIdle = (): void =>
-      sendIdleMsgIfOverMin(powerMonitor.getSystemIdleTime() * 1000);
+    const checkIdle = async (): Promise<void> => {
+      try {
+        const idleTime = await idleTimeHandler.getIdleTimeWithFallbacks();
+        sendIdleMsgIfOverMin(idleTime);
+      } catch (error) {
+        log('Error getting idle time:', error);
+        // Fallback to standard method if our handler fails
+        sendIdleMsgIfOverMin(powerMonitor.getSystemIdleTime() * 1000);
+      }
+    };
 
     // init time tracking interval
     lazySetInterval(checkIdle, CONFIG.IDLE_PING_INTERVAL);
