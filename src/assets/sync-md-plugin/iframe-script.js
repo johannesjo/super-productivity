@@ -8,9 +8,12 @@
   function waitForAPI() {
     if (window.PluginAPI) {
       pluginAPI = window.PluginAPI;
-      console.log('[Sync.md UI] Found PluginAPI');
+      console.log('[Sync.md UI] Found PluginAPI', pluginAPI);
+      // Check what methods are available
+      console.log('[Sync.md UI] Available methods:', Object.keys(pluginAPI));
       initialize();
     } else {
+      console.log('[Sync.md UI] Waiting for PluginAPI...');
       setTimeout(waitForAPI, 100);
     }
   }
@@ -31,6 +34,11 @@
 
       // Update UI state
       updateSyncInfo();
+
+      // Poll for project changes periodically
+      setInterval(async () => {
+        await loadProjects();
+      }, 5000); // Check every 5 seconds
     } catch (error) {
       console.error('[Sync.md UI] Initialization error:', error);
       showStatus('Failed to initialize plugin UI', 'error');
@@ -49,6 +57,9 @@
         return;
       }
 
+      // Remember current selection
+      const currentSelection = select.value;
+
       // Clear existing options
       select.innerHTML = '<option value="">Select a project...</option>';
 
@@ -60,6 +71,14 @@
           option.textContent = project.title;
           select.appendChild(option);
         });
+
+        // Restore selection if it still exists
+        if (currentSelection) {
+          select.value = currentSelection;
+        } else if (currentConfig && currentConfig.projectId) {
+          // Try to restore from saved config
+          select.value = currentConfig.projectId;
+        }
       } else {
         console.warn('[Sync.md UI] No projects found');
       }
@@ -82,15 +101,13 @@
           document.getElementById('filePath').value = config.filePath;
         }
 
-        // Wait a bit for projects to load, then set the selected project
-        setTimeout(() => {
-          if (config.projectId) {
-            const projectSelect = document.getElementById('projectId');
-            if (projectSelect) {
-              projectSelect.value = config.projectId;
-            }
+        // The project selection will be handled by loadProjects
+        if (config.projectId) {
+          const projectSelect = document.getElementById('projectId');
+          if (projectSelect) {
+            projectSelect.value = config.projectId;
           }
-        }, 500);
+        }
 
         if (config.syncDirection) {
           document.getElementById('syncDirection').value = config.syncDirection;
