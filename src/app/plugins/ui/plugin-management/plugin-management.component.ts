@@ -27,6 +27,7 @@ import { MatError } from '@angular/material/form-field';
 import { TranslatePipe } from '@ngx-translate/core';
 import { T } from '../../../t.const';
 import { PluginIconComponent } from '../plugin-icon/plugin-icon.component';
+import { IS_ELECTRON } from '../../../app.constants';
 
 @Component({
   selector: 'plugin-management',
@@ -57,6 +58,7 @@ export class PluginManagementComponent implements OnInit {
   private readonly _pluginCacheService = inject(PluginCacheService);
 
   T: typeof T = T;
+  readonly IS_ELECTRON = IS_ELECTRON;
 
   // Plugin size limits for display
   readonly maxPluginSizeMB = (MAX_PLUGIN_ZIP_SIZE / 1024 / 1024).toFixed(1);
@@ -182,6 +184,25 @@ export class PluginManagementComponent implements OnInit {
       return 'Error';
     }
     return plugin.isEnabled ? 'Enabled' : 'Disabled';
+  }
+
+  requiresNodeExecution(plugin: PluginInstance): boolean {
+    return (
+      plugin.manifest.permissions?.includes('nodeExecution') ||
+      plugin.manifest.permissions?.includes('executeNodeScript') ||
+      false
+    );
+  }
+
+  canEnablePlugin(plugin: PluginInstance): boolean {
+    // Plugin can be enabled if there's no error AND either:
+    // 1. It doesn't require nodeExecution, OR
+    // 2. We're running in Electron
+    return !plugin.error && (!this.requiresNodeExecution(plugin) || IS_ELECTRON);
+  }
+
+  getNodeExecutionMessage(): string {
+    return 'This plugin requires desktop version (Node.js execution)';
   }
 
   async onFileSelected(event: Event): Promise<void> {

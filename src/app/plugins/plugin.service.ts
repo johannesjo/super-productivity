@@ -182,6 +182,21 @@ export class PluginService implements OnDestroy {
 
       // Check for dangerous permissions
       if (this._pluginSecurity.requiresDangerousPermissions(manifest)) {
+        if (!IS_ELECTRON) {
+          // In web version, create a disabled placeholder for nodeExecution plugins
+          const placeholderInstance: PluginInstance = {
+            manifest,
+            loaded: false,
+            isEnabled: false,
+            error: 'This plugin requires the desktop version (Node.js execution)',
+          };
+          this._pluginPaths.set(manifest.id, pluginPath); // Store the path for potential reload
+          console.log(
+            `Plugin ${manifest.id} requires desktop version, creating placeholder`,
+          );
+          return placeholderInstance;
+        }
+
         const hasConsent = await this._getNodeExecutionConsent(manifest);
         if (!hasConsent) {
           throw new Error('User declined to grant Node.js execution permission');
@@ -566,6 +581,32 @@ export class PluginService implements OnDestroy {
       if (iconContent) {
         this._pluginIcons.set(manifest.id, iconContent);
         this._pluginIconsSignal.set(new Map(this._pluginIcons));
+      }
+
+      // Check for dangerous permissions in web version
+      if (this._pluginSecurity.requiresDangerousPermissions(manifest) && !IS_ELECTRON) {
+        // In web version, create a disabled placeholder for nodeExecution plugins
+        const placeholderInstance: PluginInstance = {
+          manifest,
+          loaded: false,
+          isEnabled: false,
+          error: 'This plugin requires the desktop version (Node.js execution)',
+        };
+        this._pluginPaths.set(manifest.id, uploadedPluginPath);
+        // Check if plugin is already in the list to prevent duplicates
+        const existingIndex = this._loadedPlugins.findIndex(
+          (p) => p.manifest.id === manifest.id,
+        );
+        if (existingIndex === -1) {
+          this._loadedPlugins.push(placeholderInstance);
+        } else {
+          // Replace existing instance
+          this._loadedPlugins[existingIndex] = placeholderInstance;
+        }
+        console.log(
+          `Uploaded plugin ${manifest.id} requires desktop version, creating placeholder`,
+        );
+        return placeholderInstance;
       }
 
       // If plugin is disabled, create a placeholder instance without loading code
