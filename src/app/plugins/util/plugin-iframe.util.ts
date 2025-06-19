@@ -93,6 +93,9 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
             console.warn('showIndexHtmlAsView is not available for side panel plugins');
           };
           
+          // Add alias for backward compatibility
+          this.loadSyncedData = this.loadPersistedData;
+          
           // Register methods are synchronous
           const registrationMethods = {
             registerHook: true,
@@ -138,18 +141,28 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
 export const createPluginIframeUrl = (config: PluginIframeConfig): string => {
   const apiScript = createPluginApiScript(config);
 
-  // Inject the PluginAPI script before the closing body tag
+  // Inject the PluginAPI script in the head to ensure it's available before body scripts run
   let modifiedHtml = config.indexHtml;
-  const bodyCloseIndex = modifiedHtml.toLowerCase().lastIndexOf('</body>');
+  const headCloseIndex = modifiedHtml.toLowerCase().lastIndexOf('</head>');
 
-  if (bodyCloseIndex !== -1) {
+  if (headCloseIndex !== -1) {
+    // Insert before closing head tag
     modifiedHtml =
-      modifiedHtml.slice(0, bodyCloseIndex) +
+      modifiedHtml.slice(0, headCloseIndex) +
       apiScript +
-      modifiedHtml.slice(bodyCloseIndex);
+      modifiedHtml.slice(headCloseIndex);
   } else {
-    // If no body tag, append at the end
-    modifiedHtml += apiScript;
+    // If no head tag, try to insert before body
+    const bodyOpenIndex = modifiedHtml.toLowerCase().indexOf('<body');
+    if (bodyOpenIndex !== -1) {
+      modifiedHtml =
+        modifiedHtml.slice(0, bodyOpenIndex) +
+        apiScript +
+        modifiedHtml.slice(bodyOpenIndex);
+    } else {
+      // Last resort: prepend to the entire document
+      modifiedHtml = apiScript + modifiedHtml;
+    }
   }
 
   // Create data URL
