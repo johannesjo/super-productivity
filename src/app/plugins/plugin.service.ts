@@ -86,6 +86,7 @@ export class PluginService implements OnDestroy {
       'assets/yesterday-tasks-plugin',
       'assets/markdown-list-to-task',
       'assets/test-side-panel-plugin',
+      'assets/sync-md-plugin',
     ];
 
     // Preload critical plugins
