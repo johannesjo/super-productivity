@@ -5,6 +5,7 @@ import {
   HostListener,
   inject,
   OnDestroy,
+  effect,
 } from '@angular/core';
 import { ChromeExtensionInterfaceService } from './core/chrome-extension-interface/chrome-extension-interface.service';
 import { ShortcutService } from './core-ui/shortcut/shortcut.service';
@@ -226,7 +227,26 @@ export class AppComponent implements OnDestroy {
 
     if (IS_ELECTRON) {
       window.ea.informAboutAppReady();
-      this._initElectronErrorHandler();
+
+      // Initialize electron error handler in an effect
+      effect(() => {
+        window.ea.on(IPC.ERROR, (ev: IpcRendererEvent, ...args: unknown[]) => {
+          const data = args[0] as {
+            error: any;
+            stack: any;
+            errorStr: string | unknown;
+          };
+          const errMsg =
+            typeof data.errorStr === 'string' ? data.errorStr : ' INVALID ERROR MSG :( ';
+
+          this._snackService.open({
+            msg: errMsg,
+            type: 'ERROR',
+          });
+          console.error(data);
+        });
+      });
+
       this._uiHelperService.initElectron();
 
       window.ea.on(IPC.TRANSFER_SETTINGS_REQUESTED, () => {
@@ -487,24 +507,6 @@ export class AppComponent implements OnDestroy {
         alert(t);
         alert(t2);
       }
-    });
-  }
-
-  private _initElectronErrorHandler(): void {
-    window.ea.on(IPC.ERROR, (ev: IpcRendererEvent, ...args: unknown[]) => {
-      const data = args[0] as {
-        error: any;
-        stack: any;
-        errorStr: string | unknown;
-      };
-      const errMsg =
-        typeof data.errorStr === 'string' ? data.errorStr : ' INVALID ERROR MSG :( ';
-
-      this._snackService.open({
-        msg: errMsg,
-        type: 'ERROR',
-      });
-      console.error(data);
     });
   }
 
