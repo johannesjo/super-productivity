@@ -90,19 +90,26 @@ export class PluginSidePanelBtnsComponent {
   }
 
   onButtonClick(button: PluginSidePanelBtnCfg): void {
+    // Prevent action if not in work view
+    if (!this.isWorkView()) {
+      return;
+    }
+
     // Check if this plugin is already active
     const currentActiveId = this._pluginService.getActiveSidePanelPluginId();
     const isCurrentlyActive = currentActiveId === button.pluginId;
 
     if (isCurrentlyActive) {
-      // Toggle off if clicking the active button
+      // Toggle off if clicking the active button - this closes the right panel
       this._pluginService.setActiveSidePanelPlugin(null);
     } else {
-      // Set the active side panel plugin
+      // Set the active side panel plugin - this opens the right panel
       this._pluginService.setActiveSidePanelPlugin(button.pluginId);
     }
 
-    // Call the original onClick handler
-    button.onClick();
+    // Call the original onClick handler if provided
+    if (button.onClick) {
+      button.onClick();
+    }
   }
 }
