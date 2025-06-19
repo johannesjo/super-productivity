@@ -8,6 +8,7 @@
   function waitForAPI() {
     if (window.PluginAPI) {
       pluginAPI = window.PluginAPI;
+      console.log('[Sync.md UI] Found PluginAPI');
       initialize();
     } else {
       setTimeout(waitForAPI, 100);
@@ -16,35 +17,52 @@
 
   async function initialize() {
     console.log('[Sync.md UI] Initializing...');
+    console.log('[Sync.md UI] PluginAPI available:', !!window.PluginAPI);
 
-    // Load projects
-    await loadProjects();
+    try {
+      // Load projects
+      await loadProjects();
 
-    // Load saved configuration
-    await loadConfig();
+      // Load saved configuration
+      await loadConfig();
 
-    // Setup event listeners
-    setupEventListeners();
+      // Setup event listeners
+      setupEventListeners();
 
-    // Update UI state
-    updateSyncInfo();
+      // Update UI state
+      updateSyncInfo();
+    } catch (error) {
+      console.error('[Sync.md UI] Initialization error:', error);
+      showStatus('Failed to initialize plugin UI', 'error');
+    }
   }
 
   async function loadProjects() {
     try {
+      console.log('[Sync.md UI] Loading projects...');
       const projects = await pluginAPI.getAllProjects();
+      console.log('[Sync.md UI] Projects loaded:', projects);
+
       const select = document.getElementById('projectId');
+      if (!select) {
+        console.error('[Sync.md UI] Project select element not found');
+        return;
+      }
 
       // Clear existing options
       select.innerHTML = '<option value="">Select a project...</option>';
 
       // Add project options
-      projects.forEach((project) => {
-        const option = document.createElement('option');
-        option.value = project.id;
-        option.textContent = project.title;
-        select.appendChild(option);
-      });
+      if (projects && projects.length > 0) {
+        projects.forEach((project) => {
+          const option = document.createElement('option');
+          option.value = project.id;
+          option.textContent = project.title;
+          select.appendChild(option);
+        });
+      } else {
+        console.warn('[Sync.md UI] No projects found');
+      }
     } catch (error) {
       console.error('[Sync.md UI] Error loading projects:', error);
       showStatus('Error loading projects', 'error');
