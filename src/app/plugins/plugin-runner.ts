@@ -69,14 +69,13 @@ export class PluginRunner {
           // Ensure plugin context is set before registering button
           this._pluginBridge._setCurrentPlugin(manifest.id);
 
-          // TODO
           pluginAPI.registerSidePanelButton({
             label: manifest.name,
             icon: manifest.icon,
             onClick: () => {
-              // This onClick is handled by the component to toggle the panel
-              console.log(`Side panel button clicked for plugin ${manifest.id}`);
-              // TODO load index html into side panel somehow
+              // The actual toggle is handled by PluginSidePanelBtnsComponent
+              // This onClick is required by the API but the component manages the state
+              console.log(`Side panel button registered for plugin ${manifest.id}`);
             },
           });
         }
