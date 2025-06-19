@@ -30,7 +30,10 @@ export class PluginSecurityService {
   /**
    * Validate plugin code for security issues
    */
-  validatePluginCode(code: string): { isValid: boolean; errors: string[] } {
+  validatePluginCode(
+    code: string,
+    manifest?: PluginManifest,
+  ): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
 
     // Check plugin size
@@ -38,8 +41,22 @@ export class PluginSecurityService {
       errors.push(`Plugin code exceeds maximum size of ${this.MAX_PLUGIN_SIZE} bytes`);
     }
 
-    // Check for dangerous patterns
+    // Check if plugin has nodeExecution permission
+    const hasNodePermission =
+      manifest?.permissions?.includes('nodeExecution') ||
+      manifest?.permissions?.includes('executeNodeScript');
+
+    // Check for dangerous patterns, but allow some for plugins with nodeExecution permission
     for (const pattern of this.DANGEROUS_PATTERNS) {
+      // Skip fs/child_process checks for plugins with nodeExecution permission
+      if (
+        hasNodePermission &&
+        (pattern.source.includes('fs|child_process') ||
+          pattern.source.includes('(fs|child_process|vm|cluster)'))
+      ) {
+        continue;
+      }
+
       if (pattern.test(code)) {
         errors.push(
           `Plugin code contains potentially dangerous pattern: ${pattern.source}`,
@@ -51,12 +68,18 @@ export class PluginSecurityService {
     // Only check for actual dangerous usage, not just the word appearing
     const forbiddenPatterns = [
       { pattern: /\bprocess\s*\.\s*exit/, name: 'process.exit' },
-      { pattern: /\brequire\s*\(\s*['"`]fs['"`]\)/, name: 'require("fs")' },
-      {
-        pattern: /\brequire\s*\(\s*['"`]child_process['"`]\)/,
-        name: 'require("child_process")',
-      },
     ];
+
+    // Only add fs and child_process restrictions for plugins without nodeExecution permission
+    if (!hasNodePermission) {
+      forbiddenPatterns.push(
+        { pattern: /\brequire\s*\(\s*['"`]fs['"`]\)/, name: 'require("fs")' },
+        {
+          pattern: /\brequire\s*\(\s*['"`]child_process['"`]\)/,
+          name: 'require("child_process")',
+        },
+      );
+    }
 
     for (const { pattern, name } of forbiddenPatterns) {
       if (pattern.test(code)) {
