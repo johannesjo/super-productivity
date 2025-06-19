@@ -49,7 +49,8 @@ export class Database {
   async save<T>(key: string, data: T, isIgnoreDBLock = false): Promise<void> {
     this._lastParams = { a: 'save', key, data };
     if (this._isLocked && !isIgnoreDBLock) {
-      devError('Attempting to write DB while locked');
+      console.trace();
+      devError(`Attempting to write DB for ${key} while locked`);
       pfLog(0, `${Database.L}.save() BLOCKED!!! - Database is locked!`, {
         key,
         isLocked: this._isLocked,
