@@ -206,8 +206,6 @@
       }
     </div>
 
-    <plugin-side-panel-btns></plugin-side-panel-btns>
-
     @if (simpleCounterService.enabledSimpleCounters$ | async; as enabledSimpleCounters) {
       @if (enabledSimpleCounters.length) {
         <div class="simple-counter-buttons-outer-wrapper">
@@ -241,6 +239,8 @@
         </div>
       }
     }
+
+    <plugin-side-panel-btns></plugin-side-panel-btns>
 
     <button
       class="toggle-notes-btn e2e-toggle-task-view-customizer-panel"
