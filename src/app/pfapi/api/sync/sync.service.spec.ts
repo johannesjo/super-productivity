@@ -397,6 +397,7 @@ describe('SyncService', () => {
         jasmine.objectContaining({
           lastUpdate: 12345,
         }),
+        true,
       );
 
       expect(mockMetaSyncService.upload).toHaveBeenCalledWith(
