@@ -173,7 +173,12 @@ export const createIframeMessageHandler = (
 
         // Get the method to call with proper type checking
         const bridgeAny = config.pluginBridge as any;
-        const methodName = String(data.method);
+        let methodName = String(data.method);
+
+        // Map some method names for compatibility
+        if (methodName === 'loadSyncedData') {
+          methodName = 'loadPersistedData';
+        }
 
         // Security: Only allow calling public methods (not starting with _)
         if (methodName.startsWith('_')) {
@@ -220,6 +225,41 @@ export const createIframeMessageHandler = (
       data.pluginId === config.pluginId
     ) {
       console.log(`Plugin ${config.pluginId} iframe is ready`);
+    }
+
+    // Handle plugin messages (for plugin-to-plugin communication)
+    if ('type' in data && data.type === 'PLUGIN_MESSAGE') {
+      try {
+        // Forward the message to the plugin's message handler
+        const result = await config.pluginBridge.sendMessageToPlugin(
+          config.pluginId,
+          data.data,
+        );
+
+        // Send response back to iframe if messageId was provided
+        if (data.messageId && event.source) {
+          event.source.postMessage(
+            {
+              type: 'PLUGIN_MESSAGE_RESPONSE',
+              messageId: data.messageId,
+              result,
+            },
+            { targetOrigin: event.origin },
+          );
+        }
+      } catch (error) {
+        // Send error back to iframe if messageId was provided
+        if (data.messageId && event.source) {
+          event.source.postMessage(
+            {
+              type: 'PLUGIN_MESSAGE_RESPONSE',
+              messageId: data.messageId,
+              error: error instanceof Error ? error.message : String(error),
+            },
+            { targetOrigin: event.origin },
+          );
+        }
+      }
     }
 
     // Call custom message handler if provided
