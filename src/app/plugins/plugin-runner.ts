@@ -71,7 +71,7 @@ export class PluginRunner {
 
           pluginAPI.registerSidePanelButton({
             label: manifest.name,
-            icon: manifest.icon,
+            icon: undefined, // Let plugin-icon component handle SVG loading
             onClick: () => {
               // The actual toggle is handled by PluginSidePanelBtnsComponent
               // This onClick is required by the API but the component manages the state
