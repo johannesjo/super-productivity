@@ -275,7 +275,7 @@ export class PluginLoaderService {
    */
   private async _loadIndexHtml(pluginPath: string): Promise<string> {
     const url = `${pluginPath}/index.html`;
-    return this._http
+    const html = await this._http
       .get(url, {
         responseType: 'text',
         headers: {
@@ -286,6 +286,50 @@ export class PluginLoaderService {
       })
       .pipe(first())
       .toPromise();
+
+    // Process HTML to inline external scripts
+    return this._processHtmlWithInlineScripts(html, pluginPath);
+  }
+
+  /**
+   * Process HTML to inline external script references
+   */
+  private async _processHtmlWithInlineScripts(
+    html: string,
+    pluginPath: string,
+  ): Promise<string> {
+    // Find all script tags with src attributes
+    const scriptPattern = /<script\s+[^>]*src=["']([^"']+)["'][^>]*><\/script>/gi;
+    const matches = [...html.matchAll(scriptPattern)];
+
+    let processedHtml = html;
+
+    for (const match of matches) {
+      const [fullMatch, scriptSrc] = match;
+
+      // Skip if it's an absolute URL or data URL
+      if (scriptSrc.startsWith('http') || scriptSrc.startsWith('data:')) {
+        continue;
+      }
+
+      try {
+        // Load the script content
+        const scriptUrl = `${pluginPath}/${scriptSrc}`;
+        const scriptContent = await this._http
+          .get(scriptUrl, { responseType: 'text' })
+          .pipe(first())
+          .toPromise();
+
+        // Replace the external script tag with inline script
+        const inlineScript = `<script>\n${scriptContent}\n</script>`;
+        processedHtml = processedHtml.replace(fullMatch, inlineScript);
+      } catch (error) {
+        console.warn(`Failed to load script ${scriptSrc} for plugin:`, error);
+        // Keep the original script tag if loading fails
+      }
+    }
+
+    return processedHtml;
   }
 
   /**

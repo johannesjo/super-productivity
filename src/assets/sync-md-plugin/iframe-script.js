@@ -1,4 +1,5 @@
 // Iframe communication script for Sync.md plugin UI
+console.log('[Sync.md UI] Script loaded at', new Date().toISOString());
 
 (function () {
   let pluginAPI = null;
@@ -6,6 +7,7 @@
 
   // Wait for plugin API to be available
   function waitForAPI() {
+    console.log('[Sync.md UI] Checking for PluginAPI...', !!window.PluginAPI);
     if (window.PluginAPI) {
       pluginAPI = window.PluginAPI;
       console.log('[Sync.md UI] Found PluginAPI', pluginAPI);
@@ -326,5 +328,11 @@
   }
 
   // Start initialization
+  console.log('[Sync.md UI] Starting waitForAPI...');
   waitForAPI();
+
+  // Mark as initialized for fallback check
+  window.__syncMdInitialized = true;
 })();
+
+console.log('[Sync.md UI] Script execution complete');

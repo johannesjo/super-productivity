@@ -283,5 +283,17 @@
     </div>
 
     <script src="iframe-script.js"></script>
+    <script>
+      // Fallback: If external script fails to load, show an error
+      window.addEventListener('load', function () {
+        setTimeout(function () {
+          if (!window.__syncMdInitialized) {
+            console.error('[Sync.md UI] External script failed to load or initialize');
+            document.body.innerHTML =
+              '<div style="padding: 20px; color: red;">Failed to load plugin UI. Please reload the page.</div>';
+          }
+        }, 2000);
+      });
+    </script>
   </body>
 </html>
