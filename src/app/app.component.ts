@@ -67,7 +67,7 @@ import { getWorklogStr } from './util/get-work-log-str';
 import { PluginService } from './plugins/plugin.service';
 import { MarkdownPasteService } from './features/tasks/markdown-paste.service';
 import { TaskService } from './features/tasks/task.service';
-// Note: WaylandIdleHelperService is deprecated - idle detection now handled in Electron main process
+import { IpcRendererEvent } from 'electron';
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -491,26 +491,21 @@ export class AppComponent implements OnDestroy {
   }
 
   private _initElectronErrorHandler(): void {
-    window.ea.on(
-      IPC.ERROR,
-      (
-        ev,
-        data: {
-          error: any;
-          stack: any;
-          errorStr: string | unknown;
-        },
-      ) => {
-        const errMsg =
-          typeof data.errorStr === 'string' ? data.errorStr : ' INVALID ERROR MSG :( ';
+    window.ea.on(IPC.ERROR, (ev: IpcRendererEvent, ...args: unknown[]) => {
+      const data = args[0] as {
+        error: any;
+        stack: any;
+        errorStr: string | unknown;
+      };
+      const errMsg =
+        typeof data.errorStr === 'string' ? data.errorStr : ' INVALID ERROR MSG :( ';
 
-        this._snackService.open({
-          msg: errMsg,
-          type: 'ERROR',
-        });
-        console.error(data);
-      },
-    );
+      this._snackService.open({
+        msg: errMsg,
+        type: 'ERROR',
+      });
+      console.error(data);
+    });
   }
 
   private _initOfflineBanner(): void {

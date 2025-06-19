@@ -1,20 +1,16 @@
-import { Injectable, inject, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import {
   Hooks,
   PluginHookHandler,
   PluginHookHandlerRegistration,
 } from './plugin-api.model';
-import { PluginCleanupService } from './plugin-cleanup.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PluginHooksService implements OnDestroy {
   private _hookHandlers: PluginHookHandlerRegistration[] = [];
-  private _cleanupService = inject(PluginCleanupService);
   private _hookTimeouts = new Map<string, Set<any>>();
-
-  constructor() {}
 
   /**
    * Dispatch a hook to all registered plugin handlers
@@ -120,34 +116,6 @@ export class PluginHooksService implements OnDestroy {
     if (removedCount > 0) {
       console.log(`Unregistered ${removedCount} hook handlers for plugin ${pluginId}`);
     }
-  }
-
-  /**
-   * Get all registered hook handlers for debugging
-   */
-  getAllHookHandlers(): PluginHookHandlerRegistration[] {
-    return [...this._hookHandlers];
-  }
-
-  /**
-   * Get hook handlers for a specific hook
-   */
-  getHandlersForHook(hook: Hooks): PluginHookHandlerRegistration[] {
-    return this._hookHandlers.filter((handler) => handler.hook === hook);
-  }
-
-  /**
-   * Get hook handlers for a specific plugin
-   */
-  getHandlersForPlugin(pluginId: string): PluginHookHandlerRegistration[] {
-    return this._hookHandlers.filter((handler) => handler.pluginId === pluginId);
-  }
-
-  /**
-   * Check if any plugins have handlers for a specific hook
-   */
-  hasHandlersForHook(hook: Hooks): boolean {
-    return this._hookHandlers.some((handler) => handler.hook === hook);
   }
 
   /**

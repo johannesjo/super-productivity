@@ -9,13 +9,15 @@ import {
 import { PluginService } from '../../plugin.service';
 import { PluginBridgeService } from '../../plugin-bridge.service';
 import { PluginCleanupService } from '../../plugin-cleanup.service';
-import { Subscription, filter } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import {
   createPluginIframeUrl,
   createIframeMessageHandler,
   PluginIframeConfig,
 } from '../../util/plugin-iframe.util';
+import { PluginInstance } from '../../plugin-api.model';
 import { CommonModule } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIcon } from '@angular/material/icon';
@@ -105,13 +107,13 @@ export class PluginPanelContainerComponent implements OnInit, OnDestroy {
   error = signal<string | null>(null);
 
   private _subs = new Subscription();
-  private _messageHandler?: (event: MessageEvent) => Promise<void>;
+  private _messageHandler?: EventListener;
 
   ngOnInit(): void {
     // Subscribe to active side panel plugin changes
     this._subs.add(
       this._pluginService.activeSidePanelPlugin$
-        .pipe(filter((plugin) => !!plugin))
+        .pipe(filter((plugin): plugin is PluginInstance => !!plugin))
         .subscribe(async (plugin) => {
           if (!plugin) return;
 
@@ -129,7 +131,9 @@ export class PluginPanelContainerComponent implements OnInit, OnDestroy {
 
             // Get plugin data
             const baseCfg = await this._pluginService.getBaseCfg();
-            const indexHtml = await this._pluginService.loadPluginIndexHtml(plugin.id);
+            const indexHtml = await this._pluginService.loadPluginIndexHtml(
+              plugin.manifest.id,
+            );
 
             if (!indexHtml) {
               throw new Error(`No index.html found for plugin ${plugin.manifest.name}`);
@@ -137,7 +141,7 @@ export class PluginPanelContainerComponent implements OnInit, OnDestroy {
 
             // Create iframe config
             const config: PluginIframeConfig = {
-              pluginId: plugin.id,
+              pluginId: plugin.manifest.id,
               manifest: plugin.manifest,
               indexHtml,
               baseCfg,
@@ -149,11 +153,14 @@ export class PluginPanelContainerComponent implements OnInit, OnDestroy {
             this.iframeUrl.set(this._sanitizer.bypassSecurityTrustResourceUrl(url));
 
             // Set up message handler
-            this._messageHandler = createIframeMessageHandler(config);
+            const handler = createIframeMessageHandler(config);
+            this._messageHandler = (event: Event) => {
+              handler(event as MessageEvent);
+            };
             window.addEventListener('message', this._messageHandler);
             // Track the listener for cleanup
             this._cleanupService.registerEventListener(
-              plugin.id,
+              plugin.manifest.id,
               window,
               'message',
               this._messageHandler,

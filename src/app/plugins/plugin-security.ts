@@ -97,7 +97,8 @@ export class PluginSecurityService {
     }
 
     // Check for attempts to access forbidden globals
-    const forbiddenGlobals = ['window', 'document', 'global', 'process', 'require'];
+    // const forbiddenGlobals = ['window', 'document', 'global', 'process', 'require'];
+    const forbiddenGlobals = ['process', 'require'];
     for (const global of forbiddenGlobals) {
       const regex = new RegExp(`\\b${global}\\b`, 'g');
       if (regex.test(code)) {
@@ -170,14 +171,6 @@ export class PluginSecurityService {
           );
         }
       }
-
-      // Validate memory limit format
-      if (manifest.nodeScriptConfig.memoryLimit) {
-        const memoryRegex = /^\d+[KMG]B$/i;
-        if (!memoryRegex.test(manifest.nodeScriptConfig.memoryLimit)) {
-          errors.push('nodeScriptConfig.memoryLimit must be in format: 128MB, 1GB, etc.');
-        }
-      }
     }
 
     return {
@@ -186,6 +179,7 @@ export class PluginSecurityService {
     };
   }
 
+  // TODO remove
   /**
    * Check if plugin assets are safe
    */
@@ -226,14 +220,14 @@ export class PluginSecurityService {
     return (
       html
         // Remove dangerous elements completely
-        .replace(/<script[^>]*>.*?<\/script>/gis, '')
         .replace(/<iframe[^>]*>.*?<\/iframe>/gis, '')
         .replace(/<object[^>]*>.*?<\/object>/gis, '')
         .replace(/<embed[^>]*>/gi, '')
         .replace(/<applet[^>]*>.*?<\/applet>/gis, '')
         .replace(/<meta[^>]*>/gi, '')
-        .replace(/<link[^>]*>/gi, '')
         .replace(/<base[^>]*>/gi, '')
+        // .replace(/<script[^>]*>.*?<\/script>/gis, '')
+        // .replace(/<link[^>]*>/gi, '')
         // .replace(/<form[^>]*>.*?<\/form>/gis, '')
         // .replace(/<input[^>]*>/gi, '')
         // .replace(/<textarea[^>]*>.*?<\/textarea>/gis, '')
@@ -241,19 +235,19 @@ export class PluginSecurityService {
         // .replace(/<style[^>]*>.*?<\/style>/gis, '')
 
         // Remove event handlers
-        .replace(/\son\w+\s*=\s*["'][^"']*["']/gi, '')
-        .replace(/\son\w+\s*=\s*[^>\s]+/gi, '')
+        // .replace(/\son\w+\s*=\s*["'][^"']*["']/gi, '')
+        // .replace(/\son\w+\s*=\s*[^>\s]+/gi, '')
 
         // Remove dangerous URLs
-        .replace(/javascript\s*:/gi, 'removed:')
-        .replace(/data\s*:/gi, 'removed:')
-        .replace(/vbscript\s*:/gi, 'removed:')
-        .replace(/livescript\s*:/gi, 'removed:')
-        .replace(/mocha\s*:/gi, 'removed:')
+        // .replace(/javascript\s*:/gi, 'removed:')
+        // .replace(/data\s*:/gi, 'removed:')
+        // .replace(/vbscript\s*:/gi, 'removed:')
+        // .replace(/livescript\s*:/gi, 'removed:')
+        // .replace(/mocha\s*:/gi, 'removed:')
 
         // Remove dangerous attributes
-        .replace(/\bsrc\s*=\s*["']javascript[^"']*["']/gi, '')
-        .replace(/\bhref\s*=\s*["']javascript[^"']*["']/gi, '')
+        // .replace(/\bsrc\s*=\s*["']javascript[^"']*["']/gi, '')
+        // .replace(/\bhref\s*=\s*["']javascript[^"']*["']/gi, '')
         .replace(/\baction\s*=\s*["'][^"']*["']/gi, '')
         .replace(/\bformaction\s*=\s*["'][^"']*["']/gi, '')
 
@@ -270,14 +264,6 @@ export class PluginSecurityService {
           return `style="${sanitizedStyle}"`;
         })
     );
-  }
-
-  /**
-   * Get a list of all available permissions that plugins can request.
-   * Useful for documentation or UI display.
-   */
-  getAvailablePermissions(): string[] {
-    return [...this.ALLOWED_PERMISSIONS];
   }
 
   /**

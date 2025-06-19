@@ -54,8 +54,6 @@ export interface NotifyCfg {
 }
 
 export interface PluginNodeScriptConfig {
-  timeout?: number; // Max execution time in milliseconds (default: 30000)
-  memoryLimit?: string; // Max memory usage (e.g., '128MB', default: '128MB')
   allowedPaths?: string[]; // Specific paths the script can access
 }
 

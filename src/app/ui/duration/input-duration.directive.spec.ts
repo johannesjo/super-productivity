@@ -11,6 +11,8 @@ describe('InputDurationDirective', () => {
   let mockElementRef: ElementRef;
   let mockTranslateService: jasmine.SpyObj<TranslateService>;
   let mockRenderer: jasmine.SpyObj<Renderer2>;
+  let mockStringToMsPipe: jasmine.SpyObj<StringToMsPipe>;
+  let mockMsToStringPipe: jasmine.SpyObj<MsToStringPipe>;
 
   beforeEach(() => {
     mockElementRef = {
@@ -28,18 +30,106 @@ describe('InputDurationDirective', () => {
       'removeAttribute',
     ]);
 
+    mockStringToMsPipe = jasmine.createSpyObj('StringToMsPipe', ['transform']);
+    mockMsToStringPipe = jasmine.createSpyObj('MsToStringPipe', ['transform']);
+
     TestBed.configureTestingModule({
       providers: [
         InputDurationDirective,
-        StringToMsPipe,
-        MsToStringPipe,
         { provide: ElementRef, useValue: mockElementRef },
         { provide: TranslateService, useValue: mockTranslateService },
         { provide: Renderer2, useValue: mockRenderer },
+        { provide: StringToMsPipe, useValue: mockStringToMsPipe },
+        { provide: MsToStringPipe, useValue: mockMsToStringPipe },
       ],
     });
 
     directive = TestBed.inject(InputDurationDirective);
+  });
+
+  describe('onInput', () => {
+    let strToMsSpy: jasmine.Spy;
+    let msToStrSpy: jasmine.Spy;
+    let onChangeSpy: jasmine.Spy;
+    let errorSpy: jasmine.Spy;
+
+    beforeEach(() => {
+      // Initialize the directive
+      directive.ngOnInit();
+
+      // Setup spies
+      strToMsSpy = spyOn(directive as any, '_strToMs').and.callThrough();
+      msToStrSpy = spyOn(directive as any, '_msToStr').and.callThrough();
+      onChangeSpy = jasmine.createSpy('onChange');
+      directive.registerOnChange(onChangeSpy);
+
+      errorSpy = spyOn(console, 'error');
+    });
+
+    it('should call _strToMs with "2h 3" and parse as 2 hours 3 minutes', () => {
+      // "2h 3" is parsed as 2 hours and 3 minutes = 7380000 ms
+      mockStringToMsPipe.transform.and.returnValue(7380000);
+      mockMsToStringPipe.transform.and.returnValue('2h 3m');
+
+      directive.onInput('2h 3');
+
+      expect(strToMsSpy).toHaveBeenCalledWith('2h 3');
+      expect(msToStrSpy).toHaveBeenCalledWith(7380000);
+    });
+
+    it('should call _msToStr with 7200000 for "2h" input', () => {
+      mockStringToMsPipe.transform.and.returnValue(7200000);
+      mockMsToStringPipe.transform.and.returnValue('2h');
+
+      directive.onInput('2h');
+
+      expect(strToMsSpy).toHaveBeenCalledWith('2h');
+      expect(msToStrSpy).toHaveBeenCalledWith(7200000);
+      expect(onChangeSpy).toHaveBeenCalledWith(7200000);
+    });
+
+    it('should call _strToMs with "45s"', () => {
+      mockStringToMsPipe.transform.and.returnValue(45000);
+      mockMsToStringPipe.transform.and.returnValue('45s');
+
+      directive.onInput('45s');
+
+      expect(strToMsSpy).toHaveBeenCalledWith('45s');
+      expect(onChangeSpy).toHaveBeenCalledWith(45000);
+    });
+
+    it('should call _strToMs with "1d"', () => {
+      mockStringToMsPipe.transform.and.returnValue(86400000);
+      mockMsToStringPipe.transform.and.returnValue('1d');
+
+      directive.onInput('1d');
+
+      expect(strToMsSpy).toHaveBeenCalledWith('1d');
+      expect(onChangeSpy).toHaveBeenCalledWith(86400000);
+    });
+
+    it('should handle empty input and call onChange with 0', () => {
+      mockStringToMsPipe.transform.and.returnValue(0);
+      mockMsToStringPipe.transform.and.returnValue('');
+
+      directive.onInput('');
+
+      expect(onChangeSpy).toHaveBeenCalledWith(0);
+    });
+
+    it('should handle invalid input and show error', () => {
+      // Mock the pipes to simulate invalid input that throws an error
+      mockStringToMsPipe.transform.and.throwError('Invalid duration format');
+
+      directive.onInput('invalid');
+
+      expect(strToMsSpy).toHaveBeenCalledWith('invalid');
+      expect(errorSpy).toHaveBeenCalledWith(
+        'Error parsing duration:',
+        jasmine.any(Error),
+      );
+      expect(onChangeSpy).toHaveBeenCalledWith(null);
+    });
   });
 
   describe('validate', () => {

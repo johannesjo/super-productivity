@@ -16,7 +16,6 @@ import { PluginService } from '../../plugin.service';
 import { PluginBridgeService } from '../../plugin-bridge.service';
 import { PluginCleanupService } from '../../plugin-cleanup.service';
 import {
-  SnackCfgLimited,
   NotifyCfg,
   DialogCfg,
   PluginCreateTaskData,
@@ -24,6 +23,7 @@ import {
   ProjectCopy,
   TagCopy,
 } from '../../plugin-api.model';
+import { SnackCfg } from '@super-productivity/plugin-api';
 import { CommonModule } from '@angular/common';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -79,7 +79,7 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
   readonly error = signal<string | null>(null);
   readonly iframeSrc = signal<SafeResourceUrl | null>(null);
 
-  private _messageListener?: (event: MessageEvent) => void;
+  private _messageListener?: EventListener;
   private _routeSubscription?: Subscription;
 
   async ngOnInit(): Promise<void> {
@@ -179,32 +179,35 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
     // Clean up any existing listener first
     this._cleanupIframeCommunication();
 
-    this._messageListener = (event: MessageEvent) => {
+    this._messageListener = (event: Event) => {
+      // Cast to MessageEvent for typed access
+      const messageEvent = event as MessageEvent;
       // Security: Verify origin for data URLs
       // In development, localhost origins are common due to dev server
-      const isDevOrigin = event.origin.startsWith('http://localhost:');
-      const isDataUrlOrigin = event.origin === 'null' || event.origin.startsWith('data:');
+      const isDevOrigin = messageEvent.origin.startsWith('http://localhost:');
+      const isDataUrlOrigin =
+        messageEvent.origin === 'null' || messageEvent.origin.startsWith('data:');
 
       if (!isDataUrlOrigin && !isDevOrigin) {
-        console.warn('Received message from unexpected origin:', event.origin);
+        console.warn('Received message from unexpected origin:', messageEvent.origin);
         return;
       }
 
       // Only handle messages from our iframe
       if (
         !this.iframeRef?.nativeElement.contentWindow ||
-        event.source !== this.iframeRef.nativeElement.contentWindow
+        messageEvent.source !== this.iframeRef.nativeElement.contentWindow
       ) {
         return;
       }
 
       // Handle plugin API calls from iframe
       if (
-        event.data &&
-        typeof event.data === 'object' &&
-        event.data.type === 'PLUGIN_API_CALL'
+        messageEvent.data &&
+        typeof messageEvent.data === 'object' &&
+        messageEvent.data.type === 'PLUGIN_API_CALL'
       ) {
-        this._handlePluginApiCall(pluginId, event.data);
+        this._handlePluginApiCall(pluginId, messageEvent.data);
       }
     };
 
@@ -251,7 +254,7 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
       // Map API method calls to bridge methods
       switch (method) {
         case 'showSnack':
-          result = this._pluginBridge.showSnack(args[0] as SnackCfgLimited);
+          result = this._pluginBridge.showSnack(args[0] as SnackCfg);
           break;
         case 'notify':
           result = await this._pluginBridge.notify(args[0] as NotifyCfg);
