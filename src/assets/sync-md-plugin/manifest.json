@@ -7,7 +7,15 @@
   "author": "SuperProductivity",
   "type": "standard",
   "minSupVersion": "10.0.0",
-  "permissions": ["tasks", "projects", "appState", "nodeExecution"],
+  "permissions": [
+    "getTasks",
+    "updateTask",
+    "addTask",
+    "getAllProjects",
+    "nodeExecution",
+    "persistDataSynced",
+    "loadSyncedData"
+  ],
   "sidePanel": true,
   "iFrame": true,
   "entryPoint": "plugin.js",

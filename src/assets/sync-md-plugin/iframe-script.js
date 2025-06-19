@@ -32,7 +32,7 @@
 
   async function loadProjects() {
     try {
-      const projects = await pluginBridge.getProjects();
+      const projects = await pluginBridge.getAllProjects();
       const select = document.getElementById('projectId');
 
       // Clear existing options
