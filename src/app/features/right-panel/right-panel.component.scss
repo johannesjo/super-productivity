@@ -2,3 +2,15 @@
   display: block;
   height: 100%;
 }
+
+.right-panel {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  plugin-panel-container {
+    flex: 1;
+    height: 100%;
+    overflow: hidden;
+  }
+}
