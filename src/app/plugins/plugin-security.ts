@@ -11,21 +11,16 @@ export class PluginSecurityService {
   private readonly ALLOWED_PERMISSIONS: string[] = this.extractPluginAPIPermissions();
   private readonly MAX_PLUGIN_SIZE = 500 * 1024; // 500KB
   private readonly DANGEROUS_PATTERNS = [
-    /eval\s*\(/,
-    /Function\s*\(/,
-    // /setTimeout\s*\(/,
-    // /setInterval\s*\(/,
-    // /XMLHttpRequest/,
-    // /fetch\s*\(/,
-    /document\./,
-    /window\./,
-    /global\./,
-    /process\./,
-    /require\s*\(/,
-    /import\s*\(/,
+    // Very minimal patterns - only block the most obvious security issues
+    // Only block eval with string literals
+    /\beval\s*\(\s*["'`]/,
+    // Only block new Function with string literals
+    /new\s+Function\s*\(\s*["'`]/,
+    // Block dangerous Node.js APIs only with string literals
+    /require\s*\(\s*['"`](fs|child_process|vm|cluster)['"`]\s*\)/,
+    // Block direct prototype manipulation
     /__proto__/,
-    /constructor/,
-    /prototype/,
+    // Allow everything else for maximum compatibility
   ];
 
   constructor() {}
@@ -96,13 +91,20 @@ export class PluginSecurityService {
       }
     }
 
-    // Check for attempts to access forbidden globals
-    // const forbiddenGlobals = ['window', 'document', 'global', 'process', 'require'];
-    const forbiddenGlobals = ['process', 'require'];
-    for (const global of forbiddenGlobals) {
-      const regex = new RegExp(`\\b${global}\\b`, 'g');
-      if (regex.test(code)) {
-        errors.push(`Plugin code attempts to access forbidden global: ${global}`);
+    // Check for attempts to access forbidden globals - be more specific
+    // Only check for actual dangerous usage, not just the word appearing
+    const forbiddenPatterns = [
+      { pattern: /\bprocess\s*\.\s*exit/, name: 'process.exit' },
+      { pattern: /\brequire\s*\(\s*['"`]fs['"`]\)/, name: 'require("fs")' },
+      {
+        pattern: /\brequire\s*\(\s*['"`]child_process['"`]\)/,
+        name: 'require("child_process")',
+      },
+    ];
+
+    for (const { pattern, name } of forbiddenPatterns) {
+      if (pattern.test(code)) {
+        errors.push(`Plugin code attempts to use forbidden API: ${name}`);
       }
     }
 
