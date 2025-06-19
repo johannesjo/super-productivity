@@ -380,7 +380,7 @@ class SyncMdPlugin {
 
           // Handle sub-tasks
           for (const subTask of mdTask.subTasks) {
-            const newSubTask = await window.PluginApi.addSubTask({
+            const newSubTask = await window.PluginApi.addTask({
               title: subTask.title,
               parentId: newTask.id,
             });
@@ -395,16 +395,17 @@ class SyncMdPlugin {
     }
 
     // Handle deletions (tasks in project but not in markdown)
-    if (this.config.syncDirection !== 'fileToProject') {
-      for (const [taskId, task] of projectTaskMap) {
-        // Only delete tasks that were previously synced (have line numbers in our map)
-        const wasInMarkdown = Array.from(existingTaskIdMap.values()).includes(taskId);
-        if (wasInMarkdown) {
-          await window.PluginApi.deleteTask(taskId);
-          result.deleted++;
-        }
-      }
-    }
+    // Note: deleteTask API is not available, so we'll skip deletions for now
+    // if (this.config.syncDirection !== 'fileToProject') {
+    //   for (const [taskId, task] of projectTaskMap) {
+    //     // Only delete tasks that were previously synced (have line numbers in our map)
+    //     const wasInMarkdown = Array.from(existingTaskIdMap.values()).includes(taskId);
+    //     if (wasInMarkdown) {
+    //       // await window.PluginApi.deleteTask(taskId); // Not available
+    //       result.deleted++;
+    //     }
+    //   }
+    // }
 
     return result;
   }
