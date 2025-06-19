@@ -26,9 +26,9 @@ class SyncMdPlugin {
       });
     }
 
-    // Register message handler for iframe communication
-    if (PluginAPI?.onMessage) {
-      PluginAPI.onMessage((message) => this.handleMessage(message));
+    // Register global message handler for iframe communication
+    if (typeof window !== 'undefined') {
+      window.__pluginMessageHandler = (message) => this.handleMessage(message);
     }
 
     // Register hook for task changes

@@ -149,15 +149,6 @@
         font-weight: 500;
       }
 
-      .file-picker {
-        display: flex;
-        gap: 8px;
-      }
-
-      .file-picker input {
-        flex: 1;
-      }
-
       .preview-container {
         margin-top: 16px;
         padding: 12px;
@@ -201,20 +192,11 @@
 
     <div class="field-group">
       <label for="filePath">Markdown File Path</label>
-      <div class="file-picker">
-        <input
-          type="text"
-          id="filePath"
-          placeholder="/path/to/your/file.md"
-        />
-        <button
-          type="button"
-          class="btn-secondary"
-          id="browseBtn"
-        >
-          Browse
-        </button>
-      </div>
+      <input
+        type="text"
+        id="filePath"
+        placeholder="/path/to/your/file.md"
+      />
       <div class="help-text">Path to the markdown file to sync with</div>
     </div>
 
