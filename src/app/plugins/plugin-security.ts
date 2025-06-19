@@ -1,14 +1,16 @@
 import { Injectable } from '@angular/core';
-import { PluginHooks, PluginManifest } from './plugin-api.model';
-import { PluginAPI } from '@super-productivity/plugin-api';
+import { PluginManifest } from './plugin-api.model';
+import {
+  validatePluginManifest,
+  requiresDangerousPermissions,
+  hasNodeExecutionPermission,
+} from './util/validate-manifest.util';
 
 // TODO should be simple util functions maybe
 @Injectable({
   providedIn: 'root',
 })
 export class PluginSecurityService {
-  // Dynamically extract allowed permissions from PluginAPI interface
-  private readonly ALLOWED_PERMISSIONS: string[] = this.extractPluginAPIPermissions();
   private readonly MAX_PLUGIN_SIZE = 500 * 1024; // 500KB
   private readonly DANGEROUS_PATTERNS = [
     // Very minimal patterns - only block the most obvious security issues
@@ -24,52 +26,6 @@ export class PluginSecurityService {
   ];
 
   constructor() {}
-
-  /**
-   * Dynamically extract allowed permissions from PluginAPI interface.
-   * Uses TypeScript's keyof operator to ensure only actual PluginAPI methods can be specified.
-   */
-  private extractPluginAPIPermissions(): string[] {
-    // Define which methods from PluginAPI should be exposed as permissions
-    // TypeScript will enforce that these are actual methods from the PluginAPI interface
-    const permissibleMethods: (keyof PluginAPI)[] = [
-      // Task methods
-      'getTasks',
-      'getArchivedTasks',
-      'getCurrentContextTasks',
-      'updateTask',
-      'addTask',
-      // Project methods
-      'getAllProjects',
-      'addProject',
-      'updateProject',
-      // Tag methods
-      'getAllTags',
-      'addTag',
-      'updateTag',
-      // UI methods
-      'showSnack',
-      'notify',
-      'showIndexHtmlAsView',
-      'openDialog',
-      // Persistence methods
-      'persistDataSynced',
-      'loadSyncedData',
-      // Hook registration methods (these are always allowed)
-      'registerHook',
-      'registerHeaderButton',
-      'registerMenuEntry',
-      'registerShortcut',
-      // Node execution (requires special handling)
-      'executeNodeScript',
-    ];
-
-    // Generate permission strings
-    // Add alias for nodeExecution permission
-    const permissions = permissibleMethods.map((method) => String(method));
-    permissions.push('nodeExecution'); // Alias for executeNodeScript
-    return permissions;
-  }
 
   /**
    * Validate plugin code for security issues
@@ -116,69 +72,13 @@ export class PluginSecurityService {
 
   /**
    * Validate plugin manifest for security issues.
-   * Uses dynamically extracted permissions from PluginAPI to stay in sync with API changes.
+   * Delegates to shared util function.
    */
   validatePluginManifest(manifest: PluginManifest): {
     isValid: boolean;
     errors: string[];
   } {
-    const errors: string[] = [];
-
-    // Validate plugin ID format (should be safe for file system)
-    if (!/^[a-zA-Z0-9_-]+$/.test(manifest.id)) {
-      errors.push(
-        'Plugin ID contains invalid characters. Only alphanumeric, underscore, and dash are allowed.',
-      );
-    }
-
-    // Check for reasonable version format
-    if (!/^\d+\.\d+\.\d+/.test(manifest.version)) {
-      errors.push('Plugin version must follow semantic versioning format (x.y.z)');
-    }
-
-    // Validate permissions using dynamically extracted list
-    for (const permission of manifest.permissions) {
-      if (!this.ALLOWED_PERMISSIONS.includes(permission)) {
-        errors.push(`Unknown permission requested: ${permission}`);
-      }
-    }
-
-    // Validate hooks (still using enum values as they're defined in the model)
-    const allowedHooks = Object.values(PluginHooks);
-
-    for (const hook of manifest.hooks) {
-      if (!allowedHooks.includes(hook)) {
-        errors.push(`Unknown hook requested: ${hook}`);
-      }
-    }
-
-    // Validate nodeScriptConfig if present
-    if (manifest.nodeScriptConfig) {
-      // Check for nodeExecution permission
-      const hasNodePermission =
-        manifest.permissions.includes('nodeExecution') ||
-        manifest.permissions.includes('executeNodeScript');
-      if (!hasNodePermission) {
-        errors.push('nodeScriptConfig requires nodeExecution permission');
-      }
-
-      // Validate timeout
-      if (manifest.nodeScriptConfig.timeout !== undefined) {
-        if (
-          manifest.nodeScriptConfig.timeout < 100 ||
-          manifest.nodeScriptConfig.timeout > 300000
-        ) {
-          errors.push(
-            'nodeScriptConfig.timeout must be between 100ms and 300000ms (5 minutes)',
-          );
-        }
-      }
-    }
-
-    return {
-      isValid: errors.length === 0,
-      errors,
-    };
+    return validatePluginManifest(manifest);
   }
 
   // TODO remove
@@ -270,19 +170,17 @@ export class PluginSecurityService {
 
   /**
    * Check if a plugin requires dangerous permissions
+   * Delegates to shared util function.
    */
   requiresDangerousPermissions(manifest: PluginManifest): boolean {
-    const dangerousPermissions = ['nodeExecution', 'executeNodeScript'];
-    return manifest.permissions.some((p) => dangerousPermissions.includes(p));
+    return requiresDangerousPermissions(manifest);
   }
 
   /**
    * Check if plugin has node execution permission
+   * Delegates to shared util function.
    */
   hasNodeExecutionPermission(manifest: PluginManifest): boolean {
-    return (
-      manifest.permissions.includes('nodeExecution') ||
-      manifest.permissions.includes('executeNodeScript')
-    );
+    return hasNodeExecutionPermission(manifest);
   }
 }
