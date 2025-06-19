@@ -76,8 +76,15 @@ export class PluginCacheService {
 
     let cachedPlugin: CachedPlugin;
 
-    // Check if compression would be beneficial
-    if (shouldCompress(code) || (indexHtml && shouldCompress(indexHtml))) {
+    // Compression disabled for now - complicates things unnecessarily and might have a bad impact on performance
+    // TODO: Re-evaluate compression benefits vs complexity/performance tradeoff
+    const useCompression = false;
+
+    if (
+      useCompression &&
+      (shouldCompress(code) || (indexHtml && shouldCompress(indexHtml)))
+    ) {
+      // Compression code kept but disabled
       try {
         const compressed = await compressPlugin(manifest, code, indexHtml, icon);
         cachedPlugin = {
@@ -109,7 +116,7 @@ export class PluginCacheService {
         };
       }
     } else {
-      // Store uncompressed for small plugins
+      // Store uncompressed (default behavior now)
       cachedPlugin = {
         id: pluginId,
         manifest,
