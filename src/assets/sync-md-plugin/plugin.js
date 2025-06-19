@@ -4,8 +4,10 @@
 class SyncMdPlugin {
   constructor() {
     this.config = null;
-    this.watcherId = null;
+    this.watchInterval = null;
     this.lastSyncTime = null;
+    this.lastFileContent = null;
+    this.lastModifiedTime = null;
     this.isWatching = false;
     this.syncInProgress = false;
     this.ignoreNextFileChange = false;
@@ -116,63 +118,18 @@ class SyncMdPlugin {
 
     try {
       // Stop existing watcher if any
-      if (this.watcherId) {
+      if (this.watchInterval) {
         await this.stopWatching();
       }
 
-      // Start file watcher using node script
-      const watchScript = `
-        const fs = require('fs');
-        const path = require('path');
+      // Initial read
+      await this.checkFileForChanges();
 
-        const filePath = '${this.config.filePath}';
+      // Start polling interval (check every 2 seconds)
+      this.watchInterval = setInterval(() => {
+        this.checkFileForChanges();
+      }, 2000);
 
-        // Initial read
-        try {
-          const content = fs.readFileSync(filePath, 'utf8');
-          console.log(JSON.stringify({
-            type: 'initial',
-            content: content,
-            exists: true
-          }));
-        } catch (error) {
-          console.log(JSON.stringify({
-            type: 'error',
-            error: error.message,
-            exists: false
-          }));
-        }
-
-        // Watch for changes
-        const watcher = fs.watch(filePath, (eventType, filename) => {
-          if (eventType === 'change') {
-            try {
-              const content = fs.readFileSync(filePath, 'utf8');
-              console.log(JSON.stringify({
-                type: 'change',
-                content: content
-              }));
-            } catch (error) {
-              console.log(JSON.stringify({
-                type: 'error',
-                error: error.message
-              }));
-            }
-          }
-        });
-
-        // Keep process alive
-        process.stdin.resume();
-      `;
-
-      const result = await PluginAPI.executeNodeScript({
-        script: watchScript,
-        persistent: true,
-        onOutput: (data) => this.handleWatcherOutput(data),
-        onError: (error) => this.handleWatcherError(error),
-      });
-
-      this.watcherId = result.id;
       this.isWatching = true;
       console.log('[Sync.md] Started watching file:', this.config.filePath);
     } catch (error) {
@@ -182,49 +139,77 @@ class SyncMdPlugin {
   }
 
   async stopWatching() {
-    if (this.watcherId && PluginAPI?.executeNodeScript) {
-      try {
-        await PluginAPI.executeNodeScript({
-          action: 'stop',
-          id: this.watcherId,
-        });
-        console.log('[Sync.md] Stopped watching file');
-      } catch (error) {
-        console.error('[Sync.md] Error stopping watcher:', error);
-      }
+    if (this.watchInterval) {
+      clearInterval(this.watchInterval);
+      this.watchInterval = null;
+      console.log('[Sync.md] Stopped watching file');
     }
-    this.watcherId = null;
     this.isWatching = false;
   }
 
-  async handleWatcherOutput(output) {
+  async checkFileForChanges() {
+    if (!this.config?.filePath || !PluginAPI?.executeNodeScript) {
+      return;
+    }
+
     try {
-      const data = JSON.parse(output);
-
-      if (data.type === 'error') {
-        console.error('[Sync.md] File watcher error:', data.error);
-        return;
-      }
-
-      if (data.type === 'initial' || data.type === 'change') {
-        // Check if we should ignore this change (from our own update)
-        if (this.ignoreNextFileChange) {
-          console.log('[Sync.md] Ignoring file change (self-triggered)');
-          this.ignoreNextFileChange = false;
-          return;
+      const checkScript = `
+        const fs = require('fs');
+        const filePath = '${this.config.filePath.replace(/'/g, "\\'")}';
+        
+        try {
+          const stats = fs.statSync(filePath);
+          const content = fs.readFileSync(filePath, 'utf8');
+          console.log(JSON.stringify({
+            exists: true,
+            content: content,
+            modifiedTime: stats.mtime.getTime()
+          }));
+        } catch (error) {
+          console.log(JSON.stringify({
+            exists: false,
+            error: error.message
+          }));
         }
+      `;
 
-        console.log('[Sync.md] File content received, syncing...');
-        await this.syncFileToProject(data.content);
+      const result = await PluginAPI.executeNodeScript({
+        script: checkScript,
+        timeout: 5000,
+      });
+
+      if (result.success && result.result) {
+        const output = typeof result.result === 'string' ? result.result : '';
+        const data = JSON.parse(output);
+
+        if (data.exists && data.content) {
+          // Check if file has changed
+          const hasChanged =
+            this.lastModifiedTime !== data.modifiedTime ||
+            this.lastFileContent !== data.content;
+
+          if (hasChanged) {
+            // Check if we should ignore this change (from our own update)
+            if (this.ignoreNextFileChange) {
+              console.log('[Sync.md] Ignoring file change (self-triggered)');
+              this.ignoreNextFileChange = false;
+              this.lastModifiedTime = data.modifiedTime;
+              this.lastFileContent = data.content;
+              return;
+            }
+
+            console.log('[Sync.md] File changed, syncing...');
+            this.lastModifiedTime = data.modifiedTime;
+            this.lastFileContent = data.content;
+            await this.syncFileToProject(data.content);
+          }
+        } else if (!data.exists) {
+          console.error('[Sync.md] File no longer exists:', data.error);
+        }
       }
     } catch (error) {
-      console.error('[Sync.md] Error handling watcher output:', error);
+      console.error('[Sync.md] Error checking file:', error);
     }
-  }
-
-  handleWatcherError(error) {
-    console.error('[Sync.md] Watcher error:', error);
-    this.isWatching = false;
   }
 
   async syncFileToProject(content) {
@@ -442,10 +427,14 @@ class SyncMdPlugin {
         console.log('File updated successfully');
       `;
 
-      await PluginAPI.executeNodeScript({
+      const result = await PluginAPI.executeNodeScript({
         script: writeScript,
-        persistent: false,
+        timeout: 5000,
       });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Write operation failed');
+      }
 
       console.log('[Sync.md] File updated with task IDs');
     } catch (error) {
@@ -481,10 +470,15 @@ class SyncMdPlugin {
 
     const result = await PluginAPI.executeNodeScript({
       script: testScript,
-      persistent: false,
+      timeout: 5000,
     });
 
-    return JSON.parse(result.output);
+    if (result.success && result.result) {
+      const output = typeof result.result === 'string' ? result.result : '';
+      return JSON.parse(output);
+    } else {
+      throw new Error(result.error || 'Test connection failed');
+    }
   }
 
   async browseForFile(filters) {
@@ -509,10 +503,15 @@ class SyncMdPlugin {
     try {
       const result = await PluginAPI.executeNodeScript({
         script: browseScript,
-        persistent: false,
+        timeout: 5000,
       });
 
-      return JSON.parse(result.output);
+      if (result.success && result.result) {
+        const output = typeof result.result === 'string' ? result.result : '';
+        return JSON.parse(output);
+      } else {
+        throw new Error(result.error || 'Browse operation failed');
+      }
     } catch (error) {
       console.error('[Sync.md] Error browsing for file:', error);
       return { filePath: null };
@@ -541,10 +540,15 @@ class SyncMdPlugin {
 
     const result = await PluginAPI.executeNodeScript({
       script: readScript,
-      persistent: false,
+      timeout: 5000,
     });
 
-    return JSON.parse(result.output);
+    if (result.success && result.result) {
+      const output = typeof result.result === 'string' ? result.result : '';
+      return JSON.parse(output);
+    } else {
+      throw new Error(result.error || 'Read operation failed');
+    }
   }
 
   async handleTasksUpdated(tasks) {
@@ -649,10 +653,14 @@ class SyncMdPlugin {
         console.log('File synced from project');
       `;
 
-      await PluginAPI.executeNodeScript({
+      const result = await PluginAPI.executeNodeScript({
         script: writeScript,
-        persistent: false,
+        timeout: 5000,
       });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Write operation failed');
+      }
 
       this.lastSyncTime = new Date();
       console.log('[Sync.md] Project synced to file');
