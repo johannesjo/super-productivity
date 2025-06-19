@@ -109,11 +109,13 @@ button.isActive2 {
     margin-right: auto;
   }
 
-  button {
-    margin-left: var(--s-quarter);
+  ::ng-deep {
+    button {
+      margin-left: var(--s-quarter);
 
-    @include mq(xs) {
-      margin-left: var(--s);
+      @include mq(xs) {
+        margin-left: var(--s);
+      }
     }
   }
 }
@@ -135,7 +137,8 @@ button.isActive2 {
 
 .play-btn-wrapper {
   position: relative;
-  margin-left: var(--s-half);
+  //margin-left: var(--s-half);
+  //margin-right: var(--s-half);
 
   @include mq(xs) {
     margin-left: var(--s);

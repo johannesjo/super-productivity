@@ -45,7 +45,6 @@ import { Router } from '@angular/router';
       }
 
       .plugin-side-panel-btn {
-        margin: 0 2px;
         transition: all 0.2s ease;
       }
 
