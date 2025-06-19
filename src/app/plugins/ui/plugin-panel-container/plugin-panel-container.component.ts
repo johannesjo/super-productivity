@@ -10,7 +10,7 @@ import { PluginService } from '../../plugin.service';
 import { PluginBridgeService } from '../../plugin-bridge.service';
 import { PluginCleanupService } from '../../plugin-cleanup.service';
 import { Subscription } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter, switchMap } from 'rxjs/operators';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import {
   createPluginIframeUrl,
@@ -21,6 +21,8 @@ import { PluginInstance } from '../../plugin-api.model';
 import { CommonModule } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIcon } from '@angular/material/icon';
+import { Store } from '@ngrx/store';
+import { selectActivePluginId } from '../../../core-ui/layout/store/layout.reducer';
 
 /**
  * Container component for rendering plugin iframes in the right panel.
@@ -101,6 +103,7 @@ export class PluginPanelContainerComponent implements OnInit, OnDestroy {
   private _pluginBridge = inject(PluginBridgeService);
   private _sanitizer = inject(DomSanitizer);
   private _cleanupService = inject(PluginCleanupService);
+  private _store = inject(Store);
 
   iframeUrl = signal<SafeResourceUrl | null>(null);
   isLoading = signal<boolean>(true);
@@ -110,13 +113,16 @@ export class PluginPanelContainerComponent implements OnInit, OnDestroy {
   private _messageHandler?: EventListener;
 
   ngOnInit(): void {
-    // Subscribe to active side panel plugin changes
+    // Subscribe to active plugin ID from layout state and load the plugin
     this._subs.add(
-      this._pluginService.activeSidePanelPlugin$
-        .pipe(filter((plugin): plugin is PluginInstance => !!plugin))
+      this._store
+        .select(selectActivePluginId)
+        .pipe(
+          filter((pluginId): pluginId is string => !!pluginId),
+          switchMap((pluginId) => this._pluginService.getLoadedPlugin(pluginId)),
+          filter((plugin): plugin is PluginInstance => !!plugin),
+        )
         .subscribe(async (plugin) => {
-          if (!plugin) return;
-
           // Reset state
           this.isLoading.set(true);
           this.error.set(null);
@@ -187,8 +193,7 @@ export class PluginPanelContainerComponent implements OnInit, OnDestroy {
     }
 
     // Clear iframe URL to release resources
-    const currentPlugin = this._pluginService.getActiveSidePanelPluginId();
-    if (currentPlugin && this.iframeUrl()) {
+    if (this.iframeUrl()) {
       // Note: The actual iframe element cleanup is handled by the cleanup service
       // when the plugin is unloaded
       this.iframeUrl.set(null);

@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import { inject, Injectable, signal, OnDestroy } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { PluginRunner } from './plugin-runner';
@@ -305,6 +305,17 @@ export class PluginService implements OnDestroy {
 
   getLoadedPlugins(): PluginInstance[] {
     return [...this._loadedPlugins];
+  }
+
+  /**
+   * Get a loaded plugin by ID
+   * Returns an Observable that emits the plugin instance if found
+   */
+  getLoadedPlugin(pluginId: string): Observable<PluginInstance | null> {
+    const plugin = this._loadedPlugins.find(
+      (p) => p.manifest.id === pluginId && p.loaded,
+    );
+    return of(plugin || null);
   }
 
   getPluginPath(pluginId: string): string | undefined {
