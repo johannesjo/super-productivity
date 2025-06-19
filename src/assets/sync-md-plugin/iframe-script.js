@@ -150,6 +150,12 @@ console.log('[Sync.md UI] Script loaded at', new Date().toISOString());
         previewFile(e.target.value);
       }
     });
+
+    // Sync now button
+    const syncNowBtn = document.getElementById('syncNowBtn');
+    if (syncNowBtn) {
+      syncNowBtn.addEventListener('click', syncNow);
+    }
   }
 
   async function saveConfig() {
@@ -279,6 +285,26 @@ console.log('[Sync.md UI] Script loaded at', new Date().toISOString());
       setTimeout(() => {
         statusEl.style.display = 'none';
       }, 5000);
+    }
+  }
+
+  async function syncNow() {
+    try {
+      showStatus('Syncing...', 'info');
+
+      const result = await sendMessageToPlugin({
+        type: 'syncNow',
+      });
+
+      if (result && result.success) {
+        showStatus('Sync completed successfully', 'success');
+        updateSyncInfo();
+      } else {
+        showStatus('Sync failed', 'error');
+      }
+    } catch (error) {
+      console.error('[Sync.md UI] Error during manual sync:', error);
+      showStatus('Error during sync: ' + error.message, 'error');
     }
   }
 

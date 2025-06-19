@@ -263,17 +263,17 @@ const safeProcess = {
 (async function() {
   const args = ${JSON.stringify(args || [])};
   const process = safeProcess;
-  
+
   try {
     const result = await (async function() {
       ${script}
     })();
-    
+
     console.log(JSON.stringify({ __result: result }));
   } catch (error) {
-    console.error(JSON.stringify({ 
+    console.error(JSON.stringify({
       __error: error.message || String(error),
-      __stack: error.stack 
+      __stack: error.stack
     }));
     process.exit(1);
   }
@@ -332,7 +332,7 @@ const safeProcess = {
         clearTimeout(timer);
         clearInterval(memoryMonitor);
         console.error('Failed to spawn node process:', err);
-        if (err.code === 'ENOENT') {
+        if (err.message === 'ENOENT') {
           reject(
             new Error(
               'Node.js executable not found. Please ensure Node.js is installed and in PATH.',

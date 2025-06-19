@@ -42,6 +42,12 @@ class SyncMdPlugin {
     // Start watching if configured
     if (this.config?.filePath && this.config?.projectId) {
       await this.startWatching();
+
+      // Do an initial sync from project to file if bidirectional or projectToFile
+      if (this.config.syncDirection !== 'fileToProject') {
+        console.log('[Sync.md] Performing initial sync from project to file...');
+        await this.syncProjectToFile();
+      }
     }
 
     console.log('[Sync.md] Plugin initialized');
@@ -75,6 +81,15 @@ class SyncMdPlugin {
             lastSyncTime: this.lastSyncTime,
             taskCount: this.taskIdMap.size,
           };
+
+        case 'syncNow':
+          console.log('[Sync.md] Manual sync requested');
+          if (this.config?.syncDirection === 'fileToProject') {
+            await this.checkFileForChanges();
+          } else {
+            await this.syncProjectToFile();
+          }
+          return { success: true };
 
         default:
           console.warn('[Sync.md] Unknown message type:', message.type);
