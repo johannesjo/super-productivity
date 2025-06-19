@@ -347,26 +347,26 @@ class SyncMdPlugin {
         // Mark as processed
         projectTaskMap.delete(mdTask.id);
       } else {
-        // Create new task
-        const newTask = await PluginAPI.addTask({
+        // Create new task - addTask returns the task ID as a string
+        const newTaskId = await PluginAPI.addTask({
           title: mdTask.title,
           projectId: this.config.projectId,
         });
 
-        if (newTask && newTask.id) {
-          result.updatedTaskIdMap.set(mdTask.lineNumber, newTask.id);
+        if (newTaskId) {
+          result.updatedTaskIdMap.set(mdTask.lineNumber, newTaskId);
           result.hasNewIds = true;
           result.created++;
 
           // Handle sub-tasks
           for (const subTask of mdTask.subTasks) {
-            const newSubTask = await PluginAPI.addTask({
+            const newSubTaskId = await PluginAPI.addTask({
               title: subTask.title,
-              parentId: newTask.id,
+              parentId: newTaskId,
             });
 
-            if (newSubTask && newSubTask.id) {
-              result.updatedTaskIdMap.set(subTask.lineNumber, newSubTask.id);
+            if (newSubTaskId) {
+              result.updatedTaskIdMap.set(subTask.lineNumber, newSubTaskId);
               result.created++;
             }
           }
