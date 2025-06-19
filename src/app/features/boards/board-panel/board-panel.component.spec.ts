@@ -112,7 +112,7 @@ describe('BoardPanelComponent - Backlog Feature', () => {
     fixture.detectChanges();
   });
 
-  it('should only include backlog tasks when filterType is OnlyBacklog', () => {
+  it('should only include backlog tasks when backlogState is OnlyBacklog', () => {
     fixture.componentRef.setInput('panelCfg', {
       ...mockPanelCfg,
       backlogState: BoardPanelCfgTaskTypeFilter.OnlyBacklog,
@@ -123,7 +123,7 @@ describe('BoardPanelComponent - Backlog Feature', () => {
     expect(tasks[0].id).toBe(mockBacklogTaskId);
   });
 
-  it('should exclude backlog tasks when filterType is NoBacklog', () => {
+  it('should exclude backlog tasks when backlogState is NoBacklog', () => {
     fixture.componentRef.setInput('panelCfg', {
       ...mockPanelCfg,
       backlogState: BoardPanelCfgTaskTypeFilter.NoBacklog,
@@ -134,7 +134,7 @@ describe('BoardPanelComponent - Backlog Feature', () => {
     expect(tasks[0].id).toBe(mockNonBacklogTaskId);
   });
 
-  it('should include all tasks regardless of backlog when filterType is All', () => {
+  it('should include all tasks regardless of backlog when backlogState is All', () => {
     fixture.componentRef.setInput('panelCfg', {
       ...mockPanelCfg,
       backlogState: BoardPanelCfgTaskTypeFilter.All,

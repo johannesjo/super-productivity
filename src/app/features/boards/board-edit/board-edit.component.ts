@@ -19,7 +19,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { T } from '../../../t.const';
 import { Store } from '@ngrx/store';
 import { BoardsActions } from '../store/boards.actions';
-import { DEFAULT_BOARD_CFG } from '../boards.const';
+import { DEFAULT_BOARD_CFG, DEFAULT_PANEL_CFG } from '../boards.const';
 
 @Component({
   selector: 'board-edit',
@@ -48,9 +48,16 @@ export class BoardEditComponent implements OnInit {
     }
 
     // be safe with legacy data (only required for my current SP config)
+    const boardCfg = this.boardCfg();
     this.boardCfg.set({
       ...DEFAULT_BOARD_CFG,
-      ...this.boardCfg(),
+      ...boardCfg,
+      // Ensure each panel has all default properties
+      panels:
+        boardCfg.panels?.map((panel) => ({
+          ...DEFAULT_PANEL_CFG,
+          ...panel,
+        })) || [],
     });
   }
 
