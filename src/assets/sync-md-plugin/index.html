@@ -189,6 +189,20 @@
   </head>
   <body>
     <h2>Sync.md Configuration</h2>
+    <div
+      id="debug"
+      style="color: red; font-weight: bold"
+    ></div>
+    <script>
+      // Immediate debug script
+      document.getElementById('debug').textContent = 'Script executing...';
+      console.log('[Sync.md] HTML loaded and inline script executing');
+      if (window.PluginAPI) {
+        document.getElementById('debug').textContent = 'PluginAPI found!';
+      } else {
+        document.getElementById('debug').textContent = 'Waiting for PluginAPI...';
+      }
+    </script>
 
     <div class="field-group">
       <label for="filePath">Markdown File Path</label>
