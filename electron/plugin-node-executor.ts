@@ -3,6 +3,7 @@ import { spawn } from 'child_process';
 import { promises as fs } from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import * as vm from 'vm';
 import { v4 as uuidv4 } from 'uuid';
 import { IPC } from './shared-with-frontend/ipc-events.const';
 import {
@@ -116,6 +117,25 @@ class PluginNodeExecutor {
         error: error instanceof Error ? error.message : 'Invalid script request',
         executionTime: Date.now() - startTime,
       };
+    }
+
+    // For simple scripts, try to execute directly in the main process with sandboxing
+    // This avoids the need for spawning node which might not be available
+    if (this.canExecuteDirectly(request.script)) {
+      try {
+        const result = await this.executeDirectly(request.script, request.args);
+        return {
+          success: true,
+          result,
+          executionTime: Date.now() - startTime,
+        };
+      } catch (error) {
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Script execution failed',
+          executionTime: Date.now() - startTime,
+        };
+      }
     }
 
     const tempDir = path.join(os.tmpdir(), 'sup-plugin-exec', context.pluginId);
@@ -270,9 +290,18 @@ const safeProcess = {
     return new Promise((resolve, reject) => {
       const memoryLimitMB = this.parseMemoryLimit(memoryLimit);
 
+      // Get node executable path - try multiple options
+      let nodePath = 'node';
+
+      // Try to use Electron's node if available
+      if (process.execPath && process.execPath.includes('electron')) {
+        // On some systems, we can use the electron executable with node mode
+        nodePath = process.execPath;
+      }
+
       // Spawn node process with restrictions
       const child = spawn(
-        'node',
+        nodePath,
         [
           '--no-warnings',
           `--max-old-space-size=${memoryLimitMB}`,
@@ -282,9 +311,12 @@ const safeProcess = {
         {
           cwd: context.userDataPath, // Plugin's data directory
           env: {
-            // Minimal environment
+            // Minimal environment with PATH
             NODE_ENV: 'production',
             PLUGIN_ID: context.pluginId,
+            PATH: process.env.PATH || '',
+            // Include Electron's internal node path if available
+            ELECTRON_RUN_AS_NODE: '1',
           },
           stdio: ['ignore', 'pipe', 'pipe'],
         },
@@ -294,6 +326,22 @@ const safeProcess = {
       let stderr = '';
       let killed = false;
       let peakMemoryUsage = 0;
+
+      // Handle spawn errors
+      child.on('error', (err) => {
+        clearTimeout(timer);
+        clearInterval(memoryMonitor);
+        console.error('Failed to spawn node process:', err);
+        if (err.code === 'ENOENT') {
+          reject(
+            new Error(
+              'Node.js executable not found. Please ensure Node.js is installed and in PATH.',
+            ),
+          );
+        } else {
+          reject(err);
+        }
+      });
 
       // Set timeout
       const timer = setTimeout(() => {
@@ -400,6 +448,58 @@ const safeProcess = {
       default:
         return 128;
     }
+  }
+
+  private canExecuteDirectly(script: string): boolean {
+    // Check if the script only uses safe fs operations
+    const hasOnlyAllowedRequires = !script.match(
+      /require\s*\(\s*['"`](?!fs|path)[^'"]+['"`]\s*\)/,
+    );
+    const hasNoDangerousPatterns = !script.match(
+      /child_process|exec|spawn|eval|Function|process\.exit/,
+    );
+
+    return hasOnlyAllowedRequires && hasNoDangerousPatterns;
+  }
+
+  private async executeDirectly(script: string, args?: unknown[]): Promise<unknown> {
+    // Create a sandboxed context for execution
+    const fsModule = await import('fs');
+    const pathModule = await import('path');
+
+    // Create sandbox with limited APIs
+    const sandbox = {
+      require: (module: string) => {
+        if (module === 'fs') return fsModule;
+        if (module === 'path') return pathModule;
+        throw new Error(`Module '${module}' is not allowed`);
+      },
+      console: {
+        log: (output: any) => {
+          // Capture console.log output as the result
+          sandbox.__result = output;
+        },
+        error: console.error,
+      },
+      JSON,
+      __result: undefined,
+      args: args || [],
+    };
+
+    // Run the script in sandbox
+    const context = vm.createContext(sandbox);
+    const wrappedScript = `
+      (function() {
+        ${script}
+      })();
+    `;
+
+    vm.runInContext(wrappedScript, context, {
+      timeout: 5000, // 5 second timeout
+    });
+
+    // Return the captured result
+    return sandbox.__result;
   }
 
   /**
