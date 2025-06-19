@@ -59,7 +59,8 @@
   position: relative;
 }
 
-progress-circle {
+progress-circle,
+breathing-dot {
   width: 150px;
   height: 150px;
   @media (min-height: 800px) and (min-width: 500px) {
