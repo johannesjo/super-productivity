@@ -1,0 +1,16 @@
+{
+  "id": "sync-md",
+  "manifestVersion": 1,
+  "name": "Sync.md",
+  "version": "1.0.0",
+  "description": "Sync markdown files with SuperProductivity projects",
+  "author": "SuperProductivity",
+  "type": "standard",
+  "minSupVersion": "10.0.0",
+  "permissions": ["tasks", "projects", "appState", "nodeExecution"],
+  "sidePanel": true,
+  "iFrame": true,
+  "entryPoint": "plugin.js",
+  "hooks": [],
+  "icon": "sync-md-icon.svg"
+}
