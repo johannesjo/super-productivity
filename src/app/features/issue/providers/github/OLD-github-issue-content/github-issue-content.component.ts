@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, Input, input, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Input,
+  input,
+  inject,
+  signal,
+} from '@angular/core';
 import { TaskWithSubTasks } from '../../../../tasks/task.model';
 import { GithubComment, GithubIssue } from '../github-issue.model';
 import { expandAnimation } from '../../../../../ui/animations/expand.ani';
@@ -43,8 +50,7 @@ export class GithubIssueContentComponent {
 
   T: typeof T = T;
 
-  isForceShowAllComments = false;
-  isForceShowDescription = false;
+  isForceShowAllComments = signal(false);
 
   lastComment(): GithubComment {
     // NOTE: when we ask for this we should have it
@@ -61,7 +67,7 @@ export class GithubIssueContentComponent {
 
   isCollapsedIssueComments(): boolean {
     if (this.issue) {
-      return !this.isForceShowAllComments && this.issue.comments?.length > 2;
+      return !this.isForceShowAllComments() && this.issue.comments?.length > 2;
     }
     return false;
   }

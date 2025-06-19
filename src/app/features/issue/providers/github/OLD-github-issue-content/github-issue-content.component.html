@@ -77,7 +77,7 @@
             <button
               mat-stroked-button
               class="load-comments-and-all-data"
-              (click)="isForceShowDescription = true; isForceShowAllComments = true"
+              (click)="isForceShowAllComments.set(true)"
             >
               <mat-icon>download</mat-icon>
               @if (isCollapsedIssueSummary()) {
