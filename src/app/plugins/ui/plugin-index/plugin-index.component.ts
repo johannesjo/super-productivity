@@ -209,6 +209,15 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
       ) {
         this._handlePluginApiCall(pluginId, messageEvent.data);
       }
+
+      // Handle plugin messages (for plugin-to-plugin communication)
+      if (
+        messageEvent.data &&
+        typeof messageEvent.data === 'object' &&
+        messageEvent.data.type === 'PLUGIN_MESSAGE'
+      ) {
+        this._handlePluginMessage(pluginId, messageEvent.data);
+      }
     };
 
     window.addEventListener('message', this._messageListener);
@@ -310,6 +319,10 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
         case 'loadPersistedData':
           result = await this._pluginBridge.loadPersistedData();
           break;
+        case 'loadSyncedData':
+          // Map loadSyncedData to loadPersistedData
+          result = await this._pluginBridge.loadPersistedData();
+          break;
         default:
           throw new Error(`Unknown API method: ${method}`);
       }
@@ -344,6 +357,41 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
   onIframeLoad(): void {
     // The API is already injected via the data URL, no need to inject again
     console.log('Plugin iframe loaded for plugin:', this.pluginId());
+  }
+
+  private async _handlePluginMessage(
+    pluginId: string,
+    message: { messageId?: string; data: any },
+  ): Promise<void> {
+    try {
+      // Call the plugin's message handler through the runner
+      const result = await this._pluginBridge.sendMessageToPlugin(pluginId, message.data);
+
+      // Send response back to iframe if messageId was provided
+      if (message.messageId && this.iframeRef?.nativeElement.contentWindow) {
+        this.iframeRef.nativeElement.contentWindow.postMessage(
+          {
+            type: 'PLUGIN_MESSAGE_RESPONSE',
+            messageId: message.messageId,
+            result,
+          },
+          '*',
+        );
+      }
+    } catch (error) {
+      console.error(`Plugin message handling failed:`, error);
+      // Send error back to iframe if messageId was provided
+      if (message.messageId && this.iframeRef?.nativeElement.contentWindow) {
+        this.iframeRef.nativeElement.contentWindow.postMessage(
+          {
+            type: 'PLUGIN_MESSAGE_RESPONSE',
+            messageId: message.messageId,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          },
+          '*',
+        );
+      }
+    }
   }
 
   private _getPluginApiScript(): string {
@@ -412,6 +460,7 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
           updateTag: (tagId, updates) => makeApiCall('updateTag', [tagId, updates]),
           persistDataSynced: (dataStr) => makeApiCall('persistDataSynced', [dataStr]),
           loadPersistedData: () => makeApiCall('loadPersistedData', []),
+          loadSyncedData: () => makeApiCall('loadSyncedData', []),
         };
 
         console.log('Plugin API injected successfully');

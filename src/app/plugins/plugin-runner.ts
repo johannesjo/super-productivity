@@ -448,4 +448,20 @@ export class PluginRunner {
       manifest.permissions.includes('executeNodeScript')
     );
   }
+
+  async sendMessageToPlugin(pluginId: string, message: any): Promise<any> {
+    const pluginInstance = this._loadedPlugins.get(pluginId);
+    if (!pluginInstance || !pluginInstance.loaded) {
+      throw new Error(`Plugin ${pluginId} is not loaded`);
+    }
+
+    // Check if the plugin has registered a message handler
+    if (typeof (window as any).__pluginMessageHandler === 'function') {
+      return await (window as any).__pluginMessageHandler(message);
+    }
+
+    // If no handler, return null
+    console.warn(`Plugin ${pluginId} has no message handler registered`);
+    return null;
+  }
 }

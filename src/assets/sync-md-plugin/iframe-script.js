@@ -1,16 +1,16 @@
 // Iframe communication script for Sync.md plugin UI
 
 (function () {
-  let pluginBridge = null;
+  let pluginAPI = null;
   let currentConfig = null;
 
-  // Wait for plugin bridge to be available
-  function waitForBridge() {
-    if (window.pluginBridge) {
-      pluginBridge = window.pluginBridge;
+  // Wait for plugin API to be available
+  function waitForAPI() {
+    if (window.PluginAPI) {
+      pluginAPI = window.PluginAPI;
       initialize();
     } else {
-      setTimeout(waitForBridge, 100);
+      setTimeout(waitForAPI, 100);
     }
   }
 
@@ -32,7 +32,7 @@
 
   async function loadProjects() {
     try {
-      const projects = await pluginBridge.getAllProjects();
+      const projects = await pluginAPI.getAllProjects();
       const select = document.getElementById('projectId');
 
       // Clear existing options
@@ -53,8 +53,9 @@
 
   async function loadConfig() {
     try {
-      const config = await pluginBridge.getUserData('syncMdConfig');
-      if (config) {
+      const dataStr = await pluginAPI.loadPersistedData();
+      if (dataStr) {
+        const config = JSON.parse(dataStr);
         currentConfig = config;
         document.getElementById('filePath').value = config.filePath || '';
         document.getElementById('projectId').value = config.projectId || '';
@@ -78,8 +79,7 @@
     // Test button
     document.getElementById('testBtn').addEventListener('click', testConnection);
 
-    // Browse button
-    document.getElementById('browseBtn').addEventListener('click', browseForFile);
+    // Browse button removed - not available in web version
 
     // File path change
     document.getElementById('filePath').addEventListener('change', (e) => {
@@ -108,13 +108,19 @@
 
     try {
       // Save config through plugin API
-      await pluginBridge.setUserData('syncMdConfig', config);
+      await pluginAPI.persistDataSynced(JSON.stringify(config));
 
-      // Notify plugin to restart watching
-      await pluginBridge.sendMessage({
-        type: 'configUpdated',
-        config: config,
-      });
+      // Notify plugin through parent window message
+      window.parent.postMessage(
+        {
+          type: 'PLUGIN_MESSAGE',
+          data: {
+            type: 'configUpdated',
+            config: config,
+          },
+        },
+        '*',
+      );
 
       currentConfig = config;
       showStatus('Configuration saved successfully', 'success');
@@ -137,7 +143,8 @@
     try {
       showStatus('Testing connection...', 'info');
 
-      const result = await pluginBridge.sendMessage({
+      // Send message to plugin through parent window
+      const result = await sendMessageToPlugin({
         type: 'testConnection',
         filePath: filePath,
       });
@@ -154,35 +161,16 @@
     }
   }
 
-  async function browseForFile() {
-    try {
-      // Request file selection through plugin bridge
-      const result = await pluginBridge.sendMessage({
-        type: 'browseFile',
-        filters: [
-          { name: 'Markdown files', extensions: ['md', 'markdown'] },
-          { name: 'All files', extensions: ['*'] },
-        ],
-      });
-
-      if (result.filePath) {
-        document.getElementById('filePath').value = result.filePath;
-        previewFile(result.filePath);
-      }
-    } catch (error) {
-      console.error('[Sync.md UI] Error browsing for file:', error);
-      showStatus('File browsing not available', 'error');
-    }
-  }
+  // File browsing not available in web version - function removed
 
   async function previewFile(filePath) {
     try {
-      const result = await pluginBridge.sendMessage({
+      const result = await sendMessageToPlugin({
         type: 'readFile',
         filePath: filePath,
       });
 
-      if (result.content) {
+      if (result && result.content) {
         document.getElementById('preview').style.display = 'block';
         document.getElementById('previewContent').textContent = result.content;
       }
@@ -201,8 +189,7 @@
     document.getElementById('lastSync').textContent = 'Just now';
 
     // Request actual sync info from plugin
-    pluginBridge
-      .sendMessage({ type: 'getSyncInfo' })
+    sendMessageToPlugin({ type: 'getSyncInfo' })
       .then((info) => {
         if (info) {
           document.getElementById('syncStatus').textContent = info.isWatching
@@ -247,13 +234,47 @@
     }
   }
 
-  // Listen for theme changes
-  if (window.pluginBridge?.onThemeChange) {
-    window.pluginBridge.onThemeChange((theme) => {
-      applyTheme(theme);
+  // Helper function to send messages to plugin
+  function sendMessageToPlugin(message) {
+    return new Promise((resolve, reject) => {
+      const messageId = Date.now() + Math.random();
+
+      // Listen for response
+      const handler = (event) => {
+        if (
+          event.data &&
+          event.data.type === 'PLUGIN_MESSAGE_RESPONSE' &&
+          event.data.messageId === messageId
+        ) {
+          window.removeEventListener('message', handler);
+          if (event.data.error) {
+            reject(new Error(event.data.error));
+          } else {
+            resolve(event.data.result);
+          }
+        }
+      };
+
+      window.addEventListener('message', handler);
+
+      // Send message to plugin
+      window.parent.postMessage(
+        {
+          type: 'PLUGIN_MESSAGE',
+          messageId: messageId,
+          data: message,
+        },
+        '*',
+      );
+
+      // Timeout after 10 seconds
+      setTimeout(() => {
+        window.removeEventListener('message', handler);
+        reject(new Error('Message timeout'));
+      }, 10000);
     });
   }
 
   // Start initialization
-  waitForBridge();
+  waitForAPI();
 })();

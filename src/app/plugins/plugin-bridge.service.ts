@@ -657,6 +657,17 @@ export class PluginBridgeService implements OnDestroy {
   }
 
   /**
+   * Send a message to a plugin's message handler
+   */
+  async sendMessageToPlugin(pluginId: string, message: any): Promise<any> {
+    // This method will be called by the plugin-index component
+    // The actual implementation is in the plugin runner
+    const PluginRunner = (await import('./plugin-runner')).PluginRunner;
+    const pluginRunner = inject(PluginRunner);
+    return pluginRunner.sendMessageToPlugin(pluginId, message);
+  }
+
+  /**
    * Clean up all resources when service is destroyed
    */
   ngOnDestroy(): void {
