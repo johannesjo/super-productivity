@@ -52,42 +52,50 @@ class SyncMdPlugin {
   async handleMessage(message) {
     console.log('[Sync.md] Received message:', message);
 
-    switch (message.type) {
-      case 'configUpdated':
-        await this.saveConfig(message.config);
-        await this.stopWatching();
-        if (message.config?.filePath && message.config?.projectId) {
-          await this.startWatching();
-        }
-        return { success: true };
+    try {
+      switch (message.type) {
+        case 'configUpdated':
+          await this.saveConfig(message.config);
+          await this.stopWatching();
+          if (message.config?.filePath && message.config?.projectId) {
+            await this.startWatching();
+          }
+          return { success: true };
 
-      case 'testConnection':
-        return await this.testConnection(message.filePath);
+        case 'testConnection':
+          return await this.testConnection(message.filePath);
 
-      case 'browseFile':
-        return await this.browseForFile(message.filters);
+        case 'browseFile':
+          return await this.browseForFile(message.filters);
 
-      case 'readFile':
-        return await this.readFile(message.filePath);
+        case 'readFile':
+          return await this.readFile(message.filePath);
 
-      case 'getSyncInfo':
-        return {
-          isWatching: this.isWatching,
-          lastSyncTime: this.lastSyncTime,
-          taskCount: this.taskIdMap.size,
-        };
+        case 'getSyncInfo':
+          return {
+            isWatching: this.isWatching,
+            lastSyncTime: this.lastSyncTime,
+            taskCount: this.taskIdMap.size,
+          };
 
-      default:
-        console.warn('[Sync.md] Unknown message type:', message.type);
-        return null;
+        default:
+          console.warn('[Sync.md] Unknown message type:', message.type);
+          return null;
+      }
+    } catch (error) {
+      console.error('[Sync.md] Error handling message:', error);
+      throw error;
     }
   }
 
   async loadConfig() {
     try {
-      const data = await PluginAPI.loadSyncedData('syncMdConfig');
+      const data = await PluginAPI.loadSyncedData();
       if (data) {
-        this.config = data;
+        // Data is returned as a string, need to parse it
+        const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
+        // Extract the config from the data
+        this.config = parsedData.syncMdConfig || parsedData;
         console.log('[Sync.md] Loaded config:', this.config);
       }
     } catch (error) {
@@ -98,7 +106,9 @@ class SyncMdPlugin {
   async saveConfig(config) {
     try {
       this.config = config;
-      await PluginAPI.persistDataSynced('syncMdConfig', config);
+      // persistDataSynced expects a string
+      const dataToSave = JSON.stringify({ syncMdConfig: config });
+      await PluginAPI.persistDataSynced(dataToSave);
       console.log('[Sync.md] Config saved:', config);
       return true;
     } catch (error) {
