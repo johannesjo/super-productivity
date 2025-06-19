@@ -5,6 +5,7 @@ import { shareReplay, first } from 'rxjs/operators';
 import { PluginManifest } from './plugin-api.model';
 import { PluginCacheService } from './plugin-cache.service';
 import { MAX_PLUGIN_CODE_SIZE, MAX_PLUGIN_MANIFEST_SIZE } from './plugin.const';
+import { validatePluginManifest } from './util/validate-manifest.util';
 
 interface PluginLoadState {
   id: string;
@@ -154,8 +155,9 @@ export class PluginLoaderService {
       this._loadManifest(pluginPath)
         .then(async (manifest) => {
           // Validate manifest
-          if (!this._validateManifest(manifest)) {
-            throw new Error('Invalid plugin manifest');
+          const validation = validatePluginManifest(manifest);
+          if (!validation.isValid) {
+            throw new Error(`Invalid plugin manifest: ${validation.errors.join(', ')}`);
           }
 
           // Load plugin code
@@ -302,21 +304,6 @@ export class PluginLoaderService {
       })
       .pipe(first())
       .toPromise();
-  }
-
-  /**
-   * Validate manifest structure
-   */
-  private _validateManifest(manifest: any): manifest is PluginManifest {
-    return (
-      manifest &&
-      typeof manifest === 'object' &&
-      typeof manifest.id === 'string' &&
-      typeof manifest.name === 'string' &&
-      typeof manifest.version === 'string' &&
-      Array.isArray(manifest.hooks) &&
-      Array.isArray(manifest.permissions)
-    );
   }
 
   /**
