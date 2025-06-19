@@ -27,11 +27,9 @@ import { PluginIconComponent } from './plugin-icon/plugin-icon.component';
         class="plugin-side-panel-btn"
         [class.active]="(activePluginId$ | async) === button.pluginId"
       >
-        <mat-icon *ngIf="!button.icon">extension</mat-icon>
         <plugin-icon
-          *ngIf="button.icon"
           [pluginId]="button.pluginId"
-          [fallbackIcon]="button.icon"
+          [fallbackIcon]="button.icon || 'extension'"
         ></plugin-icon>
       </button>
     }
