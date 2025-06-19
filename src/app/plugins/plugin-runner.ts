@@ -455,13 +455,18 @@ export class PluginRunner {
       throw new Error(`Plugin ${pluginId} is not loaded`);
     }
 
-    // Check if the plugin has registered a message handler
-    if (typeof (window as any).__pluginMessageHandler === 'function') {
-      return await (window as any).__pluginMessageHandler(message);
+    // Get the plugin API instance
+    const pluginApi = this._pluginApis.get(pluginId);
+    if (!pluginApi) {
+      throw new Error(`Plugin API not found for plugin ${pluginId}`);
     }
 
-    // If no handler, return null
-    console.warn(`Plugin ${pluginId} has no message handler registered`);
-    return null;
+    // Send message through the plugin API
+    try {
+      return await pluginApi.__sendMessage(message);
+    } catch (error) {
+      console.warn(`Plugin ${pluginId} message handler error:`, error);
+      return null;
+    }
   }
 }

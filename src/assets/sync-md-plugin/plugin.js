@@ -15,27 +15,16 @@ class SyncMdPlugin {
   async init() {
     console.log('[Sync.md] Plugin initializing...');
 
-    // Register side panel button
-    if (PluginAPI?.registerSidePanelButton) {
-      PluginAPI.registerSidePanelButton({
-        label: 'Sync.md',
-        icon: 'sync',
-        onClick: () => {
-          console.log('[Sync.md] Side panel button clicked');
-        },
-      });
-    }
-
-    // Register global message handler for iframe communication
-    if (typeof window !== 'undefined') {
-      window.__pluginMessageHandler = (message) => this.handleMessage(message);
+    // Register message handler for iframe communication
+    if (PluginAPI?.onMessage) {
+      PluginAPI.onMessage((message) => this.handleMessage(message));
     }
 
     // Register hook for task changes
-    if (PluginAPI?.onHook) {
-      PluginAPI.onHook('onTasksUpdated', (tasks) => this.handleTasksUpdated(tasks));
-      PluginAPI.onHook('onTaskAdded', (task) => this.handleTaskAdded(task));
-      PluginAPI.onHook('onTaskDeleted', (taskId) => this.handleTaskDeleted(taskId));
+    if (PluginAPI?.registerHook) {
+      PluginAPI.registerHook('onTasksUpdated', (tasks) => this.handleTasksUpdated(tasks));
+      PluginAPI.registerHook('onTaskAdded', (task) => this.handleTaskAdded(task));
+      PluginAPI.registerHook('onTaskDeleted', (taskId) => this.handleTaskDeleted(taskId));
     }
 
     // Load saved configuration
@@ -118,9 +107,9 @@ class SyncMdPlugin {
   }
 
   async startWatching() {
-    if (!this.config?.filePath || !PluginAPI?.nodeExecution) {
+    if (!this.config?.filePath || !PluginAPI?.executeNodeScript) {
       console.warn(
-        '[Sync.md] Cannot start watching: missing config or nodeExecution permission',
+        '[Sync.md] Cannot start watching: missing config or executeNodeScript permission',
       );
       return;
     }
@@ -135,48 +124,48 @@ class SyncMdPlugin {
       const watchScript = `
         const fs = require('fs');
         const path = require('path');
-        
+
         const filePath = '${this.config.filePath}';
-        
+
         // Initial read
         try {
           const content = fs.readFileSync(filePath, 'utf8');
-          console.log(JSON.stringify({ 
-            type: 'initial', 
+          console.log(JSON.stringify({
+            type: 'initial',
             content: content,
-            exists: true 
+            exists: true
           }));
         } catch (error) {
-          console.log(JSON.stringify({ 
-            type: 'error', 
+          console.log(JSON.stringify({
+            type: 'error',
             error: error.message,
-            exists: false 
+            exists: false
           }));
         }
-        
+
         // Watch for changes
         const watcher = fs.watch(filePath, (eventType, filename) => {
           if (eventType === 'change') {
             try {
               const content = fs.readFileSync(filePath, 'utf8');
-              console.log(JSON.stringify({ 
-                type: 'change', 
-                content: content 
+              console.log(JSON.stringify({
+                type: 'change',
+                content: content
               }));
             } catch (error) {
-              console.log(JSON.stringify({ 
-                type: 'error', 
-                error: error.message 
+              console.log(JSON.stringify({
+                type: 'error',
+                error: error.message
               }));
             }
           }
         });
-        
+
         // Keep process alive
         process.stdin.resume();
       `;
 
-      const result = await PluginAPI.nodeExecution({
+      const result = await PluginAPI.executeNodeScript({
         script: watchScript,
         persistent: true,
         onOutput: (data) => this.handleWatcherOutput(data),
@@ -193,9 +182,9 @@ class SyncMdPlugin {
   }
 
   async stopWatching() {
-    if (this.watcherId && PluginAPI?.nodeExecution) {
+    if (this.watcherId && PluginAPI?.executeNodeScript) {
       try {
-        await PluginAPI.nodeExecution({
+        await PluginAPI.executeNodeScript({
           action: 'stop',
           id: this.watcherId,
         });
@@ -417,8 +406,8 @@ class SyncMdPlugin {
   }
 
   async updateFileWithTaskIds(originalContent, updatedTaskIdMap) {
-    if (!PluginAPI?.nodeExecution) {
-      console.warn('[Sync.md] Cannot update file: nodeExecution permission required');
+    if (!PluginAPI?.executeNodeScript) {
+      console.warn('[Sync.md] Cannot update file: executeNodeScript permission required');
       return;
     }
 
@@ -453,7 +442,7 @@ class SyncMdPlugin {
         console.log('File updated successfully');
       `;
 
-      await PluginAPI.nodeExecution({
+      await PluginAPI.executeNodeScript({
         script: writeScript,
         persistent: false,
       });
@@ -465,14 +454,14 @@ class SyncMdPlugin {
   }
 
   async testConnection(filePath) {
-    if (!PluginAPI?.nodeExecution) {
+    if (!PluginAPI?.executeNodeScript) {
       throw new Error('Node execution permission required');
     }
 
     const testScript = `
       const fs = require('fs');
       const path = require('path');
-      
+
       try {
         const stats = fs.statSync('${filePath}');
         const content = fs.readFileSync('${filePath}', 'utf8');
@@ -490,7 +479,7 @@ class SyncMdPlugin {
       }
     `;
 
-    const result = await PluginAPI.nodeExecution({
+    const result = await PluginAPI.executeNodeScript({
       script: testScript,
       persistent: false,
     });
@@ -499,26 +488,26 @@ class SyncMdPlugin {
   }
 
   async browseForFile(filters) {
-    if (!PluginAPI?.nodeExecution) {
+    if (!PluginAPI?.executeNodeScript) {
       throw new Error('Node execution permission required');
     }
 
     // Use electron dialog if available
     const browseScript = `
       const { dialog } = require('electron');
-      
+
       const result = dialog.showOpenDialogSync({
         properties: ['openFile'],
         filters: ${JSON.stringify(filters || [])}
       });
-      
+
       console.log(JSON.stringify({
         filePath: result ? result[0] : null
       }));
     `;
 
     try {
-      const result = await PluginAPI.nodeExecution({
+      const result = await PluginAPI.executeNodeScript({
         script: browseScript,
         persistent: false,
       });
@@ -531,13 +520,13 @@ class SyncMdPlugin {
   }
 
   async readFile(filePath) {
-    if (!PluginAPI?.nodeExecution) {
+    if (!PluginAPI?.executeNodeScript) {
       throw new Error('Node execution permission required');
     }
 
     const readScript = `
       const fs = require('fs');
-      
+
       try {
         const content = fs.readFileSync('${filePath}', 'utf8');
         console.log(JSON.stringify({
@@ -550,7 +539,7 @@ class SyncMdPlugin {
       }
     `;
 
-    const result = await PluginAPI.nodeExecution({
+    const result = await PluginAPI.executeNodeScript({
       script: readScript,
       persistent: false,
     });
@@ -610,7 +599,7 @@ class SyncMdPlugin {
   }
 
   async syncProjectToFile() {
-    if (!this.config?.filePath || !PluginAPI?.nodeExecution) {
+    if (!this.config?.filePath || !PluginAPI?.executeNodeScript) {
       return;
     }
 
@@ -660,7 +649,7 @@ class SyncMdPlugin {
         console.log('File synced from project');
       `;
 
-      await PluginAPI.nodeExecution({
+      await PluginAPI.executeNodeScript({
         script: writeScript,
         persistent: false,
       });

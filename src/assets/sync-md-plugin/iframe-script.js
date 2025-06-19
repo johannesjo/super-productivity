@@ -310,14 +310,22 @@ console.log('[Sync.md UI] Script loaded at', new Date().toISOString());
       window.addEventListener('message', handler);
 
       // Send message to plugin
-      window.parent.postMessage(
-        {
-          type: 'PLUGIN_MESSAGE',
-          messageId: messageId,
-          data: message,
-        },
-        '*',
-      );
+      try {
+        // Check if we're in a data URL context (null origin)
+        const targetOrigin =
+          window.location.origin === 'null' ? '*' : window.location.origin;
+        window.parent.postMessage(
+          {
+            type: 'PLUGIN_MESSAGE',
+            messageId: messageId,
+            data: message,
+          },
+          targetOrigin,
+        );
+      } catch (e) {
+        console.error('[Sync.md UI] Failed to send message to parent:', e);
+        reject(new Error('Failed to communicate with parent window: ' + e.message));
+      }
 
       // Timeout after 10 seconds
       setTimeout(() => {
