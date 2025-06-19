@@ -196,6 +196,10 @@ export class SyncWrapperService {
       } else if (error instanceof CanNotMigrateMajorDownError) {
         alert(this._translateService.instant(T.F.SYNC.A.REMOTE_MODEL_VERSION_NEWER));
         return 'HANDLED_ERROR';
+      } else if (error?.message === 'Sync already in progress') {
+        // Silently ignore concurrent sync attempts
+        console.log('Sync already in progress, skipping concurrent sync attempt');
+        return 'HANDLED_ERROR';
       } else {
         const errStr = getSyncErrorStr(error);
         this._snackService.open({

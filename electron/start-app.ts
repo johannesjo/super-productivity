@@ -32,6 +32,7 @@ let customUrl: string;
 let isDisableTray = false;
 let forceDarkTray = false;
 let wasUserDataDirSet = false;
+let forceX11 = false;
 
 if (IS_DEV) {
   log('Starting in DEV Mode!!!');
@@ -59,6 +60,31 @@ export const startApp = (): void => {
   // https://github.com/electron/electron/issues/46538#issuecomment-2808806722
   app.commandLine.appendSwitch('gtk-version', '3');
 
+  // Wayland compatibility fixes
+  // Force X11 backend on Wayland to avoid rendering issues
+  if (process.platform === 'linux') {
+    // Check if running on Wayland or if X11 is forced
+    const isWayland =
+      process.env.WAYLAND_DISPLAY || process.env.XDG_SESSION_TYPE === 'wayland';
+
+    if (isWayland || forceX11) {
+      log('Applying X11/Wayland compatibility fixes');
+
+      // Force Ozone platform to X11
+      app.commandLine.appendSwitch('ozone-platform', 'x11');
+
+      // Disable GPU vsync to fix GetVSyncParametersIfAvailable() errors
+      app.commandLine.appendSwitch('disable-gpu-vsync');
+
+      // Additional flags to improve compatibility
+      app.commandLine.appendSwitch('disable-features', 'UseOzonePlatform');
+      app.commandLine.appendSwitch('enable-features', 'UseSkiaRenderer');
+
+      // Set GDK backend to X11
+      process.env.GDK_BACKEND = 'x11';
+    }
+  }
+
   // NOTE: needs to be executed before everything else
   process.argv.forEach((val) => {
     if (val && val.includes('--disable-tray')) {
@@ -85,6 +111,11 @@ export const startApp = (): void => {
 
     if (val && val.includes('--dev-tools')) {
       isShowDevTools = true;
+    }
+
+    if (val && val.includes('--force-x11')) {
+      forceX11 = true;
+      log('Forcing X11 mode');
     }
   });
 
