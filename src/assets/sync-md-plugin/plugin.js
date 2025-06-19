@@ -25,8 +25,14 @@ class SyncMdPlugin {
     // Register hook for task changes
     if (PluginAPI?.registerHook) {
       // Use the correct hook names from PluginHooks enum
-      PluginAPI.registerHook('taskUpdate', (task) => this.handleTaskUpdate(task));
-      PluginAPI.registerHook('taskDelete', (taskId) => this.handleTaskDeleted(taskId));
+      PluginAPI.registerHook('taskUpdate', (task) => {
+        console.log('[Sync.md] Task update hook triggered:', task);
+        this.handleTaskUpdate(task);
+      });
+      PluginAPI.registerHook('taskDelete', (taskId) => {
+        console.log('[Sync.md] Task delete hook triggered:', taskId);
+        this.handleTaskDeleted(taskId);
+      });
       // Note: There's no direct "task added" hook, it comes through taskUpdate
     }
 
