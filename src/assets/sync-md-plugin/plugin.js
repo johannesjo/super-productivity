@@ -155,7 +155,7 @@ class SyncMdPlugin {
     try {
       const checkScript = `
         const fs = require('fs');
-        const filePath = '${this.config.filePath.replace(/'/g, "\\'")}';
+        const filePath = ${JSON.stringify(this.config.filePath)};
         
         try {
           const stats = fs.statSync(filePath);
@@ -423,7 +423,8 @@ class SyncMdPlugin {
       const writeScript = `
         const fs = require('fs');
         const content = ${JSON.stringify(updatedContent)};
-        fs.writeFileSync('${this.config.filePath}', content, 'utf8');
+        const filePath = ${JSON.stringify(this.config.filePath)};
+        fs.writeFileSync(filePath, content, 'utf8');
         console.log('File updated successfully');
       `;
 
@@ -450,10 +451,11 @@ class SyncMdPlugin {
     const testScript = `
       const fs = require('fs');
       const path = require('path');
+      const filePath = ${JSON.stringify(filePath)};
 
       try {
-        const stats = fs.statSync('${filePath}');
-        const content = fs.readFileSync('${filePath}', 'utf8');
+        const stats = fs.statSync(filePath);
+        const content = fs.readFileSync(filePath, 'utf8');
         console.log(JSON.stringify({
           exists: true,
           isFile: stats.isFile(),
@@ -525,9 +527,10 @@ class SyncMdPlugin {
 
     const readScript = `
       const fs = require('fs');
+      const filePath = ${JSON.stringify(filePath)};
 
       try {
-        const content = fs.readFileSync('${filePath}', 'utf8');
+        const content = fs.readFileSync(filePath, 'utf8');
         console.log(JSON.stringify({
           content: content.substring(0, 1000) // Limit preview size
         }));
@@ -649,7 +652,8 @@ class SyncMdPlugin {
       const writeScript = `
         const fs = require('fs');
         const content = ${JSON.stringify(markdownContent)};
-        fs.writeFileSync('${this.config.filePath}', content, 'utf8');
+        const filePath = ${JSON.stringify(this.config.filePath)};
+        fs.writeFileSync(filePath, content, 'utf8');
         console.log('File synced from project');
       `;
 
