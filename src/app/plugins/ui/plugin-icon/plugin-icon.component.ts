@@ -32,6 +32,11 @@ import { CommonModule } from '@angular/common';
         justify-content: center;
       }
 
+      :host mat-icon {
+        display: flex;
+        flex: 1;
+      }
+
       .plugin-svg-icon {
         display: flex;
         align-items: center;
