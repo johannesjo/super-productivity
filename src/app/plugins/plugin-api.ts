@@ -39,6 +39,7 @@ export class PluginAPI implements PluginAPIInterface {
   private _menuEntries: Array<PluginMenuEntryCfg> = [];
   private _shortcuts: Array<PluginShortcutCfg> = [];
   private _sidePanelButtons: Array<PluginSidePanelBtnCfg> = [];
+  private _messageHandler?: (message: any) => Promise<any>;
   executeNodeScript?: (
     request: PluginNodeScriptRequest,
   ) => Promise<PluginNodeScriptResult>;
@@ -205,6 +206,26 @@ export class PluginAPI implements PluginAPIInterface {
   async openDialog(dialogCfg: DialogCfg): Promise<void> {
     console.log(`Plugin ${this._pluginId} requested to open dialog:`, dialogCfg);
     return this._pluginBridge.openDialog(dialogCfg);
+  }
+
+  /**
+   * Register a message handler for the plugin
+   * This allows the plugin's iframe to communicate with the plugin code
+   */
+  onMessage(handler: (message: any) => Promise<any>): void {
+    this._messageHandler = handler;
+    console.log(`Plugin ${this._pluginId} registered message handler`);
+  }
+
+  /**
+   * Send a message to the plugin's message handler
+   * Used internally by the plugin system
+   */
+  async __sendMessage(message: any): Promise<any> {
+    if (!this._messageHandler) {
+      throw new Error(`Plugin ${this._pluginId} has no message handler registered`);
+    }
+    return this._messageHandler(message);
   }
 
   // Internal methods for the plugin system

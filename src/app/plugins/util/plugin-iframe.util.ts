@@ -60,7 +60,14 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
                   }
                   
                   window.addEventListener('message', handleResponse);
-                  window.parent.postMessage(message, '*');
+                  try {
+                    // Use '*' for data URLs which have null origin
+                    const targetOrigin = window.location.origin === 'null' ? '*' : window.location.origin;
+                    window.parent.postMessage(message, targetOrigin);
+                  } catch (e) {
+                    window.removeEventListener('message', handleResponse);
+                    reject(new Error('Failed to communicate with parent window: ' + e.message));
+                  }
                 });
               }`;
             })
@@ -109,7 +116,13 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
         })();
         
         // Notify parent that plugin is ready
-        window.parent.postMessage({ type: 'plugin-ready', pluginId: '${config.pluginId}' }, '*');
+        try {
+          // Use '*' for data URLs which have null origin
+          const targetOrigin = window.location.origin === 'null' ? '*' : window.location.origin;
+          window.parent.postMessage({ type: 'plugin-ready', pluginId: '${config.pluginId}' }, targetOrigin);
+        } catch (e) {
+          console.error('Failed to notify parent window that plugin is ready:', e);
+        }
       })();
     </script>
   `;
@@ -185,6 +198,23 @@ export const createIframeMessageHandler = (
           throw new Error(`Access denied: Cannot call private method ${methodName}`);
         }
 
+        // Restricted methods that should not be callable from iframe
+        const restrictedMethods = [
+          'registerHook',
+          'registerHeaderButton',
+          'registerMenuEntry',
+          'registerShortcut',
+          'registerSidePanelButton',
+          'onMessage',
+          'executeNodeScript',
+        ];
+
+        if (restrictedMethods.includes(methodName)) {
+          throw new Error(
+            `Method '${methodName}' is not allowed from iframe context. This method can only be called from the main plugin code.`,
+          );
+        }
+
         const method = bridgeAny[methodName];
 
         if (typeof method !== 'function') {
@@ -196,24 +226,30 @@ export const createIframeMessageHandler = (
         const result = await method.apply(config.pluginBridge, args);
 
         // Send response back to iframe
-        event.source?.postMessage(
-          {
-            type: 'plugin-api-response',
-            messageId: data.messageId,
-            result: result,
-          },
-          { targetOrigin: event.origin },
-        );
+        if (event.source && 'postMessage' in event.source) {
+          const targetOrigin = event.origin === 'null' ? '*' : event.origin;
+          (event.source as Window).postMessage(
+            {
+              type: 'plugin-api-response',
+              messageId: data.messageId,
+              result: result,
+            },
+            targetOrigin,
+          );
+        }
       } catch (error) {
         // Send error back to iframe
-        event.source?.postMessage(
-          {
-            type: 'plugin-api-response',
-            messageId: data.messageId,
-            error: error instanceof Error ? error.message : String(error),
-          },
-          { targetOrigin: event.origin },
-        );
+        if (event.source && 'postMessage' in event.source) {
+          const targetOrigin = event.origin === 'null' ? '*' : event.origin;
+          (event.source as Window).postMessage(
+            {
+              type: 'plugin-api-response',
+              messageId: data.messageId,
+              error: error instanceof Error ? error.message : String(error),
+            },
+            targetOrigin,
+          );
+        }
       }
     }
 
@@ -237,26 +273,28 @@ export const createIframeMessageHandler = (
         );
 
         // Send response back to iframe if messageId was provided
-        if (data.messageId && event.source) {
-          event.source.postMessage(
+        if (data.messageId && event.source && 'postMessage' in event.source) {
+          const targetOrigin = event.origin === 'null' ? '*' : event.origin;
+          (event.source as Window).postMessage(
             {
               type: 'PLUGIN_MESSAGE_RESPONSE',
               messageId: data.messageId,
               result,
             },
-            { targetOrigin: event.origin },
+            targetOrigin,
           );
         }
       } catch (error) {
         // Send error back to iframe if messageId was provided
-        if (data.messageId && event.source) {
-          event.source.postMessage(
+        if (data.messageId && event.source && 'postMessage' in event.source) {
+          const targetOrigin = event.origin === 'null' ? '*' : event.origin;
+          (event.source as Window).postMessage(
             {
               type: 'PLUGIN_MESSAGE_RESPONSE',
               messageId: data.messageId,
               error: error instanceof Error ? error.message : String(error),
             },
-            { targetOrigin: event.origin },
+            targetOrigin,
           );
         }
       }

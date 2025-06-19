@@ -260,6 +260,23 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
       const { method, args, callId } = message;
       let result: unknown;
 
+      // Restricted methods that should not be callable from iframe
+      const restrictedMethods = [
+        'registerHook',
+        'registerHeaderButton',
+        'registerMenuEntry',
+        'registerShortcut',
+        'registerSidePanelButton',
+        'onMessage',
+        'executeNodeScript',
+      ];
+
+      if (restrictedMethods.includes(method)) {
+        throw new Error(
+          `Method '${method}' is not allowed from iframe context. This method can only be called from the main plugin code.`,
+        );
+      }
+
       // Map API method calls to bridge methods
       switch (method) {
         case 'showSnack':
@@ -329,27 +346,36 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
 
       // Send result back to iframe with targetOrigin for security
       if (this.iframeRef?.nativeElement.contentWindow) {
-        this.iframeRef.nativeElement.contentWindow.postMessage(
-          {
-            type: 'PLUGIN_API_RESPONSE',
-            callId,
-            result,
-          },
-          '*', // Data URLs require '*' as targetOrigin
-        );
+        try {
+          // For data URLs, we must use '*' as targetOrigin
+          this.iframeRef.nativeElement.contentWindow.postMessage(
+            {
+              type: 'PLUGIN_API_RESPONSE',
+              callId,
+              result,
+            },
+            '*', // Data URLs require '*' as targetOrigin
+          );
+        } catch (e) {
+          console.error('Failed to post message to iframe:', e);
+        }
       }
     } catch (error) {
       // Send error back to iframe
       console.error(`Plugin API call failed for ${message.method}:`, error);
       if (this.iframeRef?.nativeElement.contentWindow) {
-        this.iframeRef.nativeElement.contentWindow.postMessage(
-          {
-            type: 'PLUGIN_API_ERROR',
-            callId: message.callId,
-            error: error instanceof Error ? error.message : 'Unknown error',
-          },
-          '*', // Data URLs require '*' as targetOrigin
-        );
+        try {
+          this.iframeRef.nativeElement.contentWindow.postMessage(
+            {
+              type: 'PLUGIN_API_ERROR',
+              callId: message.callId,
+              error: error instanceof Error ? error.message : 'Unknown error',
+            },
+            '*', // Data URLs require '*' as targetOrigin
+          );
+        } catch (e) {
+          console.error('Failed to post error message to iframe:', e);
+        }
       }
     }
   }
@@ -369,27 +395,35 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
 
       // Send response back to iframe if messageId was provided
       if (message.messageId && this.iframeRef?.nativeElement.contentWindow) {
-        this.iframeRef.nativeElement.contentWindow.postMessage(
-          {
-            type: 'PLUGIN_MESSAGE_RESPONSE',
-            messageId: message.messageId,
-            result,
-          },
-          '*',
-        );
+        try {
+          this.iframeRef.nativeElement.contentWindow.postMessage(
+            {
+              type: 'PLUGIN_MESSAGE_RESPONSE',
+              messageId: message.messageId,
+              result,
+            },
+            '*',
+          );
+        } catch (e) {
+          console.error('Failed to post plugin message response to iframe:', e);
+        }
       }
     } catch (error) {
       console.error(`Plugin message handling failed:`, error);
       // Send error back to iframe if messageId was provided
       if (message.messageId && this.iframeRef?.nativeElement.contentWindow) {
-        this.iframeRef.nativeElement.contentWindow.postMessage(
-          {
-            type: 'PLUGIN_MESSAGE_RESPONSE',
-            messageId: message.messageId,
-            error: error instanceof Error ? error.message : 'Unknown error',
-          },
-          '*',
-        );
+        try {
+          this.iframeRef.nativeElement.contentWindow.postMessage(
+            {
+              type: 'PLUGIN_MESSAGE_RESPONSE',
+              messageId: message.messageId,
+              error: error instanceof Error ? error.message : 'Unknown error',
+            },
+            '*',
+          );
+        } catch (e) {
+          console.error('Failed to post plugin error response to iframe:', e);
+        }
       }
     }
   }
@@ -425,12 +459,14 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
             const currentCallId = ++callId;
             pendingCalls.set(currentCallId, { resolve, reject });
 
+            // Use '*' for data URLs which have null origin
+            const targetOrigin = window.location.origin === 'null' ? '*' : window.location.origin;
             window.parent.postMessage({
               type: 'PLUGIN_API_CALL',
               method: method,
               args: args || [],
               callId: currentCallId
-            }, '*');
+            }, targetOrigin);
 
             // Timeout after 30 seconds
             setTimeout(() => {
