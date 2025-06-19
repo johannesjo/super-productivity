@@ -31,7 +31,7 @@ import { PluginIconComponent } from './plugin-icon/plugin-icon.component';
         <plugin-icon
           *ngIf="button.icon"
           [pluginId]="button.pluginId"
-          [iconName]="button.icon"
+          [fallbackIcon]="button.icon"
         ></plugin-icon>
       </button>
     }
