@@ -24,9 +24,10 @@ class SyncMdPlugin {
 
     // Register hook for task changes
     if (PluginAPI?.registerHook) {
-      PluginAPI.registerHook('onTasksUpdated', (tasks) => this.handleTasksUpdated(tasks));
-      PluginAPI.registerHook('onTaskAdded', (task) => this.handleTaskAdded(task));
-      PluginAPI.registerHook('onTaskDeleted', (taskId) => this.handleTaskDeleted(taskId));
+      // Use the correct hook names from PluginHooks enum
+      PluginAPI.registerHook('taskUpdate', (task) => this.handleTaskUpdate(task));
+      PluginAPI.registerHook('taskDelete', (taskId) => this.handleTaskDeleted(taskId));
+      // Note: There's no direct "task added" hook, it comes through taskUpdate
     }
 
     // Load saved configuration
@@ -554,7 +555,7 @@ class SyncMdPlugin {
     }
   }
 
-  async handleTasksUpdated(tasks) {
+  async handleTaskUpdate(task) {
     if (
       this.syncInProgress ||
       !this.config?.projectId ||
@@ -563,25 +564,9 @@ class SyncMdPlugin {
       return;
     }
 
-    // Check if any of the updated tasks belong to our project
-    const projectTasks = tasks.filter((task) => task.projectId === this.config.projectId);
-    if (projectTasks.length > 0) {
-      console.log('[Sync.md] Project tasks updated, syncing to file...');
-      await this.syncProjectToFile();
-    }
-  }
-
-  async handleTaskAdded(task) {
-    if (
-      this.syncInProgress ||
-      !this.config?.projectId ||
-      this.config?.syncDirection === 'fileToProject'
-    ) {
-      return;
-    }
-
-    if (task.projectId === this.config.projectId) {
-      console.log('[Sync.md] Task added to project, syncing to file...');
+    // Check if the updated task belongs to our project
+    if (task && task.projectId === this.config.projectId) {
+      console.log('[Sync.md] Project task updated, syncing to file...');
       await this.syncProjectToFile();
     }
   }
