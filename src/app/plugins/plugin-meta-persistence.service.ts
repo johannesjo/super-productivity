@@ -59,22 +59,6 @@ export class PluginMetaPersistenceService {
   }
 
   /**
-   * Get all enabled plugins metadata
-   */
-  async getEnabledPluginsMetadata(): Promise<PluginMetadata[]> {
-    const currentState = await this._pfapiService.pf.m.pluginMetadata.load();
-    return currentState.filter((plugin) => plugin.isEnabled === true);
-  }
-
-  /**
-   * Get all disabled plugins metadata
-   */
-  async getDisabledPluginsMetadata(): Promise<PluginMetadata[]> {
-    const currentState = await this._pfapiService.pf.m.pluginMetadata.load();
-    return currentState.filter((plugin) => plugin.isEnabled === false);
-  }
-
-  /**
    * Remove plugin metadata
    */
   async removePluginMetadata(pluginId: string): Promise<void> {
@@ -82,15 +66,6 @@ export class PluginMetaPersistenceService {
     const updatedState = currentState.filter((item) => item.id !== pluginId);
 
     await this._pfapiService.pf.m.pluginMetadata.save(updatedState, {
-      isUpdateRevAndLastUpdate: true,
-    });
-  }
-
-  /**
-   * Clear all plugin metadata
-   */
-  async clearAllPluginMetadata(): Promise<void> {
-    await this._pfapiService.pf.m.pluginMetadata.save([], {
       isUpdateRevAndLastUpdate: true,
     });
   }

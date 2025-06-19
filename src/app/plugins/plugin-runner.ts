@@ -8,17 +8,16 @@ import {
 import { PluginAPI } from './plugin-api';
 import { PluginBridgeService } from './plugin-bridge.service';
 import { PluginCleanupService } from './plugin-cleanup.service';
+import { IS_ELECTRON } from '../app.constants';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PluginRunner {
-  private _loadedPlugins = new Map<string, PluginInstance>();
   private _pluginBridge = inject(PluginBridgeService);
   private _cleanupService = inject(PluginCleanupService);
+  private _loadedPlugins = new Map<string, PluginInstance>();
   private _pluginApis = new Map<string, PluginAPI>();
-
-  constructor() {}
 
   async loadPlugin(
     manifest: PluginManifest,
@@ -31,7 +30,7 @@ export class PluginRunner {
       const pluginAPI = new PluginAPI(baseCfg, manifest.id, this._pluginBridge);
 
       // Add executeNodeScript method if plugin has nodeExecution permission
-      if (this._hasNodeExecutionPermission(manifest)) {
+      if (IS_ELECTRON && this._hasNodeExecutionPermission(manifest)) {
         pluginAPI.executeNodeScript = async (request) => {
           return this._pluginBridge.executeNodeScript(request);
         };
@@ -64,41 +63,43 @@ export class PluginRunner {
       // Execute plugin code in a sandboxed environment
       await this._executePluginCode(pluginCode, pluginAPI, manifest);
 
-      // Automatically register side panel button for plugins with sidePanel flag
-      if (manifest.sidePanel) {
-        // Ensure plugin context is set before registering button
-        this._pluginBridge._setCurrentPlugin(manifest.id);
+      if (manifest.iFrame) {
+        // Automatically register side panel button for plugins with sidePanel flag
+        if (manifest.sidePanel) {
+          // Ensure plugin context is set before registering button
+          this._pluginBridge._setCurrentPlugin(manifest.id);
 
-        pluginAPI.registerSidePanelButton({
-          label: manifest.name,
-          icon: manifest.icon,
-          onClick: () => {
-            // This onClick is handled by the component to toggle the panel
-            console.log(`Side panel button clicked for plugin ${manifest.id}`);
-          },
-        });
-      }
+          // TODO
+          pluginAPI.registerSidePanelButton({
+            label: manifest.name,
+            icon: manifest.icon,
+            onClick: () => {
+              // This onClick is handled by the component to toggle the panel
+              console.log(`Side panel button clicked for plugin ${manifest.id}`);
+              // TODO load index html into side panel somehow
+            },
+          });
+        }
+        // Automatically register menu entry unless isSkipMenuEntry is true or sidePanel is true
+        else if (!manifest.isSkipMenuEntry) {
+          // Ensure plugin context is set before registering menu entry
+          this._pluginBridge._setCurrentPlugin(manifest.id);
 
-      // Automatically register menu entry unless isSkipMenuEntry is true or sidePanel is true
-      if (!manifest.isSkipMenuEntry && manifest.iFrame && !manifest.sidePanel) {
-        // Ensure plugin context is set before registering menu entry
-        this._pluginBridge._setCurrentPlugin(manifest.id);
-
-        const menuEntry: Omit<PluginMenuEntryCfg, 'pluginId'> = {
-          label: manifest.name,
-          // No icon specified - let the plugin-icon component handle SVG icons with 'extension' fallback
-          onClick: () => {
-            // Set plugin context when menu is clicked
-            this._pluginBridge._setCurrentPlugin(manifest.id);
-            pluginAPI.showIndexHtmlAsView();
-          },
-        };
-        pluginAPI.registerMenuEntry(menuEntry);
+          const menuEntry: Omit<PluginMenuEntryCfg, 'pluginId'> = {
+            label: manifest.name,
+            // No icon specified - let the plugin-icon component handle SVG icons with 'extension' fallback
+            onClick: () => {
+              // Set plugin context when menu is clicked
+              this._pluginBridge._setCurrentPlugin(manifest.id);
+              pluginAPI.showIndexHtmlAsView();
+            },
+          };
+          pluginAPI.registerMenuEntry(menuEntry);
+        }
       }
 
       pluginInstance.loaded = true;
       this._loadedPlugins.set(manifest.id, pluginInstance);
-
       console.log(`Plugin ${manifest.id} loaded successfully`);
       return pluginInstance;
     } catch (error) {
@@ -174,6 +175,8 @@ export class PluginRunner {
     pluginAPI: PluginAPI,
     manifest: PluginManifest,
   ): Record<string, unknown> {
+    // 10 minutes
+    const MAX_TIMEOUT = 600000;
     return {
       PluginAPI: pluginAPI,
       manifest: manifest,
@@ -192,8 +195,8 @@ export class PluginRunner {
             fn();
             this._cleanupService.unregisterTimer(manifest.id, timerId);
           },
-          Math.min(delay, 5000),
-        ); // Max 5 second delay
+          Math.min(delay, MAX_TIMEOUT),
+        );
         this._cleanupService.registerTimer(manifest.id, timerId);
         return timerId;
       },
@@ -205,7 +208,7 @@ export class PluginRunner {
         if (typeof fn !== 'function') {
           throw new Error('setInterval callback must be a function');
         }
-        const intervalId: any = setInterval(fn, Math.min(delay, 5000)); // Max 5 second delay
+        const intervalId: any = setInterval(fn, Math.min(delay, MAX_TIMEOUT));
         this._cleanupService.registerInterval(manifest.id, intervalId);
         return intervalId;
       },
@@ -246,7 +249,7 @@ export class PluginRunner {
     const secureWrapper = `
       (function() {
         "use strict";
-        
+
         // Override dangerous globals at runtime
         var window = null;
         var document = null;
@@ -263,7 +266,7 @@ export class PluginRunner {
         var importScripts = null;
         var location = null;
         var navigator = null;
-        
+
         try {
           // Execute plugin code in strict mode
           ${pluginCode}

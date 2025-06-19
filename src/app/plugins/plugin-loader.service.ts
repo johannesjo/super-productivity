@@ -45,23 +45,6 @@ export class PluginLoaderService {
   ]);
 
   /**
-   * Get the loading state for a plugin
-   */
-  getLoadState(pluginId: string): Observable<PluginLoadState> {
-    if (!this._loadStates.has(pluginId)) {
-      this._loadStates.set(
-        pluginId,
-        new BehaviorSubject<PluginLoadState>({
-          id: pluginId,
-          isLoading: false,
-          isLoaded: false,
-        }),
-      );
-    }
-    return this._loadStates.get(pluginId)!.asObservable();
-  }
-
-  /**
    * Check if a plugin should be preloaded
    */
   shouldPreload(pluginPath: string): boolean {
