@@ -1909,6 +1909,7 @@
     "MOVE_DONE_TO_ARCHIVE": "Move done to archive",
     "NO_DONE_TASKS": "There are currently no done tasks",
     "NO_PLANNED_TASKS": "no tasks planned",
+    "NO_PLANNED_TASK_ALL_DONE": "all tasks done",
     "READY_TO_WORK": "Ready to work!",
     "RESET_BREAK_TIMER": "Reset without break timer",
     "TIME_ESTIMATED": "Time Estimated:",

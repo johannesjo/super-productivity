@@ -196,7 +196,15 @@
                     alt="illu"
                   />
                 </div>
-                <h2 class="no-tasks-label">{{ T.WW.NO_PLANNED_TASKS | translate }}</h2>
+                <h2 class="no-tasks-label">
+                  @if (
+                    hasDoneTasks() || (workContextService.doneTodayArchived$ | async) > 0
+                  ) {
+                    {{ T.WW.NO_PLANNED_TASK_ALL_DONE | translate }}
+                  } @else {
+                    {{ T.WW.NO_PLANNED_TASKS | translate }}
+                  }
+                </h2>
               </div>
 
               @if (!overdueTasks().length) {
@@ -259,7 +267,7 @@
             }
           }
 
-          @if (!isPlanningMode() || doneTasks()?.length) {
+          @if (!isPlanningMode() || hasDoneTasks()) {
             @let nrOfDoneArchived =
               doneTasks()?.length === 0
                 ? (workContextService.doneTodayArchived$ | async)
@@ -289,7 +297,7 @@
                   listModelId="DONE"
                 ></task-list>
                 <div class="finish-day-button-wrapper">
-                  @if (!isOnTodayList() && doneTasks().length) {
+                  @if (!isOnTodayList() && hasDoneTasks()) {
                     <button
                       class="e2e-move-done-to-archive"
                       mat-stroked-button
@@ -303,7 +311,7 @@
                 </div>
               </collapsible>
               @if (isOnTodayList()) {
-                <finish-day-btn [hasDoneTasks]="doneTasks().length > 0"></finish-day-btn>
+                <finish-day-btn [hasDoneTasks]="hasDoneTasks()"></finish-day-btn>
               }
             </div>
           }
