@@ -8,6 +8,9 @@ import {
   toggleShowNotes,
   toggleSideNav,
   toggleTaskViewCustomizerPanel,
+  showPluginPanel,
+  hidePluginPanel,
+  togglePluginPanel,
 } from './layout.actions';
 import {
   Action,
@@ -26,6 +29,8 @@ export interface LayoutState {
   isShowSideNav: boolean;
   isShowCelebrate: boolean;
   isShowTaskViewCustomizerPanel: boolean;
+  isShowPluginPanel: boolean;
+  activePluginId: string | null;
 }
 
 const _initialLayoutState: LayoutState = {
@@ -35,6 +40,8 @@ const _initialLayoutState: LayoutState = {
   isShowIssuePanel: false,
   isShowCelebrate: false,
   isShowTaskViewCustomizerPanel: false,
+  isShowPluginPanel: false,
+  activePluginId: null,
 };
 
 export const selectLayoutFeatureState =
@@ -70,6 +77,16 @@ export const selectIsShowCelebrate = createSelector(
   (state) => state.isShowCelebrate,
 );
 
+export const selectIsShowPluginPanel = createSelector(
+  selectLayoutFeatureState,
+  (state) => state.isShowPluginPanel,
+);
+
+export const selectActivePluginId = createSelector(
+  selectLayoutFeatureState,
+  (state) => state.activePluginId,
+);
+
 const _reducer = createReducer<LayoutState>(
   _initialLayoutState,
 
@@ -90,6 +107,7 @@ const _reducer = createReducer<LayoutState>(
     ...state,
     isShowNotes: !state.isShowNotes,
     isShowIssuePanel: false,
+    isShowPluginPanel: false,
   })),
 
   on(toggleTaskViewCustomizerPanel, (state) => ({
@@ -97,6 +115,7 @@ const _reducer = createReducer<LayoutState>(
     isShowTaskViewCustomizerPanel: !state.isShowTaskViewCustomizerPanel,
     isShowIssuePanel: false,
     isShowNotes: false,
+    isShowPluginPanel: false,
   })),
 
   on(hideNotesAndAddTaskPanel, (state) => ({
@@ -104,13 +123,43 @@ const _reducer = createReducer<LayoutState>(
     isShowNotes: false,
     isShowIssuePanel: false,
     isShowTaskViewCustomizerPanel: false,
+    isShowPluginPanel: false,
   })),
 
   on(toggleIssuePanel, (state) => ({
     ...state,
     isShowIssuePanel: !state.isShowIssuePanel,
     isShowNotes: false,
+    isShowPluginPanel: false,
   })),
+
+  on(showPluginPanel, (state, { pluginId }) => ({
+    ...state,
+    isShowPluginPanel: true,
+    activePluginId: pluginId,
+    isShowNotes: false,
+    isShowIssuePanel: false,
+    isShowTaskViewCustomizerPanel: false,
+  })),
+
+  on(hidePluginPanel, (state) => ({
+    ...state,
+    isShowPluginPanel: false,
+    activePluginId: null,
+  })),
+
+  on(togglePluginPanel, (state, { pluginId }) => {
+    const isCurrentlyActive =
+      state.activePluginId === pluginId && state.isShowPluginPanel;
+    return {
+      ...state,
+      isShowPluginPanel: !isCurrentlyActive,
+      activePluginId: isCurrentlyActive ? null : pluginId,
+      isShowNotes: false,
+      isShowIssuePanel: false,
+      isShowTaskViewCustomizerPanel: false,
+    };
+  }),
 );
 
 export const layoutReducer = (

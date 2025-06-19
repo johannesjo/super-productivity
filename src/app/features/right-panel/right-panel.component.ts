@@ -21,6 +21,9 @@ import { TaskViewCustomizerPanelComponent } from '../task-view-customizer/task-v
 import { AsyncPipe } from '@angular/common';
 import { PluginService } from '../../plugins/plugin.service';
 import { PluginPanelContainerComponent } from '../../plugins/ui/plugin-panel-container/plugin-panel-container.component';
+import { Store } from '@ngrx/store';
+import { selectIsShowPluginPanel } from '../../core-ui/layout/store/layout.reducer';
+import { hidePluginPanel } from '../../core-ui/layout/store/layout.actions';
 
 @Component({
   selector: 'right-panel',
@@ -46,6 +49,7 @@ export class RightPanelComponent implements OnDestroy {
   taskService = inject(TaskService);
   layoutService = inject(LayoutService);
   pluginService = inject(PluginService);
+  store = inject(Store);
 
   // NOTE: used for debugging
   readonly isAlwaysOver = input<boolean>(false);
@@ -68,7 +72,7 @@ export class RightPanelComponent implements OnDestroy {
     this.taskService.selectedTask$,
     this.layoutService.isShowIssuePanel$,
     this.layoutService.isShowTaskViewCustomizerPanel$,
-    this.pluginService.activeSidePanelPlugin$,
+    this.store.select(selectIsShowPluginPanel),
   ]).pipe(
     map(
       ([
@@ -76,7 +80,7 @@ export class RightPanelComponent implements OnDestroy {
         selectedTask,
         isShowAddTaskPanel,
         isShowTaskViewCustomizerPanel,
-        activeSidePanelPlugin,
+        isShowPluginPanel,
       ]) => {
         if (selectedTask) {
           return 'TASK';
@@ -86,7 +90,7 @@ export class RightPanelComponent implements OnDestroy {
           return 'ADD_TASK_PANEL';
         } else if (isShowTaskViewCustomizerPanel) {
           return 'TASK_VIEW_CUSTOMIZER_PANEL';
-        } else if (activeSidePanelPlugin) {
+        } else if (isShowPluginPanel) {
           return 'PLUGIN';
         }
         return undefined;
@@ -101,7 +105,7 @@ export class RightPanelComponent implements OnDestroy {
     this.layoutService.isShowNotes$,
     this.layoutService.isShowIssuePanel$,
     this.layoutService.isShowTaskViewCustomizerPanel$,
-    this.pluginService.activeSidePanelPlugin$,
+    this.store.select(selectIsShowPluginPanel),
   ]).pipe(
     map(
       ([
@@ -110,14 +114,14 @@ export class RightPanelComponent implements OnDestroy {
         isShowNotes,
         isShowAddTaskPanel,
         isShowTaskViewCustomizerPanel,
-        activeSidePanelPlugin,
+        isShowPluginPanel,
       ]) =>
         !!(
           selectedTask ||
           isShowNotes ||
           isShowAddTaskPanel ||
           isShowTaskViewCustomizerPanel ||
-          activeSidePanelPlugin
+          isShowPluginPanel
         ) && targetPanel !== TaskDetailTargetPanel.DONT_OPEN_PANEL,
     ),
     distinctUntilChanged(),
@@ -151,7 +155,7 @@ export class RightPanelComponent implements OnDestroy {
   close(): void {
     this.taskService.setSelectedId(null);
     this.layoutService.hideNotes();
-    this.pluginService.setActiveSidePanelPlugin(null);
+    this.store.dispatch(hidePluginPanel());
     this.onClose();
   }
 
