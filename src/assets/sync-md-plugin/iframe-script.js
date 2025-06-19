@@ -8,6 +8,11 @@ console.log('[Sync.md UI] Script loaded at', new Date().toISOString());
   // Wait for plugin API to be available
   function waitForAPI() {
     console.log('[Sync.md UI] Checking for PluginAPI...', !!window.PluginAPI);
+    console.log(
+      '[Sync.md UI] Window keys:',
+      Object.keys(window).filter((k) => k.includes('lugin') || k.includes('API')),
+    );
+
     if (window.PluginAPI) {
       pluginAPI = window.PluginAPI;
       console.log('[Sync.md UI] Found PluginAPI', pluginAPI);
@@ -16,6 +21,10 @@ console.log('[Sync.md UI] Script loaded at', new Date().toISOString());
       initialize();
     } else {
       console.log('[Sync.md UI] Waiting for PluginAPI...');
+      // Try a fallback approach - the API might be injected before this script runs
+      if (window.parent !== window) {
+        console.log('[Sync.md UI] Running in iframe, checking parent communication...');
+      }
       setTimeout(waitForAPI, 100);
     }
   }
@@ -92,7 +101,8 @@ console.log('[Sync.md UI] Script loaded at', new Date().toISOString());
 
   async function loadConfig() {
     try {
-      const dataStr = await pluginAPI.loadSyncedData();
+      // Note: In iframe context, use loadPersistedData instead of loadSyncedData
+      const dataStr = await pluginAPI.loadPersistedData();
       console.log('[Sync.md UI] Loaded data string:', dataStr);
       if (dataStr) {
         const data = typeof dataStr === 'string' ? JSON.parse(dataStr) : dataStr;

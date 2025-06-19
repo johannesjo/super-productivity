@@ -1,4 +1,4 @@
-import { inject, Injectable, OnDestroy } from '@angular/core';
+import { inject, Injectable, OnDestroy, Injector } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { SnackService } from '../core/snack/snack.service';
@@ -57,6 +57,8 @@ export class PluginBridgeService implements OnDestroy {
   private _pluginUserPersistenceService = inject(PluginUserPersistenceService);
   private _taskArchiveService = inject(TaskArchiveService);
   private _router = inject(Router);
+  private _injector = inject(Injector);
+  private _pluginRunner?: any; // Lazy loaded to avoid circular dependency
 
   // Track which plugin is currently making calls to prevent cross-plugin access
   private _currentPluginId: string | null = null;
@@ -660,10 +662,10 @@ export class PluginBridgeService implements OnDestroy {
    * Send a message to a plugin's message handler
    */
   async sendMessageToPlugin(pluginId: string, message: any): Promise<any> {
-    // This method will be called by the plugin-index component
-    // The actual implementation is in the plugin runner
-    const PluginRunner = (await import('./plugin-runner')).PluginRunner;
-    const pluginRunner = inject(PluginRunner);
+    // Import and get the plugin runner service
+    // Using dynamic import to avoid circular dependency at compile time
+    const { PluginRunner } = await import('./plugin-runner');
+    const pluginRunner = this._injector.get(PluginRunner);
     return pluginRunner.sendMessageToPlugin(pluginId, message);
   }
 
