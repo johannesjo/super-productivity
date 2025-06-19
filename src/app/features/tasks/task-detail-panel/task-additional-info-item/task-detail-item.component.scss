@@ -35,11 +35,16 @@
     }
 
     .box {
-      border-color: var(--theme-extra-border-color);
-      bottom: 0;
-      top: -1px;
-      box-shadow: var(--whiteframe-shadow-1dp);
-      background: var(--theme-card-bg) !important;
+      @include lightTheme {
+        border-color: var(--theme-extra-border-color);
+        bottom: 0;
+        top: -1px;
+      }
+
+      @include darkTheme {
+        box-shadow: var(--whiteframe-shadow-1dp);
+        background: var(--dark16) !important;
+      }
     }
   }
 }
@@ -48,6 +53,7 @@
 // ------
 .input-item,
 .mat-expansion-panel {
+  box-shadow: none;
   //overflow: inherit !important;
   border-width: 1px;
   border-style: solid;
@@ -71,18 +77,16 @@
     }
   }
 
-  box-shadow: var(--whiteframe-shadow-1dp);
-  //border-color: var(--theme-separator-color);
-  background: var(--theme-card-bg);
-}
-
-:host-context(body.isDarkTheme) .input-item,
-:host-context(body.isDarkTheme) .mat-expansion-panel {
-  background: var(--dark10);
-}
-
-:host-context(body.isDarkTheme)::ng-deep task ::ng-deep .box {
-  background: var(--dark16) !important;
+  @include darkTheme() {
+    background: var(--dark10);
+    box-shadow: var(--whiteframe-shadow-1dp);
+    //border-color: $dark-theme-separator-color;
+  }
+  @include lightTheme {
+    background: var(--theme-card-bg);
+    border-color: var(--theme-extra-border-color);
+    //border-color: $light-theme-separator-color;
+  }
 }
 
 mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
@@ -147,15 +151,18 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
 
     .markdown-wrapper {
       min-height: 60px;
+      border-radius: var(--card-border-radius);
       overflow: visible !important;
       transition: var(--transition-standard);
-      border-radius: var(--card-border-radius);
-      background: var(--theme-bg-lightest);
-      box-shadow: var(--whiteframe-shadow-1dp);
-    }
 
-    :host-context(body.isDarkTheme) & .markdown-wrapper {
-      background: var(--theme-bg-lightest);
+      @include lightTheme {
+        background: var(--theme-bg-lightest);
+        //border: 1px solid $light-theme-extra-border-color;
+      }
+      @include darkTheme() {
+        background: var(--theme-bg-lightest);
+        box-shadow: var(--whiteframe-shadow-1dp);
+      }
     }
 
     &.isFocused .markdown-wrapper {
@@ -270,7 +277,7 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
   //  width: 32px;
   //}
 
-  color: var(--theme-text-color-muted);
+  color: var(--theme-task-detail-value-color);
 
   > * {
     flex-grow: 1;

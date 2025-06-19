@@ -96,6 +96,10 @@
     // because of the shadow, this looks better
     //bottom: 2px;
 
+    @include darkTheme {
+      box-shadow: var(--whiteframe-shadow-4dp);
+    }
+
     @include mq(xs) {
       transform-origin: left;
       left: calc(-1 * var(--task-border-radius));
@@ -190,11 +194,16 @@
   }
 
   ::ng-deep .box {
-    border-color: var(--theme-extra-border-color);
-    bottom: 0;
-    top: -1px;
-    box-shadow: var(--whiteframe-shadow-1dp);
-    background: var(--sub-task-c-bg);
+    @include lightTheme {
+      border-color: var(--theme-extra-border-color);
+      bottom: 0;
+      top: -1px;
+    }
+
+    @include darkTheme {
+      box-shadow: var(--whiteframe-shadow-1dp);
+      background: var(--sub-task-c-bg);
+    }
   }
 }
 
@@ -843,12 +852,15 @@ progress-bar {
   border: 1px solid var(--theme-extra-border-color);
   border-radius: var(--card-border-radius);
   white-space: nowrap;
+  background: #fff;
 
   // avoid affecting drag handle
   pointer-events: none;
 
-  border-color: var(--theme-extra-border-color);
-  background: var(--theme-bg-lighter);
+  @include darkTheme() {
+    border-color: var(--theme-extra-border-color);
+    background: var(--theme-bg-lighter);
+  }
 
   ::ng-deep span {
     font-size: 10px;

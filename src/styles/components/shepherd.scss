@@ -44,7 +44,9 @@
   border-top-right-radius: 5px;
   line-height: 2em;
 
-  background: var(--theme-sidebar-bg) !important;
+  @include darkTheme(true) {
+    background: var(--dark8) !important;
+  }
 
   h3 {
     margin: 0;

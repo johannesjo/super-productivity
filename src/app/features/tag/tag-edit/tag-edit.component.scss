@@ -12,7 +12,6 @@
   }
 
   input {
-    background: var(--theme-card-bg);
     appearance: none;
     display: block;
     width: 100%;
@@ -23,21 +22,12 @@
     border-bottom: 1px solid transparent;
     height: 40px;
     padding: 2px;
+    background: transparent;
 
     &:hover,
     &:focus {
       outline: none;
       border-bottom-color: var(--theme-extra-border-color);
-    }
-
-    &:hover {
-      :host-context(.isNoTouchOnly) & {
-        background: var(--theme-bg-darker);
-      }
-    }
-
-    :host-context(body.isDarkTheme) & {
-      background: var(--dark10);
     }
   }
 }

@@ -7,6 +7,8 @@ app-root,
 .app-frame {
   overflow: hidden;
   margin: 0;
+  /* stylelint-disable-next-line no-duplicate-selectors */
+  height: 100%;
   height: -webkit-fill-available;
   box-sizing: border-box;
   //font-family: 'Montserrat', 'Roboto', sans-serif;

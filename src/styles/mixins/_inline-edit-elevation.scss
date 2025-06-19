@@ -10,4 +10,8 @@ $shadow-edit-on-click-light: var(--whiteframe-shadow-7dp);
   color: var(--theme-text-color-most-intense);
   border: 1px solid var(--c-accent);
   //border: 1px solid var(--theme-extra-border-color);
+
+  @include darkTheme() {
+    background: var(--dark24);
+  }
 }

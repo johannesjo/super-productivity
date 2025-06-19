@@ -88,30 +88,10 @@
   --dark16: rgb(53, 53, 53);
   --dark24: rgb(56, 56, 56);
 
-  // Palette colors (Material Design theme colors)
-  --palette-primary-50: var(--mat-sys-primary-container);
-  --palette-primary-100: var(--mat-sys-primary-container);
-  --palette-primary-200: var(--mat-sys-primary-container);
-  --palette-primary-300: var(--mat-sys-primary);
-  --palette-primary-400: var(--mat-sys-primary);
-  --palette-primary-500: var(--mat-sys-primary);
-  --palette-primary-600: var(--mat-sys-primary);
-  --palette-primary-700: var(--mat-sys-primary);
-  --palette-primary-800: var(--mat-sys-primary);
-  --palette-primary-900: var(--mat-sys-primary);
-  --palette-primary-main: var(--mat-sys-primary);
-  --palette-primary-contrast-500: var(--mat-sys-on-primary);
-
-  --palette-accent-500: var(--mat-sys-secondary);
-  --palette-accent-main: var(--mat-sys-secondary);
-
-  --palette-warn-500: var(--mat-sys-error);
-  --palette-warn-main: var(--mat-sys-error);
-
   // Legacy color variables
-  --c-primary: var(--mat-sys-primary);
-  --c-accent: var(--mat-sys-secondary);
-  --c-warn: var(--mat-sys-error);
+  --c-primary: var(--palette-primary-500);
+  --c-accent: var(--palette-accent-500);
+  --c-warn: var(--palette-warn-500);
 
   // Special colors
   --success-green: #4fa758;
@@ -260,7 +240,7 @@ body {
 
   // Borders and separators
   --theme-extra-border-color: #dddddd;
-  --theme-separator-color: rgba(18, 18, 18, 0.3);
+  --theme-separator-color: #d0d0d0;
   --theme-divider-color: rgba(0, 0, 0, 0.12);
 
   // Backdrop
@@ -272,7 +252,7 @@ body {
   --standard-note-bg-hovered: var(--standard-note-bg);
 
   // Task colors (light theme)
-  --task-c-bg: var(--theme-bg);
+  --task-c-bg: #fff;
   --task-c-selected-bg: var(--theme-selected-task-bg-color);
   --sub-task-c-bg: var(--task-c-bg);
   --sub-task-c-bg-done: var(--task-c-bg);
@@ -325,6 +305,12 @@ body {
   // Hover controls
   --theme-hover-controls-border: 1px solid;
   --theme-hover-controls-border-opacity: 0.5;
+
+  // Task detail item
+  --theme-task-detail-value-color: rgba(
+    var(--palette-foreground-secondary-text),
+    var(--palette-foreground-secondary-text-alpha, 1)
+  );
 
   // Grid colors
   --theme-grid-color: #dadce0;
@@ -467,7 +453,7 @@ body.isDarkTheme {
 
   // Borders and separators
   --theme-extra-border-color: rgba(255, 255, 255, 0.12);
-  --theme-separator-color: var(--color-overlay-light-30);
+  --theme-separator-color: rgba(255, 255, 255, 0.1);
   --theme-divider-color: rgba(255, 255, 255, 0.12);
 
   // Backdrop
@@ -517,7 +503,7 @@ body.isDarkTheme {
   --color-overlay-light-90: rgba(255, 255, 255, 0.9);
 
   // Chip colors (dark theme)
-  --theme-chip-outline-color: rgba(255, 255, 255, 0.3);
+  --theme-chip-outline-color: rgba(125, 125, 125, 0.4);
 
   // Close button (dark theme)
   --theme-close-btn-bg: var(--theme-bg-lightest);
@@ -545,4 +531,7 @@ body.isDarkTheme {
   // Hover controls (dark theme)
   --theme-hover-controls-border: none;
   --theme-hover-controls-border-opacity: 0;
+
+  // Task detail item (dark theme)
+  --theme-task-detail-value-color: rgba(255, 255, 255, 0.7);
 }
