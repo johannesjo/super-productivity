@@ -64,6 +64,7 @@ import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { TODAY_TAG } from '../tag/tag.const';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { CommonModule } from '@angular/common';
+import { FinishDayBtnComponent } from './finish-day-btn/finish-day-btn.component';
 
 @Component({
   selector: 'work-view',
@@ -97,6 +98,7 @@ import { CommonModule } from '@angular/common';
     TranslatePipe,
     CollapsibleComponent,
     CommonModule,
+    FinishDayBtnComponent,
   ],
 })
 export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
