@@ -4,18 +4,28 @@ import {
   MatDialogActions,
   MatDialogContent,
   MatDialogRef,
+  MatDialogTitle,
 } from '@angular/material/dialog';
 import { T } from '../../t.const';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { TranslatePipe } from '@ngx-translate/core';
+import { IssueIconPipe } from '../../features/issue/issue-icon/issue-icon.pipe';
 
 @Component({
   selector: 'dialog-confirm',
   templateUrl: './dialog-confirm.component.html',
   styleUrls: ['./dialog-confirm.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatDialogContent, MatDialogActions, MatButton, MatIcon, TranslatePipe],
+  imports: [
+    MatDialogContent,
+    MatDialogActions,
+    MatButton,
+    MatIcon,
+    TranslatePipe,
+    IssueIconPipe,
+    MatDialogTitle,
+  ],
 })
 export class DialogConfirmComponent {
   @ViewChild('cancelButton', { read: MatButton }) cancelButton!: MatButton;

@@ -35,7 +35,7 @@ export class MarkdownPasteService {
       const dialogRef = this._matDialog.open(DialogConfirmComponent, {
         data: {
           okTxt: T.G.CONFIRM,
-          message: T.G.MARKDOWN_PASTE.CONFIRM_ADD_TO_SUB_TASK_NOTES,
+          message: T.F.MARKDOWN_PASTE.CONFIRM_ADD_TO_SUB_TASK_NOTES,
           translateParams: {
             parentTaskTitle: selectedTaskTitle,
           },
@@ -70,10 +70,12 @@ export class MarkdownPasteService {
         const dialogRef = this._matDialog.open(DialogConfirmComponent, {
           data: {
             okTxt: T.G.CONFIRM,
+            title: T.F.MARKDOWN_PASTE.DIALOG_TITLE,
+            titleIcon: 'content_paste',
             message:
               structure.totalSubTasks > 0
-                ? T.G.MARKDOWN_PASTE.CONFIRM_PARENT_TASKS_WITH_SUBS
-                : T.G.MARKDOWN_PASTE.CONFIRM_PARENT_TASKS,
+                ? T.F.MARKDOWN_PASTE.CONFIRM_PARENT_TASKS_WITH_SUBS
+                : T.F.MARKDOWN_PASTE.CONFIRM_PARENT_TASKS,
             translateParams: {
               tasksCount: structure.mainTasks.length,
               subTasksCount: structure.totalSubTasks,
@@ -130,9 +132,9 @@ export class MarkdownPasteService {
         okTxt: T.G.CONFIRM,
         message: selectedTaskId
           ? selectedTaskTitle
-            ? T.G.MARKDOWN_PASTE.CONFIRM_SUB_TASKS_WITH_PARENT
-            : T.G.MARKDOWN_PASTE.CONFIRM_SUB_TASKS
-          : T.G.MARKDOWN_PASTE.CONFIRM_PARENT_TASKS,
+            ? T.F.MARKDOWN_PASTE.CONFIRM_SUB_TASKS_WITH_PARENT
+            : T.F.MARKDOWN_PASTE.CONFIRM_SUB_TASKS
+          : T.F.MARKDOWN_PASTE.CONFIRM_PARENT_TASKS,
         translateParams: {
           tasksCount: parsedTasks.length,
           parentTaskTitle: selectedTaskTitle,

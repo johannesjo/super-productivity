@@ -246,7 +246,7 @@
       [class.isRouteWithRightPanel]="isRouteWithRightPanel$ | async"
       (click)="layoutService.toggleTaskViewCustomizerPanel()"
       mat-icon-button
-      matTooltip="Customize Task View {{
+      matTooltip="{{ T.GCF.KEYBOARD.TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL | translate }} {{
         kb.toggleTaskViewCustomizerPanel
           ? '[' + kb.toggleTaskViewCustomizerPanel + ']'
           : ''

@@ -1,3 +1,11 @@
+@if (data.title) {
+  <h1 mat-dialog-title>
+    @if (data.titleIcon) {
+      <mat-icon class="dialog-header-icon">{{ data.titleIcon }}</mat-icon>
+    }
+    <span>{{ data.title | translate }}</span>
+  </h1>
+}
 <mat-dialog-content>
   <div
     [innerHtml]="data.message | translate: data.translateParams"
