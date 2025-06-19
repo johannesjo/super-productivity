@@ -189,7 +189,10 @@ export class PluginService implements OnDestroy {
       }
 
       // Validate plugin code
-      const codeValidation = this._pluginSecurity.validatePluginCode(pluginCode);
+      const codeValidation = this._pluginSecurity.validatePluginCode(
+        pluginCode,
+        manifest,
+      );
       if (!codeValidation.isValid) {
         throw new Error(
           `Plugin code validation failed: ${codeValidation.errors.join(', ')}`,
@@ -527,7 +530,10 @@ export class PluginService implements OnDestroy {
       }
 
       // Validate plugin code
-      const codeValidation = this._pluginSecurity.validatePluginCode(pluginCode);
+      const codeValidation = this._pluginSecurity.validatePluginCode(
+        pluginCode,
+        manifest,
+      );
       if (!codeValidation.isValid) {
         throw new Error(
           `Plugin code validation failed: ${codeValidation.errors.join(', ')}`,
@@ -773,7 +779,10 @@ export class PluginService implements OnDestroy {
       }
 
       // Validate plugin code
-      const codeValidation = this._pluginSecurity.validatePluginCode(pluginCode);
+      const codeValidation = this._pluginSecurity.validatePluginCode(
+        pluginCode,
+        manifest,
+      );
       if (!codeValidation.isValid) {
         throw new Error(
           `Plugin code validation failed: ${codeValidation.errors.join(', ')}`,
