@@ -68,7 +68,7 @@
       </mat-card-subtitle>
       <mat-slide-toggle
         [checked]="isPluginEnabledSync(plugin)"
-        [disabled]="!!plugin.error"
+        [disabled]="!canEnablePlugin(plugin)"
         (change)="onPluginToggle(plugin, $event)"
         [attr.aria-label]="'Toggle ' + plugin.manifest.name"
       >
@@ -82,6 +82,13 @@
         <mat-error>
           <mat-icon>error</mat-icon>
           {{ plugin.error }}
+        </mat-error>
+      }
+
+      @if (requiresNodeExecution(plugin) && !IS_ELECTRON) {
+        <mat-error style="margin-top: 8px">
+          <mat-icon>desktop_windows</mat-icon>
+          {{ getNodeExecutionMessage() }}
         </mat-error>
       }
 
