@@ -174,18 +174,6 @@ export class ShortcutService {
       throw new Error('Intentional Error Fun (dont worry)');
     }
 
-    // Check plugin shortcuts
-    const pluginShortcuts = this._pluginBridgeService.shortcuts$.getValue();
-    for (const shortcut of pluginShortcuts) {
-      const shortcutKey = `plugin_${shortcut.pluginId}:${shortcut.id}`;
-      const shortcutKeyCombo = (keys as any)[shortcutKey];
-      if (shortcutKeyCombo && checkKeyCombo(ev, shortcutKeyCombo)) {
-        ev.preventDefault();
-        this._pluginBridgeService.executeShortcut(`${shortcut.pluginId}:${shortcut.id}`);
-        return;
-      }
-    }
-
     // special hidden dev tools combo to use them for production
     if (IS_ELECTRON) {
       if (checkKeyCombo(ev, 'Ctrl+Shift+J')) {
@@ -196,6 +184,18 @@ export class ShortcutService {
         this._uiHelperService.zoomBy(-0.05);
       } else if (checkKeyCombo(ev, keys.zoomDefault)) {
         this._uiHelperService.zoomTo(1);
+      }
+    }
+
+    // Check plugin shortcuts (exec last)
+    const pluginShortcuts = this._pluginBridgeService.shortcuts$.getValue();
+    for (const shortcut of pluginShortcuts) {
+      const shortcutKey = `plugin_${shortcut.pluginId}:${shortcut.id}`;
+      const shortcutKeyCombo = (keys as any)[shortcutKey];
+      if (shortcutKeyCombo && checkKeyCombo(ev, shortcutKeyCombo)) {
+        ev.preventDefault();
+        this._pluginBridgeService.executeShortcut(`${shortcut.pluginId}:${shortcut.id}`);
+        return;
       }
     }
   }
