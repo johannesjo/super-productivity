@@ -16,8 +16,8 @@ class SyncMdPlugin {
     console.log('[Sync.md] Plugin initializing...');
 
     // Register side panel button
-    if (window.PluginApi?.registerSidePanelButton) {
-      window.PluginApi.registerSidePanelButton({
+    if (PluginAPI?.registerSidePanelButton) {
+      PluginAPI.registerSidePanelButton({
         label: 'Sync.md',
         icon: 'sync',
         onClick: () => {
@@ -27,19 +27,15 @@ class SyncMdPlugin {
     }
 
     // Register message handler for iframe communication
-    if (window.PluginApi?.onMessage) {
-      window.PluginApi.onMessage((message) => this.handleMessage(message));
+    if (PluginAPI?.onMessage) {
+      PluginAPI.onMessage((message) => this.handleMessage(message));
     }
 
     // Register hook for task changes
-    if (window.PluginApi?.onHook) {
-      window.PluginApi.onHook('onTasksUpdated', (tasks) =>
-        this.handleTasksUpdated(tasks),
-      );
-      window.PluginApi.onHook('onTaskAdded', (task) => this.handleTaskAdded(task));
-      window.PluginApi.onHook('onTaskDeleted', (taskId) =>
-        this.handleTaskDeleted(taskId),
-      );
+    if (PluginAPI?.onHook) {
+      PluginAPI.onHook('onTasksUpdated', (tasks) => this.handleTasksUpdated(tasks));
+      PluginAPI.onHook('onTaskAdded', (task) => this.handleTaskAdded(task));
+      PluginAPI.onHook('onTaskDeleted', (taskId) => this.handleTaskDeleted(taskId));
     }
 
     // Load saved configuration
@@ -89,7 +85,7 @@ class SyncMdPlugin {
 
   async loadConfig() {
     try {
-      const data = await window.PluginApi.getUserData('syncMdConfig');
+      const data = await PluginAPI.loadSyncedData('syncMdConfig');
       if (data) {
         this.config = data;
         console.log('[Sync.md] Loaded config:', this.config);
@@ -102,7 +98,7 @@ class SyncMdPlugin {
   async saveConfig(config) {
     try {
       this.config = config;
-      await window.PluginApi.setUserData('syncMdConfig', config);
+      await PluginAPI.persistDataSynced('syncMdConfig', config);
       console.log('[Sync.md] Config saved:', config);
       return true;
     } catch (error) {
@@ -112,9 +108,9 @@ class SyncMdPlugin {
   }
 
   async startWatching() {
-    if (!this.config?.filePath || !window.PluginApi?.nodeExec) {
+    if (!this.config?.filePath || !PluginAPI?.nodeExecution) {
       console.warn(
-        '[Sync.md] Cannot start watching: missing config or nodeExec permission',
+        '[Sync.md] Cannot start watching: missing config or nodeExecution permission',
       );
       return;
     }
@@ -170,7 +166,7 @@ class SyncMdPlugin {
         process.stdin.resume();
       `;
 
-      const result = await window.PluginApi.nodeExec({
+      const result = await PluginAPI.nodeExecution({
         script: watchScript,
         persistent: true,
         onOutput: (data) => this.handleWatcherOutput(data),
@@ -187,9 +183,9 @@ class SyncMdPlugin {
   }
 
   async stopWatching() {
-    if (this.watcherId && window.PluginApi?.nodeExec) {
+    if (this.watcherId && PluginAPI?.nodeExecution) {
       try {
-        await window.PluginApi.nodeExec({
+        await PluginAPI.nodeExecution({
           action: 'stop',
           id: this.watcherId,
         });
@@ -331,7 +327,7 @@ class SyncMdPlugin {
 
   async getProjectTasks(projectId) {
     try {
-      const tasks = await window.PluginApi.getTasks();
+      const tasks = await PluginAPI.getTasks();
       return tasks.filter((task) => task.projectId === projectId);
     } catch (error) {
       console.error('[Sync.md] Error getting project tasks:', error);
@@ -360,7 +356,7 @@ class SyncMdPlugin {
         // Update existing task
         const projectTask = projectTaskMap.get(mdTask.id);
         if (projectTask.title !== mdTask.title) {
-          await window.PluginApi.updateTask(mdTask.id, { title: mdTask.title });
+          await PluginAPI.updateTask(mdTask.id, { title: mdTask.title });
           result.updated++;
         }
 
@@ -368,7 +364,7 @@ class SyncMdPlugin {
         projectTaskMap.delete(mdTask.id);
       } else {
         // Create new task
-        const newTask = await window.PluginApi.addTask({
+        const newTask = await PluginAPI.addTask({
           title: mdTask.title,
           projectId: this.config.projectId,
         });
@@ -380,7 +376,7 @@ class SyncMdPlugin {
 
           // Handle sub-tasks
           for (const subTask of mdTask.subTasks) {
-            const newSubTask = await window.PluginApi.addTask({
+            const newSubTask = await PluginAPI.addTask({
               title: subTask.title,
               parentId: newTask.id,
             });
@@ -411,8 +407,8 @@ class SyncMdPlugin {
   }
 
   async updateFileWithTaskIds(originalContent, updatedTaskIdMap) {
-    if (!window.PluginApi?.nodeExec) {
-      console.warn('[Sync.md] Cannot update file: nodeExec permission required');
+    if (!PluginAPI?.nodeExecution) {
+      console.warn('[Sync.md] Cannot update file: nodeExecution permission required');
       return;
     }
 
@@ -447,7 +443,7 @@ class SyncMdPlugin {
         console.log('File updated successfully');
       `;
 
-      await window.PluginApi.nodeExec({
+      await PluginAPI.nodeExecution({
         script: writeScript,
         persistent: false,
       });
@@ -459,7 +455,7 @@ class SyncMdPlugin {
   }
 
   async testConnection(filePath) {
-    if (!window.PluginApi?.nodeExec) {
+    if (!PluginAPI?.nodeExecution) {
       throw new Error('Node execution permission required');
     }
 
@@ -484,7 +480,7 @@ class SyncMdPlugin {
       }
     `;
 
-    const result = await window.PluginApi.nodeExec({
+    const result = await PluginAPI.nodeExecution({
       script: testScript,
       persistent: false,
     });
@@ -493,7 +489,7 @@ class SyncMdPlugin {
   }
 
   async browseForFile(filters) {
-    if (!window.PluginApi?.nodeExec) {
+    if (!PluginAPI?.nodeExecution) {
       throw new Error('Node execution permission required');
     }
 
@@ -512,7 +508,7 @@ class SyncMdPlugin {
     `;
 
     try {
-      const result = await window.PluginApi.nodeExec({
+      const result = await PluginAPI.nodeExecution({
         script: browseScript,
         persistent: false,
       });
@@ -525,7 +521,7 @@ class SyncMdPlugin {
   }
 
   async readFile(filePath) {
-    if (!window.PluginApi?.nodeExec) {
+    if (!PluginAPI?.nodeExecution) {
       throw new Error('Node execution permission required');
     }
 
@@ -544,7 +540,7 @@ class SyncMdPlugin {
       }
     `;
 
-    const result = await window.PluginApi.nodeExec({
+    const result = await PluginAPI.nodeExecution({
       script: readScript,
       persistent: false,
     });
@@ -604,7 +600,7 @@ class SyncMdPlugin {
   }
 
   async syncProjectToFile() {
-    if (!this.config?.filePath || !window.PluginApi?.nodeExec) {
+    if (!this.config?.filePath || !PluginAPI?.nodeExecution) {
       return;
     }
 
@@ -612,7 +608,7 @@ class SyncMdPlugin {
 
     try {
       // Get all tasks from the project
-      const allTasks = await window.PluginApi.getTasks();
+      const allTasks = await PluginAPI.getTasks();
       const projectTasks = allTasks.filter(
         (task) => task.projectId === this.config.projectId,
       );
@@ -654,7 +650,7 @@ class SyncMdPlugin {
         console.log('File synced from project');
       `;
 
-      await window.PluginApi.nodeExec({
+      await PluginAPI.nodeExecution({
         script: writeScript,
         persistent: false,
       });
@@ -679,6 +675,6 @@ const syncMdPlugin = new SyncMdPlugin();
 syncMdPlugin.init();
 
 // Register plugin for cleanup
-if (window.PluginApi?.onDestroy) {
-  window.PluginApi.onDestroy(() => syncMdPlugin.destroy());
+if (PluginAPI?.onDestroy) {
+  PluginAPI.onDestroy(() => syncMdPlugin.destroy());
 }

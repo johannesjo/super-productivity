@@ -5,6 +5,11 @@
 
 th {
   text-align: left;
+  padding-left: 0;
+}
+
+td {
+  padding-right: 0;
 }
 
 mat-card {
@@ -20,6 +25,12 @@ mat-card-header {
 plugin-icon {
   width: 40px;
   height: 40px;
+  margin-right: 8px;
+}
+
+.label {
+  font-weight: bold;
+  margin-top: 12px;
 }
 
 mat-card-subtitle {
