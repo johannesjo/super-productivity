@@ -215,10 +215,13 @@ export class SyncService<const MD extends ModelCfgs> {
     let local = await this._metaModelCtrl.load();
     if (isForceUpload) {
       // Change lastUpdate timestamp to indicate a newer revision to other clients
-      await this._metaModelCtrl.save({
-        ...local,
-        lastUpdate: Date.now(),
-      });
+      await this._metaModelCtrl.save(
+        {
+          ...local,
+          lastUpdate: Date.now(),
+        },
+        true,
+      );
       local = await this._metaModelCtrl.load();
     }
 
