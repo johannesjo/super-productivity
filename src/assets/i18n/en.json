@@ -529,6 +529,14 @@
         "WELCOME_USER": "Welcome {{user}}!"
       }
     },
+    "MARKDOWN_PASTE": {
+      "CONFIRM_PARENT_TASKS": "Create <strong>{{tasksCount}} new tasks</strong> from the pasted markdown list?",
+      "CONFIRM_PARENT_TASKS_WITH_SUBS": "Create <strong>{{tasksCount}} new tasks and {{subTasksCount}} sub-tasks</strong> from the pasted markdown list?",
+      "CONFIRM_SUB_TASKS": "Create {{tasksCount}} new sub-tasks from the pasted markdown list?",
+      "CONFIRM_SUB_TASKS_WITH_PARENT": "Create <strong>{{tasksCount}} new sub-tasks under \"{{parentTaskTitle}}\"</strong> from the pasted markdown list?",
+      "CONFIRM_ADD_TO_SUB_TASK_NOTES": "Add the pasted markdown list to the notes of sub-task \"{{parentTaskTitle}}\"?",
+      "DIALOG_TITLE": "Pasted Markdown List detected!"
+    },
     "METRIC": {
       "BANNER": {
         "CHECK": "I did it!"
@@ -1441,6 +1449,7 @@
     "ADVANCED_CFG": "Advanced Config",
     "CANCEL": "Cancel",
     "CLOSE": "Close",
+    "CONFIRM": "Confirm",
     "DELETE": "Delete",
     "DISMISS": "Dismiss",
     "DO_IT": "Do it!",
@@ -1561,6 +1570,7 @@
       "TOGGLE_ISSUE_PANEL": "Show/Hide Issue Panel",
       "TOGGLE_PLAY": "Start/Stop Task",
       "TOGGLE_SIDE_NAV": "Show & Focus/Hide Sidenav",
+      "TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL": "Toggle Filter/Group/Sort Panel",
       "TRIGGER_SYNC": "Trigger sync (if configured)",
       "ZOOM_DEFAULT": "Zoom default (Desktop only)",
       "ZOOM_IN": "Zoom in (Desktop only)",
