@@ -3,6 +3,7 @@ import {
   Component,
   ElementRef,
   inject,
+  Input,
   OnDestroy,
   OnInit,
   signal,
@@ -17,6 +18,7 @@ import { PluginBridgeService } from '../../plugin-bridge.service';
 import { PluginCleanupService } from '../../plugin-cleanup.service';
 import {
   createFullPagePluginConfig,
+  createSidePanelPluginConfig,
   createPluginIframeSetup,
 } from '../../util/plugin-iframe.util';
 import { CommonModule } from '@angular/common';
@@ -62,6 +64,13 @@ import {
 export class PluginIndexComponent implements OnInit, OnDestroy {
   @ViewChild('iframe', { static: false }) iframeRef?: ElementRef<HTMLIFrameElement>;
 
+  // Optional input for direct plugin ID (for embedding in other components)
+  @Input() directPluginId?: string;
+  // Optional input to hide the back button and header UI
+  @Input() showFullUI: boolean = true;
+  // Optional input to use side panel configuration instead of full page
+  @Input() useSidePanelConfig: boolean = false;
+
   private readonly _route = inject(ActivatedRoute);
   private readonly _router = inject(Router);
   private readonly _sanitizer = inject(DomSanitizer);
@@ -78,6 +87,22 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
   private _routeSubscription?: Subscription;
 
   async ngOnInit(): Promise<void> {
+    // If directPluginId is provided, load that plugin directly
+    if (this.directPluginId) {
+      this.pluginId.set(this.directPluginId);
+      this._cleanupIframeCommunication();
+      await this._waitForPluginSystem();
+
+      try {
+        await this._loadPluginIndex(this.directPluginId);
+      } catch (err) {
+        console.error('Failed to load plugin index:', err);
+        this.error.set(err instanceof Error ? err.message : 'Failed to load plugin');
+        this.isLoading.set(false);
+      }
+      return;
+    }
+
     // Subscribe to route parameter changes to handle navigation between plugins
     this._routeSubscription = this._route.paramMap.subscribe(async (params) => {
       const pluginId = params.get('pluginId');
@@ -165,13 +190,21 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
     const baseCfg = await this._pluginService.getBaseCfg();
 
     // Create iframe configuration using the unified utility
-    const config = createFullPagePluginConfig(
-      pluginId,
-      plugin.manifest,
-      indexContent,
-      baseCfg,
-      this._pluginBridge,
-    );
+    const config = this.useSidePanelConfig
+      ? createSidePanelPluginConfig(
+          pluginId,
+          plugin.manifest,
+          indexContent,
+          baseCfg,
+          this._pluginBridge,
+        )
+      : createFullPagePluginConfig(
+          pluginId,
+          plugin.manifest,
+          indexContent,
+          baseCfg,
+          this._pluginBridge,
+        );
 
     // Create iframe setup
     const { iframeUrl, messageHandler } = createPluginIframeSetup(config);
