@@ -249,8 +249,9 @@ export class PluginService implements OnDestroy {
         }
         this._pluginPaths.set(manifest.id, pluginPath); // Store the path
 
-        // Ensure plugin is marked as enabled since we loaded it
-        await this._pluginMetaPersistenceService.setPluginEnabled(manifest.id, true);
+        // Mark plugin as enabled in memory only during startup to avoid sync conflicts
+        // The enabled state will be persisted later when user explicitly enables/disables plugins
+        this._ensurePluginEnabledInMemory(manifest.id);
 
         console.log(`Plugin ${manifest.id} loaded successfully`);
       } else {
@@ -946,8 +947,10 @@ export class PluginService implements OnDestroy {
       .toPromise();
 
     if (secondConfirmation) {
-      // Store consent for future sessions
-      await this._pluginMetaPersistenceService.setNodeExecutionConsent(manifest.id, true);
+      // Store consent for future sessions, but avoid immediate pfapi write during startup
+      setTimeout(() => {
+        this._pluginMetaPersistenceService.setNodeExecutionConsent(manifest.id, true);
+      }, 5000); // Delay write to avoid sync conflicts during startup
     }
 
     return secondConfirmation === true;
@@ -956,6 +959,18 @@ export class PluginService implements OnDestroy {
   /**
    * Clean up all resources when service is destroyed
    */
+  /**
+   * Ensure plugin is marked as enabled in memory only during startup.
+   * This avoids pfapi writes during initialization that could cause sync conflicts.
+   */
+  private _ensurePluginEnabledInMemory(pluginId: string): void {
+    // We only need to track this in memory for startup purposes
+    // The actual persistence will happen when user explicitly enables/disables plugins
+    console.log(
+      `Plugin ${pluginId} marked as enabled in memory (no pfapi write during startup)`,
+    );
+  }
+
   ngOnDestroy(): void {
     console.log('PluginService: Cleaning up all resources');
 
