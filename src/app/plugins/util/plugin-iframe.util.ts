@@ -67,6 +67,7 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
         let callId = 0;
         const pendingCalls = new Map();
         const dialogButtonHandlers = new Map();
+        const hookHandlers = new Map(); // Store hook handlers by hook type
 
         // Handle responses from parent
         window.addEventListener('message', function(event) {
@@ -105,6 +106,18 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
                 }, '*');
               }
             }
+          } else if (data?.type === 'PLUGIN_HOOK_EVENT') {
+            // Handle hook events
+            const handlers = hookHandlers.get(data.hook);
+            if (handlers && handlers.length > 0) {
+              handlers.forEach(handler => {
+                try {
+                  handler(data.payload);
+                } catch (error) {
+                  console.error('Hook handler error:', error);
+                }
+              });
+            }
           }
         });
 
@@ -132,6 +145,23 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
                   return button;
                 })
               };
+            }
+
+            // Special handling for registerHook to store handlers locally
+            if (method === 'registerHook' && args && args.length >= 2) {
+              const [hook, handler] = args;
+              if (typeof handler === 'function') {
+                // Store handler locally
+                if (!hookHandlers.has(hook)) {
+                  hookHandlers.set(hook, []);
+                }
+                hookHandlers.get(hook).push(handler);
+
+                // Pass a placeholder to parent - parent will send events back to us
+                processedArgs = [hook, 'IFRAME_HANDLER'];
+              } else {
+                processedArgs = args;
+              }
             }
 
             window.parent.postMessage({
@@ -294,27 +324,61 @@ export const handlePluginMessage = async (
       // Set plugin context
       config.pluginBridge._setCurrentPlugin(config.pluginId);
 
-      // Call the method on the bridge
+      // For iframe plugins, we need to handle API calls differently
+      // Some methods need special handling because the bridge methods have different signatures
+
+      // For registerHook, we need to add the pluginId parameter when calling the bridge
+      if (method === 'registerHook') {
+        const bridge = config.pluginBridge as any;
+        // Special handling for registerHook - it needs pluginId as first parameter
+        if (args.length >= 2) {
+          const [hook, handlerPlaceholder] = args;
+          console.log('Plugin iframe registerHook:', {
+            hook,
+            handlerPlaceholder,
+            pluginId: config.pluginId,
+          });
+
+          let result;
+          // If it's an iframe handler, create a proxy that sends events to iframe
+          if (handlerPlaceholder === 'IFRAME_HANDLER') {
+            const handler = (payload: any): void => {
+              // Send hook event to iframe
+              event.source?.postMessage(
+                {
+                  type: 'PLUGIN_HOOK_EVENT',
+                  hook: hook,
+                  payload: payload,
+                },
+                '*' as any,
+              );
+            };
+            result = await bridge.registerHook(config.pluginId, hook, handler);
+          } else {
+            // Legacy string handler support
+            const handler = new Function('return ' + handlerPlaceholder)();
+            result = await bridge.registerHook(config.pluginId, hook, handler);
+          }
+          event.source?.postMessage(
+            {
+              type: 'PLUGIN_API_RESPONSE',
+              callId,
+              result,
+            },
+            '*' as any,
+          );
+          return;
+        }
+      }
+
+      // For other methods, call them on the bridge
       const bridge = config.pluginBridge as any;
       if (typeof bridge[method] !== 'function') {
         throw new Error(`Unknown API method: ${method}`);
       }
 
-      // Special handling for registration methods that have handlers
-      if (method === 'registerHook' && args.length >= 2) {
-        // Convert handler function to a callable
-        const [hook, handlerStr] = args;
-        const handler = new Function('return ' + handlerStr)();
-        const result = await bridge[method](hook, handler);
-        event.source?.postMessage(
-          {
-            type: 'PLUGIN_API_RESPONSE',
-            callId,
-            result,
-          },
-          '*' as any,
-        );
-      } else if (method === 'openDialog' && args.length >= 1) {
+      // Special handling for openDialog with button handlers
+      if (method === 'openDialog' && args.length >= 1) {
         // Special handling for dialog with button onClick handlers
         const dialogCfg = args[0];
         if (dialogCfg.buttons) {

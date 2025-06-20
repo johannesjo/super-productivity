@@ -83,12 +83,9 @@ export class PluginService implements OnDestroy {
 
   private async _loadBuiltInPlugins(): Promise<void> {
     const pluginPaths = [
-      'assets/example-plugin',
       'assets/yesterday-tasks-plugin',
-      'assets/markdown-list-to-task',
-      'assets/test-side-panel-plugin',
-      'assets/sync-md-plugin', // Uncomment after dev server restart
-      'assets/api-test-plugin', // Comprehensive API testing plugin
+      'assets/sync-md-plugin',
+      'assets/api-test-plugin',
     ];
 
     // KISS: No preloading - just load plugins directly
