@@ -1,13 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import {
-  selectAllTaskRepeatCfgs,
-  selectTaskRepeatCfgById,
-  selectTaskRepeatCfgByIdAllowUndefined,
-  selectTaskRepeatCfgsDueOnDayIncludingOverdue,
-  selectTaskRepeatCfgsDueOnDayOnly,
-} from './store/task-repeat-cfg.reducer';
-import {
   addTaskRepeatCfgToTask,
   deleteTaskRepeatCfg,
   deleteTaskRepeatCfgs,
@@ -38,6 +31,13 @@ import { remindOptionToMilliseconds } from '../tasks/util/remind-option-to-milli
 import { getNewestPossibleDueDate } from './store/get-newest-possible-due-date.util';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { TODAY_TAG } from '../tag/tag.const';
+import {
+  selectAllTaskRepeatCfgs,
+  selectTaskRepeatCfgById,
+  selectTaskRepeatCfgByIdAllowUndefined,
+  selectTaskRepeatCfgsDueOnDayIncludingOverdue,
+  selectTaskRepeatCfgsDueOnDayOnly,
+} from './store/task-repeat-cfg.selectors';
 
 @Injectable({
   providedIn: 'root',
