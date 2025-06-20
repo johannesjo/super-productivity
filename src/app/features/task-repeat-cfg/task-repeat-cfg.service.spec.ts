@@ -417,18 +417,30 @@ describe('TaskRepeatCfgService', () => {
 
     it('should throw error if no id', async () => {
       const cfgWithoutId = { ...mockTaskRepeatCfg, id: null };
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
 
       await expectAsync(
         service.getActionsForTaskRepeatCfg(cfgWithoutId as any),
       ).toBeRejectedWithError('No taskRepeatCfg.id');
     });
 
-    it('should throw error if unable to get due date', async () => {
+    it('should throw error if startDate is undefined', async () => {
       const cfgInvalid = { ...mockTaskRepeatCfg, startDate: undefined };
       taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
 
       await expectAsync(
         service.getActionsForTaskRepeatCfg(cfgInvalid as any),
+      ).toBeRejectedWithError('Repeat startDate needs to be defined');
+    });
+
+    it('should throw error if unable to get due date (future start date)', async () => {
+      const futureDate = new Date('2025-01-01').toISOString();
+      const cfgFutureStart = { ...mockTaskRepeatCfg, startDate: futureDate };
+      const pastTargetDate = new Date('2022-01-01').getTime();
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
+
+      await expectAsync(
+        service.getActionsForTaskRepeatCfg(cfgFutureStart as any, pastTargetDate),
       ).toBeRejectedWithError('Unable to getNewestPossibleDueDate()');
     });
   });
