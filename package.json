@@ -27,7 +27,7 @@
     "assemble:android:prod": "cd android && ./gradlew assembleRelease && cd ..",
     "assemble:android:stage": "cd android && ./gradlew assembleDebug && cd ..",
     "prebuild": "node ./tools/git-version.js",
-    "build": "npm run buildAllElectron:noTests:prod",
+    "build": "npm run plugin-api:build && npm run buildAllElectron:noTests:prod",
     "buildAllElectron:noTests:prod": "npm run lint && npm run buildFrontend:prod:es6 && npm run electron:build",
     "buildAllElectron:prod": "npm run preCheck && npm run buildFrontend:prod:es6 && npm run electron:build",
     "buildAllElectron:stage": "npm run preCheck && npm run buildFrontend:stage:es6 && npm run electron:build",
@@ -92,7 +92,9 @@
     "version": "npm run prebuild && npm run release.changelog && node ./tools/bump-android-version.js && git add -A",
     "prepare": "ts-patch install",
     "prettier": "pretty-quick",
-    "clean:translations": "node ./scripts/clean-translations.js"
+    "clean:translations": "node ./scripts/clean-translations.js",
+    "plugin-api:build": "cd packages/plugin-api && npm run build",
+    "plugin-api:build:watch": "cd packages/plugin-api && npm run build:watch"
   },
   "resolutions": {
     "sass": "1.32.6"

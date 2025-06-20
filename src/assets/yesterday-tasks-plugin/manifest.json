@@ -8,7 +8,7 @@
   "hooks": [],
   "permissions": ["getTasks", "getArchivedTasks", "showIndexHtmlAsView", "openDialog"],
   "iFrame": true,
-  "isSkipMenuEntry": false,
+  "sidePanel": true,
   "type": "standard",
   "assets": [],
   "icon": "icon.svg"
