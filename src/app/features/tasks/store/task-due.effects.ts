@@ -26,27 +26,27 @@ export class TaskDueEffects {
   private _syncWrapperService = inject(SyncWrapperService);
   private _addTasksForTomorrowService = inject(AddTasksForTomorrowService);
 
-  private _dayChangeAfterInit$ =
-    this._dataInitStateService.isAllDataLoadedInitially$.pipe(
-      switchMap(() => this._globalTrackingIntervalService.todayDateStr$),
-      switchMap(() => this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$),
-      // Add debounce to ensure sync has fully completed and status is updated
-      debounceTime(1000),
-      // Ensure we're not in the middle of another sync
-      switchMap((dateStr) =>
-        this._syncWrapperService.isSyncInProgress$.pipe(
-          filter((inProgress) => !inProgress),
-          first(),
-          map(() => dateStr),
-        ),
-      ),
-    );
-
   // NOTE: this gets a lot of interference from tagEffect.preventParentAndSubTaskInTodayList$:
   createRepeatableTasksAndAddDueToday$ = createEffect(
     () => {
-      return this._dayChangeAfterInit$.pipe(
-        tap(() => this._addTasksForTomorrowService.addAllDueToday()),
+      return this._dataInitStateService.isAllDataLoadedInitially$.pipe(
+        first(),
+        switchMap(() =>
+          // This inner observable will keep running even after outer completes
+          this._globalTrackingIntervalService.todayDateStr$.pipe(
+            switchMap(() => this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$),
+            // Add debounce to ensure sync has fully completed and status is updated
+            debounceTime(1000),
+            // Ensure we're not in the middle of another sync
+            switchMap(() =>
+              this._syncWrapperService.isSyncInProgress$.pipe(
+                filter((inProgress) => !inProgress),
+                first(),
+              ),
+            ),
+            tap(() => this._addTasksForTomorrowService.addAllDueToday()),
+          ),
+        ),
       );
     },
     {
@@ -56,15 +56,31 @@ export class TaskDueEffects {
 
   // NOTE: this gets a lot of interference from tagEffect.preventParentAndSubTaskInTodayList$:
   removeOverdueFormToday$ = createEffect(() => {
-    return this._dayChangeAfterInit$.pipe(
-      switchMap(() => this._store$.select(selectOverdueTasksOnToday).pipe(first())),
-      filter((overdue) => !!overdue.length),
-      withLatestFrom(this._store$.select(selectTodayTaskIds)),
-      // we do this to maintain the order of tasks
-      map(([overdue, todayTaskIds]) =>
-        TaskSharedActions.removeTasksFromTodayTag({
-          taskIds: todayTaskIds.filter((id) => !!overdue.find((oT) => oT.id === id)),
-        }),
+    return this._dataInitStateService.isAllDataLoadedInitially$.pipe(
+      first(),
+      switchMap(() =>
+        // This inner observable will keep running even after outer completes
+        this._globalTrackingIntervalService.todayDateStr$.pipe(
+          switchMap(() => this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$),
+          // Add debounce to ensure sync has fully completed and status is updated
+          debounceTime(1000),
+          // Ensure we're not in the middle of another sync
+          switchMap(() =>
+            this._syncWrapperService.isSyncInProgress$.pipe(
+              filter((inProgress) => !inProgress),
+              first(),
+            ),
+          ),
+          switchMap(() => this._store$.select(selectOverdueTasksOnToday).pipe(first())),
+          filter((overdue) => !!overdue.length),
+          withLatestFrom(this._store$.select(selectTodayTaskIds)),
+          // we do this to maintain the order of tasks
+          map(([overdue, todayTaskIds]) =>
+            TaskSharedActions.removeTasksFromTodayTag({
+              taskIds: todayTaskIds.filter((id) => !!overdue.find((oT) => oT.id === id)),
+            }),
+          ),
+        ),
       ),
     );
   });
