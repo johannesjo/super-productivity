@@ -1,3 +1,30 @@
+<mat-card class="warning-card">
+  <mat-card-header>
+    <mat-icon class="warning-icon">warning</mat-icon>
+    <mat-card-title>{{
+      'PLUGINS.EXPERIMENTAL_WARNING_TITLE' | translate
+    }}</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="warning-content">
+      <p>
+        <strong>{{ 'PLUGINS.EXPERIMENTAL_WARNING' | translate }}</strong>
+      </p>
+      <p>{{ 'PLUGINS.SECURITY_WARNING' | translate }}</p>
+      <ul>
+        <li>{{ 'PLUGINS.RISK_DATA_ACCESS' | translate }}</li>
+        <li>{{ 'PLUGINS.RISK_MALICIOUS_CODE' | translate }}</li>
+        <li>{{ 'PLUGINS.RISK_SYSTEM_ACCESS' | translate }}</li>
+        <li>{{ 'PLUGINS.RISK_PERFORMANCE' | translate }}</li>
+      </ul>
+      <p class="recommendation">
+        <mat-icon>security</mat-icon>
+        {{ 'PLUGINS.RECOMMENDATION' | translate }}
+      </p>
+    </div>
+  </mat-card-content>
+</mat-card>
+
 @if (allPlugins().length === 0) {
   <mat-card>
     <mat-card-content class="empty-state">
@@ -12,6 +39,10 @@
     <mat-card-title>{{ 'PLUGINS.INSTALL_PLUGIN' | translate }}</mat-card-title>
   </mat-card-header>
   <mat-card-content>
+    <div class="install-warning">
+      <mat-icon>info</mat-icon>
+      <span>{{ 'PLUGINS.INSTALL_WARNING' | translate }}</span>
+    </div>
     <p>{{ 'PLUGINS.UPLOAD_PLUGIN_INSTRUCTION' | translate }}</p>
     <input
       #fileInput
