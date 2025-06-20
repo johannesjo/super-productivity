@@ -491,8 +491,10 @@ class SyncMdPlugin {
       // In future, we might want to move them to a different project or archive them
     }
 
-    // Reorder tasks if needed
+    // Reorder ONLY main tasks in the project (not subtasks!)
+    // Subtasks should only exist in their parent's subTaskIds array
     if (mainTaskIds.length > 0 && PluginAPI.reorderTasks) {
+      console.log('[Sync.md] Reordering main tasks in project:', mainTaskIds);
       await PluginAPI.reorderTasks(mainTaskIds, this.config.projectId, 'project');
     }
   }
