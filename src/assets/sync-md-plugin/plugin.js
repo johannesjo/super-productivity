@@ -518,24 +518,38 @@ class SyncMdPlugin {
     if (mainTaskIds.length > 0 && PluginAPI.reorderTasks) {
       // Always validate task IDs before reordering to prevent errors
       const currentTasks = await PluginAPI.getTasks();
+      console.log(
+        `[Sync.md] Validating ${mainTaskIds.length} task IDs for project ${this.config.projectId}`,
+      );
+
       const validTaskIds = mainTaskIds.filter((taskId) => {
         const task = currentTasks.find((t) => t.id === taskId);
-        const isValid =
-          task && task.projectId === this.config.projectId && !task.parentId;
-        if (!isValid && task) {
-          console.log(
-            `[Sync.md] Task ${taskId} is not valid for reordering: projectId=${task.projectId}, expected=${this.config.projectId}, parentId=${task.parentId}`,
-          );
+        if (!task) {
+          console.log(`[Sync.md] Task ${taskId} not found in current tasks`);
+          return false;
         }
+
+        const isValid = task.projectId === this.config.projectId && !task.parentId;
+
+        console.log(
+          `[Sync.md] Task ${taskId} validation: projectId=${task.projectId} (expected ${this.config.projectId}), parentId=${task.parentId}, valid=${isValid}`,
+        );
+
         return isValid;
       });
 
       if (validTaskIds.length > 0) {
         console.log('[Sync.md] Reordering main tasks in project:', validTaskIds);
+        console.log(
+          `[Sync.md] Original task IDs: ${mainTaskIds.length}, Valid task IDs: ${validTaskIds.length}`,
+        );
+
         try {
           await PluginAPI.reorderTasks(validTaskIds, this.config.projectId, 'project');
         } catch (error) {
           console.error('[Sync.md] Error reordering tasks:', error);
+          console.error('[Sync.md] Failed task IDs:', validTaskIds);
+          console.error('[Sync.md] Project ID:', this.config.projectId);
         }
       } else {
         console.log(
