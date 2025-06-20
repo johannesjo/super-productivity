@@ -11,7 +11,6 @@ class SyncMdPlugin {
     this.isWatching = false;
     this.syncInProgress = false;
     this.ignoreNextFileChange = false;
-    this.taskIdMap = new Map(); // Maps markdown line to task ID
     this.orderChangeTimeout = null; // Debounce timer for order changes
   }
 
@@ -261,34 +260,26 @@ class SyncMdPlugin {
     this.syncInProgress = true;
 
     try {
-      // Parse markdown content with task IDs
-      const { tasks, taskIdMap } = this.parseMarkdownWithIds(content);
+      // Parse markdown content
+      const { tasks: markdownTasks } = this.parseMarkdown(content);
 
-      if (!tasks || tasks.length === 0) {
+      if (!markdownTasks || markdownTasks.length === 0) {
         console.log('[Sync.md] No tasks found in markdown');
         this.syncInProgress = false;
         return;
       }
 
-      // Update our internal task ID map
-      this.taskIdMap = taskIdMap;
-
       // Get existing project tasks
-      const projectTasks = await this.getProjectTasks(this.config.projectId);
+      const allTasks = await PluginAPI.getTasks();
+      const projectTasks = allTasks.filter(
+        (task) => task.projectId === this.config.projectId && !task.parentId,
+      );
 
-      // Sync tasks
-      const syncResult = await this.syncTasks(tasks, projectTasks, taskIdMap);
-
-      // Update the file with new task IDs if needed
-      if (syncResult.hasNewIds) {
-        // Set a flag to ignore the next file change event
-        this.ignoreNextFileChange = true;
-        await this.updateFileWithTaskIds(content, syncResult.updatedTaskIdMap);
-        this.taskIdMap = syncResult.updatedTaskIdMap;
-      }
+      // Sync structure by position
+      await this.syncTaskStructure(markdownTasks, projectTasks, allTasks);
 
       this.lastSyncTime = new Date();
-      console.log('[Sync.md] Sync completed:', syncResult);
+      console.log('[Sync.md] File to project sync completed');
     } catch (error) {
       console.error('[Sync.md] Error syncing file to project:', error);
     } finally {
@@ -296,17 +287,16 @@ class SyncMdPlugin {
     }
   }
 
-  parseMarkdownWithIds(content) {
+  parseMarkdown(content) {
     const lines = content.split('\n');
     const parsedLines = [];
-    const taskIdMap = new Map();
     let lineNumber = 0;
 
     // First pass: parse all lines into structured data
     for (const line of lines) {
       lineNumber++;
 
-      // Calculate indentation level (similar to markdown-paste.service)
+      // Calculate indentation level
       const indentMatch = line.match(/^(\s*)/);
       let indentLevel = 0;
       if (indentMatch && indentMatch[1]) {
@@ -320,24 +310,34 @@ class SyncMdPlugin {
       const trimmed = line.trim();
       if (!trimmed) continue;
 
-      // Match task with optional ID: - (id) title or * (id) title
-      const taskMatch = trimmed.match(/^[-*]\s*(?:\(([^)]+)\))?\s*(.+)$/);
-
-      if (taskMatch) {
-        const taskId = taskMatch[1] || null;
-        const title = taskMatch[2].trim();
+      // Match checkbox format: - [ ] title or - [x] title
+      const checkboxMatch = trimmed.match(/^-\s*\[([ x])\]\s*(.+)$/);
+      if (checkboxMatch) {
+        const isDone = checkboxMatch[1] === 'x';
+        const title = checkboxMatch[2].trim();
 
         parsedLines.push({
           title,
-          id: taskId,
+          isDone,
           lineNumber,
           indentLevel,
           originalLine: line,
         });
+        continue;
+      }
 
-        if (taskId) {
-          taskIdMap.set(lineNumber, taskId);
-        }
+      // Also support plain bullet format: - title or * title
+      const bulletMatch = trimmed.match(/^[-*]\s+(.+)$/);
+      if (bulletMatch) {
+        const title = bulletMatch[1].trim();
+
+        parsedLines.push({
+          title,
+          isDone: false,
+          lineNumber,
+          indentLevel,
+          originalLine: line,
+        });
       }
     }
 
@@ -352,7 +352,7 @@ class SyncMdPlugin {
       if (currentLine.indentLevel === 0) {
         const task = {
           title: currentLine.title,
-          id: currentLine.id,
+          isDone: currentLine.isDone,
           lineNumber: currentLine.lineNumber,
           indentLevel: currentLine.indentLevel,
           subTasks: [],
@@ -375,7 +375,7 @@ class SyncMdPlugin {
           if (subLine.indentLevel === firstSubTaskLevel) {
             task.subTasks.push({
               title: subLine.title,
-              id: subLine.id,
+              isDone: subLine.isDone,
               lineNumber: subLine.lineNumber,
               indentLevel: subLine.indentLevel,
             });
@@ -400,16 +400,7 @@ class SyncMdPlugin {
       tasks.filter((t) => t.subTasks.length > 0).length,
     );
 
-    // Log more details for debugging
-    tasks.forEach((task, idx) => {
-      if (task.subTasks.length > 0) {
-        console.log(
-          `[Sync.md] Task ${idx + 1}: "${task.title}" has ${task.subTasks.length} subtasks`,
-        );
-      }
-    });
-
-    return { tasks, taskIdMap };
+    return { tasks };
   }
 
   async getProjectTasks(projectId) {
@@ -422,217 +413,118 @@ class SyncMdPlugin {
     }
   }
 
-  async syncTasks(markdownTasks, projectTasks, existingTaskIdMap) {
-    const result = {
-      created: 0,
-      updated: 0,
-      deleted: 0,
-      hasNewIds: false,
-      updatedTaskIdMap: new Map(existingTaskIdMap),
-    };
-
-    // Create a map of existing tasks by ID
-    const projectTaskMap = new Map();
-    projectTasks.forEach((task) => {
-      projectTaskMap.set(task.id, task);
-    });
-
-    // Keep track of task order as they appear in markdown
+  async syncTaskStructure(markdownTasks, projectMainTasks, allProjectTasks) {
+    console.log('[Sync.md] Syncing task structure...');
     const mainTaskIds = [];
-    const subtasksByParent = new Map(); // parentId -> [subtaskIds]
 
-    // Sync markdown tasks to project
-    for (const mdTask of markdownTasks) {
-      let taskId = mdTask.id;
+    // Process each markdown task by position
+    for (let i = 0; i < markdownTasks.length; i++) {
+      const mdTask = markdownTasks[i];
+      let projectTask = projectMainTasks[i];
 
-      if (taskId && projectTaskMap.has(taskId)) {
-        // Update existing task
-        const projectTask = projectTaskMap.get(taskId);
-        if (projectTask.title !== mdTask.title) {
-          await PluginAPI.updateTask(taskId, { title: mdTask.title });
-          result.updated++;
-        }
-
-        // Mark as processed
-        projectTaskMap.delete(taskId);
-      } else {
-        // Create new task - addTask returns the task ID as a string
-        console.log('[Sync.md] Creating new task:', mdTask.title);
-        taskId = await PluginAPI.addTask({
+      // If there's no project task at this position, create one
+      if (!projectTask) {
+        console.log(`[Sync.md] Creating task at position ${i}: ${mdTask.title}`);
+        const taskId = await PluginAPI.addTask({
           title: mdTask.title,
           projectId: this.config.projectId,
+          isDone: mdTask.isDone,
         });
-
-        if (taskId) {
-          result.updatedTaskIdMap.set(mdTask.lineNumber, taskId);
-          result.hasNewIds = true;
-          result.created++;
-          console.log('[Sync.md] Created task:', taskId);
-        } else {
-          console.error('[Sync.md] Failed to create task:', mdTask.title);
-        }
-      }
-
-      // Add to main task order
-      if (taskId) {
         mainTaskIds.push(taskId);
 
-        // Handle sub-tasks
-        const subTaskIds = [];
-        console.log(
-          '[Sync.md] Processing',
-          mdTask.subTasks.length,
-          'subtasks for task:',
-          taskId,
+        // Handle subtasks
+        for (let j = 0; j < mdTask.subTasks.length; j++) {
+          const mdSubTask = mdTask.subTasks[j];
+          console.log(`[Sync.md] Creating subtask: ${mdSubTask.title}`);
+          await PluginAPI.addTask({
+            title: mdSubTask.title,
+            parentId: taskId,
+            projectId: this.config.projectId,
+            isDone: mdSubTask.isDone,
+          });
+        }
+      } else {
+        // Update existing task if needed
+        mainTaskIds.push(projectTask.id);
+
+        if (projectTask.title !== mdTask.title || projectTask.isDone !== mdTask.isDone) {
+          console.log(`[Sync.md] Updating task at position ${i}: ${mdTask.title}`);
+          await PluginAPI.updateTask(projectTask.id, {
+            title: mdTask.title,
+            isDone: mdTask.isDone,
+          });
+        }
+
+        // Sync subtasks
+        const projectSubTasks = allProjectTasks.filter(
+          (task) => task.parentId === projectTask.id,
         );
-
-        for (const subTask of mdTask.subTasks) {
-          let subTaskId = subTask.id;
-
-          if (subTaskId && projectTaskMap.has(subTaskId)) {
-            // Update existing subtask
-            const projectSubTask = projectTaskMap.get(subTaskId);
-            if (projectSubTask.title !== subTask.title) {
-              await PluginAPI.updateTask(subTaskId, { title: subTask.title });
-              result.updated++;
-            }
-            projectTaskMap.delete(subTaskId);
-          } else {
-            // Create new subtask
-            console.log(
-              '[Sync.md] Creating subtask:',
-              subTask.title,
-              'for parent:',
-              taskId,
-            );
-            try {
-              subTaskId = await PluginAPI.addTask({
-                title: subTask.title,
-                parentId: taskId,
-                projectId: this.config.projectId,
-              });
-
-              if (subTaskId) {
-                result.updatedTaskIdMap.set(subTask.lineNumber, subTaskId);
-                result.created++;
-                console.log(
-                  '[Sync.md] Created subtask:',
-                  subTaskId,
-                  'for parent:',
-                  taskId,
-                );
-              } else {
-                console.error('[Sync.md] Failed to create subtask:', subTask.title);
-              }
-            } catch (error) {
-              console.error('[Sync.md] Error creating subtask:', error);
-            }
-          }
-
-          if (subTaskId) {
-            subTaskIds.push(subTaskId);
-          }
-        }
-
-        // Store subtask order for this parent
-        if (subTaskIds.length > 0) {
-          subtasksByParent.set(taskId, subTaskIds);
-        }
+        await this.syncSubTasks(mdTask.subTasks, projectSubTasks, projectTask.id);
       }
     }
 
-    // Update task order in the project
+    // Remove extra project tasks that don't exist in markdown
+    for (let i = markdownTasks.length; i < projectMainTasks.length; i++) {
+      const taskToRemove = projectMainTasks[i];
+      console.log(
+        `[Sync.md] Task at position ${i} exists in project but not in markdown: ${taskToRemove.title}`,
+      );
+      // Note: We can't delete tasks via API, so we'll log this
+      // In future, we might want to move them to a different project or archive them
+    }
+
+    // Reorder tasks if needed
     if (mainTaskIds.length > 0 && PluginAPI.reorderTasks) {
-      try {
-        await PluginAPI.reorderTasks(mainTaskIds, this.config.projectId, 'project');
-        console.log('[Sync.md] Updated project task order:', mainTaskIds);
-      } catch (error) {
-        console.error('[Sync.md] Failed to update task order:', error);
-      }
+      await PluginAPI.reorderTasks(mainTaskIds, this.config.projectId, 'project');
     }
-
-    // Update subtask order for each parent task
-    for (const [parentId, subTaskIds] of subtasksByParent) {
-      if (subTaskIds.length > 0 && PluginAPI.reorderTasks) {
-        try {
-          await PluginAPI.reorderTasks(subTaskIds, parentId, 'task');
-          console.log(
-            '[Sync.md] Updated subtask order for parent:',
-            parentId,
-            subTaskIds,
-          );
-        } catch (error) {
-          console.error('[Sync.md] Failed to update subtask order:', error);
-        }
-      }
-    }
-
-    // Handle deletions (tasks in project but not in markdown)
-    // Note: deleteTask API is not available, so we'll skip deletions for now
-    // if (this.config.syncDirection !== 'fileToProject') {
-    //   for (const [taskId, task] of projectTaskMap) {
-    //     // Only delete tasks that were previously synced (have line numbers in our map)
-    //     const wasInMarkdown = Array.from(existingTaskIdMap.values()).includes(taskId);
-    //     if (wasInMarkdown) {
-    //       // await window.PluginApi.deleteTask(taskId); // Not available
-    //       result.deleted++;
-    //     }
-    //   }
-    // }
-
-    return result;
   }
 
-  async updateFileWithTaskIds(originalContent, updatedTaskIdMap) {
-    if (!PluginAPI?.executeNodeScript) {
-      console.warn('[Sync.md] Cannot update file: executeNodeScript permission required');
-      return;
-    }
+  async syncSubTasks(markdownSubTasks, projectSubTasks, parentId) {
+    const subTaskIds = [];
 
-    try {
-      const lines = originalContent.split('\n');
-      const updatedLines = [];
-      let lineNumber = 0;
+    // Process each markdown subtask by position
+    for (let i = 0; i < markdownSubTasks.length; i++) {
+      const mdSubTask = markdownSubTasks[i];
+      let projectSubTask = projectSubTasks[i];
 
-      for (const line of lines) {
-        lineNumber++;
+      // If there's no project subtask at this position, create one
+      if (!projectSubTask) {
+        console.log(`[Sync.md] Creating subtask at position ${i}: ${mdSubTask.title}`);
+        const subTaskId = await PluginAPI.addTask({
+          title: mdSubTask.title,
+          parentId: parentId,
+          projectId: this.config.projectId,
+          isDone: mdSubTask.isDone,
+        });
+        subTaskIds.push(subTaskId);
+      } else {
+        // Update existing subtask if needed
+        subTaskIds.push(projectSubTask.id);
 
-        if (updatedTaskIdMap.has(lineNumber)) {
-          const taskId = updatedTaskIdMap.get(lineNumber);
-          // Update line with task ID
-          const updatedLine = line.replace(
-            /^(\s*[-*]\s*)(?:\([^)]+\)\s*)?(.+)$/,
-            `$1(${taskId}) $2`,
-          );
-          updatedLines.push(updatedLine);
-        } else {
-          updatedLines.push(line);
+        if (
+          projectSubTask.title !== mdSubTask.title ||
+          projectSubTask.isDone !== mdSubTask.isDone
+        ) {
+          console.log(`[Sync.md] Updating subtask at position ${i}: ${mdSubTask.title}`);
+          await PluginAPI.updateTask(projectSubTask.id, {
+            title: mdSubTask.title,
+            isDone: mdSubTask.isDone,
+          });
         }
       }
+    }
 
-      const updatedContent = updatedLines.join('\n');
+    // Log extra project subtasks
+    for (let i = markdownSubTasks.length; i < projectSubTasks.length; i++) {
+      const subTaskToRemove = projectSubTasks[i];
+      console.log(
+        `[Sync.md] Subtask at position ${i} exists in project but not in markdown: ${subTaskToRemove.title}`,
+      );
+    }
 
-      // Write updated content back to file
-      const writeScript = `
-        const fs = require('fs');
-        const content = ${JSON.stringify(updatedContent)};
-        const filePath = ${JSON.stringify(this.config.filePath)};
-        fs.writeFileSync(filePath, content, 'utf8');
-        console.log('File updated successfully');
-      `;
-
-      const result = await PluginAPI.executeNodeScript({
-        script: writeScript,
-        timeout: 5000,
-      });
-
-      if (!result.success) {
-        throw new Error(result.error || 'Write operation failed');
-      }
-
-      console.log('[Sync.md] File updated with task IDs');
-    } catch (error) {
-      console.error('[Sync.md] Error updating file:', error);
+    // Reorder subtasks if needed
+    if (subTaskIds.length > 0 && PluginAPI.reorderTasks) {
+      await PluginAPI.reorderTasks(subTaskIds, parentId, 'task');
     }
   }
 
@@ -786,14 +678,9 @@ class SyncMdPlugin {
       return;
     }
 
-    // Check if this task was in our map
-    for (const [lineNumber, id] of this.taskIdMap.entries()) {
-      if (id === taskId) {
-        console.log('[Sync.md] Task deleted from project, syncing to file...');
-        await this.syncProjectToFile();
-        break;
-      }
-    }
+    // Always sync when a task is deleted to ensure markdown reflects current state
+    console.log('[Sync.md] Task deleted from project, syncing to file...');
+    await this.syncProjectToFile();
   }
 
   async handleTaskOrderChange() {
@@ -830,138 +717,34 @@ class SyncMdPlugin {
         (task) => task.projectId === this.config.projectId,
       );
 
-      // Create a set of current task IDs for quick lookup
-      const currentTaskIds = new Set(projectTasks.map((task) => task.id));
+      // Get main tasks (no parent)
+      const mainTasks = projectTasks.filter((task) => !task.parentId);
 
-      // Build markdown structure preserving existing order
+      // Build markdown structure
       const markdownLines = [];
-
-      // If we have a previous file content, try to preserve the order
-      let taskOrder = [];
-      let deletedTaskIds = [];
-      if (this.lastFileContent) {
-        const { tasks: previousTasks } = this.parseMarkdownWithIds(this.lastFileContent);
-
-        // Find deleted tasks (tasks that were in the file but no longer exist)
-        previousTasks.forEach((prevTask) => {
-          if (prevTask.id && !currentTaskIds.has(prevTask.id)) {
-            deletedTaskIds.push(prevTask.id);
-            console.log(
-              '[Sync.md] Task deleted from project:',
-              prevTask.id,
-              prevTask.title,
-            );
-          }
-          // Check subtasks too
-          prevTask.subTasks.forEach((subTask) => {
-            if (subTask.id && !currentTaskIds.has(subTask.id)) {
-              deletedTaskIds.push(subTask.id);
-              console.log(
-                '[Sync.md] Subtask deleted from project:',
-                subTask.id,
-                subTask.title,
-              );
-            }
-          });
-        });
-
-        // Only include task IDs that still exist
-        taskOrder = previousTasks
-          .map((t) => t.id)
-          .filter((id) => id && currentTaskIds.has(id));
-      }
-
-      // Create a map for quick lookup
-      const taskMap = new Map();
-      projectTasks.forEach((task) => {
-        taskMap.set(task.id, task);
-      });
-
-      // Process tasks in the order they were in the file
-      const processedTaskIds = new Set();
-      const mainTasks = [];
-
-      // First, add tasks in their previous order (only if they still exist)
-      for (const taskId of taskOrder) {
-        const task = taskMap.get(taskId);
-        if (task && !task.parentId) {
-          mainTasks.push(task);
-          processedTaskIds.add(taskId);
-        }
-      }
-
-      // Then add any new tasks that weren't in the file before, maintaining their order
-      // from the projectTasks array (which should reflect the actual project order)
-      for (const task of projectTasks) {
-        if (!task.parentId && !processedTaskIds.has(task.id)) {
-          mainTasks.push(task);
-        }
-      }
-
-      // If deleted tasks were found, log summary
-      if (deletedTaskIds.length > 0) {
-        console.log(
-          `[Sync.md] Removed ${deletedTaskIds.length} deleted tasks from markdown`,
-        );
-      }
 
       // Process main tasks and their subtasks
       for (const task of mainTasks) {
-        markdownLines.push(`* (${task.id}) ${task.title}`);
+        // Use checkbox format
+        const checkbox = task.isDone ? '[x]' : '[ ]';
+        markdownLines.push(`- ${checkbox} ${task.title}`);
 
         // Get all subtasks for this parent
         const subTasks = projectTasks.filter((t) => t.parentId === task.id);
 
-        // Try to preserve subtask order from previous file content
-        let subTaskOrder = [];
-        if (this.lastFileContent) {
-          const { tasks: previousTasks } = this.parseMarkdownWithIds(
-            this.lastFileContent,
-          );
-          const previousMainTask = previousTasks.find((t) => t.id === task.id);
-          if (previousMainTask && previousMainTask.subTasks) {
-            subTaskOrder = previousMainTask.subTasks
-              .map((st) => st.id)
-              .filter((id) => id);
-          }
-        }
-
-        // Process subtasks in order
-        const processedSubTaskIds = new Set();
-
-        // First, add subtasks in their previous order
-        for (const subTaskId of subTaskOrder) {
-          const subTask = subTasks.find((st) => st.id === subTaskId);
-          if (subTask) {
-            markdownLines.push(`    * (${subTask.id}) ${subTask.title}`);
-            processedSubTaskIds.add(subTask.id);
-
-            // Add notes as nested items if present
-            if (subTask.notes) {
-              const noteLines = subTask.notes.split('\n');
-              noteLines.forEach((line) => {
-                if (line.trim()) {
-                  markdownLines.push(`        ${line}`);
-                }
-              });
-            }
-          }
-        }
-
-        // Then add any new subtasks
+        // Process subtasks
         for (const subTask of subTasks) {
-          if (!processedSubTaskIds.has(subTask.id)) {
-            markdownLines.push(`    * (${subTask.id}) ${subTask.title}`);
+          const subCheckbox = subTask.isDone ? '[x]' : '[ ]';
+          markdownLines.push(`  - ${subCheckbox} ${subTask.title}`);
 
-            // Add notes as nested items if present
-            if (subTask.notes) {
-              const noteLines = subTask.notes.split('\n');
-              noteLines.forEach((line) => {
-                if (line.trim()) {
-                  markdownLines.push(`        ${line}`);
-                }
-              });
-            }
+          // Add notes as nested items if present
+          if (subTask.notes) {
+            const noteLines = subTask.notes.split('\n');
+            noteLines.forEach((line) => {
+              if (line.trim()) {
+                markdownLines.push(`    ${line}`);
+              }
+            });
           }
         }
       }
