@@ -13,9 +13,8 @@ import { Subscription } from 'rxjs';
 import { filter, switchMap } from 'rxjs/operators';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import {
-  createPluginIframeUrl,
-  createIframeMessageHandler,
-  PluginIframeConfig,
+  createSidePanelPluginConfig,
+  createPluginIframeSetup,
 } from '../../util/plugin-iframe.util';
 import { PluginInstance } from '../../plugin-api.model';
 import { CommonModule } from '@angular/common';
@@ -145,23 +144,24 @@ export class PluginPanelContainerComponent implements OnInit, OnDestroy {
               throw new Error(`No index.html found for plugin ${plugin.manifest.name}`);
             }
 
-            // Create iframe config
-            const config: PluginIframeConfig = {
-              pluginId: plugin.manifest.id,
-              manifest: plugin.manifest,
+            // Create iframe configuration using the unified utility
+            const config = createSidePanelPluginConfig(
+              plugin.manifest.id,
+              plugin.manifest,
               indexHtml,
               baseCfg,
-              pluginBridge: this._pluginBridge,
-            };
+              this._pluginBridge,
+            );
 
-            // Create iframe URL
-            const url = createPluginIframeUrl(config);
-            this.iframeUrl.set(this._sanitizer.bypassSecurityTrustResourceUrl(url));
+            // Create iframe setup
+            const { iframeUrl, messageHandler } = createPluginIframeSetup(config);
+
+            // Set iframe URL
+            this.iframeUrl.set(this._sanitizer.bypassSecurityTrustResourceUrl(iframeUrl));
 
             // Set up message handler
-            const handler = createIframeMessageHandler(config);
             this._messageHandler = (event: Event) => {
-              handler(event as MessageEvent);
+              messageHandler(event as MessageEvent);
             };
             window.addEventListener('message', this._messageHandler);
             // Track the listener for cleanup

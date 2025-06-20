@@ -49,6 +49,7 @@
         [src]="iframeSrc()"
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
         class="plugin-iframe"
+        (load)="onIframeLoad()"
       >
       </iframe>
     </div>
