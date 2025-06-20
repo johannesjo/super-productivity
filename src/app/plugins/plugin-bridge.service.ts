@@ -379,7 +379,25 @@ export class PluginBridgeService implements OnDestroy {
         ...(project.taskIds || []),
         ...(project.backlogTaskIds || []),
       ];
-      const invalidTaskIds = taskIds.filter((id) => !allProjectTaskIds.includes(id));
+
+      // Also check if tasks actually belong to this project by their projectId
+      const allTasks = await this._taskService.allTasks$.pipe(first()).toPromise();
+      const tasksInProject =
+        allTasks?.filter((t) => t.projectId === contextId && !t.parentId) || [];
+      const taskIdsInProject = tasksInProject.map((t) => t.id);
+
+      console.log('PluginBridge: Validating task reorder', {
+        requestedTaskIds: taskIds,
+        projectTaskIds: allProjectTaskIds,
+        actualTasksInProject: taskIdsInProject,
+        projectId: contextId,
+      });
+
+      // Use a more lenient validation - check if tasks have the correct projectId
+      const invalidTaskIds = taskIds.filter((id) => {
+        const task = allTasks?.find((t) => t.id === id);
+        return !task || task.projectId !== contextId || task.parentId;
+      });
 
       if (invalidTaskIds.length > 0) {
         throw new Error(
