@@ -418,6 +418,16 @@ class SyncMdPlugin {
       tasks.filter((t) => t.subTasks.length > 0).length,
     );
 
+    // Debug: log task structure
+    tasks.forEach((task, i) => {
+      console.log(
+        `[Sync.md] Task ${i}: "${task.title}" - ${task.subTasks.length} subtasks`,
+      );
+      task.subTasks.forEach((subTask, j) => {
+        console.log(`[Sync.md]   Subtask ${j}: "${subTask.title}"`);
+      });
+    });
+
     return { tasks };
   }
 
@@ -499,6 +509,9 @@ class SyncMdPlugin {
         const projectSubTasks = allProjectTasks.filter(
           (task) => task.parentId === projectTask.id,
         );
+        console.log(
+          `[Sync.md] Syncing subtasks for "${projectTask.title}" (${projectTask.id}): ${projectSubTasks.length} existing, ${mdTask.subTasks.length} in markdown`,
+        );
         await this.syncSubTasks(mdTask.subTasks, projectSubTasks, projectTask.id);
       }
     }
@@ -571,7 +584,9 @@ class SyncMdPlugin {
 
       // If there's no project subtask at this position, create one
       if (!projectSubTask) {
-        console.log(`[Sync.md] Creating subtask at position ${i}: ${mdSubTask.title}`);
+        console.log(
+          `[Sync.md] Creating subtask at position ${i}: "${mdSubTask.title}" for parent ${parentId}`,
+        );
         const subTaskId = await PluginAPI.addTask({
           title: mdSubTask.title,
           parentId: parentId,
@@ -590,11 +605,17 @@ class SyncMdPlugin {
           projectSubTask.title !== mdSubTask.title ||
           projectSubTask.isDone !== mdSubTask.isDone
         ) {
-          console.log(`[Sync.md] Updating subtask at position ${i}: ${mdSubTask.title}`);
+          console.log(
+            `[Sync.md] Updating subtask at position ${i}: "${projectSubTask.title}" -> "${mdSubTask.title}"`,
+          );
           await PluginAPI.updateTask(projectSubTask.id, {
             title: mdSubTask.title,
             isDone: mdSubTask.isDone,
           });
+        } else {
+          console.log(
+            `[Sync.md] Subtask at position ${i} unchanged: "${projectSubTask.title}"`,
+          );
         }
       }
     }
