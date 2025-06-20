@@ -55,13 +55,19 @@ class SyncMdPlugin {
 
     // Start watching if configured
     if (this.config?.filePath && this.config?.projectId) {
-      await this.startWatching();
+      // Always do an initial sync to ensure file matches project state
+      console.log('[Sync.md] Performing initial sync...');
 
-      // Do an initial sync from project to file if bidirectional or projectToFile
-      if (this.config.syncDirection !== 'fileToProject') {
-        console.log('[Sync.md] Performing initial sync from project to file...');
+      if (this.config.syncDirection === 'fileToProject') {
+        // Read file and sync to project
+        await this.checkFileForChanges();
+      } else {
+        // Sync project to file first to ensure clean state
         await this.syncProjectToFile();
       }
+
+      // Then start watching for changes
+      await this.startWatching();
     }
 
     console.log('[Sync.md] Plugin initialized');
@@ -90,17 +96,29 @@ class SyncMdPlugin {
           return await this.readFile(message.filePath);
 
         case 'getSyncInfo':
+          // Get current task count
+          let taskCount = 0;
+          if (this.config?.projectId) {
+            const allTasks = await PluginAPI.getTasks();
+            taskCount = allTasks.filter(
+              (task) => task.projectId === this.config.projectId,
+            ).length;
+          }
           return {
             isWatching: this.isWatching,
             lastSyncTime: this.lastSyncTime,
-            taskCount: this.taskIdMap.size,
+            taskCount: taskCount,
           };
 
         case 'syncNow':
           console.log('[Sync.md] Manual sync requested');
+          // Always do a complete sync based on sync direction
           if (this.config?.syncDirection === 'fileToProject') {
+            // Force read from file
+            this.lastModifiedTime = null; // Reset to force update
             await this.checkFileForChanges();
           } else {
+            // Force complete rebuild of markdown
             await this.syncProjectToFile();
           }
           return { success: true };
@@ -648,25 +666,10 @@ class SyncMdPlugin {
       return;
     }
 
-    // The task parameter might be null for order changes
-    // Always sync if we're in bidirectional or projectToFile mode
-    if (!task) {
-      // This might be a task order change
-      console.log('[Sync.md] Possible task order change, syncing to file...');
-      await this.syncProjectToFile();
-    } else if (task.projectId === this.config.projectId) {
-      // Check if the updated task belongs to our project
-      console.log('[Sync.md] Project task updated, syncing to file...');
-      await this.syncProjectToFile();
-    } else {
-      // Check if it's a subtask of a task in our project
-      const allTasks = await PluginAPI.getTasks();
-      const parentTask = allTasks.find((t) => t.id === task.parentId);
-      if (parentTask && parentTask.projectId === this.config.projectId) {
-        console.log('[Sync.md] Subtask of project task updated, syncing to file...');
-        await this.syncProjectToFile();
-      }
-    }
+    // Always do a complete sync when any task changes
+    // This ensures the markdown file always reflects the exact state
+    console.log('[Sync.md] Task update detected, performing complete sync...');
+    await this.syncProjectToFile();
   }
 
   async handleTaskDeleted(taskId) {
@@ -709,35 +712,55 @@ class SyncMdPlugin {
     }
 
     this.syncInProgress = true;
+    console.log('[Sync.md] Starting complete project to file sync...');
 
     try {
-      // Get all tasks from the project
+      // Get ALL tasks from the API
       const allTasks = await PluginAPI.getTasks();
+
+      // Filter for this project's tasks
       const projectTasks = allTasks.filter(
         (task) => task.projectId === this.config.projectId,
       );
 
-      // Get main tasks (no parent)
-      const mainTasks = projectTasks.filter((task) => !task.parentId);
+      console.log(
+        `[Sync.md] Found ${projectTasks.length} tasks for project ${this.config.projectId}`,
+      );
 
-      // Build markdown structure
+      // Separate main tasks and subtasks
+      const mainTasks = projectTasks.filter((task) => !task.parentId);
+      const subTasksByParent = new Map();
+
+      // Group subtasks by parent
+      projectTasks.forEach((task) => {
+        if (task.parentId) {
+          if (!subTasksByParent.has(task.parentId)) {
+            subTasksByParent.set(task.parentId, []);
+          }
+          subTasksByParent.get(task.parentId).push(task);
+        }
+      });
+
+      console.log(`[Sync.md] Building markdown for ${mainTasks.length} main tasks`);
+
+      // Build markdown content from scratch
       const markdownLines = [];
 
-      // Process main tasks and their subtasks
+      // Process each main task in order
       for (const task of mainTasks) {
-        // Use checkbox format
+        // Add main task with checkbox
         const checkbox = task.isDone ? '[x]' : '[ ]';
         markdownLines.push(`- ${checkbox} ${task.title}`);
 
-        // Get all subtasks for this parent
-        const subTasks = projectTasks.filter((t) => t.parentId === task.id);
+        // Get subtasks for this main task
+        const subTasks = subTasksByParent.get(task.id) || [];
 
-        // Process subtasks
+        // Add each subtask
         for (const subTask of subTasks) {
           const subCheckbox = subTask.isDone ? '[x]' : '[ ]';
           markdownLines.push(`  - ${subCheckbox} ${subTask.title}`);
 
-          // Add notes as nested items if present
+          // Add notes if present
           if (subTask.notes) {
             const noteLines = subTask.notes.split('\n');
             noteLines.forEach((line) => {
@@ -747,20 +770,39 @@ class SyncMdPlugin {
             });
           }
         }
+
+        // Add main task notes if present
+        if (task.notes && subTasks.length === 0) {
+          const noteLines = task.notes.split('\n');
+          noteLines.forEach((line) => {
+            if (line.trim()) {
+              markdownLines.push(`  ${line}`);
+            }
+          });
+        }
       }
 
       const markdownContent = markdownLines.join('\n');
 
+      // Always write the file to ensure it's in sync
+      console.log('[Sync.md] Writing complete content to file...');
+
       // Set flag to ignore the file change event
       this.ignoreNextFileChange = true;
 
-      // Write to file
+      // Write complete content to file
       const writeScript = `
         const fs = require('fs');
         const content = ${JSON.stringify(markdownContent)};
         const filePath = ${JSON.stringify(this.config.filePath)};
-        fs.writeFileSync(filePath, content, 'utf8');
-        console.log('File synced from project');
+        
+        try {
+          fs.writeFileSync(filePath, content, 'utf8');
+          console.log('File written successfully');
+        } catch (error) {
+          console.error('Write error:', error.message);
+          throw error;
+        }
       `;
 
       const result = await PluginAPI.executeNodeScript({
@@ -772,12 +814,14 @@ class SyncMdPlugin {
         throw new Error(result.error || 'Write operation failed');
       }
 
-      // Update our last file content to preserve order for next sync
+      // Update our cached content
       this.lastFileContent = markdownContent;
       this.lastSyncTime = new Date();
-      console.log('[Sync.md] Project synced to file');
+
+      console.log(`[Sync.md] File updated successfully with ${mainTasks.length} tasks`);
     } catch (error) {
       console.error('[Sync.md] Error syncing project to file:', error);
+      // Don't update lastFileContent on error
     } finally {
       this.syncInProgress = false;
     }
