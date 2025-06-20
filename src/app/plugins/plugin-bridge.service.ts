@@ -243,7 +243,7 @@ export class PluginBridgeService implements OnDestroy {
         additional: {
           notes: taskData.notes || '',
           timeEstimate: taskData.timeEstimate || 0,
-          isDone: taskData.isDone || false,
+          isDone: (taskData as any).isDone || false,
           tagIds: [], // Subtasks don't have tags
           projectId: taskData.projectId || undefined,
         },
@@ -269,7 +269,7 @@ export class PluginBridgeService implements OnDestroy {
         tagIds: taskData.tagIds || [],
         notes: taskData.notes || '',
         timeEstimate: taskData.timeEstimate || 0,
-        isDone: taskData.isDone || false,
+        isDone: (taskData as any).isDone || false,
       };
 
       // Add the task using TaskService
