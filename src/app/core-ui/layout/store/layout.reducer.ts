@@ -1,16 +1,16 @@
 import {
   hideAddTaskBar,
   hideNotesAndAddTaskPanel,
+  hidePluginPanel,
   hideSideNav,
   showAddTaskBar,
+  showPluginPanel,
   toggleAddTaskBar,
   toggleIssuePanel,
+  togglePluginPanel,
   toggleShowNotes,
   toggleSideNav,
   toggleTaskViewCustomizerPanel,
-  showPluginPanel,
-  hidePluginPanel,
-  togglePluginPanel,
 } from './layout.actions';
 import {
   Action,
@@ -87,6 +87,13 @@ export const selectActivePluginId = createSelector(
   (state) => state.activePluginId,
 );
 
+const ALL_PANEL_CONTENT_HIDDEN: Partial<LayoutState> = {
+  isShowNotes: false,
+  isShowIssuePanel: false,
+  isShowTaskViewCustomizerPanel: false,
+  isShowPluginPanel: false,
+};
+
 const _reducer = createReducer<LayoutState>(
   _initialLayoutState,
 
@@ -105,46 +112,37 @@ const _reducer = createReducer<LayoutState>(
 
   on(toggleShowNotes, (state) => ({
     ...state,
+    ...ALL_PANEL_CONTENT_HIDDEN,
     isShowNotes: !state.isShowNotes,
-    isShowIssuePanel: false,
-    isShowPluginPanel: false,
   })),
 
   on(toggleTaskViewCustomizerPanel, (state) => ({
     ...state,
+    ...ALL_PANEL_CONTENT_HIDDEN,
     isShowTaskViewCustomizerPanel: !state.isShowTaskViewCustomizerPanel,
-    isShowIssuePanel: false,
-    isShowNotes: false,
-    isShowPluginPanel: false,
   })),
 
   on(hideNotesAndAddTaskPanel, (state) => ({
     ...state,
-    isShowNotes: false,
-    isShowIssuePanel: false,
-    isShowTaskViewCustomizerPanel: false,
-    isShowPluginPanel: false,
+    ...ALL_PANEL_CONTENT_HIDDEN,
   })),
 
   on(toggleIssuePanel, (state) => ({
     ...state,
+    ...ALL_PANEL_CONTENT_HIDDEN,
     isShowIssuePanel: !state.isShowIssuePanel,
-    isShowNotes: false,
-    isShowPluginPanel: false,
   })),
 
   on(showPluginPanel, (state, { pluginId }) => ({
     ...state,
+    ...ALL_PANEL_CONTENT_HIDDEN,
     isShowPluginPanel: true,
     activePluginId: pluginId,
-    isShowNotes: false,
-    isShowIssuePanel: false,
-    isShowTaskViewCustomizerPanel: false,
   })),
 
   on(hidePluginPanel, (state) => ({
     ...state,
-    isShowPluginPanel: false,
+    ...ALL_PANEL_CONTENT_HIDDEN,
     activePluginId: null,
   })),
 
@@ -153,11 +151,9 @@ const _reducer = createReducer<LayoutState>(
       state.activePluginId === pluginId && state.isShowPluginPanel;
     return {
       ...state,
+      ...ALL_PANEL_CONTENT_HIDDEN,
       isShowPluginPanel: !isCurrentlyActive,
       activePluginId: isCurrentlyActive ? null : pluginId,
-      isShowNotes: false,
-      isShowIssuePanel: false,
-      isShowTaskViewCustomizerPanel: false,
     };
   }),
 );
