@@ -56,6 +56,7 @@ export class PluginPanelContainerComponent implements OnInit, OnDestroy {
         .select(selectActivePluginId)
         .pipe(filter((pluginId): pluginId is string => !!pluginId))
         .subscribe((pluginId) => {
+          console.log('Plugin panel container received active plugin ID:', pluginId);
           this.activePluginId.set(pluginId);
         }),
     );

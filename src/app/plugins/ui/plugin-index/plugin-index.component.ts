@@ -106,6 +106,13 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
     // Subscribe to route parameter changes to handle navigation between plugins
     this._routeSubscription = this._route.paramMap.subscribe(async (params) => {
       const newPluginId = params.get('pluginId');
+      console.log(
+        'Route paramMap changed, newPluginId:',
+        newPluginId,
+        'currentPluginId:',
+        this.pluginId(),
+      );
+
       if (!newPluginId) {
         this.error.set('Plugin ID not provided');
         this.isLoading.set(false);
@@ -114,6 +121,7 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
 
       // Skip if it's the same plugin (prevent unnecessary reloads)
       if (this.pluginId() === newPluginId) {
+        console.log('Same plugin ID, skipping reload');
         return;
       }
 
