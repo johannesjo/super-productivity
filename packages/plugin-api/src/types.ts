@@ -55,6 +55,8 @@ export interface NotifyCfg {
 
 export interface PluginNodeScriptConfig {
   allowedPaths?: string[]; // Specific paths the script can access
+  timeout?: number; // Default timeout in milliseconds for scripts
+  memoryLimit?: string; // Default memory limit (e.g., '128MB', '256MB')
 }
 
 export interface PluginNodeScriptRequest {
@@ -211,6 +213,13 @@ export interface PluginAPI {
   addTag(tagData: Partial<TagData>): Promise<string>;
 
   updateTag(tagId: string, updates: Partial<TagData>): Promise<void>;
+
+  // task ordering
+  reorderTasks(
+    taskIds: string[],
+    contextId: string,
+    contextType: 'project' | 'task',
+  ): Promise<void>;
 
   // persistence
   persistDataSynced(dataStr: string): Promise<void>;
