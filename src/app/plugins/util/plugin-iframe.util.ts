@@ -27,6 +27,7 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
       (function() {
         let callId = 0;
         const pendingCalls = new Map();
+        const dialogButtonHandlers = new Map();
 
         // Handle responses from parent
         window.addEventListener('message', function(event) {
@@ -43,6 +44,28 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
               pendingCalls.delete(data.callId);
               resolver.reject(new Error(data.error));
             }
+          } else if (data?.type === 'PLUGIN_DIALOG_BUTTON_CLICK') {
+            // Handle dialog button clicks
+            const key = data.dialogCallId + ':' + data.buttonIndex;
+            const handler = dialogButtonHandlers.get(key);
+            if (handler) {
+              try {
+                const result = handler();
+                window.parent.postMessage({
+                  type: 'PLUGIN_DIALOG_BUTTON_RESPONSE',
+                  dialogCallId: data.dialogCallId,
+                  buttonIndex: data.buttonIndex,
+                  result: result
+                }, '*');
+              } catch (error) {
+                window.parent.postMessage({
+                  type: 'PLUGIN_DIALOG_BUTTON_RESPONSE',
+                  dialogCallId: data.dialogCallId,
+                  buttonIndex: data.buttonIndex,
+                  error: error.message
+                }, '*');
+              }
+            }
           }
         });
 
@@ -52,10 +75,30 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
             const id = ++callId;
             pendingCalls.set(id, { resolve, reject });
             
+            // Special handling for openDialog to store button handlers
+            let processedArgs = args;
+            if (method === 'openDialog' && args && args[0] && args[0].buttons) {
+              processedArgs = [...args];
+              processedArgs[0] = {
+                ...args[0],
+                buttons: args[0].buttons.map((button, index) => {
+                  if (button.onClick) {
+                    // Store the handler
+                    const key = id + ':' + index;
+                    dialogButtonHandlers.set(key, button.onClick);
+                    // Remove onClick from serialized data
+                    const { onClick, ...buttonWithoutHandler } = button;
+                    return buttonWithoutHandler;
+                  }
+                  return button;
+                })
+              };
+            }
+            
             window.parent.postMessage({
               type: 'PLUGIN_API_CALL',
               method: method,
-              args: args || [],
+              args: processedArgs || [],
               callId: id
             }, '*');
 
@@ -213,6 +256,57 @@ export const handlePluginMessage = async (
         const [hook, handlerStr] = args;
         const handler = new Function('return ' + handlerStr)();
         const result = await bridge[method](hook, handler);
+        event.source?.postMessage(
+          {
+            type: 'PLUGIN_API_RESPONSE',
+            callId,
+            result,
+          },
+          '*' as any,
+        );
+      } else if (method === 'openDialog' && args.length >= 1) {
+        // Special handling for dialog with button onClick handlers
+        const dialogCfg = args[0];
+        if (dialogCfg.buttons) {
+          // Create a mapping of button indices to their handlers
+          const buttonHandlers = new Map();
+          dialogCfg.buttons = dialogCfg.buttons.map((button: any, index: number) => {
+            if (button.onClick) {
+              buttonHandlers.set(index, button.onClick);
+              // Replace function with a proxy that sends message back to iframe
+              return {
+                ...button,
+                onClick: async () => {
+                  // Send message to iframe to execute the button handler
+                  event.source?.postMessage(
+                    {
+                      type: 'PLUGIN_DIALOG_BUTTON_CLICK',
+                      buttonIndex: index,
+                      dialogCallId: callId,
+                    },
+                    '*' as any,
+                  );
+                  // Wait for response
+                  return new Promise((resolve) => {
+                    const handleResponse = (e: MessageEvent): void => {
+                      if (
+                        e.data?.type === 'PLUGIN_DIALOG_BUTTON_RESPONSE' &&
+                        e.data?.dialogCallId === callId &&
+                        e.data?.buttonIndex === index
+                      ) {
+                        window.removeEventListener('message', handleResponse);
+                        resolve(e.data.result);
+                      }
+                    };
+                    window.addEventListener('message', handleResponse);
+                  });
+                },
+              };
+            }
+            return button;
+          });
+        }
+        const result = await bridge[method](dialogCfg);
         event.source?.postMessage(
           {
             type: 'PLUGIN_API_RESPONSE',

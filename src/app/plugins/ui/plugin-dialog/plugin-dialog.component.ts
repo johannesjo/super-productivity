@@ -97,7 +97,9 @@ export class PluginDialogComponent {
 
   async onButtonClick(button: DialogButtonCfg): Promise<void> {
     try {
-      await button.onClick();
+      if (button.onClick) {
+        await button.onClick();
+      }
       // Close dialog after button action completes (unless button prevents it)
       if (!this._dialogRef.disableClose) {
         this._dialogRef.close(button.label);
