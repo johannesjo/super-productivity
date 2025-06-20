@@ -78,7 +78,8 @@ export class PluginRunner {
         pluginInstance.loaded = true;
 
         // Register UI components for iframe plugins
-        if (manifest.iFrame && !manifest.isSkipMenuEntry) {
+        // Skip menu entry if this is a side panel plugin
+        if (manifest.iFrame && !manifest.isSkipMenuEntry && !manifest.sidePanel) {
           pluginAPI.registerMenuEntry({
             label: manifest.name,
             icon: manifest.icon || 'extension',
