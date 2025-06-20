@@ -115,7 +115,7 @@ export class PluginAPI implements PluginAPIInterface {
 
   showIndexHtmlAsView(): void {
     console.log(`Plugin ${this._pluginId} requested to show index.html`);
-    return this._pluginBridge.showIndexHtmlAsView();
+    return this._pluginBridge.showIndexHtmlAsView(this._pluginId);
   }
 
   async getTasks(): Promise<TaskData[]> {
