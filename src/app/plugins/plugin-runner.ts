@@ -91,7 +91,10 @@ export class PluginRunner {
           pluginAPI.registerSidePanelButton({
             label: manifest.name,
             icon: manifest.icon || 'extension',
-            onClick: () => pluginAPI.showIndexHtmlAsView(),
+            onClick: () => {
+              // No-op: the side panel toggle is handled by PluginSidePanelBtnsComponent
+              // showIndexHtmlAsView() would navigate to full-screen which is not what we want
+            },
           });
         }
       } catch (error) {
