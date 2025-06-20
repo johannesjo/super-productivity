@@ -77,3 +77,5 @@ electron-builder.win-store.yaml
 /src/environments/environment.js.map
 /.claude/settings.local.json
 .aider*
+
+/packages/plugin-api/dist/**/*.*
