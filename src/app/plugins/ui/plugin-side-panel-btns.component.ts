@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { Observable } from 'rxjs';
 import { PluginBridgeService } from '../plugin-bridge.service';
 import { PluginSidePanelBtnCfg } from '../plugin-api.model';
 import { CommonModule } from '@angular/common';
@@ -9,7 +8,10 @@ import { PluginIconComponent } from './plugin-icon/plugin-icon.component';
 import { NavigationEnd, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { togglePluginPanel } from '../../core-ui/layout/store/layout.actions';
-import { selectActivePluginId } from '../../core-ui/layout/store/layout.reducer';
+import {
+  selectActivePluginId,
+  selectIsShowPluginPanel,
+} from '../../core-ui/layout/store/layout.reducer';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs/operators';
 
@@ -22,7 +24,7 @@ import { filter, map } from 'rxjs/operators';
   standalone: true,
   imports: [CommonModule, MatTooltip, MatIconButton, PluginIconComponent],
   template: `
-    @for (button of sidePanelButtons$ | async; track button.pluginId) {
+    @for (button of sidePanelButtons(); track button.pluginId) {
       <button
         mat-icon-button
         [matTooltip]="
@@ -30,7 +32,7 @@ import { filter, map } from 'rxjs/operators';
         "
         (click)="onButtonClick(button)"
         class="plugin-side-panel-btn"
-        [class.active]="(activePluginId$ | async) === button.pluginId"
+        [class.active]="activePluginId() === button.pluginId && isShowPanel()"
         [disabled]="!isWorkView()"
       >
         <plugin-icon
@@ -54,6 +56,13 @@ import { filter, map } from 'rxjs/operators';
 
       .plugin-side-panel-btn.active {
         background-color: transparent;
+      }
+
+      .plugin-side-panel-btn plugin-icon {
+        transition: all 0.2s ease;
+      }
+      .plugin-side-panel-btn.active plugin-icon {
+        transform: rotate(45deg);
       }
 
       .plugin-side-panel-btn.active::after {
@@ -97,10 +106,10 @@ export class PluginSidePanelBtnsComponent {
   private _router = inject(Router);
   private _store = inject(Store);
 
-  sidePanelButtons$: Observable<PluginSidePanelBtnCfg[]> =
-    this._pluginBridge.sidePanelButtons$;
+  sidePanelButtons = toSignal(this._pluginBridge.sidePanelButtons$, { initialValue: [] });
 
-  activePluginId$: Observable<string | null> = this._store.select(selectActivePluginId);
+  activePluginId = toSignal(this._store.select(selectActivePluginId));
+  isShowPanel = toSignal(this._store.select(selectIsShowPluginPanel));
 
   readonly currentRoute = toSignal(
     this._router.events.pipe(
