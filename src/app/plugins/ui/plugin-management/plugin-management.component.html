@@ -9,10 +9,10 @@
 
 <mat-card>
   <mat-card-header>
-    <mat-card-title>Install Plugin</mat-card-title>
+    <mat-card-title>{{ 'PLUGINS.INSTALL_PLUGIN' | translate }}</mat-card-title>
   </mat-card-header>
   <mat-card-content>
-    <p>Upload a plugin ZIP file to install it:</p>
+    <p>{{ 'PLUGINS.UPLOAD_PLUGIN_INSTRUCTION' | translate }}</p>
     <input
       #fileInput
       type="file"
@@ -27,7 +27,11 @@
       [disabled]="isUploading()"
     >
       <mat-icon>upload</mat-icon>
-      {{ isUploading() ? 'Installing...' : 'Choose Plugin File' }}
+      {{
+        isUploading()
+          ? ('PLUGINS.INSTALLING' | translate)
+          : ('PLUGINS.CHOOSE_PLUGIN_FILE' | translate)
+      }}
     </button>
     @if (uploadError()) {
       <mat-error style="margin-top: 8px; display: block">
@@ -43,7 +47,7 @@
         [disabled]="isUploading()"
       >
         <mat-icon>delete_sweep</mat-icon>
-        Clear Plugin Cache
+        {{ 'PLUGINS.CLEAR_PLUGIN_CACHE' | translate }}
       </button>
     </div>
   </mat-card-content>
@@ -70,7 +74,9 @@
         [checked]="isPluginEnabledSync(plugin)"
         [disabled]="!canEnablePlugin(plugin)"
         (change)="onPluginToggle(plugin, $event)"
-        [attr.aria-label]="'Toggle ' + plugin.manifest.name"
+        [attr.aria-label]="
+          'PLUGINS.TOGGLE_PLUGIN' | translate: { pluginName: plugin.manifest.name }
+        "
       >
       </mat-slide-toggle>
     </mat-card-header>
@@ -94,12 +100,12 @@
 
       <table>
         <tr>
-          <th>ID:</th>
+          <th>{{ 'PLUGINS.ID' | translate }}</th>
           <td>{{ plugin.manifest.id }}</td>
         </tr>
         @if (plugin.manifest.minSupVersion) {
           <tr>
-            <th>Min. Version:</th>
+            <th>{{ 'PLUGINS.MIN_VERSION' | translate }}</th>
             <td>{{ plugin.manifest.minSupVersion }}</td>
           </tr>
         }
@@ -107,7 +113,7 @@
 
       @if (plugin.manifest.hooks && plugin.manifest.hooks.length > 0) {
         <div>
-          <div class="label">Hooks:</div>
+          <div class="label">{{ 'PLUGINS.HOOKS' | translate }}:</div>
           <div>
             <mat-chip-set>
               @for (hook of plugin.manifest.hooks; track hook) {
@@ -119,7 +125,7 @@
       }
       @if (plugin.manifest.permissions && plugin.manifest.permissions.length > 0) {
         <div>
-          <div class="label">Permissions:</div>
+          <div class="label">{{ 'PLUGINS.PERMISSIONS' | translate }}:</div>
           <div>
             <mat-chip-set>
               @for (permission of plugin.manifest.permissions; track permission) {
@@ -149,7 +155,7 @@
           [disabled]="isUploading()"
         >
           <mat-icon>delete</mat-icon>
-          Remove
+          {{ 'PLUGINS.REMOVE' | translate }}
         </button>
       }
     </mat-card-actions>

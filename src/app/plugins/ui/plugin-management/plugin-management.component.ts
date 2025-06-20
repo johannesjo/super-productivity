@@ -24,7 +24,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
 import { MatChip, MatChipSet } from '@angular/material/chips';
 import { MatError } from '@angular/material/form-field';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { T } from '../../../t.const';
 import { PluginIconComponent } from '../plugin-icon/plugin-icon.component';
 import { IS_ELECTRON } from '../../../app.constants';
@@ -56,6 +56,7 @@ export class PluginManagementComponent implements OnInit {
   private readonly _pluginService = inject(PluginService);
   private readonly _pluginMetaPersistenceService = inject(PluginMetaPersistenceService);
   private readonly _pluginCacheService = inject(PluginCacheService);
+  private readonly _translateService = inject(TranslateService);
 
   T: typeof T = T;
   readonly IS_ELECTRON = IS_ELECTRON;
@@ -202,7 +203,7 @@ export class PluginManagementComponent implements OnInit {
   }
 
   getNodeExecutionMessage(): string {
-    return 'This plugin requires desktop version (Node.js execution)';
+    return this._translateService.instant('PLUGINS.NODE_EXECUTION_REQUIRED');
   }
 
   async onFileSelected(event: Event): Promise<void> {
