@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { PluginManifest } from './plugin-api.model';
 import { PluginCacheService } from './plugin-cache.service';
 // KISS: No size checks in loader - trust the browser's limits
@@ -31,9 +31,10 @@ export class PluginLoaderService {
     try {
       // Load manifest
       const manifestUrl = `${pluginPath}/manifest.json`;
-      const manifestText = await firstValueFrom(
-        this._http.get(manifestUrl, { responseType: 'text' }),
-      );
+      const manifestText = await this._http
+        .get(manifestUrl, { responseType: 'text' })
+        .pipe(first())
+        .toPromise();
 
       const manifest: PluginManifest = JSON.parse(manifestText);
 
@@ -45,9 +46,10 @@ export class PluginLoaderService {
 
       // Load plugin code
       const codeUrl = `${pluginPath}/plugin.js`;
-      const code = await firstValueFrom(
-        this._http.get(codeUrl, { responseType: 'text' }),
-      );
+      const code = await this._http
+        .get(codeUrl, { responseType: 'text' })
+        .pipe(first())
+        .toPromise();
 
       // Load optional assets
       let indexHtml: string | undefined;
@@ -56,9 +58,10 @@ export class PluginLoaderService {
       if (manifest.iFrame) {
         try {
           const htmlUrl = `${pluginPath}/index.html`;
-          indexHtml = await firstValueFrom(
-            this._http.get(htmlUrl, { responseType: 'text' }),
-          );
+          indexHtml = await this._http
+            .get(htmlUrl, { responseType: 'text' })
+            .pipe(first())
+            .toPromise();
         } catch (e) {
           console.warn(`No index.html for plugin ${manifest.id}`);
         }
@@ -67,7 +70,10 @@ export class PluginLoaderService {
       if (manifest.icon) {
         try {
           const iconUrl = `${pluginPath}/${manifest.icon}`;
-          icon = await firstValueFrom(this._http.get(iconUrl, { responseType: 'text' }));
+          icon = await this._http
+            .get(iconUrl, { responseType: 'text' })
+            .pipe(first())
+            .toPromise();
         } catch (e) {
           console.warn(`No icon for plugin ${manifest.id}`);
         }

@@ -61,7 +61,8 @@ export class PluginRunner {
         console.warn(`Plugin ${manifest.id} warnings:`, analysis.warnings);
         this._snackService.open({
           msg: `Plugin "${manifest.name}" has warnings: ${analysis.warnings[0]}`,
-          type: 'WARN',
+          type: 'CUSTOM',
+          ico: 'warning',
         });
       }
 
@@ -86,11 +87,11 @@ export class PluginRunner {
         }
 
         // Auto-register side panel if configured
-        if (manifest.sidePanelViewMode === 'auto') {
+        if (manifest.sidePanel) {
           pluginAPI.registerSidePanelButton({
             label: manifest.name,
             icon: manifest.icon || 'extension',
-            onClick: () => pluginAPI.showIndexHtmlInSidePanel(),
+            onClick: () => pluginAPI.showIndexHtmlAsView(),
           });
         }
       } catch (error) {
@@ -178,6 +179,19 @@ export class PluginRunner {
    */
   getLoadedPlugin(pluginId: string): PluginInstance | undefined {
     return this._loadedPlugins.get(pluginId);
+  }
+
+  /**
+   * Send a message to a plugin's message handler
+   */
+  async sendMessageToPlugin(pluginId: string, message: any): Promise<any> {
+    const pluginApi = this._pluginApis.get(pluginId);
+    if (!pluginApi) {
+      throw new Error(`Plugin ${pluginId} not found or not loaded`);
+    }
+
+    // Use the internal __sendMessage method on PluginAPI
+    return (pluginApi as any).__sendMessage(message);
   }
 
   // KISS: Hook execution is handled by PluginHooksService, not here

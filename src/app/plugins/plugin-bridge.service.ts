@@ -20,7 +20,7 @@ import {
   PluginNodeScriptRequest,
   PluginNodeScriptResult,
 } from './plugin-api.model';
-import { SnackCfg } from '@super-productivity/plugin-api';
+import { SnackCfg, PluginManifest } from '@super-productivity/plugin-api';
 import { snackCfgToSnackParams } from './plugin-api-mapper';
 import { PluginHooksService } from './plugin-hooks';
 import { TaskService } from '../features/tasks/task.service';
