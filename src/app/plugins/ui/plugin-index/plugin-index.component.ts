@@ -17,9 +17,9 @@ import { PluginService } from '../../plugin.service';
 import { PluginBridgeService } from '../../plugin-bridge.service';
 import { PluginCleanupService } from '../../plugin-cleanup.service';
 import {
-  createFullPagePluginConfig,
-  createSidePanelPluginConfig,
-  createPluginIframeSetup,
+  PluginIframeConfig,
+  createPluginIframeUrl,
+  handlePluginMessage,
 } from '../../util/plugin-iframe.util';
 import { CommonModule } from '@angular/common';
 import { MatButton } from '@angular/material/button';
@@ -189,29 +189,21 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
 
     const baseCfg = await this._pluginService.getBaseCfg();
 
-    // Create iframe configuration using the unified utility
-    const config = this.useSidePanelConfig
-      ? createSidePanelPluginConfig(
-          pluginId,
-          plugin.manifest,
-          indexContent,
-          baseCfg,
-          this._pluginBridge,
-        )
-      : createFullPagePluginConfig(
-          pluginId,
-          plugin.manifest,
-          indexContent,
-          baseCfg,
-          this._pluginBridge,
-        );
+    // Create simple plugin config
+    const config: PluginIframeConfig = {
+      pluginId,
+      manifest: plugin.manifest,
+      indexHtml: indexContent,
+      baseCfg,
+      pluginBridge: this._pluginBridge,
+    };
 
-    // Create iframe setup
-    const { iframeUrl, messageHandler } = createPluginIframeSetup(config);
+    // Create iframe URL
+    const iframeUrl = createPluginIframeUrl(config);
 
     // Store message handler for cleanup
-    this._messageListener = (event: Event) => {
-      messageHandler(event as MessageEvent);
+    this._messageListener = async (event: Event) => {
+      await handlePluginMessage(event as MessageEvent, config);
     };
 
     // Set up message communication
