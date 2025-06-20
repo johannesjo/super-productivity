@@ -523,14 +523,24 @@ class SyncMdPlugin {
       }
     }
 
-    // Remove extra project tasks that don't exist in markdown
+    // Handle extra project tasks that don't exist in markdown
     for (let i = markdownTasks.length; i < projectMainTasks.length; i++) {
       const taskToRemove = projectMainTasks[i];
       console.log(
-        `[Sync.md] Task at position ${i} exists in project but not in markdown: ${taskToRemove.title}`,
+        `[Sync.md] WARNING: Task at position ${i} exists in project but not in markdown: "${taskToRemove.title}" (${taskToRemove.id})`,
       );
-      // Note: We can't delete tasks via API, so we'll log this
-      // In future, we might want to move them to a different project or archive them
+      console.log(
+        `[Sync.md] Cannot delete task via API. Marking as done and prefixing with [TO DELETE]:`,
+      );
+
+      // Mark the orphaned task as done and prefix its title
+      await PluginAPI.updateTask(taskToRemove.id, {
+        title: `[TO DELETE] ${taskToRemove.title}`,
+        isDone: true,
+      });
+
+      // Add to main task IDs at the end so they don't interfere with active tasks
+      mainTaskIds.push(taskToRemove.id);
     }
 
     // Reorder ONLY main tasks in the project (not subtasks!)
@@ -559,13 +569,27 @@ class SyncMdPlugin {
       });
 
       if (validTaskIds.length > 0) {
-        console.log('[Sync.md] Reordering main tasks in project:', validTaskIds);
+        // Filter out any tasks that start with [TO DELETE] from the main order
+        const tasksToReorder = validTaskIds.filter((taskId) => {
+          const task = currentTasks.find((t) => t.id === taskId);
+          return task && !task.title.startsWith('[TO DELETE]');
+        });
+
+        // Add [TO DELETE] tasks at the end
+        const deleteTasks = validTaskIds.filter((taskId) => {
+          const task = currentTasks.find((t) => t.id === taskId);
+          return task && task.title.startsWith('[TO DELETE]');
+        });
+
+        const finalTaskOrder = [...tasksToReorder, ...deleteTasks];
+
+        console.log('[Sync.md] Reordering main tasks in project:', finalTaskOrder);
         console.log(
-          `[Sync.md] Original task IDs: ${mainTaskIds.length}, Valid task IDs: ${validTaskIds.length}`,
+          `[Sync.md] Original task IDs: ${mainTaskIds.length}, Valid task IDs: ${validTaskIds.length}, Final order: ${finalTaskOrder.length} (${tasksToReorder.length} active, ${deleteTasks.length} marked for deletion)`,
         );
 
         try {
-          await PluginAPI.reorderTasks(validTaskIds, this.config.projectId, 'project');
+          await PluginAPI.reorderTasks(finalTaskOrder, this.config.projectId, 'project');
         } catch (error) {
           console.error('[Sync.md] Error reordering tasks:', error);
           console.error('[Sync.md] Failed task IDs:', validTaskIds);
@@ -647,12 +671,24 @@ class SyncMdPlugin {
       }
     }
 
-    // Log extra project subtasks
+    // Handle extra project subtasks that don't exist in markdown
     for (let i = markdownSubTasks.length; i < projectSubTasks.length; i++) {
       const subTaskToRemove = projectSubTasks[i];
       console.log(
-        `[Sync.md] Subtask at position ${i} exists in project but not in markdown: ${subTaskToRemove.title}`,
+        `[Sync.md] WARNING: Subtask at position ${i} exists in project but not in markdown: "${subTaskToRemove.title}" (${subTaskToRemove.id})`,
       );
+      console.log(
+        `[Sync.md] Cannot delete task via API. Marking as done and prefixing with [TO DELETE]:`,
+      );
+
+      // Mark the orphaned subtask as done and prefix its title
+      await PluginAPI.updateTask(subTaskToRemove.id, {
+        title: `[TO DELETE] ${subTaskToRemove.title}`,
+        isDone: true,
+      });
+
+      // Add to subtask IDs at the end so they don't interfere with active tasks
+      subTaskIds.push(subTaskToRemove.id);
     }
 
     // Reorder subtasks if needed (skip if we just created new subtasks)
@@ -665,15 +701,30 @@ class SyncMdPlugin {
       if (parentTask) {
         // Check if parent has subTaskIds array (it might be undefined or empty)
         if (parentTask.subTaskIds && parentTask.subTaskIds.length > 0) {
-          const validSubTaskIds = subTaskIds.filter((taskId) =>
-            parentTask.subTaskIds.includes(taskId),
-          );
+          // Include all subtask IDs, even orphaned ones we're marking for deletion
+          const validSubTaskIds = subTaskIds;
 
-          if (validSubTaskIds.length > 0) {
+          // Separate active tasks from [TO DELETE] tasks
+          const activeTasks = [];
+          const deleteTasks = [];
+
+          for (const taskId of validSubTaskIds) {
+            const task = currentTasks.find((t) => t.id === taskId);
+            if (task && task.title.startsWith('[TO DELETE]')) {
+              deleteTasks.push(taskId);
+            } else {
+              activeTasks.push(taskId);
+            }
+          }
+
+          // Put active tasks first, then [TO DELETE] tasks
+          const finalSubTaskOrder = [...activeTasks, ...deleteTasks];
+
+          if (finalSubTaskOrder.length > 0) {
             console.log(
-              `[Sync.md] Reordering ${validSubTaskIds.length} subtasks for parent ${parentId}`,
+              `[Sync.md] Reordering ${finalSubTaskOrder.length} subtasks for parent ${parentId} (${activeTasks.length} active, ${deleteTasks.length} marked for deletion)`,
             );
-            await PluginAPI.reorderTasks(validSubTaskIds, parentId, 'task');
+            await PluginAPI.reorderTasks(finalSubTaskOrder, parentId, 'task');
           } else {
             console.log(`[Sync.md] No valid subtasks to reorder for parent ${parentId}`);
           }
@@ -873,13 +924,15 @@ class SyncMdPlugin {
         `[Sync.md] Found ${projectTasks.length} tasks for project ${this.config.projectId}`,
       );
 
-      // Separate main tasks and subtasks
-      const mainTasks = projectTasks.filter((task) => !task.parentId);
+      // Separate main tasks and subtasks, excluding [TO DELETE] tasks
+      const mainTasks = projectTasks.filter(
+        (task) => !task.parentId && !task.title.startsWith('[TO DELETE]'),
+      );
       const subTasksByParent = new Map();
 
-      // Group subtasks by parent
+      // Group subtasks by parent, excluding [TO DELETE] tasks
       projectTasks.forEach((task) => {
-        if (task.parentId) {
+        if (task.parentId && !task.title.startsWith('[TO DELETE]')) {
           if (!subTasksByParent.has(task.parentId)) {
             subTasksByParent.set(task.parentId, []);
           }
