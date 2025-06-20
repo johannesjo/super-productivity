@@ -250,6 +250,7 @@ export interface PluginCreateTaskData {
   notes?: string;
   timeEstimate?: number;
   parentId?: string | null;
+  isDone?: boolean;
 }
 
 export interface PluginShortcutCfg {

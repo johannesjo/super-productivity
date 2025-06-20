@@ -1,6 +1,7 @@
 import { inject, Injectable, OnDestroy, Injector } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
+import { Store } from '@ngrx/store';
 import { SnackService } from '../core/snack/snack.service';
 import { NotifyService } from '../core/notify/notify.service';
 import {
@@ -23,6 +24,7 @@ import { SnackCfg } from '@super-productivity/plugin-api';
 import { snackCfgToSnackParams } from './plugin-api-mapper';
 import { PluginHooksService } from './plugin-hooks';
 import { TaskService } from '../features/tasks/task.service';
+import { addSubTask } from '../features/tasks/store/task.actions';
 import { WorkContextService } from '../features/work-context/work-context.service';
 import { ProjectService } from '../features/project/project.service';
 import { TagService } from '../features/tag/tag.service';
@@ -49,6 +51,7 @@ export class PluginBridgeService implements OnDestroy {
   private _snackService = inject(SnackService);
   private _notifyService = inject(NotifyService);
   private _dialog = inject(MatDialog);
+  private _store = inject(Store);
   private _pluginHooksService = inject(PluginHooksService);
   private _taskService = inject(TaskService);
   private _workContextService = inject(WorkContextService);
@@ -232,25 +235,54 @@ export class PluginBridgeService implements OnDestroy {
       taskData.parentId,
     );
 
-    // TaskService.add expects (title, isAddToBacklog, additional, isAddToBottom)
-    const additional: Partial<TaskCopy> = {
-      projectId: taskData.projectId || undefined,
-      tagIds: taskData.tagIds || [],
-      notes: taskData.notes || '',
-      timeEstimate: taskData.timeEstimate || 0,
-      parentId: taskData.parentId || undefined,
-    };
+    // Check if this is a subtask
+    if (taskData.parentId) {
+      // For subtasks, we need to use the addSubTask action to properly update parent
+      const task = this._taskService.createNewTaskWithDefaults({
+        title: taskData.title,
+        additional: {
+          notes: taskData.notes || '',
+          timeEstimate: taskData.timeEstimate || 0,
+          isDone: taskData.isDone || false,
+          tagIds: [], // Subtasks don't have tags
+          projectId: taskData.projectId || undefined,
+        },
+      });
 
-    // Add the task using TaskService
-    const taskId = this._taskService.add(
-      taskData.title,
-      false, // isAddToBacklog
-      additional,
-      false, // isAddToBottom
-    );
+      // Dispatch the addSubTask action which properly updates parent's subTaskIds
+      this._store.dispatch(
+        addSubTask({
+          task,
+          parentId: taskData.parentId,
+        }),
+      );
 
-    console.log('PluginBridge: Task added successfully', { taskId, taskData });
-    return taskId;
+      console.log('PluginBridge: Subtask added successfully', {
+        taskId: task.id,
+        taskData,
+      });
+      return task.id;
+    } else {
+      // For main tasks, use the regular add method
+      const additional: Partial<TaskCopy> = {
+        projectId: taskData.projectId || undefined,
+        tagIds: taskData.tagIds || [],
+        notes: taskData.notes || '',
+        timeEstimate: taskData.timeEstimate || 0,
+        isDone: taskData.isDone || false,
+      };
+
+      // Add the task using TaskService
+      const taskId = this._taskService.add(
+        taskData.title,
+        false, // isAddToBacklog
+        additional,
+        false, // isAddToBottom
+      );
+
+      console.log('PluginBridge: Task added successfully', { taskId, taskData });
+      return taskId;
+    }
   }
 
   /**
