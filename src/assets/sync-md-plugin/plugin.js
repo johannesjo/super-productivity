@@ -512,6 +512,13 @@ class SyncMdPlugin {
         console.log(
           `[Sync.md] Syncing subtasks for "${projectTask.title}" (${projectTask.id}): ${projectSubTasks.length} existing, ${mdTask.subTasks.length} in markdown`,
         );
+
+        // Debug: log what we're about to sync
+        console.log(`[Sync.md] Markdown subtasks to sync:`);
+        mdTask.subTasks.forEach((st, idx) => {
+          console.log(`[Sync.md]   ${idx}: "${st.title}"`);
+        });
+
         await this.syncSubTasks(mdTask.subTasks, projectSubTasks, projectTask.id);
       }
     }
@@ -577,10 +584,21 @@ class SyncMdPlugin {
     const subTaskIds = [];
     let hasNewSubTasks = false;
 
+    console.log(
+      `[Sync.md] syncSubTasks called for parent ${parentId}: ${markdownSubTasks.length} markdown subtasks, ${projectSubTasks.length} existing subtasks`,
+    );
+
+    // Log all existing subtasks
+    projectSubTasks.forEach((task, i) => {
+      console.log(`[Sync.md]   Existing subtask ${i}: "${task.title}" (${task.id})`);
+    });
+
     // Process each markdown subtask by position
     for (let i = 0; i < markdownSubTasks.length; i++) {
       const mdSubTask = markdownSubTasks[i];
       let projectSubTask = projectSubTasks[i];
+
+      console.log(`[Sync.md] Processing markdown subtask ${i}: "${mdSubTask.title}"`);
 
       // If there's no project subtask at this position, create one
       if (!projectSubTask) {
@@ -596,7 +614,16 @@ class SyncMdPlugin {
         subTaskIds.push(subTaskId);
         hasNewSubTasks = true;
         // Wait for the subtask to be available
-        await this.waitForTask(subTaskId);
+        const createdTask = await this.waitForTask(subTaskId);
+        if (createdTask) {
+          console.log(
+            `[Sync.md] Successfully created subtask "${createdTask.title}" with id ${subTaskId}`,
+          );
+        } else {
+          console.error(
+            `[Sync.md] ERROR: Failed to create subtask "${mdSubTask.title}" - task ${subTaskId} not found after creation!`,
+          );
+        }
       } else {
         // Update existing subtask if needed
         subTaskIds.push(projectSubTask.id);
