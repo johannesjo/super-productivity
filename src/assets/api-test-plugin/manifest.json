@@ -25,5 +25,5 @@
     "persistDataSynced",
     "loadSyncedData"
   ],
-  "hooks": ["TASK_COMPLETE", "TASK_UPDATE", "TASK_CREATE", "PROJECT_SWITCH"]
+  "hooks": ["taskComplete", "taskUpdate", "taskDelete", "currentTaskChange"]
 }

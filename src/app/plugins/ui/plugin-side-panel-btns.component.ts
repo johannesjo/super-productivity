@@ -61,6 +61,7 @@ import { filter, map } from 'rxjs/operators';
       .plugin-side-panel-btn plugin-icon {
         transition: all 0.2s ease;
       }
+
       .plugin-side-panel-btn.active plugin-icon {
         transform: rotate(45deg);
       }
@@ -90,6 +91,11 @@ import { filter, map } from 'rxjs/operators';
       .plugin-side-panel-btn:disabled {
         opacity: 0.5;
         cursor: not-allowed;
+        background: transparent !important;
+      }
+
+      .plugin-side-panel-btn:disabled::after {
+        background: transparent !important;
       }
 
       @media (max-width: 479px) {
