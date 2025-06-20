@@ -23,7 +23,7 @@ interface PluginAssets {
 
 /**
  * Service responsible for lazy loading plugin assets
- * Implements caching and compression support
+ * Implements simple caching
  */
 @Injectable({
   providedIn: 'root',
@@ -38,19 +38,7 @@ export class PluginLoaderService {
   // Cache loaded plugin assets in memory
   private readonly _assetCache = new Map<string, Observable<PluginAssets>>();
 
-  // Track which plugins should be loaded on demand vs preloaded
-  private readonly _preloadList = new Set<string>([
-    // Core plugins that should be preloaded
-    'assets/example-plugin',
-    'assets/yesterday-tasks-plugin',
-  ]);
-
-  /**
-   * Check if a plugin should be preloaded
-   */
-  shouldPreload(pluginPath: string): boolean {
-    return this._preloadList.has(pluginPath);
-  }
+  // KISS: No preloading - load plugins when needed
 
   /**
    * Lazy load plugin assets
@@ -99,20 +87,7 @@ export class PluginLoaderService {
     return assets;
   }
 
-  /**
-   * Preload critical plugins
-   */
-  async preloadPlugins(pluginPaths: string[]): Promise<void> {
-    const preloadPromises = pluginPaths
-      .filter((path) => this.shouldPreload(path))
-      .map((path) =>
-        this.loadPluginAssets(path).catch((err) =>
-          console.error(`Failed to preload ${path}:`, err),
-        ),
-      );
-
-    await Promise.allSettled(preloadPromises);
-  }
+  // KISS: Removed preloading - load plugins on demand
 
   /**
    * Clear memory cache for a specific plugin
