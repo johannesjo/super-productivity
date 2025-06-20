@@ -90,10 +90,7 @@ export class PluginService implements OnDestroy {
       'assets/sync-md-plugin', // Uncomment after dev server restart
     ];
 
-    // Preload critical plugins
-    await this._pluginLoader.preloadPlugins(pluginPaths);
-
-    // Then load all plugins
+    // KISS: No preloading - just load plugins directly
     await this._loadPluginsFromPaths(pluginPaths, 'built-in');
   }
 
