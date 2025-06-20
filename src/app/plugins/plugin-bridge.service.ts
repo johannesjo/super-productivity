@@ -149,15 +149,17 @@ export class PluginBridgeService implements OnDestroy {
   /**
    * Show the plugin's index.html as a view by navigating to the plugin index route
    */
-  showIndexHtmlAsView(): void {
-    if (!this._currentPluginId) {
-      throw new Error('No plugin context set for showing index HTML view');
+  showIndexHtmlAsView(pluginId?: string): void {
+    // Use provided pluginId or fall back to current context
+    const targetPluginId = pluginId || this._currentPluginId;
+    if (!targetPluginId) {
+      throw new Error('No plugin ID provided or set for showing index HTML view');
     }
     console.log('PluginBridge: Navigating to plugin index view', {
-      pluginId: this._currentPluginId,
+      pluginId: targetPluginId,
     });
     // Navigate to the plugin index route
-    this._router.navigate(['/plugins', this._currentPluginId, 'index']);
+    this._router.navigate(['/plugins', targetPluginId, 'index']);
   }
 
   /**
@@ -563,6 +565,21 @@ export class PluginBridgeService implements OnDestroy {
     };
 
     const currentEntries = this._menuEntries$.value;
+
+    // Check for duplicate entry (same plugin ID and label)
+    const isDuplicate = currentEntries.some(
+      (entry) =>
+        entry.pluginId === this._currentPluginId && entry.label === menuEntryCfg.label,
+    );
+
+    if (isDuplicate) {
+      console.warn('PluginBridge: Duplicate menu entry detected, skipping registration', {
+        pluginId: this._currentPluginId,
+        label: menuEntryCfg.label,
+      });
+      return;
+    }
+
     this._menuEntries$.next([...currentEntries, newMenuEntry]);
 
     console.log('PluginBridge: Menu entry registered', {
@@ -619,6 +636,23 @@ export class PluginBridgeService implements OnDestroy {
     };
 
     const currentButtons = this._sidePanelButtons$.value;
+
+    // Check for duplicate button (same plugin ID)
+    const isDuplicate = currentButtons.some(
+      (button) => button.pluginId === this._currentPluginId,
+    );
+
+    if (isDuplicate) {
+      console.warn(
+        'PluginBridge: Duplicate side panel button detected, skipping registration',
+        {
+          pluginId: this._currentPluginId,
+          label: sidePanelBtnCfg.label,
+        },
+      );
+      return;
+    }
+
     this._sidePanelButtons$.next([...currentButtons, newButton]);
 
     console.log('PluginBridge: Side panel button registered', {
