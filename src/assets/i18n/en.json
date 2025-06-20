@@ -943,7 +943,9 @@
         "TEXT": "<p>Update from remote. Both local and remote data seem to be modified.</p>",
         "TITLE": "Sync: Conflicting Data",
         "USE_LOCAL": "Keep local",
-        "USE_REMOTE": "Keep remote"
+        "USE_REMOTE": "Keep remote",
+        "TIMESTAMP": "Timestamp",
+        "LAMPORT_CLOCK": "Revision"
       },
       "D_DECRYPT_ERROR": {
         "BTN_OVER_WRITE_REMOTE": "Change & Overwrite Remote",

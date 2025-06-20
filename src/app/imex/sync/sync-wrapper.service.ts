@@ -9,6 +9,7 @@ import { SnackService } from '../../core/snack/snack.service';
 import {
   AuthFailSPError,
   CanNotMigrateMajorDownError,
+  ConflictData,
   DecryptError,
   DecryptNoPasswordError,
   LockPresentError,
@@ -112,11 +113,9 @@ export class SyncWrapperService {
             lastSync: r.conflictData?.local.lastSyncedUpdate,
             conflictData: r.conflictData,
           });
-          const res = await this._openConflictDialog$({
-            remote: r.conflictData?.remote.lastUpdate as number,
-            local: r.conflictData?.local.lastUpdate as number,
-            lastSync: r.conflictData?.local.lastSyncedUpdate as number,
-          }).toPromise();
+          const res = await this._openConflictDialog$(
+            r.conflictData as ConflictData,
+          ).toPromise();
 
           if (res === 'USE_LOCAL') {
             console.log('User chose USE_LOCAL, calling uploadAll(true) with force');
@@ -316,15 +315,9 @@ export class SyncWrapperService {
 
   private lastConflictDialog?: MatDialogRef<any, any>;
 
-  private _openConflictDialog$({
-    remote,
-    local,
-    lastSync,
-  }: {
-    remote: number | null;
-    local: number | null;
-    lastSync: number;
-  }): Observable<DialogConflictResolutionResult> {
+  private _openConflictDialog$(
+    conflictData: ConflictData,
+  ): Observable<DialogConflictResolutionResult> {
     if (this.lastConflictDialog) {
       this.lastConflictDialog.close();
     }
@@ -332,11 +325,7 @@ export class SyncWrapperService {
       restoreFocus: true,
       autoFocus: false,
       disableClose: true,
-      data: {
-        remote,
-        local,
-        lastSync,
-      },
+      data: conflictData,
     });
     return this.lastConflictDialog.afterClosed();
   }

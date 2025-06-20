@@ -4,23 +4,34 @@
   <div [innerHTML]="T.F.SYNC.D_CONFLICT.TEXT | translate"></div>
 
   <table>
+    <thead>
+      <tr>
+        <th></th>
+        <th></th>
+        <th colspan="2">{{ T.F.SYNC.D_CONFLICT.TIMESTAMP | translate }}</th>
+        <th>{{ T.F.SYNC.D_CONFLICT.LAMPORT_CLOCK | translate }}</th>
+      </tr>
+    </thead>
     <tr [class.isHighlight]="isHighlightRemote">
       <td>{{ T.F.SYNC.D_CONFLICT.REMOTE | translate }}</td>
       <td>{{ T.F.SYNC.D_CONFLICT.LAST_CHANGE | translate }}</td>
       <td>{{ remoteDate | date: 'shortDate' }}</td>
       <td>{{ remoteTime | date: 'shortTime' }}</td>
+      <td>{{ remoteLamport }}</td>
     </tr>
     <tr [class.isHighlight]="isHighlightLocal">
       <td>{{ T.F.SYNC.D_CONFLICT.LOCAL | translate }}</td>
       <td>{{ T.F.SYNC.D_CONFLICT.LAST_CHANGE | translate }}</td>
       <td>{{ localDate | date: 'shortDate' }}</td>
       <td>{{ localTime | date: 'shortTime' }}</td>
+      <td>{{ localLamport }}</td>
     </tr>
     <tr>
       <td>{{ T.F.SYNC.D_CONFLICT.LOCAL_REMOTE | translate }}</td>
       <td>{{ T.F.SYNC.D_CONFLICT.LAST_SYNC | translate }}</td>
       <td>{{ lastDate ? (lastDate | date: 'shortDate') : 'Never' }}</td>
       <td>{{ lastTime ? (lastTime | date: 'shortTime') : '-' }}</td>
+      <td>{{ lastSyncedLamport ?? '-' }}</td>
     </tr>
   </table>
 </mat-dialog-content>
