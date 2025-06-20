@@ -109,6 +109,7 @@ describe('AddTasksForTomorrowService', () => {
     quickSetting: 'DAILY',
     repeatCycle: 'DAILY',
     repeatEvery: 1,
+    startDate: todayStr, // Valid start date
     notes: undefined,
   } as TaskRepeatCfg;
 
@@ -123,6 +124,7 @@ describe('AddTasksForTomorrowService', () => {
     quickSetting: 'DAILY',
     repeatCycle: 'DAILY',
     repeatEvery: 1,
+    startDate: todayStr, // Valid start date
     notes: undefined,
   } as TaskRepeatCfg;
 

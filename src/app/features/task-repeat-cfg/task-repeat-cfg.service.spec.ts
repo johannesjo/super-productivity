@@ -37,7 +37,9 @@ describe('TaskRepeatCfgService', () => {
     title: 'Test Repeat Task',
     projectId: 'test-project',
     repeatCycle: 'DAILY',
-    startDate: '2022-01-10',
+    startDate: new Date().toISOString().split('T')[0], // Use today's date
+    // eslint-disable-next-line no-mixed-operators
+    lastTaskCreation: Date.now() - 24 * 60 * 60 * 1000, // Yesterday
     repeatEvery: 1,
     defaultEstimate: 3600000,
     notes: 'Test notes',
@@ -47,7 +49,7 @@ describe('TaskRepeatCfgService', () => {
   const mockTask: Task = {
     ...DEFAULT_TASK,
     id: 'test-task-id',
-    title: 'Test Task',
+    title: 'Test Repeat Task',
     projectId: 'test-project',
   };
 
@@ -302,7 +304,8 @@ describe('TaskRepeatCfgService', () => {
 
   describe('createRepeatableTask', () => {
     it('should create actions for a new repeatable task', async () => {
-      const targetDayDate = new Date('2022-01-10').getTime();
+      const today = new Date();
+      const targetDayDate = today.getTime();
       taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
       taskService.createNewTaskWithDefaults.and.returnValue(mockTask);
 
@@ -340,7 +343,8 @@ describe('TaskRepeatCfgService', () => {
     });
 
     it('should not create task if already exists for the day', async () => {
-      const targetDayDate = new Date('2022-01-10').getTime();
+      const today = new Date();
+      const targetDayDate = today.getTime();
       const existingTask = { ...mockTaskWithSubTasks, created: targetDayDate };
       taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([existingTask]));
 
@@ -351,7 +355,8 @@ describe('TaskRepeatCfgService', () => {
 
     it('should add task to bottom if order > 0', async () => {
       const cfgWithOrder = { ...mockTaskRepeatCfg, order: 1 };
-      const targetDayDate = new Date('2022-01-10').getTime();
+      const today = new Date();
+      const targetDayDate = today.getTime();
       taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
       taskService.createNewTaskWithDefaults.and.returnValue(mockTask);
 
@@ -366,7 +371,8 @@ describe('TaskRepeatCfgService', () => {
     });
 
     it('should filter out TODAY_TAG from tagIds', async () => {
-      const targetDayDate = new Date('2022-01-10').getTime();
+      const today = new Date();
+      const targetDayDate = today.getTime();
       taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
       taskService.createNewTaskWithDefaults.and.returnValue(mockTask);
 
@@ -384,7 +390,8 @@ describe('TaskRepeatCfgService', () => {
 
   describe('getActionsForTaskRepeatCfg', () => {
     it('should return empty array if task already exists for day', async () => {
-      const targetDayDate = new Date('2022-01-10').getTime();
+      const today = new Date();
+      const targetDayDate = today.getTime();
       const existingTask = { ...mockTaskWithSubTasks, created: targetDayDate };
       taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([existingTask]));
 
@@ -402,7 +409,8 @@ describe('TaskRepeatCfgService', () => {
         startTime: '10:00',
         remindAt: 'AtStart',
       };
-      const targetDayDate = new Date('2022-01-10').getTime();
+      const today = new Date();
+      const targetDayDate = today.getTime();
       taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
       taskService.createNewTaskWithDefaults.and.returnValue(mockTask);
 
