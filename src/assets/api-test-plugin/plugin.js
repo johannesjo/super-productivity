@@ -202,6 +202,10 @@ PluginAPI.registerHook(PluginAPI.Hooks.CURRENT_TASK_CHANGE, (taskData) => {
   console.log('API Test - CURRENT_TASK_CHANGE hook fired:', taskData);
 });
 
+PluginAPI.registerSidePanelButton({ label: 'yeah' }, (taskData) => {
+  console.log('API Test - CURRENT_TASK_CHANGE hook fired:', taskData);
+});
+
 // Register UI elements
 
 PluginAPI.registerShortcut({
