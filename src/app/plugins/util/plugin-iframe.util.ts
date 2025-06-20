@@ -19,6 +19,45 @@ export const PLUGIN_IFRAME_SANDBOX =
   'allow-scripts allow-same-origin allow-forms allow-popups allow-modals';
 
 /**
+ * Create CSS injection for plugins - KISS approach
+ */
+export const createPluginCssInjection = (): string => {
+  const isDarkTheme = document.body.classList.contains('isDarkTheme');
+  // CSS variables are defined on body, not :root!
+  const computedStyle = getComputedStyle(document.body);
+
+  // Just get the essential theme variables we need
+  const getVar = (name: string): string => {
+    return computedStyle.getPropertyValue(name).trim();
+  };
+
+  return `
+    <style id="injected-theme-vars">
+      :root {
+        --theme-bg: ${getVar('--theme-bg')};
+        --theme-text-color: ${getVar('--theme-text-color')};
+        --theme-card-bg: ${getVar('--theme-card-bg')};
+        --theme-divider-color: ${getVar('--theme-divider-color')};
+        --theme-select-hover-bg: ${getVar('--theme-select-hover-bg')};
+        --theme-text-color-muted: ${getVar('--theme-text-color-muted')};
+        --c-primary: ${getVar('--c-primary')};
+        --c-accent: ${getVar('--c-accent')};
+        --c-warn: ${getVar('--c-warn')};
+        --color-success: ${getVar('--color-success')};
+        --color-danger: ${getVar('--color-danger')};
+        --color-warning: ${getVar('--color-warning')};
+        --is-dark-theme: ${isDarkTheme ? '1' : '0'};
+      }
+
+      body {
+        background: transparent;
+        color: var(--theme-text-color);
+      }
+    </style>
+  `;
+};
+
+/**
  * Create the plugin API script - simple and direct
  */
 export const createPluginApiScript = (config: PluginIframeConfig): string => {
@@ -74,7 +113,7 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
           return new Promise((resolve, reject) => {
             const id = ++callId;
             pendingCalls.set(id, { resolve, reject });
-            
+
             // Special handling for openDialog to store button handlers
             let processedArgs = args;
             if (method === 'openDialog' && args && args[0] && args[0].buttons) {
@@ -94,7 +133,7 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
                 })
               };
             }
-            
+
             window.parent.postMessage({
               type: 'PLUGIN_API_CALL',
               method: method,
@@ -115,7 +154,7 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
         // Create the PluginAPI object with all methods
         window.PluginAPI = {
           cfg: ${JSON.stringify(config.baseCfg)},
-          
+
           // Add Hooks enum
           Hooks: {
             TASK_COMPLETE: 'taskComplete',
@@ -127,49 +166,49 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
             PERSISTED_DATA_UPDATE: 'persistedDataUpdate',
             ACTION: 'action'
           },
-          
+
           // Task methods
           getTasks: () => callApi('getTasks'),
           getArchivedTasks: () => callApi('getArchivedTasks'),
           getCurrentContextTasks: () => callApi('getCurrentContextTasks'),
           updateTask: (taskId, updates) => callApi('updateTask', [taskId, updates]),
           addTask: (taskData) => callApi('addTask', [taskData]),
-          
+
           // Project methods
           getAllProjects: () => callApi('getAllProjects'),
           addProject: (projectData) => callApi('addProject', [projectData]),
           updateProject: (projectId, updates) => callApi('updateProject', [projectId, updates]),
-          
+
           // Tag methods
           getAllTags: () => callApi('getAllTags'),
           addTag: (tagData) => callApi('addTag', [tagData]),
           updateTag: (tagId, updates) => callApi('updateTag', [tagId, updates]),
-          
+
           // Task ordering
           reorderTasks: (taskIds, contextId, contextType) => callApi('reorderTasks', [taskIds, contextId, contextType]),
-          
+
           // UI methods
           showSnack: (cfg) => callApi('showSnack', [cfg]),
           notify: (cfg) => callApi('notify', [cfg]),
           openDialog: (cfg) => callApi('openDialog', [cfg]),
           showIndexHtmlAsView: () => callApi('showIndexHtmlAsView'),
           showIndexHtmlInSidePanel: () => callApi('showIndexHtmlInSidePanel'),
-          
+
           // Persistence methods
           persistDataSynced: (data) => callApi('persistDataSynced', [data]),
           loadPersistedData: () => callApi('loadPersistedData'),
           loadSyncedData: () => callApi('loadPersistedData'), // Alias
-          
+
           // Registration methods
           registerHook: (hook, handler) => callApi('registerHook', [hook, handler]),
           registerHeaderButton: (cfg) => callApi('registerHeaderButton', [cfg]),
           registerMenuEntry: (cfg) => callApi('registerMenuEntry', [cfg]),
           registerShortcut: (cfg) => callApi('registerShortcut', [cfg]),
           registerSidePanelButton: (cfg) => callApi('registerSidePanelButton', [cfg]),
-          
+
           // Node execution (if available)
           executeNodeScript: (request) => callApi('executeNodeScript', [request]),
-          
+
           // Message handling
           onMessage: (handler) => {
             // Store the handler and set up message listener
@@ -196,9 +235,9 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
         };
 
         // Notify parent that plugin is ready
-        window.parent.postMessage({ 
-          type: 'plugin-ready', 
-          pluginId: '${config.pluginId}' 
+        window.parent.postMessage({
+          type: 'plugin-ready',
+          pluginId: '${config.pluginId}'
         }, '*');
       })();
     </script>
@@ -210,9 +249,20 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
  */
 export const createPluginIframeUrl = (config: PluginIframeConfig): string => {
   const apiScript = createPluginApiScript(config);
+  const cssInjection = createPluginCssInjection();
 
-  // Inject before closing body tag
+  // Inject CSS in head
   let html = config.indexHtml;
+  const headEnd = html.toLowerCase().lastIndexOf('</head>');
+
+  if (headEnd !== -1) {
+    html = html.slice(0, headEnd) + cssInjection + html.slice(headEnd);
+  } else {
+    // If no head tag, inject at beginning
+    html = cssInjection + html;
+  }
+
+  // Inject API script before closing body tag
   const bodyEnd = html.toLowerCase().lastIndexOf('</body>');
 
   if (bodyEnd !== -1) {
