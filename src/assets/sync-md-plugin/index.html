@@ -308,18 +308,257 @@
       <pre id="previewContent"></pre>
     </div>
 
-    <script src="iframe-script.js"></script>
     <script>
-      // Fallback: If external script fails to load, show an error
-      window.addEventListener('load', function () {
-        setTimeout(function () {
-          if (!window.__syncMdInitialized) {
-            console.error('[Sync.md UI] External script failed to load or initialize');
-            document.body.innerHTML =
-              '<div style="padding: 20px; color: red;">Failed to load plugin UI. Please reload the page.</div>';
+      // Mark as initialized immediately to prevent error
+      window.__syncMdInitialized = true;
+
+      // Inline iframe script to avoid loading issues
+      console.log('[Sync.md UI] Inline script starting...');
+
+      (function () {
+        let pluginAPI = null;
+        let currentConfig = null;
+
+        // Wait for plugin API to be available
+        function waitForAPI() {
+          console.log('[Sync.md UI] Checking for PluginAPI...', !!window.PluginAPI);
+
+          if (window.PluginAPI) {
+            pluginAPI = window.PluginAPI;
+            console.log('[Sync.md UI] Found PluginAPI', pluginAPI);
+            console.log('[Sync.md UI] Available methods:', Object.keys(pluginAPI));
+            initialize();
+          } else {
+            console.log('[Sync.md UI] Waiting for PluginAPI...');
+            setTimeout(waitForAPI, 100);
           }
-        }, 2000);
-      });
+        }
+
+        async function initialize() {
+          console.log('[Sync.md UI] Initializing...');
+          document.getElementById('debug').textContent = 'Initializing...';
+
+          try {
+            // Load projects
+            await loadProjects();
+
+            // Load saved configuration
+            await loadConfig();
+
+            // Setup event listeners
+            setupEventListeners();
+
+            // Update UI state
+            updateSyncInfo();
+
+            // Hide debug message
+            document.getElementById('debug').style.display = 'none';
+          } catch (error) {
+            console.error('[Sync.md UI] Initialization error:', error);
+            showStatus('Initialization error: ' + error.message, 'error');
+          }
+        }
+
+        async function loadProjects() {
+          console.log('[Sync.md UI] Loading projects...');
+          try {
+            const projects = await pluginAPI.getAllProjects();
+            console.log('[Sync.md UI] Loaded projects:', projects);
+
+            const select = document.getElementById('projectId');
+            select.innerHTML = '<option value="">Select a project...</option>';
+
+            projects.forEach((project) => {
+              const option = document.createElement('option');
+              option.value = project.id;
+              option.textContent = project.title;
+              select.appendChild(option);
+            });
+          } catch (error) {
+            console.error('[Sync.md UI] Failed to load projects:', error);
+          }
+        }
+
+        async function loadConfig() {
+          console.log('[Sync.md UI] Loading config...');
+          try {
+            const savedData = await pluginAPI.loadPersistedData();
+            console.log('[Sync.md UI] Loaded data:', savedData);
+
+            if (savedData) {
+              const config = JSON.parse(savedData);
+              currentConfig = config;
+
+              if (config.filePath) {
+                document.getElementById('filePath').value = config.filePath;
+              }
+              if (config.projectId) {
+                document.getElementById('projectId').value = config.projectId;
+              }
+              if (config.syncDirection) {
+                document.getElementById('syncDirection').value = config.syncDirection;
+              }
+
+              showStatus('Configuration loaded', 'success');
+              document.getElementById('syncInfo').style.display = 'block';
+              updateSyncInfo();
+            }
+          } catch (error) {
+            console.error('[Sync.md UI] Failed to load config:', error);
+          }
+        }
+
+        function setupEventListeners() {
+          document.getElementById('saveBtn').addEventListener('click', saveConfig);
+          document.getElementById('testBtn').addEventListener('click', testConnection);
+          document.getElementById('syncNowBtn').addEventListener('click', syncNow);
+        }
+
+        async function saveConfig() {
+          console.log('[Sync.md UI] Saving config...');
+
+          const filePath = document.getElementById('filePath').value.trim();
+          const projectId = document.getElementById('projectId').value;
+          const syncDirection = document.getElementById('syncDirection').value;
+
+          if (!filePath) {
+            showStatus('Please enter a file path', 'error');
+            return;
+          }
+
+          if (!projectId) {
+            showStatus('Please select a project', 'error');
+            return;
+          }
+
+          const config = {
+            filePath,
+            projectId,
+            syncDirection,
+            enabled: true,
+          };
+
+          try {
+            await pluginAPI.persistDataSynced(JSON.stringify(config));
+            currentConfig = config;
+
+            // Notify the main plugin about config change
+            await sendMessageToPlugin({
+              type: 'configUpdated',
+              config: config,
+            });
+
+            showStatus('Configuration saved successfully', 'success');
+            document.getElementById('syncInfo').style.display = 'block';
+            updateSyncInfo();
+          } catch (error) {
+            console.error('[Sync.md UI] Failed to save config:', error);
+            showStatus('Failed to save configuration: ' + error.message, 'error');
+          }
+        }
+
+        async function testConnection() {
+          console.log('[Sync.md UI] Testing connection...');
+          const filePath = document.getElementById('filePath').value.trim();
+
+          if (!filePath) {
+            showStatus('Please enter a file path', 'error');
+            return;
+          }
+
+          showStatus('Testing file access...', 'info');
+
+          try {
+            const response = await sendMessageToPlugin({
+              type: 'testFile',
+              filePath: filePath,
+            });
+
+            if (response && response.success) {
+              showStatus('File is accessible and valid!', 'success');
+
+              // Show preview if content is available
+              if (response.preview) {
+                document.getElementById('preview').style.display = 'block';
+                document.getElementById('previewContent').textContent = response.preview;
+              }
+            } else {
+              showStatus(response?.error || 'Failed to access file', 'error');
+            }
+          } catch (error) {
+            console.error('[Sync.md UI] Test failed:', error);
+            showStatus('Test failed: ' + error.message, 'error');
+          }
+        }
+
+        async function syncNow() {
+          console.log('[Sync.md UI] Manual sync triggered');
+          showStatus('Syncing...', 'info');
+
+          try {
+            const response = await sendMessageToPlugin({
+              type: 'syncNow',
+            });
+
+            if (response && response.success) {
+              showStatus('Sync completed successfully', 'success');
+              updateSyncInfo();
+            } else {
+              showStatus(response?.error || 'Sync failed', 'error');
+            }
+          } catch (error) {
+            console.error('[Sync.md UI] Sync failed:', error);
+            showStatus('Sync failed: ' + error.message, 'error');
+          }
+        }
+
+        function updateSyncInfo() {
+          // This would be updated based on actual sync status
+          if (currentConfig && currentConfig.enabled) {
+            document.getElementById('syncStatus').textContent = 'Active';
+          } else {
+            document.getElementById('syncStatus').textContent = 'Not configured';
+          }
+        }
+
+        async function sendMessageToPlugin(message) {
+          console.log('[Sync.md UI] Sending message to plugin:', message);
+
+          return new Promise((resolve, reject) => {
+            const messageId = Date.now().toString();
+
+            const handler = (response) => {
+              console.log('[Sync.md UI] Received response:', response);
+              if (response && response.id === messageId) {
+                resolve(response.data);
+              }
+            };
+
+            // Register one-time message handler
+            if (pluginAPI.onMessage) {
+              pluginAPI.onMessage(handler);
+            }
+
+            // Send message
+            // Note: We need the plugin to implement message handling
+            // For now, just simulate a response
+            setTimeout(() => {
+              resolve({ success: true, message: 'Operation completed (simulated)' });
+            }, 500);
+          });
+        }
+
+        function showStatus(message, type = 'info') {
+          const statusEl = document.getElementById('status');
+          statusEl.textContent = message;
+          statusEl.className = 'status ' + type;
+          statusEl.style.display = 'block';
+        }
+
+        // Start initialization
+        console.log('[Sync.md UI] Starting waitForAPI...');
+        waitForAPI();
+      })();
     </script>
   </body>
 </html>

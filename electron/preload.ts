@@ -109,7 +109,23 @@ const ea: ElectronAPI = {
       request,
     ) as Promise<PluginNodeScriptResult>,
 };
+// Debug: Log the ea object before exposing
+console.log('ea object keys:', Object.keys(ea));
+console.log('pluginExecNodeScript type:', typeof ea.pluginExecNodeScript);
+
 contextBridge.exposeInMainWorld('ea', ea);
 
 // contextBridge.exposeInIsolatedWorld();
 console.log('preload script loading complete');
+
+// Debug: Verify after exposing
+setTimeout(() => {
+  // @ts-ignore - window is not available in preload context types
+  console.log('window.ea exists:', typeof window !== 'undefined' && !!(window as any).ea);
+  // @ts-ignore - window is not available in preload context types
+  console.log(
+    'window.ea.pluginExecNodeScript exists:',
+    typeof window !== 'undefined' &&
+      !!((window as any).ea && (window as any).ea.pluginExecNodeScript),
+  );
+}, 1000);

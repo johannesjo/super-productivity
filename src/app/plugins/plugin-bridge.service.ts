@@ -814,8 +814,16 @@ export class PluginBridgeService implements OnDestroy {
         };
       }
 
+      // Check if Electron API is available
+      if (!window.ea || typeof window.ea.pluginExecNodeScript !== 'function') {
+        return {
+          success: false,
+          error: 'Electron API not available. This feature requires the desktop version.',
+        };
+      }
+
       // Call Electron main process via IPC
-      const result = await window.ea!.pluginExecNodeScript(
+      const result = await window.ea.pluginExecNodeScript(
         this._currentPluginId,
         this._currentPluginManifest,
         request,
