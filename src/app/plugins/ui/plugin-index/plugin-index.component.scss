@@ -83,6 +83,10 @@
   border: none;
   background: transparent;
   @include _scrollBarStyles;
+
+  &.hidden {
+    visibility: hidden;
+  }
 }
 
 // Dark theme support

@@ -66,6 +66,12 @@ import { filter, map } from 'rxjs/operators';
       button {
         position: relative;
         overflow: visible !important;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+        border-bottom-left-radius: 4px;
+        border-bottom-right-radius: 4px;
+        box-shadow: 0px -2px 3px 0px var(--theme-separator-alpha);
+        background: var(--theme-sidebar-bg);
 
         &.isActive::after {
           content: '';
@@ -77,10 +83,6 @@ import { filter, map } from 'rxjs/operators';
           border-top-left-radius: 4px;
           border-top-right-radius: 4px;
           z-index: -1;
-          box-shadow: 0px -2px 3px 0px var(--theme-separator-alpha);
-
-          background: var(--theme-sidebar-bg);
-          // border-color: var(--theme-extra-border-color);
         }
 
         @media (max-width: 479px) {
