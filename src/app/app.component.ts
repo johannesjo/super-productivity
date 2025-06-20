@@ -185,13 +185,16 @@ export class AppComponent implements OnDestroy {
 
     // deferred init
     window.setTimeout(async () => {
-      // Initialize plugin system
-      try {
-        await this._pluginService.initializePlugins();
-        console.log('Plugin system initialized');
-      } catch (error) {
-        console.error('Failed to initialize plugin system:', error);
-      }
+      // Wait longer before initializing plugin system to avoid sync conflicts
+      // This ensures any initial sync operations complete before plugins start writing data
+      window.setTimeout(async () => {
+        try {
+          await this._pluginService.initializePlugins();
+          console.log('Plugin system initialized (delayed to avoid sync conflicts)');
+        } catch (error) {
+          console.error('Failed to initialize plugin system:', error);
+        }
+      }, 3000); // Additional 3 second delay for plugin initialization
 
       this._startTrackingReminderService.init();
       this._checkAvailableStorage();
