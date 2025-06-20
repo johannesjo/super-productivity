@@ -37,6 +37,7 @@ import { isSameDay } from '../../util/is-same-day';
 import { remindOptionToMilliseconds } from '../tasks/util/remind-option-to-milliseconds';
 import { getNewestPossibleDueDate } from './store/get-newest-possible-due-date.util';
 import { getWorklogStr } from '../../util/get-work-log-str';
+import { TODAY_TAG } from '../tag/tag.const';
 
 @Injectable({
   providedIn: 'root',
@@ -253,6 +254,7 @@ export class TaskRepeatCfgService {
           notes: taskRepeatCfg.notes || '',
           // always due for today
           dueDay: getWorklogStr(),
+          tagIds: taskRepeatCfg.tagIds.filter((tagId) => tagId !== TODAY_TAG.id),
         },
       }),
       isAddToBottom: taskRepeatCfg.order > 0,
