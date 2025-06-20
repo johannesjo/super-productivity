@@ -17,21 +17,12 @@
 
       /* Light mode (default) */
       :root {
-        --text-color: #333;
-        --text-secondary: #666;
-        --border-color: #eee;
-        --primary-color: #1976d2;
+        --text-color: var(--theme-text-color);
+        --border-color: var(--theme-separator-color);
+        --primary-color: var(--c-primary);
       }
 
       /* Dark mode */
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --text-color: #e0e0e0;
-          --text-secondary: #aaa;
-          --border-color: #333;
-          --primary-color: #42a5f5;
-        }
-      }
 
       .container {
         max-width: 800px;
@@ -44,9 +35,9 @@
       }
 
       .date {
-        color: var(--text-secondary);
         font-size: 14px;
         margin-bottom: 20px;
+        opacity: 0.7;
       }
 
       .loading,
@@ -57,7 +48,7 @@
       }
 
       .task-item {
-        padding: 16px 0;
+        padding: 8px 0;
         border-bottom: 1px solid var(--border-color);
         display: flex;
         align-items: flex-start;
@@ -73,8 +64,7 @@
       }
 
       .task-time {
-        font-weight: 600;
-        color: var(--primary-color);
+        font-weight: 400;
         white-space: nowrap;
         min-width: 60px;
         text-align: right;
@@ -180,16 +170,44 @@
           // Combine all tasks
           const combinedTasks = [...allTasks, ...archivedTasks];
 
+          console.log('Total tasks found:', combinedTasks.length);
+          console.log(
+            'Yesterday range:',
+            new Date(range.start),
+            'to',
+            new Date(range.end),
+          );
+
+          // Debug: Check first few tasks
+          combinedTasks.slice(0, 3).forEach((task, i) => {
+            console.log(`Task ${i}:`, task.title);
+            console.log('  timeSpentOnDay:', task.timeSpentOnDay);
+            console.log('  timeSpent:', task.timeSpent);
+          });
+
+          // Get yesterday's date key in YYYY-MM-DD format
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          const yesterdayKey = yesterday.toISOString().split('T')[0];
+          console.log('Looking for date key:', yesterdayKey);
+
           // Filter tasks that have time entries from yesterday
           const yesterdayTasks = combinedTasks.filter((task) => {
             if (!task.timeSpentOnDay) return false;
 
-            // Check if any time entries fall within yesterday's range
+            // Check if yesterday's date key exists
+            if (task.timeSpentOnDay[yesterdayKey]) {
+              console.log('Found task with yesterday time:', task.title);
+              return true;
+            }
+
+            // Also check timestamp-based entries
             for (const dateKey in task.timeSpentOnDay) {
               const entries = task.timeSpentOnDay[dateKey];
               if (Array.isArray(entries)) {
                 for (const entry of entries) {
                   if (entry && entry.s >= range.start && entry.s <= range.end) {
+                    console.log('Found task with yesterday entry:', task.title);
                     return true;
                   }
                 }
@@ -203,12 +221,28 @@
             let yesterdayTime = 0;
 
             if (task.timeSpentOnDay) {
-              for (const dateKey in task.timeSpentOnDay) {
-                const entries = task.timeSpentOnDay[dateKey];
-                if (Array.isArray(entries)) {
-                  for (const entry of entries) {
-                    if (entry && entry.s >= range.start && entry.s <= range.end) {
-                      yesterdayTime += entry.e - entry.s || 0;
+              // First check for direct date key (YYYY-MM-DD format)
+              if (task.timeSpentOnDay[yesterdayKey]) {
+                const timeValue = task.timeSpentOnDay[yesterdayKey];
+                if (typeof timeValue === 'number') {
+                  yesterdayTime = timeValue;
+                } else if (Array.isArray(timeValue)) {
+                  // Handle array format
+                  for (const entry of timeValue) {
+                    if (entry && entry.e && entry.s) {
+                      yesterdayTime += entry.e - entry.s;
+                    }
+                  }
+                }
+              } else {
+                // Check timestamp-based entries
+                for (const dateKey in task.timeSpentOnDay) {
+                  const entries = task.timeSpentOnDay[dateKey];
+                  if (Array.isArray(entries)) {
+                    for (const entry of entries) {
+                      if (entry && entry.s >= range.start && entry.s <= range.end) {
+                        yesterdayTime += entry.e - entry.s || 0;
+                      }
                     }
                   }
                 }
@@ -248,7 +282,8 @@
 
         try {
           const tasks = await getYesterdayTasks();
-          displayTasks(tasks);
+          const projects = await PluginAPI.getAllProjects();
+          displayTasks(tasks, projects);
         } catch (error) {
           console.error('Error loading tasks:', error);
           document.getElementById('content').innerHTML =
@@ -256,13 +291,19 @@
         }
       }
 
-      function displayTasks(tasks) {
+      function displayTasks(tasks, projects = []) {
         const contentEl = document.getElementById('content');
 
         if (tasks.length === 0) {
           contentEl.innerHTML = '<div class="no-tasks">No tasks tracked yesterday.</div>';
           return;
         }
+
+        // Create project lookup map
+        const projectMap = {};
+        projects.forEach((project) => {
+          projectMap[project.id] = project.title;
+        });
 
         // Calculate total time
         const totalTime = tasks.reduce((sum, task) => sum + task.yesterdayTimeSpent, 0);
@@ -272,8 +313,12 @@
 
         tasks.forEach((task) => {
           const isDone = task.isDone ? 'task-done' : '';
-          const projectTag = task.projectId
-            ? `<span class="project-tag">${task.projectId}</span>`
+          const projectTitle =
+            task.projectId && projectMap[task.projectId]
+              ? projectMap[task.projectId]
+              : task.projectId;
+          const projectTag = projectTitle
+            ? `<span class="project-tag">${escapeHtml(projectTitle)}</span>`
             : '';
 
           html += `
@@ -286,14 +331,6 @@
         `;
         });
 
-        // Add summary
-        html += `
-        <div class="summary">
-          <div class="summary-label">Total Time Tracked</div>
-          <div class="summary-value">${formatDuration(totalTime)}</div>
-        </div>
-      `;
-
         contentEl.innerHTML = html;
       }
 
@@ -303,7 +340,26 @@
         return div.innerHTML;
       }
 
+      // Register hooks to refresh on task changes
+      function setupHooks() {
+        PluginAPI.registerHook(PluginAPI.Hooks.TASK_UPDATE, () => {
+          init();
+        });
+        PluginAPI.registerHook(PluginAPI.Hooks.TASK_COMPLETE, () => {
+          init();
+        });
+      }
+
       // Start
+      function waitForPlugin() {
+        if (typeof PluginAPI !== 'undefined') {
+          init();
+          setupHooks();
+        } else {
+          setTimeout(waitForPlugin, 100);
+        }
+      }
+
       waitForPlugin();
     </script>
   </body>
