@@ -52,21 +52,6 @@ export class PluginMetaPersistenceService {
   }
 
   /**
-   * Set plugin enabled state without triggering pfapi write (startup-safe)
-   * This method only updates the in-memory state to avoid sync conflicts during startup
-   */
-  async setPluginEnabledSafe(pluginId: string, isEnabled: boolean): Promise<void> {
-    // During startup, we just ensure the plugin is considered enabled in memory
-    // without writing to pfapi to avoid sync conflicts
-    console.log(
-      `Plugin ${pluginId} enabled state set to ${isEnabled} (memory only, no pfapi write)`,
-    );
-
-    // The actual persistence will happen when user explicitly enables/disables plugins
-    // through the plugin management UI
-  }
-
-  /**
    * Get all plugin metadata
    */
   async getAllPluginMetadata(): Promise<PluginMetadata[]> {

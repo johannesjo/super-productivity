@@ -6,7 +6,7 @@ function logResult(method, result, error = null) {
   if (error) {
     console.error(`API Test - ${method} failed:`, error);
     PluginAPI.showSnack({
-      msg: `❌ ${method} failed: ${error.message}`,
+      msg: `${method} failed: ${error.message}`,
       type: 'ERROR',
     });
   } else {
@@ -35,7 +35,7 @@ async function testDataPersistence() {
     logResult('loadSyncedData', parsed);
 
     PluginAPI.showSnack({
-      msg: '✅ Data persistence test passed!',
+      msg: 'Data persistence test passed',
       type: 'SUCCESS',
     });
   } catch (error) {
@@ -62,7 +62,7 @@ async function testTaskOperations() {
 
     // Create a test task
     const newTaskId = await PluginAPI.addTask({
-      title: '🧪 API Test Task - ' + new Date().toLocaleTimeString(),
+      title: 'API Test Task - ' + new Date().toLocaleTimeString(),
       notes: 'This task was created by the API Test Plugin to test the addTask method',
       timeEstimate: 1800000, // 30 minutes in milliseconds
     });
@@ -78,7 +78,7 @@ async function testTaskOperations() {
     }
 
     PluginAPI.showSnack({
-      msg: '✅ Task operations test completed!',
+      msg: 'Task operations test completed',
       type: 'SUCCESS',
     });
   } catch (error) {
@@ -97,7 +97,7 @@ async function testProjectOperations() {
 
     // Create a test project
     const newProject = await PluginAPI.addProject({
-      title: '🧪 API Test Project - ' + new Date().toLocaleDateString(),
+      title: 'API Test Project - ' + new Date().toLocaleDateString(),
       themeColor: '#' + Math.floor(Math.random() * 16777215).toString(16), // Random color
     });
     logResult('addProject', `Created project: ${newProject.title}`);
@@ -111,7 +111,7 @@ async function testProjectOperations() {
     }
 
     PluginAPI.showSnack({
-      msg: '✅ Project operations test completed!',
+      msg: 'Project operations test completed',
       type: 'SUCCESS',
     });
   } catch (error) {
@@ -130,7 +130,7 @@ async function testTagOperations() {
 
     // Create a test tag
     const newTag = await PluginAPI.addTag({
-      title: '🧪 API Test Tag - ' + Date.now(),
+      title: 'API Test Tag - ' + Date.now(),
       color: '#' + Math.floor(Math.random() * 16777215).toString(16), // Random color
     });
     logResult('addTag', `Created tag: ${newTag.title}`);
@@ -144,7 +144,7 @@ async function testTagOperations() {
     }
 
     PluginAPI.showSnack({
-      msg: '✅ Tag operations test completed!',
+      msg: 'Tag operations test completed',
       type: 'SUCCESS',
     });
   } catch (error) {
@@ -233,7 +233,7 @@ PluginAPI.registerHook('PROJECT_SWITCH', (projectData) => {
 // Register UI elements
 PluginAPI.registerHeaderButton({
   label: 'Run API Tests',
-  icon: 'science',
+  icon: 'play_arrow',
   onClick: runAllTests,
 });
 
@@ -254,9 +254,9 @@ PluginAPI.registerShortcut({
 // Main test runner
 async function runAllTests() {
   PluginAPI.showSnack({
-    msg: '🧪 Running all API tests...',
+    msg: 'Running all API tests...',
     type: 'CUSTOM',
-    ico: 'science',
+    ico: 'play_arrow',
   });
 
   console.log('========================================');
@@ -286,8 +286,8 @@ async function runAllTests() {
 // Show initialization message
 setTimeout(() => {
   PluginAPI.showSnack({
-    msg: '🧪 API Test Plugin ready! Use header button to run tests.',
+    msg: 'API Test Plugin ready! Use header button to run tests.',
     type: 'SUCCESS',
-    ico: 'science',
+    ico: 'check',
   });
 }, 1000);
