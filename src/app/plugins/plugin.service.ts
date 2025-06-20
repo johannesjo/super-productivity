@@ -22,7 +22,7 @@ import { MatDialog } from '@angular/material/dialog';
 import {
   PluginNodeConsentDialogComponent,
   PluginNodeConsentDialogData,
-} from './ui/plugin-node-consent-dialog/plugin-node-consent-dialog.component';
+} from './ui/plugin-node-consent-dialog/plugin-node-consent-dialog-simple.component';
 import { first } from 'rxjs/operators';
 import { PluginCleanupService } from './plugin-cleanup.service';
 import { PluginLoaderService } from './plugin-loader.service';
@@ -904,7 +904,7 @@ export class PluginService implements OnDestroy {
   }
 
   /**
-   * Get consent for Node.js execution permissions
+   * Get consent for Node.js execution permissions (KISS approach)
    */
   private async _getNodeExecutionConsent(manifest: PluginManifest): Promise<boolean> {
     // Check if consent was already given and stored
@@ -914,46 +914,31 @@ export class PluginService implements OnDestroy {
       return true;
     }
 
-    // First confirmation dialog
-    const firstConfirmation = await this._dialog
+    // Single, simple consent dialog
+    const result = await this._dialog
       .open(PluginNodeConsentDialogComponent, {
         data: {
           manifest,
-          isFirstConfirmation: true,
         } as PluginNodeConsentDialogData,
         disableClose: false,
-        width: '600px',
+        width: '500px',
       })
       .afterClosed()
       .pipe(first())
       .toPromise();
 
-    if (!firstConfirmation) {
-      return false;
+    if (result && result.granted) {
+      // Store consent if user chose to remember
+      if (result.remember) {
+        // Delay write to avoid sync conflicts during startup
+        setTimeout(() => {
+          this._pluginMetaPersistenceService.setNodeExecutionConsent(manifest.id, true);
+        }, 5000);
+      }
+      return true;
     }
 
-    // Second confirmation dialog
-    const secondConfirmation = await this._dialog
-      .open(PluginNodeConsentDialogComponent, {
-        data: {
-          manifest,
-          isFirstConfirmation: false,
-        } as PluginNodeConsentDialogData,
-        disableClose: false,
-        width: '600px',
-      })
-      .afterClosed()
-      .pipe(first())
-      .toPromise();
-
-    if (secondConfirmation) {
-      // Store consent for future sessions, but avoid immediate pfapi write during startup
-      setTimeout(() => {
-        this._pluginMetaPersistenceService.setNodeExecutionConsent(manifest.id, true);
-      }, 5000); // Delay write to avoid sync conflicts during startup
-    }
-
-    return secondConfirmation === true;
+    return false;
   }
 
   /**

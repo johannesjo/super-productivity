@@ -1,209 +1,96 @@
 import { Injectable } from '@angular/core';
 import { PluginManifest } from './plugin-api.model';
-import {
-  validatePluginManifest,
-  requiresDangerousPermissions,
-  hasNodeExecutionPermission,
-} from './util/validate-manifest.util';
 
-// TODO should be simple util functions maybe
+/**
+ * Simplified plugin security service following KISS principles.
+ * Focuses on user awareness rather than restrictive validation.
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class PluginSecurityService {
-  private readonly MAX_PLUGIN_SIZE = 500 * 1024; // 500KB
-  private readonly DANGEROUS_PATTERNS = [
-    // Very minimal patterns - only block the most obvious security issues
-    // Only block eval with string literals
-    /\beval\s*\(\s*["'`]/,
-    // Only block new Function with string literals
-    /new\s+Function\s*\(\s*["'`]/,
-    // Block dangerous Node.js APIs only with string literals
-    /require\s*\(\s*['"`](fs|child_process|vm|cluster)['"`]\s*\)/,
-    // Block direct prototype manipulation
-    /__proto__/,
-    // Allow everything else for maximum compatibility
-  ];
-
-  constructor() {}
+  private readonly MAX_PLUGIN_SIZE = 1024 * 1024; // 1MB - be generous
 
   /**
-   * Validate plugin code for security issues
+   * Analyze plugin code and return warnings for user awareness.
+   * Does NOT block execution - trusts users to make informed decisions.
    */
-  validatePluginCode(
+  analyzePluginCode(
     code: string,
     manifest?: PluginManifest,
-  ): { isValid: boolean; errors: string[] } {
-    const errors: string[] = [];
+  ): { warnings: string[]; info: string[] } {
+    const warnings: string[] = [];
+    const info: string[] = [];
 
-    // Check plugin size
+    // Size check (informational)
     if (code.length > this.MAX_PLUGIN_SIZE) {
-      errors.push(`Plugin code exceeds maximum size of ${this.MAX_PLUGIN_SIZE} bytes`);
-    }
-
-    // Check if plugin has nodeExecution permission
-    const hasNodePermission =
-      manifest?.permissions?.includes('nodeExecution') ||
-      manifest?.permissions?.includes('executeNodeScript');
-
-    // Check for dangerous patterns, but allow some for plugins with nodeExecution permission
-    for (const pattern of this.DANGEROUS_PATTERNS) {
-      // Skip fs/child_process checks for plugins with nodeExecution permission
-      if (
-        hasNodePermission &&
-        (pattern.source.includes('fs|child_process') ||
-          pattern.source.includes('(fs|child_process|vm|cluster)'))
-      ) {
-        continue;
-      }
-
-      if (pattern.test(code)) {
-        errors.push(
-          `Plugin code contains potentially dangerous pattern: ${pattern.source}`,
-        );
-      }
-    }
-
-    // Check for attempts to access forbidden globals - be more specific
-    // Only check for actual dangerous usage, not just the word appearing
-    const forbiddenPatterns = [
-      { pattern: /\bprocess\s*\.\s*exit/, name: 'process.exit' },
-    ];
-
-    // Only add fs and child_process restrictions for plugins without nodeExecution permission
-    if (!hasNodePermission) {
-      forbiddenPatterns.push(
-        { pattern: /\brequire\s*\(\s*['"`]fs['"`]\)/, name: 'require("fs")' },
-        {
-          pattern: /\brequire\s*\(\s*['"`]child_process['"`]\)/,
-          name: 'require("child_process")',
-        },
+      warnings.push(
+        `Plugin is large (${Math.round(code.length / 1024)}KB). This may impact performance.`,
       );
     }
 
-    for (const { pattern, name } of forbiddenPatterns) {
-      if (pattern.test(code)) {
-        errors.push(`Plugin code attempts to use forbidden API: ${name}`);
+    // Look for common patterns and inform user
+    if (/eval\s*\(/.test(code)) {
+      info.push('Uses eval() - plugin can execute dynamic code');
+    }
+
+    if (/require\s*\(\s*['"`](fs|child_process)/.test(code)) {
+      if (manifest?.permissions?.includes('nodeExecution')) {
+        info.push('Uses file system or process APIs (has permission)');
+      } else {
+        warnings.push('Attempts to use Node.js APIs without permission - will fail');
       }
     }
 
-    return {
-      isValid: errors.length === 0,
-      errors,
-    };
-  }
-
-  /**
-   * Validate plugin manifest for security issues.
-   * Delegates to shared util function.
-   */
-  validatePluginManifest(manifest: PluginManifest): {
-    isValid: boolean;
-    errors: string[];
-  } {
-    return validatePluginManifest(manifest);
-  }
-
-  // TODO remove
-  /**
-   * Check if plugin assets are safe
-   */
-  validatePluginAssets(assets: string[]): { isValid: boolean; errors: string[] } {
-    const errors: string[] = [];
-    const allowedExtensions = ['.svg', '.png', '.jpg', '.jpeg', '.gif', '.css', '.html'];
-
-    for (const asset of assets) {
-      // Check for path traversal attempts
-      if (asset.includes('../') || asset.includes('..\\')) {
-        errors.push(`Asset path contains path traversal: ${asset}`);
-        continue;
-      }
-
-      // Check file extension
-      const extension = asset.toLowerCase().substring(asset.lastIndexOf('.'));
-      if (!allowedExtensions.includes(extension)) {
-        errors.push(`Asset has disallowed extension: ${asset}`);
-      }
-
-      // Check for absolute paths
-      if (asset.startsWith('/') || asset.includes(':')) {
-        errors.push(`Asset path must be relative: ${asset}`);
-      }
+    if (/fetch|XMLHttpRequest/.test(code)) {
+      info.push('Makes network requests');
     }
 
-    return {
-      isValid: errors.length === 0,
-      errors,
-    };
+    if (/localStorage|sessionStorage/.test(code)) {
+      info.push('Uses browser storage');
+    }
+
+    return { warnings, info };
   }
 
   /**
-   * Sanitize HTML content from plugins with comprehensive security measures
+   * Check if plugin requires elevated permissions.
+   * Simplified to focus only on truly dangerous permissions.
+   */
+  hasElevatedPermissions(manifest: PluginManifest): boolean {
+    return manifest.permissions?.includes('nodeExecution') || false;
+  }
+
+  /**
+   * Get human-readable permission descriptions
+   */
+  getPermissionDescriptions(manifest: PluginManifest): string[] {
+    const descriptions: string[] = [];
+
+    if (manifest.permissions?.includes('nodeExecution')) {
+      descriptions.push('🔴 Can execute system commands and access files');
+    }
+
+    if (manifest.iFrame) {
+      descriptions.push('🟡 Displays custom user interface');
+    }
+
+    if (manifest.hooks && manifest.hooks.length > 0) {
+      descriptions.push('🟢 Responds to app events: ' + manifest.hooks.join(', '));
+    }
+
+    return descriptions;
+  }
+
+  /**
+   * Minimal HTML sanitization - just prevent the worst attacks.
+   * Trust the browser's built-in protections for most things.
    */
   sanitizeHtml(html: string): string {
-    // Comprehensive HTML sanitization
-    return (
-      html
-        // Remove dangerous elements completely
-        .replace(/<iframe[^>]*>.*?<\/iframe>/gis, '')
-        .replace(/<object[^>]*>.*?<\/object>/gis, '')
-        .replace(/<embed[^>]*>/gi, '')
-        .replace(/<applet[^>]*>.*?<\/applet>/gis, '')
-        .replace(/<meta[^>]*>/gi, '')
-        .replace(/<base[^>]*>/gi, '')
-        // .replace(/<script[^>]*>.*?<\/script>/gis, '')
-        // .replace(/<link[^>]*>/gi, '')
-        // .replace(/<form[^>]*>.*?<\/form>/gis, '')
-        // .replace(/<input[^>]*>/gi, '')
-        // .replace(/<textarea[^>]*>.*?<\/textarea>/gis, '')
-        // .replace(/<select[^>]*>.*?<\/select>/gis, '')
-        // .replace(/<style[^>]*>.*?<\/style>/gis, '')
-
-        // Remove event handlers
-        // .replace(/\son\w+\s*=\s*["'][^"']*["']/gi, '')
-        // .replace(/\son\w+\s*=\s*[^>\s]+/gi, '')
-
-        // Remove dangerous URLs
-        // .replace(/javascript\s*:/gi, 'removed:')
-        // .replace(/data\s*:/gi, 'removed:')
-        // .replace(/vbscript\s*:/gi, 'removed:')
-        // .replace(/livescript\s*:/gi, 'removed:')
-        // .replace(/mocha\s*:/gi, 'removed:')
-
-        // Remove dangerous attributes
-        // .replace(/\bsrc\s*=\s*["']javascript[^"']*["']/gi, '')
-        // .replace(/\bhref\s*=\s*["']javascript[^"']*["']/gi, '')
-        .replace(/\baction\s*=\s*["'][^"']*["']/gi, '')
-        .replace(/\bformaction\s*=\s*["'][^"']*["']/gi, '')
-
-        // Sanitize style attributes to prevent CSS injection
-        .replace(/\bstyle\s*=\s*["']([^"']*)["']/gi, (match, styleContent) => {
-          const sanitizedStyle = styleContent
-            .replace(/expression\s*\(/gi, 'removed(')
-            .replace(/javascript\s*:/gi, 'removed:')
-            .replace(/vbscript\s*:/gi, 'removed:')
-            .replace(/@import/gi, 'removed')
-            .replace(/behavior\s*:/gi, 'removed:')
-            .replace(/-moz-binding/gi, 'removed')
-            .replace(/url\s*\(\s*["']?javascript/gi, 'url("removed');
-          return `style="${sanitizedStyle}"`;
-        })
-    );
-  }
-
-  /**
-   * Check if a plugin requires dangerous permissions
-   * Delegates to shared util function.
-   */
-  requiresDangerousPermissions(manifest: PluginManifest): boolean {
-    return requiresDangerousPermissions(manifest);
-  }
-
-  /**
-   * Check if plugin has node execution permission
-   * Delegates to shared util function.
-   */
-  hasNodeExecutionPermission(manifest: PluginManifest): boolean {
-    return hasNodeExecutionPermission(manifest);
+    // Only remove truly dangerous elements
+    return html
+      .replace(/<script[^>]*>.*?<\/script>/gis, '') // No inline scripts
+      .replace(/<iframe[^>]*>.*?<\/iframe>/gis, '') // No nested iframes
+      .replace(/javascript:/gi, '#'); // No javascript: URLs
   }
 }
