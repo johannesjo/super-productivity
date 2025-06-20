@@ -208,12 +208,6 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
 
     // Set up message communication
     window.addEventListener('message', this._messageListener);
-    this._cleanupService.registerEventListener(
-      pluginId,
-      window,
-      'message',
-      this._messageListener,
-    );
 
     // Create safe URL and set iframe source
     const safeUrl = this._sanitizer.bypassSecurityTrustResourceUrl(iframeUrl);
@@ -236,5 +230,10 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
 
   onIframeLoad(): void {
     console.log('Plugin iframe loaded for plugin:', this.pluginId());
+
+    // Register iframe with cleanup service
+    if (this.iframeRef?.nativeElement && this.pluginId()) {
+      this._cleanupService.registerIframe(this.pluginId(), this.iframeRef.nativeElement);
+    }
   }
 }
