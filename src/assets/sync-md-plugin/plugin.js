@@ -516,6 +516,7 @@ class SyncMdPlugin {
 
   async syncSubTasks(markdownSubTasks, projectSubTasks, parentId) {
     const subTaskIds = [];
+    let hasNewSubTasks = false;
 
     // Process each markdown subtask by position
     for (let i = 0; i < markdownSubTasks.length; i++) {
@@ -532,6 +533,7 @@ class SyncMdPlugin {
           isDone: mdSubTask.isDone,
         });
         subTaskIds.push(subTaskId);
+        hasNewSubTasks = true;
       } else {
         // Update existing subtask if needed
         subTaskIds.push(projectSubTask.id);
@@ -557,9 +559,33 @@ class SyncMdPlugin {
       );
     }
 
-    // Reorder subtasks if needed
-    if (subTaskIds.length > 0 && PluginAPI.reorderTasks) {
-      await PluginAPI.reorderTasks(subTaskIds, parentId, 'task');
+    // Reorder subtasks if needed (skip if we just created new subtasks)
+    if (subTaskIds.length > 0 && PluginAPI.reorderTasks && !hasNewSubTasks) {
+      // Double-check that all subtasks still belong to this parent
+      // (they might have been created but not yet added to parent's subTaskIds)
+      const currentTasks = await PluginAPI.getTasks();
+      const parentTask = currentTasks.find((t) => t.id === parentId);
+
+      if (parentTask && parentTask.subTaskIds) {
+        const validSubTaskIds = subTaskIds.filter((taskId) =>
+          parentTask.subTaskIds.includes(taskId),
+        );
+
+        if (validSubTaskIds.length > 0) {
+          console.log(
+            `[Sync.md] Reordering ${validSubTaskIds.length} subtasks for parent ${parentId}`,
+          );
+          await PluginAPI.reorderTasks(validSubTaskIds, parentId, 'task');
+        } else {
+          console.log(`[Sync.md] No valid subtasks to reorder for parent ${parentId}`);
+        }
+      } else {
+        console.log(`[Sync.md] Parent task ${parentId} not found or has no subTaskIds`);
+      }
+    } else if (hasNewSubTasks) {
+      console.log(
+        `[Sync.md] Skipping reorder - new subtasks were created and are already in correct order`,
+      );
     }
   }
 
