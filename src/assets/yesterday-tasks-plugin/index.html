@@ -70,30 +70,6 @@
         text-align: right;
       }
 
-      .task-done {
-        text-decoration: line-through;
-        opacity: 0.7;
-      }
-
-      .summary {
-        margin-top: 20px;
-        padding: 20px 0;
-        text-align: center;
-        border-top: 1px solid var(--border-color);
-      }
-
-      .summary-label {
-        font-size: 14px;
-        color: var(--text-secondary);
-        margin-bottom: 8px;
-      }
-
-      .summary-value {
-        font-size: 24px;
-        font-weight: 600;
-        color: var(--primary-color);
-      }
-
       .project-tag {
         display: inline-block;
         padding: 2px 8px;
@@ -305,9 +281,6 @@
           projectMap[project.id] = project.title;
         });
 
-        // Calculate total time
-        const totalTime = tasks.reduce((sum, task) => sum + task.yesterdayTimeSpent, 0);
-
         // Build task list HTML
         let html = '';
 
@@ -340,13 +313,23 @@
         return div.innerHTML;
       }
 
+      // Refresh function for hooks
+      async function refreshTasks() {
+        const tasks = await getYesterdayTasks();
+        const projects = await PluginAPI.getAllProjects();
+        displayTasks(tasks, projects);
+      }
+
       // Register hooks to refresh on task changes
       function setupHooks() {
-        PluginAPI.registerHook(PluginAPI.Hooks.TASK_UPDATE, () => {
-          init();
+        PluginAPI.registerHook(PluginAPI.Hooks.TASK_UPDATE, (taskData) => {
+          refreshTasks();
         });
-        PluginAPI.registerHook(PluginAPI.Hooks.TASK_COMPLETE, () => {
-          init();
+        PluginAPI.registerHook(PluginAPI.Hooks.TASK_COMPLETE, (taskData) => {
+          refreshTasks();
+        });
+        PluginAPI.registerHook(PluginAPI.Hooks.TASK_DELETE, (taskData) => {
+          refreshTasks();
         });
       }
 
