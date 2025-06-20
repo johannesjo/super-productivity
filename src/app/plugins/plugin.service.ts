@@ -26,6 +26,7 @@ import {
 import { first } from 'rxjs/operators';
 import { PluginCleanupService } from './plugin-cleanup.service';
 import { PluginLoaderService } from './plugin-loader.service';
+import { validatePluginManifest } from './util/validate-manifest.util';
 
 @Injectable({
   providedIn: 'root',
@@ -173,7 +174,7 @@ export class PluginService implements OnDestroy {
       );
 
       // Validate manifest and code
-      const manifestValidation = this._pluginSecurity.validatePluginManifest(manifest);
+      const manifestValidation = validatePluginManifest(manifest);
       if (!manifestValidation.isValid) {
         throw new Error(
           `Plugin manifest validation failed: ${manifestValidation.errors.join(', ')}`,
@@ -181,7 +182,7 @@ export class PluginService implements OnDestroy {
       }
 
       // Check for dangerous permissions
-      if (this._pluginSecurity.requiresDangerousPermissions(manifest)) {
+      if (this._pluginSecurity.hasElevatedPermissions(manifest)) {
         if (!IS_ELECTRON) {
           // In web version, create a disabled placeholder for nodeExecution plugins
           const placeholderInstance: PluginInstance = {
@@ -203,15 +204,13 @@ export class PluginService implements OnDestroy {
         }
       }
 
-      // Validate plugin code
-      const codeValidation = this._pluginSecurity.validatePluginCode(
-        pluginCode,
-        manifest,
-      );
-      if (!codeValidation.isValid) {
-        throw new Error(
-          `Plugin code validation failed: ${codeValidation.errors.join(', ')}`,
-        );
+      // Analyze plugin code (informational only - KISS approach)
+      const codeAnalysis = this._pluginSecurity.analyzePluginCode(pluginCode, manifest);
+      if (codeAnalysis.warnings.length > 0) {
+        console.warn(`Plugin ${manifest.id} warnings:`, codeAnalysis.warnings);
+      }
+      if (codeAnalysis.info.length > 0) {
+        console.info(`Plugin ${manifest.id} info:`, codeAnalysis.info);
       }
 
       // If plugin is disabled, create a placeholder instance without loading code
@@ -492,7 +491,7 @@ export class PluginService implements OnDestroy {
       const manifest: PluginManifest = JSON.parse(manifestText);
 
       // Validate manifest
-      const manifestValidation = this._pluginSecurity.validatePluginManifest(manifest);
+      const manifestValidation = validatePluginManifest(manifest);
       if (!manifestValidation.isValid) {
         throw new Error(
           `Plugin manifest validation failed: ${manifestValidation.errors.join(', ')}`,
@@ -545,15 +544,13 @@ export class PluginService implements OnDestroy {
         }
       }
 
-      // Validate plugin code
-      const codeValidation = this._pluginSecurity.validatePluginCode(
-        pluginCode,
-        manifest,
-      );
-      if (!codeValidation.isValid) {
-        throw new Error(
-          `Plugin code validation failed: ${codeValidation.errors.join(', ')}`,
-        );
+      // Analyze plugin code (informational only - KISS approach)
+      const codeAnalysis = this._pluginSecurity.analyzePluginCode(pluginCode, manifest);
+      if (codeAnalysis.warnings.length > 0) {
+        console.warn(`Plugin ${manifest.id} warnings:`, codeAnalysis.warnings);
+      }
+      if (codeAnalysis.info.length > 0) {
+        console.info(`Plugin ${manifest.id} info:`, codeAnalysis.info);
       }
 
       // Check if plugin is enabled (default to true for new uploads)
@@ -585,7 +582,7 @@ export class PluginService implements OnDestroy {
       }
 
       // Check for dangerous permissions in web version
-      if (this._pluginSecurity.requiresDangerousPermissions(manifest) && !IS_ELECTRON) {
+      if (this._pluginSecurity.hasElevatedPermissions(manifest) && !IS_ELECTRON) {
         // In web version, create a disabled placeholder for nodeExecution plugins
         const placeholderInstance: PluginInstance = {
           manifest,
@@ -813,22 +810,20 @@ export class PluginService implements OnDestroy {
       }
 
       // Validate manifest
-      const manifestValidation = this._pluginSecurity.validatePluginManifest(manifest);
+      const manifestValidation = validatePluginManifest(manifest);
       if (!manifestValidation.isValid) {
         throw new Error(
           `Plugin manifest validation failed: ${manifestValidation.errors.join(', ')}`,
         );
       }
 
-      // Validate plugin code
-      const codeValidation = this._pluginSecurity.validatePluginCode(
-        pluginCode,
-        manifest,
-      );
-      if (!codeValidation.isValid) {
-        throw new Error(
-          `Plugin code validation failed: ${codeValidation.errors.join(', ')}`,
-        );
+      // Analyze plugin code (informational only - KISS approach)
+      const codeAnalysis = this._pluginSecurity.analyzePluginCode(pluginCode, manifest);
+      if (codeAnalysis.warnings.length > 0) {
+        console.warn(`Plugin ${manifest.id} warnings:`, codeAnalysis.warnings);
+      }
+      if (codeAnalysis.info.length > 0) {
+        console.info(`Plugin ${manifest.id} info:`, codeAnalysis.info);
       }
 
       // Check if plugin is enabled
