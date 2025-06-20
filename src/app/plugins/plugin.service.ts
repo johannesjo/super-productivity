@@ -70,7 +70,7 @@ export class PluginService implements OnDestroy {
       await this._loadUploadedPlugins();
 
       // Clean up old cached plugins
-      await this._pluginCacheService.cleanupOldPlugins();
+      // KISS: No automatic cleanup - let users manage their plugins
 
       this._isInitialized = true;
       console.log('Plugin system initialized successfully');
