@@ -59,13 +59,14 @@
   }
 
   <!-- Plugin iframe -->
-  @if (iframeSrc() && !isLoading() && !error()) {
+  @if (iframeSrc() && !error()) {
     <div class="iframe-container">
       <iframe
         #iframe
         [src]="iframeSrc()"
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
         class="plugin-iframe"
+        [class.hidden]="isLoading()"
         (load)="onIframeLoad()"
       >
       </iframe>
