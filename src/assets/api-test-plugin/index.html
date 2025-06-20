@@ -12,8 +12,9 @@
         font-family: monospace;
         margin: 0;
         padding: 20px;
-        background: transparent;
-        color: #ccc;
+        /* Use injected CSS variables for theming */
+        background: var(--theme-bg, transparent);
+        color: var(--theme-text-color, #ccc);
       }
 
       h1 {
@@ -33,7 +34,7 @@
 
       .test-section {
         margin-bottom: 20px;
-        border-left: 2px solid #666;
+        border-left: 2px solid var(--theme-divider-color, #666);
         padding-left: 10px;
       }
 
@@ -45,40 +46,40 @@
 
       button {
         padding: 6px 12px;
-        border: 1px solid #666;
-        background: transparent;
-        color: #ccc;
+        border: 1px solid var(--theme-divider-color, #666);
+        background: var(--theme-card-bg, transparent);
+        color: var(--theme-text-color, #ccc);
         font-size: 12px;
         font-family: monospace;
         cursor: pointer;
       }
 
       button:hover {
-        background: rgba(255, 255, 255, 0.1);
-        border-color: #999;
+        background: var(--theme-select-hover-bg, rgba(255, 255, 255, 0.1));
+        border-color: var(--c-primary, #999);
       }
 
       .run-all {
         display: block;
         width: 100%;
         margin-bottom: 20px;
-        border-color: #4caf50;
-        color: #4caf50;
+        border-color: var(--color-success, #4caf50);
+        color: var(--color-success, #4caf50);
       }
 
       .run-all:hover {
-        background: rgba(76, 175, 80, 0.1);
+        background: var(--color-overlay-light-10, rgba(76, 175, 80, 0.1));
       }
 
       .console {
-        background: rgba(0, 0, 0, 0.3);
-        color: #ccc;
+        background: var(--theme-card-bg, rgba(0, 0, 0, 0.3));
+        color: var(--theme-text-color, #ccc);
         padding: 10px;
         font-size: 11px;
         max-height: 200px;
         overflow-y: auto;
         margin-top: 20px;
-        border: 1px solid #333;
+        border: 1px solid var(--theme-divider-color, #333);
       }
 
       .console-entry {
@@ -86,21 +87,21 @@
       }
 
       .console-entry.success {
-        color: #4caf50;
+        color: var(--color-success, #4caf50);
       }
 
       .console-entry.error {
-        color: #f44336;
+        color: var(--color-danger, #f44336);
       }
 
       .console-entry.info {
-        color: #999;
+        color: var(--theme-text-color-muted, #999);
       }
 
       .api-info {
         margin-bottom: 20px;
         padding-bottom: 10px;
-        border-bottom: 1px solid #333;
+        border-bottom: 1px solid var(--theme-divider-color, #333);
       }
 
       .api-list {
@@ -112,9 +113,9 @@
 
       .api-item {
         padding: 4px 8px;
-        border: 1px solid #444;
+        border: 1px solid var(--theme-divider-color, #444);
         font-size: 11px;
-        color: #999;
+        color: var(--theme-text-color-muted, #999);
       }
     </style>
   </head>
@@ -144,6 +145,12 @@
         <div class="api-item">registerHeaderButton(config)</div>
         <div class="api-item">registerMenuEntry(config)</div>
         <div class="api-item">registerShortcut(config)</div>
+        <div class="api-item">setCounter(key, value)</div>
+        <div class="api-item">getCounter(key)</div>
+        <div class="api-item">incrementCounter(key, amount)</div>
+        <div class="api-item">decrementCounter(key, amount)</div>
+        <div class="api-item">deleteCounter(key)</div>
+        <div class="api-item">getAllCounters()</div>
       </div>
     </div>
 
@@ -188,9 +195,10 @@
       <div class="button-grid">
         <button onclick="testSnackSuccess()">Success Snack</button>
         <button onclick="testSnackError()">Error Snack</button>
-        <button onclick="testSnackCustom()">Custom Snack</button>
+        <button onclick="testSnackCustom()">Info Snack</button>
         <button onclick="testNotification()">Show Notification</button>
         <button onclick="testDialog()">Open Dialog</button>
+        <button onclick="testThemeInfo()">Get Theme Info</button>
       </div>
     </div>
 
@@ -345,6 +353,77 @@
         }
       }
 
+      // Counter test functions
+      async function testSetCounter() {
+        try {
+          const value = Math.floor(Math.random() * 100);
+          await PluginAPI.setCounter('testCounter', value);
+          log(`Counter 'testCounter' set to ${value}`, 'success');
+        } catch (error) {
+          log('Failed to set counter: ' + error.message, 'error');
+        }
+      }
+
+      async function testGetCounter() {
+        try {
+          const value = await PluginAPI.getCounter('testCounter');
+          if (value !== null) {
+            log(`Counter 'testCounter' value: ${value}`, 'success');
+          } else {
+            log("Counter 'testCounter' not found", 'info');
+          }
+        } catch (error) {
+          log('Failed to get counter: ' + error.message, 'error');
+        }
+      }
+
+      async function testIncrementCounter() {
+        try {
+          const newValue = await PluginAPI.incrementCounter('testCounter', 5);
+          log(
+            `Counter 'testCounter' incremented by 5, new value: ${newValue}`,
+            'success',
+          );
+        } catch (error) {
+          log('Failed to increment counter: ' + error.message, 'error');
+        }
+      }
+
+      async function testDecrementCounter() {
+        try {
+          const newValue = await PluginAPI.decrementCounter('testCounter', 3);
+          log(
+            `Counter 'testCounter' decremented by 3, new value: ${newValue}`,
+            'success',
+          );
+        } catch (error) {
+          log('Failed to decrement counter: ' + error.message, 'error');
+        }
+      }
+
+      async function testDeleteCounter() {
+        try {
+          await PluginAPI.deleteCounter('testCounter');
+          log("Counter 'testCounter' deleted", 'success');
+        } catch (error) {
+          log('Failed to delete counter: ' + error.message, 'error');
+        }
+      }
+
+      async function testGetAllCounters() {
+        try {
+          // Create some test counters first
+          await PluginAPI.setCounter('counter1', 10);
+          await PluginAPI.setCounter('counter2', 20);
+          await PluginAPI.setCounter('counter3', 30);
+
+          const counters = await PluginAPI.getAllCounters();
+          log('All counters: ' + JSON.stringify(counters), 'success');
+        } catch (error) {
+          log('Failed to get all counters: ' + error.message, 'error');
+        }
+      }
+
       async function testGetTags() {
         try {
           const tags = await PluginAPI.getAllTags();
@@ -391,11 +470,11 @@
 
       function testSnackCustom() {
         PluginAPI.showSnack({
-          msg: 'This is a custom message',
-          type: 'CUSTOM',
+          msg: 'This is an info message',
+          type: 'INFO',
           ico: 'info',
         });
-        log('Custom snack shown', 'success');
+        log('Info snack shown', 'success');
       }
 
       function testNotification() {
@@ -428,6 +507,81 @@
           ],
         });
         log('Dialog opened', 'success');
+      }
+
+      function testThemeInfo() {
+        try {
+          const themeInfo = PluginAPI.getThemeInfo();
+          log('Theme Info:', 'info');
+          log('  Dark Theme: ' + themeInfo.isDarkTheme, 'info');
+          log('  Primary Color: ' + themeInfo.primaryColor, 'info');
+          log('  Accent Color: ' + themeInfo.accentColor, 'info');
+          log('  Warn Color: ' + themeInfo.warnColor, 'info');
+          log('  Background: ' + themeInfo.backgroundColor, 'info');
+          log('  Text Color: ' + themeInfo.textColor, 'info');
+
+          // Also show in a dialog
+          PluginAPI.openDialog({
+            title: 'Current Theme Information',
+            htmlContent: `
+              <div style="padding: 20px; font-family: monospace;">
+                <h3 style="margin: 0 0 15px 0;">Theme Variables</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr style="border-bottom: 1px solid var(--theme-divider-color, #333);">
+                    <td style="padding: 8px;">Dark Theme</td>
+                    <td style="padding: 8px; text-align: right;">${themeInfo.isDarkTheme ? 'Yes' : 'No'}</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--theme-divider-color, #333);">
+                    <td style="padding: 8px;">Primary Color</td>
+                    <td style="padding: 8px; text-align: right;">
+                      <span style="display: inline-block; width: 20px; height: 20px; background: ${themeInfo.primaryColor}; vertical-align: middle; margin-right: 8px; border: 1px solid var(--theme-divider-color, #333);"></span>
+                      ${themeInfo.primaryColor}
+                    </td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--theme-divider-color, #333);">
+                    <td style="padding: 8px;">Accent Color</td>
+                    <td style="padding: 8px; text-align: right;">
+                      <span style="display: inline-block; width: 20px; height: 20px; background: ${themeInfo.accentColor}; vertical-align: middle; margin-right: 8px; border: 1px solid var(--theme-divider-color, #333);"></span>
+                      ${themeInfo.accentColor}
+                    </td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--theme-divider-color, #333);">
+                    <td style="padding: 8px;">Warn Color</td>
+                    <td style="padding: 8px; text-align: right;">
+                      <span style="display: inline-block; width: 20px; height: 20px; background: ${themeInfo.warnColor}; vertical-align: middle; margin-right: 8px; border: 1px solid var(--theme-divider-color, #333);"></span>
+                      ${themeInfo.warnColor}
+                    </td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--theme-divider-color, #333);">
+                    <td style="padding: 8px;">Background</td>
+                    <td style="padding: 8px; text-align: right;">
+                      <span style="display: inline-block; width: 20px; height: 20px; background: ${themeInfo.backgroundColor}; vertical-align: middle; margin-right: 8px; border: 1px solid var(--theme-divider-color, #333);"></span>
+                      ${themeInfo.backgroundColor}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px;">Text Color</td>
+                    <td style="padding: 8px; text-align: right;">
+                      <span style="display: inline-block; width: 20px; height: 20px; background: ${themeInfo.textColor}; vertical-align: middle; margin-right: 8px; border: 1px solid var(--theme-divider-color, #333);"></span>
+                      ${themeInfo.textColor}
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin-top: 15px; font-size: 12px; color: var(--theme-text-color-muted, #999);">
+                  Plugins automatically receive all CSS variables from the host application, allowing seamless theme integration.
+                </p>
+              </div>
+            `,
+            buttons: [
+              {
+                label: 'Close',
+                color: 'primary',
+              },
+            ],
+          });
+        } catch (error) {
+          log('Failed to get theme info: ' + error.message, 'error');
+        }
       }
 
       async function runAllTests() {
@@ -470,6 +624,22 @@
         await testCreateTag();
         await new Promise((r) => setTimeout(r, 500));
 
+        // Test counter API
+        await testSetCounter();
+        await new Promise((r) => setTimeout(r, 500));
+
+        await testGetCounter();
+        await new Promise((r) => setTimeout(r, 500));
+
+        await testIncrementCounter();
+        await new Promise((r) => setTimeout(r, 500));
+
+        await testDecrementCounter();
+        await new Promise((r) => setTimeout(r, 500));
+
+        await testGetAllCounters();
+        await new Promise((r) => setTimeout(r, 500));
+
         testSnackSuccess();
         await new Promise((r) => setTimeout(r, 1500));
 
@@ -497,7 +667,7 @@
                 <div style="flex: 1;">
                   <h4 style="margin-top: 0;">Describe Your Goal</h4>
                   <textarea style="width: 100%; min-height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit;" placeholder="E.g., 'Launch a new mobile app by Q3 2024'">Build a comprehensive plugin system for Super Productivity that allows users to extend functionality</textarea>
-                  
+
                   <h4 style="margin-top: 20px;">Constraints & Preferences</h4>
                   <div style="margin-bottom: 10px;">
                     <label>
@@ -520,7 +690,7 @@
                     </label>
                   </div>
                 </div>
-                
+
                 <div style="flex: 1; background: #f9f9f9; padding: 15px; border-radius: 8px;">
                   <h4 style="margin-top: 0;">Generated Task Breakdown</h4>
                   <div style="max-height: 300px; overflow-y: auto;">
@@ -547,7 +717,7 @@
                   </div>
                 </div>
               </div>
-              
+
               <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px;">
                 <strong>🤖 AI Analysis:</strong> This project would take approximately 42 hours (5-6 days) with the current breakdown. Consider adding a testing phase and security audit.
               </div>
@@ -560,7 +730,7 @@
               onClick: async () => {
                 await PluginAPI.showSnack({
                   msg: 'Regenerating task breakdown...',
-                  type: 'CUSTOM',
+                  type: 'INFO',
                   ico: 'refresh',
                 });
               },
@@ -597,7 +767,7 @@
                   <button style="padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer;">Year</button>
                 </div>
               </div>
-              
+
               <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px;">
                 <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px;">
                   <div style="font-size: 2em; font-weight: bold;">147</div>
@@ -620,7 +790,7 @@
                   <div style="font-size: 0.9em; margin-top: 5px; opacity: 0.8;">Keep it up! 🔥</div>
                 </div>
               </div>
-              
+
               <div style="background: #f9f9f9; padding: 20px; border-radius: 8px;">
                 <h4 style="margin-top: 0;">Daily Activity Heatmap</h4>
                 <div style="display: grid; grid-template-columns: auto repeat(7, 1fr); gap: 10px; font-size: 0.9em;">
@@ -632,7 +802,7 @@
                   <div style="text-align: center;">Fri</div>
                   <div style="text-align: center;">Sat</div>
                   <div style="text-align: center;">Sun</div>
-                  
+
                   <div>Morning</div>
                   <div style="background: #c8e6c9; height: 40px; border-radius: 4px;"></div>
                   <div style="background: #4caf50; height: 40px; border-radius: 4px;"></div>
@@ -641,7 +811,7 @@
                   <div style="background: #a5d6a7; height: 40px; border-radius: 4px;"></div>
                   <div style="background: #e8f5e9; height: 40px; border-radius: 4px;"></div>
                   <div style="background: #e8f5e9; height: 40px; border-radius: 4px;"></div>
-                  
+
                   <div>Afternoon</div>
                   <div style="background: #4caf50; height: 40px; border-radius: 4px;"></div>
                   <div style="background: #2e7d32; height: 40px; border-radius: 4px;"></div>
@@ -650,7 +820,7 @@
                   <div style="background: #4caf50; height: 40px; border-radius: 4px;"></div>
                   <div style="background: #a5d6a7; height: 40px; border-radius: 4px;"></div>
                   <div style="background: #c8e6c9; height: 40px; border-radius: 4px;"></div>
-                  
+
                   <div>Evening</div>
                   <div style="background: #81c784; height: 40px; border-radius: 4px;"></div>
                   <div style="background: #a5d6a7; height: 40px; border-radius: 4px;"></div>
@@ -676,7 +846,7 @@
               onClick: async () => {
                 await PluginAPI.showSnack({
                   msg: 'Generating productivity report...',
-                  type: 'CUSTOM',
+                  type: 'INFO',
                   ico: 'download',
                 });
               },
@@ -687,7 +857,7 @@
               onClick: async () => {
                 await PluginAPI.showSnack({
                   msg: 'Sharing options would appear here',
-                  type: 'CUSTOM',
+                  type: 'INFO',
                   ico: 'share',
                 });
               },
