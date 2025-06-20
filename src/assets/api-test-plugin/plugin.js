@@ -157,7 +157,7 @@ function testUIOperations() {
   console.log('=== Testing UI Operations ===');
 
   // Test different snack types
-  const snackTypes = ['SUCCESS', 'ERROR', 'CUSTOM'];
+  const snackTypes = ['SUCCESS', 'ERROR', 'INFO'];
   let snackIndex = 0;
 
   const showNextSnack = () => {
@@ -203,19 +203,6 @@ PluginAPI.registerHook(PluginAPI.Hooks.CURRENT_TASK_CHANGE, (taskData) => {
 });
 
 // Register UI elements
-PluginAPI.registerHeaderButton({
-  label: 'Run API Tests',
-  icon: 'play_arrow',
-  onClick: runAllTests,
-});
-
-PluginAPI.registerMenuEntry({
-  label: 'API Test Dashboard',
-  icon: 'dashboard',
-  onClick: () => {
-    PluginAPI.showIndexHtmlAsView();
-  },
-});
 
 PluginAPI.registerShortcut({
   id: 'run_api_tests',
@@ -227,7 +214,7 @@ PluginAPI.registerShortcut({
 async function runAllTests() {
   PluginAPI.showSnack({
     msg: 'Running all API tests...',
-    type: 'CUSTOM',
+    type: 'INFO',
     ico: 'play_arrow',
   });
 
