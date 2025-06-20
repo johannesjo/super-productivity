@@ -1872,7 +1872,16 @@
     "ID": "ID:",
     "MIN_VERSION": "Min. Version:",
     "NODE_EXECUTION_REQUIRED": "This plugin requires Node.js execution which is only available in the desktop app.",
-    "TOGGLE_PLUGIN": "Toggle {{pluginName}}"
+    "TOGGLE_PLUGIN": "Toggle {{pluginName}}",
+    "EXPERIMENTAL_WARNING_TITLE": "⚠️ Experimental Feature - Security Warning",
+    "EXPERIMENTAL_WARNING": "The plugin system is in an experimental stage and should be used with extreme caution.",
+    "SECURITY_WARNING": "Plugins have significant access to your data and system. Installing untrusted plugins poses serious security risks:",
+    "RISK_DATA_ACCESS": "Plugins can read, modify, and delete ALL your tasks, projects, and personal data",
+    "RISK_MALICIOUS_CODE": "Malicious plugins could steal sensitive information or corrupt your data",
+    "RISK_SYSTEM_ACCESS": "Desktop plugins with Node.js permissions can execute system commands",
+    "RISK_PERFORMANCE": "Poorly written plugins may cause performance issues or crashes",
+    "RECOMMENDATION": "Only install plugins from trusted sources and review their code if possible. Always backup your data before installing new plugins.",
+    "INSTALL_WARNING": "Before installing a plugin, ensure you trust its source and understand the permissions it requests."
   },
   "SCHEDULE": {
     "NO_REPEATABLE_TASKS": "There are currently no repeated tasks. You can schedule a task by choosing \"Repeat Task\" in the task side panel. To open it click on the most right icon that appears when hovering a task (or just tap on the task on mobile).",
