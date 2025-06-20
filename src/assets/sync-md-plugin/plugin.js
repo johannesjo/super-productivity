@@ -431,9 +431,25 @@ class SyncMdPlugin {
     }
   }
 
+  async waitForTask(taskId, maxRetries = 10) {
+    for (let i = 0; i < maxRetries; i++) {
+      const tasks = await PluginAPI.getTasks();
+      const task = tasks.find((t) => t.id === taskId);
+      if (task) {
+        console.log(`[Sync.md] Task ${taskId} found after ${i + 1} attempts`);
+        return task;
+      }
+      // Wait a bit before retrying
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+    console.warn(`[Sync.md] Task ${taskId} not found after ${maxRetries} attempts`);
+    return null;
+  }
+
   async syncTaskStructure(markdownTasks, projectMainTasks, allProjectTasks) {
     console.log('[Sync.md] Syncing task structure...');
     const mainTaskIds = [];
+    let hasNewMainTasks = false;
 
     // Process each markdown task by position
     for (let i = 0; i < markdownTasks.length; i++) {
@@ -449,17 +465,23 @@ class SyncMdPlugin {
           isDone: mdTask.isDone,
         });
         mainTaskIds.push(taskId);
+        hasNewMainTasks = true;
+
+        // Wait for the task to be available in the store
+        await this.waitForTask(taskId);
 
         // Handle subtasks
         for (let j = 0; j < mdTask.subTasks.length; j++) {
           const mdSubTask = mdTask.subTasks[j];
           console.log(`[Sync.md] Creating subtask: ${mdSubTask.title}`);
-          await PluginAPI.addTask({
+          const subTaskId = await PluginAPI.addTask({
             title: mdSubTask.title,
             parentId: taskId,
             projectId: this.config.projectId,
             isDone: mdSubTask.isDone,
           });
+          // Wait for the subtask to be available
+          await this.waitForTask(subTaskId);
         }
       } else {
         // Update existing task if needed
@@ -494,17 +516,27 @@ class SyncMdPlugin {
     // Reorder ONLY main tasks in the project (not subtasks!)
     // Subtasks should only exist in their parent's subTaskIds array
     if (mainTaskIds.length > 0 && PluginAPI.reorderTasks) {
-      // Double-check that all tasks still belong to this project
-      // (they might have been moved during sync)
+      // Always validate task IDs before reordering to prevent errors
       const currentTasks = await PluginAPI.getTasks();
       const validTaskIds = mainTaskIds.filter((taskId) => {
         const task = currentTasks.find((t) => t.id === taskId);
-        return task && task.projectId === this.config.projectId && !task.parentId;
+        const isValid =
+          task && task.projectId === this.config.projectId && !task.parentId;
+        if (!isValid && task) {
+          console.log(
+            `[Sync.md] Task ${taskId} is not valid for reordering: projectId=${task.projectId}, expected=${this.config.projectId}, parentId=${task.parentId}`,
+          );
+        }
+        return isValid;
       });
 
       if (validTaskIds.length > 0) {
         console.log('[Sync.md] Reordering main tasks in project:', validTaskIds);
-        await PluginAPI.reorderTasks(validTaskIds, this.config.projectId, 'project');
+        try {
+          await PluginAPI.reorderTasks(validTaskIds, this.config.projectId, 'project');
+        } catch (error) {
+          console.error('[Sync.md] Error reordering tasks:', error);
+        }
       } else {
         console.log(
           '[Sync.md] No valid tasks to reorder for project:',
@@ -534,6 +566,8 @@ class SyncMdPlugin {
         });
         subTaskIds.push(subTaskId);
         hasNewSubTasks = true;
+        // Wait for the subtask to be available
+        await this.waitForTask(subTaskId);
       } else {
         // Update existing subtask if needed
         subTaskIds.push(projectSubTask.id);
@@ -566,21 +600,28 @@ class SyncMdPlugin {
       const currentTasks = await PluginAPI.getTasks();
       const parentTask = currentTasks.find((t) => t.id === parentId);
 
-      if (parentTask && parentTask.subTaskIds) {
-        const validSubTaskIds = subTaskIds.filter((taskId) =>
-          parentTask.subTaskIds.includes(taskId),
-        );
-
-        if (validSubTaskIds.length > 0) {
-          console.log(
-            `[Sync.md] Reordering ${validSubTaskIds.length} subtasks for parent ${parentId}`,
+      if (parentTask) {
+        // Check if parent has subTaskIds array (it might be undefined or empty)
+        if (parentTask.subTaskIds && parentTask.subTaskIds.length > 0) {
+          const validSubTaskIds = subTaskIds.filter((taskId) =>
+            parentTask.subTaskIds.includes(taskId),
           );
-          await PluginAPI.reorderTasks(validSubTaskIds, parentId, 'task');
+
+          if (validSubTaskIds.length > 0) {
+            console.log(
+              `[Sync.md] Reordering ${validSubTaskIds.length} subtasks for parent ${parentId}`,
+            );
+            await PluginAPI.reorderTasks(validSubTaskIds, parentId, 'task');
+          } else {
+            console.log(`[Sync.md] No valid subtasks to reorder for parent ${parentId}`);
+          }
         } else {
-          console.log(`[Sync.md] No valid subtasks to reorder for parent ${parentId}`);
+          console.log(
+            `[Sync.md] Parent task ${parentId} has no subtasks in subTaskIds array yet (might be newly created)`,
+          );
         }
       } else {
-        console.log(`[Sync.md] Parent task ${parentId} not found or has no subTaskIds`);
+        console.log(`[Sync.md] Parent task ${parentId} not found`);
       }
     } else if (hasNewSubTasks) {
       console.log(
