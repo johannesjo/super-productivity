@@ -283,64 +283,98 @@ class SyncMdPlugin {
 
   parseMarkdownWithIds(content) {
     const lines = content.split('\n');
-    const tasks = [];
+    const parsedLines = [];
     const taskIdMap = new Map();
-    let currentMainTask = null;
     let lineNumber = 0;
 
+    // First pass: parse all lines into structured data
     for (const line of lines) {
       lineNumber++;
-      const trimmed = line.trim();
 
-      if (!trimmed) continue;
-
-      // Calculate indent level - support 2 spaces, 4 spaces, or tabs
+      // Calculate indentation level (similar to markdown-paste.service)
       const indentMatch = line.match(/^(\s*)/);
       let indentLevel = 0;
-      if (indentMatch) {
-        const indent = indentMatch[1];
-        if (indent.includes('\t')) {
-          // Count tabs
-          indentLevel = (indent.match(/\t/g) || []).length;
-        } else {
-          // Count spaces - common indentations are 2 or 4 spaces
-          const spaceCount = indent.length;
-          // Try to detect the indent size based on the space count
-          if (spaceCount > 0) {
-            // If divisible by 4, assume 4-space indent, otherwise assume 2-space
-            indentLevel =
-              spaceCount % 4 === 0 ? spaceCount / 4 : Math.ceil(spaceCount / 2);
-          }
-        }
+      if (indentMatch && indentMatch[1]) {
+        const whitespace = indentMatch[1];
+        // Count tabs as 1 level each, spaces as 1 level per 2 spaces
+        const tabCount = (whitespace.match(/\t/g) || []).length;
+        const spaceCount = (whitespace.match(/ /g) || []).length;
+        indentLevel = tabCount + Math.floor(spaceCount / 2);
       }
 
-      // Match task with optional ID
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+
+      // Match task with optional ID: - (id) title or * (id) title
       const taskMatch = trimmed.match(/^[-*]\s*(?:\(([^)]+)\))?\s*(.+)$/);
 
       if (taskMatch) {
         const taskId = taskMatch[1] || null;
         const title = taskMatch[2].trim();
 
-        const taskData = {
+        parsedLines.push({
           title,
           id: taskId,
           lineNumber,
           indentLevel,
-          subTasks: [],
-        };
-
-        if (indentLevel === 0) {
-          // Main task
-          currentMainTask = taskData;
-          tasks.push(taskData);
-        } else if (currentMainTask && indentLevel >= 1) {
-          // Sub-task - support any indent level > 0
-          currentMainTask.subTasks.push(taskData);
-        }
+          originalLine: line,
+        });
 
         if (taskId) {
           taskIdMap.set(lineNumber, taskId);
         }
+      }
+    }
+
+    // Second pass: build hierarchical structure
+    const tasks = [];
+    let i = 0;
+
+    while (i < parsedLines.length) {
+      const currentLine = parsedLines[i];
+
+      // Only process top-level items (indentLevel 0) as main tasks
+      if (currentLine.indentLevel === 0) {
+        const task = {
+          title: currentLine.title,
+          id: currentLine.id,
+          lineNumber: currentLine.lineNumber,
+          indentLevel: currentLine.indentLevel,
+          subTasks: [],
+        };
+
+        // Look ahead for nested items
+        let j = i + 1;
+        let firstSubTaskLevel = null;
+
+        // Find all subtasks for this main task
+        while (j < parsedLines.length && parsedLines[j].indentLevel > 0) {
+          const subLine = parsedLines[j];
+
+          // Set the first subtask level if not set
+          if (firstSubTaskLevel === null) {
+            firstSubTaskLevel = subLine.indentLevel;
+          }
+
+          // Only add direct subtasks (at the first subtask level)
+          if (subLine.indentLevel === firstSubTaskLevel) {
+            task.subTasks.push({
+              title: subLine.title,
+              id: subLine.id,
+              lineNumber: subLine.lineNumber,
+              indentLevel: subLine.indentLevel,
+            });
+          }
+          // Skip deeper nested items (they would be sub-subtasks)
+
+          j++;
+        }
+
+        tasks.push(task);
+        i = j; // Skip the nested items we just processed
+      } else {
+        // This shouldn't happen if we process correctly, but skip just in case
+        i++;
       }
     }
 
@@ -350,6 +384,15 @@ class SyncMdPlugin {
       'main tasks with subtasks:',
       tasks.filter((t) => t.subTasks.length > 0).length,
     );
+
+    // Log more details for debugging
+    tasks.forEach((task, idx) => {
+      if (task.subTasks.length > 0) {
+        console.log(
+          `[Sync.md] Task ${idx + 1}: "${task.title}" has ${task.subTasks.length} subtasks`,
+        );
+      }
+    });
 
     return { tasks, taskIdMap };
   }
