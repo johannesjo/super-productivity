@@ -294,9 +294,25 @@ class SyncMdPlugin {
 
       if (!trimmed) continue;
 
-      // Calculate indent level
+      // Calculate indent level - support 2 spaces, 4 spaces, or tabs
       const indentMatch = line.match(/^(\s*)/);
-      const indentLevel = indentMatch ? Math.floor(indentMatch[1].length / 2) : 0;
+      let indentLevel = 0;
+      if (indentMatch) {
+        const indent = indentMatch[1];
+        if (indent.includes('\t')) {
+          // Count tabs
+          indentLevel = (indent.match(/\t/g) || []).length;
+        } else {
+          // Count spaces - common indentations are 2 or 4 spaces
+          const spaceCount = indent.length;
+          // Try to detect the indent size based on the space count
+          if (spaceCount > 0) {
+            // If divisible by 4, assume 4-space indent, otherwise assume 2-space
+            indentLevel =
+              spaceCount % 4 === 0 ? spaceCount / 4 : Math.ceil(spaceCount / 2);
+          }
+        }
+      }
 
       // Match task with optional ID
       const taskMatch = trimmed.match(/^[-*]\s*(?:\(([^)]+)\))?\s*(.+)$/);
@@ -317,8 +333,8 @@ class SyncMdPlugin {
           // Main task
           currentMainTask = taskData;
           tasks.push(taskData);
-        } else if (currentMainTask && indentLevel === 1) {
-          // Sub-task
+        } else if (currentMainTask && indentLevel >= 1) {
+          // Sub-task - support any indent level > 0
           currentMainTask.subTasks.push(taskData);
         }
 
@@ -327,6 +343,13 @@ class SyncMdPlugin {
         }
       }
     }
+
+    console.log(
+      '[Sync.md] Parsed tasks:',
+      tasks.length,
+      'main tasks with subtasks:',
+      tasks.filter((t) => t.subTasks.length > 0).length,
+    );
 
     return { tasks, taskIdMap };
   }
@@ -376,6 +399,7 @@ class SyncMdPlugin {
         projectTaskMap.delete(taskId);
       } else {
         // Create new task - addTask returns the task ID as a string
+        console.log('[Sync.md] Creating new task:', mdTask.title);
         taskId = await PluginAPI.addTask({
           title: mdTask.title,
           projectId: this.config.projectId,
@@ -385,6 +409,9 @@ class SyncMdPlugin {
           result.updatedTaskIdMap.set(mdTask.lineNumber, taskId);
           result.hasNewIds = true;
           result.created++;
+          console.log('[Sync.md] Created task:', taskId);
+        } else {
+          console.error('[Sync.md] Failed to create task:', mdTask.title);
         }
       }
 
@@ -394,6 +421,13 @@ class SyncMdPlugin {
 
         // Handle sub-tasks
         const subTaskIds = [];
+        console.log(
+          '[Sync.md] Processing',
+          mdTask.subTasks.length,
+          'subtasks for task:',
+          taskId,
+        );
+
         for (const subTask of mdTask.subTasks) {
           let subTaskId = subTask.id;
 
@@ -407,14 +441,33 @@ class SyncMdPlugin {
             projectTaskMap.delete(subTaskId);
           } else {
             // Create new subtask
-            subTaskId = await PluginAPI.addTask({
-              title: subTask.title,
-              parentId: taskId,
-            });
+            console.log(
+              '[Sync.md] Creating subtask:',
+              subTask.title,
+              'for parent:',
+              taskId,
+            );
+            try {
+              subTaskId = await PluginAPI.addTask({
+                title: subTask.title,
+                parentId: taskId,
+                projectId: this.config.projectId,
+              });
 
-            if (subTaskId) {
-              result.updatedTaskIdMap.set(subTask.lineNumber, subTaskId);
-              result.created++;
+              if (subTaskId) {
+                result.updatedTaskIdMap.set(subTask.lineNumber, subTaskId);
+                result.created++;
+                console.log(
+                  '[Sync.md] Created subtask:',
+                  subTaskId,
+                  'for parent:',
+                  taskId,
+                );
+              } else {
+                console.error('[Sync.md] Failed to create subtask:', subTask.title);
+              }
+            } catch (error) {
+              console.error('[Sync.md] Error creating subtask:', error);
             }
           }
 
