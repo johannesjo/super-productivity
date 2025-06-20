@@ -12,6 +12,7 @@ class SyncMdPlugin {
     this.syncInProgress = false;
     this.ignoreNextFileChange = false;
     this.taskIdMap = new Map(); // Maps markdown line to task ID
+    this.orderChangeTimeout = null; // Debounce timer for order changes
   }
 
   async init() {
@@ -32,6 +33,20 @@ class SyncMdPlugin {
       PluginAPI.registerHook(PluginAPI.Hooks.TASK_DELETE, (taskId) => {
         console.log('[Sync.md] Task delete hook triggered:', taskId);
         this.handleTaskDeleted(taskId);
+      });
+      // Register ACTION hook to catch task order changes
+      PluginAPI.registerHook(PluginAPI.Hooks.ACTION, (action) => {
+        // Listen for task movement actions
+        if (
+          action &&
+          action.type &&
+          (action.type.includes('moveTask') ||
+            action.type.includes('reorder') ||
+            action.type.includes('Move Task'))
+        ) {
+          console.log('[Sync.md] Task order change action detected:', action.type);
+          this.handleTaskOrderChange();
+        }
       });
       // Note: There's no direct "task added" hook, it comes through taskUpdate
     }
@@ -741,10 +756,24 @@ class SyncMdPlugin {
       return;
     }
 
-    // Check if the updated task belongs to our project
-    if (task && task.projectId === this.config.projectId) {
+    // The task parameter might be null for order changes
+    // Always sync if we're in bidirectional or projectToFile mode
+    if (!task) {
+      // This might be a task order change
+      console.log('[Sync.md] Possible task order change, syncing to file...');
+      await this.syncProjectToFile();
+    } else if (task.projectId === this.config.projectId) {
+      // Check if the updated task belongs to our project
       console.log('[Sync.md] Project task updated, syncing to file...');
       await this.syncProjectToFile();
+    } else {
+      // Check if it's a subtask of a task in our project
+      const allTasks = await PluginAPI.getTasks();
+      const parentTask = allTasks.find((t) => t.id === task.parentId);
+      if (parentTask && parentTask.projectId === this.config.projectId) {
+        console.log('[Sync.md] Subtask of project task updated, syncing to file...');
+        await this.syncProjectToFile();
+      }
     }
   }
 
@@ -767,6 +796,26 @@ class SyncMdPlugin {
     }
   }
 
+  async handleTaskOrderChange() {
+    if (
+      this.syncInProgress ||
+      !this.config?.projectId ||
+      this.config?.syncDirection === 'fileToProject'
+    ) {
+      return;
+    }
+
+    // Debounce rapid order changes
+    if (this.orderChangeTimeout) {
+      clearTimeout(this.orderChangeTimeout);
+    }
+
+    this.orderChangeTimeout = setTimeout(async () => {
+      console.log('[Sync.md] Processing task order change...');
+      await this.syncProjectToFile();
+    }, 500); // Wait 500ms to batch multiple order changes
+  }
+
   async syncProjectToFile() {
     if (!this.config?.filePath || !PluginAPI?.executeNodeScript) {
       return;
@@ -781,14 +830,45 @@ class SyncMdPlugin {
         (task) => task.projectId === this.config.projectId,
       );
 
+      // Create a set of current task IDs for quick lookup
+      const currentTaskIds = new Set(projectTasks.map((task) => task.id));
+
       // Build markdown structure preserving existing order
       const markdownLines = [];
 
       // If we have a previous file content, try to preserve the order
       let taskOrder = [];
+      let deletedTaskIds = [];
       if (this.lastFileContent) {
         const { tasks: previousTasks } = this.parseMarkdownWithIds(this.lastFileContent);
-        taskOrder = previousTasks.map((t) => t.id).filter((id) => id);
+
+        // Find deleted tasks (tasks that were in the file but no longer exist)
+        previousTasks.forEach((prevTask) => {
+          if (prevTask.id && !currentTaskIds.has(prevTask.id)) {
+            deletedTaskIds.push(prevTask.id);
+            console.log(
+              '[Sync.md] Task deleted from project:',
+              prevTask.id,
+              prevTask.title,
+            );
+          }
+          // Check subtasks too
+          prevTask.subTasks.forEach((subTask) => {
+            if (subTask.id && !currentTaskIds.has(subTask.id)) {
+              deletedTaskIds.push(subTask.id);
+              console.log(
+                '[Sync.md] Subtask deleted from project:',
+                subTask.id,
+                subTask.title,
+              );
+            }
+          });
+        });
+
+        // Only include task IDs that still exist
+        taskOrder = previousTasks
+          .map((t) => t.id)
+          .filter((id) => id && currentTaskIds.has(id));
       }
 
       // Create a map for quick lookup
@@ -801,7 +881,7 @@ class SyncMdPlugin {
       const processedTaskIds = new Set();
       const mainTasks = [];
 
-      // First, add tasks in their previous order
+      // First, add tasks in their previous order (only if they still exist)
       for (const taskId of taskOrder) {
         const task = taskMap.get(taskId);
         if (task && !task.parentId) {
@@ -810,11 +890,19 @@ class SyncMdPlugin {
         }
       }
 
-      // Then add any new tasks that weren't in the file before
+      // Then add any new tasks that weren't in the file before, maintaining their order
+      // from the projectTasks array (which should reflect the actual project order)
       for (const task of projectTasks) {
         if (!task.parentId && !processedTaskIds.has(task.id)) {
           mainTasks.push(task);
         }
+      }
+
+      // If deleted tasks were found, log summary
+      if (deletedTaskIds.length > 0) {
+        console.log(
+          `[Sync.md] Removed ${deletedTaskIds.length} deleted tasks from markdown`,
+        );
       }
 
       // Process main tasks and their subtasks
@@ -915,6 +1003,10 @@ class SyncMdPlugin {
   destroy() {
     console.log('[Sync.md] Plugin destroying...');
     this.stopWatching();
+    if (this.orderChangeTimeout) {
+      clearTimeout(this.orderChangeTimeout);
+      this.orderChangeTimeout = null;
+    }
   }
 }
 
