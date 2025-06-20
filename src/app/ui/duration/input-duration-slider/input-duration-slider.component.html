@@ -1,7 +1,7 @@
 <div class="circle bg-primary">
   <div class="inner-circle"></div>
   <div class="dots">
-    @for (hour of dots; track trackByIndex($index, hour)) {
+    @for (hour of dots; track $index) {
       <div
         @dot
         class="dot bg-100"

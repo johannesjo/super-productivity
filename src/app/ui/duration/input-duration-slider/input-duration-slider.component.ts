@@ -56,6 +56,10 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   // TODO: Skipped for migration because:
   //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set model(val: number) {
+    // Ensure val is a valid number
+    if (!Number.isFinite(val) || Number.isNaN(val)) {
+      val = 0;
+    }
     if (this._model !== val) {
       this._model = val;
       this.setRotationFromValue(val);
@@ -170,6 +174,14 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   }
 
   setDots(hours: number = 0): void {
+    // Ensure hours is a valid number
+    if (!Number.isFinite(hours) || Number.isNaN(hours)) {
+      hours = 0;
+    }
+
+    // Round to ensure we have an integer
+    hours = Math.floor(hours);
+
     if (hours > 12) {
       hours = 12;
     }
@@ -232,6 +244,11 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   }
 
   setRotationFromValue(val: number = this._model): void {
+    // Ensure val is a valid number, default to 0 if not
+    if (!Number.isFinite(val) || Number.isNaN(val) || val < 0) {
+      val = 0;
+    }
+
     const totalMinutes = Math.floor(val / (1000 * 60));
     const minutes = totalMinutes % 60;
     const hours = Math.floor(val / (1000 * 60 * 60));
@@ -241,9 +258,5 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
     this.minutesBefore = minutes;
     this.setCircleRotation(degrees);
     this._cd.detectChanges();
-  }
-
-  trackByIndex(i: number, p: any): number {
-    return i;
   }
 }
