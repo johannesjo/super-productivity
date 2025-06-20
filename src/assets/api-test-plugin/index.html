@@ -9,94 +9,80 @@
     <title>API Test Plugin Dashboard</title>
     <style>
       body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-family: monospace;
         margin: 0;
         padding: 20px;
-        background-color: #f5f5f5;
-        color: #333;
-      }
-
-      .container {
-        max-width: 800px;
-        margin: 0 auto;
-        background: white;
-        padding: 30px;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        background: transparent;
+        color: #ccc;
       }
 
       h1 {
-        color: #1976d2;
-        margin-bottom: 30px;
+        font-size: 18px;
+        margin: 0 0 20px 0;
+      }
+
+      h2 {
+        font-size: 14px;
+        margin: 0 0 10px 0;
+      }
+
+      h3 {
+        font-size: 12px;
+        margin: 0 0 8px 0;
       }
 
       .test-section {
-        margin-bottom: 30px;
-        padding: 20px;
-        background: #f8f9fa;
-        border-radius: 6px;
-        border-left: 4px solid #1976d2;
-      }
-
-      .test-section h2 {
-        margin-top: 0;
-        color: #333;
-        font-size: 18px;
+        margin-bottom: 20px;
+        border-left: 2px solid #666;
+        padding-left: 10px;
       }
 
       .button-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 10px;
-        margin-top: 15px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
       }
 
       button {
-        padding: 12px 20px;
-        border: none;
-        border-radius: 4px;
-        background: #1976d2;
-        color: white;
-        font-size: 14px;
+        padding: 6px 12px;
+        border: 1px solid #666;
+        background: transparent;
+        color: #ccc;
+        font-size: 12px;
+        font-family: monospace;
         cursor: pointer;
-        transition: background 0.3s;
       }
 
       button:hover {
-        background: #1565c0;
-      }
-
-      button:active {
-        transform: translateY(1px);
+        background: rgba(255, 255, 255, 0.1);
+        border-color: #999;
       }
 
       .run-all {
-        background: #4caf50;
-        font-size: 16px;
-        padding: 15px 30px;
+        display: block;
         width: 100%;
-        margin-bottom: 30px;
+        margin-bottom: 20px;
+        border-color: #4caf50;
+        color: #4caf50;
       }
 
       .run-all:hover {
-        background: #43a047;
+        background: rgba(76, 175, 80, 0.1);
       }
 
       .console {
-        background: #1e1e1e;
-        color: #d4d4d4;
-        padding: 15px;
-        border-radius: 4px;
-        font-family: 'Consolas', 'Monaco', monospace;
-        font-size: 12px;
-        max-height: 300px;
+        background: rgba(0, 0, 0, 0.3);
+        color: #ccc;
+        padding: 10px;
+        font-size: 11px;
+        max-height: 200px;
         overflow-y: auto;
         margin-top: 20px;
+        border: 1px solid #333;
       }
 
       .console-entry {
-        margin: 5px 0;
-        line-height: 1.4;
+        margin: 2px 0;
       }
 
       .console-entry.success {
@@ -108,121 +94,111 @@
       }
 
       .console-entry.info {
-        color: #2196f3;
+        color: #999;
       }
 
       .api-info {
-        background: #e3f2fd;
-        padding: 15px;
-        border-radius: 4px;
         margin-bottom: 20px;
-      }
-
-      .api-info h3 {
-        margin-top: 0;
-        color: #1976d2;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #333;
       }
 
       .api-list {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 10px;
-        margin-top: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
       }
 
       .api-item {
-        background: white;
-        padding: 8px 12px;
-        border-radius: 4px;
-        border: 1px solid #e0e0e0;
-        font-family: monospace;
-        font-size: 13px;
+        padding: 4px 8px;
+        border: 1px solid #444;
+        font-size: 11px;
+        color: #999;
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <h1>🧪 API Test Plugin Dashboard</h1>
+    <h1>API Test Plugin</h1>
 
-      <div class="api-info">
-        <h3>Available API Methods</h3>
-        <div class="api-list">
-          <div class="api-item">getTasks()</div>
-          <div class="api-item">getArchivedTasks()</div>
-          <div class="api-item">getCurrentContextTasks()</div>
-          <div class="api-item">addTask(data)</div>
-          <div class="api-item">updateTask(id, data)</div>
-          <div class="api-item">getAllProjects()</div>
-          <div class="api-item">addProject(data)</div>
-          <div class="api-item">updateProject(id, data)</div>
-          <div class="api-item">getAllTags()</div>
-          <div class="api-item">addTag(data)</div>
-          <div class="api-item">updateTag(id, data)</div>
-          <div class="api-item">showSnack(config)</div>
-          <div class="api-item">notify(config)</div>
-          <div class="api-item">openDialog(config)</div>
-          <div class="api-item">persistDataSynced(data)</div>
-          <div class="api-item">loadSyncedData()</div>
-          <div class="api-item">registerHook(hook, handler)</div>
-          <div class="api-item">registerHeaderButton(config)</div>
-          <div class="api-item">registerMenuEntry(config)</div>
-          <div class="api-item">registerShortcut(config)</div>
-        </div>
+    <div class="api-info">
+      <h3>Available API Methods</h3>
+      <div class="api-list">
+        <div class="api-item">getTasks()</div>
+        <div class="api-item">getArchivedTasks()</div>
+        <div class="api-item">getCurrentContextTasks()</div>
+        <div class="api-item">addTask(data)</div>
+        <div class="api-item">updateTask(id, data)</div>
+        <div class="api-item">getAllProjects()</div>
+        <div class="api-item">addProject(data)</div>
+        <div class="api-item">updateProject(id, data)</div>
+        <div class="api-item">getAllTags()</div>
+        <div class="api-item">addTag(data)</div>
+        <div class="api-item">updateTag(id, data)</div>
+        <div class="api-item">showSnack(config)</div>
+        <div class="api-item">notify(config)</div>
+        <div class="api-item">openDialog(config)</div>
+        <div class="api-item">persistDataSynced(data)</div>
+        <div class="api-item">loadSyncedData()</div>
+        <div class="api-item">registerHook(hook, handler)</div>
+        <div class="api-item">registerHeaderButton(config)</div>
+        <div class="api-item">registerMenuEntry(config)</div>
+        <div class="api-item">registerShortcut(config)</div>
       </div>
+    </div>
 
-      <button
-        class="run-all"
-        onclick="runAllTests()"
-      >
-        🚀 Run All API Tests
-      </button>
+    <button
+      class="run-all"
+      onclick="runAllTests()"
+    >
+      Run All API Tests
+    </button>
 
-      <div class="test-section">
-        <h2>Data Persistence Tests</h2>
-        <div class="button-grid">
-          <button onclick="testPersistData()">Test Save Data</button>
-          <button onclick="testLoadData()">Test Load Data</button>
-        </div>
+    <div class="test-section">
+      <h2>Data Persistence Tests</h2>
+      <div class="button-grid">
+        <button onclick="testPersistData()">Test Save Data</button>
+        <button onclick="testLoadData()">Test Load Data</button>
       </div>
+    </div>
 
-      <div class="test-section">
-        <h2>Task Operations</h2>
-        <div class="button-grid">
-          <button onclick="testGetTasks()">Get All Tasks</button>
-          <button onclick="testGetArchivedTasks()">Get Archived Tasks</button>
-          <button onclick="testGetContextTasks()">Get Context Tasks</button>
-          <button onclick="testCreateTask()">Create Test Task</button>
-          <button onclick="testUpdateTask()">Update Last Task</button>
-        </div>
+    <div class="test-section">
+      <h2>Task Operations</h2>
+      <div class="button-grid">
+        <button onclick="testGetTasks()">Get All Tasks</button>
+        <button onclick="testGetArchivedTasks()">Get Archived Tasks</button>
+        <button onclick="testGetContextTasks()">Get Context Tasks</button>
+        <button onclick="testCreateTask()">Create Test Task</button>
+        <button onclick="testUpdateTask()">Update Last Task</button>
       </div>
+    </div>
 
-      <div class="test-section">
-        <h2>Project & Tag Operations</h2>
-        <div class="button-grid">
-          <button onclick="testGetProjects()">Get All Projects</button>
-          <button onclick="testCreateProject()">Create Test Project</button>
-          <button onclick="testGetTags()">Get All Tags</button>
-          <button onclick="testCreateTag()">Create Test Tag</button>
-        </div>
+    <div class="test-section">
+      <h2>Project & Tag Operations</h2>
+      <div class="button-grid">
+        <button onclick="testGetProjects()">Get All Projects</button>
+        <button onclick="testCreateProject()">Create Test Project</button>
+        <button onclick="testGetTags()">Get All Tags</button>
+        <button onclick="testCreateTag()">Create Test Tag</button>
       </div>
+    </div>
 
-      <div class="test-section">
-        <h2>UI Operations</h2>
-        <div class="button-grid">
-          <button onclick="testSnackSuccess()">Success Snack</button>
-          <button onclick="testSnackError()">Error Snack</button>
-          <button onclick="testSnackCustom()">Custom Snack</button>
-          <button onclick="testNotification()">Show Notification</button>
-          <button onclick="testDialog()">Open Dialog</button>
-        </div>
+    <div class="test-section">
+      <h2>UI Operations</h2>
+      <div class="button-grid">
+        <button onclick="testSnackSuccess()">Success Snack</button>
+        <button onclick="testSnackError()">Error Snack</button>
+        <button onclick="testSnackCustom()">Custom Snack</button>
+        <button onclick="testNotification()">Show Notification</button>
+        <button onclick="testDialog()">Open Dialog</button>
       </div>
+    </div>
 
-      <div
-        class="console"
-        id="console"
-      >
-        <div class="console-entry info">Console output will appear here...</div>
-      </div>
+    <div
+      class="console"
+      id="console"
+    >
+      <div class="console-entry info">Console output will appear here...</div>
     </div>
 
     <script>
@@ -309,7 +285,7 @@
       async function testCreateTask() {
         try {
           const taskData = {
-            title: '🧪 Test Task from iFrame - ' + new Date().toLocaleTimeString(),
+            title: 'Test Task from iFrame - ' + new Date().toLocaleTimeString(),
             notes: 'Created from the API Test Plugin dashboard',
             timeEstimate: 1800000, // 30 minutes
           };
@@ -351,7 +327,7 @@
       async function testCreateProject() {
         try {
           const project = await PluginAPI.addProject({
-            title: '🧪 Test Project - ' + new Date().toLocaleDateString(),
+            title: 'Test Project - ' + new Date().toLocaleDateString(),
             themeColor: '#' + Math.floor(Math.random() * 16777215).toString(16),
           });
           lastProjectId = project.id;
@@ -377,7 +353,7 @@
       async function testCreateTag() {
         try {
           const tag = await PluginAPI.addTag({
-            title: '🧪 Test Tag - ' + Date.now(),
+            title: 'Test Tag - ' + Date.now(),
             color: '#' + Math.floor(Math.random() * 16777215).toString(16),
           });
           lastTagId = tag.id;
@@ -389,7 +365,7 @@
 
       function testSnackSuccess() {
         PluginAPI.showSnack({
-          msg: '✅ This is a success message!',
+          msg: 'This is a success message',
           type: 'SUCCESS',
           ico: 'check_circle',
         });
@@ -398,7 +374,7 @@
 
       function testSnackError() {
         PluginAPI.showSnack({
-          msg: '❌ This is an error message!',
+          msg: 'This is an error message',
           type: 'ERROR',
           ico: 'error',
         });
@@ -407,9 +383,9 @@
 
       function testSnackCustom() {
         PluginAPI.showSnack({
-          msg: '🎨 This is a custom message!',
+          msg: 'This is a custom message',
           type: 'CUSTOM',
-          ico: 'palette',
+          ico: 'info',
         });
         log('Custom snack shown', 'success');
       }
@@ -426,10 +402,10 @@
         PluginAPI.openDialog({
           title: 'Test Dialog from iFrame',
           htmlContent: `
-                    <div style="padding: 20px;">
-                        <h3>Hello from the iFrame!</h3>
-                        <p>This dialog was opened from the plugin dashboard.</p>
-                        <p>Current time: ${new Date().toLocaleString()}</p>
+                    <div style="padding: 20px; color: #ccc; font-family: monospace;">
+                        <h3 style="margin: 0 0 10px 0; font-size: 14px;">Test Dialog</h3>
+                        <p style="margin: 5px 0; font-size: 12px;">Dialog opened from plugin dashboard</p>
+                        <p style="margin: 5px 0; font-size: 12px; color: #999;">${new Date().toLocaleString()}</p>
                     </div>
                 `,
           buttons: [
