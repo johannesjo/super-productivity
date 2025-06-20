@@ -14,7 +14,7 @@ module.exports = {
 
   'should display a modal with a scheduled task if due': (browser: NBrowser) =>
     browser
-      .addTaskWithReminder({ title: '0 A task', scheduleTime: Date.now() })
+      .addTaskWithReminder({ title: '0 A task', scheduleTime: Date.now() + 10000 }) // Add 10 seconds buffer
       .waitForElementVisible(DIALOG, SCHEDULE_MAX_WAIT_TIME)
       .assert.elementPresent(DIALOG)
       .waitForElementVisible(DIALOG_TASK1)

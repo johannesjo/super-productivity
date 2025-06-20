@@ -27,7 +27,10 @@ module.exports = {
   'should add a scheduled tasks': (browser: NBrowser) =>
     browser
       .waitForElementPresent(TASK_LIST)
-      .addTaskWithReminder({ title: '0 test task koko', scheduleTime: Date.now() })
+      .addTaskWithReminder({
+        title: '0 test task koko',
+        scheduleTime: Date.now() + 10000,
+      }) // Add 10 seconds buffer
       .waitForElementVisible(TASK)
       .waitForElementVisible(TASK_SCHEDULE_BTN)
       .assert.elementPresent(TASK_SCHEDULE_BTN)
@@ -47,7 +50,7 @@ module.exports = {
       .addTaskWithReminder({
         title: '2 hihihi',
         taskSel: TASK_2,
-        scheduleTime: Date.now(),
+        scheduleTime: Date.now() + 10000, // Add 10 seconds buffer
       })
       .waitForElementVisible(TASK)
       .waitForElementVisible(TASK_SCHEDULE_BTN)
