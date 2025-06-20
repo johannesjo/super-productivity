@@ -428,11 +428,310 @@ async function testAdvancedDialogs() {
   console.log('Advanced dialog tests completed');
 }
 
-// Register a menu entry for advanced dialogs
+// Even more sophisticated dialog examples
+async function testComplexDialogs() {
+  console.log('=== Testing Complex Dialogs ===');
+
+  // Multi-step wizard dialog
+  await PluginAPI.openDialog({
+    title: 'Project Setup Wizard',
+    htmlContent: `
+      <div style="padding: 20px; max-width: 600px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
+          <div style="text-align: center; flex: 1;">
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: #4caf50; color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">1</div>
+            <small style="color: #4caf50; font-weight: bold;">Basic Info</small>
+          </div>
+          <div style="flex: 1; display: flex; align-items: center;">
+            <div style="height: 2px; background: #e0e0e0; width: 100%;"></div>
+          </div>
+          <div style="text-align: center; flex: 1;">
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: #e0e0e0; color: #999; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">2</div>
+            <small style="color: #999;">Settings</small>
+          </div>
+          <div style="flex: 1; display: flex; align-items: center;">
+            <div style="height: 2px; background: #e0e0e0; width: 100%;"></div>
+          </div>
+          <div style="text-align: center; flex: 1;">
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: #e0e0e0; color: #999; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">3</div>
+            <small style="color: #999;">Review</small>
+          </div>
+        </div>
+        
+        <h3>Step 1: Basic Information</h3>
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: bold;">Project Name:</label>
+          <input type="text" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" placeholder="My Awesome Project" value="Super Productivity Enhancement">
+        </div>
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: bold;">Project Type:</label>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+            <label style="padding: 15px; border: 2px solid #4caf50; border-radius: 8px; text-align: center; cursor: pointer; background: #f1f8f4;">
+              <input type="radio" name="projectType" value="personal" checked style="margin-right: 5px;">
+              <div>📝 Personal</div>
+            </label>
+            <label style="padding: 15px; border: 2px solid #ddd; border-radius: 8px; text-align: center; cursor: pointer;">
+              <input type="radio" name="projectType" value="work" style="margin-right: 5px;">
+              <div>💼 Work</div>
+            </label>
+            <label style="padding: 15px; border: 2px solid #ddd; border-radius: 8px; text-align: center; cursor: pointer;">
+              <input type="radio" name="projectType" value="side" style="margin-right: 5px;">
+              <div>🚀 Side Project</div>
+            </label>
+          </div>
+        </div>
+        <div style="background: #f0f7ff; border-left: 4px solid #2196f3; padding: 15px; border-radius: 4px;">
+          <strong>💡 Tip:</strong> Choose the project type that best matches your workflow. This will help us customize your experience.
+        </div>
+      </div>
+    `,
+    buttons: [
+      {
+        label: 'Cancel',
+        icon: 'close',
+      },
+      {
+        label: 'Next Step',
+        icon: 'arrow_forward',
+        color: 'primary',
+        onClick: async () => {
+          console.log('Moving to next step in wizard');
+          await PluginAPI.showSnack({
+            msg: 'Would proceed to Settings step',
+            type: 'CUSTOM',
+            ico: 'arrow_forward',
+          });
+        },
+      },
+    ],
+  });
+
+  // Interactive task planner dialog
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  await PluginAPI.openDialog({
+    title: 'AI Task Planner (Demo)',
+    htmlContent: `
+      <div style="padding: 20px; max-width: 700px;">
+        <div style="display: flex; gap: 20px;">
+          <div style="flex: 1;">
+            <h4 style="margin-top: 0;">Describe Your Goal</h4>
+            <textarea style="width: 100%; min-height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit;" placeholder="E.g., 'Launch a new mobile app by Q3 2024'">Build a comprehensive plugin system for Super Productivity that allows users to extend functionality</textarea>
+            
+            <h4 style="margin-top: 20px;">Constraints & Preferences</h4>
+            <div style="margin-bottom: 10px;">
+              <label>
+                <input type="checkbox" checked> Break down into weekly milestones
+              </label>
+            </div>
+            <div style="margin-bottom: 10px;">
+              <label>
+                <input type="checkbox" checked> Include time estimates
+              </label>
+            </div>
+            <div style="margin-bottom: 10px;">
+              <label>
+                <input type="checkbox"> Add dependencies between tasks
+              </label>
+            </div>
+            <div style="margin-bottom: 10px;">
+              <label>
+                <input type="checkbox" checked> Prioritize by impact
+              </label>
+            </div>
+          </div>
+          
+          <div style="flex: 1; background: #f9f9f9; padding: 15px; border-radius: 8px;">
+            <h4 style="margin-top: 0;">Generated Task Breakdown</h4>
+            <div style="max-height: 300px; overflow-y: auto;">
+              <div style="margin-bottom: 15px; padding: 10px; background: white; border-radius: 4px; border-left: 4px solid #4caf50;">
+                <div style="font-weight: bold;">📋 Design Plugin Architecture</div>
+                <div style="font-size: 0.9em; color: #666; margin-top: 5px;">Est: 8h | Priority: High</div>
+                <div style="font-size: 0.85em; margin-top: 5px;">Define API surface, security model, and manifest structure</div>
+              </div>
+              <div style="margin-bottom: 15px; padding: 10px; background: white; border-radius: 4px; border-left: 4px solid #ff9800;">
+                <div style="font-weight: bold;">🔧 Implement Core Plugin Loader</div>
+                <div style="font-size: 0.9em; color: #666; margin-top: 5px;">Est: 16h | Priority: High</div>
+                <div style="font-size: 0.85em; margin-top: 5px;">Build sandboxed execution environment and API bridge</div>
+              </div>
+              <div style="margin-bottom: 15px; padding: 10px; background: white; border-radius: 4px; border-left: 4px solid #2196f3;">
+                <div style="font-weight: bold;">🎨 Create Plugin UI Components</div>
+                <div style="font-size: 0.9em; color: #666; margin-top: 5px;">Est: 12h | Priority: Medium</div>
+                <div style="font-size: 0.85em; margin-top: 5px;">Design settings UI, permission dialogs, and plugin store</div>
+              </div>
+              <div style="margin-bottom: 15px; padding: 10px; background: white; border-radius: 4px; border-left: 4px solid #9c27b0;">
+                <div style="font-weight: bold;">📚 Write Documentation</div>
+                <div style="font-size: 0.9em; color: #666; margin-top: 5px;">Est: 6h | Priority: Medium</div>
+                <div style="font-size: 0.85em; margin-top: 5px;">Create plugin development guide and API reference</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px;">
+          <strong>🤖 AI Analysis:</strong> This project would take approximately 42 hours (5-6 days) with the current breakdown. Consider adding a testing phase and security audit.
+        </div>
+      </div>
+    `,
+    buttons: [
+      {
+        label: 'Regenerate',
+        icon: 'refresh',
+        onClick: async () => {
+          await PluginAPI.showSnack({
+            msg: 'Regenerating task breakdown...',
+            type: 'CUSTOM',
+            ico: 'refresh',
+          });
+        },
+      },
+      {
+        label: 'Create All Tasks',
+        icon: 'add_task',
+        color: 'primary',
+        onClick: async () => {
+          await PluginAPI.showSnack({
+            msg: 'Would create 4 tasks in your project',
+            type: 'SUCCESS',
+          });
+        },
+      },
+    ],
+  });
+
+  // Data visualization dialog
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  await PluginAPI.openDialog({
+    title: 'Productivity Analytics',
+    htmlContent: `
+      <div style="padding: 20px; max-width: 800px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+          <div>
+            <h3 style="margin: 0;">Weekly Performance</h3>
+            <p style="margin: 5px 0; color: #666;">Dec 11 - Dec 17, 2023</p>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <button style="padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer;">Week</button>
+            <button style="padding: 8px 16px; border: 1px solid #4caf50; background: #4caf50; color: white; border-radius: 4px; cursor: pointer;">Month</button>
+            <button style="padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer;">Year</button>
+          </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px;">
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px;">
+            <div style="font-size: 2em; font-weight: bold;">147</div>
+            <div style="opacity: 0.9;">Tasks Completed</div>
+            <div style="font-size: 0.9em; margin-top: 5px; opacity: 0.8;">↑ 23% from last week</div>
+          </div>
+          <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 8px;">
+            <div style="font-size: 2em; font-weight: bold;">42.5h</div>
+            <div style="opacity: 0.9;">Time Tracked</div>
+            <div style="font-size: 0.9em; margin-top: 5px; opacity: 0.8;">↑ 5% from last week</div>
+          </div>
+          <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 8px;">
+            <div style="font-size: 2em; font-weight: bold;">89%</div>
+            <div style="opacity: 0.9;">Focus Score</div>
+            <div style="font-size: 0.9em; margin-top: 5px; opacity: 0.8;">↓ 2% from last week</div>
+          </div>
+          <div style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 20px; border-radius: 8px;">
+            <div style="font-size: 2em; font-weight: bold;">12</div>
+            <div style="opacity: 0.9;">Streaks Active</div>
+            <div style="font-size: 0.9em; margin-top: 5px; opacity: 0.8;">Keep it up! 🔥</div>
+          </div>
+        </div>
+        
+        <div style="background: #f9f9f9; padding: 20px; border-radius: 8px;">
+          <h4 style="margin-top: 0;">Daily Activity Heatmap</h4>
+          <div style="display: grid; grid-template-columns: auto repeat(7, 1fr); gap: 10px; font-size: 0.9em;">
+            <div></div>
+            <div style="text-align: center;">Mon</div>
+            <div style="text-align: center;">Tue</div>
+            <div style="text-align: center;">Wed</div>
+            <div style="text-align: center;">Thu</div>
+            <div style="text-align: center;">Fri</div>
+            <div style="text-align: center;">Sat</div>
+            <div style="text-align: center;">Sun</div>
+            
+            <div>Morning</div>
+            <div style="background: #c8e6c9; height: 40px; border-radius: 4px;"></div>
+            <div style="background: #4caf50; height: 40px; border-radius: 4px;"></div>
+            <div style="background: #81c784; height: 40px; border-radius: 4px;"></div>
+            <div style="background: #4caf50; height: 40px; border-radius: 4px;"></div>
+            <div style="background: #a5d6a7; height: 40px; border-radius: 4px;"></div>
+            <div style="background: #e8f5e9; height: 40px; border-radius: 4px;"></div>
+            <div style="background: #e8f5e9; height: 40px; border-radius: 4px;"></div>
+            
+            <div>Afternoon</div>
+            <div style="background: #4caf50; height: 40px; border-radius: 4px;"></div>
+            <div style="background: #2e7d32; height: 40px; border-radius: 4px;"></div>
+            <div style="background: #4caf50; height: 40px; border-radius: 4px;"></div>
+            <div style="background: #81c784; height: 40px; border-radius: 4px;"></div>
+            <div style="background: #4caf50; height: 40px; border-radius: 4px;"></div>
+            <div style="background: #a5d6a7; height: 40px; border-radius: 4px;"></div>
+            <div style="background: #c8e6c9; height: 40px; border-radius: 4px;"></div>
+            
+            <div>Evening</div>
+            <div style="background: #81c784; height: 40px; border-radius: 4px;"></div>
+            <div style="background: #a5d6a7; height: 40px; border-radius: 4px;"></div>
+            <div style="background: #c8e6c9; height: 40px; border-radius: 4px;"></div>
+            <div style="background: #e8f5e9; height: 40px; border-radius: 4px;"></div>
+            <div style="background: #e8f5e9; height: 40px; border-radius: 4px;"></div>
+            <div style="background: #81c784; height: 40px; border-radius: 4px;"></div>
+            <div style="background: #4caf50; height: 40px; border-radius: 4px;"></div>
+          </div>
+          <div style="margin-top: 15px; text-align: center; color: #666;">
+            <span style="display: inline-block; width: 12px; height: 12px; background: #e8f5e9; margin-right: 5px;"></span> Low
+            <span style="display: inline-block; width: 12px; height: 12px; background: #81c784; margin: 0 5px 0 20px;"></span> Medium
+            <span style="display: inline-block; width: 12px; height: 12px; background: #4caf50; margin: 0 5px 0 20px;"></span> High
+            <span style="display: inline-block; width: 12px; height: 12px; background: #2e7d32; margin: 0 5px 0 20px;"></span> Very High
+          </div>
+        </div>
+      </div>
+    `,
+    buttons: [
+      {
+        label: 'Export Report',
+        icon: 'download',
+        onClick: async () => {
+          await PluginAPI.showSnack({
+            msg: 'Generating productivity report...',
+            type: 'CUSTOM',
+            ico: 'download',
+          });
+        },
+      },
+      {
+        label: 'Share',
+        icon: 'share',
+        onClick: async () => {
+          await PluginAPI.showSnack({
+            msg: 'Sharing options would appear here',
+            type: 'CUSTOM',
+            ico: 'share',
+          });
+        },
+      },
+      {
+        label: 'Close',
+        icon: 'close',
+        color: 'primary',
+      },
+    ],
+  });
+
+  console.log('Complex dialog tests completed');
+}
+
+// Register menu entries for dialog examples
 PluginAPI.registerMenuEntry({
   label: 'Advanced Dialog Examples',
   icon: 'web_stories',
   onClick: testAdvancedDialogs,
+});
+
+PluginAPI.registerMenuEntry({
+  label: 'Complex Dialog Examples',
+  icon: 'dashboard_customize',
+  onClick: testComplexDialogs,
 });
 
 // Show initialization message
