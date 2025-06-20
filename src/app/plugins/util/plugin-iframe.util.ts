@@ -39,7 +39,13 @@ export const PLUGIN_IFRAME_SANDBOX =
   'allow-scripts allow-same-origin allow-forms allow-popups allow-modals';
 
 /**
- * Methods that are restricted from iframe context for security
+ * Methods that are restricted from iframe context for security.
+ * These methods can only be called from the main plugin code, not from iframes.
+ *
+ * Security rationale:
+ * - UI registration methods: Only main plugin code should modify app UI structure
+ * - onMessage: Prevents iframe from intercepting plugin-to-plugin communication
+ * - executeNodeScript: Requires elevated permissions only available to main plugin
  */
 export const RESTRICTED_IFRAME_METHODS = [
   'registerHook',
@@ -49,7 +55,12 @@ export const RESTRICTED_IFRAME_METHODS = [
   'registerSidePanelButton',
   'onMessage',
   'executeNodeScript',
-];
+] as const;
+
+/**
+ * Type representing restricted iframe method names
+ */
+export type RestrictedIframeMethod = (typeof RESTRICTED_IFRAME_METHODS)[number];
 
 /**
  * Creates a simple PluginAPI script with predefined methods (compatible with plugin-index.component)
@@ -371,9 +382,12 @@ export const handlePluginApiCall = async (
     }
 
     // Security: Check for restricted methods
-    if (RESTRICTED_IFRAME_METHODS.includes(methodName)) {
+    if (RESTRICTED_IFRAME_METHODS.includes(methodName as RestrictedIframeMethod)) {
       throw new Error(
-        `Method '${methodName}' is not allowed from iframe context. This method can only be called from the main plugin code.`,
+        `Security Error: Method '${methodName}' is not allowed from iframe context. ` +
+          `UI registration methods (registerHeaderButton, registerMenuEntry, etc.) can only be called ` +
+          `from the main plugin.js file, not from iframe scripts. This restriction prevents ` +
+          `unauthorized modification of the application's UI structure.`,
       );
     }
 
