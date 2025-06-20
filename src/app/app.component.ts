@@ -1,11 +1,11 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  effect,
   HostBinding,
   HostListener,
   inject,
   OnDestroy,
-  effect,
 } from '@angular/core';
 import { ChromeExtensionInterfaceService } from './core/chrome-extension-interface/chrome-extension-interface.service';
 import { ShortcutService } from './core-ui/shortcut/shortcut.service';
@@ -185,17 +185,6 @@ export class AppComponent implements OnDestroy {
 
     // deferred init
     window.setTimeout(async () => {
-      // Wait longer before initializing plugin system to avoid sync conflicts
-      // This ensures any initial sync operations complete before plugins start writing data
-      window.setTimeout(async () => {
-        try {
-          await this._pluginService.initializePlugins();
-          console.log('Plugin system initialized (delayed to avoid sync conflicts)');
-        } catch (error) {
-          console.error('Failed to initialize plugin system:', error);
-        }
-      }, 3000); // Additional 3 second delay for plugin initialization
-
       this._startTrackingReminderService.init();
       this._checkAvailableStorage();
       // init offline banner in lack of a better place for it
@@ -225,6 +214,14 @@ export class AppComponent implements OnDestroy {
       if (lastStartDay !== todayStr) {
         localStorage.setItem(LS.APP_START_COUNT, (appStarts + 1).toString());
         localStorage.setItem(LS.APP_START_COUNT_LAST_START_DAY, todayStr);
+      }
+
+      // Initialize plugin system
+      try {
+        await this._pluginService.initializePlugins();
+        console.log('Plugin system initialized');
+      } catch (error) {
+        console.error('Failed to initialize plugin system:', error);
       }
     }, 1000);
 
