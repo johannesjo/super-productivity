@@ -65,6 +65,7 @@ export class PluginBridgeService implements OnDestroy {
 
   // Track which plugin is currently making calls to prevent cross-plugin access
   private _currentPluginId: string | null = null;
+  private _currentPluginManifest: PluginManifest | null = null;
 
   // Track header buttons registered by plugins
   private _headerButtons$ = new BehaviorSubject<PluginHeaderBtnCfg[]>([]);
@@ -84,8 +85,9 @@ export class PluginBridgeService implements OnDestroy {
   /**
    * Set the current plugin context for secure operations
    */
-  _setCurrentPlugin(pluginId: string): void {
+  _setCurrentPlugin(pluginId: string, manifest?: PluginManifest): void {
     this._currentPluginId = pluginId;
+    this._currentPluginManifest = manifest || null;
   }
 
   /**
@@ -771,9 +773,17 @@ export class PluginBridgeService implements OnDestroy {
     try {
       typia.assert<PluginNodeScriptRequest>(request);
 
+      if (!this._currentPluginManifest) {
+        return {
+          success: false,
+          error: 'No plugin manifest found for Node.js execution',
+        };
+      }
+
       // Call Electron main process via IPC
       const result = await window.ea!.pluginExecNodeScript(
         this._currentPluginId,
+        this._currentPluginManifest,
         request,
       );
 
