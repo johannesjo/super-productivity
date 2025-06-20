@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>API Test Plugin Dashboard</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f5f5f5;
+        color: #333;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        color: #1976d2;
+        margin-bottom: 30px;
+      }
+
+      .test-section {
+        margin-bottom: 30px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 6px;
+        border-left: 4px solid #1976d2;
+      }
+
+      .test-section h2 {
+        margin-top: 0;
+        color: #333;
+        font-size: 18px;
+      }
+
+      .button-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 10px;
+        margin-top: 15px;
+      }
+
+      button {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 4px;
+        background: #1976d2;
+        color: white;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      button:hover {
+        background: #1565c0;
+      }
+
+      button:active {
+        transform: translateY(1px);
+      }
+
+      .run-all {
+        background: #4caf50;
+        font-size: 16px;
+        padding: 15px 30px;
+        width: 100%;
+        margin-bottom: 30px;
+      }
+
+      .run-all:hover {
+        background: #43a047;
+      }
+
+      .console {
+        background: #1e1e1e;
+        color: #d4d4d4;
+        padding: 15px;
+        border-radius: 4px;
+        font-family: 'Consolas', 'Monaco', monospace;
+        font-size: 12px;
+        max-height: 300px;
+        overflow-y: auto;
+        margin-top: 20px;
+      }
+
+      .console-entry {
+        margin: 5px 0;
+        line-height: 1.4;
+      }
+
+      .console-entry.success {
+        color: #4caf50;
+      }
+
+      .console-entry.error {
+        color: #f44336;
+      }
+
+      .console-entry.info {
+        color: #2196f3;
+      }
+
+      .api-info {
+        background: #e3f2fd;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+      }
+
+      .api-info h3 {
+        margin-top: 0;
+        color: #1976d2;
+      }
+
+      .api-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .api-item {
+        background: white;
+        padding: 8px 12px;
+        border-radius: 4px;
+        border: 1px solid #e0e0e0;
+        font-family: monospace;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🧪 API Test Plugin Dashboard</h1>
+
+      <div class="api-info">
+        <h3>Available API Methods</h3>
+        <div class="api-list">
+          <div class="api-item">getTasks()</div>
+          <div class="api-item">getArchivedTasks()</div>
+          <div class="api-item">getCurrentContextTasks()</div>
+          <div class="api-item">addTask(data)</div>
+          <div class="api-item">updateTask(id, data)</div>
+          <div class="api-item">getAllProjects()</div>
+          <div class="api-item">addProject(data)</div>
+          <div class="api-item">updateProject(id, data)</div>
+          <div class="api-item">getAllTags()</div>
+          <div class="api-item">addTag(data)</div>
+          <div class="api-item">updateTag(id, data)</div>
+          <div class="api-item">showSnack(config)</div>
+          <div class="api-item">notify(config)</div>
+          <div class="api-item">openDialog(config)</div>
+          <div class="api-item">persistDataSynced(data)</div>
+          <div class="api-item">loadSyncedData()</div>
+          <div class="api-item">registerHook(hook, handler)</div>
+          <div class="api-item">registerHeaderButton(config)</div>
+          <div class="api-item">registerMenuEntry(config)</div>
+          <div class="api-item">registerShortcut(config)</div>
+        </div>
+      </div>
+
+      <button
+        class="run-all"
+        onclick="runAllTests()"
+      >
+        🚀 Run All API Tests
+      </button>
+
+      <div class="test-section">
+        <h2>Data Persistence Tests</h2>
+        <div class="button-grid">
+          <button onclick="testPersistData()">Test Save Data</button>
+          <button onclick="testLoadData()">Test Load Data</button>
+        </div>
+      </div>
+
+      <div class="test-section">
+        <h2>Task Operations</h2>
+        <div class="button-grid">
+          <button onclick="testGetTasks()">Get All Tasks</button>
+          <button onclick="testGetArchivedTasks()">Get Archived Tasks</button>
+          <button onclick="testGetContextTasks()">Get Context Tasks</button>
+          <button onclick="testCreateTask()">Create Test Task</button>
+          <button onclick="testUpdateTask()">Update Last Task</button>
+        </div>
+      </div>
+
+      <div class="test-section">
+        <h2>Project & Tag Operations</h2>
+        <div class="button-grid">
+          <button onclick="testGetProjects()">Get All Projects</button>
+          <button onclick="testCreateProject()">Create Test Project</button>
+          <button onclick="testGetTags()">Get All Tags</button>
+          <button onclick="testCreateTag()">Create Test Tag</button>
+        </div>
+      </div>
+
+      <div class="test-section">
+        <h2>UI Operations</h2>
+        <div class="button-grid">
+          <button onclick="testSnackSuccess()">Success Snack</button>
+          <button onclick="testSnackError()">Error Snack</button>
+          <button onclick="testSnackCustom()">Custom Snack</button>
+          <button onclick="testNotification()">Show Notification</button>
+          <button onclick="testDialog()">Open Dialog</button>
+        </div>
+      </div>
+
+      <div
+        class="console"
+        id="console"
+      >
+        <div class="console-entry info">Console output will appear here...</div>
+      </div>
+    </div>
+
+    <script>
+      let lastTaskId = null;
+      let lastProjectId = null;
+      let lastTagId = null;
+
+      // Console logging
+      function log(message, type = 'info') {
+        const console = document.getElementById('console');
+        const entry = document.createElement('div');
+        entry.className = `console-entry ${type}`;
+        entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        console.appendChild(entry);
+        console.scrollTop = console.scrollHeight;
+      }
+
+      // Clear console
+      function clearConsole() {
+        document.getElementById('console').innerHTML =
+          '<div class="console-entry info">Console cleared. Starting new test run...</div>';
+      }
+
+      // Test functions
+      async function testPersistData() {
+        try {
+          const testData = {
+            timestamp: new Date().toISOString(),
+            randomValue: Math.floor(Math.random() * 1000),
+            message: 'Test data from iframe',
+          };
+          await PluginAPI.persistDataSynced(JSON.stringify(testData));
+          log('Data saved successfully: ' + JSON.stringify(testData), 'success');
+        } catch (error) {
+          log('Failed to save data: ' + error.message, 'error');
+        }
+      }
+
+      async function testLoadData() {
+        try {
+          const data = await PluginAPI.loadSyncedData();
+          if (data) {
+            const parsed = JSON.parse(data);
+            log('Data loaded successfully: ' + JSON.stringify(parsed), 'success');
+          } else {
+            log('No saved data found', 'info');
+          }
+        } catch (error) {
+          log('Failed to load data: ' + error.message, 'error');
+        }
+      }
+
+      async function testGetTasks() {
+        try {
+          const tasks = await PluginAPI.getTasks();
+          log(`Found ${tasks.length} tasks`, 'success');
+          if (tasks.length > 0) {
+            lastTaskId = tasks[0].id;
+            log(`Sample task: "${tasks[0].title}"`, 'info');
+          }
+        } catch (error) {
+          log('Failed to get tasks: ' + error.message, 'error');
+        }
+      }
+
+      async function testGetArchivedTasks() {
+        try {
+          const tasks = await PluginAPI.getArchivedTasks();
+          log(`Found ${tasks.length} archived tasks`, 'success');
+        } catch (error) {
+          log('Failed to get archived tasks: ' + error.message, 'error');
+        }
+      }
+
+      async function testGetContextTasks() {
+        try {
+          const tasks = await PluginAPI.getCurrentContextTasks();
+          log(`Found ${tasks.length} tasks in current context`, 'success');
+        } catch (error) {
+          log('Failed to get context tasks: ' + error.message, 'error');
+        }
+      }
+
+      async function testCreateTask() {
+        try {
+          const taskData = {
+            title: '🧪 Test Task from iFrame - ' + new Date().toLocaleTimeString(),
+            notes: 'Created from the API Test Plugin dashboard',
+            timeEstimate: 1800000, // 30 minutes
+          };
+          lastTaskId = await PluginAPI.addTask(taskData);
+          log(`Task created with ID: ${lastTaskId}`, 'success');
+        } catch (error) {
+          log('Failed to create task: ' + error.message, 'error');
+        }
+      }
+
+      async function testUpdateTask() {
+        if (!lastTaskId) {
+          log('No task ID available. Create a task first!', 'error');
+          return;
+        }
+        try {
+          await PluginAPI.updateTask(lastTaskId, {
+            notes: 'Updated from dashboard at ' + new Date().toLocaleTimeString(),
+          });
+          log(`Task ${lastTaskId} updated successfully`, 'success');
+        } catch (error) {
+          log('Failed to update task: ' + error.message, 'error');
+        }
+      }
+
+      async function testGetProjects() {
+        try {
+          const projects = await PluginAPI.getAllProjects();
+          log(`Found ${projects.length} projects`, 'success');
+          if (projects.length > 0) {
+            lastProjectId = projects[0].id;
+            log(`Sample project: "${projects[0].title}"`, 'info');
+          }
+        } catch (error) {
+          log('Failed to get projects: ' + error.message, 'error');
+        }
+      }
+
+      async function testCreateProject() {
+        try {
+          const project = await PluginAPI.addProject({
+            title: '🧪 Test Project - ' + new Date().toLocaleDateString(),
+            themeColor: '#' + Math.floor(Math.random() * 16777215).toString(16),
+          });
+          lastProjectId = project.id;
+          log(`Project created: "${project.title}"`, 'success');
+        } catch (error) {
+          log('Failed to create project: ' + error.message, 'error');
+        }
+      }
+
+      async function testGetTags() {
+        try {
+          const tags = await PluginAPI.getAllTags();
+          log(`Found ${tags.length} tags`, 'success');
+          if (tags.length > 0) {
+            lastTagId = tags[0].id;
+            log(`Sample tag: "${tags[0].title}"`, 'info');
+          }
+        } catch (error) {
+          log('Failed to get tags: ' + error.message, 'error');
+        }
+      }
+
+      async function testCreateTag() {
+        try {
+          const tag = await PluginAPI.addTag({
+            title: '🧪 Test Tag - ' + Date.now(),
+            color: '#' + Math.floor(Math.random() * 16777215).toString(16),
+          });
+          lastTagId = tag.id;
+          log(`Tag created: "${tag.title}"`, 'success');
+        } catch (error) {
+          log('Failed to create tag: ' + error.message, 'error');
+        }
+      }
+
+      function testSnackSuccess() {
+        PluginAPI.showSnack({
+          msg: '✅ This is a success message!',
+          type: 'SUCCESS',
+          ico: 'check_circle',
+        });
+        log('Success snack shown', 'success');
+      }
+
+      function testSnackError() {
+        PluginAPI.showSnack({
+          msg: '❌ This is an error message!',
+          type: 'ERROR',
+          ico: 'error',
+        });
+        log('Error snack shown', 'success');
+      }
+
+      function testSnackCustom() {
+        PluginAPI.showSnack({
+          msg: '🎨 This is a custom message!',
+          type: 'CUSTOM',
+          ico: 'palette',
+        });
+        log('Custom snack shown', 'success');
+      }
+
+      function testNotification() {
+        PluginAPI.notify({
+          title: 'API Test Notification',
+          body: 'This notification was triggered from the plugin dashboard!',
+        });
+        log('Notification sent', 'success');
+      }
+
+      function testDialog() {
+        PluginAPI.openDialog({
+          title: 'Test Dialog from iFrame',
+          htmlContent: `
+                    <div style="padding: 20px;">
+                        <h3>Hello from the iFrame!</h3>
+                        <p>This dialog was opened from the plugin dashboard.</p>
+                        <p>Current time: ${new Date().toLocaleString()}</p>
+                    </div>
+                `,
+          buttons: [
+            {
+              label: 'Awesome',
+              icon: 'thumb_up',
+              color: 'primary',
+              onClick: () => {
+                log('Dialog button clicked', 'success');
+              },
+            },
+          ],
+        });
+        log('Dialog opened', 'success');
+      }
+
+      async function runAllTests() {
+        clearConsole();
+        log('Starting comprehensive API test suite...', 'info');
+
+        // Run all tests with delays
+        await testPersistData();
+        await new Promise((r) => setTimeout(r, 500));
+
+        await testLoadData();
+        await new Promise((r) => setTimeout(r, 500));
+
+        await testGetTasks();
+        await new Promise((r) => setTimeout(r, 500));
+
+        await testGetArchivedTasks();
+        await new Promise((r) => setTimeout(r, 500));
+
+        await testGetContextTasks();
+        await new Promise((r) => setTimeout(r, 500));
+
+        await testCreateTask();
+        await new Promise((r) => setTimeout(r, 500));
+
+        if (lastTaskId) {
+          await testUpdateTask();
+          await new Promise((r) => setTimeout(r, 500));
+        }
+
+        await testGetProjects();
+        await new Promise((r) => setTimeout(r, 500));
+
+        await testCreateProject();
+        await new Promise((r) => setTimeout(r, 500));
+
+        await testGetTags();
+        await new Promise((r) => setTimeout(r, 500));
+
+        await testCreateTag();
+        await new Promise((r) => setTimeout(r, 500));
+
+        testSnackSuccess();
+        await new Promise((r) => setTimeout(r, 1500));
+
+        testSnackError();
+        await new Promise((r) => setTimeout(r, 1500));
+
+        testSnackCustom();
+        await new Promise((r) => setTimeout(r, 1500));
+
+        testNotification();
+        await new Promise((r) => setTimeout(r, 1000));
+
+        testDialog();
+
+        log('All tests completed! Check console for detailed results.', 'success');
+      }
+
+      // Initial message
+      log(
+        'API Test Plugin Dashboard loaded. Click buttons to test individual APIs or run all tests.',
+        'info',
+      );
+    </script>
+  </body>
+</html>
