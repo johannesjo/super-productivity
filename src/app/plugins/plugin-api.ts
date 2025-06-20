@@ -17,6 +17,7 @@ import {
   TagData,
   SnackCfg,
   PluginAPI as PluginAPIInterface,
+  PluginManifest,
 } from '@super-productivity/plugin-api';
 import { PluginBridgeService } from './plugin-bridge.service';
 import {
@@ -48,9 +49,10 @@ export class PluginAPI implements PluginAPIInterface {
     public cfg: PluginBaseCfg,
     private _pluginId: string,
     private _pluginBridge: PluginBridgeService,
+    private _manifest?: PluginManifest,
   ) {
     // Set the plugin context for secure operations
-    this._pluginBridge._setCurrentPlugin(this._pluginId);
+    this._pluginBridge._setCurrentPlugin(this._pluginId, this._manifest);
   }
 
   registerHook(hook: Hooks, fn: PluginHookHandler): void {

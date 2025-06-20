@@ -165,6 +165,7 @@ export interface PluginNodeConsentDialogData {
 
       .recommendation {
         background: #fff3cd;
+        color: black;
         border: 1px solid #ffeaa7;
         padding: 12px;
         border-radius: 4px;

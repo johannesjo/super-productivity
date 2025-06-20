@@ -129,14 +129,7 @@ export interface ElectronAPI {
 
   pluginExecNodeScript(
     pluginId: string,
+    manifest: PluginManifest,
     request: PluginNodeScriptRequest,
   ): Promise<PluginNodeScriptResult>;
-
-  pluginRegisterForNode(
-    pluginId: string,
-    manifest: PluginManifest,
-    userDataPath: string,
-  ): void;
-
-  pluginUnregisterForNode(pluginId: string): void;
 }

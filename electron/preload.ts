@@ -97,19 +97,17 @@ const ea: ElectronAPI = {
   exec: (command: string) => _send('EXEC', command),
 
   // Plugin API
-  pluginExecNodeScript: (pluginId: string, request: PluginNodeScriptRequest) =>
+  pluginExecNodeScript: (
+    pluginId: string,
+    manifest: PluginManifest,
+    request: PluginNodeScriptRequest,
+  ) =>
     _invoke(
       'PLUGIN_EXEC_NODE_SCRIPT',
       pluginId,
+      manifest,
       request,
     ) as Promise<PluginNodeScriptResult>,
-  pluginRegisterForNode: (
-    pluginId: string,
-    manifest: PluginManifest,
-    userDataPath: string,
-  ) => _send('PLUGIN_REGISTER_FOR_NODE', pluginId, manifest, userDataPath),
-  pluginUnregisterForNode: (pluginId: string) =>
-    _send('PLUGIN_UNREGISTER_FOR_NODE', pluginId),
 };
 contextBridge.exposeInMainWorld('ea', ea);
 

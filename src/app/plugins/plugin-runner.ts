@@ -27,27 +27,13 @@ export class PluginRunner {
   ): Promise<PluginInstance> {
     try {
       // Create plugin API instance with direct bridge service injection
-      const pluginAPI = new PluginAPI(baseCfg, manifest.id, this._pluginBridge);
+      const pluginAPI = new PluginAPI(baseCfg, manifest.id, this._pluginBridge, manifest);
 
       // Add executeNodeScript method if plugin has nodeExecution permission
       if (IS_ELECTRON && this._hasNodeExecutionPermission(manifest)) {
         pluginAPI.executeNodeScript = async (request) => {
           return this._pluginBridge.executeNodeScript(request);
         };
-
-        // Register plugin with Electron for Node.js execution
-        if (window.ea?.pluginRegisterForNode) {
-          const userDataPath = await window.ea.getUserDataPath();
-          // Validate plugin ID to prevent path traversal
-          const sanitizedPluginId = manifest.id.replace(/[^a-zA-Z0-9_-]/g, '');
-          if (sanitizedPluginId !== manifest.id) {
-            console.warn(
-              `Plugin ID contains invalid characters, using sanitized version: ${sanitizedPluginId}`,
-            );
-          }
-          const pluginDataPath = `${userDataPath}/plugins/${sanitizedPluginId}`;
-          window.ea.pluginRegisterForNode(manifest.id, manifest, pluginDataPath);
-        }
       }
 
       // Create plugin instance
@@ -352,13 +338,6 @@ export class PluginRunner {
 
       this._loadedPlugins.delete(pluginId);
       this._pluginBridge.unregisterPluginHooks(pluginId);
-
-      // Unregister from Node.js execution if it had permission
-      if (plugin.manifest && this._hasNodeExecutionPermission(plugin.manifest)) {
-        if (window.ea?.pluginUnregisterForNode) {
-          window.ea.pluginUnregisterForNode(pluginId);
-        }
-      }
 
       console.log(`Plugin ${pluginId} unloaded`);
       return true;
