@@ -88,6 +88,7 @@ export class PluginService implements OnDestroy {
       'assets/markdown-list-to-task',
       'assets/test-side-panel-plugin',
       'assets/sync-md-plugin', // Uncomment after dev server restart
+      'assets/api-test-plugin', // Comprehensive API testing plugin
     ];
 
     // KISS: No preloading - just load plugins directly
