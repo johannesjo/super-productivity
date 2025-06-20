@@ -184,6 +184,18 @@ export class PluginAPI implements PluginAPIInterface {
     return this._pluginBridge.updateTag(tagId, tagCopyUpdates);
   }
 
+  async reorderTasks(
+    taskIds: string[],
+    contextId: string,
+    contextType: 'project' | 'task',
+  ): Promise<void> {
+    console.log(
+      `Plugin ${this._pluginId} requested to reorder tasks in ${contextType} ${contextId}:`,
+      taskIds,
+    );
+    return this._pluginBridge.reorderTasks(taskIds, contextId, contextType);
+  }
+
   showSnack(snackCfg: SnackCfg): void {
     this._pluginBridge.showSnack(snackCfg);
   }

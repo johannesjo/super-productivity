@@ -23,13 +23,13 @@ class SyncMdPlugin {
     }
 
     // Register hook for task changes
-    if (PluginAPI?.registerHook) {
+    if (PluginAPI?.registerHook && PluginAPI?.Hooks) {
       // Use the correct hook names from PluginHooks enum
-      PluginAPI.registerHook('taskUpdate', (task) => {
+      PluginAPI.registerHook(PluginAPI.Hooks.TASK_UPDATE, (task) => {
         console.log('[Sync.md] Task update hook triggered:', task);
         this.handleTaskUpdate(task);
       });
-      PluginAPI.registerHook('taskDelete', (taskId) => {
+      PluginAPI.registerHook(PluginAPI.Hooks.TASK_DELETE, (taskId) => {
         console.log('[Sync.md] Task delete hook triggered:', taskId);
         this.handleTaskDeleted(taskId);
       });
@@ -356,42 +356,102 @@ class SyncMdPlugin {
       projectTaskMap.set(task.id, task);
     });
 
+    // Keep track of task order as they appear in markdown
+    const mainTaskIds = [];
+    const subtasksByParent = new Map(); // parentId -> [subtaskIds]
+
     // Sync markdown tasks to project
     for (const mdTask of markdownTasks) {
-      if (mdTask.id && projectTaskMap.has(mdTask.id)) {
+      let taskId = mdTask.id;
+
+      if (taskId && projectTaskMap.has(taskId)) {
         // Update existing task
-        const projectTask = projectTaskMap.get(mdTask.id);
+        const projectTask = projectTaskMap.get(taskId);
         if (projectTask.title !== mdTask.title) {
-          await PluginAPI.updateTask(mdTask.id, { title: mdTask.title });
+          await PluginAPI.updateTask(taskId, { title: mdTask.title });
           result.updated++;
         }
 
         // Mark as processed
-        projectTaskMap.delete(mdTask.id);
+        projectTaskMap.delete(taskId);
       } else {
         // Create new task - addTask returns the task ID as a string
-        const newTaskId = await PluginAPI.addTask({
+        taskId = await PluginAPI.addTask({
           title: mdTask.title,
           projectId: this.config.projectId,
         });
 
-        if (newTaskId) {
-          result.updatedTaskIdMap.set(mdTask.lineNumber, newTaskId);
+        if (taskId) {
+          result.updatedTaskIdMap.set(mdTask.lineNumber, taskId);
           result.hasNewIds = true;
           result.created++;
+        }
+      }
 
-          // Handle sub-tasks
-          for (const subTask of mdTask.subTasks) {
-            const newSubTaskId = await PluginAPI.addTask({
+      // Add to main task order
+      if (taskId) {
+        mainTaskIds.push(taskId);
+
+        // Handle sub-tasks
+        const subTaskIds = [];
+        for (const subTask of mdTask.subTasks) {
+          let subTaskId = subTask.id;
+
+          if (subTaskId && projectTaskMap.has(subTaskId)) {
+            // Update existing subtask
+            const projectSubTask = projectTaskMap.get(subTaskId);
+            if (projectSubTask.title !== subTask.title) {
+              await PluginAPI.updateTask(subTaskId, { title: subTask.title });
+              result.updated++;
+            }
+            projectTaskMap.delete(subTaskId);
+          } else {
+            // Create new subtask
+            subTaskId = await PluginAPI.addTask({
               title: subTask.title,
-              parentId: newTaskId,
+              parentId: taskId,
             });
 
-            if (newSubTaskId) {
-              result.updatedTaskIdMap.set(subTask.lineNumber, newSubTaskId);
+            if (subTaskId) {
+              result.updatedTaskIdMap.set(subTask.lineNumber, subTaskId);
               result.created++;
             }
           }
+
+          if (subTaskId) {
+            subTaskIds.push(subTaskId);
+          }
+        }
+
+        // Store subtask order for this parent
+        if (subTaskIds.length > 0) {
+          subtasksByParent.set(taskId, subTaskIds);
+        }
+      }
+    }
+
+    // Update task order in the project
+    if (mainTaskIds.length > 0 && PluginAPI.reorderTasks) {
+      try {
+        await PluginAPI.reorderTasks(mainTaskIds, this.config.projectId, 'project');
+        console.log('[Sync.md] Updated project task order:', mainTaskIds);
+      } catch (error) {
+        console.error('[Sync.md] Failed to update task order:', error);
+      }
+    }
+
+    // Update subtask order for each parent task
+    for (const [parentId, subTaskIds] of subtasksByParent) {
+      if (subTaskIds.length > 0 && PluginAPI.reorderTasks) {
+        try {
+          await PluginAPI.reorderTasks(subTaskIds, parentId, 'task');
+          console.log(
+            '[Sync.md] Updated subtask order for parent:',
+            parentId,
+            subTaskIds,
+          );
+        } catch (error) {
+          console.error('[Sync.md] Failed to update subtask order:', error);
         }
       }
     }
@@ -625,26 +685,99 @@ class SyncMdPlugin {
         (task) => task.projectId === this.config.projectId,
       );
 
-      // Build markdown structure
+      // Build markdown structure preserving existing order
       const markdownLines = [];
-      const mainTasks = projectTasks.filter((task) => !task.parentId);
 
+      // If we have a previous file content, try to preserve the order
+      let taskOrder = [];
+      if (this.lastFileContent) {
+        const { tasks: previousTasks } = this.parseMarkdownWithIds(this.lastFileContent);
+        taskOrder = previousTasks.map((t) => t.id).filter((id) => id);
+      }
+
+      // Create a map for quick lookup
+      const taskMap = new Map();
+      projectTasks.forEach((task) => {
+        taskMap.set(task.id, task);
+      });
+
+      // Process tasks in the order they were in the file
+      const processedTaskIds = new Set();
+      const mainTasks = [];
+
+      // First, add tasks in their previous order
+      for (const taskId of taskOrder) {
+        const task = taskMap.get(taskId);
+        if (task && !task.parentId) {
+          mainTasks.push(task);
+          processedTaskIds.add(taskId);
+        }
+      }
+
+      // Then add any new tasks that weren't in the file before
+      for (const task of projectTasks) {
+        if (!task.parentId && !processedTaskIds.has(task.id)) {
+          mainTasks.push(task);
+        }
+      }
+
+      // Process main tasks and their subtasks
       for (const task of mainTasks) {
         markdownLines.push(`* (${task.id}) ${task.title}`);
 
-        // Get sub-tasks
-        const subTasks = projectTasks.filter((subTask) => subTask.parentId === task.id);
-        for (const subTask of subTasks) {
-          markdownLines.push(`    * (${subTask.id}) ${subTask.title}`);
+        // Get all subtasks for this parent
+        const subTasks = projectTasks.filter((t) => t.parentId === task.id);
 
-          // Add notes as nested items if present
-          if (subTask.notes) {
-            const noteLines = subTask.notes.split('\n');
-            noteLines.forEach((line) => {
-              if (line.trim()) {
-                markdownLines.push(`        ${line}`);
-              }
-            });
+        // Try to preserve subtask order from previous file content
+        let subTaskOrder = [];
+        if (this.lastFileContent) {
+          const { tasks: previousTasks } = this.parseMarkdownWithIds(
+            this.lastFileContent,
+          );
+          const previousMainTask = previousTasks.find((t) => t.id === task.id);
+          if (previousMainTask && previousMainTask.subTasks) {
+            subTaskOrder = previousMainTask.subTasks
+              .map((st) => st.id)
+              .filter((id) => id);
+          }
+        }
+
+        // Process subtasks in order
+        const processedSubTaskIds = new Set();
+
+        // First, add subtasks in their previous order
+        for (const subTaskId of subTaskOrder) {
+          const subTask = subTasks.find((st) => st.id === subTaskId);
+          if (subTask) {
+            markdownLines.push(`    * (${subTask.id}) ${subTask.title}`);
+            processedSubTaskIds.add(subTask.id);
+
+            // Add notes as nested items if present
+            if (subTask.notes) {
+              const noteLines = subTask.notes.split('\n');
+              noteLines.forEach((line) => {
+                if (line.trim()) {
+                  markdownLines.push(`        ${line}`);
+                }
+              });
+            }
+          }
+        }
+
+        // Then add any new subtasks
+        for (const subTask of subTasks) {
+          if (!processedSubTaskIds.has(subTask.id)) {
+            markdownLines.push(`    * (${subTask.id}) ${subTask.title}`);
+
+            // Add notes as nested items if present
+            if (subTask.notes) {
+              const noteLines = subTask.notes.split('\n');
+              noteLines.forEach((line) => {
+                if (line.trim()) {
+                  markdownLines.push(`        ${line}`);
+                }
+              });
+            }
           }
         }
       }
@@ -672,6 +805,8 @@ class SyncMdPlugin {
         throw new Error(result.error || 'Write operation failed');
       }
 
+      // Update our last file content to preserve order for next sync
+      this.lastFileContent = markdownContent;
       this.lastSyncTime = new Date();
       console.log('[Sync.md] Project synced to file');
     } catch (error) {

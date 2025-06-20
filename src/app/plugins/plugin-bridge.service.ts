@@ -317,6 +317,85 @@ export class PluginBridgeService implements OnDestroy {
   }
 
   /**
+   * Reorder tasks in a project or parent task
+   * @param taskIds - Array of task IDs in the new order
+   * @param contextId - Project ID or parent task ID
+   * @param contextType - 'project' or 'task' to indicate if contextId is a project or parent task
+   */
+  async reorderTasks(
+    taskIds: string[],
+    contextId: string,
+    contextType: 'project' | 'task',
+  ): Promise<void> {
+    typia.assert<string[]>(taskIds);
+    typia.assert<string>(contextId);
+    typia.assert<'project' | 'task'>(contextType);
+
+    if (contextType === 'project') {
+      // Update project's taskIds to reflect new order
+      const project = await this._projectService
+        .getByIdOnce$(contextId)
+        .pipe(first())
+        .toPromise();
+
+      if (!project) {
+        throw new Error(`Project with ID '${contextId}' not found`);
+      }
+
+      // Validate all taskIds belong to the project
+      const allProjectTaskIds = [
+        ...(project.taskIds || []),
+        ...(project.backlogTaskIds || []),
+      ];
+      const invalidTaskIds = taskIds.filter((id) => !allProjectTaskIds.includes(id));
+
+      if (invalidTaskIds.length > 0) {
+        throw new Error(
+          `Tasks '${invalidTaskIds.join(', ')}' do not belong to project '${contextId}'`,
+        );
+      }
+
+      // Update the project with new task order
+      // Note: This assumes all tasks are in the regular list, not backlog
+      this._projectService.update(contextId, { taskIds });
+
+      console.log('PluginBridge: Project tasks reordered successfully', {
+        projectId: contextId,
+        newOrder: taskIds,
+      });
+    } else {
+      // Update parent task's subTaskIds to reflect new order
+      const parentTask = await this._taskService
+        .getByIdOnce$(contextId)
+        .pipe(first())
+        .toPromise();
+
+      if (!parentTask) {
+        throw new Error(`Parent task with ID '${contextId}' not found`);
+      }
+
+      // Validate all taskIds are subtasks of the parent
+      const invalidSubTaskIds = taskIds.filter(
+        (id) => !parentTask.subTaskIds.includes(id),
+      );
+
+      if (invalidSubTaskIds.length > 0) {
+        throw new Error(
+          `Tasks '${invalidSubTaskIds.join(', ')}' are not subtasks of '${contextId}'`,
+        );
+      }
+
+      // Update the task with new subtask order
+      this._taskService.update(contextId, { subTaskIds: taskIds });
+
+      console.log('PluginBridge: Subtasks reordered successfully', {
+        parentTaskId: contextId,
+        newOrder: taskIds,
+      });
+    }
+  }
+
+  /**
    * Persist plugin data - uses current plugin context for security
    */
   async persistDataSynced(dataStr: string): Promise<void> {
