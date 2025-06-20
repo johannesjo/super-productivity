@@ -421,6 +421,8 @@ const handleTagUpdates = (
     .filter((tagId) => state[TAG_FEATURE_NAME].entities[tagId]); // Only existing tags
   const tagsToAddTo = newTagIds
     .filter((newId) => !oldTagIds.includes(newId))
+    // always filter TODAY_TAG
+    .filter((newId) => newId !== TODAY_TAG.id)
     .filter((tagId) => state[TAG_FEATURE_NAME].entities[tagId]); // Only existing tags
 
   let updatedState = state;
