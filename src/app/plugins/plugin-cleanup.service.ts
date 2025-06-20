@@ -22,11 +22,8 @@ export class PluginCleanupService {
    * Clean up resources for a specific plugin
    */
   cleanupPlugin(pluginId: string): void {
-    // Remove iframe if it exists
-    const iframe = this._pluginIframes.get(pluginId);
-    if (iframe && iframe.parentNode) {
-      iframe.parentNode.removeChild(iframe);
-    }
+    // Just clear the reference - let Angular manage the iframe DOM lifecycle
+    // Removing iframe from DOM interferes with Angular's template management
     this._pluginIframes.delete(pluginId);
   }
 
@@ -34,9 +31,7 @@ export class PluginCleanupService {
    * Clean up all resources
    */
   cleanupAll(): void {
-    for (const [pluginId] of this._pluginIframes) {
-      this.cleanupPlugin(pluginId);
-    }
+    // Just clear all references - let Angular manage iframe DOM lifecycle
     this._pluginIframes.clear();
   }
 }

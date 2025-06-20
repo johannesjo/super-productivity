@@ -105,27 +105,36 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
 
     // Subscribe to route parameter changes to handle navigation between plugins
     this._routeSubscription = this._route.paramMap.subscribe(async (params) => {
-      const pluginId = params.get('pluginId');
-      if (!pluginId) {
+      const newPluginId = params.get('pluginId');
+      if (!newPluginId) {
         this.error.set('Plugin ID not provided');
         this.isLoading.set(false);
         return;
       }
 
+      // Skip if it's the same plugin (prevent unnecessary reloads)
+      if (this.pluginId() === newPluginId) {
+        return;
+      }
+
+      console.log(
+        `Navigating from plugin "${this.pluginId()}" to plugin "${newPluginId}"`,
+      );
+
+      // Clean up previous iframe communication BEFORE setting new plugin ID
+      this._cleanupIframeCommunication();
+
       // Reset state when navigating to a different plugin
       this.isLoading.set(true);
       this.error.set(null);
       this.iframeSrc.set(null);
-      this.pluginId.set(pluginId);
-
-      // Clean up previous iframe communication
-      this._cleanupIframeCommunication();
+      this.pluginId.set(newPluginId);
 
       // Wait for plugin system to be initialized
       await this._waitForPluginSystem();
 
       try {
-        await this._loadPluginIndex(pluginId);
+        await this._loadPluginIndex(newPluginId);
       } catch (err) {
         console.error('Failed to load plugin index:', err);
         this.error.set(err instanceof Error ? err.message : 'Failed to load plugin');
@@ -216,16 +225,20 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
   }
 
   private _cleanupIframeCommunication(): void {
+    // Remove message listener
     if (this._messageListener) {
       window.removeEventListener('message', this._messageListener);
       this._messageListener = undefined;
     }
-    // Clean up tracked resources for the current plugin
+
+    // Clear iframe reference from cleanup service (but don't remove from DOM)
     const currentPluginId = this.pluginId();
     if (currentPluginId) {
       this._cleanupService.cleanupPlugin(currentPluginId);
     }
-    // Data URLs don't need to be revoked like blob URLs
+
+    // Clear iframe src to stop any ongoing loading/execution
+    this.iframeSrc.set(null);
   }
 
   onIframeLoad(): void {

@@ -1,17 +1,17 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { PluginBridgeService } from '../plugin-bridge.service';
 import { PluginSidePanelBtnCfg } from '../plugin-api.model';
-import { PluginService } from '../plugin.service';
 import { CommonModule } from '@angular/common';
-import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
 import { PluginIconComponent } from './plugin-icon/plugin-icon.component';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { togglePluginPanel } from '../../core-ui/layout/store/layout.actions';
 import { selectActivePluginId } from '../../core-ui/layout/store/layout.reducer';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { filter, map } from 'rxjs/operators';
 
 /**
  * Component that renders side panel buttons for plugins in the main header.
@@ -20,7 +20,7 @@ import { selectActivePluginId } from '../../core-ui/layout/store/layout.reducer'
 @Component({
   selector: 'plugin-side-panel-btns',
   standalone: true,
-  imports: [CommonModule, MatIcon, MatTooltip, MatIconButton, PluginIconComponent],
+  imports: [CommonModule, MatTooltip, MatIconButton, PluginIconComponent],
   template: `
     @for (button of sidePanelButtons$ | async; track button.pluginId) {
       <button
@@ -62,13 +62,39 @@ import { selectActivePluginId } from '../../core-ui/layout/store/layout.reducer'
         opacity: 0.5;
         cursor: not-allowed;
       }
+
+      button {
+        position: relative;
+        overflow: visible !important;
+
+        &.isActive::after {
+          content: '';
+          width: 100%;
+          position: absolute;
+          left: 1px;
+          top: 0;
+          bottom: -5px;
+          border-top-left-radius: 4px;
+          border-top-right-radius: 4px;
+          z-index: -1;
+          box-shadow: 0px -2px 3px 0px var(--theme-separator-alpha);
+
+          background: var(--theme-sidebar-bg);
+          // border-color: var(--theme-extra-border-color);
+        }
+
+        @media (max-width: 479px) {
+          &:disabled {
+            display: none;
+          }
+        }
+      }
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PluginSidePanelBtnsComponent {
   private _pluginBridge = inject(PluginBridgeService);
-  private _pluginService = inject(PluginService);
   private _router = inject(Router);
   private _store = inject(Store);
 
@@ -77,16 +103,18 @@ export class PluginSidePanelBtnsComponent {
 
   activePluginId$: Observable<string | null> = this._store.select(selectActivePluginId);
 
-  isWorkView(): boolean {
-    const url = this._router.url;
-    // Plugin side panels are only available in work views (active tasks, daily planner)
-    return (
-      url.includes('/active/') ||
-      url.includes('/daily-planner') ||
-      url.includes('/tag/') ||
-      url.includes('/project/')
-    );
-  }
+  readonly currentRoute = toSignal(
+    this._router.events.pipe(
+      filter((event) => event instanceof NavigationEnd),
+      map(() => this._router.url),
+    ),
+    { initialValue: this._router.url },
+  );
+
+  readonly isWorkView = computed(() => {
+    const url = this.currentRoute();
+    return url.includes('/active/') || url.includes('/tag/') || url.includes('/project/');
+  });
 
   onButtonClick(button: PluginSidePanelBtnCfg): void {
     // Prevent action if not in work view
