@@ -13,6 +13,57 @@ export class PluginMetaPersistenceService {
   private _pfapiService = inject(PfapiService);
 
   /**
+   * Helper function to check if data update is necessary before writing to pfapi.
+   * Compares current state with new state and only writes if different.
+   */
+  private async _saveIfChanged(
+    newState: PluginMetaDataState,
+    currentState?: PluginMetaDataState,
+  ): Promise<void> {
+    // Load current state if not provided
+    if (!currentState) {
+      currentState = await this._pfapiService.pf.m.pluginMetadata.load();
+    }
+
+    // Deep compare the states
+    if (this._isDataEqual(currentState, newState)) {
+      console.log('PluginMetaPersistenceService: No changes detected, skipping write');
+      return;
+    }
+
+    // Data is different, proceed with save
+    await this._pfapiService.pf.m.pluginMetadata.save(newState, {
+      isUpdateRevAndLastUpdate: true,
+    });
+    console.log('PluginMetaPersistenceService: Data updated');
+  }
+
+  /**
+   * Deep compare two plugin metadata states to check if they are equal
+   */
+  private _isDataEqual(
+    state1: PluginMetaDataState,
+    state2: PluginMetaDataState,
+  ): boolean {
+    if (state1.length !== state2.length) {
+      return false;
+    }
+
+    // Sort both arrays by id for comparison
+    const sorted1 = [...state1].sort((a, b) => a.id.localeCompare(b.id));
+    const sorted2 = [...state2].sort((a, b) => a.id.localeCompare(b.id));
+
+    return sorted1.every((item1, index) => {
+      const item2 = sorted2[index];
+      return (
+        item1.id === item2.id &&
+        item1.isEnabled === item2.isEnabled &&
+        item1.nodeExecutionConsent === item2.nodeExecutionConsent
+      );
+    });
+  }
+
+  /**
    * Set plugin enabled/disabled status
    */
   async setPluginEnabled(pluginId: string, isEnabled: boolean): Promise<void> {
@@ -34,9 +85,7 @@ export class PluginMetaPersistenceService {
       });
     }
 
-    await this._pfapiService.pf.m.pluginMetadata.save(updatedState, {
-      isUpdateRevAndLastUpdate: true,
-    });
+    await this._saveIfChanged(updatedState, currentState);
   }
 
   /**
@@ -65,9 +114,7 @@ export class PluginMetaPersistenceService {
     const currentState = await this._pfapiService.pf.m.pluginMetadata.load();
     const updatedState = currentState.filter((item) => item.id !== pluginId);
 
-    await this._pfapiService.pf.m.pluginMetadata.save(updatedState, {
-      isUpdateRevAndLastUpdate: true,
-    });
+    await this._saveIfChanged(updatedState, currentState);
   }
 
   /**
@@ -93,9 +140,7 @@ export class PluginMetaPersistenceService {
       });
     }
 
-    await this._pfapiService.pf.m.pluginMetadata.save(updatedState, {
-      isUpdateRevAndLastUpdate: true,
-    });
+    await this._saveIfChanged(updatedState, currentState);
   }
 
   /**
