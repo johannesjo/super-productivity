@@ -151,18 +151,15 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
   }
 
   private async _waitForPluginSystem(): Promise<void> {
-    // Wait up to 10 seconds for plugin system initialization
-    const maxWaitTime = 10000;
-    const checkInterval = 100;
-    let waitedTime = 0;
-
-    while (!this._pluginService.isInitialized() && waitedTime < maxWaitTime) {
-      await new Promise((resolve) => setTimeout(resolve, checkInterval));
-      waitedTime += checkInterval;
-    }
-
+    // Check if plugin system is already initialized
     if (!this._pluginService.isInitialized()) {
-      throw new Error('Plugin system failed to initialize after 10 seconds');
+      // Initialize it immediately
+      try {
+        await this._pluginService.initializePlugins();
+      } catch (error) {
+        console.error('Failed to initialize plugin system:', error);
+        throw new Error('Plugin system failed to initialize');
+      }
     }
   }
 
