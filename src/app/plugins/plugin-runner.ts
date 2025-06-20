@@ -5,7 +5,6 @@ import { PluginBridgeService } from './plugin-bridge.service';
 import { PluginSecurityService } from './plugin-security';
 import { SnackService } from '../core/snack/snack.service';
 import { IS_ELECTRON } from '../app.constants';
-import { PluginHooks } from './plugin-api.model';
 import { PluginCleanupService } from './plugin-cleanup.service';
 
 /**
@@ -181,26 +180,5 @@ export class PluginRunner {
     return this._loadedPlugins.get(pluginId);
   }
 
-  /**
-   * Execute hook handlers for all loaded plugins
-   */
-  async executeHook(hook: keyof PluginHooks, ...args: unknown[]): Promise<void> {
-    for (const [pluginId, instance] of this._loadedPlugins) {
-      if (instance.loaded && instance.isEnabled) {
-        const api = this._pluginApis.get(pluginId);
-        if (api && api._hookHandlers.has(pluginId)) {
-          const handlers = api._hookHandlers.get(pluginId)!.get(hook);
-          if (handlers) {
-            for (const handler of handlers) {
-              try {
-                await handler(...args);
-              } catch (error) {
-                console.error(`Plugin ${pluginId} hook ${hook} error:`, error);
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+  // KISS: Hook execution is handled by PluginHooksService, not here
 }
