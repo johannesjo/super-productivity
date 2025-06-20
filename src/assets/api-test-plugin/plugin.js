@@ -214,20 +214,20 @@ function testUIOperations() {
 }
 
 // Register hooks to test them
-PluginAPI.registerHook('TASK_COMPLETE', (taskData) => {
+PluginAPI.registerHook(PluginAPI.Hooks.TASK_COMPLETE, (taskData) => {
   console.log('API Test - TASK_COMPLETE hook fired:', taskData);
 });
 
-PluginAPI.registerHook('TASK_UPDATE', (taskData) => {
+PluginAPI.registerHook(PluginAPI.Hooks.TASK_UPDATE, (taskData) => {
   console.log('API Test - TASK_UPDATE hook fired:', taskData);
 });
 
-PluginAPI.registerHook('TASK_CREATE', (taskData) => {
-  console.log('API Test - TASK_CREATE hook fired:', taskData);
+PluginAPI.registerHook(PluginAPI.Hooks.TASK_DELETE, (taskData) => {
+  console.log('API Test - TASK_DELETE hook fired:', taskData);
 });
 
-PluginAPI.registerHook('PROJECT_SWITCH', (projectData) => {
-  console.log('API Test - PROJECT_SWITCH hook fired:', projectData);
+PluginAPI.registerHook(PluginAPI.Hooks.CURRENT_TASK_CHANGE, (taskData) => {
+  console.log('API Test - CURRENT_TASK_CHANGE hook fired:', taskData);
 });
 
 // Register UI elements

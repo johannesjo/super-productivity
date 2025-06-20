@@ -73,6 +73,18 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
         window.PluginAPI = {
           cfg: ${JSON.stringify(config.baseCfg)},
           
+          // Add Hooks enum
+          Hooks: {
+            TASK_COMPLETE: 'taskComplete',
+            TASK_UPDATE: 'taskUpdate',
+            TASK_DELETE: 'taskDelete',
+            CURRENT_TASK_CHANGE: 'currentTaskChange',
+            FINISH_DAY: 'finishDay',
+            LANGUAGE_CHANGE: 'languageChange',
+            PERSISTED_DATA_UPDATE: 'persistedDataUpdate',
+            ACTION: 'action'
+          },
+          
           // Task methods
           getTasks: () => callApi('getTasks'),
           getArchivedTasks: () => callApi('getArchivedTasks'),
@@ -89,6 +101,9 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
           getAllTags: () => callApi('getAllTags'),
           addTag: (tagData) => callApi('addTag', [tagData]),
           updateTag: (tagId, updates) => callApi('updateTag', [tagId, updates]),
+          
+          // Task ordering
+          reorderTasks: (taskIds, contextId, contextType) => callApi('reorderTasks', [taskIds, contextId, contextType]),
           
           // UI methods
           showSnack: (cfg) => callApi('showSnack', [cfg]),
@@ -110,7 +125,31 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
           registerSidePanelButton: (cfg) => callApi('registerSidePanelButton', [cfg]),
           
           // Node execution (if available)
-          executeNodeScript: (request) => callApi('executeNodeScript', [request])
+          executeNodeScript: (request) => callApi('executeNodeScript', [request]),
+          
+          // Message handling
+          onMessage: (handler) => {
+            // Store the handler and set up message listener
+            window.__pluginMessageHandler = handler;
+            window.addEventListener('message', async (event) => {
+              if (event.data?.type === 'PLUGIN_MESSAGE' && window.__pluginMessageHandler) {
+                try {
+                  const result = await window.__pluginMessageHandler(event.data.message);
+                  event.source?.postMessage({
+                    type: 'PLUGIN_MESSAGE_RESPONSE',
+                    messageId: event.data.messageId,
+                    result
+                  }, '*');
+                } catch (error) {
+                  event.source?.postMessage({
+                    type: 'PLUGIN_MESSAGE_ERROR',
+                    messageId: event.data.messageId,
+                    error: error instanceof Error ? error.message : 'Unknown error'
+                  }, '*');
+                }
+              }
+            });
+          }
         };
 
         // Notify parent that plugin is ready
