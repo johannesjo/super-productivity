@@ -6,9 +6,21 @@ import electronLog from 'electron-log/main';
 const execAsync = promisify(exec);
 const log = electronLog.scope('IdleTimeHandler');
 
+type IdleDetectionMethod =
+  | 'powerMonitor'
+  | 'gnomeDBus'
+  | 'xprintidle'
+  | 'loginctl'
+  | 'none';
+
 export class IdleTimeHandler {
   private isWayland: boolean = false;
   private isGnomeWayland: boolean = false;
+  private workingMethod: IdleDetectionMethod = 'none';
+  private hasTestedMethods: boolean = false;
+  private isSnapEnvironment: boolean = false;
+  private lastErrorLog: number = 0;
+  private ERROR_LOG_INTERVAL = 60000; // Log errors at most once per minute
 
   constructor() {
     this.detectEnvironment();
@@ -27,6 +39,9 @@ export class IdleTimeHandler {
         currentDesktop?.toLowerCase().includes('ubuntu') || // Ubuntu uses GNOME
         !!gnomeShellVersion);
 
+    // Check if running in snap environment
+    this.isSnapEnvironment = !!process.env.SNAP || !!process.env.SNAP_NAME;
+
     log.info('Environment detection:', {
       sessionType,
       currentDesktop,
@@ -34,30 +49,142 @@ export class IdleTimeHandler {
       gnomeShellVersion,
       isWayland: this.isWayland,
       isGnomeWayland: this.isGnomeWayland,
+      isSnapEnvironment: this.isSnapEnvironment,
     });
   }
 
-  async getIdleTime(): Promise<number> {
-    if (!this.isWayland) {
-      // Use standard Electron API for X11/non-Wayland sessions
-      return powerMonitor.getSystemIdleTime() * 1000;
+  private async testIdleDetectionMethods(): Promise<void> {
+    if (this.hasTestedMethods) {
+      return;
     }
 
-    if (this.isGnomeWayland) {
-      // Try to get idle time from GNOME Mutter via DBus
-      try {
-        const idleTime = await this.getGnomeIdleTime();
-        if (idleTime !== null) {
-          return idleTime;
+    log.info('Testing idle detection methods (one-time initialization)...');
+
+    if (!this.isWayland) {
+      // For X11, we can rely on powerMonitor
+      this.workingMethod = 'powerMonitor';
+      log.info('X11 detected, will use powerMonitor for idle detection');
+    } else {
+      // Test methods in order of preference for Wayland
+      const methods: Array<{ name: IdleDetectionMethod; test: () => Promise<boolean> }> =
+        [
+          {
+            name: 'gnomeDBus',
+            test: async () => {
+              if (!this.isGnomeWayland) return false;
+              // Skip DBus in snap environment due to library version mismatches
+              if (this.isSnapEnvironment) {
+                log.info('Skipping GNOME DBus in snap environment');
+                return false;
+              }
+              try {
+                const idleTime = await this.getGnomeIdleTime();
+                return idleTime !== null;
+              } catch {
+                return false;
+              }
+            },
+          },
+          {
+            name: 'xprintidle',
+            test: async () => {
+              try {
+                const idleTime = await this.getXprintidleTime();
+                return idleTime !== null;
+              } catch {
+                return false;
+              }
+            },
+          },
+          {
+            name: 'loginctl',
+            test: async () => {
+              // Skip loginctl in snap environment due to AppArmor restrictions
+              if (this.isSnapEnvironment) {
+                log.info('Skipping loginctl in snap environment');
+                return false;
+              }
+              try {
+                const idleTime = await this.getLoginctlIdleTime();
+                return idleTime !== null;
+              } catch {
+                return false;
+              }
+            },
+          },
+        ];
+
+      for (const method of methods) {
+        try {
+          log.info(`Testing ${method.name}...`);
+          const works = await method.test();
+          if (works) {
+            this.workingMethod = method.name;
+            log.info(
+              `Successfully tested ${method.name} - will use this for idle detection`,
+            );
+            break;
+          } else {
+            log.info(`${method.name} test failed, trying next method`);
+          }
+        } catch (error) {
+          log.warn(`${method.name} test error:`, error);
         }
-      } catch (error) {
-        log.warn('Failed to get GNOME idle time:', error);
+      }
+
+      if (this.workingMethod === 'none') {
+        log.warn(
+          'No working idle detection method found for Wayland. Idle detection will be disabled.',
+        );
       }
     }
 
-    // If Wayland but no GNOME or GNOME failed, return 0
-    // This is safer than returning incorrect idle time
-    return 0;
+    this.hasTestedMethods = true;
+  }
+
+  async getIdleTime(): Promise<number> {
+    // Ensure methods have been tested
+    if (!this.hasTestedMethods) {
+      await this.testIdleDetectionMethods();
+    }
+
+    // Use the working method determined during initialization
+    switch (this.workingMethod) {
+      case 'powerMonitor':
+        return powerMonitor.getSystemIdleTime() * 1000;
+
+      case 'gnomeDBus':
+        try {
+          const idleTime = await this.getGnomeIdleTime();
+          return idleTime ?? 0;
+        } catch (error) {
+          this.logError('GNOME DBus error', error);
+          return 0;
+        }
+
+      case 'xprintidle':
+        try {
+          const idleTime = await this.getXprintidleTime();
+          return idleTime ?? 0;
+        } catch (error) {
+          this.logError('xprintidle error', error);
+          return 0;
+        }
+
+      case 'loginctl':
+        try {
+          const idleTime = await this.getLoginctlIdleTime();
+          return idleTime ?? 0;
+        } catch (error) {
+          this.logError('loginctl error', error);
+          return 0;
+        }
+
+      case 'none':
+      default:
+        // No working method, return 0 (not idle)
+        return 0;
+    }
   }
 
   private async getGnomeIdleTime(): Promise<number | null> {
@@ -79,7 +206,7 @@ export class IdleTimeHandler {
       }
     } catch (error) {
       // DBus call failed, likely not running GNOME or DBus not available
-      log.debug('GNOME DBus idle time query failed:', error);
+      throw error;
     }
 
     return null;
@@ -106,7 +233,7 @@ export class IdleTimeHandler {
         }
       }
     } catch (error) {
-      log.debug('loginctl idle time query failed:', error);
+      throw error;
     }
 
     return null;
@@ -121,42 +248,22 @@ export class IdleTimeHandler {
         return idleMs;
       }
     } catch (error) {
-      log.debug('xprintidle not available:', error);
+      throw error;
     }
 
     return null;
   }
 
+  // Keep the old method for compatibility but use the new approach
   async getIdleTimeWithFallbacks(): Promise<number> {
-    if (!this.isWayland) {
-      // Use standard Electron API for X11/non-Wayland sessions
-      const idleTime = powerMonitor.getSystemIdleTime() * 1000;
-      log.debug(`X11/non-Wayland: Using powerMonitor, idle time: ${idleTime}ms`);
-      return idleTime;
+    return this.getIdleTime();
+  }
+
+  private logError(context: string, error: any): void {
+    const now = Date.now();
+    if (now - this.lastErrorLog > this.ERROR_LOG_INTERVAL) {
+      log.debug(`${context} (falling back to 0):`, error);
+      this.lastErrorLog = now;
     }
-
-    // Try multiple methods in order of preference
-    const methods = [
-      { name: 'GNOME DBus', fn: () => this.getGnomeIdleTime() },
-      { name: 'xprintidle', fn: () => this.getXprintidleTime() },
-      { name: 'loginctl', fn: () => this.getLoginctlIdleTime() },
-    ];
-
-    for (const method of methods) {
-      try {
-        const idleTime = await method.fn();
-        if (idleTime !== null && idleTime >= 0) {
-          log.debug(`Wayland: Using ${method.name}, idle time: ${idleTime}ms`);
-          return idleTime;
-        }
-      } catch (error) {
-        log.debug(`Wayland: ${method.name} failed, trying next method`);
-      }
-    }
-
-    // If all methods fail on Wayland, return 0 (not idle)
-    // This is safer than returning incorrect idle time
-    log.warn('Wayland: All idle detection methods failed, returning 0');
-    return 0;
   }
 }
