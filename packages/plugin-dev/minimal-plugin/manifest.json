@@ -1,0 +1,10 @@
+{
+  "name": "Minimal Plugin",
+  "id": "minimal-plugin",
+  "manifestVersion": 1,
+  "version": "1.0.0",
+  "minSupVersion": "13.0.0",
+  "description": "A minimal example plugin",
+  "hooks": ["taskComplete"],
+  "permissions": ["showSnack"]
+}

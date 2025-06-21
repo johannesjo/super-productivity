@@ -1,0 +1,12 @@
+{
+  "name": "simple-typescript-plugin",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "node build.js",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "@super-productivity/plugin-api": "file:../../plugin-api",
+    "typescript": "^5.0.0"
+  }
+}
