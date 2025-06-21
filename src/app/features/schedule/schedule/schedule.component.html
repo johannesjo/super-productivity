@@ -143,8 +143,8 @@
     <div class="weekday-header">Sat</div>
 
     @for (day of daysToShow; track $index) {
-      @let weekIndex = Math.floor($index / 7);
-      @let dayIndex = $index % 7;
+      @let weekIndex = getWeekIndex($index);
+      @let dayIndex = getDayIndex($index);
       @if (weekIndex < weeksToShow) {
         <div
           class="month-day-cell {{ getDayClass(day) }}"

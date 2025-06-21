@@ -418,7 +418,7 @@ schedule-event.cdk-drag-dragging + schedule-event {
 
 .main-grid-container.month-view {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   grid-template-rows: auto repeat(var(--nr-of-weeks), 1fr);
   gap: 1px;
   height: calc(100vh - 120px);
@@ -530,6 +530,9 @@ schedule-event.cdk-drag-dragging + schedule-event {
   flex-direction: column;
   min-height: 80px;
   position: relative;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 
   @include darkTheme() {
     background: $dark-theme-bg;
@@ -647,6 +650,8 @@ schedule-event.cdk-drag-dragging + schedule-event {
   overflow-y: auto;
   overflow-x: hidden;
   max-height: calc(100% - 35px);
+  width: 100%;
+  box-sizing: border-box;
 
   @include mq(xs, max) {
     padding: 2px;
@@ -727,6 +732,7 @@ schedule-event.cdk-drag-dragging + schedule-event {
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
+    box-sizing: border-box;
 
     @include mq(xs, max) {
       font-size: 10px;

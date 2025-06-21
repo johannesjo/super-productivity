@@ -104,8 +104,6 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     (v, index) => index % FH === 0,
   );
 
-  Math = Math;
-
   // events = [
 
   is12HourFormat = Intl.DateTimeFormat(this.locale, { hour: 'numeric' }).resolvedOptions()
@@ -640,56 +638,93 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
   }
 
   getEventDayStr(ev: ScheduleEvent): string | null {
+    const data = ev.data;
+
     // Calendar events
-    if (ev.type === SVEType.CalendarEvent && ev.data && (ev.data as any).start) {
-      return this._dateService.todayStr((ev.data as any).start);
+    if (ev.type === SVEType.CalendarEvent && data && 'start' in data) {
+      const start = (data as { start: unknown }).start;
+      if (typeof start === 'number') {
+        return this._dateService.todayStr(start);
+      }
     }
 
     // Tasks planned for a day
     if (
       (ev.type === SVEType.TaskPlannedForDay ||
         ev.type === SVEType.SplitTaskPlannedForDay) &&
-      (ev.data as any)?.plannedForDay
+      data &&
+      'plannedForDay' in data
     ) {
-      return (ev.data as any).plannedForDay;
+      const plannedForDay = (data as { plannedForDay: unknown }).plannedForDay;
+      if (typeof plannedForDay === 'string') {
+        return plannedForDay;
+      }
     }
 
     // ScheduledTask may have plannedForDay or be scheduled for today
-    if (ev.type === SVEType.ScheduledTask) {
-      if ((ev.data as any)?.plannedForDay) {
-        return (ev.data as any).plannedForDay;
+    if (ev.type === SVEType.ScheduledTask && data) {
+      if ('plannedForDay' in data) {
+        const plannedForDay = (data as { plannedForDay: unknown }).plannedForDay;
+        if (typeof plannedForDay === 'string') {
+          return plannedForDay;
+        }
       }
+
       // For scheduled tasks with time, they may have reminderData or be planned for today
-      if ((ev.data as any)?.remindAt) {
-        return this._dateService.todayStr((ev.data as any).remindAt);
+      if ('remindAt' in data) {
+        const remindAt = (data as { remindAt: unknown }).remindAt;
+        if (typeof remindAt === 'number') {
+          return this._dateService.todayStr(remindAt);
+        }
       }
+
       // Check dueWithTime for scheduled tasks
-      if ((ev.data as any)?.dueWithTime) {
-        const date = new Date((ev.data as any).dueWithTime);
-        const year = date.getUTCFullYear();
-        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-        const day = String(date.getUTCDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
+      if ('dueWithTime' in data) {
+        const dueWithTime = (data as { dueWithTime: unknown }).dueWithTime;
+        if (typeof dueWithTime === 'number') {
+          return this._dateService.todayStr(dueWithTime);
+        }
       }
     }
 
     // SplitTask may have plannedForDay
-    if (ev.type === SVEType.SplitTask && (ev.data as any)?.plannedForDay) {
-      return (ev.data as any).plannedForDay;
+    if (ev.type === SVEType.SplitTask && data && 'plannedForDay' in data) {
+      const plannedForDay = (data as { plannedForDay: unknown }).plannedForDay;
+      if (typeof plannedForDay === 'string') {
+        return plannedForDay;
+      }
     }
 
-    // Regular tasks may have plannedForDay
-    if (ev.type === SVEType.Task && (ev.data as any)?.plannedForDay) {
-      return (ev.data as any).plannedForDay;
+    // Regular tasks may have plannedForDay or dueDay
+    if (ev.type === SVEType.Task && data) {
+      // Check plannedForDay first
+      if ('plannedForDay' in data) {
+        const plannedForDay = (data as { plannedForDay: unknown }).plannedForDay;
+        if (typeof plannedForDay === 'string') {
+          return plannedForDay;
+        }
+      }
+
+      // Check dueDay if plannedForDay not found
+      if ('dueDay' in data) {
+        const dueDay = (data as { dueDay: unknown }).dueDay;
+        if (typeof dueDay === 'string') {
+          return dueDay;
+        }
+      }
     }
 
     // RepeatProjection types
     if (
       (ev.type === SVEType.RepeatProjection ||
         ev.type === SVEType.ScheduledRepeatProjection) &&
-      (ev.data as any)?.plannedForDay
+      data &&
+      'plannedForDay' in data
     ) {
-      return (ev.data as any).plannedForDay;
+      const plannedForDay = (data as { plannedForDay: unknown }).plannedForDay;
+      if (typeof plannedForDay === 'string') {
+        return plannedForDay;
+      }
     }
 
     // If no specific date found, return null
@@ -697,9 +732,21 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
   }
 
   hasEventsForDay(day: string, events: ScheduleEvent[] | null): boolean {
-    if (!events) return false;
-    const eventsForDay = events.filter((ev) => this.getEventDayStr(ev) === day);
+    if (!events) {
+      return false;
+    }
 
-    return eventsForDay.length > 0;
+    return events.some((ev) => {
+      const eventDay = this.getEventDayStr(ev);
+      return eventDay === day;
+    });
+  }
+
+  getWeekIndex(dayIndex: number): number {
+    return Math.floor(dayIndex / 7);
+  }
+
+  getDayIndex(dayIndex: number): number {
+    return dayIndex % 7;
   }
 }
