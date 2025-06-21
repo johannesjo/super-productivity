@@ -30,7 +30,7 @@ import { CalendarIntegrationService } from '../../calendar-integration/calendar-
 import { DateService } from '../../../core/date/date.service';
 import { LS } from '../../../core/persistence/storage-keys.const';
 import { DialogTimelineSetupComponent } from '../dialog-timeline-setup/dialog-timeline-setup.component';
-import { T } from 'src/app/t.const';
+import { T } from '../../../t.const';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { ScheduleEventComponent } from '../schedule-event/schedule-event.component';
 import { ScheduleDay, ScheduleEvent } from '../schedule.model';
@@ -41,7 +41,7 @@ import {
   CdkDragStart,
 } from '@angular/cdk/drag-drop';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
-import { IS_TOUCH_PRIMARY } from 'src/app/util/is-mouse-primary';
+import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import {
   selectTimelineConfig,
   selectTimelineWorkStartEndHours,
@@ -123,13 +123,36 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
   currentTimeRow: number = 0;
   totalRows: number = D_HOURS * FH;
 
-  daysToShow$ = this._globalTrackingIntervalService.todayDateStr$.pipe(
-    switchMap(() => {
+  isMonthView$ = this.layoutService.selectedTimeView$.pipe(
+    map((view) => view === 'month'),
+  );
+
+  daysToShow$ = combineLatest([
+    this._globalTrackingIntervalService.todayDateStr$,
+    this.layoutService.selectedTimeView$,
+  ]).pipe(
+    switchMap(([, selectedView]) => {
       return fromEvent(window, 'resize').pipe(
         startWith(window.innerWidth),
         debounceTime(50),
         map(() => {
           const width = window.innerWidth;
+          const height = window.innerHeight;
+
+          if (selectedView === 'month') {
+            const availableHeight = height - 160;
+            const minHeightPerWeek = width < 768 ? 60 : 100;
+            const maxWeeks = Math.floor(availableHeight / minHeightPerWeek);
+
+            if (maxWeeks < 3) {
+              return 3;
+            } else if (maxWeeks > 6) {
+              return 6;
+            } else {
+              return maxWeeks;
+            }
+          }
+
           if (width < 600) {
             return 3;
           } else if (width < 900) {
@@ -142,11 +165,50 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
             return 10;
           }
         }),
-        map((nrOfDaysToShow) => this._getDaysToShow(nrOfDaysToShow)),
+        map((number) => {
+          if (selectedView === 'month') {
+            return this._getMonthDaysToShow(number);
+          }
+          return this._getDaysToShow(number);
+        }),
       );
     }),
   );
   daysToShow: string[] = [];
+
+  private _getMonthDaysToShow(numberOfWeeks: number): string[] {
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    //const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+    const firstSunday = new Date(firstDayOfMonth);
+    firstSunday.setDate(firstDayOfMonth.getDate() - firstDayOfMonth.getDay());
+
+    const totalDays = numberOfWeeks * 7;
+    const daysToShow: string[] = [];
+    for (let i = 0; i < totalDays; i++) {
+      const currentDate = new Date(firstSunday);
+      currentDate.setDate(firstSunday.getDate() + i);
+      daysToShow.push(this._dateService.todayStr(currentDate.getTime()));
+    }
+
+    return daysToShow;
+  }
+
+  getDayClass(day: string): string {
+    const dayDate = new Date(day);
+    const today = new Date();
+    const isCurrentMonth =
+      dayDate.getMonth() === today.getMonth() &&
+      dayDate.getFullYear() === today.getFullYear();
+    const isToday = dayDate.toDateString() === today.toDateString();
+
+    let classes = '';
+    if (!isCurrentMonth) classes += ' other-month';
+    if (isToday) classes += ' today';
+
+    return classes;
+  }
 
   scheduleDays$: Observable<ScheduleDay[]> = combineLatest([
     this._store.pipe(select(selectTimelineTasks)),
@@ -278,7 +340,11 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
 
   private _currentAniTimeout: number | undefined;
 
+  weeksToShow: number = 6;
+
   constructor() {
+    this.layoutService.setTimeView('week');
+
     if (!localStorage.getItem(LS.WAS_SCHEDULE_INITIAL_DIALOG_SHOWN)) {
       this._matDialog.open(DialogTimelineSetupComponent, {
         data: { isInfoShownInitially: true },
@@ -287,7 +353,12 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
 
     this.daysToShow$.pipe(takeUntilDestroyed()).subscribe((days) => {
       this.daysToShow = days;
+      this.weeksToShow = Math.ceil(days.length / 7);
       this._elRef.nativeElement.style.setProperty('--nr-of-days', days.length);
+      this._elRef.nativeElement.style.setProperty(
+        '--nr-of-weeks',
+        this.weeksToShow.toString(),
+      );
     });
     this.workStartEnd$.pipe(takeUntilDestroyed()).subscribe((v) => {
       this.workStartEnd = v;
@@ -321,13 +392,25 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
   }
 
   onGridClick(ev: MouseEvent): void {
-    if (ev.target instanceof HTMLElement && ev.target.classList.contains('col')) {
-      this.isCreateTaskActive = true;
+    if (ev.target instanceof HTMLElement) {
+      const isMonthView = this.layoutService.getSelectedTimeView() === 'month';
+
+      if (isMonthView) {
+        return;
+      }
+
+      if (ev.target.classList.contains('col')) {
+        this.isCreateTaskActive = true;
+      }
     }
   }
 
   @throttle(30)
   onMoveOverGrid(ev: MouseEvent): void {
+    if (this.layoutService.getSelectedTimeView() === 'month') {
+      return;
+    }
+
     if (this.isDragging || this.isDraggingDelayed) {
       return;
     }
@@ -552,5 +635,118 @@ export class ScheduleComponent implements AfterViewInit, OnDestroy {
     const parts = input.split(',');
     parts[0] = `translate3d(${newNumber}`;
     return parts.join(',');
+  }
+
+  getEventDayStr(ev: ScheduleEvent): string | null {
+    const data = ev.data;
+
+    // Calendar events
+    if (ev.type === SVEType.CalendarEvent && data && 'start' in data) {
+      const start = (data as { start: unknown }).start;
+      if (typeof start === 'number') {
+        return this._dateService.todayStr(start);
+      }
+    }
+
+    // Tasks planned for a day
+    if (
+      (ev.type === SVEType.TaskPlannedForDay ||
+        ev.type === SVEType.SplitTaskPlannedForDay) &&
+      data &&
+      'plannedForDay' in data
+    ) {
+      const plannedForDay = (data as { plannedForDay: unknown }).plannedForDay;
+      if (typeof plannedForDay === 'string') {
+        return plannedForDay;
+      }
+    }
+
+    // ScheduledTask may have plannedForDay or be scheduled for today
+    if (ev.type === SVEType.ScheduledTask && data) {
+      if ('plannedForDay' in data) {
+        const plannedForDay = (data as { plannedForDay: unknown }).plannedForDay;
+        if (typeof plannedForDay === 'string') {
+          return plannedForDay;
+        }
+      }
+
+      // For scheduled tasks with time, they may have reminderData or be planned for today
+      if ('remindAt' in data) {
+        const remindAt = (data as { remindAt: unknown }).remindAt;
+        if (typeof remindAt === 'number') {
+          return this._dateService.todayStr(remindAt);
+        }
+      }
+
+      // Check dueWithTime for scheduled tasks
+      if ('dueWithTime' in data) {
+        const dueWithTime = (data as { dueWithTime: unknown }).dueWithTime;
+        if (typeof dueWithTime === 'number') {
+          return this._dateService.todayStr(dueWithTime);
+        }
+      }
+    }
+
+    // SplitTask may have plannedForDay
+    if (ev.type === SVEType.SplitTask && data && 'plannedForDay' in data) {
+      const plannedForDay = (data as { plannedForDay: unknown }).plannedForDay;
+      if (typeof plannedForDay === 'string') {
+        return plannedForDay;
+      }
+    }
+
+    // Regular tasks may have plannedForDay or dueDay
+    if (ev.type === SVEType.Task && data) {
+      // Check plannedForDay first
+      if ('plannedForDay' in data) {
+        const plannedForDay = (data as { plannedForDay: unknown }).plannedForDay;
+        if (typeof plannedForDay === 'string') {
+          return plannedForDay;
+        }
+      }
+
+      // Check dueDay if plannedForDay not found
+      if ('dueDay' in data) {
+        const dueDay = (data as { dueDay: unknown }).dueDay;
+        if (typeof dueDay === 'string') {
+          return dueDay;
+        }
+      }
+    }
+
+    // RepeatProjection types
+    if (
+      (ev.type === SVEType.RepeatProjection ||
+        ev.type === SVEType.ScheduledRepeatProjection) &&
+      data &&
+      'plannedForDay' in data
+    ) {
+      const plannedForDay = (data as { plannedForDay: unknown }).plannedForDay;
+      if (typeof plannedForDay === 'string') {
+        return plannedForDay;
+      }
+    }
+
+    // If no specific date found, return null
+    return null;
+  }
+
+  hasEventsForDay(day: string, events: ScheduleEvent[] | null): boolean {
+    if (!events) {
+      return false;
+    }
+
+    return events.some((ev) => {
+      const eventDay = this.getEventDayStr(ev);
+      return eventDay === day;
+    });
+  }
+
+  getWeekIndex(dayIndex: number): number {
+    return Math.floor(dayIndex / 7);
+  }
+
+  getDayIndex(dayIndex: number): number {
+    return dayIndex % 7;
   }
 }

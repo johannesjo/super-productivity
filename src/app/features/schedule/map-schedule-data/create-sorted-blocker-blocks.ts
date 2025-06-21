@@ -62,8 +62,13 @@ const createBlockerBlocksForScheduledRepeatProjections = (
 
   let i: number = 1;
   while (i < nrOfDays) {
-    // eslint-disable-next-line no-mixed-operators
-    const currentDayTimestamp = now + i * 24 * 60 * 60 * 1000;
+    // Calculate proper day start instead of adding 24-hour increments
+    const nowDate = new Date(now);
+    const targetDate = new Date(nowDate);
+    targetDate.setDate(nowDate.getDate() + i);
+    targetDate.setHours(0, 0, 0, 0);
+    const currentDayTimestamp = targetDate.getTime();
+
     const allRepeatableTasksForDay = selectTaskRepeatCfgsDueOnDayOnly.projector(
       scheduledTaskRepeatCfgs,
       {
@@ -108,16 +113,23 @@ const createBlockerBlocksForWorkStartEnd = (
   }
   let i: number = 0;
   while (i < nrOfDays) {
+    // Calculate proper day start instead of adding 24-hour increments
+    const nowDate = new Date(now);
+    const currentDate = new Date(nowDate);
+    currentDate.setDate(nowDate.getDate() + i);
+    currentDate.setHours(0, 0, 0, 0);
+    const currentDayTimestamp = currentDate.getTime();
+
+    const nextDate = new Date(nowDate);
+    nextDate.setDate(nowDate.getDate() + i + 1);
+    nextDate.setHours(0, 0, 0, 0);
+    const nextDayTimestamp = nextDate.getTime();
+
     const start = getDateTimeFromClockString(
       workStartEndCfg.endTime,
-      // prettier-ignore
-      now + (i * 24 * 60 * 60 * 1000),
+      currentDayTimestamp,
     );
-    const end = getDateTimeFromClockString(
-      workStartEndCfg.startTime,
-      // prettier-ignore
-      now + ((i + 1) * 24 * 60 * 60 * 1000),
-    );
+    const end = getDateTimeFromClockString(workStartEndCfg.startTime, nextDayTimestamp);
     blockedBlocks.push({
       start,
       end,
@@ -148,16 +160,18 @@ const createBlockerBlocksForLunchBreak = (
   }
   let i: number = 0;
   while (i < nrOfDays) {
+    // Calculate proper day start instead of adding 24-hour increments
+    const nowDate = new Date(now);
+    const targetDate = new Date(nowDate);
+    targetDate.setDate(nowDate.getDate() + i);
+    targetDate.setHours(0, 0, 0, 0);
+    const currentDayTimestamp = targetDate.getTime();
+
     const start = getDateTimeFromClockString(
       lunchBreakCfg.startTime,
-      // prettier-ignore
-      now + (i * 24 * 60 * 60 * 1000),
+      currentDayTimestamp,
     );
-    const end = getDateTimeFromClockString(
-      lunchBreakCfg.endTime,
-      // prettier-ignore
-      now + (i * 24 * 60 * 60 * 1000),
-    );
+    const end = getDateTimeFromClockString(lunchBreakCfg.endTime, currentDayTimestamp);
     blockedBlocks.push({
       start,
       end,
