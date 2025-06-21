@@ -1,4 +1,4 @@
-@import '../../../../variables';
+@import '../../../../common';
 
 :host {
   background-color: inherit;
@@ -10,8 +10,8 @@
 }
 
 header {
-  margin-top: $s;
-  margin-bottom: 2 * $s;
+  margin-top: var(--s);
+  margin-bottom: var(--s2);
 
   @include mq(xs) {
     margin-bottom: 0;
@@ -19,12 +19,12 @@ header {
 }
 
 .notes {
-  padding: $s * 1.5;
+  padding: calc(var(--s) * 1.5);
 }
 
 note {
   display: block;
-  margin-bottom: $s * 1.5;
+  margin-bottom: calc(var(--s) * 1.5);
 }
 
 .drag-over-msg {

@@ -19,16 +19,16 @@ import {
 } from '../../tag/store/tag.reducer';
 import { selectTodayStr } from '../../../root-store/app-state/app-state.selectors';
 
-const mapSubTasksToTasks = (tasksIN: any[]): TaskWithSubTasks[] => {
+const mapSubTasksToTasks = (tasksIN: Task[]): TaskWithSubTasks[] => {
   return tasksIN
     .filter((task) => !task.parentId)
     .map((task) => {
       if (task.subTaskIds && task.subTaskIds.length > 0) {
         return {
           ...task,
-          subTasks: task.subTaskIds.map((subTaskId: string) =>
-            tasksIN.find((taskIN) => taskIN.id === subTaskId),
-          ),
+          subTasks: task.subTaskIds
+            .map((subTaskId: string) => tasksIN.find((taskIN) => taskIN.id === subTaskId))
+            .filter((t): t is Task => t !== undefined),
         };
       } else {
         return {
@@ -334,15 +334,15 @@ export const selectTasksWorkedOnOrDoneFlat = createSelector(
 
 export const selectTasksDueForDay = createSelector(
   selectAllTasks,
-  (tasks: Task[], day: string): TaskWithDueDay[] => {
-    return tasks.filter((task) => task.dueDay === day) as TaskWithDueDay[];
+  (tasks: Task[], props: { day: string }): TaskWithDueDay[] => {
+    return tasks.filter((task) => task.dueDay === props.day) as TaskWithDueDay[];
   },
 );
 
 export const selectTasksDueAndOverdueForDay = createSelector(
   selectAllTasks,
-  (tasks: Task[], day: string): TaskWithDueDay[] => {
-    const dayDate = new Date(day);
+  (tasks: Task[], props: { day: string }): TaskWithDueDay[] => {
+    const dayDate = new Date(props.day);
     return tasks.filter(
       (task) => typeof task.dueDay === 'string' && new Date(task.dueDay) <= dayDate,
     ) as TaskWithDueDay[];
@@ -351,12 +351,12 @@ export const selectTasksDueAndOverdueForDay = createSelector(
 
 export const selectTasksWithDueTimeForRange = createSelector(
   selectAllTasks,
-  (tasks: Task[], { start, end }: { start: number; end: number }): TaskWithDueTime[] => {
+  (tasks: Task[], props: { start: number; end: number }): TaskWithDueTime[] => {
     return tasks.filter(
       (task) =>
         typeof task.dueWithTime === 'number' &&
-        task.dueWithTime >= start &&
-        task.dueWithTime <= end,
+        task.dueWithTime >= props.start &&
+        task.dueWithTime <= props.end,
     ) as TaskWithDueTime[];
   },
 );
@@ -381,9 +381,9 @@ export const selectAllTasksWithDueTimeSorted = createSelector(
 
 export const selectTasksWithDueTimeUntil = createSelector(
   selectAllTasks,
-  (tasks: Task[], end: number): TaskWithDueTime[] => {
+  (tasks: Task[], props: { end: number }): TaskWithDueTime[] => {
     return tasks.filter(
-      (task) => typeof task.dueWithTime === 'number' && task.dueWithTime <= end,
+      (task) => typeof task.dueWithTime === 'number' && task.dueWithTime <= props.end,
     ) as TaskWithDueTime[];
   },
 );

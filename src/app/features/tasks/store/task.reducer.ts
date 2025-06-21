@@ -10,15 +10,12 @@ import {
   moveSubTaskUp,
   removeReminderFromTask,
   removeTimeSpent,
-  reScheduleTaskWithTime,
   restoreTask,
   roundTimeSpentForDay,
-  scheduleTaskWithTime,
   setCurrentTask,
   setSelectedTask,
   toggleStart,
   toggleTaskHideSubTasks,
-  unScheduleTask,
   unsetCurrentTask,
   updateTaskUi,
 } from './task.actions';
@@ -34,8 +31,6 @@ import {
   updateTimeSpentForTask,
 } from './task.reducer.util';
 import { taskAdapter } from './task.adapter';
-import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
-
 export { taskAdapter };
 import { moveItemInList } from '../../work-context/store/work-context-meta.helper';
 import {
@@ -60,9 +55,8 @@ import { MODEL_VERSION_KEY } from '../../../app.constants';
 import { MODEL_VERSION } from '../../../core/model-version';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-import { deleteProject } from '../../project/store/project.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
-import { planTasksForToday, removeTasksFromTodayTag } from '../../tag/store/tag.actions';
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -98,7 +92,7 @@ export const taskReducer = createReducer<TaskState>(
       : state,
   ),
 
-  on(deleteProject, (state, { project, allTaskIds }) => {
+  on(TaskSharedActions.deleteProject, (state, { project, allTaskIds }) => {
     return taskAdapter.removeMany(allTaskIds, {
       ...state,
       currentTaskId:
@@ -194,14 +188,6 @@ export const taskReducer = createReducer<TaskState>(
 
   on(updateTaskUi, (state, { task }) => {
     return taskAdapter.updateOne(task, state);
-  }),
-
-  on(removeTasksFromTodayTag, (state, { taskIds }) => {
-    return {
-      ...state,
-      // we do this to maintain the order of tasks when they are moved to overdue
-      ids: [...taskIds, ...state.ids.filter((id) => !taskIds.includes(id))],
-    };
   }),
 
   // TODO simplify
@@ -605,15 +591,12 @@ export const taskReducer = createReducer<TaskState>(
     );
   }),
 
-  on(planTasksForToday, (state, { taskIds }) => {
-    const today = getWorklogStr();
-    const updates: Update<Task>[] = taskIds.map((taskId) => ({
-      id: taskId,
-      changes: {
-        dueDay: today,
-      },
-    }));
-    return taskAdapter.updateMany(updates, state);
+  on(TaskSharedActions.removeTasksFromTodayTag, (state, { taskIds }) => {
+    return {
+      ...state,
+      // we do this to maintain the order of tasks when they are moved to overdue
+      ids: [...taskIds, ...state.ids.filter((id) => !taskIds.includes(id))],
+    };
   }),
 
   // REMINDER STUFF
@@ -624,44 +607,6 @@ export const taskReducer = createReducer<TaskState>(
         id: taskId,
         changes: {
           reminderId,
-        },
-      },
-      state,
-    );
-  }),
-  on(scheduleTaskWithTime, (state, { task, dueWithTime }) => {
-    return taskAdapter.updateOne(
-      {
-        id: task.id,
-        changes: {
-          dueWithTime,
-          dueDay: undefined,
-        },
-      },
-      state,
-    );
-  }),
-
-  on(reScheduleTaskWithTime, (state, { task, dueWithTime }) => {
-    return taskAdapter.updateOne(
-      {
-        id: task.id,
-        changes: {
-          dueWithTime,
-          dueDay: undefined,
-        },
-      },
-      state,
-    );
-  }),
-
-  on(unScheduleTask, (state, { id }) => {
-    return taskAdapter.updateOne(
-      {
-        id,
-        changes: {
-          dueDay: undefined,
-          dueWithTime: undefined,
         },
       },
       state,

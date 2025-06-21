@@ -7,8 +7,6 @@ import { Actions } from '@ngrx/effects';
 import { GlobalConfigService } from '../config/global-config.service';
 import { Router } from '@angular/router';
 import { WorkContextService } from '../work-context/work-context.service';
-import Shepherd from 'shepherd.js';
-import Step = Shepherd.Step;
 
 @Injectable({
   providedIn: 'root',
@@ -22,9 +20,15 @@ export class ShepherdService {
   private workContextService = inject(WorkContextService);
 
   isActive = false;
-  tour?: Shepherd.Tour;
+  tour?: any; // Will be Shepherd.Tour when loaded
+  private _Shepherd?: typeof import('shepherd.js').default;
 
   async init(): Promise<void> {
+    // Lazy load Shepherd.js only when needed
+    if (!this._Shepherd) {
+      const ShepherdModule = await import('shepherd.js');
+      this._Shepherd = ShepherdModule.default;
+    }
     this._initialize();
 
     const cfg = await this.globalConfigService.cfg$.pipe(first()).toPromise();
@@ -84,7 +88,7 @@ export class ShepherdService {
    * Take a set of steps and create a tour object based on the current configuration
    * @param steps An array of steps
    */
-  addSteps(steps: Array<Step.StepOptions>): void {
+  addSteps(steps: Array<any>): void {
     this._initialize();
     const tour = this.tour;
     if (!tour) {
@@ -115,7 +119,10 @@ export class ShepherdService {
   }
 
   private _initialize(): void {
-    const tourObject = new Shepherd.Tour({
+    if (!this._Shepherd) {
+      throw new Error('Shepherd not loaded');
+    }
+    const tourObject = new this._Shepherd.Tour({
       defaultStepOptions: {
         scrollTo: false,
         highlightClass: 'shepherd-highlight',

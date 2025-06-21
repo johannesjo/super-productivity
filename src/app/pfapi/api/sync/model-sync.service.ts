@@ -194,6 +194,8 @@ export class ModelSyncService<MD extends ModelCfgs> {
             mainModelData[modelId] as ExtractModelCfgType<MD[string]>,
             {
               isUpdateRevAndLastUpdate: false,
+              // NOTE: this is during sync, so we ignore the DB lock
+              isIgnoreDBLock: true,
             },
           );
         }
@@ -283,7 +285,11 @@ export class ModelSyncService<MD extends ModelCfgs> {
     modelId: T,
     modelData: ExtractModelCfgType<MD[T]>,
   ): Promise<void> {
-    await this.m[modelId].save(modelData);
+    await this.m[modelId].save(modelData, {
+      isUpdateRevAndLastUpdate: true,
+      // NOTE: this is during sync, so we ignore the DB lock
+      isIgnoreDBLock: true,
+    });
   }
 
   /**

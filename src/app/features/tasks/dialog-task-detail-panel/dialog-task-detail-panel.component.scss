@@ -1,4 +1,4 @@
-@import '../../../../variables';
+@import '../../../../common';
 
 :host {
   mat-dialog-content {
@@ -8,10 +8,8 @@
     max-height: 75vh;
     min-width: 340px;
 
-    @include darkTheme() {
-      background: rgb(39, 39, 39) !important;
-      border: 4px solid $dark24;
-    }
+    background: var(--theme-bg-lightest) !important;
+    border: 4px solid var(--theme-bg-lightest);
 
     @include mq(xxxs) {
       min-width: 380px;
@@ -36,12 +34,12 @@
     }
 
     task-detail-item {
-      margin-left: $s;
-      margin-right: $s;
+      margin-left: var(--s);
+      margin-right: var(--s);
 
       @include mq(xxs) {
-        margin-left: $s * 1.5;
-        margin-right: $s * 1.5;
+        margin-left: calc(var(--s) * 1.5);
+        margin-right: calc(var(--s) * 1.5);
       }
     }
   }

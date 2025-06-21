@@ -1,18 +1,15 @@
-@import '../../../../variables';
+@import '../../../../common';
 
 .wrapper {
   position: relative;
-  padding: $s * 2;
-  background: #fff;
-  border-radius: $card-border-radius;
+  padding: var(--s2);
+  border-radius: var(--card-border-radius);
 
-  @include darkTheme {
-    background: $dark-theme-bg-lighter;
-  }
+  background: var(--theme-bg-lighter);
 }
 
 mat-form-field {
-  margin-bottom: $s;
+  margin-bottom: var(--s);
   width: 100%;
 }
 
@@ -20,7 +17,7 @@ mat-form-field {
   @include mq(xs) {
     display: flex;
     justify-content: space-between;
-    padding-bottom: $s;
+    padding-bottom: var(--s);
 
     > * {
       width: 48%;

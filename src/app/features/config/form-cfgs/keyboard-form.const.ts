@@ -91,6 +91,13 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       },
     },
     {
+      key: 'toggleTaskViewCustomizerPanel',
+      type: 'keyboard',
+      templateOptions: {
+        label: T.GCF.KEYBOARD.TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL,
+      },
+    },
+    {
       key: 'toggleIssuePanel',
       type: 'keyboard',
       templateOptions: {

@@ -1,11 +1,9 @@
-@import '../../../../variables';
-
 :host ::ng-deep .wrap-add-planned {
-  margin-top: 2 * $s;
+  margin-top: var(--s2);
 }
 
 .add-task-bar-wrapper {
-  margin: $s * 1.5 auto $s * 1.5;
+  margin: calc(var(--s) * 1.5) auto calc(var(--s) * 1.5);
   max-width: 628px;
 }
 
@@ -27,7 +25,7 @@
   vertical-align: middle;
 
   .label {
-    margin-right: $s;
+    margin-right: var(--s);
   }
 
   .no-wrap {

@@ -20,10 +20,7 @@
     "RESTORE_FILE_BACKUP_ANDROID": "似乎沒有資料，但是有可用備份。是否要從備份載入？",
     "RESTORE_STRAY_BACKUP": "在上次同步期間，可能有一些錯誤。您要還原上一個備份嗎？"
   },
-  "DATETIME_INPUT": {
-    "IN": "在 {{time}}",
-    "TOMORROW": "明天 {{time}}"
-  },
+  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "今天稍晚",
     "NEXT_WEEK": "下周",
@@ -1018,7 +1015,22 @@
   "FILE_IMEX": {
     "EXPORT_DATA": "匯出資料",
     "IMPORT_FROM_FILE": "從檔案匯入",
-    "S_ERR_INVALID_DATA": "匯入失敗：無效的JSON"
+    "S_ERR_INVALID_DATA": "匯入失敗：無效的JSON",
+    "S_ERR_INVALID_URL": "匯入失敗：提供的URL無效",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "錯誤：無法解碼用於匯入的URL參數。請確保其格式正確。",
+    "S_ERR_NETWORK": "匯入失敗：從URL獲取資料時發生網路錯誤",
+    "IMPORT_FROM_URL": "從URL匯入",
+    "URL_PLACEHOLDER": "輸入要匯入的URL",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "從URL匯入",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "請輸入您要匯入的Super Productivity備份JSON檔案的完整URL。",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "從URL匯入",
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "TITLE": "確認從URL匯入資料",
+      "INITIATED_MSG": "已啟動自動資料匯入。",
+      "SOURCE_URL_DOMAIN": "來源網域",
+      "WARNING_TITLE": "警告",
+      "WARNING_MSG": "繼續操作將使用指定URL的內容覆蓋您目前的應用程式資料和設定。此操作無法還原。"
+    }
   },
   "G": {
     "CANCEL": "取消",

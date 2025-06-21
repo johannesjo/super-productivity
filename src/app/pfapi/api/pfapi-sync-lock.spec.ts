@@ -92,41 +92,90 @@ describe('Pfapi Sync Lock', () => {
     });
 
     it('should prevent concurrent sync operations via lock', async () => {
-      // Simulate a locked database
-      let isLocked = false;
-      mockDb.lock.and.callFake(() => {
-        if (isLocked) {
-          throw new Error('Database is already locked');
-        }
-        isLocked = true;
+      // Simulate sync in progress
+      let syncPromise: Promise<any> | null = null;
+      mockSyncService.sync.and.callFake(() => {
+        return new Promise((resolve) => {
+          syncPromise = new Promise((r) =>
+            setTimeout(() => {
+              r(resolve({ status: SyncStatus.InSync }));
+            }, 100),
+          );
+          syncPromise.then(resolve);
+        });
       });
-      mockDb.unlock.and.callFake(() => {
-        isLocked = false;
-      });
-
-      mockSyncService.sync.and.returnValue(
-        new Promise((resolve) =>
-          setTimeout(() => resolve({ status: SyncStatus.InSync }), 100),
-        ),
-      );
 
       // Start first sync
-      const sync1Promise = pfapi.sync();
+      const firstSync = pfapi.sync();
 
-      // Try to start second sync immediately
+      // Try to start second sync while first is in progress
+      let secondSyncError: Error | null = null;
       try {
         await pfapi.sync();
-        fail('Second sync should have failed due to lock');
-      } catch (e: any) {
-        expect(e.message).toBe('Database is already locked');
+      } catch (e) {
+        secondSyncError = e as Error;
       }
 
       // Wait for first sync to complete
-      await sync1Promise;
+      await firstSync;
 
-      // Now second sync should work
+      expect(secondSyncError).toBeTruthy();
+      expect(secondSyncError?.message).toBe('Sync already in progress');
+      expect(mockDb.lock).toHaveBeenCalledTimes(1);
+      expect(mockDb.unlock).toHaveBeenCalledTimes(1);
+    });
+
+    it('should allow sync after previous sync completes', async () => {
+      mockSyncService.sync.and.returnValue(
+        Promise.resolve({ status: SyncStatus.InSync }),
+      );
+
+      // First sync
       await pfapi.sync();
-      expect(mockSyncService.sync).toHaveBeenCalledTimes(2);
+      expect(mockDb.lock).toHaveBeenCalledTimes(1);
+      expect(mockDb.unlock).toHaveBeenCalledTimes(1);
+
+      // Second sync should work
+      await pfapi.sync();
+      expect(mockDb.lock).toHaveBeenCalledTimes(2);
+      expect(mockDb.unlock).toHaveBeenCalledTimes(2);
+    });
+
+    it('should handle rapid sync trigger attempts gracefully', async () => {
+      let syncCount = 0;
+      mockSyncService.sync.and.callFake(() => {
+        syncCount++;
+        return new Promise((resolve) => {
+          setTimeout(() => resolve({ status: SyncStatus.InSync }), 50);
+        });
+      });
+
+      // Simulate multiple rapid sync attempts (like from different triggers)
+      const syncPromises: Promise<any>[] = [];
+      const errors: Error[] = [];
+
+      // First sync should succeed
+      syncPromises.push(pfapi.sync());
+
+      // These should fail with "Sync already in progress"
+      for (let i = 0; i < 5; i++) {
+        syncPromises.push(
+          pfapi.sync().catch((e) => {
+            errors.push(e);
+            return 'failed';
+          }),
+        );
+      }
+
+      // Wait for all promises to settle
+      const results = await Promise.all(syncPromises);
+
+      // Only one sync should have actually executed
+      expect(syncCount).toBe(1);
+      expect(errors.length).toBe(5);
+      expect(errors.every((e) => e.message === 'Sync already in progress')).toBe(true);
+      expect(results[0]).toEqual({ status: SyncStatus.InSync });
+      expect(results.slice(1).every((r) => r === 'failed')).toBe(true);
     });
 
     it('should handle sync returning different statuses', async () => {

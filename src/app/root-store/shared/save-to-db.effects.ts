@@ -22,7 +22,6 @@ import { selectPlannerState } from '../../features/planner/store/planner.selecto
 import { selectSimpleCounterFeatureState } from '../../features/simple-counter/store/simple-counter.reducer';
 import { selectImprovementFeatureState } from '../../features/metric/improvement/store/improvement.reducer';
 import { selectObstructionFeatureState } from '../../features/metric/obstruction/store/obstruction.reducer';
-import { selectTaskRepeatCfgFeatureState } from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { selectMetricFeatureState } from '../../features/metric/store/metric.selectors';
 import { DataInitStateService } from '../../core/data-init/data-init-state.service';
 import { RootState } from '../root-state';
@@ -39,9 +38,10 @@ import {
 import { TIME_TRACKING_TO_DB_INTERVAL } from '../../app.constants';
 import { environment } from '../../../environments/environment';
 import { selectTimeTrackingState } from '../../features/time-tracking/store/time-tracking.selectors';
-import { removeTasksFromTodayTag } from '../../features/tag/store/tag.actions';
+import { TaskSharedActions } from '../meta/task-shared.actions';
 import { loadAllData } from '../meta/load-all-data.action';
 import { clearHiddenImprovements } from '../../features/metric/improvement/store/improvement.actions';
+import { selectTaskRepeatCfgFeatureState } from '../../features/task-repeat-cfg/store/task-repeat-cfg.selectors';
 
 const ALWAYS_IGNORED_ACTIONS = [loadAllData.type];
 
@@ -91,7 +91,7 @@ export class SaveToDbEffects {
     toggleTaskHideSubTasks.type,
     unsetCurrentTask.type,
     toggleStart.type,
-    removeTasksFromTodayTag.type,
+    TaskSharedActions.removeTasksFromTodayTag.type,
   ]);
 
   updateTaskAuditTime$ = createEffect(

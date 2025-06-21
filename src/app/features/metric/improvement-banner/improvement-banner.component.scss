@@ -1,6 +1,4 @@
-@import '../../../../variables';
-
-$weird-task-list-f: 5px;
+@import '../../../../common';
 
 :host {
   display: block;
@@ -36,28 +34,15 @@ $weird-task-list-f: 5px;
   position: relative;
   padding: 7px 0;
   overflow: hidden;
-  transition: $transition-fast;
+  transition: var(--transition-fast);
   background: transparent;
 
-  @include lightTheme() {
-    border: 1px solid #333;
-    //background-color: rgba(var(--palette-background-unselected-chip), 1);
-    color: rgba(var(--palette-foreground-text), var(--palette-foreground-text-alpha, 1));
-    // this would be the bookmark button border
-    //border-color: rgba(0, 0, 0, 0.12);
-    border-color: rgba(0, 0, 0, 0.33);
-  }
-
-  @include darkTheme() {
-    border: 1px solid;
-    color: #fff;
-    // this would be the bookmark button border
-    //border-color: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.33);
-  }
+  border: 1px solid;
+  color: var(--theme-improvement-text);
+  border-color: var(--theme-improvement-border);
 
   &:active {
-    box-shadow: $whiteframe-shadow-2dp;
+    box-shadow: var(--whiteframe-shadow-2dp);
   }
 
   .title {
@@ -77,15 +62,7 @@ $weird-task-list-f: 5px;
     z-index: 1;
     transform-origin: center center;
 
-    @include lightTheme() {
-      color: rgba(
-        var(--palette-foreground-text),
-        var(--palette-foreground-text-alpha, 1)
-      );
-    }
-    @include darkTheme() {
-      color: white;
-    }
+    color: var(--theme-improvement-button-text);
 
     &.dismiss {
       transform: translateX(-11px);

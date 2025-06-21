@@ -1,4 +1,4 @@
-@import './../../../../_variables';
+@import './../../../../_common';
 
 :host {
   position: absolute;
@@ -11,10 +11,12 @@
     min-height: 50px;
   }
 
+  background: var(--palette-primary-200);
+
   &:before {
     position: absolute;
     content: '';
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--color-overlay-dark-20);
     width: 100%;
     top: 0;
     left: 0;
@@ -35,18 +37,13 @@
       inset 0 10px 20px rgba(0, 0, 0, 0.19),
       inset 0 6px 6px rgba(0, 0, 0, 0.23);
   }
+}
 
-  @include darkTheme {
-    background: $dark-theme-bg-slightly-lighter;
-    background: $c-primary-900;
-  }
-  @include lightTheme {
-    background: $light-theme-bg-darker;
-    background: $c-primary-200;
+body.isDarkTheme :host {
+  background: var(--palette-primary-900);
 
-    &:before {
-      background: rgba(0, 0, 0, 0.2);
-    }
+  &:before {
+    background: var(--color-overlay-dark-50);
   }
 }
 
@@ -56,7 +53,7 @@
   height: 100%;
   top: 0;
   left: 0;
-  padding-top: $s * 5;
+  padding-top: var(--s5);
   overflow-x: hidden;
   @include scrollYImportant();
 }

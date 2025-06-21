@@ -238,7 +238,9 @@ export class DataValidationFailedError extends Error {
         this.additionalLog = str.substring(0, 400);
       }
       console.log('validation result_: ' + JSON.stringify(validationResult));
-    } catch (e) {}
+    } catch (e) {
+      console.error('Failed to stringify validation errors:', e);
+    }
   }
 }
 
@@ -248,7 +250,7 @@ export class ModelVersionToImportNewerThanLocalError extends AdditionalLogErrorB
 
 // --------------OTHER--------------
 
-export class InvalidFilePrefixError extends Error {
+export class InvalidFilePrefixError extends AdditionalLogErrorBase {
   override name = 'InvalidFilePrefixError';
 }
 

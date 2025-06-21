@@ -25,20 +25,40 @@ module.exports = {
     }: AddTaskWithReminderParams,
   ) {
     const d = new Date(scheduleTime);
+    const timeValue = getTimeVal(d);
 
-    return this.addTask(title)
-      .openPanelForTask(taskSel)
-      .waitForElementVisible(SCHEDULE_TASK_ITEM)
-      .click(SCHEDULE_TASK_ITEM)
-      .waitForElementVisible(DIALOG)
-      .pause(30)
-      .waitForElementVisible(TIME_INP)
-      .pause(50)
-      .setValue(TIME_INP, getTimeVal(d))
-      .pause(50)
-      .waitForElementVisible(DIALOG_SUBMIT)
-      .click(DIALOG_SUBMIT)
-      .waitForElementNotPresent(DIALOG);
+    return (
+      this.addTask(title)
+        .openPanelForTask(taskSel)
+        .waitForElementVisible(SCHEDULE_TASK_ITEM)
+        .click(SCHEDULE_TASK_ITEM)
+        .waitForElementVisible(DIALOG)
+        .pause(100)
+        .waitForElementVisible(TIME_INP)
+        .pause(150)
+        .perform(() => {
+          console.log(`Setting time input to: ${timeValue}`);
+        })
+        // Focus the input and ensure it's ready
+        .click(TIME_INP)
+        .pause(150)
+        // Set the time value with extra reliability measures
+        .clearValue(TIME_INP)
+        .pause(100)
+        .setValue(TIME_INP, timeValue)
+        .pause(200)
+        // Second attempt for HTML time input reliability
+        .clearValue(TIME_INP)
+        .pause(100)
+        .setValue(TIME_INP, timeValue)
+        .pause(200)
+        // Send Enter key to ensure value is committed
+        .sendKeys(TIME_INP, '\uE007') // Enter key
+        .pause(200)
+        .waitForElementVisible(DIALOG_SUBMIT)
+        .click(DIALOG_SUBMIT)
+        .waitForElementNotPresent(DIALOG)
+    );
   },
 };
 

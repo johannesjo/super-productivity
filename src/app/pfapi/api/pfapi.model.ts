@@ -90,6 +90,8 @@ export interface MetaFileBase {
   lastUpdate: number;
   revMap: RevMap;
   crossModelVersion: number;
+  localLamport: number;
+  lastSyncedLamport: number | null;
 }
 
 export interface RemoteMeta extends MetaFileBase {

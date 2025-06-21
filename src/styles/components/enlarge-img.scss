@@ -15,9 +15,9 @@
   flex-direction: column; /* make main axis vertical */
   justify-content: center; /* center items vertically, in this case */
   align-items: center; /* center items horizontally, in this case */
-  //background: rgba(0, 0, 0, 0.2);
-  animation: $transition-standard fadeIn;
-  z-index: $z-backdrop;
+  //background: var(--color-overlay-dark-20);
+  animation: var(--transition-standard) fadeIn;
+  z-index: var(--z-backdrop);
 
   &.ani-enter {
     background: transparent;
@@ -32,22 +32,17 @@
     bottom: 0;
     opacity: 0;
 
-    @include lightTheme(true) {
-      background-color: $c-backdrop-light-theme;
-    }
-    @include darkTheme(true) {
-      background-color: $c-backdrop-dark-theme;
-    }
+    background-color: var(--c-backdrop);
   }
 
   &.ani-enter,
   &.ani-enter:after {
-    transition: $transition-enter;
+    transition: var(--transition-enter);
   }
 
   &.ani-leave,
   &.ani-leave:after {
-    transition: $transition-leave;
+    transition: var(--transition-leave);
   }
 
   &.ani-enter:after {
@@ -72,7 +67,7 @@
   -khtml-user-drag: none;
   -moz-user-drag: none;
   -o-user-drag: none;
-  box-shadow: $whiteframe-shadow-5dp;
+  box-shadow: var(--whiteframe-shadow-5dp);
 
   &:hover {
     cursor: zoom-in;
@@ -84,11 +79,11 @@
 
   .ani-enter & {
     opacity: 1;
-    transition: $transition-enter;
+    transition: var(--transition-enter);
   }
 
   .ani-remove & {
-    transition: $transition-leave;
+    transition: var(--transition-leave);
   }
 }
 

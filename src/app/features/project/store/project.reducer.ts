@@ -5,7 +5,6 @@ import {
   WorkContextAdvancedCfg,
   WorkContextType,
 } from '../../work-context/work-context.model';
-import { moveToOtherProject } from '../../tasks/store/task.actions';
 import {
   moveTaskDownInTodayList,
   moveTaskInTodayList,
@@ -33,7 +32,6 @@ import {
   addProject,
   addProjects,
   archiveProject,
-  deleteProject,
   loadProjects,
   moveAllProjectBacklogTasksToRegularList,
   moveProjectTaskDownInBacklogList,
@@ -157,7 +155,6 @@ export const projectReducer = createReducer<ProjectState>(
 
   on(updateProject, (state, { project }) => projectAdapter.updateOne(project, state)),
 
-  on(deleteProject, (state, { project }) => projectAdapter.removeOne(project.id, state)),
   // on(deleteProjects, (state, { ids }) => projectAdapter.removeMany(ids, state)),
   on(loadProjects, (state, { projects }) => projectAdapter.setAll(projects, state)),
 
@@ -551,40 +548,6 @@ export const projectReducer = createReducer<ProjectState>(
 
   // Task Actions
   // ------------
-
-  on(moveToOtherProject, (state, { task, targetProjectId }) => {
-    const srcProjectId = task.projectId;
-    const updates: Update<Project>[] = [];
-
-    if (srcProjectId === targetProjectId) {
-      devError('Moving task from same project to same project.');
-      return state;
-    }
-
-    if (srcProjectId) {
-      updates.push({
-        id: srcProjectId,
-        changes: {
-          taskIds: (state.entities[srcProjectId] as Project).taskIds.filter(
-            (id) => id !== task.id,
-          ),
-          backlogTaskIds: (state.entities[srcProjectId] as Project).backlogTaskIds.filter(
-            (id) => id !== task.id,
-          ),
-        },
-      });
-    }
-    if (targetProjectId) {
-      updates.push({
-        id: targetProjectId,
-        changes: {
-          taskIds: [...(state.entities[targetProjectId] as Project).taskIds, task.id],
-        },
-      });
-    }
-
-    return projectAdapter.updateMany(updates, state);
-  }),
 
   on(moveNoteToOtherProject, (state, { note, targetProjectId }) => {
     const srcProjectId = note.projectId;

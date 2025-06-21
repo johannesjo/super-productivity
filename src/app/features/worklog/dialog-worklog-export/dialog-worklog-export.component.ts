@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
 import { WorklogExportSettingsCopy } from '../worklog.model';
 import { T } from '../../../t.const';
-import moment from 'moment';
 import { WORKLOG_EXPORT_DEFAULTS } from '../../work-context/work-context.const';
 import { WorklogExportComponent } from '../worklog-export/worklog-export.component';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -30,8 +29,8 @@ export class DialogWorklogExportComponent {
 
     // this.strStart = getWorklogStr(data.rangeStart);
     // this.strEnd = getWorklogStr(data.rangeEnd);
-    this.strStart = moment(data.rangeStart).format('l');
-    this.strEnd = moment(data.rangeEnd).format('l');
+    this.strStart = new Date(data.rangeStart).toLocaleDateString();
+    this.strEnd = new Date(data.rangeEnd).toLocaleDateString();
 
     this.isSingleDay = this.strStart === this.strEnd;
   }

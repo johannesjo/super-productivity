@@ -1,5 +1,3 @@
-@import '../../../../variables';
-
 .text {
   max-width: 500px;
 }
@@ -13,5 +11,5 @@ h1 > * {
 }
 
 :host ::ng-deep .extra-margin-top {
-  margin-top: $s * 4;
+  margin-top: var(--s4);
 }

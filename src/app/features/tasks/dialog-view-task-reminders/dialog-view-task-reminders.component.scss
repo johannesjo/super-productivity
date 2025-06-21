@@ -1,18 +1,18 @@
-@import '../../../../variables';
+@import '../../../../common';
 
 :host {
   //text-align: center;
 }
 
 .tasks {
-  margin-bottom: $s * 2;
+  margin-bottom: var(--s2);
 }
 
 .task {
   display: flex;
   align-items: center;
-  border-bottom: 1px solid $dark-theme-extra-border-color;
-  padding: $s;
+  border-bottom: 1px solid var(--theme-extra-border-color);
+  padding: var(--s);
   padding-left: 0;
 
   &:last-child {
@@ -21,11 +21,11 @@
 
   .title-wrapper {
     flex: 1;
-    margin-right: $s;
+    margin-right: var(--s);
   }
 
   .due-for {
-    margin-left: $s;
+    margin-left: var(--s);
     font-size: 11px;
     line-height: 1.4;
     padding-bottom: 4px;
@@ -36,16 +36,16 @@
   }
 
   .title {
-    margin-left: $s;
+    margin-left: var(--s);
   }
 
   tag-list {
-    margin-top: $s * 0.5;
+    margin-top: var(--s-half);
   }
 
   .actions {
     @include mq(sm) {
-      margin: $s;
+      margin: var(--s);
     }
 
     button {

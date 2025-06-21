@@ -7,12 +7,12 @@ import { CalendarIntegrationService } from '../calendar-integration/calendar-int
 import { PlannerDay } from './planner.model';
 import { selectPlannerDays } from './store/planner.selectors';
 import { TaskWithDueTime } from '../tasks/task.model';
-import { selectAllTaskRepeatCfgs } from '../task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { DateService } from '../../core/date/date.service';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 import { selectTodayTaskIds } from '../work-context/store/work-context.selectors';
 import { msToString } from '../../ui/duration/ms-to-string.pipe';
 import { getWorklogStr } from '../../util/get-work-log-str';
+import { selectAllTaskRepeatCfgs } from '../task-repeat-cfg/store/task-repeat-cfg.selectors';
 
 @Injectable({
   providedIn: 'root',

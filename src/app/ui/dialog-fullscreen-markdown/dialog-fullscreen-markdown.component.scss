@@ -1,4 +1,4 @@
-@import '../../../variables';
+@import '../../../common';
 
 :host {
   position: fixed;
@@ -17,8 +17,8 @@
 .content {
   flex-grow: 1;
   position: relative;
-  @include layerTextAndBgHighest;
-
+  color: var(--theme-text-color-more-intense);
+  background-color: var(--theme-bg-lightest);
   textarea,
   .markdown-preview {
     position: absolute;
@@ -28,7 +28,7 @@
     left: 0;
     height: 100%;
     width: 100%;
-    padding: $s $s * 2;
+    padding: var(--s) var(--s2);
 
     @include scrollY;
   }
@@ -43,7 +43,7 @@
     resize: none;
     min-height: inherit;
     overflow: auto;
-    padding: $s $s * 2;
+    padding: var(--s) var(--s2);
     font-size: 14px;
 
     &:focus {
@@ -62,13 +62,7 @@
       left: 50%;
       border-left: 2px solid;
 
-      @include darkTheme() {
-        border-color: $dark-theme-extra-border-color;
-      }
-
-      @include lightTheme() {
-        border-color: $light-theme-extra-border-color;
-      }
+      border-color: var(--theme-extra-border-color);
     }
   }
 }
@@ -78,11 +72,11 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  box-shadow: $whiteframe-shadow-2dp;
-  padding: 0 $s * 2;
+  box-shadow: var(--whiteframe-shadow-2dp);
+  padding: 0 var(--s2);
 
   > button {
-    margin: $s;
+    margin: var(--s);
   }
 }
 

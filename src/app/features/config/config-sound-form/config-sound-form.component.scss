@@ -1,8 +1,6 @@
-@import '../../../../variables';
-
 .form-wrapper {
   overflow: hidden;
-  padding: $s * 2 $s * 2 $s !important;
+  padding: var(--s2) var(--s2) var(--s) !important;
 
   config-form {
     display: block;
@@ -41,5 +39,5 @@ $this-panel-padding-left-right: 12px;
 }
 
 :host ::ng-deep .extra-margin-top {
-  margin-top: $s * 4;
+  margin-top: var(--s4);
 }

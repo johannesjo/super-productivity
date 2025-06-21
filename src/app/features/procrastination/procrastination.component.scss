@@ -1,5 +1,3 @@
-@import '../../../variables';
-
 :host {
   mat-form-field {
     display: block;
@@ -11,17 +9,14 @@
 }
 
 .tab-inner {
-  margin: $s;
-  max-width: $component-max-width;
+  margin: var(--s);
+  max-width: var(--component-max-width);
   position: relative;
-  padding: $s * 2;
-  background: #fff;
-  border-radius: $card-border-radius;
-  box-shadow: $shadow-card-shadow;
+  padding: var(--s2);
+  border-radius: var(--card-border-radius);
+  box-shadow: var(--shadow-card-shadow);
 
-  @include darkTheme {
-    background: $dark-theme-bg-lighter;
-  }
+  background: var(--theme-bg-lighter);
 
   &.full-width {
     max-width: none;
@@ -35,8 +30,8 @@
 
 .procrastination-graph {
   text-align: center;
-  margin-top: $s * 2;
-  margin-bottom: $s * 2;
+  margin-top: var(--s2);
+  margin-bottom: var(--s2);
 
   mat-icon {
     font-size: 120px;
@@ -56,7 +51,7 @@
   .text-item {
     font-size: 24px;
     font-weight: 100;
-    margin: $s * 2;
+    margin: var(--s2);
   }
 }
 

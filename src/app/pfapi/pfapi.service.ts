@@ -28,6 +28,7 @@ import {
   filter,
   map,
   shareReplay,
+  startWith,
 } from 'rxjs/operators';
 import { fromPfapiEvent, pfapiEventAndInitialAfter } from './pfapi-helper';
 import { DataInitStateService } from '../core/data-init/data-init-state.service';
@@ -87,6 +88,7 @@ export class PfapiService {
   public readonly isSyncInProgress$: Observable<boolean> = this.syncState$.pipe(
     filter((state) => state !== 'UNKNOWN_OR_CHANGED'),
     map((state) => state === 'SYNCING'),
+    startWith(false),
     distinctUntilChanged(),
     shareReplay(1),
   );

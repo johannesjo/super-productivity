@@ -1,8 +1,8 @@
-@import '../../../variables';
+@import '../../../common';
 
 $mobileHorizontalPadding: 8px;
 $navVerticalPadding: 4px;
-$macExtraPadding: (-8px + $mac-title-bar-padding);
+$macExtraPadding: calc(var(--mac-title-bar-padding) - 8px);
 
 :host {
   display: block;
@@ -41,10 +41,10 @@ $macExtraPadding: (-8px + $mac-title-bar-padding);
   align-items: center;
   padding: $navVerticalPadding $mobileHorizontalPadding;
   //flex-wrap: wrap;
-  min-height: $bar-height-large;
+  min-height: var(--bar-height-large);
 
   @include mq(xs) {
-    min-height: $bar-height;
+    min-height: var(--bar-height);
     padding: $navVerticalPadding 16px;
   }
 }
@@ -58,11 +58,11 @@ $macExtraPadding: (-8px + $mac-title-bar-padding);
   white-space: nowrap;
   max-width: 100%;
   cursor: pointer;
-  border-radius: $card-border-radius;
-  padding: $s 2 * $s $s $s;
+  border-radius: var(--card-border-radius);
+  padding: var(--s) var(--s2) var(--s) var(--s);
 
   @include mq(xs) {
-    padding-right: $s;
+    padding-right: var(--s);
   }
 
   &:focus {
@@ -74,10 +74,10 @@ $macExtraPadding: (-8px + $mac-title-bar-padding);
   display: none;
   @include mq(xs) {
     display: block;
-    transition: $transition-standard;
+    transition: var(--transition-standard);
     opacity: 0;
-    margin-right: 2 * $s;
-    margin-left: -$s;
+    margin-right: var(--s2);
+    margin-left: calc(-1 * var(--s));
     position: relative;
     z-index: 1;
   }
@@ -93,6 +93,11 @@ button {
   cursor: pointer;
 }
 
+button.isActive2 {
+  background-color: var(--c-accent);
+  transition: background-color var(--transition-standard);
+}
+
 .action-nav {
   margin-right: 0px;
   margin-left: auto;
@@ -105,10 +110,10 @@ button {
   }
 
   button {
-    margin-left: $s * 0.25;
+    margin-left: var(--s-quarter);
 
     @include mq(xs) {
-      margin-left: $s;
+      margin-left: var(--s);
     }
   }
 }
@@ -215,10 +220,10 @@ button {
 
 .play-btn-wrapper {
   position: relative;
-  margin-left: $s * 0.5;
+  margin-left: var(--s-half);
 
   @include mq(xs) {
-    margin-left: $s;
+    margin-left: var(--s);
   }
 
   .pulse-circle {
@@ -233,7 +238,7 @@ button {
     margin: auto;
     transform: scale(1, 1);
     animation: pulse 2s infinite;
-    background: $c-accent;
+    background: var(--c-accent);
     opacity: 0.6;
   }
 
@@ -263,26 +268,22 @@ button {
     position: absolute;
     line-height: 1;
     padding: 2px 4px 1px;
-    background: #fff;
-    color: #000;
     width: auto;
     left: 50%;
     transform: translateX(-50%);
-    box-shadow: $whiteframe-shadow-2dp;
+    box-shadow: var(--whiteframe-shadow-2dp);
     font-weight: bold;
     border-radius: 8px;
     z-index: 4;
     pointer-events: none;
-    bottom: $s * -0.25;
+    bottom: calc(var(--s) * -0.25);
 
-    @include darkTheme {
-      background: $dark-theme-bg-lighter;
-      color: #fff;
-    }
+    background: var(--theme-bg-lighter);
+    color: var(--theme-text-color-most-intense);
   }
 
   .pomodoro-controls {
-    transition: $transition-standard;
+    transition: var(--transition-standard);
     position: absolute;
     top: 100%;
     display: flex;
@@ -295,10 +296,10 @@ button {
     &:after {
       content: '';
       position: absolute;
-      top: $s * -1.25;
-      left: $s * -1.25;
-      right: $s * -1.25;
-      bottom: $s * -1.25;
+      top: calc(var(--s) * -1.25);
+      left: calc(var(--s) * -1.25);
+      right: calc(var(--s) * -1.25);
+      bottom: calc(var(--s) * -1.25);
     }
   }
 
@@ -312,12 +313,12 @@ button {
   }
 
   .pomodoro-btn {
-    transition: $transition-standard;
+    transition: var(--transition-standard);
     transform: translateY(-100%);
     opacity: 0;
     position: relative;
     z-index: 2;
-    margin-top: $s;
+    margin-top: var(--s);
     margin-left: 0;
 
     &:nth-child(2) {
@@ -330,27 +331,24 @@ button {
   position: absolute;
   right: 100%;
   width: auto;
-  border: 2px solid $c-accent;
+  border: 2px solid var(--c-accent);
   border-radius: 12px;
   min-width: 50px;
   white-space: nowrap;
-  padding: $s * 0.5 2 * $s;
-  padding-right: $s * 2.5;
-  margin-right: -$s * 2;
+  padding: var(--s-half) var(--s2);
+  padding-right: calc(var(--s) * 2.5);
+  margin-right: calc(-1 * var(--s) * 2);
   top: 50%;
   transform: translateY(-50%);
-  background: #fff;
   pointer-events: none;
-  transition: $transition-standard;
+  transition: var(--transition-standard);
   display: flex;
 
   @include mq(xs, max) {
     display: none;
   }
 
-  @include darkTheme() {
-    background: $dark-theme-bg-lighter;
-  }
+  background: var(--theme-bg-lighter);
 
   .title {
     max-width: 250px;
@@ -368,7 +366,7 @@ button {
 }
 
 .simple-counter-mobile-trigger {
-  margin-left: $s;
+  margin-left: var(--s);
 }
 
 .simple-counter-buttons-outer-wrapper {
@@ -381,7 +379,7 @@ button {
   @include mq(xs, max) {
     position: absolute;
     display: flex;
-    transition: $transition-standard;
+    transition: var(--transition-standard);
     top: 100%;
     flex-direction: column;
     left: 50%;
@@ -397,12 +395,12 @@ button {
 
 simple-counter-button {
   @include mq(xs, max) {
-    transition: $transition-standard;
+    transition: var(--transition-standard);
     transform: translateY(-100%);
     opacity: 0;
     position: relative;
     z-index: 2;
-    margin-top: $s;
+    margin-top: var(--s);
     margin-left: 0;
 
     &:nth-child(2) {
@@ -445,17 +443,10 @@ simple-counter-button {
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
     z-index: -1;
-    box-shadow: 0px -2px 3px 0px rgba(0, 0, 0, 0.3);
+    box-shadow: 0px -2px 3px 0px var(--theme-separator-alpha);
 
-    @include lightTheme() {
-      background: $light-theme-selected-task-bg-color;
-      //border-color: rgba(0, 0, 0, 0.12);
-    }
-
-    @include darkTheme() {
-      background: $dark8;
-      //border-color: $dark-theme-extra-border-color;
-    }
+    background: var(--theme-sidebar-bg);
+    //border-color: var(--theme-extra-border-color);
   }
 
   @include mq(xxxs, max) {
@@ -466,7 +457,7 @@ simple-counter-button {
 }
 
 .note-ico {
-  transition: $transition-standard;
+  transition: var(--transition-standard);
 
   .toggle-notes-btn.isActive & {
     transform: rotate(45deg);

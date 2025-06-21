@@ -86,8 +86,13 @@ export const createWindow = ({
       nodeIntegration: false,
       // make remote module work with those two settings
       contextIsolation: true,
+      // Additional settings for better Linux/Wayland compatibility
+      enableBlinkFeatures: 'OverlayScrollbar',
     },
     icon: ICONS_FOLDER + '/icon_256x256.png',
+    // Wayland compatibility: disable transparent/frameless features that can cause issues
+    transparent: false,
+    frame: true,
   });
 
   // see: https://pratikpc.medium.com/bypassing-cors-with-electron-ab7eaf331605

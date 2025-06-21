@@ -1,0 +1,113 @@
+<div class="customizer-panel">
+  <h3>{{ T.F.TASK_VIEW.CUSTOMIZER.TITLE | translate }}</h3>
+  <div class="form-group">
+    <label>{{ T.F.TASK_VIEW.CUSTOMIZER.SORT_BY | translate }}</label>
+    <mat-form-field>
+      <mat-select
+        [ngModel]="customizerService.selectedSort()"
+        (ngModelChange)="customizerService.setSort($event)"
+      >
+        @for (opt of sortOptions; track opt.value) {
+          <mat-option [value]="opt.value">{{ opt.label | translate }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="form-group">
+    <label>{{ T.F.TASK_VIEW.CUSTOMIZER.GROUP_BY | translate }}</label>
+    <mat-form-field>
+      <mat-select
+        [ngModel]="customizerService.selectedGroup()"
+        (ngModelChange)="customizerService.setGroup($event)"
+      >
+        @for (opt of groupOptions; track opt.value) {
+          <mat-option [value]="opt.value">{{ opt.label | translate }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="form-group">
+    <label>{{ T.F.TASK_VIEW.CUSTOMIZER.FILTER_BY | translate }}</label>
+    <mat-form-field>
+      <mat-select
+        [ngModel]="customizerService.selectedFilter()"
+        (ngModelChange)="customizerService.setFilter($event)"
+      >
+        @for (opt of filterOptions; track opt.value) {
+          <mat-option [value]="opt.value">{{ opt.label | translate }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    @if (customizerService.selectedFilter() === 'tag') {
+      <mat-form-field>
+        <input
+          matInput
+          [ngModel]="customizerService.filterInputValue()"
+          (ngModelChange)="customizerService.setFilterInputValue($event)"
+          [placeholder]="T.F.TASK_VIEW.CUSTOMIZER.ENTER_TAG | translate"
+        />
+      </mat-form-field>
+    }
+
+    @if (customizerService.selectedFilter() === 'project') {
+      <mat-form-field>
+        <input
+          matInput
+          [ngModel]="customizerService.filterInputValue()"
+          (ngModelChange)="customizerService.setFilterInputValue($event)"
+          [placeholder]="T.F.TASK_VIEW.CUSTOMIZER.ENTER_PROJECT | translate"
+        />
+      </mat-form-field>
+    }
+
+    @if (customizerService.selectedFilter() === 'scheduledDate') {
+      <mat-form-field>
+        <mat-select
+          [ngModel]="customizerService.filterInputValue()"
+          (ngModelChange)="customizerService.setFilterInputValue($event)"
+        >
+          @for (option of scheduledPresets; track option.value) {
+            <mat-option [value]="option.value">{{ option.label | translate }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+
+    @if (customizerService.selectedFilter() === 'estimatedTime') {
+      <mat-form-field>
+        <mat-select
+          [ngModel]="customizerService.filterInputValue()"
+          (ngModelChange)="customizerService.setFilterInputValue($event)"
+        >
+          @for (option of timePresets; track option.value) {
+            <mat-option [value]="option.value">{{ option.label | translate }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+
+    @if (customizerService.selectedFilter() === 'timeSpent') {
+      <mat-form-field>
+        <mat-select
+          [ngModel]="customizerService.filterInputValue()"
+          (ngModelChange)="customizerService.setFilterInputValue($event)"
+        >
+          @for (option of timePresets; track option.value) {
+            <mat-option [value]="option.value">{{ option.label | translate }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+  </div>
+
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="onResetAll()"
+  >
+    {{ T.F.TASK_VIEW.CUSTOMIZER.RESET_ALL | translate }}
+  </button>
+</div>

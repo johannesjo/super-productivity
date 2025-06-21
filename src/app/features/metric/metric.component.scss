@@ -1,11 +1,11 @@
-@import '../../../variables';
+@import '../../../common';
 
 :host {
   text-align: center;
 }
 
 h3 {
-  margin-top: $s * 3;
+  margin-top: var(--s3);
 }
 
 .basic-stats {
@@ -38,9 +38,9 @@ table {
 }
 
 section {
-  margin-bottom: 2 * $s;
+  margin-bottom: var(--s2);
 }
 
 .metric-metrics {
-  margin-top: $s * 6;
+  margin-top: var(--s6);
 }

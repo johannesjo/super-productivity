@@ -8,6 +8,7 @@ import {
 } from '@angular/material/dialog';
 import { T } from 'src/app/t.const';
 import { DialogConflictResolutionResult } from '../sync.model';
+import { ConflictData } from '../../../pfapi/api';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -30,24 +31,24 @@ import { DatePipe } from '@angular/common';
 })
 export class DialogSyncConflictComponent {
   private _matDialogRef = inject<MatDialogRef<DialogSyncConflictComponent>>(MatDialogRef);
-  data = inject<{
-    remote: number;
-    local: number;
-    lastSync: number;
-  }>(MAT_DIALOG_DATA);
+  data = inject<ConflictData>(MAT_DIALOG_DATA);
 
   T: typeof T = T;
 
-  remoteDate: number = this.data.remote;
-  localDate: number = this.data.local;
-  lastDate: number = this.data.lastSync;
+  remoteDate: number = this.data.remote.lastUpdate;
+  localDate: number = this.data.local.lastUpdate;
+  lastDate: number | null = this.data.local.lastSyncedUpdate;
 
-  remoteTime: number = this.data.remote;
-  localTime: number = this.data.local;
-  lastTime: number = this.data.lastSync;
+  remoteTime: number = this.data.remote.lastUpdate;
+  localTime: number = this.data.local.lastUpdate;
+  lastTime: number | null = this.data.local.lastSyncedUpdate;
 
-  isHighlightRemote: boolean = this.data.remote >= this.data.local;
-  isHighlightLocal: boolean = this.data.local >= this.data.remote;
+  remoteLamport: number = this.data.remote.localLamport;
+  localLamport: number = this.data.local.localLamport;
+  lastSyncedLamport: number | null = this.data.local.lastSyncedLamport;
+
+  isHighlightRemote: boolean = this.data.remote.lastUpdate >= this.data.local.lastUpdate;
+  isHighlightLocal: boolean = this.data.local.lastUpdate >= this.data.remote.lastUpdate;
 
   constructor() {
     const _matDialogRef = this._matDialogRef;

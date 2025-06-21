@@ -13,12 +13,12 @@ import {
   SVEEntryForNextDay,
 } from '../schedule.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
-import { selectTaskRepeatCfgsDueOnDayOnly } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { SCHEDULE_TASK_MIN_DURATION_IN_MS, SVEType } from '../schedule.const';
 import { createViewEntriesForDay } from './create-view-entries-for-day';
 import { msLeftToday } from '../../../util/ms-left-today';
 import { getTasksWithinAndBeyondBudget } from './get-tasks-within-and-beyond-budget';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
+import { selectTaskRepeatCfgsDueOnDayOnly } from '../../task-repeat-cfg/store/task-repeat-cfg.selectors';
 
 export const createScheduleDays = (
   nonScheduledTasks: TaskWithoutReminder[],

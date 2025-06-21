@@ -1,5 +1,3 @@
-@import '../../variables';
-
 .issue-table {
   width: 100%;
   display: block;
@@ -7,14 +5,14 @@
 
   pre {
     overflow: auto;
-    border: 1px dashed $light-theme-extra-border-color;
-    padding: $s;
+    border: 1px dashed var(--theme-extra-border-color);
+    padding: var(--s);
   }
 
   tr {
     display: flex;
     flex-wrap: wrap;
-    margin-bottom: $s * 1.5;
+    margin-bottom: calc(var(--s) * 1.5);
   }
 
   td,

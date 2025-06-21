@@ -1,78 +1,5 @@
-$task-current-shadow-light: $whiteframe-shadow-3dp;
-$task-selected-shadow-light: $whiteframe-shadow-3dp;
-
-$task-current-shadow-dark: $whiteframe-shadow-8dp;
-$task-selected-shadow-dark: $whiteframe-shadow-4dp;
-
-$task-first-line-min-height: 40px;
-$task-icon-default-opacity: 0.7;
-$task-current-task-zoom: 1.0178571428, 1;
-$task-inner-padding-top-bottom: 4px;
-$task-is-done-dim-opacity: 0.3;
-$task-border-radius: 6px;
-
-// z-indexes
-$z-drag-handle: 1;
-$z-task-title: 4;
-$z-btn: 4;
-$z-time-wrapper: 4;
-$z-btn-hover: 5;
-$z-hover-controls: 6;
-$z-progress-bar: 7;
-
-$z-check-done: 11;
-$z-first-line-controls-hover: 12;
-$z-swipe-block: 0;
-
-$z-is-selected-host: 20;
-$z-focus-host: 21;
-$z-is-current-host: 22;
-
-$z-toggle-sub-task-btn: 30;
-$z-drag-over-msg: 31;
-$z-task-title-focus: 32;
-
-$z-time-btn-svg-wrapper: 5555;
-
-// colors
-$task-c-current: $c-accent;
-$task-c-selected: $c-primary-700;
-$task-c-focus: $c-focus-border;
-
-$task-text-c-dark: $dark-theme-text-color-most-intense;
-$task-text-c-dark: $dark-theme-text-color;
-// NOTE: light is just standard color
-
-$task-c-bg-light: #fff;
-$task-c-bg-dark: $dark1;
-$sub-task-c-bg-dark: $dark3;
-$sub-task-c-bg-dark-done: $dark2;
-
-$sub-task-c-bg-dark-in-selected: $dark6;
-$task-c-current-bg-dark: $dark8;
-
-$task-c-drag-drop-bg-dark: $dark12;
-
-$task-c-selected-bg-light: $light-theme-selected-task-bg-color;
-$task-c-selected-bg-dark: $dark4;
-
-//// new colors a bit darker
-//$task-c-bg-dark: $dark2;
-//$sub-task-c-bg-dark-done: $dark3;
-//$sub-task-c-bg-dark: $dark4;
-//$task-c-selected-bg-dark: $dark6;
-//$sub-task-c-bg-dark-in-selected: $dark8;
-//$task-c-current-bg-dark: $dark12;
-
-////// new colors
-$task-c-bg-dark: $dark3;
-$sub-task-c-bg-dark: $dark4_5;
-$task-c-selected-bg-dark: $dark6;
-$sub-task-c-bg-dark-in-selected: $dark10;
-$task-c-current-bg-dark: $dark12;
-
-$task-c-bg-done-dark: $dark1;
-$sub-task-c-bg-dark-done: $dark2;
+// Import only to access the material design color variables
+@import '../../../../common';
 
 @mixin isDone($direct-parent-only-sel: false) {
   @if $direct-parent-only-sel {
@@ -93,8 +20,8 @@ $sub-task-c-bg-dark-done: $dark2;
 }
 
 @mixin standardTaskOpacityChange {
-  opacity: $task-icon-default-opacity;
-  transition: transform $transition-fast;
+  opacity: var(--task-icon-default-opacity);
+  transition: transform var(--transition-fast);
 
   .isCurrent &,
   &:hover,

@@ -21,7 +21,6 @@ import { MatButton } from '@angular/material/button';
 import { AsyncPipe } from '@angular/common';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
-import confetti from 'canvas-confetti';
 
 @Component({
   selector: 'focus-mode-task-done',
@@ -49,7 +48,11 @@ export class FocusModeTaskDoneComponent implements AfterViewInit {
   );
   T: typeof T = T;
 
-  ngAfterViewInit(): void {
+  async ngAfterViewInit(): Promise<void> {
+    // Lazy load confetti library only when task is done
+    const confettiModule = await import('canvas-confetti');
+    const confetti = confettiModule.default;
+
     const defaults = { startVelocity: 80, spread: 720, ticks: 600, zIndex: 0 };
 
     const particleCount = 200;

@@ -50,13 +50,11 @@
                   </mat-chip-listbox>
                 }
                 @case (IssueFieldType.MARKDOWN) {
-                  @if (!isCollapsedIssueSummary()) {
-                    <div
-                      [data]="getFieldValue(field, currentIssue())"
-                      class="markdown"
-                      markdown
-                    ></div>
-                  }
+                  <div
+                    [data]="getFieldValue(field, currentIssue())"
+                    class="markdown"
+                    markdown
+                  ></div>
                 }
                 @case (IssueFieldType.CUSTOM) {
                   <issue-content-custom
@@ -82,21 +80,10 @@
                 (click)="showAllContent()"
               >
                 <mat-icon>download</mat-icon>
-                @if (isCollapsedIssueSummary()) {
-                  <span
-                    style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap"
-                  >
-                    {{
-                      T.F.ISSUE.ISSUE_CONTENT.LOAD_DESCRIPTION_AND_ALL_COMMENTS
-                        | translate
-                    }}
-                  </span>
-                } @else {
-                  {{
-                    T.F.ISSUE.ISSUE_CONTENT.LOAD_ALL_COMMENTS
-                      | translate: { nr: commentsLength() }
-                  }}
-                }
+                {{
+                  T.F.ISSUE.ISSUE_CONTENT.LOAD_ALL_COMMENTS
+                    | translate: { nr: commentsLength() }
+                }}
               </button>
             </div>
             @if (lastComment()) {

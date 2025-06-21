@@ -30,5 +30,5 @@ if [ "$JSON" != "{}" ]; then
   echo "$JSON" >$JSON_PATH
 fi
 
-# run nginx
-nginx -g "daemon off;"
+# go back to nginx's built-in entrypoint script
+exec /docker-entrypoint.sh nginx -g "daemon off;"

@@ -1,5 +1,16 @@
 @use 'sass:map';
 
+// Media query breakpoints - must be SASS variables, not CSS variables
+// because media queries are evaluated at parse time
+$layout-xxxs: 398px;
+$layout-xxs: 440px;
+$layout-xs: 600px;
+$layout-sm: 960px;
+$layout-md: 1280px;
+$layout-lg: 1920px;
+$layout-xl: 2000px;
+$component-max-width: 800px;
+
 @mixin mq($size, $type: min) {
   $f: 0;
   @if ($type == max) {

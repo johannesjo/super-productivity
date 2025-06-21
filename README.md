@@ -464,3 +464,19 @@ You can specify a custom folder for saving your data by starting the application
 ```bash
 superproductivity --user-data-dir=/path/to/my/data
 ```
+
+### Linux/Wayland Compatibility
+
+If you're experiencing issues running Super Productivity on Wayland (such as rendering problems, VSync errors, or GLib-GObject warnings), you can force the application to use X11 mode by starting it with the `--force-x11` parameter:
+
+```bash
+superproductivity --force-x11
+```
+
+This will automatically apply compatibility fixes including:
+
+- Forcing the Ozone platform to use X11 instead of Wayland
+- Disabling GPU VSync to prevent GetVSyncParametersIfAvailable() errors
+- Setting the appropriate environment variables for X11 compatibility
+
+The application will automatically detect Wayland sessions and apply these fixes, but you can use this flag if automatic detection doesn't work properly.

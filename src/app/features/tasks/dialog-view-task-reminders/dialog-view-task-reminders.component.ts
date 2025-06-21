@@ -25,10 +25,9 @@ import { AsyncPipe, DatePipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TagListComponent } from '../../tag/tag-list/tag-list.component';
 import { Store } from '@ngrx/store';
-import { unScheduleTask } from '../store/task.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-import { planTasksForToday } from '../../tag/store/tag.actions';
 import { selectTodayTagTaskIds } from '../../tag/store/tag.reducer';
 
 const M = 1000 * 60;
@@ -129,7 +128,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
 
   async addToToday(task: TaskWithReminderData): Promise<void> {
     this._store.dispatch(
-      planTasksForToday({
+      TaskSharedActions.planTasksForToday({
         taskIds: [task.id],
         parentTaskMap: {
           [task.id]: task.parentId,
@@ -145,7 +144,10 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     // const now = Date.now();
     if (task.projectId || task.parentId || task.tagIds.length > 0) {
       this._store.dispatch(
-        unScheduleTask({ id: task.id, reminderId: task.reminderId as string }),
+        TaskSharedActions.unscheduleTask({
+          id: task.id,
+          reminderId: task.reminderId as string,
+        }),
       );
       this._removeFromList(task.reminderId as string);
     }
@@ -240,7 +242,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     const tasksToAdd = selectedTasks;
 
     this._store.dispatch(
-      planTasksForToday({
+      TaskSharedActions.planTasksForToday({
         taskIds: tasksToAdd.map((t) => t.id),
         parentTaskMap: tasksToAdd.reduce((acc, next: Task) => {
           return { ...acc, [next.id as string]: next.parentId };

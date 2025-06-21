@@ -1,6 +1,6 @@
-@import '../../../variables';
+@import '../../../common';
 
-$summary-point-inner-margin: $s;
+$summary-point-inner-margin: var(--s);
 
 :host {
   evaluation-sheet {
@@ -9,19 +9,15 @@ $summary-point-inner-margin: $s;
 
   ::ng-deep {
     .mat-mdc-tab .mdc-tab__text-label {
-      @include darkTheme() {
-        //color: $dark-theme-text-color;
-        //font-weight: 300;
-      }
+      //color: var(--theme-text-color);
+      //font-weight: 300;
     }
   }
 
   ::ng-deep .mat-mdc-tab-list {
-    border-bottom: 1px solid $light-theme-separator-color;
+    border-bottom: 1px solid var(--theme-separator-color);
 
-    @include darkTheme {
-      border-color: $dark-theme-separator-color;
-    }
+    border-color: var(--theme-separator-color);
   }
 
   ::ng-deep .mat-mdc-tab-labels {
@@ -56,8 +52,8 @@ $summary-point-inner-margin: $s;
 
 .tab-inner {
   margin: auto;
-  max-width: $component-max-width;
-  padding: $s;
+  max-width: var(--component-max-width);
+  padding: var(--s);
 
   &.full-width {
     max-width: none;
@@ -65,16 +61,16 @@ $summary-point-inner-margin: $s;
 }
 
 .back-btn {
-  margin-top: $s * 2;
+  margin-top: var(--s2);
 }
 
 .done-headline {
-  margin-top: $s * 4;
-  margin-bottom: $s * 3 - $summary-point-inner-margin;
+  margin-top: var(--s4);
+  margin-bottom: calc(var(--s3) - var(--s));
 }
 
 .daily-summary-summary {
-  margin-bottom: $s * 5;
+  margin-bottom: var(--s5);
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -109,8 +105,8 @@ $summary-point-inner-margin: $s;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  margin-bottom: $s * 6;
-  margin-top: -1 * $s;
+  margin-bottom: var(--s6);
+  margin-top: calc(-1 * var(--s));
 
   simple-counter-summary-item {
     flex-basis: 140px;
@@ -121,7 +117,7 @@ $summary-point-inner-margin: $s;
   margin-top: 30px;
 
   button {
-    margin: 0 $s * 0.5;
+    margin: 0 var(--s-half);
   }
 }
 
@@ -142,7 +138,7 @@ $summary-point-inner-margin: $s;
     height: $this-ico-size;
     display: block;
     font-size: $this-ico-size;
-    color: $yellow;
+    color: var(--yellow);
     //transform-origin: center center;
     animation: success-animation-sun #{$this-ani-style};
     backface-visibility: hidden;
@@ -183,27 +179,20 @@ $summary-point-inner-margin: $s;
     .markdown-wrapper {
       min-height: 60px;
       overflow: visible !important;
-      transition: $transition-standard;
+      transition: var(--transition-standard);
 
-      @include lightTheme {
-        //background: $light-theme-bg;
-        //box-shadow: $whiteframe-shadow-1dp;
-        border: 1px solid $light-theme-extra-border-color;
-      }
-      @include darkTheme() {
-        //background: $dark-theme-bg-lighter;
-        //box-shadow: $whiteframe-shadow-1dp;
-        border: 1px solid $dark-theme-extra-border-color;
-      }
+      //background: var(--theme-bg);
+      //box-shadow: var(--whiteframe-shadow-1dp);
+      border: 1px solid var(--theme-extra-border-color);
 
       &,
       > * {
-        border-radius: $card-border-radius * 2;
+        border-radius: calc(var(--card-border-radius) * 2);
       }
     }
 
     &.isFocused .markdown-wrapper {
-      box-shadow: $whiteframe-shadow-3dp !important;
+      box-shadow: var(--whiteframe-shadow-3dp) !important;
       border-color: transparent;
     }
 

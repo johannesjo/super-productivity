@@ -17,7 +17,7 @@ import { TaskService } from '../tasks/task.service';
 import { expandAnimation, expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { TakeABreakService } from '../take-a-break/take-a-break.service';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import {
   from,
   fromEvent,
@@ -36,6 +36,7 @@ import { ImprovementService } from '../metric/improvement/improvement.service';
 import { workViewProjectChangeAnimation } from '../../ui/animations/work-view-project-change.ani';
 import { WorkContextService } from '../work-context/work-context.service';
 import { ProjectService } from '../project/project.service';
+import { TaskViewCustomizerService } from '../task-view-customizer/task-view-customizer.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RightPanelComponent } from '../right-panel/right-panel.component';
 import { CdkDropListGroup } from '@angular/cdk/drag-drop';
@@ -49,7 +50,7 @@ import { AddScheduledTodayOrTomorrowBtnComponent } from '../add-tasks-for-tomorr
 import { TaskListComponent } from '../tasks/task-list/task-list.component';
 import { SplitComponent } from './split/split.component';
 import { BacklogComponent } from './backlog/backlog.component';
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, CommonModule } from '@angular/common';
 import { MsToStringPipe } from '../../ui/duration/ms-to-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 import {
@@ -59,9 +60,10 @@ import {
 import { CollapsibleComponent } from '../../ui/collapsible/collapsible.component';
 import { SnackService } from '../../core/snack/snack.service';
 import { Store } from '@ngrx/store';
-import { planTasksForToday } from '../tag/store/tag.actions';
+import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { TODAY_TAG } from '../tag/tag.const';
 import { LS } from '../../core/persistence/storage-keys.const';
+import { FinishDayBtnComponent } from './finish-day-btn/finish-day-btn.component';
 
 @Component({
   selector: 'work-view',
@@ -83,7 +85,6 @@ import { LS } from '../../core/persistence/storage-keys.const';
     MatMiniFabButton,
     ImprovementBannerComponent,
     MatButton,
-    RouterLink,
     AddTaskBarComponent,
     AddScheduledTodayOrTomorrowBtnComponent,
     TaskListComponent,
@@ -94,6 +95,8 @@ import { LS } from '../../core/persistence/storage-keys.const';
     MsToStringPipe,
     TranslatePipe,
     CollapsibleComponent,
+    CommonModule,
+    FinishDayBtnComponent,
   ],
 })
 export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
@@ -102,6 +105,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   planningModeService = inject(PlanningModeService);
   improvementService = inject(ImprovementService);
   layoutService = inject(LayoutService);
+  customizerService = inject(TaskViewCustomizerService);
   workContextService = inject(WorkContextService);
   private _activatedRoute = inject(ActivatedRoute);
   private _projectService = inject(ProjectService);
@@ -114,9 +118,14 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     initialValue: [],
   });
   undoneTasks = input<TaskWithSubTasks[]>([]);
+  customizedUndoneTasks$ = this.customizerService.customizeUndoneTasks(
+    this.workContextService.undoneTasks$,
+  );
   doneTasks = input<TaskWithSubTasks[]>([]);
   backlogTasks = input<TaskWithSubTasks[]>([]);
   isShowBacklog = input<boolean>(false);
+
+  hasDoneTasks = computed(() => this.doneTasks().length > 0);
 
   isPlanningMode = toSignal(this.planningModeService.isPlanningMode$);
   todayRemainingInProject = toSignal(this.workContextService.todayRemainingInProject$);
@@ -260,7 +269,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   addAllOverdueToMyDay(): void {
     const overdueTasks = this.overdueTasks();
     this._store.dispatch(
-      planTasksForToday({
+      TaskSharedActions.planTasksForToday({
         taskIds: overdueTasks.map((t) => t.id),
       }),
     );

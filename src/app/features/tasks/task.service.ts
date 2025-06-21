@@ -24,7 +24,6 @@ import {
   moveSubTaskToTop,
   moveSubTaskUp,
   removeTimeSpent,
-  reScheduleTaskWithTime,
   roundTimeSpentForDay,
   setCurrentTask,
   setSelectedTask,
@@ -84,10 +83,9 @@ import { TimeTrackingActions } from '../time-tracking/store/time-tracking.action
 import { ArchiveService } from '../time-tracking/archive.service';
 import { TaskArchiveService } from '../time-tracking/task-archive.service';
 import { TODAY_TAG } from '../tag/tag.const';
-import { planTasksForToday } from '../tag/store/tag.actions';
+import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { INBOX_PROJECT } from '../project/project.const';
-import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { GlobalConfigService } from '../config/global-config.service';
 
 @Injectable({
@@ -691,7 +689,7 @@ export class TaskService {
   moveToCurrentWorkContext(task: TaskWithSubTasks | Task): void {
     if (this._workContextService.activeWorkContextType === WorkContextType.TAG) {
       if (this._workContextService.activeWorkContextId === TODAY_TAG.id) {
-        this._store.dispatch(planTasksForToday({ taskIds: [task.id] }));
+        this._store.dispatch(TaskSharedActions.planTasksForToday({ taskIds: [task.id] }));
       } else {
         this.updateTags(task, [this._workContextService.activeWorkContextId as string]);
       }
@@ -782,7 +780,7 @@ export class TaskService {
     isMoveToBacklog: boolean;
   }): void {
     this._store.dispatch(
-      reScheduleTaskWithTime({
+      TaskSharedActions.reScheduleTaskWithTime({
         task,
         dueWithTime: due,
         remindAt: remindOptionToMilliseconds(due, remindCfg),

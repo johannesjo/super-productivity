@@ -20,6 +20,7 @@ import { lazySetInterval } from './shared-with-frontend/lazy-set-interval';
 import { initIndicator } from './indicator';
 import { quitApp, showOrFocus } from './various-shared';
 import { createWindow } from './main-window';
+import { IdleTimeHandler } from './idle-time-handler';
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
@@ -32,6 +33,7 @@ let customUrl: string;
 let isDisableTray = false;
 let forceDarkTray = false;
 let wasUserDataDirSet = false;
+let forceX11 = false;
 
 if (IS_DEV) {
   log('Starting in DEV Mode!!!');
@@ -45,6 +47,7 @@ interface MyApp extends App {
 const appIN: MyApp = app;
 
 let mainWin: BrowserWindow;
+let idleTimeHandler: IdleTimeHandler;
 
 export const startApp = (): void => {
   // LOAD IPC STUFF
@@ -58,6 +61,31 @@ export const startApp = (): void => {
   // https://github.com/johannesjo/super-productivity/issues/4375#issuecomment-2883838113
   // https://github.com/electron/electron/issues/46538#issuecomment-2808806722
   app.commandLine.appendSwitch('gtk-version', '3');
+
+  // Wayland compatibility fixes
+  // Force X11 backend on Wayland to avoid rendering issues
+  if (process.platform === 'linux') {
+    // Check if running on Wayland or if X11 is forced
+    const isWayland =
+      process.env.WAYLAND_DISPLAY || process.env.XDG_SESSION_TYPE === 'wayland';
+
+    if (isWayland || forceX11) {
+      log('Applying X11/Wayland compatibility fixes');
+
+      // Force Ozone platform to X11
+      app.commandLine.appendSwitch('ozone-platform', 'x11');
+
+      // Disable GPU vsync to fix GetVSyncParametersIfAvailable() errors
+      app.commandLine.appendSwitch('disable-gpu-vsync');
+
+      // Additional flags to improve compatibility
+      app.commandLine.appendSwitch('disable-features', 'UseOzonePlatform');
+      app.commandLine.appendSwitch('enable-features', 'UseSkiaRenderer');
+
+      // Set GDK backend to X11
+      process.env.GDK_BACKEND = 'x11';
+    }
+  }
 
   // NOTE: needs to be executed before everything else
   process.argv.forEach((val) => {
@@ -85,6 +113,11 @@ export const startApp = (): void => {
 
     if (val && val.includes('--dev-tools')) {
       isShowDevTools = true;
+    }
+
+    if (val && val.includes('--force-x11')) {
+      forceX11 = true;
+      log('Forcing X11 mode');
     }
   });
 
@@ -152,6 +185,9 @@ export const startApp = (): void => {
   });
 
   appIN.on('ready', () => {
+    // Initialize idle time handler
+    idleTimeHandler = new IdleTimeHandler();
+
     let suspendStart: number;
     const sendIdleMsgIfOverMin = (idleTime: number): void => {
       // sometimes when starting a second instance we get here although we don't want to
@@ -168,8 +204,16 @@ export const startApp = (): void => {
       }
     };
 
-    const checkIdle = (): void =>
-      sendIdleMsgIfOverMin(powerMonitor.getSystemIdleTime() * 1000);
+    const checkIdle = async (): Promise<void> => {
+      try {
+        const idleTime = await idleTimeHandler.getIdleTimeWithFallbacks();
+        sendIdleMsgIfOverMin(idleTime);
+      } catch (error) {
+        log('Error getting idle time:', error);
+        // Fallback to standard method if our handler fails
+        sendIdleMsgIfOverMin(powerMonitor.getSystemIdleTime() * 1000);
+      }
+    };
 
     // init time tracking interval
     lazySetInterval(checkIdle, CONFIG.IDLE_PING_INTERVAL);

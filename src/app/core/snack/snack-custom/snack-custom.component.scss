@@ -1,5 +1,3 @@
-@import '../../../../variables';
-
 :host {
   background: inherit;
 }
@@ -11,17 +9,17 @@
 }
 
 .snack-icon {
-  margin-right: $s * 2;
+  margin-right: var(--s2);
   position: relative;
   z-index: 2;
   //background: inherit;
 
   .success & {
-    color: $success-green;
+    color: var(--success-green);
   }
 
   .error & {
-    color: $c-warn;
+    color: var(--c-warn);
   }
 }
 
@@ -31,7 +29,7 @@
 
 button {
   margin: 0;
-  margin-left: 1.5 * $s;
+  margin-left: calc(1.5 * var(--s));
 }
 
 .button-wrapper {

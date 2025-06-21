@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, LOCALE_ID } from '@angular/core';
 import {
   Worklog,
   WorklogDay,
@@ -28,7 +28,6 @@ import { getCompleteStateForWorkContext } from './util/get-complete-state-for-wo
 import { NavigationEnd, Router } from '@angular/router';
 import { WorklogTask } from '../tasks/task.model';
 import { mapArchiveToWorklogWeeks } from './util/map-archive-to-worklog-weeks';
-import moment from 'moment';
 import { DateAdapter } from '@angular/material/core';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { DataInitStateService } from '../../core/data-init/data-init-state.service';
@@ -45,6 +44,7 @@ export class WorklogService {
   private readonly _router = inject(Router);
   private _dateAdapter = inject<DateAdapter<unknown>>(DateAdapter);
   private _taskArchiveService = inject(TaskArchiveService);
+  private _locale = inject(LOCALE_ID);
 
   // treated as private but needs to be assigned first
   archiveUpdateManualTrigger$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
@@ -178,8 +178,8 @@ export class WorklogService {
     return this.worklogTasks$.pipe(
       map((tasks) => {
         tasks = tasks.filter((task: WorklogTask) => {
-          // NOTE: we need to use moment here as otherwise the dates might be off for other time zones
-          const taskDate = moment(task.dateStr).toDate();
+          // NOTE: parsing date string to Date object
+          const taskDate = new Date(task.dateStr);
           return (
             (!isProjectIdProvided || task.projectId === projectId) &&
             taskDate >= rangeStart &&
@@ -191,8 +191,8 @@ export class WorklogService {
           tasks = tasks.map((task): WorklogTask => {
             const timeSpentOnDay: any = {};
             Object.keys(task.timeSpentOnDay).forEach((dateStr) => {
-              // NOTE: we need to use moment here as otherwise the dates might be off for other time zones
-              const date = moment(dateStr).toDate();
+              // NOTE: parsing date string to Date object
+              const date = new Date(dateStr);
 
               if (date >= rangeStart && date <= rangeEnd) {
                 timeSpentOnDay[dateStr] = task.timeSpentOnDay[dateStr];
@@ -233,6 +233,7 @@ export class WorklogService {
         nonArchiveTaskIds,
         workStartEndForWorkContext,
         this._dateAdapter.getFirstDayOfWeek(),
+        this._locale,
       );
       return {
         worklog,
@@ -267,6 +268,7 @@ export class WorklogService {
         nonArchiveTaskIds,
         workStartEndForWorkContext,
         this._dateAdapter.getFirstDayOfWeek(),
+        this._locale,
       );
     }
     return null;

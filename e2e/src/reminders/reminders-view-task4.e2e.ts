@@ -24,7 +24,7 @@ module.exports = {
         // NOTE: tasks are sorted by due time
         .addTaskWithReminder({ title: '0 D task xyz', scheduleTime: start })
         .addTaskWithReminder({ title: '1 D task xyz', scheduleTime: start })
-        .addTaskWithReminder({ title: '2 D task xyz', scheduleTime: Date.now() })
+        .addTaskWithReminder({ title: '2 D task xyz', scheduleTime: Date.now() + 10000 }) // Add 10 seconds buffer
         .waitForElementVisible(DIALOG, SCHEDULE_MAX_WAIT_TIME + 120000)
         // wait for all tasks to be present
         .waitForElementVisible(DIALOG_TASK1, SCHEDULE_MAX_WAIT_TIME + 120000)

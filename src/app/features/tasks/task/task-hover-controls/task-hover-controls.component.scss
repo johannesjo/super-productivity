@@ -1,4 +1,4 @@
-@import '../../../../../variables';
+@import '../../../../../common';
 @import '../task.component.mixins';
 
 :host {
@@ -7,24 +7,22 @@
   right: 100%;
   top: 0;
   bottom: 0;
-  z-index: $z-hover-controls;
+  z-index: var(--z-hover-controls);
   display: none;
-  border-radius: $card-border-radius;
+  border-radius: var(--card-border-radius);
 
-  @include lightTheme() {
-    &:before {
-      content: '';
-      border-left: 1px solid;
-      width: 1px;
-      height: 90%;
-      position: absolute;
-      left: 0;
-      top: 5%;
-      opacity: 0.5;
+  &:before {
+    content: '';
+    border-left: var(--theme-hover-controls-border);
+    width: 1px;
+    height: 90%;
+    position: absolute;
+    left: 0;
+    top: 5%;
+    opacity: var(--theme-hover-controls-border-opacity);
 
-      :host-context([dir='rtl']) & {
-        right: 0;
-      }
+    :host-context([dir='rtl']) & {
+      right: 0;
     }
   }
 
@@ -43,61 +41,58 @@
 
   button {
     height: 100% !important;
-    border-radius: $card-border-radius !important;
+    border-radius: var(--card-border-radius) !important;
     margin-top: auto;
     margin-bottom: auto;
 
     ::ng-deep {
       .mat-mdc-button-persistent-ripple {
-        border-radius: $card-border-radius;
+        border-radius: var(--card-border-radius);
       }
     }
   }
 
   :host-context(.first-line:hover) & {
     display: flex;
-    background: $task-c-bg-light;
 
-    @include darkTheme() {
-      background: $task-c-bg-dark;
-    }
+    background: var(--task-c-bg);
 
     :host-context(.isLightTheme .isSelected) & {
-      background: $task-c-selected-bg-light;
+      background: var(--task-c-selected-bg);
     }
 
     :host-context(.isDarkTheme .isSelected) & {
-      background: $task-c-selected-bg-dark;
+      background: var(--task-c-selected-bg);
     }
 
     :host-context(.isDarkTheme .isCurrent) & {
-      background: $task-c-current-bg-dark;
+      background: var(--task-c-current-bg);
     }
 
     :host-context(.isDarkTheme .sub-tasks.sub-tasks) ::ng-deep & {
-      background: $sub-task-c-bg-dark;
+      background: var(--sub-task-c-bg);
     }
 
     :host-context(.isDarkTheme .sub-tasks.sub-tasks .isSelected) ::ng-deep & {
-      background: $task-c-selected-bg-dark;
+      background: var(--task-c-selected-bg);
     }
 
     :host-context(.isDarkTheme .sub-tasks.sub-tasks .isCurrent) ::ng-deep & {
-      background: $task-c-current-bg-dark;
+      background: var(--task-c-current-bg);
     }
   }
 
   // extra hitarea
   &:after {
     position: absolute;
-    top: -$s * 1.5;
+    top: calc(-1 * var(--s) * 1.5);
     right: 0;
-    left: -$s * 1.5;
-    bottom: -$s * 1.5;
+    left: calc(-1 * var(--s) * 1.5);
+    bottom: calc(-1 * var(--s) * 1.5);
     content: '';
 
     :host-context([dir='rtl']) & {
-      right: -$s * 1.5;
+      right: calc(-1 * var(--s) * 1.5);
       left: 0;
     }
   }

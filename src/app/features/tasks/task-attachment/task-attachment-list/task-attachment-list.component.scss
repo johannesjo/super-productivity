@@ -1,19 +1,20 @@
-@import '../../../../../variables';
-
-$thisHeight: 88px;
-$thisMargin: $s;
-
-$thisUpperHeight: 60px;
-$thisLowerHeight: $thisHeight - $thisUpperHeight;
+@import '../../../../../common';
 
 :host {
+  --this-height: 88px;
+  --this-margin: var(--s);
+  --this-upper-height: 60px;
+  --this-lower-height: 28px; /* 88px - 60px */
+  --larger-size: 65%;
+  --smaller-size: 35%; /* 100% - 65% */
+
   display: block;
 }
 
 .attachments {
   list-style-type: none;
   display: flex;
-  margin: -1 * $thisMargin;
+  margin: calc(-1 * var(--this-margin));
   padding: 0;
   flex-flow: row;
   justify-content: left;
@@ -21,18 +22,15 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
 }
 
 .attachment {
-  margin: $thisMargin;
+  margin: var(--this-margin);
   padding: 0;
-  border-radius: $card-border-radius;
+  border-radius: var(--card-border-radius);
   position: relative;
   overflow: hidden;
 
-  @include layerTextAndBgHigher;
-
-  @include lightTheme {
-    background: #fff;
-    border: 1px solid $light-theme-extra-border-color;
-  }
+  color: var(--theme-text-color-less-intense);
+  background-color: var(--theme-attachment-bg);
+  border: 1px solid var(--theme-attachment-border);
 
   //.controls,
   > a:focus + .controls,
@@ -43,7 +41,7 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
     a,
     button {
       opacity: 1;
-      transition: $transition-fast;
+      transition: var(--transition-fast);
     }
 
     .view-btn,
@@ -56,15 +54,15 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
 }
 
 .attachment-link {
-  padding: $s;
-  height: $thisHeight;
-  min-width: $thisHeight + $s * 2;
+  padding: var(--s);
+  height: var(--this-height);
+  min-width: calc(var(--this-height) + var(--s2));
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  border-radius: $card-border-radius;
+  border-radius: var(--card-border-radius);
   cursor: pointer;
   box-sizing: border-box;
 
@@ -73,9 +71,9 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
   }
 
   mat-icon {
-    font-size: $s * 5;
-    height: $s * 5;
-    width: $s * 5;
+    font-size: var(--s5);
+    height: var(--s5);
+    width: var(--s5);
   }
 
   &.isImage {
@@ -84,7 +82,7 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
 
     img {
       cursor: zoom-in;
-      height: $thisHeight;
+      height: var(--this-height);
       width: auto;
     }
   }
@@ -118,7 +116,7 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: $transition-enter;
+    transition: var(--transition-enter);
     margin: 0;
     padding: 0;
     min-height: 0;
@@ -127,40 +125,25 @@ $thisLowerHeight: $thisHeight - $thisUpperHeight;
     opacity: 0;
     border-width: 0;
 
-    @include lightTheme() {
-      background: rgba(255, 255, 255, 0.4);
-      border-color: rgba(255, 255, 255, 0.5);
-
-      &:hover {
-        background: rgba(255, 255, 255, 0.9);
-      }
-    }
-
-    @include darkTheme() {
-      background: rgba(0, 0, 0, 0.4);
-      border-color: rgba(0, 0, 0, 0.5);
-
-      &:hover {
-        background: rgba(0, 0, 0, 0.9);
-      }
+    background: var(--theme-attachment-control-bg);
+    border-color: var(--theme-attachment-control-border);
+    &:hover {
+      background: var(--theme-attachment-control-hover-bg);
     }
   }
 }
-
-$larger-size: 65%;
-$smaller-size: 100% - $larger-size;
 
 .view-btn {
   pointer-events: all;
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 0;
   flex: 1;
-  flex-basis: $larger-size;
-  width: $larger-size;
-  min-width: $larger-size;
-  line-height: $thisUpperHeight;
-  height: $thisUpperHeight;
-  transition: $transition-ultra-fast !important;
+  flex-basis: var(--larger-size);
+  width: var(--larger-size);
+  min-width: var(--larger-size);
+  line-height: var(--this-upper-height);
+  height: var(--this-upper-height);
+  transition: var(--transition-duration-xs) var(--ani-standard-timing) !important;
 
   @include mq(xs) {
     transform: translate(-100%, -50%);
@@ -182,8 +165,8 @@ $smaller-size: 100% - $larger-size;
 .edit-btn,
 .trash-btn {
   margin-top: 2px;
-  line-height: $thisLowerHeight;
-  height: $thisLowerHeight;
+  line-height: var(--this-lower-height);
+  height: var(--this-lower-height);
 }
 
 .copy-btn {
@@ -191,10 +174,10 @@ $smaller-size: 100% - $larger-size;
   border-top-right-radius: 0;
   border-top-left-radius: 0;
   border-bottom-right-radius: 0;
-  flex-basis: $smaller-size;
-  width: $smaller-size;
-  line-height: $thisUpperHeight;
-  height: $thisUpperHeight;
+  flex-basis: var(--smaller-size);
+  width: var(--smaller-size);
+  line-height: var(--this-upper-height);
+  height: var(--this-upper-height);
 
   @include mq(xs) {
     transform: translate(100%, -50%);
@@ -206,8 +189,8 @@ $smaller-size: 100% - $larger-size;
   border-top-right-radius: 0;
   border-top-left-radius: 0;
   border-bottom-right-radius: 0;
-  flex-basis: $larger-size;
-  width: $larger-size;
+  flex-basis: var(--larger-size);
+  width: var(--larger-size);
 
   @include mq(xs) {
     transform: translate(-100%, 50%);
@@ -220,14 +203,14 @@ $smaller-size: 100% - $larger-size;
   border-top-right-radius: 0;
   border-bottom-left-radius: 0;
   margin-left: 1px;
-  flex-basis: $smaller-size;
-  width: $smaller-size;
+  flex-basis: var(--smaller-size);
+  width: var(--smaller-size);
 
   &:hover {
-    background: $c-warn !important;
+    background: var(--c-warn) !important;
 
     mat-icon {
-      color: #fff !important;
+      color: var(--theme-card-bg) !important;
     }
   }
 

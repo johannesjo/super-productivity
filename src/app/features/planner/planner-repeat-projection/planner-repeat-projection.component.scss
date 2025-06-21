@@ -1,4 +1,4 @@
-@import '../../../../variables';
+@import '../../../../common';
 @import '../../tasks/task/task.component.mixins';
 
 :host {
@@ -10,46 +10,41 @@
   display: flex;
   align-items: center;
   flex-direction: row;
-  padding-top: $s * 0.25;
-  padding-bottom: $s * 0.25;
-  border: 1px solid $dark-theme-separator-color;
-  border-radius: $task-border-radius;
+  padding-top: var(--s-quarter);
+  padding-bottom: var(--s-quarter);
+  border: 1px solid var(--theme-separator-color);
+  border-radius: var(--task-border-radius);
   opacity: 0.9;
   cursor: pointer;
-  min-height: $planner-item-height;
+  min-height: var(--planner-item-height);
 
-  @include lightTheme {
-    border-color: $light-theme-extra-border-color;
-  }
-  @include darkTheme {
-    border-color: $dark-theme-extra-border-color;
-  }
+  border-color: var(--theme-extra-border-color);
 
   &:hover {
-    border-color: $c-primary;
+    border-color: var(--c-primary);
   }
 
   mat-icon {
-    margin-left: $s;
-    margin-right: $s;
+    margin-left: var(--s);
+    margin-right: var(--s);
     opacity: 0.8;
-    font-size: $planner-item-ico-size;
-    height: $planner-item-ico-size;
-    width: $planner-item-ico-size;
-    min-width: $planner-item-ico-size;
-    max-width: $planner-item-ico-size;
+    font-size: var(--planner-item-ico-size);
+    height: var(--planner-item-ico-size);
+    width: var(--planner-item-ico-size);
+    min-width: var(--planner-item-ico-size);
+    max-width: var(--planner-item-ico-size);
   }
 }
 
 .title {
-  font-size: $planner-font-size-mobile;
+  font-size: var(--planner-font-size-mobile);
   flex-shrink: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
 
   @include mq(xs) {
-    font-size: $planner-font-size;
+    font-size: var(--planner-font-size);
   }
 }
 

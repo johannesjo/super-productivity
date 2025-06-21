@@ -44,7 +44,14 @@ export class DialogSyncInitialCfgComponent {
   isWasEnabled = signal(false);
   fields = signal([...SYNC_FORM.items!.filter((f) => f.key !== 'isEnabled')]);
   form = new FormGroup({});
-  _tmpUpdatedCfg?: SyncConfig;
+  _tmpUpdatedCfg: SyncConfig = {
+    isEnabled: true,
+    syncProvider: null,
+    syncInterval: 300000,
+    encryptKey: '',
+    localFileSync: {},
+    webDav: {},
+  };
 
   private _matDialogRef =
     inject<MatDialogRef<DialogSyncInitialCfgComponent>>(MatDialogRef);
@@ -71,24 +78,20 @@ export class DialogSyncInitialCfgComponent {
   }
 
   async save(): Promise<void> {
-    if (this._tmpUpdatedCfg) {
-      await this.syncConfigService.updateSettingsFromForm(
-        {
-          ...this._tmpUpdatedCfg,
-          isEnabled: this._tmpUpdatedCfg.isEnabled || !this.isWasEnabled(),
-        },
-        true,
+    await this.syncConfigService.updateSettingsFromForm(
+      {
+        ...this._tmpUpdatedCfg,
+        isEnabled: this._tmpUpdatedCfg.isEnabled || !this.isWasEnabled(),
+      },
+      true,
+    );
+    if (this._tmpUpdatedCfg.syncProvider && this._tmpUpdatedCfg.isEnabled) {
+      this.syncWrapperService.configuredAuthForSyncProviderIfNecessary(
+        this._tmpUpdatedCfg.syncProvider as unknown as SyncProviderId,
       );
-      if (this._tmpUpdatedCfg.syncProvider && this._tmpUpdatedCfg.isEnabled) {
-        this.syncWrapperService.configuredAuthForSyncProviderIfNecessary(
-          this._tmpUpdatedCfg.syncProvider as unknown as SyncProviderId,
-        );
-      }
-
-      this._matDialogRef.close();
-    } else {
-      throw new Error('No tmpCfg');
     }
+
+    this._matDialogRef.close();
   }
 
   updateTmpCfg(cfg: SyncConfig): void {

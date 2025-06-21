@@ -1,7 +1,5 @@
-@import '../../../../variables';
-
 :host {
-  margin: $s 2 * $s;
+  margin: var(--s) var(--s2);
   cursor: pointer;
 
   .title {

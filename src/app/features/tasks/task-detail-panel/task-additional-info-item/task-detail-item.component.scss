@@ -1,4 +1,4 @@
-@import '../../../../../variables';
+@import '../../../../../common';
 
 :host {
   display: block;
@@ -9,7 +9,7 @@
 
   &.color-warn {
     .input-item__value {
-      color: $c-warn !important;
+      color: var(--c-warn) !important;
       font-weight: bold;
     }
   }
@@ -31,19 +31,19 @@
     }
 
     .title-and-tags-wrapper {
-      margin-left: $s * 2;
+      margin-left: var(--s2);
     }
 
     .box {
       @include lightTheme {
-        border-color: $light-theme-extra-border-color;
+        border-color: var(--theme-extra-border-color);
         bottom: 0;
         top: -1px;
       }
 
       @include darkTheme {
-        box-shadow: $whiteframe-shadow-1dp;
-        background: $dark16 !important;
+        box-shadow: var(--whiteframe-shadow-1dp);
+        background: var(--dark16) !important;
       }
     }
   }
@@ -58,13 +58,12 @@
   border-width: 1px;
   border-style: solid;
   margin: 8px;
-  border-radius: $card-border-radius * 1;
+  border-radius: var(--card-border-radius);
   //overflow: visible;
   border-color: transparent;
 
   :host-context(.isNoTouchOnly):focus & {
-    border: 1px solid $c-focus-border;
-    border-color: $c-focus-border !important;
+    border-color: var(--palette-primary-400) !important;
   }
 
   &,
@@ -74,18 +73,18 @@
 
   ::ng-deep & .mat-expansion-panel-header-title {
     ::ng-deep mat-icon:first-of-type {
-      margin-right: $s;
+      margin-right: var(--s);
     }
   }
 
   @include darkTheme() {
-    background: $dark10;
-    box-shadow: $whiteframe-shadow-1dp;
+    background: var(--dark10);
+    box-shadow: var(--whiteframe-shadow-1dp);
     //border-color: $dark-theme-separator-color;
   }
   @include lightTheme {
-    background: #fff;
-    border-color: $light-theme-extra-border-color;
+    background: var(--theme-card-bg);
+    border-color: var(--theme-extra-border-color);
     //border-color: $light-theme-separator-color;
   }
 }
@@ -95,11 +94,11 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
   &:hover,
   &:focus {
     :host-context(.isNoTouchOnly.isLightTheme) & {
-      background: #eee;
+      background: var(--theme-bg-darker);
     }
 
     :host-context(.isNoTouchOnly.isDarkTheme) & {
-      background: $dark-theme-bg-lightest;
+      background: var(--theme-bg-lightest);
     }
   }
 }
@@ -142,10 +141,9 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
 }
 
 .panel-content-wrapper {
-  margin: 0 $s $s;
+  margin: 0 var(--s) var(--s);
   display: block;
-  @include standardThemeTextColorLessIntense();
-
+  color: var(--theme-text-color-less-intense);
   &::ng-deep inline-markdown {
     &.isFocused {
       border-color: transparent;
@@ -153,23 +151,22 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
 
     .markdown-wrapper {
       min-height: 60px;
-      border-radius: $card-border-radius * 1;
+      border-radius: var(--card-border-radius);
       overflow: visible !important;
-      transition: $transition-standard;
+      transition: var(--transition-standard);
 
       @include lightTheme {
-        background: $light-theme-bg;
+        background: var(--theme-bg-lightest);
         //border: 1px solid $light-theme-extra-border-color;
       }
       @include darkTheme() {
-        border-radius: $card-border-radius;
-        background: $dark-theme-bg-lightest;
-        box-shadow: $whiteframe-shadow-1dp;
+        background: var(--theme-bg-lightest);
+        box-shadow: var(--whiteframe-shadow-1dp);
       }
     }
 
     &.isFocused .markdown-wrapper {
-      box-shadow: $whiteframe-shadow-3dp !important;
+      box-shadow: var(--whiteframe-shadow-3dp) !important;
       border-color: transparent;
     }
 
@@ -204,7 +201,6 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
   align-items: center;
   height: 48px;
   cursor: pointer;
-  color: $light-theme-text-color;
 
   &.full-size {
     height: auto;
@@ -213,22 +209,15 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
     cursor: default;
   }
 
-  @include darkTheme() {
-    color: $dark-theme-text-color;
-  }
+  color: var(--theme-text-color);
 
   &.--estimate {
     progress-bar {
-      @include lightTheme() {
-        background: $light-theme-extra-border-color;
-      }
-      @include darkTheme() {
-        background: $dark-theme-extra-border-color;
-      }
+      background: var(--theme-extra-border-color);
     }
 
     &:hover progress-bar {
-      background: $c-accent !important;
+      background: var(--c-accent) !important;
     }
   }
 }
@@ -236,14 +225,14 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
 .input-item__title {
   display: flex;
   align-items: center;
-  margin: 0 $s * 3;
+  margin: 0 var(--s3);
   overflow: hidden;
   text-overflow: ellipsis;
   min-width: 90px;
   flex-grow: 1;
 
   ::ng-deep mat-icon:first-of-type {
-    margin-right: $s;
+    margin-right: var(--s);
   }
 
   .full-size & {
@@ -259,7 +248,7 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
   flex-grow: 0;
   display: flex;
   align-items: center;
-  margin-right: $s * 3;
+  margin-right: var(--s3);
 
   .full-size & {
     min-width: 40px;
@@ -282,22 +271,13 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
 
   // TODO find out if still needed
   //::ng-deep mat-icon {
-  //  margin-right: $s;
+  //  margin-right: var(--s);
   //  font-size: 32px;
   //  height: 32px;
   //  width: 32px;
   //}
 
-  @include lightTheme() {
-    color: rgba(
-      var(--palette-foreground-secondary-text),
-      var(--palette-foreground-secondary-text-alpha, 1)
-    );
-  }
-
-  @include darkTheme() {
-    color: rgba(255, 255, 255, 0.7);
-  }
+  color: var(--theme-task-detail-value-color);
 
   > * {
     flex-grow: 1;
@@ -309,8 +289,8 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
 
 .input-item__edit-btn {
   //opacity: 0;
-  margin-left: $s * -3;
-  margin-right: $s;
+  margin-left: calc(-1 * var(--s3));
+  margin-right: var(--s);
   display: none !important;
 
   .input-item:hover & {

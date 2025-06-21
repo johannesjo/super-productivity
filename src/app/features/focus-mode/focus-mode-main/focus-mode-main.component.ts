@@ -41,6 +41,7 @@ import { SimpleCounterButtonComponent } from '../../simple-counter/simple-counte
 import { TaskAttachmentListComponent } from '../../tasks/task-attachment/task-attachment-list/task-attachment-list.component';
 import { slideInOutFromBottomAni } from '../../../ui/animations/slide-in-out-from-bottom.ani';
 import { FocusModeService } from '../focus-mode.service';
+import { BreathingDotComponent } from '../../../ui/breathing-dot/breathing-dot.component';
 
 @Component({
   selector: 'focus-mode-main',
@@ -51,6 +52,7 @@ import { FocusModeService } from '../focus-mode.service';
   imports: [
     TaskTitleComponent,
     ProgressCircleComponent,
+    BreathingDotComponent,
     MatIconButton,
     MatTooltip,
     MatIcon,

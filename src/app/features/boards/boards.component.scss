@@ -1,4 +1,4 @@
-@import '../../../variables.scss';
+@import '../../../common';
 
 :host {
   ::ng-deep {
@@ -47,7 +47,7 @@
 }
 
 .board-add-wrapper {
-  max-width: $component-max-width;
+  max-width: var(--component-max-width);
   margin: 0 auto;
   padding: 16px;
   max-height: 100%;

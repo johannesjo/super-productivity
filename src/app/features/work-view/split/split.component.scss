@@ -1,8 +1,6 @@
-@import '../../../../variables';
-
-$splitLineHeight: 2px;
-
 :host {
+  --split-line-height: 2px;
+
   z-index: 100;
   position: absolute;
   left: 0;
@@ -13,8 +11,8 @@ $splitLineHeight: 2px;
   .handle {
     position: absolute;
     width: 100%;
-    height: $splitLineHeight;
-    top: -0.5 * $splitLineHeight;
+    height: var(--split-line-height);
+    top: calc(-0.5 * var(--split-line-height));
     display: block;
     z-index: 5;
 
@@ -23,7 +21,7 @@ $splitLineHeight: 2px;
       position: absolute;
       width: 100%;
       height: 100%;
-      //box-shadow: 0 -3px 5px 0 rgba(0, 0, 0, 0.4);
+      //box-shadow: 0 -3px 5px 0 var(--color-overlay-dark-40);
       pointer-events: none;
     }
   }
@@ -53,7 +51,7 @@ $splitLineHeight: 2px;
     }
 
     &.isAnimate {
-      animation: $transition-duration-m splitWiggleAni $ani-standard-timing;
+      animation: var(--transition-duration-m) splitWiggleAni var(--ani-standard-timing);
     }
   }
 

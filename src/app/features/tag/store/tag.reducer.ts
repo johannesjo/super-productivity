@@ -26,7 +26,6 @@ import {
   addTag,
   deleteTag,
   deleteTags,
-  moveTaskInTodayTagList,
   updateAdvancedConfigForTag,
   updateTag,
   updateTagOrder,
@@ -34,7 +33,6 @@ import {
 } from './tag.actions';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-import { moveItemBeforeItem } from '../../../util/move-item-before-item';
 
 export const TAG_FEATURE_NAME = 'tag';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.TAG;
@@ -376,17 +374,4 @@ export const tagReducer = createReducer<TagState>(
 
   // TASK STUFF
   // ---------
-
-  on(moveTaskInTodayTagList, (state, { toTaskId, fromTaskId }) => {
-    const todayTag = state.entities[TODAY_TAG.id] as Tag;
-    return tagAdapter.updateOne(
-      {
-        id: todayTag.id,
-        changes: {
-          taskIds: moveItemBeforeItem(todayTag.taskIds, fromTaskId, toTaskId),
-        },
-      },
-      state,
-    );
-  }),
 );

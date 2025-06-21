@@ -51,6 +51,8 @@ export class Pfapi<const MD extends ModelCfgs> {
     isEncrypt: false,
   });
 
+  private _isSyncInProgress = false;
+
   public readonly wasDataMigratedInitiallyPromise: Promise<void>;
 
   public readonly tmpBackupService: TmpBackupService<AllSyncModels<MD>>;
@@ -131,6 +133,15 @@ export class Pfapi<const MD extends ModelCfgs> {
   }
 
   private async _wrapSyncAction<T>(logPrefix: string, fn: () => Promise<T>): Promise<T> {
+    // Check if sync is already in progress
+    if (this._isSyncInProgress) {
+      pfLog(2, `${logPrefix} SKIPPED - sync already in progress`);
+      throw new Error('Sync already in progress');
+    }
+
+    // Set sync in progress flag
+    this._isSyncInProgress = true;
+
     // Lock the database during sync to prevent concurrent modifications
     this.db.lock();
 
@@ -149,8 +160,9 @@ export class Pfapi<const MD extends ModelCfgs> {
       this.ev.emit('syncStatusChange', 'ERROR');
       throw e;
     } finally {
-      // Always unlock the database, even on error
+      // Always unlock the database and clear sync flag, even on error
       this.db.unlock();
+      this._isSyncInProgress = false;
     }
   }
 

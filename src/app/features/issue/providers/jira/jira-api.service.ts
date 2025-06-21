@@ -3,7 +3,6 @@ import { nanoid } from 'nanoid';
 import { ChromeExtensionInterfaceService } from '../../../../core/chrome-extension-interface/chrome-extension-interface.service';
 import {
   JIRA_ADDITIONAL_ISSUE_FIELDS,
-  JIRA_DATETIME_FORMAT,
   JIRA_MAX_RESULTS,
   JIRA_REQUEST_TIMEOUT_DURATION,
 } from './jira.const';
@@ -38,7 +37,6 @@ import {
   timeoutWith,
 } from 'rxjs/operators';
 import { JiraIssue, JiraIssueReduced } from './jira-issue.model';
-import moment from 'moment';
 import { BannerService } from '../../../../core/banner/banner.service';
 import { BannerId } from '../../../../core/banner/banner.model';
 import { T } from '../../../../t.const';
@@ -53,6 +51,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogPromptComponent } from '../../../../ui/dialog-prompt/dialog-prompt.component';
 import { stripTrailing } from '../../../../util/strip-trailing';
 import { IS_ANDROID_WEB_VIEW } from '../../../../util/is-android-web-view';
+import { formatJiraDate } from '../../../../util/format-jira-date';
 
 const BLOCK_ACCESS_KEY = 'SUP_BLOCK_JIRA_ACCESS';
 const API_VERSION = 'latest';
@@ -337,9 +336,7 @@ export class JiraApiService {
     cfg: JiraCfg;
   }): Observable<any> {
     const worklog = {
-      started: moment(started).locale('en').format(JIRA_DATETIME_FORMAT),
-      // TODO check if this can be replaced with this
-      // started: formatISODateWithOffset(new Date(started)),
+      started: formatJiraDate(started),
       timeSpentSeconds: Math.floor(timeSpent / 1000),
       comment,
     };

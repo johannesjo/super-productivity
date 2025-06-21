@@ -1,4 +1,4 @@
-@import '../../../../variables';
+@import '../../../../common';
 @import '../../tasks/task/task.component.mixins';
 
 :host {
@@ -27,7 +27,7 @@
   //top: -2px;
   //&.is-stuck {
   //  background: white;
-  //  box-shadow: $whiteframe-shadow-2dp;
+  //  box-shadow: var(--whiteframe-shadow-2dp);
   //  z-index: 10;
   //}
 }
@@ -85,7 +85,7 @@
 
 .normal-tasks-items,
 .scheduled-items {
-  min-height: $planner-item-height;
+  min-height: var(--planner-item-height);
   flex-grow: 1;
 }
 
@@ -101,11 +101,7 @@
   &.Task .time {
     cursor: pointer;
     border-radius: 50%;
-    background: #fff;
-
-    @include darkTheme() {
-      background: $task-c-bg-dark;
-    }
+    background: var(--task-c-bg);
   }
 
   .time {
@@ -120,10 +116,10 @@
     justify-content: center;
     align-items: center;
 
-    font-size: $planner-font-size-smaller-mobile;
+    font-size: var(--planner-font-size-smaller-mobile);
 
     @include mq(xs) {
-      font-size: $planner-font-size-smaller;
+      font-size: var(--planner-font-size-smaller);
     }
 
     mat-icon {
@@ -162,6 +158,6 @@
 .empty {
   text-align: center;
   font-style: italic;
-  line-height: $planner-item-height;
+  line-height: var(--planner-item-height);
   height: 0;
 }

@@ -127,7 +127,7 @@ export const BOARDS_FORM: LimitedFormlyFieldConfig<BoardCfg>[] = [
           },
         },
         {
-          key: 'filterType',
+          key: 'backlogState',
           type: 'radio',
           props: {
             label: T.F.BOARDS.FORM.BACKLOG_TASK_FILTER_TYPE,

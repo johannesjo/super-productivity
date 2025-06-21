@@ -1,4 +1,4 @@
-import { Injectable, NgZone, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { SnackParams } from './snack.model';
 import { Observable, Subject } from 'rxjs';
@@ -19,7 +19,6 @@ export class SnackService {
   private _translateService = inject(TranslateService);
   private _actions$ = inject(Actions);
   private _matSnackBar = inject(MatSnackBar);
-  private _ngZone = inject(NgZone);
 
   private _ref?: MatSnackBarRef<SnackCustomComponent | SimpleSnackBar>;
 
@@ -89,11 +88,9 @@ export class SnackService {
       case 'CUSTOM':
       case 'SUCCESS':
       default: {
-        // @see https://stackoverflow.com/questions/50101912/snackbar-position-wrong-when-use-errorhandler-in-angular-5-and-material
-        this._ngZone.run(() => {
-          this._ref = this._matSnackBar.openFromComponent(SnackCustomComponent, cfg);
-          this._adjustSnackPos();
-        });
+        // Opening snackbar directly without NgZone
+        this._ref = this._matSnackBar.openFromComponent(SnackCustomComponent, cfg);
+        this._adjustSnackPos();
         break;
       }
     }

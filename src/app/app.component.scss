@@ -1,4 +1,4 @@
-@import '../_variables.scss';
+@import '../common';
 
 :host {
   display: flex;
@@ -8,17 +8,12 @@
 
 .header-wrapper {
   position: relative;
-  z-index: $z-main-header-wrapper;
+  z-index: var(--z-main-header-wrapper);
   display: block;
-  transition: $transition-enter;
+  transition: var(--transition-enter);
   border-bottom: 1px solid transparent;
 
-  @include lightTheme() {
-    border-color: rgba(0, 0, 0, 0.15);
-  }
-  @include darkTheme() {
-    border-color: rgba(255, 255, 255, 0.15);
-  }
+  border-color: var(--theme-extra-border-color);
 
   &.isNotScrolled {
     border-color: transparent !important;
@@ -54,16 +49,16 @@
 }
 
 add-task-bar {
-  z-index: $z-add-task-bar;
+  z-index: var(--z-add-task-bar);
 }
 
 search-bar {
-  z-index: $z-search-bar;
+  z-index: var(--z-search-bar);
 }
 
 main-header {
   position: relative;
-  z-index: $z-main-header;
+  z-index: var(--z-main-header);
 }
 
 .right-panel {
@@ -104,18 +99,12 @@ mat-sidenav-container {
 mat-sidenav ::ng-deep .mat-drawer-inner-container {
   @include scrollYImportant();
 
-  @include lightTheme() {
-    background: $light-theme-bg-darker;
-  }
-
-  @include darkTheme {
-    background: $dark-theme-sidebar-bg;
-  }
+  background: var(--theme-sidebar-bg);
 }
 
 mat-sidenav {
   width: fit-content;
-  z-index: $z-side-nav;
+  z-index: var(--z-side-nav);
 }
 @media (min-width: 800px) {
   button.mat-mdc-menu-item {

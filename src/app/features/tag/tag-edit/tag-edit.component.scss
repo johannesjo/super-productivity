@@ -1,5 +1,3 @@
-@import '../../../../variables.scss';
-
 :host {
   width: 100%;
 
@@ -14,39 +12,22 @@
   }
 
   input {
-    background: transparent;
     appearance: none;
     display: block;
     width: 100%;
     box-shadow: none;
     border: none;
-    color: $light-theme-text-color;
+    color: var(--theme-text-color);
     border-top: 1px solid transparent;
     border-bottom: 1px solid transparent;
     height: 40px;
     padding: 2px;
-
-    @include darkTheme() {
-      color: $dark-theme-text-color;
-    }
+    background: transparent;
 
     &:hover,
     &:focus {
       outline: none;
-      border-bottom-color: rgba(0, 0, 0, 0.12);
-      @include darkTheme() {
-        border-bottom-color: rgba(255, 255, 255, 0.12);
-      }
-    }
-
-    &:hover {
-      :host-context(.isNoTouchOnly.isLightTheme) & {
-        background: #eee;
-      }
-
-      :host-context(.isNoTouchOnly.isDarkTheme) & {
-        background: $dark-theme-bg-lightest;
-      }
+      border-bottom-color: var(--theme-extra-border-color);
     }
   }
 }
