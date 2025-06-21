@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Example Plugin</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: var(--background-color, #fff);
+        color: var(--text-color, #333);
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        color: var(--primary-color, #3f51b5);
+        margin-bottom: 20px;
+      }
+
+      .stats-card {
+        background: var(--card-background, #f5f5f5);
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .button {
+        background: var(--primary-color, #3f51b5);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        margin-right: 10px;
+        transition: opacity 0.2s;
+      }
+
+      .button:hover {
+        opacity: 0.9;
+      }
+
+      .task-input {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+      }
+
+      .loading {
+        color: #666;
+        font-style: italic;
+      }
+
+      /* Dark mode support */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --background-color: #1e1e1e;
+          --text-color: #e0e0e0;
+          --card-background: #2a2a2a;
+          --primary-color: #5c6bc0;
+        }
+
+        .task-input {
+          background: #333;
+          color: #e0e0e0;
+          border-color: #555;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Example Plugin Dashboard</h1>
+
+      <div class="stats-card">
+        <h2>Plugin Statistics</h2>
+        <div
+          id="stats"
+          class="loading"
+        >
+          Loading...
+        </div>
+      </div>
+
+      <div class="stats-card">
+        <h2>Quick Task Creator</h2>
+        <input
+          type="text"
+          id="taskTitle"
+          class="task-input"
+          placeholder="Enter task title..."
+          onkeypress="if(event.key==='Enter') createTask()"
+        />
+        <textarea
+          id="taskNotes"
+          class="task-input"
+          rows="3"
+          placeholder="Optional notes..."
+        ></textarea>
+        <button
+          class="button"
+          onclick="createTask()"
+        >
+          Create Task
+        </button>
+        <button
+          class="button"
+          onclick="refreshStats()"
+        >
+          Refresh Stats
+        </button>
+      </div>
+
+      <div class="stats-card">
+        <h2>Communication with Plugin</h2>
+        <p>
+          This iframe can communicate with the main plugin code using the message API.
+        </p>
+        <div id="messages"></div>
+      </div>
+    </div>
+
+    <script>
+      // Wait for the plugin communication to be ready
+      let pluginReady = false;
+
+      // Initialize when document is ready
+      document.addEventListener('DOMContentLoaded', () => {
+        // Check if we're in an iframe
+        if (window.parent !== window) {
+          pluginReady = true;
+          refreshStats();
+          logMessage('Plugin iframe initialized');
+        } else {
+          document.getElementById('stats').innerHTML =
+            '<p>This page should be loaded within Super Productivity as a plugin.</p>';
+        }
+      });
+
+      async function sendMessage(message) {
+        if (!pluginReady) return null;
+
+        try {
+          // Send message to parent window (Super Productivity)
+          const response = await window.parent.postMessage(
+            {
+              type: 'PLUGIN_MESSAGE',
+              pluginId: 'example-plugin',
+              data: message,
+            },
+            '*',
+          );
+
+          // In a real implementation, you'd need to handle the response
+          // For now, we'll simulate it
+          return new Promise((resolve) => {
+            setTimeout(() => resolve({ success: true }), 100);
+          });
+        } catch (error) {
+          console.error('Failed to send message:', error);
+          return null;
+        }
+      }
+
+      async function refreshStats() {
+        const statsDiv = document.getElementById('stats');
+        statsDiv.innerHTML = '<p class="loading">Loading statistics...</p>';
+
+        try {
+          // In a real implementation, this would communicate with the plugin
+          // For now, we'll show example data
+          const stats = {
+            taskCompletedCount: Math.floor(Math.random() * 10) + 1,
+            totalTasks: Math.floor(Math.random() * 50) + 20,
+            lastCompletedTask: {
+              title: 'Example completed task',
+              timeSpent: 1800000, // 30 minutes in ms
+            },
+          };
+
+          statsDiv.innerHTML = `
+                    <p><strong>Tasks completed this session:</strong> ${stats.taskCompletedCount}</p>
+                    <p><strong>Total tasks in system:</strong> ${stats.totalTasks}</p>
+                    ${
+                      stats.lastCompletedTask
+                        ? `
+                        <p><strong>Last completed:</strong> ${stats.lastCompletedTask.title}</p>
+                        <p><strong>Time spent:</strong> ${Math.round(stats.lastCompletedTask.timeSpent / 1000 / 60)} minutes</p>
+                    `
+                        : ''
+                    }
+                `;
+
+          logMessage('Stats refreshed');
+        } catch (error) {
+          statsDiv.innerHTML = '<p style="color: red;">Failed to load statistics</p>';
+          logMessage('Failed to refresh stats: ' + error.message);
+        }
+      }
+
+      async function createTask() {
+        const titleInput = document.getElementById('taskTitle');
+        const notesInput = document.getElementById('taskNotes');
+
+        const title = titleInput.value.trim();
+        if (!title) {
+          alert('Please enter a task title');
+          return;
+        }
+
+        try {
+          const result = await sendMessage({
+            type: 'CREATE_TASK',
+            title: title,
+            notes: notesInput.value,
+          });
+
+          if (result && result.success) {
+            logMessage(`Task created: "${title}"`);
+            titleInput.value = '';
+            notesInput.value = '';
+            refreshStats();
+          } else {
+            logMessage('Failed to create task', 'error');
+          }
+        } catch (error) {
+          logMessage('Error creating task: ' + error.message, 'error');
+        }
+      }
+
+      function logMessage(message, type = 'info') {
+        const messagesDiv = document.getElementById('messages');
+        const messageEl = document.createElement('p');
+        messageEl.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        messageEl.style.color = type === 'error' ? 'red' : '#666';
+        messagesDiv.appendChild(messageEl);
+
+        // Keep only last 5 messages
+        while (messagesDiv.children.length > 5) {
+          messagesDiv.removeChild(messagesDiv.firstChild);
+        }
+      }
+
+      // Listen for messages from the plugin
+      window.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'PLUGIN_RESPONSE') {
+          logMessage('Received response from plugin');
+        }
+      });
+    </script>
+  </body>
+</html>
