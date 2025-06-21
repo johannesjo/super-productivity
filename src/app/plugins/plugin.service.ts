@@ -86,6 +86,7 @@ export class PluginService implements OnDestroy {
       'assets/yesterday-tasks-plugin',
       'assets/sync-md-plugin',
       'assets/api-test-plugin',
+      'assets/procrastination-buster',
     ];
 
     // KISS: No preloading - just load plugins directly

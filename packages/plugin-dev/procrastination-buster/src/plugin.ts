@@ -22,7 +22,7 @@ PluginAPI.registerHook('currentTaskChange', (taskData: any) => {
     stuckTimer = setTimeout(
       () => {
         PluginAPI.showSnack({
-          msg: 'Brauchst du Hilfe? Klicke hier für Prokrastinations-Strategien',
+          msg: 'Need help? Click here for procrastination strategies',
           type: 'INFO',
           ico: 'psychology',
         });
@@ -42,7 +42,7 @@ PluginAPI.registerHook('currentTaskChange', (taskData: any) => {
 // Register a shortcut to open the procrastination buster
 PluginAPI.registerShortcut({
   id: 'open_procrastination_buster',
-  label: 'Prokrastinations-Hilfe öffnen',
+  label: 'Open Procrastination Help',
   onExec: () => {
     PluginAPI.showIndexHtmlAsView();
   },
@@ -55,7 +55,7 @@ PluginAPI.onMessage(async (message: any) => {
   if (message.type === 'ADD_STRATEGY_TASK') {
     const taskId = await PluginAPI.addTask({
       title: message.strategy,
-      notes: `Strategie gegen ${message.blockerType}`,
+      notes: `Strategy for ${message.blockerType}`,
       timeEstimate: 5 * 60 * 1000, // 5 minutes default
     });
 
@@ -65,7 +65,7 @@ PluginAPI.onMessage(async (message: any) => {
   if (message.type === 'START_POMODORO') {
     // In a real implementation, this would start a pomodoro timer
     PluginAPI.showSnack({
-      msg: 'Pomodoro-Timer gestartet (25 Minuten)',
+      msg: 'Pomodoro timer started (25 minutes)',
       type: 'SUCCESS',
     });
     return { success: true };

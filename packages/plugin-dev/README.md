@@ -2,6 +2,22 @@
 
 This directory contains tools and examples for developing plugins for Super Productivity.
 
+## Quick Commands
+
+```bash
+# Build all plugins
+npm run build
+
+# Install dependencies for all plugins
+npm run install:all
+
+# Clean build artifacts
+npm run clean:dist
+
+# List available plugins
+npm run list
+```
+
 ## Getting Started
 
 ### Prerequisites

@@ -1,94 +1,102 @@
 # Procrastination Buster Plugin
 
-Ein Super Productivity Plugin, das dir hilft, Prokrastinationsblocker zu identifizieren und maßgeschneiderte Strategien anzubieten.
+A Super Productivity plugin that helps identify procrastination blockers and provides tailored strategies to overcome them.
 
 ## Features
 
-- 🎯 Identifiziere 8 verschiedene Prokrastinations-Typen
-- 💡 Erhalte maßgeschneiderte Strategien für jeden Typ
-- ⏱️ Starte Pomodoro-Timer direkt aus den Strategien
-- ➕ Füge Strategien als Tasks hinzu
-- 🌓 Dark Mode Support
+- 🎯 Identify 8 different procrastination types
+- 💡 Get tailored strategies for each type
+- ⏱️ Start Pomodoro timer directly from strategies
+- ➕ Add strategies as tasks
+- 🌓 Dark mode support using CSS variables
 
 ## Installation
 
-### Entwicklung
+### Development
 
 ```bash
-# Dependencies installieren
+# Install dependencies
 npm install
 
-# Entwicklungsserver starten
+# Start development server
 npm run dev
 
-# Für Produktion bauen
+# Build for production
 npm run build
 
-# Plugin-ZIP erstellen
+# Create plugin ZIP
 npm run package
 ```
 
-### In Super Productivity verwenden
+### Use in Super Productivity
 
-1. `npm run build` ausführen
-2. Die generierte `dist/plugin.zip` in Super Productivity hochladen
-3. Oder kopiere den `dist` Ordner nach `src/assets/procrastination-buster/`
+1. Run `npm run build`
+2. Upload the generated `dist/plugin.zip` in Super Productivity
+3. Or copy the `dist` folder to `src/assets/procrastination-buster/`
 
-## Verwendung
+## Usage
 
-1. **Shortcut**: Nutze die Tastenkombination für schnellen Zugriff
-2. **Side Panel**: Öffne das Plugin über das Side Panel
-3. **Automatisch**: Nach 15 Minuten Inaktivität bei einer Aufgabe
+1. **Shortcut**: Use keyboard shortcut for quick access
+2. **Side Panel**: Open the plugin via the side panel
+3. **Automatic**: After 15 minutes of inactivity on a task
 
-## Prokrastinations-Typen
+## Procrastination Types
 
-1. **Überwältigung** - "Zu viel auf einmal"
-2. **Perfektionismus** - "Es ist nicht perfekt genug"
-3. **Unklarheit** - "Ich weiß nicht, was zu tun ist"
-4. **Langeweile** - "Es ist langweilig"
-5. **Angst** - "Ich könnte scheitern"
-6. **Energiemangel** - "Ich bin zu müde"
-7. **Ablenkung** - "Andere Dinge sind interessanter"
-8. **Widerstand** - "Ich will das nicht machen"
+1. **Overwhelm** - "Too much at once"
+2. **Perfectionism** - "It's not perfect enough"
+3. **Unclear** - "I don't know what to do"
+4. **Boredom** - "It's boring"
+5. **Fear** - "I might fail"
+6. **Low Energy** - "I'm too tired"
+7. **Distraction** - "Other things are more interesting"
+8. **Resistance** - "I don't want to do this"
 
-## Technologie
+## Technology
 
-- **SolidJS** für reaktive UI
-- **Vite** für schnelles Development und Builds
-- **TypeScript** für Type Safety
+- **SolidJS** for reactive UI
+- **Vite** for fast development and builds
+- **TypeScript** for type safety
 - **Super Productivity Plugin API**
+- **CSS Variables** for theme integration
 
-## Entwicklung
+## Development
 
-Das Plugin besteht aus zwei Teilen:
+The plugin consists of two parts:
 
-1. **plugin.ts** - Backend-Logik, die mit Super Productivity kommuniziert
-2. **SolidJS App** - Frontend UI im iframe
+1. **plugin.ts** - Backend logic that communicates with Super Productivity
+2. **SolidJS App** - Frontend UI in iframe
 
-### Projekt-Struktur
+### Project Structure
 
 ```
 procrastination-buster/
 ├── src/
-│   ├── plugin.ts         # Plugin Backend
-│   ├── App.tsx          # Haupt-Komponente
-│   ├── types.ts         # TypeScript Definitionen
+│   ├── plugin.ts         # Plugin backend
+│   ├── App.tsx          # Main component
+│   ├── types.ts         # TypeScript definitions
 │   ├── BlockerSelector.tsx
 │   └── StrategyList.tsx
-├── manifest.json        # Plugin Metadata
-├── index.html          # HTML Entry
-└── vite.config.ts      # Build Konfiguration
+├── manifest.json        # Plugin metadata
+├── index.html          # HTML entry
+└── vite.config.ts      # Build configuration
 ```
 
-## Anpassungen
+## Customization
 
-### Neue Strategien hinzufügen
+### Add New Strategies
 
-Bearbeite `src/types.ts` und füge neue Strategien zu den entsprechenden Typen hinzu.
+Edit `src/types.ts` and add new strategies to the appropriate types.
 
-### Styling anpassen
+### Styling Customization
 
-Bearbeite `src/App.css` für visuelle Anpassungen. Das Plugin respektiert automatisch den Dark Mode.
+Edit `src/App.css` for visual adjustments. The plugin uses CSS variables for seamless theme integration:
+
+- `--primary-color` - Main theme color
+- `--text-color` - Primary text
+- `--background-color` - Background
+- `--card-background` - Card backgrounds
+- `--border-radius` - Standard radius
+- And many more...
 
 ## License
 

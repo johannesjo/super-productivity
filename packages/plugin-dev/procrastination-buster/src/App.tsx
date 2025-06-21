@@ -54,13 +54,13 @@ const App: Component = () => {
   return (
     <div class="app">
       <header class="header">
-        <h1>Prokrastinations-Buster</h1>
+        <h1>Procrastination Buster</h1>
         <Show when={!showIntro()}>
           <button
             class="back-button"
             onClick={handleBack}
           >
-            ← Zurück
+            ← Back
           </button>
         </Show>
       </header>
@@ -68,8 +68,8 @@ const App: Component = () => {
       <main class="main">
         <Show when={showIntro()}>
           <div class="intro">
-            <h2>Was hält dich gerade auf?</h2>
-            <p>Wähle aus, was am besten zu deinem aktuellen Gefühl passt:</p>
+            <h2>What's holding you back?</h2>
+            <p>Choose what best matches your current feeling:</p>
           </div>
         </Show>
 
@@ -90,7 +90,7 @@ const App: Component = () => {
 
       <footer class="footer">
         <p>
-          💡 Tipp: Nutze <kbd>Strg+Shift+P</kbd> für schnellen Zugriff
+          💡 Tip: Use <kbd>Ctrl+Shift+P</kbd> for quick access
         </p>
       </footer>
     </div>

@@ -14,7 +14,7 @@ export const StrategyList: Component<StrategyListProps> = (props) => {
         <p class="emotion">{props.type.emotion}</p>
       </div>
 
-      <h3>Empfohlene Strategien:</h3>
+      <h3>Recommended Strategies:</h3>
 
       <div class="strategy-list">
         <For each={props.type.strategies}>
@@ -25,7 +25,7 @@ export const StrategyList: Component<StrategyListProps> = (props) => {
                 <button
                   class="action-button task"
                   onClick={() => props.onStrategyAction(strategy, 'task')}
-                  title="Als Aufgabe hinzufügen"
+                  title="Add as task"
                 >
                   + Task
                 </button>
@@ -33,7 +33,7 @@ export const StrategyList: Component<StrategyListProps> = (props) => {
                   <button
                     class="action-button pomodoro"
                     onClick={() => props.onStrategyAction(strategy, 'pomodoro')}
-                    title="Pomodoro starten"
+                    title="Start Pomodoro"
                   >
                     ⏱️ Start
                   </button>

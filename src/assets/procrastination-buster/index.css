@@ -1,7 +1,6 @@
 * {
   box-sizing: border-box;
 }
-
 body {
   margin: 0;
   font-family: var(
@@ -15,27 +14,23 @@ body {
   background: var(--background-color, #f5f5f5);
   color: var(--text-color, #333);
 }
-
 .app {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   padding: 1rem;
 }
-
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
 }
-
 .header h1 {
   margin: 0;
   font-size: 1.5rem;
   color: var(--primary-color, #3f51b5);
 }
-
 .back-button {
   padding: 0.5rem 1rem;
   background: transparent;
@@ -46,38 +41,30 @@ body {
   transition: all 0.2s;
   font-family: inherit;
 }
-
 .back-button:hover {
   background: var(--primary-color, #3f51b5);
   color: var(--primary-text-on-primary, white);
 }
-
 .main {
   flex: 1;
 }
-
 .intro {
   text-align: center;
   margin-bottom: 2rem;
 }
-
 .intro h2 {
   font-size: 1.25rem;
   margin-bottom: 0.5rem;
 }
-
 .intro p {
   color: var(--text-color-secondary, #666);
 }
-
-/* Blocker Selector */
 .blocker-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 1rem;
   margin-top: 2rem;
 }
-
 .blocker-card {
   background: var(--card-background, white);
   border: 2px solid transparent;
@@ -88,31 +75,25 @@ body {
   text-align: left;
   box-shadow: var(--card-shadow, 0 2px 4px rgba(0, 0, 0, 0.1));
 }
-
 .blocker-card:hover {
   border-color: var(--primary-color, #3f51b5);
   transform: translateY(-2px);
   box-shadow: var(--card-shadow-hover, 0 4px 8px rgba(0, 0, 0, 0.15));
 }
-
 .blocker-card h3 {
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.5rem;
   font-size: 1.1rem;
   color: var(--primary-color, #3f51b5);
 }
-
 .blocker-card p {
   margin: 0;
   font-size: 0.9rem;
   color: var(--text-color-secondary, #666);
 }
-
-/* Strategy List */
 .strategy-container {
   max-width: 600px;
   margin: 0 auto;
 }
-
 .selected-type {
   background: var(--card-background, white);
   padding: 1.5rem;
@@ -121,24 +102,20 @@ body {
   text-align: center;
   box-shadow: var(--card-shadow, 0 2px 4px rgba(0, 0, 0, 0.1));
 }
-
 .selected-type h2 {
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.5rem;
   color: var(--primary-color, #3f51b5);
 }
-
 .emotion {
   margin: 0;
   font-style: italic;
   color: var(--text-color-secondary, #666);
 }
-
 .strategy-list {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
-
 .strategy-item {
   background: var(--card-background, white);
   padding: 1rem;
@@ -149,17 +126,14 @@ body {
   align-items: center;
   gap: 1rem;
 }
-
 .strategy-text {
   margin: 0;
   flex: 1;
 }
-
 .strategy-actions {
   display: flex;
   gap: 0.5rem;
 }
-
 .action-button {
   padding: 0.4rem 0.8rem;
   border: none;
@@ -169,28 +143,23 @@ body {
   transition: opacity 0.2s;
   font-family: inherit;
 }
-
 .action-button:hover {
   opacity: 0.8;
 }
-
 .action-button.task {
   background: var(--primary-color, #3f51b5);
   color: var(--primary-text-on-primary, white);
 }
-
 .action-button.pomodoro {
   background: var(--warn-color, #ff6b6b);
   color: var(--primary-text-on-warn, white);
 }
-
 .footer {
   margin-top: 2rem;
   text-align: center;
   font-size: 0.85rem;
   color: var(--text-color-secondary, #666);
 }
-
 kbd {
   background: var(--kbd-background, #eee);
   color: var(--kbd-text, inherit);
