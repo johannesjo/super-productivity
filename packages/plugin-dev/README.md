@@ -339,14 +339,31 @@ PluginAPI.registerHook('taskUpdate', (data: unknown) => {
 
 ## Examples
 
-See the `example-plugin` directory for a complete working example that demonstrates:
+### Available Examples
 
-- TypeScript setup
+1. **minimal-plugin** - The simplest possible plugin (10 lines)
+2. **simple-typescript-plugin** - TypeScript with minimal tooling
+3. **example-plugin** - Full featured example with webpack
+4. **procrastination-buster** - SolidJS plugin with modern UI
+
+### Example Features
+
+**example-plugin** demonstrates:
+
+- TypeScript setup with webpack
 - All API methods
 - iframe UI integration
 - State persistence
 - Hook handling
 - Build configuration
+
+**procrastination-buster** demonstrates:
+
+- SolidJS for reactive UI
+- Vite for fast builds
+- Modern component architecture
+- Plugin-to-iframe communication
+- Real-world use case
 
 ## Support
 
