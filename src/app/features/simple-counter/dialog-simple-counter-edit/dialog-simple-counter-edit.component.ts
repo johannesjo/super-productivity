@@ -28,7 +28,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
 import { TranslatePipe } from '@ngx-translate/core';
 import { BaseChartDirective } from 'ng2-charts';
-import { ChartConfiguration } from 'chart.js';
+import { ChartConfiguration, ChartEvent, ActiveElement } from 'chart.js';
 import { LineChartData } from '../../metric/metric.model';
 import { getSimpleCounterStreakDuration } from '../get-simple-counter-streak-duration';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
@@ -75,10 +75,12 @@ export class DialogSimpleCounterEditComponent {
 
     labels = labels.slice(-28);
 
-    const data =
-      this.data.simpleCounter.type === SimpleCounterType.StopWatch
-        ? labels.map((date) => Math.round(countOnDay[date] / 60000))
-        : labels.map((date) => countOnDay[date]);
+    const data = labels.map((date) => {
+      const rawVal = countOnDay[date] ?? 0;
+      return this.data.simpleCounter.type === SimpleCounterType.StopWatch
+        ? Math.round(rawVal / 60000)
+        : rawVal;
+    });
 
     const chartData: LineChartData = {
       labels: labels.map((dateStr) => {
@@ -115,7 +117,8 @@ export class DialogSimpleCounterEditComponent {
   SimpleCounterType: typeof SimpleCounterType = SimpleCounterType;
 
   todayStr: string = this._dateService.todayStr();
-  val: number = this.data.simpleCounter.countOnDay[this.todayStr];
+  selectedDateStr: string = this.todayStr;
+  val: number = this.data.simpleCounter.countOnDay[this.selectedDateStr];
   lineChartOptions: ChartConfiguration<
     'line',
     (number | undefined)[],
@@ -125,6 +128,7 @@ export class DialogSimpleCounterEditComponent {
     maintainAspectRatio: false,
     scales: {
       y: {
+        min: 0,
         ticks: {
           precision: 0,
         },
@@ -132,8 +136,38 @@ export class DialogSimpleCounterEditComponent {
     },
   };
 
+  onChartClick(event: { event?: ChartEvent; active?: ActiveElement[] }): void {
+    if (event.active && event.active.length > 0) {
+      const chartElement = event.active[0];
+      const index = chartElement.index;
+      const fullDates = this._getLast28Dates();
+      if (index >= 0 && index < fullDates.length) {
+        this.selectedDateStr = fullDates[index];
+        this.val = this.data.simpleCounter.countOnDay[this.selectedDateStr] || 0;
+      }
+    }
+  }
+
+  private _getLast28Dates(): string[] {
+    let labels = sortWorklogDates(Object.keys(this.data.simpleCounter.countOnDay));
+    labels = this._fillMissingDates(labels);
+    return labels.slice(-28);
+  }
+
+  formatSelectedDate(): string {
+    if (this.selectedDateStr === this._dateService.todayStr()) {
+      return 'Today';
+    }
+    const d = new Date(this.selectedDateStr);
+    return d.toLocaleDateString(this._locale, { day: 'numeric', month: 'numeric' });
+  }
+
   submit(): void {
-    this._simpleCounterService.setCounterToday(this.data.simpleCounter.id, this.val);
+    this._simpleCounterService.setCounterForDate(
+      this.data.simpleCounter.id,
+      this.selectedDateStr,
+      this.val,
+    );
     this.close();
   }
 
