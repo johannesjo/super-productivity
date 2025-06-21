@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Yesterday's Tasks</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        margin: 0;
+        padding: 20px;
+        color: var(--text-color);
+      }
+
+      /* Light mode (default) */
+      :root {
+        --text-color: var(--theme-text-color);
+        --border-color: var(--theme-separator-color);
+        --primary-color: var(--c-primary);
+      }
+
+      /* Dark mode */
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        margin-bottom: 10px;
+        font-size: 14px;
+      }
+
+      .date {
+        font-size: 14px;
+        margin-bottom: 20px;
+        opacity: 0.7;
+      }
+
+      .loading,
+      .no-tasks {
+        text-align: center;
+        padding: 40px;
+        color: var(--text-secondary);
+      }
+
+      .task-item {
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: flex-start;
+      }
+
+      .task-item:last-child {
+        border-bottom: none;
+      }
+
+      .task-title {
+        flex: 1;
+        margin-right: 16px;
+      }
+
+      .task-time {
+        font-weight: 400;
+        white-space: nowrap;
+        min-width: 60px;
+        text-align: right;
+      }
+
+      .project-tag {
+        display: inline-block;
+        padding: 2px 8px;
+        margin-left: 8px;
+        font-size: 12px;
+        opacity: 0.7;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div
+        class="date"
+        id="yesterday-date"
+      ></div>
+
+      <div id="content">
+        <div class="loading">Loading tasks...</div>
+      </div>
+    </div>
+
+    <script>
+      // Helper function to get yesterday's date range
+      function getYesterdayRange() {
+        const now = new Date();
+        const yesterday = new Date(now);
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        // Set to start of yesterday (00:00:00)
+        const startOfYesterday = new Date(yesterday);
+        startOfYesterday.setHours(0, 0, 0, 0);
+
+        // Set to end of yesterday (23:59:59)
+        const endOfYesterday = new Date(yesterday);
+        endOfYesterday.setHours(23, 59, 59, 999);
+
+        return {
+          start: startOfYesterday.getTime(),
+          end: endOfYesterday.getTime(),
+        };
+      }
+
+      // Function to format duration
+      function formatDuration(ms) {
+        if (!ms || ms === 0) return '0m';
+
+        const hours = Math.floor(ms / (1000 * 60 * 60));
+        const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+
+        if (hours > 0) {
+          return hours + 'h ' + minutes + 'm';
+        }
+        return minutes + 'm';
+      }
+
+      // Wait for plugin API to be available
+      function waitForPlugin() {
+        if (typeof PluginAPI !== 'undefined') {
+          init();
+        } else {
+          setTimeout(waitForPlugin, 100);
+        }
+      }
+
+      async function getYesterdayTasks() {
+        try {
+          const range = getYesterdayRange();
+          const allTasks = await PluginAPI.getTasks();
+          const archivedTasks = await PluginAPI.getArchivedTasks();
+
+          // Combine all tasks
+          const combinedTasks = [...allTasks, ...archivedTasks];
+
+          console.log('Total tasks found:', combinedTasks.length);
+          console.log(
+            'Yesterday range:',
+            new Date(range.start),
+            'to',
+            new Date(range.end),
+          );
+
+          // Debug: Check first few tasks
+          combinedTasks.slice(0, 3).forEach((task, i) => {
+            console.log(`Task ${i}:`, task.title);
+            console.log('  timeSpentOnDay:', task.timeSpentOnDay);
+            console.log('  timeSpent:', task.timeSpent);
+          });
+
+          // Get yesterday's date key in YYYY-MM-DD format
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          const yesterdayKey = yesterday.toISOString().split('T')[0];
+          console.log('Looking for date key:', yesterdayKey);
+
+          // Filter tasks that have time entries from yesterday
+          const yesterdayTasks = combinedTasks.filter((task) => {
+            if (!task.timeSpentOnDay) return false;
+
+            // Check if yesterday's date key exists
+            if (task.timeSpentOnDay[yesterdayKey]) {
+              console.log('Found task with yesterday time:', task.title);
+              return true;
+            }
+
+            // Also check timestamp-based entries
+            for (const dateKey in task.timeSpentOnDay) {
+              const entries = task.timeSpentOnDay[dateKey];
+              if (Array.isArray(entries)) {
+                for (const entry of entries) {
+                  if (entry && entry.s >= range.start && entry.s <= range.end) {
+                    console.log('Found task with yesterday entry:', task.title);
+                    return true;
+                  }
+                }
+              }
+            }
+            return false;
+          });
+
+          // Calculate time spent yesterday for each task
+          const tasksWithYesterdayTime = yesterdayTasks.map((task) => {
+            let yesterdayTime = 0;
+
+            if (task.timeSpentOnDay) {
+              // First check for direct date key (YYYY-MM-DD format)
+              if (task.timeSpentOnDay[yesterdayKey]) {
+                const timeValue = task.timeSpentOnDay[yesterdayKey];
+                if (typeof timeValue === 'number') {
+                  yesterdayTime = timeValue;
+                } else if (Array.isArray(timeValue)) {
+                  // Handle array format
+                  for (const entry of timeValue) {
+                    if (entry && entry.e && entry.s) {
+                      yesterdayTime += entry.e - entry.s;
+                    }
+                  }
+                }
+              } else {
+                // Check timestamp-based entries
+                for (const dateKey in task.timeSpentOnDay) {
+                  const entries = task.timeSpentOnDay[dateKey];
+                  if (Array.isArray(entries)) {
+                    for (const entry of entries) {
+                      if (entry && entry.s >= range.start && entry.s <= range.end) {
+                        yesterdayTime += entry.e - entry.s || 0;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+
+            return {
+              ...task,
+              yesterdayTimeSpent: yesterdayTime,
+              formattedYesterdayTime: formatDuration(yesterdayTime),
+            };
+          });
+
+          // Sort by time spent yesterday (descending)
+          tasksWithYesterdayTime.sort(
+            (a, b) => b.yesterdayTimeSpent - a.yesterdayTimeSpent,
+          );
+
+          return tasksWithYesterdayTime;
+        } catch (error) {
+          console.error("Error fetching yesterday's tasks:", error);
+          return [];
+        }
+      }
+
+      async function init() {
+        // Set yesterday's date
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        document.getElementById('yesterday-date').textContent =
+          yesterday.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          });
+
+        try {
+          const tasks = await getYesterdayTasks();
+          const projects = await PluginAPI.getAllProjects();
+          displayTasks(tasks, projects);
+        } catch (error) {
+          console.error('Error loading tasks:', error);
+          document.getElementById('content').innerHTML =
+            '<div class="no-tasks">Error loading tasks. Please try again.</div>';
+        }
+      }
+
+      function displayTasks(tasks, projects = []) {
+        const contentEl = document.getElementById('content');
+
+        if (tasks.length === 0) {
+          contentEl.innerHTML = '<div class="no-tasks">No tasks tracked yesterday.</div>';
+          return;
+        }
+
+        // Create project lookup map
+        const projectMap = {};
+        projects.forEach((project) => {
+          projectMap[project.id] = project.title;
+        });
+
+        // Build task list HTML
+        let html = '';
+
+        tasks.forEach((task) => {
+          const isDone = task.isDone ? 'task-done' : '';
+          const projectTitle =
+            task.projectId && projectMap[task.projectId]
+              ? projectMap[task.projectId]
+              : task.projectId;
+          const projectTag = projectTitle
+            ? `<span class="project-tag">${escapeHtml(projectTitle)}</span>`
+            : '';
+
+          html += `
+          <div class="task-item">
+            <div class="task-title ${isDone}">
+              ${escapeHtml(task.title)}${projectTag}
+            </div>
+            <div class="task-time">${task.formattedYesterdayTime}</div>
+          </div>
+        `;
+        });
+
+        contentEl.innerHTML = html;
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      // Refresh function for hooks
+      async function refreshTasks() {
+        const tasks = await getYesterdayTasks();
+        const projects = await PluginAPI.getAllProjects();
+        displayTasks(tasks, projects);
+      }
+
+      // Register hooks to refresh on task changes
+      function setupHooks() {
+        PluginAPI.registerHook(PluginAPI.Hooks.TASK_UPDATE, (taskData) => {
+          refreshTasks();
+        });
+        PluginAPI.registerHook(PluginAPI.Hooks.TASK_COMPLETE, (taskData) => {
+          refreshTasks();
+        });
+        PluginAPI.registerHook(PluginAPI.Hooks.TASK_DELETE, (taskData) => {
+          refreshTasks();
+        });
+      }
+
+      // Start
+      function waitForPlugin() {
+        if (typeof PluginAPI !== 'undefined') {
+          init();
+          setupHooks();
+        } else {
+          setTimeout(waitForPlugin, 100);
+        }
+      }
+
+      waitForPlugin();
+    </script>
+  </body>
+</html>

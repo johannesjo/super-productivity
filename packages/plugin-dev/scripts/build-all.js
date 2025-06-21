@@ -68,6 +68,79 @@ const plugins = [
       return 'Built and packaged';
     },
   },
+  // Migrated built-in plugins
+  {
+    name: 'api-test-plugin',
+    path: 'api-test-plugin',
+    copyToAssets: true,
+    buildCommand: async (pluginPath) => {
+      // Copy to assets directory
+      const targetDir = path.join(__dirname, '../../../src/assets/api-test-plugin');
+      if (!fs.existsSync(targetDir)) {
+        fs.mkdirSync(targetDir, { recursive: true });
+      }
+      const files = ['manifest.json', 'plugin.js', 'index.html'];
+      for (const file of files) {
+        const src = path.join(pluginPath, file);
+        const dest = path.join(targetDir, file);
+        if (fs.existsSync(src)) {
+          fs.copyFileSync(src, dest);
+        }
+      }
+      return 'Copied to assets';
+    },
+  },
+  {
+    name: 'sync-md-plugin',
+    path: 'sync-md-plugin',
+    copyToAssets: true,
+    buildCommand: async (pluginPath) => {
+      // Copy to assets directory
+      const targetDir = path.join(__dirname, '../../../src/assets/sync-md-plugin');
+      if (!fs.existsSync(targetDir)) {
+        fs.mkdirSync(targetDir, { recursive: true });
+      }
+      const files = [
+        'manifest.json',
+        'plugin.js',
+        'index.html',
+        'iframe-script.js',
+        'sync-md-icon.svg',
+      ];
+      for (const file of files) {
+        const src = path.join(pluginPath, file);
+        const dest = path.join(targetDir, file);
+        if (fs.existsSync(src)) {
+          fs.copyFileSync(src, dest);
+        }
+      }
+      return 'Copied to assets';
+    },
+  },
+  {
+    name: 'yesterday-tasks-plugin',
+    path: 'yesterday-tasks-plugin',
+    copyToAssets: true,
+    buildCommand: async (pluginPath) => {
+      // Copy to assets directory
+      const targetDir = path.join(
+        __dirname,
+        '../../../src/assets/yesterday-tasks-plugin',
+      );
+      if (!fs.existsSync(targetDir)) {
+        fs.mkdirSync(targetDir, { recursive: true });
+      }
+      const files = ['manifest.json', 'plugin.js', 'index.html', 'icon.svg'];
+      for (const file of files) {
+        const src = path.join(pluginPath, file);
+        const dest = path.join(targetDir, file);
+        if (fs.existsSync(src)) {
+          fs.copyFileSync(src, dest);
+        }
+      }
+      return 'Copied to assets';
+    },
+  },
 ];
 
 async function buildPlugin(plugin) {

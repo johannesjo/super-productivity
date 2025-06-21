@@ -43,7 +43,7 @@ let G = null,
   h = null,
   p = null,
   T = null,
-  V = 0;
+  q = 0;
 function M(e, t) {
   const n = h,
     i = d,
@@ -59,7 +59,7 @@ function M(e, t) {
               'Dispose method must be an explicit argument to createRoot function',
             );
           })
-      : () => e(() => C(() => P(l)));
+      : () => e(() => C(() => O(l)));
   (d = l), (h = null);
   try {
     return L(o, !0);
@@ -81,7 +81,7 @@ function W(e, t) {
 }
 function F(e, t, n) {
   const i = Y(e, t, !1, E, n);
-  O(i);
+  P(i);
 }
 function I(e, t, n) {
   n = n ? Object.assign({}, R, n) : R;
@@ -90,7 +90,7 @@ function I(e, t, n) {
     (i.observers = null),
     (i.observerSlots = null),
     (i.comparator = n.equals || void 0),
-    O(i),
+    P(i),
     z.bind(i)
   );
 }
@@ -124,7 +124,7 @@ function ge(e, t) {
     (n.observerSlots = null),
     (n.name = e.name),
     (n.component = e),
-    O(n),
+    P(n),
     n.tValue !== void 0 ? n.tValue : n.value
   );
 }
@@ -133,7 +133,7 @@ function me(e) {
 }
 function z() {
   if (this.sources && this.state)
-    if (this.state === E) O(this);
+    if (this.state === E) P(this);
     else {
       const e = p;
       (p = null), L(() => j(this), !1), (p = e);
@@ -174,10 +174,10 @@ function ee(e, t, n) {
     t
   );
 }
-function O(e) {
+function P(e) {
   if (!e.fn) return;
-  P(e);
-  const t = V;
+  O(e);
+  const t = q;
   we(e, e.value, t);
 }
 function we(e, t, n) {
@@ -189,7 +189,7 @@ function we(e, t, n) {
     i = e.fn(t);
   } catch (l) {
     return (
-      e.pure && ((e.state = E), e.owned && e.owned.forEach(P), (e.owned = null)),
+      e.pure && ((e.state = E), e.owned && e.owned.forEach(O), (e.owned = null)),
       (e.updatedAt = n + 1),
       ie(l)
     );
@@ -229,9 +229,9 @@ function te(e) {
   if (e.state === U) return j(e);
   if (e.suspense && C(e.suspense.inFallback)) return e.suspense.effects.push(e);
   const t = [e];
-  for (; (e = e.owner) && (!e.updatedAt || e.updatedAt < V); ) e.state && t.push(e);
+  for (; (e = e.owner) && (!e.updatedAt || e.updatedAt < q); ) e.state && t.push(e);
   for (let n = t.length - 1; n >= 0; n--)
-    if (((e = t[n]), e.state === E)) O(e);
+    if (((e = t[n]), e.state === E)) P(e);
     else if (e.state === U) {
       const i = p;
       (p = null), L(() => j(e, t[0]), !1), (p = i);
@@ -240,7 +240,7 @@ function te(e) {
 function L(e, t) {
   if (p) return e();
   let n = !1;
-  t || (p = []), T ? (n = !0) : (T = []), V++;
+  t || (p = []), T ? (n = !0) : (T = []), q++;
   try {
     const i = e();
     return ye(n), i;
@@ -263,7 +263,7 @@ function j(e, t) {
     if (i.sources) {
       const s = i.state;
       s === E
-        ? i !== t && (!i.updatedAt || i.updatedAt < V) && te(i)
+        ? i !== t && (!i.updatedAt || i.updatedAt < q) && te(i)
         : s === U && j(i, t);
     }
   }
@@ -274,7 +274,7 @@ function se(e) {
     n.state || ((n.state = U), n.pure ? p.push(n) : T.push(n), n.observers && se(n));
   }
 }
-function P(e) {
+function O(e) {
   let t;
   if (e.sources)
     for (; e.sources.length; ) {
@@ -288,11 +288,11 @@ function P(e) {
       }
     }
   if (e.tOwned) {
-    for (t = e.tOwned.length - 1; t >= 0; t--) P(e.tOwned[t]);
+    for (t = e.tOwned.length - 1; t >= 0; t--) O(e.tOwned[t]);
     delete e.tOwned;
   }
   if (e.owned) {
-    for (t = e.owned.length - 1; t >= 0; t--) P(e.owned[t]);
+    for (t = e.owned.length - 1; t >= 0; t--) O(e.owned[t]);
     e.owned = null;
   }
   if (e.cleanups) {
@@ -329,7 +329,7 @@ function $e(e, t, n = {}) {
       return (
         a[ae],
         C(() => {
-          let g, A, k, B, N, w, y, b, _;
+          let g, A, k, N, B, w, y, b, _;
           if (u === 0)
             l !== 0 && (X(r), (r = []), (i = []), (s = []), (l = 0), o && (o = [])),
               n.fallback &&
@@ -340,15 +340,15 @@ function $e(e, t, n = {}) {
           } else {
             for (
               k = new Array(u),
-                B = new Array(u),
-                o && (N = new Array(u)),
+                N = new Array(u),
+                o && (B = new Array(u)),
                 w = 0,
                 y = Math.min(l, u);
               w < y && i[w] === a[w];
               w++
             );
             for (y = l - 1, b = u - 1; y >= w && b >= w && i[y] === a[b]; y--, b--)
-              (k[b] = s[y]), (B[b] = r[y]), o && (N[b] = o[y]);
+              (k[b] = s[y]), (N[b] = r[y]), o && (B[b] = o[y]);
             for (g = new Map(), A = new Array(b + 1), c = b; c >= w; c--)
               (_ = a[c]), (f = g.get(_)), (A[c] = f === void 0 ? -1 : f), g.set(_, c);
             for (f = w; f <= y; f++)
@@ -356,14 +356,14 @@ function $e(e, t, n = {}) {
                 (c = g.get(_)),
                 c !== void 0 && c !== -1
                   ? ((k[c] = s[f]),
-                    (B[c] = r[f]),
-                    o && (N[c] = o[f]),
+                    (N[c] = r[f]),
+                    o && (B[c] = o[f]),
                     (c = A[c]),
                     g.set(_, c))
                   : r[f]();
             for (c = w; c < u; c++)
               c in k
-                ? ((s[c] = k[c]), (r[c] = B[c]), o && ((o[c] = N[c]), o[c](c)))
+                ? ((s[c] = k[c]), (r[c] = N[c]), o && ((o[c] = B[c]), o[c](c)))
                 : (s[c] = M($));
             (s = s.slice(0, (l = u))), (i = a.slice(0));
           }
@@ -506,8 +506,8 @@ function H(e, t = window.document) {
   }
 }
 function m(e, t, n, i) {
-  if ((n !== void 0 && !i && (i = []), typeof t != 'function')) return q(e, t, i, n);
-  F((s) => q(e, t(), s, n), i);
+  if ((n !== void 0 && !i && (i = []), typeof t != 'function')) return V(e, t, i, n);
+  F((s) => V(e, t(), s, n), i);
 }
 function Ee(e) {
   let t = e.target;
@@ -554,7 +554,7 @@ function Ee(e) {
   } else o();
   r(i);
 }
-function q(e, t, n, i, s) {
+function V(e, t, n, i, s) {
   for (; typeof n == 'function'; ) n = n();
   if (t === n) return n;
   const r = typeof t,
@@ -578,14 +578,14 @@ function q(e, t, n, i, s) {
         F(() => {
           let o = t();
           for (; typeof o == 'function'; ) o = o();
-          n = q(e, o, n, i);
+          n = V(e, o, n, i);
         }),
         () => n
       );
     if (Array.isArray(t)) {
       const o = [],
         a = n && Array.isArray(n);
-      if (K(o, t, n, s)) return F(() => (n = q(e, o, n, i, !0))), () => n;
+      if (K(o, t, n, s)) return F(() => (n = V(e, o, n, i, !0))), () => n;
       if (o.length === 0) {
         if (((n = x(e, n, i)), l)) return n;
       } else a ? (n.length === 0 ? Q(e, o, i) : ke(e, n, o)) : (n && x(e), Q(e, o));
@@ -764,16 +764,16 @@ const Ie = (e) =>
     );
   })();
 H(['click']);
-var Pe = v(
+var Oe = v(
     '<div class=strategy-container><div class=selected-type><h2></h2><p class=emotion></p></div><h3>Recommended Strategies:</h3><div class=strategy-list>',
   ),
-  Oe = v(
+  Pe = v(
     '<div class=strategy-item><p class=strategy-text></p><div class=strategy-actions><button class="action-button task"title="Add as task">+ Task',
   ),
   Le = v('<button class="action-button pomodoro"title="Start Pomodoro">⏱️ Start');
-const Be = (e) =>
+const Ne = (e) =>
   (() => {
-    var t = Pe(),
+    var t = Oe(),
       n = t.firstChild,
       i = n.firstChild,
       s = i.nextSibling,
@@ -790,7 +790,7 @@ const Be = (e) =>
           },
           children: (o) =>
             (() => {
-              var a = Oe(),
+              var a = Pe(),
                 u = a.firstChild,
                 f = u.nextSibling,
                 c = f.firstChild;
@@ -819,13 +819,11 @@ const Be = (e) =>
     );
   })();
 H(['click']);
-var Ne = v('<button class=back-button>← Back'),
+var Be = v('<button class=back-button>← Back'),
   De = v(
     "<div class=intro><h2>What's holding you back?</h2><p>Choose what best matches your current feeling:",
   ),
-  Me = v(
-    '<div class=app><header class=header><h1>Procrastination Buster</h1></header><main class=main></main><footer class=footer><p>💡 Tip: Use <kbd>Ctrl+Shift+P</kbd> for quick access',
-  );
+  Me = v('<div class=app><header class=header></header><main class=main>');
 const Re = () => {
   const [e, t] = W(null),
     [n, i] = W(!0),
@@ -854,9 +852,8 @@ const Re = () => {
     };
   return (() => {
     var o = Me(),
-      a = o.firstChild;
-    a.firstChild;
-    var u = a.nextSibling;
+      a = o.firstChild,
+      u = a.nextSibling;
     return (
       m(
         a,
@@ -865,11 +862,10 @@ const Re = () => {
             return !n();
           },
           get children() {
-            var f = Ne();
+            var f = Be();
             return (f.$$click = r), f;
           },
         }),
-        null,
       ),
       m(
         u,
@@ -902,7 +898,7 @@ const Re = () => {
             return e();
           },
           get children() {
-            return S(Be, {
+            return S(Ne, {
               get type() {
                 return e();
               },

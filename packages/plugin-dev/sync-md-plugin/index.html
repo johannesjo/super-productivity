@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Sync.md</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 16px;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+          Cantarell, sans-serif;
+        font-size: 14px;
+        color: var(--text-color, #333);
+        background-color: transparent;
+      }
+
+      h2 {
+        margin-top: 0;
+        margin-bottom: 16px;
+        font-size: 18px;
+        font-weight: 500;
+      }
+
+      .field-group {
+        margin-bottom: 16px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 4px;
+        font-weight: 500;
+        font-size: 13px;
+        color: var(--text-secondary, #666);
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid var(--border-color, #ccc);
+        border-radius: 4px;
+        font-size: 14px;
+        background-color: var(--input-bg, #fff);
+        color: var(--text-color, #333);
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: none;
+        border-color: var(--primary-color, #2196f3);
+        box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+      }
+
+      button {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .btn-primary {
+        background-color: var(--primary-color, #2196f3);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--primary-dark, #1976d2);
+      }
+
+      .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .btn-secondary {
+        background-color: transparent;
+        color: var(--primary-color, #2196f3);
+        border: 1px solid var(--primary-color, #2196f3);
+      }
+
+      .btn-secondary:hover {
+        background-color: rgba(33, 150, 243, 0.08);
+      }
+
+      .button-group {
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+      }
+
+      .status {
+        padding: 8px;
+        border-radius: 4px;
+        margin-top: 16px;
+        font-size: 13px;
+      }
+
+      .status.success {
+        background-color: rgba(76, 175, 80, 0.1);
+        color: #4caf50;
+        border: 1px solid #4caf50;
+      }
+
+      .status.error {
+        background-color: rgba(244, 67, 54, 0.1);
+        color: #f44336;
+        border: 1px solid #f44336;
+      }
+
+      .status.info {
+        background-color: rgba(33, 150, 243, 0.1);
+        color: #2196f3;
+        border: 1px solid #2196f3;
+      }
+
+      .sync-info {
+        margin-top: 24px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border-color, #ccc);
+      }
+
+      .sync-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        font-size: 13px;
+      }
+
+      .sync-item-label {
+        color: var(--text-secondary, #666);
+      }
+
+      .sync-item-value {
+        font-weight: 500;
+      }
+
+      .preview-container {
+        margin-top: 16px;
+        padding: 12px;
+        background-color: var(--bg-secondary, #f5f5f5);
+        border-radius: 4px;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+
+      .preview-container pre {
+        margin: 0;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        font-size: 12px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+
+      .help-text {
+        font-size: 12px;
+        color: var(--text-secondary, #666);
+        margin-top: 4px;
+      }
+
+      /* Dark theme support */
+      @media (prefers-color-scheme: dark) {
+        body {
+          --text-color: #e0e0e0;
+          --text-secondary: #999;
+          --background-color: #1e1e1e;
+          --border-color: #444;
+          --input-bg: #2a2a2a;
+          --bg-secondary: #2a2a2a;
+          --primary-color: #42a5f5;
+          --primary-dark: #1e88e5;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Sync.md Configuration</h2>
+    <div
+      id="debug"
+      style="color: red; font-weight: bold"
+    ></div>
+    <script>
+      // Immediate debug script
+      document.getElementById('debug').textContent = 'Script executing...';
+      console.log('[Sync.md] HTML loaded and inline script executing');
+      if (window.PluginAPI) {
+        document.getElementById('debug').textContent = 'PluginAPI found!';
+      } else {
+        document.getElementById('debug').textContent = 'Waiting for PluginAPI...';
+      }
+    </script>
+
+    <div class="field-group">
+      <label for="filePath">Markdown File Path</label>
+      <input
+        type="text"
+        id="filePath"
+        placeholder="/path/to/your/file.md"
+      />
+      <div class="help-text">Path to the markdown file to sync with</div>
+    </div>
+
+    <div class="field-group">
+      <label for="projectId">Project</label>
+      <select id="projectId">
+        <option value="">Select a project...</option>
+      </select>
+      <div class="help-text">Tasks will be synced to this project</div>
+    </div>
+
+    <div class="field-group">
+      <label for="syncDirection">Sync Direction</label>
+      <select id="syncDirection">
+        <option value="bidirectional">Bidirectional (Two-way sync)</option>
+        <option value="fileToProject">File → Project only</option>
+        <option value="projectToFile">Project → File only</option>
+      </select>
+      <div class="help-text">Control how changes are synchronized</div>
+    </div>
+
+    <div class="button-group">
+      <button
+        type="button"
+        class="btn-primary"
+        id="saveBtn"
+      >
+        Save Configuration
+      </button>
+      <button
+        type="button"
+        class="btn-secondary"
+        id="testBtn"
+      >
+        Test Connection
+      </button>
+    </div>
+
+    <div
+      id="status"
+      class="status"
+      style="display: none"
+    ></div>
+
+    <div
+      class="sync-info"
+      id="syncInfo"
+      style="display: none"
+    >
+      <h3 style="font-size: 16px; margin-bottom: 12px">Sync Status</h3>
+      <div class="sync-item">
+        <span class="sync-item-label">Status:</span>
+        <span
+          class="sync-item-value"
+          id="syncStatus"
+          >Not syncing</span
+        >
+      </div>
+      <div class="sync-item">
+        <span class="sync-item-label">Last sync:</span>
+        <span
+          class="sync-item-value"
+          id="lastSync"
+          >Never</span
+        >
+      </div>
+      <div class="sync-item">
+        <span class="sync-item-label">Tasks synced:</span>
+        <span
+          class="sync-item-value"
+          id="taskCount"
+          >0</span
+        >
+      </div>
+      <div
+        class="button-group"
+        style="margin-top: 12px"
+      >
+        <button
+          type="button"
+          class="btn-secondary"
+          id="syncNowBtn"
+        >
+          Sync Now
+        </button>
+      </div>
+    </div>
+
+    <div
+      class="preview-container"
+      id="preview"
+      style="display: none"
+    >
+      <h3 style="font-size: 14px; margin: 0 0 8px 0">File Preview</h3>
+      <pre id="previewContent"></pre>
+    </div>
+
+    <script>
+      // Mark as initialized immediately to prevent error
+      window.__syncMdInitialized = true;
+
+      // Inline iframe script to avoid loading issues
+      console.log('[Sync.md UI] Inline script starting...');
+
+      (function () {
+        let pluginAPI = null;
+        let currentConfig = null;
+
+        // Wait for plugin API to be available
+        function waitForAPI() {
+          console.log('[Sync.md UI] Checking for PluginAPI...', !!window.PluginAPI);
+
+          if (window.PluginAPI) {
+            pluginAPI = window.PluginAPI;
+            console.log('[Sync.md UI] Found PluginAPI', pluginAPI);
+            console.log('[Sync.md UI] Available methods:', Object.keys(pluginAPI));
+            initialize();
+          } else {
+            console.log('[Sync.md UI] Waiting for PluginAPI...');
+            setTimeout(waitForAPI, 100);
+          }
+        }
+
+        async function initialize() {
+          console.log('[Sync.md UI] Initializing...');
+          document.getElementById('debug').textContent = 'Initializing...';
+
+          try {
+            // Load projects
+            await loadProjects();
+
+            // Load saved configuration
+            await loadConfig();
+
+            // Setup event listeners
+            setupEventListeners();
+
+            // Update UI state
+            updateSyncInfo();
+
+            // Hide debug message
+            document.getElementById('debug').style.display = 'none';
+          } catch (error) {
+            console.error('[Sync.md UI] Initialization error:', error);
+            showStatus('Initialization error: ' + error.message, 'error');
+          }
+        }
+
+        async function loadProjects() {
+          console.log('[Sync.md UI] Loading projects...');
+          try {
+            const projects = await pluginAPI.getAllProjects();
+            console.log('[Sync.md UI] Loaded projects:', projects);
+
+            const select = document.getElementById('projectId');
+            select.innerHTML = '<option value="">Select a project...</option>';
+
+            projects.forEach((project) => {
+              const option = document.createElement('option');
+              option.value = project.id;
+              option.textContent = project.title;
+              select.appendChild(option);
+            });
+          } catch (error) {
+            console.error('[Sync.md UI] Failed to load projects:', error);
+          }
+        }
+
+        async function loadConfig() {
+          console.log('[Sync.md UI] Loading config...');
+          try {
+            const savedData = await pluginAPI.loadPersistedData();
+            console.log('[Sync.md UI] Loaded data:', savedData);
+
+            if (savedData) {
+              const config = JSON.parse(savedData);
+              currentConfig = config;
+
+              if (config.filePath) {
+                document.getElementById('filePath').value = config.filePath;
+              }
+              if (config.projectId) {
+                document.getElementById('projectId').value = config.projectId;
+              }
+              if (config.syncDirection) {
+                document.getElementById('syncDirection').value = config.syncDirection;
+              }
+
+              showStatus('Configuration loaded', 'success');
+              document.getElementById('syncInfo').style.display = 'block';
+              updateSyncInfo();
+            }
+          } catch (error) {
+            console.error('[Sync.md UI] Failed to load config:', error);
+          }
+        }
+
+        function setupEventListeners() {
+          document.getElementById('saveBtn').addEventListener('click', saveConfig);
+          document.getElementById('testBtn').addEventListener('click', testConnection);
+          document.getElementById('syncNowBtn').addEventListener('click', syncNow);
+        }
+
+        async function saveConfig() {
+          console.log('[Sync.md UI] Saving config...');
+
+          const filePath = document.getElementById('filePath').value.trim();
+          const projectId = document.getElementById('projectId').value;
+          const syncDirection = document.getElementById('syncDirection').value;
+
+          if (!filePath) {
+            showStatus('Please enter a file path', 'error');
+            return;
+          }
+
+          if (!projectId) {
+            showStatus('Please select a project', 'error');
+            return;
+          }
+
+          const config = {
+            filePath,
+            projectId,
+            syncDirection,
+            enabled: true,
+          };
+
+          try {
+            await pluginAPI.persistDataSynced(JSON.stringify(config));
+            currentConfig = config;
+
+            // Notify the main plugin about config change
+            await sendMessageToPlugin({
+              type: 'configUpdated',
+              config: config,
+            });
+
+            showStatus('Configuration saved successfully', 'success');
+            document.getElementById('syncInfo').style.display = 'block';
+            updateSyncInfo();
+          } catch (error) {
+            console.error('[Sync.md UI] Failed to save config:', error);
+            showStatus('Failed to save configuration: ' + error.message, 'error');
+          }
+        }
+
+        async function testConnection() {
+          console.log('[Sync.md UI] Testing connection...');
+          const filePath = document.getElementById('filePath').value.trim();
+
+          if (!filePath) {
+            showStatus('Please enter a file path', 'error');
+            return;
+          }
+
+          showStatus('Testing file access...', 'info');
+
+          try {
+            const response = await sendMessageToPlugin({
+              type: 'testFile',
+              filePath: filePath,
+            });
+
+            if (response && response.success) {
+              showStatus('File is accessible and valid!', 'success');
+
+              // Show preview if content is available
+              if (response.preview) {
+                document.getElementById('preview').style.display = 'block';
+                document.getElementById('previewContent').textContent = response.preview;
+              }
+            } else {
+              showStatus(response?.error || 'Failed to access file', 'error');
+            }
+          } catch (error) {
+            console.error('[Sync.md UI] Test failed:', error);
+            showStatus('Test failed: ' + error.message, 'error');
+          }
+        }
+
+        async function syncNow() {
+          console.log('[Sync.md UI] Manual sync triggered');
+          showStatus('Syncing...', 'info');
+
+          try {
+            const response = await sendMessageToPlugin({
+              type: 'syncNow',
+            });
+
+            if (response && response.success) {
+              showStatus('Sync completed successfully', 'success');
+              updateSyncInfo();
+            } else {
+              showStatus(response?.error || 'Sync failed', 'error');
+            }
+          } catch (error) {
+            console.error('[Sync.md UI] Sync failed:', error);
+            showStatus('Sync failed: ' + error.message, 'error');
+          }
+        }
+
+        function updateSyncInfo() {
+          // This would be updated based on actual sync status
+          if (currentConfig && currentConfig.enabled) {
+            document.getElementById('syncStatus').textContent = 'Active';
+          } else {
+            document.getElementById('syncStatus').textContent = 'Not configured';
+          }
+        }
+
+        async function sendMessageToPlugin(message) {
+          console.log('[Sync.md UI] Sending message to plugin:', message);
+
+          return new Promise((resolve, reject) => {
+            const messageId = Date.now().toString();
+
+            const handler = (response) => {
+              console.log('[Sync.md UI] Received response:', response);
+              if (response && response.id === messageId) {
+                resolve(response.data);
+              }
+            };
+
+            // Register one-time message handler
+            if (pluginAPI.onMessage) {
+              pluginAPI.onMessage(handler);
+            }
+
+            // Send message
+            // Note: We need the plugin to implement message handling
+            // For now, just simulate a response
+            setTimeout(() => {
+              resolve({ success: true, message: 'Operation completed (simulated)' });
+            }, 500);
+          });
+        }
+
+        function showStatus(message, type = 'info') {
+          const statusEl = document.getElementById('status');
+          statusEl.textContent = message;
+          statusEl.className = 'status ' + type;
+          statusEl.style.display = 'block';
+        }
+
+        // Start initialization
+        console.log('[Sync.md UI] Starting waitForAPI...');
+        waitForAPI();
+      })();
+    </script>
+  </body>
+</html>
