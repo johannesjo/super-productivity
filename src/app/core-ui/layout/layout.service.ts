@@ -160,6 +160,7 @@ export class LayoutService {
 
   setTimeView(view: 'week' | 'month'): void {
     this._selectedTimeView$.next(view);
+  }
 
   toggleTaskViewCustomizerPanel(): void {
     this._store$.dispatch(toggleTaskViewCustomizerPanel());
