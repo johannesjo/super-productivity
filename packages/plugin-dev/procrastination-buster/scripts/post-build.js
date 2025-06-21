@@ -6,11 +6,27 @@ const path = require('path');
 console.log('Post-build: Preparing files for Super Productivity...');
 
 const distDir = path.join(__dirname, '..', 'dist');
+const targetDir = path.join(
+  __dirname,
+  '..',
+  '..',
+  '..',
+  '..',
+  'src',
+  'assets',
+  'procrastination-buster',
+);
 
-// Copy manifest.json to dist
+// Ensure target directory exists
+if (!fs.existsSync(targetDir)) {
+  fs.mkdirSync(targetDir, { recursive: true });
+}
+
+// Copy manifest.json to dist and target
 const manifestSrc = path.join(__dirname, '..', 'manifest.json');
 const manifestDest = path.join(distDir, 'manifest.json');
 fs.copyFileSync(manifestSrc, manifestDest);
+fs.copyFileSync(manifestSrc, path.join(targetDir, 'manifest.json'));
 console.log('✓ Copied manifest.json');
 
 // Create/copy icon.svg if it exists
@@ -28,17 +44,49 @@ if (fs.existsSync(iconSrc)) {
   console.log('✓ Created default icon.svg');
 }
 
-// Fix paths in index.html to be relative
+// Inline JS and CSS into HTML
 const indexPath = path.join(distDir, 'index.html');
 if (fs.existsSync(indexPath)) {
   let indexContent = fs.readFileSync(indexPath, 'utf-8');
-  // Fix script and asset paths to be relative
-  indexContent = indexContent.replace(/src="\/src\//g, 'src="./');
-  indexContent = indexContent.replace(/href="\/src\//g, 'href="./');
-  indexContent = indexContent.replace(/src="\/assets\//g, 'src="./assets/');
-  indexContent = indexContent.replace(/href="\/assets\//g, 'href="./assets/');
+
+  // Find and inline JS
+  const jsPath = path.join(distDir, 'index.js');
+  if (fs.existsSync(jsPath)) {
+    const jsContent = fs.readFileSync(jsPath, 'utf-8');
+    indexContent = indexContent.replace(
+      /<script\s+type="module"\s+crossorigin\s+src="\/index\.js"><\/script>/,
+      `<script type="module">${jsContent}</script>`,
+    );
+  }
+
+  // Find and inline CSS
+  const cssPath = path.join(distDir, 'index.css');
+  if (fs.existsSync(cssPath)) {
+    const cssContent = fs.readFileSync(cssPath, 'utf-8');
+    indexContent = indexContent.replace(
+      /<link\s+rel="stylesheet"\s+crossorigin\s+href="\/index\.css"\s*\/?>/,
+      `<style>${cssContent}</style>`,
+    );
+  }
+
+  // Save inlined version
   fs.writeFileSync(indexPath, indexContent);
-  console.log('✓ Fixed paths in index.html');
+  console.log('✓ Inlined JS and CSS into index.html');
 }
 
+// Copy files to Super Productivity assets
+if (fs.existsSync(path.join(distDir, 'plugin.js'))) {
+  fs.copyFileSync(path.join(distDir, 'plugin.js'), path.join(targetDir, 'plugin.js'));
+}
+if (fs.existsSync(indexPath)) {
+  fs.copyFileSync(indexPath, path.join(targetDir, 'index.html'));
+}
+if (fs.existsSync(path.join(distDir, 'index.js'))) {
+  fs.copyFileSync(path.join(distDir, 'index.js'), path.join(targetDir, 'index.js'));
+}
+if (fs.existsSync(path.join(distDir, 'index.css'))) {
+  fs.copyFileSync(path.join(distDir, 'index.css'), path.join(targetDir, 'index.css'));
+}
+
+console.log('✓ Copied files to Super Productivity assets');
 console.log('\n✅ Build complete! Files ready in dist/');

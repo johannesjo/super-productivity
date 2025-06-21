@@ -54,7 +54,6 @@ const App: Component = () => {
   return (
     <div class="app">
       <header class="header">
-        <h1>Procrastination Buster</h1>
         <Show when={!showIntro()}>
           <button
             class="back-button"
@@ -88,11 +87,11 @@ const App: Component = () => {
         </Show>
       </main>
 
-      <footer class="footer">
-        <p>
-          💡 Tip: Use <kbd>Ctrl+Shift+P</kbd> for quick access
-        </p>
-      </footer>
+      {/*<footer class="footer">*/}
+      {/*  <p>*/}
+      {/*    💡 Tip: Use <kbd>Ctrl+Shift+P</kbd> for quick access*/}
+      {/*  </p>*/}
+      {/*</footer>*/}
     </div>
   );
 };

@@ -3,16 +3,14 @@
 }
 body {
   margin: 0;
-  font-family: var(
-    --font-family,
+  font-family:
     -apple-system,
     BlinkMacSystemFont,
-    'Segoe UI',
+    Segoe UI,
     Roboto,
-    sans-serif
-  );
-  background: var(--background-color, #f5f5f5);
-  color: var(--text-color, #333);
+    sans-serif;
+  background: transparent;
+  color: var(--theme-text-color);
 }
 .app {
   min-height: 100vh;
@@ -29,21 +27,21 @@ body {
 .header h1 {
   margin: 0;
   font-size: 1.5rem;
-  color: var(--primary-color, #3f51b5);
+  color: var(--c-primary);
 }
 .back-button {
   padding: 0.5rem 1rem;
   background: transparent;
-  border: 1px solid var(--primary-color, #3f51b5);
-  color: var(--primary-color, #3f51b5);
-  border-radius: var(--border-radius, 4px);
+  border: 1px solid var(--c-primary);
+  color: var(--c-primary);
+  border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s;
   font-family: inherit;
 }
 .back-button:hover {
-  background: var(--primary-color, #3f51b5);
-  color: var(--primary-text-on-primary, white);
+  background: var(--c-primary);
+  color: #fff;
 }
 .main {
   flex: 1;
@@ -57,7 +55,7 @@ body {
   margin-bottom: 0.5rem;
 }
 .intro p {
-  color: var(--text-color-secondary, #666);
+  color: var(--theme-text-color-muted);
 }
 .blocker-grid {
   display: grid;
@@ -66,50 +64,50 @@ body {
   margin-top: 2rem;
 }
 .blocker-card {
-  background: var(--card-background, white);
+  background: var(--theme-card-bg);
   border: 2px solid transparent;
-  border-radius: var(--border-radius-card, 8px);
+  border-radius: 8px;
   padding: 1.5rem;
   cursor: pointer;
   transition: all 0.2s;
   text-align: left;
-  box-shadow: var(--card-shadow, 0 2px 4px rgba(0, 0, 0, 0.1));
+  box-shadow: 0 2px 4px #0000001a;
 }
 .blocker-card:hover {
-  border-color: var(--primary-color, #3f51b5);
+  border-color: var(--c-primary);
   transform: translateY(-2px);
-  box-shadow: var(--card-shadow-hover, 0 4px 8px rgba(0, 0, 0, 0.15));
+  box-shadow: 0 4px 8px #00000026;
 }
 .blocker-card h3 {
   margin: 0 0 0.5rem;
   font-size: 1.1rem;
-  color: var(--primary-color, #3f51b5);
+  color: var(--c-primary);
 }
 .blocker-card p {
   margin: 0;
   font-size: 0.9rem;
-  color: var(--text-color-secondary, #666);
+  color: var(--theme-text-color-muted);
 }
 .strategy-container {
   max-width: 600px;
   margin: 0 auto;
 }
 .selected-type {
-  background: var(--card-background, white);
+  background: var(--theme-card-bg);
   padding: 1.5rem;
-  border-radius: var(--border-radius-card, 8px);
+  border-radius: 8px;
   margin-bottom: 2rem;
   text-align: center;
-  box-shadow: var(--card-shadow, 0 2px 4px rgba(0, 0, 0, 0.1));
+  box-shadow: 0 2px 4px #0000001a;
 }
 .selected-type h2 {
   margin: 0 0 0.5rem;
-  color: var(--primary-color, #3f51b5);
+  color: var(--c-primary);
 }
 .emotion {
   margin: 0;
   font-style: italic;
-  color: var(--text-color-secondary, #666);
+  color: var(--theme-text-color-muted);
 }
 .strategy-list {
   display: flex;
@@ -117,10 +115,10 @@ body {
   gap: 1rem;
 }
 .strategy-item {
-  background: var(--card-background, white);
+  background: var(--theme-card-bg);
   padding: 1rem;
-  border-radius: var(--border-radius-card, 8px);
-  box-shadow: var(--card-shadow, 0 2px 4px rgba(0, 0, 0, 0.1));
+  border-radius: 8px;
+  box-shadow: 0 2px 4px #0000001a;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -137,7 +135,7 @@ body {
 .action-button {
   padding: 0.4rem 0.8rem;
   border: none;
-  border-radius: var(--border-radius, 4px);
+  border-radius: 4px;
   cursor: pointer;
   font-size: 0.85rem;
   transition: opacity 0.2s;
@@ -147,24 +145,25 @@ body {
   opacity: 0.8;
 }
 .action-button.task {
-  background: var(--primary-color, #3f51b5);
-  color: var(--primary-text-on-primary, white);
+  background: var(--c-primary);
+  color: #fff;
 }
 .action-button.pomodoro {
-  background: var(--warn-color, #ff6b6b);
-  color: var(--primary-text-on-warn, white);
+  background: var(--c-warn);
+  color: #fff;
 }
 .footer {
   margin-top: 2rem;
   text-align: center;
   font-size: 0.85rem;
-  color: var(--text-color-secondary, #666);
+  color: var(--theme-text-color-muted);
 }
 kbd {
-  background: var(--kbd-background, #eee);
-  color: var(--kbd-text, inherit);
+  background: var(--theme-select-hover-bg);
+  color: var(--theme-text-color);
   padding: 2px 6px;
   border-radius: 3px;
   font-family: monospace;
   font-size: 0.85em;
+  border: 1px solid var(--theme-divider-color);
 }
