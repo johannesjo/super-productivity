@@ -1,3 +1,49 @@
+## [13.1.1](https://github.com/johannesjo/super-productivity/compare/v13.1.0...v13.1.1) (2025-06-21)
+
+### Bug Fixes
+
+- "could not focus task" [#4618](https://github.com/johannesjo/super-productivity/issues/4618) ([2ab0720](https://github.com/johannesjo/super-productivity/commit/2ab0720126710c6a49541b520430076b40653cfa))
+- attempt to fix boards backlog issue ([c7a7cd2](https://github.com/johannesjo/super-productivity/commit/c7a7cd22b3e0b4ef5a41a96a223ba413c8afd3dd))
+- complete moment.js migration in tests and schedule components ([799b292](https://github.com/johannesjo/super-productivity/commit/799b2923de79c1f83f0e0d3ac6bb8f6288a44fba))
+- correct service test expectations for error handling ([bb526c8](https://github.com/johannesjo/super-productivity/commit/bb526c8d1563a877b7144c2462acae79888587ea))
+- customizer panel light theme ([af76d9a](https://github.com/johannesjo/super-productivity/commit/af76d9a232d1ea1ca33a78caba14ce563f85dd26))
+- defensive programming for tag-list.component [#4627](https://github.com/johannesjo/super-productivity/issues/4627) ([e24b5fc](https://github.com/johannesjo/super-productivity/commit/e24b5fc2bb2827f2067f161a482b2de729b6ce47))
+- error with dialog estimate ([0ac83ce](https://github.com/johannesjo/super-productivity/commit/0ac83ce43cbe9ae16941bc058f48f74efcde0780))
+- idle detection errors and system freezes after hibernation ([fc343b8](https://github.com/johannesjo/super-productivity/commit/fc343b801b87f48fd214740c670cef3f7d1d2615))
+- planned tasks not created without sync enabled [#4622](https://github.com/johannesjo/super-productivity/issues/4622) ([19be55a](https://github.com/johannesjo/super-productivity/commit/19be55a90dec6b01fc223b7d23b515572e1f40f6))
+- repeated tasks not automatically added to today [#4622](https://github.com/johannesjo/super-productivity/issues/4622) ([c2b1ea1](https://github.com/johannesjo/super-productivity/commit/c2b1ea146bdb61f13c18b083313de7c7b96714ae))
+- resolve "Unable to getNewestPossibleDueDate()" test failures ([612c7de](https://github.com/johannesjo/super-productivity/commit/612c7dee785bf57fc973526a97a19165f2616c73))
+- resolve time-dependent E2E test failures for scheduled reminders ([64f2ab6](https://github.com/johannesjo/super-productivity/commit/64f2ab6cd06ccca9f8db13b4d213ce52d1034b5a))
+- **schedule:** date being shown in schedule event title ([07b17b8](https://github.com/johannesjo/super-productivity/commit/07b17b881542ddf6eb67725cd169752f7442aaa9))
+- **sync:** add missing write lock circumvention ([d36772f](https://github.com/johannesjo/super-productivity/commit/d36772fd3951f6eb6269e2b92472466f8a4397e4))
+- **sync:** db lock error ([5f8775f](https://github.com/johannesjo/super-productivity/commit/5f8775f9536e9c0e690e8668759aace8ca7f6a91))
+- tags not added for repeatable tasks [#4606](https://github.com/johannesjo/super-productivity/issues/4606) ([7cc5182](https://github.com/johannesjo/super-productivity/commit/7cc5182d308dd9fd31918b972117a88787ff2761))
+- update electron-log to fix deprecated session API warnings ([4196357](https://github.com/johannesjo/super-productivity/commit/4196357b503cbea98ade564cdf23e0999a450635))
+
+### Features
+
+- add breathing circle ani for flowtime ([3801ef9](https://github.com/johannesjo/super-productivity/commit/3801ef917a1847767ce420fab667f775d9dc9ca3))
+- add idle handling for wayland ([8db186d](https://github.com/johannesjo/super-productivity/commit/8db186de9182ce663495b64c5f93828a3a3d29f2))
+- add lamport stamp to sync conflict dialog ([4134c3b](https://github.com/johannesjo/super-productivity/commit/4134c3b9b076eb4845cff2c2abe8840c377494f9))
+- css migration fixes ([625b612](https://github.com/johannesjo/super-productivity/commit/625b612a82f5c3c3b4e02607e7e2f69ace6d3885))
+- improve finish day button primary logic ([9726701](https://github.com/johannesjo/super-productivity/commit/9726701f9b80373f79af88cb0d398a1f042b6b5e))
+- improve idle handling ([c71a7d4](https://github.com/johannesjo/super-productivity/commit/c71a7d480f017e4035e28c2a9a7ab2233d056245))
+- improve no tasks message if there are done tasks ([5d831d0](https://github.com/johannesjo/super-productivity/commit/5d831d02c047e6f6ff78efe32eb9fccb455e3986))
+- improve no tasks planned styling ([9968df3](https://github.com/johannesjo/super-productivity/commit/9968df3306fe190c17eaae048e7ea3583b89a53e))
+- improve wayland compatability ([0848f60](https://github.com/johannesjo/super-productivity/commit/0848f6015d4fef8fef532c7f9703969ef627527c))
+- **issue:** improve display logic ([0bd5a0b](https://github.com/johannesjo/super-productivity/commit/0bd5a0b93ec58295061276d959ae1e3e350b0beb))
+- make sure today tag is never added to a task ([d50abe2](https://github.com/johannesjo/super-productivity/commit/d50abe259be1b5a572d7856dbbe7cf33b8b1e20c))
+- **markdownInsert:** add markdown insert to task feature ([2683448](https://github.com/johannesjo/super-productivity/commit/26834481bfcc8f65a3284f18fce0cc41f82a0fdb))
+- **markdownInsert:** improve markdown insert ([90d97b1](https://github.com/johannesjo/super-productivity/commit/90d97b18adfe72b8bdc91897a77e5b717521575f))
+- remove improvement banner as it is not working well ([3f48914](https://github.com/johannesjo/super-productivity/commit/3f48914b02556850f7a3f71ccbda8b9fb6123b15))
+- replace moment.js with native date ([0080154](https://github.com/johannesjo/super-productivity/commit/0080154ca5996674730f209d0f3f50599455ad9b))
+- replace scss variables with css variables ([0ad8135](https://github.com/johannesjo/super-productivity/commit/0ad8135e478d01e3b7545a07b09e97327db24b16))
+
+### Performance Improvements
+
+- add OnPush change detection to components ([4e235ef](https://github.com/johannesjo/super-productivity/commit/4e235efb3f0937eedfccc7c0cda1804f10f46b8a))
+- lazy load shepherd.js and canvas-confetti libraries ([dd0dbda](https://github.com/johannesjo/super-productivity/commit/dd0dbda1ded96e250830abd9b3d5fc1af69775e8))
+
 # [13.1.0](https://github.com/johannesjo/super-productivity/compare/v13.1.0-rc.0...v13.1.0) (2025-06-17)
 
 ### Bug Fixes
