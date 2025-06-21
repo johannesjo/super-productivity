@@ -1,3 +1,9 @@
+## [13.1.2](https://github.com/johannesjo/super-productivity/compare/v13.1.1...v13.1.2) (2025-06-21)
+
+### Bug Fixes
+
+- remove duplicate snap plugs causing build failure ([6746a7f](https://github.com/johannesjo/super-productivity/commit/6746a7f2bb862ac2526ba5057f916ca532922ee9))
+
 ## [13.1.1](https://github.com/johannesjo/super-productivity/compare/v13.1.0...v13.1.1) (2025-06-21)
 
 ### Bug Fixes
