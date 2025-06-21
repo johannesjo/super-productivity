@@ -61,6 +61,19 @@ snap:
   autoStart: true
   base: core22
   confinement: strict
+  plugs:
+    - default
+    - desktop
+    - desktop-legacy
+    - wayland
+    - x11
+    - unity7
+    - home
+    - network
+    - browser-support
+    - password-manager-service
+    - system-observe
+    - login-session-observe
 
 mac:
   appId: com.super-productivity.app
