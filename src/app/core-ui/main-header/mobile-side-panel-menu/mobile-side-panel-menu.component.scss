@@ -2,83 +2,11 @@
   display: contents;
 }
 
-.mobile-menu-trigger {
-  display: none;
+// Active button styles
+button.active {
+  background-color: var(--theme-sidebar-bg);
 
-  @media (max-width: 479px) {
-    display: block;
-    margin-left: 6px;
-  }
-}
-
-.mobile-side-panel-menu {
-  position: fixed;
-  top: 60px;
-  right: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  z-index: 10;
-  opacity: 0;
-  transform: translateY(-10px);
-  pointer-events: none;
-  transition:
-    opacity 0.2s ease,
-    transform 0.2s ease;
-
-  &.isVisibleMobile {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
-  }
-
-  .menu-item {
-    &.active {
-      background-color: var(--mat-mdc-fab-color);
-    }
-
-    &.isCustomized {
-      position: relative;
-
-      &:after {
-        content: '';
-        position: absolute;
-        top: 2px;
-        right: 2px;
-        width: 8px;
-        height: 8px;
-        background-color: var(--accent-color);
-        border-radius: 50%;
-      }
-    }
-
-    &.plugin-btn {
-      position: relative;
-
-      &.active {
-        background-color: transparent;
-
-        &::after {
-          border-radius: 4px;
-          box-shadow: 0px -2px 3px 0px var(--theme-separator-alpha);
-          background: var(--theme-sidebar-bg);
-          content: '';
-          width: 100%;
-          position: absolute;
-          left: 0;
-          top: 0;
-          bottom: 0;
-          z-index: -1;
-        }
-
-        plugin-icon {
-          transform: rotate(45deg);
-        }
-      }
-    }
-
-    plugin-icon {
-      transition: all 0.2s ease;
-    }
+  &.isCustomized {
+    background-color: var(--c-accent);
   }
 }

@@ -35,86 +35,69 @@ import { BreakpointObserver } from '@angular/cdk/layout';
     PluginIconComponent,
   ],
   template: `
-    <!-- Mobile Trigger Button -->
-    @if (showMobileTrigger()) {
+    <div class="mobile-dropdown-wrapper">
       <button
         (click)="toggleMenu()"
-        class="mobile-menu-trigger"
-        color=""
-        mat-icon-button
+        mat-mini-fab
         [matTooltip]="T.MH.SIDE_PANEL_MENU | translate"
       >
-        @if (!isShowMobileMenu()) {
-          <mat-icon>view_sidebar</mat-icon>
-        }
-        @if (isShowMobileMenu()) {
-          <mat-icon>close</mat-icon>
-        }
+        <mat-icon>{{ isShowMobileMenu() ? 'close' : 'view_sidebar' }}</mat-icon>
       </button>
-    }
 
-    <!-- Mobile Menu Container -->
-    <div
-      class="mobile-side-panel-menu"
-      [class.isVisibleMobile]="isShowMobileMenu()"
-    >
-      <!-- Plugin buttons -->
-      @for (button of sidePanelButtons(); track button.pluginId) {
+      <div
+        class="mobile-dropdown"
+        [class.isVisible]="isShowMobileMenu()"
+      >
+        <!-- Plugin buttons -->
+        @for (button of sidePanelButtons(); track button.pluginId) {
+          <button
+            mat-mini-fab
+            [matTooltip]="button.label"
+            (click)="onPluginButtonClick(button)"
+            [class.active]="activePluginId() === button.pluginId && isShowPluginPanel()"
+            [disabled]="!isWorkView()"
+          >
+            <plugin-icon
+              [pluginId]="button.pluginId"
+              [fallbackIcon]="button.icon || 'extension'"
+            ></plugin-icon>
+          </button>
+        }
+
+        <!-- Task View Customizer -->
         <button
-          color=""
           mat-mini-fab
-          [matTooltip]="button.label"
-          (click)="onPluginButtonClick(button)"
-          class="menu-item plugin-btn"
-          [class.active]="activePluginId() === button.pluginId && isShowPluginPanel()"
-          [disabled]="!isWorkView()"
+          [class.active]="isShowTaskViewCustomizerPanel()"
+          [class.isCustomized]="taskViewCustomizerService.isCustomized()"
+          [disabled]="!isRouteWithSidePanel()"
+          (click)="toggleTaskViewCustomizer()"
+          [matTooltip]="T.GCF.KEYBOARD.TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL | translate"
         >
-          <plugin-icon
-            [pluginId]="button.pluginId"
-            [fallbackIcon]="button.icon || 'extension'"
-          ></plugin-icon>
+          <mat-icon>filter_list</mat-icon>
         </button>
-      }
 
-      <!-- Task View Customizer -->
-      <button
-        mat-mini-fab
-        class="menu-item"
-        [class.active]="isShowTaskViewCustomizerPanel()"
-        color=""
-        [class.isCustomized]="taskViewCustomizerService.isCustomized()"
-        [disabled]="!isRouteWithSidePanel()"
-        (click)="toggleTaskViewCustomizer()"
-        [matTooltip]="T.GCF.KEYBOARD.TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL | translate"
-      >
-        <mat-icon>filter_list</mat-icon>
-      </button>
+        <!-- Issue Panel -->
+        <button
+          mat-mini-fab
+          [class.active]="isShowIssuePanel()"
+          [disabled]="!isRouteWithSidePanel()"
+          (click)="toggleIssuePanel()"
+          [matTooltip]="T.MH.TOGGLE_SHOW_ISSUE_PANEL | translate"
+        >
+          <mat-icon>playlist_add</mat-icon>
+        </button>
 
-      <!-- Issue Panel -->
-      <button
-        mat-mini-fab
-        class="menu-item"
-        color=""
-        [class.active]="isShowIssuePanel()"
-        [disabled]="!isRouteWithSidePanel()"
-        (click)="toggleIssuePanel()"
-        [matTooltip]="T.MH.TOGGLE_SHOW_ISSUE_PANEL | translate"
-      >
-        <mat-icon>playlist_add</mat-icon>
-      </button>
-
-      <!-- Notes -->
-      <button
-        mat-mini-fab
-        class="menu-item"
-        color=""
-        [class.active]="isShowNotes()"
-        [disabled]="!isRouteWithSidePanel()"
-        (click)="toggleNotes()"
-        [matTooltip]="T.MH.TOGGLE_SHOW_NOTES | translate"
-      >
-        <mat-icon>comment</mat-icon>
-      </button>
+        <!-- Notes -->
+        <button
+          mat-mini-fab
+          [class.active]="isShowNotes()"
+          [disabled]="!isRouteWithSidePanel()"
+          (click)="toggleNotes()"
+          [matTooltip]="T.MH.TOGGLE_SHOW_NOTES | translate"
+        >
+          <mat-icon>comment</mat-icon>
+        </button>
+      </div>
     </div>
   `,
   styleUrls: ['./mobile-side-panel-menu.component.scss'],
@@ -133,13 +116,6 @@ export class MobileSidePanelMenuComponent {
 
   // State signals
   readonly isShowMobileMenu = signal(false);
-
-  // Media query computed signal
-  private _isXs$ = this.breakpointObserver.observe('(max-width: 600px)');
-  private _isXs = toSignal(this._isXs$.pipe(map((result) => result.matches)), {
-    initialValue: false,
-  });
-  readonly showMobileTrigger = computed(() => this._isXs());
 
   // Convert observables to signals
   readonly isRouteWithSidePanel = toSignal(

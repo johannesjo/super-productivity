@@ -17,10 +17,8 @@ import { PomodoroService } from '../../features/pomodoro/pomodoro.service';
 import { T } from '../../t.const';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { filter, map, startWith, switchMap } from 'rxjs/operators';
-import { Observable, of, Subscription } from 'rxjs';
+import { of, Subscription } from 'rxjs';
 import { WorkContextService } from '../../features/work-context/work-context.service';
-import { Tag } from '../../features/tag/tag.model';
-import { Project } from '../../features/project/project.model';
 import { expandFadeHorizontalAnimation } from '../../ui/animations/expand.ani';
 import { SimpleCounterService } from '../../features/simple-counter/simple-counter.service';
 import { SimpleCounter } from '../../features/simple-counter/simple-counter.model';
@@ -121,37 +119,62 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
   readonly circleSvg = viewChild<ElementRef>('circleSvg');
 
-  currentTaskContext$: Observable<Project | Tag | null> =
-    this.taskService.currentTaskParentOrCurrent$.pipe(
-      filter((ct) => !!ct),
-      switchMap((currentTask) =>
-        this.workContextService.activeWorkContextId$.pipe(
-          filter((activeWorkContextId) => !!activeWorkContextId),
-          switchMap((activeWorkContextId) => {
-            if (
-              currentTask.projectId === activeWorkContextId ||
-              currentTask.tagIds.includes(activeWorkContextId as string)
-            ) {
-              return of(null);
-            }
-            return currentTask.projectId
-              ? this.projectService.getByIdOnce$(currentTask.projectId)
-              : of(null);
-          }),
-        ),
+  private _currentTaskContext$ = this.taskService.currentTaskParentOrCurrent$.pipe(
+    filter((ct) => !!ct),
+    switchMap((currentTask) =>
+      this.workContextService.activeWorkContextId$.pipe(
+        filter((activeWorkContextId) => !!activeWorkContextId),
+        switchMap((activeWorkContextId) => {
+          if (
+            currentTask.projectId === activeWorkContextId ||
+            currentTask.tagIds.includes(activeWorkContextId as string)
+          ) {
+            return of(null);
+          }
+          return currentTask.projectId
+            ? this.projectService.getByIdOnce$(currentTask.projectId)
+            : of(null);
+        }),
       ),
-    );
+    ),
+  );
 
-  isRouteWithSidePanel$: Observable<boolean> = this._router.events.pipe(
+  currentTaskContext = toSignal(this._currentTaskContext$);
+
+  private _isRouteWithSidePanel$ = this._router.events.pipe(
     filter((event: any) => event instanceof NavigationEnd),
     map((event) => !!event.urlAfterRedirects.match(/(tasks|daily-summary)$/)),
     startWith(!!this._router.url.match(/(tasks|daily-summary)$/)),
   );
-  isRouteWithRightPanel$: Observable<boolean> = this._router.events.pipe(
-    filter((event: any) => event instanceof NavigationEnd),
-    map((event) => !!event.urlAfterRedirects.match(/(tasks)$/)),
-    startWith(!!this._router.url.match(/(tasks)$/)),
+
+  isRouteWithSidePanel = toSignal(this._isRouteWithSidePanel$, { initialValue: false });
+
+  // Convert more observables to signals
+  activeWorkContextTypeAndId = toSignal(
+    this.workContextService.activeWorkContextTypeAndId$,
   );
+  activeWorkContextTitle = toSignal(this.workContextService.activeWorkContextTitle$);
+  isNavAlwaysVisible = toSignal(this.layoutService.isNavAlwaysVisible$);
+  currentTask = toSignal(this.taskService.currentTask$);
+  currentTaskId = toSignal(this.taskService.currentTaskId$);
+  pomodoroIsEnabled = toSignal(this.pomodoroService.isEnabled$);
+  pomodoroIsBreak = toSignal(this.pomodoroService.isBreak$);
+  pomodoroCurrentSessionTime = toSignal(this.pomodoroService.currentSessionTime$);
+  enabledSimpleCounters = toSignal(this.simpleCounterService.enabledSimpleCounters$, {
+    initialValue: [],
+  });
+  isShowTaskViewCustomizerPanel = toSignal(
+    this.layoutService.isShowTaskViewCustomizerPanel$,
+  );
+  isShowIssuePanel = toSignal(this.layoutService.isShowIssuePanel$);
+  isShowNotes = toSignal(this.layoutService.isShowNotes$);
+  syncIsEnabledAndReady = toSignal(this.syncWrapperService.isEnabledAndReady$);
+  syncState = toSignal(this.syncWrapperService.syncState$);
+  isSyncInProgress = toSignal(this.syncWrapperService.isSyncInProgress$);
+  focusModeConfig = toSignal(
+    this.globalConfigService.cfg$.pipe(map((cfg) => cfg?.focusMode)),
+  );
+  isOnline = toSignal(isOnline$);
 
   private _subs: Subscription = new Subscription();
 
@@ -220,6 +243,4 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   get kb(): KeyboardConfig {
     return (this._configService.cfg?.keyboard as KeyboardConfig) || {};
   }
-
-  protected readonly isOnline$ = isOnline$;
 }

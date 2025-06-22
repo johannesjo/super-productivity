@@ -283,120 +283,68 @@ button.isActive2 {
   }
 }
 
-.simple-counter-mobile-trigger {
-  margin-left: var(--s);
-}
-
-.simple-counter-buttons-outer-wrapper {
+// Mobile dropdown wrapper - shared by simple counter and side panel
+.mobile-dropdown-wrapper {
   position: relative;
 }
 
-.simple-counter-buttons {
+// Mobile dropdown - shared style
+.mobile-dropdown {
+  position: absolute;
   display: flex;
-
-  @include mq(xs) {
-    // Desktop mode - horizontal layout
-    flex-direction: row;
-    position: static;
-    pointer-events: all;
-
-    simple-counter-button {
-      transition: none;
-      transform: none;
-      opacity: 1;
-      position: static;
-      margin-top: 0;
-      margin-left: var(--s-quarter);
-
-      @include mq(xs) {
-        margin-left: var(--s);
-      }
-    }
-  }
-
-  @include mq(xs, max) {
-    // Mobile mode - vertical dropdown
-    position: absolute;
-    transition: var(--transition-standard);
-    top: 100%;
-    flex-direction: column;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 2;
-    pointer-events: none;
-
-    &.isVisibleMobile {
-      pointer-events: all;
-    }
-
-    simple-counter-button {
-      transition: var(--transition-standard);
-      transform: translateY(-100%);
-      opacity: 0;
-      position: relative;
-      z-index: 2;
-      margin-top: var(--s);
-      margin-left: 0;
-
-      &:nth-child(2) {
-        transform: translateY(-200%);
-      }
-      &:nth-child(3) {
-        transform: translateY(-300%);
-      }
-      &:nth-child(4) {
-        transform: translateY(-400%);
-      }
-      &:nth-child(5) {
-        transform: translateY(-500%);
-      }
-      &:nth-child(6) {
-        transform: translateY(-600%);
-      }
-      &:nth-child(7) {
-        transform: translateY(-700%);
-      }
-    }
-
-    &.isVisibleMobile simple-counter-button {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-}
-
-.toggle-notes-btn {
-  position: relative;
-  overflow: visible !important;
-
-  &.isActive.isRouteWithRightPanel::after {
-    content: '';
-    width: 100%;
-    position: absolute;
-    left: 1px;
-    top: 0;
-    bottom: -5px;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    z-index: -1;
-    box-shadow: 0px -2px 3px 0px var(--theme-separator-alpha);
-
-    background: var(--theme-sidebar-bg);
-    //border-color: var(--theme-extra-border-color);
-  }
-
-  @include mq(xxxs, max) {
-    &:disabled {
-      display: none;
-    }
-  }
-}
-
-.note-ico {
   transition: var(--transition-standard);
+  top: 100%;
+  flex-direction: column;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  pointer-events: none;
 
-  .toggle-notes-btn.isActive & {
-    transform: rotate(45deg);
+  &.isVisible {
+    pointer-events: all;
+  }
+
+  simple-counter-button,
+  button {
+    transition: var(--transition-standard);
+    transform: translateY(-100%);
+    opacity: 0;
+    position: relative;
+    z-index: 2;
+    margin-top: var(--s);
+    margin-left: 0;
+
+    @for $i from 2 through 7 {
+      &:nth-child(#{$i}) {
+        transform: translateY(#{$i * -100%});
+      }
+    }
+  }
+
+  &.isVisible simple-counter-button,
+  &.isVisible button {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+// Desktop inline buttons - common style
+simple-counter-button {
+  @include mq(xs) {
+    margin-left: var(--s-quarter);
+  }
+}
+
+// Panel buttons
+.panel-btn {
+  position: relative;
+
+  &.isActive {
+    background-color: var(--theme-sidebar-bg);
+
+    &.isCustomized {
+      background-color: var(--c-accent);
+    }
   }
 }
 
