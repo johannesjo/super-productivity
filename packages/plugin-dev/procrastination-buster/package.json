@@ -4,6 +4,7 @@
   "description": "Procrastination Buster plugin for Super Productivity",
   "scripts": {
     "dev": "vite",
+    "watch": "vite build --watch",
     "build": "vite build && node scripts/post-build.js",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",

@@ -55,22 +55,24 @@ const indexPath = path.join(distDir, 'index.html');
 if (fs.existsSync(indexPath)) {
   let indexContent = fs.readFileSync(indexPath, 'utf-8');
 
-  // Find and inline JS
+  // Find and inline JS - handle both absolute and relative paths
   const jsPath = path.join(distDir, 'index.js');
   if (fs.existsSync(jsPath)) {
     const jsContent = fs.readFileSync(jsPath, 'utf-8');
+    // Match various script tag formats
     indexContent = indexContent.replace(
-      /<script\s+type="module"\s+crossorigin\s+src="\/index\.js"><\/script>/,
+      /<script\s+type="module"[^>]*\s+src=["']([^"']*index\.js)["'][^>]*><\/script>/i,
       `<script type="module">${jsContent}</script>`,
     );
   }
 
-  // Find and inline CSS
+  // Find and inline CSS - handle both absolute and relative paths
   const cssPath = path.join(distDir, 'index.css');
   if (fs.existsSync(cssPath)) {
     const cssContent = fs.readFileSync(cssPath, 'utf-8');
+    // Match various link tag formats
     indexContent = indexContent.replace(
-      /<link\s+rel="stylesheet"\s+crossorigin\s+href="\/index\.css"\s*\/?>/,
+      /<link\s+rel="stylesheet"[^>]*\s+href=["']([^"']*index\.css)["'][^>]*\/?>/i,
       `<style>${cssContent}</style>`,
     );
   }

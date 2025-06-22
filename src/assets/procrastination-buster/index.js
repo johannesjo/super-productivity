@@ -1,230 +1,277 @@
 (function () {
   const t = document.createElement('link').relList;
   if (t && t.supports && t.supports('modulepreload')) return;
-  for (const s of document.querySelectorAll('link[rel="modulepreload"]')) i(s);
+  for (const s of document.querySelectorAll('link[rel="modulepreload"]')) r(s);
   new MutationObserver((s) => {
-    for (const r of s)
-      if (r.type === 'childList')
-        for (const o of r.addedNodes)
-          o.tagName === 'LINK' && o.rel === 'modulepreload' && i(o);
+    for (const i of s)
+      if (i.type === 'childList')
+        for (const l of i.addedNodes)
+          l.tagName === 'LINK' && l.rel === 'modulepreload' && r(l);
   }).observe(document, { childList: !0, subtree: !0 });
   function n(s) {
-    const r = {};
+    const i = {};
     return (
-      s.integrity && (r.integrity = s.integrity),
-      s.referrerPolicy && (r.referrerPolicy = s.referrerPolicy),
+      s.integrity && (i.integrity = s.integrity),
+      s.referrerPolicy && (i.referrerPolicy = s.referrerPolicy),
       s.crossOrigin === 'use-credentials'
-        ? (r.credentials = 'include')
+        ? (i.credentials = 'include')
         : s.crossOrigin === 'anonymous'
-          ? (r.credentials = 'omit')
-          : (r.credentials = 'same-origin'),
-      r
+          ? (i.credentials = 'omit')
+          : (i.credentials = 'same-origin'),
+      i
     );
   }
-  function i(s) {
+  function r(s) {
     if (s.ep) return;
     s.ep = !0;
-    const r = n(s);
-    fetch(s.href, r);
+    const i = n(s);
+    fetch(s.href, i);
   }
 })();
-const ce = !1,
-  ae = (e, t) => e === t,
-  fe = Symbol('solid-track'),
-  M = { equals: ae };
-let ue = ne;
+const le = !0,
+  ce = (e, t) => e === t,
+  ae = Symbol('solid-track'),
+  ue = Symbol('solid-dev-component'),
+  R = { equals: ce };
+let fe = te;
 const x = 1,
-  R = 2,
-  Q = { owned: null, cleanups: null, context: null, owner: null };
-var h = null;
+  U = 2,
+  de = {};
+var d = null;
 let G = null,
-  de = null,
-  d = null,
+  he = null,
+  h = null,
   p = null,
-  v = null,
+  A = null,
   q = 0;
-function B(e, t) {
-  const n = d,
-    i = h,
+function D(e, t) {
+  const n = h,
+    r = d,
     s = e.length === 0,
-    r = t === void 0 ? i : t,
-    o = s ? Q : { owned: null, cleanups: null, context: r ? r.context : null, owner: r },
-    l = s ? e : () => e(() => T(() => I(o)));
-  (h = o), (d = null);
+    i = t === void 0 ? r : t,
+    l = s
+      ? { owned: null, cleanups: null, context: null, owner: null }
+      : { owned: null, cleanups: null, context: i ? i.context : null, owner: i },
+    o = s
+      ? () =>
+          e(() => {
+            throw new Error(
+              'Dispose method must be an explicit argument to createRoot function',
+            );
+          })
+      : () => e(() => _(() => I(l)));
+  (d = l), (h = null);
   try {
-    return O(l, !0);
+    return P(o, !0);
   } finally {
-    (d = n), (h = i);
+    (h = n), (d = r);
   }
 }
 function W(e, t) {
-  t = t ? Object.assign({}, M, t) : M;
+  t = t ? Object.assign({}, R, t) : R;
   const n = {
-      value: e,
-      observers: null,
-      observerSlots: null,
-      comparator: t.equals || void 0,
-    },
-    i = (s) => (typeof s == 'function' && (s = s(n.value)), z(n, s));
-  return [Z.bind(n), i];
+    value: e,
+    observers: null,
+    observerSlots: null,
+    comparator: t.equals || void 0,
+  };
+  t.name && (n.name = t.name), t.internal ? (n.internal = !0) : me(n);
+  const r = (s) => (typeof s == 'function' && (s = s(n.value)), z(n, s));
+  return [Z.bind(n), r];
 }
-function V(e, t, n) {
-  const i = ee(e, t, !1, x);
-  F(i);
+function F(e, t, n) {
+  const r = Y(e, t, !1, x, n);
+  O(r);
 }
-function D(e, t, n) {
-  n = n ? Object.assign({}, M, n) : M;
-  const i = ee(e, t, !0, 0);
+function M(e, t, n) {
+  n = n ? Object.assign({}, R, n) : R;
+  const r = Y(e, t, !0, 0, n);
   return (
-    (i.observers = null),
-    (i.observerSlots = null),
-    (i.comparator = n.equals || void 0),
-    F(i),
-    Z.bind(i)
+    (r.observers = null),
+    (r.observerSlots = null),
+    (r.comparator = n.equals || void 0),
+    O(r),
+    Z.bind(r)
   );
 }
-function T(e) {
-  if (d === null) return e();
-  const t = d;
-  d = null;
+function _(e) {
+  if (h === null) return e();
+  const t = h;
+  h = null;
   try {
     return e();
   } finally {
-    d = t;
+    h = t;
   }
 }
-function he(e) {
-  return h === null || (h.cleanups === null ? (h.cleanups = [e]) : h.cleanups.push(e)), e;
+function pe(e) {
+  return (
+    d === null
+      ? console.warn(
+          'cleanups created outside a `createRoot` or `render` will never be run',
+        )
+      : d.cleanups === null
+        ? (d.cleanups = [e])
+        : d.cleanups.push(e),
+    e
+  );
+}
+function ge(e, t) {
+  const n = Y(() => _(() => (Object.assign(e, { [ue]: !0 }), e(t))), void 0, !0, 0);
+  return (
+    (n.props = t),
+    (n.observers = null),
+    (n.observerSlots = null),
+    (n.name = e.name),
+    (n.component = e),
+    O(n),
+    n.tValue !== void 0 ? n.tValue : n.value
+  );
+}
+function me(e) {
+  d && (d.sourceMap ? d.sourceMap.push(e) : (d.sourceMap = [e]), (e.graph = d));
 }
 function Z() {
   if (this.sources && this.state)
-    if (this.state === x) F(this);
+    if (this.state === x) O(this);
     else {
       const e = p;
-      (p = null), O(() => U(this), !1), (p = e);
+      (p = null), P(() => j(this), !1), (p = e);
     }
-  if (d) {
+  if (h) {
     const e = this.observers ? this.observers.length : 0;
-    d.sources
-      ? (d.sources.push(this), d.sourceSlots.push(e))
-      : ((d.sources = [this]), (d.sourceSlots = [e])),
+    h.sources
+      ? (h.sources.push(this), h.sourceSlots.push(e))
+      : ((h.sources = [this]), (h.sourceSlots = [e])),
       this.observers
-        ? (this.observers.push(d), this.observerSlots.push(d.sources.length - 1))
-        : ((this.observers = [d]), (this.observerSlots = [d.sources.length - 1]));
+        ? (this.observers.push(h), this.observerSlots.push(h.sources.length - 1))
+        : ((this.observers = [h]), (this.observerSlots = [h.sources.length - 1]));
   }
   return this.value;
 }
 function z(e, t, n) {
-  let i = e.value;
+  let r = e.value;
   return (
-    (!e.comparator || !e.comparator(i, t)) &&
+    (!e.comparator || !e.comparator(r, t)) &&
       ((e.value = t),
       e.observers &&
         e.observers.length &&
-        O(() => {
+        P(() => {
           for (let s = 0; s < e.observers.length; s += 1) {
-            const r = e.observers[s],
-              o = G && G.running;
-            o && G.disposed.has(r),
-              (o ? !r.tState : !r.state) &&
-                (r.pure ? p.push(r) : v.push(r), r.observers && se(r)),
-              o || (r.state = x);
+            const i = e.observers[s],
+              l = G && G.running;
+            l && G.disposed.has(i),
+              (l ? !i.tState : !i.state) &&
+                (i.pure ? p.push(i) : A.push(i), i.observers && ne(i)),
+              l || (i.state = x);
           }
-          if (p.length > 1e6) throw ((p = []), new Error());
+          if (p.length > 1e6)
+            throw (
+              ((p = []),
+              le ? new Error('Potential Infinite Loop Detected.') : new Error())
+            );
         }, !1)),
     t
   );
 }
-function F(e) {
+function O(e) {
   if (!e.fn) return;
   I(e);
   const t = q;
-  pe(e, e.value, t);
+  we(e, e.value, t);
 }
-function pe(e, t, n) {
-  let i;
-  const s = h,
-    r = d;
-  d = h = e;
+function we(e, t, n) {
+  let r;
+  const s = d,
+    i = h;
+  h = d = e;
   try {
-    i = e.fn(t);
-  } catch (o) {
+    r = e.fn(t);
+  } catch (l) {
     return (
       e.pure && ((e.state = x), e.owned && e.owned.forEach(I), (e.owned = null)),
       (e.updatedAt = n + 1),
-      ie(o)
+      se(l)
     );
   } finally {
-    (d = r), (h = s);
+    (h = i), (d = s);
   }
   (!e.updatedAt || e.updatedAt <= n) &&
-    (e.updatedAt != null && 'observers' in e ? z(e, i) : (e.value = i),
+    (e.updatedAt != null && 'observers' in e ? z(e, r) : (e.value = r),
     (e.updatedAt = n));
 }
-function ee(e, t, n, i = x, s) {
-  const r = {
+function Y(e, t, n, r = x, s) {
+  const i = {
     fn: e,
-    state: i,
+    state: r,
     updatedAt: null,
     owned: null,
     sources: null,
     sourceSlots: null,
     cleanups: null,
     value: t,
-    owner: h,
-    context: h ? h.context : null,
+    owner: d,
+    context: d ? d.context : null,
     pure: n,
   };
-  return h === null || (h !== Q && (h.owned ? h.owned.push(r) : (h.owned = [r]))), r;
+  return (
+    d === null
+      ? console.warn(
+          'computations created outside a `createRoot` or `render` will never be disposed',
+        )
+      : d !== de && (d.owned ? d.owned.push(i) : (d.owned = [i])),
+    s && s.name && (i.name = s.name),
+    i
+  );
 }
-function te(e) {
+function ee(e) {
   if (e.state === 0) return;
-  if (e.state === R) return U(e);
-  if (e.suspense && T(e.suspense.inFallback)) return e.suspense.effects.push(e);
+  if (e.state === U) return j(e);
+  if (e.suspense && _(e.suspense.inFallback)) return e.suspense.effects.push(e);
   const t = [e];
   for (; (e = e.owner) && (!e.updatedAt || e.updatedAt < q); ) e.state && t.push(e);
   for (let n = t.length - 1; n >= 0; n--)
-    if (((e = t[n]), e.state === x)) F(e);
-    else if (e.state === R) {
-      const i = p;
-      (p = null), O(() => U(e, t[0]), !1), (p = i);
+    if (((e = t[n]), e.state === x)) O(e);
+    else if (e.state === U) {
+      const r = p;
+      (p = null), P(() => j(e, t[0]), !1), (p = r);
     }
 }
-function O(e, t) {
+function P(e, t) {
   if (p) return e();
   let n = !1;
-  t || (p = []), v ? (n = !0) : (v = []), q++;
+  t || (p = []), A ? (n = !0) : (A = []), q++;
   try {
-    const i = e();
-    return ge(n), i;
-  } catch (i) {
-    n || (v = null), (p = null), ie(i);
+    const r = e();
+    return ye(n), r;
+  } catch (r) {
+    n || (A = null), (p = null), se(r);
   }
 }
-function ge(e) {
-  if ((p && (ne(p), (p = null)), e)) return;
-  const t = v;
-  (v = null), t.length && O(() => ue(t), !1);
+function ye(e) {
+  if ((p && (te(p), (p = null)), e)) return;
+  const t = A;
+  (A = null), t.length && P(() => fe(t), !1);
 }
-function ne(e) {
-  for (let t = 0; t < e.length; t++) te(e[t]);
+function te(e) {
+  for (let t = 0; t < e.length; t++) ee(e[t]);
 }
-function U(e, t) {
+function j(e, t) {
   e.state = 0;
   for (let n = 0; n < e.sources.length; n += 1) {
-    const i = e.sources[n];
-    if (i.sources) {
-      const s = i.state;
+    const r = e.sources[n];
+    if (r.sources) {
+      const s = r.state;
       s === x
-        ? i !== t && (!i.updatedAt || i.updatedAt < q) && te(i)
-        : s === R && U(i, t);
+        ? r !== t && (!r.updatedAt || r.updatedAt < q) && ee(r)
+        : s === U && j(r, t);
     }
   }
 }
-function se(e) {
+function ne(e) {
   for (let t = 0; t < e.observers.length; t += 1) {
     const n = e.observers[t];
-    n.state || ((n.state = R), n.pure ? p.push(n) : v.push(n), n.observers && se(n));
+    n.state || ((n.state = U), n.pure ? p.push(n) : A.push(n), n.observers && ne(n));
   }
 }
 function I(e) {
@@ -232,12 +279,12 @@ function I(e) {
   if (e.sources)
     for (; e.sources.length; ) {
       const n = e.sources.pop(),
-        i = e.sourceSlots.pop(),
+        r = e.sourceSlots.pop(),
         s = n.observers;
       if (s && s.length) {
-        const r = s.pop(),
-          o = n.observerSlots.pop();
-        i < s.length && ((r.sourceSlots[o] = i), (s[i] = r), (n.observerSlots[i] = o));
+        const i = s.pop(),
+          l = n.observerSlots.pop();
+        r < s.length && ((i.sourceSlots[l] = r), (s[r] = i), (n.observerSlots[r] = l));
       }
     }
   if (e.tOwned) {
@@ -252,81 +299,81 @@ function I(e) {
     for (t = e.cleanups.length - 1; t >= 0; t--) e.cleanups[t]();
     e.cleanups = null;
   }
-  e.state = 0;
+  (e.state = 0), delete e.sourceMap;
 }
-function me(e) {
+function be(e) {
   return e instanceof Error
     ? e
     : new Error(typeof e == 'string' ? e : 'Unknown error', { cause: e });
 }
-function ie(e, t = h) {
-  throw me(e);
+function se(e, t = d) {
+  throw be(e);
 }
-const we = Symbol('fallback');
+const Se = Symbol('fallback');
 function H(e) {
   for (let t = 0; t < e.length; t++) e[t]();
 }
-function ye(e, t, n = {}) {
-  let i = [],
+function ve(e, t, n = {}) {
+  let r = [],
     s = [],
-    r = [],
-    o = 0,
-    l = t.length > 1 ? [] : null;
+    i = [],
+    l = 0,
+    o = t.length > 1 ? [] : null;
   return (
-    he(() => H(r)),
+    pe(() => H(i)),
     () => {
       let a = e() || [],
-        f = a.length,
-        u,
+        u = a.length,
+        f,
         c;
       return (
-        a[fe],
-        T(() => {
-          let m, A, $, P, L, w, y, b, _;
-          if (f === 0)
-            o !== 0 && (H(r), (r = []), (i = []), (s = []), (o = 0), l && (l = [])),
+        a[ae],
+        _(() => {
+          let m, v, $, L, N, w, y, b, k;
+          if (u === 0)
+            l !== 0 && (H(i), (i = []), (r = []), (s = []), (l = 0), o && (o = [])),
               n.fallback &&
-                ((i = [we]), (s[0] = B((oe) => ((r[0] = oe), n.fallback()))), (o = 1));
-          else if (o === 0) {
-            for (s = new Array(f), c = 0; c < f; c++) (i[c] = a[c]), (s[c] = B(E));
-            o = f;
+                ((r = [Se]), (s[0] = D((oe) => ((i[0] = oe), n.fallback()))), (l = 1));
+          else if (l === 0) {
+            for (s = new Array(u), c = 0; c < u; c++) (r[c] = a[c]), (s[c] = D(T));
+            l = u;
           } else {
             for (
-              $ = new Array(f),
-                P = new Array(f),
-                l && (L = new Array(f)),
+              $ = new Array(u),
+                L = new Array(u),
+                o && (N = new Array(u)),
                 w = 0,
-                y = Math.min(o, f);
-              w < y && i[w] === a[w];
+                y = Math.min(l, u);
+              w < y && r[w] === a[w];
               w++
             );
-            for (y = o - 1, b = f - 1; y >= w && b >= w && i[y] === a[b]; y--, b--)
-              ($[b] = s[y]), (P[b] = r[y]), l && (L[b] = l[y]);
-            for (m = new Map(), A = new Array(b + 1), c = b; c >= w; c--)
-              (_ = a[c]), (u = m.get(_)), (A[c] = u === void 0 ? -1 : u), m.set(_, c);
-            for (u = w; u <= y; u++)
-              (_ = i[u]),
-                (c = m.get(_)),
+            for (y = l - 1, b = u - 1; y >= w && b >= w && r[y] === a[b]; y--, b--)
+              ($[b] = s[y]), (L[b] = i[y]), o && (N[b] = o[y]);
+            for (m = new Map(), v = new Array(b + 1), c = b; c >= w; c--)
+              (k = a[c]), (f = m.get(k)), (v[c] = f === void 0 ? -1 : f), m.set(k, c);
+            for (f = w; f <= y; f++)
+              (k = r[f]),
+                (c = m.get(k)),
                 c !== void 0 && c !== -1
-                  ? (($[c] = s[u]),
-                    (P[c] = r[u]),
-                    l && (L[c] = l[u]),
-                    (c = A[c]),
-                    m.set(_, c))
-                  : r[u]();
-            for (c = w; c < f; c++)
+                  ? (($[c] = s[f]),
+                    (L[c] = i[f]),
+                    o && (N[c] = o[f]),
+                    (c = v[c]),
+                    m.set(k, c))
+                  : i[f]();
+            for (c = w; c < u; c++)
               c in $
-                ? ((s[c] = $[c]), (r[c] = P[c]), l && ((l[c] = L[c]), l[c](c)))
-                : (s[c] = B(E));
-            (s = s.slice(0, (o = f))), (i = a.slice(0));
+                ? ((s[c] = $[c]), (i[c] = L[c]), o && ((o[c] = N[c]), o[c](c)))
+                : (s[c] = D(T));
+            (s = s.slice(0, (l = u))), (r = a.slice(0));
           }
           return s;
         })
       );
-      function E(m) {
-        if (((r[c] = m), l)) {
-          const [A, $] = W(c);
-          return (l[c] = $), t(a[c], A);
+      function T(m) {
+        if (((i[c] = m), o)) {
+          const [v, $] = W(c, { name: 'index' });
+          return (o[c] = $), t(a[c], v);
         }
         return t(a[c]);
       }
@@ -334,141 +381,156 @@ function ye(e, t, n = {}) {
   );
 }
 function S(e, t) {
-  return T(() => e(t || {}));
+  return ge(e, t || {});
 }
-const be = (e) => `Stale read from <${e}>.`;
+const $e = (e) =>
+  `Attempting to access a stale value from <${e}> that could possibly be undefined. This may occur because you are reading the accessor returned from the component at a time where it has already been unmounted. We recommend cleaning up any stale timers or async, or reading from the initial condition.`;
 function re(e) {
   const t = 'fallback' in e && { fallback: () => e.fallback };
-  return D(ye(() => e.each, e.children, t || void 0));
+  return M(
+    ve(() => e.each, e.children, t || void 0),
+    void 0,
+    { name: 'value' },
+  );
 }
-function N(e) {
+function B(e) {
   const t = e.keyed,
-    n = D(() => e.when, void 0, void 0),
-    i = t ? n : D(n, void 0, { equals: (s, r) => !s == !r });
-  return D(
+    n = M(() => e.when, void 0, { name: 'condition value' }),
+    r = t ? n : M(n, void 0, { equals: (s, i) => !s == !i, name: 'condition' });
+  return M(
     () => {
-      const s = i();
+      const s = r();
       if (s) {
-        const r = e.children;
-        return typeof r == 'function' && r.length > 0
-          ? T(() =>
-              r(
+        const i = e.children;
+        return typeof i == 'function' && i.length > 0
+          ? _(() =>
+              i(
                 t
                   ? s
                   : () => {
-                      if (!T(i)) throw be('Show');
+                      if (!_(r)) throw $e('Show');
                       return n();
                     },
               ),
             )
-          : r;
+          : i;
       }
       return e.fallback;
     },
     void 0,
-    void 0,
+    { name: 'value' },
   );
 }
-function Se(e, t, n) {
-  let i = n.length,
+globalThis &&
+  (globalThis.Solid$$
+    ? console.warn(
+        'You appear to have multiple instances of Solid. This can lead to unexpected behavior.',
+      )
+    : (globalThis.Solid$$ = !0));
+function Ae(e, t, n) {
+  let r = n.length,
     s = t.length,
-    r = i,
-    o = 0,
+    i = r,
     l = 0,
+    o = 0,
     a = t[s - 1].nextSibling,
-    f = null;
-  for (; o < s || l < r; ) {
-    if (t[o] === n[l]) {
-      o++, l++;
+    u = null;
+  for (; l < s || o < i; ) {
+    if (t[l] === n[o]) {
+      l++, o++;
       continue;
     }
-    for (; t[s - 1] === n[r - 1]; ) s--, r--;
-    if (s === o) {
-      const u = r < i ? (l ? n[l - 1].nextSibling : n[r - l]) : a;
-      for (; l < r; ) e.insertBefore(n[l++], u);
-    } else if (r === l) for (; o < s; ) (!f || !f.has(t[o])) && t[o].remove(), o++;
-    else if (t[o] === n[r - 1] && n[l] === t[s - 1]) {
-      const u = t[--s].nextSibling;
-      e.insertBefore(n[l++], t[o++].nextSibling),
-        e.insertBefore(n[--r], u),
-        (t[s] = n[r]);
+    for (; t[s - 1] === n[i - 1]; ) s--, i--;
+    if (s === l) {
+      const f = i < r ? (o ? n[o - 1].nextSibling : n[i - o]) : a;
+      for (; o < i; ) e.insertBefore(n[o++], f);
+    } else if (i === o) for (; l < s; ) (!u || !u.has(t[l])) && t[l].remove(), l++;
+    else if (t[l] === n[i - 1] && n[o] === t[s - 1]) {
+      const f = t[--s].nextSibling;
+      e.insertBefore(n[o++], t[l++].nextSibling),
+        e.insertBefore(n[--i], f),
+        (t[s] = n[i]);
     } else {
-      if (!f) {
-        f = new Map();
-        let c = l;
-        for (; c < r; ) f.set(n[c], c++);
+      if (!u) {
+        u = new Map();
+        let c = o;
+        for (; c < i; ) u.set(n[c], c++);
       }
-      const u = f.get(t[o]);
-      if (u != null)
-        if (l < u && u < r) {
-          let c = o,
-            E = 1,
+      const f = u.get(t[l]);
+      if (f != null)
+        if (o < f && f < i) {
+          let c = l,
+            T = 1,
             m;
-          for (; ++c < s && c < r && !((m = f.get(t[c])) == null || m !== u + E); ) E++;
-          if (E > u - l) {
-            const A = t[o];
-            for (; l < u; ) e.insertBefore(n[l++], A);
-          } else e.replaceChild(n[l++], t[o++]);
-        } else o++;
-      else t[o++].remove();
+          for (; ++c < s && c < i && !((m = u.get(t[c])) == null || m !== f + T); ) T++;
+          if (T > f - o) {
+            const v = t[l];
+            for (; o < f; ) e.insertBefore(n[o++], v);
+          } else e.replaceChild(n[o++], t[l++]);
+        } else l++;
+      else t[l++].remove();
     }
   }
 }
 const X = '_$DX_DELEGATE';
-function Ae(e, t, n, i = {}) {
+function xe(e, t, n, r = {}) {
+  if (!t)
+    throw new Error(
+      "The `element` passed to `render(..., element)` doesn't exist. Make sure `element` exists in the document.",
+    );
   let s;
   return (
-    B((r) => {
-      (s = r), t === document ? e() : g(t, e(), t.firstChild ? null : void 0, n);
-    }, i.owner),
+    D((i) => {
+      (s = i), t === document ? e() : g(t, e(), t.firstChild ? null : void 0, n);
+    }, r.owner),
     () => {
       s(), (t.textContent = '');
     }
   );
 }
-function C(e, t, n, i) {
+function E(e, t, n, r) {
   let s;
-  const r = () => {
-      const l = document.createElement('template');
-      return (l.innerHTML = e), l.content.firstChild;
+  const i = () => {
+      const o = document.createElement('template');
+      return (o.innerHTML = e), o.content.firstChild;
     },
-    o = () => (s || (s = r())).cloneNode(!0);
-  return (o.cloneNode = o), o;
+    l = () => (s || (s = i())).cloneNode(!0);
+  return (l.cloneNode = l), l;
 }
-function le(e, t = window.document) {
+function ie(e, t = window.document) {
   const n = t[X] || (t[X] = new Set());
-  for (let i = 0, s = e.length; i < s; i++) {
-    const r = e[i];
-    n.has(r) || (n.add(r), t.addEventListener(r, $e));
+  for (let r = 0, s = e.length; r < s; r++) {
+    const i = e[r];
+    n.has(i) || (n.add(i), t.addEventListener(i, Ee));
   }
 }
-function g(e, t, n, i) {
-  if ((n !== void 0 && !i && (i = []), typeof t != 'function')) return j(e, t, i, n);
-  V((s) => j(e, t(), s, n), i);
+function g(e, t, n, r) {
+  if ((n !== void 0 && !r && (r = []), typeof t != 'function')) return V(e, t, r, n);
+  F((s) => V(e, t(), s, n), r);
 }
-function $e(e) {
+function Ee(e) {
   let t = e.target;
   const n = `$$${e.type}`,
-    i = e.target,
+    r = e.target,
     s = e.currentTarget,
-    r = (a) => Object.defineProperty(e, 'target', { configurable: !0, value: a }),
-    o = () => {
+    i = (a) => Object.defineProperty(e, 'target', { configurable: !0, value: a }),
+    l = () => {
       const a = t[n];
       if (a && !t.disabled) {
-        const f = t[`${n}Data`];
-        if ((f !== void 0 ? a.call(t, f, e) : a.call(t, e), e.cancelBubble)) return;
+        const u = t[`${n}Data`];
+        if ((u !== void 0 ? a.call(t, u, e) : a.call(t, e), e.cancelBubble)) return;
       }
       return (
         t.host &&
           typeof t.host != 'string' &&
           !t.host._$host &&
           t.contains(e.target) &&
-          r(t.host),
+          i(t.host),
         !0
       );
     },
-    l = () => {
-      for (; o() && (t = t._$host || t.parentNode || t.host); );
+    o = () => {
+      for (; l() && (t = t._$host || t.parentNode || t.host); );
     };
   if (
     (Object.defineProperty(e, 'currentTarget', {
@@ -480,108 +542,108 @@ function $e(e) {
     e.composedPath)
   ) {
     const a = e.composedPath();
-    r(a[0]);
-    for (let f = 0; f < a.length - 2 && ((t = a[f]), !!o()); f++) {
+    i(a[0]);
+    for (let u = 0; u < a.length - 2 && ((t = a[u]), !!l()); u++) {
       if (t._$host) {
-        (t = t._$host), l();
+        (t = t._$host), o();
         break;
       }
       if (t.parentNode === s) break;
     }
-  } else l();
-  r(i);
+  } else o();
+  i(r);
 }
-function j(e, t, n, i, s) {
+function V(e, t, n, r, s) {
   for (; typeof n == 'function'; ) n = n();
   if (t === n) return n;
-  const r = typeof t,
-    o = i !== void 0;
-  if (((e = (o && n[0] && n[0].parentNode) || e), r === 'string' || r === 'number')) {
-    if (r === 'number' && ((t = t.toString()), t === n)) return n;
-    if (o) {
-      let l = n[0];
-      l && l.nodeType === 3
-        ? l.data !== t && (l.data = t)
-        : (l = document.createTextNode(t)),
-        (n = k(e, n, i, l));
+  const i = typeof t,
+    l = r !== void 0;
+  if (((e = (l && n[0] && n[0].parentNode) || e), i === 'string' || i === 'number')) {
+    if (i === 'number' && ((t = t.toString()), t === n)) return n;
+    if (l) {
+      let o = n[0];
+      o && o.nodeType === 3
+        ? o.data !== t && (o.data = t)
+        : (o = document.createTextNode(t)),
+        (n = C(e, n, r, o));
     } else
       n !== '' && typeof n == 'string'
         ? (n = e.firstChild.data = t)
         : (n = e.textContent = t);
-  } else if (t == null || r === 'boolean') n = k(e, n, i);
+  } else if (t == null || i === 'boolean') n = C(e, n, r);
   else {
-    if (r === 'function')
+    if (i === 'function')
       return (
-        V(() => {
-          let l = t();
-          for (; typeof l == 'function'; ) l = l();
-          n = j(e, l, n, i);
+        F(() => {
+          let o = t();
+          for (; typeof o == 'function'; ) o = o();
+          n = V(e, o, n, r);
         }),
         () => n
       );
     if (Array.isArray(t)) {
-      const l = [],
+      const o = [],
         a = n && Array.isArray(n);
-      if (K(l, t, n, s)) return V(() => (n = j(e, l, n, i, !0))), () => n;
-      if (l.length === 0) {
-        if (((n = k(e, n, i)), o)) return n;
-      } else a ? (n.length === 0 ? Y(e, l, i) : Se(e, n, l)) : (n && k(e), Y(e, l));
-      n = l;
+      if (K(o, t, n, s)) return F(() => (n = V(e, o, n, r, !0))), () => n;
+      if (o.length === 0) {
+        if (((n = C(e, n, r)), l)) return n;
+      } else a ? (n.length === 0 ? J(e, o, r) : Ae(e, n, o)) : (n && C(e), J(e, o));
+      n = o;
     } else if (t.nodeType) {
       if (Array.isArray(n)) {
-        if (o) return (n = k(e, n, i, t));
-        k(e, n, null, t);
+        if (l) return (n = C(e, n, r, t));
+        C(e, n, null, t);
       } else
         n == null || n === '' || !e.firstChild
           ? e.appendChild(t)
           : e.replaceChild(t, e.firstChild);
       n = t;
-    }
+    } else console.warn('Unrecognized value. Skipped inserting', t);
   }
   return n;
 }
-function K(e, t, n, i) {
+function K(e, t, n, r) {
   let s = !1;
-  for (let r = 0, o = t.length; r < o; r++) {
-    let l = t[r],
+  for (let i = 0, l = t.length; i < l; i++) {
+    let o = t[i],
       a = n && n[e.length],
-      f;
-    if (!(l == null || l === !0 || l === !1))
-      if ((f = typeof l) == 'object' && l.nodeType) e.push(l);
-      else if (Array.isArray(l)) s = K(e, l, a) || s;
-      else if (f === 'function')
-        if (i) {
-          for (; typeof l == 'function'; ) l = l();
-          s = K(e, Array.isArray(l) ? l : [l], Array.isArray(a) ? a : [a]) || s;
-        } else e.push(l), (s = !0);
+      u;
+    if (!(o == null || o === !0 || o === !1))
+      if ((u = typeof o) == 'object' && o.nodeType) e.push(o);
+      else if (Array.isArray(o)) s = K(e, o, a) || s;
+      else if (u === 'function')
+        if (r) {
+          for (; typeof o == 'function'; ) o = o();
+          s = K(e, Array.isArray(o) ? o : [o], Array.isArray(a) ? a : [a]) || s;
+        } else e.push(o), (s = !0);
       else {
-        const u = String(l);
-        a && a.nodeType === 3 && a.data === u
+        const f = String(o);
+        a && a.nodeType === 3 && a.data === f
           ? e.push(a)
-          : e.push(document.createTextNode(u));
+          : e.push(document.createTextNode(f));
       }
   }
   return s;
 }
-function Y(e, t, n = null) {
-  for (let i = 0, s = t.length; i < s; i++) e.insertBefore(t[i], n);
+function J(e, t, n = null) {
+  for (let r = 0, s = t.length; r < s; r++) e.insertBefore(t[r], n);
 }
-function k(e, t, n, i) {
+function C(e, t, n, r) {
   if (n === void 0) return (e.textContent = '');
-  const s = i || document.createTextNode('');
+  const s = r || document.createTextNode('');
   if (t.length) {
-    let r = !1;
-    for (let o = t.length - 1; o >= 0; o--) {
-      const l = t[o];
-      if (s !== l) {
-        const a = l.parentNode === e;
-        !r && !o ? (a ? e.replaceChild(s, l) : e.insertBefore(s, n)) : a && l.remove();
-      } else r = !0;
+    let i = !1;
+    for (let l = t.length - 1; l >= 0; l--) {
+      const o = t[l];
+      if (s !== o) {
+        const a = o.parentNode === e;
+        !i && !l ? (a ? e.replaceChild(s, o) : e.insertBefore(s, n)) : a && o.remove();
+      } else i = !0;
     }
   } else e.insertBefore(s, n);
   return [s];
 }
-const ve = [
+const Te = [
   {
     id: 'overwhelm',
     title: 'Overwhelm',
@@ -671,13 +733,13 @@ const ve = [
     ],
   },
 ];
-var xe = C('<div class=blocker-grid>'),
-  Ce = C(
+var ke = E('<div class=blocker-grid>'),
+  Ce = E(
     '<button class="blocker-card card card-hover"><h3 class=text-primary></h3><p class=text-muted>',
   );
-const Ee = (e) =>
+const _e = (e) =>
   (() => {
-    var t = xe();
+    var t = ke();
     return (
       g(
         t,
@@ -687,14 +749,14 @@ const Ee = (e) =>
           },
           children: (n) =>
             (() => {
-              var i = Ce(),
-                s = i.firstChild,
-                r = s.nextSibling;
+              var r = Ce(),
+                s = r.firstChild,
+                i = s.nextSibling;
               return (
-                (i.$$click = () => e.onSelect(n)),
+                (r.$$click = () => e.onSelect(n)),
                 g(s, () => n.title),
-                g(r, () => n.emotion),
-                i
+                g(i, () => n.emotion),
+                r
               );
             })(),
         }),
@@ -702,133 +764,133 @@ const Ee = (e) =>
       t
     );
   })();
-le(['click']);
-var _e = C(
+ie(['click']);
+var Ie = E(
     '<div class=strategy-container><div class="selected-type card"><h2 class=text-primary></h2><p class="emotion text-muted"></p></div><h3>Recommended Strategies:</h3><div class=strategy-list>',
   ),
-  ke = C('<div class="strategy-item card"><p class=strategy-text>');
-const Te = (e) =>
+  Oe = E('<div class="strategy-item card"><p class=strategy-text>');
+const Pe = (e) =>
   (() => {
-    var t = _e(),
+    var t = Ie(),
       n = t.firstChild,
-      i = n.firstChild,
-      s = i.nextSibling,
-      r = n.nextSibling,
-      o = r.nextSibling;
+      r = n.firstChild,
+      s = r.nextSibling,
+      i = n.nextSibling,
+      l = i.nextSibling;
     return (
-      g(i, () => e.type.title),
+      g(r, () => e.type.title),
       g(s, () => e.type.emotion),
       g(
-        o,
+        l,
         S(re, {
           get each() {
             return e.type.strategies;
           },
-          children: (l) =>
+          children: (o) =>
             (() => {
-              var a = ke(),
-                f = a.firstChild;
-              return g(f, l), a;
+              var a = Oe(),
+                u = a.firstChild;
+              return g(u, o), a;
             })(),
         }),
       ),
       t
     );
   })();
-var Ie = C('<header class=header><button class=back-button>← Back'),
-  Oe = C(
+var Le = E('<header class=header><button class=back-button>← Back'),
+  Ne = E(
     "<div class=intro><h2>What's holding you back?</h2><p class=text-muted>Choose what best matches your current feeling:",
   ),
-  Pe = C('<div class=app><main class=main>');
-const Le = () => {
+  Be = E('<div class=app><main class=main>');
+const De = () => {
   const [e, t] = W(null),
-    [n, i] = W(!0),
-    s = (l) => {
-      t(l), i(!1);
+    [n, r] = W(!0),
+    s = (o) => {
+      t(o), r(!1);
     },
-    r = () => {
-      t(null), i(!0);
+    i = () => {
+      t(null), r(!0);
     },
-    o = async (l, a) => {
-      const f = e();
-      if (f)
+    l = async (o, a) => {
+      const u = e();
+      if (u)
         try {
-          const u =
+          const f =
             a === 'task'
-              ? { type: 'ADD_STRATEGY_TASK', strategy: l, blockerType: f.title }
+              ? { type: 'ADD_STRATEGY_TASK', strategy: o, blockerType: u.title }
               : { type: 'START_POMODORO' };
           window.parent !== window &&
             window.parent.postMessage(
-              { type: 'PLUGIN_MESSAGE', pluginId: 'procrastination-buster', data: u },
+              { type: 'PLUGIN_MESSAGE', pluginId: 'procrastination-buster', data: f },
               '*',
             );
-        } catch (u) {
-          console.error('Failed to send message:', u);
+        } catch (f) {
+          console.error('Failed to send message:', f);
         }
     };
   return (() => {
-    var l = Pe(),
-      a = l.firstChild;
+    var o = Be(),
+      a = o.firstChild;
     return (
       g(
-        l,
-        S(N, {
+        o,
+        S(B, {
           get when() {
             return !n();
           },
           get children() {
-            var f = Ie(),
-              u = f.firstChild;
-            return (u.$$click = r), f;
+            var u = Le(),
+              f = u.firstChild;
+            return (f.$$click = i), u;
           },
         }),
         a,
       ),
       g(
         a,
-        S(N, {
+        S(B, {
           get when() {
             return n();
           },
           get children() {
-            return Oe();
+            return Ne();
           },
         }),
         null,
       ),
       g(
         a,
-        S(N, {
+        S(B, {
           get when() {
             return !e();
           },
           get children() {
-            return S(Ee, { types: ve, onSelect: s });
+            return S(_e, { types: Te, onSelect: s });
           },
         }),
         null,
       ),
       g(
         a,
-        S(N, {
+        S(B, {
           get when() {
             return e();
           },
           get children() {
-            return S(Te, {
+            return S(Pe, {
               get type() {
                 return e();
               },
-              onStrategyAction: o,
+              onStrategyAction: l,
             });
           },
         }),
         null,
       ),
-      l
+      o
     );
   })();
 };
-le(['click']);
-const J = document.getElementById('root');
-J && Ae(() => S(Le, {}), J);
+ie(['click']);
+const Q = document.getElementById('root');
+Q && xe(() => S(De, {}), Q);
