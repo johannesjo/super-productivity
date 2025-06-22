@@ -86,12 +86,6 @@ const App: Component = () => {
           />
         </Show>
       </main>
-
-      {/*<footer class="footer">*/}
-      {/*  <p>*/}
-      {/*    💡 Tip: Use <kbd>Ctrl+Shift+P</kbd> for quick access*/}
-      {/*  </p>*/}
-      {/*</footer>*/}
     </div>
   );
 };

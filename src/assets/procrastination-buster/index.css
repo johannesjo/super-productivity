@@ -22,10 +22,14 @@ body {
   background: var(--theme-card-bg);
   border-radius: 8px;
   box-shadow: 0 2px 4px #0000001a;
+  padding: 1rem;
+  text-align: left;
+  border: 2px solid var(--theme-extra-border-color, #ddd);
 }
 .card-hover {
   transition: all 0.2s;
   cursor: pointer;
+  border-color: var(--c-primary);
 }
 .card-hover:hover {
   transform: translateY(-2px);
@@ -76,16 +80,8 @@ body {
 .blocker-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
+  gap: 0.75rem;
   margin-top: 2rem;
-}
-.blocker-card {
-  padding: 1.5rem;
-  text-align: left;
-  border: 2px solid transparent;
-}
-.blocker-card:hover {
-  border-color: var(--c-primary);
 }
 .blocker-card h3 {
   margin: 0 0 0.5rem;
@@ -121,18 +117,4 @@ body {
 }
 .strategy-text {
   margin: 0;
-}
-.footer {
-  margin-top: 2rem;
-  text-align: center;
-  font-size: 0.85rem;
-}
-kbd {
-  background: var(--theme-select-hover-bg);
-  color: var(--theme-text-color);
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-family: monospace;
-  font-size: 0.85em;
-  border: 1px solid var(--theme-divider-color);
 }

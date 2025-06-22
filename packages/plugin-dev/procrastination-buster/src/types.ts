@@ -22,7 +22,7 @@ export const procrastinationTypes: ProcrastinationType[] = [
     title: 'Perfectionism',
     emotion: "It's not perfect enough",
     strategies: [
-      'Set time limit for v0.1',
+      'Time-box your first draft (30 min)',
       'Journal: What is "good enough"?',
       'Practice self-compassion',
       'Progress over perfection',

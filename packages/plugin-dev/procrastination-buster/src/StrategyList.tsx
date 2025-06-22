@@ -9,7 +9,7 @@ interface StrategyListProps {
 export const StrategyList: Component<StrategyListProps> = (props) => {
   return (
     <div class="strategy-container">
-      <div class="selected-type card">
+      <div class="selected-type">
         <h2 class="text-primary">{props.type.title}</h2>
         <p class="emotion text-muted">{props.type.emotion}</p>
       </div>
