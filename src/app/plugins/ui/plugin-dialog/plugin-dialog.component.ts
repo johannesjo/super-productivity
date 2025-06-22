@@ -12,17 +12,26 @@ import {
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { DialogButtonCfg, DialogCfg } from '../../plugin-api.model';
 import { PluginSecurityService } from '../../plugin-security';
+import { TranslateService } from '@ngx-translate/core';
+import { T } from '../../../t.const';
 
 @Component({
   selector: 'plugin-dialog',
   template: `
-    <div mat-dialog-title>{{ dialogData.title || 'Plugin Dialog' }}</div>
+    <div mat-dialog-title>
+      {{ dialogData.title || _translateService.instant(T.PLUGINS.PLUGIN_DIALOG_TITLE) }}
+    </div>
 
     <mat-dialog-content>
       @if (sanitizedContent) {
         <div [innerHTML]="sanitizedContent"></div>
       } @else {
-        <div>{{ dialogData.htmlContent || 'No content provided' }}</div>
+        <div>
+          {{
+            dialogData.htmlContent ||
+              _translateService.instant(T.PLUGINS.NO_CONTENT_PROVIDED)
+          }}
+        </div>
       }
     </mat-dialog-content>
 
@@ -74,12 +83,14 @@ export class PluginDialogComponent {
   private readonly _dialogRef = inject(MatDialogRef<PluginDialogComponent>);
   private readonly _sanitizer = inject(DomSanitizer);
   private readonly _pluginSecurity = inject(PluginSecurityService);
+  private readonly _translateService = inject(TranslateService);
 
   readonly dialogData: DialogCfg & { title?: string };
   readonly sanitizedContent: SafeHtml | null = null;
+  readonly T = T;
   readonly defaultButtons: DialogButtonCfg[] = [
     {
-      label: 'OK',
+      label: this._translateService.instant(T.PLUGINS.OK),
       onClick: () => this._dialogRef.close(),
     },
   ];

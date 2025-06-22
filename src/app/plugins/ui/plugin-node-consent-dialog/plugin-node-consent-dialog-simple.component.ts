@@ -10,6 +10,8 @@ import {
   MatDialogActions,
 } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
+import { TranslateService, TranslatePipe } from '@ngx-translate/core';
+import { T } from '../../../t.const';
 
 export interface PluginNodeConsentDialogData {
   manifest: PluginManifest;
@@ -26,11 +28,12 @@ export interface PluginNodeConsentDialogData {
     MatIcon,
     MatCheckbox,
     FormsModule,
+    TranslatePipe,
   ],
   template: `
     <h2 mat-dialog-title>
       <mat-icon class="info-icon">info</mat-icon>
-      Plugin Requests System Access
+      {{ T.PLUGINS.SYSTEM_ACCESS_REQUEST_TITLE | translate }}
     </h2>
 
     <mat-dialog-content>
@@ -40,25 +43,25 @@ export interface PluginNodeConsentDialogData {
         </p>
 
         <p>
-          This plugin requests permission to execute system commands. This allows it to:
+          {{ T.PLUGINS.SYSTEM_ACCESS_REQUEST_DESC | translate }}
         </p>
 
         <ul class="capabilities">
-          <li>Access files on your computer</li>
-          <li>Run system commands</li>
-          <li>Use Node.js APIs</li>
+          <li>{{ T.PLUGINS.CAPABILITIES.ACCESS_FILES | translate }}</li>
+          <li>{{ T.PLUGINS.CAPABILITIES.RUN_COMMANDS | translate }}</li>
+          <li>{{ T.PLUGINS.CAPABILITIES.USE_NODE_APIS | translate }}</li>
         </ul>
 
         <p class="trust-note">
           <mat-icon>verified_user</mat-icon>
-          Only grant this permission if you trust the plugin author.
+          {{ T.PLUGINS.TRUST_WARNING | translate }}
         </p>
 
         <mat-checkbox
           [(ngModel)]="rememberChoice"
           class="remember-checkbox"
         >
-          Remember my choice for this plugin
+          {{ T.PLUGINS.REMEMBER_CHOICE | translate }}
         </mat-checkbox>
       </div>
     </mat-dialog-content>
@@ -68,7 +71,7 @@ export interface PluginNodeConsentDialogData {
         mat-button
         (click)="onCancel()"
       >
-        Cancel
+        {{ T.PLUGINS.CANCEL | translate }}
       </button>
       <button
         mat-raised-button
@@ -76,7 +79,7 @@ export interface PluginNodeConsentDialogData {
         color="primary"
       >
         <mat-icon>check</mat-icon>
-        Grant Permission
+        {{ T.PLUGINS.GRANT_PERMISSION | translate }}
       </button>
     </mat-dialog-actions>
   `,
@@ -146,7 +149,9 @@ export interface PluginNodeConsentDialogData {
 export class PluginNodeConsentDialogComponent {
   private dialogRef = inject(MatDialogRef<PluginNodeConsentDialogComponent>);
   data = inject<PluginNodeConsentDialogData>(MAT_DIALOG_DATA);
+  private _translateService = inject(TranslateService);
 
+  T = T;
   rememberChoice = false;
 
   onConfirm(): void {

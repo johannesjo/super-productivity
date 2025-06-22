@@ -36,6 +36,8 @@ import { Router } from '@angular/router';
 import { PluginDialogComponent } from './ui/plugin-dialog/plugin-dialog.component';
 import { IS_ELECTRON } from '../app.constants';
 import { isAllowedPluginAction } from './allowed-plugin-actions.const';
+import { TranslateService } from '@ngx-translate/core';
+import { T } from '../t.const';
 
 /**
  * PluginBridge acts as an intermediary layer between plugins and the main application services.
@@ -62,6 +64,7 @@ export class PluginBridgeService implements OnDestroy {
   private _taskArchiveService = inject(TaskArchiveService);
   private _router = inject(Router);
   private _injector = inject(Injector);
+  private _translateService = inject(TranslateService);
   private _pluginRunner?: any; // Lazy loaded to avoid circular dependency
 
   // Track which plugin is currently making calls to prevent cross-plugin access
@@ -154,7 +157,9 @@ export class PluginBridgeService implements OnDestroy {
     // Use provided pluginId or fall back to current context
     const targetPluginId = pluginId || this._currentPluginId;
     if (!targetPluginId) {
-      throw new Error('No plugin ID provided or set for showing index HTML view');
+      throw new Error(
+        this._translateService.instant(T.PLUGINS.NO_PLUGIN_ID_PROVIDED_FOR_HTML),
+      );
     }
     console.log('PluginBridge: Navigating to plugin index view', {
       pluginId: targetPluginId,
@@ -376,7 +381,9 @@ export class PluginBridgeService implements OnDestroy {
         .toPromise();
 
       if (!project) {
-        throw new Error(`Project with ID '${contextId}' not found`);
+        throw new Error(
+          this._translateService.instant(T.PLUGINS.PROJECT_NOT_FOUND, { contextId }),
+        );
       }
 
       // Validate all taskIds belong to the project
@@ -406,7 +413,10 @@ export class PluginBridgeService implements OnDestroy {
 
       if (invalidTaskIds.length > 0) {
         throw new Error(
-          `Tasks '${invalidTaskIds.join(', ')}' do not belong to project '${contextId}'`,
+          this._translateService.instant(T.PLUGINS.TASKS_NOT_IN_PROJECT, {
+            taskIds: invalidTaskIds.join(', '),
+            contextId,
+          }),
         );
       }
 
@@ -426,7 +436,9 @@ export class PluginBridgeService implements OnDestroy {
         .toPromise();
 
       if (!parentTask) {
-        throw new Error(`Parent task with ID '${contextId}' not found`);
+        throw new Error(
+          this._translateService.instant(T.PLUGINS.PARENT_TASK_NOT_FOUND, { contextId }),
+        );
       }
 
       // Validate all taskIds are subtasks of the parent
@@ -436,7 +448,10 @@ export class PluginBridgeService implements OnDestroy {
 
       if (invalidSubTaskIds.length > 0) {
         throw new Error(
-          `Tasks '${invalidSubTaskIds.join(', ')}' are not subtasks of '${contextId}'`,
+          this._translateService.instant(T.PLUGINS.TASKS_NOT_SUBTASKS, {
+            taskIds: invalidSubTaskIds.join(', '),
+            contextId,
+          }),
         );
       }
 
@@ -457,7 +472,9 @@ export class PluginBridgeService implements OnDestroy {
     typia.assert<string>(dataStr);
 
     if (!this._currentPluginId) {
-      throw new Error('No plugin context set for data persistence');
+      throw new Error(
+        this._translateService.instant(T.PLUGINS.NO_PLUGIN_CONTEXT_PERSISTENCE),
+      );
     }
 
     try {
@@ -470,7 +487,7 @@ export class PluginBridgeService implements OnDestroy {
       });
     } catch (error) {
       console.error('PluginBridge: Failed to persist plugin data:', error);
-      throw new Error('Unable to persist plugin data');
+      throw new Error(this._translateService.instant(T.PLUGINS.UNABLE_TO_PERSIST_DATA));
     }
   }
 
@@ -479,7 +496,9 @@ export class PluginBridgeService implements OnDestroy {
    */
   async loadPersistedData(): Promise<string | null> {
     if (!this._currentPluginId) {
-      throw new Error('No plugin context set for data loading');
+      throw new Error(
+        this._translateService.instant(T.PLUGINS.NO_PLUGIN_CONTEXT_LOADING),
+      );
     }
 
     try {
@@ -523,7 +542,9 @@ export class PluginBridgeService implements OnDestroy {
    */
   registerHeaderButton(headerBtnCfg: PluginHeaderBtnCfg): void {
     if (!this._currentPluginId) {
-      throw new Error('No plugin context set for header button registration');
+      throw new Error(
+        this._translateService.instant(T.PLUGINS.NO_PLUGIN_CONTEXT_HEADER_BUTTON),
+      );
     }
     typia.assert<Omit<PluginHeaderBtnCfg, 'pluginId'>>(headerBtnCfg);
 
@@ -546,18 +567,24 @@ export class PluginBridgeService implements OnDestroy {
    */
   registerMenuEntry(menuEntryCfg: Omit<PluginMenuEntryCfg, 'pluginId'>): void {
     if (!this._currentPluginId) {
-      throw new Error('No plugin context set for menu entry registration');
+      throw new Error(
+        this._translateService.instant(T.PLUGINS.NO_PLUGIN_CONTEXT_MENU_ENTRY),
+      );
     }
 
     // Validate required fields manually since typia has issues with optional fields
     if (!menuEntryCfg.label || typeof menuEntryCfg.label !== 'string') {
-      throw new Error('Menu entry must have a valid label string');
+      throw new Error(
+        this._translateService.instant(T.PLUGINS.MENU_ENTRY_LABEL_REQUIRED),
+      );
     }
     if (!menuEntryCfg.onClick || typeof menuEntryCfg.onClick !== 'function') {
-      throw new Error('Menu entry must have a valid onClick function');
+      throw new Error(
+        this._translateService.instant(T.PLUGINS.MENU_ENTRY_ONCLICK_REQUIRED),
+      );
     }
     if (menuEntryCfg.icon !== undefined && typeof menuEntryCfg.icon !== 'string') {
-      throw new Error('Menu entry icon must be a string if provided');
+      throw new Error(this._translateService.instant(T.PLUGINS.MENU_ENTRY_ICON_STRING));
     }
 
     const newMenuEntry: PluginMenuEntryCfg = {
@@ -620,15 +647,21 @@ export class PluginBridgeService implements OnDestroy {
     sidePanelBtnCfg: Omit<PluginSidePanelBtnCfg, 'pluginId'>,
   ): void {
     if (!this._currentPluginId) {
-      throw new Error('No plugin context set for side panel button registration');
+      throw new Error(
+        this._translateService.instant(T.PLUGINS.NO_PLUGIN_CONTEXT_SIDE_PANEL),
+      );
     }
 
     // Validate required fields
     if (!sidePanelBtnCfg.label || typeof sidePanelBtnCfg.label !== 'string') {
-      throw new Error('Side panel button must have a valid label string');
+      throw new Error(
+        this._translateService.instant(T.PLUGINS.SIDE_PANEL_LABEL_REQUIRED),
+      );
     }
     if (!sidePanelBtnCfg.onClick || typeof sidePanelBtnCfg.onClick !== 'function') {
-      throw new Error('Side panel button must have a valid onClick function');
+      throw new Error(
+        this._translateService.instant(T.PLUGINS.SIDE_PANEL_ONCLICK_REQUIRED),
+      );
     }
 
     const newButton: PluginSidePanelBtnCfg = {
@@ -680,7 +713,9 @@ export class PluginBridgeService implements OnDestroy {
    */
   registerShortcut(shortcutCfg: PluginShortcutCfg): void {
     if (!this._currentPluginId) {
-      throw new Error('No plugin context set for shortcut registration');
+      throw new Error(
+        this._translateService.instant(T.PLUGINS.NO_PLUGIN_CONTEXT_SHORTCUT),
+      );
     }
 
     const shortcutWithPluginId: PluginShortcutCfg = {
@@ -753,7 +788,9 @@ export class PluginBridgeService implements OnDestroy {
 
       const projectExists = projects?.some((project) => project.id === projectId);
       if (!projectExists) {
-        errors.push(`Project with ID '${projectId}' does not exist`);
+        errors.push(
+          this._translateService.instant(T.PLUGINS.PROJECT_DOES_NOT_EXIST, { projectId }),
+        );
       }
     }
 
@@ -765,7 +802,11 @@ export class PluginBridgeService implements OnDestroy {
       const nonExistentTags = tagIds.filter((tagId) => !existingTagIds.includes(tagId));
 
       if (nonExistentTags.length > 0) {
-        errors.push(`Tags with IDs '${nonExistentTags.join(', ')}' do not exist`);
+        errors.push(
+          this._translateService.instant(T.PLUGINS.TAGS_DO_NOT_EXIST, {
+            tagIds: nonExistentTags.join(', '),
+          }),
+        );
       }
     }
 
@@ -775,13 +816,21 @@ export class PluginBridgeService implements OnDestroy {
 
       const parentExists = tasks?.some((task) => task.id === parentId);
       if (!parentExists) {
-        errors.push(`Parent task with ID '${parentId}' does not exist`);
+        errors.push(
+          this._translateService.instant(T.PLUGINS.PARENT_TASK_DOES_NOT_EXIST, {
+            parentId,
+          }),
+        );
       }
     }
 
     // Throw error if any validation failed
     if (errors.length > 0) {
-      throw new Error(`Validation failed: ${errors.join('; ')}`);
+      throw new Error(
+        this._translateService.instant(T.PLUGINS.VALIDATION_FAILED, {
+          errors: errors.join('; '),
+        }),
+      );
     }
   }
 
@@ -790,7 +839,7 @@ export class PluginBridgeService implements OnDestroy {
    */
   dispatchAction(action: any): void {
     if (!this._currentPluginId) {
-      throw new Error('No plugin context set for action execution');
+      throw new Error(this._translateService.instant(T.PLUGINS.NO_PLUGIN_CONTEXT_ACTION));
     }
 
     // Check if the action is in the allowed list
@@ -798,7 +847,11 @@ export class PluginBridgeService implements OnDestroy {
       console.error(
         `PluginBridge: Action type '${action.type}' is not allowed for plugins`,
       );
-      throw new Error(`Action type '${action.type}' is not allowed for plugins`);
+      throw new Error(
+        this._translateService.instant(T.PLUGINS.ACTION_TYPE_NOT_ALLOWED, {
+          actionType: action.type,
+        }),
+      );
     }
 
     // Dispatch the action
@@ -818,14 +871,14 @@ export class PluginBridgeService implements OnDestroy {
     if (!IS_ELECTRON) {
       return {
         success: false,
-        error: 'Node.js execution is only available in the desktop version',
+        error: this._translateService.instant(T.PLUGINS.NODE_ONLY_DESKTOP),
       };
     }
 
     if (!this._currentPluginId) {
       return {
         success: false,
-        error: 'No plugin context set for Node.js execution',
+        error: this._translateService.instant(T.PLUGINS.NO_PLUGIN_CONTEXT_NODE),
       };
     }
 
@@ -835,7 +888,7 @@ export class PluginBridgeService implements OnDestroy {
       if (!this._currentPluginManifest) {
         return {
           success: false,
-          error: 'No plugin manifest found for Node.js execution',
+          error: this._translateService.instant(T.PLUGINS.NO_PLUGIN_MANIFEST_NODE),
         };
       }
 
@@ -843,7 +896,7 @@ export class PluginBridgeService implements OnDestroy {
       if (!window.ea || typeof window.ea.pluginExecNodeScript !== 'function') {
         return {
           success: false,
-          error: 'Electron API not available. This feature requires the desktop version.',
+          error: this._translateService.instant(T.PLUGINS.ELECTRON_API_NOT_AVAILABLE),
         };
       }
 
@@ -859,7 +912,10 @@ export class PluginBridgeService implements OnDestroy {
       console.error('PluginBridge: Failed to execute Node.js script:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to execute script',
+        error:
+          error instanceof Error
+            ? error.message
+            : this._translateService.instant(T.PLUGINS.FAILED_TO_EXECUTE_SCRIPT),
       };
     }
   }

@@ -27,6 +27,8 @@ import { first } from 'rxjs/operators';
 import { PluginCleanupService } from './plugin-cleanup.service';
 import { PluginLoaderService } from './plugin-loader.service';
 import { validatePluginManifest } from './util/validate-manifest.util';
+import { TranslateService } from '@ngx-translate/core';
+import { T } from '../t.const';
 
 @Injectable({
   providedIn: 'root',
@@ -43,6 +45,7 @@ export class PluginService implements OnDestroy {
   private readonly _dialog = inject(MatDialog);
   private readonly _cleanupService = inject(PluginCleanupService);
   private readonly _pluginLoader = inject(PluginLoaderService);
+  private readonly _translateService = inject(TranslateService);
 
   private _isInitialized = false;
   private _loadedPlugins: PluginInstance[] = [];
@@ -57,7 +60,7 @@ export class PluginService implements OnDestroy {
 
   async initializePlugins(): Promise<void> {
     if (this._isInitialized) {
-      console.warn('Plugin system already initialized');
+      console.warn(this._translateService.instant(T.PLUGINS.ALREADY_INITIALIZED));
       return;
     }
 
@@ -173,7 +176,9 @@ export class PluginService implements OnDestroy {
       const manifestValidation = validatePluginManifest(manifest);
       if (!manifestValidation.isValid) {
         throw new Error(
-          `Plugin manifest validation failed: ${manifestValidation.errors.join(', ')}`,
+          this._translateService.instant(T.PLUGINS.VALIDATION_FAILED, {
+            errors: manifestValidation.errors.join(', '),
+          }),
         );
       }
 
@@ -185,7 +190,7 @@ export class PluginService implements OnDestroy {
             manifest,
             loaded: false,
             isEnabled: false,
-            error: 'This plugin requires the desktop version (Node.js execution)',
+            error: this._translateService.instant(T.PLUGINS.NODE_ONLY_DESKTOP),
           };
           this._pluginPaths.set(manifest.id, pluginPath); // Store the path for potential reload
           console.log(
@@ -196,7 +201,9 @@ export class PluginService implements OnDestroy {
 
         const hasConsent = await this._getNodeExecutionConsent(manifest);
         if (!hasConsent) {
-          throw new Error('User declined to grant Node.js execution permission');
+          throw new Error(
+            this._translateService.instant(T.PLUGINS.USER_DECLINED_NODE_PERMISSION),
+          );
         }
       }
 
@@ -449,7 +456,10 @@ export class PluginService implements OnDestroy {
       // Validate ZIP file size
       if (file.size > MAX_PLUGIN_ZIP_SIZE) {
         throw new Error(
-          `Plugin ZIP file is too large. Maximum allowed size is ${(MAX_PLUGIN_ZIP_SIZE / 1024 / 1024).toFixed(1)} MB, but received ${(file.size / 1024 / 1024).toFixed(1)} MB.`,
+          this._translateService.instant(T.PLUGINS.FILE_TOO_LARGE, {
+            maxSize: (MAX_PLUGIN_ZIP_SIZE / 1024 / 1024).toFixed(1),
+            fileSize: (file.size / 1024 / 1024).toFixed(1),
+          }),
         );
       }
 
@@ -462,7 +472,13 @@ export class PluginService implements OnDestroy {
         (resolve, reject) => {
           unzip(zipData, (err, files) => {
             if (err) {
-              reject(new Error(`Failed to extract ZIP: ${err.message}`));
+              reject(
+                new Error(
+                  this._translateService.instant(T.PLUGINS.FAILED_TO_EXTRACT_ZIP, {
+                    error: err.message,
+                  }),
+                ),
+              );
               return;
             }
             resolve(files);
@@ -472,14 +488,17 @@ export class PluginService implements OnDestroy {
 
       // Find and extract manifest.json
       if (!extractedFiles['manifest.json']) {
-        throw new Error('manifest.json not found in plugin ZIP');
+        throw new Error(this._translateService.instant(T.PLUGINS.MANIFEST_NOT_FOUND));
       }
 
       // Validate manifest.json size
       const manifestBytes = extractedFiles['manifest.json'];
       if (manifestBytes.length > MAX_PLUGIN_MANIFEST_SIZE) {
         throw new Error(
-          `Plugin manifest.json is too large. Maximum allowed size is ${(MAX_PLUGIN_MANIFEST_SIZE / 1024).toFixed(1)} KB, but received ${(manifestBytes.length / 1024).toFixed(1)} KB.`,
+          this._translateService.instant(T.PLUGINS.MANIFEST_TOO_LARGE, {
+            maxSize: (MAX_PLUGIN_MANIFEST_SIZE / 1024).toFixed(1),
+            fileSize: (manifestBytes.length / 1024).toFixed(1),
+          }),
         );
       }
 
@@ -490,20 +509,25 @@ export class PluginService implements OnDestroy {
       const manifestValidation = validatePluginManifest(manifest);
       if (!manifestValidation.isValid) {
         throw new Error(
-          `Plugin manifest validation failed: ${manifestValidation.errors.join(', ')}`,
+          this._translateService.instant(T.PLUGINS.VALIDATION_FAILED, {
+            errors: manifestValidation.errors.join(', '),
+          }),
         );
       }
 
       // Find and extract plugin.js
       if (!extractedFiles['plugin.js']) {
-        throw new Error('plugin.js not found in plugin ZIP');
+        throw new Error(this._translateService.instant(T.PLUGINS.PLUGIN_JS_NOT_FOUND));
       }
 
       // Validate plugin.js size
       const pluginCodeBytes = extractedFiles['plugin.js'];
       if (pluginCodeBytes.length > MAX_PLUGIN_CODE_SIZE) {
         throw new Error(
-          `Plugin code (plugin.js) is too large. Maximum allowed size is ${(MAX_PLUGIN_CODE_SIZE / 1024 / 1024).toFixed(1)} MB, but received ${(pluginCodeBytes.length / 1024 / 1024).toFixed(1)} MB.`,
+          this._translateService.instant(T.PLUGINS.CODE_TOO_LARGE, {
+            maxSize: (MAX_PLUGIN_CODE_SIZE / 1024 / 1024).toFixed(1),
+            fileSize: (pluginCodeBytes.length / 1024 / 1024).toFixed(1),
+          }),
         );
       }
 
@@ -516,7 +540,10 @@ export class PluginService implements OnDestroy {
         // Validate index.html size (same as manifest for now)
         if (indexHtmlBytes.length > MAX_PLUGIN_MANIFEST_SIZE) {
           throw new Error(
-            `Plugin index.html is too large. Maximum allowed size is ${(MAX_PLUGIN_MANIFEST_SIZE / 1024).toFixed(1)} KB, but received ${(indexHtmlBytes.length / 1024).toFixed(1)} KB.`,
+            this._translateService.instant(T.PLUGINS.MANIFEST_TOO_LARGE, {
+              maxSize: (MAX_PLUGIN_MANIFEST_SIZE / 1024).toFixed(1),
+              fileSize: (indexHtmlBytes.length / 1024).toFixed(1),
+            }),
           );
         }
         indexHtml = new TextDecoder().decode(indexHtmlBytes);
@@ -529,7 +556,10 @@ export class PluginService implements OnDestroy {
         // Validate icon size (same as manifest for now)
         if (iconBytes.length > MAX_PLUGIN_MANIFEST_SIZE) {
           throw new Error(
-            `Plugin icon is too large. Maximum allowed size is ${(MAX_PLUGIN_MANIFEST_SIZE / 1024).toFixed(1)} KB, but received ${(iconBytes.length / 1024).toFixed(1)} KB.`,
+            this._translateService.instant(T.PLUGINS.MANIFEST_TOO_LARGE, {
+              maxSize: (MAX_PLUGIN_MANIFEST_SIZE / 1024).toFixed(1),
+              fileSize: (iconBytes.length / 1024).toFixed(1),
+            }),
           );
         }
         iconContent = new TextDecoder().decode(iconBytes);
@@ -584,7 +614,7 @@ export class PluginService implements OnDestroy {
           manifest,
           loaded: false,
           isEnabled: false,
-          error: 'This plugin requires the desktop version (Node.js execution)',
+          error: this._translateService.instant(T.PLUGINS.NODE_ONLY_DESKTOP),
         };
         this._pluginPaths.set(manifest.id, uploadedPluginPath);
         // Check if plugin is already in the list to prevent duplicates
@@ -678,7 +708,7 @@ export class PluginService implements OnDestroy {
         error:
           error instanceof Error
             ? error.message
-            : 'Unknown error occurred during plugin installation',
+            : this._translateService.instant(T.PLUGINS.UNKNOWN_ERROR),
       };
 
       // Still add to loaded plugins list so user can see the error
@@ -809,7 +839,9 @@ export class PluginService implements OnDestroy {
       const manifestValidation = validatePluginManifest(manifest);
       if (!manifestValidation.isValid) {
         throw new Error(
-          `Plugin manifest validation failed: ${manifestValidation.errors.join(', ')}`,
+          this._translateService.instant(T.PLUGINS.VALIDATION_FAILED, {
+            errors: manifestValidation.errors.join(', '),
+          }),
         );
       }
 

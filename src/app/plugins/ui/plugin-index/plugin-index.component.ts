@@ -31,6 +31,8 @@ import {
   MatCardHeader,
   MatCardTitle,
 } from '@angular/material/card';
+import { TranslateService, TranslatePipe } from '@ngx-translate/core';
+import { T } from '../../../t.const';
 
 @Component({
   selector: 'plugin-index',
@@ -47,6 +49,7 @@ import {
     MatCardContent,
     MatCardHeader,
     MatCardTitle,
+    TranslatePipe,
   ],
   animations: [
     trigger('pluginSwitch', [
@@ -77,6 +80,9 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
   private readonly _pluginService = inject(PluginService);
   private readonly _pluginBridge = inject(PluginBridgeService);
   private readonly _cleanupService = inject(PluginCleanupService);
+  private readonly _translateService = inject(TranslateService);
+
+  T: typeof T = T;
 
   readonly pluginId = signal<string>('');
   readonly isLoading = signal<boolean>(true);
@@ -97,7 +103,11 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
         await this._loadPluginIndex(this.directPluginId);
       } catch (err) {
         console.error('Failed to load plugin index:', err);
-        this.error.set(err instanceof Error ? err.message : 'Failed to load plugin');
+        this.error.set(
+          err instanceof Error
+            ? err.message
+            : this._translateService.instant(T.PLUGINS.FAILED_TO_LOAD),
+        );
         this.isLoading.set(false);
       }
       return;
@@ -114,7 +124,7 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
       );
 
       if (!newPluginId) {
-        this.error.set('Plugin ID not provided');
+        this.error.set(this._translateService.instant(T.PLUGINS.PLUGIN_ID_NOT_PROVIDED));
         this.isLoading.set(false);
         return;
       }
@@ -144,7 +154,11 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
         await this._loadPluginIndex(newPluginId);
       } catch (err) {
         console.error('Failed to load plugin index:', err);
-        this.error.set(err instanceof Error ? err.message : 'Failed to load plugin');
+        this.error.set(
+          err instanceof Error
+            ? err.message
+            : this._translateService.instant(T.PLUGINS.FAILED_TO_LOAD),
+        );
         this.isLoading.set(false);
       }
     });
@@ -158,7 +172,9 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
         await this._pluginService.initializePlugins();
       } catch (error) {
         console.error('Failed to initialize plugin system:', error);
-        throw new Error('Plugin system failed to initialize');
+        throw new Error(
+          this._translateService.instant(T.PLUGINS.PLUGIN_SYSTEM_FAILED_INIT),
+        );
       }
     }
   }
@@ -186,14 +202,16 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
       const plugin = plugins.find((p) => p.manifest.id === pluginId);
 
       if (!plugin) {
-        throw new Error('Plugin not found');
+        throw new Error(this._translateService.instant(T.PLUGINS.PLUGIN_NOT_FOUND));
       }
 
       if (!plugin.manifest.iFrame) {
-        throw new Error('Plugin does not support iframe view');
+        throw new Error(
+          this._translateService.instant(T.PLUGINS.PLUGIN_DOES_NOT_SUPPORT_IFRAME),
+        );
       }
 
-      throw new Error('Plugin index.html not loaded. Please reload the plugin.');
+      throw new Error(this._translateService.instant(T.PLUGINS.INDEX_HTML_NOT_LOADED));
     }
 
     // Get plugin data for iframe setup

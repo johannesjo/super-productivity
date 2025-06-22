@@ -14,7 +14,7 @@
               mode="indeterminate"
               diameter="40"
             ></mat-progress-spinner>
-            <p>Loading plugin interface...</p>
+            <p>{{ T.PLUGINS.LOADING_INTERFACE | translate }}</p>
           </div>
         </mat-card-content>
       </mat-card>
@@ -24,7 +24,7 @@
           mode="indeterminate"
           diameter="24"
         ></mat-progress-spinner>
-        <p>Loading plugin...</p>
+        <p>{{ T.PLUGINS.LOADING_PLUGIN | translate }}</p>
       </div>
     }
   }
@@ -36,7 +36,7 @@
         <mat-card-header>
           <mat-card-title>
             <mat-icon color="warn">error</mat-icon>
-            Error Loading Plugin
+            {{ T.PLUGINS.ERROR_LOADING_PLUGIN | translate }}
           </mat-card-title>
         </mat-card-header>
         <mat-card-content>
@@ -46,7 +46,7 @@
             color="primary"
             (click)="goBack()"
           >
-            Go Back
+            {{ T.PLUGINS.GO_BACK | translate }}
           </button>
         </mat-card-content>
       </mat-card>

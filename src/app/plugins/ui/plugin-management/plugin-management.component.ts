@@ -182,9 +182,11 @@ export class PluginManagementComponent implements OnInit {
 
   getPluginStatusText(plugin: PluginInstance): string {
     if (plugin.error) {
-      return 'Error';
+      return this._translateService.instant(T.PLUGINS.ERROR);
     }
-    return plugin.isEnabled ? 'Enabled' : 'Disabled';
+    return plugin.isEnabled
+      ? this._translateService.instant(T.PLUGINS.ENABLED)
+      : this._translateService.instant(T.PLUGINS.DISABLED);
   }
 
   requiresNodeExecution(plugin: PluginInstance): boolean {
@@ -215,14 +217,18 @@ export class PluginManagementComponent implements OnInit {
     }
 
     if (!file.name.endsWith('.zip')) {
-      this.uploadError.set('Please select a ZIP file');
+      this.uploadError.set(
+        this._translateService.instant(T.PLUGINS.PLEASE_SELECT_ZIP_FILE),
+      );
       return;
     }
 
     if (file.size > MAX_PLUGIN_ZIP_SIZE) {
       this.uploadError.set(
-        // eslint-disable-next-line max-len
-        `Plugin file is too large. Maximum allowed size is ${this.maxPluginSizeMB} MB, but selected file is ${(file.size / 1024 / 1024).toFixed(1)} MB.`,
+        this._translateService.instant(T.PLUGINS.FILE_TOO_LARGE, {
+          maxSize: this.maxPluginSizeMB,
+          fileSize: (file.size / 1024 / 1024).toFixed(1),
+        }),
       );
       return;
     }
@@ -239,7 +245,9 @@ export class PluginManagementComponent implements OnInit {
     } catch (error) {
       console.error('Failed to load plugin from ZIP:', error);
       this.uploadError.set(
-        error instanceof Error ? error.message : 'Failed to install plugin',
+        error instanceof Error
+          ? error.message
+          : this._translateService.instant(T.PLUGINS.FAILED_TO_INSTALL),
       );
     } finally {
       this.isUploading.set(false);
@@ -258,7 +266,9 @@ export class PluginManagementComponent implements OnInit {
     } catch (error) {
       console.error('Failed to clear plugin cache:', error);
       this.uploadError.set(
-        error instanceof Error ? error.message : 'Failed to clear plugin cache',
+        error instanceof Error
+          ? error.message
+          : this._translateService.instant(T.PLUGINS.FAILED_TO_CLEAR_CACHE),
       );
     } finally {
       this.isUploading.set(false);
@@ -277,7 +287,9 @@ export class PluginManagementComponent implements OnInit {
   async removeUploadedPlugin(plugin: PluginInstance): Promise<void> {
     if (
       !confirm(
-        `Are you sure you want to remove the plugin "${plugin.manifest.name}"? This cannot be undone.`,
+        this._translateService.instant(T.PLUGINS.CONFIRM_REMOVE, {
+          name: plugin.manifest.name,
+        }),
       )
     ) {
       return;
@@ -294,7 +306,9 @@ export class PluginManagementComponent implements OnInit {
     } catch (error) {
       console.error('Failed to remove plugin:', error);
       this.uploadError.set(
-        error instanceof Error ? error.message : 'Failed to remove plugin',
+        error instanceof Error
+          ? error.message
+          : this._translateService.instant(T.PLUGINS.FAILED_TO_REMOVE),
       );
     } finally {
       this.isUploading.set(false);
@@ -311,19 +325,31 @@ export class PluginManagementComponent implements OnInit {
     const features: string[] = [];
 
     if (plugin.manifest.hooks?.length > 0) {
-      features.push(`${plugin.manifest.hooks.length} hooks`);
+      features.push(
+        this._translateService.instant(T.PLUGINS.HOOKS, {
+          count: plugin.manifest.hooks.length,
+        }),
+      );
     }
 
     if (plugin.manifest.permissions?.length > 0) {
-      features.push(`${plugin.manifest.permissions.length} permissions`);
+      features.push(
+        this._translateService.instant(T.PLUGINS.PERMISSIONS, {
+          count: plugin.manifest.permissions.length,
+        }),
+      );
     }
 
     if (plugin.manifest.type) {
-      features.push(`Type: ${plugin.manifest.type}`);
+      features.push(
+        this._translateService.instant(T.PLUGINS.TYPE, {
+          type: plugin.manifest.type,
+        }),
+      );
     }
 
     return features.length > 0
       ? features.join(' • ')
-      : 'No additional information available';
+      : this._translateService.instant(T.PLUGINS.NO_ADDITIONAL_INFO);
   }
 }
