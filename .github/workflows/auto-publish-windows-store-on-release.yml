@@ -1,0 +1,40 @@
+#name: Auto Publish to Microsoft Store on Release
+#
+#on:
+#  release:
+#    types: [published]
+#
+#jobs:
+#  auto-publish-windows-store:
+#    runs-on: ubuntu-latest
+#
+#    # Only run for actual releases, not pre-releases
+#    if: '!github.event.release.prerelease'
+#
+#    steps:
+#      - name: Download Windows Store artifacts
+#        uses: dawidd6/action-download-artifact@v3
+#        with:
+#          github_token: ${{ secrets.GITHUB_TOKEN }}
+#          workflow: build-create-windows-store-on-release.yml
+#          name: WinStoreRelease
+#          path: downloads
+#          search_artifacts: true
+#
+#      - name: Submit to Microsoft Store for Review
+#        uses: isaacrlevin/windows-store-action@1.0
+#        with:
+#          tenant-id: ${{ secrets.AZURE_AD_TENANT_ID }}
+#          client-id: ${{ secrets.AZURE_AD_CLIENT_ID }}
+#          client-secret: ${{ secrets.AZURE_AD_CLIENT_SECRET }}
+#          app-id: ${{ secrets.MICROSOFT_STORE_APP_ID }}
+#          package-path: 'downloads/*.appx'
+#          skip-polling: false
+#          delete-pending-submission: true
+#
+#      - name: Notify submission result
+#        if: success()
+#        run: |
+#          echo "✅ Windows Store submission completed successfully"
+#          echo "📦 Package submitted for Microsoft Store review"
+#          echo "🏷️ Release: ${{ github.event.release.tag_name }}"

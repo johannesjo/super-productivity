@@ -1,0 +1,34 @@
+name: Auto Publish to Google Play on Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  auto-publish-google-play:
+    runs-on: ubuntu-latest
+
+    # Only run for actual releases, not pre-releases
+    if: '!github.event.release.prerelease'
+
+    steps:
+      - name: Download APK from Release
+        uses: robinraju/release-downloader@v1.8
+        with:
+          repository: ${{ github.repository }}
+          tag: ${{ github.event.release.tag_name }}
+          fileName: '*.apk'
+          out-file-path: 'downloads'
+
+      - name: Promote to Production in Google Play Console
+        uses: r0adkll/upload-google-play@v1.0.19
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.superproductivity.superproductivity
+          releaseFiles: downloads/*.apk
+          track: production
+          status: completed
+          inAppUpdatePriority: 3
+          releaseName: ${{ github.event.release.tag_name }}
+          releaseNotes: |
+            ${{ github.event.release.body }}

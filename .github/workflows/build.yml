@@ -74,6 +74,21 @@ jobs:
           build_script_name: empty
           github_token: ${{ secrets.github_token }}
           release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+          release_notes: |
+            ## What's Changed
+
+            This release includes various improvements, bug fixes, and new features.
+
+            ### Installation
+            - **Windows**: Download the `.exe` installer
+            - **macOS**: Download the `.dmg` file  
+            - **Linux**: Download the `.AppImage` file or install via Snap Store
+            - **Android**: Download the `.apk` file or get it from Google Play Store
+
+            For detailed changelog, see the commit history since the last release.
+
+            ### Support
+            If you encounter any issues, please report them on our [GitHub Issues](https://github.com/johannesjo/super-productivity/issues) page.
 
       # rename to possibly fix release issue
       - run: find ./app-builds -type f -name '*.snap' -exec sh -c 'x="{}"; mv "$x" "app-builds/sp.snap"' \;
