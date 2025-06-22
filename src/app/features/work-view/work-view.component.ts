@@ -56,6 +56,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import {
   flattenTasks,
   selectOverdueTasksWithSubTasks,
+  selectLaterTodayTasksWithSubTasks,
 } from '../tasks/store/task.selectors';
 import { CollapsibleComponent } from '../../ui/collapsible/collapsible.component';
 import { SnackService } from '../../core/snack/snack.service';
@@ -117,6 +118,9 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   overdueTasks = toSignal(this._store.select(selectOverdueTasksWithSubTasks), {
     initialValue: [],
   });
+  laterTodayTasks = toSignal(this._store.select(selectLaterTodayTasksWithSubTasks), {
+    initialValue: [],
+  });
   undoneTasks = input<TaskWithSubTasks[]>([]);
   customizedUndoneTasks$ = this.customizerService.customizeUndoneTasks(
     this.workContextService.undoneTasks$,
@@ -134,6 +138,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   selectedTaskId = toSignal(this.taskService.selectedTaskId$);
   isOnTodayList = toSignal(this.workContextService.isToday$);
   isDoneHidden = signal(!!localStorage.getItem(LS.DONE_TASKS_HIDDEN));
+  isLaterTodayHidden = signal(!!localStorage.getItem(LS.LATER_TODAY_TASKS_HIDDEN));
 
   isShowOverduePanel = computed(
     () => this.isOnTodayList() && this.overdueTasks().length > 0,
@@ -200,6 +205,15 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
         localStorage.setItem(LS.DONE_TASKS_HIDDEN, 'true');
       } else {
         localStorage.removeItem(LS.DONE_TASKS_HIDDEN);
+      }
+    });
+
+    effect(() => {
+      const isExpanded = this.isLaterTodayHidden();
+      if (isExpanded) {
+        localStorage.setItem(LS.LATER_TODAY_TASKS_HIDDEN, 'true');
+      } else {
+        localStorage.removeItem(LS.LATER_TODAY_TASKS_HIDDEN);
       }
     });
   }
