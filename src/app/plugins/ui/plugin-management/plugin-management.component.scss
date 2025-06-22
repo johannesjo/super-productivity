@@ -88,7 +88,7 @@ mat-error {
   }
 
   mat-card-title {
-    color: var(--warn-700, #d32f2f);
+    color: var(--c-warn);
     margin: 0;
   }
 
@@ -109,7 +109,7 @@ mat-error {
 
       li {
         margin: 8px 0;
-        color: var(--warn-700, #d32f2f);
+        color: var(--c-warn);
       }
     }
 
@@ -124,7 +124,7 @@ mat-error {
       margin-bottom: 0;
 
       mat-icon {
-        color: var(--primary, #3f51b5);
+        color: var(--c-primary);
       }
     }
   }
@@ -135,12 +135,13 @@ mat-error {
   align-items: center;
   gap: 8px;
   padding: 12px;
-  background-color: var(--primary-50, rgba(63, 81, 181, 0.08));
+  border-color: var(--c-primary);
   border-radius: 4px;
   margin-bottom: 16px;
-  color: var(--primary-700, #303f9f);
+  border-width: 2px;
+  border-style: solid;
 
   mat-icon {
-    color: var(--primary, #3f51b5);
+    color: var(--c-primary);
   }
 }
