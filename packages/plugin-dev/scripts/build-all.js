@@ -24,42 +24,6 @@ function log(message, color = '') {
 // Plugin configurations
 const plugins = [
   {
-    name: 'minimal-plugin',
-    path: 'minimal-plugin',
-    buildCommand: async (pluginPath) => {
-      const files = ['manifest.json', 'plugin.js', 'README.md'];
-      const zipName = 'minimal-plugin.zip';
-
-      // Check if files exist
-      const missingFiles = files.filter((f) => !fs.existsSync(path.join(pluginPath, f)));
-
-      if (missingFiles.length > 0) {
-        throw new Error(`Missing files: ${missingFiles.join(', ')}`);
-      }
-
-      await execAsync(`cd ${pluginPath} && zip -r ../${zipName} ${files.join(' ')}`);
-      return `${zipName} created`;
-    },
-  },
-  {
-    name: 'simple-typescript-plugin',
-    path: 'simple-typescript-plugin',
-    needsInstall: true,
-    buildCommand: async (pluginPath) => {
-      await execAsync(`cd ${pluginPath} && npm run build`);
-      return 'TypeScript compiled';
-    },
-  },
-  {
-    name: 'example-plugin',
-    path: 'example-plugin',
-    needsInstall: true,
-    buildCommand: async (pluginPath) => {
-      await execAsync(`cd ${pluginPath} && npm run build && npm run package`);
-      return 'Built and packaged';
-    },
-  },
-  {
     name: 'procrastination-buster',
     path: 'procrastination-buster',
     needsInstall: true,
