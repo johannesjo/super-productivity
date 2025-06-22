@@ -1,0 +1,11 @@
+
+### Bug Fixes
+
+* prevent APK upload from removing other release assets
+### Features
+
+* add default release notes to GitHub releases
+* auto upload APK to Google Play Console on release
+* auto upload to Microsoft Store on release
+* auto-publish to Google Play when release is published
+* auto-publish to Microsoft Store when release is published

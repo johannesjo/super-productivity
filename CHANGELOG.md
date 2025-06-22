@@ -1,3 +1,17 @@
+## [13.1.5](https://github.com/johannesjo/super-productivity/compare/v13.1.4...v13.1.5) (2025-06-22)
+
+### Bug Fixes
+
+- prevent APK upload from removing other release assets ([ecfd21b](https://github.com/johannesjo/super-productivity/commit/ecfd21b1b65c5e7c6fcbef3ea1e236820af3217a))
+
+### Features
+
+- add default release notes to GitHub releases ([9e89700](https://github.com/johannesjo/super-productivity/commit/9e897007e2c9a8dbc91de37af8d219a43d56a404))
+- auto upload APK to Google Play Console on release ([311f1e8](https://github.com/johannesjo/super-productivity/commit/311f1e8a4b1b6bd586a842b3c8815ce35197546d))
+- auto upload to Microsoft Store on release ([906f9bd](https://github.com/johannesjo/super-productivity/commit/906f9bdf0b56c5388c4d922c0233b655c4807273))
+- auto-publish to Google Play when release is published ([0eab3a9](https://github.com/johannesjo/super-productivity/commit/0eab3a9a8645ea7667f83f18e079f8bd975bf23b))
+- auto-publish to Microsoft Store when release is published ([db705be](https://github.com/johannesjo/super-productivity/commit/db705beab5bd9cbdac02e8445a6b94e55bf7912d))
+
 ## [13.1.4](https://github.com/johannesjo/super-productivity/compare/v13.1.3...v13.1.4) (2025-06-22)
 
 ## [13.1.3](https://github.com/johannesjo/super-productivity/compare/v13.1.2...v13.1.3) (2025-06-22)
