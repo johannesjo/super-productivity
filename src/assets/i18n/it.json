@@ -31,7 +31,6 @@
     "RESTORE_FILE_BACKUP_ANDROID": "Sembra che non ci siano DATI, ma è disponibile un backup. Vuoi caricarlo?",
     "RESTORE_STRAY_BACKUP": "Durante l'ultima sincronizzazione potrebbe essersi verificato un errore. Vuoi ripristinare l'ultimo backup?"
   },
-  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Più tardi oggi",
     "NEXT_WEEK": "La prossima settimana",
@@ -446,7 +445,6 @@
         "COMMENTS": "Commenti",
         "COMPONENTS": "Componenti",
         "DESCRIPTION": "Descrizione",
-        "LABELS": "Etichette",
         "LIST_OF_CHANGES": "Lista delle modifiche",
         "MARK_AS_CHECKED": "Segna gli aggiornamenti come verificati",
         "ON": "su",
