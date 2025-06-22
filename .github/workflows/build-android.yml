@@ -75,3 +75,11 @@ jobs:
         with:
           name: sup-android-release
           path: android/app/build/outputs/apk/**/*.apk
+
+      - name: Upload APK to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: android/app/build/outputs/apk/play/release/*.apk
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fail_on_unmatched_files: true
