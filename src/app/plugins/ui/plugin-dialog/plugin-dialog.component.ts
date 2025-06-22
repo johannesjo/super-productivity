@@ -5,7 +5,6 @@ import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import {
   MatDialogActions,
-  MatDialogClose,
   MatDialogContent,
   MatDialogTitle,
 } from '@angular/material/dialog';
@@ -74,7 +73,6 @@ import { T } from '../../../t.const';
     MatButton,
     MatIcon,
     MatDialogActions,
-    MatDialogClose,
     MatDialogContent,
     MatDialogTitle,
   ],
@@ -83,7 +81,7 @@ export class PluginDialogComponent {
   private readonly _dialogRef = inject(MatDialogRef<PluginDialogComponent>);
   private readonly _sanitizer = inject(DomSanitizer);
   private readonly _pluginSecurity = inject(PluginSecurityService);
-  private readonly _translateService = inject(TranslateService);
+  readonly _translateService = inject(TranslateService);
 
   readonly dialogData: DialogCfg & { title?: string };
   readonly sanitizedContent: SafeHtml | null = null;
