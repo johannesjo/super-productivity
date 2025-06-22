@@ -1902,6 +1902,7 @@
     "DONE_TASKS": "Done Tasks",
     "DONE_TASKS_IN_ARCHIVE": "There are currently no done tasks here, but there are some already archived.",
     "ESTIMATE_REMAINING": "Estimate remaining:",
+    "LATER_TODAY": "Later Today",
     "FINISH_DAY": "Finish Day",
     "FINISH_DAY_FOR_PROJECT": "Finish Day for this Project",
     "FINISH_DAY_FOR_TAG": "Finish Day for this Tag",

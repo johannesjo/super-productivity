@@ -133,7 +133,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     const isSubtask = !!task.parentId;
     // console.log(drag.data.id, { isSubtask, targetModelId, drag, drop });
     // return true;
-    if (targetModelId === 'OVERDUE') {
+    if (targetModelId === 'OVERDUE' || targetModelId === 'LATER_TODAY') {
       return false;
     } else if (isSubtask) {
       if (!PARENT_ALLOWED_LISTS.includes(targetModelId)) {
@@ -261,6 +261,11 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     const isSrcRegularList = src === 'DONE' || src === 'UNDONE';
     const isTargetRegularList = target === 'DONE' || target === 'UNDONE';
     const workContextId = this._workContextService.activeWorkContextId as string;
+
+    // Handle LATER_TODAY - prevent any moves to or from this list
+    if (src === 'LATER_TODAY' || target === 'LATER_TODAY') {
+      return;
+    }
 
     if (isSrcRegularList && isTargetRegularList) {
       // move inside today

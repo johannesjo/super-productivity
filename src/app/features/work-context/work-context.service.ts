@@ -365,7 +365,27 @@ export class WorkContextService {
   );
 
   undoneTasks$: Observable<TaskWithSubTasks[]> = this.todaysTasks$.pipe(
-    map((tasks) => tasks.filter((task) => task && !task.isDone)),
+    map((tasks) =>
+      tasks.filter((task) => {
+        if (!task || task.isDone) {
+          return false;
+        }
+
+        // Filter out tasks scheduled for later today
+        if (task.dueWithTime) {
+          const now = Date.now();
+          const todayEnd = new Date();
+          todayEnd.setHours(23, 59, 59, 999);
+
+          // If the task is scheduled for later today, exclude it
+          if (task.dueWithTime >= now && task.dueWithTime <= todayEnd.getTime()) {
+            return false;
+          }
+        }
+
+        return true;
+      }),
+    ),
   );
 
   doneTasks$: Observable<TaskWithSubTasks[]> = this.isToday$.pipe(

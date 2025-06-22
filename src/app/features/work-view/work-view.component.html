@@ -267,6 +267,32 @@
             }
           }
 
+          @if (laterTodayTasks().length > 0 && isOnTodayList()) {
+            <div
+              @expand
+              style="margin-top: 16px"
+            >
+              <collapsible
+                [title]="
+                  (T.WW.LATER_TODAY | translate) +
+                  ' (' +
+                  (laterTodayTasks()?.length || 0) +
+                  ')'
+                "
+                [isExpanded]="!isLaterTodayHidden()"
+                (isExpandedChange)="isLaterTodayHidden.set(!$event)"
+                [isIconBefore]="true"
+              >
+                <task-list
+                  [tasks]="laterTodayTasks()"
+                  [isSortingDisabled]="true"
+                  listId="PARENT"
+                  listModelId="LATER_TODAY"
+                ></task-list>
+              </collapsible>
+            </div>
+          }
+
           @if (!isPlanningMode() || hasDoneTasks()) {
             @let nrOfDoneArchived =
               doneTasks()?.length === 0
