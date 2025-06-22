@@ -38,7 +38,7 @@ import { BreakpointObserver } from '@angular/cdk/layout';
     <div class="mobile-dropdown-wrapper">
       <button
         (click)="toggleMenu()"
-        mat-mini-fab
+        mat-icon-button
         [matTooltip]="T.MH.SIDE_PANEL_MENU | translate"
       >
         <mat-icon>{{ isShowMobileMenu() ? 'close' : 'view_sidebar' }}</mat-icon>
@@ -52,6 +52,7 @@ import { BreakpointObserver } from '@angular/cdk/layout';
         @for (button of sidePanelButtons(); track button.pluginId) {
           <button
             mat-mini-fab
+            color=""
             [matTooltip]="button.label"
             (click)="onPluginButtonClick(button)"
             [class.active]="activePluginId() === button.pluginId && isShowPluginPanel()"
@@ -67,6 +68,7 @@ import { BreakpointObserver } from '@angular/cdk/layout';
         <!-- Task View Customizer -->
         <button
           mat-mini-fab
+          color=""
           [class.active]="isShowTaskViewCustomizerPanel()"
           [class.isCustomized]="taskViewCustomizerService.isCustomized()"
           [disabled]="!isRouteWithSidePanel()"
@@ -79,6 +81,7 @@ import { BreakpointObserver } from '@angular/cdk/layout';
         <!-- Issue Panel -->
         <button
           mat-mini-fab
+          color=""
           [class.active]="isShowIssuePanel()"
           [disabled]="!isRouteWithSidePanel()"
           (click)="toggleIssuePanel()"
@@ -90,6 +93,7 @@ import { BreakpointObserver } from '@angular/cdk/layout';
         <!-- Notes -->
         <button
           mat-mini-fab
+          color=""
           [class.active]="isShowNotes()"
           [disabled]="!isRouteWithSidePanel()"
           (click)="toggleNotes()"

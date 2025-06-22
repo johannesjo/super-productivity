@@ -79,7 +79,7 @@
     </button>
 
     @if (!focusModeConfig()?.isAlwaysUseFocusMode) {
-      @if (!isXxs()) {
+      @if (!isXxxs()) {
         <button
           mat-icon-button
           matTooltip="{{ T.MH.ENTER_FOCUS_MODE | translate }} {{
@@ -255,7 +255,7 @@
           <button
             (click)="isShowSimpleCounterBtnsMobile.set(!isShowSimpleCounterBtnsMobile())"
             [color]="isCounterRunning(enabledSimpleCounters()) ? 'accent' : ''"
-            mat-mini-fab
+            mat-icon-button
           >
             <mat-icon>{{ isShowSimpleCounterBtnsMobile() ? 'close' : 'timer' }}</mat-icon>
           </button>

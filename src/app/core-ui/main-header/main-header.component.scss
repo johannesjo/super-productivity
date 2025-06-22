@@ -109,13 +109,12 @@ button.isActive2 {
     margin-right: auto;
   }
 
-  ::ng-deep {
-    button {
-      margin-left: var(--s-quarter);
+  simple-counter-button,
+  button {
+    margin-left: var(--s-quarter);
 
-      @include mq(xs) {
-        margin-left: var(--s);
-      }
+    @include mq(xs) {
+      margin-left: var(--s);
     }
   }
 }
@@ -329,11 +328,6 @@ button.isActive2 {
 }
 
 // Desktop inline buttons - common style
-simple-counter-button {
-  @include mq(xs) {
-    margin-left: var(--s-quarter);
-  }
-}
 
 // Panel buttons
 .panel-btn {
