@@ -602,12 +602,12 @@
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Assegnatario",
+        "ATTACHMENTS": "Allegati",
         "DESCRIPTION": "Descrizione",
         "MARK_AS_CHECKED": "Contrassegna gli aggiornamenti come controllati",
         "STATUS": "Stato",
         "SUMMARY": "Sommario",
         "TYPE": "Tipo",
-        "ATTACHMENTS": "Allegati",
         "UPLOAD_ATTACHMENT": "Carica nel compito"
       },
       "ISSUE_STRINGS": {
@@ -615,12 +615,12 @@
         "ISSUES_STR": "pacchetti di lavoro"
       },
       "S": {
+        "ERR_NO_FILE": "Nessun file selezionato",
         "ERR_UNKNOWN": "OpenProject: errore sconosciuto {{statusCode}} {{errorMsg}}. CORS è configurato correttamente per il server?",
         "POST_TIME_SUCCESS": "OpenProject: inserimento dell'ora creato con successo per {{issueTitle}}",
         "TRANSITION": "OpenProject: Imposta issue \"{{issueKey}}\" a \"{{name}}\"",
         "TRANSITION_SUCCESS": "OpenProject: Imposta issue {{issueKey}} a <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Transizione caricata. Usa i selettori sotto per assegnarli",
-        "ERR_NO_FILE": "Nessun file selezionato"
+        "TRANSITIONS_LOADED": "Transizione caricata. Usa i selettori sotto per assegnarli"
       }
     },
     "PLANNER": {
@@ -1323,27 +1323,27 @@
     }
   },
   "FILE_IMEX": {
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "INITIATED_MSG": "È stata avviata un'importazione automatica dei dati.",
+      "SOURCE_URL_DOMAIN": "Dominio di origine",
+      "TITLE": "Conferma importazione dati da URL",
+      "WARNING_MSG": "Proseguendo, i dati e la configurazione attuali dell'applicazione verranno sovrascritti con il contenuto dell'URL specificato. Questa azione non può essere annullata.",
+      "WARNING_TITLE": "Avviso"
+    },
     "EXPORT_DATA": "Esporta dati",
     "IMPORT_FROM_FILE": "Importa da file",
+    "IMPORT_FROM_URL": "Importa da URL",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Inserisci l'URL completo del file di backup JSON di Super Productivity che desideri importare.",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "Importa da URL",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "Importa da URL",
     "PRIVACY_EXPORT": "Esporta dati anonimizzati (da inviare a contact@super-productivity.com per il debug)",
     "S_BACKUP_DOWNLOADED": "Fai backup dei download nella cartella dei documenti di Android",
     "S_ERR_IMPORT_FAILED": "Importazione dei dati fallita",
     "S_ERR_INVALID_DATA": "Importazione fallita: JSON non valido",
     "S_ERR_INVALID_URL": "Importazione fallita: URL fornito non valido",
-    "S_IMPORT_FROM_URL_ERR_DECODE": "Errore: impossibile decodificare il parametro URL per l'importazione. Assicurati che sia formattato correttamente.",
     "S_ERR_NETWORK": "Importazione fallita: errore di rete durante il recupero dei dati dall'URL",
-    "IMPORT_FROM_URL": "Importa da URL",
-    "URL_PLACEHOLDER": "Inserisci l'URL da cui importare",
-    "IMPORT_FROM_URL_DIALOG_TITLE": "Importa da URL",
-    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Inserisci l'URL completo del file di backup JSON di Super Productivity che desideri importare.",
-    "OPEN_IMPORT_FROM_URL_DIALOG": "Importa da URL",
-    "DIALOG_CONFIRM_URL_IMPORT": {
-      "TITLE": "Conferma importazione dati da URL",
-      "INITIATED_MSG": "È stata avviata un'importazione automatica dei dati.",
-      "SOURCE_URL_DOMAIN": "Dominio di origine",
-      "WARNING_TITLE": "Avviso",
-      "WARNING_MSG": "Proseguendo, i dati e la configurazione attuali dell'applicazione verranno sovrascritti con il contenuto dell'URL specificato. Questa azione non può essere annullata."
-    }
+    "S_IMPORT_FROM_URL_ERR_DECODE": "Errore: impossibile decodificare il parametro URL per l'importazione. Assicurati che sia formattato correttamente.",
+    "URL_PLACEHOLDER": "Inserisci l'URL da cui importare"
   },
   "G": {
     "ADD": "Aggiungi",

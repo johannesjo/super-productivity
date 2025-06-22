@@ -31,7 +31,6 @@
     "RESTORE_FILE_BACKUP_ANDROID": "Er lijken GEEN GEGEVENS te zijn, maar er is een back-up beschikbaar. Wil je hem laden?",
     "RESTORE_STRAY_BACKUP": "Tijdens de laatste synchronisatie is er mogelijk een fout opgetreden. Wilt u de laatste back-up herstellen?"
   },
-  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Later vandaag",
     "NEXT_WEEK": "Volgende week",
@@ -114,11 +113,24 @@
         "TITLE": "CalDav"
       },
       "ISSUE_CONTENT": {
+        "ASSIGNEE": "Toegewezen persoon",
+        "AT": "Bij",
+        "ATTACHMENTS": "Bijlagen",
+        "CHANGED": "Gewijzigd",
+        "COMMENTS": "Reacties",
+        "COMPONENTS": "Componenten",
         "DESCRIPTION": "Omschrijving",
         "LABELS": "Categorieën",
+        "LIST_OF_CHANGES": "Lijst van wijzigingen",
         "MARK_AS_CHECKED": "Markeer updates als aangevinkt",
+        "ON": "op",
+        "RELATED": "Gerelateerd",
         "STATUS": "Status",
-        "SUMMARY": "Samenvatting"
+        "STORY_POINTS": "Story Points",
+        "SUB_TASKS": "Subtaken",
+        "SUMMARY": "Samenvatting",
+        "WORKLOG": "Werklog",
+        "WRITE_A_COMMENT": "Schrijf een opmerking"
       },
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav: agenda \"{{calendarName}}\" niet gevonden",
@@ -156,6 +168,8 @@
         "L_INTERVAL": "Interval om zin te herhalen",
         "L_TEXT": "Tekst",
         "L_TEXT_DESCRIPTION": "Bijvoorbeeld: \"Werk aan ${currentTaskTitle}!\"",
+        "L_VOICE": "Selecteer een stem",
+        "L_VOICE_DESCRIPTION": "Kies een stem",
         "TITLE": "Domina Mode"
       }
     },
@@ -334,6 +348,39 @@
       "DEFAULT_PROJECT_DESCRIPTION": "Project toegewezen aan taken die zijn aangemaakt vanuit issues.",
       "DEFAULT_PROJECT_LABEL": "Standaard Superproductiviteitsproject",
       "HOW_TO_GET_A_TOKEN": "Hoe krijg ik een token?",
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Toegewezen persoon",
+        "AT": "Bij",
+        "ATTACHMENTS": "Bijlagen",
+        "AUTHOR": "Auteur",
+        "CATEGORY": "Categorie",
+        "CHANGED": "Gewijzigd",
+        "COMMENTS": "Reacties",
+        "COMPONENTS": "Componenten",
+        "DESCRIPTION": "Beschrijving",
+        "DONE_RATIO": "Voltooid percentage",
+        "DUE_DATE": "Vervaldatum",
+        "LABELS": "Labels",
+        "LAST_COMMENT": "Laatste opmerking",
+        "LIST_OF_CHANGES": "Lijst van wijzigingen",
+        "LOAD_ALL_COMMENTS": "Laad alle {{nr}} opmerkingen",
+        "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "Laad beschrijving & alle opmerkingen",
+        "LOCATION": "Locatie",
+        "MARK_AS_CHECKED": "Markeer updates als gecontroleerd",
+        "ON": "op",
+        "PRIORITY": "Prioriteit",
+        "RELATED": "Gerelateerd",
+        "START": "Start",
+        "STATUS": "Status",
+        "STORY_POINTS": "Story Points",
+        "SUB_TASKS": "Subtaken",
+        "SUMMARY": "Samenvatting",
+        "TIME_SPENT": "Tijd besteed",
+        "TYPE": "Type",
+        "VERSION": "Versie",
+        "WORKLOG": "Werklog",
+        "WRITE_A_COMMENT": "Schrijf een opmerking"
+      },
       "S": {
         "ERR_GENERIC": "{{issueProviderName}} Fout: {{errTxt}}",
         "ERR_NETWORK": "{{issueProviderName}}: Verzoek is mislukt vanwege een netwerkfout aan de clientzijde",
@@ -481,6 +528,14 @@
         "WELCOME_USER": "Welkom {{user}}!"
       }
     },
+    "MARKDOWN_PASTE": {
+      "CONFIRM_ADD_TO_SUB_TASK_NOTES": "De geplakte markdownlijst toevoegen aan de notities van subtaak \"{{parentTaskTitle}}\"?",
+      "CONFIRM_PARENT_TASKS": "Maak <strong>{{tasksCount}} nieuwe taken</strong> aan vanuit de geplakte markdownlijst?",
+      "CONFIRM_PARENT_TASKS_WITH_SUBS": "Maak <strong>{{tasksCount}} nieuwe taken en {{subTasksCount}} subtaken</strong> aan vanuit de geplakte markdownlijst?",
+      "CONFIRM_SUB_TASKS": "Maak {{tasksCount}} nieuwe subtaken aan vanuit de geplakte markdownlijst?",
+      "CONFIRM_SUB_TASKS_WITH_PARENT": "Maak <strong>{{tasksCount}} nieuwe subtaken onder \"{{parentTaskTitle}}\"</strong> aan vanuit de geplakte markdownlijst?",
+      "DIALOG_TITLE": "Geplakte Markdownlijst gedetecteerd!"
+    },
     "METRIC": {
       "BANNER": {
         "CHECK": "Ik heb het gedaan!"
@@ -603,12 +658,12 @@
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Cessionaris",
+        "ATTACHMENTS": "Bijlagen",
         "DESCRIPTION": "Omschrijving",
         "MARK_AS_CHECKED": "Markeer updates als aangevinkt",
         "STATUS": "staat",
         "SUMMARY": "Samenvatting",
         "TYPE": "Type",
-        "ATTACHMENTS": "Bijlagen",
         "UPLOAD_ATTACHMENT": "Uploaden naar taak"
       },
       "ISSUE_STRINGS": {
@@ -616,12 +671,12 @@
         "ISSUES_STR": "Werkpakketten"
       },
       "S": {
+        "ERR_NO_FILE": "Geen bestand geselecteerd",
         "ERR_UNKNOWN": "OpenProject: onbekende fout {{statusCode}} {{errorMsg}}. Is CORS correct geconfigureerd voor de server?",
         "POST_TIME_SUCCESS": "OpenProject: tijdsinvoer voor {{issueTitle}}gemaakt",
         "TRANSITION": "OpenProject: Zet issue \"{{issueKey}}\" op \"{{name}}\"",
         "TRANSITION_SUCCESS": "OpenProject: Stel issue {{issueKey}} in op <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Overgangen geladen. Gebruik de onderstaande selecties om ze toe te wijzen",
-        "ERR_NO_FILE": "Geen bestand geselecteerd"
+        "TRANSITIONS_LOADED": "Overgangen geladen. Gebruik de onderstaande selecties om ze toe te wijzen"
       }
     },
     "PLANNER": {
@@ -819,6 +874,7 @@
     "SEARCH_BAR": {
       "INFO": "Klik op het lijstpictogram om te zoeken naar gearchiveerde taken",
       "INFO_ARCHIVED": "Klik op het archiefpictogram om naar normale taken te zoeken",
+      "NO_RESULTS": "Geen taken gevonden die overeenkomen met uw zoekopdracht",
       "PLACEHOLDER": "Zoek naar taak of taakbeschrijving",
       "PLACEHOLDER_ARCHIVED": "Zoeken naar gearchiveerde taken",
       "TOO_MANY_RESULTS": "Te veel resultaten, verfijn uw zoekopdracht a.u.b."
@@ -878,20 +934,24 @@
         "TITLE": "Inloggen: {{provider}}"
       },
       "D_CONFLICT": {
+        "LAMPORT_CLOCK": "Herziening",
         "LAST_CHANGE": "laatste wijziging:",
         "LAST_SYNC": "laatste synchronisatie:",
         "LOCAL": "Lokaal",
         "LOCAL_REMOTE": "lokaal -> op afstand",
         "REMOTE": "afgelegen",
         "TEXT": "<p>Update vanuit Dropbox. Zowel lokale als externe gegevens lijken te zijn gewijzigd.</p>",
+        "TIMESTAMP": "Tijdstempel",
         "TITLE": "Dropbox: tegenstrijdige gegevens",
         "USE_LOCAL": "Gebruik lokaal",
         "USE_REMOTE": "Gebruik afstandsbediening"
       },
       "D_DECRYPT_ERROR": {
         "BTN_OVER_WRITE_REMOTE": "Wijzigen en overschrijven op afstand",
+        "CHANGE_PW_AND_DECRYPT": "Wijzig & Probeer te ontsleutelen",
         "P1": "Uw gegevens zijn versleuteld en de decodering is mislukt. Voer het juiste wachtwoord in!",
-        "P2": "U kunt ook uw wachtwoord wijzigen, waardoor alle externe gegevens worden overschreven."
+        "P2": "U kunt ook uw wachtwoord wijzigen, waardoor alle externe gegevens worden overschreven.",
+        "PASSWORD": "Wachtwoord"
       },
       "D_INCOMPLETE_SYNC": {
         "BTN_CLOSE_APP": "App sluiten",
@@ -1232,6 +1292,45 @@
         "WEDNESDAY": "woensdag"
       }
     },
+    "TASK_VIEW": {
+      "CUSTOMIZER": {
+        "ENTER_PROJECT": "Voer project in",
+        "ENTER_TAG": "Voer Tag in",
+        "ESTIMATED_TIME": "Geschatte tijd",
+        "FILTER_BY": "Filter op",
+        "FILTER_DEFAULT": "Geen filter",
+        "FILTER_ESTIMATED_TIME": "Geschatte tijd",
+        "FILTER_PROJECT": "Project",
+        "FILTER_SCHEDULED_DATE": "Geplande datum",
+        "FILTER_TAG": "Tag",
+        "FILTER_TIME_SPENT": "Tijd besteed",
+        "GROUP_BY": "Groeperen op",
+        "GROUP_DEFAULT": "Geen groep",
+        "GROUP_PROJECT": "Project",
+        "GROUP_SCHEDULED_DATE": "Geplande datum",
+        "GROUP_TAG": "Tag",
+        "RESET_ALL": "Reset alles",
+        "SCHEDULED_DEFAULT": "Elke datum",
+        "SCHEDULED_NEXT_MONTH": "Volgende maand",
+        "SCHEDULED_NEXT_WEEK": "Volgende week",
+        "SCHEDULED_THIS_MONTH": "Deze maand",
+        "SCHEDULED_THIS_WEEK": "Deze week",
+        "SCHEDULED_TODAY": "Vandaag",
+        "SCHEDULED_TOMORROW": "Morgen",
+        "SORT_BY": "Sorteer op",
+        "SORT_CREATION_DATE": "Creatiedatum",
+        "SORT_DEFAULT": "Standaard",
+        "SORT_NAME": "Naam",
+        "SORT_SCHEDULED_DATE": "Geplande datum",
+        "TIME_1HOUR": "> 1 Uur",
+        "TIME_2HOUR": "> 2 Uren",
+        "TIME_10MIN": "> 10 Minuten",
+        "TIME_30MIN": "> 30 Minuten",
+        "TIME_DEFAULT": "Elke duur",
+        "TIME_SPENT": "Tijd besteed",
+        "TITLE": "Taakweergave Aanpassen"
+      }
+    },
     "TIME_TRACKING": {
       "B": {
         "ALREADY_DID": "heb ik al gedaan",
@@ -1324,33 +1423,34 @@
     }
   },
   "FILE_IMEX": {
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "INITIATED_MSG": "Een automatische gegevensimport is gestart.",
+      "SOURCE_URL_DOMAIN": "Bron domein",
+      "TITLE": "Bevestig gegevensimport van URL",
+      "WARNING_MSG": "Doorgaan zal je huidige applicatiegegevens en configuratie overschrijven met de inhoud van de opgegeven URL. Deze actie kan niet ongedaan worden gemaakt.",
+      "WARNING_TITLE": "Waarschuwing"
+    },
     "EXPORT_DATA": "Exportgegevens",
     "IMPORT_FROM_FILE": "Importeren uit bestand",
+    "IMPORT_FROM_URL": "Importeren van URL",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Voer de volledige URL in van het Super Productivity-back-up JSON-bestand dat je wilt importeren.",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "Importeren van URL",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "Importeren van URL",
     "PRIVACY_EXPORT": "Geanonimiseerde gegevens exporteren (om naar contact@super-productivity.com te sturen voor debugging)",
     "S_BACKUP_DOWNLOADED": "Back-up gedownload naar de map met Android-documenten",
     "S_ERR_IMPORT_FAILED": "Het importeren van gegevens is mislukt",
     "S_ERR_INVALID_DATA": "Importeren mislukt: ongeldige JSON",
     "S_ERR_INVALID_URL": "Import mislukt: Ongeldige URL opgegeven",
-    "S_IMPORT_FROM_URL_ERR_DECODE": "Fout: Kon de URL-parameter voor import niet decoderen. Zorg ervoor dat deze correct is geformatteerd.",
     "S_ERR_NETWORK": "Import mislukt: Netwerkfout bij het ophalen van gegevens van URL",
-    "IMPORT_FROM_URL": "Importeren van URL",
-    "URL_PLACEHOLDER": "Voer de URL in om te importeren",
-    "IMPORT_FROM_URL_DIALOG_TITLE": "Importeren van URL",
-    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Voer de volledige URL in van het Super Productivity-back-up JSON-bestand dat je wilt importeren.",
-    "OPEN_IMPORT_FROM_URL_DIALOG": "Importeren van URL",
-    "DIALOG_CONFIRM_URL_IMPORT": {
-      "TITLE": "Bevestig gegevensimport van URL",
-      "INITIATED_MSG": "Een automatische gegevensimport is gestart.",
-      "SOURCE_URL_DOMAIN": "Bron domein",
-      "WARNING_TITLE": "Waarschuwing",
-      "WARNING_MSG": "Doorgaan zal je huidige applicatiegegevens en configuratie overschrijven met de inhoud van de opgegeven URL. Deze actie kan niet ongedaan worden gemaakt."
-    }
+    "S_IMPORT_FROM_URL_ERR_DECODE": "Fout: Kon de URL-parameter voor import niet decoderen. Zorg ervoor dat deze correct is geformatteerd.",
+    "URL_PLACEHOLDER": "Voer de URL in om te importeren"
   },
   "G": {
     "ADD": "Voeg  toe",
     "ADVANCED_CFG": "Geavanceerde Configuratie",
     "CANCEL": "annuleren",
     "CLOSE": "Sluiten",
+    "CONFIRM": "Bevestigen",
     "DELETE": "Verwijderen",
     "DISMISS": "Afwijzen",
     "DO_IT": "Doe het!",
@@ -1471,6 +1571,7 @@
       "TOGGLE_ISSUE_PANEL": "Issuepaneel weergeven/verbergen",
       "TOGGLE_PLAY": "Taak starten / stoppen",
       "TOGGLE_SIDE_NAV": "Show & Focus / Hide Sidenav",
+      "TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL": "Filter/Groep/Sorteer Paneel Wisselen",
       "TRIGGER_SYNC": "Triggersynchronisatie (indien geconfigureerd)",
       "ZOOM_DEFAULT": "Zoomstandaard (alleen desktop)",
       "ZOOM_IN": "Inzoomen (alleen desktop)",
@@ -1515,6 +1616,7 @@
       "IS_HIDE_NAV": "Verberg navigatie totdat de hoofdkop is opgehangen (alleen desktop)",
       "IS_MINIMIZE_TO_TRAY": "Minimaliseren naar lade (alleen desktop)",
       "IS_SHOW_TIP_LONGER": "Toon productiviteitstip op app-start iets langer",
+      "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Toon huidige countdown in de tray / statusmenu (alleen desktop mac)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Toon huidige taak in het systeemvak / statusmenu (alleen desktop)",
       "IS_TURN_OFF_MARKDOWN": "Schakel markdown-parsering voor notities uit",
       "IS_USE_MINIMAL_SIDE_NAV": "Gebruik een minimale navigatiebalk (toon alleen pictogrammen)",
@@ -1600,6 +1702,34 @@
       "TITLE": "Tijdregistratie"
     }
   },
+  "GLOBAL_RELATIVE_TIME": {
+    "FUTURE": {
+      "A_DAY": "over een dag",
+      "A_MINUTE": "over een minuut",
+      "A_MONTH": "over een maand",
+      "A_YEAR": "over een jaar",
+      "AN_HOUR": "over een uur",
+      "DAYS": "over {{count}} dagen",
+      "FEW_SECONDS": "over een paar seconden",
+      "HOURS": "over {{count}} uren",
+      "MINUTES": "over {{count}} minuten",
+      "MONTHS": "over {{count}} maanden",
+      "YEARS": "over {{count}} jaren"
+    },
+    "PAST": {
+      "A_DAY": "een dag geleden",
+      "A_MINUTE": "een minuut geleden",
+      "A_MONTH": "een maand geleden",
+      "A_YEAR": "een jaar geleden",
+      "AN_HOUR": "een uur geleden",
+      "DAYS": "{{count}} dagen geleden",
+      "FEW_SECONDS": "een paar seconden geleden",
+      "HOURS": "{{count}} uren geleden",
+      "MINUTES": "{{count}} minuten geleden",
+      "MONTHS": "{{count}} maanden geleden",
+      "YEARS": "{{count}} jaren geleden"
+    }
+  },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Gekopieerd naar het klembord",
     "ERR_COMPRESSION": "Fout voor compressie-interface",
@@ -1632,6 +1762,7 @@
     "CREATE_TAG": "Tag maken",
     "DELETE_PROJECT": "Project verwijderen",
     "DELETE_TAG": "Tag verwijderen",
+    "ENTER_FOCUS_MODE": "Voer Focusmodus in",
     "GO_TO_TASK_LIST": "Ga naar takenlijst",
     "HELP": "Help",
     "HM": {
@@ -1656,6 +1787,7 @@
     "PROJECTS": "Projecten",
     "QUICK_HISTORY": "Snelle geschiedenis",
     "SCHEDULE": "Schema",
+    "SEARCH": "Zoeken",
     "SETTINGS": "Instellingen",
     "SHOW_SEARCH_BAR": "Toon zoekbalk",
     "TAGS": "Tags",
@@ -1768,6 +1900,7 @@
     "ADD_SCHEDULED_FOR_TOMORROW": "Voeg taken toe die voor morgen zijn gepland ({{nr}})",
     "ADD_SOME_TASKS": "Voeg wat taken toe om je dag te plannen!",
     "DONE_TASKS": "Voltooide taken",
+    "DONE_TASKS_IN_ARCHIVE": "Er zijn momenteel geen voltooide taken hier, maar er zijn er al enkele gearchiveerd.",
     "ESTIMATE_REMAINING": "Resterende schatting:",
     "FINISH_DAY": "Eindig de dag",
     "FINISH_DAY_FOR_PROJECT": "Einddatum voor dit project",
@@ -1776,6 +1909,7 @@
     "HELP_PROCRASTINATION": "Help, ik stel het uit!",
     "MOVE_DONE_TO_ARCHIVE": "Verplaatsing gedaan naar archief",
     "NO_DONE_TASKS": "Er zijn momenteel geen voltooide taken",
+    "NO_PLANNED_TASK_ALL_DONE": "alle taken voltooid",
     "NO_PLANNED_TASKS": "Geen geplande taken",
     "READY_TO_WORK": "Klaar om te werken!",
     "RESET_BREAK_TIMER": "Reset zonder pauzetimer",

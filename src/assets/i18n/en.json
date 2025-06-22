@@ -31,7 +31,6 @@
     "RESTORE_FILE_BACKUP_ANDROID": "There seems to be NO DATA, but there is a backup available. Do you want to load it?",
     "RESTORE_STRAY_BACKUP": "During last sync there might have been some error. Do you want to restore the last backup?"
   },
-  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Later Today",
     "NEXT_WEEK": "Next Week",
@@ -114,14 +113,14 @@
         "TITLE": "CalDav"
       },
       "ISSUE_CONTENT": {
-        "DESCRIPTION": "Description",
-        "LABELS": "Categories",
         "ASSIGNEE": "Assignee",
         "AT": "at",
         "ATTACHMENTS": "Attachments",
         "CHANGED": "changed",
         "COMMENTS": "Comments",
         "COMPONENTS": "Components",
+        "DESCRIPTION": "Description",
+        "LABELS": "Categories",
         "LIST_OF_CHANGES": "List of changes",
         "MARK_AS_CHECKED": "Mark updates as checked",
         "ON": "on",
@@ -169,9 +168,9 @@
         "L_INTERVAL": "Interval to repeat phrase",
         "L_TEXT": "Text",
         "L_TEXT_DESCRIPTION": "E.g.: \"Work on ${currentTaskTitle}!\"",
-        "TITLE": "Domina Mode",
         "L_VOICE": "Select a Voice",
-        "L_VOICE_DESCRIPTION": "Choose a voice"
+        "L_VOICE_DESCRIPTION": "Choose a voice",
+        "TITLE": "Domina Mode"
       }
     },
     "DROPBOX": {
@@ -351,9 +350,9 @@
       "HOW_TO_GET_A_TOKEN": "How to get a token?",
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Assignee",
-        "AUTHOR": "Author",
         "AT": "at",
         "ATTACHMENTS": "Attachments",
+        "AUTHOR": "Author",
         "CATEGORY": "Category",
         "CHANGED": "changed",
         "COMMENTS": "Comments",
@@ -530,11 +529,11 @@
       }
     },
     "MARKDOWN_PASTE": {
+      "CONFIRM_ADD_TO_SUB_TASK_NOTES": "Add the pasted markdown list to the notes of sub-task \"{{parentTaskTitle}}\"?",
       "CONFIRM_PARENT_TASKS": "Create <strong>{{tasksCount}} new tasks</strong> from the pasted markdown list?",
       "CONFIRM_PARENT_TASKS_WITH_SUBS": "Create <strong>{{tasksCount}} new tasks and {{subTasksCount}} sub-tasks</strong> from the pasted markdown list?",
       "CONFIRM_SUB_TASKS": "Create {{tasksCount}} new sub-tasks from the pasted markdown list?",
       "CONFIRM_SUB_TASKS_WITH_PARENT": "Create <strong>{{tasksCount}} new sub-tasks under \"{{parentTaskTitle}}\"</strong> from the pasted markdown list?",
-      "CONFIRM_ADD_TO_SUB_TASK_NOTES": "Add the pasted markdown list to the notes of sub-task \"{{parentTaskTitle}}\"?",
       "DIALOG_TITLE": "Pasted Markdown List detected!"
     },
     "METRIC": {
@@ -659,12 +658,12 @@
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Assignee",
+        "ATTACHMENTS": "Attachments",
         "DESCRIPTION": "Description",
         "MARK_AS_CHECKED": "Mark updates as checked",
         "STATUS": "Status",
         "SUMMARY": "Summary",
         "TYPE": "Type",
-        "ATTACHMENTS": "Attachments",
         "UPLOAD_ATTACHMENT": "Upload to Task"
       },
       "ISSUE_STRINGS": {
@@ -672,12 +671,12 @@
         "ISSUES_STR": "work packages"
       },
       "S": {
+        "ERR_NO_FILE": "No file selected",
         "ERR_UNKNOWN": "OpenProject: Unknown error {{statusCode}} {{errorMsg}}. Is CORS properly configured for the server?",
         "POST_TIME_SUCCESS": "OpenProject: Successfully created time entry for {{issueTitle}}",
         "TRANSITION": "OpenProject: Set issue \"{{issueKey}}\" to \"{{name}}\"",
         "TRANSITION_SUCCESS": "OpenProject: Set issue {{issueKey}} to <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Transitions loaded. Use the selects below to assign them",
-        "ERR_NO_FILE": "No file selected"
+        "TRANSITIONS_LOADED": "Transitions loaded. Use the selects below to assign them"
       }
     },
     "PLANNER": {
@@ -935,17 +934,17 @@
         "TITLE": "Login: {{provider}}"
       },
       "D_CONFLICT": {
+        "LAMPORT_CLOCK": "Revision",
         "LAST_CHANGE": "Last Change:",
         "LAST_SYNC": "Last Sync:",
         "LOCAL": "Local",
         "LOCAL_REMOTE": "Local -> Remote",
         "REMOTE": "Remote",
         "TEXT": "<p>Update from remote. Both local and remote data seem to be modified.</p>",
+        "TIMESTAMP": "Timestamp",
         "TITLE": "Sync: Conflicting Data",
         "USE_LOCAL": "Keep local",
-        "USE_REMOTE": "Keep remote",
-        "TIMESTAMP": "Timestamp",
-        "LAMPORT_CLOCK": "Revision"
+        "USE_REMOTE": "Keep remote"
       },
       "D_DECRYPT_ERROR": {
         "BTN_OVER_WRITE_REMOTE": "Change & Overwrite Remote",
@@ -1213,45 +1212,6 @@
         "TOGGLE_DONE": "un-/mark as done"
       }
     },
-    "TASK_VIEW": {
-      "CUSTOMIZER": {
-        "TITLE": "Customize Task View",
-        "SORT_BY": "Sort By",
-        "GROUP_BY": "Group By",
-        "FILTER_BY": "Filter By",
-        "SORT_DEFAULT": "Default",
-        "SORT_NAME": "Name",
-        "SORT_SCHEDULED_DATE": "Scheduled Date",
-        "SORT_CREATION_DATE": "Creation Date",
-        "ESTIMATED_TIME": "Estimated Time",
-        "TIME_SPENT": "Time Spent",
-        "GROUP_DEFAULT": "No Group",
-        "GROUP_TAG": "Tag",
-        "GROUP_PROJECT": "Project",
-        "GROUP_SCHEDULED_DATE": "Scheduled Date",
-        "FILTER_DEFAULT": "No Filter",
-        "FILTER_TAG": "Tag",
-        "FILTER_PROJECT": "Project",
-        "FILTER_SCHEDULED_DATE": "Scheduled Date",
-        "FILTER_ESTIMATED_TIME": "Estimated Time",
-        "FILTER_TIME_SPENT": "Time Spent",
-        "SCHEDULED_DEFAULT": "Any Date",
-        "SCHEDULED_TODAY": "Today",
-        "SCHEDULED_TOMORROW": "Tomorrow",
-        "SCHEDULED_THIS_WEEK": "This Week",
-        "SCHEDULED_NEXT_WEEK": "Next Week",
-        "SCHEDULED_THIS_MONTH": "This Month",
-        "SCHEDULED_NEXT_MONTH": "Next Month",
-        "TIME_DEFAULT": "Any Duration",
-        "TIME_10MIN": "> 10 Minutes",
-        "TIME_30MIN": "> 30 Minutes",
-        "TIME_1HOUR": "> 1 Hour",
-        "TIME_2HOUR": "> 2 Hours",
-        "RESET_ALL": "Reset All",
-        "ENTER_TAG": "Enter tag",
-        "ENTER_PROJECT": "Enter project"
-      }
-    },
     "TASK_REPEAT": {
       "ADD_INFO_PANEL": {
         "CUSTOM": "Custom repeat config",
@@ -1330,6 +1290,45 @@
         "TITLE": "Title for task",
         "TUESDAY": "Tuesday",
         "WEDNESDAY": "Wednesday"
+      }
+    },
+    "TASK_VIEW": {
+      "CUSTOMIZER": {
+        "ENTER_PROJECT": "Enter project",
+        "ENTER_TAG": "Enter tag",
+        "ESTIMATED_TIME": "Estimated Time",
+        "FILTER_BY": "Filter By",
+        "FILTER_DEFAULT": "No Filter",
+        "FILTER_ESTIMATED_TIME": "Estimated Time",
+        "FILTER_PROJECT": "Project",
+        "FILTER_SCHEDULED_DATE": "Scheduled Date",
+        "FILTER_TAG": "Tag",
+        "FILTER_TIME_SPENT": "Time Spent",
+        "GROUP_BY": "Group By",
+        "GROUP_DEFAULT": "No Group",
+        "GROUP_PROJECT": "Project",
+        "GROUP_SCHEDULED_DATE": "Scheduled Date",
+        "GROUP_TAG": "Tag",
+        "RESET_ALL": "Reset All",
+        "SCHEDULED_DEFAULT": "Any Date",
+        "SCHEDULED_NEXT_MONTH": "Next Month",
+        "SCHEDULED_NEXT_WEEK": "Next Week",
+        "SCHEDULED_THIS_MONTH": "This Month",
+        "SCHEDULED_THIS_WEEK": "This Week",
+        "SCHEDULED_TODAY": "Today",
+        "SCHEDULED_TOMORROW": "Tomorrow",
+        "SORT_BY": "Sort By",
+        "SORT_CREATION_DATE": "Creation Date",
+        "SORT_DEFAULT": "Default",
+        "SORT_NAME": "Name",
+        "SORT_SCHEDULED_DATE": "Scheduled Date",
+        "TIME_1HOUR": "> 1 Hour",
+        "TIME_2HOUR": "> 2 Hours",
+        "TIME_10MIN": "> 10 Minutes",
+        "TIME_30MIN": "> 30 Minutes",
+        "TIME_DEFAULT": "Any Duration",
+        "TIME_SPENT": "Time Spent",
+        "TITLE": "Customize Task View"
       }
     },
     "TIME_TRACKING": {
@@ -1424,27 +1423,27 @@
     }
   },
   "FILE_IMEX": {
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "INITIATED_MSG": "An automatic data import has been initiated.",
+      "SOURCE_URL_DOMAIN": "Source Domain",
+      "TITLE": "Confirm Data Import from URL",
+      "WARNING_MSG": "Proceeding will overwrite your current application data and configuration with the content from the specified URL. This action cannot be undone.",
+      "WARNING_TITLE": "Warning"
+    },
     "EXPORT_DATA": "Export Data",
     "IMPORT_FROM_FILE": "Import from file",
+    "IMPORT_FROM_URL": "Import from URL",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Please enter the full URL of the Super Productivity backup JSON file you want to import.",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "Import from URL",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "Import from URL",
     "PRIVACY_EXPORT": "Export anonymized data (to send to contact@super-productivity.com for debugging)",
     "S_BACKUP_DOWNLOADED": "Backup downloaded to android documents folder",
     "S_ERR_IMPORT_FAILED": "Importing data failed",
     "S_ERR_INVALID_DATA": "Import failed: Invalid JSON",
     "S_ERR_INVALID_URL": "Import failed: Invalid URL provided",
-    "S_IMPORT_FROM_URL_ERR_DECODE": "Error: Could not decode the URL parameter for import. Please ensure it is correctly formatted.",
     "S_ERR_NETWORK": "Import failed: Network error while fetching data from URL",
-    "IMPORT_FROM_URL": "Import from URL",
-    "URL_PLACEHOLDER": "Enter URL to import from",
-    "IMPORT_FROM_URL_DIALOG_TITLE": "Import from URL",
-    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Please enter the full URL of the Super Productivity backup JSON file you want to import.",
-    "OPEN_IMPORT_FROM_URL_DIALOG": "Import from URL",
-    "DIALOG_CONFIRM_URL_IMPORT": {
-      "TITLE": "Confirm Data Import from URL",
-      "INITIATED_MSG": "An automatic data import has been initiated.",
-      "SOURCE_URL_DOMAIN": "Source Domain",
-      "WARNING_TITLE": "Warning",
-      "WARNING_MSG": "Proceeding will overwrite your current application data and configuration with the content from the specified URL. This action cannot be undone."
-    }
+    "S_IMPORT_FROM_URL_ERR_DECODE": "Error: Could not decode the URL parameter for import. Please ensure it is correctly formatted.",
+    "URL_PLACEHOLDER": "Enter URL to import from"
   },
   "G": {
     "ADD": "Add",
@@ -1617,8 +1616,8 @@
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_MINIMIZE_TO_TRAY": "Minimize to tray (desktop only)",
       "IS_SHOW_TIP_LONGER": "Show productivity tip on app start a little longer",
-      "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop mac/windows only)",
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Show current countdown in the tray / status menu (desktop mac only)",
+      "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop mac/windows only)",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for task notes",
       "IS_USE_MINIMAL_SIDE_NAV": "Use minimal navigation bar (show only icons)",
       "START_OF_NEXT_DAY": "Start time of the next day",
@@ -1703,6 +1702,34 @@
       "TITLE": "Time Tracking"
     }
   },
+  "GLOBAL_RELATIVE_TIME": {
+    "FUTURE": {
+      "A_DAY": "in a day",
+      "A_MINUTE": "in a minute",
+      "A_MONTH": "in a month",
+      "A_YEAR": "in a year",
+      "AN_HOUR": "in an hour",
+      "DAYS": "in {{count}} days",
+      "FEW_SECONDS": "in a few seconds",
+      "HOURS": "in {{count}} hours",
+      "MINUTES": "in {{count}} minutes",
+      "MONTHS": "in {{count}} months",
+      "YEARS": "in {{count}} years"
+    },
+    "PAST": {
+      "A_DAY": "a day ago",
+      "A_MINUTE": "a minute ago",
+      "A_MONTH": "a month ago",
+      "A_YEAR": "a year ago",
+      "AN_HOUR": "an hour ago",
+      "DAYS": "{{count}} days ago",
+      "FEW_SECONDS": "a few seconds ago",
+      "HOURS": "{{count}} hours ago",
+      "MINUTES": "{{count}} minutes ago",
+      "MONTHS": "{{count}} months ago",
+      "YEARS": "{{count}} years ago"
+    }
+  },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Copied to clipboard",
     "ERR_COMPRESSION": "Error for compression interface",
@@ -1713,34 +1740,6 @@
     "PERSISTENCE_ERROR": "Error when requesting to persist data: {{err}}",
     "RUNNING_X": "Running \"{{str}}\".",
     "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} pressed, but open bookmarks shortcut is only available when in project context."
-  },
-  "GLOBAL_RELATIVE_TIME": {
-    "PAST": {
-      "FEW_SECONDS": "a few seconds ago",
-      "A_MINUTE": "a minute ago",
-      "MINUTES": "{{count}} minutes ago",
-      "AN_HOUR": "an hour ago",
-      "HOURS": "{{count}} hours ago",
-      "A_DAY": "a day ago",
-      "DAYS": "{{count}} days ago",
-      "A_MONTH": "a month ago",
-      "MONTHS": "{{count}} months ago",
-      "A_YEAR": "a year ago",
-      "YEARS": "{{count}} years ago"
-    },
-    "FUTURE": {
-      "FEW_SECONDS": "in a few seconds",
-      "A_MINUTE": "in a minute",
-      "MINUTES": "in {{count}} minutes",
-      "AN_HOUR": "in an hour",
-      "HOURS": "in {{count}} hours",
-      "A_DAY": "in a day",
-      "DAYS": "in {{count}} days",
-      "A_MONTH": "in a month",
-      "MONTHS": "in {{count}} months",
-      "A_YEAR": "in a year",
-      "YEARS": "in {{count}} years"
-    }
   },
   "GPB": {
     "ASSETS": "Loading assets...",
@@ -1910,8 +1909,8 @@
     "HELP_PROCRASTINATION": "Help I'm procrastinating!",
     "MOVE_DONE_TO_ARCHIVE": "Move done to archive",
     "NO_DONE_TASKS": "There are currently no done tasks",
-    "NO_PLANNED_TASKS": "no tasks planned",
     "NO_PLANNED_TASK_ALL_DONE": "all tasks done",
+    "NO_PLANNED_TASKS": "no tasks planned",
     "READY_TO_WORK": "Ready to work!",
     "RESET_BREAK_TIMER": "Reset without break timer",
     "TIME_ESTIMATED": "Time Estimated:",

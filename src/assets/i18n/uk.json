@@ -31,7 +31,6 @@
     "RESTORE_FILE_BACKUP_ANDROID": "Схоже, ДАНИХ НЕМАЄ, але є резервна копія. Бажаєте завантажити її?",
     "RESTORE_STRAY_BACKUP": "Під час останньої синхронізації могла виникнути помилка. Бажаєте відновити останню резервну копію?"
   },
-  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Пізніше сьогодні",
     "NEXT_WEEK": "Наступного тижня",
@@ -603,12 +602,12 @@
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Призначено",
+        "ATTACHMENTS": "Вкладення",
         "DESCRIPTION": "Опис",
         "MARK_AS_CHECKED": "Позначити оновлення як відмічені",
         "STATUS": "Статус",
         "SUMMARY": "Підсумок",
         "TYPE": "Тип",
-        "ATTACHMENTS": "Вкладення",
         "UPLOAD_ATTACHMENT": "Завантажити в завдання"
       },
       "ISSUE_STRINGS": {
@@ -616,12 +615,12 @@
         "ISSUES_STR": "робочі пакети"
       },
       "S": {
+        "ERR_NO_FILE": "Файл не вибрано",
         "ERR_UNKNOWN": "OpenProject: Невідома помилка {{statusCode}} {{errorMsg}}. Чи правильно налаштований CORS для сервера?",
         "POST_TIME_SUCCESS": "OpenProject: Успішно створено запис часу для {{issueTitle}}",
         "TRANSITION": "OpenProject: Встановлено завдання \"{{issueKey}}\" на \"{{name}}\"",
         "TRANSITION_SUCCESS": "OpenProject: Встановлено завдання {{issueKey}} на <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Переходи завантажено. Використовуйте вибір нижче, щоб призначити їх",
-        "ERR_NO_FILE": "Файл не вибрано"
+        "TRANSITIONS_LOADED": "Переходи завантажено. Використовуйте вибір нижче, щоб призначити їх"
       }
     },
     "PLANNER": {
@@ -1324,27 +1323,27 @@
     }
   },
   "FILE_IMEX": {
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "INITIATED_MSG": "Автоматичний імпорт даних розпочато.",
+      "SOURCE_URL_DOMAIN": "Домен джерела",
+      "TITLE": "Підтвердити імпорт даних з URL",
+      "WARNING_MSG": "Продовження призведе до перезапису ваших поточних даних та налаштувань додатку вмістом із вказаного URL. Цю дію неможливо скасувати.",
+      "WARNING_TITLE": "Попередження"
+    },
     "EXPORT_DATA": "Експорт даних",
     "IMPORT_FROM_FILE": "Імпорт з файлу",
+    "IMPORT_FROM_URL": "Імпортувати з URL",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Будь ласка, введіть повний URL резервної JSON-файлу Super Productivity, який ви хочете імпортувати.",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "Імпортувати з URL",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "Імпортувати з URL",
     "PRIVACY_EXPORT": "Експорт анонімізованих даних (для надсилання на contact@super-productivity.com для налагодження)",
     "S_BACKUP_DOWNLOADED": "Резервна копія завантажена в папку з документами Android",
     "S_ERR_IMPORT_FAILED": "Не вдалося імпортувати дані",
     "S_ERR_INVALID_DATA": "Імпорт не вдався: Недійсний JSON",
     "S_ERR_INVALID_URL": "Помилка імпорту: вказано недійсний URL",
-    "S_IMPORT_FROM_URL_ERR_DECODE": "Помилка: не вдалося декодувати параметр URL для імпорту. Переконайтеся, що він правильно відформатований.",
     "S_ERR_NETWORK": "Помилка імпорту: помилка мережі під час отримання даних з URL",
-    "IMPORT_FROM_URL": "Імпортувати з URL",
-    "URL_PLACEHOLDER": "Введіть URL для імпорту",
-    "IMPORT_FROM_URL_DIALOG_TITLE": "Імпортувати з URL",
-    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Будь ласка, введіть повний URL резервної JSON-файлу Super Productivity, який ви хочете імпортувати.",
-    "OPEN_IMPORT_FROM_URL_DIALOG": "Імпортувати з URL",
-    "DIALOG_CONFIRM_URL_IMPORT": {
-      "TITLE": "Підтвердити імпорт даних з URL",
-      "INITIATED_MSG": "Автоматичний імпорт даних розпочато.",
-      "SOURCE_URL_DOMAIN": "Домен джерела",
-      "WARNING_TITLE": "Попередження",
-      "WARNING_MSG": "Продовження призведе до перезапису ваших поточних даних та налаштувань додатку вмістом із вказаного URL. Цю дію неможливо скасувати."
-    }
+    "S_IMPORT_FROM_URL_ERR_DECODE": "Помилка: не вдалося декодувати параметр URL для імпорту. Переконайтеся, що він правильно відформатований.",
+    "URL_PLACEHOLDER": "Введіть URL для імпорту"
   },
   "G": {
     "ADD": "Додати",

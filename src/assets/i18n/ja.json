@@ -31,7 +31,6 @@
     "RESTORE_FILE_BACKUP_ANDROID": "データがないようですが、利用可能なバックアップがあります。ロードしますか？",
     "RESTORE_STRAY_BACKUP": "最後の同期中に、エラーが発生した可能性があります。最後のバックアップを復元しますか？"
   },
-  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "今日あとで",
     "NEXT_WEEK": "来週",
@@ -603,12 +602,12 @@
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "譲受人",
+        "ATTACHMENTS": "添付ファイル",
         "DESCRIPTION": "説明",
         "MARK_AS_CHECKED": "更新をチェック済みとしてマーク",
         "STATUS": "状態",
         "SUMMARY": "概要",
         "TYPE": "タイプ",
-        "ATTACHMENTS": "添付ファイル",
         "UPLOAD_ATTACHMENT": "タスクにアップロード"
       },
       "ISSUE_STRINGS": {
@@ -616,12 +615,12 @@
         "ISSUES_STR": "作業パッケージ"
       },
       "S": {
+        "ERR_NO_FILE": "ファイルが選択されていません",
         "ERR_UNKNOWN": "OpenProject：不明なエラー {{statusCode}} {{errorMsg}}。 CORSはサーバー用に適切に構成されていますか？",
         "POST_TIME_SUCCESS": "OpenProject： {{issueTitle}}の時間エントリが正常に作成されました",
         "TRANSITION": "OpenProject：issue「{{issueKey}}」を「{{name}}」に設定します。\"",
         "TRANSITION_SUCCESS": "OpenProject：課題 {{issueKey}} を <strong>に設定 {{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "トランジションがロードされました。以下のセレクトを使用して割り当てます。",
-        "ERR_NO_FILE": "ファイルが選択されていません"
+        "TRANSITIONS_LOADED": "トランジションがロードされました。以下のセレクトを使用して割り当てます。"
       }
     },
     "PLANNER": {
@@ -1324,27 +1323,27 @@
     }
   },
   "FILE_IMEX": {
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "INITIATED_MSG": "自動データインポートが開始されました。",
+      "SOURCE_URL_DOMAIN": "ソースドメイン",
+      "TITLE": "URLからのデータインポートを確認",
+      "WARNING_MSG": "続行すると、指定されたURLの内容で現在のアプリケーションデータと設定が上書きされます。この操作は元に戻せません。",
+      "WARNING_TITLE": "警告"
+    },
     "EXPORT_DATA": "データのエクスポート",
     "IMPORT_FROM_FILE": "ファイルからインポート",
+    "IMPORT_FROM_URL": "URLからインポート",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "インポートしたいSuper ProductivityのバックアップJSONファイルの完全なURLを入力してください。",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "URLからインポート",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "URLからインポート",
     "PRIVACY_EXPORT": "匿名化されたデータをエクスポートする（デバッグ用に contact@super-productivity.com に送信する）。",
     "S_BACKUP_DOWNLOADED": "バックアップをAndroidドキュメントフォルダにダウンロードしました",
     "S_ERR_IMPORT_FAILED": "データのインポートに失敗しました",
     "S_ERR_INVALID_DATA": "インポートに失敗しました：無効なJSON",
     "S_ERR_INVALID_URL": "インポートに失敗しました：無効なURLが指定されました",
-    "S_IMPORT_FROM_URL_ERR_DECODE": "エラー：インポート用のURLパラメータをデコードできませんでした。正しくフォーマットされていることを確認してください。",
     "S_ERR_NETWORK": "インポートに失敗しました：URLからデータを取得中にネットワークエラーが発生しました",
-    "IMPORT_FROM_URL": "URLからインポート",
-    "URL_PLACEHOLDER": "インポートするURLを入力してください",
-    "IMPORT_FROM_URL_DIALOG_TITLE": "URLからインポート",
-    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "インポートしたいSuper ProductivityのバックアップJSONファイルの完全なURLを入力してください。",
-    "OPEN_IMPORT_FROM_URL_DIALOG": "URLからインポート",
-    "DIALOG_CONFIRM_URL_IMPORT": {
-      "TITLE": "URLからのデータインポートを確認",
-      "INITIATED_MSG": "自動データインポートが開始されました。",
-      "SOURCE_URL_DOMAIN": "ソースドメイン",
-      "WARNING_TITLE": "警告",
-      "WARNING_MSG": "続行すると、指定されたURLの内容で現在のアプリケーションデータと設定が上書きされます。この操作は元に戻せません。"
-    }
+    "S_IMPORT_FROM_URL_ERR_DECODE": "エラー：インポート用のURLパラメータをデコードできませんでした。正しくフォーマットされていることを確認してください。",
+    "URL_PLACEHOLDER": "インポートするURLを入力してください"
   },
   "G": {
     "ADD": "追加",

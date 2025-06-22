@@ -31,7 +31,6 @@
     "RESTORE_FILE_BACKUP_ANDROID": "Čini se da NEMA PODATAKA, međutim postoji sigirnosna kopija. Želiš li je učitati?",
     "RESTORE_STRAY_BACKUP": "Tijekom zadnje sinkronizacije je možda došlo do greške. Želiš li obnoviti zadnju sigurnosnu kopiju?"
   },
-  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Kasnije danas",
     "NEXT_WEEK": "Sljedeći tjedan",
@@ -603,12 +602,12 @@
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Odgovorna osoba",
+        "ATTACHMENTS": "Privitci",
         "DESCRIPTION": "Opis",
         "MARK_AS_CHECKED": "Označi aktualiziranja kao provjerena",
         "STATUS": "Stanje",
         "SUMMARY": "Sažetak",
         "TYPE": "Vrsta",
-        "ATTACHMENTS": "Privitci",
         "UPLOAD_ATTACHMENT": "Učitaj u zadatak"
       },
       "ISSUE_STRINGS": {
@@ -616,12 +615,12 @@
         "ISSUES_STR": "radni paketi"
       },
       "S": {
+        "ERR_NO_FILE": "Nije odabrana nijedna datoteka",
         "ERR_UNKNOWN": "OpenProject: Nepoznata greška {{statusCode}} {{errorMsg}}. Je li CORS ispravno konfiguriran za poslužitelja?",
         "POST_TIME_SUCCESS": "OpenProject: Unos vremena je uspješno stvoren za {{issueTitle}}",
         "TRANSITION": "OpenProject: Zadaj problemu „{{issueKey}}” ime „{{name}}”",
         "TRANSITION_SUCCESS": "OpenProject: Postavi problem {{issueKey}} kao <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Tranzicije su učitane. Koristi donje odabire za dodjeljivanje",
-        "ERR_NO_FILE": "Nije odabrana nijedna datoteka"
+        "TRANSITIONS_LOADED": "Tranzicije su učitane. Koristi donje odabire za dodjeljivanje"
       }
     },
     "PLANNER": {
@@ -1324,27 +1323,27 @@
     }
   },
   "FILE_IMEX": {
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "INITIATED_MSG": "Automatski uvoz podataka je pokrenut.",
+      "SOURCE_URL_DOMAIN": "Izvorna domena",
+      "TITLE": "Potvrdi uvoz podataka s URL-a",
+      "WARNING_MSG": "Nastavak će prebrisati vaše trenutne podatke i konfiguraciju aplikacije sadržajem s navedenog URL-a. Ova radnja se ne može poništiti.",
+      "WARNING_TITLE": "Upozorenje"
+    },
     "EXPORT_DATA": "Izvezi podatke",
     "IMPORT_FROM_FILE": "Uvezi iz datoteke",
+    "IMPORT_FROM_URL": "Uvezi s URL-a",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Molimo unesite puni URL JSON datoteke sigurnosne kopije Super Productivity koju želite uvesti.",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "Uvezi s URL-a",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "Uvezi s URL-a",
     "PRIVACY_EXPORT": "Izvezi anonimizirane podatke (za sljanje na adresu contact@super-productivity.com za ispravljanje grešaka)",
     "S_BACKUP_DOWNLOADED": "Backup telechaje nan android dokiman katab",
     "S_ERR_IMPORT_FAILED": "Enpòte done echwe",
     "S_ERR_INVALID_DATA": "Neuspio uvoz: Neispravan JSON",
     "S_ERR_INVALID_URL": "Uvoz nije uspio: Nevažeći URL",
-    "S_IMPORT_FROM_URL_ERR_DECODE": "Pogreška: Nije moguće dekodirati URL parametar za uvoz. Molimo provjerite je li ispravno formatiran.",
     "S_ERR_NETWORK": "Uvoz nije uspio: Pogreška mreže prilikom dohvaćanja podataka s URL-a",
-    "IMPORT_FROM_URL": "Uvezi s URL-a",
-    "URL_PLACEHOLDER": "Unesite URL za uvoz",
-    "IMPORT_FROM_URL_DIALOG_TITLE": "Uvezi s URL-a",
-    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Molimo unesite puni URL JSON datoteke sigurnosne kopije Super Productivity koju želite uvesti.",
-    "OPEN_IMPORT_FROM_URL_DIALOG": "Uvezi s URL-a",
-    "DIALOG_CONFIRM_URL_IMPORT": {
-      "TITLE": "Potvrdi uvoz podataka s URL-a",
-      "INITIATED_MSG": "Automatski uvoz podataka je pokrenut.",
-      "SOURCE_URL_DOMAIN": "Izvorna domena",
-      "WARNING_TITLE": "Upozorenje",
-      "WARNING_MSG": "Nastavak će prebrisati vaše trenutne podatke i konfiguraciju aplikacije sadržajem s navedenog URL-a. Ova radnja se ne može poništiti."
-    }
+    "S_IMPORT_FROM_URL_ERR_DECODE": "Pogreška: Nije moguće dekodirati URL parametar za uvoz. Molimo provjerite je li ispravno formatiran.",
+    "URL_PLACEHOLDER": "Unesite URL za uvoz"
   },
   "G": {
     "ADD": "Ajoute",
