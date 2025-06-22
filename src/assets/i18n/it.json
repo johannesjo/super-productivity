@@ -113,11 +113,24 @@
         "TITLE": "CalDav"
       },
       "ISSUE_CONTENT": {
+        "ASSIGNEE": "Assignee",
+        "AT": "ზე",
+        "ATTACHMENTS": "Დანართები",
+        "CHANGED": "შეიცვალა",
+        "COMMENTS": "Კომენტარები",
+        "COMPONENTS": "Კომპონენტები",
         "DESCRIPTION": "Descrizione",
         "LABELS": "Categorie",
+        "LIST_OF_CHANGES": "Ცვლილებების ჩამონათვალი",
         "MARK_AS_CHECKED": "Contrassegna gli aggiornamenti come controllati",
+        "ON": "on",
+        "RELATED": "Ამავე თემაზე",
         "STATUS": "Stato",
-        "SUMMARY": "Sommario"
+        "STORY_POINTS": "Სიუჟეტი",
+        "SUB_TASKS": "Ქვედავალებები",
+        "SUMMARY": "Sommario",
+        "WORKLOG": "Სამუშაო ბლოგი",
+        "WRITE_A_COMMENT": "Დაწერეთ კომენტარი"
       },
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav: calendario \"{{calendarName}}\" non trovato",
@@ -155,6 +168,8 @@
         "L_INTERVAL": "Intervallo di ripetizione frase",
         "L_TEXT": "Testo",
         "L_TEXT_DESCRIPTION": "Es.: \"Lavora su ${currentTaskTitle}!\"",
+        "L_VOICE": "Ხმის არჩევა",
+        "L_VOICE_DESCRIPTION": "Აირჩიეთ ხმა",
         "TITLE": "Modalità dominio"
       }
     },
@@ -333,6 +348,39 @@
       "DEFAULT_PROJECT_DESCRIPTION": "Progetto assegnato all'attività creata da un issue.",
       "DEFAULT_PROJECT_LABEL": "Progetto predefiniti di Super Productivity",
       "HOW_TO_GET_A_TOKEN": "Come ottenere un token?",
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Assignee",
+        "AT": "ზე",
+        "ATTACHMENTS": "Დანართები",
+        "AUTHOR": "Ავტორი",
+        "CATEGORY": "Კატეგორია",
+        "CHANGED": "შეიცვალა",
+        "COMMENTS": "Კომენტარები",
+        "COMPONENTS": "Კომპონენტები",
+        "DESCRIPTION": "Აღწერა",
+        "DONE_RATIO": "Შესრულებულია თანაფარდობა",
+        "DUE_DATE": "Ჩაბარების თარიღი",
+        "LABELS": "Ეტიკეტები",
+        "LAST_COMMENT": "Ბოლო კომენტარი",
+        "LIST_OF_CHANGES": "Ცვლილებების ჩამონათვალი",
+        "LOAD_ALL_COMMENTS": "Ჩატვირთეთ ყველა {{nr}} კომენტარი",
+        "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "Ჩატვირთვის აღწერა & ყველა კომენტარი",
+        "LOCATION": "Მდებარეობა",
+        "MARK_AS_CHECKED": "Მონიშნეთ განახლებები, როგორც შემოწმებულია",
+        "ON": "on",
+        "PRIORITY": "Პრიორიტეტი",
+        "RELATED": "Ამავე თემაზე",
+        "START": "Დაქოქვა",
+        "STATUS": "Სტატუსი",
+        "STORY_POINTS": "Სიუჟეტი",
+        "SUB_TASKS": "Ქვედავალებები",
+        "SUMMARY": "Შეჯამება",
+        "TIME_SPENT": "Დახარჯული დრო",
+        "TYPE": "Ტიპი",
+        "VERSION": "Ვერსია",
+        "WORKLOG": "Სამუშაო ბლოგი",
+        "WRITE_A_COMMENT": "Დაწერეთ კომენტარი"
+      },
       "S": {
         "ERR_GENERIC": "{{issueProviderName}} Errore: {{errTxt}}",
         "ERR_NETWORK": "{{issueProviderName}}: richiesta non riuscita a causa di un errore di rete lato client",
@@ -479,6 +527,14 @@
         "TEST_CREDENTIALS": "Credenziali di test",
         "WELCOME_USER": "Benvenuto {{user}}!"
       }
+    },
+    "MARKDOWN_PASTE": {
+      "CONFIRM_ADD_TO_SUB_TASK_NOTES": "Დაამატეთ გაკრული მარკირების სია ქვე-დავალების ჩანაწერებს \"{{parentTaskTitle}}\"?",
+      "CONFIRM_PARENT_TASKS": "Შექმენით <strong>{{tasksCount}} ახალი ამოცანები, რომლებიც</strong> ჩასმის სიიდან?",
+      "CONFIRM_PARENT_TASKS_WITH_SUBS": "Შექმენით <strong>{{tasksCount}} ახალი დავალებები და {{subTasksCount}} ქვე-ამოცანები, რომლებიც</strong> ჩასმის სიიდან?",
+      "CONFIRM_SUB_TASKS": "Შექმენით {{tasksCount}} ახალი ქვე-დავალება გაკრული მარკირების სიიდან?",
+      "CONFIRM_SUB_TASKS_WITH_PARENT": "Შექმენით <strong>{{tasksCount}} ახალი ქვე-დავალება \"{{parentTaskTitle}}\"</strong> ჩასმის სიიდან?",
+      "DIALOG_TITLE": "Ჩაწერილია Markdown სია!"
     },
     "METRIC": {
       "BANNER": {
@@ -818,6 +874,7 @@
     "SEARCH_BAR": {
       "INFO": "Fare clic sull'icona dell'elenco per cercare le attività archiviate",
       "INFO_ARCHIVED": "Fare clic sull'icona dell'archivio per cercare le attività normali",
+      "NO_RESULTS": "Თქვენი ძიების შესატყვისი დავალებები ვერ მოიძებნა",
       "PLACEHOLDER": "Cerca l'attività o la descrizione dell'attività",
       "PLACEHOLDER_ARCHIVED": "Cerca attività archiviate",
       "TOO_MANY_RESULTS": "Troppi risultati, restringi la ricerca"
@@ -877,20 +934,24 @@
         "TITLE": "Accesso: {{provider}}"
       },
       "D_CONFLICT": {
+        "LAMPORT_CLOCK": "Გადახედვა",
         "LAST_CHANGE": "Ultima modifica:",
         "LAST_SYNC": "ultima sincronizzazione:",
         "LOCAL": "Locale",
         "LOCAL_REMOTE": "local -> remote",
         "REMOTE": "a distanza",
         "TEXT": "<p>Aggiornamento da Dropbox. I dati sia locali che remoti sembrano essere modificati.</p>",
+        "TIMESTAMP": "Დროის ნიშნული",
         "TITLE": "Dropbox: dati in conflitto",
         "USE_LOCAL": "Usa locale",
         "USE_REMOTE": "Usa remoto"
       },
       "D_DECRYPT_ERROR": {
         "BTN_OVER_WRITE_REMOTE": "Cambia e sovrascrivi remoto",
+        "CHANGE_PW_AND_DECRYPT": "&& დაშიფვრის მცდელობა",
         "P1": "I tuoi dati sono criptati e la decriptazione è fallita. Inserisci la password corretta!",
-        "P2": "Puoi anche cambiare la tua password, il che sovrascriverà tutti i dati in remoto."
+        "P2": "Puoi anche cambiare la tua password, il che sovrascriverà tutti i dati in remoto.",
+        "PASSWORD": "Პაროლი"
       },
       "D_INCOMPLETE_SYNC": {
         "BTN_CLOSE_APP": "Chiudi App",
@@ -1231,6 +1292,45 @@
         "WEDNESDAY": "Mercoledì"
       }
     },
+    "TASK_VIEW": {
+      "CUSTOMIZER": {
+        "ENTER_PROJECT": "Შეიყვანეთ პროექტი",
+        "ENTER_TAG": "Შეიყვანეთ ტეგი",
+        "ESTIMATED_TIME": "Სავარაუდო დრო",
+        "FILTER_BY": "Ფილტრი",
+        "FILTER_DEFAULT": "Არ არის ფილტრი",
+        "FILTER_ESTIMATED_TIME": "Სავარაუდო დრო",
+        "FILTER_PROJECT": "Პროექტი",
+        "FILTER_SCHEDULED_DATE": "Თარიღს წინასწარ დაგეგმილი",
+        "FILTER_TAG": "Ჭდე",
+        "FILTER_TIME_SPENT": "Დახარჯული დრო",
+        "GROUP_BY": "Ჯგუფი By",
+        "GROUP_DEFAULT": "Არცერთი ჯგუფი",
+        "GROUP_PROJECT": "Პროექტი",
+        "GROUP_SCHEDULED_DATE": "Თარიღს წინასწარ დაგეგმილი",
+        "GROUP_TAG": "Ჭდე",
+        "RESET_ALL": "Ყველას გადატვირთვა",
+        "SCHEDULED_DEFAULT": "Ყველა თარიღი",
+        "SCHEDULED_NEXT_MONTH": "Მომდევნო თვე",
+        "SCHEDULED_NEXT_WEEK": "Შემდეგ კვირას",
+        "SCHEDULED_THIS_MONTH": "Ამ თვეში",
+        "SCHEDULED_THIS_WEEK": "Ამ კვირაში",
+        "SCHEDULED_TODAY": "Დღეს",
+        "SCHEDULED_TOMORROW": "Ხვალ",
+        "SORT_BY": "Სორტირება",
+        "SORT_CREATION_DATE": "Შექმნის თარიღი",
+        "SORT_DEFAULT": "Დეფოლტი",
+        "SORT_NAME": "Სახელი",
+        "SORT_SCHEDULED_DATE": "Თარიღს წინასწარ დაგეგმილი",
+        "TIME_1HOUR": "> 1 საათი",
+        "TIME_2HOUR": "> 2 საათი",
+        "TIME_10MIN": "> 10 წუთი",
+        "TIME_30MIN": "> 30 წუთი",
+        "TIME_DEFAULT": "Ნებისმიერი ხანგრძლივობა",
+        "TIME_SPENT": "Დახარჯული დრო",
+        "TITLE": "Სამუშაო ხედვის მორგება"
+      }
+    },
     "TIME_TRACKING": {
       "B": {
         "ALREADY_DID": "Ho già fatto",
@@ -1350,6 +1450,7 @@
     "ADVANCED_CFG": "Impostazioni avanzate",
     "CANCEL": "Annulla",
     "CLOSE": "Chiudi",
+    "CONFIRM": "Დადასტურება",
     "DELETE": "Cancella",
     "DISMISS": "Rimuovi",
     "DO_IT": "Fallo!",
@@ -1470,6 +1571,7 @@
       "TOGGLE_ISSUE_PANEL": "Mostra/nascondi pannello issue",
       "TOGGLE_PLAY": "Inizia/Interrompi attività",
       "TOGGLE_SIDE_NAV": "Mostra & metti a fuoco / Nascondi Sidenav",
+      "TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL": "Toggle Filter / Group / Sort Panel",
       "TRIGGER_SYNC": "Esegui sincronizzazione (se configurata)",
       "ZOOM_DEFAULT": "Zoom default (solo Desktop)",
       "ZOOM_IN": "Zoom in (solo Desktop)",
@@ -1514,6 +1616,7 @@
       "IS_HIDE_NAV": "Nascondi la navigazione mentre il cursore è sull'header principale (solo Desktop)",
       "IS_MINIMIZE_TO_TRAY": "Riduci a icona nel vassoio (solo desktop)",
       "IS_SHOW_TIP_LONGER": "Mostra consigli di produttività all'avvio dell'applicazione un po' più a lungo",
+      "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Მიმდინარე ათვლა უჯრის / სტატუსის მენიუში (მხოლოდ დესკტოპის mac)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Mostra l'attività corrente nella barra delle applicazioni / menu di stato (solo desktop)",
       "IS_TURN_OFF_MARKDOWN": "Disattiva markdown per le note",
       "IS_USE_MINIMAL_SIDE_NAV": "Usa barra di navigazione minima (mostra solo icone)",
@@ -1599,6 +1702,34 @@
       "TITLE": "Monitoraggio del tempo"
     }
   },
+  "GLOBAL_RELATIVE_TIME": {
+    "FUTURE": {
+      "A_DAY": "დღეში",
+      "A_MINUTE": "ერთ წუთში",
+      "A_MONTH": "თვეში",
+      "A_YEAR": "წელიწადში",
+      "AN_HOUR": "ერთ საათში",
+      "DAYS": " {{count}} დღეში",
+      "FEW_SECONDS": "რამდენიმე წამში",
+      "HOURS": "in {{count}} საათში",
+      "MINUTES": " {{count}} წუთში",
+      "MONTHS": " {{count}} თვეში",
+      "YEARS": " {{count}} წლებში"
+    },
+    "PAST": {
+      "A_DAY": "დღის წინ",
+      "A_MINUTE": "ერთი წუთის წინ",
+      "A_MONTH": "თვის წინ",
+      "A_YEAR": "ერთი წლის წინ",
+      "AN_HOUR": "საათის წინ",
+      "DAYS": "{{count}} დღის წინ",
+      "FEW_SECONDS": "რამდენიმე წამის წინ",
+      "HOURS": "{{count}} საათის წინ",
+      "MINUTES": "{{count}} წუთის წინ",
+      "MONTHS": "{{count}} თვის წინ",
+      "YEARS": "{{count}} წლის წინ"
+    }
+  },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Copiato negli appunti",
     "ERR_COMPRESSION": "Errore per l'interfaccia di compressione",
@@ -1631,6 +1762,7 @@
     "CREATE_TAG": "Crea etichetta",
     "DELETE_PROJECT": "Elimina progetto",
     "DELETE_TAG": "Elimina etichetta",
+    "ENTER_FOCUS_MODE": "Შეიყვანეთ ფოკუსის რეჟიმი",
     "GO_TO_TASK_LIST": "Vai alla lista delle attività",
     "HELP": "Aiuto",
     "HM": {
@@ -1655,6 +1787,7 @@
     "PROJECTS": "Progetti",
     "QUICK_HISTORY": "Cronologia rapida",
     "SCHEDULE": "Pianifica",
+    "SEARCH": "Ძიება",
     "SETTINGS": "Impostazioni",
     "SHOW_SEARCH_BAR": "Mostra barra di ricerca",
     "TAGS": "Etichette",
@@ -1776,6 +1909,7 @@
     "HELP_PROCRASTINATION": "Aiuto sto procastinando!",
     "MOVE_DONE_TO_ARCHIVE": "Sposta attività completate in archivio",
     "NO_DONE_TASKS": "Non c'è alcuna attività completata",
+    "NO_PLANNED_TASK_ALL_DONE": "ყველა შესრულებული დავალება",
     "NO_PLANNED_TASKS": "Nessuna attività pianificata",
     "READY_TO_WORK": "Pronto a lavorare!",
     "RESET_BREAK_TIMER": "Reset senza interrompere il tempo",

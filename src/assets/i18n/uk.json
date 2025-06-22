@@ -113,11 +113,24 @@
         "TITLE": "CalDav"
       },
       "ISSUE_CONTENT": {
+        "ASSIGNEE": "Правонаступник",
+        "AT": "при",
+        "ATTACHMENTS": "Вкладення",
+        "CHANGED": "змінений",
+        "COMMENTS": "Коментарі",
+        "COMPONENTS": "Компоненти",
         "DESCRIPTION": "Опис",
         "LABELS": "Категорії",
+        "LIST_OF_CHANGES": "Перелік змін",
         "MARK_AS_CHECKED": "Позначити оновлення як відмічені",
+        "ON": "на",
+        "RELATED": "Пов'язані",
         "STATUS": "Статус",
-        "SUMMARY": "Підсумок"
+        "STORY_POINTS": "Сюжетні моменти",
+        "SUB_TASKS": "Підзавдання",
+        "SUMMARY": "Підсумок",
+        "WORKLOG": "Робочий журнал",
+        "WRITE_A_COMMENT": "Написати коментар"
       },
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav: Календар \"{{calendarName}}\" не знайдено",
@@ -155,6 +168,8 @@
         "L_INTERVAL": "Інтервал повторення фрази",
         "L_TEXT": "Текст",
         "L_TEXT_DESCRIPTION": "Наприклад: \"Працюй над ${currentTaskTitle}!\"",
+        "L_VOICE": "Виберіть голос",
+        "L_VOICE_DESCRIPTION": "Виберіть голос",
         "TITLE": "Режим Domina"
       }
     },
@@ -333,6 +348,39 @@
       "DEFAULT_PROJECT_DESCRIPTION": "Проект призначається завданням, створеним з проблем.",
       "DEFAULT_PROJECT_LABEL": "Суперпродуктивний проект за замовчуванням",
       "HOW_TO_GET_A_TOKEN": "Як отримати токен?",
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Правонаступник",
+        "AT": "при",
+        "ATTACHMENTS": "Вкладення",
+        "AUTHOR": "Автор",
+        "CATEGORY": "Категорія",
+        "CHANGED": "змінений",
+        "COMMENTS": "Коментарі",
+        "COMPONENTS": "Компоненти",
+        "DESCRIPTION": "Опис",
+        "DONE_RATIO": "Коефіцієнт готовності",
+        "DUE_DATE": "Термін виконання",
+        "LABELS": "Етикетки",
+        "LAST_COMMENT": "Останній коментар",
+        "LIST_OF_CHANGES": "Перелік змін",
+        "LOAD_ALL_COMMENTS": "Завантажити всі {{nr}} коментарі",
+        "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "Завантажити опис та всі коментарі",
+        "LOCATION": "Місце",
+        "MARK_AS_CHECKED": "Позначити оновлення як позначені",
+        "ON": "на",
+        "PRIORITY": "Пріоритет",
+        "RELATED": "Пов'язані",
+        "START": "Почати",
+        "STATUS": "Статус",
+        "STORY_POINTS": "Сюжетні моменти",
+        "SUB_TASKS": "Підзавдання",
+        "SUMMARY": "Зведення",
+        "TIME_SPENT": "Витрачений час",
+        "TYPE": "Тип",
+        "VERSION": "Версія",
+        "WORKLOG": "Робочий журнал",
+        "WRITE_A_COMMENT": "Написати коментар"
+      },
       "S": {
         "ERR_GENERIC": "{{issueProviderName}} Помилка: {{errTxt}}",
         "ERR_NETWORK": "{{issueProviderName}}: Запит не вдався через мережеву помилку на стороні клієнта",
@@ -479,6 +527,14 @@
         "TEST_CREDENTIALS": "Перевірити облікові дані",
         "WELCOME_USER": "Ласкаво просимо, {{user}}!"
       }
+    },
+    "MARKDOWN_PASTE": {
+      "CONFIRM_ADD_TO_SUB_TASK_NOTES": "Додайте вставлений список Markdown до приміток підзавдання «{{parentTaskTitle}}»?",
+      "CONFIRM_PARENT_TASKS": "Створювати <strong>{{tasksCount}} нові завдання</strong> зі вставленого списку Markdown?",
+      "CONFIRM_PARENT_TASKS_WITH_SUBS": "Створювати <strong>{{tasksCount}} нові завдання та {{subTasksCount}} підзавдання</strong> зі вставленого списку Markdown?",
+      "CONFIRM_SUB_TASKS": "Створювати {{tasksCount}} нові підзавдання зі вставленого списку Markdown?",
+      "CONFIRM_SUB_TASKS_WITH_PARENT": "Створити <strong>{{tasksCount}} нові підзавдання під</strong> « «{{parentTaskTitle}}» зі вставленого списку Markdown?",
+      "DIALOG_TITLE": "Виявлено вставлений список Markdown!"
     },
     "METRIC": {
       "BANNER": {
@@ -818,6 +874,7 @@
     "SEARCH_BAR": {
       "INFO": "Натисніть на іконку списку, щоб шукати архівовані завдання",
       "INFO_ARCHIVED": "Натисніть на іконку архіву, щоб шукати звичайні завдання",
+      "NO_RESULTS": "Не знайдено завдань, які б відповідали вашому пошуку",
       "PLACEHOLDER": "Шукати завдання або опис завдання",
       "PLACEHOLDER_ARCHIVED": "Шукати архівовані завдання",
       "TOO_MANY_RESULTS": "Занадто багато результатів, будь ласка, уточніть пошук"
@@ -877,20 +934,24 @@
         "TITLE": "Логін: {{provider}}"
       },
       "D_CONFLICT": {
+        "LAMPORT_CLOCK": "Перегляд",
         "LAST_CHANGE": "Остання зміна:",
         "LAST_SYNC": "Остання синхронізація:",
         "LOCAL": "Локальні",
         "LOCAL_REMOTE": "Локальні -> Віддалені",
         "REMOTE": "Віддалені",
         "TEXT": "<p>Оновлення з віддаленого сервера. І локальні, і віддалені дані, здається, були змінені.</p>",
+        "TIMESTAMP": "Позначка часу",
         "TITLE": "Синхронізація: Конфлікт даних",
         "USE_LOCAL": "Зберегти локальні",
         "USE_REMOTE": "Зберегти віддалені"
       },
       "D_DECRYPT_ERROR": {
         "BTN_OVER_WRITE_REMOTE": "Зміна та перезапис віддаленого пристрою",
+        "CHANGE_PW_AND_DECRYPT": "Зміна та спроба розшифровки",
         "P1": "Ваші дані зашифровано, а розшифровці не вдалося. Будь ласка, введіть правильний пароль!",
-        "P2": "Ви також можете змінити пароль, який перезапише всі віддалені дані."
+        "P2": "Ви також можете змінити пароль, який перезапише всі віддалені дані.",
+        "PASSWORD": "Пароль"
       },
       "D_INCOMPLETE_SYNC": {
         "BTN_CLOSE_APP": "Закрити застосунок",
@@ -1231,6 +1292,45 @@
         "WEDNESDAY": "Середа"
       }
     },
+    "TASK_VIEW": {
+      "CUSTOMIZER": {
+        "ENTER_PROJECT": "Увійти в проект",
+        "ENTER_TAG": "Введіть тег",
+        "ESTIMATED_TIME": "Орієнтовний час",
+        "FILTER_BY": "Фільтрувати за",
+        "FILTER_DEFAULT": "Без фільтра",
+        "FILTER_ESTIMATED_TIME": "Орієнтовний час",
+        "FILTER_PROJECT": "Проект",
+        "FILTER_SCHEDULED_DATE": "Запланована дата",
+        "FILTER_TAG": "Тег",
+        "FILTER_TIME_SPENT": "Витрачений час",
+        "GROUP_BY": "Групувати за",
+        "GROUP_DEFAULT": "Без групи",
+        "GROUP_PROJECT": "Проект",
+        "GROUP_SCHEDULED_DATE": "Запланована дата",
+        "GROUP_TAG": "Тег",
+        "RESET_ALL": "Скинути все",
+        "SCHEDULED_DEFAULT": "Будь-яка дата",
+        "SCHEDULED_NEXT_MONTH": "Наступний місяць",
+        "SCHEDULED_NEXT_WEEK": "Наступного тижня",
+        "SCHEDULED_THIS_MONTH": "Цього місяця",
+        "SCHEDULED_THIS_WEEK": "Цього тижня",
+        "SCHEDULED_TODAY": "Сьогодні",
+        "SCHEDULED_TOMORROW": "Завтра",
+        "SORT_BY": "Сортувати за",
+        "SORT_CREATION_DATE": "Дата створення",
+        "SORT_DEFAULT": "За промовчанням",
+        "SORT_NAME": "Ім'я",
+        "SORT_SCHEDULED_DATE": "Запланована дата",
+        "TIME_1HOUR": "> 1 годину",
+        "TIME_2HOUR": "> 2 години",
+        "TIME_10MIN": "> 10 хвилин",
+        "TIME_30MIN": "> 30 хвилин",
+        "TIME_DEFAULT": "Будь-яка тривалість",
+        "TIME_SPENT": "Витрачений час",
+        "TITLE": "Налаштування перегляду завдань"
+      }
+    },
     "TIME_TRACKING": {
       "B": {
         "ALREADY_DID": "Я вже зробив",
@@ -1350,6 +1450,7 @@
     "ADVANCED_CFG": "Розширена конфігурація",
     "CANCEL": "Скасувати",
     "CLOSE": "Закрити",
+    "CONFIRM": "Підтвердити",
     "DELETE": "Видалити",
     "DISMISS": "Відхилити",
     "DO_IT": "Зробити це!",
@@ -1470,6 +1571,7 @@
       "TOGGLE_ISSUE_PANEL": "Показати/приховати панель проблем",
       "TOGGLE_PLAY": "Почати/Зупинити завдання",
       "TOGGLE_SIDE_NAV": "Показати і сфокусувати/Приховати бічну навігацію",
+      "TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL": "Перемкнути панель «Фільтр/Група/Сортування»",
       "TRIGGER_SYNC": "Запустити синхронізацію (якщо налаштовано)",
       "ZOOM_DEFAULT": "Масштаб за замовчуванням (тільки для десктопної версії)",
       "ZOOM_IN": "Збільшити масштаб (тільки для десктопної версії)",
@@ -1514,6 +1616,7 @@
       "IS_HIDE_NAV": "Приховувати навігацію, поки курсор не наведено на заголовок (тільки для десктопної версії)",
       "IS_MINIMIZE_TO_TRAY": "Згортати до системного трею (тільки для десктопної версії)",
       "IS_SHOW_TIP_LONGER": "Показувати поради щодо продуктивності на початку програми трохи довше",
+      "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Показувати поточний зворотний відлік у треї / меню статусу (лише для настільного комп'ютера Mac)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Показувати поточне завдання в системному треї / меню статусу (тільки для десктопної версії Mac/Windows)",
       "IS_TURN_OFF_MARKDOWN": "Вимкнути обробку markdown для нотаток завдань",
       "IS_USE_MINIMAL_SIDE_NAV": "Використовувати мінімальну панель навігації (показувати лише іконки)",
@@ -1599,6 +1702,34 @@
       "TITLE": "Відстеження часу"
     }
   },
+  "GLOBAL_RELATIVE_TIME": {
+    "FUTURE": {
+      "A_DAY": "за добу",
+      "A_MINUTE": "за хвилину",
+      "A_MONTH": "за місяць",
+      "A_YEAR": "за рік",
+      "AN_HOUR": "за годину",
+      "DAYS": "за {{count}} днів",
+      "FEW_SECONDS": "за кілька секунд",
+      "HOURS": "за {{count}} годин",
+      "MINUTES": "за {{count}} хвилин",
+      "MONTHS": "за {{count}} місяці",
+      "YEARS": "за {{count}} років"
+    },
+    "PAST": {
+      "A_DAY": "добу тому",
+      "A_MINUTE": "хвилину тому",
+      "A_MONTH": "місяць тому",
+      "A_YEAR": "рік тому",
+      "AN_HOUR": "годину тому",
+      "DAYS": "{{count}} днів тому",
+      "FEW_SECONDS": "кілька секунд тому",
+      "HOURS": "{{count}} годин тому",
+      "MINUTES": "{{count}} хвилин тому",
+      "MONTHS": "{{count}} місяців тому",
+      "YEARS": "{{count}} років тому"
+    }
+  },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Скопійовано в буфер обміну",
     "ERR_COMPRESSION": "Помилка інтерфейсу стиснення",
@@ -1631,6 +1762,7 @@
     "CREATE_TAG": "Створити тег",
     "DELETE_PROJECT": "Видалити проект",
     "DELETE_TAG": "Видалити тег",
+    "ENTER_FOCUS_MODE": "Увійдіть у режим фокусування",
     "GO_TO_TASK_LIST": "Перейти до списку завдань",
     "HELP": "Допомога",
     "HM": {
@@ -1655,6 +1787,7 @@
     "PROJECTS": "Проекти",
     "QUICK_HISTORY": "Швидка історія",
     "SCHEDULE": "Розклад",
+    "SEARCH": "Шукати",
     "SETTINGS": "Налаштування",
     "SHOW_SEARCH_BAR": "Показати рядок пошуку",
     "TAGS": "Теги",
@@ -1767,6 +1900,7 @@
     "ADD_SCHEDULED_FOR_TOMORROW": "Додати завдання, заплановані на завтра ({{nr}})",
     "ADD_SOME_TASKS": "Додайте кілька завдань, щоб спланувати свій день!",
     "DONE_TASKS": "Виконані завдання",
+    "DONE_TASKS_IN_ARCHIVE": "Наразі тут немає виконаних завдань, але деякі вже заархівовані.",
     "ESTIMATE_REMAINING": "Залишилось за оцінкою:",
     "FINISH_DAY": "Завершити день",
     "FINISH_DAY_FOR_PROJECT": "Завершити день для цього проекту",
@@ -1775,6 +1909,7 @@
     "HELP_PROCRASTINATION": "Допоможіть, я прокрастиную!",
     "MOVE_DONE_TO_ARCHIVE": "Перенести в архів",
     "NO_DONE_TASKS": "Наразі немає виконаних завдань",
+    "NO_PLANNED_TASK_ALL_DONE": "Всі поставлені завдання виконані",
     "NO_PLANNED_TASKS": "Немає запланованих завдань",
     "READY_TO_WORK": "Готові до роботи!",
     "RESET_BREAK_TIMER": "Скинути без таймера перерви",

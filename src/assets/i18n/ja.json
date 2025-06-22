@@ -113,11 +113,24 @@
         "TITLE": "CalDav"
       },
       "ISSUE_CONTENT": {
+        "ASSIGNEE": "担当者",
+        "AT": "で",
+        "ATTACHMENTS": "添付 ファイル",
+        "CHANGED": "変更",
+        "COMMENTS": "コメント",
+        "COMPONENTS": "コンポーネント",
         "DESCRIPTION": "説明",
         "LABELS": "カテゴリー",
+        "LIST_OF_CHANGES": "変更点の一覧",
         "MARK_AS_CHECKED": "更新をチェック済みとしてマーク",
+        "ON": "オン",
+        "RELATED": "関連",
         "STATUS": "状態",
-        "SUMMARY": "概要"
+        "STORY_POINTS": "ストーリーポイント",
+        "SUB_TASKS": "サブタスク",
+        "SUMMARY": "概要",
+        "WORKLOG": "ワークログ",
+        "WRITE_A_COMMENT": "コメントを書く"
       },
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav：カレンダー \"{{calendarName}}\"が見つかりません",
@@ -155,6 +168,8 @@
         "L_INTERVAL": "フレーズを繰り返す間隔",
         "L_TEXT": "テキスト",
         "L_TEXT_DESCRIPTION": "例えば\"${currentTaskTitle}に取り組む！\"",
+        "L_VOICE": "ボイスを選択",
+        "L_VOICE_DESCRIPTION": "音声を選択する",
         "TITLE": "ドミナ・モード"
       }
     },
@@ -333,6 +348,39 @@
       "DEFAULT_PROJECT_DESCRIPTION": "課題から作成されたタスクに割り当てられたプロジェクト",
       "DEFAULT_PROJECT_LABEL": "デフォルトの超生産性プロジェクト",
       "HOW_TO_GET_A_TOKEN": "トークンの入手方法は？",
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "担当者",
+        "AT": "で",
+        "ATTACHMENTS": "添付 ファイル",
+        "AUTHOR": "著者",
+        "CATEGORY": "カテゴリ",
+        "CHANGED": "変更",
+        "COMMENTS": "コメント",
+        "COMPONENTS": "コンポーネント",
+        "DESCRIPTION": "形容",
+        "DONE_RATIO": "完了率",
+        "DUE_DATE": "期日",
+        "LABELS": "ラベル",
+        "LAST_COMMENT": "最後のコメント",
+        "LIST_OF_CHANGES": "変更点の一覧",
+        "LOAD_ALL_COMMENTS": "すべての {{nr}} コメントをロードする",
+        "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "説明とすべてのコメントをロードする",
+        "LOCATION": "場所",
+        "MARK_AS_CHECKED": "更新をチェック済みとしてマークする",
+        "ON": "オン",
+        "PRIORITY": "優先権",
+        "RELATED": "関連",
+        "START": "始める",
+        "STATUS": "地位",
+        "STORY_POINTS": "ストーリーポイント",
+        "SUB_TASKS": "サブタスク",
+        "SUMMARY": "概要",
+        "TIME_SPENT": "滞在時間",
+        "TYPE": "種類",
+        "VERSION": "バージョン",
+        "WORKLOG": "ワークログ",
+        "WRITE_A_COMMENT": "コメントを書く"
+      },
       "S": {
         "ERR_GENERIC": "{{issueProviderName}} エラー： {{errTxt}}",
         "ERR_NETWORK": "{{issueProviderName}}：クライアント側のネットワークエラーが原因でリクエストが失敗しました",
@@ -479,6 +527,14 @@
         "TEST_CREDENTIALS": "テスト資格情報",
         "WELCOME_USER": " {{user}}さん、ようこそ！"
       }
+    },
+    "MARKDOWN_PASTE": {
+      "CONFIRM_ADD_TO_SUB_TASK_NOTES": "貼り付けたマークダウンリストをサブタスク「{{parentTaskTitle}}」のノートに追加しますか?",
+      "CONFIRM_PARENT_TASKS": "貼り付けたマークダウンリストから</strong>  <strong>{{tasksCount}} 新しいタスクを作成しますか?",
+      "CONFIRM_PARENT_TASKS_WITH_SUBS": "新しいタスクを作成し <strong>{{tasksCount}} 貼り付けたマークダウンリストから</strong> サブタスク {{subTasksCount}} しますか?",
+      "CONFIRM_SUB_TASKS": "貼り付けたマークダウンリストから新しいサブタスクを {{tasksCount}} 作成しますか?",
+      "CONFIRM_SUB_TASKS_WITH_PARENT": "貼り付けたマークダウンリストから「{{parentTaskTitle}}」</strong> の下に新しいサブタスクを <strong>{{tasksCount}} 作成しますか?",
+      "DIALOG_TITLE": "貼り付けられたMarkdownリストが検出されました!"
     },
     "METRIC": {
       "BANNER": {
@@ -818,6 +874,7 @@
     "SEARCH_BAR": {
       "INFO": "リストアイコンをクリックして、アーカイブされたタスクを検索します",
       "INFO_ARCHIVED": "アーカイブアイコンをクリックして、通常のタスクを検索します",
+      "NO_RESULTS": "検索に一致するタスクが見つかりませんでした",
       "PLACEHOLDER": "タスクまたはタスクの説明を検索する",
       "PLACEHOLDER_ARCHIVED": "アーカイブされたタスクを検索する",
       "TOO_MANY_RESULTS": "結果が多すぎるため、検索を絞り込んでください"
@@ -877,20 +934,24 @@
         "TITLE": "ログイン： {{provider}}"
       },
       "D_CONFLICT": {
+        "LAMPORT_CLOCK": "改定",
         "LAST_CHANGE": "最終変更：",
         "LAST_SYNC": "最終同期：",
         "LOCAL": "ローカル",
         "LOCAL_REMOTE": "ローカル→リモート",
         "REMOTE": "リモート",
         "TEXT": "<p>リモートから更新します。ローカルデータとリモートデータの両方が変更されているようです。</p>",
+        "TIMESTAMP": "タイムスタンプ",
         "TITLE": "同期：矛盾するデータ",
         "USE_LOCAL": "ローカルを使用",
         "USE_REMOTE": "リモートを使用"
       },
       "D_DECRYPT_ERROR": {
         "BTN_OVER_WRITE_REMOTE": "リモートの変更と上書き",
+        "CHANGE_PW_AND_DECRYPT": "変更と復号化の試行",
         "P1": "データは暗号化され、復号化に失敗しました。正しいパスワードを入力してください。",
-        "P2": "パスワードを変更することもでき、これによりすべてのリモートデータが上書きされます。"
+        "P2": "パスワードを変更することもでき、これによりすべてのリモートデータが上書きされます。",
+        "PASSWORD": "パスワード"
       },
       "D_INCOMPLETE_SYNC": {
         "BTN_CLOSE_APP": "アプリを閉じる",
@@ -1231,6 +1292,45 @@
         "WEDNESDAY": "水曜日"
       }
     },
+    "TASK_VIEW": {
+      "CUSTOMIZER": {
+        "ENTER_PROJECT": "プロジェクトに入る",
+        "ENTER_TAG": "タグを入力",
+        "ESTIMATED_TIME": "推定時間",
+        "FILTER_BY": "フィルター",
+        "FILTER_DEFAULT": "フィルターなし",
+        "FILTER_ESTIMATED_TIME": "推定時間",
+        "FILTER_PROJECT": "プロジェクト",
+        "FILTER_SCHEDULED_DATE": "開催予定日",
+        "FILTER_TAG": "タグ",
+        "FILTER_TIME_SPENT": "滞在時間",
+        "GROUP_BY": "グループ化",
+        "GROUP_DEFAULT": "グループなし",
+        "GROUP_PROJECT": "プロジェクト",
+        "GROUP_SCHEDULED_DATE": "開催予定日",
+        "GROUP_TAG": "タグ",
+        "RESET_ALL": "すべてリセット",
+        "SCHEDULED_DEFAULT": "任意の日付",
+        "SCHEDULED_NEXT_MONTH": "来月",
+        "SCHEDULED_NEXT_WEEK": "来週",
+        "SCHEDULED_THIS_MONTH": "今月",
+        "SCHEDULED_THIS_WEEK": "今週",
+        "SCHEDULED_TODAY": "今日",
+        "SCHEDULED_TOMORROW": "明日",
+        "SORT_BY": "並べ替え",
+        "SORT_CREATION_DATE": "作成日",
+        "SORT_DEFAULT": "デフォルト",
+        "SORT_NAME": "名前",
+        "SORT_SCHEDULED_DATE": "開催予定日",
+        "TIME_1HOUR": "> 1時間",
+        "TIME_2HOUR": "> 2時間",
+        "TIME_10MIN": "> 10分間",
+        "TIME_30MIN": ">30分",
+        "TIME_DEFAULT": "任意の期間",
+        "TIME_SPENT": "滞在時間",
+        "TITLE": "タスクビューのカスタマイズ"
+      }
+    },
     "TIME_TRACKING": {
       "B": {
         "ALREADY_DID": "私はすでにやった",
@@ -1350,6 +1450,7 @@
     "ADVANCED_CFG": "詳細設定",
     "CANCEL": "キャンセル",
     "CLOSE": "閉じる",
+    "CONFIRM": "確認する",
     "DELETE": "削除",
     "DISMISS": "やめる",
     "DO_IT": "やれ！",
@@ -1470,6 +1571,7 @@
       "TOGGLE_ISSUE_PANEL": "課題パネルの表示／非表示",
       "TOGGLE_PLAY": "タスクの開始/停止",
       "TOGGLE_SIDE_NAV": "Sidenavの表示とフォーカス/非表示",
+      "TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL": "トグルフィルター/グループ/ソートパネル",
       "TRIGGER_SYNC": "トリガー同期（設定されている場合）",
       "ZOOM_DEFAULT": "ズームのデフォルト（デスクトップのみ）",
       "ZOOM_IN": "ズームイン（デスクトップのみ）",
@@ -1514,6 +1616,7 @@
       "IS_HIDE_NAV": "メインヘッダーが表示されるまでナビゲーションを非表示にする（デスクトップのみ）",
       "IS_MINIMIZE_TO_TRAY": "トレイに最小化（デスクトップのみ）",
       "IS_SHOW_TIP_LONGER": "アプリの起動時に生産性のヒントを少し長く表示する",
+      "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "トレイ/ステータスメニューに現在のカウントダウンを表示する(デスクトップMacのみ)",
       "IS_TRAY_SHOW_CURRENT_TASK": "トレイ/ステータスメニューに現在のタスクを表示する（デスクトップのみ）",
       "IS_TURN_OFF_MARKDOWN": "ノートのマークダウン解析をオフにする",
       "IS_USE_MINIMAL_SIDE_NAV": "最小限のナビゲーションバーを使用する（アイコンのみを表示する）",
@@ -1599,6 +1702,34 @@
       "TITLE": "タイムトラッキング"
     }
   },
+  "GLOBAL_RELATIVE_TIME": {
+    "FUTURE": {
+      "A_DAY": "一日で",
+      "A_MINUTE": "1分で",
+      "A_MONTH": "一ヶ月で",
+      "A_YEAR": "1年で",
+      "AN_HOUR": "1時間で",
+      "DAYS": " {{count}} 日で",
+      "FEW_SECONDS": "数秒で",
+      "HOURS": " {{count}} 時間で",
+      "MINUTES": " {{count}} 分で完了",
+      "MONTHS": " {{count}} か月で",
+      "YEARS": " {{count}} 年後"
+    },
+    "PAST": {
+      "A_DAY": "一日前",
+      "A_MINUTE": "1分前",
+      "A_MONTH": "一ヶ月前",
+      "A_YEAR": "一年前",
+      "AN_HOUR": "一時間前",
+      "DAYS": "{{count}} 日前",
+      "FEW_SECONDS": "数秒前",
+      "HOURS": "{{count}} 時間前",
+      "MINUTES": "{{count}} 分前",
+      "MONTHS": "{{count}} ヶ月前",
+      "YEARS": "{{count}} 年前"
+    }
+  },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "クリップボードにコピー",
     "ERR_COMPRESSION": "圧縮インターフェースのエラー",
@@ -1631,6 +1762,7 @@
     "CREATE_TAG": "タグを作成",
     "DELETE_PROJECT": "プロジェクトの削除",
     "DELETE_TAG": "タグを削除",
+    "ENTER_FOCUS_MODE": "フォーカスモードに入る",
     "GO_TO_TASK_LIST": "タスクリストへ",
     "HELP": "ヘルプ",
     "HM": {
@@ -1655,6 +1787,7 @@
     "PROJECTS": "プロジェクト",
     "QUICK_HISTORY": "クイックヒストリー",
     "SCHEDULE": "スケジュール",
+    "SEARCH": "捜索",
     "SETTINGS": "設定",
     "SHOW_SEARCH_BAR": "検索バーを表示する",
     "TAGS": "タグ",
@@ -1767,6 +1900,7 @@
     "ADD_SCHEDULED_FOR_TOMORROW": "明日予定されているタスクを追加します（{{nr}}）",
     "ADD_SOME_TASKS": "一日を計画するためタスクをいくつか追加しましょう！",
     "DONE_TASKS": "完了したタスク",
+    "DONE_TASKS_IN_ARCHIVE": "現在、ここには完了したタスクはありませんが、すでにアーカイブされているタスクがいくつかあります。",
     "ESTIMATE_REMAINING": "推定残り：",
     "FINISH_DAY": "一日を終える",
     "FINISH_DAY_FOR_PROJECT": "プロジェクト終了日",
@@ -1775,6 +1909,7 @@
     "HELP_PROCRASTINATION": "先延ばししてるので助けて！",
     "MOVE_DONE_TO_ARCHIVE": "アーカイブへの移動が完了しました",
     "NO_DONE_TASKS": "現在、完了したタスクはありません",
+    "NO_PLANNED_TASK_ALL_DONE": "完了したすべてのタスク",
     "NO_PLANNED_TASKS": "計画タスクなし",
     "READY_TO_WORK": "準備オーケー！",
     "RESET_BREAK_TIMER": "休憩タイマーなしでリセット",
