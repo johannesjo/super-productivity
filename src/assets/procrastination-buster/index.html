@@ -15,8 +15,8 @@
         new MutationObserver((s) => {
           for (const r of s)
             if (r.type === 'childList')
-              for (const o of r.addedNodes)
-                o.tagName === 'LINK' && o.rel === 'modulepreload' && i(o);
+              for (const l of r.addedNodes)
+                l.tagName === 'LINK' && l.rel === 'modulepreload' && i(l);
         }).observe(document, { childList: !0, subtree: !0 });
         function n(s) {
           const r = {};
@@ -38,144 +38,179 @@
           fetch(s.href, r);
         }
       })();
-      const ce = !1,
+      const le = !0,
         ae = (e, t) => e === t,
-        fe = Symbol('solid-track'),
-        M = { equals: ae };
-      let ue = ne;
-      const x = 1,
-        R = 2,
-        Q = { owned: null, cleanups: null, context: null, owner: null };
-      var h = null;
-      let G = null,
-        de = null,
-        d = null,
-        p = null,
-        v = null,
-        q = 0;
-      function B(e, t) {
-        const n = d,
-          i = h,
+        ce = Symbol('solid-track'),
+        ue = Symbol('solid-dev-component'),
+        R = { equals: ae };
+      let fe = ne;
+      const _ = 1,
+        U = 2,
+        de = {};
+      var d = null;
+      let j = null,
+        he = null,
+        h = null,
+        g = null,
+        k = null,
+        G = 0;
+      function N(e, t) {
+        const n = h,
+          i = d,
           s = e.length === 0,
           r = t === void 0 ? i : t,
-          o = s
-            ? Q
+          l = s
+            ? { owned: null, cleanups: null, context: null, owner: null }
             : { owned: null, cleanups: null, context: r ? r.context : null, owner: r },
-          l = s ? e : () => e(() => _(() => I(o)));
-        (h = o), (d = null);
+          o = s
+            ? () =>
+                e(() => {
+                  throw new Error(
+                    'Dispose method must be an explicit argument to createRoot function',
+                  );
+                })
+            : () => e(() => C(() => I(l)));
+        (d = l), (h = null);
         try {
-          return O(l, !0);
+          return P(o, !0);
         } finally {
-          (d = n), (h = i);
+          (h = n), (d = i);
         }
       }
-      function W(e, t) {
-        t = t ? Object.assign({}, M, t) : M;
+      function V(e, t) {
+        t = t ? Object.assign({}, R, t) : R;
         const n = {
-            value: e,
-            observers: null,
-            observerSlots: null,
-            comparator: t.equals || void 0,
-          },
-          i = (s) => (typeof s == 'function' && (s = s(n.value)), z(n, s));
-        return [Z.bind(n), i];
+          value: e,
+          observers: null,
+          observerSlots: null,
+          comparator: t.equals || void 0,
+        };
+        t.name && (n.name = t.name), t.internal ? (n.internal = !0) : me(n);
+        const i = (s) => (typeof s == 'function' && (s = s(n.value)), ee(n, s));
+        return [z.bind(n), i];
       }
-      function V(e, t, n) {
-        const i = ee(e, t, !1, x);
-        F(i);
+      function W(e, t, n) {
+        const i = Q(e, t, !1, _, n);
+        O(i);
       }
-      function D(e, t, n) {
-        n = n ? Object.assign({}, M, n) : M;
-        const i = ee(e, t, !0, 0);
+      function B(e, t, n) {
+        n = n ? Object.assign({}, R, n) : R;
+        const i = Q(e, t, !0, 0, n);
         return (
           (i.observers = null),
           (i.observerSlots = null),
           (i.comparator = n.equals || void 0),
-          F(i),
-          Z.bind(i)
+          O(i),
+          z.bind(i)
         );
       }
-      function _(e) {
-        if (d === null) return e();
-        const t = d;
-        d = null;
+      function C(e) {
+        if (h === null) return e();
+        const t = h;
+        h = null;
         try {
           return e();
         } finally {
-          d = t;
+          h = t;
         }
       }
-      function he(e) {
+      function ge(e) {
         return (
-          h === null || (h.cleanups === null ? (h.cleanups = [e]) : h.cleanups.push(e)), e
+          d === null
+            ? console.warn(
+                'cleanups created outside a `createRoot` or `render` will never be run',
+              )
+            : d.cleanups === null
+              ? (d.cleanups = [e])
+              : d.cleanups.push(e),
+          e
         );
       }
-      function Z() {
+      function pe(e, t) {
+        const n = Q(() => C(() => (Object.assign(e, { [ue]: !0 }), e(t))), void 0, !0, 0);
+        return (
+          (n.props = t),
+          (n.observers = null),
+          (n.observerSlots = null),
+          (n.name = e.name),
+          (n.component = e),
+          O(n),
+          n.tValue !== void 0 ? n.tValue : n.value
+        );
+      }
+      function me(e) {
+        d && (d.sourceMap ? d.sourceMap.push(e) : (d.sourceMap = [e]), (e.graph = d));
+      }
+      function z() {
         if (this.sources && this.state)
-          if (this.state === x) F(this);
+          if (this.state === _) O(this);
           else {
-            const e = p;
-            (p = null), O(() => U(this), !1), (p = e);
+            const e = g;
+            (g = null), P(() => q(this), !1), (g = e);
           }
-        if (d) {
+        if (h) {
           const e = this.observers ? this.observers.length : 0;
-          d.sources
-            ? (d.sources.push(this), d.sourceSlots.push(e))
-            : ((d.sources = [this]), (d.sourceSlots = [e])),
+          h.sources
+            ? (h.sources.push(this), h.sourceSlots.push(e))
+            : ((h.sources = [this]), (h.sourceSlots = [e])),
             this.observers
-              ? (this.observers.push(d), this.observerSlots.push(d.sources.length - 1))
-              : ((this.observers = [d]), (this.observerSlots = [d.sources.length - 1]));
+              ? (this.observers.push(h), this.observerSlots.push(h.sources.length - 1))
+              : ((this.observers = [h]), (this.observerSlots = [h.sources.length - 1]));
         }
         return this.value;
       }
-      function z(e, t, n) {
+      function ee(e, t, n) {
         let i = e.value;
         return (
           (!e.comparator || !e.comparator(i, t)) &&
             ((e.value = t),
             e.observers &&
               e.observers.length &&
-              O(() => {
+              P(() => {
                 for (let s = 0; s < e.observers.length; s += 1) {
                   const r = e.observers[s],
-                    o = G && G.running;
-                  o && G.disposed.has(r),
-                    (o ? !r.tState : !r.state) &&
-                      (r.pure ? p.push(r) : v.push(r), r.observers && se(r)),
-                    o || (r.state = x);
+                    l = j && j.running;
+                  l && j.disposed.has(r),
+                    (l ? !r.tState : !r.state) &&
+                      (r.pure ? g.push(r) : k.push(r), r.observers && se(r)),
+                    l || (r.state = _);
                 }
-                if (p.length > 1e6) throw ((p = []), new Error());
+                if (g.length > 1e6)
+                  throw (
+                    ((g = []),
+                    le ? new Error('Potential Infinite Loop Detected.') : new Error())
+                  );
               }, !1)),
           t
         );
       }
-      function F(e) {
+      function O(e) {
         if (!e.fn) return;
         I(e);
-        const t = q;
-        pe(e, e.value, t);
+        const t = G;
+        we(e, e.value, t);
       }
-      function pe(e, t, n) {
+      function we(e, t, n) {
         let i;
-        const s = h,
-          r = d;
-        d = h = e;
+        const s = d,
+          r = h;
+        h = d = e;
         try {
           i = e.fn(t);
-        } catch (o) {
+        } catch (l) {
           return (
-            e.pure && ((e.state = x), e.owned && e.owned.forEach(I), (e.owned = null)),
+            e.pure && ((e.state = _), e.owned && e.owned.forEach(I), (e.owned = null)),
             (e.updatedAt = n + 1),
-            ie(o)
+            ie(l)
           );
         } finally {
-          (d = r), (h = s);
+          (h = r), (d = s);
         }
         (!e.updatedAt || e.updatedAt <= n) &&
-          (e.updatedAt != null && 'observers' in e ? z(e, i) : (e.value = i),
+          (e.updatedAt != null && 'observers' in e ? ee(e, i) : (e.value = i),
           (e.updatedAt = n));
       }
-      function ee(e, t, n, i = x, s) {
+      function Q(e, t, n, i = _, s) {
         const r = {
           fn: e,
           state: i,
@@ -185,55 +220,61 @@
           sourceSlots: null,
           cleanups: null,
           value: t,
-          owner: h,
-          context: h ? h.context : null,
+          owner: d,
+          context: d ? d.context : null,
           pure: n,
         };
         return (
-          h === null || (h !== Q && (h.owned ? h.owned.push(r) : (h.owned = [r]))), r
+          d === null
+            ? console.warn(
+                'computations created outside a `createRoot` or `render` will never be disposed',
+              )
+            : d !== de && (d.owned ? d.owned.push(r) : (d.owned = [r])),
+          s && s.name && (r.name = s.name),
+          r
         );
       }
       function te(e) {
         if (e.state === 0) return;
-        if (e.state === R) return U(e);
-        if (e.suspense && _(e.suspense.inFallback)) return e.suspense.effects.push(e);
+        if (e.state === U) return q(e);
+        if (e.suspense && C(e.suspense.inFallback)) return e.suspense.effects.push(e);
         const t = [e];
-        for (; (e = e.owner) && (!e.updatedAt || e.updatedAt < q); ) e.state && t.push(e);
+        for (; (e = e.owner) && (!e.updatedAt || e.updatedAt < G); ) e.state && t.push(e);
         for (let n = t.length - 1; n >= 0; n--)
-          if (((e = t[n]), e.state === x)) F(e);
-          else if (e.state === R) {
-            const i = p;
-            (p = null), O(() => U(e, t[0]), !1), (p = i);
+          if (((e = t[n]), e.state === _)) O(e);
+          else if (e.state === U) {
+            const i = g;
+            (g = null), P(() => q(e, t[0]), !1), (g = i);
           }
       }
-      function O(e, t) {
-        if (p) return e();
+      function P(e, t) {
+        if (g) return e();
         let n = !1;
-        t || (p = []), v ? (n = !0) : (v = []), q++;
+        t || (g = []), k ? (n = !0) : (k = []), G++;
         try {
           const i = e();
-          return ge(n), i;
+          return ye(n), i;
         } catch (i) {
-          n || (v = null), (p = null), ie(i);
+          n || (k = null), (g = null), ie(i);
         }
       }
-      function ge(e) {
-        if ((p && (ne(p), (p = null)), e)) return;
-        const t = v;
-        (v = null), t.length && O(() => ue(t), !1);
+      function ye(e) {
+        if ((g && (ne(g), (g = null)), e)) return;
+        const t = k;
+        (k = null), t.length && P(() => fe(t), !1);
       }
       function ne(e) {
         for (let t = 0; t < e.length; t++) te(e[t]);
       }
-      function U(e, t) {
+      function q(e, t) {
         e.state = 0;
         for (let n = 0; n < e.sources.length; n += 1) {
           const i = e.sources[n];
           if (i.sources) {
             const s = i.state;
-            s === x
-              ? i !== t && (!i.updatedAt || i.updatedAt < q) && te(i)
-              : s === R && U(i, t);
+            s === _
+              ? i !== t && (!i.updatedAt || i.updatedAt < G) && te(i)
+              : s === U && q(i, t);
           }
         }
       }
@@ -241,7 +282,7 @@
         for (let t = 0; t < e.observers.length; t += 1) {
           const n = e.observers[t];
           n.state ||
-            ((n.state = R), n.pure ? p.push(n) : v.push(n), n.observers && se(n));
+            ((n.state = U), n.pure ? g.push(n) : k.push(n), n.observers && se(n));
         }
       }
       function I(e) {
@@ -253,9 +294,9 @@
               s = n.observers;
             if (s && s.length) {
               const r = s.pop(),
-                o = n.observerSlots.pop();
+                l = n.observerSlots.pop();
               i < s.length &&
-                ((r.sourceSlots[o] = i), (s[i] = r), (n.observerSlots[i] = o));
+                ((r.sourceSlots[l] = i), (s[i] = r), (n.observerSlots[i] = l));
             }
           }
         if (e.tOwned) {
@@ -270,116 +311,121 @@
           for (t = e.cleanups.length - 1; t >= 0; t--) e.cleanups[t]();
           e.cleanups = null;
         }
-        e.state = 0;
+        (e.state = 0), delete e.sourceMap;
       }
-      function me(e) {
+      function be(e) {
         return e instanceof Error
           ? e
           : new Error(typeof e == 'string' ? e : 'Unknown error', { cause: e });
       }
-      function ie(e, t = h) {
-        throw me(e);
+      function ie(e, t = d) {
+        throw be(e);
       }
-      const we = Symbol('fallback');
+      const Se = Symbol('fallback');
       function H(e) {
         for (let t = 0; t < e.length; t++) e[t]();
       }
-      function ye(e, t, n = {}) {
+      function $e(e, t, n = {}) {
         let i = [],
           s = [],
           r = [],
-          o = 0,
-          l = t.length > 1 ? [] : null;
+          l = 0,
+          o = t.length > 1 ? [] : null;
         return (
-          he(() => H(r)),
+          ge(() => H(r)),
           () => {
-            let a = e() || [],
-              f = a.length,
-              u,
-              c;
+            let c = e() || [],
+              u = c.length,
+              f,
+              a;
             return (
-              a[fe],
-              _(() => {
-                let m, A, $, P, L, w, y, b, k;
-                if (f === 0)
-                  o !== 0 && (H(r), (r = []), (i = []), (s = []), (o = 0), l && (l = [])),
+              c[ce],
+              C(() => {
+                let p, y, $, D, M, b, S, A, T;
+                if (u === 0)
+                  l !== 0 && (H(r), (r = []), (i = []), (s = []), (l = 0), o && (o = [])),
                     n.fallback &&
-                      ((i = [we]),
-                      (s[0] = B((oe) => ((r[0] = oe), n.fallback()))),
-                      (o = 1));
-                else if (o === 0) {
-                  for (s = new Array(f), c = 0; c < f; c++) (i[c] = a[c]), (s[c] = B(E));
-                  o = f;
+                      ((i = [Se]),
+                      (s[0] = N((oe) => ((r[0] = oe), n.fallback()))),
+                      (l = 1));
+                else if (l === 0) {
+                  for (s = new Array(u), a = 0; a < u; a++) (i[a] = c[a]), (s[a] = N(w));
+                  l = u;
                 } else {
                   for (
-                    $ = new Array(f),
-                      P = new Array(f),
-                      l && (L = new Array(f)),
-                      w = 0,
-                      y = Math.min(o, f);
-                    w < y && i[w] === a[w];
-                    w++
+                    $ = new Array(u),
+                      D = new Array(u),
+                      o && (M = new Array(u)),
+                      b = 0,
+                      S = Math.min(l, u);
+                    b < S && i[b] === c[b];
+                    b++
                   );
-                  for (y = o - 1, b = f - 1; y >= w && b >= w && i[y] === a[b]; y--, b--)
-                    ($[b] = s[y]), (P[b] = r[y]), l && (L[b] = l[y]);
-                  for (m = new Map(), A = new Array(b + 1), c = b; c >= w; c--)
-                    (k = a[c]),
-                      (u = m.get(k)),
-                      (A[c] = u === void 0 ? -1 : u),
-                      m.set(k, c);
-                  for (u = w; u <= y; u++)
-                    (k = i[u]),
-                      (c = m.get(k)),
-                      c !== void 0 && c !== -1
-                        ? (($[c] = s[u]),
-                          (P[c] = r[u]),
-                          l && (L[c] = l[u]),
-                          (c = A[c]),
-                          m.set(k, c))
-                        : r[u]();
-                  for (c = w; c < f; c++)
-                    c in $
-                      ? ((s[c] = $[c]), (r[c] = P[c]), l && ((l[c] = L[c]), l[c](c)))
-                      : (s[c] = B(E));
-                  (s = s.slice(0, (o = f))), (i = a.slice(0));
+                  for (S = l - 1, A = u - 1; S >= b && A >= b && i[S] === c[A]; S--, A--)
+                    ($[A] = s[S]), (D[A] = r[S]), o && (M[A] = o[S]);
+                  for (p = new Map(), y = new Array(A + 1), a = A; a >= b; a--)
+                    (T = c[a]),
+                      (f = p.get(T)),
+                      (y[a] = f === void 0 ? -1 : f),
+                      p.set(T, a);
+                  for (f = b; f <= S; f++)
+                    (T = i[f]),
+                      (a = p.get(T)),
+                      a !== void 0 && a !== -1
+                        ? (($[a] = s[f]),
+                          (D[a] = r[f]),
+                          o && (M[a] = o[f]),
+                          (a = y[a]),
+                          p.set(T, a))
+                        : r[f]();
+                  for (a = b; a < u; a++)
+                    a in $
+                      ? ((s[a] = $[a]), (r[a] = D[a]), o && ((o[a] = M[a]), o[a](a)))
+                      : (s[a] = N(w));
+                  (s = s.slice(0, (l = u))), (i = c.slice(0));
                 }
                 return s;
               })
             );
-            function E(m) {
-              if (((r[c] = m), l)) {
-                const [A, $] = W(c);
-                return (l[c] = $), t(a[c], A);
+            function w(p) {
+              if (((r[a] = p), o)) {
+                const [y, $] = V(a, { name: 'index' });
+                return (o[a] = $), t(c[a], y);
               }
-              return t(a[c]);
+              return t(c[a]);
             }
           }
         );
       }
-      function S(e, t) {
-        return _(() => e(t || {}));
+      function v(e, t) {
+        return pe(e, t || {});
       }
-      const be = (e) => `Stale read from <${e}>.`;
+      const Ae = (e) =>
+        `Attempting to access a stale value from <${e}> that could possibly be undefined. This may occur because you are reading the accessor returned from the component at a time where it has already been unmounted. We recommend cleaning up any stale timers or async, or reading from the initial condition.`;
       function re(e) {
         const t = 'fallback' in e && { fallback: () => e.fallback };
-        return D(ye(() => e.each, e.children, t || void 0));
+        return B(
+          $e(() => e.each, e.children, t || void 0),
+          void 0,
+          { name: 'value' },
+        );
       }
-      function N(e) {
+      function L(e) {
         const t = e.keyed,
-          n = D(() => e.when, void 0, void 0),
-          i = t ? n : D(n, void 0, { equals: (s, r) => !s == !r });
-        return D(
+          n = B(() => e.when, void 0, { name: 'condition value' }),
+          i = t ? n : B(n, void 0, { equals: (s, r) => !s == !r, name: 'condition' });
+        return B(
           () => {
             const s = i();
             if (s) {
               const r = e.children;
               return typeof r == 'function' && r.length > 0
-                ? _(() =>
+                ? C(() =>
                     r(
                       t
                         ? s
                         : () => {
-                            if (!_(i)) throw be('Show');
+                            if (!C(i)) throw Ae('Show');
                             return n();
                           },
                     ),
@@ -389,99 +435,109 @@
             return e.fallback;
           },
           void 0,
-          void 0,
+          { name: 'value' },
         );
       }
-      function Se(e, t, n) {
+      globalThis &&
+        (globalThis.Solid$
+          ? console.warn(
+              'You appear to have multiple instances of Solid. This can lead to unexpected behavior.',
+            )
+          : (globalThis.Solid$ = !0));
+      function ve(e, t, n) {
         let i = n.length,
           s = t.length,
           r = i,
-          o = 0,
           l = 0,
-          a = t[s - 1].nextSibling,
-          f = null;
-        for (; o < s || l < r; ) {
-          if (t[o] === n[l]) {
-            o++, l++;
+          o = 0,
+          c = t[s - 1].nextSibling,
+          u = null;
+        for (; l < s || o < r; ) {
+          if (t[l] === n[o]) {
+            l++, o++;
             continue;
           }
           for (; t[s - 1] === n[r - 1]; ) s--, r--;
-          if (s === o) {
-            const u = r < i ? (l ? n[l - 1].nextSibling : n[r - l]) : a;
-            for (; l < r; ) e.insertBefore(n[l++], u);
-          } else if (r === l) for (; o < s; ) (!f || !f.has(t[o])) && t[o].remove(), o++;
-          else if (t[o] === n[r - 1] && n[l] === t[s - 1]) {
-            const u = t[--s].nextSibling;
-            e.insertBefore(n[l++], t[o++].nextSibling),
-              e.insertBefore(n[--r], u),
+          if (s === l) {
+            const f = r < i ? (o ? n[o - 1].nextSibling : n[r - o]) : c;
+            for (; o < r; ) e.insertBefore(n[o++], f);
+          } else if (r === o) for (; l < s; ) (!u || !u.has(t[l])) && t[l].remove(), l++;
+          else if (t[l] === n[r - 1] && n[o] === t[s - 1]) {
+            const f = t[--s].nextSibling;
+            e.insertBefore(n[o++], t[l++].nextSibling),
+              e.insertBefore(n[--r], f),
               (t[s] = n[r]);
           } else {
-            if (!f) {
-              f = new Map();
-              let c = l;
-              for (; c < r; ) f.set(n[c], c++);
+            if (!u) {
+              u = new Map();
+              let a = o;
+              for (; a < r; ) u.set(n[a], a++);
             }
-            const u = f.get(t[o]);
-            if (u != null)
-              if (l < u && u < r) {
-                let c = o,
-                  E = 1,
-                  m;
-                for (; ++c < s && c < r && !((m = f.get(t[c])) == null || m !== u + E); )
-                  E++;
-                if (E > u - l) {
-                  const A = t[o];
-                  for (; l < u; ) e.insertBefore(n[l++], A);
-                } else e.replaceChild(n[l++], t[o++]);
-              } else o++;
-            else t[o++].remove();
+            const f = u.get(t[l]);
+            if (f != null)
+              if (o < f && f < r) {
+                let a = l,
+                  w = 1,
+                  p;
+                for (; ++a < s && a < r && !((p = u.get(t[a])) == null || p !== f + w); )
+                  w++;
+                if (w > f - o) {
+                  const y = t[l];
+                  for (; o < f; ) e.insertBefore(n[o++], y);
+                } else e.replaceChild(n[o++], t[l++]);
+              } else l++;
+            else t[l++].remove();
           }
         }
       }
       const X = '_$DX_DELEGATE';
-      function Ae(e, t, n, i = {}) {
+      function ke(e, t, n, i = {}) {
+        if (!t)
+          throw new Error(
+            "The `element` passed to `render(..., element)` doesn't exist. Make sure `element` exists in the document.",
+          );
         let s;
         return (
-          B((r) => {
-            (s = r), t === document ? e() : g(t, e(), t.firstChild ? null : void 0, n);
+          N((r) => {
+            (s = r), t === document ? e() : m(t, e(), t.firstChild ? null : void 0, n);
           }, i.owner),
           () => {
             s(), (t.textContent = '');
           }
         );
       }
-      function C(e, t, n, i) {
+      function x(e, t, n, i) {
         let s;
         const r = () => {
-            const l = document.createElement('template');
-            return (l.innerHTML = e), l.content.firstChild;
+            const o = document.createElement('template');
+            return (o.innerHTML = e), o.content.firstChild;
           },
-          o = () => (s || (s = r())).cloneNode(!0);
-        return (o.cloneNode = o), o;
+          l = () => (s || (s = r())).cloneNode(!0);
+        return (l.cloneNode = l), l;
       }
-      function le(e, t = window.document) {
+      function Y(e, t = window.document) {
         const n = t[X] || (t[X] = new Set());
         for (let i = 0, s = e.length; i < s; i++) {
           const r = e[i];
-          n.has(r) || (n.add(r), t.addEventListener(r, $e));
+          n.has(r) || (n.add(r), t.addEventListener(r, _e));
         }
       }
-      function g(e, t, n, i) {
+      function m(e, t, n, i) {
         if ((n !== void 0 && !i && (i = []), typeof t != 'function'))
-          return j(e, t, i, n);
-        V((s) => j(e, t(), s, n), i);
+          return F(e, t, i, n);
+        W((s) => F(e, t(), s, n), i);
       }
-      function $e(e) {
+      function _e(e) {
         let t = e.target;
         const n = `$${e.type}`,
           i = e.target,
           s = e.currentTarget,
-          r = (a) => Object.defineProperty(e, 'target', { configurable: !0, value: a }),
-          o = () => {
-            const a = t[n];
-            if (a && !t.disabled) {
-              const f = t[`${n}Data`];
-              if ((f !== void 0 ? a.call(t, f, e) : a.call(t, e), e.cancelBubble)) return;
+          r = (c) => Object.defineProperty(e, 'target', { configurable: !0, value: c }),
+          l = () => {
+            const c = t[n];
+            if (c && !t.disabled) {
+              const u = t[`${n}Data`];
+              if ((u !== void 0 ? c.call(t, u, e) : c.call(t, e), e.cancelBubble)) return;
             }
             return (
               t.host &&
@@ -492,8 +548,8 @@
               !0
             );
           },
-          l = () => {
-            for (; o() && (t = t._$host || t.parentNode || t.host); );
+          o = () => {
+            for (; l() && (t = t._$host || t.parentNode || t.host); );
           };
         if (
           (Object.defineProperty(e, 'currentTarget', {
@@ -504,115 +560,115 @@
           }),
           e.composedPath)
         ) {
-          const a = e.composedPath();
-          r(a[0]);
-          for (let f = 0; f < a.length - 2 && ((t = a[f]), !!o()); f++) {
+          const c = e.composedPath();
+          r(c[0]);
+          for (let u = 0; u < c.length - 2 && ((t = c[u]), !!l()); u++) {
             if (t._$host) {
-              (t = t._$host), l();
+              (t = t._$host), o();
               break;
             }
             if (t.parentNode === s) break;
           }
-        } else l();
+        } else o();
         r(i);
       }
-      function j(e, t, n, i, s) {
+      function F(e, t, n, i, s) {
         for (; typeof n == 'function'; ) n = n();
         if (t === n) return n;
         const r = typeof t,
-          o = i !== void 0;
+          l = i !== void 0;
         if (
-          ((e = (o && n[0] && n[0].parentNode) || e), r === 'string' || r === 'number')
+          ((e = (l && n[0] && n[0].parentNode) || e), r === 'string' || r === 'number')
         ) {
           if (r === 'number' && ((t = t.toString()), t === n)) return n;
-          if (o) {
-            let l = n[0];
-            l && l.nodeType === 3
-              ? l.data !== t && (l.data = t)
-              : (l = document.createTextNode(t)),
-              (n = T(e, n, i, l));
+          if (l) {
+            let o = n[0];
+            o && o.nodeType === 3
+              ? o.data !== t && (o.data = t)
+              : (o = document.createTextNode(t)),
+              (n = E(e, n, i, o));
           } else
             n !== '' && typeof n == 'string'
               ? (n = e.firstChild.data = t)
               : (n = e.textContent = t);
-        } else if (t == null || r === 'boolean') n = T(e, n, i);
+        } else if (t == null || r === 'boolean') n = E(e, n, i);
         else {
           if (r === 'function')
             return (
-              V(() => {
-                let l = t();
-                for (; typeof l == 'function'; ) l = l();
-                n = j(e, l, n, i);
+              W(() => {
+                let o = t();
+                for (; typeof o == 'function'; ) o = o();
+                n = F(e, o, n, i);
               }),
               () => n
             );
           if (Array.isArray(t)) {
-            const l = [],
-              a = n && Array.isArray(n);
-            if (K(l, t, n, s)) return V(() => (n = j(e, l, n, i, !0))), () => n;
-            if (l.length === 0) {
-              if (((n = T(e, n, i)), o)) return n;
-            } else a ? (n.length === 0 ? Y(e, l, i) : Se(e, n, l)) : (n && T(e), Y(e, l));
-            n = l;
+            const o = [],
+              c = n && Array.isArray(n);
+            if (K(o, t, n, s)) return W(() => (n = F(e, o, n, i, !0))), () => n;
+            if (o.length === 0) {
+              if (((n = E(e, n, i)), l)) return n;
+            } else c ? (n.length === 0 ? J(e, o, i) : ve(e, n, o)) : (n && E(e), J(e, o));
+            n = o;
           } else if (t.nodeType) {
             if (Array.isArray(n)) {
-              if (o) return (n = T(e, n, i, t));
-              T(e, n, null, t);
+              if (l) return (n = E(e, n, i, t));
+              E(e, n, null, t);
             } else
               n == null || n === '' || !e.firstChild
                 ? e.appendChild(t)
                 : e.replaceChild(t, e.firstChild);
             n = t;
-          }
+          } else console.warn('Unrecognized value. Skipped inserting', t);
         }
         return n;
       }
       function K(e, t, n, i) {
         let s = !1;
-        for (let r = 0, o = t.length; r < o; r++) {
-          let l = t[r],
-            a = n && n[e.length],
-            f;
-          if (!(l == null || l === !0 || l === !1))
-            if ((f = typeof l) == 'object' && l.nodeType) e.push(l);
-            else if (Array.isArray(l)) s = K(e, l, a) || s;
-            else if (f === 'function')
+        for (let r = 0, l = t.length; r < l; r++) {
+          let o = t[r],
+            c = n && n[e.length],
+            u;
+          if (!(o == null || o === !0 || o === !1))
+            if ((u = typeof o) == 'object' && o.nodeType) e.push(o);
+            else if (Array.isArray(o)) s = K(e, o, c) || s;
+            else if (u === 'function')
               if (i) {
-                for (; typeof l == 'function'; ) l = l();
-                s = K(e, Array.isArray(l) ? l : [l], Array.isArray(a) ? a : [a]) || s;
-              } else e.push(l), (s = !0);
+                for (; typeof o == 'function'; ) o = o();
+                s = K(e, Array.isArray(o) ? o : [o], Array.isArray(c) ? c : [c]) || s;
+              } else e.push(o), (s = !0);
             else {
-              const u = String(l);
-              a && a.nodeType === 3 && a.data === u
-                ? e.push(a)
-                : e.push(document.createTextNode(u));
+              const f = String(o);
+              c && c.nodeType === 3 && c.data === f
+                ? e.push(c)
+                : e.push(document.createTextNode(f));
             }
         }
         return s;
       }
-      function Y(e, t, n = null) {
+      function J(e, t, n = null) {
         for (let i = 0, s = t.length; i < s; i++) e.insertBefore(t[i], n);
       }
-      function T(e, t, n, i) {
+      function E(e, t, n, i) {
         if (n === void 0) return (e.textContent = '');
         const s = i || document.createTextNode('');
         if (t.length) {
           let r = !1;
-          for (let o = t.length - 1; o >= 0; o--) {
-            const l = t[o];
-            if (s !== l) {
-              const a = l.parentNode === e;
-              !r && !o
-                ? a
-                  ? e.replaceChild(s, l)
+          for (let l = t.length - 1; l >= 0; l--) {
+            const o = t[l];
+            if (s !== o) {
+              const c = o.parentNode === e;
+              !r && !l
+                ? c
+                  ? e.replaceChild(s, o)
                   : e.insertBefore(s, n)
-                : a && l.remove();
+                : c && o.remove();
             } else r = !0;
           }
         } else e.insertBefore(s, n);
         return [s];
       }
-      const ve = [
+      const xe = [
         {
           id: 'overwhelm',
           title: 'Overwhelm',
@@ -702,29 +758,29 @@
           ],
         },
       ];
-      var xe = C('<div class=blocker-grid>'),
-        Ce = C(
+      var Te = x('<div class=blocker-grid>'),
+        Ee = x(
           '<button class="blocker-card card card-clickable"><h3 class=text-primary></h3><p class=text-muted>',
         );
-      const Ee = (e) =>
+      const Ce = (e) =>
         (() => {
-          var t = xe();
+          var t = Te();
           return (
-            g(
+            m(
               t,
-              S(re, {
+              v(re, {
                 get each() {
                   return e.types;
                 },
                 children: (n) =>
                   (() => {
-                    var i = Ce(),
+                    var i = Ee(),
                       s = i.firstChild,
                       r = s.nextSibling;
                     return (
                       (i.$click = () => e.onSelect(n)),
-                      g(s, () => n.title),
-                      g(r, () => n.emotion),
+                      m(s, () => n.title),
+                      m(r, () => n.emotion),
                       i
                     );
                   })(),
@@ -733,140 +789,176 @@
             t
           );
         })();
-      le(['click']);
-      var ke = C(
+      Y(['click']);
+      var Ie = x(
           '<div class=strategy-container><div class=selected-type><h2 class=text-primary></h2><p class="emotion text-muted"></p></div><h3>Recommended Strategies:</h3><div class=strategy-list>',
         ),
-        Te = C('<div class="strategy-item card"><p class=strategy-text>');
-      const _e = (e) =>
+        Oe = x(
+          '<div class="strategy-item card"><p class=strategy-text></p><div class=strategy-actions><button class=strategy-action-btn title="Create a task for this strategy">📝 Add as Task</button><button class="strategy-action-btn pomodoro-btn"title="Start a Pomodoro session">🍅 Start Pomodoro',
+        );
+      const Pe = (e) =>
         (() => {
-          var t = ke(),
+          var t = Ie(),
             n = t.firstChild,
             i = n.firstChild,
             s = i.nextSibling,
             r = n.nextSibling,
-            o = r.nextSibling;
+            l = r.nextSibling;
           return (
-            g(i, () => e.type.title),
-            g(s, () => e.type.emotion),
-            g(
-              o,
-              S(re, {
+            m(i, () => e.type.title),
+            m(s, () => e.type.emotion),
+            m(
+              l,
+              v(re, {
                 get each() {
                   return e.type.strategies;
                 },
-                children: (l) =>
+                children: (o) =>
                   (() => {
-                    var a = Te(),
-                      f = a.firstChild;
-                    return g(f, l), a;
+                    var c = Oe(),
+                      u = c.firstChild,
+                      f = u.nextSibling,
+                      a = f.firstChild,
+                      w = a.nextSibling;
+                    return (
+                      m(u, o),
+                      (a.$click = () => e.onStrategyAction(o, 'task')),
+                      (w.$click = () => e.onStrategyAction(o, 'pomodoro')),
+                      c
+                    );
                   })(),
               }),
             ),
             t
           );
         })();
-      var Ie = C('<header class=header><button class=back-button>← Back'),
-        Oe = C(
-          "<div class=intro><h2>What's holding you back?</h2><p class=text-muted>Choose what best matches your current feeling:",
+      Y(['click']);
+      var De = x('<header class=header><button class=back-button>← Back'),
+        Me = x(
+          `<div class=intro><h2>What's holding you back?</h2><p class=text-muted>Choose what best matches your current feeling:</p><div class=quick-actions><button class=quick-action-btn title="Open add task bar to quickly create a task">✏️ Quick Add Task</button><button class="quick-action-btn focus-btn"title="Activate focus mode to minimize distractions">🎯 Focus Mode`,
         ),
-        Pe = C('<div class=app><main class=main>');
-      const Le = () => {
-        const [e, t] = W(null),
-          [n, i] = W(!0),
-          s = (l) => {
-            t(l), i(!1);
+        Le = x('<div class=app><main class=main>');
+      const Ne = () => {
+        const [e, t] = V(null),
+          [n, i] = V(!0),
+          s = (c) => {
+            t(c), i(!1);
           },
           r = () => {
             t(null), i(!0);
           },
-          o = async (l, a) => {
+          l = async (c, u) => {
             const f = e();
             if (f)
               try {
-                const u =
-                  a === 'task'
-                    ? { type: 'ADD_STRATEGY_TASK', strategy: l, blockerType: f.title }
+                const a =
+                  u === 'task'
+                    ? { type: 'ADD_STRATEGY_TASK', strategy: c, blockerType: f.title }
                     : { type: 'START_POMODORO' };
-                window.parent !== window &&
+                console.log('Sending message to parent:', a),
                   window.parent.postMessage(
                     {
                       type: 'PLUGIN_MESSAGE',
-                      pluginId: 'procrastination-buster',
-                      data: u,
+                      message: a,
+                      messageId: Date.now().toString(),
                     },
                     '*',
                   );
-              } catch (u) {
-                console.error('Failed to send message:', u);
+              } catch (a) {
+                console.error('Failed to send message:', a);
               }
+          },
+          o = (c) => {
+            try {
+              console.log('Sending message to parent with type:', c),
+                window.parent.postMessage(
+                  {
+                    type: 'PLUGIN_MESSAGE',
+                    message: { type: c },
+                    messageId: Date.now().toString(),
+                  },
+                  '*',
+                );
+            } catch (u) {
+              console.error('Failed to send message:', u);
+            }
           };
         return (() => {
-          var l = Pe(),
-            a = l.firstChild;
+          var c = Le(),
+            u = c.firstChild;
           return (
-            g(
-              l,
-              S(N, {
+            m(
+              c,
+              v(L, {
                 get when() {
                   return !n();
                 },
                 get children() {
-                  var f = Ie(),
-                    u = f.firstChild;
-                  return (u.$click = r), f;
+                  var f = De(),
+                    a = f.firstChild;
+                  return (a.$click = r), f;
                 },
               }),
-              a,
+              u,
             ),
-            g(
-              a,
-              S(N, {
+            m(
+              u,
+              v(L, {
                 get when() {
                   return n();
                 },
                 get children() {
-                  return Oe();
+                  var f = Me(),
+                    a = f.firstChild,
+                    w = a.nextSibling,
+                    p = w.nextSibling,
+                    y = p.firstChild,
+                    $ = y.nextSibling;
+                  return (
+                    (y.$click = () => o('QUICK_ADD_TASK')),
+                    ($.$click = () => o('START_FOCUS_MODE')),
+                    f
+                  );
                 },
               }),
               null,
             ),
-            g(
-              a,
-              S(N, {
+            m(
+              u,
+              v(L, {
                 get when() {
                   return !e();
                 },
                 get children() {
-                  return S(Ee, { types: ve, onSelect: s });
+                  return v(Ce, { types: xe, onSelect: s });
                 },
               }),
               null,
             ),
-            g(
-              a,
-              S(N, {
+            m(
+              u,
+              v(L, {
                 get when() {
                   return e();
                 },
                 get children() {
-                  return S(_e, {
+                  return v(Pe, {
                     get type() {
                       return e();
                     },
-                    onStrategyAction: o,
+                    onStrategyAction: l,
                   });
                 },
               }),
               null,
             ),
-            l
+            c
           );
         })();
       };
-      le(['click']);
-      const J = document.getElementById('root');
-      J && Ae(() => S(Le, {}), J);
+      Y(['click']);
+      const Z = document.getElementById('root');
+      Z && ke(() => v(Ne, {}), Z);
     </script>
     <style>
       * {
@@ -984,6 +1076,61 @@
       }
       .strategy-text {
         margin: 0;
+      }
+      .quick-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+        justify-content: center;
+      }
+      .quick-action-btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: var(--theme-extra-border-color);
+        color: var(--theme-text-color);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .quick-action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px #0000001a;
+      }
+      .quick-action-btn.focus-btn {
+        background: var(--c-primary);
+        color: #fff;
+      }
+      .strategy-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      .strategy-action-btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: var(--theme-extra-border-color);
+        color: var(--theme-text-color);
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+      .strategy-action-btn:hover {
+        background: var(--c-primary);
+        color: #fff;
+      }
+      .strategy-action-btn.pomodoro-btn:hover {
+        background: #e74c3c;
       }
     </style>
   </head>

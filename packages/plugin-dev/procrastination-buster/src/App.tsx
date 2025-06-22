@@ -1,5 +1,10 @@
 import { Component, createSignal, Show } from 'solid-js';
-import { ProcrastinationType, procrastinationTypes } from './types';
+import {
+  ProcrastinationType,
+  procrastinationTypes,
+  PluginMessageType,
+  WindowMessageType,
+} from './types';
 import { BlockerSelector } from './BlockerSelector';
 import { StrategyList } from './StrategyList';
 import './App.css';
@@ -23,29 +28,41 @@ const App: Component = () => {
     if (!selectedBlocker) return;
 
     try {
-      // Send message to plugin
       const message =
         action === 'task'
           ? {
-              type: 'ADD_STRATEGY_TASK',
+              type: PluginMessageType.ADD_STRATEGY_TASK,
               strategy,
               blockerType: selectedBlocker.title,
             }
           : {
-              type: 'START_POMODORO',
+              type: PluginMessageType.START_POMODORO,
             };
 
-      // Post message to parent (Super Productivity)
-      if (window.parent !== window) {
-        window.parent.postMessage(
-          {
-            type: 'PLUGIN_MESSAGE',
-            pluginId: 'procrastination-buster',
-            data: message,
-          },
-          '*',
-        );
-      }
+      // Send message to parent window (plugin context)
+      window.parent.postMessage(
+        {
+          type: WindowMessageType.PLUGIN_MESSAGE,
+          message: message,
+          messageId: Date.now().toString(),
+        },
+        '*',
+      );
+    } catch (error) {
+      console.error('Failed to send message:', error);
+    }
+  };
+
+  const sendPluginMessage = (type: PluginMessageType) => {
+    try {
+      window.parent.postMessage(
+        {
+          type: WindowMessageType.PLUGIN_MESSAGE,
+          message: { type },
+          messageId: Date.now().toString(),
+        },
+        '*',
+      );
     } catch (error) {
       console.error('Failed to send message:', error);
     }
@@ -69,6 +86,23 @@ const App: Component = () => {
           <div class="intro">
             <h2>What's holding you back?</h2>
             <p class="text-muted">Choose what best matches your current feeling:</p>
+
+            <div class="quick-actions">
+              <button
+                class="quick-action-btn"
+                onClick={() => sendPluginMessage(PluginMessageType.QUICK_ADD_TASK)}
+                title="Open add task bar to quickly create a task"
+              >
+                ✏️ Quick Add Task
+              </button>
+              <button
+                class="quick-action-btn focus-btn"
+                onClick={() => sendPluginMessage(PluginMessageType.START_FOCUS_MODE)}
+                title="Activate focus mode to minimize distractions"
+              >
+                🎯 Focus Mode
+              </button>
+            </div>
           </div>
         </Show>
 
