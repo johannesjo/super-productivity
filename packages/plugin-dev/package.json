@@ -12,7 +12,7 @@
     "build:procrastination": "cd procrastination-buster && npm install && npm run build && npm run package && cd .. && echo '✓ Built procrastination-buster'",
     "clean": "rm -rf */node_modules */dist minimal-plugin.zip",
     "clean:dist": "rm -rf */dist minimal-plugin.zip",
-    "install:all": "npm install && cd simple-typescript-plugin && npm install && cd ../example-plugin && npm install && cd ../procrastination-buster && npm install && cd ..",
+    "install:all": "node scripts/install-all.js",
     "test": "echo 'No tests configured yet'",
     "list": "echo 'Available plugins:' && ls -d */ | grep -v node_modules | grep -v scripts"
   },
