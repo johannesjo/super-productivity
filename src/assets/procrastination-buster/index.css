@@ -27,7 +27,7 @@ body {
   border: 2px solid var(--theme-extra-border-color);
 }
 .card-clickable:hover {
-  transition: all 0.2s;
+  transition: transform 0.2s;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px #00000026;
   border-color: var(--c-primary);

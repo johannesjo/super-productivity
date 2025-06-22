@@ -51,11 +51,42 @@ export const createPluginCssInjection = (): string => {
         --color-danger: ${getVar('--color-danger')};
         --color-warning: ${getVar('--color-warning')};
         --is-dark-theme: ${isDarkTheme ? '1' : '0'};
+        --theme-scrollbar-thumb: ${getVar('--theme-scrollbar-thumb')};
+        --theme-scrollbar-thumb-hover: ${getVar('--theme-scrollbar-thumb-hover')};
+        --theme-scrollbar-track: ${getVar('--theme-scrollbar-track')};
       }
 
       body {
         background: transparent;
         color: var(--theme-text-color);
+      }
+      
+      /* Custom scrollbar styles for plugins */
+      :root {
+        scrollbar-color: var(--theme-scrollbar-thumb) var(--theme-scrollbar-track);
+        scrollbar-width: thin;
+      }
+      
+      ::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+      }
+      
+      /* Track */
+      ::-webkit-scrollbar-track {
+        background: var(--theme-scrollbar-track);
+        border-radius: 4px;
+      }
+      
+      /* Handle */
+      ::-webkit-scrollbar-thumb {
+        background: var(--theme-scrollbar-thumb);
+        border-radius: 16px;
+      }
+      
+      /* Handle on hover */
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--theme-scrollbar-thumb-hover);
       }
     </style>
   `;

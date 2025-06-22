@@ -27,7 +27,7 @@ body {
 }
 
 .card-clickable:hover {
-  transition: all 0.2s;
+  transition: transform 0.2s;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   border-color: var(--c-primary);
