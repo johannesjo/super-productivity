@@ -21,24 +21,6 @@ export const StrategyList: Component<StrategyListProps> = (props) => {
           {(strategy) => (
             <div class="strategy-item">
               <p class="strategy-text">{strategy}</p>
-              <div class="strategy-actions">
-                <button
-                  class="action-button task"
-                  onClick={() => props.onStrategyAction(strategy, 'task')}
-                  title="Add as task"
-                >
-                  + Task
-                </button>
-                {strategy.toLowerCase().includes('pomodoro') && (
-                  <button
-                    class="action-button pomodoro"
-                    onClick={() => props.onStrategyAction(strategy, 'pomodoro')}
-                    title="Start Pomodoro"
-                  >
-                    ⏱️ Start
-                  </button>
-                )}
-              </div>
             </div>
           )}
         </For>

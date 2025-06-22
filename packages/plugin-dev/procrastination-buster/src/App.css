@@ -137,44 +137,10 @@ body {
   padding: 1rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
 }
 
 .strategy-text {
   margin: 0;
-  flex: 1;
-}
-
-.strategy-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.action-button {
-  padding: 0.4rem 0.8rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  transition: opacity 0.2s;
-  font-family: inherit;
-}
-
-.action-button:hover {
-  opacity: 0.8;
-}
-
-.action-button.task {
-  background: var(--c-primary);
-  color: white;
-}
-
-.action-button.pomodoro {
-  background: var(--c-warn);
-  color: white;
 }
 
 .footer {
