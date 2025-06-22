@@ -21,6 +21,7 @@ import { togglePluginPanel } from '../../layout/store/layout.actions';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map, startWith } from 'rxjs/operators';
 import { computed } from '@angular/core';
+import { BreakpointObserver } from '@angular/cdk/layout';
 
 @Component({
   selector: 'mobile-side-panel-menu',
@@ -35,20 +36,22 @@ import { computed } from '@angular/core';
   ],
   template: `
     <!-- Mobile Trigger Button -->
-    <button
-      (click)="toggleMenu()"
-      class="mobile-menu-trigger show-xs-only"
-      color=""
-      mat-mini-fab
-      [matTooltip]="T.MH.SIDE_PANEL_MENU | translate"
-    >
-      @if (!isShowMobileMenu()) {
-        <mat-icon>view_sidebar</mat-icon>
-      }
-      @if (isShowMobileMenu()) {
-        <mat-icon>close</mat-icon>
-      }
-    </button>
+    @if (showMobileTrigger()) {
+      <button
+        (click)="toggleMenu()"
+        class="mobile-menu-trigger"
+        color=""
+        mat-icon-button
+        [matTooltip]="T.MH.SIDE_PANEL_MENU | translate"
+      >
+        @if (!isShowMobileMenu()) {
+          <mat-icon>view_sidebar</mat-icon>
+        }
+        @if (isShowMobileMenu()) {
+          <mat-icon>close</mat-icon>
+        }
+      </button>
+    }
 
     <!-- Mobile Menu Container -->
     <div
@@ -121,6 +124,7 @@ export class MobileSidePanelMenuComponent {
   readonly T = T;
   readonly layoutService = inject(LayoutService);
   readonly taskViewCustomizerService = inject(TaskViewCustomizerService);
+  readonly breakpointObserver = inject(BreakpointObserver);
 
   private _globalConfigService = inject(GlobalConfigService);
   private _pluginBridge = inject(PluginBridgeService);
@@ -129,6 +133,13 @@ export class MobileSidePanelMenuComponent {
 
   // State signals
   readonly isShowMobileMenu = signal(false);
+
+  // Media query computed signal
+  private _isXs$ = this.breakpointObserver.observe('(max-width: 600px)');
+  private _isXs = toSignal(this._isXs$.pipe(map((result) => result.matches)), {
+    initialValue: false,
+  });
+  readonly showMobileTrigger = computed(() => this._isXs());
 
   // Convert observables to signals
   readonly isRouteWithSidePanel = toSignal(

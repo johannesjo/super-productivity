@@ -14,6 +14,7 @@ import {
 } from '../../core-ui/layout/store/layout.reducer';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs/operators';
+import { BreakpointObserver } from '@angular/cdk/layout';
 
 /**
  * Component that renders side panel buttons for plugins in the main header.
@@ -97,12 +98,6 @@ import { filter, map } from 'rxjs/operators';
       .plugin-side-panel-btn:disabled::after {
         background: transparent !important;
       }
-
-      @media (max-width: 479px) {
-        .plugin-side-panel-btn:disabled {
-          display: none;
-        }
-      }
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -110,12 +105,18 @@ import { filter, map } from 'rxjs/operators';
 export class PluginSidePanelBtnsComponent {
   private _pluginBridge = inject(PluginBridgeService);
   private _router = inject(Router);
+  private _breakpointObserver = inject(BreakpointObserver);
+
   private _store = inject(Store);
+  private _isXs$ = this._breakpointObserver.observe('(max-width: 600px)');
 
   sidePanelButtons = toSignal(this._pluginBridge.sidePanelButtons$, { initialValue: [] });
 
   activePluginId = toSignal(this._store.select(selectActivePluginId));
   isShowPanel = toSignal(this._store.select(selectIsShowPluginPanel));
+  isXs = toSignal(this._isXs$.pipe(map((result) => result.matches)), {
+    initialValue: false,
+  });
 
   readonly currentRoute = toSignal(
     this._router.events.pipe(

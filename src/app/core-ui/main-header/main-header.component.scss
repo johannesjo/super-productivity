@@ -294,9 +294,29 @@ button.isActive2 {
 .simple-counter-buttons {
   display: flex;
 
+  @include mq(xs) {
+    // Desktop mode - horizontal layout
+    flex-direction: row;
+    position: static;
+    pointer-events: all;
+
+    simple-counter-button {
+      transition: none;
+      transform: none;
+      opacity: 1;
+      position: static;
+      margin-top: 0;
+      margin-left: var(--s-quarter);
+
+      @include mq(xs) {
+        margin-left: var(--s);
+      }
+    }
+  }
+
   @include mq(xs, max) {
+    // Mobile mode - vertical dropdown
     position: absolute;
-    display: flex;
     transition: var(--transition-standard);
     top: 100%;
     flex-direction: column;
@@ -308,39 +328,37 @@ button.isActive2 {
     &.isVisibleMobile {
       pointer-events: all;
     }
-  }
-}
 
-simple-counter-button {
-  @include mq(xs, max) {
-    transition: var(--transition-standard);
-    transform: translateY(-100%);
-    opacity: 0;
-    position: relative;
-    z-index: 2;
-    margin-top: var(--s);
-    margin-left: 0;
+    simple-counter-button {
+      transition: var(--transition-standard);
+      transform: translateY(-100%);
+      opacity: 0;
+      position: relative;
+      z-index: 2;
+      margin-top: var(--s);
+      margin-left: 0;
 
-    &:nth-child(2) {
-      transform: translateY(-200%);
-    }
-    &:nth-child(3) {
-      transform: translateY(-300%);
-    }
-    &:nth-child(4) {
-      transform: translateY(-400%);
-    }
-    &:nth-child(5) {
-      transform: translateY(-500%);
-    }
-    &:nth-child(6) {
-      transform: translateY(-600%);
-    }
-    &:nth-child(7) {
-      transform: translateY(-700%);
+      &:nth-child(2) {
+        transform: translateY(-200%);
+      }
+      &:nth-child(3) {
+        transform: translateY(-300%);
+      }
+      &:nth-child(4) {
+        transform: translateY(-400%);
+      }
+      &:nth-child(5) {
+        transform: translateY(-500%);
+      }
+      &:nth-child(6) {
+        transform: translateY(-600%);
+      }
+      &:nth-child(7) {
+        transform: translateY(-700%);
+      }
     }
 
-    .simple-counter-buttons.isVisibleMobile & {
+    &.isVisibleMobile simple-counter-button {
       transform: translateY(0);
       opacity: 1;
     }

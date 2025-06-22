@@ -7,6 +7,8 @@ import {
   OnInit,
   Renderer2,
   viewChild,
+  computed,
+  signal,
 } from '@angular/core';
 import { ProjectService } from '../../features/project/project.service';
 import { LayoutService } from '../layout/layout.service';
@@ -49,6 +51,8 @@ import { SyncStatus } from '../../pfapi/api';
 import { PluginHeaderBtnsComponent } from '../../plugins/ui/plugin-header-btns.component';
 import { PluginSidePanelBtnsComponent } from '../../plugins/ui/plugin-side-panel-btns.component';
 import { MobileSidePanelMenuComponent } from './mobile-side-panel-menu/mobile-side-panel-menu.component';
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'main-header',
@@ -89,6 +93,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   readonly simpleCounterService = inject(SimpleCounterService);
   readonly syncWrapperService = inject(SyncWrapperService);
   readonly globalConfigService = inject(GlobalConfigService);
+  readonly breakpointObserver = inject(BreakpointObserver);
   private readonly _renderer = inject(Renderer2);
   private readonly _snackService = inject(SnackService);
   private readonly _router = inject(Router);
@@ -98,7 +103,21 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   T: typeof T = T;
   progressCircleRadius: number = 10;
   circumference: number = this.progressCircleRadius * Math.PI * 2;
-  isShowSimpleCounterBtnsMobile: boolean = false;
+  isShowSimpleCounterBtnsMobile = signal(false);
+
+  // Convert breakpoint observer to signals
+  private _isXs$ = this.breakpointObserver.observe('(max-width: 600px)');
+  private _isXxxs$ = this.breakpointObserver.observe('(max-width: 398px)');
+
+  isXs = toSignal(this._isXs$.pipe(map((result) => result.matches)), {
+    initialValue: false,
+  });
+
+  isXxxs = toSignal(this._isXxxs$.pipe(map((result) => result.matches)), {
+    initialValue: false,
+  });
+
+  showDesktopButtons = computed(() => !this.isXs());
 
   readonly circleSvg = viewChild<ElementRef>('circleSvg');
 
