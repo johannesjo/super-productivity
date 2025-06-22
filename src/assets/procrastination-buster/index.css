@@ -114,34 +114,6 @@ body {
 .strategy-text {
   margin: 0;
 }
-.quick-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 24px;
-  justify-content: center;
-}
-.quick-action-btn {
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  background: var(--theme-extra-border-color);
-  color: var(--theme-text-color);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.quick-action-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px #0000001a;
-}
-.quick-action-btn.focus-btn {
-  background: var(--c-primary);
-  color: #fff;
-}
 .strategy-actions {
   display: flex;
   gap: 8px;
@@ -149,13 +121,13 @@ body {
 }
 .strategy-action-btn {
   padding: 8px 16px;
-  border: none;
+  border: 1px solid var(--c-primary);
+  background: transparent;
+  color: var(--c-primary);
   border-radius: 6px;
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: var(--theme-extra-border-color);
-  color: var(--theme-text-color);
   flex: 1;
   display: flex;
   align-items: center;
@@ -163,9 +135,9 @@ body {
   gap: 6px;
 }
 .strategy-action-btn:hover {
-  background: var(--c-primary);
-  color: #fff;
-}
-.strategy-action-btn.pomodoro-btn:hover {
-  background: #e74c3c;
+  transition: all 0.2s;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px #00000026;
+  border-color: var(--c-primary);
+  cursor: pointer;
 }

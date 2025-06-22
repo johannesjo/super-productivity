@@ -66,11 +66,11 @@ const messageHandler = async (message) => {
 
     case PluginMessageType.START_POMODORO:
       PluginAPI.dispatchAction({
-        type: SPActionType.START_POMODORO,
+        type: SPActionType.SHOW_FOCUS_OVERLAY,
       });
 
       PluginAPI.showSnack({
-        msg: 'Pomodoro started! Time to focus.',
+        msg: 'Focus mode activated! Distractions minimized.',
         type: SnackType.SUCCESS,
       });
       break;
