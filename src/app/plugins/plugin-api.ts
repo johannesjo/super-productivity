@@ -248,6 +248,14 @@ export class PluginAPI implements PluginAPIInterface {
   }
 
   /**
+   * Execute an NgRx action if it's in the allowed list
+   */
+  dispatchAction(action: any): void {
+    console.log(`Plugin ${this._pluginId} requested to execute action:`, action);
+    return this._pluginBridge.dispatchAction(action);
+  }
+
+  /**
    * Clean up all resources associated with this plugin API instance
    * Called when the plugin is being unloaded
    */

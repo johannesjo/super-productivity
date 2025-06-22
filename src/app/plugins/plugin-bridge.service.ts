@@ -35,6 +35,7 @@ import { TaskArchiveService } from '../features/time-tracking/task-archive.servi
 import { Router } from '@angular/router';
 import { PluginDialogComponent } from './ui/plugin-dialog/plugin-dialog.component';
 import { IS_ELECTRON } from '../app.constants';
+import { isAllowedPluginAction } from './allowed-plugin-actions.const';
 
 /**
  * PluginBridge acts as an intermediary layer between plugins and the main application services.
@@ -782,6 +783,30 @@ export class PluginBridgeService implements OnDestroy {
     if (errors.length > 0) {
       throw new Error(`Validation failed: ${errors.join('; ')}`);
     }
+  }
+
+  /**
+   * Execute an NgRx action if it's in the allowed list
+   */
+  dispatchAction(action: any): void {
+    if (!this._currentPluginId) {
+      throw new Error('No plugin context set for action execution');
+    }
+
+    // Check if the action is in the allowed list
+    if (!isAllowedPluginAction(action)) {
+      console.error(
+        `PluginBridge: Action type '${action.type}' is not allowed for plugins`,
+      );
+      throw new Error(`Action type '${action.type}' is not allowed for plugins`);
+    }
+
+    // Dispatch the action
+    this._store.dispatch(action);
+    console.log(`PluginBridge: Dispatched action for plugin ${this._currentPluginId}`, {
+      actionType: action.type,
+      payload: action,
+    });
   }
 
   /**

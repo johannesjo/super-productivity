@@ -228,6 +228,9 @@ export interface PluginAPI {
 
   // node execution (only available in Electron with nodeExecution permission)
   executeNodeScript?(request: PluginNodeScriptRequest): Promise<PluginNodeScriptResult>;
+
+  // action execution - dispatch NgRx actions (limited to allowed subset)
+  dispatchAction(action: any): void;
 }
 
 export interface PluginInstance {
