@@ -1,15 +1,23 @@
 import { Component, For, Show } from 'solid-js';
-import { ProcrastinationType } from './types';
+import { ProcrastinationType, StrategyActionType } from './types';
 
 interface StrategyListProps {
   type: ProcrastinationType;
-  onStrategyAction: (strategy: string, action: 'task' | 'pomodoro') => void;
+  onStrategyAction: (strategy: string, action: StrategyActionType) => void;
 }
 
 export const StrategyList: Component<StrategyListProps> = (props) => {
-  // Only show action buttons for overwhelm and distraction blockers
-  const showActions = () =>
-    props.type.id === 'overwhelm' || props.type.id === 'distraction';
+  const getStrategyText = (
+    strategy: string | { text: string; action?: StrategyActionType },
+  ) => {
+    return typeof strategy === 'string' ? strategy : strategy.text;
+  };
+
+  const getStrategyAction = (
+    strategy: string | { text: string; action?: StrategyActionType },
+  ) => {
+    return typeof strategy === 'string' ? undefined : strategy.action;
+  };
 
   return (
     <div class="strategy-container">
@@ -22,29 +30,27 @@ export const StrategyList: Component<StrategyListProps> = (props) => {
 
       <div class="strategy-list">
         <For each={props.type.strategies}>
-          {(strategy) => (
-            <div class="strategy-item card">
-              <p class="strategy-text">{strategy}</p>
-              <Show when={showActions()}>
-                <div class="strategy-actions">
-                  <button
-                    class="strategy-action-btn"
-                    onClick={() => props.onStrategyAction(strategy, 'task')}
-                    title="Create a task for this strategy"
-                  >
-                    📝 Add as Task
-                  </button>
-                  <button
-                    class="strategy-action-btn pomodoro-btn"
-                    onClick={() => props.onStrategyAction(strategy, 'pomodoro')}
-                    title="Start a focus session"
-                  >
-                    🎯 Start focus session
-                  </button>
+          {(strategy) => {
+            const text = getStrategyText(strategy);
+            const action = getStrategyAction(strategy);
+
+            return (
+              <div class="strategy-item card">
+                <div class="strategy-content">
+                  <p class="strategy-text">{text}</p>
+                  <Show when={action}>
+                    <button
+                      class="strategy-action-btn"
+                      onClick={() => props.onStrategyAction(text, action!)}
+                      title="Start a focus session"
+                    >
+                      Start focus session
+                    </button>
+                  </Show>
                 </div>
-              </Show>
-            </div>
-          )}
+              </div>
+            );
+          }}
         </For>
       </div>
     </div>

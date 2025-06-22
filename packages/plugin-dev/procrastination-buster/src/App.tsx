@@ -4,6 +4,7 @@ import {
   procrastinationTypes,
   PluginMessageType,
   WindowMessageType,
+  StrategyActionType,
 } from './types';
 import { BlockerSelector } from './BlockerSelector';
 import { StrategyList } from './StrategyList';
@@ -23,21 +24,23 @@ const App: Component = () => {
     setShowIntro(true);
   };
 
-  const handleStrategyAction = async (strategy: string, action: 'task' | 'pomodoro') => {
+  const handleStrategyAction = async (strategy: string, action: StrategyActionType) => {
     const selectedBlocker = selectedType();
     if (!selectedBlocker) return;
 
     try {
-      const message =
-        action === 'task'
-          ? {
-              type: PluginMessageType.ADD_STRATEGY_TASK,
-              strategy,
-              blockerType: selectedBlocker.title,
-            }
-          : {
-              type: PluginMessageType.START_POMODORO,
-            };
+      let message;
+
+      switch (action) {
+        case StrategyActionType.FOCUS_SESSION:
+          message = {
+            type: PluginMessageType.START_POMODORO,
+          };
+          break;
+        default:
+          console.warn('Unknown action type:', action);
+          return;
+      }
 
       // Send message to parent window (plugin context)
       window.parent.postMessage(
@@ -86,23 +89,6 @@ const App: Component = () => {
           <div class="intro">
             <h2>What's holding you back?</h2>
             <p class="text-muted">Choose what best matches your current feeling:</p>
-
-            <div class="quick-actions">
-              <button
-                class="quick-action-btn"
-                onClick={() => sendPluginMessage(PluginMessageType.QUICK_ADD_TASK)}
-                title="Open add task bar to quickly create a task"
-              >
-                ✏️ Quick Add Task
-              </button>
-              <button
-                class="quick-action-btn focus-btn"
-                onClick={() => sendPluginMessage(PluginMessageType.START_FOCUS_MODE)}
-                title="Activate focus mode to minimize distractions"
-              >
-                🎯 Focus Mode
-              </button>
-            </div>
           </div>
         </Show>
 

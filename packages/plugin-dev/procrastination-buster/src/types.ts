@@ -44,8 +44,27 @@ export enum WindowMessageType {
 }
 
 // ============================================================================
+// Strategy Action Types
+// ============================================================================
+
+/**
+ * Available action types for strategies
+ */
+export enum StrategyActionType {
+  FOCUS_SESSION = 'focusSession',
+}
+
+// ============================================================================
 // Interfaces
 // ============================================================================
+
+/**
+ * Represents a strategy with optional action
+ */
+export interface Strategy {
+  text: string;
+  action?: StrategyActionType;
+}
 
 /**
  * Represents a type of procrastination with associated strategies.
@@ -54,7 +73,7 @@ export interface ProcrastinationType {
   id: string;
   title: string;
   emotion: string;
-  strategies: string[];
+  strategies: (string | Strategy)[];
 }
 
 // ============================================================================
@@ -72,9 +91,9 @@ export const procrastinationTypes: ProcrastinationType[] = [
     emotion: 'Too much at once',
     strategies: [
       'Create micro-tasks (5 min steps)',
-      'Start Pomodoro timer (25 min)',
       'Implementation Intentions (If X, then Y)',
       'Pick just one thing',
+      { text: 'Start Focus Session', action: StrategyActionType.FOCUS_SESSION },
     ],
   },
   {
@@ -138,7 +157,7 @@ export const procrastinationTypes: ProcrastinationType[] = [
     emotion: 'Other things are more interesting',
     strategies: [
       'Block distractions',
-      'Schedule deep work block',
+      { text: 'Schedule deep work block', action: StrategyActionType.FOCUS_SESSION },
       'Clear work environment',
       'Start focus ritual',
     ],
