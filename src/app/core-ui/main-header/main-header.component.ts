@@ -48,6 +48,7 @@ import { showFocusOverlay } from '../../features/focus-mode/store/focus-mode.act
 import { SyncStatus } from '../../pfapi/api';
 import { PluginHeaderBtnsComponent } from '../../plugins/ui/plugin-header-btns.component';
 import { PluginSidePanelBtnsComponent } from '../../plugins/ui/plugin-side-panel-btns.component';
+import { MobileSidePanelMenuComponent } from './mobile-side-panel-menu/mobile-side-panel-menu.component';
 
 @Component({
   selector: 'main-header',
@@ -74,6 +75,7 @@ import { PluginSidePanelBtnsComponent } from '../../plugins/ui/plugin-side-panel
     LongPressDirective,
     PluginHeaderBtnsComponent,
     PluginSidePanelBtnsComponent,
+    MobileSidePanelMenuComponent,
   ],
 })
 export class MainHeaderComponent implements OnInit, OnDestroy {

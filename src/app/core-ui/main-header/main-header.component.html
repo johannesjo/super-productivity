@@ -240,10 +240,10 @@
       }
     }
 
-    <plugin-side-panel-btns></plugin-side-panel-btns>
+    <plugin-side-panel-btns class="hide-xs"></plugin-side-panel-btns>
 
     <button
-      class="toggle-notes-btn e2e-toggle-task-view-customizer-panel"
+      class="toggle-notes-btn e2e-toggle-task-view-customizer-panel hide-xs"
       [disabled]="!(isRouteWithSidePanel$ | async)"
       [class.isActive]="layoutService.isShowTaskViewCustomizerPanel$ | async"
       [class.isActive2]="taskViewCustomizerService.isCustomized()"
@@ -260,7 +260,7 @@
     </button>
 
     <button
-      class="toggle-notes-btn tour-issuePanelTrigger e2e-toggle-issue-provider-panel"
+      class="toggle-notes-btn tour-issuePanelTrigger e2e-toggle-issue-provider-panel hide-xs"
       [disabled]="!(isRouteWithSidePanel$ | async)"
       [class.isActive]="layoutService.isShowIssuePanel$ | async"
       [class.isRouteWithRightPanel]="isRouteWithRightPanel$ | async"
@@ -274,7 +274,7 @@
     </button>
 
     <button
-      class="toggle-notes-btn e2e-toggle-notes-btn"
+      class="toggle-notes-btn e2e-toggle-notes-btn hide-xs"
       [title]="
         !(isRouteWithSidePanel$ | async) ? (T.MH.NOTES_PANEL_INFO | translate) : ''
       "
@@ -289,5 +289,7 @@
     >
       <mat-icon class="note-ico">comment</mat-icon>
     </button>
+
+    <mobile-side-panel-menu></mobile-side-panel-menu>
   </nav>
 </div>
