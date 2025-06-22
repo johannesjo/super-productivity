@@ -1,40 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
   <g transform="translate(50,50)">
-    <!-- Central star shape -->
-    <path d="M 0,-20 L 5,-5 L 20,-6 L 7,3 L 10,18 L 0,6 L -10,18 L -7,3 L -20,-6 L -5,-5 Z" fill="#FFA500" stroke="#FF8C00" stroke-width="1"/>
-    
-    <!-- Radiating explosion lines -->
-    <g stroke="#FFD700" stroke-width="2" stroke-linecap="round">
-      <!-- Top -->
-      <line x1="0" y1="-25" x2="0" y2="-40" opacity="0.8"/>
-      <!-- Top-right -->
-      <line x1="18" y1="-18" x2="28" y2="-28" opacity="0.8"/>
-      <!-- Right -->
-      <line x1="25" y1="0" x2="40" y2="0" opacity="0.8"/>
-      <!-- Bottom-right -->
-      <line x1="18" y1="18" x2="28" y2="28" opacity="0.8"/>
-      <!-- Bottom -->
-      <line x1="0" y1="25" x2="0" y2="40" opacity="0.8"/>
-      <!-- Bottom-left -->
-      <line x1="-18" y1="18" x2="-28" y2="28" opacity="0.8"/>
-      <!-- Left -->
-      <line x1="-25" y1="0" x2="-40" y2="0" opacity="0.8"/>
-      <!-- Top-left -->
-      <line x1="-18" y1="-18" x2="-28" y2="-28" opacity="0.8"/>
-    </g>
-    
-    <!-- Secondary burst lines -->
-    <g stroke="#FFA500" stroke-width="1.5" stroke-linecap="round">
-      <line x1="13" y1="-13" x2="20" y2="-20" opacity="0.6"/>
-      <line x1="13" y1="13" x2="20" y2="20" opacity="0.6"/>
-      <line x1="-13" y1="13" x2="-20" y2="20" opacity="0.6"/>
-      <line x1="-13" y1="-13" x2="-20" y2="-20" opacity="0.6"/>
-    </g>
-    
-    <!-- Small dots for sparkle effect -->
-    <circle cx="30" cy="-15" r="2" fill="#FFD700" opacity="0.7"/>
-    <circle cx="-30" cy="15" r="2" fill="#FFD700" opacity="0.7"/>
-    <circle cx="15" cy="30" r="2" fill="#FFD700" opacity="0.7"/>
-    <circle cx="-15" cy="-30" r="2" fill="#FFD700" opacity="0.7"/>
+    <!-- Full size star shape -->
+    <path d="M 0,-45 L 11.25,-11.25 L 45,-13.5 L 15.75,6.75 L 22.5,40.5 L 0,13.5 L -22.5,40.5 L -15.75,6.75 L -45,-13.5 L -11.25,-11.25 Z" fill="currentColor" stroke="currentColor" stroke-width="2"/>
   </g>
 </svg>

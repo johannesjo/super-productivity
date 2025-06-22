@@ -1,5 +1,5 @@
-import { createSignal, Show, Component } from 'solid-js';
-import { procrastinationTypes, ProcrastinationType } from './types';
+import { Component, createSignal, Show } from 'solid-js';
+import { ProcrastinationType, procrastinationTypes } from './types';
 import { BlockerSelector } from './BlockerSelector';
 import { StrategyList } from './StrategyList';
 import './App.css';
@@ -53,22 +53,22 @@ const App: Component = () => {
 
   return (
     <div class="app">
-      <header class="header">
-        <Show when={!showIntro()}>
+      <Show when={!showIntro()}>
+        <header class="header">
           <button
             class="back-button"
             onClick={handleBack}
           >
             ← Back
           </button>
-        </Show>
-      </header>
+        </header>
+      </Show>
 
       <main class="main">
         <Show when={showIntro()}>
           <div class="intro">
             <h2>What's holding you back?</h2>
-            <p>Choose what best matches your current feeling:</p>
+            <p class="text-muted">Choose what best matches your current feeling:</p>
           </div>
         </Show>
 

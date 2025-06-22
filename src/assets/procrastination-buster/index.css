@@ -18,6 +18,25 @@ body {
   flex-direction: column;
   padding: 1rem;
 }
+.card {
+  background: var(--theme-card-bg);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px #0000001a;
+}
+.card-hover {
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px #00000026;
+}
+.text-muted {
+  color: var(--theme-text-color-muted);
+}
+.text-primary {
+  color: var(--c-primary);
+}
 .header {
   display: flex;
   justify-content: space-between;
@@ -54,9 +73,6 @@ body {
   font-size: 1.25rem;
   margin-bottom: 0.5rem;
 }
-.intro p {
-  color: var(--theme-text-color-muted);
-}
 .blocker-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -64,50 +80,36 @@ body {
   margin-top: 2rem;
 }
 .blocker-card {
-  background: var(--theme-card-bg);
-  border: 2px solid transparent;
-  border-radius: 8px;
   padding: 1.5rem;
-  cursor: pointer;
-  transition: all 0.2s;
   text-align: left;
-  box-shadow: 0 2px 4px #0000001a;
+  border: 2px solid transparent;
 }
 .blocker-card:hover {
   border-color: var(--c-primary);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px #00000026;
 }
 .blocker-card h3 {
   margin: 0 0 0.5rem;
   font-size: 1.1rem;
-  color: var(--c-primary);
 }
 .blocker-card p {
   margin: 0;
   font-size: 0.9rem;
-  color: var(--theme-text-color-muted);
 }
 .strategy-container {
   max-width: 600px;
   margin: 0 auto;
 }
 .selected-type {
-  background: var(--theme-card-bg);
   padding: 1.5rem;
-  border-radius: 8px;
   margin-bottom: 2rem;
   text-align: center;
-  box-shadow: 0 2px 4px #0000001a;
 }
 .selected-type h2 {
   margin: 0 0 0.5rem;
-  color: var(--c-primary);
 }
 .emotion {
   margin: 0;
   font-style: italic;
-  color: var(--theme-text-color-muted);
 }
 .strategy-list {
   display: flex;
@@ -115,10 +117,7 @@ body {
   gap: 1rem;
 }
 .strategy-item {
-  background: var(--theme-card-bg);
   padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px #0000001a;
 }
 .strategy-text {
   margin: 0;
@@ -127,7 +126,6 @@ body {
   margin-top: 2rem;
   text-align: center;
   font-size: 0.85rem;
-  color: var(--theme-text-color-muted);
 }
 kbd {
   background: var(--theme-select-hover-bg);
