@@ -73,6 +73,8 @@ body {
 
 .main {
   flex: 1;
+  position: relative;
+  overflow: hidden;
 }
 
 .intro {
@@ -167,4 +169,18 @@ body {
 .strategy-action-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Simple page transition */
+.page-fade {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

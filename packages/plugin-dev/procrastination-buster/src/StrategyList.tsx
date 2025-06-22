@@ -30,7 +30,7 @@ export const StrategyList: Component<StrategyListProps> = (props) => {
 
       <div class="strategy-list">
         <For each={props.type.strategies}>
-          {(strategy) => {
+          {(strategy, index) => {
             const text = getStrategyText(strategy);
             const action = getStrategyAction(strategy);
 

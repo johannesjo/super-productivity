@@ -74,7 +74,7 @@ const App: Component = () => {
   return (
     <div class="app">
       <Show when={!showIntro()}>
-        <header class="header">
+        <header class="header page-fade">
           <button
             class="back-button"
             onClick={handleBack}
@@ -86,24 +86,28 @@ const App: Component = () => {
 
       <main class="main">
         <Show when={showIntro()}>
-          <div class="intro">
+          <div class="intro page-fade">
             <h2>What's holding you back?</h2>
             <p class="text-muted">Choose what best matches your current feeling:</p>
           </div>
         </Show>
 
         <Show when={!selectedType()}>
-          <BlockerSelector
-            types={procrastinationTypes}
-            onSelect={handleSelectType}
-          />
+          <div class="page-fade">
+            <BlockerSelector
+              types={procrastinationTypes}
+              onSelect={handleSelectType}
+            />
+          </div>
         </Show>
 
         <Show when={selectedType()}>
-          <StrategyList
-            type={selectedType()!}
-            onStrategyAction={handleStrategyAction}
-          />
+          <div class="page-fade">
+            <StrategyList
+              type={selectedType()!}
+              onStrategyAction={handleStrategyAction}
+            />
+          </div>
         </Show>
       </main>
     </div>

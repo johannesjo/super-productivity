@@ -10,7 +10,7 @@ export const BlockerSelector: Component<BlockerSelectorProps> = (props) => {
   return (
     <div class="blocker-grid">
       <For each={props.types}>
-        {(type) => (
+        {(type, index) => (
           <button
             class="blocker-card card card-clickable"
             onClick={() => props.onSelect(type)}

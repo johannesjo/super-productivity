@@ -65,6 +65,8 @@ body {
 }
 .main {
   flex: 1;
+  position: relative;
+  overflow: hidden;
 }
 .intro {
   text-align: center;
@@ -137,4 +139,15 @@ body {
 .strategy-action-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 2px 4px #0000001a;
+}
+.page-fade {
+  animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
