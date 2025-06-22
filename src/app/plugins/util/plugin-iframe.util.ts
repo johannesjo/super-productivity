@@ -35,9 +35,13 @@ export const createPluginCssInjection = (): string => {
     <style id="injected-theme-vars">
       :root {
         --theme-bg: ${getVar('--theme-bg')};
+        --theme-bg-darker: ${getVar('--theme-bg-darker')};
         --theme-text-color: ${getVar('--theme-text-color')};
+        --theme-text-color-less-intense: ${getVar('--theme-text-color-less-intense')};
+        --theme-text-color-muted: ${getVar('--theme-text-color-muted')};
         --theme-card-bg: ${getVar('--theme-card-bg')};
         --theme-divider-color: ${getVar('--theme-divider-color')};
+        --theme-extra-border-color: ${getVar('--theme-extra-border-color')};
         --theme-select-hover-bg: ${getVar('--theme-select-hover-bg')};
         --theme-text-color-muted: ${getVar('--theme-text-color-muted')};
         --c-primary: ${getVar('--c-primary')};

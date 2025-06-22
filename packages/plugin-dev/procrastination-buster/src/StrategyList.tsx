@@ -44,7 +44,7 @@ export const StrategyList: Component<StrategyListProps> = (props) => {
                       onClick={() => props.onStrategyAction(text, action!)}
                       title="Start a focus session"
                     >
-                      Start focus session
+                      🎯 Start focus session
                     </button>
                   </Show>
                 </div>
