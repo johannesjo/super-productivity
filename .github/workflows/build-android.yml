@@ -76,13 +76,32 @@ jobs:
           name: sup-android-release
           path: android/app/build/outputs/apk/**/*.apk
 
-      - name: Upload APK to GitHub Release
+      - name: Wait for main release to be created
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: android/app/build/outputs/apk/play/release/*.apk
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fail_on_unmatched_files: true
+        run: |
+          echo "Waiting for main release to be created..."
+          for i in {1..30}; do
+            if gh release view ${{ github.ref_name }} --repo ${{ github.repository }} >/dev/null 2>&1; then
+              echo "Release found!"
+              break
+            fi
+            echo "Waiting for release... (attempt $i/30)"
+            sleep 30
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload APK to existing GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          for apk in android/app/build/outputs/apk/play/release/*.apk; do
+            if [ -f "$apk" ]; then
+              echo "Uploading $apk to release ${{ github.ref_name }}"
+              gh release upload ${{ github.ref_name }} "$apk" --repo ${{ github.repository }}
+            fi
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload to Google Play Console
         if: startsWith(github.ref, 'refs/tags/v')
