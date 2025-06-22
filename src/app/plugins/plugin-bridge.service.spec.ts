@@ -14,10 +14,9 @@ import { PluginService } from './plugin.service';
 import { Task, TaskCopy } from '../features/tasks/task.model';
 import { Project, ProjectCopy } from '../features/project/project.model';
 import { Tag, TagCopy } from '../features/tag/tag.model';
-import { Plugin } from './plugin.model';
+// import { PluginInstance } from './plugin-api.model';
 import { WorkContext } from '../features/work-context/work-context.model';
 import { GlobalConfigService } from '../features/config/global-config.service';
-import { ElectronService } from '../core/electron/electron.service';
 
 describe('PluginBridgeService', () => {
   let service: PluginBridgeService;
@@ -56,19 +55,19 @@ describe('PluginBridgeService', () => {
     timeSpent: 0,
     timeEstimate: 0,
     isDone: false,
-    doneOn: null,
+    doneOn: undefined,
     plannedAt: null,
-    reminderId: null,
-    parentId: null,
+    reminderId: undefined,
+    parentId: undefined,
     attachments: [],
-    issueId: null,
-    issuePoints: null,
-    issueType: null,
-    issueAttachmentNr: null,
-    issueLastUpdated: null,
+    issueId: undefined,
+    issuePoints: undefined,
+    issueType: undefined,
+    issueAttachmentNr: undefined,
+    issueLastUpdated: undefined,
     issueWasUpdated: false,
     subTaskIds: [],
-    repeatCfgId: null,
+    repeatCfgId: undefined,
     _showSubTasksMode: 2,
   };
 
@@ -88,11 +87,11 @@ describe('PluginBridgeService', () => {
       isAutoContrast: true,
       isDisableBackgroundGradient: false,
       primary: '',
-      huePrimary: 500,
+      huePrimary: '500',
       accent: '',
-      hueAccent: 500,
+      hueAccent: '500',
       warn: '',
-      hueWarn: 500,
+      hueWarn: '500',
       backgroundImageDark: null,
       backgroundImageLight: null,
       isAutoAccent: false,
