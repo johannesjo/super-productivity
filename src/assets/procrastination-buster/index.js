@@ -49,7 +49,7 @@ function B(e, t) {
     s = e.length === 0,
     r = t === void 0 ? i : t,
     o = s ? Q : { owned: null, cleanups: null, context: r ? r.context : null, owner: r },
-    l = s ? e : () => e(() => k(() => I(o)));
+    l = s ? e : () => e(() => _(() => I(o)));
   (h = o), (d = null);
   try {
     return O(l, !0);
@@ -83,7 +83,7 @@ function D(e, t, n) {
     Z.bind(i)
   );
 }
-function k(e) {
+function _(e) {
   if (d === null) return e();
   const t = d;
   d = null;
@@ -180,7 +180,7 @@ function ee(e, t, n, i = x, s) {
 function te(e) {
   if (e.state === 0) return;
   if (e.state === R) return U(e);
-  if (e.suspense && k(e.suspense.inFallback)) return e.suspense.effects.push(e);
+  if (e.suspense && _(e.suspense.inFallback)) return e.suspense.effects.push(e);
   const t = [e];
   for (; (e = e.owner) && (!e.updatedAt || e.updatedAt < q); ) e.state && t.push(e);
   for (let n = t.length - 1; n >= 0; n--)
@@ -281,8 +281,8 @@ function ye(e, t, n = {}) {
         c;
       return (
         a[fe],
-        k(() => {
-          let m, A, $, P, L, w, y, b, T;
+        _(() => {
+          let m, A, $, P, L, w, y, b, k;
           if (f === 0)
             o !== 0 && (H(r), (r = []), (i = []), (s = []), (o = 0), l && (l = [])),
               n.fallback &&
@@ -303,16 +303,16 @@ function ye(e, t, n = {}) {
             for (y = o - 1, b = f - 1; y >= w && b >= w && i[y] === a[b]; y--, b--)
               ($[b] = s[y]), (P[b] = r[y]), l && (L[b] = l[y]);
             for (m = new Map(), A = new Array(b + 1), c = b; c >= w; c--)
-              (T = a[c]), (u = m.get(T)), (A[c] = u === void 0 ? -1 : u), m.set(T, c);
+              (k = a[c]), (u = m.get(k)), (A[c] = u === void 0 ? -1 : u), m.set(k, c);
             for (u = w; u <= y; u++)
-              (T = i[u]),
-                (c = m.get(T)),
+              (k = i[u]),
+                (c = m.get(k)),
                 c !== void 0 && c !== -1
                   ? (($[c] = s[u]),
                     (P[c] = r[u]),
                     l && (L[c] = l[u]),
                     (c = A[c]),
-                    m.set(T, c))
+                    m.set(k, c))
                   : r[u]();
             for (c = w; c < f; c++)
               c in $
@@ -334,7 +334,7 @@ function ye(e, t, n = {}) {
   );
 }
 function S(e, t) {
-  return k(() => e(t || {}));
+  return _(() => e(t || {}));
 }
 const be = (e) => `Stale read from <${e}>.`;
 function re(e) {
@@ -351,12 +351,12 @@ function N(e) {
       if (s) {
         const r = e.children;
         return typeof r == 'function' && r.length > 0
-          ? k(() =>
+          ? _(() =>
               r(
                 t
                   ? s
                   : () => {
-                      if (!k(i)) throw be('Show');
+                      if (!_(i)) throw be('Show');
                       return n();
                     },
               ),
@@ -503,12 +503,12 @@ function j(e, t, n, i, s) {
       l && l.nodeType === 3
         ? l.data !== t && (l.data = t)
         : (l = document.createTextNode(t)),
-        (n = _(e, n, i, l));
+        (n = T(e, n, i, l));
     } else
       n !== '' && typeof n == 'string'
         ? (n = e.firstChild.data = t)
         : (n = e.textContent = t);
-  } else if (t == null || r === 'boolean') n = _(e, n, i);
+  } else if (t == null || r === 'boolean') n = T(e, n, i);
   else {
     if (r === 'function')
       return (
@@ -524,13 +524,13 @@ function j(e, t, n, i, s) {
         a = n && Array.isArray(n);
       if (K(l, t, n, s)) return V(() => (n = j(e, l, n, i, !0))), () => n;
       if (l.length === 0) {
-        if (((n = _(e, n, i)), o)) return n;
-      } else a ? (n.length === 0 ? Y(e, l, i) : Se(e, n, l)) : (n && _(e), Y(e, l));
+        if (((n = T(e, n, i)), o)) return n;
+      } else a ? (n.length === 0 ? Y(e, l, i) : Se(e, n, l)) : (n && T(e), Y(e, l));
       n = l;
     } else if (t.nodeType) {
       if (Array.isArray(n)) {
-        if (o) return (n = _(e, n, i, t));
-        _(e, n, null, t);
+        if (o) return (n = T(e, n, i, t));
+        T(e, n, null, t);
       } else
         n == null || n === '' || !e.firstChild
           ? e.appendChild(t)
@@ -566,7 +566,7 @@ function K(e, t, n, i) {
 function Y(e, t, n = null) {
   for (let i = 0, s = t.length; i < s; i++) e.insertBefore(t[i], n);
 }
-function _(e, t, n, i) {
+function T(e, t, n, i) {
   if (n === void 0) return (e.textContent = '');
   const s = i || document.createTextNode('');
   if (t.length) {
@@ -673,7 +673,7 @@ const ve = [
 ];
 var xe = C('<div class=blocker-grid>'),
   Ce = C(
-    '<button class="blocker-card card card-hover"><h3 class=text-primary></h3><p class=text-muted>',
+    '<button class="blocker-card card card-clickable"><h3 class=text-primary></h3><p class=text-muted>',
   );
 const Ee = (e) =>
   (() => {
@@ -703,13 +703,13 @@ const Ee = (e) =>
     );
   })();
 le(['click']);
-var Te = C(
+var ke = C(
     '<div class=strategy-container><div class=selected-type><h2 class=text-primary></h2><p class="emotion text-muted"></p></div><h3>Recommended Strategies:</h3><div class=strategy-list>',
   ),
-  _e = C('<div class="strategy-item card"><p class=strategy-text>');
-const ke = (e) =>
+  Te = C('<div class="strategy-item card"><p class=strategy-text>');
+const _e = (e) =>
   (() => {
-    var t = Te(),
+    var t = ke(),
       n = t.firstChild,
       i = n.firstChild,
       s = i.nextSibling,
@@ -726,7 +726,7 @@ const ke = (e) =>
           },
           children: (l) =>
             (() => {
-              var a = _e(),
+              var a = Te(),
                 f = a.firstChild;
               return g(f, l), a;
             })(),
@@ -815,7 +815,7 @@ const Le = () => {
             return e();
           },
           get children() {
-            return S(ke, {
+            return S(_e, {
               get type() {
                 return e();
               },

@@ -12,7 +12,7 @@ export const BlockerSelector: Component<BlockerSelectorProps> = (props) => {
       <For each={props.types}>
         {(type) => (
           <button
-            class="blocker-card card card-hover"
+            class="blocker-card card card-clickable"
             onClick={() => props.onSelect(type)}
           >
             <h3 class="text-primary">{type.title}</h3>

@@ -26,14 +26,12 @@ body {
   text-align: left;
   border: 2px solid var(--theme-extra-border-color, #ddd);
 }
-.card-hover {
+.card-clickable:hover {
   transition: all 0.2s;
-  cursor: pointer;
-  border-color: var(--c-primary);
-}
-.card-hover:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px #00000026;
+  border-color: var(--c-primary);
+  cursor: pointer;
 }
 .text-muted {
   color: var(--theme-text-color-muted);
@@ -45,7 +43,6 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
 }
 .header h1 {
   margin: 0;
@@ -97,7 +94,6 @@ body {
 }
 .selected-type {
   padding: 1.5rem;
-  margin-bottom: 2rem;
   text-align: center;
 }
 .selected-type h2 {
