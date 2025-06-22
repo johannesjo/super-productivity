@@ -239,6 +239,9 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
           // Node execution (if available)
           executeNodeScript: (request) => callApi('executeNodeScript', [request]),
 
+          // Action dispatch
+          dispatchAction: (action) => callApi('dispatchAction', [action]),
+
           // Message handling
           onMessage: (handler) => {
             // Store the handler and set up message listener

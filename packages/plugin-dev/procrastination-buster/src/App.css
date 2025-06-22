@@ -140,3 +140,34 @@ body {
 .strategy-text {
   margin: 0;
 }
+
+/* Strategy Actions */
+.strategy-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.strategy-action-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--c-primary);
+  background: transparent;
+  color: var(--c-primary);
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.strategy-action-btn:hover {
+  transition: all 0.2s;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  border-color: var(--c-primary);
+  cursor: pointer;
+}

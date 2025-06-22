@@ -21,6 +21,22 @@ export const StrategyList: Component<StrategyListProps> = (props) => {
           {(strategy) => (
             <div class="strategy-item card">
               <p class="strategy-text">{strategy}</p>
+              <div class="strategy-actions">
+                <button
+                  class="strategy-action-btn"
+                  onClick={() => props.onStrategyAction(strategy, 'task')}
+                  title="Create a task for this strategy"
+                >
+                  📝 Add as Task
+                </button>
+                <button
+                  class="strategy-action-btn pomodoro-btn"
+                  onClick={() => props.onStrategyAction(strategy, 'pomodoro')}
+                  title="Start a Pomodoro session"
+                >
+                  🍅 Start Pomodoro
+                </button>
+              </div>
             </div>
           )}
         </For>

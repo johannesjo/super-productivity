@@ -105,7 +105,7 @@ export default defineConfig(({ command, mode }) => {
       outDir: 'dist',
       rollupOptions: {
         input: {
-          plugin: 'src/plugin.ts',
+          plugin: 'src/plugin.js',
           index: 'index.html',
         },
         output: {
