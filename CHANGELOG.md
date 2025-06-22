@@ -1,3 +1,15 @@
+## [13.1.3](https://github.com/johannesjo/super-productivity/compare/v13.1.2...v13.1.3) (2025-06-22)
+
+### Bug Fixes
+
+- db lock warning during sync ([e2806ae](https://github.com/johannesjo/super-productivity/commit/e2806ae2185889723786c31c17aa6528b82df17a))
+
+### Features
+
+- **i18n:** remove orphaned translations ([bbd90fc](https://github.com/johannesjo/super-productivity/commit/bbd90fcc8685c33cff430d021832aacc8e1006e7))
+- **i18n:** update translations 1 ([387b44e](https://github.com/johannesjo/super-productivity/commit/387b44e25230b4a07b5dbb72de6a3affd8880b90))
+- **i18n:** update translations 2 ([00e78c6](https://github.com/johannesjo/super-productivity/commit/00e78c678d7c03041a6299652adeb16409d025ba))
+
 ## [13.1.2](https://github.com/johannesjo/super-productivity/compare/v13.1.1...v13.1.2) (2025-06-21)
 
 ### Bug Fixes
