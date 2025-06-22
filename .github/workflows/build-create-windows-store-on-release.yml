@@ -81,14 +81,13 @@ jobs:
         with:
           name: WinStoreRelease
           path: app-builds/*.appx
-
-      - name: Upload to Microsoft Store
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: isaacrlevin/windows-store-action@1.0
-        with:
-          tenant-id: ${{ secrets.AZURE_AD_TENANT_ID }}
-          client-id: ${{ secrets.AZURE_AD_CLIENT_ID }}
-          client-secret: ${{ secrets.AZURE_AD_CLIENT_SECRET }}
-          app-id: ${{ secrets.MICROSOFT_STORE_APP_ID }}
-          package-path: 'app-builds/*.appx'
-          skip-polling: false
+#      - name: Upload to Microsoft Store
+#        if: startsWith(github.ref, 'refs/tags/v')
+#        uses: isaacrlevin/windows-store-action@1.0
+#        with:
+#          tenant-id: ${{ secrets.AZURE_AD_TENANT_ID }}
+#          client-id: ${{ secrets.AZURE_AD_CLIENT_ID }}
+#          client-secret: ${{ secrets.AZURE_AD_CLIENT_SECRET }}
+#          app-id: ${{ secrets.MICROSOFT_STORE_APP_ID }}
+#          package-path: 'app-builds/*.appx'
+#          skip-polling: false
