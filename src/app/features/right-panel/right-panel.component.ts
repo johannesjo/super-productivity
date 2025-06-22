@@ -22,7 +22,10 @@ import { AsyncPipe } from '@angular/common';
 import { PluginService } from '../../plugins/plugin.service';
 import { PluginPanelContainerComponent } from '../../plugins/ui/plugin-panel-container/plugin-panel-container.component';
 import { Store } from '@ngrx/store';
-import { selectIsShowPluginPanel } from '../../core-ui/layout/store/layout.reducer';
+import {
+  selectIsShowPluginPanel,
+  selectActivePluginId,
+} from '../../core-ui/layout/store/layout.reducer';
 import { hidePluginPanel } from '../../core-ui/layout/store/layout.actions';
 
 @Component({
@@ -97,6 +100,24 @@ export class RightPanelComponent implements OnDestroy {
       },
     ),
     distinctUntilChanged(),
+  );
+
+  // Observable that includes plugin ID for component recreation
+  pluginPanelKeys$: Observable<string[]> = combineLatest([
+    this.store.select(selectIsShowPluginPanel),
+    this.store.select(selectActivePluginId),
+  ]).pipe(
+    map(([isShowPluginPanel, activePluginId]) => {
+      const keys =
+        isShowPluginPanel && activePluginId ? [`plugin-${activePluginId}`] : [];
+      console.log('RightPanel: pluginPanelKeys$ emitted:', {
+        isShowPluginPanel,
+        activePluginId,
+        keys,
+      });
+      return keys;
+    }),
+    distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
   );
 
   isOpen$: Observable<boolean> = combineLatest([

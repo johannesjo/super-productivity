@@ -20,7 +20,7 @@
       @if (panelContent === 'TASK_VIEW_CUSTOMIZER_PANEL') {
         <task-view-customizer-panel [@slideInFromRight]></task-view-customizer-panel>
       }
-      @if (panelContent === 'PLUGIN') {
+      @for (key of pluginPanelKeys$ | async; track key) {
         <plugin-panel-container [@slideInFromRight]></plugin-panel-container>
       }
       @if (selectedTaskWithDelayForNone$ | async; as selectedTaskWithDelayForNone) {
