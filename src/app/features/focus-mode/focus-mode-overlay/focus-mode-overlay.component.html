@@ -6,24 +6,13 @@
   </header>
   @if (activePage()) {
     <main>
-      @if (activePage() === FocusModePage.ProcrastinationHelp) {
-        <button
-          class="close-btn"
-          mat-icon-button
-          (click)="leaveProcrastinationHelp()"
-        >
-          <mat-icon>close</mat-icon>
-        </button>
-      }
-      @if (activePage() !== FocusModePage.ProcrastinationHelp) {
-        <button
-          class="close-btn"
-          mat-icon-button
-          (click)="closeOverlay()"
-        >
-          <mat-icon>close</mat-icon>
-        </button>
-      }
+      <button
+        class="close-btn"
+        mat-icon-button
+        (click)="closeOverlay()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
 
       <ng-template #selectModeTpl>
         <mat-button-toggle-group
@@ -44,14 +33,6 @@
       <!-- -->
       @switch (activePage()) {
         <!-- -->
-        @case (FocusModePage.ProcrastinationHelp) {
-          <div
-            class="scroll-container"
-            @warpIn
-          >
-            <procrastination></procrastination>
-          </div>
-        }
         @case (FocusModePage.TaskSelection) {
           <ng-container *ngTemplateOutlet="selectModeTpl"></ng-container>
           <focus-mode-task-selection

@@ -20,11 +20,11 @@ import {
   selectFocusModeMode,
   selectFocusSessionTimeElapsed,
 } from '../store/focus-mode.selectors';
-import { focusSessionDone, setFocusSessionActivePage } from '../store/focus-mode.actions';
+import { focusSessionDone } from '../store/focus-mode.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
-import { FocusModeMode, FocusModePage } from '../focus-mode.const';
+import { FocusModeMode } from '../focus-mode.const';
 import { ICAL_TYPE } from '../../issue/issue.const';
 import { TaskTitleComponent } from '../../../ui/task-title/task-title.component';
 import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-circle.component';
@@ -184,12 +184,6 @@ export class FocusModeMainComponent implements OnDestroy {
           },
         },
       }),
-    );
-  }
-
-  getProcrastinationHelp(): void {
-    this._store.dispatch(
-      setFocusSessionActivePage({ focusActivePage: FocusModePage.ProcrastinationHelp }),
     );
   }
 

@@ -50,13 +50,6 @@
     >
       <mat-icon>done</mat-icon>
     </button>
-    <button
-      mat-icon-button
-      [matTooltip]="T.F.FOCUS_MODE.GO_TO_PROCRASTINATION | translate"
-      (click)="getProcrastinationHelp()"
-    >
-      <mat-icon>flash_on</mat-icon>
-    </button>
     @if (task.issueId && task.issueType !== ICAL_TYPE) {
       <a
         mat-icon-button

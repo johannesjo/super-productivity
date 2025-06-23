@@ -8,11 +8,13 @@ import {
 } from './types';
 import { BlockerSelector } from './BlockerSelector';
 import { StrategyList } from './StrategyList';
+import { ProcrastinationInfo } from './ProcrastinationInfo';
 import './App.css';
 
 const App: Component = () => {
   const [selectedType, setSelectedType] = createSignal<ProcrastinationType | null>(null);
   const [showIntro, setShowIntro] = createSignal(true);
+  const [showInfo, setShowInfo] = createSignal(false);
 
   const handleSelectType = (type: ProcrastinationType) => {
     setSelectedType(type);
@@ -20,8 +22,30 @@ const App: Component = () => {
   };
 
   const handleBack = () => {
-    setSelectedType(null);
-    setShowIntro(true);
+    if (showInfo()) {
+      setShowInfo(false);
+      setShowIntro(true);
+    } else {
+      setSelectedType(null);
+      setShowIntro(true);
+    }
+  };
+
+  const handleShowInfo = () => {
+    setShowIntro(false);
+    setShowInfo(true);
+  };
+
+  const handleBackToWork = () => {
+    // Close the plugin window or navigate back
+    window.parent.postMessage(
+      {
+        type: WindowMessageType.PLUGIN_MESSAGE,
+        message: { type: PluginMessageType.START_FOCUS_MODE },
+        messageId: Date.now().toString(),
+      },
+      '*',
+    );
   };
 
   const handleStrategyAction = async (strategy: string, action: StrategyActionType) => {
@@ -73,7 +97,7 @@ const App: Component = () => {
 
   return (
     <div class="app">
-      <Show when={!showIntro()}>
+      <Show when={!showIntro() || showInfo()}>
         <header class="header page-fade">
           <button
             class="back-button"
@@ -85,29 +109,44 @@ const App: Component = () => {
       </Show>
 
       <main class="main">
-        <Show when={showIntro()}>
-          <div class="intro page-fade">
-            <h2>What's holding you back?</h2>
-            <p class="text-muted">Choose what best matches your current feeling:</p>
-          </div>
+        <Show when={showInfo()}>
+          <ProcrastinationInfo
+            onBack={handleBack}
+            onBackToWork={handleBackToWork}
+          />
         </Show>
 
-        <Show when={!selectedType()}>
-          <div class="page-fade">
-            <BlockerSelector
-              types={procrastinationTypes}
-              onSelect={handleSelectType}
-            />
-          </div>
-        </Show>
+        <Show when={!showInfo()}>
+          <Show when={showIntro()}>
+            <div class="intro page-fade">
+              <h2>What's holding you back?</h2>
+              <p class="text-muted">Choose what best matches your current feeling:</p>
+              <button
+                class="info-button"
+                onClick={handleShowInfo}
+              >
+                Learn about procrastination →
+              </button>
+            </div>
+          </Show>
 
-        <Show when={selectedType()}>
-          <div class="page-fade">
-            <StrategyList
-              type={selectedType()!}
-              onStrategyAction={handleStrategyAction}
-            />
-          </div>
+          <Show when={!selectedType() && !showInfo()}>
+            <div class="page-fade">
+              <BlockerSelector
+                types={procrastinationTypes}
+                onSelect={handleSelectType}
+              />
+            </div>
+          </Show>
+
+          <Show when={selectedType() && !showInfo()}>
+            <div class="page-fade">
+              <StrategyList
+                type={selectedType()!}
+                onStrategyAction={handleStrategyAction}
+              />
+            </div>
+          </Show>
         </Show>
       </main>
     </div>
