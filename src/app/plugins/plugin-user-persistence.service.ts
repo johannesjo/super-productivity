@@ -16,7 +16,7 @@ export class PluginUserPersistenceService {
    * Persist user data for a specific plugin (called by plugin via persistDataSynced)
    */
   async persistPluginUserData(pluginId: string, data: string): Promise<void> {
-    const currentState = await this._pfapiService.pf.m.pluginUserData.load();
+    const currentState = (await this._pfapiService.pf.m.pluginUserData.load()) || [];
     const existingIndex = currentState.findIndex((item) => item.id === pluginId);
 
     const updatedState: PluginUserDataState = [...currentState];
@@ -40,7 +40,7 @@ export class PluginUserPersistenceService {
    * Load user data for a specific plugin (called by plugin via loadSyncedData)
    */
   async loadPluginUserData(pluginId: string): Promise<string | null> {
-    const currentState = await this._pfapiService.pf.m.pluginUserData.load();
+    const currentState = (await this._pfapiService.pf.m.pluginUserData.load()) || [];
     const pluginData = currentState.find((item) => item.id === pluginId);
     return pluginData?.data || null;
   }
@@ -49,7 +49,7 @@ export class PluginUserPersistenceService {
    * Remove user data for a specific plugin
    */
   async removePluginUserData(pluginId: string): Promise<void> {
-    const currentState = await this._pfapiService.pf.m.pluginUserData.load();
+    const currentState = (await this._pfapiService.pf.m.pluginUserData.load()) || [];
     const updatedState = currentState.filter((item) => item.id !== pluginId);
 
     await this._pfapiService.pf.m.pluginUserData.save(updatedState, {
@@ -61,7 +61,7 @@ export class PluginUserPersistenceService {
    * Get all plugin user data
    */
   async getAllPluginUserData(): Promise<PluginUserData[]> {
-    return await this._pfapiService.pf.m.pluginUserData.load();
+    return (await this._pfapiService.pf.m.pluginUserData.load()) || [];
   }
 
   /**

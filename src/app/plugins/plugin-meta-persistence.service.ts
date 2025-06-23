@@ -22,7 +22,7 @@ export class PluginMetaPersistenceService {
   ): Promise<void> {
     // Load current state if not provided
     if (!currentState) {
-      currentState = await this._pfapiService.pf.m.pluginMetadata.load();
+      currentState = (await this._pfapiService.pf.m.pluginMetadata.load()) || [];
     }
 
     // Deep compare the states
@@ -67,7 +67,7 @@ export class PluginMetaPersistenceService {
    * Set plugin enabled/disabled status
    */
   async setPluginEnabled(pluginId: string, isEnabled: boolean): Promise<void> {
-    const currentState = await this._pfapiService.pf.m.pluginMetadata.load();
+    const currentState = (await this._pfapiService.pf.m.pluginMetadata.load()) || [];
     const existingIndex = currentState.findIndex((item) => item.id === pluginId);
     const updatedState: PluginMetaDataState = [...currentState];
 
@@ -92,7 +92,7 @@ export class PluginMetaPersistenceService {
    * Check if plugin is enabled
    */
   async isPluginEnabled(pluginId: string): Promise<boolean> {
-    const currentState = await this._pfapiService.pf.m.pluginMetadata.load();
+    const currentState = (await this._pfapiService.pf.m.pluginMetadata.load()) || [];
     const pluginMetadata = currentState.find((item) => item.id === pluginId);
 
     // Default to false for all plugins that haven't been explicitly enabled
@@ -104,14 +104,14 @@ export class PluginMetaPersistenceService {
    * Get all plugin metadata
    */
   async getAllPluginMetadata(): Promise<PluginMetadata[]> {
-    return await this._pfapiService.pf.m.pluginMetadata.load();
+    return (await this._pfapiService.pf.m.pluginMetadata.load()) || [];
   }
 
   /**
    * Remove plugin metadata
    */
   async removePluginMetadata(pluginId: string): Promise<void> {
-    const currentState = await this._pfapiService.pf.m.pluginMetadata.load();
+    const currentState = (await this._pfapiService.pf.m.pluginMetadata.load()) || [];
     const updatedState = currentState.filter((item) => item.id !== pluginId);
 
     await this._saveIfChanged(updatedState, currentState);
@@ -121,7 +121,7 @@ export class PluginMetaPersistenceService {
    * Set Node.js execution consent for a plugin
    */
   async setNodeExecutionConsent(pluginId: string, hasConsent: boolean): Promise<void> {
-    const currentState = await this._pfapiService.pf.m.pluginMetadata.load();
+    const currentState = (await this._pfapiService.pf.m.pluginMetadata.load()) || [];
     const existingIndex = currentState.findIndex((item) => item.id === pluginId);
     const updatedState: PluginMetaDataState = [...currentState];
 
@@ -147,7 +147,7 @@ export class PluginMetaPersistenceService {
    * Get Node.js execution consent for a plugin
    */
   async getNodeExecutionConsent(pluginId: string): Promise<boolean | undefined> {
-    const currentState = await this._pfapiService.pf.m.pluginMetadata.load();
+    const currentState = (await this._pfapiService.pf.m.pluginMetadata.load()) || [];
     const pluginMetadata = currentState.find((item) => item.id === pluginId);
     return pluginMetadata?.nodeExecutionConsent;
   }
