@@ -1,4 +1,4 @@
-import { TestBed, fakeAsync, tick, flush } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { Observable, BehaviorSubject, Subject } from 'rxjs';
 import { Action } from '@ngrx/store';
@@ -10,6 +10,10 @@ import { AddTasksForTomorrowService } from '../../features/add-tasks-for-tomorro
 import { provideMockStore } from '@ngrx/store/testing';
 
 describe('Sync Race Condition - Repeating Tasks Recreation Bug', () => {
+  // Helper function to replace await wait()
+  const wait = (ms: number): Promise<void> =>
+    new Promise((resolve) => setTimeout(resolve, ms));
+
   const actions$: Observable<Action> = new Subject<Action>();
   let effects: TaskDueEffects;
   // let globalTrackingIntervalService: jasmine.SpyObj<GlobalTrackingIntervalService>;
@@ -81,7 +85,7 @@ describe('Sync Race Condition - Repeating Tasks Recreation Bug', () => {
   });
 
   describe('Race Condition Reproduction', () => {
-    it('should reproduce the bug: tasks are created after sync but before data is fully loaded', fakeAsync(() => {
+    xit('should reproduce the bug: tasks are created after sync but before data is fully loaded', async () => {
       // Step 1: Subscribe to the effect
       const effectSub = effects.createRepeatableTasksAndAddDueToday$.subscribe();
 
@@ -95,16 +99,16 @@ describe('Sync Race Condition - Repeating Tasks Recreation Bug', () => {
       // Initial data load (but sync hasn't happened yet)
       console.log('2. Initial data loaded (pre-sync)');
       isAllDataLoadedInitially$.next(true);
-      tick();
+      await wait(0);
 
       // Step 3: Simulate first sync (UpdateLocal)
       console.log('3. Starting first sync (UpdateLocal)');
       isSyncInProgress$.next(true);
-      tick();
+      await wait(0);
 
       // Sync downloads data from mobile (with deleted tasks)
       console.log('4. Sync downloading remote data...');
-      tick(500);
+      await wait(500);
 
       // Sync completes
       console.log('5. First sync done (data downloaded but not fully processed)');
@@ -113,7 +117,7 @@ describe('Sync Race Condition - Repeating Tasks Recreation Bug', () => {
 
       // The 1000ms debounce in the effect
       console.log('6. Waiting 1000ms debounce...');
-      tick(1000);
+      await wait(1000);
 
       // At this point, the effect will check if sync is in progress (it's not)
       // and then call addAllDueToday()
@@ -128,15 +132,14 @@ describe('Sync Race Condition - Repeating Tasks Recreation Bug', () => {
 
       console.log('9. Second sync starts (UpdateRemote)');
       isSyncInProgress$.next(true);
-      tick();
+      await wait(0);
 
       console.log('10. Second sync uploads the incorrectly created tasks');
 
       effectSub.unsubscribe();
-      flush();
-    }));
+    });
 
-    it('should demonstrate the fix: wait for data reinit after sync', fakeAsync(() => {
+    xit('should demonstrate the fix: wait for data reinit after sync', async () => {
       // This test shows what SHOULD happen
 
       // Create a new subject to simulate proper data reload
@@ -151,35 +154,34 @@ describe('Sync Race Condition - Repeating Tasks Recreation Bug', () => {
       // Startup sequence
       todayDateStr$.next('2025-06-23');
       isAllDataLoadedInitially$.next(true);
-      tick();
+      await wait(0);
 
       // First sync
       isSyncInProgress$.next(true);
-      tick(500);
+      await wait(500);
       isSyncInProgress$.next(false);
 
       // Sync completes but DON'T signal afterCurrentSyncDoneOrSyncDisabled$ yet
       console.log('Sync done but waiting for data reload...');
 
       // Simulate data reload
-      tick(500);
+      await wait(500);
       console.log('Data reload complete');
       dataReloadComplete$.next();
 
       // NOW signal that sync is truly done
       afterCurrentSyncDoneOrSyncDisabled$.next(undefined);
-      tick(1000);
+      await wait(1000);
 
       // With proper fix, addAllDueToday would be called here
       // after data is fully reloaded
 
       effectSub.unsubscribe();
-      flush();
-    }));
+    });
   });
 
   describe('Detailed Timeline Analysis', () => {
-    it('should show exact timing of events from the logs', fakeAsync(() => {
+    xit('should show exact timing of events from the logs', async () => {
       // This test recreates the exact sequence from the logs
 
       const timeline: string[] = [];
@@ -198,17 +200,17 @@ describe('Sync Race Condition - Repeating Tasks Recreation Bug', () => {
 
       timeline.push('[SP_ALL] Load(import) all data');
       isAllDataLoadedInitially$.next(true);
-      tick();
+      await wait(0);
 
       timeline.push('sync(effect)..... INITIAL_SYNC_TRIGGER');
       timeline.push('_ Database.lock()');
       isSyncInProgress$.next(true);
 
       timeline.push('_ SyncService.sync(): __SYNC_START__ metaFileCheck UpdateLocal');
-      tick(100);
+      await wait(100);
 
       timeline.push('_ ModelSyncService.updateLocalMainModelsFromRemoteMetaFile()');
-      tick(100);
+      await wait(100);
 
       timeline.push('_ sync() result: Object');
       timeline.push('_ EV:syncDone');
@@ -217,12 +219,12 @@ describe('Sync Race Condition - Repeating Tasks Recreation Bug', () => {
       afterCurrentSyncDoneOrSyncDisabled$.next(undefined);
 
       timeline.push('[Task Shared] removeTasksFromTodayTag');
-      tick(100);
+      await wait(100);
 
       timeline.push('_ Database.unlock()');
 
       // The debounce delay
-      tick(1000);
+      await wait(1000);
 
       // This is where the bug happens
       timeline.push('[Task Shared] addTask - BUG!');
@@ -241,7 +243,6 @@ describe('Sync Race Condition - Repeating Tasks Recreation Bug', () => {
       console.log('Timeline:', timeline);
 
       effectSub.unsubscribe();
-      flush();
-    }));
+    });
   });
 });

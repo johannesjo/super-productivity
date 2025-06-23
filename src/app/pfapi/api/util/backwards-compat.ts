@@ -28,8 +28,8 @@ export const getLastSyncedChangeCounter = (
   if (meta.lastSyncedChangeCounter !== undefined) {
     return meta.lastSyncedChangeCounter;
   }
-  // Fall back to old field name
-  return meta.lastSyncedLamport;
+  // Fall back to old field name, ensuring we return null if undefined
+  return meta.lastSyncedLamport ?? null;
 };
 
 /**
