@@ -74,8 +74,8 @@ export class BidirectionalSync {
       const indentLevel = indentMatch ? Math.floor(indentMatch[1].length / 2) : 0;
 
       // Match checkbox or bullet format
-      const checkboxMatch = line.trim().match(/^-\s*\[([ x])\]\s*(.+)$/);
-      const bulletMatch = line.trim().match(/^[-*]\s+(.+)$/);
+      const checkboxMatch = line.trim().match(/^[-*]\s*\[([ x])\]\s*(.+)$/);
+      const bulletMatch = !checkboxMatch ? line.trim().match(/^[-*]\s+(.+)$/) : null;
 
       if (checkboxMatch || bulletMatch) {
         const isDone = checkboxMatch ? checkboxMatch[1] === 'x' : false;
