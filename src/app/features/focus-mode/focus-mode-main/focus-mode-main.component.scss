@@ -99,6 +99,7 @@ breathing-dot {
   transform: translateX(-50%);
   // needs to be higher than task title
   z-index: 4;
+  gap: 8px;
 
   simple-counter-button.isHiddenWithoutFocus {
     @include mousePrimaryDevice {
