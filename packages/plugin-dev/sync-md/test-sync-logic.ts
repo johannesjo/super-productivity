@@ -245,7 +245,5 @@ async function runAllTests() {
   }
 }
 
-// Run tests if executed directly
-if (require.main === module) {
-  runAllTests();
-}
+// Run tests
+runAllTests();
