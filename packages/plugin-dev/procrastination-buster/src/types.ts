@@ -4,54 +4,17 @@
 
 /**
  * Plugin message types sent from the iframe to the plugin.
- * These are the actions that the procrastination buster can trigger.
  */
 export enum PluginMessageType {
-  ADD_STRATEGY_TASK = 'ADD_STRATEGY_TASK',
   START_POMODORO = 'START_POMODORO',
   START_FOCUS_MODE = 'START_FOCUS_MODE',
-  QUICK_ADD_TASK = 'QUICK_ADD_TASK',
-}
-
-/**
- * Super Productivity action types used by the plugin.
- * These are the native SP actions that our plugin dispatches.
- */
-export enum SPActionType {
-  SHOW_ADD_TASK_BAR = '[Layout] Show AddTaskBar',
-  SET_CURRENT_TASK = '[Task] SetCurrentTask',
-  START_POMODORO = '[Pomodoro] Start Pomodoro',
-  SHOW_FOCUS_OVERLAY = '[FocusMode] Show Focus Overlay',
-}
-
-/**
- * Snack notification types for user feedback.
- */
-export enum SnackType {
-  SUCCESS = 'SUCCESS',
-  ERROR = 'ERROR',
-  INFO = 'INFO',
 }
 
 /**
  * Window message types for iframe communication.
- * Used for postMessage between the plugin iframe and the main app.
  */
 export enum WindowMessageType {
   PLUGIN_MESSAGE = 'PLUGIN_MESSAGE',
-  PLUGIN_MESSAGE_RESPONSE = 'PLUGIN_MESSAGE_RESPONSE',
-  PLUGIN_MESSAGE_ERROR = 'PLUGIN_MESSAGE_ERROR',
-}
-
-// ============================================================================
-// Strategy Action Types
-// ============================================================================
-
-/**
- * Available action types for strategies
- */
-export enum StrategyActionType {
-  FOCUS_SESSION = 'focusSession',
 }
 
 // ============================================================================
@@ -63,7 +26,7 @@ export enum StrategyActionType {
  */
 export interface Strategy {
   text: string;
-  action?: StrategyActionType;
+  action?: boolean; // true if this strategy can trigger a focus session
 }
 
 /**
@@ -93,7 +56,7 @@ export const procrastinationTypes: ProcrastinationType[] = [
       'Create micro-tasks (5 min steps)',
       'Implementation Intentions (If X, then Y)',
       'Pick just one thing',
-      { text: 'Start Focus Session', action: StrategyActionType.FOCUS_SESSION },
+      { text: 'Start Focus Session', action: true },
     ],
   },
   {
@@ -157,7 +120,7 @@ export const procrastinationTypes: ProcrastinationType[] = [
     emotion: 'Other things are more interesting',
     strategies: [
       'Block distractions',
-      { text: 'Schedule deep work block', action: StrategyActionType.FOCUS_SESSION },
+      { text: 'Schedule deep work block', action: true },
       'Clear work environment',
       'Start focus ritual',
     ],

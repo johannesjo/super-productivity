@@ -1,3 +1,8 @@
+/* 
+ * Procrastination Buster Plugin Styles
+ * Simplified structure following KISS principles
+ */
+
 * {
   box-sizing: border-box;
 }
@@ -203,64 +208,31 @@ body {
   color: var(--c-primary);
 }
 
-/* Tabs */
-.tabs {
-  max-width: 800px;
+/* Info content */
+.info-content {
+  max-width: 700px;
   margin: 0 auto;
-}
-
-.tab-buttons {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-  border-bottom: 2px solid var(--theme-extra-border-color);
-}
-
-.tab-button {
-  padding: 0.75rem 1.5rem;
-  background: transparent;
-  border: none;
-  color: var(--theme-text-color-muted);
-  cursor: pointer;
-  transition: all 0.2s;
-  font-family: inherit;
-  font-size: 1rem;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
-}
-
-.tab-button:hover {
-  color: var(--theme-text-color);
-}
-
-.tab-button.active {
-  color: var(--c-primary);
-  border-bottom-color: var(--c-primary);
-}
-
-.tab-content {
   padding: 1rem;
 }
 
-.tab-inner {
-  max-width: 600px;
-  margin: 0 auto;
+.info-content section {
+  margin-bottom: 2rem;
 }
 
-.tab-inner p {
+.info-content h3 {
+  color: var(--c-primary);
+  margin-bottom: 0.75rem;
+}
+
+.info-content p {
   line-height: 1.6;
   margin-bottom: 1rem;
 }
 
-.tab-inner ul {
+.info-content ul {
   line-height: 1.8;
   padding-left: 1.5rem;
-}
-
-.tab-inner h3 {
-  margin-top: 1.5rem;
-  margin-bottom: 0.75rem;
-  color: var(--c-primary);
+  margin-bottom: 1rem;
 }
 
 /* Procrastination graph */
@@ -268,68 +240,23 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
-  margin: 2rem 0;
+  gap: 0.5rem;
+  margin: 1.5rem 0;
   flex-wrap: wrap;
 }
 
-.procrastination-graph .wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
 .graph-item {
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 1rem;
   background: var(--theme-card-bg);
   border: 1px solid var(--theme-extra-border-color);
-  border-radius: 8px;
+  border-radius: 4px;
   text-align: center;
-}
-
-.arrow {
-  font-size: 1.5rem;
-  color: var(--theme-text-color-muted);
+  font-size: 0.9rem;
 }
 
 .sync-icon {
-  font-size: 2rem;
+  font-size: 1.2rem;
   color: var(--theme-text-color-muted);
-}
-
-/* Reframe questions */
-.reframe-questions {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.question-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.question-group label {
-  font-weight: 500;
-  color: var(--c-primary);
-}
-
-.question-group textarea {
-  width: 100%;
-  min-height: 80px;
-  padding: 0.75rem;
-  border: 1px solid var(--theme-extra-border-color);
-  border-radius: 4px;
-  background: var(--theme-card-bg);
-  color: var(--theme-text-color);
-  font-family: inherit;
-  resize: vertical;
-}
-
-.question-group textarea:focus {
-  outline: none;
-  border-color: var(--c-primary);
 }
 
 /* Action buttons */
