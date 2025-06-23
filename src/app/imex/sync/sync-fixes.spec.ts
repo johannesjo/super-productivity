@@ -242,7 +242,7 @@ describe('Sync Fixes - TDD', () => {
 
       // Mock the sync process downloading new data
       const mockPfapi = {
-        downloadedData: null,
+        downloadedData: null as any,
         getAllSyncModelData: jasmine
           .createSpy('getAllSyncModelData')
           .and.callFake((forceReload?: boolean) => {
@@ -279,7 +279,7 @@ describe('Sync Fixes - TDD', () => {
 
       // Mock the fixed pfapi service
       const mockPfapi = {
-        syncedData: null,
+        syncedData: null as any,
 
         // Simulate sync downloading data
         sync: async () => {
@@ -331,7 +331,8 @@ describe('Sync Fixes - TDD', () => {
       addTasksForTomorrowService.addAllDueToday.and.callFake(async () => {
         events.push('Tasks checked - data state');
         // Mock checking if tasks would be created
-        const currentState = (store as MockStore<any>).lastState;
+        let currentState: any;
+        store.select((state) => state).subscribe((state) => (currentState = state));
         if (
           currentState?.taskRepeatCfg?.entities?.repeat1?.lastTaskCreation < '2025-06-23'
         ) {

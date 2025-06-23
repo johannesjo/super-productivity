@@ -47,7 +47,7 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
   };
 
   // Mock sync data that would come from remote
-  const mockRemoteSyncData = {
+  const mockRemoteSyncData: any = {
     taskRepeatCfg: {
       ids: ['repeat1', 'repeat2'],
       entities: {
@@ -56,12 +56,29 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
       },
     },
     task: { ids: [], entities: {} }, // No tasks - they were deleted on mobile
+    // Add minimal required properties for AppDataCompleteLegacy
+    project: { ids: [], entities: {} },
+    globalConfig: {} as any,
+    planner: {} as any,
+    boards: {} as any,
+    note: { ids: [], entities: {} },
+    issueProvider: {} as any,
+    metric: {} as any,
+    improvement: {} as any,
+    obstruction: {} as any,
+    tag: { ids: [], entities: {} },
+    simpleCounter: { ids: [], entities: {} },
+    reminders: [],
+    taskArchive: { ids: [], entities: {} },
+    archivedProjects: [],
+    lastLocalSyncModelChange: null,
+    lastArchiveUpdate: null,
   };
 
   // State tracking
   let currentAppState = {
     taskRepeatCfg: mockTaskRepeatConfigs,
-    lastDataLoadAction: null,
+    lastDataLoadAction: null as Action | null,
   };
 
   beforeEach(() => {
@@ -71,7 +88,7 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
     dispatchedActions = [];
     currentAppState = {
       taskRepeatCfg: { ...mockTaskRepeatConfigs },
-      lastDataLoadAction: null,
+      lastDataLoadAction: null as Action | null,
     };
 
     // Create subjects
@@ -268,7 +285,13 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
         currentAppState.taskRepeatCfg = { ...mockTaskRepeatConfigs };
         store.dispatch(
           loadAllData({
-            appDataComplete: { taskRepeatCfg: mockTaskRepeatConfigs },
+            appDataComplete: {
+              ...mockRemoteSyncData,
+              taskRepeatCfg: {
+                ids: Object.keys(mockTaskRepeatConfigs),
+                entities: mockTaskRepeatConfigs,
+              },
+            },
             isOmitTokens: false,
           }),
         );
