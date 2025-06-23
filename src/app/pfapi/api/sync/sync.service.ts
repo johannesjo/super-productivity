@@ -214,11 +214,34 @@ export class SyncService<const MD extends ModelCfgs> {
 
     let local = await this._metaModelCtrl.load();
     if (isForceUpload) {
-      // Change lastUpdate timestamp to indicate a newer revision to other clients
+      // For conflict resolution, we need to ensure our Lamport stamp is higher than any remote
+      // First, try to get the remote meta to see the current remote Lamport
+      let remoteLamport = 0;
+      try {
+        const { remoteMeta } = await this._metaFileSyncService.download();
+        remoteLamport = remoteMeta.localLamport || 0;
+      } catch (e) {
+        // If download fails, use local Lamport as baseline
+        remoteLamport = local.localLamport || 0;
+      }
+
+      // Set our Lamport to be higher than both local and remote
+      const currentLamport = Math.max(local.localLamport || 0, remoteLamport);
+      // Reset if approaching max safe integer (same logic as MetaModelCtrl)
+      const nextLamport =
+        currentLamport >= Number.MAX_SAFE_INTEGER - 1000 ? 1 : currentLamport + 1;
+
+      pfLog(
+        2,
+        `${SyncService.L}.${this.uploadAll.name}(): Incrementing Lamport for conflict resolution`,
+        { localLamport: local.localLamport, remoteLamport, currentLamport, nextLamport },
+      );
+
       await this._metaModelCtrl.save(
         {
           ...local,
           lastUpdate: Date.now(),
+          localLamport: nextLamport,
         },
         // NOTE we always ignore db lock while syncing
         true,
