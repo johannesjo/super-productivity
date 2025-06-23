@@ -294,9 +294,28 @@ export const selectLaterTodayTasksWithSubTasks = createSelector(
         (parentTasks.includes(task) || parentIdsWithScheduledSubtasks.has(task.id)),
     );
 
-    // Map to include subtasks and sort by time
-    const tasksWithSubTasks = parentsToInclude
-      .map((task) => mapSubTasksToTask(task, taskState) as TaskWithSubTasks)
+    // Get IDs of parents that will be included
+    const parentIdsInLaterToday = new Set(parentsToInclude.map((task) => task.id));
+
+    // Find orphaned subtasks (scheduled subtasks whose parents are NOT in Later Today)
+    const orphanedScheduledSubtasks = scheduledSubtasks.filter(
+      (subtask) => !parentIdsInLaterToday.has(subtask.parentId!),
+    );
+
+    // Combine parents and orphaned subtasks
+    const allTopLevelTasks = [...parentsToInclude, ...orphanedScheduledSubtasks];
+
+    // Map to include subtasks for parents and sort by time
+    const tasksWithSubTasks = allTopLevelTasks
+      .map((task) => {
+        // If it's a parent task, include its subtasks
+        if (!task.parentId) {
+          return mapSubTasksToTask(task, taskState) as TaskWithSubTasks;
+        } else {
+          // If it's an orphaned subtask, treat it as a standalone task
+          return { ...task, subTasks: [] } as TaskWithSubTasks;
+        }
+      })
       .sort((a, b) => {
         // Sort by the earliest scheduled time (parent or any subtask)
         const aTime = Math.min(
@@ -310,18 +329,7 @@ export const selectLaterTodayTasksWithSubTasks = createSelector(
         return aTime - bTime;
       });
 
-    // Flatten to include subtasks in the result
-    const result: TaskWithSubTasks[] = [];
-    tasksWithSubTasks.forEach((task) => {
-      result.push(task);
-      if (task.subTasks && task.subTasks.length > 0) {
-        task.subTasks.forEach((subTask) => {
-          result.push({ ...subTask, subTasks: [] });
-        });
-      }
-    });
-
-    return result;
+    return tasksWithSubTasks;
   },
 );
 
