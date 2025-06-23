@@ -1,0 +1,21 @@
+{
+  "name": "sync-md",
+  "version": "2.0.0",
+  "description": "Sync markdown files with SuperProductivity projects - Solid.js version",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "package": "node scripts/package.js",
+    "preview": "vite preview",
+    "clean": "rm -rf dist node_modules"
+  },
+  "devDependencies": {
+    "@super-productivity/plugin-api": "file:../../plugin-api",
+    "fflate": "^0.8.2",
+    "solid-js": "^1.8.11",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.11",
+    "vite-plugin-solid": "^2.8.2"
+  }
+}
