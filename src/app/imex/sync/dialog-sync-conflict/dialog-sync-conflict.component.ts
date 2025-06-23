@@ -68,7 +68,7 @@ export class DialogSyncConflictComponent {
     this._matDialogRef.close(res);
   }
 
-  shortenLamport(lamport?: number): string {
+  shortenLamport(lamport?: number | null): string {
     if (!lamport) return '-';
     return lamport.toString().slice(-4);
   }
