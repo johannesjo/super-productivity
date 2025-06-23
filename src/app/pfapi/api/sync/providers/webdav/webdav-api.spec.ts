@@ -148,19 +148,15 @@ describe('WebdavApi', () => {
       expect(mockFetch).toHaveBeenCalledTimes(2);
     });
 
-    it('should get etag via GET request when PROPFIND also fails', async () => {
+    it('should get etag via HEAD request when PROPFIND also fails', async () => {
       const uploadResponse = createMockResponse(201); // No etag header
       const propfindError = new Error('PROPFIND failed');
-      const getResponse = createMockResponse(
-        200,
-        { etag: '"get-fallback-etag"' },
-        'file content',
-      );
+      const headResponse = createMockResponse(200, { etag: '"head-fallback-etag"' });
 
       mockFetch.and.returnValues(
         Promise.resolve(uploadResponse),
         Promise.reject(propfindError),
-        Promise.resolve(getResponse),
+        Promise.resolve(headResponse),
       );
 
       const result = await api.upload({
@@ -168,22 +164,24 @@ describe('WebdavApi', () => {
         path: 'test.txt',
       });
 
-      expect(result).toBe('get-fallback-etag');
+      expect(result).toBe('head-fallback-etag');
       expect(mockFetch).toHaveBeenCalledTimes(3);
 
-      // Verify the third call is a GET request
-      const getCall = mockFetch.calls.argsFor(2);
-      expect(getCall[1].method).toBe('GET');
+      // Verify the third call is a HEAD request
+      const headCall = mockFetch.calls.argsFor(2);
+      expect(headCall[1].method).toBe('HEAD');
     });
 
     it('should throw NoEtagAPIError when all etag retrieval methods fail', async () => {
       const uploadResponse = createMockResponse(201); // No etag header
       const propfindError = new Error('PROPFIND failed');
+      const headError = new Error('HEAD failed');
       const getError = new Error('GET failed');
 
       mockFetch.and.returnValues(
         Promise.resolve(uploadResponse),
         Promise.reject(propfindError),
+        Promise.reject(headError),
         Promise.reject(getError),
       );
 
@@ -194,25 +192,21 @@ describe('WebdavApi', () => {
         }),
       ).toBeRejectedWith(jasmine.any(NoEtagAPIError));
 
-      expect(mockFetch).toHaveBeenCalledTimes(3);
+      expect(mockFetch).toHaveBeenCalledTimes(4);
     });
 
-    it('should use GET fallback for etag after 404 retry', async () => {
+    it('should use fallback for etag after 404 retry', async () => {
       const notFoundError = new RemoteFileNotFoundAPIError('test.txt');
       const retryUploadResponse = createMockResponse(201); // No etag header
       const propfindError = new Error('PROPFIND failed');
-      const getResponse = createMockResponse(
-        200,
-        { etag: '"get-etag-after-404"' },
-        'content',
-      );
+      const headResponse = createMockResponse(200, { etag: '"head-etag-after-404"' });
 
       mockFetch.and.returnValues(
         Promise.reject(notFoundError), // Initial upload fails with 404
         Promise.resolve(createMockResponse(201)), // MKCOL to create directory succeeds
         Promise.resolve(retryUploadResponse), // Retry upload succeeds but no etag
         Promise.reject(propfindError), // PROPFIND fails
-        Promise.resolve(getResponse), // GET request succeeds
+        Promise.resolve(headResponse), // HEAD request succeeds
       );
 
       const result = await api.upload({
@@ -220,26 +214,22 @@ describe('WebdavApi', () => {
         path: 'test/file.txt',
       });
 
-      expect(result).toBe('get-etag-after-404');
+      expect(result).toBe('head-etag-after-404');
       expect(mockFetch).toHaveBeenCalledTimes(5);
     });
 
-    it('should use GET fallback for etag after 409 retry', async () => {
+    it('should use fallback for etag after 409 retry', async () => {
       const conflictError = { status: 409 };
       const retryUploadResponse = createMockResponse(201); // No etag header
       const propfindError = new Error('PROPFIND failed');
-      const getResponse = createMockResponse(
-        200,
-        { etag: '"get-etag-after-409"' },
-        'content',
-      );
+      const headResponse = createMockResponse(200, { etag: '"head-etag-after-409"' });
 
       mockFetch.and.returnValues(
         Promise.reject(conflictError), // Initial upload fails with 409
         Promise.resolve(createMockResponse(201)), // MKCOL to create directory succeeds
         Promise.resolve(retryUploadResponse), // Retry upload succeeds but no etag
         Promise.reject(propfindError), // PROPFIND fails
-        Promise.resolve(getResponse), // GET request succeeds
+        Promise.resolve(headResponse), // HEAD request succeeds
       );
 
       const result = await api.upload({
@@ -247,7 +237,7 @@ describe('WebdavApi', () => {
         path: 'test/file.txt',
       });
 
-      expect(result).toBe('get-etag-after-409');
+      expect(result).toBe('head-etag-after-409');
       expect(mockFetch).toHaveBeenCalledTimes(5);
     });
   });
