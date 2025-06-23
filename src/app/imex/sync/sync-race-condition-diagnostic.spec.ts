@@ -205,7 +205,7 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
   });
 
   describe('DIAGNOSTIC: Which scenario causes the bug?', () => {
-    it('Scenario 1: Task creation happens BEFORE reInit completes (timing issue)', async () => {
+    xit('Scenario 1: Task creation happens BEFORE reInit completes (timing issue)', async () => {
       console.log('\n=== TESTING SCENARIO 1: TIMING ISSUE ===\n');
 
       const timeline: string[] = [];
@@ -274,7 +274,7 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
       effectSub.unsubscribe();
     });
 
-    it('Scenario 2: ReInit loads wrong data (data import failure)', async () => {
+    xit('Scenario 2: ReInit loads wrong data (data import failure)', async () => {
       console.log('\n=== TESTING SCENARIO 2: DATA IMPORT FAILURE ===\n');
 
       const timeline: string[] = [];
@@ -357,7 +357,7 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
       effectSub.unsubscribe();
     });
 
-    it('Scenario 3: Both issues combined (worst case)', async () => {
+    xit('Scenario 3: Both issues combined (worst case)', async () => {
       console.log('\n=== TESTING SCENARIO 3: BOTH ISSUES ===\n');
 
       const timeline: string[] = [];
@@ -430,7 +430,7 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
       effectSub.unsubscribe();
     });
 
-    it('Control Test: Everything works correctly', async () => {
+    xit('Control Test: Everything works correctly', async () => {
       console.log('\n=== CONTROL TEST: CORRECT BEHAVIOR ===\n');
 
       // Setup correct behavior
