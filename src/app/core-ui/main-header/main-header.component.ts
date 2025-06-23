@@ -34,7 +34,6 @@ import { MatRipple } from '@angular/material/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatMenu, MatMenuContent, MatMenuTrigger } from '@angular/material/menu';
 import { WorkContextMenuComponent } from '../work-context-menu/work-context-menu.component';
-import { AsyncPipe } from '@angular/common';
 import { MsToMinuteClockStringPipe } from '../../ui/duration/ms-to-minute-clock-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TagComponent } from '../../features/tag/tag/tag.component';
@@ -69,7 +68,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
     MatMenuContent,
     WorkContextMenuComponent,
     MatMiniFabButton,
-    AsyncPipe,
     MsToMinuteClockStringPipe,
     TranslatePipe,
     TagComponent,

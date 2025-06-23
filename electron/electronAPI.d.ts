@@ -13,7 +13,7 @@ import {
   PluginNodeScriptRequest,
   PluginNodeScriptResult,
   PluginManifest,
-} from '../packages/plugin-api/dist/types';
+} from '../packages/plugin-api/src/types';
 
 export interface ElectronAPI {
   on(
