@@ -108,9 +108,7 @@ describe('MetaModelCtrl', () => {
       expect(mockDb.save).toHaveBeenCalledWith(
         MetaModelCtrl.META_MODEL_ID,
         jasmine.objectContaining({
-          lastUpdateAction: jasmine.stringMatching(
-            /^Updated testModel at \d{4}-\d{2}-\d{2}T/,
-          ),
+          lastUpdateAction: jasmine.stringMatching(/^testModel => \d{4}-\d{2}-\d{2}T/),
         }),
         false,
       );
