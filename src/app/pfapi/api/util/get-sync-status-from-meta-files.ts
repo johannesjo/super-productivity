@@ -7,6 +7,7 @@ import {
   SyncInvalidTimeValuesError,
 } from '../errors/errors';
 import { pfLog } from './log';
+import { getLocalChangeCounter, getLastSyncedChangeCounter } from './backwards-compat';
 
 // TODO unit test the hell out of this
 export const getSyncStatusFromMetaFiles = (
@@ -44,25 +45,29 @@ export const getSyncStatusFromMetaFiles = (
       };
     }
 
-    // Try to use Lamport timestamps first if available
+    // Try to use change counters (Lamport timestamps) first if available
+    const localChangeCounter = getLocalChangeCounter(local);
+    const remoteChangeCounter = getLocalChangeCounter(remote);
+    const lastSyncedChangeCounter = getLastSyncedChangeCounter(local);
+
     if (
-      typeof local.localLamport === 'number' &&
-      typeof remote.localLamport === 'number' &&
-      typeof local.lastSyncedLamport === 'number'
+      typeof localChangeCounter === 'number' &&
+      typeof remoteChangeCounter === 'number' &&
+      typeof lastSyncedChangeCounter === 'number'
     ) {
       const lamportResult = _checkForUpdateLamport({
-        remoteLocalLamport: remote.localLamport,
-        localLamport: local.localLamport,
-        lastSyncedLamport: local.lastSyncedLamport,
+        remoteLocalLamport: remoteChangeCounter,
+        localLamport: localChangeCounter,
+        lastSyncedLamport: lastSyncedChangeCounter,
       });
 
-      pfLog(2, 'Using Lamport timestamps for sync status', {
-        localLamport: local.localLamport,
-        remoteLocalLamport: remote.localLamport,
-        lastSyncedLamport: local.lastSyncedLamport,
+      pfLog(2, 'Using change counters for sync status', {
+        localChangeCounter,
+        remoteChangeCounter,
+        lastSyncedChangeCounter,
         result: lamportResult,
-        hasLocalChanges: local.localLamport > local.lastSyncedLamport,
-        hasRemoteChanges: remote.localLamport > local.lastSyncedLamport,
+        hasLocalChanges: localChangeCounter > lastSyncedChangeCounter,
+        hasRemoteChanges: remoteChangeCounter > lastSyncedChangeCounter,
       });
 
       switch (lamportResult) {

@@ -91,8 +91,12 @@ export interface MetaFileBase {
   lastUpdateAction?: string;
   revMap: RevMap;
   crossModelVersion: number;
+  // Change tracking fields - support both old and new names for backwards compatibility
   localLamport: number;
   lastSyncedLamport: number | null;
+  // New field names (will be migrated to gradually)
+  localChangeCounter?: number;
+  lastSyncedChangeCounter?: number | null;
   lastSyncedAction?: string;
 }
 
