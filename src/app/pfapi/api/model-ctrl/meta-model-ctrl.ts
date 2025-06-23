@@ -81,7 +81,7 @@ export class MetaModelCtrl {
     const timestamp = Date.now();
 
     // Create action string (max 100 chars)
-    const actionStr = `Updated ${modelId} at ${new Date(timestamp).toISOString()}`;
+    const actionStr = `${modelId} => ${new Date(timestamp).toISOString()}`;
     const lastUpdateAction =
       actionStr.length > 100 ? actionStr.substring(0, 97) + '...' : actionStr;
 
