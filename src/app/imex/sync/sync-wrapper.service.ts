@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { filter, first, map, switchMap, take } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
@@ -44,6 +44,9 @@ export class SyncWrapperService {
   private _dataInitService = inject(DataInitService);
   private _reminderService = inject(ReminderService);
 
+  // NEW: Subject to track when data reload is complete after sync
+  private _dataReloadComplete$ = new Subject<void>();
+
   syncState$ = this._pfapiService.syncState$;
 
   syncCfg$: Observable<SyncConfig> = this._globalConfigService.cfg$.pipe(
@@ -62,6 +65,7 @@ export class SyncWrapperService {
 
   _afterCurrentSyncDoneIfAny$: Observable<unknown> = this.isSyncInProgress$.pipe(
     filter((isSyncing) => !isSyncing),
+    switchMap(() => this._dataReloadComplete$),
   );
 
   afterCurrentSyncDoneOrSyncDisabled$: Observable<unknown> = this.isEnabledAndReady$.pipe(
@@ -302,11 +306,21 @@ export class SyncWrapperService {
   }
 
   private async _reInitAppAfterDataModelChange(): Promise<void> {
-    await Promise.all([
-      // reload view model from ls
-      this._dataInitService.reInit(true),
-      this._reminderService.reloadFromDatabase(),
-    ]);
+    console.log('Starting data re-initialization after sync...');
+
+    try {
+      await Promise.all([
+        this._dataInitService.reInit(true),
+        this._reminderService.reloadFromDatabase(),
+      ]);
+
+      console.log('Data re-initialization complete');
+      // Signal that data reload is complete
+      this._dataReloadComplete$.next();
+    } catch (error) {
+      console.error('Error during data re-initialization:', error);
+      throw error;
+    }
   }
 
   private _c(str: string): boolean {
