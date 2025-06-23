@@ -1,4 +1,4 @@
-import { TestBed, fakeAsync, tick, flush } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { Observable, BehaviorSubject, Subject } from 'rxjs';
 import { Action, Store } from '@ngrx/store';
@@ -13,6 +13,10 @@ import { DataInitService } from '../../core/data-init/data-init.service';
 import { PfapiService } from '../../pfapi/pfapi.service';
 
 describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
+  // Helper function to replace await wait()
+  const wait = (ms: number): Promise<void> =>
+    new Promise((resolve) => setTimeout(resolve, ms));
+
   let actions$: Observable<Action>;
   let effects: TaskDueEffects;
   let store: MockStore;
@@ -201,7 +205,7 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
   });
 
   describe('DIAGNOSTIC: Which scenario causes the bug?', () => {
-    it('Scenario 1: Task creation happens BEFORE reInit completes (timing issue)', fakeAsync(async () => {
+    it('Scenario 1: Task creation happens BEFORE reInit completes (timing issue)', async () => {
       console.log('\n=== TESTING SCENARIO 1: TIMING ISSUE ===\n');
 
       const timeline: string[] = [];
@@ -211,12 +215,12 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
       timeline.push('1. App startup');
       todayDateStr$.next('2025-06-23');
       isAllDataLoadedInitially$.next(true);
-      tick();
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
       // Step 2: Sync starts
       timeline.push('2. Sync starts (UpdateLocal)');
       isSyncInProgress$.next(true);
-      tick(100);
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Step 3: Sync downloads data but hasn't called reInit yet
       timeline.push('3. Sync completes download');
@@ -225,23 +229,23 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
 
       // Step 4: Effect waits 1000ms
       timeline.push('4. Effect waiting 1000ms...');
-      tick(500);
+      await wait(500);
 
       // Step 5: ReInit starts but hasn't completed
       timeline.push('5. ReInit starts (async)');
       dataInitService.reInit();
 
       // Step 6: Effect finishes waiting
-      tick(500);
+      await wait(500);
       timeline.push('6. Effect calls addAllDueToday (reInit still running!)');
 
       // Check what happened
-      const tasksCreated =
-        await (addTasksForTomorrowService.addAllDueToday.calls.mostRecent()
-          ?.returnValue || Promise.resolve([]));
+      const returnValue =
+        addTasksForTomorrowService.addAllDueToday.calls.mostRecent()?.returnValue;
+      const tasksCreated = returnValue || [];
 
       // Step 7: ReInit completes
-      tick(100);
+      await wait(100);
       timeline.push('7. ReInit completes (too late!)');
 
       console.log('Timeline:', timeline);
@@ -268,10 +272,9 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
       );
 
       effectSub.unsubscribe();
-      flush();
-    }));
+    });
 
-    it('Scenario 2: ReInit loads wrong data (data import failure)', fakeAsync(async () => {
+    it('Scenario 2: ReInit loads wrong data (data import failure)', async () => {
       console.log('\n=== TESTING SCENARIO 2: DATA IMPORT FAILURE ===\n');
 
       const timeline: string[] = [];
@@ -303,7 +306,7 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
       timeline.push('1. App startup');
       todayDateStr$.next('2025-06-23');
       isAllDataLoadedInitially$.next(true);
-      tick();
+      await wait(0);
 
       // Step 2: Sync completes
       timeline.push('2. Sync completes');
@@ -312,19 +315,19 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
 
       // Step 3: ReInit is called and completes
       timeline.push('3. ReInit called (loads WRONG data)');
-      tick(100);
-      await dataInitService.reInit();
-      tick(100);
+      await wait(100);
+      dataInitService.reInit();
+      await wait(100);
 
       // Step 4: Effect waits and then runs
       timeline.push('4. Effect waiting...');
-      tick(1000);
+      await wait(1000);
       timeline.push('5. Effect calls addAllDueToday');
 
       // Check what happened
-      const tasksCreated =
-        await (addTasksForTomorrowService.addAllDueToday.calls.mostRecent()
-          ?.returnValue || Promise.resolve([]));
+      const returnValue =
+        addTasksForTomorrowService.addAllDueToday.calls.mostRecent()?.returnValue;
+      const tasksCreated = returnValue || [];
 
       console.log('Timeline:', timeline);
       console.log('Tasks created:', tasksCreated);
@@ -352,10 +355,9 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
       ); // Old data
 
       effectSub.unsubscribe();
-      flush();
-    }));
+    });
 
-    it('Scenario 3: Both issues combined (worst case)', fakeAsync(async () => {
+    it('Scenario 3: Both issues combined (worst case)', async () => {
       console.log('\n=== TESTING SCENARIO 3: BOTH ISSUES ===\n');
 
       const timeline: string[] = [];
@@ -383,14 +385,14 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
       timeline.push('1. App startup');
       todayDateStr$.next('2025-06-23');
       isAllDataLoadedInitially$.next(true);
-      tick();
+      await wait(0);
 
       timeline.push('2. Sync completes');
       isSyncInProgress$.next(false);
       afterCurrentSyncDoneOrSyncDisabled$.next(undefined);
 
       // Effect waits 1000ms
-      tick(1000);
+      await wait(1000);
       timeline.push(
         '3. Effect fires - reInit started? ' +
           reInitStarted +
@@ -398,12 +400,12 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
           reInitCompleted,
       );
 
-      const tasksCreated =
-        await (addTasksForTomorrowService.addAllDueToday.calls.mostRecent()
-          ?.returnValue || Promise.resolve([]));
+      const returnVal3 =
+        addTasksForTomorrowService.addAllDueToday.calls.mostRecent()?.returnValue;
+      const tasksCreated = returnVal3 || [];
 
       // Let reInit complete
-      tick(2000);
+      await wait(2000);
       timeline.push('4. ReInit finally completes');
 
       console.log('Timeline:', timeline);
@@ -426,10 +428,9 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
       }
 
       effectSub.unsubscribe();
-      flush();
-    }));
+    });
 
-    it('Control Test: Everything works correctly', fakeAsync(async () => {
+    it('Control Test: Everything works correctly', async () => {
       console.log('\n=== CONTROL TEST: CORRECT BEHAVIOR ===\n');
 
       // Setup correct behavior
@@ -449,20 +450,20 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
       // Run sequence with proper timing
       todayDateStr$.next('2025-06-23');
       isAllDataLoadedInitially$.next(true);
-      tick();
+      await wait(0);
 
       // Sync and reInit complete properly
       isSyncInProgress$.next(false);
-      await dataInitService.reInit();
-      tick(100);
+      dataInitService.reInit();
+      await wait(100);
 
       // Then signal sync done
       afterCurrentSyncDoneOrSyncDisabled$.next(undefined);
-      tick(1000);
+      await wait(1000);
 
-      const tasksCreated =
-        await (addTasksForTomorrowService.addAllDueToday.calls.mostRecent()
-          ?.returnValue || Promise.resolve([]));
+      const returnVal4 =
+        addTasksForTomorrowService.addAllDueToday.calls.mostRecent()?.returnValue;
+      const tasksCreated = returnVal4 || [];
 
       console.log('Tasks created with correct data:', tasksCreated);
       console.log(
@@ -472,7 +473,6 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
       expect(Array.isArray(tasksCreated) ? tasksCreated.length : 0).toBe(0);
 
       effectSub.unsubscribe();
-      flush();
-    }));
+    });
   });
 });

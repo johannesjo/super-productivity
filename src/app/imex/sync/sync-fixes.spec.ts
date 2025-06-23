@@ -1,4 +1,4 @@
-import { fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { Action, Store } from '@ngrx/store';
@@ -11,6 +11,10 @@ import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { DataInitService } from '../../core/data-init/data-init.service';
 
 describe('Sync Fixes - TDD', () => {
+  // Helper function to replace await wait()
+  const wait = (ms: number): Promise<void> =>
+    new Promise((resolve) => setTimeout(resolve, ms));
+
   let actions$: Observable<Action>;
   let effects: TaskDueEffects;
   let store: MockStore;
@@ -111,7 +115,7 @@ describe('Sync Fixes - TDD', () => {
   });
 
   describe('Fix for Scenario 1: Timing Race Condition', () => {
-    it('FAILING TEST: Task creation should wait for data reload to complete after sync', fakeAsync(() => {
+    it('FAILING TEST: Task creation should wait for data reload to complete after sync', async () => {
       // This test will FAIL with current implementation
       // After fix, it should PASS
 
@@ -149,7 +153,7 @@ describe('Sync Fixes - TDD', () => {
 
       // Trigger the sequence
       isAllDataLoadedInitially$.next(true);
-      tick();
+      await wait(0);
 
       // Sync completes (but data not reloaded yet)
       isSyncInProgress$.next(false);
@@ -159,7 +163,7 @@ describe('Sync Fixes - TDD', () => {
       dataInitService.reInit();
 
       // Current implementation waits 1000ms then creates tasks
-      tick(1000);
+      await wait(1000);
 
       // ASSERTION: Tasks should NOT be created before data reload
       expect(tasksCreatedBeforeReload).toBe(
@@ -172,13 +176,12 @@ describe('Sync Fixes - TDD', () => {
       );
 
       // Let everything complete
-      tick(1000);
+      await wait(1000);
 
       effectSub.unsubscribe();
-      flush();
-    }));
+    });
 
-    it('SUCCESS TEST: With fix, tasks are created only after data reload', fakeAsync(() => {
+    it('SUCCESS TEST: With fix, tasks are created only after data reload', async () => {
       // This test shows the DESIRED behavior after fix
 
       const timeline: string[] = [];
@@ -207,7 +210,7 @@ describe('Sync Fixes - TDD', () => {
 
       timeline.push('Effect subscribed');
       isAllDataLoadedInitially$.next(true);
-      tick();
+      await wait(0);
 
       timeline.push('Sync done');
       isSyncInProgress$.next(false);
@@ -216,8 +219,8 @@ describe('Sync Fixes - TDD', () => {
       timeline.push('Starting reInit');
       dataInitService.reInit();
 
-      tick(500); // ReInit completes
-      tick(1000); // Debounce time
+      await wait(500); // ReInit completes
+      await wait(1000); // Debounce time
 
       console.log('Timeline:', timeline);
 
@@ -231,8 +234,7 @@ describe('Sync Fixes - TDD', () => {
       );
 
       effectSub.unsubscribe();
-      flush();
-    }));
+    });
   });
 
   describe('Fix for Scenario 2: Data Import Failure', () => {
@@ -321,7 +323,7 @@ describe('Sync Fixes - TDD', () => {
   });
 
   describe('Integration: Both fixes working together', () => {
-    it('Complete flow with both fixes applied', fakeAsync(() => {
+    it('Complete flow with both fixes applied', async () => {
       // This test verifies the complete fixed flow
 
       const events: string[] = [];
@@ -365,7 +367,7 @@ describe('Sync Fixes - TDD', () => {
 
       events.push('App started');
       isAllDataLoadedInitially$.next(true);
-      tick();
+      await wait(0);
 
       events.push('Sync completed');
       isSyncInProgress$.next(false);
@@ -373,10 +375,10 @@ describe('Sync Fixes - TDD', () => {
 
       // Data reload happens
       dataInitService.reInit();
-      tick(500); // ReInit completes
+      await wait(500); // ReInit completes
 
       // NOW the effect should fire (after data is ready)
-      tick(1000); // Debounce
+      await wait(1000); // Debounce
 
       console.log('Event sequence:', events);
       console.log('Tasks created:', finalTasksCreated);
@@ -392,7 +394,6 @@ describe('Sync Fixes - TDD', () => {
       );
 
       effectSub.unsubscribe();
-      flush();
-    }));
+    });
   });
 });
