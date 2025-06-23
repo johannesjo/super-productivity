@@ -432,6 +432,28 @@ describe('SyncService', () => {
       expect(mockMetaSyncService.upload).toHaveBeenCalled();
     });
 
+    it('should set lastSyncedAction when uploading', async () => {
+      mockSyncProvider.isLimitedToSingleFileSync = true;
+
+      await service.uploadToRemote(
+        createDefaultRemoteMeta(),
+        createDefaultLocalMeta({
+          revMap: { tasks: 'rev1' },
+          lastUpdate: 2000,
+          lastSyncedUpdate: 1000,
+        }),
+        'meta-rev',
+      );
+
+      expect(mockMetaSyncService.saveLocal).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          lastSyncedAction: jasmine.stringMatching(
+            /^Uploaded single file at \d{4}-\d{2}-\d{2}T/,
+          ),
+        }),
+      );
+    });
+
     it('should upload multiple files when models need updating', async () => {
       mockModelSyncService.getModelIdsToUpdateFromRevMaps.and.returnValue({
         toUpdate: ['singleModel1'],

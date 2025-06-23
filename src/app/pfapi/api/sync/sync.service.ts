@@ -428,6 +428,7 @@ export class SyncService<const MD extends ModelCfgs> {
       // localLamport tracks LOCAL changes only
       localLamport: Math.max(local.localLamport || 0, remote.localLamport || 0),
       lastSyncedLamport: Math.max(local.localLamport || 0, remote.localLamport || 0),
+      lastSyncedAction: `Downloaded ${isDownloadAll ? 'all data' : `${toUpdate.length} models`} at ${new Date().toISOString()}`,
       revMap: validateRevMap({
         ...local.revMap,
         ...realRemoteRevMap,
@@ -497,6 +498,7 @@ export class SyncService<const MD extends ModelCfgs> {
         ...local,
         lastSyncedUpdate: local.lastUpdate,
         lastSyncedLamport: local.localLamport || 0,
+        lastSyncedAction: `Uploaded single file at ${new Date().toISOString()}`,
         metaRev: metaRevAfterUpdate,
       });
 
@@ -584,6 +586,7 @@ export class SyncService<const MD extends ModelCfgs> {
       // actual updates
       lastSyncedUpdate: local.lastUpdate,
       lastSyncedLamport: local.localLamport || 0,
+      lastSyncedAction: `Uploaded ${toUpdate.length} models at ${new Date().toISOString()}`,
       revMap: validatedRevMap,
       metaRev: metaRevAfterUpload,
     });

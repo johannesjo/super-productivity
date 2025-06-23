@@ -96,6 +96,26 @@ describe('MetaModelCtrl', () => {
       );
     });
 
+    it('should set lastUpdateAction when updating a model', () => {
+      const modelCfg: ModelCfg<any> = {
+        defaultData: {},
+        isLocalOnly: false,
+        isMainFileModel: false,
+      };
+
+      testCtrl.updateRevForModel('testModel', modelCfg);
+
+      expect(mockDb.save).toHaveBeenCalledWith(
+        MetaModelCtrl.META_MODEL_ID,
+        jasmine.objectContaining({
+          lastUpdateAction: jasmine.stringMatching(
+            /^Updated testModel at \d{4}-\d{2}-\d{2}T/,
+          ),
+        }),
+        false,
+      );
+    });
+
     it('should not update for local-only models', () => {
       const modelCfg: ModelCfg<any> = {
         defaultData: {},

@@ -80,10 +80,16 @@ export class MetaModelCtrl {
     const metaModel = this._getMetaModelOrThrow(modelId, modelCfg);
     const timestamp = Date.now();
 
+    // Create action string (max 100 chars)
+    const actionStr = `Updated ${modelId} at ${new Date(timestamp).toISOString()}`;
+    const lastUpdateAction =
+      actionStr.length > 100 ? actionStr.substring(0, 97) + '...' : actionStr;
+
     this.save(
       {
         ...metaModel,
         lastUpdate: timestamp,
+        lastUpdateAction,
         localLamport: this._incrementLamport(metaModel.localLamport || 0),
 
         ...(modelCfg.isMainFileModel

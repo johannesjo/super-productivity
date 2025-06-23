@@ -13,6 +13,7 @@ import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { TranslatePipe } from '@ngx-translate/core';
 import { DatePipe } from '@angular/common';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
   selector: 'dialog-sync-conflict',
@@ -27,6 +28,7 @@ import { DatePipe } from '@angular/common';
     MatIcon,
     TranslatePipe,
     DatePipe,
+    MatTooltip,
   ],
 })
 export class DialogSyncConflictComponent {
@@ -47,6 +49,12 @@ export class DialogSyncConflictComponent {
   localLamport: number = this.data.local.localLamport;
   lastSyncedLamport: number | null = this.data.local.lastSyncedLamport;
 
+  remoteLastUpdateAction: string | undefined = this.data.remote.lastUpdateAction;
+  localLastUpdateAction: string | undefined = this.data.local.lastUpdateAction;
+  lastSyncedAction: string | undefined = this.data.local.lastSyncedAction;
+
+  localMetaRev: string | null = this.data.local.metaRev;
+
   isHighlightRemote: boolean = this.data.remote.lastUpdate >= this.data.local.lastUpdate;
   isHighlightLocal: boolean = this.data.local.lastUpdate >= this.data.remote.lastUpdate;
 
@@ -58,5 +66,10 @@ export class DialogSyncConflictComponent {
 
   close(res?: DialogConflictResolutionResult): void {
     this._matDialogRef.close(res);
+  }
+
+  shortenRev(rev: string | null | undefined): string {
+    if (!rev) return '-';
+    return rev.substring(0, 4);
   }
 }
