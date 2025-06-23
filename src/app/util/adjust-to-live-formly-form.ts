@@ -1,5 +1,4 @@
 import { FormlyFieldConfig } from '@ngx-formly/core';
-import { isArray } from 'rxjs/internal-compatibility';
 import { stringToMs } from '../ui/duration/string-to-ms.pipe';
 
 export const adjustToLiveFormlyForm = (
@@ -42,7 +41,7 @@ export const adjustToLiveFormlyForm = (
       };
     }
 
-    if (isArray(item?.fieldGroup)) {
+    if (Array.isArray(item?.fieldGroup)) {
       return {
         ...item,
         fieldGroup: adjustToLiveFormlyForm(item?.fieldGroup),
@@ -52,7 +51,7 @@ export const adjustToLiveFormlyForm = (
     if (
       item.type === 'repeat' &&
       (item?.fieldArray as any)?.fieldGroup &&
-      isArray((item.fieldArray as any).fieldGroup)
+      Array.isArray((item.fieldArray as any).fieldGroup)
     ) {
       return {
         ...item,
