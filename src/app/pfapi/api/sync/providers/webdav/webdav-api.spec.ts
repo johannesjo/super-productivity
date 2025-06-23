@@ -147,6 +147,107 @@ describe('WebdavApi', () => {
       expect(result).toBe('fallback-etag');
       expect(mockFetch).toHaveBeenCalledTimes(2);
     });
+
+    it('should get etag via GET request when PROPFIND also fails', async () => {
+      const uploadResponse = createMockResponse(201); // No etag header
+      const propfindError = new Error('PROPFIND failed');
+      const getResponse = createMockResponse(
+        200,
+        { etag: '"get-fallback-etag"' },
+        'file content',
+      );
+
+      mockFetch.and.returnValues(
+        Promise.resolve(uploadResponse),
+        Promise.reject(propfindError),
+        Promise.resolve(getResponse),
+      );
+
+      const result = await api.upload({
+        data: 'test data',
+        path: 'test.txt',
+      });
+
+      expect(result).toBe('get-fallback-etag');
+      expect(mockFetch).toHaveBeenCalledTimes(3);
+
+      // Verify the third call is a GET request
+      const getCall = mockFetch.calls.argsFor(2);
+      expect(getCall[1].method).toBe('GET');
+    });
+
+    it('should throw NoEtagAPIError when all etag retrieval methods fail', async () => {
+      const uploadResponse = createMockResponse(201); // No etag header
+      const propfindError = new Error('PROPFIND failed');
+      const getError = new Error('GET failed');
+
+      mockFetch.and.returnValues(
+        Promise.resolve(uploadResponse),
+        Promise.reject(propfindError),
+        Promise.reject(getError),
+      );
+
+      await expectAsync(
+        api.upload({
+          data: 'test data',
+          path: 'test.txt',
+        }),
+      ).toBeRejectedWith(jasmine.any(NoEtagAPIError));
+
+      expect(mockFetch).toHaveBeenCalledTimes(3);
+    });
+
+    it('should use GET fallback for etag after 404 retry', async () => {
+      const notFoundError = new RemoteFileNotFoundAPIError('test.txt');
+      const retryUploadResponse = createMockResponse(201); // No etag header
+      const propfindError = new Error('PROPFIND failed');
+      const getResponse = createMockResponse(
+        200,
+        { etag: '"get-etag-after-404"' },
+        'content',
+      );
+
+      mockFetch.and.returnValues(
+        Promise.reject(notFoundError), // Initial upload fails with 404
+        Promise.resolve(retryUploadResponse), // Retry upload succeeds but no etag
+        Promise.reject(propfindError), // PROPFIND fails
+        Promise.resolve(getResponse), // GET request succeeds
+      );
+
+      const result = await api.upload({
+        data: 'test data',
+        path: 'test/file.txt',
+      });
+
+      expect(result).toBe('get-etag-after-404');
+      expect(mockFetch).toHaveBeenCalledTimes(4);
+    });
+
+    it('should use GET fallback for etag after 409 retry', async () => {
+      const conflictError = { status: 409 };
+      const retryUploadResponse = createMockResponse(201); // No etag header
+      const propfindError = new Error('PROPFIND failed');
+      const getResponse = createMockResponse(
+        200,
+        { etag: '"get-etag-after-409"' },
+        'content',
+      );
+
+      mockFetch.and.returnValues(
+        Promise.reject(conflictError), // Initial upload fails with 409
+        Promise.resolve(retryUploadResponse), // Retry upload succeeds but no etag
+        Promise.reject(propfindError), // PROPFIND fails
+        Promise.resolve(getResponse), // GET request succeeds
+      );
+
+      const result = await api.upload({
+        data: 'test data',
+        path: 'test/file.txt',
+      });
+
+      expect(result).toBe('get-etag-after-409');
+      expect(mockFetch).toHaveBeenCalledTimes(4);
+    });
   });
 
   describe('download', () => {
@@ -494,6 +595,91 @@ describe('WebdavApi', () => {
       await expectAsync(api.getFileMeta('test.txt', null)).toBeRejectedWith(
         jasmine.any(RemoteFileNotFoundAPIError),
       );
+    });
+
+    it('should use GET fallback when useGetFallback is true and HEAD fails', async () => {
+      const propfindError = new Error('PROPFIND not supported');
+      const headError = new Error('HEAD failed');
+      const getResponse = createMockResponse(
+        200,
+        { etag: '"get-meta-etag"' },
+        'file content',
+      );
+
+      mockFetch.and.returnValues(
+        Promise.reject(propfindError),
+        Promise.reject(headError),
+        Promise.resolve(getResponse),
+      );
+
+      const result = await api.getFileMeta('test.txt', null, true);
+
+      expect(result).toEqual({
+        filename: 'test.txt',
+        basename: 'test.txt',
+        lastmod: jasmine.any(String),
+        size: 0,
+        type: 'file',
+        etag: 'get-meta-etag',
+        data: {
+          etag: 'get-meta-etag',
+          href: 'test.txt',
+        },
+      });
+      expect(mockFetch).toHaveBeenCalledTimes(3);
+
+      // Verify the third call is a GET request
+      const getCall = mockFetch.calls.argsFor(2);
+      expect(getCall[1].method).toBe('GET');
+    });
+
+    it('should not use GET fallback when useGetFallback is false', async () => {
+      const propfindError = new Error('PROPFIND not supported');
+      const headError = new Error('HEAD failed');
+
+      mockFetch.and.returnValues(
+        Promise.reject(propfindError),
+        Promise.reject(headError),
+      );
+
+      await expectAsync(api.getFileMeta('test.txt', null, false)).toBeRejectedWith(
+        headError,
+      );
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+    });
+
+    it('should throw RemoteFileNotFoundAPIError when GET fallback returns 404', async () => {
+      const propfindError = new Error('PROPFIND not supported');
+      const headError = new Error('HEAD failed');
+      const getError = new RemoteFileNotFoundAPIError('test.txt');
+
+      mockFetch.and.returnValues(
+        Promise.reject(propfindError),
+        Promise.reject(headError),
+        Promise.reject(getError),
+      );
+
+      await expectAsync(api.getFileMeta('test.txt', null, true)).toBeRejectedWith(
+        jasmine.any(RemoteFileNotFoundAPIError),
+      );
+      expect(mockFetch).toHaveBeenCalledTimes(3);
+    });
+
+    it('should propagate other errors from GET fallback', async () => {
+      const propfindError = new Error('PROPFIND not supported');
+      const headError = new Error('HEAD failed');
+      const getError = new Error('Network error');
+
+      mockFetch.and.returnValues(
+        Promise.reject(propfindError),
+        Promise.reject(headError),
+        Promise.reject(getError),
+      );
+
+      await expectAsync(api.getFileMeta('test.txt', null, true)).toBeRejectedWith(
+        getError,
+      );
+      expect(mockFetch).toHaveBeenCalledTimes(3);
     });
   });
 
