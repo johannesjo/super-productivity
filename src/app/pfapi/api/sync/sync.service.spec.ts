@@ -566,8 +566,8 @@ describe('SyncService', () => {
           crossModelVersion: 1,
           revMap: {},
           lastSyncedUpdate: 2000,
-          localLamport: 6, // max(5, 5) + 1
-          lastSyncedLamport: 6,
+          localLamport: 5, // max(5, 5) - NO increment on download
+          lastSyncedLamport: 5,
           metaRev: 'expected-new-meta-rev',
         }),
       );
