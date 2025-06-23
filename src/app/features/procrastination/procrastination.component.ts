@@ -1,1 +1,0 @@
-// This component has been removed. The functionality has been moved to the procrastination-buster plugin.
