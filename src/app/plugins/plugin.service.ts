@@ -199,11 +199,14 @@ export class PluginService implements OnDestroy {
           return placeholderInstance;
         }
 
-        const hasConsent = await this._getNodeExecutionConsent(manifest);
-        if (!hasConsent) {
-          throw new Error(
-            this._translateService.instant(T.PLUGINS.USER_DECLINED_NODE_PERMISSION),
-          );
+        // Only check for consent if plugin is enabled
+        if (isPluginEnabled) {
+          const hasConsent = await this._getNodeExecutionConsent(manifest);
+          if (!hasConsent) {
+            throw new Error(
+              this._translateService.instant(T.PLUGINS.USER_DECLINED_NODE_PERMISSION),
+            );
+          }
         }
       }
 
