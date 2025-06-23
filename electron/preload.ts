@@ -7,7 +7,7 @@ import {
   PluginNodeScriptRequest,
   PluginNodeScriptResult,
   PluginManifest,
-} from '../packages/plugin-api/dist/types';
+} from '../packages/plugin-api/src/types';
 
 const _send: (channel: IPCEventValue, ...args: unknown[]) => void = (channel, ...args) =>
   ipcRenderer.send(channel, ...args);

@@ -6,7 +6,7 @@ import {
   PluginNodeScriptRequest,
   PluginNodeScriptResult,
   PluginManifest,
-} from '../packages/plugin-api/dist/types';
+} from '../packages/plugin-api/src/types';
 
 const DEFAULT_TIMEOUT = 30000; // 30 seconds
 const MAX_TIMEOUT = 300000; // 5 minutes
