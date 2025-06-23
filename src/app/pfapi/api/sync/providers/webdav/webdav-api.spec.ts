@@ -209,6 +209,7 @@ describe('WebdavApi', () => {
 
       mockFetch.and.returnValues(
         Promise.reject(notFoundError), // Initial upload fails with 404
+        Promise.resolve(createMockResponse(201)), // MKCOL to create directory succeeds
         Promise.resolve(retryUploadResponse), // Retry upload succeeds but no etag
         Promise.reject(propfindError), // PROPFIND fails
         Promise.resolve(getResponse), // GET request succeeds
@@ -220,7 +221,7 @@ describe('WebdavApi', () => {
       });
 
       expect(result).toBe('get-etag-after-404');
-      expect(mockFetch).toHaveBeenCalledTimes(4);
+      expect(mockFetch).toHaveBeenCalledTimes(5);
     });
 
     it('should use GET fallback for etag after 409 retry', async () => {
@@ -235,6 +236,7 @@ describe('WebdavApi', () => {
 
       mockFetch.and.returnValues(
         Promise.reject(conflictError), // Initial upload fails with 409
+        Promise.resolve(createMockResponse(201)), // MKCOL to create directory succeeds
         Promise.resolve(retryUploadResponse), // Retry upload succeeds but no etag
         Promise.reject(propfindError), // PROPFIND fails
         Promise.resolve(getResponse), // GET request succeeds
@@ -246,7 +248,7 @@ describe('WebdavApi', () => {
       });
 
       expect(result).toBe('get-etag-after-409');
-      expect(mockFetch).toHaveBeenCalledTimes(4);
+      expect(mockFetch).toHaveBeenCalledTimes(5);
     });
   });
 
