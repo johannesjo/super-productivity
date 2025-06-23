@@ -29,6 +29,21 @@ import { modelVersionCheck, ModelVersionCheckResult } from '../util/model-versio
 import { MetaSyncService } from './meta-sync.service';
 import { ModelSyncService } from './model-sync.service';
 
+/**
+ * Sync Service for Super Productivity
+ *
+ * Change Detection System:
+ * This is NOT a pure Lamport timestamp implementation!
+ * We use a hybrid approach that combines:
+ * - Physical timestamps (lastUpdate) for ordering
+ * - Change counters (localLamport) for detecting local modifications
+ * - Sync tracking (lastSyncedLamport) to detect when sync is needed
+ *
+ * Key difference from Lamport clocks:
+ * - We DON'T increment on receive (prevents sync loops)
+ * - We DO increment on local changes
+ * - We track the last synced state separately
+ */
 export class SyncService<const MD extends ModelCfgs> {
   public readonly IS_DO_CROSS_MODEL_MIGRATIONS: boolean;
   private static readonly UPDATE_ALL_REV = 'UPDATE_ALL_REV';
@@ -233,7 +248,7 @@ export class SyncService<const MD extends ModelCfgs> {
 
       pfLog(
         2,
-        `${SyncService.L}.${this.uploadAll.name}(): Incrementing Lamport for conflict resolution`,
+        `${SyncService.L}.${this.uploadAll.name}(): Incrementing change counter for conflict resolution`,
         { localLamport: local.localLamport, remoteLamport, currentLamport, nextLamport },
       );
 
@@ -242,6 +257,8 @@ export class SyncService<const MD extends ModelCfgs> {
           ...local,
           lastUpdate: Date.now(),
           localLamport: nextLamport,
+          // Important: Don't update lastSyncedLamport yet
+          // It will be updated after successful upload
         },
         // NOTE we always ignore db lock while syncing
         true,
@@ -357,12 +374,12 @@ export class SyncService<const MD extends ModelCfgs> {
         lastUpdate: remote.lastUpdate,
         crossModelVersion: remote.crossModelVersion,
         revMap: remote.revMap,
-        // Lamport clock: take max of local and remote, then increment
-        localLamport: Math.max(local.localLamport || 0, remote.localLamport || 0) + 1,
+        // Don't increment localLamport during download - only take the max
+        // localLamport tracks LOCAL changes only
+        localLamport: Math.max(local.localLamport || 0, remote.localLamport || 0),
         // local meta
         lastSyncedUpdate: remote.lastUpdate,
-        lastSyncedLamport:
-          Math.max(local.localLamport || 0, remote.localLamport || 0) + 1,
+        lastSyncedLamport: Math.max(local.localLamport || 0, remote.localLamport || 0),
         metaRev: remoteRev,
       });
       return;

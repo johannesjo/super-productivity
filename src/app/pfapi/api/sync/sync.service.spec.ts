@@ -889,7 +889,7 @@ describe('SyncService', () => {
     });
 
     describe('download operations', () => {
-      it('should update localLamport to max(local, remote) + 1 after download', async () => {
+      it('should update localLamport to max(local, remote) WITHOUT incrementing after download', async () => {
         const localMeta = createDefaultLocalMeta({
           lastUpdate: 1000,
           lastSyncedUpdate: 1000,
@@ -916,8 +916,8 @@ describe('SyncService', () => {
 
         expect(mockMetaSyncService.saveLocal).toHaveBeenCalledWith(
           jasmine.objectContaining({
-            localLamport: 9, // max(5, 8) + 1
-            lastSyncedLamport: 9,
+            localLamport: 8, // max(5, 8) - NO increment to prevent sync loops
+            lastSyncedLamport: 8,
           }),
         );
       });
@@ -949,8 +949,8 @@ describe('SyncService', () => {
 
         expect(mockMetaSyncService.saveLocal).toHaveBeenCalledWith(
           jasmine.objectContaining({
-            localLamport: 1, // max(0, 0) + 1
-            lastSyncedLamport: 1,
+            localLamport: 0, // max(0, 0) - NO increment
+            lastSyncedLamport: 0,
           }),
         );
       });
@@ -988,6 +988,84 @@ describe('SyncService', () => {
           jasmine.objectContaining({
             localLamport: 15, // max(10, 15) - no increment on download
             lastSyncedLamport: 15,
+          }),
+        );
+      });
+    });
+
+    describe('sync loop prevention', () => {
+      it('should NOT trigger sync after download when no local changes exist', async () => {
+        // Initial state: in sync
+        const localMeta = createDefaultLocalMeta({
+          lastUpdate: 1000,
+          lastSyncedUpdate: 1000,
+          localLamport: 5,
+          lastSyncedLamport: 5,
+        });
+
+        // Remote has new data
+        const remoteMeta = createDefaultRemoteMeta({
+          lastUpdate: 2000,
+          localLamport: 8,
+          mainModelData: { mainModel1: { id: 'data' } },
+        });
+
+        mockMetaSyncService.download.and.returnValue(
+          Promise.resolve({
+            remoteMeta,
+            remoteMetaRev: 'meta-rev-2',
+          }),
+        );
+        mockModelSyncService.updateLocalMainModelsFromRemoteMetaFile.and.returnValue(
+          Promise.resolve(),
+        );
+
+        await service.downloadToLocal(remoteMeta, localMeta, 'meta-rev-2');
+
+        // After download, localLamport should equal lastSyncedLamport
+        expect(mockMetaSyncService.saveLocal).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            localLamport: 8,
+            lastSyncedLamport: 8,
+          }),
+        );
+
+        // This means localLamport === lastSyncedLamport, so no sync will be triggered
+      });
+
+      it('should preserve local changes indicator after download', async () => {
+        // Local has unsaved changes (localLamport > lastSyncedLamport)
+        const localMeta = createDefaultLocalMeta({
+          lastUpdate: 1500,
+          lastSyncedUpdate: 1000,
+          localLamport: 7, // Higher than lastSyncedLamport
+          lastSyncedLamport: 5,
+        });
+
+        // Remote has different changes
+        const remoteMeta = createDefaultRemoteMeta({
+          lastUpdate: 2000,
+          localLamport: 6,
+          mainModelData: { mainModel1: { id: 'data' } },
+        });
+
+        mockMetaSyncService.download.and.returnValue(
+          Promise.resolve({
+            remoteMeta,
+            remoteMetaRev: 'meta-rev-2',
+          }),
+        );
+        mockModelSyncService.updateLocalMainModelsFromRemoteMetaFile.and.returnValue(
+          Promise.resolve(),
+        );
+
+        await service.downloadToLocal(remoteMeta, localMeta, 'meta-rev-2');
+
+        // localLamport takes max but preserves the fact that local > lastSynced
+        expect(mockMetaSyncService.saveLocal).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            localLamport: 7, // max(7, 6) = 7
+            lastSyncedLamport: 7, // Updated to match
           }),
         );
       });
@@ -1057,6 +1135,70 @@ describe('SyncService', () => {
             lastSyncedUpdate: 2000,
             lastSyncedLamport: 20,
           }),
+        );
+      });
+
+      it('should increment localLamport when force uploading for conflict resolution', async () => {
+        const localMeta = createDefaultLocalMeta({
+          lastUpdate: 2000,
+          lastSyncedUpdate: 1000,
+          localLamport: 10,
+          lastSyncedLamport: 8,
+        });
+
+        const remoteMeta = createDefaultRemoteMeta({
+          lastUpdate: 2100,
+          localLamport: 12,
+        });
+
+        mockMetaModelCtrl.load.and.returnValue(Promise.resolve(localMeta));
+        mockMetaSyncService.download.and.returnValue(
+          Promise.resolve({
+            remoteMeta,
+            remoteMetaRev: 'meta-rev-2',
+          }),
+        );
+
+        await service.uploadAll(true); // Force upload
+
+        // Should increment to be higher than remote's Lamport
+        expect(mockMetaModelCtrl.save).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            localLamport: 13, // max(10, 12) + 1
+          }),
+          true,
+        );
+      });
+
+      it('should handle Lamport overflow correctly during conflict resolution', async () => {
+        const localMeta = createDefaultLocalMeta({
+          lastUpdate: 2000,
+          lastSyncedUpdate: 1000,
+          localLamport: Number.MAX_SAFE_INTEGER - 500,
+          lastSyncedLamport: Number.MAX_SAFE_INTEGER - 501,
+        });
+
+        const remoteMeta = createDefaultRemoteMeta({
+          lastUpdate: 2100,
+          localLamport: Number.MAX_SAFE_INTEGER - 100,
+        });
+
+        mockMetaModelCtrl.load.and.returnValue(Promise.resolve(localMeta));
+        mockMetaSyncService.download.and.returnValue(
+          Promise.resolve({
+            remoteMeta,
+            remoteMetaRev: 'meta-rev-2',
+          }),
+        );
+
+        await service.uploadAll(true); // Force upload
+
+        // Should reset to 1 when approaching MAX_SAFE_INTEGER
+        expect(mockMetaModelCtrl.save).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            localLamport: 1, // Reset due to overflow protection
+          }),
+          true,
         );
       });
     });
