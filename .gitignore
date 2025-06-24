@@ -54,6 +54,12 @@ perf-metrics-*.json
 .DS_Store
 Thumbs.db
 
+# iOS build artifacts
+ios/App/App/public/
+ios/App/App/capacitor.config.json
+ios/App/App/config.xml
+ios/App/App/Plugins/
+
 # sometimes idea does compile ts files...
 src/app/**/*.js
 src/app/**/*.js.map

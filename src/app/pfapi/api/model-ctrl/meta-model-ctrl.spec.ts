@@ -15,8 +15,13 @@ describe('MetaModelCtrl', () => {
     mockDb = jasmine.createSpyObj('Database', ['save', 'load']);
     mockEventEmitter = jasmine.createSpyObj('PFEventEmitter', ['emit']);
 
-    // Default behavior for load - return null initially
-    mockDb.load.and.returnValue(Promise.resolve(null));
+    // Default behavior for load - return null initially for meta, but return client ID
+    mockDb.load.and.callFake(<T = unknown>(key: string): Promise<T | void> => {
+      if (key === MetaModelCtrl.CLIENT_ID) {
+        return Promise.resolve('test-client-id' as any);
+      }
+      return Promise.resolve(null as any);
+    });
     mockDb.save.and.returnValue(Promise.resolve());
 
     metaModelCtrl = new MetaModelCtrl(mockDb, mockEventEmitter, crossModelVersion);
@@ -45,7 +50,12 @@ describe('MetaModelCtrl', () => {
         lastSyncedLamport: 5,
       };
 
-      mockDb.load.and.returnValue(Promise.resolve(existingMeta));
+      mockDb.load.and.callFake(<T = unknown>(key: string): Promise<T | void> => {
+        if (key === MetaModelCtrl.CLIENT_ID) {
+          return Promise.resolve('test-client-id' as any);
+        }
+        return Promise.resolve(existingMeta as any);
+      });
 
       const newCtrl = new MetaModelCtrl(mockDb, mockEventEmitter, crossModelVersion);
       const meta = await newCtrl.load();
@@ -68,7 +78,12 @@ describe('MetaModelCtrl', () => {
         localLamport: 5,
         lastSyncedLamport: null,
       };
-      mockDb.load.and.returnValue(Promise.resolve(initialMeta));
+      mockDb.load.and.callFake(<T = unknown>(key: string): Promise<T | void> => {
+        if (key === MetaModelCtrl.CLIENT_ID) {
+          return Promise.resolve('test-client-id' as any);
+        }
+        return Promise.resolve(initialMeta as any);
+      });
 
       // Create a new controller and wait for it to load
       testCtrl = new MetaModelCtrl(mockDb, mockEventEmitter, crossModelVersion);
@@ -78,14 +93,14 @@ describe('MetaModelCtrl', () => {
       mockDb.save.calls.reset();
     });
 
-    it('should increment localLamport when updating a model', () => {
+    it('should increment localLamport when updating a model', async () => {
       const modelCfg: ModelCfg<any> = {
         defaultData: {},
         isLocalOnly: false,
         isMainFileModel: false,
       };
 
-      testCtrl.updateRevForModel('testModel', modelCfg);
+      await testCtrl.updateRevForModel('testModel', modelCfg);
 
       expect(mockDb.save).toHaveBeenCalledWith(
         MetaModelCtrl.META_MODEL_ID,
@@ -96,14 +111,14 @@ describe('MetaModelCtrl', () => {
       );
     });
 
-    it('should set lastUpdateAction when updating a model', () => {
+    it('should set lastUpdateAction when updating a model', async () => {
       const modelCfg: ModelCfg<any> = {
         defaultData: {},
         isLocalOnly: false,
         isMainFileModel: false,
       };
 
-      testCtrl.updateRevForModel('testModel', modelCfg);
+      await testCtrl.updateRevForModel('testModel', modelCfg);
 
       expect(mockDb.save).toHaveBeenCalledWith(
         MetaModelCtrl.META_MODEL_ID,
@@ -114,26 +129,26 @@ describe('MetaModelCtrl', () => {
       );
     });
 
-    it('should not update for local-only models', () => {
+    it('should not update for local-only models', async () => {
       const modelCfg: ModelCfg<any> = {
         defaultData: {},
         isLocalOnly: true,
         isMainFileModel: false,
       };
 
-      testCtrl.updateRevForModel('testModel', modelCfg);
+      await testCtrl.updateRevForModel('testModel', modelCfg);
 
       expect(mockDb.save).not.toHaveBeenCalled();
     });
 
-    it('should update revMap for non-main file models', () => {
+    it('should update revMap for non-main file models', async () => {
       const modelCfg: ModelCfg<any> = {
         defaultData: {},
         isLocalOnly: false,
         isMainFileModel: false,
       };
 
-      testCtrl.updateRevForModel('testModel', modelCfg);
+      await testCtrl.updateRevForModel('testModel', modelCfg);
 
       expect(mockDb.save).toHaveBeenCalledWith(
         MetaModelCtrl.META_MODEL_ID,
@@ -146,27 +161,27 @@ describe('MetaModelCtrl', () => {
       );
     });
 
-    it('should not update revMap for main file models', () => {
+    it('should not update revMap for main file models', async () => {
       const modelCfg: ModelCfg<any> = {
         defaultData: {},
         isLocalOnly: false,
         isMainFileModel: true,
       };
 
-      metaModelCtrl.updateRevForModel('mainModel', modelCfg);
+      await testCtrl.updateRevForModel('mainModel', modelCfg);
 
       const savedMeta = mockDb.save.calls.mostRecent().args[1] as LocalMeta;
       expect(savedMeta.revMap).toEqual({});
     });
 
-    it('should emit events after update', () => {
+    it('should emit events after update', async () => {
       const modelCfg: ModelCfg<any> = {
         defaultData: {},
         isLocalOnly: false,
         isMainFileModel: false,
       };
 
-      testCtrl.updateRevForModel('testModel', modelCfg);
+      await testCtrl.updateRevForModel('testModel', modelCfg);
 
       expect(mockEventEmitter.emit).toHaveBeenCalledWith(
         'metaModelChange',
@@ -189,7 +204,12 @@ describe('MetaModelCtrl', () => {
         localLamport: undefined as any,
         lastSyncedLamport: undefined as any,
       };
-      mockDb.load.and.returnValue(Promise.resolve(oldMeta));
+      mockDb.load.and.callFake(<T = unknown>(key: string): Promise<T | void> => {
+        if (key === MetaModelCtrl.CLIENT_ID) {
+          return Promise.resolve('test-client-id' as any);
+        }
+        return Promise.resolve(oldMeta as any);
+      });
 
       const newCtrl = new MetaModelCtrl(mockDb, mockEventEmitter, crossModelVersion);
       await newCtrl.load();
@@ -203,7 +223,7 @@ describe('MetaModelCtrl', () => {
         isMainFileModel: false,
       };
 
-      newCtrl.updateRevForModel('testModel', modelCfg);
+      await newCtrl.updateRevForModel('testModel', modelCfg);
 
       expect(mockDb.save).toHaveBeenCalledWith(
         MetaModelCtrl.META_MODEL_ID,

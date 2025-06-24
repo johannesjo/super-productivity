@@ -8,12 +8,18 @@ import {
 } from '@angular/material/dialog';
 import { T } from 'src/app/t.const';
 import { DialogConflictResolutionResult } from '../sync.model';
-import { ConflictData } from '../../../pfapi/api';
+import { ConflictData, VectorClock } from '../../../pfapi/api';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { TranslatePipe } from '@ngx-translate/core';
 import { DatePipe } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
+import {
+  vectorClockToString,
+  compareVectorClocks,
+  VectorClockComparison,
+} from '../../../pfapi/api/util/vector-clock';
+import { CollapsibleComponent } from '../../../ui/collapsible/collapsible.component';
 
 @Component({
   selector: 'dialog-sync-conflict',
@@ -29,6 +35,7 @@ import { MatTooltip } from '@angular/material/tooltip';
     TranslatePipe,
     DatePipe,
     MatTooltip,
+    CollapsibleComponent,
   ],
 })
 export class DialogSyncConflictComponent {
@@ -48,6 +55,15 @@ export class DialogSyncConflictComponent {
   remoteLamport: number = this.data.remote.localLamport;
   localLamport: number = this.data.local.localLamport;
   lastSyncedLamport: number | null = this.data.local.lastSyncedLamport;
+
+  // Vector clock data
+  remoteVectorClock: VectorClock | undefined = this.data.remote.vectorClock;
+  localVectorClock: VectorClock | undefined = this.data.local.vectorClock;
+  lastSyncedVectorClock: VectorClock | null | undefined =
+    this.data.local.lastSyncedVectorClock;
+
+  // Vector clock comparison
+  vectorClockComparison: VectorClockComparison | null = this.getVectorClockComparison();
 
   remoteLastUpdateAction: string | undefined = this.data.remote.lastUpdateAction;
   localLastUpdateAction: string | undefined = this.data.local.lastUpdateAction;
@@ -70,6 +86,34 @@ export class DialogSyncConflictComponent {
 
   shortenLamport(lamport?: number | null): string {
     if (!lamport) return '-';
-    return lamport.toString().slice(-4);
+    return lamport.toString().slice(-5);
+  }
+
+  getVectorClockComparison(): VectorClockComparison | null {
+    if (!this.localVectorClock || !this.remoteVectorClock) {
+      return null;
+    }
+    return compareVectorClocks(this.localVectorClock, this.remoteVectorClock);
+  }
+
+  getVectorClockString(clock?: VectorClock | null): string {
+    if (!clock) return '-';
+    return vectorClockToString(clock);
+  }
+
+  getVectorClockComparisonLabel(): string {
+    if (!this.vectorClockComparison) return '-';
+    switch (this.vectorClockComparison) {
+      case VectorClockComparison.EQUAL:
+        return 'Equal';
+      case VectorClockComparison.LESS_THAN:
+        return 'Local < Remote';
+      case VectorClockComparison.GREATER_THAN:
+        return 'Local > Remote';
+      case VectorClockComparison.CONCURRENT:
+        return 'Concurrent (True Conflict)';
+      default:
+        return '-';
+    }
   }
 }

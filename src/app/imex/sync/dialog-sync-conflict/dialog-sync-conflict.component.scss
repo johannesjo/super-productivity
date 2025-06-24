@@ -1,3 +1,18 @@
 .isHighlight {
   font-weight: 600;
 }
+
+h3 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-size: 1.1em;
+  font-weight: 500;
+}
+
+table + table {
+  margin-top: 20px;
+}
+
+:host ::ng-deep .collapsible-title {
+  font-weight: bold;
+}

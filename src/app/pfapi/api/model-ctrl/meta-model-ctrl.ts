@@ -11,6 +11,8 @@ import {
 import { validateLocalMeta } from '../util/validate-local-meta';
 import { PFEventEmitter } from '../util/events';
 import { devError } from '../../../util/dev-error';
+import { incrementVectorClock } from '../util/vector-clock';
+import { getVectorClock, setVectorClock } from '../util/backwards-compat';
 
 export const DEFAULT_META_MODEL: LocalMeta = {
   crossModelVersion: 1,
@@ -20,6 +22,8 @@ export const DEFAULT_META_MODEL: LocalMeta = {
   lastSyncedUpdate: null,
   localLamport: 0,
   lastSyncedLamport: null,
+  vectorClock: {},
+  lastSyncedVectorClock: null,
 };
 
 /**
@@ -64,11 +68,11 @@ export class MetaModelCtrl {
    * @param isIgnoreDBLock Whether to ignore database locks
    * @throws {MetaNotReadyError} When metamodel is not loaded yet
    */
-  updateRevForModel<MT extends ModelBase>(
+  async updateRevForModel<MT extends ModelBase>(
     modelId: string,
     modelCfg: ModelCfg<MT>,
     isIgnoreDBLock = false,
-  ): void {
+  ): Promise<void> {
     pfLog(2, `${MetaModelCtrl.L}.${this.updateRevForModel.name}()`, modelId, {
       modelCfg,
       inMemory: this._metaModelInMemory,
@@ -80,31 +84,54 @@ export class MetaModelCtrl {
     const metaModel = this._getMetaModelOrThrow(modelId, modelCfg);
     const timestamp = Date.now();
 
+    // Get client ID for vector clock
+    const clientId = await this.loadClientId();
+
     // Create action string (max 100 chars)
     const actionStr = `${modelId} => ${new Date(timestamp).toISOString()}`;
     const lastUpdateAction =
       actionStr.length > 100 ? actionStr.substring(0, 97) + '...' : actionStr;
 
-    this.save(
-      {
-        ...metaModel,
-        lastUpdate: timestamp,
-        lastUpdateAction,
-        localLamport: this._incrementLamport(metaModel.localLamport || 0),
+    // Update vector clock - migrate from Lamport if needed
+    let currentVectorClock = getVectorClock(metaModel, clientId);
+    if (!currentVectorClock && metaModel.localLamport > 0) {
+      // First time creating vector clock - migrate from Lamport timestamp
+      currentVectorClock = { [clientId]: metaModel.localLamport };
+      pfLog(
+        2,
+        `${MetaModelCtrl.L}.${this.updateRevForModel.name}() migrating Lamport to vector clock`,
+        {
+          clientId,
+          localLamport: metaModel.localLamport,
+          newVectorClock: currentVectorClock,
+        },
+      );
+    }
 
-        ...(modelCfg.isMainFileModel
-          ? {}
-          : {
-              revMap: {
-                ...metaModel.revMap,
-                [modelId]: timestamp.toString(),
-              },
-            }),
-        // as soon as we save a related model, we are using the local crossModelVersion (while other updates might be from importing remote data)
-        crossModelVersion: this.crossModelVersion,
-      },
-      isIgnoreDBLock,
-    );
+    const newVectorClock = incrementVectorClock(currentVectorClock || {}, clientId);
+
+    const updatedMeta = {
+      ...metaModel,
+      lastUpdate: timestamp,
+      lastUpdateAction,
+      localLamport: this._incrementLamport(metaModel.localLamport || 0),
+
+      ...(modelCfg.isMainFileModel
+        ? {}
+        : {
+            revMap: {
+              ...metaModel.revMap,
+              [modelId]: timestamp.toString(),
+            },
+          }),
+      // as soon as we save a related model, we are using the local crossModelVersion (while other updates might be from importing remote data)
+      crossModelVersion: this.crossModelVersion,
+    };
+
+    // Set vector clock using backwards compatibility helper
+    setVectorClock(updatedMeta, newVectorClock, clientId);
+
+    await this.save(updatedMeta, isIgnoreDBLock);
   }
 
   /**

@@ -1,4 +1,4 @@
-import { ConflictData, LocalMeta, RemoteMeta } from '../pfapi.model';
+import { ConflictData, LocalMeta, RemoteMeta, VectorClock } from '../pfapi.model';
 import { ConflictReason, SyncStatus } from '../pfapi.const';
 import {
   ImpossibleError,
@@ -7,7 +7,17 @@ import {
   SyncInvalidTimeValuesError,
 } from '../errors/errors';
 import { pfLog } from './log';
-import { getLocalChangeCounter, getLastSyncedChangeCounter } from './backwards-compat';
+import {
+  getLocalChangeCounter,
+  getLastSyncedChangeCounter,
+  hasVectorClocks,
+} from './backwards-compat';
+import {
+  compareVectorClocks,
+  VectorClockComparison,
+  hasVectorClockChanges,
+  vectorClockToString,
+} from './vector-clock';
 
 // TODO unit test the hell out of this
 export const getSyncStatusFromMetaFiles = (
@@ -33,22 +43,138 @@ export const getSyncStatusFromMetaFiles = (
       status: SyncStatus.UpdateRemote,
     };
   } else {
-    // Special case: When timestamps match exactly, we're in sync
-    // This overrides any Lamport timestamp mismatches which only indicate metadata is out of sync
-    if (local.lastUpdate === remote.lastUpdate) {
-      pfLog(2, 'Timestamps match exactly - treating as InSync', {
-        local,
-        remote,
+    // Check if we can use vector clocks for more accurate conflict detection
+    const localHasVectorClock =
+      local.vectorClock && Object.keys(local.vectorClock).length > 0;
+    const remoteHasVectorClock =
+      remote.vectorClock && Object.keys(remote.vectorClock).length > 0;
+
+    // Use console.log for critical debugging to ensure visibility
+    console.log('SYNC DEBUG - Vector clock availability check', {
+      localHasVectorClock,
+      remoteHasVectorClock,
+      localVectorClock: local.vectorClock,
+      remoteVectorClock: remote.vectorClock,
+      hasVectorClocksResult: hasVectorClocks(local, remote),
+      localLastUpdate: local.lastUpdate,
+      remoteLastUpdate: remote.lastUpdate,
+      localLastSyncedUpdate: local.lastSyncedUpdate,
+    });
+
+    // Try to use vector clocks first if both sides have them
+    if (hasVectorClocks(local, remote)) {
+      // Extract vector clocks directly since we're comparing full clocks
+      // Don't use backwards compatibility functions here as they require client ID for migration
+      const localVector = local.vectorClock!;
+      const remoteVector = remote.vectorClock!;
+      const lastSyncedVector = local.lastSyncedVectorClock;
+
+      console.log('SYNC DEBUG - Using vector clocks for sync status', {
+        localVector: vectorClockToString(localVector),
+        remoteVector: vectorClockToString(remoteVector),
+        lastSyncedVector: vectorClockToString(lastSyncedVector),
+        localVectorRaw: localVector,
+        remoteVectorRaw: remoteVector,
+        lastSyncedVectorRaw: lastSyncedVector,
       });
-      return {
-        status: SyncStatus.InSync,
-      };
+
+      const vectorResult = _checkForUpdateVectorClock({
+        localVector,
+        remoteVector,
+        lastSyncedVector: lastSyncedVector || null,
+      });
+
+      switch (vectorResult) {
+        case UpdateCheckResult.InSync:
+          return {
+            status: SyncStatus.InSync,
+          };
+        case UpdateCheckResult.LocalUpdateRequired:
+          return {
+            status: SyncStatus.UpdateLocal,
+          };
+        case UpdateCheckResult.RemoteUpdateRequired:
+          return {
+            status: SyncStatus.UpdateRemote,
+          };
+        case UpdateCheckResult.DataDiverged:
+          return {
+            status: SyncStatus.Conflict,
+            conflictData: {
+              reason: ConflictReason.BothNewerLastSync,
+              remote,
+              local,
+              additional: {
+                vectorClockComparison: VectorClockComparison.CONCURRENT,
+                localVector: vectorClockToString(localVector),
+                remoteVector: vectorClockToString(remoteVector),
+              },
+            },
+          };
+      }
     }
 
-    // Try to use change counters (Lamport timestamps) first if available
+    // Enhanced fallback: Try to create hybrid comparison using available data
     const localChangeCounter = getLocalChangeCounter(local);
     const remoteChangeCounter = getLocalChangeCounter(remote);
     const lastSyncedChangeCounter = getLastSyncedChangeCounter(local);
+
+    // Special case: If one side has vector clock and other has Lamport, we can still compare intelligently
+    if (
+      localHasVectorClock &&
+      !remoteHasVectorClock &&
+      typeof remoteChangeCounter === 'number'
+    ) {
+      // Extract the maximum value from local vector clock to compare with remote Lamport
+      const localMaxClock = Math.max(...Object.values(local.vectorClock!));
+      const hasLocalChanges = localMaxClock > (lastSyncedChangeCounter || 0);
+      const hasRemoteChanges = remoteChangeCounter > (lastSyncedChangeCounter || 0);
+
+      if (!hasLocalChanges && !hasRemoteChanges) {
+        return { status: SyncStatus.InSync };
+      } else if (hasLocalChanges && !hasRemoteChanges) {
+        return { status: SyncStatus.UpdateRemote };
+      } else if (!hasLocalChanges && hasRemoteChanges) {
+        return { status: SyncStatus.UpdateLocal };
+      } else {
+        // Both have changes - need to compare magnitudes
+        if (localMaxClock > remoteChangeCounter) {
+          return { status: SyncStatus.UpdateRemote };
+        } else if (remoteChangeCounter > localMaxClock) {
+          return { status: SyncStatus.UpdateLocal };
+        } else {
+          // Equal - fall through to timestamp comparison
+        }
+      }
+    } else if (
+      !localHasVectorClock &&
+      remoteHasVectorClock &&
+      typeof localChangeCounter === 'number'
+    ) {
+      // Extract the maximum value from remote vector clock to compare with local Lamport
+      const remoteMaxClock = Math.max(...Object.values(remote.vectorClock!));
+      const hasLocalChanges = localChangeCounter > (lastSyncedChangeCounter || 0);
+      const hasRemoteChanges = remoteMaxClock > (lastSyncedChangeCounter || 0);
+
+      if (!hasLocalChanges && !hasRemoteChanges) {
+        return { status: SyncStatus.InSync };
+      } else if (hasLocalChanges && !hasRemoteChanges) {
+        return { status: SyncStatus.UpdateRemote };
+      } else if (!hasLocalChanges && hasRemoteChanges) {
+        return { status: SyncStatus.UpdateLocal };
+      } else {
+        // Both have changes - need to compare magnitudes
+        if (localChangeCounter > remoteMaxClock) {
+          return { status: SyncStatus.UpdateRemote };
+        } else if (remoteMaxClock > localChangeCounter) {
+          return { status: SyncStatus.UpdateLocal };
+        } else {
+          // Equal - fall through to timestamp comparison
+        }
+      }
+    }
+
+    // Standard Lamport fallback when both sides lack vector clocks
 
     if (
       typeof localChangeCounter === 'number' &&
@@ -96,7 +222,8 @@ export const getSyncStatusFromMetaFiles = (
     }
 
     // TODO remove later once it is likely that all running apps have lamport clocks
-    // Fall back to timestamp-based checking
+    // Final fallback to timestamp-based checking
+
     if (typeof local.lastSyncedUpdate === 'number') {
       const r = _checkForUpdate({
         remote: remote.lastUpdate,
@@ -193,6 +320,52 @@ enum UpdateCheckResult {
   LastSyncNotUpToDate = 'LastSyncNotUpToDate',
 }
 
+const _checkForUpdateVectorClock = (params: {
+  localVector: VectorClock;
+  remoteVector: VectorClock;
+  lastSyncedVector: VectorClock | null;
+}): UpdateCheckResult => {
+  const { localVector, remoteVector, lastSyncedVector } = params;
+
+  pfLog(2, 'Vector clock check', {
+    localVector: vectorClockToString(localVector),
+    remoteVector: vectorClockToString(remoteVector),
+    lastSyncedVector: vectorClockToString(lastSyncedVector),
+  });
+
+  // Check if there have been changes since last sync
+  const hasLocalChanges = hasVectorClockChanges(localVector, lastSyncedVector);
+  const hasRemoteChanges = hasVectorClockChanges(remoteVector, lastSyncedVector);
+
+  if (!hasLocalChanges && !hasRemoteChanges) {
+    return UpdateCheckResult.InSync;
+  } else if (hasLocalChanges && !hasRemoteChanges) {
+    return UpdateCheckResult.RemoteUpdateRequired;
+  } else if (!hasLocalChanges && hasRemoteChanges) {
+    return UpdateCheckResult.LocalUpdateRequired;
+  } else {
+    // Both have changes - need to check if they're truly concurrent
+    const comparison = compareVectorClocks(localVector, remoteVector);
+
+    pfLog(2, 'Both sides have changes, vector comparison result:', comparison);
+
+    // If one vector clock dominates the other, we can still sync
+    if (comparison === VectorClockComparison.LESS_THAN) {
+      // Remote is strictly ahead, update local
+      return UpdateCheckResult.LocalUpdateRequired;
+    } else if (comparison === VectorClockComparison.GREATER_THAN) {
+      // Local is strictly ahead, update remote
+      return UpdateCheckResult.RemoteUpdateRequired;
+    } else if (comparison === VectorClockComparison.EQUAL) {
+      // Both have the same vector clock - they're in sync
+      return UpdateCheckResult.InSync;
+    } else {
+      // Vectors are concurrent - true conflict
+      return UpdateCheckResult.DataDiverged;
+    }
+  }
+};
+
 const _checkForUpdateLamport = (params: {
   remoteLocalLamport: number;
   localLamport: number;
@@ -219,7 +392,12 @@ const _checkForUpdateLamport = (params: {
   } else if (!hasLocalChanges && hasRemoteChanges) {
     return UpdateCheckResult.LocalUpdateRequired;
   } else {
-    // Both have changes - conflict
+    // Both have changes - check if they're the same
+    if (localLamport === remoteLocalLamport) {
+      // Both made the same changes - they're in sync
+      return UpdateCheckResult.InSync;
+    }
+    // Different changes - conflict
     return UpdateCheckResult.DataDiverged;
   }
 };
