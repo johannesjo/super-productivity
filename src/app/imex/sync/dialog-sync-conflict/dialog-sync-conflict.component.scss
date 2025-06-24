@@ -12,3 +12,7 @@ h3 {
 table + table {
   margin-top: 20px;
 }
+
+:host ::ng-deep .collapsible-title {
+  font-weight: bold;
+}

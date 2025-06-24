@@ -19,6 +19,7 @@ import {
   compareVectorClocks,
   VectorClockComparison,
 } from '../../../pfapi/api/util/vector-clock';
+import { CollapsibleComponent } from '../../../ui/collapsible/collapsible.component';
 
 @Component({
   selector: 'dialog-sync-conflict',
@@ -34,6 +35,7 @@ import {
     TranslatePipe,
     DatePipe,
     MatTooltip,
+    CollapsibleComponent,
   ],
 })
 export class DialogSyncConflictComponent {
@@ -84,7 +86,7 @@ export class DialogSyncConflictComponent {
 
   shortenLamport(lamport?: number | null): string {
     if (!lamport) return '-';
-    return lamport.toString().slice(-4);
+    return lamport.toString().slice(-5);
   }
 
   getVectorClockComparison(): VectorClockComparison | null {
