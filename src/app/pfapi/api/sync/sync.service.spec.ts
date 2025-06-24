@@ -157,8 +157,13 @@ describe('SyncService', () => {
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type,prefer-arrow/prefer-arrow-functions
   function setupMetaModelCtrl() {
-    const ctrl = jasmine.createSpyObj<MetaModelCtrl>('MetaModelCtrl', ['load', 'save']);
+    const ctrl = jasmine.createSpyObj<MetaModelCtrl>('MetaModelCtrl', [
+      'load',
+      'save',
+      'loadClientId',
+    ]);
     ctrl.load.and.returnValue(Promise.resolve(createDefaultLocalMeta()));
+    ctrl.loadClientId.and.returnValue(Promise.resolve('test-client-id'));
     return ctrl;
   }
 

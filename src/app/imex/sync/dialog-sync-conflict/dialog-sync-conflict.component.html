@@ -38,6 +38,43 @@
       </td>
     </tr>
   </table>
+
+  <!-- Vector Clock Debug Information -->
+  @if (localVectorClock || remoteVectorClock) {
+    <h3>Vector Clock Debug Information</h3>
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>Vector Clock</th>
+        </tr>
+      </thead>
+      <tr>
+        <td>{{ T.F.SYNC.D_CONFLICT.REMOTE | translate }}</td>
+        <td [matTooltip]="getVectorClockString(remoteVectorClock)">
+          {{ getVectorClockString(remoteVectorClock) }}
+        </td>
+      </tr>
+      <tr>
+        <td>{{ T.F.SYNC.D_CONFLICT.LOCAL | translate }}</td>
+        <td [matTooltip]="getVectorClockString(localVectorClock)">
+          {{ getVectorClockString(localVectorClock) }}
+        </td>
+      </tr>
+      <tr>
+        <td>Last Synced</td>
+        <td [matTooltip]="getVectorClockString(lastSyncedVectorClock)">
+          {{ getVectorClockString(lastSyncedVectorClock) }}
+        </td>
+      </tr>
+      <tr>
+        <td>Comparison Result</td>
+        <td>
+          <strong>{{ getVectorClockComparisonLabel() }}</strong>
+        </td>
+      </tr>
+    </table>
+  }
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">

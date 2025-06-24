@@ -98,11 +98,27 @@ export interface MetaFileBase {
   localChangeCounter?: number;
   lastSyncedChangeCounter?: number | null;
   lastSyncedAction?: string;
+  // Vector clock fields for improved conflict detection
+  vectorClock?: VectorClock;
+  lastSyncedVectorClock?: VectorClock | null;
+}
+
+export interface VectorClock {
+  [clientId: string]: number;
 }
 
 export interface RemoteMeta extends MetaFileBase {
   mainModelData: MainModelData;
   isFullData?: boolean;
+}
+
+export interface UploadMeta
+  extends Omit<
+    RemoteMeta,
+    'lastSyncedLamport' | 'lastSyncedChangeCounter' | 'lastSyncedVectorClock'
+  > {
+  lastSyncedLamport: null;
+  lastSyncedChangeCounter?: null;
 }
 
 export interface LocalMeta extends MetaFileBase {

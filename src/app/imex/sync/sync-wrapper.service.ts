@@ -117,6 +117,17 @@ export class SyncWrapperService {
             lastSync: r.conflictData?.local.lastSyncedUpdate,
             conflictData: r.conflictData,
           });
+
+          // Enhanced debugging for vector clock issues
+          console.log('CONFLICT DEBUG - Vector Clock Analysis:', {
+            localVectorClock: r.conflictData?.local.vectorClock,
+            remoteVectorClock: r.conflictData?.remote.vectorClock,
+            localLastSyncedVectorClock: r.conflictData?.local.lastSyncedVectorClock,
+            localLamport: r.conflictData?.local.localLamport,
+            remoteLamport: r.conflictData?.remote.localLamport,
+            conflictReason: r.conflictData?.reason,
+            additional: r.conflictData?.additional,
+          });
           const res = await this._openConflictDialog$(
             r.conflictData as ConflictData,
           ).toPromise();
