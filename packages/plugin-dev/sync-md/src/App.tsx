@@ -16,6 +16,7 @@ const App: Component = () => {
   const [lastSync, setLastSync] = createSignal<Date | null>(null);
   const [taskCount, setTaskCount] = createSignal(0);
   const [preview, setPreview] = createSignal<string | null>(null);
+  const [isDesktopMode, setIsDesktopMode] = createSignal(true);
 
   onMount(async () => {
     await initialize();
@@ -23,6 +24,10 @@ const App: Component = () => {
 
   const initialize = async () => {
     try {
+      // Check if we're in desktop mode
+      const response = await sendMessageToPlugin({ type: 'checkDesktopMode' });
+      setIsDesktopMode(response?.isDesktop !== false);
+
       // Load projects
       const projectList = await PluginAPI.getAllProjects();
       setProjects(projectList);
@@ -144,14 +149,47 @@ const App: Component = () => {
   };
 
   const sendMessageToPlugin = async (message: any): Promise<any> => {
-    // For now, just simulate the response
-    // In the real implementation, this would communicate with the plugin
     console.log('Sending message to plugin:', message);
 
     return new Promise((resolve) => {
+      const messageId = Date.now().toString();
+
+      // Listen for response - try multiple event types
+      const handleResponse = (event: MessageEvent) => {
+        console.log('Received message event:', event.data);
+
+        // Check for direct response
+        if (event.data?.messageId === messageId) {
+          window.removeEventListener('message', handleResponse);
+          resolve(event.data.response || event.data);
+        }
+        // Check for plugin framework response format
+        else if (
+          event.data?.type === 'PLUGIN_MESSAGE_RESPONSE' &&
+          event.data?.messageId === messageId
+        ) {
+          window.removeEventListener('message', handleResponse);
+          resolve(event.data.response || event.data.result);
+        }
+      };
+
+      window.addEventListener('message', handleResponse);
+
+      // Send message to plugin
+      window.parent.postMessage(
+        {
+          type: 'PLUGIN_MESSAGE',
+          message,
+          messageId,
+        },
+        '*',
+      );
+
+      // Timeout after 10 seconds
       setTimeout(() => {
-        resolve({ success: true, message: 'Operation completed' });
-      }, 500);
+        window.removeEventListener('message', handleResponse);
+        resolve({ success: false, error: 'Request timeout' });
+      }, 10000);
     });
   };
 
@@ -163,6 +201,13 @@ const App: Component = () => {
   return (
     <div class="sync-md-app">
       <h2>Sync.md Configuration</h2>
+
+      <Show when={!isDesktopMode()}>
+        <div class="status error">
+          This plugin requires the desktop version of Super Productivity to access local
+          files. Please use the Electron app instead of the web version.
+        </div>
+      </Show>
 
       <div class="field-group">
         <label for="filePath">Markdown File Path</label>

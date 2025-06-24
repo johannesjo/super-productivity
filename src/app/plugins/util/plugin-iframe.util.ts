@@ -491,6 +491,36 @@ export const handlePluginMessage = async (
     }
   }
 
+  // Handle plugin message forwarding
+  if (data.type === 'PLUGIN_MESSAGE' && data.messageId) {
+    try {
+      // Forward the message to the plugin using the bridge
+      const result = await config.pluginBridge.sendMessageToPlugin(
+        config.pluginId,
+        data.message,
+      );
+
+      // Send the response back to the iframe
+      event.source?.postMessage(
+        {
+          type: 'PLUGIN_MESSAGE_RESPONSE',
+          messageId: data.messageId,
+          result,
+        },
+        '*' as any,
+      );
+    } catch (error) {
+      event.source?.postMessage(
+        {
+          type: 'PLUGIN_MESSAGE_ERROR',
+          messageId: data.messageId,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        },
+        '*' as any,
+      );
+    }
+  }
+
   // Handle plugin ready
   if (data.type === 'plugin-ready' && data.pluginId === config.pluginId) {
     console.log(`Plugin ${config.pluginId} is ready`);

@@ -6,9 +6,11 @@ export default defineConfig({
   build: {
     minify: true,
     target: 'esnext',
+    cssCodeSplit: false,
     rollupOptions: {
       output: {
         inlineDynamicImports: true,
+        manualChunks: undefined,
       },
     },
   },

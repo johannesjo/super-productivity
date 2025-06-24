@@ -222,6 +222,11 @@ export class PluginAPI implements PluginAPIInterface {
     return this._pluginBridge.openDialog(dialogCfg);
   }
 
+  async triggerSync(): Promise<void> {
+    console.log(`Plugin ${this._pluginId} requested to trigger sync`);
+    return this._pluginBridge.triggerSync();
+  }
+
   /**
    * Register a message handler for the plugin
    * This allows the plugin's iframe to communicate with the plugin code
@@ -239,7 +244,16 @@ export class PluginAPI implements PluginAPIInterface {
     if (!this._messageHandler) {
       throw new Error(`Plugin ${this._pluginId} has no message handler registered`);
     }
-    return this._messageHandler(message);
+
+    // Set plugin context before handling message
+    this._pluginBridge._setCurrentPlugin(this._pluginId, this._manifest);
+
+    try {
+      return await this._messageHandler(message);
+    } finally {
+      // Clear context after handling
+      this._pluginBridge._setCurrentPlugin('', null);
+    }
   }
 
   // Internal methods for the plugin system

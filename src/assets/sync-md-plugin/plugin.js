@@ -16,7 +16,19 @@ class SyncMdPlugin {
 
     // Register message handler for iframe communication
     if (PluginAPI?.onMessage) {
-      PluginAPI.onMessage((message) => this.handleMessage(message));
+      PluginAPI.onMessage(async (message) => {
+        console.log('[Sync.md] Received plugin message:', message);
+        try {
+          const response = await this.handleMessage(message.message || message);
+          console.log('[Sync.md] Sending response:', response);
+
+          // Return the response directly - the plugin framework will handle sending it back
+          return response;
+        } catch (error) {
+          console.error('[Sync.md] Error handling message:', error);
+          return { success: false, error: error.message };
+        }
+      });
     }
 
     // Register hooks for task changes
@@ -42,6 +54,8 @@ class SyncMdPlugin {
 
   async handleMessage(message) {
     console.log('[Sync.md] Received message:', message);
+    console.log('[Sync.md] Message type:', message?.type);
+    console.log('[Sync.md] Full message object:', JSON.stringify(message, null, 2));
 
     try {
       switch (message.type) {
@@ -71,8 +85,20 @@ class SyncMdPlugin {
 
         case 'syncNow':
           console.log('[Sync.md] Manual sync requested');
-          const syncResult = await this.performSync();
-          return { success: true, result: syncResult };
+          try {
+            const syncResult = await this.performSync();
+            if (syncResult === null) {
+              return {
+                success: false,
+                error:
+                  'Sync skipped - plugin not properly configured or already in progress',
+              };
+            }
+            return { success: true, result: syncResult };
+          } catch (error) {
+            console.error('[Sync.md] Sync error:', error);
+            return { success: false, error: error.message };
+          }
 
         default:
           console.warn('[Sync.md] Unknown message type:', message.type);
@@ -126,6 +152,25 @@ class SyncMdPlugin {
         await this.stopWatching();
       }
 
+      // Test if file exists before starting sync
+      try {
+        const testResult = await this.testFile(this.config.filePath);
+        if (!testResult.exists) {
+          console.warn(
+            '[Sync.md] File does not exist, skipping initial sync:',
+            this.config.filePath,
+          );
+          return;
+        }
+      } catch (error) {
+        console.warn(
+          '[Sync.md] Cannot access file, skipping initial sync:',
+          this.config.filePath,
+          error.message,
+        );
+        return;
+      }
+
       // Initial sync
       await this.performSync();
 
@@ -165,11 +210,28 @@ class SyncMdPlugin {
       }
     } catch (error) {
       console.error('[Sync.md] Error checking file:', error);
+      // Stop watching on persistent errors to prevent spam
+      await this.stopWatching();
     }
   }
 
   async performSync() {
-    if (this.syncInProgress || !this.config?.projectId) return;
+    if (
+      this.syncInProgress ||
+      !this.config?.projectId ||
+      !this.config?.filePath ||
+      !this.config?.enabled ||
+      !PluginAPI?.executeNodeScript
+    ) {
+      console.log('[Sync.md] Sync skipped due to:', {
+        syncInProgress: this.syncInProgress,
+        hasProjectId: !!this.config?.projectId,
+        hasFilePath: !!this.config?.filePath,
+        isEnabled: !!this.config?.enabled,
+        hasNodeScript: !!PluginAPI?.executeNodeScript,
+      });
+      return null; // Return null instead of undefined to indicate skip
+    }
 
     this.syncInProgress = true;
     try {
@@ -339,6 +401,9 @@ class SyncMdPlugin {
     if (
       this.syncInProgress ||
       !this.config?.projectId ||
+      !this.config?.filePath ||
+      !this.config?.enabled ||
+      !PluginAPI?.executeNodeScript ||
       this.config?.syncDirection === 'fileToProject'
     ) {
       return;
@@ -348,7 +413,15 @@ class SyncMdPlugin {
       console.log('[Sync.md] Task update detected, scheduling sync...');
       // Debounce to avoid too many syncs
       if (this.syncTimeout) clearTimeout(this.syncTimeout);
-      this.syncTimeout = setTimeout(() => this.performSync(), 1000);
+      this.syncTimeout = setTimeout(async () => {
+        try {
+          await this.performSync();
+        } catch (error) {
+          console.error('[Sync.md] Sync error:', error);
+          // Don't repeatedly try to sync if there's a persistent error
+          this.stopWatching();
+        }
+      }, 1000);
     }
   }
 

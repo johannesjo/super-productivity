@@ -38,6 +38,7 @@ import { IS_ELECTRON } from '../app.constants';
 import { isAllowedPluginAction } from './allowed-plugin-actions.const';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from '../t.const';
+import { SyncWrapperService } from '../imex/sync/sync-wrapper.service';
 
 /**
  * PluginBridge acts as an intermediary layer between plugins and the main application services.
@@ -65,6 +66,7 @@ export class PluginBridgeService implements OnDestroy {
   private _router = inject(Router);
   private _injector = inject(Injector);
   private _translateService = inject(TranslateService);
+  private _syncWrapperService = inject(SyncWrapperService);
   private _pluginRunner?: any; // Lazy loaded to avoid circular dependency
 
   // Track which plugin is currently making calls to prevent cross-plugin access
@@ -508,6 +510,24 @@ export class PluginBridgeService implements OnDestroy {
     } catch (error) {
       console.error('PluginBridge: Failed to get persisted plugin data:', error);
       return null;
+    }
+  }
+
+  /**
+   * Trigger a sync operation
+   */
+  async triggerSync(): Promise<void> {
+    if (!this._currentPluginId) {
+      throw new Error(this._translateService.instant(T.PLUGINS.NO_PLUGIN_CONTEXT_SYNC));
+    }
+
+    try {
+      console.log('PluginBridge: Triggering sync for plugin', this._currentPluginId);
+      await this._syncWrapperService.sync();
+      console.log('PluginBridge: Sync completed successfully');
+    } catch (error) {
+      console.error('PluginBridge: Sync failed:', error);
+      throw error;
     }
   }
 
