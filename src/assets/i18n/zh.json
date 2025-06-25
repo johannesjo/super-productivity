@@ -143,7 +143,8 @@
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "显示/隐藏任务注释和附件",
       "START_FOCUS_SESSION": "开始聚焦会话",
       "START_NEXT_FOCUS_SESSION": "开始下一个聚焦会话",
-      "WORKED_FOR": "您正在进行"
+      "WORKED_FOR": "您正在进行",
+      "CANCEL_FOCUS_SESSION": "取消聚焦会话"
     },
     "GITEA": {
       "ISSUE_CONTENT": {

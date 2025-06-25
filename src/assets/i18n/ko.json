@@ -220,7 +220,8 @@
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "작업 노트 및 첨부 파일 표시/숨기기",
       "START_FOCUS_SESSION": "포커스 세션 시작",
       "START_NEXT_FOCUS_SESSION": "다음 포커스 세션 시작",
-      "WORKED_FOR": "근무처"
+      "WORKED_FOR": "근무처",
+      "CANCEL_FOCUS_SESSION": "포커스 세션 취소"
     },
     "GITEA": {
       "DIALOG_INITIAL": {

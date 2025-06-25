@@ -220,7 +220,8 @@
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Vis/skjul oppgavenotater og vedlegg",
       "START_FOCUS_SESSION": "Start fokusøkten",
       "START_NEXT_FOCUS_SESSION": "Start neste fokusøkt",
-      "WORKED_FOR": "Du jobbet for"
+      "WORKED_FOR": "Du jobbet for",
+      "CANCEL_FOCUS_SESSION": "Avlys fokusøkten"
     },
     "GITEA": {
       "DIALOG_INITIAL": {

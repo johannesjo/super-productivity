@@ -151,7 +151,8 @@
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Mostrar/ocultar notas de tarefas e anexos",
       "START_FOCUS_SESSION": "Iniciar sessão de foco",
       "START_NEXT_FOCUS_SESSION": "Iniciar próxima sessão de foco",
-      "WORKED_FOR": "Você trabalhou por"
+      "WORKED_FOR": "Você trabalhou por",
+      "CANCEL_FOCUS_SESSION": "Cancelar sessão de foco"
     },
     "GITEA": {
       "DIALOG_INITIAL": {

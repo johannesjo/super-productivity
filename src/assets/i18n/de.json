@@ -220,7 +220,8 @@
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Aufgabennotizen und Anhänge ein-/ausblenden",
       "START_FOCUS_SESSION": "Starten Sie die Fokussitzung",
       "START_NEXT_FOCUS_SESSION": "Starten Sie die nächste Fokussitzung",
-      "WORKED_FOR": "Sie arbeiten bereits seit"
+      "WORKED_FOR": "Sie arbeiten bereits seit",
+      "CANCEL_FOCUS_SESSION": "Fokussitzung abbrechen"
     },
     "GITEA": {
       "DIALOG_INITIAL": {

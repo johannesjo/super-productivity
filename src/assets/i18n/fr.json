@@ -220,7 +220,8 @@
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Afficher/masquer les notes et pièces jointes de la tâche",
       "START_FOCUS_SESSION": "Débuter la session de concentration",
       "START_NEXT_FOCUS_SESSION": "Débuter la prochaine session de concentration",
-      "WORKED_FOR": "Vous avez travaillé pendant"
+      "WORKED_FOR": "Vous avez travaillé pendant",
+      "CANCEL_FOCUS_SESSION": "Annuler la session de concentration"
     },
     "GITEA": {
       "DIALOG_INITIAL": {

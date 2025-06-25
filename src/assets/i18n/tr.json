@@ -220,7 +220,8 @@
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Görev notlarını ve eklerini göster/gizle",
       "START_FOCUS_SESSION": "Odaklanma Oturumunu Başlat",
       "START_NEXT_FOCUS_SESSION": "Sonraki Odak Oturumunu başlat",
-      "WORKED_FOR": "Şunun için çalıştın"
+      "WORKED_FOR": "Şunun için çalıştın",
+      "CANCEL_FOCUS_SESSION": "Odaklanma Oturumunu İptal Et"
     },
     "GITEA": {
       "DIALOG_INITIAL": {
