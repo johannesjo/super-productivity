@@ -15,11 +15,12 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { DatePipe } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
 import {
-  vectorClockToString,
   compareVectorClocks,
   VectorClockComparison,
+  vectorClockToString,
 } from '../../../pfapi/api/util/vector-clock';
 import { CollapsibleComponent } from '../../../ui/collapsible/collapsible.component';
+import { MatTable } from '@angular/material/table';
 
 @Component({
   selector: 'dialog-sync-conflict',
@@ -36,6 +37,7 @@ import { CollapsibleComponent } from '../../../ui/collapsible/collapsible.compon
     DatePipe,
     MatTooltip,
     CollapsibleComponent,
+    MatTable,
   ],
 })
 export class DialogSyncConflictComponent {

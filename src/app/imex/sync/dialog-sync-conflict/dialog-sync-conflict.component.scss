@@ -13,6 +13,14 @@ table + table {
   margin-top: 20px;
 }
 
+td {
+  text-align: center;
+
+  &:first-child {
+    text-align: left;
+  }
+}
+
 :host ::ng-deep .collapsible-title {
   font-weight: bold;
 }

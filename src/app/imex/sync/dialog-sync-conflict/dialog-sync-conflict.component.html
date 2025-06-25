@@ -3,66 +3,59 @@
 <mat-dialog-content>
   <div [innerHTML]="T.F.SYNC.D_CONFLICT.TEXT | translate"></div>
 
-  <table>
+  <table mat-table>
     <thead>
       <tr>
         <th></th>
-        <th colspan="2">{{ T.F.SYNC.D_CONFLICT.TIMESTAMP | translate }}</th>
         <th>{{ T.F.SYNC.D_CONFLICT.LAMPORT_CLOCK | translate }}</th>
+        <th>Last Action</th>
+        <th colspan="2">{{ T.F.SYNC.D_CONFLICT.TIMESTAMP | translate }}</th>
       </tr>
     </thead>
-    <tr
-      [class.isHighlight]="isHighlightRemote"
-      [matTooltip]="remoteLastUpdateAction || ''"
-    >
+    <tr [class.isHighlight]="isHighlightRemote">
       <td>{{ T.F.SYNC.D_CONFLICT.REMOTE | translate }}</td>
+      <td [matTooltip]="remoteLamport">{{ shortenLamport(remoteLamport) }}</td>
+      <td>{{ remoteLastUpdateAction || '?' }}</td>
       <td>{{ remoteDate | date: 'shortDate' }}</td>
       <td>{{ remoteTime | date: 'shortTime' }}</td>
-      <td [matTooltip]="remoteLamport">{{ shortenLamport(remoteLamport) }}</td>
     </tr>
-    <tr
-      [class.isHighlight]="isHighlightLocal"
-      [matTooltip]="localLastUpdateAction || ''"
-    >
+    <tr [class.isHighlight]="isHighlightLocal">
       <td>{{ T.F.SYNC.D_CONFLICT.LOCAL | translate }}</td>
+      <td [matTooltip]="localLamport">{{ shortenLamport(localLamport) }}</td>
+      <td>{{ localLastUpdateAction || '?' }}</td>
       <td>{{ localDate | date: 'shortDate' }}</td>
       <td>{{ localTime | date: 'shortTime' }}</td>
-      <td [matTooltip]="localLamport">{{ shortenLamport(localLamport) }}</td>
     </tr>
-    <tr [matTooltip]="lastSyncedAction || ''">
+    <tr>
       <td>{{ T.F.SYNC.D_CONFLICT.LOCAL_REMOTE | translate }}</td>
-      <td>{{ lastDate ? (lastDate | date: 'shortDate') : 'Never' }}</td>
-      <td>{{ lastTime ? (lastTime | date: 'shortTime') : '-' }}</td>
       <td [matTooltip]="lastSyncedLamport">
         {{ shortenLamport(lastSyncedLamport) ?? '-' }}
       </td>
+      <td>{{ lastSyncedAction || '?' }}</td>
+      <td>{{ lastDate ? (lastDate | date: 'shortDate') : 'Never' }}</td>
+      <td>{{ lastTime ? (lastTime | date: 'shortTime') : '-' }}</td>
     </tr>
   </table>
 
   <!-- Vector Clock Debug Information -->
   @if (localVectorClock || remoteVectorClock) {
     <collapsible
+      [isIconBefore]="true"
       title="Vector Clock Info"
       style="margin-top: 24px"
     >
       <table>
         <tr>
           <td>{{ T.F.SYNC.D_CONFLICT.REMOTE | translate }}</td>
-          <td [matTooltip]="getVectorClockString(remoteVectorClock)">
-            {{ getVectorClockString(remoteVectorClock) }}
-          </td>
+          <td>{{ getVectorClockString(remoteVectorClock) }}</td>
         </tr>
         <tr>
           <td>{{ T.F.SYNC.D_CONFLICT.LOCAL | translate }}</td>
-          <td [matTooltip]="getVectorClockString(localVectorClock)">
-            {{ getVectorClockString(localVectorClock) }}
-          </td>
+          <td>{{ getVectorClockString(localVectorClock) }}</td>
         </tr>
         <tr>
           <td>Last Synced</td>
-          <td [matTooltip]="getVectorClockString(lastSyncedVectorClock)">
-            {{ getVectorClockString(lastSyncedVectorClock) }}
-          </td>
+          <td>{{ getVectorClockString(lastSyncedVectorClock) }}</td>
         </tr>
         <tr>
           <td>Comparison Result</td>
@@ -79,14 +72,13 @@
   <div class="wrap-buttons">
     <button
       (click)="close()"
-      color="primary"
       mat-button
     >
       {{ T.G.CANCEL | translate }}
     </button>
     <button
       (click)="close('USE_REMOTE')"
-      color="primary"
+      [color]="isHighlightRemote ? 'primary' : ''"
       mat-stroked-button
     >
       <mat-icon>file_download</mat-icon>
@@ -94,7 +86,7 @@
     </button>
     <button
       (click)="close('USE_LOCAL')"
-      color="primary"
+      [color]="isHighlightLocal ? 'primary' : ''"
       mat-stroked-button
     >
       <mat-icon>file_upload</mat-icon>
