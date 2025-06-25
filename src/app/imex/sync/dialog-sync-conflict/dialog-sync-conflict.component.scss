@@ -13,11 +13,18 @@ table + table {
   margin-top: 20px;
 }
 
-td {
+td,
+th {
+  padding: 2px 8px;
   text-align: center;
 
   &:first-child {
     text-align: left;
+    padding-left: 0;
+  }
+
+  &:last-child {
+    padding-right: 0;
   }
 }
 

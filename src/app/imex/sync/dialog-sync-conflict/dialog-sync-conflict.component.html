@@ -75,6 +75,7 @@
 
     <!-- Vector Clock Table -->
     @if (localVectorClock || remoteVectorClock) {
+      <h3>Vector Clock</h3>
       <table>
         <tr>
           <td>{{ T.F.SYNC.D_CONFLICT.REMOTE | translate }}</td>
@@ -91,7 +92,7 @@
         <tr>
           <td>{{ T.F.SYNC.D_CONFLICT.COMPARISON_RESULT | translate }}</td>
           <td>
-            <strong>{{ getVectorClockComparisonLabel() }}</strong>
+            <strong>{{ getVectorClockComparisonLabel() | translate }}</strong>
           </td>
         </tr>
       </table>
