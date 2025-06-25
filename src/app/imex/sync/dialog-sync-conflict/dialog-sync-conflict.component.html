@@ -3,26 +3,30 @@
 <mat-dialog-content>
   <div [innerHTML]="T.F.SYNC.D_CONFLICT.TEXT | translate"></div>
 
-  <table mat-table>
+  <table>
     <thead>
       <tr>
         <th></th>
         <th>{{ T.F.SYNC.D_CONFLICT.LAMPORT_CLOCK | translate }}</th>
-        <th>Last Action</th>
+        <th>Last Write</th>
         <th colspan="2">{{ T.F.SYNC.D_CONFLICT.TIMESTAMP | translate }}</th>
       </tr>
     </thead>
     <tr [class.isHighlight]="isHighlightRemote">
       <td>{{ T.F.SYNC.D_CONFLICT.REMOTE | translate }}</td>
       <td [matTooltip]="remoteLamport">{{ shortenLamport(remoteLamport) }}</td>
-      <td>{{ remoteLastUpdateAction || '?' }}</td>
+      <td [matTooltip]="remoteLastUpdateAction">
+        {{ shortenAction(remoteLastUpdateAction || '?') }}
+      </td>
       <td>{{ remoteDate | date: 'shortDate' }}</td>
       <td>{{ remoteTime | date: 'shortTime' }}</td>
     </tr>
     <tr [class.isHighlight]="isHighlightLocal">
       <td>{{ T.F.SYNC.D_CONFLICT.LOCAL | translate }}</td>
       <td [matTooltip]="localLamport">{{ shortenLamport(localLamport) }}</td>
-      <td>{{ localLastUpdateAction || '?' }}</td>
+      <td [matTooltip]="localLastUpdateAction">
+        {{ shortenAction(localLastUpdateAction || '?') }}
+      </td>
       <td>{{ localDate | date: 'shortDate' }}</td>
       <td>{{ localTime | date: 'shortTime' }}</td>
     </tr>
@@ -31,7 +35,7 @@
       <td [matTooltip]="lastSyncedLamport">
         {{ shortenLamport(lastSyncedLamport) ?? '-' }}
       </td>
-      <td>{{ lastSyncedAction || '?' }}</td>
+      <td [matTooltip]="lastSyncedAction"></td>
       <td>{{ lastDate ? (lastDate | date: 'shortDate') : 'Never' }}</td>
       <td>{{ lastTime ? (lastTime | date: 'shortTime') : '-' }}</td>
     </tr>

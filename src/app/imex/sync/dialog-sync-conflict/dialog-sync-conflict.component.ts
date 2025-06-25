@@ -91,6 +91,11 @@ export class DialogSyncConflictComponent {
     return lamport.toString().slice(-5);
   }
 
+  shortenAction(actionStr?: string | null): string {
+    if (!actionStr) return '?';
+    return actionStr.trim().split(/\s+/)[0];
+  }
+
   getVectorClockComparison(): VectorClockComparison | null {
     if (!this.localVectorClock || !this.remoteVectorClock) {
       return null;
