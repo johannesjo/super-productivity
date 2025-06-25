@@ -949,7 +949,7 @@
         "TITLE": "Sync: Conflicting Data",
         "USE_LOCAL": "Keep local",
         "USE_REMOTE": "Keep remote",
-        "VECTOR_CLOCK_INFO": "Vector Clock Info",
+        "ADDITIONAL_INFO": "Additional Info",
         "VECTOR_COMPARISON_CONCURRENT": "Concurrent (True Conflict)",
         "VECTOR_COMPARISON_EQUAL": "Equal",
         "VECTOR_COMPARISON_LOCAL_GREATER": "Local > Remote",
