@@ -934,17 +934,26 @@
         "TITLE": "Login: {{provider}}"
       },
       "D_CONFLICT": {
+        "COMPARISON_RESULT": "Comparison Result",
         "LAMPORT_CLOCK": "Revision",
         "LAST_CHANGE": "Last Change:",
         "LAST_SYNC": "Last Sync:",
+        "LAST_SYNCED": "Last Synced",
+        "LAST_WRITE": "Last Write",
         "LOCAL": "Local",
         "LOCAL_REMOTE": "Local -> Remote",
+        "NEVER": "Never",
         "REMOTE": "Remote",
         "TEXT": "<p>Update from remote. Both local and remote data seem to be modified.</p>",
         "TIMESTAMP": "Timestamp",
         "TITLE": "Sync: Conflicting Data",
         "USE_LOCAL": "Keep local",
-        "USE_REMOTE": "Keep remote"
+        "USE_REMOTE": "Keep remote",
+        "VECTOR_CLOCK_INFO": "Vector Clock Info",
+        "VECTOR_COMPARISON_CONCURRENT": "Concurrent (True Conflict)",
+        "VECTOR_COMPARISON_EQUAL": "Equal",
+        "VECTOR_COMPARISON_LOCAL_GREATER": "Local > Remote",
+        "VECTOR_COMPARISON_LOCAL_LESS": "Local < Remote"
       },
       "D_DECRYPT_ERROR": {
         "BTN_OVER_WRITE_REMOTE": "Change & Overwrite Remote",

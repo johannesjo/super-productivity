@@ -112,13 +112,13 @@ export class DialogSyncConflictComponent {
     if (!this.vectorClockComparison) return '-';
     switch (this.vectorClockComparison) {
       case VectorClockComparison.EQUAL:
-        return 'Equal';
+        return this.T.F.SYNC.D_CONFLICT.VECTOR_COMPARISON_EQUAL;
       case VectorClockComparison.LESS_THAN:
-        return 'Local < Remote';
+        return this.T.F.SYNC.D_CONFLICT.VECTOR_COMPARISON_LOCAL_LESS;
       case VectorClockComparison.GREATER_THAN:
-        return 'Local > Remote';
+        return this.T.F.SYNC.D_CONFLICT.VECTOR_COMPARISON_LOCAL_GREATER;
       case VectorClockComparison.CONCURRENT:
-        return 'Concurrent (True Conflict)';
+        return this.T.F.SYNC.D_CONFLICT.VECTOR_COMPARISON_CONCURRENT;
       default:
         return '-';
     }

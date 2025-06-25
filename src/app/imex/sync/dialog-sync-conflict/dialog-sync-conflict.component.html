@@ -8,7 +8,7 @@
       <tr>
         <th></th>
         <th>{{ T.F.SYNC.D_CONFLICT.LAMPORT_CLOCK | translate }}</th>
-        <th>Last Write</th>
+        <th>{{ T.F.SYNC.D_CONFLICT.LAST_WRITE | translate }}</th>
         <th colspan="2">{{ T.F.SYNC.D_CONFLICT.TIMESTAMP | translate }}</th>
       </tr>
     </thead>
@@ -36,7 +36,13 @@
         {{ shortenLamport(lastSyncedLamport) ?? '-' }}
       </td>
       <td [matTooltip]="lastSyncedAction"></td>
-      <td>{{ lastDate ? (lastDate | date: 'shortDate') : 'Never' }}</td>
+      <td>
+        {{
+          lastDate
+            ? (lastDate | date: 'shortDate')
+            : (T.F.SYNC.D_CONFLICT.NEVER | translate)
+        }}
+      </td>
       <td>{{ lastTime ? (lastTime | date: 'shortTime') : '-' }}</td>
     </tr>
   </table>
@@ -45,7 +51,7 @@
   @if (localVectorClock || remoteVectorClock) {
     <collapsible
       [isIconBefore]="true"
-      title="Vector Clock Info"
+      [title]="T.F.SYNC.D_CONFLICT.VECTOR_CLOCK_INFO | translate"
       style="margin-top: 24px"
     >
       <table>
@@ -58,11 +64,11 @@
           <td>{{ getVectorClockString(localVectorClock) }}</td>
         </tr>
         <tr>
-          <td>Last Synced</td>
+          <td>{{ T.F.SYNC.D_CONFLICT.LAST_SYNCED | translate }}</td>
           <td>{{ getVectorClockString(lastSyncedVectorClock) }}</td>
         </tr>
         <tr>
-          <td>Comparison Result</td>
+          <td>{{ T.F.SYNC.D_CONFLICT.COMPARISON_RESULT | translate }}</td>
           <td>
             <strong>{{ getVectorClockComparisonLabel() }}</strong>
           </td>
