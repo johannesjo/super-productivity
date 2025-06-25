@@ -613,6 +613,7 @@ export class SyncService<const MD extends ModelCfgs> {
       const uploadMeta: UploadMeta = {
         revMap: local.revMap,
         lastUpdate: local.lastUpdate,
+        lastUpdateAction: local.lastUpdateAction,
         crossModelVersion: local.crossModelVersion,
         mainModelData,
         localLamport: local.localLamport || 0,
@@ -725,6 +726,7 @@ export class SyncService<const MD extends ModelCfgs> {
     const uploadMeta: UploadMeta = {
       revMap: validatedRevMap,
       lastUpdate: local.lastUpdate,
+      lastUpdateAction: local.lastUpdateAction,
       crossModelVersion: local.crossModelVersion,
       mainModelData:
         await this._modelSyncService.getMainFileModelDataForUpload(completeData),
