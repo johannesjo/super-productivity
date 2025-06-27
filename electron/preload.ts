@@ -1,4 +1,4 @@
-import { ipcRenderer, IpcRendererEvent, webFrame } from 'electron';
+import { ipcRenderer, IpcRendererEvent, webFrame, contextBridge } from 'electron';
 import { ElectronAPI } from './electronAPI.d';
 import { IPCEventValue } from './shared-with-frontend/ipc-events.const';
 import { LocalBackupMeta } from '../src/app/imex/local-backup/local-backup.model';
@@ -125,5 +125,5 @@ const ea: ElectronAPI = {
     ) as Promise<PluginNodeScriptResult>,
 };
 
-// Expose ea to window for ipc-event.ts
-(window as any).ea = ea;
+// Expose ea to window for ipc-event.ts using contextBridge for context isolation
+contextBridge.exposeInMainWorld('ea', ea);
