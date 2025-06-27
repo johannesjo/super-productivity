@@ -137,7 +137,7 @@ export const createWindow = ({
     : IS_DEV
       ? 'http://localhost:4200'
       : format({
-          pathname: normalize(join(__dirname, '../dist/browser/index.html')),
+          pathname: normalize(join(__dirname, '../.tmp/angular-dist/browser/index.html')),
           protocol: 'file:',
           slashes: true,
         });

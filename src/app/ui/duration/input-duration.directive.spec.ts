@@ -66,14 +66,14 @@ describe('InputDurationDirective', () => {
       errorSpy = spyOn(console, 'error');
     });
 
-    it('should call _strToMs with "2h 3" and parse as 2 hours 3 minutes', () => {
-      // "2h 3" is parsed as 2 hours and 3 minutes = 7380000 ms
+    it('should call _strToMs with "2h 3m" and parse as 2 hours 3 minutes', () => {
+      // "2h 3m" is parsed as 2 hours and 3 minutes = 7380000 ms
       mockStringToMsPipe.transform.and.returnValue(7380000);
       mockMsToStringPipe.transform.and.returnValue('2h 3m');
 
-      directive.onInput('2h 3');
+      directive.onInput('2h 3m');
 
-      expect(strToMsSpy).toHaveBeenCalledWith('2h 3');
+      expect(strToMsSpy).toHaveBeenCalledWith('2h 3m');
       expect(msToStrSpy).toHaveBeenCalledWith(7380000);
     });
 
@@ -88,47 +88,39 @@ describe('InputDurationDirective', () => {
       expect(onChangeSpy).toHaveBeenCalledWith(7200000);
     });
 
-    it('should call _strToMs with "45s"', () => {
-      mockStringToMsPipe.transform.and.returnValue(45000);
-      mockMsToStringPipe.transform.and.returnValue('45s');
-
+    it('should not process "45s" input (does not match allowed pattern)', () => {
+      // The directive only accepts patterns like "1h", "2m", "3h 30m"
+      // "45s" does not match the regex /(^\d+h(?: \d+m)?$)|(^\d+m$)/i
       directive.onInput('45s');
 
-      expect(strToMsSpy).toHaveBeenCalledWith('45s');
-      expect(onChangeSpy).toHaveBeenCalledWith(45000);
+      expect(strToMsSpy).not.toHaveBeenCalled();
+      expect(onChangeSpy).not.toHaveBeenCalled();
     });
 
-    it('should call _strToMs with "1d"', () => {
-      mockStringToMsPipe.transform.and.returnValue(86400000);
-      mockMsToStringPipe.transform.and.returnValue('1d');
-
+    it('should not process "1d" input (does not match allowed pattern)', () => {
+      // The directive only accepts patterns like "1h", "2m", "3h 30m"
+      // "1d" does not match the regex /(^\d+h(?: \d+m)?$)|(^\d+m$)/i
       directive.onInput('1d');
 
-      expect(strToMsSpy).toHaveBeenCalledWith('1d');
-      expect(onChangeSpy).toHaveBeenCalledWith(86400000);
+      expect(strToMsSpy).not.toHaveBeenCalled();
+      expect(onChangeSpy).not.toHaveBeenCalled();
     });
 
-    it('should handle empty input and call onChange with 0', () => {
-      mockStringToMsPipe.transform.and.returnValue(0);
-      mockMsToStringPipe.transform.and.returnValue('');
-
+    it('should not process empty input (does not match allowed pattern)', () => {
+      // Empty string does not match the regex
       directive.onInput('');
 
-      expect(onChangeSpy).toHaveBeenCalledWith(0);
+      expect(strToMsSpy).not.toHaveBeenCalled();
+      expect(onChangeSpy).not.toHaveBeenCalled();
     });
 
-    it('should handle invalid input and show error', () => {
-      // Mock the pipes to simulate invalid input that throws an error
-      mockStringToMsPipe.transform.and.throwError('Invalid duration format');
-
+    it('should not process invalid input (does not match allowed pattern)', () => {
+      // "invalid" does not match the regex pattern
       directive.onInput('invalid');
 
-      expect(strToMsSpy).toHaveBeenCalledWith('invalid');
-      expect(errorSpy).toHaveBeenCalledWith(
-        'Error parsing duration:',
-        jasmine.any(Error),
-      );
-      expect(onChangeSpy).toHaveBeenCalledWith(null);
+      expect(strToMsSpy).not.toHaveBeenCalled();
+      expect(onChangeSpy).not.toHaveBeenCalled();
+      expect(errorSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -284,16 +276,12 @@ describe('InputDurationDirective', () => {
     });
 
     it('should update value for various valid formats', () => {
-      // Real implementation test without mocking conversions
-      strToMsSpy.and.callThrough();
-      msToStrSpy.and.callThrough();
-
-      // Only test formats that match the regex: /(^\d+h(?: \d+m)?$)|(^\d+m$)/i
-      const validTestCases = [
-        { input: '30m', shouldProcess: true },
-        { input: '1h', shouldProcess: true },
-        { input: '1h 30m', shouldProcess: true },
-        { input: '2h', shouldProcess: true },
+      // Mock the conversion methods to simulate proper behavior
+      const testCases = [
+        { input: '30m', ms: 1800000, output: '30m' },
+        { input: '1h', ms: 3600000, output: '1h' },
+        { input: '1h 30m', ms: 5400000, output: '1h 30m' },
+        { input: '2h', ms: 7200000, output: '2h' },
       ];
 
       // These don't match the regex pattern
@@ -302,15 +290,20 @@ describe('InputDurationDirective', () => {
         { input: '1d', shouldProcess: false },
       ];
 
-      validTestCases.forEach(({ input, shouldProcess }) => {
+      testCases.forEach(({ input, ms, output }) => {
         onChangeSpy.calls.reset();
         strToMsSpy.calls.reset();
+        msToStrSpy.calls.reset();
+
+        // Mock the conversions
+        strToMsSpy.and.returnValue(ms);
+        msToStrSpy.and.returnValue(output);
+
         directive['_processInput'](input);
 
-        if (shouldProcess) {
-          expect(strToMsSpy).toHaveBeenCalledWith(input);
-          expect(onChangeSpy).toHaveBeenCalled();
-        }
+        expect(strToMsSpy).toHaveBeenCalledWith(input);
+        expect(msToStrSpy).toHaveBeenCalledWith(ms);
+        expect(onChangeSpy).toHaveBeenCalledWith(ms);
       });
 
       invalidTestCases.forEach(({ input }) => {

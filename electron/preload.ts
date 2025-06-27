@@ -1,12 +1,12 @@
-import { contextBridge, ipcRenderer, IpcRendererEvent, webFrame } from 'electron';
+import { ipcRenderer, IpcRendererEvent, webFrame } from 'electron';
 import { ElectronAPI } from './electronAPI.d';
 import { IPCEventValue } from './shared-with-frontend/ipc-events.const';
 import { LocalBackupMeta } from '../src/app/imex/local-backup/local-backup.model';
 import { SyncGetRevResult } from '../src/app/imex/sync/sync.model';
 import {
+  PluginManifest,
   PluginNodeScriptRequest,
   PluginNodeScriptResult,
-  PluginManifest,
 } from '../packages/plugin-api/src/types';
 
 const _send: (channel: IPCEventValue, ...args: unknown[]) => void = (channel, ...args) =>
@@ -16,6 +16,7 @@ const _invoke: (channel: IPCEventValue, ...args: unknown[]) => Promise<unknown> 
   ...args
 ) => ipcRenderer.invoke(channel, ...args);
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const ea: ElectronAPI = {
   on: (
     channel: string,
