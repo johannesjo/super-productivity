@@ -11,7 +11,7 @@ files:
 #afterSign: ./tools/notarizeMacApp.js
 
 directories:
-  output: './.tmp/deploy'
+  output: './.tmp/app-builds'
 
 win:
   target:

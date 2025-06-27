@@ -81,7 +81,7 @@ jobs:
 
             ### Installation
             - **Windows**: Download the `.exe` installer
-            - **macOS**: Download the `.dmg` file  
+            - **macOS**: Download the `.dmg` file
             - **Linux**: Download the `.AppImage` file or install via Snap Store
             - **Android**: Download the `.apk` file or get it from Google Play Store
 
@@ -91,7 +91,7 @@ jobs:
             If you encounter any issues, please report them on our [GitHub Issues](https://github.com/johannesjo/super-productivity/issues) page.
 
       # rename to possibly fix release issue
-      - run: find ./app-builds -type f -name '*.snap' -exec sh -c 'x="{}"; mv "$x" "app-builds/sp.snap"' \;
+      - run: find ./.tmp/app-builds -type f -name '*.snap' -exec sh -c 'x="{}"; mv "$x" ".tmp/app-builds/sp.snap"' \;
       # Release to edge if no tag and to candidate if tag
       - #otherwise it would be executed twice
         if: false == startsWith(github.ref, 'refs/tags/v')
@@ -99,7 +99,7 @@ jobs:
         with:
           max_attempts: 2
           timeout_minutes: 11
-          command: snapcraft push app-builds/sp.snap --release edge
+          command: snapcraft push .tmp/app-builds/sp.snap --release edge
       #      - run: snapcraft push app-builds/sp.snap --release candidate
       #        if: startsWith(github.ref, 'refs/tags/v')
   #      - run: snapcraft promote superproductivity --from-channel latest/edge --to-channel latest/candidate --yes
@@ -191,7 +191,7 @@ jobs:
 
             ### Installation
             - **Windows**: Download the `.exe` installer
-            - **macOS**: Download the `.dmg` file  
+            - **macOS**: Download the `.dmg` file
             - **Linux**: Download the `.AppImage` file or install via Snap Store
             - **Android**: Download the `.apk` file or get it from Google Play Store
 
@@ -272,7 +272,7 @@ jobs:
 
             ### Installation
             - **Windows**: Download the `.exe` installer
-            - **macOS**: Download the `.dmg` file  
+            - **macOS**: Download the `.dmg` file
             - **Linux**: Download the `.AppImage` file or install via Snap Store
             - **Android**: Download the `.apk` file or get it from Google Play Store
 
