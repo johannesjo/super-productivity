@@ -10,38 +10,42 @@ module.exports = {
       (name: string) => {
         // Find the plugin item (now in mat-card elements)
         const items = Array.from(document.querySelectorAll('plugin-management mat-card'));
-        const pluginItem = items.find((item) => item.textContent?.includes(name));
+
+        // Find by card title or card content
+        const pluginItem = items.find((item) => {
+          const cardTitle = item.querySelector('mat-card-title')?.textContent || '';
+          const cardContent = item.textContent || '';
+          return cardTitle.includes(name) || cardContent.includes(name);
+        });
 
         if (!pluginItem) {
           return {
             found: false,
             debug: {
               totalCards: items.length,
-              cardTexts: items.map((item) => item.textContent?.trim().substring(0, 50)),
+              cardTitles: items.map(
+                (item) =>
+                  item.querySelector('mat-card-title')?.textContent?.trim() || 'No title',
+              ),
               searchName: name,
             },
           };
         }
 
-        // Check if toggle is checked - use button for new Angular Material switches
+        // Check if toggle is checked - Angular Material slide toggle
         const toggleInput = pluginItem.querySelector(
-          '.mat-mdc-slide-toggle input',
+          'mat-slide-toggle input',
         ) as HTMLInputElement;
-        const toggleButton = pluginItem.querySelector(
-          '.mat-mdc-slide-toggle button[role="switch"]',
-        ) as HTMLButtonElement;
 
         let enabled = false;
         if (toggleInput) {
           enabled = toggleInput.checked;
-        } else if (toggleButton) {
-          enabled = toggleButton.getAttribute('aria-checked') === 'true';
         }
 
         return {
           found: true,
           enabled,
-          name: pluginItem.textContent?.trim(),
+          name: pluginItem.querySelector('mat-card-title')?.textContent?.trim() || '',
         };
       },
       [pluginName],

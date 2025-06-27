@@ -16,15 +16,19 @@ module.exports = {
       .execute(
         () => {
           const pluginMgmt = document.querySelector('plugin-management');
-          const matList = pluginMgmt ? pluginMgmt.querySelector('mat-list') : null;
-          const listItems = matList ? matList.querySelectorAll('mat-list-item') : [];
+          const matCards = pluginMgmt ? pluginMgmt.querySelectorAll('mat-card') : [];
+
+          // Filter out warning card
+          const pluginCards = Array.from(matCards).filter((card) => {
+            return card.querySelector('mat-slide-toggle') !== null;
+          });
 
           return {
             pluginMgmtExists: !!pluginMgmt,
-            matListExists: !!matList,
-            listItemCount: listItems.length,
-            listItemsText: Array.from(listItems).map(
-              (item) => item.textContent?.trim() || '',
+            totalCardCount: matCards.length,
+            pluginCardCount: pluginCards.length,
+            pluginCardTexts: pluginCards.map(
+              (card) => card.querySelector('mat-card-title')?.textContent?.trim() || '',
             ),
           };
         },
@@ -34,21 +38,19 @@ module.exports = {
         },
       )
       .pause(1000)
-      // Try to find and enable the hello-world plugin
+      // Try to find and enable the API Test Plugin (which exists by default)
       .execute(
         () => {
-          const pluginItems = document.querySelectorAll(
-            'plugin-management mat-list-item',
-          );
-          let foundHelloWorld = false;
+          const pluginCards = document.querySelectorAll('plugin-management mat-card');
+          let foundApiTestPlugin = false;
           let toggleClicked = false;
 
-          for (const item of Array.from(pluginItems)) {
-            const text = item.textContent || '';
-            if (text.includes('Hello World') || text.includes('hello-world')) {
-              foundHelloWorld = true;
-              const toggle = item.querySelector(
-                '.mat-mdc-slide-toggle input',
+          for (const card of Array.from(pluginCards)) {
+            const title = card.querySelector('mat-card-title')?.textContent || '';
+            if (title.includes('API Test Plugin') || title.includes('api-test-plugin')) {
+              foundApiTestPlugin = true;
+              const toggle = card.querySelector(
+                'mat-slide-toggle input',
               ) as HTMLInputElement;
               if (toggle && !toggle.checked) {
                 toggle.click();
@@ -59,14 +61,18 @@ module.exports = {
           }
 
           return {
-            totalPluginItems: pluginItems.length,
-            foundHelloWorld,
+            totalPluginCards: pluginCards.length,
+            foundApiTestPlugin,
             toggleClicked,
           };
         },
         [],
         (result) => {
           console.log('Plugin enablement result:', result.value);
+          browser.assert.ok(
+            (result.value as any).foundApiTestPlugin,
+            'API Test Plugin should be found',
+          );
         },
       )
       .pause(3000) // Wait for plugin to initialize

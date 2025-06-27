@@ -86,8 +86,8 @@ module.exports = {
           const pluginCard = items.find((item) => item.textContent?.includes(pluginName));
           if (pluginCard) {
             const toggle = pluginCard.querySelector(
-              '.mat-mdc-slide-toggle button[role="switch"]',
-            ) as HTMLElement;
+              'mat-slide-toggle input',
+            ) as HTMLInputElement;
             if (toggle) {
               toggle.click();
               return true;
@@ -117,8 +117,8 @@ module.exports = {
           const pluginCard = items.find((item) => item.textContent?.includes(pluginId));
           if (pluginCard) {
             const toggle = pluginCard.querySelector(
-              '.mat-mdc-slide-toggle button[role="switch"]',
-            ) as HTMLElement;
+              'mat-slide-toggle input',
+            ) as HTMLInputElement;
             if (toggle) {
               toggle.click();
               return true;
@@ -144,8 +144,8 @@ module.exports = {
           const pluginCard = items.find((item) => item.textContent?.includes(pluginId));
           if (pluginCard) {
             const toggle = pluginCard.querySelector(
-              '.mat-mdc-slide-toggle button[role="switch"]',
-            ) as HTMLElement;
+              'mat-slide-toggle input',
+            ) as HTMLInputElement;
             if (toggle) {
               toggle.click();
               return true;

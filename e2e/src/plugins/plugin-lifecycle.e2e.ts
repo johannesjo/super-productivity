@@ -10,8 +10,8 @@ const { SIDENAV } = cssSelectors;
 const SETTINGS_BTN = `${SIDENAV} .tour-settingsMenuBtn`;
 const PLUGIN_TAB = 'mat-tab-link:contains("Plugins")';
 const PLUGIN_CARD = 'plugin-management mat-card.ng-star-inserted';
-const HELLO_WORLD_PLUGIN = `${PLUGIN_CARD}`;
-const PLUGIN_TOGGLE = `${HELLO_WORLD_PLUGIN} .mat-mdc-slide-toggle button[role="switch"]`;
+const API_TEST_PLUGIN = `${PLUGIN_CARD}`;
+const PLUGIN_TOGGLE = `${API_TEST_PLUGIN} mat-slide-toggle input`;
 const PLUGIN_MENU = `${SIDENAV} plugin-menu`;
 const PLUGIN_MENU_ITEM = `${PLUGIN_MENU} button`;
 const SNACK_BAR = 'mat-snack-bar';
@@ -27,26 +27,16 @@ module.exports = {
       .loadAppAndClickAwayWelcomeDialog()
       .createAndGoToDefaultProject()
       .navigateToPluginSettings()
-      // Enable the hello-world plugin if it's not already enabled
+      // Enable the API Test Plugin if it's not already enabled
       .execute(() => {
-        const items = Array.from(
-          document.querySelectorAll('plugin-management mat-card.ng-star-inserted'),
-        );
-        const helloWorldItem = items.find((item) =>
-          item.textContent?.includes('Hello World Plugin'),
-        );
-        if (helloWorldItem) {
-          // Try new button-style toggle first
-          const toggleButton = helloWorldItem.querySelector(
-            '.mat-mdc-slide-toggle button[role="switch"]',
-          ) as HTMLButtonElement;
-          if (toggleButton && toggleButton.getAttribute('aria-checked') === 'false') {
-            toggleButton.click();
-            return true;
-          }
-          // Fallback to input-style toggle
-          const toggleInput = helloWorldItem.querySelector(
-            '.mat-mdc-slide-toggle input',
+        const items = Array.from(document.querySelectorAll('plugin-management mat-card'));
+        const apiTestItem = items.find((item) => {
+          const title = item.querySelector('mat-card-title')?.textContent || '';
+          return title.includes('API Test Plugin');
+        });
+        if (apiTestItem) {
+          const toggleInput = apiTestItem.querySelector(
+            'mat-slide-toggle input',
           ) as HTMLInputElement;
           if (toggleInput && !toggleInput.checked) {
             toggleInput.click();
@@ -65,7 +55,7 @@ module.exports = {
       .pause(2000) // Wait for plugins to initialize
       // Plugin doesn't show snack bar on load, check plugin menu instead
       .waitForElementVisible(PLUGIN_MENU_ITEM)
-      .assert.textContains(PLUGIN_MENU_ITEM, 'Hello World Plugin'),
+      .assert.textContains(PLUGIN_MENU_ITEM, 'API Test Plugin'),
 
   // 'verify plugin menu entry is auto-registered': (browser: NBrowser) =>
   //   browser
@@ -80,7 +70,7 @@ module.exports = {
       .waitForElementVisible(PLUGIN_HEADER_BTN)
       .click(PLUGIN_HEADER_BTN)
       .pause(500)
-      .assert.urlContains('/plugins/hello-world/index')
+      .assert.urlContains('/plugins/api-test-plugin/index')
       .waitForElementVisible('iframe')
       .url('http://localhost:4200'), // Go back to work view
 
@@ -100,7 +90,7 @@ module.exports = {
     browser
       // Navigate to settings
       .navigateToPluginSettings()
-      .waitForElementVisible(HELLO_WORLD_PLUGIN)
+      .waitForElementVisible(API_TEST_PLUGIN)
       // Disable the plugin
       .click(PLUGIN_TOGGLE)
       .pause(1000)

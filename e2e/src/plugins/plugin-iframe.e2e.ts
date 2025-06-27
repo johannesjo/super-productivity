@@ -33,26 +33,16 @@ module.exports = {
       .loadAppAndClickAwayWelcomeDialog()
       .createAndGoToDefaultProject()
       .navigateToPluginSettings()
-      // Enable the hello-world plugin if it's not already enabled
+      // Enable the API Test Plugin if it's not already enabled
       .execute(() => {
-        const items = Array.from(
-          document.querySelectorAll('plugin-management mat-card.ng-star-inserted'),
-        );
-        const helloWorldItem = items.find((item) =>
-          item.textContent?.includes('Hello World Plugin'),
-        );
-        if (helloWorldItem) {
-          // Try new button-style toggle first
-          const toggleButton = helloWorldItem.querySelector(
-            '.mat-mdc-slide-toggle button[role="switch"]',
-          ) as HTMLButtonElement;
-          if (toggleButton && toggleButton.getAttribute('aria-checked') === 'false') {
-            toggleButton.click();
-            return true;
-          }
-          // Fallback to input-style toggle
-          const toggleInput = helloWorldItem.querySelector(
-            '.mat-mdc-slide-toggle input',
+        const items = Array.from(document.querySelectorAll('plugin-management mat-card'));
+        const apiTestItem = items.find((item) => {
+          const title = item.querySelector('mat-card-title')?.textContent || '';
+          return title.includes('API Test Plugin');
+        });
+        if (apiTestItem) {
+          const toggleInput = apiTestItem.querySelector(
+            'mat-slide-toggle input',
           ) as HTMLInputElement;
           if (toggleInput && !toggleInput.checked) {
             toggleInput.click();
@@ -105,7 +95,7 @@ module.exports = {
       .waitForElementVisible(PLUGIN_MENU_ITEM)
       .click(PLUGIN_MENU_ITEM)
       .pause(1000)
-      .assert.urlContains('/plugins/hello-world/index')
+      .assert.urlContains('/plugins/api-test-plugin/index')
       .waitForElementVisible(PLUGIN_IFRAME)
       .pause(1000), // Wait for iframe content to load
 
@@ -113,7 +103,7 @@ module.exports = {
     browser
       .frame(0) // Switch to iframe context
       .waitForElementVisible(IFRAME_TITLE)
-      .assert.textContains(IFRAME_TITLE, 'Hello World')
+      .assert.textContains(IFRAME_TITLE, 'API Test Plugin')
       .assert.elementPresent(STATS_SECTION)
       .assert.elementPresent(ACTIVITY_LOG)
       // Skip checking initial log entry as it's empty on load
