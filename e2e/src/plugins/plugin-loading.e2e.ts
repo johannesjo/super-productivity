@@ -96,14 +96,31 @@ module.exports = {
         const toggle = apiTestCard?.querySelector(
           'mat-slide-toggle button[role="switch"]',
         ) as HTMLButtonElement;
-        if (toggle && toggle.getAttribute('aria-checked') === 'true') toggle.click();
+        
+        const result = {
+          found: !!apiTestCard,
+          hasToggle: !!toggle,
+          wasChecked: toggle?.getAttribute('aria-checked') === 'true',
+          clicked: false
+        };
+        
+        if (toggle && toggle.getAttribute('aria-checked') === 'true') {
+          toggle.click();
+          result.clicked = true;
+        }
+        
+        return result;
+      }, [], (result) => {
+        console.log('Disable plugin result:', result.value);
       })
-      .pause(500)
+      .pause(2000) // Give more time for plugin to unload
+      // Navigate to main view to ensure menu updates
+      .url('http://localhost:4200')
+      .pause(1000)
       // Verify menu entry is gone
-      .click(SIDENAV)
       .assert.not.elementPresent(PLUGIN_MENU_ENTRY)
       // Re-enable the plugin
-      .click(SETTINGS_BTN)
+      .navigateToPluginSettings()
       .pause(1000)
       .execute(() => {
         const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
@@ -114,11 +131,28 @@ module.exports = {
         const toggle = apiTestCard?.querySelector(
           'mat-slide-toggle button[role="switch"]',
         ) as HTMLButtonElement;
-        if (toggle && toggle.getAttribute('aria-checked') !== 'true') toggle.click();
+        
+        const result = {
+          found: !!apiTestCard,
+          hasToggle: !!toggle,
+          wasChecked: toggle?.getAttribute('aria-checked') === 'true',
+          clicked: false
+        };
+        
+        if (toggle && toggle.getAttribute('aria-checked') !== 'true') {
+          toggle.click();
+          result.clicked = true;
+        }
+        
+        return result;
+      }, [], (result) => {
+        console.log('Re-enable plugin result:', result.value);
       })
-      .pause(500)
+      .pause(2000) // Give time for plugin to reload
+      // Navigate back to main view
+      .url('http://localhost:4200')
+      .pause(1000)
       // Verify menu entry is back
-      .click(SIDENAV)
       .waitForElementVisible(PLUGIN_MENU_ENTRY)
       .assert.textContains(PLUGIN_MENU_ENTRY, 'API Test Plugin'),
 
