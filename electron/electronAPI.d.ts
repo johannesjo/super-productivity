@@ -95,6 +95,8 @@ export interface ElectronAPI {
 
   sendAppSettingsToElectron(globalCfg: GlobalConfigState): void;
 
+  sendSettingsUpdate(globalCfg: GlobalConfigState): void;
+
   registerGlobalShortcuts(keyboardConfig: KeyboardConfig): void;
 
   showFullScreenBlocker(args: { msg?: string; takeABreakCfg: TakeABreakConfig }): void;
@@ -115,6 +117,8 @@ export interface ElectronAPI {
     task: Task | null,
     isPomodoroEnabled: boolean,
     currentPomodoroSessionTime: number,
+    isFocusModeEnabled?: boolean,
+    currentFocusSessionTime?: number,
   );
 
   exec(command: string): void;

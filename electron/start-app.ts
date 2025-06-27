@@ -21,6 +21,7 @@ import { initIndicator } from './indicator';
 import { quitApp, showOrFocus } from './various-shared';
 import { createWindow } from './main-window';
 import { IdleTimeHandler } from './idle-time-handler';
+import { destroyOverlayWindow } from './overlay-indicator/overlay-indicator';
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
@@ -251,6 +252,11 @@ export const startApp = (): void => {
   appIN.on('will-quit', () => {
     // un-register all shortcuts.
     globalShortcut.unregisterAll();
+  });
+
+  appIN.on('before-quit', () => {
+    // Clean up overlay window before quitting
+    destroyOverlayWindow();
   });
 
   appIN.on('window-all-closed', () => {

@@ -74,6 +74,7 @@ const ea: ElectronAPI = {
 
   sendAppSettingsToElectron: (globalCfg) =>
     _send('TRANSFER_SETTINGS_TO_ELECTRON', globalCfg),
+  sendSettingsUpdate: (globalCfg) => _send('UPDATE_SETTINGS', globalCfg),
   registerGlobalShortcuts: (keyboardCfg) =>
     _send('REGISTER_GLOBAL_SHORTCUTS', keyboardCfg),
   showFullScreenBlocker: (args) => _send('FULL_SCREEN_BLOCKER', args),
@@ -83,8 +84,21 @@ const ea: ElectronAPI = {
 
   backupAppData: (appData) => _send('BACKUP', appData),
 
-  updateCurrentTask: (task, isPomodoroEnabled, currentPomodoroSessionTime) =>
-    _send('CURRENT_TASK_UPDATED', task, isPomodoroEnabled, currentPomodoroSessionTime),
+  updateCurrentTask: (
+    task,
+    isPomodoroEnabled,
+    currentPomodoroSessionTime,
+    isFocusModeEnabled?,
+    currentFocusSessionTime?,
+  ) =>
+    _send(
+      'CURRENT_TASK_UPDATED',
+      task,
+      isPomodoroEnabled,
+      currentPomodoroSessionTime,
+      isFocusModeEnabled,
+      currentFocusSessionTime,
+    ),
 
   exec: (command: string) => _send('EXEC', command),
 };
