@@ -1,7 +1,7 @@
-import { NightwatchBrowser } from 'nightwatch';
+import { NBrowser } from '../n-browser-interface';
 
 module.exports = {
-  async command(this: NightwatchBrowser, pluginName: string = 'API Test Plugin') {
+  async command(this: NBrowser, pluginName: string = 'API Test Plugin') {
     return this.navigateToPluginSettings()
       .pause(1000)
       .execute(
@@ -15,14 +15,23 @@ module.exports = {
           });
 
           if (targetCard) {
-            const toggleInput = targetCard.querySelector(
-              'mat-slide-toggle input',
-            ) as HTMLInputElement;
-            if (toggleInput && !toggleInput.checked) {
-              toggleInput.click();
-              return { enabled: true, found: true };
+            const toggleButton = targetCard.querySelector(
+              'mat-slide-toggle button[role="switch"]',
+            ) as HTMLButtonElement;
+            if (toggleButton) {
+              const wasChecked = toggleButton.getAttribute('aria-checked') === 'true';
+              if (!wasChecked) {
+                toggleButton.click();
+              }
+              return {
+                enabled: true,
+                found: true,
+                wasChecked,
+                nowChecked: toggleButton.getAttribute('aria-checked') === 'true',
+                clicked: !wasChecked,
+              };
             }
-            return { enabled: toggleInput?.checked || false, found: true };
+            return { enabled: false, found: true, error: 'No toggle found' };
           }
 
           return { enabled: false, found: false };

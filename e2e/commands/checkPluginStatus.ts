@@ -33,13 +33,13 @@ module.exports = {
         }
 
         // Check if toggle is checked - Angular Material slide toggle
-        const toggleInput = pluginItem.querySelector(
-          'mat-slide-toggle input',
-        ) as HTMLInputElement;
+        const toggleButton = pluginItem.querySelector(
+          'mat-slide-toggle button[role="switch"]',
+        ) as HTMLButtonElement;
 
         let enabled = false;
-        if (toggleInput) {
-          enabled = toggleInput.checked;
+        if (toggleButton) {
+          enabled = toggleButton.getAttribute('aria-checked') === 'true';
         }
 
         return {

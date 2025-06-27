@@ -11,7 +11,7 @@ const SETTINGS_BTN = `${SIDENAV} .tour-settingsMenuBtn`;
 const PLUGIN_TAB = 'mat-tab-link:contains("Plugins")';
 const PLUGIN_CARD = 'plugin-management mat-card.ng-star-inserted';
 const API_TEST_PLUGIN = `${PLUGIN_CARD}`;
-const PLUGIN_TOGGLE = `${API_TEST_PLUGIN} mat-slide-toggle input`;
+const PLUGIN_TOGGLE = `${API_TEST_PLUGIN} mat-slide-toggle button[role="switch"]`;
 const PLUGIN_MENU = `${SIDENAV} plugin-menu`;
 const PLUGIN_MENU_ITEM = `${PLUGIN_MENU} button`;
 const SNACK_BAR = 'mat-snack-bar';

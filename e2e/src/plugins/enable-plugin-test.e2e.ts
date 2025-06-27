@@ -50,9 +50,9 @@ module.exports = {
             if (title.includes('API Test Plugin') || title.includes('api-test-plugin')) {
               foundApiTestPlugin = true;
               const toggle = card.querySelector(
-                'mat-slide-toggle input',
-              ) as HTMLInputElement;
-              if (toggle && !toggle.checked) {
+                'mat-slide-toggle button[role="switch"]',
+              ) as HTMLButtonElement;
+              if (toggle && toggle.getAttribute('aria-checked') !== 'true') {
                 toggle.click();
                 toggleClicked = true;
                 break;

@@ -94,9 +94,9 @@ module.exports = {
           return title.includes('API Test Plugin');
         });
         const toggle = apiTestCard?.querySelector(
-          'mat-slide-toggle input',
-        ) as HTMLInputElement;
-        if (toggle) toggle.click();
+          'mat-slide-toggle button[role="switch"]',
+        ) as HTMLButtonElement;
+        if (toggle && toggle.getAttribute('aria-checked') === 'true') toggle.click();
       })
       .pause(500)
       // Verify menu entry is gone
@@ -112,9 +112,9 @@ module.exports = {
           return title.includes('API Test Plugin');
         });
         const toggle = apiTestCard?.querySelector(
-          'mat-slide-toggle input',
-        ) as HTMLInputElement;
-        if (toggle) toggle.click();
+          'mat-slide-toggle button[role="switch"]',
+        ) as HTMLButtonElement;
+        if (toggle && toggle.getAttribute('aria-checked') !== 'true') toggle.click();
       })
       .pause(500)
       // Verify menu entry is back
