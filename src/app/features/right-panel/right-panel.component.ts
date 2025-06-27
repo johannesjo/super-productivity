@@ -23,10 +23,11 @@ import { PluginService } from '../../plugins/plugin.service';
 import { PluginPanelContainerComponent } from '../../plugins/ui/plugin-panel-container/plugin-panel-container.component';
 import { Store } from '@ngrx/store';
 import {
-  selectIsShowPluginPanel,
   selectActivePluginId,
+  selectIsShowPluginPanel,
 } from '../../core-ui/layout/store/layout.reducer';
 import { hidePluginPanel } from '../../core-ui/layout/store/layout.actions';
+import { fastArrayCompare } from '../../util/fast-array-compare';
 
 @Component({
   selector: 'right-panel',
@@ -117,7 +118,7 @@ export class RightPanelComponent implements OnDestroy {
       });
       return keys;
     }),
-    distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
+    distinctUntilChanged((a, b) => fastArrayCompare(a, b)),
   );
 
   isOpen$: Observable<boolean> = combineLatest([

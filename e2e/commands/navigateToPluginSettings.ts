@@ -25,21 +25,18 @@ module.exports = {
           return;
         }
 
-        // Make sure collapsible is expanded - click the title to toggle
+        // Make sure collapsible is expanded - click the header to toggle
         const collapsible = document.querySelector('.plugin-section collapsible');
         if (collapsible) {
           const isExpanded = collapsible.classList.contains('isExpanded');
           if (!isExpanded) {
-            // Click the collapsible title to expand it
-            const titleWrapper =
-              collapsible.querySelector('.collapsible-title-wrapper') ||
-              collapsible.querySelector('[mat-button]') ||
-              collapsible.querySelector('button');
-            if (titleWrapper) {
-              (titleWrapper as HTMLElement).click();
+            // Click the collapsible header to expand it
+            const header = collapsible.querySelector('.collapsible-header');
+            if (header) {
+              (header as HTMLElement).click();
               console.log('Clicked to expand plugin collapsible');
             } else {
-              console.error('Could not find collapsible toggle button');
+              console.error('Could not find collapsible header');
             }
           } else {
             console.log('Plugin collapsible already expanded');
