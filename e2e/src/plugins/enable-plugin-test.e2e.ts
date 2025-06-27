@@ -8,7 +8,7 @@ module.exports = {
 
   after: (browser: NBrowser) => browser.end(),
 
-  'navigate to plugin settings and enable hello-world plugin': (browser: NBrowser) =>
+  'navigate to plugin settings and enable API Test Plugin': (browser: NBrowser) =>
     browser
       .navigateToPluginSettings()
       .pause(2000)

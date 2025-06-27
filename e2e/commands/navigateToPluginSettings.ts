@@ -9,19 +9,43 @@ module.exports = {
     return this.click(SETTINGS_BTN)
       .pause(1000)
       .execute(() => {
+        // First ensure we're on the config page
+        const configPage = document.querySelector('.page-settings');
+        if (!configPage) {
+          console.error('Not on config page');
+          return;
+        }
+
         // Scroll to plugins section
         const pluginSection = document.querySelector('.plugin-section');
         if (pluginSection) {
           pluginSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          console.error('Plugin section not found');
+          return;
         }
 
-        // Make sure collapsible is expanded
+        // Make sure collapsible is expanded - click the title to toggle
         const collapsible = document.querySelector('.plugin-section collapsible');
-        if (collapsible && !collapsible.classList.contains('isExpanded')) {
-          const toggleBtn = collapsible.querySelector('.collapsible-title-wrapper');
-          if (toggleBtn) {
-            (toggleBtn as HTMLElement).click();
+        if (collapsible) {
+          const isExpanded = collapsible.classList.contains('isExpanded');
+          if (!isExpanded) {
+            // Click the collapsible title to expand it
+            const titleWrapper =
+              collapsible.querySelector('.collapsible-title-wrapper') ||
+              collapsible.querySelector('[mat-button]') ||
+              collapsible.querySelector('button');
+            if (titleWrapper) {
+              (titleWrapper as HTMLElement).click();
+              console.log('Clicked to expand plugin collapsible');
+            } else {
+              console.error('Could not find collapsible toggle button');
+            }
+          } else {
+            console.log('Plugin collapsible already expanded');
           }
+        } else {
+          console.error('Plugin collapsible not found');
         }
       })
       .pause(1000)

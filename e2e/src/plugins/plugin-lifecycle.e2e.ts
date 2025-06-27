@@ -26,27 +26,9 @@ module.exports = {
     browser
       .loadAppAndClickAwayWelcomeDialog()
       .createAndGoToDefaultProject()
-      .navigateToPluginSettings()
-      // Enable the API Test Plugin if it's not already enabled
-      .execute(() => {
-        const items = Array.from(document.querySelectorAll('plugin-management mat-card'));
-        const apiTestItem = items.find((item) => {
-          const title = item.querySelector('mat-card-title')?.textContent || '';
-          return title.includes('API Test Plugin');
-        });
-        if (apiTestItem) {
-          const toggleInput = apiTestItem.querySelector(
-            'mat-slide-toggle input',
-          ) as HTMLInputElement;
-          if (toggleInput && !toggleInput.checked) {
-            toggleInput.click();
-            return true;
-          }
-        }
-        return false;
-      })
+      .enableTestPlugin('API Test Plugin')
       .url('http://localhost:4200') // Go back to work view
-      .pause(3000), // Wait for plugin to initialize
+      .pause(1000), // Wait for navigation
 
   after: (browser: NBrowser) => browser.end(),
 

@@ -19,4 +19,5 @@ export interface NBrowser extends NightwatchAPI {
   addTaskWithReminder: (params: AddTaskWithReminderParams) => NBrowser;
   navigateToPluginSettings: () => NBrowser;
   checkPluginStatus: (pluginName: string, expectedEnabled?: boolean) => NBrowser;
+  enableTestPlugin: (pluginName?: string) => NBrowser;
 }
