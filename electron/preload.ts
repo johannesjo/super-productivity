@@ -110,3 +110,6 @@ const ea: ElectronAPI = {
       request,
     ) as Promise<PluginNodeScriptResult>,
 };
+
+// Expose ea to window for ipc-event.ts
+(window as any).ea = ea;
