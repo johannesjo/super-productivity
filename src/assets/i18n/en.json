@@ -953,7 +953,11 @@
         "VECTOR_COMPARISON_CONCURRENT": "Concurrent (True Conflict)",
         "VECTOR_COMPARISON_EQUAL": "Equal",
         "VECTOR_COMPARISON_LOCAL_GREATER": "Local > Remote",
-        "VECTOR_COMPARISON_LOCAL_LESS": "Local < Remote"
+        "VECTOR_COMPARISON_LOCAL_LESS": "Local < Remote",
+        "DATE": "Date",
+        "TIME": "Time",
+        "VECTOR_CLOCK": "Vector Clock",
+        "RESULT": "Result"
       },
       "D_DECRYPT_ERROR": {
         "BTN_OVER_WRITE_REMOTE": "Change & Overwrite Remote",
