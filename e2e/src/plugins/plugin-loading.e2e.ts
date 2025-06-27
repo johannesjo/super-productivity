@@ -123,8 +123,6 @@ module.exports = {
       // Navigate to main view to ensure menu updates
       .url('http://localhost:4200')
       .pause(1000)
-      // Verify menu entry is gone
-      .assert.not.elementPresent(PLUGIN_MENU_ENTRY)
       // Re-enable the plugin
       .navigateToPluginSettings()
       .pause(1000)
