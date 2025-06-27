@@ -97,7 +97,10 @@
               "serviceWorker": "ngsw-config.json"
             },
             "productionWeb": {
-              "outputPath": "dist/browser",
+              "outputPath": {
+                "base": "dist",
+                "browser": "browser"
+              },
               "budgets": [
                 {
                   "type": "anyComponentStyle",
@@ -155,7 +158,10 @@
               "serviceWorker": false
             },
             "stageWeb": {
-              "outputPath": "dist/browser",
+              "outputPath": {
+                "base": "dist",
+                "browser": "browser"
+              },
               "budgets": [
                 {
                   "type": "anyComponentStyle",
