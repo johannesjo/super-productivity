@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+  <g transform="translate(50,50)">
+    <!-- Full size star shape -->
+    <path d="M 0,-45 L 11.25,-11.25 L 45,-13.5 L 15.75,6.75 L 22.5,40.5 L 0,13.5 L -22.5,40.5 L -15.75,6.75 L -45,-13.5 L -11.25,-11.25 Z" fill="currentColor" stroke="currentColor" stroke-width="2"/>
+  </g>
+</svg>

@@ -33,7 +33,6 @@ import { FocusModeMainComponent } from '../focus-mode-main/focus-mode-main.compo
 import { FocusModeTaskDoneComponent } from '../focus-mode-task-done/focus-mode-task-done.component';
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
-import { ProcrastinationComponent } from '../../procrastination/procrastination.component';
 import { BannerService } from '../../../core/banner/banner.service';
 import { BannerId } from '../../../core/banner/banner.model';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -58,7 +57,6 @@ import { FocusModeService } from '../focus-mode.service';
     MatButton,
     AsyncPipe,
     TranslatePipe,
-    ProcrastinationComponent,
     MatButtonToggleGroup,
     MatButtonToggle,
     NgTemplateOutlet,
@@ -181,11 +179,5 @@ export class FocusModeOverlayComponent implements OnDestroy {
 
   deactivatePomodoro(): void {
     this._globalConfigService.updateSection('pomodoro', { isEnabled: false });
-  }
-
-  leaveProcrastinationHelp(): void {
-    this._store.dispatch(
-      setFocusSessionActivePage({ focusActivePage: FocusModePage.Main }),
-    );
   }
 }

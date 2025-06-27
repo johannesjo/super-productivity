@@ -278,7 +278,19 @@ export const taskReducer = createReducer<TaskState>(
   }),
 
   on(moveSubTaskUp, (state, { id, parentId }) => {
-    const parentSubTaskIds = getTaskById(parentId, state).subTaskIds;
+    const parentTask = state.entities[parentId];
+    if (!parentTask) {
+      console.warn(`Parent task ${parentId} not found`);
+      return state;
+    }
+    const parentSubTaskIds = parentTask.subTaskIds;
+
+    // Check if the subtask is actually in the parent's subtask list
+    if (!parentSubTaskIds.includes(id)) {
+      console.warn(`Subtask ${id} not found in parent ${parentId} subtasks`);
+      return state;
+    }
+
     return taskAdapter.updateOne(
       {
         id: parentId,
@@ -291,7 +303,19 @@ export const taskReducer = createReducer<TaskState>(
   }),
 
   on(moveSubTaskDown, (state, { id, parentId }) => {
-    const parentSubTaskIds = getTaskById(parentId, state).subTaskIds;
+    const parentTask = state.entities[parentId];
+    if (!parentTask) {
+      console.warn(`Parent task ${parentId} not found`);
+      return state;
+    }
+    const parentSubTaskIds = parentTask.subTaskIds;
+
+    // Check if the subtask is actually in the parent's subtask list
+    if (!parentSubTaskIds.includes(id)) {
+      console.warn(`Subtask ${id} not found in parent ${parentId} subtasks`);
+      return state;
+    }
+
     return taskAdapter.updateOne(
       {
         id: parentId,
@@ -304,7 +328,19 @@ export const taskReducer = createReducer<TaskState>(
   }),
 
   on(moveSubTaskToTop, (state, { id, parentId }) => {
-    const parentSubTaskIds = getTaskById(parentId, state).subTaskIds;
+    const parentTask = state.entities[parentId];
+    if (!parentTask) {
+      console.warn(`Parent task ${parentId} not found`);
+      return state;
+    }
+    const parentSubTaskIds = parentTask.subTaskIds;
+
+    // Check if the subtask is actually in the parent's subtask list
+    if (!parentSubTaskIds.includes(id)) {
+      console.warn(`Subtask ${id} not found in parent ${parentId} subtasks`);
+      return state;
+    }
+
     return taskAdapter.updateOne(
       {
         id: parentId,
@@ -317,7 +353,19 @@ export const taskReducer = createReducer<TaskState>(
   }),
 
   on(moveSubTaskToBottom, (state, { id, parentId }) => {
-    const parentSubTaskIds = getTaskById(parentId, state).subTaskIds;
+    const parentTask = state.entities[parentId];
+    if (!parentTask) {
+      console.warn(`Parent task ${parentId} not found`);
+      return state;
+    }
+    const parentSubTaskIds = parentTask.subTaskIds;
+
+    // Check if the subtask is actually in the parent's subtask list
+    if (!parentSubTaskIds.includes(id)) {
+      console.warn(`Subtask ${id} not found in parent ${parentId} subtasks`);
+      return state;
+    }
+
     return taskAdapter.updateOne(
       {
         id: parentId,

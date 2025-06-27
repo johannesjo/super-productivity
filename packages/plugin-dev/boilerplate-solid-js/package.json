@@ -1,0 +1,27 @@
+{
+  "name": "sp-plugin-boilerplate-solid",
+  "version": "1.0.0",
+  "description": "A boilerplate Super Productivity plugin using Solid.js and TypeScript",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:watch": "node scripts/watch-and-build.js",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "package": "npm run build && node scripts/build-plugin.js",
+    "clean": "rm -rf dist node_modules *.zip",
+    "lint": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.33",
+    "solid-js": "^1.9.7",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5",
+    "vite-plugin-solid": "^2.11.7",
+    "archiver": "^7.0.1"
+  },
+  "dependencies": {
+    "@super-productivity/plugin-api": "file:../plugin-api"
+  }
+}

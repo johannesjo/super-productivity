@@ -6,6 +6,8 @@
 /app-builds
 /tmp
 /logs
+packages/plugin-api/dist/**
+
 
 # dependencies
 /node_modules
@@ -79,6 +81,9 @@ electron-builder.win-store.yaml
 /src/environments/environment.js
 /src/environments/environment.js.map
 /.claude/settings.local.json
+.aider*
+
+/packages/plugin-api/dist/**/*.*
 
 #
 perf-metrics-create-tasks.json

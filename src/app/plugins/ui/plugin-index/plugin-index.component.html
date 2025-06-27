@@ -1,0 +1,75 @@
+<div
+  class="plugin-index-container"
+  [@pluginSwitch]="pluginId()"
+>
+  <!-- Header -->
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    @if (showFullUI) {
+      <mat-card class="loading-card">
+        <mat-card-content>
+          <div class="loading-content">
+            <mat-progress-spinner
+              mode="indeterminate"
+              diameter="40"
+            ></mat-progress-spinner>
+            <p>{{ T.PLUGINS.LOADING_INTERFACE | translate }}</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    } @else {
+      <div class="simple-loading">
+        <mat-progress-spinner
+          mode="indeterminate"
+          diameter="24"
+        ></mat-progress-spinner>
+        <p>{{ T.PLUGINS.LOADING_PLUGIN | translate }}</p>
+      </div>
+    }
+  }
+
+  <!-- Error State -->
+  @if (error()) {
+    @if (showFullUI) {
+      <mat-card class="error-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon color="warn">error</mat-icon>
+            {{ T.PLUGINS.ERROR_LOADING_PLUGIN | translate }}
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>{{ error() }}</p>
+          <button
+            mat-button
+            color="primary"
+            (click)="goBack()"
+          >
+            {{ T.PLUGINS.GO_BACK | translate }}
+          </button>
+        </mat-card-content>
+      </mat-card>
+    } @else {
+      <div class="simple-error">
+        <mat-icon>error_outline</mat-icon>
+        <p>{{ error() }}</p>
+      </div>
+    }
+  }
+
+  <!-- Plugin iframe -->
+  @if (iframeSrc() && !error()) {
+    <div class="iframe-container">
+      <iframe
+        #iframe
+        [src]="iframeSrc()"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+        class="plugin-iframe"
+        [class.hidden]="isLoading()"
+        (load)="onIframeLoad()"
+      >
+      </iframe>
+    </div>
+  }
+</div>

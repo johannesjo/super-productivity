@@ -69,6 +69,9 @@ export enum IPC {
   OPEN_PATH = 'OPEN_PATH',
   OPEN_EXTERNAL = 'OPEN_EXTERNAL',
 
+  // Plugin Node Execution
+  PLUGIN_EXEC_NODE_SCRIPT = 'PLUGIN_EXEC_NODE_SCRIPT',
+
   // maybe_UPDATE_CURRENT_TASK = 'UPDATE_CURRENT_TASK',
   // maybe_IS_IDLE = 'IS_IDLE',
   // maybe_IS_BUSY = 'IS_BUSY',

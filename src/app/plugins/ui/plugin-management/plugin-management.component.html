@@ -1,0 +1,198 @@
+<mat-card class="warning-card">
+  <mat-card-header>
+    <mat-card-title
+      >⚠️️️{{ 'PLUGINS.EXPERIMENTAL_WARNING_TITLE' | translate }}️️ ⚠️️️
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="warning-content">
+      <p>
+        <strong>{{ 'PLUGINS.EXPERIMENTAL_WARNING' | translate }}</strong>
+      </p>
+      <p>{{ 'PLUGINS.SECURITY_WARNING' | translate }}</p>
+      <ul>
+        <li>{{ 'PLUGINS.RISK_DATA_ACCESS' | translate }}</li>
+        <li>{{ 'PLUGINS.RISK_MALICIOUS_CODE' | translate }}</li>
+        <li>{{ 'PLUGINS.RISK_SYSTEM_ACCESS' | translate }}</li>
+        <li>{{ 'PLUGINS.RISK_PERFORMANCE' | translate }}</li>
+      </ul>
+      <p class="recommendation">
+        <mat-icon>security</mat-icon>
+        {{ 'PLUGINS.RECOMMENDATION' | translate }}
+      </p>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+@if (allPlugins().length === 0) {
+  <mat-card>
+    <mat-card-content class="empty-state">
+      <mat-icon>extension_off</mat-icon>
+      <p>{{ T.PS.NO_PLUGINS_INSTALLED | translate }}</p>
+    </mat-card-content>
+  </mat-card>
+}
+
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>{{ 'PLUGINS.INSTALL_PLUGIN' | translate }}</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="install-warning">
+      <mat-icon>info</mat-icon>
+      <span>{{ 'PLUGINS.INSTALL_WARNING' | translate }}</span>
+    </div>
+    <p>{{ 'PLUGINS.UPLOAD_PLUGIN_INSTRUCTION' | translate }}</p>
+    <input
+      #fileInput
+      type="file"
+      accept=".zip"
+      (change)="onFileSelected($event)"
+      style="display: none"
+    />
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="fileInput.click()"
+      [disabled]="isUploading()"
+    >
+      <mat-icon>upload</mat-icon>
+      {{
+        isUploading()
+          ? ('PLUGINS.INSTALLING' | translate)
+          : ('PLUGINS.CHOOSE_PLUGIN_FILE' | translate)
+      }}
+    </button>
+    @if (uploadError()) {
+      <mat-error style="margin-top: 8px; display: block">
+        {{ uploadError() }}
+      </mat-error>
+    }
+
+    <div style="margin-top: 16px">
+      <button
+        mat-button
+        color="warn"
+        (click)="clearPluginCache()"
+        [disabled]="isUploading()"
+      >
+        <mat-icon>delete_sweep</mat-icon>
+        {{ 'PLUGINS.CLEAR_PLUGIN_CACHE' | translate }}
+      </button>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+@for (plugin of allPlugins(); track plugin.manifest.id) {
+  <mat-card>
+    <mat-card-header>
+      <div mat-card-avatar>
+        <plugin-icon
+          [pluginId]="plugin.manifest.id"
+          [size]="40"
+          fallbackIcon="extension"
+        ></plugin-icon>
+      </div>
+      <mat-card-title>{{ plugin.manifest.name }}</mat-card-title>
+      <mat-card-subtitle>
+        v{{ plugin.manifest.version }}
+        @if (isPluginLoading(plugin)) {
+          <mat-chip color="accent">
+            <mat-icon class="loading-icon">autorenew</mat-icon>
+            {{ T.PLUGINS.LOADING_PLUGIN | translate }}
+          </mat-chip>
+        }
+      </mat-card-subtitle>
+      <mat-slide-toggle
+        [checked]="isPluginEnabledSync(plugin)"
+        [disabled]="!canEnablePlugin(plugin) || isPluginLoading(plugin)"
+        (change)="onPluginToggle(plugin, $event)"
+        [attr.aria-label]="
+          'PLUGINS.TOGGLE_PLUGIN' | translate: { pluginName: plugin.manifest.name }
+        "
+      >
+      </mat-slide-toggle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <p>{{ getPluginDescription(plugin) }}</p>
+
+      @if (plugin.error) {
+        <mat-error>
+          <mat-icon>error</mat-icon>
+          {{ plugin.error }}
+        </mat-error>
+      }
+
+      @if (requiresNodeExecution(plugin) && !IS_ELECTRON) {
+        <mat-error style="margin-top: 8px">
+          <mat-icon>desktop_windows</mat-icon>
+          {{ getNodeExecutionMessage() }}
+        </mat-error>
+      }
+
+      <table>
+        <tr>
+          <th>{{ 'PLUGINS.ID' | translate }}</th>
+          <td>{{ plugin.manifest.id }}</td>
+        </tr>
+        @if (plugin.manifest.minSupVersion) {
+          <tr>
+            <th>{{ 'PLUGINS.MIN_VERSION' | translate }}</th>
+            <td>{{ plugin.manifest.minSupVersion }}</td>
+          </tr>
+        }
+      </table>
+
+      @if (plugin.manifest.hooks && plugin.manifest.hooks.length > 0) {
+        <div>
+          <div class="label">{{ 'PLUGINS.HOOKS' | translate }}:</div>
+          <div>
+            <mat-chip-set>
+              @for (hook of plugin.manifest.hooks; track hook) {
+                <mat-chip>{{ hook }}</mat-chip>
+              }
+            </mat-chip-set>
+          </div>
+        </div>
+      }
+      @if (plugin.manifest.permissions && plugin.manifest.permissions.length > 0) {
+        <div>
+          <div class="label">{{ 'PLUGINS.PERMISSIONS' | translate }}:</div>
+          <div>
+            <mat-chip-set>
+              @for (permission of plugin.manifest.permissions; track permission) {
+                <mat-chip>{{ permission }}</mat-chip>
+              }
+            </mat-chip-set>
+          </div>
+        </div>
+      }
+    </mat-card-content>
+
+    <mat-card-actions [align]="'end'">
+      <button
+        mat-button
+        color="primary"
+        (click)="reloadPlugin(plugin)"
+        [disabled]="!!plugin.error || isPluginLoading(plugin)"
+      >
+        <mat-icon>refresh</mat-icon>
+        {{ T.PS.RELOAD | translate }}
+      </button>
+      @if (isUploadedPlugin(plugin)) {
+        <button
+          mat-button
+          color="warn"
+          (click)="removeUploadedPlugin(plugin)"
+          [disabled]="isUploading()"
+        >
+          <mat-icon>delete</mat-icon>
+          {{ 'PLUGINS.REMOVE' | translate }}
+        </button>
+      }
+    </mat-card-actions>
+  </mat-card>
+}
+
+<div class="bottom-bar"></div>

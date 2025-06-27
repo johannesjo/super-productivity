@@ -3,16 +3,24 @@ import { ElectronAPI } from './electronAPI.d';
 import { IPCEventValue } from './shared-with-frontend/ipc-events.const';
 import { LocalBackupMeta } from '../src/app/imex/local-backup/local-backup.model';
 import { SyncGetRevResult } from '../src/app/imex/sync/sync.model';
+import {
+  PluginNodeScriptRequest,
+  PluginNodeScriptResult,
+  PluginManifest,
+} from '../packages/plugin-api/src/types';
 
-const _send: (channel: IPCEventValue, ...args: any[]) => void = (channel, ...args) =>
+const _send: (channel: IPCEventValue, ...args: unknown[]) => void = (channel, ...args) =>
   ipcRenderer.send(channel, ...args);
-const _invoke: (channel: IPCEventValue, ...args: any[]) => Promise<unknown> = (
+const _invoke: (channel: IPCEventValue, ...args: unknown[]) => Promise<unknown> = (
   channel,
   ...args
 ) => ipcRenderer.invoke(channel, ...args);
 
 const ea: ElectronAPI = {
-  on: (channel: string, listener: (event: IpcRendererEvent, ...args: any[]) => void) => {
+  on: (
+    channel: string,
+    listener: (event: IpcRendererEvent, ...args: unknown[]) => void,
+  ) => {
     // NOTE: there is no proper way to unsubscribe apart from unsubscribing all
     ipcRenderer.on(channel, listener);
   },
@@ -87,8 +95,37 @@ const ea: ElectronAPI = {
     _send('CURRENT_TASK_UPDATED', task, isPomodoroEnabled, currentPomodoroSessionTime),
 
   exec: (command: string) => _send('EXEC', command),
+
+  // Plugin API
+  pluginExecNodeScript: (
+    pluginId: string,
+    manifest: PluginManifest,
+    request: PluginNodeScriptRequest,
+  ) =>
+    _invoke(
+      'PLUGIN_EXEC_NODE_SCRIPT',
+      pluginId,
+      manifest,
+      request,
+    ) as Promise<PluginNodeScriptResult>,
 };
+// Debug: Log the ea object before exposing
+console.log('ea object keys:', Object.keys(ea));
+console.log('pluginExecNodeScript type:', typeof ea.pluginExecNodeScript);
+
 contextBridge.exposeInMainWorld('ea', ea);
 
 // contextBridge.exposeInIsolatedWorld();
 console.log('preload script loading complete');
+
+// Debug: Verify after exposing
+setTimeout(() => {
+  // @ts-ignore - window is not available in preload context types
+  console.log('window.ea exists:', typeof window !== 'undefined' && !!(window as any).ea);
+  // @ts-ignore - window is not available in preload context types
+  console.log(
+    'window.ea.pluginExecNodeScript exists:',
+    typeof window !== 'undefined' &&
+      !!((window as any).ea && (window as any).ea.pluginExecNodeScript),
+  );
+}, 1000);

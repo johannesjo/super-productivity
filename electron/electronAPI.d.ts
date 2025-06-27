@@ -9,9 +9,17 @@ import { AppDataCompleteLegacy, SyncGetRevResult } from '../src/app/imex/sync/sy
 import { Task } from '../src/app/features/tasks/task.model';
 import { LocalBackupMeta } from '../src/app/imex/local-backup/local-backup.model';
 import { AppDataCompleteNew } from '../src/app/pfapi/pfapi-config';
+import {
+  PluginNodeScriptRequest,
+  PluginNodeScriptResult,
+  PluginManifest,
+} from '../packages/plugin-api/src/types';
 
 export interface ElectronAPI {
-  on(channel: string, listener: (event: IpcRendererEvent, ...args: any[]) => void): void;
+  on(
+    channel: string,
+    listener: (event: IpcRendererEvent, ...args: unknown[]) => void,
+  ): void;
 
   // INVOKE
   // ------
@@ -118,4 +126,10 @@ export interface ElectronAPI {
   );
 
   exec(command: string): void;
+
+  pluginExecNodeScript(
+    pluginId: string,
+    manifest: PluginManifest,
+    request: PluginNodeScriptRequest,
+  ): Promise<PluginNodeScriptResult>;
 }

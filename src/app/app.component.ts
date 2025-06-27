@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  effect,
   HostBinding,
   HostListener,
   inject,
@@ -64,9 +65,10 @@ import { TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogPleaseRateComponent } from './features/dialog-please-rate/dialog-please-rate.component';
 import { getWorklogStr } from './util/get-work-log-str';
+import { PluginService } from './plugins/plugin.service';
 import { MarkdownPasteService } from './features/tasks/markdown-paste.service';
 import { TaskService } from './features/tasks/task.service';
-// Note: WaylandIdleHelperService is deprecated - idle detection now handled in Electron main process
+import { IpcRendererEvent } from 'electron';
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -118,6 +120,7 @@ export class AppComponent implements OnDestroy {
   private _matDialog = inject(MatDialog);
   private _markdownPasteService = inject(MarkdownPasteService);
   private _taskService = inject(TaskService);
+  private _pluginService = inject(PluginService);
 
   readonly syncTriggerService = inject(SyncTriggerService);
   readonly imexMetaService = inject(ImexViewService);
@@ -181,7 +184,7 @@ export class AppComponent implements OnDestroy {
     this._requestPersistence();
 
     // deferred init
-    window.setTimeout(() => {
+    window.setTimeout(async () => {
       this._startTrackingReminderService.init();
       this._checkAvailableStorage();
       // init offline banner in lack of a better place for it
@@ -212,11 +215,38 @@ export class AppComponent implements OnDestroy {
         localStorage.setItem(LS.APP_START_COUNT, (appStarts + 1).toString());
         localStorage.setItem(LS.APP_START_COUNT_LAST_START_DAY, todayStr);
       }
+
+      // Initialize plugin system
+      try {
+        await this._pluginService.initializePlugins();
+        console.log('Plugin system initialized');
+      } catch (error) {
+        console.error('Failed to initialize plugin system:', error);
+      }
     }, 1000);
 
     if (IS_ELECTRON) {
       window.ea.informAboutAppReady();
-      this._initElectronErrorHandler();
+
+      // Initialize electron error handler in an effect
+      effect(() => {
+        window.ea.on(IPC.ERROR, (ev: IpcRendererEvent, ...args: unknown[]) => {
+          const data = args[0] as {
+            error: any;
+            stack: any;
+            errorStr: string | unknown;
+          };
+          const errMsg =
+            typeof data.errorStr === 'string' ? data.errorStr : ' INVALID ERROR MSG :( ';
+
+          this._snackService.open({
+            msg: errMsg,
+            type: 'ERROR',
+          });
+          console.error(data);
+        });
+      });
+
       this._uiHelperService.initElectron();
 
       window.ea.on(IPC.TRANSFER_SETTINGS_REQUESTED, () => {
@@ -478,29 +508,6 @@ export class AppComponent implements OnDestroy {
         alert(t2);
       }
     });
-  }
-
-  private _initElectronErrorHandler(): void {
-    window.ea.on(
-      IPC.ERROR,
-      (
-        ev,
-        data: {
-          error: any;
-          stack: any;
-          errorStr: string | unknown;
-        },
-      ) => {
-        const errMsg =
-          typeof data.errorStr === 'string' ? data.errorStr : ' INVALID ERROR MSG :( ';
-
-        this._snackService.open({
-          msg: errMsg,
-          type: 'ERROR',
-        });
-        console.error(data);
-      },
-    );
   }
 
   private _initOfflineBanner(): void {
