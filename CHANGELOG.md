@@ -1,3 +1,52 @@
+# [14.0.0-rc.0](https://github.com/johannesjo/super-productivity/compare/v13.1.5...v14.0.0-rc.0) (2025-06-27)
+
+### Bug Fixes
+
+- add e2e selectors to mobile buttons and resolve Electron IPC error ([e6c74ee](https://github.com/johannesjo/super-productivity/commit/e6c74eeb0e1d48f43e9d72bb6a815ab1b23e68f8))
+- add npm cache configuration to lighthouse-ci workflow ([e74a131](https://github.com/johannesjo/super-productivity/commit/e74a131d08c16cde5545240dbc55c739290dc6c8))
+- **build:** fix Android CI build by correcting Angular output paths ([b411a6f](https://github.com/johannesjo/super-productivity/commit/b411a6fc6e3d702427deec98d368f330e47f0a5d))
+- **ci:** update remaining commented snap path reference ([32fba86](https://github.com/johannesjo/super-productivity/commit/32fba869a46d099fa8a083cbf47d2144ff8cce08))
+- **e2e:** improve plugin disable/enable test reliability ([9340001](https://github.com/johannesjo/super-productivity/commit/9340001c58872c7304539e858ce849297ffe4a17))
+- **e2e:** improve plugin e2e test navigation and setup ([d79f926](https://github.com/johannesjo/super-productivity/commit/d79f9267ac54630651ecf76f908bf172430d0e9e))
+- **e2e:** move chromedriver logs to .tmp directory ([775b66f](https://github.com/johannesjo/super-productivity/commit/775b66f2ebd40e76e88cf98e396c79869137ed95))
+- **e2e:** restore test-plugin.zip and update test path ([0de18ab](https://github.com/johannesjo/super-productivity/commit/0de18ab05641101a5382d3e4ebabce08937d84c0))
+- **e2e:** update plugin e2e tests for new UI structure ([1f324f0](https://github.com/johannesjo/super-productivity/commit/1f324f023854e64578959968d9c30b83359c0da5))
+- **e2e:** update plugin e2e tests to use correct selectors and improve navigation ([a8081de](https://github.com/johannesjo/super-productivity/commit/a8081de69f1e143fc81410cab4cf5477161c78ad))
+- ensure release notes appear in all GitHub releases ([a712c59](https://github.com/johannesjo/super-productivity/commit/a712c59df0813fc42f11171b38a78e9c3e576366))
+- expose ElectronAPI to window in preload script ([81e340d](https://github.com/johannesjo/super-productivity/commit/81e340d445fa67c6ea0b08091ee94b61a14b706b))
+- replace deprecated ComponentFactoryResolver to fix NG02100 error on Android ([296f987](https://github.com/johannesjo/super-productivity/commit/296f987698fd66fc77a7d40bf39a9778b20d65e9)), closes [#4641](https://github.com/johannesjo/super-productivity/issues/4641)
+- resolve e2e test failures and build issues ([c7b65bc](https://github.com/johannesjo/super-productivity/commit/c7b65bc0032c574b0a6a279fb63469d1c3617cd4))
+- resolve unit test failures caused by task model changes ([f11b97a](https://github.com/johannesjo/super-productivity/commit/f11b97aeaecde54646657e3128385e3e808d4597))
+- **sync:** data being written before sync is done ([fa0a39b](https://github.com/johannesjo/super-productivity/commit/fa0a39be06d2999d6a9e4c50f5da8e7bfb33ac02))
+- **sync:** ensure Lamport stamp is higher than remote on conflict resolution ([9dfd35f](https://github.com/johannesjo/super-productivity/commit/9dfd35f5bd5fdddfd0465764c42a434b46264a4f))
+- **sync:** handle null values in dialog-sync-conflict component ([6d065f1](https://github.com/johannesjo/super-productivity/commit/6d065f1e51bd6f63abe463248127e49190d17cb2))
+- **sync:** include lastUpdateAction in sync upload metadata ([219cf88](https://github.com/johannesjo/super-productivity/commit/219cf8897e06f02c2556ac8695f474c5abe606c2))
+- **sync:** prevent sync loops by not incrementing change counter on receive ([df172cf](https://github.com/johannesjo/super-productivity/commit/df172cf3beed0a20120e279bccff2d58835153ef))
+- **task:** later today tasks ([9db74a9](https://github.com/johannesjo/super-productivity/commit/9db74a96baa59ec0fd93112a8fa828a6e17d41e6))
+- update MetaModelCtrl test to match current lastUpdateAction format ([96fb61b](https://github.com/johannesjo/super-productivity/commit/96fb61bc0be3c7d76815f3043523c52a3daca5b5))
+- use contextBridge for Electron API exposure with context isolation ([d2eecb4](https://github.com/johannesjo/super-productivity/commit/d2eecb49ec90b3655a125dab09628f8b4a34d116))
+- wrong function ([f5c3350](https://github.com/johannesjo/super-productivity/commit/f5c3350f43d3bda46459810560fa6ad18d660345))
+
+### Features
+
+- add Later Today section with disabled drag-and-drop [#4382](https://github.com/johannesjo/super-productivity/issues/4382) ([d978d33](https://github.com/johannesjo/super-productivity/commit/d978d33cd74b501219be5b7065f78f6642ff8c64))
+- **i18n:** add missing translations ([323d60f](https://github.com/johannesjo/super-productivity/commit/323d60fc88768b6091b7199a883632e824a65779))
+- **overlayIndicator:** implement basic overlay ([1c7eaad](https://github.com/johannesjo/super-productivity/commit/1c7eaad5bba8e790500c50ae0c0529246f8b14dd))
+- **plugin-api:** create foundational plugin API package ([d4d81bf](https://github.com/johannesjo/super-productivity/commit/d4d81bf5110fdc2390d5615171ea18c3b879462e))
+- **plugin:** cleanup and improve ([5d3bae6](https://github.com/johannesjo/super-productivity/commit/5d3bae6fc6a977c2bbe602dcd667be0c703045b2))
+- **sync:** add backwards compatibility for Lamport timestamp field names ([f30db31](https://github.com/johannesjo/super-productivity/commit/f30db3168b7aaaced006ad68ae3fe6acf41a08fb))
+- **sync:** add horizontal padding between table columns in conflict dialog ([b3a8229](https://github.com/johannesjo/super-productivity/commit/b3a82294f1137feb960371d318ae12f91b834d1e))
+- **sync:** add lastUpdateAction and lastSyncedAction to make it easier to reason about sync ([55a83be](https://github.com/johannesjo/super-productivity/commit/55a83be94911e85bdc393f638067be7cb156deab))
+- **sync:** extract untranslated strings in conflict dialog ([0d2edfe](https://github.com/johannesjo/super-productivity/commit/0d2edfe59013b045862eb1ece0cc021e7157e3eb))
+- **sync:** implement vector clock checking ([a08ad5a](https://github.com/johannesjo/super-productivity/commit/a08ad5ae9d0c8c16d0c4f306569b6618e0c582b3))
+- **sync:** improve conflict dialog ([e56ee5d](https://github.com/johannesjo/super-productivity/commit/e56ee5d8b4c6e5886e855518be27c2ec381b1977))
+- **sync:** improve conflict dialog ([5d876c0](https://github.com/johannesjo/super-productivity/commit/5d876c0594e0f9cabeace1c02b8519f7bc1f60c3))
+- **sync:** improve conflict dialog ([73eda7a](https://github.com/johannesjo/super-productivity/commit/73eda7a5c9232ac5e50126eb73057c87d1eb90ed))
+- **sync:** improve conflict dialog layout ([b0cb36e](https://github.com/johannesjo/super-productivity/commit/b0cb36eebbeb3ab465d359529fc2ec3c798071ad))
+- **sync:** improve dialog sync conflict ([5c4a8fe](https://github.com/johannesjo/super-productivity/commit/5c4a8fe37ed65816c6f693c861ccacd02b567283))
+- **sync:** improve mobile layout for conflict dialog ([133d1b6](https://github.com/johannesjo/super-productivity/commit/133d1b6145bcccd7a1f0767a31e754b069fe7f1a))
+- **webdav:** add another fallback method to get etag for PUT requests [#4634](https://github.com/johannesjo/super-productivity/issues/4634) ([046544c](https://github.com/johannesjo/super-productivity/commit/046544cc95329e23ffb69ec77b686e9c9ed3c87f))
+
 ## [13.1.5](https://github.com/johannesjo/super-productivity/compare/v13.1.4...v13.1.5) (2025-06-22)
 
 ### Bug Fixes
