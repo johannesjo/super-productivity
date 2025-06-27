@@ -80,7 +80,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: WinStoreRelease
-          path: app-builds/*.appx
+          path: .tmp/app-builds/*.appx
 #      - name: Upload to Microsoft Store
 #        if: startsWith(github.ref, 'refs/tags/v')
 #        uses: isaacrlevin/windows-store-action@1.0
@@ -89,5 +89,5 @@ jobs:
 #          client-id: ${{ secrets.AZURE_AD_CLIENT_ID }}
 #          client-secret: ${{ secrets.AZURE_AD_CLIENT_SECRET }}
 #          app-id: ${{ secrets.MICROSOFT_STORE_APP_ID }}
-#          package-path: 'app-builds/*.appx'
+#          package-path: '.tmp/app-builds/*.appx'
 #          skip-polling: false

@@ -10,7 +10,7 @@ module.exports = {
     start_process: true,
     port: 9515,
     server_path: require('chromedriver').path,
-    cli_args: [],
+    cli_args: ['--log-path=./.tmp/e2e-test-results/chromedriver.log'],
   },
 
   test_settings: {
