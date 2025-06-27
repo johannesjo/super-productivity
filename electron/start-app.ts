@@ -72,7 +72,6 @@ export const startApp = (): void => {
 
     if (isWayland || forceX11) {
       log('Applying X11/Wayland compatibility fixes');
-
       // Force Ozone platform to X11
       app.commandLine.appendSwitch('ozone-platform', 'x11');
 
@@ -84,7 +83,7 @@ export const startApp = (): void => {
       app.commandLine.appendSwitch('enable-features', 'UseSkiaRenderer');
 
       // Set GDK backend to X11
-      process.env.GDK_BACKEND = 'x11';
+      // process.env.GDK_BACKEND = 'x11';
     }
   }
 
