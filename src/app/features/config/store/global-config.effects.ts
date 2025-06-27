@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { filter, pairwise, tap } from 'rxjs/operators';
+import { filter, pairwise, tap, withLatestFrom } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { IS_ELECTRON, LanguageCode } from '../../../app.constants';
 import { T } from '../../../t.const';
@@ -145,4 +145,34 @@ export class GlobalConfigEffects {
       ),
     { dispatch: false },
   );
+
+  notifyElectronAboutCfgChange: any =
+    IS_ELECTRON &&
+    createEffect(
+      () =>
+        this._actions$.pipe(
+          ofType(updateGlobalConfigSection),
+          withLatestFrom(this._store.select('globalConfig')),
+          tap(([action, globalConfig]) => {
+            // Send the entire settings object to electron for overlay initialization
+            window.ea.sendSettingsUpdate(globalConfig);
+          }),
+        ),
+      { dispatch: false },
+    );
+
+  notifyElectronAboutCfgChangeInitially: any =
+    IS_ELECTRON &&
+    createEffect(
+      () =>
+        this._actions$.pipe(
+          ofType(loadAllData),
+          tap(({ appDataComplete }) => {
+            const cfg = appDataComplete.globalConfig || DEFAULT_GLOBAL_CONFIG;
+            // Send initial settings to electron for overlay initialization
+            window.ea.sendSettingsUpdate(cfg);
+          }),
+        ),
+      { dispatch: false },
+    );
 }

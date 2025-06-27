@@ -93,6 +93,11 @@ export const initDebug = (opts: any, isAddReload: boolean): void => {
   }
 
   app.on('browser-window-created', (event, win) => {
+    // Skip dev tools for overlay window
+    if (win.title === 'Super Productivity Overlay') {
+      return;
+    }
+
     if (opts.showDevTools) {
       win.webContents.once('devtools-opened', () => {
         // Workaround for https://github.com/electron/electron/issues/13095
