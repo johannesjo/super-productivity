@@ -6,12 +6,12 @@ files:
   - electron/**/*
   - '!electron/**/*.ts'
   - '!electron/**/*.js.map'
-  - dist/**/*
+  - .tmp/angular-dist/**/*
   - 'embedded.provisionprofile'
 #afterSign: ./tools/notarizeMacApp.js
 
 directories:
-  output: './app-builds'
+  output: './.tmp/deploy'
 
 win:
   target:

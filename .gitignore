@@ -1,11 +1,10 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
 # compiled output
+/.tmp
 /dist
 /app-builds
 /tmp
-/out-tsc
-/logs
 
 # dependencies
 /node_modules
@@ -45,9 +44,6 @@ yarn-error.log
 testem.log
 /typings
 chromedriver.log
-e2e-test-results
-e2e/screenshots
-perf-metrics-*.json
 .eslintcache
 
 # System Files

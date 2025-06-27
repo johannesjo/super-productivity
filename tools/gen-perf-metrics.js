@@ -1,7 +1,7 @@
 const fs = require('fs');
 
-const mi = JSON.parse(fs.readFileSync('perf-metrics-initial-load.json', 'utf8'));
-const mct = JSON.parse(fs.readFileSync('perf-metrics-create-tasks.json', 'utf8'));
+const mi = JSON.parse(fs.readFileSync('.tmp/perf-metrics-initial-load.json', 'utf8'));
+const mct = JSON.parse(fs.readFileSync('.tmp/perf-metrics-create-tasks.json', 'utf8'));
 
 const block = (m) => {
   return `
