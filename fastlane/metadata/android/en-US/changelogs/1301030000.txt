@@ -1,9 +1,0 @@
-
-### Bug Fixes
-
-* db lock warning during sync
-### Features
-
-* **i18n:** remove orphaned translations
-* **i18n:** update translations 1
-* **i18n:** update translations 2

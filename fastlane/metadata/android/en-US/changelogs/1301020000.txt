@@ -1,4 +1,0 @@
-
-### Bug Fixes
-
-* remove duplicate snap plugs causing build failure

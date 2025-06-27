@@ -52,6 +52,7 @@ const changelogPath = path.join(__dirname, '..', 'CHANGELOG.md');
 const outputDir = path.join(
   __dirname,
   '..',
+  'android',
   'fastlane',
   'metadata',
   'android',
