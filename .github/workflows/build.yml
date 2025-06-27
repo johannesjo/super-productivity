@@ -100,7 +100,7 @@ jobs:
           max_attempts: 2
           timeout_minutes: 11
           command: snapcraft push .tmp/app-builds/sp.snap --release edge
-      #      - run: snapcraft push app-builds/sp.snap --release candidate
+      #      - run: snapcraft push .tmp/app-builds/sp.snap --release candidate
       #        if: startsWith(github.ref, 'refs/tags/v')
   #      - run: snapcraft promote superproductivity --from-channel latest/edge --to-channel latest/candidate --yes
   #        if: startsWith(github.ref, 'refs/tags/v')
