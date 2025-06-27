@@ -24,6 +24,7 @@ export const autoFixTypiaErrors = (
       ) {
         const parsedValue = parseFloat(value);
         setValueByPath(data, keys, parsedValue);
+        console.warn(`Fixed: ${path} from string "${value}" to number ${parsedValue}`);
       } else if (keys[0] === 'globalConfig') {
         const defaultValue = getValueByPath(DEFAULT_GLOBAL_CONFIG, keys.slice(1));
         setValueByPath(data, keys, defaultValue);

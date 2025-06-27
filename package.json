@@ -208,7 +208,6 @@
     "ng2-charts": "^8.0.0",
     "ngx-markdown": "^19.0.0",
     "nightwatch": "^3.12.1",
-    "p-throttle": "^7.0.0",
     "prettier": "^3.5.1",
     "pretty-quick": "^4.1.1",
     "query-string": "^7.1.3",
