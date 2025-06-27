@@ -87,32 +87,38 @@ module.exports = {
       .navigateToPluginSettings()
       .waitForElementVisible(PLUGIN_ITEM)
       // Find the toggle for API Test Plugin
-      .execute(() => {
-        const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
-        const apiTestCard = cards.find((card) => {
-          const title = card.querySelector('mat-card-title')?.textContent || '';
-          return title.includes('API Test Plugin');
-        });
-        const toggle = apiTestCard?.querySelector(
-          'mat-slide-toggle button[role="switch"]',
-        ) as HTMLButtonElement;
-        
-        const result = {
-          found: !!apiTestCard,
-          hasToggle: !!toggle,
-          wasChecked: toggle?.getAttribute('aria-checked') === 'true',
-          clicked: false
-        };
-        
-        if (toggle && toggle.getAttribute('aria-checked') === 'true') {
-          toggle.click();
-          result.clicked = true;
-        }
-        
-        return result;
-      }, [], (result) => {
-        console.log('Disable plugin result:', result.value);
-      })
+      .execute(
+        () => {
+          const cards = Array.from(
+            document.querySelectorAll('plugin-management mat-card'),
+          );
+          const apiTestCard = cards.find((card) => {
+            const title = card.querySelector('mat-card-title')?.textContent || '';
+            return title.includes('API Test Plugin');
+          });
+          const toggle = apiTestCard?.querySelector(
+            'mat-slide-toggle button[role="switch"]',
+          ) as HTMLButtonElement;
+
+          const result = {
+            found: !!apiTestCard,
+            hasToggle: !!toggle,
+            wasChecked: toggle?.getAttribute('aria-checked') === 'true',
+            clicked: false,
+          };
+
+          if (toggle && toggle.getAttribute('aria-checked') === 'true') {
+            toggle.click();
+            result.clicked = true;
+          }
+
+          return result;
+        },
+        [],
+        (result) => {
+          console.log('Disable plugin result:', result.value);
+        },
+      )
       .pause(2000) // Give more time for plugin to unload
       // Navigate to main view to ensure menu updates
       .url('http://localhost:4200')
@@ -122,32 +128,38 @@ module.exports = {
       // Re-enable the plugin
       .navigateToPluginSettings()
       .pause(1000)
-      .execute(() => {
-        const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
-        const apiTestCard = cards.find((card) => {
-          const title = card.querySelector('mat-card-title')?.textContent || '';
-          return title.includes('API Test Plugin');
-        });
-        const toggle = apiTestCard?.querySelector(
-          'mat-slide-toggle button[role="switch"]',
-        ) as HTMLButtonElement;
-        
-        const result = {
-          found: !!apiTestCard,
-          hasToggle: !!toggle,
-          wasChecked: toggle?.getAttribute('aria-checked') === 'true',
-          clicked: false
-        };
-        
-        if (toggle && toggle.getAttribute('aria-checked') !== 'true') {
-          toggle.click();
-          result.clicked = true;
-        }
-        
-        return result;
-      }, [], (result) => {
-        console.log('Re-enable plugin result:', result.value);
-      })
+      .execute(
+        () => {
+          const cards = Array.from(
+            document.querySelectorAll('plugin-management mat-card'),
+          );
+          const apiTestCard = cards.find((card) => {
+            const title = card.querySelector('mat-card-title')?.textContent || '';
+            return title.includes('API Test Plugin');
+          });
+          const toggle = apiTestCard?.querySelector(
+            'mat-slide-toggle button[role="switch"]',
+          ) as HTMLButtonElement;
+
+          const result = {
+            found: !!apiTestCard,
+            hasToggle: !!toggle,
+            wasChecked: toggle?.getAttribute('aria-checked') === 'true',
+            clicked: false,
+          };
+
+          if (toggle && toggle.getAttribute('aria-checked') !== 'true') {
+            toggle.click();
+            result.clicked = true;
+          }
+
+          return result;
+        },
+        [],
+        (result) => {
+          console.log('Re-enable plugin result:', result.value);
+        },
+      )
       .pause(2000) // Give time for plugin to reload
       // Navigate back to main view
       .url('http://localhost:4200')

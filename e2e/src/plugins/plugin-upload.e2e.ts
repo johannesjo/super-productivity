@@ -29,7 +29,7 @@ module.exports = {
     // Use the test plugin from assets folder
     const testPluginPath = path.resolve(
       __dirname,
-      '../../../../dist/browser/assets/test-plugin.zip',
+      '../../../../src/assets/test-plugin.zip',
     );
 
     browser
