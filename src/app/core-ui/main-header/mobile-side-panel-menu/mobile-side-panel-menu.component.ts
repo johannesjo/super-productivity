@@ -82,6 +82,7 @@ import { BreakpointObserver } from '@angular/cdk/layout';
         <button
           mat-mini-fab
           color=""
+          class="e2e-toggle-issue-provider-panel"
           [class.active]="isShowIssuePanel()"
           [disabled]="!isRouteWithSidePanel()"
           (click)="toggleIssuePanel()"
@@ -94,6 +95,7 @@ import { BreakpointObserver } from '@angular/cdk/layout';
         <button
           mat-mini-fab
           color=""
+          class="e2e-toggle-notes-btn"
           [class.active]="isShowNotes()"
           [disabled]="!isRouteWithSidePanel()"
           (click)="toggleNotes()"
