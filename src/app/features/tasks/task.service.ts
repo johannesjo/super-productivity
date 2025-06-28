@@ -78,7 +78,7 @@ import {
   moveProjectTaskUpInBacklogList,
 } from '../project/store/project.actions';
 import { Update } from '@ngrx/entity';
-import { DateService } from 'src/app/core/date/date.service';
+import { DateService } from '../../core/date/date.service';
 import { TimeTrackingActions } from '../time-tracking/store/time-tracking.actions';
 import { ArchiveService } from '../time-tracking/archive.service';
 import { TaskArchiveService } from '../time-tracking/task-archive.service';
@@ -894,7 +894,11 @@ export class TaskService {
 
   async getByIdFromEverywhere(id: string, isArchive?: boolean): Promise<Task> {
     if (isArchive === undefined) {
-      return this.getByIdOnce$(id).toPromise() || this._taskArchiveService.getById(id);
+      const task = await this.getByIdOnce$(id).toPromise();
+      if (task) {
+        return task;
+      }
+      return await this._taskArchiveService.getById(id);
     }
 
     if (isArchive) {
