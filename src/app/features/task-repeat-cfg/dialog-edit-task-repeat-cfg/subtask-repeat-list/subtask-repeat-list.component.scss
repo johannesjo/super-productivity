@@ -1,32 +1,30 @@
-@import '../../../../../variables';
-
 :host {
   display: block;
   width: 100%;
 }
 
 .subtask-list {
-  margin-bottom: $s * 2;
+  margin-bottom: var(--s2);
 }
 
 .subtask-item {
-  margin-bottom: $s;
+  margin-bottom: var(--s);
   position: relative;
 
   mat-card {
-    padding: $s;
+    padding: var(--s);
   }
 }
 
 .subtask-form {
   display: flex;
   flex-direction: column;
-  gap: $s;
+  gap: var(--s);
 }
 
 .subtask-form-row {
   display: flex;
-  gap: $s;
+  gap: var(--s);
   align-items: flex-start;
 
   mat-form-field {
@@ -44,18 +42,18 @@
 }
 
 .remove-btn {
-  margin-top: $s;
+  margin-top: var(--s);
   align-self: flex-start;
 }
 
 .add-subtask-btn {
   width: 100%;
-  margin-top: $s;
+  margin-top: var(--s);
 }
 
 .empty-state {
   text-align: center;
-  color: #666;
+  color: var(--theme-task-detail-value-color);
   font-style: italic;
-  padding: $s * 2;
+  padding: var(--s2);
 }
