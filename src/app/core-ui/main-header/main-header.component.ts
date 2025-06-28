@@ -2,13 +2,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  ElementRef,
   inject,
   OnDestroy,
-  OnInit,
-  Renderer2,
   signal,
-  viewChild,
 } from '@angular/core';
 import { ProjectService } from '../../features/project/project.service';
 import { LayoutService } from '../layout/layout.service';
@@ -48,6 +44,9 @@ import { showFocusOverlay } from '../../features/focus-mode/store/focus-mode.act
 import { SyncStatus } from '../../pfapi/api';
 import { PluginHeaderBtnsComponent } from '../../plugins/ui/plugin-header-btns.component';
 import { PluginSidePanelBtnsComponent } from '../../plugins/ui/plugin-side-panel-btns.component';
+import { WorkContextTitleComponent } from './work-context-title/work-context-title.component';
+import { PlayButtonComponent } from './play-button/play-button.component';
+import { DesktopPanelButtonsComponent } from './desktop-panel-buttons/desktop-panel-buttons.component';
 import { MobileSidePanelMenuComponent } from './mobile-side-panel-menu/mobile-side-panel-menu.component';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -78,9 +77,12 @@ import { toSignal } from '@angular/core/rxjs-interop';
     PluginHeaderBtnsComponent,
     PluginSidePanelBtnsComponent,
     MobileSidePanelMenuComponent,
+    WorkContextTitleComponent,
+    PlayButtonComponent,
+    DesktopPanelButtonsComponent,
   ],
 })
-export class MainHeaderComponent implements OnInit, OnDestroy {
+export class MainHeaderComponent implements OnDestroy {
   readonly projectService = inject(ProjectService);
   readonly matDialog = inject(MatDialog);
   readonly workContextService = inject(WorkContextService);
@@ -116,8 +118,6 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   });
 
   showDesktopButtons = computed(() => !this.isXs());
-
-  readonly circleSvg = viewChild<ElementRef>('circleSvg');
 
   private _currentTaskContext$ = this.taskService.currentTaskParentOrCurrent$.pipe(
     filter((ct) => !!ct),
@@ -192,20 +192,6 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this._subs.unsubscribe();
-  }
-
-  ngOnInit(): void {
-    this.taskService.currentTaskProgress$.subscribe((progressIN) => {
-      const circleSvg = this.circleSvg();
-      if (circleSvg) {
-        let progress = progressIN || 1;
-        if (progress > 1) {
-          progress = 1;
-        }
-        const dashOffset = this.circumference * -1 * progress;
-        this._renderer.setStyle(circleSvg.nativeElement, 'stroke-dashoffset', dashOffset);
-      }
-    });
   }
 
   trackById(i: number, item: SimpleCounter): string {

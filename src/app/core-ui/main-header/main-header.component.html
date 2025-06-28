@@ -9,34 +9,10 @@
     </button>
   }
 
-  @if (activeWorkContextTypeAndId()) {
-    <div
-      [matTooltip]="T.MH.GO_TO_TASK_LIST | translate"
-      class="current-work-context-title"
-      mat-ripple
-      routerLink="/active/tasks"
-    >
-      {{ activeWorkContextTitle() }}
-    </div>
-    @if (!isXxxs()) {
-      <button
-        [mat-menu-trigger-for]="activeWorkContextMenu"
-        [matTooltip]="T.MH.PROJECT_MENU | translate"
-        class="project-settings-btn"
-        mat-icon-button
-      >
-        <mat-icon>more_vert</mat-icon>
-      </button>
-    }
-    <mat-menu #activeWorkContextMenu="matMenu">
-      <ng-template matMenuContent>
-        <work-context-menu
-          [contextId]="activeWorkContextTypeAndId()!.activeId"
-          [contextType]="activeWorkContextTypeAndId()!.activeType"
-        ></work-context-menu>
-      </ng-template>
-    </mat-menu>
-  }
+  <work-context-title
+    [title]="activeWorkContextTitle()"
+    [activeWorkContextTypeAndId]="activeWorkContextTypeAndId()"
+  ></work-context-title>
 
   @if (isScheduleSection()) {
     <div class="week-month-selector">
@@ -117,100 +93,14 @@
 
     <plugin-header-btns></plugin-header-btns>
 
-    <div class="play-btn-wrapper">
-      @if (currentTask(); as task) {
-        <div
-          @fade
-          class="current-task-title"
-        >
-          <div class="title">{{ task.title }}</div>
-          @if (currentTaskContext(); as taskContext) {
-            <tag
-              @expandFadeHorizontal
-              [tag]="taskContext"
-              class="project"
-            ></tag>
-          }
-        </div>
-      }
-      @if (currentTaskId()) {
-        <div class="pulse-circle"></div>
-      }
-
-      <button
-        (click)="taskService.toggleStartTask()"
-        [color]="currentTaskId() ? 'accent' : 'primary'"
-        matTooltip="{{ T.MH.TOGGLE_TRACK_TIME | translate }}"
-        [matTooltipPosition]="pomodoroIsEnabled() ? 'left' : 'below'"
-        class="play-btn tour-playBtn mat-elevation-z3"
-        mat-mini-fab
-      >
-        @if (pomodoroIsEnabled()) {
-          @if (pomodoroIsBreak()) {
-            <mat-icon>free_breakfast</mat-icon>
-          } @else {
-            @if (!currentTaskId()) {
-              <mat-icon>play_arrow</mat-icon>
-            } @else {
-              <mat-icon>pause</mat-icon>
-            }
-          }
-        } @else {
-          @if (!currentTaskId()) {
-            <mat-icon>play_arrow</mat-icon>
-          } @else {
-            <mat-icon>pause</mat-icon>
-          }
-        }
-
-        <svg
-          class="circle-svg"
-          focusable="false"
-          height="40"
-          width="40"
-        >
-          <circle
-            #circleSvg
-            cx="50%"
-            cy="50%"
-            fill="none"
-            r="10"
-            stroke="#000"
-            stroke-dasharray="81.6814089933"
-            stroke-dashoffset="-81.6814089933"
-            stroke-width="20"
-          ></circle>
-        </svg>
-      </button>
-
-      @if (pomodoroIsEnabled()) {
-        <div class="pomodoro-label">
-          {{ pomodoroCurrentSessionTime() | msToMinuteClockString }}
-        </div>
-        <div class="pomodoro-controls">
-          <button
-            (click)="pomodoroService.finishPomodoroSession()"
-            [matTooltip]="T.F.POMODORO.S.SESSION_SKIP | translate"
-            matTooltipPosition="left"
-            class="pomodoro-btn"
-            color=""
-            mat-mini-fab
-          >
-            <mat-icon>skip_next</mat-icon>
-          </button>
-          <button
-            (click)="pomodoroService.stop()"
-            [matTooltip]="T.F.POMODORO.S.RESET | translate"
-            matTooltipPosition="left"
-            class="pomodoro-btn"
-            color=""
-            mat-mini-fab
-          >
-            <mat-icon>restart_alt</mat-icon>
-          </button>
-        </div>
-      }
-    </div>
+    <play-button
+      [currentTask]="currentTask()"
+      [currentTaskId]="currentTaskId()"
+      [currentTaskContext]="currentTaskContext()"
+      [pomodoroIsEnabled]="pomodoroIsEnabled()"
+      [pomodoroIsBreak]="pomodoroIsBreak()"
+      [pomodoroCurrentSessionTime]="pomodoroCurrentSessionTime()"
+    ></play-button>
 
     <!-- Desktop: Show all buttons inline -->
     @if (showDesktopButtons()) {
@@ -227,47 +117,13 @@
 
       <plugin-side-panel-btns></plugin-side-panel-btns>
 
-      <button
-        class="panel-btn"
-        [disabled]="!isRouteWithSidePanel()"
-        [class.isActive]="isShowTaskViewCustomizerPanel()"
-        [class.isCustomized]="taskViewCustomizerService.isCustomized()"
-        (click)="layoutService.toggleTaskViewCustomizerPanel()"
-        mat-icon-button
-        matTooltip="{{ T.GCF.KEYBOARD.TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL | translate }} {{
-          kb.toggleTaskViewCustomizerPanel
-            ? '[' + kb.toggleTaskViewCustomizerPanel + ']'
-            : ''
-        }}"
-      >
-        <mat-icon>filter_list</mat-icon>
-      </button>
-
-      <button
-        class="panel-btn e2e-toggle-issue-provider-panel"
-        [disabled]="!isRouteWithSidePanel()"
-        [class.isActive]="isShowIssuePanel()"
-        (click)="layoutService.toggleAddTaskPanel()"
-        mat-icon-button
-        matTooltip="{{ T.MH.TOGGLE_SHOW_ISSUE_PANEL | translate }} {{
-          kb.toggleIssuePanel ? '[' + kb.toggleIssuePanel + ']' : ''
-        }}"
-      >
-        <mat-icon>playlist_add</mat-icon>
-      </button>
-
-      <button
-        class="panel-btn e2e-toggle-notes-btn"
-        [disabled]="!isRouteWithSidePanel()"
-        [class.isActive]="isShowNotes()"
-        (click)="layoutService.toggleNotes()"
-        mat-icon-button
-        matTooltip="{{ T.MH.TOGGLE_SHOW_NOTES | translate }} {{
-          kb.openProjectNotes ? '[' + kb.openProjectNotes + ']' : ''
-        }}"
-      >
-        <mat-icon>comment</mat-icon>
-      </button>
+      <desktop-panel-buttons
+        [kb]="kb"
+        [isRouteWithSidePanel]="isRouteWithSidePanel()"
+        [isShowTaskViewCustomizerPanel]="isShowTaskViewCustomizerPanel()"
+        [isShowIssuePanel]="isShowIssuePanel()"
+        [isShowNotes]="isShowNotes()"
+      ></desktop-panel-buttons>
     }
 
     <!-- Mobile: Show dropdown menus -->
