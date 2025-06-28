@@ -331,13 +331,47 @@ button.isActive2 {
 // Panel buttons
 .panel-btn {
   position: relative;
+  transition: all 0.2s ease;
+  overflow: visible !important;
 
   &.isActive {
-    background-color: var(--theme-sidebar-bg);
+    background-color: transparent;
 
-    &.isCustomized {
-      background-color: var(--c-accent);
+    .mat-icon {
+      transition: all 0.2s ease;
+      transform: rotate(45deg);
     }
+
+    &::after {
+      border-radius: 4px;
+      box-shadow: 0px -2px 3px 0px var(--theme-separator-alpha);
+      background: var(--theme-sidebar-bg);
+      content: '';
+      width: 100%;
+      position: absolute;
+      left: 1px;
+      top: 0;
+      bottom: -5px;
+      z-index: -1;
+    }
+
+    &.isCustomized::after {
+      background: var(--c-accent);
+    }
+  }
+
+  &:hover:not(.isActive):not(:disabled) {
+    background-color: var(--hover-color, rgba(0, 0, 0, 0.04));
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: transparent !important;
+  }
+
+  &:disabled::after {
+    background: transparent !important;
   }
 }
 
