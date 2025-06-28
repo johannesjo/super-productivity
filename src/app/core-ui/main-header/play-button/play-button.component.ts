@@ -133,8 +133,6 @@ import { Subscription } from 'rxjs';
   `,
   styles: [
     `
-      @import '../../../../common';
-
       :host {
         display: contents;
       }
@@ -157,7 +155,7 @@ import { Subscription } from 'rxjs';
       .play-btn-wrapper {
         position: relative;
 
-        @include mq(xs) {
+        @media (min-width: 600px) {
           margin-left: var(--s);
         }
 
@@ -277,7 +275,7 @@ import { Subscription } from 'rxjs';
         display: flex;
         background: var(--theme-bg-lighter);
 
-        @include mq(xs, max) {
+        @media (max-width: 599px) {
           display: none;
         }
 
@@ -317,18 +315,19 @@ export class PlayButtonComponent implements OnInit, OnDestroy {
 
   private _circleProgressAnimation?: any;
   private _subs = new Subscription();
+  private circumference = 47 * 2 * Math.PI;
 
   ngOnInit(): void {
     const circleSvgEl = this.circleSvg()?.nativeElement;
-    if (this.pomodoroIsEnabled() && circleSvgEl) {
+    if (circleSvgEl) {
       this._subs.add(
-        this.pomodoroService.progress$.subscribe((progress) => {
-          this._circleProgressAnimation = this._renderer.setStyle(
-            circleSvgEl,
-            'stroke-dashoffset',
-            // eslint-disable-next-line no-mixed-operators
-            81.6814089933 - 81.6814089933 * progress + 'px',
-          );
+        this.taskService.currentTaskProgress$.subscribe((progressIN) => {
+          let progress = progressIN || 1;
+          if (progress > 1) {
+            progress = 1;
+          }
+          const dashOffset = this.circumference * -1 * progress;
+          this._renderer.setStyle(circleSvgEl, 'stroke-dashoffset', dashOffset);
         }),
       );
     }

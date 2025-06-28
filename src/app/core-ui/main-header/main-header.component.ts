@@ -4,6 +4,7 @@ import {
   computed,
   inject,
   OnDestroy,
+  Renderer2,
   signal,
 } from '@angular/core';
 import { ProjectService } from '../../features/project/project.service';

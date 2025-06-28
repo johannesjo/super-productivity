@@ -57,8 +57,6 @@ import { KeyboardConfig } from '../../../features/config/keyboard-config.model';
   `,
   styles: [
     `
-      @import '../../../../common';
-
       :host {
         display: contents;
       }

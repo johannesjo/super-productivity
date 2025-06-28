@@ -8,7 +8,6 @@ import { MatMenu, MatMenuContent, MatMenuTrigger } from '@angular/material/menu'
 import { WorkContextMenuComponent } from '../../work-context-menu/work-context-menu.component';
 import { TranslatePipe } from '@ngx-translate/core';
 import { T } from '../../../t.const';
-import { WorkContextTypeAndActiveId } from '../../../features/work-context/work-context.model';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
@@ -74,7 +73,7 @@ import { map } from 'rxjs/operators';
         border-radius: var(--card-border-radius);
         padding: var(--s) var(--s2) var(--s) var(--s);
 
-        @include mq(xs) {
+        @media (min-width: 600px) {
           padding-right: var(--s);
         }
 
@@ -85,7 +84,7 @@ import { map } from 'rxjs/operators';
 
       .project-settings-btn {
         display: none;
-        @include mq(xs) {
+        @media (min-width: 600px) {
           display: block;
           transition: var(--transition-standard);
           opacity: 0;
@@ -109,7 +108,10 @@ export class WorkContextTitleComponent {
 
   readonly T = T;
   readonly title = input.required<string>();
-  readonly activeWorkContextTypeAndId = input<WorkContextTypeAndActiveId | null>();
+  readonly activeWorkContextTypeAndId = input<{
+    activeId: string;
+    activeType: 'PROJECT' | 'TAG';
+  } | null>();
 
   private _isXxxs$ = this._breakpointObserver.observe('(max-width: 350px)');
   isXxxs = toSignal(this._isXxxs$.pipe(map((result) => result.matches)), {
