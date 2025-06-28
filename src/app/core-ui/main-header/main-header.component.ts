@@ -1,14 +1,14 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   ElementRef,
   inject,
   OnDestroy,
   OnInit,
   Renderer2,
-  viewChild,
-  computed,
   signal,
+  viewChild,
 } from '@angular/core';
 import { ProjectService } from '../../features/project/project.service';
 import { LayoutService } from '../layout/layout.service';
@@ -36,6 +36,7 @@ import { MatMenu, MatMenuContent, MatMenuTrigger } from '@angular/material/menu'
 import { WorkContextMenuComponent } from '../work-context-menu/work-context-menu.component';
 import { MsToMinuteClockStringPipe } from '../../ui/duration/ms-to-minute-clock-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
+import { AsyncPipe } from '@angular/common';
 import { TagComponent } from '../../features/tag/tag/tag.component';
 import { SimpleCounterButtonComponent } from '../../features/simple-counter/simple-counter-button/simple-counter-button.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -70,6 +71,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
     MatMiniFabButton,
     MsToMinuteClockStringPipe,
     TranslatePipe,
+    AsyncPipe,
     TagComponent,
     SimpleCounterButtonComponent,
     LongPressDirective,
@@ -100,9 +102,6 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   progressCircleRadius: number = 10;
   circumference: number = this.progressCircleRadius * Math.PI * 2;
   isShowSimpleCounterBtnsMobile = signal(false);
-  get isScheduleSection(): boolean {
-    return this._router.url.includes('schedule');
-  }
 
   // Convert breakpoint observer to signals
   private _isXs$ = this.breakpointObserver.observe('(max-width: 600px)');
@@ -147,8 +146,14 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     map((event) => !!event.urlAfterRedirects.match(/(tasks|daily-summary)$/)),
     startWith(!!this._router.url.match(/(tasks|daily-summary)$/)),
   );
-
   isRouteWithSidePanel = toSignal(this._isRouteWithSidePanel$, { initialValue: false });
+
+  private _isScheduleSection$ = this._router.events.pipe(
+    filter((event: any) => event instanceof NavigationEnd),
+    map((event) => !!event.urlAfterRedirects.match(/(schedule)$/)),
+    startWith(!!this._router.url.match(/(schedule)$/)),
+  );
+  isScheduleSection = toSignal(this._isScheduleSection$, { initialValue: false });
 
   // Convert more observables to signals
   activeWorkContextTypeAndId = toSignal(

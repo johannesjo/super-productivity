@@ -1,8 +1,7 @@
 @import '../../../common';
 
-$mobileHorizontalPadding: 8px;
-$navVerticalPadding: 4px;
-$macExtraPadding: calc(var(--mac-title-bar-padding) - 8px);
+// Using CSS variables and direct values
+// Note: These local variables are replaced with direct values or CSS variables
 
 :host {
   display: block;
@@ -12,7 +11,7 @@ $macExtraPadding: calc(var(--mac-title-bar-padding) - 8px);
 }
 
 :host-context(.isMac.isElectron) {
-  padding-top: $macExtraPadding;
+  padding-top: calc(var(--mac-title-bar-padding) - 8px);
   -webkit-app-region: drag;
   cursor: grab;
 
@@ -39,13 +38,13 @@ $macExtraPadding: calc(var(--mac-title-bar-padding) - 8px);
   flex-direction: row;
   flex-wrap: nowrap;
   align-items: center;
-  padding: $navVerticalPadding $mobileHorizontalPadding;
+  padding: 4px 8px;
   //flex-wrap: wrap;
   min-height: var(--bar-height-large);
 
   @include mq(xs) {
     min-height: var(--bar-height);
-    padding: $navVerticalPadding 16px;
+    padding: 4px 16px;
   }
 }
 
@@ -116,91 +115,6 @@ button.isActive2 {
     @include mq(xs) {
       margin-left: var(--s);
     }
-  }
-}
-
-.week-month-selector {
-  display: flex;
-  border-radius: $card-border-radius;
-  overflow: hidden;
-  margin-right: $s * 0.25;
-  box-shadow: $whiteframe-shadow-2dp;
-
-  @include mq(xs) {
-    margin-right: $s;
-  }
-
-  @include mq(xs, max) {
-    margin-right: $s * 0.125;
-  }
-}
-
-.week-month-btn {
-  min-width: 48px;
-  height: 36px;
-  padding: 0 $s;
-  font-size: 12px;
-  font-weight: 500;
-  text-transform: uppercase;
-  border: none;
-  border-radius: 0;
-  transition: $transition-standard;
-  cursor: pointer;
-  position: relative;
-
-  @include mq(xs, max) {
-    min-width: 40px;
-    padding: 0 $s * 0.75;
-    font-size: 11px;
-  }
-
-  @include lightTheme() {
-    background: rgba($c-primary, 0.7);
-    color: white;
-
-    &:hover {
-      background: rgba($c-primary, 0.9);
-    }
-
-    &.active {
-      background: $c-primary;
-      color: white;
-      font-weight: 600;
-    }
-  }
-
-  @include darkTheme() {
-    background: $dark-theme-bg-lighter;
-    color: $dark-theme-text-color;
-
-    &:hover {
-      background: $dark8;
-    }
-
-    &.active {
-      background: $c-primary;
-      color: white;
-      font-weight: 600;
-    }
-  }
-
-  &:first-child {
-    border-right: 1px solid rgba(255, 255, 255, 0.2);
-    border-top-left-radius: $card-border-radius;
-    border-bottom-left-radius: $card-border-radius;
-
-    @include darkTheme() {
-      border-right-color: rgba(255, 255, 255, 0.1);
-    }
-  }
-
-  &:last-child {
-    border-top-right-radius: $card-border-radius;
-    border-bottom-right-radius: $card-border-radius;
-  }
-
-  &:focus {
-    outline: none;
   }
 }
 
@@ -446,5 +360,83 @@ button.isActive2 {
 @keyframes spin {
   100% {
     transform: rotate(-360deg);
+  }
+}
+
+.week-month-selector {
+  display: flex;
+  border-radius: var(--card-border-radius);
+  overflow: hidden;
+  margin-right: calc(var(--s) * 0.25);
+  box-shadow: var(--whiteframe-shadow-2dp);
+
+  @include mq(xs) {
+    margin-right: var(--s);
+  }
+
+  @include mq(xs, max) {
+    margin-right: calc(var(--s) * 0.125);
+  }
+}
+
+.week-month-btn {
+  min-width: 48px;
+  height: 36px;
+  padding: 0 var(--s);
+  font-size: 12px;
+  font-weight: 500;
+  //text-transform: uppercase;
+  border: none;
+  border-radius: 0;
+  transition: var(--transition-standard);
+  cursor: pointer;
+  position: relative;
+
+  @include mq(xs, max) {
+    min-width: 40px;
+    padding: 0 calc(var(--s) * 0.75);
+    font-size: 11px;
+  }
+
+  @include lightTheme() {
+    &.active {
+      background: var(--c-primary);
+      color: white;
+      font-weight: 600;
+    }
+  }
+
+  @include darkTheme() {
+    background: var(--theme-bg-lighter);
+    color: var(--theme-text-color);
+
+    &:hover {
+      background: var(--dark8);
+    }
+
+    &.active {
+      background: var(--c-primary);
+      color: white;
+      font-weight: 600;
+    }
+  }
+
+  &:first-child {
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    border-top-left-radius: var(--card-border-radius);
+    border-bottom-left-radius: var(--card-border-radius);
+
+    @include darkTheme() {
+      border-right-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  &:last-child {
+    border-top-right-radius: var(--card-border-radius);
+    border-bottom-right-radius: var(--card-border-radius);
+  }
+
+  &:focus {
+    outline: none;
   }
 }

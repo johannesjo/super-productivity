@@ -372,10 +372,10 @@ schedule-event.cdk-drag-dragging + schedule-event {
   grid-template-rows: auto repeat(var(--nr-of-weeks), 1fr);
   gap: 1px;
   height: calc(100vh - 120px);
-  background: $grid-color;
+  background: var(--theme-grid-color);
 
   @include darkTheme() {
-    background: $grid-color-dark;
+    background: var(--theme-grid-color);
   }
 
   .cdk-drag-dragging {
@@ -434,15 +434,15 @@ schedule-event.cdk-drag-dragging + schedule-event {
   text-align: center;
   font-weight: 600;
   padding: 6px;
-  background: $light-theme-bg;
-  color: $light-theme-text-color;
-  border: 1px solid $grid-color;
+  background: var(--theme-bg);
+  color: var(--theme-text-color);
+  border: 1px solid var(--theme-grid-color);
   grid-row: 1;
 
   @include darkTheme() {
-    background: $dark-theme-bg-lighter;
-    color: $dark-theme-text-color;
-    border-color: $grid-color-dark;
+    background: var(--theme-bg-lighter);
+    color: var(--theme-text-color);
+    border-color: var(--theme-grid-color);
   }
 
   @include mq(xs, max) {
@@ -474,8 +474,8 @@ schedule-event.cdk-drag-dragging + schedule-event {
 }
 
 .month-day-cell {
-  background: $light-theme-bg;
-  border: 1px solid $grid-color;
+  background: var(--theme-bg);
+  border: 1px solid var(--theme-grid-color);
   display: flex;
   flex-direction: column;
   min-height: 80px;
@@ -485,8 +485,8 @@ schedule-event.cdk-drag-dragging + schedule-event {
   overflow: hidden;
 
   @include darkTheme() {
-    background: $dark-theme-bg;
-    border-color: $grid-color-dark;
+    background: var(--theme-bg-darker);
+    border-color: var(--theme-grid-color);
   }
 
   :host[style*='--nr-of-weeks: 3'] & {
@@ -527,16 +527,16 @@ schedule-event.cdk-drag-dragging + schedule-event {
 
   &.other-month {
     opacity: 0.4;
-    background: lighten($light-theme-bg, 3%);
+    background: var(--theme-bg-lighter);
 
     @include darkTheme() {
-      background: darken($dark-theme-bg, 2%);
+      background: var(--theme-bg-darker);
     }
   }
 
   &.today {
     .month-day-number {
-      background: $c-primary;
+      background: var(--c-primary);
       color: white;
       border-radius: 50%;
       width: 24px;
@@ -555,10 +555,10 @@ schedule-event.cdk-drag-dragging + schedule-event {
 
   // Hover effect
   &:hover {
-    background: lighten($light-theme-bg, 1%);
+    background: var(--theme-bg-lighter);
 
     @include darkTheme() {
-      background: lighten($dark-theme-bg, 5%);
+      background: var(--theme-bg-lighter);
     }
   }
 
@@ -574,10 +574,10 @@ schedule-event.cdk-drag-dragging + schedule-event {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid $grid-color;
+  border-bottom: 1px solid var(--theme-grid-color);
 
   @include darkTheme() {
-    border-color: $grid-color-dark;
+    border-color: var(--theme-grid-color);
   }
 
   @include mq(xs, max) {
@@ -732,7 +732,7 @@ schedule-event.cdk-drag-dragging + schedule-event {
   display: inline-block;
   width: 7px;
   height: 7px;
-  background: $c-accent;
+  background: var(--c-accent);
   border-radius: 50%;
   margin-left: 4px;
   vertical-align: middle;

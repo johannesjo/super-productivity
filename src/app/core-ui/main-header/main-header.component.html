@@ -38,7 +38,7 @@
     </mat-menu>
   }
 
-  @if (isScheduleSection) {
+  @if (isScheduleSection()) {
     <div class="week-month-selector">
       <button
         (click)="selectTimeView('week')"
@@ -47,7 +47,7 @@
         matTooltip="View Week"
         mat-button
       >
-        {{ 'GCF.SCHEDULE.WEEK' | translate }}
+        {{ T.GCF.SCHEDULE.WEEK | translate }}
       </button>
       <button
         (click)="selectTimeView('month')"
@@ -56,7 +56,7 @@
         matTooltip="View Month"
         mat-button
       >
-        {{ 'GCF.SCHEDULE.MONTH' | translate }}
+        {{ T.GCF.SCHEDULE.MONTH | translate }}
       </button>
     </div>
   }
