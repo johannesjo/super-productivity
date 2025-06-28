@@ -1,0 +1,205 @@
+@use 'angular-material-css-vars' as mat-css-vars;
+@import '../../../../common';
+
+.week-grid-container {
+  --schedule-time-width: 3em;
+  --schedule-row-height: 11px;
+  --schedule-row-height-mobile: 7px;
+  --schedule-fr: 12;
+  --schedule-total-rows: calc(24 * var(--schedule-fr));
+
+  grid-auto-flow: column;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  grid-auto-columns: 1fr;
+  grid-template-columns: var(--schedule-time-width) repeat(var(--nr-of-days), 1fr);
+  grid-template-rows: repeat(var(--schedule-total-rows), var(--schedule-row-height));
+
+  @include mq(xs, max) {
+    grid-template-rows: repeat(
+      var(--schedule-total-rows),
+      var(--schedule-row-height-mobile)
+    );
+  }
+
+  &.isCtrlKeyPressed {
+    schedule-event,
+    .work-start,
+    .work-end {
+      pointer-events: none !important;
+    }
+  }
+}
+
+.time {
+  grid-column: 1;
+  align-self: end;
+  font-size: 80%;
+  position: relative;
+  color: var(--theme-text-color-muted);
+  padding-right: 6px;
+  line-height: 1.2;
+  text-align: right;
+}
+
+.col {
+  border-left: 1px solid var(--theme-grid-color);
+  grid-row: 1 / span var(--schedule-total-rows);
+  grid-column: span 1;
+
+  &.drag-over {
+    background: mat-css-vars.mat-css-color-primary($opacity: 0.2);
+  }
+}
+
+.row {
+  grid-column: 2 / -1;
+  border-top: 1px solid var(--theme-grid-color);
+  pointer-events: none;
+}
+
+.current-time {
+  border-top: 2px solid var(--c-accent);
+  position: relative;
+  top: calc(50% - 1px);
+}
+
+.circle {
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--c-accent);
+  border-radius: 50%;
+  background: var(--c-accent);
+  position: relative;
+  top: -6px;
+  left: -6px;
+}
+
+.cdk-drag-dragging {
+  position: relative;
+  z-index: 99 !important;
+  box-shadow: var(--whiteframe-shadow-20dp);
+}
+
+.drop-label {
+  display: none;
+  top: 40px;
+  position: sticky;
+  line-height: 1.2;
+  padding: 4px 4px;
+  justify-content: stretch;
+  align-self: start;
+  z-index: 33;
+  box-shadow: var(--whiteframe-shadow-4dp);
+  width: inherit;
+  flex-direction: column;
+  border: 1px dashed var(--c-primary);
+  background: var(--c-primary);
+  color: var(--palette-primary-contrast-500);
+  pointer-events: none;
+
+  .drag-over & {
+    display: flex;
+  }
+}
+
+.excess-entries {
+  z-index: 10;
+  position: sticky;
+  bottom: -2px;
+  max-height: 100px;
+  padding-bottom: 30px;
+  border-top: 4px solid var(--c-warn);
+  border: 2px solid var(--c-warn);
+  box-shadow: var(--whiteframe-shadow-6dp);
+  border-radius: 4px;
+  background: var(--theme-bg);
+
+  @media (min-height: 1000px) {
+    max-height: 200px;
+  }
+
+  schedule-event {
+    margin: 5px;
+  }
+}
+
+.excess-entries-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+
+  @include mq(xs, max) {
+    padding: 4px;
+  }
+
+  mat-icon {
+    font-size: 20px;
+    height: 20px;
+
+    @include mq(xs, max) {
+      font-size: 16px;
+      height: 16px;
+    }
+  }
+}
+
+.work-end,
+.work-start {
+  scroll-margin-top: 80px;
+  border-top: 2px dashed var(--theme-separator-color);
+  min-width: 100px;
+  grid-column: 2 / -1;
+  position: relative;
+  color: var(--theme-text-color);
+
+  &:hover {
+    z-index: 22;
+    border-color: var(--theme-text-color-most-intense);
+  }
+
+  > div {
+    left: 0;
+    font-weight: bold;
+    font-size: 10px;
+    position: absolute;
+    bottom: 100%;
+    line-height: 1;
+    padding: 2px 8px;
+    margin-bottom: -6px;
+    background: var(--theme-bg);
+  }
+
+  .is-dragging & {
+    pointer-events: none;
+  }
+}
+
+.work-end {
+  > div {
+    bottom: auto;
+    top: 100%;
+    margin-bottom: 0;
+    margin-top: -16px;
+  }
+}
+
+// prevent moving out the way
+schedule-event.cdk-drag-dragging + schedule-event {
+  transform: translateY(0);
+
+  &:after {
+    display: none;
+  }
+}
+
+// no animation feels slicker and is less error prone
+.cdk-drag {
+  transition: none !important;
+}
+
+.cdk-drag-animating {
+  transition: none !important;
+}
