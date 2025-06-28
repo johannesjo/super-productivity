@@ -1147,7 +1147,9 @@
         "START": "Inizia attività",
         "SWITCH_CONTEXT_START": "Cambia progetto & inizia attività",
         "UNSCHEDULE": "Rimuovi pianificazione",
-        "UNSCHEDULE_ALL": "Rimuovi tutte le pianificazioni"
+        "UNSCHEDULE_ALL": "Rimuovi tutte le pianificazioni",
+        "DISMISS_REMINDER_KEEP_TODAY": "Ignora promemoria (Mantieni in Oggi)",
+        "DISMISS_ALL_REMINDERS_KEEP_TODAY": "Ignora tutti i promemoria (Mantieni in Oggi)"
       },
       "D_SCHEDULE_TASK": {
         "MOVE_TO_BACKLOG": "Sposta attività negli arretrati finché non viene pianificata",

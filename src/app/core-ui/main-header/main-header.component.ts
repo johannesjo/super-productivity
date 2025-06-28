@@ -21,20 +21,15 @@ import { SimpleCounterService } from '../../features/simple-counter/simple-count
 import { SimpleCounter } from '../../features/simple-counter/simple-counter.model';
 import { SyncWrapperService } from '../../imex/sync/sync-wrapper.service';
 import { SnackService } from '../../core/snack/snack.service';
-import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { TaskViewCustomizerService } from 'src/app/features/task-view-customizer/task-view-customizer.service';
 import { KeyboardConfig } from 'src/app/features/config/keyboard-config.model';
-import { MatIconButton, MatMiniFabButton } from '@angular/material/button';
+import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { MatRipple } from '@angular/material/core';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatMenu, MatMenuContent, MatMenuTrigger } from '@angular/material/menu';
-import { WorkContextMenuComponent } from '../work-context-menu/work-context-menu.component';
-import { MsToMinuteClockStringPipe } from '../../ui/duration/ms-to-minute-clock-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AsyncPipe } from '@angular/common';
-import { TagComponent } from '../../features/tag/tag/tag.component';
 import { SimpleCounterButtonComponent } from '../../features/simple-counter/simple-counter-button/simple-counter-button.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { DialogSyncInitialCfgComponent } from '../../imex/sync/dialog-sync-initial-cfg/dialog-sync-initial-cfg.component';
@@ -61,18 +56,9 @@ import { toSignal } from '@angular/core/rxjs-interop';
   imports: [
     MatIconButton,
     MatIcon,
-    MatRipple,
-    RouterLink,
     MatTooltip,
-    MatMenuTrigger,
-    MatMenu,
-    MatMenuContent,
-    WorkContextMenuComponent,
-    MatMiniFabButton,
-    MsToMinuteClockStringPipe,
     TranslatePipe,
     AsyncPipe,
-    TagComponent,
     SimpleCounterButtonComponent,
     LongPressDirective,
     PluginHeaderBtnsComponent,

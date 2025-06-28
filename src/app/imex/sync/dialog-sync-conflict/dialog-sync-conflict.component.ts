@@ -20,7 +20,6 @@ import {
   vectorClockToString,
 } from '../../../pfapi/api/util/vector-clock';
 import { CollapsibleComponent } from '../../../ui/collapsible/collapsible.component';
-import { MatTable } from '@angular/material/table';
 
 @Component({
   selector: 'dialog-sync-conflict',
@@ -37,7 +36,6 @@ import { MatTable } from '@angular/material/table';
     DatePipe,
     MatTooltip,
     CollapsibleComponent,
-    MatTable,
   ],
 })
 export class DialogSyncConflictComponent {

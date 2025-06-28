@@ -1147,7 +1147,9 @@
         "START": "Démarrer la tâche",
         "SWITCH_CONTEXT_START": "Changer de contexte et démarrer",
         "UNSCHEDULE": "Déprogrammer",
-        "UNSCHEDULE_ALL": "Déprogrammer tout"
+        "UNSCHEDULE_ALL": "Déprogrammer tout",
+        "DISMISS_REMINDER_KEEP_TODAY": "Ignorer le rappel (Garder dans Aujourd'hui)",
+        "DISMISS_ALL_REMINDERS_KEEP_TODAY": "Ignorer tous les rappels (Garder dans Aujourd'hui)"
       },
       "D_SCHEDULE_TASK": {
         "MOVE_TO_BACKLOG": "Déplacer la tâche dans le backlog en atendant la planification",

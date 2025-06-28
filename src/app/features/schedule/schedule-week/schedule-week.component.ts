@@ -24,7 +24,7 @@ import { FH, SVEType, T_ID_PREFIX } from '../schedule.const';
 import { throttle } from 'helpful-decorators';
 import { CreateTaskPlaceholderComponent } from '../create-task-placeholder/create-task-placeholder.component';
 import { ScheduleEventComponent } from '../schedule-event/schedule-event.component';
-import { DatePipe, AsyncPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { T } from '../../../t.const';
@@ -45,7 +45,6 @@ const IS_NOT_DRAGGING_CLASS = 'is-not-dragging';
     AsyncPipe,
     ScheduleEventComponent,
     CdkDrag,
-    DatePipe,
     CreateTaskPlaceholderComponent,
     MatIcon,
     TranslatePipe,

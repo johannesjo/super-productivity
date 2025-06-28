@@ -1147,7 +1147,9 @@
         "START": "Start",
         "SWITCH_CONTEXT_START": "Kontext wechseln & starten",
         "UNSCHEDULE": "Ablegen",
-        "UNSCHEDULE_ALL": "Alle ablegen"
+        "UNSCHEDULE_ALL": "Alle ablegen",
+        "DISMISS_REMINDER_KEEP_TODAY": "Erinnerung verwerfen (Behalten in Heute)",
+        "DISMISS_ALL_REMINDERS_KEEP_TODAY": "Alle Erinnerungen verwerfen (Behalten in Heute)"
       },
       "D_SCHEDULE_TASK": {
         "MOVE_TO_BACKLOG": "Verschieben Sie die Aufgabe in das Backlog, bis sie geplant ist",
