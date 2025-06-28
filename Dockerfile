@@ -37,7 +37,7 @@ ENV PORT=80
 
 # install dependencies
 RUN apk update \
-  && apk add --no-cache jq=1.7.1-r0
+  && apk add --no-cache jq
 
 # copy artifact build from the 'build environment'
 COPY --from=build /app/dist/browser /usr/share/nginx/html
