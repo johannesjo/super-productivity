@@ -153,6 +153,18 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     }
   }
 
+  dismissReminderOnly(task: TaskWithReminderData): void {
+    if (task.reminderId) {
+      this._store.dispatch(
+        TaskSharedActions.dismissReminderOnly({
+          id: task.id,
+          reminderId: task.reminderId as string,
+        }),
+      );
+      this._removeFromList(task.reminderId as string);
+    }
+  }
+
   snooze(task: TaskWithReminderData, snoozeInMinutes: number): void {
     this._reminderService.updateReminder(task.reminderData.id, {
       // prettier-ignore
@@ -261,6 +273,15 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
       if (task.projectId || task.parentId || task.tagIds.length > 0) {
         this.dismiss(task);
       }
+    });
+    this._close();
+  }
+
+  async dismissAllRemindersOnly(): Promise<void> {
+    this.isDisableControls = true;
+    const tasks = await this.tasks$.pipe(first()).toPromise();
+    tasks.forEach((task) => {
+      this.dismissReminderOnly(task);
     });
     this._close();
   }

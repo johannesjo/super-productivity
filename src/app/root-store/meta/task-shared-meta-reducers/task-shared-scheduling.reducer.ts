@@ -111,6 +111,22 @@ const handleUnScheduleTask = (state: RootState, taskId: string): RootState => {
   ]);
 };
 
+const handleDismissReminderOnly = (state: RootState, taskId: string): RootState => {
+  // Only clear the dueWithTime (reminder time) but keep dueDay and Today tag
+  return {
+    ...state,
+    [TASK_FEATURE_NAME]: taskAdapter.updateOne(
+      {
+        id: taskId,
+        changes: {
+          dueWithTime: undefined,
+        },
+      },
+      state[TASK_FEATURE_NAME],
+    ),
+  };
+};
+
 const handlePlanTasksForToday = (
   state: RootState,
   taskIds: string[],
@@ -229,6 +245,10 @@ const createActionHandlers = (state: RootState, action: Action): ActionHandlerMa
   [TaskSharedActions.unscheduleTask.type]: () => {
     const { id } = action as ReturnType<typeof TaskSharedActions.unscheduleTask>;
     return handleUnScheduleTask(state, id);
+  },
+  [TaskSharedActions.dismissReminderOnly.type]: () => {
+    const { id } = action as ReturnType<typeof TaskSharedActions.dismissReminderOnly>;
+    return handleDismissReminderOnly(state, id);
   },
   [TaskSharedActions.planTasksForToday.type]: () => {
     const { taskIds, parentTaskMap = {} } = action as ReturnType<

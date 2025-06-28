@@ -256,6 +256,19 @@ export class TaskReminderEffects {
     ),
   );
 
+  removeTaskReminderForDismissOnly$ = createEffect(() =>
+    this._actions$.pipe(
+      ofType(TaskSharedActions.dismissReminderOnly),
+      map(({ id, reminderId }) => {
+        return removeReminderFromTask({
+          id,
+          reminderId: reminderId,
+          isSkipToast: false,
+        });
+      }),
+    ),
+  );
+
   removeTaskReminderTrigger3$ = createEffect(() => {
     return this._actions$.pipe(
       ofType(PlannerActions.planTaskForDay),

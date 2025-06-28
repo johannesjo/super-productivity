@@ -70,6 +70,11 @@ export const TaskSharedActions = createActionGroup({
       isSkipToast?: boolean;
     }>(),
 
+    dismissReminderOnly: props<{
+      id: string;
+      reminderId: string;
+    }>(),
+
     // Task Updates
     updateTask: props<{
       task: Update<Task>;

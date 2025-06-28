@@ -101,6 +101,13 @@
                   {{ T.F.TASK.D_REMINDER_VIEW.UNSCHEDULE | translate }}
                 </button>
                 <button
+                  (click)="dismissReminderOnly(task)"
+                  mat-menu-item
+                >
+                  <mat-icon>alarm_off</mat-icon>
+                  {{ T.F.TASK.D_REMINDER_VIEW.DISMISS_REMINDER_KEEP_TODAY | translate }}
+                </button>
+                <button
                   (click)="editReminder(task)"
                   mat-menu-item
                 >
@@ -227,6 +234,19 @@
         (isMultiple
           ? T.F.TASK.D_REMINDER_VIEW.UNSCHEDULE_ALL
           : T.F.TASK.D_REMINDER_VIEW.UNSCHEDULE
+        ) | translate
+      }}
+    </button>
+    <button
+      (click)="dismissAllRemindersOnly()"
+      [disabled]="isDisableControls"
+      mat-menu-item
+    >
+      <mat-icon>alarm_off</mat-icon>
+      {{
+        (isMultiple
+          ? T.F.TASK.D_REMINDER_VIEW.DISMISS_ALL_REMINDERS_KEEP_TODAY
+          : T.F.TASK.D_REMINDER_VIEW.DISMISS_REMINDER_KEEP_TODAY
         ) | translate
       }}
     </button>
