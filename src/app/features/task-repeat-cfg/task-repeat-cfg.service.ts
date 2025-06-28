@@ -21,7 +21,7 @@ import { T } from '../../t.const';
 import { first, take } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { Task } from '../tasks/task.model';
-import { addSubTask, scheduleTaskWithTime } from '../tasks/store/task.actions';
+import { addSubTask } from '../tasks/store/task.actions';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { WorkContextService } from '../work-context/work-context.service';
 import { WorkContextType } from '../work-context/work-context.model';
