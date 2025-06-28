@@ -1,0 +1,20 @@
+{
+  "name": "Procrastination Buster",
+  "id": "procrastination-buster",
+  "manifestVersion": 1,
+  "version": "1.0.0",
+  "minSupVersion": "13.0.0",
+  "description": "Helps identify procrastination blockers and provides tailored strategies to overcome them",
+  "author": "Super Productivity Community",
+  "homepage": "https://github.com/johannesjo/super-productivity",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/johannesjo/super-productivity.git"
+  },
+  "hooks": ["currentTaskChange"],
+  "permissions": ["showSnack", "openDialog", "addTask", "showIndexHtmlAsView"],
+  "iFrame": true,
+  "sidePanel": true,
+  "isSkipMenuEntry": false,
+  "icon": "icon.svg"
+}

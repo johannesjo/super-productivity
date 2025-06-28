@@ -10,6 +10,9 @@ import {
 } from '../errors/errors';
 import { validateLocalMeta } from '../util/validate-local-meta';
 import { PFEventEmitter } from '../util/events';
+import { devError } from '../../../util/dev-error';
+import { incrementVectorClock } from '../util/vector-clock';
+import { getVectorClock, setVectorClock } from '../util/backwards-compat';
 
 export const DEFAULT_META_MODEL: LocalMeta = {
   crossModelVersion: 1,
@@ -17,6 +20,10 @@ export const DEFAULT_META_MODEL: LocalMeta = {
   lastUpdate: 0,
   metaRev: null,
   lastSyncedUpdate: null,
+  localLamport: 0,
+  lastSyncedLamport: null,
+  vectorClock: {},
+  lastSyncedVectorClock: null,
 };
 
 /**
@@ -61,11 +68,11 @@ export class MetaModelCtrl {
    * @param isIgnoreDBLock Whether to ignore database locks
    * @throws {MetaNotReadyError} When metamodel is not loaded yet
    */
-  updateRevForModel<MT extends ModelBase>(
+  async updateRevForModel<MT extends ModelBase>(
     modelId: string,
     modelCfg: ModelCfg<MT>,
     isIgnoreDBLock = false,
-  ): void {
+  ): Promise<void> {
     pfLog(2, `${MetaModelCtrl.L}.${this.updateRevForModel.name}()`, modelId, {
       modelCfg,
       inMemory: this._metaModelInMemory,
@@ -77,24 +84,54 @@ export class MetaModelCtrl {
     const metaModel = this._getMetaModelOrThrow(modelId, modelCfg);
     const timestamp = Date.now();
 
-    this.save(
-      {
-        ...metaModel,
-        lastUpdate: timestamp,
+    // Get client ID for vector clock
+    const clientId = await this.loadClientId();
 
-        ...(modelCfg.isMainFileModel
-          ? {}
-          : {
-              revMap: {
-                ...metaModel.revMap,
-                [modelId]: timestamp.toString(),
-              },
-            }),
-        // as soon as we save a related model, we are using the local crossModelVersion (while other updates might be from importing remote data)
-        crossModelVersion: this.crossModelVersion,
-      },
-      isIgnoreDBLock,
-    );
+    // Create action string (max 100 chars)
+    const actionStr = `${modelId} => ${new Date(timestamp).toISOString()}`;
+    const lastUpdateAction =
+      actionStr.length > 100 ? actionStr.substring(0, 97) + '...' : actionStr;
+
+    // Update vector clock - migrate from Lamport if needed
+    let currentVectorClock = getVectorClock(metaModel, clientId);
+    if (!currentVectorClock && metaModel.localLamport > 0) {
+      // First time creating vector clock - migrate from Lamport timestamp
+      currentVectorClock = { [clientId]: metaModel.localLamport };
+      pfLog(
+        2,
+        `${MetaModelCtrl.L}.${this.updateRevForModel.name}() migrating Lamport to vector clock`,
+        {
+          clientId,
+          localLamport: metaModel.localLamport,
+          newVectorClock: currentVectorClock,
+        },
+      );
+    }
+
+    const newVectorClock = incrementVectorClock(currentVectorClock || {}, clientId);
+
+    const updatedMeta = {
+      ...metaModel,
+      lastUpdate: timestamp,
+      lastUpdateAction,
+      localLamport: this._incrementLamport(metaModel.localLamport || 0),
+
+      ...(modelCfg.isMainFileModel
+        ? {}
+        : {
+            revMap: {
+              ...metaModel.revMap,
+              [modelId]: timestamp.toString(),
+            },
+          }),
+      // as soon as we save a related model, we are using the local crossModelVersion (while other updates might be from importing remote data)
+      crossModelVersion: this.crossModelVersion,
+    };
+
+    // Set vector clock using backwards compatibility helper
+    setVectorClock(updatedMeta, newVectorClock, clientId);
+
+    await this.save(updatedMeta, isIgnoreDBLock);
   }
 
   /**
@@ -106,11 +143,18 @@ export class MetaModelCtrl {
    * @throws {InvalidMetaError} When metamodel is invalid
    */
   save(metaModel: LocalMeta, isIgnoreDBLock = false): Promise<unknown> {
-    pfLog(2, `${MetaModelCtrl.L}.${this.save.name}()`, metaModel);
+    pfLog(2, `${MetaModelCtrl.L}.${this.save.name}()`, {
+      metaModel,
+      lastSyncedUpdate: metaModel.lastSyncedUpdate,
+      lastUpdate: metaModel.lastUpdate,
+      isIgnoreDBLock,
+    });
     if (typeof metaModel.lastUpdate !== 'number') {
-      throw new InvalidMetaError(
-        `${MetaModelCtrl.L}.${this.save.name}()`,
-        'lastUpdate not found',
+      return Promise.reject(
+        new InvalidMetaError(
+          `${MetaModelCtrl.L}.${this.save.name}()`,
+          'lastUpdate not found',
+        ),
       );
     }
 
@@ -119,7 +163,36 @@ export class MetaModelCtrl {
     this._ev.emit('metaModelChange', metaModel);
     this._ev.emit('syncStatusChange', 'UNKNOWN_OR_CHANGED');
 
-    return this._db.save(MetaModelCtrl.META_MODEL_ID, metaModel, isIgnoreDBLock);
+    // Add detailed logging before saving
+    pfLog(2, `${MetaModelCtrl.L}.${this.save.name}() about to save to DB:`, {
+      id: MetaModelCtrl.META_MODEL_ID,
+      lastSyncedUpdate: metaModel.lastSyncedUpdate,
+      lastUpdate: metaModel.lastUpdate,
+      willMatch: metaModel.lastSyncedUpdate === metaModel.lastUpdate,
+    });
+
+    const savePromise = this._db.save(
+      MetaModelCtrl.META_MODEL_ID,
+      metaModel,
+      isIgnoreDBLock,
+    );
+
+    // Log after save completes
+    savePromise
+      .then(() => {
+        pfLog(
+          2,
+          `${MetaModelCtrl.L}.${this.save.name}() DB save completed successfully`,
+          metaModel.localLamport,
+          metaModel,
+        );
+      })
+      .catch((error) => {
+        devError('DB save for meta file failed');
+        pfLog(0, `${MetaModelCtrl.L}.${this.save.name}() DB save failed`, error);
+      });
+
+    return savePromise;
   }
 
   /**
@@ -136,16 +209,43 @@ export class MetaModelCtrl {
     }
 
     const data = (await this._db.load(MetaModelCtrl.META_MODEL_ID)) as LocalMeta;
+
+    // Add debug logging
+    pfLog(2, `${MetaModelCtrl.L}.${this.load.name}() loaded from DB:`, {
+      data,
+      hasData: !!data,
+      lastSyncedUpdate: data?.lastSyncedUpdate,
+      lastUpdate: data?.lastUpdate,
+    });
+
     // Initialize if not found
     if (!data) {
       this._metaModelInMemory = {
         ...DEFAULT_META_MODEL,
         crossModelVersion: this.crossModelVersion,
       };
+      pfLog(2, `${MetaModelCtrl.L}.${this.load.name}() initialized with defaults`);
       return this._metaModelInMemory;
     }
     if (!data.revMap) {
       throw new InvalidMetaError('loadMetaModel: revMap not found');
+    }
+
+    // Log the loaded data
+    pfLog(2, `${MetaModelCtrl.L}.${this.load.name}() loaded valid data:`, {
+      lastUpdate: data.lastUpdate,
+      lastSyncedUpdate: data.lastSyncedUpdate,
+      metaRev: data.metaRev,
+      hasRevMap: !!data.revMap,
+      revMapKeys: Object.keys(data.revMap || {}),
+    });
+
+    // Ensure Lamport fields are initialized for old data
+    if (data.localLamport === undefined) {
+      data.localLamport = 0;
+    }
+    if (data.lastSyncedLamport === undefined) {
+      data.lastSyncedLamport = null;
     }
 
     this._metaModelInMemory = data;
@@ -223,5 +323,20 @@ export class MetaModelCtrl {
   private _generateClientId(): string {
     pfLog(2, `${MetaModelCtrl.L}.${this._generateClientId.name}()`);
     return getEnvironmentId() + '_' + Date.now();
+  }
+
+  /**
+   * Safely increments Lamport timestamp with overflow protection
+   *
+   * @param current Current Lamport value
+   * @returns Incremented value
+   */
+  private _incrementLamport(current: number): number {
+    // Reset if approaching max safe integer
+    if (current >= Number.MAX_SAFE_INTEGER - 1000) {
+      pfLog(1, `${MetaModelCtrl.L} Lamport counter overflow protection triggered`);
+      return 1;
+    }
+    return current + 1;
   }
 }

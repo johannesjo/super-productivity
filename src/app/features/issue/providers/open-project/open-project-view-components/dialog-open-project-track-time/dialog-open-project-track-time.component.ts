@@ -10,7 +10,6 @@ import {
 import { SnackService } from '../../../../../../core/snack/snack.service';
 import { Task } from '../../../../../tasks/task.model';
 import { T } from '../../../../../../t.const';
-import moment from 'moment';
 import { OpenProjectWorkPackage } from '../../open-project-issue.model';
 import { parseOpenProjectDuration } from '../parse-open-project-duration.util';
 import { JiraWorklogExportDefaultTime } from '../../../jira/jira.model';
@@ -52,6 +51,9 @@ import { MsToStringPipe } from '../../../../../../ui/duration/ms-to-string.pipe'
 import { MatCheckbox } from '@angular/material/checkbox';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MatOption, MatSelect } from '@angular/material/select';
+import { formatLocalIsoWithoutSeconds } from '../../../../../../util/format-local-iso-without-seconds';
+import { formatDateYYYYMMDD } from '../../../../../../util/format-date-yyyy-mm-dd';
+import { msToIsoDuration } from '../../../../../../util/ms-to-iso-duration';
 
 @Component({
   selector: 'dialog-open-project-track-time',
@@ -209,8 +211,8 @@ export class DialogOpenProjectTrackTimeComponent implements OnDestroy {
       this._openProjectApiService
         .trackTime$({
           workPackage: this.workPackage,
-          spentOn: moment(this.started).format('YYYY-MM-DD'),
-          hours: moment.duration({ milliseconds: this.timeSpent }).toISOString(),
+          spentOn: formatDateYYYYMMDD(this.started),
+          hours: msToIsoDuration(this.timeSpent),
           comment: this.comment,
           activityId: this.activityId,
           cfg,
@@ -254,9 +256,7 @@ export class DialogOpenProjectTrackTimeComponent implements OnDestroy {
   }
 
   private _convertTimestamp(timestamp: number): string {
-    const date = moment(timestamp);
-    const isoStr = date.seconds(0).local().format();
-    return isoStr.substring(0, 19);
+    return formatLocalIsoWithoutSeconds(timestamp);
   }
 
   private _fillInStarted(mode: JiraWorklogExportDefaultTime): string {

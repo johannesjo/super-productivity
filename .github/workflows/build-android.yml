@@ -68,17 +68,48 @@ jobs:
           ls -la android/app/build/outputs/apk/play
           ls -la android/app/build/outputs/apk/play/release
 
-      - name: Sign APK
-        run: |
-          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
-            -keystore keystore.jks \
-            -storepass ${{ secrets.DROID_KEYSTORE_PASSWORD }} \
-            -keypass ${{ secrets.DROID_KEY_PASSWORD }} \
-            android/app/build/outputs/apk/play/release/app-play-release-unsigned.apk \
-            ${{ secrets.DROID_KEYSTORE_ALIAS }}
+      # APK is now signed automatically by Gradle using signingConfig
 
-      - name: 'Upload Artifact'
+      - name: 'Upload APK files'
         uses: actions/upload-artifact@v4
         with:
           name: sup-android-release
-          path: android/app/build/outputs/*/*
+          path: android/app/build/outputs/apk/**/*.apk
+
+      - name: Wait for main release to be created
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          echo "Waiting for main release to be created..."
+          for i in {1..30}; do
+            if gh release view ${{ github.ref_name }} --repo ${{ github.repository }} >/dev/null 2>&1; then
+              echo "Release found!"
+              break
+            fi
+            echo "Waiting for release... (attempt $i/30)"
+            sleep 30
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload APK to existing GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          for apk in android/app/build/outputs/apk/play/release/*.apk; do
+            if [ -f "$apk" ]; then
+              echo "Uploading $apk to release ${{ github.ref_name }}"
+              gh release upload ${{ github.ref_name }} "$apk" --repo ${{ github.repository }}
+            fi
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload to Google Play Console
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: r0adkll/upload-google-play@v1.0.19
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.superproductivity.superproductivity
+          releaseFiles: android/app/build/outputs/apk/play/release/*.apk
+          track: internal
+          status: draft
+          inAppUpdatePriority: 2

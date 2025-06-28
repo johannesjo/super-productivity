@@ -1,0 +1,534 @@
+// CSS Custom Properties (CSS Variables)
+// This file defines all CSS variables used throughout the application
+
+// ===============================
+// CORE DESIGN TOKENS
+// ===============================
+
+:root {
+  // -----------------------------
+  // Spacing System
+  // -----------------------------
+  --s: 8px;
+  --s-quarter: 2px;
+  --s-half: 4px;
+  --s2: 16px; // 2 * 8px
+  --s3: 24px; // 3 * 8px
+  --s4: 32px; // 4 * 8px
+  --s5: 40px; // 5 * 8px
+  --s6: 48px; // 6 * 8px
+  --s7: 56px; // 7 * 8px
+  --s8: 64px; // 8 * 8px
+
+  // -----------------------------
+  // Layout System
+  // -----------------------------
+  // Breakpoints
+  --layout-xxxs: 398px;
+  --layout-xxs: 440px;
+  --layout-xs: 600px;
+  --layout-sm: 960px;
+  --layout-md: 1280px;
+  --layout-lg: 1920px;
+  --layout-xl: 2000px;
+
+  // Component dimensions
+  --component-max-width: 800px;
+  --side-nav-width-switch-l: 1500px;
+  --side-nav-width: 200px;
+  --side-nav-width-l: 400px;
+  --bar-height-large: 56px;
+  --bar-height: 48px;
+  --bar-height-small: 40px;
+  --mat-mini-fab-size: 48px;
+  --mac-title-bar-padding: 20px;
+  --card-border-radius: 4px;
+
+  // Z-index layers
+  --z-focus-mode-overlay: 101;
+  --z-side-panel-task-and-notes: 44;
+  --z-side-panel-planner: 46;
+  --z-task-side-bar-over: 100;
+  --z-main-header-wrapper: 50;
+  --z-side-nav: 60;
+  --z-banner: 11;
+  --z-main-header: 10;
+  --z-celebrate: 102;
+  --z-backdrop: 222;
+  --z-add-task-bar: 10000;
+  --z-search-bar: 10000;
+  --z-tour: 99;
+
+  // ===============================
+  // COLORS - Theme Independent
+  // ===============================
+
+  // -----------------------------
+  // Semantic Colors
+  // -----------------------------
+  --color-success: #4caf50;
+  --color-warning: #ff9800;
+  --color-danger: #f44336;
+  --success-green: #4fa758;
+  --yellow: #fff400;
+
+  // -----------------------------
+  // Dark Theme Elevation Colors
+  // -----------------------------
+  --dark0: rgb(0, 0, 0);
+  --dark1: rgb(30, 30, 30);
+  --dark2: rgb(34, 34, 34);
+  --dark3: rgb(36, 36, 36);
+  --dark4: rgb(39, 39, 39);
+  --dark4-5: rgb(40, 40, 40);
+  --dark5: rgb(42, 42, 42);
+  --dark6: rgb(44, 44, 44);
+  --dark8: rgb(46, 46, 46);
+  --dark10: rgb(48, 48, 48);
+  --dark12: rgb(51, 51, 51);
+  --dark16: rgb(53, 53, 53);
+  --dark24: rgb(56, 56, 56);
+
+  // -----------------------------
+  // Overlay Colors
+  // -----------------------------
+  --color-overlay-dark-10: rgba(0, 0, 0, 0.1);
+  --color-overlay-dark-20: rgba(0, 0, 0, 0.2);
+  --color-overlay-dark-30: rgba(0, 0, 0, 0.3);
+  --color-overlay-dark-40: rgba(0, 0, 0, 0.4);
+  --color-overlay-dark-50: rgba(0, 0, 0, 0.5);
+  --color-overlay-dark-60: rgba(0, 0, 0, 0.6);
+  --color-overlay-dark-80: rgba(0, 0, 0, 0.8);
+  --color-overlay-dark-90: rgba(0, 0, 0, 0.9);
+  --color-overlay-light-05: rgba(255, 255, 255, 0.05);
+  --color-overlay-light-10: rgba(255, 255, 255, 0.1);
+  --color-overlay-light-20: rgba(255, 255, 255, 0.2);
+  --color-overlay-light-30: rgba(255, 255, 255, 0.3);
+  --color-overlay-light-33: rgba(255, 255, 255, 0.33);
+  --color-overlay-light-40: rgba(255, 255, 255, 0.4);
+  --color-overlay-light-50: rgba(255, 255, 255, 0.5);
+  --color-overlay-light-70: rgba(255, 255, 255, 0.7);
+  --color-overlay-light-90: rgba(255, 255, 255, 0.9);
+
+  // Legacy palette references
+  --c-primary: var(--palette-primary-500);
+  --c-accent: var(--palette-accent-500);
+  --c-warn: var(--palette-warn-500);
+
+  // ===============================
+  // SHADOWS & ELEVATION
+  // ===============================
+
+  // Shadow opacity values
+  --shadow-key-umbra-opacity: 0.2;
+  --shadow-key-penumbra-opacity: 0.14;
+  --shadow-ambient-shadow-opacity: 0.12;
+
+  // Material Design elevation shadows (1-24dp)
+  --whiteframe-shadow-1dp:
+    0px 1px 3px 0px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
+    0px 1px 1px 0px rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
+    0px 2px 1px -1px rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
+  --whiteframe-shadow-2dp:
+    0px 1px 5px 0px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
+    0px 2px 2px 0px rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
+    0px 3px 1px -2px rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
+  --whiteframe-shadow-3dp:
+    0px 1px 8px 0px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
+    0px 3px 4px 0px rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
+    0px 3px 3px -2px rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
+  --whiteframe-shadow-4dp:
+    0px 2px 4px -1px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
+    0px 4px 5px 0px rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
+    0px 1px 10px 0px rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
+  --whiteframe-shadow-5dp:
+    0px 3px 5px -1px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
+    0px 5px 8px 0px rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
+    0px 1px 14px 0px rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
+  --whiteframe-shadow-6dp:
+    0px 3px 5px -1px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
+    0px 6px 10px 0px rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
+    0px 1px 18px 0px rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
+  --whiteframe-shadow-7dp:
+    0px 4px 5px -2px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
+    0px 7px 10px 1px rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
+    0px 2px 16px 1px rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
+  --whiteframe-shadow-8dp:
+    0px 5px 5px -3px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
+    0px 8px 10px 1px rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
+    0px 3px 14px 2px rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
+  --whiteframe-shadow-9dp:
+    0px 5px 6px -3px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
+    0px 9px 12px 1px rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
+    0px 3px 16px 2px rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
+  --whiteframe-shadow-10dp:
+    0px 6px 6px -3px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
+    0px 10px 14px 1px rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
+    0px 4px 18px 3px rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
+  --whiteframe-shadow-11dp:
+    0px 6px 7px -4px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
+    0px 11px 15px 1px rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
+    0px 4px 20px 3px rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
+  --whiteframe-shadow-12dp:
+    0px 7px 8px -4px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
+    0px 12px 17px 2px rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
+    0px 5px 22px 4px rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
+  --whiteframe-shadow-13dp:
+    0px 7px 8px -4px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
+    0px 13px 19px 2px rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
+    0px 5px 24px 4px rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
+  --whiteframe-shadow-14dp:
+    0px 7px 9px -4px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
+    0px 14px 21px 2px rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
+    0px 5px 26px 4px rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
+  --whiteframe-shadow-15dp:
+    0px 8px 9px -5px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
+    0px 15px 22px 2px rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
+    0px 6px 28px 5px rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
+  --whiteframe-shadow-16dp:
+    0px 8px 10px -5px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
+    0px 16px 24px 2px rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
+    0px 6px 30px 5px rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
+  --whiteframe-shadow-17dp:
+    0px 8px 11px -5px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
+    0px 17px 26px 2px rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
+    0px 6px 32px 5px rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
+  --whiteframe-shadow-18dp:
+    0px 9px 11px -5px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
+    0px 18px 28px 2px rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
+    0px 7px 34px 6px rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
+  --whiteframe-shadow-19dp:
+    0px 9px 12px -6px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
+    0px 19px 29px 2px rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
+    0px 7px 36px 6px rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
+  --whiteframe-shadow-20dp:
+    0px 10px 13px -6px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
+    0px 20px 31px 3px rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
+    0px 8px 38px 7px rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
+  --whiteframe-shadow-21dp:
+    0px 10px 13px -6px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
+    0px 21px 33px 3px rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
+    0px 8px 40px 7px rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
+  --whiteframe-shadow-22dp:
+    0px 10px 14px -6px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
+    0px 22px 35px 3px rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
+    0px 8px 42px 7px rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
+  --whiteframe-shadow-23dp:
+    0px 11px 14px -7px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
+    0px 23px 36px 3px rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
+    0px 9px 44px 8px rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
+  --whiteframe-shadow-24dp:
+    0px 11px 15px -7px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
+    0px 24px 38px 3px rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
+    0px 9px 46px 8px rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
+
+  // Special shadows
+  --header-inset-shadow: inset 0 -4px 4px rgba(0, 0, 0, var(--shadow-key-umbra-opacity));
+  --shadow-card-shadow:
+    0 3px 1px -2px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
+    0 2px 2px 0 rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
+    0 1px 5px 0 rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
+  --shadow-bottom: 0 10px 6px -6px var(--color-overlay-dark-30);
+  --shadow-bottom-boxed:
+    0 10px 6px -6px var(--color-overlay-dark-30), 0 0 1px var(--color-overlay-dark-30);
+
+  // ===============================
+  // ANIMATION & TRANSITIONS
+  // ===============================
+
+  // Timing functions
+  --ani-standard-timing: cubic-bezier(0.4, 0, 0.2, 1);
+  --ani-enter-timing: cubic-bezier(0, 0, 0.2, 1);
+  --ani-leave-timing: cubic-bezier(0.4, 0, 1, 1);
+  --ani-sharp-timing: cubic-bezier(0.4, 0, 0.6, 1);
+  --ease-in-out-quint: cubic-bezier(0.38, 0.04, 0.35, 0.96);
+
+  // Durations
+  --transition-duration-xs: 90ms;
+  --transition-duration-s: 150ms;
+  --transition-duration-m: 225ms;
+  --transition-duration-l: 375ms;
+  --transition-duration-enter: 225ms;
+  --transition-duration-leave: 195ms;
+  --page-transition-duration: 225ms;
+
+  // Transition shorthands
+  --transition-fast: all var(--transition-duration-xs) ease-in-out;
+  --transition-standard: all var(--transition-duration-m) var(--ani-standard-timing);
+  --transition-enter: all var(--transition-duration-m) var(--ani-enter-timing);
+  --transition-leave: all var(--transition-duration-m) var(--ani-leave-timing);
+
+  // ===============================
+  // COMPONENT-SPECIFIC VARIABLES
+  // ===============================
+
+  // -----------------------------
+  // Planner Component
+  // -----------------------------
+  --planner-item-height: 42px;
+  --planner-item-ico-size: 20px;
+  --planner-font-size: 14px;
+  --planner-font-size-mobile: 13px;
+  --planner-font-size-smaller: 11px;
+  --planner-font-size-smaller-mobile: 10px;
+
+  // -----------------------------
+  // Task Component
+  // -----------------------------
+  --task-first-line-min-height: 40px;
+  --task-icon-default-opacity: 0.7;
+  --task-inner-padding-top-bottom: 4px;
+  --task-is-done-dim-opacity: 0.3;
+  --task-border-radius: 6px;
+
+  // Task z-indexes
+  --z-drag-handle: 1;
+  --z-task-title: 4;
+  --z-btn: 4;
+  --z-time-wrapper: 4;
+  --z-btn-hover: 5;
+  --z-hover-controls: 6;
+  --z-progress-bar: 7;
+  --z-check-done: 11;
+  --z-first-line-controls-hover: 12;
+  --z-swipe-block: 0;
+  --z-is-selected-host: 20;
+  --z-focus-host: 21;
+  --z-is-current-host: 22;
+  --z-toggle-sub-task-btn: 30;
+  --z-drag-over-msg: 31;
+  --z-task-title-focus: 32;
+  --z-time-btn-svg-wrapper: 5555;
+
+  // -----------------------------
+  // Common Alpha Values
+  // -----------------------------
+  --theme-border-alpha: 0.12;
+  --theme-overlay-alpha: 0.1;
+  --theme-separator-alpha: 0.3;
+  --theme-muted-alpha: 0.6;
+  --theme-intense-alpha: 0.9;
+}
+
+// ===============================
+// THEME-SPECIFIC OVERRIDES
+// ===============================
+
+// -----------------------------
+// Light Theme (Default)
+// -----------------------------
+body {
+  // Background colors
+  --theme-bg: #f8f8f7;
+  --theme-bg-darker: rgb(235, 235, 235);
+  --theme-bg-drag-col: rgb(242, 242, 242);
+  --theme-bg-slightly-lighter: var(--theme-bg);
+  --theme-bg-lighter: var(--theme-bg);
+  --theme-bg-lightest: var(--theme-bg);
+  --theme-bg-super-light: var(--theme-bg);
+  --theme-card-bg: #ffffff;
+  --theme-sidebar-bg: var(--theme-bg);
+
+  // Text colors
+  --theme-text-color: rgb(44, 44, 44);
+  --theme-text-color-less-intense: rgba(44, 44, 44, 0.9);
+  --theme-text-color-muted: rgba(44, 44, 44, 0.6);
+  --theme-text-color-more-intense: var(--theme-text-color);
+  --theme-text-color-most-intense: rgb(0, 0, 0);
+
+  // Selected task
+  --theme-selected-task-bg-color: #fff;
+
+  // Borders and separators
+  --theme-extra-border-color: #dddddd;
+  --theme-separator-color: #d0d0d0;
+  --theme-divider-color: rgba(0, 0, 0, 0.12);
+
+  // Backdrop
+  --c-backdrop: var(--color-overlay-dark-60);
+
+  // Note colors
+  --standard-note-bg: #ffffff;
+  --standard-note-fg: var(--theme-text-color);
+  --standard-note-bg-hovered: var(--standard-note-bg);
+
+  // Task colors
+  --task-c-bg: #fff;
+  --task-c-selected-bg: var(--theme-selected-task-bg-color);
+  --sub-task-c-bg: var(--task-c-bg);
+  --sub-task-c-bg-done: var(--task-c-bg);
+  --task-c-bg-done: var(--task-c-bg);
+  --task-c-current-bg: var(--task-c-bg);
+  --task-c-drag-drop-bg: var(--task-c-bg);
+  --sub-task-c-bg-in-selected: var(--task-c-bg);
+
+  // Task shadows
+  --task-current-shadow: var(--whiteframe-shadow-3dp);
+  --task-selected-shadow: var(--whiteframe-shadow-3dp);
+
+  // Scrollbar colors
+  --theme-scrollbar-thumb: #888;
+  --theme-scrollbar-thumb-hover: #555;
+  --theme-scrollbar-track: #f1f1f1;
+
+  // Chip colors
+  --theme-chip-outline-color: rgba(125, 125, 125, 0.4);
+
+  // Progress circle
+  --theme-progress-bg: rgba(127, 127, 127, 0.2);
+
+  // Close button
+  --theme-close-btn-bg: var(--theme-bg-darker);
+  --theme-close-btn-border: var(--theme-divider-color);
+
+  // Banner
+  --theme-banner-bg: var(--theme-card-bg);
+
+  // Improvement banner
+  --theme-improvement-text: rgba(44, 44, 44, 1);
+  --theme-improvement-border: var(--color-overlay-light-33);
+  --theme-improvement-button-text: rgba(44, 44, 44, 1);
+
+  // Select/Options
+  --theme-select-hover-bg: var(--color-overlay-dark-10);
+  --theme-options-border-color: var(--color-overlay-dark-10);
+
+  // Attachments
+  --theme-attachment-bg: var(--theme-card-bg);
+  --theme-attachment-border: var(--theme-extra-border-color);
+  --theme-attachment-control-bg: var(--color-overlay-light-40);
+  --theme-attachment-control-border: var(--color-overlay-light-50);
+  --theme-attachment-control-hover-bg: var(--color-overlay-light-90);
+
+  // Hover controls
+  --theme-hover-controls-border: 1px solid;
+  --theme-hover-controls-border-opacity: 0.5;
+
+  // Task detail item
+  --theme-task-detail-value-color: rgba(
+    var(--palette-foreground-secondary-text),
+    var(--palette-foreground-secondary-text-alpha, 1)
+  );
+
+  // Grid colors
+  --theme-grid-color: #dadce0;
+
+  // Date-time picker colors
+  --owl-text-color-strong: var(--color-overlay-dark-90);
+  --owl-text-color: rgba(0, 0, 0, 0.75);
+  --owl-text-color-less-intense: var(--color-overlay-dark-50);
+  --owl-text-color-muted: rgba(0, 0, 0, 0.15);
+  --owl-light-selected-bg: rgb(238, 238, 238);
+  --owl-divider-color: rgba(0, 0, 0, 0.12);
+  --owl-inp-bg-color: rgba(0, 0, 0, 0.04);
+
+  // Special colors overrides for light theme
+  --yellow: #ffc107;
+
+  // Transition duration overrides for light theme
+  --transition-duration-s: 180ms;
+  --transition-duration-l: 400ms;
+  --transition-duration--leave: 195ms;
+}
+
+// -----------------------------
+// Dark Theme
+// -----------------------------
+body.isDarkTheme {
+  // Background colors
+  --theme-bg: var(--dark0);
+  --theme-bg-darker: var(--dark0);
+  --theme-bg-slightly-lighter: var(--dark4);
+  --theme-bg-lighter: var(--dark12);
+  --theme-bg-lightest: var(--dark24);
+  --theme-bg-super-light: #616161;
+  --theme-card-bg: var(--dark2);
+  --theme-sidebar-bg: var(--dark8);
+
+  // Text colors
+  --theme-text-color: rgb(235, 235, 235);
+  --theme-text-color-less-intense: rgba(235, 235, 235, 0.9);
+  --theme-text-color-muted: rgba(235, 235, 235, 0.6);
+  --theme-text-color-more-intense: rgb(245, 245, 245);
+  --theme-text-color-most-intense: rgb(255, 255, 255);
+
+  // Selected task
+  --theme-selected-task-bg-color: var(--dark6);
+
+  // Borders and separators
+  --theme-extra-border-color: rgba(255, 255, 255, 0.12);
+  --theme-separator-color: rgba(255, 255, 255, 0.1);
+  --theme-divider-color: rgba(255, 255, 255, 0.12);
+
+  // Backdrop
+  --c-backdrop: var(--color-overlay-dark-60);
+
+  // Note colors
+  --standard-note-bg: var(--dark16);
+  --standard-note-fg: #eeeeee;
+  --standard-note-bg-hovered: var(--dark24);
+
+  // Task colors
+  --task-c-bg: var(--dark3);
+  --task-c-selected-bg: var(--dark6);
+  --sub-task-c-bg: var(--dark4-5);
+  --sub-task-c-bg-done: var(--dark2);
+  --task-c-bg-done: var(--dark1);
+  --task-c-current-bg: var(--dark12);
+  --task-c-drag-drop-bg: var(--dark12);
+  --sub-task-c-bg-in-selected: var(--dark10);
+
+  // Task shadows
+  --task-current-shadow: var(--whiteframe-shadow-8dp);
+  --task-selected-shadow: var(--whiteframe-shadow-4dp);
+
+  // Scrollbar colors
+  --theme-scrollbar-thumb: #333;
+  --theme-scrollbar-thumb-hover: #444;
+  --theme-scrollbar-track: #222;
+
+  // Grid colors
+  --theme-grid-color: var(--color-overlay-light-10);
+
+  // Date-time picker colors
+  --owl-text-color-strong: var(--color-overlay-light-90);
+  --owl-text-color: rgba(255, 255, 255, 0.75);
+  --owl-text-color-less-intense: var(--color-overlay-light-50);
+  --owl-text-color-muted: rgba(255, 255, 255, 0.15);
+  --owl-light-selected-bg: rgba(49, 49, 49, 1);
+  --owl-divider-color: rgba(255, 255, 255, 0.12);
+  --owl-inp-bg-color: rgba(255, 255, 255, 0.08);
+
+  // Chip colors
+  --theme-chip-outline-color: rgba(125, 125, 125, 0.4);
+
+  // Close button
+  --theme-close-btn-bg: var(--theme-bg-lightest);
+  --theme-close-btn-border: var(--theme-extra-border-color);
+
+  // Banner
+  --theme-banner-bg: var(--theme-bg-lightest);
+
+  // Improvement banner
+  --theme-improvement-text: var(--theme-text-color-most-intense);
+  --theme-improvement-border: var(--color-overlay-light-33);
+  --theme-improvement-button-text: white;
+
+  // Select/Options
+  --theme-select-hover-bg: var(--color-overlay-light-10);
+  --theme-options-border-color: var(--color-overlay-light-10);
+
+  // Attachments
+  --theme-attachment-bg: var(--theme-bg-lighter);
+  --theme-attachment-border: transparent;
+  --theme-attachment-control-bg: var(--color-overlay-dark-40);
+  --theme-attachment-control-border: var(--color-overlay-dark-50);
+  --theme-attachment-control-hover-bg: var(--color-overlay-dark-90);
+
+  // Hover controls
+  --theme-hover-controls-border: none;
+  --theme-hover-controls-border-opacity: 0;
+
+  // Task detail item
+  --theme-task-detail-value-color: rgba(255, 255, 255, 0.7);
+}

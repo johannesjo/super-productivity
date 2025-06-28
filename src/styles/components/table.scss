@@ -9,7 +9,7 @@ table {
   @include mq(xs) {
     th,
     td {
-      padding: 0 $s;
+      padding: 0 var(--s);
 
       &:first-child {
         //padding-left: 0;
@@ -24,15 +24,15 @@ table {
 
 .table-wrapper {
   overflow: auto;
-  border-radius: $card-border-radius;
+  border-radius: var(--card-border-radius);
 }
 
-$this-table-min-height: $s * 2;
-$this-table-shadow: $whiteframe-shadow-1dp;
+$this-table-min-height: var(--s2);
+$this-table-shadow: var(--whiteframe-shadow-1dp);
 
 div.material-table {
   box-shadow: $this-table-shadow;
-  border-radius: $card-border-radius;
+  border-radius: var(--card-border-radius);
 
   table {
     width: 100%;
@@ -45,7 +45,7 @@ div.material-table {
   box-shadow: $this-table-shadow;
   font-size: 13px;
   white-space: nowrap;
-  background-color: #fff;
+  background-color: var(--theme-card-bg);
 
   &,
   * {
@@ -64,9 +64,9 @@ div.material-table {
   }
 
   .isDarkTheme & {
-    background: $dark-theme-card-bg;
+    background: var(--theme-card-bg);
     // NOTE: because we're on a lighter background
-    color: $dark-theme-text-color;
+    color: var(--theme-text-color);
   }
 
   .isDarkTheme &._no-elevation {
@@ -98,24 +98,24 @@ div.material-table {
     position: relative;
     border-top: 1px solid;
     border-bottom: 1px solid;
-    padding: $s $s * 2.25;
+    padding: var(--s) calc(var(--s) * 2.25);
     box-sizing: border-box;
     text-align: left;
 
     .isLightTheme & {
-      border-color: $light-theme-extra-border-color;
+      border-color: var(--theme-extra-border-color);
     }
 
     .isDarkTheme & {
-      border-color: $dark-theme-extra-border-color;
+      border-color: var(--theme-extra-border-color);
     }
 
     &:first-of-type {
-      padding-left: $s * 3;
+      padding-left: var(--s3);
     }
 
     &:last-of-type {
-      padding-right: $s * 3;
+      padding-right: var(--s3);
     }
   }
 }

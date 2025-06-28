@@ -6,7 +6,7 @@
       "name": "app",
       "installMode": "prefetch",
       "resources": {
-        "files": ["/favicon.ico", "/index.html", "/*.css", "/*.js"]
+        "files": ["/favicon.ico", "/index.html", "/manifest.json", "/*.css", "/*.js"]
       }
     },
     {
@@ -18,14 +18,15 @@
       }
     },
     {
-      "name": "assetsAlwaysNeeded",
+      "name": "criticalAssets",
       "installMode": "prefetch",
       "updateMode": "prefetch",
       "resources": {
         "files": [
           "/assets/icons/*.svg",
+          "/assets/icons/icon-*.png",
+          "/assets/icons/favicon-*.png",
           "/assets/i18n/en.json",
-          "/assets/unicorn.png",
           "/assets/fonts/MaterialIcons-Regular.ttf",
           "/*.(otf|ttf|woff|woff2)"
         ]
@@ -40,5 +41,20 @@
       }
     }
   ],
-  "dataGroups": []
+  "dataGroups": [
+    {
+      "name": "api-freshness",
+      "urls": [
+        "https://api.github.com/**",
+        "https://gitlab.com/api/**",
+        "https://*.atlassian.net/**"
+      ],
+      "cacheConfig": {
+        "strategy": "freshness",
+        "maxSize": 10,
+        "maxAge": "1h",
+        "timeout": "10s"
+      }
+    }
+  ]
 }

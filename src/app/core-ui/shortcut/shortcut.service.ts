@@ -1,4 +1,4 @@
-import { inject, Injectable, NgZone } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { IS_ELECTRON } from '../../app.constants';
 import { checkKeyCombo } from '../../util/check-key-combo';
 import { GlobalConfigService } from '../../features/config/global-config.service';
@@ -18,6 +18,7 @@ import { showFocusOverlay } from '../../features/focus-mode/store/focus-mode.act
 import { SyncWrapperService } from '../../imex/sync/sync-wrapper.service';
 import { first, mapTo, switchMap } from 'rxjs/operators';
 import { fromEvent, merge, Observable, of } from 'rxjs';
+import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
 
 @Injectable({
   providedIn: 'root',
@@ -34,8 +35,8 @@ export class ShortcutService {
   private _uiHelperService = inject(UiHelperService);
   private _translateService = inject(TranslateService);
   private _syncWrapperService = inject(SyncWrapperService);
-  private _ngZone = inject(NgZone);
   private _store = inject(Store);
+  private _pluginBridgeService = inject(PluginBridgeService);
 
   isCtrlPressed$: Observable<boolean> = fromEvent(document, 'keydown').pipe(
     switchMap((ev: Event) => {
@@ -58,23 +59,17 @@ export class ShortcutService {
     // GLOBAL SHORTCUTS
     if (IS_ELECTRON) {
       window.ea.on(IPC.TASK_TOGGLE_START, () => {
-        this._ngZone.run(() => {
-          this._taskService.toggleStartTask();
-        });
+        this._taskService.toggleStartTask();
       });
       window.ea.on(IPC.ADD_TASK, () => {
-        this._ngZone.run(() => {
-          this._layoutService.showAddTaskBar();
-        });
+        this._layoutService.showAddTaskBar();
       });
       window.ea.on(IPC.ADD_NOTE, () => {
         if (this._matDialog.openDialogs.length === 0) {
-          this._ngZone.run(() => {
-            this._matDialog.open(DialogAddNoteComponent, {
-              minWidth: '100vw',
-              height: '100vh',
-              restoreFocus: true,
-            });
+          this._matDialog.open(DialogAddNoteComponent, {
+            minWidth: '100vw',
+            height: '100vh',
+            restoreFocus: true,
           });
         }
       });
@@ -160,6 +155,9 @@ export class ShortcutService {
     } else if (checkKeyCombo(ev, keys.openProjectNotes)) {
       ev.preventDefault();
       this._layoutService.toggleNotes();
+    } else if (checkKeyCombo(ev, keys.toggleTaskViewCustomizerPanel)) {
+      ev.preventDefault();
+      this._layoutService.toggleTaskViewCustomizerPanel();
     } else if (checkKeyCombo(ev, keys.toggleIssuePanel)) {
       ev.preventDefault();
       this._layoutService.toggleAddTaskPanel();
@@ -186,6 +184,18 @@ export class ShortcutService {
         this._uiHelperService.zoomBy(-0.05);
       } else if (checkKeyCombo(ev, keys.zoomDefault)) {
         this._uiHelperService.zoomTo(1);
+      }
+    }
+
+    // Check plugin shortcuts (exec last)
+    const pluginShortcuts = this._pluginBridgeService.shortcuts$.getValue();
+    for (const shortcut of pluginShortcuts) {
+      const shortcutKey = `plugin_${shortcut.pluginId}:${shortcut.id}`;
+      const shortcutKeyCombo = (keys as any)[shortcutKey];
+      if (shortcutKeyCombo && checkKeyCombo(ev, shortcutKeyCombo)) {
+        ev.preventDefault();
+        this._pluginBridgeService.executeShortcut(`${shortcut.pluginId}:${shortcut.id}`);
+        return;
       }
     }
   }

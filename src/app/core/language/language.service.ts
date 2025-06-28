@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { DateAdapter } from '@angular/material/core';
-import moment from 'moment';
 import {
   AUTO_SWITCH_LNGS,
   LanguageCode,
@@ -75,8 +74,6 @@ export class LanguageService {
 
     this.isRTL.next(this._isRTL(lng));
     this._translateService.use(lng);
-
-    moment.locale(momLng);
 
     this._dateAdapter.setLocale(momLng);
   }

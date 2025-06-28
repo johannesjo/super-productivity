@@ -1,18 +1,27 @@
-import { contextBridge, ipcRenderer, IpcRendererEvent, webFrame } from 'electron';
+import { ipcRenderer, IpcRendererEvent, webFrame, contextBridge } from 'electron';
 import { ElectronAPI } from './electronAPI.d';
 import { IPCEventValue } from './shared-with-frontend/ipc-events.const';
 import { LocalBackupMeta } from '../src/app/imex/local-backup/local-backup.model';
 import { SyncGetRevResult } from '../src/app/imex/sync/sync.model';
+import {
+  PluginManifest,
+  PluginNodeScriptRequest,
+  PluginNodeScriptResult,
+} from '../packages/plugin-api/src/types';
 
-const _send: (channel: IPCEventValue, ...args: any[]) => void = (channel, ...args) =>
+const _send: (channel: IPCEventValue, ...args: unknown[]) => void = (channel, ...args) =>
   ipcRenderer.send(channel, ...args);
-const _invoke: (channel: IPCEventValue, ...args: any[]) => Promise<unknown> = (
+const _invoke: (channel: IPCEventValue, ...args: unknown[]) => Promise<unknown> = (
   channel,
   ...args
 ) => ipcRenderer.invoke(channel, ...args);
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const ea: ElectronAPI = {
-  on: (channel: string, listener: (event: IpcRendererEvent, ...args: any[]) => void) => {
+  on: (
+    channel: string,
+    listener: (event: IpcRendererEvent, ...args: unknown[]) => void,
+  ) => {
     // NOTE: there is no proper way to unsubscribe apart from unsubscribing all
     ipcRenderer.on(channel, listener);
   },
@@ -74,6 +83,7 @@ const ea: ElectronAPI = {
 
   sendAppSettingsToElectron: (globalCfg) =>
     _send('TRANSFER_SETTINGS_TO_ELECTRON', globalCfg),
+  sendSettingsUpdate: (globalCfg) => _send('UPDATE_SETTINGS', globalCfg),
   registerGlobalShortcuts: (keyboardCfg) =>
     _send('REGISTER_GLOBAL_SHORTCUTS', keyboardCfg),
   showFullScreenBlocker: (args) => _send('FULL_SCREEN_BLOCKER', args),
@@ -83,12 +93,37 @@ const ea: ElectronAPI = {
 
   backupAppData: (appData) => _send('BACKUP', appData),
 
-  updateCurrentTask: (task, isPomodoroEnabled, currentPomodoroSessionTime) =>
-    _send('CURRENT_TASK_UPDATED', task, isPomodoroEnabled, currentPomodoroSessionTime),
+  updateCurrentTask: (
+    task,
+    isPomodoroEnabled,
+    currentPomodoroSessionTime,
+    isFocusModeEnabled?,
+    currentFocusSessionTime?,
+  ) =>
+    _send(
+      'CURRENT_TASK_UPDATED',
+      task,
+      isPomodoroEnabled,
+      currentPomodoroSessionTime,
+      isFocusModeEnabled,
+      currentFocusSessionTime,
+    ),
 
   exec: (command: string) => _send('EXEC', command),
-};
-contextBridge.exposeInMainWorld('ea', ea);
 
-// contextBridge.exposeInIsolatedWorld();
-console.log('preload script loading complete');
+  // Plugin API
+  pluginExecNodeScript: (
+    pluginId: string,
+    manifest: PluginManifest,
+    request: PluginNodeScriptRequest,
+  ) =>
+    _invoke(
+      'PLUGIN_EXEC_NODE_SCRIPT',
+      pluginId,
+      manifest,
+      request,
+    ) as Promise<PluginNodeScriptResult>,
+};
+
+// Expose ea to window for ipc-event.ts using contextBridge for context isolation
+contextBridge.exposeInMainWorld('ea', ea);

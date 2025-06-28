@@ -3,6 +3,7 @@ import {
   ErrorHandler,
   importProvidersFrom,
   LOCALE_ID,
+  provideExperimentalZonelessChangeDetection,
   SecurityContext,
 } from '@angular/core';
 
@@ -29,7 +30,6 @@ import { DatePipe } from '@angular/common';
 import { MarkdownModule, MARKED_OPTIONS, provideMarkdown } from 'ngx-markdown';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { FeatureStoresModule } from './app/root-store/feature-stores.module';
-import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { MatNativeDateModule } from '@angular/material/core';
 import { FormlyConfigModule } from './app/ui/formly-config.module';
 import { markedOptionsFactory } from './app/ui/marked-options-factory';
@@ -48,7 +48,14 @@ import { StoreModule } from '@ngrx/store';
 import { reducers } from './app/root-store';
 import { undoTaskDeleteMetaReducer } from './app/root-store/meta/undo-task-delete.meta-reducer';
 import { actionLoggerReducer } from './app/root-store/meta/action-logger.reducer';
-import { taskSharedMetaReducer } from './app/root-store/meta/task-shared.reducer';
+import {
+  plannerSharedMetaReducer,
+  projectSharedMetaReducer,
+  tagSharedMetaReducer,
+  taskSharedCrudMetaReducer,
+  taskSharedLifecycleMetaReducer,
+  taskSharedSchedulingMetaReducer,
+} from './app/root-store/meta/task-shared-meta-reducers';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -61,6 +68,8 @@ import { ShortTime2Pipe } from './app/ui/pipes/short-time2.pipe';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { BackgroundTask } from '@capawesome/capacitor-background-task';
 import { promiseTimeout } from './app/util/promise-timeout';
+import { PLUGIN_INITIALIZER_PROVIDER } from './app/plugins/plugin-initializer';
+import { initializeMatMenuTouchFix } from './app/features/tasks/task-context-menu/mat-menu-touch-monkey-patch';
 
 if (environment.production || environment.stage) {
   enableProdMode();
@@ -79,7 +88,6 @@ bootstrapApplication(AppComponent, {
   providers: [
     importProvidersFrom(
       FeatureStoresModule,
-      MatMomentDateModule,
       MatNativeDateModule,
       FormlyConfigModule,
       MarkdownModule.forRoot({
@@ -99,8 +107,13 @@ bootstrapApplication(AppComponent, {
       // NOTE: both need to be present to use forFeature stores
       StoreModule.forRoot(reducers, {
         metaReducers: [
-          taskSharedMetaReducer,
           undoTaskDeleteMetaReducer,
+          taskSharedCrudMetaReducer,
+          taskSharedLifecycleMetaReducer,
+          taskSharedSchedulingMetaReducer,
+          projectSharedMetaReducer,
+          tagSharedMetaReducer,
+          plannerSharedMetaReducer,
           actionLoggerReducer,
         ],
         ...(environment.production
@@ -118,14 +131,13 @@ bootstrapApplication(AppComponent, {
                 strictActionImmutability: true,
                 strictStateSerializability: true,
                 strictActionSerializability: true,
-                strictActionWithinNgZone: true,
                 strictActionTypeUniqueness: true,
               },
             }),
       }),
       EffectsModule.forRoot([]),
       !environment.production && !environment.stage
-        ? StoreDevtoolsModule.instrument({ connectInZone: true })
+        ? StoreDevtoolsModule.instrument()
         : [],
       ReactiveFormsModule,
       ServiceWorkerModule.register('ngsw-worker.js', {
@@ -163,17 +175,21 @@ bootstrapApplication(AppComponent, {
     ShortTime2Pipe,
     provideCharts(withDefaultRegisterables()),
     provideMarkdown(),
-    { provide: ErrorHandler, useClass: GlobalErrorHandler },
     {
       provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
       useValue: { appearance: 'fill', subscriptSizing: 'dynamic' },
     },
-    { provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig },
     provideAnimations(),
     provideRouter(APP_ROUTES, withHashLocation(), withPreloading(PreloadAllModules)),
+    PLUGIN_INITIALIZER_PROVIDER,
+    provideExperimentalZonelessChangeDetection(),
   ],
 }).then(() => {
+  // Initialize touch fix for Material menus
+  initializeMatMenuTouchFix();
+
   // TODO make asset caching work for electron
+
   if (
     'serviceWorker' in navigator &&
     (environment.production || environment.stage) &&

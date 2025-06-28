@@ -31,10 +31,6 @@
     "RESTORE_FILE_BACKUP_ANDROID": "Parece que NÃO HÁ DADOS, mas há um backup disponível. Você quer carregá-lo?",
     "RESTORE_STRAY_BACKUP": "Durante a última sincronização pode ter ocorrido algum erro. Você quer restaurar o último backup?"
   },
-  "DATETIME_INPUT": {
-    "IN": "em {{time}}",
-    "TOMORROW": "amanhã {{time}}"
-  },
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Mais tarde hoje",
     "NEXT_WEEK": "Próxima semana",
@@ -54,32 +50,6 @@
         },
         "SELECT_TYPE": "Selecione um tipo",
         "TYPES": {
-          "FILE": "Arquivo (aberto pelo aplicativo padrão do sistema)",
-          "IMG": "Imagem (mostrada como miniatura)",
-          "LINK": "Link (abre no navegador)"
-        }
-      }
-    },
-    "BOOKMARK": {
-      "BAR": {
-        "ADD": "Adicionar Favorito",
-        "DROP": "Solte aqui para adicionar um Favorito",
-        "EDIT": "Editar Favoritos",
-        "NO_BOOKMARKS": "Você não tem Favoritos no projeto. Adicione um por meio de arrastar e soltar ou clicando no botão 'mais'."
-      },
-      "DIALOG_EDIT": {
-        "ADD_BOOKMARK": "Adicionar Favorito",
-        "EDIT_BOOKMARK": "Editar Favorito",
-        "LABELS": {
-          "COMMAND": "Comando",
-          "FILE": "Caminho do arquivo",
-          "IMG": "Imagem",
-          "LINK": "Url"
-        },
-        "SELECT_ICON": "Selecione um ícone",
-        "SELECT_TYPE": "Selecione um tipo",
-        "TYPES": {
-          "COMMAND": "Comando (comando de shell personalizado)",
           "FILE": "Arquivo (aberto pelo aplicativo padrão do sistema)",
           "IMG": "Imagem (mostrada como miniatura)",
           "LINK": "Link (abre no navegador)"
@@ -604,11 +574,6 @@
         "ADD_PLANNED": {
           "ADD_TO_TODAY": "Adicionar a Hoje",
           "TITLE": "Adicionar tarefas planejadas para Hoje"
-        },
-        "PLAN_FOR_DAY": {
-          "REMINDER_WARNING": "Isso removerá o lembrete da tarefa! Pressione Escape para cancelar.",
-          "REMOVE_PLAN_DATE": "Remover data do planenjamento",
-          "TITLE": "Planejar tarefa para o dia"
         }
       },
       "EDIT_REPEATED_TASK": "Editar tarefa repetida ' {{taskName}}'",
@@ -842,7 +807,6 @@
       },
       "C": {
         "EMPTY_SYNC": "Você está tentando sincronizar um objeto de dados vazio. Se estiver tentando configurar a sincronização de uma nova instância de aplicativo, basta pressionar OK para carregar os dados do servidor. Caso contrário, verifique seus dados.",
-        "FORCE_IMPORT": "Importar dados remotos mesmo assim?",
         "FORCE_UPLOAD": "Carregar dados locais mesmo assim?",
         "FORCE_UPLOAD_AFTER_ERROR": "Ocorreu um erro ao carregar seus dados locais. Tentar forçar a atualização?",
         "MIGRATE_LEGACY": "Dados legados detectados durante a importação. Deseja tentar migrá-los?",
@@ -1027,8 +991,6 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Adicione tudo para hoje",
         "ADD_TO_TODAY": "Adicione a hoje",
-        "DISMISS": "Descartar lembrete",
-        "DISMISS_ALL": "Descartar tudo",
         "DONE": "Feito",
         "DUE_TASK": "Tarefa atrasada",
         "DUE_TASKS": "Tarefas atrasadas",
@@ -1279,7 +1241,22 @@
     "EXPORT_DATA": "Exportar dados",
     "IMPORT_FROM_FILE": "Importar do arquivo",
     "PRIVACY_EXPORT": "Exportar dados anonimizados (para enviar para contact@super-productivity.com para depuração)",
-    "S_ERR_INVALID_DATA": "Falha na importação: JSON inválido"
+    "S_ERR_INVALID_DATA": "Falha na importação: JSON inválido",
+    "S_ERR_INVALID_URL": "Falha na importação: URL fornecido inválido",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "Erro: Não foi possível decodificar o parâmetro de URL para importação. Certifique-se de que está corretamente formatado.",
+    "S_ERR_NETWORK": "Falha na importação: erro de rede ao buscar dados do URL",
+    "IMPORT_FROM_URL": "Importar do URL",
+    "URL_PLACEHOLDER": "Insira o URL para importar",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "Importar do URL",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Por favor, insira o URL completo do arquivo de backup JSON do Super Productivity que deseja importar.",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "Importar do URL",
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "TITLE": "Confirmar importação de dados do URL",
+      "INITIATED_MSG": "Uma importação automática de dados foi iniciada.",
+      "SOURCE_URL_DOMAIN": "Domínio de origem",
+      "WARNING_TITLE": "Aviso",
+      "WARNING_MSG": "Prosseguir irá sobrescrever seus dados e configurações atuais do aplicativo com o conteúdo do URL especificado. Esta ação não pode ser desfeita."
+    }
   },
   "G": {
     "ADD": "Adicionar",
@@ -1680,17 +1657,14 @@
   },
   "WW": {
     "ADD_MORE": "Adicionar mais",
-    "ADD_SCHEDULED_FOR_TODAY": "Adicionar tarefas planejadas para hoje ( {{nr}})",
     "ADD_SCHEDULED_FOR_TOMORROW": "Adicionar tarefas planejadas para amanhã ( {{nr}})",
     "ADD_SOME_TASKS": "Adicione algumas tarefas para planejar seu dia!",
-    "COMPLETED_TASKS": "Tarefas Concluídas",
     "ESTIMATE_REMAINING": "Estimativa restante:",
     "FINISH_DAY": "Dia de término",
     "FINISH_DAY_FOR_PROJECT": "Dia de conclusão deste projeto",
     "FINISH_DAY_FOR_TAG": "Dia de término para esta etiqueta",
     "FINISH_DAY_TOOLTIP": "Avalie seu dia, mova todas as tarefas concluídas para o arquivo (opcionalmente) e/ou planeje seu dia seguinte.",
     "HELP_PROCRASTINATION": "Socorro, estou procrastinando!",
-    "NO_COMPLETED_TASKS": "Não há tarefas concluídas no momento",
     "NO_PLANNED_TASKS": "Nenhuma tarefa planejada",
     "READY_TO_WORK": "Pronto para trabalhar!",
     "RESET_BREAK_TIMER": "Reiniciar sem temporizador de intervalo",

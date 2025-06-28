@@ -1,4 +1,5 @@
-@import '../../../../../variables.scss';
+@import '../../../../../common.scss';
+@import '../task-context-menu-touch-fix.scss';
 
 .key-i {
   opacity: 0.4;
@@ -31,12 +32,8 @@
 .quick-access {
   display: flex;
   justify-content: space-evenly;
-  border-bottom: 1px solid var(--extra-border-color);
+  border-bottom: 1px solid var(--theme-extra-border-color);
   height: 48px;
-
-  //@include darkTheme() {
-  //  border-color: $dark-theme-extra-border-color;
-  //}
 
   > button {
     height: 48px;
@@ -50,7 +47,7 @@
   }
 
   button + button {
-    border-left: 1px solid var(--extra-border-color) !important;
+    border-left: 1px solid var(--theme-extra-border-color) !important;
   }
 }
 

@@ -31,10 +31,6 @@
     "RESTORE_FILE_BACKUP_ANDROID": "Данных не найдено, но есть резервная копия. Вы хотите её загрузить?",
     "RESTORE_STRAY_BACKUP": "Во время последней синхронизации могла произойти ошибка. Вы хотите восстановить последнюю резервную копию?"
   },
-  "DATETIME_INPUT": {
-    "IN": "через {{time}}",
-    "TOMORROW": "завтра {{time}}"
-  },
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Позже сегодня",
     "NEXT_WEEK": "На след. неделе",
@@ -117,11 +113,24 @@
         "TITLE": "CalDav"
       },
       "ISSUE_CONTENT": {
+        "ASSIGNEE": "Исполнитель",
+        "AT": "в",
+        "ATTACHMENTS": "Вложения",
+        "CHANGED": "Изменено",
+        "COMMENTS": "Комментарии",
+        "COMPONENTS": "Компоненты",
         "DESCRIPTION": "Описание",
         "LABELS": "Метки",
+        "LIST_OF_CHANGES": "Список изменений",
         "MARK_AS_CHECKED": "Отметить обновления как отмеченные",
+        "ON": "вкл.",
+        "RELATED": "Связанные",
         "STATUS": "Статус",
-        "SUMMARY": "Сводка"
+        "STORY_POINTS": "История очков",
+        "SUB_TASKS": "Подзадачи",
+        "SUMMARY": "Сводка",
+        "WORKLOG": "Журнал работы",
+        "WRITE_A_COMMENT": "Написать комментарий"
       },
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav: Календарь \"{{calendarName}}\" не найден",
@@ -159,6 +168,8 @@
         "L_INTERVAL": "Интервал повторения фразы",
         "L_TEXT": "Текст",
         "L_TEXT_DESCRIPTION": "Н-р: \"Работай над ${currentTaskTitle}!\"",
+        "L_VOICE": "Выбрать голос",
+        "L_VOICE_DESCRIPTION": "Выберите голос",
         "TITLE": "Режим доминирования"
       }
     },
@@ -337,6 +348,39 @@
       "DEFAULT_PROJECT_DESCRIPTION": "Проект, назначенный на задания, созданные из проблем.",
       "DEFAULT_PROJECT_LABEL": "Проект суперпродуктивности по умолчанию",
       "HOW_TO_GET_A_TOKEN": "Как получить токен?",
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Исполнитель",
+        "AT": "в",
+        "ATTACHMENTS": "Вложения",
+        "AUTHOR": "Автор",
+        "CATEGORY": "Категория",
+        "CHANGED": "Изменено",
+        "COMMENTS": "Комментарии",
+        "COMPONENTS": "Компоненты",
+        "DESCRIPTION": "Описание",
+        "DONE_RATIO": "Соотношение выполненных работ",
+        "DUE_DATE": "Срок оплаты",
+        "LABELS": "Метки",
+        "LAST_COMMENT": "Последний комментарий",
+        "LIST_OF_CHANGES": "Список изменений",
+        "LOAD_ALL_COMMENTS": "Загрузить все {{nr}} комментариев",
+        "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "Загрузить описание и все комментарии",
+        "LOCATION": "Местоположение",
+        "MARK_AS_CHECKED": "Отметить обновления как проверенные",
+        "ON": "вкл.",
+        "PRIORITY": "ПРИОРИТЕТ",
+        "RELATED": "Связанные",
+        "START": "Начать",
+        "STATUS": "Статус",
+        "STORY_POINTS": "История очков",
+        "SUB_TASKS": "Подзадачи",
+        "SUMMARY": "Резюме",
+        "TIME_SPENT": "Потраченное время",
+        "TYPE": "Тип",
+        "VERSION": "Версия",
+        "WORKLOG": "Журнал работы",
+        "WRITE_A_COMMENT": "Написать комментарий"
+      },
       "S": {
         "ERR_GENERIC": "{{issueProviderName}} Ошибка: {{errTxt}}",
         "ERR_NETWORK": "{{issueProviderName}}: запрос не выполнен из-за сетевой ошибки на стороне клиента.",
@@ -484,6 +528,14 @@
         "WELCOME_USER": "Добро пожаловать {{user}}!"
       }
     },
+    "MARKDOWN_PASTE": {
+      "CONFIRM_ADD_TO_SUB_TASK_NOTES": "Добавить вставленный список markdown в заметки подзадачи \"{{parentTaskTitle}}\"?",
+      "CONFIRM_PARENT_TASKS": "Создать <strong>{{tasksCount}} новые задачи</strong> из вставленного списка markdown?",
+      "CONFIRM_PARENT_TASKS_WITH_SUBS": "Создать <strong>{{tasksCount}} новые задачи и {{subTasksCount}} подзадачи</strong> из вставленного списка markdown?",
+      "CONFIRM_SUB_TASKS": "Создать {{tasksCount}} новые подзадачи из вставленного списка markdown?",
+      "CONFIRM_SUB_TASKS_WITH_PARENT": "Создать <strong>{{tasksCount}} новые подзадачи под \"{{parentTaskTitle}}\"</strong> из вставленного списка markdown?",
+      "DIALOG_TITLE": "Обнаружен вставленный список Markdown!"
+    },
     "METRIC": {
       "BANNER": {
         "CHECK": "Я сделал это!"
@@ -606,12 +658,12 @@
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Уполномоченный",
+        "ATTACHMENTS": "Вложения",
         "DESCRIPTION": "Описание",
         "MARK_AS_CHECKED": "Отметить обновления как отмеченные",
         "STATUS": "Статус",
         "SUMMARY": "Сводка",
         "TYPE": "Тип",
-        "ATTACHMENTS": "Вложения",
         "UPLOAD_ATTACHMENT": "Загрузить в задачу"
       },
       "ISSUE_STRINGS": {
@@ -619,12 +671,12 @@
         "ISSUES_STR": "комплексы работ"
       },
       "S": {
+        "ERR_NO_FILE": "Файл не выбран",
         "ERR_UNKNOWN": "OpenProject: неизвестная ошибка {{statusCode}} {{errorMsg}}. Правильно ли настроен CORS для сервера?",
         "POST_TIME_SUCCESS": "OpenProject: Успешно создана запись времени для {{issueTitle}}",
         "TRANSITION": "OpenProject: Установить значение {{name}} для проблемы \"{{issueKey}}\"",
         "TRANSITION_SUCCESS": "OpenProject: Установить значение <strong>{{chosenTransition}}</strong> для проблемы {{issueKey}}",
-        "TRANSITIONS_LOADED": "Переходы загружены. Используйте выбранные для назначения их",
-        "ERR_NO_FILE": "Файл не выбран"
+        "TRANSITIONS_LOADED": "Переходы загружены. Используйте выбранные для назначения их"
       }
     },
     "PLANNER": {
@@ -822,6 +874,7 @@
     "SEARCH_BAR": {
       "INFO": "Щелкните на значок списка для поиска заархивированных задач.",
       "INFO_ARCHIVED": "Щелкните на значок архива для поиска обычных задач.",
+      "NO_RESULTS": "Задачи, соответствующие вашему запросу, не найдены",
       "PLACEHOLDER": "Найдите задачу или описание задачи",
       "PLACEHOLDER_ARCHIVED": "Поиск заархивированных задач",
       "TOO_MANY_RESULTS": "Слишком много результатов, сузьте область поиска"
@@ -881,20 +934,24 @@
         "TITLE": "Логин: {{provider}}"
       },
       "D_CONFLICT": {
+        "LAMPORT_CLOCK": "Ревизия",
         "LAST_CHANGE": "Последнее изменение:",
         "LAST_SYNC": "Последняя синхронизация:",
         "LOCAL": "Локальный",
         "LOCAL_REMOTE": "Локальный -> Удаленный",
         "REMOTE": "Удаленный",
         "TEXT": "<p>Обновление из Dropbox. Как локальные, так и удаленные данные кажутся измененными.</p>",
+        "TIMESTAMP": "Временная метка",
         "TITLE": "Dropbox: Конфликтующие данные",
         "USE_LOCAL": "Использовать локальный",
         "USE_REMOTE": "Использовать удаленный"
       },
       "D_DECRYPT_ERROR": {
         "BTN_OVER_WRITE_REMOTE": "Изменение и перезапись удаленного репозитория",
+        "CHANGE_PW_AND_DECRYPT": "Изменить и попытаться расшифровать",
         "P1": "Ваши данные зашифрованы, и расшифровка не удалась. Пожалуйста, введите правильный пароль!",
-        "P2": "Вы также можете изменить пароль, который перезапишет все удаленные данные."
+        "P2": "Вы также можете изменить пароль, который перезапишет все удаленные данные.",
+        "PASSWORD": "Пароль"
       },
       "D_INCOMPLETE_SYNC": {
         "BTN_CLOSE_APP": "Закрыть приложение",
@@ -1235,6 +1292,45 @@
         "WEDNESDAY": "Среда"
       }
     },
+    "TASK_VIEW": {
+      "CUSTOMIZER": {
+        "ENTER_PROJECT": "Введите проект",
+        "ENTER_TAG": "Введите тег",
+        "ESTIMATED_TIME": "Оценочное время",
+        "FILTER_BY": "Фильтр по",
+        "FILTER_DEFAULT": "Без фильтра",
+        "FILTER_ESTIMATED_TIME": "Оценочное время",
+        "FILTER_PROJECT": "Проект",
+        "FILTER_SCHEDULED_DATE": "Запланированная дата",
+        "FILTER_TAG": "Тег",
+        "FILTER_TIME_SPENT": "Потраченное время",
+        "GROUP_BY": "Группировать по",
+        "GROUP_DEFAULT": "Без группы",
+        "GROUP_PROJECT": "Проект",
+        "GROUP_SCHEDULED_DATE": "Запланированная дата",
+        "GROUP_TAG": "Тег",
+        "RESET_ALL": "Сбросить все",
+        "SCHEDULED_DEFAULT": "Любая дата",
+        "SCHEDULED_NEXT_MONTH": "Следующий месяц",
+        "SCHEDULED_NEXT_WEEK": "Следующая неделя",
+        "SCHEDULED_THIS_MONTH": "Этот месяц",
+        "SCHEDULED_THIS_WEEK": "Эта неделя",
+        "SCHEDULED_TODAY": "Сегодня",
+        "SCHEDULED_TOMORROW": "Завтра",
+        "SORT_BY": "Сортировать по",
+        "SORT_CREATION_DATE": "Дата создания",
+        "SORT_DEFAULT": "По умолчанию",
+        "SORT_NAME": "Имя",
+        "SORT_SCHEDULED_DATE": "Запланированная дата",
+        "TIME_1HOUR": "> 1 час",
+        "TIME_2HOUR": "> 2 часа",
+        "TIME_10MIN": "> 10 минут",
+        "TIME_30MIN": "> 30 минут",
+        "TIME_DEFAULT": "Любая продолжительность",
+        "TIME_SPENT": "Потраченное время",
+        "TITLE": "Настроить вид задач"
+      }
+    },
     "TIME_TRACKING": {
       "B": {
         "ALREADY_DID": "Я уже сделал",
@@ -1327,18 +1423,34 @@
     }
   },
   "FILE_IMEX": {
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "INITIATED_MSG": "Автоматический импорт данных был инициирован.",
+      "SOURCE_URL_DOMAIN": "Исходный домен",
+      "TITLE": "Подтвердите импорт данных из URL",
+      "WARNING_MSG": "Продолжение приведет к перезаписи ваших текущих данных и конфигурации приложения содержимым из указанного URL. Это действие невозможно отменить.",
+      "WARNING_TITLE": "Предупреждение"
+    },
     "EXPORT_DATA": "Экспорт данных",
     "IMPORT_FROM_FILE": "Импорт из файла",
+    "IMPORT_FROM_URL": "Импорт из URL",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Пожалуйста, введите полный URL файла резервной копии JSON Super Productivity, который вы хотите импортировать.",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "Импорт из URL",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "Импорт из URL",
     "PRIVACY_EXPORT": "Экспортировать обезличенные данные (отправить contact@super-productivity.com для отладки)",
     "S_BACKUP_DOWNLOADED": "Резервная копия загружена в папку с документами Android",
     "S_ERR_IMPORT_FAILED": "Ошибка импорта данных",
-    "S_ERR_INVALID_DATA": "Ошибка импорта: неверный JSON"
+    "S_ERR_INVALID_DATA": "Ошибка импорта: неверный JSON",
+    "S_ERR_INVALID_URL": "Ошибка импорта: указан недопустимый URL",
+    "S_ERR_NETWORK": "Ошибка импорта: ошибка сети при получении данных с URL",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "Ошибка: не удалось декодировать параметр URL для импорта. Пожалуйста, убедитесь, что он правильно отформатирован.",
+    "URL_PLACEHOLDER": "Введите URL для импорта"
   },
   "G": {
     "ADD": "Добавить",
     "ADVANCED_CFG": "Расширенная настройка",
     "CANCEL": "Отменить",
     "CLOSE": "Закрыть",
+    "CONFIRM": "Подтвердить",
     "DELETE": "Удалить",
     "DISMISS": "Отклонить",
     "DO_IT": "Сделать это!",
@@ -1459,6 +1571,7 @@
       "TOGGLE_ISSUE_PANEL": "Показать/скрыть панель выдачи",
       "TOGGLE_PLAY": "Запустить/Остановить задачу",
       "TOGGLE_SIDE_NAV": "Показать и сфокусировать / Скрыть боковую навигацию",
+      "TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL": "Переключить панель фильтрации/группировки/сортировки",
       "TRIGGER_SYNC": "Синхронизация запуска (если настроена)",
       "ZOOM_DEFAULT": "Масштаб по умолчанию (только для ПК)",
       "ZOOM_IN": "Увеличить (только для ПК)",
@@ -1503,6 +1616,7 @@
       "IS_HIDE_NAV": "Скрыть навигацию, пока основной заголовок не наведен (только на рабочем столе)",
       "IS_MINIMIZE_TO_TRAY": "Сворачивать в трей (только для ПК)",
       "IS_SHOW_TIP_LONGER": "Показывать советы по продуктивности при запуске приложения немного дольше",
+      "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Показать текущее время обратного отсчета в трее / меню состояния (только для настольных Mac)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Показать текущую задачу в трее / меню состояния (только на рабочем столе)",
       "IS_TURN_OFF_MARKDOWN": "Отключить Markdown для заметок",
       "IS_USE_MINIMAL_SIDE_NAV": "Использовать минимальную панель навигации (отображаются только значки).",
@@ -1588,6 +1702,34 @@
       "TITLE": "Отслеживание времени"
     }
   },
+  "GLOBAL_RELATIVE_TIME": {
+    "FUTURE": {
+      "A_DAY": "Через день",
+      "A_MINUTE": "через минуту",
+      "A_MONTH": "Через месяц",
+      "A_YEAR": "через год",
+      "AN_HOUR": "через час",
+      "DAYS": "через {{count}} дней",
+      "FEW_SECONDS": "через несколько секунд",
+      "HOURS": "через {{count}} часов",
+      "MINUTES": "через {{count}} минут",
+      "MONTHS": "через {{count}} месяцев",
+      "YEARS": "через {{count}} лет"
+    },
+    "PAST": {
+      "A_DAY": "день назад",
+      "A_MINUTE": "минуту назад",
+      "A_MONTH": "месяц назад",
+      "A_YEAR": "год назад",
+      "AN_HOUR": "час назад",
+      "DAYS": "{{count}} дней назад",
+      "FEW_SECONDS": "несколько секунд назад",
+      "HOURS": "{{count}} часов назад",
+      "MINUTES": "{{count}} минут назад",
+      "MONTHS": "{{count}} месяцев назад",
+      "YEARS": "{{count}} лет назад"
+    }
+  },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Скопировано в буфер обмена",
     "ERR_COMPRESSION": "Ошибка для интерфейса сжатия",
@@ -1620,6 +1762,7 @@
     "CREATE_TAG": "Создать тег",
     "DELETE_PROJECT": "Удалить проект",
     "DELETE_TAG": "Удалить тег",
+    "ENTER_FOCUS_MODE": "Войти в режим фокуса",
     "GO_TO_TASK_LIST": "Перейти к списку задач",
     "HELP": "Помощь",
     "HM": {
@@ -1644,6 +1787,7 @@
     "PROJECTS": "Проекты",
     "QUICK_HISTORY": "Быстрая история",
     "SCHEDULE": "Расписание",
+    "SEARCH": "Поиск",
     "SETTINGS": "Настройки",
     "SHOW_SEARCH_BAR": "Показать панель поиска",
     "TAGS": "Теги",
@@ -1765,6 +1909,7 @@
     "HELP_PROCRASTINATION": "Помогите, я прокрастинирую!",
     "MOVE_DONE_TO_ARCHIVE": "Переместить в архив",
     "NO_DONE_TASKS": "В настоящее время нет выполненных задач",
+    "NO_PLANNED_TASK_ALL_DONE": "все задачи выполнены",
     "NO_PLANNED_TASKS": "Нет запланированных задач",
     "READY_TO_WORK": "Готов к работе!",
     "RESET_BREAK_TIMER": "Сброс таймера без перерыва",

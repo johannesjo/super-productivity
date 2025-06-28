@@ -1,4 +1,4 @@
-@import '../../../../variables';
+@import '../../../../common';
 
 :host-context([dir='rtl']) {
   direction: rtl;
@@ -21,21 +21,21 @@
 
   td {
     ::ng-deep .mat-mdc-select-value {
-      padding-left: $s * 2.25;
-      padding-top: $s * 1.25;
-      padding-bottom: $s * 1.25;
+      padding-left: calc(var(--s) * 2.25);
+      padding-top: calc(var(--s) * 1.25);
+      padding-bottom: calc(var(--s) * 1.25);
     }
 
     &:first-of-type ::ng-deep .mat-mdc-select-value {
-      padding-left: $s * 3;
+      padding-left: var(--s3);
     }
 
     ::ng-deep .mat-mdc-select-arrow-wrapper {
-      padding-right: $s * 1.25;
+      padding-right: calc(var(--s) * 1.25);
     }
 
     &:last-of-type ::ng-deep .mat-mdc-select-arrow-wrapper {
-      padding-right: $s * 3;
+      padding-right: var(--s3);
     }
   }
 
@@ -50,24 +50,19 @@
         bottom: 0;
         z-index: -1;
 
-        @include darkTheme() {
-          background: rgba(255, 255, 255, 0.1);
-        }
-        @include lightTheme() {
-          background: rgba(0, 0, 0, 0.1);
-        }
+        background: var(--theme-select-hover-bg);
       }
     }
   }
 }
 
-@media (min-width: $layout-xs) {
+@media (min-width: #{$layout-xs}) {
   .row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    padding-top: $s * 2;
+    padding-top: var(--s2);
   }
   .col {
     width: 32%;
@@ -76,7 +71,7 @@
 
 #task-textarea {
   width: 100%;
-  @media (min-width: $layout-xs) {
+  @media (min-width: #{$layout-xs}) {
     min-width: 70vw;
   }
 }
@@ -95,7 +90,7 @@
   position: absolute;
   top: 0;
   right: -20px;
-  transition: $transition-slow;
+  transition: var(--transition-duration-l) var(--ani-standard-timing);
 
   .isNoCols & {
     position: absolute;
@@ -116,7 +111,7 @@
   overflow: auto;
   position: relative;
   z-index: 1;
-  margin: 0 -20px $s;
+  margin: 0 -20px var(--s);
 
   ::ng-deep table {
     width: 100%;
@@ -131,7 +126,7 @@
   }
 
   tr:first-of-type td {
-    @include extraBorder;
+    border: 1px solid var(--theme-extra-border-color);
   }
 
   th {
@@ -157,7 +152,7 @@
 }
 
 .options-collapsible {
-  margin-top: $s * 2;
+  margin-top: var(--s2);
   text-align: center;
 }
 
@@ -173,13 +168,7 @@
     top: 0;
     border: 1px solid;
 
-    @include darkTheme() {
-      border-color: rgba(255, 255, 255, 0.1);
-    }
-
-    @include lightTheme() {
-      border-color: rgba(0, 0, 0, 0.1);
-    }
+    border-color: var(--theme-options-border-color);
   }
 }
 

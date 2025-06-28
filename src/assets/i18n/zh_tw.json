@@ -20,10 +20,6 @@
     "RESTORE_FILE_BACKUP_ANDROID": "似乎沒有資料，但是有可用備份。是否要從備份載入？",
     "RESTORE_STRAY_BACKUP": "在上次同步期間，可能有一些錯誤。您要還原上一個備份嗎？"
   },
-  "DATETIME_INPUT": {
-    "IN": "在 {{time}}",
-    "TOMORROW": "明天 {{time}}"
-  },
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "今天稍晚",
     "NEXT_WEEK": "下周",
@@ -49,32 +45,6 @@
         }
       }
     },
-    "BOOKMARK": {
-      "BAR": {
-        "ADD": "添加書籤",
-        "DROP": "點擊此處添加書籤",
-        "EDIT": "編輯書籤",
-        "NO_BOOKMARKS": "您沒有項目書籤。通過拖放或單擊\"圖標\"添加一個。"
-      },
-      "DIALOG_EDIT": {
-        "ADD_BOOKMARK": "添加書籤",
-        "EDIT_BOOKMARK": "編輯書籤",
-        "LABELS": {
-          "COMMAND": "命令",
-          "FILE": "檔案路徑",
-          "IMG": "圖片",
-          "LINK": "網址"
-        },
-        "SELECT_ICON": "選擇一個圖標",
-        "SELECT_TYPE": "選擇一種類型",
-        "TYPES": {
-          "COMMAND": "命令（自定義shell命令）",
-          "FILE": "檔案（打開系統預設應用程式）",
-          "IMG": "圖像（顯示為縮略圖）",
-          "LINK": "連結（在瀏覽器中打開）"
-        }
-      }
-    },
     "CALDAV": {
       "DIALOG_INITIAL": {
         "TITLE": "Setup CalDav for Project"
@@ -85,9 +55,6 @@
         "CALDAV_RESOURCE": "The name of the CalDav resource (the calendar)",
         "CALDAV_URL": "CalDav URL (the base URL)",
         "CALDAV_USER": "Your CalDav username",
-        "IS_AUTO_IMPORT_ISSUES": "Automatically add uncompleted CalDav todos to your backlog",
-        "IS_AUTO_POLL": "Automatically poll imported tasks for changes",
-        "IS_SEARCH_ISSUES_FROM_CALDAV": "Show uncompleted CalDav todos as suggestion when adding new tasks",
         "IS_TRANSITION_ISSUES_ENABLED": "Automatically complete CalDav todos on task completion"
       },
       "FORM_SECTION": {
@@ -128,12 +95,8 @@
       },
       "FORM": {
         "FILTER_USER": "使用者名稱（請輸入您的使用者名稱）",
-        "IS_AUTO_IMPORT_ISSUES": "自動將 GitHub 未解決的 Issue 添加到待辦事項",
-        "IS_AUTO_POLL": "自動拉取匯入的git Issue",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "在添加新任務時，將 git 中的 Issue 顯示為建議",
         "REPO": "GitHub：\"username / repositoryName\"",
-        "TOKEN": "存取權杖",
-        "TOKEN_DESCRIPTION": "私儲存庫存取所需"
+        "TOKEN": "存取權杖"
       },
       "FORM_SECTION": {
         "HELP": "<p>您可以在此處配置 Super Productivity，以在日常計劃視圖的任務建立面板中列出特儲存庫的打開 GitHub Issue。它們將被列為建議，並將提供該 Issue 的連結以及有關該 Issue 的更多資訊。</p> <p>此外，您還可以自動將所有未解決的 Issue 添加並同步到任務待辦事項中。</p><p>您可以提供存取Token以此獲得使用限制並進行存取， <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>更多資訊，請參見此處</a>。",
@@ -160,9 +123,6 @@
       "FORM": {
         "FILTER_USER": "使用者名稱（例如，自行過濾掉更改）",
         "GITLAB_BASE_URL": "Custom GitLab base URL",
-        "IS_AUTO_IMPORT_ISSUES": "自動將未解決的 Issue 從 GitLab 添加到待辦事項",
-        "IS_AUTO_POLL": "自動拉取匯入的 git 的 Issue 以進行更改",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "在添加新任務時，將git中的 Issue 顯示為建議",
         "PROJECT": "GitLab 完整路徑或使用者名稱/repo",
         "TOKEN": "存取權杖",
         "SCOPE": "Scope",
@@ -191,26 +151,6 @@
       },
       "S": {
         "ERR_UNKNOWN": "GitLab：未知錯誤 {{statusCode}} {{errorMsg}}"
-      }
-    },
-    "GOOGLE": {
-      "BANNER": {
-        "AUTH_FAIL": "GoogleApi：無法驗證，請嘗試重新登入！"
-      },
-      "DIALOG": {
-        "CREATE_SYNC_FILE": "Google Drive：找不到名稱為<strong>\"{{fileName}}\"</strong> 的檔案。是否在Google Drive 上將其建立為同步檔案？",
-        "USE_EXISTING_SYNC_FILE": "Google Drive：使用</strong>現有</strong>檔案 \"{{fileName}}\" 作為同步檔案？如果沒有，請更改同步檔案名。"
-      },
-      "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "找到名為\"{{newFileName}}\"的多個檔案。請進保留一個檔案或選擇其他名稱。",
-        "SYNC_FILE_CREATION_ERROR": "Google雲端硬碟：建立同步檔案時發生錯誤。 {{err}}",
-        "UPDATED_SYNC_FILE_NAME": "Google雲端硬碟：更新的同步檔案名"
-      },
-      "S_API": {
-        "ERR": "GoogleApi錯誤： {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi：未指定檔案ID",
-        "ERR_NO_FILE_NAME": "GoogleApi：未指定檔案名",
-        "SUCCESS_LOGIN": "GoogleApi：登入成功"
       }
     },
     "DOMINA_MODE": {
@@ -293,17 +233,9 @@
         "TIME_SPENT_TOOLTIP": "Add different times",
         "TITLE": "Jira：提交工作日誌 Worklog"
       },
-      "FORM": {
-        "IS_AUTO_IMPORT_ISSUES": "自動將未解決的 Issue 從GitHub添加到待辦事項",
-        "IS_AUTO_POLL": "自動拉取匯入的git Issue 進行的更改",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "在添加新任務時，將git中的Issue顯示為建議",
-        "REPO": "您要追蹤的gi儲存庫的\"username / repositoryName\""
-      },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL用於自動向待辦事項添加任務",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "子任務完成後，打開對話框將工作日誌提交給Jira",
-        "IS_AUTO_IMPORT_ISSUES": "自動向Jira待辦事項添加 Issue ",
-        "IS_AUTO_POLL_TICKETS": "自動檢查匯入的 Issue 以進行更改並通知",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "檢查當前處理的 Issue 是否已分配給當前用戶",
         "IS_WORKLOG_ENABLED": "打開對話框，在任務完成時將工作日誌提交給 Jira",
         "WORKLOG_DEFAULT_TIME_MODE": "Default time value for dialog",
@@ -323,7 +255,6 @@
       },
       "FORM_SECTION": {
         "ADV_CFG": "高級配置",
-        "CREDENTIALS": "證書",
         "HELP_ARR": {
           "H1": "基本配置",
           "H2": "工作日誌設置",
@@ -428,7 +359,6 @@
       "D_ADD": {
         "NOTE_LABEL": "請輸入提醒的內容..."
       },
-      "EDIT_FULLSCREEN": "全螢幕編輯",
       "NOTES_CMP": {
         "ADD_BTN": "添加新筆記",
         "DROP_TO_ADD": "拖動到此處以添加新筆記"
@@ -455,9 +385,6 @@
       "FORM": {
         "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
         "HOST": "Host (e.g.: https://www.openproject.org/)",
-        "IS_AUTO_IMPORT_ISSUES": "Automatically add unresolved work packages from OpenProject to backlog",
-        "IS_AUTO_POLL": "Automatically poll imported OpenProject work packages for changes",
-        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Show work packages as suggestions when adding new tasks",
         "IS_SHOW_TIME_TRACKING_DIALOG": "Show time tracking dialog to report to OpenProject",
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Show time tracking dialog when sub tasks are completed",
         "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Requires time tracking module to be enabled for OpenProject project",
@@ -499,11 +426,6 @@
         "ADD_PLANNED": {
           "ADD_TO_TODAY": "添加到今天",
           "TITLE": "將計劃任務添加到今天"
-        },
-        "PLAN_FOR_DAY": {
-          "REMINDER_WARNING": "這將移除任務中的提醒！按下 Esc 鍵取消。",
-          "REMOVE_PLAN_DATE": "移除計劃日期",
-          "TITLE": "為一天計劃任務"
         }
       },
       "PLAN_VIEW": {
@@ -634,15 +556,11 @@
         "OK": "做吧！"
       },
       "D_EDIT": {
-        "L_COUNTER": "計數",
-        "TITLE": "編輯簡單計數器"
+        "L_COUNTER": "計數"
       },
       "FORM": {
         "ADD_NEW": "添加簡單的計數器",
         "HELP": "您可以在此處配置簡單的按鈕，這些按鈕將顯示在右上方。通過單擊它們，它們可以是計時器，也可以是簡單的計數器。",
-        "L_AUTO_COUNT_UP": "自動觸發計數",
-        "L_AUTO_SWITCH_OFF": "自動觸發關閉",
-        "L_AUTO_SWITCH_ON": "自動觸發開關打開",
         "L_ICON": "圖標",
         "L_ICON_ON": "切換後的圖標",
         "L_IS_ENABLED": "啟用",
@@ -660,7 +578,6 @@
       },
       "C": {
         "EMPTY_SYNC": "您正在嘗試同步一個空的資料對象。這是您（幾乎）原始應用程式的第一次同步嗎？",
-        "FORCE_IMPORT": "仍要匯入遠端資料？",
         "FORCE_UPLOAD": "仍要上傳本地資料嗎？",
         "FORCE_UPLOAD_AFTER_ERROR": "上傳本地資料時發生錯誤。嘗試強制更新？",
         "NO_REMOTE_DATA": "找不到遠端資料。本地上傳到遠端嗎？",
@@ -689,12 +606,7 @@
           "L_ACCESS_TOKEN": "存取權杖（從身份驗證代碼生成）"
         },
         "GOOGLE": {
-          "L_IS_COMPRESS_DATA": "壓縮資料",
           "L_SYNC_FILE_NAME": "同步檔案名"
-        },
-        "LOCAL_FILE": {
-          "L_SYNC_FILE_PATH": "Sync file path",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "Absolute path to the file that should be used for syncing (will be created)."
         },
         "L_ENABLE_SYNCING": "啟用同步",
         "L_SYNC_INTERVAL": "同步間隔",
@@ -704,7 +616,6 @@
           "CORS_INFO": "<p><strong>實驗！！</strong>為了<strong>完成這項工作，您需要為Nextcloud實例停用或限制CORS</strong>，這可能會對安全性造成負面影響！請<a href='https://github.com/nextcloud/server/issues/3131'>參考該Issue</a>以獲取更多資訊。使此功能在移動設備上起作用的一種方法是通過nextcloud應用程序<a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a> 將 \"https://app.super-roductivity.com\"列入白名單使用風險自負！",
           "L_BASE_URL": "基本網址",
           "L_PASSWORD": "密碼",
-          "L_SYNC_FILE_PATH": "同步檔案路徑",
           "L_USER_NAME": "使用者名稱"
         }
       },
@@ -807,10 +718,6 @@
         "UPDATE_ISSUE_DATA": "更新 Issue 資料"
       },
       "D_SCHEDULE_TASK": {
-        "CONFIRM_REPEAT_OK": "Schedule",
-        "CONFIRM_REPEAT_TXT": "You're trying to schedule this repeated task to another day. Repeated tasks are usually meant to be re-created on specified days and only scheduled on that day. Do you want to proceed anyway?",
-        "DATETIME_FOR": "提醒的日期時間",
-        "EDIT": "編輯提醒",
         "MOVE_TO_BACKLOG": "在計劃時間到來後將任務移至待辦事項",
         "REMIND_AT": "提醒時間",
         "RO_10M": "開始前 10 分鐘",
@@ -826,8 +733,6 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "全部添加到今天",
         "ADD_TO_TODAY": "添加到今天",
-        "DISMISS": "取消提醒",
-        "DISMISS_ALL": "關閉所有",
         "DONE": "完成",
         "DUE_TASK": "到期任務",
         "DUE_TASKS": "到期任務",
@@ -920,7 +825,6 @@
         "TITLE": "時間軸"
       },
       "END": "Work End",
-      "MENU_TITLE": "時間軸",
       "NOW": "Now",
       "NO_TASKS": "Currently there are no tasks. Please add some tasks via the + Button in the top bar.",
       "START": "Work Start",
@@ -947,7 +851,6 @@
         "SIMPLE_COUNTER_TOOLTIP_DISABLE": "Click to NOT track to {{title}}",
         "SKIP": "跳過",
         "TASK": "任務",
-        "TASK_BREAK": "任務中斷",
         "TRACK_TO": "追蹤到："
       },
       "D_TRACKING_REMINDER": {
@@ -1018,7 +921,22 @@
   "FILE_IMEX": {
     "EXPORT_DATA": "匯出資料",
     "IMPORT_FROM_FILE": "從檔案匯入",
-    "S_ERR_INVALID_DATA": "匯入失敗：無效的JSON"
+    "S_ERR_INVALID_DATA": "匯入失敗：無效的JSON",
+    "S_ERR_INVALID_URL": "匯入失敗：提供的URL無效",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "錯誤：無法解碼用於匯入的URL參數。請確保其格式正確。",
+    "S_ERR_NETWORK": "匯入失敗：從URL獲取資料時發生網路錯誤",
+    "IMPORT_FROM_URL": "從URL匯入",
+    "URL_PLACEHOLDER": "輸入要匯入的URL",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "從URL匯入",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "請輸入您要匯入的Super Productivity備份JSON檔案的完整URL。",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "從URL匯入",
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "TITLE": "確認從URL匯入資料",
+      "INITIATED_MSG": "已啟動自動資料匯入。",
+      "SOURCE_URL_DOMAIN": "來源網域",
+      "WARNING_TITLE": "警告",
+      "WARNING_MSG": "繼續操作將使用指定URL的內容覆蓋您目前的應用程式資料和設定。此操作無法還原。"
+    }
   },
   "G": {
     "CANCEL": "取消",
@@ -1061,7 +979,6 @@
       "HELP": "啟用空閑時間處理後，將在指定的時間後打開一個對話框，以檢查您在空閑時是否以及在哪個任務上追蹤您的時間。",
       "IS_ENABLE_IDLE_TIME_TRACKING": "啟用空閑時間處理",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "僅在選擇當前任務時觸發空閑時間對話框",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "未追蹤的空閑時間重置需要休息計時器",
       "MIN_IDLE_TIME": "觸發空閑的時間閾值",
       "TITLE": "閑置處理"
     },
@@ -1123,12 +1040,10 @@
       "HELP": "<p><strong>沒有看到桌面通知？</strong>對於Windows，您可能需要檢查 系統 > 通知與動作，並檢查是否已啟用所需的通知。</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "自動添加今日標籤以處理任務",
       "IS_AUTO_MARK_PARENT_AS_DONE": "完成所有子任務後，將父任務標記為已完成",
-      "IS_AUTO_START_NEXT_TASK": "將當前標記為已完成時，開始追蹤下一個任務",
       "IS_CONFIRM_BEFORE_EXIT": "退出應用前確認",
       "IS_DARK_MODE": "深色模式",
       "IS_HIDE_NAV": "隱藏導航，直到主標題懸停（僅限桌面版本）",
       "IS_MINIMIZE_TO_TRAY": "縮小至工具列（僅限桌面版本）",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "在超出時間估算時發送通知",
       "IS_TRAY_SHOW_CURRENT_TASK": "在任務欄/狀態菜單中顯示當前任務（僅限桌面版本）",
       "IS_TURN_OFF_MARKDOWN": "停止在任務備註中解析Markdown",
       "TASK_NOTES_TPL": "任務描述模板",
@@ -1156,7 +1071,6 @@
     "SOUND": {
       "DONE_SOUND": "任務完成聲音",
       "IS_INCREASE_DONE_PITCH": "為完成的每項任務增加音調",
-      "IS_PLAY_DONE_SOUND": "任務標記為完成時播放聲音",
       "TITLE": "聲音",
       "VOLUME": "音量"
     },
@@ -1202,8 +1116,7 @@
     "PERSISTENCE_DISALLOWED": "資料將不會永久儲存。請注意，這可能會導致資料丟失！！",
     "PERSISTENCE_ERROR": "Error when requesting to persist data: {{err}}",
     "RUNNING_X": "運行\"{{str}}\"。",
-    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": " 按下了{{keyCombo}} ，但是打開書籤捷徑僅在項目上下文中可用。",
-    "SHORTCUT_WARN_OPEN_NOTES_FROM_TAG": " 按下了{{keyCombo}} ，但是僅在項目上下文中，打開註釋捷徑才可用。"
+    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": " 按下了{{keyCombo}} ，但是打開書籤捷徑僅在項目上下文中可用。"
   },
   "GPB": {
     "ASSETS": "正在載入資料...",
@@ -1211,8 +1124,6 @@
     "DBX_GEN_TOKEN": "Dropbox：生成權杖...",
     "DBX_META": "Dropbox：獲取檔案元資料...",
     "DBX_UPLOAD": "Dropbox：上傳檔案...",
-    "GDRIVE_DOWNLOAD": "Google Drive：下載檔案...",
-    "GDRIVE_UPLOAD": "Google Drive：上傳檔案...",
     "GITHUB_LOAD_ISSUE": "GitHub：載入 Issue 資料...",
     "JIRA_LOAD_ISSUE": "Jira: Load issue data...",
     "UNKNOWN": "載入遠端資料",
@@ -1225,7 +1136,6 @@
     "CREATE_TAG": "建立標籤",
     "DELETE_TAG": "刪除標籤",
     "GO_TO_TASK_LIST": "轉到任務列表",
-    "MANAGE_PROJECTS": "管理項目",
     "METRICS": "評估",
     "NOTES": "筆記",
     "PLANNER": "計劃",
@@ -1234,7 +1144,6 @@
     "PROJECT_MENU": "項目清單",
     "PROJECT_SETTINGS": "項目設置",
     "QUICK_HISTORY": "Quick History",
-    "SCHEDULED": "計劃",
     "SETTINGS": "設置",
     "SHOW_SEARCH_BAR": "顯示搜尋欄",
     "TAGS": "標籤",
@@ -1257,10 +1166,8 @@
       "OK": "好的！結束程式！"
     },
     "ESTIMATE_TOTAL": "Total estimate:",
-    "EVALUATION": "評估",
     "EXPORT_TASK_LIST": "匯出任務列表",
     "NO_TASKS": "今天沒有任務",
-    "PLAN": "計劃",
     "ROUND_15M": "將所有任務舍入到15分鐘",
     "ROUND_30M": "將所有任務舍入到30分鐘",
     "ROUND_5M": "將所有任務舍入到5分鐘",
@@ -1274,42 +1181,12 @@
     "START_END": "開始 - 結束",
     "SUMMARY_FOR": " {{dayStr}}的每日摘要",
     "TASKS_COMPLETED": "任務已完成",
-    "TASK_LIST": "任務列表",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "花費時間/估計",
     "TIME_SPENT_ESTIMATE_TITLE": "花費的時間：今天花費的總時間。存檔的任務不包括在內。 - 估計時間：今天工作的任務估計時間減去其他日子已經花費的時間。",
-    "TODAY": "今天",
     "WEEK": "周"
   },
   "PM": {
     "TITLE": "項目指標"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "存檔的項目",
-    "ARCHIVE_PROJECT": "存檔項目",
-    "CREATE_NEW": "建立新的",
-    "DELETE_PROJECT": "刪除項目",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "您確定要存檔此項目嗎？存檔的項目將不再顯示在菜單中，如果不恢復它們，您將無法存取任何資料。建議您在執行此操作之前備份資料。",
-      "OK": "檔案"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "您確定要刪除此項目嗎？建議您在執行此操作之前備份資料。",
-      "OK": "刪除"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "您確定要取消歸檔此項目嗎？",
-      "OK": "取消封存"
-    },
-    "EDIT_PROJECT": "編輯項目",
-    "EXPORT_PROJECT": "出口項目",
-    "GITHUB_CONFIGURED": "配置GitHub集成",
-    "GITLAB_CONFIGURED": "配置GitLab集成",
-    "IMPORT_FROM_FILE": "從檔案匯入",
-    "JIRA_CONFIGURED": "配置Jira集成",
-    "OPEN_PROJECT_CONFIGURED": "OpenProject Integration Configured",
-    "S_INVALID_JSON": "項目檔案的json無效",
-    "TITLE": "項目概況",
-    "UN_ARCHIVE_PROJECT": "Unarchive項目"
   },
   "PS": {
     "GLOBAL_SETTINGS": "全域設置",
@@ -1356,14 +1233,11 @@
   },
   "WW": {
     "ADD_MORE": "添加更多",
-    "ADD_SCHEDULED_FOR_TODAY": "Add tasks planned for today ({{nr}})",
     "ADD_SCHEDULED_FOR_TOMORROW": "Add tasks planned for tomorrow ({{nr}})",
     "ADD_SOME_TASKS": "添加一些任務來規劃你的一天！",
-    "COMPLETED_TASKS": "完成的任務",
     "ESTIMATE_REMAINING": "預估剩餘時間：",
     "FINISH_DAY": "完成日",
     "HELP_PROCRASTINATION": "幫幫我！我在拖延！",
-    "NO_COMPLETED_TASKS": "目前還沒有完成的任務",
     "NO_PLANNED_TASKS": "沒有計劃的任務",
     "READY_TO_WORK": "準備好工作了！",
     "RESET_BREAK_TIMER": "無需中斷計時器即可重置",

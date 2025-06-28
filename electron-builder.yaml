@@ -6,12 +6,12 @@ files:
   - electron/**/*
   - '!electron/**/*.ts'
   - '!electron/**/*.js.map'
-  - dist/**/*
+  - .tmp/angular-dist/**/*
   - 'embedded.provisionprofile'
 #afterSign: ./tools/notarizeMacApp.js
 
 directories:
-  output: './app-builds'
+  output: './.tmp/app-builds'
 
 win:
   target:
@@ -61,6 +61,11 @@ snap:
   autoStart: true
   base: core22
   confinement: strict
+  plugs:
+    - default
+    - password-manager-service
+    - system-observe
+    - login-session-observe
 
 mac:
   appId: com.super-productivity.app

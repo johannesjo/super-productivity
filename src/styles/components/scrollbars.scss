@@ -1,5 +1,7 @@
+@import '../mixins/media-queries';
+
 @mixin _scrollBarStyles() {
-  scrollbar-color: #888 #f1f1f1;
+  scrollbar-color: var(--theme-scrollbar-thumb) var(--theme-scrollbar-track);
   scrollbar-width: 4px;
 
   ::-webkit-scrollbar {
@@ -9,39 +11,19 @@
 
   /* Track */
   ::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: var(--theme-scrollbar-track);
     border-radius: 4px;
   }
 
   /* Handle */
   ::-webkit-scrollbar-thumb {
-    background: #888;
+    background: var(--theme-scrollbar-thumb);
     border-radius: 16px;
   }
 
   /* Handle on hover */
   ::-webkit-scrollbar-thumb:hover {
-    background: #555;
-  }
-
-  &.isDarkTheme {
-    scrollbar-color: #333 #222;
-
-    ::-webkit-scrollbar-track {
-      background: #222;
-      border-radius: 4px;
-    }
-
-    /* Handle */
-    ::-webkit-scrollbar-thumb {
-      background: rgb(74, 74, 74);
-      border-radius: 16px;
-    }
-
-    /* Handle on hover */
-    ::-webkit-scrollbar-thumb:hover {
-      background: #444;
-    }
+    background: var(--theme-scrollbar-thumb-hover);
   }
 }
 

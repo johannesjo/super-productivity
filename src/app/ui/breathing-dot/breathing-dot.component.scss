@@ -1,0 +1,32 @@
+:host {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.breathing-dot-inner {
+  width: 144px;
+  height: 144px;
+  background-color: var(--c-primary);
+  border-radius: 50%;
+  animation: breathe 8s ease-in-out infinite;
+  box-shadow: 0 0 40px var(--c-primary);
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(0.4);
+    opacity: 0.1;
+    box-shadow: 0 0 10px var(--c-primary);
+  }
+  50% {
+    transform: scale(1);
+    opacity: 0.4;
+    box-shadow:
+      0 0 30px var(--c-primary),
+      0 0 120px var(--c-primary);
+  }
+}

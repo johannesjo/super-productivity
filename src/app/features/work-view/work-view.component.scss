@@ -1,11 +1,11 @@
-@import './../../../_variables';
+@import './../../../_common';
 
 :host {
   overflow: hidden !important;
 }
 
 add-task-bar {
-  margin: 0 auto $s * 2;
+  margin: 0 auto var(--s2);
   max-width: 628px;
 
   ::ng-deep input {
@@ -14,7 +14,7 @@ add-task-bar {
 }
 
 h1 {
-  margin: $s * 2 0;
+  margin: var(--s2) 0;
   text-align: center;
 }
 
@@ -28,25 +28,25 @@ h2 {
   position: absolute;
   top: 0;
   left: 0;
-  transition: $transition-enter;
+  transition: var(--transition-enter);
   overflow: hidden;
 
   &.isFadeOut {
-    transition: $transition-ultra-fast;
+    transition: var(--transition-duration-xs) var(--ani-standard-timing);
     opacity: 0;
   }
 }
 
 .work-view-header {
-  padding: 0.5 * $s;
+  padding: var(--s-half);
 
   position: relative;
-  min-height: $bar-height-small;
+  min-height: var(--bar-height-small);
   display: flex;
   justify-content: center;
   align-items: center;
   @include mq(xs) {
-    padding: 2 * $s 0;
+    padding: var(--s2) 0;
   }
 
   @include smallMainContainer() {
@@ -70,18 +70,18 @@ h2 {
 }
 
 .completed-tasks-heading {
-  margin: $s;
-  margin-top: $s * 2;
+  margin: var(--s);
+  margin-top: var(--s2);
   //text-align: left;
   font-size: 16px;
-  //border-bottom: 1px solid $light-theme-extra-border-color;
+  //border-bottom: 1px solid var(--theme-extra-border-color);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .backlog-heading {
-  margin: $s;
+  margin: var(--s);
 }
 
 .status-bar {
@@ -94,19 +94,19 @@ h2 {
   -webkit-user-select: none; /* Safari */
 
   .item {
-    margin: 0 1.5 * $s;
+    margin: 0 calc(1.5 * var(--s));
     text-align: center;
     position: relative;
   }
 
   .controls {
     text-align: center;
-    margin: $s 0;
+    margin: var(--s) 0;
     white-space: nowrap;
   }
 
   .label {
-    margin-right: $s;
+    margin-right: var(--s);
   }
 
   .no-wrap {
@@ -124,7 +124,7 @@ h2 {
   right: -8px;
   z-index: 4;
   transform: translateY(-50%) scale(0);
-  transition: $transition-standard;
+  transition: var(--transition-standard);
   opacity: 0;
   visibility: hidden;
   @include mq(xs) {
@@ -144,11 +144,11 @@ h2 {
 
 .finish-day-button-wrapper {
   text-align: center;
-  margin: $s * 2 0 $s;
+  margin: var(--s2) 0 var(--s);
   white-space: nowrap;
 
   button {
-    margin: 0 $s;
+    margin: 0 var(--s);
   }
 }
 
@@ -161,7 +161,7 @@ h2 {
   width: 100%;
 
   &.isAnimatable {
-    transition: $transition-standard;
+    transition: var(--transition-standard);
   }
 
   task-list {
@@ -211,10 +211,10 @@ h2 {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding-bottom: 2 * $s;
-  margin: $s;
+  padding-bottom: var(--s2);
+  margin: var(--s);
 
-  @include mq('xs') {
+  @include mq(xs) {
     margin: 0;
   }
 
@@ -225,7 +225,7 @@ h2 {
 
 .add-more-or-finish {
   text-align: center;
-  padding-bottom: $s;
+  padding-bottom: var(--s);
 
   .btn-wrapper {
     display: block;
@@ -234,8 +234,8 @@ h2 {
       min-width: 160px;
       overflow: hidden;
       text-overflow: ellipsis;
-      margin-left: $s;
-      margin-bottom: $s;
+      margin-left: var(--s);
+      margin-bottom: var(--s);
 
       &:first-child {
         margin-left: 0;
@@ -245,14 +245,14 @@ h2 {
 }
 
 .add-scheduled {
-  margin-top: $s;
+  margin-top: var(--s);
 }
 
 .ready-to-work-btn {
-  margin-top: $s * 2;
+  margin-top: var(--s2);
 
   @include mq(xs) {
-    margin-top: $s * 3;
+    margin-top: var(--s3);
   }
 }
 
@@ -260,12 +260,12 @@ h2 {
   z-index: 45;
   position: fixed;
   right: 50%;
-  bottom: $s * 2;
+  bottom: var(--s2);
   transform: translateX(50%);
 
   &.isRight {
     transform: none;
-    right: $s * 2;
+    right: var(--s2);
   }
 }
 
@@ -282,21 +282,21 @@ h2 {
   }
 
   .no-tasks-label {
-    font-size: 16px;
+    font-size: 17px;
     position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
-    font-weight: 200;
+    font-weight: 400;
+    color: #333;
 
-    @include lightTheme {
-      color: rgba(0, 0, 0, 0.6);
-    }
-
-    @include darkTheme {
-      color: rgba(255, 255, 255, 1);
-      text-shadow: 0 0 1px rgba(0, 0, 0, 1);
+    @include darkTheme() {
+      color: var(--theme-text-color-most-intense);
+      font-weight: 500;
+      text-shadow:
+        0 0 2px black,
+        0 0 5px black;
     }
   }
 }

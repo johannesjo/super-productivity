@@ -1,5 +1,3 @@
-@import '../../../variables';
-
 :host {
   display: block;
 
@@ -9,7 +7,7 @@
     border-left: 0;
     border-right: 0;
     border-style: solid;
-    padding: 0 $s * 2;
+    padding: 0 var(--s2);
   }
 
   .help-btn {

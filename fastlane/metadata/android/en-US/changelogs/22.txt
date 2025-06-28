@@ -1,3 +1,0 @@
-* allow requests to google calendar
-* remove permanent notification because it is annoying :)
-* stability and performance improvements

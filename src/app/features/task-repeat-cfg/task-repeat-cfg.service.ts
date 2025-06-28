@@ -1,13 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import {
-  selectAllTaskRepeatCfgs,
-  selectTaskRepeatCfgById,
-  selectTaskRepeatCfgByIdAllowUndefined,
-  selectTaskRepeatCfgsDueOnDayIncludingOverdue,
-  selectTaskRepeatCfgsDueOnDayOnly,
-} from './store/task-repeat-cfg.reducer';
-import {
   addTaskRepeatCfgToTask,
   deleteTaskRepeatCfg,
   deleteTaskRepeatCfgs,
@@ -38,6 +31,14 @@ import { isSameDay } from '../../util/is-same-day';
 import { remindOptionToMilliseconds } from '../tasks/util/remind-option-to-milliseconds';
 import { getNewestPossibleDueDate } from './store/get-newest-possible-due-date.util';
 import { getWorklogStr } from '../../util/get-work-log-str';
+import { TODAY_TAG } from '../tag/tag.const';
+import {
+  selectAllTaskRepeatCfgs,
+  selectTaskRepeatCfgById,
+  selectTaskRepeatCfgByIdAllowUndefined,
+  selectTaskRepeatCfgsDueOnDayIncludingOverdue,
+  selectTaskRepeatCfgsDueOnDayOnly,
+} from './store/task-repeat-cfg.selectors';
 
 @Injectable({
   providedIn: 'root',
@@ -178,7 +179,7 @@ export class TaskRepeatCfgService {
       | ReturnType<typeof addSubTask>
       | ReturnType<typeof TaskSharedActions.addTask>
       | ReturnType<typeof updateTaskRepeatCfg>
-      | ReturnType<typeof scheduleTaskWithTime>
+      | ReturnType<typeof TaskSharedActions.scheduleTaskWithTime>
     )[]
   > {
     // NOTE: there might be multiple configs in case something went wrong
@@ -213,7 +214,7 @@ export class TaskRepeatCfgService {
       | ReturnType<typeof addSubTask>
       | ReturnType<typeof TaskSharedActions.addTask>
       | ReturnType<typeof updateTaskRepeatCfg>
-      | ReturnType<typeof scheduleTaskWithTime>
+      | ReturnType<typeof TaskSharedActions.scheduleTaskWithTime>
     )[] = [
       TaskSharedActions.addTask({
         task: {
@@ -262,7 +263,7 @@ export class TaskRepeatCfgService {
         targetDayDate,
       );
       createNewActions.push(
-        scheduleTaskWithTime({
+        TaskSharedActions.scheduleTaskWithTime({
           task,
           dueWithTime: dateTime,
           remindAt: remindOptionToMilliseconds(dateTime, taskRepeatCfg.remindAt),
@@ -302,6 +303,7 @@ export class TaskRepeatCfgService {
           notes: subTaskTemplate.notes || '',
           isDone: subTaskTemplate.isDone || false,
           dueDay: getWorklogStr(),
+          tagIds: taskRepeatCfg.tagIds.filter((tagId) => tagId !== TODAY_TAG.id),
         },
       }),
     );

@@ -1,13 +1,11 @@
-@import '../../../variables';
-
-$spacer: $s;
+@import '../../../common';
 
 // MAIN LAYOUT
 // -----------
 :host {
   flex-grow: 1;
-  max-width: $side-nav-width;
-  width: $side-nav-width;
+  max-width: var(--side-nav-width);
+  width: var(--side-nav-width);
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -59,20 +57,13 @@ $spacer: $s;
 
   a {
     color: rgba(var(--palette-foreground-text), var(--palette-foreground-text-alpha));
-
-    @include darkTheme() {
-      color: rgba(
-        var(--palette-foreground-text-dark),
-        var(--palette-foreground-text-dark-alpha)
-      );
-    }
   }
 }
 
-@media (min-width: $side-nav-width-switch-l) {
+@media (min-width: var(--side-nav-width-switch-l)) {
   :host {
-    max-width: $side-nav-width-l;
-    width: $side-nav-width-l;
+    max-width: var(--side-nav-width-l);
+    width: var(--side-nav-width-l);
   }
 }
 
@@ -82,11 +73,11 @@ section {
 }
 
 .main {
-  margin-bottom: $spacer;
-  padding-bottom: $spacer;
+  margin-bottom: var(--s);
+  padding-bottom: var(--s);
 
   :host-context(.isMac.isElectron) & {
-    padding-top: $mac-title-bar-padding;
+    padding-top: var(--mac-title-bar-padding);
   }
 
   &:after {
@@ -96,7 +87,7 @@ section {
 
 .app {
   margin-top: auto;
-  padding-top: $spacer;
+  padding-top: var(--s);
 
   &:after {
     top: 0;
@@ -110,19 +101,19 @@ section {
   position: relative;
 
   &:after {
-    @include dividerBorderColor();
+    border-bottom: 1px solid var(--theme-divider-color);
     content: '';
     position: absolute;
-    left: $s * 2;
-    right: $s * 2;
+    left: var(--s2);
+    right: var(--s2);
     height: 0;
   }
 }
 
 .tags,
 .projects {
-  margin-bottom: $spacer;
-  padding-bottom: $spacer;
+  margin-bottom: var(--s);
+  padding-bottom: var(--s);
 }
 
 // LIST-ITEMS
@@ -135,14 +126,12 @@ section {
 
 .route-link.isActiveRoute,
 .route-link.isActiveRoute mat-icon {
-  // does not look good for dark theme...
-  @include lightTheme {
-    color: $c-primary-800;
-  }
+  color: var(--palette-primary-800);
+}
 
-  @include darkTheme {
-    color: $c-primary;
-  }
+body.isDarkTheme .route-link.isActiveRoute,
+body.isDarkTheme .route-link.isActiveRoute mat-icon {
+  color: var(--c-primary);
 }
 
 // OTHER-ITEMS
@@ -166,7 +155,7 @@ section {
     margin-right: 0;
     //margin-left: -10px;
     opacity: 0.4;
-    transition: $transition-standard;
+    transition: var(--transition-standard);
   }
 
   &.isExpanded ::ng-deep mat-icon:last-of-type {

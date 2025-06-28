@@ -1,8 +1,8 @@
-@import '../../../../variables';
+@import '../../../../common';
 
 :host {
   position: fixed;
-  z-index: $z-focus-mode-overlay;
+  z-index: var(--z-focus-mode-overlay);
   top: 0;
   right: 0;
   bottom: 0;
@@ -46,19 +46,19 @@ main {
 
 .close-btn {
   position: absolute;
-  top: $s;
-  right: $s;
+  top: var(--s);
+  right: var(--s);
   width: 56px;
   height: 56px;
   z-index: 5;
   @include mousePrimaryDevice {
-    transition: opacity $transition-leave;
+    transition: opacity var(--transition-leave);
     //visibility: hidden;
     opacity: 0;
   }
 
   :host:hover & {
-    transition: opacity $transition-enter;
+    transition: opacity var(--transition-enter);
     //visibility: visible;
     opacity: 1;
   }

@@ -1,5 +1,5 @@
 <a href="https://super-productivity.com/">
-  <img align="center" alt="Banner" src="screens/banner.png" />
+  <img align="center" alt="Banner" src="docs/screens/banner.png" />
 </a>
 
 <br>
@@ -89,13 +89,13 @@
        height="50" />
 </a>
 <a href='//apps.apple.com/de/app/super-productivity/id1482572463?l=en&mt=12' target="_blank">
-  <img src='./screens/app-store-badge.svg'
+  <img src='docs/screens/app-store-badge.svg'
        align="center"
        alt='App Store Badge'
        height="50" />
 </a>
 <a href='//play.google.com/store/apps/details?id=com.superproductivity.superproductivity' target="_blank">
-  <img src='./screens/google-play-badge.png'
+  <img src='docs/screens/google-play-badge.png'
        align="center"
        alt='Play Store Badge'
        height="50" />
@@ -264,7 +264,7 @@ brew install --cask superproductivity
 ```
 
 <a href='//apps.apple.com/de/app/super-productivity/id1482572463?l=en&mt=12' target="_blank">
-  <img src='./screens/app-store-badge.svg'
+  <img src='docs/screens/app-store-badge.svg'
        alt='App Store Badge'
        height="50" />
 </a>
@@ -280,7 +280,7 @@ Stay tuned for even more exciting updates!
 You can find the Android app here:
 
 <a href='//play.google.com/store/apps/details?id=com.superproductivity.superproductivity' target="_blank">
-  <img src='./screens/google-play-badge.png'
+  <img src='docs/screens/google-play-badge.png'
        align="center"
        alt='App Store Badge'
        height="50" />
@@ -464,3 +464,19 @@ You can specify a custom folder for saving your data by starting the application
 ```bash
 superproductivity --user-data-dir=/path/to/my/data
 ```
+
+### Linux/Wayland Compatibility
+
+If you're experiencing issues running Super Productivity on Wayland (such as rendering problems, VSync errors, or GLib-GObject warnings), you can force the application to use X11 mode by starting it with the `--force-x11` parameter:
+
+```bash
+superproductivity --force-x11
+```
+
+This will automatically apply compatibility fixes including:
+
+- Forcing the Ozone platform to use X11 instead of Wayland
+- Disabling GPU VSync to prevent GetVSyncParametersIfAvailable() errors
+- Setting the appropriate environment variables for X11 compatibility
+
+The application will automatically detect Wayland sessions and apply these fixes, but you can use this flag if automatic detection doesn't work properly.

@@ -12,7 +12,6 @@ import {
 } from '../planner.model';
 import { TaskCopy, TaskWithDueDay, TaskWithDueTime } from '../../tasks/task.model';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
-import { selectTaskRepeatCfgsDueOnDayOnly } from '../../task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { isSameDay } from '../../../util/is-same-day';
 import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
@@ -23,6 +22,7 @@ import { selectConfigFeatureState } from '../../config/store/global-config.reduc
 import { ScheduleConfig } from '../../config/global-config.model';
 import { selectTodayStr } from '../../../root-store/app-state/app-state.selectors';
 import { isToday } from '../../../util/is-today.util';
+import { selectTaskRepeatCfgsDueOnDayOnly } from '../../task-repeat-cfg/store/task-repeat-cfg.selectors';
 
 export const selectPlannerState = createFeatureSelector<fromPlanner.PlannerState>(
   fromPlanner.plannerFeatureKey,

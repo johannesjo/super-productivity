@@ -41,6 +41,12 @@ export class InputDurationFormlyComponent
     this._updateValue(val);
   }
 
+  override ngOnDestroy(): void {
+    if (this._timeout) {
+      window.clearTimeout(this._timeout);
+    }
+  }
+
   private _updateValue(val: string): void {
     this._timeout = window.setTimeout(() => {
       this.formControl.setValue(val ? stringToMs(val) : null);

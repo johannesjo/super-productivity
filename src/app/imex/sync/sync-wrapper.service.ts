@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { filter, first, map, switchMap, take } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
@@ -9,6 +9,7 @@ import { SnackService } from '../../core/snack/snack.service';
 import {
   AuthFailSPError,
   CanNotMigrateMajorDownError,
+  ConflictData,
   DecryptError,
   DecryptNoPasswordError,
   LockPresentError,
@@ -43,6 +44,9 @@ export class SyncWrapperService {
   private _dataInitService = inject(DataInitService);
   private _reminderService = inject(ReminderService);
 
+  // NEW: Subject to track when data reload is complete after sync
+  private _dataReloadComplete$ = new Subject<void>();
+
   syncState$ = this._pfapiService.syncState$;
 
   syncCfg$: Observable<SyncConfig> = this._globalConfigService.cfg$.pipe(
@@ -61,6 +65,7 @@ export class SyncWrapperService {
 
   _afterCurrentSyncDoneIfAny$: Observable<unknown> = this.isSyncInProgress$.pipe(
     filter((isSyncing) => !isSyncing),
+    switchMap(() => this._dataReloadComplete$),
   );
 
   afterCurrentSyncDoneOrSyncDisabled$: Observable<unknown> = this.isEnabledAndReady$.pipe(
@@ -106,14 +111,32 @@ export class SyncWrapperService {
           return r.status;
 
         case SyncStatus.Conflict:
-          const res = await this._openConflictDialog$({
-            remote: r.conflictData?.remote.lastUpdate as number,
-            local: r.conflictData?.local.lastUpdate as number,
-            lastSync: r.conflictData?.local.lastSyncedUpdate as number,
-          }).toPromise();
+          console.log('Sync conflict detected:', {
+            remote: r.conflictData?.remote.lastUpdate,
+            local: r.conflictData?.local.lastUpdate,
+            lastSync: r.conflictData?.local.lastSyncedUpdate,
+            conflictData: r.conflictData,
+          });
+
+          // Enhanced debugging for vector clock issues
+          console.log('CONFLICT DEBUG - Vector Clock Analysis:', {
+            localVectorClock: r.conflictData?.local.vectorClock,
+            remoteVectorClock: r.conflictData?.remote.vectorClock,
+            localLastSyncedVectorClock: r.conflictData?.local.lastSyncedVectorClock,
+            localLamport: r.conflictData?.local.localLamport,
+            remoteLamport: r.conflictData?.remote.localLamport,
+            conflictReason: r.conflictData?.reason,
+            additional: r.conflictData?.additional,
+          });
+          const res = await this._openConflictDialog$(
+            r.conflictData as ConflictData,
+          ).toPromise();
 
           if (res === 'USE_LOCAL') {
-            await this._pfapiService.pf.uploadAll();
+            console.log('User chose USE_LOCAL, calling uploadAll(true) with force');
+            // Use force upload to skip the meta file check and ensure lastUpdate is updated
+            await this._pfapiService.pf.uploadAll(true);
+            console.log('uploadAll(true) completed');
             return SyncStatus.UpdateRemoteAll;
           } else if (res === 'USE_REMOTE') {
             await this._pfapiService.pf.downloadAll();
@@ -186,6 +209,10 @@ export class SyncWrapperService {
         return 'HANDLED_ERROR';
       } else if (error instanceof CanNotMigrateMajorDownError) {
         alert(this._translateService.instant(T.F.SYNC.A.REMOTE_MODEL_VERSION_NEWER));
+        return 'HANDLED_ERROR';
+      } else if (error?.message === 'Sync already in progress') {
+        // Silently ignore concurrent sync attempts
+        console.log('Sync already in progress, skipping concurrent sync attempt');
         return 'HANDLED_ERROR';
       } else {
         const errStr = getSyncErrorStr(error);
@@ -290,11 +317,21 @@ export class SyncWrapperService {
   }
 
   private async _reInitAppAfterDataModelChange(): Promise<void> {
-    await Promise.all([
-      // reload view model from ls
-      this._dataInitService.reInit(true),
-      this._reminderService.reloadFromDatabase(),
-    ]);
+    console.log('Starting data re-initialization after sync...');
+
+    try {
+      await Promise.all([
+        this._dataInitService.reInit(true),
+        this._reminderService.reloadFromDatabase(),
+      ]);
+
+      console.log('Data re-initialization complete');
+      // Signal that data reload is complete
+      this._dataReloadComplete$.next();
+    } catch (error) {
+      console.error('Error during data re-initialization:', error);
+      throw error;
+    }
   }
 
   private _c(str: string): boolean {
@@ -303,15 +340,9 @@ export class SyncWrapperService {
 
   private lastConflictDialog?: MatDialogRef<any, any>;
 
-  private _openConflictDialog$({
-    remote,
-    local,
-    lastSync,
-  }: {
-    remote: number | null;
-    local: number | null;
-    lastSync: number;
-  }): Observable<DialogConflictResolutionResult> {
+  private _openConflictDialog$(
+    conflictData: ConflictData,
+  ): Observable<DialogConflictResolutionResult> {
     if (this.lastConflictDialog) {
       this.lastConflictDialog.close();
     }
@@ -319,11 +350,7 @@ export class SyncWrapperService {
       restoreFocus: true,
       autoFocus: false,
       disableClose: true,
-      data: {
-        remote,
-        local,
-        lastSync,
-      },
+      data: conflictData,
     });
     return this.lastConflictDialog.afterClosed();
   }

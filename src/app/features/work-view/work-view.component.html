@@ -172,9 +172,9 @@
               </div>
             }
           </header>
-          @if (improvementService.hasLastTrackedImprovements$ | async) {
-            <improvement-banner [@expandFade]></improvement-banner>
-          }
+          <!--          @if (improvementService.hasLastTrackedImprovements$ | async) {-->
+          <!--            <improvement-banner [@expandFade]></improvement-banner>-->
+          <!--          }-->
         }
 
         <div class="task-list-wrapper">
@@ -196,7 +196,15 @@
                     alt="illu"
                   />
                 </div>
-                <h2 class="no-tasks-label">{{ T.WW.NO_PLANNED_TASKS | translate }}</h2>
+                <h2 class="no-tasks-label">
+                  @if (
+                    hasDoneTasks() || (workContextService.doneTodayArchived$ | async)
+                  ) {
+                    {{ T.WW.NO_PLANNED_TASK_ALL_DONE | translate }}
+                  } @else {
+                    {{ T.WW.NO_PLANNED_TASKS | translate }}
+                  }
+                </h2>
               </div>
 
               @if (!overdueTasks().length) {
@@ -239,14 +247,53 @@
               </button>
             </div>
           }
-          <task-list
-            class="tour-undoneList"
-            [tasks]="undoneTasks()"
-            listId="PARENT"
-            listModelId="UNDONE"
-          ></task-list>
+          @if (customizedUndoneTasks$ | async; as customized) {
+            @if (customized.grouped) {
+              @for (group of customized.grouped | keyvalue; track group.key) {
+                <h3>{{ group.key }}</h3>
+                <task-list
+                  [tasks]="group.value"
+                  listId="PARENT"
+                  listModelId="UNDONE"
+                ></task-list>
+              }
+            } @else {
+              <task-list
+                class="tour-undoneList"
+                [tasks]="customized.list"
+                listId="PARENT"
+                listModelId="UNDONE"
+              ></task-list>
+            }
+          }
 
-          @if (!isPlanningMode() || doneTasks()?.length) {
+          @if (laterTodayTasks().length > 0 && isOnTodayList()) {
+            <div
+              @expand
+              style="margin-top: 16px"
+            >
+              <collapsible
+                [title]="
+                  (T.WW.LATER_TODAY | translate) +
+                  ' (' +
+                  (laterTodayTasks()?.length || 0) +
+                  ')'
+                "
+                [isExpanded]="!isLaterTodayHidden()"
+                (isExpandedChange)="isLaterTodayHidden.set(!$event)"
+                [isIconBefore]="true"
+              >
+                <task-list
+                  [tasks]="laterTodayTasks()"
+                  [isSortingDisabled]="true"
+                  listId="PARENT"
+                  listModelId="LATER_TODAY"
+                ></task-list>
+              </collapsible>
+            </div>
+          }
+
+          @if (!isPlanningMode() || hasDoneTasks()) {
             @let nrOfDoneArchived =
               doneTasks()?.length === 0
                 ? (workContextService.doneTodayArchived$ | async)
@@ -276,7 +323,7 @@
                   listModelId="DONE"
                 ></task-list>
                 <div class="finish-day-button-wrapper">
-                  @if (!isOnTodayList() && doneTasks().length) {
+                  @if (!isOnTodayList() && hasDoneTasks()) {
                     <button
                       class="e2e-move-done-to-archive"
                       mat-stroked-button
@@ -289,36 +336,9 @@
                   }
                 </div>
               </collapsible>
-              <div class="finish-day-button-wrapper">
-                <!-- NOTE: tabindex is same as for tasks -->
-                @if (isOnTodayList()) {
-                  @if (undoneTasks().length) {
-                    <button
-                      [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"
-                      color=""
-                      mat-stroked-button
-                      routerLink="/active/daily-summary"
-                      tabindex="1"
-                      class="e2e-finish-day"
-                    >
-                      <mat-icon>done_all</mat-icon>
-                      {{ T.WW.FINISH_DAY | translate }}
-                    </button>
-                  } @else {
-                    <button
-                      [matTooltip]="T.WW.FINISH_DAY_TOOLTIP | translate"
-                      color="primary"
-                      mat-flat-button
-                      routerLink="/active/daily-summary"
-                      tabindex="1"
-                      class="e2e-finish-day"
-                    >
-                      <mat-icon>done_all</mat-icon>
-                      {{ T.WW.FINISH_DAY | translate }}
-                    </button>
-                  }
-                }
-              </div>
+              @if (isOnTodayList()) {
+                <finish-day-btn [hasDoneTasks]="hasDoneTasks()"></finish-day-btn>
+              }
             </div>
           }
         </div>

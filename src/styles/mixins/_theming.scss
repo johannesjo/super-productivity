@@ -41,76 +41,42 @@
 }
 
 @mixin standardThemeTextColor {
-  @include darkTheme() {
-    color: $dark-theme-text-color;
-  }
-  @include lightTheme() {
-    color: $light-theme-text-color;
-  }
+  color: var(--theme-text-color);
 }
 
 @mixin standardThemeTextColorLessIntense {
-  @include darkTheme() {
-    color: $dark-theme-text-color-less-intense;
-  }
-  @include lightTheme() {
-    color: $light-theme-text-color-less-intense;
-  }
+  color: var(--theme-text-color-less-intense);
 }
 
 @mixin standardThemeTextColorMostIntense {
-  @include darkTheme() {
-    color: $dark-theme-text-color-most-intense;
-  }
-  @include lightTheme() {
-    color: $light-theme-text-color-most-intense;
-  }
+  color: var(--theme-text-color-most-intense);
 }
 
 @mixin extraBorder($sideSuffix: '') {
-  @include darkTheme {
-    #{'border'+$sideSuffix}: 1px solid $dark-theme-extra-border-color;
-  }
-  @include lightTheme {
-    #{'border'+$sideSuffix}: 1px solid $light-theme-extra-border-color;
-  }
+  #{'border'+$sideSuffix}: 1px solid var(--theme-extra-border-color);
 }
 
 // e.g. cards and tasks
 @mixin layerTextAndBgHigher {
-  @include darkTheme() {
-    color: $dark-theme-text-color-less-intense;
-    background-color: $dark-theme-bg-lighter;
-  }
-  @include lightTheme() {
-    color: $light-theme-text-color-less-intense;
-  }
+  color: var(--theme-text-color-less-intense);
+  background-color: var(--theme-bg-lighter);
 }
 
 // e.g. nested cards / tabs etc
 @mixin layerTextAndBgHighest {
-  @include darkTheme() {
-    // NOTE: needs to be more intense than light color, because we have a lighter background
-    color: $dark-theme-text-color-more-intense;
-    background-color: $dark-theme-bg-lightest;
-  }
-  @include lightTheme() {
-    color: $light-theme-text-color-less-intense;
-  }
+  // NOTE: needs to be more intense than light color, because we have a lighter background
+  color: var(--theme-text-color-more-intense);
+  background-color: var(--theme-bg-lightest);
 }
 
 @mixin dividerBorderColor($border-width: 0 0 1px 0, $is-global: false) {
   border-style: solid;
   border-width: $border-width;
-
-  @include lightTheme($is-global) {
-    border-color: var(--dark-dividers);
-  }
-  @include darkTheme($is-global) {
-    border-color: var(--light-dividers);
-  }
+  border-color: var(--theme-divider-color);
 }
 
 @mixin flatBox($is-global: false) {
-  @include dividerBorderColor(1px, $is-global);
+  border:
+    1px,
+    $is-global solid var(--theme-divider-color);
 }

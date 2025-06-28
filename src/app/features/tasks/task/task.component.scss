@@ -1,4 +1,4 @@
-@import '../../../../variables';
+@import '../../../../common';
 @import './task.component.mixins';
 
 // TASK BOX STYLES
@@ -6,34 +6,39 @@
 // NOTE: needs to come first to be overwritten by :host.isCurrent
 // NOTE: needs to be very light, because we're on a lighter background for the dark theme
 :host-context(.isDarkTheme) {
-  color: $task-text-c-dark;
+  color: var(--theme-text-color);
 }
 
 :host-context(.isDarkTheme).isSelected,
 :host-context(.isDarkTheme).isCurrent {
-  color: $dark-theme-text-color-most-intense;
+  color: var(--theme-text-color-most-intense);
 }
 
 :host {
+  --task-button-spacer: 1px;
+  --play-icon-size: 22px;
+  --task-icon-size: 40px;
+  --mini-badge-size: var(--s2);
+
   display: block;
   position: relative;
 
-  color: $light-theme-text-color;
+  color: var(--theme-text-color);
 
   &.isSelected {
-    z-index: $z-is-selected-host;
+    z-index: var(--z-is-selected-host);
     //position: sticky;
     //top: 16px;
   }
 
   &.isCurrent {
-    z-index: $z-is-current-host;
+    z-index: var(--z-is-current-host);
     position: sticky;
-    top: $s;
+    top: var(--s);
   }
 
   &:focus {
-    z-index: $z-focus-host;
+    z-index: var(--z-focus-host);
     outline: none;
   }
 }
@@ -41,7 +46,8 @@
 .inner-wrapper {
   position: relative;
   // NOTE: -1 px because we move the box slightly up
-  padding: #{$task-inner-padding-top-bottom - 1} 0 $task-inner-padding-top-bottom;
+  padding: calc(var(--task-inner-padding-top-bottom) - 1px) 0
+    var(--task-inner-padding-top-bottom);
   margin-bottom: 0;
 }
 
@@ -55,92 +61,86 @@
   right: 0;
   bottom: 1px;
   top: 1px;
-  transition: $transition-standard;
+  transition: var(--transition-standard);
   transition-property: transform, box-shadow;
   border: 1px solid transparent;
 
-  @include lightTheme {
-    background: $task-c-bg-light;
-  }
-
-  @include darkTheme {
-    background: $task-c-bg-dark;
-  }
+  background: var(--task-c-bg);
 
   :host.gu-mirror & {
-    box-shadow: $whiteframe-shadow-8dp !important;
-    border-radius: $task-border-radius !important;
+    box-shadow: var(--whiteframe-shadow-8dp) !important;
+    border-radius: var(--task-border-radius) !important;
   }
 
   :host-context(.isDarkTheme).gu-mirror & {
-    background: $task-c-drag-drop-bg-dark !important;
+    background: var(--task-c-drag-drop-bg) !important;
   }
 
   // NOTE: also applies to child tasks
   :host-context(.isLightTheme).isSelected.isSelected & {
-    background: $task-c-selected-bg-light;
+    background: var(--task-c-selected-bg);
   }
 
   :host-context(.isDarkTheme).isDone & {
-    background: $task-c-bg-done-dark;
+    background: var(--task-c-bg-done);
   }
 
   :host-context(.isDarkTheme).isSelected.isSelected & {
-    background: $task-c-selected-bg-dark;
+    background: var(--task-c-selected-bg);
   }
 
   :host.isSelected.isSelected > .inner-wrapper > & {
-    transition: $transition-enter;
+    transition: var(--transition-enter);
     transition-property: left, right, box-shadow;
-    box-shadow: $task-selected-shadow-light;
+    box-shadow: var(--task-selected-shadow);
     // because of the shadow, this looks better
     //bottom: 2px;
 
     @include darkTheme {
-      box-shadow: $task-selected-shadow-dark;
+      box-shadow: var(--whiteframe-shadow-4dp);
     }
 
     @include mq(xs) {
       transform-origin: left;
-      left: -1 * $task-border-radius;
-      border-top-left-radius: $task-border-radius;
-      border-bottom-left-radius: $task-border-radius;
+      left: calc(-1 * var(--task-border-radius));
+      border-top-left-radius: var(--task-border-radius);
+      border-bottom-left-radius: var(--task-border-radius);
     }
 
     @at-root :host-context(.isDarkTheme).isSelected.isSelected.isSelected
         .sub-tasks
         ::ng-deep
         .box {
-      background: $sub-task-c-bg-dark-in-selected;
+      background: var(--sub-task-c-bg-in-selected);
     }
   }
 
   :host:focus > .inner-wrapper > & {
-    border-radius: $task-border-radius;
+    border-radius: var(--task-border-radius);
     // we don't want focus borders for touch only devices
     @include noTouchOnly() {
-      border-color: $task-c-focus;
+      border-color: var(--palette-primary-400);
       border-width: 1px;
       border-style: solid !important;
     }
   }
 
   :host:focus.mobile-highlight > .inner-wrapper > & {
-    border-color: $task-c-focus;
+    border-color: var(--palette-primary-400);
     border-width: 1px;
     border-style: solid !important;
   }
 
   :host.isCurrent.isCurrent.isCurrent.isCurrent.isCurrent & {
-    border-radius: $task-border-radius;
-    box-shadow: $task-current-shadow-light;
+    border-radius: var(--task-border-radius);
+    box-shadow: var(--task-current-shadow);
     // because of the shadow, this looks better
     //bottom: 2px;
 
     @include mq(xs) {
       //transform: scale($task-current-task-zoom);
-      left: -1 * ($task-border-radius);
-      right: -1 * ($task-border-radius);
+      left: calc(-1 * var(--task-border-radius));
+      right: calc(-1 * var(--task-border-radius));
     }
   }
 
@@ -153,62 +153,62 @@
       right: -234px;
     }
     @include mq(xl) {
-      right: -1 * ($task-border-radius);
+      right: calc(-1 * var(--task-border-radius));
     }
   }
 
   :host-context(.isLightTheme).isCurrent.isCurrent.isCurrent.isCurrent & {
-    border-color: $task-c-current !important;
+    border-color: var(--c-accent) !important;
     border-width: 1px !important;
     border-style: dashed;
   }
 
   :host-context(.isDarkTheme).isCurrent.isCurrent.isCurrent.isCurrent & {
-    background: $task-c-current-bg-dark;
-    box-shadow: $task-current-shadow-dark;
+    background: var(--task-c-current-bg);
+    box-shadow: var(--task-current-shadow);
   }
 
   :host:first-child > .inner-wrapper > & {
-    border-top-left-radius: $task-border-radius;
-    border-top-right-radius: $task-border-radius;
+    border-top-left-radius: var(--task-border-radius);
+    border-top-right-radius: var(--task-border-radius);
   }
 
   :host:last-child > .inner-wrapper > & {
-    border-bottom-left-radius: $task-border-radius;
-    border-bottom-right-radius: $task-border-radius;
+    border-bottom-left-radius: var(--task-border-radius);
+    border-bottom-right-radius: var(--task-border-radius);
   }
 }
 
 .sub-tasks {
-  margin: $s $s $s $s * 3;
+  margin: var(--s) var(--s) var(--s) var(--s3);
   position: relative;
 
   @include smallMainContainer {
-    margin: $s $s $s $s * 3;
+    margin: var(--s) var(--s) var(--s) var(--s3);
     position: relative;
   }
 
   @include mq(xs) {
-    //margin: $s $s*2 $s $s*3;
-    margin: $s $s $s $s * 5;
+    //margin: var(--s) var(--s2) var(--s) var(--s3);
+    margin: var(--s) var(--s) var(--s) var(--s5);
   }
 
   ::ng-deep .box {
     @include lightTheme {
-      border-color: $light-theme-extra-border-color;
+      border-color: var(--theme-extra-border-color);
       bottom: 0;
       top: -1px;
     }
 
     @include darkTheme {
-      box-shadow: $whiteframe-shadow-1dp;
-      background: $sub-task-c-bg-dark;
+      box-shadow: var(--whiteframe-shadow-1dp);
+      background: var(--sub-task-c-bg);
     }
   }
 }
 
 :host-context(.isDarkTheme) ::ng-deep .isDone.isDone .box {
-  background: $sub-task-c-bg-dark-done;
+  background: var(--sub-task-c-bg-done);
 }
 
 .first-line {
@@ -219,7 +219,7 @@
   user-select: none;
   -webkit-user-select: none; /* Safari */
   justify-content: space-between;
-  min-height: $task-first-line-min-height;
+  min-height: var(--task-first-line-min-height);
   touch-action: pan-y;
 
   @include mq(xs, max) {
@@ -252,7 +252,7 @@
   }
 
   @include isDoneForFirstLine {
-    opacity: $task-is-done-dim-opacity;
+    opacity: var(--task-is-done-dim-opacity);
   }
 }
 
@@ -262,8 +262,8 @@
   display: flex;
   flex-flow: row;
   position: relative;
-  margin-left: $s;
-  margin-right: $s;
+  margin-left: var(--s);
+  margin-right: var(--s);
   align-items: stretch;
 
   //@include verySmallMainContainer {
@@ -286,21 +286,18 @@
     margin-bottom: auto;
     height: 100% !important;
     min-height: 40px;
-    border-radius: $card-border-radius;
+    border-radius: var(--card-border-radius);
 
     ::ng-deep {
       .mat-mdc-button-persistent-ripple {
-        border-radius: $card-border-radius;
+        border-radius: var(--card-border-radius);
       }
     }
 
     &:hover {
-      //@include darkTheme() {
-      //  background: rgba(255, 255, 255, 0.1);
-      //}
-      //@include lightTheme() {
-      //  background: rgba(0, 0, 0, 0.05);
-      //}
+      ////  background: var(--color-overlay-light-10);
+      //
+      //
     }
   }
 
@@ -363,8 +360,8 @@
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  margin-right: $s;
-  z-index: $z-time-wrapper;
+  margin-right: var(--s);
+  z-index: var(--z-time-wrapper);
   // note: fixes styles for empty time for very small mobile
   min-width: 25px;
   //border: 1px solid red;
@@ -378,7 +375,7 @@
 
     &:hover {
       .time {
-        transition: $transition-standard;
+        transition: var(--transition-standard);
         opacity: 1 !important;
       }
     }
@@ -429,7 +426,7 @@
   }
 
   .separator {
-    padding: 0 $s * 0.5;
+    padding: 0 var(--s-half);
   }
 
   //@include smallMainContainer {
@@ -442,7 +439,7 @@
       @include timeWrapperMinimalStyles;
 
       @include isDoneForFirstLine {
-        opacity: $task-is-done-dim-opacity + 0.1;
+        opacity: calc(var(--task-is-done-dim-opacity) + 0.1);
       }
     }
   }
@@ -479,7 +476,7 @@
   align-items: center;
   font-weight: bold;
   display: flex;
-  z-index: $z-drag-over-msg;
+  z-index: var(--z-drag-over-msg);
 }
 
 .check-done {
@@ -488,16 +485,16 @@
   left: 50%;
   top: 50%;
   display: block;
-  z-index: $z-check-done;
+  z-index: var(--z-check-done);
   transform: translate(-50%, -50%);
-  transition: $transition-standard;
+  transition: var(--transition-standard);
   border-radius: 50%;
 
   &:hover {
     opacity: 1 !important;
 
     mat-icon {
-      animation: $transition-duration-m success-btn-ani linear;
+      animation: var(--transition-duration-m) success-btn-ani linear;
     }
 
     .check {
@@ -510,11 +507,10 @@
   }
 
   mat-icon {
-    $task-size: 40px;
-    font-size: $task-size;
-    height: $task-size;
-    width: $task-size;
-    line-height: $task-size;
+    font-size: var(--task-icon-size);
+    height: var(--task-icon-size);
+    width: var(--task-icon-size);
+    line-height: var(--task-icon-size);
 
     &.undo {
       display: none;
@@ -526,18 +522,18 @@
 .block-left,
 .block-right {
   pointer-events: none;
-  color: $c-contrast;
+  color: var(--palette-primary-contrast-500);
   position: absolute;
   bottom: 2px;
   top: 1px;
   width: 0;
-  z-index: $z-swipe-block;
-  transition: $transition-standard;
-  border-radius: $task-border-radius;
+  z-index: var(--z-swipe-block);
+  transition: var(--transition-standard);
+  border-radius: var(--task-border-radius);
   overflow: hidden;
 
   &.isActive {
-    background-color: $c-accent;
+    background-color: var(--c-accent);
   }
 
   mat-icon {
@@ -557,7 +553,7 @@
 }
 
 progress-bar {
-  z-index: $z-progress-bar;
+  z-index: var(--z-progress-bar);
 }
 
 // BUTTON STYLES AND DRAG HANDLE
@@ -565,14 +561,13 @@ progress-bar {
 .toggle-sub-tasks-btn,
 .first-line ::ng-deep .ico-btn,
 .first-line .ico-btn {
-  $task-button-spacer: 1px;
-  margin: 0 $task-button-spacer;
+  margin: 0 var(--task-button-spacer);
   padding: 0;
-  z-index: $z-btn;
+  z-index: var(--z-btn);
   @extend %standardTaskOpacityChange;
 
   &:hover {
-    z-index: $z-btn-hover;
+    z-index: var(--z-btn-hover);
   }
 
   &:focus {
@@ -592,17 +587,17 @@ progress-bar {
 
 .delete-btn {
   mat-icon.delete-icon {
-    color: $c-warn !important;
+    color: var(--c-warn) !important;
   }
 }
 
 .drag-handle {
-  margin-left: $s;
+  margin-left: var(--s);
   margin-right: 0;
   width: 40px;
   height: 40px;
   min-width: 40px;
-  z-index: $z-drag-handle;
+  z-index: var(--z-drag-handle);
   //display: flex;
   //justify-content: center;
   //align-items: center;
@@ -626,7 +621,7 @@ progress-bar {
     width: 40px;
     height: 40px;
     min-width: 40px;
-    opacity: $task-icon-default-opacity;
+    opacity: var(--task-icon-default-opacity);
     position: absolute;
     display: flex;
     justify-content: center;
@@ -664,34 +659,33 @@ progress-bar {
   &:after {
     content: '';
     position: absolute;
-    top: -$s * 0.25;
-    bottom: -$s * 0.25;
-    left: -$s * 0.25;
-    right: -$s * 0.25;
+    top: calc(-1 * var(--s-quarter));
+    bottom: calc(-1 * var(--s-quarter));
+    left: calc(-1 * var(--s-quarter));
+    right: calc(-1 * var(--s-quarter));
 
     @include mq(xs) {
-      top: -$s * 1;
-      bottom: -$s * 1;
-      left: -$s * 1;
-      right: -$s * 0.5;
+      top: calc(-1 * var(--s));
+      bottom: calc(-1 * var(--s));
+      left: calc(-1 * var(--s));
+      right: calc(-1 * var(--s-half));
     }
   }
 }
 
-$this-play-size: 22px;
 //
 .play-icon-indicator {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: $c-accent;
+  color: var(--c-accent);
 
-  height: $this-play-size;
+  height: var(--play-icon-size);
   margin-top: 1px;
-  width: $this-play-size;
-  font-size: $this-play-size;
-  line-height: $this-play-size;
+  width: var(--play-icon-size);
+  font-size: var(--play-icon-size);
+  line-height: var(--play-icon-size);
   opacity: 1 !important;
   z-index: 3;
   pointer-events: none;
@@ -710,21 +704,20 @@ $this-play-size: 22px;
   color: inherit;
 
   &.mat-accent {
-    color: $c-accent;
+    color: var(--c-accent);
   }
 }
 
 .toggle-sub-tasks-btn,
 .first-line .ico-btn {
-  $task-button-spacer: 1px;
-  margin: auto $task-button-spacer;
+  margin: auto var(--task-button-spacer);
   padding: 0;
-  z-index: $z-btn;
+  z-index: var(--z-btn);
 
   @extend %standardTaskOpacityChange;
 
   &:hover {
-    z-index: $z-btn-hover;
+    z-index: var(--z-btn-hover);
   }
 
   &:focus {
@@ -739,7 +732,7 @@ $this-play-size: 22px;
   transform: translateY(-50%);
   left: -24px;
   top: 50%;
-  z-index: $z-toggle-sub-task-btn !important;
+  z-index: var(--z-toggle-sub-task-btn) !important;
   min-width: 0;
   min-height: 0;
   width: 32px !important;
@@ -747,7 +740,7 @@ $this-play-size: 22px;
   margin-top: -1px !important;
   transform-origin: left top;
   transition-property: all;
-  box-shadow: $whiteframe-shadow-1dp;
+  box-shadow: var(--whiteframe-shadow-1dp);
 
   :host-context(.isNoTouchOnly) & {
     //opacity: 0;
@@ -758,8 +751,8 @@ $this-play-size: 22px;
   }
 
   mat-icon {
-    transition: $transition-standard;
-    opacity: $task-icon-default-opacity;
+    transition: var(--transition-standard);
+    opacity: var(--task-icon-default-opacity);
 
     &.isHideDoneTasks {
       transform: rotate(-45deg);
@@ -770,7 +763,7 @@ $this-play-size: 22px;
 .attachment-btn,
 .show-additional-info-btn {
   mat-icon {
-    transition: transform $transition-standard;
+    transition: transform var(--transition-standard);
   }
 }
 
@@ -811,12 +804,10 @@ $this-play-size: 22px;
   }
 }
 
-$min-badge-size: $s * 2.25;
-
 .mini-badge {
-  line-height: $min-badge-size;
-  width: $min-badge-size;
-  height: $min-badge-size;
+  line-height: var(--mini-badge-size);
+  width: var(--mini-badge-size);
+  height: var(--mini-badge-size);
   font-size: 12px;
   position: absolute;
   right: 0;
@@ -828,8 +819,8 @@ $min-badge-size: $s * 2.25;
 .parent-title {
   display: flex;
   align-items: center;
-  padding-left: $s;
-  padding-top: $s * 0.5;
+  padding-left: var(--s);
+  padding-top: var(--s-half);
   margin-bottom: -2px;
 
   .title {
@@ -842,7 +833,7 @@ $min-badge-size: $s * 2.25;
   position: relative;
 
   &.mat-warn mat-icon {
-    color: $c-warn !important;
+    color: var(--c-warn) !important;
   }
 }
 
@@ -858,17 +849,17 @@ $min-badge-size: $s * 2.25;
   line-height: 1;
   text-align: center;
   padding: 1px 2px 0;
-  border: 1px solid $light-theme-extra-border-color;
-  background: #fff;
-  border-radius: $card-border-radius;
+  border: 1px solid var(--theme-extra-border-color);
+  border-radius: var(--card-border-radius);
   white-space: nowrap;
+  background: #fff;
 
   // avoid affecting drag handle
   pointer-events: none;
 
   @include darkTheme() {
-    border-color: $dark-theme-extra-border-color;
-    background: $dark-theme-bg-lighter;
+    border-color: var(--theme-extra-border-color);
+    background: var(--theme-bg-lighter);
   }
 
   ::ng-deep span {
@@ -876,7 +867,7 @@ $min-badge-size: $s * 2.25;
   }
 }
 
-@media (min-width: $layout-sm) and (max-width: #{-1 + $layout-xl }) {
+@media (min-width: #{$layout-sm}) and (max-width: #{$layout-xl - 1px}) {
   .closeBtn {
     min-width: 40px;
     margin-right: -29px !important;

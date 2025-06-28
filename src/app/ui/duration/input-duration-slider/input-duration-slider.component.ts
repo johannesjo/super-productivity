@@ -11,7 +11,6 @@ import {
   viewChild,
 } from '@angular/core';
 import { nanoid } from 'nanoid';
-import moment from 'moment';
 import { dotAnimation } from './dot.ani';
 import { T } from '../../../t.const';
 import { InputDurationDirective } from '../input-duration.directive';
@@ -57,6 +56,10 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   // TODO: Skipped for migration because:
   //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set model(val: number) {
+    // Ensure val is a valid number
+    if (!Number.isFinite(val) || Number.isNaN(val)) {
+      val = 0;
+    }
     if (this._model !== val) {
       this._model = val;
       this.setRotationFromValue(val);
@@ -171,6 +174,14 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   }
 
   setDots(hours: number = 0): void {
+    // Ensure hours is a valid number
+    if (!Number.isFinite(hours) || Number.isNaN(hours)) {
+      hours = 0;
+    }
+
+    // Round to ensure we have an integer
+    hours = Math.floor(hours);
+
     if (hours > 12) {
       hours = 12;
     }
@@ -199,13 +210,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
       minutesFromDegrees = 0;
     }
 
-    let hours = Math.floor(
-      moment
-        .duration({
-          milliseconds: this._model,
-        })
-        .asHours(),
-    );
+    let hours = Math.floor(this._model / (1000 * 60 * 60));
 
     const minuteDelta = minutesFromDegrees - this.minutesBefore;
 
@@ -225,12 +230,8 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
 
     this.minutesBefore = minutesFromDegrees;
     this.setDots(hours);
-    this._model = moment
-      .duration({
-        hours,
-        minutes: minutesFromDegrees,
-      })
-      .asMilliseconds();
+    // eslint-disable-next-line no-mixed-operators
+    this._model = hours * 60 * 60 * 1000 + minutesFromDegrees * 60 * 1000;
 
     this.modelChange.emit(this._model);
     this._cd.detectChanges();
@@ -243,19 +244,19 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   }
 
   setRotationFromValue(val: number = this._model): void {
-    const momentVal = moment.duration({
-      milliseconds: val,
-    });
+    // Ensure val is a valid number, default to 0 if not
+    if (!Number.isFinite(val) || Number.isNaN(val) || val < 0) {
+      val = 0;
+    }
 
-    const minutes = momentVal.minutes();
-    this.setDots(Math.floor(momentVal.asHours()));
+    const totalMinutes = Math.floor(val / (1000 * 60));
+    const minutes = totalMinutes % 60;
+    const hours = Math.floor(val / (1000 * 60 * 60));
+
+    this.setDots(hours);
     const degrees = (minutes * 360) / 60;
     this.minutesBefore = minutes;
     this.setCircleRotation(degrees);
     this._cd.detectChanges();
-  }
-
-  trackByIndex(i: number, p: any): number {
-    return i;
   }
 }

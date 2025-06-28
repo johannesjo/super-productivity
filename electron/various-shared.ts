@@ -1,6 +1,7 @@
 import { app, BrowserWindow } from 'electron';
 import { info } from 'electron-log/main';
 import { getWin } from './main-window';
+import { hideOverlayWindow } from './overlay-indicator/overlay-indicator';
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function quitApp(): void {
@@ -27,6 +28,9 @@ export function showOrFocus(passedWin: BrowserWindow): void {
   } else {
     win.show();
   }
+
+  // Hide overlay when main window is shown
+  hideOverlayWindow();
 
   // focus window afterwards always
   setTimeout(() => {

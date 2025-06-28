@@ -21,6 +21,12 @@ export const ipcEvent$ = (evName: string): Observable<unknown[]> => {
     console.log('ipcEvent$ trigger', evName);
     subject.next([...args]);
   };
+
+  if (!window.ea) {
+    console.error('window.ea is not available. Make sure the preload script is loaded.');
+    return subject;
+  }
+
   window.ea.on(evName, handler);
 
   return subject;

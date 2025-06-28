@@ -12,7 +12,7 @@
         [progress]="focusModeService.sessionProgress$ | async"
       ></progress-circle>
     } @else {
-      <progress-circle [progress]="autoRationProgress$ | async"></progress-circle>
+      <breathing-dot></breathing-dot>
     }
     <div class="progress-label-wrapper">
       <div
@@ -49,13 +49,6 @@
       (click)="finishCurrentTask()"
     >
       <mat-icon>done</mat-icon>
-    </button>
-    <button
-      mat-icon-button
-      [matTooltip]="T.F.FOCUS_MODE.GO_TO_PROCRASTINATION | translate"
-      (click)="getProcrastinationHelp()"
-    >
-      <mat-icon>flash_on</mat-icon>
     </button>
     @if (task.issueId && task.issueType !== ICAL_TYPE) {
       <a

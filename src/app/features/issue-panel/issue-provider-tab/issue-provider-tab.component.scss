@@ -1,5 +1,3 @@
-@import '../../../../variables';
-
 $pad: 12px;
 
 :host {
@@ -47,15 +45,15 @@ header {
 }
 
 .arrow {
-  margin: 0 $s;
+  margin: 0 var(--s);
   min-width: 24px;
 }
 
 .empty {
   text-align: center;
   font-style: italic;
-  margin-top: $s * 2;
-  margin-bottom: $s * 2;
+  margin-top: var(--s2);
+  margin-bottom: var(--s2);
 }
 
 .item-list {

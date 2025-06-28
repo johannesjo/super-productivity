@@ -31,7 +31,6 @@ import {
   takeUntil,
   withLatestFrom,
 } from 'rxjs/operators';
-import moment from 'moment';
 import { T } from '../../t.const';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
@@ -347,15 +346,15 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   updateWorkStart(ev: string): void {
-    const startTime = moment(this.dayStr + ' ' + ev).unix() * 1000;
-    if (startTime) {
+    const startTime = new Date(`${this.dayStr} ${ev}`).getTime();
+    if (startTime && !isNaN(startTime)) {
       this.workContextService.updateWorkStartForActiveContext(this.dayStr, startTime);
     }
   }
 
   updateWorkEnd(ev: string): void {
-    const endTime = moment(this.dayStr + ' ' + ev).unix() * 1000;
-    if (endTime) {
+    const endTime = new Date(`${this.dayStr} ${ev}`).getTime();
+    if (endTime && !isNaN(endTime)) {
       this.workContextService.updateWorkEndForActiveContext(this.dayStr, endTime);
     }
   }

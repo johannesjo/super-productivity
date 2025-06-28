@@ -1,7 +1,7 @@
-@import '../../../../variables';
+@import '../../../../common';
 
 :host {
-  padding-bottom: $s * 2;
+  padding-bottom: var(--s2);
 }
 
 :host::ng-deep .tpl {
@@ -11,12 +11,12 @@
 }
 
 :host::ng-deep .sub-section-heading:not(.collapsible-header) {
-  margin-top: $s * 3 !important;
-  margin-bottom: $s;
+  margin-top: var(--s3) !important;
+  margin-bottom: var(--s);
 }
 
 .controls {
   clear: both;
   text-align: end;
-  margin-bottom: $s;
+  margin-bottom: var(--s);
 }

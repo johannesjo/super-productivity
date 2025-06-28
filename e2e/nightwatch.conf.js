@@ -1,7 +1,7 @@
 module.exports = {
-  src_folders: ['../out-tsc/e2e/src'],
-  output_folder: './e2e-test-results',
-  custom_commands_path: 'out-tsc/e2e/commands',
+  src_folders: ['../.tmp/out-tsc/e2e/src'],
+  output_folder: './.tmp/e2e-test-results',
+  custom_commands_path: '.tmp/out-tsc/e2e/commands',
   test_workers: {
     enabled: false,
     workers: 5,
@@ -10,11 +10,12 @@ module.exports = {
     start_process: true,
     port: 9515,
     server_path: require('chromedriver').path,
-    cli_args: [],
+    cli_args: ['--log-path=./.tmp/e2e-test-results/chromedriver.log'],
   },
 
   test_settings: {
     default: {
+      attempts: 2,
       persist_globals: true,
       launch_url: 'https://0.0.0.0:4200',
       desiredCapabilities: {
@@ -40,7 +41,7 @@ module.exports = {
         enabled: true,
         on_failure: true,
         on_error: true,
-        path: './e2e-test-results/screenshots',
+        path: './.tmp/e2e-test-results/screenshots',
       },
       globals: {
         waitForConditionPollInterval: 500,

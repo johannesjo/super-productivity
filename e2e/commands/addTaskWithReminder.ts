@@ -25,20 +25,49 @@ module.exports = {
     }: AddTaskWithReminderParams,
   ) {
     const d = new Date(scheduleTime);
+    const timeValue = getTimeVal(d);
 
-    return this.addTask(title)
-      .openPanelForTask(taskSel)
-      .waitForElementVisible(SCHEDULE_TASK_ITEM)
-      .click(SCHEDULE_TASK_ITEM)
-      .waitForElementVisible(DIALOG)
-      .pause(30)
-      .waitForElementVisible(TIME_INP)
-      .pause(50)
-      .setValue(TIME_INP, getTimeVal(d))
-      .pause(50)
-      .waitForElementVisible(DIALOG_SUBMIT)
-      .click(DIALOG_SUBMIT)
-      .waitForElementNotPresent(DIALOG);
+    return (
+      this.addTask(title)
+        .openPanelForTask(taskSel)
+        .waitForElementVisible(SCHEDULE_TASK_ITEM)
+        .click(SCHEDULE_TASK_ITEM)
+        .waitForElementVisible(DIALOG)
+        .pause(100)
+        .waitForElementVisible(TIME_INP)
+        .pause(150)
+        .perform(() => {
+          console.log(`Setting time input to: ${timeValue}`);
+        })
+        // Focus the input and ensure it's ready
+        .click(TIME_INP)
+        .pause(150)
+        // Set the time value with extra reliability measures
+        .clearValue(TIME_INP)
+        .pause(100)
+        // Use execute to directly set the value attribute as a fallback
+        .execute(
+          (selector: string, value: string) => {
+            const el = document.querySelector(selector) as HTMLInputElement;
+            if (el) {
+              el.value = value;
+              el.dispatchEvent(new Event('input', { bubbles: true }));
+              el.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          },
+          [TIME_INP, timeValue],
+        )
+        .pause(200)
+        // Also try setValue as backup
+        .setValue(TIME_INP, timeValue)
+        .pause(200)
+        // Send Tab key to ensure value is committed and move focus
+        .sendKeys(TIME_INP, '\uE004') // Tab key
+        .pause(200)
+        .waitForElementVisible(DIALOG_SUBMIT)
+        .click(DIALOG_SUBMIT)
+        .waitForElementNotPresent(DIALOG)
+    );
   },
 };
 

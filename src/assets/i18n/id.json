@@ -31,10 +31,6 @@
     "RESTORE_FILE_BACKUP_ANDROID": "Sepertinya TIDAK ADA DATA, tetapi ada cadangan yang tersedia. Apakah Anda ingin memuatnya?",
     "RESTORE_STRAY_BACKUP": "Selama sinkronisasi terakhir mungkin ada beberapa kesalahan. Apakah Anda ingin memulihkan cadangan terakhir?"
   },
-  "DATETIME_INPUT": {
-    "IN": "di {{time}}",
-    "TOMORROW": "besok {{time}}"
-  },
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Nanti hari ini",
     "NEXT_WEEK": "Minggu depan",
@@ -117,11 +113,24 @@
         "TITLE": "CalDav"
       },
       "ISSUE_CONTENT": {
+        "ASSIGNEE": "Penanggung jawab",
+        "AT": "di",
+        "ATTACHMENTS": "Lampiran",
+        "CHANGED": "diubah",
+        "COMMENTS": "Komentar",
+        "COMPONENTS": "Komponen",
         "DESCRIPTION": "Deskripsi",
         "LABELS": "Kategori",
+        "LIST_OF_CHANGES": "Daftar perubahan",
         "MARK_AS_CHECKED": "Tandai pembaruan sebagai dicentang",
+        "ON": "pada",
+        "RELATED": "Terkait",
         "STATUS": "Status",
-        "SUMMARY": "Ringkasan"
+        "STORY_POINTS": "Poin Cerita",
+        "SUB_TASKS": "Subtugas",
+        "SUMMARY": "Ringkasan",
+        "WORKLOG": "Catatan kerja",
+        "WRITE_A_COMMENT": "Tulis Komentar"
       },
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav: Kalender \"{{calendarName}}\" tidak ditemukan",
@@ -159,6 +168,8 @@
         "L_INTERVAL": "Interval untuk mengulang frasa",
         "L_TEXT": "Teks",
         "L_TEXT_DESCRIPTION": "Misalnya: \"Kerjakan ${currentTaskTitle}!\"",
+        "L_VOICE": "Pilih Suara",
+        "L_VOICE_DESCRIPTION": "Pilih Suara",
         "TITLE": "Mode Domina"
       }
     },
@@ -337,6 +348,39 @@
       "DEFAULT_PROJECT_DESCRIPTION": "Proyek yang ditugaskan untuk tugas yang dibuat dari masalah.",
       "DEFAULT_PROJECT_LABEL": "Proyek Produktivitas Super Default",
       "HOW_TO_GET_A_TOKEN": "Bagaimana cara mendapatkan token?",
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Penanggung jawab",
+        "AT": "di",
+        "ATTACHMENTS": "Lampiran",
+        "AUTHOR": "Penulis",
+        "CATEGORY": "Kategori",
+        "CHANGED": "diubah",
+        "COMMENTS": "Komentar",
+        "COMPONENTS": "Komponen",
+        "DESCRIPTION": "Deskripsi",
+        "DONE_RATIO": "Rasio Selesai",
+        "DUE_DATE": "Tanggal Jatuh Tempo",
+        "LABELS": "Label",
+        "LAST_COMMENT": "Komentar terakhir",
+        "LIST_OF_CHANGES": "Daftar perubahan",
+        "LOAD_ALL_COMMENTS": "Muat semua {{nr}} komentar",
+        "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "Muat deskripsi & semua komentar",
+        "LOCATION": "Lokasi",
+        "MARK_AS_CHECKED": "Tandai pembaruan sebagai diperiksa",
+        "ON": "pada",
+        "PRIORITY": "Prioritas",
+        "RELATED": "Terkait",
+        "START": "Mulai",
+        "STATUS": "Status",
+        "STORY_POINTS": "Poin Cerita",
+        "SUB_TASKS": "Subtugas",
+        "SUMMARY": "Ringkasan",
+        "TIME_SPENT": "Waktu yang dihabiskan",
+        "TYPE": "Tipe",
+        "VERSION": "Versi",
+        "WORKLOG": "Catatan kerja",
+        "WRITE_A_COMMENT": "Tulis Komentar"
+      },
       "S": {
         "ERR_GENERIC": "{{issueProviderName}} Kesalahan: {{errTxt}}",
         "ERR_NETWORK": "{{issueProviderName}}: Permintaan gagal karena kesalahan jaringan sisi klien ",
@@ -484,6 +528,14 @@
         "WELCOME_USER": "Selamat datang {{user}}!"
       }
     },
+    "MARKDOWN_PASTE": {
+      "CONFIRM_ADD_TO_SUB_TASK_NOTES": "Tambahkan daftar markdown yang disalin ke catatan subtugas \"{{parentTaskTitle}}\"?",
+      "CONFIRM_PARENT_TASKS": "Buat <strong>{{tasksCount}} tugas baru</strong> dari daftar markdown yang disalin?",
+      "CONFIRM_PARENT_TASKS_WITH_SUBS": "Buat <strong>{{tasksCount}} tugas baru dan {{subTasksCount}} subtugas</strong> dari daftar markdown yang disalin?",
+      "CONFIRM_SUB_TASKS": "Buat {{tasksCount}} subtugas baru dari daftar markdown yang disalin?",
+      "CONFIRM_SUB_TASKS_WITH_PARENT": "Buat <strong>{{tasksCount}} subtugas baru di bawah \"{{parentTaskTitle}}\"</strong> dari daftar markdown yang disalin?",
+      "DIALOG_TITLE": "Daftar Markdown yang disalin terdeteksi!"
+    },
     "METRIC": {
       "BANNER": {
         "CHECK": "Saya melakukannya!"
@@ -606,12 +658,12 @@
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Penerima tugas",
+        "ATTACHMENTS": "Lampiran",
         "DESCRIPTION": "Deskripsi",
         "MARK_AS_CHECKED": "Tandai pembaruan sebagai dicentang",
         "STATUS": "Status",
         "SUMMARY": "Ringkasan",
         "TYPE": "Tipe",
-        "ATTACHMENTS": "Lampiran",
         "UPLOAD_ATTACHMENT": "Unggah ke Tugas"
       },
       "ISSUE_STRINGS": {
@@ -619,12 +671,12 @@
         "ISSUES_STR": "work packages"
       },
       "S": {
+        "ERR_NO_FILE": "Tidak ada file yang dipilih",
         "ERR_UNKNOWN": "OpenProject: Error tidak diketahui {{statusCode}} {{errorMsg}}. Apakah CORS dikonfigurasi dengan benar untuk server?",
         "POST_TIME_SUCCESS": "OpenProject: Berhasil membuat entri waktu untuk {{issueTitle}}",
         "TRANSITION": "OpenProject: Atur issue \"{{issueKey}}\" untuk \"{{name}}\"",
         "TRANSITION_SUCCESS": "OpenProject: Atur issue {{issueKey}} untuk <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Transisi dimuat. Gunakan pilihan di bawah ini untuk menetapkannya",
-        "ERR_NO_FILE": "Tidak ada file yang dipilih"
+        "TRANSITIONS_LOADED": "Transisi dimuat. Gunakan pilihan di bawah ini untuk menetapkannya"
       }
     },
     "PLANNER": {
@@ -822,6 +874,7 @@
     "SEARCH_BAR": {
       "INFO": "Klik ikon daftar untuk mencari tugas yang diarsipkan",
       "INFO_ARCHIVED": "Klik ikon arsip untuk mencari tugas normal",
+      "NO_RESULTS": "Tidak ada tugas yang ditemukan sesuai pencarian Anda",
       "PLACEHOLDER": "Cari tugas atau deskripsi tugas",
       "PLACEHOLDER_ARCHIVED": "Cari tugas yang diarsipkan",
       "TOO_MANY_RESULTS": "Terlalu banyak hasil, harap persempit pencarian Anda"
@@ -881,20 +934,24 @@
         "TITLE": "Login: {{provider}}"
       },
       "D_CONFLICT": {
+        "LAMPORT_CLOCK": "Revisi",
         "LAST_CHANGE": "Perubahan Terakhir:",
         "LAST_SYNC": "Sinkronasi Terakhir",
         "LOCAL": "Lokal",
         "LOCAL_REMOTE": "Lokal -> Jarak Jauh",
         "REMOTE": "Jarak Jauh",
         "TEXT": "<p>Perbarui dari jarak jauh. Baik data lokal maupun jarak jauh tampaknya dimodifikasi.</p>",
+        "TIMESTAMP": "Stempel Waktu",
         "TITLE": "Sinkronisasi: Data yang Bertentangan",
         "USE_LOCAL": "Gunakan lokal",
         "USE_REMOTE": "Gunakan jarak jauh"
       },
       "D_DECRYPT_ERROR": {
         "BTN_OVER_WRITE_REMOTE": "Mengubah dan menimpa remote",
+        "CHANGE_PW_AND_DECRYPT": "Ubah & Coba Dekripsi",
         "P1": "Data Anda dienkripsi dan dekripsi gagal. Silakan masukkan kata sandi yang benar!",
-        "P2": "Anda juga dapat mengubah kata sandi Anda, yang akan menimpa semua data jarak jauh."
+        "P2": "Anda juga dapat mengubah kata sandi Anda, yang akan menimpa semua data jarak jauh.",
+        "PASSWORD": "Kata sandi"
       },
       "D_INCOMPLETE_SYNC": {
         "BTN_CLOSE_APP": "Tutup Aplikasi",
@@ -1235,6 +1292,45 @@
         "WEDNESDAY": "Rabu"
       }
     },
+    "TASK_VIEW": {
+      "CUSTOMIZER": {
+        "ENTER_PROJECT": "Masukkan proyek",
+        "ENTER_TAG": "Masukkan tag",
+        "ESTIMATED_TIME": "Waktu Perkiraan",
+        "FILTER_BY": "Saring Berdasarkan",
+        "FILTER_DEFAULT": "Tidak Ada Filter",
+        "FILTER_ESTIMATED_TIME": "Waktu Perkiraan",
+        "FILTER_PROJECT": "Proyek",
+        "FILTER_SCHEDULED_DATE": "Tanggal Terjadwal",
+        "FILTER_TAG": "Tag",
+        "FILTER_TIME_SPENT": "Waktu yang dihabiskan",
+        "GROUP_BY": "Kelompokkan Berdasarkan",
+        "GROUP_DEFAULT": "Tidak ada grup",
+        "GROUP_PROJECT": "Proyek",
+        "GROUP_SCHEDULED_DATE": "Tanggal Terjadwal",
+        "GROUP_TAG": "Tag",
+        "RESET_ALL": "Reset Semua",
+        "SCHEDULED_DEFAULT": "Tanggal Apa Saja",
+        "SCHEDULED_NEXT_MONTH": "Bulan Depan",
+        "SCHEDULED_NEXT_WEEK": "Minggu Depan",
+        "SCHEDULED_THIS_MONTH": "Bulan ini",
+        "SCHEDULED_THIS_WEEK": "Minggu ini",
+        "SCHEDULED_TODAY": "Hari ini",
+        "SCHEDULED_TOMORROW": "Besok",
+        "SORT_BY": "Urutkan berdasarkan",
+        "SORT_CREATION_DATE": "Tanggal pembuatan",
+        "SORT_DEFAULT": "Default",
+        "SORT_NAME": "Nama",
+        "SORT_SCHEDULED_DATE": "Tanggal Terjadwal",
+        "TIME_1HOUR": "> 1 Jam",
+        "TIME_2HOUR": "> 2 Jam",
+        "TIME_10MIN": "> 10 Menit",
+        "TIME_30MIN": "> 30 Menit",
+        "TIME_DEFAULT": "Durasi Apa Saja",
+        "TIME_SPENT": "Waktu yang dihabiskan",
+        "TITLE": "Sesuaikan Tampilan Tugas"
+      }
+    },
     "TIME_TRACKING": {
       "B": {
         "ALREADY_DID": "Saya sudah melakukan",
@@ -1327,18 +1423,34 @@
     }
   },
   "FILE_IMEX": {
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "INITIATED_MSG": "Impor data otomatis telah dimulai.",
+      "SOURCE_URL_DOMAIN": "Domain Sumber",
+      "TITLE": "Konfirmasi Impor Data dari URL",
+      "WARNING_MSG": "Melanjutkan akan menimpa data dan konfigurasi aplikasi Anda saat ini dengan konten dari URL yang ditentukan. Tindakan ini tidak dapat dibatalkan.",
+      "WARNING_TITLE": "Peringatan"
+    },
     "EXPORT_DATA": "Ekspor Data",
     "IMPORT_FROM_FILE": "Impor dari file",
+    "IMPORT_FROM_URL": "Impor dari URL",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Silakan masukkan URL lengkap file cadangan JSON Super Productivity yang ingin Anda impor.",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "Impor dari URL",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "Impor dari URL",
     "PRIVACY_EXPORT": "Ekspor data anonim (untuk dikirim ke contact@super-productivity.com untuk debugging)",
     "S_BACKUP_DOWNLOADED": "Cadangan diunduh ke folder dokumen android",
     "S_ERR_IMPORT_FAILED": "Mengimpor data gagal",
-    "S_ERR_INVALID_DATA": "Impor gagal: JSON tidak valid"
+    "S_ERR_INVALID_DATA": "Impor gagal: JSON tidak valid",
+    "S_ERR_INVALID_URL": "Impor gagal: URL yang diberikan tidak valid",
+    "S_ERR_NETWORK": "Impor gagal: Kesalahan jaringan saat mengambil data dari URL",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "Kesalahan: Tidak dapat mendekode parameter URL untuk impor. Pastikan formatnya benar.",
+    "URL_PLACEHOLDER": "Masukkan URL untuk impor"
   },
   "G": {
     "ADD": "Menambahkan",
     "ADVANCED_CFG": "Konfigurasi Lanjutan",
     "CANCEL": "Batal",
     "CLOSE": "Tutup",
+    "CONFIRM": "Konfirmasi",
     "DELETE": "Hapus",
     "DISMISS": "Abaikan",
     "DO_IT": "Lakukan!",
@@ -1459,6 +1571,7 @@
       "TOGGLE_ISSUE_PANEL": "Tampilkan/Sembunyikan Panel Masalah",
       "TOGGLE_PLAY": "Mulai/Berhenti Tugas",
       "TOGGLE_SIDE_NAV": "Tampilkan & Fokus/Sembunyikan Sidenav",
+      "TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL": "Alihkan Panel Filter/Grupp/Urutkan",
       "TRIGGER_SYNC": "Sinkronisasi pemicu (jika dikonfigurasi)",
       "ZOOM_DEFAULT": "Zoom default (khusus Desktop)",
       "ZOOM_IN": "Perbesar (khusus Desktop)",
@@ -1503,6 +1616,7 @@
       "IS_HIDE_NAV": "Sembunyikan navigasi hingga header utama diarahkan (khusus desktop)",
       "IS_MINIMIZE_TO_TRAY": "Minimalkan ke baki (hanya desktop)",
       "IS_SHOW_TIP_LONGER": "Tampilkan tip produktivitas saat aplikasi mulai sedikit lebih lama",
+      "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Tampilkan hitung mundur saat ini di tray / menu status (desktop mac saja)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Tampilkan tugas saat ini di menu baki / status (khusus desktop mac/windows)",
       "IS_TURN_OFF_MARKDOWN": "Matikan penguraian penurunan harga untuk catatan tugas",
       "IS_USE_MINIMAL_SIDE_NAV": "Gunakan bilah navigasi minimal (hanya menampilkan ikon)",
@@ -1588,6 +1702,34 @@
       "TITLE": "Pelacakan waktu"
     }
   },
+  "GLOBAL_RELATIVE_TIME": {
+    "FUTURE": {
+      "A_DAY": "dalam sehari",
+      "A_MINUTE": "dalam satu menit",
+      "A_MONTH": "dalam sebulan",
+      "A_YEAR": "dalam setahun",
+      "AN_HOUR": "dalam satu jam",
+      "DAYS": "dalam {{count}} hari",
+      "FEW_SECONDS": "dalam beberapa detik",
+      "HOURS": "dalam {{count}} jam",
+      "MINUTES": "dalam {{count}} menit",
+      "MONTHS": "dalam {{count}} bulan",
+      "YEARS": "dalam {{count}} tahun"
+    },
+    "PAST": {
+      "A_DAY": "sehari yang lalu",
+      "A_MINUTE": "satu menit yang lalu",
+      "A_MONTH": "sebulan yang lalu",
+      "A_YEAR": "setahun yang lalu",
+      "AN_HOUR": "satu jam yang lalu",
+      "DAYS": "{{count}} hari yang lalu",
+      "FEW_SECONDS": "beberapa detik yang lalu",
+      "HOURS": "{{count}} jam yang lalu",
+      "MINUTES": "{{count}} menit yang lalu",
+      "MONTHS": "{{count}} bulan yang lalu",
+      "YEARS": "{{count}} tahun yang lalu"
+    }
+  },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Disalin ke papan klip",
     "ERR_COMPRESSION": "Kesalahan untuk antarmuka kompresi",
@@ -1620,6 +1762,7 @@
     "CREATE_TAG": "Buat Tag",
     "DELETE_PROJECT": "Menghapus Proyek",
     "DELETE_TAG": "Hapus Tag",
+    "ENTER_FOCUS_MODE": "Masukkan Mode Fokus",
     "GO_TO_TASK_LIST": "Buka daftar tugas",
     "HELP": "Bantuan",
     "HM": {
@@ -1644,6 +1787,7 @@
     "PROJECTS": "Proyek",
     "QUICK_HISTORY": "Riwayat Cepat",
     "SCHEDULE": "Jadwal",
+    "SEARCH": "Cari",
     "SETTINGS": "Pengaturan",
     "SHOW_SEARCH_BAR": "Tampilkan Bilah Pencarian",
     "TAGS": "Tag-tag",
@@ -1756,6 +1900,7 @@
     "ADD_SCHEDULED_FOR_TOMORROW": "Tambahkan tugas yang direncanakan untuk besok ({{nr}})",
     "ADD_SOME_TASKS": "Tambahkan beberapa tugas untuk merencanakan hari Anda!",
     "DONE_TASKS": "Tugas Selesai",
+    "DONE_TASKS_IN_ARCHIVE": "Saat ini tidak ada tugas yang selesai di sini, tetapi ada beberapa yang sudah diarsipkan.",
     "ESTIMATE_REMAINING": "Perkiraan tersisa:",
     "FINISH_DAY": "Selesai Hari",
     "FINISH_DAY_FOR_PROJECT": "Hari Selesai untuk Proyek ini",
@@ -1764,6 +1909,7 @@
     "HELP_PROCRASTINATION": "Bantu saya menunda-nunda!",
     "MOVE_DONE_TO_ARCHIVE": "Pemindahan dilakukan ke arsip",
     "NO_DONE_TASKS": "Saat ini tidak ada tugas yang dilakukan",
+    "NO_PLANNED_TASK_ALL_DONE": "semua tugas selesai",
     "NO_PLANNED_TASKS": "Tidak ada tugas yang direncanakan",
     "READY_TO_WORK": "Siap bekerja!",
     "RESET_BREAK_TIMER": "Setel ulang tanpa penghitung waktu istirahat",

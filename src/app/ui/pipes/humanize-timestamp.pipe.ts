@@ -1,11 +1,12 @@
-import { Pipe, PipeTransform } from '@angular/core';
-import moment from 'moment';
+import { inject, Pipe, PipeTransform } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
+import { humanizeTimestamp } from '../../util/humanize-timestamp';
 
 @Pipe({ name: 'humanizeTimestamp' })
 export class HumanizeTimestampPipe implements PipeTransform {
+  private translateService = inject(TranslateService);
+
   transform(value: any): any {
-    if (value) {
-      return moment(value).fromNow();
-    }
+    return humanizeTimestamp(value, this.translateService);
   }
 }

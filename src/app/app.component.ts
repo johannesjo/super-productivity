@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  effect,
   HostBinding,
   HostListener,
   inject,
@@ -64,6 +65,10 @@ import { TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogPleaseRateComponent } from './features/dialog-please-rate/dialog-please-rate.component';
 import { getWorklogStr } from './util/get-work-log-str';
+import { PluginService } from './plugins/plugin.service';
+import { MarkdownPasteService } from './features/tasks/markdown-paste.service';
+import { TaskService } from './features/tasks/task.service';
+import { IpcRendererEvent } from 'electron';
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -113,6 +118,9 @@ export class AppComponent implements OnDestroy {
   private _persistenceLocalService = inject(PersistenceLocalService);
   private _localBackupService = inject(LocalBackupService);
   private _matDialog = inject(MatDialog);
+  private _markdownPasteService = inject(MarkdownPasteService);
+  private _taskService = inject(TaskService);
+  private _pluginService = inject(PluginService);
 
   readonly syncTriggerService = inject(SyncTriggerService);
   readonly imexMetaService = inject(ImexViewService);
@@ -176,7 +184,7 @@ export class AppComponent implements OnDestroy {
     this._requestPersistence();
 
     // deferred init
-    window.setTimeout(() => {
+    window.setTimeout(async () => {
       this._startTrackingReminderService.init();
       this._checkAvailableStorage();
       // init offline banner in lack of a better place for it
@@ -207,11 +215,38 @@ export class AppComponent implements OnDestroy {
         localStorage.setItem(LS.APP_START_COUNT, (appStarts + 1).toString());
         localStorage.setItem(LS.APP_START_COUNT_LAST_START_DAY, todayStr);
       }
+
+      // Initialize plugin system
+      try {
+        await this._pluginService.initializePlugins();
+        console.log('Plugin system initialized');
+      } catch (error) {
+        console.error('Failed to initialize plugin system:', error);
+      }
     }, 1000);
 
     if (IS_ELECTRON) {
       window.ea.informAboutAppReady();
-      this._initElectronErrorHandler();
+
+      // Initialize electron error handler in an effect
+      effect(() => {
+        window.ea.on(IPC.ERROR, (ev: IpcRendererEvent, ...args: unknown[]) => {
+          const data = args[0] as {
+            error: any;
+            stack: any;
+            errorStr: string | unknown;
+          };
+          const errMsg =
+            typeof data.errorStr === 'string' ? data.errorStr : ' INVALID ERROR MSG :( ';
+
+          this._snackService.open({
+            msg: errMsg,
+            type: 'ERROR',
+          });
+          console.error(data);
+        });
+      });
+
       this._uiHelperService.initElectron();
 
       window.ea.on(IPC.TRANSFER_SETTINGS_REQUESTED, () => {
@@ -250,6 +285,71 @@ export class AppComponent implements OnDestroy {
 
   @HostListener('document:drop', ['$event']) onDrop(ev: DragEvent): void {
     ev.preventDefault();
+  }
+
+  @HostListener('document:paste', ['$event']) onPaste(ev: ClipboardEvent): void {
+    // Only handle paste if not in an input/textarea
+    const target = ev.target as HTMLElement;
+    if (
+      target.tagName === 'INPUT' ||
+      target.tagName === 'TEXTAREA' ||
+      target.isContentEditable
+    ) {
+      return;
+    }
+
+    const clipboardData = ev.clipboardData;
+    if (!clipboardData) {
+      return;
+    }
+
+    const pastedText = clipboardData.getData('text/plain');
+    if (!pastedText) {
+      return;
+    }
+
+    if (!this._markdownPasteService.isMarkdownTaskList(pastedText)) {
+      return;
+    }
+
+    // Prevent default paste behavior
+    ev.preventDefault();
+
+    // Check if paste is happening on a task element
+    let taskId: string | null = null;
+    let taskTitle: string | null = null;
+    let isSubTask = false;
+
+    // Find task element by traversing up the DOM tree
+    let element: HTMLElement | null = target;
+    while (element && !element.id.startsWith('t-')) {
+      element = element.parentElement;
+    }
+
+    if (element && element.id.startsWith('t-')) {
+      // Extract task ID from DOM id (format: "t-{taskId}")
+      taskId = element.id.substring(2);
+
+      // Get task data to determine if it's a sub-task
+      this._taskService.getByIdOnce$(taskId).subscribe((task) => {
+        if (task) {
+          taskTitle = task.title;
+          isSubTask = !!task.parentId;
+          this._markdownPasteService.handleMarkdownPaste(
+            pastedText,
+            taskId,
+            taskTitle,
+            isSubTask,
+          );
+        } else {
+          // Fallback: handle as parent tasks if task not found
+          this._markdownPasteService.handleMarkdownPaste(pastedText, null);
+        }
+      });
+    } else {
+      // Handle as parent tasks since no specific task context
+      this._markdownPasteService.handleMarkdownPaste(pastedText, null);
+    }
   }
 
   @HostListener('window:beforeinstallprompt', ['$event']) onBeforeInstallPrompt(
@@ -408,29 +508,6 @@ export class AppComponent implements OnDestroy {
         alert(t2);
       }
     });
-  }
-
-  private _initElectronErrorHandler(): void {
-    window.ea.on(
-      IPC.ERROR,
-      (
-        ev,
-        data: {
-          error: any;
-          stack: any;
-          errorStr: string | unknown;
-        },
-      ) => {
-        const errMsg =
-          typeof data.errorStr === 'string' ? data.errorStr : ' INVALID ERROR MSG :( ';
-
-        this._snackService.open({
-          msg: errMsg,
-          type: 'ERROR',
-        });
-        console.error(data);
-      },
-    );
   }
 
   private _initOfflineBanner(): void {

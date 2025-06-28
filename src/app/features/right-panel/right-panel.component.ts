@@ -17,7 +17,17 @@ import { BetterDrawerContainerComponent } from '../../ui/better-drawer/better-dr
 import { IssuePanelComponent } from '../issue-panel/issue-panel.component';
 import { NotesComponent } from '../note/notes/notes.component';
 import { TaskDetailPanelComponent } from '../tasks/task-detail-panel/task-detail-panel.component';
+import { TaskViewCustomizerPanelComponent } from '../task-view-customizer/task-view-customizer-panel/task-view-customizer-panel.component';
 import { AsyncPipe } from '@angular/common';
+import { PluginService } from '../../plugins/plugin.service';
+import { PluginPanelContainerComponent } from '../../plugins/ui/plugin-panel-container/plugin-panel-container.component';
+import { Store } from '@ngrx/store';
+import {
+  selectActivePluginId,
+  selectIsShowPluginPanel,
+} from '../../core-ui/layout/store/layout.reducer';
+import { hidePluginPanel } from '../../core-ui/layout/store/layout.actions';
+import { fastArrayCompare } from '../../util/fast-array-compare';
 
 @Component({
   selector: 'right-panel',
@@ -34,12 +44,16 @@ import { AsyncPipe } from '@angular/common';
     IssuePanelComponent,
     NotesComponent,
     TaskDetailPanelComponent,
+    TaskViewCustomizerPanelComponent,
     AsyncPipe,
+    PluginPanelContainerComponent,
   ],
 })
 export class RightPanelComponent implements OnDestroy {
   taskService = inject(TaskService);
   layoutService = inject(LayoutService);
+  pluginService = inject(PluginService);
+  store = inject(Store);
 
   // NOTE: used for debugging
   readonly isAlwaysOver = input<boolean>(false);
@@ -50,35 +64,87 @@ export class RightPanelComponent implements OnDestroy {
       switchMap((task) => (task ? of(task) : of(null).pipe(delay(200)))),
     );
 
-  panelContent$: Observable<'NOTES' | 'TASK' | 'ADD_TASK_PANEL' | undefined> =
-    combineLatest([
-      this.layoutService.isShowNotes$,
-      this.taskService.selectedTask$,
-      this.layoutService.isShowIssuePanel$,
-    ]).pipe(
-      map(([isShowNotes, selectedTask, isShowAddTaskPanel]) => {
+  panelContent$: Observable<
+    | 'NOTES'
+    | 'TASK'
+    | 'ADD_TASK_PANEL'
+    | 'TASK_VIEW_CUSTOMIZER_PANEL'
+    | 'PLUGIN'
+    | undefined
+  > = combineLatest([
+    this.layoutService.isShowNotes$,
+    this.taskService.selectedTask$,
+    this.layoutService.isShowIssuePanel$,
+    this.layoutService.isShowTaskViewCustomizerPanel$,
+    this.store.select(selectIsShowPluginPanel),
+  ]).pipe(
+    map(
+      ([
+        isShowNotes,
+        selectedTask,
+        isShowAddTaskPanel,
+        isShowTaskViewCustomizerPanel,
+        isShowPluginPanel,
+      ]) => {
         if (selectedTask) {
           return 'TASK';
         } else if (isShowNotes) {
           return 'NOTES';
         } else if (isShowAddTaskPanel) {
           return 'ADD_TASK_PANEL';
+        } else if (isShowTaskViewCustomizerPanel) {
+          return 'TASK_VIEW_CUSTOMIZER_PANEL';
+        } else if (isShowPluginPanel) {
+          return 'PLUGIN';
         }
         return undefined;
-      }),
-      distinctUntilChanged(),
-    );
+      },
+    ),
+    distinctUntilChanged(),
+  );
+
+  // Observable that includes plugin ID for component recreation
+  pluginPanelKeys$: Observable<string[]> = combineLatest([
+    this.store.select(selectIsShowPluginPanel),
+    this.store.select(selectActivePluginId),
+  ]).pipe(
+    map(([isShowPluginPanel, activePluginId]) => {
+      const keys =
+        isShowPluginPanel && activePluginId ? [`plugin-${activePluginId}`] : [];
+      console.log('RightPanel: pluginPanelKeys$ emitted:', {
+        isShowPluginPanel,
+        activePluginId,
+        keys,
+      });
+      return keys;
+    }),
+    distinctUntilChanged((a, b) => fastArrayCompare(a, b)),
+  );
 
   isOpen$: Observable<boolean> = combineLatest([
     this.taskService.selectedTask$,
     this.taskService.taskDetailPanelTargetPanel$,
     this.layoutService.isShowNotes$,
     this.layoutService.isShowIssuePanel$,
+    this.layoutService.isShowTaskViewCustomizerPanel$,
+    this.store.select(selectIsShowPluginPanel),
   ]).pipe(
     map(
-      ([selectedTask, targetPanel, isShowNotes, isShowAddTaskPanel]) =>
-        !!(selectedTask || isShowNotes || isShowAddTaskPanel) &&
-        targetPanel !== TaskDetailTargetPanel.DONT_OPEN_PANEL,
+      ([
+        selectedTask,
+        targetPanel,
+        isShowNotes,
+        isShowAddTaskPanel,
+        isShowTaskViewCustomizerPanel,
+        isShowPluginPanel,
+      ]) =>
+        !!(
+          selectedTask ||
+          isShowNotes ||
+          isShowAddTaskPanel ||
+          isShowTaskViewCustomizerPanel ||
+          isShowPluginPanel
+        ) && targetPanel !== TaskDetailTargetPanel.DONT_OPEN_PANEL,
     ),
     distinctUntilChanged(),
   );
@@ -111,6 +177,7 @@ export class RightPanelComponent implements OnDestroy {
   close(): void {
     this.taskService.setSelectedId(null);
     this.layoutService.hideNotes();
+    this.store.dispatch(hidePluginPanel());
     this.onClose();
   }
 

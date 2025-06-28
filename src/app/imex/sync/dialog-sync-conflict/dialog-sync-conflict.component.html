@@ -4,39 +4,151 @@
   <div [innerHTML]="T.F.SYNC.D_CONFLICT.TEXT | translate"></div>
 
   <table>
+    <thead>
+      <tr>
+        <th></th>
+        <th colspan="2">{{ T.F.SYNC.D_CONFLICT.TIMESTAMP | translate }}</th>
+      </tr>
+    </thead>
     <tr [class.isHighlight]="isHighlightRemote">
       <td>{{ T.F.SYNC.D_CONFLICT.REMOTE | translate }}</td>
-      <td>{{ T.F.SYNC.D_CONFLICT.LAST_CHANGE | translate }}</td>
-      <td>{{ remoteDate | date: 'shortDate' }}</td>
-      <td>{{ remoteTime | date: 'shortTime' }}</td>
+      <td [attr.data-label]="T.F.SYNC.D_CONFLICT.DATE | translate">
+        {{ remoteDate | date: 'shortDate' }}
+      </td>
+      <td [attr.data-label]="T.F.SYNC.D_CONFLICT.TIME | translate">
+        {{ remoteTime | date: 'shortTime' }}
+      </td>
     </tr>
     <tr [class.isHighlight]="isHighlightLocal">
       <td>{{ T.F.SYNC.D_CONFLICT.LOCAL | translate }}</td>
-      <td>{{ T.F.SYNC.D_CONFLICT.LAST_CHANGE | translate }}</td>
-      <td>{{ localDate | date: 'shortDate' }}</td>
-      <td>{{ localTime | date: 'shortTime' }}</td>
+      <td [attr.data-label]="T.F.SYNC.D_CONFLICT.DATE | translate">
+        {{ localDate | date: 'shortDate' }}
+      </td>
+      <td [attr.data-label]="T.F.SYNC.D_CONFLICT.TIME | translate">
+        {{ localTime | date: 'shortTime' }}
+      </td>
     </tr>
     <tr>
       <td>{{ T.F.SYNC.D_CONFLICT.LOCAL_REMOTE | translate }}</td>
-      <td>{{ T.F.SYNC.D_CONFLICT.LAST_SYNC | translate }}</td>
-      <td>{{ lastDate | date: 'shortDate' }}</td>
-      <td>{{ lastTime | date: 'shortTime' }}</td>
+      <td [attr.data-label]="T.F.SYNC.D_CONFLICT.DATE | translate">
+        {{
+          lastDate
+            ? (lastDate | date: 'shortDate')
+            : (T.F.SYNC.D_CONFLICT.NEVER | translate)
+        }}
+      </td>
+      <td [attr.data-label]="T.F.SYNC.D_CONFLICT.TIME | translate">
+        {{ lastTime ? (lastTime | date: 'shortTime') : '-' }}
+      </td>
     </tr>
   </table>
+
+  <!-- Additional Debug Information -->
+  <collapsible
+    [isIconBefore]="true"
+    [title]="T.F.SYNC.D_CONFLICT.ADDITIONAL_INFO | translate"
+    style="margin-top: 24px"
+  >
+    <!-- Revision and Last Action Table -->
+    <table style="margin-bottom: 16px">
+      <thead>
+        <tr>
+          <th></th>
+          <th>{{ T.F.SYNC.D_CONFLICT.LAMPORT_CLOCK | translate }}</th>
+          <th>{{ T.F.SYNC.D_CONFLICT.LAST_WRITE | translate }}</th>
+        </tr>
+      </thead>
+      <tr>
+        <td>{{ T.F.SYNC.D_CONFLICT.REMOTE | translate }}</td>
+        <td
+          [matTooltip]="remoteLamport"
+          [attr.data-label]="T.F.SYNC.D_CONFLICT.LAMPORT_CLOCK | translate"
+        >
+          {{ shortenLamport(remoteLamport) }}
+        </td>
+        <td
+          [matTooltip]="remoteLastUpdateAction"
+          [attr.data-label]="T.F.SYNC.D_CONFLICT.LAST_WRITE | translate"
+        >
+          {{ shortenAction(remoteLastUpdateAction || '?') }}
+        </td>
+      </tr>
+      <tr>
+        <td>{{ T.F.SYNC.D_CONFLICT.LOCAL | translate }}</td>
+        <td
+          [matTooltip]="localLamport"
+          [attr.data-label]="T.F.SYNC.D_CONFLICT.LAMPORT_CLOCK | translate"
+        >
+          {{ shortenLamport(localLamport) }}
+        </td>
+        <td
+          [matTooltip]="localLastUpdateAction"
+          [attr.data-label]="T.F.SYNC.D_CONFLICT.LAST_WRITE | translate"
+        >
+          {{ shortenAction(localLastUpdateAction || '?') }}
+        </td>
+      </tr>
+      <tr>
+        <td>{{ T.F.SYNC.D_CONFLICT.LOCAL_REMOTE | translate }}</td>
+        <td
+          [matTooltip]="lastSyncedLamport"
+          [attr.data-label]="T.F.SYNC.D_CONFLICT.LAMPORT_CLOCK | translate"
+        >
+          {{ shortenLamport(lastSyncedLamport) ?? '-' }}
+        </td>
+        <td
+          [matTooltip]="lastSyncedAction"
+          [attr.data-label]="T.F.SYNC.D_CONFLICT.LAST_WRITE | translate"
+        >
+          {{ shortenAction(lastSyncedAction || '-') }}
+        </td>
+      </tr>
+    </table>
+
+    <!-- Vector Clock Table -->
+    @if (localVectorClock || remoteVectorClock) {
+      <h3>Vector Clock</h3>
+      <table>
+        <tr>
+          <td>{{ T.F.SYNC.D_CONFLICT.REMOTE | translate }}</td>
+          <td [attr.data-label]="T.F.SYNC.D_CONFLICT.VECTOR_CLOCK | translate">
+            {{ getVectorClockString(remoteVectorClock) }}
+          </td>
+        </tr>
+        <tr>
+          <td>{{ T.F.SYNC.D_CONFLICT.LOCAL | translate }}</td>
+          <td [attr.data-label]="T.F.SYNC.D_CONFLICT.VECTOR_CLOCK | translate">
+            {{ getVectorClockString(localVectorClock) }}
+          </td>
+        </tr>
+        <tr>
+          <td>{{ T.F.SYNC.D_CONFLICT.LAST_SYNCED | translate }}</td>
+          <td [attr.data-label]="T.F.SYNC.D_CONFLICT.VECTOR_CLOCK | translate">
+            {{ getVectorClockString(lastSyncedVectorClock) }}
+          </td>
+        </tr>
+        <tr>
+          <td>{{ T.F.SYNC.D_CONFLICT.COMPARISON_RESULT | translate }}</td>
+          <td [attr.data-label]="T.F.SYNC.D_CONFLICT.RESULT | translate">
+            <strong>{{ getVectorClockComparisonLabel() | translate }}</strong>
+          </td>
+        </tr>
+      </table>
+    }
+  </collapsible>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
   <div class="wrap-buttons">
     <button
       (click)="close()"
-      color="primary"
       mat-button
     >
       {{ T.G.CANCEL | translate }}
     </button>
     <button
       (click)="close('USE_REMOTE')"
-      color="primary"
+      [color]="isHighlightRemote ? 'primary' : ''"
       mat-stroked-button
     >
       <mat-icon>file_download</mat-icon>
@@ -44,7 +156,7 @@
     </button>
     <button
       (click)="close('USE_LOCAL')"
-      color="primary"
+      [color]="isHighlightLocal ? 'primary' : ''"
       mat-stroked-button
     >
       <mat-icon>file_upload</mat-icon>

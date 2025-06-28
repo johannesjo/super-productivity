@@ -19,11 +19,15 @@ export interface ProjectBasicCfg {
   noteIds: string[];
 }
 
-export interface ProjectCopy extends ProjectBasicCfg, WorkContextCommon {
-  id: string;
-  // TODO legacy remove
-  // issueIntegrationCfgs?: IssueIntegrationCfgs | { [key: string]: any };
-  // to make it simpler for validation
+// Import the unified Project type from plugin-api
+import { Project as PluginProject } from '@super-productivity/plugin-api';
+
+// Omit conflicting properties from PluginProject when extending
+export interface ProjectCopy
+  extends Omit<PluginProject, 'advancedCfg' | 'theme'>,
+    ProjectBasicCfg,
+    WorkContextCommon {
+  // Additional app-specific fields
   issueIntegrationCfgs?: any;
 }
 

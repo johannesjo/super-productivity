@@ -22,6 +22,9 @@
     "resolveJsonModule": true,
     "typeRoots": ["node_modules/@types"],
     "lib": ["es2022", "dom"],
+    "paths": {
+      "@super-productivity/plugin-api": ["packages/plugin-api/src/index.ts"]
+    },
     "plugins": [
       {
         "transform": "typia/lib/transform"

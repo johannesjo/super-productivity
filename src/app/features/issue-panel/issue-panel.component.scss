@@ -1,4 +1,4 @@
-@import '../../../variables.scss';
+@import '../../../common';
 
 :host {
   // NOTE 0 because we want the inner scrollbars at the very right
@@ -79,9 +79,7 @@
   margin-top: 1px;
   font-size: 12px;
 
-  @include darkTheme() {
-    color: #ffffff;
-  }
+  color: var(--theme-text-color-most-intense);
 }
 
 ::ng-deep .issue-provider-drag-preview {

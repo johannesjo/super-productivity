@@ -17,6 +17,7 @@ export type KeyboardConfig = Readonly<{
   addNewNote?: string | null;
   toggleSideNav?: string | null;
   openProjectNotes?: string | null;
+  toggleTaskViewCustomizerPanel?: string | null;
   toggleIssuePanel?: string | null;
   zoomIn?: string | null;
   zoomOut?: string | null;
@@ -46,4 +47,7 @@ export type KeyboardConfig = Readonly<{
   collapseSubTasks?: string | null;
   togglePlay?: string | null;
   taskEditTags?: string | null;
+
+  // Dynamic plugin shortcuts - added at runtime
+  [key: `plugin_${string}`]: string | null;
 }>;

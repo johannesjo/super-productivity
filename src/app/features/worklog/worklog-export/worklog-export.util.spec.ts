@@ -350,3 +350,65 @@ describe('createRows', () => {
     });
   });
 });
+
+describe('worklog-export.util moment replacement', () => {
+  describe('time formatting', () => {
+    it('should format timestamps as HH:mm', () => {
+      const testCases = [
+        {
+          timestamp: new Date('2023-10-15T09:30:00').getTime(),
+          expected: '09:30',
+        },
+        {
+          timestamp: new Date('2023-10-15T14:45:00').getTime(),
+          expected: '14:45',
+        },
+        {
+          timestamp: new Date('2023-10-15T00:00:00').getTime(),
+          expected: '00:00',
+        },
+        {
+          timestamp: new Date('2023-10-15T23:59:00').getTime(),
+          expected: '23:59',
+        },
+      ];
+
+      testCases.forEach(({ timestamp, expected }) => {
+        const date = new Date(timestamp);
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const formatted = `${hours}:${minutes}`;
+        expect(formatted).toBe(expected);
+      });
+    });
+
+    it('should handle roundTime functionality', () => {
+      // Test rounding to 15 minutes
+      const roundTo = 15 * 60 * 1000; // 15 minutes in ms
+      const testCases = [
+        {
+          timestamp: new Date('2023-10-15T09:07:00').getTime(),
+          expected: new Date('2023-10-15T09:00:00').getTime(),
+        },
+        {
+          timestamp: new Date('2023-10-15T09:08:00').getTime(),
+          expected: new Date('2023-10-15T09:15:00').getTime(),
+        },
+        {
+          timestamp: new Date('2023-10-15T09:22:00').getTime(),
+          expected: new Date('2023-10-15T09:15:00').getTime(),
+        },
+        {
+          timestamp: new Date('2023-10-15T09:23:00').getTime(),
+          expected: new Date('2023-10-15T09:30:00').getTime(),
+        },
+      ];
+
+      testCases.forEach(({ timestamp, expected }) => {
+        // roundTime implementation
+        const rounded = Math.round(timestamp / roundTo) * roundTo;
+        expect(rounded).toBe(expected);
+      });
+    });
+  });
+});

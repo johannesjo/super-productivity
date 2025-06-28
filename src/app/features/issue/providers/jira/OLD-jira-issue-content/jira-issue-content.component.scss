@@ -1,4 +1,4 @@
-@import 'variables';
+@import '../../../../../../common';
 
 // table styled by ./src/styles/components/issue-table.scss
 
@@ -16,17 +16,17 @@
 }
 
 .wrapper {
-  margin: $s * 2;
-  margin-bottom: $s;
+  margin: var(--s2);
+  margin-bottom: var(--s);
 }
 
 .comment {
   display: flex;
-  margin-bottom: $s * 2;
+  margin-bottom: var(--s2);
   align-items: flex-start;
 
   .author-avatar {
-    margin-right: $s;
+    margin-right: var(--s);
     width: 48px;
     height: 48px;
     min-width: 48px;
@@ -38,16 +38,16 @@
   }
 
   .when {
-    margin-left: $s;
+    margin-left: var(--s);
     opacity: 0.6;
   }
 }
 
 .attachments {
-  //margin-bottom: $s;
+  //margin-bottom: var(--s);
   // because they have an inner padding
   &.hasAttachments {
-    margin-top: -$s;
+    margin-top: calc(-1 * var(--s));
   }
 }
 
@@ -55,15 +55,15 @@
   text-align: center;
 
   h3 {
-    margin-top: $s;
+    margin-top: var(--s);
     margin-bottom: 0;
   }
 }
 
 .changelog {
   list-style: none;
-  margin: 0 0 $s * 2;
-  padding: 0 0 $s * 2;
+  margin: 0 0 var(--s2);
+  padding: 0 0 var(--s2);
   max-height: 100px;
   display: block;
   overflow-y: auto;
@@ -89,7 +89,7 @@
   }
 }
 .subtask-list {
-  margin-left: $s * 2;
+  margin-left: var(--s2);
 }
 
 .related-issue-list {

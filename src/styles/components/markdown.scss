@@ -18,19 +18,19 @@
   }
 
   ul {
-    margin: 0 $s;
-    padding-left: $s * 2;
+    margin: 0 var(--s);
+    padding-left: var(--s2);
     padding-inline-start: 20px;
   }
 
   > ul {
-    padding-left: $s * 2;
+    padding-left: var(--s2);
   }
 
   ul ul {
     padding-top: 0;
-    padding-left: $s * 2;
-    padding-inline-start: $s * 2;
+    padding-left: var(--s2);
+    padding-inline-start: var(--s2);
   }
 
   h1,
@@ -48,8 +48,8 @@
   h3 {
     &,
     .mat-typography & {
-      margin-bottom: $s;
-      margin-top: $s * 2;
+      margin-bottom: var(--s);
+      margin-top: var(--s2);
 
       &:first-child {
         margin-top: 0;
@@ -92,7 +92,7 @@
     text-align: center;
     margin-left: -28px;
     vertical-align: middle;
-    padding-right: $s;
+    padding-right: var(--s);
     position: relative;
     cursor: pointer;
 
@@ -109,7 +109,7 @@
   .checkbox-wrapper {
     display: block;
     list-style: none;
-    padding-bottom: $s;
+    padding-bottom: var(--s);
 
     &.done {
       opacity: 0.6;

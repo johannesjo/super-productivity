@@ -1,4 +1,4 @@
-@import '../../../../variables';
+@import '../../../../common';
 
 :host {
   display: block;
@@ -43,10 +43,7 @@
   display: flex;
   padding: 12px 0;
   border-radius: 4px;
-  border-bottom: 1px dashed $light-theme-extra-border-color;
-  @include darkTheme {
-    border-color: $dark-theme-extra-border-color;
-  }
+  border-bottom: 1px dashed var(--theme-extra-border-color);
 
   &:last-child {
     border-bottom: none;

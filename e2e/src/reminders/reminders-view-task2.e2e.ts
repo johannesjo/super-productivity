@@ -20,7 +20,7 @@ module.exports = {
       browser
         // NOTE: tasks are sorted by due time
         .addTaskWithReminder({ title: '0 B task' })
-        .addTaskWithReminder({ title: '1 B task', scheduleTime: Date.now() })
+        .addTaskWithReminder({ title: '1 B task', scheduleTime: Date.now() + 10000 }) // Add 10 seconds buffer
         .waitForElementVisible(DIALOG, SCHEDULE_MAX_WAIT_TIME)
         .assert.elementPresent(DIALOG)
         .waitForElementVisible(DIALOG_TASK1, SCHEDULE_MAX_WAIT_TIME)

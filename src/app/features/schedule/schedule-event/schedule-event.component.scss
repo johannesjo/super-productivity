@@ -1,12 +1,14 @@
-@import '../../../../variables.scss';
-
-$split-extra-border-radius: 20px;
-$margin-bottom: 6px;
-$margin-right: 10px;
+@import '../../../../common';
 
 :host {
+  --split-extra-border-radius: 20px;
+  --margin-bottom: 6px;
+  --margin-right: 10px;
+  --offset: 40px;
+  --offset-short-event: 15px;
+
   border-radius: 6px;
-  margin-right: $margin-right;
+  margin-right: var(--margin-right);
   // size of sticky header
   scroll-margin-top: 120px;
   scroll-padding-top: 120px;
@@ -14,14 +16,14 @@ $margin-right: 10px;
   min-height: 20px;
   display: flex;
   align-items: flex-start;
-  margin-bottom: $margin-bottom;
-  border: 1px solid $light-theme-separator-color;
-  //box-shadow: $whiteframe-shadow-1dp;
-  background: #fff;
-  color: $light-theme-text-color;
+  margin-bottom: var(--margin-bottom);
+  border: 1px solid var(--theme-separator-color);
+  //box-shadow: var(--whiteframe-shadow-1dp);
+  background: var(--theme-card-bg);
+  color: var(--theme-text-color);
   position: relative;
   z-index: 2;
-  border-left: 3px solid var(--project-color, $light-theme-separator-color);
+  border-left: 3px solid var(--project-color, var(--theme-separator-color));
   user-select: none;
   // has to be for after elements
   overflow: visible !important;
@@ -31,13 +33,6 @@ $margin-right: 10px;
   //   z-index: 3;
   //   overflow: visible;
   // }
-
-  @include darkTheme() {
-    border-color: rgba(255, 255, 255, 0.1);
-    border-left-color: var(--project-color, $dark-theme-separator-color);
-    background: $dark-theme-bg-slightly-lighter;
-    color: $dark-theme-text-color;
-  }
 
   &.very-short-event {
     // slightly move up to  reduce chance of overlap with next
@@ -52,14 +47,14 @@ $margin-right: 10px;
   }
 
   &.split-start {
-    border-radius: $split-extra-border-radius;
+    border-radius: var(--split-extra-border-radius);
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
     border-bottom-style: dashed;
   }
 
   &.split-continued {
-    border-radius: $split-extra-border-radius;
+    border-radius: var(--split-extra-border-radius);
     border-top-left-radius: 0;
     border-bottom-right-radius: 0;
     border-bottom-style: dashed;
@@ -68,7 +63,7 @@ $margin-right: 10px;
   }
 
   &.split-continued-last {
-    border-radius: $split-extra-border-radius;
+    border-radius: var(--split-extra-border-radius);
     border-top-style: dashed;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
@@ -117,9 +112,9 @@ $margin-right: 10px;
   content: '';
   position: absolute;
   top: 0;
-  bottom: -1 * ($margin-bottom + 1);
+  bottom: calc(-1 * (var(--margin-bottom) + 1px));
   left: 0;
-  right: -1 * ($margin-right + 4);
+  right: calc(-1 * (var(--margin-right) + 4px));
   z-index: 3;
   //background: rgba(255, 0, 0, 0.1);
   display: block;
@@ -135,15 +130,11 @@ $margin-right: 10px;
   &.RepeatProjectionSplitContinued,
   &.RepeatProjectionSplitContinuedLast,
   &.ScheduledRepeatProjection {
-    background: $light-theme-bg;
     border-style: dashed;
     border-left-style: solid;
 
-    @include darkTheme() {
-      //border-color: $dark-theme-separator-color;
-      background: $dark-theme-bg;
-      background: $dark1;
-    }
+    //border-color: var(--theme-separator-color);
+    background: var(--theme-bg-lighter);
 
     > * {
       opacity: 0.7;
@@ -153,16 +144,13 @@ $margin-right: 10px;
 
 :host.CalendarEvent {
   border-left-width: 1px;
-  border-left-color: $light-theme-extra-border-color;
 
-  @include darkTheme() {
-    border-left-color: $dark-theme-extra-border-color;
-  }
+  border-left-color: var(--theme-extra-border-color);
 }
 
 :host-context(.is-not-dragging) :host.CalendarEvent:hover {
-  border-color: $c-accent;
-  color: $c-accent;
+  border-color: var(--c-accent);
+  color: var(--c-accent);
 }
 
 :host-context(.is-not-dragging) {
@@ -175,11 +163,11 @@ $margin-right: 10px;
 
     &:hover {
       opacity: 1;
-      //outline: 1px solid $c-accent;
-      border-color: $c-accent;
+      //outline: 1px solid var(--c-accent);
+      border-color: var(--c-accent);
 
       .ico {
-        color: $c-accent;
+        color: var(--c-accent);
       }
 
       > * {
@@ -192,14 +180,14 @@ $margin-right: 10px;
 //  scheduable tasks
 :host {
   &.ScheduledRepeatProjection .ico {
-    color: $c-primary;
+    color: var(--c-primary);
   }
 
   &.ScheduledTask {
     border-radius: 0;
 
     .ico {
-      color: $c-primary;
+      color: var(--c-primary);
       font-size: 24px;
       height: 24px;
       min-width: 24px;
@@ -221,13 +209,9 @@ $margin-right: 10px;
     }
 
     .time-badge {
-      color: $light-theme-text-color;
-      border-color: $c-primary;
-      //color: $c-primary;
-      @include darkTheme() {
-        color: $dark-theme-text-color;
-        border-color: $c-primary;
-      }
+      color: var(--theme-text-color);
+      border-color: var(--c-primary);
+      //color: var(--c-primary);
     }
   }
 }
@@ -247,21 +231,17 @@ $margin-right: 10px;
   height: 13px;
   text-align: center;
   padding: 1px;
-  border: 1px solid $light-theme-extra-border-color;
-  background: #fff;
-  border-radius: $card-border-radius;
-  color: #000;
+  border: 1px solid var(--theme-extra-border-color);
+  border-radius: var(--card-border-radius);
 
   @include mq(xs, max) {
     font-size: 9px;
     height: 11px;
   }
 
-  @include darkTheme() {
-    color: $dark-theme-text-color;
-    border-color: $dark-theme-extra-border-color;
-    background: $dark-theme-bg-lighter;
-  }
+  color: var(--theme-text-color);
+  border-color: var(--theme-extra-border-color);
+  background: var(--theme-bg-lighter);
 
   :host.very-short-event & {
     //bottom: 4px
@@ -269,8 +249,8 @@ $margin-right: 10px;
   }
 
   :host-context(.is-not-dragging):hover & {
-    border-color: $c-accent;
-    color: $c-accent;
+    border-color: var(--c-accent);
+    color: var(--c-accent);
   }
 }
 
@@ -339,16 +319,13 @@ $margin-right: 10px;
   min-width: 14px;
   width: auto;
   font-weight: 900;
-  color: $light-theme-text-color-muted;
-  border: 1px solid $light-theme-text-color-muted;
+  border: 1px solid var(--theme-text-color-muted);
   border-top-width: 3px;
   border-radius: 2px;
   position: relative;
 
-  @include darkTheme() {
-    color: $dark-theme-text-color-muted;
-    border-color: $dark-theme-text-color-muted;
-  }
+  color: var(--theme-text-color-muted);
+  border-color: var(--theme-text-color-muted);
 
   @include mq(xs, max) {
     border-radius: 1px;
@@ -410,7 +387,7 @@ $margin-right: 10px;
   :host.SplitTaskPlannedForDay,
   :host.Task,
   :host.SplitTask {
-    box-shadow: $whiteframe-shadow-6dp;
+    box-shadow: var(--whiteframe-shadow-6dp);
   }
 }
 
@@ -419,38 +396,36 @@ $margin-right: 10px;
   :host.SplitTaskPlannedForDay,
   :host.Task,
   :host.SplitTask {
-    background: $dark24;
+    background: var(--theme-bg-lightest);
   }
 }
 
-$offset: 40px;
 :host.drag-over {
-  transform: translateY($offset);
+  transform: translateY(var(--offset));
   z-index: 3;
 
   &:after {
     // NOTE: there are some styles in the parent component since host:active + :host  is not working
     content: '';
     position: absolute;
-    transform: translateY(-$offset);
-    top: -1 * $margin-bottom;
-    height: $offset + $margin-bottom;
+    transform: translateY(calc(-1 * var(--offset)));
+    top: calc(-1 * var(--margin-bottom));
+    height: calc(var(--offset) + var(--margin-bottom));
     left: 0;
-    right: -1 * ($margin-right + 4);
+    right: calc(-1 * (var(--margin-right) + 4px));
     z-index: 3;
     //border: 1px solid red;
     //background: rgba(255, 0, 0, 0.2);
   }
 }
 
-$offsetShortEvent: 15px;
 :host.very-short-event.drag-over {
-  transform: translateY($offsetShortEvent);
+  transform: translateY(var(--offset-short-event));
   z-index: 3;
 
   &:after {
-    transform: translateY(-$offsetShortEvent);
-    height: $offsetShortEvent + $margin-bottom;
+    transform: translateY(calc(-1 * var(--offset-short-event)));
+    height: calc(var(--offset-short-event) + var(--margin-bottom));
   }
 }
 

@@ -1,5 +1,3 @@
-@import '../../../_variables.scss';
-
 :host {
   display: block;
 }
@@ -35,8 +33,8 @@
 }
 
 .collapsible-expand-icon {
-  margin-right: $s;
-  transition: all $transition-standard;
+  margin-right: var(--s);
+  transition: all var(--transition-standard);
 
   :host.isExpanded & {
     transform: rotate(180deg);

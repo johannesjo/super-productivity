@@ -4,11 +4,13 @@ import {
   hideIssuePanel,
   hideNotesAndAddTaskPanel,
   hideSideNav,
+  hideTaskViewCustomizerPanel,
   showAddTaskBar,
   toggleAddTaskBar,
   toggleIssuePanel,
   toggleShowNotes,
   toggleSideNav,
+  toggleTaskViewCustomizerPanel,
 } from './store/layout.actions';
 import { BehaviorSubject, EMPTY, merge, Observable, of } from 'rxjs';
 import { select, Store } from '@ngrx/store';
@@ -18,6 +20,7 @@ import {
   selectIsShowIssuePanel,
   selectIsShowNotes,
   selectIsShowSideNav,
+  selectIsShowTaskViewCustomizerPanel,
 } from './store/layout.reducer';
 import { filter, map, switchMap, withLatestFrom } from 'rxjs/operators';
 import { BreakpointObserver } from '@angular/cdk/layout';
@@ -38,6 +41,9 @@ export class LayoutService {
   private _router = inject(Router);
   private _workContextService = inject(WorkContextService);
   private _breakPointObserver = inject(BreakpointObserver);
+
+  private _selectedTimeView$ = new BehaviorSubject<'week' | 'month'>('week');
+  readonly selectedTimeView$ = this._selectedTimeView$.asObservable();
 
   isScreenXs$: Observable<boolean> = this._breakPointObserver
     .observe([`(max-width: ${XS_MAX}px)`])
@@ -79,12 +85,20 @@ export class LayoutService {
   );
   isShowNotes$: Observable<boolean> = this._isShowNotes$.pipe();
 
+  private _isShowTaskViewCustomizerPanel$: Observable<boolean> = this._store$.pipe(
+    select(selectIsShowTaskViewCustomizerPanel),
+  );
+  isShowTaskViewCustomizerPanel$: Observable<boolean> =
+    this._isShowTaskViewCustomizerPanel$.pipe();
+
   private _isShowIssuePanel$: Observable<boolean> = this._store$.pipe(
     select(selectIsShowIssuePanel),
   );
   isShowIssuePanel$: Observable<boolean> = this._isShowIssuePanel$.pipe();
 
   constructor() {
+    this.setTimeView('week');
+
     this.isNavOver$
       .pipe(
         switchMap((isNavOver) =>
@@ -138,5 +152,21 @@ export class LayoutService {
 
   hideAddTaskPanel(): void {
     this._store$.dispatch(hideIssuePanel());
+  }
+
+  getSelectedTimeView(): 'week' | 'month' {
+    return this._selectedTimeView$.value;
+  }
+
+  setTimeView(view: 'week' | 'month'): void {
+    this._selectedTimeView$.next(view);
+  }
+
+  toggleTaskViewCustomizerPanel(): void {
+    this._store$.dispatch(toggleTaskViewCustomizerPanel());
+  }
+
+  hideTaskViewCustomizerPanel(): void {
+    this._store$.dispatch(hideTaskViewCustomizerPanel());
   }
 }

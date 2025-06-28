@@ -35,19 +35,31 @@ export const reCalcTimeSpentForParentIfParent = (
   state: TaskState,
 ): TaskState => {
   if (parentId) {
-    const parentTask: Task = getTaskById(parentId, state);
-    const subTasks = parentTask.subTaskIds.map((id) => state.entities[id] as Task);
+    const parentTask = state.entities[parentId];
+    if (!parentTask) {
+      console.warn(
+        `Parent task ${parentId} not found in reCalcTimeSpentForParentIfParent`,
+      );
+      return state;
+    }
+
+    const subTasks = parentTask.subTaskIds
+      .map((id) => state.entities[id])
+      .filter((task): task is Task => !!task);
+
     const timeSpentOnDayParent: { [key: string]: number } = {};
 
     subTasks.forEach((subTask: Task) => {
-      Object.keys(subTask.timeSpentOnDay).forEach((strDate) => {
-        if (subTask.timeSpentOnDay[strDate]) {
-          if (!timeSpentOnDayParent[strDate]) {
-            timeSpentOnDayParent[strDate] = 0;
+      if (subTask.timeSpentOnDay) {
+        Object.keys(subTask.timeSpentOnDay).forEach((strDate) => {
+          if (subTask.timeSpentOnDay[strDate]) {
+            if (!timeSpentOnDayParent[strDate]) {
+              timeSpentOnDayParent[strDate] = 0;
+            }
+            timeSpentOnDayParent[strDate] += subTask.timeSpentOnDay[strDate];
           }
-          timeSpentOnDayParent[strDate] += subTask.timeSpentOnDay[strDate];
-        }
-      });
+        });
+      }
     });
     return taskAdapter.updateOne(
       {
@@ -69,13 +81,22 @@ export const reCalcTimeEstimateForParentIfParent = (
   state: TaskState,
   upd?: Update<TaskCopy>,
 ): TaskState => {
-  const parentTask: Task = state.entities[parentId] as Task;
-  const subTasks = parentTask.subTaskIds.map((id) =>
-    // we do this since we also need to consider the done value of the update
-    upd && upd.id === id
-      ? { ...(state.entities[id] as Task), ...upd.changes }
-      : (state.entities[id] as Task),
-  );
+  const parentTask = state.entities[parentId];
+  if (!parentTask) {
+    console.warn(
+      `Parent task ${parentId} not found in reCalcTimeEstimateForParentIfParent`,
+    );
+    return state;
+  }
+
+  const subTasks = parentTask.subTaskIds
+    .map((id) => {
+      const task = state.entities[id];
+      if (!task) return null;
+      // we do this since we also need to consider the done value of the update
+      return upd && upd.id === id ? { ...task, ...upd.changes } : task;
+    })
+    .filter((task): task is Task => !!task);
   // console.log(
   //   subTasks.reduce((acc: number, st: Task) => {
   //     console.log(

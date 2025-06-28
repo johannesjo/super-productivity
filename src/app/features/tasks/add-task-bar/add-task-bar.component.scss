@@ -1,15 +1,17 @@
-@import '../../../../variables';
+@import '../../../../common';
 
 :host {
+  --short-syntax-bar-height: 28px;
+
   display: block;
   //overflow: hidden;
   text-align: start;
 
   &.global {
     position: fixed;
-    top: $s;
-    left: $s;
-    right: $s;
+    top: var(--s);
+    left: var(--s);
+    right: var(--s);
     overflow: visible;
     transform-origin: left top;
 
@@ -21,7 +23,7 @@
       margin-top: 20px;
       max-width: 632px;
       width: 80%;
-      top: $s * 6;
+      top: var(--s6);
       left: 50%;
       right: auto;
       transform: translateX(-50%);
@@ -31,36 +33,29 @@
 
 :host-context(.isTouchOnly).global {
   top: auto;
-  bottom: $s;
+  bottom: var(--s);
 }
 
 .add-task-form {
   width: 100%;
   position: relative;
-  color: #000000;
-  border-radius: $card-border-radius;
-  background: #ffffff;
+  border-radius: var(--card-border-radius);
+  background: var(--theme-bg);
 
-  @include darkTheme {
-    // 58 overlay 53 normal
-    background-color: $dark-theme-bg-lighter;
-    color: $dark-theme-text-color-most-intense;
-  }
+  // 58 overlay 53 normal
+  background-color: var(--theme-bg-lighter);
+  color: var(--theme-text-color-most-intense);
 
   &.isElevated {
-    @include darkTheme {
-      background-color: $dark-theme-bg-lightest;
-      color: $dark-theme-text-color-most-intense;
-    }
+    background-color: var(--theme-bg-lightest);
+    color: var(--theme-text-color-most-intense);
   }
 
   .input-wrapper {
     position: relative;
     display: flex;
 
-    @include darkTheme {
-      color: $dark-theme-text-color-most-intense;
-    }
+    color: var(--theme-text-color-most-intense);
   }
 
   input {
@@ -73,7 +68,7 @@
     border-width: 0;
     outline: 0;
     padding-right: 4px;
-    padding-left: $s * 2;
+    padding-left: var(--s2);
     line-height: 42px;
     background: transparent;
     color: inherit;
@@ -89,7 +84,7 @@
 }
 
 .is-loading {
-  padding: $s;
+  padding: var(--s);
 }
 
 .button-controls {
@@ -107,22 +102,17 @@
   }
 }
 
-$short-syntax-bar-height: 32px;
-
 .info-bar {
-  padding: 0 1.75 * $s;
-  height: $short-syntax-bar-height;
-  line-height: $short-syntax-bar-height;
-  color: $light-theme-text-color-muted;
-  border-top: 1px dashed $light-theme-extra-border-color;
+  padding: 0 var(--s2);
+  height: var(--short-syntax-bar-height);
+  line-height: var(--short-syntax-bar-height);
+  border-top: 1px dashed var(--theme-extra-border-color);
   position: relative;
   z-index: 1;
   pointer-events: none;
 
-  @include darkTheme {
-    border-color: $dark-theme-extra-border-color;
-    color: $dark-theme-text-color-muted;
-  }
+  border-color: var(--theme-extra-border-color);
+  color: var(--theme-text-color-muted);
 }
 
 .info-text {
@@ -133,11 +123,8 @@ $short-syntax-bar-height: 32px;
 
   &.add-existing {
     font-weight: bold;
-    color: $light-theme-text-color;
 
-    @include darkTheme {
-      color: $dark-theme-text-color;
-    }
+    color: var(--theme-text-color);
   }
 
   > mat-icon {
@@ -146,10 +133,8 @@ $short-syntax-bar-height: 32px;
 }
 
 .separator-box {
-  border-right: 1px dashed $light-theme-extra-border-color;
-  border-left: 1px dashed $light-theme-extra-border-color;
+  border-right: 1px dashed var(--theme-extra-border-color);
+  border-left: 1px dashed var(--theme-extra-border-color);
 
-  @include darkTheme() {
-    border-color: $dark-theme-extra-border-color;
-  }
+  border-color: var(--theme-extra-border-color);
 }

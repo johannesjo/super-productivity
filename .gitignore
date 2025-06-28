@@ -1,11 +1,13 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
 # compiled output
+/.tmp
 /dist
 /app-builds
 /tmp
-/out-tsc
 /logs
+packages/plugin-api/dist/**
+
 
 # dependencies
 /node_modules
@@ -45,14 +47,17 @@ yarn-error.log
 testem.log
 /typings
 chromedriver.log
-e2e-test-results
-e2e/screenshots
-perf-metrics-*.json
 .eslintcache
 
 # System Files
 .DS_Store
 Thumbs.db
+
+# iOS build artifacts
+ios/App/App/public/
+ios/App/App/capacitor.config.json
+ios/App/App/config.xml
+ios/App/App/Plugins/
 
 # sometimes idea does compile ts files...
 src/app/**/*.js
@@ -76,3 +81,10 @@ electron-builder.win-store.yaml
 /src/environments/environment.js
 /src/environments/environment.js.map
 /.claude/settings.local.json
+.aider*
+
+/packages/plugin-api/dist/**/*.*
+
+#
+perf-metrics-create-tasks.json
+perf-metrics-initial-load.json

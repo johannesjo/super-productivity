@@ -17,6 +17,9 @@ module.exports = {
     browser
       .waitForElementVisible(PANEL_BTN)
       .click(PANEL_BTN)
+      .waitForElementVisible('mat-tab-group')
+      // Click on the last tab (add tab) which contains the issue-provider-setup-overview
+      .click('mat-tab-group .mat-mdc-tab:last-child')
       .waitForElementVisible('issue-provider-setup-overview')
 
       .click(`${ITEMS1} > button:nth-of-type(1)`)

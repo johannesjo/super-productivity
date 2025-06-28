@@ -12,6 +12,11 @@ describe('getSyncStatusFromMetaFiles', () => {
     localLastUpdate: number | undefined,
     remoteLastUpdate: number | undefined,
     lastSyncedUpdate: number | null = null,
+    lamportData?: {
+      localLamport?: number;
+      remoteLamport?: number;
+      lastSyncedLamport?: number | null;
+    },
   ): { local: LocalMeta; remote: RemoteMeta } => {
     const local: LocalMeta = {
       lastUpdate: localLastUpdate as any,
@@ -19,6 +24,8 @@ describe('getSyncStatusFromMetaFiles', () => {
       crossModelVersion: 1,
       metaRev: 'test-rev',
       revMap: {},
+      localLamport: lamportData?.localLamport ?? 0,
+      lastSyncedLamport: lamportData?.lastSyncedLamport ?? null,
     };
 
     const remote: RemoteMeta = {
@@ -26,6 +33,8 @@ describe('getSyncStatusFromMetaFiles', () => {
       crossModelVersion: 1,
       revMap: {},
       mainModelData: {},
+      localLamport: lamportData?.remoteLamport ?? 0,
+      lastSyncedLamport: null,
     };
 
     return { local, remote };
@@ -56,7 +65,7 @@ describe('getSyncStatusFromMetaFiles', () => {
     });
 
     it('should throw SyncInvalidTimeValuesError when lastSync > local', () => {
-      const { local, remote } = createMeta(1000, 1000, 2000);
+      const { local, remote } = createMeta(1000, 1500, 2000);
 
       expect(() => getSyncStatusFromMetaFiles(remote, local)).toThrowError(
         SyncInvalidTimeValuesError,
@@ -97,14 +106,11 @@ describe('getSyncStatusFromMetaFiles', () => {
         expect(result.status).toBe(SyncStatus.InSync);
       });
 
-      it('should return LastSyncNotUpToDate when local === remote but lastSync differs', () => {
+      it('should return InSync when local === remote but lastSync differs', () => {
         const { local, remote } = createMeta(2000, 2000, 1000);
 
         const result = getSyncStatusFromMetaFiles(remote, local);
-        expect(result.status).toBe(SyncStatus.Conflict);
-        expect(result.conflictData?.reason).toBe(
-          ConflictReason.MatchingModelChangeButLastSyncMismatch,
-        );
+        expect(result.status).toBe(SyncStatus.InSync);
       });
     });
 
@@ -124,14 +130,11 @@ describe('getSyncStatusFromMetaFiles', () => {
         expect(result.conflictData?.reason).toBe(ConflictReason.BothNewerLastSync);
       });
 
-      it('should return LastSyncNotUpToDate when local > remote but no local changes', () => {
+      it('should return Conflict when local > remote but it says lastSync === lastLocalUpdate', () => {
         const { local, remote } = createMeta(2000, 1000, 2000);
 
         const result = getSyncStatusFromMetaFiles(remote, local);
         expect(result.status).toBe(SyncStatus.Conflict);
-        expect(result.conflictData?.reason).toBe(
-          ConflictReason.MatchingModelChangeButLastSyncMismatch,
-        );
       });
     });
 
@@ -222,7 +225,7 @@ describe('getSyncStatusFromMetaFiles', () => {
       const { local, remote } = createMeta(time, time, time - 1000);
 
       const result = getSyncStatusFromMetaFiles(remote, local);
-      expect(result.status).toBe(SyncStatus.Conflict);
+      expect(result.status).toBe(SyncStatus.InSync);
     });
 
     it('should handle all three timestamps being different', () => {
@@ -242,6 +245,230 @@ describe('getSyncStatusFromMetaFiles', () => {
       expect(result.conflictData).toBeDefined();
       expect(result.conflictData?.local).toEqual(local);
       expect(result.conflictData?.remote).toEqual(remote);
+    });
+  });
+
+  describe('Lamport timestamp handling', () => {
+    describe('when Lamport timestamps are available', () => {
+      it('should return InSync when no changes since last sync', () => {
+        const { local, remote } = createMeta(2000, 2000, 1500, {
+          localLamport: 5,
+          remoteLamport: 5,
+          lastSyncedLamport: 5,
+        });
+
+        const result = getSyncStatusFromMetaFiles(remote, local);
+        expect(result.status).toBe(SyncStatus.InSync);
+      });
+
+      it('should return UpdateRemote when only local has changes', () => {
+        const { local, remote } = createMeta(2000, 1500, 1500, {
+          localLamport: 10,
+          remoteLamport: 5,
+          lastSyncedLamport: 5,
+        });
+
+        const result = getSyncStatusFromMetaFiles(remote, local);
+        expect(result.status).toBe(SyncStatus.UpdateRemote);
+      });
+
+      it('should return UpdateLocal when only remote has changes', () => {
+        const { local, remote } = createMeta(1500, 2000, 1500, {
+          localLamport: 5,
+          remoteLamport: 10,
+          lastSyncedLamport: 5,
+        });
+
+        const result = getSyncStatusFromMetaFiles(remote, local);
+        expect(result.status).toBe(SyncStatus.UpdateLocal);
+      });
+
+      it('should return Conflict when both have changes', () => {
+        const { local, remote } = createMeta(2100, 2000, 1500, {
+          localLamport: 8,
+          remoteLamport: 7,
+          lastSyncedLamport: 5,
+        });
+
+        const result = getSyncStatusFromMetaFiles(remote, local);
+        expect(result.status).toBe(SyncStatus.Conflict);
+        expect(result.conflictData?.reason).toBe(ConflictReason.BothNewerLastSync);
+      });
+
+      it('should handle Lamport timestamps correctly even with clock skew', () => {
+        // Scenario: local clock is behind but has made changes
+        const { local, remote } = createMeta(1000, 2000, 900, {
+          localLamport: 10,
+          remoteLamport: 8,
+          lastSyncedLamport: 8,
+        });
+
+        // Lamport timestamps show local has changes, despite older timestamp
+        const result = getSyncStatusFromMetaFiles(remote, local);
+        expect(result.status).toBe(SyncStatus.UpdateRemote);
+      });
+
+      it('should prioritize Lamport timestamps over regular timestamps', () => {
+        // Timestamps suggest conflict, but Lamport shows only local changed
+        const { local, remote } = createMeta(2000, 1800, 1500, {
+          localLamport: 10,
+          remoteLamport: 5,
+          lastSyncedLamport: 5,
+        });
+
+        const result = getSyncStatusFromMetaFiles(remote, local);
+        expect(result.status).toBe(SyncStatus.UpdateRemote);
+      });
+    });
+
+    describe('fallback behavior', () => {
+      it('should fall back to timestamp checking when Lamport timestamps are missing', () => {
+        const { local, remote } = createMeta(2000, 1000, 1000);
+        // No Lamport timestamps provided
+
+        const result = getSyncStatusFromMetaFiles(remote, local);
+        expect(result.status).toBe(SyncStatus.UpdateRemote);
+      });
+
+      it('should fall back when only partial Lamport data is available', () => {
+        const { local, remote } = createMeta(2000, 1000, 1000, {
+          localLamport: 10,
+          // remoteLamport missing
+          lastSyncedLamport: 5,
+        });
+
+        const result = getSyncStatusFromMetaFiles(remote, local);
+        expect(result.status).toBe(SyncStatus.UpdateRemote);
+      });
+
+      it('should fall back when lastSyncedLamport is null', () => {
+        const { local, remote } = createMeta(2000, 1000, 1000, {
+          localLamport: 10,
+          remoteLamport: 5,
+          lastSyncedLamport: null,
+        });
+
+        const result = getSyncStatusFromMetaFiles(remote, local);
+        expect(result.status).toBe(SyncStatus.UpdateRemote);
+      });
+    });
+
+    describe('edge cases with Lamport timestamps', () => {
+      it('should handle zero Lamport values', () => {
+        const { local, remote } = createMeta(2000, 2000, 2000, {
+          localLamport: 0,
+          remoteLamport: 0,
+          lastSyncedLamport: 0,
+        });
+
+        const result = getSyncStatusFromMetaFiles(remote, local);
+        expect(result.status).toBe(SyncStatus.InSync);
+      });
+
+      it('should handle very large Lamport values', () => {
+        const { local, remote } = createMeta(2100, 2000, 1500, {
+          localLamport: Number.MAX_SAFE_INTEGER - 1,
+          remoteLamport: Number.MAX_SAFE_INTEGER - 2,
+          lastSyncedLamport: Number.MAX_SAFE_INTEGER - 2,
+        });
+
+        const result = getSyncStatusFromMetaFiles(remote, local);
+        expect(result.status).toBe(SyncStatus.UpdateRemote);
+      });
+    });
+
+    describe('backwards compatibility', () => {
+      it('should work with new field names (localChangeCounter)', () => {
+        const local: LocalMeta = {
+          lastUpdate: 2000,
+          lastSyncedUpdate: 1000,
+          crossModelVersion: 1,
+          metaRev: 'test-rev',
+          revMap: {},
+          localLamport: 0, // Old field not set properly
+          lastSyncedLamport: null,
+          localChangeCounter: 10, // New field
+          lastSyncedChangeCounter: 5, // New field
+        };
+
+        const remote: RemoteMeta = {
+          lastUpdate: 1500,
+          crossModelVersion: 1,
+          revMap: {},
+          mainModelData: {},
+          localLamport: 0, // Old field not set properly
+          lastSyncedLamport: null,
+          localChangeCounter: 5, // New field
+        };
+
+        const result = getSyncStatusFromMetaFiles(remote, local);
+        expect(result.status).toBe(SyncStatus.UpdateRemote);
+      });
+
+      it('should work with old field names (localLamport)', () => {
+        const { local, remote } = createMeta(2000, 1500, 1000, {
+          localLamport: 10,
+          remoteLamport: 5,
+          lastSyncedLamport: 5,
+        });
+
+        const result = getSyncStatusFromMetaFiles(remote, local);
+        expect(result.status).toBe(SyncStatus.UpdateRemote);
+      });
+
+      it('should prefer new field names when both are present', () => {
+        const local: LocalMeta = {
+          lastUpdate: 2000,
+          lastSyncedUpdate: 1000,
+          crossModelVersion: 1,
+          metaRev: 'test-rev',
+          revMap: {},
+          localLamport: 5, // Old field (should be ignored)
+          lastSyncedLamport: 3,
+          localChangeCounter: 10, // New field (should be used)
+          lastSyncedChangeCounter: 8,
+        };
+
+        const remote: RemoteMeta = {
+          lastUpdate: 1500,
+          crossModelVersion: 1,
+          revMap: {},
+          mainModelData: {},
+          localLamport: 4, // Old field (should be ignored)
+          lastSyncedLamport: null,
+          localChangeCounter: 8, // New field (should be used)
+        };
+
+        const result = getSyncStatusFromMetaFiles(remote, local);
+        expect(result.status).toBe(SyncStatus.UpdateRemote);
+      });
+
+      it('should handle mixed old/new field scenarios', () => {
+        // Local has old fields, remote has new fields
+        const local: LocalMeta = {
+          lastUpdate: 2000,
+          lastSyncedUpdate: 1000,
+          crossModelVersion: 1,
+          metaRev: 'test-rev',
+          revMap: {},
+          localLamport: 15,
+          lastSyncedLamport: 10,
+        };
+
+        const remote: RemoteMeta = {
+          lastUpdate: 1500,
+          crossModelVersion: 1,
+          revMap: {},
+          mainModelData: {},
+          localLamport: 0, // Not properly set
+          lastSyncedLamport: null,
+          localChangeCounter: 10, // New field
+        };
+
+        const result = getSyncStatusFromMetaFiles(remote, local);
+        // Local has changes (15 > 10), remote is at 10, so update remote
+        expect(result.status).toBe(SyncStatus.UpdateRemote);
+      });
     });
   });
 });

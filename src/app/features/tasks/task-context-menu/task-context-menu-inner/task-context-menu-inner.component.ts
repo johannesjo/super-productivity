@@ -66,10 +66,10 @@ import { showFocusOverlay } from '../../../focus-mode/store/focus-mode.actions';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TagService } from '../../../tag/tag.service';
 import { DialogPromptComponent } from '../../../../ui/dialog-prompt/dialog-prompt.component';
-import { unScheduleTask } from '../../store/task.actions';
-import { planTasksForToday } from '../../../tag/store/tag.actions';
+import { TaskSharedActions } from '../../../../root-store/meta/task-shared.actions';
 import { selectTodayTagTaskIds } from '../../../tag/store/tag.reducer';
 import { isToday } from '../../../../util/is-today.util';
+import { MenuTouchFixDirective } from '../menu-touch-fix.directive';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -84,6 +84,7 @@ import { isToday } from '../../../../util/is-today.util';
     MatIconButton,
     MatTooltip,
     IssueIconPipe,
+    MenuTouchFixDirective,
   ],
   templateUrl: './task-context-menu-inner.component.html',
   styleUrl: './task-context-menu-inner.component.scss',
@@ -325,13 +326,16 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
   addToMyDay(): void {
     this._store.dispatch(
-      planTasksForToday({ taskIds: [this.task.id], isShowSnack: true }),
+      TaskSharedActions.planTasksForToday({ taskIds: [this.task.id], isShowSnack: true }),
     );
   }
 
   unschedule(): void {
     this._store.dispatch(
-      unScheduleTask({ id: this.task.id, reminderId: this.task.reminderId }),
+      TaskSharedActions.unscheduleTask({
+        id: this.task.id,
+        reminderId: this.task.reminderId,
+      }),
     );
   }
 
@@ -579,7 +583,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
   unscheduleTask(): void {
     this._store.dispatch(
-      unScheduleTask({
+      TaskSharedActions.unscheduleTask({
         id: this.task.id,
         reminderId: this.task.reminderId,
       }),

@@ -1,4 +1,4 @@
-@import '../../../../variables.scss';
+@import '../../../../common';
 
 :host,
 :host * {
@@ -37,11 +37,11 @@
     }
 
     .mat-calendar-body-cell:focus .mat-calendar-body-cell-content {
-      outline: 2px solid $c-accent;
+      outline: 2px solid var(--c-accent);
     }
 
     .mat-calendar-body-selected {
-      background: $c-primary !important;
+      background: var(--c-primary) !important;
     }
 
     .mat-calendar-controls {
@@ -61,11 +61,7 @@
 .form-ctrl-wrapper {
   margin: 0 16px;
   margin-top: 16px;
-  //border-top: 1px solid $light-theme-separator-color;
-
-  @include darkTheme() {
-    border-color: $dark-theme-separator-color;
-  }
+  //border-top: 1px solid var(--theme-separator-color);
 }
 
 .press-enter-msg {
@@ -75,16 +71,13 @@
   position: absolute;
   left: 50%;
   z-index: 11;
-  background: $light-theme-bg;
-  box-shadow: $whiteframe-shadow-1dp;
+  box-shadow: var(--whiteframe-shadow-1dp);
   border-radius: 8px;
   margin-top: -12px;
   white-space: nowrap;
   transform: translateX(-50%);
 
-  @include darkTheme() {
-    background: rgb(80, 80, 80);
-  }
+  background: var(--theme-bg-lighter);
 }
 
 :host ::ng-deep mat-month-view .mat-calendar-body-today {
@@ -92,25 +85,19 @@
 
   &:after {
     @include materialIcon('wb_sunny');
-    color: $light-theme-text-color;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    @include darkTheme() {
-      color: $dark-theme-text-color;
-    }
+    color: var(--theme-text-color);
   }
 }
 
 .quick-access {
   display: flex;
   justify-content: space-evenly;
-  border-bottom: 1px solid $light-theme-extra-border-color;
+  border-bottom: 1px solid var(--theme-extra-border-color);
   height: 48px;
-  @include darkTheme() {
-    border-color: $dark-theme-extra-border-color;
-  }
 
   > button {
     height: 48px;
@@ -123,9 +110,6 @@
   }
 
   button + button {
-    border-left: 1px solid $light-theme-extra-border-color;
-    @include darkTheme() {
-      border-color: $dark-theme-extra-border-color;
-    }
+    border-left: 1px solid var(--theme-extra-border-color);
   }
 }

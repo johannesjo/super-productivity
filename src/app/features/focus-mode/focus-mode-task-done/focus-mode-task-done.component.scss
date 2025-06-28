@@ -1,12 +1,10 @@
-@import '../../../../variables';
-
 :host {
   text-align: center;
 }
 
 .msg {
-  margin-bottom: $s * 3;
-  padding: $s * 2;
+  margin-bottom: var(--s3);
+  padding: var(--s2);
 }
 
 .task-title-label,
@@ -18,19 +16,19 @@
   font-size: 20px;
   font-weight: bold;
   margin: auto;
-  margin-top: $s * 2;
-  margin-bottom: $s * 2;
+  margin-top: var(--s2);
+  margin-bottom: var(--s2);
   //display: inline-block;
-  //border: 3px solid $c-primary;
+  //border: 3px solid var(--c-primary);
   //border-radius: 50%;
   //min-width: 90px;
   //height: 90px;
   //line-height: 90px;
-  padding: 0 $s;
+  padding: 0 var(--s);
 }
 
 .task-title {
-  margin-top: $s;
+  margin-top: var(--s);
   font-size: 18px;
 }
 
@@ -39,6 +37,6 @@
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  margin-top: $s * 4;
-  gap: $s;
+  margin-top: var(--s4);
+  gap: var(--s);
 }

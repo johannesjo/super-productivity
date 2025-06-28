@@ -1,5 +1,3 @@
-@import '../../../../../../variables';
-
 :host {
   position: relative;
 }
@@ -40,7 +38,7 @@
   }
 
   .cdk-column-timeSpentToday ::ng-deep .inline-input-wrapper {
-    padding: $s;
+    padding: var(--s);
 
     input {
       width: 100px;
@@ -51,8 +49,8 @@
 .total-msg {
   text-align: center;
   font-size: 18px;
-  margin: $s 0;
-  margin-top: $s * 4;
+  margin: var(--s) 0;
+  margin-top: var(--s4);
   width: 740px;
   max-width: 100%;
 
@@ -69,7 +67,7 @@
   right: -24px;
   bottom: 0;
   left: -24px;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--color-overlay-dark-50);
   z-index: 10;
 
   mat-progress-spinner {

@@ -28,7 +28,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogEditTaskRepeatCfgComponent } from '../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { TranslateModule } from '@ngx-translate/core';
-import { T } from 'src/app/t.const';
+import { T } from '../../../t.const';
 import { TaskCopy } from '../../tasks/task.model';
 import { selectTaskByIdWithSubTaskData } from '../../tasks/store/task.selectors';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
@@ -59,6 +59,8 @@ export class ScheduleEventComponent implements OnInit {
   @HostBinding('title') hoverTitle: string = '';
   @HostBinding('class') cssClass: string = '';
   @HostBinding('style') style: string = '';
+
+  @Input() isMonthView: boolean = false;
 
   title: string = '';
   se!: ScheduleEvent;

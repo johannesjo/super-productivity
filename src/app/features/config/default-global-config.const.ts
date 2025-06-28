@@ -31,6 +31,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
 
 **Why do I want it?**
 `,
+    isOverlayIndicatorEnabled: false,
   },
   shortSyntax: {
     isEnableProject: true,
@@ -92,6 +93,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     addNewTask: 'Shift+A',
     addNewNote: 'n',
     openProjectNotes: 'Shift+N',
+    toggleTaskViewCustomizerPanel: 'c',
     toggleIssuePanel: 'p',
     toggleSideNav: 'Shift+D',
     showHelp: '?',

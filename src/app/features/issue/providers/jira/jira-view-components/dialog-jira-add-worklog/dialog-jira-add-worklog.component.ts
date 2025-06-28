@@ -11,7 +11,6 @@ import { SnackService } from '../../../../../../core/snack/snack.service';
 import { JiraIssue } from '../../jira-issue.model';
 import { Task } from '../../../../../tasks/task.model';
 import { T } from '../../../../../../t.const';
-import moment from 'moment';
 import { expandFadeAnimation } from '../../../../../../ui/animations/expand.ani';
 import {
   JIRA_WORK_LOG_EXPORT_CHECKBOXES,
@@ -48,6 +47,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MsToStringPipe } from '../../../../../../ui/duration/ms-to-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
+import { formatLocalIsoWithoutSeconds } from '../../../../../../util/format-local-iso-without-seconds';
 
 @Component({
   selector: 'dialog-jira-add-worklog',
@@ -222,9 +222,7 @@ export class DialogJiraAddWorklogComponent implements OnDestroy {
   }
 
   private _convertTimestamp(timestamp: number): string {
-    const date = moment(timestamp);
-    const isoStr = date.seconds(0).local().format();
-    return isoStr.substring(0, 19);
+    return formatLocalIsoWithoutSeconds(timestamp);
   }
 
   private _fillInStarted(mode: JiraWorklogExportDefaultTime): string {

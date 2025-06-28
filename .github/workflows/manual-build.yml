@@ -58,7 +58,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: WinBuildStuff
-          path: app-builds/*.exe
+          path: .tmp/app-builds/*.exe
 
   mac-bin:
     runs-on: macos-latest
@@ -153,4 +153,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dmg
-          path: app-builds/*.dmg
+          path: .tmp/app-builds/*.dmg

@@ -10,7 +10,10 @@ export const validateRevMap = (revMap: RevMap): RevMap => {
       throw new InvalidRevMapError(revMap);
     }
     if (revMap[modelId].includes('\"')) {
-      throw new Error('" occurred ERR');
+      throw new InvalidRevMapError(
+        revMap,
+        `RevMap entry for modelId "${modelId}" contains invalid quote character`,
+      );
     }
   });
   return revMap;

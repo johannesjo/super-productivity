@@ -31,10 +31,6 @@
     "RESTORE_FILE_BACKUP_ANDROID": "Det ser ut til å være INGEN DATA, men det er en sikkerhetskopi tilgjengelig. Vil du laste den inn?",
     "RESTORE_STRAY_BACKUP": "Under siste synkronisering kan det ha oppstått en feil. Vil du gjenopprette den siste sikkerhetskopien?"
   },
-  "DATETIME_INPUT": {
-    "IN": "om {{time}}",
-    "TOMORROW": "i morgen {{time}}"
-  },
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Senere i dag",
     "NEXT_WEEK": "Neste uke",
@@ -117,11 +113,24 @@
         "TITLE": "CalDav"
       },
       "ISSUE_CONTENT": {
+        "ASSIGNEE": "Tildelt",
+        "AT": "på",
+        "ATTACHMENTS": "Vedlegg",
+        "CHANGED": "endret",
+        "COMMENTS": "Kommentarer",
+        "COMPONENTS": "Komponenter",
         "DESCRIPTION": "Beskrivelse",
         "LABELS": "Kategorier",
+        "LIST_OF_CHANGES": "Liste over endringer",
         "MARK_AS_CHECKED": "Merk oppdateringer som sjekket",
+        "ON": "på",
+        "RELATED": "Relatert",
         "STATUS": "Status",
-        "SUMMARY": "Sammendrag"
+        "STORY_POINTS": "Story Points",
+        "SUB_TASKS": "Deloppgaver",
+        "SUMMARY": "Sammendrag",
+        "WORKLOG": "Arbeidslogg",
+        "WRITE_A_COMMENT": "Skriv en kommentar"
       },
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav: Kalender \"{{calendarName}}\" ikke funnet",
@@ -159,6 +168,8 @@
         "L_INTERVAL": "Intervall for å gjenta frasen",
         "L_TEXT": "Tekst",
         "L_TEXT_DESCRIPTION": "F.eks: \"Jobb på ${currentTaskTitle}!\"",
+        "L_VOICE": "Velg en stemme",
+        "L_VOICE_DESCRIPTION": "Velg en stemme",
         "TITLE": "Domina Mode"
       }
     },
@@ -337,6 +348,39 @@
       "DEFAULT_PROJECT_DESCRIPTION": "Prosjekt som er tilordnet oppgaver som er opprettet fra problemer.",
       "DEFAULT_PROJECT_LABEL": "Standard superproduktivitetsprosjekt",
       "HOW_TO_GET_A_TOKEN": "Hvordan får man et token?",
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Tildelt",
+        "AT": "på",
+        "ATTACHMENTS": "Vedlegg",
+        "AUTHOR": "Forfatter",
+        "CATEGORY": "Kategori",
+        "CHANGED": "endret",
+        "COMMENTS": "Kommentarer",
+        "COMPONENTS": "Komponenter",
+        "DESCRIPTION": "Beskrivelse",
+        "DONE_RATIO": "Ferdig prosent",
+        "DUE_DATE": "Forfallsdato",
+        "LABELS": "Etiketter",
+        "LAST_COMMENT": "Siste kommentar",
+        "LIST_OF_CHANGES": "Liste over endringer",
+        "LOAD_ALL_COMMENTS": "Last inn alle {{nr}} kommentarer",
+        "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "Last inn beskrivelse og alle kommentarer",
+        "LOCATION": "Plassering",
+        "MARK_AS_CHECKED": "Merk oppdateringer som sjekket",
+        "ON": "på",
+        "PRIORITY": "Prioritet",
+        "RELATED": "Relatert",
+        "START": "Start",
+        "STATUS": "Status",
+        "STORY_POINTS": "Story Points",
+        "SUB_TASKS": "Deloppgaver",
+        "SUMMARY": "Sammendrag",
+        "TIME_SPENT": "Brukt tid",
+        "TYPE": "Type",
+        "VERSION": "Versjon",
+        "WORKLOG": "Arbeidslogg",
+        "WRITE_A_COMMENT": "Skriv en kommentar"
+      },
       "S": {
         "ERR_GENERIC": "{{issueProviderName}} Feil: {{errTxt}}",
         "ERR_NETWORK": "{{issueProviderName}}: Forespørselen mislyktes på grunn av en nettverksfeil på klientsiden",
@@ -484,6 +528,14 @@
         "WELCOME_USER": "Velkommen {{user}}!"
       }
     },
+    "MARKDOWN_PASTE": {
+      "CONFIRM_ADD_TO_SUB_TASK_NOTES": "Legg den innlimte markdown-listen til notatene til deloppgave \"{{parentTaskTitle}}\"?",
+      "CONFIRM_PARENT_TASKS": "Opprett <strong>{{tasksCount}} nye oppgaver</strong> fra den innlimte markdown-listen?",
+      "CONFIRM_PARENT_TASKS_WITH_SUBS": "Opprett <strong>{{tasksCount}} nye oppgaver og {{subTasksCount}} deloppgaver</strong> fra den innlimte markdown-listen?",
+      "CONFIRM_SUB_TASKS": "Opprett {{tasksCount}} nye deloppgaver fra den innlimte markdown-listen?",
+      "CONFIRM_SUB_TASKS_WITH_PARENT": "Opprett <strong>{{tasksCount}} nye deloppgaver under \"{{parentTaskTitle}}\"</strong> fra den innlimte markdown-listen?",
+      "DIALOG_TITLE": "Innlimt Markdown-liste oppdaget!"
+    },
     "METRIC": {
       "BANNER": {
         "CHECK": "Jeg gjorde det!"
@@ -606,12 +658,12 @@
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Tildelt",
+        "ATTACHMENTS": "Vedlegg",
         "DESCRIPTION": "Beskrivelse",
         "MARK_AS_CHECKED": "Merk oppdateringer som sjekket",
         "STATUS": "Status",
         "SUMMARY": "Sammendrag",
         "TYPE": "Type",
-        "ATTACHMENTS": "Vedlegg",
         "UPLOAD_ATTACHMENT": "Last opp til oppgave"
       },
       "ISSUE_STRINGS": {
@@ -619,12 +671,12 @@
         "ISSUES_STR": "arbeidspakker"
       },
       "S": {
+        "ERR_NO_FILE": "Ingen fil valgt",
         "ERR_UNKNOWN": "OpenProject: Ukjent feil {{statusCode}} {{errorMsg}}. Er CORS riktig konfigurert for serveren?",
         "POST_TIME_SUCCESS": "OpenProject: Vellykket opprettet tidsoppføring for {{issueTitle}}",
         "TRANSITION": "OpenProject: Sett problem \"{{issueKey}}\" til \"{{name}}\"",
         "TRANSITION_SUCCESS": "OpenProject: Sett problem {{issueKey}} til <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Overganger lastet inn. Bruk valgene nedenfor for å tilordne dem",
-        "ERR_NO_FILE": "Ingen fil valgt"
+        "TRANSITIONS_LOADED": "Overganger lastet inn. Bruk valgene nedenfor for å tilordne dem"
       }
     },
     "PLANNER": {
@@ -822,6 +874,7 @@
     "SEARCH_BAR": {
       "INFO": "Klikk på listeikonet for å søke etter arkiverte oppgaver",
       "INFO_ARCHIVED": "Klikk på arkivikonet for å søke etter vanlige oppgaver",
+      "NO_RESULTS": "Ingen oppgaver funnet som matcher søket ditt",
       "PLACEHOLDER": "Søk etter oppgave eller oppgavebeskrivelse",
       "PLACEHOLDER_ARCHIVED": "Søk etter arkiverte oppgaver",
       "TOO_MANY_RESULTS": "For mange resultater, vennligst begrens søket ditt"
@@ -881,20 +934,24 @@
         "TITLE": "Logg inn: {{provider}}"
       },
       "D_CONFLICT": {
+        "LAMPORT_CLOCK": "Revisjon",
         "LAST_CHANGE": "Siste endring:",
         "LAST_SYNC": "Siste synkronisering:",
         "LOCAL": "Lokalt",
         "LOCAL_REMOTE": "Lokal -> Ekstern",
         "REMOTE": "Fjernstyrt",
         "TEXT": "<p>Oppdatering fra fjern. Både lokale og eksterne data ser ut til å være endret.<\\/p>",
+        "TIMESTAMP": "Tidsstempel",
         "TITLE": "Synkronisering: Motstridende data",
         "USE_LOCAL": "Behold det lokale",
         "USE_REMOTE": "Hold fjernkontrollen"
       },
       "D_DECRYPT_ERROR": {
         "BTN_OVER_WRITE_REMOTE": "Endre og overskrive eksternt",
+        "CHANGE_PW_AND_DECRYPT": "Endre og prøv å dekryptere",
         "P1": "Dataene dine er kryptert og dekryptering mislyktes. Vennligst skriv inn riktig passord!",
-        "P2": "Du kan også endre passordet ditt, som vil overskrive alle eksterne data."
+        "P2": "Du kan også endre passordet ditt, som vil overskrive alle eksterne data.",
+        "PASSWORD": "Passord"
       },
       "D_INCOMPLETE_SYNC": {
         "BTN_CLOSE_APP": "Lukk app",
@@ -1235,6 +1292,45 @@
         "WEDNESDAY": "onsdag"
       }
     },
+    "TASK_VIEW": {
+      "CUSTOMIZER": {
+        "ENTER_PROJECT": "Skriv inn prosjekt",
+        "ENTER_TAG": "Skriv inn tag",
+        "ESTIMATED_TIME": "Estimert tid",
+        "FILTER_BY": "Filtrer etter",
+        "FILTER_DEFAULT": "Ingen filter",
+        "FILTER_ESTIMATED_TIME": "Estimert tid",
+        "FILTER_PROJECT": "Prosjekt",
+        "FILTER_SCHEDULED_DATE": "Planlagt dato",
+        "FILTER_TAG": "Tag",
+        "FILTER_TIME_SPENT": "Brukt tid",
+        "GROUP_BY": "Grupper etter",
+        "GROUP_DEFAULT": "Ingen gruppe",
+        "GROUP_PROJECT": "Prosjekt",
+        "GROUP_SCHEDULED_DATE": "Planlagt dato",
+        "GROUP_TAG": "Tag",
+        "RESET_ALL": "Tilbakestill alt",
+        "SCHEDULED_DEFAULT": "Hvilken som helst dato",
+        "SCHEDULED_NEXT_MONTH": "Neste måned",
+        "SCHEDULED_NEXT_WEEK": "Neste uke",
+        "SCHEDULED_THIS_MONTH": "Denne måneden",
+        "SCHEDULED_THIS_WEEK": "Denne uken",
+        "SCHEDULED_TODAY": "I dag",
+        "SCHEDULED_TOMORROW": "I morgen",
+        "SORT_BY": "Sorter etter",
+        "SORT_CREATION_DATE": "Opprettelsesdato",
+        "SORT_DEFAULT": "Standard",
+        "SORT_NAME": "Navn",
+        "SORT_SCHEDULED_DATE": "Planlagt dato",
+        "TIME_1HOUR": "> 1 time",
+        "TIME_2HOUR": "> 2 timer",
+        "TIME_10MIN": "> 10 minutter",
+        "TIME_30MIN": "> 30 minutter",
+        "TIME_DEFAULT": "Valgfri varighet",
+        "TIME_SPENT": "Brukt tid",
+        "TITLE": "Tilpass oppgavevisning"
+      }
+    },
     "TIME_TRACKING": {
       "B": {
         "ALREADY_DID": "Det gjorde jeg allerede",
@@ -1327,18 +1423,34 @@
     }
   },
   "FILE_IMEX": {
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "INITIATED_MSG": "En automatisk dataimport er igangsatt.",
+      "SOURCE_URL_DOMAIN": "Kildedomene",
+      "TITLE": "Bekreft dataimport fra URL",
+      "WARNING_MSG": "Å fortsette vil overskrive dine nåværende applikasjonsdata og konfigurasjon med innholdet fra den angitte URL-en. Denne handlingen kan ikke angres.",
+      "WARNING_TITLE": "Advarsel"
+    },
     "EXPORT_DATA": "Eksporter data",
     "IMPORT_FROM_FILE": "Importer fra fil",
+    "IMPORT_FROM_URL": "Importer fra URL",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Vennligst skriv inn den fullstendige URL-en til Super Productivity sikkerhetskopi JSON-filen du ønsker å importere.",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "Importer fra URL",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "Importer fra URL",
     "PRIVACY_EXPORT": "Eksporter anonymiserte data (for å sende til contact@super-productivity.com for feilsøking)",
     "S_BACKUP_DOWNLOADED": "Sikkerhetskopi lastet ned til Android-dokumentmappe",
     "S_ERR_IMPORT_FAILED": "Import av data mislyktes",
-    "S_ERR_INVALID_DATA": "Import mislyktes: Ugyldig JSON"
+    "S_ERR_INVALID_DATA": "Import mislyktes: Ugyldig JSON",
+    "S_ERR_INVALID_URL": "Import mislyktes: Ugyldig URL oppgitt",
+    "S_ERR_NETWORK": "Import mislyktes: Nettverksfeil ved henting av data fra URL",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "Feil: Kunne ikke dekode URL-parameteren for import. Vennligst sørg for at den er riktig formatert.",
+    "URL_PLACEHOLDER": "Skriv inn URL for import"
   },
   "G": {
     "ADD": "ADD",
     "ADVANCED_CFG": "Avansert konfigurasjon",
     "CANCEL": "Avbryt",
     "CLOSE": "Lukk",
+    "CONFIRM": "Bekreft",
     "DELETE": "Slett",
     "DISMISS": "Avvis",
     "DO_IT": "Gjør det!",
@@ -1459,6 +1571,7 @@
       "TOGGLE_ISSUE_PANEL": "Vis/skjul utgavepanel",
       "TOGGLE_PLAY": "Start / stopp oppgave",
       "TOGGLE_SIDE_NAV": "Vis og fokuser/skjul sidenav",
+      "TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL": "Veksle filter/grupper/sorteringspanel",
       "TRIGGER_SYNC": "Utløsersynkronisering (hvis konfigurert)",
       "ZOOM_DEFAULT": "Zoomstandard (bare skrivebord)",
       "ZOOM_IN": "Zoom inn (bare skrivebordet)",
@@ -1503,6 +1616,7 @@
       "IS_HIDE_NAV": "Skjul navigasjonen til hovedoverskriften er svevet (kun på skrivebordet)",
       "IS_MINIMIZE_TO_TRAY": "Minimere til skuffen (kun på skrivebordet)",
       "IS_SHOW_TIP_LONGER": "Vis produktivitetstips på appstart litt lenger",
+      "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Vis nåværende nedtelling i systemstatusmenyen (kun desktop mac)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Vis gjeldende oppgave i skuffen / statusmenyen (kun desktop mac/windows)",
       "IS_TURN_OFF_MARKDOWN": "Slå av Markdown-parsering for notater",
       "IS_USE_MINIMAL_SIDE_NAV": "Bruk minimal navigasjonslinje (vis bare ikoner)",
@@ -1588,6 +1702,34 @@
       "TITLE": "Tidsregistrering"
     }
   },
+  "GLOBAL_RELATIVE_TIME": {
+    "FUTURE": {
+      "A_DAY": "om en dag",
+      "A_MINUTE": "om et minutt",
+      "A_MONTH": "om en måned",
+      "A_YEAR": "om et år",
+      "AN_HOUR": "om en time",
+      "DAYS": "om {{count}} dager",
+      "FEW_SECONDS": "om noen sekunder",
+      "HOURS": "om {{count}} timer",
+      "MINUTES": "om {{count}} minutter",
+      "MONTHS": "om {{count}} måneder",
+      "YEARS": "om {{count}} år"
+    },
+    "PAST": {
+      "A_DAY": "for en dag siden",
+      "A_MINUTE": "for et minutt siden",
+      "A_MONTH": "for en måned siden",
+      "A_YEAR": "for et år siden",
+      "AN_HOUR": "for en time siden",
+      "DAYS": "{{count}} dager siden",
+      "FEW_SECONDS": "for noen sekunder siden",
+      "HOURS": "{{count}} timer siden",
+      "MINUTES": "{{count}} minutter siden",
+      "MONTHS": "{{count}} måneder siden",
+      "YEARS": "{{count}} år siden"
+    }
+  },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Kopiert til utklippstavlen",
     "ERR_COMPRESSION": "Feil for kompresjonsgrensesnitt",
@@ -1620,6 +1762,7 @@
     "CREATE_TAG": "Opprett tag",
     "DELETE_PROJECT": "Slett prosjekt",
     "DELETE_TAG": "Slett tag",
+    "ENTER_FOCUS_MODE": "Gå inn i fokusmodus",
     "GO_TO_TASK_LIST": "Gå til oppgavelisten",
     "HELP": "Hjelp",
     "HM": {
@@ -1644,6 +1787,7 @@
     "PROJECTS": "Prosjekter",
     "QUICK_HISTORY": "Rask historikk",
     "SCHEDULE": "Planlegge",
+    "SEARCH": "Søk",
     "SETTINGS": "Innstillinger",
     "SHOW_SEARCH_BAR": "Vis søkefelt",
     "TAGS": "Merker",
@@ -1756,6 +1900,7 @@
     "ADD_SCHEDULED_FOR_TOMORROW": "Legg til oppgaver som er planlagt for i morgen ({{nr}})",
     "ADD_SOME_TASKS": "Legg til noen oppgaver for å planlegge dagen din!",
     "DONE_TASKS": "Utførte oppgaver",
+    "DONE_TASKS_IN_ARCHIVE": "Det er for øyeblikket ingen fullførte oppgaver her, men det er noen som allerede er arkivert.",
     "ESTIMATE_REMAINING": "Anslått gjenværende:",
     "FINISH_DAY": "Avslutt dagen",
     "FINISH_DAY_FOR_PROJECT": "Sluttdag for dette prosjektet",
@@ -1764,6 +1909,7 @@
     "HELP_PROCRASTINATION": "Hjelp jeg utsetter!",
     "MOVE_DONE_TO_ARCHIVE": "Flytt ferdig til arkiv",
     "NO_DONE_TASKS": "Det er for øyeblikket ingen utførte oppgaver",
+    "NO_PLANNED_TASK_ALL_DONE": "alle oppgaver fullført",
     "NO_PLANNED_TASKS": "Ingen planlagte oppgaver",
     "READY_TO_WORK": "Klar til å arbeide!",
     "RESET_BREAK_TIMER": "Tilbakestill uten pausetimer",

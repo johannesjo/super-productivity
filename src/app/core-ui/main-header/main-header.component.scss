@@ -1,8 +1,7 @@
-@import '../../../variables';
+@import '../../../common';
 
-$mobileHorizontalPadding: 8px;
-$navVerticalPadding: 4px;
-$macExtraPadding: (-8px + $mac-title-bar-padding);
+// Using CSS variables and direct values
+// Note: These local variables are replaced with direct values or CSS variables
 
 :host {
   display: block;
@@ -12,7 +11,7 @@ $macExtraPadding: (-8px + $mac-title-bar-padding);
 }
 
 :host-context(.isMac.isElectron) {
-  padding-top: $macExtraPadding;
+  padding-top: calc(var(--mac-title-bar-padding) - 8px);
   -webkit-app-region: drag;
   cursor: grab;
 
@@ -39,13 +38,13 @@ $macExtraPadding: (-8px + $mac-title-bar-padding);
   flex-direction: row;
   flex-wrap: nowrap;
   align-items: center;
-  padding: $navVerticalPadding $mobileHorizontalPadding;
+  padding: 4px 8px;
   //flex-wrap: wrap;
-  min-height: $bar-height-large;
+  min-height: var(--bar-height-large);
 
   @include mq(xs) {
-    min-height: $bar-height;
-    padding: $navVerticalPadding 16px;
+    min-height: var(--bar-height);
+    padding: 4px 16px;
   }
 }
 
@@ -58,11 +57,11 @@ $macExtraPadding: (-8px + $mac-title-bar-padding);
   white-space: nowrap;
   max-width: 100%;
   cursor: pointer;
-  border-radius: $card-border-radius;
-  padding: $s 2 * $s $s $s;
+  border-radius: var(--card-border-radius);
+  padding: var(--s) var(--s2) var(--s) var(--s);
 
   @include mq(xs) {
-    padding-right: $s;
+    padding-right: var(--s);
   }
 
   &:focus {
@@ -74,10 +73,10 @@ $macExtraPadding: (-8px + $mac-title-bar-padding);
   display: none;
   @include mq(xs) {
     display: block;
-    transition: $transition-standard;
+    transition: var(--transition-standard);
     opacity: 0;
-    margin-right: 2 * $s;
-    margin-left: -$s;
+    margin-right: var(--s2);
+    margin-left: calc(-1 * var(--s));
     position: relative;
     z-index: 1;
   }
@@ -93,6 +92,11 @@ button {
   cursor: pointer;
 }
 
+button.isActive2 {
+  background-color: var(--c-accent);
+  transition: background-color var(--transition-standard);
+}
+
 .action-nav {
   margin-right: 0px;
   margin-left: auto;
@@ -104,11 +108,12 @@ button {
     margin-right: auto;
   }
 
+  simple-counter-button,
   button {
-    margin-left: $s * 0.25;
+    margin-left: var(--s-quarter);
 
     @include mq(xs) {
-      margin-left: $s;
+      margin-left: var(--s);
     }
   }
 }
@@ -130,10 +135,11 @@ button {
 
 .play-btn-wrapper {
   position: relative;
-  margin-left: $s * 0.5;
+  //margin-left: var(--s-half);
+  //margin-right: var(--s-half);
 
   @include mq(xs) {
-    margin-left: $s;
+    margin-left: var(--s);
   }
 
   .pulse-circle {
@@ -148,7 +154,7 @@ button {
     margin: auto;
     transform: scale(1, 1);
     animation: pulse 2s infinite;
-    background: $c-accent;
+    background: var(--c-accent);
     opacity: 0.6;
   }
 
@@ -178,26 +184,22 @@ button {
     position: absolute;
     line-height: 1;
     padding: 2px 4px 1px;
-    background: #fff;
-    color: #000;
     width: auto;
     left: 50%;
     transform: translateX(-50%);
-    box-shadow: $whiteframe-shadow-2dp;
+    box-shadow: var(--whiteframe-shadow-2dp);
     font-weight: bold;
     border-radius: 8px;
     z-index: 4;
     pointer-events: none;
-    bottom: $s * -0.25;
+    bottom: calc(var(--s) * -0.25);
 
-    @include darkTheme {
-      background: $dark-theme-bg-lighter;
-      color: #fff;
-    }
+    background: var(--theme-bg-lighter);
+    color: var(--theme-text-color-most-intense);
   }
 
   .pomodoro-controls {
-    transition: $transition-standard;
+    transition: var(--transition-standard);
     position: absolute;
     top: 100%;
     display: flex;
@@ -210,10 +212,10 @@ button {
     &:after {
       content: '';
       position: absolute;
-      top: $s * -1.25;
-      left: $s * -1.25;
-      right: $s * -1.25;
-      bottom: $s * -1.25;
+      top: calc(var(--s) * -1.25);
+      left: calc(var(--s) * -1.25);
+      right: calc(var(--s) * -1.25);
+      bottom: calc(var(--s) * -1.25);
     }
   }
 
@@ -227,12 +229,12 @@ button {
   }
 
   .pomodoro-btn {
-    transition: $transition-standard;
+    transition: var(--transition-standard);
     transform: translateY(-100%);
     opacity: 0;
     position: relative;
     z-index: 2;
-    margin-top: $s;
+    margin-top: var(--s);
     margin-left: 0;
 
     &:nth-child(2) {
@@ -245,27 +247,24 @@ button {
   position: absolute;
   right: 100%;
   width: auto;
-  border: 2px solid $c-accent;
+  border: 2px solid var(--c-accent);
   border-radius: 12px;
   min-width: 50px;
   white-space: nowrap;
-  padding: $s * 0.5 2 * $s;
-  padding-right: $s * 2.5;
-  margin-right: -$s * 2;
+  padding: var(--s-half) var(--s2);
+  padding-right: calc(var(--s) * 2.5);
+  margin-right: calc(-1 * var(--s) * 2);
   top: 50%;
   transform: translateY(-50%);
-  background: #fff;
   pointer-events: none;
-  transition: $transition-standard;
+  transition: var(--transition-standard);
   display: flex;
 
   @include mq(xs, max) {
     display: none;
   }
 
-  @include darkTheme() {
-    background: $dark-theme-bg-lighter;
-  }
+  background: var(--theme-bg-lighter);
 
   .title {
     max-width: 250px;
@@ -282,109 +281,63 @@ button {
   }
 }
 
-.simple-counter-mobile-trigger {
-  margin-left: $s;
-}
-
-.simple-counter-buttons-outer-wrapper {
+// Mobile dropdown wrapper - shared by simple counter and side panel
+.mobile-dropdown-wrapper {
   position: relative;
 }
 
-.simple-counter-buttons {
+// Mobile dropdown - shared style
+.mobile-dropdown {
+  position: absolute;
   display: flex;
+  transition: var(--transition-standard);
+  top: 100%;
+  flex-direction: column;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  pointer-events: none;
 
-  @include mq(xs, max) {
-    position: absolute;
-    display: flex;
-    transition: $transition-standard;
-    top: 100%;
-    flex-direction: column;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 2;
-    pointer-events: none;
-
-    &.isVisibleMobile {
-      pointer-events: all;
-    }
+  &.isVisible {
+    pointer-events: all;
   }
-}
 
-simple-counter-button {
-  @include mq(xs, max) {
-    transition: $transition-standard;
+  simple-counter-button,
+  button {
+    transition: var(--transition-standard);
     transform: translateY(-100%);
     opacity: 0;
     position: relative;
     z-index: 2;
-    margin-top: $s;
+    margin-top: var(--s);
     margin-left: 0;
 
-    &:nth-child(2) {
-      transform: translateY(-200%);
+    @for $i from 2 through 7 {
+      &:nth-child(#{$i}) {
+        transform: translateY(#{$i * -100%});
+      }
     }
-    &:nth-child(3) {
-      transform: translateY(-300%);
-    }
-    &:nth-child(4) {
-      transform: translateY(-400%);
-    }
-    &:nth-child(5) {
-      transform: translateY(-500%);
-    }
-    &:nth-child(6) {
-      transform: translateY(-600%);
-    }
-    &:nth-child(7) {
-      transform: translateY(-700%);
-    }
+  }
 
-    .simple-counter-buttons.isVisibleMobile & {
-      transform: translateY(0);
-      opacity: 1;
-    }
+  &.isVisible simple-counter-button,
+  &.isVisible button {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 
-.toggle-notes-btn {
+// Desktop inline buttons - common style
+
+// Panel buttons
+.panel-btn {
   position: relative;
-  overflow: visible !important;
 
-  &.isActive.isRouteWithRightPanel::after {
-    content: '';
-    width: 100%;
-    position: absolute;
-    left: 1px;
-    top: 0;
-    bottom: -5px;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    z-index: -1;
-    box-shadow: 0px -2px 3px 0px rgba(0, 0, 0, 0.3);
+  &.isActive {
+    background-color: var(--theme-sidebar-bg);
 
-    @include lightTheme() {
-      background: $light-theme-selected-task-bg-color;
-      //border-color: rgba(0, 0, 0, 0.12);
+    &.isCustomized {
+      background-color: var(--c-accent);
     }
-
-    @include darkTheme() {
-      background: $dark8;
-      //border-color: $dark-theme-extra-border-color;
-    }
-  }
-
-  @include mq(xxxs, max) {
-    &:disabled {
-      display: none;
-    }
-  }
-}
-
-.note-ico {
-  transition: $transition-standard;
-
-  .toggle-notes-btn.isActive & {
-    transform: rotate(45deg);
   }
 }
 
@@ -407,5 +360,83 @@ simple-counter-button {
 @keyframes spin {
   100% {
     transform: rotate(-360deg);
+  }
+}
+
+.week-month-selector {
+  display: flex;
+  border-radius: var(--card-border-radius);
+  overflow: hidden;
+  margin-right: calc(var(--s) * 0.25);
+  box-shadow: var(--whiteframe-shadow-2dp);
+
+  @include mq(xs) {
+    margin-right: var(--s);
+  }
+
+  @include mq(xs, max) {
+    margin-right: calc(var(--s) * 0.125);
+  }
+}
+
+.week-month-btn {
+  min-width: 48px;
+  height: 36px;
+  padding: 0 var(--s);
+  font-size: 12px;
+  font-weight: 500;
+  //text-transform: uppercase;
+  border: none;
+  border-radius: 0;
+  transition: var(--transition-standard);
+  cursor: pointer;
+  position: relative;
+
+  @include mq(xs, max) {
+    min-width: 40px;
+    padding: 0 calc(var(--s) * 0.75);
+    font-size: 11px;
+  }
+
+  @include lightTheme() {
+    &.active {
+      background: var(--c-primary);
+      color: white;
+      font-weight: 600;
+    }
+  }
+
+  @include darkTheme() {
+    background: var(--theme-bg-lighter);
+    color: var(--theme-text-color);
+
+    &:hover {
+      background: var(--dark8);
+    }
+
+    &.active {
+      background: var(--c-primary);
+      color: white;
+      font-weight: 600;
+    }
+  }
+
+  &:first-child {
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    border-top-left-radius: var(--card-border-radius);
+    border-bottom-left-radius: var(--card-border-radius);
+
+    @include darkTheme() {
+      border-right-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  &:last-child {
+    border-top-right-radius: var(--card-border-radius);
+    border-bottom-right-radius: var(--card-border-radius);
+  }
+
+  &:focus {
+    outline: none;
   }
 }

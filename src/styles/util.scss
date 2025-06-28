@@ -13,7 +13,7 @@
 }
 
 .mw {
-  max-width: $component-max-width;
+  max-width: var(--component-max-width);
   margin: auto;
 }
 
@@ -98,13 +98,17 @@
 }
 
 .show-dark-only {
-  @include lightTheme(true) {
-    display: none !important;
-  }
+  display: none !important;
+}
+
+body.isDarkTheme .show-dark-only {
+  display: block !important;
 }
 
 .show-light-only {
-  @include darkTheme(true) {
-    display: none !important;
-  }
+  display: block !important;
+}
+
+body.isDarkTheme .show-light-only {
+  display: none !important;
 }

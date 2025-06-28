@@ -1,6 +1,4 @@
-@import '../../../../variables';
-
-@media (min-width: $layout-xs) {
+@media (min-width: var(--layout-xs)) {
   .row {
     display: flex;
   }
@@ -11,7 +9,7 @@
 
 #task-textarea {
   width: 100%;
-  @media (min-width: $layout-xs) {
+  @media (min-width: var(--layout-xs)) {
     min-width: 70vw;
   }
 }

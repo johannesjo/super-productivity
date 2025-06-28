@@ -38,7 +38,7 @@ describe('mapArchiveToWorklog', () => {
       },
     ]);
 
-    const r = mapArchiveToWorklog(ts, [], START_END_ALL);
+    const r = mapArchiveToWorklog(ts, [], START_END_ALL, 1, 'en-US');
     const w: Worklog = r.worklog;
 
     expect(r.totalTimeSpent).toBe(13332);
@@ -96,7 +96,7 @@ describe('mapArchiveToWorklog', () => {
       },
     ]);
 
-    const r = mapArchiveToWorklog(ts, [], START_END_ALL);
+    const r = mapArchiveToWorklog(ts, [], START_END_ALL, 1, 'en-US');
     const w: Worklog = r.worklog;
 
     expect(r.totalTimeSpent).toBe(13332);
@@ -168,7 +168,7 @@ describe('mapArchiveToWorklog', () => {
       },
     ]);
 
-    const r = mapArchiveToWorklog(ts, [], START_END_ALL);
+    const r = mapArchiveToWorklog(ts, [], START_END_ALL, 1, 'en-US');
     const w: Worklog = r.worklog;
 
     expect(r.totalTimeSpent).toBe(13333);
@@ -245,7 +245,7 @@ describe('mapArchiveToWorklog', () => {
       },
     ]);
 
-    const r = mapArchiveToWorklog(ts, [], START_END_ALL);
+    const r = mapArchiveToWorklog(ts, [], START_END_ALL, 1, 'en-US');
     const w: Worklog = r.worklog;
 
     expect(r.totalTimeSpent).toBe(21366);
@@ -335,7 +335,7 @@ describe('mapArchiveToWorklog', () => {
       },
     ]);
 
-    const r = mapArchiveToWorklog(ts, [], START_END_ALL);
+    const r = mapArchiveToWorklog(ts, [], START_END_ALL, 1, 'en-US');
     const w: Worklog = r.worklog;
 
     expect(r.totalTimeSpent).toBe(21366);

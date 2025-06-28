@@ -6,12 +6,7 @@
   right: 0;
   bottom: 0;
   position: fixed;
-  z-index: $z-backdrop;
+  z-index: var(--z-backdrop);
 
-  @include lightTheme(true) {
-    background-color: $c-backdrop-light-theme;
-  }
-  @include darkTheme(true) {
-    background-color: $c-backdrop-dark-theme;
-  }
+  background-color: var(--c-backdrop);
 }

@@ -24,7 +24,7 @@
           "options": {
             "aot": true,
             "outputPath": {
-              "base": "dist"
+              "base": ".tmp/angular-dist"
             },
             "index": "src/index.html",
             "polyfills": ["src/polyfills.ts"],
@@ -97,6 +97,10 @@
               "serviceWorker": "ngsw-config.json"
             },
             "productionWeb": {
+              "outputPath": {
+                "base": "dist",
+                "browser": "browser"
+              },
               "budgets": [
                 {
                   "type": "anyComponentStyle",
@@ -154,6 +158,10 @@
               "serviceWorker": false
             },
             "stageWeb": {
+              "outputPath": {
+                "base": "dist",
+                "browser": "browser"
+              },
               "budgets": [
                 {
                   "type": "anyComponentStyle",

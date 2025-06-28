@@ -1,5 +1,5 @@
 @use 'angular-material-css-vars' as mat-css-vars;
-@import '../_variables.scss';
+@import '../_common';
 
 html,
 body,
@@ -7,6 +7,7 @@ app-root,
 .app-frame {
   overflow: hidden;
   margin: 0;
+  /* stylelint-disable-next-line no-duplicate-selectors */
   height: 100%;
   height: -webkit-fill-available;
   box-sizing: border-box;
@@ -56,11 +57,11 @@ body {
   }
 
   &.isLightTheme {
-    color: $light-theme-text-color;
-    background: $light-theme-bg;
+    color: var(--theme-text-color);
+    background: var(--theme-bg);
 
     &.isDisableBackgroundGradient {
-      background: $light-theme-bg;
+      background: var(--theme-bg);
       //&:before {
       //  display: block;
       //  opacity: .3;
@@ -74,17 +75,17 @@ body {
         180deg,
         mat-css-vars.mat-css-color(100, 1) 0%,
         mat-css-vars.mat-css-color(50, 1) 140px,
-        $light-theme-bg 100%
+        var(--theme-bg) 100%
       );
     }
   }
 
   &.isDarkTheme {
-    color: $dark-theme-text-color;
-    background: #000;
+    color: var(--theme-text-color);
+    background: var(--theme-bg);
 
     &.isDisableBackgroundGradient {
-      background: $dark-theme-bg;
+      background: var(--theme-bg);
     }
 
     &:before {
@@ -107,40 +108,40 @@ body {
 }
 
 .page-wrapper {
-  padding: $s $s $s * 9;
+  padding: var(--s) var(--s) calc(var(--s) * 9);
 
   @include mq(xs) {
-    padding: $s 2 * $s $s * 9;
+    padding: var(--s) var(--s2) calc(var(--s) * 9);
   }
 }
 
 .component-wrapper {
-  max-width: $component-max-width;
+  max-width: var(--component-max-width);
   margin: auto;
 }
 
 .task-list-wrapper {
-  padding: 0 0 $s * 7;
+  padding: 0 0 var(--s7);
   // for a little bit of extra space for 800 width
-  max-width: #{$component-max-width - 40};
+  max-width: calc(var(--component-max-width) - 40px);
   margin: auto;
 
   @include mq(xxs) {
-    padding: 0 $s * 1 $s * 7;
+    padding: 0 var(--s) var(--s7);
   }
 
   @include mq(xs) {
-    padding: 0 $s * 1.5 $s * 7;
+    padding: 0 calc(var(--s) * 1.5) var(--s7);
   }
 
   @include mq(sm) {
-    padding: 0 3 * $s $s * 7;
-    max-width: $component-max-width;
+    padding: 0 var(--s3) var(--s7);
+    max-width: var(--component-max-width);
   }
 
   @include mq(lg) {
-    padding: 0 3 * $s $s * 7;
-    max-width: $component-max-width + 100;
+    padding: 0 var(--s3) var(--s7);
+    max-width: calc(var(--component-max-width) + 100px);
   }
 
   improvement-banner + & {
@@ -149,13 +150,13 @@ body {
 }
 
 blockquote {
-  border-left: 4px solid rgba(var(--palette-accent-500), 1);
+  border-left: 4px solid rgba(var(--c-accent), 1);
   margin: 20px 0;
   padding: 1px 20px;
 }
 
 a[href] {
-  color: $c-accent;
+  color: var(--c-accent);
 }
 
 *,
@@ -175,12 +176,12 @@ img {
 * {
   --scrollbar-width: thin;
   --scrollbar-width-legacy: 4px;
-  --scrollbar-color-thumb: #888;
-  --scrollbar-color-track: #f1f1f1;
+  --scrollbar-color-thumb: var(--theme-scrollbar-thumb);
+  --scrollbar-color-track: var(--theme-scrollbar-track);
 
   .isDarkTheme & {
-    --scrollbar-color-thumb: #333;
-    --scrollbar-color-track: #222;
+    --scrollbar-color-thumb: var(--theme-scrollbar-thumb);
+    --scrollbar-color-track: var(--theme-scrollbar-track);
   }
 
   /* Modern browsers with `scrollbar-*` support */

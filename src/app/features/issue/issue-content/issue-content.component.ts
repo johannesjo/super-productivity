@@ -61,7 +61,6 @@ export class IssueContentComponent {
   task = input.required<TaskWithSubTasks>();
   issueData = input<IssueData>();
 
-  isForceShowDescription = signal(false);
   isForceShowAllComments = signal(false);
 
   config = computed<IssueContentConfig | undefined>(() => {
@@ -83,10 +82,6 @@ export class IssueContentComponent {
     return cfg.fields.filter((field) =>
       field.isVisible ? field.isVisible(issue) : true,
     );
-  });
-
-  isCollapsedIssueSummary = computed(() => {
-    return !this.isForceShowDescription() && this.task().issueWasUpdated;
   });
 
   isCollapsedIssueComments = computed(() => {
@@ -213,7 +208,6 @@ export class IssueContentComponent {
   }
 
   showAllContent(): void {
-    this.isForceShowDescription.set(true);
     this.isForceShowAllComments.set(true);
   }
 }

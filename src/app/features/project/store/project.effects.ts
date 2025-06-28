@@ -3,10 +3,10 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { filter, map, take, tap } from 'rxjs/operators';
 import {
   addProject,
-  deleteProject,
   moveAllProjectBacklogTasksToRegularList,
   updateProject,
 } from './project.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { SnackService } from '../../../core/snack/snack.service';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { T } from '../../../t.const';
@@ -28,7 +28,7 @@ export class ProjectEffects {
   deleteProjectRelatedData: Observable<unknown> = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(deleteProject),
+        ofType(TaskSharedActions.deleteProject),
         tap(async ({ project, allTaskIds }) => {
           // NOTE: we also do stuff on a reducer level (probably better to handle on this level @TODO refactor)
           const id = project.id as string;
@@ -127,7 +127,7 @@ export class ProjectEffects {
   showDeletionSnack: Observable<unknown> = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(deleteProject.type),
+        ofType(TaskSharedActions.deleteProject.type),
         tap(() => {
           this._snackService.open({
             ico: 'delete_forever',

@@ -56,6 +56,14 @@ export const TaskSharedActions = createActionGroup({
       isSkipAutoRemoveFromToday?: boolean;
     }>(),
 
+    reScheduleTaskWithTime: props<{
+      task: Task;
+      dueWithTime: number;
+      remindAt?: number;
+      isMoveToBacklog: boolean;
+      isSkipAutoRemoveFromToday?: boolean;
+    }>(),
+
     unscheduleTask: props<{
       id: string;
       reminderId?: string;
@@ -94,6 +102,11 @@ export const TaskSharedActions = createActionGroup({
     // Tag Management
     removeTagsForAllTasks: props<{
       tagIdsToRemove: string[];
+    }>(),
+
+    moveTaskInTodayTagList: props<{
+      toTaskId: string;
+      fromTaskId: string;
     }>(),
   },
 });
