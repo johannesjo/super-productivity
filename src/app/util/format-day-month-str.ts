@@ -1,4 +1,5 @@
 import { DatePipe } from '@angular/common';
+import { dateStrToUtcDate } from './date-str-to-utc-date';
 
 /**
  * Formats a date as day string with short date in locale-aware format
@@ -7,7 +8,7 @@ import { DatePipe } from '@angular/common';
  * @returns The formatted day and date string in the specified locale
  */
 export const formatDayMonthStr = (dateStr: string, locale: string): string => {
-  const date = new Date(dateStr);
+  const date = dateStrToUtcDate(dateStr);
   const dayName = date.toLocaleDateString(locale, { weekday: 'short' });
 
   // Use Angular's DatePipe for locale-aware date formatting

@@ -1,6 +1,6 @@
 import { plannerInitialState, plannerReducer } from './planner.reducer';
 import { PlannerActions } from './planner.actions';
-import { TaskCopy } from '../../tasks/task.model';
+import { DEFAULT_TASK } from '../../tasks/task.model';
 
 describe('Planner Reducer', () => {
   describe('an unknown action', () => {
@@ -14,7 +14,7 @@ describe('Planner Reducer', () => {
   describe('moveBeforeTask', () => {
     it('should do nothing when the target does not exist', () => {
       const action = PlannerActions.moveBeforeTask({
-        fromTask: { id: '1' } as TaskCopy,
+        fromTask: { ...DEFAULT_TASK, id: '1', projectId: 'test' },
         toTaskId: '2',
       });
       const result = plannerReducer(
@@ -36,7 +36,7 @@ describe('Planner Reducer', () => {
 
     it('should move to index before target task', () => {
       const action = PlannerActions.moveBeforeTask({
-        fromTask: { id: '1' } as TaskCopy,
+        fromTask: { ...DEFAULT_TASK, id: '1', projectId: 'test' },
         toTaskId: '2',
       });
       const result = plannerReducer(

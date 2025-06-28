@@ -5,6 +5,7 @@ import { sortRepeatableTaskCfgs } from '../task-repeat-cfg/sort-repeatable-task-
 import { TaskRepeatCfgService } from '../task-repeat-cfg/task-repeat-cfg.service';
 import { combineLatest, Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
+import { dateStrToUtcDate } from '../../util/date-str-to-utc-date';
 import {
   selectTasksDueForDay,
   selectTasksWithDueTimeForRange,
@@ -27,7 +28,7 @@ export class AddTasksForTomorrowService {
 
   private _tomorrowDate$ = this._globalTrackingIntervalService.todayDateStr$.pipe(
     map((todayStr) => {
-      const d = new Date(todayStr);
+      const d = dateStrToUtcDate(todayStr);
       d.setDate(d.getDate() + 1);
       return d;
     }),

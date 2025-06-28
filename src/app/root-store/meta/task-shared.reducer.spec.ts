@@ -862,8 +862,18 @@ describe('taskSharedMetaReducer', () => {
           tagIds: ['tag1'],
           subTaskIds: ['subtask1', 'subtask2'],
           subTasks: [
-            { id: 'subtask1', tagIds: ['tag1'] } as Task,
-            { id: 'subtask2', tagIds: ['tag1', 'tag2'] } as Task,
+            {
+              ...DEFAULT_TASK,
+              id: 'subtask1',
+              projectId: 'test-project',
+              tagIds: ['tag1'],
+            },
+            {
+              ...DEFAULT_TASK,
+              id: 'subtask2',
+              projectId: 'test-project',
+              tagIds: ['tag1', 'tag2'],
+            },
           ],
         },
       ]);
@@ -1064,9 +1074,9 @@ describe('taskSharedMetaReducer', () => {
           tagIds: ['tag1'],
           subTaskIds: ['sub1', 'sub2', 'sub3'],
           subTasks: [
-            { id: 'sub1', tagIds: ['tag1'] } as Task,
-            { id: 'sub2', tagIds: ['tag1'] } as Task,
-            { id: 'sub3', tagIds: ['tag1'] } as Task,
+            { ...DEFAULT_TASK, id: 'sub1', projectId: 'test-project', tagIds: ['tag1'] },
+            { ...DEFAULT_TASK, id: 'sub2', projectId: 'test-project', tagIds: ['tag1'] },
+            { ...DEFAULT_TASK, id: 'sub3', projectId: 'test-project', tagIds: ['tag1'] },
           ],
         },
       ]);

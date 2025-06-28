@@ -47,8 +47,16 @@ export const autoFixTypiaErrors = (
         setValueByPath(data, keys, false);
         console.warn(`Fixed: ${path} to false (was ${value})`);
       } else if (keys[0] === 'task' && error.expected.includes('number')) {
-        setValueByPath(data, keys, 0);
-        console.warn(`Fixed: ${path} to 0 (was ${value})`);
+        // If the value is a string that can be parsed to a number, parse it
+        if (typeof value === 'string' && !isNaN(parseFloat(value))) {
+          setValueByPath(data, keys, parseFloat(value));
+          console.warn(
+            `Fixed: ${path} from string "${value}" to number ${parseFloat(value)}`,
+          );
+        } else {
+          setValueByPath(data, keys, 0);
+          console.warn(`Fixed: ${path} to 0 (was ${value})`);
+        }
       } else if (
         keys[0] === 'simpleCounter' &&
         keys[1] === 'entities' &&
