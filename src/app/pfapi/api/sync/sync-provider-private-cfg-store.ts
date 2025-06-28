@@ -73,7 +73,8 @@ export class SyncProviderPrivateCfgStore<PID extends SyncProviderId> {
     });
 
     try {
-      return await this._db.save(this._dbKey, privateCfg);
+      // NOTE we always want to ignore DB lock during sync as it is unrelated to sync data in every single case
+      return await this._db.save(this._dbKey, privateCfg, true);
     } catch (error) {
       pfLog(0, `Failed to save private config: ${error}`);
       throw new Error(`Failed to save private config: ${error}`);

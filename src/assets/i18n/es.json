@@ -31,7 +31,6 @@
     "RESTORE_FILE_BACKUP_ANDROID": "Parece que NO HAY DATOS, pero hay una copia de seguridad disponible. ¿Quieres cargarla?",
     "RESTORE_STRAY_BACKUP": "Durante la última sincronización puede que haya habido algún error. ¿Quieres restaurar la última copia de seguridad?"
   },
-  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Mas tarde, hoy",
     "NEXT_WEEK": "La próxima semana",
@@ -114,11 +113,24 @@
         "TITLE": "CalDav"
       },
       "ISSUE_CONTENT": {
+        "ASSIGNEE": "Asignado",
+        "AT": "EN",
+        "ATTACHMENTS": "Adjuntos",
+        "CHANGED": "Cambiado",
+        "COMMENTS": "Comentarios",
+        "COMPONENTS": "Componentes",
         "DESCRIPTION": "Descripción",
         "LABELS": "categorías",
+        "LIST_OF_CHANGES": "Lista de cambios",
         "MARK_AS_CHECKED": "Marcar actualizaciones como verificadas",
+        "ON": "EN",
+        "RELATED": "Relacionado",
         "STATUS": "Estado",
-        "SUMMARY": "Resumen"
+        "STORY_POINTS": "Puntos de historia",
+        "SUB_TASKS": "Subtareas",
+        "SUMMARY": "Resumen",
+        "WORKLOG": "Registro de trabajo",
+        "WRITE_A_COMMENT": "Escribir un comentario"
       },
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav: no se encontró el calendario \"{{calendarName}}\"",
@@ -156,6 +168,8 @@
         "L_INTERVAL": "Intervalo para repetir frase",
         "L_TEXT": "Texto",
         "L_TEXT_DESCRIPTION": "Por ejemplo: \"¡Trabaja en ${currentTaskTitle}!\"",
+        "L_VOICE": "Seleccionar una voz",
+        "L_VOICE_DESCRIPTION": "Elegir una voz",
         "TITLE": "Modo Domina"
       }
     },
@@ -334,6 +348,39 @@
       "DEFAULT_PROJECT_DESCRIPTION": "Proyecto asignado a tareas creadas a partir de incidencias.",
       "DEFAULT_PROJECT_LABEL": "Proyecto de superproductividad por defecto",
       "HOW_TO_GET_A_TOKEN": "¿Cómo obtener un token?",
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Asignado",
+        "AT": "EN",
+        "ATTACHMENTS": "Adjuntos",
+        "AUTHOR": "Autor",
+        "CATEGORY": "Categoría",
+        "CHANGED": "Cambiado",
+        "COMMENTS": "Comentarios",
+        "COMPONENTS": "Componentes",
+        "DESCRIPTION": "Descripción",
+        "DONE_RATIO": "Proporción de completado",
+        "DUE_DATE": "Fecha de vencimiento",
+        "LABELS": "Etiquetas",
+        "LAST_COMMENT": "Último comentario",
+        "LIST_OF_CHANGES": "Lista de cambios",
+        "LOAD_ALL_COMMENTS": "Cargar todos los {{nr}} comentarios",
+        "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "Cargar descripción y todos los comentarios",
+        "LOCATION": "Ubicación",
+        "MARK_AS_CHECKED": "Marcar actualizaciones como revisadas",
+        "ON": "EN",
+        "PRIORITY": "Prioridad",
+        "RELATED": "Relacionado",
+        "START": "INICIO",
+        "STATUS": "Estado",
+        "STORY_POINTS": "Puntos de historia",
+        "SUB_TASKS": "Subtareas",
+        "SUMMARY": "Resumen",
+        "TIME_SPENT": "Tiempo gastado",
+        "TYPE": "Tipo",
+        "VERSION": "Versión",
+        "WORKLOG": "Registro de trabajo",
+        "WRITE_A_COMMENT": "Escribir un comentario"
+      },
       "S": {
         "ERR_GENERIC": "{{issueProviderName}} Error: {{errTxt}}",
         "ERR_NETWORK": "{{issueProviderName}}: la solicitud falló debido a un error de red del lado del cliente",
@@ -481,6 +528,14 @@
         "WELCOME_USER": "¡Bienvenido {{user}}!"
       }
     },
+    "MARKDOWN_PASTE": {
+      "CONFIRM_ADD_TO_SUB_TASK_NOTES": "¿Agregar la lista de markdown pegada a las notas de la subtarea \"{{parentTaskTitle}}\"?",
+      "CONFIRM_PARENT_TASKS": "¿Crear <strong>{{tasksCount}} nuevas tareas</strong> a partir de la lista de markdown pegada?",
+      "CONFIRM_PARENT_TASKS_WITH_SUBS": "¿Crear <strong>{{tasksCount}} nuevas tareas y {{subTasksCount}} subtareas</strong> a partir de la lista de markdown pegada?",
+      "CONFIRM_SUB_TASKS": "¿Crear {{tasksCount}} nuevas subtareas a partir de la lista de markdown pegada?",
+      "CONFIRM_SUB_TASKS_WITH_PARENT": "¿Crear <strong>{{tasksCount}} nuevas subtareas bajo \"{{parentTaskTitle}}\"</strong> a partir de la lista de markdown pegada?",
+      "DIALOG_TITLE": "¡Lista de Markdown pegada detectada!"
+    },
     "METRIC": {
       "BANNER": {
         "CHECK": "¡Lo hice!"
@@ -603,12 +658,12 @@
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Cesionario",
+        "ATTACHMENTS": "Archivos adjuntos",
         "DESCRIPTION": "Descripción",
         "MARK_AS_CHECKED": "Marcar actualizaciones como verificadas",
         "STATUS": "Estado",
         "SUMMARY": "Resumen",
         "TYPE": "Tipo",
-        "ATTACHMENTS": "Archivos adjuntos",
         "UPLOAD_ATTACHMENT": "Subir a la tarea"
       },
       "ISSUE_STRINGS": {
@@ -616,12 +671,12 @@
         "ISSUES_STR": "paquetes de trabajo"
       },
       "S": {
+        "ERR_NO_FILE": "No se seleccionó ningún archivo",
         "ERR_UNKNOWN": "OpenProject: error desconocido {{statusCode}} {{errorMsg}}. ¿CORS está configurado correctamente para el servidor?",
         "POST_TIME_SUCCESS": "OpenProject: entrada de tiempo creada correctamente para {{issueTitle}}",
         "TRANSITION": "OpenProject: Establecer el problema \"{{issueKey}}\" en \"{{name}}\"",
         "TRANSITION_SUCCESS": "OpenProject: Establecer el problema {{issueKey}} en <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Transiciones cargadas. Utilice las siguientes opciones para asignarlas",
-        "ERR_NO_FILE": "No se seleccionó ningún archivo"
+        "TRANSITIONS_LOADED": "Transiciones cargadas. Utilice las siguientes opciones para asignarlas"
       }
     },
     "PLANNER": {
@@ -819,6 +874,7 @@
     "SEARCH_BAR": {
       "INFO": "Haga clic en el icono de lista para buscar tareas archivadas",
       "INFO_ARCHIVED": "Haga clic en el icono de archivo para buscar tareas normales",
+      "NO_RESULTS": "No se encontraron tareas que coincidan con tu búsqueda",
       "PLACEHOLDER": "Buscar tarea o descripción de la tarea",
       "PLACEHOLDER_ARCHIVED": "Buscar tareas archivadas",
       "TOO_MANY_RESULTS": "Demasiados resultados, limite su búsqueda"
@@ -878,20 +934,24 @@
         "TITLE": "Iniciar sesión: {{provider}}"
       },
       "D_CONFLICT": {
+        "LAMPORT_CLOCK": "Revisión",
         "LAST_CHANGE": "ultimo cambio:",
         "LAST_SYNC": "Última sincronización:",
         "LOCAL": "Local",
         "LOCAL_REMOTE": "local -> remoto",
         "REMOTE": "remoto",
         "TEXT": "<p>Actualización desde Dropbox. Los datos locales y remotos parecen estar modificados.</p>",
+        "TIMESTAMP": "Marca de tiempo",
         "TITLE": "Dropbox: datos en conflicto",
         "USE_LOCAL": "Usar local",
         "USE_REMOTE": "Usar control remoto"
       },
       "D_DECRYPT_ERROR": {
         "BTN_OVER_WRITE_REMOTE": "Cambiar y sobrescribir remoto",
+        "CHANGE_PW_AND_DECRYPT": "Cambiar e intentar descifrar",
         "P1": "Sus datos están encriptados y el descifrado ha fallado. ¡Introduzca la contraseña correcta!",
-        "P2": "También puede cambiar su contraseña, lo que sobrescribirá todos los datos remotos."
+        "P2": "También puede cambiar su contraseña, lo que sobrescribirá todos los datos remotos.",
+        "PASSWORD": "Contraseña"
       },
       "D_INCOMPLETE_SYNC": {
         "BTN_CLOSE_APP": "Cerrar aplicación",
@@ -1232,6 +1292,45 @@
         "WEDNESDAY": "Miércoles"
       }
     },
+    "TASK_VIEW": {
+      "CUSTOMIZER": {
+        "ENTER_PROJECT": "Ingresar proyecto",
+        "ENTER_TAG": "Ingresar etiqueta",
+        "ESTIMATED_TIME": "Tiempo estimado",
+        "FILTER_BY": "Filtrar por",
+        "FILTER_DEFAULT": "Sin filtro",
+        "FILTER_ESTIMATED_TIME": "Tiempo estimado",
+        "FILTER_PROJECT": "Proyecto",
+        "FILTER_SCHEDULED_DATE": "Fecha programada",
+        "FILTER_TAG": "Etiqueta",
+        "FILTER_TIME_SPENT": "Tiempo gastado",
+        "GROUP_BY": "Agrupar por",
+        "GROUP_DEFAULT": "Sin Grupo",
+        "GROUP_PROJECT": "Proyecto",
+        "GROUP_SCHEDULED_DATE": "Fecha programada",
+        "GROUP_TAG": "Etiqueta",
+        "RESET_ALL": "Restablecer todo",
+        "SCHEDULED_DEFAULT": "Cualquier fecha",
+        "SCHEDULED_NEXT_MONTH": "Próximo mes",
+        "SCHEDULED_NEXT_WEEK": "Próxima semana",
+        "SCHEDULED_THIS_MONTH": "Este mes",
+        "SCHEDULED_THIS_WEEK": "ESTA SEMANA",
+        "SCHEDULED_TODAY": "Hoy",
+        "SCHEDULED_TOMORROW": "Mañana",
+        "SORT_BY": "Ordenar por",
+        "SORT_CREATION_DATE": "Fecha de creación",
+        "SORT_DEFAULT": "Predeterminado",
+        "SORT_NAME": "Nombre",
+        "SORT_SCHEDULED_DATE": "Fecha programada",
+        "TIME_1HOUR": "> 1 hora",
+        "TIME_2HOUR": "> 2 horas",
+        "TIME_10MIN": "> 10 minutos",
+        "TIME_30MIN": "> 30 minutos",
+        "TIME_DEFAULT": "Cualquier duración",
+        "TIME_SPENT": "Tiempo gastado",
+        "TITLE": "Personalizar vista de tareas"
+      }
+    },
     "TIME_TRACKING": {
       "B": {
         "ALREADY_DID": "Ya lo hice",
@@ -1324,33 +1423,34 @@
     }
   },
   "FILE_IMEX": {
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "INITIATED_MSG": "Se ha iniciado una importación automática de datos.",
+      "SOURCE_URL_DOMAIN": "Dominio de origen",
+      "TITLE": "Confirmar importación de datos desde URL",
+      "WARNING_MSG": "Al continuar, se sobrescribirán sus datos y configuraciones actuales de la aplicación con el contenido de la URL especificada. Esta acción no se puede deshacer.",
+      "WARNING_TITLE": "Advertencia"
+    },
     "EXPORT_DATA": "Exportar datos",
     "IMPORT_FROM_FILE": "Importar desde archivo",
+    "IMPORT_FROM_URL": "Importar desde URL",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Por favor, ingrese la URL completa del archivo de respaldo JSON de Super Productivity que desea importar.",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "Importar desde URL",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "Importar desde URL",
     "PRIVACY_EXPORT": "Exportación de datos anonimizados (para enviarlos a contact@super-productivity.com para su depuración)",
     "S_BACKUP_DOWNLOADED": "Copia de seguridad descargada en la carpeta de documentos de Android",
     "S_ERR_IMPORT_FAILED": "Error en la importación de datos",
     "S_ERR_INVALID_DATA": "Falló la importación: JSON no válido",
     "S_ERR_INVALID_URL": "Importación fallida: URL proporcionada no válida",
-    "S_IMPORT_FROM_URL_ERR_DECODE": "Error: No se pudo decodificar el parámetro de URL para la importación. Por favor, asegúrese de que esté correctamente formateado.",
     "S_ERR_NETWORK": "Importación fallida: Error de red al obtener datos de la URL",
-    "IMPORT_FROM_URL": "Importar desde URL",
-    "URL_PLACEHOLDER": "Ingrese la URL desde la cual importar",
-    "IMPORT_FROM_URL_DIALOG_TITLE": "Importar desde URL",
-    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Por favor, ingrese la URL completa del archivo de respaldo JSON de Super Productivity que desea importar.",
-    "OPEN_IMPORT_FROM_URL_DIALOG": "Importar desde URL",
-    "DIALOG_CONFIRM_URL_IMPORT": {
-      "TITLE": "Confirmar importación de datos desde URL",
-      "INITIATED_MSG": "Se ha iniciado una importación automática de datos.",
-      "SOURCE_URL_DOMAIN": "Dominio de origen",
-      "WARNING_TITLE": "Advertencia",
-      "WARNING_MSG": "Al continuar, se sobrescribirán sus datos y configuraciones actuales de la aplicación con el contenido de la URL especificada. Esta acción no se puede deshacer."
-    }
+    "S_IMPORT_FROM_URL_ERR_DECODE": "Error: No se pudo decodificar el parámetro de URL para la importación. Por favor, asegúrese de que esté correctamente formateado.",
+    "URL_PLACEHOLDER": "Ingrese la URL desde la cual importar"
   },
   "G": {
     "ADD": "Agregar",
     "ADVANCED_CFG": "Configuración avanzada",
     "CANCEL": "Cancelar",
     "CLOSE": "Cerrar",
+    "CONFIRM": "Confirmar",
     "DELETE": "Borrar",
     "DISMISS": "Descartar",
     "DO_IT": "¡Hazlo!",
@@ -1471,6 +1571,7 @@
       "TOGGLE_ISSUE_PANEL": "Mostrar/Ocultar panel de incidencias",
       "TOGGLE_PLAY": "Iniciar/Detener tarea",
       "TOGGLE_SIDE_NAV": "Mostrar y enfocar / Ocultar Sidenav",
+      "TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL": "Alternar panel de filtro/grupo/ordenar",
       "TRIGGER_SYNC": "Sincronización de disparo (si está configurada)",
       "ZOOM_DEFAULT": "Valor predeterminado de zoom (solo para escritorio)",
       "ZOOM_IN": "Acercar (solo para escritorio)",
@@ -1515,6 +1616,7 @@
       "IS_HIDE_NAV": "Ocultar la navegación hasta que se desplace sobre el encabezado principal (solo para escritorio)",
       "IS_MINIMIZE_TO_TRAY": "Minimizar a la bandeja (solo escritorio)",
       "IS_SHOW_TIP_LONGER": "Mostrar consejo de productividad en la aplicación iniciar un poco más de tiempo",
+      "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Mostrar cuenta regresiva actual en la bandeja / menú de estado (solo mac de escritorio)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Mostrar la tarea actual en el menú de bandeja / estado (solo escritorio)",
       "IS_TURN_OFF_MARKDOWN": "Desactivar la sintaxis markdown para las notas",
       "IS_USE_MINIMAL_SIDE_NAV": "Utilice una barra de navegación mínima (muestre sólo iconos)",
@@ -1600,6 +1702,34 @@
       "TITLE": "Control del tiempo"
     }
   },
+  "GLOBAL_RELATIVE_TIME": {
+    "FUTURE": {
+      "A_DAY": "En un día",
+      "A_MINUTE": "en un minuto",
+      "A_MONTH": "En un mes",
+      "A_YEAR": "en un año",
+      "AN_HOUR": "en una hora",
+      "DAYS": "en {{count}} días",
+      "FEW_SECONDS": "en unos segundos",
+      "HOURS": "en {{count}} horas",
+      "MINUTES": "en {{count}} minutos",
+      "MONTHS": "en {{count}} meses",
+      "YEARS": "en {{count}} años"
+    },
+    "PAST": {
+      "A_DAY": "Hace un día",
+      "A_MINUTE": "Hace un minuto",
+      "A_MONTH": "Hace un mes",
+      "A_YEAR": "Hace un año",
+      "AN_HOUR": "Hace una hora",
+      "DAYS": "hace {{count}} días",
+      "FEW_SECONDS": "hace unos segundos",
+      "HOURS": "hace {{count}} horas",
+      "MINUTES": "hace {{count}} minutos",
+      "MONTHS": "hace {{count}} meses",
+      "YEARS": "hace {{count}} años"
+    }
+  },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Copiado al portapapeles",
     "ERR_COMPRESSION": "Error para la interfaz de compresión",
@@ -1632,6 +1762,7 @@
     "CREATE_TAG": "Crear etiqueta",
     "DELETE_PROJECT": "Eliminar proyecto",
     "DELETE_TAG": "Eliminar etiqueta",
+    "ENTER_FOCUS_MODE": "Entrar en modo de enfoque",
     "GO_TO_TASK_LIST": "Ir a la lista de tareas",
     "HELP": "Ayuda",
     "HM": {
@@ -1656,6 +1787,7 @@
     "PROJECTS": "Proyectos",
     "QUICK_HISTORY": "Historia rápida",
     "SCHEDULE": "Calendario",
+    "SEARCH": "Buscar",
     "SETTINGS": "Ajustes",
     "SHOW_SEARCH_BAR": "Mostrar barra de búsqueda",
     "TAGS": "Etiquetas",
@@ -1768,6 +1900,7 @@
     "ADD_SCHEDULED_FOR_TOMORROW": "Agregar tareas planificadas para mañana ({{nr}})",
     "ADD_SOME_TASKS": "¡Agrega algunas tareas para planificar tu día!",
     "DONE_TASKS": "Tareas finalizadas",
+    "DONE_TASKS_IN_ARCHIVE": "Actualmente no hay tareas completadas aquí, pero ya hay algunas archivadas.",
     "ESTIMATE_REMAINING": "Estimación restante:",
     "FINISH_DAY": "Fin de día",
     "FINISH_DAY_FOR_PROJECT": "Fin de día pra este Proyecto",
@@ -1776,6 +1909,7 @@
     "HELP_PROCRASTINATION": "Ayuda, ¡estoy procrastinando!",
     "MOVE_DONE_TO_ARCHIVE": "Mover realizado al archivo",
     "NO_DONE_TASKS": "Actualmente no hay tareas terminadas",
+    "NO_PLANNED_TASK_ALL_DONE": "Todas las tareas completadas",
     "NO_PLANNED_TASKS": "No hay tareas planificadas",
     "READY_TO_WORK": "¡Listo para trabajar!",
     "RESET_BREAK_TIMER": "Restablecer sin temporizador de pausa",

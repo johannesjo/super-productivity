@@ -376,5 +376,99 @@ describe('getSyncStatusFromMetaFiles', () => {
         expect(result.status).toBe(SyncStatus.UpdateRemote);
       });
     });
+
+    describe('backwards compatibility', () => {
+      it('should work with new field names (localChangeCounter)', () => {
+        const local: LocalMeta = {
+          lastUpdate: 2000,
+          lastSyncedUpdate: 1000,
+          crossModelVersion: 1,
+          metaRev: 'test-rev',
+          revMap: {},
+          localLamport: 0, // Old field not set properly
+          lastSyncedLamport: null,
+          localChangeCounter: 10, // New field
+          lastSyncedChangeCounter: 5, // New field
+        };
+
+        const remote: RemoteMeta = {
+          lastUpdate: 1500,
+          crossModelVersion: 1,
+          revMap: {},
+          mainModelData: {},
+          localLamport: 0, // Old field not set properly
+          lastSyncedLamport: null,
+          localChangeCounter: 5, // New field
+        };
+
+        const result = getSyncStatusFromMetaFiles(remote, local);
+        expect(result.status).toBe(SyncStatus.UpdateRemote);
+      });
+
+      it('should work with old field names (localLamport)', () => {
+        const { local, remote } = createMeta(2000, 1500, 1000, {
+          localLamport: 10,
+          remoteLamport: 5,
+          lastSyncedLamport: 5,
+        });
+
+        const result = getSyncStatusFromMetaFiles(remote, local);
+        expect(result.status).toBe(SyncStatus.UpdateRemote);
+      });
+
+      it('should prefer new field names when both are present', () => {
+        const local: LocalMeta = {
+          lastUpdate: 2000,
+          lastSyncedUpdate: 1000,
+          crossModelVersion: 1,
+          metaRev: 'test-rev',
+          revMap: {},
+          localLamport: 5, // Old field (should be ignored)
+          lastSyncedLamport: 3,
+          localChangeCounter: 10, // New field (should be used)
+          lastSyncedChangeCounter: 8,
+        };
+
+        const remote: RemoteMeta = {
+          lastUpdate: 1500,
+          crossModelVersion: 1,
+          revMap: {},
+          mainModelData: {},
+          localLamport: 4, // Old field (should be ignored)
+          lastSyncedLamport: null,
+          localChangeCounter: 8, // New field (should be used)
+        };
+
+        const result = getSyncStatusFromMetaFiles(remote, local);
+        expect(result.status).toBe(SyncStatus.UpdateRemote);
+      });
+
+      it('should handle mixed old/new field scenarios', () => {
+        // Local has old fields, remote has new fields
+        const local: LocalMeta = {
+          lastUpdate: 2000,
+          lastSyncedUpdate: 1000,
+          crossModelVersion: 1,
+          metaRev: 'test-rev',
+          revMap: {},
+          localLamport: 15,
+          lastSyncedLamport: 10,
+        };
+
+        const remote: RemoteMeta = {
+          lastUpdate: 1500,
+          crossModelVersion: 1,
+          revMap: {},
+          mainModelData: {},
+          localLamport: 0, // Not properly set
+          lastSyncedLamport: null,
+          localChangeCounter: 10, // New field
+        };
+
+        const result = getSyncStatusFromMetaFiles(remote, local);
+        // Local has changes (15 > 10), remote is at 10, so update remote
+        expect(result.status).toBe(SyncStatus.UpdateRemote);
+      });
+    });
   });
 });

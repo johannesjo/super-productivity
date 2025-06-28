@@ -2,8 +2,6 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ComponentFactory,
-  ComponentFactoryResolver,
   inject,
   Input,
   OnDestroy,
@@ -44,7 +42,6 @@ import { ConfigFormComponent } from '../config-form/config-form.component';
 })
 export class ConfigSectionComponent implements OnInit, OnDestroy {
   private _cd = inject(ChangeDetectorRef);
-  private _componentFactoryResolver = inject(ComponentFactoryResolver);
   private _workContextService = inject(WorkContextService);
   private _translateService = inject(TranslateService);
 
@@ -135,9 +132,7 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
     const componentToRender = customConfigFormSectionComponent(customSection);
 
     if (componentToRender) {
-      const factory: ComponentFactory<any> =
-        this._componentFactoryResolver.resolveComponentFactory(componentToRender as any);
-      const ref = exists<any>(this.customFormRef()).createComponent(factory);
+      const ref = exists<any>(this.customFormRef()).createComponent(componentToRender);
 
       // NOTE: important that this is set only if we actually have a value
       // otherwise the default fallback will be overwritten

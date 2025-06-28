@@ -31,7 +31,6 @@
     "RESTORE_FILE_BACKUP_ANDROID": "به نظر می رسد هیچ داده ای وجود ندارد ، اما نسخه پشتیبان موجود است. آیا می خواهید آن را بارگیری کنید؟",
     "RESTORE_STRAY_BACKUP": "در آخرین همگام سازی ممکن است خطایی رخ داده باشد. آیا می خواهید آخرین نسخه پشتیبان را بازیابی کنید؟"
   },
-  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "امروز بعد",
     "NEXT_WEEK": "هفته بعد",
@@ -114,11 +113,24 @@
         "TITLE": "CalDav"
       },
       "ISSUE_CONTENT": {
+        "ASSIGNEE": "وکیل",
+        "AT": "در",
+        "ATTACHMENTS": "پیوست",
+        "CHANGED": "تغییر",
+        "COMMENTS": "نظرات",
+        "COMPONENTS": "قطعات",
         "DESCRIPTION": "شرح",
         "LABELS": "دسته بندی ها",
+        "LIST_OF_CHANGES": "لیست تغییرات",
         "MARK_AS_CHECKED": "به روزرسانی ها را به عنوان علامت گذاری شده علامت گذاری کنید",
+        "ON": "در",
+        "RELATED": "مربوط",
         "STATUS": "وضعیت",
-        "SUMMARY": "خلاصه"
+        "STORY_POINTS": "نکات داستانی",
+        "SUB_TASKS": "وظایف فرعی",
+        "SUMMARY": "خلاصه",
+        "WORKLOG": "گزارش کار",
+        "WRITE_A_COMMENT": "نظر بنویسید"
       },
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav: تقویم \"{{calendarName}}\" یافت نشد",
@@ -156,6 +168,8 @@
         "L_INTERVAL": "فاصله برای تکرار عبارت",
         "L_TEXT": "متن",
         "L_TEXT_DESCRIPTION": "به عنوان مثال: \"روی ${currentTaskTitle}کار کنید!\"",
+        "L_VOICE": "یک صدا را انتخاب کنید",
+        "L_VOICE_DESCRIPTION": "صدا را انتخاب کنید",
         "TITLE": "حالت Domina"
       }
     },
@@ -334,6 +348,39 @@
       "DEFAULT_PROJECT_DESCRIPTION": "پروژه اختصاص داده شده به وظایف ایجاد شده از مسائل.",
       "DEFAULT_PROJECT_LABEL": "پروژه پیش فرض بهره وری فوق العاده",
       "HOW_TO_GET_A_TOKEN": "چگونه یک توکن دریافت کنیم؟",
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "وکیل",
+        "AT": "در",
+        "ATTACHMENTS": "پیوست",
+        "AUTHOR": "نویسنده",
+        "CATEGORY": "رده",
+        "CHANGED": "تغییر",
+        "COMMENTS": "نظرات",
+        "COMPONENTS": "قطعات",
+        "DESCRIPTION": "توضیحات",
+        "DONE_RATIO": "نسبت انجام شده",
+        "DUE_DATE": "سررسید",
+        "LABELS": "برچسب",
+        "LAST_COMMENT": "آخرین نظر",
+        "LIST_OF_CHANGES": "لیست تغییرات",
+        "LOAD_ALL_COMMENTS": "همه نظرات {{nr}} را بارگیری کنید",
+        "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "بارگذاری توضیحات و همه نظرات",
+        "LOCATION": "محل",
+        "MARK_AS_CHECKED": "علامت گذاری به روزرسانی ها به عنوان علامت گذاری شده",
+        "ON": "در",
+        "PRIORITY": "اولویت",
+        "RELATED": "مربوط",
+        "START": "شروع",
+        "STATUS": "وضعیت",
+        "STORY_POINTS": "نکات داستانی",
+        "SUB_TASKS": "وظایف فرعی",
+        "SUMMARY": "خلاصه",
+        "TIME_SPENT": "زمان صرف شده",
+        "TYPE": "نوع",
+        "VERSION": "نسخه",
+        "WORKLOG": "گزارش کار",
+        "WRITE_A_COMMENT": "نظر بنویسید"
+      },
       "S": {
         "ERR_GENERIC": "{{issueProviderName}} خطا: {{errTxt}}",
         "ERR_NETWORK": "{{issueProviderName}}: درخواست به دلیل خطای شبکه سمت سرویس گیرنده ناموفق بود",
@@ -481,6 +528,14 @@
         "WELCOME_USER": "Welcome {{user}}!"
       }
     },
+    "MARKDOWN_PASTE": {
+      "CONFIRM_ADD_TO_SUB_TASK_NOTES": "لیست علامت گذاری چسبانده شده را به یادداشت های کار فرعی \"{{parentTaskTitle}}\"؟",
+      "CONFIRM_PARENT_TASKS": " <strong>{{tasksCount}} تسک های جدید</strong> از لیست علامت گذاری چسبانده شده ایجاد کنید؟",
+      "CONFIRM_PARENT_TASKS_WITH_SUBS": " <strong>{{tasksCount}} تسک های جدید و {{subTasksCount}} وظایف فرعی</strong> از لیست علامت گذاری چسبانده شده ایجاد کنید؟",
+      "CONFIRM_SUB_TASKS": " {{tasksCount}} کار فرعی جدید از لیست علامت گذاری چسبانده شده ایجاد کنید؟",
+      "CONFIRM_SUB_TASKS_WITH_PARENT": " <strong>{{tasksCount}} وظایف فرعی جدید در زیر</strong> \"{{parentTaskTitle}}\" از لیست علامت گذاری چسبانده شده ایجاد کنید؟",
+      "DIALOG_TITLE": "لیست Markdown چسبانده شده شناسایی شد!"
+    },
     "METRIC": {
       "BANNER": {
         "CHECK": "من انجام دادم!"
@@ -603,12 +658,12 @@
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "اختصاص دهنده",
+        "ATTACHMENTS": "پیوست‌ها",
         "DESCRIPTION": "شرح",
         "MARK_AS_CHECKED": "به روزرسانی ها را به عنوان علامت گذاری شده علامت گذاری کنید",
         "STATUS": "وضعیت",
         "SUMMARY": "خلاصه",
         "TYPE": "تایپ کنید",
-        "ATTACHMENTS": "پیوست‌ها",
         "UPLOAD_ATTACHMENT": "بارگذاری در وظیفه"
       },
       "ISSUE_STRINGS": {
@@ -616,12 +671,12 @@
         "ISSUES_STR": "بسته های کاری"
       },
       "S": {
+        "ERR_NO_FILE": "فایلی انتخاب نشده است",
         "ERR_UNKNOWN": "OpenProject: خطای ناشناخته {{statusCode}} {{errorMsg}}. آیا CORS به درستی برای سرور پیکربندی شده است؟",
         "POST_TIME_SUCCESS": "OpenProject: ورودی زمان برای {{issueTitle}}با موفقیت ایجاد شد",
         "TRANSITION": "OpenProject: مسئله \"{{issueKey}}\" را روی \"{{name}}\" تنظیم کنید",
         "TRANSITION_SUCCESS": "OpenProject: شماره {{issueKey}} را روی <strong>{{chosenTransition}}</strong>تنظیم کنید ",
-        "TRANSITIONS_LOADED": "انتقال بارگذاری شد. از انتخاب های زیر برای اختصاص دادن آنها استفاده کنید",
-        "ERR_NO_FILE": "فایلی انتخاب نشده است"
+        "TRANSITIONS_LOADED": "انتقال بارگذاری شد. از انتخاب های زیر برای اختصاص دادن آنها استفاده کنید"
       }
     },
     "PLANNER": {
@@ -819,6 +874,7 @@
     "SEARCH_BAR": {
       "INFO": "برای جستجوی کارهای بایگانی شده روی نماد لیست کلیک کنید",
       "INFO_ARCHIVED": "برای جستجوی کارهای معمولی ، روی نماد بایگانی کلیک کنید",
+      "NO_RESULTS": "هیچ وظیفه ای مطابق با جستجوی شما پیدا نشد",
       "PLACEHOLDER": "جستجو برای شرح وظیفه یا کار",
       "PLACEHOLDER_ARCHIVED": "جستجوی کارهای بایگانی شده",
       "TOO_MANY_RESULTS": "نتایج بسیار زیاد است ، لطفاً جستجوی خود را محدود کنید"
@@ -878,20 +934,24 @@
         "TITLE": "ورود به سیستم: {{provider}}"
       },
       "D_CONFLICT": {
+        "LAMPORT_CLOCK": "تجدید نظر",
         "LAST_CHANGE": "آخرین تغییر:",
         "LAST_SYNC": "آخرین همگام سازی:",
         "LOCAL": "محلی",
         "LOCAL_REMOTE": "محلی -> از راه دور",
         "REMOTE": "از راه دور",
         "TEXT": "<p>از Dropbox به روز کنید. به نظر می رسد که هر دو داده محلی و از راه دور اصلاح شده اند.</p>",
+        "TIMESTAMP": "مهرزمان",
         "TITLE": "Dropbox: داده های متضاد",
         "USE_LOCAL": "از محلی استفاده کنید",
         "USE_REMOTE": "از راه دور استفاده کنید"
       },
       "D_DECRYPT_ERROR": {
         "BTN_OVER_WRITE_REMOTE": "تغییر و بازنویسی از راه دور",
+        "CHANGE_PW_AND_DECRYPT": "تغییر و تلاش برای رمزگشایی",
         "P1": "داده های شما رمزگذاری شده و رمزگشایی انجام نشد. لطفا رمز عبور صحیح را وارد کنید!",
-        "P2": "همچنین می توانید رمز عبور خود را تغییر دهید، که تمام داده های راه دور را بازنویسی می کند."
+        "P2": "همچنین می توانید رمز عبور خود را تغییر دهید، که تمام داده های راه دور را بازنویسی می کند.",
+        "PASSWORD": "رمز عبور"
       },
       "D_INCOMPLETE_SYNC": {
         "BTN_CLOSE_APP": "بستن برنامه",
@@ -1232,6 +1292,45 @@
         "WEDNESDAY": "چهارشنبه"
       }
     },
+    "TASK_VIEW": {
+      "CUSTOMIZER": {
+        "ENTER_PROJECT": "پروژه را وارد کنید",
+        "ENTER_TAG": "تگ را وارد کنید",
+        "ESTIMATED_TIME": "زمان تخمینی",
+        "FILTER_BY": "فیلتر بر اساس",
+        "FILTER_DEFAULT": "بدون فیلتر",
+        "FILTER_ESTIMATED_TIME": "زمان تخمینی",
+        "FILTER_PROJECT": "پروژه",
+        "FILTER_SCHEDULED_DATE": "تاریخ برنامه ریزی شده",
+        "FILTER_TAG": "برچسب",
+        "FILTER_TIME_SPENT": "زمان صرف شده",
+        "GROUP_BY": "گروه بندی بر اساس",
+        "GROUP_DEFAULT": "بدون گروه",
+        "GROUP_PROJECT": "پروژه",
+        "GROUP_SCHEDULED_DATE": "تاریخ برنامه ریزی شده",
+        "GROUP_TAG": "برچسب",
+        "RESET_ALL": "همه را بازنشانی کنید",
+        "SCHEDULED_DEFAULT": "هر تاریخ",
+        "SCHEDULED_NEXT_MONTH": "ماه آینده",
+        "SCHEDULED_NEXT_WEEK": "هفته ی بعد",
+        "SCHEDULED_THIS_MONTH": "این ماه",
+        "SCHEDULED_THIS_WEEK": "این هفته",
+        "SCHEDULED_TODAY": "امروز",
+        "SCHEDULED_TOMORROW": "فردا",
+        "SORT_BY": "مرتب سازی بر اساس",
+        "SORT_CREATION_DATE": "تاریخ ایجاد",
+        "SORT_DEFAULT": "پیش فرض",
+        "SORT_NAME": "نام",
+        "SORT_SCHEDULED_DATE": "تاریخ برنامه ریزی شده",
+        "TIME_1HOUR": "> 1 ساعت",
+        "TIME_2HOUR": "> 2 ساعت",
+        "TIME_10MIN": "> 10 دقیقه",
+        "TIME_30MIN": "> 30 دقیقه",
+        "TIME_DEFAULT": "هر مدت زمان",
+        "TIME_SPENT": "زمان صرف شده",
+        "TITLE": "سفارشی کردن Task View"
+      }
+    },
     "TIME_TRACKING": {
       "B": {
         "ALREADY_DID": "قبلا انجام دادم",
@@ -1324,33 +1423,34 @@
     }
   },
   "FILE_IMEX": {
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "INITIATED_MSG": "وارد کردن خودکار داده‌ها آغاز شده است.",
+      "SOURCE_URL_DOMAIN": "دامنه منبع",
+      "TITLE": "تأیید وارد کردن داده‌ها از URL",
+      "WARNING_MSG": "ادامه دادن باعث بازنویسی داده‌ها و پیکربندی فعلی برنامه شما با محتوای URL مشخص‌شده خواهد شد. این عمل قابل بازگشت نیست.",
+      "WARNING_TITLE": "هشدار"
+    },
     "EXPORT_DATA": "خروجی اطلاعات",
     "IMPORT_FROM_FILE": "وارد کردن از فایل",
+    "IMPORT_FROM_URL": "وارد کردن از URL",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "لطفاً نشانی کامل فایل پشتیبان JSON از Super Productivity را که می‌خواهید وارد کنید، وارد نمایید.",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "وارد کردن از URL",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "وارد کردن از URL",
     "PRIVACY_EXPORT": "صادر کردن داده های ناشناس (برای ارسال به contact@super-productivity.com برای اشکال زدایی)",
     "S_BACKUP_DOWNLOADED": "پشتیبان گیری در پوشه اسناد اندروید دانلود شده است",
     "S_ERR_IMPORT_FAILED": "وارد کردن داده ها انجام نشد",
     "S_ERR_INVALID_DATA": "وارد کردن انجام نشد: JSON نامعتبر",
     "S_ERR_INVALID_URL": "وارد کردن ناموفق: نشانی وب ارائه‌شده نامعتبر است",
-    "S_IMPORT_FROM_URL_ERR_DECODE": "خطا: نمی‌توان پارامتر URL را برای وارد کردن رمزگشایی کرد. لطفاً اطمینان حاصل کنید که به‌درستی قالب‌بندی شده است.",
     "S_ERR_NETWORK": "وارد کردن ناموفق: خطای شبکه هنگام واکشی داده‌ها از URL",
-    "IMPORT_FROM_URL": "وارد کردن از URL",
-    "URL_PLACEHOLDER": "نشانی وب برای وارد کردن را وارد کنید",
-    "IMPORT_FROM_URL_DIALOG_TITLE": "وارد کردن از URL",
-    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "لطفاً نشانی کامل فایل پشتیبان JSON از Super Productivity را که می‌خواهید وارد کنید، وارد نمایید.",
-    "OPEN_IMPORT_FROM_URL_DIALOG": "وارد کردن از URL",
-    "DIALOG_CONFIRM_URL_IMPORT": {
-      "TITLE": "تأیید وارد کردن داده‌ها از URL",
-      "INITIATED_MSG": "وارد کردن خودکار داده‌ها آغاز شده است.",
-      "SOURCE_URL_DOMAIN": "دامنه منبع",
-      "WARNING_TITLE": "هشدار",
-      "WARNING_MSG": "ادامه دادن باعث بازنویسی داده‌ها و پیکربندی فعلی برنامه شما با محتوای URL مشخص‌شده خواهد شد. این عمل قابل بازگشت نیست."
-    }
+    "S_IMPORT_FROM_URL_ERR_DECODE": "خطا: نمی‌توان پارامتر URL را برای وارد کردن رمزگشایی کرد. لطفاً اطمینان حاصل کنید که به‌درستی قالب‌بندی شده است.",
+    "URL_PLACEHOLDER": "نشانی وب برای وارد کردن را وارد کنید"
   },
   "G": {
     "ADD": "اضافه کردن",
     "ADVANCED_CFG": "پیکربندی پیشرفته",
     "CANCEL": "لغو",
     "CLOSE": "بستن",
+    "CONFIRM": "تایید",
     "DELETE": "حذف",
     "DISMISS": "رد کردن",
     "DO_IT": "انجام بدهید!",
@@ -1471,6 +1571,7 @@
       "TOGGLE_ISSUE_PANEL": "نمایش/پنهان کردن پنل مشکل",
       "TOGGLE_PLAY": "شروع/توقت کار",
       "TOGGLE_SIDE_NAV": "نمایش و تمرکز / مخفی کردن Sidenav",
+      "TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL": "فیلتر/گروه/مرتب سازی پنل را تغییر دهید",
       "TRIGGER_SYNC": "همگام سازی راه اندازی (در صورت پیکربندی)",
       "ZOOM_DEFAULT": "بزرگنمایی پیش فرض (فقط دسکتاپ)",
       "ZOOM_IN": "بزرگنمایی (فقط دسکتاپ)",
@@ -1515,6 +1616,7 @@
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_MINIMIZE_TO_TRAY": "کوچک کردن به سینی (فقط دسک تاپ)",
       "IS_SHOW_TIP_LONGER": "نمایش نکته بهره وری در برنامه کمی طولانی تر شروع کنید",
+      "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "نمایش شمارش معکوس فعلی در منوی سینی / وضعیت (فقط مک دسکتاپ)",
       "IS_TRAY_SHOW_CURRENT_TASK": "نمایش وظیفه فعلی در منوی سینی / وضعیت (فقط دسک تاپ)",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for notes",
       "IS_USE_MINIMAL_SIDE_NAV": "استفاده از حداقل نوار پیمایش (فقط نشان دادن نمادها)",
@@ -1600,6 +1702,34 @@
       "TITLE": "ردیابی زمان"
     }
   },
+  "GLOBAL_RELATIVE_TIME": {
+    "FUTURE": {
+      "A_DAY": "در یک روز",
+      "A_MINUTE": "در یک دقیقه",
+      "A_MONTH": "در یک ماه",
+      "A_YEAR": "در یک سال",
+      "AN_HOUR": "در یک ساعت",
+      "DAYS": "در {{count}} روز",
+      "FEW_SECONDS": "در چند ثانیه",
+      "HOURS": "در {{count}} ساعت",
+      "MINUTES": "در {{count}} دقیقه",
+      "MONTHS": "در {{count}} ماه",
+      "YEARS": "در {{count}} سال"
+    },
+    "PAST": {
+      "A_DAY": "یک روز پیش",
+      "A_MINUTE": "یک دقیقه پیش",
+      "A_MONTH": "یک ماه پیش",
+      "A_YEAR": "یک سال پیش",
+      "AN_HOUR": "یک ساعت پیش",
+      "DAYS": "{{count}} روز پیش",
+      "FEW_SECONDS": "چند ثانیه پیش",
+      "HOURS": "{{count}} ساعت پیش",
+      "MINUTES": "{{count}} دقیقه پیش",
+      "MONTHS": "{{count}} ماه قبل",
+      "YEARS": "{{count}} سال پیش"
+    }
+  },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "در کلیپ برد کپی شد",
     "ERR_COMPRESSION": "خطایی برای رابط فشرده سازی",
@@ -1632,6 +1762,7 @@
     "CREATE_TAG": "ایجاد برچسب",
     "DELETE_PROJECT": "حذف پروژه",
     "DELETE_TAG": "برچسب را حذف کنید",
+    "ENTER_FOCUS_MODE": "وارد حالت فوکوس شوید",
     "GO_TO_TASK_LIST": "به لیست کارها برو",
     "HELP": "کمک",
     "HM": {
@@ -1656,6 +1787,7 @@
     "PROJECTS": "پروژه ها",
     "QUICK_HISTORY": "تاریخچه سریع",
     "SCHEDULE": "برنامه ریزی کنید",
+    "SEARCH": "جستجو",
     "SETTINGS": "تنظیمات",
     "SHOW_SEARCH_BAR": "نمایش نوار جستجو",
     "TAGS": "برچسب ها",
@@ -1768,6 +1900,7 @@
     "ADD_SCHEDULED_FOR_TOMORROW": "اضافه کردن کارهایی که برای فردا برنامه ریزی شده است ({{nr}})",
     "ADD_SOME_TASKS": "برای برنامه ریزی کارهای امروز، کار اضافه کنید!",
     "DONE_TASKS": "کارهای انجام شده",
+    "DONE_TASKS_IN_ARCHIVE": "در حال حاضر هیچ کار انجام شده ای در اینجا وجود ندارد، اما برخی از آنها قبلا بایگانی شده اند.",
     "ESTIMATE_REMAINING": "تخمین باقی مانده:",
     "FINISH_DAY": "پایان روز",
     "FINISH_DAY_FOR_PROJECT": "روز پایان برای این پروژه",
@@ -1776,6 +1909,7 @@
     "HELP_PROCRASTINATION": "کمک، دارم اهمال‌کاری می‌کنم!",
     "MOVE_DONE_TO_ARCHIVE": "انتقال به بایگانی انجام شد",
     "NO_DONE_TASKS": "در حال حاضر هیچ کار انجام شده ای وجود ندارد",
+    "NO_PLANNED_TASK_ALL_DONE": "تمام وظایف انجام شده",
     "NO_PLANNED_TASKS": "کارهای برنامه ریزی نشده",
     "READY_TO_WORK": "آماده به کار!",
     "RESET_BREAK_TIMER": "تنظیم مجدد زمان بدون زمان استراحت",

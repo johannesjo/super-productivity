@@ -88,15 +88,37 @@ export interface RevMap {
 
 export interface MetaFileBase {
   lastUpdate: number;
+  lastUpdateAction?: string;
   revMap: RevMap;
   crossModelVersion: number;
+  // Change tracking fields - support both old and new names for backwards compatibility
   localLamport: number;
   lastSyncedLamport: number | null;
+  // New field names (will be migrated to gradually)
+  localChangeCounter?: number;
+  lastSyncedChangeCounter?: number | null;
+  lastSyncedAction?: string;
+  // Vector clock fields for improved conflict detection
+  vectorClock?: VectorClock;
+  lastSyncedVectorClock?: VectorClock | null;
+}
+
+export interface VectorClock {
+  [clientId: string]: number;
 }
 
 export interface RemoteMeta extends MetaFileBase {
   mainModelData: MainModelData;
   isFullData?: boolean;
+}
+
+export interface UploadMeta
+  extends Omit<
+    RemoteMeta,
+    'lastSyncedLamport' | 'lastSyncedChangeCounter' | 'lastSyncedVectorClock'
+  > {
+  lastSyncedLamport: null;
+  lastSyncedChangeCounter?: null;
 }
 
 export interface LocalMeta extends MetaFileBase {

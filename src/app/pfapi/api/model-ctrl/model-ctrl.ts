@@ -38,7 +38,7 @@ export class ModelCtrl<MT extends ModelBase> {
    * @param p
    * @returns Promise resolving after save operation
    */
-  save(
+  async save(
     data: MT,
     p?: { isUpdateRevAndLastUpdate: boolean; isIgnoreDBLock?: boolean },
   ): Promise<unknown> {
@@ -70,7 +70,11 @@ export class ModelCtrl<MT extends ModelBase> {
     // Update revision if requested
     const isIgnoreDBLock = !!p?.isIgnoreDBLock;
     if (p?.isUpdateRevAndLastUpdate) {
-      this._metaModel.updateRevForModel(this.modelId, this.modelCfg, isIgnoreDBLock);
+      await this._metaModel.updateRevForModel(
+        this.modelId,
+        this.modelCfg,
+        isIgnoreDBLock,
+      );
     }
 
     // Save data to database

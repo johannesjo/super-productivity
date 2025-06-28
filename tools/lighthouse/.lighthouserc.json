@@ -16,7 +16,9 @@
         "largest-contentful-paint": ["warn", { "maxNumericValue": 4000 }],
         "cumulative-layout-shift": ["warn", { "maxNumericValue": 0.1 }],
         "total-blocking-time": ["warn", { "maxNumericValue": 300 }],
-        "interactive": ["warn", { "maxNumericValue": 5000 }]
+        "interactive": ["warn", { "maxNumericValue": 5000 }],
+        "resource-summary.script.count": ["warn", { "maxNumericValue": 100 }],
+        "resource-summary.total.count": ["warn", { "maxNumericValue": 140 }]
       }
     },
     "upload": {

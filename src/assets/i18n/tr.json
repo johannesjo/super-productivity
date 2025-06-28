@@ -31,7 +31,6 @@
     "RESTORE_FILE_BACKUP_ANDROID": "HİÇ VERİ yok gibi görünüyor, ancak bir yedek mevcut. Yüklemek istiyor musun?",
     "RESTORE_STRAY_BACKUP": "Son senkronizasyon sırasında bazı hatalar olabilir. Son yedeği geri yüklemek istiyor musunuz?"
   },
-  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Bugün Daha Sonra",
     "NEXT_WEEK": "Gelecek Hafta",
@@ -114,11 +113,24 @@
         "TITLE": "CalDav"
       },
       "ISSUE_CONTENT": {
+        "ASSIGNEE": "Atanan",
+        "AT": "üzerinde",
+        "ATTACHMENTS": "Ekler",
+        "CHANGED": "Değiştirildi",
+        "COMMENTS": "Yorumlar",
+        "COMPONENTS": "Bileşenler",
         "DESCRIPTION": "Açıklama",
         "LABELS": "Kategoriler",
+        "LIST_OF_CHANGES": "Değişiklikler listesi",
         "MARK_AS_CHECKED": "Güncellemeleri işaretlendi olarak işaretle",
+        "ON": "üzerinde",
+        "RELATED": "İlgili",
         "STATUS": "Durum",
-        "SUMMARY": "Özet"
+        "STORY_POINTS": "Hikaye Puanları",
+        "SUB_TASKS": "Alt Görevler",
+        "SUMMARY": "Özet",
+        "WORKLOG": "Çalışma kaydı",
+        "WRITE_A_COMMENT": "Bir yorum yaz"
       },
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav: \"{{calendarName}}\" takvimi bulunamadı",
@@ -156,6 +168,8 @@
         "L_INTERVAL": "İfadeyi tekrarlama aralığı",
         "L_TEXT": "Metin",
         "L_TEXT_DESCRIPTION": "Örn.: \"${currentTaskTitle} üzerinde çalış!\"",
+        "L_VOICE": "Bir Ses Seçin",
+        "L_VOICE_DESCRIPTION": "Bir Ses Seçin",
         "TITLE": "Domina Modu"
       }
     },
@@ -334,6 +348,39 @@
       "DEFAULT_PROJECT_DESCRIPTION": "Sorunlardan oluşturulan görevlere atanan proje.",
       "DEFAULT_PROJECT_LABEL": "Varsayılan Super Productivity Projesi",
       "HOW_TO_GET_A_TOKEN": "Bir token nasıl alınır?",
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Atanan",
+        "AT": "üzerinde",
+        "ATTACHMENTS": "Ekler",
+        "AUTHOR": "Yazar",
+        "CATEGORY": "Kategori",
+        "CHANGED": "Değiştirildi",
+        "COMMENTS": "Yorumlar",
+        "COMPONENTS": "Bileşenler",
+        "DESCRIPTION": "Açıklama",
+        "DONE_RATIO": "Tamamlanma Oranı",
+        "DUE_DATE": "Son Tarih",
+        "LABELS": "Etiketler",
+        "LAST_COMMENT": "Son yorum",
+        "LIST_OF_CHANGES": "Değişiklikler listesi",
+        "LOAD_ALL_COMMENTS": "Tüm {{nr}} yorumu yükle",
+        "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "Açıklamayı ve tüm yorumları yükle",
+        "LOCATION": "Konum",
+        "MARK_AS_CHECKED": "Güncellemeleri kontrol edildi olarak işaretle",
+        "ON": "üzerinde",
+        "PRIORITY": "Öncelik",
+        "RELATED": "İlgili",
+        "START": "Başla",
+        "STATUS": "Durum",
+        "STORY_POINTS": "Hikaye Puanları",
+        "SUB_TASKS": "Alt Görevler",
+        "SUMMARY": "Özet",
+        "TIME_SPENT": "Geçen Zaman",
+        "TYPE": "Tür",
+        "VERSION": "Sürüm",
+        "WORKLOG": "Çalışma kaydı",
+        "WRITE_A_COMMENT": "Bir yorum yaz"
+      },
       "S": {
         "ERR_GENERIC": "{{issueProviderName}} Hata: {{errTxt}}",
         "ERR_NETWORK": "{{issueProviderName}}: İstemci tarafı ağ hatası nedeniyle istek başarısız oldu",
@@ -481,6 +528,14 @@
         "WELCOME_USER": "Hoş geldiniz {{user}}!"
       }
     },
+    "MARKDOWN_PASTE": {
+      "CONFIRM_ADD_TO_SUB_TASK_NOTES": "Yapıştırılan markdown listesini \"{{parentTaskTitle}}\" alt görev notlarına ekleyelim mi?",
+      "CONFIRM_PARENT_TASKS": "Yapıştırılan markdown listesinden <strong>{{tasksCount}} yeni görev oluşturulsun mu? </strong>",
+      "CONFIRM_PARENT_TASKS_WITH_SUBS": "Yapıştırılan markdown listesinden <strong>{{tasksCount}} yeni görev ve {{subTasksCount}} alt görev oluşturulsun mu? </strong>",
+      "CONFIRM_SUB_TASKS": "Yapıştırılan markdown listesinden {{tasksCount}} yeni alt görev oluşturulsun mu?",
+      "CONFIRM_SUB_TASKS_WITH_PARENT": "Yapıştırılan markdown listesinden <strong>{{tasksCount}} yeni alt görevi \"{{parentTaskTitle}}\" altında oluşturalım mı? </strong>",
+      "DIALOG_TITLE": "Yapıştırılan Markdown Listesi tespit edildi!"
+    },
     "METRIC": {
       "BANNER": {
         "CHECK": "Yaptım!"
@@ -603,12 +658,12 @@
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Atanan",
+        "ATTACHMENTS": "Ekler",
         "DESCRIPTION": "Açıklama",
         "MARK_AS_CHECKED": "Güncellemeleri işaretli olarak işaretle",
         "STATUS": "Durum",
         "SUMMARY": "Özet",
         "TYPE": "Tip",
-        "ATTACHMENTS": "Ekler",
         "UPLOAD_ATTACHMENT": "Göreve yükle"
       },
       "ISSUE_STRINGS": {
@@ -616,12 +671,12 @@
         "ISSUES_STR": "iş paketleri"
       },
       "S": {
+        "ERR_NO_FILE": "Dosya seçilmedi",
         "ERR_UNKNOWN": "OpenProject: Bilinmeyen hata {{statusCode}} {{errorMsg}}. CORS, sunucu için uygun şekilde yapılandırılmış mı?",
         "POST_TIME_SUCCESS": "OpenProject: {{issueTitle}}için başarıyla oluşturulan zaman girişi",
         "TRANSITION": "OpenProject: \"{{issueKey}}\" sorununu \"{{name}}\" olarak ayarlayın",
         "TRANSITION_SUCCESS": "OpenProject: {{issueKey}} sorununu <strong>{{chosenTransition}}</strong> olarak ayarlayın",
-        "TRANSITIONS_LOADED": "Geçişler yüklendi. Bunları atamak için aşağıdaki seçimleri kullanın",
-        "ERR_NO_FILE": "Dosya seçilmedi"
+        "TRANSITIONS_LOADED": "Geçişler yüklendi. Bunları atamak için aşağıdaki seçimleri kullanın"
       }
     },
     "PLANNER": {
@@ -819,6 +874,7 @@
     "SEARCH_BAR": {
       "INFO": "Arşivlenmiş görevleri aramak için liste simgesine tıklayın",
       "INFO_ARCHIVED": "Normal görevleri aramak için arşiv simgesine tıklayın",
+      "NO_RESULTS": "Aramanızla eşleşen görev bulunamadı",
       "PLACEHOLDER": "Görev veya görev tanımını arayın",
       "PLACEHOLDER_ARCHIVED": "Arşivlenmiş görevleri arayın",
       "TOO_MANY_RESULTS": "Çok fazla sonuç, lütfen aramanızı daraltın"
@@ -878,20 +934,24 @@
         "TITLE": "Giriş: {{provider}}"
       },
       "D_CONFLICT": {
+        "LAMPORT_CLOCK": "Revizyon",
         "LAST_CHANGE": "Son Değişiklik:",
         "LAST_SYNC": "Son Senkronizasyon:",
         "LOCAL": "Lokal",
         "LOCAL_REMOTE": "Lokal -> Uzak",
         "REMOTE": "Uzak",
         "TEXT": "<p>Dropbox'tan güncelleme. Hem Lokal hem de uzak veriler değiştirilmiş gibi görünüyor.</p>",
+        "TIMESTAMP": "Zaman Damgası",
         "TITLE": "Dropbox: Çakışan Veriler",
         "USE_LOCAL": "Lokal Verileri Kullan",
         "USE_REMOTE": "Uzak Verileri Kullan"
       },
       "D_DECRYPT_ERROR": {
         "BTN_OVER_WRITE_REMOTE": "Uzaktan kumandayı değiştirme ve üzerine yazma",
+        "CHANGE_PW_AND_DECRYPT": "Değiştir ve Şifreyi Çözmeyi Deneyin",
         "P1": "Verileriniz şifrelenir ve şifre çözme başarısız olur. Lütfen doğru şifreyi giriniz!",
-        "P2": "Ayrıca, tüm uzak verilerin üzerine yazacak olan şifrenizi de değiştirebilirsiniz."
+        "P2": "Ayrıca, tüm uzak verilerin üzerine yazacak olan şifrenizi de değiştirebilirsiniz.",
+        "PASSWORD": "Şifre"
       },
       "D_INCOMPLETE_SYNC": {
         "BTN_CLOSE_APP": "Uygulamayı Kapat",
@@ -1232,6 +1292,45 @@
         "WEDNESDAY": "Çarşamba"
       }
     },
+    "TASK_VIEW": {
+      "CUSTOMIZER": {
+        "ENTER_PROJECT": "Proje girin",
+        "ENTER_TAG": "Etiket girin",
+        "ESTIMATED_TIME": "Tahmini Zaman",
+        "FILTER_BY": "Filtrele",
+        "FILTER_DEFAULT": "Filtre Yok",
+        "FILTER_ESTIMATED_TIME": "Tahmini Zaman",
+        "FILTER_PROJECT": "Proje",
+        "FILTER_SCHEDULED_DATE": "Planlanan Tarih",
+        "FILTER_TAG": "Etiket",
+        "FILTER_TIME_SPENT": "Geçen Zaman",
+        "GROUP_BY": "Grupla",
+        "GROUP_DEFAULT": "Gruplama Yok",
+        "GROUP_PROJECT": "Proje",
+        "GROUP_SCHEDULED_DATE": "Planlanan Tarih",
+        "GROUP_TAG": "Etiket",
+        "RESET_ALL": "Tümünü Sıfırla",
+        "SCHEDULED_DEFAULT": "Herhangi Bir Tarih",
+        "SCHEDULED_NEXT_MONTH": "Gelecek ay",
+        "SCHEDULED_NEXT_WEEK": "Gelecek hafta",
+        "SCHEDULED_THIS_MONTH": "Bu ay",
+        "SCHEDULED_THIS_WEEK": "Bu hafta",
+        "SCHEDULED_TODAY": "Bugün",
+        "SCHEDULED_TOMORROW": "Yarın",
+        "SORT_BY": "Sırala",
+        "SORT_CREATION_DATE": "Oluşturma Tarihi",
+        "SORT_DEFAULT": "Varsayılan",
+        "SORT_NAME": "Ad",
+        "SORT_SCHEDULED_DATE": "Planlanan Tarih",
+        "TIME_1HOUR": "> 1 Saat",
+        "TIME_2HOUR": "> 2 Saat",
+        "TIME_10MIN": "> 10 Dakika",
+        "TIME_30MIN": "> 30 Dakika",
+        "TIME_DEFAULT": "Herhangi Bir Süre",
+        "TIME_SPENT": "Geçen Zaman",
+        "TITLE": "Görev Görünümünü Özelleştir"
+      }
+    },
     "TIME_TRACKING": {
       "B": {
         "ALREADY_DID": "Zaten yaptım",
@@ -1324,33 +1423,34 @@
     }
   },
   "FILE_IMEX": {
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "INITIATED_MSG": "Otomatik veri içe aktarma başlatıldı.",
+      "SOURCE_URL_DOMAIN": "Kaynak Alan Adı",
+      "TITLE": "URL'den Veri İçe Aktarmayı Onayla",
+      "WARNING_MSG": "Devam etmek, mevcut uygulama verilerinizi ve yapılandırmanızı belirtilen URL'deki içerikle üzerine yazacaktır. Bu işlem geri alınamaz.",
+      "WARNING_TITLE": "Uyarı"
+    },
     "EXPORT_DATA": "Verileri Dışa Aktar",
     "IMPORT_FROM_FILE": "Dosyadan içe aktar",
+    "IMPORT_FROM_URL": "URL'den İçe Aktar",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Lütfen içe aktarmak istediğiniz Super Productivity yedek JSON dosyasının tam URL'sini girin.",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "URL'den İçe Aktar",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "URL'den İçe Aktar",
     "PRIVACY_EXPORT": "Anonimleştirilmiş verileri dışa aktarın (hata ayıklama için contact@super-productivity.com adresine göndermek üzere)",
     "S_BACKUP_DOWNLOADED": "Android belgeler klasörüne indirilen yedekleme",
     "S_ERR_IMPORT_FAILED": "Verileri içeri aktarma başarısız oldu",
     "S_ERR_INVALID_DATA": "İçe aktarma başarısız oldu: Geçersiz JSON",
     "S_ERR_INVALID_URL": "İçe aktarma başarısız oldu: Geçersiz URL sağlandı",
-    "S_IMPORT_FROM_URL_ERR_DECODE": "Hata: İçe aktarma için URL parametresi çözümlenemedi. Lütfen doğru biçimlendirildiğinden emin olun.",
     "S_ERR_NETWORK": "İçe aktarma başarısız oldu: URL'den veri alınırken ağ hatası oluştu",
-    "IMPORT_FROM_URL": "URL'den İçe Aktar",
-    "URL_PLACEHOLDER": "İçe aktarmak için URL girin",
-    "IMPORT_FROM_URL_DIALOG_TITLE": "URL'den İçe Aktar",
-    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Lütfen içe aktarmak istediğiniz Super Productivity yedek JSON dosyasının tam URL'sini girin.",
-    "OPEN_IMPORT_FROM_URL_DIALOG": "URL'den İçe Aktar",
-    "DIALOG_CONFIRM_URL_IMPORT": {
-      "TITLE": "URL'den Veri İçe Aktarmayı Onayla",
-      "INITIATED_MSG": "Otomatik veri içe aktarma başlatıldı.",
-      "SOURCE_URL_DOMAIN": "Kaynak Alan Adı",
-      "WARNING_TITLE": "Uyarı",
-      "WARNING_MSG": "Devam etmek, mevcut uygulama verilerinizi ve yapılandırmanızı belirtilen URL'deki içerikle üzerine yazacaktır. Bu işlem geri alınamaz."
-    }
+    "S_IMPORT_FROM_URL_ERR_DECODE": "Hata: İçe aktarma için URL parametresi çözümlenemedi. Lütfen doğru biçimlendirildiğinden emin olun.",
+    "URL_PLACEHOLDER": "İçe aktarmak için URL girin"
   },
   "G": {
     "ADD": "Ekle",
     "ADVANCED_CFG": "Gelişmiş yapılandırma",
     "CANCEL": "İptal",
     "CLOSE": "Kapat",
+    "CONFIRM": "Onayla",
     "DELETE": "Sil",
     "DISMISS": "Görmezden gel",
     "DO_IT": "Yap!",
@@ -1471,6 +1571,7 @@
       "TOGGLE_ISSUE_PANEL": "Sorun Panelini Göster/Gizle",
       "TOGGLE_PLAY": "Görevi Başlat / Durdur",
       "TOGGLE_SIDE_NAV": "Yan navigasyon çubuğunu Göster ve Odakla/Gizle",
+      "TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL": "Filtre/Grupla/Sırala Panelini Değiştir",
       "TRIGGER_SYNC": "Senkronizasyonu tetikle (yapılandırılmışsa)",
       "ZOOM_DEFAULT": "Varsayılan yakınlaştırma (Yalnızca masaüstü)",
       "ZOOM_IN": "Yakınlaştır (Yalnızca masaüstü)",
@@ -1515,6 +1616,7 @@
       "IS_HIDE_NAV": "Ana başlık yönlendirilene kadar gezinmeyi gizle (yalnızca masaüstü)",
       "IS_MINIMIZE_TO_TRAY": "Tepsiye küçült (yalnızca masaüstü)",
       "IS_SHOW_TIP_LONGER": "Uygulamada üretkenlik ipucunu biraz daha uzun süre başlatın",
+      "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Mevcut geri sayımı tepsi / durum menüsünde göster (sadece masaüstü mac için)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Mevcut görevi tepsi / Durum menüsünde göster (yalnızca masaüstü)",
       "IS_TURN_OFF_MARKDOWN": "Notlar için etiketleme ayrıştırmayı kapatın",
       "IS_USE_MINIMAL_SIDE_NAV": "Minimal gezinme çubuğunu kullan (sadece ikonları göster)",
@@ -1600,6 +1702,34 @@
       "TITLE": "Zaman İzleyici"
     }
   },
+  "GLOBAL_RELATIVE_TIME": {
+    "FUTURE": {
+      "A_DAY": "bir gün içinde",
+      "A_MINUTE": "bir dakika içinde",
+      "A_MONTH": "Bir ay içinde",
+      "A_YEAR": "bir yıl içinde",
+      "AN_HOUR": "bir saat içinde",
+      "DAYS": "{{count}} gün içinde",
+      "FEW_SECONDS": "birkaç saniye içinde",
+      "HOURS": "{{count}} saat içinde",
+      "MINUTES": "{{count}} dakika içinde",
+      "MONTHS": "{{count}} ay içinde",
+      "YEARS": "{{count}} yıl içinde"
+    },
+    "PAST": {
+      "A_DAY": "Bir gün önce",
+      "A_MINUTE": "bir dakika önce",
+      "A_MONTH": "Bir ay önce",
+      "A_YEAR": "bir yıl önce",
+      "AN_HOUR": "bir saat önce",
+      "DAYS": "{{count}} gün önce",
+      "FEW_SECONDS": "birkaç saniye önce",
+      "HOURS": "{{count}} saat önce",
+      "MINUTES": "{{count}} dakika önce",
+      "MONTHS": "{{count}} ay önce",
+      "YEARS": "{{count}} yıl önce"
+    }
+  },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Panoya kopyalandı",
     "ERR_COMPRESSION": "Sıkıştırma arayüzü için hata",
@@ -1632,6 +1762,7 @@
     "CREATE_TAG": "Etiket Oluştur",
     "DELETE_PROJECT": "Projeyi Sil",
     "DELETE_TAG": "Etiketi Sil",
+    "ENTER_FOCUS_MODE": "Odak Moduna Geç",
     "GO_TO_TASK_LIST": "Görev listesine git",
     "HELP": "Yardım",
     "HM": {
@@ -1656,6 +1787,7 @@
     "PROJECTS": "Projeler",
     "QUICK_HISTORY": "Hızlı Geçmiş",
     "SCHEDULE": "Takvim",
+    "SEARCH": "Arama",
     "SETTINGS": "Ayarlar",
     "SHOW_SEARCH_BAR": "Arama çubuğunu göster",
     "TAGS": "Etiketler",
@@ -1768,6 +1900,7 @@
     "ADD_SCHEDULED_FOR_TOMORROW": "Yarın için planlanan görevleri ekleyin ({{nr}})",
     "ADD_SOME_TASKS": "Gününüzü planlamak için bazı görevler ekleyin!",
     "DONE_TASKS": "Yapılan Görevler",
+    "DONE_TASKS_IN_ARCHIVE": "Burada şu anda tamamlanmış görev yok, ancak bazıları zaten arşivlendi.",
     "ESTIMATE_REMAINING": "Tahmini kalan süre:",
     "FINISH_DAY": "Günü bitir",
     "FINISH_DAY_FOR_PROJECT": "Günü bu proje için bitir",
@@ -1776,6 +1909,7 @@
     "HELP_PROCRASTINATION": "Erteliyorum yardım et!",
     "MOVE_DONE_TO_ARCHIVE": "Arşive taşıma işlemi tamamlandı",
     "NO_DONE_TASKS": "Şu anda yapılmış bir görev yok",
+    "NO_PLANNED_TASK_ALL_DONE": "tüm görevler tamamlandı",
     "NO_PLANNED_TASKS": "Planlanmış görev yok",
     "READY_TO_WORK": "Çalışmaya hazır!",
     "RESET_BREAK_TIMER": "Mola zamanlayıcısı olmadan sıfırla",

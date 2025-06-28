@@ -1,0 +1,214 @@
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslateModule } from '@ngx-translate/core';
+import { LayoutService } from '../../layout/layout.service';
+import { TaskViewCustomizerService } from '../../../features/task-view-customizer/task-view-customizer.service';
+import { T } from '../../../t.const';
+import { KeyboardConfig } from '../../../features/config/keyboard-config.model';
+import { GlobalConfigService } from '../../../features/config/global-config.service';
+import { Store } from '@ngrx/store';
+import {
+  selectActivePluginId,
+  selectIsShowPluginPanel,
+} from '../../layout/store/layout.reducer';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { PluginBridgeService } from '../../../plugins/plugin-bridge.service';
+import { PluginIconComponent } from '../../../plugins/ui/plugin-icon/plugin-icon.component';
+import { togglePluginPanel } from '../../layout/store/layout.actions';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter, map, startWith } from 'rxjs/operators';
+import { computed } from '@angular/core';
+import { BreakpointObserver } from '@angular/cdk/layout';
+
+@Component({
+  selector: 'mobile-side-panel-menu',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatIconModule,
+    MatButtonModule,
+    MatTooltipModule,
+    TranslateModule,
+    PluginIconComponent,
+  ],
+  template: `
+    <div class="mobile-dropdown-wrapper">
+      <button
+        (click)="toggleMenu()"
+        mat-icon-button
+        [matTooltip]="T.MH.SIDE_PANEL_MENU | translate"
+      >
+        <mat-icon>{{ isShowMobileMenu() ? 'close' : 'view_sidebar' }}</mat-icon>
+      </button>
+
+      <div
+        class="mobile-dropdown"
+        [class.isVisible]="isShowMobileMenu()"
+      >
+        <!-- Plugin buttons -->
+        @for (button of sidePanelButtons(); track button.pluginId) {
+          <button
+            mat-mini-fab
+            color=""
+            [matTooltip]="button.label"
+            (click)="onPluginButtonClick(button)"
+            [class.active]="activePluginId() === button.pluginId && isShowPluginPanel()"
+            [disabled]="!isWorkView()"
+          >
+            <plugin-icon
+              [pluginId]="button.pluginId"
+              [fallbackIcon]="button.icon || 'extension'"
+            ></plugin-icon>
+          </button>
+        }
+
+        <!-- Task View Customizer -->
+        <button
+          mat-mini-fab
+          color=""
+          [class.active]="isShowTaskViewCustomizerPanel()"
+          [class.isCustomized]="taskViewCustomizerService.isCustomized()"
+          [disabled]="!isRouteWithSidePanel()"
+          (click)="toggleTaskViewCustomizer()"
+          [matTooltip]="T.GCF.KEYBOARD.TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL | translate"
+        >
+          <mat-icon>filter_list</mat-icon>
+        </button>
+
+        <!-- Issue Panel -->
+        <button
+          mat-mini-fab
+          color=""
+          class="e2e-toggle-issue-provider-panel"
+          [class.active]="isShowIssuePanel()"
+          [disabled]="!isRouteWithSidePanel()"
+          (click)="toggleIssuePanel()"
+          [matTooltip]="T.MH.TOGGLE_SHOW_ISSUE_PANEL | translate"
+        >
+          <mat-icon>playlist_add</mat-icon>
+        </button>
+
+        <!-- Notes -->
+        <button
+          mat-mini-fab
+          color=""
+          class="e2e-toggle-notes-btn"
+          [class.active]="isShowNotes()"
+          [disabled]="!isRouteWithSidePanel()"
+          (click)="toggleNotes()"
+          [matTooltip]="T.MH.TOGGLE_SHOW_NOTES | translate"
+        >
+          <mat-icon>comment</mat-icon>
+        </button>
+      </div>
+    </div>
+  `,
+  styleUrls: ['./mobile-side-panel-menu.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class MobileSidePanelMenuComponent {
+  readonly T = T;
+  readonly layoutService = inject(LayoutService);
+  readonly taskViewCustomizerService = inject(TaskViewCustomizerService);
+  readonly breakpointObserver = inject(BreakpointObserver);
+
+  private _globalConfigService = inject(GlobalConfigService);
+  private _pluginBridge = inject(PluginBridgeService);
+  private _store = inject(Store);
+  private _router = inject(Router);
+
+  // State signals
+  readonly isShowMobileMenu = signal(false);
+
+  // Convert observables to signals
+  readonly isRouteWithSidePanel = toSignal(
+    this._router.events.pipe(
+      filter((event: any) => event instanceof NavigationEnd),
+      map((event) => !!event.urlAfterRedirects.match(/(tasks|daily-summary)$/)),
+      startWith(!!this._router.url.match(/(tasks|daily-summary)$/)),
+    ),
+    { initialValue: !!this._router.url.match(/(tasks|daily-summary)$/) },
+  );
+
+  readonly kb: KeyboardConfig = this._globalConfigService.cfg?.keyboard || {};
+
+  // Plugin-related signals
+  readonly sidePanelButtons = toSignal(this._pluginBridge.sidePanelButtons$, {
+    initialValue: [],
+  });
+  readonly activePluginId = toSignal(this._store.select(selectActivePluginId));
+  readonly isShowPluginPanel = toSignal(this._store.select(selectIsShowPluginPanel));
+
+  // Navigation signals
+  readonly currentRoute = toSignal(
+    this._router.events.pipe(
+      filter((event) => event instanceof NavigationEnd),
+      map(() => this._router.url),
+    ),
+    { initialValue: this._router.url },
+  );
+
+  readonly isWorkView = computed(() => {
+    const url = this.currentRoute();
+    return url.includes('/active/') || url.includes('/tag/') || url.includes('/project/');
+  });
+
+  // Panel state signals
+  readonly isShowNotes = toSignal(this.layoutService.isShowNotes$, {
+    initialValue: false,
+  });
+  readonly isShowIssuePanel = toSignal(this.layoutService.isShowIssuePanel$, {
+    initialValue: false,
+  });
+  readonly isShowTaskViewCustomizerPanel = toSignal(
+    this.layoutService.isShowTaskViewCustomizerPanel$,
+    { initialValue: false },
+  );
+
+  // Computed signal for active panel
+  readonly hasActivePanel = computed(() => {
+    return !!(
+      this.isShowNotes() ||
+      this.isShowIssuePanel() ||
+      this.isShowTaskViewCustomizerPanel() ||
+      (this.activePluginId() && this.isShowPluginPanel())
+    );
+  });
+
+  toggleMenu(): void {
+    this.isShowMobileMenu.update((v) => !v);
+  }
+
+  onPluginButtonClick(button: any): void {
+    if (!this.isWorkView()) {
+      return;
+    }
+
+    this._store.dispatch(togglePluginPanel(button.pluginId));
+
+    if (button.onClick) {
+      button.onClick();
+    }
+
+    // Close mobile menu after action
+    this.isShowMobileMenu.set(false);
+  }
+
+  toggleTaskViewCustomizer(): void {
+    this.layoutService.toggleTaskViewCustomizerPanel();
+    this.isShowMobileMenu.set(false);
+  }
+
+  toggleIssuePanel(): void {
+    this.layoutService.toggleAddTaskPanel();
+    this.isShowMobileMenu.set(false);
+  }
+
+  toggleNotes(): void {
+    this.layoutService.toggleNotes();
+    this.isShowMobileMenu.set(false);
+  }
+}

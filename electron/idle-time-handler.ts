@@ -72,15 +72,13 @@ export class IdleTimeHandler {
             name: 'gnomeDBus',
             test: async () => {
               if (!this.isGnomeWayland) return false;
-              // Skip DBus in snap environment due to library version mismatches
-              if (this.isSnapEnvironment) {
-                log.info('Skipping GNOME DBus in snap environment');
-                return false;
-              }
               try {
                 const idleTime = await this.getGnomeIdleTime();
                 return idleTime !== null;
-              } catch {
+              } catch (error) {
+                if (this.isSnapEnvironment) {
+                  log.info('GNOME DBus test failed in snap environment:', error);
+                }
                 return false;
               }
             },
@@ -189,16 +187,26 @@ export class IdleTimeHandler {
 
   private async getGnomeIdleTime(): Promise<number | null> {
     try {
-      const { stdout } = await execAsync(
-        'dbus-send --print-reply --dest=org.gnome.Mutter.IdleMonitor /org/gnome/Mutter/IdleMonitor/Core org.gnome.Mutter.IdleMonitor.GetIdletime',
-        { timeout: 5000 }, // 5 second timeout
-      );
+      // Try gdbus first as it might work better in snap environments
+      let command =
+        'gdbus call --session --dest org.gnome.Mutter.IdleMonitor --object-path /org/gnome/Mutter/IdleMonitor/Core --method org.gnome.Mutter.IdleMonitor.GetIdletime';
 
-      // Parse the DBus response to extract the idle time
-      // Expected format: "uint64 1234567890"
-      const match = stdout.match(/uint64\s+(\d+)/);
-      if (match && match[1]) {
-        const idleMs = parseInt(match[1], 10);
+      // Check if gdbus is available
+      try {
+        await execAsync('which gdbus', { timeout: 1000 });
+      } catch {
+        // Fall back to dbus-send if gdbus is not available
+        command =
+          'dbus-send --print-reply --dest=org.gnome.Mutter.IdleMonitor /org/gnome/Mutter/IdleMonitor/Core org.gnome.Mutter.IdleMonitor.GetIdletime';
+      }
+
+      const { stdout } = await execAsync(command, { timeout: 5000 });
+
+      // Parse the response - gdbus format: (uint64 1234567890,)
+      // dbus-send format: uint64 1234567890
+      const match = stdout.match(/uint64\s+(\d+)|(?:\(uint64\s+)?(\d+)(?:,\))?/);
+      if (match) {
+        const idleMs = parseInt(match[1] || match[2], 10);
         // Validate the result is reasonable (not negative, not extremely large)
         if (idleMs >= 0 && idleMs < Number.MAX_SAFE_INTEGER) {
           return idleMs;

@@ -146,6 +146,23 @@ export class WebdavApi {
           return meta.etag;
         } catch (metaError) {
           pfLog(0, `${WebdavApi.L}.upload() failed to get etag via PROPFIND`, metaError);
+          // Last resort: try GET request to retrieve ETag
+          try {
+            pfLog(1, `${WebdavApi.L}.upload() attempting GET request fallback for etag`);
+            const { rev } = await this.download({ path });
+            return rev;
+          } catch (getError) {
+            pfLog(
+              0,
+              `${WebdavApi.L}.upload() GET request fallback also failed`,
+              getError,
+            );
+            // If all methods fail, we have no ETag to return
+            throw new NoEtagAPIError({
+              path,
+              attemptedMethods: ['response-headers', 'PROPFIND', 'GET'],
+            });
+          }
         }
       }
 
@@ -185,6 +202,25 @@ export class WebdavApi {
                 `${WebdavApi.L}.upload() failed to get etag after retry`,
                 metaError,
               );
+              // Last resort: try GET request to retrieve ETag
+              try {
+                pfLog(
+                  1,
+                  `${WebdavApi.L}.upload() attempting GET request fallback for etag after retry`,
+                );
+                const { rev } = await this.download({ path });
+                return rev;
+              } catch (getError) {
+                pfLog(
+                  0,
+                  `${WebdavApi.L}.upload() GET request fallback also failed after retry`,
+                  getError,
+                );
+                throw new NoEtagAPIError({
+                  path,
+                  attemptedMethods: ['response-headers', 'PROPFIND', 'GET'],
+                });
+              }
             }
           }
 
@@ -233,6 +269,25 @@ export class WebdavApi {
                   `${WebdavApi.L}.upload() failed to get etag after retry`,
                   metaError,
                 );
+                // Last resort: try GET request to retrieve ETag
+                try {
+                  pfLog(
+                    1,
+                    `${WebdavApi.L}.upload() attempting GET request fallback for etag after 409 retry`,
+                  );
+                  const { rev } = await this.download({ path });
+                  return rev;
+                } catch (getError) {
+                  pfLog(
+                    0,
+                    `${WebdavApi.L}.upload() GET request fallback also failed after 409 retry`,
+                    getError,
+                  );
+                  throw new NoEtagAPIError({
+                    path,
+                    attemptedMethods: ['response-headers', 'PROPFIND', 'GET'],
+                  });
+                }
               }
             }
 
@@ -267,7 +322,11 @@ export class WebdavApi {
     }
   }
 
-  async getFileMeta(path: string, localRev: string | null): Promise<FileMeta> {
+  async getFileMeta(
+    path: string,
+    localRev: string | null,
+    useGetFallback: boolean = false,
+  ): Promise<FileMeta> {
     try {
       const response = await this._makeRequest({
         method: 'PROPFIND',
@@ -337,6 +396,35 @@ export class WebdavApi {
           if (headError?.status === 404) {
             throw new RemoteFileNotFoundAPIError(path);
           }
+
+          // If HEAD also fails and useGetFallback is enabled, try GET as last resort
+          if (useGetFallback) {
+            try {
+              pfLog(1, `${WebdavApi.L}.getFileMeta() attempting GET request fallback`);
+              const { rev } = await this.download({ path });
+
+              // Since we only have the ETag from GET, create minimal metadata
+              return {
+                filename: path.split('/').pop() || '',
+                basename: path.split('/').pop() || '',
+                lastmod: new Date().toISOString(),
+                size: 0, // Size unknown from GET fallback
+                type: 'file',
+                etag: rev,
+                data: {
+                  etag: rev,
+                  href: path,
+                },
+              };
+            } catch (getError: any) {
+              pfLog(0, `${WebdavApi.L}.getFileMeta() GET fallback also failed`, getError);
+              if (getError?.status === 404) {
+                throw new RemoteFileNotFoundAPIError(path);
+              }
+              throw getError;
+            }
+          }
+
           throw headError;
         }
       }

@@ -1,0 +1,29 @@
+{
+  "id": "sync-md",
+  "manifestVersion": 1,
+  "name": "Sync.md",
+  "version": "2.0.0",
+  "description": "Sync markdown files with SuperProductivity projects - Solid.js version",
+  "author": "SuperProductivity",
+  "homepage": "https://github.com/johannesjo/super-productivity",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/johannesjo/super-productivity.git"
+  },
+  "minSupVersion": "10.0.0",
+  "permissions": [
+    "getTasks",
+    "updateTask",
+    "addTask",
+    "deleteTask",
+    "getAllProjects",
+    "nodeExecution",
+    "persistDataSynced",
+    "loadSyncedData"
+  ],
+  "sidePanel": true,
+  "iFrame": true,
+  "isSkipMenuEntry": false,
+  "hooks": [],
+  "icon": "icon.svg"
+}

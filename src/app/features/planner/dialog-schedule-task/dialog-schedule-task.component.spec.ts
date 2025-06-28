@@ -93,6 +93,14 @@ describe('DialogScheduleTaskComponent', () => {
       id: 'task123',
       title: 'Test Task',
       tagIds: [] as string[],
+      projectId: 'DEFAULT',
+      timeSpentOnDay: {},
+      attachments: [],
+      timeEstimate: 0,
+      timeSpent: 0,
+      isDone: false,
+      created: Date.now(),
+      subTaskIds: [],
     } as TaskCopy;
     component.data = {
       task: t,
@@ -118,18 +126,39 @@ describe('DialogScheduleTaskComponent', () => {
       const expectedDate = new Date(testDate);
       expectedDate.setHours(10, 0, 0, 0); // Set time to 10:00 AM
 
-      component.selectedDate = testDate;
-      component.selectedTime = '10:00';
-      component.selectedReminderCfgId = TaskReminderOptionId.AtStart;
-      component.task = {
+      const mockTask = {
         id: 'task123',
         title: 'Test Task',
         tagIds: [] as string[],
+        projectId: 'DEFAULT',
+        timeSpentOnDay: {},
+        attachments: [],
+        timeEstimate: 0,
+        timeSpent: 0,
+        isDone: false,
+        created: 1640995200000, // Fixed timestamp
+        subTaskIds: [],
       } as TaskCopy;
+
+      component.selectedDate = testDate;
+      component.selectedTime = '10:00';
+      component.selectedReminderCfgId = TaskReminderOptionId.AtStart;
+      component.task = mockTask;
       await component.submit();
 
       expect(taskServiceSpy.scheduleTask).toHaveBeenCalledWith(
-        component.task,
+        jasmine.objectContaining({
+          id: 'task123',
+          title: 'Test Task',
+          tagIds: [],
+          projectId: 'DEFAULT',
+          timeSpentOnDay: {},
+          attachments: [],
+          timeEstimate: 0,
+          timeSpent: 0,
+          isDone: false,
+          subTaskIds: [],
+        }),
         expectedDate.getTime(),
         TaskReminderOptionId.AtStart,
         false,
@@ -153,6 +182,14 @@ describe('DialogScheduleTaskComponent', () => {
         id: 'taskThrow',
         title: 'Throw Task',
         tagIds: [] as string[],
+        projectId: 'DEFAULT',
+        timeSpentOnDay: {},
+        attachments: [],
+        timeEstimate: 0,
+        timeSpent: 0,
+        isDone: false,
+        created: 1640995200000, // Fixed timestamp
+        subTaskIds: [],
       } as TaskCopy;
       taskServiceSpy.scheduleTask.and.throwError('Schedule failed');
       try {
@@ -171,6 +208,14 @@ describe('DialogScheduleTaskComponent', () => {
         id: 'taskClose',
         title: 'Close Task',
         tagIds: [] as string[],
+        projectId: 'DEFAULT',
+        timeSpentOnDay: {},
+        attachments: [],
+        timeEstimate: 0,
+        timeSpent: 0,
+        isDone: false,
+        created: 1640995200000, // Fixed timestamp
+        subTaskIds: [],
       } as TaskCopy;
       await component.submit();
       expect(dialogRefSpy.close).toHaveBeenCalledWith(true);
@@ -185,6 +230,14 @@ describe('DialogScheduleTaskComponent', () => {
         id: 'taskNoSnack',
         title: 'No Snack Task',
         tagIds: [] as string[],
+        projectId: 'DEFAULT',
+        timeSpentOnDay: {},
+        attachments: [],
+        timeEstimate: 0,
+        timeSpent: 0,
+        isDone: false,
+        created: 1640995200000, // Fixed timestamp
+        subTaskIds: [],
       } as TaskCopy;
       taskServiceSpy.scheduleTask.and.throwError('Error');
       try {

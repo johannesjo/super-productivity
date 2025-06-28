@@ -3,7 +3,6 @@ import { CrossModelMigrateFn } from '../api';
 import { TaskCopy } from '../../features/tasks/task.model';
 import { EntityState } from '@ngrx/entity';
 import { TODAY_TAG } from '../../features/tag/tag.const';
-import { isArray } from 'rxjs/internal-compatibility';
 
 export const crossModelMigration4: CrossModelMigrateFn = ((
   fullData: AppDataCompleteNew,
@@ -12,7 +11,7 @@ export const crossModelMigration4: CrossModelMigrateFn = ((
   console.log('____________________Migrate4__________________');
   const copy = fullData;
 
-  if (!isArray(copy.improvement.hiddenImprovementBannerItems)) {
+  if (!Array.isArray(copy.improvement.hiddenImprovementBannerItems)) {
     copy.improvement.hiddenImprovementBannerItems = [];
   }
 

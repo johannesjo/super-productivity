@@ -125,8 +125,12 @@ const handleAddTask = (
     [TASK_FEATURE_NAME]: taskAdapter.addOne(newTask, updatedState[TASK_FEATURE_NAME]),
   };
 
-  // Update project if task has projectId
-  if (task.projectId && state[PROJECT_FEATURE_NAME].entities[task.projectId]) {
+  // Update project if task has projectId - but only for main tasks (not subtasks)
+  if (
+    task.projectId &&
+    state[PROJECT_FEATURE_NAME].entities[task.projectId] &&
+    !task.parentId
+  ) {
     const project = getProject(state, task.projectId);
     const targetList: ProjectTaskList =
       isAddToBacklog && project.isEnableBacklog ? 'backlogTaskIds' : 'taskIds';

@@ -39,6 +39,7 @@
       [isBacklog]="isBacklog()"
       [task]="task"
       cdkDrag
+      [cdkDragDisabled]="listModelId() === 'LATER_TODAY'"
       [cdkDragData]="task"
     >
     </task>

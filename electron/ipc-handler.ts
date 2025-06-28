@@ -13,12 +13,20 @@ import { getWin } from './main-window';
 import { quitApp, showOrFocus } from './various-shared';
 import { loadSimpleStoreAll, saveSimpleStore } from './simple-store';
 import { BACKUP_DIR, BACKUP_DIR_WINSTORE } from './backup';
+import { pluginNodeExecutor } from './plugin-node-executor';
 
 export const initIpcInterfaces = (): void => {
+  // Initialize plugin node executor (registers IPC handlers)
+  // This is needed for plugins with nodeExecution permission
+  // The constructor automatically sets up the IPC handlers
+  log('Initializing plugin node executor');
+  if (!pluginNodeExecutor) {
+    log('Warning: Plugin node executor failed to initialize');
+  }
   // HANDLER
   // -------
   ipcMain.handle(IPC.GET_PATH, (ev, name: string) => {
-    return app.getPath(name as any);
+    return app.getPath(name as Parameters<typeof app.getPath>[0]);
   });
   ipcMain.handle(IPC.GET_BACKUP_PATH, () => {
     if (process?.windowsStore) {

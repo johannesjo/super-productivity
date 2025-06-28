@@ -6,6 +6,7 @@ import {
   ModelCfgToModelCtrl,
   RemoteMeta,
   RevMap,
+  UploadMeta,
 } from '../pfapi.model';
 import { SyncProviderServiceInterface } from './sync-provider.interface';
 import { MiniObservable } from '../util/mini-observable';
@@ -28,7 +29,28 @@ import { Pfapi } from '../pfapi';
 import { modelVersionCheck, ModelVersionCheckResult } from '../util/model-version-check';
 import { MetaSyncService } from './meta-sync.service';
 import { ModelSyncService } from './model-sync.service';
+import { mergeVectorClocks, incrementVectorClock } from '../util/vector-clock';
+import {
+  getVectorClock,
+  setVectorClock,
+  setLastSyncedVectorClock,
+} from '../util/backwards-compat';
 
+/**
+ * Sync Service for Super Productivity
+ *
+ * Change Detection System:
+ * This is NOT a pure Lamport timestamp implementation!
+ * We use a hybrid approach that combines:
+ * - Physical timestamps (lastUpdate) for ordering
+ * - Change counters (localLamport) for detecting local modifications
+ * - Sync tracking (lastSyncedLamport) to detect when sync is needed
+ *
+ * Key difference from Lamport clocks:
+ * - We DON'T increment on receive (prevents sync loops)
+ * - We DO increment on local changes
+ * - We track the last synced state separately
+ */
 export class SyncService<const MD extends ModelCfgs> {
   public readonly IS_DO_CROSS_MODEL_MIGRATIONS: boolean;
   private static readonly UPDATE_ALL_REV = 'UPDATE_ALL_REV';
@@ -161,12 +183,24 @@ export class SyncService<const MD extends ModelCfgs> {
               lastSyncedLamport: localMeta.lastSyncedLamport,
               localLamport: localMeta.localLamport,
             });
-            await this._metaFileSyncService.saveLocal({
+
+            // Get client ID for vector clock operations
+            const clientId = await this._metaModelCtrl.loadClientId();
+            const localVector = getVectorClock(localMeta, clientId);
+
+            const updatedMeta = {
               ...localMeta,
               lastSyncedUpdate: localMeta.lastUpdate,
               lastSyncedLamport: localMeta.localLamport || 0,
               metaRev: remoteMetaRev,
-            });
+            };
+
+            // Update vector clock if available
+            if (localVector) {
+              setLastSyncedVectorClock(updatedMeta, localVector, clientId);
+            }
+
+            await this._metaFileSyncService.saveLocal(updatedMeta);
           }
           return { status };
         case SyncStatus.Conflict:
@@ -214,12 +248,75 @@ export class SyncService<const MD extends ModelCfgs> {
 
     let local = await this._metaModelCtrl.load();
     if (isForceUpload) {
-      // Change lastUpdate timestamp to indicate a newer revision to other clients
+      // For conflict resolution, we need to ensure our Lamport stamp is higher than any remote
+      // First, try to get the remote meta to see the current remote Lamport
+      let remoteLamport = 0;
+      try {
+        const { remoteMeta } = await this._metaFileSyncService.download();
+        remoteLamport = remoteMeta.localLamport || 0;
+      } catch (e) {
+        // If download fails, use local Lamport as baseline
+        remoteLamport = local.localLamport || 0;
+      }
+
+      // Set our Lamport to be higher than both local and remote
+      const currentLamport = Math.max(local.localLamport || 0, remoteLamport);
+      // Reset if approaching max safe integer (same logic as MetaModelCtrl)
+      const nextLamport =
+        currentLamport >= Number.MAX_SAFE_INTEGER - 1000 ? 1 : currentLamport + 1;
+
+      pfLog(
+        2,
+        `${SyncService.L}.${this.uploadAll.name}(): Incrementing change counter for conflict resolution`,
+        { localLamport: local.localLamport, remoteLamport, currentLamport, nextLamport },
+      );
+
+      // Get client ID for vector clock operations
+      const clientId = await this._metaModelCtrl.loadClientId();
+      let localVector = getVectorClock(local, clientId) || {};
+
+      // For force uploads, try to merge with remote vector clock to preserve all components
+      if (isForceUpload) {
+        try {
+          const { remoteMeta } = await this._metaFileSyncService.download();
+          const remoteVector = getVectorClock(remoteMeta, clientId);
+          if (remoteVector) {
+            localVector = mergeVectorClocks(localVector, remoteVector);
+            pfLog(
+              2,
+              `${SyncService.L}.${this.uploadAll.name}(): Merged remote vector clock for force upload`,
+              {
+                localOriginal: getVectorClock(local, clientId),
+                remote: remoteVector,
+                merged: localVector,
+              },
+            );
+          }
+        } catch (e) {
+          pfLog(
+            1,
+            `${SyncService.L}.${this.uploadAll.name}(): Could not get remote vector clock for merge`,
+            e,
+          );
+          // Continue with local vector clock only
+        }
+      }
+
+      const newVector = incrementVectorClock(localVector, clientId);
+
+      const updatedMeta = {
+        ...local,
+        lastUpdate: Date.now(),
+        localLamport: nextLamport,
+        // Important: Don't update lastSyncedLamport yet
+        // It will be updated after successful upload
+      };
+
+      // Update vector clock
+      setVectorClock(updatedMeta, newVector, clientId);
+
       await this._metaModelCtrl.save(
-        {
-          ...local,
-          lastUpdate: Date.now(),
-        },
+        updatedMeta,
         // NOTE we always ignore db lock while syncing
         true,
       );
@@ -227,6 +324,10 @@ export class SyncService<const MD extends ModelCfgs> {
     }
 
     try {
+      // Get client ID for vector clock operations
+      const clientId = await this._metaModelCtrl.loadClientId();
+      const localVector = getVectorClock(local, clientId);
+
       return await this.uploadToRemote(
         {
           crossModelVersion: local.crossModelVersion,
@@ -236,6 +337,7 @@ export class SyncService<const MD extends ModelCfgs> {
           mainModelData: {},
           localLamport: local.localLamport || 0,
           lastSyncedLamport: null,
+          vectorClock: localVector,
         },
         {
           ...local,
@@ -276,6 +378,9 @@ export class SyncService<const MD extends ModelCfgs> {
       revMap: {},
       localLamport: 0,
       lastSyncedLamport: null,
+      // Include vector clock fields to prevent comparison issues
+      vectorClock: {},
+      lastSyncedVectorClock: null,
     };
 
     return await this.downloadToLocal(
@@ -329,19 +434,35 @@ export class SyncService<const MD extends ModelCfgs> {
         localRevMap: local.revMap,
       });
 
-      await this._metaFileSyncService.saveLocal({
+      // Get client ID for vector clock operations
+      const clientId = await this._metaModelCtrl.loadClientId();
+
+      // Merge vector clocks if available
+      const localVector = getVectorClock(local, clientId);
+      const remoteVector = getVectorClock(remote, clientId);
+      const mergedVector = mergeVectorClocks(localVector, remoteVector);
+
+      const updatedMeta = {
         // shared
         lastUpdate: remote.lastUpdate,
         crossModelVersion: remote.crossModelVersion,
         revMap: remote.revMap,
-        // Lamport clock: take max of local and remote, then increment
-        localLamport: Math.max(local.localLamport || 0, remote.localLamport || 0) + 1,
+        // Don't increment localLamport during download - only take the max
+        // localLamport tracks LOCAL changes only
+        localLamport: Math.max(local.localLamport || 0, remote.localLamport || 0),
         // local meta
         lastSyncedUpdate: remote.lastUpdate,
-        lastSyncedLamport:
-          Math.max(local.localLamport || 0, remote.localLamport || 0) + 1,
+        lastSyncedLamport: Math.max(local.localLamport || 0, remote.localLamport || 0),
         metaRev: remoteRev,
-      });
+      };
+
+      // Update vector clocks if we have them
+      if (mergedVector) {
+        setVectorClock(updatedMeta, mergedVector, clientId);
+        setLastSyncedVectorClock(updatedMeta, mergedVector, clientId);
+      }
+
+      await this._metaFileSyncService.saveLocal(updatedMeta);
       return;
     }
 
@@ -420,7 +541,15 @@ export class SyncService<const MD extends ModelCfgs> {
       await this._modelSyncService.updateLocalMainModelsFromRemoteMetaFile(remote);
     }
 
-    await this._metaFileSyncService.saveLocal({
+    // Get client ID for vector clock operations
+    const clientId = await this._metaModelCtrl.loadClientId();
+
+    // Merge vector clocks if available
+    const localVector = getVectorClock(local, clientId);
+    const remoteVector = getVectorClock(remote, clientId);
+    const mergedVector = mergeVectorClocks(localVector, remoteVector);
+
+    const updatedMeta = {
       metaRev: remoteRev,
       lastSyncedUpdate: remote.lastUpdate,
       lastUpdate: remote.lastUpdate,
@@ -428,12 +557,21 @@ export class SyncService<const MD extends ModelCfgs> {
       // localLamport tracks LOCAL changes only
       localLamport: Math.max(local.localLamport || 0, remote.localLamport || 0),
       lastSyncedLamport: Math.max(local.localLamport || 0, remote.localLamport || 0),
+      lastSyncedAction: `Downloaded ${isDownloadAll ? 'all data' : `${toUpdate.length} models`} at ${new Date().toISOString()}`,
       revMap: validateRevMap({
         ...local.revMap,
         ...realRemoteRevMap,
       }),
       crossModelVersion: remote.crossModelVersion,
-    });
+    };
+
+    // Update vector clocks if we have them
+    if (mergedVector) {
+      setVectorClock(updatedMeta, mergedVector, clientId);
+      setLastSyncedVectorClock(updatedMeta, mergedVector, clientId);
+    }
+
+    await this._metaFileSyncService.saveLocal(updatedMeta);
   }
 
   /**
@@ -468,16 +606,24 @@ export class SyncService<const MD extends ModelCfgs> {
         ? await this._pfapiMain.getAllSyncModelData()
         : await this._modelSyncService.getMainFileModelDataForUpload();
 
+      // Get client ID for vector clock operations
+      const clientId = await this._metaModelCtrl.loadClientId();
+      const localVector = getVectorClock(local, clientId);
+
+      const uploadMeta: UploadMeta = {
+        revMap: local.revMap,
+        lastUpdate: local.lastUpdate,
+        lastUpdateAction: local.lastUpdateAction,
+        crossModelVersion: local.crossModelVersion,
+        mainModelData,
+        localLamport: local.localLamport || 0,
+        lastSyncedLamport: null,
+        vectorClock: localVector,
+        ...(syncProvider.isLimitedToSingleFileSync ? { isFullData: true } : {}),
+      };
+
       const metaRevAfterUpdate = await this._metaFileSyncService.upload(
-        {
-          revMap: local.revMap,
-          lastUpdate: local.lastUpdate,
-          crossModelVersion: local.crossModelVersion,
-          mainModelData,
-          localLamport: local.localLamport || 0,
-          lastSyncedLamport: null,
-          ...(syncProvider.isLimitedToSingleFileSync ? { isFullData: true } : {}),
-        },
+        uploadMeta,
         lastRemoteRev,
       );
 
@@ -493,12 +639,20 @@ export class SyncService<const MD extends ModelCfgs> {
         },
       );
 
-      await this._metaFileSyncService.saveLocal({
+      const updatedMeta = {
         ...local,
         lastSyncedUpdate: local.lastUpdate,
         lastSyncedLamport: local.localLamport || 0,
+        lastSyncedAction: `Uploaded single file at ${new Date().toISOString()}`,
         metaRev: metaRevAfterUpdate,
-      });
+      };
+
+      // Update vector clock if available
+      if (localVector) {
+        setLastSyncedVectorClock(updatedMeta, localVector, clientId);
+      }
+
+      await this._metaFileSyncService.saveLocal(updatedMeta);
 
       pfLog(
         2,
@@ -564,18 +718,27 @@ export class SyncService<const MD extends ModelCfgs> {
 
     // Validate and upload the final revMap
     const validatedRevMap = validateRevMap(realRevMap);
-    const metaRevAfterUpload = await this._metaFileSyncService.upload({
+
+    // Get client ID for vector clock operations
+    const clientId = await this._metaModelCtrl.loadClientId();
+    const localVector = getVectorClock(local, clientId);
+
+    const uploadMeta: UploadMeta = {
       revMap: validatedRevMap,
       lastUpdate: local.lastUpdate,
+      lastUpdateAction: local.lastUpdateAction,
       crossModelVersion: local.crossModelVersion,
       mainModelData:
         await this._modelSyncService.getMainFileModelDataForUpload(completeData),
       localLamport: local.localLamport || 0,
       lastSyncedLamport: null,
-    });
+      vectorClock: localVector,
+    };
+
+    const metaRevAfterUpload = await this._metaFileSyncService.upload(uploadMeta);
 
     // Update local after successful upload
-    await this._metaFileSyncService.saveLocal({
+    const updatedMeta = {
       // leave as is basically
       lastUpdate: local.lastUpdate,
       crossModelVersion: local.crossModelVersion,
@@ -584,9 +747,17 @@ export class SyncService<const MD extends ModelCfgs> {
       // actual updates
       lastSyncedUpdate: local.lastUpdate,
       lastSyncedLamport: local.localLamport || 0,
+      lastSyncedAction: `Uploaded ${toUpdate.length} models at ${new Date().toISOString()}`,
       revMap: validatedRevMap,
       metaRev: metaRevAfterUpload,
-    });
+    };
+
+    // Update vector clock if available
+    if (localVector) {
+      setLastSyncedVectorClock(updatedMeta, localVector, clientId);
+    }
+
+    await this._metaFileSyncService.saveLocal(updatedMeta);
   }
 
   /**

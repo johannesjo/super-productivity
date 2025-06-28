@@ -1,0 +1,42 @@
+
+### Bug Fixes
+
+* "could not focus task" #4618
+* attempt to fix boards backlog issue
+* complete moment.js migration in tests and schedule components
+* correct service test expectations for error handling
+* customizer panel light theme
+* defensive programming for tag-list.component #4627
+* error with dialog estimate
+* idle detection errors and system freezes after hibernation
+* planned tasks not created without sync enabled #4622
+* repeated tasks not automatically added to today #4622
+* resolve "Unable to getNewestPossibleDueDate()" test failures
+* resolve time-dependent E2E test failures for scheduled reminders
+* **schedule:** date being shown in schedule event title
+* **sync:** add missing write lock circumvention
+* **sync:** db lock error
+* tags not added for repeatable tasks #4606
+* update electron-log to fix deprecated session API warnings
+### Features
+
+* add breathing circle ani for flowtime
+* add idle handling for wayland
+* add lamport stamp to sync conflict dialog
+* css migration fixes
+* improve finish day button primary logic
+* improve idle handling
+* improve no tasks message if there are done tasks
+* improve no tasks planned styling
+* improve wayland compatability
+* **issue:** improve display logic
+* make sure today tag is never added to a task
+* **markdownInsert:** add markdown insert to task feature
+* **markdownInsert:** improve markdown insert
+* remove improvement banner as it is not working well
+* replace moment.js with native date
+* replace scss variables with css variables
+### Performance Improvements
+
+* add OnPush change detection to components
+* lazy load shepherd.js and canvas-confetti libraries

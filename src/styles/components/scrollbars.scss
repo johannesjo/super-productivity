@@ -1,3 +1,5 @@
+@import '../mixins/media-queries';
+
 @mixin _scrollBarStyles() {
   scrollbar-color: var(--theme-scrollbar-thumb) var(--theme-scrollbar-track);
   scrollbar-width: 4px;

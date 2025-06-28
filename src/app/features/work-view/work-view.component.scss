@@ -282,20 +282,22 @@ h2 {
   }
 
   .no-tasks-label {
-    font-size: 16px;
+    font-size: 17px;
     position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
-    font-weight: 200;
+    font-weight: 400;
+    color: #333;
 
-    color: var(--theme-text-color-most-intense);
-
-    :host-context(body:not(.isDarkTheme)) & {
-      color: var(--c-backdrop);
+    @include darkTheme() {
+      color: var(--theme-text-color-most-intense);
+      font-weight: 500;
+      text-shadow:
+        0 0 2px black,
+        0 0 5px black;
     }
-    text-shadow: 0 0 1px var(--color-black);
   }
 }
 

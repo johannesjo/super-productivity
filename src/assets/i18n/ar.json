@@ -31,7 +31,6 @@
     "RESTORE_FILE_BACKUP_ANDROID": "يبدو أنه لا توجد بيانات ، ولكن هناك نسخة احتياطية متاحة. هل تريد تحميلها؟",
     "RESTORE_STRAY_BACKUP": "قد يكون هناك خطأ ما أثناء المزامنة الأخيرة. هل تريد استعادة آخر نسخة احتياطية؟"
   },
-  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "لاحقا اليوم",
     "NEXT_WEEK": "الاسبوع القادم",
@@ -114,11 +113,24 @@
         "TITLE": "كالداف"
       },
       "ISSUE_CONTENT": {
+        "ASSIGNEE": "المحال",
+        "AT": "في",
+        "ATTACHMENTS": "المرفقات",
+        "CHANGED": "تغيير",
+        "COMMENTS": "التعليقات",
+        "COMPONENTS": "مكونات",
         "DESCRIPTION": "وصف",
         "LABELS": "الاقسام",
+        "LIST_OF_CHANGES": "قائمة التغييرات",
         "MARK_AS_CHECKED": "وضع علامة على التحديثات على أنها محددة",
+        "ON": "على",
+        "RELATED": "ذات الصله",
         "STATUS": "الحالة",
-        "SUMMARY": "ملخص"
+        "STORY_POINTS": "نقاط القصة",
+        "SUB_TASKS": "الفرعيه",
+        "SUMMARY": "ملخص",
+        "WORKLOG": "سجل العمل",
+        "WRITE_A_COMMENT": "اكتب تعليقا"
       },
       "S": {
         "CALENDAR_NOT_FOUND": " كالداف : التقويم غير موجود\n\"{{calendarName}}\" ",
@@ -156,6 +168,8 @@
         "L_INTERVAL": "الفاصل الزمني لتكرار العبارة",
         "L_TEXT": "نص",
         "L_TEXT_DESCRIPTION": "على سبيل المثال: ”العمل على\n$currentTaskTitle”",
+        "L_VOICE": "حدد صوتا",
+        "L_VOICE_DESCRIPTION": "اختر صوتا",
         "TITLE": "وضع الدومينا"
       }
     },
@@ -334,6 +348,39 @@
       "DEFAULT_PROJECT_DESCRIPTION": "تم تعيين المشروع للمهام التي تم إنشاؤها من المشكلات.",
       "DEFAULT_PROJECT_LABEL": "مشروع الإنتاجية الفائقة الافتراضي",
       "HOW_TO_GET_A_TOKEN": "كيف تحصل على الرمز المميز؟",
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "المحال",
+        "AT": "في",
+        "ATTACHMENTS": "المرفقات",
+        "AUTHOR": "كاتب",
+        "CATEGORY": "باب",
+        "CHANGED": "تغيير",
+        "COMMENTS": "التعليقات",
+        "COMPONENTS": "مكونات",
+        "DESCRIPTION": "وصف",
+        "DONE_RATIO": "نسبة تم",
+        "DUE_DATE": "تاريخ الاستحقاق",
+        "LABELS": "تسميات",
+        "LAST_COMMENT": "التعليق الأخير",
+        "LIST_OF_CHANGES": "قائمة التغييرات",
+        "LOAD_ALL_COMMENTS": "تحميل جميع تعليقات {{nr}} ",
+        "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "وصف التحميل وجميع التعليقات",
+        "LOCATION": "مكان",
+        "MARK_AS_CHECKED": "وضع علامة على التحديثات كعلامة محددة",
+        "ON": "على",
+        "PRIORITY": "أولوية",
+        "RELATED": "ذات الصله",
+        "START": "بدء",
+        "STATUS": "حالة",
+        "STORY_POINTS": "نقاط القصة",
+        "SUB_TASKS": "الفرعيه",
+        "SUMMARY": "ملخص",
+        "TIME_SPENT": "الوقت المستغرق",
+        "TYPE": "نوع",
+        "VERSION": "الإصدار",
+        "WORKLOG": "سجل العمل",
+        "WRITE_A_COMMENT": "اكتب تعليقا"
+      },
       "S": {
         "ERR_GENERIC": "{{issueProviderName}} خطأ: {{errTxt}}",
         "ERR_NETWORK": "{{issueProviderName}}: فشل الطلب بسبب خطأ في الشبكة من جانب العميل",
@@ -481,6 +528,14 @@
         "WELCOME_USER": "مرحبًا {{user}}!"
       }
     },
+    "MARKDOWN_PASTE": {
+      "CONFIRM_ADD_TO_SUB_TASK_NOTES": "أضف قائمة تخفيض السعر الملصقة إلى ملاحظات المهمة الفرعية \"{{parentTaskTitle}}\"؟",
+      "CONFIRM_PARENT_TASKS": "إنشاء <strong>{{tasksCount}} مهام جديدة</strong> من قائمة تخفيض السعر الملصقة؟",
+      "CONFIRM_PARENT_TASKS_WITH_SUBS": "إنشاء <strong>{{tasksCount}} مهام جديدة {{subTasksCount}} </strong> من قائمة تخفيض السعر الملصقة؟",
+      "CONFIRM_SUB_TASKS": "إنشاء {{tasksCount}} مهام فرعية جديدة من قائمة تخفيض السعر الملصقة؟",
+      "CONFIRM_SUB_TASKS_WITH_PARENT": "إنشاء <strong>{{tasksCount}} مهام فرعية جديدة ضمن</strong> \"{{parentTaskTitle}}\" من قائمة تخفيض السعر الملصقة؟",
+      "DIALOG_TITLE": "تم اكتشاف قائمة تخفيض السعر الملصقة!"
+    },
     "METRIC": {
       "BANNER": {
         "CHECK": "أنا فعلت هذا!"
@@ -603,12 +658,12 @@
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "المحال",
+        "ATTACHMENTS": "المرفقات",
         "DESCRIPTION": "وصف",
         "MARK_AS_CHECKED": "وضع علامة على التحديثات على أنها محددة",
         "STATUS": "الحالة",
         "SUMMARY": "ملخص",
         "TYPE": "نوع",
-        "ATTACHMENTS": "المرفقات",
         "UPLOAD_ATTACHMENT": "تحميل إلى المهمة"
       },
       "ISSUE_STRINGS": {
@@ -616,12 +671,12 @@
         "ISSUES_STR": "حزم العمل"
       },
       "S": {
+        "ERR_NO_FILE": "لم يتم تحديد ملف",
         "ERR_UNKNOWN": "OpenProject: خطأ غير معروف {{statusCode}} {{errorMsg}}. هل تم تكوين CORS بشكل صحيح للخادم؟",
         "POST_TIME_SUCCESS": "OpenProject: تم إنشاء إدخال الوقت بنجاح لـ {{issueTitle}}",
         "TRANSITION": "OpenProject: تعيين المشكلة \"{{issueKey}}\" إلى \"{{name}}\"",
         "TRANSITION_SUCCESS": "OpenProject: تعيين المشكلة {{issueKey}} إلى <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "تم تحميل الانتقالات. استخدم التحديدات أدناه لتعيينها",
-        "ERR_NO_FILE": "لم يتم تحديد ملف"
+        "TRANSITIONS_LOADED": "تم تحميل الانتقالات. استخدم التحديدات أدناه لتعيينها"
       }
     },
     "PLANNER": {
@@ -819,6 +874,7 @@
     "SEARCH_BAR": {
       "INFO": "انقر فوق رمز القائمة للبحث عن المهام المؤرشفة",
       "INFO_ARCHIVED": "انقر فوق رمز الأرشيف للبحث عن المهام العادية",
+      "NO_RESULTS": "لم يتم العثور على مهام تطابق بحثك",
       "PLACEHOLDER": "ابحث عن وصف المهمة أو المهمة",
       "PLACEHOLDER_ARCHIVED": "ابحث عن المهام المؤرشفة",
       "TOO_MANY_RESULTS": "نتائج كثيرة جدا ، يرجى تضييق نطاق البحث"
@@ -878,20 +934,24 @@
         "TITLE": "تسجيل الدخول: {{provider}}"
       },
       "D_CONFLICT": {
+        "LAMPORT_CLOCK": "مراجعه",
         "LAST_CHANGE": "اخر تغير:",
         "LAST_SYNC": "المزامنة الأخيرة:",
         "LOCAL": "محلي",
         "LOCAL_REMOTE": "محلي -> بعيد",
         "REMOTE": "التحكم عن بعد",
         "TEXT": "<p>التحديث من Dropbox. يبدو أن البيانات المحلية والبعيدة يتم تعديلها.</p>",
+        "TIMESTAMP": "الطابع الزمني",
         "TITLE": "Dropbox: تضارب البيانات",
         "USE_LOCAL": "استخدم المحلي",
         "USE_REMOTE": "استخدم جهاز التحكم عن بعد"
       },
       "D_DECRYPT_ERROR": {
         "BTN_OVER_WRITE_REMOTE": "تغيير جهاز التحكم عن بعد والكتابة فوقه",
+        "CHANGE_PW_AND_DECRYPT": "التغيير ومحاولة فك التشفير",
         "P1": "يتم تشفير بياناتك وفشل فك التشفير. الرجاء إدخال كلمة المرور الصحيحة!",
-        "P2": "يمكنك أيضا تغيير كلمة المرور الخاصة بك ، والتي ستحل محل جميع البيانات عن بعد."
+        "P2": "يمكنك أيضا تغيير كلمة المرور الخاصة بك ، والتي ستحل محل جميع البيانات عن بعد.",
+        "PASSWORD": "شعار"
       },
       "D_INCOMPLETE_SYNC": {
         "BTN_CLOSE_APP": "إغلاق التطبيق",
@@ -1232,6 +1292,45 @@
         "WEDNESDAY": "الأربعاء"
       }
     },
+    "TASK_VIEW": {
+      "CUSTOMIZER": {
+        "ENTER_PROJECT": "أدخل المشروع",
+        "ENTER_TAG": "أدخل العلامة",
+        "ESTIMATED_TIME": "الوقت المقدر",
+        "FILTER_BY": "تصفية حسب",
+        "FILTER_DEFAULT": "لا يوجد مرشح",
+        "FILTER_ESTIMATED_TIME": "الوقت المقدر",
+        "FILTER_PROJECT": "مشروع",
+        "FILTER_SCHEDULED_DATE": "التاريخ المحدد",
+        "FILTER_TAG": "العلامه",
+        "FILTER_TIME_SPENT": "الوقت المستغرق",
+        "GROUP_BY": "مجموعة حسب",
+        "GROUP_DEFAULT": "لا مجموعة",
+        "GROUP_PROJECT": "مشروع",
+        "GROUP_SCHEDULED_DATE": "التاريخ المحدد",
+        "GROUP_TAG": "العلامه",
+        "RESET_ALL": "إعادة تعيين الكل",
+        "SCHEDULED_DEFAULT": "أي تاريخ",
+        "SCHEDULED_NEXT_MONTH": "الشهر المقبل",
+        "SCHEDULED_NEXT_WEEK": "الأسبوع القادم",
+        "SCHEDULED_THIS_MONTH": "هذا الشهر",
+        "SCHEDULED_THIS_WEEK": "هذا الأسبوع",
+        "SCHEDULED_TODAY": "اليوم",
+        "SCHEDULED_TOMORROW": "غداً",
+        "SORT_BY": "الترتيب حسب",
+        "SORT_CREATION_DATE": "تاريخ الإنشاء",
+        "SORT_DEFAULT": "افتراضي",
+        "SORT_NAME": "اسم",
+        "SORT_SCHEDULED_DATE": "التاريخ المحدد",
+        "TIME_1HOUR": "> 1 ساعة",
+        "TIME_2HOUR": "> 2 ساعة",
+        "TIME_10MIN": "> 10 دقائق",
+        "TIME_30MIN": "> 30 دقيقة",
+        "TIME_DEFAULT": "أي مدة",
+        "TIME_SPENT": "الوقت المستغرق",
+        "TITLE": "تخصيص عرض المهام"
+      }
+    },
     "TIME_TRACKING": {
       "B": {
         "ALREADY_DID": "لقد فعلتها",
@@ -1324,33 +1423,34 @@
     }
   },
   "FILE_IMEX": {
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "INITIATED_MSG": "تم بدء استيراد البيانات تلقائيًا.",
+      "SOURCE_URL_DOMAIN": "النطاق المصدر",
+      "TITLE": "تأكيد استيراد البيانات من URL",
+      "WARNING_MSG": "المتابعة ستؤدي إلى استبدال بيانات التطبيق الحالية والإعدادات بالمحتوى من عنوان URL المحدد. لا يمكن التراجع عن هذا الإجراء.",
+      "WARNING_TITLE": "تحذير"
+    },
     "EXPORT_DATA": "تصدير البيانات",
     "IMPORT_FROM_FILE": "استيراد من الملف",
+    "IMPORT_FROM_URL": "الاستيراد من URL",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "يرجى إدخال عنوان URL الكامل لملف نسخ Super Productivity الاحتياطي بتنسيق JSON الذي تريد استيراده.",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "الاستيراد من URL",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "الاستيراد من URL",
     "PRIVACY_EXPORT": "تصدير البيانات مجهولة المصدر (لإرسالها إلى contact@super-productivity.com للتصحيح)",
     "S_BACKUP_DOWNLOADED": "تم تنزيل النسخة الاحتياطية إلى مجلد مستندات android",
     "S_ERR_IMPORT_FAILED": "فشل استيراد البيانات",
     "S_ERR_INVALID_DATA": "فشل الاستيراد: غير صالح JSON",
     "S_ERR_INVALID_URL": "فشل الاستيراد: تم توفير عنوان URL غير صالح",
-    "S_IMPORT_FROM_URL_ERR_DECODE": "خطأ: تعذر فك تشفير معلمة URL للاستيراد. يرجى التأكد من تنسيقها بشكل صحيح.",
     "S_ERR_NETWORK": "فشل الاستيراد: خطأ في الشبكة أثناء جلب البيانات من URL",
-    "IMPORT_FROM_URL": "الاستيراد من URL",
-    "URL_PLACEHOLDER": "أدخل عنوان URL للاستيراد منه",
-    "IMPORT_FROM_URL_DIALOG_TITLE": "الاستيراد من URL",
-    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "يرجى إدخال عنوان URL الكامل لملف نسخ Super Productivity الاحتياطي بتنسيق JSON الذي تريد استيراده.",
-    "OPEN_IMPORT_FROM_URL_DIALOG": "الاستيراد من URL",
-    "DIALOG_CONFIRM_URL_IMPORT": {
-      "TITLE": "تأكيد استيراد البيانات من URL",
-      "INITIATED_MSG": "تم بدء استيراد البيانات تلقائيًا.",
-      "SOURCE_URL_DOMAIN": "النطاق المصدر",
-      "WARNING_TITLE": "تحذير",
-      "WARNING_MSG": "المتابعة ستؤدي إلى استبدال بيانات التطبيق الحالية والإعدادات بالمحتوى من عنوان URL المحدد. لا يمكن التراجع عن هذا الإجراء."
-    }
+    "S_IMPORT_FROM_URL_ERR_DECODE": "خطأ: تعذر فك تشفير معلمة URL للاستيراد. يرجى التأكد من تنسيقها بشكل صحيح.",
+    "URL_PLACEHOLDER": "أدخل عنوان URL للاستيراد منه"
   },
   "G": {
     "ADD": "يضيف",
     "ADVANCED_CFG": "التكوين المتقدم",
     "CANCEL": "إلغاء",
     "CLOSE": "قريب",
+    "CONFIRM": "أكد",
     "DELETE": "حذف",
     "DISMISS": "رفض",
     "DO_IT": "افعلها!",
@@ -1471,6 +1571,7 @@
       "TOGGLE_ISSUE_PANEL": "إظهار/إخفاء لوحة المشكلة",
       "TOGGLE_PLAY": "بدء / إيقاف المهمة",
       "TOGGLE_SIDE_NAV": "إظهار والتركيز / إخفاء Sidenav",
+      "TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL": "تبديل لوحة التصفية / المجموعة / الفرز",
       "TRIGGER_SYNC": "تشغيل المزامنة (إذا تم تكوينها)",
       "ZOOM_DEFAULT": "التكبير الافتراضي (سطح المكتب فقط)",
       "ZOOM_IN": "تكبير (سطح المكتب فقط)",
@@ -1515,6 +1616,7 @@
       "IS_HIDE_NAV": "إخفاء التنقل حتى يتم تمرير الرأس الرئيسي (سطح المكتب فقط)",
       "IS_MINIMIZE_TO_TRAY": "تصغير إلى درج (سطح المكتب فقط)",
       "IS_SHOW_TIP_LONGER": "إظهار نصيحة الإنتاجية في التطبيق ابدأ لفترة أطول قليلا",
+      "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "إظهار العد التنازلي الحالي في قائمة الدرج / الحالة (Mac لسطح المكتب فقط)",
       "IS_TRAY_SHOW_CURRENT_TASK": "إظهار المهمة الحالية في الدرج / قائمة الحالة (سطح المكتب فقط)",
       "IS_TURN_OFF_MARKDOWN": "إيقاف تشغيل تخفيض السعر للملاحظات",
       "IS_USE_MINIMAL_SIDE_NAV": "استخدم شريط التنقل البسيط (إظهار الرموز فقط)",
@@ -1600,6 +1702,34 @@
       "TITLE": "تتبع الوقت"
     }
   },
+  "GLOBAL_RELATIVE_TIME": {
+    "FUTURE": {
+      "A_DAY": "في يوم واحد",
+      "A_MINUTE": "في دقيقة واحدة",
+      "A_MONTH": "في شهر",
+      "A_YEAR": "في سنة",
+      "AN_HOUR": "في ساعة",
+      "DAYS": "في {{count}} أيام",
+      "FEW_SECONDS": "في ثوان قليلة",
+      "HOURS": "في {{count}} ساعة",
+      "MINUTES": "في {{count}} دقائق",
+      "MONTHS": "في {{count}} أشهر",
+      "YEARS": "في {{count}} سنوات"
+    },
+    "PAST": {
+      "A_DAY": "منذ يوم",
+      "A_MINUTE": "منذ دقيقة",
+      "A_MONTH": "شهر منذ",
+      "A_YEAR": "قبل عام",
+      "AN_HOUR": "منذ ساعة",
+      "DAYS": " منذ{{count}} يوم",
+      "FEW_SECONDS": "منذ بضع ثوان",
+      "HOURS": " منذ{{count}} ساعة",
+      "MINUTES": " منذ{{count}} دقيقة",
+      "MONTHS": " منذ{{count}} أشهر",
+      "YEARS": " منذ{{count}} سنوات"
+    }
+  },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "نسخ إلى الحافظة",
     "ERR_COMPRESSION": "خطأ لواجهة الضغط",
@@ -1632,6 +1762,7 @@
     "CREATE_TAG": "إنشاء علامة",
     "DELETE_PROJECT": "حذف المشروع",
     "DELETE_TAG": "حذف العلامة",
+    "ENTER_FOCUS_MODE": "الدخول إلى وضع التركيز البؤري",
     "GO_TO_TASK_LIST": "انتقل إلى قائمة المهام",
     "HELP": "يساعد",
     "HM": {
@@ -1656,6 +1787,7 @@
     "PROJECTS": "مشاريع",
     "QUICK_HISTORY": "التاريخ السريع",
     "SCHEDULE": "جدول",
+    "SEARCH": "بحث",
     "SETTINGS": "الإعدادات",
     "SHOW_SEARCH_BAR": "إظهار شريط البحث",
     "TAGS": "الكلمات",
@@ -1768,6 +1900,7 @@
     "ADD_SCHEDULED_FOR_TOMORROW": "إضافة المهام المخطط لها غدًا ({{nr}})",
     "ADD_SOME_TASKS": "أضف بعض المهام للتخطيط ليومك!",
     "DONE_TASKS": "المهام المنجزة",
+    "DONE_TASKS_IN_ARCHIVE": "لا توجد حاليا مهام منتهية هنا ، ولكن هناك بعض المهام المؤرشفة بالفعل.",
     "ESTIMATE_REMAINING": "الباقى من الوقت المتوقع:",
     "FINISH_DAY": "إنهاء اليوم",
     "FINISH_DAY_FOR_PROJECT": "إنهاء اليوم لهذا المشروع",
@@ -1776,6 +1909,7 @@
     "HELP_PROCRASTINATION": "المساعدة أنا أماطل!",
     "MOVE_DONE_TO_ARCHIVE": "تم النقل إلى الأرشفة",
     "NO_DONE_TASKS": "لا توجد حاليا مهام منتجزة",
+    "NO_PLANNED_TASK_ALL_DONE": "جميع المهام المنجزة",
     "NO_PLANNED_TASKS": "لا توجد مهام مخطط لها",
     "READY_TO_WORK": "على استعداد للعمل!",
     "RESET_BREAK_TIMER": "إعادة تعيين دون كسر الوقت",

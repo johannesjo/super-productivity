@@ -1,0 +1,36 @@
+{
+  "name": "sync-md",
+  "version": "2.0.0",
+  "description": "Sync markdown files with SuperProductivity projects - Solid.js version",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:watch": "node scripts/watch-and-build.js",
+    "build": "vite build && node scripts/build-inline.js",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "package": "npm run build && node scripts/build-plugin.js",
+    "deploy": "npm run build && cp -r dist/* ../../../src/assets/sync-md-plugin/",
+    "clean": "rm -rf dist node_modules *.zip",
+    "lint": "tsc --noEmit",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
+    "test:watch": "NODE_OPTIONS='--experimental-vm-modules' jest --watch",
+    "test:coverage": "NODE_OPTIONS='--experimental-vm-modules' jest --coverage"
+  },
+  "devDependencies": {
+    "@jest/globals": "^30.0.3",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.15.33",
+    "archiver": "^7.0.1",
+    "fflate": "^0.8.2",
+    "jest": "^30.0.3",
+    "solid-js": "^1.9.7",
+    "ts-jest": "^29.4.0",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5",
+    "vite-plugin-solid": "^2.11.7"
+  },
+  "dependencies": {
+    "@super-productivity/plugin-api": "file:../../plugin-api"
+  }
+}

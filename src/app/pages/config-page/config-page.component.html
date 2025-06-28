@@ -45,6 +45,25 @@
             (save)="saveGlobalCfg($event)"
           ></config-sound-form>
         </section>
+
+        <div>
+          <h2
+            class="mat-h2"
+            style="margin-top: 32px"
+          >
+            {{ T.PS.PLUGINS | translate }}
+          </h2>
+          <section class="config-section plugin-section">
+            <collapsible
+              [isIconBefore]="true"
+              [isExpanded]="false"
+              [title]="T.PS.PLUGINS | translate"
+            >
+              <plugin-management></plugin-management>
+            </collapsible>
+          </section>
+        </div>
+
         <div class="tour-productivityHelper">
           <h2
             class="mat-h2"
@@ -62,6 +81,7 @@
             </section>
           }
         </div>
+
         <h2
           class="mat-h2"
           style="margin-top: 32px"

@@ -1,7 +1,150 @@
 .isHighlight {
   font-weight: 600;
+}
 
-  td:nth-child(2) {
-    font-weight: normal;
+h3 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-size: 1.1em;
+  font-weight: 500;
+}
+
+table + table {
+  margin-top: 20px;
+}
+
+td,
+th {
+  padding: 2px 8px;
+  text-align: center;
+
+  &:first-child {
+    text-align: left;
+    padding-left: 0;
+  }
+
+  &:last-child {
+    padding-right: 0;
+  }
+}
+
+:host ::ng-deep .collapsible-title {
+  font-weight: bold;
+}
+
+// Mobile responsiveness
+@media (max-width: 600px) {
+  table {
+    font-size: 0.875rem;
+    width: 100%;
+  }
+
+  td,
+  th {
+    padding: 4px 4px;
+    word-break: break-word;
+    min-width: auto;
+
+    &:first-child {
+      padding-left: 0;
+      width: 30%;
+      text-align: left;
+    }
+
+    &:not(:first-child) {
+      text-align: right;
+    }
+
+    &:last-child {
+      padding-right: 0;
+    }
+  }
+
+  // Stack timestamp columns on very small screens
+  @media (max-width: 400px) {
+    table {
+      display: block;
+
+      thead {
+        display: none;
+      }
+
+      tbody,
+      tr {
+        display: block;
+      }
+
+      tr {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+        padding: 8px 0;
+
+        &:last-child {
+          border-bottom: none;
+        }
+      }
+
+      td {
+        display: flex;
+        justify-content: space-between;
+        padding: 2px 0;
+        text-align: left !important;
+
+        &:first-child {
+          width: 100%;
+          font-weight: 500;
+          margin-bottom: 4px;
+        }
+
+        &:not(:first-child) {
+          &::before {
+            content: attr(data-label);
+            font-weight: 400;
+            margin-right: 8px;
+            opacity: 0.7;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Dialog container mobile layout
+:host ::ng-deep {
+  .mat-mdc-dialog-container {
+    @media (max-width: 600px) {
+      max-width: calc(100vw - 32px);
+      margin: 16px;
+    }
+  }
+
+  .mat-mdc-dialog-content {
+    @media (max-width: 600px) {
+      padding: 0 16px;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+  }
+}
+
+// Dialog actions mobile layout
+:host ::ng-deep .mat-mdc-dialog-actions {
+  @media (max-width: 600px) {
+    padding: 16px;
+
+    .wrap-buttons {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      gap: 8px;
+
+      button {
+        width: 100%;
+        justify-content: center;
+
+        .mat-icon {
+          margin-right: 8px;
+        }
+      }
+    }
   }
 }

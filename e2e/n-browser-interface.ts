@@ -8,7 +8,7 @@ export interface AddTaskWithReminderParams {
 
 export interface NBrowser extends NightwatchAPI {
   addTask: (taskTitle: string, isSkipClose?: boolean) => NBrowser;
-  addTaskWithNewTag: (tagName: string) => NBrowser;
+  addTaskWithNewTag: (tagName: string, taskTitle: string) => NBrowser;
   addNote: (noteTitle: string) => NBrowser;
   draftTask: (taskTitle: string) => NBrowser;
   createAndGoToDefaultProject: () => NBrowser;
@@ -17,4 +17,7 @@ export interface NBrowser extends NightwatchAPI {
   openPanelForTask: (taskSel: string) => NBrowser;
   sendKeysToActiveEl: (keys: string | string[]) => NBrowser;
   addTaskWithReminder: (params: AddTaskWithReminderParams) => NBrowser;
+  navigateToPluginSettings: () => NBrowser;
+  checkPluginStatus: (pluginName: string, expectedEnabled?: boolean) => NBrowser;
+  enableTestPlugin: (pluginName?: string) => NBrowser;
 }

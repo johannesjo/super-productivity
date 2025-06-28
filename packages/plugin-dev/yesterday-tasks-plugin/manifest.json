@@ -1,0 +1,15 @@
+{
+  "name": "Yesterday's Tasks",
+  "id": "yesterday-tasks",
+  "manifestVersion": 1,
+  "version": "1.0.0",
+  "minSupVersion": "13.0.0",
+  "description": "Shows all tasks you worked on yesterday with time spent on each.",
+  "hooks": [],
+  "permissions": ["getTasks", "getArchivedTasks", "showIndexHtmlAsView", "openDialog"],
+  "iFrame": true,
+  "sidePanel": true,
+  "type": "standard",
+  "assets": [],
+  "icon": "icon.svg"
+}

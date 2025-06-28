@@ -109,6 +109,7 @@ button.isActive2 {
     margin-right: auto;
   }
 
+  simple-counter-button,
   button {
     margin-left: var(--s-quarter);
 
@@ -220,7 +221,8 @@ button.isActive2 {
 
 .play-btn-wrapper {
   position: relative;
-  margin-left: var(--s-half);
+  //margin-left: var(--s-half);
+  //margin-right: var(--s-half);
 
   @include mq(xs) {
     margin-left: var(--s);
@@ -365,36 +367,29 @@ button.isActive2 {
   }
 }
 
-.simple-counter-mobile-trigger {
-  margin-left: var(--s);
-}
-
-.simple-counter-buttons-outer-wrapper {
+// Mobile dropdown wrapper - shared by simple counter and side panel
+.mobile-dropdown-wrapper {
   position: relative;
 }
 
-.simple-counter-buttons {
+// Mobile dropdown - shared style
+.mobile-dropdown {
+  position: absolute;
   display: flex;
+  transition: var(--transition-standard);
+  top: 100%;
+  flex-direction: column;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  pointer-events: none;
 
-  @include mq(xs, max) {
-    position: absolute;
-    display: flex;
-    transition: var(--transition-standard);
-    top: 100%;
-    flex-direction: column;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 2;
-    pointer-events: none;
-
-    &.isVisibleMobile {
-      pointer-events: all;
-    }
+  &.isVisible {
+    pointer-events: all;
   }
-}
 
-simple-counter-button {
-  @include mq(xs, max) {
+  simple-counter-button,
+  button {
     transition: var(--transition-standard);
     transform: translateY(-100%);
     opacity: 0;
@@ -403,64 +398,32 @@ simple-counter-button {
     margin-top: var(--s);
     margin-left: 0;
 
-    &:nth-child(2) {
-      transform: translateY(-200%);
+    @for $i from 2 through 7 {
+      &:nth-child(#{$i}) {
+        transform: translateY(#{$i * -100%});
+      }
     }
-    &:nth-child(3) {
-      transform: translateY(-300%);
-    }
-    &:nth-child(4) {
-      transform: translateY(-400%);
-    }
-    &:nth-child(5) {
-      transform: translateY(-500%);
-    }
-    &:nth-child(6) {
-      transform: translateY(-600%);
-    }
-    &:nth-child(7) {
-      transform: translateY(-700%);
-    }
+  }
 
-    .simple-counter-buttons.isVisibleMobile & {
-      transform: translateY(0);
-      opacity: 1;
-    }
+  &.isVisible simple-counter-button,
+  &.isVisible button {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 
-.toggle-notes-btn {
+// Desktop inline buttons - common style
+
+// Panel buttons
+.panel-btn {
   position: relative;
-  overflow: visible !important;
 
-  &.isActive.isRouteWithRightPanel::after {
-    content: '';
-    width: 100%;
-    position: absolute;
-    left: 1px;
-    top: 0;
-    bottom: -5px;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    z-index: -1;
-    box-shadow: 0px -2px 3px 0px var(--theme-separator-alpha);
+  &.isActive {
+    background-color: var(--theme-sidebar-bg);
 
-    background: var(--theme-sidebar-bg);
-    //border-color: var(--theme-extra-border-color);
-  }
-
-  @include mq(xxxs, max) {
-    &:disabled {
-      display: none;
+    &.isCustomized {
+      background-color: var(--c-accent);
     }
-  }
-}
-
-.note-ico {
-  transition: var(--transition-standard);
-
-  .toggle-notes-btn.isActive & {
-    transform: rotate(45deg);
   }
 }
 

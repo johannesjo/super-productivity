@@ -5,7 +5,6 @@ export enum FocusModePage {
   DurationSelection = 'DurationSelection',
   Preparation = 'Preparation',
   Break = 'Break',
-  ProcrastinationHelp = 'ProcrastinationHelp',
 }
 
 export enum FocusModeMode {

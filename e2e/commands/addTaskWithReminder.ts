@@ -45,15 +45,24 @@ module.exports = {
         // Set the time value with extra reliability measures
         .clearValue(TIME_INP)
         .pause(100)
+        // Use execute to directly set the value attribute as a fallback
+        .execute(
+          (selector: string, value: string) => {
+            const el = document.querySelector(selector) as HTMLInputElement;
+            if (el) {
+              el.value = value;
+              el.dispatchEvent(new Event('input', { bubbles: true }));
+              el.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          },
+          [TIME_INP, timeValue],
+        )
+        .pause(200)
+        // Also try setValue as backup
         .setValue(TIME_INP, timeValue)
         .pause(200)
-        // Second attempt for HTML time input reliability
-        .clearValue(TIME_INP)
-        .pause(100)
-        .setValue(TIME_INP, timeValue)
-        .pause(200)
-        // Send Enter key to ensure value is committed
-        .sendKeys(TIME_INP, '\uE007') // Enter key
+        // Send Tab key to ensure value is committed and move focus
+        .sendKeys(TIME_INP, '\uE004') // Tab key
         .pause(200)
         .waitForElementVisible(DIALOG_SUBMIT)
         .click(DIALOG_SUBMIT)

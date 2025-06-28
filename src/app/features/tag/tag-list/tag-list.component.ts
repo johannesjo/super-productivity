@@ -15,7 +15,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { selectTagFeatureState } from '../store/tag.reducer';
 import { selectProjectFeatureState } from '../../project/store/project.selectors';
-import { Project } from '../../project/project.model';
 import { TagComponent } from '../tag/tag.component';
 import { DEFAULT_PROJECT_COLOR } from '../../work-context/work-context.const';
 
@@ -53,19 +52,21 @@ export class TagListComponent {
         : this.tagIds()
       : this.tagIds().filter((id) => id !== this.workContext()?.activeId);
 
-    const tagsI = tagIdsFiltered.map((id) => this.tagState()?.entities[id]);
+    const tagsI = tagIdsFiltered
+      .map((id) => this.tagState()?.entities[id])
+      .filter((tag): tag is Tag => !!tag);
     const projectId = this.projectId();
-    const project = projectId && (this.projectState()?.entities[projectId] as Project);
-    if (project) {
+    const project = projectId && this.projectState()?.entities[projectId];
+    if (project && project.id) {
       const projectTag: Tag = {
         ...project,
         color: project.theme.primary || DEFAULT_PROJECT_COLOR,
         created: 0,
         icon: project.icon || 'folder_special',
       };
-      return [projectTag, ...(tagsI || [])] as Tag[];
+      return [projectTag, ...tagsI];
     }
-    return (tagsI as Tag[]) || [];
+    return tagsI;
   });
 
   projectId = computed<string | undefined>(() => {

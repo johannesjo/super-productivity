@@ -4,11 +4,6 @@
 
 .wrapper {
   position: relative;
-  margin-left: var(--s-half);
-
-  @include mq(xs) {
-    margin-left: var(--s);
-  }
 }
 
 .main-btn {

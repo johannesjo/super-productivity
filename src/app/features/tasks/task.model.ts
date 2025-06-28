@@ -21,7 +21,8 @@ export type DropListModelSource =
   | 'DONE'
   | 'BACKLOG'
   | 'ADD_TASK_PANEL'
-  | 'OVERDUE';
+  | 'OVERDUE'
+  | 'LATER_TODAY';
 
 // NOTE: do not change these, as they are used inside task repeat model directly
 // (new can be added though)
@@ -68,43 +69,38 @@ export interface IssueFieldsForTask {
   issuePoints?: number;
 }
 
-export interface TaskCopy extends IssueFieldsForTask {
-  id: string;
+// Import the unified Task type from plugin-api
+import { Task as PluginTask } from '@super-productivity/plugin-api';
+
+// Extend the plugin Task type with app-specific fields
+// Omit issue fields from PluginTask to avoid conflict with IssueFieldsForTask
+export interface TaskCopy
+  extends Omit<
+      PluginTask,
+      | 'issueId'
+      | 'issueProviderId'
+      | 'issueType'
+      | 'issueWasUpdated'
+      | 'issueLastUpdated'
+      | 'issueAttachmentNr'
+      | 'issuePoints'
+    >,
+    IssueFieldsForTask {
+  // Override required fields that are optional in plugin type
   projectId: string;
-  title: string;
-
-  subTaskIds: string[];
-
   timeSpentOnDay: TimeSpentOnDay;
-  timeEstimate: number;
-  timeSpent: number;
 
-  notes?: string;
-
-  created: number;
-  isDone: boolean;
-  doneOn?: number;
-
-  // datetime
+  // Additional app-specific fields
   dueWithTime?: number;
-  // day only
   dueDay?: string;
-
-  // TODO replace
   hasPlannedTime?: boolean;
-  // remindCfg: TaskReminderOptionId;
+  attachments: TaskAttachment[];
 
+  // Ensure type compatibility for internal fields
+  doneOn?: number;
   parentId?: string;
   reminderId?: string;
   repeatCfgId?: string;
-  // NOTE: only main tasks have tagIds set
-  tagIds: string[];
-
-  // attachments
-  attachments: TaskAttachment[];
-
-  // ui model
-  // 0: show, 1: hide-done tasks, 2: hide all sub-tasks
   _hideSubTasksMode?: HideSubTasksMode;
 }
 

@@ -31,7 +31,6 @@
     "RESTORE_FILE_BACKUP_ANDROID": "Zdá se, že neexistují ŽÁDNÁ DATA, ale je k dispozici záloha. Chcete ji načíst?",
     "RESTORE_STRAY_BACKUP": "Během poslední synchronizace mohla nastat chyba. Chcete obnovit poslední zálohu?"
   },
-  "DATETIME_INPUT": {},
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Později dnes",
     "NEXT_WEEK": "Příští týden",
@@ -57,32 +56,6 @@
         }
       }
     },
-    "BOOKMARK": {
-      "BAR": {
-        "ADD": "Přidat záložku",
-        "DROP": "Přesuňte sem pro přidání záložky",
-        "EDIT": "Upravit záložky",
-        "NO_BOOKMARKS": "Nemáte žádné záložky projektu. Přidejte je přetažením nebo kliknutím na tlačítko 'plus'."
-      },
-      "DIALOG_EDIT": {
-        "ADD_BOOKMARK": "Přidat záložku",
-        "EDIT_BOOKMARK": "Upravit záložku",
-        "LABELS": {
-          "COMMAND": "Příkaz",
-          "FILE": "Cesta k souboru",
-          "IMG": "Obrázek",
-          "LINK": "URL"
-        },
-        "SELECT_ICON": "Vyberte ikonu",
-        "SELECT_TYPE": "Vyberte typ",
-        "TYPES": {
-          "COMMAND": "Příkaz (vlastní shell příkaz)",
-          "FILE": "Soubor (otevřen výchozím systémovým programem)",
-          "IMG": "Obrázek (zobrazen jako náhled)",
-          "LINK": "Odkaz (otevře se v prohlížeči)"
-        }
-      }
-    },
     "CALDAV": {
       "DIALOG_INITIAL": {
         "TITLE": "Nastavení CalDav pro projekt"
@@ -93,10 +66,7 @@
         "CALDAV_RESOURCE": "Název zdroje CalDav (kalendář)",
         "CALDAV_URL": "URL CalDav (základní URL)",
         "CALDAV_USER": "Vaše uživatelské jméno CalDav",
-        "IS_TRANSITION_ISSUES_ENABLED": "Automaticky dokončovat úkoly CalDav při dokončení úkolu",
-        "IS_AUTO_IMPORT_ISSUES": "Automaticky přidávat neukončené úkoly CalDav do vašeho backlogu",
-        "IS_AUTO_POLL": "Automaticky sledovat importované úkoly na změny",
-        "IS_SEARCH_ISSUES_FROM_CALDAV": "Při přidávání nových úkolů zobrazovat neukončené úkoly CalDav jako návrhy"
+        "IS_TRANSITION_ISSUES_ENABLED": "Automaticky dokončovat úkoly CalDav při dokončení úkolu"
       },
       "FORM_SECTION": {
         "HELP": "<p>Zde můžete nakonfigurovat SuperProductivity tak, aby v seznamu úkolů pro konkrétní projekt v panelu vytváření úkolů v denním plánovacím zobrazení zobrazoval neukončené úkoly CalDav. Budou uvedeny jako návrhy a poskytnou odkaz na úkol a další informace o něm.</p> <p>Kromě toho můžete automaticky přidat a synchronizovat všechny neukončené úkoly do vašeho backlogu úkolů.</p><p>Aby to fungovalo v Nextcloud ve webové aplikaci, možná budete muset přidat „https://app.super-productivity.com“ na bílý seznam pomocí aplikace Nextcloud <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword</a>.</p>",
@@ -182,11 +152,7 @@
         "SCOPE_ALL": "Všechny",
         "SCOPE_ASSIGNED": "Přiřazeno mně",
         "SCOPE_CREATED": "Vytvořeno mnou",
-        "TOKEN": "Přístupový token",
-        "IS_AUTO_IMPORT_ISSUES": "Automaticky přidat nerozhodnuté problémy z Gitea do backlogu",
-        "IS_AUTO_POLL": "Automaticky sledovat importované problémy z gitu na změny",
-        "IS_SEARCH_ISSUES_FROM_GITEA": "Zobrazit problémy z gitu jako návrhy při přidávání nových úkolů",
-        "TOKEN_DESCRIPTION": "Vyžadováno pro přístup k soukromým repozitářům"
+        "TOKEN": "Přístupový token"
       },
       "FORM_SECTION": {
         "HELP": "<p>Zde můžete nakonfigurovat SuperProductivity tak, aby zobrazoval otevřené problémy Gitea pro konkrétní repozitář v panelu vytváření úkolů v denním plánovacím zobrazení. Budou uvedeny jako návrhy a poskytnou odkaz na problém a další informace o něm.</p> <p>Kromě toho můžete automaticky přidat a importovat všechny otevřené problémy.</p><p>Pro překročení omezení a přístup můžete poskytnout přístupový token.",
@@ -215,11 +181,7 @@
         "FILTER_USER": "Uživatelské jméno (např. pro filtrování změn od vás)",
         "IS_ASSIGNEE_FILTER": "Filtrovat úkoly přiřazené mně",
         "REPO": "\"uživatelské jméno/název repozitáře\" pro gitový repozitář, který chcete sledovat",
-        "TOKEN": "Přístupový token",
-        "IS_AUTO_IMPORT_ISSUES": "Automaticky importovat nerozhodnuté problémy z GitHubu",
-        "IS_AUTO_POLL": "Automaticky sledovat importované problémy z gitu na změny",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Zobrazit problémy z gitu jako návrhy při přidávání nových úkolů",
-        "TOKEN_DESCRIPTION": "Vyžadováno pro přístup k soukromým repozitářům"
+        "TOKEN": "Přístupový token"
       },
       "FORM_SECTION": {
         "HELP": "<p>Zde můžete nakonfigurovat SuperProductivity tak, aby zobrazoval otevřené problémy GitHubu pro konkrétní repozitář v panelu vytváření úkolů v denním plánovacím zobrazení. Budou uvedeny jako návrhy a poskytnou odkaz na problém a další informace o něm.</p> <p>Kromě toho můžete automaticky importovat všechny otevřené problémy.</p><p>Pro překročení omezení použití a k přístupu můžete poskytnout přístupový token. <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>Více informací o jeho rozsahu naleznete zde</a>.",
@@ -227,16 +189,7 @@
       },
       "ISSUE_CONTENT": {
         "DESCRIPTION": "Popis",
-        "MARK_AS_CHECKED": "Označit změny jako zkontrolované",
-        "PRIRAZENY": "Přiřazeno",
-        "U": "na",
-        "STITKY": "Štítky",
-        "POSLEDNI_KOMENTAR": "Poslední komentář",
-        "NAHRAJT_VSECHNY_KOMENTARE": "Načíst všechny {{nr}} komentáře",
-        "NAHRAJT_POPIS_A_VSECHNY_KOMENTARE": "Načíst popis a všechny komentáře",
-        "STAV": "Stav",
-        "SHRNUJ": "Shrnutí",
-        "NAPSAT_KOMENTAR": "Napsat komentář"
+        "MARK_AS_CHECKED": "Označit změny jako zkontrolované"
       },
       "S": {
         "CONFIG_ERROR": "GitHub: Chyba při mapování dat. Je název vašeho repozitáře správný?",
@@ -271,10 +224,7 @@
         "SOURCE_PROJECT": "Projekt",
         "SUBMIT_TIMELOGS": "Odeslat časové záznamy do Gitlabu",
         "SUBMIT_TIMELOGS_DESCRIPTION": "Zobrazit dialog sledování času po kliknutí na dokončení dne",
-        "TOKEN": "Přístupový token",
-        "IS_AUTO_IMPORT_ISSUES": "Automaticky importovat úkoly z GitLabu",
-        "IS_AUTO_POLL": "Automaticky sledovat importované úkoly Gitu na změny",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "Zobrazovat úkoly z Gitu jako návrhy při přidávání nových úkolů"
+        "TOKEN": "Přístupový token"
       },
       "FORM_SECTION": {
         "HELP": "<p>Zde můžete konfigurovat SuperProductivity pro zobrazení otevřených úkolů GitLabu (buď online verze nebo self-hosted instance) pro konkrétní projekt v panelu vytváření úkolů v denním plánovacím zobrazení. Budou uvedeny jako návrhy a poskytnou odkaz na úkol a další informace o něm.</p> <p>Kromě toho můžete automaticky importovat všechny otevřené úkoly.</p>",
@@ -377,9 +327,7 @@
         "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "Vyplnit všechny strávené časy mínus zaznamenaný čas",
         "WORKLOG_DEFAULT_TIME_MODE": "Výchozí hodnota času pro dialog",
         "WORKLOG_DEFAULT_TODAY": "Vyplnit pouze čas strávený dnes",
-        "WORKLOG_DEFAULT_YESTERDAY": "Vyplnit pouze čas strávený včera",
-        "IS_AUTO_IMPORT_ISSUES": "Automaticky importovat úkoly z Jiry",
-        "IS_AUTO_POLL_TICKETS": "Automaticky kontrolovat importované úkoly na změny a informovat"
+        "WORKLOG_DEFAULT_YESTERDAY": "Vyplnit pouze čas strávený včera"
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "Povolit samo-podepsaný certifikát",
@@ -403,8 +351,7 @@
           "P2_2": "<em>'Otevřít dialog pracovního záznamu, když je hotov podúkol a ne pro úkoly s podúkoly sami o sobě'</em> otevírá dialog pracovního záznamu pokaždé, když označíte podúkol úkolu Jiry jako hotový. Protože již sledujete svůj čas pomocí podúkolů, není otevírán žádný dialog, když označíte samotný úkol Jiry jako hotový.",
           "P2_3": "<em>'Automaticky odesílat aktualizace pracovního záznamu bez dialogu'</em> dělá to, co říká. Protože označení úkolu jako hotového několikrát vede k celkovému sledování celého pracovního času dvakrát, toto se nedoporučuje.",
           "P3_1": "Zde můžete znovu nakonfigurovat výchozí přechody. Jira umožňuje širokou konfiguraci přechodů, které obvykle vstupují v platnost jako různé sloupce na vaší agilní tabuli Jiry, nemůžeme dělat předpoklady o tom, kde a kdy přecházet úkoly, a musíte je nastavit manuálně."
-        },
-        "CREDENTIALS": "Přihlašovací údaje"
+        }
       },
       "ISSUE_CONTENT": {
         "ASSIGNEE": "Přiřazený",
@@ -447,12 +394,6 @@
         "LOGIN_SUCCESS": "Přihlášení bylo úspěšné!",
         "TEST_CREDENTIALS": "Otestovat přihlašovací údaje",
         "WELCOME_USER": "Vítejte, {{user}}!"
-      },
-      "FORM": {
-        "IS_AUTO_IMPORT_ISSUES": "Automaticky importovat nevyřešené úkoly z GitHubu",
-        "IS_AUTO_POLL": "Automaticky sledovat importované úkoly Gitu na změny",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Zobrazovat úkoly z Gitu jako návrhy při přidávání nových úkolů",
-        "REPO": "\"jméno_uživatele/název_repozitáře\" pro sledování gitového repozitáře"
       }
     },
     "METRIC": {
@@ -566,10 +507,7 @@
         "SCOPE_ALL": "Vše",
         "SCOPE_ASSIGNED": "Přiřazeno mně",
         "SCOPE_CREATED": "Vytvořeno mnou",
-        "TOKEN": "Přístupový token",
-        "IS_AUTO_IMPORT_ISSUES": "Automaticky importovat nerozhodnuté pracovní balíčky z OpenProject",
-        "IS_AUTO_POLL": "Automaticky dotazovat importované pracovní balíčky OpenProject na změny",
-        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Zobrazit pracovní balíčky jako návrhy při přidávání nových úkolů"
+        "TOKEN": "Přístupový token"
       },
       "FORM_SECTION": {
         "HELP": "<p>Zde můžete nakonfigurovat SuperProductivity k zobrazení otevřených pracovních balíčků OpenProject. Upozorňujeme, že pro toto fungování v prohlížeči pravděpodobně musíte nakonfigurovat CORS pro váš server OpenProject, aby umožnil přístup z app.super-productivity.com</p>",
@@ -725,10 +663,7 @@
         "SCOPE": "Rozsah",
         "SCOPE_ALL": "Všechny",
         "SCOPE_ASSIGNED": "Přiřazeno mně",
-        "SCOPE_CREATED": "Vytvořeno mnou",
-        "IS_AUTO_POLL": "Automaticky sledovat importované problémy z Redmine na změny",
-        "IS_SEARCH_ISSUES_FROM_REDMINE": "Zobrazit problémy z Redmine jako návrhy při přidávání nových úkolů",
-        "IS_AUTO_IMPORT_ISSUES": "Automaticky přidat otevřené problémy z Redmine"
+        "SCOPE_CREATED": "Vytvořeno mnou"
       },
       "FORM_SECTION": {
         "HELP": "<p>Zde můžete nakonfigurovat SuperProductivity tak, aby zobrazoval otevřené problémy Redmine (buď online verze, nebo samonosné instance) pro konkrétní projekt v panelu vytváření úkolů v denním plánovacím zobrazení. Budou uvedeny jako návrhy a poskytnou odkaz na problém a další informace o něm.</p><p>Kromě toho můžete automaticky importovat všechny otevřené problémy.</p>",
@@ -737,9 +672,7 @@
       "ISSUE_CONTENT": {
         "DESCRIPTION": "Popis",
         "MARK_AS_CHECKED": "Označit změny jako zkontrolované",
-        "PRIORITY": "Priorita",
-        "AUTOR": "Autor",
-        "STAV": "Stav"
+        "PRIORITY": "Priorita"
       },
       "S": {
         "ERR_UNKNOWN": "Redmine: Neznámá chyba {{statusCode}} {{errorMsg}}."
@@ -759,11 +692,7 @@
       "NO_TASKS": "Momentálně zde nejsou žádné úkoly. Přidejte nějaké úkoly pomocí tlačítka + v horní liště.",
       "NOW": "Nyní",
       "START": "Začátek práce",
-      "TASK_PROJECTION_INFO": "Budoucí projekce naplánovaného opakovatelného úkolu",
-      "MENU_TITLE": "Časová osa",
-      "S": {
-        "CAL_PROVIDER_ERROR": "Chyba poskytovatele kalendáře Časové osy: {{errTxt}}"
-      }
+      "TASK_PROJECTION_INFO": "Budoucí projekce naplánovaného opakovatelného úkolu"
     },
     "SEARCH_BAR": {
       "INFO": "Klikněte na ikonu seznamu pro vyhledávání archivovaných úkolů",
@@ -778,8 +707,7 @@
         "OK": "Udělat to!"
       },
       "D_EDIT": {
-        "L_COUNTER": "Počet",
-        "TITLE": "Upravit jednoduchý čítač"
+        "L_COUNTER": "Počet"
       },
       "FORM": {
         "ADD_NEW": "Přidat jednoduchý čítač",
@@ -791,16 +719,12 @@
         "L_TYPE": "Typ",
         "TITLE": "Jednoduché čítače",
         "TYPE_CLICK_COUNTER": "Klikací čítač",
-        "TYPE_STOPWATCH": "Stopky",
-        "L_AUTO_COUNT_UP": "Automatické spouštění připočítávání pro",
-        "L_AUTO_SWITCH_OFF": "Automatické vypnutí pro",
-        "L_AUTO_SWITCH_ON": "Automatické zapnutí pro"
+        "TYPE_STOPWATCH": "Stopky"
       }
     },
     "SYNC": {
       "C": {
         "EMPTY_SYNC": "Zkoušíte synchronizovat prázdný datový objekt. Pokud se snažíte nastavit synchronizaci z nové instance aplikace, stačí stisknout OK pro načtení dat ze serveru. Jinak zkontrolujte svá data.",
-        "FORCE_IMPORT": "Přesto importovat vzdálená data?",
         "FORCE_UPLOAD": "Přesto nahrát lokální data?",
         "FORCE_UPLOAD_AFTER_ERROR": "Při nahrávání vašich lokálních dat došlo k chybě. Chcete provést nucenou aktualizaci?",
         "MIGRATE_LEGACY": "Detekována stará data při importu. Chcete je zkusit převést?",
@@ -842,17 +766,14 @@
         "L_SYNC_INTERVAL": "Interval synchronizace",
         "L_SYNC_PROVIDER": "Poskytovatel synchronizace",
         "LOCAL_FILE": {
-          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Vyžaduje oprávnění k přístupu k souboru",
-          "L_SYNC_FILE_PATH": "Cesta k souboru pro synchronizaci",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "Absolutní cesta k souboru, který by měl být použit pro synchronizaci (bude vytvořen)."
+          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Vyžaduje oprávnění k přístupu k souboru"
         },
         "TITLE": "Synchronizace",
         "WEB_DAV": {
           "CORS_INFO": "<strong>Jak to funguje v prohlížeči:</strong> Aby to fungovalo v prohlížeči, musíte povolit Super Productivity pro CORS požadavky pro vaši instanci Nextcloud. To může mít negativní bezpečnostní dopady! Podívejte se na <a href='https://github.com/nextcloud/server/issues/3131'>tuto diskuzi pro více informací</a>. Jeden z přístupů k tomu, aby to fungovalo na mobilu, je povolení \"https://app.super-productivity.com\" prostřednictvím aplikace Nextcloud <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>. Používejte na vlastní nebezpečí!</p>",
           "L_BASE_URL": "Základní adresa URL",
           "L_PASSWORD": "Heslo",
-          "L_USER_NAME": "Uživatelské jméno",
-          "L_SYNC_FILE_PATH": "Cesta k souboru pro synchronizaci"
+          "L_USER_NAME": "Uživatelské jméno"
         }
       },
       "S": {
@@ -955,8 +876,6 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Přidat vše do dneška",
         "ADD_TO_TODAY": "Přidat do dneška",
-        "DISMISS": "Odmítnout připomenutí",
-        "DISMISS_ALL": "Odmítnout vše",
         "DONE": "Hotovo",
         "DUE_TASK": "Úkol k dokončení",
         "DUE_TASKS": "Plánované úkoly",
@@ -982,11 +901,7 @@
         "RO_NEVER": "Nikdy",
         "RO_START": "kdy začíná",
         "SCHEDULE": "Naplánovat",
-        "UNSCHEDULE": "Zrušit naplánování",
-        "CONFIRM_REPEAT_OK": "Naplánovat",
-        "CONFIRM_REPEAT_TXT": "Zkoušíte naplánovat tento opakující se úkol na jiný den. Opakující se úkoly jsou obvykle určeny k opětovnému vytvoření ve stanovené dny a jsou naplánovány pouze v tento den. Chcete přesto pokračovat?",
-        "DATETIME_FOR": "Datum a čas pro připomenutí",
-        "EDIT": "Upravit připomenutí"
+        "UNSCHEDULE": "Zrušit naplánování"
       },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "Přidat strávený čas pro jiný den",
@@ -1017,8 +932,7 @@
         "REMINDER_ADDED": "Naplánován úkol „{{title}}“",
         "REMINDER_DELETED": "Smazáno připomenutí k úkolu",
         "REMINDER_UPDATED": "Aktualizováno připomenutí k úkolu „{{title}}“",
-        "TASK_CREATED": "Vytvořen úkol „{{title}}“",
-        "MOVE_TO_PROJECT_NOT_ALLOWED_FOR_ISSUE_TASK": "Nelze přesouvat úkoly k jiným projektům u úkolů souvisejících s problémem"
+        "TASK_CREATED": "Vytvořen úkol „{{title}}“"
       },
       "SELECT_OR_CREATE": "Vyberte nebo vytvořte úkol",
       "SUMMARY_TABLE": {
@@ -1131,8 +1045,7 @@
         "SKIP": "Přeskočit",
         "SPLIT_TIME": "Rozdělit čas na více úkolů a přestávek",
         "TASK": "Úkol",
-        "TRACK_TO": "Sledovat k",
-        "TASK_BREAK": "Úkol + Přestávka"
+        "TRACK_TO": "Sledovat k"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Vytvořit</em> a sledovat k",
@@ -1196,18 +1109,6 @@
         "EXPORT": "Export dat za týden",
         "NO_DATA": "Tento týden zatím nejsou žádné úkoly.",
         "TITLE": "Název"
-      }
-    },
-    "WELCOME": {
-      "D_WELCOME": {
-        "L1": "Začínáme",
-        "L2": "Úvodní video na YouTube",
-        "L3": "Zeptejte se na otázku",
-        "LETS_GO": "Jdeme na to!",
-        "MOBILE_INFO": "<strong>Přejetím</strong> vytvořených úkolů <strong>doprava, abyste je označili jako hotové</strong>.\n    Přejetím doleva je naplánujete. Dlouhým stisknutím získáte další možnosti.",
-        "T1": "Je skvělé vidět, že jste se rozhodli vyzkoušet tuto aplikaci! 🦄",
-        "T2": "Pokud máte potíže s orientací, existuje několik míst, kde můžete najít pomoc:",
-        "TITLE": "Vítejte v Super Productivity!"
       }
     }
   },
@@ -1284,8 +1185,7 @@
       "IS_ENABLE_IDLE_TIME_TRACKING": "Povolit zacházení s nečinným časem",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Otevřít dialogové okno nečinnosti pouze při vybraném aktuálním úkolu",
       "MIN_IDLE_TIME": "Spustit nečinnost po X",
-      "TITLE": "Zacházení s nečinným časem",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "Nečinný čas bez sledování obnovuje časovač přestávky"
+      "TITLE": "Zacházení s nečinným časem"
     },
     "IMEX": {
       "HELP": "<p>Zde můžete exportovat všechna data jako <strong>JSON</strong> pro zálohování, ale také pro použití v jiném kontextu (např. můžete exportovat své projekty v prohlížeči a importovat je do desktopové verze).</p> <p>Import očekává platný formát JSON, který je zkopírován do textové oblasti. <strong>POZNÁMKA: Jakmile stisknete tlačítko importu, všechna vaše aktuální nastavení a data budou přepsána!</strong></p>",
@@ -1358,9 +1258,7 @@
       "START_OF_NEXT_DAY": "Začátek dalšího dne",
       "START_OF_NEXT_DAY_HINT": "od kdy (v hodinách) chcete počítat, že další den začal. Výchozí hodnota je půlnoc, což je 0.",
       "TASK_NOTES_TPL": "Šablona popisu úkolu",
-      "TITLE": "Různá nastavení",
-      "IS_AUTO_START_NEXT_TASK": "Začít sledovat další úkol při označení aktuálního jako hotového",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Upozornit, když byl překročen odhad času"
+      "TITLE": "Různá nastavení"
     },
     "POMODORO": {
       "BREAK_DURATION": "Délka krátkých přestávek",
@@ -1383,11 +1281,7 @@
       "L_WORK_END": "Konec pracovního dne",
       "L_WORK_START": "Začátek pracovního dne",
       "TITLE": "Časová osa",
-      "WORK_START_END_DESCRIPTION": "např. 17:00",
-      "CAL_PROVIDERS": "Poskytovatelé kalendáře (experimentální a volitelní)",
-      "CAL_PROVIDERS_ADD": "Přidat zdroj iCal",
-      "CAL_PROVIDERS_INFO": "Můžete volitelně nakonfigurovat časovou osu tak, aby také načítala a zobrazovala data z iCal (např. <a href=\"https://support.google.com/calendar/answer/37648?hl=cs#zippy=%2Csync-your-google-calendar-view-edit%2Cget-your-calendar-view-only\">Google Calendar</a>).",
-      "L_CAL_PATH": "URL/cesta k souboru pro kalendář ICAL (volitelně)"
+      "WORK_START_END_DESCRIPTION": "např. 17:00"
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Zvuk připomenutí přestávky",
@@ -1410,13 +1304,6 @@
       "NOTIFICATION_TITLE": "Přestávka!",
       "SNOOZE_TIME": "Doba odložení, když máte přestávku",
       "TITLE": "Připomenutí o přestávce"
-    },
-    "TRACKING_REMINDER": {
-      "HELP": "Nakonfigurujte banner, který se zobrazí, pokud jste zapomněli spustit sledování času.",
-      "L_IS_ENABLED": "Povoleno",
-      "L_IS_SHOW_ON_MOBILE": "Zobrazit v mobilní aplikaci",
-      "L_MIN_TIME": "Čas čekání před zobrazením banneru",
-      "TITLE": "Připomenutí sledování času"
     }
   },
   "GLOBAL_SNACK": {
@@ -1465,9 +1352,7 @@
     "TOGGLE_SHOW_NOTES": "Zobrazit/Skrýt poznámky k projektu",
     "TOGGLE_TRACK_TIME": "Spustit/Zastavit sledování času",
     "TRIGGER_SYNC": "Spustit synchronizaci ručně",
-    "WORKLOG": "Pracovní záznam",
-    "MANAGE_PROJECTS": "Spravovat projekty",
-    "SCHEDULED": "Naplánováno"
+    "WORKLOG": "Pracovní záznam"
   },
   "PDS": {
     "BACK": "Počkej, zapomněl jsem na něco!",
@@ -1499,11 +1384,7 @@
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Strávený čas / Odhadovaný",
     "TIME_SPENT_ESTIMATE_TITLE": "Strávený čas: Celkový čas strávený dnes. Archivované úkoly nejsou zahrnuty. – Čas odhadovaný: Čas odhadovaný pro úkoly pracované dnes minus čas již strávený s nimi v jiné dny.",
     "TIME_SPENT_TODAY_BY_TAG": "Strávený čas dnes podle štítku",
-    "WEEK": "Týden",
-    "EVALUATION": "Hodnocení",
-    "PLAN": "Plán",
-    "TASK_LIST": "Seznam úkolů",
-    "TODAY": "Dnes"
+    "WEEK": "Týden"
   },
   "PM": {
     "TITLE": "Projektová metrika"
@@ -1556,51 +1437,19 @@
   },
   "WW": {
     "ADD_MORE": "Přidat další",
-    "ADD_SCHEDULED_FOR_TODAY": "Přidat úkoly naplánované na dnes ({{nr}})",
     "ADD_SCHEDULED_FOR_TOMORROW": "Přidat úkoly naplánované na zítra ({{nr}})",
     "ADD_SOME_TASKS": "Přidejte nějaké úkoly pro plánování svého dne!",
-    "COMPLETED_TASKS": "Dokončené úkoly",
     "ESTIMATE_REMAINING": "Odhad zbývajícího času:",
     "FINISH_DAY": "Ukončit den",
     "FINISH_DAY_FOR_PROJECT": "Ukončit den pro tento projekt",
     "FINISH_DAY_FOR_TAG": "Ukončit den pro tento štítek",
     "FINISH_DAY_TOOLTIP": "Zhodnoťte svůj den, přesuňte všechny hotové úkoly do archivu (volitelně) a/nebo naplánujte svůj další den.",
     "HELP_PROCRASTINATION": "Pomoc, prokrastinuji!",
-    "NO_COMPLETED_TASKS": "Momentálně nejsou žádné dokončené úkoly",
     "NO_PLANNED_TASKS": "Žádné naplánované úkoly",
     "READY_TO_WORK": "Připraven k práci!",
     "RESET_BREAK_TIMER": "Resetovat bez přerušení časovače",
     "TIME_ESTIMATED": "Odhadovaný čas:",
     "WITHOUT_BREAK": "Bez přestávky:",
     "WORKING_TODAY": "Pracujete dnes:"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "Archivované projekty",
-    "ARCHIVE_PROJECT": "Archivovat projekt",
-    "CLICK_TO_HIDE": "Klikněte pro skrytí projektu z menu",
-    "CLICK_TO_SHOW": "Klikněte pro zobrazení projektu v menu",
-    "DELETE_PROJECT": "Smazat projekt",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "Opravdu chcete tento projekt archivovat? Archivované projekty se v menu již nezobrazují, a nemůžete přistupovat k žádným jejich datům bez obnovení. Doporučuje se zálohovat data před provedením této akce.",
-      "OK": "Archivovat"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "Opravdu chcete tento projekt smazat? Doporučuje se zálohovat data před provedením této akce.",
-      "OK": "Smazat"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "Opravdu chcete tento projekt znovu zarchivovat?",
-      "OK": "Odzarchivovat"
-    },
-    "EDIT_PROJECT": "Upravit projekt",
-    "EXPORT_PROJECT": "Exportovat projekt",
-    "GITHUB_CONFIGURED": "Nastavena integrace GitHubu",
-    "GITLAB_CONFIGURED": "Nastavena integrace GitLabu",
-    "IMPORT_FROM_FILE": "Importovat z souboru",
-    "JIRA_CONFIGURED": "Nastavena integrace Jiry",
-    "OPEN_PROJECT_CONFIGURED": "Nastavena integrace OpenProjectu",
-    "S_INVALID_JSON": "Neplatný JSON pro soubor s projektem",
-    "TITLE": "Přehled projektu",
-    "UN_ARCHIVE_PROJECT": "Odzarchivovat projekt"
   }
 }

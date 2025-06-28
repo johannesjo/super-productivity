@@ -1,0 +1,15 @@
+#!/bin/sh
+# Connect interfaces for idle detection
+if snapctl is-connected login-session-observe; then
+    echo "login-session-observe interface already connected"
+else
+    echo "Please connect login-session-observe interface for idle detection:"
+    echo "sudo snap connect superproductivity:login-session-observe"
+fi
+
+if snapctl is-connected system-observe; then
+    echo "system-observe interface already connected"
+else
+    echo "Please connect system-observe interface for better system integration:"
+    echo "sudo snap connect superproductivity:system-observe"
+fi

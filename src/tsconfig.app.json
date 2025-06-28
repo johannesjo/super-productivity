@@ -1,7 +1,7 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "../out-tsc/app",
+    "outDir": "../.tmp/out-tsc/app",
     "types": [],
     "strict": true,
     "allowSyntheticDefaultImports": true
