@@ -1,9 +1,9 @@
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
-import { TaskCopy, TaskWithoutReminder } from '../../tasks/task.model';
+import { TaskWithoutReminder } from '../../tasks/task.model';
 import { createScheduleViewEntriesForNormalTasks } from './create-schedule-view-entries-for-normal-tasks';
 
 const FID = 'FAKE_TASK_ID';
-const FAKE_TASK: TaskCopy = {
+const FAKE_TASK = {
   id: FID,
   subTaskIds: [],
   timeSpent: 0,

@@ -5,6 +5,7 @@ import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { BlockedBlockType } from '../schedule.model';
 
 const ESA: string[] = [];
+const FIXED_TIMESTAMP = 1234567890000;
 
 describe('createViewEntriesForBlock()', () => {
   it('should work for empty case', () => {
@@ -22,11 +23,17 @@ describe('createViewEntriesForBlock()', () => {
             type: BlockedBlockType.ScheduledTask,
             data: {
               id: '1',
+              projectId: 'test-project',
+              timeSpentOnDay: {},
+              attachments: [],
               dueWithTime: 0,
               timeSpent: 0,
               subTaskIds: ESA,
               tagIds: ESA,
               timeEstimate: 1000,
+              isDone: false,
+              title: 'Test Task',
+              created: FIXED_TIMESTAMP,
             } as TaskWithDueTime,
           },
         ],
@@ -39,11 +46,17 @@ describe('createViewEntriesForBlock()', () => {
       {
         data: {
           id: '1',
+          projectId: 'test-project',
+          timeSpentOnDay: {},
+          attachments: [],
           dueWithTime: 0,
           subTaskIds: ESA,
           tagIds: ESA,
           timeEstimate: 1000,
           timeSpent: 0,
+          isDone: false,
+          title: 'Test Task',
+          created: FIXED_TIMESTAMP,
         } as TaskWithDueTime,
         id: '1',
         start: 0,
@@ -63,11 +76,17 @@ describe('createViewEntriesForBlock()', () => {
             type: BlockedBlockType.ScheduledTask,
             data: {
               id: '1',
+              projectId: 'test-project',
+              timeSpentOnDay: {},
+              attachments: [],
               dueWithTime: 0,
               timeSpent: 0,
               subTaskIds: ESA,
               tagIds: ESA,
               timeEstimate: 1000,
+              isDone: false,
+              title: 'Test Task',
+              created: FIXED_TIMESTAMP,
             } as TaskWithDueTime,
           },
           {
@@ -110,11 +129,17 @@ describe('createViewEntriesForBlock()', () => {
       {
         data: {
           id: '1',
+          projectId: 'test-project',
+          timeSpentOnDay: {},
+          attachments: [],
           dueWithTime: 0,
           subTaskIds: ESA,
           tagIds: ESA,
           timeEstimate: 1000,
           timeSpent: 0,
+          isDone: false,
+          title: 'Test Task',
+          created: FIXED_TIMESTAMP,
         } as TaskWithDueTime,
         id: '1',
         start: 0,
