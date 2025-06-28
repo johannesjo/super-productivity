@@ -1,12 +1,9 @@
-import { inject, Injectable } from '@angular/core';
-import { select, Store } from '@ngrx/store';
-import {
-  selectAllTaskRepeatCfgs,
-  selectTaskRepeatCfgById,
-  selectTaskRepeatCfgByIdAllowUndefined,
-  selectTaskRepeatCfgsDueOnDayIncludingOverdue,
-  selectTaskRepeatCfgsDueOnDayOnly,
-} from './store/task-repeat-cfg.reducer';
+import { TestBed } from '@angular/core/testing';
+import { TaskRepeatCfgService } from './task-repeat-cfg.service';
+import { provideMockStore, MockStore } from '@ngrx/store/testing';
+import { MatDialog } from '@angular/material/dialog';
+import { TaskService } from '../tasks/task.service';
+import { WorkContextService } from '../work-context/work-context.service';
 import {
   addTaskRepeatCfgToTask,
   deleteTaskRepeatCfg,
@@ -15,305 +12,379 @@ import {
   updateTaskRepeatCfgs,
   upsertTaskRepeatCfg,
 } from './store/task-repeat-cfg.actions';
-import { Observable } from 'rxjs';
-import {
-  TaskRepeatCfg,
-  TaskRepeatCfgCopy,
-  TaskRepeatCfgState,
-} from './task-repeat-cfg.model';
-import { nanoid } from 'nanoid';
-import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
-import { MatDialog } from '@angular/material/dialog';
-import { T } from '../../t.const';
-import { first, take } from 'rxjs/operators';
-import { TaskService } from '../tasks/task.service';
-import { Task } from '../tasks/task.model';
-import { addTask, addSubTask, scheduleTaskWithTime } from '../tasks/store/task.actions';
-import { scheduleTaskWithTime } from '../tasks/store/task.actions';
-import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
-import { WorkContextService } from '../work-context/work-context.service';
+import { DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfg } from './task-repeat-cfg.model';
+import { of } from 'rxjs';
 import { WorkContextType } from '../work-context/work-context.model';
-import { isValidSplitTime } from '../../util/is-valid-split-time';
-import { getDateTimeFromClockString } from '../../util/get-date-time-from-clock-string';
-import { isSameDay } from '../../util/is-same-day';
-import { remindOptionToMilliseconds } from '../tasks/util/remind-option-to-milliseconds';
-import { getNewestPossibleDueDate } from './store/get-newest-possible-due-date.util';
+import { Task, DEFAULT_TASK } from '../tasks/task.model';
+import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { getWorklogStr } from '../../util/get-work-log-str';
+import { TODAY_TAG } from '../tag/tag.const';
 
-@Injectable({
-  providedIn: 'root',
-})
-export class TaskRepeatCfgService {
-  private _store$ = inject<Store<TaskRepeatCfgState>>(Store);
-  private _matDialog = inject(MatDialog);
-  private _taskService = inject(TaskService);
-  private _workContextService = inject(WorkContextService);
+describe('TaskRepeatCfgService', () => {
+  let service: TaskRepeatCfgService;
+  let store: MockStore;
+  let matDialog: jasmine.SpyObj<MatDialog>;
+  let taskService: jasmine.SpyObj<TaskService>;
+  let dispatchSpy: jasmine.Spy;
 
-  taskRepeatCfgs$: Observable<TaskRepeatCfg[]> = this._store$.pipe(
-    select(selectAllTaskRepeatCfgs),
-  );
+  const mockTaskRepeatCfg: TaskRepeatCfg = {
+    ...DEFAULT_TASK_REPEAT_CFG,
+    id: 'test-cfg-id',
+    title: 'Test Repeat Task',
+    projectId: 'test-project',
+    repeatCycle: 'DAILY',
+    startDate: new Date().toISOString().split('T')[0], // Use today's date
+    // eslint-disable-next-line no-mixed-operators
+    lastTaskCreation: Date.now() - 24 * 60 * 60 * 1000, // Yesterday
+    repeatEvery: 1,
+    defaultEstimate: 3600000,
+    notes: 'Test notes',
+    tagIds: ['tag1', 'tag2', TODAY_TAG.id],
+  };
 
-  getRepeatableTasksDueForDayOnly$(dayDate: number): Observable<TaskRepeatCfg[]> {
-    // ===> taskRepeatCfgs scheduled for today and not yet created already
-    return this._store$.select(selectTaskRepeatCfgsDueOnDayOnly, { dayDate });
-  }
+  const mockTask: Task = {
+    ...DEFAULT_TASK,
+    id: 'test-task-id',
+    title: 'Test Task',
+    timeSpentOnDay: {},
+    timeSpent: 0,
+    created: Date.now(),
+    dueDay: getWorklogStr(),
+    subTaskIds: [],
+    projectId: 'test-project',
+    notes: 'Test notes',
+    repeatCfgId: 'test-cfg-id',
+    timeEstimate: 3600000,
+    timeSpentOnDay: {},
+  } as Task;
 
-  getRepeatableTasksDueForDayIncludingOverdue$(
-    dayDate: number,
-  ): Observable<TaskRepeatCfg[]> {
-    // ===> taskRepeatCfgs scheduled for today and not yet created already
-    return this._store$
-      .select(selectTaskRepeatCfgsDueOnDayIncludingOverdue, { dayDate })
-      .pipe(first());
-  }
-
-  getTaskRepeatCfgById$(id: string): Observable<TaskRepeatCfg> {
-    return this._store$.select(selectTaskRepeatCfgById, { id });
-  }
-
-  getTaskRepeatCfgByIdAllowUndefined$(id: string): Observable<TaskRepeatCfg | undefined> {
-    return this._store$.select(selectTaskRepeatCfgByIdAllowUndefined, { id });
-  }
-
-  addTaskRepeatCfgToTask(
-    taskId: string,
-    projectId: string | null,
-    taskRepeatCfg: Omit<TaskRepeatCfgCopy, 'id'>,
-  ): void {
-    const repeatCfgId = nanoid();
-    const taskRepeatCfgWithId = {
-      ...taskRepeatCfg,
-      projectId,
-      id: repeatCfgId,
-    };
-    this._store$.dispatch(
-      addTaskRepeatCfgToTask({
-        taskRepeatCfg: taskRepeatCfgWithId,
-        taskId,
-      }),
-    );
-    if (taskRepeatCfg.subTasks && taskRepeatCfg.subTasks.length > 0) {
-      const { subTasks } = this._getTaskRepeatTemplate(taskRepeatCfgWithId);
-      subTasks.forEach((subTask) => {
-        this._store$.dispatch(
-          addSubTask({
-            task: {
-              ...subTask,
-              created: Date.now(),
-              dueDay: getWorklogStr(),
-            },
-            parentId: taskId,
-          }),
-        );
-      });
-    }
-  }
-
-  deleteTaskRepeatCfg(id: string): void {
-    this._store$.dispatch(deleteTaskRepeatCfg({ id }));
-  }
-
-  deleteTaskRepeatCfgsNoTaskCleanup(ids: string[]): void {
-    this._store$.dispatch(deleteTaskRepeatCfgs({ ids }));
-  }
-
-  updateTaskRepeatCfg(
-    id: string,
-    changes: Partial<TaskRepeatCfg>,
-    isUpdateAllTaskInstances: boolean = false,
-  ): void {
-    this._store$.dispatch(
-      updateTaskRepeatCfg({
-        taskRepeatCfg: { id, changes },
-        isAskToUpdateAllTaskInstances: isUpdateAllTaskInstances,
-      }),
-    );
-  }
-
-  updateTaskRepeatCfgs(ids: string[], changes: Partial<TaskRepeatCfg>): void {
-    this._store$.dispatch(updateTaskRepeatCfgs({ ids, changes }));
-  }
-
-  upsertTaskRepeatCfg(taskRepeatCfg: TaskRepeatCfg): void {
-    this._store$.dispatch(upsertTaskRepeatCfg({ taskRepeatCfg }));
-  }
-
-  async createRepeatableTask(
-    taskRepeatCfg: TaskRepeatCfg,
-    targetDayDate: number,
-  ): Promise<void> {
-    const actionsForRepeatCfg = await this.getActionsForTaskRepeatCfg(
-      taskRepeatCfg,
-      targetDayDate,
-    );
-    actionsForRepeatCfg.forEach((act) => {
-      this._store$.dispatch(act);
+  beforeEach(() => {
+    const matDialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
+    const taskServiceSpy = jasmine.createSpyObj('TaskService', [
+      'createNewTaskWithDefaults',
+      'getTasksWithSubTasksByRepeatCfgId$',
+    ]);
+    const workContextServiceSpy = jasmine.createSpyObj('WorkContextService', [], {
+      activeWorkContextType: WorkContextType.PROJECT,
+      activeWorkContextId: 'test-project',
     });
-  }
 
-  deleteTaskRepeatCfgWithDialog(id: string): void {
-    this._matDialog
-      .open(DialogConfirmComponent, {
-        restoreFocus: true,
-        data: {
-          message: T.F.TASK_REPEAT.D_CONFIRM_REMOVE.MSG,
-          okTxt: T.F.TASK_REPEAT.D_CONFIRM_REMOVE.OK,
-        },
-      })
-      .afterClosed()
-      .subscribe((isConfirm: boolean) => {
-        if (isConfirm) {
-          this.deleteTaskRepeatCfg(id);
-        }
-      });
-  }
+    TestBed.configureTestingModule({
+      providers: [
+        TaskRepeatCfgService,
+        provideMockStore(),
+        { provide: MatDialog, useValue: matDialogSpy },
+        { provide: TaskService, useValue: taskServiceSpy },
+        { provide: WorkContextService, useValue: workContextServiceSpy },
+      ],
+    });
 
-  // NOTE: there is a duplicate of this in plan-tasks-tomorrow.component
+    service = TestBed.inject(TaskRepeatCfgService);
+    store = TestBed.inject(MockStore);
+    matDialog = TestBed.inject(MatDialog) as jasmine.SpyObj<MatDialog>;
+    taskService = TestBed.inject(TaskService) as jasmine.SpyObj<TaskService>;
+    dispatchSpy = spyOn(store, 'dispatch');
 
-  async getActionsForTaskRepeatCfg(
-    taskRepeatCfg: TaskRepeatCfg,
-    targetDayDate: number = Date.now(),
-  ): // NOTE: updateTaskRepeatCfg missing as there is no way to declare it as action type
-  Promise<
-    (
-      | ReturnType<typeof addTask>
-      | ReturnType<typeof addSubTask>
-      | ReturnType<typeof TaskSharedActions.addTask>
-      | ReturnType<typeof updateTaskRepeatCfg>
-      | ReturnType<typeof scheduleTaskWithTime>
-    )[]
-  > {
-    // NOTE: there might be multiple configs in case something went wrong
-    // we want to move all of them to the archive
-    const existingTaskInstances: Task[] = await this._taskService
-      .getTasksWithSubTasksByRepeatCfgId$(taskRepeatCfg.id as string)
-      .pipe(take(1))
-      .toPromise();
+    // Default mock return values
+    taskService.createNewTaskWithDefaults.and.returnValue(mockTask);
+    taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
+  });
 
-    if (!taskRepeatCfg.id) {
-      throw new Error('No taskRepeatCfg.id');
-    }
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
 
-    const isCreateNew =
-      existingTaskInstances.filter((taskI) => isSameDay(targetDayDate, taskI.created))
-        .length === 0;
+  describe('addTaskRepeatCfgToTask', () => {
+    it('should dispatch addTaskRepeatCfgToTask action', () => {
+      const taskId = 'test-task-id';
+      const projectId = 'test-project';
+      const taskRepeatCfg = { ...DEFAULT_TASK_REPEAT_CFG };
 
-    if (!isCreateNew) {
-      return [];
-    }
-    const targetCreated = getNewestPossibleDueDate(
-      taskRepeatCfg,
-      new Date(targetDayDate),
-    );
-    if (!targetCreated) {
-      throw new Error('Unable to getNewestPossibleDueDate()');
-    }
+      service.addTaskRepeatCfgToTask(taskId, projectId, taskRepeatCfg);
 
-    const { task, isAddToBottom, subTasks } = this._getTaskRepeatTemplate(taskRepeatCfg);
-
-    const createNewActions: (
-      | ReturnType<typeof addTask>
-      | ReturnType<typeof addSubTask>
-      | ReturnType<typeof TaskSharedActions.addTask>
-      | ReturnType<typeof updateTaskRepeatCfg>
-      | ReturnType<typeof scheduleTaskWithTime>
-    )[] = [
-      TaskSharedActions.addTask({
-        task: {
-          ...task,
-          // NOTE if moving this to top isCreateNew check above would not work as intended
-          // we use created also for the repeat day label for past tasks
-          created: targetCreated.getTime(),
-          dueDay: getWorklogStr(targetCreated),
-        },
-        workContextType: this._workContextService
-          .activeWorkContextType as WorkContextType,
-        workContextId: this._workContextService.activeWorkContextId as string,
-        isAddToBacklog: false,
-        isAddToBottom,
-      }),
-      updateTaskRepeatCfg({
-        taskRepeatCfg: {
-          id: taskRepeatCfg.id,
-          changes: {
-            lastTaskCreation: targetDayDate,
-          },
-        },
-      }),
-    ];
-
-    // Add subtasks if configured
-    if (subTasks && subTasks.length > 0) {
-      subTasks.forEach((subTask) => {
-        createNewActions.push(
-          addSubTask({
-            task: {
-              ...subTask,
-              created: targetCreated.getTime(),
-              dueDay: getWorklogStr(targetCreated),
-            },
-            parentId: task.id,
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        addTaskRepeatCfgToTask({
+          taskRepeatCfg: jasmine.objectContaining({
+            ...taskRepeatCfg,
+            projectId,
+            id: jasmine.any(String),
           }),
-        );
-      });
-    }
-
-    // Schedule if given
-    if (isValidSplitTime(taskRepeatCfg.startTime) && taskRepeatCfg.remindAt) {
-      const dateTime = getDateTimeFromClockString(
-        taskRepeatCfg.startTime as string,
-        targetDayDate,
-      );
-      createNewActions.push(
-        scheduleTaskWithTime({
-          task,
-          dueWithTime: dateTime,
-          remindAt: remindOptionToMilliseconds(dateTime, taskRepeatCfg.remindAt),
-          isMoveToBacklog: false,
-          isSkipAutoRemoveFromToday: true,
+          taskId,
         }),
       );
-    }
-
-    return createNewActions;
-  }
-
-  private _getTaskRepeatTemplate(taskRepeatCfg: TaskRepeatCfg): {
-    task: Task;
-    isAddToBottom: boolean;
-    subTasks: Task[];
-  } {
-    const mainTask = this._taskService.createNewTaskWithDefaults({
-      title: taskRepeatCfg.title,
-      additional: {
-        repeatCfgId: taskRepeatCfg.id,
-        timeEstimate: taskRepeatCfg.defaultEstimate,
-        projectId: taskRepeatCfg.projectId || undefined,
-        notes: taskRepeatCfg.notes || '',
-        // always due for today
-        dueDay: getWorklogStr(),
-      },
     });
 
-    const subTasks: Task[] = (taskRepeatCfg.subTasks || []).map((subTaskTemplate) =>
-      this._taskService.createNewTaskWithDefaults({
-        title: subTaskTemplate.title,
-        additional: {
-          timeEstimate: subTaskTemplate.timeEstimate,
-          repeatCfgId: taskRepeatCfg.id,
-          timeEstimate: taskRepeatCfg.defaultEstimate || 0,
-          projectId: taskRepeatCfg.projectId || undefined,
-          notes: subTaskTemplate.notes || '',
-          isDone: subTaskTemplate.isDone || false,
-          dueDay: getWorklogStr(),
-        },
-      }),
-    );
+    it('should dispatch addSubTask actions when subTasks are configured', () => {
+      const taskId = 'test-task-id';
+      const projectId = 'test-project';
+      const taskRepeatCfg = {
+        ...DEFAULT_TASK_REPEAT_CFG,
+        subTasks: [
+          { title: 'Subtask 1', notes: 'Notes 1', timeEstimate: 1800000 },
+          { title: 'Subtask 2', notes: 'Notes 2', timeEstimate: 900000 },
+        ],
+      };
 
-    return {
-      task: mainTask,
-      isAddToBottom: taskRepeatCfg.order > 0,
-      subTasks,
-    };
-  }
-}
+      service.addTaskRepeatCfgToTask(taskId, projectId, taskRepeatCfg);
+
+      // Should dispatch addTaskRepeatCfgToTask plus one addSubTask for each subtask
+      expect(dispatchSpy).toHaveBeenCalledTimes(3);
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        addTaskRepeatCfgToTask(jasmine.any(Object)),
+      );
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          type: '[Task] Add sub task',
+        }),
+      );
+    });
+  });
+
+  describe('deleteTaskRepeatCfg', () => {
+    it('should dispatch deleteTaskRepeatCfg action', () => {
+      const id = 'test-id';
+      service.deleteTaskRepeatCfg(id);
+      expect(dispatchSpy).toHaveBeenCalledWith(deleteTaskRepeatCfg({ id }));
+    });
+  });
+
+  describe('updateTaskRepeatCfg', () => {
+    it('should dispatch updateTaskRepeatCfg action', () => {
+      const id = 'test-id';
+      const changes = { title: 'Updated Title' };
+      service.updateTaskRepeatCfg(id, changes);
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        updateTaskRepeatCfg({
+          taskRepeatCfg: { id, changes },
+          isAskToUpdateAllTaskInstances: false,
+        }),
+      );
+    });
+  });
+
+  describe('createRepeatableTask', () => {
+    it('should dispatch actions returned by getActionsForTaskRepeatCfg', async () => {
+      const targetDayDate = Date.now();
+      const mockActions = [
+        TaskSharedActions.addTask({
+          task: mockTask,
+          workContextType: WorkContextType.PROJECT,
+          workContextId: 'test-project',
+          isAddToBacklog: false,
+          isAddToBottom: false,
+        }),
+        updateTaskRepeatCfg({
+          taskRepeatCfg: {
+            id: mockTaskRepeatCfg.id,
+            changes: { lastTaskCreation: targetDayDate },
+          },
+        }),
+      ];
+
+      spyOn(service, 'getActionsForTaskRepeatCfg').and.returnValue(
+        Promise.resolve(mockActions),
+      );
+
+      await service.createRepeatableTask(mockTaskRepeatCfg, targetDayDate);
+
+      expect(dispatchSpy).toHaveBeenCalledTimes(2);
+      mockActions.forEach((action) => {
+        expect(dispatchSpy).toHaveBeenCalledWith(action);
+      });
+    });
+  });
+
+  describe('getActionsForTaskRepeatCfg', () => {
+    beforeEach(() => {
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
+    });
+
+    it('should return empty array if task already exists for target date', async () => {
+      const targetDayDate = Date.now();
+      const existingTask = { ...mockTask, created: targetDayDate };
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([existingTask]));
+
+      const actions = await service.getActionsForTaskRepeatCfg(
+        mockTaskRepeatCfg,
+        targetDayDate,
+      );
+
+      expect(actions).toEqual([]);
+    });
+
+    it('should create actions for new task when no existing task for target date', async () => {
+      const targetDayDate = Date.now();
+
+      const actions = await service.getActionsForTaskRepeatCfg(
+        mockTaskRepeatCfg,
+        targetDayDate,
+      );
+
+      expect(actions.length).toBeGreaterThan(0);
+      expect(actions).toContain(
+        jasmine.objectContaining({
+          type: '[Task Shared] Add Task',
+        }),
+      );
+      expect(actions).toContain(
+        jasmine.objectContaining({
+          type: '[TaskRepeatCfg] Update Task Repeat Cfg',
+        }),
+      );
+    });
+
+    it('should include subtask actions when taskRepeatCfg has subTasks', async () => {
+      const targetDayDate = Date.now();
+      const taskRepeatCfgWithSubTasks = {
+        ...mockTaskRepeatCfg,
+        subTasks: [
+          { title: 'Subtask 1', notes: 'Notes 1', timeEstimate: 1800000 },
+          { title: 'Subtask 2', notes: 'Notes 2', timeEstimate: 900000 },
+        ],
+      };
+
+      const actions = await service.getActionsForTaskRepeatCfg(
+        taskRepeatCfgWithSubTasks,
+        targetDayDate,
+      );
+
+      const subTaskActions = actions.filter((action) =>
+        action.type.includes('Add sub task'),
+      );
+      expect(subTaskActions.length).toBe(2);
+    });
+
+    it('should include schedule action when startTime and remindAt are configured', async () => {
+      const targetDayDate = Date.now();
+      const taskRepeatCfgWithSchedule = {
+        ...mockTaskRepeatCfg,
+        startTime: '09:00',
+        remindAt: 'AT_START',
+      };
+
+      const actions = await service.getActionsForTaskRepeatCfg(
+        taskRepeatCfgWithSchedule,
+        targetDayDate,
+      );
+
+      const scheduleActions = actions.filter((action) =>
+        action.type.includes('Schedule'),
+      );
+      expect(scheduleActions.length).toBe(1);
+    });
+
+    it('should throw error if taskRepeatCfg.id is missing', async () => {
+      const taskRepeatCfgWithoutId = { ...mockTaskRepeatCfg, id: undefined };
+
+      await expectAsync(
+        service.getActionsForTaskRepeatCfg(taskRepeatCfgWithoutId as any),
+      ).toBeRejectedWithError('No taskRepeatCfg.id');
+    });
+  });
+
+  describe('deleteTaskRepeatCfgWithDialog', () => {
+    it('should open confirmation dialog and delete if confirmed', () => {
+      const id = 'test-id';
+      const dialogRef = {
+        afterClosed: () => of(true),
+      };
+      matDialog.open.and.returnValue(dialogRef as any);
+
+      service.deleteTaskRepeatCfgWithDialog(id);
+
+      expect(matDialog.open).toHaveBeenCalled();
+      expect(dispatchSpy).toHaveBeenCalledWith(deleteTaskRepeatCfg({ id }));
+    });
+
+    it('should not delete if dialog is cancelled', () => {
+      const id = 'test-id';
+      const dialogRef = {
+        afterClosed: () => of(false),
+      };
+      matDialog.open.and.returnValue(dialogRef as any);
+
+      service.deleteTaskRepeatCfgWithDialog(id);
+
+      expect(matDialog.open).toHaveBeenCalled();
+      expect(dispatchSpy).not.toHaveBeenCalledWith(deleteTaskRepeatCfg({ id }));
+    });
+  });
+
+  describe('selector methods', () => {
+    it('should return observables from store selectors', () => {
+      const dayDate = Date.now();
+      const id = 'test-id';
+
+      service.getRepeatableTasksDueForDayOnly$(dayDate);
+      service.getRepeatableTasksDueForDayIncludingOverdue$(dayDate);
+      service.getTaskRepeatCfgById$(id);
+      service.getTaskRepeatCfgByIdAllowUndefined$(id);
+
+      // These methods should return observables - we're just testing they don't throw
+      expect(service.getRepeatableTasksDueForDayOnly$(dayDate)).toBeDefined();
+      expect(service.getRepeatableTasksDueForDayIncludingOverdue$(dayDate)).toBeDefined();
+      expect(service.getTaskRepeatCfgById$(id)).toBeDefined();
+      expect(service.getTaskRepeatCfgByIdAllowUndefined$(id)).toBeDefined();
+    });
+  });
+
+  describe('batch operations', () => {
+    it('should handle deleteTaskRepeatCfgsNoTaskCleanup', () => {
+      const ids = ['id1', 'id2', 'id3'];
+      service.deleteTaskRepeatCfgsNoTaskCleanup(ids);
+      expect(dispatchSpy).toHaveBeenCalledWith(deleteTaskRepeatCfgs({ ids }));
+    });
+
+    it('should handle updateTaskRepeatCfgs', () => {
+      const ids = ['id1', 'id2'];
+      const changes = { title: 'Updated Title' };
+      service.updateTaskRepeatCfgs(ids, changes);
+      expect(dispatchSpy).toHaveBeenCalledWith(updateTaskRepeatCfgs({ ids, changes }));
+    });
+
+    it('should handle upsertTaskRepeatCfg', () => {
+      service.upsertTaskRepeatCfg(mockTaskRepeatCfg);
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        upsertTaskRepeatCfg({ taskRepeatCfg: mockTaskRepeatCfg }),
+      );
+    });
+  });
+
+  describe('_getTaskRepeatTemplate (private method testing through public interface)', () => {
+    it('should create correct task template through getActionsForTaskRepeatCfg', async () => {
+      const targetDayDate = Date.now();
+      const taskRepeatCfgWithSubTasks = {
+        ...mockTaskRepeatCfg,
+        subTasks: [
+          {
+            title: 'Subtask 1',
+            notes: 'Notes 1',
+            timeEstimate: 1800000,
+            isDone: false,
+          },
+        ],
+      };
+
+      const actions = await service.getActionsForTaskRepeatCfg(
+        taskRepeatCfgWithSubTasks,
+        targetDayDate,
+      );
+
+      // The addTask action should contain the correct task data
+      const addTaskAction = actions.find((action) =>
+        action.type.includes('[Task Shared] Add Task'),
+      );
+      expect(addTaskAction).toBeDefined();
+      expect(addTaskAction.task.title).toBe(mockTaskRepeatCfg.title);
+      expect(addTaskAction.task.repeatCfgId).toBe(mockTaskRepeatCfg.id);
+
+      // The addSubTask actions should contain the correct subtask data
+      const addSubTaskActions = actions.filter((action) =>
+        action.type.includes('Add sub task'),
+      );
+      expect(addSubTaskActions.length).toBe(1);
+      expect(addSubTaskActions[0].task.title).toBe('Subtask 1');
+      expect(addSubTaskActions[0].task.timeEstimate).toBe(1800000);
+    });
+  });
+});

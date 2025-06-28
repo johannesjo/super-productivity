@@ -28,8 +28,7 @@ import { T } from '../../t.const';
 import { first, take } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { Task } from '../tasks/task.model';
-import { addTask, addSubTask, scheduleTaskWithTime } from '../tasks/store/task.actions';
-import { scheduleTaskWithTime } from '../tasks/store/task.actions';
+import { addSubTask, scheduleTaskWithTime } from '../tasks/store/task.actions';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { WorkContextService } from '../work-context/work-context.service';
 import { WorkContextType } from '../work-context/work-context.model';
@@ -176,7 +175,6 @@ export class TaskRepeatCfgService {
   ): // NOTE: updateTaskRepeatCfg missing as there is no way to declare it as action type
   Promise<
     (
-      | ReturnType<typeof addTask>
       | ReturnType<typeof addSubTask>
       | ReturnType<typeof TaskSharedActions.addTask>
       | ReturnType<typeof updateTaskRepeatCfg>
@@ -212,7 +210,6 @@ export class TaskRepeatCfgService {
     const { task, isAddToBottom, subTasks } = this._getTaskRepeatTemplate(taskRepeatCfg);
 
     const createNewActions: (
-      | ReturnType<typeof addTask>
       | ReturnType<typeof addSubTask>
       | ReturnType<typeof TaskSharedActions.addTask>
       | ReturnType<typeof updateTaskRepeatCfg>
@@ -301,7 +298,6 @@ export class TaskRepeatCfgService {
         additional: {
           timeEstimate: subTaskTemplate.timeEstimate,
           repeatCfgId: taskRepeatCfg.id,
-          timeEstimate: taskRepeatCfg.defaultEstimate || 0,
           projectId: taskRepeatCfg.projectId || undefined,
           notes: subTaskTemplate.notes || '',
           isDone: subTaskTemplate.isDone || false,
