@@ -21,6 +21,7 @@ import { IS_MAC } from './common.const';
 import {
   showOverlayWindow,
   hideOverlayWindow,
+  destroyOverlayWindow,
 } from './overlay-indicator/overlay-indicator';
 
 let mainWin: BrowserWindow;
@@ -280,6 +281,8 @@ const appCloseHandler = (app: App): void => {
 
   const _quitApp = (): void => {
     (app as any).isQuiting = true;
+    // Destroy overlay window before closing main window to ensure window-all-closed fires
+    destroyOverlayWindow();
     mainWin.close();
   };
 
@@ -293,6 +296,8 @@ const appCloseHandler = (app: App): void => {
     ids = ids.filter((idIn) => idIn !== id);
     log(IPC.BEFORE_CLOSE_DONE, id, ids);
     if (ids.length === 0) {
+      // Destroy overlay window before closing main window
+      destroyOverlayWindow();
       mainWin.close();
     }
   });
