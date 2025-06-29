@@ -107,7 +107,7 @@ async function buildPlugin(plugin) {
 
     // Copy files to assets if not skipped
     if (!plugin.skipCopy) {
-      const targetDir = path.join('src/assets', plugin.name);
+      const targetDir = path.join('src/assets/bundled-plugins', plugin.name);
       await ensureDir(targetDir);
 
       const filesToCopy = plugin.distFiles || plugin.files || [];

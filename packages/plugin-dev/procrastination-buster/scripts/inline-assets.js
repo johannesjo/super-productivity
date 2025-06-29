@@ -6,7 +6,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const distDir = path.join(__dirname, '../dist');
-const targetDir = path.join(__dirname, '../../../../src/assets/procrastination-buster');
+const targetDir = path.join(
+  __dirname,
+  '../../../../src/assets/bundled-plugins/procrastination-buster',
+);
 
 // Read the HTML file
 const htmlPath = path.join(distDir, 'index.html');

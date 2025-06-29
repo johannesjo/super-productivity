@@ -90,10 +90,10 @@ export class PluginService implements OnDestroy {
 
   private async _discoverBuiltInPlugins(): Promise<void> {
     const pluginPaths = [
-      'assets/yesterday-tasks-plugin',
+      'assets/bundled-plugins/yesterday-tasks-plugin',
       // 'assets/sync-md-plugin', // Disabled - not ready for prime time
-      'assets/api-test-plugin',
-      'assets/procrastination-buster',
+      'assets/bundled-plugins/api-test-plugin',
+      'assets/bundled-plugins/procrastination-buster',
     ];
 
     // Only load manifests for discovery
@@ -146,10 +146,10 @@ export class PluginService implements OnDestroy {
 
   private async _loadBuiltInPlugins(): Promise<void> {
     const pluginPaths = [
-      'assets/yesterday-tasks-plugin',
+      'assets/bundled-plugins/yesterday-tasks-plugin',
       // 'assets/sync-md-plugin', // Disabled - not ready for prime time
-      'assets/api-test-plugin',
-      'assets/procrastination-buster',
+      'assets/bundled-plugins/api-test-plugin',
+      'assets/bundled-plugins/procrastination-buster',
     ];
 
     // KISS: No preloading - just load plugins directly

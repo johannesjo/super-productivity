@@ -4,7 +4,8 @@
     "app-builds/**/*",
     "dist/**",
     "node_modules/**/*",
-    "src/app/t.const.ts"
+    "src/app/t.const.ts",
+    "src/assets/bundled-plugins/**/*"
   ],
   "overrides": [
     {

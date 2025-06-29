@@ -41,7 +41,10 @@ const plugins = [
     copyToAssets: true,
     buildCommand: async (pluginPath) => {
       // Copy to assets directory
-      const targetDir = path.join(__dirname, '../../../src/assets/api-test-plugin');
+      const targetDir = path.join(
+        __dirname,
+        '../../../src/assets/bundled-plugins/api-test-plugin',
+      );
       if (!fs.existsSync(targetDir)) {
         fs.mkdirSync(targetDir, { recursive: true });
       }
@@ -93,7 +96,7 @@ const plugins = [
       // Copy to assets directory
       const targetDir = path.join(
         __dirname,
-        '../../../src/assets/yesterday-tasks-plugin',
+        '../../../src/assets/bundled-plugins/yesterday-tasks-plugin',
       );
       if (!fs.existsSync(targetDir)) {
         fs.mkdirSync(targetDir, { recursive: true });
