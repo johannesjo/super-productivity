@@ -1,4 +1,4 @@
-import { BrowserWindow, ipcMain, screen, globalShortcut } from 'electron';
+import { BrowserWindow, ipcMain, screen } from 'electron';
 import { join } from 'path';
 import { TaskCopy } from '../../src/app/features/tasks/task.model';
 import { info } from 'electron-log/main';
@@ -6,35 +6,28 @@ import { IPC } from '../shared-with-frontend/ipc-events.const';
 
 let overlayWindow: BrowserWindow | null = null;
 let isOverlayEnabled = false;
-let isOverlayVisible = true;
 let currentTask: TaskCopy | null = null;
 let isPomodoroEnabled = false;
 let currentPomodoroSessionTime = 0;
 let isFocusModeEnabled = false;
 let currentFocusSessionTime = 0;
+let initTimeoutId: NodeJS.Timeout | null = null;
 
 export const initOverlayIndicator = (enabled: boolean, shortcut?: string): void => {
   isOverlayEnabled = enabled;
 
   if (enabled) {
     createOverlayWindow();
-    if (shortcut) {
-      registerShortcut(shortcut);
-    }
     initListeners();
 
     // Show overlay and request current task state
-    setTimeout(() => {
-      const mainWindow = BrowserWindow.getAllWindows().find(
-        (win) => win !== overlayWindow,
-      );
-      if (mainWindow) {
-        // Request current task state
-        mainWindow.webContents.send(IPC.REQUEST_CURRENT_TASK_FOR_OVERLAY);
-      }
-      // Always show overlay when initialized
-      showOverlayWindow();
-    }, 100);
+    const mainWindow = BrowserWindow.getAllWindows().find((win) => win !== overlayWindow);
+    if (mainWindow) {
+      // Request current task state
+      mainWindow.webContents.send(IPC.REQUEST_CURRENT_TASK_FOR_OVERLAY);
+    }
+    // Always show overlay when initialized
+    showOverlayWindow();
   }
 };
 
@@ -46,16 +39,12 @@ export const updateOverlayEnabled = (isEnabled: boolean): void => {
     initListeners();
 
     // Show overlay and request current task state immediately when enabling
-    setTimeout(() => {
-      const mainWindow = BrowserWindow.getAllWindows().find(
-        (win) => win !== overlayWindow,
-      );
-      if (mainWindow) {
-        mainWindow.webContents.send(IPC.REQUEST_CURRENT_TASK_FOR_OVERLAY);
-      }
-      // Always show overlay when enabled
-      showOverlayWindow();
-    }, 100);
+    const mainWindow = BrowserWindow.getAllWindows().find((win) => win !== overlayWindow);
+    if (mainWindow) {
+      mainWindow.webContents.send(IPC.REQUEST_CURRENT_TASK_FOR_OVERLAY);
+    }
+    // Always show overlay when enabled
+    showOverlayWindow();
   } else if (!isEnabled && overlayWindow) {
     destroyOverlayWindow();
   }
@@ -66,8 +55,31 @@ export const updateOverlayTheme = (isDarkTheme: boolean): void => {
 };
 
 export const destroyOverlayWindow = (): void => {
+  // Clear any pending timeouts
+  if (initTimeoutId) {
+    clearTimeout(initTimeoutId);
+    initTimeoutId = null;
+  }
+
+  // Disable overlay to prevent close event prevention
+  isOverlayEnabled = false;
+
+  // Remove IPC listeners
+  ipcMain.removeAllListeners('overlay-show-main-window');
+
   if (overlayWindow) {
+    // Remove ALL event listeners
     overlayWindow.removeAllListeners('close');
+    overlayWindow.removeAllListeners('closed');
+    overlayWindow.removeAllListeners('ready-to-show');
+    overlayWindow.removeAllListeners('system-context-menu');
+
+    // Remove webContents listeners
+    if (overlayWindow.webContents) {
+      overlayWindow.webContents.removeAllListeners('context-menu');
+    }
+
+    // Force destroy the window
     overlayWindow.destroy();
     overlayWindow = null;
   }
@@ -118,7 +130,6 @@ const createOverlayWindow = (): void => {
 
   overlayWindow.on('ready-to-show', () => {
     // Show the overlay window
-    isOverlayVisible = true;
     overlayWindow.show();
 
     // Ensure window stays on all workspaces
@@ -141,39 +152,20 @@ const createOverlayWindow = (): void => {
     e.preventDefault();
   });
 
-  // Prevent window close attempts that might cause issues
-  overlayWindow.on('close', (e) => {
-    if (isOverlayEnabled) {
-      e.preventDefault();
-      overlayWindow.hide();
-      isOverlayVisible = false;
-    }
-  });
+  // // Prevent window close attempts that might cause issues
+  // overlayWindow.on('close', (e) => {
+  //   if (isOverlayEnabled) {
+  //     e.preventDefault();
+  //     overlayWindow.hide();
+  //     isOverlayVisible = false;
+  //   }
+  // });
 
   // Don't make window click-through initially to allow dragging
   // The renderer process will handle mouse events dynamically
 
   // Update initial state
   updateOverlayContent();
-};
-
-const registerShortcut = (shortcut: string): void => {
-  globalShortcut.register(shortcut, () => {
-    toggleOverlayVisibility();
-  });
-};
-
-const toggleOverlayVisibility = (): void => {
-  if (!overlayWindow) {
-    return;
-  }
-
-  isOverlayVisible = !isOverlayVisible;
-  if (isOverlayVisible) {
-    overlayWindow.show();
-  } else {
-    overlayWindow.hide();
-  }
 };
 
 export const showOverlayWindow = (): void => {
@@ -187,7 +179,6 @@ export const showOverlayWindow = (): void => {
   // Only show if not already visible
   if (!overlayWindow.isVisible()) {
     info('Showing overlay window');
-    isOverlayVisible = true;
     overlayWindow.show();
   } else {
     info('Overlay already visible');
@@ -205,7 +196,6 @@ export const hideOverlayWindow = (): void => {
   // Only hide if currently visible
   if (overlayWindow.isVisible()) {
     info('Hiding overlay window');
-    isOverlayVisible = false;
     overlayWindow.hide();
   } else {
     info('Overlay already hidden');
