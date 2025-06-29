@@ -73,6 +73,22 @@ This will:
 2. Create a ZIP file containing all necessary files
 3. Place the ZIP in the root directory
 
+### Deployment (for Plugins with HTML UI)
+
+If your plugin has an `index.html` file (for UI components, side panels, etc.), use the deploy command instead:
+
+```bash
+npm run deploy
+```
+
+This will:
+
+1. Build the plugin
+2. Inline all CSS and JavaScript assets into the HTML file
+3. Create a ZIP file for distribution
+
+**Note**: The `deploy` command is necessary for any plugin with HTML UI because Super Productivity loads plugin HTML as data URLs, which cannot access external files. The inline-assets script ensures all assets are embedded directly in the HTML.
+
 ## Project Structure
 
 ```
