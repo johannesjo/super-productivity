@@ -28,6 +28,8 @@ export const adjustToLiveFormlyForm = (
               // For duration fields, convert the string to milliseconds
               if (item.type === 'duration') {
                 field.formControl?.setValue(value ? stringToMs(value) : null);
+              } else if (item?.templateOptions?.type === 'number') {
+                field.formControl?.setValue(value ? Number(value) : 0);
               } else {
                 field.formControl?.setValue(value);
               }
