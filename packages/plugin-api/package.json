@@ -5,8 +5,9 @@
   "main": "src/index.ts",
   "types": "src/index.ts",
   "scripts": {
-    "build": "tsc --emitDeclarationOnly",
+    "build": "tsc",
     "build:watch": "tsc --emitDeclarationOnly --watch",
+    "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [

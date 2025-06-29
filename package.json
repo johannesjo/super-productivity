@@ -26,8 +26,9 @@
   "scripts": {
     "assemble:android:prod": "cd android && ./gradlew assembleRelease && cd ..",
     "assemble:android:stage": "cd android && ./gradlew assembleDebug && cd ..",
-    "prebuild": "node ./tools/git-version.js",
+    "prebuild": "node ./tools/git-version.js && npm run build:packages",
     "build": "npm run buildAllElectron:noTests:prod",
+    "build:packages": "node ./packages/build-packages.js",
     "buildAllElectron:noTests:prod": "npm run lint && npm run buildFrontend:prod:es6 && npm run electron:build",
     "buildAllElectron:prod": "npm run preCheck && npm run buildFrontend:prod:es6 && npm run electron:build",
     "buildAllElectron:stage": "npm run preCheck && npm run buildFrontend:stage:es6 && npm run electron:build",
