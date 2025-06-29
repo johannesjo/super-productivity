@@ -1,14 +1,15 @@
 {
   "name": "@super-productivity/plugin-api",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "TypeScript definitions for Super Productivity plugin development",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --emitDeclarationOnly --watch",
     "clean": "rm -rf dist",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run clean && npm run build",
+    "version": "npm run build"
   },
   "keywords": [
     "super-productivity",
@@ -22,7 +23,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/johannesjo/super-productivity.git",
+    "url": "git+https://github.com/johannesjo/super-productivity.git",
     "directory": "packages/plugin-api"
   },
   "bugs": {
@@ -30,10 +31,12 @@
   },
   "homepage": "https://github.com/johannesjo/super-productivity#readme",
   "files": [
-    "src/**/*.ts",
-    "README.md",
-    "LICENSE"
+    "dist/**/*.d.ts",
+    "README.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "typescript": "^5.0.0"
   },

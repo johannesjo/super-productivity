@@ -323,6 +323,8 @@ There are several ways to help.
 
 9. **[Sponsor the project](https://github.com/sponsors/johannesjo)**
 
+10. **[Create custom plugins](docs/plugin-development.md)**: Extend Super Productivity with your own features and integrations by developing custom plugins.
+
 ### Running the development server
 
 If you don't want or cannot use Codespaces for any reason, here are the instructions for local development.
