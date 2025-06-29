@@ -474,3 +474,9 @@ button.isActive2 {
     outline: none;
   }
 }
+
+:host:hover ::ng-deep {
+  .current-task-title {
+    display: none;
+  }
+}
