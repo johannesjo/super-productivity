@@ -5,6 +5,7 @@ import {
   app,
   BrowserWindow,
   globalShortcut,
+  ipcMain,
   powerMonitor,
   protocol,
 } from 'electron';
@@ -254,15 +255,30 @@ export const startApp = (): void => {
   });
 
   appIN.on('before-quit', () => {
+    log('App before-quit: cleaning up resources');
+
     // Clean up overlay window before quitting
     destroyOverlayWindow();
+
+    // Remove all IPC listeners to prevent memory leaks
+    ipcMain.removeAllListeners();
+
+    // Clear any pending timeouts/intervals
+    if (global.gc) {
+      global.gc();
+    }
   });
 
   appIN.on('window-all-closed', () => {
     log('Quit after all windows being closed');
-    // if (!IS_MAC) {
+    // Force quit the app
     app.quit();
-    // }
+
+    // If app doesn't quit within 2 seconds, force exit
+    setTimeout(() => {
+      log('Force exiting app as it did not quit properly');
+      app.exit(0);
+    }, 2000);
   });
   process.on('uncaughtException', (err) => {
     console.log(err);

@@ -66,6 +66,14 @@ export const initFullScreenBlocker = (IS_DEV: boolean): void => {
           evI.preventDefault();
         }
       });
+
+      win.on('closed', () => {
+        // Clean up references
+        isFullScreenWindowOpen = false;
+        if (closeTimeout) {
+          clearTimeout(closeTimeout);
+        }
+      });
     },
   );
 };

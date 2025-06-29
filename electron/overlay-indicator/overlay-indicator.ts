@@ -66,21 +66,31 @@ export const destroyOverlayWindow = (): void => {
 
   // Remove IPC listeners
   ipcMain.removeAllListeners('overlay-show-main-window');
+  ipcMain.removeAllListeners('overlay-set-ignore-mouse');
 
-  if (overlayWindow) {
-    // Remove ALL event listeners
-    overlayWindow.removeAllListeners('close');
-    overlayWindow.removeAllListeners('closed');
-    overlayWindow.removeAllListeners('ready-to-show');
-    overlayWindow.removeAllListeners('system-context-menu');
+  if (overlayWindow && !overlayWindow.isDestroyed()) {
+    try {
+      // Remove ALL event listeners
+      overlayWindow.removeAllListeners();
 
-    // Remove webContents listeners
-    if (overlayWindow.webContents) {
-      overlayWindow.webContents.removeAllListeners('context-menu');
+      // Remove webContents listeners
+      if (overlayWindow.webContents && !overlayWindow.webContents.isDestroyed()) {
+        overlayWindow.webContents.removeAllListeners();
+      }
+
+      // Hide first to prevent visual issues
+      overlayWindow.hide();
+
+      // Set closable to ensure we can close it
+      overlayWindow.setClosable(true);
+
+      // Force destroy the window
+      overlayWindow.destroy();
+    } catch (e) {
+      // Window might already be destroyed
+      console.error('Error destroying overlay window:', e);
     }
 
-    // Force destroy the window
-    overlayWindow.destroy();
     overlayWindow = null;
   }
 };
@@ -106,6 +116,7 @@ const createOverlayWindow = (): void => {
     // resizable: false,
     minimizable: false,
     maximizable: false,
+    closable: true, // Ensure window is closable
     hasShadow: false, // Disable shadow with transparent windows
     autoHideMenuBar: true,
     roundedCorners: false, // Disable rounded corners for better compatibility
@@ -116,6 +127,7 @@ const createOverlayWindow = (): void => {
       disableDialogs: true,
       webSecurity: true,
       allowRunningInsecureContent: false,
+      backgroundThrottling: false, // Prevent throttling when hidden
     },
   });
 

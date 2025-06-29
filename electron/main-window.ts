@@ -319,6 +319,12 @@ const appCloseHandler = (app: App): void => {
     }
   });
 
+  mainWin.on('closed', () => {
+    // Dereference the window object
+    mainWin = null;
+    mainWinModule.win = null;
+  });
+
   mainWin.webContents.on('render-process-gone', (event, detailed) => {
     log('!crashed, reason: ' + detailed.reason + ', exitCode = ' + detailed.exitCode);
     if (detailed.reason == 'crashed') {

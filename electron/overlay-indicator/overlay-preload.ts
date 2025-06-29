@@ -8,6 +8,13 @@ contextBridge.exposeInMainWorld('overlayAPI', {
     ipcRenderer.send('overlay-show-main-window');
   },
   onUpdateContent: (callback: (data: any) => void) => {
-    ipcRenderer.on('update-content', (event, data) => callback(data));
+    const listener = (event: Electron.IpcRendererEvent, data: any): void =>
+      callback(data);
+    ipcRenderer.on('update-content', listener);
+
+    // Return cleanup function
+    return () => {
+      ipcRenderer.removeListener('update-content', listener);
+    };
   },
 });

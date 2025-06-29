@@ -192,6 +192,12 @@ class PluginNodeExecutor {
       const timer = setTimeout(() => {
         killed = true;
         child.kill('SIGTERM');
+        // Force kill after a short delay if process doesn't terminate
+        setTimeout(() => {
+          if (!child.killed) {
+            child.kill('SIGKILL');
+          }
+        }, 1000);
         reject(new Error(`Script execution timed out after ${timeoutMs}ms`));
       }, timeoutMs);
 
