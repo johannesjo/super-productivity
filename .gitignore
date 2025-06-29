@@ -84,7 +84,10 @@ electron-builder.win-store.yaml
 .aider*
 
 /packages/plugin-api/dist/**/*.*
+/packages/plugin-api/src/**/*.js
+/packages/plugin-api/src/**/*.js.map
 
 #
 perf-metrics-create-tasks.json
 perf-metrics-initial-load.json
+/packages/plugin-dev/procrastination-buster/procrastination-buster-v1.0.0.zip

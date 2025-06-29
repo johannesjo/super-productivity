@@ -2,12 +2,12 @@
   "name": "@super-productivity/plugin-api",
   "version": "1.0.0",
   "description": "TypeScript definitions for Super Productivity plugin development",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
   "scripts": {
-    "build": "tsc",
-    "build:watch": "tsc --watch",
-    "prepublishOnly": "npm run build"
+    "build": "tsc --emitDeclarationOnly",
+    "build:watch": "tsc --emitDeclarationOnly --watch",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "super-productivity",
@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/johannesjo/super-productivity#readme",
   "files": [
-    "dist/**/*",
+    "src/**/*.ts",
     "README.md",
     "LICENSE"
   ],

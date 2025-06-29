@@ -6,10 +6,6 @@
   "scripts": {
     "build": "node scripts/build-all.js",
     "build:all": "node scripts/build-all.js",
-    "build:minimal": "cd minimal-plugin && zip -r ../minimal-plugin.zip manifest.json plugin.js README.md && cd .. && echo '✓ Built minimal-plugin.zip'",
-    "build:simple": "cd simple-typescript-plugin && npm install && npm run build && cd .. && echo '✓ Built simple-typescript-plugin'",
-    "build:example": "cd example-plugin && npm install && npm run build && npm run package && cd .. && echo '✓ Built example-plugin'",
-    "build:procrastination": "cd procrastination-buster && npm install && npm run build && npm run package && cd .. && echo '✓ Built procrastination-buster'",
     "clean": "rm -rf */node_modules */dist minimal-plugin.zip",
     "clean:dist": "rm -rf */dist minimal-plugin.zip",
     "install:all": "node scripts/install-all.js",

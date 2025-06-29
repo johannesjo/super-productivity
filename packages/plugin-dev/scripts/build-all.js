@@ -27,6 +27,7 @@ const plugins = [
     name: 'procrastination-buster',
     path: 'procrastination-buster',
     needsInstall: true,
+    copyToAssets: true,
     buildCommand: async (pluginPath) => {
       await execAsync(`cd ${pluginPath} && npm run build && npm run package`);
       return 'Built and packaged';
@@ -36,6 +37,7 @@ const plugins = [
   {
     name: 'api-test-plugin',
     path: 'api-test-plugin',
+    needsInstall: true,
     copyToAssets: true,
     buildCommand: async (pluginPath) => {
       // Copy to assets directory
@@ -54,36 +56,38 @@ const plugins = [
       return 'Copied to assets';
     },
   },
-  {
-    name: 'sync-md-plugin',
-    path: 'sync-md-plugin',
-    copyToAssets: true,
-    buildCommand: async (pluginPath) => {
-      // Copy to assets directory
-      const targetDir = path.join(__dirname, '../../../src/assets/sync-md-plugin');
-      if (!fs.existsSync(targetDir)) {
-        fs.mkdirSync(targetDir, { recursive: true });
-      }
-      const files = [
-        'manifest.json',
-        'plugin.js',
-        'index.html',
-        'iframe-script.js',
-        'sync-md-icon.svg',
-      ];
-      for (const file of files) {
-        const src = path.join(pluginPath, file);
-        const dest = path.join(targetDir, file);
-        if (fs.existsSync(src)) {
-          fs.copyFileSync(src, dest);
-        }
-      }
-      return 'Copied to assets';
-    },
-  },
+  // {
+  //   name: 'sync-md-plugin',
+  //   path: 'sync-md-plugin',
+  //   needsInstall: true,
+  //   copyToAssets: true,
+  //   buildCommand: async (pluginPath) => {
+  //     // Copy to assets directory
+  //     const targetDir = path.join(__dirname, '../../../src/assets/sync-md-plugin');
+  //     if (!fs.existsSync(targetDir)) {
+  //       fs.mkdirSync(targetDir, { recursive: true });
+  //     }
+  //     const files = [
+  //       'manifest.json',
+  //       'plugin.js',
+  //       'index.html',
+  //       'iframe-script.js',
+  //       'sync-md-icon.svg',
+  //     ];
+  //     for (const file of files) {
+  //       const src = path.join(pluginPath, file);
+  //       const dest = path.join(targetDir, file);
+  //       if (fs.existsSync(src)) {
+  //         fs.copyFileSync(src, dest);
+  //       }
+  //     }
+  //     return 'Copied to assets';
+  //   },
+  // },
   {
     name: 'yesterday-tasks-plugin',
     path: 'yesterday-tasks-plugin',
+    needsInstall: true,
     copyToAssets: true,
     buildCommand: async (pluginPath) => {
       // Copy to assets directory
