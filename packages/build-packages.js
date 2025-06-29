@@ -38,15 +38,7 @@ const plugins = [
     name: 'procrastination-buster',
     path: 'packages/plugin-dev/procrastination-buster',
     buildCommand: 'npm run build',
-    distFiles: [
-      'manifest.json',
-      'plugin.js',
-      'index.html',
-      'index.js',
-      'index.css',
-      'icon.svg',
-    ],
-    sourcePath: 'dist',
+    skipCopy: true, // inline-assets.js handles the copying with inlined assets
   },
   {
     name: 'yesterday-tasks-plugin',

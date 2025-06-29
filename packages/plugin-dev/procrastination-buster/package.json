@@ -6,11 +6,9 @@
   "scripts": {
     "dev": "vite",
     "dev:watch": "node scripts/watch-and-build.js",
-    "build": "vite build",
+    "build": "vite build && node scripts/inline-assets.js",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "package": "npm run build && node scripts/build-plugin.js",
-    "deploy": "npm run build && node scripts/inline-assets.js",
     "clean": "rm -rf dist node_modules *.zip",
     "lint": "tsc --noEmit"
   },
