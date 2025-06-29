@@ -75,7 +75,7 @@ describe('InputDurationFormlyComponent', () => {
       setTimeout(() => {
         expect(setValueSpy).toHaveBeenCalledWith(7200000);
         done();
-      }, 10);
+      }, 0);
     });
 
     it('should handle "45s" input', (done) => {
@@ -90,7 +90,7 @@ describe('InputDurationFormlyComponent', () => {
       setTimeout(() => {
         expect(setValueSpy).toHaveBeenCalledWith(45000);
         done();
-      }, 10);
+      }, 0);
     });
 
     it('should handle "1d" input', (done) => {
@@ -105,7 +105,7 @@ describe('InputDurationFormlyComponent', () => {
       setTimeout(() => {
         expect(setValueSpy).toHaveBeenCalledWith(86400000);
         done();
-      }, 10);
+      }, 0);
     });
 
     it('should handle empty input and set null', (done) => {
@@ -120,7 +120,7 @@ describe('InputDurationFormlyComponent', () => {
       setTimeout(() => {
         expect(setValueSpy).toHaveBeenCalledWith(null);
         done();
-      }, 10);
+      }, 0);
     });
 
     it('should parse "2h 3" as 2 hours and 3 minutes', (done) => {

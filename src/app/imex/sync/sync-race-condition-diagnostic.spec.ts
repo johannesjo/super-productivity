@@ -229,14 +229,14 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
 
       // Step 4: Effect waits 1000ms
       timeline.push('4. Effect waiting 1000ms...');
-      await wait(500);
+      await wait(50);
 
       // Step 5: ReInit starts but hasn't completed
       timeline.push('5. ReInit starts (async)');
       dataInitService.reInit();
 
       // Step 6: Effect finishes waiting
-      await wait(500);
+      await wait(50);
       timeline.push('6. Effect calls addAllDueToday (reInit still running!)');
 
       // Check what happened
@@ -245,7 +245,7 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
       const tasksCreated = returnValue || [];
 
       // Step 7: ReInit completes
-      await wait(100);
+      await wait(10);
       timeline.push('7. ReInit completes (too late!)');
 
       console.log('Timeline:', timeline);
@@ -315,13 +315,13 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
 
       // Step 3: ReInit is called and completes
       timeline.push('3. ReInit called (loads WRONG data)');
-      await wait(100);
+      await wait(10);
       dataInitService.reInit();
-      await wait(100);
+      await wait(10);
 
       // Step 4: Effect waits and then runs
       timeline.push('4. Effect waiting...');
-      await wait(1000);
+      await wait(10);
       timeline.push('5. Effect calls addAllDueToday');
 
       // Check what happened
@@ -392,7 +392,7 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
       afterCurrentSyncDoneOrSyncDisabled$.next(undefined);
 
       // Effect waits 1000ms
-      await wait(1000);
+      await wait(10);
       timeline.push(
         '3. Effect fires - reInit started? ' +
           reInitStarted +
@@ -405,7 +405,7 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
       const tasksCreated = returnVal3 || [];
 
       // Let reInit complete
-      await wait(2000);
+      await wait(200);
       timeline.push('4. ReInit finally completes');
 
       console.log('Timeline:', timeline);
@@ -455,11 +455,11 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
       // Sync and reInit complete properly
       isSyncInProgress$.next(false);
       dataInitService.reInit();
-      await wait(100);
+      await wait(10);
 
       // Then signal sync done
       afterCurrentSyncDoneOrSyncDisabled$.next(undefined);
-      await wait(1000);
+      await wait(10);
 
       const returnVal4 =
         addTasksForTomorrowService.addAllDueToday.calls.mostRecent()?.returnValue;

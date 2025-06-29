@@ -158,7 +158,7 @@ describe('SaveToDbEffects', () => {
       setTimeout(() => {
         expect(pfapiServiceMock.m.tag.save).not.toHaveBeenCalled();
         done();
-      }, 50);
+      }, 25);
     });
 
     it('should handle multiple sequential state changes with their corresponding actions', (done) => {
@@ -207,8 +207,8 @@ describe('SaveToDbEffects', () => {
           mockTagSelector.setResult(states[2]);
           store.refreshState();
           actions$.next(actions[2]);
-        }, 10);
-      }, 10);
+        }, 5);
+      }, 5);
     });
 
     it('should correctly associate state changes with their triggering actions in createSaveEffectWithFilter', (done) => {

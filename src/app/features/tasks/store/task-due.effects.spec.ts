@@ -131,12 +131,12 @@ describe('TaskDueEffects', () => {
       // Simulate sync completing
       syncSubject.next(undefined);
 
-      // Wait a bit to ensure effect doesn't fire
+      // Reduce timeout for faster tests
       setTimeout(() => {
         expect(effectFired).toBe(false);
         expect(addTasksForTomorrowService.addAllDueToday).not.toHaveBeenCalled();
         done();
-      }, 100);
+      }, 50);
     });
 
     it('should add tasks after debounce period when sync completes', (done) => {

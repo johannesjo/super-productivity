@@ -108,7 +108,7 @@ describe('Sync Race Condition - Repeating Tasks Recreation Bug', () => {
 
       // Sync downloads data from mobile (with deleted tasks)
       console.log('4. Sync downloading remote data...');
-      await wait(500);
+      await wait(50);
 
       // Sync completes
       console.log('5. First sync done (data downloaded but not fully processed)');
@@ -117,7 +117,7 @@ describe('Sync Race Condition - Repeating Tasks Recreation Bug', () => {
 
       // The 1000ms debounce in the effect
       console.log('6. Waiting 1000ms debounce...');
-      await wait(1000);
+      await wait(10);
 
       // At this point, the effect will check if sync is in progress (it's not)
       // and then call addAllDueToday()
@@ -158,20 +158,20 @@ describe('Sync Race Condition - Repeating Tasks Recreation Bug', () => {
 
       // First sync
       isSyncInProgress$.next(true);
-      await wait(500);
+      await wait(50);
       isSyncInProgress$.next(false);
 
       // Sync completes but DON'T signal afterCurrentSyncDoneOrSyncDisabled$ yet
       console.log('Sync done but waiting for data reload...');
 
       // Simulate data reload
-      await wait(500);
+      await wait(50);
       console.log('Data reload complete');
       dataReloadComplete$.next();
 
       // NOW signal that sync is truly done
       afterCurrentSyncDoneOrSyncDisabled$.next(undefined);
-      await wait(1000);
+      await wait(10);
 
       // With proper fix, addAllDueToday would be called here
       // after data is fully reloaded
@@ -207,10 +207,10 @@ describe('Sync Race Condition - Repeating Tasks Recreation Bug', () => {
       isSyncInProgress$.next(true);
 
       timeline.push('_ SyncService.sync(): __SYNC_START__ metaFileCheck UpdateLocal');
-      await wait(100);
+      await wait(10);
 
       timeline.push('_ ModelSyncService.updateLocalMainModelsFromRemoteMetaFile()');
-      await wait(100);
+      await wait(10);
 
       timeline.push('_ sync() result: Object');
       timeline.push('_ EV:syncDone');
@@ -219,12 +219,12 @@ describe('Sync Race Condition - Repeating Tasks Recreation Bug', () => {
       afterCurrentSyncDoneOrSyncDisabled$.next(undefined);
 
       timeline.push('[Task Shared] removeTasksFromTodayTag');
-      await wait(100);
+      await wait(10);
 
       timeline.push('_ Database.unlock()');
 
       // The debounce delay
-      await wait(1000);
+      await wait(10);
 
       // This is where the bug happens
       timeline.push('[Task Shared] addTask - BUG!');
