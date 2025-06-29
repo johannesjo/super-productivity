@@ -134,6 +134,12 @@ export class DialogSimpleCounterEditComponent {
         },
       },
     },
+    onHover: (event, activeElements) => {
+      const canvas = event.native?.target as HTMLCanvasElement;
+      if (canvas) {
+        canvas.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+      }
+    },
   };
 
   onChartClick(event: { event?: ChartEvent; active?: ActiveElement[] }): void {
