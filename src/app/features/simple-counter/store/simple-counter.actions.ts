@@ -37,6 +37,11 @@ export const setSimpleCounterCounterToday = createAction(
   props<{ id: string; newVal: number; today: string }>(),
 );
 
+export const setSimpleCounterCounterForDate = createAction(
+  '[Simple Counter] Set SimpleCounter Counter For Date',
+  props<{ id: string; date: string; newVal: number }>(),
+);
+
 export const increaseSimpleCounterCounterToday = createAction(
   '[SimpleCounter] Increase SimpleCounter Counter Today',
   props<{ id: string; increaseBy: number; today: string }>(),

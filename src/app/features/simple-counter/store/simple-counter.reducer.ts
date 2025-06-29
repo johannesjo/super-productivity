@@ -28,6 +28,7 @@ import {
   setSimpleCounterCounterOff,
   setSimpleCounterCounterOn,
   setSimpleCounterCounterToday,
+  setSimpleCounterCounterForDate,
   toggleSimpleCounterCounter,
   turnOffAllSimpleCounterCounters,
   updateAllSimpleCounters,
@@ -118,6 +119,21 @@ const _reducer = createReducer<SimpleCounterState>(
           countOnDay: {
             ...(state.entities[id] as SimpleCounter).countOnDay,
             [today]: newVal,
+          },
+        },
+      },
+      state,
+    ),
+  ),
+
+  on(setSimpleCounterCounterForDate, (state, { id, newVal, date }) =>
+    adapter.updateOne(
+      {
+        id,
+        changes: {
+          countOnDay: {
+            ...(state.entities[id] as SimpleCounter).countOnDay,
+            [date]: newVal,
           },
         },
       },
