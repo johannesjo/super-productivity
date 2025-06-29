@@ -29,8 +29,8 @@ const plugins = [
     needsInstall: true,
     copyToAssets: true,
     buildCommand: async (pluginPath) => {
-      await execAsync(`cd ${pluginPath} && npm run build && npm run package`);
-      return 'Built and packaged';
+      await execAsync(`cd ${pluginPath} && npm run deploy`);
+      return 'Built and deployed';
     },
   },
   // Migrated built-in plugins

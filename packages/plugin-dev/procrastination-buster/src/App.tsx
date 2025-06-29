@@ -25,19 +25,19 @@ const App: Component = () => {
   };
 
   const sendPluginMessage = async (type: string, payload?: any) => {
-    return new Promise((resolve) => {
-      const messageId = Math.random().toString(36).substr(2, 9);
-
-      const handler = (event: MessageEvent) => {
-        if (event.data.messageId === messageId) {
-          window.removeEventListener('message', handler);
-          resolve(event.data.response);
-        }
-      };
-
-      window.addEventListener('message', handler);
-      window.parent.postMessage({ type, payload, messageId }, '*');
-    });
+    const pluginAPI = (window as any).PluginAPI;
+    if (pluginAPI) {
+      switch (type) {
+        case PluginMessageType.START_FOCUS_MODE:
+          return pluginAPI.dispatchAction({
+            type: '[FocusMode] Show Focus Overlay',
+          });
+        case 'START_POMODORO':
+          return pluginAPI.dispatchAction({
+            type: '[Pomodoro] Start Pomodoro',
+          });
+      }
+    }
   };
 
   return (
