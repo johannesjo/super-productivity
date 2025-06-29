@@ -197,15 +197,17 @@ export class PluginService implements OnDestroy {
   }
 
   private async _loadPluginsWithHooks(): Promise<void> {
-    // Load all plugins that have hooks (they need to be active immediately)
-    const pluginsWithHooks = Array.from(this._pluginStates.values()).filter(
+    // Load all plugins that have hooks OR side panels (they need to be active immediately)
+    const pluginsToLoad = Array.from(this._pluginStates.values()).filter(
       (state) =>
-        state.isEnabled && state.manifest.hooks && state.manifest.hooks.length > 0,
+        state.isEnabled &&
+        ((state.manifest.hooks && state.manifest.hooks.length > 0) ||
+          state.manifest.sidePanel === true),
     );
 
-    console.log(`Loading ${pluginsWithHooks.length} plugins with hooks...`);
+    console.log(`Loading ${pluginsToLoad.length} plugins with hooks or side panels...`);
 
-    for (const state of pluginsWithHooks) {
+    for (const state of pluginsToLoad) {
       await this.activatePlugin(state.manifest.id);
     }
   }
