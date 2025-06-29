@@ -82,8 +82,8 @@ export const startApp = (): void => {
       app.commandLine.appendSwitch('disable-features', 'UseOzonePlatform');
       app.commandLine.appendSwitch('enable-features', 'UseSkiaRenderer');
 
-      // Set GDK backend to X11
-      // process.env.GDK_BACKEND = 'x11';
+      // Set GDK backend to X11 which is needed for idle handling to work it seems
+      process.env.GDK_BACKEND = 'x11';
     }
   }
 
