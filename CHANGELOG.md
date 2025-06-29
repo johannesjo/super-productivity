@@ -1,3 +1,38 @@
+# [14.0.0-rc.1](https://github.com/johannesjo/super-productivity/compare/v14.0.0-rc.0...v14.0.0-rc.1) (2025-06-29)
+
+### Bug Fixes
+
+- could not focus task error [#4618](https://github.com/johannesjo/super-productivity/issues/4618) ([7b7e702](https://github.com/johannesjo/super-productivity/commit/7b7e7020c0f8c83b50b05cee55d2372136e74f3c))
+- **date:** resolve day of week mismatch in negative UTC timezones ([257eff9](https://github.com/johannesjo/super-productivity/commit/257eff904ad997b54b413eb461989e2cb212cef3)), closes [#4653](https://github.com/johannesjo/super-productivity/issues/4653)
+- fix for ModelValidationError: ModelValidationError [#4654](https://github.com/johannesjo/super-productivity/issues/4654) ([52a49b3](https://github.com/johannesjo/super-productivity/commit/52a49b3a184e144315b2696d15ee9aca67720352))
+- load plugins with side panels during initialization ([f75a890](https://github.com/johannesjo/super-productivity/commit/f75a8902cf4e9ab4c6ed43cb2a00df101f9ebf86))
+- main header current task title being in the way ([95a7436](https://github.com/johannesjo/super-productivity/commit/95a7436a1b065a25ddf127ba1603aae4a659cec8))
+- **plugin:** better handle bundled plugins ([caa6477](https://github.com/johannesjo/super-productivity/commit/caa64775e52d8342cae8baab6b51f0847493374f))
+- **plugin:** loading missing icon ([4ec6841](https://github.com/johannesjo/super-productivity/commit/4ec68410f5531baf34ada4ad8fec2e5ca5d8b0da))
+- **plugin:** procrastination buster plugin again ([2475616](https://github.com/johannesjo/super-productivity/commit/247561682fe97046c37c1deb776f6ba97d696873))
+- procrastination-buster plugin build process with asset inlining ([11911b2](https://github.com/johannesjo/super-productivity/commit/11911b2ba2a5dafa0a9747824b5153ba86bc7550))
+- rebuild procrastination-buster plugin with inlined assets ([5e8253b](https://github.com/johannesjo/super-productivity/commit/5e8253ba6f7f729d15181ed7360f708df4656e30))
+- remove specific jq version constraint in Dockerfile ([578bd05](https://github.com/johannesjo/super-productivity/commit/578bd05077660d2c8b64b6042c089510e5b6ca18))
+- resolve Angular compilation errors ([282004c](https://github.com/johannesjo/super-productivity/commit/282004c0bd2ad5712a6fbdaefa6f75921d20fcf5))
+- resolve build errors in refactored header components ([f9ab8ed](https://github.com/johannesjo/super-productivity/commit/f9ab8eda17ccebc0c880deab3f9bc4bee389d6fa))
+
+### Features
+
+- add inline-assets mechanism to plugin-boilerplate ([e0237b3](https://github.com/johannesjo/super-productivity/commit/e0237b3dad8b8f11757f5ef1f221c727a3720b1b))
+- add option to dismiss reminder without removing from Today [#4601](https://github.com/johannesjo/super-productivity/issues/4601) ([63ed3fa](https://github.com/johannesjo/super-productivity/commit/63ed3fae3edbe9c55c7cda6b924f91b973cab983))
+- **calendar:** improve styling ([19f16cd](https://github.com/johannesjo/super-productivity/commit/19f16cd9eaa3ad46153693c571ad2de986358ce5))
+- **calendar:** migrate and make it work better ([e4b5887](https://github.com/johannesjo/super-productivity/commit/e4b588775f5facf9274ebca84e62cc30cc4a47de))
+- cleanup and update plugins 2 ([8838be0](https://github.com/johannesjo/super-productivity/commit/8838be0aad3f9687df1040d9249d87738ab74ba7))
+- cleanup plugins ([0145f28](https://github.com/johannesjo/super-productivity/commit/0145f28d50f12f568a95d3762e2dff4888b7b0a9))
+- cleanup search bar component ([aaab03c](https://github.com/johannesjo/super-productivity/commit/aaab03c14f49991966e4b2bbe98cb2569ba5c72a))
+- **electron:** avoid white flash ([cd7460b](https://github.com/johannesjo/super-productivity/commit/cd7460b718046010a1563760e624810d19ffb194))
+- **electron:** remove x11 for wayland ([0a2965a](https://github.com/johannesjo/super-productivity/commit/0a2965ae18d9cad25497b2547fe18b35eda0e2dc))
+- **i18n:** add missing translations ([e0b234b](https://github.com/johannesjo/super-productivity/commit/e0b234be7028d473ee3c8e263160d4a88933305c))
+- **plugin-api:** publish TypeScript definitions package to npm ([cc98d63](https://github.com/johannesjo/super-productivity/commit/cc98d63c4e8591d74891f7a61b153839d50d009b))
+- **plugin:** update once more ([8f51b2d](https://github.com/johannesjo/super-productivity/commit/8f51b2dcab744a06c5673cfd3d6316bc6d9d890f))
+- restore panel button rotation and border-radius styles ([722a11a](https://github.com/johannesjo/super-productivity/commit/722a11a8c64279d925afbeb4d46c3cfca12b7217))
+- **timezone:** add comprehensive timezone tests and fix tomorrow date calculation ([d722531](https://github.com/johannesjo/super-productivity/commit/d7225312bd801eefe66bd5cf4704a5569a9f3451)), closes [#4653](https://github.com/johannesjo/super-productivity/issues/4653)
+
 # [14.0.0-rc.0](https://github.com/johannesjo/super-productivity/compare/v13.1.5...v14.0.0-rc.0) (2025-06-27)
 
 ### Bug Fixes
