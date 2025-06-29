@@ -76,6 +76,17 @@ jobs:
           release: false
           github_token: ${{ secrets.github_token }}
 
+      - name: Move .appx files to correct directory
+        run: |
+          if (Test-Path "app-builds\*.appx") {
+            New-Item -ItemType Directory -Force -Path ".tmp\app-builds"
+            Move-Item -Path "app-builds\*.appx" -Destination ".tmp\app-builds\" -Force
+            Write-Host "Moved .appx files from app-builds to .tmp/app-builds"
+          } else {
+            Write-Host "No .appx files found in app-builds directory"
+          }
+        shell: powershell
+
       - name: 'Upload Artifact'
         uses: actions/upload-artifact@v4
         with:
