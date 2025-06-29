@@ -32,7 +32,7 @@ const plugins = [
   {
     name: 'api-test-plugin',
     path: 'packages/plugin-dev/api-test-plugin',
-    files: ['manifest.json', 'plugin.js', 'index.html', 'icon.svg'],
+    files: ['manifest.json', 'plugin.js', 'index.html'],
   },
   {
     name: 'procrastination-buster',
