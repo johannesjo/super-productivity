@@ -1,3 +1,14 @@
+# WARNING WIP (HELP WANTED)
+
+These docs are a first draft and at many places plain wrong. I think the best way to figure out how to write a plugin is to check aut the example plugins:
+
+https://github.com/johannesjo/super-productivity/tree/master/packages/plugin-dev/
+https://github.com/johannesjo/super-productivity/tree/master/packages/plugin-dev/yesterday-tasks-plugin
+
+It is not super complicated, I think :)
+
+---
+
 # Super Productivity Plugin Development Guide
 
 This guide covers everything you need to know about creating plugins for Super Productivity.
