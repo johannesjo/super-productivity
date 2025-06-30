@@ -98,7 +98,31 @@ export class TaskTitleComponent {
   }
 
   updateTmpValue(value: string): void {
-    this.tmpValue = value;
+    this.tmpValue = this._cleanValue(value);
+  }
+
+  handlePaste(event: ClipboardEvent): void {
+    event.preventDefault();
+
+    const pastedText = event.clipboardData?.getData('text/plain') || '';
+    const cleaned = this._cleanValue(pastedText);
+
+    const textarea = this.textarea().nativeElement;
+    const start = textarea.selectionStart || 0;
+    const end = textarea.selectionEnd || 0;
+
+    const currentVal = textarea.value;
+    const newVal = currentVal.slice(0, start) + cleaned + currentVal.slice(end);
+
+    // Update both textarea and tmpValue
+    textarea.value = newVal;
+    this.tmpValue = newVal;
+    this.updateTmpValue(newVal);
+
+    // Reset cursor position
+    requestAnimationFrame(() => {
+      textarea.selectionStart = textarea.selectionEnd = start + cleaned.length;
+    });
   }
 
   private _forceBlur(): void {
