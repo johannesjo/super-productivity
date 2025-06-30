@@ -1214,7 +1214,7 @@ describe('SyncService', () => {
           lastUpdate: 2000,
           lastSyncedUpdate: 1900, // Different from lastUpdate to trigger saveLocal
           localLamport: 5,
-          lastSyncedLamport: 5, // Same as localLamport for InSync
+          lastSyncedLamport: 4, // Different from localLamport to trigger saveLocal
           vectorClock: { CLIENT_123: 5 },
           lastSyncedVectorClock: { CLIENT_123: 5 }, // Same as vectorClock for InSync
         });
@@ -1222,7 +1222,7 @@ describe('SyncService', () => {
         const remoteMeta = createDefaultRemoteMeta({
           lastUpdate: 2000,
           localLamport: 5, // Same as local for InSync
-          vectorClock: { CLIENT_456: 10 },
+          vectorClock: { CLIENT_123: 5 }, // Same as local for InSync
         });
 
         mockMetaModelCtrl.load.and.returnValue(Promise.resolve(localMeta));
