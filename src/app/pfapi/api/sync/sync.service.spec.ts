@@ -1256,11 +1256,14 @@ describe('SyncService', () => {
         const localMeta = createDefaultLocalMeta({
           lastUpdate: 1000,
           lastSyncedUpdate: 1000,
+          localLamport: 0, // Set to 0 to ensure timestamp comparison is used
+          lastSyncedLamport: 0,
           // No vector clock fields
         });
 
         const remoteMeta = createDefaultRemoteMeta({
           lastUpdate: 2000,
+          localLamport: 0, // Ensure consistent Lamport values
           vectorClock: { CLIENT_456: 10 },
         });
 

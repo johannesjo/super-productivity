@@ -9,6 +9,10 @@ import {
   lamportToVectorClock,
   vectorClockToString,
   hasVectorClockChanges,
+  isValidVectorClock,
+  sanitizeVectorClock,
+  limitVectorClockSize,
+  measureVectorClock,
 } from './vector-clock';
 
 describe('Vector Clock', () => {
@@ -516,6 +520,229 @@ describe('Vector Clock', () => {
       for (let i = 0; i < 50; i++) {
         expect(merged[`client${i}`]).toBe(i * 3);
       }
+    });
+  });
+
+  describe('Vector Clock Validation', () => {
+    it('should validate correct vector clocks', () => {
+      expect(isValidVectorClock({ a: 1, b: 2 })).toBe(true);
+      expect(isValidVectorClock({})).toBe(true);
+      expect(isValidVectorClock({ client1: 0 })).toBe(true);
+      expect(isValidVectorClock({ client1: Number.MAX_SAFE_INTEGER })).toBe(true);
+    });
+
+    it('should reject invalid vector clocks', () => {
+      expect(isValidVectorClock(null)).toBe(false);
+      expect(isValidVectorClock(undefined)).toBe(false);
+      expect(isValidVectorClock('string')).toBe(false);
+      expect(isValidVectorClock(123)).toBe(false);
+      expect(isValidVectorClock([])).toBe(false);
+      expect(isValidVectorClock([1, 2, 3])).toBe(false);
+    });
+
+    it('should reject vector clocks with invalid values', () => {
+      expect(isValidVectorClock({ a: -1 })).toBe(false);
+      expect(isValidVectorClock({ a: 'string' as any })).toBe(false);
+      expect(isValidVectorClock({ a: null as any })).toBe(false);
+      expect(isValidVectorClock({ a: undefined as any })).toBe(false);
+      expect(isValidVectorClock({ a: NaN })).toBe(false);
+      expect(isValidVectorClock({ a: Infinity })).toBe(false);
+      expect(isValidVectorClock({ a: Number.MAX_SAFE_INTEGER + 1 })).toBe(false);
+    });
+
+    it('should reject vector clocks with invalid keys', () => {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      expect(isValidVectorClock({ '': 1 })).toBe(false);
+      const objWithNumKey = {};
+      (objWithNumKey as any)[123] = 1;
+      expect(isValidVectorClock(objWithNumKey)).toBe(true); // Numbers are converted to strings
+    });
+
+    it('should handle non-plain objects', () => {
+      class CustomClass {
+        a = 1;
+      }
+      expect(isValidVectorClock(new CustomClass())).toBe(false);
+      expect(isValidVectorClock(new Date())).toBe(false);
+      expect(isValidVectorClock(/regex/)).toBe(false);
+    });
+  });
+
+  describe('Vector Clock Sanitization', () => {
+    it('should sanitize valid vector clocks', () => {
+      const valid = { a: 1, b: 2 };
+      expect(sanitizeVectorClock(valid)).toEqual(valid);
+    });
+
+    it('should remove invalid entries', () => {
+      const invalid = {
+        valid: 1,
+        negative: -1,
+        string: 'not a number' as any,
+        null: null as any,
+        undefined: undefined as any,
+        nan: NaN,
+        infinity: Infinity,
+        tooLarge: Number.MAX_SAFE_INTEGER + 1,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        '': 5, // Empty key
+      };
+      expect(sanitizeVectorClock(invalid)).toEqual({ valid: 1 });
+    });
+
+    it('should handle non-objects', () => {
+      expect(sanitizeVectorClock(null)).toEqual({});
+      expect(sanitizeVectorClock(undefined)).toEqual({});
+      expect(sanitizeVectorClock('string' as any)).toEqual({});
+      expect(sanitizeVectorClock(123 as any)).toEqual({});
+      expect(sanitizeVectorClock([] as any)).toEqual({});
+    });
+
+    it('should handle objects that throw on iteration', () => {
+      const problematic = {
+        get a() {
+          throw new Error('Property access error');
+        },
+      };
+      expect(sanitizeVectorClock(problematic)).toEqual({});
+    });
+
+    it('should preserve zero values', () => {
+      const withZero = { a: 0, b: 5 };
+      expect(sanitizeVectorClock(withZero)).toEqual(withZero);
+    });
+  });
+
+  describe('Vector Clock Size Limiting', () => {
+    it('should not limit clocks under the threshold', () => {
+      const small: VectorClock = {};
+      for (let i = 0; i < 30; i++) {
+        small[`client${i}`] = i;
+      }
+
+      const result = limitVectorClockSize(small, 'client0');
+      expect(result).toEqual(small);
+      expect(Object.keys(result).length).toBe(30);
+    });
+
+    it('should limit vector clock size to MAX_VECTOR_CLOCK_SIZE', () => {
+      const large: VectorClock = {};
+      for (let i = 0; i < 100; i++) {
+        large[`client${i}`] = i;
+      }
+
+      const limited = limitVectorClockSize(large, 'myClient');
+      expect(Object.keys(limited).length).toBe(50); // MAX_VECTOR_CLOCK_SIZE
+    });
+
+    it('should always preserve current client', () => {
+      const large: VectorClock = {};
+      for (let i = 0; i < 100; i++) {
+        large[`client${i}`] = 100 - i; // Higher values for lower client numbers
+      }
+      large['myClient'] = 1; // Low value that would normally be pruned
+
+      const limited = limitVectorClockSize(large, 'myClient');
+      expect(limited['myClient']).toBe(1);
+      expect(Object.keys(limited).length).toBe(50);
+    });
+
+    it('should keep clients with highest values', () => {
+      const clock: VectorClock = {
+        lowActivity1: 1,
+        lowActivity2: 2,
+        highActivity1: 100,
+        highActivity2: 99,
+        mediumActivity: 50,
+        currentClient: 3,
+      };
+
+      // Create a large clock to trigger limiting
+      for (let i = 0; i < 60; i++) {
+        clock[`filler${i}`] = i + 10;
+      }
+
+      const limited = limitVectorClockSize(clock, 'currentClient');
+
+      // Should keep high activity clients
+      expect(limited['highActivity1']).toBe(100);
+      expect(limited['highActivity2']).toBe(99);
+      expect(limited['currentClient']).toBe(3); // Always kept
+
+      // Should drop low activity clients
+      expect(limited['lowActivity1']).toBeUndefined();
+      expect(limited['lowActivity2']).toBeUndefined();
+    });
+
+    it('should handle current client not in clock', () => {
+      const clock: VectorClock = {};
+      for (let i = 0; i < 60; i++) {
+        clock[`client${i}`] = i;
+      }
+
+      const limited = limitVectorClockSize(clock, 'newClient');
+      expect(Object.keys(limited).length).toBe(50);
+      expect(limited['newClient']).toBeUndefined();
+    });
+
+    it('should handle empty clock', () => {
+      const limited = limitVectorClockSize({}, 'client1');
+      expect(limited).toEqual({});
+    });
+
+    it('should maintain consistency when limiting', () => {
+      const clock: VectorClock = {};
+      // Create entries with distinct values
+      for (let i = 0; i < 100; i++) {
+        clock[`client${i}`] = 1000 - i;
+      }
+
+      const limited = limitVectorClockSize(clock, 'client99');
+
+      // Verify we kept the highest values
+      const values = Object.values(limited).sort((a, b) => b - a);
+      expect(values[0]).toBe(1000); // Highest value
+      expect(values.length).toBe(50);
+
+      // client99 should be included even with low value
+      expect(limited['client99']).toBe(901);
+    });
+  });
+
+  describe('Vector Clock Metrics', () => {
+    it('should measure empty vector clock', () => {
+      expect(measureVectorClock(null)).toEqual({
+        size: 0,
+        comparisonTime: 0,
+        pruningOccurred: false,
+      });
+      expect(measureVectorClock(undefined)).toEqual({
+        size: 0,
+        comparisonTime: 0,
+        pruningOccurred: false,
+      });
+      expect(measureVectorClock({})).toEqual({
+        size: 0,
+        comparisonTime: 0,
+        pruningOccurred: false,
+      });
+    });
+
+    it('should measure vector clock size', () => {
+      const clock = { a: 1, b: 2, c: 3 };
+      const metrics = measureVectorClock(clock);
+      expect(metrics.size).toBe(3);
+      expect(metrics.comparisonTime).toBe(0);
+      expect(metrics.pruningOccurred).toBe(false);
+    });
+
+    it('should measure large vector clock', () => {
+      const clock: VectorClock = {};
+      for (let i = 0; i < 75; i++) {
+        clock[`client${i}`] = i;
+      }
+      const metrics = measureVectorClock(clock);
+      expect(metrics.size).toBe(75);
     });
   });
 });

@@ -29,7 +29,12 @@ import { Pfapi } from '../pfapi';
 import { modelVersionCheck, ModelVersionCheckResult } from '../util/model-version-check';
 import { MetaSyncService } from './meta-sync.service';
 import { ModelSyncService } from './model-sync.service';
-import { mergeVectorClocks, incrementVectorClock } from '../util/vector-clock';
+import {
+  mergeVectorClocks,
+  incrementVectorClock,
+  limitVectorClockSize,
+  sanitizeVectorClock,
+} from '../util/vector-clock';
 import {
   getVectorClock,
   withVectorClock,
@@ -251,14 +256,21 @@ export class SyncService<const MD extends ModelCfgs> {
 
     let local = await this._metaModelCtrl.load();
     if (isForceUpload) {
-      // For conflict resolution, we need to ensure our Lamport stamp is higher than any remote
-      // First, try to get the remote meta to see the current remote Lamport
+      // Get client ID for vector clock operations
+      const clientId = await this._metaModelCtrl.loadClientId();
+      let localVector = getVectorClock(local, clientId) || {};
+
+      // For conflict resolution, fetch remote metadata once and handle both Lamport and vector clocks
+      let remoteMeta: RemoteMeta | null = null;
       let remoteLamport = 0;
+
       try {
-        const { remoteMeta } = await this._metaFileSyncService.download();
+        const result = await this._metaFileSyncService.download();
+        remoteMeta = result.remoteMeta;
         remoteLamport = remoteMeta.localLamport || 0;
       } catch (e) {
-        // If download fails, use local Lamport as baseline
+        pfLog(1, 'Warning: Cannot fetch remote metadata during force upload', e);
+        // If download fails, use local values as baseline
         remoteLamport = local.localLamport || 0;
       }
 
@@ -274,38 +286,27 @@ export class SyncService<const MD extends ModelCfgs> {
         { localLamport: local.localLamport, remoteLamport, currentLamport, nextLamport },
       );
 
-      // Get client ID for vector clock operations
-      const clientId = await this._metaModelCtrl.loadClientId();
-      let localVector = getVectorClock(local, clientId) || {};
-
-      // For force uploads, try to merge with remote vector clock to preserve all components
-      if (isForceUpload) {
-        try {
-          const { remoteMeta } = await this._metaFileSyncService.download();
-          const remoteVector = getVectorClock(remoteMeta, clientId);
-          if (remoteVector) {
-            localVector = mergeVectorClocks(localVector, remoteVector);
-            pfLog(
-              2,
-              `${SyncService.L}.${this.uploadAll.name}(): Merged remote vector clock for force upload`,
-              {
-                localOriginal: getVectorClock(local, clientId),
-                remote: remoteVector,
-                merged: localVector,
-              },
-            );
-          }
-        } catch (e) {
-          pfLog(
-            1,
-            `${SyncService.L}.${this.uploadAll.name}(): Could not get remote vector clock for merge`,
-            e,
-          );
-          // Continue with local vector clock only
+      // Merge vector clocks if remote metadata was successfully fetched
+      if (remoteMeta) {
+        let remoteVector = getVectorClock(remoteMeta, clientId);
+        if (remoteVector) {
+          // Sanitize remote vector clock before merging
+          remoteVector = sanitizeVectorClock(remoteVector);
+          localVector = mergeVectorClocks(localVector, remoteVector);
+          pfLog(2, 'Merged remote vector clock for force upload', {
+            localOriginal: getVectorClock(local, clientId),
+            remote: remoteVector,
+            merged: localVector,
+          });
         }
+      } else {
+        pfLog(1, 'Proceeding with force upload without remote vector clock merge');
       }
 
-      const newVector = incrementVectorClock(localVector, clientId);
+      let newVector = incrementVectorClock(localVector, clientId);
+
+      // Apply size limiting to prevent unbounded growth
+      newVector = limitVectorClockSize(newVector, clientId);
 
       let updatedMeta = {
         ...local,
@@ -441,9 +442,14 @@ export class SyncService<const MD extends ModelCfgs> {
       const clientId = await this._metaModelCtrl.loadClientId();
 
       // Merge vector clocks if available
-      const localVector = getVectorClock(local, clientId);
-      const remoteVector = getVectorClock(remote, clientId);
-      const mergedVector = mergeVectorClocks(localVector, remoteVector);
+      const localVector = sanitizeVectorClock(getVectorClock(local, clientId) || {});
+      const remoteVector = sanitizeVectorClock(getVectorClock(remote, clientId) || {});
+      let mergedVector = mergeVectorClocks(localVector, remoteVector);
+
+      // Apply size limiting after merge
+      if (mergedVector) {
+        mergedVector = limitVectorClockSize(mergedVector, clientId);
+      }
 
       let updatedMeta = {
         // shared
@@ -551,9 +557,14 @@ export class SyncService<const MD extends ModelCfgs> {
     const clientId = await this._metaModelCtrl.loadClientId();
 
     // Merge vector clocks if available
-    const localVector = getVectorClock(local, clientId);
-    const remoteVector = getVectorClock(remote, clientId);
-    const mergedVector = mergeVectorClocks(localVector, remoteVector);
+    const localVector = sanitizeVectorClock(getVectorClock(local, clientId) || {});
+    const remoteVector = sanitizeVectorClock(getVectorClock(remote, clientId) || {});
+    let mergedVector = mergeVectorClocks(localVector, remoteVector);
+
+    // Apply size limiting after merge
+    if (mergedVector) {
+      mergedVector = limitVectorClockSize(mergedVector, clientId);
+    }
 
     let updatedMeta = {
       metaRev: remoteRev,

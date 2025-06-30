@@ -11,7 +11,7 @@ import {
 import { validateLocalMeta } from '../util/validate-local-meta';
 import { PFEventEmitter } from '../util/events';
 import { devError } from '../../../util/dev-error';
-import { incrementVectorClock } from '../util/vector-clock';
+import { incrementVectorClock, limitVectorClockSize } from '../util/vector-clock';
 import { getVectorClock, withVectorClock } from '../util/backwards-compat';
 
 export const DEFAULT_META_MODEL: LocalMeta = {
@@ -108,7 +108,10 @@ export class MetaModelCtrl {
       );
     }
 
-    const newVectorClock = incrementVectorClock(currentVectorClock || {}, clientId);
+    let newVectorClock = incrementVectorClock(currentVectorClock || {}, clientId);
+
+    // Apply size limiting to prevent unbounded growth
+    newVectorClock = limitVectorClockSize(newVectorClock, clientId);
 
     const baseUpdatedMeta = {
       ...metaModel,

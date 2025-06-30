@@ -55,6 +55,63 @@ export const isVectorClockEmpty = (clock: VectorClock | null | undefined): boole
 };
 
 /**
+ * Validates that a value is a valid VectorClock
+ * @param clock The value to validate
+ * @returns True if valid vector clock structure
+ */
+export const isValidVectorClock = (clock: any): clock is VectorClock => {
+  if (!clock || typeof clock !== 'object') return false;
+
+  // Check it's not an array or other non-plain object
+  if (Array.isArray(clock) || clock.constructor !== Object) return false;
+
+  // Validate all entries
+  return Object.entries(clock).every(([key, value]) => {
+    // Client ID must be non-empty string
+    if (typeof key !== 'string' || key.length === 0) return false;
+
+    // Value must be valid number
+    if (typeof value !== 'number' || !Number.isFinite(value)) return false;
+
+    // Value must be non-negative and within safe range
+    if (value < 0 || value > Number.MAX_SAFE_INTEGER) return false;
+
+    return true;
+  });
+};
+
+/**
+ * Sanitizes a vector clock, removing invalid entries
+ * @param clock The vector clock to sanitize
+ * @returns A valid vector clock with invalid entries removed
+ */
+export const sanitizeVectorClock = (clock: any): VectorClock => {
+  if (!clock || typeof clock !== 'object' || Array.isArray(clock)) return {};
+
+  const sanitized: VectorClock = {};
+
+  try {
+    for (const [key, value] of Object.entries(clock)) {
+      if (
+        typeof key === 'string' &&
+        key.length > 0 &&
+        typeof value === 'number' &&
+        Number.isFinite(value) &&
+        value >= 0 &&
+        value <= Number.MAX_SAFE_INTEGER
+      ) {
+        sanitized[key] = value;
+      }
+    }
+  } catch (e) {
+    pfLog(1, 'Error sanitizing vector clock', e);
+    return {};
+  }
+
+  return sanitized;
+};
+
+/**
  * Compare two vector clocks to determine their relationship
  *
  * @param a First vector clock
@@ -138,6 +195,17 @@ export const incrementVectorClock = (
     newClock[clientId] = 1;
   } else {
     newClock[clientId] = currentValue + 1;
+  }
+
+  // Warn if vector clock is getting large
+  const size = Object.keys(newClock).length;
+  if (size > 30) {
+    pfLog(1, 'Warning: Vector clock growing large', {
+      size,
+      clientId,
+      threshold: 30,
+      maxSize: MAX_VECTOR_CLOCK_SIZE,
+    });
   }
 
   return newClock;
@@ -235,4 +303,83 @@ export const hasVectorClockChanges = (
   }
 
   return false;
+};
+
+// Maximum number of clients to track in a vector clock
+const MAX_VECTOR_CLOCK_SIZE = 50;
+
+/**
+ * Metrics for vector clock operations
+ */
+export interface VectorClockMetrics {
+  size: number;
+  comparisonTime: number;
+  pruningOccurred: boolean;
+}
+
+/**
+ * Limits the size of a vector clock by keeping only the most active clients
+ * @param clock The vector clock to limit
+ * @param currentClientId The current client's ID (always preserved)
+ * @returns A vector clock with at most MAX_VECTOR_CLOCK_SIZE entries
+ */
+export const limitVectorClockSize = (
+  clock: VectorClock,
+  currentClientId: string,
+): VectorClock => {
+  const entries = Object.entries(clock);
+
+  if (entries.length <= MAX_VECTOR_CLOCK_SIZE) {
+    return clock;
+  }
+
+  pfLog(1, 'Vector clock pruning triggered', {
+    originalSize: entries.length,
+    maxSize: MAX_VECTOR_CLOCK_SIZE,
+    currentClientId,
+    pruned: entries.length - MAX_VECTOR_CLOCK_SIZE,
+  });
+
+  // Sort by value (descending) to keep most active clients
+  entries.sort(([, a], [, b]) => b - a);
+
+  // Always keep current client
+  const limited: VectorClock = {};
+  if (clock[currentClientId] !== undefined) {
+    limited[currentClientId] = clock[currentClientId];
+  }
+
+  // Add top clients up to limit
+  let count = Object.keys(limited).length;
+  for (const [clientId, value] of entries) {
+    if (clientId !== currentClientId && count < MAX_VECTOR_CLOCK_SIZE) {
+      limited[clientId] = value;
+      count++;
+    }
+  }
+
+  return limited;
+};
+
+/**
+ * Measures vector clock metrics for monitoring
+ * @param clock The vector clock to measure
+ * @returns Metrics about the vector clock
+ */
+export const measureVectorClock = (
+  clock: VectorClock | null | undefined,
+): VectorClockMetrics => {
+  if (!clock) {
+    return {
+      size: 0,
+      comparisonTime: 0,
+      pruningOccurred: false,
+    };
+  }
+
+  return {
+    size: Object.keys(clock).length,
+    comparisonTime: 0, // Will be set during comparison
+    pruningOccurred: false,
+  };
 };

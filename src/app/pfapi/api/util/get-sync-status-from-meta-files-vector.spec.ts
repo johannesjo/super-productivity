@@ -156,6 +156,45 @@ describe('getSyncStatusFromMetaFiles with Vector Clocks', () => {
       expect(result.status).toBe(SyncStatus.UpdateRemote);
     });
 
+    it('should handle mixed vector clock states without conflict when no changes', () => {
+      const { local, remote } = createMetaWithVectorClock(1500, 1500, 1500, {
+        localVector: { clientA: 3 },
+        // remote has no vector clock
+      });
+      // Add matching Lamport data
+      local.localLamport = 3;
+      local.lastSyncedLamport = 3;
+      remote.localLamport = 3;
+
+      const result = getSyncStatusFromMetaFiles(remote, local);
+      expect(result.status).toBe(SyncStatus.InSync);
+    });
+
+    it('should handle mixed states with remote having vector clock', () => {
+      const { local, remote } = createMetaWithVectorClock(1500, 2000, 1000, {
+        remoteVector: { clientB: 5 },
+        // local has no vector clock
+      });
+      // Add Lamport data
+      local.localLamport = 3;
+      local.lastSyncedLamport = 3;
+      remote.localLamport = 5;
+
+      const result = getSyncStatusFromMetaFiles(remote, local);
+      expect(result.status).toBe(SyncStatus.UpdateLocal);
+    });
+
+    it('should use timestamps when mixed states lack change counters', () => {
+      const { local, remote } = createMetaWithVectorClock(2000, 1500, null, {
+        localVector: { clientA: 5 },
+        // remote has no vector clock
+      });
+      // No valid Lamport data
+
+      const result = getSyncStatusFromMetaFiles(remote, local);
+      expect(result.status).toBe(SyncStatus.UpdateRemote);
+    });
+
     it('should detect diverged changes with partial vector clock overlap', () => {
       const { local, remote } = createMetaWithVectorClock(2000, 2000, 1000, {
         localVector: { clientA: 5, clientB: 2, clientC: 7 },
