@@ -35,27 +35,55 @@ export const getLastSyncedChangeCounter = (
 };
 
 /**
- * Set the local change counter value, updating both old and new field names
- * for backwards compatibility
+ * Create a new metadata object with the local change counter value set,
+ * updating both old and new field names for backwards compatibility
+ */
+export const withLocalChangeCounter = <T extends LocalMeta | RemoteMeta>(
+  meta: T,
+  value: number,
+): T => {
+  return {
+    ...meta,
+    localLamport: value,
+    localChangeCounter: value,
+  };
+};
+
+/**
+ * Create a new metadata object with the last synced change counter value set,
+ * updating both old and new field names for backwards compatibility
+ */
+export const withLastSyncedChangeCounter = <T extends LocalMeta | RemoteMeta>(
+  meta: T,
+  value: number | null,
+): T => {
+  return {
+    ...meta,
+    lastSyncedLamport: value,
+    lastSyncedChangeCounter: value,
+  };
+};
+
+/**
+ * @deprecated Use withLocalChangeCounter instead - this mutates the object
  */
 export const setLocalChangeCounter = (
   meta: LocalMeta | RemoteMeta,
   value: number,
 ): void => {
-  meta.localLamport = value;
-  meta.localChangeCounter = value;
+  const updated = withLocalChangeCounter(meta, value);
+  Object.assign(meta, updated);
 };
 
 /**
- * Set the last synced change counter value, updating both old and new field names
- * for backwards compatibility
+ * @deprecated Use withLastSyncedChangeCounter instead - this mutates the object
  */
 export const setLastSyncedChangeCounter = (
   meta: LocalMeta | RemoteMeta,
   value: number | null,
 ): void => {
-  meta.lastSyncedLamport = value;
-  meta.lastSyncedChangeCounter = value;
+  const updated = withLastSyncedChangeCounter(meta, value);
+  Object.assign(meta, updated);
 };
 
 /**

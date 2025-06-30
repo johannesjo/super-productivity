@@ -4,6 +4,8 @@ import {
   getLastSyncedChangeCounter,
   setLocalChangeCounter,
   setLastSyncedChangeCounter,
+  withLocalChangeCounter,
+  withLastSyncedChangeCounter,
   createBackwardsCompatibleMeta,
   getVectorClock,
   getLastSyncedVectorClock,
@@ -13,6 +15,16 @@ import {
 } from './backwards-compat';
 
 describe('backwards-compat', () => {
+  const createBaseMeta = (): LocalMeta => ({
+    localLamport: 0,
+    lastUpdate: 0,
+    lastSyncedUpdate: null,
+    lastSyncedLamport: null,
+    revMap: {},
+    metaRev: null,
+    crossModelVersion: 1,
+  });
+
   describe('getLocalChangeCounter', () => {
     it('should prefer new field name when both are present', () => {
       const meta: Partial<LocalMeta> = {
@@ -111,6 +123,57 @@ describe('backwards-compat', () => {
     });
   });
 
+  describe('withLocalChangeCounter', () => {
+    it('should return new object with both old and new field names', () => {
+      const meta = { ...createBaseMeta(), lastUpdate: 1000 };
+      const result = withLocalChangeCounter(meta, 25);
+      expect(result.localLamport).toBe(25);
+      expect(result.localChangeCounter).toBe(25);
+      expect(result.lastUpdate).toBe(1000);
+      expect(result).not.toBe(meta);
+    });
+
+    it('should preserve existing values', () => {
+      const meta: LocalMeta = {
+        ...createBaseMeta(),
+        localLamport: 10,
+        localChangeCounter: 10,
+        lastUpdate: 1500,
+        revMap: { test: 'value' },
+      };
+      const result = withLocalChangeCounter(meta, 30);
+      expect(result.localLamport).toBe(30);
+      expect(result.localChangeCounter).toBe(30);
+      expect(result.lastUpdate).toBe(1500);
+      expect(result.revMap).toEqual({ test: 'value' });
+    });
+  });
+
+  describe('withLastSyncedChangeCounter', () => {
+    it('should return new object with both old and new field names', () => {
+      const meta = { ...createBaseMeta(), lastUpdate: 1000 };
+      const result = withLastSyncedChangeCounter(meta, 25);
+      expect(result.lastSyncedLamport).toBe(25);
+      expect(result.lastSyncedChangeCounter).toBe(25);
+      expect(result.lastUpdate).toBe(1000);
+      expect(result).not.toBe(meta);
+    });
+
+    it('should handle null values', () => {
+      const meta: LocalMeta = {
+        ...createBaseMeta(),
+        lastSyncedLamport: 10,
+        lastSyncedChangeCounter: 10,
+        lastUpdate: 1500,
+      };
+      const result = withLastSyncedChangeCounter(meta, null);
+      expect(result.lastSyncedLamport).toBeNull();
+      expect(result.lastSyncedChangeCounter).toBeNull();
+      expect(result.lastUpdate).toBe(1500);
+      expect(result).not.toBe(meta);
+    });
+  });
+
   describe('createBackwardsCompatibleMeta', () => {
     it('should populate old field from new field', () => {
       const meta: Partial<LocalMeta> = {
@@ -189,16 +252,6 @@ describe('backwards-compat', () => {
   });
 
   describe('Vector Clock Functions', () => {
-    const createBaseMeta = (): LocalMeta => ({
-      localLamport: 0,
-      lastUpdate: 0,
-      lastSyncedUpdate: null,
-      lastSyncedLamport: null,
-      revMap: {},
-      metaRev: null,
-      crossModelVersion: 1,
-    });
-
     describe('getVectorClock', () => {
       it('should return existing vector clock', () => {
         const meta = createBaseMeta();
