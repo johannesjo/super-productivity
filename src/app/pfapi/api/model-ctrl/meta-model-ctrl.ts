@@ -12,7 +12,7 @@ import { validateLocalMeta } from '../util/validate-local-meta';
 import { PFEventEmitter } from '../util/events';
 import { devError } from '../../../util/dev-error';
 import { incrementVectorClock } from '../util/vector-clock';
-import { getVectorClock, setVectorClock } from '../util/backwards-compat';
+import { getVectorClock, withVectorClock } from '../util/backwards-compat';
 
 export const DEFAULT_META_MODEL: LocalMeta = {
   crossModelVersion: 1,
@@ -110,7 +110,7 @@ export class MetaModelCtrl {
 
     const newVectorClock = incrementVectorClock(currentVectorClock || {}, clientId);
 
-    const updatedMeta = {
+    const baseUpdatedMeta = {
       ...metaModel,
       lastUpdate: timestamp,
       lastUpdateAction,
@@ -128,8 +128,8 @@ export class MetaModelCtrl {
       crossModelVersion: this.crossModelVersion,
     };
 
-    // Set vector clock using backwards compatibility helper
-    setVectorClock(updatedMeta, newVectorClock, clientId);
+    // Create final meta with vector clock using pure function
+    const updatedMeta = withVectorClock(baseUpdatedMeta, newVectorClock, clientId);
 
     await this.save(updatedMeta, isIgnoreDBLock);
   }
@@ -238,6 +238,10 @@ export class MetaModelCtrl {
       metaRev: data.metaRev,
       hasRevMap: !!data.revMap,
       revMapKeys: Object.keys(data.revMap || {}),
+      vectorClock: data.vectorClock,
+      lastSyncedVectorClock: data.lastSyncedVectorClock,
+      hasVectorClock: !!data.vectorClock,
+      vectorClockKeys: data.vectorClock ? Object.keys(data.vectorClock) : [],
     });
 
     // Ensure Lamport fields are initialized for old data
@@ -246,6 +250,19 @@ export class MetaModelCtrl {
     }
     if (data.lastSyncedLamport === undefined) {
       data.lastSyncedLamport = null;
+    }
+
+    // Ensure vector clock fields are initialized for old data
+    if (data.vectorClock === undefined) {
+      data.vectorClock = {};
+      pfLog(2, `${MetaModelCtrl.L}.${this.load.name}() initialized missing vectorClock`);
+    }
+    if (data.lastSyncedVectorClock === undefined) {
+      data.lastSyncedVectorClock = null;
+      pfLog(
+        2,
+        `${MetaModelCtrl.L}.${this.load.name}() initialized missing lastSyncedVectorClock`,
+      );
     }
 
     this._metaModelInMemory = data;

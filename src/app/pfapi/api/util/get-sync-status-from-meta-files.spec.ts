@@ -470,5 +470,106 @@ describe('getSyncStatusFromMetaFiles', () => {
         expect(result.status).toBe(SyncStatus.UpdateRemote);
       });
     });
+
+    describe('vector clock compatibility', () => {
+      it('should detect remote updates when local has no vector clock but remote does', () => {
+        const local: LocalMeta = {
+          lastUpdate: 1751232326819,
+          lastSyncedUpdate: 1751232326819,
+          crossModelVersion: 1,
+          metaRev: 'test-rev',
+          revMap: {},
+          localLamport: 0,
+          lastSyncedLamport: 0,
+          // No vector clock
+          vectorClock: undefined,
+          lastSyncedVectorClock: undefined,
+        };
+
+        const remote: RemoteMeta = {
+          lastUpdate: 1751235301876, // Newer than local
+          crossModelVersion: 1,
+          revMap: {},
+          mainModelData: {},
+          localLamport: 0,
+          lastSyncedLamport: null,
+          // Has vector clock
+          vectorClock: {
+            BCL_1746967850430: 26415,
+            AND_1743419517757: 32,
+          },
+        };
+
+        const result = getSyncStatusFromMetaFiles(remote, local);
+        // Remote has newer timestamp, should update local
+        expect(result.status).toBe(SyncStatus.UpdateLocal);
+      });
+
+      it('should detect local updates when local has no vector clock but remote does', () => {
+        const local: LocalMeta = {
+          lastUpdate: 1751235301876, // Newer than remote
+          lastSyncedUpdate: 1751232326819,
+          crossModelVersion: 1,
+          metaRev: 'test-rev',
+          revMap: {},
+          localLamport: 0,
+          lastSyncedLamport: 0,
+          // No vector clock
+          vectorClock: undefined,
+          lastSyncedVectorClock: undefined,
+        };
+
+        const remote: RemoteMeta = {
+          lastUpdate: 1751232326819,
+          crossModelVersion: 1,
+          revMap: {},
+          mainModelData: {},
+          localLamport: 0,
+          lastSyncedLamport: null,
+          // Has vector clock
+          vectorClock: {
+            BCL_1746967850430: 26415,
+            AND_1743419517757: 32,
+          },
+        };
+
+        const result = getSyncStatusFromMetaFiles(remote, local);
+        // Local has newer timestamp, should update remote
+        expect(result.status).toBe(SyncStatus.UpdateRemote);
+      });
+
+      it('should detect in sync when timestamps match despite vector clock mismatch', () => {
+        const local: LocalMeta = {
+          lastUpdate: 1751232326819,
+          lastSyncedUpdate: 1751232326819,
+          crossModelVersion: 1,
+          metaRev: 'test-rev',
+          revMap: {},
+          localLamport: 0,
+          lastSyncedLamport: 0,
+          // No vector clock
+          vectorClock: undefined,
+          lastSyncedVectorClock: undefined,
+        };
+
+        const remote: RemoteMeta = {
+          lastUpdate: 1751232326819, // Same as local
+          crossModelVersion: 1,
+          revMap: {},
+          mainModelData: {},
+          localLamport: 0,
+          lastSyncedLamport: null,
+          // Has vector clock
+          vectorClock: {
+            BCL_1746967850430: 26415,
+            AND_1743419517757: 32,
+          },
+        };
+
+        const result = getSyncStatusFromMetaFiles(remote, local);
+        // Timestamps match, should be in sync
+        expect(result.status).toBe(SyncStatus.InSync);
+      });
+    });
   });
 });

@@ -32,8 +32,8 @@ import { ModelSyncService } from './model-sync.service';
 import { mergeVectorClocks, incrementVectorClock } from '../util/vector-clock';
 import {
   getVectorClock,
-  setVectorClock,
-  setLastSyncedVectorClock,
+  withVectorClock,
+  withLastSyncedVectorClock,
 } from '../util/backwards-compat';
 
 /**
@@ -188,16 +188,19 @@ export class SyncService<const MD extends ModelCfgs> {
             const clientId = await this._metaModelCtrl.loadClientId();
             const localVector = getVectorClock(localMeta, clientId);
 
-            const updatedMeta = {
+            let updatedMeta = {
               ...localMeta,
               lastSyncedUpdate: localMeta.lastUpdate,
               lastSyncedLamport: localMeta.localLamport || 0,
               metaRev: remoteMetaRev,
+              // Ensure vector clock fields are always present
+              vectorClock: localMeta.vectorClock || {},
+              lastSyncedVectorClock: localMeta.lastSyncedVectorClock || null,
             };
 
             // Update vector clock if available
             if (localVector) {
-              setLastSyncedVectorClock(updatedMeta, localVector, clientId);
+              updatedMeta = withLastSyncedVectorClock(updatedMeta, localVector, clientId);
             }
 
             await this._metaFileSyncService.saveLocal(updatedMeta);
@@ -304,7 +307,7 @@ export class SyncService<const MD extends ModelCfgs> {
 
       const newVector = incrementVectorClock(localVector, clientId);
 
-      const updatedMeta = {
+      let updatedMeta = {
         ...local,
         lastUpdate: Date.now(),
         localLamport: nextLamport,
@@ -313,7 +316,7 @@ export class SyncService<const MD extends ModelCfgs> {
       };
 
       // Update vector clock
-      setVectorClock(updatedMeta, newVector, clientId);
+      updatedMeta = withVectorClock(updatedMeta, newVector, clientId);
 
       await this._metaModelCtrl.save(
         updatedMeta,
@@ -442,7 +445,7 @@ export class SyncService<const MD extends ModelCfgs> {
       const remoteVector = getVectorClock(remote, clientId);
       const mergedVector = mergeVectorClocks(localVector, remoteVector);
 
-      const updatedMeta = {
+      let updatedMeta = {
         // shared
         lastUpdate: remote.lastUpdate,
         crossModelVersion: remote.crossModelVersion,
@@ -454,12 +457,15 @@ export class SyncService<const MD extends ModelCfgs> {
         lastSyncedUpdate: remote.lastUpdate,
         lastSyncedLamport: Math.max(local.localLamport || 0, remote.localLamport || 0),
         metaRev: remoteRev,
+        // Always include vector clock fields to prevent them from being lost
+        vectorClock: mergedVector || local.vectorClock || remote.vectorClock || {},
+        lastSyncedVectorClock: null,
       };
 
       // Update vector clocks if we have them
       if (mergedVector) {
-        setVectorClock(updatedMeta, mergedVector, clientId);
-        setLastSyncedVectorClock(updatedMeta, mergedVector, clientId);
+        updatedMeta = withVectorClock(updatedMeta, mergedVector, clientId);
+        updatedMeta = withLastSyncedVectorClock(updatedMeta, mergedVector, clientId);
       }
 
       await this._metaFileSyncService.saveLocal(updatedMeta);
@@ -549,7 +555,7 @@ export class SyncService<const MD extends ModelCfgs> {
     const remoteVector = getVectorClock(remote, clientId);
     const mergedVector = mergeVectorClocks(localVector, remoteVector);
 
-    const updatedMeta = {
+    let updatedMeta = {
       metaRev: remoteRev,
       lastSyncedUpdate: remote.lastUpdate,
       lastUpdate: remote.lastUpdate,
@@ -563,12 +569,15 @@ export class SyncService<const MD extends ModelCfgs> {
         ...realRemoteRevMap,
       }),
       crossModelVersion: remote.crossModelVersion,
+      // Always include vector clock fields to prevent them from being lost
+      vectorClock: mergedVector || local.vectorClock || remote.vectorClock || {},
+      lastSyncedVectorClock: null,
     };
 
     // Update vector clocks if we have them
     if (mergedVector) {
-      setVectorClock(updatedMeta, mergedVector, clientId);
-      setLastSyncedVectorClock(updatedMeta, mergedVector, clientId);
+      updatedMeta = withVectorClock(updatedMeta, mergedVector, clientId);
+      updatedMeta = withLastSyncedVectorClock(updatedMeta, mergedVector, clientId);
     }
 
     await this._metaFileSyncService.saveLocal(updatedMeta);
@@ -639,7 +648,7 @@ export class SyncService<const MD extends ModelCfgs> {
         },
       );
 
-      const updatedMeta = {
+      let updatedMeta = {
         ...local,
         lastSyncedUpdate: local.lastUpdate,
         lastSyncedLamport: local.localLamport || 0,
@@ -649,7 +658,7 @@ export class SyncService<const MD extends ModelCfgs> {
 
       // Update vector clock if available
       if (localVector) {
-        setLastSyncedVectorClock(updatedMeta, localVector, clientId);
+        updatedMeta = withLastSyncedVectorClock(updatedMeta, localVector, clientId);
       }
 
       await this._metaFileSyncService.saveLocal(updatedMeta);
@@ -738,11 +747,14 @@ export class SyncService<const MD extends ModelCfgs> {
     const metaRevAfterUpload = await this._metaFileSyncService.upload(uploadMeta);
 
     // Update local after successful upload
-    const updatedMeta = {
+    let updatedMeta = {
       // leave as is basically
       lastUpdate: local.lastUpdate,
       crossModelVersion: local.crossModelVersion,
       localLamport: local.localLamport || 0,
+      // Always include vector clock fields to prevent them from being lost
+      vectorClock: local.vectorClock || {},
+      lastSyncedVectorClock: local.lastSyncedVectorClock || null,
 
       // actual updates
       lastSyncedUpdate: local.lastUpdate,
@@ -754,7 +766,7 @@ export class SyncService<const MD extends ModelCfgs> {
 
     // Update vector clock if available
     if (localVector) {
-      setLastSyncedVectorClock(updatedMeta, localVector, clientId);
+      updatedMeta = withLastSyncedVectorClock(updatedMeta, localVector, clientId);
     }
 
     await this._metaFileSyncService.saveLocal(updatedMeta);

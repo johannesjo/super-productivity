@@ -1207,5 +1207,89 @@ describe('SyncService', () => {
         );
       });
     });
+
+    describe('vector clock preservation', () => {
+      it('should preserve vector clock fields when status is InSync', async () => {
+        const localMeta = createDefaultLocalMeta({
+          lastUpdate: 2000,
+          lastSyncedUpdate: 1900, // Different from lastUpdate to trigger saveLocal
+          localLamport: 5,
+          lastSyncedLamport: 5, // Same as localLamport for InSync
+          vectorClock: { CLIENT_123: 5 },
+          lastSyncedVectorClock: { CLIENT_123: 5 }, // Same as vectorClock for InSync
+        });
+
+        const remoteMeta = createDefaultRemoteMeta({
+          lastUpdate: 2000,
+          localLamport: 5, // Same as local for InSync
+          vectorClock: { CLIENT_456: 10 },
+        });
+
+        mockMetaModelCtrl.load.and.returnValue(Promise.resolve(localMeta));
+        mockMetaModelCtrl.loadClientId.and.returnValue(Promise.resolve('CLIENT_123'));
+        mockMetaSyncService.getRev.and.returnValue(Promise.resolve('meta-rev-1'));
+        mockMetaSyncService.download.and.returnValue(
+          Promise.resolve({
+            remoteMeta,
+            remoteMetaRev: 'meta-rev-2',
+          }),
+        );
+        mockModelSyncService.getModelIdsToUpdateFromRevMaps.and.returnValue({
+          toUpdate: [],
+          toDelete: [],
+        });
+
+        const result = await service.sync();
+
+        expect(result.status).toBe(SyncStatus.InSync);
+
+        // Check that saveLocal was called with vector clock fields preserved
+        expect(mockMetaSyncService.saveLocal).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            vectorClock: { CLIENT_123: 5 }, // Should be preserved
+            lastSyncedVectorClock: jasmine.any(Object), // Should be set
+          }),
+        );
+      });
+
+      it('should initialize vector clock fields during download when missing', async () => {
+        const localMeta = createDefaultLocalMeta({
+          lastUpdate: 1000,
+          lastSyncedUpdate: 1000,
+          // No vector clock fields
+        });
+
+        const remoteMeta = createDefaultRemoteMeta({
+          lastUpdate: 2000,
+          vectorClock: { CLIENT_456: 10 },
+        });
+
+        mockMetaModelCtrl.load.and.returnValue(Promise.resolve(localMeta));
+        mockMetaModelCtrl.loadClientId.and.returnValue(Promise.resolve('CLIENT_123'));
+        mockMetaSyncService.getRev.and.returnValue(Promise.resolve('old-rev'));
+        mockMetaSyncService.download.and.returnValue(
+          Promise.resolve({
+            remoteMeta,
+            remoteMetaRev: 'new-rev',
+          }),
+        );
+        mockModelSyncService.getModelIdsToUpdateFromRevMaps.and.returnValue({
+          toUpdate: [],
+          toDelete: [],
+        });
+
+        const result = await service.sync();
+
+        expect(result.status).toBe(SyncStatus.UpdateLocal);
+
+        // Check that saveLocal was called with initialized vector clock fields
+        expect(mockMetaSyncService.saveLocal).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            vectorClock: jasmine.any(Object), // Should be initialized
+            lastSyncedVectorClock: jasmine.any(Object), // Should be initialized
+          }),
+        );
+      });
+    });
   });
 });

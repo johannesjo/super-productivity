@@ -168,44 +168,74 @@ export const getLastSyncedVectorClock = (
 };
 
 /**
- * Set the vector clock and update Lamport timestamps for compatibility
+ * Create a new metadata object with the vector clock set and Lamport timestamps updated
  * @param meta The metadata object
  * @param vectorClock The vector clock to set
  * @param clientId The client ID for this instance
+ * @returns A new metadata object with updated vector clock
+ */
+export const withVectorClock = <T extends LocalMeta | RemoteMeta>(
+  meta: T,
+  vectorClock: VectorClock,
+  clientId: string,
+): T => {
+  // Update Lamport timestamps for backwards compatibility
+  // Use this client's component value
+  const clientValue = vectorClock[clientId] || 0;
+
+  return {
+    ...meta,
+    vectorClock,
+    localLamport: clientValue,
+    localChangeCounter: clientValue,
+  };
+};
+
+/**
+ * Create a new metadata object with the last synced vector clock set and Lamport timestamps updated
+ * @param meta The metadata object
+ * @param vectorClock The vector clock to set (can be null)
+ * @param clientId The client ID for this instance
+ * @returns A new metadata object with updated last synced vector clock
+ */
+export const withLastSyncedVectorClock = <T extends LocalMeta | RemoteMeta>(
+  meta: T,
+  vectorClock: VectorClock | null,
+  clientId: string,
+): T => {
+  // Update Lamport timestamps for backwards compatibility
+  const lastSyncedValue = vectorClock ? vectorClock[clientId] || 0 : null;
+
+  return {
+    ...meta,
+    lastSyncedVectorClock: vectorClock,
+    lastSyncedLamport: lastSyncedValue,
+    lastSyncedChangeCounter: lastSyncedValue,
+  };
+};
+
+/**
+ * @deprecated Use withVectorClock instead - this mutates the object
  */
 export const setVectorClock = (
   meta: LocalMeta | RemoteMeta,
   vectorClock: VectorClock,
   clientId: string,
 ): void => {
-  meta.vectorClock = vectorClock;
-
-  // Update Lamport timestamps for backwards compatibility
-  // Use this client's component value
-  const clientValue = vectorClock[clientId] || 0;
-  setLocalChangeCounter(meta, clientValue);
+  const updated = withVectorClock(meta, vectorClock, clientId);
+  Object.assign(meta, updated);
 };
 
 /**
- * Set the last synced vector clock and update Lamport timestamps for compatibility
- * @param meta The metadata object
- * @param vectorClock The vector clock to set (can be null)
- * @param clientId The client ID for this instance
+ * @deprecated Use withLastSyncedVectorClock instead - this mutates the object
  */
 export const setLastSyncedVectorClock = (
   meta: LocalMeta | RemoteMeta,
   vectorClock: VectorClock | null,
   clientId: string,
 ): void => {
-  meta.lastSyncedVectorClock = vectorClock;
-
-  // Update Lamport timestamps for backwards compatibility
-  if (vectorClock) {
-    const clientValue = vectorClock[clientId] || 0;
-    setLastSyncedChangeCounter(meta, clientValue);
-  } else {
-    setLastSyncedChangeCounter(meta, null);
-  }
+  const updated = withLastSyncedVectorClock(meta, vectorClock, clientId);
+  Object.assign(meta, updated);
 };
 
 /**

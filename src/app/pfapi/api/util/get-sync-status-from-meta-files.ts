@@ -151,26 +151,22 @@ export const getSyncStatusFromMetaFiles = (
       remoteHasVectorClock &&
       typeof localChangeCounter === 'number'
     ) {
-      // Extract the maximum value from remote vector clock to compare with local Lamport
-      const remoteMaxClock = Math.max(...Object.values(remote.vectorClock!));
-      const hasLocalChanges = localChangeCounter > (lastSyncedChangeCounter || 0);
-      const hasRemoteChanges = remoteMaxClock > (lastSyncedChangeCounter || 0);
+      // When local has no vector clock but remote does, we can't reliably compare
+      // vector clock values with Lamport counters. Fall back to timestamp comparison.
+      pfLog(2, 'Local has no vector clock but remote does - using timestamp comparison', {
+        localChangeCounter,
+        remoteVectorClock: remote.vectorClock,
+        localLastUpdate: local.lastUpdate,
+        remoteLastUpdate: remote.lastUpdate,
+      });
 
-      if (!hasLocalChanges && !hasRemoteChanges) {
+      // Simply compare timestamps to determine sync direction
+      if (local.lastUpdate === remote.lastUpdate) {
         return { status: SyncStatus.InSync };
-      } else if (hasLocalChanges && !hasRemoteChanges) {
+      } else if (local.lastUpdate > remote.lastUpdate) {
         return { status: SyncStatus.UpdateRemote };
-      } else if (!hasLocalChanges && hasRemoteChanges) {
-        return { status: SyncStatus.UpdateLocal };
       } else {
-        // Both have changes - need to compare magnitudes
-        if (localChangeCounter > remoteMaxClock) {
-          return { status: SyncStatus.UpdateRemote };
-        } else if (remoteMaxClock > localChangeCounter) {
-          return { status: SyncStatus.UpdateLocal };
-        } else {
-          // Equal - fall through to timestamp comparison
-        }
+        return { status: SyncStatus.UpdateLocal };
       }
     }
 
