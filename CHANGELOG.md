@@ -1,3 +1,17 @@
+## [14.0.1](https://github.com/johannesjo/super-productivity/compare/v14.0.0...v14.0.1) (2025-06-30)
+
+### Bug Fixes
+
+- overlay-indicator.ts not being cleaned up ([c08c401](https://github.com/johannesjo/super-productivity/commit/c08c40140f0a2f35d29a018745f693f7adb00152))
+- vector clock edge cases ([cb9bf56](https://github.com/johannesjo/super-productivity/commit/cb9bf567fd4c8f7e45292f8059aeada71a8424ec))
+
+### Features
+
+- improve overlay-indicator.ts cleanup ([92b4d54](https://github.com/johannesjo/super-productivity/commit/92b4d5409ba23b9005f195d3bc50c1867fbf19af))
+- improve shutdown cleanup ([fcf5e5f](https://github.com/johannesjo/super-productivity/commit/fcf5e5fe307df413713d6b715d24e3bae0828b1b))
+- make wayland idle time work again ([5c62daf](https://github.com/johannesjo/super-productivity/commit/5c62dafed1657edfaf4ee17b4e1fc760a4f9842d))
+- **sync:** improve vector clock handling ([1fde618](https://github.com/johannesjo/super-productivity/commit/1fde6183879e6983557a34636c52594da8c2af06))
+
 # [14.0.0](https://github.com/johannesjo/super-productivity/compare/v14.0.0-rc.1...v14.0.0) (2025-06-29)
 
 # [14.0.0-rc.1](https://github.com/johannesjo/super-productivity/compare/v14.0.0-rc.0...v14.0.0-rc.1) (2025-06-29)
