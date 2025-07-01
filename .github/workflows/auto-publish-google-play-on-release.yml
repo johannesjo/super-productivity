@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Download APK from Release
-        uses: robinraju/release-downloader@v1.8
+        uses: robinraju/release-downloader@v1.12
         with:
           repository: ${{ github.repository }}
           tag: ${{ github.event.release.tag_name }}
