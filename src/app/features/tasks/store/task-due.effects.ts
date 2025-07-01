@@ -1,12 +1,13 @@
 import { inject, Injectable } from '@angular/core';
 import { createEffect } from '@ngrx/effects';
 import {
+  catchError,
+  concatMap,
   debounceTime,
   filter,
   first,
   map,
   switchMap,
-  tap,
   withLatestFrom,
 } from 'rxjs/operators';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
@@ -17,6 +18,10 @@ import { DataInitStateService } from '../../../core/data-init/data-init-state.se
 import { SyncWrapperService } from '../../../imex/sync/sync-wrapper.service';
 import { selectTodayTaskIds } from '../../work-context/store/work-context.selectors';
 import { AddTasksForTomorrowService } from '../../add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
+import { devError } from '../../../util/dev-error';
+import { SnackService } from '../../../core/snack/snack.service';
+import { getErrorTxt } from '../../../util/get-error-text';
+import { EMPTY } from 'rxjs';
 
 @Injectable()
 export class TaskDueEffects {
@@ -25,6 +30,7 @@ export class TaskDueEffects {
   private _dataInitStateService = inject(DataInitStateService);
   private _syncWrapperService = inject(SyncWrapperService);
   private _addTasksForTomorrowService = inject(AddTasksForTomorrowService);
+  private _snackService = inject(SnackService);
 
   // NOTE: this gets a lot of interference from tagEffect.preventParentAndSubTaskInTodayList$:
   createRepeatableTasksAndAddDueToday$ = createEffect(
@@ -44,7 +50,16 @@ export class TaskDueEffects {
                 first(),
               ),
             ),
-            tap(() => this._addTasksForTomorrowService.addAllDueToday()),
+            concatMap(() => this._addTasksForTomorrowService.addAllDueToday()),
+            catchError((e) => {
+              const errorMsg = 'Failed to create repeatable tasks: ' + getErrorTxt(e);
+              devError(errorMsg);
+              this._snackService.open({
+                type: 'ERROR',
+                msg: 'Failed to create repeatable tasks. Please check console for details.',
+              });
+              return EMPTY;
+            }),
           ),
         ),
       );
