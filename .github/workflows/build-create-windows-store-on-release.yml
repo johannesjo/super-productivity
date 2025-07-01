@@ -69,56 +69,12 @@ jobs:
       - name: Build Frontend & Electron
         run: npm run build
 
-      - name: Copy build files to legacy dist path for Windows Store compatibility
-        run: |
-          # The Windows Store build expects files in 'dist' directory (legacy path)
-          # but the current build outputs to '.tmp/angular-dist'
-          if (Test-Path ".tmp\angular-dist") {
-            Write-Host "Found .tmp/angular-dist directory"
-            
-            # Create dist directory if it doesn't exist
-            if (-not (Test-Path "dist")) {
-              New-Item -ItemType Directory -Path "dist" -Force
-              Write-Host "Created dist directory"
-            }
-            
-            # Copy all contents from .tmp/angular-dist to dist
-            Write-Host "Copying files from .tmp/angular-dist to dist..."
-            Copy-Item -Path ".tmp\angular-dist\*" -Destination "dist\" -Recurse -Force
-            
-            # Verify the copy was successful
-            if (Test-Path "dist\browser\index.html") {
-              Write-Host "Successfully copied browser files to dist/browser/"
-            } else {
-              Write-Warning "browser/index.html not found in dist directory after copy"
-            }
-            
-            # List contents of dist for verification
-            Write-Host "`nContents of dist directory:"
-            Get-ChildItem -Path "dist" -Recurse -Name | Select-Object -First 20
-          } else {
-            Write-Error ".tmp/angular-dist directory not found!"
-            exit 1
-          }
-        shell: powershell
-
       - name: Build/Release Electron app
         uses: johannesjo/action-electron-builder@v1
         with:
           build_script_name: empty
           release: false
           github_token: ${{ secrets.github_token }}
-
-      - name: Move .appx files to correct directory
-        run: |
-          if (Test-Path "app-builds\*.appx") {
-            New-Item -ItemType Directory -Force -Path ".tmp\app-builds"
-            Move-Item -Path "app-builds\*.appx" -Destination ".tmp\app-builds\" -Force
-            Write-Host "Moved .appx files from app-builds to .tmp/app-builds"
-          } else {
-            Write-Host "No .appx files found in app-builds directory"
-          }
-        shell: powershell
 
       - name: 'Upload Artifact'
         uses: actions/upload-artifact@v4
