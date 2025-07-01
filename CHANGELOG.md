@@ -1,3 +1,9 @@
+## [14.0.2](https://github.com/johannesjo/super-productivity/compare/v14.0.1...v14.0.2) (2025-07-01)
+
+### Features
+
+- add error handling for repeatable tasks ([8825f47](https://github.com/johannesjo/super-productivity/commit/8825f4790c32e9c6cbfdc7817989d53ba50e7373))
+
 ## [14.0.1](https://github.com/johannesjo/super-productivity/compare/v14.0.0...v14.0.1) (2025-06-30)
 
 ### Bug Fixes
