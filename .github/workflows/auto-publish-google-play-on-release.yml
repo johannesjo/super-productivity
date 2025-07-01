@@ -21,7 +21,7 @@ jobs:
           out-file-path: 'downloads'
 
       - name: Promote to Production in Google Play Console
-        uses: r0adkll/upload-google-play@v1.0.19
+        uses: r0adkll/upload-google-play@v1.1.3
         with:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: com.superproductivity.superproductivity
