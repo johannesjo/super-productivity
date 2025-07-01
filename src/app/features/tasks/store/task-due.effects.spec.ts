@@ -13,6 +13,7 @@ import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions'
 import { selectOverdueTasksOnToday } from './task.selectors';
 import { selectTodayTaskIds } from '../../work-context/store/work-context.selectors';
 import { Task } from '../task.model';
+import { SnackService } from '../../../core/snack/snack.service';
 
 describe('TaskDueEffects', () => {
   let effects: TaskDueEffects;
@@ -24,6 +25,8 @@ describe('TaskDueEffects', () => {
   let dataInitStateService: jasmine.SpyObj<DataInitStateService>;
   let syncWrapperService: jasmine.SpyObj<SyncWrapperService>;
   let addTasksForTomorrowService: jasmine.SpyObj<AddTasksForTomorrowService>;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  let snackService: jasmine.SpyObj<SnackService>;
 
   const mockTask: Task = {
     ...DEFAULT_TASK,
@@ -54,6 +57,7 @@ describe('TaskDueEffects', () => {
       'AddTasksForTomorrowService',
       ['addAllDueToday'],
     );
+    const snackServiceSpy = jasmine.createSpyObj('SnackService', ['open']);
 
     TestBed.configureTestingModule({
       providers: [
@@ -72,6 +76,7 @@ describe('TaskDueEffects', () => {
         { provide: DataInitStateService, useValue: dataInitStateServiceSpy },
         { provide: SyncWrapperService, useValue: syncWrapperServiceSpy },
         { provide: AddTasksForTomorrowService, useValue: addTasksForTomorrowServiceSpy },
+        { provide: SnackService, useValue: snackServiceSpy },
       ],
     });
 
@@ -89,6 +94,7 @@ describe('TaskDueEffects', () => {
     addTasksForTomorrowService = TestBed.inject(
       AddTasksForTomorrowService,
     ) as jasmine.SpyObj<AddTasksForTomorrowService>;
+    snackService = TestBed.inject(SnackService) as jasmine.SpyObj<SnackService>;
   });
 
   describe('createRepeatableTasksAndAddDueToday$', () => {
