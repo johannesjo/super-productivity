@@ -308,7 +308,7 @@ const parseScheduledDate = (task: Partial<TaskCopy>, now: Date): DueChanges => {
   const rr = task.title.match(SHORT_SYNTAX_DUE_REG_EX);
 
   if (rr && rr[0]) {
-    const parsedDateArr = customDateParser.parse(task.title, now, {
+    const parsedDateArr = customDateParser.parse(rr[0], now, {
       forwardDate: true,
     });
 
