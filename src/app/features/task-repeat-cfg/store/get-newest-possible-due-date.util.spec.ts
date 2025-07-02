@@ -48,7 +48,7 @@ const testCase = (
   expected: Date | null,
 ): void => {
   if (expected) {
-    expected.setHours(2, 0, 0, 0);
+    expected.setHours(12, 0, 0, 0);
   }
 
   expect(

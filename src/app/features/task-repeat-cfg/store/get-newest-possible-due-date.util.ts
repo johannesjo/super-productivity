@@ -19,10 +19,10 @@ export const getNewestPossibleDueDate = (
   const checkDate = new Date(today);
   const startDateDate = dateStrToUtcDate(taskRepeatCfg.startDate);
   const lastTaskCreation = new Date(taskRepeatCfg.lastTaskCreation);
-  // set to 2 to be safer(?) for summer/winter time affected comparisons
-  checkDate.setHours(2, 0, 0, 0);
-  lastTaskCreation.setHours(2, 0, 0, 0);
-  startDateDate.setHours(2, 0, 0, 0);
+  // Use noon (12:00) to avoid DST issues - noon is never affected by DST transitions
+  checkDate.setHours(12, 0, 0, 0);
+  lastTaskCreation.setHours(12, 0, 0, 0);
+  startDateDate.setHours(12, 0, 0, 0);
 
   if (startDateDate > checkDate) {
     return null;
@@ -79,9 +79,12 @@ export const getNewestPossibleDueDate = (
       // Handle month-end dates properly
       const setDateSafely = (date: Date, day: number): void => {
         date.setDate(1); // First set to 1st to avoid overflow
-        date.setDate(
-          Math.min(day, new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()),
-        );
+        const lastDayOfMonth = new Date(
+          date.getFullYear(),
+          date.getMonth() + 1,
+          0,
+        ).getDate();
+        date.setDate(Math.min(day, lastDayOfMonth));
       };
 
       // Start by checking if the repeat day has passed this month
