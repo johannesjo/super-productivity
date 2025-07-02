@@ -63,6 +63,40 @@ const testCase = (
 };
 
 describe('getNewestPossibleDueDate()', () => {
+  describe('Input validation', () => {
+    it('should throw error if startDate is not defined', () => {
+      const cfg = dummyRepeatable('ID1', {
+        startDate: undefined as any,
+      });
+      expect(() => getNewestPossibleDueDate(cfg, new Date())).toThrowError(
+        'Repeat startDate needs to be defined',
+      );
+    });
+
+    it('should throw error if repeatEvery is not a positive integer', () => {
+      const cfg1 = dummyRepeatable('ID1', {
+        repeatEvery: 0,
+      });
+      expect(() => getNewestPossibleDueDate(cfg1, new Date())).toThrowError(
+        'Invalid repeatEvery value given',
+      );
+
+      const cfg2 = dummyRepeatable('ID1', {
+        repeatEvery: -1,
+      });
+      expect(() => getNewestPossibleDueDate(cfg2, new Date())).toThrowError(
+        'Invalid repeatEvery value given',
+      );
+
+      const cfg3 = dummyRepeatable('ID1', {
+        repeatEvery: 1.5,
+      });
+      expect(() => getNewestPossibleDueDate(cfg3, new Date())).toThrowError(
+        'Invalid repeatEvery value given',
+      );
+    });
+  });
+
   describe('DAILY', () => {
     const testCases = [
       {
@@ -341,6 +375,50 @@ describe('getNewestPossibleDueDate()', () => {
         today: dateStrToUtcDate('2024-07-16'),
         startDate: dateStrToUtcDate('2024-01-26'),
         expectedDate: null,
+      },
+      {
+        description: 'should handle month-end dates correctly (31st to February)',
+        taskRepeatCfg: dummyRepeatable('ID1', {
+          repeatCycle: 'MONTHLY',
+          repeatEvery: 1,
+          lastTaskCreation: dateStrToUtcDate('2022-01-31').getTime(),
+        }),
+        today: dateStrToUtcDate('2022-03-01'),
+        startDate: dateStrToUtcDate('2022-01-31'),
+        expectedDate: dateStrToUtcDate('2022-02-28'),
+      },
+      {
+        description: 'should handle month-end dates correctly in leap year',
+        taskRepeatCfg: dummyRepeatable('ID1', {
+          repeatCycle: 'MONTHLY',
+          repeatEvery: 1,
+          lastTaskCreation: dateStrToUtcDate('2020-01-31').getTime(),
+        }),
+        today: dateStrToUtcDate('2020-03-01'),
+        startDate: dateStrToUtcDate('2020-01-31'),
+        expectedDate: dateStrToUtcDate('2020-02-29'),
+      },
+      {
+        description: 'should handle 30th correctly for months with fewer days',
+        taskRepeatCfg: dummyRepeatable('ID1', {
+          repeatCycle: 'MONTHLY',
+          repeatEvery: 1,
+          lastTaskCreation: dateStrToUtcDate('2022-01-30').getTime(),
+        }),
+        today: dateStrToUtcDate('2022-03-01'),
+        startDate: dateStrToUtcDate('2022-01-30'),
+        expectedDate: dateStrToUtcDate('2022-02-28'),
+      },
+      {
+        description: 'should handle 31st across multiple months',
+        taskRepeatCfg: dummyRepeatable('ID1', {
+          repeatCycle: 'MONTHLY',
+          repeatEvery: 1,
+          lastTaskCreation: dateStrToUtcDate('2022-01-31').getTime(),
+        }),
+        today: dateStrToUtcDate('2022-05-01'),
+        startDate: dateStrToUtcDate('2022-01-31'),
+        expectedDate: dateStrToUtcDate('2022-04-30'),
       },
     ];
 
