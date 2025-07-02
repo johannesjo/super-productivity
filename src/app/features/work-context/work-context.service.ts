@@ -372,7 +372,7 @@ export class WorkContextService {
         }
 
         // Filter out tasks scheduled for later today
-        if (task.dueWithTime) {
+        if (this.activeWorkContextId === TODAY_TAG.id && task.dueWithTime) {
           const now = Date.now();
           const todayEnd = new Date();
           todayEnd.setHours(23, 59, 59, 999);

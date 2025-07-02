@@ -54,8 +54,8 @@ import { MsToStringPipe } from '../../ui/duration/ms-to-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 import {
   flattenTasks,
-  selectOverdueTasksWithSubTasks,
   selectLaterTodayTasksWithSubTasks,
+  selectOverdueTasksWithSubTasks,
 } from '../tasks/store/task.selectors';
 import { CollapsibleComponent } from '../../ui/collapsible/collapsible.component';
 import { SnackService } from '../../core/snack/snack.service';
@@ -120,8 +120,9 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     initialValue: [],
   });
   undoneTasks = input<TaskWithSubTasks[]>([]);
-  customizedUndoneTasks$ = this.customizerService.customizeUndoneTasks(
-    this.workContextService.undoneTasks$,
+  customizedUndoneTasks = toSignal(
+    this.customizerService.customizeUndoneTasks(this.workContextService.undoneTasks$),
+    { initialValue: { list: [] } },
   );
   doneTasks = input<TaskWithSubTasks[]>([]);
   backlogTasks = input<TaskWithSubTasks[]>([]);

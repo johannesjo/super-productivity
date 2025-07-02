@@ -247,7 +247,7 @@
               </button>
             </div>
           }
-          @if (customizedUndoneTasks$ | async; as customized) {
+          @if (customizedUndoneTasks(); as customized) {
             @if (customized.grouped) {
               @for (group of customized.grouped | keyvalue; track group.key) {
                 <h3>{{ group.key }}</h3>
