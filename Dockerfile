@@ -14,15 +14,14 @@ RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 # configure git to use https instead of ssh
 RUN git config --global url."https://github.com/".insteadOf ssh://git@github.com/
 
-# install dependencies
-COPY package*.json /app
-RUN (npm ci || npm i) && npm i -g @angular/cli
+# add app
+COPY . /app
 
 # add `/app/node_modules/.bin` to $PATH
 ENV PATH=/app/node_modules/.bin:$PATH
 
-# add app
-COPY . /app
+# install dependencies (with prepare script running naturally)
+RUN (npm ci || npm i) && npm i -g @angular/cli
 
 # run linter
 RUN npm run lint
