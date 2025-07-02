@@ -53,7 +53,7 @@ export const selectTaskRepeatCfgsWithAndWithoutStartTime = createSelector(
 export const selectTaskRepeatCfgsSortedByTitleAndProject = createSelector(
   selectAllTaskRepeatCfgs,
   (taskRepeatCfgs: TaskRepeatCfg[]): TaskRepeatCfg[] => {
-    return taskRepeatCfgs.sort((a, b) => {
+    return [...taskRepeatCfgs].sort((a, b) => {
       if (a.projectId !== b.projectId) {
         if (a.projectId === null) {
           return -1;
