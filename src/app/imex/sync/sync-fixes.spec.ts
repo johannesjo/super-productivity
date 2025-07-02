@@ -9,6 +9,8 @@ import { SyncWrapperService } from './sync-wrapper.service';
 import { AddTasksForTomorrowService } from '../../features/add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { DataInitService } from '../../core/data-init/data-init.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { SnackService } from '../../core/snack/snack.service';
 
 describe('Sync Fixes - TDD', () => {
   // Helper function to replace await wait()
@@ -80,7 +82,10 @@ describe('Sync Fixes - TDD', () => {
 
     const dataInitSpy = jasmine.createSpyObj('DataInitService', ['reInit']);
 
+    const snackServiceSpy = jasmine.createSpyObj('SnackService', ['open']);
+
     TestBed.configureTestingModule({
+      imports: [TranslateModule.forRoot()],
       providers: [
         TaskDueEffects,
         provideMockActions(() => actions$),
@@ -97,6 +102,7 @@ describe('Sync Fixes - TDD', () => {
         { provide: SyncWrapperService, useValue: syncWrapperSpy },
         { provide: AddTasksForTomorrowService, useValue: addTasksForTomorrowSpy },
         { provide: DataInitService, useValue: dataInitSpy },
+        { provide: SnackService, useValue: snackServiceSpy },
       ],
     });
 
