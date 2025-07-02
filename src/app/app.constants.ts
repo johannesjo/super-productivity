@@ -44,6 +44,7 @@ import '@angular/common/locales/global/nl';
 import '@angular/common/locales/global/nb';
 import '@angular/common/locales/global/hr';
 import '@angular/common/locales/global/uk';
+import '@angular/common/locales/global/id';
 
 export enum LanguageCode {
   ar = 'ar',

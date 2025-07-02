@@ -12,16 +12,17 @@ export const getNewestPossibleDueDate = (
   if (!taskRepeatCfg.startDate) {
     throw new Error('Repeat startDate needs to be defined');
   }
-  if (+taskRepeatCfg.repeatEvery < 1) {
+  if (!Number.isInteger(taskRepeatCfg.repeatEvery) || taskRepeatCfg.repeatEvery < 1) {
     throw new Error('Invalid repeatEvery value given');
   }
 
   const checkDate = new Date(today);
   const startDateDate = dateStrToUtcDate(taskRepeatCfg.startDate);
   const lastTaskCreation = new Date(taskRepeatCfg.lastTaskCreation);
-  // set to 2 to be safer(?) for summer/winter time affected comparisons
-  checkDate.setHours(2, 0, 0, 0);
-  lastTaskCreation.setHours(2, 0, 0, 0);
+  // Use noon (12:00) to avoid DST issues - noon is never affected by DST transitions
+  checkDate.setHours(12, 0, 0, 0);
+  lastTaskCreation.setHours(12, 0, 0, 0);
+  startDateDate.setHours(12, 0, 0, 0);
 
   if (startDateDate > checkDate) {
     return null;
@@ -55,9 +56,15 @@ export const getNewestPossibleDueDate = (
           break;
         }
         const todayDay = checkDate.getDay();
-        const todayDayStr: keyof TaskRepeatCfg = TASK_REPEAT_WEEKDAY_MAP[todayDay];
+        const todayDayStr = TASK_REPEAT_WEEKDAY_MAP[
+          todayDay
+        ] as keyof typeof TASK_REPEAT_WEEKDAY_MAP;
 
-        if (diffInWeeks % taskRepeatCfg.repeatEvery === 0 && taskRepeatCfg[todayDayStr]) {
+        if (
+          diffInWeeks % taskRepeatCfg.repeatEvery === 0 &&
+          todayDayStr &&
+          taskRepeatCfg[todayDayStr as keyof TaskRepeatCfg] === true
+        ) {
           return checkDate;
         }
         checkDate.setDate(checkDate.getDate() - 1);
@@ -69,11 +76,33 @@ export const getNewestPossibleDueDate = (
       const nrOfMonthsToCheck = taskRepeatCfg.repeatEvery;
       const dayOfMonthRepeat = startDateDate.getDate();
 
-      checkDate.setDate(dayOfMonthRepeat);
+      // Handle month-end dates properly
+      const setDateSafely = (date: Date, day: number): void => {
+        date.setDate(1); // First set to 1st to avoid overflow
+        const lastDayOfMonth = new Date(
+          date.getFullYear(),
+          date.getMonth() + 1,
+          0,
+        ).getDate();
+        date.setDate(Math.min(day, lastDayOfMonth));
+      };
 
-      if (today.getDate() < dayOfMonthRepeat) {
+      // Start by checking if the repeat day has passed this month
+      const lastDayOfCurrentMonth = new Date(
+        checkDate.getFullYear(),
+        checkDate.getMonth() + 1,
+        0,
+      ).getDate();
+      const adjustedDayForCurrentMonth = Math.min(
+        dayOfMonthRepeat,
+        lastDayOfCurrentMonth,
+      );
+
+      if (today.getDate() < adjustedDayForCurrentMonth) {
+        // The repeat day hasn't occurred yet this month, so check previous month
         checkDate.setMonth(checkDate.getMonth() - 1);
       }
+      setDateSafely(checkDate, dayOfMonthRepeat);
 
       for (let i = 0; i < nrOfMonthsToCheck; i++) {
         const diffInMonth = getDiffInMonth(startDateDate, checkDate);
@@ -85,6 +114,7 @@ export const getNewestPossibleDueDate = (
           return checkDate;
         }
         checkDate.setMonth(checkDate.getMonth() - 1);
+        setDateSafely(checkDate, dayOfMonthRepeat);
       }
       return null;
     }
