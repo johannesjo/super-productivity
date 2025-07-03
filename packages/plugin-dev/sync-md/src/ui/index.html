@@ -1,0 +1,760 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Sync.md Configuration</title>
+    <style>
+      /* Reset and base styles */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+          sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+        color: var(--text-color);
+        background: transparent;
+        padding: 20px;
+      }
+
+      /* Dark mode support */
+      @media (prefers-color-scheme: dark) {
+        input[type='text'],
+        select {
+          background: #2a2a2a;
+          color: #e0e0e0;
+          border-color: #444;
+        }
+
+        input[type='text']:focus,
+        select:focus {
+          border-color: #4a9eff;
+          background: #333;
+        }
+
+        button {
+          background: #333;
+          color: #e0e0e0;
+          border: 1px solid #444;
+        }
+
+        .btn-primary {
+          background: #1976d2;
+          border-color: #1976d2;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+          background: #1565c0;
+          border-color: #1565c0;
+        }
+
+        .btn-secondary {
+          background: #333;
+          color: #e0e0e0;
+          border-color: #555;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+          background: #444;
+          border-color: #666;
+        }
+
+        .status.info {
+          background: #1e3a5f;
+          color: #64b5f6;
+          border-color: #2962a0;
+        }
+
+        .status.success {
+          background: #1b3a1b;
+          color: #81c784;
+          border-color: #2e5f2e;
+        }
+
+        .status.error {
+          background: #4a1414;
+          color: #ef5350;
+          border-color: #6f2020;
+        }
+
+        .sync-info {
+          background: #2a2a2a;
+          border: 1px solid #444;
+        }
+
+        .sync-stat {
+          border-bottom-color: #444;
+        }
+
+        .sync-stat-label {
+          color: #aaa;
+        }
+
+        .sync-stat-value {
+          color: #e0e0e0;
+        }
+
+        .spinner {
+          border-color: #444;
+          border-top-color: #4a9eff;
+        }
+      }
+
+      /* Container */
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      /* Header */
+      h1 {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+
+      .subtitle {
+        color: #666;
+        margin-bottom: 24px;
+      }
+
+      /* Form elements */
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 6px;
+        color: #444;
+      }
+
+      input[type='text'],
+      select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #444;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.2s;
+      }
+
+      input[type='text']:focus,
+      select:focus {
+        outline: none;
+        border-color: #2196f3;
+      }
+
+      .help-text {
+        font-size: 12px;
+        color: #666;
+        margin-top: 4px;
+      }
+
+      /* Buttons */
+      .button-group {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .btn-primary {
+        background: #2196f3;
+        color: white;
+      }
+
+      .btn-primary:hover:not(:disabled) {
+        background: #1976d2;
+      }
+
+      .btn-secondary {
+        background: #f5f5f5;
+      }
+
+      .btn-secondary:hover:not(:disabled) {
+        background: #e0e0e0;
+      }
+
+      /* Status messages */
+      .status {
+        padding: 12px 16px;
+        border-radius: 6px;
+        margin-top: 20px;
+        display: none;
+      }
+
+      .status.show {
+        display: block;
+      }
+
+      .status.info {
+        background: #e3f2fd;
+        color: #1565c0;
+        border: 1px solid #bbdefb;
+      }
+
+      .status.success {
+        background: #e8f5e9;
+        color: #2e7d32;
+        border: 1px solid #c8e6c9;
+      }
+
+      .status.error {
+        background: #ffebee;
+        color: #c62828;
+        border: 1px solid #ffcdd2;
+      }
+
+      /* Sync info */
+      .sync-info {
+        margin-top: 32px;
+        padding: 20px;
+        border-radius: 8px;
+        display: none;
+      }
+
+      .sync-info.show {
+        display: block;
+      }
+
+      .sync-info h3 {
+        font-size: 16px;
+        margin-bottom: 12px;
+      }
+
+      .sync-stat {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .sync-stat:last-child {
+        border-bottom: none;
+      }
+
+      .sync-stat-label {
+        font-weight: 500;
+        color: #555;
+      }
+
+      .sync-stat-value {
+        color: #333;
+      }
+
+      /* Loading spinner */
+      .spinner {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #2196f3;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-left: 8px;
+        vertical-align: middle;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* File path test button */
+      .file-path-wrapper {
+        position: relative;
+      }
+
+      .test-file-btn {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        padding: 6px 12px;
+        font-size: 12px;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .test-file-btn:hover {
+        background: #f5f5f5;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Sync.md</h1>
+      <p class="subtitle">Sync tasks between Super Productivity and Markdown files</p>
+
+      <form id="configForm">
+        <div class="form-group">
+          <label for="filePath">Markdown File Path</label>
+          <div class="file-path-wrapper">
+            <input
+              type="text"
+              id="filePath"
+              placeholder="/path/to/your/tasks.md"
+              style="padding-right: 70px"
+            />
+            <button
+              type="button"
+              class="test-file-btn"
+              onclick="testFilePath()"
+            >
+              Test
+            </button>
+          </div>
+          <div class="help-text">Full path to the markdown file to sync with</div>
+        </div>
+
+        <div class="form-group">
+          <label for="projectId">Project</label>
+          <select id="projectId">
+            <option value="">Loading projects...</option>
+          </select>
+          <div class="help-text">Select the project to sync tasks with</div>
+        </div>
+
+        <div class="form-group">
+          <label for="syncDirection">Sync Direction</label>
+          <select id="syncDirection">
+            <option value="bidirectional">Bidirectional (Two-way sync)</option>
+            <option value="fileToProject">File → Project only</option>
+            <option value="projectToFile">Project → File only</option>
+          </select>
+          <div class="help-text">Control how changes are synchronized</div>
+        </div>
+
+        <div class="button-group">
+          <button
+            type="submit"
+            class="btn-primary"
+          >
+            Save Configuration
+          </button>
+          <button
+            type="button"
+            class="btn-secondary"
+            onclick="syncNow()"
+            id="syncBtn"
+          >
+            Sync Now
+          </button>
+        </div>
+      </form>
+
+      <div
+        id="status"
+        class="status"
+      ></div>
+
+      <div
+        id="syncInfo"
+        class="sync-info"
+      >
+        <h3>Sync Status</h3>
+        <div class="sync-stat">
+          <span class="sync-stat-label">Status:</span>
+          <span
+            class="sync-stat-value"
+            id="syncStatus"
+            >Not configured</span
+          >
+        </div>
+        <div class="sync-stat">
+          <span class="sync-stat-label">Last sync:</span>
+          <span
+            class="sync-stat-value"
+            id="lastSync"
+            >Never</span
+          >
+        </div>
+        <div class="sync-stat">
+          <span class="sync-stat-label">File watching:</span>
+          <span
+            class="sync-stat-value"
+            id="watchStatus"
+            >Inactive</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // State
+      let config = null;
+      let projects = [];
+      let syncInfoInterval = null;
+
+      // Message handling
+      async function sendMessage(message) {
+        return new Promise((resolve, reject) => {
+          const messageId = Date.now().toString();
+          const timeout = setTimeout(() => {
+            window.removeEventListener('message', handler);
+            reject(new Error('Message timeout'));
+          }, 10000);
+
+          const handler = (event) => {
+            if (
+              event.data?.messageId === messageId ||
+              (event.data?.type === 'PLUGIN_MESSAGE_RESPONSE' &&
+                event.data?.messageId === messageId)
+            ) {
+              clearTimeout(timeout);
+              window.removeEventListener('message', handler);
+              resolve(event.data.response || event.data);
+            }
+          };
+
+          window.addEventListener('message', handler);
+
+          window.parent.postMessage(
+            {
+              type: 'PLUGIN_MESSAGE',
+              message,
+              messageId,
+            },
+            '*',
+          );
+        });
+      }
+
+      // UI functions
+      function showStatus(message, type = 'info') {
+        const status = document.getElementById('status');
+        status.textContent = message;
+        status.className = `status ${type} show`;
+
+        if (type !== 'error') {
+          setTimeout(() => {
+            status.classList.remove('show');
+          }, 5000);
+        }
+      }
+
+      async function loadProjects() {
+        try {
+          // Try to get projects directly from PluginAPI if available
+          if (window.PluginAPI?.getAllProjects) {
+            console.log('Loading projects directly from PluginAPI');
+            projects = await window.PluginAPI.getAllProjects();
+          } else {
+            console.log('Loading projects via message');
+            const response = await sendMessage({ type: 'getProjects' });
+            if (response?.success && response.projects) {
+              projects = response.projects;
+            } else {
+              throw new Error('Failed to get projects from background');
+            }
+          }
+
+          const select = document.getElementById('projectId');
+          select.innerHTML = '<option value="">Select a project...</option>';
+
+          if (projects && projects.length > 0) {
+            projects.forEach((project) => {
+              const option = document.createElement('option');
+              option.value = project.id;
+              option.textContent = project.title;
+              select.appendChild(option);
+            });
+          } else {
+            select.innerHTML = '<option value="">No projects found</option>';
+          }
+        } catch (error) {
+          console.error('Failed to load projects:', error);
+          showStatus('Failed to load projects', 'error');
+
+          // Retry after a delay
+          setTimeout(() => {
+            console.log('Retrying to load projects...');
+            loadProjects();
+          }, 2000);
+        }
+      }
+
+      async function loadConfig() {
+        try {
+          const savedData = await window.PluginAPI?.loadSyncedData?.();
+          if (savedData) {
+            config = JSON.parse(savedData);
+            document.getElementById('filePath').value = config.filePath || '';
+            document.getElementById('projectId').value = config.projectId || '';
+            document.getElementById('syncDirection').value =
+              config.syncDirection || 'bidirectional';
+
+            if (config.enabled) {
+              document.getElementById('syncInfo').classList.add('show');
+              updateSyncInfo();
+            }
+          }
+        } catch (error) {
+          console.error('Failed to load config:', error);
+        }
+      }
+
+      async function updateSyncInfo() {
+        try {
+          const response = await sendMessage({ type: 'getSyncInfo' });
+          console.log('getSyncInfo response:', response);
+
+          if (response?.success) {
+            document.getElementById('syncStatus').textContent = response.syncInProgress
+              ? 'Syncing...'
+              : 'Active';
+            document.getElementById('lastSync').textContent = response.lastSyncTime
+              ? new Date(response.lastSyncTime).toLocaleString()
+              : 'Never';
+            document.getElementById('watchStatus').textContent = response.isWatching
+              ? 'Active'
+              : 'Inactive';
+
+            // Update sync button
+            const syncBtn = document.getElementById('syncBtn');
+            if (response.syncInProgress) {
+              syncBtn.disabled = true;
+              syncBtn.innerHTML = 'Syncing<span class="spinner"></span>';
+            } else {
+              syncBtn.disabled = false;
+              syncBtn.textContent = 'Sync Now';
+            }
+          }
+        } catch (error) {
+          console.error('Failed to update sync info:', error);
+        }
+      }
+
+      async function testFilePath() {
+        const filePath = document.getElementById('filePath').value;
+        if (!filePath) {
+          showStatus('Please enter a file path', 'error');
+          return;
+        }
+
+        // Check if we're in desktop mode first
+        if (!window.PluginAPI?.executeNodeScript) {
+          showStatus(
+            'File operations are only available in the desktop version of Super Productivity',
+            'error',
+          );
+          return;
+        }
+
+        try {
+          const result = await window.PluginAPI.executeNodeScript({
+            script: `
+              const fs = require('fs');
+              const path = require('path');
+
+              try {
+                const absolutePath = path.resolve(args[0]);
+                if (!fs.existsSync(absolutePath)) {
+                  return { success: false, error: 'File not found' };
+                }
+
+                const stats = fs.statSync(absolutePath);
+                if (!stats.isFile()) {
+                  return { success: false, error: 'Path is not a file' };
+                }
+
+                const content = fs.readFileSync(absolutePath, 'utf8');
+                const lines = content.split('\\n');
+                const taskCount = lines.filter(line => /^\\s*- \\[[ x]\\]/.test(line)).length;
+
+                return {
+                  success: true,
+                  info: {
+                    size: stats.size,
+                    modified: stats.mtime,
+                    taskCount: taskCount
+                  }
+                };
+              } catch (error) {
+                return { success: false, error: error.message };
+              }
+            `,
+            args: [filePath],
+            timeout: 5000,
+          });
+
+          if (result.success && result.result?.success) {
+            const info = result.result.info;
+            showStatus(`File is valid! Found ${info.taskCount} tasks`, 'success');
+          } else {
+            showStatus(result.result?.error || 'Failed to access file', 'error');
+          }
+        } catch (error) {
+          showStatus('Failed to test file: ' + error.message, 'error');
+        }
+      }
+
+      async function syncNow() {
+        if (!config || !config.enabled) {
+          showStatus('Please save configuration first', 'error');
+          return;
+        }
+
+        try {
+          showStatus('Triggering sync...', 'info');
+          console.log('Sending syncNow message...');
+          const response = await sendMessage({ type: 'syncNow' });
+          console.log('syncNow response:', response);
+
+          if (response?.success) {
+            showStatus('Sync triggered - please wait', 'info');
+            // Update UI after debounce period (5 seconds)
+            setTimeout(updateSyncInfo, 6000);
+          } else {
+            showStatus(response?.error || 'Failed to trigger sync', 'error');
+          }
+        } catch (error) {
+          console.error('syncNow error:', error);
+          showStatus('Failed to trigger sync', 'error');
+        }
+      }
+
+      // Form submission
+      document.getElementById('configForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const filePath = document.getElementById('filePath').value;
+        const projectId = document.getElementById('projectId').value;
+        const syncDirection = document.getElementById('syncDirection').value;
+
+        if (!filePath || !projectId) {
+          showStatus('Please fill in all required fields', 'error');
+          return;
+        }
+
+        // Check if we're in desktop mode
+        if (!window.PluginAPI?.executeNodeScript) {
+          showStatus(
+            'Sync.md plugin requires the desktop version of Super Productivity',
+            'error',
+          );
+          return;
+        }
+
+        const newConfig = {
+          filePath,
+          projectId,
+          syncDirection,
+          enabled: true,
+        };
+
+        try {
+          // Save to storage
+          await window.PluginAPI.persistDataSynced(JSON.stringify(newConfig));
+          config = newConfig;
+
+          // Notify background
+          await sendMessage({
+            type: 'configUpdated',
+            config: newConfig,
+          });
+
+          showStatus('Configuration saved successfully', 'success');
+          document.getElementById('syncInfo').classList.add('show');
+          updateSyncInfo();
+        } catch (error) {
+          console.error('Failed to save config:', error);
+          showStatus('Failed to save configuration', 'error');
+        }
+      });
+
+      // Listen for sync events from background
+      window.addEventListener('message', (event) => {
+        console.log('UI received message:', event.data);
+
+        if (event.data?.type === 'SYNC_COMPLETED') {
+          console.log('Sync completed event received');
+          updateSyncInfo();
+          showStatus('Sync completed successfully', 'success');
+        } else if (event.data?.type === 'SYNC_ERROR') {
+          console.log('Sync error event received:', event.data.error);
+          updateSyncInfo();
+          showStatus('Sync error: ' + event.data.error, 'error');
+        }
+      });
+
+      // Wait for PluginAPI to be available
+      async function waitForPluginAPI(maxAttempts = 20) {
+        for (let i = 0; i < maxAttempts; i++) {
+          if (window.PluginAPI) {
+            console.log(`PluginAPI available after ${i} attempts`);
+            return true;
+          }
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+        console.error('PluginAPI not available after', maxAttempts, 'attempts');
+        return false;
+      }
+
+      // Initialize
+      window.addEventListener('load', async () => {
+        // Wait for PluginAPI
+        const apiAvailable = await waitForPluginAPI();
+        if (!apiAvailable) {
+          showStatus('Plugin API not available. Please reload the page.', 'error');
+          return;
+        }
+
+        // Check if we're in desktop mode
+        if (!window.PluginAPI?.executeNodeScript) {
+          showStatus(
+            'Sync.md plugin requires the desktop version of Super Productivity. File sync features are not available in the web version.',
+            'error',
+          );
+          document.getElementById('configForm').style.opacity = '0.5';
+          document.getElementById('configForm').style.pointerEvents = 'none';
+          return;
+        }
+
+        await loadProjects();
+        await loadConfig();
+
+        // Update sync info periodically
+        syncInfoInterval = setInterval(updateSyncInfo, 5000);
+      });
+
+      // Cleanup
+      window.addEventListener('unload', () => {
+        if (syncInfoInterval) {
+          clearInterval(syncInfoInterval);
+        }
+      });
+    </script>
+  </body>
+</html>

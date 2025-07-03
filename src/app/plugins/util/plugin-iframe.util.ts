@@ -238,6 +238,8 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
           getCurrentContextTasks: () => callApi('getCurrentContextTasks'),
           updateTask: (taskId, updates) => callApi('updateTask', [taskId, updates]),
           addTask: (taskData) => callApi('addTask', [taskData]),
+          deleteTask: (taskId) => callApi('deleteTask', [taskId]),
+          batchUpdateForProject: (request) => callApi('batchUpdateForProject', [request]),
 
           // Project methods
           getAllProjects: () => callApi('getAllProjects'),

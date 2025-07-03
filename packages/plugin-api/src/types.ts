@@ -17,6 +17,8 @@ export enum PluginHooks {
   LANGUAGE_CHANGE = 'languageChange',
   PERSISTED_DATA_UPDATE = 'persistedDataUpdate',
   ACTION = 'action',
+  ANY_TASK_UPDATE = 'anyTaskUpdate',
+  PROJECT_LIST_UPDATE = 'projectListUpdate',
 }
 
 export type Hooks = PluginHooks;
@@ -233,6 +235,9 @@ export interface PluginAPI {
 
   registerSidePanelButton(sidePanelBtnCfg: Omit<PluginSidePanelBtnCfg, 'pluginId'>): void;
 
+  // cross-process communication
+  onMessage?(handler: (message: any) => Promise<any> | any): void;
+
   // ui bridge
   showSnack(snackCfg: SnackCfg): void;
 
@@ -252,6 +257,8 @@ export interface PluginAPI {
   updateTask(taskId: string, updates: Partial<Task>): Promise<void>;
 
   addTask(taskData: PluginCreateTaskData): Promise<string>;
+
+  deleteTask(taskId: string): Promise<void>;
 
   // projects
   getAllProjects(): Promise<Project[]>;
@@ -284,6 +291,10 @@ export interface PluginAPI {
 
   // action execution - dispatch NgRx actions (limited to allowed subset)
   dispatchAction(action: any): void;
+
+  // window state
+  isWindowFocused(): boolean;
+  onWindowFocusChange?(handler: (isFocused: boolean) => void): void;
 }
 
 export interface PluginInstance {

@@ -91,7 +91,7 @@ export class PluginService implements OnDestroy {
   private async _discoverBuiltInPlugins(): Promise<void> {
     const pluginPaths = [
       'assets/bundled-plugins/yesterday-tasks-plugin',
-      // 'assets/sync-md-plugin', // Disabled - not ready for prime time
+      'assets/bundled-plugins/sync-md',
       'assets/bundled-plugins/api-test-plugin',
       'assets/bundled-plugins/procrastination-buster',
     ];
@@ -147,7 +147,7 @@ export class PluginService implements OnDestroy {
   private async _loadBuiltInPlugins(): Promise<void> {
     const pluginPaths = [
       'assets/bundled-plugins/yesterday-tasks-plugin',
-      // 'assets/sync-md-plugin', // Disabled - not ready for prime time
+      'assets/bundled-plugins/sync-md',
       'assets/bundled-plugins/api-test-plugin',
       'assets/bundled-plugins/procrastination-buster',
     ];

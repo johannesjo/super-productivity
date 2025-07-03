@@ -4,6 +4,7 @@ import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
 import { IssueDataReduced } from '../../features/issue/issue.model';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { Project } from '../../features/project/project.model';
+import { BatchOperation } from '../../api/batch-update-types';
 
 /**
  * Shared actions that affect multiple reducers (tasks, projects, tags)
@@ -112,6 +113,13 @@ export const TaskSharedActions = createActionGroup({
     moveTaskInTodayTagList: props<{
       toTaskId: string;
       fromTaskId: string;
+    }>(),
+
+    // Batch Operations
+    batchUpdateForProject: props<{
+      projectId: string;
+      operations: BatchOperation[];
+      createdTaskIds: { [tempId: string]: string };
     }>(),
   },
 });

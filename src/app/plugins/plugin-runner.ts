@@ -39,6 +39,8 @@ export class PluginRunner {
       // Add executeNodeScript for electron if permitted
       if (IS_ELECTRON && manifest.permissions?.includes('nodeExecution')) {
         pluginAPI.executeNodeScript = async (request) => {
+          // Ensure plugin context is set before executing
+          this._pluginBridge._setCurrentPlugin(manifest.id, manifest);
           return this._pluginBridge.executeNodeScript(request);
         };
       }

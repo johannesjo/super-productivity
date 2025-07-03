@@ -147,6 +147,11 @@ export class PluginAPI implements PluginAPIInterface {
     return this._pluginBridge.addTask(taskData);
   }
 
+  async deleteTask(taskId: string): Promise<void> {
+    console.log(`Plugin ${this._pluginId} requested to delete task ${taskId}`);
+    return this._pluginBridge.deleteTask(taskId);
+  }
+
   async getAllProjects(): Promise<Project[]> {
     console.log(`Plugin ${this._pluginId} requested all projects`);
     const projects = await this._pluginBridge.getAllProjects();
@@ -196,6 +201,14 @@ export class PluginAPI implements PluginAPIInterface {
       taskIds,
     );
     return this._pluginBridge.reorderTasks(taskIds, contextId, contextType);
+  }
+
+  async batchUpdateForProject(request: any): Promise<any> {
+    console.log(
+      `Plugin ${this._pluginId} requested batch update for project ${request.projectId}`,
+      request,
+    );
+    return this._pluginBridge.batchUpdateForProject(request);
   }
 
   showSnack(snackCfg: SnackCfg): void {
@@ -267,6 +280,20 @@ export class PluginAPI implements PluginAPIInterface {
   dispatchAction(action: any): void {
     console.log(`Plugin ${this._pluginId} requested to execute action:`, action);
     return this._pluginBridge.dispatchAction(action);
+  }
+
+  /**
+   * Check if the application window is currently focused
+   */
+  isWindowFocused(): boolean {
+    return this._pluginBridge.isWindowFocused();
+  }
+
+  /**
+   * Register a handler for window focus changes
+   */
+  onWindowFocusChange(handler: (isFocused: boolean) => void): void {
+    this._pluginBridge.onWindowFocusChange(this._pluginId, handler);
   }
 
   /**

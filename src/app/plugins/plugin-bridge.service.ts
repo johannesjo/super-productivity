@@ -17,6 +17,16 @@ import {
   PluginNodeScriptRequest,
   PluginNodeScriptResult,
 } from './plugin-api.model';
+import {
+  BatchUpdateRequest,
+  BatchUpdateResult,
+  BatchUpdateError,
+  BatchOperation,
+  BatchTaskCreate,
+  BatchTaskUpdate,
+  BatchTaskDelete,
+  BatchTaskReorder,
+} from '../api/batch-update-types';
 import { Task as TaskCopy } from '../features/tasks/task.model';
 import { Project as ProjectCopy } from '../features/project/project.model';
 import { Tag as TagCopy } from '../features/tag/tag.model';
@@ -25,11 +35,14 @@ import { snackCfgToSnackParams } from './plugin-api-mapper';
 import { PluginHooksService } from './plugin-hooks';
 import { TaskService } from '../features/tasks/task.service';
 import { addSubTask } from '../features/tasks/store/task.actions';
+import { TaskSharedActions } from '../root-store/meta/task-shared.actions';
+import { nanoid } from 'nanoid';
 import { WorkContextService } from '../features/work-context/work-context.service';
 import { ProjectService } from '../features/project/project.service';
 import { TagService } from '../features/tag/tag.service';
 import typia from 'typia';
 import { first } from 'rxjs/operators';
+import { selectTaskByIdWithSubTaskData } from '../features/tasks/store/task.selectors';
 import { PluginUserPersistenceService } from './plugin-user-persistence.service';
 import { TaskArchiveService } from '../features/time-tracking/task-archive.service';
 import { Router } from '@angular/router';
@@ -87,6 +100,11 @@ export class PluginBridgeService implements OnDestroy {
   // Track side panel buttons registered by plugins
   private _sidePanelButtons$ = new BehaviorSubject<PluginSidePanelBtnCfg[]>([]);
   public readonly sidePanelButtons$ = this._sidePanelButtons$.asObservable();
+
+  constructor() {
+    // Initialize window focus tracking
+    this._initWindowFocusTracking();
+  }
 
   /**
    * Set the current plugin context for secure operations
@@ -298,6 +316,38 @@ export class PluginBridgeService implements OnDestroy {
   }
 
   /**
+   * Delete a task
+   */
+  async deleteTask(taskId: string): Promise<void> {
+    typia.assert<string>(taskId);
+
+    try {
+      // Get the task with its subtasks
+      const taskWithSubTasks = await this._store
+        .select(selectTaskByIdWithSubTaskData, { id: taskId })
+        .pipe(first())
+        .toPromise();
+
+      if (!taskWithSubTasks) {
+        throw new Error(
+          this._translateService.instant(T.PLUGINS.TASK_NOT_FOUND, { taskId }),
+        );
+      }
+
+      // Use the TaskService remove method which handles deletion properly
+      this._taskService.remove(taskWithSubTasks);
+
+      console.log('PluginBridge: Task deleted successfully', {
+        taskId,
+        hadSubTasks: taskWithSubTasks.subTasks.length > 0,
+      });
+    } catch (error) {
+      console.error('PluginBridge: Failed to delete task:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Get all projects
    */
   async getAllProjects(): Promise<ProjectCopy[]> {
@@ -468,6 +518,160 @@ export class PluginBridgeService implements OnDestroy {
   }
 
   /**
+   * Batch update tasks for a project with validation
+   * Allows multiple operations to be performed atomically with proper validation
+   */
+  async batchUpdateForProject(request: BatchUpdateRequest): Promise<BatchUpdateResult> {
+    typia.assert<BatchUpdateRequest>(request);
+
+    const errors: BatchUpdateError[] = [];
+    const createdTaskIds: { [tempId: string]: string } = {};
+
+    // Validate project exists
+    const project = await this._projectService
+      .getByIdOnce$(request.projectId)
+      .pipe(first())
+      .toPromise();
+
+    if (!project) {
+      throw new Error(
+        this._translateService.instant(T.PLUGINS.PROJECT_NOT_FOUND, {
+          contextId: request.projectId,
+        }),
+      );
+    }
+
+    // Get all current tasks for validation
+    const allTasks = await this._taskService.allTasks$.pipe(first()).toPromise();
+    const projectTasks = allTasks?.filter((t) => t.projectId === request.projectId) || [];
+
+    // Validate operations
+    for (let i = 0; i < request.operations.length; i++) {
+      const op = request.operations[i];
+      const validationError = this._validateBatchOperation(
+        op,
+        request.projectId,
+        projectTasks,
+        createdTaskIds,
+        i,
+      );
+      if (validationError) {
+        errors.push(validationError);
+      }
+    }
+
+    // If there are validation errors, return early
+    if (errors.length > 0) {
+      return {
+        success: false,
+        createdTaskIds: {},
+        errors,
+      };
+    }
+
+    // Generate IDs for all create operations
+    request.operations.forEach((op) => {
+      if (op.type === 'create') {
+        const createOp = op as BatchTaskCreate;
+        createdTaskIds[createOp.tempId] = nanoid();
+      }
+    });
+
+    // Dispatch the batch update action
+    try {
+      this._store.dispatch(
+        TaskSharedActions.batchUpdateForProject({
+          projectId: request.projectId,
+          operations: request.operations,
+          createdTaskIds,
+        }),
+      );
+
+      console.log('PluginBridge: Batch update dispatched successfully', {
+        projectId: request.projectId,
+        operationCount: request.operations.length,
+        createdTasks: Object.keys(createdTaskIds).length,
+      });
+
+      return {
+        success: true,
+        createdTaskIds,
+      };
+    } catch (error) {
+      console.error('PluginBridge: Batch update failed', error);
+      throw error;
+    }
+  }
+
+  private _validateBatchOperation(
+    op: BatchOperation,
+    projectId: string,
+    projectTasks: TaskCopy[],
+    createdTaskIds: { [tempId: string]: string },
+    operationIndex: number,
+  ): BatchUpdateError | null {
+    switch (op.type) {
+      case 'create':
+        const createOp = op as BatchTaskCreate;
+        // Check for circular dependencies
+        if (createOp.data.parentId === createOp.tempId) {
+          return {
+            operationIndex,
+            type: 'CIRCULAR_DEPENDENCY',
+            message: 'Task cannot be its own parent',
+          };
+        }
+        // Basic validation for required fields
+        if (!createOp.data.title || createOp.data.title.trim() === '') {
+          return {
+            operationIndex,
+            type: 'VALIDATION_ERROR',
+            message: 'Task title is required',
+          };
+        }
+        break;
+
+      case 'update':
+        const updateOp = op as BatchTaskUpdate;
+        const taskToUpdate = projectTasks.find((t) => t.id === updateOp.taskId);
+        if (!taskToUpdate) {
+          return {
+            operationIndex,
+            type: 'TASK_NOT_FOUND',
+            message: `Task ${updateOp.taskId} not found in project`,
+          };
+        }
+        break;
+
+      case 'delete':
+        const deleteOp = op as BatchTaskDelete;
+        const taskToDelete = projectTasks.find((t) => t.id === deleteOp.taskId);
+        if (!taskToDelete) {
+          return {
+            operationIndex,
+            type: 'TASK_NOT_FOUND',
+            message: `Task ${deleteOp.taskId} not found in project`,
+          };
+        }
+        break;
+
+      case 'reorder':
+        // Basic validation - the reducer will handle the actual reordering
+        const reorderOp = op as BatchTaskReorder;
+        if (!reorderOp.taskIds || reorderOp.taskIds.length === 0) {
+          return {
+            operationIndex,
+            type: 'VALIDATION_ERROR',
+            message: 'Reorder operation requires at least one task ID',
+          };
+        }
+        break;
+    }
+
+    return null;
+  }
+
+  /**
    * Persist plugin data - uses current plugin context for security
    */
   async persistDataSynced(dataStr: string): Promise<void> {
@@ -553,6 +757,9 @@ export class PluginBridgeService implements OnDestroy {
     this._removePluginMenuEntries(pluginId);
     this._removePluginSidePanelButtons(pluginId);
     this.unregisterPluginShortcuts(pluginId);
+
+    // Clean up window focus handler
+    this._windowFocusHandlers.delete(pluginId);
 
     console.log('PluginBridge: All hooks unregistered for plugin', { pluginId });
   }
@@ -949,6 +1156,65 @@ export class PluginBridgeService implements OnDestroy {
     const { PluginRunner } = await import('./plugin-runner');
     const pluginRunner = this._injector.get(PluginRunner);
     return pluginRunner.sendMessageToPlugin(pluginId, message);
+  }
+
+  /**
+   * Track window focus state
+   */
+  private _isWindowFocused = true;
+  private _windowFocusHandlers = new Map<string, (isFocused: boolean) => void>();
+
+  /**
+   * Initialize window focus tracking
+   */
+  private _initWindowFocusTracking(): void {
+    // Track window focus/blur events
+    window.addEventListener('focus', () => {
+      this._isWindowFocused = true;
+      this._notifyFocusHandlers(true);
+    });
+
+    window.addEventListener('blur', () => {
+      this._isWindowFocused = false;
+      this._notifyFocusHandlers(false);
+    });
+
+    // Also track document visibility changes
+    document.addEventListener('visibilitychange', () => {
+      const isFocused = !document.hidden;
+      this._isWindowFocused = isFocused;
+      this._notifyFocusHandlers(isFocused);
+    });
+  }
+
+  /**
+   * Notify all registered focus handlers
+   */
+  private _notifyFocusHandlers(isFocused: boolean): void {
+    this._windowFocusHandlers.forEach((handler) => {
+      try {
+        handler(isFocused);
+      } catch (error) {
+        console.error('Error in window focus handler:', error);
+      }
+    });
+  }
+
+  /**
+   * Check if the window is currently focused
+   */
+  isWindowFocused(): boolean {
+    return this._isWindowFocused;
+  }
+
+  /**
+   * Register a handler for window focus changes
+   */
+  onWindowFocusChange(pluginId: string, handler: (isFocused: boolean) => void): void {
+    this._windowFocusHandlers.set(pluginId, handler);
+
+    // Immediately notify the handler of the current state
+    handler(this._isWindowFocused);
   }
 
   /**

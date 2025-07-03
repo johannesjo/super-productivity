@@ -53,11 +53,15 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     rollupOptions: {
-      input: resolve(__dirname, 'src/index.html'),
+      input: {
+        index: resolve(__dirname, 'src/index.html'),
+        background: resolve(__dirname, 'src/background.ts'),
+      },
       output: {
-        entryFileNames: 'index.js',
+        entryFileNames: '[name].js',
         chunkFileNames: '[name]-[hash].js',
         assetFileNames: '[name].[ext]',
+        format: 'iife',
       },
     },
     copyPublicDir: false,

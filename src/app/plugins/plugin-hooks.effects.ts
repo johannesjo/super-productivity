@@ -8,12 +8,15 @@ import {
   selectTaskById,
   selectTaskFeatureState,
 } from '../features/tasks/store/task.selectors';
+import { selectProjectFeatureState } from '../features/project/store/project.selectors';
 import { Task } from '../features/tasks/task.model';
 import { PluginService } from './plugin.service';
 import { PluginHooks } from './plugin-api.model';
 import { setActiveWorkContext } from '../features/work-context/store/work-context.actions';
 import { TaskSharedActions } from '../root-store/meta/task-shared.actions';
 import { setCurrentTask, unsetCurrentTask } from '../features/tasks/store/task.actions';
+import * as projectActions from '../features/project/store/project.actions';
+import { updateProject } from '../features/project/store/project.actions';
 
 @Injectable()
 export class PluginHooksEffects {
@@ -144,6 +147,62 @@ export class PluginHooksEffects {
         filter((action) => action.type === 'FINISH_DAY'),
         tap(() => {
           this.pluginService.dispatchHook(PluginHooks.FINISH_DAY);
+        }),
+      ),
+    { dispatch: false },
+  );
+
+  // Trigger for ANY task update (add, update, delete)
+  anyTaskUpdate$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(
+          TaskSharedActions.addTask,
+          TaskSharedActions.updateTask,
+          TaskSharedActions.deleteTask,
+          TaskSharedActions.deleteTasks,
+        ),
+        withLatestFrom(this.store.pipe(select(selectTaskFeatureState))),
+        tap(([action, taskState]) => {
+          this.pluginService.dispatchHook(PluginHooks.ANY_TASK_UPDATE, {
+            action: action.type,
+            taskState,
+          });
+        }),
+      ),
+    { dispatch: false },
+  );
+
+  // Trigger when project taskIds or backlogTaskIds change
+  projectListUpdate$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(
+          // Direct project updates
+          updateProject,
+          // Task-related actions that affect project lists
+          TaskSharedActions.addTask,
+          TaskSharedActions.deleteTask,
+          TaskSharedActions.deleteTasks,
+          TaskSharedActions.moveToOtherProject,
+          // Project task list actions
+          projectActions.moveProjectTaskToBacklogListAuto,
+          projectActions.moveProjectTaskToRegularListAuto,
+          projectActions.moveProjectTaskUpInBacklogList,
+          projectActions.moveProjectTaskDownInBacklogList,
+          projectActions.moveProjectTaskToTopInBacklogList,
+          projectActions.moveProjectTaskToBottomInBacklogList,
+          projectActions.moveProjectTaskInBacklogList,
+          projectActions.moveProjectTaskToBacklogList,
+          projectActions.moveProjectTaskToRegularList,
+          projectActions.moveAllProjectBacklogTasksToRegularList,
+        ),
+        withLatestFrom(this.store.pipe(select(selectProjectFeatureState))),
+        tap(([action, projectState]) => {
+          this.pluginService.dispatchHook(PluginHooks.PROJECT_LIST_UPDATE, {
+            action: action.type,
+            projectState,
+          });
         }),
       ),
     { dispatch: false },

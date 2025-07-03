@@ -1935,6 +1935,7 @@
     "PROJECT_NOT_FOUND": "Project '{{contextId}}' not found",
     "TASKS_NOT_IN_PROJECT": "One or more tasks are not in project '{{contextId}}'",
     "PARENT_TASK_NOT_FOUND": "Parent task not found in context '{{contextId}}'",
+    "TASK_NOT_FOUND": "Task with ID '{{taskId}}' not found",
     "TASKS_NOT_SUBTASKS": "One or more tasks are not subtasks of '{{contextId}}'",
     "NO_PLUGIN_CONTEXT_PERSISTENCE": "Plugin does not have permission to persist data",
     "UNABLE_TO_PERSIST_DATA": "Unable to persist data to plugin storage",
