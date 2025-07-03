@@ -1063,6 +1063,10 @@ export class PluginService implements OnDestroy {
     this._pluginIcons.delete(pluginId);
     this._pluginIconsSignal.set(new Map(this._pluginIcons));
 
+    // Remove from plugin states
+    this._pluginStates.delete(pluginId);
+    this._updatePluginStates();
+
     console.log(`Uploaded plugin ${pluginId} removed completely`);
   }
 
