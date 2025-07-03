@@ -38,6 +38,7 @@ import {
   selectTaskRepeatCfgsDueOnDayIncludingOverdue,
   selectTaskRepeatCfgsDueOnDayOnly,
 } from './store/task-repeat-cfg.selectors';
+import { devError } from '../../util/dev-error';
 
 @Injectable({
   providedIn: 'root',
@@ -124,7 +125,7 @@ export class TaskRepeatCfgService {
     taskRepeatCfg: TaskRepeatCfg,
     targetDayDate: number,
   ): Promise<void> {
-    const actionsForRepeatCfg = await this.getActionsForTaskRepeatCfg(
+    const actionsForRepeatCfg = await this._getActionsForTaskRepeatCfg(
       taskRepeatCfg,
       targetDayDate,
     );
@@ -150,9 +151,8 @@ export class TaskRepeatCfgService {
       });
   }
 
-  // NOTE: there is a duplicate of this in plan-tasks-tomorrow.component
-
-  async getActionsForTaskRepeatCfg(
+  // NOTE: this is public for testing purposes only
+  async _getActionsForTaskRepeatCfg(
     taskRepeatCfg: TaskRepeatCfg,
     targetDayDate: number = Date.now(),
   ): // NOTE: updateTaskRepeatCfg missing as there is no way to declare it as action type
@@ -185,7 +185,13 @@ export class TaskRepeatCfgService {
       taskRepeatCfg,
       new Date(targetDayDate),
     );
-    if (!targetCreated) {
+
+    // there is no creation date in the present
+    if (targetCreated === null) {
+      // not sure if we should always expect one when this is called, so we throw a dev error for evaluation
+      devError('No target creation date found for repeatable task');
+      return [];
+    } else if (!targetCreated) {
       throw new Error('Unable to getNewestPossibleDueDate()');
     }
 

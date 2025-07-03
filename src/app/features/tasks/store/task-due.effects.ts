@@ -1,7 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { createEffect } from '@ngrx/effects';
 import {
-  catchError,
   concatMap,
   debounceTime,
   filter,
@@ -18,10 +17,7 @@ import { DataInitStateService } from '../../../core/data-init/data-init-state.se
 import { SyncWrapperService } from '../../../imex/sync/sync-wrapper.service';
 import { selectTodayTaskIds } from '../../work-context/store/work-context.selectors';
 import { AddTasksForTomorrowService } from '../../add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
-import { devError } from '../../../util/dev-error';
 import { SnackService } from '../../../core/snack/snack.service';
-import { getErrorTxt } from '../../../util/get-error-text';
-import { EMPTY } from 'rxjs';
 
 @Injectable()
 export class TaskDueEffects {
@@ -50,16 +46,8 @@ export class TaskDueEffects {
                 first(),
               ),
             ),
+            // NOTE we use concatMap since tap errors only show in console, but are not handled by global handler
             concatMap(() => this._addTasksForTomorrowService.addAllDueToday()),
-            catchError((e) => {
-              const errorMsg = 'Failed to create repeatable tasks: ' + getErrorTxt(e);
-              devError(errorMsg);
-              this._snackService.open({
-                type: 'ERROR',
-                msg: 'Failed to create repeatable tasks. Please check console for details.',
-              });
-              return EMPTY;
-            }),
           ),
         ),
       );
