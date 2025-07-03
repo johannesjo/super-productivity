@@ -17,8 +17,11 @@ describe('isRelatedModelDataValid', () => {
 
   beforeEach(() => {
     mockAppData = createAppDataCompleteMock();
-    alertSpy = spyOn(window, 'alert').and.stub();
-    confirmSpy = spyOn(window, 'confirm').and.returnValue(true);
+    // Alert and confirm are already mocked globally, just get references and reset
+    alertSpy = window.alert as jasmine.Spy;
+    confirmSpy = window.confirm as jasmine.Spy;
+    alertSpy.calls.reset();
+    confirmSpy.calls.reset();
   });
 
   afterEach(() => {

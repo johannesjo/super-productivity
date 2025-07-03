@@ -14,6 +14,16 @@ declare global {
   }
 }
 
+// Mock browser dialogs globally for tests
+// We need to handle tests that try to spy on alert/confirm after we've already mocked them
+// First check if alert/confirm are already spies (from previous test runs)
+if (!(window.alert as any).and) {
+  window.alert = jasmine.createSpy('alert');
+}
+if (!(window.confirm as any).and) {
+  window.confirm = jasmine.createSpy('confirm').and.returnValue(true);
+}
+
 // Configure the TestBed providers globally
 const originalConfigureTestingModule = TestBed.configureTestingModule;
 TestBed.configureTestingModule = function (moduleDef: any) {

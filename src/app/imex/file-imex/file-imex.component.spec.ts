@@ -31,7 +31,10 @@ describe('FileImexComponent', () => {
   const mockAppData = createAppDataCompleteMock();
 
   beforeEach(async () => {
-    spyOn(window, 'alert').and.stub();
+    // Alert is already mocked globally, just reset the spy
+    if ((window.alert as jasmine.Spy).calls) {
+      (window.alert as jasmine.Spy).calls.reset();
+    }
 
     const snackServiceSpy = jasmine.createSpyObj('SnackService', ['open']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
