@@ -70,18 +70,18 @@ export class PluginService implements OnDestroy {
       return;
     }
 
-    console.log('Initializing plugin system (lazy loading mode)...');
+    console.log('Initializing plugin system...');
 
     try {
       // Only load manifests, not the actual plugin code
       await this._discoverBuiltInPlugins();
       await this._discoverUploadedPlugins();
 
-      // Load plugins that have hooks registered (they need to be active)
-      await this._loadPluginsWithHooks();
+      // Load all enabled plugins on startup
+      await this._loadEnabledPlugins();
 
       this._isInitialized = true;
-      console.log('Plugin system initialized successfully (lazy loading enabled)');
+      console.log('Plugin system initialized successfully');
     } catch (error) {
       console.error('Failed to initialize plugin system:', error);
       throw error;
@@ -196,16 +196,20 @@ export class PluginService implements OnDestroy {
     }
   }
 
-  private async _loadPluginsWithHooks(): Promise<void> {
-    // Load all plugins that have hooks OR side panels (they need to be active immediately)
+  private async _loadEnabledPlugins(): Promise<void> {
+    // Load all enabled plugins on startup
     const pluginsToLoad = Array.from(this._pluginStates.values()).filter(
-      (state) =>
-        state.isEnabled &&
-        ((state.manifest.hooks && state.manifest.hooks.length > 0) ||
-          state.manifest.sidePanel === true),
+      (state) => state.isEnabled,
     );
 
-    console.log(`Loading ${pluginsToLoad.length} plugins with hooks or side panels...`);
+    console.log(`Loading ${pluginsToLoad.length} enabled plugins...`);
+
+    // Log which plugins are being loaded
+    for (const state of pluginsToLoad) {
+      console.log(
+        `Loading plugin: ${state.manifest.id} (enabled: ${state.isEnabled}, hooks: ${state.manifest.hooks?.length || 0}, sidePanel: ${state.manifest.sidePanel})`,
+      );
+    }
 
     for (const state of pluginsToLoad) {
       await this.activatePlugin(state.manifest.id);
