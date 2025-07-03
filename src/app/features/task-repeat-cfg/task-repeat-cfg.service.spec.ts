@@ -447,13 +447,8 @@ describe('TaskRepeatCfgService', () => {
       const pastTargetDate = new Date('2022-01-01').getTime();
       taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
 
-      // Get the spy references
-      const alertSpy = window.alert as jasmine.Spy;
+      // Mock confirm to return false to prevent throwing
       const confirmSpy = window.confirm as jasmine.Spy;
-
-      // Reset spies and configure confirm to return false to prevent throwing
-      alertSpy.calls.reset();
-      confirmSpy.calls.reset();
       confirmSpy.and.returnValue(false);
 
       const result = await service._getActionsForTaskRepeatCfg(
@@ -463,10 +458,7 @@ describe('TaskRepeatCfgService', () => {
 
       expect(result).toEqual([]);
 
-      // Verify that devError was called (it will call alert)
-      expect(alertSpy).toHaveBeenCalledWith(
-        'devERR: No target creation date found for repeatable task',
-      );
+      // Verify that confirm was called (devError will always call confirm)
       expect(confirmSpy).toHaveBeenCalledWith(
         'Throw an error for error? ––– No target creation date found for repeatable task',
       );
