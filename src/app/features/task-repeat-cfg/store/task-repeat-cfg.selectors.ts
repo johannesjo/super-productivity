@@ -131,3 +131,23 @@ export const selectTaskRepeatCfgByIdAllowUndefined = createSelector(
   (state: TaskRepeatCfgState, props: { id: string }): TaskRepeatCfg | undefined =>
     state.entities[props.id],
 );
+
+// FOR DEBUG
+// export const selectTaskRepeatCfgsDueOnDayOnly = createSelector(
+//   selectAllTaskRepeatCfgs,
+//   (
+//     taskRepeatCfgs: TaskRepeatCfg[],
+//     { dayDate }: { dayDate: number },
+//   ): TaskRepeatCfg[] => {
+//     return taskRepeatCfgs;
+//   },
+// );
+// export const selectTaskRepeatCfgsDueOnDayIncludingOverdue = createSelector(
+//   selectAllTaskRepeatCfgs,
+//   (
+//     taskRepeatCfgs: TaskRepeatCfg[],
+//     { dayDate }: { dayDate: number },
+//   ): TaskRepeatCfg[] => {
+//     return taskRepeatCfgs;
+//   },
+// );

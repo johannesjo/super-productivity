@@ -9,6 +9,9 @@ export const getNewestPossibleDueDate = (
   taskRepeatCfg: TaskRepeatCfg,
   today: Date,
 ): Date | null => {
+  // FOR DEBUG
+  // return new Date();
+
   if (!taskRepeatCfg.startDate) {
     throw new Error('Repeat startDate needs to be defined');
   }

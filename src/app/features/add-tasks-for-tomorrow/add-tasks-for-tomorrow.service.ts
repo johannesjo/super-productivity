@@ -149,7 +149,8 @@ export class AddTasksForTomorrowService {
       .select(selectTasksForPlannerDay(todayStr))
       .pipe(first())
       .toPromise();
-    console.log(JSON.parse(JSON.stringify(todayTasksFromPlanner)));
+
+    console.log('addAllDueToday()', { dueRepeatCfgs, todayTasksFromPlanner });
 
     const allDue = todayTasksFromPlanner;
 

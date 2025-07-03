@@ -395,7 +395,7 @@ describe('TaskRepeatCfgService', () => {
       const existingTask = { ...mockTaskWithSubTasks, created: targetDayDate };
       taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([existingTask]));
 
-      const actions = await service.getActionsForTaskRepeatCfg(
+      const actions = await service._getActionsForTaskRepeatCfg(
         mockTaskRepeatCfg,
         targetDayDate,
       );
@@ -414,7 +414,7 @@ describe('TaskRepeatCfgService', () => {
       taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
       taskService.createNewTaskWithDefaults.and.returnValue(mockTask);
 
-      const actions = await service.getActionsForTaskRepeatCfg(
+      const actions = await service._getActionsForTaskRepeatCfg(
         cfgWithSchedule as any,
         targetDayDate,
       );
@@ -428,7 +428,7 @@ describe('TaskRepeatCfgService', () => {
       taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
 
       await expectAsync(
-        service.getActionsForTaskRepeatCfg(cfgWithoutId as any),
+        service._getActionsForTaskRepeatCfg(cfgWithoutId as any),
       ).toBeRejectedWithError('No taskRepeatCfg.id');
     });
 
@@ -437,7 +437,7 @@ describe('TaskRepeatCfgService', () => {
       taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
 
       await expectAsync(
-        service.getActionsForTaskRepeatCfg(cfgInvalid as any),
+        service._getActionsForTaskRepeatCfg(cfgInvalid as any),
       ).toBeRejectedWithError('Repeat startDate needs to be defined');
     });
 
@@ -448,7 +448,7 @@ describe('TaskRepeatCfgService', () => {
       taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
 
       await expectAsync(
-        service.getActionsForTaskRepeatCfg(cfgFutureStart as any, pastTargetDate),
+        service._getActionsForTaskRepeatCfg(cfgFutureStart as any, pastTargetDate),
       ).toBeRejectedWithError('Unable to getNewestPossibleDueDate()');
     });
   });
