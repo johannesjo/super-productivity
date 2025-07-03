@@ -15,7 +15,7 @@
   flex-direction: column; /* make main axis vertical */
   justify-content: center; /* center items vertically, in this case */
   align-items: center; /* center items horizontally, in this case */
-  //background: var(--color-overlay-dark-20);
+  //background: var(--c-dark-20);
   animation: var(--transition-standard) fadeIn;
   z-index: var(--z-backdrop);
 

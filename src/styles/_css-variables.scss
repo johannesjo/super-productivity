@@ -92,23 +92,21 @@
   // -----------------------------
   // Overlay Colors
   // -----------------------------
-  --color-overlay-dark-10: rgba(0, 0, 0, 0.1);
-  --color-overlay-dark-20: rgba(0, 0, 0, 0.2);
-  --color-overlay-dark-30: rgba(0, 0, 0, 0.3);
-  --color-overlay-dark-40: rgba(0, 0, 0, 0.4);
-  --color-overlay-dark-50: rgba(0, 0, 0, 0.5);
-  --color-overlay-dark-60: rgba(0, 0, 0, 0.6);
-  --color-overlay-dark-80: rgba(0, 0, 0, 0.8);
-  --color-overlay-dark-90: rgba(0, 0, 0, 0.9);
-  --color-overlay-light-05: rgba(255, 255, 255, 0.05);
-  --color-overlay-light-10: rgba(255, 255, 255, 0.1);
-  --color-overlay-light-20: rgba(255, 255, 255, 0.2);
-  --color-overlay-light-30: rgba(255, 255, 255, 0.3);
-  --color-overlay-light-33: rgba(255, 255, 255, 0.33);
-  --color-overlay-light-40: rgba(255, 255, 255, 0.4);
-  --color-overlay-light-50: rgba(255, 255, 255, 0.5);
-  --color-overlay-light-70: rgba(255, 255, 255, 0.7);
-  --color-overlay-light-90: rgba(255, 255, 255, 0.9);
+  --c-dark-10: rgba(0, 0, 0, 0.1);
+  --c-dark-20: rgba(0, 0, 0, 0.2);
+  --c-dark-30: rgba(0, 0, 0, 0.3);
+  --c-dark-40: rgba(0, 0, 0, 0.4);
+  --c-dark-50: rgba(0, 0, 0, 0.5);
+  --c-dark-60: rgba(0, 0, 0, 0.6);
+  --c-dark-80: rgba(0, 0, 0, 0.8);
+  --c-dark-90: rgba(0, 0, 0, 0.9);
+  --c-light-05: rgba(255, 255, 255, 0.05);
+  --c-light-10: rgba(255, 255, 255, 0.1);
+  --c-light-33: rgba(255, 255, 255, 0.33);
+  --c-light-40: rgba(255, 255, 255, 0.4);
+  --c-light-50: rgba(255, 255, 255, 0.5);
+  --c-light-70: rgba(255, 255, 255, 0.7);
+  --c-light-90: rgba(255, 255, 255, 0.9);
 
   // Legacy palette references
   --c-primary: var(--palette-primary-500);
@@ -228,9 +226,8 @@
     0 3px 1px -2px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
     0 2px 2px 0 rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
     0 1px 5px 0 rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
-  --shadow-bottom: 0 10px 6px -6px var(--color-overlay-dark-30);
-  --shadow-bottom-boxed:
-    0 10px 6px -6px var(--color-overlay-dark-30), 0 0 1px var(--color-overlay-dark-30);
+  --shadow-bottom: 0 10px 6px -6px var(--c-dark-30);
+  --shadow-bottom-boxed: 0 10px 6px -6px var(--c-dark-30), 0 0 1px var(--c-dark-30);
 
   // ===============================
   // ANIMATION & TRANSITIONS
@@ -345,7 +342,7 @@ body {
   --divider-color: rgba(0, 0, 0, 0.12);
 
   // Backdrop
-  --c-backdrop: var(--color-overlay-dark-60);
+  --c-backdrop: var(--c-dark-60);
 
   // Note colors
   --standard-note-bg: #ffffff;
@@ -386,19 +383,19 @@ body {
 
   // Improvement banner
   --improvement-text: rgba(44, 44, 44, 1);
-  --improvement-border: var(--color-overlay-light-33);
+  --improvement-border: var(--c-light-33);
   --improvement-button-text: rgba(44, 44, 44, 1);
 
   // Select/Options
-  --select-hover-bg: var(--color-overlay-dark-10);
-  --options-border-color: var(--color-overlay-dark-10);
+  --select-hover-bg: var(--c-dark-10);
+  --options-border-color: var(--c-dark-10);
 
   // Attachments
   --attachment-bg: var(--card-bg);
   --attachment-border: var(--extra-border-color);
-  --attachment-control-bg: var(--color-overlay-light-40);
-  --attachment-control-border: var(--color-overlay-light-50);
-  --attachment-control-hover-bg: var(--color-overlay-light-90);
+  --attachment-control-bg: var(--c-light-40);
+  --attachment-control-border: var(--c-light-50);
+  --attachment-control-hover-bg: var(--c-light-90);
 
   // Hover controls
   --hover-controls-border: 1px solid;
@@ -452,7 +449,7 @@ body.isDarkTheme {
   --divider-color: rgba(255, 255, 255, 0.12);
 
   // Backdrop
-  --c-backdrop: var(--color-overlay-dark-60);
+  --c-backdrop: var(--c-dark-60);
 
   // Note colors
   --standard-note-bg: var(--dark16);
@@ -479,7 +476,7 @@ body.isDarkTheme {
   --scrollbar-track: #222;
 
   // Grid colors
-  --grid-color: var(--color-overlay-light-10);
+  --grid-color: var(--c-light-10);
 
   // Chip colors
   --chip-outline-color: rgba(125, 125, 125, 0.4);
@@ -493,19 +490,19 @@ body.isDarkTheme {
 
   // Improvement banner
   --improvement-text: var(--text-color-most-intense);
-  --improvement-border: var(--color-overlay-light-33);
+  --improvement-border: var(--c-light-33);
   --improvement-button-text: white;
 
   // Select/Options
-  --select-hover-bg: var(--color-overlay-light-10);
-  --options-border-color: var(--color-overlay-light-10);
+  --select-hover-bg: var(--c-light-10);
+  --options-border-color: var(--c-light-10);
 
   // Attachments
   --attachment-bg: var(--bg-lighter);
   --attachment-border: transparent;
-  --attachment-control-bg: var(--color-overlay-dark-40);
-  --attachment-control-border: var(--color-overlay-dark-50);
-  --attachment-control-hover-bg: var(--color-overlay-dark-90);
+  --attachment-control-bg: var(--c-dark-40);
+  --attachment-control-border: var(--c-dark-50);
+  --attachment-control-hover-bg: var(--c-dark-90);
 
   // Hover controls
   --hover-controls-border: none;

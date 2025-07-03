@@ -16,7 +16,7 @@
   &:before {
     position: absolute;
     content: '';
-    background: var(--color-overlay-dark-20);
+    background: var(--c-dark-20);
     width: 100%;
     top: 0;
     left: 0;
@@ -43,7 +43,7 @@ body.isDarkTheme :host {
   background: var(--palette-primary-900);
 
   &:before {
-    background: var(--color-overlay-dark-50);
+    background: var(--c-dark-50);
   }
 }
 
