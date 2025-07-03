@@ -85,7 +85,7 @@
 
       background: var(--standard-note-bg);
       color: var(--standard-note-fg);
-      border-color: var(--theme-extra-border-color);
+      border-color: var(--extra-border-color);
     }
 
     .markdown-unparsed,
@@ -127,7 +127,7 @@
   align-items: center;
   transition: var(--transition-standard);
   cursor: move;
-  border-top: 1px dashed var(--theme-extra-border-color);
+  border-top: 1px dashed var(--extra-border-color);
   opacity: 0;
   position: relative;
 

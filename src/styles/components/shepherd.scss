@@ -13,13 +13,13 @@
 }
 
 .shepherd-text kbd {
-  background-color: var(--theme-bg-lightest);
+  background-color: var(--bg-lightest);
   border-radius: 3px;
-  border: 1px solid var(--theme-extra-border-color);
+  border: 1px solid var(--extra-border-color);
   box-shadow:
     0 1px 1px var(--color-overlay-dark-20),
     0 2px 0 0 var(--color-overlay-light-70) inset;
-  color: var(--theme-text-color);
+  color: var(--text-color);
   display: inline-block;
   font-size: 0.85em;
   font-weight: 700;
@@ -73,7 +73,7 @@
   font-size: 16px;
   line-height: 1.5;
 
-  color: var(--theme-text-color);
+  color: var(--text-color);
 }
 
 .shepherd-element {
@@ -89,7 +89,7 @@
   visibility: hidden;
   width: 100%;
 
-  background: var(--theme-bg-lightest) !important;
+  background: var(--bg-lightest) !important;
 
   .material-icons {
     vertical-align: middle;
@@ -100,7 +100,7 @@
   content: '';
   transform: rotate(45deg);
 
-  background: var(--theme-bg-lightest) !important;
+  background: var(--bg-lightest) !important;
 }
 
 .shepherd-footer button + button {
@@ -128,7 +128,7 @@
 }
 
 .shepherd-has-title .shepherd-content .shepherd-header {
-  background: var(--theme-bg-lighter);
+  background: var(--bg-lighter);
   padding: 1em;
 }
 
@@ -186,7 +186,7 @@
 
 .shepherd-element.shepherd-has-title[data-popper-placement^='bottom']
   > .shepherd-arrow:before {
-  background-color: var(--theme-bg-lighter);
+  background-color: var(--bg-lighter);
 }
 
 .shepherd-target-click-disabled.shepherd-enabled.shepherd-target,

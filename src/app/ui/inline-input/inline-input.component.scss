@@ -39,8 +39,8 @@ input {
   transform: translate(-50%, -50%) scaleX(0);
   opacity: 0;
   //transition: var(--transition-fast);
-  background: var(--theme-card-bg);
-  color: var(--theme-text-color);
+  background: var(--card-bg);
+  color: var(--text-color);
   padding: var(--s-half) var(--s-half);
   text-align: center;
   font-size: 14px;

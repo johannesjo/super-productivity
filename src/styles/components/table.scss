@@ -45,7 +45,7 @@ div.material-table {
   box-shadow: $this-table-shadow;
   font-size: 13px;
   white-space: nowrap;
-  background-color: var(--theme-card-bg);
+  background-color: var(--card-bg);
 
   &,
   * {
@@ -64,9 +64,9 @@ div.material-table {
   }
 
   .isDarkTheme & {
-    background: var(--theme-card-bg);
+    background: var(--card-bg);
     // NOTE: because we're on a lighter background
-    color: var(--theme-text-color);
+    color: var(--text-color);
   }
 
   .isDarkTheme &._no-elevation {
@@ -103,11 +103,11 @@ div.material-table {
     text-align: left;
 
     .isLightTheme & {
-      border-color: var(--theme-extra-border-color);
+      border-color: var(--extra-border-color);
     }
 
     .isDarkTheme & {
-      border-color: var(--theme-extra-border-color);
+      border-color: var(--extra-border-color);
     }
 
     &:first-of-type {

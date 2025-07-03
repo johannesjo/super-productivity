@@ -38,8 +38,8 @@
   background: transparent;
 
   border: 1px solid;
-  color: var(--theme-improvement-text);
-  border-color: var(--theme-improvement-border);
+  color: var(--improvement-text);
+  border-color: var(--improvement-border);
 
   &:active {
     box-shadow: var(--whiteframe-shadow-2dp);
@@ -62,7 +62,7 @@
     z-index: 1;
     transform-origin: center center;
 
-    color: var(--theme-improvement-button-text);
+    color: var(--improvement-button-text);
 
     &.dismiss {
       transform: translateX(-11px);

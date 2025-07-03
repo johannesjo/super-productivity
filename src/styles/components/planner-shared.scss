@@ -15,7 +15,7 @@
   @include mq(xs) {
     font-size: var(--planner-font-size);
   }
-  color: var(--theme-text-color-muted);
+  color: var(--text-color-muted);
 
   mat-icon {
     vertical-align: middle;

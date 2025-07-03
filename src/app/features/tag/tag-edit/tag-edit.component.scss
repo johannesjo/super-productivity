@@ -17,7 +17,7 @@
     width: 100%;
     box-shadow: none;
     border: none;
-    color: var(--theme-text-color);
+    color: var(--text-color);
     border-top: 1px solid transparent;
     border-bottom: 1px solid transparent;
     height: 40px;
@@ -27,7 +27,7 @@
     &:hover,
     &:focus {
       outline: none;
-      border-bottom-color: var(--theme-extra-border-color);
+      border-bottom-color: var(--extra-border-color);
     }
   }
 }

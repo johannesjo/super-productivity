@@ -70,7 +70,7 @@
   --color-warning: #ff9800;
   --color-danger: #f44336;
   --success-green: #4fa758;
-  --yellow: #fff400;
+  --sun-yellow: #fff400;
 
   // -----------------------------
   // Dark Theme Elevation Colors
@@ -303,11 +303,11 @@
   // -----------------------------
   // Common Alpha Values
   // -----------------------------
-  --theme-border-alpha: 0.12;
-  --theme-overlay-alpha: 0.1;
-  --theme-separator-alpha: 0.3;
-  --theme-muted-alpha: 0.6;
-  --theme-intense-alpha: 0.9;
+  --border-alpha: 0.12;
+  --overlay-alpha: 0.1;
+  --separator-alpha: 0.3;
+  --muted-alpha: 0.6;
+  --intense-alpha: 0.9;
 }
 
 // ===============================
@@ -319,42 +319,42 @@
 // -----------------------------
 body {
   // Background colors
-  --theme-bg: #f8f8f7;
-  --theme-bg-darker: rgb(235, 235, 235);
-  --theme-bg-drag-col: rgb(242, 242, 242);
-  --theme-bg-slightly-lighter: var(--theme-bg);
-  --theme-bg-lighter: var(--theme-bg);
-  --theme-bg-lightest: var(--theme-bg);
-  --theme-bg-super-light: var(--theme-bg);
-  --theme-card-bg: #ffffff;
-  --theme-sidebar-bg: var(--theme-bg);
+  --bg: #f8f8f7;
+  --bg-darker: rgb(235, 235, 235);
+  --bg-drag-col: rgb(242, 242, 242);
+  --bg-slightly-lighter: var(--bg);
+  --bg-lighter: var(--bg);
+  --bg-lightest: var(--bg);
+  --bg-super-light: var(--bg);
+  --card-bg: #ffffff;
+  --sidebar-bg: var(--bg);
 
   // Text colors
-  --theme-text-color: rgb(44, 44, 44);
-  --theme-text-color-less-intense: rgba(44, 44, 44, 0.9);
-  --theme-text-color-muted: rgba(44, 44, 44, 0.6);
-  --theme-text-color-more-intense: var(--theme-text-color);
-  --theme-text-color-most-intense: rgb(0, 0, 0);
+  --text-color: rgb(44, 44, 44);
+  --text-color-less-intense: rgba(44, 44, 44, 0.9);
+  --text-color-muted: rgba(44, 44, 44, 0.6);
+  --text-color-more-intense: var(--text-color);
+  --text-color-most-intense: rgb(0, 0, 0);
 
   // Selected task
-  --theme-selected-task-bg-color: #fff;
+  --selected-task-bg-color: #fff;
 
   // Borders and separators
-  --theme-extra-border-color: #dddddd;
-  --theme-separator-color: #d0d0d0;
-  --theme-divider-color: rgba(0, 0, 0, 0.12);
+  --extra-border-color: #dddddd;
+  --separator-color: #d0d0d0;
+  --divider-color: rgba(0, 0, 0, 0.12);
 
   // Backdrop
   --c-backdrop: var(--color-overlay-dark-60);
 
   // Note colors
   --standard-note-bg: #ffffff;
-  --standard-note-fg: var(--theme-text-color);
+  --standard-note-fg: var(--text-color);
   --standard-note-bg-hovered: var(--standard-note-bg);
 
   // Task colors
   --task-c-bg: #fff;
-  --task-c-selected-bg: var(--theme-selected-task-bg-color);
+  --task-c-selected-bg: var(--selected-task-bg-color);
   --sub-task-c-bg: var(--task-c-bg);
   --sub-task-c-bg-done: var(--task-c-bg);
   --task-c-bg-done: var(--task-c-bg);
@@ -367,63 +367,54 @@ body {
   --task-selected-shadow: var(--whiteframe-shadow-3dp);
 
   // Scrollbar colors
-  --theme-scrollbar-thumb: #888;
-  --theme-scrollbar-thumb-hover: #555;
-  --theme-scrollbar-track: #f1f1f1;
+  --scrollbar-thumb: #888;
+  --scrollbar-thumb-hover: #555;
+  --scrollbar-track: #f1f1f1;
 
   // Chip colors
-  --theme-chip-outline-color: rgba(125, 125, 125, 0.4);
+  --chip-outline-color: rgba(125, 125, 125, 0.4);
 
   // Progress circle
-  --theme-progress-bg: rgba(127, 127, 127, 0.2);
+  --progress-bg: rgba(127, 127, 127, 0.2);
 
   // Close button
-  --theme-close-btn-bg: var(--theme-bg-darker);
-  --theme-close-btn-border: var(--theme-divider-color);
+  --close-btn-bg: var(--bg-darker);
+  --close-btn-border: var(--divider-color);
 
   // Banner
-  --theme-banner-bg: var(--theme-card-bg);
+  --banner-bg: var(--card-bg);
 
   // Improvement banner
-  --theme-improvement-text: rgba(44, 44, 44, 1);
-  --theme-improvement-border: var(--color-overlay-light-33);
-  --theme-improvement-button-text: rgba(44, 44, 44, 1);
+  --improvement-text: rgba(44, 44, 44, 1);
+  --improvement-border: var(--color-overlay-light-33);
+  --improvement-button-text: rgba(44, 44, 44, 1);
 
   // Select/Options
-  --theme-select-hover-bg: var(--color-overlay-dark-10);
-  --theme-options-border-color: var(--color-overlay-dark-10);
+  --select-hover-bg: var(--color-overlay-dark-10);
+  --options-border-color: var(--color-overlay-dark-10);
 
   // Attachments
-  --theme-attachment-bg: var(--theme-card-bg);
-  --theme-attachment-border: var(--theme-extra-border-color);
-  --theme-attachment-control-bg: var(--color-overlay-light-40);
-  --theme-attachment-control-border: var(--color-overlay-light-50);
-  --theme-attachment-control-hover-bg: var(--color-overlay-light-90);
+  --attachment-bg: var(--card-bg);
+  --attachment-border: var(--extra-border-color);
+  --attachment-control-bg: var(--color-overlay-light-40);
+  --attachment-control-border: var(--color-overlay-light-50);
+  --attachment-control-hover-bg: var(--color-overlay-light-90);
 
   // Hover controls
-  --theme-hover-controls-border: 1px solid;
-  --theme-hover-controls-border-opacity: 0.5;
+  --hover-controls-border: 1px solid;
+  --hover-controls-border-opacity: 0.5;
 
   // Task detail item
-  --theme-task-detail-value-color: rgba(
+  --task-detail-value-color: rgba(
     var(--palette-foreground-secondary-text),
     var(--palette-foreground-secondary-text-alpha, 1)
   );
 
   // Grid colors
-  --theme-grid-color: #dadce0;
-
-  // Date-time picker colors
-  --owl-text-color-strong: var(--color-overlay-dark-90);
-  --owl-text-color: rgba(0, 0, 0, 0.75);
-  --owl-text-color-less-intense: var(--color-overlay-dark-50);
-  --owl-text-color-muted: rgba(0, 0, 0, 0.15);
-  --owl-light-selected-bg: rgb(238, 238, 238);
-  --owl-divider-color: rgba(0, 0, 0, 0.12);
-  --owl-inp-bg-color: rgba(0, 0, 0, 0.04);
+  --grid-color: #dadce0;
 
   // Special colors overrides for light theme
-  --yellow: #ffc107;
+  --sun-yellow: #ffc107;
 
   // Transition duration overrides for light theme
   --transition-duration-s: 180ms;
@@ -436,29 +427,29 @@ body {
 // -----------------------------
 body.isDarkTheme {
   // Background colors
-  --theme-bg: var(--dark0);
-  --theme-bg-darker: var(--dark0);
-  --theme-bg-slightly-lighter: var(--dark4);
-  --theme-bg-lighter: var(--dark12);
-  --theme-bg-lightest: var(--dark24);
-  --theme-bg-super-light: #616161;
-  --theme-card-bg: var(--dark2);
-  --theme-sidebar-bg: var(--dark8);
+  --bg: var(--dark0);
+  --bg-darker: var(--dark0);
+  --bg-slightly-lighter: var(--dark4);
+  --bg-lighter: var(--dark12);
+  --bg-lightest: var(--dark24);
+  --bg-super-light: #616161;
+  --card-bg: var(--dark2);
+  --sidebar-bg: var(--dark8);
 
   // Text colors
-  --theme-text-color: rgb(235, 235, 235);
-  --theme-text-color-less-intense: rgba(235, 235, 235, 0.9);
-  --theme-text-color-muted: rgba(235, 235, 235, 0.6);
-  --theme-text-color-more-intense: rgb(245, 245, 245);
-  --theme-text-color-most-intense: rgb(255, 255, 255);
+  --text-color: rgb(235, 235, 235);
+  --text-color-less-intense: rgba(235, 235, 235, 0.9);
+  --text-color-muted: rgba(235, 235, 235, 0.6);
+  --text-color-more-intense: rgb(245, 245, 245);
+  --text-color-most-intense: rgb(255, 255, 255);
 
   // Selected task
-  --theme-selected-task-bg-color: var(--dark6);
+  --selected-task-bg-color: var(--dark6);
 
   // Borders and separators
-  --theme-extra-border-color: rgba(255, 255, 255, 0.12);
-  --theme-separator-color: rgba(255, 255, 255, 0.1);
-  --theme-divider-color: rgba(255, 255, 255, 0.12);
+  --extra-border-color: rgba(255, 255, 255, 0.12);
+  --separator-color: rgba(255, 255, 255, 0.1);
+  --divider-color: rgba(255, 255, 255, 0.12);
 
   // Backdrop
   --c-backdrop: var(--color-overlay-dark-60);
@@ -483,52 +474,43 @@ body.isDarkTheme {
   --task-selected-shadow: var(--whiteframe-shadow-4dp);
 
   // Scrollbar colors
-  --theme-scrollbar-thumb: #333;
-  --theme-scrollbar-thumb-hover: #444;
-  --theme-scrollbar-track: #222;
+  --scrollbar-thumb: #333;
+  --scrollbar-thumb-hover: #444;
+  --scrollbar-track: #222;
 
   // Grid colors
-  --theme-grid-color: var(--color-overlay-light-10);
-
-  // Date-time picker colors
-  --owl-text-color-strong: var(--color-overlay-light-90);
-  --owl-text-color: rgba(255, 255, 255, 0.75);
-  --owl-text-color-less-intense: var(--color-overlay-light-50);
-  --owl-text-color-muted: rgba(255, 255, 255, 0.15);
-  --owl-light-selected-bg: rgba(49, 49, 49, 1);
-  --owl-divider-color: rgba(255, 255, 255, 0.12);
-  --owl-inp-bg-color: rgba(255, 255, 255, 0.08);
+  --grid-color: var(--color-overlay-light-10);
 
   // Chip colors
-  --theme-chip-outline-color: rgba(125, 125, 125, 0.4);
+  --chip-outline-color: rgba(125, 125, 125, 0.4);
 
   // Close button
-  --theme-close-btn-bg: var(--theme-bg-lightest);
-  --theme-close-btn-border: var(--theme-extra-border-color);
+  --close-btn-bg: var(--bg-lightest);
+  --close-btn-border: var(--extra-border-color);
 
   // Banner
-  --theme-banner-bg: var(--theme-bg-lightest);
+  --banner-bg: var(--bg-lightest);
 
   // Improvement banner
-  --theme-improvement-text: var(--theme-text-color-most-intense);
-  --theme-improvement-border: var(--color-overlay-light-33);
-  --theme-improvement-button-text: white;
+  --improvement-text: var(--text-color-most-intense);
+  --improvement-border: var(--color-overlay-light-33);
+  --improvement-button-text: white;
 
   // Select/Options
-  --theme-select-hover-bg: var(--color-overlay-light-10);
-  --theme-options-border-color: var(--color-overlay-light-10);
+  --select-hover-bg: var(--color-overlay-light-10);
+  --options-border-color: var(--color-overlay-light-10);
 
   // Attachments
-  --theme-attachment-bg: var(--theme-bg-lighter);
-  --theme-attachment-border: transparent;
-  --theme-attachment-control-bg: var(--color-overlay-dark-40);
-  --theme-attachment-control-border: var(--color-overlay-dark-50);
-  --theme-attachment-control-hover-bg: var(--color-overlay-dark-90);
+  --attachment-bg: var(--bg-lighter);
+  --attachment-border: transparent;
+  --attachment-control-bg: var(--color-overlay-dark-40);
+  --attachment-control-border: var(--color-overlay-dark-50);
+  --attachment-control-hover-bg: var(--color-overlay-dark-90);
 
   // Hover controls
-  --theme-hover-controls-border: none;
-  --theme-hover-controls-border-opacity: 0;
+  --hover-controls-border: none;
+  --hover-controls-border-opacity: 0;
 
   // Task detail item
-  --theme-task-detail-value-color: rgba(255, 255, 255, 0.7);
+  --task-detail-value-color: rgba(255, 255, 255, 0.7);
 }

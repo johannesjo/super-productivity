@@ -8,7 +8,7 @@
   flex-direction: row;
   padding-top: var(--s-quarter);
   padding-bottom: var(--s-quarter);
-  border: 1px solid var(--theme-separator-color);
+  border: 1px solid var(--separator-color);
   border-radius: var(--task-border-radius);
   opacity: 0.9;
   min-height: var(--planner-item-height);
@@ -19,7 +19,7 @@
     pointer-events: none !important;
   }
 
-  border-color: var(--theme-extra-border-color);
+  border-color: var(--extra-border-color);
 
   &:hover {
     border-color: var(--c-accent);

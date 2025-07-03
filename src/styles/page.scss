@@ -57,11 +57,11 @@ body {
   }
 
   &.isLightTheme {
-    color: var(--theme-text-color);
-    background: var(--theme-bg);
+    color: var(--text-color);
+    background: var(--bg);
 
     &.isDisableBackgroundGradient {
-      background: var(--theme-bg);
+      background: var(--bg);
       //&:before {
       //  display: block;
       //  opacity: .3;
@@ -75,17 +75,17 @@ body {
         180deg,
         mat-css-vars.mat-css-color(100, 1) 0%,
         mat-css-vars.mat-css-color(50, 1) 140px,
-        var(--theme-bg) 100%
+        var(--bg) 100%
       );
     }
   }
 
   &.isDarkTheme {
-    color: var(--theme-text-color);
-    background: var(--theme-bg);
+    color: var(--text-color);
+    background: var(--bg);
 
     &.isDisableBackgroundGradient {
-      background: var(--theme-bg);
+      background: var(--bg);
     }
 
     &:before {
@@ -176,12 +176,12 @@ img {
 * {
   --scrollbar-width: thin;
   --scrollbar-width-legacy: 4px;
-  --scrollbar-color-thumb: var(--theme-scrollbar-thumb);
-  --scrollbar-color-track: var(--theme-scrollbar-track);
+  --scrollbar-color-thumb: var(--scrollbar-thumb);
+  --scrollbar-color-track: var(--scrollbar-track);
 
   .isDarkTheme & {
-    --scrollbar-color-thumb: var(--theme-scrollbar-thumb);
-    --scrollbar-color-track: var(--theme-scrollbar-track);
+    --scrollbar-color-thumb: var(--scrollbar-thumb);
+    --scrollbar-color-track: var(--scrollbar-track);
   }
 
   /* Modern browsers with `scrollbar-*` support */

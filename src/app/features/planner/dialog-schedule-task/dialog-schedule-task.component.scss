@@ -61,7 +61,7 @@
 .form-ctrl-wrapper {
   margin: 0 16px;
   margin-top: 16px;
-  //border-top: 1px solid var(--theme-separator-color);
+  //border-top: 1px solid var(--separator-color);
 }
 
 .press-enter-msg {
@@ -77,7 +77,7 @@
   white-space: nowrap;
   transform: translateX(-50%);
 
-  background: var(--theme-bg-lighter);
+  background: var(--bg-lighter);
 }
 
 :host ::ng-deep mat-month-view .mat-calendar-body-today {
@@ -89,14 +89,14 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: var(--theme-text-color);
+    color: var(--text-color);
   }
 }
 
 .quick-access {
   display: flex;
   justify-content: space-evenly;
-  border-bottom: 1px solid var(--theme-extra-border-color);
+  border-bottom: 1px solid var(--extra-border-color);
   height: 48px;
 
   > button {
@@ -110,6 +110,6 @@
   }
 
   button + button {
-    border-left: 1px solid var(--theme-extra-border-color);
+    border-left: 1px solid var(--extra-border-color);
   }
 }

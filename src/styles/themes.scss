@@ -8,10 +8,10 @@
 @include mat-css-vars.init-material-css-vars();
 
 .bg-card {
-  background: var(--theme-card-bg);
+  background: var(--card-bg);
 
   .isDarkTheme & {
-    background: var(--theme-card-bg);
+    background: var(--card-bg);
   }
 }
 

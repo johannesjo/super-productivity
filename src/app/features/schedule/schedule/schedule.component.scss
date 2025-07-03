@@ -13,19 +13,19 @@ header {
   top: 0;
   left: 0;
   right: 0;
-  border-top: 1px solid var(--theme-extra-border-color);
-  border-bottom: 1px solid var(--theme-extra-border-color);
+  border-top: 1px solid var(--extra-border-color);
+  border-bottom: 1px solid var(--extra-border-color);
   box-shadow: var(--whiteframe-shadow-1dp);
   z-index: 10;
-  color: var(--theme-text-color);
-  background: var(--theme-bg-lighter);
+  color: var(--text-color);
+  background: var(--bg-lighter);
 }
 
 .main-controls {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-bottom: 1px solid var(--theme-extra-border-color);
+  border-bottom: 1px solid var(--extra-border-color);
 }
 
 .days {
@@ -42,7 +42,7 @@ header {
 .day {
   line-height: 32px;
   font-size: 18px;
-  border-left: 1px solid var(--theme-extra-border-color);
+  border-left: 1px solid var(--extra-border-color);
 
   @include mq(xs, max) {
     font-size: 14px;

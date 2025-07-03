@@ -13,8 +13,8 @@
         margin: 0;
         padding: 20px;
         /* Use injected CSS variables for theming */
-        background: var(--theme-bg, transparent);
-        color: var(--theme-text-color, #ccc);
+        background: var(--bg, transparent);
+        color: var(--text-color, #ccc);
       }
 
       h1 {
@@ -34,7 +34,7 @@
 
       .test-section {
         margin-bottom: 20px;
-        border-left: 2px solid var(--theme-divider-color, #666);
+        border-left: 2px solid var(--divider-color, #666);
         padding-left: 10px;
       }
 
@@ -46,16 +46,16 @@
 
       button {
         padding: 6px 12px;
-        border: 1px solid var(--theme-divider-color, #666);
-        background: var(--theme-card-bg, transparent);
-        color: var(--theme-text-color, #ccc);
+        border: 1px solid var(--divider-color, #666);
+        background: var(--card-bg, transparent);
+        color: var(--text-color, #ccc);
         font-size: 12px;
         font-family: monospace;
         cursor: pointer;
       }
 
       button:hover {
-        background: var(--theme-select-hover-bg, rgba(255, 255, 255, 0.1));
+        background: var(--select-hover-bg, rgba(255, 255, 255, 0.1));
         border-color: var(--c-primary, #999);
       }
 
@@ -72,14 +72,14 @@
       }
 
       .console {
-        background: var(--theme-card-bg, rgba(0, 0, 0, 0.3));
-        color: var(--theme-text-color, #ccc);
+        background: var(--card-bg, rgba(0, 0, 0, 0.3));
+        color: var(--text-color, #ccc);
         padding: 10px;
         font-size: 11px;
         max-height: 200px;
         overflow-y: auto;
         margin-top: 20px;
-        border: 1px solid var(--theme-divider-color, #333);
+        border: 1px solid var(--divider-color, #333);
       }
 
       .console-entry {
@@ -95,13 +95,13 @@
       }
 
       .console-entry.info {
-        color: var(--theme-text-color-muted, #999);
+        color: var(--text-color-muted, #999);
       }
 
       .api-info {
         margin-bottom: 20px;
         padding-bottom: 10px;
-        border-bottom: 1px solid var(--theme-divider-color, #333);
+        border-bottom: 1px solid var(--divider-color, #333);
       }
 
       .api-list {
@@ -113,9 +113,9 @@
 
       .api-item {
         padding: 4px 8px;
-        border: 1px solid var(--theme-divider-color, #444);
+        border: 1px solid var(--divider-color, #444);
         font-size: 11px;
-        color: var(--theme-text-color-muted, #999);
+        color: var(--text-color-muted, #999);
       }
     </style>
   </head>
@@ -526,47 +526,47 @@
               <div style="padding: 20px; font-family: monospace;">
                 <h3 style="margin: 0 0 15px 0;">Theme Variables</h3>
                 <table style="width: 100%; border-collapse: collapse;">
-                  <tr style="border-bottom: 1px solid var(--theme-divider-color, #333);">
+                  <tr style="border-bottom: 1px solid var(--divider-color, #333);">
                     <td style="padding: 8px;">Dark Theme</td>
                     <td style="padding: 8px; text-align: right;">${themeInfo.isDarkTheme ? 'Yes' : 'No'}</td>
                   </tr>
-                  <tr style="border-bottom: 1px solid var(--theme-divider-color, #333);">
+                  <tr style="border-bottom: 1px solid var(--divider-color, #333);">
                     <td style="padding: 8px;">Primary Color</td>
                     <td style="padding: 8px; text-align: right;">
-                      <span style="display: inline-block; width: 20px; height: 20px; background: ${themeInfo.primaryColor}; vertical-align: middle; margin-right: 8px; border: 1px solid var(--theme-divider-color, #333);"></span>
+                      <span style="display: inline-block; width: 20px; height: 20px; background: ${themeInfo.primaryColor}; vertical-align: middle; margin-right: 8px; border: 1px solid var(--divider-color, #333);"></span>
                       ${themeInfo.primaryColor}
                     </td>
                   </tr>
-                  <tr style="border-bottom: 1px solid var(--theme-divider-color, #333);">
+                  <tr style="border-bottom: 1px solid var(--divider-color, #333);">
                     <td style="padding: 8px;">Accent Color</td>
                     <td style="padding: 8px; text-align: right;">
-                      <span style="display: inline-block; width: 20px; height: 20px; background: ${themeInfo.accentColor}; vertical-align: middle; margin-right: 8px; border: 1px solid var(--theme-divider-color, #333);"></span>
+                      <span style="display: inline-block; width: 20px; height: 20px; background: ${themeInfo.accentColor}; vertical-align: middle; margin-right: 8px; border: 1px solid var(--divider-color, #333);"></span>
                       ${themeInfo.accentColor}
                     </td>
                   </tr>
-                  <tr style="border-bottom: 1px solid var(--theme-divider-color, #333);">
+                  <tr style="border-bottom: 1px solid var(--divider-color, #333);">
                     <td style="padding: 8px;">Warn Color</td>
                     <td style="padding: 8px; text-align: right;">
-                      <span style="display: inline-block; width: 20px; height: 20px; background: ${themeInfo.warnColor}; vertical-align: middle; margin-right: 8px; border: 1px solid var(--theme-divider-color, #333);"></span>
+                      <span style="display: inline-block; width: 20px; height: 20px; background: ${themeInfo.warnColor}; vertical-align: middle; margin-right: 8px; border: 1px solid var(--divider-color, #333);"></span>
                       ${themeInfo.warnColor}
                     </td>
                   </tr>
-                  <tr style="border-bottom: 1px solid var(--theme-divider-color, #333);">
+                  <tr style="border-bottom: 1px solid var(--divider-color, #333);">
                     <td style="padding: 8px;">Background</td>
                     <td style="padding: 8px; text-align: right;">
-                      <span style="display: inline-block; width: 20px; height: 20px; background: ${themeInfo.backgroundColor}; vertical-align: middle; margin-right: 8px; border: 1px solid var(--theme-divider-color, #333);"></span>
+                      <span style="display: inline-block; width: 20px; height: 20px; background: ${themeInfo.backgroundColor}; vertical-align: middle; margin-right: 8px; border: 1px solid var(--divider-color, #333);"></span>
                       ${themeInfo.backgroundColor}
                     </td>
                   </tr>
                   <tr>
                     <td style="padding: 8px;">Text Color</td>
                     <td style="padding: 8px; text-align: right;">
-                      <span style="display: inline-block; width: 20px; height: 20px; background: ${themeInfo.textColor}; vertical-align: middle; margin-right: 8px; border: 1px solid var(--theme-divider-color, #333);"></span>
+                      <span style="display: inline-block; width: 20px; height: 20px; background: ${themeInfo.textColor}; vertical-align: middle; margin-right: 8px; border: 1px solid var(--divider-color, #333);"></span>
                       ${themeInfo.textColor}
                     </td>
                   </tr>
                 </table>
-                <p style="margin-top: 15px; font-size: 12px; color: var(--theme-text-color-muted, #999);">
+                <p style="margin-top: 15px; font-size: 12px; color: var(--text-color-muted, #999);">
                   Plugins automatically receive all CSS variables from the host application, allowing seamless theme integration.
                 </p>
               </div>

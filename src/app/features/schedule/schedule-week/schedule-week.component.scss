@@ -37,14 +37,14 @@
   align-self: end;
   font-size: 80%;
   position: relative;
-  color: var(--theme-text-color-muted);
+  color: var(--text-color-muted);
   padding-right: 6px;
   line-height: 1.2;
   text-align: right;
 }
 
 .col {
-  border-left: 1px solid var(--theme-grid-color);
+  border-left: 1px solid var(--grid-color);
   grid-row: 1 / span var(--schedule-total-rows);
   grid-column: span 1;
 
@@ -55,7 +55,7 @@
 
 .row {
   grid-column: 2 / -1;
-  border-top: 1px solid var(--theme-grid-color);
+  border-top: 1px solid var(--grid-color);
   pointer-events: none;
 }
 
@@ -114,7 +114,7 @@
   border: 2px solid var(--c-warn);
   box-shadow: var(--whiteframe-shadow-6dp);
   border-radius: 4px;
-  background: var(--theme-bg);
+  background: var(--bg);
 
   @media (min-height: 1000px) {
     max-height: 200px;
@@ -149,15 +149,15 @@
 .work-end,
 .work-start {
   scroll-margin-top: 80px;
-  border-top: 2px dashed var(--theme-separator-color);
+  border-top: 2px dashed var(--separator-color);
   min-width: 100px;
   grid-column: 2 / -1;
   position: relative;
-  color: var(--theme-text-color);
+  color: var(--text-color);
 
   &:hover {
     z-index: 22;
-    border-color: var(--theme-text-color-most-intense);
+    border-color: var(--text-color-most-intense);
   }
 
   > div {
@@ -169,7 +169,7 @@
     line-height: 1;
     padding: 2px 8px;
     margin-bottom: -6px;
-    background: var(--theme-bg);
+    background: var(--bg);
   }
 
   .is-dragging & {

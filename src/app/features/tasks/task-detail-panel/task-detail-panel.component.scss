@@ -41,7 +41,7 @@ progress-bar {
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
 
-  background: var(--theme-card-bg);
+  background: var(--card-bg);
   //border-bottom: 1px solid var(--c-primary);
 
   @include mq(xs) {
@@ -58,7 +58,7 @@ progress-bar {
     padding-bottom: 4px;
     margin-top: 0;
 
-    color: var(--theme-text-color);
+    color: var(--text-color);
   }
 }
 
@@ -90,7 +90,7 @@ progress-bar {
   padding: var(--s);
   opacity: 0.5;
   text-align: center;
-  color: var(--theme-text-color-muted);
+  color: var(--text-color-muted);
 }
 
 .drag-over-msg {

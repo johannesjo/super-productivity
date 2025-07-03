@@ -9,7 +9,7 @@
   --mdc-chip-container-shape-radius: 4px !important;
   --mdc-chip-elevated-container-color: transparent !important;
   //--mdc-chip-outline-color: var(--mdc-chip-outline-color, var(--mat-sys-outline)) !important;
-  --mdc-chip-outline-color: var(--theme-chip-outline-color) !important;
+  --mdc-chip-outline-color: var(--chip-outline-color) !important;
   --mdc-chip-outline-width: 1px !important;
 }
 
@@ -182,7 +182,7 @@ mat-icon.mat-icon[svgicon] {
     cursor: grabbing !important;
   }
 
-  background: var(--theme-bg-lightest) !important;
+  background: var(--bg-lightest) !important;
 }
 
 .cdk-drag-placeholder {
@@ -218,7 +218,7 @@ mat-icon.mat-icon[svgicon] {
 }
 
 task.cdk-drag-preview .box {
-  background: var(--theme-bg-lightest) !important;
+  background: var(--bg-lightest) !important;
 }
 
 // MAT TOOLTIP

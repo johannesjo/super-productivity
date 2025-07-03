@@ -10,8 +10,8 @@
 
   background: var(--task-c-bg);
 
-  color: var(--theme-text-color);
-  border-color: var(--theme-extra-border-color);
+  color: var(--text-color);
+  border-color: var(--extra-border-color);
 
   &.isDone {
     opacity: 0.7;

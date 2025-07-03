@@ -13,8 +13,8 @@
   // NOTE: to be consistent with scheduled event
   margin-bottom: 6px;
 
-  color: var(--theme-text-color);
-  background: var(--theme-bg-lightest);
+  color: var(--text-color);
+  background: var(--bg-lightest);
 
   &.isEditMode {
     pointer-events: auto;

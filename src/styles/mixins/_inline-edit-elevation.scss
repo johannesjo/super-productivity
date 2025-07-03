@@ -1,15 +1,15 @@
 //$shadow-edit-on-click-light: 0 0 4px 0 var(--color-overlay-dark-80), var(--whiteframe-shadow-14dp);
-//$shadow-edit-on-click-dark: 0 0 4px 0 var(--theme-bg)-lightest, var(--whiteframe-shadow-14dp);
+//$shadow-edit-on-click-dark: 0 0 4px 0 var(--bg)-lightest, var(--whiteframe-shadow-14dp);
 $shadow-edit-on-click-dark: var(--whiteframe-shadow-15dp);
 $shadow-edit-on-click-light: var(--whiteframe-shadow-7dp);
 
 @mixin inlineEditElevation {
   border-radius: var(--card-border-radius);
-  background: var(--theme-card-bg);
+  background: var(--card-bg);
   box-shadow: var(--whiteframe-shadow-7dp);
-  color: var(--theme-text-color-most-intense);
+  color: var(--text-color-most-intense);
   border: 1px solid var(--c-accent);
-  //border: 1px solid var(--theme-extra-border-color);
+  //border: 1px solid var(--extra-border-color);
 
   @include darkTheme() {
     background: var(--dark24);

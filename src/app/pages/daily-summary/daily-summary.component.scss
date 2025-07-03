@@ -9,15 +9,15 @@ $summary-point-inner-margin: var(--s);
 
   ::ng-deep {
     .mat-mdc-tab .mdc-tab__text-label {
-      //color: var(--theme-text-color);
+      //color: var(--text-color);
       //font-weight: 300;
     }
   }
 
   ::ng-deep .mat-mdc-tab-list {
-    border-bottom: 1px solid var(--theme-separator-color);
+    border-bottom: 1px solid var(--separator-color);
 
-    border-color: var(--theme-separator-color);
+    border-color: var(--separator-color);
   }
 
   ::ng-deep .mat-mdc-tab-labels {
@@ -138,7 +138,7 @@ $summary-point-inner-margin: var(--s);
     height: $this-ico-size;
     display: block;
     font-size: $this-ico-size;
-    color: var(--yellow);
+    color: var(--sun-yellow);
     //transform-origin: center center;
     animation: success-animation-sun #{$this-ani-style};
     backface-visibility: hidden;
@@ -181,9 +181,9 @@ $summary-point-inner-margin: var(--s);
       overflow: visible !important;
       transition: var(--transition-standard);
 
-      //background: var(--theme-bg);
+      //background: var(--bg);
       //box-shadow: var(--whiteframe-shadow-1dp);
-      border: 1px solid var(--theme-extra-border-color);
+      border: 1px solid var(--extra-border-color);
 
       &,
       > * {

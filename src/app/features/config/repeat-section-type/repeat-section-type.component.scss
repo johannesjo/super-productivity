@@ -9,14 +9,14 @@
 .row {
   display: flex;
   margin-bottom: var(--s3);
-  border: 1px solid var(--theme-extra-border-color);
+  border: 1px solid var(--extra-border-color);
   padding: 8px;
   box-shadow: var(--whiteframe-shadow-2dp);
   border-radius: 8px;
   position: relative;
 
-  background: var(--theme-bg-slightly-lighter);
-  border-color: var(--theme-extra-border-color);
+  background: var(--bg-slightly-lighter);
+  border-color: var(--extra-border-color);
 
   @include mq(component) {
     margin-bottom: 0;

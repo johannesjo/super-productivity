@@ -40,22 +40,22 @@
   width: 100%;
   position: relative;
   border-radius: var(--card-border-radius);
-  background: var(--theme-bg);
+  background: var(--bg);
 
   // 58 overlay 53 normal
-  background-color: var(--theme-bg-lighter);
-  color: var(--theme-text-color-most-intense);
+  background-color: var(--bg-lighter);
+  color: var(--text-color-most-intense);
 
   &.isElevated {
-    background-color: var(--theme-bg-lightest);
-    color: var(--theme-text-color-most-intense);
+    background-color: var(--bg-lightest);
+    color: var(--text-color-most-intense);
   }
 
   .input-wrapper {
     position: relative;
     display: flex;
 
-    color: var(--theme-text-color-most-intense);
+    color: var(--text-color-most-intense);
   }
 
   input {
@@ -106,13 +106,13 @@
   padding: 0 var(--s2);
   height: var(--short-syntax-bar-height);
   line-height: var(--short-syntax-bar-height);
-  border-top: 1px dashed var(--theme-extra-border-color);
+  border-top: 1px dashed var(--extra-border-color);
   position: relative;
   z-index: 1;
   pointer-events: none;
 
-  border-color: var(--theme-extra-border-color);
-  color: var(--theme-text-color-muted);
+  border-color: var(--extra-border-color);
+  color: var(--text-color-muted);
 }
 
 .info-text {
@@ -124,7 +124,7 @@
   &.add-existing {
     font-weight: bold;
 
-    color: var(--theme-text-color);
+    color: var(--text-color);
   }
 
   > mat-icon {
@@ -133,8 +133,8 @@
 }
 
 .separator-box {
-  border-right: 1px dashed var(--theme-extra-border-color);
-  border-left: 1px dashed var(--theme-extra-border-color);
+  border-right: 1px dashed var(--extra-border-color);
+  border-left: 1px dashed var(--extra-border-color);
 
-  border-color: var(--theme-extra-border-color);
+  border-color: var(--extra-border-color);
 }

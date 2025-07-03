@@ -5,7 +5,7 @@
 .summary-table {
   width: 100%;
 
-  background: var(--theme-card-bg);
+  background: var(--card-bg);
 
   tr {
     height: 36px !important;
@@ -14,10 +14,10 @@
   td {
     text-align: center;
 
-    color: var(--theme-text-color-muted);
+    color: var(--text-color-muted);
 
     inline-input {
-      color: var(--theme-text-color);
+      color: var(--text-color);
     }
   }
 

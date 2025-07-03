@@ -36,7 +36,7 @@
 
     .box {
       @include lightTheme {
-        border-color: var(--theme-extra-border-color);
+        border-color: var(--extra-border-color);
         bottom: 0;
         top: -1px;
       }
@@ -83,8 +83,8 @@
     //border-color: $dark-theme-separator-color;
   }
   @include lightTheme {
-    background: var(--theme-card-bg);
-    border-color: var(--theme-extra-border-color);
+    background: var(--card-bg);
+    border-color: var(--extra-border-color);
     //border-color: $light-theme-separator-color;
   }
 }
@@ -94,11 +94,11 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
   &:hover,
   &:focus {
     :host-context(.isNoTouchOnly.isLightTheme) & {
-      background: var(--theme-bg-darker);
+      background: var(--bg-darker);
     }
 
     :host-context(.isNoTouchOnly.isDarkTheme) & {
-      background: var(--theme-bg-lightest);
+      background: var(--bg-lightest);
     }
   }
 }
@@ -143,7 +143,7 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
 .panel-content-wrapper {
   margin: 0 var(--s) var(--s);
   display: block;
-  color: var(--theme-text-color-less-intense);
+  color: var(--text-color-less-intense);
   &::ng-deep inline-markdown {
     &.isFocused {
       border-color: transparent;
@@ -156,11 +156,11 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
       transition: var(--transition-standard);
 
       @include lightTheme {
-        background: var(--theme-bg-lightest);
+        background: var(--bg-lightest);
         //border: 1px solid $light-theme-extra-border-color;
       }
       @include darkTheme() {
-        background: var(--theme-bg-lightest);
+        background: var(--bg-lightest);
         box-shadow: var(--whiteframe-shadow-1dp);
       }
     }
@@ -209,11 +209,11 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
     cursor: default;
   }
 
-  color: var(--theme-text-color);
+  color: var(--text-color);
 
   &.--estimate {
     progress-bar {
-      background: var(--theme-extra-border-color);
+      background: var(--extra-border-color);
     }
 
     &:hover progress-bar {
@@ -277,7 +277,7 @@ mat-expansion-panel::ng-deep .mat-expansion-panel-header:not(.mat-expanded),
   //  width: 32px;
   //}
 
-  color: var(--theme-task-detail-value-color);
+  color: var(--task-detail-value-color);
 
   > * {
     flex-grow: 1;

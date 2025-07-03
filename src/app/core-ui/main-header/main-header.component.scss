@@ -194,8 +194,8 @@ button.isActive2 {
     pointer-events: none;
     bottom: calc(var(--s) * -0.25);
 
-    background: var(--theme-bg-lighter);
-    color: var(--theme-text-color-most-intense);
+    background: var(--bg-lighter);
+    color: var(--text-color-most-intense);
   }
 
   .pomodoro-controls {
@@ -264,7 +264,7 @@ button.isActive2 {
     display: none;
   }
 
-  background: var(--theme-bg-lighter);
+  background: var(--bg-lighter);
 
   .title {
     max-width: 250px;
@@ -344,8 +344,8 @@ button.isActive2 {
 
     &::after {
       border-radius: 4px;
-      box-shadow: 0px -2px 3px 0px var(--theme-separator-alpha);
-      background: var(--theme-sidebar-bg);
+      box-shadow: 0px -2px 3px 0px var(--separator-alpha);
+      background: var(--sidebar-bg);
       content: '';
       width: 100%;
       position: absolute;
@@ -441,8 +441,8 @@ button.isActive2 {
   }
 
   @include darkTheme() {
-    background: var(--theme-bg-lighter);
-    color: var(--theme-text-color);
+    background: var(--bg-lighter);
+    color: var(--text-color);
 
     &:hover {
       background: var(--dark8);

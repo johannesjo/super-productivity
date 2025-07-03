@@ -50,7 +50,7 @@
         bottom: 0;
         z-index: -1;
 
-        background: var(--theme-select-hover-bg);
+        background: var(--select-hover-bg);
       }
     }
   }
@@ -126,7 +126,7 @@
   }
 
   tr:first-of-type td {
-    border: 1px solid var(--theme-extra-border-color);
+    border: 1px solid var(--extra-border-color);
   }
 
   th {
@@ -168,7 +168,7 @@
     top: 0;
     border: 1px solid;
 
-    border-color: var(--theme-options-border-color);
+    border-color: var(--options-border-color);
   }
 }
 

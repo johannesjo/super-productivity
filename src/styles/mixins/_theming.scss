@@ -41,42 +41,42 @@
 }
 
 @mixin standardThemeTextColor {
-  color: var(--theme-text-color);
+  color: var(--text-color);
 }
 
 @mixin standardThemeTextColorLessIntense {
-  color: var(--theme-text-color-less-intense);
+  color: var(--text-color-less-intense);
 }
 
 @mixin standardThemeTextColorMostIntense {
-  color: var(--theme-text-color-most-intense);
+  color: var(--text-color-most-intense);
 }
 
 @mixin extraBorder($sideSuffix: '') {
-  #{'border'+$sideSuffix}: 1px solid var(--theme-extra-border-color);
+  #{'border'+$sideSuffix}: 1px solid var(--extra-border-color);
 }
 
 // e.g. cards and tasks
 @mixin layerTextAndBgHigher {
-  color: var(--theme-text-color-less-intense);
-  background-color: var(--theme-bg-lighter);
+  color: var(--text-color-less-intense);
+  background-color: var(--bg-lighter);
 }
 
 // e.g. nested cards / tabs etc
 @mixin layerTextAndBgHighest {
   // NOTE: needs to be more intense than light color, because we have a lighter background
-  color: var(--theme-text-color-more-intense);
-  background-color: var(--theme-bg-lightest);
+  color: var(--text-color-more-intense);
+  background-color: var(--bg-lightest);
 }
 
 @mixin dividerBorderColor($border-width: 0 0 1px 0, $is-global: false) {
   border-style: solid;
   border-width: $border-width;
-  border-color: var(--theme-divider-color);
+  border-color: var(--divider-color);
 }
 
 @mixin flatBox($is-global: false) {
   border:
     1px,
-    $is-global solid var(--theme-divider-color);
+    $is-global solid var(--divider-color);
 }

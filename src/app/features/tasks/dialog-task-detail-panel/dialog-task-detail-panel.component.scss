@@ -8,8 +8,8 @@
     max-height: 75vh;
     min-width: 340px;
 
-    background: var(--theme-bg-lightest) !important;
-    border: 4px solid var(--theme-bg-lightest);
+    background: var(--bg-lightest) !important;
+    border: 4px solid var(--bg-lightest);
 
     @include mq(xxxs) {
       min-width: 380px;

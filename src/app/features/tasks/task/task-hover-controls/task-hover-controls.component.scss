@@ -13,13 +13,13 @@
 
   &:before {
     content: '';
-    border-left: var(--theme-hover-controls-border);
+    border-left: var(--hover-controls-border);
     width: 1px;
     height: 90%;
     position: absolute;
     left: 0;
     top: 5%;
-    opacity: var(--theme-hover-controls-border-opacity);
+    opacity: var(--hover-controls-border-opacity);
 
     :host-context([dir='rtl']) & {
       right: 0;

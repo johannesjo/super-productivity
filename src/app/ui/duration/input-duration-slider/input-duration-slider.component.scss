@@ -37,7 +37,7 @@ $this-dot-size: 14px;
   -webkit-user-select: none; /* Safari */
   width: $this-size + $this-margin * 2;
   min-width: $this-size + $this-margin * 2;
-  color: var(--theme-text-color);
+  color: var(--text-color);
   &.is-dragging .circle {
     cursor: grabbing;
   }
@@ -84,7 +84,7 @@ $this-dot-size: 14px;
     left: $this-circle-width;
     bottom: $this-circle-width;
     border-radius: 100%;
-    background: var(--theme-bg-darker);
+    background: var(--bg-darker);
     border-color: transparent;
   }
 
@@ -101,7 +101,7 @@ $this-dot-size: 14px;
   }
 
   .dot {
-    box-shadow: 1px 1px 1px var(--theme-separator-alpha);
+    box-shadow: 1px 1px 1px var(--separator-alpha);
     height: 8px;
     width: 8px;
     border-radius: 100%;
@@ -148,7 +148,7 @@ $this-stroke-width: 4px;
 
   // actual handle
   &:after {
-    box-shadow: 1px 1px 2px var(--theme-separator-alpha);
+    box-shadow: 1px 1px 2px var(--separator-alpha);
     content: '';
     top: -$this-handle-size * 0.5 + $this-circle-width * 0.5;
     background: $this-handle-color;
@@ -195,8 +195,8 @@ $this-stroke-width: 4px;
   border-bottom-right-radius: 20px;
   background-color: transparent;
 
-  caret-color: var(--theme-text-color-most-intense);
-  color: var(--theme-text-color-most-intense);
+  caret-color: var(--text-color-most-intense);
+  color: var(--text-color-most-intense);
 
   &:focus {
     @include inlineEditElevation();

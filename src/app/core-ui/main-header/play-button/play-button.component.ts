@@ -209,8 +209,8 @@ import { Subscription } from 'rxjs';
           z-index: 4;
           pointer-events: none;
           bottom: calc(var(--s) * -0.25);
-          background: var(--theme-bg-lighter);
-          color: var(--theme-text-color-most-intense);
+          background: var(--bg-lighter);
+          color: var(--text-color-most-intense);
         }
 
         .pomodoro-controls {
@@ -273,7 +273,7 @@ import { Subscription } from 'rxjs';
         pointer-events: none;
         transition: var(--transition-standard);
         display: flex;
-        background: var(--theme-bg-lighter);
+        background: var(--bg-lighter);
 
         @media (max-width: 599px) {
           display: none;

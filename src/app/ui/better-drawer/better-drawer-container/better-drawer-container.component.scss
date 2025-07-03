@@ -35,7 +35,7 @@ $z-this-backdrop: calc(var(--z-task-side-bar-over) - 1);
   //border: 1px solid;
   //border-right: 0;
   //border-bottom: 0;
-  //box-shadow: 0px 8px 10px -5px var(--color-overlay-dark-20), 0px 16px 24px 2px rgba(0, 0, 0, 0.14), 0px 6px 30px 5px var(--theme-divider-color) !important;
+  //box-shadow: 0px 8px 10px -5px var(--color-overlay-dark-20), 0px 16px 24px 2px rgba(0, 0, 0, 0.14), 0px 6px 30px 5px var(--divider-color) !important;
 
   @include mq(sm, max) {
     // NOTE: prevents overlapping with nav when open
@@ -46,8 +46,8 @@ $z-this-backdrop: calc(var(--z-task-side-bar-over) - 1);
     max-width: 100%;
   }
 
-  background: var(--theme-selected-task-bg-color);
-  //border-color: var(--theme-extra-border-color);
+  background: var(--selected-task-bg-color);
+  //border-color: var(--extra-border-color);
 
   :host.isOver & {
     position: fixed;
@@ -115,12 +115,12 @@ $z-this-backdrop: calc(var(--z-task-side-bar-over) - 1);
     outline: none;
   }
 
-  color: var(--theme-text-color);
-  background: var(--theme-bg-lightest);
-  border-color: var(--theme-extra-border-color);
+  color: var(--text-color);
+  background: var(--bg-lightest);
+  border-color: var(--extra-border-color);
 
   @include mq(xs) {
-    background: var(--theme-bg-slightly-lighter);
+    background: var(--bg-slightly-lighter);
   }
 
   :host.isOver.isOpen & {

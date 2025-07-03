@@ -74,7 +74,7 @@ h2 {
   margin-top: var(--s2);
   //text-align: left;
   font-size: 16px;
-  //border-bottom: 1px solid var(--theme-extra-border-color);
+  //border-bottom: 1px solid var(--extra-border-color);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -292,7 +292,7 @@ h2 {
     color: #333;
 
     @include darkTheme() {
-      color: var(--theme-text-color-most-intense);
+      color: var(--text-color-most-intense);
       font-weight: 500;
       text-shadow:
         0 0 2px black,

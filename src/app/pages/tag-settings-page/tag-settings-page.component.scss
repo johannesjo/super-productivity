@@ -5,13 +5,13 @@
 }
 
 .config-section {
-  border: 1px solid var(--theme-divider-color);
+  border: 1px solid var(--divider-color);
   break-inside: avoid;
   margin-bottom: 10px;
   border-radius: var(--card-border-radius);
-  background: var(--theme-card-bg);
+  background: var(--card-bg);
 
-  background-color: var(--theme-card-bg);
+  background-color: var(--card-bg);
 
   .md-title {
     margin-top: 0;
@@ -24,7 +24,7 @@
   ::ng-deep .isExpanded .collapsible-header {
     font-weight: bold;
 
-    border-color: var(--theme-extra-border-color);
+    border-color: var(--extra-border-color);
   }
 }
 

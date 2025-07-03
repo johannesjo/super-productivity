@@ -1,14 +1,14 @@
 .mention-menu {
   box-shadow: var(--whiteframe-shadow-4dp);
 
-  background: var(--theme-bg-lightest) !important;
+  background: var(--bg-lightest) !important;
 }
 
 .mention-item {
-  color: var(--theme-text-color) !important;
+  color: var(--text-color) !important;
 }
 
 .mention-active > a {
   background: var(--c-primary) !important;
-  color: var(--theme-text-color-most-intense) !important;
+  color: var(--text-color-most-intense) !important;
 }

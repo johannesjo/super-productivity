@@ -17,8 +17,8 @@
 .content {
   flex-grow: 1;
   position: relative;
-  color: var(--theme-text-color-more-intense);
-  background-color: var(--theme-bg-lightest);
+  color: var(--text-color-more-intense);
+  background-color: var(--bg-lightest);
   textarea,
   .markdown-preview {
     position: absolute;
@@ -62,7 +62,7 @@
       left: 50%;
       border-left: 2px solid;
 
-      border-color: var(--theme-extra-border-color);
+      border-color: var(--extra-border-color);
     }
   }
 }

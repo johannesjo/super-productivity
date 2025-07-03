@@ -21,7 +21,7 @@
   border: 1px solid transparent;
   transition: var(--transition-leave);
 
-  caret-color: var(--theme-text-color-most-intense);
+  caret-color: var(--text-color-most-intense);
 
   &:focus {
     outline: none !important;
@@ -63,7 +63,7 @@
     outline: none;
     // NOTE: needed to overwrite color for current task
 
-    color: var(--theme-text-color-most-intense);
+    color: var(--text-color-most-intense);
   }
 }
 

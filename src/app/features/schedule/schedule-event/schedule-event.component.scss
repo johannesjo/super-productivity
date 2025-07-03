@@ -17,13 +17,13 @@
   display: flex;
   align-items: flex-start;
   margin-bottom: var(--margin-bottom);
-  border: 1px solid var(--theme-separator-color);
+  border: 1px solid var(--separator-color);
   //box-shadow: var(--whiteframe-shadow-1dp);
-  background: var(--theme-card-bg);
-  color: var(--theme-text-color);
+  background: var(--card-bg);
+  color: var(--text-color);
   position: relative;
   z-index: 2;
-  border-left: 3px solid var(--project-color, var(--theme-separator-color));
+  border-left: 3px solid var(--project-color, var(--separator-color));
   user-select: none;
   // has to be for after elements
   overflow: visible !important;
@@ -133,8 +133,8 @@
     border-style: dashed;
     border-left-style: solid;
 
-    //border-color: var(--theme-separator-color);
-    background: var(--theme-bg-lighter);
+    //border-color: var(--separator-color);
+    background: var(--bg-lighter);
 
     > * {
       opacity: 0.7;
@@ -145,7 +145,7 @@
 :host.CalendarEvent {
   border-left-width: 1px;
 
-  border-left-color: var(--theme-extra-border-color);
+  border-left-color: var(--extra-border-color);
 }
 
 :host-context(.is-not-dragging) :host.CalendarEvent:hover {
@@ -209,7 +209,7 @@
     }
 
     .time-badge {
-      color: var(--theme-text-color);
+      color: var(--text-color);
       border-color: var(--c-primary);
       //color: var(--c-primary);
     }
@@ -231,7 +231,7 @@
   height: 13px;
   text-align: center;
   padding: 1px;
-  border: 1px solid var(--theme-extra-border-color);
+  border: 1px solid var(--extra-border-color);
   border-radius: var(--card-border-radius);
 
   @include mq(xs, max) {
@@ -239,9 +239,9 @@
     height: 11px;
   }
 
-  color: var(--theme-text-color);
-  border-color: var(--theme-extra-border-color);
-  background: var(--theme-bg-lighter);
+  color: var(--text-color);
+  border-color: var(--extra-border-color);
+  background: var(--bg-lighter);
 
   :host.very-short-event & {
     //bottom: 4px
@@ -319,13 +319,13 @@
   min-width: 14px;
   width: auto;
   font-weight: 900;
-  border: 1px solid var(--theme-text-color-muted);
+  border: 1px solid var(--text-color-muted);
   border-top-width: 3px;
   border-radius: 2px;
   position: relative;
 
-  color: var(--theme-text-color-muted);
-  border-color: var(--theme-text-color-muted);
+  color: var(--text-color-muted);
+  border-color: var(--text-color-muted);
 
   @include mq(xs, max) {
     border-radius: 1px;
@@ -396,7 +396,7 @@
   :host.SplitTaskPlannedForDay,
   :host.Task,
   :host.SplitTask {
-    background: var(--theme-bg-lightest);
+    background: var(--bg-lightest);
   }
 }
 

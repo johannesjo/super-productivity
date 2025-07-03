@@ -101,7 +101,7 @@ section {
   position: relative;
 
   &:after {
-    border-bottom: 1px solid var(--theme-divider-color);
+    border-bottom: 1px solid var(--divider-color);
     content: '';
     position: absolute;
     left: var(--s2);

@@ -23,9 +23,9 @@
   display: flex;
   margin-bottom: var(--s);
   padding-top: var(--s);
-  border-top: 1px dashed var(--theme-extra-border-color);
+  border-top: 1px dashed var(--extra-border-color);
 
-  border-color: var(--theme-extra-border-color);
+  border-color: var(--extra-border-color);
 
   &.isLastComment {
     border-top: 0 !important;
@@ -54,7 +54,7 @@
 
   pre {
     overflow: auto;
-    border: 1px dashed var(--theme-extra-border-color);
+    border: 1px dashed var(--extra-border-color);
     padding: var(--s);
   }
 }

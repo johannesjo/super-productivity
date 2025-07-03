@@ -59,12 +59,12 @@
 //       spyOn(window, 'getComputedStyle').and.returnValue({
 //         getPropertyValue: (prop: string) => {
 //           const values: { [key: string]: string } = {
-//             '--theme-bg': '#ffffff',
-//             '--theme-text-color': '#000000',
-//             '--theme-card-bg': '#f5f5f5',
-//             '--theme-divider-color': '#e0e0e0',
-//             '--theme-select-hover-bg': '#eeeeee',
-//             '--theme-text-color-muted': '#666666',
+//             '--bg': '#ffffff',
+//             '--text-color': '#000000',
+//             '--card-bg': '#f5f5f5',
+//             '--divider-color': '#e0e0e0',
+//             '--select-hover-bg': '#eeeeee',
+//             '--text-color-muted': '#666666',
 //             '--c-primary': '#2196f3',
 //             '--c-accent': '#ff4081',
 //             '--c-warn': '#f44336',
@@ -72,13 +72,13 @@
 //             '--color-danger': '#f44336',
 //             '--color-warning': '#ff9800',
 //             '--is-rtl': '0',
-//             '--theme-primary-bg': '#e3f2fd',
-//             '--theme-primary-color': '#1976d2',
-//             '--theme-link-color': '#2196f3',
-//             '--theme-border-radius': '4px',
-//             '--theme-transition': '0.3s ease',
+//             '--primary-bg': '#e3f2fd',
+//             '--primary-color': '#1976d2',
+//             '--link-color': '#2196f3',
+//             '--border-radius': '4px',
+//             '--transition': '0.3s ease',
 //             '--font-family': 'Roboto, sans-serif',
-//             '--theme-error-color': '#f44336',
+//             '--error-color': '#f44336',
 //           };
 //           // eslint-enable @typescript-eslint/naming-convention
 //           return values[prop] || '';
@@ -91,12 +91,12 @@
 //
 //       const css = createPluginCssInjection();
 //
-//       expect(css).toContain('--theme-bg: #ffffff');
-//       expect(css).toContain('--theme-text-color: #000000');
+//       expect(css).toContain('--bg: #ffffff');
+//       expect(css).toContain('--text-color: #000000');
 //       expect(css).toContain('--is-dark-theme: 0');
 //       expect(css).toContain('background: transparent');
-//       expect(css).toContain('--theme-primary-bg: #e3f2fd');
-//       expect(css).toContain('--theme-link-color: #2196f3');
+//       expect(css).toContain('--primary-bg: #e3f2fd');
+//       expect(css).toContain('--link-color: #2196f3');
 //       expect(css).toContain('font-family: Roboto, sans-serif');
 //     });
 //
@@ -115,12 +115,12 @@
 //
 //       // Check for all CSS variables
 //       const expectedVars = [
-//         '--theme-bg',
-//         '--theme-text-color',
-//         '--theme-card-bg',
-//         '--theme-divider-color',
-//         '--theme-select-hover-bg',
-//         '--theme-text-color-muted',
+//         '--bg',
+//         '--text-color',
+//         '--card-bg',
+//         '--divider-color',
+//         '--select-hover-bg',
+//         '--text-color-muted',
 //         '--c-primary',
 //         '--c-accent',
 //         '--c-warn',
@@ -128,13 +128,13 @@
 //         '--color-danger',
 //         '--color-warning',
 //         '--is-rtl',
-//         '--theme-primary-bg',
-//         '--theme-primary-color',
-//         '--theme-link-color',
-//         '--theme-border-radius',
-//         '--theme-transition',
+//         '--primary-bg',
+//         '--primary-color',
+//         '--link-color',
+//         '--border-radius',
+//         '--transition',
 //         '--font-family',
-//         '--theme-error-color',
+//         '--error-color',
 //         '--is-dark-theme',
 //       ];
 //
@@ -151,7 +151,7 @@
 //       expect(css).toContain('padding: 8px');
 //       expect(css).toContain('background: transparent');
 //       expect(css).toContain('font-family: Roboto, sans-serif');
-//       expect(css).toContain('color: var(--theme-text-color)');
+//       expect(css).toContain('color: var(--text-color)');
 //     });
 //   });
 //

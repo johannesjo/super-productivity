@@ -105,7 +105,7 @@ $z-this-side: calc(#{$z-this-content} + 2);
   z-index: 2;
   display: flex;
 
-  background: var(--theme-bg-darker);
+  background: var(--bg-darker);
 }
 
 .close-btn {
@@ -138,10 +138,10 @@ $z-this-side: calc(#{$z-this-content} + 2);
     outline: none;
   }
 
-  color: var(--theme-text-color);
-  background: var(--theme-close-btn-bg);
-  border-color: var(--theme-close-btn-border);
+  color: var(--text-color);
+  background: var(--close-btn-bg);
+  border-color: var(--close-btn-border);
   @include mq(xs) {
-    background: var(--theme-bg-slightly-lighter);
+    background: var(--bg-slightly-lighter);
   }
 }

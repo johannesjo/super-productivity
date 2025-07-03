@@ -6,12 +6,12 @@
 // NOTE: needs to come first to be overwritten by :host.isCurrent
 // NOTE: needs to be very light, because we're on a lighter background for the dark theme
 :host-context(.isDarkTheme) {
-  color: var(--theme-text-color);
+  color: var(--text-color);
 }
 
 :host-context(.isDarkTheme).isSelected,
 :host-context(.isDarkTheme).isCurrent {
-  color: var(--theme-text-color-most-intense);
+  color: var(--text-color-most-intense);
 }
 
 :host {
@@ -23,7 +23,7 @@
   display: block;
   position: relative;
 
-  color: var(--theme-text-color);
+  color: var(--text-color);
 
   &.isSelected {
     z-index: var(--z-is-selected-host);
@@ -195,7 +195,7 @@
 
   ::ng-deep .box {
     @include lightTheme {
-      border-color: var(--theme-extra-border-color);
+      border-color: var(--extra-border-color);
       bottom: 0;
       top: -1px;
     }
@@ -849,7 +849,7 @@ progress-bar {
   line-height: 1;
   text-align: center;
   padding: 1px 2px 0;
-  border: 1px solid var(--theme-extra-border-color);
+  border: 1px solid var(--extra-border-color);
   border-radius: var(--card-border-radius);
   white-space: nowrap;
   background: #fff;
@@ -858,8 +858,8 @@ progress-bar {
   pointer-events: none;
 
   @include darkTheme() {
-    border-color: var(--theme-extra-border-color);
-    background: var(--theme-bg-lighter);
+    border-color: var(--extra-border-color);
+    background: var(--bg-lighter);
   }
 
   ::ng-deep span {

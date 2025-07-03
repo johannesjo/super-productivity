@@ -32,7 +32,7 @@
 .quick-access {
   display: flex;
   justify-content: space-evenly;
-  border-bottom: 1px solid var(--theme-extra-border-color);
+  border-bottom: 1px solid var(--extra-border-color);
   height: 48px;
 
   > button {
@@ -47,7 +47,7 @@
   }
 
   button + button {
-    border-left: 1px solid var(--theme-extra-border-color) !important;
+    border-left: 1px solid var(--extra-border-color) !important;
   }
 }
 

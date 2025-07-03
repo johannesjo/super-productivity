@@ -2,7 +2,7 @@
 
 :host {
   //border: 1px solid var(--color-overlay-light-20);
-  border: 1px solid var(--theme-extra-border-color);
+  border: 1px solid var(--extra-border-color);
   border-radius: 8px;
   min-height: 200px;
   min-width: 280px;
@@ -18,7 +18,7 @@
     min-height: 300px;
   }
 
-  border-color: var(--theme-extra-border-color);
+  border-color: var(--extra-border-color);
 
   planner-task {
     margin-bottom: 8px;
@@ -78,7 +78,7 @@ header {
   border-radius: 8px;
   min-height: 100px;
   flex-grow: 1;
-  //border-color: var(--theme-extra-border-color);
+  //border-color: var(--extra-border-color);
 }
 
 .empty {
@@ -117,15 +117,15 @@ header {
   line-height: 1;
   text-align: center;
   padding: 1px 2px 0;
-  border: 1px solid var(--theme-extra-border-color);
+  border: 1px solid var(--extra-border-color);
   border-radius: var(--card-border-radius);
   white-space: nowrap;
 
   // avoid affecting drag handle
   pointer-events: none;
 
-  border-color: var(--theme-extra-border-color);
-  background: var(--theme-bg-lighter);
+  border-color: var(--extra-border-color);
+  background: var(--bg-lighter);
 
   ::ng-deep span {
     font-size: 10px;

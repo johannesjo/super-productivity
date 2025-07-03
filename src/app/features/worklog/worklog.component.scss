@@ -9,7 +9,7 @@
 }
 
 .year {
-  border-top: 1px dashed var(--theme-separator-color);
+  border-top: 1px dashed var(--separator-color);
 
   &-title {
     margin-top: var(--s3);
@@ -25,7 +25,7 @@
 .month {
   margin-top: calc(3 * var(--s));
   margin-bottom: 0;
-  border-top: 1px dashed var(--theme-separator-color);
+  border-top: 1px dashed var(--separator-color);
   padding-top: var(--s2);
 
   &-title {
@@ -123,10 +123,10 @@
           > td {
             // bold without respacing
             text-shadow: 0.01px 0 0.01px;
-            background: var(--theme-card-bg);
+            background: var(--card-bg);
             box-shadow: var(--whiteframe-shadow-2dp);
 
-            background-color: var(--theme-bg-lighter);
+            background-color: var(--bg-lighter);
           }
         }
       }

@@ -28,9 +28,9 @@
   position: relative;
   overflow: hidden;
 
-  color: var(--theme-text-color-less-intense);
-  background-color: var(--theme-attachment-bg);
-  border: 1px solid var(--theme-attachment-border);
+  color: var(--text-color-less-intense);
+  background-color: var(--attachment-bg);
+  border: 1px solid var(--attachment-border);
 
   //.controls,
   > a:focus + .controls,
@@ -125,10 +125,10 @@
     opacity: 0;
     border-width: 0;
 
-    background: var(--theme-attachment-control-bg);
-    border-color: var(--theme-attachment-control-border);
+    background: var(--attachment-control-bg);
+    border-color: var(--attachment-control-border);
     &:hover {
-      background: var(--theme-attachment-control-hover-bg);
+      background: var(--attachment-control-hover-bg);
     }
   }
 }
@@ -210,7 +210,7 @@
     background: var(--c-warn) !important;
 
     mat-icon {
-      color: var(--theme-card-bg) !important;
+      color: var(--card-bg) !important;
     }
   }
 

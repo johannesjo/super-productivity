@@ -27,7 +27,7 @@
 }
 
 // Helper to create CSS variable with fallback
-// Usage: @include css-var(color, --theme-text-color, var(--theme-text-color-most-intense));
+// Usage: @include css-var(color, --text-color, var(--text-color-most-intense));
 @mixin css-var($property, $var, $fallback: null) {
   @if $fallback {
     #{$property}: var(#{$var}, #{$fallback});
@@ -37,7 +37,7 @@
 }
 
 // Helper to define CSS variables with light/dark theme support
-// Usage: @include theme-var(--my-color, var(--theme-text-color-most-intense), var(--theme-card-bg));
+// Usage: @include theme-var(--my-color, var(--text-color-most-intense), var(--card-bg));
 @mixin theme-var($var-name, $light-value, $dark-value) {
   body {
     #{$var-name}: #{$light-value};
@@ -49,7 +49,7 @@
 }
 
 // Helper to convert RGBA with opacity to CSS variables
-// Usage: @include rgba-var(border-color, --theme-text-color-rgb, 0.5);
+// Usage: @include rgba-var(border-color, --text-color-rgb, 0.5);
 @mixin rgba-var($property, $rgb-var, $opacity) {
   #{$property}: rgba(var(#{$rgb-var}), #{$opacity});
 }

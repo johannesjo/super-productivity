@@ -7,7 +7,7 @@
   grid-template-rows: auto repeat(var(--nr-of-weeks), 1fr);
   gap: 1px;
   height: calc(100vh - 120px);
-  background: var(--theme-grid-color);
+  background: var(--grid-color);
 
   .cdk-drag-dragging {
     z-index: 1000;
@@ -23,9 +23,9 @@
   text-align: center;
   font-weight: 600;
   padding: 6px;
-  background: var(--theme-bg);
-  color: var(--theme-text-color);
-  border: 1px solid var(--theme-grid-color);
+  background: var(--bg);
+  color: var(--text-color);
+  border: 1px solid var(--grid-color);
   grid-row: 1;
 
   @include mq(xs, max) {
@@ -57,8 +57,8 @@
 }
 
 .month-day-cell {
-  background: var(--theme-bg);
-  border: 1px solid var(--theme-grid-color);
+  background: var(--bg);
+  border: 1px solid var(--grid-color);
   display: flex;
   flex-direction: column;
   min-height: 80px;
@@ -105,7 +105,7 @@
 
   &.other-month {
     opacity: 0.4;
-    background: var(--theme-bg-lighter);
+    background: var(--bg-lighter);
   }
 
   &.today {
@@ -129,7 +129,7 @@
 
   // Hover effect
   &:hover {
-    background: var(--theme-bg-lighter);
+    background: var(--bg-lighter);
   }
 
   // Drag over effect
@@ -144,7 +144,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--theme-grid-color);
+  border-bottom: 1px solid var(--grid-color);
 
   @include mq(xs, max) {
     padding: 4px;

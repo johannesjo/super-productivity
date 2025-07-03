@@ -34,16 +34,16 @@ export const createPluginCssInjection = (): string => {
   return `
     <style id="injected-theme-vars">
       :root {
-        --theme-bg: ${getVar('--theme-bg')};
-        --theme-bg-darker: ${getVar('--theme-bg-darker')};
-        --theme-text-color: ${getVar('--theme-text-color')};
-        --theme-text-color-less-intense: ${getVar('--theme-text-color-less-intense')};
-        --theme-text-color-muted: ${getVar('--theme-text-color-muted')};
-        --theme-card-bg: ${getVar('--theme-card-bg')};
-        --theme-divider-color: ${getVar('--theme-divider-color')};
-        --theme-extra-border-color: ${getVar('--theme-extra-border-color')};
-        --theme-select-hover-bg: ${getVar('--theme-select-hover-bg')};
-        --theme-text-color-muted: ${getVar('--theme-text-color-muted')};
+        --bg: ${getVar('--bg')};
+        --bg-darker: ${getVar('--bg-darker')};
+        --text-color: ${getVar('--text-color')};
+        --text-color-less-intense: ${getVar('--text-color-less-intense')};
+        --text-color-muted: ${getVar('--text-color-muted')};
+        --card-bg: ${getVar('--card-bg')};
+        --divider-color: ${getVar('--divider-color')};
+        --extra-border-color: ${getVar('--extra-border-color')};
+        --select-hover-bg: ${getVar('--select-hover-bg')};
+        --text-color-muted: ${getVar('--text-color-muted')};
         --c-primary: ${getVar('--c-primary')};
         --c-accent: ${getVar('--c-accent')};
         --c-warn: ${getVar('--c-warn')};
@@ -51,42 +51,42 @@ export const createPluginCssInjection = (): string => {
         --color-danger: ${getVar('--color-danger')};
         --color-warning: ${getVar('--color-warning')};
         --is-dark-theme: ${isDarkTheme ? '1' : '0'};
-        --theme-scrollbar-thumb: ${getVar('--theme-scrollbar-thumb')};
-        --theme-scrollbar-thumb-hover: ${getVar('--theme-scrollbar-thumb-hover')};
-        --theme-scrollbar-track: ${getVar('--theme-scrollbar-track')};
+        --scrollbar-thumb: ${getVar('--scrollbar-thumb')};
+        --scrollbar-thumb-hover: ${getVar('--scrollbar-thumb-hover')};
+        --scrollbar-track: ${getVar('--scrollbar-track')};
       }
 
       body {
         background: transparent;
-        color: var(--theme-text-color);
+        color: var(--text-color);
       }
-      
+
       /* Custom scrollbar styles for plugins */
       :root {
-        scrollbar-color: var(--theme-scrollbar-thumb) var(--theme-scrollbar-track);
+        scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
         scrollbar-width: thin;
       }
-      
+
       ::-webkit-scrollbar {
         width: 4px;
         height: 4px;
       }
-      
+
       /* Track */
       ::-webkit-scrollbar-track {
-        background: var(--theme-scrollbar-track);
+        background: var(--scrollbar-track);
         border-radius: 4px;
       }
-      
+
       /* Handle */
       ::-webkit-scrollbar-thumb {
-        background: var(--theme-scrollbar-thumb);
+        background: var(--scrollbar-thumb);
         border-radius: 16px;
       }
-      
+
       /* Handle on hover */
       ::-webkit-scrollbar-thumb:hover {
-        background: var(--theme-scrollbar-thumb-hover);
+        background: var(--scrollbar-thumb-hover);
       }
     </style>
   `;

@@ -13,7 +13,7 @@
   transition: var(--transition-enter);
   border-bottom: 1px solid transparent;
 
-  border-color: var(--theme-extra-border-color);
+  border-color: var(--extra-border-color);
 
   &.isNotScrolled {
     border-color: transparent !important;
@@ -95,7 +95,7 @@ mat-sidenav-container {
 mat-sidenav ::ng-deep .mat-drawer-inner-container {
   @include scrollYImportant();
 
-  background: var(--theme-sidebar-bg);
+  background: var(--sidebar-bg);
 }
 
 mat-sidenav {
