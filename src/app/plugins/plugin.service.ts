@@ -683,11 +683,11 @@ export class PluginService implements OnDestroy {
   }
 
   async dispatchHook(hookName: Hooks, payload?: unknown): Promise<void> {
+    // NOTE: these are events that the plugins might listen to. it is ok that they don't get them, if they happen
+    // before the plugins are loaded
     if (!this._isInitialized) {
-      console.warn('Plugin system not initialized, skipping hook dispatch');
       return;
     }
-
     await this._pluginHooks.dispatchHook(hookName, payload);
   }
 
