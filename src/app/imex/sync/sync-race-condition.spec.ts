@@ -8,6 +8,8 @@ import { DataInitStateService } from '../../core/data-init/data-init-state.servi
 import { SyncWrapperService } from './sync-wrapper.service';
 import { AddTasksForTomorrowService } from '../../features/add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
 import { provideMockStore } from '@ngrx/store/testing';
+import { TranslateModule } from '@ngx-translate/core';
+import { SnackService } from '../../core/snack/snack.service';
 
 describe('Sync Race Condition - Repeating Tasks Recreation Bug', () => {
   // Helper function to replace await wait()
@@ -56,16 +58,27 @@ describe('Sync Race Condition - Repeating Tasks Recreation Bug', () => {
     const addTasksForTomorrowSpy = jasmine.createSpyObj('AddTasksForTomorrowService', [
       'addAllDueToday',
     ]);
+    addTasksForTomorrowSpy.addAllDueToday.and.returnValue(Promise.resolve('ADDED'));
+
+    const snackServiceSpy = jasmine.createSpyObj('SnackService', ['open']);
 
     TestBed.configureTestingModule({
+      imports: [TranslateModule.forRoot()],
       providers: [
         TaskDueEffects,
         provideMockActions(() => actions$),
-        provideMockStore(),
+        provideMockStore({
+          initialState: {
+            tasks: { ids: [], entities: {} },
+            workContext: { todayTaskIds: [] },
+            planner: { days: [] },
+          },
+        }),
         { provide: GlobalTrackingIntervalService, useValue: globalTrackingIntervalSpy },
         { provide: DataInitStateService, useValue: dataInitStateSpy },
         { provide: SyncWrapperService, useValue: syncWrapperSpy },
         { provide: AddTasksForTomorrowService, useValue: addTasksForTomorrowSpy },
+        { provide: SnackService, useValue: snackServiceSpy },
       ],
     });
 
@@ -85,7 +98,7 @@ describe('Sync Race Condition - Repeating Tasks Recreation Bug', () => {
   });
 
   describe('Race Condition Reproduction', () => {
-    xit('should reproduce the bug: tasks are created after sync but before data is fully loaded', async () => {
+    it('should reproduce the bug: tasks are created after sync but before data is fully loaded', async () => {
       // Step 1: Subscribe to the effect
       const effectSub = effects.createRepeatableTasksAndAddDueToday$.subscribe();
 
@@ -117,7 +130,7 @@ describe('Sync Race Condition - Repeating Tasks Recreation Bug', () => {
 
       // The 1000ms debounce in the effect
       console.log('6. Waiting 1000ms debounce...');
-      await wait(10);
+      await wait(1100);
 
       // At this point, the effect will check if sync is in progress (it's not)
       // and then call addAllDueToday()
@@ -139,7 +152,7 @@ describe('Sync Race Condition - Repeating Tasks Recreation Bug', () => {
       effectSub.unsubscribe();
     });
 
-    xit('should demonstrate the fix: wait for data reinit after sync', async () => {
+    it('should demonstrate the fix: wait for data reinit after sync', async () => {
       // This test shows what SHOULD happen
 
       // Create a new subject to simulate proper data reload
@@ -171,7 +184,7 @@ describe('Sync Race Condition - Repeating Tasks Recreation Bug', () => {
 
       // NOW signal that sync is truly done
       afterCurrentSyncDoneOrSyncDisabled$.next(undefined);
-      await wait(10);
+      await wait(1100);
 
       // With proper fix, addAllDueToday would be called here
       // after data is fully reloaded
@@ -181,7 +194,7 @@ describe('Sync Race Condition - Repeating Tasks Recreation Bug', () => {
   });
 
   describe('Detailed Timeline Analysis', () => {
-    xit('should show exact timing of events from the logs', async () => {
+    it('should show exact timing of events from the logs', async () => {
       // This test recreates the exact sequence from the logs
 
       const timeline: string[] = [];
@@ -224,7 +237,7 @@ describe('Sync Race Condition - Repeating Tasks Recreation Bug', () => {
       timeline.push('_ Database.unlock()');
 
       // The debounce delay
-      await wait(10);
+      await wait(1100);
 
       // This is where the bug happens
       timeline.push('[Task Shared] addTask - BUG!');

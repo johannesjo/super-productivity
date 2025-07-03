@@ -79,6 +79,7 @@ describe('Sync Fixes - TDD', () => {
     const addTasksForTomorrowSpy = jasmine.createSpyObj('AddTasksForTomorrowService', [
       'addAllDueToday',
     ]);
+    addTasksForTomorrowSpy.addAllDueToday.and.returnValue(Promise.resolve('ADDED'));
 
     const dataInitSpy = jasmine.createSpyObj('DataInitService', ['reInit']);
 
@@ -95,6 +96,9 @@ describe('Sync Fixes - TDD', () => {
               ids: ['repeat1'],
               entities: { repeat1: oldTaskRepeatConfig },
             },
+            tasks: { ids: [], entities: {} },
+            workContext: { todayTaskIds: [] },
+            planner: { days: [] },
           },
         }),
         { provide: GlobalTrackingIntervalService, useValue: globalTrackingIntervalSpy },
@@ -121,7 +125,7 @@ describe('Sync Fixes - TDD', () => {
   });
 
   describe('Fix for Scenario 1: Timing Race Condition', () => {
-    xit('FAILING TEST: Task creation should wait for data reload to complete after sync', async () => {
+    it('FAILING TEST: Task creation should wait for data reload to complete after sync', async () => {
       // This test will FAIL with current implementation
       // After fix, it should PASS
 
@@ -187,7 +191,7 @@ describe('Sync Fixes - TDD', () => {
       effectSub.unsubscribe();
     });
 
-    xit('SUCCESS TEST: With fix, tasks are created only after data reload', async () => {
+    it('SUCCESS TEST: With fix, tasks are created only after data reload', async () => {
       // This test shows the DESIRED behavior after fix
 
       const timeline: string[] = [];
@@ -329,7 +333,7 @@ describe('Sync Fixes - TDD', () => {
   });
 
   describe('Integration: Both fixes working together', () => {
-    xit('Complete flow with both fixes applied', async () => {
+    it('Complete flow with both fixes applied', async () => {
       // This test verifies the complete fixed flow
 
       const events: string[] = [];
@@ -395,7 +399,7 @@ describe('Sync Fixes - TDD', () => {
         'No tasks should be created - synced data shows task already exists for today',
       );
       expect(events.indexOf('reInit: completed')).toBeLessThan(
-        events.indexOf('Tasks checked'),
+        events.indexOf('Tasks checked - data state'),
         'Data must be reloaded before checking tasks',
       );
 

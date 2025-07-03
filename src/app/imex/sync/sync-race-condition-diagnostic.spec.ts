@@ -11,6 +11,8 @@ import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { loadAllData } from '../../root-store/meta/load-all-data.action';
 import { DataInitService } from '../../core/data-init/data-init.service';
 import { PfapiService } from '../../pfapi/pfapi.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { SnackService } from '../../core/snack/snack.service';
 
 describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
   // Helper function to replace await wait()
@@ -123,6 +125,7 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
     const addTasksForTomorrowSpy = jasmine.createSpyObj('AddTasksForTomorrowService', [
       'addAllDueToday',
     ]);
+    addTasksForTomorrowSpy.addAllDueToday.and.returnValue(Promise.resolve('ADDED'));
 
     const dataInitSpy = jasmine.createSpyObj('DataInitService', ['reInit']);
 
@@ -160,13 +163,19 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
       return tasksToCreate;
     });
 
+    const snackServiceSpy = jasmine.createSpyObj('SnackService', ['open']);
+
     TestBed.configureTestingModule({
+      imports: [TranslateModule.forRoot()],
       providers: [
         TaskDueEffects,
         provideMockActions(() => actions$),
         provideMockStore({
           initialState: {
             taskRepeatCfg: mockTaskRepeatConfigs,
+            tasks: { ids: [], entities: {} },
+            workContext: { todayTaskIds: [] },
+            planner: { days: [] },
           },
         }),
         { provide: GlobalTrackingIntervalService, useValue: globalTrackingIntervalSpy },
@@ -175,6 +184,7 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
         { provide: AddTasksForTomorrowService, useValue: addTasksForTomorrowSpy },
         { provide: DataInitService, useValue: dataInitSpy },
         { provide: PfapiService, useValue: pfapiSpy },
+        { provide: SnackService, useValue: snackServiceSpy },
       ],
     });
 
@@ -205,7 +215,7 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
   });
 
   describe('DIAGNOSTIC: Which scenario causes the bug?', () => {
-    xit('Scenario 1: Task creation happens BEFORE reInit completes (timing issue)', async () => {
+    it('Scenario 1: Task creation happens BEFORE reInit completes (timing issue)', async () => {
       console.log('\n=== TESTING SCENARIO 1: TIMING ISSUE ===\n');
 
       const timeline: string[] = [];
@@ -274,7 +284,7 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
       effectSub.unsubscribe();
     });
 
-    xit('Scenario 2: ReInit loads wrong data (data import failure)', async () => {
+    it('Scenario 2: ReInit loads wrong data (data import failure)', async () => {
       console.log('\n=== TESTING SCENARIO 2: DATA IMPORT FAILURE ===\n');
 
       const timeline: string[] = [];
@@ -357,7 +367,7 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
       effectSub.unsubscribe();
     });
 
-    xit('Scenario 3: Both issues combined (worst case)', async () => {
+    it('Scenario 3: Both issues combined (worst case)', async () => {
       console.log('\n=== TESTING SCENARIO 3: BOTH ISSUES ===\n');
 
       const timeline: string[] = [];
@@ -430,7 +440,7 @@ describe('Sync Race Condition - DIAGNOSTIC TEST', () => {
       effectSub.unsubscribe();
     });
 
-    xit('Control Test: Everything works correctly', async () => {
+    it('Control Test: Everything works correctly', async () => {
       console.log('\n=== CONTROL TEST: CORRECT BEHAVIOR ===\n');
 
       // Setup correct behavior
