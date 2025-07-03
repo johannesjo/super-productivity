@@ -25,6 +25,7 @@ import { Store } from '@ngrx/store';
 import {
   selectActivePluginId,
   selectIsShowPluginPanel,
+  selectLayoutFeatureState,
 } from '../../core-ui/layout/store/layout.reducer';
 import { hidePluginPanel } from '../../core-ui/layout/store/layout.actions';
 import { fastArrayCompare } from '../../util/fast-array-compare';
@@ -68,34 +69,35 @@ export class RightPanelComponent implements OnDestroy {
     | 'NOTES'
     | 'TASK'
     | 'ADD_TASK_PANEL'
+    | 'ISSUE_PANEL'
     | 'TASK_VIEW_CUSTOMIZER_PANEL'
     | 'PLUGIN'
     | undefined
   > = combineLatest([
-    this.layoutService.isShowNotes$,
+    this.store.select(selectLayoutFeatureState),
     this.taskService.selectedTask$,
-    this.layoutService.isShowIssuePanel$,
-    this.layoutService.isShowTaskViewCustomizerPanel$,
-    this.store.select(selectIsShowPluginPanel),
   ]).pipe(
     map(
       ([
-        isShowNotes,
+        {
+          isShowNotes,
+          isShowIssuePanel,
+          isShowTaskViewCustomizerPanel,
+          isShowPluginPanel,
+        },
         selectedTask,
-        isShowAddTaskPanel,
-        isShowTaskViewCustomizerPanel,
-        isShowPluginPanel,
       ]) => {
-        if (selectedTask) {
-          return 'TASK';
-        } else if (isShowNotes) {
+        if (isShowNotes) {
           return 'NOTES';
-        } else if (isShowAddTaskPanel) {
-          return 'ADD_TASK_PANEL';
+        } else if (isShowIssuePanel) {
+          return 'ISSUE_PANEL';
         } else if (isShowTaskViewCustomizerPanel) {
           return 'TASK_VIEW_CUSTOMIZER_PANEL';
         } else if (isShowPluginPanel) {
           return 'PLUGIN';
+        } else if (selectedTask) {
+          // Task content comes last so we can avoid an extra effect to unset selected task
+          return 'TASK';
         }
         return undefined;
       },

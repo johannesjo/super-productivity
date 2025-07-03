@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import {
   hideAddTaskBar,
   hideIssuePanel,
-  hideNotesAndAddTaskPanel,
+  hideNonTaskSidePanelContent,
   hideSideNav,
   hideTaskViewCustomizerPanel,
   showAddTaskBar,
@@ -143,7 +143,7 @@ export class LayoutService {
   }
 
   hideNotes(): void {
-    this._store$.dispatch(hideNotesAndAddTaskPanel());
+    this._store$.dispatch(hideNonTaskSidePanelContent());
   }
 
   toggleAddTaskPanel(): void {

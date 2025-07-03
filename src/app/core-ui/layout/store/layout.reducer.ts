@@ -1,6 +1,6 @@
 import {
   hideAddTaskBar,
-  hideNotesAndAddTaskPanel,
+  hideNonTaskSidePanelContent,
   hidePluginPanel,
   hideSideNav,
   showAddTaskBar,
@@ -92,6 +92,7 @@ const ALL_PANEL_CONTENT_HIDDEN: Partial<LayoutState> = {
   isShowIssuePanel: false,
   isShowTaskViewCustomizerPanel: false,
   isShowPluginPanel: false,
+  activePluginId: null,
 };
 
 const _reducer = createReducer<LayoutState>(
@@ -122,7 +123,7 @@ const _reducer = createReducer<LayoutState>(
     isShowTaskViewCustomizerPanel: !state.isShowTaskViewCustomizerPanel,
   })),
 
-  on(hideNotesAndAddTaskPanel, (state) => ({
+  on(hideNonTaskSidePanelContent, (state) => ({
     ...state,
     ...ALL_PANEL_CONTENT_HIDDEN,
   })),

@@ -18,7 +18,7 @@ import { setActiveWorkContext } from '../features/work-context/store/work-contex
 import { updateGlobalConfigSection } from '../features/config/store/global-config.actions';
 import {
   hideAddTaskBar,
-  hideNotesAndAddTaskPanel,
+  hideNonTaskSidePanelContent,
   hidePluginPanel,
   hideSideNav,
   showAddTaskBar,
@@ -41,7 +41,7 @@ export const ALLOWED_PLUGIN_ACTIONS = [
   hideSideNav,
   toggleSideNav,
   toggleShowNotes,
-  hideNotesAndAddTaskPanel,
+  hideNonTaskSidePanelContent,
   toggleIssuePanel,
   hidePluginPanel,
 
