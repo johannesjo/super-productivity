@@ -37,15 +37,12 @@ npm run prettier  # Prettier formatting
 npm run lint      # Linting
 
 # Build for production
-npm run dist      # All platforms
-npm run dist:win  # Windows only
-npm run dist:mac:dl  # macOS only
-npm run dist:android:prod  # Android production
+npm run dist      # All platforms Builds (all available in current environment)
 ```
 
 ### Testing
 
-- Unit tests: `npm test` or `npm run test:watch` - Uses Jasmine/Karma, tests are co-located with source files (`.spec.ts`)
+- Unit tests: `npm test`  - Uses Jasmine/Karma, tests are co-located with source files (`.spec.ts`)
 - E2E tests: `npm run e2e` - Uses Nightwatch, located in `/e2e/src/`
 - Linting: `npm run lint` - ESLint for TypeScript, Stylelint for SCSS
 
@@ -65,7 +62,7 @@ The app uses NgRx (Redux pattern) for state management. Key state slices:
 
 1. **Persistence Layer** (`/src/app/pfapi/`): Handles data storage with multiple adapters (IndexedDB)
 2. **Services** (`*.service.ts`): Business logic and state mutations via NgRx
-3. **Components**: Subscribe to state via selectors, dispatch actions for changes
+3. **Components**: (`*.component.ts`) Subscribe to state via selectors, dispatch actions for changes
 4. **Effects**: Handle side effects (persistence, sync, notifications)
 
 ### Key Architectural Patterns
@@ -84,7 +81,7 @@ The app uses NgRx (Redux pattern) for state management. Key state slices:
 ### Data Sync
 
 - Multiple sync providers: Dropbox, WebDAV, local file
-- Sync is conflict-aware with timestamp-based resolution
+- Sync is conflict-aware with vector-clock  resolution
 - All sync operations go through `/src/app/imex/sync/`
 
 ## Important Development Notes
