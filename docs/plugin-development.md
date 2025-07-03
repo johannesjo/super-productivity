@@ -533,3 +533,25 @@ If you create a useful plugin, consider:
 2. Submitting a PR to add it to the community plugins list (coming soon)
 
 Happy plugin development! 🚀
+
+## Bonus: Vibe Coding your Plugins
+
+### Tips
+
+- Don't test on your real world data! Use a test instance! (you can use https://test-app.super-productivity.com/ if you don't know how get one)
+- Be as specific as possible
+- Outline what APIs your plugin should use
+- Test for errors (`Ctrl+Shift+i` opens the console) and iterate until it works. Don't expect that everything works on your first try.
+- Read the code! Don't trust it blindly.
+
+### Example
+
+```md
+Can you you write me a plugin for Super Productivity that plays a beep sound every time i click on a header button (You need to add a header button via PluginAPI.registerHeaderButton).
+
+Here are the docs: https://github.com/johannesjo/super-productivity/blob/master/docs/plugin-development.md
+
+Don't use any PluginAPI methods that are not listed in the guide.
+
+Please give me the output as flat zip file to download.
+```
