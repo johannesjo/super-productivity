@@ -1959,7 +1959,7 @@
     "ALREADY_INITIALIZED": "Plugin is already initialized",
     "USER_DECLINED_NODE_PERMISSION": "User declined Node.js execution permission",
     "FAILED_TO_EXTRACT_ZIP": "Failed to extract plugin ZIP file",
-    "MANIFEST_NOT_FOUND": "Plugin manifest (plugin.json) not found in ZIP file",
+    "MANIFEST_NOT_FOUND": "Plugin manifest (manifest.json) not found in ZIP file",
     "MANIFEST_TOO_LARGE": "Plugin manifest is too large (max {{maxSize}}KB)",
     "PLUGIN_JS_NOT_FOUND": "Plugin JavaScript file (plugin.js) not found in ZIP file",
     "CODE_TOO_LARGE": "Plugin code is too large (max {{maxSize}}MB)",

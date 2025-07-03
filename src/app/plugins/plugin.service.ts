@@ -736,6 +736,7 @@ export class PluginService implements OnDestroy {
           });
         },
       );
+      console.log({ extractedFiles });
 
       // Find and extract manifest.json
       if (!extractedFiles['manifest.json']) {
