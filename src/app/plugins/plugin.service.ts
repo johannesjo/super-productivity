@@ -879,6 +879,20 @@ export class PluginService implements OnDestroy {
           // Replace existing instance
           this._loadedPlugins[existingIndex] = placeholderInstance;
         }
+
+        // Add to plugin states for UI reactivity
+        const state: PluginState = {
+          manifest,
+          status: 'error',
+          path: uploadedPluginPath,
+          type: 'uploaded',
+          isEnabled: false,
+          error: placeholderInstance.error,
+          icon: iconContent || undefined,
+        };
+        this._pluginStates.set(manifest.id, state);
+        this._updatePluginStates();
+
         console.log(
           `Uploaded plugin ${manifest.id} requires desktop version, creating placeholder`,
         );
@@ -904,6 +918,18 @@ export class PluginService implements OnDestroy {
           // Replace existing instance
           this._loadedPlugins[existingIndexDisabled] = placeholderInstance;
         }
+
+        // Add to plugin states for UI reactivity
+        const state: PluginState = {
+          manifest,
+          status: 'not-loaded',
+          path: uploadedPluginPath,
+          type: 'uploaded',
+          isEnabled: false,
+          icon: iconContent || undefined,
+        };
+        this._pluginStates.set(manifest.id, state);
+        this._updatePluginStates();
 
         console.log(`Uploaded plugin ${manifest.id} is disabled, skipping load`);
         return placeholderInstance;
@@ -931,12 +957,38 @@ export class PluginService implements OnDestroy {
         }
         this._pluginPaths.set(manifest.id, uploadedPluginPath);
 
+        // Add to plugin states for UI reactivity
+        const state: PluginState = {
+          manifest,
+          status: 'loaded',
+          path: uploadedPluginPath,
+          type: 'uploaded',
+          isEnabled: true,
+          instance: pluginInstance,
+          icon: iconContent || undefined,
+        };
+        this._pluginStates.set(manifest.id, state);
+        this._updatePluginStates();
+
         console.log(`Uploaded plugin ${manifest.id} loaded successfully`);
       } else {
         console.error(
           `Uploaded plugin ${manifest.id} failed to load:`,
           pluginInstance.error,
         );
+
+        // Add failed plugin to states as well
+        const state: PluginState = {
+          manifest,
+          status: 'error',
+          path: uploadedPluginPath,
+          type: 'uploaded',
+          isEnabled: false,
+          error: pluginInstance.error,
+          icon: iconContent || undefined,
+        };
+        this._pluginStates.set(manifest.id, state);
+        this._updatePluginStates();
       }
 
       return pluginInstance;
@@ -1153,7 +1205,7 @@ export class PluginService implements OnDestroy {
    */
   async checkNodeExecutionPermission(manifest: PluginManifest): Promise<boolean> {
     // Check if plugin has nodeExecution permission
-    if (!manifest.permissions.includes('nodeExecution')) {
+    if (!manifest.permissions?.includes('nodeExecution')) {
       return true; // No node execution permission needed
     }
 

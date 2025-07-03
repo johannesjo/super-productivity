@@ -28,6 +28,12 @@ export class PluginLoaderService {
    * Load plugin assets - simple and direct
    */
   async loadPluginAssets(pluginPath: string): Promise<PluginAssets> {
+    // Handle uploaded plugins differently
+    if (pluginPath.startsWith('uploaded://')) {
+      const pluginId = pluginPath.replace('uploaded://', '');
+      return this.loadUploadedPluginAssets(pluginId);
+    }
+
     try {
       // Load manifest
       const manifestUrl = `${pluginPath}/manifest.json`;
