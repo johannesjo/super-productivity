@@ -159,7 +159,7 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
       key: 'customTheme',
       type: 'select',
       templateOptions: {
-        label: 'Custom Theme',
+        label: T.GCF.MISC.THEME,
         options: AVAILABLE_CUSTOM_THEMES.map((theme) => ({
           label: theme.name,
           value: theme.id,

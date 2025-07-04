@@ -12,6 +12,8 @@ import { AsyncPipe } from '@angular/common';
 import { GlobalThemeService } from '../global-theme.service';
 import { CustomThemeService } from '../custom-theme.service';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
+import { T } from '../../../t.const';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'theme-selector',
@@ -25,36 +27,37 @@ import { GlobalConfigService } from '../../../features/config/global-config.serv
     MatFormField,
     MatLabel,
     AsyncPipe,
+    TranslatePipe,
   ],
   template: `
     <div class="theme-selector-container">
       <div class="dark-mode-select">
-        <h3>Dark Mode</h3>
+        <h3>{{ T.GCF.MISC.DARK_MODE | translate }}</h3>
         <mat-button-toggle-group
           name="darkMode"
-          aria-label="Dark mode selection"
+          [attr.aria-label]="T.GCF.MISC.DARK_MODE_ARIA_LABEL | translate"
           [value]="globalThemeService.darkMode$ | async"
           (change)="updateDarkMode($event)"
         >
           <mat-button-toggle value="system">
             <mat-icon>computer</mat-icon>
-            System
+            {{ T.GCF.MISC.DARK_MODE_SYSTEM | translate }}
           </mat-button-toggle>
           <mat-button-toggle value="dark">
             <mat-icon>dark_mode</mat-icon>
-            Dark
+            {{ T.GCF.MISC.DARK_MODE_DARK | translate }}
           </mat-button-toggle>
           <mat-button-toggle value="light">
             <mat-icon>light_mode</mat-icon>
-            Light
+            {{ T.GCF.MISC.DARK_MODE_LIGHT | translate }}
           </mat-button-toggle>
         </mat-button-toggle-group>
       </div>
 
       <div class="theme-select">
-        <h3>Theme (experimental)</h3>
+        <h3>{{ T.GCF.MISC.THEME_EXPERIMENTAL | translate }}</h3>
         <mat-form-field appearance="outline">
-          <mat-label>Select Theme</mat-label>
+          <mat-label>{{ T.GCF.MISC.THEME_SELECT_LABEL | translate }}</mat-label>
           <mat-select
             [value]="(configService.misc$ | async)?.customTheme || 'default'"
             (selectionChange)="updateCustomTheme($event.value)"
@@ -124,6 +127,7 @@ export class ThemeSelectorComponent {
   readonly globalThemeService = inject(GlobalThemeService);
   readonly customThemeService = inject(CustomThemeService);
   readonly configService = inject(GlobalConfigService);
+  readonly T = T;
 
   updateDarkMode(ev: MatButtonToggleChange): void {
     if (ev.value) {
