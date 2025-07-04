@@ -1,7 +1,29 @@
 @import '../../../../common';
 
-:host {
+.streak-info {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+  margin-bottom: 24px;
+
+  .label {
+    font-size: 0.875rem;
+    opacity: 0.8;
+    margin-bottom: 4px;
+  }
+
+  .value {
+    font-size: 1.125rem;
+  }
+}
+
+.chart-section {
+  margin-bottom: 32px;
+
   .chart-wrapper {
+    height: 200px;
+    position: relative;
+
     @include mq(xs) {
       min-width: 500px;
     }
@@ -9,9 +31,16 @@
       min-width: 740px;
     }
   }
+}
 
-  .inner-chart-wrapper {
-    min-height: 170px;
+.edit-section {
+  .date-label {
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  mat-form-field {
+    width: 100%;
   }
 }
 

@@ -1,113 +1,101 @@
-<form (submit)="$event.preventDefault(); submit()">
-  <!--  <h1 mat-dialog-title>{{ T.F.SIMPLE_COUNTER.D_EDIT.TITLE|translate }}</h1>-->
-  <h1 mat-dialog-title>{{ data.simpleCounter.title }}</h1>
+<form (submit)="$event.preventDefault(); save()">
+  <h1 mat-dialog-title>{{ dialogData.simpleCounter.title }}</h1>
 
   <mat-dialog-content>
-    <!---->
-    @if (data.simpleCounter.isTrackStreaks) {
-      <section style="text-align: center; margin-bottom: 16px">
-        <div>{{ T.F.SIMPLE_COUNTER.D_EDIT.CURRENT_STREAK | translate }}</div>
-        <div>
-          <strong
-            >{{ currentStreak() }}
-            {{ T.F.SIMPLE_COUNTER.D_EDIT.DAYS | translate }}</strong
-          >
-        </div>
-      </section>
-
-      <section style="text-align: center; margin-bottom: 16px">
-        <div>{{ T.F.SIMPLE_COUNTER.D_EDIT.DAILY_GOAL | translate }}</div>
-        <div>
-          <strong>
-            @if (data.simpleCounter.type === SimpleCounterType.StopWatch) {
-              {{ data.simpleCounter.streakMinValue | msToString }}
-              <!---->
-            } @else {
-              {{ data.simpleCounter.streakMinValue }}
-            }
-          </strong>
-        </div>
-      </section>
-    }
-    <!---->
-
-    @if (stats()) {
-      <section style="margin-bottom: 32px">
-        <div class="chart-wrapper">
-          <div class="inner-chart-wrapper">
-            <canvas
-              [type]="'line'"
-              [data]="stats()"
-              [labels]="stats()?.labels"
-              [options]="lineChartOptions"
-              [legend]="true"
-              baseChart
-              (chartClick)="onChartClick($event)"
+    @if (dialogData.simpleCounter.isTrackStreaks) {
+      <section class="streak-info">
+        <div class="streak-current">
+          <div class="label">
+            {{ T.F.SIMPLE_COUNTER.D_EDIT.CURRENT_STREAK | translate }}
+          </div>
+          <div class="value">
+            <strong
+              >{{ currentStreak() }}
+              {{ T.F.SIMPLE_COUNTER.D_EDIT.DAYS | translate }}</strong
             >
-            </canvas>
+          </div>
+        </div>
+
+        <div class="streak-goal">
+          <div class="label">{{ T.F.SIMPLE_COUNTER.D_EDIT.DAILY_GOAL | translate }}</div>
+          <div class="value">
+            <strong>
+              @if (dialogData.simpleCounter.type === SimpleCounterType.StopWatch) {
+                {{ dialogData.simpleCounter.streakMinValue | msToString }}
+              } @else {
+                {{ dialogData.simpleCounter.streakMinValue }}
+              }
+            </strong>
           </div>
         </div>
       </section>
     }
 
-    <div class="form-wrapper">
-      <div style="margin-bottom: 8px; font-weight: 600">
-        Edit for {{ selectedDateStr }}
-      </div>
+    @if (chartData()) {
+      <section class="chart-section">
+        <div class="chart-wrapper">
+          <canvas
+            baseChart
+            [type]="'line'"
+            [data]="chartData()"
+            [options]="chartOptions"
+            [legend]="false"
+            (chartClick)="onChartClick($event)"
+          >
+          </canvas>
+        </div>
+      </section>
+    }
 
-      @if (
-        data.simpleCounter.type === SimpleCounterType.ClickCounter ||
-        data.simpleCounter.type === SimpleCounterType.RepeatedCountdownReminder
-      ) {
-        <mat-form-field>
-          <mat-label>{{ T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER | translate }}</mat-label>
-          <input
-            (ngModelChange)="onModelChange($event)"
-            [ngModel]="val"
-            matInput
-            name="count"
-            type="number"
-          />
-        </mat-form-field>
-      }
-      <!---->
-      @if (data.simpleCounter.type === SimpleCounterType.StopWatch) {
-        <mat-form-field>
-          <mat-label>{{ T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER | translate }}</mat-label>
-          <input
-            (ngModelChange)="onModelChange($event)"
-            [ngModel]="val"
-            inputDuration="optional"
-            matInput
-            name="count"
-            type="text"
-          />
-          <mat-icon matPrefix>timer</mat-icon>
-        </mat-form-field>
+    <div class="edit-section">
+      <div class="date-label">Edit for {{ formatSelectedDate() }}</div>
+
+      @switch (dialogData.simpleCounter.type) {
+        @case (SimpleCounterType.StopWatch) {
+          <mat-form-field>
+            <mat-label>{{ T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER | translate }}</mat-label>
+            <input
+              matInput
+              inputDuration="optional"
+              type="text"
+              name="count"
+              [ngModel]="selectedValue()"
+              (ngModelChange)="updateValue($event)"
+            />
+            <mat-icon matPrefix>timer</mat-icon>
+          </mat-form-field>
+        }
+        @default {
+          <mat-form-field>
+            <mat-label>{{ T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER | translate }}</mat-label>
+            <input
+              matInput
+              type="number"
+              name="count"
+              [ngModel]="selectedValue()"
+              (ngModelChange)="updateValue($event)"
+            />
+          </mat-form-field>
+        }
       }
     </div>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <div class="wrap-buttons">
-      <button
-        (click)="close()"
-        class="btn btn-primary submit-button"
-        color="primary"
-        mat-button
-        type="button"
-      >
-        {{ T.G.CANCEL | translate }}
-      </button>
-      <button
-        class="btn btn-primary submit-button"
-        color="primary"
-        mat-stroked-button
-        type="submit"
-      >
-        <mat-icon>save</mat-icon>
-        {{ T.G.SAVE | translate }}
-      </button>
-    </div>
+    <button
+      mat-button
+      type="button"
+      (click)="close()"
+    >
+      {{ T.G.CANCEL | translate }}
+    </button>
+    <button
+      mat-stroked-button
+      color="primary"
+      type="submit"
+    >
+      <mat-icon>save</mat-icon>
+      {{ T.G.SAVE | translate }}
+    </button>
   </mat-dialog-actions>
 </form>
