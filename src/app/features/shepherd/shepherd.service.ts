@@ -128,7 +128,7 @@ export class ShepherdService {
         highlightClass: 'shepherd-highlight',
         arrow: true,
         cancelIcon: {
-          enabled: false,
+          enabled: true,
         },
         buttons: [],
       },
