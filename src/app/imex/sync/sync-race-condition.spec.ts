@@ -129,7 +129,7 @@ describe('Sync Race Condition - Repeating Tasks Recreation Bug', () => {
       afterCurrentSyncDoneOrSyncDisabled$.next(undefined);
 
       // The 1000ms debounce in the effect
-      console.log('6. Waiting 1000ms debounce...');
+      console.log('6. Waiting for debounce...');
       await wait(1100);
 
       // At this point, the effect will check if sync is in progress (it's not)
