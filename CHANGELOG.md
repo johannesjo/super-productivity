@@ -1,3 +1,36 @@
+## [14.0.3](https://github.com/johannesjo/super-productivity/compare/v14.0.2...v14.0.3) (2025-07-04)
+
+### Bug Fixes
+
+- add defensive programming fix for ([9b30d56](https://github.com/johannesjo/super-productivity/commit/9b30d56b0c59597a4f7108e032d92eaeaa06f920)), closes [#4698](https://github.com/johannesjo/super-productivity/issues/4698)
+- Adding [@date](https://github.com/date) incorrectly adds task to today when [@date](https://github.com/date) is listed last [#4644](https://github.com/johannesjo/super-productivity/issues/4644) ([d075c2a](https://github.com/johannesjo/super-productivity/commit/d075c2a3a4fac9d840f165babd5d17b4a25574ff))
+- avoid mutation ([cd5fd1e](https://github.com/johannesjo/super-productivity/commit/cd5fd1e69889ad675cd6f3f82f07a4d06c82ccb0))
+- date pipe error with indonesian ([42dc082](https://github.com/johannesjo/super-productivity/commit/42dc082235583fda5f8e95fcf7c7f6cbb5bf99f3)), closes [#4670](https://github.com/johannesjo/super-productivity/issues/4670)
+- error alert background for dark theme ([635f644](https://github.com/johannesjo/super-productivity/commit/635f64486714ac2f027ac725c6ecbcaf8571447d))
+- only filter out later today tasks for today list ([f9f1049](https://github.com/johannesjo/super-productivity/commit/f9f104943762a5aad562bb3afc9a398864d174cc))
+- **plugin:** plugin.js initialization not working as it should ([2a75f32](https://github.com/johannesjo/super-productivity/commit/2a75f32b76237da220d7fb441808fe627d41a852))
+- **plugin:** remove plugin from list when deleted ([a73c74c](https://github.com/johannesjo/super-productivity/commit/a73c74ce1d0a8ff4e06bd03e197f3b5656f5288b))
+- **plugins:** fix plugin upload issues with UI reactivity and uploaded:// protocol ([0091cea](https://github.com/johannesjo/super-productivity/commit/0091cea5a128b81260a57672fa1a20cef01808cb))
+- **plugin:** uploaded plugins not working ([4b15ac1](https://github.com/johannesjo/super-productivity/commit/4b15ac1fc1ab36b0bbc5077fb3b83bd9e146694c))
+- **plugin:** warning ([5fec51f](https://github.com/johannesjo/super-productivity/commit/5fec51fe83cccaea6f1a967f3cc8685b1341b5d5))
+- remove line breaks on paste in task title ([#4669](https://github.com/johannesjo/super-productivity/issues/4669)) ([087d6a5](https://github.com/johannesjo/super-productivity/commit/087d6a5a34746b7046dd9e374bc4fe47369317df))
+- repeatable tasks not getting re-created [#4687](https://github.com/johannesjo/super-productivity/issues/4687) ([4da07d1](https://github.com/johannesjo/super-productivity/commit/4da07d1f7b5c5fd8f1b0e32ff10646b2f7b290ba))
+- side panel content show behavior ([b56d4e2](https://github.com/johannesjo/super-productivity/commit/b56d4e21b100e0e3644ebcef378f4bf1614ed207))
+- task detail panel not opening for tasks planned for later ([64cba1f](https://github.com/johannesjo/super-productivity/commit/64cba1ffa49db20d24f23cab8d5caa401ddd9a9a)), closes [#4664](https://github.com/johannesjo/super-productivity/issues/4664)
+
+### Features
+
+- add log and update message ([c35687c](https://github.com/johannesjo/super-productivity/commit/c35687c8726c20970000f62a9c23339fc64764e9))
+- add possibility to cancel tutorial ([76dc5c1](https://github.com/johannesjo/super-productivity/commit/76dc5c1eafc15cb6deaf437615a09ed3de35f97b))
+- improve reliably for repeatable tasks ([928b4d2](https://github.com/johannesjo/super-productivity/commit/928b4d27794613bbb957fff027e5b04870f9f6ba))
+- improve reliably for repeatable tasks 2 ([3242626](https://github.com/johannesjo/super-productivity/commit/32426267e029d9f2afdb29aa267f50ab7c850ef5))
+- improve repeat task handling ([df829fd](https://github.com/johannesjo/super-productivity/commit/df829fd4d15f2cde013df749d18f5589b444c362))
+- **sync:** improve sync conflict dialog ([24878e5](https://github.com/johannesjo/super-productivity/commit/24878e552898af794429bb3f1d115a4dc2109bd1))
+
+### Reverts
+
+- Revert "test: disable due tests for now" ([8c6782e](https://github.com/johannesjo/super-productivity/commit/8c6782e0c14801566e1186993e3b2e98363f48ca))
+
 ## [14.0.2](https://github.com/johannesjo/super-productivity/compare/v14.0.1...v14.0.2) (2025-07-01)
 
 ### Features
