@@ -4,6 +4,7 @@ import {
   computed,
   inject,
   LOCALE_ID,
+  signal,
 } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
@@ -68,8 +69,16 @@ export class DialogSimpleCounterEditComponent {
     simpleCounter: SimpleCounterCopy;
   }>(MAT_DIALOG_DATA);
 
+  // Create a local copy that updates immediately using a signal
+  localCounterData = signal<SimpleCounterCopy>({
+    ...this.data.simpleCounter,
+    countOnDay: { ...this.data.simpleCounter.countOnDay },
+  });
+
   stats = computed(() => {
-    const countOnDay = this.data.simpleCounter.countOnDay;
+    // Use local data for immediate updates
+    const localData = this.localCounterData();
+    const countOnDay = localData.countOnDay;
     let labels = sortWorklogDates(Object.keys(countOnDay));
     labels = this._fillMissingDates(labels);
 
@@ -77,7 +86,7 @@ export class DialogSimpleCounterEditComponent {
 
     const data = labels.map((date) => {
       const rawVal = countOnDay[date] ?? 0;
-      return this.data.simpleCounter.type === SimpleCounterType.StopWatch
+      return localData.type === SimpleCounterType.StopWatch
         ? Math.round(rawVal / 60000)
         : rawVal;
     });
@@ -85,9 +94,8 @@ export class DialogSimpleCounterEditComponent {
     const chartData: LineChartData = {
       labels: labels.map((dateStr) => {
         const d = new Date(dateStr);
-        const isStreakDay = this.data.simpleCounter.streakWeekDays?.[d.getDay()];
-        const isStreakFulfilled =
-          countOnDay[dateStr] >= (this.data.simpleCounter.streakMinValue || 0);
+        const isStreakDay = localData.streakWeekDays?.[d.getDay()];
+        const isStreakFulfilled = countOnDay[dateStr] >= (localData.streakMinValue || 0);
 
         return `${d.toLocaleDateString(this._locale, {
           month: 'numeric',
@@ -97,10 +105,7 @@ export class DialogSimpleCounterEditComponent {
       datasets: [
         {
           data,
-          label:
-            this.data.simpleCounter.type === SimpleCounterType.StopWatch
-              ? 'Duration'
-              : 'Count',
+          label: localData.type === SimpleCounterType.StopWatch ? 'Duration' : 'Count',
           fill: false,
           borderColor: '#4bc0c0',
         },
@@ -110,7 +115,7 @@ export class DialogSimpleCounterEditComponent {
   });
 
   currentStreak = computed(() => {
-    return getSimpleCounterStreakDuration(this.data.simpleCounter);
+    return getSimpleCounterStreakDuration(this.localCounterData());
   });
 
   T: typeof T = T;
@@ -118,7 +123,7 @@ export class DialogSimpleCounterEditComponent {
 
   todayStr: string = this._dateService.todayStr();
   selectedDateStr: string = this.todayStr;
-  val: number = this.data.simpleCounter.countOnDay[this.selectedDateStr];
+  val: number = this.localCounterData().countOnDay[this.selectedDateStr] || 0;
   lineChartOptions: ChartConfiguration<
     'line',
     (number | undefined)[],
@@ -149,13 +154,13 @@ export class DialogSimpleCounterEditComponent {
       const fullDates = this._getLast28Dates();
       if (index >= 0 && index < fullDates.length) {
         this.selectedDateStr = fullDates[index];
-        this.val = this.data.simpleCounter.countOnDay[this.selectedDateStr] || 0;
+        this.val = this.localCounterData().countOnDay[this.selectedDateStr] || 0;
       }
     }
   }
 
   private _getLast28Dates(): string[] {
-    let labels = sortWorklogDates(Object.keys(this.data.simpleCounter.countOnDay));
+    let labels = sortWorklogDates(Object.keys(this.localCounterData().countOnDay));
     labels = this._fillMissingDates(labels);
     return labels.slice(-28);
   }
@@ -169,16 +174,32 @@ export class DialogSimpleCounterEditComponent {
   }
 
   submit(): void {
-    this._simpleCounterService.setCounterForDate(
-      this.data.simpleCounter.id,
-      this.selectedDateStr,
-      this.val,
-    );
+    // Save all local changes
+    const localData = this.localCounterData();
+    Object.keys(localData.countOnDay).forEach((dateStr) => {
+      const localValue = localData.countOnDay[dateStr];
+      const originalValue = this.data.simpleCounter.countOnDay[dateStr] || 0;
+      if (localValue !== originalValue) {
+        this._simpleCounterService.setCounterForDate(
+          this.data.simpleCounter.id,
+          dateStr,
+          localValue,
+        );
+      }
+    });
     this.close();
   }
 
   onModelChange($event: number): void {
     this.val = $event;
+    // Update local data immediately
+    this.localCounterData.update((current) => ({
+      ...current,
+      countOnDay: {
+        ...current.countOnDay,
+        [this.selectedDateStr]: $event,
+      },
+    }));
   }
 
   close(): void {
