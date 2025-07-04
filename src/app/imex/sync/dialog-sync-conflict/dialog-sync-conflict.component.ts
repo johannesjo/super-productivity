@@ -44,35 +44,12 @@ export class DialogSyncConflictComponent {
 
   T: typeof T = T;
 
-  remoteDate: number = this.data.remote.lastUpdate;
-  localDate: number = this.data.local.lastUpdate;
-  lastDate: number | null = this.data.local.lastSyncedUpdate;
+  remote = this.data.remote;
+  local = this.data.local;
 
-  remoteTime: number = this.data.remote.lastUpdate;
-  localTime: number = this.data.local.lastUpdate;
-  lastTime: number | null = this.data.local.lastSyncedUpdate;
-
-  remoteLamport: number = this.data.remote.localLamport;
-  localLamport: number = this.data.local.localLamport;
-  lastSyncedLamport: number | null = this.data.local.lastSyncedLamport;
-
-  // Vector clock data
-  remoteVectorClock: VectorClock | undefined = this.data.remote.vectorClock;
-  localVectorClock: VectorClock | undefined = this.data.local.vectorClock;
-  lastSyncedVectorClock: VectorClock | null | undefined =
-    this.data.local.lastSyncedVectorClock;
-
-  // Vector clock comparison
-  vectorClockComparison: VectorClockComparison | null = this.getVectorClockComparison();
-
-  remoteLastUpdateAction: string | undefined = this.data.remote.lastUpdateAction;
-  localLastUpdateAction: string | undefined = this.data.local.lastUpdateAction;
-  lastSyncedAction: string | undefined = this.data.local.lastSyncedAction;
-
-  localMetaRev: string | null = this.data.local.metaRev;
-
-  isHighlightRemote: boolean = this.data.remote.lastUpdate >= this.data.local.lastUpdate;
-  isHighlightLocal: boolean = this.data.local.lastUpdate >= this.data.remote.lastUpdate;
+  isHighlightRemote = this.remote.lastUpdate >= this.local.lastUpdate;
+  // isHighlightLocal = this.local.lastUpdate >= this.remote.lastUpdate;
+  isHighlightLocal = !this.isHighlightRemote;
 
   constructor() {
     const _matDialogRef = this._matDialogRef;
@@ -95,10 +72,10 @@ export class DialogSyncConflictComponent {
   }
 
   getVectorClockComparison(): VectorClockComparison | null {
-    if (!this.localVectorClock || !this.remoteVectorClock) {
+    if (!this.local.vectorClock || !this.remote.vectorClock) {
       return null;
     }
-    return compareVectorClocks(this.localVectorClock, this.remoteVectorClock);
+    return compareVectorClocks(this.local.vectorClock, this.remote.vectorClock);
   }
 
   getVectorClockString(clock?: VectorClock | null): string {
@@ -107,8 +84,9 @@ export class DialogSyncConflictComponent {
   }
 
   getVectorClockComparisonLabel(): string {
-    if (!this.vectorClockComparison) return '-';
-    switch (this.vectorClockComparison) {
+    const comparison = this.getVectorClockComparison();
+    if (!comparison) return '-';
+    switch (comparison) {
       case VectorClockComparison.EQUAL:
         return this.T.F.SYNC.D_CONFLICT.VECTOR_COMPARISON_EQUAL;
       case VectorClockComparison.LESS_THAN:

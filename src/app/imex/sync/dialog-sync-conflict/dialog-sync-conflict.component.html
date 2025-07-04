@@ -13,32 +13,32 @@
     <tr [class.isHighlight]="isHighlightRemote">
       <td>{{ T.F.SYNC.D_CONFLICT.REMOTE | translate }}</td>
       <td [attr.data-label]="T.F.SYNC.D_CONFLICT.DATE | translate">
-        {{ remoteDate | date: 'shortDate' }}
+        {{ remote.lastUpdate | date: 'shortDate' }}
       </td>
       <td [attr.data-label]="T.F.SYNC.D_CONFLICT.TIME | translate">
-        {{ remoteTime | date: 'shortTime' }}
+        {{ remote.lastUpdate | date: 'shortTime' }}
       </td>
     </tr>
     <tr [class.isHighlight]="isHighlightLocal">
       <td>{{ T.F.SYNC.D_CONFLICT.LOCAL | translate }}</td>
       <td [attr.data-label]="T.F.SYNC.D_CONFLICT.DATE | translate">
-        {{ localDate | date: 'shortDate' }}
+        {{ local.lastUpdate | date: 'shortDate' }}
       </td>
       <td [attr.data-label]="T.F.SYNC.D_CONFLICT.TIME | translate">
-        {{ localTime | date: 'shortTime' }}
+        {{ local.lastUpdate | date: 'shortTime' }}
       </td>
     </tr>
     <tr>
       <td>{{ T.F.SYNC.D_CONFLICT.LOCAL_REMOTE | translate }}</td>
       <td [attr.data-label]="T.F.SYNC.D_CONFLICT.DATE | translate">
         {{
-          lastDate
-            ? (lastDate | date: 'shortDate')
+          local.lastSyncedUpdate
+            ? (local.lastSyncedUpdate | date: 'shortDate')
             : (T.F.SYNC.D_CONFLICT.NEVER | translate)
         }}
       </td>
       <td [attr.data-label]="T.F.SYNC.D_CONFLICT.TIME | translate">
-        {{ lastTime ? (lastTime | date: 'shortTime') : '-' }}
+        {{ local.lastSyncedUpdate ? (local.lastSyncedUpdate | date: 'shortTime') : '-' }}
       </td>
     </tr>
   </table>
@@ -61,70 +61,70 @@
       <tr>
         <td>{{ T.F.SYNC.D_CONFLICT.REMOTE | translate }}</td>
         <td
-          [matTooltip]="remoteLamport"
+          [matTooltip]="remote.localLamport"
           [attr.data-label]="T.F.SYNC.D_CONFLICT.LAMPORT_CLOCK | translate"
         >
-          {{ shortenLamport(remoteLamport) }}
+          {{ shortenLamport(remote.localLamport) }}
         </td>
         <td
-          [matTooltip]="remoteLastUpdateAction"
+          [matTooltip]="remote.lastUpdateAction"
           [attr.data-label]="T.F.SYNC.D_CONFLICT.LAST_WRITE | translate"
         >
-          {{ shortenAction(remoteLastUpdateAction || '?') }}
+          {{ shortenAction(remote.lastUpdateAction || '?') }}
         </td>
       </tr>
       <tr>
         <td>{{ T.F.SYNC.D_CONFLICT.LOCAL | translate }}</td>
         <td
-          [matTooltip]="localLamport"
+          [matTooltip]="local.localLamport"
           [attr.data-label]="T.F.SYNC.D_CONFLICT.LAMPORT_CLOCK | translate"
         >
-          {{ shortenLamport(localLamport) }}
+          {{ shortenLamport(local.localLamport) }}
         </td>
         <td
-          [matTooltip]="localLastUpdateAction"
+          [matTooltip]="local.lastUpdateAction"
           [attr.data-label]="T.F.SYNC.D_CONFLICT.LAST_WRITE | translate"
         >
-          {{ shortenAction(localLastUpdateAction || '?') }}
+          {{ shortenAction(local.lastUpdateAction || '?') }}
         </td>
       </tr>
       <tr>
         <td>{{ T.F.SYNC.D_CONFLICT.LOCAL_REMOTE | translate }}</td>
         <td
-          [matTooltip]="lastSyncedLamport"
+          [matTooltip]="local.lastSyncedLamport"
           [attr.data-label]="T.F.SYNC.D_CONFLICT.LAMPORT_CLOCK | translate"
         >
-          {{ shortenLamport(lastSyncedLamport) ?? '-' }}
+          {{ shortenLamport(local.lastSyncedLamport) ?? '-' }}
         </td>
         <td
-          [matTooltip]="lastSyncedAction"
+          [matTooltip]="local.lastSyncedAction"
           [attr.data-label]="T.F.SYNC.D_CONFLICT.LAST_WRITE | translate"
         >
-          {{ shortenAction(lastSyncedAction || '-') }}
+          {{ shortenAction(local.lastSyncedAction || '-') }}
         </td>
       </tr>
     </table>
 
     <!-- Vector Clock Table -->
-    @if (localVectorClock || remoteVectorClock) {
+    @if (local.vectorClock || remote.vectorClock) {
       <h3>Vector Clock</h3>
       <table>
         <tr>
           <td>{{ T.F.SYNC.D_CONFLICT.REMOTE | translate }}</td>
           <td [attr.data-label]="T.F.SYNC.D_CONFLICT.VECTOR_CLOCK | translate">
-            {{ getVectorClockString(remoteVectorClock) }}
+            {{ getVectorClockString(remote.vectorClock) }}
           </td>
         </tr>
         <tr>
           <td>{{ T.F.SYNC.D_CONFLICT.LOCAL | translate }}</td>
           <td [attr.data-label]="T.F.SYNC.D_CONFLICT.VECTOR_CLOCK | translate">
-            {{ getVectorClockString(localVectorClock) }}
+            {{ getVectorClockString(local.vectorClock) }}
           </td>
         </tr>
         <tr>
           <td>{{ T.F.SYNC.D_CONFLICT.LAST_SYNCED | translate }}</td>
           <td [attr.data-label]="T.F.SYNC.D_CONFLICT.VECTOR_CLOCK | translate">
-            {{ getVectorClockString(lastSyncedVectorClock) }}
+            {{ getVectorClockString(local.lastSyncedVectorClock) }}
           </td>
         </tr>
         <tr>
