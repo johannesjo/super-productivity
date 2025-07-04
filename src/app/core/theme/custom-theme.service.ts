@@ -5,6 +5,7 @@ export interface CustomTheme {
   id: string;
   name: string;
   url: string;
+  requiredMode?: 'dark' | 'light' | 'system';
 }
 
 export const AVAILABLE_CUSTOM_THEMES: CustomTheme[] = [
@@ -12,31 +13,37 @@ export const AVAILABLE_CUSTOM_THEMES: CustomTheme[] = [
     id: 'default',
     name: 'Default',
     url: '',
+    requiredMode: 'system',
   },
   {
     id: 'dracula',
     name: 'Dracula',
     url: 'assets/themes/dracula.css',
+    requiredMode: 'dark',
   },
   {
     id: 'nord-polar-night',
     name: 'Nord Polar Night',
     url: 'assets/themes/nord-polar-night.css',
+    requiredMode: 'dark',
   },
   {
     id: 'nord-snow-storm',
     name: 'Nord Snow Storm',
     url: 'assets/themes/nord-snow-storm.css',
+    requiredMode: 'light',
   },
   {
     id: 'arc',
     name: 'Arc',
     url: 'assets/themes/arc.css',
+    requiredMode: 'dark',
   },
   {
     id: 'dark-base',
     name: 'Dark Base',
     url: 'assets/themes/dark-base.css',
+    requiredMode: 'dark',
   },
 ];
 

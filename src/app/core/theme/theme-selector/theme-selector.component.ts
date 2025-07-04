@@ -52,7 +52,7 @@ import { GlobalConfigService } from '../../../features/config/global-config.serv
       </div>
 
       <div class="theme-select">
-        <h3>Theme</h3>
+        <h3>Theme (experimental)</h3>
         <mat-form-field appearance="outline">
           <mat-label>Select Theme</mat-label>
           <mat-select
@@ -60,7 +60,14 @@ import { GlobalConfigService } from '../../../features/config/global-config.serv
             (selectionChange)="updateCustomTheme($event.value)"
           >
             @for (theme of customThemeService.getAvailableThemes(); track theme.id) {
-              <mat-option [value]="theme.id">{{ theme.name }}</mat-option>
+              <mat-option [value]="theme.id">
+                {{ theme.name }}
+                @if (theme.requiredMode && theme.requiredMode !== 'system') {
+                  <span class="theme-mode-indicator">
+                    ({{ theme.requiredMode === 'dark' ? '🌙' : '☀️' }})
+                  </span>
+                }
+              </mat-option>
             }
           </mat-select>
         </mat-form-field>
@@ -93,6 +100,11 @@ import { GlobalConfigService } from '../../../features/config/global-config.serv
         max-width: 300px;
       }
 
+      .theme-mode-indicator {
+        opacity: 0.7;
+        margin-left: 4px;
+      }
+
       @media (max-width: 600px) {
         .dark-mode-select,
         .theme-select {
@@ -121,5 +133,13 @@ export class ThemeSelectorComponent {
 
   updateCustomTheme(themeId: string): void {
     this.configService.updateSection('misc', { customTheme: themeId });
+
+    // Auto-switch dark mode based on theme requirements
+    const theme = this.customThemeService
+      .getAvailableThemes()
+      .find((t) => t.id === themeId);
+    if (theme?.requiredMode) {
+      this.globalThemeService.darkMode$.next(theme.requiredMode);
+    }
   }
 }
