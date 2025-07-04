@@ -8,6 +8,9 @@
       <tr>
         <th></th>
         <th colspan="2">{{ T.F.SYNC.D_CONFLICT.TIMESTAMP | translate }}</th>
+        <th [title]="T.F.SYNC.D_CONFLICT.CHANGES_SINCE_LAST_SYNC | translate">
+          {{ T.F.SYNC.D_CONFLICT.CHANGES | translate }}
+        </th>
       </tr>
     </thead>
     <tr [class.isHighlight]="isHighlightRemote">
@@ -18,6 +21,11 @@
       <td [attr.data-label]="T.F.SYNC.D_CONFLICT.TIME | translate">
         {{ remote.lastUpdate | date: 'shortTime' }}
       </td>
+      <td [attr.data-label]="T.F.SYNC.D_CONFLICT.CHANGES | translate">
+        <span [class.isHighlight]="isHighlightRemoteChanges">{{
+          remoteChangeCount
+        }}</span>
+      </td>
     </tr>
     <tr [class.isHighlight]="isHighlightLocal">
       <td>{{ T.F.SYNC.D_CONFLICT.LOCAL | translate }}</td>
@@ -26,6 +34,9 @@
       </td>
       <td [attr.data-label]="T.F.SYNC.D_CONFLICT.TIME | translate">
         {{ local.lastUpdate | date: 'shortTime' }}
+      </td>
+      <td [attr.data-label]="T.F.SYNC.D_CONFLICT.CHANGES | translate">
+        <span [class.isHighlight]="isHighlightLocalChanges">{{ localChangeCount }}</span>
       </td>
     </tr>
     <tr>
@@ -40,6 +51,7 @@
       <td [attr.data-label]="T.F.SYNC.D_CONFLICT.TIME | translate">
         {{ local.lastSyncedUpdate ? (local.lastSyncedUpdate | date: 'shortTime') : '-' }}
       </td>
+      <td [attr.data-label]="T.F.SYNC.D_CONFLICT.CHANGES | translate">-</td>
     </tr>
   </table>
 
@@ -107,7 +119,7 @@
 
     <!-- Vector Clock Table -->
     @if (local.vectorClock || remote.vectorClock) {
-      <h3>Vector Clock</h3>
+      <h3>{{ T.F.SYNC.D_CONFLICT.VECTOR_CLOCK_HEADING | translate }}</h3>
       <table>
         <tr>
           <td>{{ T.F.SYNC.D_CONFLICT.REMOTE | translate }}</td>
@@ -148,7 +160,7 @@
     </button>
     <button
       (click)="close('USE_REMOTE')"
-      [color]="isHighlightRemote ? 'primary' : ''"
+      [color]="isHighlightRemote && isHighlightRemoteChanges ? 'primary' : ''"
       mat-stroked-button
     >
       <mat-icon>file_download</mat-icon>
@@ -156,7 +168,7 @@
     </button>
     <button
       (click)="close('USE_LOCAL')"
-      [color]="isHighlightLocal ? 'primary' : ''"
+      [color]="isHighlightLocal && isHighlightLocalChanges ? 'primary' : ''"
       mat-stroked-button
     >
       <mat-icon>file_upload</mat-icon>

@@ -13,6 +13,14 @@ table + table {
   margin-top: 20px;
 }
 
+td span {
+  font-weight: normal;
+}
+
+td span.isHighlight {
+  font-weight: 800;
+}
+
 td,
 th {
   padding: 2px 8px;
@@ -59,53 +67,6 @@ th {
       padding-right: 0;
     }
   }
-
-  // Stack timestamp columns on very small screens
-  @media (max-width: 400px) {
-    table {
-      display: block;
-
-      thead {
-        display: none;
-      }
-
-      tbody,
-      tr {
-        display: block;
-      }
-
-      tr {
-        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-        padding: 8px 0;
-
-        &:last-child {
-          border-bottom: none;
-        }
-      }
-
-      td {
-        display: flex;
-        justify-content: space-between;
-        padding: 2px 0;
-        text-align: left !important;
-
-        &:first-child {
-          width: 100%;
-          font-weight: 500;
-          margin-bottom: 4px;
-        }
-
-        &:not(:first-child) {
-          &::before {
-            content: attr(data-label);
-            font-weight: 400;
-            margin-right: 8px;
-            opacity: 0.7;
-          }
-        }
-      }
-    }
-  }
 }
 
 // Dialog container mobile layout
@@ -122,29 +83,6 @@ th {
       padding: 0 16px;
       max-width: 100%;
       overflow-x: hidden;
-    }
-  }
-}
-
-// Dialog actions mobile layout
-:host ::ng-deep .mat-mdc-dialog-actions {
-  @media (max-width: 600px) {
-    padding: 16px;
-
-    .wrap-buttons {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      gap: 8px;
-
-      button {
-        width: 100%;
-        justify-content: center;
-
-        .mat-icon {
-          margin-right: 8px;
-        }
-      }
     }
   }
 }

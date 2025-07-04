@@ -959,7 +959,11 @@
         "DATE": "Date",
         "TIME": "Time",
         "VECTOR_CLOCK": "Vector Clock",
-        "RESULT": "Result"
+        "RESULT": "Result",
+        "CHANGES": "Changes",
+        "CHANGES_SINCE_LAST_SYNC": "Changes since last sync",
+        "VECTOR_CLOCK_HEADING": "Vector Clock",
+        "OVERWRITE_WARNING": "WARNING: The {{targetName}} data contains approximately {{targetChanges}} changes while the {{sourceName}} data only has {{sourceChanges}} changes. Are you sure you want to overwrite the {{targetName}} data with the {{sourceName}} version? This action cannot be undone."
       },
       "D_DECRYPT_ERROR": {
         "BTN_OVER_WRITE_REMOTE": "Change & Overwrite Remote",
