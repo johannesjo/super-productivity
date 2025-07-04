@@ -222,7 +222,7 @@ export const selectSelectedTask = createSelector(
     if (!s.selectedTaskId || !s.entities[s.selectedTaskId]) {
       return null;
     }
-    return mapSubTasksToTask(s.entities[s.selectedTaskId], s);
+    return mapSubTasksToTask(s.entities[s.selectedTaskId] || null, s);
   },
 );
 
