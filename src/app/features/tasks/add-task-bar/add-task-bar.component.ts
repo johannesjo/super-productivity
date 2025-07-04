@@ -254,7 +254,13 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  async addTask(): Promise<void> {
+  async addTask(ev?: Event): Promise<void> {
+    // Prevent form submission if event is provided and has preventDefault method
+    // This handles cases where event might not be a standard Event object (e.g., in Android WebView)
+    if (ev && typeof ev.preventDefault === 'function') {
+      ev.preventDefault();
+    }
+
     this._isAddInProgress = true;
     const item: AddTaskSuggestion | string = this.taskSuggestionsCtrl.value;
 
