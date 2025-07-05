@@ -1,5 +1,4 @@
 import { inject, Injectable } from '@angular/core';
-import { DatabaseService } from '../../core/persistence/database.service'; // LEGACY - to be migrated
 import { pfLog } from '../../pfapi/api/util/log';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { CompleteBackup } from '../../pfapi/api';
@@ -22,8 +21,7 @@ const TOTAL_BACKUP_SLOTS = 4;
   providedIn: 'root',
 })
 export class SyncSafetyBackupService {
-  // LEGACY: DatabaseService - should migrate to pfapi db adapter
-  private readonly _database = inject(DatabaseService);
+  // NOTE: Using pfapi db adapter directly, DatabaseService is legacy and no longer used
   private readonly _pfapiService = inject(PfapiService);
 
   // Subject to notify components when backups change
