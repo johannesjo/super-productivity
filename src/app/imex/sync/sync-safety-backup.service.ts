@@ -204,9 +204,8 @@ export class SyncSafetyBackupService {
       });
 
       try {
-        await this._pfapiService.importCompleteBackup(backup.data, false, true);
-        // Increment vector clock to prevent immediate overwrite by sync
-        await this._incrementVectorClockAfterRestore();
+        // Import backup with: isSkipLegacyWarnings=false, isSkipReload=true, isForceConflict=true
+        await this._pfapiService.importCompleteBackup(backup.data, false, true, true);
 
         pfLog(1, 'SyncSafetyBackupService: Backup restored successfully', { backupId });
       } catch (error) {
@@ -350,13 +349,5 @@ export class SyncSafetyBackupService {
 
   private _generateBackupId(): string {
     return `backup_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
-
-  /**
-   * Increments the vector clock after restoring a backup to prevent immediate sync overwrite
-   */
-  private async _incrementVectorClockAfterRestore(): Promise<void> {
-    // Delegate to the MetaModelCtrl method
-    await this._pfapiService.pf.metaModel.incrementVectorClockForRestore();
   }
 }

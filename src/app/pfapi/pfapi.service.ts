@@ -137,11 +137,12 @@ export class PfapiService {
     data: AppDataCompleteNew | CompleteBackup<PfapiAllModelCfg>,
     isSkipLegacyWarnings: boolean = false,
     isSkipReload: boolean = false,
+    isForceConflict: boolean = false,
   ): Promise<void> {
     try {
       this._imexViewService.setDataImportInProgress(true);
       if ('crossModelVersion' in data && 'timestamp' in data) {
-        await this.pf.importCompleteBackup(data, isSkipLegacyWarnings);
+        await this.pf.importCompleteBackup(data, isSkipLegacyWarnings, isForceConflict);
       } else {
         await this.pf.importCompleteBackup(
           {
@@ -152,6 +153,7 @@ export class PfapiService {
             crossModelVersion: 0,
           },
           isSkipLegacyWarnings,
+          isForceConflict,
         );
       }
 

@@ -287,54 +287,6 @@ export class MetaModelCtrl {
   }
 
   /**
-   * Increments the vector clock after restoring a backup to prevent immediate sync overwrite
-   */
-  async incrementVectorClockForRestore(): Promise<void> {
-    try {
-      const metaData = await this.load();
-      const clientId = await this.loadClientId();
-
-      if (metaData.vectorClock) {
-        // Increment this client's vector clock component
-        metaData.vectorClock[clientId] = (metaData.vectorClock[clientId] || 0) + 1;
-
-        // Save the updated metadata
-        // IMPORTANT: Keep lastSyncedVectorClock as is (don't update it)
-        // This ensures a sync conflict will be detected on next sync
-        await this.save({
-          ...metaData,
-          metaRev: 'LOCAL_' + Date.now(),
-          lastUpdate: Date.now(),
-          // Explicitly preserve lastSyncedVectorClock to ensure conflict detection
-          lastSyncedVectorClock: metaData.lastSyncedVectorClock,
-          // Mark that we've modified data since last sync
-          lastUpdateAction: 'Restored from backup',
-        });
-
-        pfLog(
-          1,
-          `${MetaModelCtrl.L}.incrementVectorClockForRestore() incremented vector clock`,
-          {
-            clientId,
-            newValue: metaData.vectorClock[clientId],
-            vectorClock: metaData.vectorClock,
-            lastSyncedVectorClock: metaData.lastSyncedVectorClock,
-          },
-        );
-      } else {
-        devError('No vector clock found');
-      }
-    } catch (error) {
-      pfLog(
-        0,
-        `${MetaModelCtrl.L}.incrementVectorClockForRestore() failed to increment vector clock`,
-        { error },
-      );
-      // Don't throw - the restore was successful, this is just a sync optimization
-    }
-  }
-
-  /**
    * Saves the client ID to storage
    *
    * @param clientId Client ID to save
@@ -351,6 +303,16 @@ export class MetaModelCtrl {
    *
    * @returns Generated client ID
    */
+  async generateNewClientId(): Promise<string> {
+    const newClientId = this._generateClientId();
+    // Save the new client ID
+    await this._db.save(MetaModelCtrl.CLIENT_ID, newClientId, true);
+    pfLog(1, `${MetaModelCtrl.L}.generateNewClientId() generated new client ID`, {
+      newClientId,
+    });
+    return newClientId;
+  }
+
   private _generateClientId(): string {
     pfLog(2, `${MetaModelCtrl.L}.${this._generateClientId.name}()`);
     return getEnvironmentId() + '_' + Date.now();

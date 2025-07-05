@@ -9,6 +9,7 @@ import {
   ModelCfgToModelCtrl,
   PfapiBaseCfg,
   PrivateCfgByProviderId,
+  VectorClock,
 } from './pfapi.model';
 import { SyncService } from './sync/sync.service';
 import { Database } from './db/database';
@@ -285,8 +286,10 @@ export class Pfapi<const MD extends ModelCfgs> {
   async importCompleteBackup(
     backup: CompleteBackup<MD>,
     isSkipLegacyWarnings: boolean = false,
+    isForceConflict: boolean = false,
   ): Promise<void> {
-    return await this.importAllSycModelData({
+    // First import the data
+    await this.importAllSycModelData({
       data: backup.data,
       crossModelVersion: backup.crossModelVersion,
       // TODO maybe also make model versions work
@@ -294,6 +297,28 @@ export class Pfapi<const MD extends ModelCfgs> {
       isAttemptRepair: true,
       isSkipLegacyWarnings,
     });
+
+    // If we want to force a conflict, reset sync metadata with fresh vector clock
+    if (isForceConflict) {
+      // Generate a new client ID to represent this as a fresh client
+      const newClientId = await this.metaModel.generateNewClientId();
+
+      // Create a fresh vector clock with just this client
+      const freshVectorClock: VectorClock = {
+        [newClientId]: 1,
+      };
+
+      await this.metaModel.save({
+        crossModelVersion: backup.crossModelVersion,
+        lastUpdate: Date.now(),
+        lastSyncedUpdate: null, // No sync history
+        lastSyncedVectorClock: null, // No sync history
+        vectorClock: freshVectorClock,
+        metaRev: null, // No remote rev
+        lastUpdateAction: 'Restored from backup with fresh sync state',
+        revMap: {}, // Will be populated on next save
+      });
+    }
   }
 
   async importAllSycModelData({
