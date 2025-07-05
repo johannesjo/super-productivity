@@ -299,10 +299,16 @@ export class MetaModelCtrl {
         metaData.vectorClock[clientId] = (metaData.vectorClock[clientId] || 0) + 1;
 
         // Save the updated metadata
+        // IMPORTANT: Keep lastSyncedVectorClock as is (don't update it)
+        // This ensures a sync conflict will be detected on next sync
         await this.save({
           ...metaData,
           metaRev: 'LOCAL_' + Date.now(),
           lastUpdate: Date.now(),
+          // Explicitly preserve lastSyncedVectorClock to ensure conflict detection
+          lastSyncedVectorClock: metaData.lastSyncedVectorClock,
+          // Mark that we've modified data since last sync
+          lastUpdateAction: 'Restored from backup',
         });
 
         pfLog(
@@ -311,6 +317,8 @@ export class MetaModelCtrl {
           {
             clientId,
             newValue: metaData.vectorClock[clientId],
+            vectorClock: metaData.vectorClock,
+            lastSyncedVectorClock: metaData.lastSyncedVectorClock,
           },
         );
       } else {
