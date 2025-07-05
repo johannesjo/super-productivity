@@ -1,133 +1,125 @@
 /**
  * Dark Base Theme for Super Productivity
- * Minimal dark theme with no shadows
+ * Minimal dark theme with enhanced accessibility and smooth transitions
  */
 
-/* Remove all shadows */
+/* Remove all shadows for minimal aesthetic */
 * {
   box-shadow: none !important;
 }
 
-/* Hide gradient backgrounds */
-body .first-line:hover .hover-controls::before,
-body.isDarkTheme .first-line:hover .hover-controls::before,
-body.isDarkTheme.isDisableBackgroundGradient .first-line:hover .hover-controls::before,
-body.isDarkTheme.isDisableBackgroundGradient::before,
-body.isDarkTheme::before,
-body.isDisableBackgroundGradient .first-line:hover .hover-controls::before,
-body.isDisableBackgroundGradient::before,
-body.isEnabledBackgroundGradient .first-line:hover .hover-controls::before,
-body.isEnabledBackgroundGradient::before,
-body.isLightTheme .first-line:hover .hover-controls::before,
-body.isLightTheme.isDisableBackgroundGradient .first-line:hover .hover-controls::before,
-body.isLightTheme.isDisableBackgroundGradient::before,
-body.isLightTheme::before,
-body.isMac.isEnabledBackgroundGradient .first-line:hover .hover-controls::before,
-body.isMac.isEnabledBackgroundGradient::before,
-body.isWeb.isEnabledBackgroundGradient .first-line:hover .hover-controls::before,
-body.isWeb.isEnabledBackgroundGradient::before,
-body::before {
-  display: none;
+/* Smooth transitions for better UX */
+:root {
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 250ms ease-in-out;
 }
 
-/* Override CSS variables for dark base theme */
+/* Dark theme variables */
 body.isDarkTheme {
   /* ===============================
    * BACKGROUND COLORS
    * ===============================*/
 
-  /* Main backgrounds */
-  --bg: #121212;
-  --bg-darker: #121212;
-  --bg-slightly-lighter: #1e1e1e;
-  --bg-lighter: #222222;
-  --bg-lightest: #2c2c2c;
-  --bg-super-light: #383838;
+  /* Main backgrounds - improved contrast */
+  --bg: #0a0a0a;
+  --bg-darker: #050505;
+  --bg-slightly-lighter: #141414;
+  --bg-lighter: #1a1a1a;
+  --bg-lightest: #242424;
+  --bg-super-light: #2e2e2e;
 
   /* Component backgrounds */
-  --card-bg: #222222;
-  --sidebar-bg: #2e2e2e;
-  --selected-task-bg-color: #2c2c2c;
-  --banner-bg: #383838;
+  --card-bg: #141414;
+  --sidebar-bg: #0f0f0f;
+  --selected-task-bg-color: #1f1f1f;
+  --banner-bg: #1a1a1a;
 
-  /* Task backgrounds */
-  --task-c-bg: #1e1e1e;
-  --task-c-selected-bg: #2c2c2c;
-  --sub-task-c-bg: #1e1e1e;
-  --sub-task-c-bg-done: #1a1a1a;
-  --task-c-bg-done: #1a1a1a;
-  --task-c-current-bg: #2c2c2c;
-  --task-c-drag-drop-bg: #2c2c2c;
-  --sub-task-c-bg-in-selected: #242424;
+  /* Task backgrounds with better hierarchy */
+  --task-c-bg: #141414;
+  --task-c-selected-bg: #1f1f1f;
+  --sub-task-c-bg: #0f0f0f;
+  --sub-task-c-bg-done: #0a0a0a;
+  --task-c-bg-done: #0a0a0a;
+  --task-c-current-bg: #242424;
+  --task-c-drag-drop-bg: #2e2e2e;
+  --sub-task-c-bg-in-selected: #1a1a1a;
 
   /* Note backgrounds */
-  --standard-note-bg: #222222;
-  --standard-note-bg-hovered: #2c2c2c;
+  --standard-note-bg: #1a1a1a;
+  --standard-note-bg-hovered: #242424;
 
   /* ===============================
-   * TEXT COLORS
+   * TEXT COLORS - WCAG AA compliant
    * ===============================*/
 
-  --text-color: #ebebeb;
-  --text-color-less-intense: rgba(235, 235, 235, 0.9);
-  --text-color-muted: rgba(235, 235, 235, 0.6);
+  --text-color: #e0e0e0;
+  --text-color-less-intense: rgba(224, 224, 224, 0.87);
+  --text-color-muted: rgba(224, 224, 224, 0.54);
   --text-color-more-intense: #f5f5f5;
   --text-color-most-intense: #ffffff;
 
   /* Note text */
-  --standard-note-fg: #ebebeb;
+  --standard-note-fg: #e0e0e0;
 
   /* Task detail */
-  --task-detail-value-color: rgba(235, 235, 235, 0.7);
+  --task-detail-value-color: rgba(224, 224, 224, 0.7);
 
   /* ===============================
    * BORDERS & SEPARATORS
    * ===============================*/
 
-  --extra-border-color: #3d3d3d;
-  --separator-color: rgba(61, 61, 61, 0.5);
-  --divider-color: #2e2e2e;
+  --extra-border-color: #2a2a2a;
+  --separator-color: rgba(255, 255, 255, 0.08);
+  --divider-color: #1f1f1f;
 
   /* Chip borders */
-  --chip-outline-color: rgba(235, 235, 235, 0.3);
+  --chip-outline-color: rgba(224, 224, 224, 0.23);
 
   /* ===============================
    * ACCENT & THEME COLORS
    * ===============================*/
 
-  /* Pink/purple accent */
+  /* High contrast pink accent */
   --palette-accent-500: #ff4081;
   --c-accent: #ff4081;
+  --palette-accent-100: #ff80ab;
+  --palette-accent-200: #ff669a;
+  --palette-accent-300: #ff4d88;
+  --palette-accent-400: #ff3377;
+  --palette-accent-600: #e63771;
+  --palette-accent-700: #cc2b60;
+  --palette-accent-800: #b31f50;
+  --palette-accent-900: #991340;
 
   /* ===============================
    * UI ELEMENTS
    * ===============================*/
 
-  /* Scrollbar */
-  --scrollbar-thumb: #424242;
-  --scrollbar-thumb-hover: #555555;
-  --scrollbar-track: #121212;
+  /* Scrollbar - improved visibility */
+  --scrollbar-thumb: #3a3a3a;
+  --scrollbar-thumb-hover: #4a4a4a;
+  --scrollbar-track: #0a0a0a;
 
   /* Close button */
-  --close-btn-bg: #383838;
-  --close-btn-border: #3d3d3d;
+  --close-btn-bg: #2e2e2e;
+  --close-btn-border: transparent;
 
   /* Select/Options */
-  --select-hover-bg: rgba(255, 64, 129, 0.15);
+  --select-hover-bg: rgba(255, 64, 129, 0.12);
   --options-border-color: rgba(255, 64, 129, 0.2);
 
   /* Attachments */
-  --attachment-bg: #222222;
+  --attachment-bg: #1a1a1a;
   --attachment-border: transparent;
-  --attachment-control-bg: rgba(0, 0, 0, 0.3);
-  --attachment-control-border: rgba(0, 0, 0, 0.4);
-  --attachment-control-hover-bg: rgba(0, 0, 0, 0.7);
+  --attachment-control-bg: rgba(0, 0, 0, 0.4);
+  --attachment-control-border: transparent;
+  --attachment-control-hover-bg: rgba(0, 0, 0, 0.8);
 
   /* Grid */
-  --grid-color: rgba(235, 235, 235, 0.1);
+  --grid-color: rgba(255, 255, 255, 0.06);
 
   /* Progress */
-  --progress-bg: rgba(235, 235, 235, 0.2);
+  --progress-bg: rgba(255, 255, 255, 0.12);
 
   /* Improvement banner */
   --improvement-text: #f5f5f5;
@@ -138,12 +130,9 @@ body.isDarkTheme {
    * SHADOWS - DISABLED
    * ===============================*/
 
-  /* Remove all shadows for minimal look */
   --shadow-key-umbra-opacity: 0;
   --shadow-key-penumbra-opacity: 0;
   --shadow-ambient-shadow-opacity: 0;
-
-  /* Task shadows - disabled */
   --task-current-shadow: none;
   --task-selected-shadow: none;
 
@@ -153,46 +142,70 @@ body.isDarkTheme {
 
   --hover-controls-border: none;
   --hover-controls-border-opacity: 0;
+
+  /* ===============================
+   * INTERACTION STATES
+   * ===============================*/
+
+  --hover-bg-opacity: 0.04;
+  --focus-bg-opacity: 0.08;
+  --pressed-bg-opacity: 0.12;
+  --disabled-opacity: 0.38;
 }
 
-/* Apply background color to all body variants */
+/* Hide gradient backgrounds */
+body::before,
+body .first-line:hover .hover-controls::before {
+  display: none !important;
+}
+
+/* Apply background and text colors */
 body,
-body.isDarkTheme,
-body.isDarkTheme.isDisableBackgroundGradient,
-body.isDisableBackgroundGradient,
-body.isEnabledBackgroundGradient,
-body.isLightTheme,
-body.isLightTheme.isDisableBackgroundGradient,
-body.isMac.isEnabledBackgroundGradient,
-body.isWeb.isEnabledBackgroundGradient {
+body.isDarkTheme {
   background-color: var(--bg);
+  color: var(--text-color);
+  transition:
+    background-color var(--transition-normal),
+    color var(--transition-normal);
 }
 
-/* Apply text color to all body variants */
-body,
+/* Page wrapper */
 body .page-wrapper,
-body.isDarkTheme,
-body.isDarkTheme .page-wrapper,
-body.isDarkTheme.isDisableBackgroundGradient .page-wrapper,
-body.isDisableBackgroundGradient .page-wrapper,
-body.isEnabledBackgroundGradient .page-wrapper,
-body.isLightTheme .page-wrapper,
-body.isLightTheme.isDisableBackgroundGradient .page-wrapper,
-body.isMac.isEnabledBackgroundGradient .page-wrapper,
-body.isWeb.isEnabledBackgroundGradient .page-wrapper {
+body.isDarkTheme .page-wrapper {
   color: var(--text-color);
 }
 
-/* Version footer links */
-body .version-footer a[href],
-body.isDarkTheme .version-footer a[href],
-body.isDarkTheme.isDisableBackgroundGradient .version-footer a[href],
-body.isDisableBackgroundGradient .version-footer a[href],
-body.isEnabledBackgroundGradient .version-footer a[href],
-body.isLightTheme .version-footer a[href],
-body.isLightTheme.isDisableBackgroundGradient .version-footer a[href],
-body.isMac.isEnabledBackgroundGradient .version-footer a[href],
-body.isWeb.isEnabledBackgroundGradient .version-footer a[href] {
+/* Links */
+a,
+body a[href],
+body.isDarkTheme a[href] {
   color: var(--c-accent);
   text-decoration: none;
+  transition: opacity var(--transition-fast);
+}
+
+a:hover,
+body a[href]:hover,
+body.isDarkTheme a[href]:hover {
+  opacity: 0.8;
+}
+
+/* Smooth hover states */
+.task-c:hover,
+.sub-task-c:hover {
+  background-color: var(--task-c-selected-bg);
+  transition: background-color var(--transition-fast);
+}
+
+/* Focus visible for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--c-accent);
+  outline-offset: 2px;
+}
+
+/* Material overrides */
+body.isDarkTheme {
+  --mdc-theme-surface: var(--card-bg);
+  --mdc-theme-on-surface: var(--text-color);
+  --mdc-theme-background: var(--bg);
 }
