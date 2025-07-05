@@ -15,17 +15,19 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { T } from '../../../t.const';
 import { CommonModule } from '@angular/common';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'sync-safety-backups',
   templateUrl: './sync-safety-backups.component.html',
   styleUrls: ['./sync-safety-backups.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatIcon, MatButton, MatTooltip],
+  imports: [CommonModule, MatIcon, MatButton, MatTooltip, TranslatePipe],
 })
 export class SyncSafetyBackupsComponent implements OnInit, OnDestroy {
   private _syncSafetyBackupService = inject(SyncSafetyBackupService);
   private _snackService = inject(SnackService);
+  private _translateService = inject(TranslateService);
   private _destroy$ = new Subject<void>();
 
   readonly backups = signal<SyncSafetyBackup[]>([]);
@@ -72,13 +74,13 @@ export class SyncSafetyBackupsComponent implements OnInit, OnDestroy {
       // No need to manually reload - the service will emit backupsChanged$
       this._snackService.open({
         type: 'SUCCESS',
-        msg: 'Manual backup created successfully',
+        msg: T.F.SYNC.SAFETY_BACKUP.CREATED_SUCCESS,
       });
     } catch (error) {
       console.error('Failed to create manual backup:', error);
       this._snackService.open({
         type: 'ERROR',
-        msg: 'Failed to create manual backup',
+        msg: T.F.SYNC.SAFETY_BACKUP.CREATE_FAILED,
       });
     } finally {
       this.isLoading.set(false);
@@ -91,7 +93,7 @@ export class SyncSafetyBackupsComponent implements OnInit, OnDestroy {
       await this._syncSafetyBackupService.restoreBackup(backup.id);
       this._snackService.open({
         type: 'SUCCESS',
-        msg: 'Backup restored successfully. The page will reload.',
+        msg: T.F.SYNC.SAFETY_BACKUP.RESTORED_SUCCESS,
       });
       // Reload the page after restoration
       setTimeout(() => window.location.reload(), 1000);
@@ -117,13 +119,13 @@ export class SyncSafetyBackupsComponent implements OnInit, OnDestroy {
         // No need to manually reload - the service will emit backupsChanged$
         this._snackService.open({
           type: 'SUCCESS',
-          msg: 'Backup deleted successfully',
+          msg: T.F.SYNC.SAFETY_BACKUP.DELETED_SUCCESS,
         });
       } catch (error) {
         console.error('Failed to delete backup:', error);
         this._snackService.open({
           type: 'ERROR',
-          msg: 'Failed to delete backup',
+          msg: T.F.SYNC.SAFETY_BACKUP.DELETE_FAILED,
         });
       }
     }
@@ -140,13 +142,13 @@ export class SyncSafetyBackupsComponent implements OnInit, OnDestroy {
         // No need to manually reload - the service will emit backupsChanged$
         this._snackService.open({
           type: 'SUCCESS',
-          msg: 'All backups cleared successfully',
+          msg: T.F.SYNC.SAFETY_BACKUP.CLEARED_SUCCESS,
         });
       } catch (error) {
         console.error('Failed to clear backups:', error);
         this._snackService.open({
           type: 'ERROR',
-          msg: 'Failed to clear backups',
+          msg: T.F.SYNC.SAFETY_BACKUP.CLEAR_FAILED,
         });
       }
     }
@@ -159,9 +161,11 @@ export class SyncSafetyBackupsComponent implements OnInit, OnDestroy {
   getReasonText(reason: SyncSafetyBackup['reason']): string {
     switch (reason) {
       case 'BEFORE_UPDATE_LOCAL':
-        return 'Automatic';
+        return this._translateService.instant(
+          T.F.SYNC.SAFETY_BACKUP.REASON_BEFORE_UPDATE,
+        );
       case 'MANUAL':
-        return 'Manual';
+        return this._translateService.instant(T.F.SYNC.SAFETY_BACKUP.REASON_MANUAL);
       default:
         return reason;
     }
@@ -178,13 +182,13 @@ export class SyncSafetyBackupsComponent implements OnInit, OnDestroy {
     const isFromToday = backup.timestamp >= todayStart;
 
     if (index < 2) {
-      return `Slot ${index + 1}: Recent backup`;
+      return `Slot ${index + 1}: ${this._translateService.instant(T.F.SYNC.SAFETY_BACKUP.SLOT_RECENT)}`;
     } else if (index === 2) {
       return isFromToday
-        ? 'Slot 3: First backup today'
+        ? `Slot 3: ${this._translateService.instant(T.F.SYNC.SAFETY_BACKUP.SLOT_TODAY)}`
         : 'Slot 3: Backup from ' + this.getRelativeDay(backup.timestamp);
     } else if (index === 3) {
-      return 'Slot 4: ' + this.getRelativeDay(backup.timestamp);
+      return `Slot 4: ${this._translateService.instant(T.F.SYNC.SAFETY_BACKUP.SLOT_BEFORE_TODAY)}`;
     }
     return '';
   }

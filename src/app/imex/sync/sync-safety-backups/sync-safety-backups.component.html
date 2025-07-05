@@ -1,8 +1,4 @@
-<p>
-  Automatic backups are created before downloading data from remote during sync
-  operations. Backups are organized in 4 smart slots: 2 most recent, 1 first from today,
-  and 1 first from a day before today.
-</p>
+<p>{{ T.F.SYNC.SAFETY_BACKUP.DESCRIPTION | translate }}</p>
 
 <div class="backup-actions">
   <button
@@ -11,10 +7,10 @@
     mat-stroked-button
     type="button"
     [disabled]="isLoading()"
-    matTooltip="Create a manual backup of all your data"
+    [matTooltip]="T.F.SYNC.SAFETY_BACKUP.TOOLTIP_CREATE_MANUAL | translate"
   >
     <mat-icon>backup</mat-icon>
-    Create Manual Backup
+    {{ T.F.SYNC.SAFETY_BACKUP.BTN_CREATE_MANUAL | translate }}
   </button>
 
   <button
@@ -23,10 +19,10 @@
     mat-button
     type="button"
     [disabled]="isLoading()"
-    matTooltip="Refresh the backup list"
+    [matTooltip]="T.F.SYNC.SAFETY_BACKUP.TOOLTIP_REFRESH | translate"
   >
     <mat-icon>refresh</mat-icon>
-    Refresh
+    {{ T.F.SYNC.SAFETY_BACKUP.BTN_REFRESH | translate }}
   </button>
 
   @if (backups().length > 0) {
@@ -36,10 +32,10 @@
       mat-button
       type="button"
       [disabled]="isLoading()"
-      matTooltip="Delete all safety backups"
+      [matTooltip]="T.F.SYNC.SAFETY_BACKUP.TOOLTIP_CLEAR_ALL | translate"
     >
       <mat-icon>delete_sweep</mat-icon>
-      Clear All
+      {{ T.F.SYNC.SAFETY_BACKUP.BTN_CLEAR_ALL | translate }}
     </button>
   }
 </div>
@@ -47,15 +43,14 @@
 @if (isLoading()) {
   <div class="loading-indicator">
     <mat-icon>hourglass_empty</mat-icon>
-    Loading...
+    {{ T.F.SYNC.SAFETY_BACKUP.LOADING | translate }}
   </div>
 }
 
 @if (backups().length === 0 && !isLoading()) {
   <div class="no-backups">
     <mat-icon>info</mat-icon>
-    No safety backups available yet. Backups are created automatically before sync
-    operations.
+    {{ T.F.SYNC.SAFETY_BACKUP.NO_BACKUPS | translate }}
   </div>
 }
 
@@ -72,7 +67,8 @@
             <div class="backup-subtitle">
               {{ getSlotInfo(backup, i) }} • {{ getReasonText(backup.reason) }}
               @if (backup.lastChangedModelId) {
-                • Last change: {{ backup.lastChangedModelId }}
+                • {{ T.F.SYNC.SAFETY_BACKUP.LAST_CHANGE_PREFIX | translate }}
+                {{ backup.lastChangedModelId }}
               }
             </div>
           </div>
@@ -85,10 +81,10 @@
             mat-button
             type="button"
             [disabled]="isLoading()"
-            matTooltip="Restore this backup (will replace all current data)"
+            [matTooltip]="T.F.SYNC.SAFETY_BACKUP.TOOLTIP_RESTORE | translate"
           >
             <mat-icon>restore</mat-icon>
-            Restore
+            {{ T.F.SYNC.SAFETY_BACKUP.BTN_RESTORE | translate }}
           </button>
 
           <button
@@ -97,10 +93,10 @@
             mat-button
             type="button"
             [disabled]="isLoading()"
-            matTooltip="Delete this backup"
+            [matTooltip]="T.F.SYNC.SAFETY_BACKUP.TOOLTIP_DELETE | translate"
           >
             <mat-icon>delete</mat-icon>
-            Delete
+            {{ T.F.SYNC.SAFETY_BACKUP.BTN_DELETE | translate }}
           </button>
         </div>
       </div>
