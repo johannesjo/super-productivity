@@ -1646,7 +1646,15 @@
       "START_OF_NEXT_DAY": "Start time of the next day",
       "START_OF_NEXT_DAY_HINT": "from when (in hour) you want to count the next day has started. default is midnight which is 0.",
       "TASK_NOTES_TPL": "Task description template",
-      "TITLE": "Misc Settings"
+      "TITLE": "Misc Settings",
+      "DARK_MODE": "Dark Mode",
+      "DARK_MODE_SYSTEM": "System",
+      "DARK_MODE_DARK": "Dark",
+      "DARK_MODE_LIGHT": "Light",
+      "DARK_MODE_ARIA_LABEL": "Dark mode selection",
+      "THEME": "Theme",
+      "THEME_EXPERIMENTAL": "Theme (experimental)",
+      "THEME_SELECT_LABEL": "Select Theme"
     },
     "POMODORO": {
       "BREAK_DURATION": "Duration of short breaks",

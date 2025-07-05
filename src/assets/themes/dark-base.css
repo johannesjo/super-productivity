@@ -1,0 +1,2989 @@
+body,
+body .page-wrapper,
+body.isDarkTheme,
+body.isDarkTheme .page-wrapper,
+body.isDarkTheme.isDisableBackgroundGradient .page-wrapper,
+body.isDisableBackgroundGradient .page-wrapper,
+body.isEnabledBackgroundGradient .page-wrapper,
+body.isLightTheme .page-wrapper,
+body.isLightTheme.isDisableBackgroundGradient .page-wrapper,
+body.isMac.isEnabledBackgroundGradient .page-wrapper,
+body.isWeb.isEnabledBackgroundGradient .page-wrapper {
+  color: var(--color-foreground);
+}
+.isLightTheme .first-line:hover .hover-controls::before,
+body .first-line:hover .hover-controls::before,
+body.isDarkTheme .first-line:hover .hover-controls::before,
+body.isDarkTheme.isDisableBackgroundGradient .first-line:hover .hover-controls::before,
+body.isDarkTheme.isDisableBackgroundGradient::before,
+body.isDarkTheme::before,
+body.isDisableBackgroundGradient .first-line:hover .hover-controls::before,
+body.isDisableBackgroundGradient::before,
+body.isEnabledBackgroundGradient .first-line:hover .hover-controls::before,
+body.isEnabledBackgroundGradient::before,
+body.isLightTheme .first-line:hover .hover-controls::before,
+body.isLightTheme.isDisableBackgroundGradient .first-line:hover .hover-controls::before,
+body.isLightTheme.isDisableBackgroundGradient::before,
+body.isLightTheme::before,
+body.isMac.isEnabledBackgroundGradient .first-line:hover .hover-controls::before,
+body.isMac.isEnabledBackgroundGradient::before,
+body.isWeb.isEnabledBackgroundGradient .first-line:hover .hover-controls::before,
+body.isWeb.isEnabledBackgroundGradient::before,
+body::before {
+  display: none;
+}
+:root {
+  --color-white: #fff;
+  --color-foreground: #ebebeb;
+  --color-background-sidebar: #2e2e2e;
+  --color-border-sidebar: #2e2e2e;
+  --color-border-divider-sidebar: #2e2e2e;
+  --color-background-main: #121212;
+  --color-background-panels: #222;
+  --color-border-panels: #3d3d3d;
+  --color-background-slide-toggle-bar-disabled: #444;
+  --color-background-setting-buttons: #424242;
+  --color-background-banner: #383838;
+  --color-background-task: #1e1e1e;
+  --color-disabled-dates: rgba(255, 255, 255, 0.4);
+  --color-tag-title: rgba(255, 255, 255, 0.6);
+  --color-large-toggle-panels: #272727;
+  --color-large-toggle-panels-inputs: #2c2c2c;
+  --color-inputs-focused: var(--color-background-task);
+  --color-purple: #ff4081;
+  --color-accent: var(--color-purple);
+  --palette-accent-500: var(--color-accent);
+  --color-info-bar: var(--color-tag-title);
+}
+* {
+  box-shadow: none !important;
+}
+body,
+body.isDarkTheme,
+body.isDarkTheme.isDisableBackgroundGradient,
+body.isDisableBackgroundGradient,
+body.isEnabledBackgroundGradient,
+body.isLightTheme,
+body.isLightTheme.isDisableBackgroundGradient,
+body.isMac.isEnabledBackgroundGradient,
+body.isWeb.isEnabledBackgroundGradient {
+  background-color: var(--color-background-main);
+}
+body .version-footer a[href],
+body.isDarkTheme .version-footer a[href],
+body.isDarkTheme.isDisableBackgroundGradient .version-footer a[href],
+body.isDisableBackgroundGradient .version-footer a[href],
+body.isEnabledBackgroundGradient .version-footer a[href],
+body.isLightTheme .version-footer a[href],
+body.isLightTheme.isDisableBackgroundGradient .version-footer a[href],
+body.isMac.isEnabledBackgroundGradient .version-footer a[href],
+body.isWeb.isEnabledBackgroundGradient .version-footer a[href] {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+body :focus .input-item,
+body :focus .mat-expansion-panel,
+body :focus > .inner-wrapper > .box,
+body.isDarkTheme :focus .input-item,
+body.isDarkTheme :focus .mat-expansion-panel,
+body.isDarkTheme :focus > .inner-wrapper > .box,
+body.isDarkTheme.isDisableBackgroundGradient :focus .input-item,
+body.isDarkTheme.isDisableBackgroundGradient :focus .mat-expansion-panel,
+body.isDarkTheme.isDisableBackgroundGradient :focus > .inner-wrapper > .box,
+body.isDarkTheme.isDisableBackgroundGradient.isNoTouchOnly :focus > .inner-wrapper > .box,
+body.isDarkTheme.isDisableBackgroundGradient.isNoTouchOnly:focus > .inner-wrapper > .box,
+body.isDarkTheme.isNoTouchOnly :focus > .inner-wrapper > .box,
+body.isDarkTheme.isNoTouchOnly:focus > .inner-wrapper > .box,
+body.isDisableBackgroundGradient :focus .input-item,
+body.isDisableBackgroundGradient :focus .mat-expansion-panel,
+body.isDisableBackgroundGradient :focus > .inner-wrapper > .box,
+body.isDisableBackgroundGradient.isNoTouchOnly :focus > .inner-wrapper > .box,
+body.isDisableBackgroundGradient.isNoTouchOnly:focus > .inner-wrapper > .box,
+body.isEnabledBackgroundGradient :focus .input-item,
+body.isEnabledBackgroundGradient :focus .mat-expansion-panel,
+body.isEnabledBackgroundGradient :focus > .inner-wrapper > .box,
+body.isEnabledBackgroundGradient.isNoTouchOnly :focus > .inner-wrapper > .box,
+body.isEnabledBackgroundGradient.isNoTouchOnly:focus > .inner-wrapper > .box,
+body.isLightTheme :focus .input-item,
+body.isLightTheme :focus .mat-expansion-panel,
+body.isLightTheme :focus > .inner-wrapper > .box,
+body.isLightTheme.isDisableBackgroundGradient :focus .input-item,
+body.isLightTheme.isDisableBackgroundGradient :focus .mat-expansion-panel,
+body.isLightTheme.isDisableBackgroundGradient :focus > .inner-wrapper > .box,
+body.isLightTheme.isDisableBackgroundGradient.isNoTouchOnly
+  :focus
+  > .inner-wrapper
+  > .box,
+body.isLightTheme.isDisableBackgroundGradient.isNoTouchOnly:focus > .inner-wrapper > .box,
+body.isLightTheme.isNoTouchOnly :focus > .inner-wrapper > .box,
+body.isLightTheme.isNoTouchOnly:focus > .inner-wrapper > .box,
+body.isMac.isEnabledBackgroundGradient :focus .input-item,
+body.isMac.isEnabledBackgroundGradient :focus .mat-expansion-panel,
+body.isMac.isEnabledBackgroundGradient :focus > .inner-wrapper > .box,
+body.isMac.isEnabledBackgroundGradient.isNoTouchOnly :focus > .inner-wrapper > .box,
+body.isMac.isEnabledBackgroundGradient.isNoTouchOnly:focus > .inner-wrapper > .box,
+body.isNoTouchOnly :focus > .inner-wrapper > .box,
+body.isNoTouchOnly:focus > .inner-wrapper > .box,
+body.isWeb.isEnabledBackgroundGradient :focus .input-item,
+body.isWeb.isEnabledBackgroundGradient :focus .mat-expansion-panel,
+body.isWeb.isEnabledBackgroundGradient :focus > .inner-wrapper > .box,
+body.isWeb.isEnabledBackgroundGradient.isNoTouchOnly :focus > .inner-wrapper > .box,
+body.isWeb.isEnabledBackgroundGradient.isNoTouchOnly:focus > .inner-wrapper > .box {
+  border-color: var(--color-accent) !important;
+}
+body .bg-accent,
+body.isDarkTheme .bg-accent,
+body.isDarkTheme.isDisableBackgroundGradient .bg-accent,
+body.isDisableBackgroundGradient .bg-accent,
+body.isEnabledBackgroundGradient .bg-accent,
+body.isLightTheme .bg-accent,
+body.isLightTheme.isDisableBackgroundGradient .bg-accent,
+body.isMac.isEnabledBackgroundGradient .bg-accent,
+body.isWeb.isEnabledBackgroundGradient .bg-accent {
+  background-color: var(--color-accent);
+}
+body .project .project-color:not([style]),
+body .project .tag-color:not([style]),
+body .project.isActiveContext .project-color:not([style]),
+body .project.isActiveContext .tag-color:not([style]),
+body .project.isActiveRoute::before:not([style]),
+body .project:hover .project-color:not([style]),
+body .project:hover .tag-color:not([style]),
+body .route-link .project-color:not([style]),
+body .route-link .tag-color:not([style]),
+body .route-link.isActiveContext .project-color:not([style]),
+body .route-link.isActiveContext .tag-color:not([style]),
+body .route-link.isActiveRoute::before:not([style]),
+body .route-link:hover .project-color:not([style]),
+body .route-link:hover .tag-color:not([style]),
+body .tag .project-color:not([style]),
+body .tag .tag-color:not([style]),
+body .tag.isActiveContext .project-color:not([style]),
+body .tag.isActiveContext .tag-color:not([style]),
+body .tag.isActiveRoute::before:not([style]),
+body .tag:hover .project-color:not([style]),
+body .tag:hover .tag-color:not([style]),
+body.isDarkTheme .project .project-color:not([style]),
+body.isDarkTheme .project .tag-color:not([style]),
+body.isDarkTheme .project.isActiveContext .project-color:not([style]),
+body.isDarkTheme .project.isActiveContext .tag-color:not([style]),
+body.isDarkTheme .project.isActiveRoute::before:not([style]),
+body.isDarkTheme .project:hover .project-color:not([style]),
+body.isDarkTheme .project:hover .tag-color:not([style]),
+body.isDarkTheme .route-link .project-color:not([style]),
+body.isDarkTheme .route-link .tag-color:not([style]),
+body.isDarkTheme .route-link.isActiveContext .project-color:not([style]),
+body.isDarkTheme .route-link.isActiveContext .tag-color:not([style]),
+body.isDarkTheme .route-link.isActiveRoute::before:not([style]),
+body.isDarkTheme .route-link:hover .project-color:not([style]),
+body.isDarkTheme .route-link:hover .tag-color:not([style]),
+body.isDarkTheme .tag .project-color:not([style]),
+body.isDarkTheme .tag .tag-color:not([style]),
+body.isDarkTheme .tag.isActiveContext .project-color:not([style]),
+body.isDarkTheme .tag.isActiveContext .tag-color:not([style]),
+body.isDarkTheme .tag.isActiveRoute::before:not([style]),
+body.isDarkTheme .tag:hover .project-color:not([style]),
+body.isDarkTheme .tag:hover .tag-color:not([style]),
+body.isDarkTheme.isDisableBackgroundGradient .project .project-color:not([style]),
+body.isDarkTheme.isDisableBackgroundGradient .project .tag-color:not([style]),
+body.isDarkTheme.isDisableBackgroundGradient
+  .project.isActiveContext
+  .project-color:not([style]),
+body.isDarkTheme.isDisableBackgroundGradient
+  .project.isActiveContext
+  .tag-color:not([style]),
+body.isDarkTheme.isDisableBackgroundGradient .project.isActiveRoute::before:not([style]),
+body.isDarkTheme.isDisableBackgroundGradient .project:hover .project-color:not([style]),
+body.isDarkTheme.isDisableBackgroundGradient .project:hover .tag-color:not([style]),
+body.isDarkTheme.isDisableBackgroundGradient .route-link .project-color:not([style]),
+body.isDarkTheme.isDisableBackgroundGradient .route-link .tag-color:not([style]),
+body.isDarkTheme.isDisableBackgroundGradient
+  .route-link.isActiveContext
+  .project-color:not([style]),
+body.isDarkTheme.isDisableBackgroundGradient
+  .route-link.isActiveContext
+  .tag-color:not([style]),
+body.isDarkTheme.isDisableBackgroundGradient
+  .route-link.isActiveRoute::before:not([style]),
+body.isDarkTheme.isDisableBackgroundGradient
+  .route-link:hover
+  .project-color:not([style]),
+body.isDarkTheme.isDisableBackgroundGradient .route-link:hover .tag-color:not([style]),
+body.isDarkTheme.isDisableBackgroundGradient .tag .project-color:not([style]),
+body.isDarkTheme.isDisableBackgroundGradient .tag .tag-color:not([style]),
+body.isDarkTheme.isDisableBackgroundGradient
+  .tag.isActiveContext
+  .project-color:not([style]),
+body.isDarkTheme.isDisableBackgroundGradient .tag.isActiveContext .tag-color:not([style]),
+body.isDarkTheme.isDisableBackgroundGradient .tag.isActiveRoute::before:not([style]),
+body.isDarkTheme.isDisableBackgroundGradient .tag:hover .project-color:not([style]),
+body.isDarkTheme.isDisableBackgroundGradient .tag:hover .tag-color:not([style]),
+body.isDisableBackgroundGradient .project .project-color:not([style]),
+body.isDisableBackgroundGradient .project .tag-color:not([style]),
+body.isDisableBackgroundGradient .project.isActiveContext .project-color:not([style]),
+body.isDisableBackgroundGradient .project.isActiveContext .tag-color:not([style]),
+body.isDisableBackgroundGradient .project.isActiveRoute::before:not([style]),
+body.isDisableBackgroundGradient .project:hover .project-color:not([style]),
+body.isDisableBackgroundGradient .project:hover .tag-color:not([style]),
+body.isDisableBackgroundGradient .route-link .project-color:not([style]),
+body.isDisableBackgroundGradient .route-link .tag-color:not([style]),
+body.isDisableBackgroundGradient .route-link.isActiveContext .project-color:not([style]),
+body.isDisableBackgroundGradient .route-link.isActiveContext .tag-color:not([style]),
+body.isDisableBackgroundGradient .route-link.isActiveRoute::before:not([style]),
+body.isDisableBackgroundGradient .route-link:hover .project-color:not([style]),
+body.isDisableBackgroundGradient .route-link:hover .tag-color:not([style]),
+body.isDisableBackgroundGradient .tag .project-color:not([style]),
+body.isDisableBackgroundGradient .tag .tag-color:not([style]),
+body.isDisableBackgroundGradient .tag.isActiveContext .project-color:not([style]),
+body.isDisableBackgroundGradient .tag.isActiveContext .tag-color:not([style]),
+body.isDisableBackgroundGradient .tag.isActiveRoute::before:not([style]),
+body.isDisableBackgroundGradient .tag:hover .project-color:not([style]),
+body.isDisableBackgroundGradient .tag:hover .tag-color:not([style]),
+body.isEnabledBackgroundGradient .project .project-color:not([style]),
+body.isEnabledBackgroundGradient .project .tag-color:not([style]),
+body.isEnabledBackgroundGradient .project.isActiveContext .project-color:not([style]),
+body.isEnabledBackgroundGradient .project.isActiveContext .tag-color:not([style]),
+body.isEnabledBackgroundGradient .project.isActiveRoute::before:not([style]),
+body.isEnabledBackgroundGradient .project:hover .project-color:not([style]),
+body.isEnabledBackgroundGradient .project:hover .tag-color:not([style]),
+body.isEnabledBackgroundGradient .route-link .project-color:not([style]),
+body.isEnabledBackgroundGradient .route-link .tag-color:not([style]),
+body.isEnabledBackgroundGradient .route-link.isActiveContext .project-color:not([style]),
+body.isEnabledBackgroundGradient .route-link.isActiveContext .tag-color:not([style]),
+body.isEnabledBackgroundGradient .route-link.isActiveRoute::before:not([style]),
+body.isEnabledBackgroundGradient .route-link:hover .project-color:not([style]),
+body.isEnabledBackgroundGradient .route-link:hover .tag-color:not([style]),
+body.isEnabledBackgroundGradient .tag .project-color:not([style]),
+body.isEnabledBackgroundGradient .tag .tag-color:not([style]),
+body.isEnabledBackgroundGradient .tag.isActiveContext .project-color:not([style]),
+body.isEnabledBackgroundGradient .tag.isActiveContext .tag-color:not([style]),
+body.isEnabledBackgroundGradient .tag.isActiveRoute::before:not([style]),
+body.isEnabledBackgroundGradient .tag:hover .project-color:not([style]),
+body.isEnabledBackgroundGradient .tag:hover .tag-color:not([style]),
+body.isLightTheme .project .project-color:not([style]),
+body.isLightTheme .project .tag-color:not([style]),
+body.isLightTheme .project.isActiveContext .project-color:not([style]),
+body.isLightTheme .project.isActiveContext .tag-color:not([style]),
+body.isLightTheme .project.isActiveRoute::before:not([style]),
+body.isLightTheme .project:hover .project-color:not([style]),
+body.isLightTheme .project:hover .tag-color:not([style]),
+body.isLightTheme .route-link .project-color:not([style]),
+body.isLightTheme .route-link .tag-color:not([style]),
+body.isLightTheme .route-link.isActiveContext .project-color:not([style]),
+body.isLightTheme .route-link.isActiveContext .tag-color:not([style]),
+body.isLightTheme .route-link.isActiveRoute::before:not([style]),
+body.isLightTheme .route-link:hover .project-color:not([style]),
+body.isLightTheme .route-link:hover .tag-color:not([style]),
+body.isLightTheme .tag .project-color:not([style]),
+body.isLightTheme .tag .tag-color:not([style]),
+body.isLightTheme .tag.isActiveContext .project-color:not([style]),
+body.isLightTheme .tag.isActiveContext .tag-color:not([style]),
+body.isLightTheme .tag.isActiveRoute::before:not([style]),
+body.isLightTheme .tag:hover .project-color:not([style]),
+body.isLightTheme .tag:hover .tag-color:not([style]),
+body.isLightTheme.isDisableBackgroundGradient .project .project-color:not([style]),
+body.isLightTheme.isDisableBackgroundGradient .project .tag-color:not([style]),
+body.isLightTheme.isDisableBackgroundGradient
+  .project.isActiveContext
+  .project-color:not([style]),
+body.isLightTheme.isDisableBackgroundGradient
+  .project.isActiveContext
+  .tag-color:not([style]),
+body.isLightTheme.isDisableBackgroundGradient .project.isActiveRoute::before:not([style]),
+body.isLightTheme.isDisableBackgroundGradient .project:hover .project-color:not([style]),
+body.isLightTheme.isDisableBackgroundGradient .project:hover .tag-color:not([style]),
+body.isLightTheme.isDisableBackgroundGradient .route-link .project-color:not([style]),
+body.isLightTheme.isDisableBackgroundGradient .route-link .tag-color:not([style]),
+body.isLightTheme.isDisableBackgroundGradient
+  .route-link.isActiveContext
+  .project-color:not([style]),
+body.isLightTheme.isDisableBackgroundGradient
+  .route-link.isActiveContext
+  .tag-color:not([style]),
+body.isLightTheme.isDisableBackgroundGradient
+  .route-link.isActiveRoute::before:not([style]),
+body.isLightTheme.isDisableBackgroundGradient
+  .route-link:hover
+  .project-color:not([style]),
+body.isLightTheme.isDisableBackgroundGradient .route-link:hover .tag-color:not([style]),
+body.isLightTheme.isDisableBackgroundGradient .tag .project-color:not([style]),
+body.isLightTheme.isDisableBackgroundGradient .tag .tag-color:not([style]),
+body.isLightTheme.isDisableBackgroundGradient
+  .tag.isActiveContext
+  .project-color:not([style]),
+body.isLightTheme.isDisableBackgroundGradient
+  .tag.isActiveContext
+  .tag-color:not([style]),
+body.isLightTheme.isDisableBackgroundGradient .tag.isActiveRoute::before:not([style]),
+body.isLightTheme.isDisableBackgroundGradient .tag:hover .project-color:not([style]),
+body.isLightTheme.isDisableBackgroundGradient .tag:hover .tag-color:not([style]),
+body.isMac.isEnabledBackgroundGradient .project .project-color:not([style]),
+body.isMac.isEnabledBackgroundGradient .project .tag-color:not([style]),
+body.isMac.isEnabledBackgroundGradient
+  .project.isActiveContext
+  .project-color:not([style]),
+body.isMac.isEnabledBackgroundGradient .project.isActiveContext .tag-color:not([style]),
+body.isMac.isEnabledBackgroundGradient .project.isActiveRoute::before:not([style]),
+body.isMac.isEnabledBackgroundGradient .project:hover .project-color:not([style]),
+body.isMac.isEnabledBackgroundGradient .project:hover .tag-color:not([style]),
+body.isMac.isEnabledBackgroundGradient .route-link .project-color:not([style]),
+body.isMac.isEnabledBackgroundGradient .route-link .tag-color:not([style]),
+body.isMac.isEnabledBackgroundGradient
+  .route-link.isActiveContext
+  .project-color:not([style]),
+body.isMac.isEnabledBackgroundGradient
+  .route-link.isActiveContext
+  .tag-color:not([style]),
+body.isMac.isEnabledBackgroundGradient .route-link.isActiveRoute::before:not([style]),
+body.isMac.isEnabledBackgroundGradient .route-link:hover .project-color:not([style]),
+body.isMac.isEnabledBackgroundGradient .route-link:hover .tag-color:not([style]),
+body.isMac.isEnabledBackgroundGradient .tag .project-color:not([style]),
+body.isMac.isEnabledBackgroundGradient .tag .tag-color:not([style]),
+body.isMac.isEnabledBackgroundGradient .tag.isActiveContext .project-color:not([style]),
+body.isMac.isEnabledBackgroundGradient .tag.isActiveContext .tag-color:not([style]),
+body.isMac.isEnabledBackgroundGradient .tag.isActiveRoute::before:not([style]),
+body.isMac.isEnabledBackgroundGradient .tag:hover .project-color:not([style]),
+body.isMac.isEnabledBackgroundGradient .tag:hover .tag-color:not([style]),
+body.isWeb.isEnabledBackgroundGradient .project .project-color:not([style]),
+body.isWeb.isEnabledBackgroundGradient .project .tag-color:not([style]),
+body.isWeb.isEnabledBackgroundGradient
+  .project.isActiveContext
+  .project-color:not([style]),
+body.isWeb.isEnabledBackgroundGradient .project.isActiveContext .tag-color:not([style]),
+body.isWeb.isEnabledBackgroundGradient .project.isActiveRoute::before:not([style]),
+body.isWeb.isEnabledBackgroundGradient .project:hover .project-color:not([style]),
+body.isWeb.isEnabledBackgroundGradient .project:hover .tag-color:not([style]),
+body.isWeb.isEnabledBackgroundGradient .route-link .project-color:not([style]),
+body.isWeb.isEnabledBackgroundGradient .route-link .tag-color:not([style]),
+body.isWeb.isEnabledBackgroundGradient
+  .route-link.isActiveContext
+  .project-color:not([style]),
+body.isWeb.isEnabledBackgroundGradient
+  .route-link.isActiveContext
+  .tag-color:not([style]),
+body.isWeb.isEnabledBackgroundGradient .route-link.isActiveRoute::before:not([style]),
+body.isWeb.isEnabledBackgroundGradient .route-link:hover .project-color:not([style]),
+body.isWeb.isEnabledBackgroundGradient .route-link:hover .tag-color:not([style]),
+body.isWeb.isEnabledBackgroundGradient .tag .project-color:not([style]),
+body.isWeb.isEnabledBackgroundGradient .tag .tag-color:not([style]),
+body.isWeb.isEnabledBackgroundGradient .tag.isActiveContext .project-color:not([style]),
+body.isWeb.isEnabledBackgroundGradient .tag.isActiveContext .tag-color:not([style]),
+body.isWeb.isEnabledBackgroundGradient .tag.isActiveRoute::before:not([style]),
+body.isWeb.isEnabledBackgroundGradient .tag:hover .project-color:not([style]),
+body.isWeb.isEnabledBackgroundGradient .tag:hover .tag-color:not([style]) {
+  background-color: var(--color-accent) !important;
+}
+body .bg-primary,
+body .mat-focused .mat-form-field-appearance-legacy .mat-form-field-underline,
+body .mat-form-field-appearance-legacy .mat-form-field-underline,
+body .mat-form-field-underline,
+body .mat-step-header .mat-step-icon-selected,
+body .mat-step-header .mat-step-icon-state-done,
+body .mat-step-header .mat-step-icon-state-edit,
+body.isDarkTheme .bg-primary,
+body.isDarkTheme .mat-focused .mat-form-field-appearance-legacy .mat-form-field-underline,
+body.isDarkTheme .mat-form-field-appearance-legacy .mat-form-field-underline,
+body.isDarkTheme .mat-form-field-underline,
+body.isDarkTheme .mat-step-header .mat-step-icon-selected,
+body.isDarkTheme .mat-step-header .mat-step-icon-state-done,
+body.isDarkTheme .mat-step-header .mat-step-icon-state-edit,
+body.isDarkTheme.isDisableBackgroundGradient .bg-primary,
+body.isDarkTheme.isDisableBackgroundGradient
+  .mat-focused
+  .mat-form-field-appearance-legacy
+  .mat-form-field-underline,
+body.isDarkTheme.isDisableBackgroundGradient
+  .mat-form-field-appearance-legacy
+  .mat-form-field-underline,
+body.isDarkTheme.isDisableBackgroundGradient .mat-form-field-underline,
+body.isDarkTheme.isDisableBackgroundGradient .mat-step-header .mat-step-icon-selected,
+body.isDarkTheme.isDisableBackgroundGradient .mat-step-header .mat-step-icon-state-done,
+body.isDarkTheme.isDisableBackgroundGradient .mat-step-header .mat-step-icon-state-edit,
+body.isDisableBackgroundGradient .bg-primary,
+body.isDisableBackgroundGradient
+  .mat-focused
+  .mat-form-field-appearance-legacy
+  .mat-form-field-underline,
+body.isDisableBackgroundGradient
+  .mat-form-field-appearance-legacy
+  .mat-form-field-underline,
+body.isDisableBackgroundGradient .mat-form-field-underline,
+body.isDisableBackgroundGradient .mat-step-header .mat-step-icon-selected,
+body.isDisableBackgroundGradient .mat-step-header .mat-step-icon-state-done,
+body.isDisableBackgroundGradient .mat-step-header .mat-step-icon-state-edit,
+body.isEnabledBackgroundGradient .bg-primary,
+body.isEnabledBackgroundGradient
+  .mat-focused
+  .mat-form-field-appearance-legacy
+  .mat-form-field-underline,
+body.isEnabledBackgroundGradient
+  .mat-form-field-appearance-legacy
+  .mat-form-field-underline,
+body.isEnabledBackgroundGradient .mat-form-field-underline,
+body.isEnabledBackgroundGradient .mat-step-header .mat-step-icon-selected,
+body.isEnabledBackgroundGradient .mat-step-header .mat-step-icon-state-done,
+body.isEnabledBackgroundGradient .mat-step-header .mat-step-icon-state-edit,
+body.isLightTheme .bg-primary,
+body.isLightTheme
+  .mat-focused
+  .mat-form-field-appearance-legacy
+  .mat-form-field-underline,
+body.isLightTheme .mat-form-field-appearance-legacy .mat-form-field-underline,
+body.isLightTheme .mat-form-field-underline,
+body.isLightTheme .mat-step-header .mat-step-icon-selected,
+body.isLightTheme .mat-step-header .mat-step-icon-state-done,
+body.isLightTheme .mat-step-header .mat-step-icon-state-edit,
+body.isLightTheme.isDisableBackgroundGradient .bg-primary,
+body.isLightTheme.isDisableBackgroundGradient
+  .mat-focused
+  .mat-form-field-appearance-legacy
+  .mat-form-field-underline,
+body.isLightTheme.isDisableBackgroundGradient
+  .mat-form-field-appearance-legacy
+  .mat-form-field-underline,
+body.isLightTheme.isDisableBackgroundGradient .mat-form-field-underline,
+body.isLightTheme.isDisableBackgroundGradient .mat-step-header .mat-step-icon-selected,
+body.isLightTheme.isDisableBackgroundGradient .mat-step-header .mat-step-icon-state-done,
+body.isLightTheme.isDisableBackgroundGradient .mat-step-header .mat-step-icon-state-edit,
+body.isMac.isEnabledBackgroundGradient .bg-primary,
+body.isMac.isEnabledBackgroundGradient
+  .mat-focused
+  .mat-form-field-appearance-legacy
+  .mat-form-field-underline,
+body.isMac.isEnabledBackgroundGradient
+  .mat-form-field-appearance-legacy
+  .mat-form-field-underline,
+body.isMac.isEnabledBackgroundGradient .mat-form-field-underline,
+body.isMac.isEnabledBackgroundGradient .mat-step-header .mat-step-icon-selected,
+body.isMac.isEnabledBackgroundGradient .mat-step-header .mat-step-icon-state-done,
+body.isMac.isEnabledBackgroundGradient .mat-step-header .mat-step-icon-state-edit,
+body.isWeb.isEnabledBackgroundGradient .bg-primary,
+body.isWeb.isEnabledBackgroundGradient
+  .mat-focused
+  .mat-form-field-appearance-legacy
+  .mat-form-field-underline,
+body.isWeb.isEnabledBackgroundGradient
+  .mat-form-field-appearance-legacy
+  .mat-form-field-underline,
+body.isWeb.isEnabledBackgroundGradient .mat-form-field-underline,
+body.isWeb.isEnabledBackgroundGradient .mat-step-header .mat-step-icon-selected,
+body.isWeb.isEnabledBackgroundGradient .mat-step-header .mat-step-icon-state-done,
+body.isWeb.isEnabledBackgroundGradient .mat-step-header .mat-step-icon-state-edit {
+  background: var(--color-accent) !important;
+}
+body .mat-drawer-container,
+body button,
+body.isDarkTheme .mat-drawer-container,
+body.isDarkTheme button,
+body.isDarkTheme.isDisableBackgroundGradient .mat-drawer-container,
+body.isDarkTheme.isDisableBackgroundGradient button,
+body.isDisableBackgroundGradient .mat-drawer-container,
+body.isDisableBackgroundGradient button,
+body.isEnabledBackgroundGradient .mat-drawer-container,
+body.isEnabledBackgroundGradient button,
+body.isLightTheme .mat-drawer-container,
+body.isLightTheme button,
+body.isLightTheme.isDisableBackgroundGradient .mat-drawer-container,
+body.isLightTheme.isDisableBackgroundGradient button,
+body.isMac.isEnabledBackgroundGradient .mat-drawer-container,
+body.isMac.isEnabledBackgroundGradient button,
+body.isWeb.isEnabledBackgroundGradient .mat-drawer-container,
+body.isWeb.isEnabledBackgroundGradient button {
+  color: var(--color-foreground);
+}
+body .mat-drawer-content .content-wrapper,
+body.isDarkTheme .mat-drawer-content .content-wrapper,
+body.isDarkTheme.isDisableBackgroundGradient .mat-drawer-content .content-wrapper,
+body.isDisableBackgroundGradient .mat-drawer-content .content-wrapper,
+body.isEnabledBackgroundGradient .mat-drawer-content .content-wrapper,
+body.isLightTheme .mat-drawer-content .content-wrapper,
+body.isLightTheme.isDisableBackgroundGradient .mat-drawer-content .content-wrapper,
+body.isMac.isEnabledBackgroundGradient .mat-drawer-content .content-wrapper,
+body.isWeb.isEnabledBackgroundGradient .mat-drawer-content .content-wrapper {
+  background-color: var(--color-background-banner);
+  color: var(--color-foreground);
+  border-color: var(--color-border-panels);
+}
+.page-settings
+  .config-section
+  .isExpanded
+  .collapsible-header
+  .issue-table
+  pre
+  table.material-table
+  .isLightTheme
+  body,
+.page-settings
+  .config-section
+  .isExpanded
+  .collapsible-header
+  .issue-table
+  pre
+  table.material-table
+  .isLightTheme
+  body.isDarkTheme,
+.page-settings
+  .config-section
+  .isExpanded
+  .collapsible-header
+  .issue-table
+  pre
+  table.material-table
+  .isLightTheme
+  body.isDarkTheme.isDisableBackgroundGradient,
+.page-settings
+  .config-section
+  .isExpanded
+  .collapsible-header
+  .issue-table
+  pre
+  table.material-table
+  .isLightTheme
+  body.isDisableBackgroundGradient,
+.page-settings
+  .config-section
+  .isExpanded
+  .collapsible-header
+  .issue-table
+  pre
+  table.material-table
+  .isLightTheme
+  body.isEnabledBackgroundGradient,
+.page-settings
+  .config-section
+  .isExpanded
+  .collapsible-header
+  .issue-table
+  pre
+  table.material-table
+  .isLightTheme
+  body.isLightTheme,
+.page-settings
+  .config-section
+  .isExpanded
+  .collapsible-header
+  .issue-table
+  pre
+  table.material-table
+  .isLightTheme
+  body.isLightTheme.isDisableBackgroundGradient,
+.page-settings
+  .config-section
+  .isExpanded
+  .collapsible-header
+  .issue-table
+  pre
+  table.material-table
+  .isLightTheme
+  body.isMac.isEnabledBackgroundGradient,
+.page-settings
+  .config-section
+  .isExpanded
+  .collapsible-header
+  .issue-table
+  pre
+  table.material-table
+  .isLightTheme
+  body.isWeb.isEnabledBackgroundGradient,
+body .attachment,
+body .comment,
+body .info-bar,
+body .project-title,
+body .row,
+body .sub-tasks .box,
+body.isDarkTheme .attachment,
+body.isDarkTheme .comment,
+body.isDarkTheme .info-bar,
+body.isDarkTheme .project-title,
+body.isDarkTheme .row,
+body.isDarkTheme .sub-tasks .box,
+body.isDarkTheme.isDisableBackgroundGradient .attachment,
+body.isDarkTheme.isDisableBackgroundGradient .comment,
+body.isDarkTheme.isDisableBackgroundGradient .info-bar,
+body.isDarkTheme.isDisableBackgroundGradient .project-title,
+body.isDarkTheme.isDisableBackgroundGradient .row,
+body.isDarkTheme.isDisableBackgroundGradient .sub-tasks .box,
+body.isDisableBackgroundGradient .attachment,
+body.isDisableBackgroundGradient .comment,
+body.isDisableBackgroundGradient .info-bar,
+body.isDisableBackgroundGradient .project-title,
+body.isDisableBackgroundGradient .row,
+body.isDisableBackgroundGradient .sub-tasks .box,
+body.isEnabledBackgroundGradient .attachment,
+body.isEnabledBackgroundGradient .comment,
+body.isEnabledBackgroundGradient .info-bar,
+body.isEnabledBackgroundGradient .project-title,
+body.isEnabledBackgroundGradient .row,
+body.isEnabledBackgroundGradient .sub-tasks .box,
+body.isLightTheme .attachment,
+body.isLightTheme .comment,
+body.isLightTheme .info-bar,
+body.isLightTheme .project-title,
+body.isLightTheme .row,
+body.isLightTheme .sub-tasks .box,
+body.isLightTheme.isDisableBackgroundGradient .attachment,
+body.isLightTheme.isDisableBackgroundGradient .comment,
+body.isLightTheme.isDisableBackgroundGradient .info-bar,
+body.isLightTheme.isDisableBackgroundGradient .project-title,
+body.isLightTheme.isDisableBackgroundGradient .row,
+body.isLightTheme.isDisableBackgroundGradient .sub-tasks .box,
+body.isMac.isEnabledBackgroundGradient .attachment,
+body.isMac.isEnabledBackgroundGradient .comment,
+body.isMac.isEnabledBackgroundGradient .info-bar,
+body.isMac.isEnabledBackgroundGradient .project-title,
+body.isMac.isEnabledBackgroundGradient .row,
+body.isMac.isEnabledBackgroundGradient .sub-tasks .box,
+body.isWeb.isEnabledBackgroundGradient .attachment,
+body.isWeb.isEnabledBackgroundGradient .comment,
+body.isWeb.isEnabledBackgroundGradient .info-bar,
+body.isWeb.isEnabledBackgroundGradient .project-title,
+body.isWeb.isEnabledBackgroundGradient .row,
+body.isWeb.isEnabledBackgroundGradient .sub-tasks .box,
+div.material-table .isLightTheme body,
+div.material-table .isLightTheme body.isDarkTheme,
+div.material-table .isLightTheme body.isDarkTheme.isDisableBackgroundGradient,
+div.material-table .isLightTheme body.isDisableBackgroundGradient,
+div.material-table .isLightTheme body.isEnabledBackgroundGradient,
+div.material-table .isLightTheme body.isLightTheme,
+div.material-table .isLightTheme body.isLightTheme.isDisableBackgroundGradient,
+div.material-table .isLightTheme body.isMac.isEnabledBackgroundGradient,
+div.material-table .isLightTheme body.isWeb.isEnabledBackgroundGradient {
+  border-color: var(--color-background) !important;
+}
+body .mat-fab.mat-accent,
+body .mat-flat-button.mat-accent,
+body .mat-mini-fab.mat-accent,
+body .mat-raised-button.mat-accent,
+body.isDarkTheme .mat-fab.mat-accent,
+body.isDarkTheme .mat-flat-button.mat-accent,
+body.isDarkTheme .mat-mini-fab.mat-accent,
+body.isDarkTheme .mat-raised-button.mat-accent,
+body.isDarkTheme.isDisableBackgroundGradient .mat-fab.mat-accent,
+body.isDarkTheme.isDisableBackgroundGradient .mat-flat-button.mat-accent,
+body.isDarkTheme.isDisableBackgroundGradient .mat-mini-fab.mat-accent,
+body.isDarkTheme.isDisableBackgroundGradient .mat-raised-button.mat-accent,
+body.isDisableBackgroundGradient .mat-fab.mat-accent,
+body.isDisableBackgroundGradient .mat-flat-button.mat-accent,
+body.isDisableBackgroundGradient .mat-mini-fab.mat-accent,
+body.isDisableBackgroundGradient .mat-raised-button.mat-accent,
+body.isEnabledBackgroundGradient .mat-fab.mat-accent,
+body.isEnabledBackgroundGradient .mat-flat-button.mat-accent,
+body.isEnabledBackgroundGradient .mat-mini-fab.mat-accent,
+body.isEnabledBackgroundGradient .mat-raised-button.mat-accent,
+body.isLightTheme .mat-fab.mat-accent,
+body.isLightTheme .mat-flat-button.mat-accent,
+body.isLightTheme .mat-mini-fab.mat-accent,
+body.isLightTheme .mat-raised-button.mat-accent,
+body.isLightTheme.isDisableBackgroundGradient .mat-fab.mat-accent,
+body.isLightTheme.isDisableBackgroundGradient .mat-flat-button.mat-accent,
+body.isLightTheme.isDisableBackgroundGradient .mat-mini-fab.mat-accent,
+body.isLightTheme.isDisableBackgroundGradient .mat-raised-button.mat-accent,
+body.isMac.isEnabledBackgroundGradient .mat-fab.mat-accent,
+body.isMac.isEnabledBackgroundGradient .mat-flat-button.mat-accent,
+body.isMac.isEnabledBackgroundGradient .mat-mini-fab.mat-accent,
+body.isMac.isEnabledBackgroundGradient .mat-raised-button.mat-accent,
+body.isWeb.isEnabledBackgroundGradient .mat-fab.mat-accent,
+body.isWeb.isEnabledBackgroundGradient .mat-flat-button.mat-accent,
+body.isWeb.isEnabledBackgroundGradient .mat-mini-fab.mat-accent,
+body.isWeb.isEnabledBackgroundGradient .mat-raised-button.mat-accent {
+  background-color: var(--color-accent);
+  color: var(--color-white);
+}
+body .mat-fab.mat-accent .mat-icon-no-color,
+body .mat-flat-button.mat-accent .mat-icon-no-color,
+body .mat-mini-fab.mat-accent .mat-icon-no-color,
+body .mat-raised-button.mat-accent .mat-icon-no-color,
+body.isDarkTheme .mat-fab.mat-accent .mat-icon-no-color,
+body.isDarkTheme .mat-flat-button.mat-accent .mat-icon-no-color,
+body.isDarkTheme .mat-mini-fab.mat-accent .mat-icon-no-color,
+body.isDarkTheme .mat-raised-button.mat-accent .mat-icon-no-color,
+body.isDarkTheme.isDisableBackgroundGradient .mat-fab.mat-accent .mat-icon-no-color,
+body.isDarkTheme.isDisableBackgroundGradient
+  .mat-flat-button.mat-accent
+  .mat-icon-no-color,
+body.isDarkTheme.isDisableBackgroundGradient .mat-mini-fab.mat-accent .mat-icon-no-color,
+body.isDarkTheme.isDisableBackgroundGradient
+  .mat-raised-button.mat-accent
+  .mat-icon-no-color,
+body.isDisableBackgroundGradient .mat-fab.mat-accent .mat-icon-no-color,
+body.isDisableBackgroundGradient .mat-flat-button.mat-accent .mat-icon-no-color,
+body.isDisableBackgroundGradient .mat-mini-fab.mat-accent .mat-icon-no-color,
+body.isDisableBackgroundGradient .mat-raised-button.mat-accent .mat-icon-no-color,
+body.isEnabledBackgroundGradient .mat-fab.mat-accent .mat-icon-no-color,
+body.isEnabledBackgroundGradient .mat-flat-button.mat-accent .mat-icon-no-color,
+body.isEnabledBackgroundGradient .mat-mini-fab.mat-accent .mat-icon-no-color,
+body.isEnabledBackgroundGradient .mat-raised-button.mat-accent .mat-icon-no-color,
+body.isLightTheme .mat-fab.mat-accent .mat-icon-no-color,
+body.isLightTheme .mat-flat-button.mat-accent .mat-icon-no-color,
+body.isLightTheme .mat-mini-fab.mat-accent .mat-icon-no-color,
+body.isLightTheme .mat-raised-button.mat-accent .mat-icon-no-color,
+body.isLightTheme.isDisableBackgroundGradient .mat-fab.mat-accent .mat-icon-no-color,
+body.isLightTheme.isDisableBackgroundGradient
+  .mat-flat-button.mat-accent
+  .mat-icon-no-color,
+body.isLightTheme.isDisableBackgroundGradient .mat-mini-fab.mat-accent .mat-icon-no-color,
+body.isLightTheme.isDisableBackgroundGradient
+  .mat-raised-button.mat-accent
+  .mat-icon-no-color,
+body.isMac.isEnabledBackgroundGradient .mat-fab.mat-accent .mat-icon-no-color,
+body.isMac.isEnabledBackgroundGradient .mat-flat-button.mat-accent .mat-icon-no-color,
+body.isMac.isEnabledBackgroundGradient .mat-mini-fab.mat-accent .mat-icon-no-color,
+body.isMac.isEnabledBackgroundGradient .mat-raised-button.mat-accent .mat-icon-no-color,
+body.isWeb.isEnabledBackgroundGradient .mat-fab.mat-accent .mat-icon-no-color,
+body.isWeb.isEnabledBackgroundGradient .mat-flat-button.mat-accent .mat-icon-no-color,
+body.isWeb.isEnabledBackgroundGradient .mat-mini-fab.mat-accent .mat-icon-no-color,
+body.isWeb.isEnabledBackgroundGradient .mat-raised-button.mat-accent .mat-icon-no-color {
+  color: var(--color-white);
+}
+body .current-task-title,
+body.isDarkTheme .current-task-title,
+body.isDarkTheme.isDisableBackgroundGradient .current-task-title,
+body.isDisableBackgroundGradient .current-task-title,
+body.isEnabledBackgroundGradient .current-task-title,
+body.isLightTheme .current-task-title,
+body.isLightTheme.isDisableBackgroundGradient .current-task-title,
+body.isMac.isEnabledBackgroundGradient .current-task-title,
+body.isWeb.isEnabledBackgroundGradient .current-task-title {
+  background-color: var(--color-background-setting-buttons);
+}
+body .mat-drawer,
+body .mat-drawer-container,
+body
+  .mat-drawer-container.mat-sidenav-container
+  .mat-drawer.mat-sidenav
+  .mat-drawer-inner-container,
+body.isDarkTheme .mat-drawer,
+body.isDarkTheme .mat-drawer-container,
+body.isDarkTheme
+  .mat-drawer-container.mat-sidenav-container
+  .mat-drawer.mat-sidenav
+  .mat-drawer-inner-container,
+body.isDarkTheme.isDisableBackgroundGradient .mat-drawer,
+body.isDarkTheme.isDisableBackgroundGradient .mat-drawer-container,
+body.isDarkTheme.isDisableBackgroundGradient
+  .mat-drawer-container.mat-sidenav-container
+  .mat-drawer.mat-sidenav
+  .mat-drawer-inner-container,
+body.isDisableBackgroundGradient .mat-drawer,
+body.isDisableBackgroundGradient .mat-drawer-container,
+body.isDisableBackgroundGradient
+  .mat-drawer-container.mat-sidenav-container
+  .mat-drawer.mat-sidenav
+  .mat-drawer-inner-container,
+body.isEnabledBackgroundGradient .mat-drawer,
+body.isEnabledBackgroundGradient .mat-drawer-container,
+body.isEnabledBackgroundGradient
+  .mat-drawer-container.mat-sidenav-container
+  .mat-drawer.mat-sidenav
+  .mat-drawer-inner-container,
+body.isLightTheme .mat-drawer,
+body.isLightTheme .mat-drawer-container,
+body.isLightTheme
+  .mat-drawer-container.mat-sidenav-container
+  .mat-drawer.mat-sidenav
+  .mat-drawer-inner-container,
+body.isLightTheme.isDisableBackgroundGradient .mat-drawer,
+body.isLightTheme.isDisableBackgroundGradient .mat-drawer-container,
+body.isLightTheme.isDisableBackgroundGradient
+  .mat-drawer-container.mat-sidenav-container
+  .mat-drawer.mat-sidenav
+  .mat-drawer-inner-container,
+body.isMac.isEnabledBackgroundGradient .mat-drawer,
+body.isMac.isEnabledBackgroundGradient .mat-drawer-container,
+body.isMac.isEnabledBackgroundGradient
+  .mat-drawer-container.mat-sidenav-container
+  .mat-drawer.mat-sidenav
+  .mat-drawer-inner-container,
+body.isWeb.isEnabledBackgroundGradient .mat-drawer,
+body.isWeb.isEnabledBackgroundGradient .mat-drawer-container,
+body.isWeb.isEnabledBackgroundGradient
+  .mat-drawer-container.mat-sidenav-container
+  .mat-drawer.mat-sidenav
+  .mat-drawer-inner-container {
+  background-color: var(--color-background-sidebar);
+  color: var(--color-foreground);
+}
+body .badge,
+body .tag.hasTask .badge,
+body.isDarkTheme .badge,
+body.isDarkTheme .tag.hasTask .badge,
+body.isDarkTheme.isDisableBackgroundGradient .badge,
+body.isDarkTheme.isDisableBackgroundGradient .tag.hasTask .badge,
+body.isDisableBackgroundGradient .badge,
+body.isDisableBackgroundGradient .tag.hasTask .badge,
+body.isEnabledBackgroundGradient .badge,
+body.isEnabledBackgroundGradient .tag.hasTask .badge,
+body.isLightTheme .badge,
+body.isLightTheme .tag.hasTask .badge,
+body.isLightTheme.isDisableBackgroundGradient .badge,
+body.isLightTheme.isDisableBackgroundGradient .tag.hasTask .badge,
+body.isMac.isEnabledBackgroundGradient .badge,
+body.isMac.isEnabledBackgroundGradient .tag.hasTask .badge,
+body.isWeb.isEnabledBackgroundGradient .badge,
+body.isWeb.isEnabledBackgroundGradient .tag.hasTask .badge {
+  background-color: var(--color-border-sidebar) !important;
+  border-color: var(--color-border-sidebar) !important;
+  padding: 10px 0 !important;
+}
+body .app::after,
+body .main::after,
+body .tags::after,
+body.isDarkTheme .app::after,
+body.isDarkTheme .main::after,
+body.isDarkTheme .tags::after,
+body.isDarkTheme.isDisableBackgroundGradient .app::after,
+body.isDarkTheme.isDisableBackgroundGradient .main::after,
+body.isDarkTheme.isDisableBackgroundGradient .tags::after,
+body.isDisableBackgroundGradient .app::after,
+body.isDisableBackgroundGradient .main::after,
+body.isDisableBackgroundGradient .tags::after,
+body.isEnabledBackgroundGradient .app::after,
+body.isEnabledBackgroundGradient .main::after,
+body.isEnabledBackgroundGradient .tags::after,
+body.isLightTheme .app::after,
+body.isLightTheme .main::after,
+body.isLightTheme .tags::after,
+body.isLightTheme.isDisableBackgroundGradient .app::after,
+body.isLightTheme.isDisableBackgroundGradient .main::after,
+body.isLightTheme.isDisableBackgroundGradient .tags::after,
+body.isMac.isEnabledBackgroundGradient .app::after,
+body.isMac.isEnabledBackgroundGradient .main::after,
+body.isMac.isEnabledBackgroundGradient .tags::after,
+body.isWeb.isEnabledBackgroundGradient .app::after,
+body.isWeb.isEnabledBackgroundGradient .main::after,
+body.isWeb.isEnabledBackgroundGradient .tags::after {
+  border-color: var(--color-border-divider-sidebar) !important;
+}
+body .mat-drawer-side,
+body .mat-sidenav,
+body .mat-sidenav:focus .mat-drawer-side,
+body.isDarkTheme .mat-drawer-side,
+body.isDarkTheme .mat-sidenav,
+body.isDarkTheme .mat-sidenav:focus .mat-drawer-side,
+body.isDarkTheme.isDisableBackgroundGradient .mat-drawer-side,
+body.isDarkTheme.isDisableBackgroundGradient .mat-sidenav,
+body.isDarkTheme.isDisableBackgroundGradient .mat-sidenav:focus .mat-drawer-side,
+body.isDisableBackgroundGradient .mat-drawer-side,
+body.isDisableBackgroundGradient .mat-sidenav,
+body.isDisableBackgroundGradient .mat-sidenav:focus .mat-drawer-side,
+body.isEnabledBackgroundGradient .mat-drawer-side,
+body.isEnabledBackgroundGradient .mat-sidenav,
+body.isEnabledBackgroundGradient .mat-sidenav:focus .mat-drawer-side,
+body.isLightTheme .mat-drawer-side,
+body.isLightTheme .mat-sidenav,
+body.isLightTheme .mat-sidenav:focus .mat-drawer-side,
+body.isLightTheme.isDisableBackgroundGradient .mat-drawer-side,
+body.isLightTheme.isDisableBackgroundGradient .mat-sidenav,
+body.isLightTheme.isDisableBackgroundGradient .mat-sidenav:focus .mat-drawer-side,
+body.isMac.isEnabledBackgroundGradient .mat-drawer-side,
+body.isMac.isEnabledBackgroundGradient .mat-sidenav,
+body.isMac.isEnabledBackgroundGradient .mat-sidenav:focus .mat-drawer-side,
+body.isWeb.isEnabledBackgroundGradient .mat-drawer-side,
+body.isWeb.isEnabledBackgroundGradient .mat-sidenav,
+body.isWeb.isEnabledBackgroundGradient .mat-sidenav:focus .mat-drawer-side {
+  border-color: var(--color-border-sidebar);
+}
+body .mat-menu-item .mat-icon-no-color,
+body .mat-menu-item-submenu-trigger::after,
+body button,
+body.isDarkTheme .mat-menu-item .mat-icon-no-color,
+body.isDarkTheme .mat-menu-item-submenu-trigger::after,
+body.isDarkTheme button,
+body.isDarkTheme.isDisableBackgroundGradient .mat-menu-item .mat-icon-no-color,
+body.isDarkTheme.isDisableBackgroundGradient .mat-menu-item-submenu-trigger::after,
+body.isDarkTheme.isDisableBackgroundGradient button,
+body.isDisableBackgroundGradient .mat-menu-item .mat-icon-no-color,
+body.isDisableBackgroundGradient .mat-menu-item-submenu-trigger::after,
+body.isDisableBackgroundGradient button,
+body.isEnabledBackgroundGradient .mat-menu-item .mat-icon-no-color,
+body.isEnabledBackgroundGradient .mat-menu-item-submenu-trigger::after,
+body.isEnabledBackgroundGradient button,
+body.isLightTheme .mat-menu-item .mat-icon-no-color,
+body.isLightTheme .mat-menu-item-submenu-trigger::after,
+body.isLightTheme button,
+body.isLightTheme.isDisableBackgroundGradient .mat-menu-item .mat-icon-no-color,
+body.isLightTheme.isDisableBackgroundGradient .mat-menu-item-submenu-trigger::after,
+body.isLightTheme.isDisableBackgroundGradient button,
+body.isMac.isEnabledBackgroundGradient .mat-menu-item .mat-icon-no-color,
+body.isMac.isEnabledBackgroundGradient .mat-menu-item-submenu-trigger::after,
+body.isMac.isEnabledBackgroundGradient button,
+body.isWeb.isEnabledBackgroundGradient .mat-menu-item .mat-icon-no-color,
+body.isWeb.isEnabledBackgroundGradient .mat-menu-item-submenu-trigger::after,
+body.isWeb.isEnabledBackgroundGradient button {
+  color: var(--color-foreground);
+}
+body .mat-sidenav .drag-handle,
+body .mat-sidenav .mat-icon-no-color,
+body.isDarkTheme .mat-sidenav .drag-handle,
+body.isDarkTheme .mat-sidenav .mat-icon-no-color,
+body.isDarkTheme.isDisableBackgroundGradient .mat-sidenav .drag-handle,
+body.isDarkTheme.isDisableBackgroundGradient .mat-sidenav .mat-icon-no-color,
+body.isDisableBackgroundGradient .mat-sidenav .drag-handle,
+body.isDisableBackgroundGradient .mat-sidenav .mat-icon-no-color,
+body.isEnabledBackgroundGradient .mat-sidenav .drag-handle,
+body.isEnabledBackgroundGradient .mat-sidenav .mat-icon-no-color,
+body.isLightTheme .mat-sidenav .drag-handle,
+body.isLightTheme .mat-sidenav .mat-icon-no-color,
+body.isLightTheme.isDisableBackgroundGradient .mat-sidenav .drag-handle,
+body.isLightTheme.isDisableBackgroundGradient .mat-sidenav .mat-icon-no-color,
+body.isMac.isEnabledBackgroundGradient .mat-sidenav .drag-handle,
+body.isMac.isEnabledBackgroundGradient .mat-sidenav .mat-icon-no-color,
+body.isWeb.isEnabledBackgroundGradient .mat-sidenav .drag-handle,
+body.isWeb.isEnabledBackgroundGradient .mat-sidenav .mat-icon-no-color {
+  background: 0 0;
+}
+.isLightTheme .gu-mirror,
+.isLightTheme .gu-mirror .box,
+.isLightTheme .scheduled-task,
+.isLightTheme .task-list-wrapper .box,
+body .gu-mirror,
+body .gu-mirror .box,
+body .scheduled-task,
+body .task-list-wrapper .box,
+body.isDarkTheme .gu-mirror,
+body.isDarkTheme .gu-mirror .box,
+body.isDarkTheme .scheduled-task,
+body.isDarkTheme .task-list-wrapper .box,
+body.isDarkTheme.isDisableBackgroundGradient .gu-mirror,
+body.isDarkTheme.isDisableBackgroundGradient .gu-mirror .box,
+body.isDarkTheme.isDisableBackgroundGradient .scheduled-task,
+body.isDarkTheme.isDisableBackgroundGradient .task-list-wrapper .box,
+body.isDisableBackgroundGradient .gu-mirror,
+body.isDisableBackgroundGradient .gu-mirror .box,
+body.isDisableBackgroundGradient .scheduled-task,
+body.isDisableBackgroundGradient .task-list-wrapper .box,
+body.isEnabledBackgroundGradient .gu-mirror,
+body.isEnabledBackgroundGradient .gu-mirror .box,
+body.isEnabledBackgroundGradient .scheduled-task,
+body.isEnabledBackgroundGradient .task-list-wrapper .box,
+body.isLightTheme .gu-mirror,
+body.isLightTheme .gu-mirror .box,
+body.isLightTheme .scheduled-task,
+body.isLightTheme .task-list-wrapper .box,
+body.isLightTheme.isDisableBackgroundGradient .gu-mirror,
+body.isLightTheme.isDisableBackgroundGradient .gu-mirror .box,
+body.isLightTheme.isDisableBackgroundGradient .scheduled-task,
+body.isLightTheme.isDisableBackgroundGradient .task-list-wrapper .box,
+body.isMac.isEnabledBackgroundGradient .gu-mirror,
+body.isMac.isEnabledBackgroundGradient .gu-mirror .box,
+body.isMac.isEnabledBackgroundGradient .scheduled-task,
+body.isMac.isEnabledBackgroundGradient .task-list-wrapper .box,
+body.isWeb.isEnabledBackgroundGradient .gu-mirror,
+body.isWeb.isEnabledBackgroundGradient .gu-mirror .box,
+body.isWeb.isEnabledBackgroundGradient .scheduled-task,
+body.isWeb.isEnabledBackgroundGradient .task-list-wrapper .box {
+  background-color: var(--color-background-task) !important;
+  top: 0;
+}
+.isLightTheme .gu-mirror .box .content,
+.isLightTheme .gu-mirror .content,
+.isLightTheme .scheduled-task .content,
+.isLightTheme .task-list-wrapper .box .content,
+body .gu-mirror .box .content,
+body .gu-mirror .content,
+body .scheduled-task .content,
+body .task-list-wrapper .box .content,
+body.isDarkTheme .gu-mirror .box .content,
+body.isDarkTheme .gu-mirror .content,
+body.isDarkTheme .scheduled-task .content,
+body.isDarkTheme .task-list-wrapper .box .content,
+body.isDarkTheme.isDisableBackgroundGradient .gu-mirror .box .content,
+body.isDarkTheme.isDisableBackgroundGradient .gu-mirror .content,
+body.isDarkTheme.isDisableBackgroundGradient .scheduled-task .content,
+body.isDarkTheme.isDisableBackgroundGradient .task-list-wrapper .box .content,
+body.isDisableBackgroundGradient .gu-mirror .box .content,
+body.isDisableBackgroundGradient .gu-mirror .content,
+body.isDisableBackgroundGradient .scheduled-task .content,
+body.isDisableBackgroundGradient .task-list-wrapper .box .content,
+body.isEnabledBackgroundGradient .gu-mirror .box .content,
+body.isEnabledBackgroundGradient .gu-mirror .content,
+body.isEnabledBackgroundGradient .scheduled-task .content,
+body.isEnabledBackgroundGradient .task-list-wrapper .box .content,
+body.isLightTheme .gu-mirror .box .content,
+body.isLightTheme .gu-mirror .content,
+body.isLightTheme .scheduled-task .content,
+body.isLightTheme .task-list-wrapper .box .content,
+body.isLightTheme.isDisableBackgroundGradient .gu-mirror .box .content,
+body.isLightTheme.isDisableBackgroundGradient .gu-mirror .content,
+body.isLightTheme.isDisableBackgroundGradient .scheduled-task .content,
+body.isLightTheme.isDisableBackgroundGradient .task-list-wrapper .box .content,
+body.isMac.isEnabledBackgroundGradient .gu-mirror .box .content,
+body.isMac.isEnabledBackgroundGradient .gu-mirror .content,
+body.isMac.isEnabledBackgroundGradient .scheduled-task .content,
+body.isMac.isEnabledBackgroundGradient .task-list-wrapper .box .content,
+body.isWeb.isEnabledBackgroundGradient .gu-mirror .box .content,
+body.isWeb.isEnabledBackgroundGradient .gu-mirror .content,
+body.isWeb.isEnabledBackgroundGradient .scheduled-task .content,
+body.isWeb.isEnabledBackgroundGradient .task-list-wrapper .box .content {
+  background-color: var(--color-background-task) !important;
+}
+.isLightTheme .isCurrent.isCurrent.isCurrent.isCurrent .inner-wrapper .box,
+.isLightTheme.isCurrent.isCurrent.isCurrent.isCurrent .inner-wrapper .box,
+body .isCurrent.isCurrent.isCurrent.isCurrent .inner-wrapper .box,
+body.isCurrent.isCurrent.isCurrent.isCurrent .inner-wrapper .box,
+body.isDarkTheme .isCurrent.isCurrent.isCurrent.isCurrent .inner-wrapper .box,
+body.isDarkTheme.isCurrent.isCurrent.isCurrent.isCurrent .inner-wrapper .box,
+body.isDarkTheme.isDisableBackgroundGradient
+  .isCurrent.isCurrent.isCurrent.isCurrent
+  .inner-wrapper
+  .box,
+body.isDarkTheme.isDisableBackgroundGradient.isCurrent.isCurrent.isCurrent.isCurrent
+  .inner-wrapper
+  .box,
+body.isDisableBackgroundGradient
+  .isCurrent.isCurrent.isCurrent.isCurrent
+  .inner-wrapper
+  .box,
+body.isDisableBackgroundGradient.isCurrent.isCurrent.isCurrent.isCurrent
+  .inner-wrapper
+  .box,
+body.isEnabledBackgroundGradient
+  .isCurrent.isCurrent.isCurrent.isCurrent
+  .inner-wrapper
+  .box,
+body.isEnabledBackgroundGradient.isCurrent.isCurrent.isCurrent.isCurrent
+  .inner-wrapper
+  .box,
+body.isLightTheme .isCurrent.isCurrent.isCurrent.isCurrent .inner-wrapper .box,
+body.isLightTheme.isCurrent.isCurrent.isCurrent.isCurrent .inner-wrapper .box,
+body.isLightTheme.isDisableBackgroundGradient
+  .isCurrent.isCurrent.isCurrent.isCurrent
+  .inner-wrapper
+  .box,
+body.isLightTheme.isDisableBackgroundGradient.isCurrent.isCurrent.isCurrent.isCurrent
+  .inner-wrapper
+  .box,
+body.isMac.isEnabledBackgroundGradient
+  .isCurrent.isCurrent.isCurrent.isCurrent
+  .inner-wrapper
+  .box,
+body.isMac.isEnabledBackgroundGradient.isCurrent.isCurrent.isCurrent.isCurrent
+  .inner-wrapper
+  .box,
+body.isWeb.isEnabledBackgroundGradient
+  .isCurrent.isCurrent.isCurrent.isCurrent
+  .inner-wrapper
+  .box,
+body.isWeb.isEnabledBackgroundGradient.isCurrent.isCurrent.isCurrent.isCurrent
+  .inner-wrapper
+  .box {
+  --palette-accent-500: var(--color-accent);
+  border-color: var(--color-accent) !important;
+}
+.isLightTheme .header-wrapper .current-task-title,
+.isLightTheme.isCurrent.isCurrent.isCurrent.isCurrent .header-wrapper .current-task-title,
+body .header-wrapper .current-task-title,
+body.isCurrent.isCurrent.isCurrent.isCurrent .header-wrapper .current-task-title,
+body.isDarkTheme .header-wrapper .current-task-title,
+body.isDarkTheme.isCurrent.isCurrent.isCurrent.isCurrent
+  .header-wrapper
+  .current-task-title,
+body.isDarkTheme.isDisableBackgroundGradient .header-wrapper .current-task-title,
+body.isDarkTheme.isDisableBackgroundGradient.isCurrent.isCurrent.isCurrent.isCurrent
+  .header-wrapper
+  .current-task-title,
+body.isDisableBackgroundGradient .header-wrapper .current-task-title,
+body.isDisableBackgroundGradient.isCurrent.isCurrent.isCurrent.isCurrent
+  .header-wrapper
+  .current-task-title,
+body.isEnabledBackgroundGradient .header-wrapper .current-task-title,
+body.isEnabledBackgroundGradient.isCurrent.isCurrent.isCurrent.isCurrent
+  .header-wrapper
+  .current-task-title,
+body.isLightTheme .header-wrapper .current-task-title,
+body.isLightTheme.isCurrent.isCurrent.isCurrent.isCurrent
+  .header-wrapper
+  .current-task-title,
+body.isLightTheme.isDisableBackgroundGradient .header-wrapper .current-task-title,
+body.isLightTheme.isDisableBackgroundGradient.isCurrent.isCurrent.isCurrent.isCurrent
+  .header-wrapper
+  .current-task-title,
+body.isMac.isEnabledBackgroundGradient .header-wrapper .current-task-title,
+body.isMac.isEnabledBackgroundGradient.isCurrent.isCurrent.isCurrent.isCurrent
+  .header-wrapper
+  .current-task-title,
+body.isWeb.isEnabledBackgroundGradient .header-wrapper .current-task-title,
+body.isWeb.isEnabledBackgroundGradient.isCurrent.isCurrent.isCurrent.isCurrent
+  .header-wrapper
+  .current-task-title {
+  border-color: var(--color-accent) !important;
+}
+.isLightTheme .play-icon-indicator,
+body .play-icon-indicator,
+body.isDarkTheme .play-icon-indicator,
+body.isDarkTheme.isDisableBackgroundGradient .play-icon-indicator,
+body.isDisableBackgroundGradient .play-icon-indicator,
+body.isEnabledBackgroundGradient .play-icon-indicator,
+body.isLightTheme .play-icon-indicator,
+body.isLightTheme.isDisableBackgroundGradient .play-icon-indicator,
+body.isMac.isEnabledBackgroundGradient .play-icon-indicator,
+body.isWeb.isEnabledBackgroundGradient .play-icon-indicator {
+  color: var(--color-accent) !important;
+}
+.isLightTheme .tag-title,
+body .tag-title,
+body.isDarkTheme .tag-title,
+body.isDarkTheme.isDisableBackgroundGradient .tag-title,
+body.isDisableBackgroundGradient .tag-title,
+body.isEnabledBackgroundGradient .tag-title,
+body.isLightTheme .tag-title,
+body.isLightTheme.isDisableBackgroundGradient .tag-title,
+body.isMac.isEnabledBackgroundGradient .tag-title,
+body.isWeb.isEnabledBackgroundGradient .tag-title {
+  color: var(--color-tag-title) !important;
+}
+.isLightTheme .task-title,
+.isLightTheme .title-and-tags-wrapper,
+body .task-title,
+body .title-and-tags-wrapper,
+body.isDarkTheme .task-title,
+body.isDarkTheme .title-and-tags-wrapper,
+body.isDarkTheme.isDisableBackgroundGradient .task-title,
+body.isDarkTheme.isDisableBackgroundGradient .title-and-tags-wrapper,
+body.isDisableBackgroundGradient .task-title,
+body.isDisableBackgroundGradient .title-and-tags-wrapper,
+body.isEnabledBackgroundGradient .task-title,
+body.isEnabledBackgroundGradient .title-and-tags-wrapper,
+body.isLightTheme .task-title,
+body.isLightTheme .title-and-tags-wrapper,
+body.isLightTheme.isDisableBackgroundGradient .task-title,
+body.isLightTheme.isDisableBackgroundGradient .title-and-tags-wrapper,
+body.isMac.isEnabledBackgroundGradient .task-title,
+body.isMac.isEnabledBackgroundGradient .title-and-tags-wrapper,
+body.isWeb.isEnabledBackgroundGradient .task-title,
+body.isWeb.isEnabledBackgroundGradient .title-and-tags-wrapper {
+  color: var(--color-foreground);
+  caret-color: var(--color-foreground);
+}
+.isLightTheme .task-title:focus,
+.isLightTheme .title-and-tags-wrapper:focus,
+body .task-title:focus,
+body .title-and-tags-wrapper:focus,
+body.isDarkTheme .task-title:focus,
+body.isDarkTheme .title-and-tags-wrapper:focus,
+body.isDarkTheme.isDisableBackgroundGradient .task-title:focus,
+body.isDarkTheme.isDisableBackgroundGradient .title-and-tags-wrapper:focus,
+body.isDisableBackgroundGradient .task-title:focus,
+body.isDisableBackgroundGradient .title-and-tags-wrapper:focus,
+body.isEnabledBackgroundGradient .task-title:focus,
+body.isEnabledBackgroundGradient .title-and-tags-wrapper:focus,
+body.isLightTheme .task-title:focus,
+body.isLightTheme .title-and-tags-wrapper:focus,
+body.isLightTheme.isDisableBackgroundGradient .task-title:focus,
+body.isLightTheme.isDisableBackgroundGradient .title-and-tags-wrapper:focus,
+body.isMac.isEnabledBackgroundGradient .task-title:focus,
+body.isMac.isEnabledBackgroundGradient .title-and-tags-wrapper:focus,
+body.isWeb.isEnabledBackgroundGradient .task-title:focus,
+body.isWeb.isEnabledBackgroundGradient .title-and-tags-wrapper:focus {
+  background-color: var(--color-inputs-focused);
+  border-color: var(--color-large-toggle-panels-inputs);
+}
+.isLightTheme .task-title:focus::after,
+.isLightTheme .title-and-tags-wrapper:focus::after,
+body .task-title:focus::after,
+body .title-and-tags-wrapper:focus::after,
+body.isDarkTheme .task-title:focus::after,
+body.isDarkTheme .title-and-tags-wrapper:focus::after,
+body.isDarkTheme.isDisableBackgroundGradient .task-title:focus::after,
+body.isDarkTheme.isDisableBackgroundGradient .title-and-tags-wrapper:focus::after,
+body.isDisableBackgroundGradient .task-title:focus::after,
+body.isDisableBackgroundGradient .title-and-tags-wrapper:focus::after,
+body.isEnabledBackgroundGradient .task-title:focus::after,
+body.isEnabledBackgroundGradient .title-and-tags-wrapper:focus::after,
+body.isLightTheme .task-title:focus::after,
+body.isLightTheme .title-and-tags-wrapper:focus::after,
+body.isLightTheme.isDisableBackgroundGradient .task-title:focus::after,
+body.isLightTheme.isDisableBackgroundGradient .title-and-tags-wrapper:focus::after,
+body.isMac.isEnabledBackgroundGradient .task-title:focus::after,
+body.isMac.isEnabledBackgroundGradient .title-and-tags-wrapper:focus::after,
+body.isWeb.isEnabledBackgroundGradient .task-title:focus::after,
+body.isWeb.isEnabledBackgroundGradient .title-and-tags-wrapper:focus::after {
+  background-color: var(--color-inputs-focused);
+  border-color: var(--color-large-toggle-panels-inputs);
+  box-shadow: none;
+}
+.isLightTheme .drag-handle,
+.isLightTheme .mat-card,
+body .drag-handle,
+body .mat-card,
+body.isDarkTheme .drag-handle,
+body.isDarkTheme .mat-card,
+body.isDarkTheme.isDisableBackgroundGradient .drag-handle,
+body.isDarkTheme.isDisableBackgroundGradient .mat-card,
+body.isDisableBackgroundGradient .drag-handle,
+body.isDisableBackgroundGradient .mat-card,
+body.isEnabledBackgroundGradient .drag-handle,
+body.isEnabledBackgroundGradient .mat-card,
+body.isLightTheme .drag-handle,
+body.isLightTheme .mat-card,
+body.isLightTheme.isDisableBackgroundGradient .drag-handle,
+body.isLightTheme.isDisableBackgroundGradient .mat-card,
+body.isMac.isEnabledBackgroundGradient .drag-handle,
+body.isMac.isEnabledBackgroundGradient .mat-card,
+body.isWeb.isEnabledBackgroundGradient .drag-handle,
+body.isWeb.isEnabledBackgroundGradient .mat-card {
+  background-color: var(--color-background-task);
+  color: var(--color-foreground);
+}
+.isLightTheme .drag-handle::after,
+body .drag-handle::after,
+body.isDarkTheme .drag-handle::after,
+body.isDarkTheme.isDisableBackgroundGradient .drag-handle::after,
+body.isDisableBackgroundGradient .drag-handle::after,
+body.isEnabledBackgroundGradient .drag-handle::after,
+body.isLightTheme .drag-handle::after,
+body.isLightTheme.isDisableBackgroundGradient .drag-handle::after,
+body.isMac.isEnabledBackgroundGradient .drag-handle::after,
+body.isWeb.isEnabledBackgroundGradient .drag-handle::after {
+  box-shadow: none;
+}
+.isLightTheme .first-line:hover .hover-controls,
+body .first-line:hover .hover-controls,
+body.isDarkTheme .first-line:hover .hover-controls,
+body.isDarkTheme.isDisableBackgroundGradient .first-line:hover .hover-controls,
+body.isDisableBackgroundGradient .first-line:hover .hover-controls,
+body.isEnabledBackgroundGradient .first-line:hover .hover-controls,
+body.isLightTheme .first-line:hover .hover-controls,
+body.isLightTheme.isDisableBackgroundGradient .first-line:hover .hover-controls,
+body.isMac.isEnabledBackgroundGradient .first-line:hover .hover-controls,
+body.isWeb.isEnabledBackgroundGradient .first-line:hover .hover-controls {
+  background-color: var(--color-background-task);
+}
+.isLightTheme .mat-button.mat-accent.mat-button-disabled,
+.isLightTheme .mat-button.mat-button-disabled.mat-button-disabled,
+.isLightTheme .mat-button.mat-primary.mat-button-disabled,
+.isLightTheme .mat-button.mat-warn.mat-button-disabled,
+.isLightTheme .mat-icon-button.mat-accent.mat-button-disabled,
+.isLightTheme .mat-icon-button.mat-button-disabled.mat-button-disabled,
+.isLightTheme .mat-icon-button.mat-primary.mat-button-disabled,
+.isLightTheme .mat-icon-button.mat-warn.mat-button-disabled,
+.isLightTheme .mat-stroked-button.mat-accent.mat-button-disabled,
+.isLightTheme .mat-stroked-button.mat-button-disabled.mat-button-disabled,
+.isLightTheme .mat-stroked-button.mat-primary.mat-button-disabled,
+.isLightTheme .mat-stroked-button.mat-warn.mat-button-disabled,
+.isLightTheme .mat-stroked-button:not(.mat-button-disabled),
+body .mat-button.mat-accent.mat-button-disabled,
+body .mat-button.mat-button-disabled.mat-button-disabled,
+body .mat-button.mat-primary.mat-button-disabled,
+body .mat-button.mat-warn.mat-button-disabled,
+body .mat-icon-button.mat-accent.mat-button-disabled,
+body .mat-icon-button.mat-button-disabled.mat-button-disabled,
+body .mat-icon-button.mat-primary.mat-button-disabled,
+body .mat-icon-button.mat-warn.mat-button-disabled,
+body .mat-stroked-button.mat-accent.mat-button-disabled,
+body .mat-stroked-button.mat-button-disabled.mat-button-disabled,
+body .mat-stroked-button.mat-primary.mat-button-disabled,
+body .mat-stroked-button.mat-warn.mat-button-disabled,
+body .mat-stroked-button:not(.mat-button-disabled),
+body.isDarkTheme .mat-button.mat-accent.mat-button-disabled,
+body.isDarkTheme .mat-button.mat-button-disabled.mat-button-disabled,
+body.isDarkTheme .mat-button.mat-primary.mat-button-disabled,
+body.isDarkTheme .mat-button.mat-warn.mat-button-disabled,
+body.isDarkTheme .mat-icon-button.mat-accent.mat-button-disabled,
+body.isDarkTheme .mat-icon-button.mat-button-disabled.mat-button-disabled,
+body.isDarkTheme .mat-icon-button.mat-primary.mat-button-disabled,
+body.isDarkTheme .mat-icon-button.mat-warn.mat-button-disabled,
+body.isDarkTheme .mat-stroked-button.mat-accent.mat-button-disabled,
+body.isDarkTheme .mat-stroked-button.mat-button-disabled.mat-button-disabled,
+body.isDarkTheme .mat-stroked-button.mat-primary.mat-button-disabled,
+body.isDarkTheme .mat-stroked-button.mat-warn.mat-button-disabled,
+body.isDarkTheme .mat-stroked-button:not(.mat-button-disabled),
+body.isDarkTheme.isDisableBackgroundGradient .mat-button.mat-accent.mat-button-disabled,
+body.isDarkTheme.isDisableBackgroundGradient
+  .mat-button.mat-button-disabled.mat-button-disabled,
+body.isDarkTheme.isDisableBackgroundGradient .mat-button.mat-primary.mat-button-disabled,
+body.isDarkTheme.isDisableBackgroundGradient .mat-button.mat-warn.mat-button-disabled,
+body.isDarkTheme.isDisableBackgroundGradient
+  .mat-icon-button.mat-accent.mat-button-disabled,
+body.isDarkTheme.isDisableBackgroundGradient
+  .mat-icon-button.mat-button-disabled.mat-button-disabled,
+body.isDarkTheme.isDisableBackgroundGradient
+  .mat-icon-button.mat-primary.mat-button-disabled,
+body.isDarkTheme.isDisableBackgroundGradient
+  .mat-icon-button.mat-warn.mat-button-disabled,
+body.isDarkTheme.isDisableBackgroundGradient
+  .mat-stroked-button.mat-accent.mat-button-disabled,
+body.isDarkTheme.isDisableBackgroundGradient
+  .mat-stroked-button.mat-button-disabled.mat-button-disabled,
+body.isDarkTheme.isDisableBackgroundGradient
+  .mat-stroked-button.mat-primary.mat-button-disabled,
+body.isDarkTheme.isDisableBackgroundGradient
+  .mat-stroked-button.mat-warn.mat-button-disabled,
+body.isDarkTheme.isDisableBackgroundGradient
+  .mat-stroked-button:not(.mat-button-disabled),
+body.isDisableBackgroundGradient .mat-button.mat-accent.mat-button-disabled,
+body.isDisableBackgroundGradient .mat-button.mat-button-disabled.mat-button-disabled,
+body.isDisableBackgroundGradient .mat-button.mat-primary.mat-button-disabled,
+body.isDisableBackgroundGradient .mat-button.mat-warn.mat-button-disabled,
+body.isDisableBackgroundGradient .mat-icon-button.mat-accent.mat-button-disabled,
+body.isDisableBackgroundGradient .mat-icon-button.mat-button-disabled.mat-button-disabled,
+body.isDisableBackgroundGradient .mat-icon-button.mat-primary.mat-button-disabled,
+body.isDisableBackgroundGradient .mat-icon-button.mat-warn.mat-button-disabled,
+body.isDisableBackgroundGradient .mat-stroked-button.mat-accent.mat-button-disabled,
+body.isDisableBackgroundGradient
+  .mat-stroked-button.mat-button-disabled.mat-button-disabled,
+body.isDisableBackgroundGradient .mat-stroked-button.mat-primary.mat-button-disabled,
+body.isDisableBackgroundGradient .mat-stroked-button.mat-warn.mat-button-disabled,
+body.isDisableBackgroundGradient .mat-stroked-button:not(.mat-button-disabled),
+body.isEnabledBackgroundGradient .mat-button.mat-accent.mat-button-disabled,
+body.isEnabledBackgroundGradient .mat-button.mat-button-disabled.mat-button-disabled,
+body.isEnabledBackgroundGradient .mat-button.mat-primary.mat-button-disabled,
+body.isEnabledBackgroundGradient .mat-button.mat-warn.mat-button-disabled,
+body.isEnabledBackgroundGradient .mat-icon-button.mat-accent.mat-button-disabled,
+body.isEnabledBackgroundGradient .mat-icon-button.mat-button-disabled.mat-button-disabled,
+body.isEnabledBackgroundGradient .mat-icon-button.mat-primary.mat-button-disabled,
+body.isEnabledBackgroundGradient .mat-icon-button.mat-warn.mat-button-disabled,
+body.isEnabledBackgroundGradient .mat-stroked-button.mat-accent.mat-button-disabled,
+body.isEnabledBackgroundGradient
+  .mat-stroked-button.mat-button-disabled.mat-button-disabled,
+body.isEnabledBackgroundGradient .mat-stroked-button.mat-primary.mat-button-disabled,
+body.isEnabledBackgroundGradient .mat-stroked-button.mat-warn.mat-button-disabled,
+body.isEnabledBackgroundGradient .mat-stroked-button:not(.mat-button-disabled),
+body.isLightTheme .mat-button.mat-accent.mat-button-disabled,
+body.isLightTheme .mat-button.mat-button-disabled.mat-button-disabled,
+body.isLightTheme .mat-button.mat-primary.mat-button-disabled,
+body.isLightTheme .mat-button.mat-warn.mat-button-disabled,
+body.isLightTheme .mat-icon-button.mat-accent.mat-button-disabled,
+body.isLightTheme .mat-icon-button.mat-button-disabled.mat-button-disabled,
+body.isLightTheme .mat-icon-button.mat-primary.mat-button-disabled,
+body.isLightTheme .mat-icon-button.mat-warn.mat-button-disabled,
+body.isLightTheme .mat-stroked-button.mat-accent.mat-button-disabled,
+body.isLightTheme .mat-stroked-button.mat-button-disabled.mat-button-disabled,
+body.isLightTheme .mat-stroked-button.mat-primary.mat-button-disabled,
+body.isLightTheme .mat-stroked-button.mat-warn.mat-button-disabled,
+body.isLightTheme .mat-stroked-button:not(.mat-button-disabled),
+body.isLightTheme.isDisableBackgroundGradient .mat-button.mat-accent.mat-button-disabled,
+body.isLightTheme.isDisableBackgroundGradient
+  .mat-button.mat-button-disabled.mat-button-disabled,
+body.isLightTheme.isDisableBackgroundGradient .mat-button.mat-primary.mat-button-disabled,
+body.isLightTheme.isDisableBackgroundGradient .mat-button.mat-warn.mat-button-disabled,
+body.isLightTheme.isDisableBackgroundGradient
+  .mat-icon-button.mat-accent.mat-button-disabled,
+body.isLightTheme.isDisableBackgroundGradient
+  .mat-icon-button.mat-button-disabled.mat-button-disabled,
+body.isLightTheme.isDisableBackgroundGradient
+  .mat-icon-button.mat-primary.mat-button-disabled,
+body.isLightTheme.isDisableBackgroundGradient
+  .mat-icon-button.mat-warn.mat-button-disabled,
+body.isLightTheme.isDisableBackgroundGradient
+  .mat-stroked-button.mat-accent.mat-button-disabled,
+body.isLightTheme.isDisableBackgroundGradient
+  .mat-stroked-button.mat-button-disabled.mat-button-disabled,
+body.isLightTheme.isDisableBackgroundGradient
+  .mat-stroked-button.mat-primary.mat-button-disabled,
+body.isLightTheme.isDisableBackgroundGradient
+  .mat-stroked-button.mat-warn.mat-button-disabled,
+body.isLightTheme.isDisableBackgroundGradient
+  .mat-stroked-button:not(.mat-button-disabled),
+body.isMac.isEnabledBackgroundGradient .mat-button.mat-accent.mat-button-disabled,
+body.isMac.isEnabledBackgroundGradient
+  .mat-button.mat-button-disabled.mat-button-disabled,
+body.isMac.isEnabledBackgroundGradient .mat-button.mat-primary.mat-button-disabled,
+body.isMac.isEnabledBackgroundGradient .mat-button.mat-warn.mat-button-disabled,
+body.isMac.isEnabledBackgroundGradient .mat-icon-button.mat-accent.mat-button-disabled,
+body.isMac.isEnabledBackgroundGradient
+  .mat-icon-button.mat-button-disabled.mat-button-disabled,
+body.isMac.isEnabledBackgroundGradient .mat-icon-button.mat-primary.mat-button-disabled,
+body.isMac.isEnabledBackgroundGradient .mat-icon-button.mat-warn.mat-button-disabled,
+body.isMac.isEnabledBackgroundGradient .mat-stroked-button.mat-accent.mat-button-disabled,
+body.isMac.isEnabledBackgroundGradient
+  .mat-stroked-button.mat-button-disabled.mat-button-disabled,
+body.isMac.isEnabledBackgroundGradient
+  .mat-stroked-button.mat-primary.mat-button-disabled,
+body.isMac.isEnabledBackgroundGradient .mat-stroked-button.mat-warn.mat-button-disabled,
+body.isMac.isEnabledBackgroundGradient .mat-stroked-button:not(.mat-button-disabled),
+body.isWeb.isEnabledBackgroundGradient .mat-button.mat-accent.mat-button-disabled,
+body.isWeb.isEnabledBackgroundGradient
+  .mat-button.mat-button-disabled.mat-button-disabled,
+body.isWeb.isEnabledBackgroundGradient .mat-button.mat-primary.mat-button-disabled,
+body.isWeb.isEnabledBackgroundGradient .mat-button.mat-warn.mat-button-disabled,
+body.isWeb.isEnabledBackgroundGradient .mat-icon-button.mat-accent.mat-button-disabled,
+body.isWeb.isEnabledBackgroundGradient
+  .mat-icon-button.mat-button-disabled.mat-button-disabled,
+body.isWeb.isEnabledBackgroundGradient .mat-icon-button.mat-primary.mat-button-disabled,
+body.isWeb.isEnabledBackgroundGradient .mat-icon-button.mat-warn.mat-button-disabled,
+body.isWeb.isEnabledBackgroundGradient .mat-stroked-button.mat-accent.mat-button-disabled,
+body.isWeb.isEnabledBackgroundGradient
+  .mat-stroked-button.mat-button-disabled.mat-button-disabled,
+body.isWeb.isEnabledBackgroundGradient
+  .mat-stroked-button.mat-primary.mat-button-disabled,
+body.isWeb.isEnabledBackgroundGradient .mat-stroked-button.mat-warn.mat-button-disabled,
+body.isWeb.isEnabledBackgroundGradient .mat-stroked-button:not(.mat-button-disabled) {
+  color: var(--color-foreground);
+  border-color: var(--color-large-toggle-panels-inputs);
+}
+.isLightTheme .ico-btn.mat-accent,
+.isLightTheme .mat-accent,
+body .ico-btn.mat-accent,
+body .mat-accent,
+body.isDarkTheme .ico-btn.mat-accent,
+body.isDarkTheme .mat-accent,
+body.isDarkTheme.isDisableBackgroundGradient .ico-btn.mat-accent,
+body.isDarkTheme.isDisableBackgroundGradient .mat-accent,
+body.isDisableBackgroundGradient .ico-btn.mat-accent,
+body.isDisableBackgroundGradient .mat-accent,
+body.isEnabledBackgroundGradient .ico-btn.mat-accent,
+body.isEnabledBackgroundGradient .mat-accent,
+body.isLightTheme .ico-btn.mat-accent,
+body.isLightTheme .mat-accent,
+body.isLightTheme.isDisableBackgroundGradient .ico-btn.mat-accent,
+body.isLightTheme.isDisableBackgroundGradient .mat-accent,
+body.isMac.isEnabledBackgroundGradient .ico-btn.mat-accent,
+body.isMac.isEnabledBackgroundGradient .mat-accent,
+body.isWeb.isEnabledBackgroundGradient .ico-btn.mat-accent,
+body.isWeb.isEnabledBackgroundGradient .mat-accent {
+  color: var(--color-accent) !important;
+}
+.isLightTheme .drag-handle .drag-handle-ico,
+body .drag-handle .drag-handle-ico,
+body.isDarkTheme .drag-handle .drag-handle-ico,
+body.isDarkTheme.isDisableBackgroundGradient .drag-handle .drag-handle-ico,
+body.isDisableBackgroundGradient .drag-handle .drag-handle-ico,
+body.isEnabledBackgroundGradient .drag-handle .drag-handle-ico,
+body.isLightTheme .drag-handle .drag-handle-ico,
+body.isLightTheme.isDisableBackgroundGradient .drag-handle .drag-handle-ico,
+body.isMac.isEnabledBackgroundGradient .drag-handle .drag-handle-ico,
+body.isWeb.isEnabledBackgroundGradient .drag-handle .drag-handle-ico {
+  opacity: 0.6 !important;
+}
+body .mat-dialog-container,
+body .mat-stepper-horizontal,
+body .mat-stepper-vertical,
+body .owl-dt-calendar-table .owl-dt-calendar-cell,
+body .owl-dt-calendar-table .owl-dt-calendar-header,
+body .owl-dt-control-period-button .owl-dt-control-button-arrow,
+body .owl-dt-schedule-item:focus,
+body .owl-dt-schedule-item:hover,
+body .owl-dt-timer-content .owl-dt-timer-input,
+body .owl-dt-timer-divider,
+body.isDarkTheme .mat-dialog-container,
+body.isDarkTheme .mat-stepper-horizontal,
+body.isDarkTheme .mat-stepper-vertical,
+body.isDarkTheme .owl-dt-calendar-table .owl-dt-calendar-cell,
+body.isDarkTheme .owl-dt-calendar-table .owl-dt-calendar-header,
+body.isDarkTheme .owl-dt-control-period-button .owl-dt-control-button-arrow,
+body.isDarkTheme .owl-dt-schedule-item:focus,
+body.isDarkTheme .owl-dt-schedule-item:hover,
+body.isDarkTheme .owl-dt-timer-content .owl-dt-timer-input,
+body.isDarkTheme .owl-dt-timer-divider,
+body.isDarkTheme.isDisableBackgroundGradient .mat-dialog-container,
+body.isDarkTheme.isDisableBackgroundGradient .mat-stepper-horizontal,
+body.isDarkTheme.isDisableBackgroundGradient .mat-stepper-vertical,
+body.isDarkTheme.isDisableBackgroundGradient .owl-dt-calendar-table .owl-dt-calendar-cell,
+body.isDarkTheme.isDisableBackgroundGradient
+  .owl-dt-calendar-table
+  .owl-dt-calendar-header,
+body.isDarkTheme.isDisableBackgroundGradient
+  .owl-dt-control-period-button
+  .owl-dt-control-button-arrow,
+body.isDarkTheme.isDisableBackgroundGradient .owl-dt-schedule-item:focus,
+body.isDarkTheme.isDisableBackgroundGradient .owl-dt-schedule-item:hover,
+body.isDarkTheme.isDisableBackgroundGradient .owl-dt-timer-content .owl-dt-timer-input,
+body.isDarkTheme.isDisableBackgroundGradient .owl-dt-timer-divider,
+body.isDisableBackgroundGradient .mat-dialog-container,
+body.isDisableBackgroundGradient .mat-stepper-horizontal,
+body.isDisableBackgroundGradient .mat-stepper-vertical,
+body.isDisableBackgroundGradient .owl-dt-calendar-table .owl-dt-calendar-cell,
+body.isDisableBackgroundGradient .owl-dt-calendar-table .owl-dt-calendar-header,
+body.isDisableBackgroundGradient
+  .owl-dt-control-period-button
+  .owl-dt-control-button-arrow,
+body.isDisableBackgroundGradient .owl-dt-schedule-item:focus,
+body.isDisableBackgroundGradient .owl-dt-schedule-item:hover,
+body.isDisableBackgroundGradient .owl-dt-timer-content .owl-dt-timer-input,
+body.isDisableBackgroundGradient .owl-dt-timer-divider,
+body.isEnabledBackgroundGradient .mat-dialog-container,
+body.isEnabledBackgroundGradient .mat-stepper-horizontal,
+body.isEnabledBackgroundGradient .mat-stepper-vertical,
+body.isEnabledBackgroundGradient .owl-dt-calendar-table .owl-dt-calendar-cell,
+body.isEnabledBackgroundGradient .owl-dt-calendar-table .owl-dt-calendar-header,
+body.isEnabledBackgroundGradient
+  .owl-dt-control-period-button
+  .owl-dt-control-button-arrow,
+body.isEnabledBackgroundGradient .owl-dt-schedule-item:focus,
+body.isEnabledBackgroundGradient .owl-dt-schedule-item:hover,
+body.isEnabledBackgroundGradient .owl-dt-timer-content .owl-dt-timer-input,
+body.isEnabledBackgroundGradient .owl-dt-timer-divider,
+body.isLightTheme .mat-dialog-container,
+body.isLightTheme .mat-stepper-horizontal,
+body.isLightTheme .mat-stepper-vertical,
+body.isLightTheme .owl-dt-calendar-table .owl-dt-calendar-cell,
+body.isLightTheme .owl-dt-calendar-table .owl-dt-calendar-header,
+body.isLightTheme .owl-dt-control-period-button .owl-dt-control-button-arrow,
+body.isLightTheme .owl-dt-schedule-item:focus,
+body.isLightTheme .owl-dt-schedule-item:hover,
+body.isLightTheme .owl-dt-timer-content .owl-dt-timer-input,
+body.isLightTheme .owl-dt-timer-divider,
+body.isLightTheme.isDisableBackgroundGradient .mat-dialog-container,
+body.isLightTheme.isDisableBackgroundGradient .mat-stepper-horizontal,
+body.isLightTheme.isDisableBackgroundGradient .mat-stepper-vertical,
+body.isLightTheme.isDisableBackgroundGradient
+  .owl-dt-calendar-table
+  .owl-dt-calendar-cell,
+body.isLightTheme.isDisableBackgroundGradient
+  .owl-dt-calendar-table
+  .owl-dt-calendar-header,
+body.isLightTheme.isDisableBackgroundGradient
+  .owl-dt-control-period-button
+  .owl-dt-control-button-arrow,
+body.isLightTheme.isDisableBackgroundGradient .owl-dt-schedule-item:focus,
+body.isLightTheme.isDisableBackgroundGradient .owl-dt-schedule-item:hover,
+body.isLightTheme.isDisableBackgroundGradient .owl-dt-timer-content .owl-dt-timer-input,
+body.isLightTheme.isDisableBackgroundGradient .owl-dt-timer-divider,
+body.isMac.isEnabledBackgroundGradient .mat-dialog-container,
+body.isMac.isEnabledBackgroundGradient .mat-stepper-horizontal,
+body.isMac.isEnabledBackgroundGradient .mat-stepper-vertical,
+body.isMac.isEnabledBackgroundGradient .owl-dt-calendar-table .owl-dt-calendar-cell,
+body.isMac.isEnabledBackgroundGradient .owl-dt-calendar-table .owl-dt-calendar-header,
+body.isMac.isEnabledBackgroundGradient
+  .owl-dt-control-period-button
+  .owl-dt-control-button-arrow,
+body.isMac.isEnabledBackgroundGradient .owl-dt-schedule-item:focus,
+body.isMac.isEnabledBackgroundGradient .owl-dt-schedule-item:hover,
+body.isMac.isEnabledBackgroundGradient .owl-dt-timer-content .owl-dt-timer-input,
+body.isMac.isEnabledBackgroundGradient .owl-dt-timer-divider,
+body.isWeb.isEnabledBackgroundGradient .mat-dialog-container,
+body.isWeb.isEnabledBackgroundGradient .mat-stepper-horizontal,
+body.isWeb.isEnabledBackgroundGradient .mat-stepper-vertical,
+body.isWeb.isEnabledBackgroundGradient .owl-dt-calendar-table .owl-dt-calendar-cell,
+body.isWeb.isEnabledBackgroundGradient .owl-dt-calendar-table .owl-dt-calendar-header,
+body.isWeb.isEnabledBackgroundGradient
+  .owl-dt-control-period-button
+  .owl-dt-control-button-arrow,
+body.isWeb.isEnabledBackgroundGradient .owl-dt-schedule-item:focus,
+body.isWeb.isEnabledBackgroundGradient .owl-dt-schedule-item:hover,
+body.isWeb.isEnabledBackgroundGradient .owl-dt-timer-content .owl-dt-timer-input,
+body.isWeb.isEnabledBackgroundGradient .owl-dt-timer-divider {
+  background-color: var(--color-background-setting-buttons);
+  color: var(--color-foreground);
+  border-color: var(--color-background-setting-buttons);
+  fill: var(--color-foreground);
+}
+body .mat-dialog-container:focus,
+body .mat-dialog-container:hover,
+body .mat-stepper-horizontal:focus,
+body .mat-stepper-horizontal:hover,
+body .mat-stepper-vertical:focus,
+body .mat-stepper-vertical:hover,
+body .owl-dt-calendar-table .owl-dt-calendar-cell:focus,
+body .owl-dt-calendar-table .owl-dt-calendar-cell:hover,
+body .owl-dt-calendar-table .owl-dt-calendar-header:focus,
+body .owl-dt-calendar-table .owl-dt-calendar-header:hover,
+body .owl-dt-control-period-button .owl-dt-control-button-arrow:focus,
+body .owl-dt-control-period-button .owl-dt-control-button-arrow:hover,
+body .owl-dt-schedule-item:focus:focus,
+body .owl-dt-schedule-item:focus:hover,
+body .owl-dt-schedule-item:hover:focus,
+body .owl-dt-schedule-item:hover:hover,
+body .owl-dt-timer-content .owl-dt-timer-input:focus,
+body .owl-dt-timer-content .owl-dt-timer-input:hover,
+body .owl-dt-timer-divider:focus,
+body .owl-dt-timer-divider:hover,
+body.isDarkTheme .mat-dialog-container:focus,
+body.isDarkTheme .mat-dialog-container:hover,
+body.isDarkTheme .mat-stepper-horizontal:focus,
+body.isDarkTheme .mat-stepper-horizontal:hover,
+body.isDarkTheme .mat-stepper-vertical:focus,
+body.isDarkTheme .mat-stepper-vertical:hover,
+body.isDarkTheme .owl-dt-calendar-table .owl-dt-calendar-cell:focus,
+body.isDarkTheme .owl-dt-calendar-table .owl-dt-calendar-cell:hover,
+body.isDarkTheme .owl-dt-calendar-table .owl-dt-calendar-header:focus,
+body.isDarkTheme .owl-dt-calendar-table .owl-dt-calendar-header:hover,
+body.isDarkTheme .owl-dt-control-period-button .owl-dt-control-button-arrow:focus,
+body.isDarkTheme .owl-dt-control-period-button .owl-dt-control-button-arrow:hover,
+body.isDarkTheme .owl-dt-schedule-item:focus:focus,
+body.isDarkTheme .owl-dt-schedule-item:focus:hover,
+body.isDarkTheme .owl-dt-schedule-item:hover:focus,
+body.isDarkTheme .owl-dt-schedule-item:hover:hover,
+body.isDarkTheme .owl-dt-timer-content .owl-dt-timer-input:focus,
+body.isDarkTheme .owl-dt-timer-content .owl-dt-timer-input:hover,
+body.isDarkTheme .owl-dt-timer-divider:focus,
+body.isDarkTheme .owl-dt-timer-divider:hover,
+body.isDarkTheme.isDisableBackgroundGradient .mat-dialog-container:focus,
+body.isDarkTheme.isDisableBackgroundGradient .mat-dialog-container:hover,
+body.isDarkTheme.isDisableBackgroundGradient .mat-stepper-horizontal:focus,
+body.isDarkTheme.isDisableBackgroundGradient .mat-stepper-horizontal:hover,
+body.isDarkTheme.isDisableBackgroundGradient .mat-stepper-vertical:focus,
+body.isDarkTheme.isDisableBackgroundGradient .mat-stepper-vertical:hover,
+body.isDarkTheme.isDisableBackgroundGradient
+  .owl-dt-calendar-table
+  .owl-dt-calendar-cell:focus,
+body.isDarkTheme.isDisableBackgroundGradient
+  .owl-dt-calendar-table
+  .owl-dt-calendar-cell:hover,
+body.isDarkTheme.isDisableBackgroundGradient
+  .owl-dt-calendar-table
+  .owl-dt-calendar-header:focus,
+body.isDarkTheme.isDisableBackgroundGradient
+  .owl-dt-calendar-table
+  .owl-dt-calendar-header:hover,
+body.isDarkTheme.isDisableBackgroundGradient
+  .owl-dt-control-period-button
+  .owl-dt-control-button-arrow:focus,
+body.isDarkTheme.isDisableBackgroundGradient
+  .owl-dt-control-period-button
+  .owl-dt-control-button-arrow:hover,
+body.isDarkTheme.isDisableBackgroundGradient .owl-dt-schedule-item:focus:focus,
+body.isDarkTheme.isDisableBackgroundGradient .owl-dt-schedule-item:focus:hover,
+body.isDarkTheme.isDisableBackgroundGradient .owl-dt-schedule-item:hover:focus,
+body.isDarkTheme.isDisableBackgroundGradient .owl-dt-schedule-item:hover:hover,
+body.isDarkTheme.isDisableBackgroundGradient
+  .owl-dt-timer-content
+  .owl-dt-timer-input:focus,
+body.isDarkTheme.isDisableBackgroundGradient
+  .owl-dt-timer-content
+  .owl-dt-timer-input:hover,
+body.isDarkTheme.isDisableBackgroundGradient .owl-dt-timer-divider:focus,
+body.isDarkTheme.isDisableBackgroundGradient .owl-dt-timer-divider:hover,
+body.isDisableBackgroundGradient .mat-dialog-container:focus,
+body.isDisableBackgroundGradient .mat-dialog-container:hover,
+body.isDisableBackgroundGradient .mat-stepper-horizontal:focus,
+body.isDisableBackgroundGradient .mat-stepper-horizontal:hover,
+body.isDisableBackgroundGradient .mat-stepper-vertical:focus,
+body.isDisableBackgroundGradient .mat-stepper-vertical:hover,
+body.isDisableBackgroundGradient .owl-dt-calendar-table .owl-dt-calendar-cell:focus,
+body.isDisableBackgroundGradient .owl-dt-calendar-table .owl-dt-calendar-cell:hover,
+body.isDisableBackgroundGradient .owl-dt-calendar-table .owl-dt-calendar-header:focus,
+body.isDisableBackgroundGradient .owl-dt-calendar-table .owl-dt-calendar-header:hover,
+body.isDisableBackgroundGradient
+  .owl-dt-control-period-button
+  .owl-dt-control-button-arrow:focus,
+body.isDisableBackgroundGradient
+  .owl-dt-control-period-button
+  .owl-dt-control-button-arrow:hover,
+body.isDisableBackgroundGradient .owl-dt-schedule-item:focus:focus,
+body.isDisableBackgroundGradient .owl-dt-schedule-item:focus:hover,
+body.isDisableBackgroundGradient .owl-dt-schedule-item:hover:focus,
+body.isDisableBackgroundGradient .owl-dt-schedule-item:hover:hover,
+body.isDisableBackgroundGradient .owl-dt-timer-content .owl-dt-timer-input:focus,
+body.isDisableBackgroundGradient .owl-dt-timer-content .owl-dt-timer-input:hover,
+body.isDisableBackgroundGradient .owl-dt-timer-divider:focus,
+body.isDisableBackgroundGradient .owl-dt-timer-divider:hover,
+body.isEnabledBackgroundGradient .mat-dialog-container:focus,
+body.isEnabledBackgroundGradient .mat-dialog-container:hover,
+body.isEnabledBackgroundGradient .mat-stepper-horizontal:focus,
+body.isEnabledBackgroundGradient .mat-stepper-horizontal:hover,
+body.isEnabledBackgroundGradient .mat-stepper-vertical:focus,
+body.isEnabledBackgroundGradient .mat-stepper-vertical:hover,
+body.isEnabledBackgroundGradient .owl-dt-calendar-table .owl-dt-calendar-cell:focus,
+body.isEnabledBackgroundGradient .owl-dt-calendar-table .owl-dt-calendar-cell:hover,
+body.isEnabledBackgroundGradient .owl-dt-calendar-table .owl-dt-calendar-header:focus,
+body.isEnabledBackgroundGradient .owl-dt-calendar-table .owl-dt-calendar-header:hover,
+body.isEnabledBackgroundGradient
+  .owl-dt-control-period-button
+  .owl-dt-control-button-arrow:focus,
+body.isEnabledBackgroundGradient
+  .owl-dt-control-period-button
+  .owl-dt-control-button-arrow:hover,
+body.isEnabledBackgroundGradient .owl-dt-schedule-item:focus:focus,
+body.isEnabledBackgroundGradient .owl-dt-schedule-item:focus:hover,
+body.isEnabledBackgroundGradient .owl-dt-schedule-item:hover:focus,
+body.isEnabledBackgroundGradient .owl-dt-schedule-item:hover:hover,
+body.isEnabledBackgroundGradient .owl-dt-timer-content .owl-dt-timer-input:focus,
+body.isEnabledBackgroundGradient .owl-dt-timer-content .owl-dt-timer-input:hover,
+body.isEnabledBackgroundGradient .owl-dt-timer-divider:focus,
+body.isEnabledBackgroundGradient .owl-dt-timer-divider:hover,
+body.isLightTheme .mat-dialog-container:focus,
+body.isLightTheme .mat-dialog-container:hover,
+body.isLightTheme .mat-stepper-horizontal:focus,
+body.isLightTheme .mat-stepper-horizontal:hover,
+body.isLightTheme .mat-stepper-vertical:focus,
+body.isLightTheme .mat-stepper-vertical:hover,
+body.isLightTheme .owl-dt-calendar-table .owl-dt-calendar-cell:focus,
+body.isLightTheme .owl-dt-calendar-table .owl-dt-calendar-cell:hover,
+body.isLightTheme .owl-dt-calendar-table .owl-dt-calendar-header:focus,
+body.isLightTheme .owl-dt-calendar-table .owl-dt-calendar-header:hover,
+body.isLightTheme .owl-dt-control-period-button .owl-dt-control-button-arrow:focus,
+body.isLightTheme .owl-dt-control-period-button .owl-dt-control-button-arrow:hover,
+body.isLightTheme .owl-dt-schedule-item:focus:focus,
+body.isLightTheme .owl-dt-schedule-item:focus:hover,
+body.isLightTheme .owl-dt-schedule-item:hover:focus,
+body.isLightTheme .owl-dt-schedule-item:hover:hover,
+body.isLightTheme .owl-dt-timer-content .owl-dt-timer-input:focus,
+body.isLightTheme .owl-dt-timer-content .owl-dt-timer-input:hover,
+body.isLightTheme .owl-dt-timer-divider:focus,
+body.isLightTheme .owl-dt-timer-divider:hover,
+body.isLightTheme.isDisableBackgroundGradient .mat-dialog-container:focus,
+body.isLightTheme.isDisableBackgroundGradient .mat-dialog-container:hover,
+body.isLightTheme.isDisableBackgroundGradient .mat-stepper-horizontal:focus,
+body.isLightTheme.isDisableBackgroundGradient .mat-stepper-horizontal:hover,
+body.isLightTheme.isDisableBackgroundGradient .mat-stepper-vertical:focus,
+body.isLightTheme.isDisableBackgroundGradient .mat-stepper-vertical:hover,
+body.isLightTheme.isDisableBackgroundGradient
+  .owl-dt-calendar-table
+  .owl-dt-calendar-cell:focus,
+body.isLightTheme.isDisableBackgroundGradient
+  .owl-dt-calendar-table
+  .owl-dt-calendar-cell:hover,
+body.isLightTheme.isDisableBackgroundGradient
+  .owl-dt-calendar-table
+  .owl-dt-calendar-header:focus,
+body.isLightTheme.isDisableBackgroundGradient
+  .owl-dt-calendar-table
+  .owl-dt-calendar-header:hover,
+body.isLightTheme.isDisableBackgroundGradient
+  .owl-dt-control-period-button
+  .owl-dt-control-button-arrow:focus,
+body.isLightTheme.isDisableBackgroundGradient
+  .owl-dt-control-period-button
+  .owl-dt-control-button-arrow:hover,
+body.isLightTheme.isDisableBackgroundGradient .owl-dt-schedule-item:focus:focus,
+body.isLightTheme.isDisableBackgroundGradient .owl-dt-schedule-item:focus:hover,
+body.isLightTheme.isDisableBackgroundGradient .owl-dt-schedule-item:hover:focus,
+body.isLightTheme.isDisableBackgroundGradient .owl-dt-schedule-item:hover:hover,
+body.isLightTheme.isDisableBackgroundGradient
+  .owl-dt-timer-content
+  .owl-dt-timer-input:focus,
+body.isLightTheme.isDisableBackgroundGradient
+  .owl-dt-timer-content
+  .owl-dt-timer-input:hover,
+body.isLightTheme.isDisableBackgroundGradient .owl-dt-timer-divider:focus,
+body.isLightTheme.isDisableBackgroundGradient .owl-dt-timer-divider:hover,
+body.isMac.isEnabledBackgroundGradient .mat-dialog-container:focus,
+body.isMac.isEnabledBackgroundGradient .mat-dialog-container:hover,
+body.isMac.isEnabledBackgroundGradient .mat-stepper-horizontal:focus,
+body.isMac.isEnabledBackgroundGradient .mat-stepper-horizontal:hover,
+body.isMac.isEnabledBackgroundGradient .mat-stepper-vertical:focus,
+body.isMac.isEnabledBackgroundGradient .mat-stepper-vertical:hover,
+body.isMac.isEnabledBackgroundGradient .owl-dt-calendar-table .owl-dt-calendar-cell:focus,
+body.isMac.isEnabledBackgroundGradient .owl-dt-calendar-table .owl-dt-calendar-cell:hover,
+body.isMac.isEnabledBackgroundGradient
+  .owl-dt-calendar-table
+  .owl-dt-calendar-header:focus,
+body.isMac.isEnabledBackgroundGradient
+  .owl-dt-calendar-table
+  .owl-dt-calendar-header:hover,
+body.isMac.isEnabledBackgroundGradient
+  .owl-dt-control-period-button
+  .owl-dt-control-button-arrow:focus,
+body.isMac.isEnabledBackgroundGradient
+  .owl-dt-control-period-button
+  .owl-dt-control-button-arrow:hover,
+body.isMac.isEnabledBackgroundGradient .owl-dt-schedule-item:focus:focus,
+body.isMac.isEnabledBackgroundGradient .owl-dt-schedule-item:focus:hover,
+body.isMac.isEnabledBackgroundGradient .owl-dt-schedule-item:hover:focus,
+body.isMac.isEnabledBackgroundGradient .owl-dt-schedule-item:hover:hover,
+body.isMac.isEnabledBackgroundGradient .owl-dt-timer-content .owl-dt-timer-input:focus,
+body.isMac.isEnabledBackgroundGradient .owl-dt-timer-content .owl-dt-timer-input:hover,
+body.isMac.isEnabledBackgroundGradient .owl-dt-timer-divider:focus,
+body.isMac.isEnabledBackgroundGradient .owl-dt-timer-divider:hover,
+body.isWeb.isEnabledBackgroundGradient .mat-dialog-container:focus,
+body.isWeb.isEnabledBackgroundGradient .mat-dialog-container:hover,
+body.isWeb.isEnabledBackgroundGradient .mat-stepper-horizontal:focus,
+body.isWeb.isEnabledBackgroundGradient .mat-stepper-horizontal:hover,
+body.isWeb.isEnabledBackgroundGradient .mat-stepper-vertical:focus,
+body.isWeb.isEnabledBackgroundGradient .mat-stepper-vertical:hover,
+body.isWeb.isEnabledBackgroundGradient .owl-dt-calendar-table .owl-dt-calendar-cell:focus,
+body.isWeb.isEnabledBackgroundGradient .owl-dt-calendar-table .owl-dt-calendar-cell:hover,
+body.isWeb.isEnabledBackgroundGradient
+  .owl-dt-calendar-table
+  .owl-dt-calendar-header:focus,
+body.isWeb.isEnabledBackgroundGradient
+  .owl-dt-calendar-table
+  .owl-dt-calendar-header:hover,
+body.isWeb.isEnabledBackgroundGradient
+  .owl-dt-control-period-button
+  .owl-dt-control-button-arrow:focus,
+body.isWeb.isEnabledBackgroundGradient
+  .owl-dt-control-period-button
+  .owl-dt-control-button-arrow:hover,
+body.isWeb.isEnabledBackgroundGradient .owl-dt-schedule-item:focus:focus,
+body.isWeb.isEnabledBackgroundGradient .owl-dt-schedule-item:focus:hover,
+body.isWeb.isEnabledBackgroundGradient .owl-dt-schedule-item:hover:focus,
+body.isWeb.isEnabledBackgroundGradient .owl-dt-schedule-item:hover:hover,
+body.isWeb.isEnabledBackgroundGradient .owl-dt-timer-content .owl-dt-timer-input:focus,
+body.isWeb.isEnabledBackgroundGradient .owl-dt-timer-content .owl-dt-timer-input:hover,
+body.isWeb.isEnabledBackgroundGradient .owl-dt-timer-divider:focus,
+body.isWeb.isEnabledBackgroundGradient .owl-dt-timer-divider:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+body
+  .owl-dt-calendar-table
+  .owl-dt-calendar-cell-today:not(.owl-dt-calendar-cell-selected),
+body.isDarkTheme
+  .owl-dt-calendar-table
+  .owl-dt-calendar-cell-today:not(.owl-dt-calendar-cell-selected),
+body.isDarkTheme.isDisableBackgroundGradient
+  .owl-dt-calendar-table
+  .owl-dt-calendar-cell-today:not(.owl-dt-calendar-cell-selected),
+body.isDisableBackgroundGradient
+  .owl-dt-calendar-table
+  .owl-dt-calendar-cell-today:not(.owl-dt-calendar-cell-selected),
+body.isEnabledBackgroundGradient
+  .owl-dt-calendar-table
+  .owl-dt-calendar-cell-today:not(.owl-dt-calendar-cell-selected),
+body.isLightTheme
+  .owl-dt-calendar-table
+  .owl-dt-calendar-cell-today:not(.owl-dt-calendar-cell-selected),
+body.isLightTheme.isDisableBackgroundGradient
+  .owl-dt-calendar-table
+  .owl-dt-calendar-cell-today:not(.owl-dt-calendar-cell-selected),
+body.isMac.isEnabledBackgroundGradient
+  .owl-dt-calendar-table
+  .owl-dt-calendar-cell-today:not(.owl-dt-calendar-cell-selected),
+body.isWeb.isEnabledBackgroundGradient
+  .owl-dt-calendar-table
+  .owl-dt-calendar-cell-today:not(.owl-dt-calendar-cell-selected) {
+  background-color: var(--color-background-setting-buttons) !important;
+}
+body
+  .owl-dt-calendar-table
+  .owl-dt-calendar-cell-disabled
+  > .owl-dt-calendar-cell-content:not(.owl-dt-calendar-cell-selected),
+body.isDarkTheme
+  .owl-dt-calendar-table
+  .owl-dt-calendar-cell-disabled
+  > .owl-dt-calendar-cell-content:not(.owl-dt-calendar-cell-selected),
+body.isDarkTheme.isDisableBackgroundGradient
+  .owl-dt-calendar-table
+  .owl-dt-calendar-cell-disabled
+  > .owl-dt-calendar-cell-content:not(.owl-dt-calendar-cell-selected),
+body.isDisableBackgroundGradient
+  .owl-dt-calendar-table
+  .owl-dt-calendar-cell-disabled
+  > .owl-dt-calendar-cell-content:not(.owl-dt-calendar-cell-selected),
+body.isEnabledBackgroundGradient
+  .owl-dt-calendar-table
+  .owl-dt-calendar-cell-disabled
+  > .owl-dt-calendar-cell-content:not(.owl-dt-calendar-cell-selected),
+body.isLightTheme
+  .owl-dt-calendar-table
+  .owl-dt-calendar-cell-disabled
+  > .owl-dt-calendar-cell-content:not(.owl-dt-calendar-cell-selected),
+body.isLightTheme.isDisableBackgroundGradient
+  .owl-dt-calendar-table
+  .owl-dt-calendar-cell-disabled
+  > .owl-dt-calendar-cell-content:not(.owl-dt-calendar-cell-selected),
+body.isMac.isEnabledBackgroundGradient
+  .owl-dt-calendar-table
+  .owl-dt-calendar-cell-disabled
+  > .owl-dt-calendar-cell-content:not(.owl-dt-calendar-cell-selected),
+body.isWeb.isEnabledBackgroundGradient
+  .owl-dt-calendar-table
+  .owl-dt-calendar-cell-disabled
+  > .owl-dt-calendar-cell-content:not(.owl-dt-calendar-cell-selected) {
+  color: var(--color-disabled-dates);
+}
+body .circle .inner-circle,
+body.isDarkTheme .circle .inner-circle,
+body.isDarkTheme.isDisableBackgroundGradient .circle .inner-circle,
+body.isDisableBackgroundGradient .circle .inner-circle,
+body.isEnabledBackgroundGradient .circle .inner-circle,
+body.isLightTheme .circle .inner-circle,
+body.isLightTheme.isDisableBackgroundGradient .circle .inner-circle,
+body.isMac.isEnabledBackgroundGradient .circle .inner-circle,
+body.isWeb.isEnabledBackgroundGradient .circle .inner-circle {
+  background: var(--color-background-setting-buttons);
+}
+body .dots,
+body .dots label,
+body .value-wrapper,
+body .value-wrapper label,
+body.isDarkTheme .dots,
+body.isDarkTheme .dots label,
+body.isDarkTheme .value-wrapper,
+body.isDarkTheme .value-wrapper label,
+body.isDarkTheme.isDisableBackgroundGradient .dots,
+body.isDarkTheme.isDisableBackgroundGradient .dots label,
+body.isDarkTheme.isDisableBackgroundGradient .value-wrapper,
+body.isDarkTheme.isDisableBackgroundGradient .value-wrapper label,
+body.isDisableBackgroundGradient .dots,
+body.isDisableBackgroundGradient .dots label,
+body.isDisableBackgroundGradient .value-wrapper,
+body.isDisableBackgroundGradient .value-wrapper label,
+body.isEnabledBackgroundGradient .dots,
+body.isEnabledBackgroundGradient .dots label,
+body.isEnabledBackgroundGradient .value-wrapper,
+body.isEnabledBackgroundGradient .value-wrapper label,
+body.isLightTheme .dots,
+body.isLightTheme .dots label,
+body.isLightTheme .value-wrapper,
+body.isLightTheme .value-wrapper label,
+body.isLightTheme.isDisableBackgroundGradient .dots,
+body.isLightTheme.isDisableBackgroundGradient .dots label,
+body.isLightTheme.isDisableBackgroundGradient .value-wrapper,
+body.isLightTheme.isDisableBackgroundGradient .value-wrapper label,
+body.isMac.isEnabledBackgroundGradient .dots,
+body.isMac.isEnabledBackgroundGradient .dots label,
+body.isMac.isEnabledBackgroundGradient .value-wrapper,
+body.isMac.isEnabledBackgroundGradient .value-wrapper label,
+body.isWeb.isEnabledBackgroundGradient .dots,
+body.isWeb.isEnabledBackgroundGradient .dots label,
+body.isWeb.isEnabledBackgroundGradient .value-wrapper,
+body.isWeb.isEnabledBackgroundGradient .value-wrapper label {
+  color: var(--color-foreground);
+}
+body .handle::after,
+body.isDarkTheme .handle::after,
+body.isDarkTheme.isDisableBackgroundGradient .handle::after,
+body.isDisableBackgroundGradient .handle::after,
+body.isEnabledBackgroundGradient .handle::after,
+body.isLightTheme .handle::after,
+body.isLightTheme.isDisableBackgroundGradient .handle::after,
+body.isMac.isEnabledBackgroundGradient .handle::after,
+body.isWeb.isEnabledBackgroundGradient .handle::after {
+  background: var(--color-accent);
+}
+body .content,
+body .isOpen .side,
+body .mat-drawer-container .isSelected .box,
+body .side,
+body .textarea,
+body.isDarkTheme .content,
+body.isDarkTheme .isOpen .side,
+body.isDarkTheme .mat-drawer-container .isSelected .box,
+body.isDarkTheme .side,
+body.isDarkTheme .textarea,
+body.isDarkTheme.isDisableBackgroundGradient .content,
+body.isDarkTheme.isDisableBackgroundGradient .isOpen .side,
+body.isDarkTheme.isDisableBackgroundGradient .mat-drawer-container .isSelected .box,
+body.isDarkTheme.isDisableBackgroundGradient .side,
+body.isDarkTheme.isDisableBackgroundGradient .textarea,
+body.isDisableBackgroundGradient .content,
+body.isDisableBackgroundGradient .isOpen .side,
+body.isDisableBackgroundGradient .mat-drawer-container .isSelected .box,
+body.isDisableBackgroundGradient .side,
+body.isDisableBackgroundGradient .textarea,
+body.isEnabledBackgroundGradient .content,
+body.isEnabledBackgroundGradient .isOpen .side,
+body.isEnabledBackgroundGradient .mat-drawer-container .isSelected .box,
+body.isEnabledBackgroundGradient .side,
+body.isEnabledBackgroundGradient .textarea,
+body.isLightTheme .content,
+body.isLightTheme .isOpen .side,
+body.isLightTheme .mat-drawer-container .isSelected .box,
+body.isLightTheme .side,
+body.isLightTheme .textarea,
+body.isLightTheme.isDisableBackgroundGradient .content,
+body.isLightTheme.isDisableBackgroundGradient .isOpen .side,
+body.isLightTheme.isDisableBackgroundGradient .mat-drawer-container .isSelected .box,
+body.isLightTheme.isDisableBackgroundGradient .side,
+body.isLightTheme.isDisableBackgroundGradient .textarea,
+body.isMac.isEnabledBackgroundGradient .content,
+body.isMac.isEnabledBackgroundGradient .isOpen .side,
+body.isMac.isEnabledBackgroundGradient .mat-drawer-container .isSelected .box,
+body.isMac.isEnabledBackgroundGradient .side,
+body.isMac.isEnabledBackgroundGradient .textarea,
+body.isWeb.isEnabledBackgroundGradient .content,
+body.isWeb.isEnabledBackgroundGradient .isOpen .side,
+body.isWeb.isEnabledBackgroundGradient .mat-drawer-container .isSelected .box,
+body.isWeb.isEnabledBackgroundGradient .side,
+body.isWeb.isEnabledBackgroundGradient .textarea {
+  background-color: var(--color-large-toggle-panels) !important;
+  color: var(--color-foreground) !important;
+  box-shadow: none !important;
+}
+body .mat-drawer-container .isSelected .handle-par,
+body .mat-drawer-container .isSelected .hover-controls,
+body .mat-drawer-container .isSelected .task-handle,
+body.isDarkTheme .mat-drawer-container .isSelected .handle-par,
+body.isDarkTheme .mat-drawer-container .isSelected .hover-controls,
+body.isDarkTheme .mat-drawer-container .isSelected .task-handle,
+body.isDarkTheme.isDisableBackgroundGradient
+  .mat-drawer-container
+  .isSelected
+  .handle-par,
+body.isDarkTheme.isDisableBackgroundGradient
+  .mat-drawer-container
+  .isSelected
+  .hover-controls,
+body.isDarkTheme.isDisableBackgroundGradient
+  .mat-drawer-container
+  .isSelected
+  .task-handle,
+body.isDisableBackgroundGradient .mat-drawer-container .isSelected .handle-par,
+body.isDisableBackgroundGradient .mat-drawer-container .isSelected .hover-controls,
+body.isDisableBackgroundGradient .mat-drawer-container .isSelected .task-handle,
+body.isEnabledBackgroundGradient .mat-drawer-container .isSelected .handle-par,
+body.isEnabledBackgroundGradient .mat-drawer-container .isSelected .hover-controls,
+body.isEnabledBackgroundGradient .mat-drawer-container .isSelected .task-handle,
+body.isLightTheme .mat-drawer-container .isSelected .handle-par,
+body.isLightTheme .mat-drawer-container .isSelected .hover-controls,
+body.isLightTheme .mat-drawer-container .isSelected .task-handle,
+body.isLightTheme.isDisableBackgroundGradient
+  .mat-drawer-container
+  .isSelected
+  .handle-par,
+body.isLightTheme.isDisableBackgroundGradient
+  .mat-drawer-container
+  .isSelected
+  .hover-controls,
+body.isLightTheme.isDisableBackgroundGradient
+  .mat-drawer-container
+  .isSelected
+  .task-handle,
+body.isMac.isEnabledBackgroundGradient .mat-drawer-container .isSelected .handle-par,
+body.isMac.isEnabledBackgroundGradient .mat-drawer-container .isSelected .hover-controls,
+body.isMac.isEnabledBackgroundGradient .mat-drawer-container .isSelected .task-handle,
+body.isWeb.isEnabledBackgroundGradient .mat-drawer-container .isSelected .handle-par,
+body.isWeb.isEnabledBackgroundGradient .mat-drawer-container .isSelected .hover-controls,
+body.isWeb.isEnabledBackgroundGradient .mat-drawer-container .isSelected .task-handle {
+  background-color: var(--color-large-toggle-panels) !important;
+}
+body .mat-dialog-container .mat-dialog-content .content,
+body.isDarkTheme .mat-dialog-container .mat-dialog-content .content,
+body.isDarkTheme.isDisableBackgroundGradient
+  .mat-dialog-container
+  .mat-dialog-content
+  .content,
+body.isDisableBackgroundGradient .mat-dialog-container .mat-dialog-content .content,
+body.isEnabledBackgroundGradient .mat-dialog-container .mat-dialog-content .content,
+body.isLightTheme .mat-dialog-container .mat-dialog-content .content,
+body.isLightTheme.isDisableBackgroundGradient
+  .mat-dialog-container
+  .mat-dialog-content
+  .content,
+body.isMac.isEnabledBackgroundGradient .mat-dialog-container .mat-dialog-content .content,
+body.isWeb.isEnabledBackgroundGradient
+  .mat-dialog-container
+  .mat-dialog-content
+  .content {
+  background: 0 0 !important;
+}
+body .input-item,
+body .input-item:focus,
+body .input-item:hover,
+body .markdown-wrapper,
+body .mat-expansion-panel,
+body .mat-expansion-panel-header:not(.mat-expanded):focus,
+body mat-expansion-panel .mat-expansion-panel-header:not(.mat-expanded):hover,
+body.isDarkTheme .input-item,
+body.isDarkTheme .input-item:focus,
+body.isDarkTheme .input-item:hover,
+body.isDarkTheme .markdown-wrapper,
+body.isDarkTheme .mat-expansion-panel,
+body.isDarkTheme .mat-expansion-panel-header:not(.mat-expanded):focus,
+body.isDarkTheme mat-expansion-panel .mat-expansion-panel-header:not(.mat-expanded):hover,
+body.isDarkTheme.isDisableBackgroundGradient .input-item,
+body.isDarkTheme.isDisableBackgroundGradient .input-item:focus,
+body.isDarkTheme.isDisableBackgroundGradient .input-item:hover,
+body.isDarkTheme.isDisableBackgroundGradient .markdown-wrapper,
+body.isDarkTheme.isDisableBackgroundGradient .mat-expansion-panel,
+body.isDarkTheme.isDisableBackgroundGradient
+  .mat-expansion-panel-header:not(.mat-expanded):focus,
+body.isDarkTheme.isDisableBackgroundGradient
+  mat-expansion-panel
+  .mat-expansion-panel-header:not(.mat-expanded):hover,
+body.isDisableBackgroundGradient .input-item,
+body.isDisableBackgroundGradient .input-item:focus,
+body.isDisableBackgroundGradient .input-item:hover,
+body.isDisableBackgroundGradient .markdown-wrapper,
+body.isDisableBackgroundGradient .mat-expansion-panel,
+body.isDisableBackgroundGradient .mat-expansion-panel-header:not(.mat-expanded):focus,
+body.isDisableBackgroundGradient
+  mat-expansion-panel
+  .mat-expansion-panel-header:not(.mat-expanded):hover,
+body.isEnabledBackgroundGradient .input-item,
+body.isEnabledBackgroundGradient .input-item:focus,
+body.isEnabledBackgroundGradient .input-item:hover,
+body.isEnabledBackgroundGradient .markdown-wrapper,
+body.isEnabledBackgroundGradient .mat-expansion-panel,
+body.isEnabledBackgroundGradient .mat-expansion-panel-header:not(.mat-expanded):focus,
+body.isEnabledBackgroundGradient
+  mat-expansion-panel
+  .mat-expansion-panel-header:not(.mat-expanded):hover,
+body.isLightTheme .input-item,
+body.isLightTheme .input-item:focus,
+body.isLightTheme .input-item:hover,
+body.isLightTheme .markdown-wrapper,
+body.isLightTheme .mat-expansion-panel,
+body.isLightTheme .mat-expansion-panel-header:not(.mat-expanded):focus,
+body.isLightTheme
+  mat-expansion-panel
+  .mat-expansion-panel-header:not(.mat-expanded):hover,
+body.isLightTheme.isDisableBackgroundGradient .input-item,
+body.isLightTheme.isDisableBackgroundGradient .input-item:focus,
+body.isLightTheme.isDisableBackgroundGradient .input-item:hover,
+body.isLightTheme.isDisableBackgroundGradient .markdown-wrapper,
+body.isLightTheme.isDisableBackgroundGradient .mat-expansion-panel,
+body.isLightTheme.isDisableBackgroundGradient
+  .mat-expansion-panel-header:not(.mat-expanded):focus,
+body.isLightTheme.isDisableBackgroundGradient
+  mat-expansion-panel
+  .mat-expansion-panel-header:not(.mat-expanded):hover,
+body.isMac.isEnabledBackgroundGradient .input-item,
+body.isMac.isEnabledBackgroundGradient .input-item:focus,
+body.isMac.isEnabledBackgroundGradient .input-item:hover,
+body.isMac.isEnabledBackgroundGradient .markdown-wrapper,
+body.isMac.isEnabledBackgroundGradient .mat-expansion-panel,
+body.isMac.isEnabledBackgroundGradient
+  .mat-expansion-panel-header:not(.mat-expanded):focus,
+body.isMac.isEnabledBackgroundGradient
+  mat-expansion-panel
+  .mat-expansion-panel-header:not(.mat-expanded):hover,
+body.isWeb.isEnabledBackgroundGradient .input-item,
+body.isWeb.isEnabledBackgroundGradient .input-item:focus,
+body.isWeb.isEnabledBackgroundGradient .input-item:hover,
+body.isWeb.isEnabledBackgroundGradient .markdown-wrapper,
+body.isWeb.isEnabledBackgroundGradient .mat-expansion-panel,
+body.isWeb.isEnabledBackgroundGradient
+  .mat-expansion-panel-header:not(.mat-expanded):focus,
+body.isWeb.isEnabledBackgroundGradient
+  mat-expansion-panel
+  .mat-expansion-panel-header:not(.mat-expanded):hover {
+  background-color: var(--color-large-toggle-panels-inputs) !important;
+  border-color: var(--color-large-toggle-panels-inputs) !important;
+  color: var(--color-foreground) !important;
+}
+body .mat-expansion-panel-header-title,
+body.isDarkTheme .mat-expansion-panel-header-title,
+body.isDarkTheme.isDisableBackgroundGradient .mat-expansion-panel-header-title,
+body.isDisableBackgroundGradient .mat-expansion-panel-header-title,
+body.isEnabledBackgroundGradient .mat-expansion-panel-header-title,
+body.isLightTheme .mat-expansion-panel-header-title,
+body.isLightTheme.isDisableBackgroundGradient .mat-expansion-panel-header-title,
+body.isMac.isEnabledBackgroundGradient .mat-expansion-panel-header-title,
+body.isWeb.isEnabledBackgroundGradient .mat-expansion-panel-header-title {
+  color: var(--color-foreground);
+}
+body .mat-menu-panel,
+body.isDarkTheme .mat-menu-panel,
+body.isDarkTheme.isDisableBackgroundGradient .mat-menu-panel,
+body.isDisableBackgroundGradient .mat-menu-panel,
+body.isEnabledBackgroundGradient .mat-menu-panel,
+body.isLightTheme .mat-menu-panel,
+body.isLightTheme.isDisableBackgroundGradient .mat-menu-panel,
+body.isMac.isEnabledBackgroundGradient .mat-menu-panel,
+body.isWeb.isEnabledBackgroundGradient .mat-menu-panel {
+  background-color: var(--color-background-setting-buttons);
+}
+body .page-settings.page-wrapper .section-wrapper .config-section,
+body section.config-section,
+body.isDarkTheme .page-settings.page-wrapper .section-wrapper .config-section,
+body.isDarkTheme section.config-section,
+body.isDarkTheme.isDisableBackgroundGradient
+  .page-settings.page-wrapper
+  .section-wrapper
+  .config-section,
+body.isDarkTheme.isDisableBackgroundGradient section.config-section,
+body.isDisableBackgroundGradient
+  .page-settings.page-wrapper
+  .section-wrapper
+  .config-section,
+body.isDisableBackgroundGradient section.config-section,
+body.isEnabledBackgroundGradient
+  .page-settings.page-wrapper
+  .section-wrapper
+  .config-section,
+body.isEnabledBackgroundGradient section.config-section,
+body.isLightTheme .page-settings.page-wrapper .section-wrapper .config-section,
+body.isLightTheme section.config-section,
+body.isLightTheme.isDisableBackgroundGradient
+  .page-settings.page-wrapper
+  .section-wrapper
+  .config-section,
+body.isLightTheme.isDisableBackgroundGradient section.config-section,
+body.isMac.isEnabledBackgroundGradient
+  .page-settings.page-wrapper
+  .section-wrapper
+  .config-section,
+body.isMac.isEnabledBackgroundGradient section.config-section,
+body.isWeb.isEnabledBackgroundGradient
+  .page-settings.page-wrapper
+  .section-wrapper
+  .config-section,
+body.isWeb.isEnabledBackgroundGradient section.config-section {
+  background-color: var(--color-background-panels);
+  border-color: var(--color-border-panels);
+}
+body .page-settings .config-section .collapsible-header,
+body section.config-section .collapsible-header,
+body.isDarkTheme .page-settings .config-section .collapsible-header,
+body.isDarkTheme section.config-section .collapsible-header,
+body.isDarkTheme.isDisableBackgroundGradient
+  .page-settings
+  .config-section
+  .collapsible-header,
+body.isDarkTheme.isDisableBackgroundGradient section.config-section .collapsible-header,
+body.isDisableBackgroundGradient .page-settings .config-section .collapsible-header,
+body.isDisableBackgroundGradient section.config-section .collapsible-header,
+body.isEnabledBackgroundGradient .page-settings .config-section .collapsible-header,
+body.isEnabledBackgroundGradient section.config-section .collapsible-header,
+body.isLightTheme .page-settings .config-section .collapsible-header,
+body.isLightTheme section.config-section .collapsible-header,
+body.isLightTheme.isDisableBackgroundGradient
+  .page-settings
+  .config-section
+  .collapsible-header,
+body.isLightTheme.isDisableBackgroundGradient section.config-section .collapsible-header,
+body.isMac.isEnabledBackgroundGradient .page-settings .config-section .collapsible-header,
+body.isMac.isEnabledBackgroundGradient section.config-section .collapsible-header,
+body.isWeb.isEnabledBackgroundGradient .page-settings .config-section .collapsible-header,
+body.isWeb.isEnabledBackgroundGradient section.config-section .collapsible-header {
+  border-color: var(--color-border-panels) !important;
+}
+body .created,
+body .mat-form-field-appearance-legacy .mat-hint,
+body .mat-hint,
+body .mat-select-value,
+body .time,
+body .time-wrapper,
+body.isDarkTheme .created,
+body.isDarkTheme .mat-form-field-appearance-legacy .mat-hint,
+body.isDarkTheme .mat-hint,
+body.isDarkTheme .mat-select-value,
+body.isDarkTheme .time,
+body.isDarkTheme .time-wrapper,
+body.isDarkTheme.isDisableBackgroundGradient .created,
+body.isDarkTheme.isDisableBackgroundGradient .mat-form-field-appearance-legacy .mat-hint,
+body.isDarkTheme.isDisableBackgroundGradient .mat-hint,
+body.isDarkTheme.isDisableBackgroundGradient .mat-select-value,
+body.isDarkTheme.isDisableBackgroundGradient .time,
+body.isDarkTheme.isDisableBackgroundGradient .time-wrapper,
+body.isDisableBackgroundGradient .created,
+body.isDisableBackgroundGradient .mat-form-field-appearance-legacy .mat-hint,
+body.isDisableBackgroundGradient .mat-hint,
+body.isDisableBackgroundGradient .mat-select-value,
+body.isDisableBackgroundGradient .time,
+body.isDisableBackgroundGradient .time-wrapper,
+body.isEnabledBackgroundGradient .created,
+body.isEnabledBackgroundGradient .mat-form-field-appearance-legacy .mat-hint,
+body.isEnabledBackgroundGradient .mat-hint,
+body.isEnabledBackgroundGradient .mat-select-value,
+body.isEnabledBackgroundGradient .time,
+body.isEnabledBackgroundGradient .time-wrapper,
+body.isLightTheme .created,
+body.isLightTheme .mat-form-field-appearance-legacy .mat-hint,
+body.isLightTheme .mat-hint,
+body.isLightTheme .mat-select-value,
+body.isLightTheme .time,
+body.isLightTheme .time-wrapper,
+body.isLightTheme.isDisableBackgroundGradient .created,
+body.isLightTheme.isDisableBackgroundGradient .mat-form-field-appearance-legacy .mat-hint,
+body.isLightTheme.isDisableBackgroundGradient .mat-hint,
+body.isLightTheme.isDisableBackgroundGradient .mat-select-value,
+body.isLightTheme.isDisableBackgroundGradient .time,
+body.isLightTheme.isDisableBackgroundGradient .time-wrapper,
+body.isMac.isEnabledBackgroundGradient .created,
+body.isMac.isEnabledBackgroundGradient .mat-form-field-appearance-legacy .mat-hint,
+body.isMac.isEnabledBackgroundGradient .mat-hint,
+body.isMac.isEnabledBackgroundGradient .mat-select-value,
+body.isMac.isEnabledBackgroundGradient .time,
+body.isMac.isEnabledBackgroundGradient .time-wrapper,
+body.isWeb.isEnabledBackgroundGradient .created,
+body.isWeb.isEnabledBackgroundGradient .mat-form-field-appearance-legacy .mat-hint,
+body.isWeb.isEnabledBackgroundGradient .mat-hint,
+body.isWeb.isEnabledBackgroundGradient .mat-select-value,
+body.isWeb.isEnabledBackgroundGradient .time,
+body.isWeb.isEnabledBackgroundGradient .time-wrapper {
+  color: var(--color-foreground) !important;
+}
+body .mat-form-field-appearance-legacy .mat-form-field-label,
+body.isDarkTheme .mat-form-field-appearance-legacy .mat-form-field-label,
+body.isDarkTheme.isDisableBackgroundGradient
+  .mat-form-field-appearance-legacy
+  .mat-form-field-label,
+body.isDisableBackgroundGradient .mat-form-field-appearance-legacy .mat-form-field-label,
+body.isEnabledBackgroundGradient .mat-form-field-appearance-legacy .mat-form-field-label,
+body.isLightTheme .mat-form-field-appearance-legacy .mat-form-field-label,
+body.isLightTheme.isDisableBackgroundGradient
+  .mat-form-field-appearance-legacy
+  .mat-form-field-label,
+body.isMac.isEnabledBackgroundGradient
+  .mat-form-field-appearance-legacy
+  .mat-form-field-label,
+body.isWeb.isEnabledBackgroundGradient
+  .mat-form-field-appearance-legacy
+  .mat-form-field-label {
+  color: var(--color-foreground);
+}
+body .add-task-form,
+body .info-bar,
+body.isDarkTheme .add-task-form,
+body.isDarkTheme .info-bar,
+body.isDarkTheme.isDisableBackgroundGradient .add-task-form,
+body.isDarkTheme.isDisableBackgroundGradient .info-bar,
+body.isDisableBackgroundGradient .add-task-form,
+body.isDisableBackgroundGradient .info-bar,
+body.isEnabledBackgroundGradient .add-task-form,
+body.isEnabledBackgroundGradient .info-bar,
+body.isLightTheme .add-task-form,
+body.isLightTheme .info-bar,
+body.isLightTheme.isDisableBackgroundGradient .add-task-form,
+body.isLightTheme.isDisableBackgroundGradient .info-bar,
+body.isMac.isEnabledBackgroundGradient .add-task-form,
+body.isMac.isEnabledBackgroundGradient .info-bar,
+body.isWeb.isEnabledBackgroundGradient .add-task-form,
+body.isWeb.isEnabledBackgroundGradient .info-bar {
+  background-color: var(--color-large-toggle-panels) !important;
+  box-shadow: none !important;
+  border-color: var(--color-border-panels);
+}
+body .add-task-form input,
+body .add-task-form.isElevated input,
+body .info-bar input,
+body .info-bar.isElevated input,
+body.isDarkTheme .add-task-form input,
+body.isDarkTheme .add-task-form.isElevated input,
+body.isDarkTheme .info-bar input,
+body.isDarkTheme .info-bar.isElevated input,
+body.isDarkTheme.isDisableBackgroundGradient .add-task-form input,
+body.isDarkTheme.isDisableBackgroundGradient .add-task-form.isElevated input,
+body.isDarkTheme.isDisableBackgroundGradient .info-bar input,
+body.isDarkTheme.isDisableBackgroundGradient .info-bar.isElevated input,
+body.isDisableBackgroundGradient .add-task-form input,
+body.isDisableBackgroundGradient .add-task-form.isElevated input,
+body.isDisableBackgroundGradient .info-bar input,
+body.isDisableBackgroundGradient .info-bar.isElevated input,
+body.isEnabledBackgroundGradient .add-task-form input,
+body.isEnabledBackgroundGradient .add-task-form.isElevated input,
+body.isEnabledBackgroundGradient .info-bar input,
+body.isEnabledBackgroundGradient .info-bar.isElevated input,
+body.isLightTheme .add-task-form input,
+body.isLightTheme .add-task-form.isElevated input,
+body.isLightTheme .info-bar input,
+body.isLightTheme .info-bar.isElevated input,
+body.isLightTheme.isDisableBackgroundGradient .add-task-form input,
+body.isLightTheme.isDisableBackgroundGradient .add-task-form.isElevated input,
+body.isLightTheme.isDisableBackgroundGradient .info-bar input,
+body.isLightTheme.isDisableBackgroundGradient .info-bar.isElevated input,
+body.isMac.isEnabledBackgroundGradient .add-task-form input,
+body.isMac.isEnabledBackgroundGradient .add-task-form.isElevated input,
+body.isMac.isEnabledBackgroundGradient .info-bar input,
+body.isMac.isEnabledBackgroundGradient .info-bar.isElevated input,
+body.isWeb.isEnabledBackgroundGradient .add-task-form input,
+body.isWeb.isEnabledBackgroundGradient .add-task-form.isElevated input,
+body.isWeb.isEnabledBackgroundGradient .info-bar input,
+body.isWeb.isEnabledBackgroundGradient .info-bar.isElevated input {
+  background-color: var(--color-large-toggle-panels) !important;
+  color: var(--color-foreground) !important;
+}
+body .add-task-form input::-moz-placeholder,
+body .add-task-form.isElevated input::-moz-placeholder,
+body .info-bar input::-moz-placeholder,
+body .info-bar.isElevated input::-moz-placeholder,
+body.isDarkTheme .add-task-form input::-moz-placeholder,
+body.isDarkTheme .add-task-form.isElevated input::-moz-placeholder,
+body.isDarkTheme .info-bar input::-moz-placeholder,
+body.isDarkTheme .info-bar.isElevated input::-moz-placeholder,
+body.isDarkTheme.isDisableBackgroundGradient .add-task-form input::-moz-placeholder,
+body.isDarkTheme.isDisableBackgroundGradient
+  .add-task-form.isElevated
+  input::-moz-placeholder,
+body.isDarkTheme.isDisableBackgroundGradient .info-bar input::-moz-placeholder,
+body.isDarkTheme.isDisableBackgroundGradient .info-bar.isElevated input::-moz-placeholder,
+body.isDisableBackgroundGradient .add-task-form input::-moz-placeholder,
+body.isDisableBackgroundGradient .add-task-form.isElevated input::-moz-placeholder,
+body.isDisableBackgroundGradient .info-bar input::-moz-placeholder,
+body.isDisableBackgroundGradient .info-bar.isElevated input::-moz-placeholder,
+body.isEnabledBackgroundGradient .add-task-form input::-moz-placeholder,
+body.isEnabledBackgroundGradient .add-task-form.isElevated input::-moz-placeholder,
+body.isEnabledBackgroundGradient .info-bar input::-moz-placeholder,
+body.isEnabledBackgroundGradient .info-bar.isElevated input::-moz-placeholder,
+body.isLightTheme .add-task-form input::-moz-placeholder,
+body.isLightTheme .add-task-form.isElevated input::-moz-placeholder,
+body.isLightTheme .info-bar input::-moz-placeholder,
+body.isLightTheme .info-bar.isElevated input::-moz-placeholder,
+body.isLightTheme.isDisableBackgroundGradient .add-task-form input::-moz-placeholder,
+body.isLightTheme.isDisableBackgroundGradient
+  .add-task-form.isElevated
+  input::-moz-placeholder,
+body.isLightTheme.isDisableBackgroundGradient .info-bar input::-moz-placeholder,
+body.isLightTheme.isDisableBackgroundGradient
+  .info-bar.isElevated
+  input::-moz-placeholder,
+body.isMac.isEnabledBackgroundGradient .add-task-form input::-moz-placeholder,
+body.isMac.isEnabledBackgroundGradient .add-task-form.isElevated input::-moz-placeholder,
+body.isMac.isEnabledBackgroundGradient .info-bar input::-moz-placeholder,
+body.isMac.isEnabledBackgroundGradient .info-bar.isElevated input::-moz-placeholder,
+body.isWeb.isEnabledBackgroundGradient .add-task-form input::-moz-placeholder,
+body.isWeb.isEnabledBackgroundGradient .add-task-form.isElevated input::-moz-placeholder,
+body.isWeb.isEnabledBackgroundGradient .info-bar input::-moz-placeholder,
+body.isWeb.isEnabledBackgroundGradient .info-bar.isElevated input::-moz-placeholder {
+  color: var(--color-foreground) !important;
+}
+body .add-task-form input:-ms-input-placeholder,
+body .add-task-form.isElevated input:-ms-input-placeholder,
+body .info-bar input:-ms-input-placeholder,
+body .info-bar.isElevated input:-ms-input-placeholder,
+body.isDarkTheme .add-task-form input:-ms-input-placeholder,
+body.isDarkTheme .add-task-form.isElevated input:-ms-input-placeholder,
+body.isDarkTheme .info-bar input:-ms-input-placeholder,
+body.isDarkTheme .info-bar.isElevated input:-ms-input-placeholder,
+body.isDarkTheme.isDisableBackgroundGradient .add-task-form input:-ms-input-placeholder,
+body.isDarkTheme.isDisableBackgroundGradient
+  .add-task-form.isElevated
+  input:-ms-input-placeholder,
+body.isDarkTheme.isDisableBackgroundGradient .info-bar input:-ms-input-placeholder,
+body.isDarkTheme.isDisableBackgroundGradient
+  .info-bar.isElevated
+  input:-ms-input-placeholder,
+body.isDisableBackgroundGradient .add-task-form input:-ms-input-placeholder,
+body.isDisableBackgroundGradient .add-task-form.isElevated input:-ms-input-placeholder,
+body.isDisableBackgroundGradient .info-bar input:-ms-input-placeholder,
+body.isDisableBackgroundGradient .info-bar.isElevated input:-ms-input-placeholder,
+body.isEnabledBackgroundGradient .add-task-form input:-ms-input-placeholder,
+body.isEnabledBackgroundGradient .add-task-form.isElevated input:-ms-input-placeholder,
+body.isEnabledBackgroundGradient .info-bar input:-ms-input-placeholder,
+body.isEnabledBackgroundGradient .info-bar.isElevated input:-ms-input-placeholder,
+body.isLightTheme .add-task-form input:-ms-input-placeholder,
+body.isLightTheme .add-task-form.isElevated input:-ms-input-placeholder,
+body.isLightTheme .info-bar input:-ms-input-placeholder,
+body.isLightTheme .info-bar.isElevated input:-ms-input-placeholder,
+body.isLightTheme.isDisableBackgroundGradient .add-task-form input:-ms-input-placeholder,
+body.isLightTheme.isDisableBackgroundGradient
+  .add-task-form.isElevated
+  input:-ms-input-placeholder,
+body.isLightTheme.isDisableBackgroundGradient .info-bar input:-ms-input-placeholder,
+body.isLightTheme.isDisableBackgroundGradient
+  .info-bar.isElevated
+  input:-ms-input-placeholder,
+body.isMac.isEnabledBackgroundGradient .add-task-form input:-ms-input-placeholder,
+body.isMac.isEnabledBackgroundGradient
+  .add-task-form.isElevated
+  input:-ms-input-placeholder,
+body.isMac.isEnabledBackgroundGradient .info-bar input:-ms-input-placeholder,
+body.isMac.isEnabledBackgroundGradient .info-bar.isElevated input:-ms-input-placeholder,
+body.isWeb.isEnabledBackgroundGradient .add-task-form input:-ms-input-placeholder,
+body.isWeb.isEnabledBackgroundGradient
+  .add-task-form.isElevated
+  input:-ms-input-placeholder,
+body.isWeb.isEnabledBackgroundGradient .info-bar input:-ms-input-placeholder,
+body.isWeb.isEnabledBackgroundGradient .info-bar.isElevated input:-ms-input-placeholder {
+  color: var(--color-foreground) !important;
+}
+body .add-task-form input::placeholder,
+body .add-task-form.isElevated input::placeholder,
+body .info-bar input::placeholder,
+body .info-bar.isElevated input::placeholder,
+body.isDarkTheme .add-task-form input::placeholder,
+body.isDarkTheme .add-task-form.isElevated input::placeholder,
+body.isDarkTheme .info-bar input::placeholder,
+body.isDarkTheme .info-bar.isElevated input::placeholder,
+body.isDarkTheme.isDisableBackgroundGradient .add-task-form input::placeholder,
+body.isDarkTheme.isDisableBackgroundGradient .add-task-form.isElevated input::placeholder,
+body.isDarkTheme.isDisableBackgroundGradient .info-bar input::placeholder,
+body.isDarkTheme.isDisableBackgroundGradient .info-bar.isElevated input::placeholder,
+body.isDisableBackgroundGradient .add-task-form input::placeholder,
+body.isDisableBackgroundGradient .add-task-form.isElevated input::placeholder,
+body.isDisableBackgroundGradient .info-bar input::placeholder,
+body.isDisableBackgroundGradient .info-bar.isElevated input::placeholder,
+body.isEnabledBackgroundGradient .add-task-form input::placeholder,
+body.isEnabledBackgroundGradient .add-task-form.isElevated input::placeholder,
+body.isEnabledBackgroundGradient .info-bar input::placeholder,
+body.isEnabledBackgroundGradient .info-bar.isElevated input::placeholder,
+body.isLightTheme .add-task-form input::placeholder,
+body.isLightTheme .add-task-form.isElevated input::placeholder,
+body.isLightTheme .info-bar input::placeholder,
+body.isLightTheme .info-bar.isElevated input::placeholder,
+body.isLightTheme.isDisableBackgroundGradient .add-task-form input::placeholder,
+body.isLightTheme.isDisableBackgroundGradient
+  .add-task-form.isElevated
+  input::placeholder,
+body.isLightTheme.isDisableBackgroundGradient .info-bar input::placeholder,
+body.isLightTheme.isDisableBackgroundGradient .info-bar.isElevated input::placeholder,
+body.isMac.isEnabledBackgroundGradient .add-task-form input::placeholder,
+body.isMac.isEnabledBackgroundGradient .add-task-form.isElevated input::placeholder,
+body.isMac.isEnabledBackgroundGradient .info-bar input::placeholder,
+body.isMac.isEnabledBackgroundGradient .info-bar.isElevated input::placeholder,
+body.isWeb.isEnabledBackgroundGradient .add-task-form input::placeholder,
+body.isWeb.isEnabledBackgroundGradient .add-task-form.isElevated input::placeholder,
+body.isWeb.isEnabledBackgroundGradient .info-bar input::placeholder,
+body.isWeb.isEnabledBackgroundGradient .info-bar.isElevated input::placeholder {
+  color: var(--color-foreground) !important;
+}
+body .info-bar,
+body.isDarkTheme .info-bar,
+body.isDarkTheme.isDisableBackgroundGradient .info-bar,
+body.isDisableBackgroundGradient .info-bar,
+body.isEnabledBackgroundGradient .info-bar,
+body.isLightTheme .info-bar,
+body.isLightTheme.isDisableBackgroundGradient .info-bar,
+body.isMac.isEnabledBackgroundGradient .info-bar,
+body.isWeb.isEnabledBackgroundGradient .info-bar {
+  color: var(--color-info-bar) !important;
+}
+body .collapsible-header,
+body.isDarkTheme .collapsible-header,
+body.isDarkTheme.isDisableBackgroundGradient .collapsible-header,
+body.isDisableBackgroundGradient .collapsible-header,
+body.isEnabledBackgroundGradient .collapsible-header,
+body.isLightTheme .collapsible-header,
+body.isLightTheme.isDisableBackgroundGradient .collapsible-header,
+body.isMac.isEnabledBackgroundGradient .collapsible-header,
+body.isWeb.isEnabledBackgroundGradient .collapsible-header {
+  border-color: var(--color-border-panels);
+}
+body .mat-fab,
+body .mat-flat-button,
+body .mat-mini-fab,
+body .mat-raised-button,
+body.isDarkTheme .mat-fab,
+body.isDarkTheme .mat-flat-button,
+body.isDarkTheme .mat-mini-fab,
+body.isDarkTheme .mat-raised-button,
+body.isDarkTheme.isDisableBackgroundGradient .mat-fab,
+body.isDarkTheme.isDisableBackgroundGradient .mat-flat-button,
+body.isDarkTheme.isDisableBackgroundGradient .mat-mini-fab,
+body.isDarkTheme.isDisableBackgroundGradient .mat-raised-button,
+body.isDisableBackgroundGradient .mat-fab,
+body.isDisableBackgroundGradient .mat-flat-button,
+body.isDisableBackgroundGradient .mat-mini-fab,
+body.isDisableBackgroundGradient .mat-raised-button,
+body.isEnabledBackgroundGradient .mat-fab,
+body.isEnabledBackgroundGradient .mat-flat-button,
+body.isEnabledBackgroundGradient .mat-mini-fab,
+body.isEnabledBackgroundGradient .mat-raised-button,
+body.isLightTheme .mat-fab,
+body.isLightTheme .mat-flat-button,
+body.isLightTheme .mat-mini-fab,
+body.isLightTheme .mat-raised-button,
+body.isLightTheme.isDisableBackgroundGradient .mat-fab,
+body.isLightTheme.isDisableBackgroundGradient .mat-flat-button,
+body.isLightTheme.isDisableBackgroundGradient .mat-mini-fab,
+body.isLightTheme.isDisableBackgroundGradient .mat-raised-button,
+body.isMac.isEnabledBackgroundGradient .mat-fab,
+body.isMac.isEnabledBackgroundGradient .mat-flat-button,
+body.isMac.isEnabledBackgroundGradient .mat-mini-fab,
+body.isMac.isEnabledBackgroundGradient .mat-raised-button,
+body.isWeb.isEnabledBackgroundGradient .mat-fab,
+body.isWeb.isEnabledBackgroundGradient .mat-flat-button,
+body.isWeb.isEnabledBackgroundGradient .mat-mini-fab,
+body.isWeb.isEnabledBackgroundGradient .mat-raised-button {
+  background-color: var(--color-background-setting-buttons);
+  color: var(--color-foreground);
+}
+body .mat-checkbox-frame,
+body.isDarkTheme .mat-checkbox-frame,
+body.isDarkTheme.isDisableBackgroundGradient .mat-checkbox-frame,
+body.isDisableBackgroundGradient .mat-checkbox-frame,
+body.isEnabledBackgroundGradient .mat-checkbox-frame,
+body.isLightTheme .mat-checkbox-frame,
+body.isLightTheme.isDisableBackgroundGradient .mat-checkbox-frame,
+body.isMac.isEnabledBackgroundGradient .mat-checkbox-frame,
+body.isWeb.isEnabledBackgroundGradient .mat-checkbox-frame {
+  border-color: var(--color-foreground);
+}
+body :focus,
+body :focus .input-item,
+body.isDarkTheme :focus,
+body.isDarkTheme :focus .input-item,
+body.isDarkTheme.isDisableBackgroundGradient :focus,
+body.isDarkTheme.isDisableBackgroundGradient :focus .input-item,
+body.isDisableBackgroundGradient :focus,
+body.isDisableBackgroundGradient :focus .input-item,
+body.isEnabledBackgroundGradient :focus,
+body.isEnabledBackgroundGradient :focus .input-item,
+body.isLightTheme :focus,
+body.isLightTheme :focus .input-item,
+body.isLightTheme.isDisableBackgroundGradient :focus,
+body.isLightTheme.isDisableBackgroundGradient :focus .input-item,
+body.isMac.isEnabledBackgroundGradient :focus,
+body.isMac.isEnabledBackgroundGradient :focus .input-item,
+body.isWeb.isEnabledBackgroundGradient :focus,
+body.isWeb.isEnabledBackgroundGradient :focus .input-item {
+  border-color: var(--color-accent) !important;
+}
+body .input-item__value,
+body.isDarkTheme .input-item__value,
+body.isDarkTheme.isDisableBackgroundGradient .input-item__value,
+body.isDisableBackgroundGradient .input-item__value,
+body.isEnabledBackgroundGradient .input-item__value,
+body.isLightTheme .input-item__value,
+body.isLightTheme.isDisableBackgroundGradient .input-item__value,
+body.isMac.isEnabledBackgroundGradient .input-item__value,
+body.isWeb.isEnabledBackgroundGradient .input-item__value {
+  color: var(--color-foreground) !important;
+}
+body .mat-expansion-indicator::after,
+body.isDarkTheme .mat-expansion-indicator::after,
+body.isDarkTheme.isDisableBackgroundGradient .mat-expansion-indicator::after,
+body.isDisableBackgroundGradient .mat-expansion-indicator::after,
+body.isEnabledBackgroundGradient .mat-expansion-indicator::after,
+body.isLightTheme .mat-expansion-indicator::after,
+body.isLightTheme.isDisableBackgroundGradient .mat-expansion-indicator::after,
+body.isMac.isEnabledBackgroundGradient .mat-expansion-indicator::after,
+body.isWeb.isEnabledBackgroundGradient .mat-expansion-indicator::after {
+  border-color: var(--color-foreground) !important;
+}
+body .mat-slide-toggle-bar,
+body.isDarkTheme .mat-slide-toggle-bar,
+body.isDarkTheme.isDisableBackgroundGradient .mat-slide-toggle-bar,
+body.isDisableBackgroundGradient .mat-slide-toggle-bar,
+body.isEnabledBackgroundGradient .mat-slide-toggle-bar,
+body.isLightTheme .mat-slide-toggle-bar,
+body.isLightTheme.isDisableBackgroundGradient .mat-slide-toggle-bar,
+body.isMac.isEnabledBackgroundGradient .mat-slide-toggle-bar,
+body.isWeb.isEnabledBackgroundGradient .mat-slide-toggle-bar {
+  background-color: var(--color-background-slide-toggle-bar-disabled);
+}
+body .mat-checkbox-checked .mat-checkbox-background,
+body.isDarkTheme .mat-checkbox-checked .mat-checkbox-background,
+body.isDarkTheme.isDisableBackgroundGradient
+  .mat-checkbox-checked
+  .mat-checkbox-background,
+body.isDisableBackgroundGradient .mat-checkbox-checked .mat-checkbox-background,
+body.isEnabledBackgroundGradient .mat-checkbox-checked .mat-checkbox-background,
+body.isLightTheme .mat-checkbox-checked .mat-checkbox-background,
+body.isLightTheme.isDisableBackgroundGradient
+  .mat-checkbox-checked
+  .mat-checkbox-background,
+body.isMac.isEnabledBackgroundGradient .mat-checkbox-checked .mat-checkbox-background,
+body.isWeb.isEnabledBackgroundGradient .mat-checkbox-checked .mat-checkbox-background {
+  background-color: var(--color-accent);
+}
+body .input-item,
+body .mat-expansion-panel-header:not(.mat-expanded),
+body.isDarkTheme .input-item,
+body.isDarkTheme .mat-expansion-panel-header:not(.mat-expanded),
+body.isDarkTheme.isDisableBackgroundGradient .input-item,
+body.isDarkTheme.isDisableBackgroundGradient
+  .mat-expansion-panel-header:not(.mat-expanded),
+body.isDisableBackgroundGradient .input-item,
+body.isDisableBackgroundGradient .mat-expansion-panel-header:not(.mat-expanded),
+body.isEnabledBackgroundGradient .input-item,
+body.isEnabledBackgroundGradient .mat-expansion-panel-header:not(.mat-expanded),
+body.isLightTheme .input-item,
+body.isLightTheme .mat-expansion-panel-header:not(.mat-expanded),
+body.isLightTheme.isDisableBackgroundGradient .input-item,
+body.isLightTheme.isDisableBackgroundGradient
+  .mat-expansion-panel-header:not(.mat-expanded),
+body.isMac.isEnabledBackgroundGradient .input-item,
+body.isMac.isEnabledBackgroundGradient .mat-expansion-panel-header:not(.mat-expanded),
+body.isWeb.isEnabledBackgroundGradient .input-item,
+body.isWeb.isEnabledBackgroundGradient .mat-expansion-panel-header:not(.mat-expanded) {
+  background-color: var(--color-background-banner);
+}
+body .mat-tab-label-content,
+body.isDarkTheme .mat-tab-label-content,
+body.isDarkTheme.isDisableBackgroundGradient .mat-tab-label-content,
+body.isDisableBackgroundGradient .mat-tab-label-content,
+body.isEnabledBackgroundGradient .mat-tab-label-content,
+body.isLightTheme .mat-tab-label-content,
+body.isLightTheme.isDisableBackgroundGradient .mat-tab-label-content,
+body.isMac.isEnabledBackgroundGradient .mat-tab-label-content,
+body.isWeb.isEnabledBackgroundGradient .mat-tab-label-content {
+  color: var(--color-foreground);
+}
+body .week table.week-table > tbody > tr.week-row.isExpanded > td,
+body .week table.week-table > tbody > tr.week-row:hover > td,
+body .week table.week-table > tr.week-row.isExpanded > td,
+body .week table.week-table > tr.week-row:hover > td,
+body.isDarkTheme .week table.week-table > tbody > tr.week-row.isExpanded > td,
+body.isDarkTheme .week table.week-table > tbody > tr.week-row:hover > td,
+body.isDarkTheme .week table.week-table > tr.week-row.isExpanded > td,
+body.isDarkTheme .week table.week-table > tr.week-row:hover > td,
+body.isDarkTheme.isDisableBackgroundGradient
+  .week
+  table.week-table
+  > tbody
+  > tr.week-row.isExpanded
+  > td,
+body.isDarkTheme.isDisableBackgroundGradient
+  .week
+  table.week-table
+  > tbody
+  > tr.week-row:hover
+  > td,
+body.isDarkTheme.isDisableBackgroundGradient
+  .week
+  table.week-table
+  > tr.week-row.isExpanded
+  > td,
+body.isDarkTheme.isDisableBackgroundGradient
+  .week
+  table.week-table
+  > tr.week-row:hover
+  > td,
+body.isDisableBackgroundGradient
+  .week
+  table.week-table
+  > tbody
+  > tr.week-row.isExpanded
+  > td,
+body.isDisableBackgroundGradient .week table.week-table > tbody > tr.week-row:hover > td,
+body.isDisableBackgroundGradient .week table.week-table > tr.week-row.isExpanded > td,
+body.isDisableBackgroundGradient .week table.week-table > tr.week-row:hover > td,
+body.isEnabledBackgroundGradient
+  .week
+  table.week-table
+  > tbody
+  > tr.week-row.isExpanded
+  > td,
+body.isEnabledBackgroundGradient .week table.week-table > tbody > tr.week-row:hover > td,
+body.isEnabledBackgroundGradient .week table.week-table > tr.week-row.isExpanded > td,
+body.isEnabledBackgroundGradient .week table.week-table > tr.week-row:hover > td,
+body.isLightTheme .week table.week-table > tbody > tr.week-row.isExpanded > td,
+body.isLightTheme .week table.week-table > tbody > tr.week-row:hover > td,
+body.isLightTheme .week table.week-table > tr.week-row.isExpanded > td,
+body.isLightTheme .week table.week-table > tr.week-row:hover > td,
+body.isLightTheme.isDisableBackgroundGradient
+  .week
+  table.week-table
+  > tbody
+  > tr.week-row.isExpanded
+  > td,
+body.isLightTheme.isDisableBackgroundGradient
+  .week
+  table.week-table
+  > tbody
+  > tr.week-row:hover
+  > td,
+body.isLightTheme.isDisableBackgroundGradient
+  .week
+  table.week-table
+  > tr.week-row.isExpanded
+  > td,
+body.isLightTheme.isDisableBackgroundGradient
+  .week
+  table.week-table
+  > tr.week-row:hover
+  > td,
+body.isMac.isEnabledBackgroundGradient
+  .week
+  table.week-table
+  > tbody
+  > tr.week-row.isExpanded
+  > td,
+body.isMac.isEnabledBackgroundGradient
+  .week
+  table.week-table
+  > tbody
+  > tr.week-row:hover
+  > td,
+body.isMac.isEnabledBackgroundGradient
+  .week
+  table.week-table
+  > tr.week-row.isExpanded
+  > td,
+body.isMac.isEnabledBackgroundGradient .week table.week-table > tr.week-row:hover > td,
+body.isWeb.isEnabledBackgroundGradient
+  .week
+  table.week-table
+  > tbody
+  > tr.week-row.isExpanded
+  > td,
+body.isWeb.isEnabledBackgroundGradient
+  .week
+  table.week-table
+  > tbody
+  > tr.week-row:hover
+  > td,
+body.isWeb.isEnabledBackgroundGradient
+  .week
+  table.week-table
+  > tr.week-row.isExpanded
+  > td,
+body.isWeb.isEnabledBackgroundGradient .week table.week-table > tr.week-row:hover > td {
+  background-color: var(--color-inputs-focused) !important;
+}
+body .month,
+body .year,
+body.isDarkTheme .month,
+body.isDarkTheme .year,
+body.isDarkTheme.isDisableBackgroundGradient .month,
+body.isDarkTheme.isDisableBackgroundGradient .year,
+body.isDisableBackgroundGradient .month,
+body.isDisableBackgroundGradient .year,
+body.isEnabledBackgroundGradient .month,
+body.isEnabledBackgroundGradient .year,
+body.isLightTheme .month,
+body.isLightTheme .year,
+body.isLightTheme.isDisableBackgroundGradient .month,
+body.isLightTheme.isDisableBackgroundGradient .year,
+body.isMac.isEnabledBackgroundGradient .month,
+body.isMac.isEnabledBackgroundGradient .year,
+body.isWeb.isEnabledBackgroundGradient .month,
+body.isWeb.isEnabledBackgroundGradient .year {
+  border-color: var(--color-background-main) !important;
+}
+body .mat-table,
+body div.material-table,
+body table.material-table,
+body.isDarkTheme .mat-table,
+body.isDarkTheme div.material-table,
+body.isDarkTheme table.material-table,
+body.isDarkTheme.isDisableBackgroundGradient .mat-table,
+body.isDarkTheme.isDisableBackgroundGradient div.material-table,
+body.isDarkTheme.isDisableBackgroundGradient table.material-table,
+body.isDisableBackgroundGradient .mat-table,
+body.isDisableBackgroundGradient div.material-table,
+body.isDisableBackgroundGradient table.material-table,
+body.isEnabledBackgroundGradient .mat-table,
+body.isEnabledBackgroundGradient div.material-table,
+body.isEnabledBackgroundGradient table.material-table,
+body.isLightTheme .mat-table,
+body.isLightTheme div.material-table,
+body.isLightTheme table.material-table,
+body.isLightTheme.isDisableBackgroundGradient .mat-table,
+body.isLightTheme.isDisableBackgroundGradient div.material-table,
+body.isLightTheme.isDisableBackgroundGradient table.material-table,
+body.isMac.isEnabledBackgroundGradient .mat-table,
+body.isMac.isEnabledBackgroundGradient div.material-table,
+body.isMac.isEnabledBackgroundGradient table.material-table,
+body.isWeb.isEnabledBackgroundGradient .mat-table,
+body.isWeb.isEnabledBackgroundGradient div.material-table,
+body.isWeb.isEnabledBackgroundGradient table.material-table {
+  background-color: var(--color-background-task);
+  box-shadow: none;
+}
+body .mat-table input:focus,
+body .mat-table input:hover,
+body div.material-table input:focus,
+body div.material-table input:hover,
+body table.material-table input:focus,
+body table.material-table input:hover,
+body.isDarkTheme .mat-table input:focus,
+body.isDarkTheme .mat-table input:hover,
+body.isDarkTheme div.material-table input:focus,
+body.isDarkTheme div.material-table input:hover,
+body.isDarkTheme table.material-table input:focus,
+body.isDarkTheme table.material-table input:hover,
+body.isDarkTheme.isDisableBackgroundGradient .mat-table input:focus,
+body.isDarkTheme.isDisableBackgroundGradient .mat-table input:hover,
+body.isDarkTheme.isDisableBackgroundGradient div.material-table input:focus,
+body.isDarkTheme.isDisableBackgroundGradient div.material-table input:hover,
+body.isDarkTheme.isDisableBackgroundGradient table.material-table input:focus,
+body.isDarkTheme.isDisableBackgroundGradient table.material-table input:hover,
+body.isDisableBackgroundGradient .mat-table input:focus,
+body.isDisableBackgroundGradient .mat-table input:hover,
+body.isDisableBackgroundGradient div.material-table input:focus,
+body.isDisableBackgroundGradient div.material-table input:hover,
+body.isDisableBackgroundGradient table.material-table input:focus,
+body.isDisableBackgroundGradient table.material-table input:hover,
+body.isEnabledBackgroundGradient .mat-table input:focus,
+body.isEnabledBackgroundGradient .mat-table input:hover,
+body.isEnabledBackgroundGradient div.material-table input:focus,
+body.isEnabledBackgroundGradient div.material-table input:hover,
+body.isEnabledBackgroundGradient table.material-table input:focus,
+body.isEnabledBackgroundGradient table.material-table input:hover,
+body.isLightTheme .mat-table input:focus,
+body.isLightTheme .mat-table input:hover,
+body.isLightTheme div.material-table input:focus,
+body.isLightTheme div.material-table input:hover,
+body.isLightTheme table.material-table input:focus,
+body.isLightTheme table.material-table input:hover,
+body.isLightTheme.isDisableBackgroundGradient .mat-table input:focus,
+body.isLightTheme.isDisableBackgroundGradient .mat-table input:hover,
+body.isLightTheme.isDisableBackgroundGradient div.material-table input:focus,
+body.isLightTheme.isDisableBackgroundGradient div.material-table input:hover,
+body.isLightTheme.isDisableBackgroundGradient table.material-table input:focus,
+body.isLightTheme.isDisableBackgroundGradient table.material-table input:hover,
+body.isMac.isEnabledBackgroundGradient .mat-table input:focus,
+body.isMac.isEnabledBackgroundGradient .mat-table input:hover,
+body.isMac.isEnabledBackgroundGradient div.material-table input:focus,
+body.isMac.isEnabledBackgroundGradient div.material-table input:hover,
+body.isMac.isEnabledBackgroundGradient table.material-table input:focus,
+body.isMac.isEnabledBackgroundGradient table.material-table input:hover,
+body.isWeb.isEnabledBackgroundGradient .mat-table input:focus,
+body.isWeb.isEnabledBackgroundGradient .mat-table input:hover,
+body.isWeb.isEnabledBackgroundGradient div.material-table input:focus,
+body.isWeb.isEnabledBackgroundGradient div.material-table input:hover,
+body.isWeb.isEnabledBackgroundGradient table.material-table input:focus,
+body.isWeb.isEnabledBackgroundGradient table.material-table input:hover {
+  background-color: var(--color-background-task);
+  border-color: var(--color-accent);
+  color: var(--color-foreground);
+}
+body .mat-table *,
+body .mat-table td,
+body .mat-table th,
+body .mat-table tr,
+body div.material-table *,
+body div.material-table td,
+body div.material-table th,
+body div.material-table tr,
+body table.material-table *,
+body table.material-table td,
+body table.material-table th,
+body table.material-table tr,
+body.isDarkTheme .mat-table *,
+body.isDarkTheme .mat-table td,
+body.isDarkTheme .mat-table th,
+body.isDarkTheme .mat-table tr,
+body.isDarkTheme div.material-table *,
+body.isDarkTheme div.material-table td,
+body.isDarkTheme div.material-table th,
+body.isDarkTheme div.material-table tr,
+body.isDarkTheme table.material-table *,
+body.isDarkTheme table.material-table td,
+body.isDarkTheme table.material-table th,
+body.isDarkTheme table.material-table tr,
+body.isDarkTheme.isDisableBackgroundGradient .mat-table *,
+body.isDarkTheme.isDisableBackgroundGradient .mat-table td,
+body.isDarkTheme.isDisableBackgroundGradient .mat-table th,
+body.isDarkTheme.isDisableBackgroundGradient .mat-table tr,
+body.isDarkTheme.isDisableBackgroundGradient div.material-table *,
+body.isDarkTheme.isDisableBackgroundGradient div.material-table td,
+body.isDarkTheme.isDisableBackgroundGradient div.material-table th,
+body.isDarkTheme.isDisableBackgroundGradient div.material-table tr,
+body.isDarkTheme.isDisableBackgroundGradient table.material-table *,
+body.isDarkTheme.isDisableBackgroundGradient table.material-table td,
+body.isDarkTheme.isDisableBackgroundGradient table.material-table th,
+body.isDarkTheme.isDisableBackgroundGradient table.material-table tr,
+body.isDisableBackgroundGradient .mat-table *,
+body.isDisableBackgroundGradient .mat-table td,
+body.isDisableBackgroundGradient .mat-table th,
+body.isDisableBackgroundGradient .mat-table tr,
+body.isDisableBackgroundGradient div.material-table *,
+body.isDisableBackgroundGradient div.material-table td,
+body.isDisableBackgroundGradient div.material-table th,
+body.isDisableBackgroundGradient div.material-table tr,
+body.isDisableBackgroundGradient table.material-table *,
+body.isDisableBackgroundGradient table.material-table td,
+body.isDisableBackgroundGradient table.material-table th,
+body.isDisableBackgroundGradient table.material-table tr,
+body.isEnabledBackgroundGradient .mat-table *,
+body.isEnabledBackgroundGradient .mat-table td,
+body.isEnabledBackgroundGradient .mat-table th,
+body.isEnabledBackgroundGradient .mat-table tr,
+body.isEnabledBackgroundGradient div.material-table *,
+body.isEnabledBackgroundGradient div.material-table td,
+body.isEnabledBackgroundGradient div.material-table th,
+body.isEnabledBackgroundGradient div.material-table tr,
+body.isEnabledBackgroundGradient table.material-table *,
+body.isEnabledBackgroundGradient table.material-table td,
+body.isEnabledBackgroundGradient table.material-table th,
+body.isEnabledBackgroundGradient table.material-table tr,
+body.isLightTheme .mat-table *,
+body.isLightTheme .mat-table td,
+body.isLightTheme .mat-table th,
+body.isLightTheme .mat-table tr,
+body.isLightTheme div.material-table *,
+body.isLightTheme div.material-table td,
+body.isLightTheme div.material-table th,
+body.isLightTheme div.material-table tr,
+body.isLightTheme table.material-table *,
+body.isLightTheme table.material-table td,
+body.isLightTheme table.material-table th,
+body.isLightTheme table.material-table tr,
+body.isLightTheme.isDisableBackgroundGradient .mat-table *,
+body.isLightTheme.isDisableBackgroundGradient .mat-table td,
+body.isLightTheme.isDisableBackgroundGradient .mat-table th,
+body.isLightTheme.isDisableBackgroundGradient .mat-table tr,
+body.isLightTheme.isDisableBackgroundGradient div.material-table *,
+body.isLightTheme.isDisableBackgroundGradient div.material-table td,
+body.isLightTheme.isDisableBackgroundGradient div.material-table th,
+body.isLightTheme.isDisableBackgroundGradient div.material-table tr,
+body.isLightTheme.isDisableBackgroundGradient table.material-table *,
+body.isLightTheme.isDisableBackgroundGradient table.material-table td,
+body.isLightTheme.isDisableBackgroundGradient table.material-table th,
+body.isLightTheme.isDisableBackgroundGradient table.material-table tr,
+body.isMac.isEnabledBackgroundGradient .mat-table *,
+body.isMac.isEnabledBackgroundGradient .mat-table td,
+body.isMac.isEnabledBackgroundGradient .mat-table th,
+body.isMac.isEnabledBackgroundGradient .mat-table tr,
+body.isMac.isEnabledBackgroundGradient div.material-table *,
+body.isMac.isEnabledBackgroundGradient div.material-table td,
+body.isMac.isEnabledBackgroundGradient div.material-table th,
+body.isMac.isEnabledBackgroundGradient div.material-table tr,
+body.isMac.isEnabledBackgroundGradient table.material-table *,
+body.isMac.isEnabledBackgroundGradient table.material-table td,
+body.isMac.isEnabledBackgroundGradient table.material-table th,
+body.isMac.isEnabledBackgroundGradient table.material-table tr,
+body.isWeb.isEnabledBackgroundGradient .mat-table *,
+body.isWeb.isEnabledBackgroundGradient .mat-table td,
+body.isWeb.isEnabledBackgroundGradient .mat-table th,
+body.isWeb.isEnabledBackgroundGradient .mat-table tr,
+body.isWeb.isEnabledBackgroundGradient div.material-table *,
+body.isWeb.isEnabledBackgroundGradient div.material-table td,
+body.isWeb.isEnabledBackgroundGradient div.material-table th,
+body.isWeb.isEnabledBackgroundGradient div.material-table tr,
+body.isWeb.isEnabledBackgroundGradient table.material-table *,
+body.isWeb.isEnabledBackgroundGradient table.material-table td,
+body.isWeb.isEnabledBackgroundGradient table.material-table th,
+body.isWeb.isEnabledBackgroundGradient table.material-table tr {
+  color: var(--color-foreground);
+  border-color: var(--color-border-panels);
+}
