@@ -24,8 +24,6 @@ describe('Vector Clock Integration with Sync Service', () => {
     crossModelVersion: 1,
     metaRev: null,
     revMap: {},
-    localLamport: 0,
-    lastSyncedLamport: null,
     vectorClock: {},
     lastSyncedVectorClock: null,
     ...overrides,
@@ -36,8 +34,6 @@ describe('Vector Clock Integration with Sync Service', () => {
     crossModelVersion: 1,
     revMap: {},
     mainModelData: {},
-    localLamport: 0,
-    lastSyncedLamport: null,
     vectorClock: {},
     ...overrides,
   });
@@ -209,29 +205,6 @@ describe('Vector Clock Integration with Sync Service', () => {
   });
 
   describe('Migration Scenarios', () => {
-    it('should handle migration from Lamport to vector clocks smoothly', () => {
-      // Client A has only Lamport
-      const clientAMeta = createLocalMeta({
-        localLamport: 42,
-        vectorClock: undefined,
-      });
-
-      // Client B has vector clock
-      const clientBMeta = createRemoteMeta({
-        vectorClock: { [CLIENT_ID_B]: 30 },
-      });
-
-      const result = getSyncStatusFromMetaFiles(clientBMeta, clientAMeta);
-
-      // Should handle mixed state gracefully
-      expect(result.status).toBeDefined();
-      expect([
-        SyncStatus.InSync,
-        SyncStatus.UpdateLocal,
-        SyncStatus.UpdateRemote,
-      ]).toContain(result.status);
-    });
-
     it('should preserve vector clock data during force upload', () => {
       const localVector: VectorClock = { [CLIENT_ID_A]: 10 };
       const remoteVector: VectorClock = { [CLIENT_ID_B]: 20, [CLIENT_ID_A]: 5 };

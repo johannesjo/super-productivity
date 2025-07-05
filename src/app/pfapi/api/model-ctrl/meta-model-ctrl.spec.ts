@@ -35,8 +35,6 @@ describe('MetaModelCtrl', () => {
         ...DEFAULT_META_MODEL,
         crossModelVersion,
       });
-      expect(meta.localLamport).toBe(0);
-      expect(meta.lastSyncedLamport).toBe(null);
     });
 
     it('should load existing meta model from database', async () => {
@@ -46,8 +44,6 @@ describe('MetaModelCtrl', () => {
         lastUpdate: 1000,
         metaRev: 'rev1',
         lastSyncedUpdate: 1000,
-        localLamport: 5,
-        lastSyncedLamport: 5,
       };
 
       mockDb.load.and.callFake(<T = unknown>(key: string): Promise<T | void> => {
@@ -75,8 +71,6 @@ describe('MetaModelCtrl', () => {
         lastUpdate: 1000,
         metaRev: null,
         lastSyncedUpdate: null,
-        localLamport: 5,
-        lastSyncedLamport: null,
       };
       mockDb.load.and.callFake(<T = unknown>(key: string): Promise<T | void> => {
         if (key === MetaModelCtrl.CLIENT_ID) {
@@ -91,24 +85,6 @@ describe('MetaModelCtrl', () => {
 
       // Reset the spy call count after initialization
       mockDb.save.calls.reset();
-    });
-
-    it('should increment localLamport when updating a model', async () => {
-      const modelCfg: ModelCfg<any> = {
-        defaultData: {},
-        isLocalOnly: false,
-        isMainFileModel: false,
-      };
-
-      await testCtrl.updateRevForModel('testModel', modelCfg);
-
-      expect(mockDb.save).toHaveBeenCalledWith(
-        MetaModelCtrl.META_MODEL_ID,
-        jasmine.objectContaining({
-          localLamport: 6, // Should increment from 5 to 6
-        }),
-        false,
-      );
     });
 
     it('should set lastUpdateAction when updating a model', async () => {
@@ -192,47 +168,6 @@ describe('MetaModelCtrl', () => {
         'UNKNOWN_OR_CHANGED',
       );
     });
-
-    it('should handle missing localLamport gracefully', async () => {
-      // Load meta without Lamport fields (simulating old data)
-      const oldMeta: LocalMeta = {
-        crossModelVersion: 4.1,
-        revMap: {},
-        lastUpdate: 1000,
-        metaRev: null,
-        lastSyncedUpdate: null,
-        localLamport: undefined as any,
-        lastSyncedLamport: undefined as any,
-      };
-      mockDb.load.and.callFake(<T = unknown>(key: string): Promise<T | void> => {
-        if (key === MetaModelCtrl.CLIENT_ID) {
-          return Promise.resolve('test-client-id' as any);
-        }
-        return Promise.resolve(oldMeta as any);
-      });
-
-      const newCtrl = new MetaModelCtrl(mockDb, mockEventEmitter, crossModelVersion);
-      await newCtrl.load();
-
-      // Reset spy to ignore initialization saves
-      mockDb.save.calls.reset();
-
-      const modelCfg: ModelCfg<any> = {
-        defaultData: {},
-        isLocalOnly: false,
-        isMainFileModel: false,
-      };
-
-      await newCtrl.updateRevForModel('testModel', modelCfg);
-
-      expect(mockDb.save).toHaveBeenCalledWith(
-        MetaModelCtrl.META_MODEL_ID,
-        jasmine.objectContaining({
-          localLamport: 1, // Should start from 0 + 1
-        }),
-        false,
-      );
-    });
   });
 
   describe('save', () => {
@@ -243,8 +178,6 @@ describe('MetaModelCtrl', () => {
         lastUpdate: 2000,
         metaRev: 'rev2',
         lastSyncedUpdate: 2000,
-        localLamport: 10,
-        lastSyncedLamport: 10,
       };
 
       await metaModelCtrl.save(metaToSave);
@@ -256,20 +189,16 @@ describe('MetaModelCtrl', () => {
       );
     });
 
-    it('should throw error if lastUpdate is not a number', async () => {
+    it('should throw error if lastUpdate is not a number', () => {
       const invalidMeta: LocalMeta = {
         crossModelVersion: 4.1,
         revMap: {},
         lastUpdate: null as any,
         metaRev: null,
         lastSyncedUpdate: null,
-        localLamport: 0,
-        lastSyncedLamport: null,
       };
 
-      await expectAsync(metaModelCtrl.save(invalidMeta)).toBeRejectedWithError(
-        InvalidMetaError,
-      );
+      expect(() => metaModelCtrl.save(invalidMeta)).toThrowError(InvalidMetaError);
     });
   });
 });

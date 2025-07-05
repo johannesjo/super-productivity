@@ -22,11 +22,14 @@ export const hasVectorClocks = (local: LocalMeta, remote: RemoteMeta): boolean =
  * Get the vector clock from metadata
  * @param meta Metadata object
  * @param clientId Client ID (unused, kept for compatibility)
- * @returns Vector clock or null if not present
+ * @returns Vector clock or null if not present or empty
  */
 export const getVectorClock = (
   meta: LocalMeta | RemoteMeta,
   clientId?: string,
 ): Record<string, number> | null => {
-  return meta.vectorClock || null;
+  if (!meta.vectorClock || Object.keys(meta.vectorClock).length === 0) {
+    return null;
+  }
+  return meta.vectorClock;
 };

@@ -6,7 +6,6 @@ import {
   compareVectorClocks,
   incrementVectorClock,
   mergeVectorClocks,
-  lamportToVectorClock,
   vectorClockToString,
   hasVectorClockChanges,
   isValidVectorClock,
@@ -149,28 +148,6 @@ describe('Vector Clock', () => {
       const clock1 = { client1: 5 };
       expect(mergeVectorClocks(clock1, null)).toEqual({ client1: 5 });
       expect(mergeVectorClocks(null, clock1)).toEqual({ client1: 5 });
-    });
-  });
-
-  describe('lamportToVectorClock', () => {
-    it('should convert positive Lamport timestamp', () => {
-      const result = lamportToVectorClock(5, 'client1');
-      expect(result).toEqual({ client1: 5 });
-    });
-
-    it('should return empty clock for null', () => {
-      const result = lamportToVectorClock(null, 'client1');
-      expect(result).toEqual({});
-    });
-
-    it('should return empty clock for 0', () => {
-      const result = lamportToVectorClock(0, 'client1');
-      expect(result).toEqual({});
-    });
-
-    it('should return empty clock for undefined', () => {
-      const result = lamportToVectorClock(undefined, 'client1');
-      expect(result).toEqual({});
     });
   });
 
@@ -451,43 +428,6 @@ describe('Vector Clock', () => {
       expect(compareVectorClocks(clock1, clock2)).toBe(
         VectorClockComparison.GREATER_THAN,
       );
-    });
-  });
-
-  describe('Backwards compatibility scenarios', () => {
-    it('should handle migration from Lamport timestamps', () => {
-      // Simulate device with only Lamport timestamp
-      const lamportValue = 42;
-      const migratedClock = lamportToVectorClock(lamportValue, 'deviceA');
-
-      expect(migratedClock).toEqual({ deviceA: 42 });
-
-      // Should be able to increment normally after migration
-      const incremented = incrementVectorClock(migratedClock, 'deviceA');
-      expect(incremented).toEqual({ deviceA: 43 });
-    });
-
-    it('should handle mixed Lamport/vector clock comparison', () => {
-      // Device A has vector clock, Device B has Lamport
-      const vectorClock: VectorClock = { A: 10, B: 5 };
-      const lamportClock = lamportToVectorClock(8, 'B');
-
-      // B's Lamport 8 is higher than its component in A's vector (5)
-      const merged = mergeVectorClocks(vectorClock, lamportClock);
-      expect(merged).toEqual({ A: 10, B: 8 });
-    });
-
-    it('should handle empty to non-empty migration', () => {
-      // Device starts with no clock
-      let deviceClock: VectorClock | undefined = undefined;
-
-      // First update creates clock
-      deviceClock = incrementVectorClock(deviceClock, 'device1');
-      expect(deviceClock).toEqual({ device1: 1 });
-
-      // Can continue incrementing
-      deviceClock = incrementVectorClock(deviceClock, 'device1');
-      expect(deviceClock).toEqual({ device1: 2 });
     });
   });
 

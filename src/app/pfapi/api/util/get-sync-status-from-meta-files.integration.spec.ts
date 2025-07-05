@@ -3,15 +3,13 @@ import { SyncStatus } from '../pfapi.const';
 import { LocalMeta, RemoteMeta } from '../pfapi.model';
 
 describe('getSyncStatusFromMetaFiles integration test for vector clock migration', () => {
-  it('should return UpdateLocal when local has no vector clock but remote does and is newer', () => {
+  it('should return Conflict when local has no vector clock but remote does', () => {
     const local: LocalMeta = {
       lastUpdate: 1000,
       lastSyncedUpdate: 1000,
       crossModelVersion: 1,
       metaRev: 'test-rev',
       revMap: {},
-      localLamport: 0,
-      lastSyncedLamport: 0,
       // No vector clock fields
     } as any;
 
@@ -20,26 +18,23 @@ describe('getSyncStatusFromMetaFiles integration test for vector clock migration
       crossModelVersion: 1,
       revMap: {},
       mainModelData: {},
-      localLamport: 0,
-      lastSyncedLamport: null,
       vectorClock: { CLIENT_456: 10 },
     } as any;
 
     const result = getSyncStatusFromMetaFiles(remote, local);
 
-    // Should return UpdateLocal because remote is newer
-    expect(result.status).toBe(SyncStatus.UpdateLocal);
+    // Should return Conflict because vector clock is missing from local
+    expect(result.status).toBe(SyncStatus.Conflict);
+    expect((result.conflictData?.additional as any)?.vectorClockMissing).toBe(true);
   });
 
-  it('should return InSync when timestamps match even with vector clock mismatch', () => {
+  it('should return Conflict when vector clocks are missing regardless of timestamps', () => {
     const local: LocalMeta = {
       lastUpdate: 1000,
       lastSyncedUpdate: 1000,
       crossModelVersion: 1,
       metaRev: 'test-rev',
       revMap: {},
-      localLamport: 0,
-      lastSyncedLamport: 0,
       // No vector clock fields
     } as any;
 
@@ -48,14 +43,13 @@ describe('getSyncStatusFromMetaFiles integration test for vector clock migration
       crossModelVersion: 1,
       revMap: {},
       mainModelData: {},
-      localLamport: 0,
-      lastSyncedLamport: null,
       vectorClock: { CLIENT_456: 10 },
     } as any;
 
     const result = getSyncStatusFromMetaFiles(remote, local);
 
-    // Should return InSync because timestamps match
-    expect(result.status).toBe(SyncStatus.InSync);
+    // Should return Conflict because vector clock is missing from local, regardless of matching timestamps
+    expect(result.status).toBe(SyncStatus.Conflict);
+    expect((result.conflictData?.additional as any)?.vectorClockMissing).toBe(true);
   });
 });
