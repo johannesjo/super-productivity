@@ -334,9 +334,24 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   @Input() set task(newVal: TaskWithSubTasks) {
     const prev = this._taskData;
     this._taskData = newVal;
+
+    // Add null check before accessing properties
+    if (!newVal) {
+      this.localAttachments = [];
+      this.issueDataNullTrigger$.next(null);
+      this.reminderId$.next(null);
+      this.repeatCfgId$.next(null);
+      this.parentId$.next(null);
+      this.isPlannedForTodayDay = false;
+      this.isMarkdownChecklist = false;
+      this.isExpandedIssuePanel = false;
+      this.isExpandedNotesPanel = false;
+      return;
+    }
+
     this.localAttachments = newVal.attachments;
 
-    if (!prev || !newVal || prev.id !== newVal.id) {
+    if (!prev || prev.id !== newVal.id) {
       this._focusFirst();
     }
 

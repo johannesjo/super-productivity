@@ -218,9 +218,11 @@ export const selectTaskDetailTargetPanel = createSelector(
 );
 export const selectSelectedTask = createSelector(
   selectTaskFeatureState,
-  (s): TaskWithSubTasks => {
-    // @ts-ignore
-    return s.selectedTaskId && mapSubTasksToTask(s.entities[s.selectedTaskId], s);
+  (s): TaskWithSubTasks | null => {
+    if (!s.selectedTaskId || !s.entities[s.selectedTaskId]) {
+      return null;
+    }
+    return mapSubTasksToTask(s.entities[s.selectedTaskId], s);
   },
 );
 

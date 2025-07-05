@@ -124,7 +124,7 @@ export class TaskService {
     // NOTE: we can't use share here, as we need the last emitted value
   );
 
-  selectedTask$: Observable<TaskWithSubTasks> = this._store.pipe(
+  selectedTask$: Observable<TaskWithSubTasks | null> = this._store.pipe(
     select(selectSelectedTask),
     // NOTE: we can't use share here, as we need the last emitted value
   );
