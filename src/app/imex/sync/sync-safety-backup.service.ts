@@ -3,6 +3,7 @@ import { pfLog } from '../../pfapi/api/util/log';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { CompleteBackup } from '../../pfapi/api';
 import { Subject } from 'rxjs';
+import { nanoid } from 'nanoid';
 
 export interface SyncSafetyBackup {
   id: string;
@@ -36,7 +37,7 @@ export class SyncSafetyBackupService {
           modelsToUpdate: eventData.modelsToUpdate,
         });
 
-        const backupId = this._generateBackupId();
+        const backupId = nanoid();
         if (!backupId || backupId === 'EMPTY') {
           throw new Error('Invalid backup ID generated');
         }
@@ -73,7 +74,7 @@ export class SyncSafetyBackupService {
    */
   async createBackup(): Promise<void> {
     const data = await this._pfapiService.pf.loadCompleteBackup();
-    const backupId = this._generateBackupId();
+    const backupId = nanoid();
     if (!backupId || backupId === 'EMPTY') {
       throw new Error('Invalid backup ID generated');
     }
@@ -144,7 +145,7 @@ export class SyncSafetyBackupService {
       const uniqueBackups = validBackups.map((backup) => {
         if (seenIds.has(backup.id) || backup.id === 'EMPTY' || !backup.id) {
           // Generate a new unique ID if duplicate, empty, or "EMPTY" found
-          const newId = this._generateBackupId();
+          const newId = nanoid();
           pfLog(1, 'SyncSafetyBackupService: Regenerating duplicate/invalid backup ID', {
             oldId: backup.id,
             newId,
@@ -255,7 +256,7 @@ export class SyncSafetyBackupService {
     // Ensure backup has a valid ID
     if (!backup.id || backup.id === 'EMPTY' || backup.id.trim() === '') {
       const oldId = backup.id;
-      backup.id = this._generateBackupId();
+      backup.id = nanoid();
       pfLog(1, 'SyncSafetyBackupService: Generated new ID for backup with invalid ID', {
         oldId,
         newId: backup.id,
@@ -345,9 +346,5 @@ export class SyncSafetyBackupService {
         hasBeforeTodayBackup: !!beforeTodayBackup,
       },
     );
-  }
-
-  private _generateBackupId(): string {
-    return `backup_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 }

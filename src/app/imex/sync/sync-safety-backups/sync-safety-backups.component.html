@@ -1,7 +1,7 @@
 <p>
   Automatic backups are created before downloading data from remote during sync
-  operations. Backups are organized in 4 smart slots: 2 most recent, 1 from today, and 1
-  from before today.
+  operations. Backups are organized in 4 smart slots: 2 most recent, 1 first from today,
+  and 1 first from a day before today.
 </p>
 
 <div class="backup-actions">
@@ -61,7 +61,7 @@
 
 @if (backups().length > 0 && !isLoading()) {
   <div class="backup-list">
-    @for (backup of backups(); track trackByBackupId(i, backup); let i = $index) {
+    @for (backup of backups(); track backup.id; let i = $index) {
       <div class="backup-item">
         <div class="backup-item-header">
           <mat-icon class="backup-icon">{{ getReasonIcon(backup.reason) }}</mat-icon>

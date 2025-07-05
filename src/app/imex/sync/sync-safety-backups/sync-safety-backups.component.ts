@@ -2,46 +2,26 @@ import {
   ChangeDetectionStrategy,
   Component,
   inject,
-  OnInit,
   OnDestroy,
+  OnInit,
   signal,
 } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
-import { TranslatePipe } from '@ngx-translate/core';
-import { SyncSafetyBackupService, SyncSafetyBackup } from '../sync-safety-backup.service';
+import { SyncSafetyBackup, SyncSafetyBackupService } from '../sync-safety-backup.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { T } from '../../../t.const';
 import { CommonModule } from '@angular/common';
-import {
-  MatCard,
-  MatCardContent,
-  MatCardHeader,
-  MatCardTitle,
-} from '@angular/material/card';
-import { MatList, MatListItem } from '@angular/material/list';
 
 @Component({
   selector: 'sync-safety-backups',
   templateUrl: './sync-safety-backups.component.html',
   styleUrls: ['./sync-safety-backups.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    CommonModule,
-    MatIcon,
-    MatButton,
-    MatTooltip,
-    TranslatePipe,
-    MatCard,
-    MatCardContent,
-    MatCardHeader,
-    MatCardTitle,
-    MatList,
-    MatListItem,
-  ],
+  imports: [CommonModule, MatIcon, MatButton, MatTooltip],
 })
 export class SyncSafetyBackupsComponent implements OnInit, OnDestroy {
   private _syncSafetyBackupService = inject(SyncSafetyBackupService);
@@ -234,13 +214,5 @@ export class SyncSafetyBackupsComponent implements OnInit, OnDestroy {
       default:
         return 'help';
     }
-  }
-
-  trackByBackupId(index: number, backup: SyncSafetyBackup): string {
-    // Use a combination of ID and timestamp to ensure uniqueness
-    // This prevents issues if IDs are somehow duplicated
-    return backup.id && backup.id !== 'EMPTY'
-      ? `${backup.id}_${backup.timestamp}`
-      : `backup_${index}_${backup.timestamp || Date.now()}`;
   }
 }
