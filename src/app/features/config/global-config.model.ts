@@ -216,6 +216,7 @@ export interface LimitedFormlyFieldConfig<FormModel>
 
 export type CustomCfgSection =
   | 'FILE_IMPORT_EXPORT'
+  | 'SYNC_SAFETY_BACKUPS'
   | 'JIRA_CFG'
   | 'SIMPLE_COUNTER_CFG'
   | 'OPENPROJECT_CFG';

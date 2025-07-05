@@ -5,6 +5,7 @@ import { POMODORO_FORM_CFG } from './form-cfgs/pomodoro-form.const';
 import { IDLE_FORM_CFG } from './form-cfgs/idle-form.const';
 import { TAKE_A_BREAK_FORM_CFG } from './form-cfgs/take-a-break-form.const';
 import { IMEX_FORM } from './form-cfgs/imex-form.const';
+import { SYNC_SAFETY_BACKUPS_FORM } from './form-cfgs/sync-safety-backups-form.const';
 import { LANGUAGE_SELECTION_FORM_FORM } from './form-cfgs/language-selection-form.const';
 import { EVALUATION_SETTINGS_FORM_CFG } from './form-cfgs/evaluation-settings-form.const';
 import { SIMPLE_COUNTER_FORM } from './form-cfgs/simple-counter-form.const';
@@ -39,6 +40,7 @@ export const GLOBAL_CONFIG_FORM_CONFIG: ConfigFormConfig = [
 export const GLOBAL_IMEX_FORM_CONFIG: ConfigFormConfig = [
   // NOTE: the backup form is added dynamically due to async prop required
   IMEX_FORM,
+  SYNC_SAFETY_BACKUPS_FORM,
 ].filter(filterGlobalConfigForm);
 
 export const GLOBAL_PRODUCTIVITY_FORM_CONFIG: ConfigFormConfig = [

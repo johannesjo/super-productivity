@@ -1,0 +1,109 @@
+<p>
+  Automatic backups are created before downloading data from remote during sync
+  operations. Backups are organized in 4 smart slots: 2 most recent, 1 from today, and 1
+  from before today.
+</p>
+
+<div class="backup-actions">
+  <button
+    (click)="createManualBackup()"
+    color="primary"
+    mat-stroked-button
+    type="button"
+    [disabled]="isLoading()"
+    matTooltip="Create a manual backup of all your data"
+  >
+    <mat-icon>backup</mat-icon>
+    Create Manual Backup
+  </button>
+
+  <button
+    (click)="loadBackups()"
+    color="primary"
+    mat-button
+    type="button"
+    [disabled]="isLoading()"
+    matTooltip="Refresh the backup list"
+  >
+    <mat-icon>refresh</mat-icon>
+    Refresh
+  </button>
+
+  @if (backups().length > 0) {
+    <button
+      (click)="clearAllBackups()"
+      color="warn"
+      mat-button
+      type="button"
+      [disabled]="isLoading()"
+      matTooltip="Delete all safety backups"
+    >
+      <mat-icon>delete_sweep</mat-icon>
+      Clear All
+    </button>
+  }
+</div>
+
+@if (isLoading()) {
+  <div class="loading-indicator">
+    <mat-icon>hourglass_empty</mat-icon>
+    Loading...
+  </div>
+}
+
+@if (backups().length === 0 && !isLoading()) {
+  <div class="no-backups">
+    <mat-icon>info</mat-icon>
+    No safety backups available yet. Backups are created automatically before sync
+    operations.
+  </div>
+}
+
+@if (backups().length > 0 && !isLoading()) {
+  <div class="backup-list">
+    @for (backup of backups(); track trackByBackupId(i, backup); let i = $index) {
+      <div class="backup-item">
+        <div class="backup-item-header">
+          <mat-icon class="backup-icon">{{ getReasonIcon(backup.reason) }}</mat-icon>
+          <div class="backup-info">
+            <div class="backup-title">
+              {{ formatTimestamp(backup.timestamp) }}
+            </div>
+            <div class="backup-subtitle">
+              {{ getSlotInfo(backup, i) }} • {{ getReasonText(backup.reason) }}
+              @if (backup.lastChangedModelId) {
+                • Last change: {{ backup.lastChangedModelId }}
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="backup-actions-item">
+          <button
+            (click)="restoreBackup(backup)"
+            color="primary"
+            mat-button
+            type="button"
+            [disabled]="isLoading()"
+            matTooltip="Restore this backup (will replace all current data)"
+          >
+            <mat-icon>restore</mat-icon>
+            Restore
+          </button>
+
+          <button
+            (click)="deleteBackup(backup)"
+            color="warn"
+            mat-button
+            type="button"
+            [disabled]="isLoading()"
+            matTooltip="Delete this backup"
+          >
+            <mat-icon>delete</mat-icon>
+            Delete
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+}

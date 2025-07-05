@@ -205,7 +205,8 @@ export type PfapiEvents =
   | 'metaModelChange'
   | 'providerChange'
   | 'providerPrivateCfgChange'
-  | 'providerReady';
+  | 'providerReady'
+  | 'onBeforeUpdateLocal';
 
 export type SyncStatusChangePayload =
   | 'UNKNOWN_OR_CHANGED'
@@ -226,6 +227,10 @@ export interface PfapiEventPayloadMap {
   providerPrivateCfgChange: {
     providerId: string;
     privateCfg: SyncProviderPrivateCfg;
+  };
+  onBeforeUpdateLocal: {
+    backup: CompleteBackup<any>;
+    modelsToUpdate?: string[];
   };
 }
 

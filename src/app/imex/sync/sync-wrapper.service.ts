@@ -107,6 +107,11 @@ export class SyncWrapperService {
 
         case SyncStatus.UpdateLocal:
         case SyncStatus.UpdateLocalAll:
+          // Note: We can't create a backup BEFORE the sync because we don't know
+          // what operation will happen until after checking with the remote.
+          // The data has already been downloaded and saved to the database at this point.
+          // Future improvement: modify the pfapi sync service to support pre-download callbacks.
+
           await this._reInitAppAfterDataModelChange();
           this._snackService.open({
             msg: T.F.SYNC.S.SUCCESS_DOWNLOAD,

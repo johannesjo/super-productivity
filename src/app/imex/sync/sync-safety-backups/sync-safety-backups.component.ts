@@ -1,0 +1,246 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+  OnDestroy,
+  signal,
+} from '@angular/core';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { TranslatePipe } from '@ngx-translate/core';
+import { SyncSafetyBackupService, SyncSafetyBackup } from '../sync-safety-backup.service';
+import { SnackService } from '../../../core/snack/snack.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { T } from '../../../t.const';
+import { CommonModule } from '@angular/common';
+import {
+  MatCard,
+  MatCardContent,
+  MatCardHeader,
+  MatCardTitle,
+} from '@angular/material/card';
+import { MatList, MatListItem } from '@angular/material/list';
+
+@Component({
+  selector: 'sync-safety-backups',
+  templateUrl: './sync-safety-backups.component.html',
+  styleUrls: ['./sync-safety-backups.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    MatIcon,
+    MatButton,
+    MatTooltip,
+    TranslatePipe,
+    MatCard,
+    MatCardContent,
+    MatCardHeader,
+    MatCardTitle,
+    MatList,
+    MatListItem,
+  ],
+})
+export class SyncSafetyBackupsComponent implements OnInit, OnDestroy {
+  private _syncSafetyBackupService = inject(SyncSafetyBackupService);
+  private _snackService = inject(SnackService);
+  private _destroy$ = new Subject<void>();
+
+  readonly backups = signal<SyncSafetyBackup[]>([]);
+  readonly isLoading = signal(false);
+
+  T: typeof T = T;
+
+  async ngOnInit(): Promise<void> {
+    await this.loadBackups();
+
+    // Subscribe to backup changes to automatically refresh the list
+    this._syncSafetyBackupService.backupsChanged$
+      .pipe(takeUntil(this._destroy$))
+      .subscribe(() => {
+        this.loadBackups();
+      });
+  }
+
+  ngOnDestroy(): void {
+    this._destroy$.next();
+    this._destroy$.complete();
+  }
+
+  async loadBackups(): Promise<void> {
+    try {
+      this.isLoading.set(true);
+      const backups = await this._syncSafetyBackupService.getBackups();
+      this.backups.set(backups);
+    } catch (error) {
+      console.error('Failed to load backups:', error);
+      this._snackService.open({
+        type: 'ERROR',
+        msg: 'Failed to load safety backups',
+      });
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  async createManualBackup(): Promise<void> {
+    try {
+      this.isLoading.set(true);
+      await this._syncSafetyBackupService.createBackup();
+      // No need to manually reload - the service will emit backupsChanged$
+      this._snackService.open({
+        type: 'SUCCESS',
+        msg: 'Manual backup created successfully',
+      });
+    } catch (error) {
+      console.error('Failed to create manual backup:', error);
+      this._snackService.open({
+        type: 'ERROR',
+        msg: 'Failed to create manual backup',
+      });
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  async restoreBackup(backup: SyncSafetyBackup): Promise<void> {
+    try {
+      this.isLoading.set(true);
+      await this._syncSafetyBackupService.restoreBackup(backup.id);
+      this._snackService.open({
+        type: 'SUCCESS',
+        msg: 'Backup restored successfully. The page will reload.',
+      });
+      // Reload the page after restoration
+      setTimeout(() => window.location.reload(), 1000);
+    } catch (error) {
+      console.error('Failed to restore backup:', error);
+      this._snackService.open({
+        type: 'ERROR',
+        msg: error instanceof Error ? error.message : 'Failed to restore backup',
+      });
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  async deleteBackup(backup: SyncSafetyBackup): Promise<void> {
+    if (
+      window.confirm(
+        `Are you sure you want to delete the backup from ${this.formatTimestamp(backup.timestamp)}?`,
+      )
+    ) {
+      try {
+        await this._syncSafetyBackupService.deleteBackup(backup.id);
+        // No need to manually reload - the service will emit backupsChanged$
+        this._snackService.open({
+          type: 'SUCCESS',
+          msg: 'Backup deleted successfully',
+        });
+      } catch (error) {
+        console.error('Failed to delete backup:', error);
+        this._snackService.open({
+          type: 'ERROR',
+          msg: 'Failed to delete backup',
+        });
+      }
+    }
+  }
+
+  async clearAllBackups(): Promise<void> {
+    if (
+      window.confirm(
+        'Are you sure you want to delete ALL safety backups? This cannot be undone.',
+      )
+    ) {
+      try {
+        await this._syncSafetyBackupService.clearAllBackups();
+        // No need to manually reload - the service will emit backupsChanged$
+        this._snackService.open({
+          type: 'SUCCESS',
+          msg: 'All backups cleared successfully',
+        });
+      } catch (error) {
+        console.error('Failed to clear backups:', error);
+        this._snackService.open({
+          type: 'ERROR',
+          msg: 'Failed to clear backups',
+        });
+      }
+    }
+  }
+
+  formatTimestamp(timestamp: number): string {
+    return new Date(timestamp).toLocaleString();
+  }
+
+  getReasonText(reason: SyncSafetyBackup['reason']): string {
+    switch (reason) {
+      case 'BEFORE_UPDATE_LOCAL':
+        return 'Automatic';
+      case 'MANUAL':
+        return 'Manual';
+      default:
+        return reason;
+    }
+  }
+
+  getSlotInfo(backup: SyncSafetyBackup, index: number): string {
+    // const backups = this.backups();
+    const now = new Date();
+    const todayStart = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+    ).getTime();
+    const isFromToday = backup.timestamp >= todayStart;
+
+    if (index < 2) {
+      return `Slot ${index + 1}: Recent backup`;
+    } else if (index === 2) {
+      return isFromToday
+        ? 'Slot 3: First backup today'
+        : 'Slot 3: Backup from ' + this.getRelativeDay(backup.timestamp);
+    } else if (index === 3) {
+      return 'Slot 4: ' + this.getRelativeDay(backup.timestamp);
+    }
+    return '';
+  }
+
+  getRelativeDay(timestamp: number): string {
+    const now = new Date();
+    const backupDate = new Date(timestamp);
+    const daysDiff = Math.floor((now.getTime() - timestamp) / (1000 * 60 * 60 * 24));
+
+    if (daysDiff === 0) {
+      return 'Today';
+    } else if (daysDiff === 1) {
+      return 'Yesterday';
+    } else if (daysDiff < 7) {
+      return `${daysDiff} days ago`;
+    } else {
+      return backupDate.toLocaleDateString();
+    }
+  }
+
+  getReasonIcon(reason: SyncSafetyBackup['reason']): string {
+    switch (reason) {
+      case 'BEFORE_UPDATE_LOCAL':
+        return 'sync';
+      case 'MANUAL':
+        return 'person';
+      default:
+        return 'help';
+    }
+  }
+
+  trackByBackupId(index: number, backup: SyncSafetyBackup): string {
+    // Use a combination of ID and timestamp to ensure uniqueness
+    // This prevents issues if IDs are somehow duplicated
+    return backup.id && backup.id !== 'EMPTY'
+      ? `${backup.id}_${backup.timestamp}`
+      : `backup_${index}_${backup.timestamp || Date.now()}`;
+  }
+}

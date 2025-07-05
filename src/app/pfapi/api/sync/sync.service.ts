@@ -148,6 +148,26 @@ export class SyncService<const MD extends ModelCfgs> {
 
       switch (status) {
         case SyncStatus.UpdateLocal:
+          // Emit event before updating local data
+          try {
+            const currentBackup = await this._pfapiMain.loadCompleteBackup();
+
+            // Get the models that will be updated
+            const { toUpdate } = this._modelSyncService.getModelIdsToUpdateFromRevMaps({
+              revMapNewer: remoteMeta.revMap,
+              revMapToOverwrite: localMeta.revMap,
+              errorContext: 'DOWNLOAD',
+            });
+
+            this._pfapiMain.ev.emit('onBeforeUpdateLocal', {
+              backup: currentBackup,
+              modelsToUpdate: toUpdate,
+            });
+          } catch (error) {
+            pfLog(0, 'Failed to emit onBeforeUpdateLocal event', error);
+            // Continue with sync even if backup event fails
+          }
+
           if (this.IS_DO_CROSS_MODEL_MIGRATIONS) {
             const mvcR = modelVersionCheck({
               // TODO check for problems

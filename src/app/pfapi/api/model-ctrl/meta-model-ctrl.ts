@@ -324,6 +324,51 @@ export class MetaModelCtrl {
   }
 
   /**
+   * Increments the vector clock after restoring a backup to prevent immediate sync overwrite
+   */
+  async incrementVectorClockForRestore(): Promise<void> {
+    try {
+      const metaData = await this.load();
+      const clientId = await this.loadClientId();
+
+      if (metaData.vectorClock) {
+        // Increment this client's vector clock component
+        metaData.vectorClock[clientId] = (metaData.vectorClock[clientId] || 0) + 1;
+
+        // Also increment the Lamport timestamp for backwards compatibility
+        if (typeof metaData.localLamport === 'number') {
+          metaData.localLamport = this._incrementLamport(metaData.localLamport);
+        }
+
+        // Save the updated metadata
+        await this.save({
+          ...metaData,
+          metaRev: 'LOCAL_' + Date.now(),
+          lastUpdate: Date.now(),
+        });
+
+        pfLog(
+          1,
+          `${MetaModelCtrl.L}.incrementVectorClockForRestore() incremented vector clock`,
+          {
+            clientId,
+            newValue: metaData.vectorClock[clientId],
+          },
+        );
+      } else {
+        devError('No vector clock found');
+      }
+    } catch (error) {
+      pfLog(
+        0,
+        `${MetaModelCtrl.L}.incrementVectorClockForRestore() failed to increment vector clock`,
+        { error },
+      );
+      // Don't throw - the restore was successful, this is just a sync optimization
+    }
+  }
+
+  /**
    * Saves the client ID to storage
    *
    * @param clientId Client ID to save

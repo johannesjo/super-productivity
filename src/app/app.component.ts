@@ -69,6 +69,7 @@ import { PluginService } from './plugins/plugin.service';
 import { MarkdownPasteService } from './features/tasks/markdown-paste.service';
 import { TaskService } from './features/tasks/task.service';
 import { IpcRendererEvent } from 'electron';
+import { SyncSafetyBackupService } from './imex/sync/sync-safety-backup.service';
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -103,6 +104,7 @@ const productivityTip: string[] = w.productivityTips && w.productivityTips[w.ran
 })
 export class AppComponent implements OnDestroy {
   private _translateService = inject(TranslateService);
+
   private _globalConfigService = inject(GlobalConfigService);
   private _shortcutService = inject(ShortcutService);
   private _bannerService = inject(BannerService);
@@ -121,6 +123,9 @@ export class AppComponent implements OnDestroy {
   private _markdownPasteService = inject(MarkdownPasteService);
   private _taskService = inject(TaskService);
   private _pluginService = inject(PluginService);
+
+  // needs to be imported for initialization
+  private _syncSafetyBackupService = inject(SyncSafetyBackupService);
 
   readonly syncTriggerService = inject(SyncTriggerService);
   readonly imexMetaService = inject(ImexViewService);

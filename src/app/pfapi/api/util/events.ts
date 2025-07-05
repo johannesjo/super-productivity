@@ -16,6 +16,7 @@ export class PFEventEmitter {
     providerChange: [],
     providerReady: [],
     providerPrivateCfgChange: [],
+    onBeforeUpdateLocal: [],
   };
 
   on<K extends PfapiEvents>(
