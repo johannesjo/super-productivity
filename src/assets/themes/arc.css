@@ -1,3 +1,157 @@
+/**
+ * Arc Theme for Super Productivity
+ * Dark theme inspired by Arc Dark
+ */
+
+/* Override CSS variables for Arc dark theme */
+body.isDarkTheme {
+  /* ===============================
+   * BACKGROUND COLORS
+   * ===============================*/
+
+  /* Main backgrounds */
+  --bg: #2d323d;
+  --bg-darker: #2d323d;
+  --bg-slightly-lighter: #2f3240;
+  --bg-lighter: #383c4a;
+  --bg-lightest: #444a58;
+  --bg-super-light: #4e5467;
+
+  /* Component backgrounds */
+  --card-bg: #383c4a;
+  --sidebar-bg: #2e343e;
+  --selected-task-bg-color: #383c4a;
+  --banner-bg: #383c4a;
+
+  /* Task backgrounds */
+  --task-c-bg: #2f3240;
+  --task-c-selected-bg: #383c4a;
+  --sub-task-c-bg: #2f3240;
+  --sub-task-c-bg-done: #2a2e3a;
+  --task-c-bg-done: #2a2e3a;
+  --task-c-current-bg: #383c4a;
+  --task-c-drag-drop-bg: #383c4a;
+  --sub-task-c-bg-in-selected: #353947;
+
+  /* Note backgrounds */
+  --standard-note-bg: #383c4a;
+  --standard-note-bg-hovered: #3e4252;
+
+  /* ===============================
+   * TEXT COLORS
+   * ===============================*/
+
+  --text-color: #c5cfd9;
+  --text-color-less-intense: rgba(197, 207, 217, 0.9);
+  --text-color-muted: rgba(197, 207, 217, 0.6);
+  --text-color-more-intense: #d3dae3;
+  --text-color-most-intense: #ffffff;
+
+  /* Note text */
+  --standard-note-fg: #c5cfd9;
+
+  /* Task detail */
+  --task-detail-value-color: rgba(197, 207, 217, 0.7);
+
+  /* ===============================
+   * BORDERS & SEPARATORS
+   * ===============================*/
+
+  --extra-border-color: #2e343e;
+  --separator-color: rgba(46, 52, 62, 0.5);
+  --divider-color: #2e343e;
+
+  /* Chip borders */
+  --chip-outline-color: rgba(197, 207, 217, 0.3);
+
+  /* ===============================
+   * ACCENT & THEME COLORS
+   * ===============================*/
+
+  /* Arc theme signature blue accent */
+  --palette-accent-500: #5294e2;
+  --c-accent: #5294e2;
+
+  /* Keep default primary (can be customized) */
+  /* --palette-primary-500: #5294e2; */
+  /* --c-primary: #5294e2; */
+
+  /* ===============================
+   * UI ELEMENTS
+   * ===============================*/
+
+  /* Scrollbar */
+  --scrollbar-thumb: #3e4350;
+  --scrollbar-thumb-hover: #4a4f5e;
+  --scrollbar-track: #2d323d;
+
+  /* Close button */
+  --close-btn-bg: #383c4a;
+  --close-btn-border: #2e343e;
+
+  /* Select/Options */
+  --select-hover-bg: rgba(82, 148, 226, 0.15);
+  --options-border-color: rgba(82, 148, 226, 0.2);
+
+  /* Attachments */
+  --attachment-bg: #383c4a;
+  --attachment-border: transparent;
+  --attachment-control-bg: rgba(0, 0, 0, 0.3);
+  --attachment-control-border: rgba(0, 0, 0, 0.4);
+  --attachment-control-hover-bg: rgba(0, 0, 0, 0.7);
+
+  /* Grid */
+  --grid-color: rgba(197, 207, 217, 0.1);
+
+  /* Progress */
+  --progress-bg: rgba(197, 207, 217, 0.2);
+
+  /* Improvement banner */
+  --improvement-text: #d3dae3;
+  --improvement-border: rgba(82, 148, 226, 0.3);
+  --improvement-button-text: #ffffff;
+
+  /* ===============================
+   * SHADOWS
+   * ===============================*/
+
+  /* Adjust shadow opacity for Arc theme */
+  --shadow-key-umbra-opacity: 0.25;
+  --shadow-key-penumbra-opacity: 0.16;
+  --shadow-ambient-shadow-opacity: 0.14;
+
+  /* Task shadows - subtle for Arc theme */
+  --task-current-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --task-selected-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+
+  /* ===============================
+   * HOVER CONTROLS
+   * ===============================*/
+
+  --hover-controls-border: none;
+  --hover-controls-border-opacity: 0;
+}
+
+/* Arc-specific Material overrides */
+body.isDarkTheme {
+  /* Material Design components that need Arc theme colors */
+  --mdc-theme-surface: #383c4a;
+  --mdc-theme-on-surface: #c5cfd9;
+  --mdc-theme-background: #2d323d;
+}
+
+/* Optional: Arc light theme variant (if needed in future) */
+/*
+body:not(.isDarkTheme) {
+  --bg: #f5f6f7;
+  --card-bg: #ffffff;
+  --sidebar-bg: #e7e8eb;
+  --text-color: #3b3e45;
+  --palette-accent-500: #5294e2;
+  --c-accent: #5294e2;
+}
+*/
+
 body,
 body .page-wrapper,
 body.isDarkTheme,
