@@ -73,6 +73,7 @@
   <img alt='Get it on Flathub'
        src='https://flathub.org/api/badge?locale=en'
        align="center"
+       style="height: 50px"
        height="50" />
   </a>
   
@@ -80,36 +81,42 @@
   <img alt="Get it from the Snap Store"
        src="https://snapcraft.io/static/images/badges/en/snap-store-black.svg"
        align="center"
+       style="height: 50px"
        height="50">
 </a>
 <a href='//www.microsoft.com/store/apps/9NHFVG8361TW?cid=storebadge&ocid=badge' target="_blank">
   <img src='https://developer.microsoft.com/store/badges/images/English_get-it-from-MS.png'
        align="center"
        alt='English badge'
+       style="height: 50px"
        height="50" />
 </a>
 <a href='//apps.apple.com/de/app/super-productivity/id1482572463?l=en&mt=12' target="_blank">
   <img src='docs/screens/app-store-badge.svg'
        align="center"
        alt='App Store Badge'
+       style="height: 50px"
        height="50" />
 </a>
 <a href='//play.google.com/store/apps/details?id=com.superproductivity.superproductivity' target="_blank">
   <img src='docs/screens/google-play-badge.png'
        align="center"
        alt='Play Store Badge'
+       style="height: 50px"
        height="50" />
 </a>
 <a href='//f-droid.org/en/packages/com.superproductivity.superproductivity' target="_blank">
   <img src='https://f-droid.org/assets/fdroid-logo-text_S0MUfk_FsnAYL7n2MQye-34IoSNm6QM6xYjDnMqkufo=.svg'
        align="center"
        alt='F-Droid Badge'
+       style="height: 50px"
        height="50" />
 </a>
 <a href='http://apps.obtainium.imranr.dev/redirect.html?r=obtainium://add/https://github.com/johannesjo/super-productivity/releases'>
   <img src='https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png'
        align="center"
        alt='Obtanium Badge'
+       style="height: 50px"
        height="50" />
 </a>
 </p>
