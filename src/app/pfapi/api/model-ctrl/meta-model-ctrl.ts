@@ -12,7 +12,6 @@ import { validateLocalMeta } from '../util/validate-local-meta';
 import { PFEventEmitter } from '../util/events';
 import { devError } from '../../../util/dev-error';
 import { incrementVectorClock, limitVectorClockSize } from '../util/vector-clock';
-import { getVectorClock, withVectorClock } from '../util/backwards-compat';
 
 export const DEFAULT_META_MODEL: LocalMeta = {
   crossModelVersion: 1,
@@ -20,8 +19,6 @@ export const DEFAULT_META_MODEL: LocalMeta = {
   lastUpdate: 0,
   metaRev: null,
   lastSyncedUpdate: null,
-  localLamport: 0,
-  lastSyncedLamport: null,
   vectorClock: {},
   lastSyncedVectorClock: null,
 };
@@ -92,32 +89,18 @@ export class MetaModelCtrl {
     const lastUpdateAction =
       actionStr.length > 100 ? actionStr.substring(0, 97) + '...' : actionStr;
 
-    // Update vector clock - migrate from Lamport if needed
-    let currentVectorClock = getVectorClock(metaModel, clientId);
-    if (!currentVectorClock && metaModel.localLamport > 0) {
-      // First time creating vector clock - migrate from Lamport timestamp
-      currentVectorClock = { [clientId]: metaModel.localLamport };
-      pfLog(
-        2,
-        `${MetaModelCtrl.L}.${this.updateRevForModel.name}() migrating Lamport to vector clock`,
-        {
-          clientId,
-          localLamport: metaModel.localLamport,
-          newVectorClock: currentVectorClock,
-        },
-      );
-    }
-
-    let newVectorClock = incrementVectorClock(currentVectorClock || {}, clientId);
+    // Update vector clock
+    const currentVectorClock = metaModel.vectorClock || {};
+    let newVectorClock = incrementVectorClock(currentVectorClock, clientId);
 
     // Apply size limiting to prevent unbounded growth
     newVectorClock = limitVectorClockSize(newVectorClock, clientId);
 
-    const baseUpdatedMeta = {
+    const updatedMeta = {
       ...metaModel,
       lastUpdate: timestamp,
       lastUpdateAction,
-      localLamport: this._incrementLamport(metaModel.localLamport || 0),
+      vectorClock: newVectorClock,
 
       ...(modelCfg.isMainFileModel
         ? {}
@@ -130,9 +113,6 @@ export class MetaModelCtrl {
       // as soon as we save a related model, we are using the local crossModelVersion (while other updates might be from importing remote data)
       crossModelVersion: this.crossModelVersion,
     };
-
-    // Create final meta with vector clock using pure function
-    const updatedMeta = withVectorClock(baseUpdatedMeta, newVectorClock, clientId);
 
     await this.save(updatedMeta, isIgnoreDBLock);
   }
@@ -152,14 +132,6 @@ export class MetaModelCtrl {
       lastUpdate: metaModel.lastUpdate,
       isIgnoreDBLock,
     });
-    if (typeof metaModel.lastUpdate !== 'number') {
-      return Promise.reject(
-        new InvalidMetaError(
-          `${MetaModelCtrl.L}.${this.save.name}()`,
-          'lastUpdate not found',
-        ),
-      );
-    }
 
     // NOTE: in order to not mess up separate model updates started at the same time, we need to update synchronously as well
     this._metaModelInMemory = validateLocalMeta(metaModel);
@@ -186,7 +158,6 @@ export class MetaModelCtrl {
         pfLog(
           2,
           `${MetaModelCtrl.L}.${this.save.name}() DB save completed successfully`,
-          metaModel.localLamport,
           metaModel,
         );
       })
@@ -246,14 +217,6 @@ export class MetaModelCtrl {
       hasVectorClock: !!data.vectorClock,
       vectorClockKeys: data.vectorClock ? Object.keys(data.vectorClock) : [],
     });
-
-    // Ensure Lamport fields are initialized for old data
-    if (data.localLamport === undefined) {
-      data.localLamport = 0;
-    }
-    if (data.lastSyncedLamport === undefined) {
-      data.lastSyncedLamport = null;
-    }
 
     // Ensure vector clock fields are initialized for old data
     if (data.vectorClock === undefined) {
@@ -335,11 +298,6 @@ export class MetaModelCtrl {
         // Increment this client's vector clock component
         metaData.vectorClock[clientId] = (metaData.vectorClock[clientId] || 0) + 1;
 
-        // Also increment the Lamport timestamp for backwards compatibility
-        if (typeof metaData.localLamport === 'number') {
-          metaData.localLamport = this._incrementLamport(metaData.localLamport);
-        }
-
         // Save the updated metadata
         await this.save({
           ...metaData,
@@ -388,20 +346,5 @@ export class MetaModelCtrl {
   private _generateClientId(): string {
     pfLog(2, `${MetaModelCtrl.L}.${this._generateClientId.name}()`);
     return getEnvironmentId() + '_' + Date.now();
-  }
-
-  /**
-   * Safely increments Lamport timestamp with overflow protection
-   *
-   * @param current Current Lamport value
-   * @returns Incremented value
-   */
-  private _incrementLamport(current: number): number {
-    // Reset if approaching max safe integer
-    if (current >= Number.MAX_SAFE_INTEGER - 1000) {
-      pfLog(1, `${MetaModelCtrl.L} Lamport counter overflow protection triggered`);
-      return 1;
-    }
-    return current + 1;
   }
 }

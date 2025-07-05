@@ -7,11 +7,7 @@ import {
   SyncInvalidTimeValuesError,
 } from '../errors/errors';
 import { pfLog } from './log';
-import {
-  getLocalChangeCounter,
-  getLastSyncedChangeCounter,
-  hasVectorClocks,
-} from './backwards-compat';
+import { hasVectorClocks } from './backwards-compat';
 import {
   compareVectorClocks,
   VectorClockComparison,
@@ -123,66 +119,19 @@ export const getSyncStatusFromMetaFiles = (
       }
     }
 
-    // Enhanced fallback: Try to create hybrid comparison using available data
-    const localChangeCounter = getLocalChangeCounter(local);
-    const remoteChangeCounter = getLocalChangeCounter(remote);
-    const lastSyncedChangeCounter = getLastSyncedChangeCounter(local);
-
     // Handle mixed vector clock states gracefully for migration
     if (localHasVectorClock !== remoteHasVectorClock) {
       pfLog(
         2,
-        'Mixed vector clock state detected - using migration-friendly comparison',
+        'Mixed vector clock state detected - using timestamp comparison for migration',
         {
           localHasVectorClock,
           remoteHasVectorClock,
-          localChangeCounter,
-          remoteChangeCounter,
-          lastSyncedChangeCounter,
+          localLastUpdate: local.lastUpdate,
+          remoteLastUpdate: remote.lastUpdate,
+          localLastSyncedUpdate: local.lastSyncedUpdate,
         },
       );
-
-      // If we have valid change counters (non-zero), use them for comparison during migration
-      const hasValidChangeCounters =
-        typeof localChangeCounter === 'number' &&
-        typeof remoteChangeCounter === 'number' &&
-        typeof lastSyncedChangeCounter === 'number' &&
-        (localChangeCounter > 0 ||
-          remoteChangeCounter > 0 ||
-          lastSyncedChangeCounter > 0);
-
-      if (hasValidChangeCounters) {
-        // Use Lamport comparison logic for mixed states
-        const hasLocalChanges = localChangeCounter > lastSyncedChangeCounter;
-        const hasRemoteChanges = remoteChangeCounter > lastSyncedChangeCounter;
-
-        if (!hasLocalChanges && !hasRemoteChanges) {
-          return { status: SyncStatus.InSync };
-        } else if (hasLocalChanges && !hasRemoteChanges) {
-          return { status: SyncStatus.UpdateRemote };
-        } else if (!hasLocalChanges && hasRemoteChanges) {
-          return { status: SyncStatus.UpdateLocal };
-        } else {
-          // Both have changes - compare values
-          if (localChangeCounter > remoteChangeCounter) {
-            return { status: SyncStatus.UpdateRemote };
-          } else if (remoteChangeCounter > localChangeCounter) {
-            return { status: SyncStatus.UpdateLocal };
-          } else {
-            // Equal change counters with changes - likely same changes
-            return { status: SyncStatus.InSync };
-          }
-        }
-      }
-
-      // If no valid change counters, fall back to timestamp comparison
-      pfLog(2, 'No valid change counters in mixed state - using timestamp comparison', {
-        localHasVectorClock,
-        remoteHasVectorClock,
-        localLastUpdate: local.lastUpdate,
-        remoteLastUpdate: remote.lastUpdate,
-        localLastSyncedUpdate: local.lastSyncedUpdate,
-      });
 
       // If we have lastSyncedUpdate, check for changes
       if (typeof local.lastSyncedUpdate === 'number') {
@@ -225,55 +174,7 @@ export const getSyncStatusFromMetaFiles = (
       }
     }
 
-    // Standard Lamport fallback when both sides lack vector clocks
-
-    if (
-      typeof localChangeCounter === 'number' &&
-      typeof remoteChangeCounter === 'number' &&
-      typeof lastSyncedChangeCounter === 'number'
-    ) {
-      const lamportResult = _checkForUpdateLamport({
-        remoteLocalLamport: remoteChangeCounter,
-        localLamport: localChangeCounter,
-        lastSyncedLamport: lastSyncedChangeCounter,
-      });
-
-      pfLog(2, 'Using change counters for sync status', {
-        localChangeCounter,
-        remoteChangeCounter,
-        lastSyncedChangeCounter,
-        result: lamportResult,
-        hasLocalChanges: localChangeCounter > lastSyncedChangeCounter,
-        hasRemoteChanges: remoteChangeCounter > lastSyncedChangeCounter,
-      });
-
-      switch (lamportResult) {
-        case UpdateCheckResult.InSync:
-          return {
-            status: SyncStatus.InSync,
-          };
-        case UpdateCheckResult.LocalUpdateRequired:
-          return {
-            status: SyncStatus.UpdateLocal,
-          };
-        case UpdateCheckResult.RemoteUpdateRequired:
-          return {
-            status: SyncStatus.UpdateRemote,
-          };
-        case UpdateCheckResult.DataDiverged:
-          return {
-            status: SyncStatus.Conflict,
-            conflictData: {
-              reason: ConflictReason.BothNewerLastSync,
-              remote,
-              local,
-            },
-          };
-      }
-    }
-
-    // TODO remove later once it is likely that all running apps have lamport clocks
-    // Final fallback to timestamp-based checking
+    // Fallback to timestamp-based checking when vector clocks are not available
 
     if (typeof local.lastSyncedUpdate === 'number') {
       const r = _checkForUpdate({
@@ -422,42 +323,6 @@ const _checkForUpdateVectorClock = (params: {
       // Vectors are concurrent - true conflict
       return UpdateCheckResult.DataDiverged;
     }
-  }
-};
-
-const _checkForUpdateLamport = (params: {
-  remoteLocalLamport: number;
-  localLamport: number;
-  lastSyncedLamport: number;
-}): UpdateCheckResult => {
-  const { remoteLocalLamport, localLamport, lastSyncedLamport } = params;
-
-  pfLog(2, 'Lamport timestamp check', {
-    localLamport,
-    remoteLocalLamport,
-    lastSyncedLamport,
-    hasLocalChanges: localLamport > lastSyncedLamport,
-    hasRemoteChanges: remoteLocalLamport > lastSyncedLamport,
-  });
-
-  // Check if there have been changes since last sync
-  const hasLocalChanges = localLamport > lastSyncedLamport;
-  const hasRemoteChanges = remoteLocalLamport > lastSyncedLamport;
-
-  if (!hasLocalChanges && !hasRemoteChanges) {
-    return UpdateCheckResult.InSync;
-  } else if (hasLocalChanges && !hasRemoteChanges) {
-    return UpdateCheckResult.RemoteUpdateRequired;
-  } else if (!hasLocalChanges && hasRemoteChanges) {
-    return UpdateCheckResult.LocalUpdateRequired;
-  } else {
-    // Both have changes - check if they're the same
-    if (localLamport === remoteLocalLamport) {
-      // Both made the same changes - they're in sync
-      return UpdateCheckResult.InSync;
-    }
-    // Different changes - conflict
-    return UpdateCheckResult.DataDiverged;
   }
 };
 

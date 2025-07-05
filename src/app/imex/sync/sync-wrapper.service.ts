@@ -139,8 +139,6 @@ export class SyncWrapperService {
             localVectorClock: r.conflictData?.local.vectorClock,
             remoteVectorClock: r.conflictData?.remote.vectorClock,
             localLastSyncedVectorClock: r.conflictData?.local.lastSyncedVectorClock,
-            localLamport: r.conflictData?.local.localLamport,
-            remoteLamport: r.conflictData?.remote.localLamport,
             conflictReason: r.conflictData?.reason,
             additional: r.conflictData?.additional,
           });

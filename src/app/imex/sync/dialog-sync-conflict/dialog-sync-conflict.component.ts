@@ -88,11 +88,6 @@ export class DialogSyncConflictComponent {
     }
   }
 
-  shortenLamport(lamport?: number | null): string {
-    if (!lamport) return '-';
-    return lamport.toString().slice(-5);
-  }
-
   shortenAction(actionStr?: string | null): string {
     if (!actionStr) return '?';
     return actionStr.trim().split(/\s+/)[0];
@@ -149,11 +144,8 @@ export class DialogSyncConflictComponent {
       return changeCount;
     }
 
-    // Fallback to Lamport clock
-    const lastSyncedLamport = this.local.lastSyncedLamport || 0;
-    const currentLamport =
-      side === 'remote' ? this.remote.localLamport : this.local.localLamport;
-    return Math.max(0, currentLamport - lastSyncedLamport);
+    // No vector clock available
+    return 0;
   }
 
   private shouldConfirmOverwrite(resolution: DialogConflictResolutionResult): boolean {

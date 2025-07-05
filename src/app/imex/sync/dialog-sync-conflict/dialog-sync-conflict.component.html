@@ -66,18 +66,11 @@
       <thead>
         <tr>
           <th></th>
-          <th>{{ T.F.SYNC.D_CONFLICT.LAMPORT_CLOCK | translate }}</th>
           <th>{{ T.F.SYNC.D_CONFLICT.LAST_WRITE | translate }}</th>
         </tr>
       </thead>
       <tr>
         <td>{{ T.F.SYNC.D_CONFLICT.REMOTE | translate }}</td>
-        <td
-          [matTooltip]="remote.localLamport"
-          [attr.data-label]="T.F.SYNC.D_CONFLICT.LAMPORT_CLOCK | translate"
-        >
-          {{ shortenLamport(remote.localLamport) }}
-        </td>
         <td
           [matTooltip]="remote.lastUpdateAction"
           [attr.data-label]="T.F.SYNC.D_CONFLICT.LAST_WRITE | translate"
@@ -87,12 +80,6 @@
       </tr>
       <tr>
         <td>{{ T.F.SYNC.D_CONFLICT.LOCAL | translate }}</td>
-        <td
-          [matTooltip]="local.localLamport"
-          [attr.data-label]="T.F.SYNC.D_CONFLICT.LAMPORT_CLOCK | translate"
-        >
-          {{ shortenLamport(local.localLamport) }}
-        </td>
         <td
           [matTooltip]="local.lastUpdateAction"
           [attr.data-label]="T.F.SYNC.D_CONFLICT.LAST_WRITE | translate"

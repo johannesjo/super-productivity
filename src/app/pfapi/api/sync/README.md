@@ -21,12 +21,11 @@ Located in `sync-providers/`:
 
 ### Sync Algorithm
 
-The sync system uses a hybrid approach combining:
+The sync system uses vector clocks for accurate conflict detection:
 
 1. **Physical Timestamps** (`lastUpdate`) - For ordering events
-2. **Change Counters** (`localLamport`) - For detecting local modifications
-3. **Vector Clocks** (`vectorClock`) - For accurate causality tracking
-4. **Sync State** (`lastSyncedUpdate`, `lastSyncedLamport`) - To track last successful sync
+2. **Vector Clocks** (`vectorClock`) - For accurate causality tracking and conflict detection
+3. **Sync State** (`lastSyncedUpdate`, `lastSyncedVectorClock`) - To track last successful sync
 
 ## How Sync Works
 
@@ -37,7 +36,6 @@ When a user modifies data:
 ```typescript
 // In meta-model-ctrl.ts
 lastUpdate = Date.now();
-localLamport = localLamport + 1;
 vectorClock[clientId] = vectorClock[clientId] + 1;
 ```
 
@@ -75,9 +73,8 @@ if (comparison === VectorClockComparison.CONCURRENT) {
 interface LocalMeta {
   lastUpdate: number; // Physical timestamp
   lastSyncedUpdate: number; // Last synced timestamp
-  localLamport: number; // Change counter
-  lastSyncedLamport: number; // Last synced counter
   vectorClock?: VectorClock; // Causality tracking
+  lastSyncedVectorClock?: VectorClock; // Last synced vector clock
   revMap: RevMap; // Model revision map
   crossModelVersion: number; // Schema version
 }
@@ -85,9 +82,9 @@ interface LocalMeta {
 
 ### Important Considerations
 
-1. **NOT Pure Lamport Clocks**: We don't increment on receive to prevent sync loops
+1. **Vector Clocks**: Each client maintains its own counter for accurate causality tracking
 2. **Backwards Compatibility**: Supports migration from older versions
-3. **Conflict Minimization**: Vector clocks reduce false conflicts
+3. **Conflict Minimization**: Vector clocks eliminate false conflicts
 4. **Atomic Operations**: Meta file serves as transaction coordinator
 
 ## Common Sync Scenarios

@@ -33,7 +33,6 @@ export class SyncSafetyBackupService {
   constructor() {
     // Subscribe to the onBeforeUpdateLocal event
     this._pfapiService.pf.ev.on('onBeforeUpdateLocal', async (eventData) => {
-      alert(2);
       try {
         pfLog(1, 'SyncSafetyBackupService: Received onBeforeUpdateLocal event', {
           modelsToUpdate: eventData.modelsToUpdate,

@@ -4,7 +4,7 @@ import { environment } from '../../../../environments/environment';
 2: normal
 3: verbose
  */
-const LOG_LEVEL = environment.production ? 2 : 0;
+const LOG_LEVEL = environment.production ? 2 : 2;
 
 /**
  * Safe logging function that prevents crashes during console access
