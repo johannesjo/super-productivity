@@ -16,6 +16,18 @@ export const AVAILABLE_CUSTOM_THEMES: CustomTheme[] = [
     requiredMode: 'system',
   },
   {
+    id: 'arc',
+    name: 'Arc',
+    url: 'assets/themes/arc.css',
+    requiredMode: 'dark',
+  },
+  {
+    id: 'dark-base',
+    name: 'Dark Base',
+    url: 'assets/themes/dark-base.css',
+    requiredMode: 'dark',
+  },
+  {
     id: 'dracula',
     name: 'Dracula',
     url: 'assets/themes/dracula.css',
@@ -32,18 +44,6 @@ export const AVAILABLE_CUSTOM_THEMES: CustomTheme[] = [
     name: 'Nord Snow Storm',
     url: 'assets/themes/nord-snow-storm.css',
     requiredMode: 'light',
-  },
-  {
-    id: 'arc',
-    name: 'Arc',
-    url: 'assets/themes/arc.css',
-    requiredMode: 'dark',
-  },
-  {
-    id: 'dark-base',
-    name: 'Dark Base',
-    url: 'assets/themes/dark-base.css',
-    requiredMode: 'dark',
   },
 ];
 
