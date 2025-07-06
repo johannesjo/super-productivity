@@ -132,6 +132,11 @@ describe('Sync Race Condition - Repeating Tasks Recreation Bug', () => {
       console.log('6. Waiting for debounce...');
       await wait(1100);
 
+      // After debounce, the effect waits for another afterCurrentSyncDoneOrSyncDisabled$ emission
+      // This simulates that the sync is truly done
+      afterCurrentSyncDoneOrSyncDisabled$.next(undefined);
+      await wait(0);
+
       // At this point, the effect will check if sync is in progress (it's not)
       // and then call addAllDueToday()
 
@@ -238,6 +243,10 @@ describe('Sync Race Condition - Repeating Tasks Recreation Bug', () => {
 
       // The debounce delay
       await wait(1100);
+
+      // After debounce, the effect waits for another afterCurrentSyncDoneOrSyncDisabled$ emission
+      afterCurrentSyncDoneOrSyncDisabled$.next(undefined);
+      await wait(0);
 
       // This is where the bug happens
       timeline.push('[Task Shared] addTask - BUG!');
