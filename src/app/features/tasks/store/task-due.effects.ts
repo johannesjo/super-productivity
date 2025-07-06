@@ -17,7 +17,6 @@ import { DataInitStateService } from '../../../core/data-init/data-init-state.se
 import { SyncWrapperService } from '../../../imex/sync/sync-wrapper.service';
 import { selectTodayTaskIds } from '../../work-context/store/work-context.selectors';
 import { AddTasksForTomorrowService } from '../../add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
-import { SnackService } from '../../../core/snack/snack.service';
 
 @Injectable()
 export class TaskDueEffects {
@@ -26,7 +25,6 @@ export class TaskDueEffects {
   private _dataInitStateService = inject(DataInitStateService);
   private _syncWrapperService = inject(SyncWrapperService);
   private _addTasksForTomorrowService = inject(AddTasksForTomorrowService);
-  private _snackService = inject(SnackService);
 
   // NOTE: this gets a lot of interference from tagEffect.preventParentAndSubTaskInTodayList$:
   createRepeatableTasksAndAddDueToday$ = createEffect(
