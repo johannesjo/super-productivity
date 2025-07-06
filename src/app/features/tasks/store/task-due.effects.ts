@@ -38,12 +38,7 @@ export class TaskDueEffects {
             // Add debounce to ensure sync has fully completed and status is updated
             debounceTime(1000),
             // Ensure we're not in the middle of another sync
-            switchMap(() =>
-              this._syncWrapperService.isSyncInProgress$.pipe(
-                filter((inProgress) => !inProgress),
-                first(),
-              ),
-            ),
+            switchMap(() => this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$),
             // NOTE we use concatMap since tap errors only show in console, but are not handled by global handler
             concatMap(() => this._addTasksForTomorrowService.addAllDueToday()),
           ),
@@ -66,12 +61,7 @@ export class TaskDueEffects {
           // Add debounce to ensure sync has fully completed and status is updated
           debounceTime(1000),
           // Ensure we're not in the middle of another sync
-          switchMap(() =>
-            this._syncWrapperService.isSyncInProgress$.pipe(
-              filter((inProgress) => !inProgress),
-              first(),
-            ),
-          ),
+          switchMap(() => this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$),
           switchMap(() => this._store$.select(selectOverdueTasksOnToday).pipe(first())),
           filter((overdue) => !!overdue.length),
           withLatestFrom(this._store$.select(selectTodayTaskIds)),
