@@ -13,11 +13,10 @@ jobs:
 
     steps:
       - name: Promote Internal Release to Production
-        uses: r0adkll/upload-google-play@v1.1.3
+        uses: kevin-david/promote-play-release@v1.0.0
         with:
-          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
-          packageName: com.superproductivity.superproductivity
-          track: internal
-          promoteTrack: production
-          status: completed
-          inAppUpdatePriority: 3
+          service-account-json-raw: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          package-name: com.superproductivity.superproductivity
+          from-track: internal
+          to-track: production
+          inapp-update-priority: 3
