@@ -22,12 +22,12 @@ export const taskCopyToTaskData = (task: TaskCopy): Task => {
  */
 export const taskDataToPartialTaskCopy = (updates: Partial<Task>): Partial<TaskCopy> => {
   // Handle null -> undefined conversions for internal use
-  const result: any = {};
+  const result: Record<string, unknown> = {};
 
   // Copy all properties, converting nulls to undefined where needed
   for (const key in updates) {
     if (updates.hasOwnProperty(key)) {
-      const value = (updates as any)[key];
+      const value = (updates as Record<string, unknown>)[key];
       if (
         value === null &&
         ['projectId', 'doneOn', 'parentId', 'reminderId', 'repeatCfgId'].includes(key)

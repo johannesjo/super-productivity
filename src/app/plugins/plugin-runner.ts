@@ -182,14 +182,16 @@ export class PluginRunner {
   /**
    * Send a message to a plugin's message handler
    */
-  async sendMessageToPlugin(pluginId: string, message: any): Promise<any> {
+  async sendMessageToPlugin(pluginId: string, message: unknown): Promise<unknown> {
     const pluginApi = this._pluginApis.get(pluginId);
     if (!pluginApi) {
       throw new Error(`Plugin ${pluginId} not found or not loaded`);
     }
 
     // Use the internal __sendMessage method on PluginAPI
-    return (pluginApi as any).__sendMessage(message);
+    return (
+      pluginApi as { __sendMessage: (message: unknown) => Promise<unknown> }
+    ).__sendMessage(message);
   }
 
   // KISS: Hook execution is handled by PluginHooksService, not here

@@ -28,6 +28,7 @@ import {
   projectDataToPartialProjectCopy,
   tagDataToPartialTagCopy,
 } from './plugin-api-mapper';
+import { BatchUpdateRequest } from '../api/batch-update-types';
 
 /**
  * PluginAPI implementation that uses direct bridge service injection
@@ -214,12 +215,12 @@ export class PluginAPI implements PluginAPIInterface {
     return this._pluginBridge.reorderTasks(taskIds, contextId, contextType);
   }
 
-  async batchUpdateForProject(request: any): Promise<any> {
+  async batchUpdateForProject(request: unknown): Promise<unknown> {
     console.log(
-      `Plugin ${this._pluginId} requested batch update for project ${request.projectId}`,
+      `Plugin ${this._pluginId} requested batch update for project ${(request as { projectId: string }).projectId}`,
       request,
     );
-    return this._pluginBridge.batchUpdateForProject(request);
+    return this._pluginBridge.batchUpdateForProject(request as BatchUpdateRequest);
   }
 
   showSnack(snackCfg: SnackCfg): void {

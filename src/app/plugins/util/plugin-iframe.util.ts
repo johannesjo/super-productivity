@@ -6,6 +6,31 @@ import { PluginBaseCfg, PluginManifest } from '../plugin-api.model';
  * One way to do things, no complex options.
  */
 
+/**
+ * Enum for plugin iframe message types
+ */
+export enum PluginIframeMessageType {
+  // API communication
+  API_CALL = 'PLUGIN_API_CALL',
+  API_RESPONSE = 'PLUGIN_API_RESPONSE',
+  API_ERROR = 'PLUGIN_API_ERROR',
+
+  // Hook events
+  HOOK_EVENT = 'PLUGIN_HOOK_EVENT',
+
+  // Dialog interaction
+  DIALOG_BUTTON_CLICK = 'PLUGIN_DIALOG_BUTTON_CLICK',
+  DIALOG_BUTTON_RESPONSE = 'PLUGIN_DIALOG_BUTTON_RESPONSE',
+
+  // Message forwarding
+  MESSAGE = 'PLUGIN_MESSAGE',
+  MESSAGE_RESPONSE = 'PLUGIN_MESSAGE_RESPONSE',
+  MESSAGE_ERROR = 'PLUGIN_MESSAGE_ERROR',
+
+  // Plugin lifecycle
+  READY = 'plugin-ready',
+}
+
 export interface PluginIframeConfig {
   pluginId: string;
   manifest: PluginManifest;
@@ -108,19 +133,19 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
         // Handle responses from parent
         window.addEventListener('message', function(event) {
           const data = event.data;
-          if (data?.type === 'PLUGIN_API_RESPONSE' && data.callId) {
+          if (data?.type === '${PluginIframeMessageType.API_RESPONSE}' && data.callId) {
             const resolver = pendingCalls.get(data.callId);
             if (resolver) {
               pendingCalls.delete(data.callId);
               resolver.resolve(data.result);
             }
-          } else if (data?.type === 'PLUGIN_API_ERROR' && data.callId) {
+          } else if (data?.type === '${PluginIframeMessageType.API_ERROR}' && data.callId) {
             const resolver = pendingCalls.get(data.callId);
             if (resolver) {
               pendingCalls.delete(data.callId);
               resolver.reject(new Error(data.error));
             }
-          } else if (data?.type === 'PLUGIN_DIALOG_BUTTON_CLICK') {
+          } else if (data?.type === '${PluginIframeMessageType.DIALOG_BUTTON_CLICK}') {
             // Handle dialog button clicks
             const key = data.dialogCallId + ':' + data.buttonIndex;
             const handler = dialogButtonHandlers.get(key);
@@ -128,21 +153,21 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
               try {
                 const result = handler();
                 window.parent.postMessage({
-                  type: 'PLUGIN_DIALOG_BUTTON_RESPONSE',
+                  type: '${PluginIframeMessageType.DIALOG_BUTTON_RESPONSE}',
                   dialogCallId: data.dialogCallId,
                   buttonIndex: data.buttonIndex,
                   result: result
                 }, '*');
               } catch (error) {
                 window.parent.postMessage({
-                  type: 'PLUGIN_DIALOG_BUTTON_RESPONSE',
+                  type: '${PluginIframeMessageType.DIALOG_BUTTON_RESPONSE}',
                   dialogCallId: data.dialogCallId,
                   buttonIndex: data.buttonIndex,
                   error: error.message
                 }, '*');
               }
             }
-          } else if (data?.type === 'PLUGIN_HOOK_EVENT') {
+          } else if (data?.type === '${PluginIframeMessageType.HOOK_EVENT}') {
             // Handle hook events
             const handlers = hookHandlers.get(data.hook);
             if (handlers && handlers.length > 0) {
@@ -201,7 +226,7 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
             }
 
             window.parent.postMessage({
-              type: 'PLUGIN_API_CALL',
+              type: '${PluginIframeMessageType.API_CALL}',
               method: method,
               args: processedArgs || [],
               callId: id
@@ -285,17 +310,17 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
             // Store the handler and set up message listener
             window.__pluginMessageHandler = handler;
             window.addEventListener('message', async (event) => {
-              if (event.data?.type === 'PLUGIN_MESSAGE' && window.__pluginMessageHandler) {
+              if (event.data?.type === '${PluginIframeMessageType.MESSAGE}' && window.__pluginMessageHandler) {
                 try {
                   const result = await window.__pluginMessageHandler(event.data.message);
                   event.source?.postMessage({
-                    type: 'PLUGIN_MESSAGE_RESPONSE',
+                    type: '${PluginIframeMessageType.MESSAGE_RESPONSE}',
                     messageId: event.data.messageId,
                     result
                   }, '*');
                 } catch (error) {
                   event.source?.postMessage({
-                    type: 'PLUGIN_MESSAGE_ERROR',
+                    type: '${PluginIframeMessageType.MESSAGE_ERROR}',
                     messageId: event.data.messageId,
                     error: error instanceof Error ? error.message : 'Unknown error'
                   }, '*');
@@ -307,7 +332,7 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
 
         // Notify parent that plugin is ready
         window.parent.postMessage({
-          type: 'plugin-ready',
+          type: '${PluginIframeMessageType.READY}',
           pluginId: '${config.pluginId}'
         }, '*');
       })();
@@ -366,7 +391,7 @@ export const handlePluginMessage = async (
   }
 
   // Handle API calls
-  if (data.type === 'PLUGIN_API_CALL' && data.callId) {
+  if (data.type === PluginIframeMessageType.API_CALL && data.callId) {
     const { method, args, callId } = data;
 
     try {
@@ -375,7 +400,7 @@ export const handlePluginMessage = async (
 
       // For registerHook, we need to add the pluginId parameter when calling the bridge
       if (method === 'registerHook') {
-        const bridge = config.pluginBridge as Record<
+        const bridge = config.pluginBridge as unknown as Record<
           string,
           (...args: unknown[]) => unknown
         >;
@@ -393,13 +418,13 @@ export const handlePluginMessage = async (
           if (handlerPlaceholder === 'IFRAME_HANDLER') {
             const handler = (payload: unknown): void => {
               // Send hook event to iframe
-              event.source?.postMessage(
+              (event.source as Window)?.postMessage(
                 {
-                  type: 'PLUGIN_HOOK_EVENT',
+                  type: PluginIframeMessageType.HOOK_EVENT,
                   hook: hook,
                   payload: payload,
                 },
-                '*' as any,
+                '*' as const,
               );
             };
             result = await bridge.registerHook(config.pluginId, hook, handler);
@@ -410,11 +435,11 @@ export const handlePluginMessage = async (
           }
           event.source?.postMessage(
             {
-              type: 'PLUGIN_API_RESPONSE',
+              type: PluginIframeMessageType.API_RESPONSE,
               callId,
               result,
             },
-            '*' as any,
+            { targetOrigin: '*' },
           );
           return;
         }
@@ -428,21 +453,21 @@ export const handlePluginMessage = async (
       if (boundMethods && typeof boundMethods[method] === 'function') {
         // Use the bound method
         const result = await boundMethods[method](...(args || []));
-        event.source?.postMessage(
+        (event.source as Window)?.postMessage(
           {
-            type: 'PLUGIN_API_RESPONSE',
+            type: PluginIframeMessageType.API_RESPONSE,
             callId,
             result,
           },
-          '*' as any,
+          '*',
         );
         return;
       }
 
       // For other methods, call them on the bridge
-      const bridge = config.pluginBridge as Record<
+      const bridge = config.pluginBridge as unknown as Record<
         string,
-        (...args: unknown[]) => unknown
+        (...args: unknown[]) => Promise<unknown>
       >;
       if (typeof bridge[method] !== 'function') {
         throw new Error(`Unknown API method: ${method}`);
@@ -464,19 +489,20 @@ export const handlePluginMessage = async (
                   ...button,
                   onClick: async () => {
                     // Send message to iframe to execute the button handler
-                    event.source?.postMessage(
+                    (event.source as Window)?.postMessage(
                       {
-                        type: 'PLUGIN_DIALOG_BUTTON_CLICK',
+                        type: PluginIframeMessageType.DIALOG_BUTTON_CLICK,
                         buttonIndex: index,
                         dialogCallId: callId,
                       },
-                      '*' as any,
+                      { targetOrigin: '*' },
                     );
                     // Wait for response
                     return new Promise((resolve) => {
                       const handleResponse = (e: MessageEvent): void => {
                         if (
-                          e.data?.type === 'PLUGIN_DIALOG_BUTTON_RESPONSE' &&
+                          e.data?.type ===
+                            PluginIframeMessageType.DIALOG_BUTTON_RESPONSE &&
                           e.data?.dialogCallId === callId &&
                           e.data?.buttonIndex === index
                         ) {
@@ -494,40 +520,40 @@ export const handlePluginMessage = async (
           );
         }
         const result = await bridge[method](dialogCfg);
-        event.source?.postMessage(
+        (event.source as Window)?.postMessage(
           {
-            type: 'PLUGIN_API_RESPONSE',
+            type: PluginIframeMessageType.API_RESPONSE,
             callId,
             result,
           },
-          '*' as any,
+          '*',
         );
       } else {
         // Normal method call
         const result = await bridge[method](...(args || []));
-        event.source?.postMessage(
+        (event.source as Window)?.postMessage(
           {
-            type: 'PLUGIN_API_RESPONSE',
+            type: PluginIframeMessageType.API_RESPONSE,
             callId,
             result,
           },
-          '*' as any,
+          '*',
         );
       }
     } catch (error) {
-      event.source?.postMessage(
+      (event.source as Window)?.postMessage(
         {
-          type: 'PLUGIN_API_ERROR',
+          type: PluginIframeMessageType.API_ERROR,
           callId,
           error: error instanceof Error ? error.message : 'Unknown error',
         },
-        '*' as any,
+        '*',
       );
     }
   }
 
   // Handle plugin message forwarding
-  if (data.type === 'PLUGIN_MESSAGE' && data.messageId) {
+  if (data.type === PluginIframeMessageType.MESSAGE && data.messageId) {
     try {
       // Forward the message to the plugin using the bridge
       const result = await config.pluginBridge.sendMessageToPlugin(
@@ -536,28 +562,28 @@ export const handlePluginMessage = async (
       );
 
       // Send the response back to the iframe
-      event.source?.postMessage(
+      (event.source as Window)?.postMessage(
         {
-          type: 'PLUGIN_MESSAGE_RESPONSE',
+          type: PluginIframeMessageType.MESSAGE_RESPONSE,
           messageId: data.messageId,
           result,
         },
-        '*' as any,
+        '*',
       );
     } catch (error) {
-      event.source?.postMessage(
+      (event.source as Window)?.postMessage(
         {
-          type: 'PLUGIN_MESSAGE_ERROR',
+          type: PluginIframeMessageType.MESSAGE_ERROR,
           messageId: data.messageId,
           error: error instanceof Error ? error.message : 'Unknown error',
         },
-        '*' as any,
+        '*',
       );
     }
   }
 
   // Handle plugin ready
-  if (data.type === 'plugin-ready' && data.pluginId === config.pluginId) {
+  if (data.type === PluginIframeMessageType.READY && data.pluginId === config.pluginId) {
     console.log(`Plugin ${config.pluginId} is ready`);
   }
 };

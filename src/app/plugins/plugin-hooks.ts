@@ -25,7 +25,7 @@ export class PluginHooksService {
   /**
    * Dispatch a hook to all registered handlers
    */
-  async dispatchHook(hook: Hooks, payload?: any): Promise<void> {
+  async dispatchHook(hook: Hooks, payload?: unknown): Promise<void> {
     const handlers = this._handlers.get(hook);
     if (!handlers || handlers.size === 0) {
       return;
