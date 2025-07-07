@@ -4,7 +4,6 @@ import { PluginAPI } from './plugin-api';
 import { PluginBridgeService } from './plugin-bridge.service';
 import { PluginSecurityService } from './plugin-security';
 import { SnackService } from '../core/snack/snack.service';
-import { IS_ELECTRON } from '../app.constants';
 import { PluginCleanupService } from './plugin-cleanup.service';
 
 /**
@@ -36,14 +35,7 @@ export class PluginRunner {
       // Create plugin API
       const pluginAPI = new PluginAPI(baseCfg, manifest.id, this._pluginBridge, manifest);
 
-      // Add executeNodeScript for electron if permitted
-      if (IS_ELECTRON && manifest.permissions?.includes('nodeExecution')) {
-        pluginAPI.executeNodeScript = async (request) => {
-          // Ensure plugin context is set before executing
-          this._pluginBridge._setCurrentPlugin(manifest.id, manifest);
-          return this._pluginBridge.executeNodeScript(request);
-        };
-      }
+      // executeNodeScript is now automatically bound if permitted via createBoundMethods
 
       // Store API reference
       this._pluginApis.set(manifest.id, pluginAPI);

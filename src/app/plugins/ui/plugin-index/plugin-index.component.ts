@@ -230,6 +230,7 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
       indexHtml: indexContent,
       baseCfg,
       pluginBridge: this._pluginBridge,
+      boundMethods: this._pluginBridge.createBoundMethods(pluginId, plugin.manifest),
     };
 
     // Create iframe URL

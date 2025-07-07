@@ -40,7 +40,10 @@ export class PluginAPI implements PluginAPIInterface {
   private _menuEntries: Array<PluginMenuEntryCfg> = [];
   private _shortcuts: Array<PluginShortcutCfg> = [];
   private _sidePanelButtons: Array<PluginSidePanelBtnCfg> = [];
-  private _messageHandler?: (message: any) => Promise<any>;
+  private _messageHandler?: (message: unknown) => Promise<unknown>;
+  private _boundMethods: ReturnType<
+    typeof PluginBridgeService.prototype.createBoundMethods
+  >;
   executeNodeScript?: (
     request: PluginNodeScriptRequest,
   ) => Promise<PluginNodeScriptResult>;
@@ -51,8 +54,16 @@ export class PluginAPI implements PluginAPIInterface {
     private _pluginBridge: PluginBridgeService,
     private _manifest?: PluginManifest,
   ) {
-    // Set the plugin context for secure operations
-    this._pluginBridge._setCurrentPlugin(this._pluginId, this._manifest);
+    // Get bound methods for this plugin
+    this._boundMethods = this._pluginBridge.createBoundMethods(
+      this._pluginId,
+      this._manifest,
+    );
+
+    // Set executeNodeScript if available
+    if (this._boundMethods.executeNodeScript) {
+      this.executeNodeScript = this._boundMethods.executeNodeScript;
+    }
   }
 
   registerHook(hook: Hooks, fn: PluginHookHandler): void {
@@ -75,14 +86,14 @@ export class PluginAPI implements PluginAPIInterface {
   registerHeaderButton(headerBtnCfg: PluginHeaderBtnCfg): void {
     this._headerButtons.push({ ...headerBtnCfg, pluginId: this._pluginId });
     console.log(`Plugin ${this._pluginId} registered header button`, headerBtnCfg);
-    this._pluginBridge.registerHeaderButton(headerBtnCfg);
+    this._boundMethods.registerHeaderButton(headerBtnCfg);
   }
 
   registerMenuEntry(menuEntryCfg: Omit<PluginMenuEntryCfg, 'pluginId'>): void {
     const fullMenuEntry = { ...menuEntryCfg, pluginId: this._pluginId };
     this._menuEntries.push(fullMenuEntry);
     console.log(`Plugin ${this._pluginId} registered menu entry`, menuEntryCfg);
-    this._pluginBridge.registerMenuEntry(menuEntryCfg);
+    this._boundMethods.registerMenuEntry(menuEntryCfg);
   }
 
   registerShortcut(
@@ -102,7 +113,7 @@ export class PluginAPI implements PluginAPIInterface {
     console.log(`Plugin ${this._pluginId} registered shortcut`, shortcutCfg);
 
     // Register shortcut with bridge
-    this._pluginBridge.registerShortcut(shortcut);
+    this._boundMethods.registerShortcut(shortcut);
   }
 
   registerSidePanelButton(
@@ -110,12 +121,12 @@ export class PluginAPI implements PluginAPIInterface {
   ): void {
     this._sidePanelButtons.push({ ...sidePanelBtnCfg, pluginId: this._pluginId });
     console.log(`Plugin ${this._pluginId} registered side panel button`, sidePanelBtnCfg);
-    this._pluginBridge.registerSidePanelButton(sidePanelBtnCfg);
+    this._boundMethods.registerSidePanelButton(sidePanelBtnCfg);
   }
 
   showIndexHtmlAsView(): void {
     console.log(`Plugin ${this._pluginId} requested to show index.html`);
-    return this._pluginBridge.showIndexHtmlAsView(this._pluginId);
+    return this._boundMethods.showIndexHtmlAsView();
   }
 
   async getTasks(): Promise<Task[]> {
@@ -222,12 +233,12 @@ export class PluginAPI implements PluginAPIInterface {
 
   persistDataSynced(dataStr: string): Promise<void> {
     console.log(`Plugin ${this._pluginId} requested to persist data:`, dataStr);
-    return this._pluginBridge.persistDataSynced(dataStr);
+    return this._boundMethods.persistDataSynced(dataStr);
   }
 
   loadSyncedData(): Promise<string | null> {
     console.log(`Plugin ${this._pluginId} requested to load persisted data:`);
-    return this._pluginBridge.loadPersistedData();
+    return this._boundMethods.loadPersistedData();
   }
 
   async openDialog(dialogCfg: DialogCfg): Promise<void> {
@@ -237,14 +248,14 @@ export class PluginAPI implements PluginAPIInterface {
 
   async triggerSync(): Promise<void> {
     console.log(`Plugin ${this._pluginId} requested to trigger sync`);
-    return this._pluginBridge.triggerSync();
+    return this._boundMethods.triggerSync();
   }
 
   /**
    * Register a message handler for the plugin
    * This allows the plugin's iframe to communicate with the plugin code
    */
-  onMessage(handler: (message: any) => Promise<any>): void {
+  onMessage(handler: (message: unknown) => Promise<unknown>): void {
     this._messageHandler = handler;
     console.log(`Plugin ${this._pluginId} registered message handler`);
   }
@@ -253,20 +264,12 @@ export class PluginAPI implements PluginAPIInterface {
    * Send a message to the plugin's message handler
    * Used internally by the plugin system
    */
-  async __sendMessage(message: any): Promise<any> {
+  async __sendMessage(message: unknown): Promise<unknown> {
     if (!this._messageHandler) {
       throw new Error(`Plugin ${this._pluginId} has no message handler registered`);
     }
 
-    // Set plugin context before handling message
-    this._pluginBridge._setCurrentPlugin(this._pluginId, this._manifest);
-
-    try {
-      return await this._messageHandler(message);
-    } finally {
-      // Clear context after handling
-      this._pluginBridge._setCurrentPlugin('', undefined);
-    }
+    return await this._messageHandler(message);
   }
 
   // Internal methods for the plugin system
@@ -277,9 +280,9 @@ export class PluginAPI implements PluginAPIInterface {
   /**
    * Execute an NgRx action if it's in the allowed list
    */
-  dispatchAction(action: any): void {
+  dispatchAction(action: { type: string; [key: string]: unknown }): void {
     console.log(`Plugin ${this._pluginId} requested to execute action:`, action);
-    return this._pluginBridge.dispatchAction(action);
+    return this._boundMethods.dispatchAction(action);
   }
 
   /**

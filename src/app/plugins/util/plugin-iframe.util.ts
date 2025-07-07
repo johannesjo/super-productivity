@@ -12,6 +12,7 @@ export interface PluginIframeConfig {
   indexHtml: string;
   baseCfg: PluginBaseCfg;
   pluginBridge: PluginBridgeService;
+  boundMethods?: ReturnType<typeof PluginBridgeService.prototype.createBoundMethods>;
 }
 
 // Simple sandbox - allow what plugins need
@@ -356,20 +357,28 @@ export const handlePluginMessage = async (
 
   if (!data || typeof data !== 'object') return;
 
+  // Ensure we have bound methods
+  if (!config.boundMethods) {
+    config.boundMethods = config.pluginBridge.createBoundMethods(
+      config.pluginId,
+      config.manifest,
+    );
+  }
+
   // Handle API calls
   if (data.type === 'PLUGIN_API_CALL' && data.callId) {
     const { method, args, callId } = data;
 
     try {
-      // Set plugin context
-      config.pluginBridge._setCurrentPlugin(config.pluginId, config.manifest);
-
       // For iframe plugins, we need to handle API calls differently
       // Some methods need special handling because the bridge methods have different signatures
 
       // For registerHook, we need to add the pluginId parameter when calling the bridge
       if (method === 'registerHook') {
-        const bridge = config.pluginBridge as any;
+        const bridge = config.pluginBridge as Record<
+          string,
+          (...args: unknown[]) => unknown
+        >;
         // Special handling for registerHook - it needs pluginId as first parameter
         if (args.length >= 2) {
           const [hook, handlerPlaceholder] = args;
@@ -382,7 +391,7 @@ export const handlePluginMessage = async (
           let result;
           // If it's an iframe handler, create a proxy that sends events to iframe
           if (handlerPlaceholder === 'IFRAME_HANDLER') {
-            const handler = (payload: any): void => {
+            const handler = (payload: unknown): void => {
               // Send hook event to iframe
               event.source?.postMessage(
                 {
@@ -411,8 +420,30 @@ export const handlePluginMessage = async (
         }
       }
 
+      // Check if this method is available in bound methods
+      const boundMethods = config.boundMethods as Record<
+        string,
+        (...args: unknown[]) => unknown
+      >;
+      if (boundMethods && typeof boundMethods[method] === 'function') {
+        // Use the bound method
+        const result = await boundMethods[method](...(args || []));
+        event.source?.postMessage(
+          {
+            type: 'PLUGIN_API_RESPONSE',
+            callId,
+            result,
+          },
+          '*' as any,
+        );
+        return;
+      }
+
       // For other methods, call them on the bridge
-      const bridge = config.pluginBridge as any;
+      const bridge = config.pluginBridge as Record<
+        string,
+        (...args: unknown[]) => unknown
+      >;
       if (typeof bridge[method] !== 'function') {
         throw new Error(`Unknown API method: ${method}`);
       }
@@ -424,41 +455,43 @@ export const handlePluginMessage = async (
         if (dialogCfg.buttons) {
           // Create a mapping of button indices to their handlers
           const buttonHandlers = new Map();
-          dialogCfg.buttons = dialogCfg.buttons.map((button: any, index: number) => {
-            if (button.onClick) {
-              buttonHandlers.set(index, button.onClick);
-              // Replace function with a proxy that sends message back to iframe
-              return {
-                ...button,
-                onClick: async () => {
-                  // Send message to iframe to execute the button handler
-                  event.source?.postMessage(
-                    {
-                      type: 'PLUGIN_DIALOG_BUTTON_CLICK',
-                      buttonIndex: index,
-                      dialogCallId: callId,
-                    },
-                    '*' as any,
-                  );
-                  // Wait for response
-                  return new Promise((resolve) => {
-                    const handleResponse = (e: MessageEvent): void => {
-                      if (
-                        e.data?.type === 'PLUGIN_DIALOG_BUTTON_RESPONSE' &&
-                        e.data?.dialogCallId === callId &&
-                        e.data?.buttonIndex === index
-                      ) {
-                        window.removeEventListener('message', handleResponse);
-                        resolve(e.data.result);
-                      }
-                    };
-                    window.addEventListener('message', handleResponse);
-                  });
-                },
-              };
-            }
-            return button;
-          });
+          dialogCfg.buttons = dialogCfg.buttons.map(
+            (button: Record<string, unknown>, index: number) => {
+              if (button.onClick) {
+                buttonHandlers.set(index, button.onClick);
+                // Replace function with a proxy that sends message back to iframe
+                return {
+                  ...button,
+                  onClick: async () => {
+                    // Send message to iframe to execute the button handler
+                    event.source?.postMessage(
+                      {
+                        type: 'PLUGIN_DIALOG_BUTTON_CLICK',
+                        buttonIndex: index,
+                        dialogCallId: callId,
+                      },
+                      '*' as any,
+                    );
+                    // Wait for response
+                    return new Promise((resolve) => {
+                      const handleResponse = (e: MessageEvent): void => {
+                        if (
+                          e.data?.type === 'PLUGIN_DIALOG_BUTTON_RESPONSE' &&
+                          e.data?.dialogCallId === callId &&
+                          e.data?.buttonIndex === index
+                        ) {
+                          window.removeEventListener('message', handleResponse);
+                          resolve(e.data.result);
+                        }
+                      };
+                      window.addEventListener('message', handleResponse);
+                    });
+                  },
+                };
+              }
+              return button;
+            },
+          );
         }
         const result = await bridge[method](dialogCfg);
         event.source?.postMessage(
