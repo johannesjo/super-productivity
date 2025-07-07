@@ -63,24 +63,26 @@ const handlePlanTaskForDay = (
   const todayTag = getTag(state, TODAY_TAG.id);
 
   if (day === todayStr && !todayTag.taskIds.includes(task.id)) {
+    const newTaskIds = unique(
+      isAddToTop
+        ? [task.id, ...todayTag.taskIds]
+        : [...todayTag.taskIds.filter((tid) => tid !== task.id), task.id],
+    );
     return updateTags(state, [
       {
         id: todayTag.id,
         changes: {
-          taskIds: unique(
-            isAddToTop
-              ? [task.id, ...todayTag.taskIds]
-              : [...todayTag.taskIds.filter((tid) => tid !== task.id), task.id],
-          ),
+          taskIds: newTaskIds,
         },
       },
     ]);
   } else if (day !== todayStr && todayTag.taskIds.includes(task.id)) {
+    const newTaskIds = todayTag.taskIds.filter((id) => id !== task.id);
     return updateTags(state, [
       {
         id: todayTag.id,
         changes: {
-          taskIds: todayTag.taskIds.filter((id) => id !== task.id),
+          taskIds: newTaskIds,
         },
       },
     ]);

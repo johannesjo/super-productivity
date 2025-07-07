@@ -257,10 +257,12 @@ export class WorkContextService {
   );
 
   todaysTasks$: Observable<TaskWithSubTasks[]> = this.todaysTaskIds$.pipe(
-    // tap(() => console.log('TRIGGER TODAY TASKS')),
-    switchMap((taskIds) => this._getTasksByIds$(taskIds)),
+    // tap((taskIds: string[]) => console.log('[WorkContext] Today task IDs:', taskIds)),
+    switchMap((taskIds: string[]) => this._getTasksByIds$(taskIds)),
     // TODO find out why this is triggered so often
-    // tap(() => console.log('AFTER SWITCHMAP  TODAYSTASKS')),
+    // tap((tasks: TaskWithSubTasks[]) =>
+    //   console.log('[WorkContext] Today tasks loaded:', tasks.length, 'tasks'),
+    // ),
     // map(to => to.filter(t => !!t)),
     shareReplay(1),
   );

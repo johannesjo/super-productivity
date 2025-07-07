@@ -12,11 +12,13 @@ import {
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { Store } from '@ngrx/store';
-import { selectOverdueTasksOnToday } from './task.selectors';
+import { selectOverdueTasksOnToday, selectTasksDueForDay } from './task.selectors';
 import { DataInitStateService } from '../../../core/data-init/data-init-state.service';
 import { SyncWrapperService } from '../../../imex/sync/sync-wrapper.service';
 import { selectTodayTaskIds } from '../../work-context/store/work-context.selectors';
 import { AddTasksForTomorrowService } from '../../add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
+import { getWorklogStr } from '../../../util/get-work-log-str';
+import { environment } from '../../../../environments/environment';
 
 @Injectable()
 export class TaskDueEffects {
@@ -71,6 +73,51 @@ export class TaskDueEffects {
               taskIds: todayTaskIds.filter((id) => !!overdue.find((oT) => oT.id === id)),
             }),
           ),
+        ),
+      ),
+    );
+  });
+
+  // Defensive effect to ensure tasks due today are in TODAY tag
+  ensureTasksDueTodayInTodayTag$ = createEffect(() => {
+    return this._dataInitStateService.isAllDataLoadedInitially$.pipe(
+      first(),
+      switchMap(() =>
+        this._globalTrackingIntervalService.todayDateStr$.pipe(
+          switchMap(() => this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$),
+          debounceTime(2000), // Wait a bit longer to ensure all other effects have run
+          switchMap(() => this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$),
+          switchMap(() => {
+            const todayStr = getWorklogStr();
+            return this._store$.select(selectTasksDueForDay, { day: todayStr }).pipe(
+              first(),
+              withLatestFrom(this._store$.select(selectTodayTaskIds)),
+              map(([tasksDueToday, todayTaskIds]) => {
+                const missingTaskIds = tasksDueToday
+                  .filter((task) => !todayTaskIds.includes(task.id))
+                  .map((task) => task.id);
+
+                if (!environment.production && missingTaskIds.length > 0) {
+                  console.warn(
+                    '[TaskDueEffects] Found tasks due today missing from TODAY tag:',
+                    {
+                      tasksDueToday: tasksDueToday.length,
+                      todayTaskIds: todayTaskIds.length,
+                      missingTaskIds,
+                    },
+                  );
+                }
+
+                return missingTaskIds.length > 0
+                  ? TaskSharedActions.planTasksForToday({
+                      taskIds: missingTaskIds,
+                      isSkipRemoveReminder: true,
+                    })
+                  : null;
+              }),
+              filter((action) => !!action),
+            );
+          }),
         ),
       ),
     );

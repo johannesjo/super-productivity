@@ -150,8 +150,6 @@ export class AddTasksForTomorrowService {
       .pipe(first())
       .toPromise();
 
-    console.log('addAllDueToday()', { dueRepeatCfgs, todayTasksFromPlanner });
-
     const allDue = todayTasksFromPlanner;
 
     [...dueWithTime, ...dueWithDay].forEach((task) => {
@@ -167,7 +165,6 @@ export class AddTasksForTomorrowService {
     const allDueSorted = this._sortAll([
       ...allDue.filter((t) => !todaysTaskIds.includes(t.id)),
     ]);
-    console.log({ allDue, allDueSorted });
 
     this._movePlannedTasksToToday(allDueSorted);
 
