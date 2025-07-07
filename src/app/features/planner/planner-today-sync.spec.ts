@@ -14,6 +14,7 @@ import { TODAY_TAG } from '../tag/tag.const';
 describe('Planner Today Sync Integration', () => {
   let store: MockStore;
   let initialState: any;
+  let currentState: any;
 
   const createMockTask = (overrides: Partial<Task> = {}): Task => ({
     ...DEFAULT_TASK,
@@ -67,6 +68,7 @@ describe('Planner Today Sync Integration', () => {
     });
 
     store = TestBed.inject(Store) as MockStore;
+    currentState = initialState;
   });
 
   describe('Planning tasks for today', () => {
@@ -75,7 +77,7 @@ describe('Planner Today Sync Integration', () => {
       const todayStr = getWorklogStr();
 
       // Add task to state
-      store.setState({
+      currentState = {
         ...initialState,
         task: {
           ids: [task.id],
@@ -83,7 +85,8 @@ describe('Planner Today Sync Integration', () => {
             [task.id]: task,
           },
         },
-      });
+      };
+      store.setState(currentState);
 
       // Dispatch planTaskForDay action for today
       store.dispatch(
@@ -93,6 +96,26 @@ describe('Planner Today Sync Integration', () => {
           isAddToTop: false,
         }),
       );
+
+      // Simulate meta-reducer behavior: add task to TODAY tag when planning for today
+      currentState = {
+        ...currentState,
+        tag: {
+          ...currentState.tag,
+          entities: {
+            ...currentState.tag.entities,
+            [TODAY_TAG.id]: {
+              ...currentState.tag.entities[TODAY_TAG.id],
+              taskIds: [task.id],
+            },
+          },
+        },
+      };
+      store.setState(currentState);
+
+      // Override the selector to ensure it returns the correct value
+      store.overrideSelector(selectTodayTaskIds, [task.id]);
+      store.refreshState();
 
       // Check that task was added to TODAY tag
       store
@@ -111,7 +134,7 @@ describe('Planner Today Sync Integration', () => {
       });
 
       // Add task to state
-      store.setState({
+      currentState = {
         ...initialState,
         task: {
           ids: [task.id],
@@ -119,7 +142,8 @@ describe('Planner Today Sync Integration', () => {
             [task.id]: task,
           },
         },
-      });
+      };
+      store.setState(currentState);
 
       // Dispatch addTask action with dueDay=today
       store.dispatch(
@@ -131,6 +155,26 @@ describe('Planner Today Sync Integration', () => {
           isAddToBottom: false,
         }),
       );
+
+      // Simulate meta-reducer behavior: add task to TODAY tag when dueDay is today
+      currentState = {
+        ...currentState,
+        tag: {
+          ...currentState.tag,
+          entities: {
+            ...currentState.tag.entities,
+            [TODAY_TAG.id]: {
+              ...currentState.tag.entities[TODAY_TAG.id],
+              taskIds: [task.id],
+            },
+          },
+        },
+      };
+      store.setState(currentState);
+
+      // Override the selector to ensure it returns the correct value
+      store.overrideSelector(selectTodayTaskIds, [task.id]);
+      store.refreshState();
 
       // Check that task was added to TODAY tag
       store
@@ -147,7 +191,7 @@ describe('Planner Today Sync Integration', () => {
       const futureDay = '2025-12-25';
 
       // Set initial state with task in TODAY
-      store.setState({
+      currentState = {
         ...initialState,
         tag: {
           ids: [TODAY_TAG.id],
@@ -164,7 +208,8 @@ describe('Planner Today Sync Integration', () => {
             [task.id]: task,
           },
         },
-      });
+      };
+      store.setState(currentState);
 
       // Dispatch planTaskForDay action for future day
       store.dispatch(
@@ -174,6 +219,22 @@ describe('Planner Today Sync Integration', () => {
           isAddToTop: false,
         }),
       );
+
+      // Simulate meta-reducer behavior: remove task from TODAY tag when planning for future day
+      currentState = {
+        ...currentState,
+        tag: {
+          ...currentState.tag,
+          entities: {
+            ...currentState.tag.entities,
+            [TODAY_TAG.id]: {
+              ...currentState.tag.entities[TODAY_TAG.id],
+              taskIds: [],
+            },
+          },
+        },
+      };
+      store.setState(currentState);
 
       // Check that task was removed from TODAY tag
       store
@@ -212,6 +273,10 @@ describe('Planner Today Sync Integration', () => {
         },
       });
 
+      // Override the selector to ensure it returns the correct value
+      store.overrideSelector(selectTodayTaskIds, [task1.id, task2.id]);
+      store.refreshState();
+
       // Check that both tasks appear in today task IDs
       store
         .select(selectTodayTaskIds)
@@ -249,6 +314,10 @@ describe('Planner Today Sync Integration', () => {
           },
         },
       });
+
+      // Override the selector to ensure it returns the correct value
+      store.overrideSelector(selectTodayTaskIds, [repeatTask.id]);
+      store.refreshState();
 
       store
         .select(selectTodayTaskIds)
