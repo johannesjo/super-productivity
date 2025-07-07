@@ -196,6 +196,10 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
       )
         return;
 
+      // Check if task is in backlog
+      const backlogArr = flattenTasks(this.backlogTasks());
+      if (backlogArr.some((t) => t.id === currentSelectedId)) return;
+
       // if task really is gone
       this.taskService.setSelectedId(null);
     });
