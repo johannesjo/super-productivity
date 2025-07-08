@@ -90,6 +90,61 @@ describe('getSyncStatusFromMetaFiles', () => {
     });
   });
 
+  describe('first-time sync', () => {
+    it('should return UpdateLocal when local is empty (lastUpdate = 0) and remote has data (no vector clock)', () => {
+      const { local, remote } = createMetaNoVectorClock(0, 1000);
+
+      const result = getSyncStatusFromMetaFiles(remote, local);
+      expect(result.status).toBe(SyncStatus.UpdateLocal);
+    });
+
+    it('should return UpdateLocal when local has minimal vector clock updates and remote has data', () => {
+      const { local, remote } = createMeta(
+        1000,
+        2000,
+        null,
+        { client1: 3 }, // 3 total updates (under threshold of 5)
+        { client2: 50 },
+      );
+
+      const result = getSyncStatusFromMetaFiles(remote, local);
+      expect(result.status).toBe(SyncStatus.UpdateLocal);
+    });
+
+    it('should return UpdateLocal when local has multiple clients but still minimal total updates', () => {
+      const { local, remote } = createMeta(
+        1000,
+        2000,
+        null,
+        { client1: 2, client2: 2 }, // 4 total updates (under threshold)
+        { client3: 100 },
+      );
+
+      const result = getSyncStatusFromMetaFiles(remote, local);
+      expect(result.status).toBe(SyncStatus.UpdateLocal);
+    });
+
+    it('should return Conflict when local has too many updates (over threshold)', () => {
+      const { local, remote } = createMeta(
+        1000,
+        2000,
+        null,
+        { client1: 10 }, // 10 updates (over threshold of 5)
+        { client2: 50 },
+      );
+
+      const result = getSyncStatusFromMetaFiles(remote, local);
+      expect(result.status).toBe(SyncStatus.Conflict);
+    });
+
+    it('should return UpdateRemote when remote is empty and local has data', () => {
+      const { local, remote } = createMeta(1000, 0);
+
+      const result = getSyncStatusFromMetaFiles(remote, local);
+      expect(result.status).toBe(SyncStatus.UpdateRemote);
+    });
+  });
+
   describe('missing timestamps', () => {
     it('should return UpdateLocal when local.lastUpdate is not a number', () => {
       const { local, remote } = createMeta(undefined, 1000);

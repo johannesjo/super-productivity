@@ -10,6 +10,11 @@ import {
   vectorClockToString,
 } from './vector-clock';
 
+const getTotalVectorClockUpdates = (vc: VectorClock | null | undefined): number => {
+  if (!vc) return 0;
+  return Object.values(vc).reduce((sum, val) => sum + val, 0);
+};
+
 // TODO unit test the hell out of this
 export const getSyncStatusFromMetaFiles = (
   remote: RemoteMeta,
@@ -23,6 +28,23 @@ export const getSyncStatusFromMetaFiles = (
   }
   if (!local) {
     throw new InvalidMetaError('localSyncMetaData is not defined');
+  }
+
+  // Check for first-time sync with minimal local data
+  // Only auto-import remote if local has very few changes (indicating fresh installation)
+  const MINIMAL_UPDATE_THRESHOLD = 1;
+  if (local.vectorClock && remote.lastUpdate > 0) {
+    const localTotalUpdates = getTotalVectorClockUpdates(local.vectorClock);
+    if (localTotalUpdates <= MINIMAL_UPDATE_THRESHOLD) {
+      pfLog(2, 'First-time sync detected with minimal local data', {
+        localTotalUpdates,
+        threshold: MINIMAL_UPDATE_THRESHOLD,
+        localVectorClock: local.vectorClock,
+      });
+      return {
+        status: SyncStatus.UpdateLocal,
+      };
+    }
   }
 
   if (typeof local.lastUpdate !== 'number') {

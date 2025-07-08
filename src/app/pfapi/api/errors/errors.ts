@@ -96,7 +96,7 @@ export class RevMismatchForModelError extends AdditionalLogErrorBase<string> {
 }
 
 export class UnknownSyncStateError extends Error {
-  override name = 'DBNotInitializedError';
+  override name = 'UnknownSyncStateError';
 }
 
 export class SyncInvalidTimeValuesError extends AdditionalLogErrorBase {
