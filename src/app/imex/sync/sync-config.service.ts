@@ -140,6 +140,7 @@ export class SyncConfigService {
         userName: webDavCfg.userName || '',
         password: webDavCfg.password || '',
         syncFolderPath: webDavCfg.syncFolderPath || '',
+        encryptKey: webDavCfg.encryptKey || '',
       });
       // } else if (providerId === SyncProviderId.LocalFile) {
       //   const localFileCfg = privateCfg as PrivateCfgByProviderId<SyncProviderId.LocalFile>;
