@@ -33,13 +33,38 @@ export const getSyncStatusFromMetaFiles = (
   // Check for first-time sync with minimal local data
   // Only auto-import remote if local has very few changes (indicating fresh installation)
   const MINIMAL_UPDATE_THRESHOLD = 1;
+
+  // Handle the case where remote is empty (lastUpdate = 0) - should upload local data
+  if (remote.lastUpdate === 0 && local.lastUpdate > 0) {
+    pfLog(2, 'Remote is empty, uploading local data');
+    return {
+      status: SyncStatus.UpdateRemote,
+    };
+  }
+
+  // Handle the case where local is empty (lastUpdate = 0) - should download remote data
+  if (local.lastUpdate === 0 && remote.lastUpdate > 0) {
+    pfLog(2, 'Local is empty, downloading remote data');
+    return {
+      status: SyncStatus.UpdateLocal,
+    };
+  }
+
   if (local.vectorClock && remote.lastUpdate > 0) {
     const localTotalUpdates = getTotalVectorClockUpdates(local.vectorClock);
-    if (localTotalUpdates <= MINIMAL_UPDATE_THRESHOLD) {
+    const remoteTotalUpdates = getTotalVectorClockUpdates(remote.vectorClock);
+
+    // Only auto-import if local has minimal updates AND remote has significantly more
+    if (
+      localTotalUpdates <= MINIMAL_UPDATE_THRESHOLD &&
+      remoteTotalUpdates > localTotalUpdates * 2
+    ) {
       pfLog(2, 'First-time sync detected with minimal local data', {
         localTotalUpdates,
+        remoteTotalUpdates,
         threshold: MINIMAL_UPDATE_THRESHOLD,
         localVectorClock: local.vectorClock,
+        remoteVectorClock: remote.vectorClock,
       });
       return {
         status: SyncStatus.UpdateLocal,

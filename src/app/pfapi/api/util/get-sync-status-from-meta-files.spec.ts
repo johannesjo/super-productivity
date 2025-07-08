@@ -98,26 +98,26 @@ describe('getSyncStatusFromMetaFiles', () => {
       expect(result.status).toBe(SyncStatus.UpdateLocal);
     });
 
-    it('should return UpdateLocal when local has minimal vector clock updates and remote has data', () => {
+    it('should return UpdateLocal when local has minimal vector clock updates and remote has significantly more data', () => {
       const { local, remote } = createMeta(
         1000,
         2000,
         null,
-        { client1: 3 }, // 3 total updates (under threshold of 5)
-        { client2: 50 },
+        { client1: 1 }, // 1 total updates (at threshold of 1)
+        { client2: 50 }, // 50 total updates (significantly more than local)
       );
 
       const result = getSyncStatusFromMetaFiles(remote, local);
       expect(result.status).toBe(SyncStatus.UpdateLocal);
     });
 
-    it('should return UpdateLocal when local has multiple clients but still minimal total updates', () => {
+    it('should return UpdateLocal when local has multiple clients but still minimal total updates and remote has significantly more', () => {
       const { local, remote } = createMeta(
         1000,
         2000,
         null,
-        { client1: 2, client2: 2 }, // 4 total updates (under threshold)
-        { client3: 100 },
+        { client1: 0, client2: 1 }, // 1 total updates (at threshold)
+        { client3: 100 }, // 100 total updates (significantly more than local)
       );
 
       const result = getSyncStatusFromMetaFiles(remote, local);
@@ -129,7 +129,7 @@ describe('getSyncStatusFromMetaFiles', () => {
         1000,
         2000,
         null,
-        { client1: 10 }, // 10 updates (over threshold of 5)
+        { client1: 2 }, // 2 updates (over threshold of 1)
         { client2: 50 },
       );
 
