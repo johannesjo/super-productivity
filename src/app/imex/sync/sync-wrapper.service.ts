@@ -291,7 +291,12 @@ export class SyncWrapperService {
           .toPromise();
         if (authCode) {
           const r = await verifyCodeChallenge(authCode);
-          await this._pfapiService.pf.setPrivateCfgForSyncProvider(provider.id, r);
+          // Preserve existing config (especially encryptKey) when updating auth
+          const existingConfig = await provider.privateCfg.load();
+          await this._pfapiService.pf.setPrivateCfgForSyncProvider(provider.id, {
+            ...existingConfig,
+            ...r,
+          });
           // NOTE: exec sync afterward; promise not awaited
           setTimeout(() => {
             this.sync();
