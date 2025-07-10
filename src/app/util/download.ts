@@ -32,6 +32,7 @@ const saveStringAsFile = async (
   return r;
 };
 
+// interestingly this can't live in the logs.ts or it leads to weird "window" not found errors
 export const downloadLogs = (): void => {
-  download('SP-logs', Log.exportLogHistory());
+  download('SP-logs.json', Log.exportLogHistory());
 };
