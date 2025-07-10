@@ -43,7 +43,11 @@ export class ModelCtrl<MT extends ModelBase> {
     p?: { isUpdateRevAndLastUpdate: boolean; isIgnoreDBLock?: boolean },
   ): Promise<unknown> {
     this._inMemoryData = data;
-    PFLog.normal(`___ ${ModelCtrl.L}.${this.save.name}():${this.modelId}`, p, data);
+    PFLog.normal(`___ ${ModelCtrl.L}.${this.save.name}():${this.modelId}`, p, {
+      // Log only safe metadata, not the actual data which might contain credentials
+      dataKeys: data ? Object.keys(data) : [],
+      dataType: typeof data,
+    });
 
     // Validate data if validator is available
     if (this.modelCfg.validate) {

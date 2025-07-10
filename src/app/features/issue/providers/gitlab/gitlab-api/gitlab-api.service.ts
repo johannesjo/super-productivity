@@ -308,7 +308,8 @@ export class GitlabApiService {
         responseType: params.responseType,
       },
     ];
-    IssueLog.log(allArgs);
+    // NOTE: DO NOT LOG allArgs - contains PRIVATE-TOKEN in headers
+    // IssueLog.log(allArgs);
 
     const req = new HttpRequest(p.method, p.url, ...allArgs);
 

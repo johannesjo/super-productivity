@@ -7,6 +7,7 @@ import { switchMap, tap } from 'rxjs/operators';
 import { PrivateCfgByProviderId, SyncProviderId } from '../../pfapi/api';
 import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-config.const';
 import { SyncLog } from '../../core/log';
+import { environment } from '../../../environments/environment';
 
 const PROP_MAP_TO_FORM: Record<SyncProviderId, keyof SyncConfig | null> = {
   [SyncProviderId.LocalFile]: 'localFileSync',
@@ -77,7 +78,8 @@ export class SyncConfigService {
 
       return of(result);
     }),
-    tap((v) => SyncLog.log('syncSettingsForm$', v)),
+    // NOTE: DO NOT LOG - contains passwords and encryption keys in production
+    tap((v) => SyncLog.log('syncSettingsForm$', environment.production ? typeof v : v)),
   );
 
   async updateEncryptionPassword(
