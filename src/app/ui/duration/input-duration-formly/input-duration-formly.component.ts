@@ -49,7 +49,7 @@ export class InputDurationFormlyComponent
 
   private _updateValue(val: string): void {
     this._timeout = window.setTimeout(() => {
-      this.formControl.setValue(val ? stringToMs(val) : null);
+      this.formControl.setValue(val ? stringToMs(val) : undefined);
     });
   }
 }
