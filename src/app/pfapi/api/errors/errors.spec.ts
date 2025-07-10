@@ -22,8 +22,13 @@ describe('DataValidationFailedError', () => {
     expect(error.name).toBe('DataValidationFailedError');
     expect(error.additionalLog).toBeDefined();
     expect(error.additionalLog).toContain('test.path');
-    expect(consoleLogSpy).toHaveBeenCalledWith('validation result: ', validationResult);
     expect(consoleLogSpy).toHaveBeenCalledWith(
+      '[pf]',
+      'validation result: ',
+      validationResult,
+    );
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      '[pf]',
       jasmine.stringContaining('validation errors_:'),
     );
   });
@@ -49,8 +54,13 @@ describe('DataValidationFailedError', () => {
     const error = new DataValidationFailedError(validationResult as any);
 
     expect(error.name).toBe('DataValidationFailedError');
-    expect(consoleLogSpy).toHaveBeenCalledWith('validation result: ', validationResult);
     expect(consoleLogSpy).toHaveBeenCalledWith(
+      '[pf]',
+      'validation result: ',
+      validationResult,
+    );
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      '[pf]',
       jasmine.stringContaining('validation result_:'),
     );
   });
@@ -66,6 +76,7 @@ describe('DataValidationFailedError', () => {
 
     expect(error.name).toBe('DataValidationFailedError');
     expect(consoleErrorSpy).toHaveBeenCalledWith(
+      '[pf]',
       'Failed to stringify validation errors:',
       jasmine.any(Error),
     );
@@ -80,6 +91,7 @@ describe('DataValidationFailedError', () => {
 
     expect(() => new DataValidationFailedError(validationResult as any)).not.toThrow();
     expect(consoleErrorSpy).toHaveBeenCalledWith(
+      '[pf]',
       'Failed to stringify validation errors:',
       jasmine.any(Error),
     );

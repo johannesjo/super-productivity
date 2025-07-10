@@ -14,7 +14,6 @@ import {
 } from '../../features/config/global-config-form-config.const';
 import {
   ConfigFormConfig,
-  ConfigFormSection,
   GlobalConfigSectionKey,
   GlobalConfigState,
   GlobalSectionConfig,
@@ -34,13 +33,11 @@ import { SYNC_FORM } from '../../features/config/form-cfgs/sync-form.const';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { map, tap } from 'rxjs/operators';
 import { SyncConfigService } from '../../imex/sync/sync-config.service';
-import { GlobalThemeService } from '../../core/theme/global-theme.service';
 import { AsyncPipe } from '@angular/common';
 import { PluginManagementComponent } from '../../plugins/ui/plugin-management/plugin-management.component';
 import { CollapsibleComponent } from '../../ui/collapsible/collapsible.component';
 import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
 import { createPluginShortcutFormItems } from '../../features/config/form-cfgs/plugin-keyboard-shortcuts';
-import { PluginService } from '../../plugins/plugin.service';
 import { PluginShortcutCfg } from '../../plugins/plugin-api.model';
 import { ThemeSelectorComponent } from '../../core/theme/theme-selector/theme-selector.component';
 import { downloadLogs, Log } from '../../core/log';
@@ -66,9 +63,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   private readonly _pfapiService = inject(PfapiService);
   readonly configService = inject(GlobalConfigService);
   readonly syncSettingsService = inject(SyncConfigService);
-  readonly globalThemeService = inject(GlobalThemeService);
   private readonly _pluginBridgeService = inject(PluginBridgeService);
-  private readonly _pluginService = inject(PluginService);
   private readonly _snackService = inject(SnackService);
 
   T: typeof T = T;
@@ -201,13 +196,6 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     this._subs.unsubscribe();
   }
 
-  trackBySectionKey(
-    i: number,
-    section: ConfigFormSection<{ [key: string]: any }>,
-  ): string {
-    return section.key;
-  }
-
   saveGlobalCfg($event: {
     sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;
     config: any;
@@ -221,9 +209,6 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
       this.configService.updateSection(sectionKey, config);
     }
   }
-
-  // TODO
-  saveSyncFormCfg($event: { config: any }): void {}
 
   getGlobalCfgSection(
     sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey,

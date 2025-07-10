@@ -166,7 +166,7 @@ describe('DialogImportFromUrlComponent', () => {
 
       component.submit();
 
-      expect(console.error).toHaveBeenCalledWith('URL is required.');
+      expect(console.error).toHaveBeenCalledWith('', 'URL is required.');
     });
   });
 
