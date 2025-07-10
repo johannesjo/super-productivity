@@ -62,6 +62,7 @@ export class Database {
                 lastSyncedUpdate: (data as any)?.lastSyncedUpdate,
               }
             : undefined,
+        data,
       });
       return;
     }
