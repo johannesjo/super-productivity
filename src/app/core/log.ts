@@ -20,6 +20,8 @@ interface LogEntry {
 // Map old numeric levels to new enum for backwards compatibility
 const LOG_LEVEL = environment.production ? LogLevel.DEBUG : LogLevel.NORMAL;
 
+const MAX_DATA_LENGTH = 400;
+
 // IMPORTANT: All Log class methods and context loggers (SyncLog, etc.) record logs to history
 // for later export. The trade-off is that line numbers will show log.ts instead of the
 // actual calling location. This is a fundamental limitation of JavaScript - any wrapper
@@ -145,7 +147,28 @@ export class Log {
 
   /** Export log history as JSON string for download */
   static exportLogHistory(): string {
-    return JSON.stringify(this.logHistory, null, 2);
+    // Safe JSON serialization to avoid circular structure errors
+    const safeHistory = this.logHistory.map((entry) => ({
+      timestamp: entry.timestamp,
+      level: entry.level,
+      context: entry.context,
+      message: entry.message,
+      args: entry.args.map((arg) => {
+        try {
+          // Try to serialize each arg safely
+          const r = JSON.stringify(arg);
+          if (r.length > MAX_DATA_LENGTH) {
+            return 'short:' + r.substring(0, MAX_DATA_LENGTH);
+          }
+          return JSON.parse(r);
+        } catch {
+          // If circular reference or any other error, convert to string representation
+          return String(arg);
+        }
+      }),
+    }));
+
+    return JSON.stringify(safeHistory, null, 2);
   }
 
   /** Export log history as formatted text for download */
