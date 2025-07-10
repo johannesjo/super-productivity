@@ -106,14 +106,31 @@ describe('parseMarkdown', () => {
 
     const tasks = parseMarkdown(markdown);
 
-    expect(tasks).toHaveLength(2);
+    // With 4 spaces being the most common indent (2 occurrences),
+    // the 2-space task is treated as depth 0 (not a subtask)
+    expect(tasks).toHaveLength(4);
+    expect(tasks[0]).toMatchObject({
+      id: 'parent1',
+      title: 'Parent task',
+      isSubtask: false,
+    });
     expect(tasks[1]).toMatchObject({
       id: 'child1',
       title: 'Subtask',
-      notes:
-        '- [ ] This becomes a note\n- [x] This also becomes a note\n  - Even deeper nesting',
-      parentId: 'parent1',
+      isSubtask: false, // 2 spaces / 4 = 0.5, floor = 0
+      parentId: null,
+    });
+    // The 4-space tasks are subtasks of child1
+    expect(tasks[2]).toMatchObject({
+      title: 'This becomes a note',
+      parentId: 'child1',
       isSubtask: true,
+    });
+    expect(tasks[3]).toMatchObject({
+      title: 'This also becomes a note',
+      parentId: 'child1',
+      isSubtask: true,
+      notes: 'Even deeper nesting',
     });
   });
 

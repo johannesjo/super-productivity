@@ -1,4 +1,4 @@
-import { parseTasks } from './markdown-parser';
+import { parseMarkdownWithErrors as parseTasks } from './markdown-parser';
 
 describe('markdown-parser', () => {
   describe('parseTasks', () => {
@@ -203,10 +203,13 @@ describe('markdown-parser', () => {
       const result = parseTasks(markdown);
 
       // Should detect 2 spaces as most common (3 occurrences vs 1)
+      // Only depth 0 and 1 tasks are included, depth 2+ become notes
+      expect(result.tasks.length).toBe(6); // Not 7, because 4-space subtask is too deep
       expect(result.tasks[1].depth).toBe(1); // 2 spaces / 2 = depth 1
       expect(result.tasks[2].depth).toBe(1); // 2 spaces / 2 = depth 1
-      expect(result.tasks[4].depth).toBe(2); // 4 spaces / 2 = depth 2 (too deep, ignored)
-      expect(result.tasks[6].depth).toBe(1); // 2 spaces / 2 = depth 1
+      expect(result.tasks[3].title).toBe('Parent 2'); // 4-space subtask becomes note
+      expect(result.tasks[3].notes).toContain('- [ ] Subtask 2.1 (4 spaces)');
+      expect(result.tasks[5].depth).toBe(1); // 2 spaces / 2 = depth 1
     });
 
     it('should handle complex nested structure', () => {

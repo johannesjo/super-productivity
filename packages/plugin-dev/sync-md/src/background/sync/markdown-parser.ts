@@ -126,14 +126,14 @@ export const parseMarkdownWithErrors = (content: string): TaskParseResult => {
         }
 
         // Check for duplicate IDs
-        const taskId = id?.trim() || null;
+        let taskId = id?.trim() || null;
         if (taskId && seenIds.has(taskId)) {
           errors.push(`Duplicate task ID found: ${taskId} at line ${i + 1}`);
           console.warn(
-            `[sync-md] Skipping duplicate task ID: ${taskId} at line ${i + 1}`,
+            `[sync-md] Found duplicate task ID: ${taskId} at line ${i + 1}, setting to null`,
           );
-          // Skip this task to avoid issues
-          continue;
+          // Set ID to null instead of skipping the task
+          taskId = null;
         }
         if (taskId) {
           seenIds.add(taskId);

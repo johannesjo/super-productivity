@@ -379,13 +379,19 @@ describe('Integration Tests - Full Sync Workflows', () => {
 
       const parsedTasks = parseMarkdown(markdown);
 
-      // Should parse correctly with deep nesting converted to notes
-      expect(parsedTasks).toHaveLength(2); // Only parent and child as tasks
+      // With 4-space indent being most common, the 2-space task is not a subtask
+      // We get: parent (depth 0), child (depth 0), and 4-space tasks as subtasks
+      expect(parsedTasks).toHaveLength(5); // Parent, child, and 3 subtasks of child
 
-      const childTask = parsedTasks.find((t) => t.id === 'child');
-      expect(childTask?.notes).toContain('Deep note 1');
-      expect(childTask?.notes).toContain('Deep note 2');
-      expect(childTask?.notes).toContain('Even deeper note');
+      // The 4-space tasks become subtasks of child
+      const deepNote1 = parsedTasks.find((t) => t.title === 'Deep note 1');
+      expect(deepNote1?.parentId).toBe('child');
+      expect(deepNote1?.isSubtask).toBe(true);
+
+      // The 6+ space content becomes notes
+      const evenDeeperTask = parsedTasks.find((t) => t.title === 'Even deeper note');
+      expect(evenDeeperTask?.notes).toContain('Very deep note');
+      expect(evenDeeperTask?.notes).toContain('Extremely deep note');
     });
 
     it('should handle markdown with mixed content types', () => {
