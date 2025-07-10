@@ -243,3 +243,4 @@ export class Log {
 export const SyncLog = Log.withContext('sync');
 export const PFLog = Log.withContext('pf');
 export const PluginLog = Log.withContext('plugin');
+export const IssueLog = Log.withContext('issue');

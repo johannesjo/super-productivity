@@ -1,7 +1,7 @@
 import { DatabaseAdapter } from './database-adapter.model';
 import { SyncLog } from '../../../core/log';
 import { devError } from '../../../util/dev-error';
-import { Log } from '../../../core/log';
+import { PFLog } from '../../../core/log';
 
 export class Database {
   private static readonly L = 'Database';
@@ -77,27 +77,27 @@ export class Database {
   async remove(key: string, isIgnoreDBLock = false): Promise<unknown> {
     this._lastParams = { a: 'remove', key };
     if (this._isLocked && !isIgnoreDBLock) {
-      Log.err('Blocking write during lock');
+      PFLog.err('Blocking write during lock');
       return;
     }
     try {
       return await this._adapter.remove(key);
     } catch (e) {
-      Log.err('DB Remove Error: Last Params,', this._lastParams);
+      PFLog.err('DB Remove Error: Last Params,', this._lastParams);
       return this._errorHandler(e as Error, this.remove, [key]);
     }
   }
 
   async clearDatabase(isIgnoreDBLock = false): Promise<unknown> {
     if (this._isLocked && !isIgnoreDBLock) {
-      Log.err('Blocking write during lock');
+      PFLog.err('Blocking write during lock');
       return;
     }
     this._lastParams = { a: 'clearDatabase' };
     try {
       return await this._adapter.clearDatabase();
     } catch (e) {
-      Log.err('DB Clear Error: Last Params,', this._lastParams);
+      PFLog.err('DB Clear Error: Last Params,', this._lastParams);
       return this._errorHandler(e as Error, this.clearDatabase, []);
     }
   }
@@ -106,7 +106,7 @@ export class Database {
     try {
       await this._adapter.init();
     } catch (e) {
-      Log.err(e);
+      PFLog.err(e);
       SyncLog.critical('Database initialization failed', {
         lastParams: this._lastParams,
         error: e,

@@ -3,13 +3,13 @@ import { CrossModelMigrateFn } from '../api';
 import { TaskCopy } from '../../features/tasks/task.model';
 import { EntityState } from '@ngrx/entity';
 import { TODAY_TAG } from '../../features/tag/tag.const';
-import { Log } from '../../core/log';
+import { PFLog } from '../../core/log';
 
 export const crossModelMigration4: CrossModelMigrateFn = ((
   fullData: AppDataCompleteNew,
 ): AppDataCompleteNew => {
   // throw new Error('Migration 4 is not implemented yet');
-  Log.log('____________________Migrate4__________________');
+  PFLog.log('____________________Migrate4__________________');
   const copy = fullData;
 
   if (!Array.isArray(copy.improvement.hiddenImprovementBannerItems)) {
@@ -23,7 +23,7 @@ export const crossModelMigration4: CrossModelMigrateFn = ((
   // @ts-ignore
   // copy.tag.entities[TODAY_TAG.id].taskIds = [];
 
-  Log.log(copy);
+  PFLog.log(copy);
   return copy;
 }) as CrossModelMigrateFn;
 

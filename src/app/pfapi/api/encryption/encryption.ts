@@ -86,17 +86,17 @@ export async function decrypt(data: string, password: string): Promise<string> {
 // TESTING CODE
 // export const testCrypto = async (): Promise<void> => {
 //   const enc = await encrypt('HAHAHHA', '1234');
-//   Log.log('enc', enc);
+//   PFLog.log('enc', enc);
 //   decrypt(enc, '1234')
 //     .then((r) => {
-//       Log.log('YEAH', r);
+//       PFLog.log('YEAH', r);
 //     })
 //     .catch((r) => {
-//       Log.log('NOOO', r);
+//       PFLog.log('NOOO', r);
 //     });
 //
 //   const decrypted = await decrypt(enc, '1234');
-//   Log.log('decrypted', decrypted);
+//   PFLog.log('decrypted', decrypted);
 // };
 //
 // testCrypto();

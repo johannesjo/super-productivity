@@ -33,7 +33,7 @@ import {
 import { fromPfapiEvent, pfapiEventAndInitialAfter } from './pfapi-helper';
 import { DataInitStateService } from '../core/data-init/data-init-state.service';
 import { GlobalProgressBarService } from '../core-ui/global-progress-bar/global-progress-bar.service';
-import { Log } from '../core/log';
+import { PFLog } from '../core/log';
 
 @Injectable({
   providedIn: 'root',
@@ -60,7 +60,7 @@ export class PfapiService {
   ).pipe(
     shareReplay(1),
     distinctUntilChanged(),
-    // tap((v) => Log.log(`isSyncProviderEnabledAndReady$`, v)),
+    // tap((v) => PFLog.log(`isSyncProviderEnabledAndReady$`, v)),
   );
 
   public readonly currentProviderPrivateCfg$ = pfapiEventAndInitialAfter(
@@ -106,9 +106,9 @@ export class PfapiService {
 
   constructor() {
     // TODO check why it gets triggered twice always
-    // this.syncState$.subscribe((v) => Log.log(`syncState$`, v));
+    // this.syncState$.subscribe((v) => PFLog.log(`syncState$`, v));
     this.isSyncInProgress$.subscribe((v) => {
-      // Log.log('isSyncInProgress$', v);
+      // PFLog.log('isSyncInProgress$', v);
       if (v) {
         this._globalProgressBarService.countUp('SYNC');
       } else {
@@ -128,7 +128,7 @@ export class PfapiService {
           });
         }
       } catch (e) {
-        Log.err(e);
+        PFLog.err(e);
         alert('Unable to set sync provider. Please check your settings.');
       }
     });

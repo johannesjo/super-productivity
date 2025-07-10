@@ -1,6 +1,6 @@
 import { FileAdapter } from '../file-adapter.interface';
 import { SafService } from './saf.service';
-import { Log } from '../../../../../../core/log';
+import { PFLog } from '../../../../../../core/log';
 
 export class SafFileAdapter implements FileAdapter {
   constructor(private getUri: () => Promise<string | undefined>) {}
@@ -38,7 +38,7 @@ export class SafFileAdapter implements FileAdapter {
     } catch (error) {
       // Ignore file not found errors
       if (error?.toString?.().includes('File not found')) {
-        Log.err(`File not found for deletion: ${filePath}`);
+        PFLog.err(`File not found for deletion: ${filePath}`);
         return;
       }
       throw error;

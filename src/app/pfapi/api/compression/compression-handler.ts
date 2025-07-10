@@ -1,5 +1,5 @@
 import { CompressError, DecompressError } from '../errors/errors';
-import { Log } from '../../../core/log';
+import { PFLog } from '../../../core/log';
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export async function compressWithGzipToString(input: string): Promise<string> {
@@ -25,7 +25,7 @@ export async function compressWithGzipToString(input: string): Promise<string> {
 
     return base64;
   } catch (error) {
-    Log.err(error);
+    PFLog.err(error);
     throw new CompressError(error);
   }
 }
@@ -52,7 +52,7 @@ export async function decompressGzipFromString(
     // SyncLog.normal( 'Decompression stats', { decompressedLength: decoded.length });
     return decoded;
   } catch (error) {
-    Log.err(error);
+    PFLog.err(error);
     throw new DecompressError(error);
   }
 }

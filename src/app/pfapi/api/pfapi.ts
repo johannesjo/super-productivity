@@ -36,7 +36,7 @@ import { promiseTimeout } from '../../util/promise-timeout';
 import { PFEventEmitter } from './util/events';
 import { MigrationService } from './migration/migration.service';
 import { IValidation } from 'typia';
-import { Log } from '../../core/log';
+import { PFLog } from '../../core/log';
 
 export class Pfapi<const MD extends ModelCfgs> {
   private static _wasInstanceCreated = false;
@@ -177,7 +177,7 @@ export class Pfapi<const MD extends ModelCfgs> {
     if (activeProviderId) {
       const provider = this.syncProviders.find((sp) => sp.id === activeProviderId);
       if (!provider) {
-        Log.log(provider, activeProviderId);
+        PFLog.log(provider, activeProviderId);
         throw new InvalidSyncProviderError();
       }
       this._activeSyncProvider$.next(provider);
@@ -372,10 +372,10 @@ export class Pfapi<const MD extends ModelCfgs> {
         await this.tmpBackupService.save(await this.getAllSyncModelData());
       } catch (error) {
         SyncLog.critical(this.importAllSycModelData.name, error);
-        Log.err(
+        PFLog.err(
           'Could not create valid backup. Onwards on the highway throug the Danger Zone!',
         );
-        Log.err(error);
+        PFLog.err(error);
       }
     }
 
@@ -387,7 +387,7 @@ export class Pfapi<const MD extends ModelCfgs> {
         const modelData = data[modelId];
         const modelCtrl = this.m[modelId];
         if (!modelCtrl) {
-          Log.err('ModelId without Ctrl', modelId, modelData);
+          PFLog.err('ModelId without Ctrl', modelId, modelData);
           if (
             SKIPPED_MODEL_IDS.includes(modelId) ||
             isSkipLegacyWarnings ||

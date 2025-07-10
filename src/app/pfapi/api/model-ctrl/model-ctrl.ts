@@ -3,7 +3,7 @@ import { Database } from '../db/database';
 import { MetaModelCtrl } from './meta-model-ctrl';
 import { SyncLog } from '../../../core/log';
 import { ModelValidationError } from '../errors/errors';
-import { Log } from '../../../core/log';
+import { PFLog } from '../../../core/log';
 
 // type ExtractModelType<T extends ModelCfg<unknown>> = T extends ModelCfg<infer U> ? U : never;
 
@@ -54,7 +54,7 @@ export class ModelCtrl<MT extends ModelBase> {
           try {
             data = this.modelCfg.repair(data);
           } catch (e) {
-            Log.err(e);
+            PFLog.err(e);
             throw new ModelValidationError({
               id: this.modelId,
               data,

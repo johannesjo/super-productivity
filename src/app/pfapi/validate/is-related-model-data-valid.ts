@@ -1,7 +1,7 @@
 import { devError } from '../../util/dev-error';
 import { environment } from '../../../environments/environment';
 import { AppDataCompleteNew } from '../pfapi-config';
-import { Log } from '../../core/log';
+import { PFLog } from '../../core/log';
 
 let errorCount = 0;
 let lastValidityError: string;
@@ -48,10 +48,10 @@ export const getLastValidityError = (): string | undefined => lastValidityError;
 
 const _validityError = (errTxt: string, additionalInfo?: any): void => {
   if (additionalInfo) {
-    Log.log('Validity Error Info: ', additionalInfo);
+    PFLog.log('Validity Error Info: ', additionalInfo);
     if (environment.production) {
       try {
-        Log.log('Validity Error Info string: ', JSON.stringify(additionalInfo));
+        PFLog.log('Validity Error Info string: ', JSON.stringify(additionalInfo));
       } catch (e) {}
     }
   }
@@ -59,9 +59,9 @@ const _validityError = (errTxt: string, additionalInfo?: any): void => {
     devError(errTxt);
   } else {
     if (errorCount === 4) {
-      Log.err('too many validity errors, only logging from now on');
+      PFLog.err('too many validity errors, only logging from now on');
     }
-    Log.err(errTxt);
+    PFLog.err(errTxt);
   }
   lastValidityError = errTxt;
   errorCount++;

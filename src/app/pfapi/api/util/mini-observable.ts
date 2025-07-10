@@ -1,4 +1,4 @@
-import { Log } from '../../../core/log';
+import { PFLog } from '../../../core/log';
 
 export class MiniObservable<T, E extends typeof Error = typeof Error> {
   private _value: T;
@@ -35,7 +35,7 @@ export class MiniObservable<T, E extends typeof Error = typeof Error> {
 
   subscribe(listener: (value: T) => void): () => void {
     if (this._closed) {
-      Log.err('Cannot subscribe to a closed observable');
+      PFLog.err('Cannot subscribe to a closed observable');
       return () => {};
     }
 

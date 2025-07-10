@@ -3,7 +3,7 @@ import { LocalFileSyncBase } from './local-file-sync-base';
 import { LocalFileSyncPrivateCfg } from '../../../pfapi.model';
 import { SafService } from './droid-saf/saf.service';
 import { SafFileAdapter } from './droid-saf/saf-file-adapter';
-import { Log } from '../../../../../core/log';
+import { PFLog } from '../../../../../core/log';
 
 export class LocalFileSyncAndroid extends LocalFileSyncBase {
   constructor(public directory = Directory.Documents) {
@@ -40,7 +40,7 @@ export class LocalFileSyncAndroid extends LocalFileSyncBase {
       });
       return uri;
     } catch (error) {
-      Log.err('Failed to setup SAF:', error);
+      PFLog.err('Failed to setup SAF:', error);
       return undefined;
     }
   }

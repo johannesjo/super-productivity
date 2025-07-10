@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { Capacitor, registerPlugin } from '@capacitor/core';
-import { Log } from '../../../../../../core/log';
+import { PFLog } from '../../../../../../core/log';
 
 // Define the plugin interface for SAF operations
 export interface SafPlugin {
@@ -71,7 +71,7 @@ export class SafService {
       const result = await SafBridge.checkUriPermission({ uri });
       return result.hasPermission;
     } catch (error) {
-      Log.err('Error checking SAF permission:', error);
+      PFLog.err('Error checking SAF permission:', error);
       return false;
     }
   }
@@ -110,7 +110,7 @@ export class SafService {
       const result = await SafBridge.checkFileExists({ uri, fileName });
       return result.exists;
     } catch (error) {
-      Log.err('Error checking file existence:', error);
+      PFLog.err('Error checking file existence:', error);
       return false;
     }
   }

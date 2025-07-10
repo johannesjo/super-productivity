@@ -17,12 +17,12 @@ import {
   initialBoardsState,
 } from '../../features/boards/store/boards.reducer';
 import { DEFAULT_BOARD_CFG, DEFAULT_PANEL_CFG } from '../../features/boards/boards.const';
-import { Log } from '../../core/log';
+import { PFLog } from '../../core/log';
 
 export const crossModelMigration2: CrossModelMigrateFn = ((
   fullData: AppDataCompleteLegacy,
 ): AppDataCompleteNew => {
-  Log.log('____________________Migrate2__________________');
+  PFLog.log('____________________Migrate2__________________');
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { lastLocalSyncModelChange, lastArchiveUpdate, taskArchive, ...copy } = fullData;
 
@@ -34,10 +34,10 @@ export const crossModelMigration2: CrossModelMigrateFn = ((
     Object.keys((fullData as any as AppDataCompleteNew).timeTracking.project).length
   ) {
     // If time tracking is already migrated, return the original data
-    Log.err('already migrated despite old model version!!!');
+    PFLog.err('already migrated despite old model version!!!');
     return fullData as any as AppDataCompleteNew;
   }
-  Log.log(':::::::::::crossModelMigration2::::::::::::::');
+  PFLog.log(':::::::::::crossModelMigration2::::::::::::::');
 
   // Migrate project time tracking data
   const projectTimeTracking: TTWorkContextSessionMap = Object.keys(
@@ -127,7 +127,7 @@ export const crossModelMigration2: CrossModelMigrateFn = ((
     },
     {} as TTWorkContextSessionMap,
   );
-  Log.log('________________________________________________________', {
+  PFLog.log('________________________________________________________', {
     copy,
     projectTimeTracking,
     tagTimeTracking,

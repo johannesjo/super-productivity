@@ -1,5 +1,5 @@
 import { SyncLog } from '../../../core/log';
-import { Log } from '../../../core/log';
+import { PFLog } from '../../../core/log';
 
 /**
  * Vector Clock implementation for distributed synchronization
@@ -125,15 +125,15 @@ export const compareVectorClocks = (
 ): VectorClockComparison => {
   // Handle null/undefined cases
   if (isVectorClockEmpty(a) && isVectorClockEmpty(b)) {
-    Log.err('BOTH VECTOR CLOCKS EMPTY!!!');
+    PFLog.err('BOTH VECTOR CLOCKS EMPTY!!!');
     return VectorClockComparison.CONCURRENT;
   }
   if (isVectorClockEmpty(a)) {
-    Log.err('EMPTY VECTOR CLOCK a !!!');
+    PFLog.err('EMPTY VECTOR CLOCK a !!!');
     return VectorClockComparison.CONCURRENT;
   }
   if (isVectorClockEmpty(b)) {
-    Log.err('EMPTY VECTOR CLOCK b !!!');
+    PFLog.err('EMPTY VECTOR CLOCK b !!!');
     return VectorClockComparison.CONCURRENT;
   }
 
