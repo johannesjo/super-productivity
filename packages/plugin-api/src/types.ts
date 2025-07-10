@@ -116,7 +116,78 @@ export interface PluginManifest {
   sidePanel?: boolean; // If true, plugin loads in right panel instead of route
 }
 
-export type PluginHookHandler = (...args: unknown[]) => void | Promise<void>;
+// Hook payload types
+export interface TaskCompletePayload {
+  taskId: string;
+  task: Task;
+}
+
+export interface TaskUpdatePayload {
+  taskId: string;
+  task: Task;
+  changes: Partial<Task>;
+}
+
+export interface TaskDeletePayload {
+  taskId: string;
+}
+
+export interface CurrentTaskChangePayload {
+  current: Task | null;
+  previous: Task | null;
+}
+
+export interface FinishDayPayload {
+  date: string;
+}
+
+export interface LanguageChangePayload {
+  code: string;
+
+  [key: string]: any;
+}
+
+export interface PersistedDataUpdatePayload {
+  data: string;
+}
+
+export interface ActionPayload {
+  action: string;
+  payload?: any;
+}
+
+export interface AnyTaskUpdatePayload {
+  action: string;
+  taskId?: string;
+  task?: Task;
+  changes?: Partial<Task>;
+}
+
+export interface ProjectListUpdatePayload {
+  action: string;
+  projectId?: string;
+  project?: Project;
+  changes?: Partial<Project>;
+}
+
+// Map hook types to their payload types
+export interface HookPayloadMap {
+  [PluginHooks.TASK_COMPLETE]: TaskCompletePayload;
+  [PluginHooks.TASK_UPDATE]: TaskUpdatePayload;
+  [PluginHooks.TASK_DELETE]: TaskDeletePayload;
+  [PluginHooks.CURRENT_TASK_CHANGE]: CurrentTaskChangePayload;
+  [PluginHooks.FINISH_DAY]: FinishDayPayload;
+  [PluginHooks.LANGUAGE_CHANGE]: LanguageChangePayload;
+  [PluginHooks.PERSISTED_DATA_UPDATE]: PersistedDataUpdatePayload;
+  [PluginHooks.ACTION]: ActionPayload;
+  [PluginHooks.ANY_TASK_UPDATE]: AnyTaskUpdatePayload;
+  [PluginHooks.PROJECT_LIST_UPDATE]: ProjectListUpdatePayload;
+}
+
+// Generic hook handler with typed payload
+export type PluginHookHandler<T extends Hooks = Hooks> = (
+  payload: T extends keyof HookPayloadMap ? HookPayloadMap[T] : unknown,
+) => void | Promise<void>;
 
 // Core data types - Single source of truth for both plugins and app
 export interface Task {
@@ -223,7 +294,7 @@ export interface PluginSidePanelBtnCfg {
 export interface PluginAPI {
   cfg: PluginBaseCfg;
 
-  registerHook(hook: Hooks, fn: PluginHookHandler): void;
+  registerHook<T extends Hooks>(hook: T, fn: PluginHookHandler<T>): void;
 
   registerHeaderButton(headerBtnCfg: Omit<PluginHeaderBtnCfg, 'pluginId'>): void;
 
@@ -260,6 +331,8 @@ export interface PluginAPI {
 
   deleteTask(taskId: string): Promise<void>;
 
+  batchUpdateForProject(request: BatchUpdateRequest): Promise<BatchUpdateResult>;
+
   // projects
   getAllProjects(): Promise<Project[]>;
 
@@ -294,6 +367,7 @@ export interface PluginAPI {
 
   // window state
   isWindowFocused(): boolean;
+
   onWindowFocusChange?(handler: (isFocused: boolean) => void): void;
 }
 
@@ -304,10 +378,10 @@ export interface PluginInstance {
   error?: string;
 }
 
-export interface PluginHookHandlerRegistration {
+export interface PluginHookHandlerRegistration<T extends Hooks = Hooks> {
   pluginId: string;
-  hook: Hooks;
-  handler: PluginHookHandler;
+  hook: T;
+  handler: PluginHookHandler<T>;
 }
 
 export interface PluginCreateTaskData {
@@ -325,6 +399,96 @@ export interface PluginShortcutCfg {
   id: string;
   label: string;
   onExec: () => void;
+}
+
+export interface BatchTaskCreate {
+  type: 'create';
+  tempId: string; // Temporary ID to reference in other operations
+  data: {
+    title: string;
+    notes?: string;
+    isDone?: boolean;
+    parentId?: string | null; // Can reference tempId or existing task ID
+    timeEstimate?: number;
+  };
+}
+
+export interface BatchTaskUpdate {
+  type: 'update';
+  taskId: string; // Existing task ID
+  updates: {
+    title?: string;
+    notes?: string;
+    isDone?: boolean;
+    parentId?: string | null;
+    timeEstimate?: number;
+    subTaskIds?: string[];
+  };
+}
+
+export interface BatchTaskDelete {
+  type: 'delete';
+  taskId: string; // Existing task ID
+}
+
+export interface BatchTaskReorder {
+  type: 'reorder';
+  taskIds: string[]; // Can include tempIds for newly created tasks
+}
+
+export type BatchOperation =
+  | BatchTaskCreate
+  | BatchTaskUpdate
+  | BatchTaskDelete
+  | BatchTaskReorder;
+
+export interface BatchUpdateRequest {
+  projectId: string;
+  operations: BatchOperation[];
+}
+
+export interface BatchUpdateResult {
+  success: boolean;
+  // Map temporary IDs to actual created task IDs
+  createdTaskIds: { [tempId: string]: string };
+  errors?: BatchUpdateError[];
+}
+
+export interface BatchUpdateError {
+  operationIndex: number;
+  type:
+    | 'VALIDATION_ERROR'
+    | 'CIRCULAR_DEPENDENCY'
+    | 'TASK_NOT_FOUND'
+    | 'OUTSIDE_PROJECT'
+    | 'UNKNOWN';
+  message: string;
+}
+
+/**
+ * Enum for plugin iframe message types - used for communication between
+ * plugin iframes and the host application
+ */
+export enum PluginIframeMessageType {
+  // API communication
+  API_CALL = 'PLUGIN_API_CALL',
+  API_RESPONSE = 'PLUGIN_API_RESPONSE',
+  API_ERROR = 'PLUGIN_API_ERROR',
+
+  // Hook events
+  HOOK_EVENT = 'PLUGIN_HOOK_EVENT',
+
+  // Dialog interaction
+  DIALOG_BUTTON_CLICK = 'PLUGIN_DIALOG_BUTTON_CLICK',
+  DIALOG_BUTTON_RESPONSE = 'PLUGIN_DIALOG_BUTTON_RESPONSE',
+
+  // Message forwarding
+  MESSAGE = 'PLUGIN_MESSAGE',
+  MESSAGE_RESPONSE = 'PLUGIN_MESSAGE_RESPONSE',
+  MESSAGE_ERROR = 'PLUGIN_MESSAGE_ERROR',
+
+  // Plugin lifecycle
+  READY = 'plugin-ready',
 }
 
 // Global PluginAPI interface for runtime use
