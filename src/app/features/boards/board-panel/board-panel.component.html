@@ -9,6 +9,53 @@
       >task_alt</mat-icon
     >{{ this.tasks().length }}
   </div>
+  
+  <!-- Sort Controls -->
+  <div class="sort-controls">
+    <mat-select
+      [(value)]="currentSortField"
+      (selectionChange)="onSortFieldChange($event.value)"
+      placeholder="Sort by"
+      class="sort-select"
+    >
+      <mat-option value="none">No Sort</mat-option>
+      <mat-option value="dueDate">Due Date</mat-option>
+      <mat-option value="timeEstimate">Time Estimate</mat-option>
+      <mat-option value="priority">Priority</mat-option>
+      <mat-option value="createdAt">Created Date</mat-option>
+      <mat-option value="title">Title</mat-option>
+      <mat-option value="project">Project</mat-option>
+    </mat-select>
+    
+    @if (currentSortField !== 'none') {
+      <button
+        mat-icon-button
+        (click)="toggleSortDirection()"
+        [title]="currentSortDirection === 'asc' ? 'Sort Ascending' : 'Sort Descending'"
+        class="sort-direction-btn"
+      >
+        <mat-icon>{{ currentSortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+      </button>
+    }
+  </div>
+
+  <!-- Group Controls -->
+  <div class="group-controls">
+    <mat-select
+      [(value)]="currentGroupField"
+      (selectionChange)="onGroupFieldChange($event.value)"
+      placeholder="Group by"
+      class="group-select"
+    >
+      <mat-option value="none">No Group</mat-option>
+      <mat-option value="tags">Tags</mat-option>
+      <mat-option value="project">Project</mat-option>
+      <mat-option value="priority">Priority</mat-option>
+      <mat-option value="dueDateRange">Due Date Range</mat-option>
+      <mat-option value="timeEstimateRange">Time Estimate Range</mat-option>
+    </mat-select>
+  </div>
+
   <button
     mat-icon-button
     (click)="editBoard.emit()"
@@ -36,41 +83,100 @@
   [cdkDropListData]="panelCfg()"
   (cdkDropListDropped)="drop($event)"
 >
-  @for (task of tasks(); track task.id) {
-    <planner-task
-      cdkDrag
-      [cdkDragData]="task"
-      [task]="task"
-      [tagsToHide]="panelCfg().includedTagIds || []"
-    >
-      @if (task.reminderId) {
-        <button
-          (click)="scheduleTask(task, $event)"
-          [title]="T.F.TASK.CMP.EDIT_SCHEDULED | translate"
-          class="ico-btn schedule-btn"
-          color=""
-          mat-icon-button
-        >
-          <mat-icon>alarm</mat-icon>
-          <div
-            class="time-badge"
-            [innerHTML]="task.dueWithTime | shortPlannedAt"
-          ></div>
-        </button>
-      }
-      @if (task.dueDay) {
-        <button
-          (click)="scheduleTask(task, $event)"
-          [title]="T.F.TASK.CMP.SCHEDULE | translate"
-          class="ico-btn schedule-btn"
-          color=""
-          mat-icon-button
-        >
-          <mat-icon>today</mat-icon>
-          <div class="time-badge">{{ task.dueDay | localDateStr }}</div>
-        </button>
-      }
-    </planner-task>
+  @if (currentGroupField === 'none') {
+    <!-- Ungrouped tasks -->
+    @for (task of tasks(); track task.id) {
+      <planner-task
+        cdkDrag
+        [cdkDragData]="task"
+        [task]="task"
+        [tagsToHide]="panelCfg().includedTagIds || []"
+      >
+        @if (task.reminderId) {
+          <button
+            (click)="scheduleTask(task, $event)"
+            [title]="T.F.TASK.CMP.EDIT_SCHEDULED | translate"
+            class="ico-btn schedule-btn"
+            color=""
+            mat-icon-button
+          >
+            <mat-icon>alarm</mat-icon>
+            <div
+              class="time-badge"
+              [innerHTML]="task.dueWithTime | shortPlannedAt"
+            ></div>
+          </button>
+        }
+        @if (task.dueDay) {
+          <button
+            (click)="scheduleTask(task, $event)"
+            [title]="T.F.TASK.CMP.SCHEDULE | translate"
+            class="ico-btn schedule-btn"
+            color=""
+            mat-icon-button
+          >
+            <mat-icon>today</mat-icon>
+            <div class="time-badge">{{ task.dueDay | localDateStr }}</div>
+          </button>
+        }
+      </planner-task>
+    }
+  } @else {
+    <!-- Grouped tasks -->
+    @for (group of taskGroups(); track group.key) {
+      <div class="task-group">
+        <div class="group-header" (click)="toggleGroupCollapse(group.key)">
+          <mat-icon class="group-expand-icon">
+            {{ group.collapsed ? 'expand_more' : 'expand_less' }}
+          </mat-icon>
+          <span class="group-title">{{ group.title }}</span>
+          <span class="group-count">({{ group.tasks.length }})</span>
+          <span class="group-estimate">{{ getGroupEstimate(group.tasks) | msToString }}</span>
+        </div>
+        
+        @if (!group.collapsed) {
+          <div class="group-tasks">
+            @for (task of group.tasks; track task.id) {
+              <planner-task
+                cdkDrag
+                [cdkDragData]="task"
+                [task]="task"
+                [tagsToHide]="panelCfg().includedTagIds || []"
+                class="grouped-task"
+              >
+                @if (task.reminderId) {
+                  <button
+                    (click)="scheduleTask(task, $event)"
+                    [title]="T.F.TASK.CMP.EDIT_SCHEDULED | translate"
+                    class="ico-btn schedule-btn"
+                    color=""
+                    mat-icon-button
+                  >
+                    <mat-icon>alarm</mat-icon>
+                    <div
+                      class="time-badge"
+                      [innerHTML]="task.dueWithTime | shortPlannedAt"
+                    ></div>
+                  </button>
+                }
+                @if (task.dueDay) {
+                  <button
+                    (click)="scheduleTask(task, $event)"
+                    [title]="T.F.TASK.CMP.SCHEDULE | translate"
+                    class="ico-btn schedule-btn"
+                    color=""
+                    mat-icon-button
+                  >
+                    <mat-icon>today</mat-icon>
+                    <div class="time-badge">{{ task.dueDay | localDateStr }}</div>
+                  </button>
+                }
+              </planner-task>
+            }
+          </div>
+        }
+      </div>
+    }
   }
 
   <!--  @if (tasks().length === 0) {-->

@@ -108,6 +108,72 @@ export const boardsReducer = createReducer(
 
     return state;
   }),
+
+  on(BoardsActions.updatePanelSortConfig, (state, { panelId, sortCfg }) => {
+    let panelCfgToUpdate;
+    const boardCfg = state.boardCfgs.find((cfg) => {
+      panelCfgToUpdate = cfg.panels.find((panel) => panel.id === panelId);
+      return !!panelCfgToUpdate;
+    });
+
+    if (boardCfg && panelCfgToUpdate) {
+      return {
+        ...state,
+        boardCfgs: state.boardCfgs.map((boardCfgInner) => {
+          if (boardCfgInner.id === boardCfg.id) {
+            return {
+              ...boardCfgInner,
+              panels: boardCfgInner.panels.map((panel) => {
+                if (panel.id === panelId) {
+                  return {
+                    ...panel,
+                    sortCfg,
+                  };
+                }
+                return panel;
+              }),
+            };
+          }
+          return boardCfgInner;
+        }),
+      };
+    }
+
+    return state;
+  }),
+
+  on(BoardsActions.updatePanelGroupConfig, (state, { panelId, groupCfg }) => {
+    let panelCfgToUpdate;
+    const boardCfg = state.boardCfgs.find((cfg) => {
+      panelCfgToUpdate = cfg.panels.find((panel) => panel.id === panelId);
+      return !!panelCfgToUpdate;
+    });
+
+    if (boardCfg && panelCfgToUpdate) {
+      return {
+        ...state,
+        boardCfgs: state.boardCfgs.map((boardCfgInner) => {
+          if (boardCfgInner.id === boardCfg.id) {
+            return {
+              ...boardCfgInner,
+              panels: boardCfgInner.panels.map((panel) => {
+                if (panel.id === panelId) {
+                  return {
+                    ...panel,
+                    groupCfg,
+                  };
+                }
+                return panel;
+              }),
+            };
+          }
+          return boardCfgInner;
+        }),
+      };
+    }
+
+    return state;
+  }),
 );
 
 export const boardsFeature = createFeature({
