@@ -30,7 +30,6 @@ import { HttpClient } from '@angular/common/http';
 import { LS } from '../persistence/storage-keys.const';
 import { CustomThemeService } from './custom-theme.service';
 import { Log } from '../log';
-import { Log } from '../log';
 
 export type DarkModeCfg = 'dark' | 'light' | 'system';
 

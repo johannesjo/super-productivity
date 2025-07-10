@@ -12,7 +12,6 @@ import { GlobalConfigService } from 'src/app/features/config/global-config.servi
 import { map, startWith } from 'rxjs/operators';
 import { DEFAULT_GLOBAL_CONFIG } from 'src/app/features/config/default-global-config.const';
 import { Log } from '../log';
-import { Log } from '../log';
 
 @Injectable({ providedIn: 'root' })
 export class LanguageService {

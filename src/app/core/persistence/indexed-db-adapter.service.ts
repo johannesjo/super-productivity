@@ -5,7 +5,6 @@ import { filter, shareReplay, take } from 'rxjs/operators';
 import { DBSchema, openDB } from 'idb';
 import { DBAdapter } from './db-adapter.model';
 import { Log } from '../log';
-import { Log } from '../log';
 
 const DB_NAME = 'SUP';
 const DB_MAIN_NAME = 'SUP_STORE';
