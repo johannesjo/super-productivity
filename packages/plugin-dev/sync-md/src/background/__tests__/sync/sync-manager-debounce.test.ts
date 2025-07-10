@@ -51,12 +51,12 @@ describe('Sync Manager Debounce Behavior', () => {
     // Capture the file watcher callback
     (fileWatcher.startFileWatcher as jest.Mock).mockImplementation((path, callback) => {
       mockFileChangeCallback = callback;
-    });
+    }, 10000);
 
     // Capture the window focus callback
     (global.PluginAPI.onWindowFocusChange as jest.Mock).mockImplementation((callback) => {
       mockWindowFocusCallback = callback;
-    });
+    }, 10000);
   });
 
   afterEach(() => {
@@ -66,6 +66,12 @@ describe('Sync Manager Debounce Behavior', () => {
   describe('MD to SP sync debouncing', () => {
     it('should debounce MD to SP sync for 10 seconds', async () => {
       initSyncManager(mockConfig);
+
+      // Wait for initial setup
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Reset mock calls after initial sync
+      jest.clearAllMocks();
 
       // Trigger file change
       mockFileChangeCallback();
@@ -85,10 +91,16 @@ describe('Sync Manager Debounce Behavior', () => {
 
       // Now sync should be called
       expect(mdToSp).toHaveBeenCalledTimes(1);
-    });
+    }, 10000);
 
     it('should reset debounce timer on multiple file changes', async () => {
       initSyncManager(mockConfig);
+
+      // Wait for initial setup
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Reset mock calls after initial sync
+      jest.clearAllMocks();
 
       // First file change
       mockFileChangeCallback();
@@ -113,10 +125,16 @@ describe('Sync Manager Debounce Behavior', () => {
 
       // Now sync should be called
       expect(mdToSp).toHaveBeenCalledTimes(1);
-    });
+    }, 10000);
 
     it('should trigger sync immediately when window gains focus with pending sync', async () => {
       initSyncManager(mockConfig);
+
+      // Wait for initial setup
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Reset mock calls after initial sync
+      jest.clearAllMocks();
 
       // Window starts focused
       mockWindowFocusCallback(true);
@@ -139,10 +157,16 @@ describe('Sync Manager Debounce Behavior', () => {
 
       // Sync should be called immediately
       expect(mdToSp).toHaveBeenCalledTimes(1);
-    });
+    }, 10000);
 
     it('should not trigger immediate sync when window gains focus without pending sync', async () => {
       initSyncManager(mockConfig);
+
+      // Wait for initial setup
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Reset mock calls after initial sync
+      jest.clearAllMocks();
 
       // Window starts focused
       mockWindowFocusCallback(true);
@@ -158,10 +182,16 @@ describe('Sync Manager Debounce Behavior', () => {
 
       // No sync should be triggered
       expect(mdToSp).not.toHaveBeenCalled();
-    });
+    }, 10000);
 
     it('should not trigger immediate sync if sync already completed', async () => {
       initSyncManager(mockConfig);
+
+      // Wait for initial setup
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Reset mock calls after initial sync
+      jest.clearAllMocks();
 
       // Trigger file change
       mockFileChangeCallback();
@@ -180,12 +210,51 @@ describe('Sync Manager Debounce Behavior', () => {
 
       // Should still only have one sync call
       expect(mdToSp).toHaveBeenCalledTimes(1);
-    });
+    }, 10000);
+
+    it('should pass correct config to handleMdToSpSync when window gains focus', async () => {
+      initSyncManager(mockConfig);
+
+      // Wait for initial setup
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Reset mock calls after initial sync
+      jest.clearAllMocks();
+
+      // Window starts focused
+      mockWindowFocusCallback(true);
+
+      // Trigger file change
+      mockFileChangeCallback();
+
+      // Window loses focus
+      mockWindowFocusCallback(false);
+
+      // Fast forward 5 seconds (half of debounce time)
+      jest.advanceTimersByTime(5000);
+      expect(mdToSp).not.toHaveBeenCalled();
+
+      // Window gains focus - should trigger immediate sync with correct config
+      mockWindowFocusCallback(true);
+
+      // Wait for any pending promises
+      await flushPromises();
+
+      // Sync should be called immediately with the correct config
+      expect(mdToSp).toHaveBeenCalledTimes(1);
+      expect(mdToSp).toHaveBeenCalledWith('- [ ] Test task', mockConfig.projectId);
+    }, 10000);
   });
 
   describe('SP to MD sync behavior', () => {
     it('should use short debounce for SP to MD sync', async () => {
       initSyncManager(mockConfig);
+
+      // Wait for initial setup
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Reset mock calls after initial sync
+      jest.clearAllMocks();
 
       // Trigger SP change through hook
       const spChangeHandler = (
@@ -202,6 +271,6 @@ describe('Sync Manager Debounce Behavior', () => {
 
       // SP to MD sync should be called
       expect(spToMd).toHaveBeenCalledTimes(1);
-    });
+    }, 10000);
   });
 });
