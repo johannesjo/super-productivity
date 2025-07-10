@@ -257,6 +257,34 @@ export const taskBatchUpdateMetaReducer = (
           taskIdsToDelete,
           newState[TASK_FEATURE_NAME],
         );
+
+        // Comprehensive cleanup: Remove deleted task IDs from all remaining tasks' subTaskIds
+        const deletedTaskIdsSet = new Set(taskIdsToDelete);
+        const additionalUpdates: { id: string; changes: Partial<Task> }[] = [];
+
+        Object.values(newState[TASK_FEATURE_NAME].entities).forEach((task) => {
+          if (task && task.subTaskIds && task.subTaskIds.length > 0) {
+            const cleanedSubTaskIds = task.subTaskIds.filter(
+              (subTaskId) => !deletedTaskIdsSet.has(subTaskId),
+            );
+
+            // Only update if the array actually changed
+            if (cleanedSubTaskIds.length !== task.subTaskIds.length) {
+              additionalUpdates.push({
+                id: task.id,
+                changes: { subTaskIds: cleanedSubTaskIds },
+              });
+            }
+          }
+        });
+
+        // Apply additional cleanup updates if needed
+        if (additionalUpdates.length > 0) {
+          newState[TASK_FEATURE_NAME] = taskAdapter.updateMany(
+            additionalUpdates,
+            newState[TASK_FEATURE_NAME],
+          );
+        }
       }
 
       // Apply comprehensive data validation and consistency fixes
