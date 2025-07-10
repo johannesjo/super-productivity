@@ -9,6 +9,7 @@ import { Update } from '@ngrx/entity/src/models';
 import { Store } from '@ngrx/store';
 import { __updateMultipleTaskSimple } from '../../tasks/store/task.actions';
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
+import { IssueLog } from '../../../core/log';
 
 @Injectable()
 export class UnlinkAllTasksOnProviderDeletionEffects {
@@ -71,7 +72,7 @@ export class UnlinkAllTasksOnProviderDeletionEffects {
 
     await this._taskArchiveService.updateTasks(archiveTaskUpdates);
 
-    console.log('unlinkAllTasksOnProviderDeletion$', {
+    IssueLog.log('unlinkAllTasksOnProviderDeletion$', {
       regularTasks,
       archiveTasks,
       taskUpdates,

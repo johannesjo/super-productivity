@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { PfapiService } from '../pfapi/pfapi.service';
 import { PluginMetadata, PluginMetaDataState } from './plugin-persistence.model';
+import { PluginLog } from '../core/log';
 
 /**
  * Service for persisting plugin metadata using pfapi.
@@ -27,7 +28,7 @@ export class PluginMetaPersistenceService {
 
     // Deep compare the states
     if (this._isDataEqual(currentState, newState)) {
-      console.log('PluginMetaPersistenceService: No changes detected, skipping write');
+      PluginLog.log('PluginMetaPersistenceService: No changes detected, skipping write');
       return;
     }
 
@@ -35,7 +36,7 @@ export class PluginMetaPersistenceService {
     await this._pfapiService.pf.m.pluginMetadata.save(newState, {
       isUpdateRevAndLastUpdate: true,
     });
-    console.log('PluginMetaPersistenceService: Data updated');
+    PluginLog.log('PluginMetaPersistenceService: Data updated');
   }
 
   /**

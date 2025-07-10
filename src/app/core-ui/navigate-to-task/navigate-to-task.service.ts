@@ -9,6 +9,7 @@ import { Task } from '../../features/tasks/task.model';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
+import { Log } from '../../core/log';
 
 @Injectable({
   providedIn: 'root',
@@ -36,7 +37,7 @@ export class NavigateToTaskService {
         await this._router.navigate([location], { queryParams });
       }
     } catch (err) {
-      console.error(err);
+      Log.err(err);
       this._snackService.open({
         type: 'ERROR',
         msg: T.GLOBAL_SNACK.NAVIGATE_TO_TASK_ERR,

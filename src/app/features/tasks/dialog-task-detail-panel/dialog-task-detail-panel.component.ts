@@ -42,7 +42,7 @@ export class DialogTaskDetailPanelComponent implements OnDestroy {
         isSkipToggle: true,
       }),
     );
-    // this.task$.subscribe((v) => console.log(`task$`, v));
+    // this.task$.subscribe((v) => TaskLog.log(`task$`, v));
   }
 
   // close(): void {

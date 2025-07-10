@@ -1,3 +1,5 @@
+import { Log } from '../../core/log';
+
 /*
 we want to match:
 - [x] task
@@ -25,8 +27,8 @@ export const isMarkdownChecklist = (text: string): boolean => {
     );
     return items.length === lines.length || items.length >= 2;
   } catch (e) {
-    console.error('Checklist parsing failed');
-    console.error(e);
+    Log.err('Checklist parsing failed');
+    Log.err(e);
     return false;
   }
 };

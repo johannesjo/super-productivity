@@ -1,6 +1,7 @@
 import { ScheduleConfig } from '../../config/global-config.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
+import { Log } from '../../../core/log';
 
 export const DEFAULT_WORK_HOURS = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
 
@@ -36,7 +37,7 @@ export const calculateAvailableHours = (
     return Math.max(0, availableTime);
   } catch (error) {
     // If there's an error parsing time strings, return default
-    console.error('Error calculating available hours:', error);
+    Log.err('Error calculating available hours:', error);
     return DEFAULT_WORK_HOURS;
   }
 };

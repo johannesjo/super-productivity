@@ -43,6 +43,7 @@ import { createPluginShortcutFormItems } from '../../features/config/form-cfgs/p
 import { PluginService } from '../../plugins/plugin.service';
 import { PluginShortcutCfg } from '../../plugins/plugin-api.model';
 import { ThemeSelectorComponent } from '../../core/theme/theme-selector/theme-selector.component';
+import { downloadLogs, Log } from '../../core/log';
 
 @Component({
   selector: 'config-page',
@@ -96,7 +97,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
         };
       }),
     )
-    .pipe(tap((v) => console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXA', v)));
+    .pipe(tap((v) => Log.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXA', v)));
 
   private _subs: Subscription = new Subscription();
 
@@ -131,7 +132,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     // Subscribe to plugin shortcuts changes for live updates
     this._subs.add(
       this._pluginBridgeService.shortcuts$.subscribe((shortcuts) => {
-        console.log('Plugin shortcuts changed:', { shortcuts });
+        Log.log('Plugin shortcuts changed:', { shortcuts });
         this._updateKeyboardFormWithPluginShortcuts(shortcuts);
       }),
     );
@@ -144,7 +145,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     );
 
     if (keyboardFormIndex === -1) {
-      console.warn('Keyboard form section not found');
+      Log.err('Keyboard form section not found');
       return;
     }
 
@@ -172,9 +173,9 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     if (shortcuts.length > 0) {
       const pluginShortcutItems = createPluginShortcutFormItems(shortcuts);
       newItems = [...filteredItems, ...pluginShortcutItems];
-      console.log(`Updated keyboard form with ${shortcuts.length} plugin shortcuts`);
+      Log.log(`Updated keyboard form with ${shortcuts.length} plugin shortcuts`);
     } else {
-      console.log('No plugin shortcuts to add to keyboard form');
+      Log.log('No plugin shortcuts to add to keyboard form');
     }
 
     // Create a new keyboard section object to trigger change detection
@@ -227,4 +228,6 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   ): GlobalSectionConfig {
     return (this.globalCfg as any)[sectionKey];
   }
+
+  protected readonly downloadLogs = downloadLogs;
 }

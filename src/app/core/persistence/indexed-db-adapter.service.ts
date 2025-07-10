@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, shareReplay, take } from 'rxjs/operators';
 import { DBSchema, openDB } from 'idb';
 import { DBAdapter } from './db-adapter.model';
+import { Log } from '../log';
 
 const DB_NAME = 'SUP';
 const DB_MAIN_NAME = 'SUP_STORE';
@@ -34,7 +35,7 @@ export class IndexedDBAdapterService implements DBAdapter {
         // upgrade(db: IDBPDatabase<MyDb>, oldVersion: number, newVersion: number | null, transaction: IDBPTransaction<MyDb>) {
         // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
         upgrade(db: IDBPDatabase<MyDb>, oldVersion: number, newVersion: number | null) {
-          console.log('IDB UPGRADE', oldVersion, newVersion);
+          Log.log('IDB UPGRADE', oldVersion, newVersion);
           db.createObjectStore(DB_MAIN_NAME);
         },
         // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
@@ -70,23 +71,20 @@ export class IndexedDBAdapterService implements DBAdapter {
       const result = await (this._db as IDBPDatabase<MyDb>).get(DB_MAIN_NAME, key);
       return result;
     } catch (e) {
-      console.error(
-        `[IndexedDB] Error loading key "${key}" from store "${DB_MAIN_NAME}":`,
-        e,
-      );
+      Log.err(`[IndexedDB] Error loading key "${key}" from store "${DB_MAIN_NAME}":`, e);
 
       if (e instanceof Error) {
-        console.error('[IndexedDB] Error name:', e.name);
-        console.error('[IndexedDB] Error message:', e.message);
+        Log.err('[IndexedDB] Error name:', e.name);
+        Log.err('[IndexedDB] Error message:', e.message);
 
         // Log specific details for the large value error
         if (e.message && e.message.includes('Failed to read large IndexedDB value')) {
-          console.error('[IndexedDB] CRITICAL: Large value read failure detected');
-          console.error(
+          Log.err('[IndexedDB] CRITICAL: Large value read failure detected');
+          Log.err(
             '[IndexedDB] This indicates IndexedDB blob files are missing or corrupted',
           );
-          console.error('[IndexedDB] Affected store:', DB_MAIN_NAME);
-          console.error('[IndexedDB] Affected key:', key);
+          Log.err('[IndexedDB] Affected store:', DB_MAIN_NAME);
+          Log.err('[IndexedDB] Affected key:', key);
         }
       }
 
@@ -100,10 +98,7 @@ export class IndexedDBAdapterService implements DBAdapter {
     try {
       return await (this._db as IDBPDatabase<MyDb>).put(DB_MAIN_NAME, data, key);
     } catch (e) {
-      console.error(
-        `[IndexedDB] Error saving key "${key}" to store "${DB_MAIN_NAME}":`,
-        e,
-      );
+      Log.err(`[IndexedDB] Error saving key "${key}" to store "${DB_MAIN_NAME}":`, e);
       throw e;
     }
   }
@@ -122,7 +117,7 @@ export class IndexedDBAdapterService implements DBAdapter {
     try {
       return await this._afterReady$.pipe(take(1)).toPromise();
     } catch (e) {
-      console.warn('DB After Ready Error: Last Params');
+      Log.err('DB After Ready Error: Last Params');
       throw new Error(e as string);
     }
   }

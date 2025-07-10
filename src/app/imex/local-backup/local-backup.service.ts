@@ -12,6 +12,7 @@ import { T } from '../../t.const';
 import { TranslateService } from '@ngx-translate/core';
 import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
 import { SnackService } from '../../core/snack/snack.service';
+import { Log } from '../../core/log';
 
 const DEFAULT_BACKUP_INTERVAL = 5 * 60 * 1000;
 const ANDROID_DB_KEY = 'backup';
@@ -72,7 +73,7 @@ export class LocalBackupService {
         )
       ) {
         const backupData = await this.loadBackupElectron(backupMeta.path);
-        console.log('backupData', backupData);
+        Log.log('backupData', backupData);
         await this._importBackup(backupData);
       }
 
@@ -83,9 +84,9 @@ export class LocalBackupService {
         confirm(this._translateService.instant(T.CONFIRM.RESTORE_FILE_BACKUP_ANDROID))
       ) {
         const backupData = await this.loadBackupAndroid();
-        console.log('backupData', backupData);
+        Log.log('backupData', backupData);
         const lineBreaksReplaced = backupData.replace(/\n/g, '\\n');
-        console.log('lineBreaksReplaced', lineBreaksReplaced);
+        Log.log('lineBreaksReplaced', lineBreaksReplaced);
         await this._importBackup(lineBreaksReplaced);
       }
     }

@@ -16,6 +16,7 @@ import { takeUntil } from 'rxjs/operators';
 import { T } from '../../../t.const';
 import { CommonModule } from '@angular/common';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { SyncLog } from '../../../core/log';
 
 @Component({
   selector: 'sync-safety-backups',
@@ -57,7 +58,7 @@ export class SyncSafetyBackupsComponent implements OnInit, OnDestroy {
       const backups = await this._syncSafetyBackupService.getBackups();
       this.backups.set(backups);
     } catch (error) {
-      console.error('Failed to load backups:', error);
+      SyncLog.err('Failed to load backups:', error);
       this._snackService.open({
         type: 'ERROR',
         msg: 'Failed to load safety backups',
@@ -77,7 +78,7 @@ export class SyncSafetyBackupsComponent implements OnInit, OnDestroy {
         msg: T.F.SYNC.SAFETY_BACKUP.CREATED_SUCCESS,
       });
     } catch (error) {
-      console.error('Failed to create manual backup:', error);
+      SyncLog.err('Failed to create manual backup:', error);
       this._snackService.open({
         type: 'ERROR',
         msg: T.F.SYNC.SAFETY_BACKUP.CREATE_FAILED,
@@ -98,7 +99,7 @@ export class SyncSafetyBackupsComponent implements OnInit, OnDestroy {
       // Reload the page after restoration
       setTimeout(() => window.location.reload(), 1000);
     } catch (error) {
-      console.error('Failed to restore backup:', error);
+      SyncLog.err('Failed to restore backup:', error);
       this._snackService.open({
         type: 'ERROR',
         msg: error instanceof Error ? error.message : 'Failed to restore backup',
@@ -122,7 +123,7 @@ export class SyncSafetyBackupsComponent implements OnInit, OnDestroy {
           msg: T.F.SYNC.SAFETY_BACKUP.DELETED_SUCCESS,
         });
       } catch (error) {
-        console.error('Failed to delete backup:', error);
+        SyncLog.err('Failed to delete backup:', error);
         this._snackService.open({
           type: 'ERROR',
           msg: T.F.SYNC.SAFETY_BACKUP.DELETE_FAILED,
@@ -145,7 +146,7 @@ export class SyncSafetyBackupsComponent implements OnInit, OnDestroy {
           msg: T.F.SYNC.SAFETY_BACKUP.CLEARED_SUCCESS,
         });
       } catch (error) {
-        console.error('Failed to clear backups:', error);
+        SyncLog.err('Failed to clear backups:', error);
         this._snackService.open({
           type: 'ERROR',
           msg: T.F.SYNC.SAFETY_BACKUP.CLEAR_FAILED,

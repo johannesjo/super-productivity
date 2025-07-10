@@ -19,6 +19,7 @@ import { selectTodayTaskIds } from '../../work-context/store/work-context.select
 import { AddTasksForTomorrowService } from '../../add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { environment } from '../../../../environments/environment';
+import { TaskLog } from '../../../core/log';
 
 @Injectable()
 export class TaskDueEffects {
@@ -42,7 +43,10 @@ export class TaskDueEffects {
             // Ensure we're not in the middle of another sync
             switchMap(() => this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$),
             // NOTE we use concatMap since tap errors only show in console, but are not handled by global handler
-            concatMap(() => this._addTasksForTomorrowService.addAllDueToday()),
+            concatMap(() => {
+              TaskLog.log('[TaskDueEffects] Triggering addAllDueToday after sync');
+              return this._addTasksForTomorrowService.addAllDueToday();
+            }),
           ),
         ),
       );
@@ -68,11 +72,19 @@ export class TaskDueEffects {
           filter((overdue) => !!overdue.length),
           withLatestFrom(this._store$.select(selectTodayTaskIds)),
           // we do this to maintain the order of tasks
-          map(([overdue, todayTaskIds]) =>
-            TaskSharedActions.removeTasksFromTodayTag({
-              taskIds: todayTaskIds.filter((id) => !!overdue.find((oT) => oT.id === id)),
-            }),
-          ),
+          map(([overdue, todayTaskIds]) => {
+            const overdueIds = todayTaskIds.filter(
+              (id) => !!overdue.find((oT) => oT.id === id),
+            );
+            if (overdueIds.length > 0) {
+              TaskLog.log('[TaskDueEffects] Removing overdue tasks from today', {
+                overdueCount: overdueIds.length,
+              });
+            }
+            return TaskSharedActions.removeTasksFromTodayTag({
+              taskIds: overdueIds,
+            });
+          }),
         ),
       ),
     );
@@ -98,7 +110,7 @@ export class TaskDueEffects {
                   .map((task) => task.id);
 
                 if (!environment.production && missingTaskIds.length > 0) {
-                  console.warn(
+                  TaskLog.err(
                     '[TaskDueEffects] Found tasks due today missing from TODAY tag:',
                     {
                       tasksDueToday: tasksDueToday.length,

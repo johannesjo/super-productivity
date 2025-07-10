@@ -77,7 +77,7 @@ export const createViewEntriesForDay = (
   //     viewEntries.splice(currentIndex + 1, 1);
   //   } else {
   //     debug(viewEntries);
-  //     console.warn('View Entry for current not available');
+  //     Log.err('View Entry for current not available');
   //   }
   // }
 
@@ -133,7 +133,7 @@ const createViewEntriesForNonScheduledRepeatProjections = (
 
   const lastEntry = viewEntries[viewEntries.length - 1];
 
-  // console.log(viewEntries);
+  // Log.log(viewEntries);
 
   return {
     entries: viewEntries,

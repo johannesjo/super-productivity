@@ -13,13 +13,14 @@ import {
 import { ProjectState } from '../../features/project/project.model';
 import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-config.const';
 import { issueProviderInitialState } from '../../features/issue/store/issue-provider.reducer';
+import { PFLog } from '../../core/log';
 
 const LEGACY_INBOX_PROJECT_ID = 'INBOX' as const;
 
 export const crossModelMigration3: CrossModelMigrateFn = ((
   fullData: AppDataCompleteNew,
 ): AppDataCompleteNew => {
-  console.log('____________________Migrate3__________________');
+  PFLog.log('____________________Migrate3__________________');
   const copy = fullData;
 
   if (copy.planner) {
@@ -153,7 +154,7 @@ export const crossModelMigration3: CrossModelMigrateFn = ((
     }
   });
 
-  console.log(copy);
+  PFLog.log(copy);
   return copy;
 }) as CrossModelMigrateFn;
 

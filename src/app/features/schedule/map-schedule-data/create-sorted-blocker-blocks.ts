@@ -11,7 +11,6 @@ import {
   ScheduleWorkStartEndCfg,
 } from '../schedule.model';
 import { selectTaskRepeatCfgsDueOnDayOnly } from '../../task-repeat-cfg/store/task-repeat-cfg.selectors';
-
 const PROJECTION_DAYS: number = 30;
 
 export const createSortedBlockerBlocks = (
@@ -40,7 +39,7 @@ export const createSortedBlockerBlocks = (
 
   blockedBlocks = mergeBlocksRecursively(blockedBlocks);
   blockedBlocks.sort((a, b) => a.start - b.start);
-  // console.log(
+  // Log.log(
   //   blockedBlocks.map(({ start, end }) => ({
   //     // start,
   //     // end,
@@ -48,7 +47,7 @@ export const createSortedBlockerBlocks = (
   //     e: new Date(end),
   //   })),
   // );
-  // console.log(blockedBlocks);
+  // Log.log(blockedBlocks);
 
   return blockedBlocks;
 };

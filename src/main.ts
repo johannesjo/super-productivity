@@ -70,6 +70,7 @@ import { BackgroundTask } from '@capawesome/capacitor-background-task';
 import { promiseTimeout } from './app/util/promise-timeout';
 import { PLUGIN_INITIALIZER_PROVIDER } from './app/plugins/plugin-initializer';
 import { initializeMatMenuTouchFix } from './app/features/tasks/task-context-menu/mat-menu-touch-monkey-patch';
+import { Log } from './app/core/log';
 
 if (environment.production || environment.stage) {
   enableProdMode();
@@ -196,10 +197,10 @@ bootstrapApplication(AppComponent, {
     !IS_ELECTRON &&
     !IS_ANDROID_WEB_VIEW
   ) {
-    console.log('Registering Service worker');
+    Log.log('Registering Service worker');
     return navigator.serviceWorker.register('ngsw-worker.js').catch((err: any) => {
-      console.log('Service Worker Registration Error');
-      console.error(err);
+      Log.log('Service Worker Registration Error');
+      Log.err(err);
     });
   } else if ('serviceWorker' in navigator && (IS_ELECTRON || IS_ANDROID_WEB_VIEW)) {
     navigator.serviceWorker
@@ -210,8 +211,8 @@ bootstrapApplication(AppComponent, {
         }
       })
       .catch((e) => {
-        console.error('ERROR when unregistering service worker');
-        console.error(e);
+        Log.err('ERROR when unregistering service worker');
+        Log.err(e);
       });
   }
   return undefined;
@@ -223,7 +224,7 @@ window.addEventListener('touchmove', () => {});
 if (!(environment.production || environment.stage) && IS_ANDROID_WEB_VIEW) {
   setTimeout(() => {
     androidInterface.showToast('Android DEV works');
-    console.log(androidInterface);
+    Log.log(androidInterface);
   }, 1000);
 }
 
@@ -247,9 +248,9 @@ if (IS_ANDROID_WEB_VIEW) {
     const taskId = await BackgroundTask.beforeExit(async () => {
       // Run your code...
       // Finish the background task as soon as everything is done.
-      console.log('Time window for completing sync started');
+      Log.log('Time window for completing sync started');
       await promiseTimeout(20000);
-      console.log('Time window for completing sync ended. Closing app!');
+      Log.log('Time window for completing sync ended. Closing app!');
       BackgroundTask.finish({ taskId });
     });
   });

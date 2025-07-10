@@ -1,4 +1,5 @@
 import { SoundConfig } from '../../config/global-config.model';
+import { TaskLog } from '../../../core/log';
 
 export const playDoneSound = (soundCfg: SoundConfig, nrOfDoneTasks: number = 0): void => {
   const speed = 1;
@@ -7,13 +8,13 @@ export const playDoneSound = (soundCfg: SoundConfig, nrOfDoneTasks: number = 0):
   const file = `${BASE}/${soundCfg.doneSound}`;
   // const speed = 0.5;
   // const a = new Audio('/assets/snd/done4.mp3');
-  // console.log(a);
+  // TaskLog.log(a);
   // a.volume = .4;
   // a.playbackRate = 1.5;
   // (a as any).mozPreservesPitch = false;
   // (a as any).webkitPreservesPitch = false;
   // a.play();
-  console.log(file);
+  TaskLog.log(file);
 
   const pitchFactor = soundCfg.isIncreaseDoneSoundPitch
     ? // prettier-ignore

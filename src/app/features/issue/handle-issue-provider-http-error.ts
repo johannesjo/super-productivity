@@ -6,13 +6,14 @@ import { HANDLED_ERROR_PROP_STR } from '../../app.constants';
 import { IssueProviderKey } from './issue.model';
 import { getErrorTxt } from '../../util/get-error-text';
 import { SnackService } from '../../core/snack/snack.service';
+import { IssueLog } from '../../core/log';
 
 export const handleIssueProviderHttpError$ = <T>(
   issueProviderKey: IssueProviderKey,
   snackService: SnackService,
   error: HttpErrorResponse,
 ): ObservableInput<T> => {
-  console.log(error);
+  IssueLog.log(error);
   if (error.error instanceof ErrorEvent) {
     // A client-side or network error occurred. Handle it accordingly.
     snackService.open({

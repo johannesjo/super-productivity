@@ -1,6 +1,7 @@
 import { saveAs } from 'file-saver';
 import { Directory, Encoding, Filesystem, WriteFileResult } from '@capacitor/filesystem';
 import { IS_ANDROID_WEB_VIEW } from './is-android-web-view';
+import { Log } from '../core/log';
 
 export const download = (filename: string, stringData: string): void => {
   const blob = new Blob([stringData], { type: 'text/plain;charset=utf-8' });
@@ -27,6 +28,6 @@ const saveStringAsFile = async (
     encoding: Encoding.UTF8,
     recursive: true,
   });
-  console.log(r);
+  Log.log(r);
   return r;
 };

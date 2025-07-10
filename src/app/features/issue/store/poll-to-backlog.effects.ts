@@ -20,6 +20,7 @@ import { IssueProvider } from '../issue.model';
 import { SnackService } from '../../../core/snack/snack.service';
 import { getErrorTxt } from '../../../util/get-error-text';
 import { DELAY_BEFORE_ISSUE_POLLING } from '../issue.const';
+import { IssueLog } from '../../../core/log';
 
 @Injectable()
 export class PollToBacklogEffects {
@@ -71,7 +72,7 @@ export class PollToBacklogEffects {
                       this._issueService.getPollInterval(provider.issueProviderKey),
                     ).pipe(
                       takeUntil(this.pollToBacklogActions$),
-                      tap(() => console.log('POLL ' + provider.issueProviderKey)),
+                      tap(() => IssueLog.log('POLL ' + provider.issueProviderKey)),
                       switchMap(() =>
                         this._issueService.checkAndImportNewIssuesToBacklogForProject(
                           provider.issueProviderKey,
@@ -79,7 +80,7 @@ export class PollToBacklogEffects {
                         ),
                       ),
                       catchError((e) => {
-                        console.error(e);
+                        IssueLog.err(e);
                         this._snackService.open({
                           type: 'ERROR',
                           // TODO translate

@@ -1,6 +1,6 @@
 import { Database } from '../db/database';
 import { LocalMeta, ModelBase, ModelCfg } from '../pfapi.model';
-import { pfLog } from '../util/log';
+import { PFLog } from '../../../core/log';
 import { getEnvironmentId } from '../util/get-environment-id';
 import { DBNames } from '../pfapi.const';
 import {
@@ -70,7 +70,7 @@ export class MetaModelCtrl {
     modelCfg: ModelCfg<MT>,
     isIgnoreDBLock = false,
   ): Promise<void> {
-    pfLog(2, `${MetaModelCtrl.L}.${this.updateRevForModel.name}()`, modelId, {
+    PFLog.normal(`${MetaModelCtrl.L}.${this.updateRevForModel.name}()`, modelId, {
       modelCfg,
       inMemory: this._metaModelInMemory,
     });
@@ -126,7 +126,7 @@ export class MetaModelCtrl {
    * @throws {InvalidMetaError} When metamodel is invalid
    */
   save(metaModel: LocalMeta, isIgnoreDBLock = false): Promise<unknown> {
-    pfLog(2, `${MetaModelCtrl.L}.${this.save.name}()`, {
+    PFLog.normal(`${MetaModelCtrl.L}.${this.save.name}()`, {
       metaModel,
       lastSyncedUpdate: metaModel.lastSyncedUpdate,
       lastUpdate: metaModel.lastUpdate,
@@ -139,7 +139,7 @@ export class MetaModelCtrl {
     this._ev.emit('syncStatusChange', 'UNKNOWN_OR_CHANGED');
 
     // Add detailed logging before saving
-    pfLog(2, `${MetaModelCtrl.L}.${this.save.name}() about to save to DB:`, {
+    PFLog.normal(`${MetaModelCtrl.L}.${this.save.name}() about to save to DB:`, {
       id: MetaModelCtrl.META_MODEL_ID,
       lastSyncedUpdate: metaModel.lastSyncedUpdate,
       lastUpdate: metaModel.lastUpdate,
@@ -155,15 +155,14 @@ export class MetaModelCtrl {
     // Log after save completes
     savePromise
       .then(() => {
-        pfLog(
-          2,
+        PFLog.normal(
           `${MetaModelCtrl.L}.${this.save.name}() DB save completed successfully`,
           metaModel,
         );
       })
       .catch((error) => {
         devError('DB save for meta file failed');
-        pfLog(0, `${MetaModelCtrl.L}.${this.save.name}() DB save failed`, error);
+        PFLog.critical(`${MetaModelCtrl.L}.${this.save.name}() DB save failed`, error);
       });
 
     return savePromise;
@@ -176,7 +175,7 @@ export class MetaModelCtrl {
    * @throws {InvalidMetaError} When loaded data is invalid
    */
   async load(): Promise<LocalMeta> {
-    pfLog(3, `${MetaModelCtrl.L}.${this.load.name}()`, this._metaModelInMemory);
+    PFLog.verbose(`${MetaModelCtrl.L}.${this.load.name}()`, this._metaModelInMemory);
 
     if (this._metaModelInMemory) {
       return this._metaModelInMemory;
@@ -185,7 +184,7 @@ export class MetaModelCtrl {
     const data = (await this._db.load(MetaModelCtrl.META_MODEL_ID)) as LocalMeta;
 
     // Add debug logging
-    pfLog(2, `${MetaModelCtrl.L}.${this.load.name}() loaded from DB:`, {
+    PFLog.normal(`${MetaModelCtrl.L}.${this.load.name}() loaded from DB:`, {
       data,
       hasData: !!data,
       lastSyncedUpdate: data?.lastSyncedUpdate,
@@ -198,7 +197,7 @@ export class MetaModelCtrl {
         ...DEFAULT_META_MODEL,
         crossModelVersion: this.crossModelVersion,
       };
-      pfLog(2, `${MetaModelCtrl.L}.${this.load.name}() initialized with defaults`);
+      PFLog.normal(`${MetaModelCtrl.L}.${this.load.name}() initialized with defaults`);
       return this._metaModelInMemory;
     }
     if (!data.revMap) {
@@ -206,7 +205,7 @@ export class MetaModelCtrl {
     }
 
     // Log the loaded data
-    pfLog(2, `${MetaModelCtrl.L}.${this.load.name}() loaded valid data:`, {
+    PFLog.normal(`${MetaModelCtrl.L}.${this.load.name}() loaded valid data:`, {
       lastUpdate: data.lastUpdate,
       lastSyncedUpdate: data.lastSyncedUpdate,
       metaRev: data.metaRev,
@@ -221,12 +220,13 @@ export class MetaModelCtrl {
     // Ensure vector clock fields are initialized for old data
     if (data.vectorClock === undefined) {
       data.vectorClock = {};
-      pfLog(2, `${MetaModelCtrl.L}.${this.load.name}() initialized missing vectorClock`);
+      PFLog.normal(
+        `${MetaModelCtrl.L}.${this.load.name}() initialized missing vectorClock`,
+      );
     }
     if (data.lastSyncedVectorClock === undefined) {
       data.lastSyncedVectorClock = null;
-      pfLog(
-        2,
+      PFLog.normal(
         `${MetaModelCtrl.L}.${this.load.name}() initialized missing lastSyncedVectorClock`,
       );
     }
@@ -264,10 +264,10 @@ export class MetaModelCtrl {
     } catch (e) {
       if (e instanceof ClientIdNotFoundError) {
         const clientId = this._generateClientId();
-        pfLog(2, `${MetaModelCtrl.L} Create clientId ${clientId}`);
+        PFLog.normal(`${MetaModelCtrl.L} Create clientId ${clientId}`);
         await this._saveClientId(clientId);
       } else {
-        pfLog(0, `${MetaModelCtrl.L} Error initializing clientId:`, e);
+        PFLog.critical(`${MetaModelCtrl.L} Error initializing clientId:`, e);
       }
     }
   }
@@ -293,7 +293,7 @@ export class MetaModelCtrl {
    * @returns Promise that resolves when the save completes
    */
   private _saveClientId(clientId: string): Promise<unknown> {
-    pfLog(2, `${MetaModelCtrl.L}.${this._saveClientId.name}()`, clientId);
+    PFLog.normal(`${MetaModelCtrl.L}.${this._saveClientId.name}()`, clientId);
     this._clientIdInMemory = clientId;
     return this._db.save(MetaModelCtrl.CLIENT_ID, clientId, true);
   }
@@ -307,14 +307,14 @@ export class MetaModelCtrl {
     const newClientId = this._generateClientId();
     // Save the new client ID
     await this._db.save(MetaModelCtrl.CLIENT_ID, newClientId, true);
-    pfLog(1, `${MetaModelCtrl.L}.generateNewClientId() generated new client ID`, {
+    PFLog.error(`${MetaModelCtrl.L}.generateNewClientId() generated new client ID`, {
       newClientId,
     });
     return newClientId;
   }
 
   private _generateClientId(): string {
-    pfLog(2, `${MetaModelCtrl.L}.${this._generateClientId.name}()`);
+    PFLog.normal(`${MetaModelCtrl.L}.${this._generateClientId.name}()`);
     return getEnvironmentId() + '_' + Date.now();
   }
 }

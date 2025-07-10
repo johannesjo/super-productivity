@@ -11,6 +11,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { T } from 'src/app/t.const';
 import { TranslateModule } from '@ngx-translate/core';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
+import { Log } from '../../core/log';
 
 @Component({
   selector: 'task-title',
@@ -31,7 +32,7 @@ export class TaskTitleComponent {
     if (!this.isFocused && this.tmpValue !== this.lastExternalValue) {
       // NOTE: this works because set value is called after this, for non-short syntax only changes
       this.tmpValue = this.lastExternalValue;
-      console.log('new tmp', this.tmpValue);
+      Log.log('new tmp', this.tmpValue);
     }
   }
 
@@ -64,7 +65,7 @@ export class TaskTitleComponent {
         el.selectionStart = el.selectionEnd = el.value.length;
       });
     } catch (e) {
-      console.warn(e);
+      Log.err(e);
     }
   }
 
@@ -88,7 +89,7 @@ export class TaskTitleComponent {
   onTextInput(ev: Event): void {
     // TODO not really clear if this is needed. was apparently added to prevent the android web view enter key from submitting
     if (IS_ANDROID_WEB_VIEW && (ev as InputEvent)?.data?.slice(-1) === '\n') {
-      console.log('android enter key press');
+      Log.log('android enter key press');
       this._forceBlur();
       ev.preventDefault();
       setTimeout(() => {

@@ -10,6 +10,7 @@ import {
 import { FieldType } from '@ngx-formly/core';
 import { Subscription } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
+import { Log } from '../../core/log';
 
 @Component({
   selector: 'formly-translated-template',
@@ -36,7 +37,7 @@ export class FormlyTranslatedTemplateComponent
 
     const translationId = this.field.templateOptions.text;
     if (!translationId) {
-      console.warn('No translation id provided');
+      Log.err('No translation id provided');
       return;
     }
 

@@ -31,6 +31,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { PlannerService } from '../../planner/planner.service';
 import { selectAllTasksDueToday } from '../../planner/store/planner.selectors';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
+import { Log } from '../../../core/log';
 
 @Injectable()
 export class TagEffects {
@@ -174,7 +175,7 @@ export class TagEffects {
           ),
         ),
         filter(({ nullTasks }) => nullTasks.length > 0),
-        tap((arg) => console.log('Error INFO Today:', arg)),
+        tap((arg) => Log.log('Error INFO Today:', arg)),
         tap(({ activeId, allTasks }) => {
           const allIds = allTasks.map((t) => t && t.id);
           const r = confirm(
@@ -221,7 +222,7 @@ export class TagEffects {
           newTaskIds.some((id, i) => id !== todayTagTaskIds[i]);
 
         if (isChanged && (tasksWithParentInListIds.length || dueNotInListIds.length)) {
-          console.log('Preventing parent and subtask in today list', {
+          Log.log('Preventing parent and subtask in today list', {
             isChanged,
             tasksWithParentInListIds,
             dueNotInListIds,

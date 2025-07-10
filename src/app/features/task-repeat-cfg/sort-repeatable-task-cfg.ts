@@ -14,4 +14,4 @@ export const sortRepeatableTaskCfgs = (a: TaskRepeatCfg, b: TaskRepeatCfg): numb
 // arr.push({ order: 0 });
 // arr.push({ order: 0 });
 // arr.push({ order: 0 });
-// console.log(arr.sort(sortRepeatableTaskCfgs as any));
+// Log.log(arr.sort(sortRepeatableTaskCfgs as any));

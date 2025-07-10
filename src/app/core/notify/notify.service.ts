@@ -6,6 +6,7 @@ import { IS_MOBILE } from '../../util/is-mobile';
 import { TranslateService } from '@ngx-translate/core';
 import { UiHelperService } from '../../features/ui-helper/ui-helper.service';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
+import { Log } from '../log';
 
 @Injectable({
   providedIn: 'root',
@@ -79,7 +80,7 @@ export class NotifyService {
         return instance;
       }
     }
-    console.warn('No notifications supported');
+    Log.err('No notifications supported');
     return undefined;
   }
 

@@ -35,6 +35,7 @@ import { selectCalendarProviders } from '../issue/store/issue-provider.selectors
 import { IssueProviderCalendar } from '../issue/issue.model';
 import { CalendarProviderCfg } from '../issue/providers/calendar/calendar.model';
 import { CORS_SKIP_EXTRA_HEADERS } from '../../app.constants';
+import { Log } from '../../core/log';
 
 const ONE_MONTHS = 60 * 60 * 1000 * 24 * 31;
 
@@ -75,7 +76,7 @@ export class CalendarIntegrationService {
                     .pipe(distinctUntilChanged(fastArrayCompare)),
                   this.skippedEventIds$.pipe(distinctUntilChanged(fastArrayCompare)),
                 ]).pipe(
-                  // tap((val) => console.log('selectAllCalendarTaskEventIds', val)),
+                  // tap((val) => Log.log('selectAllCalendarTaskEventIds', val)),
                   map(([allCalendarTaskEventIds, skippedEventIds]) => {
                     return resultForProviders.map(({ itemsForProvider, calProvider }) => {
                       return {
@@ -90,7 +91,7 @@ export class CalendarIntegrationService {
                   }),
                 ),
               ),
-              // tap((v) => console.log('icalEvents$ final', v)),
+              // tap((v) => Log.log('icalEvents$ final', v)),
               tap((val) => {
                 saveToRealLs(LS.CAL_EVENTS_CACHE, val);
               }),
@@ -104,7 +105,7 @@ export class CalendarIntegrationService {
   public readonly skippedEventIds$ = new BehaviorSubject<string[]>([]);
 
   constructor() {
-    // console.log(
+    // Log.log(
     //   localStorage.getItem(LS.CALENDER_EVENTS_LAST_SKIP_DAY),
     //   localStorage.getItem(LS.CALENDER_EVENTS_SKIPPED_TODAY),
     //   localStorage.getItem(LS.CAL_EVENTS_CACHE),
@@ -132,7 +133,7 @@ export class CalendarIntegrationService {
       .pipe(
         map((v) => !!v),
         catchError((err) => {
-          console.error(err);
+          Log.err(err);
           return of(false);
         }),
       )
@@ -155,7 +156,7 @@ export class CalendarIntegrationService {
     end = getEndOfDayTimestamp(),
     isForwardError = false,
   ): Observable<CalendarIntegrationEvent[]> {
-    // console.log('REQUEST EVENTS', calProvider, start, end);
+    // Log.log('REQUEST EVENTS', calProvider, start, end);
 
     return this._http
       .get(calProvider.icalUrl, {
@@ -174,7 +175,7 @@ export class CalendarIntegrationService {
           ),
         ),
         catchError((err) => {
-          console.error(err);
+          Log.err(err);
           this._snackService.open({
             type: 'ERROR',
             msg: T.F.CALENDARS.S.CAL_PROVIDER_ERROR,

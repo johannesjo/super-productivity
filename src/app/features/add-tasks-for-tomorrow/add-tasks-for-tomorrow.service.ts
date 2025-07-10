@@ -17,6 +17,7 @@ import { getWorklogStr } from '../../util/get-work-log-str';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { selectTodayTaskIds } from '../work-context/store/work-context.selectors';
 import { selectTasksForPlannerDay } from '../planner/store/planner.selectors';
+import { TaskLog } from '../../core/log';
 
 @Injectable({
   providedIn: 'root',
@@ -105,7 +106,13 @@ export class AddTasksForTomorrowService {
     const allDueSorted = this._sortAll([
       ...allDue.filter((t) => !todaysTaskIds.includes(t.id)),
     ]);
-    console.log({ allDue, allDueSorted });
+
+    if (allDueSorted.length > 0) {
+      TaskLog.log('[AddTasksForTomorrow] Moving tomorrow tasks to today', {
+        count: allDueSorted.length,
+        taskIds: allDueSorted.map((t) => t.id),
+      });
+    }
 
     this._movePlannedTasksToToday(allDueSorted);
 
@@ -120,6 +127,8 @@ export class AddTasksForTomorrowService {
     // Use current timestamp for today
     const todayTS = Date.now();
     const todayStr = getWorklogStr();
+
+    TaskLog.log('[AddTasksForTomorrow] Starting addAllDueToday', { todayStr });
 
     const dueRepeatCfgs = await this._taskRepeatCfgService
       .getRepeatableTasksDueForDayOnly$(todayDate.getTime())
@@ -165,6 +174,15 @@ export class AddTasksForTomorrowService {
     const allDueSorted = this._sortAll([
       ...allDue.filter((t) => !todaysTaskIds.includes(t.id)),
     ]);
+
+    if (allDueSorted.length > 0) {
+      TaskLog.log('[AddTasksForTomorrow] Found tasks due today to add', {
+        count: allDueSorted.length,
+        repeatableTasks: dueRepeatCfgs.length,
+        dueWithTime: dueWithTime.length,
+        dueWithDay: dueWithDay.length,
+      });
+    }
 
     this._movePlannedTasksToToday(allDueSorted);
 

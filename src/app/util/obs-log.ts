@@ -1,5 +1,6 @@
 import { defer, Observable, Subscriber } from 'rxjs';
 import { finalize, tap } from 'rxjs/operators';
+import { Log } from '../core/log';
 
 export const obsLogAll$ = <T>(
   sourceOrName: Observable<T> | string,
@@ -12,13 +13,13 @@ export const obsLogAll$ = <T>(
 
 export const obsLog$ = <T>(source: Observable<T>, name: string = 'obs$'): Observable<T> =>
   defer(() => {
-    console.log(`_o_ ${name}: subscribed ++`);
+    Log.log(`_o_ ${name}: subscribed ++`);
     return source.pipe(
       tap({
-        next: (value) => console.log(`_o_ ${name}: ${value}`),
-        complete: () => console.log(`_o_ ${name}: $$$ complete $$$`),
+        next: (value) => Log.log(`_o_ ${name}: ${value}`),
+        complete: () => Log.log(`_o_ ${name}: $$$ complete $$$`),
       }),
-      finalize(() => console.log(`_o_ ${name}: unsubscribed --`)),
+      finalize(() => Log.log(`_o_ ${name}: unsubscribed --`)),
     );
   });
 
@@ -30,12 +31,12 @@ export const subscriberCount$ = <T>(
   return new Observable((subscriber: Subscriber<T>) => {
     const subscription = sourceObservable.subscribe(subscriber);
     counter++;
-    console.log(`_o_ ${name} subs: ${counter}`);
+    Log.log(`_o_ ${name} subs: ${counter}`);
 
     return () => {
       subscription.unsubscribe();
       counter--;
-      console.log(`_o_ ${name} subs: ${counter}`);
+      Log.log(`_o_ ${name} subs: ${counter}`);
     };
   });
 };

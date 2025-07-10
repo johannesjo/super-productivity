@@ -12,7 +12,7 @@ import {
   WebCryptoNotAvailableError,
 } from '../../../errors/errors';
 import { md5HashPromise } from '../../../../../util/md5-hash';
-import { pfLog } from '../../../util/log';
+import { PFLog } from '../../../../../core/log';
 import { PrivateCfgByProviderId } from '../../../pfapi.model';
 
 export abstract class LocalFileSyncBase
@@ -39,7 +39,7 @@ export abstract class LocalFileSyncBase
   protected abstract getFilePath(targetPath: string): Promise<string>;
 
   async getFileRev(targetPath: string, localRev: string): Promise<{ rev: string }> {
-    pfLog(2, `${LocalFileSyncBase.LB}.${this.getFileRev.name}`, {
+    PFLog.normal(`${LocalFileSyncBase.LB}.${this.getFileRev.name}`, {
       targetPath,
       localRev,
     });
@@ -47,7 +47,7 @@ export abstract class LocalFileSyncBase
       const r = await this.downloadFile(targetPath, localRev);
       return { rev: r.rev };
     } catch (e) {
-      pfLog(0, `${LocalFileSyncBase.LB}.${this.getFileRev.name} error`, e);
+      PFLog.critical(`${LocalFileSyncBase.LB}.${this.getFileRev.name} error`, e);
       throw e;
     }
   }
@@ -56,7 +56,7 @@ export abstract class LocalFileSyncBase
     targetPath: string,
     localRev: string,
   ): Promise<{ rev: string; dataStr: string }> {
-    pfLog(2, `${LocalFileSyncBase.LB}.${this.downloadFile.name}()`, {
+    PFLog.normal(`${LocalFileSyncBase.LB}.${this.downloadFile.name}()`, {
       targetPath,
       localRev,
     });
@@ -87,7 +87,7 @@ export abstract class LocalFileSyncBase
         throw new RemoteFileNotFoundAPIError(targetPath);
       }
 
-      pfLog(0, `${LocalFileSyncBase.LB}.${this.downloadFile.name}() error`, e);
+      PFLog.critical(`${LocalFileSyncBase.LB}.${this.downloadFile.name}() error`, e);
       throw e;
     }
   }
@@ -98,7 +98,7 @@ export abstract class LocalFileSyncBase
     revToMatch: string | null,
     isForceOverwrite: boolean = false,
   ): Promise<{ rev: string }> {
-    pfLog(2, `${LocalFileSyncBase.LB}.${this.uploadFile.name}()`, {
+    PFLog.normal(`${LocalFileSyncBase.LB}.${this.uploadFile.name}()`, {
       targetPath,
       dataLength: dataStr?.length,
       revToMatch,
@@ -111,8 +111,7 @@ export abstract class LocalFileSyncBase
         try {
           const existingFile = await this.downloadFile(targetPath, revToMatch);
           if (existingFile.rev !== revToMatch) {
-            pfLog(
-              0,
+            PFLog.critical(
               `${LocalFileSyncBase.LB}.${this.uploadFile.name}() rev mismatch`,
               existingFile.rev,
               revToMatch,
@@ -133,13 +132,13 @@ export abstract class LocalFileSyncBase
       const newRev = await this._getLocalRev(dataStr);
       return { rev: newRev };
     } catch (e) {
-      pfLog(0, `${LocalFileSyncBase.LB}.${this.uploadFile.name}() error`, e);
+      PFLog.critical(`${LocalFileSyncBase.LB}.${this.uploadFile.name}() error`, e);
       throw e;
     }
   }
 
   async removeFile(targetPath: string): Promise<void> {
-    pfLog(2, `${LocalFileSyncBase.LB}.${this.removeFile.name}`, { targetPath });
+    PFLog.normal(`${LocalFileSyncBase.LB}.${this.removeFile.name}`, { targetPath });
     try {
       const filePath = await this.getFilePath(targetPath);
       await this.fileAdapter.deleteFile(filePath);
@@ -150,13 +149,16 @@ export abstract class LocalFileSyncBase
         e?.toString?.().includes('File does not exist') ||
         e?.toString?.().includes('ENOENT')
       ) {
-        pfLog(2, `${LocalFileSyncBase.LB}.${this.removeFile.name} - file doesn't exist`, {
-          targetPath,
-        });
+        PFLog.normal(
+          `${LocalFileSyncBase.LB}.${this.removeFile.name} - file doesn't exist`,
+          {
+            targetPath,
+          },
+        );
         return;
       }
 
-      pfLog(0, `${LocalFileSyncBase.LB}.${this.removeFile.name} error`, e);
+      PFLog.critical(`${LocalFileSyncBase.LB}.${this.removeFile.name} error`, e);
       throw e;
     }
   }

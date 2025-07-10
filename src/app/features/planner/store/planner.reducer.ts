@@ -6,6 +6,7 @@ import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { unique } from '../../../util/unique';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { Log } from '../../../core/log';
 
 export const plannerFeatureKey = 'planner';
 
@@ -139,7 +140,7 @@ export const plannerReducer = createReducer(
               // when moving a parent to the day, remove all sub-tasks
               .filter((id) => !action.task.subTaskIds.includes(id)),
           };
-    console.log({ updateNextDay, updatePrevDay });
+    Log.log({ updateNextDay, updatePrevDay });
 
     return {
       ...state,
@@ -174,7 +175,7 @@ export const plannerReducer = createReducer(
       }
       const toIndex = daysCopy[dayI].indexOf(action.toTaskId);
       if (toIndex > -1) {
-        console.log('toIndex', toIndex);
+        Log.log('toIndex', toIndex);
         const tidsForDay = [...daysCopy[dayI]];
         tidsForDay.splice(toIndex, 0, action.fromTask.id);
         daysCopy[dayI] = tidsForDay;

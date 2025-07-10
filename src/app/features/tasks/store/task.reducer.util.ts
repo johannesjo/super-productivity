@@ -11,6 +11,7 @@ import { calcTotalTimeSpent } from '../util/calc-total-time-spent';
 import { taskAdapter } from './task.adapter';
 import { filterOutId } from '../../../util/filter-out-id';
 import { Update } from '@ngrx/entity';
+import { TaskLog } from '../../../core/log';
 
 export const getTaskById = (taskId: string, state: TaskState): Task => {
   if (!state.entities[taskId]) {
@@ -37,7 +38,7 @@ export const reCalcTimeSpentForParentIfParent = (
   if (parentId) {
     const parentTask = state.entities[parentId];
     if (!parentTask) {
-      console.warn(
+      TaskLog.err(
         `Parent task ${parentId} not found in reCalcTimeSpentForParentIfParent`,
       );
       return state;
@@ -83,7 +84,7 @@ export const reCalcTimeEstimateForParentIfParent = (
 ): TaskState => {
   const parentTask = state.entities[parentId];
   if (!parentTask) {
-    console.warn(
+    TaskLog.err(
       `Parent task ${parentId} not found in reCalcTimeEstimateForParentIfParent`,
     );
     return state;
@@ -97,9 +98,9 @@ export const reCalcTimeEstimateForParentIfParent = (
       return upd && upd.id === id ? { ...task, ...upd.changes } : task;
     })
     .filter((task): task is Task => !!task);
-  // console.log(
+  // TaskLog.log(
   //   subTasks.reduce((acc: number, st: Task) => {
-  //     console.log(
+  //     TaskLog.log(
   //       (st.isDone ? 0 : Math.max(0, st.timeEstimate - st.timeSpent)) / 60 / 1000,
   //     );
   //

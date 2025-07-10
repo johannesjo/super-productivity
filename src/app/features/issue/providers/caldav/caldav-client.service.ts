@@ -16,6 +16,7 @@ import { T } from '../../../../t.const';
 import { catchError } from 'rxjs/operators';
 import { HANDLED_ERROR_PROP_STR } from '../../../../app.constants';
 import { throwHandledError } from '../../../../util/throw-handled-error';
+import { IssueLog } from '../../../../core/log';
 
 interface ClientCache {
   client: DavClient;
@@ -114,7 +115,7 @@ export class CaldavClientService {
     const todo = comp.getFirstSubcomponent('vtodo');
 
     if (!todo) {
-      console.log(task);
+      IssueLog.log(task);
       throw new Error('No todo found for task');
     }
 
@@ -397,7 +398,7 @@ export class CaldavClientService {
     const todo = comp.getFirstSubcomponent('vtodo');
 
     if (!todo) {
-      console.warn('No todo found for task', task);
+      IssueLog.err('No todo found for task', task);
       return;
     }
 
