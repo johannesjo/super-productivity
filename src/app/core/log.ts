@@ -1,4 +1,5 @@
 import { environment } from '../../environments/environment';
+import { download } from '../util/download';
 
 export enum LogLevel {
   CRITICAL = 0,
@@ -245,5 +246,6 @@ export const PFLog = Log.withContext('pf');
 export const PluginLog = Log.withContext('plugin');
 export const IssueLog = Log.withContext('issue');
 export const DroidLog = Log.withContext('droid');
-
 export const TaskLog = Log.withContext('task');
+
+export const downloadLogs = (): void => download('SP-logs', Log.exportLogHistory());

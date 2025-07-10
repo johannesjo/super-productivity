@@ -43,7 +43,7 @@ import { createPluginShortcutFormItems } from '../../features/config/form-cfgs/p
 import { PluginService } from '../../plugins/plugin.service';
 import { PluginShortcutCfg } from '../../plugins/plugin-api.model';
 import { ThemeSelectorComponent } from '../../core/theme/theme-selector/theme-selector.component';
-import { Log } from '../../core/log';
+import { downloadLogs, Log } from '../../core/log';
 
 @Component({
   selector: 'config-page',
@@ -228,4 +228,6 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   ): GlobalSectionConfig {
     return (this.globalCfg as any)[sectionKey];
   }
+
+  protected readonly downloadLogs = downloadLogs;
 }

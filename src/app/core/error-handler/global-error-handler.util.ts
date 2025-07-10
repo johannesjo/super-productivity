@@ -6,7 +6,7 @@ import { download } from '../../util/download';
 import { privacyExport } from '../../imex/file-imex/privacy-export';
 import { getAppVersionStr } from '../../util/get-app-version-str';
 import { CompleteBackup } from '../../pfapi/api';
-import { Log } from '../log';
+import { downloadLogs, Log } from '../log';
 
 let isWasErrorAlertCreated = false;
 
@@ -172,6 +172,11 @@ export const createErrorAlert = (
     });
     innerWrapper.append(btnPrivacyExport);
   }
+
+  const btnLogs = document.createElement('BUTTON');
+  btnLogs.innerText = 'Logs';
+  btnLogs.addEventListener('click', () => downloadLogs());
+  innerWrapper.append(btnLogs);
 
   const tagReport = document.createElement('A');
   const btnReport = document.createElement('BUTTON');
