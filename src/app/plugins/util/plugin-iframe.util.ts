@@ -1,35 +1,11 @@
 import { PluginBridgeService } from '../plugin-bridge.service';
 import { PluginBaseCfg, PluginManifest } from '../plugin-api.model';
+import { PluginIframeMessageType } from '@super-productivity/plugin-api';
 
 /**
  * Simplified plugin iframe utilities following KISS principles.
  * One way to do things, no complex options.
  */
-
-/**
- * Enum for plugin iframe message types
- */
-export enum PluginIframeMessageType {
-  // API communication
-  API_CALL = 'PLUGIN_API_CALL',
-  API_RESPONSE = 'PLUGIN_API_RESPONSE',
-  API_ERROR = 'PLUGIN_API_ERROR',
-
-  // Hook events
-  HOOK_EVENT = 'PLUGIN_HOOK_EVENT',
-
-  // Dialog interaction
-  DIALOG_BUTTON_CLICK = 'PLUGIN_DIALOG_BUTTON_CLICK',
-  DIALOG_BUTTON_RESPONSE = 'PLUGIN_DIALOG_BUTTON_RESPONSE',
-
-  // Message forwarding
-  MESSAGE = 'PLUGIN_MESSAGE',
-  MESSAGE_RESPONSE = 'PLUGIN_MESSAGE_RESPONSE',
-  MESSAGE_ERROR = 'PLUGIN_MESSAGE_ERROR',
-
-  // Plugin lifecycle
-  READY = 'plugin-ready',
-}
 
 export interface PluginIframeConfig {
   pluginId: string;
@@ -340,8 +316,11 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
   `;
 };
 
+// Store blob URLs for cleanup
+const activeBlobUrls = new Set<string>();
+
 /**
- * Create iframe URL with injected API
+ * Create iframe URL with injected API using blob URLs instead of data URLs
  */
 export const createPluginIframeUrl = (config: PluginIframeConfig): string => {
   const apiScript = createPluginApiScript(config);
@@ -367,8 +346,34 @@ export const createPluginIframeUrl = (config: PluginIframeConfig): string => {
     html = html + apiScript;
   }
 
-  // Convert to data URL
-  return 'data:text/html;base64,' + btoa(unescape(encodeURIComponent(html)));
+  // Create blob URL instead of data URL
+  const blob = new Blob([html], { type: 'text/html' });
+  const blobUrl = URL.createObjectURL(blob);
+
+  // Track the blob URL for cleanup
+  activeBlobUrls.add(blobUrl);
+
+  return blobUrl;
+};
+
+/**
+ * Clean up a blob URL when iframe is no longer needed
+ */
+export const cleanupPluginIframeUrl = (url: string): void => {
+  if (url.startsWith('blob:') && activeBlobUrls.has(url)) {
+    URL.revokeObjectURL(url);
+    activeBlobUrls.delete(url);
+  }
+};
+
+/**
+ * Clean up all active blob URLs (useful for cleanup on destroy)
+ */
+export const cleanupAllPluginIframeUrls = (): void => {
+  activeBlobUrls.forEach((url) => {
+    URL.revokeObjectURL(url);
+  });
+  activeBlobUrls.clear();
 };
 
 /**

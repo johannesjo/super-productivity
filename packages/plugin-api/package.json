@@ -2,6 +2,7 @@
   "name": "@super-productivity/plugin-api",
   "version": "1.0.1",
   "description": "TypeScript definitions for Super Productivity plugin development",
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
@@ -31,6 +32,7 @@
   },
   "homepage": "https://github.com/johannesjo/super-productivity#readme",
   "files": [
+    "dist/**/*.js",
     "dist/**/*.d.ts",
     "README.md"
   ],

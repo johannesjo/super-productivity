@@ -1,34 +1,35 @@
 import {
-  PluginCreateTaskData,
+  BatchUpdateRequest,
+  BatchUpdateResult,
   DialogCfg,
   Hooks,
   NotifyCfg,
+  PluginAPI as PluginAPIInterface,
   PluginBaseCfg,
+  PluginCreateTaskData,
+  PluginHeaderBtnCfg,
   PluginHookHandler,
   PluginHooks,
+  PluginManifest,
   PluginMenuEntryCfg,
-  PluginShortcutCfg,
-  PluginHeaderBtnCfg,
   PluginNodeScriptRequest,
   PluginNodeScriptResult,
+  PluginShortcutCfg,
   PluginSidePanelBtnCfg,
-  Task,
   Project,
-  Tag,
   SnackCfg,
-  PluginAPI as PluginAPIInterface,
-  PluginManifest,
+  Tag,
+  Task,
 } from '@super-productivity/plugin-api';
 import { PluginBridgeService } from './plugin-bridge.service';
 import {
-  taskCopyToTaskData,
   projectCopyToProjectData,
-  tagCopyToTagData,
-  taskDataToPartialTaskCopy,
   projectDataToPartialProjectCopy,
+  tagCopyToTagData,
   tagDataToPartialTagCopy,
+  taskCopyToTaskData,
+  taskDataToPartialTaskCopy,
 } from './plugin-api-mapper';
-import { BatchUpdateRequest } from '../api/batch-update-types';
 
 /**
  * PluginAPI implementation that uses direct bridge service injection
@@ -36,7 +37,7 @@ import { BatchUpdateRequest } from '../api/batch-update-types';
  */
 export class PluginAPI implements PluginAPIInterface {
   readonly Hooks = PluginHooks;
-  private _hookHandlers = new Map<string, Map<Hooks, Array<PluginHookHandler>>>();
+  private _hookHandlers = new Map<string, Map<Hooks, Array<PluginHookHandler<any>>>>();
   private _headerButtons: Array<PluginHeaderBtnCfg> = [];
   private _menuEntries: Array<PluginMenuEntryCfg> = [];
   private _shortcuts: Array<PluginShortcutCfg> = [];
@@ -67,7 +68,7 @@ export class PluginAPI implements PluginAPIInterface {
     }
   }
 
-  registerHook(hook: Hooks, fn: PluginHookHandler): void {
+  registerHook<T extends Hooks>(hook: T, fn: PluginHookHandler<T>): void {
     if (!this._hookHandlers.has(this._pluginId)) {
       this._hookHandlers.set(this._pluginId, new Map());
     }
@@ -77,11 +78,11 @@ export class PluginAPI implements PluginAPIInterface {
       pluginHooks.set(hook, []);
     }
 
-    pluginHooks.get(hook)!.push(fn);
+    pluginHooks.get(hook)!.push(fn as PluginHookHandler<any>);
     console.log(`Plugin ${this._pluginId} registered hook: ${hook}`);
 
     // Register hook with bridge
-    this._pluginBridge.registerHook(this._pluginId, hook, fn);
+    this._pluginBridge.registerHook(this._pluginId, hook, fn as PluginHookHandler<any>);
   }
 
   registerHeaderButton(headerBtnCfg: PluginHeaderBtnCfg): void {
@@ -215,12 +216,12 @@ export class PluginAPI implements PluginAPIInterface {
     return this._pluginBridge.reorderTasks(taskIds, contextId, contextType);
   }
 
-  async batchUpdateForProject(request: unknown): Promise<unknown> {
+  async batchUpdateForProject(request: BatchUpdateRequest): Promise<BatchUpdateResult> {
     console.log(
       `Plugin ${this._pluginId} requested batch update for project ${(request as { projectId: string }).projectId}`,
       request,
     );
-    return this._pluginBridge.batchUpdateForProject(request as BatchUpdateRequest);
+    return this._pluginBridge.batchUpdateForProject(request);
   }
 
   showSnack(snackCfg: SnackCfg): void {

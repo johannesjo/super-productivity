@@ -17,20 +17,14 @@ import {
   PluginNodeScriptRequest,
   PluginNodeScriptResult,
 } from './plugin-api.model';
+
 import {
+  SnackCfg,
+  PluginManifest,
   BatchUpdateRequest,
   BatchUpdateResult,
-  BatchUpdateError,
-  BatchOperation,
   BatchTaskCreate,
-  BatchTaskUpdate,
-  BatchTaskDelete,
-  BatchTaskReorder,
-} from '../api/batch-update-types';
-import { Task as TaskCopy } from '../features/tasks/task.model';
-import { Project as ProjectCopy } from '../features/project/project.model';
-import { Tag as TagCopy } from '../features/tag/tag.model';
-import { SnackCfg, PluginManifest } from '@super-productivity/plugin-api';
+} from '@super-productivity/plugin-api';
 import { snackCfgToSnackParams } from './plugin-api-mapper';
 import { PluginHooksService } from './plugin-hooks';
 import { TaskService } from '../features/tasks/task.service';
@@ -52,6 +46,9 @@ import { isAllowedPluginAction } from './allowed-plugin-actions.const';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from '../t.const';
 import { SyncWrapperService } from '../imex/sync/sync-wrapper.service';
+import { TaskCopy } from '../features/tasks/task.model';
+import { ProjectCopy } from '../features/project/project.model';
+import { TagCopy } from '../features/tag/tag.model';
 
 /**
  * PluginBridge acts as an intermediary layer between plugins and the main application services.
@@ -549,58 +546,15 @@ export class PluginBridgeService implements OnDestroy {
   }
 
   /**
-   * Batch update tasks for a project with validation
-   * Allows multiple operations to be performed atomically with proper validation
+   * Batch update tasks for a project
+   * Only generate IDs here - let the reducer handle all validation
    */
   async batchUpdateForProject(request: BatchUpdateRequest): Promise<BatchUpdateResult> {
     typia.assert<BatchUpdateRequest>(request);
 
-    const errors: BatchUpdateError[] = [];
-    const createdTaskIds: { [tempId: string]: string } = {};
-
-    // Validate project exists
-    const project = await this._projectService
-      .getByIdOnce$(request.projectId)
-      .pipe(first())
-      .toPromise();
-
-    if (!project) {
-      throw new Error(
-        this._translateService.instant(T.PLUGINS.PROJECT_NOT_FOUND, {
-          contextId: request.projectId,
-        }),
-      );
-    }
-
-    // Get all current tasks for validation
-    const allTasks = await this._taskService.allTasks$.pipe(first()).toPromise();
-    const projectTasks = allTasks?.filter((t) => t.projectId === request.projectId) || [];
-
-    // Validate operations
-    for (let i = 0; i < request.operations.length; i++) {
-      const op = request.operations[i];
-      const validationError = this._validateBatchOperation(
-        op,
-        request.projectId,
-        projectTasks,
-        createdTaskIds,
-        i,
-      );
-      if (validationError) {
-        errors.push(validationError);
-      }
-    }
-
-    // If there are validation errors, return early
-    if (errors.length > 0) {
-      return {
-        success: false,
-        createdTaskIds: {},
-        errors,
-      };
-    }
-
     // Generate IDs for all create operations
+    // We need to do this here so we can return them to the plugin immediately
+    const createdTaskIds: { [tempId: string]: string } = {};
     request.operations.forEach((op) => {
       if (op.type === 'create') {
         const createOp = op as BatchTaskCreate;
@@ -608,98 +562,21 @@ export class PluginBridgeService implements OnDestroy {
       }
     });
 
-    // Dispatch the batch update action
-    try {
-      this._store.dispatch(
-        TaskSharedActions.batchUpdateForProject({
-          projectId: request.projectId,
-          operations: request.operations,
-          createdTaskIds,
-        }),
-      );
-
-      console.log('PluginBridge: Batch update dispatched successfully', {
+    // Dispatch the batch update action - let the reducer handle all validation
+    this._store.dispatch(
+      TaskSharedActions.batchUpdateForProject({
         projectId: request.projectId,
-        operationCount: request.operations.length,
-        createdTasks: Object.keys(createdTaskIds).length,
-      });
-
-      return {
-        success: true,
+        operations: request.operations,
         createdTaskIds,
-      };
-    } catch (error) {
-      console.error('PluginBridge: Batch update failed', error);
-      throw error;
-    }
-  }
+      }),
+    );
 
-  private _validateBatchOperation(
-    op: BatchOperation,
-    projectId: string,
-    projectTasks: TaskCopy[],
-    createdTaskIds: { [tempId: string]: string },
-    operationIndex: number,
-  ): BatchUpdateError | null {
-    switch (op.type) {
-      case 'create':
-        const createOp = op as BatchTaskCreate;
-        // Check for circular dependencies
-        if (createOp.data.parentId === createOp.tempId) {
-          return {
-            operationIndex,
-            type: 'CIRCULAR_DEPENDENCY',
-            message: 'Task cannot be its own parent',
-          };
-        }
-        // Basic validation for required fields
-        if (!createOp.data.title || createOp.data.title.trim() === '') {
-          return {
-            operationIndex,
-            type: 'VALIDATION_ERROR',
-            message: 'Task title is required',
-          };
-        }
-        break;
-
-      case 'update':
-        const updateOp = op as BatchTaskUpdate;
-        const taskToUpdate = projectTasks.find((t) => t.id === updateOp.taskId);
-        if (!taskToUpdate) {
-          return {
-            operationIndex,
-            type: 'TASK_NOT_FOUND',
-            message: `Task ${updateOp.taskId} not found in project`,
-          };
-        }
-        break;
-
-      case 'delete':
-        const deleteOp = op as BatchTaskDelete;
-        const taskToDelete = projectTasks.find((t) => t.id === deleteOp.taskId);
-        if (!taskToDelete) {
-          return {
-            operationIndex,
-            type: 'TASK_NOT_FOUND',
-            message: `Task ${deleteOp.taskId} not found in project`,
-          };
-        }
-        break;
-
-      case 'reorder':
-        // Basic validation - the reducer will handle the actual reordering
-        const reorderOp = op as BatchTaskReorder;
-        if (!reorderOp.taskIds || reorderOp.taskIds.length === 0) {
-          return {
-            operationIndex,
-            type: 'VALIDATION_ERROR',
-            message: 'Reorder operation requires at least one task ID',
-          };
-        }
-        break;
-    }
-
-    return null;
+    // Return the generated IDs immediately
+    // The reducer will validate everything including project existence
+    return {
+      success: true,
+      createdTaskIds,
+    };
   }
 
   /**
@@ -748,10 +625,14 @@ export class PluginBridgeService implements OnDestroy {
   /**
    * Register a hook handler for a plugin
    */
-  registerHook(pluginId: string, hook: Hooks, handler: PluginHookHandler): void {
+  registerHook<T extends Hooks>(
+    pluginId: string,
+    hook: T,
+    handler: PluginHookHandler<T>,
+  ): void {
     typia.assert<string>(pluginId);
     typia.assert<Hooks>(hook);
-    typia.assert<PluginHookHandler>(handler);
+    // Note: Can't assert generic function type with typia
 
     this._pluginHooksService.registerHookHandler(pluginId, hook, handler);
   }

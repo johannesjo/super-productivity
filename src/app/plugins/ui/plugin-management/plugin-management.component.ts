@@ -155,14 +155,15 @@ export class PluginManagementComponent implements OnInit {
         return;
       }
 
-      // Set plugin as enabled in persistence
+      // Set plugin as enabled in persistence ONLY after consent is granted
       await this._pluginMetaPersistenceService.setPluginEnabled(plugin.manifest.id, true);
 
       // Update the plugin state immediately
       plugin.isEnabled = true;
 
       // Activate the plugin (lazy load if needed)
-      const instance = await this._pluginService.activatePlugin(plugin.manifest.id);
+      // Pass true to indicate this is a manual activation from UI
+      const instance = await this._pluginService.activatePlugin(plugin.manifest.id, true);
       if (instance) {
         console.log('Plugin activated successfully:', plugin.manifest.id);
       }

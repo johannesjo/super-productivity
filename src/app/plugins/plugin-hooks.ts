@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Hooks, PluginHookHandler } from './plugin-api.model';
+import { Hooks, PluginHookHandler } from '@super-productivity/plugin-api';
 
 /**
  * Simplified plugin hooks service following KISS principles.
@@ -9,12 +9,16 @@ import { Hooks, PluginHookHandler } from './plugin-api.model';
   providedIn: 'root',
 })
 export class PluginHooksService {
-  private _handlers = new Map<Hooks, Map<string, PluginHookHandler>>();
+  private _handlers = new Map<Hooks, Map<string, PluginHookHandler<any>>>();
 
   /**
    * Register a hook handler
    */
-  registerHookHandler(pluginId: string, hook: Hooks, handler: PluginHookHandler): void {
+  registerHookHandler<T extends Hooks>(
+    pluginId: string,
+    hook: T,
+    handler: PluginHookHandler<T>,
+  ): void {
     if (!this._handlers.has(hook)) {
       this._handlers.set(hook, new Map());
     }

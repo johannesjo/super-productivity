@@ -14,9 +14,24 @@ import { PluginService } from './plugin.service';
 import { PluginHooks } from './plugin-api.model';
 import { setActiveWorkContext } from '../features/work-context/store/work-context.actions';
 import { TaskSharedActions } from '../root-store/meta/task-shared.actions';
-import { setCurrentTask, unsetCurrentTask } from '../features/tasks/store/task.actions';
+import {
+  setCurrentTask,
+  unsetCurrentTask,
+  moveSubTask,
+  moveSubTaskUp,
+  moveSubTaskDown,
+  moveSubTaskToTop,
+  moveSubTaskToBottom,
+} from '../features/tasks/store/task.actions';
 import * as projectActions from '../features/project/store/project.actions';
 import { updateProject } from '../features/project/store/project.actions';
+import {
+  moveTaskDownInTodayList,
+  moveTaskInTodayList,
+  moveTaskToBottomInTodayList,
+  moveTaskToTopInTodayList,
+  moveTaskUpInTodayList,
+} from '../features/work-context/store/work-context-meta.actions';
 
 @Injectable()
 export class PluginHooksEffects {
@@ -152,7 +167,7 @@ export class PluginHooksEffects {
     { dispatch: false },
   );
 
-  // Trigger for ANY task update (add, update, delete)
+  // Trigger for ANY task update (add, update, delete, move subtasks)
   anyTaskUpdate$ = createEffect(
     () =>
       this.actions$.pipe(
@@ -161,6 +176,12 @@ export class PluginHooksEffects {
           TaskSharedActions.updateTask,
           TaskSharedActions.deleteTask,
           TaskSharedActions.deleteTasks,
+          // Include subtask move actions
+          moveSubTask,
+          moveSubTaskUp,
+          moveSubTaskDown,
+          moveSubTaskToTop,
+          moveSubTaskToBottom,
         ),
         withLatestFrom(this.store.pipe(select(selectTaskFeatureState))),
         tap(([action, taskState]) => {
@@ -196,6 +217,13 @@ export class PluginHooksEffects {
           projectActions.moveProjectTaskToBacklogList,
           projectActions.moveProjectTaskToRegularList,
           projectActions.moveAllProjectBacklogTasksToRegularList,
+
+          // cross model
+          moveTaskInTodayList,
+          moveTaskUpInTodayList,
+          moveTaskDownInTodayList,
+          moveTaskToTopInTodayList,
+          moveTaskToBottomInTodayList,
         ),
         withLatestFrom(this.store.pipe(select(selectProjectFeatureState))),
         tap(([action, projectState]) => {

@@ -15,6 +15,7 @@ import { T } from '../../../t.const';
 
 export interface PluginNodeConsentDialogData {
   manifest: PluginManifest;
+  rememberChoice?: boolean;
 }
 
 @Component({
@@ -89,6 +90,10 @@ export interface PluginNodeConsentDialogData {
         display: block;
       }
 
+      ul li {
+        font-weight: bold;
+      }
+
       mat-dialog-content {
         min-width: 400px;
         max-width: 500px;
@@ -124,7 +129,7 @@ export interface PluginNodeConsentDialogData {
         display: flex;
         align-items: center;
         gap: 8px;
-        background: #e3f2fd;
+        border: 1px solid var(--extra-border-color);
         padding: 12px;
         border-radius: 4px;
         margin: 16px 0;
@@ -153,6 +158,13 @@ export class PluginNodeConsentDialogComponent {
 
   T = T;
   rememberChoice = false;
+
+  constructor() {
+    // Pre-check the remember checkbox if provided in data
+    if (this.data.rememberChoice !== undefined) {
+      this.rememberChoice = this.data.rememberChoice;
+    }
+  }
 
   onConfirm(): void {
     this.dialogRef.close({ granted: true, remember: this.rememberChoice });
