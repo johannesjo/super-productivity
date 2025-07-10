@@ -31,3 +31,7 @@ const saveStringAsFile = async (
   Log.log(r);
   return r;
 };
+
+export const downloadLogs = (): void => {
+  download('SP-logs', Log.exportLogHistory());
+};

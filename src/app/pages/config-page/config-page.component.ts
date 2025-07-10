@@ -40,8 +40,8 @@ import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
 import { createPluginShortcutFormItems } from '../../features/config/form-cfgs/plugin-keyboard-shortcuts';
 import { PluginShortcutCfg } from '../../plugins/plugin-api.model';
 import { ThemeSelectorComponent } from '../../core/theme/theme-selector/theme-selector.component';
-import { downloadLogs, Log } from '../../core/log';
-import { SnackService } from '../../core/snack/snack.service';
+import { Log } from '../../core/log';
+import { downloadLogs } from '../../util/download';
 
 @Component({
   selector: 'config-page',

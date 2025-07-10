@@ -1,5 +1,4 @@
 import { environment } from '../../environments/environment';
-import { download } from '../util/download';
 
 export enum LogLevel {
   CRITICAL = 0,
@@ -270,11 +269,3 @@ export const PluginLog = Log.withContext('plugin');
 export const IssueLog = Log.withContext('issue');
 export const DroidLog = Log.withContext('droid');
 export const TaskLog = Log.withContext('task');
-
-export const downloadLogs = async (): Promise<void> => {
-  try {
-    await download('SP-logs.json', Log.exportLogHistory());
-  } catch (error) {
-    Log.err('Failed to download logs:', error);
-  }
-};
