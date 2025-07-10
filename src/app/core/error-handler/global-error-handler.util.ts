@@ -40,7 +40,9 @@ const _getStacktrace = async (err: Error | any): Promise<string> => {
 
   // Don't try to send stacktraces of HTTP errors as they are already logged on the server
   if (!isHttpError && isErrorWithStack && !isHandledError(err)) {
-    return StackTrace.fromError(err).then((stackframes) => {
+    return StackTrace.fromError(err, {
+      filter: (f) => f?.fileName !== 'log.ts',
+    }).then((stackframes) => {
       return stackframes
         .splice(0, 20)
         .map((sf) => {
