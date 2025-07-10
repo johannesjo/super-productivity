@@ -1,7 +1,7 @@
 // src/app/pfapi/api/sync/providers/local-file-sync/electron-file-adapter.ts
 import { LocalFileSyncBase } from './local-file-sync-base';
 import { IS_ELECTRON } from '../../../../../app.constants';
-import { SyncLog } from '../../../../../core/log';
+import { PFLog } from '../../../../../core/log';
 import { ElectronFileAdapter } from './electron-file-adapter';
 import { LocalFileSyncPrivateCfg } from '../../../pfapi.model';
 
@@ -34,7 +34,7 @@ export class LocalFileSyncElectron extends LocalFileSyncBase {
   }
 
   private async _checkDirAndOpenPickerIfNotExists(): Promise<void> {
-    SyncLog.normal(
+    PFLog.normal(
       `${LocalFileSyncElectron.L}.${this._checkDirAndOpenPickerIfNotExists.name}`,
     );
 
@@ -43,13 +43,11 @@ export class LocalFileSyncElectron extends LocalFileSyncBase {
       const isDirExists = await this._checkDirExists(folderPath);
 
       if (!isDirExists) {
-        SyncLog.critical(
-          `${LocalFileSyncElectron.L} - No valid directory, opening picker`,
-        );
+        PFLog.critical(`${LocalFileSyncElectron.L} - No valid directory, opening picker`);
         await this.pickDirectory();
       }
     } catch (err) {
-      SyncLog.error(
+      PFLog.error(
         `${LocalFileSyncElectron.L}.${this._checkDirAndOpenPickerIfNotExists.name}() error`,
         err,
       );
@@ -76,7 +74,7 @@ export class LocalFileSyncElectron extends LocalFileSyncBase {
       }
       return r;
     } catch (e) {
-      SyncLog.critical(
+      PFLog.critical(
         `${LocalFileSyncElectron.L}.${this._checkDirExists.name}() error`,
         e,
       );
@@ -85,7 +83,7 @@ export class LocalFileSyncElectron extends LocalFileSyncBase {
   }
 
   async pickDirectory(): Promise<string | void> {
-    SyncLog.normal(`${LocalFileSyncElectron.L}.pickDirectory()`);
+    PFLog.normal(`${LocalFileSyncElectron.L}.pickDirectory()`);
 
     try {
       const dir = await (window as any).ea.pickDirectory();
@@ -94,7 +92,7 @@ export class LocalFileSyncElectron extends LocalFileSyncBase {
       }
       return dir;
     } catch (e) {
-      SyncLog.critical(`${LocalFileSyncElectron.L}.pickDirectory() error`, e);
+      PFLog.critical(`${LocalFileSyncElectron.L}.pickDirectory() error`, e);
       throw e;
     }
   }

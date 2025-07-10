@@ -1,9 +1,8 @@
 import { ModelBase, ModelCfg } from '../pfapi.model';
 import { Database } from '../db/database';
 import { MetaModelCtrl } from './meta-model-ctrl';
-import { SyncLog } from '../../../core/log';
-import { ModelValidationError } from '../errors/errors';
 import { PFLog } from '../../../core/log';
+import { ModelValidationError } from '../errors/errors';
 
 // type ExtractModelType<T extends ModelCfg<unknown>> = T extends ModelCfg<infer U> ? U : never;
 
@@ -44,7 +43,7 @@ export class ModelCtrl<MT extends ModelBase> {
     p?: { isUpdateRevAndLastUpdate: boolean; isIgnoreDBLock?: boolean },
   ): Promise<unknown> {
     this._inMemoryData = data;
-    SyncLog.normal(`___ ${ModelCtrl.L}.${this.save.name}()`, this.modelId, p, data);
+    PFLog.normal(`___ ${ModelCtrl.L}.${this.save.name}()`, this.modelId, p, data);
 
     // Validate data if validator is available
     if (this.modelCfg.validate) {
@@ -108,7 +107,7 @@ export class ModelCtrl<MT extends ModelBase> {
    * @returns Promise resolving to model data
    */
   async load(): Promise<MT> {
-    SyncLog.verbose(`${ModelCtrl.L}.${this.load.name}()`, {
+    PFLog.verbose(`${ModelCtrl.L}.${this.load.name}()`, {
       inMemoryData: this._inMemoryData,
     });
     return (
@@ -123,7 +122,7 @@ export class ModelCtrl<MT extends ModelBase> {
    * @returns Promise resolving after remove operation
    */
   async remove(): Promise<unknown> {
-    SyncLog.normal(`${ModelCtrl.L}.${this.remove.name}()`, this.modelId);
+    PFLog.normal(`${ModelCtrl.L}.${this.remove.name}()`, this.modelId);
     this._inMemoryData = null;
     return this._db.remove(this.modelId);
   }

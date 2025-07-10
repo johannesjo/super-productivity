@@ -18,7 +18,7 @@ import { MetaModelCtrl } from './model-ctrl/meta-model-ctrl';
 import { ModelCtrl } from './model-ctrl/model-ctrl';
 import { MiniObservable } from './util/mini-observable';
 import { SyncProviderServiceInterface } from './sync/sync-provider.interface';
-import { SyncLog } from '../../core/log';
+import { PFLog } from '../../core/log';
 import { SyncProviderId, SyncStatus } from './pfapi.const';
 import { EncryptAndCompressHandlerService } from './sync/encrypt-and-compress-handler.service';
 import { SyncProviderPrivateCfgStore } from './sync/sync-provider-private-cfg-store';
@@ -95,7 +95,7 @@ export class Pfapi<const MD extends ModelCfgs> {
       this.cfg?.crossModelVersion || 0,
     );
     this.m = this._createModels(modelCfgs);
-    SyncLog.normal(`m`, this.m);
+    PFLog.normal(`m`, this.m);
 
     this.syncProviders = syncProviders;
     this.syncProviders.forEach((sp) => {
@@ -137,7 +137,7 @@ export class Pfapi<const MD extends ModelCfgs> {
   private async _wrapSyncAction<T>(logPrefix: string, fn: () => Promise<T>): Promise<T> {
     // Check if sync is already in progress
     if (this._isSyncInProgress) {
-      SyncLog.normal(`${logPrefix} SKIPPED - sync already in progress`);
+      PFLog.normal(`${logPrefix} SKIPPED - sync already in progress`);
       throw new Error('Sync already in progress');
     }
 
@@ -148,10 +148,10 @@ export class Pfapi<const MD extends ModelCfgs> {
     this.db.lock();
 
     try {
-      SyncLog.normal(`${logPrefix}`);
+      PFLog.normal(`${logPrefix}`);
       this.ev.emit('syncStatusChange', 'SYNCING');
       const result = await fn();
-      SyncLog.normal(`${logPrefix} result:`, result);
+      PFLog.normal(`${logPrefix} result:`, result);
       this.ev.emit('syncDone', result);
       // Keep lock until after status change to prevent race conditions
       this.ev.emit('syncStatusChange', 'IN_SYNC');
@@ -169,7 +169,7 @@ export class Pfapi<const MD extends ModelCfgs> {
   }
 
   setActiveSyncProvider(activeProviderId: SyncProviderId | null): void {
-    SyncLog.normal(
+    PFLog.normal(
       `${this.setActiveSyncProvider.name}()`,
       activeProviderId,
       activeProviderId,
@@ -197,7 +197,7 @@ export class Pfapi<const MD extends ModelCfgs> {
   async getSyncProviderById<T extends SyncProviderId>(
     providerId: T,
   ): Promise<SyncProviderServiceInterface<T>> {
-    SyncLog.normal(`${this.getSyncProviderById.name}()`, providerId);
+    PFLog.normal(`${this.getSyncProviderById.name}()`, providerId);
     const provider = this.syncProviders.find((sp) => sp.id === providerId);
     if (!provider) {
       throw new InvalidSyncProviderError();
@@ -209,7 +209,7 @@ export class Pfapi<const MD extends ModelCfgs> {
   async getSyncProviderPrivateCfg<T extends SyncProviderId>(
     providerId: T,
   ): Promise<PrivateCfgByProviderId<T>> {
-    SyncLog.normal(`${this.getSyncProviderPrivateCfg.name}()`, providerId);
+    PFLog.normal(`${this.getSyncProviderPrivateCfg.name}()`, providerId);
     const provider = this.syncProviders.find((sp) => sp.id === providerId);
     if (!provider) {
       throw new InvalidSyncProviderError();
@@ -223,7 +223,7 @@ export class Pfapi<const MD extends ModelCfgs> {
     providerId: T,
     privateCfg: PrivateCfgByProviderId<T>,
   ): Promise<void> {
-    SyncLog.normal(`${this.setPrivateCfgForSyncProvider.name}()`, providerId, privateCfg);
+    PFLog.normal(`${this.setPrivateCfgForSyncProvider.name}()`, providerId, privateCfg);
     const provider = this.syncProviders.find((sp) => sp.id === providerId);
     if (!provider) {
       throw new InvalidSyncProviderError();
@@ -236,7 +236,7 @@ export class Pfapi<const MD extends ModelCfgs> {
   }
 
   setEncryptAndCompressCfg(cfg: EncryptAndCompressCfg): void {
-    SyncLog.normal(`${this.setEncryptAndCompressCfg.name}()`, cfg);
+    PFLog.normal(`${this.setEncryptAndCompressCfg.name}()`, cfg);
     this._encryptAndCompressCfg$.next(cfg);
   }
 
@@ -244,7 +244,7 @@ export class Pfapi<const MD extends ModelCfgs> {
 
   // TODO improve naming with validity check
   async getAllSyncModelData(isSkipValidityCheck = false): Promise<AllSyncModels<MD>> {
-    SyncLog.normal(`${this.getAllSyncModelData.name}()`);
+    PFLog.normal(`${this.getAllSyncModelData.name}()`);
     const modelIds = Object.keys(this.m);
     const promises = modelIds.map((modelId) => {
       const modelCtrl = this.m[modelId];
@@ -263,9 +263,9 @@ export class Pfapi<const MD extends ModelCfgs> {
       this.cfg?.validate &&
       this.cfg.validate(allData as AllSyncModels<MD>);
     if (validationResultIfNeeded && !validationResultIfNeeded.success) {
-      SyncLog.error('ACTUALLY GOT ONE!!', validationResultIfNeeded);
+      PFLog.error('ACTUALLY GOT ONE!!', validationResultIfNeeded);
       if (this._getAllSyncModelDataRetryCount >= 1) {
-        SyncLog.error('ACTUALLY GOT ONE 2!! ERROR', validationResultIfNeeded);
+        PFLog.error('ACTUALLY GOT ONE 2!! ERROR', validationResultIfNeeded);
         this._getAllSyncModelDataRetryCount = 0;
         throw new DataValidationFailedError(validationResultIfNeeded);
       }
@@ -341,7 +341,7 @@ export class Pfapi<const MD extends ModelCfgs> {
     isSkipLegacyWarnings?: boolean;
     isBackupImport?: boolean;
   }): Promise<void> {
-    SyncLog.normal(`${this.importAllSycModelData.name}()`, { data, cfg: this.cfg });
+    PFLog.normal(`${this.importAllSycModelData.name}()`, { data, cfg: this.cfg });
 
     const { dataAfter } = await this.migrationService.migrate(crossModelVersion, data);
     data = dataAfter;
@@ -349,12 +349,12 @@ export class Pfapi<const MD extends ModelCfgs> {
     if (this.cfg?.validate) {
       const validationResult = this.cfg.validate(data);
       if (!validationResult.success) {
-        SyncLog.critical(
+        PFLog.critical(
           `${this.importAllSycModelData.name}() data not valid`,
           validationResult,
         );
         if (isAttemptRepair && this.cfg.repair) {
-          SyncLog.critical(`${this.importAllSycModelData.name}() attempting repair`);
+          PFLog.critical(`${this.importAllSycModelData.name}() attempting repair`);
           data = this.cfg.repair(data, (validationResult as IValidation.IFailure).errors);
 
           const r2 = this.cfg.validate(data);
@@ -371,7 +371,7 @@ export class Pfapi<const MD extends ModelCfgs> {
       try {
         await this.tmpBackupService.save(await this.getAllSyncModelData());
       } catch (error) {
-        SyncLog.critical(this.importAllSycModelData.name, error);
+        PFLog.critical(this.importAllSycModelData.name, error);
         PFLog.err(
           'Could not create valid backup. Onwards on the highway throug the Danger Zone!',
         );
@@ -432,7 +432,7 @@ export class Pfapi<const MD extends ModelCfgs> {
   }
 
   isValidateComplete(data: AllSyncModels<MD>): boolean {
-    SyncLog.normal(`${this.isValidateComplete.name}()`, { data });
+    PFLog.normal(`${this.isValidateComplete.name}()`, { data });
     if (!this.cfg?.validate) {
       throw new NoValidateFunctionProvidedError();
     }
@@ -441,7 +441,7 @@ export class Pfapi<const MD extends ModelCfgs> {
   }
 
   repairCompleteData(data: unknown, errors: IValidation.IError[]): AllSyncModels<MD> {
-    SyncLog.normal(`${this.repairCompleteData.name}()`, { data });
+    PFLog.normal(`${this.repairCompleteData.name}()`, { data });
     if (!this.cfg?.repair) {
       throw new NoRepairFunctionProvidedError();
     }
@@ -449,7 +449,7 @@ export class Pfapi<const MD extends ModelCfgs> {
   }
 
   validate(data: unknown): IValidation<AllSyncModels<MD>> {
-    SyncLog.normal(`${this.validate.name}()`, { data });
+    PFLog.normal(`${this.validate.name}()`, { data });
     if (!this.cfg?.validate) {
       throw new NoValidateFunctionProvidedError();
     }

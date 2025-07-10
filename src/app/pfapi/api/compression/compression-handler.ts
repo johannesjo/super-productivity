@@ -17,7 +17,7 @@ export async function compressWithGzipToString(input: string): Promise<string> {
     }
     const base64 = btoa(binary);
 
-    // SyncLog.normal( 'Compression stats', {
+    // PFLog.normal( 'Compression stats', {
     //   inputLength: input.length,
     //   compressedSize: compressed.byteLength,
     //   base64Length: base64.length,
@@ -49,7 +49,7 @@ export async function decompressGzipFromString(
 
     const decompressed = await new Response(stream.readable).arrayBuffer();
     const decoded = new TextDecoder().decode(decompressed);
-    // SyncLog.normal( 'Decompression stats', { decompressedLength: decoded.length });
+    // PFLog.normal( 'Decompression stats', { decompressedLength: decoded.length });
     return decoded;
   } catch (error) {
     PFLog.err(error);

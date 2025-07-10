@@ -12,7 +12,7 @@ import {
   RemoteFileNotFoundAPIError,
   TooManyRequestsAPIError,
 } from '../../../errors/errors';
-import { SyncLog } from '../../../../../core/log';
+import { PFLog } from '../../../../../core/log';
 import { SyncProviderServiceInterface } from '../../sync-provider.interface';
 import { SyncProviderId } from '../../../pfapi.const';
 import { tryCatchInlineAsync } from '../../../../../util/try-catch-inline';
@@ -68,7 +68,7 @@ export class DropboxApi {
       });
       return response.json();
     } catch (e) {
-      SyncLog.critical(`${DropboxApi.L}.getMetaData() error for path: ${path}`, e);
+      PFLog.critical(`${DropboxApi.L}.getMetaData() error for path: ${path}`, e);
       this._checkCommonErrors(e, path);
       throw e;
     }
@@ -115,7 +115,7 @@ export class DropboxApi {
 
       return { meta, data: data as unknown as T };
     } catch (e) {
-      SyncLog.critical(`${DropboxApi.L}.download() error for path: ${path}`, e);
+      PFLog.critical(`${DropboxApi.L}.download() error for path: ${path}`, e);
       this._checkCommonErrors(e, path);
       throw e;
     }
@@ -167,7 +167,7 @@ export class DropboxApi {
 
       return result;
     } catch (e) {
-      SyncLog.critical(`${DropboxApi.L}.upload() error for path: ${path}`, e);
+      PFLog.critical(`${DropboxApi.L}.upload() error for path: ${path}`, e);
       this._checkCommonErrors(e, path);
       throw e;
     }
@@ -186,7 +186,7 @@ export class DropboxApi {
       });
       return response.json();
     } catch (e) {
-      SyncLog.critical(`${DropboxApi.L}.remove() error for path: ${path}`, e);
+      PFLog.critical(`${DropboxApi.L}.remove() error for path: ${path}`, e);
       this._checkCommonErrors(e, path);
       throw e;
     }
@@ -209,7 +209,7 @@ export class DropboxApi {
       });
       return response.json();
     } catch (e) {
-      SyncLog.critical(`${DropboxApi.L}.checkUser() error`, e);
+      PFLog.critical(`${DropboxApi.L}.checkUser() error`, e);
       this._checkCommonErrors(e, 'check/user');
       throw e;
     }
@@ -219,13 +219,13 @@ export class DropboxApi {
    * Refresh access token using refresh token
    */
   async updateAccessTokenFromRefreshTokenIfAvailable(): Promise<void> {
-    SyncLog.normal(`${DropboxApi.L}.updateAccessTokenFromRefreshTokenIfAvailable()`);
+    PFLog.normal(`${DropboxApi.L}.updateAccessTokenFromRefreshTokenIfAvailable()`);
 
     const privateCfg = await this._parent.privateCfg.load();
     const refreshToken = privateCfg?.refreshToken;
 
     if (!refreshToken) {
-      SyncLog.critical('Dropbox: No refresh token available');
+      PFLog.critical('Dropbox: No refresh token available');
       throw new MissingRefreshTokenAPIError();
     }
 
@@ -247,14 +247,14 @@ export class DropboxApi {
       }
 
       const data = (await response.json()) as TokenResponse;
-      SyncLog.normal('Dropbox: Refresh access token Response', data);
+      PFLog.normal('Dropbox: Refresh access token Response', data);
 
       await this._parent.privateCfg.save({
         accessToken: data.access_token,
         refreshToken: data.refresh_token || privateCfg?.refreshToken,
       });
     } catch (e) {
-      SyncLog.critical('Failed to refresh Dropbox access token', e);
+      PFLog.critical('Failed to refresh Dropbox access token', e);
       throw e;
     }
   }
@@ -308,7 +308,7 @@ export class DropboxApi {
         expiresAt: +data.expires_in * 1000 + Date.now(),
       };
     } catch (e) {
-      SyncLog.critical(`${DropboxApi.L}.getTokensFromAuthCode() error`, e);
+      PFLog.critical(`${DropboxApi.L}.getTokensFromAuthCode() error`, e);
       throw e;
     }
   }
@@ -398,7 +398,7 @@ export class DropboxApi {
 
       return response;
     } catch (e) {
-      SyncLog.critical(`${DropboxApi.L}._request() error for ${url}`, e);
+      PFLog.critical(`${DropboxApi.L}._request() error for ${url}`, e);
       this._checkCommonErrors(e, url);
       throw e;
     }
@@ -471,7 +471,7 @@ export class DropboxApi {
     return new Promise((resolve, reject) => {
       setTimeout(
         () => {
-          SyncLog.normal(`Too many requests ${path}, retrying in ${retryAfter}s...`);
+          PFLog.normal(`Too many requests ${path}, retrying in ${retryAfter}s...`);
           originalRequestExecutor().then(resolve).catch(reject);
         },
         (retryAfter + EXTRA_WAIT) * 1000,
