@@ -85,7 +85,7 @@ import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions'
 import { environment } from '../../../../environments/environment';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
-import { Log } from '../../../core/log';
+import { TaskLog } from '../../../core/log';
 
 @Component({
   selector: 'task',
@@ -597,7 +597,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   focusTitleForEdit(): void {
     const taskTitleEditEl = this.taskTitleEditEl();
     if (!taskTitleEditEl || !taskTitleEditEl.textarea().nativeElement) {
-      Log.log(taskTitleEditEl);
+      TaskLog.log(taskTitleEditEl);
       throw new Error('No el');
     }
     taskTitleEditEl.textarea().nativeElement.focus();
@@ -711,7 +711,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
               archiveInstances,
               targetProject,
             ]) => {
-              Log.log({
+              TaskLog.log({
                 reminderCfg,
                 nonArchiveInstancesWithSubTasks,
                 archiveInstances,

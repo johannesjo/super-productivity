@@ -308,9 +308,9 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
           }
         });
     }
-    // this.issueIdAndType$.subscribe((v) => Log.log('issueIdAndType$', v));
-    // this.issueDataTrigger$.subscribe((v) => Log.log('issueDataTrigger$', v));
-    // this.issueData$.subscribe((v) => Log.log('issueData$', v));
+    // this.issueIdAndType$.subscribe((v) => TaskLog.log('issueIdAndType$', v));
+    // this.issueDataTrigger$.subscribe((v) => TaskLog.log('issueDataTrigger$', v));
+    // this.issueData$.subscribe((v) => TaskLog.log('issueData$', v));
 
     // NOTE: check work-view component for more info
   }

@@ -37,7 +37,7 @@ import { MatIcon } from '@angular/material/icon';
 import { TaskComponent } from '../task/task.component';
 import { AsyncPipe } from '@angular/common';
 import { TaskViewCustomizerService } from '../../task-view-customizer/task-view-customizer.service';
-import { Log } from '../../../core/log';
+import { TaskLog } from '../../../core/log';
 
 export type TaskListId = 'PARENT' | 'SUB';
 export type ListModelId = DropListModelSource | string;
@@ -132,7 +132,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     // const targetModelId = drag.dropContainer.data.listModelId;
     const targetModelId = drop.data.listModelId;
     const isSubtask = !!task.parentId;
-    // Log.log(drag.data.id, { isSubtask, targetModelId, drag, drop });
+    // TaskLog.log(drag.data.id, { isSubtask, targetModelId, drag, drop });
     // return true;
     if (targetModelId === 'OVERDUE' || targetModelId === 'LATER_TODAY') {
       return false;
@@ -159,7 +159,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     const srcListData = ev.previousContainer.data;
     const targetListData = ev.container.data;
     const draggedTask = ev.item.data;
-    Log.log({
+    TaskLog.log({
       ev,
       srcListData,
       targetListData,
@@ -221,7 +221,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
             ...targetListData.filteredTasks.filter((t) => t.id !== draggedTask.id),
             draggedTask,
           ];
-    Log.log(srcListData.listModelId, '=>', targetListData.listModelId, {
+    TaskLog.log(srcListData.listModelId, '=>', targetListData.listModelId, {
       targetTask,
       draggedTask,
       newIds,

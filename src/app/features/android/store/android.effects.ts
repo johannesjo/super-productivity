@@ -8,7 +8,7 @@ import { LocalNotifications } from '@capacitor/local-notifications';
 import { SnackService } from '../../../core/snack/snack.service';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { LocalNotificationSchema } from '@capacitor/local-notifications/dist/esm/definitions';
-import { Log } from '../../../core/log';
+import { DroidLog } from '../../../core/log';
 
 // TODO send message to electron when current task changes here
 
@@ -31,11 +31,11 @@ export class AndroidEffects {
             try {
               const checkResult = await LocalNotifications.checkPermissions();
               if (checkResult.display === 'denied') {
-                Log.log(await LocalNotifications.requestPermissions());
-                Log.log(await LocalNotifications.changeExactNotificationSetting());
+                DroidLog.log(await LocalNotifications.requestPermissions());
+                DroidLog.log(await LocalNotifications.changeExactNotificationSetting());
               }
             } catch (error) {
-              Log.err(error);
+              DroidLog.err(error);
               this._snackService.open({
                 type: 'ERROR',
                 msg: error?.toString() || 'Notifications not supported',
@@ -59,7 +59,7 @@ export class AndroidEffects {
               const checkResult = await LocalNotifications.checkPermissions();
               if (checkResult.display === 'granted') {
                 const pendingNotifications = await LocalNotifications.getPending();
-                Log.log({ pendingNotifications });
+                DroidLog.log({ pendingNotifications });
                 if (pendingNotifications.notifications.length > 0) {
                   await LocalNotifications.cancel({
                     notifications: pendingNotifications.notifications.map((n) => ({
@@ -91,7 +91,7 @@ export class AndroidEffects {
                 });
               }
             } catch (error) {
-              Log.err(error);
+              DroidLog.err(error);
               this._snackService.open({
                 type: 'ERROR',
                 msg: error?.toString() || 'Notifications not supported',

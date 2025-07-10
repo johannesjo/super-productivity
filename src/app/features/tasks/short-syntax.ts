@@ -284,15 +284,15 @@ const parseTagChanges = (task: Partial<TaskCopy>, allTags?: Tag[]): TagChanges =
         taskChanges.title = taskChanges.title.trim();
       }
 
-      // Log.log(task.title);
-      // Log.log('newTagTitles', regexTagTitles);
-      // Log.log('newTagTitlesTrimmed', regexTagTitlesTrimmedAndFiltered);
-      // Log.log('allTags)', allTags.map(tag => `${tag.id}: ${tag.title}`));
-      // Log.log('task.tagIds', task.tagIds);
-      // Log.log('task.title', task.title);
+      // TaskLog.log(task.title);
+      // TaskLog.log('newTagTitles', regexTagTitles);
+      // TaskLog.log('newTagTitlesTrimmed', regexTagTitlesTrimmedAndFiltered);
+      // TaskLog.log('allTags)', allTags.map(tag => `${tag.id}: ${tag.title}`));
+      // TaskLog.log('task.tagIds', task.tagIds);
+      // TaskLog.log('task.title', task.title);
     }
   }
-  // Log.log(taskChanges);
+  // TaskLog.log(taskChanges);
 
   return {
     taskChanges,

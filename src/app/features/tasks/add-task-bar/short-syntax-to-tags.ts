@@ -9,7 +9,7 @@ import { Tag } from '../../tag/tag.model';
 import { Project } from '../../project/project.model';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { ShortSyntaxConfig } from '../../config/global-config.model';
-import { Log } from '../../../core/log';
+import { TaskLog } from '../../../core/log';
 
 export interface ShortSyntaxTag {
   title: string;
@@ -67,7 +67,7 @@ export const shortSyntaxToTags = ({
     if (r.taskChanges.timeSpentOnDay && r.taskChanges.timeSpentOnDay[getWorklogStr()]) {
       time = msToString(r.taskChanges.timeSpentOnDay[getWorklogStr()]) + '/' + time;
     }
-    Log.log(time);
+    TaskLog.log(time);
 
     shortSyntaxTags.push({
       title: time,

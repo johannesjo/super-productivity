@@ -30,7 +30,7 @@ import { T } from '../../../t.const';
 import { IssueService } from '../../issue/issue.service';
 import { assertTruthy } from '../../../util/assert-truthy';
 import { DEFAULT_PROJECT_COLOR } from '../../work-context/work-context.const';
-import { Log } from '../../../core/log';
+import { TaskLog } from '../../../core/log';
 
 @Injectable({
   providedIn: 'root',
@@ -185,7 +185,7 @@ export class AddTaskBarService {
       return item.taskId;
     } else if (item.taskId) {
       if (!item.projectId) {
-        Log.log(item);
+        TaskLog.log(item);
         throw new Error('Weird add task case1');
       }
       this._projectService.moveTaskToTodayList(item.taskId, item.projectId);
@@ -205,7 +205,7 @@ export class AddTaskBarService {
         item.issueType,
         this._workContextService.activeWorkContextId as string,
       );
-      Log.log(res);
+      TaskLog.log(res);
       if (!res) {
         return await this._issueService.addTaskFromIssue({
           issueProviderKey: item.issueType,
@@ -306,7 +306,7 @@ export class AddTaskBarService {
     try {
       return !!task.title.toLowerCase().match(searchText.toLowerCase());
     } catch (e) {
-      Log.err('RegEx Error', e);
+      TaskLog.err('RegEx Error', e);
       return false;
     }
   }
