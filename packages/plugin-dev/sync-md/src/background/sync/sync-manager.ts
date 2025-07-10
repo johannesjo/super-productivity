@@ -74,6 +74,7 @@ const performInitialSync = async (config: LocalUserCfg): Promise<void> => {
 
 const handleFileChange = (config: LocalUserCfg): void => {
   if (mdToSpDebounceTimer) {
+    console.log('[sync-md] Clearing existing MD to SP debounce timer');
     clearTimeout(mdToSpDebounceTimer);
   }
 
@@ -82,16 +83,22 @@ const handleFileChange = (config: LocalUserCfg): void => {
 
   // Always use 10 second debounce for MD to SP sync
   console.log(
-    `[sync-md] File change detected, debouncing for ${SYNC_DEBOUNCE_MS_MD_TO_SP}ms (10 seconds)`,
+    `[sync-md] File change detected, debouncing for ${SYNC_DEBOUNCE_MS_MD_TO_SP}ms (10 seconds), window focused: ${isWindowFocused}`,
   );
 
   mdToSpDebounceTimer = setTimeout(() => {
+    console.log('[sync-md] MD to SP debounce timer fired, executing sync');
     handleMdToSpSync(config);
   }, SYNC_DEBOUNCE_MS_MD_TO_SP);
 };
 
 const handleMdToSpSync = async (config: LocalUserCfg): Promise<void> => {
-  if (syncInProgress) return;
+  if (syncInProgress) {
+    console.log('[sync-md] MD to SP sync skipped - sync already in progress');
+    return;
+  }
+
+  console.log('[sync-md] Starting MD to SP sync');
   syncInProgress = true;
   pendingMdToSpSync = null;
   mdToSpDebounceTimer = null;
@@ -101,6 +108,7 @@ const handleMdToSpSync = async (config: LocalUserCfg): Promise<void> => {
     if (content) {
       // Use the project ID from config, fallback to default
       const projectId = config.projectId;
+      console.log(`[sync-md] Executing mdToSp for project: ${projectId}`);
       await mdToSp(content, projectId);
       lastSyncTime = new Date();
 
@@ -198,8 +206,13 @@ const setupWindowFocusTracking = (): void => {
       clearTimeout(mdToSpDebounceTimer);
       mdToSpDebounceTimer = null;
 
-      // Trigger the sync immediately
-      handleMdToSpSync(pendingMdToSpSync);
+      // Trigger the sync immediately with the stored config
+      const configToSync = pendingMdToSpSync;
+      handleMdToSpSync(configToSync);
+    } else {
+      console.log(
+        `[sync-md] Window focus conditions: focused=${isFocused}, wasFocused=${wasFocused}, pendingSync=${!!pendingMdToSpSync}, timer=${!!mdToSpDebounceTimer}`,
+      );
     }
   });
 };
