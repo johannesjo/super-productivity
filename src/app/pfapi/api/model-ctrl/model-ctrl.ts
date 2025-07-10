@@ -43,7 +43,7 @@ export class ModelCtrl<MT extends ModelBase> {
     p?: { isUpdateRevAndLastUpdate: boolean; isIgnoreDBLock?: boolean },
   ): Promise<unknown> {
     this._inMemoryData = data;
-    PFLog.normal(`___ ${ModelCtrl.L}.${this.save.name}()`, this.modelId, p, data);
+    PFLog.normal(`___ ${ModelCtrl.L}.${this.save.name}():${this.modelId}`, p, data);
 
     // Validate data if validator is available
     if (this.modelCfg.validate) {
@@ -107,7 +107,7 @@ export class ModelCtrl<MT extends ModelBase> {
    * @returns Promise resolving to model data
    */
   async load(): Promise<MT> {
-    PFLog.verbose(`${ModelCtrl.L}.${this.load.name}()`, {
+    PFLog.verbose(`${ModelCtrl.L}.${this.load.name}():${this.modelId}`, {
       inMemoryData: this._inMemoryData,
     });
     return (
@@ -122,7 +122,7 @@ export class ModelCtrl<MT extends ModelBase> {
    * @returns Promise resolving after remove operation
    */
   async remove(): Promise<unknown> {
-    PFLog.normal(`${ModelCtrl.L}.${this.remove.name}()`, this.modelId);
+    PFLog.normal(`${ModelCtrl.L}.${this.remove.name}():${this.modelId}`);
     this._inMemoryData = null;
     return this._db.remove(this.modelId);
   }
