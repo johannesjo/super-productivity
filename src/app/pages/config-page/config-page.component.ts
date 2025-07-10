@@ -43,7 +43,8 @@ import { createPluginShortcutFormItems } from '../../features/config/form-cfgs/p
 import { PluginService } from '../../plugins/plugin.service';
 import { PluginShortcutCfg } from '../../plugins/plugin-api.model';
 import { ThemeSelectorComponent } from '../../core/theme/theme-selector/theme-selector.component';
-import { downloadLogs, Log } from '../../core/log';
+import { Log } from '../../core/log';
+import { downloadLogs } from '../../util/download';
 
 @Component({
   selector: 'config-page',

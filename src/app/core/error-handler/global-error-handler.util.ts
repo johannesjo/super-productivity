@@ -2,11 +2,11 @@ import { HANDLED_ERROR_PROP_STR, IS_ELECTRON } from '../../app.constants';
 import StackTrace from 'stacktrace-js';
 import newGithubIssueUrl from 'new-github-issue-url';
 import { getBeforeLastErrorActionLog } from '../../util/action-logger';
-import { download } from '../../util/download';
+import { download, downloadLogs } from '../../util/download';
 import { privacyExport } from '../../imex/file-imex/privacy-export';
 import { getAppVersionStr } from '../../util/get-app-version-str';
 import { CompleteBackup } from '../../pfapi/api';
-import { downloadLogs, Log } from '../log';
+import { Log } from '../log';
 
 let isWasErrorAlertCreated = false;
 
