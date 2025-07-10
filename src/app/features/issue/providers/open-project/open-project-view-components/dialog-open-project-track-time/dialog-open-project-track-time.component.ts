@@ -54,7 +54,7 @@ import { MatOption, MatSelect } from '@angular/material/select';
 import { formatLocalIsoWithoutSeconds } from '../../../../../../util/format-local-iso-without-seconds';
 import { formatDateYYYYMMDD } from '../../../../../../util/format-date-yyyy-mm-dd';
 import { msToIsoDuration } from '../../../../../../util/ms-to-iso-duration';
-import { Log } from '../../../../../../core/log';
+import { IssueLog } from '../../../../../../core/log';
 
 @Component({
   selector: 'dialog-open-project-track-time',
@@ -153,7 +153,7 @@ export class DialogOpenProjectTrackTimeComponent implements OnDestroy {
   );
 
   constructor() {
-    this._issueProviderIdOnce$.subscribe((v) => Log.log(`_issueProviderIdOnce$`, v));
+    this._issueProviderIdOnce$.subscribe((v) => IssueLog.log(`_issueProviderIdOnce$`, v));
 
     this.timeSpent = this.data.task.timeSpent;
     this.workPackage = this.data.workPackage;
@@ -184,7 +184,7 @@ export class DialogOpenProjectTrackTimeComponent implements OnDestroy {
   }
 
   async postTime(): Promise<void> {
-    Log.log({
+    IssueLog.log({
       wp: this.workPackage,
       started: this.started,
       timeSpent: this.timeSpent,

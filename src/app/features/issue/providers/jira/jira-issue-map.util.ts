@@ -26,10 +26,10 @@ import { IssueProviderKey, SearchResultItem } from '../../issue.model';
 import { TaskAttachment } from '../../../tasks/task-attachment/task-attachment.model';
 import { dedupeByKey } from '../../../../util/de-dupe-by-key';
 import { JIRA_TYPE } from '../../issue.const';
-import { Log } from '../../../../core/log';
+import { IssueLog } from '../../../../core/log';
 
 export const mapToSearchResults = (res: any): SearchResultItem[] => {
-  Log.log(res);
+  IssueLog.log(res);
 
   const issues = dedupeByKey(
     res.response.sections.map((sec: any) => sec.issues).flat(),
@@ -51,7 +51,7 @@ export const mapToSearchResults = (res: any): SearchResultItem[] => {
 };
 
 export const mapToSearchResultsForJQL = (res: any): SearchResultItem[] => {
-  Log.log(res);
+  IssueLog.log(res);
 
   const issues = dedupeByKey(res.response.issues, 'key').map((issue: any) => {
     return {
@@ -83,7 +83,7 @@ export const mapIssueResponse = (res: any, cfg: JiraCfg): JiraIssue =>
 export const mapIssue = (issue: JiraIssueOriginal, cfg: JiraCfg): JiraIssue => {
   const issueCopy = Object.assign({}, issue);
   const fields = issueCopy.fields;
-  Log.log(fields);
+  IssueLog.log(fields);
 
   return {
     key: issueCopy.key,
@@ -114,7 +114,7 @@ export const mapIssue = (issue: JiraIssueOriginal, cfg: JiraCfg): JiraIssue => {
 };
 
 const mapIssueLinks = (issueLinks: JiraOriginalIssueLink[]): JiraRelatedIssue[] => {
-  Log.log(issueLinks);
+  IssueLog.log(issueLinks);
 
   return issueLinks.map((il) => {
     const isInwardIssue = !!il.inwardIssue;

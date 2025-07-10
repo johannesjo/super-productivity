@@ -28,7 +28,7 @@ import { IssueServiceInterface } from './issue-service-interface';
 import { JiraCommonInterfacesService } from './providers/jira/jira-common-interfaces.service';
 import { GithubCommonInterfacesService } from './providers/github/github-common-interfaces.service';
 import { catchError, map, switchMap } from 'rxjs/operators';
-import { Log } from '../../core/log';
+import { IssueLog } from '../../core/log';
 import { GitlabCommonInterfacesService } from './providers/gitlab/gitlab-common-interfaces.service';
 import { CaldavCommonInterfacesService } from './providers/caldav/caldav-common-interfaces.service';
 import { OpenProjectCommonInterfacesService } from './providers/open-project/open-project-common-interfaces.service';
@@ -325,7 +325,7 @@ export class IssueService {
 
     for (const pKey of Object.keys(tasksIssueIdsByIssueProviderKey)) {
       const providerKey = pKey as IssueProviderKey;
-      Log.log(
+      IssueLog.log(
         'POLLING CHANGES FOR ' + providerKey,
         tasksIssueIdsByIssueProviderKey[providerKey],
       );
@@ -427,7 +427,7 @@ export class IssueService {
 
     const { title = null, ...additionalFromProviderIssueService } =
       this.ISSUE_SERVICE_MAP[issueProviderKey].getAddTaskData(issueDataReduced);
-    Log.log({ title, additionalFromProviderIssueService });
+    IssueLog.log({ title, additionalFromProviderIssueService });
 
     const getProjectOrTagId = async (): Promise<Partial<TaskCopy>> => {
       const defaultProjectId = (
@@ -547,7 +547,7 @@ export class IssueService {
   //     this.ISSUE_SERVICE_MAP[issueProviderKey].getAddTaskData(freshIssueData);
   //   this._taskService.update(taskId, {});
   // } catch (e) {
-  //   Log.err(e);
+  //   IssueLog.err(e);
   //   this._taskService.remove(taskId);
   //   // TODO show error msg
   // }

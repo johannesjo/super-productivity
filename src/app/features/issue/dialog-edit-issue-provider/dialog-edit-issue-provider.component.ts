@@ -48,7 +48,7 @@ import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { devError } from '../../../util/dev-error';
-import { Log } from '../../../core/log';
+import { IssueLog } from '../../../core/log';
 
 @Component({
   selector: 'dialog-edit-issue-provider',
@@ -149,7 +149,7 @@ export class DialogEditIssueProviderComponent {
   }
 
   customCfgCmpSave(cfgUpdates: IssueIntegrationCfg): void {
-    Log.log('customCfgCmpSave()', cfgUpdates);
+    IssueLog.log('customCfgCmpSave()', cfgUpdates);
     this.updateModel(cfgUpdates);
   }
 

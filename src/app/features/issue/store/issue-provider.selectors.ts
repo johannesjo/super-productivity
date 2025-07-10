@@ -10,7 +10,7 @@ import {
   IssueProviderState,
 } from '../issue.model';
 import { ICAL_TYPE } from '../issue.const';
-import { Log } from '../../../core/log';
+import { IssueLog } from '../../../core/log';
 
 export const selectIssueProviderState = createFeatureSelector<IssueProviderState>(
   ISSUE_PROVIDER_FEATURE_KEY,
@@ -49,7 +49,7 @@ export const selectIssueProviderById = <T extends IssueProvider>(
       throw new Error(`No issueProvider found for id ${id}`);
     }
     if (issueProviderKey && issueProvider.issueProviderKey !== issueProviderKey) {
-      Log.log(issueProviderKey, issueProvider);
+      IssueLog.log(issueProviderKey, issueProvider);
       throw new Error(
         `IssueProvider found for id ${id} is not of type ${issueProviderKey} but ${issueProvider.issueProviderKey}`,
       );

@@ -13,7 +13,7 @@ import { isJiraEnabled } from './is-jira-enabled.util';
 import { JIRA_POLL_INTERVAL } from './jira.const';
 import { IssueProviderService } from '../../issue-provider.service';
 import { assertTruthy } from '../../../../util/assert-truthy';
-import { Log } from '../../../../core/log';
+import { IssueLog } from '../../../../core/log';
 
 @Injectable({
   providedIn: 'root',
@@ -64,7 +64,7 @@ export class JiraCommonInterfacesService implements IssueServiceInterface {
           this.isEnabled(jiraCfg)
             ? this._jiraApiService
                 .issuePicker$(searchTerm, jiraCfg)
-                .pipe(tap((v) => Log.log('jira.issuePicker$', v)))
+                .pipe(tap((v) => IssueLog.log('jira.issuePicker$', v)))
             : of([]),
         ),
       )
