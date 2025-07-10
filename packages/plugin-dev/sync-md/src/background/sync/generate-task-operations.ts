@@ -1,0 +1,260 @@
+import {
+  BatchOperation,
+  BatchTaskCreate,
+  BatchTaskDelete,
+  BatchTaskReorder,
+  BatchTaskUpdate,
+  Task,
+} from '@super-productivity/plugin-api';
+import { ParsedTask } from './markdown-parser';
+
+/**
+ * Generate batch operations to sync markdown tasks to Super Productivity
+ */
+export const generateTaskOperations = (
+  mdTasks: ParsedTask[],
+  spTasks: Task[],
+  projectId: string,
+): BatchOperation[] => {
+  const operations: BatchOperation[] = [];
+
+  // Create maps for easier lookup
+  const spById = new Map<string, Task>();
+  const spByTitle = new Map<string, Task>();
+  const mdById = new Map<string, ParsedTask>();
+  const mdByTitle = new Map<string, ParsedTask>();
+
+  // Build SP maps
+  spTasks.forEach((task) => {
+    spById.set(task.id!, task);
+    // Only map by title if no duplicate titles
+    if (!spByTitle.has(task.title)) {
+      spByTitle.set(task.title, task);
+    }
+  });
+
+  // Build MD maps and check for duplicates
+  const duplicateIds = new Set<string>();
+  const firstOccurrence = new Map<string, number>();
+
+  mdTasks.forEach((mdTask) => {
+    const checkId = mdTask.id;
+    if (checkId) {
+      if (firstOccurrence.has(checkId)) {
+        duplicateIds.add(checkId);
+        console.warn(
+          `[sync-md] Duplicate task ID found: ${checkId} at line ${mdTask.line} (first occurrence at line ${firstOccurrence.get(checkId)})`,
+        );
+      } else {
+        firstOccurrence.set(checkId, mdTask.line);
+        mdById.set(checkId, mdTask);
+      }
+    }
+    if (!mdByTitle.has(mdTask.title)) {
+      mdByTitle.set(mdTask.title, mdTask);
+    }
+  });
+
+  // Track which SP tasks we've seen
+  const processedSpIds = new Set<string>();
+
+  // First pass: process MD tasks
+  mdTasks.forEach((mdTask) => {
+    // Check if this task has a duplicate ID
+    const effectiveId = mdTask.id && !duplicateIds.has(mdTask.id) ? mdTask.id : null;
+
+    if (effectiveId) {
+      const spTask = spById.get(effectiveId);
+      if (spTask) {
+        processedSpIds.add(spTask.id!);
+
+        // Update existing task
+        const updates: Record<string, unknown> = {};
+        if (spTask.title !== mdTask.title) {
+          updates.title = mdTask.title;
+        }
+        if (spTask.isDone !== mdTask.completed) {
+          updates.isDone = mdTask.completed;
+        }
+
+        // Handle notes
+        const mdNotes = mdTask.notes || '';
+        if ((spTask.notes || '') !== mdNotes) {
+          updates.notes = mdNotes;
+        }
+
+        // Handle parent relationship
+        if (spTask.parentId !== mdTask.parentId) {
+          updates.parentId = mdTask.parentId;
+        }
+
+        if (Object.keys(updates).length > 0) {
+          operations.push({
+            type: 'update',
+            taskId: spTask.id!,
+            updates,
+          } as BatchTaskUpdate);
+        }
+      } else {
+        // Create new task with the specified ID
+        operations.push({
+          type: 'create',
+          tempId: `temp_${mdTask.line}`,
+          data: {
+            title: mdTask.title,
+            isDone: mdTask.completed,
+            notes: mdTask.notes,
+            parentId: mdTask.parentId,
+          },
+        } as BatchTaskCreate);
+      }
+    } else {
+      // No ID - try to match by title
+      const spTask = spByTitle.get(mdTask.title);
+      if (spTask && !processedSpIds.has(spTask.id!)) {
+        processedSpIds.add(spTask.id!);
+        console.log(`[sync-md] Matched task by title: "${mdTask.title}" -> ${spTask.id}`);
+
+        // Update existing task
+        const updates: Record<string, unknown> = {};
+        if (spTask.isDone !== mdTask.completed) {
+          updates.isDone = mdTask.completed;
+        }
+
+        const mdNotes = mdTask.notes || '';
+        if ((spTask.notes || '') !== mdNotes) {
+          updates.notes = mdNotes;
+        }
+
+        // Handle parent relationship
+        if (spTask.parentId !== mdTask.parentId) {
+          updates.parentId = mdTask.parentId;
+        }
+
+        if (Object.keys(updates).length > 0) {
+          operations.push({
+            type: 'update',
+            taskId: spTask.id!,
+            updates,
+          } as BatchTaskUpdate);
+        }
+      } else {
+        // Create new task
+        operations.push({
+          type: 'create',
+          tempId: `temp_${mdTask.line}`,
+          data: {
+            title: mdTask.title,
+            isDone: mdTask.completed,
+            notes: mdTask.notes,
+            parentId: mdTask.parentId,
+          },
+        } as BatchTaskCreate);
+      }
+    }
+  });
+
+  // Second pass: delete tasks that exist in SP but not in MD
+  spTasks.forEach((spTask) => {
+    if (!processedSpIds.has(spTask.id!) && spTask.projectId === projectId) {
+      operations.push({
+        type: 'delete',
+        taskId: spTask.id!,
+      } as BatchTaskDelete);
+    }
+  });
+
+  // Third pass: handle reordering if needed
+  const mdRootTasks = mdTasks.filter((t) => !t.isSubtask);
+  const mdTaskIds = mdRootTasks.map((t) => {
+    if (t.id && spById.has(t.id)) {
+      return t.id;
+    }
+    const spTask = spByTitle.get(t.title);
+    return spTask ? spTask.id! : `temp_${t.line}`;
+  });
+
+  if (mdTaskIds.length > 0) {
+    // Log the order for debugging
+    console.log('[sync-md] Reorder operation - task order from markdown:');
+    mdRootTasks.forEach((task, index) => {
+      console.log(
+        `  ${index + 1}. Line ${task.line}: ${task.title} (${mdTaskIds[index]})`,
+      );
+    });
+
+    operations.push({
+      type: 'reorder',
+      taskIds: mdTaskIds,
+    } as BatchTaskReorder);
+  }
+
+  // Fourth pass: handle subtask ordering
+  // Group subtasks by parent, maintaining their order from the markdown file
+  const subtasksByParent = new Map<string, ParsedTask[]>();
+  mdTasks
+    .filter((t) => t.isSubtask && t.parentId)
+    .forEach((subtask) => {
+      if (!subtasksByParent.has(subtask.parentId!)) {
+        subtasksByParent.set(subtask.parentId!, []);
+      }
+      subtasksByParent.get(subtask.parentId!)!.push(subtask);
+    });
+
+  // Sort subtasks by line number to maintain order from file
+  subtasksByParent.forEach((subtasks) => {
+    subtasks.sort((a, b) => a.line - b.line);
+  });
+
+  // Update parent tasks with correct subtask order
+  subtasksByParent.forEach((subtasks, parentId) => {
+    const parentTask = spById.get(parentId);
+    if (parentTask) {
+      // Map subtasks to their IDs
+      const orderedSubtaskIds = subtasks
+        .map((subtask) => {
+          if (subtask.id && spById.has(subtask.id)) {
+            return subtask.id;
+          }
+          const spSubtask = spByTitle.get(subtask.title);
+          return spSubtask ? spSubtask.id! : null;
+        })
+        .filter((id) => id !== null) as string[];
+
+      // Check if the order is different
+      const currentSubtaskIds = parentTask.subTaskIds || [];
+      const orderChanged =
+        currentSubtaskIds.length !== orderedSubtaskIds.length ||
+        currentSubtaskIds.some((id, index) => id !== orderedSubtaskIds[index]);
+
+      if (orderChanged) {
+        // Find if we already have an update operation for this parent
+        const existingUpdateIndex = operations.findIndex(
+          (op) => op.type === 'update' && op.taskId === parentId,
+        );
+
+        if (existingUpdateIndex >= 0) {
+          // Add subTaskIds to existing update
+          (operations[existingUpdateIndex] as BatchTaskUpdate).updates.subTaskIds =
+            orderedSubtaskIds;
+        } else {
+          // Create new update operation
+          operations.push({
+            type: 'update',
+            taskId: parentId,
+            updates: {
+              subTaskIds: orderedSubtaskIds,
+            },
+          } as BatchTaskUpdate);
+        }
+      }
+    }
+  });
+
+  // Ensure reorder operations come last
+  // This is important so that newly created tasks are ordered correctly
+  const reorderOps = operations.filter((op) => op.type === 'reorder');
+  const otherOps = operations.filter((op) => op.type !== 'reorder');
+
+  return [...otherOps, ...reorderOps];
+};

@@ -9,6 +9,52 @@
     <title>Sync.md Configuration</title>
     <style>
       /* Reset and base styles */
+      :root {
+        --bg-primary: #fff;
+        --bg-secondary: #f5f5f5;
+        --bg-tertiary: #e0e0e0;
+        --text-primary: #333;
+        --text-secondary: #666;
+        --text-muted: #999;
+        --border-color: #ddd;
+        --border-color-focus: #2196f3;
+        --accent-primary: #2196f3;
+        --accent-primary-hover: #1976d2;
+        --success-bg: #e8f5e9;
+        --success-text: #2e7d32;
+        --success-border: #c8e6c9;
+        --error-bg: #ffebee;
+        --error-text: #c62828;
+        --error-border: #ffcdd2;
+        --info-bg: #e3f2fd;
+        --info-text: #1565c0;
+        --info-border: #bbdefb;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-primary: #2a2a2a;
+          --bg-secondary: #333;
+          --bg-tertiary: #444;
+          --text-primary: #e0e0e0;
+          --text-secondary: #ccc;
+          --text-muted: #aaa;
+          --border-color: #444;
+          --border-color-focus: #4a9eff;
+          --accent-primary: #1976d2;
+          --accent-primary-hover: #1565c0;
+          --success-bg: #1b3a1b;
+          --success-text: #81c784;
+          --success-border: #2e5f2e;
+          --error-bg: #4a1414;
+          --error-text: #ef5350;
+          --error-border: #6f2020;
+          --info-bg: #1e3a5f;
+          --info-text: #64b5f6;
+          --info-border: #2962a0;
+        }
+      }
+
       * {
         box-sizing: border-box;
         margin: 0;
@@ -21,92 +67,9 @@
           sans-serif;
         font-size: 14px;
         line-height: 1.5;
-        color: var(--text-color);
+        color: var(--text-primary);
         background: transparent;
         padding: 20px;
-      }
-
-      /* Dark mode support */
-      @media (prefers-color-scheme: dark) {
-        input[type='text'],
-        select {
-          background: #2a2a2a;
-          color: #e0e0e0;
-          border-color: #444;
-        }
-
-        input[type='text']:focus,
-        select:focus {
-          border-color: #4a9eff;
-          background: #333;
-        }
-
-        button {
-          background: #333;
-          color: #e0e0e0;
-          border: 1px solid #444;
-        }
-
-        .btn-primary {
-          background: #1976d2;
-          border-color: #1976d2;
-        }
-
-        .btn-primary:hover:not(:disabled) {
-          background: #1565c0;
-          border-color: #1565c0;
-        }
-
-        .btn-secondary {
-          background: #333;
-          color: #e0e0e0;
-          border-color: #555;
-        }
-
-        .btn-secondary:hover:not(:disabled) {
-          background: #444;
-          border-color: #666;
-        }
-
-        .status.info {
-          background: #1e3a5f;
-          color: #64b5f6;
-          border-color: #2962a0;
-        }
-
-        .status.success {
-          background: #1b3a1b;
-          color: #81c784;
-          border-color: #2e5f2e;
-        }
-
-        .status.error {
-          background: #4a1414;
-          color: #ef5350;
-          border-color: #6f2020;
-        }
-
-        .sync-info {
-          background: #2a2a2a;
-          border: 1px solid #444;
-        }
-
-        .sync-stat {
-          border-bottom-color: #444;
-        }
-
-        .sync-stat-label {
-          color: #aaa;
-        }
-
-        .sync-stat-value {
-          color: #e0e0e0;
-        }
-
-        .spinner {
-          border-color: #444;
-          border-top-color: #4a9eff;
-        }
       }
 
       /* Container */
@@ -123,7 +86,7 @@
       }
 
       .subtitle {
-        color: #666;
+        color: var(--text-secondary);
         margin-bottom: 24px;
       }
 
@@ -136,28 +99,31 @@
         display: block;
         font-weight: 500;
         margin-bottom: 6px;
-        color: #444;
+        color: var(--text-secondary);
       }
 
       input[type='text'],
       select {
         width: 100%;
         padding: 10px 12px;
-        border: 1px solid #444;
+        border: 1px solid var(--border-color);
         border-radius: 6px;
         font-size: 14px;
+        background: var(--bg-primary);
+        color: var(--text-primary);
         transition: border-color 0.2s;
       }
 
       input[type='text']:focus,
       select:focus {
         outline: none;
-        border-color: #2196f3;
+        border-color: var(--border-color-focus);
+        background: var(--bg-secondary);
       }
 
       .help-text {
         font-size: 12px;
-        color: #666;
+        color: var(--text-muted);
         margin-top: 4px;
       }
 
@@ -170,11 +136,13 @@
 
       button {
         padding: 10px 20px;
-        border: none;
+        border: 1px solid var(--border-color);
         border-radius: 6px;
         font-size: 14px;
         font-weight: 500;
         cursor: pointer;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
         transition: all 0.2s;
       }
 
@@ -184,20 +152,19 @@
       }
 
       .btn-primary {
-        background: #2196f3;
+        background: var(--accent-primary);
+        border-color: var(--accent-primary);
         color: white;
       }
 
       .btn-primary:hover:not(:disabled) {
-        background: #1976d2;
-      }
-
-      .btn-secondary {
-        background: #f5f5f5;
+        background: var(--accent-primary-hover);
+        border-color: var(--accent-primary-hover);
       }
 
       .btn-secondary:hover:not(:disabled) {
-        background: #e0e0e0;
+        background: var(--bg-tertiary);
+        border-color: var(--border-color);
       }
 
       /* Status messages */
@@ -213,58 +180,21 @@
       }
 
       .status.info {
-        background: #e3f2fd;
-        color: #1565c0;
-        border: 1px solid #bbdefb;
+        background: var(--info-bg);
+        color: var(--info-text);
+        border: 1px solid var(--info-border);
       }
 
       .status.success {
-        background: #e8f5e9;
-        color: #2e7d32;
-        border: 1px solid #c8e6c9;
+        background: var(--success-bg);
+        color: var(--success-text);
+        border: 1px solid var(--success-border);
       }
 
       .status.error {
-        background: #ffebee;
-        color: #c62828;
-        border: 1px solid #ffcdd2;
-      }
-
-      /* Sync info */
-      .sync-info {
-        margin-top: 32px;
-        padding: 20px;
-        border-radius: 8px;
-        display: none;
-      }
-
-      .sync-info.show {
-        display: block;
-      }
-
-      .sync-info h3 {
-        font-size: 16px;
-        margin-bottom: 12px;
-      }
-
-      .sync-stat {
-        display: flex;
-        justify-content: space-between;
-        padding: 8px 0;
-        border-bottom: 1px solid #e0e0e0;
-      }
-
-      .sync-stat:last-child {
-        border-bottom: none;
-      }
-
-      .sync-stat-label {
-        font-weight: 500;
-        color: #555;
-      }
-
-      .sync-stat-value {
-        color: #333;
+        background: var(--error-bg);
+        color: var(--error-text);
+        border: 1px solid var(--error-border);
       }
 
       /* Loading spinner */
@@ -272,8 +202,8 @@
         display: inline-block;
         width: 14px;
         height: 14px;
-        border: 2px solid #f3f3f3;
-        border-top: 2px solid #2196f3;
+        border: 2px solid var(--border-color);
+        border-top: 2px solid var(--border-color-focus);
         border-radius: 50%;
         animation: spin 1s linear infinite;
         margin-left: 8px;
@@ -301,14 +231,15 @@
         transform: translateY(-50%);
         padding: 6px 12px;
         font-size: 12px;
-        background: #fff;
-        border: 1px solid #ddd;
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
         border-radius: 4px;
         cursor: pointer;
+        color: var(--text-primary);
       }
 
       .test-file-btn:hover {
-        background: #f5f5f5;
+        background: var(--bg-secondary);
       }
     </style>
   </head>
@@ -346,30 +277,13 @@
           <div class="help-text">Select the project to sync tasks with</div>
         </div>
 
-        <div class="form-group">
-          <label for="syncDirection">Sync Direction</label>
-          <select id="syncDirection">
-            <option value="bidirectional">Bidirectional (Two-way sync)</option>
-            <option value="fileToProject">File → Project only</option>
-            <option value="projectToFile">Project → File only</option>
-          </select>
-          <div class="help-text">Control how changes are synchronized</div>
-        </div>
-
         <div class="button-group">
           <button
             type="submit"
             class="btn-primary"
+            id="saveBtn"
           >
-            Save Configuration
-          </button>
-          <button
-            type="button"
-            class="btn-secondary"
-            onclick="syncNow()"
-            id="syncBtn"
-          >
-            Sync Now
+            Save & Sync
           </button>
         </div>
       </form>
@@ -378,44 +292,12 @@
         id="status"
         class="status"
       ></div>
-
-      <div
-        id="syncInfo"
-        class="sync-info"
-      >
-        <h3>Sync Status</h3>
-        <div class="sync-stat">
-          <span class="sync-stat-label">Status:</span>
-          <span
-            class="sync-stat-value"
-            id="syncStatus"
-            >Not configured</span
-          >
-        </div>
-        <div class="sync-stat">
-          <span class="sync-stat-label">Last sync:</span>
-          <span
-            class="sync-stat-value"
-            id="lastSync"
-            >Never</span
-          >
-        </div>
-        <div class="sync-stat">
-          <span class="sync-stat-label">File watching:</span>
-          <span
-            class="sync-stat-value"
-            id="watchStatus"
-            >Inactive</span
-          >
-        </div>
-      </div>
     </div>
 
     <script>
       // State
       let config = null;
       let projects = [];
-      let syncInfoInterval = null;
 
       // Message handling
       async function sendMessage(message) {
@@ -471,6 +353,7 @@
             console.log('Loading projects directly from PluginAPI');
             projects = await window.PluginAPI.getAllProjects();
           } else {
+            // TODO remove fallback
             console.log('Loading projects via message');
             const response = await sendMessage({ type: 'getProjects' });
             if (response?.success && response.projects) {
@@ -507,52 +390,15 @@
 
       async function loadConfig() {
         try {
-          const savedData = await window.PluginAPI?.loadSyncedData?.();
-          if (savedData) {
-            config = JSON.parse(savedData);
+          // Request config from background
+          const response = await sendMessage({ type: 'getConfig' });
+          if (response?.success && response.config) {
+            config = response.config;
             document.getElementById('filePath').value = config.filePath || '';
             document.getElementById('projectId').value = config.projectId || '';
-            document.getElementById('syncDirection').value =
-              config.syncDirection || 'bidirectional';
-
-            if (config.enabled) {
-              document.getElementById('syncInfo').classList.add('show');
-              updateSyncInfo();
-            }
           }
         } catch (error) {
           console.error('Failed to load config:', error);
-        }
-      }
-
-      async function updateSyncInfo() {
-        try {
-          const response = await sendMessage({ type: 'getSyncInfo' });
-          console.log('getSyncInfo response:', response);
-
-          if (response?.success) {
-            document.getElementById('syncStatus').textContent = response.syncInProgress
-              ? 'Syncing...'
-              : 'Active';
-            document.getElementById('lastSync').textContent = response.lastSyncTime
-              ? new Date(response.lastSyncTime).toLocaleString()
-              : 'Never';
-            document.getElementById('watchStatus').textContent = response.isWatching
-              ? 'Active'
-              : 'Inactive';
-
-            // Update sync button
-            const syncBtn = document.getElementById('syncBtn');
-            if (response.syncInProgress) {
-              syncBtn.disabled = true;
-              syncBtn.innerHTML = 'Syncing<span class="spinner"></span>';
-            } else {
-              syncBtn.disabled = false;
-              syncBtn.textContent = 'Sync Now';
-            }
-          }
-        } catch (error) {
-          console.error('Failed to update sync info:', error);
         }
       }
 
@@ -620,38 +466,13 @@
         }
       }
 
-      async function syncNow() {
-        if (!config || !config.enabled) {
-          showStatus('Please save configuration first', 'error');
-          return;
-        }
-
-        try {
-          showStatus('Triggering sync...', 'info');
-          console.log('Sending syncNow message...');
-          const response = await sendMessage({ type: 'syncNow' });
-          console.log('syncNow response:', response);
-
-          if (response?.success) {
-            showStatus('Sync triggered - please wait', 'info');
-            // Update UI after debounce period (5 seconds)
-            setTimeout(updateSyncInfo, 6000);
-          } else {
-            showStatus(response?.error || 'Failed to trigger sync', 'error');
-          }
-        } catch (error) {
-          console.error('syncNow error:', error);
-          showStatus('Failed to trigger sync', 'error');
-        }
-      }
-
       // Form submission
       document.getElementById('configForm').addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const filePath = document.getElementById('filePath').value;
         const projectId = document.getElementById('projectId').value;
-        const syncDirection = document.getElementById('syncDirection').value;
+        const syncDirection = 'bidirectional';
 
         if (!filePath || !projectId) {
           showStatus('Please fill in all required fields', 'error');
@@ -675,22 +496,54 @@
         };
 
         try {
-          // Save to storage
-          await window.PluginAPI.persistDataSynced(JSON.stringify(newConfig));
-          config = newConfig;
+          // Disable save button during operation
+          const saveBtn = document.getElementById('saveBtn');
+          saveBtn.disabled = true;
+          saveBtn.innerHTML = 'Saving<span class="spinner"></span>';
 
-          // Notify background
-          await sendMessage({
-            type: 'configUpdated',
+          // Update config in background (which will store it locally)
+          const saveResponse = await sendMessage({
+            type: 'saveConfig',
             config: newConfig,
           });
 
-          showStatus('Configuration saved successfully', 'success');
-          document.getElementById('syncInfo').classList.add('show');
-          updateSyncInfo();
+          console.log('Save response received:', saveResponse);
+
+          // Check if we have a result field (message response wrapper)
+          const actualResponse = saveResponse?.result || saveResponse;
+
+          if (!actualResponse?.success) {
+            throw new Error(actualResponse?.error || 'Failed to save config');
+          }
+
+          config = newConfig;
+
+          // Trigger sync immediately after saving
+          saveBtn.innerHTML = 'Syncing<span class="spinner"></span>';
+          showStatus('Configuration saved - sync started...', 'info');
+
+          try {
+            const syncResponse = await sendMessage({ type: 'syncNow' });
+            // Don't show error here - the sync is async and will complete later
+            // The SYNC_COMPLETED or SYNC_ERROR events will handle the final status
+            if (!syncResponse?.success && syncResponse?.error) {
+              // Only show error if there's an actual error message (not just missing success)
+              showStatus('Sync error: ' + syncResponse.error, 'error');
+            }
+          } catch (error) {
+            showStatus('Failed to trigger sync: ' + error.message, 'error');
+          }
+
+          // Re-enable button
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Save & Sync';
         } catch (error) {
           console.error('Failed to save config:', error);
           showStatus('Failed to save configuration', 'error');
+          // Re-enable button on error
+          const saveBtn = document.getElementById('saveBtn');
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Save & Sync';
         }
       });
 
@@ -700,12 +553,41 @@
 
         if (event.data?.type === 'SYNC_COMPLETED') {
           console.log('Sync completed event received');
-          updateSyncInfo();
-          showStatus('Sync completed successfully', 'success');
+
+          // Show success with sync result details
+          if (event.data.result) {
+            const result = event.data.result;
+            let message = 'Sync completed successfully';
+            if (
+              result.tasksAdded > 0 ||
+              result.tasksUpdated > 0 ||
+              result.tasksDeleted > 0
+            ) {
+              message += ` - ${result.tasksAdded} added, ${result.tasksUpdated} updated, ${result.tasksDeleted} deleted`;
+            } else {
+              message += ' - no changes';
+            }
+            showStatus(message, 'success');
+          } else {
+            showStatus('Sync completed successfully', 'success');
+          }
+
+          // Re-enable save button if it was disabled
+          const saveBtn = document.getElementById('saveBtn');
+          if (saveBtn && saveBtn.disabled) {
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save & Sync';
+          }
         } else if (event.data?.type === 'SYNC_ERROR') {
           console.log('Sync error event received:', event.data.error);
-          updateSyncInfo();
           showStatus('Sync error: ' + event.data.error, 'error');
+
+          // Re-enable save button on error
+          const saveBtn = document.getElementById('saveBtn');
+          if (saveBtn && saveBtn.disabled) {
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save & Sync';
+          }
         }
       });
 
@@ -744,16 +626,6 @@
 
         await loadProjects();
         await loadConfig();
-
-        // Update sync info periodically
-        syncInfoInterval = setInterval(updateSyncInfo, 5000);
-      });
-
-      // Cleanup
-      window.addEventListener('unload', () => {
-        if (syncInfoInterval) {
-          clearInterval(syncInfoInterval);
-        }
       });
     </script>
   </body>
