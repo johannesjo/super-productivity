@@ -10,7 +10,6 @@ import {
   decompressGzipFromString,
 } from '../compression/compression-handler';
 import { EncryptAndCompressCfg } from '../pfapi.model';
-import { PFLog } from '../../../core/log';
 
 export class EncryptAndCompressHandlerService {
   private static readonly L = 'EncryptAndCompressHandlerService';

@@ -25,7 +25,6 @@ import { cleanRev } from '../util/clean-rev';
 import { getModelIdsToUpdateFromRevMaps } from '../util/get-model-ids-to-update-from-rev-maps';
 import { Pfapi } from '../pfapi';
 import { SyncProviderId } from '../pfapi.const';
-import { PFLog } from '../../../core/log';
 
 export class ModelSyncService<MD extends ModelCfgs> {
   private static readonly L = 'ModelSyncService';

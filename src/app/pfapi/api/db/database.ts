@@ -1,7 +1,6 @@
 import { DatabaseAdapter } from './database-adapter.model';
 import { PFLog } from '../../../core/log';
 import { devError } from '../../../util/dev-error';
-import { PFLog } from '../../../core/log';
 
 export class Database {
   private static readonly L = 'Database';

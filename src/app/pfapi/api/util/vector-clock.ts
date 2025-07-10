@@ -1,5 +1,4 @@
 import { PFLog } from '../../../core/log';
-import { PFLog } from '../../../core/log';
 
 /**
  * Vector Clock implementation for distributed synchronization

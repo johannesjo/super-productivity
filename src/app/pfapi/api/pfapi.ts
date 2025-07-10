@@ -36,7 +36,6 @@ import { promiseTimeout } from '../../util/promise-timeout';
 import { PFEventEmitter } from './util/events';
 import { MigrationService } from './migration/migration.service';
 import { IValidation } from 'typia';
-import { PFLog } from '../../core/log';
 
 export class Pfapi<const MD extends ModelCfgs> {
   private static _wasInstanceCreated = false;
