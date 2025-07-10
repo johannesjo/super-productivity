@@ -12,7 +12,7 @@ import {
   BatchTaskDelete,
   BatchTaskReorder,
   BatchOperation,
-} from '../../../api/batch-update-types';
+} from '@super-productivity/plugin-api';
 import { createBaseState, createStateWithExistingTasks } from './test-utils';
 
 describe('taskBatchUpdateMetaReducer', () => {

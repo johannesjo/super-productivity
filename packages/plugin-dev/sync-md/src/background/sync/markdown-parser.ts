@@ -107,7 +107,11 @@ export const parseMarkdownWithErrors = (content: string): TaskParseResult => {
           // Find parent from stack
           for (let j = parentStack.length - 1; j >= 0; j--) {
             if (parentStack[j].indent < indentLevel) {
-              parentId = parentStack[j].id;
+              const parentStackEntry = parentStack[j];
+              // If the parent has a real ID, use it. Otherwise, use the temp ID.
+              // This allows subtasks to reference their parent even when parsing
+              // markdown without IDs for the first time.
+              parentId = parentStackEntry.id;
               break;
             }
           }
@@ -152,9 +156,12 @@ export const parseMarkdownWithErrors = (content: string): TaskParseResult => {
         currentTaskIndex = tasks.length - 1;
 
         // Add to parent stack
+        // Use the task ID if available, otherwise use a temporary ID based on line number
+        // This ensures subtasks can find their parent even when IDs haven't been assigned yet
+        const stackId = task.id || `temp_${i}`;
         parentStack.push({
           indent: indentLevel,
-          id: task.id,
+          id: stackId,
           taskIndex: currentTaskIndex,
         });
       } else {

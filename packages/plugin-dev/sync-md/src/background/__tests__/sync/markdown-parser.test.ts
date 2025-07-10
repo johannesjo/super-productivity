@@ -133,7 +133,7 @@ describe('parseMarkdown', () => {
     expect(tasks[1]).toMatchObject({
       title: 'Subtask without ID',
       id: null,
-      parentId: null, // Parent has no ID, so can't establish relationship
+      parentId: 'temp_0', // Parent is referenced by temporary ID
       isSubtask: true,
     });
   });

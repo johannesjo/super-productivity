@@ -12,10 +12,6 @@ export const mdToSp = async (
 ): Promise<void> => {
   const parsedTasks = parseMarkdown(markdownContent);
 
-  if (parsedTasks.length === 0) {
-    return;
-  }
-
   // Get current state
   const currentTasks = await PluginAPI.getTasks();
   const currentProjects = await PluginAPI.getAllProjects();

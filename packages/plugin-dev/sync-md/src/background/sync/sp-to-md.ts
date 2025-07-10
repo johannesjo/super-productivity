@@ -130,9 +130,17 @@ export const convertTasksToMarkdown = (tasks: Task[]): string => {
         }
       }
     }
+  }
 
-    // Add empty line after each parent task group
-    lines.push('');
+  // Also process orphaned subtasks (subtasks whose parent is not in the current task list)
+  const allSubtasks = tasks.filter((task) => task.parentId);
+  const parentIds = new Set(parentTasks.map((t) => t.id));
+  const orphanedSubtasks = allSubtasks.filter(
+    (subtask) => !parentIds.has(subtask.parentId),
+  );
+
+  for (const orphan of orphanedSubtasks) {
+    lines.push(formatTask(orphan)); // No indentation for orphaned subtasks
   }
 
   return lines.join('\n').trim();
