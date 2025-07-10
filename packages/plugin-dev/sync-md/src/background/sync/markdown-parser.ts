@@ -20,18 +20,36 @@ export interface TaskParseResult {
 
 /**
  * Detect the base indentation size used in the markdown
+ * Uses most common indent size among subtasks, not minimum
  */
 const detectIndentSize = (lines: string[]): number => {
-  let minIndent = Infinity;
+  const indentCounts = new Map<number, number>();
 
   for (const line of lines) {
     const match = line.match(/^(\s+)- \[/);
     if (match && match[1].length > 0) {
-      minIndent = Math.min(minIndent, match[1].length);
+      const indentSize = match[1].length;
+      indentCounts.set(indentSize, (indentCounts.get(indentSize) || 0) + 1);
     }
   }
 
-  return minIndent === Infinity ? 2 : minIndent;
+  // If no indented tasks found, default to 2 spaces
+  if (indentCounts.size === 0) {
+    return 2;
+  }
+
+  // Find the most common indent size
+  let mostCommonIndent = 2;
+  let maxCount = 0;
+
+  for (const [indent, count] of indentCounts) {
+    if (count > maxCount) {
+      maxCount = count;
+      mostCommonIndent = indent;
+    }
+  }
+
+  return mostCommonIndent;
 };
 
 /**
