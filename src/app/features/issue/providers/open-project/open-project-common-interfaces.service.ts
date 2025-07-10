@@ -19,6 +19,7 @@ import {
 } from './format-open-project-work-package-subject.util';
 import { IssueProviderService } from '../../issue-provider.service';
 import { getWorklogStr } from '../../../../util/get-work-log-str';
+import { Log } from '../../../../core/log';
 
 @Injectable({
   providedIn: 'root',
@@ -167,7 +168,7 @@ export class OpenProjectCommonInterfacesService implements IssueServiceInterface
     allExistingIssueIds: number[] | string[],
   ): Promise<OpenProjectWorkPackageReduced[]> {
     const cfg = await this._getCfgOnce$(issueProviderId).toPromise();
-    console.log(
+    Log.log(
       await this._openProjectApiService
         .getLast100WorkPackagesForCurrentOpenProjectProject$(cfg)
         .toPromise(),

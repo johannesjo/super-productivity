@@ -106,7 +106,7 @@ export class Database {
     try {
       await this._adapter.init();
     } catch (e) {
-      console.error(e);
+      Log.err(e);
       SyncLog.critical('Database initialization failed', {
         lastParams: this._lastParams,
         error: e,

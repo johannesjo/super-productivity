@@ -10,6 +10,7 @@ import {
 } from 'rxjs/operators';
 import { PROGRESS_BAR_LABEL_MAP } from './global-progress-bar.const';
 import { T } from '../../t.const';
+import { Log } from '../../core/log';
 
 const DELAY = 100;
 
@@ -32,7 +33,7 @@ export class GlobalProgressBarService {
       return isShow
         ? timer(60 * 1000).pipe(
             tap(() => {
-              console.error('Global spinner was shown forever (60s). Forcing countDown!');
+              Log.err('Global spinner was shown forever (60s). Forcing countDown!');
               this.countDown();
             }),
           )

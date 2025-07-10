@@ -30,6 +30,7 @@ import { InlineInputComponent } from '../../../ui/inline-input/inline-input.comp
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { ShortDate2Pipe } from '../../../ui/pipes/short-date2.pipe';
+import { Log } from '../../../core/log';
 
 @Component({
   selector: 'planner-task',
@@ -149,7 +150,7 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
   }
 
   updateTimeEstimate(val: number): void {
-    console.log(val);
+    Log.log(val);
     this._taskService.update(this.task.id, {
       timeEstimate: val,
     });

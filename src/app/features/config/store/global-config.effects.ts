@@ -13,6 +13,7 @@ import { KeyboardConfig } from '../keyboard-config.model';
 import { updateGlobalConfigSection } from './global-config.actions';
 import { MiscConfig } from '../global-config.model';
 import { selectMiscConfig } from './global-config.reducer';
+import { Log } from '../../../core/log';
 
 @Injectable()
 export class GlobalConfigEffects {
@@ -137,7 +138,7 @@ export class GlobalConfigEffects {
         pairwise(),
         filter(([a, b]) => a.isUseMinimalNav !== b.isUseMinimalNav),
         tap(() => {
-          console.log('AA');
+          Log.log('AA');
           // this._store.dispatch(hideSideNav());
           // this._store.dispatch(toggleSideNav());
           window.dispatchEvent(new Event('resize'));

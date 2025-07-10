@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
+import { Log } from '../log';
 
 export interface CustomTheme {
   id: string;
@@ -56,7 +57,7 @@ export class CustomThemeService {
     const theme = AVAILABLE_CUSTOM_THEMES.find((t) => t.id === themeId);
 
     if (!theme) {
-      console.error(`Theme with id ${themeId} not found`);
+      Log.err(`Theme with id ${themeId} not found`);
       return;
     }
 

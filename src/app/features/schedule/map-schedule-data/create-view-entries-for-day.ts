@@ -13,6 +13,7 @@ import {
 import { createScheduleViewEntriesForNormalTasks } from './create-schedule-view-entries-for-normal-tasks';
 import { insertBlockedBlocksViewEntriesForSchedule } from './insert-blocked-blocks-view-entries-for-schedule';
 import { SCHEDULE_VIEW_TYPE_ORDER, SVEType } from '../schedule.const';
+
 export const createViewEntriesForDay = (
   dayDate: string,
   initialStartTime: number,
@@ -132,7 +133,7 @@ const createViewEntriesForNonScheduledRepeatProjections = (
 
   const lastEntry = viewEntries[viewEntries.length - 1];
 
-  // console.log(viewEntries);
+  // Log.log(viewEntries);
 
   return {
     entries: viewEntries,

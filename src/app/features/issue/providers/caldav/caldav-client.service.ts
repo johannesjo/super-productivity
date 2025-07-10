@@ -115,7 +115,7 @@ export class CaldavClientService {
     const todo = comp.getFirstSubcomponent('vtodo');
 
     if (!todo) {
-      console.log(task);
+      Log.log(task);
       throw new Error('No todo found for task');
     }
 

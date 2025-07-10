@@ -39,6 +39,7 @@ import { MsToClockStringPipe } from '../../../../../ui/duration/ms-to-clock-stri
 import { MatTooltip } from '@angular/material/tooltip';
 import { InlineInputComponent } from '../../../../../ui/inline-input/inline-input.component';
 import { MatButton } from '@angular/material/button';
+import { Log } from '../../../../../core/log';
 
 interface TmpTask {
   id: string;
@@ -209,7 +210,7 @@ export class DialogGitlabSubmitWorklogForDayComponent {
       });
       this.close();
     } catch (e) {
-      console.error(e);
+      Log.err(e);
       this._snackService.open({
         type: 'ERROR',
         // TODO translate

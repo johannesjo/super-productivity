@@ -246,7 +246,7 @@ export const PFAPI_CFG: PfapiBaseCfg<PfapiAllModelCfg> = {
     const r = validateAllData(data);
 
     if (!environment.production && !r.success) {
-      console.log(r);
+      Log.log(r);
       alert('VALIDATION ERROR ');
     }
 

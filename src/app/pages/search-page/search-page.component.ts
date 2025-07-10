@@ -28,6 +28,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { TagComponent } from '../../features/tag/tag/tag.component';
 import { MatList, MatListItem } from '@angular/material/list';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { Log } from '../../core/log';
 
 const MAX_RESULTS = 50;
 
@@ -116,7 +117,7 @@ export class SearchPageComponent implements OnInit {
       : (tags.find((tag) => tag.id === tagId) as Tag);
 
     if (!context) {
-      console.warn(`Could not find context for task: ${task.title}`);
+      Log.err(`Could not find context for task: ${task.title}`);
       context = { ...DEFAULT_TAG, icon: 'help_outline', color: 'black' };
     }
 

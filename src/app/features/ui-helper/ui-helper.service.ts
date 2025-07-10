@@ -33,7 +33,7 @@ export class UiHelperService {
       return;
     }
     const currentZoom = window.ea.getZoomFactor();
-    console.log({ currentZoom });
+    Log.log({ currentZoom });
 
     const zoomFactor = currentZoom + zoomBy;
 

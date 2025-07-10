@@ -40,7 +40,7 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
   isForDayMode = signal<boolean>(false);
   due: Signal<number> = computed(() => {
     if (this.date() && this.time()) {
-      // console.log(this.date(), this.time());
+      // Log.log(this.date(), this.time());
       const formattedTime = this._formatTimeWithLeadingZero(this.time() as string);
       return new Date(`${this.date()}T${formattedTime}`).getTime();
     }

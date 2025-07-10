@@ -60,7 +60,7 @@ export class FocusModeService {
     scan((acc, value) => {
       // NOTE: to prevent initial negative acc values
       const accValMinZero = acc < 0 ? 0 : acc;
-      // console.log('VALUPD currentSessionTime', value, value < 0, accValMinZero);
+      // Log.log('VALUPD currentSessionTime', value, value < 0, accValMinZero);
       return value < 0 ? accValMinZero - value : value;
     }),
     shareReplay(1),

@@ -47,6 +47,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { TagComponent } from '../../tag/tag/tag.component';
 import { TaskCopy } from '../task.model';
+import { Log } from '../../../core/log';
 
 @Component({
   selector: 'add-task-bar',
@@ -306,7 +307,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
           const task = await this._taskService
             .getByIdOnce$(this._lastAddedTaskId)
             .toPromise();
-          console.log(additionalFields, tagsToRemove, task);
+          Log.log(additionalFields, tagsToRemove, task);
 
           this._taskService.updateTags(
             task,

@@ -79,7 +79,7 @@ const _fixIds = (projectState: ProjectState): ProjectState => {
 
   if (!currentIds) {
     Log.err('Project Ids not defined');
-    console.log('Attempting to fix...');
+    Log.log('Attempting to fix...');
     return {
       ...projectState,
       ids: allIds,

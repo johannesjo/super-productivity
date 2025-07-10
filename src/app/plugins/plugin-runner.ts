@@ -173,7 +173,7 @@ export class PluginRunner {
       // Unregister hooks
       this._pluginBridge.unregisterPluginHooks(pluginId);
 
-      console.log(`Plugin ${pluginId} unloaded`);
+      Log.log(`Plugin ${pluginId} unloaded`);
       return true;
     }
     return false;

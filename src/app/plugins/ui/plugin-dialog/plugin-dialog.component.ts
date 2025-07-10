@@ -13,6 +13,7 @@ import { DialogButtonCfg, DialogCfg } from '../../plugin-api.model';
 import { PluginSecurityService } from '../../plugin-security';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from '../../../t.const';
+import { Log } from '../../../core/log';
 
 @Component({
   selector: 'plugin-dialog',
@@ -114,7 +115,7 @@ export class PluginDialogComponent {
         this._dialogRef.close(button.label);
       }
     } catch (error) {
-      console.error('Plugin dialog button action failed:', error);
+      Log.err('Plugin dialog button action failed:', error);
       this._dialogRef.close('error');
     }
   }

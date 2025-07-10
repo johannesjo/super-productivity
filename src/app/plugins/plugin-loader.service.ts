@@ -88,7 +88,7 @@ export class PluginLoaderService {
 
       return { manifest, code, indexHtml, icon };
     } catch (error) {
-      console.error(`Failed to load plugin from ${pluginPath}:`, error);
+      Log.err(`Failed to load plugin from ${pluginPath}:`, error);
       throw error;
     }
   }

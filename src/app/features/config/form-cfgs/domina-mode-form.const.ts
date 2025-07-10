@@ -68,7 +68,7 @@ export const DOMINA_MODE_FORM: ConfigFormSection<DominaModeConfig> = {
         onInit: (field) => {
           let voices: SpeechSynthesisVoice[] = getAvailableVoices() || [];
           voices = getAvailableVoices();
-          //console.log(voices);
+          //Log.log(voices);
 
           if (field.templateOptions) {
             field.templateOptions.options = voices.map((voiceName) => ({

@@ -20,7 +20,7 @@ export class PluginHooksService {
       this._handlers.set(hook, new Map());
     }
     this._handlers.get(hook)!.set(pluginId, handler);
-    console.log(`Plugin ${pluginId} registered for ${hook}`);
+    Log.log(`Plugin ${pluginId} registered for ${hook}`);
   }
 
   /**

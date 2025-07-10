@@ -43,6 +43,7 @@ import { ChipListInputComponent } from '../../../ui/chip-list-input/chip-list-in
 import { MatButton } from '@angular/material/button';
 import { AsyncPipe } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
+import { Log } from '../../../core/log';
 
 // TASK_REPEAT_CFG_FORM_CFG
 @Component({
@@ -192,7 +193,7 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
       // Mark all fields as touched to show validation errors
       this.formGroup1.markAllAsTouched();
       this.formGroup2.markAllAsTouched();
-      console.warn('Form validation failed', {
+      Log.err('Form validation failed', {
         form1Errors: this.formGroup1.errors,
         form2Errors: this.formGroup2.errors,
       });

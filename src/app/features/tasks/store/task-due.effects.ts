@@ -19,6 +19,7 @@ import { selectTodayTaskIds } from '../../work-context/store/work-context.select
 import { AddTasksForTomorrowService } from '../../add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { environment } from '../../../../environments/environment';
+import { Log } from '../../../core/log';
 
 @Injectable()
 export class TaskDueEffects {
@@ -98,7 +99,7 @@ export class TaskDueEffects {
                   .map((task) => task.id);
 
                 if (!environment.production && missingTaskIds.length > 0) {
-                  console.warn(
+                  Log.err(
                     '[TaskDueEffects] Found tasks due today missing from TODAY tag:',
                     {
                       tasksDueToday: tasksDueToday.length,

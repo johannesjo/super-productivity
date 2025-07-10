@@ -60,7 +60,7 @@ export class IssuePanelCalendarAgendaComponent implements OnInit {
       throw new Error('Issue Provider and Search Result Type dont match');
     }
 
-    console.log('Add issue', item);
+    Log.log('Add issue', item);
 
     this._issueService.addTaskFromIssue({
       issueDataReduced: item.issueData,

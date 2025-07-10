@@ -113,7 +113,7 @@ export class InputDurationDirective implements ControlValueAccessor, Validator, 
 
     // Apply external validator if available
     // if (this._validator) {
-    //   console.log(this._validator(control), this._validator);
+    //   Log.log(this._validator(control), this._validator);
     //   return this._validator(control);
     // }
 

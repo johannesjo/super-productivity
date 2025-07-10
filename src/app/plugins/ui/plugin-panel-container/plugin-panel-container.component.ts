@@ -12,6 +12,7 @@ import { Store } from '@ngrx/store';
 import { selectActivePluginId } from '../../../core-ui/layout/store/layout.reducer';
 import { PluginIndexComponent } from '../plugin-index/plugin-index.component';
 import { CommonModule } from '@angular/common';
+import { Log } from '../../../core/log';
 
 /**
  * Container component for rendering plugin iframes in the right panel.
@@ -56,7 +57,7 @@ export class PluginPanelContainerComponent implements OnInit, OnDestroy {
         .select(selectActivePluginId)
         .pipe(filter((pluginId): pluginId is string => !!pluginId))
         .subscribe((pluginId) => {
-          console.log('Plugin panel container received active plugin ID:', pluginId);
+          Log.log('Plugin panel container received active plugin ID:', pluginId);
           this.activePluginId.set(pluginId);
         }),
     );

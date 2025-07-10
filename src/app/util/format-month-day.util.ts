@@ -1,4 +1,5 @@
 import { DatePipe } from '@angular/common';
+import { Log } from '../core/log';
 
 /**
  * Formats a date to show only month and day in locale-aware format.
@@ -44,7 +45,7 @@ export const formatMonthDay = (date: Date, locale: string): string => {
     return result;
   } catch (error) {
     // Fallback to basic formatting if locale data is missing
-    console.warn(`formatMonthDay failed for locale ${locale}:`, error);
+    Log.err(`formatMonthDay failed for locale ${locale}:`, error);
     const month = date.getMonth() + 1;
     const day = date.getDate();
     return `${month}/${day}`;

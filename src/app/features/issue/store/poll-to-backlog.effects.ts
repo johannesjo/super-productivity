@@ -72,7 +72,7 @@ export class PollToBacklogEffects {
                       this._issueService.getPollInterval(provider.issueProviderKey),
                     ).pipe(
                       takeUntil(this.pollToBacklogActions$),
-                      tap(() => console.log('POLL ' + provider.issueProviderKey)),
+                      tap(() => Log.log('POLL ' + provider.issueProviderKey)),
                       switchMap(() =>
                         this._issueService.checkAndImportNewIssuesToBacklogForProject(
                           provider.issueProviderKey,

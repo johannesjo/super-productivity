@@ -404,7 +404,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
               archiveInstances,
               targetProject,
             ]) => {
-              console.log({
+              Log.log({
                 reminderCfg,
                 nonArchiveInstancesWithSubTasks,
                 archiveInstances,

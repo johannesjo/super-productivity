@@ -17,6 +17,7 @@ import { getWorklogStr } from '../../util/get-work-log-str';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { selectTodayTaskIds } from '../work-context/store/work-context.selectors';
 import { selectTasksForPlannerDay } from '../planner/store/planner.selectors';
+import { Log } from '../../core/log';
 
 @Injectable({
   providedIn: 'root',
@@ -105,7 +106,7 @@ export class AddTasksForTomorrowService {
     const allDueSorted = this._sortAll([
       ...allDue.filter((t) => !todaysTaskIds.includes(t.id)),
     ]);
-    console.log({ allDue, allDueSorted });
+    Log.log({ allDue, allDueSorted });
 
     this._movePlannedTasksToToday(allDueSorted);
 

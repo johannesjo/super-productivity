@@ -547,7 +547,7 @@ export class IssueService {
   //     this.ISSUE_SERVICE_MAP[issueProviderKey].getAddTaskData(freshIssueData);
   //   this._taskService.update(taskId, {});
   // } catch (e) {
-  //   console.error(e);
+  //   Log.err(e);
   //   this._taskService.remove(taskId);
   //   // TODO show error msg
   // }

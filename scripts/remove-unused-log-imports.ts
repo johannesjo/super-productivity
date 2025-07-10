@@ -4,14 +4,24 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 const filesToFix = [
-  'src/app/features/calendar-integration/is-calender-event-due.ts',
-  'src/app/features/schedule/map-schedule-data/create-sorted-blocker-blocks.ts',
+  'src/app/core-ui/drop-list/drop-list.service.ts',
+  'src/app/core-ui/side-nav/side-nav.component.ts',
+  'src/app/core/banner/banner.service.ts',
+  'src/app/features/config/form-cfgs/domina-mode-form.const.ts',
+  'src/app/features/focus-mode/focus-mode.service.ts',
+  'src/app/features/schedule/create-task-placeholder/create-task-placeholder.component.ts',
+  'src/app/features/schedule/map-schedule-data/create-blocked-blocks-by-day-map.ts',
   'src/app/features/schedule/map-schedule-data/create-view-entries-for-day.ts',
-  'src/app/features/tasks/short-syntax.ts',
-  'src/app/features/tasks/task-detail-panel/task-detail-panel.component.ts',
-  'src/app/imex/sync/sync-trigger.service.ts',
-  'src/app/pfapi/api/encryption/encryption.ts',
-  'src/app/ui/stuck/stuck.directive.ts',
+  'src/app/features/schedule/map-schedule-data/insert-blocked-blocks-view-entries-for-schedule.ts',
+  'src/app/features/schedule/map-schedule-data/map-to-schedule-days.ts',
+  'src/app/features/task-repeat-cfg/sort-repeatable-task-cfg.ts',
+  'src/app/features/tasks/dialog-task-detail-panel/dialog-task-detail-panel.component.ts',
+  'src/app/features/work-context/store/work-context-meta.helper.ts',
+  'src/app/root-store/index.ts',
+  'src/app/ui/duration/input-duration-formly/input-duration-formly.component.ts',
+  'src/app/ui/inline-markdown/inline-markdown.component.ts',
+  'src/app/util/is-touch-only.ts',
+  'src/app/util/watch-object.ts',
 ];
 
 function removeUnusedLogImport(filePath: string): void {

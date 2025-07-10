@@ -10,6 +10,7 @@ import { WorkContextType, WorkStartEnd } from '../work-context/work-context.mode
 import { ImpossibleError } from '../../pfapi/api';
 import { toLegacyWorkStartEndMaps } from './to-legacy-work-start-end-maps';
 import { TimeTrackingActions } from './store/time-tracking.actions';
+import { Log } from '../../core/log';
 
 @Injectable({
   providedIn: 'root',
@@ -72,7 +73,7 @@ export class TimeTrackingService {
     const archiveYoung = await this._pfapiService.m.archiveYoung.load();
     const archiveOld = await this._pfapiService.m.archiveOld.load();
 
-    console.log({ current, archiveYoung, archiveOld });
+    Log.log({ current, archiveYoung, archiveOld });
 
     if (projectId in current.project) {
       const newProject = { ...current.project };

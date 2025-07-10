@@ -36,6 +36,7 @@ import { NumberToMonthPipe } from '../../ui/pipes/number-to-month.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { TaskArchiveService } from '../time-tracking/task-archive.service';
+import { Log } from '../../core/log';
 
 @Component({
   selector: 'worklog',
@@ -141,7 +142,7 @@ export class WorklogComponent implements AfterViewInit, OnDestroy {
               .filter((v) => !!v);
           }
 
-          console.log('RESTORE', task, subTasks);
+          Log.log('RESTORE', task, subTasks);
           this._taskService.restoreTask(task, (subTasks || []) as Task[]);
           this._router.navigate(['/active/tasks']);
         }

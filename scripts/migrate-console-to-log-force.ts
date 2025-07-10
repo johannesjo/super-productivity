@@ -25,7 +25,7 @@ const excludePatterns = [
   '**/build/**',
   '**/*.spec.ts',
   '**/core/log.ts',
-  '**/scripts/migrate-console-to-log.ts',
+  '**/scripts/migrate-console-to-log*.ts',
   '**/e2e/**',
   '**/coverage/**',
   '**/.angular/**',
@@ -48,8 +48,8 @@ function calculateImportPath(filePath: string): string {
 }
 
 function hasLogImport(content: string): boolean {
-  // More flexible pattern that matches any Log import
-  return /import\s+{[^}]*\bLog\b[^}]*}\s+from\s+['"].*['"]/.test(content);
+  // Check if there's already a Log import from core/log
+  return /import\s+{[^}]*\bLog\b[^}]*}\s+from\s+['"][^'"]*\/core\/log['"]/.test(content);
 }
 
 function addLogImport(content: string, importPath: string): string {
@@ -73,43 +73,40 @@ function addLogImport(content: string, importPath: string): string {
   }
 }
 
-function processFile(filePath: string, dryRun: boolean = false): boolean {
+function processFile(
+  filePath: string,
+  dryRun: boolean = false,
+): { modified: boolean; changes: number } {
   try {
     let content = fs.readFileSync(filePath, 'utf8');
     const originalContent = content;
-    let hasChanges = false;
-
-    // Check if file uses any console methods (including in comments)
-    const usesConsole = replacements.some((r) => r.pattern.test(content));
-
-    if (!usesConsole) {
-      return false;
-    }
+    let changeCount = 0;
 
     // Apply replacements - this will replace even in comments, which is what we want
     for (const { pattern, replacement } of replacements) {
-      if (pattern.test(content)) {
+      const matches = content.match(pattern);
+      if (matches) {
+        changeCount += matches.length;
         content = content.replace(pattern, replacement);
-        hasChanges = true;
       }
     }
 
-    if (hasChanges && !hasLogImport(content)) {
+    // If we made changes and don't have the correct Log import, add it
+    if (changeCount > 0 && !hasLogImport(content)) {
       const importPath = calculateImportPath(filePath);
       content = addLogImport(content, importPath);
     }
 
-    if (content !== originalContent) {
-      if (!dryRun) {
-        fs.writeFileSync(filePath, content, 'utf8');
-      }
-      return true;
+    const modified = content !== originalContent;
+
+    if (modified && !dryRun) {
+      fs.writeFileSync(filePath, content, 'utf8');
     }
 
-    return false;
+    return { modified, changes: changeCount };
   } catch (error) {
     console.error(`Error processing ${filePath}:`, error);
-    return false;
+    return { modified: false, changes: 0 };
   }
 }
 
@@ -117,7 +114,8 @@ function main() {
   const args = process.argv.slice(2);
   const dryRun = args.includes('--dry-run');
 
-  console.log('Starting console to Log migration...');
+  console.log('Starting FORCED console to Log migration...');
+  console.log('This will replace ALL console.* calls, including those in comments.');
   if (dryRun) {
     console.log('Running in DRY RUN mode - no files will be modified\n');
   }
@@ -130,7 +128,7 @@ function main() {
 
   console.log(`Found ${files.length} TypeScript files to check\n`);
 
-  const modifiedFiles: string[] = [];
+  const modifiedFiles: { path: string; changes: number }[] = [];
   const stats = {
     total: 0,
     log: 0,
@@ -144,15 +142,21 @@ function main() {
     const content = fs.readFileSync(file, 'utf8');
 
     // Count occurrences before processing (with word boundary)
-    stats.log += (content.match(/\bconsole\.log\(/g) || []).length;
-    stats.info += (content.match(/\bconsole\.info\(/g) || []).length;
-    stats.error += (content.match(/\bconsole\.error\(/g) || []).length;
-    stats.warn += (content.match(/\bconsole\.warn\(/g) || []).length;
-    stats.debug += (content.match(/\bconsole\.debug\(/g) || []).length;
+    const logCount = (content.match(/\bconsole\.log\(/g) || []).length;
+    const infoCount = (content.match(/\bconsole\.info\(/g) || []).length;
+    const errorCount = (content.match(/\bconsole\.error\(/g) || []).length;
+    const warnCount = (content.match(/\bconsole\.warn\(/g) || []).length;
+    const debugCount = (content.match(/\bconsole\.debug\(/g) || []).length;
 
-    const willModify = processFile(file, dryRun);
-    if (willModify) {
-      modifiedFiles.push(file);
+    stats.log += logCount;
+    stats.info += infoCount;
+    stats.error += errorCount;
+    stats.warn += warnCount;
+    stats.debug += debugCount;
+
+    const result = processFile(file, dryRun);
+    if (result.modified) {
+      modifiedFiles.push({ path: file, changes: result.changes });
     }
   }
 
@@ -166,11 +170,15 @@ function main() {
   console.log(`  - console.error: ${stats.error}`);
   console.log(`  - console.warn: ${stats.warn}`);
   console.log(`  - console.debug: ${stats.debug}`);
-  console.log(`\n${dryRun ? 'Would modify' : 'Modified'} ${modifiedFiles.length} files:`);
+  console.log(
+    `\n${dryRun ? 'Would modify' : 'Modified'} ${modifiedFiles.length} files:\n`,
+  );
 
-  modifiedFiles.forEach((file) => {
-    console.log(`  - ${path.relative(process.cwd(), file)}`);
-  });
+  modifiedFiles
+    .sort((a, b) => b.changes - a.changes)
+    .forEach(({ path: filePath, changes }) => {
+      console.log(`  - ${path.relative(process.cwd(), filePath)} (${changes} changes)`);
+    });
 
   if (modifiedFiles.length === 0) {
     console.log('  No files needed modification.');

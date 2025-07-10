@@ -166,7 +166,7 @@ export class SideNavComponent implements OnDestroy {
           this.keyboardFocusTimeout = window.setTimeout(() => {
             this.keyManager?.setFirstItemActive();
           }, 100);
-          // this.keyManager.change.subscribe((v) => console.log('this.keyManager.change', v));
+          // this.keyManager.change.subscribe((v) => Log.log('this.keyManager.change', v));
         } else if (!isShow) {
           this._taskService.focusFirstTaskIfVisible();
         }

@@ -1,5 +1,6 @@
 import { loadFromRealLs, saveToRealLs } from '../core/persistence/local-storage';
 import { LS } from '../core/persistence/storage-keys.const';
+import { Log } from '../core/log';
 
 const NUMBER_OF_ACTIONS_TO_SAVE = 30;
 
@@ -36,7 +37,7 @@ export const actionLogger = (action: any): void => {
 
 export const saveBeforeLastErrorActionLog = (): void => {
   const current = getActionLog();
-  console.log('Last actions before error:', current);
+  Log.log('Last actions before error:', current);
   saveToRealLs(LS.ACTION_BEFORE_LAST_ERROR_LOG, current);
 };
 

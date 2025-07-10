@@ -6,6 +6,7 @@ import { ProjectCfgFormKey } from '../../project/project.model';
 import { T } from '../../../t.const';
 import { exists } from '../../../util/exists';
 import { adjustToLiveFormlyForm } from '../../../util/adjust-to-live-formly-form';
+import { Log } from '../../../core/log';
 
 @Component({
   selector: 'config-form',
@@ -60,7 +61,7 @@ export class ConfigFormComponent {
     } else {
       // Update validity to ensure error messages are shown
       this.form.updateValueAndValidity();
-      console.warn('Form is invalid, not saving config:', this.form.errors);
+      Log.err('Form is invalid, not saving config:', this.form.errors);
     }
   }
 }

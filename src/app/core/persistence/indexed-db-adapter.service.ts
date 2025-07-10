@@ -5,6 +5,7 @@ import { filter, shareReplay, take } from 'rxjs/operators';
 import { DBSchema, openDB } from 'idb';
 import { DBAdapter } from './db-adapter.model';
 import { Log } from '../log';
+import { Log } from '../log';
 
 const DB_NAME = 'SUP';
 const DB_MAIN_NAME = 'SUP_STORE';
@@ -35,7 +36,7 @@ export class IndexedDBAdapterService implements DBAdapter {
         // upgrade(db: IDBPDatabase<MyDb>, oldVersion: number, newVersion: number | null, transaction: IDBPTransaction<MyDb>) {
         // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
         upgrade(db: IDBPDatabase<MyDb>, oldVersion: number, newVersion: number | null) {
-          console.log('IDB UPGRADE', oldVersion, newVersion);
+          Log.log('IDB UPGRADE', oldVersion, newVersion);
           db.createObjectStore(DB_MAIN_NAME);
         },
         // eslint-disable-next-line prefer-arrow/prefer-arrow-functions

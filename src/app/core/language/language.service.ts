@@ -12,6 +12,7 @@ import { GlobalConfigService } from 'src/app/features/config/global-config.servi
 import { map, startWith } from 'rxjs/operators';
 import { DEFAULT_GLOBAL_CONFIG } from 'src/app/features/config/default-global-config.const';
 import { Log } from '../log';
+import { Log } from '../log';
 
 @Injectable({ providedIn: 'root' })
 export class LanguageService {
@@ -35,7 +36,7 @@ export class LanguageService {
       this._setFn(lng);
     } else {
       if (lng) {
-        console.error('Invalid language code', lng);
+        Log.err('Invalid language code', lng);
       } else {
         Log.err('No language code provided');
       }

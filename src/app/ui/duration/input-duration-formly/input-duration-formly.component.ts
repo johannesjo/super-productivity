@@ -36,7 +36,7 @@ export class InputDurationFormlyComponent
   // @ViewChild(MatInput, {static: true}) formFieldControl?: MatInput;
   onInputValueChange(ev: Event): void {
     const val = (ev.target as HTMLInputElement).value;
-    // console.log('formly onInputValueChange', val);
+    // Log.log('formly onInputValueChange', val);
     // this.formControl.setValue(val);
     this._updateValue(val);
   }

@@ -148,7 +148,7 @@ export class JiraIssueContentComponent {
     try {
       this.description = i && i.description && j2m.to_markdown(i.description);
     } catch (e) {
-      console.log(i);
+      Log.log(i);
       devError(e);
       this.description = (i && i.description) || undefined;
     }

@@ -25,6 +25,7 @@ import { cleanRev } from '../util/clean-rev';
 import { getModelIdsToUpdateFromRevMaps } from '../util/get-model-ids-to-update-from-rev-maps';
 import { Pfapi } from '../pfapi';
 import { SyncProviderId } from '../pfapi.const';
+import { Log } from '../../../core/log';
 
 export class ModelSyncService<MD extends ModelCfgs> {
   private static readonly L = 'ModelSyncService';
@@ -328,7 +329,7 @@ export class ModelSyncService<MD extends ModelCfgs> {
    */
   private _isSameRev(a: string | null, b: string | null): boolean {
     if (!a || !b) {
-      console.warn(`Invalid revs a:${a} and b:${b} given`);
+      Log.err(`Invalid revs a:${a} and b:${b} given`);
       return false;
     }
     if (a === b) {

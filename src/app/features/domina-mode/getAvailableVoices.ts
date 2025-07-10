@@ -1,7 +1,9 @@
+import { Log } from '../../core/log';
+
 export const getAvailableVoices = (): SpeechSynthesisVoice[] => {
   const synth = window.speechSynthesis;
   if (!synth) {
-    console.warn('window.speechSynthesis not available');
+    Log.err('window.speechSynthesis not available');
     return [];
   }
 

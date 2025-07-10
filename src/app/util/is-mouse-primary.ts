@@ -10,6 +10,7 @@
 import { primaryInput } from 'detect-it';
 import { IS_TOUCH_ONLY } from './is-touch-only';
 import { environment } from '../../environments/environment';
+import { Log } from '../core/log';
 
 // @see https://css-tricks.com/interaction-media-features-and-their-potential-for-incorrect-assumptions/
 
@@ -17,5 +18,5 @@ export const IS_MOUSE_PRIMARY = primaryInput === 'mouse';
 export const IS_TOUCH_PRIMARY = IS_TOUCH_ONLY || primaryInput === 'touch';
 
 if (environment.production) {
-  console.log({ IS_MOUSE_PRIMARY, IS_TOUCH_PRIMARY });
+  Log.log({ IS_MOUSE_PRIMARY, IS_TOUCH_PRIMARY });
 }
