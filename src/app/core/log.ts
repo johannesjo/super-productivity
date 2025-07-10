@@ -48,7 +48,8 @@ export class Log {
   /** Pre-bound console functions that preserve line numbers */
   private static readonly c = console.log.bind(console); // critical
   private static readonly e = (console.error || console.log).bind(console);
-  private static readonly n = console.log.bind(console); // normal
+  private static readonly l = console.log.bind(console); // log (formerly normal)
+  private static readonly i = (console.info || console.log).bind(console); // info
   private static readonly v = console.log.bind(console); // verbose
   private static readonly d = (console.debug || console.log).bind(console);
 
@@ -91,17 +92,24 @@ export class Log {
     this.c(this.getPrefix(), ...args);
   }
 
-  static error(...args: unknown[]): void {
+  static err(...args: unknown[]): void {
     if (this.level >= LogLevel.ERROR) {
       this.recordLog('ERROR', this.context, args);
       this.e(this.getPrefix(), ...args);
     }
   }
 
-  static normal(...args: unknown[]): void {
+  static log(...args: unknown[]): void {
     if (this.level >= LogLevel.NORMAL) {
-      this.recordLog('NORMAL', this.context, args);
-      this.n(this.getPrefix(), ...args);
+      this.recordLog('LOG', this.context, args);
+      this.l(this.getPrefix(), ...args);
+    }
+  }
+
+  static info(...args: unknown[]): void {
+    if (this.level >= LogLevel.NORMAL) {
+      this.recordLog('INFO', this.context, args);
+      this.i(this.getPrefix(), ...args);
     }
   }
 
@@ -120,9 +128,9 @@ export class Log {
   }
 
   // Backwards compatibility aliases
-  static log = Log.normal;
-  static info = Log.normal;
-  static warn = Log.error;
+  static error = Log.err;
+  static normal = Log.log;
+  static warn = Log.err;
 
   /** Get the current log history */
   static getLogHistory(): LogEntry[] {
@@ -159,12 +167,14 @@ export class Log {
    */
   static withContext(context: string): {
     critical: (...args: unknown[]) => void;
-    error: (...args: unknown[]) => void;
-    normal: (...args: unknown[]) => void;
-    verbose: (...args: unknown[]) => void;
-    debug: (...args: unknown[]) => void;
+    err: (...args: unknown[]) => void;
     log: (...args: unknown[]) => void;
     info: (...args: unknown[]) => void;
+    verbose: (...args: unknown[]) => void;
+    debug: (...args: unknown[]) => void;
+    // Backwards compatibility aliases
+    error: (...args: unknown[]) => void;
+    normal: (...args: unknown[]) => void;
     warn: (...args: unknown[]) => void;
   } {
     const contextPrefix = `[${context}]`;
@@ -175,16 +185,22 @@ export class Log {
         this.recordLog('CRITICAL', context, args);
         console.log(contextPrefix, ...args);
       },
-      error: (...args: unknown[]) => {
+      err: (...args: unknown[]) => {
         if (LOG_LEVEL >= LogLevel.ERROR) {
           this.recordLog('ERROR', context, args);
           console.error(contextPrefix, ...args);
         }
       },
-      normal: (...args: unknown[]) => {
+      log: (...args: unknown[]) => {
         if (LOG_LEVEL >= LogLevel.NORMAL) {
-          this.recordLog('NORMAL', context, args);
+          this.recordLog('LOG', context, args);
           console.log(contextPrefix, ...args);
+        }
+      },
+      info: (...args: unknown[]) => {
+        if (LOG_LEVEL >= LogLevel.NORMAL) {
+          this.recordLog('INFO', context, args);
+          console.info(contextPrefix, ...args);
         }
       },
       verbose: (...args: unknown[]) => {
@@ -199,17 +215,17 @@ export class Log {
           console.debug(contextPrefix, ...args);
         }
       },
-      // Aliases
-      log: (...args: unknown[]) => {
-        if (LOG_LEVEL >= LogLevel.NORMAL) {
-          this.recordLog('NORMAL', context, args);
-          console.log(contextPrefix, ...args);
+      // Backwards compatibility aliases
+      error: (...args: unknown[]) => {
+        if (LOG_LEVEL >= LogLevel.ERROR) {
+          this.recordLog('ERROR', context, args);
+          console.error(contextPrefix, ...args);
         }
       },
-      info: (...args: unknown[]) => {
+      normal: (...args: unknown[]) => {
         if (LOG_LEVEL >= LogLevel.NORMAL) {
-          this.recordLog('INFO', context, args);
-          console.info(contextPrefix, ...args);
+          this.recordLog('LOG', context, args);
+          console.log(contextPrefix, ...args);
         }
       },
       warn: (...args: unknown[]) => {
