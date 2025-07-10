@@ -155,24 +155,63 @@ export const generateTaskOperations = (
   });
 
   // Second pass: delete tasks that exist in SP but not in MD
+  const tasksToDelete: string[] = [];
   spTasks.forEach((spTask) => {
     if (!processedSpIds.has(spTask.id!) && spTask.projectId === projectId) {
-      operations.push({
-        type: 'delete',
-        taskId: spTask.id!,
-      } as BatchTaskDelete);
+      tasksToDelete.push(spTask.id!);
     }
+  });
+
+  // Before deleting tasks, clean up any references to them in other tasks
+  tasksToDelete.forEach((taskIdToDelete) => {
+    spTasks.forEach((spTask) => {
+      if (
+        spTask.id !== taskIdToDelete &&
+        spTask.subTaskIds &&
+        spTask.subTaskIds.includes(taskIdToDelete)
+      ) {
+        // Remove the deleted task from the parent's subtask list
+        const updateOp = operations.find(
+          (op) => op.type === 'update' && op.taskId === spTask.id,
+        );
+        if (updateOp && updateOp.type === 'update') {
+          // Update existing operation
+          updateOp.updates.subTaskIds = spTask.subTaskIds.filter(
+            (id) => id !== taskIdToDelete,
+          );
+        } else {
+          // Create new update operation
+          operations.push({
+            type: 'update',
+            taskId: spTask.id!,
+            updates: {
+              subTaskIds: spTask.subTaskIds.filter((id) => id !== taskIdToDelete),
+            },
+          } as BatchTaskUpdate);
+        }
+      }
+    });
+  });
+
+  // Now add the delete operations
+  tasksToDelete.forEach((taskId) => {
+    operations.push({
+      type: 'delete',
+      taskId,
+    } as BatchTaskDelete);
   });
 
   // Third pass: handle reordering if needed
   const mdRootTasks = mdTasks.filter((t) => !t.isSubtask);
-  const mdTaskIds = mdRootTasks.map((t) => {
-    if (t.id && spById.has(t.id)) {
-      return t.id;
-    }
-    const spTask = spByTitle.get(t.title);
-    return spTask ? spTask.id! : `temp_${t.line}`;
-  });
+  const mdTaskIds = mdRootTasks
+    .map((t) => {
+      if (t.id && spById.has(t.id)) {
+        return t.id;
+      }
+      const spTask = spByTitle.get(t.title);
+      return spTask ? spTask.id! : `temp_${t.line}`;
+    })
+    .filter((taskId) => !tasksToDelete.includes(taskId)); // Filter out tasks that are being deleted
 
   if (mdTaskIds.length > 0) {
     // Log the order for debugging
