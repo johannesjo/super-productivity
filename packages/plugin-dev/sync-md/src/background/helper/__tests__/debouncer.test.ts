@@ -115,6 +115,9 @@ describe('Debouncer', () => {
       throw new Error('Test error');
     });
 
+    // Mock console.error to avoid test output
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
     debouncer.debounce('test', errorFn, 1000);
 
     // Should not throw when timer fires
@@ -123,5 +126,11 @@ describe('Debouncer', () => {
     }).not.toThrow();
 
     expect(errorFn).toHaveBeenCalledTimes(1);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Error in debounced function test:',
+      expect.any(Error),
+    );
+
+    consoleErrorSpy.mockRestore();
   });
 });

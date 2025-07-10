@@ -1,30 +1,29 @@
-import { MarkdownTask } from '../shared/types';
-
 // Pure markdown parsing utilities - easily testable
-export interface ParsedTask {
-  line: number;
-  indent: number;
-  completed: boolean;
-  id: string | null;
-  title: string;
-  originalLine: string;
-  parentId?: string | null;
-  isSubtask: boolean;
-  originalId?: string | null; // Track the original ID even if it's a duplicate
-  depth: number; // Track depth level (0 = root, 1 = subtask, 2+ = notes content)
-  noteLines?: string[]; // Third-level content to be synced as notes
-}
+import { ParsedTask, TaskParseResult } from './models/markdown.model';
 
-export interface TaskParseResult {
-  tasks: ParsedTask[];
-  errors: string[];
-}
+/**
+ * Detect the base indentation size used in the markdown
+ * Returns the smallest non-zero indentation found
+ */
+const detectIndentSize = (lines: string[]): number => {
+  let minIndent = Infinity;
+
+  for (const line of lines) {
+    const match = line.match(/^(\s*)- \[/);
+    if (match && match[1].length > 0) {
+      minIndent = Math.min(minIndent, match[1].length);
+    }
+  }
+
+  // Default to 2 if no indentation found
+  return minIndent === Infinity ? 2 : minIndent;
+};
 
 /**
  * Pure function to parse markdown content into task objects
  * This is easily testable as it has no side effects
  */
-export function parseMarkdownTasks(content: string): TaskParseResult {
+export const parseMarkdownTasks = (content: string): TaskParseResult => {
   const lines = content.split('\n');
   const tasks: ParsedTask[] = [];
   const errors: string[] = [];
@@ -36,14 +35,34 @@ export function parseMarkdownTasks(content: string): TaskParseResult {
   }> = [];
   const seenIds = new Set<string>();
 
+  // Detect the indentation size used in this file
+  const detectedIndentSize = detectIndentSize(lines);
+  console.log(`📏 Detected indent size: ${detectedIndentSize} spaces per level`);
+
   // First pass: identify all task lines and parse tasks
   lines.forEach((line, index) => {
-    const taskMatch = line.match(/^(\s*)- \[([ x])\]\s*(?:<!-- sp:([^>]+) -->)?\s*(.*)$/);
+    // Try new format first (no sp: prefix, no spaces)
+    let taskMatch = line.match(/^(\s*)- \[([ x])\]\s*(?:<!--([^>]+)-->)?\s*(.*)$/);
+
+    // If no match, try old format (with sp: prefix and spaces)
+    if (!taskMatch) {
+      taskMatch = line.match(/^(\s*)- \[([ x])\]\s*(?:<!-- sp:([^>]+) -->)?\s*(.*)$/);
+    }
 
     if (taskMatch) {
       const [, indent, completed, id, title] = taskMatch;
       const indentLevel = indent.length;
-      const depth = Math.floor(indentLevel / 2);
+
+      // Calculate depth using actual detected indent size
+      let depth: number;
+      if (detectedIndentSize === 1) {
+        // Special handling for 1-space indentation
+        // 0 spaces = depth 0, 1 space = depth 1, 2+ spaces = depth 2+
+        depth = indentLevel;
+      } else {
+        // Normal calculation for 2+ space indentation
+        depth = detectedIndentSize > 0 ? Math.floor(indentLevel / detectedIndentSize) : 0;
+      }
 
       // Only process tasks at depth 0 or 1 (parent tasks and subtasks)
       if (depth <= 1) {
@@ -79,9 +98,10 @@ export function parseMarkdownTasks(content: string): TaskParseResult {
           seenIds.add(id);
         }
 
-        // Validate task structure
+        // Skip tasks with empty titles
         if (!title.trim()) {
-          errors.push(`Empty task title at line ${index + 1}`);
+          errors.push(`Skipping task with empty title at line ${index + 1}`);
+          return; // Skip this iteration in forEach
         }
 
         const taskIndex = tasks.length;
@@ -109,13 +129,13 @@ export function parseMarkdownTasks(content: string): TaskParseResult {
     }
   });
 
-  // Second pass: collect notes for subtasks
-  // Notes are any lines between a subtask and the next task
+  // Second pass: collect notes for all tasks at depth 0 and 1
+  // Notes are any lines between a task and the next task
   for (let i = 0; i < tasks.length; i++) {
     const task = tasks[i];
 
-    // Only subtasks (depth 1) can have notes
-    if (task.depth === 1) {
+    // Both parent tasks (depth 0) and subtasks (depth 1) can have notes
+    if (task.depth <= 1) {
       const startLine = task.line + 1;
       let endLine = lines.length;
 
@@ -146,80 +166,5 @@ export function parseMarkdownTasks(content: string): TaskParseResult {
     }
   }
 
-  return { tasks, errors };
-}
-
-/**
- * Generate a unique task ID
- */
-export function generateTaskId(): string {
-  return 'md-' + Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
-}
-
-/**
- * Convert tasks back to markdown lines
- */
-export function tasksToMarkdownLines(tasks: ParsedTask[]): string[] {
-  return tasks.map((task) => {
-    const indent = ' '.repeat(task.indent);
-    const check = task.completed ? 'x' : ' ';
-    const idPart = task.id ? ` <!-- sp:${task.id} -->` : '';
-    return `${indent}- [${check}]${idPart} ${task.title}`;
-  });
-}
-
-/**
- * Convert parsed tasks to hierarchical MarkdownTask structure
- */
-export function buildTaskHierarchy(parsedTasks: ParsedTask[]): MarkdownTask[] {
-  const rootTasks: MarkdownTask[] = [];
-  const taskMap = new Map<string | null, MarkdownTask>();
-
-  // First pass: create all tasks
-  parsedTasks.forEach((parsed) => {
-    const task: MarkdownTask = {
-      title: parsed.title,
-      isDone: parsed.completed,
-      lineNumber: parsed.line,
-      indentLevel: parsed.indent / 2, // Convert spaces to indent level
-      subTasks: [],
-    };
-
-    if (parsed.id) {
-      taskMap.set(parsed.id, task);
-    } else {
-      taskMap.set(`line-${parsed.line}`, task);
-    }
-  });
-
-  // Second pass: build hierarchy
-  parsedTasks.forEach((parsed, index) => {
-    const taskKey = parsed.id || `line-${parsed.line}`;
-    const task = taskMap.get(taskKey)!;
-
-    if (parsed.parentId) {
-      const parent = taskMap.get(parsed.parentId);
-      if (parent) {
-        parent.subTasks.push(task);
-      } else {
-        rootTasks.push(task);
-      }
-    } else if (!parsed.isSubtask) {
-      rootTasks.push(task);
-    } else {
-      // Find parent by indentation
-      for (let i = index - 1; i >= 0; i--) {
-        if (parsedTasks[i].indent < parsed.indent) {
-          const parentKey = parsedTasks[i].id || `line-${parsedTasks[i].line}`;
-          const parent = taskMap.get(parentKey);
-          if (parent) {
-            parent.subTasks.push(task);
-            break;
-          }
-        }
-      }
-    }
-  });
-
-  return rootTasks;
-}
+  return { tasks, errors, detectedIndentSize };
+};

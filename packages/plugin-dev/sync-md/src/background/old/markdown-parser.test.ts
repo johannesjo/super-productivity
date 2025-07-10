@@ -1,5 +1,4 @@
-import { parseMarkdownTasks, tasksToMarkdownLines } from '../../markdown-parser';
-import { generateTaskId } from '../../markdown-parser';
+import { parseMarkdownTasks } from '../../markdown-parser';
 
 describe('markdown-parser', () => {
   describe('parseMarkdownTasks', () => {
@@ -124,18 +123,21 @@ describe('markdown-parser', () => {
       });
     });
 
-    it('should detect empty task titles as errors', () => {
+    it('should skip empty task titles', () => {
       const content = `
 - [ ]
 - [x] Valid task
+- [ ] <!-- sp:123 -->
       `.trim();
 
       const result = parseMarkdownTasks(content);
 
-      expect(result.errors).toEqual(['Empty task title at line 1']);
-      expect(result.tasks).toHaveLength(2);
-      expect(result.tasks[0].title).toBe('');
-      expect(result.tasks[1].title).toBe('Valid task');
+      expect(result.errors).toEqual([
+        'Skipping task with empty title at line 1',
+        'Skipping task with empty title at line 3',
+      ]);
+      expect(result.tasks).toHaveLength(1);
+      expect(result.tasks[0].title).toBe('Valid task');
     });
 
     it('should ignore non-task lines', () => {
@@ -169,77 +171,6 @@ More text
       expect(result.tasks[0].id).toBe('simple-id');
       expect(result.tasks[1].id).toBe('123-456-789');
       expect(result.tasks[2].id).toBe('uuid-like-id-here');
-    });
-  });
-
-  describe('generateTaskId', () => {
-    it('should generate unique IDs', () => {
-      const id1 = generateTaskId();
-      const id2 = generateTaskId();
-
-      expect(id1).toMatch(/^md-[a-z0-9]+$/);
-      expect(id2).toMatch(/^md-[a-z0-9]+$/);
-      expect(id1).not.toBe(id2);
-    });
-
-    it('should always start with "md-"', () => {
-      for (let i = 0; i < 10; i++) {
-        const id = generateTaskId();
-        expect(id).toMatch(/^md-/);
-      }
-    });
-  });
-
-  describe('tasksToMarkdownLines', () => {
-    it('should convert tasks back to markdown', () => {
-      const tasks = [
-        {
-          line: 0,
-          indent: 0,
-          completed: false,
-          id: 'task1',
-          title: 'Task 1',
-          originalLine: '',
-          parentId: null,
-          isSubtask: false,
-          originalId: 'task1',
-        },
-        {
-          line: 1,
-          indent: 2,
-          completed: true,
-          id: null,
-          title: 'Child task',
-          originalLine: '',
-          parentId: 'task1',
-          isSubtask: true,
-          originalId: null,
-        },
-      ];
-
-      const lines = tasksToMarkdownLines(tasks);
-
-      expect(lines).toEqual(['- [ ] <!-- sp:task1 --> Task 1', '  - [x] Child task']);
-    });
-
-    it('should handle tasks without IDs', () => {
-      const tasks = [
-        {
-          line: 0,
-          indent: 0,
-          completed: false,
-          id: null,
-          title: 'Task without ID',
-          originalLine: '',
-          parentId: null,
-          isSubtask: false,
-          originalId: null,
-        },
-      ];
-
-      const lines = tasksToMarkdownLines(tasks);
-
-      expect(lines).toEqual(['- [ ] Task without ID']);
     });
   });
 });

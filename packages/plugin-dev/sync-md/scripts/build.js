@@ -36,19 +36,22 @@ async function buildPlugin() {
 // This file is auto-generated. Do not edit directly.
 (function() {
   'use strict';
+  console.log('[sync-md] Plugin script loaded');
 `,
       },
       footer: {
         js: `
-  // Initialize plugin - initPlugin should already be attached to window by the plugin code
-  console.log('[Plugin Build] Checking for initPlugin function...');
-  if (typeof window.initPlugin === 'function') {
-    console.log('[Plugin Build] initPlugin function found on window');
-  } else if (typeof window.SyncMdPlugin !== 'undefined' && window.SyncMdPlugin.initPlugin) {
-    console.log('[Plugin Build] initPlugin found on SyncMdPlugin, attaching to window');
-    window.initPlugin = window.SyncMdPlugin.initPlugin;
+  // Assign SyncMdPlugin to window
+  window.SyncMdPlugin = SyncMdPlugin;
+  
+  // Initialize plugin
+  console.log('[Plugin Build] Setting up initPlugin...');
+  if (typeof window.SyncMdPlugin !== 'undefined' && typeof window.SyncMdPlugin.initPlugin === 'function') {
+    console.log('[Plugin Build] initPlugin found on SyncMdPlugin, calling it now');
+    // Call initPlugin immediately
+    window.SyncMdPlugin.initPlugin();
   } else {
-    console.error('[Plugin Build] initPlugin function not found!');
+    console.error('[Plugin Build] initPlugin function not found on SyncMdPlugin!', window.SyncMdPlugin);
   }
 })();`,
       },
