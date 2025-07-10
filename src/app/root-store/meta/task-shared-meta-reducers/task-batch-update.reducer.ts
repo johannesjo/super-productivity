@@ -1,13 +1,7 @@
 import { Action } from '@ngrx/store';
 import { Task, DEFAULT_TASK } from '../../../features/tasks/task.model';
 import { TaskSharedActions } from '../task-shared.actions';
-import {
-  BatchOperation,
-  BatchTaskCreate,
-  BatchTaskUpdate,
-  BatchTaskDelete,
-  BatchTaskReorder,
-} from '../../../api/batch-update-types';
+
 import { taskAdapter } from '../../../features/tasks/store/task.adapter';
 import { TASK_FEATURE_NAME } from '../../../features/tasks/store/task.reducer';
 import {
@@ -18,6 +12,13 @@ import { TAG_FEATURE_NAME } from '../../../features/tag/store/tag.reducer';
 import { nanoid } from 'nanoid';
 import { Tag } from '../../../features/tag/tag.model';
 import { RootState } from '../../root-state';
+import {
+  BatchOperation,
+  BatchTaskCreate,
+  BatchTaskDelete,
+  BatchTaskReorder,
+  BatchTaskUpdate,
+} from '@super-productivity/plugin-api';
 
 /**
  * Meta reducer for handling batch updates to tasks within a project
@@ -35,6 +36,12 @@ export const taskBatchUpdateMetaReducer = (
       // Ensure state has required properties
       if (!state[TASK_FEATURE_NAME] || !state[PROJECT_FEATURE_NAME]) {
         console.error('taskBatchUpdateMetaReducer: Missing required state properties');
+        return reducer(state, action);
+      }
+
+      // Validate project exists
+      if (!state[PROJECT_FEATURE_NAME].entities[projectId]) {
+        console.error(`taskBatchUpdateMetaReducer: Project ${projectId} not found`);
         return reducer(state, action);
       }
 
@@ -58,6 +65,18 @@ export const taskBatchUpdateMetaReducer = (
               (parentId.startsWith('temp-') || parentId.startsWith('temp_'))
             ) {
               parentId = createdTaskIds[parentId] || parentId;
+            }
+
+            // Skip if circular dependency (task is its own parent)
+            if (parentId === actualId) {
+              console.warn(`Skipping task with circular dependency: ${actualId}`);
+              break;
+            }
+
+            // Skip if title is empty
+            if (!createOp.data.title || createOp.data.title.trim() === '') {
+              console.warn(`Skipping task with empty title: ${actualId}`);
+              break;
             }
 
             const newTask: Task = {
@@ -95,6 +114,13 @@ export const taskBatchUpdateMetaReducer = (
 
           case 'update': {
             const updateOp = op as BatchTaskUpdate;
+
+            // Skip if task doesn't exist
+            if (!newState[TASK_FEATURE_NAME].entities[updateOp.taskId]) {
+              console.warn(`Skipping update for non-existent task: ${updateOp.taskId}`);
+              break;
+            }
+
             const updates: any = {};
 
             if (updateOp.updates.title !== undefined) {
@@ -108,6 +134,10 @@ export const taskBatchUpdateMetaReducer = (
             }
             if (updateOp.updates.timeEstimate !== undefined) {
               updates.timeEstimate = updateOp.updates.timeEstimate;
+            }
+            if (updateOp.updates.subTaskIds !== undefined) {
+              // Handle direct subTaskIds updates (for reordering subtasks)
+              updates.subTaskIds = updateOp.updates.subTaskIds;
             }
             if (updateOp.updates.parentId !== undefined) {
               // Handle parent ID changes (moving subtasks)
@@ -165,6 +195,13 @@ export const taskBatchUpdateMetaReducer = (
 
           case 'delete': {
             const deleteOp = op as BatchTaskDelete;
+
+            // Skip if task doesn't exist
+            if (!newState[TASK_FEATURE_NAME].entities[deleteOp.taskId]) {
+              console.warn(`Skipping delete for non-existent task: ${deleteOp.taskId}`);
+              break;
+            }
+
             taskIdsToDelete.push(deleteOp.taskId);
 
             // Remove from parent's subTaskIds
