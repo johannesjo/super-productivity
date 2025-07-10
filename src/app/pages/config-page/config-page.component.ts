@@ -42,6 +42,7 @@ import { PluginShortcutCfg } from '../../plugins/plugin-api.model';
 import { ThemeSelectorComponent } from '../../core/theme/theme-selector/theme-selector.component';
 import { Log } from '../../core/log';
 import { downloadLogs } from '../../util/download';
+import { SnackService } from '../../core/snack/snack.service';
 
 @Component({
   selector: 'config-page',

@@ -11,6 +11,7 @@ import { By } from '@angular/platform-browser';
 
 import { DialogImportFromUrlComponent } from './dialog-import-from-url.component';
 import { T } from '../../t.const';
+import { Log } from '../../core/log';
 
 describe('DialogImportFromUrlComponent', () => {
   let component: DialogImportFromUrlComponent;
@@ -161,12 +162,12 @@ describe('DialogImportFromUrlComponent', () => {
     });
 
     it('should log error when URL is empty', () => {
-      spyOn(console, 'error');
+      spyOn(Log, 'err');
       component.url = '';
 
       component.submit();
 
-      expect(console.error).toHaveBeenCalledWith('', 'URL is required.');
+      expect(Log.err).toHaveBeenCalledWith('URL is required.');
     });
   });
 
