@@ -44,6 +44,7 @@ import { PluginService } from '../../plugins/plugin.service';
 import { PluginShortcutCfg } from '../../plugins/plugin-api.model';
 import { ThemeSelectorComponent } from '../../core/theme/theme-selector/theme-selector.component';
 import { downloadLogs, Log } from '../../core/log';
+import { SnackService } from '../../core/snack/snack.service';
 
 @Component({
   selector: 'config-page',
@@ -68,6 +69,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   readonly globalThemeService = inject(GlobalThemeService);
   private readonly _pluginBridgeService = inject(PluginBridgeService);
   private readonly _pluginService = inject(PluginService);
+  private readonly _snackService = inject(SnackService);
 
   T: typeof T = T;
   globalConfigFormCfg: ConfigFormConfig;
@@ -229,5 +231,12 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     return (this.globalCfg as any)[sectionKey];
   }
 
-  protected readonly downloadLogs = downloadLogs;
+  async downloadLogs(): Promise<void> {
+    try {
+      await downloadLogs();
+      this._snackService.open('Logs downloaded to android documents folder');
+    } catch (error) {
+      this._snackService.open('Failed to download logs');
+    }
+  }
 }

@@ -3,10 +3,10 @@ import { Directory, Encoding, Filesystem, WriteFileResult } from '@capacitor/fil
 import { IS_ANDROID_WEB_VIEW } from './is-android-web-view';
 import { Log } from '../core/log';
 
-export const download = (filename: string, stringData: string): void => {
+export const download = async (filename: string, stringData: string): Promise<void> => {
   const blob = new Blob([stringData], { type: 'text/plain;charset=utf-8' });
   if (IS_ANDROID_WEB_VIEW) {
-    saveStringAsFile(filename, stringData);
+    await saveStringAsFile(filename, stringData);
   } else {
     saveAs(blob, filename);
   }

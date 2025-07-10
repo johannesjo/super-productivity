@@ -101,7 +101,7 @@
   >
   –
   <a
-    (click)="downloadLogs()"
+    (click)="downloadLogs(); $event?.preventDefault()"
     href="#"
     >Logs</a
   >

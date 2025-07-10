@@ -271,4 +271,10 @@ export const IssueLog = Log.withContext('issue');
 export const DroidLog = Log.withContext('droid');
 export const TaskLog = Log.withContext('task');
 
-export const downloadLogs = (): void => download('SP-logs', Log.exportLogHistory());
+export const downloadLogs = async (): Promise<void> => {
+  try {
+    await download('SP-logs.json', Log.exportLogHistory());
+  } catch (error) {
+    Log.err('Failed to download logs:', error);
+  }
+};
