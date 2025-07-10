@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { pfLog } from '../../pfapi/api/util/log';
+import { SyncLog } from '../../core/log';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { CompleteBackup } from '../../pfapi/api';
 import { Subject } from 'rxjs';
@@ -33,7 +33,7 @@ export class SyncSafetyBackupService {
     // Subscribe to the onBeforeUpdateLocal event
     this._pfapiService.pf.ev.on('onBeforeUpdateLocal', async (eventData) => {
       try {
-        pfLog(1, 'SyncSafetyBackupService: Received onBeforeUpdateLocal event', {
+        SyncLog.error('SyncSafetyBackupService: Received onBeforeUpdateLocal event', {
           modelsToUpdate: eventData.modelsToUpdate,
         });
 
@@ -56,15 +56,18 @@ export class SyncSafetyBackupService {
         };
 
         await this._saveBackup(backup);
-        pfLog(1, 'SyncSafetyBackupService: Backup created before UpdateLocal', {
+        SyncLog.error('SyncSafetyBackupService: Backup created before UpdateLocal', {
           backupId: backup.id,
           lastChangedModelId,
           modelsToUpdate: eventData.modelsToUpdate,
         });
       } catch (error) {
-        pfLog(0, 'SyncSafetyBackupService: Failed to create backup on UpdateLocal', {
-          error,
-        });
+        SyncLog.critical(
+          'SyncSafetyBackupService: Failed to create backup on UpdateLocal',
+          {
+            error,
+          },
+        );
       }
     });
   }
@@ -92,7 +95,9 @@ export class SyncSafetyBackupService {
     };
 
     await this._saveBackup(backup);
-    pfLog(1, 'SyncSafetyBackupService: Manual backup created', { backupId: backup.id });
+    SyncLog.error('SyncSafetyBackupService: Manual backup created', {
+      backupId: backup.id,
+    });
   }
 
   /**
@@ -111,7 +116,9 @@ export class SyncSafetyBackupService {
       // Filter out any invalid backups and ensure all have unique IDs
       const validBackups = backups.filter((backup) => {
         if (!backup || typeof backup !== 'object') {
-          pfLog(0, 'SyncSafetyBackupService: Invalid backup object found', { backup });
+          SyncLog.critical('SyncSafetyBackupService: Invalid backup object found', {
+            backup,
+          });
           return false;
         }
 
@@ -122,7 +129,7 @@ export class SyncSafetyBackupService {
           backup.id === 'EMPTY' ||
           backup.id.trim() === ''
         ) {
-          pfLog(0, 'SyncSafetyBackupService: Invalid backup ID found', {
+          SyncLog.critical('SyncSafetyBackupService: Invalid backup ID found', {
             id: backup.id,
             timestamp: backup.timestamp,
           });
@@ -130,7 +137,7 @@ export class SyncSafetyBackupService {
         }
 
         if (!backup.timestamp || typeof backup.timestamp !== 'number') {
-          pfLog(0, 'SyncSafetyBackupService: Invalid backup timestamp', {
+          SyncLog.critical('SyncSafetyBackupService: Invalid backup timestamp', {
             id: backup.id,
             timestamp: backup.timestamp,
           });
@@ -146,11 +153,14 @@ export class SyncSafetyBackupService {
         if (seenIds.has(backup.id) || backup.id === 'EMPTY' || !backup.id) {
           // Generate a new unique ID if duplicate, empty, or "EMPTY" found
           const newId = nanoid();
-          pfLog(1, 'SyncSafetyBackupService: Regenerating duplicate/invalid backup ID', {
-            oldId: backup.id,
-            newId,
-            timestamp: backup.timestamp,
-          });
+          SyncLog.error(
+            'SyncSafetyBackupService: Regenerating duplicate/invalid backup ID',
+            {
+              oldId: backup.id,
+              newId,
+              timestamp: backup.timestamp,
+            },
+          );
           backup.id = newId;
         }
         seenIds.add(backup.id);
@@ -161,8 +171,7 @@ export class SyncSafetyBackupService {
       const finalIds = new Set<string>();
       const finalBackups = uniqueBackups.filter((backup) => {
         if (finalIds.has(backup.id)) {
-          pfLog(
-            0,
+          SyncLog.critical(
             'SyncSafetyBackupService: Duplicate ID still exists after regeneration',
             {
               id: backup.id,
@@ -176,7 +185,7 @@ export class SyncSafetyBackupService {
 
       return finalBackups.sort((a, b) => b.timestamp - a.timestamp);
     } catch (error) {
-      pfLog(0, 'SyncSafetyBackupService: Failed to load backups', { error });
+      SyncLog.critical('SyncSafetyBackupService: Failed to load backups', { error });
       return [];
     }
   }
@@ -199,7 +208,7 @@ export class SyncSafetyBackupService {
       `Click OK to proceed or Cancel to abort.`;
 
     if (window.confirm(confirmMessage)) {
-      pfLog(1, 'SyncSafetyBackupService: Restoring backup', {
+      SyncLog.error('SyncSafetyBackupService: Restoring backup', {
         backupId,
         timestamp: backup.timestamp,
       });
@@ -208,16 +217,18 @@ export class SyncSafetyBackupService {
         // Import backup with: isSkipLegacyWarnings=false, isSkipReload=true, isForceConflict=true
         await this._pfapiService.importCompleteBackup(backup.data, false, true, true);
 
-        pfLog(1, 'SyncSafetyBackupService: Backup restored successfully', { backupId });
+        SyncLog.error('SyncSafetyBackupService: Backup restored successfully', {
+          backupId,
+        });
       } catch (error) {
-        pfLog(0, 'SyncSafetyBackupService: Failed to restore backup', {
+        SyncLog.critical('SyncSafetyBackupService: Failed to restore backup', {
           backupId,
           error,
         });
         throw new Error(`Failed to restore backup: ${error}`);
       }
     } else {
-      pfLog(1, 'SyncSafetyBackupService: Backup restoration cancelled by user', {
+      SyncLog.error('SyncSafetyBackupService: Backup restoration cancelled by user', {
         backupId,
       });
     }
@@ -236,7 +247,7 @@ export class SyncSafetyBackupService {
     // Notify components that backups have changed
     this._backupsChanged$.next();
 
-    pfLog(1, 'SyncSafetyBackupService: Backup deleted', { backupId });
+    SyncLog.error('SyncSafetyBackupService: Backup deleted', { backupId });
   }
 
   /**
@@ -249,7 +260,7 @@ export class SyncSafetyBackupService {
     // Notify components that backups have changed
     this._backupsChanged$.next();
 
-    pfLog(1, 'SyncSafetyBackupService: All backups cleared');
+    SyncLog.error('SyncSafetyBackupService: All backups cleared');
   }
 
   private async _saveBackup(backup: SyncSafetyBackup): Promise<void> {
@@ -257,10 +268,13 @@ export class SyncSafetyBackupService {
     if (!backup.id || backup.id === 'EMPTY' || backup.id.trim() === '') {
       const oldId = backup.id;
       backup.id = nanoid();
-      pfLog(1, 'SyncSafetyBackupService: Generated new ID for backup with invalid ID', {
-        oldId,
-        newId: backup.id,
-      });
+      SyncLog.error(
+        'SyncSafetyBackupService: Generated new ID for backup with invalid ID',
+        {
+          oldId,
+          newId: backup.id,
+        },
+      );
     }
 
     const existingBackups = await this.getBackups();
@@ -337,8 +351,7 @@ export class SyncSafetyBackupService {
     // Notify components that backups have changed
     this._backupsChanged$.next();
 
-    pfLog(
-      1,
+    SyncLog.error(
       `SyncSafetyBackupService: Saved backup. Total slots used: ${result.length}/${TOTAL_BACKUP_SLOTS}`,
       {
         recentCount: Math.min(finalBackups.length, MAX_RECENT_BACKUPS),

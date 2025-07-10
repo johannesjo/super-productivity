@@ -9,7 +9,7 @@ class AdditionalLogErrorBase<T = unknown[]> extends Error {
     super(typeof additional[0] === 'string' ? additional[0] : new.target.name);
 
     if (additional.length > 0) {
-      // pfLog(0, this.name, ...additional);
+      // SyncLog.critical( this.name, ...additional);
       console.log(this.name, ...additional);
       try {
         console.log('additional error log: ' + JSON.stringify(additional));

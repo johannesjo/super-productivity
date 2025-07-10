@@ -9,7 +9,7 @@ import {
   RemoteFileNotFoundAPIError,
   NoRevAPIError,
 } from '../../../errors/errors';
-import { pfLog } from '../../../util/log';
+import { SyncLog } from '../../../../../core/log';
 import { DropboxApi } from './dropbox-api';
 import { generatePKCECodes } from './generate-pkce-codes';
 import { SyncProviderPrivateCfgStore } from '../../sync-provider-private-cfg-store';
@@ -86,7 +86,7 @@ export class Dropbox implements SyncProviderServiceInterface<SyncProviderId.Drop
       };
     } catch (e) {
       if (this._isTokenError(e)) {
-        pfLog(0, 'EXPIRED or INVALID TOKEN, trying to refresh');
+        SyncLog.critical('EXPIRED or INVALID TOKEN, trying to refresh');
         await this._api.updateAccessTokenFromRefreshTokenIfAvailable();
         return this.getFileRev(targetPath, localRev);
       }
@@ -131,7 +131,7 @@ export class Dropbox implements SyncProviderServiceInterface<SyncProviderId.Drop
       }
 
       if (typeof r.data !== 'string') {
-        pfLog(0, `${Dropbox.L}.${this.downloadFile.name}() data`, r.data);
+        SyncLog.critical(`${Dropbox.L}.${this.downloadFile.name}() data`, r.data);
         throw new InvalidDataSPError(r.data);
       }
 
@@ -141,7 +141,7 @@ export class Dropbox implements SyncProviderServiceInterface<SyncProviderId.Drop
       };
     } catch (e) {
       if (this._isTokenError(e)) {
-        pfLog(0, 'EXPIRED or INVALID TOKEN, trying to refresh');
+        SyncLog.critical('EXPIRED or INVALID TOKEN, trying to refresh');
         await this._api.updateAccessTokenFromRefreshTokenIfAvailable();
         return this.downloadFile(targetPath, localRev);
       }
@@ -181,7 +181,7 @@ export class Dropbox implements SyncProviderServiceInterface<SyncProviderId.Drop
       };
     } catch (e) {
       if (this._isTokenError(e)) {
-        pfLog(0, 'EXPIRED or INVALID TOKEN, trying to refresh');
+        SyncLog.critical('EXPIRED or INVALID TOKEN, trying to refresh');
         await this._api.updateAccessTokenFromRefreshTokenIfAvailable();
         return this.uploadFile(targetPath, dataStr, revToMatch, isForceOverwrite);
       }
@@ -200,7 +200,7 @@ export class Dropbox implements SyncProviderServiceInterface<SyncProviderId.Drop
       await this._api.remove(this._getPath(targetPath));
     } catch (e) {
       if (this._isTokenError(e)) {
-        pfLog(0, 'EXPIRED or INVALID TOKEN, trying to refresh');
+        SyncLog.critical('EXPIRED or INVALID TOKEN, trying to refresh');
         await this._api.updateAccessTokenFromRefreshTokenIfAvailable();
         return this.removeFile(targetPath);
       }

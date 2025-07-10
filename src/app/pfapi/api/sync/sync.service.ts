@@ -18,7 +18,7 @@ import {
   NoRemoteMetaFile,
   UnknownSyncStateError,
 } from '../errors/errors';
-import { pfLog } from '../util/log';
+import { SyncLog } from '../../../core/log';
 import { MetaModelCtrl } from '../model-ctrl/meta-model-ctrl';
 import { EncryptAndCompressHandlerService } from './encrypt-and-compress-handler.service';
 import { cleanRev } from '../util/clean-rev';
@@ -95,7 +95,7 @@ export class SyncService<const MD extends ModelCfgs> {
       }
       const localMeta0 = await this._metaModelCtrl.load();
 
-      pfLog(2, `${SyncService.L}.${this.sync.name}(): Initial meta check`, {
+      SyncLog.normal(`${SyncService.L}.${this.sync.name}(): Initial meta check`, {
         lastUpdate: localMeta0.lastUpdate,
         lastSyncedUpdate: localMeta0.lastSyncedUpdate,
         metaRev: localMeta0.metaRev,
@@ -106,8 +106,7 @@ export class SyncService<const MD extends ModelCfgs> {
       if (localMeta0.lastSyncedUpdate === localMeta0.lastUpdate) {
         const metaRev = await this._metaFileSyncService.getRev(localMeta0.metaRev);
         if (metaRev === localMeta0.metaRev) {
-          pfLog(
-            2,
+          SyncLog.normal(
             `${SyncService.L}.${this.sync.name}(): Early return - already in sync`,
           );
           return { status: SyncStatus.InSync };
@@ -123,8 +122,7 @@ export class SyncService<const MD extends ModelCfgs> {
 
       const { status, conflictData } = getSyncStatusFromMetaFiles(remoteMeta, localMeta);
 
-      pfLog(
-        2,
+      SyncLog.normal(
         `${SyncService.L}.${this.sync.name}(): __SYNC_START__ metaFileCheck`,
         status,
         {
@@ -154,7 +152,7 @@ export class SyncService<const MD extends ModelCfgs> {
               modelsToUpdate: toUpdate,
             });
           } catch (error) {
-            pfLog(0, 'Failed to emit onBeforeUpdateLocal event', error);
+            SyncLog.critical('Failed to emit onBeforeUpdateLocal event', error);
             // Continue with sync even if backup event fails
           }
 
@@ -168,7 +166,7 @@ export class SyncService<const MD extends ModelCfgs> {
             switch (mvcR) {
               case ModelVersionCheckResult.MinorUpdate:
               case ModelVersionCheckResult.MajorUpdate:
-                pfLog(2, 'Downloading all since model version changed');
+                SyncLog.normal('Downloading all since model version changed');
                 await this.downloadAll();
                 return { status: SyncStatus.UpdateLocalAll };
               case ModelVersionCheckResult.RemoteMajorAhead:
@@ -189,7 +187,7 @@ export class SyncService<const MD extends ModelCfgs> {
         case SyncStatus.InSync:
           // Ensure lastSyncedUpdate is set even when already in sync
           if (localMeta.lastSyncedUpdate !== localMeta.lastUpdate) {
-            pfLog(2, 'InSync but lastSyncedUpdate needs update', {
+            SyncLog.normal('InSync but lastSyncedUpdate needs update', {
               lastSyncedUpdate: localMeta.lastSyncedUpdate,
               lastUpdate: localMeta.lastUpdate,
             });
@@ -218,10 +216,10 @@ export class SyncService<const MD extends ModelCfgs> {
           throw new UnknownSyncStateError();
       }
     } catch (e) {
-      pfLog(0, `${SyncService.L}.${this.sync.name}(): Sync error`, e);
+      SyncLog.critical(`${SyncService.L}.${this.sync.name}(): Sync error`, e);
 
       if (e instanceof NoRemoteMetaFile) {
-        pfLog(0, 'No remote meta file found, uploading all data');
+        SyncLog.critical('No remote meta file found, uploading all data');
         // if there is no remote meta file, we need to upload all data
         await this.uploadAll(true);
         return { status: SyncStatus.UpdateRemoteAll };
@@ -229,7 +227,7 @@ export class SyncService<const MD extends ModelCfgs> {
 
       // This indicates an incomplete sync, retry upload
       if (e instanceof LockFromLocalClientPresentError) {
-        pfLog(0, 'Lock from local client present, forcing upload of all data');
+        SyncLog.critical('Lock from local client present, forcing upload of all data');
         await this.uploadAll(true);
         return { status: SyncStatus.UpdateRemoteAll };
       }
@@ -242,8 +240,7 @@ export class SyncService<const MD extends ModelCfgs> {
    * @param isForceUpload Whether to force upload even if lock exists
    */
   async uploadAll(isForceUpload: boolean = false): Promise<void> {
-    pfLog(
-      2,
+    SyncLog.normal(
       `${SyncService.L}.${this.uploadAll.name}(): Uploading all data to remote, force=${isForceUpload}`,
     );
 
@@ -265,7 +262,7 @@ export class SyncService<const MD extends ModelCfgs> {
         const result = await this._metaFileSyncService.download();
         remoteMeta = result.remoteMeta;
       } catch (e) {
-        pfLog(1, 'Warning: Cannot fetch remote metadata during force upload', e);
+        SyncLog.error('Warning: Cannot fetch remote metadata during force upload', e);
       }
 
       // Merge vector clocks if remote metadata was successfully fetched
@@ -274,13 +271,13 @@ export class SyncService<const MD extends ModelCfgs> {
         // Sanitize remote vector clock before merging
         remoteVector = sanitizeVectorClock(remoteVector);
         localVector = mergeVectorClocks(localVector, remoteVector);
-        pfLog(2, 'Merged remote vector clock for force upload', {
+        SyncLog.normal('Merged remote vector clock for force upload', {
           localOriginal: local.vectorClock,
           remote: remoteVector,
           merged: localVector,
         });
       } else {
-        pfLog(1, 'Proceeding with force upload without remote vector clock merge');
+        SyncLog.error('Proceeding with force upload without remote vector clock merge');
       }
 
       let newVector = incrementVectorClock(localVector, clientId);
@@ -325,7 +322,9 @@ export class SyncService<const MD extends ModelCfgs> {
       );
     } catch (e) {
       if (e instanceof LockFromLocalClientPresentError) {
-        pfLog(0, 'Lock from local client detected during uploadAll, forcing upload');
+        SyncLog.critical(
+          'Lock from local client detected during uploadAll, forcing upload',
+        );
         return await this.uploadAll(true);
       }
       throw e;
@@ -337,8 +336,7 @@ export class SyncService<const MD extends ModelCfgs> {
    * @param isSkipModelRevMapCheck Whether to skip revision map checks
    */
   async downloadAll(isSkipModelRevMapCheck: boolean = false): Promise<void> {
-    pfLog(
-      2,
+    SyncLog.normal(
       `${SyncService.L}.${this.downloadAll.name}(): Downloading all data from remote`,
     );
 
@@ -386,7 +384,7 @@ export class SyncService<const MD extends ModelCfgs> {
       errorContext: 'DOWNLOAD',
     });
 
-    pfLog(2, `${SyncService.L}.${this.downloadToLocal.name}()`, {
+    SyncLog.normal(`${SyncService.L}.${this.downloadToLocal.name}()`, {
       remoteMeta: remote,
       localMeta: local,
       remoteRev,
@@ -401,7 +399,7 @@ export class SyncService<const MD extends ModelCfgs> {
       this._currentSyncProvider$.getOrError().isLimitedToSingleFileSync
     ) {
       await this._modelSyncService.updateLocalMainModelsFromRemoteMetaFile(remote);
-      pfLog(3, 'RevMap comparison', {
+      SyncLog.verbose('RevMap comparison', {
         isEqual: JSON.stringify(remote.revMap) === JSON.stringify(local.revMap),
         remoteRevMap: remote.revMap,
         localRevMap: local.revMap,
@@ -458,7 +456,7 @@ export class SyncService<const MD extends ModelCfgs> {
     isSkipModelRevMapCheck: boolean = false,
     isDownloadAll: boolean = false,
   ): Promise<void> {
-    pfLog(2, `${SyncService.L}.${this._downloadToLocalMULTI.name}()`, {
+    SyncLog.normal(`${SyncService.L}.${this._downloadToLocalMULTI.name}()`, {
       remote,
       local,
       remoteRev,
@@ -495,7 +493,7 @@ export class SyncService<const MD extends ModelCfgs> {
 
     if (isDownloadAll) {
       const fullData = { ...dataMap, ...remote.mainModelData } as any;
-      pfLog(2, `${SyncService.L}.${this._downloadToLocalMULTI.name}()`, {
+      SyncLog.normal(`${SyncService.L}.${this._downloadToLocalMULTI.name}()`, {
         fullData,
         dataMap,
         realRemoteRevMap,
@@ -556,7 +554,7 @@ export class SyncService<const MD extends ModelCfgs> {
     local: LocalMeta,
     lastRemoteRev: string | null,
   ): Promise<void> {
-    pfLog(2, `${SyncService.L}.${this.uploadToRemote.name}()`, {
+    SyncLog.normal(`${SyncService.L}.${this.uploadToRemote.name}()`, {
       remoteMeta: remote,
       localMeta: local,
     });
@@ -593,8 +591,7 @@ export class SyncService<const MD extends ModelCfgs> {
       );
 
       // Update local after successful upload
-      pfLog(
-        2,
+      SyncLog.normal(
         `${SyncService.L}.${this.uploadToRemote.name}(): Updating local metadata after upload`,
         {
           localLastUpdate: local.lastUpdate,
@@ -614,8 +611,7 @@ export class SyncService<const MD extends ModelCfgs> {
 
       await this._metaFileSyncService.saveLocal(updatedMeta);
 
-      pfLog(
-        2,
+      SyncLog.normal(
         `${SyncService.L}.${this.uploadToRemote.name}(): Local metadata updated successfully`,
       );
       return;
@@ -642,7 +638,7 @@ export class SyncService<const MD extends ModelCfgs> {
       errorContext: 'UPLOAD',
     });
 
-    pfLog(2, `${SyncService.L}.${this._uploadToRemoteMULTI.name}()`, {
+    SyncLog.normal(`${SyncService.L}.${this._uploadToRemoteMULTI.name}()`, {
       toUpdate,
       toDelete,
       remote,
@@ -674,7 +670,7 @@ export class SyncService<const MD extends ModelCfgs> {
     // Execute operations with load balancing
     await loadBalancer([...uploadModelFns, ...toDeleteFns], maxConcurrentRequests);
 
-    pfLog(3, 'Final revMap after uploads', realRevMap);
+    SyncLog.verbose('Final revMap after uploads', realRevMap);
 
     // Validate and upload the final revMap
     const validatedRevMap = validateRevMap(realRevMap);

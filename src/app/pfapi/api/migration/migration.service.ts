@@ -1,5 +1,5 @@
 import { AllSyncModels, ModelCfgs } from '../pfapi.model';
-import { pfLog } from '../util/log';
+import { SyncLog } from '../../../core/log';
 import {
   CanNotMigrateMajorDownError,
   ImpossibleError,
@@ -15,7 +15,7 @@ export class MigrationService<MD extends ModelCfgs> {
 
   async checkAndMigrateLocalDB(): Promise<void> {
     const meta = await this._pfapiMain.metaModel.load();
-    pfLog(2, `${MigrationService.L}.${this.checkAndMigrateLocalDB.name}()`, {
+    SyncLog.normal(`${MigrationService.L}.${this.checkAndMigrateLocalDB.name}()`, {
       meta,
     });
 
@@ -41,9 +41,11 @@ export class MigrationService<MD extends ModelCfgs> {
           crossModelVersion: versionAfter,
           lastUpdate: Date.now(),
         });
-        pfLog(2, `Migration successful: ${meta.crossModelVersion} → ${versionAfter}`);
+        SyncLog.normal(
+          `Migration successful: ${meta.crossModelVersion} → ${versionAfter}`,
+        );
       } catch (error) {
-        pfLog(0, `Migration failed`, {
+        SyncLog.critical(`Migration failed`, {
           error,
           fromVersion: meta.crossModelVersion,
           toVersion: versionAfter,
@@ -67,7 +69,7 @@ export class MigrationService<MD extends ModelCfgs> {
       typeof codeModelVersion !== 'number' ||
       dataInCrossModelVersion === codeModelVersion
     ) {
-      pfLog(2, `${MigrationService.L}.${this.migrate.name}() no migration needed`, {
+      SyncLog.normal(`${MigrationService.L}.${this.migrate.name}() no migration needed`, {
         dataInCrossModelVersion,
         codeModelVersion,
       });
@@ -110,8 +112,7 @@ export class MigrationService<MD extends ModelCfgs> {
     const migrationsKeysToRun = migrationKeys.filter((v) => v > dataInCrossModelVersion);
     const migrationsToRun = migrationsKeysToRun.map((v) => cfg!.crossModelMigrations![v]);
 
-    pfLog(
-      2,
+    SyncLog.normal(
       `${MigrationService.L}.${this.migrate.name}() migrate ${dataInCrossModelVersion} to ${codeModelVersion}`,
       {
         migrationKeys,
@@ -141,7 +142,7 @@ export class MigrationService<MD extends ModelCfgs> {
         wasMigrated: true,
       };
     } catch (error) {
-      pfLog(0, `Migration functions failed to execute`, { error });
+      SyncLog.critical(`Migration functions failed to execute`, { error });
       throw new ModelMigrationError('Error running migration functions', error);
     }
   }

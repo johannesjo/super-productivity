@@ -238,7 +238,7 @@ describe('Vector Clock Integration with Sync Service', () => {
     });
 
     it('should warn when vector clock grows large', () => {
-      spyOn(console, 'warn'); // Note: In real implementation, this would be pfLog
+      spyOn(console, 'warn'); // Note: In real implementation, this would be SyncLog
 
       let clock: VectorClock = {};
 
@@ -248,7 +248,7 @@ describe('Vector Clock Integration with Sync Service', () => {
       }
 
       expect(Object.keys(clock).length).toBe(35);
-      // In real implementation, check pfLog was called with warning
+      // In real implementation, check SyncLog was called with warning
     });
   });
 

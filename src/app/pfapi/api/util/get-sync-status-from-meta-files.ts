@@ -1,7 +1,7 @@
 import { ConflictData, LocalMeta, RemoteMeta, VectorClock } from '../pfapi.model';
 import { ConflictReason, SyncStatus } from '../pfapi.const';
 import { ImpossibleError, InvalidMetaError, NoRemoteMetaFile } from '../errors/errors';
-import { pfLog } from './log';
+import { SyncLog } from '../../../core/log';
 import { hasVectorClocks } from './backwards-compat';
 import {
   compareVectorClocks,
@@ -37,7 +37,7 @@ export const getSyncStatusFromMetaFiles = (
 
   // Handle the case where remote is empty (lastUpdate = 0) - should upload local data
   if (remote.lastUpdate === 0 && local.lastUpdate > 0) {
-    pfLog(2, 'Remote is empty, uploading local data');
+    SyncLog.normal('Remote is empty, uploading local data');
     return {
       status: SyncStatus.UpdateRemote,
     };
@@ -45,7 +45,7 @@ export const getSyncStatusFromMetaFiles = (
 
   // Handle the case where local is empty (lastUpdate = 0) - should download remote data
   if (local.lastUpdate === 0 && remote.lastUpdate > 0) {
-    pfLog(2, 'Local is empty, downloading remote data');
+    SyncLog.normal('Local is empty, downloading remote data');
     return {
       status: SyncStatus.UpdateLocal,
     };
@@ -60,7 +60,7 @@ export const getSyncStatusFromMetaFiles = (
       localTotalUpdates <= MINIMAL_UPDATE_THRESHOLD &&
       remoteTotalUpdates > localTotalUpdates * MINIMAL_FACTOR
     ) {
-      pfLog(2, 'First-time sync detected with minimal local data', {
+      SyncLog.normal('First-time sync detected with minimal local data', {
         localTotalUpdates,
         remoteTotalUpdates,
         threshold: MINIMAL_UPDATE_THRESHOLD,
@@ -88,7 +88,7 @@ export const getSyncStatusFromMetaFiles = (
     const remoteHasVectorClock =
       remote.vectorClock && Object.keys(remote.vectorClock).length > 0;
 
-    pfLog(2, 'Vector clock availability check', {
+    SyncLog.normal('Vector clock availability check', {
       localHasVectorClock,
       remoteHasVectorClock,
       localVectorClock: local.vectorClock,
@@ -124,7 +124,7 @@ export const getSyncStatusFromMetaFiles = (
       const remoteVector = remote.vectorClock!;
       const lastSyncedVector = local.lastSyncedVectorClock;
 
-      pfLog(2, 'Using vector clocks for sync status', {
+      SyncLog.normal('Using vector clocks for sync status', {
         localVector: vectorClockToString(localVector),
         remoteVector: vectorClockToString(remoteVector),
         lastSyncedVector: vectorClockToString(lastSyncedVector),
@@ -169,7 +169,7 @@ export const getSyncStatusFromMetaFiles = (
             };
         }
       } catch (e) {
-        pfLog(0, 'Vector clock comparison failed', {
+        SyncLog.critical('Vector clock comparison failed', {
           error: e,
           localVector: vectorClockToString(localVector),
           remoteVector: vectorClockToString(remoteVector),
@@ -223,7 +223,7 @@ const _checkForUpdateVectorClock = (params: {
     throw new Error('Invalid remoteVector in vector clock comparison');
   }
 
-  pfLog(2, 'Vector clock check', {
+  SyncLog.normal('Vector clock check', {
     localVector: vectorClockToString(localVector),
     remoteVector: vectorClockToString(remoteVector),
     lastSyncedVector: vectorClockToString(lastSyncedVector),
@@ -243,7 +243,7 @@ const _checkForUpdateVectorClock = (params: {
     // Both have changes - need to check if they're truly concurrent
     const comparison = compareVectorClocks(localVector, remoteVector);
 
-    pfLog(2, 'Both sides have changes, vector comparison result:', comparison);
+    SyncLog.normal('Both sides have changes, vector comparison result:', comparison);
 
     // If one vector clock dominates the other, we can still sync
     if (comparison === VectorClockComparison.LESS_THAN) {

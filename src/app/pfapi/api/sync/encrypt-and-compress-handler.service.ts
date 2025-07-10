@@ -2,7 +2,7 @@ import {
   extractSyncFileStateFromPrefix,
   getSyncFilePrefix,
 } from '../util/sync-file-prefix';
-import { pfLog } from '../util/log';
+import { SyncLog } from '../../../core/log';
 import { decrypt, encrypt } from '../encryption/encryption';
 import { DecryptError, DecryptNoPasswordError } from '../errors/errors';
 import {
@@ -61,12 +61,15 @@ export class EncryptAndCompressHandlerService {
       isEncrypt,
       modelVersion,
     });
-    pfLog(2, `${EncryptAndCompressHandlerService.L}.${this.compressAndEncrypt.name}()`, {
-      prefix,
-      modelVersion,
-      isCompress,
-      isEncrypt,
-    });
+    SyncLog.normal(
+      `${EncryptAndCompressHandlerService.L}.${this.compressAndEncrypt.name}()`,
+      {
+        prefix,
+        modelVersion,
+        isCompress,
+        isEncrypt,
+      },
+    );
     let dataStr = JSON.stringify(data);
     if (isCompress) {
       dataStr = await compressWithGzipToString(dataStr);
@@ -95,8 +98,7 @@ export class EncryptAndCompressHandlerService {
   }> {
     const { isCompressed, isEncrypted, modelVersion, cleanDataStr } =
       extractSyncFileStateFromPrefix(dataStr);
-    pfLog(
-      2,
+    SyncLog.normal(
       `${EncryptAndCompressHandlerService.L}.${this.decompressAndDecrypt.name}()`,
       { isCompressed, isEncrypted, modelVersion },
     );

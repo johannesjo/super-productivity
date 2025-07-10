@@ -1,4 +1,4 @@
-import { pfLog } from './log';
+import { SyncLog } from '../../../core/log';
 
 /**
  * Vector Clock implementation for distributed synchronization
@@ -104,7 +104,7 @@ export const sanitizeVectorClock = (clock: any): VectorClock => {
       }
     }
   } catch (e) {
-    pfLog(1, 'Error sanitizing vector clock', e);
+    SyncLog.error('Error sanitizing vector clock', e);
     return {};
   }
 
@@ -191,7 +191,7 @@ export const incrementVectorClock = (
 
   // Handle overflow - reset to 1 if approaching max safe integer
   if (currentValue >= Number.MAX_SAFE_INTEGER - 1000) {
-    pfLog(1, 'Vector clock component overflow protection triggered', {
+    SyncLog.error('Vector clock component overflow protection triggered', {
       clientId,
       currentValue,
     });
@@ -203,7 +203,7 @@ export const incrementVectorClock = (
   // Warn if vector clock is getting large
   const size = Object.keys(newClock).length;
   if (size > 30) {
-    pfLog(1, 'Warning: Vector clock growing large', {
+    SyncLog.error('Warning: Vector clock growing large', {
       size,
       clientId,
       threshold: 30,
@@ -292,7 +292,7 @@ export const hasVectorClockChanges = (
   // This detects when a client's entry has been removed/corrupted
   for (const [clientId, refVal] of Object.entries(reference!)) {
     if (refVal > 0 && !(clientId in current!)) {
-      pfLog(1, 'Vector clock change detected: client missing from current', {
+      SyncLog.error('Vector clock change detected: client missing from current', {
         clientId,
         refValue: refVal,
         currentClock: vectorClockToString(current),
@@ -333,7 +333,7 @@ export const limitVectorClockSize = (
     return clock;
   }
 
-  pfLog(1, 'Vector clock pruning triggered', {
+  SyncLog.error('Vector clock pruning triggered', {
     originalSize: entries.length,
     maxSize: MAX_VECTOR_CLOCK_SIZE,
     currentClientId,
