@@ -43,7 +43,10 @@ export class TaskDueEffects {
             // Ensure we're not in the middle of another sync
             switchMap(() => this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$),
             // NOTE we use concatMap since tap errors only show in console, but are not handled by global handler
-            concatMap(() => this._addTasksForTomorrowService.addAllDueToday()),
+            concatMap(() => {
+              TaskLog.log('[TaskDueEffects] Triggering addAllDueToday after sync');
+              return this._addTasksForTomorrowService.addAllDueToday();
+            }),
           ),
         ),
       );
@@ -69,11 +72,19 @@ export class TaskDueEffects {
           filter((overdue) => !!overdue.length),
           withLatestFrom(this._store$.select(selectTodayTaskIds)),
           // we do this to maintain the order of tasks
-          map(([overdue, todayTaskIds]) =>
-            TaskSharedActions.removeTasksFromTodayTag({
-              taskIds: todayTaskIds.filter((id) => !!overdue.find((oT) => oT.id === id)),
-            }),
-          ),
+          map(([overdue, todayTaskIds]) => {
+            const overdueIds = todayTaskIds.filter(
+              (id) => !!overdue.find((oT) => oT.id === id),
+            );
+            if (overdueIds.length > 0) {
+              TaskLog.log('[TaskDueEffects] Removing overdue tasks from today', {
+                overdueCount: overdueIds.length,
+              });
+            }
+            return TaskSharedActions.removeTasksFromTodayTag({
+              taskIds: overdueIds,
+            });
+          }),
         ),
       ),
     );
