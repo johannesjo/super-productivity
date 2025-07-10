@@ -29,6 +29,7 @@ import { androidInterface } from '../../features/android/android-interface';
 import { HttpClient } from '@angular/common/http';
 import { LS } from '../persistence/storage-keys.const';
 import { CustomThemeService } from './custom-theme.service';
+import { Log } from '../log';
 
 export type DarkModeCfg = 'dark' | 'light' | 'system';
 
@@ -176,7 +177,7 @@ export class GlobalThemeService {
           );
         })
         .catch((error) => {
-          console.error(`Error loading icon: ${iconName} from ${url}`, error);
+          Log.err(`Error loading icon: ${iconName} from ${url}`, error);
         });
     });
 

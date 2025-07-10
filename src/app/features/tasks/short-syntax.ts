@@ -5,7 +5,6 @@ import { stringToMs } from '../../ui/duration/string-to-ms.pipe';
 import { Tag } from '../tag/tag.model';
 import { Project } from '../project/project.model';
 import { ShortSyntaxConfig } from '../config/global-config.model';
-
 type ProjectChanges = {
   title?: string;
   projectId?: string;
@@ -285,15 +284,15 @@ const parseTagChanges = (task: Partial<TaskCopy>, allTags?: Tag[]): TagChanges =
         taskChanges.title = taskChanges.title.trim();
       }
 
-      // console.log(task.title);
-      // console.log('newTagTitles', regexTagTitles);
-      // console.log('newTagTitlesTrimmed', regexTagTitlesTrimmedAndFiltered);
-      // console.log('allTags)', allTags.map(tag => `${tag.id}: ${tag.title}`));
-      // console.log('task.tagIds', task.tagIds);
-      // console.log('task.title', task.title);
+      // Log.log(task.title);
+      // Log.log('newTagTitles', regexTagTitles);
+      // Log.log('newTagTitlesTrimmed', regexTagTitlesTrimmedAndFiltered);
+      // Log.log('allTags)', allTags.map(tag => `${tag.id}: ${tag.title}`));
+      // Log.log('task.tagIds', task.tagIds);
+      // Log.log('task.title', task.title);
     }
   }
-  // console.log(taskChanges);
+  // Log.log(taskChanges);
 
   return {
     taskChanges,

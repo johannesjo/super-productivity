@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Hooks, PluginHookHandler } from './plugin-api.model';
+import { Log } from '../core/log';
 
 /**
  * Simplified plugin hooks service following KISS principles.
@@ -36,7 +37,7 @@ export class PluginHooksService {
       try {
         await handler(payload);
       } catch (error) {
-        console.error(`Plugin ${pluginId} ${hook} handler error:`, error);
+        Log.err(`Plugin ${pluginId} ${hook} handler error:`, error);
         // Continue with other handlers
       }
     }

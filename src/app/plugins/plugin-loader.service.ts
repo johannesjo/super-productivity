@@ -5,6 +5,7 @@ import { PluginManifest } from './plugin-api.model';
 import { PluginCacheService } from './plugin-cache.service';
 // KISS: No size checks in loader - trust the browser's limits
 import { validatePluginManifest } from './util/validate-manifest.util';
+import { Log } from '../core/log';
 
 interface PluginAssets {
   manifest: PluginManifest;
@@ -69,7 +70,7 @@ export class PluginLoaderService {
             .pipe(first())
             .toPromise();
         } catch (e) {
-          console.warn(`No index.html for plugin ${manifest.id}`);
+          Log.err(`No index.html for plugin ${manifest.id}`);
         }
       }
 
@@ -81,7 +82,7 @@ export class PluginLoaderService {
             .pipe(first())
             .toPromise();
         } catch (e) {
-          console.warn(`No icon for plugin ${manifest.id}`);
+          Log.err(`No icon for plugin ${manifest.id}`);
         }
       }
 

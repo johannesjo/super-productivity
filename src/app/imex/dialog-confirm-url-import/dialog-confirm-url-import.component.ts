@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common'; // For *ngIf, etc.
 import { TranslateModule } from '@ngx-translate/core'; // For translate pipe
 import { T } from '../../t.const';
+import { Log } from '../../core/log';
 
 export interface DialogConfirmUrlImportData {
   domain: string;
@@ -29,7 +30,7 @@ export class ConfirmUrlImportDialogComponent {
 
   constructor() {
     if (!this.data || !this.data.domain) {
-      console.error('ConfirmUrlImportDialogComponent: No URL provided in dialog data.');
+      Log.err('ConfirmUrlImportDialogComponent: No URL provided in dialog data.');
       // Optionally close dialog or handle error, for now, it will show undefined in template
     }
   }

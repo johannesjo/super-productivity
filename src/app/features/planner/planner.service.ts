@@ -13,6 +13,7 @@ import { selectTodayTaskIds } from '../work-context/store/work-context.selectors
 import { msToString } from '../../ui/duration/ms-to-string.pipe';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { selectAllTaskRepeatCfgs } from '../task-repeat-cfg/store/task-repeat-cfg.selectors';
+import { Log } from '../../core/log';
 
 @Injectable({
   providedIn: 'root',
@@ -26,7 +27,7 @@ export class PlannerService {
   includedWeekDays$ = of([0, 1, 2, 3, 4, 5, 6]);
 
   daysToShow$ = this._globalTrackingIntervalService.todayDateStr$.pipe(
-    tap((val) => console.log('daysToShow$', val)),
+    tap((val) => Log.log('daysToShow$', val)),
     switchMap(() => this.includedWeekDays$),
     map((includedWeekDays) => {
       const today = new Date().getTime();
@@ -74,8 +75,8 @@ export class PlannerService {
     ),
     // for better performance
     // TODO better solution, gets called very often
-    // tap((val) => console.log('days$', val)),
-    // tap((val) => console.log('days$ SIs', val[0]?.scheduledIItems)),
+    // tap((val) => Log.log('days$', val)),
+    // tap((val) => Log.log('days$ SIs', val[0]?.scheduledIItems)),
     shareReplay(1),
   );
   tomorrow$ = this.days$.pipe(

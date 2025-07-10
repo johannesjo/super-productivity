@@ -36,6 +36,7 @@ import { promiseTimeout } from '../../util/promise-timeout';
 import { PFEventEmitter } from './util/events';
 import { MigrationService } from './migration/migration.service';
 import { IValidation } from 'typia';
+import { Log } from '../../core/log';
 
 export class Pfapi<const MD extends ModelCfgs> {
   private static _wasInstanceCreated = false;
@@ -371,10 +372,10 @@ export class Pfapi<const MD extends ModelCfgs> {
         await this.tmpBackupService.save(await this.getAllSyncModelData());
       } catch (error) {
         SyncLog.critical(this.importAllSycModelData.name, error);
-        console.warn(
+        Log.err(
           'Could not create valid backup. Onwards on the highway throug the Danger Zone!',
         );
-        console.error(error);
+        Log.err(error);
       }
     }
 
@@ -386,7 +387,7 @@ export class Pfapi<const MD extends ModelCfgs> {
         const modelData = data[modelId];
         const modelCtrl = this.m[modelId];
         if (!modelCtrl) {
-          console.warn('ModelId without Ctrl', modelId, modelData);
+          Log.err('ModelId without Ctrl', modelId, modelData);
           if (
             SKIPPED_MODEL_IDS.includes(modelId) ||
             isSkipLegacyWarnings ||

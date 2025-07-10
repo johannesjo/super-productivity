@@ -20,6 +20,7 @@ import { ObstructionState } from '../../features/metric/obstruction/obstruction.
 import { GlobalConfigState } from '../../features/config/global-config.model';
 import { AppDataCompleteNew } from '../pfapi-config';
 import { ValidationResult } from '../api/pfapi.model';
+import { Log } from '../../core/log';
 import {
   PluginUserDataState,
   PluginMetaDataState,
@@ -110,7 +111,7 @@ export const appDataValidators: {
 const validateArchiveModel = <R>(d: ArchiveModel | R): ValidationResult<ArchiveModel> => {
   const r = _validateArchive(d);
   if (!r.success) {
-    console.log('Validation failed', (r as any)?.errors, r.data);
+    Log.log('Validation failed', (r as any)?.errors, r.data);
   }
   if (!isEntityStateConsistent((d as ArchiveModel).task)) {
     return {
@@ -135,7 +136,7 @@ const _wrapValidate = <R>(
   isEntityCheck = false,
 ): ValidationResult<R> => {
   if (!result.success) {
-    console.log('Validation failed', (result as any)?.errors, result, d);
+    Log.log('Validation failed', (result as any)?.errors, result, d);
   }
   if (isEntityCheck && !isEntityStateConsistent(d as any)) {
     return {

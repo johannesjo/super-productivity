@@ -32,6 +32,7 @@ import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { DRAG_DELAY_FOR_TOUCH } from '../../../app.constants';
 import { MatTooltip } from '@angular/material/tooltip';
 import { ShortcutService } from '../../../core-ui/shortcut/shortcut.service';
+import { Log } from '../../../core/log';
 
 const D_HOURS = 24;
 const DRAG_CLONE_CLASS = 'drag-clone';
@@ -201,7 +202,7 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
     }
 
     if (targetEl !== this.prevDragOverEl) {
-      console.log('dragMoved targetElChanged', targetEl);
+      Log.log('dragMoved targetElChanged', targetEl);
 
       if (this.prevDragOverEl) {
         this.prevDragOverEl.classList.remove(DRAG_OVER_CLASS);
@@ -222,7 +223,7 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
   }
 
   dragStarted(ev: CdkDragStart<ScheduleEvent>): void {
-    console.log('dragStart', ev);
+    Log.log('dragStart', ev);
     this.isDragging = this.isDraggingDelayed = true;
     this.containerExtraClass = IS_DRAGGING_CLASS + '  ' + ev.source.data.type;
 
@@ -238,7 +239,7 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
   }
 
   dragReleased(ev: CdkDragRelease): void {
-    console.log('dragReleased', {
+    Log.log('dragReleased', {
       target: ev.event.target,
       source: ev.source.element.nativeElement,
       ev,
@@ -271,7 +272,7 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
     if (target.tagName.toLowerCase() === 'div' && target.classList.contains('col')) {
       const isMoveToEndOfDay = target.classList.contains('end-of-day');
       const targetDay = (target as any).day || target.getAttribute('data-day');
-      console.log({ targetDay });
+      Log.log({ targetDay });
       if (targetDay) {
         this._store.dispatch(
           PlannerActions.planTaskForDay({
@@ -284,7 +285,7 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
     } else if (target.tagName.toLowerCase() === 'schedule-event') {
       const sourceTaskId = ev.source.element.nativeElement.id.replace(T_ID_PREFIX, '');
       const targetTaskId = target.id.replace(T_ID_PREFIX, '');
-      console.log(sourceTaskId === targetTaskId, sourceTaskId, targetTaskId);
+      Log.log(sourceTaskId === targetTaskId, sourceTaskId, targetTaskId);
 
       if (
         sourceTaskId &&
@@ -292,7 +293,7 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
         targetTaskId &&
         sourceTaskId !== targetTaskId
       ) {
-        console.log('sourceTaskId', sourceTaskId, 'targetTaskId', targetTaskId);
+        Log.log('sourceTaskId', sourceTaskId, 'targetTaskId', targetTaskId);
         this._store.dispatch(
           PlannerActions.moveBeforeTask({
             fromTask: ev.source.data.data,

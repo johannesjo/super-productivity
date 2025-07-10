@@ -6,6 +6,7 @@ import { T } from '../../t.const';
 import { IndexedDBAdapterService } from './indexed-db-adapter.service';
 import { DBAdapter } from './db-adapter.model';
 import { AndroidDbAdapterService } from './android-db-adapter.service';
+import { Log } from '../log';
 
 @Injectable({
   providedIn: 'root',
@@ -32,7 +33,7 @@ export class DatabaseService {
     try {
       return await this._adapter.load(key);
     } catch (e) {
-      console.warn('DB Load Error: Last Params,', this._lastParams);
+      Log.err('DB Load Error: Last Params,', this._lastParams);
       return this._errorHandler(e, this.load, [key]);
     }
   }
@@ -44,7 +45,7 @@ export class DatabaseService {
     try {
       return await this._adapter.save(key, data);
     } catch (e) {
-      console.warn('DB Save Error: Last Params,', this._lastParams);
+      Log.err('DB Save Error: Last Params,', this._lastParams);
       return this._errorHandler(e, this.save, [key, data]);
     }
   }
@@ -54,7 +55,7 @@ export class DatabaseService {
     try {
       return await this._adapter.remove(key);
     } catch (e) {
-      console.warn('DB Remove Error: Last Params,', this._lastParams);
+      Log.err('DB Remove Error: Last Params,', this._lastParams);
       return this._errorHandler(e, this.remove, [key]);
     }
   }
@@ -64,7 +65,7 @@ export class DatabaseService {
     try {
       return await this._adapter.clearDatabase();
     } catch (e) {
-      console.warn('DB Clear Error: Last Params,', this._lastParams);
+      Log.err('DB Clear Error: Last Params,', this._lastParams);
       return this._errorHandler(e, this.clearDatabase, []);
     }
   }
@@ -73,9 +74,9 @@ export class DatabaseService {
     try {
       await this._adapter.init();
     } catch (e) {
-      console.error('Database initialization failed');
-      console.error('_lastParams', this._lastParams);
-      console.error(e);
+      Log.err('Database initialization failed');
+      Log.err('_lastParams', this._lastParams);
+      Log.err(e);
       alert('DB INIT Error');
       throw new Error(e as any);
     }

@@ -85,7 +85,6 @@ import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { isToday } from '../../../util/is-today.util';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-
 interface IssueAndType {
   id?: string | number;
   type?: IssueProviderKey;
@@ -309,9 +308,9 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
           }
         });
     }
-    // this.issueIdAndType$.subscribe((v) => console.log('issueIdAndType$', v));
-    // this.issueDataTrigger$.subscribe((v) => console.log('issueDataTrigger$', v));
-    // this.issueData$.subscribe((v) => console.log('issueData$', v));
+    // this.issueIdAndType$.subscribe((v) => Log.log('issueIdAndType$', v));
+    // this.issueDataTrigger$.subscribe((v) => Log.log('issueDataTrigger$', v));
+    // this.issueData$.subscribe((v) => Log.log('issueData$', v));
 
     // NOTE: check work-view component for more info
   }

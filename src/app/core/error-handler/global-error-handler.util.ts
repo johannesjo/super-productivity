@@ -6,6 +6,7 @@ import { download } from '../../util/download';
 import { privacyExport } from '../../imex/file-imex/privacy-export';
 import { getAppVersionStr } from '../../util/get-app-version-str';
 import { CompleteBackup } from '../../pfapi/api';
+import { Log } from '../log';
 
 let isWasErrorAlertCreated = false;
 
@@ -48,7 +49,7 @@ const _getStacktrace = async (err: Error | any): Promise<string> => {
         .join('\n');
     });
   } else if (!isHandledError(err)) {
-    console.warn('Error without stack', err);
+    Log.err('Error without stack', err);
   }
   return Promise.resolve('');
 };
@@ -74,7 +75,7 @@ export const logAdvancedStacktrace = (
       }
 
       const githubIssueLinks = document.getElementsByClassName('github-issue-urlX');
-      console.log(githubIssueLinks);
+      Log.log(githubIssueLinks);
 
       if (githubIssueLinks) {
         const errEscaped = _cleanHtml(origErr as string);
@@ -144,7 +145,7 @@ export const createErrorAlert = (
   });
   innerWrapper.append(btnReload);
 
-  console.log(userData);
+  Log.log(userData);
 
   if (userData) {
     const btnExport = document.createElement('BUTTON');

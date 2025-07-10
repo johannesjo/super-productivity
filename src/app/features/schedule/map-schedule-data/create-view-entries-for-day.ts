@@ -13,7 +13,6 @@ import {
 import { createScheduleViewEntriesForNormalTasks } from './create-schedule-view-entries-for-normal-tasks';
 import { insertBlockedBlocksViewEntriesForSchedule } from './insert-blocked-blocks-view-entries-for-schedule';
 import { SCHEDULE_VIEW_TYPE_ORDER, SVEType } from '../schedule.const';
-
 export const createViewEntriesForDay = (
   dayDate: string,
   initialStartTime: number,
@@ -77,7 +76,7 @@ export const createViewEntriesForDay = (
   //     viewEntries.splice(currentIndex + 1, 1);
   //   } else {
   //     debug(viewEntries);
-  //     console.warn('View Entry for current not available');
+  //     Log.err('View Entry for current not available');
   //   }
   // }
 

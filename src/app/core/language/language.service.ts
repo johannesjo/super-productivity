@@ -11,6 +11,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { GlobalConfigService } from 'src/app/features/config/global-config.service';
 import { map, startWith } from 'rxjs/operators';
 import { DEFAULT_GLOBAL_CONFIG } from 'src/app/features/config/default-global-config.const';
+import { Log } from '../log';
 
 @Injectable({ providedIn: 'root' })
 export class LanguageService {
@@ -36,7 +37,7 @@ export class LanguageService {
       if (lng) {
         console.error('Invalid language code', lng);
       } else {
-        console.warn('No language code provided');
+        Log.err('No language code provided');
       }
       this.setFromBrowserLngIfAutoSwitchLng();
     }

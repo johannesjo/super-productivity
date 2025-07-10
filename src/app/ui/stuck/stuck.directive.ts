@@ -1,5 +1,4 @@
 import { AfterViewInit, Directive, ElementRef, OnDestroy, inject } from '@angular/core';
-
 const DEFAULT_PINNED_CLASS = 'is-stuck';
 
 @Directive({
@@ -17,8 +16,8 @@ export class StuckDirective implements AfterViewInit, OnDestroy {
       // ([e]) => e.target.classList.toggle(DEFAULT_PINNED_CLASS, e.intersectionRatio < 1),
       ([e]) => {
         e.target.classList.toggle(DEFAULT_PINNED_CLASS, !e.isIntersecting);
-        // console.log(e.boundingClientRect.top, e);
-        // console.log('top', e.boundingClientRect.top < 0, e.isIntersecting);
+        // Log.log(e.boundingClientRect.top, e);
+        // Log.log('top', e.boundingClientRect.top < 0, e.isIntersecting);
         // if (e.boundingClientRect.top < 0) {
         //   e.target.classList.toggle(DEFAULT_PINNED_CLASS, e.isIntersecting);
         // }

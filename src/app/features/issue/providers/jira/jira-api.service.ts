@@ -52,6 +52,7 @@ import { DialogPromptComponent } from '../../../../ui/dialog-prompt/dialog-promp
 import { stripTrailing } from '../../../../util/strip-trailing';
 import { IS_ANDROID_WEB_VIEW } from '../../../../util/is-android-web-view';
 import { formatJiraDate } from '../../../../util/format-jira-date';
+import { Log } from '../../../../core/log';
 
 const BLOCK_ACCESS_KEY = 'SUP_BLOCK_JIRA_ACCESS';
 const API_VERSION = 'latest';
@@ -149,7 +150,7 @@ export class JiraApiService {
       // switchMap((res) =>
       //   res.length > 0 ? of(res) : this.issuePicker$(searchTerm, cfg),
       // ),
-      tap((v) => console.log('AAAAA', v)),
+      tap((v) => Log.log('AAAAA', v)),
     );
   }
 
@@ -421,7 +422,7 @@ export class JiraApiService {
         }
 
         if (this._isBlockAccess && !isForce) {
-          console.error('Blocked Jira Access to prevent being shut out');
+          Log.err('Blocked Jira Access to prevent being shut out');
           this._bannerService.open({
             id: BannerId.JiraUnblock,
             msg: T.F.JIRA.BANNER.BLOCK_ACCESS_MSG,
@@ -513,8 +514,8 @@ export class JiraApiService {
           }),
       ).pipe(
         catchError((err) => {
-          console.log(err);
-          console.log(getErrorTxt(err));
+          Log.log(err);
+          Log.log(getErrorTxt(err));
           const errTxt = `Jira: ${getErrorTxt(err)}`;
           this._snackService.open({ type: 'ERROR', msg: errTxt });
           return throwError({ [HANDLED_ERROR_PROP_STR]: errTxt });
@@ -527,8 +528,8 @@ export class JiraApiService {
     this._globalProgressBarService.countUp(url);
     return fromPromise(promise).pipe(
       catchError((err) => {
-        console.log(err);
-        console.log(getErrorTxt(err));
+        Log.log(err);
+        Log.log(getErrorTxt(err));
         const errTxt = `Jira: ${getErrorTxt(err)}`;
         this._snackService.open({ type: 'ERROR', msg: errTxt });
         return throwError({ [HANDLED_ERROR_PROP_STR]: errTxt });
@@ -625,7 +626,7 @@ export class JiraApiService {
       jiraCfg,
 
       timeoutId: window.setTimeout(() => {
-        console.log('ERROR', 'Jira Request timed out', requestInit);
+        Log.log('ERROR', 'Jira Request timed out', requestInit);
         this._blockAccess();
         // delete entry for promise
         this._snackService.open({
@@ -647,7 +648,7 @@ export class JiraApiService {
 
       // resolve saved promise
       if (!res || res.error) {
-        console.error('JIRA_RESPONSE_ERROR', res, currentRequest);
+        Log.err('JIRA_RESPONSE_ERROR', res, currentRequest);
         // let msg =
         if (
           res?.error &&
@@ -661,15 +662,15 @@ export class JiraApiService {
 
         currentRequest.reject(res);
       } else {
-        // console.log('JIRA_RESPONSE', res);
+        // Log.log('JIRA_RESPONSE', res);
         if (currentRequest.transform) {
           // data can be invalid, that's why we check
           try {
             currentRequest.resolve(currentRequest.transform(res, currentRequest.jiraCfg));
           } catch (e) {
-            console.log(res);
-            console.log(currentRequest);
-            console.error(e);
+            Log.log(res);
+            Log.log(currentRequest);
+            Log.err(e);
             this._snackService.open({
               type: 'ERROR',
               msg: T.F.JIRA.S.INVALID_RESPONSE,
@@ -682,7 +683,7 @@ export class JiraApiService {
       // delete entry for promise afterwards
       delete this._requestsLog[res.requestId];
     } else {
-      console.warn('Jira: Response Request ID not existing', res && res.requestId);
+      Log.err('Jira: Response Request ID not existing', res && res.requestId);
     }
   }
 
@@ -726,7 +727,7 @@ async function streamToJsonIfPossible(stream: ReadableStream): Promise<any> {
   try {
     return JSON.parse(text);
   } catch (e) {
-    console.error('Jira: Could not parse response', text);
+    Log.err('Jira: Could not parse response', text);
     return text;
   }
 }

@@ -1,5 +1,6 @@
 import { PluginBridgeService } from '../plugin-bridge.service';
 import { PluginBaseCfg, PluginManifest } from '../plugin-api.model';
+import { Log } from '../../core/log';
 
 /**
  * Simplified plugin iframe utilities following KISS principles.
@@ -149,7 +150,7 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
                 try {
                   handler(data.payload);
                 } catch (error) {
-                  console.error('Hook handler error:', error);
+                  Log.err('Hook handler error:', error);
                 }
               });
             }
@@ -371,7 +372,7 @@ export const handlePluginMessage = async (
         // Special handling for registerHook - it needs pluginId as first parameter
         if (args.length >= 2) {
           const [hook, handlerPlaceholder] = args;
-          console.log('Plugin iframe registerHook:', {
+          Log.log('Plugin iframe registerHook:', {
             hook,
             handlerPlaceholder,
             pluginId: config.pluginId,
@@ -523,6 +524,6 @@ export const handlePluginMessage = async (
 
   // Handle plugin ready
   if (data.type === 'plugin-ready' && data.pluginId === config.pluginId) {
-    console.log(`Plugin ${config.pluginId} is ready`);
+    Log.log(`Plugin ${config.pluginId} is ready`);
   }
 };

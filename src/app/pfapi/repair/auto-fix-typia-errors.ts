@@ -1,6 +1,7 @@
 import { AppDataCompleteNew } from '../pfapi-config';
 import { IValidation } from 'typia';
 import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-config.const';
+import { Log } from '../../core/log';
 
 export const autoFixTypiaErrors = (
   data: AppDataCompleteNew,
@@ -15,7 +16,7 @@ export const autoFixTypiaErrors = (
       const path = error.path.replace('$input.', '');
       const keys = parsePath(path);
       const value = getValueByPath(data, keys);
-      console.warn('Auto-fixing error:', error, keys, value);
+      Log.err('Auto-fixing error:', error, keys, value);
 
       if (
         error.expected.includes('number') &&
@@ -24,7 +25,7 @@ export const autoFixTypiaErrors = (
       ) {
         const parsedValue = parseFloat(value);
         setValueByPath(data, keys, parsedValue);
-        console.warn(`Fixed: ${path} from string "${value}" to number ${parsedValue}`);
+        Log.err(`Fixed: ${path} from string "${value}" to number ${parsedValue}`);
       } else if (keys[0] === 'globalConfig') {
         const defaultValue = getValueByPath(DEFAULT_GLOBAL_CONFIG, keys.slice(1));
         setValueByPath(data, keys, defaultValue);
@@ -33,29 +34,27 @@ export const autoFixTypiaErrors = (
         );
       } else if (error.expected.includes('undefined') && value === null) {
         setValueByPath(data, keys, undefined);
-        console.warn(`Fixed: ${path} from null to undefined`);
+        Log.err(`Fixed: ${path} from null to undefined`);
       } else if (error.expected.includes('null') && value === 'null') {
         setValueByPath(data, keys, null);
-        console.warn(`Fixed: ${path} from string null to null`);
+        Log.err(`Fixed: ${path} from string null to null`);
       } else if (error.expected.includes('undefined') && value === 'null') {
         setValueByPath(data, keys, undefined);
-        console.warn(`Fixed: ${path} from string null to null`);
+        Log.err(`Fixed: ${path} from string null to null`);
       } else if (error.expected.includes('null') && value === undefined) {
         setValueByPath(data, keys, null);
-        console.warn(`Fixed: ${path} from undefined to null`);
+        Log.err(`Fixed: ${path} from undefined to null`);
       } else if (error.expected.includes('boolean') && !value) {
         setValueByPath(data, keys, false);
-        console.warn(`Fixed: ${path} to false (was ${value})`);
+        Log.err(`Fixed: ${path} to false (was ${value})`);
       } else if (keys[0] === 'task' && error.expected.includes('number')) {
         // If the value is a string that can be parsed to a number, parse it
         if (typeof value === 'string' && !isNaN(parseFloat(value))) {
           setValueByPath(data, keys, parseFloat(value));
-          console.warn(
-            `Fixed: ${path} from string "${value}" to number ${parseFloat(value)}`,
-          );
+          Log.err(`Fixed: ${path} from string "${value}" to number ${parseFloat(value)}`);
         } else {
           setValueByPath(data, keys, 0);
-          console.warn(`Fixed: ${path} to 0 (was ${value})`);
+          Log.err(`Fixed: ${path} to 0 (was ${value})`);
         }
       } else if (
         keys[0] === 'simpleCounter' &&
@@ -67,7 +66,7 @@ export const autoFixTypiaErrors = (
       ) {
         // Fix for issue #4593: simpleCounter countOnDay null value
         setValueByPath(data, keys, 0);
-        console.warn(`Fixed: ${path} from null to 0 for simpleCounter`);
+        Log.err(`Fixed: ${path} from null to 0 for simpleCounter`);
       }
     }
   });
@@ -109,7 +108,7 @@ const setValueByPath = <T extends object>(
   value: any,
 ): void => {
   if (!Array.isArray(path) || path.length === 0) return;
-  console.warn('Auto-fixing error =>', path, value);
+  Log.err('Auto-fixing error =>', path, value);
 
   let current: any = obj;
   for (let i = 0; i < path.length - 1; i++) {

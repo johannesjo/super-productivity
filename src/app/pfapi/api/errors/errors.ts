@@ -1,5 +1,6 @@
 import { IValidation } from 'typia';
 import { AllModelData } from '../pfapi.model';
+import { Log } from '../../../core/log';
 
 class AdditionalLogErrorBase<T = unknown[]> extends Error {
   additionalLog: T;
@@ -10,11 +11,11 @@ class AdditionalLogErrorBase<T = unknown[]> extends Error {
 
     if (additional.length > 0) {
       // SyncLog.critical( this.name, ...additional);
-      console.log(this.name, ...additional);
+      Log.log(this.name, ...additional);
       try {
-        console.log('additional error log: ' + JSON.stringify(additional));
+        Log.log('additional error log: ' + JSON.stringify(additional));
       } catch (e) {
-        console.log('additional error log not stringified: ', additional, e);
+        Log.log('additional error log not stringified: ', additional, e);
       }
     }
     this.additionalLog = additional as T;
@@ -201,24 +202,24 @@ export class ModelValidationError extends Error {
     e?: unknown;
   }) {
     super('ModelValidationError');
-    console.log(`ModelValidationError for model ${params.id}:`, params);
+    Log.log(`ModelValidationError for model ${params.id}:`, params);
 
     if (params.validationResult) {
-      console.log('validation result: ', params.validationResult);
+      Log.log('validation result: ', params.validationResult);
 
       try {
         if ('errors' in params.validationResult) {
           const str = JSON.stringify(params.validationResult.errors);
-          console.log('validation errors: ' + str);
+          Log.log('validation errors: ' + str);
           this.additionalLog = `Model: ${params.id}, Errors: ${str.substring(0, 400)}`;
         }
       } catch (e) {
-        console.error('Error stringifying validation errors:', e);
+        Log.err('Error stringifying validation errors:', e);
       }
     }
 
     if (params.e) {
-      console.log('Additional error:', params.e);
+      Log.log('Additional error:', params.e);
     }
   }
 }
@@ -229,17 +230,17 @@ export class DataValidationFailedError extends Error {
 
   constructor(validationResult: IValidation<AllModelData<any>>) {
     super('DataValidationFailedError');
-    console.log('validation result: ', validationResult);
+    Log.log('validation result: ', validationResult);
 
     try {
       if ('errors' in validationResult) {
         const str = JSON.stringify(validationResult.errors);
-        console.log('validation errors_: ' + str);
+        Log.log('validation errors_: ' + str);
         this.additionalLog = str.substring(0, 400);
       }
-      console.log('validation result_: ' + JSON.stringify(validationResult));
+      Log.log('validation result_: ' + JSON.stringify(validationResult));
     } catch (e) {
-      console.error('Failed to stringify validation errors:', e);
+      Log.err('Failed to stringify validation errors:', e);
     }
   }
 }

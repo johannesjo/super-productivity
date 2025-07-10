@@ -1,6 +1,7 @@
 import { DatabaseAdapter } from './database-adapter.model';
 import { SyncLog } from '../../../core/log';
 import { devError } from '../../../util/dev-error';
+import { Log } from '../../../core/log';
 
 export class Database {
   private static readonly L = 'Database';
@@ -76,27 +77,27 @@ export class Database {
   async remove(key: string, isIgnoreDBLock = false): Promise<unknown> {
     this._lastParams = { a: 'remove', key };
     if (this._isLocked && !isIgnoreDBLock) {
-      console.warn('Blocking write during lock');
+      Log.err('Blocking write during lock');
       return;
     }
     try {
       return await this._adapter.remove(key);
     } catch (e) {
-      console.warn('DB Remove Error: Last Params,', this._lastParams);
+      Log.err('DB Remove Error: Last Params,', this._lastParams);
       return this._errorHandler(e as Error, this.remove, [key]);
     }
   }
 
   async clearDatabase(isIgnoreDBLock = false): Promise<unknown> {
     if (this._isLocked && !isIgnoreDBLock) {
-      console.warn('Blocking write during lock');
+      Log.err('Blocking write during lock');
       return;
     }
     this._lastParams = { a: 'clearDatabase' };
     try {
       return await this._adapter.clearDatabase();
     } catch (e) {
-      console.warn('DB Clear Error: Last Params,', this._lastParams);
+      Log.err('DB Clear Error: Last Params,', this._lastParams);
       return this._errorHandler(e as Error, this.clearDatabase, []);
     }
   }

@@ -39,6 +39,7 @@ import { isAllowedPluginAction } from './allowed-plugin-actions.const';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from '../t.const';
 import { SyncWrapperService } from '../imex/sync/sync-wrapper.service';
+import { Log } from '../core/log';
 
 /**
  * PluginBridge acts as an intermediary layer between plugins and the main application services.
@@ -119,7 +120,7 @@ export class PluginBridgeService implements OnDestroy {
       duration: 5000, // 5 seconds default duration
     });
 
-    console.log('PluginBridge: Notification sent successfully', notifyCfg);
+    Log.log('PluginBridge: Notification sent successfully', notifyCfg);
   }
 
   /**
@@ -142,11 +143,11 @@ export class PluginBridgeService implements OnDestroy {
         });
 
         dialogRef.afterClosed().subscribe((result) => {
-          console.log('PluginBridge: Dialog closed with result:', result);
+          Log.log('PluginBridge: Dialog closed with result:', result);
           resolve();
         });
       } catch (error) {
-        console.error('PluginBridge: Failed to open dialog:', error);
+        Log.err('PluginBridge: Failed to open dialog:', error);
         reject(error);
       }
     });
@@ -163,7 +164,7 @@ export class PluginBridgeService implements OnDestroy {
         this._translateService.instant(T.PLUGINS.NO_PLUGIN_ID_PROVIDED_FOR_HTML),
       );
     }
-    console.log('PluginBridge: Navigating to plugin index view', {
+    Log.log('PluginBridge: Navigating to plugin index view', {
       pluginId: targetPluginId,
     });
     // Navigate to the plugin index route
@@ -194,12 +195,12 @@ export class PluginBridgeService implements OnDestroy {
         return task as TaskCopy;
       });
 
-      console.log('PluginBridge: Retrieved archived tasks', {
+      Log.log('PluginBridge: Retrieved archived tasks', {
         count: archivedTasks.length,
       });
       return archivedTasks;
     } catch (error) {
-      console.error('PluginBridge: Failed to load archived tasks:', error);
+      Log.err('PluginBridge: Failed to load archived tasks:', error);
       return [];
     }
   }
@@ -231,7 +232,7 @@ export class PluginBridgeService implements OnDestroy {
     // Update the task using TaskService (TaskCopy is compatible with Task)
     this._taskService.update(taskId, updates);
 
-    console.log('PluginBridge: Task updated successfully', { taskId, updates });
+    Log.log('PluginBridge: Task updated successfully', { taskId, updates });
   }
 
   /**
@@ -269,7 +270,7 @@ export class PluginBridgeService implements OnDestroy {
         }),
       );
 
-      console.log('PluginBridge: Subtask added successfully', {
+      Log.log('PluginBridge: Subtask added successfully', {
         taskId: task.id,
         taskData,
       });
@@ -292,7 +293,7 @@ export class PluginBridgeService implements OnDestroy {
         false, // isAddToBottom
       );
 
-      console.log('PluginBridge: Task added successfully', { taskId, taskData });
+      Log.log('PluginBridge: Task added successfully', { taskId, taskData });
       return taskId;
     }
   }
@@ -311,7 +312,7 @@ export class PluginBridgeService implements OnDestroy {
   async addProject(projectData: Partial<ProjectCopy>): Promise<string> {
     typia.assert<Partial<ProjectCopy>>(projectData);
 
-    console.log('PluginBridge: Project add', { projectData });
+    Log.log('PluginBridge: Project add', { projectData });
     return this._projectService.add(projectData);
   }
 
@@ -325,7 +326,7 @@ export class PluginBridgeService implements OnDestroy {
     // Update the project using ProjectService (ProjectCopy is compatible with Project)
     this._projectService.update(projectId, updates);
 
-    console.log('PluginBridge: Project updated successfully', { projectId, updates });
+    Log.log('PluginBridge: Project updated successfully', { projectId, updates });
   }
 
   /**
@@ -344,7 +345,7 @@ export class PluginBridgeService implements OnDestroy {
 
     // Add the tag using TagService (TagCopy is compatible with Tag)
     const tagId = this._tagService.addTag(tagData);
-    console.log('PluginBridge: Tag added successfully', { tagId, tagData });
+    Log.log('PluginBridge: Tag added successfully', { tagId, tagData });
     return tagId;
   }
 
@@ -357,7 +358,7 @@ export class PluginBridgeService implements OnDestroy {
 
     // Update the tag using TagService (TagCopy is compatible with Tag)
     this._tagService.updateTag(tagId, updates);
-    console.log('PluginBridge: Tag updated successfully', { tagId, updates });
+    Log.log('PluginBridge: Tag updated successfully', { tagId, updates });
   }
 
   /**
@@ -400,7 +401,7 @@ export class PluginBridgeService implements OnDestroy {
         allTasks?.filter((t) => t.projectId === contextId && !t.parentId) || [];
       const taskIdsInProject = tasksInProject.map((t) => t.id);
 
-      console.log('PluginBridge: Validating task reorder', {
+      Log.log('PluginBridge: Validating task reorder', {
         requestedTaskIds: taskIds,
         projectTaskIds: allProjectTaskIds,
         actualTasksInProject: taskIdsInProject,
@@ -426,7 +427,7 @@ export class PluginBridgeService implements OnDestroy {
       // Note: This assumes all tasks are in the regular list, not backlog
       this._projectService.update(contextId, { taskIds });
 
-      console.log('PluginBridge: Project tasks reordered successfully', {
+      Log.log('PluginBridge: Project tasks reordered successfully', {
         projectId: contextId,
         newOrder: taskIds,
       });
@@ -460,7 +461,7 @@ export class PluginBridgeService implements OnDestroy {
       // Update the task with new subtask order
       this._taskService.update(contextId, { subTaskIds: taskIds });
 
-      console.log('PluginBridge: Subtasks reordered successfully', {
+      Log.log('PluginBridge: Subtasks reordered successfully', {
         parentTaskId: contextId,
         newOrder: taskIds,
       });
@@ -484,11 +485,11 @@ export class PluginBridgeService implements OnDestroy {
         this._currentPluginId,
         dataStr,
       );
-      console.log('PluginBridge: Plugin data persisted successfully', {
+      Log.log('PluginBridge: Plugin data persisted successfully', {
         pluginId: this._currentPluginId,
       });
     } catch (error) {
-      console.error('PluginBridge: Failed to persist plugin data:', error);
+      Log.err('PluginBridge: Failed to persist plugin data:', error);
       throw new Error(this._translateService.instant(T.PLUGINS.UNABLE_TO_PERSIST_DATA));
     }
   }
@@ -508,7 +509,7 @@ export class PluginBridgeService implements OnDestroy {
         this._currentPluginId,
       );
     } catch (error) {
-      console.error('PluginBridge: Failed to get persisted plugin data:', error);
+      Log.err('PluginBridge: Failed to get persisted plugin data:', error);
       return null;
     }
   }
@@ -522,11 +523,11 @@ export class PluginBridgeService implements OnDestroy {
     }
 
     try {
-      console.log('PluginBridge: Triggering sync for plugin', this._currentPluginId);
+      Log.log('PluginBridge: Triggering sync for plugin', this._currentPluginId);
       await this._syncWrapperService.sync();
-      console.log('PluginBridge: Sync completed successfully');
+      Log.log('PluginBridge: Sync completed successfully');
     } catch (error) {
-      console.error('PluginBridge: Sync failed:', error);
+      Log.err('PluginBridge: Sync failed:', error);
       throw error;
     }
   }
@@ -554,7 +555,7 @@ export class PluginBridgeService implements OnDestroy {
     this._removePluginSidePanelButtons(pluginId);
     this.unregisterPluginShortcuts(pluginId);
 
-    console.log('PluginBridge: All hooks unregistered for plugin', { pluginId });
+    Log.log('PluginBridge: All hooks unregistered for plugin', { pluginId });
   }
 
   /**
@@ -576,7 +577,7 @@ export class PluginBridgeService implements OnDestroy {
     const currentButtons = this._headerButtons$.value;
     this._headerButtons$.next([...currentButtons, newButton]);
 
-    console.log('PluginBridge: Header button registered', {
+    Log.log('PluginBridge: Header button registered', {
       pluginId: this._currentPluginId,
       headerBtnCfg,
     });
@@ -621,7 +622,7 @@ export class PluginBridgeService implements OnDestroy {
     );
 
     if (isDuplicate) {
-      console.warn('PluginBridge: Duplicate menu entry detected, skipping registration', {
+      Log.err('PluginBridge: Duplicate menu entry detected, skipping registration', {
         pluginId: this._currentPluginId,
         label: menuEntryCfg.label,
       });
@@ -630,7 +631,7 @@ export class PluginBridgeService implements OnDestroy {
 
     this._menuEntries$.next([...currentEntries, newMenuEntry]);
 
-    console.log('PluginBridge: Menu entry registered', {
+    Log.log('PluginBridge: Menu entry registered', {
       pluginId: this._currentPluginId,
       menuEntryCfg,
     });
@@ -646,7 +647,7 @@ export class PluginBridgeService implements OnDestroy {
     );
     this._headerButtons$.next(filteredButtons);
 
-    console.log('PluginBridge: Header buttons removed for plugin', { pluginId });
+    Log.log('PluginBridge: Header buttons removed for plugin', { pluginId });
   }
 
   /**
@@ -657,7 +658,7 @@ export class PluginBridgeService implements OnDestroy {
     const filteredEntries = currentEntries.filter((entry) => entry.pluginId !== pluginId);
     this._menuEntries$.next(filteredEntries);
 
-    console.log('PluginBridge: Menu entries removed for plugin', { pluginId });
+    Log.log('PluginBridge: Menu entries removed for plugin', { pluginId });
   }
 
   /**
@@ -697,7 +698,7 @@ export class PluginBridgeService implements OnDestroy {
     );
 
     if (isDuplicate) {
-      console.warn(
+      Log.err(
         'PluginBridge: Duplicate side panel button detected, skipping registration',
         {
           pluginId: this._currentPluginId,
@@ -709,7 +710,7 @@ export class PluginBridgeService implements OnDestroy {
 
     this._sidePanelButtons$.next([...currentButtons, newButton]);
 
-    console.log('PluginBridge: Side panel button registered', {
+    Log.log('PluginBridge: Side panel button registered', {
       pluginId: this._currentPluginId,
       sidePanelBtnCfg,
     });
@@ -725,7 +726,7 @@ export class PluginBridgeService implements OnDestroy {
     );
     this._sidePanelButtons$.next(filteredButtons);
 
-    console.log('PluginBridge: Side panel buttons removed for plugin', { pluginId });
+    Log.log('PluginBridge: Side panel buttons removed for plugin', { pluginId });
   }
 
   /**
@@ -746,7 +747,7 @@ export class PluginBridgeService implements OnDestroy {
     const currentShortcuts = this.shortcuts$.value;
     this.shortcuts$.next([...currentShortcuts, shortcutWithPluginId]);
 
-    console.log('PluginBridge: Shortcut registered', {
+    Log.log('PluginBridge: Shortcut registered', {
       pluginId: this._currentPluginId,
       shortcut: shortcutWithPluginId,
     });
@@ -762,12 +763,10 @@ export class PluginBridgeService implements OnDestroy {
     if (shortcut) {
       try {
         await Promise.resolve(shortcut.onExec());
-        console.log(
-          `Executed shortcut "${shortcut.label}" from plugin ${shortcut.pluginId}`,
-        );
+        Log.log(`Executed shortcut "${shortcut.label}" from plugin ${shortcut.pluginId}`);
         return true;
       } catch (error) {
-        console.error(`Failed to execute shortcut "${shortcut.label}":`, error);
+        Log.err(`Failed to execute shortcut "${shortcut.label}":`, error);
         return false;
       }
     }
@@ -786,7 +785,7 @@ export class PluginBridgeService implements OnDestroy {
 
     if (filteredShortcuts.length !== currentShortcuts.length) {
       this.shortcuts$.next(filteredShortcuts);
-      console.log(
+      Log.log(
         `Unregistered ${currentShortcuts.length - filteredShortcuts.length} shortcuts for plugin ${pluginId}`,
       );
     }
@@ -864,9 +863,7 @@ export class PluginBridgeService implements OnDestroy {
 
     // Check if the action is in the allowed list
     if (!isAllowedPluginAction(action)) {
-      console.error(
-        `PluginBridge: Action type '${action.type}' is not allowed for plugins`,
-      );
+      Log.err(`PluginBridge: Action type '${action.type}' is not allowed for plugins`);
       throw new Error(
         this._translateService.instant(T.PLUGINS.ACTION_TYPE_NOT_ALLOWED, {
           actionType: action.type,
@@ -876,7 +873,7 @@ export class PluginBridgeService implements OnDestroy {
 
     // Dispatch the action
     this._store.dispatch(action);
-    console.log(`PluginBridge: Dispatched action for plugin ${this._currentPluginId}`, {
+    Log.log(`PluginBridge: Dispatched action for plugin ${this._currentPluginId}`, {
       actionType: action.type,
       payload: action,
     });
@@ -929,7 +926,7 @@ export class PluginBridgeService implements OnDestroy {
 
       return result;
     } catch (error) {
-      console.error('PluginBridge: Failed to execute Node.js script:', error);
+      Log.err('PluginBridge: Failed to execute Node.js script:', error);
       return {
         success: false,
         error:
@@ -955,7 +952,7 @@ export class PluginBridgeService implements OnDestroy {
    * Clean up all resources when service is destroyed
    */
   ngOnDestroy(): void {
-    console.log('PluginBridgeService: Cleaning up resources');
+    Log.log('PluginBridgeService: Cleaning up resources');
 
     // Complete all BehaviorSubjects
     this._headerButtons$.complete();
@@ -963,6 +960,6 @@ export class PluginBridgeService implements OnDestroy {
     this.shortcuts$.complete();
     this._sidePanelButtons$.complete();
 
-    console.log('PluginBridgeService: Cleanup complete');
+    Log.log('PluginBridgeService: Cleanup complete');
   }
 }

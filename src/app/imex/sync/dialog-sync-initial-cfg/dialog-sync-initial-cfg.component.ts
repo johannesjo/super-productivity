@@ -19,6 +19,7 @@ import { SyncWrapperService } from '../sync-wrapper.service';
 import { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { SyncProviderId } from '../../../pfapi/api';
+import { SyncLog } from '../../../core/log';
 
 @Component({
   selector: 'dialog-sync-initial-cfg',
@@ -82,7 +83,7 @@ export class DialogSyncInitialCfgComponent {
     if (!this.form.valid) {
       // Mark all fields as touched to show validation errors
       this.form.markAllAsTouched();
-      console.warn('Sync form validation failed', this.form.errors);
+      SyncLog.err('Sync form validation failed', this.form.errors);
       return;
     }
 

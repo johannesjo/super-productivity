@@ -2,6 +2,7 @@ import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { nanoid } from 'nanoid';
 import { BehaviorSubject, merge, Observable, Subject } from 'rxjs';
 import { mapTo } from 'rxjs/operators';
+import { Log } from '../../core/log';
 
 export interface AndroidInterface {
   getVersion?(): string;
@@ -123,5 +124,5 @@ if (IS_ANDROID_WEB_VIEW) {
     delete requestMap[rId];
   };
 
-  console.log('Android Web View interfaces initialized', androidInterface);
+  Log.log('Android Web View interfaces initialized', androidInterface);
 }

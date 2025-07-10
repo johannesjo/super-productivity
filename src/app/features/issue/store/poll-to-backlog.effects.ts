@@ -20,6 +20,7 @@ import { IssueProvider } from '../issue.model';
 import { SnackService } from '../../../core/snack/snack.service';
 import { getErrorTxt } from '../../../util/get-error-text';
 import { DELAY_BEFORE_ISSUE_POLLING } from '../issue.const';
+import { Log } from '../../../core/log';
 
 @Injectable()
 export class PollToBacklogEffects {
@@ -79,7 +80,7 @@ export class PollToBacklogEffects {
                         ),
                       ),
                       catchError((e) => {
-                        console.error(e);
+                        Log.err(e);
                         this._snackService.open({
                           type: 'ERROR',
                           // TODO translate

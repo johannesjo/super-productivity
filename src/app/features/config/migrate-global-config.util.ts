@@ -10,6 +10,7 @@ import { MODEL_VERSION_KEY } from '../../app.constants';
 import { isMigrateModel } from '../../util/is-migrate-model';
 import { LegacySyncProvider } from '../../imex/sync/legacy-sync-provider.model';
 import { MODEL_VERSION } from '../../core/model-version';
+import { Log } from '../../core/log';
 
 export const migrateGlobalConfigState = (
   globalConfigState: GlobalConfigState,
@@ -111,7 +112,7 @@ const _extendConfigDefaults = (config: GlobalConfigState): GlobalConfigState => 
         if (!newCfg[key].hasOwnProperty(entryKey)) {
           // @ts-ignore
           const defaultVal = DEFAULT_GLOBAL_CONFIG[key][entryKey];
-          console.log('EXTEND globalConfig', key, entryKey, defaultVal);
+          Log.log('EXTEND globalConfig', key, entryKey, defaultVal);
           // @ts-ignore
           newCfg[key] = { ...newCfg[key], [entryKey]: defaultVal };
         }
@@ -214,10 +215,7 @@ const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
     }
 
     if (!config.sync.localFileSync || !config.sync.webDav) {
-      console.warn(
-        'sync config was missing some keys, reverting to default',
-        config.sync,
-      );
+      Log.err('sync config was missing some keys, reverting to default', config.sync);
       return {
         ...config,
         sync: {
@@ -233,7 +231,7 @@ const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
     //   config.sync.localFileSync.syncFolderPath = getDir(
     //     config.sync.localFileSync.syncFilePath,
     //   );
-    //   console.log(
+    //   Log.log(
     //     'migrating new folder path localFileSync',
     //     JSON.stringify(config.sync.localFileSync),
     //   );
@@ -242,7 +240,7 @@ const _migrateSyncCfg = (config: GlobalConfigState): GlobalConfigState => {
     // }
     // if (!config.sync.webDav.syncFolderPath && config.sync.webDav.syncFilePath?.length) {
     //   config.sync.webDav.syncFolderPath = getDir(config.sync.webDav.syncFilePath);
-    //   console.log('migrating new folder path webDav', JSON.stringify(config.sync.webDav));
+    //   Log.log('migrating new folder path webDav', JSON.stringify(config.sync.webDav));
     //   // TODO add delete with next version
     //   // delete config.sync.webDav.syncFilePath;
     // }

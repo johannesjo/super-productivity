@@ -6,6 +6,7 @@ import { isMigrateModel } from '../../util/is-migrate-model';
 import { WORK_CONTEXT_DEFAULT_THEME } from '../work-context/work-context.const';
 import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
 import { MODEL_VERSION } from '../../core/model-version';
+import { Log } from '../../core/log';
 
 export const migrateProjectState = (projectState: ProjectState): ProjectState => {
   if (!isMigrateModel(projectState, MODEL_VERSION.PROJECT, 'Project')) {
@@ -77,7 +78,7 @@ const _fixIds = (projectState: ProjectState): ProjectState => {
   const allIds = Object.keys(projectState.entities);
 
   if (!currentIds) {
-    console.error('Project Ids not defined');
+    Log.err('Project Ids not defined');
     console.log('Attempting to fix...');
     return {
       ...projectState,

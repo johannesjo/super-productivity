@@ -29,6 +29,7 @@ import { Update } from '@ngrx/entity';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { isToday } from '../../../util/is-today.util';
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
+import { Log } from '../../../core/log';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
@@ -122,8 +123,8 @@ export class TaskRepeatCfgEffects {
               ),
               tap(([isConfirm, completeCfg]) => {
                 if (isConfirm) {
-                  console.log(changes);
-                  console.log(todayTasks, archiveTasks);
+                  Log.log(changes);
+                  Log.log(todayTasks, archiveTasks);
                   // NOTE: keep in mind that it's very likely that there will be only one task for today
                   // TODO update reminders if given
                   todayTasks.forEach((task) =>
@@ -163,7 +164,7 @@ export class TaskRepeatCfgEffects {
                     ) {
                       changesForArchiveTask.timeEstimate = changes.defaultEstimate;
                     }
-                    console.log('updateArchiveTask', changesForArchiveTask);
+                    Log.log('updateArchiveTask', changesForArchiveTask);
                     return { id: task.id, changes: changesForArchiveTask };
                   });
                   this._taskService.updateArchiveTasks(archiveUpdates);

@@ -1,4 +1,5 @@
 import { SyncLog } from '../../../core/log';
+import { Log } from '../../../core/log';
 
 /**
  * Vector Clock implementation for distributed synchronization
@@ -124,15 +125,15 @@ export const compareVectorClocks = (
 ): VectorClockComparison => {
   // Handle null/undefined cases
   if (isVectorClockEmpty(a) && isVectorClockEmpty(b)) {
-    console.warn('BOTH VECTOR CLOCKS EMPTY!!!');
+    Log.err('BOTH VECTOR CLOCKS EMPTY!!!');
     return VectorClockComparison.CONCURRENT;
   }
   if (isVectorClockEmpty(a)) {
-    console.warn('EMPTY VECTOR CLOCK a !!!');
+    Log.err('EMPTY VECTOR CLOCK a !!!');
     return VectorClockComparison.CONCURRENT;
   }
   if (isVectorClockEmpty(b)) {
-    console.warn('EMPTY VECTOR CLOCK b !!!');
+    Log.err('EMPTY VECTOR CLOCK b !!!');
     return VectorClockComparison.CONCURRENT;
   }
 

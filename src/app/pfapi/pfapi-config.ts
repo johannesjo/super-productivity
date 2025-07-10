@@ -55,6 +55,7 @@ import { CROSS_MODEL_MIGRATIONS } from './migrate/cross-model-migrations';
 import { appDataValidators, validateAllData } from './validate/validation-fn';
 import { fixEntityStateConsistency } from '../util/check-fix-entity-state-consistency';
 import { IValidation } from 'typia';
+import { Log } from '../core/log';
 import {
   initialPluginMetaDataState,
   initialPluginUserDataState,
@@ -268,7 +269,7 @@ export const PFAPI_CFG: PfapiBaseCfg<PfapiAllModelCfg> = {
     return r;
   },
   onDbError: (err) => {
-    console.error(err);
+    Log.err(err);
     alert('DB ERROR: ' + err);
   },
   repair: (data: any, errors: IValidation.IError[]) => {

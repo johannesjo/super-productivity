@@ -70,6 +70,7 @@ import { TaskSharedActions } from '../../../../root-store/meta/task-shared.actio
 import { selectTodayTagTaskIds } from '../../../tag/store/tag.reducer';
 import { isToday } from '../../../../util/is-today.util';
 import { MenuTouchFixDirective } from '../menu-touch-fix.directive';
+import { Log } from '../../../../core/log';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -536,7 +537,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
   private async _schedule(selectedDate: Date, isRemoveFromToday = false): Promise<void> {
     if (!selectedDate) {
-      console.warn('no selected date');
+      Log.err('no selected date');
       return;
     }
 
