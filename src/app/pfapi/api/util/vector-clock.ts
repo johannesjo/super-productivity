@@ -124,13 +124,16 @@ export const compareVectorClocks = (
 ): VectorClockComparison => {
   // Handle null/undefined cases
   if (isVectorClockEmpty(a) && isVectorClockEmpty(b)) {
-    return VectorClockComparison.EQUAL;
+    console.warn('BOTH VECTOR CLOCKS EMPTY!!!');
+    return VectorClockComparison.CONCURRENT;
   }
   if (isVectorClockEmpty(a)) {
-    return VectorClockComparison.LESS_THAN;
+    console.warn('EMPTY VECTOR CLOCK a !!!');
+    return VectorClockComparison.CONCURRENT;
   }
   if (isVectorClockEmpty(b)) {
-    return VectorClockComparison.GREATER_THAN;
+    console.warn('EMPTY VECTOR CLOCK b !!!');
+    return VectorClockComparison.CONCURRENT;
   }
 
   // Safe type assertion after null checks
