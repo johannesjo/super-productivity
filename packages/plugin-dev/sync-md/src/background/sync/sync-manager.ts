@@ -13,7 +13,8 @@ import { logSyncVerification, verifySyncState } from './verify-sync';
 
 let syncInProgress = false;
 let lastSyncTime: Date | null = null;
-let debounceTimer: NodeJS.Timeout | null = null;
+let mdToSpDebounceTimer: NodeJS.Timeout | null = null;
+let spToMdDebounceTimer: NodeJS.Timeout | null = null;
 let isWindowFocused = true;
 let pendingMdToSpSync: LocalUserCfg | null = null;
 
@@ -72,8 +73,8 @@ const performInitialSync = async (config: LocalUserCfg): Promise<void> => {
 };
 
 const handleFileChange = (config: LocalUserCfg): void => {
-  if (debounceTimer) {
-    clearTimeout(debounceTimer);
+  if (mdToSpDebounceTimer) {
+    clearTimeout(mdToSpDebounceTimer);
   }
 
   // Mark that we have a pending MD to SP sync
@@ -84,7 +85,7 @@ const handleFileChange = (config: LocalUserCfg): void => {
     `[sync-md] File change detected, debouncing for ${SYNC_DEBOUNCE_MS_MD_TO_SP}ms (10 seconds)`,
   );
 
-  debounceTimer = setTimeout(() => {
+  mdToSpDebounceTimer = setTimeout(() => {
     handleMdToSpSync(config);
   }, SYNC_DEBOUNCE_MS_MD_TO_SP);
 };
@@ -93,6 +94,7 @@ const handleMdToSpSync = async (config: LocalUserCfg): Promise<void> => {
   if (syncInProgress) return;
   syncInProgress = true;
   pendingMdToSpSync = null;
+  mdToSpDebounceTimer = null;
 
   try {
     const content = await readTasksFile(config.filePath);
@@ -145,12 +147,16 @@ const setupSpHooks = (config: LocalUserCfg): void => {
 };
 
 const handleSpChange = (config: LocalUserCfg): void => {
-  if (debounceTimer) {
-    clearTimeout(debounceTimer);
+  if (spToMdDebounceTimer) {
+    clearTimeout(spToMdDebounceTimer);
   }
 
+  console.log(
+    `[sync-md] SP change detected, debouncing for ${SYNC_DEBOUNCE_MS}ms (0.5 seconds)`,
+  );
+
   // For SP changes, we always use the short debounce since the user is actively using SP
-  debounceTimer = setTimeout(async () => {
+  spToMdDebounceTimer = setTimeout(async () => {
     if (syncInProgress) return;
     syncInProgress = true;
 
@@ -185,12 +191,12 @@ const setupWindowFocusTracking = (): void => {
     console.log(`[sync-md] Window focus changed: ${isFocused ? 'focused' : 'unfocused'}`);
 
     // If window gains focus and we have a pending MD to SP sync, trigger it immediately
-    if (isFocused && !wasFocused && pendingMdToSpSync && debounceTimer) {
+    if (isFocused && !wasFocused && pendingMdToSpSync && mdToSpDebounceTimer) {
       console.log(
         '[sync-md] Window gained focus, triggering pending MD to SP sync immediately',
       );
-      clearTimeout(debounceTimer);
-      debounceTimer = null;
+      clearTimeout(mdToSpDebounceTimer);
+      mdToSpDebounceTimer = null;
 
       // Trigger the sync immediately
       handleMdToSpSync(pendingMdToSpSync);
