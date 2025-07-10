@@ -133,6 +133,18 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   }
 
   submit(): void {
+    // Check if both forms are valid
+    if (!this.formBasic.valid || !this.formTheme.valid) {
+      // Mark all fields as touched to show validation errors
+      this.formBasic.markAllAsTouched();
+      this.formTheme.markAllAsTouched();
+      console.warn('Form validation failed', {
+        basicFormErrors: this.formBasic.errors,
+        themeFormErrors: this.formTheme.errors,
+      });
+      return;
+    }
+
     const projectDataToSave: Project | Partial<Project> = {
       ...this.projectData,
     };

@@ -187,6 +187,18 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
   }
 
   save(): void {
+    // Check if both forms are valid
+    if (!this.formGroup1.valid || !this.formGroup2.valid) {
+      // Mark all fields as touched to show validation errors
+      this.formGroup1.markAllAsTouched();
+      this.formGroup2.markAllAsTouched();
+      console.warn('Form validation failed', {
+        form1Errors: this.formGroup1.errors,
+        form2Errors: this.formGroup2.errors,
+      });
+      return;
+    }
+
     // workaround for formly not always updating hidden fields correctly (in time??)
     if (this.repeatCfg.quickSetting !== 'CUSTOM') {
       const updatesForQuickSetting = getQuickSettingUpdates(this.repeatCfg.quickSetting);

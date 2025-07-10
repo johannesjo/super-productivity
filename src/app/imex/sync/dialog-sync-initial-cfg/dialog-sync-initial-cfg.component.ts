@@ -78,6 +78,14 @@ export class DialogSyncInitialCfgComponent {
   }
 
   async save(): Promise<void> {
+    // Check if form is valid
+    if (!this.form.valid) {
+      // Mark all fields as touched to show validation errors
+      this.form.markAllAsTouched();
+      console.warn('Sync form validation failed', this.form.errors);
+      return;
+    }
+
     await this.syncConfigService.updateSettingsFromForm(
       {
         ...this._tmpUpdatedCfg,
