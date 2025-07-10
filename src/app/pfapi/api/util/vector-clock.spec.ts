@@ -46,9 +46,9 @@ describe('Vector Clock', () => {
   });
 
   describe('compareVectorClocks', () => {
-    it('should return EQUAL for two empty clocks', () => {
-      expect(compareVectorClocks({}, {})).toBe(VectorClockComparison.EQUAL);
-      expect(compareVectorClocks(null, null)).toBe(VectorClockComparison.EQUAL);
+    it('should return CONCURRENT for two empty clocks', () => {
+      expect(compareVectorClocks({}, {})).toBe(VectorClockComparison.CONCURRENT);
+      expect(compareVectorClocks(null, null)).toBe(VectorClockComparison.CONCURRENT);
     });
 
     it('should return EQUAL for identical clocks', () => {
@@ -85,8 +85,8 @@ describe('Vector Clock', () => {
 
     it('should handle comparison with empty clock', () => {
       const clock1 = { client1: 1 };
-      expect(compareVectorClocks(clock1, {})).toBe(VectorClockComparison.GREATER_THAN);
-      expect(compareVectorClocks({}, clock1)).toBe(VectorClockComparison.LESS_THAN);
+      expect(compareVectorClocks(clock1, {})).toBe(VectorClockComparison.CONCURRENT);
+      expect(compareVectorClocks({}, clock1)).toBe(VectorClockComparison.CONCURRENT);
     });
   });
 
@@ -198,8 +198,8 @@ describe('Vector Clock', () => {
 
     it('should handle empty current clock', () => {
       const reference = { client1: 5 };
-      expect(hasVectorClockChanges({}, reference)).toBe(false);
-      expect(hasVectorClockChanges(null, reference)).toBe(false);
+      expect(hasVectorClockChanges({}, reference)).toBe(true);
+      expect(hasVectorClockChanges(null, reference)).toBe(true);
     });
 
     it('should handle empty reference clock', () => {
