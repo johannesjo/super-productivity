@@ -194,6 +194,18 @@
       </span>
     </button>
   }
+  <!-- Only show the duplicate command if it is a parent unfinished task -->
+  @if (isAdvancedControls() && !task.parentId && !task.isDone) {
+    <button
+      (click)="duplicate()"
+      mat-menu-item
+    >
+      <span class="menuItemLeft">
+        <mat-icon>file_copy</mat-icon>
+        {{ T.F.TASK.CMP.DUPLICATE | translate }}
+      </span>
+    </button>
+  }
 
   @if (isAdvancedControls() && !task.parentId && !task.isDone) {
     <button
