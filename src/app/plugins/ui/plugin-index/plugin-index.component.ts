@@ -33,7 +33,7 @@ import {
 } from '@angular/material/card';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { T } from '../../../t.const';
-import { Log } from '../../../core/log';
+import { PluginLog } from '../../../core/log';
 
 @Component({
   selector: 'plugin-index',
@@ -103,7 +103,7 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
       try {
         await this._loadPluginIndex(this.directPluginId);
       } catch (err) {
-        Log.err('Failed to load plugin index:', err);
+        PluginLog.err('Failed to load plugin index:', err);
         this.error.set(
           err instanceof Error
             ? err.message
@@ -117,7 +117,7 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
     // Subscribe to route parameter changes to handle navigation between plugins
     this._routeSubscription = this._route.paramMap.subscribe(async (params) => {
       const newPluginId = params.get('pluginId');
-      Log.log(
+      PluginLog.log(
         'Route paramMap changed, newPluginId:',
         newPluginId,
         'currentPluginId:',
@@ -132,11 +132,13 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
 
       // Skip if it's the same plugin (prevent unnecessary reloads)
       if (this.pluginId() === newPluginId) {
-        Log.log('Same plugin ID, skipping reload');
+        PluginLog.log('Same plugin ID, skipping reload');
         return;
       }
 
-      Log.log(`Navigating from plugin "${this.pluginId()}" to plugin "${newPluginId}"`);
+      PluginLog.log(
+        `Navigating from plugin "${this.pluginId()}" to plugin "${newPluginId}"`,
+      );
 
       // Clean up previous iframe communication BEFORE setting new plugin ID
       this._cleanupIframeCommunication();
@@ -152,7 +154,7 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
       try {
         await this._loadPluginIndex(newPluginId);
       } catch (err) {
-        Log.err('Failed to load plugin index:', err);
+        PluginLog.err('Failed to load plugin index:', err);
         this.error.set(
           err instanceof Error
             ? err.message
@@ -170,7 +172,7 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
       try {
         await this._pluginService.initializePlugins();
       } catch (error) {
-        Log.err('Failed to initialize plugin system:', error);
+        PluginLog.err('Failed to initialize plugin system:', error);
         throw new Error(
           this._translateService.instant(T.PLUGINS.PLUGIN_SYSTEM_FAILED_INIT),
         );
@@ -190,12 +192,12 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
   }
 
   private async _loadPluginIndex(pluginId: string): Promise<void> {
-    Log.log(`Loading plugin index for: ${pluginId}`);
+    PluginLog.log(`Loading plugin index for: ${pluginId}`);
 
     // Get the plugin index.html content
     const indexContent = this._pluginService.getPluginIndexHtml(pluginId);
     if (!indexContent) {
-      Log.err(`No index.html content found for plugin: ${pluginId}`);
+      PluginLog.err(`No index.html content found for plugin: ${pluginId}`);
       // Try to get the plugin instance to check if it should have an index.html
       const plugins = await this._pluginService.getAllPlugins();
       const plugin = plugins.find((p) => p.manifest.id === pluginId);
@@ -244,30 +246,30 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
 
     // Create safe URL and set iframe source
     const safeUrl = this._sanitizer.bypassSecurityTrustResourceUrl(iframeUrl);
-    Log.log(
+    PluginLog.log(
       `Setting iframe src for plugin ${pluginId}:`,
       iframeUrl.substring(0, 100) + '...',
     );
     this.iframeSrc.set(safeUrl);
     this.isLoading.set(false);
-    Log.log(`Plugin ${pluginId} iframe src set, loading complete`);
+    PluginLog.log(`Plugin ${pluginId} iframe src set, loading complete`);
   }
 
   private _cleanupIframeCommunication(): void {
     const currentPluginId = this.pluginId();
-    Log.log(`Cleaning up iframe communication for plugin: ${currentPluginId}`);
+    PluginLog.log(`Cleaning up iframe communication for plugin: ${currentPluginId}`);
 
     // Remove message listener
     if (this._messageListener) {
       window.removeEventListener('message', this._messageListener);
       this._messageListener = undefined;
-      Log.log(`Removed message listener for plugin: ${currentPluginId}`);
+      PluginLog.log(`Removed message listener for plugin: ${currentPluginId}`);
     }
 
     // Clear iframe reference from cleanup service (but don't remove from DOM)
     if (currentPluginId) {
       this._cleanupService.cleanupPlugin(currentPluginId);
-      Log.log(`Cleaned up plugin references for: ${currentPluginId}`);
+      PluginLog.log(`Cleaned up plugin references for: ${currentPluginId}`);
     }
 
     // Set iframe to empty data URL to stop execution but keep iframe in DOM
@@ -276,11 +278,11 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
         'data:text/html,<html><body></body></html>',
       ),
     );
-    Log.log(`Set iframe to empty data URL for plugin: ${currentPluginId}`);
+    PluginLog.log(`Set iframe to empty data URL for plugin: ${currentPluginId}`);
   }
 
   onIframeLoad(): void {
-    Log.log('Plugin iframe loaded for plugin:', this.pluginId());
+    PluginLog.log('Plugin iframe loaded for plugin:', this.pluginId());
 
     // Register iframe with cleanup service
     if (this.iframeRef?.nativeElement && this.pluginId()) {

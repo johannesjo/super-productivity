@@ -6,7 +6,7 @@ import { PluginSecurityService } from './plugin-security';
 import { SnackService } from '../core/snack/snack.service';
 import { IS_ELECTRON } from '../app.constants';
 import { PluginCleanupService } from './plugin-cleanup.service';
-import { Log } from '../core/log';
+import { PluginLog } from '../core/log';
 
 /**
  * Simplified plugin runner following KISS principles.
@@ -59,7 +59,7 @@ export class PluginRunner {
 
       // Show warnings if any
       if (analysis.warnings.length > 0) {
-        Log.err(`Plugin ${manifest.id} warnings:`, analysis.warnings);
+        PluginLog.err(`Plugin ${manifest.id} warnings:`, analysis.warnings);
         this._snackService.open({
           msg: `Plugin "${manifest.name}" has warnings: ${analysis.warnings[0]}`,
           type: 'CUSTOM',
@@ -69,7 +69,7 @@ export class PluginRunner {
 
       // Log info for transparency
       if (analysis.info.length > 0) {
-        Log.info(`Plugin ${manifest.id} info:`, analysis.info);
+        PluginLog.info(`Plugin ${manifest.id} info:`, analysis.info);
       }
 
       try {
@@ -102,13 +102,13 @@ export class PluginRunner {
       } catch (error) {
         pluginInstance.error =
           error instanceof Error ? error.message : 'Failed to load plugin';
-        Log.err(`Plugin ${manifest.id} error:`, error);
+        PluginLog.err(`Plugin ${manifest.id} error:`, error);
       }
 
       this._loadedPlugins.set(manifest.id, pluginInstance);
       return pluginInstance;
     } catch (error) {
-      Log.err(`Failed to load plugin ${manifest.id}:`, error);
+      PluginLog.err(`Failed to load plugin ${manifest.id}:`, error);
       throw error;
     }
   }
@@ -173,7 +173,7 @@ export class PluginRunner {
       // Unregister hooks
       this._pluginBridge.unregisterPluginHooks(pluginId);
 
-      Log.log(`Plugin ${pluginId} unloaded`);
+      PluginLog.log(`Plugin ${pluginId} unloaded`);
       return true;
     }
     return false;

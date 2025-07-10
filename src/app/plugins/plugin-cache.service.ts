@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Log } from '../core/log';
+import { PluginLog } from '../core/log';
 
 export interface CachedPlugin {
   id: string;
@@ -65,18 +65,19 @@ export class PluginCacheService {
     };
     const totalSizeKB = Object.values(sizes).reduce((sum, size) => sum + size, 0);
 
-    Log.log(`[PluginCache] Storing plugin "${pluginId}":`);
-    Log.log(`[PluginCache] - Manifest: ${sizes.manifest.toFixed(2)}KB`);
-    Log.log(`[PluginCache] - Code: ${sizes.code.toFixed(2)}KB`);
-    if (indexHtml) Log.log(`[PluginCache] - IndexHtml: ${sizes.indexHtml.toFixed(2)}KB`);
-    if (icon) Log.log(`[PluginCache] - Icon: ${sizes.icon.toFixed(2)}KB`);
-    Log.log(
+    PluginLog.log(`[PluginCache] Storing plugin "${pluginId}":`);
+    PluginLog.log(`[PluginCache] - Manifest: ${sizes.manifest.toFixed(2)}KB`);
+    PluginLog.log(`[PluginCache] - Code: ${sizes.code.toFixed(2)}KB`);
+    if (indexHtml)
+      PluginLog.log(`[PluginCache] - IndexHtml: ${sizes.indexHtml.toFixed(2)}KB`);
+    if (icon) PluginLog.log(`[PluginCache] - Icon: ${sizes.icon.toFixed(2)}KB`);
+    PluginLog.log(
       `[PluginCache] - Total size: ${totalSizeKB.toFixed(2)}KB (${(totalSizeKB / 1024).toFixed(2)}MB)`,
     );
 
     if (totalSizeKB > 1024) {
       // Warn if plugin is larger than 1MB
-      Log.err(
+      PluginLog.err(
         `[PluginCache] Large plugin detected: "${pluginId}" is ${(totalSizeKB / 1024).toFixed(2)}MB`,
       );
     }
@@ -97,11 +98,14 @@ export class PluginCacheService {
     return new Promise((resolve, reject) => {
       const request = store.put(plugin);
       request.onsuccess = () => {
-        Log.log(`[PluginCache] Successfully stored plugin "${pluginId}"`);
+        PluginLog.log(`[PluginCache] Successfully stored plugin "${pluginId}"`);
         resolve();
       };
       request.onerror = () => {
-        Log.err(`[PluginCache] Failed to store plugin "${pluginId}":`, request.error);
+        PluginLog.err(
+          `[PluginCache] Failed to store plugin "${pluginId}":`,
+          request.error,
+        );
         reject(new Error(`Failed to store plugin ${pluginId}`));
       };
     });
@@ -111,7 +115,7 @@ export class PluginCacheService {
    * Get a plugin from the cache
    */
   async getPlugin(pluginId: string): Promise<CachedPlugin | null> {
-    Log.log(`[PluginCache] Loading plugin "${pluginId}"`);
+    PluginLog.log(`[PluginCache] Loading plugin "${pluginId}"`);
     const db = await this._getDB();
     const transaction = db.transaction([this.STORE_NAME], 'readonly');
     const store = transaction.objectStore(this.STORE_NAME);
@@ -142,7 +146,7 @@ export class PluginCacheService {
    * Get all cached plugins
    */
   async getAllPlugins(): Promise<CachedPlugin[]> {
-    Log.log('[PluginCache] Loading all plugins from cache');
+    PluginLog.log('[PluginCache] Loading all plugins from cache');
     const db = await this._getDB();
     const transaction = db.transaction([this.STORE_NAME], 'readonly');
     const store = transaction.objectStore(this.STORE_NAME);

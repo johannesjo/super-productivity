@@ -15,7 +15,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs/operators';
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { Log } from '../../core/log';
+import { PluginLog } from '../../core/log';
 
 /**
  * Component that renders side panel buttons for plugins in the main header.
@@ -133,21 +133,21 @@ export class PluginSidePanelBtnsComponent {
   });
 
   onButtonClick(button: PluginSidePanelBtnCfg): void {
-    Log.log('Side panel button clicked:', button.pluginId, button.label);
+    PluginLog.log('Side panel button clicked:', button.pluginId, button.label);
 
     // Prevent action if not in work view
     if (!this.isWorkView()) {
-      Log.log('Not in work view, ignoring click');
+      PluginLog.log('Not in work view, ignoring click');
       return;
     }
 
-    Log.log('Dispatching togglePluginPanel action for:', button.pluginId);
+    PluginLog.log('Dispatching togglePluginPanel action for:', button.pluginId);
     // Dispatch action to toggle the plugin panel
     this._store.dispatch(togglePluginPanel(button.pluginId));
 
     // Call the original onClick handler if provided
     if (button.onClick) {
-      Log.log('Calling plugin onClick handler for:', button.pluginId);
+      PluginLog.log('Calling plugin onClick handler for:', button.pluginId);
       button.onClick();
     }
   }
