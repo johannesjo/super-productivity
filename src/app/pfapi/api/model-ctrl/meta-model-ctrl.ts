@@ -51,6 +51,10 @@ export class MetaModelCtrl {
     public crossModelVersion: number,
   ) {
     //
+    console.log('XXXXXXXXXXXX');
+
+    console.log(this._generateClientId());
+
     this._initClientId();
     this.load().then((v) => {
       this._metaModelInMemory = v;
@@ -315,6 +319,21 @@ export class MetaModelCtrl {
 
   private _generateClientId(): string {
     PFLog.normal(`${MetaModelCtrl.L}.${this._generateClientId.name}()`);
-    return getEnvironmentId() + '_' + Date.now();
+
+    const now = new Date();
+    const prefix = getEnvironmentId(); // e.g., "BCL"
+    const monthDay = `${now.getMonth() + 1}_${now.getDate()}`;
+
+    const millisSinceEpoch = now.getTime();
+    const base36Ts = millisSinceEpoch.toString(36); // precise + compact
+
+    return `${prefix}${base36Ts}${monthDay}`;
   }
+
+  // decoder for real timestamp
+  // function decodeBase36ClientId(id: string): Date {
+  //   const base36Ts = id.slice(-10); // or regex if format varies
+  //   const millis = parseInt(base36Ts, 36);
+  //   return new Date(millis);
+  // }
 }
