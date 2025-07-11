@@ -2,6 +2,7 @@ import { IDBPDatabase } from 'idb/build';
 import { DBSchema, openDB } from 'idb';
 import { DatabaseAdapter } from './database-adapter.model';
 import { MiniObservable } from '../util/mini-observable';
+import { PFLog } from '../../../core/log';
 
 // otherwise the typing of idb dependency won't work
 const FAKE = 'FAAAAAKE' as const;
@@ -35,7 +36,7 @@ export class IndexedDbAdapter implements DatabaseAdapter {
         // upgrade(db: IDBPDatabase<MyDb>, oldVersion: number, newVersion: number | null, transaction: IDBPTransaction<MyDb>) {
         // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
         upgrade(db: IDBPDatabase<MyDb>, oldVersion: number, newVersion: number | null) {
-          console.log('IDB UPGRADE', oldVersion, newVersion);
+          PFLog.log('IDB UPGRADE', oldVersion, newVersion);
           // TODO
           db.createObjectStore(that._dbMainName as typeof FAKE);
           // db.createObjectStore(FAKE_DB_MAIN_NAME);

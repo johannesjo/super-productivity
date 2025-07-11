@@ -8,6 +8,7 @@ import { MatDialogModule } from '@angular/material/dialog'; // Import MatDialogM
 import { T } from '../../t.const';
 import { TranslatePipe } from '@ngx-translate/core';
 import { NgIf } from '@angular/common'; // For potential translations
+import { Log } from '../../core/log';
 
 @Component({
   selector: 'dialog-import-from-url',
@@ -43,7 +44,7 @@ export class DialogImportFromUrlComponent {
       // Basic validation: show error or prevent closing if URL is empty
       // For now, we rely on the required attribute in HTML and button disable
       // Or handle with a snackbar if more sophisticated feedback is needed
-      console.error('URL is required.');
+      Log.err('URL is required.');
     }
   }
 

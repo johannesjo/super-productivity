@@ -28,6 +28,8 @@ import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { androidInterface } from '../../features/android/android-interface';
 import { HttpClient } from '@angular/common/http';
 import { LS } from '../persistence/storage-keys.const';
+import { CustomThemeService } from './custom-theme.service';
+import { Log } from '../log';
 
 export type DarkModeCfg = 'dark' | 'light' | 'system';
 
@@ -43,6 +45,7 @@ export class GlobalThemeService {
   private _chromeExtensionInterfaceService = inject(ChromeExtensionInterfaceService);
   private _imexMetaService = inject(ImexViewService);
   private _http = inject(HttpClient);
+  private _customThemeService = inject(CustomThemeService);
 
   darkMode$ = new BehaviorSubject<DarkModeCfg>(
     (localStorage.getItem(LS.DARK_MODE) as DarkModeCfg) || 'system',
@@ -85,6 +88,9 @@ export class GlobalThemeService {
     this.darkMode$
       .pipe(skip(1))
       .subscribe((darkMode) => localStorage.setItem(LS.DARK_MODE, darkMode));
+
+    // Initialize custom theme
+    this._initCustomTheme();
   }
 
   private _setDarkTheme(isDarkTheme: boolean): void {
@@ -171,7 +177,7 @@ export class GlobalThemeService {
           );
         })
         .catch((error) => {
-          console.error(`Error loading icon: ${iconName} from ${url}`, error);
+          Log.err(`Error loading icon: ${iconName} from ${url}`, error);
         });
     });
 
@@ -215,7 +221,7 @@ export class GlobalThemeService {
 
     if (IS_ANDROID_WEB_VIEW) {
       androidInterface.isKeyboardShown$.subscribe((isShown) => {
-        console.log('isShown', isShown);
+        Log.log('isShown', isShown);
 
         this.document.body.classList.remove(BodyClass.isAndroidKeyboardHidden);
         this.document.body.classList.remove(BodyClass.isAndroidKeyboardShown);
@@ -287,5 +293,28 @@ export class GlobalThemeService {
           scales: {},
         };
     this._chartThemeService.setColorschemesOptions(overrides);
+  }
+
+  private _initCustomTheme(): void {
+    // Load initial theme
+    this._globalConfigService.misc$
+      .pipe(
+        take(1),
+        map((misc) => misc.customTheme || 'default'),
+      )
+      .subscribe((themeId) => {
+        this._customThemeService.loadTheme(themeId);
+      });
+
+    // Watch for theme changes
+    this._globalConfigService.misc$
+      .pipe(
+        map((misc) => misc.customTheme || 'default'),
+        distinctUntilChanged(),
+        skip(1),
+      )
+      .subscribe((themeId) => {
+        this._customThemeService.loadTheme(themeId);
+      });
   }
 }

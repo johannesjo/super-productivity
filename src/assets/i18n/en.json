@@ -890,7 +890,7 @@
         "CURRENT_STREAK": "Current Streak",
         "DAILY_GOAL": "Daily Goal",
         "DAYS": "Days",
-        "L_COUNTER": "Count for Today"
+        "L_COUNTER": "Count"
       },
       "FORM": {
         "ADD_NEW": "Add simple counter/ habit",
@@ -1044,6 +1044,40 @@
         "SUCCESS_VIA_BUTTON": "Data successfully synced",
         "UNKNOWN_ERROR": "Unknown Sync Error: {{err}}",
         "UPLOAD_ERROR": "Unknown Upload Error (Settings correct?): {{err}}"
+      },
+      "SAFETY_BACKUP": {
+        "TITLE": "Sync Safety Backups",
+        "DESCRIPTION": "Automatic backups are created before downloading data from remote during sync operations. Backups are organized in 4 smart slots: 2 most recent, 1 first from today, and 1 first from a day before today.",
+        "BTN_CREATE_MANUAL": "Create Manual Backup",
+        "BTN_REFRESH": "Refresh",
+        "BTN_CLEAR_ALL": "Clear All",
+        "BTN_RESTORE": "Restore",
+        "BTN_DELETE": "Delete",
+        "LOADING": "Loading...",
+        "NO_BACKUPS": "No safety backups available yet. Backups are created automatically before sync operations.",
+        "TOOLTIP_CREATE_MANUAL": "Create a manual backup of all your data",
+        "TOOLTIP_REFRESH": "Refresh the backup list",
+        "TOOLTIP_CLEAR_ALL": "Delete all safety backups",
+        "TOOLTIP_RESTORE": "Restore this backup (will replace all current data)",
+        "TOOLTIP_DELETE": "Delete this backup",
+        "SLOT_RECENT": "Recent backup",
+        "SLOT_TODAY": "First backup of today",
+        "SLOT_BEFORE_TODAY": "First backup before today",
+        "REASON_MANUAL": "Manual backup",
+        "REASON_BEFORE_UPDATE": "Automatic backup before sync",
+        "LAST_CHANGE_PREFIX": "Last change:",
+        "RESTORE_CONFIRM_TITLE": "Restore Backup",
+        "RESTORE_CONFIRM_MSG": "Are you sure you want to restore the backup from {{timestamp}}?\n\nThis will COMPLETELY REPLACE all your current data!\n\nReason: {{reason}}\n\nClick OK to proceed or Cancel to abort.",
+        "BACKUP_NOT_FOUND": "Backup with ID {{backupId}} not found",
+        "RESTORE_FAILED": "Failed to restore backup: {{error}}",
+        "INVALID_ID_ERROR": "Invalid backup ID generated",
+        "CREATED_SUCCESS": "Manual backup created successfully",
+        "RESTORED_SUCCESS": "Backup restored successfully",
+        "DELETED_SUCCESS": "Backup deleted successfully",
+        "CLEARED_SUCCESS": "All backups cleared successfully",
+        "CREATE_FAILED": "Failed to create backup",
+        "DELETE_FAILED": "Failed to delete backup",
+        "CLEAR_FAILED": "Failed to clear backups"
       }
     },
     "TAG": {
@@ -1114,6 +1148,7 @@
         "DELETE": "Delete Task",
         "DELETE_REPEAT_INSTANCE": "Delete repeated Task Instance",
         "DROP_ATTACHMENT": "Drop here to attach to \"{{title}}\"",
+        "DUPLICATE": "Duplicate",
         "EDIT_SCHEDULED": "Reschedule",
         "EDIT_TAGS": "Edit tags",
         "EDIT_TASK_TITLE": "Edit title",
@@ -1646,7 +1681,15 @@
       "START_OF_NEXT_DAY": "Start time of the next day",
       "START_OF_NEXT_DAY_HINT": "from when (in hour) you want to count the next day has started. default is midnight which is 0.",
       "TASK_NOTES_TPL": "Task description template",
-      "TITLE": "Misc Settings"
+      "TITLE": "Misc Settings",
+      "DARK_MODE": "Dark Mode",
+      "DARK_MODE_SYSTEM": "System",
+      "DARK_MODE_DARK": "Dark",
+      "DARK_MODE_LIGHT": "Light",
+      "DARK_MODE_ARIA_LABEL": "Dark mode selection",
+      "THEME": "Theme",
+      "THEME_EXPERIMENTAL": "Theme (experimental)",
+      "THEME_SELECT_LABEL": "Select Theme"
     },
     "POMODORO": {
       "BREAK_DURATION": "Duration of short breaks",

@@ -1,8 +1,10 @@
+import { Log } from '../core/log';
+
 const synth = window.speechSynthesis;
 
 export const speak = (text: string, volume: number, voice: string): void => {
   if (!synth) {
-    console.warn('No window.speechSynthesis available.');
+    Log.err('No window.speechSynthesis available.');
     return;
   }
 

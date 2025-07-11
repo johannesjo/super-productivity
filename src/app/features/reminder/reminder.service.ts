@@ -15,6 +15,7 @@ import { devError } from '../../util/dev-error';
 import { Note } from '../note/note.model';
 import { environment } from 'src/environments/environment';
 import { PfapiService } from '../../pfapi/pfapi.service';
+import { Log } from '../../core/log';
 
 @Injectable({
   providedIn: 'root',
@@ -49,10 +50,10 @@ export class ReminderService {
   private _reminders: Reminder[] = [];
 
   constructor() {
-    // this._triggerPauseAfterUpdate$.subscribe((v) => console.log('_triggerPauseAfterUpdate$', v));
-    // this._pauseAfterUpdate$.subscribe((v) => console.log('_pauseAfterUpdate$', v));
-    // this._onRemindersActive$.subscribe((v) => console.log('_onRemindersActive$', v));
-    // this.onRemindersActive$.subscribe((v) => console.log('onRemindersActive$', v));
+    // this._triggerPauseAfterUpdate$.subscribe((v) => Log.log('_triggerPauseAfterUpdate$', v));
+    // this._pauseAfterUpdate$.subscribe((v) => Log.log('_pauseAfterUpdate$', v));
+    // this._onRemindersActive$.subscribe((v) => Log.log('_onRemindersActive$', v));
+    // this.onRemindersActive$.subscribe((v) => Log.log('onRemindersActive$', v));
 
     if (typeof (Worker as any) === 'undefined') {
       throw new Error('No service workers supported :(');
@@ -78,7 +79,7 @@ export class ReminderService {
     }
     this._reminders = await this._loadFromDatabase();
     if (!Array.isArray(this._reminders)) {
-      console.log(this._reminders);
+      Log.log(this._reminders);
       devError('Something went wrong with the reminders');
       this._reminders = [];
     }
@@ -87,7 +88,7 @@ export class ReminderService {
     this._onReloadModel$.next(this._reminders);
     this._reminders$.next(this._reminders);
     if (environment.production) {
-      console.log('loaded reminders from database', this._reminders);
+      Log.log('loaded reminders from database', this._reminders);
     }
   }
 
@@ -205,7 +206,7 @@ export class ReminderService {
     const remindersWithData: Reminder[] = (await Promise.all(
       reminders.map(async (reminder) => {
         const relatedModel = await this._getRelatedDataForReminder(reminder);
-        // console.log('RelatedModel for Reminder', relatedModel);
+        // Log.log('RelatedModel for Reminder', relatedModel);
         // only show when not currently syncing and related model still exists
         if (!relatedModel) {
           devError('No Reminder Related Data found, removing reminder...');
@@ -241,7 +242,7 @@ export class ReminderService {
     } else if (!this._isRemindersLoaded$.getValue()) {
       throw new Error('Reminders not loaded initially when trying to save model');
     }
-    console.log('saveReminders', reminders);
+    Log.log('saveReminders', reminders);
     await this._pfapiService.m.reminders.save(reminders, {
       isUpdateRevAndLastUpdate: true,
     });
@@ -254,7 +255,7 @@ export class ReminderService {
   }
 
   private _handleError(err: any): void {
-    console.error(err);
+    Log.err(err);
     this._snackService.open({ type: 'ERROR', msg: T.F.REMINDER.S_REMINDER_ERR });
   }
 

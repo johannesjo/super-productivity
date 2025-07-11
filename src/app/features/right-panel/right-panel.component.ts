@@ -29,6 +29,7 @@ import {
 } from '../../core-ui/layout/store/layout.reducer';
 import { hidePluginPanel } from '../../core-ui/layout/store/layout.actions';
 import { fastArrayCompare } from '../../util/fast-array-compare';
+import { Log } from '../../core/log';
 
 @Component({
   selector: 'right-panel',
@@ -113,7 +114,7 @@ export class RightPanelComponent implements OnDestroy {
     map(([isShowPluginPanel, activePluginId]) => {
       const keys =
         isShowPluginPanel && activePluginId ? [`plugin-${activePluginId}`] : [];
-      console.log('RightPanel: pluginPanelKeys$ emitted:', {
+      Log.log('RightPanel: pluginPanelKeys$ emitted:', {
         isShowPluginPanel,
         activePluginId,
         keys,

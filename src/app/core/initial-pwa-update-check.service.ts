@@ -6,6 +6,7 @@ import { T } from '../t.const';
 import { SwUpdate } from '@angular/service-worker';
 import { isOnline } from '../util/is-online';
 import { TranslateService } from '@ngx-translate/core';
+import { Log } from './log';
 
 @Injectable({
   providedIn: 'root',
@@ -19,7 +20,7 @@ export class InitialPwaUpdateCheckService {
     !IS_ELECTRON && this._swUpdate.isEnabled && isOnline()
       ? from(this._swUpdate.checkForUpdate()).pipe(
           concatMap((isUpdateAvailable) => {
-            console.log(
+            Log.log(
               '___________isServiceWorkerUpdateAvailable____________',
               isUpdateAvailable,
             );

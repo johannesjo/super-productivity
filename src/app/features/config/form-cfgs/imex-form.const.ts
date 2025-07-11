@@ -4,7 +4,8 @@ import { T } from '../../../t.const';
 
 export const IMEX_FORM: ConfigFormSection<{ [key: string]: any }> = {
   title: T.GCF.IMEX.TITLE,
-  key: 'EMPTY',
+  // @ts-ignore
+  key: 'IMEX_YEAH',
   help: T.GCF.IMEX.HELP,
   customSection: 'FILE_IMPORT_EXPORT',
 };

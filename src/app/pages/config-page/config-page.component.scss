@@ -60,18 +60,6 @@
   padding: var(--s3);
 }
 
-.dark-mode-select {
-  margin: 20px 0;
-
-  display: flex;
-  justify-content: stretch;
-  align-items: center;
-
-  h3 {
-    margin-right: var(--s2);
-  }
-}
-
 :host .config-section ::ng-deep {
   $this-panel-padding-left-right: 12px;
 

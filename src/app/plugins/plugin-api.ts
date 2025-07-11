@@ -22,6 +22,7 @@ import {
   Task,
 } from '@super-productivity/plugin-api';
 import { PluginBridgeService } from './plugin-bridge.service';
+import { PluginLog } from '../core/log';
 import {
   projectCopyToProjectData,
   projectDataToPartialProjectCopy,
@@ -79,7 +80,7 @@ export class PluginAPI implements PluginAPIInterface {
     }
 
     pluginHooks.get(hook)!.push(fn as PluginHookHandler<any>);
-    console.log(`Plugin ${this._pluginId} registered hook: ${hook}`);
+    PluginLog.log(`Plugin ${this._pluginId} registered hook: ${hook}`);
 
     // Register hook with bridge
     this._pluginBridge.registerHook(this._pluginId, hook, fn as PluginHookHandler<any>);
@@ -87,14 +88,14 @@ export class PluginAPI implements PluginAPIInterface {
 
   registerHeaderButton(headerBtnCfg: PluginHeaderBtnCfg): void {
     this._headerButtons.push({ ...headerBtnCfg, pluginId: this._pluginId });
-    console.log(`Plugin ${this._pluginId} registered header button`, headerBtnCfg);
+    PluginLog.log(`Plugin ${this._pluginId} registered header button`, headerBtnCfg);
     this._boundMethods.registerHeaderButton(headerBtnCfg);
   }
 
   registerMenuEntry(menuEntryCfg: Omit<PluginMenuEntryCfg, 'pluginId'>): void {
     const fullMenuEntry = { ...menuEntryCfg, pluginId: this._pluginId };
     this._menuEntries.push(fullMenuEntry);
-    console.log(`Plugin ${this._pluginId} registered menu entry`, menuEntryCfg);
+    PluginLog.log(`Plugin ${this._pluginId} registered menu entry`, menuEntryCfg);
     this._boundMethods.registerMenuEntry(menuEntryCfg);
   }
 
@@ -112,7 +113,7 @@ export class PluginAPI implements PluginAPIInterface {
     };
 
     this._shortcuts.push(shortcut);
-    console.log(`Plugin ${this._pluginId} registered shortcut`, shortcutCfg);
+    PluginLog.log(`Plugin ${this._pluginId} registered shortcut`, shortcutCfg);
 
     // Register shortcut with bridge
     this._boundMethods.registerShortcut(shortcut);
@@ -122,63 +123,69 @@ export class PluginAPI implements PluginAPIInterface {
     sidePanelBtnCfg: Omit<PluginSidePanelBtnCfg, 'pluginId'>,
   ): void {
     this._sidePanelButtons.push({ ...sidePanelBtnCfg, pluginId: this._pluginId });
-    console.log(`Plugin ${this._pluginId} registered side panel button`, sidePanelBtnCfg);
+    PluginLog.log(
+      `Plugin ${this._pluginId} registered side panel button`,
+      sidePanelBtnCfg,
+    );
     this._boundMethods.registerSidePanelButton(sidePanelBtnCfg);
   }
 
   showIndexHtmlAsView(): void {
-    console.log(`Plugin ${this._pluginId} requested to show index.html`);
+    PluginLog.log(`Plugin ${this._pluginId} requested to show index.html`);
     return this._boundMethods.showIndexHtmlAsView();
   }
 
   async getTasks(): Promise<Task[]> {
-    console.log(`Plugin ${this._pluginId} requested all tasks`);
+    PluginLog.log(`Plugin ${this._pluginId} requested all tasks`);
     const tasks = await this._pluginBridge.getTasks();
     return tasks.map(taskCopyToTaskData);
   }
 
   async getArchivedTasks(): Promise<Task[]> {
-    console.log(`Plugin ${this._pluginId} requested archived tasks`);
+    PluginLog.log(`Plugin ${this._pluginId} requested archived tasks`);
     const tasks = await this._pluginBridge.getArchivedTasks();
     return tasks.map(taskCopyToTaskData);
   }
 
   async getCurrentContextTasks(): Promise<Task[]> {
-    console.log(`Plugin ${this._pluginId} requested current context tasks`);
+    PluginLog.log(`Plugin ${this._pluginId} requested current context tasks`);
     const tasks = await this._pluginBridge.getCurrentContextTasks();
     return tasks.map(taskCopyToTaskData);
   }
 
   async updateTask(taskId: string, updates: Partial<Task>): Promise<void> {
-    console.log(`Plugin ${this._pluginId} requested to update task ${taskId}:`, updates);
+    PluginLog.log(
+      `Plugin ${this._pluginId} requested to update task ${taskId}:`,
+      updates,
+    );
     const taskCopyUpdates = taskDataToPartialTaskCopy(updates);
     return this._pluginBridge.updateTask(taskId, taskCopyUpdates);
   }
 
   async addTask(taskData: PluginCreateTaskData): Promise<string> {
-    console.log(`Plugin ${this._pluginId} requested to add task:`, taskData);
+    PluginLog.log(`Plugin ${this._pluginId} requested to add task:`, taskData);
     return this._pluginBridge.addTask(taskData);
   }
 
   async deleteTask(taskId: string): Promise<void> {
-    console.log(`Plugin ${this._pluginId} requested to delete task ${taskId}`);
+    PluginLog.log(`Plugin ${this._pluginId} requested to delete task ${taskId}`);
     return this._pluginBridge.deleteTask(taskId);
   }
 
   async getAllProjects(): Promise<Project[]> {
-    console.log(`Plugin ${this._pluginId} requested all projects`);
+    PluginLog.log(`Plugin ${this._pluginId} requested all projects`);
     const projects = await this._pluginBridge.getAllProjects();
     return projects.map(projectCopyToProjectData);
   }
 
   async addProject(projectData: Partial<Project>): Promise<string> {
-    console.log(`Plugin ${this._pluginId} requested to add project:`, projectData);
+    PluginLog.log(`Plugin ${this._pluginId} requested to add project:`, projectData);
     const projectCopyData = projectDataToPartialProjectCopy(projectData);
     return this._pluginBridge.addProject(projectCopyData);
   }
 
   async updateProject(projectId: string, updates: Partial<Project>): Promise<void> {
-    console.log(
+    PluginLog.log(
       `Plugin ${this._pluginId} requested to update project ${projectId}:`,
       updates,
     );
@@ -187,19 +194,19 @@ export class PluginAPI implements PluginAPIInterface {
   }
 
   async getAllTags(): Promise<Tag[]> {
-    console.log(`Plugin ${this._pluginId} requested all tags`);
+    PluginLog.log(`Plugin ${this._pluginId} requested all tags`);
     const tags = await this._pluginBridge.getAllTags();
     return tags.map(tagCopyToTagData);
   }
 
   async addTag(tagData: Partial<Tag>): Promise<string> {
-    console.log(`Plugin ${this._pluginId} requested to add tag:`, tagData);
+    PluginLog.log(`Plugin ${this._pluginId} requested to add tag:`, tagData);
     const tagCopyData = tagDataToPartialTagCopy(tagData);
     return this._pluginBridge.addTag(tagCopyData);
   }
 
   async updateTag(tagId: string, updates: Partial<Tag>): Promise<void> {
-    console.log(`Plugin ${this._pluginId} requested to update tag ${tagId}:`, updates);
+    PluginLog.log(`Plugin ${this._pluginId} requested to update tag ${tagId}:`, updates);
     const tagCopyUpdates = tagDataToPartialTagCopy(updates);
     return this._pluginBridge.updateTag(tagId, tagCopyUpdates);
   }
@@ -209,7 +216,7 @@ export class PluginAPI implements PluginAPIInterface {
     contextId: string,
     contextType: 'project' | 'task',
   ): Promise<void> {
-    console.log(
+    PluginLog.log(
       `Plugin ${this._pluginId} requested to reorder tasks in ${contextType} ${contextId}:`,
       taskIds,
     );
@@ -217,7 +224,7 @@ export class PluginAPI implements PluginAPIInterface {
   }
 
   async batchUpdateForProject(request: BatchUpdateRequest): Promise<BatchUpdateResult> {
-    console.log(
+    PluginLog.log(
       `Plugin ${this._pluginId} requested batch update for project ${(request as { projectId: string }).projectId}`,
       request,
     );
@@ -229,27 +236,27 @@ export class PluginAPI implements PluginAPIInterface {
   }
 
   async notify(notifyCfg: NotifyCfg): Promise<void> {
-    console.log(`Plugin ${this._pluginId} requested notification:`, notifyCfg);
+    PluginLog.log(`Plugin ${this._pluginId} requested notification:`, notifyCfg);
     return this._pluginBridge.notify(notifyCfg);
   }
 
   persistDataSynced(dataStr: string): Promise<void> {
-    console.log(`Plugin ${this._pluginId} requested to persist data:`, dataStr);
+    PluginLog.log(`Plugin ${this._pluginId} requested to persist data:`, dataStr);
     return this._boundMethods.persistDataSynced(dataStr);
   }
 
   loadSyncedData(): Promise<string | null> {
-    console.log(`Plugin ${this._pluginId} requested to load persisted data:`);
+    PluginLog.log(`Plugin ${this._pluginId} requested to load persisted data:`);
     return this._boundMethods.loadPersistedData();
   }
 
   async openDialog(dialogCfg: DialogCfg): Promise<void> {
-    console.log(`Plugin ${this._pluginId} requested to open dialog:`, dialogCfg);
+    PluginLog.log(`Plugin ${this._pluginId} requested to open dialog:`, dialogCfg);
     return this._pluginBridge.openDialog(dialogCfg);
   }
 
   async triggerSync(): Promise<void> {
-    console.log(`Plugin ${this._pluginId} requested to trigger sync`);
+    PluginLog.log(`Plugin ${this._pluginId} requested to trigger sync`);
     return this._boundMethods.triggerSync();
   }
 
@@ -259,7 +266,7 @@ export class PluginAPI implements PluginAPIInterface {
    */
   onMessage(handler: (message: unknown) => Promise<unknown>): void {
     this._messageHandler = handler;
-    console.log(`Plugin ${this._pluginId} registered message handler`);
+    PluginLog.log(`Plugin ${this._pluginId} registered message handler`);
   }
 
   /**
@@ -283,7 +290,7 @@ export class PluginAPI implements PluginAPIInterface {
    * Execute an NgRx action if it's in the allowed list
    */
   dispatchAction(action: { type: string; [key: string]: unknown }): void {
-    console.log(`Plugin ${this._pluginId} requested to execute action:`, action);
+    PluginLog.log(`Plugin ${this._pluginId} requested to execute action:`, action);
     return this._boundMethods.dispatchAction(action);
   }
 
@@ -306,7 +313,7 @@ export class PluginAPI implements PluginAPIInterface {
    * Called when the plugin is being unloaded
    */
   cleanup(): void {
-    console.log(`Cleaning up PluginAPI for plugin ${this._pluginId}`);
+    PluginLog.log(`Cleaning up PluginAPI for plugin ${this._pluginId}`);
 
     // Clear all hook handlers
     this._hookHandlers.clear();

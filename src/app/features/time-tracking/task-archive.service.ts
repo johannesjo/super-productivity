@@ -1,7 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { roundTimeSpentForDay } from '../tasks/store/task.actions';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
-import { taskReducer } from '../tasks/store/task.reducer';
+import { TASK_FEATURE_NAME, taskReducer } from '../tasks/store/task.reducer';
+import { taskSharedCrudMetaReducer } from '../../root-store/meta/task-shared-meta-reducers/task-shared-crud.reducer';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { Task, TaskArchive, TaskState } from '../tasks/task.model';
 import { RoundTimeOption } from '../project/project.model';
@@ -9,6 +10,24 @@ import { Update } from '@ngrx/entity';
 import { ArchiveModel } from './time-tracking.model';
 import { ModelCfgToModelCtrl } from '../../pfapi/api';
 import { PfapiAllModelCfg } from '../../pfapi/pfapi-config';
+import { Log } from '../../core/log';
+import { RootState } from '../../root-store/root-state';
+import { PROJECT_FEATURE_NAME } from '../project/store/project.reducer';
+import { TAG_FEATURE_NAME } from '../tag/store/tag.reducer';
+import { WORK_CONTEXT_FEATURE_NAME } from '../work-context/store/work-context.selectors';
+import { plannerFeatureKey } from '../planner/store/planner.reducer';
+
+// Create a minimal RootState with the archive task state
+// Other feature states are empty as they're not needed for task updates
+const FAKE_ROOT_STATE: RootState = {
+  [PROJECT_FEATURE_NAME]: { ids: [], entities: {} },
+  [TAG_FEATURE_NAME]: { ids: [], entities: {} },
+  [WORK_CONTEXT_FEATURE_NAME]: {
+    activeId: 'xyz',
+    activeType: 'TAG',
+  },
+  [plannerFeatureKey]: { days: {}, addPlannedTasksDialogLastShown: undefined },
+} as const as Partial<RootState> as RootState;
 
 type TaskArchiveAction =
   | ReturnType<typeof TaskSharedActions.updateTask>
@@ -67,8 +86,8 @@ export class TaskArchiveService {
     );
 
     if (toDeleteInArchiveYoung.length > 0) {
-      const newTaskState = taskReducer(
-        archiveYoung.task as TaskState,
+      const newTaskState = this._reduceForArchive(
+        archiveYoung,
         TaskSharedActions.deleteTasks({ taskIds: toDeleteInArchiveYoung }),
       );
       await this._pfapiService.m.archiveYoung.save(
@@ -85,8 +104,8 @@ export class TaskArchiveService {
       const toDeleteInArchiveOld = taskIdsToDelete.filter(
         (id) => !!archiveOld.task.entities[id],
       );
-      const newTaskStateArchiveOld = taskReducer(
-        archiveOld.task as TaskState,
+      const newTaskStateArchiveOld = this._reduceForArchive(
+        archiveOld,
         TaskSharedActions.deleteTasks({ taskIds: toDeleteInArchiveOld }),
       );
       await this._pfapiService.m.archiveOld.save(
@@ -102,6 +121,8 @@ export class TaskArchiveService {
   async updateTask(id: string, changedFields: Partial<Task>): Promise<void> {
     const archiveYoung = await this._pfapiService.m.archiveYoung.load();
     if (archiveYoung.task.entities[id]) {
+      Log.x(changedFields, id);
+
       return await this._execAction(
         'archiveYoung',
         archiveYoung,
@@ -126,10 +147,12 @@ export class TaskArchiveService {
       (upd) => !!archiveYoung.task.entities[upd.task.id],
     );
     if (updatesYoung.length > 0) {
-      const newTaskStateArchiveYoung = updatesYoung.reduce(
-        (acc, act) => taskReducer(acc, act),
-        archiveYoung.task as TaskState,
-      );
+      let currentArchiveYoung = archiveYoung;
+      for (const act of updatesYoung) {
+        const newTaskState = this._reduceForArchive(currentArchiveYoung, act);
+        currentArchiveYoung = { ...currentArchiveYoung, task: newTaskState };
+      }
+      const newTaskStateArchiveYoung = currentArchiveYoung.task;
       await this._pfapiService.m.archiveYoung.save(
         {
           ...archiveYoung,
@@ -144,10 +167,12 @@ export class TaskArchiveService {
       const updatesOld = allUpdates.filter(
         (upd) => !!archiveOld.task.entities[upd.task.id],
       );
-      const newTaskStateArchiveOld = updatesOld.reduce(
-        (acc, act) => taskReducer(acc, act),
-        archiveOld.task as TaskState,
-      );
+      let currentArchiveOld = archiveOld;
+      for (const act of updatesOld) {
+        const newTaskState = this._reduceForArchive(currentArchiveOld, act);
+        currentArchiveOld = { ...currentArchiveOld, task: newTaskState };
+      }
+      const newTaskStateArchiveOld = currentArchiveOld.task;
       await this._pfapiService.m.archiveOld.save(
         {
           ...archiveOld,
@@ -239,8 +264,8 @@ export class TaskArchiveService {
       (id) => !!archiveYoung.task.entities[id],
     );
     if (taskIdsInArchiveYoung.length > 0) {
-      const newTaskState = taskReducer(
-        archiveYoung.task as TaskState,
+      const newTaskState = this._reduceForArchive(
+        archiveYoung,
         roundTimeSpentForDay({
           day,
           taskIds: taskIdsInArchiveYoung,
@@ -261,8 +286,8 @@ export class TaskArchiveService {
       const archiveOld = await this._pfapiService.m.archiveOld.load();
       const taskIdsInArchiveOld = taskIds.filter((id) => !!archiveOld.task.entities[id]);
       if (taskIdsInArchiveOld.length > 0) {
-        const newTaskStateArchiveOld = taskReducer(
-          archiveOld.task as TaskState,
+        const newTaskStateArchiveOld = this._reduceForArchive(
+          archiveOld,
           roundTimeSpentForDay({
             day,
             taskIds: taskIdsInArchiveOld,
@@ -292,7 +317,8 @@ export class TaskArchiveService {
     archiveBefore: ArchiveModel,
     action: TaskArchiveAction,
   ): Promise<void> {
-    const newTaskState = taskReducer(archiveBefore.task as TaskState, action);
+    const newTaskState = this._reduceForArchive(archiveBefore, action);
+    Log.x(newTaskState);
     await this._pfapiService.m[target].save(
       {
         ...archiveBefore,
@@ -307,10 +333,10 @@ export class TaskArchiveService {
     isUpdateRevAndLastUpdate = true,
   ): Promise<void> {
     const archiveYoung = await this._pfapiService.m.archiveYoung.load();
-    const newTaskState = taskReducer(archiveYoung.task as TaskState, action);
+    const newTaskState = this._reduceForArchive(archiveYoung, action);
 
     const archiveOld = await this._pfapiService.m.archiveOld.load();
-    const newTaskStateArchiveOld = taskReducer(archiveOld.task as TaskState, action);
+    const newTaskStateArchiveOld = this._reduceForArchive(archiveOld, action);
 
     await this._pfapiService.m.archiveYoung.save(
       {
@@ -326,6 +352,32 @@ export class TaskArchiveService {
       },
       { isUpdateRevAndLastUpdate },
     );
+  }
+
+  private _reduceForArchive(
+    archiveBefore: ArchiveModel,
+    action: TaskArchiveAction,
+  ): TaskState {
+    // Create a wrapped reducer that combines taskReducer with the meta-reducer
+    const wrappedReducer = taskSharedCrudMetaReducer((state: RootState, act: any) => {
+      // Only update the task feature state
+      return {
+        ...state,
+        [TASK_FEATURE_NAME]: taskReducer(state[TASK_FEATURE_NAME], act),
+      };
+    });
+
+    // Create root state with the actual archive task state
+    const rootStateWithArchiveTasks: RootState = {
+      ...FAKE_ROOT_STATE,
+      [TASK_FEATURE_NAME]: archiveBefore.task as TaskState,
+    };
+
+    // Apply the action through the wrapped reducer
+    const updatedRootState = wrappedReducer(rootStateWithArchiveTasks, action);
+
+    // Extract and return the updated task state
+    return updatedRootState[TASK_FEATURE_NAME];
   }
 
   // more beautiful but less efficient

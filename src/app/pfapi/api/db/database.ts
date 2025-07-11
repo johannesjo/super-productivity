@@ -1,5 +1,5 @@
 import { DatabaseAdapter } from './database-adapter.model';
-import { pfLog } from '../util/log';
+import { PFLog } from '../../../core/log';
 import { devError } from '../../../util/dev-error';
 
 export class Database {
@@ -17,12 +17,12 @@ export class Database {
   }
 
   lock(): void {
-    pfLog(2, `${Database.L}.${this.lock.name}()`);
+    PFLog.normal(`${Database.L}.${this.lock.name}()`);
     this._isLocked = true;
   }
 
   unlock(): void {
-    pfLog(2, `${Database.L}.${this.unlock.name}()`);
+    PFLog.normal(`${Database.L}.${this.unlock.name}()`);
     this._isLocked = false;
   }
 
@@ -31,7 +31,7 @@ export class Database {
     try {
       return await this._adapter.load<T>(key);
     } catch (e) {
-      pfLog(0, 'DB Load Error', { lastParams: this._lastParams, error: e });
+      PFLog.critical('DB Load Error', { lastParams: this._lastParams, error: e });
       return this._errorHandler(e as Error, this.load, [key]);
     }
   }
@@ -41,7 +41,7 @@ export class Database {
     try {
       return await this._adapter.loadAll<T>();
     } catch (e) {
-      pfLog(0, 'DB LoadAll Error', { lastParams: this._lastParams, error: e });
+      PFLog.critical('DB LoadAll Error', { lastParams: this._lastParams, error: e });
       return this._errorHandler(e as Error, this.loadAll, []);
     }
   }
@@ -51,7 +51,7 @@ export class Database {
     if (this._isLocked && !isIgnoreDBLock) {
       console.trace();
       devError(`Attempting to write DB for ${key} while locked`);
-      pfLog(0, `${Database.L}.save() BLOCKED!!! - Database is locked!`, {
+      PFLog.critical(`${Database.L}.save() BLOCKED!!! - Database is locked!`, {
         key,
         isLocked: this._isLocked,
         isIgnoreDBLock,
@@ -62,13 +62,14 @@ export class Database {
                 lastSyncedUpdate: (data as any)?.lastSyncedUpdate,
               }
             : undefined,
+        data,
       });
       return;
     }
     try {
       return await this._adapter.save(key, data);
     } catch (e) {
-      pfLog(0, 'DB Save Error', { lastParams: this._lastParams, error: e });
+      PFLog.critical('DB Save Error', { lastParams: this._lastParams, error: e });
       return this._errorHandler(e as Error, this.save, [key, data]);
     }
   }
@@ -76,27 +77,27 @@ export class Database {
   async remove(key: string, isIgnoreDBLock = false): Promise<unknown> {
     this._lastParams = { a: 'remove', key };
     if (this._isLocked && !isIgnoreDBLock) {
-      console.warn('Blocking write during lock');
+      PFLog.err('Blocking write during lock');
       return;
     }
     try {
       return await this._adapter.remove(key);
     } catch (e) {
-      console.warn('DB Remove Error: Last Params,', this._lastParams);
+      PFLog.err('DB Remove Error: Last Params,', this._lastParams);
       return this._errorHandler(e as Error, this.remove, [key]);
     }
   }
 
   async clearDatabase(isIgnoreDBLock = false): Promise<unknown> {
     if (this._isLocked && !isIgnoreDBLock) {
-      console.warn('Blocking write during lock');
+      PFLog.err('Blocking write during lock');
       return;
     }
     this._lastParams = { a: 'clearDatabase' };
     try {
       return await this._adapter.clearDatabase();
     } catch (e) {
-      console.warn('DB Clear Error: Last Params,', this._lastParams);
+      PFLog.err('DB Clear Error: Last Params,', this._lastParams);
       return this._errorHandler(e as Error, this.clearDatabase, []);
     }
   }
@@ -105,8 +106,8 @@ export class Database {
     try {
       await this._adapter.init();
     } catch (e) {
-      console.error(e);
-      pfLog(0, 'Database initialization failed', {
+      PFLog.err(e);
+      PFLog.critical('Database initialization failed', {
         lastParams: this._lastParams,
         error: e,
       });
@@ -119,7 +120,7 @@ export class Database {
     fn: (...args: any[]) => Promise<any>,
     args: any[],
   ): Promise<void> {
-    pfLog(0, `${Database.L}.${this._errorHandler.name}()`, e, fn.name, args);
+    PFLog.critical(`${Database.L}.${this._errorHandler.name}()`, e, fn.name, args);
     this._onError(e);
     throw e; // Rethrow to allow caller to handle
   }

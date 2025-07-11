@@ -33,6 +33,7 @@ import {
 import { fromPfapiEvent, pfapiEventAndInitialAfter } from './pfapi-helper';
 import { DataInitStateService } from '../core/data-init/data-init-state.service';
 import { GlobalProgressBarService } from '../core-ui/global-progress-bar/global-progress-bar.service';
+import { PFLog } from '../core/log';
 
 @Injectable({
   providedIn: 'root',
@@ -59,7 +60,7 @@ export class PfapiService {
   ).pipe(
     shareReplay(1),
     distinctUntilChanged(),
-    // tap((v) => console.log(`isSyncProviderEnabledAndReady$`, v)),
+    // tap((v) => PFLog.log(`isSyncProviderEnabledAndReady$`, v)),
   );
 
   public readonly currentProviderPrivateCfg$ = pfapiEventAndInitialAfter(
@@ -105,9 +106,9 @@ export class PfapiService {
 
   constructor() {
     // TODO check why it gets triggered twice always
-    // this.syncState$.subscribe((v) => console.log(`syncState$`, v));
+    // this.syncState$.subscribe((v) => PFLog.log(`syncState$`, v));
     this.isSyncInProgress$.subscribe((v) => {
-      // console.log('isSyncInProgress$', v);
+      // PFLog.log('isSyncInProgress$', v);
       if (v) {
         this._globalProgressBarService.countUp('SYNC');
       } else {
@@ -127,7 +128,7 @@ export class PfapiService {
           });
         }
       } catch (e) {
-        console.error(e);
+        PFLog.err(e);
         alert('Unable to set sync provider. Please check your settings.');
       }
     });
@@ -137,11 +138,12 @@ export class PfapiService {
     data: AppDataCompleteNew | CompleteBackup<PfapiAllModelCfg>,
     isSkipLegacyWarnings: boolean = false,
     isSkipReload: boolean = false,
+    isForceConflict: boolean = false,
   ): Promise<void> {
     try {
       this._imexViewService.setDataImportInProgress(true);
       if ('crossModelVersion' in data && 'timestamp' in data) {
-        await this.pf.importCompleteBackup(data, isSkipLegacyWarnings);
+        await this.pf.importCompleteBackup(data, isSkipLegacyWarnings, isForceConflict);
       } else {
         await this.pf.importCompleteBackup(
           {
@@ -152,6 +154,7 @@ export class PfapiService {
             crossModelVersion: 0,
           },
           isSkipLegacyWarnings,
+          isForceConflict,
         );
       }
 

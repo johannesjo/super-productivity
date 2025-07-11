@@ -58,6 +58,7 @@ import {
 } from '../../note/store/note.actions';
 import { MODEL_VERSION } from '../../../core/model-version';
 import { INBOX_PROJECT } from '../project.const';
+import { Log } from '../../../core/log';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.PROJECT;
@@ -271,7 +272,7 @@ export const projectReducer = createReducer<ProjectState>(
   on(moveProjectTaskToBacklogList, (state, { taskId, newOrderedIds, workContextId }) => {
     const project = state.entities[workContextId] as Project;
     if (!project.isEnableBacklog) {
-      console.warn('Project backlog is disabled');
+      Log.err('Project backlog is disabled');
       return state;
     }
     const todaysTaskIdsBefore = project.taskIds;
@@ -461,7 +462,7 @@ export const projectReducer = createReducer<ProjectState>(
   on(moveProjectTaskToBacklogListAuto, (state, { taskId, projectId }) => {
     const project = state.entities[projectId] as Project;
     if (!project.isEnableBacklog) {
-      console.warn('Project backlog is disabled');
+      Log.err('Project backlog is disabled');
       return state;
     }
     const todaysTaskIdsBefore = project.taskIds;

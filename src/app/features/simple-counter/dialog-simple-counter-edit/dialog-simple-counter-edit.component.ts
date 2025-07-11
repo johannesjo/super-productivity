@@ -4,6 +4,7 @@ import {
   computed,
   inject,
   LOCALE_ID,
+  signal,
 } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
@@ -17,12 +18,8 @@ import { SimpleCounterCopy, SimpleCounterType } from '../simple-counter.model';
 import { SimpleCounterService } from '../simple-counter.service';
 import { DateService } from 'src/app/core/date/date.service';
 import { FormsModule } from '@angular/forms';
-import {
-  MatFormField,
-  MatFormFieldModule,
-  MatPrefix,
-} from '@angular/material/form-field';
-import { MatInput, MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { InputDurationDirective } from '../../../ui/duration/input-duration.directive';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
@@ -32,7 +29,9 @@ import { ChartConfiguration } from 'chart.js';
 import { LineChartData } from '../../metric/metric.model';
 import { getSimpleCounterStreakDuration } from '../get-simple-counter-streak-duration';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
-import { sortWorklogDates } from '../../../util/sortWorklogDates';
+
+const CHART_DAYS = 28;
+const CHART_COLOR = '#4bc0c0';
 
 @Component({
   selector: 'dialog-simple-counter-edit',
@@ -43,119 +42,175 @@ import { sortWorklogDates } from '../../../util/sortWorklogDates';
     FormsModule,
     MatDialogTitle,
     MatDialogContent,
-    MatFormField,
-    MatInput,
+    MatFormFieldModule,
+    MatInputModule,
     InputDurationDirective,
     MatIcon,
-    MatPrefix,
     MatDialogActions,
     MatButton,
     TranslatePipe,
     BaseChartDirective,
-    MatFormFieldModule,
-    MatInputModule,
     MsToStringPipe,
   ],
 })
 export class DialogSimpleCounterEditComponent {
-  private _matDialogRef =
-    inject<MatDialogRef<DialogSimpleCounterEditComponent>>(MatDialogRef);
-  private _simpleCounterService = inject(SimpleCounterService);
-  private _dateService = inject(DateService);
-  private _locale = inject(LOCALE_ID);
+  private readonly _dialogRef = inject(MatDialogRef<DialogSimpleCounterEditComponent>);
+  private readonly _counterService = inject(SimpleCounterService);
+  private readonly _dateService = inject(DateService);
+  private readonly _locale = inject(LOCALE_ID);
 
-  data = inject<{
-    simpleCounter: SimpleCounterCopy;
-  }>(MAT_DIALOG_DATA);
+  readonly dialogData = inject<{ simpleCounter: SimpleCounterCopy }>(MAT_DIALOG_DATA);
+  readonly T = T;
+  readonly SimpleCounterType = SimpleCounterType;
+  readonly todayStr = this._dateService.todayStr();
 
-  stats = computed(() => {
-    const countOnDay = this.data.simpleCounter.countOnDay;
-    let labels = sortWorklogDates(Object.keys(countOnDay));
-    labels = this._fillMissingDates(labels);
+  // State
+  readonly localCounter = signal<SimpleCounterCopy>({
+    ...this.dialogData.simpleCounter,
+    countOnDay: { ...this.dialogData.simpleCounter.countOnDay },
+  });
 
-    labels = labels.slice(-28);
+  selectedDateStr = signal(this.todayStr);
 
-    const data =
-      this.data.simpleCounter.type === SimpleCounterType.StopWatch
-        ? labels.map((date) => Math.round(countOnDay[date] / 60000))
-        : labels.map((date) => countOnDay[date]);
+  // Computed values
+  readonly selectedValue = computed(() => {
+    const counter = this.localCounter();
+    const date = this.selectedDateStr();
+    return counter.countOnDay[date] || 0;
+  });
 
-    const chartData: LineChartData = {
-      labels: labels.map((dateStr) => {
-        const d = new Date(dateStr);
-        const isStreakDay = this.data.simpleCounter.streakWeekDays?.[d.getDay()];
-        const isStreakFulfilled =
-          countOnDay[dateStr] >= (this.data.simpleCounter.streakMinValue || 0);
+  readonly currentStreak = computed(() =>
+    getSimpleCounterStreakDuration(this.localCounter()),
+  );
 
-        return `${d.toLocaleDateString(this._locale, {
-          month: 'numeric',
-          day: 'numeric',
-        })}${isStreakDay ? (isStreakFulfilled ? '🔥' : '❌') : ''}`;
-      }),
+  readonly chartData = computed((): LineChartData => {
+    const counter = this.localCounter();
+    const dates = this._getChartDates();
+
+    const values = dates.map((date) => {
+      const rawValue = counter.countOnDay[date] || 0;
+      return counter.type === SimpleCounterType.StopWatch
+        ? Math.round(rawValue / 60000) // Convert ms to minutes for display
+        : rawValue;
+    });
+
+    const labels = dates.map((date) => this._formatChartLabel(date, counter));
+
+    return {
+      labels,
       datasets: [
         {
-          data,
-          label:
-            this.data.simpleCounter.type === SimpleCounterType.StopWatch
-              ? 'Duration'
-              : 'Count',
+          data: values,
+          label: counter.type === SimpleCounterType.StopWatch ? 'Duration' : 'Count',
           fill: false,
-          borderColor: '#4bc0c0',
+          borderColor: CHART_COLOR,
         },
       ],
     };
-    return chartData;
   });
 
-  currentStreak = computed(() => {
-    return getSimpleCounterStreakDuration(this.data.simpleCounter);
-  });
-
-  T: typeof T = T;
-  SimpleCounterType: typeof SimpleCounterType = SimpleCounterType;
-
-  todayStr: string = this._dateService.todayStr();
-  val: number = this.data.simpleCounter.countOnDay[this.todayStr];
-  lineChartOptions: ChartConfiguration<
-    'line',
-    (number | undefined)[],
-    string
-  >['options'] = {
+  readonly chartOptions: ChartConfiguration['options'] = {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
       y: {
-        ticks: {
-          precision: 0,
-        },
+        min: 0,
+        ticks: { precision: 0 },
       },
+    },
+    onHover: (event, activeElements) => {
+      const canvas = event.native?.target as HTMLCanvasElement;
+      if (canvas) {
+        canvas.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+      }
     },
   };
 
-  submit(): void {
-    this._simpleCounterService.setCounterToday(this.data.simpleCounter.id, this.val);
+  onChartClick(event: { active?: any[] }): void {
+    if (!event.active?.length) return;
+
+    const index = event.active[0].index;
+    const dates = this._getChartDates();
+
+    if (dates[index]) {
+      this.selectedDateStr.set(dates[index]);
+    }
+  }
+
+  updateValue(value: number): void {
+    const date = this.selectedDateStr();
+    this.localCounter.update((counter) => ({
+      ...counter,
+      countOnDay: {
+        ...counter.countOnDay,
+        [date]: value,
+      },
+    }));
+  }
+
+  save(): void {
+    const localData = this.localCounter();
+    const originalData = this.dialogData.simpleCounter;
+
+    // Only save changed values
+    Object.entries(localData.countOnDay).forEach(([date, value]) => {
+      const originalValue = originalData.countOnDay[date] || 0;
+      if (value !== originalValue) {
+        this._counterService.setCounterForDate(originalData.id, date, value);
+      }
+    });
+
     this.close();
   }
 
-  onModelChange($event: number): void {
-    this.val = $event;
-  }
-
   close(): void {
-    this._matDialogRef.close();
+    this._dialogRef.close();
   }
 
-  private _fillMissingDates(dates: string[]): string[] {
-    const startDate = new Date(dates[0]);
-    // const endDate = new Date(dates[dates.length - 1]);
-    const endDate = new Date();
+  formatSelectedDate(): string {
+    const date = this.selectedDateStr();
+    if (date === this.todayStr) return 'Today';
 
-    const filledDates: string[] = [];
-    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-      const dateStr = d.toISOString().split('T')[0];
-      filledDates.push(dateStr);
+    return new Date(date).toLocaleDateString(this._locale, {
+      day: 'numeric',
+      month: 'numeric',
+    });
+  }
+
+  private _getChartDates(): string[] {
+    const counter = this.localCounter();
+    const allDates = Object.keys(counter.countOnDay).sort();
+
+    if (!allDates.length) return [];
+
+    // Fill in missing dates from first entry to today
+    const startDate = new Date(allDates[0]);
+    const endDate = new Date();
+    const dates: string[] = [];
+
+    for (const d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+      dates.push(d.toISOString().split('T')[0]);
     }
 
-    return filledDates;
+    // Return last 28 days
+    return dates.slice(-CHART_DAYS);
+  }
+
+  private _formatChartLabel(dateStr: string, counter: SimpleCounterCopy): string {
+    const date = new Date(dateStr);
+    const dayOfWeek = date.getDay();
+
+    const baseLabel = date.toLocaleDateString(this._locale, {
+      month: 'numeric',
+      day: 'numeric',
+    });
+
+    if (!counter.isTrackStreaks || !counter.streakWeekDays?.[dayOfWeek]) {
+      return baseLabel;
+    }
+
+    const value = counter.countOnDay[dateStr] || 0;
+    const streakMet = value >= (counter.streakMinValue || 0);
+    return `${baseLabel}${streakMet ? '🔥' : '❌'}`;
   }
 }

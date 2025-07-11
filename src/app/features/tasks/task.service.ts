@@ -87,6 +87,7 @@ import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { getWorklogStr } from '../../util/get-work-log-str';
 import { INBOX_PROJECT } from '../project/project.const';
 import { GlobalConfigService } from '../config/global-config.service';
+import { TaskLog } from '../../core/log';
 
 @Injectable({
   providedIn: 'root',
@@ -124,7 +125,7 @@ export class TaskService {
     // NOTE: we can't use share here, as we need the last emitted value
   );
 
-  selectedTask$: Observable<TaskWithSubTasks> = this._store.pipe(
+  selectedTask$: Observable<TaskWithSubTasks | null> = this._store.pipe(
     select(selectSelectedTask),
     // NOTE: we can't use share here, as we need the last emitted value
   );
@@ -284,7 +285,7 @@ export class TaskService {
       workContextId,
     });
 
-    console.log(task, additional);
+    TaskLog.log(task, additional);
 
     this._store.dispatch(
       TaskSharedActions.addTask({

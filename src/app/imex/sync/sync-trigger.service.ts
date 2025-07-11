@@ -36,6 +36,7 @@ import { PfapiService } from '../../pfapi/pfapi.service';
 import { DataInitStateService } from '../../core/data-init/data-init-state.service';
 import { Store } from '@ngrx/store';
 import { selectCurrentTaskId } from '../../features/tasks/store/task.selectors';
+import { SyncLog } from '../../core/log';
 
 const MAX_WAIT_FOR_INITIAL_SYNC = 25000;
 const USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME = 15 * 60 * 10000;
@@ -194,7 +195,7 @@ export class SyncTriggerService {
         );
     return merge(
       // once immediately
-      _immediateSyncTrigger$.pipe(tap((v) => console.log('immediate sync trigger', v))),
+      _immediateSyncTrigger$.pipe(tap((v) => SyncLog.log('immediate sync trigger', v))),
 
       // and once we reset the sync interval for all other triggers
       // we do this to reset the audit time to avoid sync checks in short succession
@@ -205,8 +206,8 @@ export class SyncTriggerService {
         switchMap(() =>
           // NOTE: interval changes are only ever executed, if local data was changed
           this._onUpdateLocalDataTrigger$.pipe(
-            // tap((ev) => console.log('__trigger_sync__', ev.appDataKey, ev)),
-            // tap((ev) => console.log('__trigger_sync__', 'I_ON_UPDATE_LOCAL_DATA', ev)),
+            // tap((ev) => Log.log('__trigger_sync__', ev.appDataKey, ev)),
+            // tap((ev) => Log.log('__trigger_sync__', 'I_ON_UPDATE_LOCAL_DATA', ev)),
             auditTime(Math.max(syncInterval, SYNC_MIN_INTERVAL)),
             // tap((ev) => alert('__trigger_sync after auditTime__')),
           ),

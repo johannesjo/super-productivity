@@ -20,6 +20,7 @@ import { StringToMsPipe } from './string-to-ms.pipe';
 import { MsToStringPipe } from './ms-to-string.pipe';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from 'src/app/t.const';
+import { Log } from '../../core/log';
 
 @Directive({
   selector: 'input[inputDuration]',
@@ -112,7 +113,7 @@ export class InputDurationDirective implements ControlValueAccessor, Validator, 
 
     // Apply external validator if available
     // if (this._validator) {
-    //   console.log(this._validator(control), this._validator);
+    //   Log.log(this._validator(control), this._validator);
     //   return this._validator(control);
     // }
 
@@ -160,7 +161,7 @@ export class InputDurationDirective implements ControlValueAccessor, Validator, 
       this._previousMsValue = this._msValue;
     } catch (err) {
       // If parsing fails, set to null
-      console.error('Error parsing duration:', err);
+      Log.err('Error parsing duration:', err);
       this._msValue = null;
       this._onChange(null);
     }

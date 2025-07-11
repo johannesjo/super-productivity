@@ -69,6 +69,8 @@ import { PluginService } from './plugins/plugin.service';
 import { MarkdownPasteService } from './features/tasks/markdown-paste.service';
 import { TaskService } from './features/tasks/task.service';
 import { IpcRendererEvent } from 'electron';
+import { SyncSafetyBackupService } from './imex/sync/sync-safety-backup.service';
+import { Log } from './core/log';
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -103,6 +105,7 @@ const productivityTip: string[] = w.productivityTips && w.productivityTips[w.ran
 })
 export class AppComponent implements OnDestroy {
   private _translateService = inject(TranslateService);
+
   private _globalConfigService = inject(GlobalConfigService);
   private _shortcutService = inject(ShortcutService);
   private _bannerService = inject(BannerService);
@@ -121,6 +124,9 @@ export class AppComponent implements OnDestroy {
   private _markdownPasteService = inject(MarkdownPasteService);
   private _taskService = inject(TaskService);
   private _pluginService = inject(PluginService);
+
+  // needs to be imported for initialization
+  private _syncSafetyBackupService = inject(SyncSafetyBackupService);
 
   readonly syncTriggerService = inject(SyncTriggerService);
   readonly imexMetaService = inject(ImexViewService);
@@ -219,9 +225,9 @@ export class AppComponent implements OnDestroy {
       // Initialize plugin system
       try {
         await this._pluginService.initializePlugins();
-        console.log('Plugin system initialized');
+        Log.log('Plugin system initialized');
       } catch (error) {
-        console.error('Failed to initialize plugin system:', error);
+        Log.err('Failed to initialize plugin system:', error);
       }
     }, 1000);
 
@@ -243,7 +249,7 @@ export class AppComponent implements OnDestroy {
             msg: errMsg,
             type: 'ERROR',
           });
-          console.error(data);
+          Log.err(data);
         });
       });
 
@@ -409,7 +415,7 @@ export class AppComponent implements OnDestroy {
       this.imexMetaService.setDataImportInProgress(true);
 
       const legacyData = await this._persistenceLegacyService.loadComplete();
-      console.log({ legacyData: legacyData });
+      Log.log({ legacyData: legacyData });
 
       alert(this._translateService.instant(T.MIGRATE.DETECTED_LEGACY));
 
@@ -444,7 +450,7 @@ export class AppComponent implements OnDestroy {
       } catch (error) {
         // prevent any interaction with the app on after failure
         this.imexMetaService.setDataImportInProgress(true);
-        console.error(error);
+        Log.err(error);
 
         try {
           alert(
@@ -532,21 +538,21 @@ export class AppComponent implements OnDestroy {
           if (!persisted) {
             return navigator.storage.persist().then((granted) => {
               if (granted) {
-                console.log('Persistent store granted');
+                Log.log('Persistent store granted');
               }
               // NOTE: we never execute for android web view, because it is always true
               else if (!IS_ANDROID_WEB_VIEW) {
                 const msg = T.GLOBAL_SNACK.PERSISTENCE_DISALLOWED;
-                console.warn('Persistence not allowed');
+                Log.err('Persistence not allowed');
                 this._snackService.open({ msg });
               }
             });
           } else {
-            console.log('Persistence already allowed');
+            Log.log('Persistence already allowed');
           }
         })
         .catch((e) => {
-          console.log(e);
+          Log.log(e);
           const err = e && e.toString ? e.toString() : 'UNKNOWN';
           const msg = T.GLOBAL_SNACK.PERSISTENCE_ERROR;
           this._snackService.open({
@@ -571,7 +577,7 @@ export class AppComponent implements OnDestroy {
           const usageInMib = Math.round(u / (1024 * 1024));
           const quotaInMib = Math.round(q / (1024 * 1024));
           const details = `${usageInMib} out of ${quotaInMib} MiB used (${percentUsed}%)`;
-          console.log(details);
+          Log.log(details);
           if (quotaInMib - usageInMib <= 333) {
             alert(
               `There is only very little disk space available (${

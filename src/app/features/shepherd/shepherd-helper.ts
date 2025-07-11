@@ -4,10 +4,11 @@ import { ShepherdService } from './shepherd.service';
 import Step from 'shepherd.js/src/types/step';
 import StepOptionsWhen = Step.StepOptionsWhen;
 import { TourId } from './shepherd-steps.const';
+import { Log } from '../../core/log';
 
 export const waitForEl = (selector: string, cb: () => void): number => {
   const int = window.setInterval(() => {
-    console.log('INT');
+    Log.log('INT');
 
     if (document.querySelector(selector)) {
       window.clearInterval(int);
@@ -41,7 +42,7 @@ export const nextOnObs = (
         .pipe(
           tap((v) => {
             if (debugTitle) {
-              console.log('nextOnObs', v, debugTitle);
+              Log.log('nextOnObs', v, debugTitle);
             }
           }),
           first(),
@@ -75,7 +76,7 @@ export const twoWayObs = (
       onDestroy$ = new Subject();
       fwd.obs.pipe(first(), takeUntil(onDestroy$)).subscribe((v) => {
         if (debugTitle) {
-          console.log(debugTitle, 'fwd', v);
+          Log.log(debugTitle, 'fwd', v);
         }
         fwd.cbAfter?.();
         shepherdService.next();
@@ -83,7 +84,7 @@ export const twoWayObs = (
       if (back) {
         back.obs.pipe(first(), takeUntil(onDestroy$)).subscribe((v) => {
           if (debugTitle) {
-            console.log(debugTitle, 'back', v);
+            Log.log(debugTitle, 'back', v);
           }
           back.cbAfter?.();
           if (back.backToId) {

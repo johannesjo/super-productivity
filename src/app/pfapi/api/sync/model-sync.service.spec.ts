@@ -255,8 +255,6 @@ describe('ModelSyncService', () => {
 
       await service.updateLocalMainModelsFromRemoteMetaFile({
         ...remoteMeta,
-        localLamport: 0,
-        lastSyncedLamport: null,
       } as RemoteMeta);
 
       expect(mockModelControllers.mainModel.save).toHaveBeenCalledWith(
@@ -281,8 +279,6 @@ describe('ModelSyncService', () => {
 
       await service.updateLocalMainModelsFromRemoteMetaFile({
         ...remoteMeta,
-        localLamport: 0,
-        lastSyncedLamport: null,
       } as RemoteMeta);
 
       expect(mockModelControllers.mainModel.save).not.toHaveBeenCalled();

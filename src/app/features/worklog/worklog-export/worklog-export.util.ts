@@ -8,6 +8,7 @@ import { ProjectCopy } from '../../project/project.model';
 import { TagCopy } from '../../tag/tag.model';
 import { WorklogTask } from '../../tasks/task.model';
 import { WorklogExportSettingsCopy, WorklogGrouping } from '../worklog.model';
+import { Log } from '../../../core/log';
 import {
   ItemsByKey,
   RowItem,
@@ -254,7 +255,7 @@ export const formatRows = (
           0,
         );
         const timeSpentPart = row.timeSpent / timeSpentTotal;
-        console.log(`${row.timeSpent} / ${timeSpentTotal} = ${timeSpentPart}`);
+        Log.log(`${row.timeSpent} / ${timeSpentTotal} = ${timeSpentPart}`);
         timeEstimate = timeEstimate * timeSpentPart;
       }
 

@@ -8,9 +8,9 @@ export const isCalenderEventDue = (
   skippedEventIds: string[],
   now: number,
 ): boolean => {
-  // console.log(calEv);
-  // console.log(calEv.start >= now - START_OFFSET, calEv.start, now - START_OFFSET);
-  // console.log(
+  // Log.log(calEv);
+  // Log.log(calEv.start >= now - START_OFFSET, calEv.start, now - START_OFFSET);
+  // Log.log(
   //   calEv.start <= now + (calProvider.showBannerBeforeThreshold || 0),
   //   calEv.start,
   //   now + (calProvider.showBannerBeforeThreshold || 0),

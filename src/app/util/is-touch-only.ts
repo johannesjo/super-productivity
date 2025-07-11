@@ -26,5 +26,5 @@ export const IS_TOUCH_ONLY = IS_ANDROID_WEB_VIEW || isTouchOnly();
 //   'hover: hover',
 //   'hover: none',
 // ].forEach((v) => {
-//   console.log(v, window.matchMedia('(' + v + ')').matches);
+//   Log.log(v, window.matchMedia('(' + v + ')').matches);
 // });

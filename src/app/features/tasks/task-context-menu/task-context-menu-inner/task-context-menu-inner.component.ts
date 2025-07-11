@@ -58,6 +58,7 @@ import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { getWorklogStr } from '../../../../util/get-work-log-str';
 import { PlannerActions } from '../../../planner/store/planner.actions';
+import { addSubTask } from '../../../tasks/store/task.actions';
 import { combineDateAndTime } from '../../../../util/combine-date-and-time';
 import { DateAdapter } from '@angular/material/core';
 import { ICAL_TYPE } from '../../../issue/issue.const';
@@ -70,6 +71,7 @@ import { TaskSharedActions } from '../../../../root-store/meta/task-shared.actio
 import { selectTodayTagTaskIds } from '../../../tag/store/tag.reducer';
 import { isToday } from '../../../../util/is-today.util';
 import { MenuTouchFixDirective } from '../menu-touch-fix.directive';
+import { TaskLog } from '../../../../core/log';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -307,6 +309,50 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     this._taskService.addSubTaskTo(this.task.parentId || this.task.id);
   }
 
+  async duplicate(): Promise<void> {
+    console.log(this.task);
+    const taskData = {
+      isDone: false,
+      projectId: this.task.projectId || undefined,
+      tagIds: this.task.tagIds || [],
+    };
+    console.log({ taskData });
+    const timeData = {
+      ...(this.task.dueDay && { dueDay: this.task.dueDay }),
+      ...(this.task.dueWithTime && { dueWithTime: this.task.dueWithTime }),
+      ...(this.task.timeEstimate && { timeEstimate: this.task.timeEstimate }),
+    };
+    console.log({ timeData });
+    const taskId = this._taskService.add(
+      `${this.task.title} (copy)`,
+      false,
+      { ...taskData, ...timeData },
+      false,
+    );
+    console.log({ taskId });
+    if (this.task.subTaskIds.length) {
+      const taskWithSubtasks = await this._getTaskWithSubtasks();
+      console.log({ taskWithSubtasks });
+      for (const subTask of taskWithSubtasks.subTasks) {
+        console.log({ subTask });
+        const subTaskInfo = {
+          isDone: subTask.isDone,
+          projectId: subTask.projectId,
+        };
+        const subTaskObj = this._taskService.createNewTaskWithDefaults({
+          title: subTask.title,
+          additional: subTaskInfo,
+        });
+        this._store.dispatch(
+          addSubTask({
+            task: subTaskObj,
+            parentId: taskId,
+          }),
+        );
+      }
+    }
+  }
+
   moveToTop(): void {
     this._taskService.moveToTop(this.task.id, this.task.parentId, false);
   }
@@ -403,7 +449,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
               archiveInstances,
               targetProject,
             ]) => {
-              console.log({
+              TaskLog.log({
                 reminderCfg,
                 nonArchiveInstancesWithSubTasks,
                 archiveInstances,
@@ -536,7 +582,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
   private async _schedule(selectedDate: Date, isRemoveFromToday = false): Promise<void> {
     if (!selectedDate) {
-      console.warn('no selected date');
+      TaskLog.err('no selected date');
       return;
     }
 

@@ -19,6 +19,7 @@ import { msLeftToday } from '../../../util/ms-left-today';
 import { getTasksWithinAndBeyondBudget } from './get-tasks-within-and-beyond-budget';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 import { selectTaskRepeatCfgsDueOnDayOnly } from '../../task-repeat-cfg/store/task-repeat-cfg.selectors';
+import { Log } from '../../../core/log';
 
 export const createScheduleDays = (
   nonScheduledTasks: TaskWithoutReminder[],
@@ -131,8 +132,8 @@ export const createScheduleDays = (
         ) {
           viewEntriesPushedToNextDay.push(entry);
         } else {
-          console.log('entry Start:', new Date(entry.start), { entry });
-          console.warn('Entry start time after next day start', entry);
+          Log.log('entry Start:', new Date(entry.start), { entry });
+          Log.err('Entry start time after next day start', entry);
         }
       } else {
         if (
@@ -149,7 +150,7 @@ export const createScheduleDays = (
       }
     });
 
-    // console.log({
+    // Log.log({
     //   dayDate,
     //   startTime: dateStrToUtcDate(startTime),
     //   viewEntriesPushedToNextDay,

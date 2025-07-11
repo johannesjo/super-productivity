@@ -30,6 +30,7 @@ import { PluginLoaderService } from './plugin-loader.service';
 import { validatePluginManifest } from './util/validate-manifest.util';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from '../t.const';
+import { PluginLog } from '../core/log';
 
 @Injectable({
   providedIn: 'root',
@@ -66,11 +67,11 @@ export class PluginService implements OnDestroy {
 
   async initializePlugins(): Promise<void> {
     if (this._isInitialized) {
-      console.warn(this._translateService.instant(T.PLUGINS.ALREADY_INITIALIZED));
+      PluginLog.err(this._translateService.instant(T.PLUGINS.ALREADY_INITIALIZED));
       return;
     }
 
-    console.log('Initializing plugin system...');
+    PluginLog.log('Initializing plugin system...');
 
     try {
       // Only load manifests, not the actual plugin code
@@ -81,9 +82,9 @@ export class PluginService implements OnDestroy {
       await this._loadEnabledPlugins();
 
       this._isInitialized = true;
-      console.log('Plugin system initialized successfully');
+      PluginLog.log('Plugin system initialized successfully');
     } catch (error) {
-      console.error('Failed to initialize plugin system:', error);
+      PluginLog.err('Failed to initialize plugin system:', error);
       throw error;
     }
   }
@@ -131,13 +132,13 @@ export class PluginService implements OnDestroy {
             }
           } catch (e) {
             // Icon is optional - silently ignore 404s and other errors
-            console.debug(
+            PluginLog.debug(
               `Icon not found for plugin ${manifest.id}: ${path}/${manifest.icon || 'icon.svg'}`,
             );
           }
         }
       } catch (error) {
-        console.error(`Failed to discover plugin at ${path}:`, error);
+        PluginLog.err(`Failed to discover plugin at ${path}:`, error);
       }
     }
 
@@ -186,13 +187,13 @@ export class PluginService implements OnDestroy {
             this._pluginIcons.set(cachedPlugin.id, cachedPlugin.icon);
           }
         } catch (error) {
-          console.error(`Failed to discover cached plugin ${cachedPlugin.id}:`, error);
+          PluginLog.err(`Failed to discover cached plugin ${cachedPlugin.id}:`, error);
         }
       }
 
       this._updatePluginStates();
     } catch (error) {
-      console.error('Failed to discover cached plugins:', error);
+      PluginLog.err('Failed to discover cached plugins:', error);
     }
   }
 
@@ -202,11 +203,11 @@ export class PluginService implements OnDestroy {
       (state) => state.isEnabled,
     );
 
-    console.log(`Loading ${pluginsToLoad.length} enabled plugins...`);
+    PluginLog.log(`Loading ${pluginsToLoad.length} enabled plugins...`);
 
     // Log which plugins are being loaded
     for (const state of pluginsToLoad) {
-      console.log(
+      PluginLog.log(
         `Loading plugin: ${state.manifest.id} (enabled: ${state.isEnabled}, hooks: ${state.manifest.hooks?.length || 0}, sidePanel: ${state.manifest.sidePanel})`,
       );
     }
@@ -231,7 +232,7 @@ export class PluginService implements OnDestroy {
   ): Promise<PluginInstance | null> {
     const state = this._pluginStates.get(pluginId);
     if (!state) {
-      console.error(`Plugin ${pluginId} not found`);
+      PluginLog.err(`Plugin ${pluginId} not found`);
       return null;
     }
 
@@ -284,7 +285,7 @@ export class PluginService implements OnDestroy {
     this._updatePluginStates();
 
     try {
-      console.log(`Activating plugin: ${pluginId}`);
+      PluginLog.log(`Activating plugin: ${pluginId}`);
       const instance = await this._loadPluginLazy(state);
 
       state.status = 'loaded';
@@ -298,7 +299,7 @@ export class PluginService implements OnDestroy {
 
       return instance;
     } catch (error) {
-      console.error(`Failed to activate plugin ${pluginId}:`, error);
+      PluginLog.err(`Failed to activate plugin ${pluginId}:`, error);
       state.status = 'error';
       state.error = error instanceof Error ? error.message : String(error);
       this._updatePluginStates();
@@ -336,7 +337,7 @@ export class PluginService implements OnDestroy {
 
       const promises = cachedPlugins.map(async (cachedPlugin) => {
         try {
-          console.log(`Loading cached plugin: ${cachedPlugin.id}`);
+          PluginLog.log(`Loading cached plugin: ${cachedPlugin.id}`);
           // Set the path for reload functionality
           this._pluginPaths.set(cachedPlugin.id, `uploaded://${cachedPlugin.id}`);
 
@@ -344,14 +345,14 @@ export class PluginService implements OnDestroy {
           await this._loadUploadedPlugin(cachedPlugin.id);
           // The plugin instance is already added to _loadedPlugins in _loadUploadedPlugin if loaded successfully
         } catch (error) {
-          console.error(`Failed to load cached plugin ${cachedPlugin.id}:`, error);
+          PluginLog.err(`Failed to load cached plugin ${cachedPlugin.id}:`, error);
           // Continue loading other plugins even if one fails
         }
       });
 
       await Promise.allSettled(promises);
     } catch (error) {
-      console.error('Failed to load cached plugins:', error);
+      PluginLog.err('Failed to load cached plugins:', error);
       // Don't throw - this shouldn't prevent other plugins from loading
     }
   }
@@ -376,9 +377,9 @@ export class PluginService implements OnDestroy {
         if (pluginInstance.manifest && pluginInstance.manifest.id) {
           this._pluginPaths.set(pluginInstance.manifest.id, pluginPath);
         }
-        console.log(`${type} plugin loaded successfully from ${pluginPath}`);
+        PluginLog.log(`${type} plugin loaded successfully from ${pluginPath}`);
       } catch (error) {
-        console.error(`Failed to load ${type} plugin from ${pluginPath}:`, error);
+        PluginLog.err(`Failed to load ${type} plugin from ${pluginPath}:`, error);
         // Continue loading other plugins even if one fails
       }
     });
@@ -427,7 +428,7 @@ export class PluginService implements OnDestroy {
             error: this._translateService.instant(T.PLUGINS.NODE_ONLY_DESKTOP),
           };
           this._pluginPaths.set(manifest.id, pluginPath); // Store the path for potential reload
-          console.log(
+          PluginLog.log(
             `Plugin ${manifest.id} requires desktop version, creating placeholder`,
           );
           return placeholderInstance;
@@ -440,10 +441,10 @@ export class PluginService implements OnDestroy {
       // Analyze plugin code (informational only - KISS approach)
       const codeAnalysis = this._pluginSecurity.analyzePluginCode(pluginCode, manifest);
       if (codeAnalysis.warnings.length > 0) {
-        console.warn(`Plugin ${manifest.id} warnings:`, codeAnalysis.warnings);
+        PluginLog.err(`Plugin ${manifest.id} warnings:`, codeAnalysis.warnings);
       }
       if (codeAnalysis.info.length > 0) {
-        console.info(`Plugin ${manifest.id} info:`, codeAnalysis.info);
+        PluginLog.info(`Plugin ${manifest.id} info:`, codeAnalysis.info);
       }
 
       // If plugin is disabled, create a placeholder instance without loading code
@@ -455,7 +456,7 @@ export class PluginService implements OnDestroy {
           error: undefined,
         };
         this._pluginPaths.set(manifest.id, pluginPath); // Store the path for potential reload
-        console.log(`Plugin ${manifest.id} is disabled, skipping load`);
+        PluginLog.log(`Plugin ${manifest.id} is disabled, skipping load`);
         return placeholderInstance;
       }
 
@@ -485,14 +486,14 @@ export class PluginService implements OnDestroy {
         // The enabled state will be persisted later when user explicitly enables/disables plugins
         this._ensurePluginEnabledInMemory(manifest.id);
 
-        console.log(`Plugin ${manifest.id} loaded successfully`);
+        PluginLog.log(`Plugin ${manifest.id} loaded successfully`);
       } else {
-        console.error(`Plugin ${manifest.id} failed to load:`, pluginInstance.error);
+        PluginLog.err(`Plugin ${manifest.id} failed to load:`, pluginInstance.error);
       }
 
       return pluginInstance;
     } catch (error) {
-      console.error(`Failed to load plugin from ${pluginPath}:`, error);
+      PluginLog.err(`Failed to load plugin from ${pluginPath}:`, error);
       throw error;
     }
   }
@@ -637,7 +638,7 @@ export class PluginService implements OnDestroy {
     // Check if plugin exists in states
     const state = this._pluginStates.get(pluginId);
     if (!state) {
-      console.warn(`Plugin ${pluginId} not found`);
+      PluginLog.err(`Plugin ${pluginId} not found`);
       this._activeSidePanelPlugin$.next(null);
       return;
     }
@@ -654,11 +655,11 @@ export class PluginService implements OnDestroy {
       if (instance) {
         this._activeSidePanelPlugin$.next(instance);
       } else {
-        console.warn(`Failed to activate plugin ${pluginId}`);
+        PluginLog.err(`Failed to activate plugin ${pluginId}`);
         this._activeSidePanelPlugin$.next(null);
       }
     } catch (error) {
-      console.error(`Error activating plugin ${pluginId}:`, error);
+      PluginLog.err(`Error activating plugin ${pluginId}:`, error);
       this._activeSidePanelPlugin$.next(null);
     }
   }
@@ -721,7 +722,7 @@ export class PluginService implements OnDestroy {
   }
 
   async loadPluginFromZip(file: File): Promise<PluginInstance> {
-    console.log(`Starting plugin load from ZIP: ${file.name}`);
+    PluginLog.log(`Starting plugin load from ZIP: ${file.name}`);
 
     // Import fflate dynamically for better bundle size
     const { unzip } = await import('fflate');
@@ -759,7 +760,7 @@ export class PluginService implements OnDestroy {
           });
         },
       );
-      console.log({ extractedFiles });
+      PluginLog.log({ extractedFiles });
 
       // Find and extract manifest.json
       if (!extractedFiles['manifest.json']) {
@@ -840,7 +841,7 @@ export class PluginService implements OnDestroy {
         iconContent = new TextDecoder().decode(iconBytes);
         // Basic SVG validation
         if (!iconContent.includes('<svg') || !iconContent.includes('</svg>')) {
-          console.warn(`Plugin icon ${manifest.icon} does not appear to be a valid SVG`);
+          PluginLog.err(`Plugin icon ${manifest.icon} does not appear to be a valid SVG`);
           iconContent = null;
         }
       }
@@ -848,10 +849,10 @@ export class PluginService implements OnDestroy {
       // Analyze plugin code (informational only - KISS approach)
       const codeAnalysis = this._pluginSecurity.analyzePluginCode(pluginCode, manifest);
       if (codeAnalysis.warnings.length > 0) {
-        console.warn(`Plugin ${manifest.id} warnings:`, codeAnalysis.warnings);
+        PluginLog.err(`Plugin ${manifest.id} warnings:`, codeAnalysis.warnings);
       }
       if (codeAnalysis.info.length > 0) {
-        console.info(`Plugin ${manifest.id} info:`, codeAnalysis.info);
+        PluginLog.info(`Plugin ${manifest.id} info:`, codeAnalysis.info);
       }
 
       // Check if plugin is enabled (default to true for new uploads)
@@ -916,7 +917,7 @@ export class PluginService implements OnDestroy {
         this._pluginStates.set(manifest.id, state);
         this._updatePluginStates();
 
-        console.log(
+        PluginLog.log(
           `Uploaded plugin ${manifest.id} requires desktop version, creating placeholder`,
         );
         return placeholderInstance;
@@ -954,7 +955,7 @@ export class PluginService implements OnDestroy {
         this._pluginStates.set(manifest.id, state);
         this._updatePluginStates();
 
-        console.log(`Uploaded plugin ${manifest.id} is disabled, skipping load`);
+        PluginLog.log(`Uploaded plugin ${manifest.id} is disabled, skipping load`);
         return placeholderInstance;
       }
 
@@ -993,9 +994,9 @@ export class PluginService implements OnDestroy {
         this._pluginStates.set(manifest.id, state);
         this._updatePluginStates();
 
-        console.log(`Uploaded plugin ${manifest.id} loaded successfully`);
+        PluginLog.log(`Uploaded plugin ${manifest.id} loaded successfully`);
       } else {
-        console.error(
+        PluginLog.err(
           `Uploaded plugin ${manifest.id} failed to load:`,
           pluginInstance.error,
         );
@@ -1016,7 +1017,7 @@ export class PluginService implements OnDestroy {
 
       return pluginInstance;
     } catch (error) {
-      console.error('Failed to load plugin from ZIP:', error);
+      PluginLog.err('Failed to load plugin from ZIP:', error);
 
       // Create error instance for UI display
       const errorInstance: PluginInstance = {
@@ -1090,7 +1091,7 @@ export class PluginService implements OnDestroy {
     this._pluginStates.delete(pluginId);
     this._updatePluginStates();
 
-    console.log(`Uploaded plugin ${pluginId} removed completely`);
+    PluginLog.log(`Uploaded plugin ${pluginId} removed completely`);
   }
 
   unloadPlugin(pluginId: string): boolean {
@@ -1129,7 +1130,7 @@ export class PluginService implements OnDestroy {
     // In lazy loading mode, unload and re-activate
     const state = this._pluginStates.get(pluginId);
     if (!state) {
-      console.error(`Cannot reload plugin ${pluginId}: not found`);
+      PluginLog.err(`Cannot reload plugin ${pluginId}: not found`);
       return false;
     }
 
@@ -1169,10 +1170,10 @@ export class PluginService implements OnDestroy {
       // Analyze plugin code (informational only - KISS approach)
       const codeAnalysis = this._pluginSecurity.analyzePluginCode(pluginCode, manifest);
       if (codeAnalysis.warnings.length > 0) {
-        console.warn(`Plugin ${manifest.id} warnings:`, codeAnalysis.warnings);
+        PluginLog.err(`Plugin ${manifest.id} warnings:`, codeAnalysis.warnings);
       }
       if (codeAnalysis.info.length > 0) {
-        console.info(`Plugin ${manifest.id} info:`, codeAnalysis.info);
+        PluginLog.info(`Plugin ${manifest.id} info:`, codeAnalysis.info);
       }
 
       // Check if plugin is enabled
@@ -1188,7 +1189,7 @@ export class PluginService implements OnDestroy {
           isEnabled: false,
           error: undefined,
         };
-        console.log(`Uploaded plugin ${manifest.id} is disabled, skipping reload`);
+        PluginLog.log(`Uploaded plugin ${manifest.id} is disabled, skipping reload`);
         return placeholderInstance;
       }
 
@@ -1212,9 +1213,9 @@ export class PluginService implements OnDestroy {
           // Replace existing instance
           this._loadedPlugins[existingIndex] = pluginInstance;
         }
-        console.log(`Uploaded plugin ${manifest.id} reloaded successfully`);
+        PluginLog.log(`Uploaded plugin ${manifest.id} reloaded successfully`);
       } else {
-        console.error(
+        PluginLog.err(
           `Uploaded plugin ${manifest.id} failed to reload:`,
           pluginInstance.error,
         );
@@ -1222,7 +1223,7 @@ export class PluginService implements OnDestroy {
 
       return pluginInstance;
     } catch (error) {
-      console.error(`Failed to reload uploaded plugin ${pluginId}:`, error);
+      PluginLog.err(`Failed to reload uploaded plugin ${pluginId}:`, error);
       throw error;
     }
   }
@@ -1238,7 +1239,7 @@ export class PluginService implements OnDestroy {
 
     // Only check consent in Electron environment
     if (!IS_ELECTRON) {
-      console.warn(
+      PluginLog.err(
         `Plugin ${manifest.id} requires nodeExecution permission which is not available in web environment`,
       );
       return false;
@@ -1330,13 +1331,13 @@ export class PluginService implements OnDestroy {
   private _ensurePluginEnabledInMemory(pluginId: string): void {
     // We only need to track this in memory for startup purposes
     // The actual persistence will happen when user explicitly enables/disables plugins
-    console.log(
+    PluginLog.log(
       `Plugin ${pluginId} marked as enabled in memory (no pfapi write during startup)`,
     );
   }
 
   ngOnDestroy(): void {
-    console.log('PluginService: Cleaning up all resources');
+    PluginLog.log('PluginService: Cleaning up all resources');
 
     // Complete the side panel subject
     this._activeSidePanelPlugin$.complete();
@@ -1347,7 +1348,7 @@ export class PluginService implements OnDestroy {
       try {
         this.unloadPlugin(pluginId);
       } catch (error) {
-        console.error(`Error unloading plugin ${pluginId} during cleanup:`, error);
+        PluginLog.err(`Error unloading plugin ${pluginId} during cleanup:`, error);
       }
     });
 
@@ -1363,6 +1364,6 @@ export class PluginService implements OnDestroy {
     // Clear loader caches
     this._pluginLoader.clearAllCaches();
 
-    console.log('PluginService: Cleanup complete');
+    PluginLog.log('PluginService: Cleanup complete');
   }
 }

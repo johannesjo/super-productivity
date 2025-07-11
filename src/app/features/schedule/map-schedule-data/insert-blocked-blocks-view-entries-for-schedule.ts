@@ -17,7 +17,7 @@ import {
 } from './is-schedule-types-type';
 import { createViewEntriesForBlock } from './create-view-entries-for-block';
 
-// const debug = (...args: any): void => console.log(...args);
+// const debug = (...args: any): void => Log.log(...args);
 const debug = (...args: any): void => undefined;
 
 export const insertBlockedBlocksViewEntriesForSchedule = (

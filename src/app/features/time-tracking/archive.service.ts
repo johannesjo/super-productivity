@@ -11,6 +11,7 @@ import {
 import { Store } from '@ngrx/store';
 import { TimeTrackingActions } from './store/time-tracking.actions';
 import { getWorklogStr } from '../../util/get-work-log-str';
+import { Log } from '../../core/log';
 
 /*
 # Considerations for flush architecture:
@@ -136,7 +137,7 @@ export class ArchiveService {
         isUpdateRevAndLastUpdate: true,
       },
     );
-    console.log(
+    Log.log(
       '______________________\nFLUSHED ALL FROM ARCHIVE YOUNG TO OLD\n_______________________',
     );
   }

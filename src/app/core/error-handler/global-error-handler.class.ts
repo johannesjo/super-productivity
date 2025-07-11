@@ -11,6 +11,7 @@ import { saveBeforeLastErrorActionLog } from '../../util/action-logger';
 import { error } from 'electron-log/renderer';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { CompleteBackup } from '../../pfapi/api';
+import { Log } from '../log';
 
 let isErrorAlertShown = false;
 
@@ -23,7 +24,7 @@ export class GlobalErrorHandler implements ErrorHandler {
     const errStr = typeof err === 'string' ? err : err.toString();
     // eslint-disable-next-line
     const simpleStack = err && err.stack;
-    console.error('GLOBAL_ERROR_HANDLER', err);
+    Log.err('GLOBAL_ERROR_HANDLER', err);
 
     // if not our custom error handler we have a critical error on our hands
     if (!isHandledError(err) && !isErrorAlertShown) {
@@ -67,8 +68,8 @@ export class GlobalErrorHandler implements ErrorHandler {
     try {
       return await this.injector.get(PfapiService).pf.loadCompleteBackup(true);
     } catch (e) {
-      console.warn('Cannot load user data for error modal');
-      console.error(e);
+      Log.err('Cannot load user data for error modal');
+      Log.err(e);
       return undefined;
     }
   }

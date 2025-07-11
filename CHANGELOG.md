@@ -1,3 +1,96 @@
+## [14.0.5](https://github.com/johannesjo/super-productivity/compare/v14.0.3...v14.0.5) (2025-07-06)
+
+### Bug Fixes
+
+- add null safety checks to task detail panel ([bf1ba88](https://github.com/johannesjo/super-productivity/commit/bf1ba88011b0aec45b0e5df5a3b36165427a778e)), closes [#4705](https://github.com/johannesjo/super-productivity/issues/4705)
+- error ([fa70d5f](https://github.com/johannesjo/super-productivity/commit/fa70d5f6edf9549cd1ca684da9869e7aba4d1e27))
+- remove unused imports and variables to resolve lint errors ([ce0fd3c](https://github.com/johannesjo/super-productivity/commit/ce0fd3cd8d8299b79ea1f2c7a84435b4c5a93929))
+- **sync:** ensure sync conflict is detected after backup restore ([80f84d4](https://github.com/johannesjo/super-productivity/commit/80f84d4e141bc2e27d5d2beb3773f7a5c4f49d81))
+- **sync:** force sync conflict after backup restore with fresh client ID ([4bfe708](https://github.com/johannesjo/super-productivity/commit/4bfe7087985c26b2086f00e02df33b7a9e2f240a))
+- warning ([0c9cea4](https://github.com/johannesjo/super-productivity/commit/0c9cea4698d26ecb147c5bf9ede02187e200941b))
+
+### Features
+
+- **i18n:** add translations for theme selector component ([56b1fa1](https://github.com/johannesjo/super-productivity/commit/56b1fa1b81bb8a084c2a3cdb7b3f82c6fca4a12c))
+- **i18n:** extract hardcoded strings from sync safety backups component ([a9238da](https://github.com/johannesjo/super-productivity/commit/a9238da1523f75d423559cc6d267af6869f9eb8e))
+- improve due creation and potentially fix the issue when tasks for today were not added until another task was added manually ([821f528](https://github.com/johannesjo/super-productivity/commit/821f528b8f3fa7a654d69a9aaa3721296ff12435))
+- improve logging for indexeddb issue ([4867a87](https://github.com/johannesjo/super-productivity/commit/4867a87253d1d51bcb73d9b5c8265f448468c469))
+- **simpleCounter:** update values immediately in dialog view, save only on submit ([016cb74](https://github.com/johannesjo/super-productivity/commit/016cb7410c3e6c8868439115b6df383da3372381))
+- **sync:** add basic safety backups during sync ([48bff6b](https://github.com/johannesjo/super-productivity/commit/48bff6b46d78f6ca3d8506e4996ff1c33b544eeb))
+- **sync:** improve id generation etc ([b4ec2fa](https://github.com/johannesjo/super-productivity/commit/b4ec2facfb2ded930c0f582715806fe0cf4683a7))
+- **theme:** add custom theme switcher with local theme files ([b6d2a22](https://github.com/johannesjo/super-productivity/commit/b6d2a2276cafa32621c91fdb0202319925f01fa9))
+- **theme:** auto-switch dark/light mode based on theme requirements ([f1b12de](https://github.com/johannesjo/super-productivity/commit/f1b12ded4f9935e03958e26a5398547ade08f0d7))
+- **themes:** add simplified version of each ([a9699ad](https://github.com/johannesjo/super-productivity/commit/a9699ad8cff1c6c0a10642e86e44df1b24aa057b))
+- **themes:** optimize and beautify all theme files ([26166d4](https://github.com/johannesjo/super-productivity/commit/26166d4a3eecc45b6e5c7966d6166bbf3c4ad248))
+
+### BREAKING CHANGES
+
+- **sync:** Backup restores now always trigger sync conflicts requiring
+  manual resolution. This is intentional to prevent data loss.
+
+## [14.0.4](https://github.com/johannesjo/super-productivity/compare/v14.0.3...v14.0.4) (2025-07-06)
+
+### Bug Fixes
+
+- add null safety checks to task detail panel ([bf1ba88](https://github.com/johannesjo/super-productivity/commit/bf1ba88011b0aec45b0e5df5a3b36165427a778e)), closes [#4705](https://github.com/johannesjo/super-productivity/issues/4705)
+- error ([fa70d5f](https://github.com/johannesjo/super-productivity/commit/fa70d5f6edf9549cd1ca684da9869e7aba4d1e27))
+- remove unused imports and variables to resolve lint errors ([ce0fd3c](https://github.com/johannesjo/super-productivity/commit/ce0fd3cd8d8299b79ea1f2c7a84435b4c5a93929))
+- **sync:** ensure sync conflict is detected after backup restore ([80f84d4](https://github.com/johannesjo/super-productivity/commit/80f84d4e141bc2e27d5d2beb3773f7a5c4f49d81))
+- **sync:** force sync conflict after backup restore with fresh client ID ([4bfe708](https://github.com/johannesjo/super-productivity/commit/4bfe7087985c26b2086f00e02df33b7a9e2f240a))
+- warning ([0c9cea4](https://github.com/johannesjo/super-productivity/commit/0c9cea4698d26ecb147c5bf9ede02187e200941b))
+
+### Features
+
+- **i18n:** add translations for theme selector component ([56b1fa1](https://github.com/johannesjo/super-productivity/commit/56b1fa1b81bb8a084c2a3cdb7b3f82c6fca4a12c))
+- **i18n:** extract hardcoded strings from sync safety backups component ([a9238da](https://github.com/johannesjo/super-productivity/commit/a9238da1523f75d423559cc6d267af6869f9eb8e))
+- improve due creation and potentially fix the issue when tasks for today were not added until another task was added manually ([821f528](https://github.com/johannesjo/super-productivity/commit/821f528b8f3fa7a654d69a9aaa3721296ff12435))
+- improve logging for indexeddb issue ([4867a87](https://github.com/johannesjo/super-productivity/commit/4867a87253d1d51bcb73d9b5c8265f448468c469))
+- **simpleCounter:** update values immediately in dialog view, save only on submit ([016cb74](https://github.com/johannesjo/super-productivity/commit/016cb7410c3e6c8868439115b6df383da3372381))
+- **sync:** add basic safety backups during sync ([48bff6b](https://github.com/johannesjo/super-productivity/commit/48bff6b46d78f6ca3d8506e4996ff1c33b544eeb))
+- **sync:** improve id generation etc ([b4ec2fa](https://github.com/johannesjo/super-productivity/commit/b4ec2facfb2ded930c0f582715806fe0cf4683a7))
+- **theme:** add custom theme switcher with local theme files ([b6d2a22](https://github.com/johannesjo/super-productivity/commit/b6d2a2276cafa32621c91fdb0202319925f01fa9))
+- **theme:** auto-switch dark/light mode based on theme requirements ([f1b12de](https://github.com/johannesjo/super-productivity/commit/f1b12ded4f9935e03958e26a5398547ade08f0d7))
+- **themes:** add simplified version of each ([a9699ad](https://github.com/johannesjo/super-productivity/commit/a9699ad8cff1c6c0a10642e86e44df1b24aa057b))
+- **themes:** optimize and beautify all theme files ([26166d4](https://github.com/johannesjo/super-productivity/commit/26166d4a3eecc45b6e5c7966d6166bbf3c4ad248))
+
+### BREAKING CHANGES
+
+- **sync:** Backup restores now always trigger sync conflicts requiring
+  manual resolution. This is intentional to prevent data loss.
+
+## [14.0.3](https://github.com/johannesjo/super-productivity/compare/v14.0.2...v14.0.3) (2025-07-04)
+
+### Bug Fixes
+
+- add defensive programming fix for ([9b30d56](https://github.com/johannesjo/super-productivity/commit/9b30d56b0c59597a4f7108e032d92eaeaa06f920)), closes [#4698](https://github.com/johannesjo/super-productivity/issues/4698)
+- Adding [@date](https://github.com/date) incorrectly adds task to today when [@date](https://github.com/date) is listed last [#4644](https://github.com/johannesjo/super-productivity/issues/4644) ([d075c2a](https://github.com/johannesjo/super-productivity/commit/d075c2a3a4fac9d840f165babd5d17b4a25574ff))
+- avoid mutation ([cd5fd1e](https://github.com/johannesjo/super-productivity/commit/cd5fd1e69889ad675cd6f3f82f07a4d06c82ccb0))
+- date pipe error with indonesian ([42dc082](https://github.com/johannesjo/super-productivity/commit/42dc082235583fda5f8e95fcf7c7f6cbb5bf99f3)), closes [#4670](https://github.com/johannesjo/super-productivity/issues/4670)
+- error alert background for dark theme ([635f644](https://github.com/johannesjo/super-productivity/commit/635f64486714ac2f027ac725c6ecbcaf8571447d))
+- only filter out later today tasks for today list ([f9f1049](https://github.com/johannesjo/super-productivity/commit/f9f104943762a5aad562bb3afc9a398864d174cc))
+- **plugin:** plugin.js initialization not working as it should ([2a75f32](https://github.com/johannesjo/super-productivity/commit/2a75f32b76237da220d7fb441808fe627d41a852))
+- **plugin:** remove plugin from list when deleted ([a73c74c](https://github.com/johannesjo/super-productivity/commit/a73c74ce1d0a8ff4e06bd03e197f3b5656f5288b))
+- **plugins:** fix plugin upload issues with UI reactivity and uploaded:// protocol ([0091cea](https://github.com/johannesjo/super-productivity/commit/0091cea5a128b81260a57672fa1a20cef01808cb))
+- **plugin:** uploaded plugins not working ([4b15ac1](https://github.com/johannesjo/super-productivity/commit/4b15ac1fc1ab36b0bbc5077fb3b83bd9e146694c))
+- **plugin:** warning ([5fec51f](https://github.com/johannesjo/super-productivity/commit/5fec51fe83cccaea6f1a967f3cc8685b1341b5d5))
+- remove line breaks on paste in task title ([#4669](https://github.com/johannesjo/super-productivity/issues/4669)) ([087d6a5](https://github.com/johannesjo/super-productivity/commit/087d6a5a34746b7046dd9e374bc4fe47369317df))
+- repeatable tasks not getting re-created [#4687](https://github.com/johannesjo/super-productivity/issues/4687) ([4da07d1](https://github.com/johannesjo/super-productivity/commit/4da07d1f7b5c5fd8f1b0e32ff10646b2f7b290ba))
+- side panel content show behavior ([b56d4e2](https://github.com/johannesjo/super-productivity/commit/b56d4e21b100e0e3644ebcef378f4bf1614ed207))
+- task detail panel not opening for tasks planned for later ([64cba1f](https://github.com/johannesjo/super-productivity/commit/64cba1ffa49db20d24f23cab8d5caa401ddd9a9a)), closes [#4664](https://github.com/johannesjo/super-productivity/issues/4664)
+
+### Features
+
+- add log and update message ([c35687c](https://github.com/johannesjo/super-productivity/commit/c35687c8726c20970000f62a9c23339fc64764e9))
+- add possibility to cancel tutorial ([76dc5c1](https://github.com/johannesjo/super-productivity/commit/76dc5c1eafc15cb6deaf437615a09ed3de35f97b))
+- improve reliably for repeatable tasks ([928b4d2](https://github.com/johannesjo/super-productivity/commit/928b4d27794613bbb957fff027e5b04870f9f6ba))
+- improve reliably for repeatable tasks 2 ([3242626](https://github.com/johannesjo/super-productivity/commit/32426267e029d9f2afdb29aa267f50ab7c850ef5))
+- improve repeat task handling ([df829fd](https://github.com/johannesjo/super-productivity/commit/df829fd4d15f2cde013df749d18f5589b444c362))
+- **sync:** improve sync conflict dialog ([24878e5](https://github.com/johannesjo/super-productivity/commit/24878e552898af794429bb3f1d115a4dc2109bd1))
+
+### Reverts
+
+- Revert "test: disable due tests for now" ([8c6782e](https://github.com/johannesjo/super-productivity/commit/8c6782e0c14801566e1186993e3b2e98363f48ca))
+
 ## [14.0.2](https://github.com/johannesjo/super-productivity/compare/v14.0.1...v14.0.2) (2025-07-01)
 
 ### Features

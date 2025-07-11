@@ -2,12 +2,13 @@
 
 import { ReminderCopy } from './reminder.model';
 import { lazySetInterval } from '../../../../electron/shared-with-frontend/lazy-set-interval';
+import { Log } from '../../core/log';
 
 const CHECK_INTERVAL_DURATION = 10000;
 let cancelCheckInterval: (() => void) | undefined;
 
 addEventListener('message', ({ data }) => {
-  // console.log('REMINDER WORKER', data);
+  // Log.log('REMINDER WORKER', data);
   reInitCheckInterval(data);
 });
 
@@ -32,7 +33,7 @@ const reInitCheckInterval = (reminders: ReminderCopy[]): void => {
             [oldest];
 
       postMessage(remindersToSend);
-      console.log('Worker postMessage', remindersToSend);
+      Log.log('Worker postMessage', remindersToSend);
     }
   }, CHECK_INTERVAL_DURATION);
 };

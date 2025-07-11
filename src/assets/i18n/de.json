@@ -159,8 +159,8 @@
     "D_RATE": {
       "A_HOW": "Wie und wo zu bewerten",
       "BTN_DONT_BOTHER": "Belästige mich nicht wieder",
-      "TITLE": "\u001b[1mBitte entschuldigen Sie uns, aber...\u001b[0m",
-      "TXT": "Sie würden dem Projekt immens helfen, indem Sie <strong>es gut bewerten, wenn es Ihnen gefällt!<\\/strong>"
+      "TITLE": "🙈 Verzeihung, aber...",
+      "TXT": "Sie würden dem Projekt immens helfen, wenn Sie <strong>es gut bewerten, falls Sie es mögen!</strong>"
     },
     "DOMINA_MODE": {
       "FORM": {

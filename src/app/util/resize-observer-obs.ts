@@ -1,4 +1,5 @@
 import { Observable, Subscriber } from 'rxjs';
+import { Log } from '../core/log';
 
 export const observeWidth = (target: HTMLElement): Observable<number> => {
   return new Observable((observer: Subscriber<number>) => {
@@ -13,7 +14,7 @@ export const observeWidth = (target: HTMLElement): Observable<number> => {
         resizeObserver.unobserve(target);
       };
     } else {
-      console.warn('ResizeObserver not supported in this browser');
+      Log.err('ResizeObserver not supported in this browser');
       return undefined;
     }
   });

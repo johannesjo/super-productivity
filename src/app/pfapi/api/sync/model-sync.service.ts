@@ -1,4 +1,4 @@
-import { pfLog } from '../util/log';
+import { PFLog } from '../../../core/log';
 import { MiniObservable } from '../util/mini-observable';
 import { SyncProviderServiceInterface } from './sync-provider.interface';
 import {
@@ -55,7 +55,7 @@ export class ModelSyncService<MD extends ModelCfgs> {
     }
 
     const modelVersion = this._getModelVersion(modelId);
-    pfLog(2, `${ModelSyncService.L}.${this.upload.name}()`, modelId, {
+    PFLog.normal(`${ModelSyncService.L}.${this.upload.name}()`, modelId, {
       modelVersion,
       data,
       localRev,
@@ -93,7 +93,7 @@ export class ModelSyncService<MD extends ModelCfgs> {
       throw new ImpossibleError('Model ID is required for download');
     }
 
-    pfLog(2, `${ModelSyncService.L}.${this.download.name}()`, {
+    PFLog.normal(`${ModelSyncService.L}.${this.download.name}()`, {
       modelId,
       expectedRev,
     });
@@ -106,7 +106,7 @@ export class ModelSyncService<MD extends ModelCfgs> {
       );
       if (expectedRev) {
         if (!rev || !this._isSameRev(rev, expectedRev)) {
-          pfLog(2, 'Rev mismatch', rev, expectedRev);
+          PFLog.normal('Rev mismatch', rev, expectedRev);
           throw new RevMismatchForModelError(modelId, { rev, expectedRev });
         }
       }
@@ -145,7 +145,7 @@ export class ModelSyncService<MD extends ModelCfgs> {
       throw new ImpossibleError('Model ID is required for removal');
     }
 
-    pfLog(2, `${ModelSyncService.L}.${this.remove.name}()`, {
+    PFLog.normal(`${ModelSyncService.L}.${this.remove.name}()`, {
       modelId,
     });
     const syncProvider = this._currentSyncProvider$.getOrError();
@@ -182,8 +182,7 @@ export class ModelSyncService<MD extends ModelCfgs> {
   async updateLocalMainModelsFromRemoteMetaFile(remote: RemoteMeta): Promise<void> {
     const mainModelData = remote.mainModelData;
     if (typeof mainModelData === 'object' && mainModelData !== null) {
-      pfLog(
-        2,
+      PFLog.normal(
         `${ModelSyncService.L}.${this.updateLocalMainModelsFromRemoteMetaFile.name}() updating (main) models`,
         Object.keys(mainModelData),
       );
@@ -222,7 +221,7 @@ export class ModelSyncService<MD extends ModelCfgs> {
     const mainModelData: MainModelData = Object.fromEntries(
       mainFileModelIds.map((modelId) => [modelId, completeModel[modelId]]),
     );
-    pfLog(2, `${ModelSyncService.L}.${this.getMainFileModelDataForUpload.name}()`, {
+    PFLog.normal(`${ModelSyncService.L}.${this.getMainFileModelDataForUpload.name}()`, {
       mainModelData,
       mainFileModelIds,
     });
@@ -299,8 +298,7 @@ export class ModelSyncService<MD extends ModelCfgs> {
    * @private
    */
   private async _removeLocal<T extends keyof MD>(modelId: T): Promise<void> {
-    pfLog(
-      2,
+    PFLog.normal(
       `${ModelSyncService.L}.${this._removeLocal.name}: Delete local model ${String(modelId)}`,
     );
     await this.m[modelId].remove();
@@ -330,7 +328,7 @@ export class ModelSyncService<MD extends ModelCfgs> {
    */
   private _isSameRev(a: string | null, b: string | null): boolean {
     if (!a || !b) {
-      console.warn(`Invalid revs a:${a} and b:${b} given`);
+      PFLog.err(`Invalid revs a:${a} and b:${b} given`);
       return false;
     }
     if (a === b) {

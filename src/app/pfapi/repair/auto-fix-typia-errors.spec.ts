@@ -3,6 +3,7 @@ import { createAppDataCompleteMock } from '../../util/app-data-mock';
 import { createValidate } from 'typia';
 import { initialTaskState } from '../../features/tasks/store/task.reducer';
 import { DEFAULT_TASK, TaskState } from '../../features/tasks/task.model';
+import { PFLog } from '../../core/log';
 
 interface TestInterface {
   globalConfig: {
@@ -20,16 +21,16 @@ interface TestInterface {
 describe('autoFixTypiaErrors', () => {
   const validate = createValidate<TestInterface>();
 
-  let warnSpy: jasmine.Spy;
+  let errSpy: jasmine.Spy;
 
   beforeEach(() => {
-    // Spy on console.warn to prevent test output cluttering
-    warnSpy = spyOn(console, 'warn').and.stub();
+    // Spy on PFLog.err to prevent test output cluttering
+    errSpy = spyOn(PFLog, 'err').and.stub();
   });
 
   afterEach(() => {
     // Reset spies
-    warnSpy.calls.reset();
+    errSpy.calls.reset();
   });
 
   it('should return data unchanged when no errors', () => {
@@ -173,7 +174,7 @@ describe('autoFixTypiaErrors', () => {
         '2025-06-16'
       ],
     ).toBe(0);
-    expect(warnSpy).toHaveBeenCalledWith(
+    expect(errSpy).toHaveBeenCalledWith(
       "Fixed: simpleCounter.entities['BpYFLFtlIGGgTNfZB-t2-'].countOnDay['2025-06-16'] from null to 0 for simpleCounter",
     );
   });

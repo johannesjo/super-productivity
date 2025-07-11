@@ -197,7 +197,7 @@ describe('Pfapi Sync Lock', () => {
     });
 
     it('should pass through the correct log prefix', async () => {
-      spyOn(console, 'log'); // Spy on console.log if pfLog uses it
+      spyOn(console, 'log'); // Spy on console.log for logging
       mockSyncService.sync.and.returnValue(
         Promise.resolve({ status: SyncStatus.InSync }),
       );

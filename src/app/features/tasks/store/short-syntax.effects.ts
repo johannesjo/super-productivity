@@ -34,6 +34,7 @@ import { WorkContextService } from '../../work-context/work-context.service';
 
 import { INBOX_PROJECT } from '../../project/project.const';
 import { devError } from '../../../util/dev-error';
+import { TaskLog } from '../../../core/log';
 
 @Injectable()
 export class ShortSyntaxEffects {
@@ -109,7 +110,7 @@ export class ShortSyntaxEffects {
           projects,
         );
         if (environment.production) {
-          console.log('shortSyntax', r);
+          TaskLog.log('shortSyntax', r);
         }
         const isAddDefaultProjectIfNecessary: boolean =
           !!defaultProjectId &&

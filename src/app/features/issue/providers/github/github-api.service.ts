@@ -23,6 +23,7 @@ import { HANDLED_ERROR_PROP_STR } from '../../../../app.constants';
 import { T } from '../../../../t.const';
 import { throwHandledError } from '../../../../util/throw-handled-error';
 import { GITHUB_TYPE, ISSUE_PROVIDER_HUMANIZED } from '../../issue.const';
+import { IssueLog } from '../../../../core/log';
 
 const BASE = GITHUB_API_BASE_URL;
 
@@ -144,7 +145,7 @@ query Issues {
         try {
           return mapGithubGraphQLSearchResult(res);
         } catch (e) {
-          console.error(e);
+          IssueLog.err(e);
           this._snackService.open({
             type: 'ERROR',
             msg: T.F.GITHUB.S.CONFIG_ERROR,

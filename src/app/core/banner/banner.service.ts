@@ -124,7 +124,7 @@ export class BannerService {
 
   dismiss(bannerId: BannerId): void {
     const bannerIndex = this._banners.findIndex((bannerIN) => bannerIN.id === bannerId);
-    // console.log('BannerService -> dismissing Banner', bannerId);
+    // Log.log('BannerService -> dismissing Banner', bannerId);
     if (bannerIndex > -1) {
       // NOTE splice mutates
       this._banners.splice(bannerIndex, 1);

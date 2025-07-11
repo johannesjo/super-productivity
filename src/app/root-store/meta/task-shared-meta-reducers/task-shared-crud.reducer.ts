@@ -141,9 +141,11 @@ const handleAddTask = (
   }
 
   // Update tags - only update tags that exist
+  const shouldAddToToday = task.dueDay === getWorklogStr();
+
   const tagIdsToUpdate = [
     ...task.tagIds,
-    ...(task.dueDay === getWorklogStr() ? [TODAY_TAG.id] : []),
+    ...(shouldAddToToday ? [TODAY_TAG.id] : []),
   ].filter((tagId) => state[TAG_FEATURE_NAME].entities[tagId]);
 
   // First, handle conflicts for all tags

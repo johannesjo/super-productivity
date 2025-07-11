@@ -13,6 +13,7 @@ import { taskAdapter } from '../../features/tasks/store/task.adapter';
 import { Project } from '../../features/project/project.model';
 import { Action, ActionReducer } from '@ngrx/store/src/models';
 import { TODAY_TAG } from '../../features/tag/tag.const';
+import { Log } from '../../core/log';
 
 interface UndoTaskDeleteState {
   // Project context
@@ -121,7 +122,7 @@ const captureProjectData = (
   }
 
   if (!project.taskIds || !project.backlogTaskIds) {
-    console.error('Invalid project data:', { projectId, project });
+    Log.err('Invalid project data:', { projectId, project });
     throw new Error('Invalid project data');
   }
 

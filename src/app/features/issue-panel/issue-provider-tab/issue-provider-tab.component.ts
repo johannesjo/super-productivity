@@ -58,6 +58,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { MatInput } from '@angular/material/input';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { Log } from '../../../core/log';
 
 @Component({
   selector: 'issue-provider-tab',
@@ -122,7 +123,7 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
         : of(null),
     ),
     catchError(() => {
-      console.error('Project not found for issueProvider');
+      Log.err('Project not found for issueProvider');
       return of(null);
     }),
   );
@@ -255,7 +256,7 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
       throw new Error('Issue Provider and Search Result Type dont match');
     }
 
-    console.log('Add issue', item);
+    Log.log('Add issue', item);
 
     this._issueService.addTaskFromIssue({
       issueDataReduced: item.issueData,

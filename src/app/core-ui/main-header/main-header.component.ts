@@ -4,7 +4,6 @@ import {
   computed,
   inject,
   OnDestroy,
-  Renderer2,
   signal,
 } from '@angular/core';
 import { ProjectService } from '../../features/project/project.service';
@@ -23,7 +22,6 @@ import { SyncWrapperService } from '../../imex/sync/sync-wrapper.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { NavigationEnd, Router } from '@angular/router';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { TaskViewCustomizerService } from 'src/app/features/task-view-customizer/task-view-customizer.service';
 import { KeyboardConfig } from 'src/app/features/config/keyboard-config.model';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -73,7 +71,6 @@ export class MainHeaderComponent implements OnDestroy {
   readonly projectService = inject(ProjectService);
   readonly matDialog = inject(MatDialog);
   readonly workContextService = inject(WorkContextService);
-  readonly taskViewCustomizerService = inject(TaskViewCustomizerService);
   readonly taskService = inject(TaskService);
   readonly pomodoroService = inject(PomodoroService);
   readonly layoutService = inject(LayoutService);
@@ -81,19 +78,16 @@ export class MainHeaderComponent implements OnDestroy {
   readonly syncWrapperService = inject(SyncWrapperService);
   readonly globalConfigService = inject(GlobalConfigService);
   readonly breakpointObserver = inject(BreakpointObserver);
-  private readonly _renderer = inject(Renderer2);
   private readonly _snackService = inject(SnackService);
   private readonly _router = inject(Router);
   private readonly _store = inject(Store);
   private readonly _configService = inject(GlobalConfigService);
 
   T: typeof T = T;
-  progressCircleRadius: number = 10;
-  circumference: number = this.progressCircleRadius * Math.PI * 2;
   isShowSimpleCounterBtnsMobile = signal(false);
 
   // Convert breakpoint observer to signals
-  private _isXs$ = this.breakpointObserver.observe('(max-width: 600px)');
+  private _isXs$ = this.breakpointObserver.observe('(max-width: 599px)');
   private _isXxxs$ = this.breakpointObserver.observe('(max-width: 398px)');
 
   isXs = toSignal(this._isXs$.pipe(map((result) => result.matches)), {

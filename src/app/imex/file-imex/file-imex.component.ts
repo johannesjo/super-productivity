@@ -27,6 +27,7 @@ import {
   ConfirmUrlImportDialogComponent,
   DialogConfirmUrlImportData,
 } from '../dialog-confirm-url-import/dialog-confirm-url-import.component';
+import { Log } from '../../core/log';
 
 @Component({
   selector: 'file-imex',
@@ -62,7 +63,7 @@ export class FileImexComponent implements OnInit {
         try {
           decodedUrl = decodeURIComponent(importUrlParam);
         } catch (e) {
-          console.error('Error decoding importFromUrl parameter:', e);
+          Log.err('Error decoding importFromUrl parameter:', e);
           this._snackService.open({
             type: 'ERROR',
             msg: T.FILE_IMEX.S_IMPORT_FROM_URL_ERR_DECODE,
@@ -134,7 +135,7 @@ export class FileImexComponent implements OnInit {
       await this._processAndImportData(textData);
     } catch (error) {
       // Handle network errors and HTTP errors
-      console.error('Network error or HTTP error fetching from URL:', error);
+      Log.err('Network error or HTTP error fetching from URL:', error);
       this._snackService.open({ type: 'ERROR', msg: T.FILE_IMEX.S_ERR_NETWORK });
     }
   }
@@ -183,7 +184,7 @@ export class FileImexComponent implements OnInit {
       // Optionally, add a success snackbar here if desired
       // this._snackService.open({ type: 'SUCCESS', msg: 'Data imported successfully!' });
     } catch (e) {
-      console.error('Import process failed', e);
+      Log.err('Import process failed', e);
       this._snackService.open({
         type: 'ERROR',
         msg: T.FILE_IMEX.S_ERR_IMPORT_FAILED,
