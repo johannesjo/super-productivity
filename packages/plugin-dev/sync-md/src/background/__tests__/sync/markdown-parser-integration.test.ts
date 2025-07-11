@@ -26,15 +26,15 @@ describe('Markdown Parser Integration - 4-space indented subtasks', () => {
     const createOps = operations.filter((op) => op.type === 'create');
     expect(createOps).toHaveLength(4);
 
-    // Parent task
+    // Parent task (parentId should not be included when null)
     expect(createOps[0]).toMatchObject({
       type: 'create',
       tempId: 'temp_0',
       data: {
         title: 'then i am adding tasks',
-        parentId: null,
       },
     });
+    expect(createOps[0].data.parentId).toBeUndefined();
 
     // Subtasks reference parent by temp ID
     expect(createOps[1]).toMatchObject({

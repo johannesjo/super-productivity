@@ -63,9 +63,9 @@ describe('generateTaskOperations', () => {
       const createOps = operations.filter((op) => op.type === 'create');
       expect(createOps).toHaveLength(3);
 
-      // Parent task
+      // Parent task (parentId should not be included when null)
       expect(createOps[0].data.title).toBe('Parent task');
-      expect(createOps[0].data.parentId).toBe(null);
+      expect(createOps[0].data.parentId).toBeUndefined();
 
       // Child with ID
       expect(createOps[1].data.title).toBe('Child task');

@@ -97,15 +97,21 @@ export const generateTaskOperations = (
         }
       } else {
         // Create new task with the specified ID
+        const createData: any = {
+          title: mdTask.title,
+          isDone: mdTask.completed,
+          notes: mdTask.notes,
+        };
+
+        // Only include parentId if it's not null
+        if (mdTask.parentId) {
+          createData.parentId = mdTask.parentId;
+        }
+
         operations.push({
           type: 'create',
           tempId: `temp_${mdTask.line}`,
-          data: {
-            title: mdTask.title,
-            isDone: mdTask.completed,
-            notes: mdTask.notes,
-            parentId: mdTask.parentId,
-          },
+          data: createData,
         } as BatchTaskCreate);
       }
     } else {
@@ -140,15 +146,21 @@ export const generateTaskOperations = (
         }
       } else {
         // Create new task
+        const createData: any = {
+          title: mdTask.title,
+          isDone: mdTask.completed,
+          notes: mdTask.notes,
+        };
+
+        // Only include parentId if it's not null
+        if (mdTask.parentId) {
+          createData.parentId = mdTask.parentId;
+        }
+
         operations.push({
           type: 'create',
           tempId: `temp_${mdTask.line}`,
-          data: {
-            title: mdTask.title,
-            isDone: mdTask.completed,
-            notes: mdTask.notes,
-            parentId: mdTask.parentId,
-          },
+          data: createData,
         } as BatchTaskCreate);
       }
     }

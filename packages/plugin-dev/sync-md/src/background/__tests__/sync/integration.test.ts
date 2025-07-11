@@ -151,7 +151,7 @@ describe('Integration Tests - Full Sync Workflows', () => {
       expect(createOps).toHaveLength(2);
 
       expect(createOps[0].data.title).toBe('New Task');
-      expect(createOps[0].data.parentId).toBe(null);
+      expect(createOps[0].data.parentId).toBeUndefined();
 
       expect(createOps[1].data.title).toBe('New Subtask');
       expect(createOps[1].data.parentId).toBe('new-task');
