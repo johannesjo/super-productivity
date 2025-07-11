@@ -1,7 +1,7 @@
 import { parseMarkdown } from '../../sync/markdown-parser';
 import { generateTaskOperations } from '../../sync/generate-task-operations';
 import { convertTasksToMarkdown } from '../../sync/sp-to-md';
-import { Task } from '@super-productivity/plugin-api';
+import { Task, BatchTaskCreate, BatchTaskUpdate } from '@super-productivity/plugin-api';
 
 describe('Parent-Child Relationship Duplication Bug', () => {
   it('should not duplicate subtasks under multiple parents', () => {
@@ -47,21 +47,17 @@ describe('Parent-Child Relationship Duplication Bug', () => {
     const operations = generateTaskOperations(parsedTasks, spTasks, 'INBOX_PROJECT');
 
     // Should create 4 tasks total
-    const createOps = operations.filter((op) => op.type === 'create');
+    const createOps = operations.filter(
+      (op) => op.type === 'create',
+    ) as BatchTaskCreate[];
     expect(createOps).toHaveLength(4);
 
     // Verify each task is created with correct parent
-    const wheeeeatCreate = createOps.find(
-      (op) => op.type === 'create' && op.data.title === 'whaaaat',
-    );
-    const yeahCreate = createOps.find(
-      (op) => op.type === 'create' && op.data.title === 'yeah',
-    );
-    const coolCreate = createOps.find(
-      (op) => op.type === 'create' && op.data.title === 'cool',
-    );
+    const wheeeeatCreate = createOps.find((op) => op.data.title === 'whaaaat');
+    const yeahCreate = createOps.find((op) => op.data.title === 'yeah');
+    const coolCreate = createOps.find((op) => op.data.title === 'cool');
     const workingCreate = createOps.find(
-      (op) => op.type === 'create' && op.data.title === 'it is working very well',
+      (op) => op.data.title === 'it is working very well',
     );
 
     expect(wheeeeatCreate).toBeDefined();
@@ -93,7 +89,11 @@ describe('Parent-Child Relationship Duplication Bug', () => {
         projectId: 'INBOX_PROJECT',
         parentId: null,
         subTaskIds: [], // Should NOT have subtasks
-      } as Task,
+        timeEstimate: 0,
+        timeSpent: 0,
+        tagIds: [],
+        created: Date.now(),
+      } as unknown as Task,
       {
         id: 'xXKqQdbDd5dwtvHafeNCP',
         title: 'yeah',
@@ -101,7 +101,11 @@ describe('Parent-Child Relationship Duplication Bug', () => {
         projectId: 'INBOX_PROJECT',
         parentId: null,
         subTaskIds: ['Qme9-Sdf7U-Zb7GR-WNpl', 'J51QnQgFUpIfoyAdKn-oh'], // Should have these subtasks
-      } as Task,
+        timeEstimate: 0,
+        timeSpent: 0,
+        tagIds: [],
+        created: Date.now(),
+      } as unknown as Task,
       {
         id: 'Qme9-Sdf7U-Zb7GR-WNpl',
         title: 'cool',
@@ -109,7 +113,11 @@ describe('Parent-Child Relationship Duplication Bug', () => {
         projectId: 'INBOX_PROJECT',
         parentId: 'xXKqQdbDd5dwtvHafeNCP',
         subTaskIds: [],
-      } as Task,
+        timeEstimate: 0,
+        timeSpent: 0,
+        tagIds: [],
+        created: Date.now(),
+      } as unknown as Task,
       {
         id: 'J51QnQgFUpIfoyAdKn-oh',
         title: 'it is working very well',
@@ -117,7 +125,11 @@ describe('Parent-Child Relationship Duplication Bug', () => {
         projectId: 'INBOX_PROJECT',
         parentId: 'xXKqQdbDd5dwtvHafeNCP',
         subTaskIds: [],
-      } as Task,
+        timeEstimate: 0,
+        timeSpent: 0,
+        tagIds: [],
+        created: Date.now(),
+      } as unknown as Task,
     ];
 
     // Run sync again with existing tasks
@@ -128,9 +140,11 @@ describe('Parent-Child Relationship Duplication Bug', () => {
     expect(createOps).toHaveLength(0);
 
     // Should not update parent relationships incorrectly
-    const updateOps = operations.filter((op) => op.type === 'update');
+    const updateOps = operations.filter(
+      (op) => op.type === 'update',
+    ) as BatchTaskUpdate[];
     const incorrectParentUpdates = updateOps.filter(
-      (op) => op.type === 'update' && op.updates.parentId !== undefined,
+      (op) => op.updates.parentId !== undefined,
     );
     expect(incorrectParentUpdates).toHaveLength(0);
   });
@@ -145,7 +159,11 @@ describe('Parent-Child Relationship Duplication Bug', () => {
         projectId: 'INBOX_PROJECT',
         parentId: null,
         subTaskIds: [], // whaaaat has no children
-      } as Task,
+        timeEstimate: 0,
+        timeSpent: 0,
+        tagIds: [],
+        created: Date.now(),
+      } as unknown as Task,
       {
         id: 'xXKqQdbDd5dwtvHafeNCP',
         title: 'yeah',
@@ -153,7 +171,11 @@ describe('Parent-Child Relationship Duplication Bug', () => {
         projectId: 'INBOX_PROJECT',
         parentId: null,
         subTaskIds: ['Qme9-Sdf7U-Zb7GR-WNpl', 'J51QnQgFUpIfoyAdKn-oh'], // yeah has 2 children
-      } as Task,
+        timeEstimate: 0,
+        timeSpent: 0,
+        tagIds: [],
+        created: Date.now(),
+      } as unknown as Task,
       {
         id: 'Qme9-Sdf7U-Zb7GR-WNpl',
         title: 'cool',
@@ -161,7 +183,11 @@ describe('Parent-Child Relationship Duplication Bug', () => {
         projectId: 'INBOX_PROJECT',
         parentId: 'xXKqQdbDd5dwtvHafeNCP', // child of yeah
         subTaskIds: [],
-      } as Task,
+        timeEstimate: 0,
+        timeSpent: 0,
+        tagIds: [],
+        created: Date.now(),
+      } as unknown as Task,
       {
         id: 'J51QnQgFUpIfoyAdKn-oh',
         title: 'it is working very well',
@@ -169,7 +195,11 @@ describe('Parent-Child Relationship Duplication Bug', () => {
         projectId: 'INBOX_PROJECT',
         parentId: 'xXKqQdbDd5dwtvHafeNCP', // child of yeah
         subTaskIds: [],
-      } as Task,
+        timeEstimate: 0,
+        timeSpent: 0,
+        tagIds: [],
+        created: Date.now(),
+      } as unknown as Task,
     ];
 
     const markdown = convertTasksToMarkdown(spTasks);
