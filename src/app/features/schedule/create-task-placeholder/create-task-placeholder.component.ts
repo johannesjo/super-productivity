@@ -58,9 +58,12 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
 
   readonly selectTaskMinimal = viewChild('selectTaskMinimal', { read: ElementRef });
 
-  private _editEndTimeout: number | undefined;
-  private _isAutocompleteOpen = false;
-  private _isTaskBeingSelected = false;
+  private _interactionState: 'Idle' | 'Editing' | 'Selecting' = 'Idle';
+  private _blurTimeout: number | undefined;
+
+  // Timeout constants for better maintainability
+  private readonly BLUR_DELAY = 150;
+  private readonly SELECTION_DELAY = 100;
 
   @HostBinding('class.edit-mode')
   get isEditModeClass(): boolean {
@@ -70,8 +73,8 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
   @HostListener('click', ['$event'])
   onClick(event: MouseEvent): void {
     event.stopPropagation();
+    this._setState('Editing');
     this._focusSelectTaskMinimal();
-    window.clearTimeout(this._editEndTimeout);
   }
 
   @HostListener('document:click', ['$event'])
@@ -79,9 +82,10 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
     if (this.isEditMode()) {
       const target = event.target as HTMLElement;
       const component = target.closest('create-task-placeholder');
+      const autocompleteOption = target.closest('mat-option');
 
-      // If click is outside the component, close it
-      if (!component) {
+      // If click is outside the component and not on an autocomplete option, close it
+      if (!component && !autocompleteOption) {
         this._closeAndReset();
       }
     }
@@ -96,7 +100,7 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    window.clearTimeout(this._editEndTimeout);
+    this._clearTimeouts();
     this.editEnd.emit();
   }
   onTaskChange(taskOrTaskTitle: Task | string): void {
@@ -114,21 +118,17 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
   }
 
   async onTaskSelected(task: Task): Promise<void> {
-    this._isTaskBeingSelected = true;
-    this.isCreate.set(false);
+    this._setState('Selecting');
     this.selectedTask.set(task);
     this.newTaskTitle.set('');
+    this.isCreate.set(false);
 
-    // Automatically trigger addTask when a task is selected via mouse click
-    if (this.due() && this.selectedTask()) {
+    if (this.due()) {
       await this.addTask();
-      this.editEnd.emit();
+      this._closeAndReset();
+    } else {
+      this._setState('Idle');
     }
-
-    // Reset the flag after a short delay
-    setTimeout(() => {
-      this._isTaskBeingSelected = false;
-    }, 100);
   }
 
   onTextChanged(text: string): void {
@@ -138,31 +138,48 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
   }
 
   onSimpleTaskInputBlur(): void {
-    window.clearTimeout(this._editEndTimeout);
-    // Only close if autocomplete is not open and no task is being selected
-    if (!this._isAutocompleteOpen && !this._isTaskBeingSelected) {
-      this._editEndTimeout = window.setTimeout(() => this._closeAndReset(), 150);
+    this._clearTimeouts();
+    // Only close if we're in idle state (not editing autocomplete or selecting)
+    if (this._interactionState === 'Idle') {
+      this._blurTimeout = window.setTimeout(() => this._closeAndReset(), this.BLUR_DELAY);
+    }
+  }
+
+  private _clearTimeouts(): void {
+    window.clearTimeout(this._blurTimeout);
+  }
+
+  private _resetTaskState(): void {
+    this.newTaskTitle.set('');
+    this.selectedTask.set(null);
+    this.isCreate.set(false);
+  }
+
+  private _setState(state: 'Idle' | 'Editing' | 'Selecting'): void {
+    this._interactionState = state;
+    if (state === 'Editing') {
+      this._clearTimeouts();
     }
   }
 
   private _closeAndReset(): void {
-    window.clearTimeout(this._editEndTimeout);
-    this.newTaskTitle.set('');
-    this.selectedTask.set(null);
-    this.isCreate.set(false);
+    this._clearTimeouts();
+    this._resetTaskState();
+    this._setState('Idle');
     this.editEnd.emit();
   }
 
   onAutocompleteOpened(): void {
-    this._isAutocompleteOpen = true;
-    window.clearTimeout(this._editEndTimeout);
+    this._setState('Editing');
   }
 
   onAutocompleteClosed(): void {
     // Add a small delay to ensure option selection is processed first
     setTimeout(() => {
-      this._isAutocompleteOpen = false;
-    }, 100);
+      if (this._interactionState !== 'Selecting') {
+        this._setState('Idle');
+      }
+    }, this.SELECTION_DELAY);
   }
 
   async onSelectTaskKeyDown(event: KeyboardEvent): Promise<void> {
@@ -172,23 +189,29 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
       (this.selectedTask() || this.newTaskTitle())
     ) {
       await this.addTask();
-      this.editEnd.emit();
+      this._closeAndReset();
     } else if (event.key === 'Escape') {
-      this.editEnd.emit();
+      this._closeAndReset();
     } else if (event.key === '1' && event.ctrlKey) {
       this.isForDayMode.set(!this.isForDayMode());
     }
   }
 
   private _focusSelectTaskMinimal(): void {
-    // Focus on the select-task-minimal component
-    setTimeout(() => {
-      const selectTaskMinimal =
+    const tryFocus: () => boolean = () => {
+      const selectTaskInput =
         this.selectTaskMinimal()?.nativeElement?.querySelector('input');
-      if (selectTaskMinimal) {
-        selectTaskMinimal.focus();
+      if (selectTaskInput) {
+        selectTaskInput.focus();
+        return true;
       }
-    }, 0);
+      return false;
+    };
+
+    // Try immediate focus, fallback to next tick if needed
+    if (!tryFocus()) {
+      setTimeout(tryFocus, 0);
+    }
   }
 
   private async addTask(): Promise<void> {
