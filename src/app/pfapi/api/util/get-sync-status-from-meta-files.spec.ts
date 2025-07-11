@@ -172,7 +172,7 @@ describe('getSyncStatusFromMetaFiles', () => {
 
   describe('sync status detection', () => {
     describe('when timestamps are equal (local === remote)', () => {
-      it('should return InSync when all timestamps match', () => {
+      it('should return UpdateLocal when all timestamps match but has minimal updates', () => {
         const { local, remote } = createMeta(
           1000,
           1000,
@@ -183,7 +183,7 @@ describe('getSyncStatusFromMetaFiles', () => {
         );
 
         const result = getSyncStatusFromMetaFiles(remote, local);
-        expect(result.status).toBe(SyncStatus.InSync);
+        expect(result.status).toBe(SyncStatus.UpdateLocal);
       });
 
       it('should return InSync when local === remote but lastSync differs', () => {

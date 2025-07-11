@@ -186,7 +186,7 @@ export const incrementVectorClock = (
   clock: VectorClock | null | undefined,
   clientId: string,
 ): VectorClock => {
-  if (!clientId || typeof clientId !== 'string' || clientId.length < 10) {
+  if (!clientId || typeof clientId !== 'string' || clientId.length < 5) {
     PFLog.critical('incrementVectorClock: Invalid clientId', {
       clientId,
       type: typeof clientId,
