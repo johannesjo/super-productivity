@@ -328,7 +328,7 @@ finish-day-btn,
 }
 
 :host collapsible.isExpanded ::ng-deep .collapsible-header {
-  border-bottom: 2px solid var(--extra-border-color);
+  border-bottom: 1px solid var(--extra-border-color);
 }
 
 .overdue-tasks {

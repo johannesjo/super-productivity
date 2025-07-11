@@ -201,7 +201,8 @@
               <!-- OVERDUE Outline -->
               <collapsible
                 [title]="(T.G.OVERDUE | translate) + ' (' + overdueTasks().length + ')'"
-                [isExpanded]="true"
+                [isExpanded]="!isOverdueHidden()"
+                (isExpandedChange)="isOverdueHidden.set(!$event)"
                 [isIconBefore]="true"
               >
                 <div class="overdue-btn-wrapper">

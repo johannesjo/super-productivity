@@ -138,6 +138,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   isOnTodayList = toSignal(this.workContextService.isToday$);
   isDoneHidden = signal(!!localStorage.getItem(LS.DONE_TASKS_HIDDEN));
   isLaterTodayHidden = signal(!!localStorage.getItem(LS.LATER_TODAY_TASKS_HIDDEN));
+  isOverdueHidden = signal(!!localStorage.getItem(LS.OVERDUE_TASKS_HIDDEN));
 
   isShowOverduePanel = computed(
     () => this.isOnTodayList() && this.overdueTasks().length > 0,
@@ -219,6 +220,15 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
         localStorage.setItem(LS.LATER_TODAY_TASKS_HIDDEN, 'true');
       } else {
         localStorage.removeItem(LS.LATER_TODAY_TASKS_HIDDEN);
+      }
+    });
+
+    effect(() => {
+      const isExpanded = this.isOverdueHidden();
+      if (isExpanded) {
+        localStorage.setItem(LS.OVERDUE_TASKS_HIDDEN, 'true');
+      } else {
+        localStorage.removeItem(LS.OVERDUE_TASKS_HIDDEN);
       }
     });
   }
