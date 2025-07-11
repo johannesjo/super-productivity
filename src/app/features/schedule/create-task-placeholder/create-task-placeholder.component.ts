@@ -23,6 +23,7 @@ import { Store } from '@ngrx/store';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { ShortTime2Pipe } from '../../../ui/pipes/short-time2.pipe';
 import { SelectTaskMinimalComponent } from '../../tasks/select-task/select-task-minimal/select-task-minimal.component';
+import { devError } from '../../../util/dev-error';
 
 @Component({
   selector: 'create-task-placeholder',
@@ -68,28 +69,14 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
   @HostListener('click', ['$event'])
   onClick(event: MouseEvent): void {
     event.stopPropagation();
-    // Focus on the select-task-minimal component
-    setTimeout(() => {
-      const selectTaskMinimal =
-        this.selectTaskMinimal()?.nativeElement?.querySelector('input');
-      if (selectTaskMinimal) {
-        selectTaskMinimal.focus();
-      }
-    }, 0);
+    this._focusSelectTaskMinimal();
     window.clearTimeout(this._editEndTimeout);
   }
 
   constructor() {
     effect(() => {
       if (this.isEditMode()) {
-        // Focus on the select-task-minimal component when entering edit mode
-        setTimeout(() => {
-          const selectTaskMinimal =
-            this.selectTaskMinimal()?.nativeElement?.querySelector('input');
-          if (selectTaskMinimal) {
-            selectTaskMinimal.focus();
-          }
-        }, 0);
+        this._focusSelectTaskMinimal();
       }
     });
   }
@@ -144,6 +131,17 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
     }
   }
 
+  private _focusSelectTaskMinimal(): void {
+    // Focus on the select-task-minimal component
+    setTimeout(() => {
+      const selectTaskMinimal =
+        this.selectTaskMinimal()?.nativeElement?.querySelector('input');
+      if (selectTaskMinimal) {
+        selectTaskMinimal.focus();
+      }
+    }, 0);
+  }
+
   private async addTask(): Promise<void> {
     if (this.isCreate() && this.newTaskTitle()) {
       // Create new task
@@ -155,28 +153,35 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
   }
 
   private async createNewTask(title: string): Promise<void> {
-    if (this.isForDayMode()) {
-      // Plan task for day (no specific time)
-      const id = this._taskService.add(title, false, {
-        timeEstimate: 30 * 60 * 1000,
-      });
-      const task = await this._taskService.getByIdOnce$(id).toPromise();
-      this._store.dispatch(
-        PlannerActions.planTaskForDay({
-          task: task,
-          day: getWorklogStr(this.due()),
-        }),
-      );
-    } else {
-      // Schedule task with specific time
-      this._taskService.addAndSchedule(
-        title,
-        {
+    try {
+      if (this.isForDayMode()) {
+        // Plan task for day (no specific time)
+        const id = this._taskService.add(title, false, {
           timeEstimate: 30 * 60 * 1000,
-        },
-        this.due(),
-        TaskReminderOptionId.AtStart,
-      );
+        });
+        const task = await this._taskService.getByIdOnce$(id).toPromise();
+        if (!task) {
+          throw new Error(`Could not resolve task with id ${id}`);
+        }
+        this._store.dispatch(
+          PlannerActions.planTaskForDay({
+            task: task,
+            day: getWorklogStr(this.due()),
+          }),
+        );
+      } else {
+        // Schedule task with specific time
+        this._taskService.addAndSchedule(
+          title,
+          {
+            timeEstimate: 30 * 60 * 1000,
+          },
+          this.due(),
+          TaskReminderOptionId.AtStart,
+        );
+      }
+    } catch (error) {
+      devError(`Failed to create/schedule task: ${error}`);
     }
   }
 

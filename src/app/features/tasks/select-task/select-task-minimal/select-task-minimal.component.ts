@@ -99,14 +99,12 @@ export class SelectTaskMinimalComponent
         const searchText =
           typeof searchValue === 'string' ? searchValue : searchValue?.title || '';
         const search = searchText.toLowerCase().trim();
-        console.log('Filtering tasks:', { totalTasks: tasks.length, searchText: search }); // Debug log
         const filtered =
           search.length > 0
             ? tasks
                 .filter((task) => task.title.toLowerCase().includes(search))
                 .slice(0, 10) // Limit to 10 suggestions
             : [];
-        console.log('Filtered tasks:', filtered.length); // Debug log
         return filtered;
       }),
       takeUntil(this._destroy$),
