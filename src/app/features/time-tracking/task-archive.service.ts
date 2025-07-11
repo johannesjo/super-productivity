@@ -86,8 +86,8 @@ export class TaskArchiveService {
     );
 
     if (toDeleteInArchiveYoung.length > 0) {
-      const newTaskState = taskReducer(
-        archiveYoung.task as TaskState,
+      const newTaskState = this._reduceForArchive(
+        archiveYoung,
         TaskSharedActions.deleteTasks({ taskIds: toDeleteInArchiveYoung }),
       );
       await this._pfapiService.m.archiveYoung.save(
@@ -104,8 +104,8 @@ export class TaskArchiveService {
       const toDeleteInArchiveOld = taskIdsToDelete.filter(
         (id) => !!archiveOld.task.entities[id],
       );
-      const newTaskStateArchiveOld = taskReducer(
-        archiveOld.task as TaskState,
+      const newTaskStateArchiveOld = this._reduceForArchive(
+        archiveOld,
         TaskSharedActions.deleteTasks({ taskIds: toDeleteInArchiveOld }),
       );
       await this._pfapiService.m.archiveOld.save(
@@ -147,10 +147,12 @@ export class TaskArchiveService {
       (upd) => !!archiveYoung.task.entities[upd.task.id],
     );
     if (updatesYoung.length > 0) {
-      const newTaskStateArchiveYoung = updatesYoung.reduce(
-        (acc, act) => taskReducer(acc, act),
-        archiveYoung.task as TaskState,
-      );
+      let currentArchiveYoung = archiveYoung;
+      for (const act of updatesYoung) {
+        const newTaskState = this._reduceForArchive(currentArchiveYoung, act);
+        currentArchiveYoung = { ...currentArchiveYoung, task: newTaskState };
+      }
+      const newTaskStateArchiveYoung = currentArchiveYoung.task;
       await this._pfapiService.m.archiveYoung.save(
         {
           ...archiveYoung,
@@ -165,10 +167,12 @@ export class TaskArchiveService {
       const updatesOld = allUpdates.filter(
         (upd) => !!archiveOld.task.entities[upd.task.id],
       );
-      const newTaskStateArchiveOld = updatesOld.reduce(
-        (acc, act) => taskReducer(acc, act),
-        archiveOld.task as TaskState,
-      );
+      let currentArchiveOld = archiveOld;
+      for (const act of updatesOld) {
+        const newTaskState = this._reduceForArchive(currentArchiveOld, act);
+        currentArchiveOld = { ...currentArchiveOld, task: newTaskState };
+      }
+      const newTaskStateArchiveOld = currentArchiveOld.task;
       await this._pfapiService.m.archiveOld.save(
         {
           ...archiveOld,
@@ -260,8 +264,8 @@ export class TaskArchiveService {
       (id) => !!archiveYoung.task.entities[id],
     );
     if (taskIdsInArchiveYoung.length > 0) {
-      const newTaskState = taskReducer(
-        archiveYoung.task as TaskState,
+      const newTaskState = this._reduceForArchive(
+        archiveYoung,
         roundTimeSpentForDay({
           day,
           taskIds: taskIdsInArchiveYoung,
@@ -282,8 +286,8 @@ export class TaskArchiveService {
       const archiveOld = await this._pfapiService.m.archiveOld.load();
       const taskIdsInArchiveOld = taskIds.filter((id) => !!archiveOld.task.entities[id]);
       if (taskIdsInArchiveOld.length > 0) {
-        const newTaskStateArchiveOld = taskReducer(
-          archiveOld.task as TaskState,
+        const newTaskStateArchiveOld = this._reduceForArchive(
+          archiveOld,
           roundTimeSpentForDay({
             day,
             taskIds: taskIdsInArchiveOld,
