@@ -54,12 +54,13 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
     return 0;
   });
 
-  // time = computed(() => {})
   editEnd = output<void>();
 
   readonly selectTaskMinimal = viewChild('selectTaskMinimal', { read: ElementRef });
 
   private _editEndTimeout: number | undefined;
+  private _isAutocompleteOpen = false;
+  private _isTaskBeingSelected = false;
 
   @HostBinding('class.edit-mode')
   get isEditModeClass(): boolean {
@@ -71,6 +72,19 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
     event.stopPropagation();
     this._focusSelectTaskMinimal();
     window.clearTimeout(this._editEndTimeout);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.isEditMode()) {
+      const target = event.target as HTMLElement;
+      const component = target.closest('create-task-placeholder');
+
+      // If click is outside the component, close it
+      if (!component) {
+        this._closeAndReset();
+      }
+    }
   }
 
   constructor() {
@@ -99,10 +113,22 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
     }
   }
 
-  onTaskSelected(task: Task): void {
+  async onTaskSelected(task: Task): Promise<void> {
+    this._isTaskBeingSelected = true;
     this.isCreate.set(false);
     this.selectedTask.set(task);
     this.newTaskTitle.set('');
+
+    // Automatically trigger addTask when a task is selected via mouse click
+    if (this.due() && this.selectedTask()) {
+      await this.addTask();
+      this.editEnd.emit();
+    }
+
+    // Reset the flag after a short delay
+    setTimeout(() => {
+      this._isTaskBeingSelected = false;
+    }, 100);
   }
 
   onTextChanged(text: string): void {
@@ -113,7 +139,30 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
 
   onSimpleTaskInputBlur(): void {
     window.clearTimeout(this._editEndTimeout);
-    this._editEndTimeout = window.setTimeout(() => this.editEnd.emit(), 200);
+    // Only close if autocomplete is not open and no task is being selected
+    if (!this._isAutocompleteOpen && !this._isTaskBeingSelected) {
+      this._editEndTimeout = window.setTimeout(() => this._closeAndReset(), 150);
+    }
+  }
+
+  private _closeAndReset(): void {
+    window.clearTimeout(this._editEndTimeout);
+    this.newTaskTitle.set('');
+    this.selectedTask.set(null);
+    this.isCreate.set(false);
+    this.editEnd.emit();
+  }
+
+  onAutocompleteOpened(): void {
+    this._isAutocompleteOpen = true;
+    window.clearTimeout(this._editEndTimeout);
+  }
+
+  onAutocompleteClosed(): void {
+    // Add a small delay to ensure option selection is processed first
+    setTimeout(() => {
+      this._isAutocompleteOpen = false;
+    }, 100);
   }
 
   async onSelectTaskKeyDown(event: KeyboardEvent): Promise<void> {

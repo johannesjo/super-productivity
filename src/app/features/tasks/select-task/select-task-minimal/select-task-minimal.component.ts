@@ -9,6 +9,7 @@ import {
   OnInit,
   output,
   viewChild,
+  effect,
 } from '@angular/core';
 import {
   ControlValueAccessor,
@@ -70,6 +71,8 @@ export class SelectTaskMinimalComponent
   textChanged = output<string>();
   blurred = output<void>();
   keyPressed = output<KeyboardEvent>();
+  autocompleteOpened = output<void>();
+  autocompleteClosed = output<void>();
 
   // Internal state
   taskSelectCtrl: UntypedFormControl = new UntypedFormControl();
@@ -80,6 +83,23 @@ export class SelectTaskMinimalComponent
   private _onTouched: () => void = (): void => {};
 
   readonly inputElement = viewChild<ElementRef>('input');
+  readonly autocomplete = viewChild<MatAutocomplete>('auto');
+
+  constructor() {
+    // Set up autocomplete event listeners when autocomplete becomes available
+    effect(() => {
+      const autocomplete = this.autocomplete();
+      if (autocomplete) {
+        autocomplete.opened.pipe(takeUntil(this._destroy$)).subscribe(() => {
+          this.autocompleteOpened.emit();
+        });
+
+        autocomplete.closed.pipe(takeUntil(this._destroy$)).subscribe(() => {
+          this.autocompleteClosed.emit();
+        });
+      }
+    });
+  }
 
   ngOnInit(): void {
     // Use the same task selection logic as the original SelectTaskComponent
@@ -159,8 +179,15 @@ export class SelectTaskMinimalComponent
   // Event handlers
   onOptionSelected(event: any): void {
     const selectedTask: Task = event.option.value;
+
+    // Explicitly set the FormControl value to ensure consistency
+    this.taskSelectCtrl.setValue(selectedTask, { emitEvent: false });
+
+    // Emit the task selected event
     this.taskSelected.emit(selectedTask);
-    // The FormControl will automatically handle the value change
+
+    // Call onChange to update the form value
+    this._onChange(selectedTask);
   }
 
   onBlur(): void {

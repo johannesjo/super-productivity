@@ -25,6 +25,8 @@
       (textChanged)="onTextChanged($event)"
       (blurred)="onSimpleTaskInputBlur()"
       (keyPressed)="onSelectTaskKeyDown($event)"
+      (autocompleteOpened)="onAutocompleteOpened()"
+      (autocompleteClosed)="onAutocompleteClosed()"
       [placeholder]="isForDayMode() ? 'Plan task for day...' : 'Schedule task...'"
       [isIncludeDoneTasks]="false"
       [isLimitToProject]="false"
