@@ -193,32 +193,6 @@
             }
           }
 
-          @if (laterTodayTasks().length > 0 && isOnTodayList()) {
-            <div
-              @expand
-              class="collapsible-section"
-            >
-              <collapsible
-                [title]="
-                  (T.WW.LATER_TODAY | translate) +
-                  ' (' +
-                  (laterTodayTasks()?.length || 0) +
-                  ')'
-                "
-                [isExpanded]="!isLaterTodayHidden()"
-                (isExpandedChange)="isLaterTodayHidden.set(!$event)"
-                [isIconBefore]="true"
-              >
-                <task-list
-                  [tasks]="laterTodayTasks()"
-                  [isSortingDisabled]="true"
-                  listId="PARENT"
-                  listModelId="LATER_TODAY"
-                ></task-list>
-              </collapsible>
-            </div>
-          }
-
           @if (isShowOverduePanel()) {
             <section
               class="overdue-tasks"
@@ -260,6 +234,32 @@
                 </div>
               </collapsible>
             </section>
+          }
+
+          @if (laterTodayTasks().length > 0 && isOnTodayList()) {
+            <div
+              @expand
+              class="collapsible-section"
+            >
+              <collapsible
+                [title]="
+                  (T.WW.LATER_TODAY | translate) +
+                  ' (' +
+                  (laterTodayTasks()?.length || 0) +
+                  ')'
+                "
+                [isExpanded]="!isLaterTodayHidden()"
+                (isExpandedChange)="isLaterTodayHidden.set(!$event)"
+                [isIconBefore]="true"
+              >
+                <task-list
+                  [tasks]="laterTodayTasks()"
+                  [isSortingDisabled]="true"
+                  listId="PARENT"
+                  listModelId="LATER_TODAY"
+                ></task-list>
+              </collapsible>
+            </div>
           }
 
           @if (!isPlanningMode() || hasDoneTasks()) {
