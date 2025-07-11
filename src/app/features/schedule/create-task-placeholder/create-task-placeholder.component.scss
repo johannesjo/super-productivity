@@ -9,6 +9,7 @@
   opacity: 0.2;
   margin-bottom: 6px;
   display: block;
+  container-type: inline-size;
 
   color: var(--text-color);
   background: var(--bg-lightest);
@@ -81,6 +82,12 @@
       gap: 4px;
     }
 
+    // Remove padding when width is very small (< 150px)
+    @container (max-width: 135px) {
+      padding: 2px;
+      gap: 2px;
+    }
+
     select-task-minimal {
       flex: 1;
       min-height: 0;
@@ -143,6 +150,11 @@
 
       @include mq(xs, max) {
         font-size: 8px;
+      }
+
+      // Hide hint text when width is very small (< 150px)
+      @container (max-width: 135px) {
+        display: none;
       }
     }
   }
