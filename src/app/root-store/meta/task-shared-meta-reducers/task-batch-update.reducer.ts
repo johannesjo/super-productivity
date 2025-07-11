@@ -1,5 +1,5 @@
 import { Action } from '@ngrx/store';
-import { Task, DEFAULT_TASK } from '../../../features/tasks/task.model';
+import { DEFAULT_TASK, Task, TaskCopy } from '../../../features/tasks/task.model';
 import { TaskSharedActions } from '../task-shared.actions';
 
 import { taskAdapter } from '../../../features/tasks/store/task.adapter';
@@ -51,6 +51,15 @@ export const taskBatchUpdateMetaReducer = (
       const taskIdsToDelete: string[] = [];
       let newTaskOrder: string[] | null = null;
 
+      // Map to accumulate updates for each task
+      const pendingUpdatesMap = new Map<string, Partial<Task>>();
+
+      // Helper function to merge updates for a task
+      const mergeTaskUpdate = (taskId: string, changes: Partial<Task>): void => {
+        const existingChanges = pendingUpdatesMap.get(taskId) || {};
+        pendingUpdatesMap.set(taskId, { ...existingChanges, ...changes });
+      };
+
       // Process each operation
       operations.forEach((op: BatchOperation) => {
         switch (op.type) {
@@ -99,14 +108,10 @@ export const taskBatchUpdateMetaReducer = (
               !parentId.startsWith('temp-') &&
               !parentId.startsWith('temp_')
             ) {
-              tasksToUpdate.push({
-                id: parentId,
-                changes: {
-                  subTaskIds: [
-                    ...(newState[TASK_FEATURE_NAME].entities[parentId]?.subTaskIds || []),
-                    actualId,
-                  ],
-                },
+              const currentParentSubTaskIds =
+                newState[TASK_FEATURE_NAME].entities[parentId]?.subTaskIds || [];
+              mergeTaskUpdate(parentId, {
+                subTaskIds: [...currentParentSubTaskIds, actualId],
               });
             }
             break;
@@ -121,7 +126,7 @@ export const taskBatchUpdateMetaReducer = (
               break;
             }
 
-            const updates: any = {};
+            const updates: Partial<TaskCopy> = {};
 
             if (updateOp.updates.title !== undefined) {
               updates.title = updateOp.updates.title;
@@ -148,13 +153,15 @@ export const taskBatchUpdateMetaReducer = (
                   const oldParent =
                     newState[TASK_FEATURE_NAME].entities[oldTask.parentId];
                   if (oldParent) {
-                    tasksToUpdate.push({
-                      id: oldTask.parentId,
-                      changes: {
-                        subTaskIds: oldParent.subTaskIds.filter(
-                          (id) => id !== updateOp.taskId,
-                        ),
-                      },
+                    // Get the current state of subTaskIds (might have been updated by previous operations)
+                    const currentOldParentChanges =
+                      pendingUpdatesMap.get(oldTask.parentId) || {};
+                    const currentSubTaskIds =
+                      currentOldParentChanges.subTaskIds || oldParent.subTaskIds || [];
+                    mergeTaskUpdate(oldTask.parentId, {
+                      subTaskIds: currentSubTaskIds.filter(
+                        (id) => id !== updateOp.taskId,
+                      ),
                     });
                   }
                 }
@@ -171,11 +178,13 @@ export const taskBatchUpdateMetaReducer = (
                 if (newParentId) {
                   const newParent = newState[TASK_FEATURE_NAME].entities[newParentId];
                   if (newParent) {
-                    tasksToUpdate.push({
-                      id: newParentId,
-                      changes: {
-                        subTaskIds: [...newParent.subTaskIds, updateOp.taskId],
-                      },
+                    // Get the current state of subTaskIds (might have been updated by previous operations)
+                    const currentNewParentChanges =
+                      pendingUpdatesMap.get(newParentId) || {};
+                    const currentSubTaskIds =
+                      currentNewParentChanges.subTaskIds || newParent.subTaskIds || [];
+                    mergeTaskUpdate(newParentId, {
+                      subTaskIds: [...currentSubTaskIds, updateOp.taskId],
                     });
                   }
                 }
@@ -185,10 +194,7 @@ export const taskBatchUpdateMetaReducer = (
             }
 
             if (Object.keys(updates).length > 0) {
-              tasksToUpdate.push({
-                id: updateOp.taskId,
-                changes: updates,
-              });
+              mergeTaskUpdate(updateOp.taskId, updates);
             }
             break;
           }
@@ -209,11 +215,13 @@ export const taskBatchUpdateMetaReducer = (
             if (taskToDelete?.parentId) {
               const parent = newState[TASK_FEATURE_NAME].entities[taskToDelete.parentId];
               if (parent) {
-                tasksToUpdate.push({
-                  id: taskToDelete.parentId,
-                  changes: {
-                    subTaskIds: parent.subTaskIds.filter((id) => id !== deleteOp.taskId),
-                  },
+                // Get the current state of subTaskIds (might have been updated by previous operations)
+                const currentParentChanges =
+                  pendingUpdatesMap.get(taskToDelete.parentId) || {};
+                const currentSubTaskIds =
+                  currentParentChanges.subTaskIds || parent.subTaskIds || [];
+                mergeTaskUpdate(taskToDelete.parentId, {
+                  subTaskIds: currentSubTaskIds.filter((id) => id !== deleteOp.taskId),
                 });
               }
             }
@@ -237,6 +245,11 @@ export const taskBatchUpdateMetaReducer = (
             break;
           }
         }
+      });
+
+      // Convert pending updates map to array
+      pendingUpdatesMap.forEach((changes, taskId) => {
+        tasksToUpdate.push({ id: taskId, changes });
       });
 
       // Apply all task changes
@@ -286,6 +299,7 @@ export const taskBatchUpdateMetaReducer = (
           );
         }
       }
+      console.log('A', JSON.parse(JSON.stringify(newState)));
 
       // Apply comprehensive data validation and consistency fixes
       newState = validateAndFixDataConsistency(
@@ -296,6 +310,7 @@ export const taskBatchUpdateMetaReducer = (
         taskIdsToDelete,
         newTaskOrder,
       );
+      console.log('B', JSON.parse(JSON.stringify(newState)));
 
       return reducer(newState, action);
     }
