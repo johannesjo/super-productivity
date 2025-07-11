@@ -299,7 +299,6 @@ export const taskBatchUpdateMetaReducer = (
           );
         }
       }
-      console.log('A', JSON.parse(JSON.stringify(newState)));
 
       // Apply comprehensive data validation and consistency fixes
       newState = validateAndFixDataConsistency(
@@ -310,7 +309,6 @@ export const taskBatchUpdateMetaReducer = (
         taskIdsToDelete,
         newTaskOrder,
       );
-      console.log('B', JSON.parse(JSON.stringify(newState)));
 
       return reducer(newState, action);
     }
@@ -468,6 +466,14 @@ const validateAndFixDataConsistency = (
   const parentChildUpdates: { id: string; changes: Partial<Task> }[] = [];
   const parentsToUpdate = new Map<string, Set<string>>();
 
+  // Track which parents had explicit subTaskIds updates
+  const parentsWithExplicitSubTaskUpdates = new Set<string>();
+  tasksToUpdate.forEach((update) => {
+    if (update.changes.subTaskIds !== undefined) {
+      parentsWithExplicitSubTaskUpdates.add(update.id);
+    }
+  });
+
   // Collect all parent-child relationships
   allCurrentTasks.forEach((task) => {
     if (task.parentId && allCurrentTasks.has(task.parentId)) {
@@ -480,6 +486,11 @@ const validateAndFixDataConsistency = (
 
   // Update parent tasks with correct subTaskIds
   parentsToUpdate.forEach((subTaskIds, parentId) => {
+    // Skip if this parent had an explicit subTaskIds update - trust the operation
+    if (parentsWithExplicitSubTaskUpdates.has(parentId)) {
+      return;
+    }
+
     const parentTask = allCurrentTasks.get(parentId);
     if (parentTask) {
       const newSubTaskIds = Array.from(subTaskIds);
@@ -495,6 +506,22 @@ const validateAndFixDataConsistency = (
           changes: { subTaskIds: newSubTaskIds },
         });
       }
+    }
+  });
+
+  // Also check for parents that should have empty subTaskIds but don't
+  allCurrentTasks.forEach((task) => {
+    // Skip if this parent had an explicit subTaskIds update
+    if (parentsWithExplicitSubTaskUpdates.has(task.id)) {
+      return;
+    }
+
+    if (task.subTaskIds && task.subTaskIds.length > 0 && !parentsToUpdate.has(task.id)) {
+      // This parent has subTaskIds but no children point to it
+      parentChildUpdates.push({
+        id: task.id,
+        changes: { subTaskIds: [] },
+      });
     }
   });
 
