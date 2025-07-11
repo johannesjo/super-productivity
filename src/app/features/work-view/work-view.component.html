@@ -196,7 +196,7 @@
           @if (laterTodayTasks().length > 0 && isOnTodayList()) {
             <div
               @expand
-              style="margin-top: 16px"
+              class="collapsible-section"
             >
               <collapsible
                 [title]="
@@ -267,9 +267,11 @@
               doneTasks()?.length === 0
                 ? (workContextService.doneTodayArchived$ | async)
                 : 0;
-            <div @expand>
+            <div
+              @expand
+              class="collapsible-section"
+            >
               <collapsible
-                style="margin-top: 16px"
                 [title]="
                   (T.WW.DONE_TASKS | translate) +
                   ' (' +
@@ -312,6 +314,7 @@
           }
         </div>
       </div>
+
       @if (isShowBacklog()) {
         <div
           #splitBottomEl

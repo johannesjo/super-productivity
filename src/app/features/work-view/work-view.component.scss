@@ -304,28 +304,35 @@ finish-day-btn,
   }
 }
 
+// Unified collapsible section styles
+.collapsible-section {
+  margin-top: 16px;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
 :host ::ng-deep .collapsible-header {
   font-size: 16px;
   margin-top: 0;
-  padding: 8px;
-  padding-bottom: 4px;
-  justify-content: flex-start;
+  padding: 12px 8px;
   justify-content: center;
-  //margin-bottom: 10px;
-  border-bottom: 1px solid transparent;
-  border-bottom: 2px solid var(--extra-border-color);
+  border-bottom: 2px solid transparent;
 
   .collapsible-title {
     flex-grow: 0;
     margin-left: -10px;
+    opacity: 0.8;
   }
 }
 
 :host collapsible.isExpanded ::ng-deep .collapsible-header {
-  border-bottom: 1px solid var(--extra-border-color);
+  border-bottom: 2px solid var(--extra-border-color);
 }
 
 .overdue-tasks {
+  margin-top: 16px;
 }
 
 .overdue-btn-wrapper {
@@ -334,4 +341,5 @@ finish-day-btn,
   justify-content: center;
   align-items: center;
   padding-bottom: 8px;
+  padding-top: 8px;
 }
