@@ -16,16 +16,17 @@ import {
 } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { TaskService } from '../../tasks/task.service';
-import { TaskReminderOptionId } from '../../tasks/task.model';
+import { Task, TaskReminderOptionId } from '../../tasks/task.model';
 import { DatePipe } from '@angular/common';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { Store } from '@ngrx/store';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { ShortTime2Pipe } from '../../../ui/pipes/short-time2.pipe';
+import { SelectTaskMinimalComponent } from '../../tasks/select-task/select-task-minimal/select-task-minimal.component';
 
 @Component({
   selector: 'create-task-placeholder',
-  imports: [MatIcon, DatePipe, ShortTime2Pipe],
+  imports: [MatIcon, DatePipe, ShortTime2Pipe, SelectTaskMinimalComponent],
   templateUrl: './create-task-placeholder.component.html',
   styleUrl: './create-task-placeholder.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,6 +38,11 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
   isEditMode = input.required<boolean>();
   time = input<string>();
   date = input<string>();
+
+  // Task selection state
+  selectedTask = signal<Task | null>(null);
+  newTaskTitle = signal<string>('');
+  isCreate = signal<boolean>(false);
   isForDayMode = signal<boolean>(false);
   due: Signal<number> = computed(() => {
     if (this.date() && this.time()) {
@@ -50,11 +56,11 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
   // time = computed(() => {})
   editEnd = output<void>();
 
-  readonly textAreaElement = viewChild('textAreaElement', { read: ElementRef });
+  readonly selectTaskMinimal = viewChild('selectTaskMinimal', { read: ElementRef });
 
   private _editEndTimeout: number | undefined;
 
-  @HostBinding('class.isEditMode')
+  @HostBinding('class.edit-mode')
   get isEditModeClass(): boolean {
     return this.isEditMode();
   }
@@ -62,67 +68,130 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
   @HostListener('click', ['$event'])
   onClick(event: MouseEvent): void {
     event.stopPropagation();
-    this.textAreaElement()?.nativeElement.focus();
-    // cancel blur
+    // Focus on the select-task-minimal component
+    setTimeout(() => {
+      const selectTaskMinimal =
+        this.selectTaskMinimal()?.nativeElement?.querySelector('input');
+      if (selectTaskMinimal) {
+        selectTaskMinimal.focus();
+      }
+    }, 0);
     window.clearTimeout(this._editEndTimeout);
   }
 
   constructor() {
     effect(() => {
       if (this.isEditMode()) {
-        this.textAreaElement()?.nativeElement.focus();
+        // Focus on the select-task-minimal component when entering edit mode
+        setTimeout(() => {
+          const selectTaskMinimal =
+            this.selectTaskMinimal()?.nativeElement?.querySelector('input');
+          if (selectTaskMinimal) {
+            selectTaskMinimal.focus();
+          }
+        }, 0);
       }
     });
   }
 
   ngOnDestroy(): void {
     window.clearTimeout(this._editEndTimeout);
-    // otherwise the element  might not reappear always
     this.editEnd.emit();
   }
+  onTaskChange(taskOrTaskTitle: Task | string): void {
+    this.isCreate.set(typeof taskOrTaskTitle === 'string');
 
-  onBlur(): void {
+    if (this.isCreate()) {
+      // New task creation
+      this.newTaskTitle.set(taskOrTaskTitle as string);
+      this.selectedTask.set(null);
+    } else {
+      // Existing task selection
+      this.selectedTask.set(taskOrTaskTitle as Task);
+      this.newTaskTitle.set('');
+    }
+  }
+
+  onTaskSelected(task: Task): void {
+    this.isCreate.set(false);
+    this.selectedTask.set(task);
+    this.newTaskTitle.set('');
+  }
+
+  onTextChanged(text: string): void {
+    this.isCreate.set(true);
+    this.newTaskTitle.set(text);
+    this.selectedTask.set(null);
+  }
+
+  onSimpleTaskInputBlur(): void {
     window.clearTimeout(this._editEndTimeout);
     this._editEndTimeout = window.setTimeout(() => this.editEnd.emit(), 200);
   }
 
-  async onKeyDown(event: KeyboardEvent): Promise<void> {
-    const textAreaElement = this.textAreaElement();
+  async onSelectTaskKeyDown(event: KeyboardEvent): Promise<void> {
     if (
       event.key === 'Enter' &&
-      typeof this.due() === 'number' &&
-      textAreaElement?.nativeElement.value
+      this.due() &&
+      (this.selectedTask() || this.newTaskTitle())
     ) {
+      await this.addTask();
       this.editEnd.emit();
-      if (this.isForDayMode()) {
-        const id = this._taskService.add(
-          textAreaElement?.nativeElement.value || '',
-          false,
-          {
-            timeEstimate: 30 * 60 * 1000,
-          },
-        );
-        const task = await this._taskService.getByIdOnce$(id).toPromise();
-        this._store.dispatch(
-          PlannerActions.planTaskForDay({
-            task: task,
-            day: getWorklogStr(this.due()),
-          }),
-        );
-      } else {
-        this._taskService.addAndSchedule(
-          textAreaElement?.nativeElement.value || '',
-          {
-            timeEstimate: 30 * 60 * 1000,
-          },
-          this.due(),
-          TaskReminderOptionId.AtStart,
-        );
-      }
     } else if (event.key === 'Escape') {
       this.editEnd.emit();
     } else if (event.key === '1' && event.ctrlKey) {
       this.isForDayMode.set(!this.isForDayMode());
+    }
+  }
+
+  private async addTask(): Promise<void> {
+    if (this.isCreate() && this.newTaskTitle()) {
+      // Create new task
+      await this.createNewTask(this.newTaskTitle());
+    } else if (!this.isCreate() && this.selectedTask()) {
+      // Schedule existing task
+      await this.scheduleExistingTask(this.selectedTask()!);
+    }
+  }
+
+  private async createNewTask(title: string): Promise<void> {
+    if (this.isForDayMode()) {
+      // Plan task for day (no specific time)
+      const id = this._taskService.add(title, false, {
+        timeEstimate: 30 * 60 * 1000,
+      });
+      const task = await this._taskService.getByIdOnce$(id).toPromise();
+      this._store.dispatch(
+        PlannerActions.planTaskForDay({
+          task: task,
+          day: getWorklogStr(this.due()),
+        }),
+      );
+    } else {
+      // Schedule task with specific time
+      this._taskService.addAndSchedule(
+        title,
+        {
+          timeEstimate: 30 * 60 * 1000,
+        },
+        this.due(),
+        TaskReminderOptionId.AtStart,
+      );
+    }
+  }
+
+  private async scheduleExistingTask(task: Task): Promise<void> {
+    if (this.isForDayMode()) {
+      // Plan existing task for day
+      this._store.dispatch(
+        PlannerActions.planTaskForDay({
+          task: task,
+          day: getWorklogStr(this.due()),
+        }),
+      );
+    } else {
+      // Schedule existing task with specific time
+      this._taskService.scheduleTask(task, this.due(), TaskReminderOptionId.AtStart);
     }
   }
 
