@@ -87,7 +87,7 @@ describe('Sync Manager Debounce Behavior', () => {
   });
 
   describe('MD to SP sync debouncing', () => {
-    it('should debounce MD to SP sync for 10 seconds', async () => {
+    it('should sync immediately when window is focused', async () => {
       // Initialize sync manager - it will create file since getFileStats returns null
       initSyncManager(mockConfig);
 
@@ -96,6 +96,30 @@ describe('Sync Manager Debounce Behavior', () => {
 
       // Clear mocks after initial sync
       jest.clearAllMocks();
+
+      // Window is focused by default
+      // Trigger file change
+      mockFileChangeCallback();
+
+      // Should sync immediately without waiting
+      await jest.runAllTimersAsync();
+
+      expect(mdToSp).toHaveBeenCalledTimes(1);
+      expect(mdToSp).toHaveBeenCalledWith('- [ ] Test task', mockConfig.projectId);
+    });
+
+    it('should debounce MD to SP sync for 10 seconds when window is not focused', async () => {
+      // Initialize sync manager
+      initSyncManager(mockConfig);
+
+      // Let initial sync complete
+      await jest.runAllTimersAsync();
+
+      // Clear mocks after initial sync
+      jest.clearAllMocks();
+
+      // Set window as unfocused
+      mockWindowFocusCallback(false);
 
       // Trigger file change
       mockFileChangeCallback();
@@ -118,10 +142,34 @@ describe('Sync Manager Debounce Behavior', () => {
       expect(mdToSp).toHaveBeenCalledWith('- [ ] Test task', mockConfig.projectId);
     });
 
-    it('should reset debounce timer on multiple file changes', async () => {
+    it('should handle multiple file changes when window is focused', async () => {
       initSyncManager(mockConfig);
       await jest.runAllTimersAsync();
       jest.clearAllMocks();
+
+      // Window is focused - each file change triggers immediate sync
+
+      // First file change
+      mockFileChangeCallback();
+      await jest.runAllTimersAsync();
+
+      expect(mdToSp).toHaveBeenCalledTimes(1);
+
+      // Second file change
+      mockFileChangeCallback();
+      await jest.runAllTimersAsync();
+
+      // Should be called again (not debounced when focused)
+      expect(mdToSp).toHaveBeenCalledTimes(2);
+    });
+
+    it('should reset debounce timer on multiple file changes when unfocused', async () => {
+      initSyncManager(mockConfig);
+      await jest.runAllTimersAsync();
+      jest.clearAllMocks();
+
+      // Set window as unfocused
+      mockWindowFocusCallback(false);
 
       // First file change
       mockFileChangeCallback();
@@ -144,7 +192,7 @@ describe('Sync Manager Debounce Behavior', () => {
       // Run all timers and wait for async operations
       await jest.runAllTimersAsync();
 
-      // Now sync should be called
+      // Now sync should be called only once
       expect(mdToSp).toHaveBeenCalledTimes(1);
     });
 
@@ -202,7 +250,10 @@ describe('Sync Manager Debounce Behavior', () => {
       await jest.runAllTimersAsync();
       jest.clearAllMocks();
 
-      // Trigger file change
+      // Set window as unfocused first
+      mockWindowFocusCallback(false);
+
+      // Trigger file change while unfocused
       mockFileChangeCallback();
 
       // Fast forward to complete the sync
@@ -213,8 +264,7 @@ describe('Sync Manager Debounce Behavior', () => {
 
       expect(mdToSp).toHaveBeenCalledTimes(1);
 
-      // Window loses focus then gains focus
-      mockWindowFocusCallback(false);
+      // Window gains focus after sync completed
       mockWindowFocusCallback(true);
 
       await jest.runAllTimersAsync();
@@ -228,14 +278,11 @@ describe('Sync Manager Debounce Behavior', () => {
       await jest.runAllTimersAsync();
       jest.clearAllMocks();
 
-      // Window starts focused
-      mockWindowFocusCallback(true);
-
-      // Trigger file change
-      mockFileChangeCallback();
-
-      // Window loses focus
+      // Start with window unfocused
       mockWindowFocusCallback(false);
+
+      // Trigger file change while unfocused
+      mockFileChangeCallback();
 
       // Fast forward 5 seconds (half of debounce time)
       jest.advanceTimersByTime(5000);

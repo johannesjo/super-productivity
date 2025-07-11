@@ -78,12 +78,21 @@ const handleFileChange = (config: LocalUserCfg): void => {
     clearTimeout(mdToSpDebounceTimer);
   }
 
+  // If window is focused, sync immediately without debounce
+  if (isWindowFocused) {
+    console.log(
+      '[sync-md] File change detected while window is focused, syncing immediately',
+    );
+    handleMdToSpSync(config);
+    return;
+  }
+
   // Mark that we have a pending MD to SP sync
   pendingMdToSpSync = config;
 
-  // Always use 10 second debounce for MD to SP sync
+  // Use 10 second debounce for MD to SP sync when window is not focused
   console.log(
-    `[sync-md] File change detected, debouncing for ${SYNC_DEBOUNCE_MS_MD_TO_SP}ms (10 seconds), window focused: ${isWindowFocused}`,
+    `[sync-md] File change detected while window is unfocused, debouncing for ${SYNC_DEBOUNCE_MS_MD_TO_SP}ms (10 seconds)`,
   );
 
   mdToSpDebounceTimer = setTimeout(() => {
@@ -208,6 +217,7 @@ const setupWindowFocusTracking = (): void => {
 
       // Trigger the sync immediately with the stored config
       const configToSync = pendingMdToSpSync;
+      pendingMdToSpSync = null;
       handleMdToSpSync(configToSync);
     } else {
       console.log(
