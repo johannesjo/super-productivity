@@ -186,8 +186,25 @@ export const incrementVectorClock = (
   clock: VectorClock | null | undefined,
   clientId: string,
 ): VectorClock => {
+  if (!clientId || typeof clientId !== 'string' || clientId.length < 10) {
+    PFLog.critical('incrementVectorClock: Invalid clientId', {
+      clientId,
+      type: typeof clientId,
+      length: clientId?.length,
+      stackTrace: new Error().stack,
+    });
+    throw new Error(`Invalid clientId for vector clock increment: ${clientId}`);
+  }
+
   const newClock = { ...(clock || {}) };
   const currentValue = newClock[clientId] || 0;
+
+  // Log for debugging
+  PFLog.verbose('incrementVectorClock', {
+    clientId,
+    currentValue,
+    allClients: Object.keys(newClock),
+  });
 
   // Handle overflow - reset to 1 if approaching max safe integer
   if (currentValue >= Number.MAX_SAFE_INTEGER - 1000) {

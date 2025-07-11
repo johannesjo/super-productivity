@@ -88,6 +88,17 @@ export class MetaModelCtrl {
     // Get client ID for vector clock
     const clientId = await this.loadClientId();
 
+    // Log to debug vector clock updates
+    PFLog.normal(
+      `${MetaModelCtrl.L}.${this.updateRevForModel.name}() vector clock update`,
+      {
+        modelId,
+        clientId,
+        currentVectorClock: metaModel.vectorClock,
+        clientIdInMemory: this._clientIdInMemory,
+      },
+    );
+
     // Create action string (max 100 chars)
     const actionStr = `${modelId} => ${new Date(timestamp).toISOString()}`;
     const lastUpdateAction =
@@ -255,7 +266,17 @@ export class MetaModelCtrl {
       throw new ClientIdNotFoundError();
     }
 
+    // Validate clientId format to catch corruption
+    if (clientId.length < 10) {
+      PFLog.critical(`${MetaModelCtrl.L}.loadClientId() Invalid clientId loaded:`, {
+        clientId,
+        length: clientId.length,
+      });
+      throw new Error(`Invalid clientId loaded: ${clientId}`);
+    }
+
     this._clientIdInMemory = clientId;
+    PFLog.normal(`${MetaModelCtrl.L}.loadClientId() loaded:`, { clientId });
     return clientId;
   }
 
