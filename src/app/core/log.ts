@@ -129,6 +129,14 @@ export class Log {
     }
   }
 
+  // special helper to make a specially visible log
+  static x(...args: unknown[]): void {
+    if (this.level >= LogLevel.NORMAL) {
+      this.recordLog('LOG', this.context, args);
+      this.l('XXXXXXX: ', ...args);
+    }
+  }
+
   // Backwards compatibility aliases
   static error = Log.err;
   static normal = Log.log;

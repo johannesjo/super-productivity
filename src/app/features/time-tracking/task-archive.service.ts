@@ -9,6 +9,7 @@ import { Update } from '@ngrx/entity';
 import { ArchiveModel } from './time-tracking.model';
 import { ModelCfgToModelCtrl } from '../../pfapi/api';
 import { PfapiAllModelCfg } from '../../pfapi/pfapi-config';
+import { Log } from '../../core/log';
 
 type TaskArchiveAction =
   | ReturnType<typeof TaskSharedActions.updateTask>
@@ -102,6 +103,8 @@ export class TaskArchiveService {
   async updateTask(id: string, changedFields: Partial<Task>): Promise<void> {
     const archiveYoung = await this._pfapiService.m.archiveYoung.load();
     if (archiveYoung.task.entities[id]) {
+      Log.x(changedFields, id);
+
       return await this._execAction(
         'archiveYoung',
         archiveYoung,
@@ -292,7 +295,8 @@ export class TaskArchiveService {
     archiveBefore: ArchiveModel,
     action: TaskArchiveAction,
   ): Promise<void> {
-    const newTaskState = taskReducer(archiveBefore.task as TaskState, action);
+    const newTaskState = this._reduceForArchive(archiveBefore, action);
+    Log.x(newTaskState);
     await this._pfapiService.m[target].save(
       {
         ...archiveBefore,
@@ -307,10 +311,10 @@ export class TaskArchiveService {
     isUpdateRevAndLastUpdate = true,
   ): Promise<void> {
     const archiveYoung = await this._pfapiService.m.archiveYoung.load();
-    const newTaskState = taskReducer(archiveYoung.task as TaskState, action);
+    const newTaskState = this._reduceForArchive(archiveYoung, action);
 
     const archiveOld = await this._pfapiService.m.archiveOld.load();
-    const newTaskStateArchiveOld = taskReducer(archiveOld.task as TaskState, action);
+    const newTaskStateArchiveOld = this._reduceForArchive(archiveOld, action);
 
     await this._pfapiService.m.archiveYoung.save(
       {
@@ -326,6 +330,13 @@ export class TaskArchiveService {
       },
       { isUpdateRevAndLastUpdate },
     );
+  }
+
+  private _reduceForArchive(
+    archiveBefore: ArchiveModel,
+    action: TaskArchiveAction,
+  ): TaskState {
+    return taskReducer(archiveBefore.task as TaskState, action);
   }
 
   // more beautiful but less efficient
