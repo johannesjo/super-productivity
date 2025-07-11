@@ -142,9 +142,12 @@ h2 {
   transform: rotate(90deg);
 }
 
+finish-day-btn,
 .finish-day-button-wrapper {
   text-align: center;
   margin: var(--s2) 0 var(--s);
+  padding-top: 8px;
+  display: block;
   white-space: nowrap;
 
   button {
@@ -304,11 +307,31 @@ h2 {
 :host ::ng-deep .collapsible-header {
   font-size: 16px;
   margin-top: 0;
-  padding: 10px 10px;
+  padding: 8px;
+  padding-bottom: 4px;
+  justify-content: flex-start;
   justify-content: center;
+  //margin-bottom: 10px;
+  border-bottom: 1px solid transparent;
+  border-bottom: 2px solid var(--extra-border-color);
 
   .collapsible-title {
     flex-grow: 0;
     margin-left: -10px;
   }
+}
+
+:host collapsible.isExpanded ::ng-deep .collapsible-header {
+  border-bottom: 1px solid var(--extra-border-color);
+}
+
+.overdue-tasks {
+}
+
+.overdue-btn-wrapper {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 8px;
 }
