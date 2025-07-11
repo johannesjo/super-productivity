@@ -58,6 +58,13 @@ export const generateTaskOperations = (
   // Track which SP tasks we've seen
   const processedSpIds = new Set<string>();
 
+  // Track tasks that have changed parents for cleanup
+  const tasksWithChangedParents: Array<{
+    taskId: string;
+    oldParentId: string | null;
+    newParentId: string | null;
+  }> = [];
+
   // First pass: process MD tasks
   mdTasks.forEach((mdTask) => {
     // Check if this task has a duplicate ID
@@ -86,6 +93,12 @@ export const generateTaskOperations = (
         // Handle parent relationship
         if (spTask.parentId !== mdTask.parentId) {
           updates.parentId = mdTask.parentId;
+          // Track this parent change for cleanup
+          tasksWithChangedParents.push({
+            taskId: spTask.id!,
+            oldParentId: spTask.parentId,
+            newParentId: mdTask.parentId,
+          });
         }
 
         if (Object.keys(updates).length > 0) {
@@ -135,6 +148,12 @@ export const generateTaskOperations = (
         // Handle parent relationship
         if (spTask.parentId !== mdTask.parentId) {
           updates.parentId = mdTask.parentId;
+          // Track this parent change for cleanup
+          tasksWithChangedParents.push({
+            taskId: spTask.id!,
+            oldParentId: spTask.parentId,
+            newParentId: mdTask.parentId,
+          });
         }
 
         if (Object.keys(updates).length > 0) {
@@ -162,6 +181,48 @@ export const generateTaskOperations = (
           tempId: `temp_${mdTask.line}`,
           data: createData,
         } as BatchTaskCreate);
+      }
+    }
+  });
+
+  // Clean up old parent subTaskIds when tasks have changed parents
+  // Group tasks by their old parent to clean them up all at once
+  const tasksByOldParent = new Map<string, string[]>();
+  tasksWithChangedParents.forEach(({ taskId, oldParentId }) => {
+    if (oldParentId) {
+      if (!tasksByOldParent.has(oldParentId)) {
+        tasksByOldParent.set(oldParentId, []);
+      }
+      tasksByOldParent.get(oldParentId)!.push(taskId);
+    }
+  });
+
+  tasksByOldParent.forEach((movedTaskIds, oldParentId) => {
+    const oldParentTask = spById.get(oldParentId);
+    if (oldParentTask && oldParentTask.subTaskIds) {
+      // Remove all moved tasks from the parent's subTaskIds
+      const newSubTaskIds = oldParentTask.subTaskIds.filter(
+        (id) => !movedTaskIds.includes(id),
+      );
+
+      // Check if we already have an update operation for this parent
+      const existingUpdateIndex = operations.findIndex(
+        (op) => op.type === 'update' && op.taskId === oldParentId,
+      );
+
+      if (existingUpdateIndex >= 0) {
+        // Add subTaskIds to existing update
+        (operations[existingUpdateIndex] as BatchTaskUpdate).updates.subTaskIds =
+          newSubTaskIds;
+      } else {
+        // Create new update operation
+        operations.push({
+          type: 'update',
+          taskId: oldParentId,
+          updates: {
+            subTaskIds: newSubTaskIds,
+          },
+        } as BatchTaskUpdate);
       }
     }
   });
