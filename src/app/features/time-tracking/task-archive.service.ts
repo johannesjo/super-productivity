@@ -1,7 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { roundTimeSpentForDay } from '../tasks/store/task.actions';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
-import { taskReducer } from '../tasks/store/task.reducer';
+import { TASK_FEATURE_NAME, taskReducer } from '../tasks/store/task.reducer';
+import { taskSharedCrudMetaReducer } from '../../root-store/meta/task-shared-meta-reducers/task-shared-crud.reducer';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { Task, TaskArchive, TaskState } from '../tasks/task.model';
 import { RoundTimeOption } from '../project/project.model';
@@ -10,6 +11,23 @@ import { ArchiveModel } from './time-tracking.model';
 import { ModelCfgToModelCtrl } from '../../pfapi/api';
 import { PfapiAllModelCfg } from '../../pfapi/pfapi-config';
 import { Log } from '../../core/log';
+import { RootState } from '../../root-store/root-state';
+import { PROJECT_FEATURE_NAME } from '../project/store/project.reducer';
+import { TAG_FEATURE_NAME } from '../tag/store/tag.reducer';
+import { WORK_CONTEXT_FEATURE_NAME } from '../work-context/store/work-context.selectors';
+import { plannerFeatureKey } from '../planner/store/planner.reducer';
+
+// Create a minimal RootState with the archive task state
+// Other feature states are empty as they're not needed for task updates
+const FAKE_ROOT_STATE: RootState = {
+  [PROJECT_FEATURE_NAME]: { ids: [], entities: {} },
+  [TAG_FEATURE_NAME]: { ids: [], entities: {} },
+  [WORK_CONTEXT_FEATURE_NAME]: {
+    activeId: 'xyz',
+    activeType: 'TAG',
+  },
+  [plannerFeatureKey]: { days: {}, addPlannedTasksDialogLastShown: undefined },
+} as const as Partial<RootState> as RootState;
 
 type TaskArchiveAction =
   | ReturnType<typeof TaskSharedActions.updateTask>
@@ -336,7 +354,26 @@ export class TaskArchiveService {
     archiveBefore: ArchiveModel,
     action: TaskArchiveAction,
   ): TaskState {
-    return taskReducer(archiveBefore.task as TaskState, action);
+    // Create a wrapped reducer that combines taskReducer with the meta-reducer
+    const wrappedReducer = taskSharedCrudMetaReducer((state: RootState, act: any) => {
+      // Only update the task feature state
+      return {
+        ...state,
+        [TASK_FEATURE_NAME]: taskReducer(state[TASK_FEATURE_NAME], act),
+      };
+    });
+
+    // Create root state with the actual archive task state
+    const rootStateWithArchiveTasks: RootState = {
+      ...FAKE_ROOT_STATE,
+      [TASK_FEATURE_NAME]: archiveBefore.task as TaskState,
+    };
+
+    // Apply the action through the wrapped reducer
+    const updatedRootState = wrappedReducer(rootStateWithArchiveTasks, action);
+
+    // Extract and return the updated task state
+    return updatedRootState[TASK_FEATURE_NAME];
   }
 
   // more beautiful but less efficient

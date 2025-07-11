@@ -1,6 +1,5 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { restoreTask } from './task.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { filter, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { Task } from '../task.model';
@@ -28,7 +27,7 @@ export class TaskRelatedModelEffects {
   restoreTask$: any = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(restoreTask),
+        ofType(TaskSharedActions.restoreTask),
         tap(({ task }) => this._removeFromArchive(task)),
       ),
     { dispatch: false },

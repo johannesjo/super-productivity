@@ -2,7 +2,6 @@ import {
   __updateMultipleTaskSimple,
   addReminderIdToTask,
   addSubTask,
-  convertToMainTask,
   moveSubTask,
   moveSubTaskDown,
   moveSubTaskToBottom,
@@ -10,7 +9,6 @@ import {
   moveSubTaskUp,
   removeReminderFromTask,
   removeTimeSpent,
-  restoreTask,
   roundTimeSpentForDay,
   setCurrentTask,
   setSelectedTask,
@@ -27,7 +25,6 @@ import {
   getTaskById,
   reCalcTimesForParentIfParent,
   reCalcTimeSpentForParentIfParent,
-  removeTaskFromParentSideEffects,
   updateTimeSpentForTask,
 } from './task.reducer.util';
 import { taskAdapter } from './task.adapter';
@@ -436,26 +433,6 @@ export const taskReducer = createReducer<TaskState>(
     };
   }),
 
-  on(convertToMainTask, (state, { task, isPlanForToday }) => {
-    const par = state.entities[task.parentId as string];
-    if (!par) {
-      throw new Error('No parent for sub task');
-    }
-
-    const stateCopy = removeTaskFromParentSideEffects(state, task);
-    return taskAdapter.updateOne(
-      {
-        id: task.id,
-        changes: {
-          parentId: undefined,
-          tagIds: [...par.tagIds],
-          ...(isPlanForToday ? { dueDay: getWorklogStr() } : {}),
-        },
-      },
-      stateCopy,
-    );
-  }),
-
   on(toggleStart, (state) => {
     if (state.currentTaskId) {
       return {
@@ -517,15 +494,6 @@ export const taskReducer = createReducer<TaskState>(
     return {
       ...copyState,
     };
-  }),
-
-  on(restoreTask, (state, { task, subTasks = [] }) => {
-    const updatedTask = {
-      ...task,
-      isDone: false,
-      doneOn: undefined,
-    };
-    return taskAdapter.addMany([updatedTask, ...subTasks], state);
   }),
 
   // REPEAT STUFF
