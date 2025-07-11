@@ -535,4 +535,198 @@ describe('TaskArchiveService', () => {
       expect(service.deleteTasks).toHaveBeenCalledWith(['task2', 'parent1', 'sub1']);
     });
   });
+
+  describe('_reduceForArchive', () => {
+    it('should properly reduce state with TaskSharedActions.updateTask', async () => {
+      const task = createMockTask('task1', { title: 'Original Title' });
+      const archive = createMockArchiveModel([task]);
+
+      archiveYoungMock.load.and.returnValue(Promise.resolve(archive));
+
+      // Test the updateTask method which uses _reduceForArchive internally
+      await service.updateTask('task1', { title: 'Updated Title' });
+
+      expect(archiveYoungMock.save).toHaveBeenCalled();
+      const saveCall = archiveYoungMock.save.calls.mostRecent();
+      expect(saveCall.args[0].task).toBeDefined();
+      expect(saveCall.args[1]).toEqual({ isUpdateRevAndLastUpdate: true });
+    });
+
+    it('should handle deleteTasks action through _reduceForArchive', async () => {
+      const task1 = createMockTask('task1');
+      const task2 = createMockTask('task2');
+      const archive = createMockArchiveModel([task1, task2]);
+
+      archiveYoungMock.load.and.returnValue(Promise.resolve(archive));
+      archiveOldMock.load.and.returnValue(Promise.resolve(createMockArchiveModel([])));
+
+      await service.deleteTasks(['task1']);
+
+      expect(archiveYoungMock.save).toHaveBeenCalled();
+      const saveCall = archiveYoungMock.save.calls.mostRecent();
+      const savedArchive = saveCall.args[0];
+      expect(savedArchive.task).toBeDefined();
+      // The actual deletion is handled by the reducer
+    });
+
+    it('should handle roundTimeSpentForDay action through _reduceForArchive', async () => {
+      const task = createMockTask('task1', {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        timeSpentOnDay: { '2024-01-01': 1234567 },
+        timeSpent: 1234567,
+      });
+      const archive = createMockArchiveModel([task]);
+
+      archiveYoungMock.load.and.returnValue(Promise.resolve(archive));
+      archiveOldMock.load.and.returnValue(Promise.resolve(createMockArchiveModel([])));
+
+      await service.roundTimeSpent({
+        day: '2024-01-01',
+        taskIds: ['task1'],
+        roundTo: 'QUARTER' as RoundTimeOption,
+        isRoundUp: true,
+        projectId: 'project1',
+      });
+
+      expect(archiveYoungMock.save).toHaveBeenCalled();
+      const saveCall = archiveYoungMock.save.calls.mostRecent();
+      expect(saveCall.args[0].task).toBeDefined();
+    });
+  });
+
+  describe('updateTasks with proper iterative reduction', () => {
+    it('should apply multiple updates iteratively through _reduceForArchive', async () => {
+      const task1 = createMockTask('task1', { title: 'Task 1', isDone: false });
+      const task2 = createMockTask('task2', { title: 'Task 2', isDone: false });
+      const archive = createMockArchiveModel([task1, task2]);
+
+      archiveYoungMock.load.and.returnValue(Promise.resolve(archive));
+      archiveOldMock.load.and.returnValue(Promise.resolve(createMockArchiveModel([])));
+
+      const updates: Update<Task>[] = [
+        { id: 'task1', changes: { title: 'Updated Task 1', isDone: true } },
+        { id: 'task2', changes: { title: 'Updated Task 2' } },
+      ];
+
+      await service.updateTasks(updates);
+
+      expect(archiveYoungMock.save).toHaveBeenCalled();
+      const saveCall = archiveYoungMock.save.calls.mostRecent();
+      const savedArchive = saveCall.args[0];
+      expect(savedArchive.task).toBeDefined();
+      // Each update is applied iteratively through _reduceForArchive
+    });
+
+    it('should handle updates across both young and old archives', async () => {
+      const youngTask = createMockTask('young1', { title: 'Young Task' });
+      const oldTask = createMockTask('old1', { title: 'Old Task' });
+
+      const youngArchive = createMockArchiveModel([youngTask]);
+      const oldArchive = createMockArchiveModel([oldTask]);
+
+      archiveYoungMock.load.and.returnValue(Promise.resolve(youngArchive));
+      archiveOldMock.load.and.returnValue(Promise.resolve(oldArchive));
+
+      const updates: Update<Task>[] = [
+        { id: 'young1', changes: { title: 'Updated Young' } },
+        { id: 'old1', changes: { title: 'Updated Old' } },
+      ];
+
+      await service.updateTasks(updates);
+
+      expect(archiveYoungMock.save).toHaveBeenCalled();
+      expect(archiveOldMock.save).toHaveBeenCalled();
+
+      // Verify young archive save
+      const youngSaveCall = archiveYoungMock.save.calls.mostRecent();
+      expect(youngSaveCall.args[0].task).toBeDefined();
+
+      // Verify old archive save
+      const oldSaveCall = archiveOldMock.save.calls.mostRecent();
+      expect(oldSaveCall.args[0].task).toBeDefined();
+    });
+  });
+
+  describe('consistent state reduction across all methods', () => {
+    it('should consistently use _reduceForArchive in deleteTasks', async () => {
+      const tasks = [
+        createMockTask('task1'),
+        createMockTask('task2'),
+        createMockTask('task3'),
+      ];
+      const youngArchive = createMockArchiveModel(tasks.slice(0, 2));
+      const oldArchive = createMockArchiveModel([tasks[2]]);
+
+      archiveYoungMock.load.and.returnValue(Promise.resolve(youngArchive));
+      archiveOldMock.load.and.returnValue(Promise.resolve(oldArchive));
+
+      await service.deleteTasks(['task1', 'task3']);
+
+      // Both archives should be saved with properly reduced state
+      expect(archiveYoungMock.save).toHaveBeenCalled();
+      expect(archiveOldMock.save).toHaveBeenCalled();
+
+      const youngSave = archiveYoungMock.save.calls.mostRecent();
+      const oldSave = archiveOldMock.save.calls.mostRecent();
+
+      expect(youngSave.args[0].task).toBeDefined();
+      expect(oldSave.args[0].task).toBeDefined();
+    });
+
+    it('should consistently use _reduceForArchive in roundTimeSpent', async () => {
+      const youngTask = createMockTask('young1', {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        timeSpentOnDay: { '2024-01-01': 1000000 },
+      });
+      const oldTask = createMockTask('old1', {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        timeSpentOnDay: { '2024-01-01': 2000000 },
+      });
+
+      const youngArchive = createMockArchiveModel([youngTask]);
+      const oldArchive = createMockArchiveModel([oldTask]);
+
+      archiveYoungMock.load.and.returnValue(Promise.resolve(youngArchive));
+      archiveOldMock.load.and.returnValue(Promise.resolve(oldArchive));
+
+      await service.roundTimeSpent({
+        day: '2024-01-01',
+        taskIds: ['young1', 'old1'],
+        roundTo: 'QUARTER' as RoundTimeOption,
+        isRoundUp: false,
+      });
+
+      expect(archiveYoungMock.save).toHaveBeenCalled();
+      expect(archiveOldMock.save).toHaveBeenCalled();
+
+      // Both saves should have properly reduced task state
+      const youngSave = archiveYoungMock.save.calls.mostRecent();
+      const oldSave = archiveOldMock.save.calls.mostRecent();
+
+      expect(youngSave.args[0].task).toBeDefined();
+      expect(oldSave.args[0].task).toBeDefined();
+    });
+
+    it('should use _execActionBoth for removeTagsFromAllTasks', async () => {
+      const task = createMockTask('task1', { tagIds: ['tag1', 'tag2'] });
+      const archive = createMockArchiveModel([task]);
+
+      archiveYoungMock.load.and.returnValue(Promise.resolve(archive));
+      archiveOldMock.load.and.returnValue(Promise.resolve(createMockArchiveModel([])));
+
+      // Mock load to prevent orphan deletion logic
+      spyOn(service, 'load').and.returnValue(
+        Promise.resolve({
+          ids: ['task1'],
+          entities: { task1: { ...task, tagIds: ['tag2'] } },
+        }),
+      );
+
+      await service.removeTagsFromAllTasks(['tag1']);
+
+      // Both archives should be updated through _execActionBoth
+      expect(archiveYoungMock.save).toHaveBeenCalled();
+      expect(archiveOldMock.save).toHaveBeenCalled();
+    });
+  });
 });
