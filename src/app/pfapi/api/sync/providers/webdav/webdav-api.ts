@@ -44,9 +44,148 @@ export class WebdavApi {
   </D:prop>
 </D:propfind>`;
 
+  // Make IS_ANDROID_WEB_VIEW testable by making it a class property
+  protected get isAndroidWebView(): boolean {
+    return IS_ANDROID_WEB_VIEW;
+  }
+
   constructor(private _getCfgOrError: () => Promise<WebdavPrivateCfg>) {}
 
   // Utility methods to reduce duplication
+  /**
+   * Common upload retry logic for 404 and 409 errors
+   * Creates parent directories and retries the upload request
+   */
+  private async _retryUploadWithDirectoryCreation(
+    path: string,
+    data: string,
+    headers: Record<string, string>,
+    errorCode: number,
+  ): Promise<string> {
+    const context = errorCode === 404 ? 'upload-404-retry' : 'upload-409-retry';
+    PFLog.error(
+      `${WebdavApi.L}.upload() ${errorCode} ${errorCode === 404 ? 'not found' : 'conflict'}, attempting to create parent directories`,
+      { path },
+    );
+
+    try {
+      await this._ensureParentDirectoryExists(path);
+
+      // Retry the upload
+      const retryResponse = await this._makeRequest({
+        method: 'PUT',
+        path,
+        body: data,
+        headers,
+      });
+
+      const retryHeaderObj = this._responseHeadersToObject(retryResponse);
+      const retryEtag = this._findEtagInHeaders(retryHeaderObj);
+
+      if (!retryEtag) {
+        return await this._retrieveEtagWithFallback(path, retryHeaderObj, context);
+      }
+
+      return retryEtag;
+    } catch (retryError: any) {
+      PFLog.err(`${WebdavApi.L}.upload() retry after ${errorCode} failed`, retryError);
+      if (retryError instanceof RemoteFileNotFoundAPIError) {
+        throw retryError;
+      }
+      if (retryError instanceof NoEtagAPIError) {
+        throw retryError;
+      }
+      throw new Error(
+        `Upload failed after creating directories: ${retryError?.message || 'Unknown error'}`,
+      );
+    }
+  }
+
+  /**
+   * Validates that response content is not an HTML error page
+   * Used by operations that expect specific content types
+   */
+  private _validateResponseContent(
+    content: string,
+    path: string,
+    operation: string,
+    expectedContentDescription: string = 'content',
+  ): void {
+    if (this._isHtmlResponse(content)) {
+      PFLog.error(
+        `${WebdavApi.L}.${operation}() received HTML error page instead of ${expectedContentDescription}`,
+        {
+          path,
+          responseSnippet: content.substring(0, 200),
+        },
+      );
+      throw new RemoteFileNotFoundAPIError(path);
+    }
+  }
+
+  /**
+   * Validates XML response and throws appropriate error if HTML error page is received
+   * Used by operations that expect XML responses (PROPFIND, etc.)
+   */
+  private _validateAndParseXmlResponse(
+    xmlText: string,
+    path: string,
+    operation: string = 'XML operation',
+  ): FileMeta {
+    this._validateResponseContent(xmlText, path, operation, 'XML');
+
+    const fileMeta = this._parsePropsFromXml(xmlText, path);
+
+    if (!fileMeta) {
+      throw new RemoteFileNotFoundAPIError(path);
+    }
+
+    return fileMeta;
+  }
+
+  /**
+   * Common ETag retrieval fallback chain: response headers -> PROPFIND -> GET (optional)
+   * Used by upload, download, and other operations that need ETags
+   */
+  private async _retrieveEtagWithFallback(
+    path: string,
+    headers?: Record<string, string>,
+    context: string = 'operation',
+  ): Promise<string> {
+    // Try response headers first if provided
+    if (headers) {
+      const etag = this._findEtagInHeaders(headers);
+      if (etag) {
+        return etag;
+      }
+    }
+
+    // Fallback to PROPFIND
+    try {
+      const meta = await this.getFileMeta(path, null);
+      return meta.etag;
+    } catch (metaError) {
+      PFLog.err(`${WebdavApi.L}.${context}() failed to get etag via PROPFIND`, metaError);
+
+      // Last resort: try GET request to retrieve ETag
+      try {
+        PFLog.error(
+          `${WebdavApi.L}.${context}() attempting GET request fallback for etag`,
+        );
+        const { rev } = await this.download({ path });
+        return rev;
+      } catch (getError) {
+        PFLog.err(
+          `${WebdavApi.L}.${context}() GET request fallback also failed`,
+          getError,
+        );
+        throw new NoEtagAPIError({
+          path,
+          attemptedMethods: ['response-headers', 'PROPFIND', 'GET'],
+        });
+      }
+    }
+  }
   private _responseHeadersToObject(response: Response): Record<string, string> {
     const headers: Record<string, string> = {};
     response.headers.forEach((value, key) => {
@@ -81,31 +220,6 @@ export class WebdavApi {
     );
   }
 
-  private _handleWebDavError(error: any, operation: string, path: string): void {
-    const status = error?.status;
-    PFLog.critical(`${WebdavApi.L}.${operation}() error`, { path, error });
-
-    switch (status) {
-      case 401:
-      case 403:
-        throw new AuthFailSPError(`WebDAV ${status}`, path);
-      case 404:
-        throw new RemoteFileNotFoundAPIError(path);
-      case 409:
-        throw new Error(`Conflict: ${path} (parent directory may not exist)`);
-      case 412:
-        throw new Error(`Precondition failed: ${path} (file was modified)`);
-      case 413:
-        throw new Error(`File too large: ${path}`);
-      case 423:
-        throw new Error(`Resource is locked: ${path}`);
-      case 507:
-        throw new Error(`Insufficient storage space for: ${path}`);
-      default:
-        throw error;
-    }
-  }
-
   async upload({
     data,
     path,
@@ -136,164 +250,24 @@ export class WebdavApi {
       const etag = this._findEtagInHeaders(responseHeaderObj);
 
       if (!etag) {
-        PFLog.error(`${WebdavApi.L}.upload() no etag in response headers`, {
-          path,
-          headers: responseHeaderObj,
-        });
-        // Try to get etag by doing a PROPFIND immediately after upload
-        try {
-          const meta = await this.getFileMeta(path, null);
-          return meta.etag;
-        } catch (metaError) {
-          PFLog.critical(
-            `${WebdavApi.L}.upload() failed to get etag via PROPFIND`,
-            metaError,
-          );
-          // Last resort: try GET request to retrieve ETag
-          try {
-            PFLog.error(
-              `${WebdavApi.L}.upload() attempting GET request fallback for etag`,
-            );
-            const { rev } = await this.download({ path });
-            return rev;
-          } catch (getError) {
-            PFLog.critical(
-              `${WebdavApi.L}.upload() GET request fallback also failed`,
-              getError,
-            );
-            // If all methods fail, we have no ETag to return
-            throw new NoEtagAPIError({
-              path,
-              attemptedMethods: ['response-headers', 'PROPFIND', 'GET'],
-            });
-          }
-        }
+        return await this._retrieveEtagWithFallback(path, responseHeaderObj, 'upload');
       }
 
       return etag;
     } catch (e: any) {
-      PFLog.critical(`${WebdavApi.L}.upload() error`, { path, error: e });
+      PFLog.err(`${WebdavApi.L}.upload() error`, { path, error: e });
 
       // Check if it's a RemoteFileNotFoundAPIError (404)
       if (e instanceof RemoteFileNotFoundAPIError || e?.status === 404) {
         // Not found - parent directory might not exist (some WebDAV servers return 404 instead of 409)
-        PFLog.error(
-          `${WebdavApi.L}.upload() 404 not found, attempting to create parent directories`,
-          { path },
-        );
-        try {
-          await this._ensureParentDirectoryExists(path);
-
-          // Retry the upload
-          const retryResponse = await this._makeRequest({
-            method: 'PUT',
-            path,
-            body: data,
-            headers,
-          });
-
-          const retryHeaderObj = this._responseHeadersToObject(retryResponse);
-          const retryEtag = this._findEtagInHeaders(retryHeaderObj);
-
-          if (!retryEtag) {
-            try {
-              const meta = await this.getFileMeta(path, null);
-              return meta.etag;
-            } catch (metaError) {
-              PFLog.critical(
-                `${WebdavApi.L}.upload() failed to get etag after retry`,
-                metaError,
-              );
-              // Last resort: try GET request to retrieve ETag
-              try {
-                PFLog.error(
-                  `${WebdavApi.L}.upload() attempting GET request fallback for etag after retry`,
-                );
-                const { rev } = await this.download({ path });
-                return rev;
-              } catch (getError) {
-                PFLog.critical(
-                  `${WebdavApi.L}.upload() GET request fallback also failed after retry`,
-                  getError,
-                );
-                throw new NoEtagAPIError({
-                  path,
-                  attemptedMethods: ['response-headers', 'PROPFIND', 'GET'],
-                });
-              }
-            }
-          }
-
-          return retryEtag;
-        } catch (retryError: any) {
-          PFLog.critical(`${WebdavApi.L}.upload() retry after 404 failed`, retryError);
-          if (retryError instanceof RemoteFileNotFoundAPIError) {
-            throw retryError;
-          }
-          throw new Error(
-            `Upload failed after creating directories: ${retryError?.message || 'Unknown error'}`,
-          );
-        }
+        return await this._retryUploadWithDirectoryCreation(path, data, headers, 404);
       }
 
       // Enhanced error handling for WebDAV-specific scenarios
       switch (e?.status) {
         case 409:
           // Conflict - parent directory doesn't exist
-          PFLog.error(
-            `${WebdavApi.L}.upload() 409 conflict, attempting to create parent directories`,
-            { path },
-          );
-          try {
-            await this._ensureParentDirectoryExists(path);
-
-            // Retry the upload
-            const retryResponse = await this._makeRequest({
-              method: 'PUT',
-              path,
-              body: data,
-              headers,
-            });
-
-            const retryHeaderObj = this._responseHeadersToObject(retryResponse);
-            const retryEtag = this._findEtagInHeaders(retryHeaderObj);
-
-            if (!retryEtag) {
-              try {
-                const meta = await this.getFileMeta(path, null);
-                return meta.etag;
-              } catch (metaError) {
-                PFLog.critical(
-                  `${WebdavApi.L}.upload() failed to get etag after retry`,
-                  metaError,
-                );
-                // Last resort: try GET request to retrieve ETag
-                try {
-                  PFLog.error(
-                    `${WebdavApi.L}.upload() attempting GET request fallback for etag after 409 retry`,
-                  );
-                  const { rev } = await this.download({ path });
-                  return rev;
-                } catch (getError) {
-                  PFLog.critical(
-                    `${WebdavApi.L}.upload() GET request fallback also failed after 409 retry`,
-                    getError,
-                  );
-                  throw new NoEtagAPIError({
-                    path,
-                    attemptedMethods: ['response-headers', 'PROPFIND', 'GET'],
-                  });
-                }
-              }
-            }
-
-            return retryEtag;
-          } catch (retryError: any) {
-            PFLog.critical(`${WebdavApi.L}.upload() retry after 409 failed`, retryError);
-            throw new Error(
-              `Upload failed: ${retryError?.message || 'Directory creation or upload conflict'}`,
-            );
-          }
+          return await this._retryUploadWithDirectoryCreation(path, data, headers, 409);
         case 412:
           // Precondition Failed - conditional header failed
           if (expectedEtag) {
@@ -336,26 +310,7 @@ export class WebdavApi {
       });
 
       const xmlText = await response.text();
-
-      // Check if response is HTML instead of XML
-      if (this._isHtmlResponse(xmlText)) {
-        PFLog.error(
-          `${WebdavApi.L}.getFileMeta() received HTML response instead of XML`,
-          {
-            path,
-            responseSnippet: xmlText.substring(0, 200),
-          },
-        );
-        throw new RemoteFileNotFoundAPIError(path);
-      }
-
-      const fileMeta = this._parsePropsFromXml(xmlText, path);
-
-      if (!fileMeta) {
-        throw new RemoteFileNotFoundAPIError(path);
-      }
-
-      return fileMeta;
+      return this._validateAndParseXmlResponse(xmlText, path, 'getFileMeta');
     } catch (e: any) {
       if (e?.status === 404) {
         throw new RemoteFileNotFoundAPIError(path);
@@ -416,7 +371,7 @@ export class WebdavApi {
                 },
               };
             } catch (getError: any) {
-              PFLog.critical(
+              PFLog.err(
                 `${WebdavApi.L}.getFileMeta() GET fallback also failed`,
                 getError,
               );
@@ -493,17 +448,8 @@ export class WebdavApi {
       // Get response data
       const dataStr = await response.text();
 
-      // Check if response is HTML instead of file content
-      if (this._isHtmlResponse(dataStr)) {
-        PFLog.error(
-          `${WebdavApi.L}.download() received HTML error page instead of file content`,
-          {
-            path,
-            responseSnippet: dataStr.substring(0, 200),
-          },
-        );
-        throw new RemoteFileNotFoundAPIError(path);
-      }
+      // Validate that we didn't receive an HTML error page
+      this._validateResponseContent(dataStr, path, 'download', 'file content');
 
       // Validate response content
       if (!dataStr && response.status === 200) {
@@ -534,7 +480,7 @@ export class WebdavApi {
           if (metaError instanceof RemoteFileNotFoundAPIError) {
             throw metaError;
           }
-          PFLog.critical(`${WebdavApi.L}.download() PROPFIND fallback failed`, metaError);
+          PFLog.err(`${WebdavApi.L}.download() PROPFIND fallback failed`, metaError);
           // Use content-based hash as last resort
           const crypto = globalThis.crypto || (globalThis as any).msCrypto;
           if (crypto && crypto.subtle) {
@@ -551,10 +497,7 @@ export class WebdavApi {
                 dataStr,
               };
             } catch (hashError) {
-              PFLog.critical(
-                `${WebdavApi.L}.download() hash generation failed`,
-                hashError,
-              );
+              PFLog.err(`${WebdavApi.L}.download() hash generation failed`, hashError);
             }
           }
           throw new NoEtagAPIError(headerObj);
@@ -566,7 +509,7 @@ export class WebdavApi {
         dataStr,
       };
     } catch (e: any) {
-      PFLog.critical(`${WebdavApi.L}.download() error`, { path, error: e });
+      PFLog.err(`${WebdavApi.L}.download() error`, { path, error: e });
 
       // Enhanced error handling
       switch (e?.status) {
@@ -604,7 +547,10 @@ export class WebdavApi {
         const meta = await this.getFileMeta(path, null);
         resourceType = meta.type;
       } catch (checkError: any) {
-        if (checkError?.status === 404) {
+        if (
+          checkError?.status === 404 ||
+          checkError instanceof RemoteFileNotFoundAPIError
+        ) {
           // Resource doesn't exist, consider deletion successful
           PFLog.normal(`${WebdavApi.L}.remove() resource already doesn't exist: ${path}`);
           return;
@@ -641,7 +587,7 @@ export class WebdavApi {
 
       PFLog.normal(`${WebdavApi.L}.remove() successfully deleted: ${path}`);
     } catch (e: any) {
-      PFLog.critical(`${WebdavApi.L}.remove() error`, { path, error: e });
+      PFLog.err(`${WebdavApi.L}.remove() error`, { path, error: e });
 
       // Enhanced error handling for WebDAV DELETE
       if (e instanceof RemoteFileNotFoundAPIError || e?.status === 404) {
@@ -692,7 +638,7 @@ export class WebdavApi {
         const status = response.querySelector('status')?.textContent;
 
         if (href && status && !status.includes('200') && !status.includes('204')) {
-          PFLog.critical(
+          PFLog.err(
             `${WebdavApi.L}._checkDeleteMultiStatusResponse() deletion failed for`,
             {
               href,
@@ -706,7 +652,7 @@ export class WebdavApi {
 
       return hasErrors;
     } catch (parseError) {
-      PFLog.critical(
+      PFLog.err(
         `${WebdavApi.L}._checkDeleteMultiStatusResponse() XML parsing error`,
         parseError,
       );
@@ -719,7 +665,7 @@ export class WebdavApi {
       await this.getFileMeta(path, null);
       return true;
     } catch (e: any) {
-      if (e?.status === 404) {
+      if (e?.status === 404 || e instanceof RemoteFileNotFoundAPIError) {
         return false;
       }
       throw e;
@@ -770,7 +716,7 @@ export class WebdavApi {
         },
       };
     } catch (error: any) {
-      PFLog.critical(`${WebdavApi.L}.testConnection() failed`, { error });
+      PFLog.err(`${WebdavApi.L}.testConnection() failed`, { error });
       return {
         success: false,
         message: `WebDAV connection failed: ${error?.message || 'Unknown error'}`,
@@ -792,7 +738,7 @@ export class WebdavApi {
       return this._cleanRev(d[etagKey]);
     }
 
-    PFLog.critical(`${WebdavApi.L}.getRevFromMeta() No etag found in metadata`, {
+    PFLog.err(`${WebdavApi.L}.getRevFromMeta() No etag found in metadata`, {
       availableKeys: Object.keys(d),
       metadata: d,
     });
@@ -804,10 +750,13 @@ export class WebdavApi {
       folderPath,
     });
 
+    // Ensure folder path has trailing slash for MKCOL requests
+    const normalizedFolderPath = folderPath.endsWith('/') ? folderPath : `${folderPath}/`;
+
     try {
       await this._makeRequest({
         method: 'MKCOL',
-        path: folderPath,
+        path: normalizedFolderPath,
       });
       PFLog.normal(
         `${WebdavApi.L}.createFolder() successfully created folder with MKCOL`,
@@ -816,7 +765,7 @@ export class WebdavApi {
         },
       );
     } catch (e: any) {
-      PFLog.critical(`${WebdavApi.L}.createFolder() MKCOL error`, {
+      PFLog.err(`${WebdavApi.L}.createFolder() MKCOL error`, {
         folderPath,
         error: e,
         status: e?.status,
@@ -837,7 +786,7 @@ export class WebdavApi {
           `${WebdavApi.L}.createFolder() MKCOL failed with status ${e?.status}, trying PUT fallback`,
         );
         try {
-          const putPath = `${folderPath}/.folder`;
+          const putPath = `${normalizedFolderPath}.folder`;
           PFLog.normal(`${WebdavApi.L}.createFolder() attempting PUT to`, { putPath });
 
           await this._makeRequest({
@@ -856,7 +805,7 @@ export class WebdavApi {
             },
           );
         } catch (putError: any) {
-          PFLog.critical(`${WebdavApi.L}.createFolder() PUT fallback failed`, {
+          PFLog.err(`${WebdavApi.L}.createFolder() PUT fallback failed`, {
             folderPath,
             error: putError,
             status: putError?.status,
@@ -894,20 +843,17 @@ export class WebdavApi {
                     await this.createFolder({ folderPath: currentPath });
                   }
                 } catch (parentError) {
-                  PFLog.critical(
-                    `${WebdavApi.L}.createFolder() failed to create parent`,
-                    {
-                      currentPath,
-                      error: parentError,
-                    },
-                  );
+                  PFLog.err(`${WebdavApi.L}.createFolder() failed to create parent`, {
+                    currentPath,
+                    error: parentError,
+                  });
                 }
               }
             }
 
             // Try one more time with a different approach - create a .gitkeep file
             try {
-              const gitkeepPath = `${folderPath}/.gitkeep`;
+              const gitkeepPath = `${normalizedFolderPath}.gitkeep`;
               PFLog.normal(`${WebdavApi.L}.createFolder() trying .gitkeep approach`, {
                 gitkeepPath,
               });
@@ -927,13 +873,10 @@ export class WebdavApi {
               );
               return;
             } catch (gitkeepError) {
-              PFLog.critical(
-                `${WebdavApi.L}.createFolder() .gitkeep approach also failed`,
-                {
-                  folderPath,
-                  error: gitkeepError,
-                },
-              );
+              PFLog.err(`${WebdavApi.L}.createFolder() .gitkeep approach also failed`, {
+                folderPath,
+                error: gitkeepError,
+              });
             }
           }
 
@@ -965,7 +908,7 @@ export class WebdavApi {
     }
 
     // Use CapacitorHttp directly on Android to bypass the broken interceptor
-    if (IS_ANDROID_WEB_VIEW) {
+    if (this.isAndroidWebView) {
       try {
         const capacitorResponse = await CapacitorHttp.request({
           url: this._getUrl(path, cfg),
@@ -1021,7 +964,7 @@ export class WebdavApi {
         ];
 
         if (!validWebDavStatuses.includes(response.status)) {
-          PFLog.critical(`${WebdavApi.L}._makeRequest() HTTP error`, {
+          PFLog.err(`${WebdavApi.L}._makeRequest() HTTP error`, {
             method,
             path,
             status: response.status,
@@ -1030,7 +973,7 @@ export class WebdavApi {
         }
         return response;
       } catch (e) {
-        PFLog.critical(`${WebdavApi.L}._makeRequest() CapacitorHttp error`, {
+        PFLog.err(`${WebdavApi.L}._makeRequest() CapacitorHttp error`, {
           method,
           path,
           error: e,
@@ -1078,7 +1021,7 @@ export class WebdavApi {
       ];
 
       if (!validWebDavStatuses.includes(response.status)) {
-        PFLog.critical(`${WebdavApi.L}._makeRequest() HTTP error`, {
+        PFLog.err(`${WebdavApi.L}._makeRequest() HTTP error`, {
           method,
           path,
           status: response.status,
@@ -1088,7 +1031,7 @@ export class WebdavApi {
       }
       return response;
     } catch (e) {
-      PFLog.critical(`${WebdavApi.L}._makeRequest() network error`, {
+      PFLog.err(`${WebdavApi.L}._makeRequest() network error`, {
         method,
         path,
         error: e,
@@ -1200,19 +1143,16 @@ export class WebdavApi {
     try {
       // Check if xmlText is empty or not valid XML
       if (!xmlText || xmlText.trim() === '') {
-        PFLog.critical(`${WebdavApi.L}._parsePropsFromXml() Empty XML response`);
+        PFLog.err(`${WebdavApi.L}._parsePropsFromXml() Empty XML response`);
         return null;
       }
 
       // Check if response is HTML instead of XML
       if (this._isHtmlResponse(xmlText)) {
-        PFLog.critical(
-          `${WebdavApi.L}._parsePropsFromXml() Received HTML instead of XML`,
-          {
-            requestPath,
-            responseSnippet: xmlText.substring(0, 200),
-          },
-        );
+        PFLog.err(`${WebdavApi.L}._parsePropsFromXml() Received HTML instead of XML`, {
+          requestPath,
+          responseSnippet: xmlText.substring(0, 200),
+        });
         return null;
       }
 
@@ -1222,7 +1162,7 @@ export class WebdavApi {
       // Check for parsing errors
       const parserError = xmlDoc.querySelector('parsererror');
       if (parserError) {
-        PFLog.critical(
+        PFLog.err(
           `${WebdavApi.L}._parsePropsFromXml() XML parsing error`,
           parserError.textContent,
         );
@@ -1247,12 +1187,12 @@ export class WebdavApi {
         }
       }
 
-      PFLog.critical(
+      PFLog.err(
         `${WebdavApi.L}._parsePropsFromXml() No matching response found for path: ${requestPath}`,
       );
       return null;
     } catch (error) {
-      PFLog.critical(`${WebdavApi.L}._parsePropsFromXml() parsing error`, error);
+      PFLog.err(`${WebdavApi.L}._parsePropsFromXml() parsing error`, error);
       return null;
     }
   }
@@ -1287,7 +1227,7 @@ export class WebdavApi {
 
       const parserError = xmlDoc.querySelector('parsererror');
       if (parserError) {
-        PFLog.critical(
+        PFLog.err(
           `${WebdavApi.L}._parseMultiplePropsFromXml() XML parsing error`,
           parserError.textContent,
         );
@@ -1304,7 +1244,11 @@ export class WebdavApi {
         const decodedHref = decodeURIComponent(href);
 
         // Skip the base path itself (we only want children)
-        if (decodedHref.replace(/\/$/, '') === basePath.replace(/\/$/, '')) {
+        // Normalize both paths: remove leading/trailing slashes for comparison
+        const normalizedHref = decodedHref.replace(/^\//, '').replace(/\/$/, '');
+        const normalizedBasePath = basePath.replace(/^\//, '').replace(/\/$/, '');
+
+        if (normalizedHref === normalizedBasePath) {
           continue;
         }
 
@@ -1316,7 +1260,7 @@ export class WebdavApi {
 
       return results;
     } catch (error) {
-      PFLog.critical(`${WebdavApi.L}._parseMultiplePropsFromXml() parsing error`, error);
+      PFLog.err(`${WebdavApi.L}._parseMultiplePropsFromXml() parsing error`, error);
       return [];
     }
   }
@@ -1367,7 +1311,7 @@ export class WebdavApi {
 
         // Check if it's a 404 error, which might indicate the parent doesn't exist
         if (error?.status === 404 || error instanceof RemoteFileNotFoundAPIError) {
-          PFLog.critical(
+          PFLog.err(
             `${WebdavApi.L}._ensureParentDirectoryExists() got 404 for directory creation, this might indicate a path issue`,
             { currentPath },
           );
@@ -1383,14 +1327,14 @@ export class WebdavApi {
   }
 
   private _checkCommonErrors(e: any, targetPath: string): void {
-    PFLog.critical(`${WebdavApi.L} API error for ${targetPath}`, e);
+    PFLog.err(`${WebdavApi.L} API error for ${targetPath}`, e);
 
     const status = e?.status || e?.response?.status;
     // Handle common HTTP error codes
     switch (status) {
       case 401:
       case 403:
-        throw new AuthFailSPError(`WebDAV ${e.status}`, targetPath);
+        throw new AuthFailSPError(`WebDAV ${status}`, targetPath);
       case 207:
         // Multi-Status is normal for WebDAV PROPFIND responses
         break;
