@@ -96,8 +96,8 @@ export const generateTaskOperations = (
           // Track this parent change for cleanup
           tasksWithChangedParents.push({
             taskId: spTask.id!,
-            oldParentId: spTask.parentId,
-            newParentId: mdTask.parentId,
+            oldParentId: spTask.parentId || null,
+            newParentId: mdTask.parentId || null,
           });
         }
 
@@ -151,8 +151,8 @@ export const generateTaskOperations = (
           // Track this parent change for cleanup
           tasksWithChangedParents.push({
             taskId: spTask.id!,
-            oldParentId: spTask.parentId,
-            newParentId: mdTask.parentId,
+            oldParentId: spTask.parentId || null,
+            newParentId: mdTask.parentId || null,
           });
         }
 

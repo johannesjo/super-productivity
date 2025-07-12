@@ -31,6 +31,7 @@ export const mdToSp = async (
   if (operations.length > 0) {
     console.log(
       `[sync-md] Executing ${operations.length} sync operations for project ${projectId}`,
+      operations,
     );
 
     // Use the operations directly - they already match the expected BatchOperation format

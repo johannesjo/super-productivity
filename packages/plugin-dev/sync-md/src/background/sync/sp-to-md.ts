@@ -136,7 +136,7 @@ export const convertTasksToMarkdown = (tasks: Task[]): string => {
   const allSubtasks = tasks.filter((task) => task.parentId);
   const parentIds = new Set(parentTasks.map((t) => t.id));
   const orphanedSubtasks = allSubtasks.filter(
-    (subtask) => !parentIds.has(subtask.parentId),
+    (subtask) => subtask.parentId && !parentIds.has(subtask.parentId),
   );
 
   for (const orphan of orphanedSubtasks) {
