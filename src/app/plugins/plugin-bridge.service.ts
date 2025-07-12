@@ -150,7 +150,7 @@ export class PluginBridgeService implements OnDestroy {
         this._executeNodeScript(pluginId, manifest || null, request),
 
       // Logging
-      log: () => Log.withContext(`${pluginId}`),
+      log: Log.withContext(`${pluginId}`),
     };
   }
 

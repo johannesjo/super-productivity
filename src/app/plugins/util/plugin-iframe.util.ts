@@ -452,13 +452,12 @@ export const handlePluginMessage = async (
       }
 
       // Check if this method is available in bound methods
-      const boundMethods = config.boundMethods as Record<
-        string,
-        (...args: unknown[]) => unknown
-      >;
+      const boundMethods = config.boundMethods as Record<string, unknown>;
       if (boundMethods && typeof boundMethods[method] === 'function') {
         // Use the bound method
-        const result = await boundMethods[method](...(args || []));
+        const result = await (boundMethods[method] as (...args: unknown[]) => unknown)(
+          ...(args || []),
+        );
         (event.source as Window)?.postMessage(
           {
             type: PluginIframeMessageType.API_RESPONSE,
