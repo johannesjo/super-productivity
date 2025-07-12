@@ -341,7 +341,7 @@ export class SyncWrapperService {
 
     try {
       await Promise.all([
-        this._dataInitService.reInit(true),
+        this._dataInitService.reInit(),
         this._reminderService.reloadFromDatabase(),
       ]);
 
