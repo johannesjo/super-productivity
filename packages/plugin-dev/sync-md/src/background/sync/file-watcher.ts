@@ -1,4 +1,5 @@
 import { FILE_WATCH_POLL_INTERVAL_MS } from '../config.const';
+import { lazySetInterval } from '../helper/lazy-set-interval';
 
 interface NodeScriptResult {
   success: boolean;
@@ -6,7 +7,7 @@ interface NodeScriptResult {
   error?: string;
 }
 
-let watchInterval: number | null = null;
+let clearIntervalFn: (() => void) | null = null;
 let lastMtime: Date | null = null;
 
 export const startFileWatcher = (filePath: string, onChange: () => void): void => {
@@ -27,7 +28,7 @@ export const startFileWatcher = (filePath: string, onChange: () => void): void =
     });
 
   // Poll for changes
-  watchInterval = window.setInterval(async () => {
+  clearIntervalFn = lazySetInterval(async () => {
     try {
       const currentMtime = await getFileMtime(filePath);
       if (lastMtime && currentMtime && currentMtime.getTime() !== lastMtime.getTime()) {
@@ -44,9 +45,9 @@ export const startFileWatcher = (filePath: string, onChange: () => void): void =
 };
 
 export const stopFileWatcher = (): void => {
-  if (watchInterval) {
-    clearInterval(watchInterval);
-    watchInterval = null;
+  if (clearIntervalFn) {
+    clearIntervalFn();
+    clearIntervalFn = null;
   }
   lastMtime = null;
 };
@@ -74,6 +75,7 @@ const getFileMtime = async (filePath: string): Promise<Date | null> => {
 
   const nodeResult = result.result as NodeScriptResult;
   if (!result.success || !nodeResult?.success) {
+    // TODO fix typing
     throw new Error(nodeResult?.error || result.error || 'Failed to get file stats');
   }
 

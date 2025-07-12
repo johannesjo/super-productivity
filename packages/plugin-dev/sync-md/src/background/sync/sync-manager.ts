@@ -12,10 +12,9 @@ import { LocalUserCfg } from '../local-config';
 import { logSyncVerification, verifySyncState } from './verify-sync';
 
 let syncInProgress = false;
-let lastSyncTime: Date | null = null;
-let mdToSpDebounceTimer: NodeJS.Timeout | null = null;
-let spToMdDebounceTimer: NodeJS.Timeout | null = null;
-let isWindowFocused = false;
+let mdToSpDebounceTimer: number | null = null;
+let spToMdDebounceTimer: number | null = null;
+let isWindowFocused = document.hasFocus();
 let pendingMdToSpSync: LocalUserCfg | null = null;
 
 export const initSyncManager = (config: LocalUserCfg): void => {
@@ -43,26 +42,21 @@ const performInitialSync = async (config: LocalUserCfg): Promise<void> => {
 
   try {
     const fileStats = await getFileStats(config.filePath);
-    const lastSpChange = getLastSpChangeTime();
 
     // Determine sync direction
     if (!fileStats) {
       // No file exists, create from SP
       await spToMd(config);
-    } else if (!lastSpChange || fileStats.mtime > lastSpChange) {
+    } else {
       // File is newer, sync to SP
       const content = await readTasksFile(config.filePath);
       if (content) {
-        // Use the project ID from config, fallback to default
         const projectId = config.projectId;
         await mdToSp(content, projectId);
       }
-    } else {
-      // SP is newer, sync to file
-      await spToMd(config);
     }
-
-    lastSyncTime = new Date();
+    // TODO there is no proper way to check for a newer state from SP
+    // TODO we should persist the last modified timestamp from the file when syncing and check if it changed. if not we always update from SP to MD
 
     // Verify sync state after initial sync
     const verificationResult = await verifySyncState(config);
@@ -75,14 +69,12 @@ const performInitialSync = async (config: LocalUserCfg): Promise<void> => {
 const handleFileChange = (config: LocalUserCfg): void => {
   if (mdToSpDebounceTimer) {
     console.log('[sync-md] Clearing existing MD to SP debounce timer');
-    clearTimeout(mdToSpDebounceTimer);
+    window.clearTimeout(mdToSpDebounceTimer);
   }
 
   // If window is focused, sync immediately without debounce
   if (isWindowFocused) {
-    console.log(
-      '[sync-md] File change detected while window is focused, syncing immediately',
-    );
+    console.log('[sync-md] file change & window:focused => syncing immediately');
     handleMdToSpSync(config);
     return;
   }
@@ -92,10 +84,10 @@ const handleFileChange = (config: LocalUserCfg): void => {
 
   // Use 10 second debounce for MD to SP sync when window is not focused
   console.log(
-    `[sync-md] File change detected while window is unfocused, debouncing for ${SYNC_DEBOUNCE_MS_MD_TO_SP}ms (10 seconds)`,
+    `[sync-md] file change & window:unfocused => debouncing for ${SYNC_DEBOUNCE_MS_MD_TO_SP}ms (10 seconds)`,
   );
 
-  mdToSpDebounceTimer = setTimeout(() => {
+  mdToSpDebounceTimer = window.setTimeout(() => {
     console.log('[sync-md] MD to SP debounce timer fired, executing sync');
     handleMdToSpSync(config);
   }, SYNC_DEBOUNCE_MS_MD_TO_SP);
@@ -119,7 +111,6 @@ const handleMdToSpSync = async (config: LocalUserCfg): Promise<void> => {
       const projectId = config.projectId;
       console.log(`[sync-md] Executing mdToSp for project: ${projectId}`);
       await mdToSp(content, projectId);
-      lastSyncTime = new Date();
 
       // Verify sync state after file change sync
       const verificationResult = await verifySyncState(config);
@@ -165,7 +156,7 @@ const setupSpHooks = (config: LocalUserCfg): void => {
 
 const handleSpChange = (config: LocalUserCfg): void => {
   if (spToMdDebounceTimer) {
-    clearTimeout(spToMdDebounceTimer);
+    window.clearTimeout(spToMdDebounceTimer);
   }
 
   console.log(
@@ -173,7 +164,7 @@ const handleSpChange = (config: LocalUserCfg): void => {
   );
 
   // For SP changes, we always use the short debounce since the user is actively using SP
-  spToMdDebounceTimer = setTimeout(async () => {
+  spToMdDebounceTimer = window.setTimeout(async () => {
     if (syncInProgress) return;
     syncInProgress = true;
 
@@ -184,7 +175,6 @@ const handleSpChange = (config: LocalUserCfg): void => {
 
     try {
       await spToMd(config);
-      lastSyncTime = new Date();
 
       // Verify sync state after SP change sync
       const verificationResult = await verifySyncState(config);
@@ -199,11 +189,6 @@ const handleSpChange = (config: LocalUserCfg): void => {
       syncInProgress = false;
     }
   }, SYNC_DEBOUNCE_MS);
-};
-
-const getLastSpChangeTime = (): Date | null => {
-  // This is a simplified version - in reality, you'd track the actual last change
-  return lastSyncTime;
 };
 
 const setupWindowFocusTracking = (): void => {
@@ -223,7 +208,7 @@ const setupWindowFocusTracking = (): void => {
       console.log(
         '[sync-md] Window gained focus, triggering pending MD to SP sync immediately',
       );
-      clearTimeout(mdToSpDebounceTimer);
+      window.clearTimeout(mdToSpDebounceTimer);
       mdToSpDebounceTimer = null;
 
       // Trigger the sync immediately with the stored config
@@ -232,6 +217,7 @@ const setupWindowFocusTracking = (): void => {
       handleMdToSpSync(configToSync);
     } else {
       console.log(
+        // eslint-disable-next-line max-len
         `[sync-md] Window focus conditions: focused=${isFocused}, wasFocused=${wasFocused}, pendingSync=${!!pendingMdToSpSync}, timer=${!!mdToSpDebounceTimer}`,
       );
     }

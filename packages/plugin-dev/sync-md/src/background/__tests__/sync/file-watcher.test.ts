@@ -106,7 +106,7 @@ describe('File Watcher', () => {
       });
 
       // Advance timer to trigger poll and wait for async completion
-      await jest.advanceTimersByTimeAsync(1000);
+      await jest.advanceTimersByTimeAsync(2000);
 
       expect(mockCallback).toHaveBeenCalledTimes(1);
     });
@@ -243,14 +243,14 @@ describe('File Watcher', () => {
         success: true,
         result: { success: true, mtime: mtime2.toISOString() },
       });
-      await jest.advanceTimersByTimeAsync(1000);
+      await jest.advanceTimersByTimeAsync(2000);
 
       // Second poll with another change
       mockExecuteNodeScript.mockResolvedValueOnce({
         success: true,
         result: { success: true, mtime: mtime3.toISOString() },
       });
-      await jest.advanceTimersByTimeAsync(1000);
+      await jest.advanceTimersByTimeAsync(2000);
 
       // Each change triggers one callback
       expect(mockCallback).toHaveBeenCalledTimes(2);
