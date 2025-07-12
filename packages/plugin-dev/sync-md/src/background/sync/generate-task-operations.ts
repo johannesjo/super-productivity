@@ -91,7 +91,10 @@ export const generateTaskOperations = (
         }
 
         // Handle parent relationship
-        if (spTask.parentId !== mdTask.parentId) {
+        // Normalize undefined and null to null for comparison
+        const spParentId = spTask.parentId || null;
+        const mdParentId = mdTask.parentId || null;
+        if (spParentId !== mdParentId) {
           updates.parentId = mdTask.parentId;
           // Track this parent change for cleanup
           tasksWithChangedParents.push({
@@ -146,7 +149,10 @@ export const generateTaskOperations = (
         }
 
         // Handle parent relationship
-        if (spTask.parentId !== mdTask.parentId) {
+        // Normalize undefined and null to null for comparison
+        const spParentId = spTask.parentId || null;
+        const mdParentId = mdTask.parentId || null;
+        if (spParentId !== mdParentId) {
           updates.parentId = mdTask.parentId;
           // Track this parent change for cleanup
           tasksWithChangedParents.push({
@@ -322,14 +328,18 @@ export const generateTaskOperations = (
   subtasksByParent.forEach((subtasks, parentId) => {
     const parentTask = spById.get(parentId);
     if (parentTask) {
-      // Map subtasks to their IDs
+      // Map subtasks to their IDs (including temp IDs for new tasks)
       const orderedSubtaskIds = subtasks
         .map((subtask) => {
           if (subtask.id && spById.has(subtask.id)) {
             return subtask.id;
           }
           const spSubtask = spByTitle.get(subtask.title);
-          return spSubtask ? spSubtask.id! : null;
+          if (spSubtask) {
+            return spSubtask.id!;
+          }
+          // For new subtasks, use the temp ID that will be created
+          return `temp_${subtask.line}`;
         })
         .filter((id) => id !== null) as string[];
 
