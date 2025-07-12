@@ -276,4 +276,191 @@ describe('generateTaskOperations', () => {
       }
     });
   });
+
+  describe('when cleaning up deleted task references', () => {
+    it('should remove deleted tasks from parent subTaskIds', () => {
+      // Existing SP tasks with parent-child relationship
+      const spTasks: Task[] = [
+        {
+          id: 'parent-task',
+          title: 'Parent Task',
+          isDone: false,
+          projectId: 'test-project',
+          subTaskIds: ['child-1', 'child-2', 'child-3'],
+        },
+        {
+          id: 'child-1',
+          title: 'Child 1',
+          isDone: false,
+          projectId: 'test-project',
+          parentId: 'parent-task',
+        },
+        {
+          id: 'child-2',
+          title: 'Child 2',
+          isDone: false,
+          projectId: 'test-project',
+          parentId: 'parent-task',
+        },
+        {
+          id: 'child-3',
+          title: 'Child 3',
+          isDone: false,
+          projectId: 'test-project',
+          parentId: 'parent-task',
+        },
+      ];
+
+      // Markdown only shows parent and one child (others will be deleted)
+      const mdTasks: ParsedTask[] = [
+        {
+          line: 0,
+          indent: 0,
+          completed: false,
+          id: 'parent-task',
+          title: 'Parent Task',
+          originalLine: '- [ ] <!--parent-task--> Parent Task',
+          parentId: null,
+          isSubtask: false,
+          depth: 0,
+        },
+        {
+          line: 1,
+          indent: 2,
+          completed: false,
+          id: 'child-1',
+          title: 'Child 1',
+          originalLine: '  - [ ] <!--child-1--> Child 1',
+          parentId: 'parent-task',
+          isSubtask: true,
+          depth: 1,
+        },
+      ];
+
+      const operations = generateTaskOperations(mdTasks, spTasks, 'test-project');
+
+      // Should delete the missing children
+      const deleteOps = operations.filter((op) => op.type === 'delete');
+      expect(deleteOps).toHaveLength(2);
+      expect(deleteOps.map((op) => op.taskId)).toContain('child-2');
+      expect(deleteOps.map((op) => op.taskId)).toContain('child-3');
+
+      // Should update parent to remove deleted children from subTaskIds
+      const parentUpdateOp = operations.find(
+        (op) => op.type === 'update' && op.taskId === 'parent-task',
+      );
+
+      expect(parentUpdateOp).toBeDefined();
+      if (parentUpdateOp?.type === 'update') {
+        expect(parentUpdateOp.updates.subTaskIds).toEqual(['child-1']);
+        expect(parentUpdateOp.updates.subTaskIds).not.toContain('child-2');
+        expect(parentUpdateOp.updates.subTaskIds).not.toContain('child-3');
+      }
+    });
+
+    it('should create new update operation when parent has no existing updates', () => {
+      // Parent task with subtasks that will be deleted
+      const spTasks: Task[] = [
+        {
+          id: 'parent-task',
+          title: 'Parent Task',
+          isDone: false,
+          projectId: 'test-project',
+          subTaskIds: ['child-to-delete'],
+        },
+        {
+          id: 'child-to-delete',
+          title: 'Child to Delete',
+          isDone: false,
+          projectId: 'test-project',
+          parentId: 'parent-task',
+        },
+      ];
+
+      // Markdown shows only the parent (child will be deleted)
+      const mdTasks: ParsedTask[] = [
+        {
+          line: 0,
+          indent: 0,
+          completed: false,
+          id: 'parent-task',
+          title: 'Parent Task',
+          originalLine: '- [ ] <!--parent-task--> Parent Task',
+          parentId: null,
+          isSubtask: false,
+          depth: 0,
+        },
+      ];
+
+      const operations = generateTaskOperations(mdTasks, spTasks, 'test-project');
+
+      // Should delete the child
+      const deleteOps = operations.filter((op) => op.type === 'delete');
+      expect(deleteOps).toHaveLength(1);
+      expect(deleteOps[0].taskId).toBe('child-to-delete');
+
+      // Should create update operation for parent to clear subTaskIds
+      const parentUpdateOp = operations.find(
+        (op) => op.type === 'update' && op.taskId === 'parent-task',
+      );
+
+      expect(parentUpdateOp).toBeDefined();
+      if (parentUpdateOp?.type === 'update') {
+        expect(parentUpdateOp.updates.subTaskIds).toEqual([]);
+      }
+    });
+
+    it('should update existing operation when parent already has pending updates', () => {
+      // Parent task that will get both a property update and subTaskIds cleanup
+      const spTasks: Task[] = [
+        {
+          id: 'parent-task',
+          title: 'Old Title',
+          isDone: false,
+          projectId: 'test-project',
+          subTaskIds: ['child-to-delete'],
+        },
+        {
+          id: 'child-to-delete',
+          title: 'Child to Delete',
+          isDone: false,
+          projectId: 'test-project',
+          parentId: 'parent-task',
+        },
+      ];
+
+      // Markdown shows parent with new title but no children
+      const mdTasks: ParsedTask[] = [
+        {
+          line: 0,
+          indent: 0,
+          completed: false,
+          id: 'parent-task',
+          title: 'New Title', // Changed title
+          originalLine: '- [ ] <!--parent-task--> New Title',
+          parentId: null,
+          isSubtask: false,
+          depth: 0,
+        },
+      ];
+
+      const operations = generateTaskOperations(mdTasks, spTasks, 'test-project');
+
+      // Should delete the child
+      const deleteOps = operations.filter((op) => op.type === 'delete');
+      expect(deleteOps).toHaveLength(1);
+      expect(deleteOps[0].taskId).toBe('child-to-delete');
+
+      // Should have one update operation with both title and subTaskIds
+      const updateOps = operations.filter((op) => op.type === 'update');
+      expect(updateOps).toHaveLength(1);
+
+      const parentUpdateOp = updateOps[0];
+      expect(parentUpdateOp.taskId).toBe('parent-task');
+      if (parentUpdateOp.type === 'update') {
+        expect(parentUpdateOp.updates.title).toBe('New Title');
+        expect(parentUpdateOp.updates.subTaskIds).toEqual([]);
+      }
+    });
+  });
 });
