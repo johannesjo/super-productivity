@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0"
     />
-    <title>Sync.md Configuration</title>
+    <title>sync.md Configuration</title>
     <style>
       /* Reset and base styles */
       :root {
@@ -134,6 +134,13 @@
         margin-top: 24px;
       }
 
+      .warning {
+        border: 1px solid var(--accent-primary);
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-weight: bold;
+      }
+
       button {
         padding: 10px 20px;
         border: 1px solid var(--border-color);
@@ -245,7 +252,7 @@
   </head>
   <body>
     <div class="container">
-      <h1>Sync.md</h1>
+      <h1>sync.md</h1>
       <p class="subtitle">Sync tasks between Super Productivity and Markdown files</p>
 
       <form id="configForm">
@@ -487,7 +494,7 @@
         // Check if we're in desktop mode
         if (!window.PluginAPI?.executeNodeScript) {
           showStatus(
-            'Sync.md plugin requires the desktop version of Super Productivity',
+            'sync.md plugin requires the desktop version of Super Productivity',
             'error',
           );
           return;
@@ -621,7 +628,7 @@
         // Check if we're in desktop mode
         if (!window.PluginAPI?.executeNodeScript) {
           showStatus(
-            'Sync.md plugin requires the desktop version of Super Productivity. File sync features are not available in the web version.',
+            'sync.md plugin requires the desktop version of Super Productivity. File sync features are not available in the web version.',
             'error',
           );
           document.getElementById('configForm').style.opacity = '0.5';
