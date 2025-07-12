@@ -273,17 +273,35 @@ export class WebdavApi {
   private _createConditionalHeaders(
     isOverwrite?: boolean,
     expectedEtag?: string | null,
+    expectedLastModified?: string | null,
+    validatorType?: 'etag' | 'last-modified' | 'none',
   ): Record<string, string> {
     const headers: Record<string, string> = {};
+
+    // Determine validator preference - default to etag for backward compatibility
+    const useLastModified = validatorType === 'last-modified' && !expectedEtag;
+
     if (!isOverwrite) {
-      if (expectedEtag) {
+      // For updates/conditional operations
+      if (expectedEtag && !useLastModified) {
         headers['If-Match'] = expectedEtag;
-      } else {
+      } else if (useLastModified && expectedLastModified) {
+        headers['If-Unmodified-Since'] = expectedLastModified;
+      } else if (!useLastModified) {
+        // For new resource creation - only works with ETag
         headers['If-None-Match'] = '*';
       }
-    } else if (expectedEtag) {
-      headers['If-Match'] = expectedEtag;
+      // Note: Last-Modified cannot safely handle resource creation
+      // so we don't set any headers for new resources with Last-Modified only
+    } else {
+      // For overwrite operations
+      if (expectedEtag && !useLastModified) {
+        headers['If-Match'] = expectedEtag;
+      } else if (useLastModified && expectedLastModified) {
+        headers['If-Unmodified-Since'] = expectedLastModified;
+      }
     }
+
     return headers;
   }
 

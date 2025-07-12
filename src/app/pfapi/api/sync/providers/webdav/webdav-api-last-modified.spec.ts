@@ -120,4 +120,92 @@ describe('WebdavApi Last-Modified Support', () => {
       expect(result.validatorType).toBe('none');
     });
   });
+
+  describe('_createConditionalHeaders method', () => {
+    it('should create ETag-based headers when ETag provided', async () => {
+      // @ts-expect-error - accessing private method for testing
+      const headers = api._createConditionalHeaders(false, '"abc123"', null, 'etag');
+
+      expect(headers['If-Match']).toBe('"abc123"');
+      expect(headers['If-Unmodified-Since']).toBeUndefined();
+      expect(headers['If-None-Match']).toBeUndefined();
+      expect(headers['If-Modified-Since']).toBeUndefined();
+    });
+
+    it('should create Last-Modified headers when Last-Modified provided', async () => {
+      const timestamp = 'Wed, 21 Oct 2015 07:28:00 GMT';
+
+      // @ts-expect-error - accessing private method for testing
+      const headers = api._createConditionalHeaders(
+        false,
+        null,
+        timestamp,
+        'last-modified',
+      );
+
+      expect(headers['If-Unmodified-Since']).toBe(timestamp);
+      expect(headers['If-Match']).toBeUndefined();
+      expect(headers['If-None-Match']).toBeUndefined();
+      expect(headers['If-Modified-Since']).toBeUndefined();
+    });
+
+    it('should create If-None-Match for new file creation with ETag', async () => {
+      // @ts-expect-error - accessing private method for testing
+      const headers = api._createConditionalHeaders(false, null, null, 'etag');
+
+      expect(headers['If-None-Match']).toBe('*');
+      expect(headers['If-Match']).toBeUndefined();
+      expect(headers['If-Unmodified-Since']).toBeUndefined();
+      expect(headers['If-Modified-Since']).toBeUndefined();
+    });
+
+    it('should not create conditional headers for new file creation with Last-Modified only', async () => {
+      // Last-Modified cannot safely handle resource creation
+      // @ts-expect-error - accessing private method for testing
+      const headers = api._createConditionalHeaders(false, null, null, 'last-modified');
+
+      expect(Object.keys(headers).length).toBe(0);
+    });
+
+    it('should handle overwrite mode with ETag', async () => {
+      // @ts-expect-error - accessing private method for testing
+      const headers = api._createConditionalHeaders(true, '"abc123"', null, 'etag');
+
+      expect(headers['If-Match']).toBe('"abc123"');
+      expect(headers['If-None-Match']).toBeUndefined();
+    });
+
+    it('should handle overwrite mode with Last-Modified', async () => {
+      const timestamp = 'Wed, 21 Oct 2015 07:28:00 GMT';
+
+      // @ts-expect-error - accessing private method for testing
+      const headers = api._createConditionalHeaders(
+        true,
+        null,
+        timestamp,
+        'last-modified',
+      );
+
+      expect(headers['If-Unmodified-Since']).toBe(timestamp);
+      expect(headers['If-Match']).toBeUndefined();
+    });
+
+    it('should prefer ETag when both ETag and Last-Modified provided', async () => {
+      const timestamp = 'Wed, 21 Oct 2015 07:28:00 GMT';
+
+      // @ts-expect-error - accessing private method for testing
+      const headers = api._createConditionalHeaders(false, '"abc123"', timestamp, 'etag');
+
+      expect(headers['If-Match']).toBe('"abc123"');
+      expect(headers['If-Unmodified-Since']).toBeUndefined();
+    });
+
+    it('should handle missing validator type gracefully', async () => {
+      // @ts-expect-error - accessing private method for testing
+      const headers = api._createConditionalHeaders(false, '"abc123"', null, 'none');
+
+      // Should fall back to ETag behavior when validator is provided
+      expect(headers['If-Match']).toBe('"abc123"');
+    });
+  });
 });
