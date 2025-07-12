@@ -15,7 +15,7 @@ let syncInProgress = false;
 let lastSyncTime: Date | null = null;
 let mdToSpDebounceTimer: NodeJS.Timeout | null = null;
 let spToMdDebounceTimer: NodeJS.Timeout | null = null;
-let isWindowFocused = true;
+let isWindowFocused = false;
 let pendingMdToSpSync: LocalUserCfg | null = null;
 
 export const initSyncManager = (config: LocalUserCfg): void => {
@@ -26,7 +26,7 @@ export const initSyncManager = (config: LocalUserCfg): void => {
   setupWindowFocusTracking();
 
   // Perform initial sync
-  performInitialSync(config).then((r) => console.log('SyncMD initial sync', r));
+  performInitialSync(config).then((r) => console.log('[sync-md] SyncMD initial sync', r));
 
   // Set up file watcher for ongoing sync
   startFileWatcher(config.filePath, () => {
