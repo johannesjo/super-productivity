@@ -307,12 +307,12 @@ export class WebdavApi {
     return headers;
   }
 
-  private _createConditionalHeaders(
+  private async _createConditionalHeaders(
     isOverwrite?: boolean,
     expectedEtag?: string | null,
     expectedLastModified?: string | null,
     validatorType?: 'etag' | 'last-modified' | 'none',
-  ): Record<string, string> {
+  ): Promise<Record<string, string>> {
     const headers: Record<string, string> = {};
 
     // Determine validator preference - default to etag for backward compatibility
@@ -327,9 +327,26 @@ export class WebdavApi {
       } else if (!useLastModified) {
         // For new resource creation - only works with ETag
         headers['If-None-Match'] = '*';
+      } else {
+        // Last-Modified cannot safely handle resource creation with standard headers
+        // Check for alternative safe creation methods
+        const capabilities = await this._getOrDetectCapabilities();
+
+        if (capabilities.supportsIfHeader) {
+          // Use WebDAV If header with Not token for safe creation
+          // Format: If: <Not> <*> means "if resource does not exist"
+          headers['If'] = '<Not> <*>';
+        } else if (!capabilities.supportsLocking) {
+          // No safe creation method available - warn but continue
+          // Use console.warn for visibility in tests
+          console.warn(`WARNING: No safe creation method available for WebDAV`, {
+            supportsETags: capabilities.supportsETags,
+            supportsIfHeader: capabilities.supportsIfHeader,
+            supportsLocking: capabilities.supportsLocking,
+          });
+        }
+        // Note: Locking-based safe creation is handled separately in upload method
       }
-      // Note: Last-Modified cannot safely handle resource creation
-      // so we don't set any headers for new resources with Last-Modified only
     } else {
       // For overwrite operations
       if (expectedEtag && !useLastModified) {
@@ -351,6 +368,69 @@ export class WebdavApi {
     );
   }
 
+  /**
+   * Lock a resource for exclusive write access
+   * Returns the lock token if successful
+   */
+  private async _lockResource(path: string): Promise<string | null> {
+    const lockXml = `<?xml version="1.0" encoding="utf-8"?>
+<D:lockinfo xmlns:D="DAV:">
+  <D:lockscope><D:exclusive/></D:lockscope>
+  <D:locktype><D:write/></D:locktype>
+  <D:owner>${(await this._getCfgOrError()).userName}</D:owner>
+</D:lockinfo>`;
+
+    try {
+      const response = await this._makeRequest({
+        method: 'LOCK',
+        path,
+        body: lockXml,
+        headers: {
+          'Content-Type': 'application/xml',
+          Depth: '0',
+          Timeout: 'Second-600', // 10 minute timeout
+        },
+      });
+
+      // Extract lock token from response
+      const lockTokenHeader = response.headers.get('lock-token');
+      if (lockTokenHeader) {
+        // Remove angle brackets if present
+        return lockTokenHeader.replace(/[<>]/g, '');
+      }
+
+      // Try to extract from response body
+      const responseText = await response.text();
+      const lockTokenMatch = responseText.match(/<d:href>([^<]+)<\/d:href>/i);
+      if (lockTokenMatch) {
+        return lockTokenMatch[1];
+      }
+
+      return null;
+    } catch (e: any) {
+      PFLog.err(`${WebdavApi.L}._lockResource() failed`, { path, error: e });
+      return null;
+    }
+  }
+
+  /**
+   * Unlock a previously locked resource
+   */
+  private async _unlockResource(path: string, lockToken: string): Promise<void> {
+    try {
+      await this._makeRequest({
+        method: 'UNLOCK',
+        path,
+        headers: {
+          'Lock-Token': `<${lockToken}>`,
+        },
+      });
+    } catch (e: any) {
+      PFLog.err(`${WebdavApi.L}._unlockResource() failed`, { path, lockToken, error: e });
+      // Don't throw - unlock failure is not critical
+    }
+  }
+
   async upload({
     data,
     path,
@@ -370,18 +450,47 @@ export class WebdavApi {
         ? 'last-modified'
         : 'none';
 
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/octet-stream',
-      'Content-Length': new Blob([data]).size.toString(),
-      ...this._createConditionalHeaders(
+    // Check if we need locking for safe creation
+    const needsLockingForCreation =
+      !isOverwrite &&
+      !capabilities.supportsETags &&
+      !capabilities.supportsIfHeader &&
+      capabilities.supportsLocking &&
+      !expectedEtag; // Only for new file creation
+
+    let lockToken: string | null = null;
+    let headers: Record<string, string> = {};
+
+    try {
+      if (needsLockingForCreation) {
+        // Try to lock the resource for safe creation
+        lockToken = await this._lockResource(path);
+        if (!lockToken) {
+          PFLog.error(
+            `${WebdavApi.L}.upload() Failed to acquire lock for safe creation`,
+            { path },
+          );
+        }
+      }
+
+      const conditionalHeaders = await this._createConditionalHeaders(
         isOverwrite,
         validatorType === 'etag' ? expectedEtag : null,
         validatorType === 'last-modified' ? expectedEtag : null,
         validatorType,
-      ),
-    };
+      );
 
-    try {
+      headers = {
+        'Content-Type': 'application/octet-stream',
+        'Content-Length': new Blob([data]).size.toString(),
+        ...conditionalHeaders,
+      };
+
+      // Add lock token to headers if we have one
+      if (lockToken) {
+        headers['If'] = `(<${lockToken}>)`;
+      }
+
       const response = await this._makeRequest({
         method: 'PUT',
         path,
@@ -398,23 +507,36 @@ export class WebdavApi {
       }
 
       // Clean ETag if it's an ETag validator
-      return validators.validatorType === 'etag'
-        ? this._cleanRev(validators.validator)
-        : validators.validator;
+      const result =
+        validators.validatorType === 'etag'
+          ? this._cleanRev(validators.validator)
+          : validators.validator;
+
+      return result;
     } catch (e: any) {
       PFLog.err(`${WebdavApi.L}.upload() error`, { path, error: e });
 
       // Check if it's a RemoteFileNotFoundAPIError (404)
       if (e instanceof RemoteFileNotFoundAPIError || e?.status === 404) {
         // Not found - parent directory might not exist (some WebDAV servers return 404 instead of 409)
-        return await this._retryUploadWithDirectoryCreation(path, data, headers, 404);
+        return await this._retryUploadWithDirectoryCreation(
+          path,
+          data,
+          headers || {},
+          404,
+        );
       }
 
       // Enhanced error handling for WebDAV-specific scenarios
       switch (e?.status) {
         case 409:
           // Conflict - parent directory doesn't exist
-          return await this._retryUploadWithDirectoryCreation(path, data, headers, 409);
+          return await this._retryUploadWithDirectoryCreation(
+            path,
+            data,
+            headers || {},
+            409,
+          );
         case 412:
           // Precondition Failed - conditional header failed
           if (expectedEtag) {
@@ -450,6 +572,11 @@ export class WebdavApi {
             return await this.upload({ data, path, isOverwrite, expectedEtag });
           }
           throw e;
+      }
+    } finally {
+      // Always unlock if we acquired a lock
+      if (lockToken) {
+        await this._unlockResource(path, lockToken);
       }
     }
   }
