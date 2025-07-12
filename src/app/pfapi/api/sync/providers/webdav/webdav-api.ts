@@ -1129,6 +1129,49 @@ export class WebdavApi {
     return Object.keys(obj).find((key) => possibleEtagKeys.includes(key.toLowerCase()));
   }
 
+  /**
+   * Extract validators (ETag and Last-Modified) from response headers
+   * Returns the preferred validator and type for conditional requests
+   */
+  private _extractValidators(headers: Record<string, string>): {
+    etag?: string;
+    lastModified?: string;
+    validator?: string;
+    validatorType: 'etag' | 'last-modified' | 'none';
+  } {
+    // Find ETag (case-insensitive)
+    const etagKey = this._findEtagKeyInObject(headers);
+    const etag = etagKey ? headers[etagKey] : undefined;
+
+    // Find Last-Modified (case-insensitive)
+    const lastModifiedKey = Object.keys(headers).find(
+      (key) => key.toLowerCase() === 'last-modified',
+    );
+    const lastModified = lastModifiedKey ? headers[lastModifiedKey] : undefined;
+
+    // Determine the preferred validator
+    // ETags are preferred over Last-Modified per RFC 7232
+    let validator: string | undefined;
+    let validatorType: 'etag' | 'last-modified' | 'none';
+
+    if (etag && etag.trim()) {
+      validator = etag;
+      validatorType = 'etag';
+    } else if (lastModified && lastModified.trim()) {
+      validator = lastModified;
+      validatorType = 'last-modified';
+    } else {
+      validatorType = 'none';
+    }
+
+    return {
+      etag,
+      lastModified,
+      validator,
+      validatorType,
+    };
+  }
+
   private _cleanRev(rev: string): string {
     if (!rev) return '';
 

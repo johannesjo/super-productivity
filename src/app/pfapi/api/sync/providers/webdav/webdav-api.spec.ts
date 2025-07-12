@@ -10,6 +10,7 @@ import './webdav-api-connection.spec';
 import './webdav-api-helpers.spec';
 import './webdav-api-android.spec';
 import './webdav-api-additional.spec';
+import './webdav-api-last-modified.spec';
 
 // Note: The original monolithic test file has been split into the following files:
 // - webdav-api-upload.spec.ts: Upload operations and related error handling
