@@ -19,6 +19,7 @@ import {
   BatchTaskReorder,
   BatchTaskUpdate,
 } from '@super-productivity/plugin-api';
+import { Log } from '../../../core/log';
 
 /**
  * Meta reducer for handling batch updates to tasks within a project
@@ -35,13 +36,13 @@ export const taskBatchUpdateMetaReducer = (
 
       // Ensure state has required properties
       if (!state[TASK_FEATURE_NAME] || !state[PROJECT_FEATURE_NAME]) {
-        console.error('taskBatchUpdateMetaReducer: Missing required state properties');
+        Log.error('taskBatchUpdateMetaReducer: Missing required state properties');
         return reducer(state, action);
       }
 
       // Validate project exists
       if (!state[PROJECT_FEATURE_NAME].entities[projectId]) {
-        console.error(`taskBatchUpdateMetaReducer: Project ${projectId} not found`);
+        Log.error(`taskBatchUpdateMetaReducer: Project ${projectId} not found`);
         return reducer(state, action);
       }
 
@@ -55,13 +56,45 @@ export const taskBatchUpdateMetaReducer = (
       const pendingUpdatesMap = new Map<string, Partial<Task>>();
 
       // Helper function to merge updates for a task
-      const mergeTaskUpdate = (taskId: string, changes: Partial<Task>): void => {
+      const mergeTaskUpdate = (
+        taskId: string,
+        changes: Partial<Task>,
+        shouldMergeSubTaskIds = false,
+      ): void => {
         const existingChanges = pendingUpdatesMap.get(taskId) || {};
-        pendingUpdatesMap.set(taskId, { ...existingChanges, ...changes });
+        const mergedChanges = { ...existingChanges, ...changes };
+
+        // Special handling for subTaskIds: merge or replace based on context
+        if (changes.subTaskIds && existingChanges.subTaskIds && shouldMergeSubTaskIds) {
+          const existingIds = new Set(existingChanges.subTaskIds);
+          const newIds = changes.subTaskIds.filter((id) => !existingIds.has(id));
+          mergedChanges.subTaskIds = [...existingChanges.subTaskIds, ...newIds];
+        }
+        // Otherwise use normal replacement behavior (changes.subTaskIds overwrites existingChanges.subTaskIds)
+        pendingUpdatesMap.set(taskId, mergedChanges);
       };
 
+      // Sort operations to ensure parents are created before children
+      const sortedOperations = [...operations].sort((a, b) => {
+        // Create operations: parents first, then children
+        if (a.type === 'create' && b.type === 'create') {
+          const aOp = a as BatchTaskCreate;
+          const bOp = b as BatchTaskCreate;
+          const aHasParent = !!aOp.data.parentId;
+          const bHasParent = !!bOp.data.parentId;
+
+          // Tasks without parents (root tasks) come first
+          if (!aHasParent && bHasParent) return -1;
+          if (aHasParent && !bHasParent) return 1;
+          return 0;
+        }
+
+        // All other operations maintain their original order
+        return 0;
+      });
+
       // Process each operation
-      operations.forEach((op: BatchOperation) => {
+      sortedOperations.forEach((op: BatchOperation) => {
         switch (op.type) {
           case 'create': {
             const createOp = op as BatchTaskCreate;
@@ -78,13 +111,13 @@ export const taskBatchUpdateMetaReducer = (
 
             // Skip if circular dependency (task is its own parent)
             if (parentId === actualId) {
-              console.warn(`Skipping task with circular dependency: ${actualId}`);
+              Log.error(`Skipping task with circular dependency: ${actualId}`);
               break;
             }
 
             // Skip if title is empty
             if (!createOp.data.title || createOp.data.title.trim() === '') {
-              console.warn(`Skipping task with empty title: ${actualId}`);
+              Log.error(`Skipping task with empty title: ${actualId}`);
               break;
             }
 
@@ -102,17 +135,27 @@ export const taskBatchUpdateMetaReducer = (
 
             tasksToAdd.push(newTask);
 
+            // Update the createdTaskIds mapping for temp ID resolution
+            // This allows subsequent operations in the same batch to resolve this temp ID
+            if (!createdTaskIds[createOp.tempId]) {
+              createdTaskIds[createOp.tempId] = actualId;
+            }
+
             // Update parent task's subTaskIds if needed
-            if (
-              parentId &&
-              !parentId.startsWith('temp-') &&
-              !parentId.startsWith('temp_')
-            ) {
+            if (parentId) {
+              // Get current parent subTaskIds from both existing state and pending updates
+              const parentFromState = newState[TASK_FEATURE_NAME].entities[parentId];
+              const pendingParentChanges = pendingUpdatesMap.get(parentId) || {};
               const currentParentSubTaskIds =
-                newState[TASK_FEATURE_NAME].entities[parentId]?.subTaskIds || [];
-              mergeTaskUpdate(parentId, {
-                subTaskIds: [...currentParentSubTaskIds, actualId],
-              });
+                pendingParentChanges.subTaskIds || parentFromState?.subTaskIds || [];
+
+              mergeTaskUpdate(
+                parentId,
+                {
+                  subTaskIds: [...currentParentSubTaskIds, actualId],
+                },
+                true,
+              ); // Merge when adding individual subtasks
             }
             break;
           }
@@ -122,28 +165,21 @@ export const taskBatchUpdateMetaReducer = (
 
             // Skip if task doesn't exist
             if (!newState[TASK_FEATURE_NAME].entities[updateOp.taskId]) {
-              console.warn(`Skipping update for non-existent task: ${updateOp.taskId}`);
+              Log.warn(`Skipping update for non-existent task: ${updateOp.taskId}`);
               break;
             }
 
             const updates: Partial<TaskCopy> = {};
 
-            if (updateOp.updates.title !== undefined) {
-              updates.title = updateOp.updates.title;
-            }
-            if (updateOp.updates.notes !== undefined) {
-              updates.notes = updateOp.updates.notes;
-            }
-            if (updateOp.updates.isDone !== undefined) {
-              updates.isDone = updateOp.updates.isDone;
-            }
-            if (updateOp.updates.timeEstimate !== undefined) {
-              updates.timeEstimate = updateOp.updates.timeEstimate;
-            }
-            if (updateOp.updates.subTaskIds !== undefined) {
-              // Handle direct subTaskIds updates (for reordering subtasks)
-              updates.subTaskIds = updateOp.updates.subTaskIds;
-            }
+            // Copy all defined updates
+            ['title', 'notes', 'isDone', 'timeEstimate', 'subTaskIds'].forEach(
+              (field) => {
+                if (updateOp.updates[field] !== undefined) {
+                  updates[field] = updateOp.updates[field];
+                }
+              },
+            );
+
             if (updateOp.updates.parentId !== undefined) {
               // Handle parent ID changes (moving subtasks)
               const oldTask = newState[TASK_FEATURE_NAME].entities[updateOp.taskId];
@@ -183,9 +219,13 @@ export const taskBatchUpdateMetaReducer = (
                       pendingUpdatesMap.get(newParentId) || {};
                     const currentSubTaskIds =
                       currentNewParentChanges.subTaskIds || newParent.subTaskIds || [];
-                    mergeTaskUpdate(newParentId, {
-                      subTaskIds: [...currentSubTaskIds, updateOp.taskId],
-                    });
+                    mergeTaskUpdate(
+                      newParentId,
+                      {
+                        subTaskIds: [...currentSubTaskIds, updateOp.taskId],
+                      },
+                      true,
+                    ); // Merge when adding individual subtasks
                   }
                 }
 
@@ -204,7 +244,7 @@ export const taskBatchUpdateMetaReducer = (
 
             // Skip if task doesn't exist
             if (!newState[TASK_FEATURE_NAME].entities[deleteOp.taskId]) {
-              console.warn(`Skipping delete for non-existent task: ${deleteOp.taskId}`);
+              Log.err(`Skipping delete for non-existent task: ${deleteOp.taskId}`);
               break;
             }
 

@@ -177,6 +177,11 @@ const handleSpChange = (config: LocalUserCfg): void => {
     if (syncInProgress) return;
     syncInProgress = true;
 
+    console.log('[sync-md] Starting SP to MD sync (disabling file watcher)');
+
+    // Temporarily disable file watcher to prevent triggering another MD→SP sync
+    stopFileWatcher();
+
     try {
       await spToMd(config);
       lastSyncTime = new Date();
@@ -185,6 +190,12 @@ const handleSpChange = (config: LocalUserCfg): void => {
       const verificationResult = await verifySyncState(config);
       logSyncVerification(verificationResult, 'SP to MD sync (SP change)');
     } finally {
+      // Re-enable file watcher
+      console.log('[sync-md] SP to MD sync complete, re-enabling file watcher');
+      startFileWatcher(config.filePath, () => {
+        handleFileChange(config);
+      });
+
       syncInProgress = false;
     }
   }, SYNC_DEBOUNCE_MS);
