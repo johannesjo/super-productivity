@@ -157,13 +157,16 @@ export class WebdavApi {
       });
 
       const retryHeaderObj = this._responseHeadersToObject(retryResponse);
-      const retryEtag = this._findEtagInHeaders(retryHeaderObj);
+      const validators = this._extractValidators(retryHeaderObj);
 
-      if (!retryEtag) {
+      if (!validators.validator) {
         return await this._retrieveEtagWithFallback(path, retryHeaderObj, context);
       }
 
-      return retryEtag;
+      // Clean ETag if it's an ETag validator
+      return validators.validatorType === 'etag'
+        ? this._cleanRev(validators.validator)
+        : validators.validator;
     } catch (retryError: any) {
       PFLog.err(`${WebdavApi.L}.upload() retry after ${errorCode} failed`, retryError);
       if (retryError instanceof RemoteFileNotFoundAPIError) {
@@ -239,7 +242,10 @@ export class WebdavApi {
 
       // Return the preferred validator based on server capabilities
       if (validators.validator) {
-        return validators.validator;
+        // Clean ETag if it's an ETag validator
+        return validators.validatorType === 'etag'
+          ? this._cleanRev(validators.validator)
+          : validators.validator;
       }
     }
 
@@ -367,7 +373,12 @@ export class WebdavApi {
     const headers: Record<string, string> = {
       'Content-Type': 'application/octet-stream',
       'Content-Length': new Blob([data]).size.toString(),
-      ...this._createConditionalHeaders(isOverwrite, expectedEtag, null, validatorType),
+      ...this._createConditionalHeaders(
+        isOverwrite,
+        validatorType === 'etag' ? expectedEtag : null,
+        validatorType === 'last-modified' ? expectedEtag : null,
+        validatorType,
+      ),
     };
 
     try {
@@ -386,7 +397,10 @@ export class WebdavApi {
         return await this._retrieveEtagWithFallback(path, responseHeaderObj, 'upload');
       }
 
-      return validators.validator;
+      // Clean ETag if it's an ETag validator
+      return validators.validatorType === 'etag'
+        ? this._cleanRev(validators.validator)
+        : validators.validator;
     } catch (e: any) {
       PFLog.err(`${WebdavApi.L}.upload() error`, { path, error: e });
 
@@ -591,7 +605,11 @@ export class WebdavApi {
       // Handle different response statuses
       if (response.status === 304) {
         // Not Modified - file hasn't changed
-        return undefined as any;
+        // For backward compatibility, throw an error like before
+        const error = new Error(`File not modified: ${path}`);
+        (error as any).status = 304;
+        (error as any).localRev = localRev;
+        throw error;
       }
 
       if (response.status === 206) {
@@ -616,7 +634,12 @@ export class WebdavApi {
 
       // Get validator (ETag or Last-Modified)
       const validators = this._extractValidators(headerObj);
-      const rev = validators.validator;
+      let rev = validators.validator;
+
+      // Clean ETag if it's an ETag validator
+      if (rev && validators.validatorType === 'etag') {
+        rev = this._cleanRev(rev);
+      }
 
       if (!rev) {
         PFLog.error(`${WebdavApi.L}.download() no validator in response headers`, {
