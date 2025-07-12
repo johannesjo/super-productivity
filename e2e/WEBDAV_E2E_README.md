@@ -32,11 +32,12 @@ npm run e2e:webdav
    docker-compose -f docker-compose.webdav-e2e.yaml down
    ```
 
-## Mock Server Details
+## WebDAV Server Details
 
 - URL: http://localhost:8080
-- Credentials: test/testpass
-- Features: ETag, Last-Modified, conditional headers
-- Storage: In-memory (resets on restart)
+- Uses: hacdias/webdav:latest (same as main docker-compose.yaml)
+- Credentials: alice/alicepassword, bob/bobpassword
+- Features: Full WebDAV with ETag support
+- Storage: Persistent in ./e2e-webdav-data
 
 Keep it simple!

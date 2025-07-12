@@ -12,8 +12,8 @@ module.exports = {
       // Configure WebDAV sync
       .setupWebdavSync({
         baseUrl: 'http://localhost:8080/',
-        username: 'test',
-        password: 'testpass',
+        username: 'alice',
+        password: 'alicepassword',
         syncFolderPath: '/super-productivity-test',
       })
       // Create a test task

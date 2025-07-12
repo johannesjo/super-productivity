@@ -1,4 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/no-namespace
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace NightwatchCustomCommands {
     interface Commands {
       triggerSync(callback?: () => void): this;
