@@ -194,6 +194,7 @@ const handleConvertToMainTask = (
       changes: {
         parentId: undefined,
         tagIds: [...parentTask.tagIds],
+        modified: Date.now(),
         ...(isPlanForToday ? { dueDay: getWorklogStr() } : {}),
       },
     },
@@ -408,7 +409,16 @@ const handleUpdateTask = (
     : taskState;
   taskState = updateTimeEstimateForTask(taskUpdate, timeEstimate, taskState);
   taskState = updateDoneOnForTask(taskUpdate, taskState);
-  taskState = taskAdapter.updateOne(taskUpdate, taskState);
+  taskState = taskAdapter.updateOne(
+    {
+      ...taskUpdate,
+      changes: {
+        ...taskUpdate.changes,
+        modified: Date.now(),
+      },
+    },
+    taskState,
+  );
 
   return {
     ...updatedState,
