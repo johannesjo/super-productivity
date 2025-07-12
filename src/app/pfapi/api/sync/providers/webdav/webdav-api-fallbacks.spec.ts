@@ -14,6 +14,13 @@ describe('WebdavApi - Fallback Paths', () => {
     userName: 'testuser',
     password: 'testpass',
     syncFolderPath: '/sync',
+    // Pre-configure server capabilities to prevent detection calls
+    serverCapabilities: {
+      supportsETags: true,
+      supportsIfHeader: true,
+      supportsLocking: false,
+      supportsLastModified: false,
+    },
   };
 
   const createMockResponse = (

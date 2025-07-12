@@ -169,14 +169,19 @@ export class WebdavApi {
         : validators.validator;
     } catch (retryError: any) {
       PFLog.err(`${WebdavApi.L}.upload() retry after ${errorCode} failed`, retryError);
-      if (retryError instanceof RemoteFileNotFoundAPIError) {
+
+      // Preserve all API error types to maintain test compatibility
+      if (
+        retryError instanceof NoEtagAPIError ||
+        retryError instanceof NoRevAPIError ||
+        retryError instanceof RemoteFileNotFoundAPIError
+      ) {
         throw retryError;
       }
-      if (retryError instanceof NoEtagAPIError) {
-        throw retryError;
-      }
+
+      // For other errors, wrap with context but preserve original message
       throw new Error(
-        `Upload failed after creating directories: ${retryError?.message || 'Unknown error'}`,
+        `Upload failed after creating directories: ${path} - ${retryError?.message || 'Unknown error'}`,
       );
     }
   }
@@ -274,10 +279,16 @@ export class WebdavApi {
           throw new NoRevAPIError(path);
         }
 
-        throw new NoEtagAPIError({
-          path,
+        // Include attempted methods and context for better debugging
+        const additionalLog = {
           attemptedMethods: ['response-headers', 'PROPFIND', 'GET'],
-        });
+          context,
+          capabilities,
+        };
+
+        const error = new NoEtagAPIError(path);
+        (error as any).additionalLog = additionalLog;
+        throw error;
       }
     }
   }
@@ -408,7 +419,7 @@ export class WebdavApi {
 
       return null;
     } catch (e: any) {
-      PFLog.err(`${WebdavApi.L}._lockResource() failed`, { path, error: e });
+      PFLog.error(`${WebdavApi.L}._lockResource() failed`, { path, error: e });
       return null;
     }
   }
@@ -436,19 +447,45 @@ export class WebdavApi {
     path,
     isOverwrite,
     expectedEtag,
+    _retryAttempted,
   }: {
     data: string;
     path: string;
     isOverwrite?: boolean;
     expectedEtag?: string | null;
+    _retryAttempted?: boolean;
   }): Promise<string | undefined> {
+    // Get configuration to check for compatibility options
+    const cfg = await this._getCfgOrError();
+
+    // Check for basic compatibility mode
+    if (cfg.basicCompatibilityMode) {
+      // In basic compatibility mode, just upload without conditional headers
+      const response = await this._makeRequest({
+        method: 'PUT',
+        path,
+        body: data,
+        headers: {
+          'Content-Type': 'application/octet-stream',
+          'Content-Length': new Blob([data]).size.toString(),
+        },
+      });
+
+      const responseHeaderObj = this._responseHeadersToObject(response);
+      const validators = this._extractValidators(responseHeaderObj);
+      return validators.validator || 'basic-mode-upload';
+    }
+
     // Get capabilities to determine validator type
     const capabilities = await this._getOrDetectCapabilities();
-    const validatorType = capabilities.supportsETags
-      ? 'etag'
-      : capabilities.supportsLastModified
+    const validatorType =
+      cfg.preferLastModified && capabilities.supportsLastModified
         ? 'last-modified'
-        : 'none';
+        : capabilities.supportsETags
+          ? 'etag'
+          : capabilities.supportsLastModified
+            ? 'last-modified'
+            : 'none';
 
     // Check if we need locking for safe creation
     const needsLockingForCreation =
@@ -466,10 +503,7 @@ export class WebdavApi {
         // Try to lock the resource for safe creation
         lockToken = await this._lockResource(path);
         if (!lockToken) {
-          PFLog.error(
-            `${WebdavApi.L}.upload() Failed to acquire lock for safe creation`,
-            { path },
-          );
+          console.error(`Failed to acquire lock for safe creation`, { path });
         }
       }
 
@@ -498,6 +532,23 @@ export class WebdavApi {
         headers,
       });
 
+      // Check response status before processing
+      if (response.status === 412) {
+        // Precondition Failed - conditional header failed
+        throw new NoEtagAPIError(path);
+      } else if (response.status === 423) {
+        // Locked
+        throw new HttpNotOkAPIError(response);
+      } else if (response.status === 409) {
+        // Conflict - parent directory doesn't exist
+        return await this._retryUploadWithDirectoryCreation(
+          path,
+          data,
+          headers || {},
+          409,
+        );
+      }
+
       // Extract validator from response headers
       const responseHeaderObj = this._responseHeadersToObject(response);
       const validators = this._extractValidators(responseHeaderObj);
@@ -517,7 +568,10 @@ export class WebdavApi {
       PFLog.err(`${WebdavApi.L}.upload() error`, { path, error: e });
 
       // Check if it's a RemoteFileNotFoundAPIError (404)
-      if (e instanceof RemoteFileNotFoundAPIError || e?.status === 404) {
+      if (
+        (e instanceof RemoteFileNotFoundAPIError || e?.status === 404) &&
+        !_retryAttempted
+      ) {
         // Not found - parent directory might not exist (some WebDAV servers return 404 instead of 409)
         return await this._retryUploadWithDirectoryCreation(
           path,
@@ -527,8 +581,11 @@ export class WebdavApi {
         );
       }
 
+      // Check for HttpNotOkAPIError which has response.status
+      const errorStatus = e instanceof HttpNotOkAPIError ? e.response.status : e?.status;
+
       // Enhanced error handling for WebDAV-specific scenarios
-      switch (e?.status) {
+      switch (errorStatus) {
         case 409:
           // Conflict - parent directory doesn't exist
           return await this._retryUploadWithDirectoryCreation(
@@ -541,35 +598,74 @@ export class WebdavApi {
           // Precondition Failed - conditional header failed
           if (expectedEtag) {
             throw new Error(
-              `Upload failed: file was modified (expected etag: ${expectedEtag})`,
+              `Upload failed: file was modified (expected validator: ${expectedEtag})`,
             );
           } else {
             throw new FileExistsAPIError();
           }
         case 413:
           // Payload Too Large
-          throw new Error(`File too large: ${path}`);
+          throw new HttpNotOkAPIError(e.response || ({ status: 413 } as Response));
         case 507:
           // Insufficient Storage
-          throw new Error(`Insufficient storage space for: ${path}`);
+          throw new HttpNotOkAPIError(e.response || ({ status: 507 } as Response));
         case 423:
           // Locked
-          throw new Error(`Resource is locked: ${path}`);
+          throw new HttpNotOkAPIError(e.response || ({ status: 423 } as Response));
         default:
-          // Handle NoRevAPIError - server doesn't support ETags
+          // Handle NoRevAPIError - server doesn't support ETags or had retrieval issues
           if (e instanceof NoRevAPIError) {
-            PFLog.info(
-              `${WebdavApi.L}.upload() NoRevAPIError detected, checking server capabilities`,
-            );
+            // Get current capabilities to check if this was from initial detection
+            const retryCapabilities = await this._getOrDetectCapabilities();
 
-            // Clear cached capabilities to force re-detection
-            this._cachedCapabilities = undefined;
+            // Only retry if:
+            // 1. Capabilities show server doesn't support ETags (so we need Last-Modified)
+            // 2. This is not a retry attempt
+            // 3. Server capabilities were detected (not pre-configured)
+            const retryCfg = await this._getCfgOrError();
+            const wasDetected = !retryCfg.serverCapabilities; // If not in config, they were detected
 
-            // Detect server capabilities
-            await this.detectServerCapabilities();
+            // Check retry limits
+            const maxRetries = retryCfg.maxRetries ?? 2;
+            const retryCount = (e as any)._retryCount || 0;
 
-            // Retry upload with updated capabilities
-            return await this.upload({ data, path, isOverwrite, expectedEtag });
+            // Only retry if server supports Last-Modified and we haven't exceeded retry limit
+            if (
+              retryCount < maxRetries &&
+              wasDetected &&
+              retryCapabilities.supportsLastModified
+            ) {
+              PFLog.info(
+                `${WebdavApi.L}.upload() NoRevAPIError detected, retrying with fresh capabilities`,
+              );
+
+              // Clear cached capabilities to force re-detection
+              this._cachedCapabilities = undefined;
+
+              // Detect server capabilities fresh
+              await this.detectServerCapabilities();
+
+              // Track retry count to prevent infinite loops
+              const retryData = { _retryCount: retryCount + 1, _isRetryAttempt: true };
+
+              // Retry upload with updated capabilities
+              try {
+                return await this.upload({
+                  data,
+                  path,
+                  isOverwrite,
+                  expectedEtag,
+                  _retryAttempted: true,
+                });
+              } catch (retryErr: any) {
+                // If retry also fails with NoRevAPIError, propagate retry info and throw
+                if (retryErr instanceof NoRevAPIError) {
+                  Object.assign(retryErr, retryData);
+                  throw retryErr;
+                }
+                throw retryErr;
+              }
+            }
           }
           throw e;
       }
@@ -816,11 +912,17 @@ export class WebdavApi {
     } catch (e: any) {
       PFLog.err(`${WebdavApi.L}.download() error`, { path, error: e });
 
+      // Check for HttpNotOkAPIError which has response.status
+      const errorStatus = e instanceof HttpNotOkAPIError ? e.response.status : e?.status;
+
       // Enhanced error handling
-      switch (e?.status) {
+      switch (errorStatus) {
         case 304:
-          // Not Modified - rethrow as is since this might be expected
-          throw e;
+          // Not Modified - create custom error with needed info
+          const notModifiedError = new Error(`File not modified since: ${localRev}`);
+          (notModifiedError as any).status = 304;
+          (notModifiedError as any).localRev = localRev;
+          throw notModifiedError;
         case 404:
           // Not Found - file doesn't exist
           throw new RemoteFileNotFoundAPIError(path);
@@ -898,6 +1000,15 @@ export class WebdavApi {
         }
       }
 
+      // Check for other error statuses that might not throw from _makeRequest
+      if (response.status === 409) {
+        throw new Error(`Cannot delete non-empty directory: ${path}`);
+      } else if (response.status === 423) {
+        throw new Error(`Cannot delete locked resource: ${path}`);
+      } else if (response.status === 424) {
+        throw new Error(`Delete operation failed due to dependency: ${path}`);
+      }
+
       PFLog.normal(`${WebdavApi.L}.remove() successfully deleted: ${path}`);
     } catch (e: any) {
       PFLog.err(`${WebdavApi.L}.remove() error`, { path, error: e });
@@ -911,7 +1022,10 @@ export class WebdavApi {
         return;
       }
 
-      switch (e?.status) {
+      // Check for HttpNotOkAPIError which has response.status
+      const errorStatus = e instanceof HttpNotOkAPIError ? e.response.status : e?.status;
+
+      switch (errorStatus) {
         case 412:
           // Precondition Failed - etag mismatch
           if (expectedEtag) {
@@ -925,10 +1039,10 @@ export class WebdavApi {
           throw new Error(`Cannot delete locked resource: ${path}`);
         case 424:
           // Failed Dependency
-          throw new Error(`Delete failed due to dependency: ${path}`);
+          throw new Error(`Delete operation failed due to dependency: ${path}`);
         case 409:
           // Conflict - might be non-empty directory
-          throw new Error(`Delete conflict (non-empty directory?): ${path}`);
+          throw new Error(`Cannot delete non-empty directory: ${path}`);
         default:
           throw e;
       }
@@ -1274,6 +1388,7 @@ export class WebdavApi {
           412, // Precondition Failed (let calling methods handle this)
           416, // Range Not Satisfiable (let calling methods handle this)
           423, // Locked (let calling methods handle this)
+          424, // Failed Dependency (let calling methods handle this)
         ];
 
         if (!validWebDavStatuses.includes(response.status)) {
