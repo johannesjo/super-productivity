@@ -33,6 +33,7 @@ import {
 } from './tag.actions';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { Log } from '../../../core/log';
 
 export const TAG_FEATURE_NAME = 'tag';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.TAG;
@@ -343,7 +344,7 @@ export const tagReducer = createReducer<TagState>(
 
   on(updateTagOrder, (state: TagState, { ids }) => {
     if (ids.length !== state.ids.length) {
-      console.log({ state, ids });
+      Log.log({ state, ids });
       throw new Error('Tag length should not change on re-order');
     }
 

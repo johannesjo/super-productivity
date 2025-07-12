@@ -59,24 +59,6 @@ describe('Task Reducer', () => {
 
       expect(state).toBe(stateWithTasks);
     });
-
-    it('should handle restored tasks', () => {
-      const restoredTask = createTask('restored-task');
-      const action = fromActions.restoreTask({
-        task: restoredTask,
-        subTasks: [],
-      });
-      const state = taskReducer(initialTaskState, action);
-
-      expect(state.ids).toContain('restored-task');
-      expect(state.entities['restored-task']).toEqual(
-        jasmine.objectContaining({
-          id: 'restored-task',
-          isDone: false,
-          doneOn: undefined,
-        }),
-      );
-    });
   });
 
   describe('Note: CRUD operations moved to meta-reducer', () => {

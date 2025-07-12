@@ -141,9 +141,11 @@ const handleAddTask = (
   }
 
   // Update tags - only update tags that exist
+  const shouldAddToToday = task.dueDay === getWorklogStr();
+
   const tagIdsToUpdate = [
     ...task.tagIds,
-    ...(task.dueDay === getWorklogStr() ? [TODAY_TAG.id] : []),
+    ...(shouldAddToToday ? [TODAY_TAG.id] : []),
   ].filter((tagId) => state[TAG_FEATURE_NAME].entities[tagId]);
 
   // First, handle conflicts for all tags
@@ -192,6 +194,7 @@ const handleConvertToMainTask = (
       changes: {
         parentId: undefined,
         tagIds: [...parentTask.tagIds],
+        modified: Date.now(),
         ...(isPlanForToday ? { dueDay: getWorklogStr() } : {}),
       },
     },
@@ -406,7 +409,16 @@ const handleUpdateTask = (
     : taskState;
   taskState = updateTimeEstimateForTask(taskUpdate, timeEstimate, taskState);
   taskState = updateDoneOnForTask(taskUpdate, taskState);
-  taskState = taskAdapter.updateOne(taskUpdate, taskState);
+  taskState = taskAdapter.updateOne(
+    {
+      ...taskUpdate,
+      changes: {
+        ...taskUpdate.changes,
+        modified: Date.now(),
+      },
+    },
+    taskState,
+  );
 
   return {
     ...updatedState,

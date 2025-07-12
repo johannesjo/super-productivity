@@ -1,11 +1,12 @@
 import { saveAs } from 'file-saver';
 import { Directory, Encoding, Filesystem, WriteFileResult } from '@capacitor/filesystem';
 import { IS_ANDROID_WEB_VIEW } from './is-android-web-view';
+import { Log } from '../core/log';
 
-export const download = (filename: string, stringData: string): void => {
+export const download = async (filename: string, stringData: string): Promise<void> => {
   const blob = new Blob([stringData], { type: 'text/plain;charset=utf-8' });
   if (IS_ANDROID_WEB_VIEW) {
-    saveStringAsFile(filename, stringData);
+    await saveStringAsFile(filename, stringData);
   } else {
     saveAs(blob, filename);
   }
@@ -27,6 +28,11 @@ const saveStringAsFile = async (
     encoding: Encoding.UTF8,
     recursive: true,
   });
-  console.log(r);
+  Log.log(r);
   return r;
+};
+
+// interestingly this can't live in the logs.ts or it leads to weird "window" not found errors
+export const downloadLogs = (): void => {
+  download('SP-logs.json', Log.exportLogHistory());
 };

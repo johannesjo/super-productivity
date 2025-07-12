@@ -312,7 +312,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
         .filter((i) => i !== null);
 
       // Find all to-do items in the markdown string
-      // console.log(checkIndex, todoAllLinesIndexes, allLines);
+      // Log.log(checkIndex, todoAllLinesIndexes, allLines);
 
       const itemIndex = todoAllLinesIndexes[checkIndex];
       if (typeof itemIndex === 'number' && itemIndex > -1) {

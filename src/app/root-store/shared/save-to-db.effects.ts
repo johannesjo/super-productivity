@@ -42,6 +42,7 @@ import { TaskSharedActions } from '../meta/task-shared.actions';
 import { loadAllData } from '../meta/load-all-data.action';
 import { clearHiddenImprovements } from '../../features/metric/improvement/store/improvement.actions';
 import { selectTaskRepeatCfgFeatureState } from '../../features/task-repeat-cfg/store/task-repeat-cfg.selectors';
+import { Log } from '../../core/log';
 
 const ALWAYS_IGNORED_ACTIONS = [loadAllData.type];
 
@@ -198,7 +199,7 @@ export class SaveToDbEffects {
             ),
           ),
           tap(([state, action]) =>
-            console.log(
+            Log.log(
               `__DB_S_${modelKey}__`,
               !ignoredActionTypesToUse.includes(action.type),
               action.type,

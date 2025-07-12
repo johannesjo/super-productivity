@@ -1,4 +1,4 @@
-import { pfLog } from './log';
+import { PFLog } from '../../../core/log';
 
 export const loadBalancer = <T>(
   asyncTasks: (() => Promise<T>)[],
@@ -13,8 +13,7 @@ export const loadBalancer = <T>(
       const batch = asyncTasks.slice(index, index + batchSize);
 
       // Execute all promises in the current batch concurrently
-      pfLog(
-        2,
+      PFLog.normal(
         // eslint-disable-next-line no-mixed-operators
         `loadBalancer ${index / batchSize + 1} / ${Math.ceil(asyncTasks.length / batchSize)}`,
       );

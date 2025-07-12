@@ -60,6 +60,18 @@ describe('SaveToDbEffects', () => {
 
     // Reset mock store state to ensure clean test environment
     store.resetSelectors();
+
+    // Set up meta-reducer simulation to make actions trigger state changes
+    // Store the original dispatch method
+    const originalStoreDispatch = store.dispatch.bind(store);
+
+    // Override dispatch to emit actions to the stream
+    (store as any).dispatch = (action: Action) => {
+      // Emit the action to the actions$ stream first (simulating the action happening)
+      actions$.next(action);
+      // Then call the original dispatch
+      originalStoreDispatch(action);
+    };
   });
 
   afterEach(() => {
@@ -100,9 +112,8 @@ describe('SaveToDbEffects', () => {
       mockTagSelector.setResult(updatedTagState);
       store.refreshState();
 
-      // 2. Then emit the action that triggered the state change
-      // This tests the critical assumption that "the next action after is the action that triggered the change"
-      actions$.next(triggeringAction);
+      // 2. Dispatch the action (which will also emit it to actions$ via our spy)
+      store.dispatch(triggeringAction);
     });
 
     it('should capture the action that triggered the state change for project state', (done) => {
@@ -133,7 +144,7 @@ describe('SaveToDbEffects', () => {
       // Simulate the sequence: state change followed by the action that triggered it
       mockProjectSelector.setResult(updatedProjectState);
       store.refreshState();
-      actions$.next(triggeringAction);
+      store.dispatch(triggeringAction);
     });
 
     it('should filter out ignored actions when they follow state changes', (done) => {
@@ -151,7 +162,7 @@ describe('SaveToDbEffects', () => {
       // Simulate state change followed by ignored action
       mockTagSelector.setResult(updatedTagState);
       store.refreshState();
-      actions$.next(ignoredAction);
+      store.dispatch(ignoredAction);
 
       // Wait a bit to ensure the effect had time to process
       // The effect should filter out the ignored action and not call save
@@ -196,17 +207,17 @@ describe('SaveToDbEffects', () => {
       // Process state changes with small delays to ensure proper sequencing
       mockTagSelector.setResult(states[0]);
       store.refreshState();
-      actions$.next(actions[0]);
+      store.dispatch(actions[0]);
 
       setTimeout(() => {
         mockTagSelector.setResult(states[1]);
         store.refreshState();
-        actions$.next(actions[1]);
+        store.dispatch(actions[1]);
 
         setTimeout(() => {
           mockTagSelector.setResult(states[2]);
           store.refreshState();
-          actions$.next(actions[2]);
+          store.dispatch(actions[2]);
         }, 5);
       }, 5);
     });
@@ -236,7 +247,7 @@ describe('SaveToDbEffects', () => {
       // Test the critical pattern
       mockConfigSelector.setResult(updatedConfigState);
       store.refreshState();
-      actions$.next(triggeringAction);
+      store.dispatch(triggeringAction);
     });
   });
 });

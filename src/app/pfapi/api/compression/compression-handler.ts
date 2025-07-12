@@ -1,4 +1,5 @@
 import { CompressError, DecompressError } from '../errors/errors';
+import { PFLog } from '../../../core/log';
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export async function compressWithGzipToString(input: string): Promise<string> {
@@ -16,7 +17,7 @@ export async function compressWithGzipToString(input: string): Promise<string> {
     }
     const base64 = btoa(binary);
 
-    // pfLog(2, 'Compression stats', {
+    // PFLog.normal( 'Compression stats', {
     //   inputLength: input.length,
     //   compressedSize: compressed.byteLength,
     //   base64Length: base64.length,
@@ -24,7 +25,7 @@ export async function compressWithGzipToString(input: string): Promise<string> {
 
     return base64;
   } catch (error) {
-    console.error(error);
+    PFLog.err(error);
     throw new CompressError(error);
   }
 }
@@ -48,10 +49,10 @@ export async function decompressGzipFromString(
 
     const decompressed = await new Response(stream.readable).arrayBuffer();
     const decoded = new TextDecoder().decode(decompressed);
-    // pfLog(2, 'Decompression stats', { decompressedLength: decoded.length });
+    // PFLog.normal( 'Decompression stats', { decompressedLength: decoded.length });
     return decoded;
   } catch (error) {
-    console.error(error);
+    PFLog.err(error);
     throw new DecompressError(error);
   }
 }

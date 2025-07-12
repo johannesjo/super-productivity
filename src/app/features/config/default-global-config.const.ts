@@ -32,6 +32,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
 **Why do I want it?**
 `,
     isOverlayIndicatorEnabled: false,
+    customTheme: 'default',
   },
   shortSyntax: {
     isEnableProject: true,

@@ -3,7 +3,7 @@
 @let inputVal = (inputVal$ | async) || '';
 
 <form
-  (submit)="$event.preventDefault(); addTask()"
+  (submit)="addTask($event)"
   @blendInOut
   [class.isElevated]="isElevated()"
   [class.mat-elevation-z3]="!isElevated()"

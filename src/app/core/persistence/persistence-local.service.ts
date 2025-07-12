@@ -5,6 +5,7 @@ import { LocalSyncMetaForProvider, LocalSyncMetaModel } from '../../imex/sync/sy
 import { LegacySyncProvider } from 'src/app/imex/sync/legacy-sync-provider.model';
 import { environment } from 'src/environments/environment';
 import { BehaviorSubject } from 'rxjs';
+import { Log } from '../log';
 
 const DEFAULT_LOCAL_SYNC_META: LocalSyncMetaModel = {
   [LegacySyncProvider.Dropbox]: {
@@ -46,7 +47,7 @@ export class PersistenceLocalService {
       r[LegacySyncProvider.LocalFile]
     ) {
       if (environment.production) {
-        console.log(r);
+        Log.log(r);
       }
       return r;
     }
@@ -82,7 +83,7 @@ export class PersistenceLocalService {
   }
 
   async updateLastSyncModelChange(lastSyncModelChange: number): Promise<unknown> {
-    console.log(lastSyncModelChange);
+    Log.log(lastSyncModelChange);
     console.trace();
     this.lastSnyModelChange$.next(lastSyncModelChange);
     return await this._databaseService.save(

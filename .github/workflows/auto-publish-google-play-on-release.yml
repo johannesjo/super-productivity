@@ -12,23 +12,11 @@ jobs:
     if: '!github.event.release.prerelease'
 
     steps:
-      - name: Download APK from Release
-        uses: robinraju/release-downloader@v1.12
+      - name: Promote Internal Release to Production
+        uses: kevin-david/promote-play-release@v1.0.0
         with:
-          repository: ${{ github.repository }}
-          tag: ${{ github.event.release.tag_name }}
-          fileName: '*.apk'
-          out-file-path: 'downloads'
-
-      - name: Promote to Production in Google Play Console
-        uses: r0adkll/upload-google-play@v1.1.3
-        with:
-          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
-          packageName: com.superproductivity.superproductivity
-          releaseFiles: downloads/*.apk
-          track: production
-          status: completed
-          inAppUpdatePriority: 3
-          releaseName: ${{ github.event.release.tag_name }}
-          releaseNotes: |
-            ${{ github.event.release.body }}
+          service-account-json-raw: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          package-name: com.superproductivity.superproductivity
+          from-track: internal
+          to-track: production
+          inapp-update-priority: 3

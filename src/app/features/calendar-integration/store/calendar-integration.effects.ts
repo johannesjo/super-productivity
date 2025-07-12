@@ -20,6 +20,7 @@ import { IssueProviderCalendar } from '../../issue/issue.model';
 import { IssueService } from '../../issue/issue.service';
 import { isToday } from '../../../util/is-today.util';
 import { TaskService } from '../../tasks/task.service';
+import { Log } from '../../../core/log';
 
 const CHECK_TO_SHOW_INTERVAL = 60 * 1000;
 
@@ -58,7 +59,7 @@ export class CalendarIntegrationEffects {
             activatedProviders.map((calProvider) =>
               timer(0, calProvider.checkUpdatesEvery).pipe(
                 // timer(0, 10000).pipe(
-                // tap(() => console.log('REQUEST CALENDAR', calProvider)),
+                // tap(() => Log.log('REQUEST CALENDAR', calProvider)),
                 switchMap(() =>
                   this._calendarIntegrationService.requestEvents$(calProvider),
                 ),
@@ -103,7 +104,7 @@ export class CalendarIntegrationEffects {
             ),
           );
         }),
-        tap((a) => console.log('_____END___', a)),
+        tap((a) => Log.log('_____END___', a)),
       ),
     { dispatch: false },
   );
@@ -123,11 +124,11 @@ export class CalendarIntegrationEffects {
     calProvider: IssueProviderCalendar,
   ): void {
     const curVal = this._currentlyShownBanners$.getValue();
-    console.log('addEvToShow', curVal, calEv);
+    Log.log('addEvToShow', curVal, calEv);
     if (!curVal.map((val) => val.id).includes(calEv.id)) {
       const newBanners = [...curVal, { id: calEv.id, calEv, calProvider }];
       newBanners.sort((a, b) => a.calEv.start - b.calEv.start);
-      console.log('UDATE _currentlyShownBanners$');
+      Log.log('UDATE _currentlyShownBanners$');
 
       this._currentlyShownBanners$.next(newBanners);
     }
@@ -162,7 +163,7 @@ export class CalendarIntegrationEffects {
     const isInPast = calEv.start < Date.now();
 
     const nrOfAllBanners = allEvsToShow.length;
-    console.log({ taskForEvent, allEvsToShow });
+    Log.log({ taskForEvent, allEvsToShow });
 
     this._bannerService.open({
       id: BannerId.CalendarEvent,

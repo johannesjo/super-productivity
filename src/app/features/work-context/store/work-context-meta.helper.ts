@@ -26,7 +26,7 @@ export const moveItemInList = (
   partialList: string[],
   emptyListVal = 0,
 ): string[] => {
-  // console.log(itemId, completeList, partialList);
+  // Log.log(itemId, completeList, partialList);
 
   let newIndex;
   const curInUpdateListIndex = partialList.indexOf(itemId);

@@ -6,6 +6,7 @@ import { isDataRepairPossible } from '../../pfapi/repair/is-data-repair-possible
 import { getLastValidityError } from '../../pfapi/validate/is-related-model-data-valid';
 import { IS_ELECTRON } from '../../app.constants';
 import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
+import { Log } from '../log';
 
 @Injectable({
   providedIn: 'root',
@@ -17,7 +18,7 @@ export class DataRepairService {
     dataIn: AppDataCompleteLegacy | AppDataCompleteNew,
   ): boolean {
     if (!isDataRepairPossible(dataIn)) {
-      console.log({ dataIn });
+      Log.log({ dataIn });
       alert('Data damaged, repair not possible.');
       return false;
     }

@@ -4,8 +4,8 @@ import { PluginAPI } from './plugin-api';
 import { PluginBridgeService } from './plugin-bridge.service';
 import { PluginSecurityService } from './plugin-security';
 import { SnackService } from '../core/snack/snack.service';
-import { IS_ELECTRON } from '../app.constants';
 import { PluginCleanupService } from './plugin-cleanup.service';
+import { PluginLog } from '../core/log';
 
 /**
  * Simplified plugin runner following KISS principles.
@@ -36,12 +36,7 @@ export class PluginRunner {
       // Create plugin API
       const pluginAPI = new PluginAPI(baseCfg, manifest.id, this._pluginBridge, manifest);
 
-      // Add executeNodeScript for electron if permitted
-      if (IS_ELECTRON && manifest.permissions?.includes('nodeExecution')) {
-        pluginAPI.executeNodeScript = async (request) => {
-          return this._pluginBridge.executeNodeScript(request);
-        };
-      }
+      // executeNodeScript is now automatically bound if permitted via createBoundMethods
 
       // Store API reference
       this._pluginApis.set(manifest.id, pluginAPI);
@@ -58,7 +53,7 @@ export class PluginRunner {
 
       // Show warnings if any
       if (analysis.warnings.length > 0) {
-        console.warn(`Plugin ${manifest.id} warnings:`, analysis.warnings);
+        PluginLog.err(`Plugin ${manifest.id} warnings:`, analysis.warnings);
         this._snackService.open({
           msg: `Plugin "${manifest.name}" has warnings: ${analysis.warnings[0]}`,
           type: 'CUSTOM',
@@ -68,7 +63,7 @@ export class PluginRunner {
 
       // Log info for transparency
       if (analysis.info.length > 0) {
-        console.info(`Plugin ${manifest.id} info:`, analysis.info);
+        PluginLog.info(`Plugin ${manifest.id} info:`, analysis.info);
       }
 
       try {
@@ -101,13 +96,13 @@ export class PluginRunner {
       } catch (error) {
         pluginInstance.error =
           error instanceof Error ? error.message : 'Failed to load plugin';
-        console.error(`Plugin ${manifest.id} error:`, error);
+        PluginLog.err(`Plugin ${manifest.id} error:`, error);
       }
 
       this._loadedPlugins.set(manifest.id, pluginInstance);
       return pluginInstance;
     } catch (error) {
-      console.error(`Failed to load plugin ${manifest.id}:`, error);
+      PluginLog.err(`Failed to load plugin ${manifest.id}:`, error);
       throw error;
     }
   }
@@ -172,7 +167,7 @@ export class PluginRunner {
       // Unregister hooks
       this._pluginBridge.unregisterPluginHooks(pluginId);
 
-      console.log(`Plugin ${pluginId} unloaded`);
+      PluginLog.log(`Plugin ${pluginId} unloaded`);
       return true;
     }
     return false;
@@ -188,14 +183,16 @@ export class PluginRunner {
   /**
    * Send a message to a plugin's message handler
    */
-  async sendMessageToPlugin(pluginId: string, message: any): Promise<any> {
+  async sendMessageToPlugin(pluginId: string, message: unknown): Promise<unknown> {
     const pluginApi = this._pluginApis.get(pluginId);
     if (!pluginApi) {
       throw new Error(`Plugin ${pluginId} not found or not loaded`);
     }
 
     // Use the internal __sendMessage method on PluginAPI
-    return (pluginApi as any).__sendMessage(message);
+    return (
+      pluginApi as { __sendMessage: (message: unknown) => Promise<unknown> }
+    ).__sendMessage(message);
   }
 
   // KISS: Hook execution is handled by PluginHooksService, not here

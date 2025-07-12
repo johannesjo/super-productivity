@@ -106,31 +106,23 @@ if (comparison === VectorClockComparison.CONCURRENT) {
 2. **SyncService**: Merges vector clocks during download, includes in upload
 3. **getSyncStatusFromMetaFiles**: Uses vector clocks for conflict detection
 
-## Migration from Lamport Timestamps
+## Vector Clock Implementation
 
-The system maintains backwards compatibility with existing Lamport timestamps:
+The system uses vector clocks exclusively for conflict detection:
 
-### Automatic Migration
+### How It Works
 
-```typescript
-// If no vector clock exists, create from Lamport timestamp
-if (!meta.vectorClock && meta.localLamport > 0) {
-  meta.vectorClock = { [clientId]: meta.localLamport };
-}
-```
+- Each client maintains its own counter in the vector clock
+- Counters increment on local changes only
+- Vector clocks are compared to detect concurrent changes
+- No false conflicts from timestamp-based comparisons
 
-### Dual Support
+### Current Fields
 
-- New installations use vector clocks immediately
-- Existing installations migrate transparently
-- Both systems coexist during transition period
-
-### Field Mapping
-
-| Old Field           | New Field               | Purpose             |
-| ------------------- | ----------------------- | ------------------- |
-| `localLamport`      | `vectorClock[clientId]` | Track local changes |
-| `lastSyncedLamport` | `lastSyncedVectorClock` | Track sync state    |
+| Field                   | Purpose                          |
+| ----------------------- | -------------------------------- |
+| `vectorClock`           | Track changes across all clients |
+| `lastSyncedVectorClock` | Track last synced state          |
 
 ## API Reference
 

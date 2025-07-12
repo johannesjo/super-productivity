@@ -34,6 +34,7 @@ import { SearchResultItem } from '../../../issue.model';
 import { GITLAB_TYPE, ISSUE_PROVIDER_HUMANIZED } from '../../../issue.const';
 import { assertTruthy } from '../../../../../util/assert-truthy';
 import { handleIssueProviderHttpError$ } from '../../../handle-issue-provider-http-error';
+import { IssueLog } from '../../../../../core/log';
 
 @Injectable({
   providedIn: 'root',
@@ -43,7 +44,7 @@ export class GitlabApiService {
   private _http = inject(HttpClient);
 
   getById$(id: string, cfg: GitlabCfg): Observable<GitlabIssue> {
-    console.log(this._issueApiLink(cfg, id));
+    IssueLog.log(this._issueApiLink(cfg, id));
 
     return this._sendIssuePaginatedRequest$(
       {
@@ -307,7 +308,8 @@ export class GitlabApiService {
         responseType: params.responseType,
       },
     ];
-    console.log(allArgs);
+    // NOTE: DO NOT LOG allArgs - contains PRIVATE-TOKEN in headers
+    // IssueLog.log(allArgs);
 
     const req = new HttpRequest(p.method, p.url, ...allArgs);
 
@@ -325,7 +327,7 @@ export class GitlabApiService {
   }
 
   private _issueApiLink(cfg: GitlabCfg, issueId: string): string {
-    console.log(issueId);
+    IssueLog.log(issueId);
     const { projectIssueId } = getPartsFromGitlabIssueId(issueId);
     return `${this._apiLink(cfg)}/issues/${projectIssueId}`;
   }

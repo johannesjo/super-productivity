@@ -1,32 +1,24 @@
-# Sync.md Plugin (Solid.js Version)
+# Sync-MD Plugin v2.0.0
 
-A SuperProductivity plugin that syncs markdown files with project tasks, now built with Solid.js for better performance and maintainability.
+A SuperProductivity plugin that enables bidirectional synchronization between markdown files and project tasks.
 
 ## Features
 
-- **Bidirectional Sync**: Sync changes from markdown to project and vice versa
-- **One-way Sync Options**: Choose to sync only from file to project or project to file
-- **Conflict Detection**: Detects when both file and project have changed
-- **Real-time Monitoring**: Watches markdown files for changes
-- **Modern UI**: Built with Solid.js for a responsive, reactive interface
+- **Bidirectional Sync**: Keep markdown files and SuperProductivity tasks in sync
+- **Batch API Integration**: Efficient bulk operations for better performance
+- **Smart Debouncing**: 10-second delays prevent conflicts during active editing
+- **Real-time Monitoring**: File system watching with automatic sync triggers
+- **Task Hierarchy**: Preserves parent-child relationships in markdown
+- **Modern Architecture**: Built with Solid.js UI and modular TypeScript
 
-## Sync Logic
-
-The plugin uses a sophisticated bidirectional sync algorithm that:
-
-1. **Tracks Changes**: Maintains checksums of tasks and file content to detect changes
-2. **Detects Conflicts**: Identifies when both sides have modified the same task
-3. **Preserves Hierarchy**: Maintains task/subtask relationships during sync
-4. **Handles Deletions**: Marks tasks for deletion rather than removing them
-
-## Development
+## Quick Start
 
 ```bash
 # Install dependencies
 npm install
 
-# Development server
-npm run dev
+# Development mode with hot reload
+npm run dev:watch
 
 # Build for production
 npm run build
@@ -35,22 +27,66 @@ npm run build
 npm run package
 ```
 
-## Testing Sync Logic
-
-```bash
-# Run sync logic tests
-npx tsx test-sync-logic.ts
-```
-
 ## Architecture
 
-- `src/App.tsx` - Main Solid.js application component
-- `src/syncLogic.ts` - Core bidirectional sync algorithm
-- `plugin.js` - Plugin entry point that integrates with SuperProductivity
-- `index.html` - HTML template for the plugin UI
+### Core Components
 
-## Sync Directions
+- `src/fileWatcherBatch.ts` - Main sync engine with batch API support
+- `src/background.ts` - Plugin lifecycle and message handling
+- `src/App.tsx` - Solid.js UI for configuration
+- `src/utils/` - Reusable utilities (parser, debouncer, file ops)
 
-- **Bidirectional**: Changes sync both ways with conflict detection
-- **File → Project**: Markdown file is the source of truth
-- **Project → File**: SuperProductivity project is the source of truth
+### Build System
+
+- `build-proper.js` - Main build script
+- `build-plugin.js` - Package as distributable ZIP
+- `watch-and-build.js` - Development with auto-rebuild
+
+## Configuration
+
+```typescript
+{
+  projectId: "project-uuid",
+  filePath: "/path/to/tasks.md",
+  syncDirection: "fileToProject" | "projectToFile" | "bidirectional"
+}
+```
+
+## Markdown Format
+
+```markdown
+- [ ] Parent task
+  - [x] <!-- sp:task-id --> Completed subtask
+  - [ ] Pending subtask
+```
+
+Tasks are linked using HTML comments containing unique IDs.
+
+## Testing
+
+```bash
+# Run all tests
+npm test
+
+# Watch mode
+npm run test:watch
+
+# Coverage report
+npm run test:coverage
+```
+
+## Documentation
+
+For detailed documentation, see:
+
+- [Full Documentation](../../../docs/ai/sync-md-plugin-documentation.md)
+- [Migration Guide](../../../docs/ai/sync-md-documentation-migration.md)
+
+## Cleanup
+
+To remove old/unnecessary files after updating:
+
+```bash
+chmod +x cleanup.sh
+./cleanup.sh
+```

@@ -4,6 +4,7 @@ import { IssueProviderCalendar } from '../../issue.model';
 import { CalendarProviderCfg } from './calendar.model';
 import { ISSUE_PROVIDER_FF_DEFAULT_PROJECT } from '../../common-issue-form-stuff.const';
 import { IS_ELECTRON } from '../../../../app.constants';
+import { IssueLog } from '../../../../core/log';
 
 export const DEFAULT_CALENDAR_CFG: CalendarProviderCfg = {
   isEnabled: false,
@@ -45,7 +46,7 @@ export const CALENDAR_FORM_CFG_NEW: ConfigFormSection<IssueProviderCalendar> = {
       key: 'checkUpdatesEvery',
       hooks: {
         onInit: (field) => {
-          console.log(field?.formControl?.value);
+          IssueLog.log(field?.formControl?.value);
           if (!field?.formControl?.value) {
             field?.formControl?.setValue(2 * 60 * 60000);
           }
@@ -61,7 +62,7 @@ export const CALENDAR_FORM_CFG_NEW: ConfigFormSection<IssueProviderCalendar> = {
       key: 'showBannerBeforeThreshold',
       hooks: {
         onInit: (field) => {
-          console.log(field?.formControl?.value);
+          IssueLog.log(field?.formControl?.value);
           if (!field?.formControl?.value && field?.formControl?.value !== null) {
             field?.formControl?.setValue(2 * 60 * 60000);
           }

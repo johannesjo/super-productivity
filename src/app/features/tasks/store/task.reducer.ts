@@ -2,7 +2,6 @@ import {
   __updateMultipleTaskSimple,
   addReminderIdToTask,
   addSubTask,
-  convertToMainTask,
   moveSubTask,
   moveSubTaskDown,
   moveSubTaskToBottom,
@@ -10,7 +9,6 @@ import {
   moveSubTaskUp,
   removeReminderFromTask,
   removeTimeSpent,
-  restoreTask,
   roundTimeSpentForDay,
   setCurrentTask,
   setSelectedTask,
@@ -27,7 +25,6 @@ import {
   getTaskById,
   reCalcTimesForParentIfParent,
   reCalcTimeSpentForParentIfParent,
-  removeTaskFromParentSideEffects,
   updateTimeSpentForTask,
 } from './task.reducer.util';
 import { taskAdapter } from './task.adapter';
@@ -57,6 +54,7 @@ import { PlannerActions } from '../../planner/store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
+import { TaskLog } from '../../../core/log';
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -280,14 +278,14 @@ export const taskReducer = createReducer<TaskState>(
   on(moveSubTaskUp, (state, { id, parentId }) => {
     const parentTask = state.entities[parentId];
     if (!parentTask) {
-      console.warn(`Parent task ${parentId} not found`);
+      TaskLog.err(`Parent task ${parentId} not found`);
       return state;
     }
     const parentSubTaskIds = parentTask.subTaskIds;
 
     // Check if the subtask is actually in the parent's subtask list
     if (!parentSubTaskIds.includes(id)) {
-      console.warn(`Subtask ${id} not found in parent ${parentId} subtasks`);
+      TaskLog.err(`Subtask ${id} not found in parent ${parentId} subtasks`);
       return state;
     }
 
@@ -305,14 +303,14 @@ export const taskReducer = createReducer<TaskState>(
   on(moveSubTaskDown, (state, { id, parentId }) => {
     const parentTask = state.entities[parentId];
     if (!parentTask) {
-      console.warn(`Parent task ${parentId} not found`);
+      TaskLog.err(`Parent task ${parentId} not found`);
       return state;
     }
     const parentSubTaskIds = parentTask.subTaskIds;
 
     // Check if the subtask is actually in the parent's subtask list
     if (!parentSubTaskIds.includes(id)) {
-      console.warn(`Subtask ${id} not found in parent ${parentId} subtasks`);
+      TaskLog.err(`Subtask ${id} not found in parent ${parentId} subtasks`);
       return state;
     }
 
@@ -330,14 +328,14 @@ export const taskReducer = createReducer<TaskState>(
   on(moveSubTaskToTop, (state, { id, parentId }) => {
     const parentTask = state.entities[parentId];
     if (!parentTask) {
-      console.warn(`Parent task ${parentId} not found`);
+      TaskLog.err(`Parent task ${parentId} not found`);
       return state;
     }
     const parentSubTaskIds = parentTask.subTaskIds;
 
     // Check if the subtask is actually in the parent's subtask list
     if (!parentSubTaskIds.includes(id)) {
-      console.warn(`Subtask ${id} not found in parent ${parentId} subtasks`);
+      TaskLog.err(`Subtask ${id} not found in parent ${parentId} subtasks`);
       return state;
     }
 
@@ -355,14 +353,14 @@ export const taskReducer = createReducer<TaskState>(
   on(moveSubTaskToBottom, (state, { id, parentId }) => {
     const parentTask = state.entities[parentId];
     if (!parentTask) {
-      console.warn(`Parent task ${parentId} not found`);
+      TaskLog.err(`Parent task ${parentId} not found`);
       return state;
     }
     const parentSubTaskIds = parentTask.subTaskIds;
 
     // Check if the subtask is actually in the parent's subtask list
     if (!parentSubTaskIds.includes(id)) {
-      console.warn(`Subtask ${id} not found in parent ${parentId} subtasks`);
+      TaskLog.err(`Subtask ${id} not found in parent ${parentId} subtasks`);
       return state;
     }
 
@@ -435,26 +433,6 @@ export const taskReducer = createReducer<TaskState>(
     };
   }),
 
-  on(convertToMainTask, (state, { task, isPlanForToday }) => {
-    const par = state.entities[task.parentId as string];
-    if (!par) {
-      throw new Error('No parent for sub task');
-    }
-
-    const stateCopy = removeTaskFromParentSideEffects(state, task);
-    return taskAdapter.updateOne(
-      {
-        id: task.id,
-        changes: {
-          parentId: undefined,
-          tagIds: [...par.tagIds],
-          ...(isPlanForToday ? { dueDay: getWorklogStr() } : {}),
-        },
-      },
-      stateCopy,
-    );
-  }),
-
   on(toggleStart, (state) => {
     if (state.currentTaskId) {
       return {
@@ -516,15 +494,6 @@ export const taskReducer = createReducer<TaskState>(
     return {
       ...copyState,
     };
-  }),
-
-  on(restoreTask, (state, { task, subTasks = [] }) => {
-    const updatedTask = {
-      ...task,
-      isDone: false,
-      doneOn: undefined,
-    };
-    return taskAdapter.addMany([updatedTask, ...subTasks], state);
   }),
 
   // REPEAT STUFF

@@ -47,7 +47,9 @@ yarn-error.log
 testem.log
 /typings
 chromedriver.log
+/docs/tmp
 .eslintcache
+
 
 # System Files
 .DS_Store

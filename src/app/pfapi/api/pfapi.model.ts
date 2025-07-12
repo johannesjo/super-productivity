@@ -91,12 +91,6 @@ export interface MetaFileBase {
   lastUpdateAction?: string;
   revMap: RevMap;
   crossModelVersion: number;
-  // Change tracking fields - support both old and new names for backwards compatibility
-  localLamport: number;
-  lastSyncedLamport: number | null;
-  // New field names (will be migrated to gradually)
-  localChangeCounter?: number;
-  lastSyncedChangeCounter?: number | null;
   lastSyncedAction?: string;
   // Vector clock fields for improved conflict detection
   vectorClock?: VectorClock;
@@ -112,13 +106,9 @@ export interface RemoteMeta extends MetaFileBase {
   isFullData?: boolean;
 }
 
-export interface UploadMeta
-  extends Omit<
-    RemoteMeta,
-    'lastSyncedLamport' | 'lastSyncedChangeCounter' | 'lastSyncedVectorClock'
-  > {
-  lastSyncedLamport: null;
-  lastSyncedChangeCounter?: null;
+export interface UploadMeta extends Omit<RemoteMeta, 'lastSyncedVectorClock'> {
+  // Vector clock should not be synced, only used locally
+  lastSyncedVectorClock?: null;
 }
 
 export interface LocalMeta extends MetaFileBase {
@@ -205,7 +195,8 @@ export type PfapiEvents =
   | 'metaModelChange'
   | 'providerChange'
   | 'providerPrivateCfgChange'
-  | 'providerReady';
+  | 'providerReady'
+  | 'onBeforeUpdateLocal';
 
 export type SyncStatusChangePayload =
   | 'UNKNOWN_OR_CHANGED'
@@ -226,6 +217,10 @@ export interface PfapiEventPayloadMap {
   providerPrivateCfgChange: {
     providerId: string;
     privateCfg: SyncProviderPrivateCfg;
+  };
+  onBeforeUpdateLocal: {
+    backup: CompleteBackup<any>;
+    modelsToUpdate?: string[];
   };
 }
 

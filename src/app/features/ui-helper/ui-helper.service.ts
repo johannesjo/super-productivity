@@ -7,6 +7,7 @@ import { UI_LOCAL_HELPER_DEFAULT } from './ui-helper.const';
 import { IS_ELECTRON } from '../../app.constants';
 import { fromEvent } from 'rxjs';
 import { throttleTime } from 'rxjs/operators';
+import { Log } from '../../core/log';
 
 @Injectable({ providedIn: 'root' })
 export class UiHelperService {
@@ -18,7 +19,7 @@ export class UiHelperService {
 
   zoomTo(zoomFactor: number): void {
     if (Number.isNaN(zoomFactor)) {
-      console.error('Invalid zoom factor', zoomFactor);
+      Log.err('Invalid zoom factor', zoomFactor);
       return;
     }
 
@@ -28,11 +29,11 @@ export class UiHelperService {
 
   zoomBy(zoomBy: number): void {
     if (Number.isNaN(zoomBy)) {
-      console.error('Invalid zoom factor', zoomBy);
+      Log.err('Invalid zoom factor', zoomBy);
       return;
     }
     const currentZoom = window.ea.getZoomFactor();
-    console.log({ currentZoom });
+    Log.log({ currentZoom });
 
     const zoomFactor = currentZoom + zoomBy;
 
@@ -49,7 +50,7 @@ export class UiHelperService {
 
       window.ea.showOrFocus();
     } else {
-      console.error('Cannot execute focus app window in browser');
+      Log.err('Cannot execute focus app window in browser');
     }
   }
 

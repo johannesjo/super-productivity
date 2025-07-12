@@ -31,6 +31,7 @@ import { SyncWrapperService } from './sync-wrapper.service';
 import { getSyncErrorStr } from './get-sync-error-str';
 import { InitialPwaUpdateCheckService } from '../../core/initial-pwa-update-check.service';
 import { DataInitStateService } from '../../core/data-init/data-init-state.service';
+import { SyncLog } from '../../core/log';
 
 @Injectable()
 export class SyncEffects {
@@ -72,7 +73,7 @@ export class SyncEffects {
                   this._execBeforeCloseService.setDone(SYNC_BEFORE_CLOSE_ID);
                 })
                 .catch((e: unknown) => {
-                  console.error(e);
+                  SyncLog.err(e);
                   this._snackService.open({
                     msg: T.F.DROPBOX.S.SYNC_ERROR,
                     type: 'ERROR',
@@ -132,7 +133,7 @@ export class SyncEffects {
             // this._wasJustEnabled$.pipe(take(1), mapTo('SYNC_DBX_AFTER_ENABLE')),
           ),
         ),
-        tap((x) => console.log('sync(effect).....', x)),
+        tap((x) => SyncLog.log('sync(effect).....', x)),
         withLatestFrom(isOnline$),
         // don't run multiple after each other when dialog is open
         exhaustMap(([trigger, isOnline]) => {

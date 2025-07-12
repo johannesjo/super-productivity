@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, shareReplay, take } from 'rxjs/operators';
 import { DBSchema, openDB } from 'idb';
 import { DBAdapter } from './db-adapter.model';
+import { Log } from '../log';
 
 const DB_NAME = 'SUP';
 const DB_MAIN_NAME = 'SUP_STORE';
@@ -34,7 +35,7 @@ export class IndexedDBAdapterService implements DBAdapter {
         // upgrade(db: IDBPDatabase<MyDb>, oldVersion: number, newVersion: number | null, transaction: IDBPTransaction<MyDb>) {
         // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
         upgrade(db: IDBPDatabase<MyDb>, oldVersion: number, newVersion: number | null) {
-          console.log('IDB UPGRADE', oldVersion, newVersion);
+          Log.log('IDB UPGRADE', oldVersion, newVersion);
           db.createObjectStore(DB_MAIN_NAME);
         },
         // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
@@ -65,12 +66,41 @@ export class IndexedDBAdapterService implements DBAdapter {
 
   async load(key: string): Promise<unknown> {
     await this._afterReady();
-    return await (this._db as IDBPDatabase<MyDb>).get(DB_MAIN_NAME, key);
+
+    try {
+      const result = await (this._db as IDBPDatabase<MyDb>).get(DB_MAIN_NAME, key);
+      return result;
+    } catch (e) {
+      Log.err(`[IndexedDB] Error loading key "${key}" from store "${DB_MAIN_NAME}":`, e);
+
+      if (e instanceof Error) {
+        Log.err('[IndexedDB] Error name:', e.name);
+        Log.err('[IndexedDB] Error message:', e.message);
+
+        // Log specific details for the large value error
+        if (e.message && e.message.includes('Failed to read large IndexedDB value')) {
+          Log.err('[IndexedDB] CRITICAL: Large value read failure detected');
+          Log.err(
+            '[IndexedDB] This indicates IndexedDB blob files are missing or corrupted',
+          );
+          Log.err('[IndexedDB] Affected store:', DB_MAIN_NAME);
+          Log.err('[IndexedDB] Affected key:', key);
+        }
+      }
+
+      throw e;
+    }
   }
 
   async save(key: string, data: unknown): Promise<unknown> {
     await this._afterReady();
-    return await (this._db as IDBPDatabase<MyDb>).put(DB_MAIN_NAME, data, key);
+
+    try {
+      return await (this._db as IDBPDatabase<MyDb>).put(DB_MAIN_NAME, data, key);
+    } catch (e) {
+      Log.err(`[IndexedDB] Error saving key "${key}" to store "${DB_MAIN_NAME}":`, e);
+      throw e;
+    }
   }
 
   async remove(key: string): Promise<unknown> {
@@ -87,7 +117,7 @@ export class IndexedDBAdapterService implements DBAdapter {
     try {
       return await this._afterReady$.pipe(take(1)).toPromise();
     } catch (e) {
-      console.warn('DB After Ready Error: Last Params');
+      Log.err('DB After Ready Error: Last Params');
       throw new Error(e as string);
     }
   }

@@ -1,4 +1,4 @@
-import { pfLog } from './log';
+import { PFLog } from '../../../core/log';
 
 /**
  * Vector Clock implementation for distributed synchronization
@@ -104,7 +104,7 @@ export const sanitizeVectorClock = (clock: any): VectorClock => {
       }
     }
   } catch (e) {
-    pfLog(1, 'Error sanitizing vector clock', e);
+    PFLog.error('Error sanitizing vector clock', e);
     return {};
   }
 
@@ -124,13 +124,16 @@ export const compareVectorClocks = (
 ): VectorClockComparison => {
   // Handle null/undefined cases
   if (isVectorClockEmpty(a) && isVectorClockEmpty(b)) {
-    return VectorClockComparison.EQUAL;
+    PFLog.err('BOTH VECTOR CLOCKS EMPTY!!!');
+    return VectorClockComparison.CONCURRENT;
   }
   if (isVectorClockEmpty(a)) {
-    return VectorClockComparison.LESS_THAN;
+    PFLog.err('EMPTY VECTOR CLOCK a !!!');
+    return VectorClockComparison.CONCURRENT;
   }
   if (isVectorClockEmpty(b)) {
-    return VectorClockComparison.GREATER_THAN;
+    PFLog.err('EMPTY VECTOR CLOCK b !!!');
+    return VectorClockComparison.CONCURRENT;
   }
 
   // Safe type assertion after null checks
@@ -183,12 +186,29 @@ export const incrementVectorClock = (
   clock: VectorClock | null | undefined,
   clientId: string,
 ): VectorClock => {
+  if (!clientId || typeof clientId !== 'string' || clientId.length < 5) {
+    PFLog.critical('incrementVectorClock: Invalid clientId', {
+      clientId,
+      type: typeof clientId,
+      length: clientId?.length,
+      stackTrace: new Error().stack,
+    });
+    throw new Error(`Invalid clientId for vector clock increment: ${clientId}`);
+  }
+
   const newClock = { ...(clock || {}) };
   const currentValue = newClock[clientId] || 0;
 
+  // Log for debugging
+  PFLog.verbose('incrementVectorClock', {
+    clientId,
+    currentValue,
+    allClients: Object.keys(newClock),
+  });
+
   // Handle overflow - reset to 1 if approaching max safe integer
   if (currentValue >= Number.MAX_SAFE_INTEGER - 1000) {
-    pfLog(1, 'Vector clock component overflow protection triggered', {
+    PFLog.error('Vector clock component overflow protection triggered', {
       clientId,
       currentValue,
     });
@@ -200,7 +220,7 @@ export const incrementVectorClock = (
   // Warn if vector clock is getting large
   const size = Object.keys(newClock).length;
   if (size > 30) {
-    pfLog(1, 'Warning: Vector clock growing large', {
+    PFLog.error('Warning: Vector clock growing large', {
       size,
       clientId,
       threshold: 30,
@@ -239,24 +259,6 @@ export const mergeVectorClocks = (
 };
 
 /**
- * Convert a Lamport timestamp to a vector clock
- * Used for backwards compatibility during migration
- *
- * @param lamport The Lamport timestamp value
- * @param clientId The client ID to use
- * @returns A vector clock with a single component
- */
-export const lamportToVectorClock = (
-  lamport: number | null | undefined,
-  clientId: string,
-): VectorClock => {
-  if (lamport == null || lamport === 0) {
-    return {};
-  }
-  return { [clientId]: lamport };
-};
-
-/**
  * Get a human-readable string representation of a vector clock
  * Useful for debugging and logging
  *
@@ -281,14 +283,15 @@ export const vectorClockToString = (clock: VectorClock | null | undefined): stri
  *
  * @param current The current vector clock
  * @param reference The reference vector clock (e.g., last synced)
- * @returns True if current has any components greater than reference
+ * @returns True if current has any components greater than reference OR if reference has clients missing from current
  */
 export const hasVectorClockChanges = (
   current: VectorClock | null | undefined,
   reference: VectorClock | null | undefined,
 ): boolean => {
   if (isVectorClockEmpty(current)) {
-    return false;
+    // If current is empty but reference has values, that's a change (reset/corruption)
+    return !isVectorClockEmpty(reference);
   }
   if (isVectorClockEmpty(reference)) {
     return !isVectorClockEmpty(current);
@@ -298,6 +301,20 @@ export const hasVectorClockChanges = (
   for (const [clientId, currentVal] of Object.entries(current!)) {
     const refVal = reference![clientId] || 0;
     if (currentVal > refVal) {
+      return true;
+    }
+  }
+
+  // CRITICAL FIX: Check if reference has any clients missing from current
+  // This detects when a client's entry has been removed/corrupted
+  for (const [clientId, refVal] of Object.entries(reference!)) {
+    if (refVal > 0 && !(clientId in current!)) {
+      PFLog.error('Vector clock change detected: client missing from current', {
+        clientId,
+        refValue: refVal,
+        currentClock: vectorClockToString(current),
+        referenceClock: vectorClockToString(reference),
+      });
       return true;
     }
   }
@@ -333,7 +350,7 @@ export const limitVectorClockSize = (
     return clock;
   }
 
-  pfLog(1, 'Vector clock pruning triggered', {
+  PFLog.error('Vector clock pruning triggered', {
     originalSize: entries.length,
     maxSize: MAX_VECTOR_CLOCK_SIZE,
     currentClientId,

@@ -1,6 +1,6 @@
 import { DBNames, SyncProviderId } from '../pfapi.const';
 import { Database } from '../db/database';
-import { pfLog } from '../util/log';
+import { PFLog } from '../../../core/log';
 import { PFEventEmitter } from '../util/events';
 import { PrivateCfgByProviderId } from '../pfapi.model';
 
@@ -29,8 +29,7 @@ export class SyncProviderPrivateCfgStore<PID extends SyncProviderId> {
    * @throws Error if database load operation fails
    */
   async load(): Promise<PrivateCfgByProviderId<PID> | null> {
-    pfLog(
-      3,
+    PFLog.verbose(
       `${SyncProviderPrivateCfgStore.L}.${this.load.name}`,
       this._privateCfgInMemory,
     );
@@ -49,7 +48,7 @@ export class SyncProviderPrivateCfgStore<PID extends SyncProviderId> {
       }
       return loadedConfig;
     } catch (error) {
-      pfLog(0, `Failed to load private config: ${error}`);
+      PFLog.critical(`Failed to load private config: ${error}`);
       throw new Error(`Failed to load private config: ${error}`);
     }
   }
@@ -62,7 +61,7 @@ export class SyncProviderPrivateCfgStore<PID extends SyncProviderId> {
    */
   async save(privateCfg: PrivateCfgByProviderId<PID>): Promise<unknown> {
     const key = this._providerId;
-    pfLog(2, `${SyncProviderPrivateCfgStore.L}.${this.save.name}()`, key, privateCfg);
+    PFLog.normal(`${SyncProviderPrivateCfgStore.L}.${this.save.name}()`, key, privateCfg);
 
     this._privateCfgInMemory = privateCfg;
 
@@ -76,7 +75,7 @@ export class SyncProviderPrivateCfgStore<PID extends SyncProviderId> {
       // NOTE we always want to ignore DB lock during sync as it is unrelated to sync data in every single case
       return await this._db.save(this._dbKey, privateCfg, true);
     } catch (error) {
-      pfLog(0, `Failed to save private config: ${error}`);
+      PFLog.critical(`Failed to save private config: ${error}`);
       throw new Error(`Failed to save private config: ${error}`);
     }
   }

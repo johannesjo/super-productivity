@@ -86,7 +86,6 @@ import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { isToday } from '../../../util/is-today.util';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-
 interface IssueAndType {
   id?: string | number;
   type?: IssueProviderKey;
@@ -310,9 +309,9 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
           }
         });
     }
-    // this.issueIdAndType$.subscribe((v) => console.log('issueIdAndType$', v));
-    // this.issueDataTrigger$.subscribe((v) => console.log('issueDataTrigger$', v));
-    // this.issueData$.subscribe((v) => console.log('issueData$', v));
+    // this.issueIdAndType$.subscribe((v) => TaskLog.log('issueIdAndType$', v));
+    // this.issueDataTrigger$.subscribe((v) => TaskLog.log('issueDataTrigger$', v));
+    // this.issueData$.subscribe((v) => TaskLog.log('issueData$', v));
 
     // NOTE: check work-view component for more info
   }
@@ -335,9 +334,24 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   @Input() set task(newVal: TaskWithSubTasks) {
     const prev = this._taskData;
     this._taskData = newVal;
+
+    // Add null check before accessing properties
+    if (!newVal) {
+      this.localAttachments = [];
+      this.issueDataNullTrigger$.next(null);
+      this.reminderId$.next(null);
+      this.repeatCfgId$.next(null);
+      this.parentId$.next(null);
+      this.isPlannedForTodayDay = false;
+      this.isMarkdownChecklist = false;
+      this.isExpandedIssuePanel = false;
+      this.isExpandedNotesPanel = false;
+      return;
+    }
+
     this.localAttachments = newVal.attachments;
 
-    if (!prev || !newVal || prev.id !== newVal.id) {
+    if (!prev || prev.id !== newVal.id) {
       this._focusFirst();
     }
 

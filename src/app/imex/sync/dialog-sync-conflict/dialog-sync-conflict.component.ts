@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
+  MatDialog,
   MatDialogActions,
   MatDialogContent,
   MatDialogRef,
@@ -11,7 +12,7 @@ import { DialogConflictResolutionResult } from '../sync.model';
 import { ConflictData, VectorClock } from '../../../pfapi/api';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { DatePipe } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
 import {
@@ -20,6 +21,7 @@ import {
   vectorClockToString,
 } from '../../../pfapi/api/util/vector-clock';
 import { CollapsibleComponent } from '../../../ui/collapsible/collapsible.component';
+import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 
 @Component({
   selector: 'dialog-sync-conflict',
@@ -40,53 +42,50 @@ import { CollapsibleComponent } from '../../../ui/collapsible/collapsible.compon
 })
 export class DialogSyncConflictComponent {
   private _matDialogRef = inject<MatDialogRef<DialogSyncConflictComponent>>(MatDialogRef);
+  private _matDialog = inject(MatDialog);
+  private _translateService = inject(TranslateService);
   data = inject<ConflictData>(MAT_DIALOG_DATA);
 
   T: typeof T = T;
 
-  remoteDate: number = this.data.remote.lastUpdate;
-  localDate: number = this.data.local.lastUpdate;
-  lastDate: number | null = this.data.local.lastSyncedUpdate;
+  remote = this.data.remote;
+  local = this.data.local;
 
-  remoteTime: number = this.data.remote.lastUpdate;
-  localTime: number = this.data.local.lastUpdate;
-  lastTime: number | null = this.data.local.lastSyncedUpdate;
+  isHighlightRemote = this.remote.lastUpdate >= this.local.lastUpdate;
+  isHighlightLocal = !this.isHighlightRemote;
 
-  remoteLamport: number = this.data.remote.localLamport;
-  localLamport: number = this.data.local.localLamport;
-  lastSyncedLamport: number | null = this.data.local.lastSyncedLamport;
+  remoteChangeCount = this.getChangeCount('remote');
+  localChangeCount = this.getChangeCount('local');
 
-  // Vector clock data
-  remoteVectorClock: VectorClock | undefined = this.data.remote.vectorClock;
-  localVectorClock: VectorClock | undefined = this.data.local.vectorClock;
-  lastSyncedVectorClock: VectorClock | null | undefined =
-    this.data.local.lastSyncedVectorClock;
-
-  // Vector clock comparison
-  vectorClockComparison: VectorClockComparison | null = this.getVectorClockComparison();
-
-  remoteLastUpdateAction: string | undefined = this.data.remote.lastUpdateAction;
-  localLastUpdateAction: string | undefined = this.data.local.lastUpdateAction;
-  lastSyncedAction: string | undefined = this.data.local.lastSyncedAction;
-
-  localMetaRev: string | null = this.data.local.metaRev;
-
-  isHighlightRemote: boolean = this.data.remote.lastUpdate >= this.data.local.lastUpdate;
-  isHighlightLocal: boolean = this.data.local.lastUpdate >= this.data.remote.lastUpdate;
+  isHighlightRemoteChanges = this.remoteChangeCount > this.localChangeCount;
+  isHighlightLocalChanges = !this.isHighlightRemoteChanges;
 
   constructor() {
-    const _matDialogRef = this._matDialogRef;
-
-    _matDialogRef.disableClose = true;
+    this._matDialogRef.disableClose = true;
   }
 
   close(res?: DialogConflictResolutionResult): void {
-    this._matDialogRef.close(res);
-  }
+    if (res && this.shouldConfirmOverwrite(res)) {
+      const confirmMessage = this.getConfirmationMessage(res);
 
-  shortenLamport(lamport?: number | null): string {
-    if (!lamport) return '-';
-    return lamport.toString().slice(-5);
+      this._matDialog
+        .open(DialogConfirmComponent, {
+          data: {
+            message: confirmMessage,
+            translateParams: {},
+            okBtnLabel: this.T.G.OK,
+            cancelBtnLabel: this.T.G.CANCEL,
+          },
+        })
+        .afterClosed()
+        .subscribe((isConfirm) => {
+          if (isConfirm) {
+            this._matDialogRef.close(res);
+          }
+        });
+    } else {
+      this._matDialogRef.close(res);
+    }
   }
 
   shortenAction(actionStr?: string | null): string {
@@ -95,10 +94,10 @@ export class DialogSyncConflictComponent {
   }
 
   getVectorClockComparison(): VectorClockComparison | null {
-    if (!this.localVectorClock || !this.remoteVectorClock) {
+    if (!this.local.vectorClock || !this.remote.vectorClock) {
       return null;
     }
-    return compareVectorClocks(this.localVectorClock, this.remoteVectorClock);
+    return compareVectorClocks(this.local.vectorClock, this.remote.vectorClock);
   }
 
   getVectorClockString(clock?: VectorClock | null): string {
@@ -107,8 +106,9 @@ export class DialogSyncConflictComponent {
   }
 
   getVectorClockComparisonLabel(): string {
-    if (!this.vectorClockComparison) return '-';
-    switch (this.vectorClockComparison) {
+    const comparison = this.getVectorClockComparison();
+    if (!comparison) return '-';
+    switch (comparison) {
       case VectorClockComparison.EQUAL:
         return this.T.F.SYNC.D_CONFLICT.VECTOR_COMPARISON_EQUAL;
       case VectorClockComparison.LESS_THAN:
@@ -120,5 +120,64 @@ export class DialogSyncConflictComponent {
       default:
         return '-';
     }
+  }
+
+  private getChangeCount(side: 'remote' | 'local'): number {
+    // First try vector clock, fall back to Lamport if not available
+    if (this.remote.vectorClock && this.local.vectorClock) {
+      const clock = side === 'remote' ? this.remote.vectorClock : this.local.vectorClock;
+      const lastSyncedClock = this.local.lastSyncedVectorClock;
+
+      if (!clock) return 0;
+
+      // If no last synced clock, return total of all values
+      if (!lastSyncedClock) {
+        return Object.values(clock).reduce((sum, value) => sum + value, 0);
+      }
+
+      // Calculate changes since last sync
+      let changeCount = 0;
+      for (const [clientId, value] of Object.entries(clock)) {
+        const lastSyncedValue = lastSyncedClock[clientId] || 0;
+        changeCount += Math.max(0, value - lastSyncedValue);
+      }
+      return changeCount;
+    }
+
+    // No vector clock available
+    return 0;
+  }
+
+  private shouldConfirmOverwrite(resolution: DialogConflictResolutionResult): boolean {
+    const remoteChanges = this.getChangeCount('remote');
+    const localChanges = this.getChangeCount('local');
+
+    const MIN_CHANGES_DIFFERENCE = 20;
+
+    if (resolution === 'USE_REMOTE') {
+      // User wants to use remote, but local has significantly more changes
+      return localChanges - remoteChanges >= MIN_CHANGES_DIFFERENCE;
+    } else if (resolution === 'USE_LOCAL') {
+      // User wants to use local, but remote has significantly more changes
+      return remoteChanges - localChanges >= MIN_CHANGES_DIFFERENCE;
+    }
+
+    return false;
+  }
+
+  private getConfirmationMessage(resolution: DialogConflictResolutionResult): string {
+    const remoteChanges = this.getChangeCount('remote');
+    const localChanges = this.getChangeCount('local');
+    const [sourceChanges, targetChanges, sourceName, targetName] =
+      resolution === 'USE_REMOTE'
+        ? [remoteChanges, localChanges, 'remote', 'local']
+        : [localChanges, remoteChanges, 'local', 'remote'];
+
+    return this._translateService.instant(T.F.SYNC.D_CONFLICT.OVERWRITE_WARNING, {
+      targetName,
+      targetChanges,
+      sourceName,
+      sourceChanges,
+    });
   }
 }

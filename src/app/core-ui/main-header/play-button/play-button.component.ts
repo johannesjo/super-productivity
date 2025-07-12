@@ -1,5 +1,6 @@
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   inject,
@@ -82,24 +83,26 @@ import { Subscription } from 'rxjs';
           }
         }
 
-        <svg
-          class="circle-svg"
-          focusable="false"
-          height="40"
-          width="40"
-        >
-          <circle
-            #circleSvg
-            cx="50%"
-            cy="50%"
-            fill="none"
-            r="10"
-            stroke="#000"
-            stroke-dasharray="81.6814089933"
-            stroke-dashoffset="-81.6814089933"
-            stroke-width="20"
-          ></circle>
-        </svg>
+        @if (hasTimeEstimate) {
+          <svg
+            class="circle-svg"
+            focusable="false"
+            height="40"
+            width="40"
+          >
+            <circle
+              #circleSvg
+              cx="50%"
+              cy="50%"
+              fill="none"
+              r="10"
+              stroke="currentColor"
+              stroke-dasharray="62.83185307179586"
+              stroke-dashoffset="0"
+              stroke-width="20"
+            ></circle>
+          </svg>
+        }
       </button>
 
       @if (pomodoroIsEnabled()) {
@@ -300,6 +303,7 @@ import { Subscription } from 'rxjs';
 })
 export class PlayButtonComponent implements OnInit, OnDestroy {
   private _renderer = inject(Renderer2);
+  private _cd = inject(ChangeDetectorRef);
 
   readonly T = T;
   readonly taskService = inject(TaskService);
@@ -313,24 +317,35 @@ export class PlayButtonComponent implements OnInit, OnDestroy {
   readonly pomodoroCurrentSessionTime = input<number>();
   readonly circleSvg = viewChild<ElementRef<SVGCircleElement>>('circleSvg');
 
-  private _circleProgressAnimation?: any;
   private _subs = new Subscription();
-  private circumference = 47 * 2 * Math.PI;
+  private circumference = 10 * 2 * Math.PI; // ~62.83
+  protected hasTimeEstimate = false;
 
   ngOnInit(): void {
-    const circleSvgEl = this.circleSvg()?.nativeElement;
-    if (circleSvgEl) {
-      this._subs.add(
-        this.taskService.currentTaskProgress$.subscribe((progressIN) => {
-          let progress = progressIN || 1;
+    // Subscribe to current task to track if it has a time estimate
+    this._subs.add(
+      this.taskService.currentTask$.subscribe((task) => {
+        this.hasTimeEstimate = !!(task && task.timeEstimate && task.timeEstimate > 0);
+        this._cd.markForCheck();
+      }),
+    );
+
+    // Subscribe to task progress for circle animation
+    this._subs.add(
+      this.taskService.currentTaskProgress$.subscribe((progressIN) => {
+        const circleSvgEl = this.circleSvg()?.nativeElement;
+        if (circleSvgEl) {
+          let progress = progressIN || 0;
           if (progress > 1) {
             progress = 1;
           }
-          const dashOffset = this.circumference * -1 * progress;
+          // Calculate dashoffset: 0 when 0%, negative circumference when 100%
+          // This shows the completed portion of the circle
+          const dashOffset = this.circumference * -progress;
           this._renderer.setStyle(circleSvgEl, 'stroke-dashoffset', dashOffset);
-        }),
-      );
-    }
+        }
+      }),
+    );
   }
 
   ngOnDestroy(): void {

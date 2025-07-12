@@ -31,6 +31,7 @@ import { PluginIconComponent } from '../plugin-icon/plugin-icon.component';
 import { IS_ELECTRON } from '../../../app.constants';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DestroyRef } from '@angular/core';
+import { PluginLog } from '../../../core/log';
 
 @Component({
   selector: 'plugin-management',
@@ -138,7 +139,7 @@ export class PluginManagementComponent implements OnInit {
   }
 
   private async enablePlugin(plugin: PluginInstance): Promise<void> {
-    console.log('Enabling plugin:', plugin.manifest.id);
+    PluginLog.log('Enabling plugin:', plugin.manifest.id);
 
     try {
       // Check if plugin requires Node.js execution consent
@@ -146,7 +147,7 @@ export class PluginManagementComponent implements OnInit {
         plugin.manifest,
       );
       if (!hasConsent) {
-        console.log(
+        PluginLog.log(
           'User denied Node.js execution permission for plugin:',
           plugin.manifest.id,
         );
@@ -155,27 +156,28 @@ export class PluginManagementComponent implements OnInit {
         return;
       }
 
-      // Set plugin as enabled in persistence
+      // Set plugin as enabled in persistence ONLY after consent is granted
       await this._pluginMetaPersistenceService.setPluginEnabled(plugin.manifest.id, true);
 
       // Update the plugin state immediately
       plugin.isEnabled = true;
 
       // Activate the plugin (lazy load if needed)
-      const instance = await this._pluginService.activatePlugin(plugin.manifest.id);
+      // Pass true to indicate this is a manual activation from UI
+      const instance = await this._pluginService.activatePlugin(plugin.manifest.id, true);
       if (instance) {
-        console.log('Plugin activated successfully:', plugin.manifest.id);
+        PluginLog.log('Plugin activated successfully:', plugin.manifest.id);
       }
 
       // Refresh UI
       await this.loadPlugins();
     } catch (error) {
-      console.error('Failed to enable plugin:', error);
+      PluginLog.err('Failed to enable plugin:', error);
     }
   }
 
   private async disablePlugin(plugin: PluginInstance): Promise<void> {
-    console.log('Disabling plugin:', plugin.manifest.id);
+    PluginLog.log('Disabling plugin:', plugin.manifest.id);
 
     try {
       // Set plugin as disabled in persistence
@@ -194,22 +196,22 @@ export class PluginManagementComponent implements OnInit {
       // Reload plugins to get the updated state from the service
       await this.loadPlugins();
     } catch (error) {
-      console.error('Failed to disable plugin:', error);
+      PluginLog.err('Failed to disable plugin:', error);
     }
   }
 
   async reloadPlugin(plugin: PluginInstance): Promise<void> {
-    console.log('Reloading plugin:', plugin.manifest.id);
+    PluginLog.log('Reloading plugin:', plugin.manifest.id);
 
     try {
       const success = await this._pluginService.reloadPlugin(plugin.manifest.id);
       if (success) {
-        console.log('Plugin reloaded successfully:', plugin.manifest.id);
+        PluginLog.log('Plugin reloaded successfully:', plugin.manifest.id);
       } else {
-        console.error('Failed to reload plugin:', plugin.manifest.id);
+        PluginLog.err('Failed to reload plugin:', plugin.manifest.id);
       }
     } catch (error) {
-      console.error('Failed to reload plugin:', error);
+      PluginLog.err('Failed to reload plugin:', error);
     }
 
     // Refresh the UI
@@ -298,7 +300,7 @@ export class PluginManagementComponent implements OnInit {
       // Clear the input
       input.value = '';
     } catch (error) {
-      console.error('Failed to load plugin from ZIP:', error);
+      PluginLog.err('Failed to load plugin from ZIP:', error);
       this.uploadError.set(
         error instanceof Error
           ? error.message
@@ -317,9 +319,9 @@ export class PluginManagementComponent implements OnInit {
       await this._pluginCacheService.clearCache();
       await this.loadPlugins(); // Refresh the plugin list
 
-      console.log('Plugin cache cleared successfully');
+      PluginLog.log('Plugin cache cleared successfully');
     } catch (error) {
-      console.error('Failed to clear plugin cache:', error);
+      PluginLog.err('Failed to clear plugin cache:', error);
       this.uploadError.set(
         error instanceof Error
           ? error.message
@@ -357,9 +359,9 @@ export class PluginManagementComponent implements OnInit {
       await this._pluginService.removeUploadedPlugin(plugin.manifest.id);
       await this.loadPlugins(); // Refresh the plugin list
 
-      console.log(`Plugin ${plugin.manifest.id} removed successfully`);
+      PluginLog.log(`Plugin ${plugin.manifest.id} removed successfully`);
     } catch (error) {
-      console.error('Failed to remove plugin:', error);
+      PluginLog.err('Failed to remove plugin:', error);
       this.uploadError.set(
         error instanceof Error
           ? error.message

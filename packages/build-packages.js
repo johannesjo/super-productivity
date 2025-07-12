@@ -45,9 +45,15 @@ const plugins = [
     path: 'packages/plugin-dev/yesterday-tasks-plugin',
     files: ['manifest.json', 'plugin.js', 'index.html', 'icon.svg'],
   },
+  {
+    name: 'sync-md',
+    path: 'packages/plugin-dev/sync-md',
+    buildCommand: 'npm run build',
+    distFiles: ['manifest.json', 'plugin.js', 'index.html', 'icon.svg'],
+    sourcePath: 'dist',
+  },
   // Explicitly excluding:
   // - boilerplate-solid-js
-  // - sync-md
 ];
 
 async function ensureDir(dir) {

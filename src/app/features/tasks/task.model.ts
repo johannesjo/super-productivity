@@ -98,6 +98,7 @@ export interface TaskCopy
   attachments: TaskAttachment[];
 
   // Ensure type compatibility for internal fields
+  modified?: number;
   doneOn?: number;
   parentId?: string;
   reminderId?: string;

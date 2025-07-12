@@ -1,7 +1,7 @@
 import { ModelBase, ModelCfg } from '../pfapi.model';
 import { Database } from '../db/database';
 import { MetaModelCtrl } from './meta-model-ctrl';
-import { pfLog } from '../util/log';
+import { PFLog } from '../../../core/log';
 import { ModelValidationError } from '../errors/errors';
 
 // type ExtractModelType<T extends ModelCfg<unknown>> = T extends ModelCfg<infer U> ? U : never;
@@ -43,7 +43,11 @@ export class ModelCtrl<MT extends ModelBase> {
     p?: { isUpdateRevAndLastUpdate: boolean; isIgnoreDBLock?: boolean },
   ): Promise<unknown> {
     this._inMemoryData = data;
-    pfLog(2, `___ ${ModelCtrl.L}.${this.save.name}()`, this.modelId, p, data);
+    PFLog.normal(`___ ${ModelCtrl.L}.${this.save.name}():${this.modelId}`, p, {
+      // Log only safe metadata, not the actual data which might contain credentials
+      dataKeys: data ? Object.keys(data) : [],
+      dataType: typeof data,
+    });
 
     // Validate data if validator is available
     if (this.modelCfg.validate) {
@@ -53,7 +57,7 @@ export class ModelCtrl<MT extends ModelBase> {
           try {
             data = this.modelCfg.repair(data);
           } catch (e) {
-            console.error(e);
+            PFLog.err(e);
             throw new ModelValidationError({
               id: this.modelId,
               data,
@@ -107,7 +111,7 @@ export class ModelCtrl<MT extends ModelBase> {
    * @returns Promise resolving to model data
    */
   async load(): Promise<MT> {
-    pfLog(3, `${ModelCtrl.L}.${this.load.name}()`, {
+    PFLog.verbose(`${ModelCtrl.L}.${this.load.name}():${this.modelId}`, {
       inMemoryData: this._inMemoryData,
     });
     return (
@@ -122,7 +126,7 @@ export class ModelCtrl<MT extends ModelBase> {
    * @returns Promise resolving after remove operation
    */
   async remove(): Promise<unknown> {
-    pfLog(2, `${ModelCtrl.L}.${this.remove.name}()`, this.modelId);
+    PFLog.normal(`${ModelCtrl.L}.${this.remove.name}():${this.modelId}`);
     this._inMemoryData = null;
     return this._db.remove(this.modelId);
   }

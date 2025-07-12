@@ -2,7 +2,7 @@ import {
   extractSyncFileStateFromPrefix,
   getSyncFilePrefix,
 } from '../util/sync-file-prefix';
-import { pfLog } from '../util/log';
+import { PFLog } from '../../../core/log';
 import { decrypt, encrypt } from '../encryption/encryption';
 import { DecryptError, DecryptNoPasswordError } from '../errors/errors';
 import {
@@ -10,6 +10,7 @@ import {
   decompressGzipFromString,
 } from '../compression/compression-handler';
 import { EncryptAndCompressCfg } from '../pfapi.model';
+import { environment } from '../../../../environments/environment';
 
 export class EncryptAndCompressHandlerService {
   private static readonly L = 'EncryptAndCompressHandlerService';
@@ -61,19 +62,22 @@ export class EncryptAndCompressHandlerService {
       isEncrypt,
       modelVersion,
     });
-    pfLog(2, `${EncryptAndCompressHandlerService.L}.${this.compressAndEncrypt.name}()`, {
-      prefix,
-      modelVersion,
-      isCompress,
-      isEncrypt,
-    });
+    PFLog.normal(
+      `${EncryptAndCompressHandlerService.L}.${this.compressAndEncrypt.name}()`,
+      {
+        prefix,
+        modelVersion,
+        isCompress,
+        isEncrypt,
+      },
+    );
     let dataStr = JSON.stringify(data);
     if (isCompress) {
       dataStr = await compressWithGzipToString(dataStr);
     }
     if (isEncrypt) {
       if (!encryptKey) {
-        console.log(encryptKey);
+        PFLog.log(environment.production ? typeof encryptKey : encryptKey);
         throw new Error('No encryption password provided');
       }
 
@@ -95,8 +99,7 @@ export class EncryptAndCompressHandlerService {
   }> {
     const { isCompressed, isEncrypted, modelVersion, cleanDataStr } =
       extractSyncFileStateFromPrefix(dataStr);
-    pfLog(
-      2,
+    PFLog.normal(
       `${EncryptAndCompressHandlerService.L}.${this.decompressAndDecrypt.name}()`,
       { isCompressed, isEncrypted, modelVersion },
     );

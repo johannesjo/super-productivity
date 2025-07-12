@@ -1,0 +1,29 @@
+
+### Bug Fixes
+
+* add null safety checks to task detail panel (bf1ba88), closes #4705
+* error
+* remove unused imports and variables to resolve lint errors
+* **sync:** ensure sync conflict is detected after backup restore
+* **sync:** force sync conflict after backup restore with fresh client ID
+* warning
+### Features
+
+* **i18n:** add translations for theme selector component
+* **i18n:** extract hardcoded strings from sync safety backups component
+* improve due creation and potentially fix the issue when tasks for today were not added until another task was added manually
+* improve logging for indexeddb issue
+* **simpleCounter:** update values immediately in dialog view, save only on submit
+* **sync:** add basic safety backups during sync
+* **sync:** improve id generation etc
+* **theme:** add custom theme switcher with local theme files
+* **theme:** auto-switch dark/light mode based on theme requirements
+* **themes:** add simplified version of each
+* **themes:** optimize and beautify all theme files
+### BREAKING CHANGES
+
+* **sync:** Backup restores now always trigger sync conflicts requiring
+manual resolution. This is intentional to prevent data loss.
+
+
+

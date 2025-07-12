@@ -44,6 +44,7 @@ import { PersistenceLocalService } from './persistence-local.service';
 import { PlannerState } from '../../features/planner/store/planner.reducer';
 import { IssueProvider, IssueProviderState } from '../../features/issue/issue.model';
 import { BoardsState } from '../../features/boards/store/boards.reducer';
+import { Log } from '../log';
 
 @Injectable({
   providedIn: 'root',
@@ -282,7 +283,7 @@ export class PersistenceLegacyService {
 
       return r;
     } else {
-      console.warn('BLOCKED SAVING for ', dbKey);
+      Log.err('BLOCKED SAVING for ', dbKey);
       return Promise.reject('Data import currently in progress. Saving disabled');
     }
   }

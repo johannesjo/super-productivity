@@ -1,6 +1,6 @@
 import { createAction, props } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
-import { Task, TaskDetailTargetPanel, TaskWithSubTasks } from '../task.model';
+import { Task, TaskDetailTargetPanel } from '../task.model';
 import { RoundTimeOption } from '../../project/project.model';
 
 export const setCurrentTask = createAction(
@@ -104,22 +104,10 @@ export const removeReminderFromTask = createAction(
   }>(),
 );
 
-export const restoreTask = createAction(
-  '[Task] Restore Task',
-
-  props<{ task: Task | TaskWithSubTasks; subTasks: Task[] }>(),
-);
-
 export const addSubTask = createAction(
   '[Task] Add SubTask',
 
   props<{ task: Task; parentId: string }>(),
-);
-
-export const convertToMainTask = createAction(
-  '[Task] Convert SubTask to main task',
-
-  props<{ task: Task; parentTagIds: string[]; isPlanForToday?: boolean }>(),
 );
 
 export const toggleStart = createAction('[Task] Toggle start');

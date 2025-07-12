@@ -43,6 +43,7 @@
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   line-height: 2em;
+  position: relative;
 
   @include darkTheme(true) {
     background: var(--dark8) !important;
@@ -51,6 +52,27 @@
   h3 {
     margin: 0;
     font-weight: bold;
+  }
+}
+
+.shepherd-cancel-icon {
+  background: transparent;
+  border: none;
+  color: var(--text-color);
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: normal;
+  height: auto;
+  padding: 0;
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  width: auto;
+  opacity: 0.75;
+  transition: opacity 0.25s;
+
+  &:hover {
+    opacity: 1;
   }
 }
 

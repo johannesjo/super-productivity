@@ -108,7 +108,7 @@ describe('InputDurationFormlyComponent', () => {
       }, 0);
     });
 
-    it('should handle empty input and set null', (done) => {
+    it('should handle empty input and set undefined', (done) => {
       const event = {
         target: {
           value: '',
@@ -118,7 +118,7 @@ describe('InputDurationFormlyComponent', () => {
       component.onInputValueChange(event);
 
       setTimeout(() => {
-        expect(setValueSpy).toHaveBeenCalledWith(null);
+        expect(setValueSpy).toHaveBeenCalledWith(undefined);
         done();
       }, 0);
     });

@@ -47,6 +47,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { TagComponent } from '../../tag/tag/tag.component';
 import { TaskCopy } from '../task.model';
+import { TaskLog } from '../../../core/log';
 
 @Component({
   selector: 'add-task-bar',
@@ -254,7 +255,13 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  async addTask(): Promise<void> {
+  async addTask(ev?: Event): Promise<void> {
+    // Prevent form submission if event is provided and has preventDefault method
+    // This handles cases where event might not be a standard Event object (e.g., in Android WebView)
+    if (ev && typeof ev.preventDefault === 'function') {
+      ev.preventDefault();
+    }
+
     this._isAddInProgress = true;
     const item: AddTaskSuggestion | string = this.taskSuggestionsCtrl.value;
 
@@ -300,7 +307,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
           const task = await this._taskService
             .getByIdOnce$(this._lastAddedTaskId)
             .toPromise();
-          console.log(additionalFields, tagsToRemove, task);
+          TaskLog.log(additionalFields, tagsToRemove, task);
 
           this._taskService.updateTags(
             task,

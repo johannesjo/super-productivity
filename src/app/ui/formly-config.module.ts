@@ -28,7 +28,14 @@ import { FormlyBtnComponent } from './formly-button/formly-btn.component';
     FormlyMatSliderModule,
     ReactiveFormsModule,
     FormlyModule.forRoot({
-      validationMessages: [{ name: 'pattern', message: 'Invalid input' }],
+      validationMessages: [
+        { name: 'pattern', message: 'Invalid input' },
+        { name: 'required', message: 'This field is required' },
+        { name: 'min', message: 'Value is too low' },
+        { name: 'max', message: 'Value is too high' },
+        { name: 'minLength', message: 'Value is too short' },
+        { name: 'maxLength', message: 'Value is too long' },
+      ],
       types: [
         { name: 'link', component: FormlyLinkWidgetComponent },
         {
@@ -76,6 +83,14 @@ import { FormlyBtnComponent } from './formly-button/formly-btn.component';
       ],
       extras: {
         immutable: true,
+        // Show errors when field is touched or form is submitted
+        showError: (field) => {
+          return !!(
+            field.formControl &&
+            field.formControl.invalid &&
+            (field.formControl.touched || field.options?.parentForm?.submitted)
+          );
+        },
       },
     }),
     FormlyMatToggleModule,

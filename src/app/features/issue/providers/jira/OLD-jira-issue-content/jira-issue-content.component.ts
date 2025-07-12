@@ -30,6 +30,7 @@ import { MsToStringPipe } from '../../../../../ui/duration/ms-to-string.pipe';
 import { SortPipe } from '../../../../../ui/pipes/sort.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 import { SnackService } from '../../../../../core/snack/snack.service';
+import { IssueLog } from '../../../../../core/log';
 
 interface JiraSubtaskWithUrl extends JiraSubtask {
   href: string;
@@ -102,7 +103,7 @@ export class JiraIssueContentComponent {
             }),
           ).pipe(
             catchError((e) => {
-              console.error(e);
+              IssueLog.err(e);
               this._snackService.open({
                 type: 'ERROR',
                 msg: 'Failed to load subtasks for Jira Issue',
@@ -147,7 +148,7 @@ export class JiraIssueContentComponent {
     try {
       this.description = i && i.description && j2m.to_markdown(i.description);
     } catch (e) {
-      console.log(i);
+      IssueLog.log(i);
       devError(e);
       this.description = (i && i.description) || undefined;
     }

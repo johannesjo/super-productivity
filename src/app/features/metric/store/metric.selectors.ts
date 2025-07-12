@@ -14,6 +14,7 @@ import {
 } from '../obstruction/store/obstruction.reducer';
 import { ObstructionState } from '../obstruction/obstruction.model';
 import { unique } from '../../../util/unique';
+import { Log } from '../../../core/log';
 import {
   selectAllSimpleCounters,
   selectSimpleCounterFeatureState,
@@ -159,7 +160,7 @@ export const selectImprovementCountsPieChartData = createSelector(
         chart.labels?.push(imp.title);
         chart.datasets[0].data.push(counts[id]);
       } else {
-        console.warn('No improvement entity found');
+        Log.err('No improvement entity found');
       }
     });
     return chart;
@@ -190,7 +191,7 @@ export const selectObstructionCountsPieChartData = createSelector(
         chart.labels?.push(obstr.title);
         chart.datasets[0].data.push(counts[id]);
       } else {
-        console.warn('No obstruction entity found');
+        Log.err('No obstruction entity found');
       }
     });
     return chart;

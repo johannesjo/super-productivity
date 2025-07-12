@@ -37,6 +37,7 @@ import { getRandomWorkContextColor } from '../../../work-context/work-context-co
 import { removeDebounceFromFormItems } from '../../../../util/remove-debounce-from-form-items';
 import { MatButton } from '@angular/material/button';
 import { TranslatePipe } from '@ngx-translate/core';
+import { Log } from '../../../../core/log';
 
 @Component({
   selector: 'dialog-create-project',
@@ -133,6 +134,18 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   }
 
   submit(): void {
+    // Check if both forms are valid
+    if (!this.formBasic.valid || !this.formTheme.valid) {
+      // Mark all fields as touched to show validation errors
+      this.formBasic.markAllAsTouched();
+      this.formTheme.markAllAsTouched();
+      Log.err('Form validation failed', {
+        basicFormErrors: this.formBasic.errors,
+        themeFormErrors: this.formTheme.errors,
+      });
+      return;
+    }
+
     const projectDataToSave: Project | Partial<Project> = {
       ...this.projectData,
     };

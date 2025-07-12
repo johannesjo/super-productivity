@@ -12,6 +12,7 @@ import {
 } from './task-attachment.actions';
 import { TaskState } from '../task.model';
 import { createFromDrop } from 'src/app/core/drop-paste-input/drop-paste-input';
+import { TaskLog } from '../../../core/log';
 
 @Injectable({
   providedIn: 'root',
@@ -22,7 +23,7 @@ export class TaskAttachmentService {
 
   addAttachment(taskId: string, taskAttachment: TaskAttachment): void {
     if (!taskAttachment) {
-      console.error('No valid attachment passed');
+      TaskLog.err('No valid attachment passed');
       return;
     }
 
