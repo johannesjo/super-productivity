@@ -1,4 +1,4 @@
-import { WebdavPrivateCfg } from './webdav';
+import { WebdavPrivateCfg, WebdavServerCapabilities } from './webdav';
 import {
   AuthFailSPError,
   FileExistsAPIError,
@@ -44,12 +44,88 @@ export class WebdavApi {
   </D:prop>
 </D:propfind>`;
 
+  private _cachedCapabilities?: WebdavServerCapabilities;
+
   // Make IS_ANDROID_WEB_VIEW testable by making it a class property
   protected get isAndroidWebView(): boolean {
     return IS_ANDROID_WEB_VIEW;
   }
 
   constructor(private _getCfgOrError: () => Promise<WebdavPrivateCfg>) {}
+
+  /**
+   * Detect server capabilities by testing a simple file operation
+   * Caches results to avoid repeated detection calls
+   */
+  async detectServerCapabilities(testPath?: string): Promise<WebdavServerCapabilities> {
+    if (this._cachedCapabilities) {
+      return this._cachedCapabilities;
+    }
+
+    const cfg = await this._getCfgOrError();
+
+    // Check for cached capabilities in config
+    if (cfg.serverCapabilities) {
+      this._cachedCapabilities = cfg.serverCapabilities;
+      return this._cachedCapabilities;
+    }
+
+    const capabilities: WebdavServerCapabilities = {
+      supportsETags: false,
+      supportsIfHeader: false,
+      supportsLocking: false,
+      supportsLastModified: false,
+    };
+
+    try {
+      // Test ETag support with a simple PROPFIND request
+      const path = testPath || '';
+      const response = await this._makeRequest({
+        method: 'PROPFIND',
+        path,
+        body: WebdavApi.PROPFIND_XML,
+        headers: {
+          'Content-Type': 'application/xml',
+          Depth: '0',
+        },
+      });
+
+      const headers = this._responseHeadersToObject(response);
+      const xmlText = await response.text();
+
+      // Check for ETag support (case-insensitive XML check)
+      const etag = this._findEtagInHeaders(headers);
+      const xmlLower = xmlText.toLowerCase();
+      if (etag || xmlLower.includes('<d:getetag>') || xmlLower.includes('<getetag>')) {
+        capabilities.supportsETags = true;
+      }
+
+      // Check for Last-Modified support (case-insensitive XML check)
+      const lastModified = headers['last-modified'];
+      if (
+        lastModified ||
+        xmlLower.includes('<d:getlastmodified>') ||
+        xmlLower.includes('<getlastmodified>')
+      ) {
+        capabilities.supportsLastModified = true;
+      }
+
+      // Basic WebDAV support implies If header support
+      if (response.status === 207) {
+        // Multi-Status indicates WebDAV support
+        capabilities.supportsIfHeader = true;
+      }
+
+      PFLog.normal(`${WebdavApi.L}.detectServerCapabilities() detected`, capabilities);
+    } catch (error: any) {
+      PFLog.err(`${WebdavApi.L}.detectServerCapabilities() failed`, error);
+      // Assume minimal capabilities on detection failure
+      capabilities.supportsLastModified = true; // Most basic HTTP servers support this
+    }
+
+    this._cachedCapabilities = capabilities;
+    return capabilities;
+  }
 
   // Utility methods to reduce duplication
   /**

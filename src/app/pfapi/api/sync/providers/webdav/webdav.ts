@@ -9,11 +9,20 @@ import {
 } from '../../../errors/errors';
 import { SyncProviderPrivateCfgBase } from '../../../pfapi.model';
 
+export interface WebdavServerCapabilities {
+  supportsETags: boolean;
+  supportsIfHeader: boolean;
+  supportsLocking: boolean;
+  supportsLastModified: boolean;
+}
+
 export interface WebdavPrivateCfg extends SyncProviderPrivateCfgBase {
   baseUrl: string;
   userName: string;
   password: string;
   syncFolderPath: string;
+  serverCapabilities?: WebdavServerCapabilities;
+  preferLastModified?: boolean; // Force Last-Modified for testing
 }
 
 export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDAV> {
