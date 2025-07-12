@@ -7,6 +7,7 @@ describe('WebdavApi - Fallback Paths', () => {
   let api: WebdavApi;
   let mockGetCfgOrError: jasmine.Spy;
   let mockFetch: jasmine.Spy;
+  let originalFetch: any;
 
   const mockCfg: WebdavPrivateCfg = {
     baseUrl: 'https://webdav.example.com',
@@ -35,15 +36,21 @@ describe('WebdavApi - Fallback Paths', () => {
       .and.returnValue(Promise.resolve(mockCfg));
     api = new WebdavApi(mockGetCfgOrError);
 
-    // Mock global fetch
+    // Save original fetch and mock global fetch
+    originalFetch = (globalThis as any).fetch;
     mockFetch = jasmine.createSpy('fetch');
-    spyOn(globalThis, 'fetch').and.callFake(mockFetch);
+    (globalThis as any).fetch = mockFetch;
 
     // Mock IS_ANDROID_WEB_VIEW to false for most tests
     spyOnProperty(api as any, 'isAndroidWebView', 'get').and.returnValue(false);
 
     // Mock checkFolderExists to avoid infinite recursion in tests
     spyOn(api, 'checkFolderExists').and.returnValue(Promise.resolve(false));
+  });
+
+  afterEach(() => {
+    // Restore original fetch
+    (globalThis as any).fetch = originalFetch;
   });
 
   describe('Upload ETag Fallback Chain', () => {
