@@ -160,9 +160,25 @@ export const validateAndFixDataConsistencyAfterBatchUpdate = (
 
   // Track which parents had explicit subTaskIds updates
   const parentsWithExplicitSubTaskUpdates = new Set<string>();
+  const tasksToUnparent: { id: string; changes: Partial<Task> }[] = [];
+
   tasksToUpdate.forEach((update) => {
     if (update.changes.subTaskIds !== undefined) {
       parentsWithExplicitSubTaskUpdates.add(update.id);
+
+      // If a parent explicitly updates its subTaskIds, any children not in the new list
+      // should have their parentId cleared to prevent them from becoming orphans
+      const currentParent = allCurrentTasks.get(update.id);
+      if (currentParent) {
+        const newSubTaskIds = new Set(update.changes.subTaskIds || []);
+
+        // Also check all tasks that claim this as their parent
+        allCurrentTasks.forEach((task) => {
+          if (task.parentId === update.id && !newSubTaskIds.has(task.id)) {
+            tasksToUnparent.push({ id: task.id, changes: { parentId: undefined } });
+          }
+        });
+      }
     }
   });
 
@@ -217,23 +233,95 @@ export const validateAndFixDataConsistencyAfterBatchUpdate = (
     }
   });
 
-  // Apply parent-child updates
-  if (parentChildUpdates.length > 0) {
+  // Apply explicit task updates from the batch operation first
+  if (tasksToUpdate.length > 0) {
     newState[TASK_FEATURE_NAME] = taskAdapter.updateMany(
-      parentChildUpdates,
+      tasksToUpdate,
       newState[TASK_FEATURE_NAME],
     );
   }
 
+  // Apply parent-child updates
+  if (parentChildUpdates.length > 0 || tasksToUnparent.length > 0) {
+    const allParentChildUpdates = [...parentChildUpdates, ...tasksToUnparent];
+    newState[TASK_FEATURE_NAME] = taskAdapter.updateMany(
+      allParentChildUpdates,
+      newState[TASK_FEATURE_NAME],
+    );
+
+    // Update allCurrentTasks to reflect unparented tasks
+    tasksToUnparent.forEach((update) => {
+      const task = allCurrentTasks.get(update.id);
+      if (task) {
+        allCurrentTasks.set(update.id, { ...task, parentId: undefined });
+      }
+    });
+  }
+
   // =========================================================================
-  // 4. ORPHAN CLEANUP: Remove invalid references
+  // 4. ORPHAN CLEANUP: Delete orphaned subtasks and clean non-existent references
   // =========================================================================
 
-  // This is handled implicitly by the above validation steps:
-  // - Tasks with invalid projectIds are not included in project.taskIds
-  // - Tasks with invalid tagIds are not included in tag.taskIds
-  // - Tasks with invalid parentIds are not included in parent.subTaskIds
-  // - The entity adapters handle removing deleted tasks from collections
+  // Simple approach: iterate over all tasks and collect orphaned subtasks
+  const orphanedTaskIds: string[] = [];
+  const existingTaskIds = new Set(Object.keys(newState[TASK_FEATURE_NAME].entities));
+
+  // Find all tasks that have a parentId pointing to a non-existent parent
+  Object.values(newState[TASK_FEATURE_NAME].entities).forEach((task) => {
+    if (task && task.parentId && !existingTaskIds.has(task.parentId)) {
+      orphanedTaskIds.push(task.id);
+    }
+  });
+
+  // Recursively collect all descendants of orphaned tasks
+  const collectDescendants = (taskId: string, collected: Set<string>): void => {
+    Object.values(newState[TASK_FEATURE_NAME].entities).forEach((task) => {
+      if (task && task.parentId === taskId && !collected.has(task.id)) {
+        collected.add(task.id);
+        collectDescendants(task.id, collected);
+      }
+    });
+  };
+
+  // Collect all tasks to delete (orphans and their descendants)
+  const allTasksToDelete = new Set<string>(orphanedTaskIds);
+  orphanedTaskIds.forEach((orphanId) => {
+    collectDescendants(orphanId, allTasksToDelete);
+  });
+
+  // Remove orphaned tasks from the state
+  if (allTasksToDelete.size > 0) {
+    newState[TASK_FEATURE_NAME] = taskAdapter.removeMany(
+      Array.from(allTasksToDelete),
+      newState[TASK_FEATURE_NAME],
+    );
+  }
+
+  // Clean up non-existent task references from tags
+  const tagCleanupUpdates: { id: string; changes: Partial<Tag> }[] = [];
+  const remainingTaskIds = new Set(Object.keys(newState[TASK_FEATURE_NAME].entities));
+
+  Object.values(newState[TAG_FEATURE_NAME].entities).forEach((tag) => {
+    if (tag && tag.taskIds && tag.taskIds.length > 0) {
+      const cleanedTaskIds = tag.taskIds.filter((id) => remainingTaskIds.has(id));
+      if (cleanedTaskIds.length !== tag.taskIds.length) {
+        tagCleanupUpdates.push({
+          id: tag.id,
+          changes: { taskIds: cleanedTaskIds },
+        });
+      }
+    }
+  });
+
+  // Apply tag cleanup updates
+  if (tagCleanupUpdates.length > 0) {
+    tagCleanupUpdates.forEach((update) => {
+      newState[TAG_FEATURE_NAME].entities[update.id] = {
+        ...newState[TAG_FEATURE_NAME].entities[update.id]!,
+        ...update.changes,
+      };
+    });
+  }
 
   return newState;
 };

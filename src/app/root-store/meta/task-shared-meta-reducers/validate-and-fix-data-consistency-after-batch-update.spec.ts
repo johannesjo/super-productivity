@@ -159,6 +159,11 @@ describe('validateAndFixDataConsistencyAfterBatchUpdate', () => {
       const parent1 = result[TASK_FEATURE_NAME].entities['parent1'] as Task;
       expect(parent1.subTaskIds).toEqual(['child1']);
       expect(parent1.subTaskIds).not.toContain('child2');
+
+      // child2 should be unparented (become a root task)
+      const child2 = result[TASK_FEATURE_NAME].entities['child2'] as Task;
+      expect(child2).toBeDefined();
+      expect(child2.parentId).toBeUndefined();
     });
   });
 
@@ -368,6 +373,175 @@ describe('validateAndFixDataConsistencyAfterBatchUpdate', () => {
 
       // Should be the same reference since no changes were needed
       expect(result[TAG_FEATURE_NAME].entities['tag1']).toEqual(originalTag);
+    });
+  });
+
+  describe('orphaned subtasks deletion', () => {
+    it('should delete subtasks whose parent task does not exist', () => {
+      const state = createStateWithExistingTasks(['orphan1', 'orphan2', 'valid-child']);
+
+      // Set up orphaned subtasks (parent doesn't exist)
+      state[TASK_FEATURE_NAME].entities['orphan1'] = {
+        ...state[TASK_FEATURE_NAME].entities['orphan1']!,
+        parentId: 'non-existent-parent',
+      };
+      state[TASK_FEATURE_NAME].entities['orphan2'] = {
+        ...state[TASK_FEATURE_NAME].entities['orphan2']!,
+        parentId: 'deleted-parent',
+      };
+
+      // Valid subtask with existing parent
+      state[TASK_FEATURE_NAME].entities['valid-parent'] = createMockTask({
+        id: 'valid-parent',
+        title: 'Valid Parent',
+        projectId: 'project1',
+        subTaskIds: ['valid-child'],
+      });
+      state[TASK_FEATURE_NAME].entities['valid-child'] = {
+        ...state[TASK_FEATURE_NAME].entities['valid-child']!,
+        parentId: 'valid-parent',
+      };
+      state[TASK_FEATURE_NAME].ids = [
+        'orphan1',
+        'orphan2',
+        'valid-child',
+        'valid-parent',
+      ];
+
+      const result = validateAndFixDataConsistencyAfterBatchUpdate(
+        state,
+        'project1',
+        [], // tasksToAdd
+        [], // tasksToUpdate
+        [], // taskIdsToDelete
+        null, // newTaskOrder
+      );
+
+      // Orphaned subtasks should be deleted
+      expect(result[TASK_FEATURE_NAME].entities['orphan1']).toBeUndefined();
+      expect(result[TASK_FEATURE_NAME].entities['orphan2']).toBeUndefined();
+      expect(result[TASK_FEATURE_NAME].ids).not.toContain('orphan1');
+      expect(result[TASK_FEATURE_NAME].ids).not.toContain('orphan2');
+
+      // Valid subtask should remain
+      expect(result[TASK_FEATURE_NAME].entities['valid-child']).toBeDefined();
+      expect(result[TASK_FEATURE_NAME].entities['valid-parent']).toBeDefined();
+      expect(result[TASK_FEATURE_NAME].ids).toContain('valid-child');
+      expect(result[TASK_FEATURE_NAME].ids).toContain('valid-parent');
+    });
+
+    it('should clean up orphaned subtasks from tag references', () => {
+      const state = createStateWithExistingTasks(['orphan-with-tag', 'valid-task']);
+
+      // Set up orphaned subtask with tag
+      state[TASK_FEATURE_NAME].entities['orphan-with-tag'] = {
+        ...state[TASK_FEATURE_NAME].entities['orphan-with-tag']!,
+        parentId: 'non-existent-parent',
+        tagIds: ['tag1'],
+      };
+
+      // Set up tag that references the orphaned subtask
+      state[TAG_FEATURE_NAME].entities = {
+        tag1: createMockTag({
+          id: 'tag1',
+          title: 'Tag 1',
+          taskIds: ['orphan-with-tag', 'valid-task'],
+        }),
+      };
+
+      const result = validateAndFixDataConsistencyAfterBatchUpdate(
+        state,
+        'project1',
+        [], // tasksToAdd
+        [], // tasksToUpdate
+        [], // taskIdsToDelete
+        null, // newTaskOrder
+      );
+
+      // Orphaned subtask should be deleted
+      expect(result[TASK_FEATURE_NAME].entities['orphan-with-tag']).toBeUndefined();
+
+      // Tag should no longer reference the orphaned subtask
+      const tag1 = result[TAG_FEATURE_NAME].entities['tag1'];
+      expect(tag1?.taskIds).not.toContain('orphan-with-tag');
+      expect(tag1?.taskIds).toContain('valid-task');
+    });
+
+    it('should handle cascading deletion of orphaned subtasks', () => {
+      const state = createStateWithExistingTasks(['parent', 'child', 'grandchild']);
+
+      // Set up a hierarchy where middle task will be orphaned
+      state[TASK_FEATURE_NAME].entities['child'] = {
+        ...state[TASK_FEATURE_NAME].entities['child']!,
+        parentId: 'non-existent-parent', // This makes child orphaned
+        subTaskIds: ['grandchild'],
+      };
+      state[TASK_FEATURE_NAME].entities['grandchild'] = {
+        ...state[TASK_FEATURE_NAME].entities['grandchild']!,
+        parentId: 'child',
+      };
+
+      const result = validateAndFixDataConsistencyAfterBatchUpdate(
+        state,
+        'project1',
+        [], // tasksToAdd
+        [], // tasksToUpdate
+        [], // taskIdsToDelete
+        null, // newTaskOrder
+      );
+
+      // Both orphaned child and its grandchild should be deleted
+      expect(result[TASK_FEATURE_NAME].entities['child']).toBeUndefined();
+      expect(result[TASK_FEATURE_NAME].entities['grandchild']).toBeUndefined();
+      expect(result[TASK_FEATURE_NAME].ids).not.toContain('child');
+      expect(result[TASK_FEATURE_NAME].ids).not.toContain('grandchild');
+
+      // Regular parent should remain
+      expect(result[TASK_FEATURE_NAME].entities['parent']).toBeDefined();
+    });
+
+    it('should delete child tasks when their parent is deleted in batch operation', () => {
+      const state = createStateWithExistingTasks(['parent', 'child1', 'child2']);
+
+      // Set up parent-child relationships
+      state[TASK_FEATURE_NAME].entities['parent'] = {
+        ...state[TASK_FEATURE_NAME].entities['parent']!,
+        subTaskIds: ['child1', 'child2'],
+      };
+      state[TASK_FEATURE_NAME].entities['child1'] = {
+        ...state[TASK_FEATURE_NAME].entities['child1']!,
+        parentId: 'parent',
+      };
+      state[TASK_FEATURE_NAME].entities['child2'] = {
+        ...state[TASK_FEATURE_NAME].entities['child2']!,
+        parentId: 'parent',
+      };
+
+      // Delete parent in this batch operation
+      // Simulate what the batch update reducer does - remove the parent from state
+      const stateAfterDelete = {
+        ...state,
+        [TASK_FEATURE_NAME]: {
+          ...state[TASK_FEATURE_NAME],
+          entities: { ...state[TASK_FEATURE_NAME].entities },
+          ids: state[TASK_FEATURE_NAME].ids.filter((id) => id !== 'parent'),
+        },
+      };
+      delete stateAfterDelete[TASK_FEATURE_NAME].entities['parent'];
+
+      const result = validateAndFixDataConsistencyAfterBatchUpdate(
+        stateAfterDelete,
+        'project1',
+        [], // tasksToAdd
+        [], // tasksToUpdate
+        ['parent'], // taskIdsToDelete - deleting parent
+        null, // newTaskOrder
+      );
+
+      // Children should be deleted too since their parent is being deleted
+      expect(result[TASK_FEATURE_NAME].entities['parent']).toBeUndefined();
+      expect(result[TASK_FEATURE_NAME].entities['child1']).toBeUndefined();
+      expect(result[TASK_FEATURE_NAME].entities['child2']).toBeUndefined();
     });
   });
 
