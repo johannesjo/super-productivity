@@ -66,6 +66,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { getTaskRepeatInfoText } from './get-task-repeat-info-text.util';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
+import { DialogDeadlineTaskComponent } from '../../planner/dialog-deadline-task/dialog-deadline-task.component';
 import { Store } from '@ngrx/store';
 import { selectIssueProviderById } from '../../issue/store/issue-provider.selectors';
 import { isMarkdownChecklist } from '../../markdown-checklist/is-markdown-checklist';
@@ -472,6 +473,14 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   scheduleTask(): void {
     this._matDialog.open(DialogScheduleTaskComponent, {
       // we focus inside dialog instead
+      autoFocus: false,
+      restoreFocus: true,
+      data: { task: this.task },
+    });
+  }
+
+  setDeadlineTask(): void {
+    this._matDialog.open(DialogDeadlineTaskComponent, {
       autoFocus: false,
       restoreFocus: true,
       data: { task: this.task },
