@@ -47,6 +47,13 @@ export class PluginAPI implements PluginAPIInterface {
   private _boundMethods: ReturnType<
     typeof PluginBridgeService.prototype.createBoundMethods
   >;
+
+  /**
+   * Logger instance for this plugin
+   */
+  readonly log: ReturnType<
+    typeof PluginBridgeService.prototype.createBoundMethods
+  >['log'];
   executeNodeScript?: (
     request: PluginNodeScriptRequest,
   ) => Promise<PluginNodeScriptResult>;
@@ -67,6 +74,9 @@ export class PluginAPI implements PluginAPIInterface {
     if (this._boundMethods.executeNodeScript) {
       this.executeNodeScript = this._boundMethods.executeNodeScript;
     }
+
+    // Set up logging for this plugin
+    this.log = this._boundMethods.log;
   }
 
   registerHook<T extends Hooks>(hook: T, fn: PluginHookHandler<T>): void {

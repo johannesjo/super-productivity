@@ -354,6 +354,19 @@ export interface PluginAPI {
     contextType: 'project' | 'task',
   ): Promise<void>;
 
+  // logging
+  log: {
+    critical: (...args: unknown[]) => void;
+    err: (...args: unknown[]) => void;
+    log: (...args: unknown[]) => void;
+    info: (...args: unknown[]) => void;
+    verbose: (...args: unknown[]) => void;
+    debug: (...args: unknown[]) => void;
+    error: (...args: unknown[]) => void;
+    normal: (...args: unknown[]) => void;
+    warn: (...args: unknown[]) => void;
+  };
+
   // persistence
   persistDataSynced(dataStr: string): Promise<void>;
 

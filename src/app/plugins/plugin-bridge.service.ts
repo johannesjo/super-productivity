@@ -46,7 +46,7 @@ import { isAllowedPluginAction } from './allowed-plugin-actions.const';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from '../t.const';
 import { SyncWrapperService } from '../imex/sync/sync-wrapper.service';
-import { PluginLog } from '../core/log';
+import { PluginLog, Log } from '../core/log';
 import { TaskCopy } from '../features/tasks/task.model';
 import { ProjectCopy } from '../features/project/project.model';
 import { TagCopy } from '../features/tag/tag.model';
@@ -119,6 +119,7 @@ export class PluginBridgeService implements OnDestroy {
     executeNodeScript: (
       request: PluginNodeScriptRequest,
     ) => Promise<PluginNodeScriptResult>;
+    log: ReturnType<typeof Log.withContext>;
   } {
     return {
       // Data persistence
@@ -147,6 +148,9 @@ export class PluginBridgeService implements OnDestroy {
       // Node execution
       executeNodeScript: (request: PluginNodeScriptRequest) =>
         this._executeNodeScript(pluginId, manifest || null, request),
+
+      // Logging
+      log: () => Log.withContext(`${pluginId}`),
     };
   }
 

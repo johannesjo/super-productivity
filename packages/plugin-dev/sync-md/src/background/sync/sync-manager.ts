@@ -10,6 +10,7 @@ import {
 import { PluginHooks } from '@super-productivity/plugin-api';
 import { LocalUserCfg } from '../local-config';
 import { logSyncVerification, verifySyncState } from './verify-sync';
+import { log } from '../../shared/logger';
 
 let syncInProgress = false;
 let mdToSpDebounceTimer: number | null = null;
@@ -25,7 +26,7 @@ export const initSyncManager = (config: LocalUserCfg): void => {
   setupWindowFocusTracking();
 
   // Perform initial sync
-  performInitialSync(config).then((r) => console.log('[sync-md] SyncMD initial sync', r));
+  performInitialSync(config).then((r) => log.log('SyncMD initial sync', r));
 
   // Set up file watcher for ongoing sync
   startFileWatcher(config.filePath, () => {
