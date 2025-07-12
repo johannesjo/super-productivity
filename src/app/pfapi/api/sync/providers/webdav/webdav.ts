@@ -121,7 +121,7 @@ export const getRecommendedServerCapabilities = (
         supportsLastModified: false,
       };
   }
-}
+};
 
 export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDAV> {
   private static readonly L = 'Webdav';

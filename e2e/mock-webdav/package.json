@@ -1,0 +1,10 @@
+{
+  "name": "mock-webdav-server",
+  "version": "1.0.0",
+  "description": "Simple WebDAV server for e2e testing",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}

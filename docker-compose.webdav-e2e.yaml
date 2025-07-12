@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  webdav-server:
+    build: ./e2e/mock-webdav
+    ports:
+      - '8080:8080'
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:8080/']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
