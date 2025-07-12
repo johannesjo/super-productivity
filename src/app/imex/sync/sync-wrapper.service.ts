@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { first, map, switchMap, take } from 'rxjs/operators';
+import { catchError, filter, first, map, switchMap, take, timeout } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -33,6 +33,7 @@ import { DialogHandleDecryptErrorComponent } from './dialog-handle-decrypt-error
 import { DialogIncoherentTimestampsErrorComponent } from './dialog-incoherent-timestamps-error/dialog-incoherent-timestamps-error.component';
 import { SyncLog } from '../../core/log';
 import { promiseTimeout } from '../../util/promise-timeout';
+import { devError } from '../../util/dev-error';
 
 @Injectable({
   providedIn: 'root',
@@ -66,7 +67,18 @@ export class SyncWrapperService {
   isSyncInProgress$ = this._isSyncInProgress$.asObservable();
 
   afterCurrentSyncDoneOrSyncDisabled$: Observable<unknown> = this.isEnabledAndReady$.pipe(
-    switchMap((isEnabled) => (isEnabled ? this._isSyncInProgress$ : of(undefined))),
+    switchMap((isEnabled) =>
+      isEnabled
+        ? this._isSyncInProgress$.pipe(
+            filter((isInProgress) => !isInProgress),
+            timeout(40000),
+            catchError((error) => {
+              devError('Sync wait timeout exceeded');
+              return of(undefined);
+            }),
+          )
+        : of(undefined),
+    ),
     first(),
   );
 
