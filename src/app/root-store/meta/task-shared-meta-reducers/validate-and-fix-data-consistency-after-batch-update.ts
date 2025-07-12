@@ -1,0 +1,239 @@
+import { RootState } from '../../root-state';
+import { Task } from '../../../features/tasks/task.model';
+import { TASK_FEATURE_NAME } from '../../../features/tasks/store/task.reducer';
+import {
+  PROJECT_FEATURE_NAME,
+  projectAdapter,
+} from '../../../features/project/store/project.reducer';
+import { TAG_FEATURE_NAME } from '../../../features/tag/store/tag.reducer';
+import { Tag } from '../../../features/tag/tag.model';
+import { taskAdapter } from '../../../features/tasks/store/task.adapter';
+
+/**
+ * Validates and fixes data consistency across tasks, projects, and tags
+ * Ensures bidirectional consistency: project.taskIds ↔ task.projectId, tag.taskIds ↔ task.tagIds
+ */
+export const validateAndFixDataConsistencyAfterBatchUpdate = (
+  state: RootState,
+  projectId: string,
+  tasksToAdd: Task[],
+  tasksToUpdate: { id: string; changes: Partial<Task> }[],
+  taskIdsToDelete: string[],
+  newTaskOrder: string[] | null,
+): RootState => {
+  // eslint-disable-next-line prefer-const
+  let newState = { ...state };
+
+  // Get all affected task IDs for validation
+  const deletedTaskIds = new Set(taskIdsToDelete);
+
+  // Build current task state after all operations
+  const allCurrentTasks = new Map<string, Task>();
+
+  // Add existing tasks that weren't deleted
+  Object.values(newState[TASK_FEATURE_NAME].entities).forEach((task) => {
+    if (task && !deletedTaskIds.has(task.id)) {
+      allCurrentTasks.set(task.id, { ...task });
+    }
+  });
+
+  // Apply updates to existing tasks
+  tasksToUpdate.forEach((update) => {
+    const existingTask = allCurrentTasks.get(update.id);
+    if (existingTask) {
+      allCurrentTasks.set(update.id, { ...existingTask, ...update.changes });
+    }
+  });
+
+  // Add new tasks
+  tasksToAdd.forEach((task) => {
+    allCurrentTasks.set(task.id, task);
+  });
+
+  // =========================================================================
+  // 1. PROJECT CONSISTENCY: Validate project.taskIds ↔ task.projectId
+  // =========================================================================
+
+  const project = newState[PROJECT_FEATURE_NAME].entities[projectId];
+  if (project) {
+    // Get all tasks that should belong to this project
+    const projectTaskIds = Array.from(allCurrentTasks.values())
+      .filter((task) => task.projectId === projectId && !task.parentId) // Only root tasks
+      .map((task) => task.id);
+
+    // Apply reordering if specified
+    let finalTaskIds = projectTaskIds;
+    if (newTaskOrder) {
+      // Start with the specified order
+      const orderedIds = newTaskOrder.filter((id) => projectTaskIds.includes(id));
+      // Add any missing tasks at the end
+      const remainingIds = projectTaskIds.filter((id) => !newTaskOrder.includes(id));
+      finalTaskIds = [...orderedIds, ...remainingIds];
+    }
+
+    // Update project with validated task list
+    newState[PROJECT_FEATURE_NAME] = projectAdapter.updateOne(
+      {
+        id: projectId,
+        changes: { taskIds: finalTaskIds },
+      },
+      newState[PROJECT_FEATURE_NAME],
+    );
+  }
+
+  // =========================================================================
+  // 2. TAG CONSISTENCY: Validate tag.taskIds ↔ task.tagIds
+  // =========================================================================
+
+  // Collect all tags that need updating
+  const tagsToUpdate = new Map<string, Set<string>>();
+
+  // Initialize with existing tag task lists
+  Object.values(newState[TAG_FEATURE_NAME].entities).forEach((tag) => {
+    if (tag) {
+      const currentTaskIds = tag.taskIds || [];
+      tagsToUpdate.set(
+        tag.id,
+        new Set(currentTaskIds.filter((id) => !deletedTaskIds.has(id))),
+      );
+    }
+  });
+
+  // Update tag memberships based on task.tagIds
+  allCurrentTasks.forEach((task) => {
+    if (task.tagIds && task.tagIds.length > 0) {
+      task.tagIds.forEach((tagId) => {
+        // Ensure tag exists
+        if (newState[TAG_FEATURE_NAME].entities[tagId]) {
+          if (!tagsToUpdate.has(tagId)) {
+            tagsToUpdate.set(tagId, new Set());
+          }
+          tagsToUpdate.get(tagId)!.add(task.id);
+        }
+      });
+    }
+  });
+
+  // Apply tag updates
+  const tagUpdates: { id: string; changes: Partial<Tag> }[] = [];
+  tagsToUpdate.forEach((taskIds, tagId) => {
+    const currentTag = newState[TAG_FEATURE_NAME].entities[tagId];
+    if (currentTag) {
+      const newTaskIds = Array.from(taskIds);
+      const currentTaskIds = currentTag.taskIds || [];
+
+      // Only update if the task list actually changed
+      if (
+        JSON.stringify([...currentTaskIds].sort()) !==
+        JSON.stringify([...newTaskIds].sort())
+      ) {
+        tagUpdates.push({
+          id: tagId,
+          changes: { taskIds: newTaskIds },
+        });
+      }
+    }
+  });
+
+  if (tagUpdates.length > 0) {
+    newState[TAG_FEATURE_NAME] = {
+      ...newState[TAG_FEATURE_NAME],
+      entities: {
+        ...newState[TAG_FEATURE_NAME].entities,
+      },
+    };
+
+    tagUpdates.forEach((update) => {
+      newState[TAG_FEATURE_NAME].entities[update.id] = {
+        ...newState[TAG_FEATURE_NAME].entities[update.id]!,
+        ...update.changes,
+      };
+    });
+  }
+
+  // =========================================================================
+  // 3. PARENT-CHILD CONSISTENCY: Validate parent.subTaskIds ↔ child.parentId
+  // =========================================================================
+
+  const parentChildUpdates: { id: string; changes: Partial<Task> }[] = [];
+  const parentsToUpdate = new Map<string, Set<string>>();
+
+  // Track which parents had explicit subTaskIds updates
+  const parentsWithExplicitSubTaskUpdates = new Set<string>();
+  tasksToUpdate.forEach((update) => {
+    if (update.changes.subTaskIds !== undefined) {
+      parentsWithExplicitSubTaskUpdates.add(update.id);
+    }
+  });
+
+  // Collect all parent-child relationships
+  allCurrentTasks.forEach((task) => {
+    if (task.parentId && allCurrentTasks.has(task.parentId)) {
+      if (!parentsToUpdate.has(task.parentId)) {
+        parentsToUpdate.set(task.parentId, new Set());
+      }
+      parentsToUpdate.get(task.parentId)!.add(task.id);
+    }
+  });
+
+  // Update parent tasks with correct subTaskIds
+  parentsToUpdate.forEach((subTaskIds, parentId) => {
+    // Skip if this parent had an explicit subTaskIds update - trust the operation
+    if (parentsWithExplicitSubTaskUpdates.has(parentId)) {
+      return;
+    }
+
+    const parentTask = allCurrentTasks.get(parentId);
+    if (parentTask) {
+      const newSubTaskIds = Array.from(subTaskIds);
+      const currentSubTaskIds = parentTask.subTaskIds || [];
+
+      // Only update if the subtask list actually changed
+      if (
+        JSON.stringify([...currentSubTaskIds].sort()) !==
+        JSON.stringify([...newSubTaskIds].sort())
+      ) {
+        parentChildUpdates.push({
+          id: parentId,
+          changes: { subTaskIds: newSubTaskIds },
+        });
+      }
+    }
+  });
+
+  // Also check for parents that should have empty subTaskIds but don't
+  allCurrentTasks.forEach((task) => {
+    // Skip if this parent had an explicit subTaskIds update
+    if (parentsWithExplicitSubTaskUpdates.has(task.id)) {
+      return;
+    }
+
+    if (task.subTaskIds && task.subTaskIds.length > 0 && !parentsToUpdate.has(task.id)) {
+      // This parent has subTaskIds but no children point to it
+      parentChildUpdates.push({
+        id: task.id,
+        changes: { subTaskIds: [] },
+      });
+    }
+  });
+
+  // Apply parent-child updates
+  if (parentChildUpdates.length > 0) {
+    newState[TASK_FEATURE_NAME] = taskAdapter.updateMany(
+      parentChildUpdates,
+      newState[TASK_FEATURE_NAME],
+    );
+  }
+
+  // =========================================================================
+  // 4. ORPHAN CLEANUP: Remove invalid references
+  // =========================================================================
+
+  // This is handled implicitly by the above validation steps:
+  // - Tasks with invalid projectIds are not included in project.taskIds
+  // - Tasks with invalid tagIds are not included in tag.taskIds
+  // - Tasks with invalid parentIds are not included in parent.subTaskIds
+  // - The entity adapters handle removing deleted tasks from collections
+
+  return newState;
+};
