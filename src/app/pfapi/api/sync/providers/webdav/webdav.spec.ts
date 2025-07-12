@@ -402,4 +402,88 @@ describe('Webdav', () => {
       expect(path).toBe('/test.txt');
     });
   });
+
+  describe('edge cases for downloadFile with 304 retry', () => {
+    beforeEach(() => {
+      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(mockCfg));
+    });
+
+    it('should throw InvalidDataSPError when 304 retry returns null data', async () => {
+      const notModifiedError = new Error('File not modified');
+      (notModifiedError as any).status = 304;
+
+      mockWebdavApi.download.and.callFake((params: any) => {
+        if (params.localRev === 'local-rev') {
+          return Promise.reject(notModifiedError);
+        } else if (params.localRev === null) {
+          return Promise.resolve({ rev: 'etag-123', dataStr: null as any });
+        }
+        return Promise.reject(new Error('Unexpected call'));
+      });
+
+      await expectAsync(webdav.downloadFile('test.txt', 'local-rev')).toBeRejectedWith(
+        jasmine.any(InvalidDataSPError),
+      );
+    });
+
+    it('should throw NoRevAPIError when 304 retry returns no rev', async () => {
+      const notModifiedError = new Error('File not modified');
+      (notModifiedError as any).status = 304;
+
+      mockWebdavApi.download.and.callFake((params: any) => {
+        if (params.localRev === 'local-rev') {
+          return Promise.reject(notModifiedError);
+        } else if (params.localRev === null) {
+          return Promise.resolve({ rev: undefined as any, dataStr: 'content' });
+        }
+        return Promise.reject(new Error('Unexpected call'));
+      });
+
+      await expectAsync(webdav.downloadFile('test.txt', 'local-rev')).toBeRejectedWith(
+        jasmine.any(NoRevAPIError),
+      );
+    });
+  });
+
+  describe('uploadFile with empty localRev', () => {
+    beforeEach(() => {
+      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(mockCfg));
+    });
+
+    it('should handle empty string localRev as valid', async () => {
+      mockWebdavApi.upload.and.returnValue(Promise.resolve('etag-123'));
+
+      const result = await webdav.uploadFile('test.txt', 'content', '');
+
+      expect(result).toEqual({ rev: 'etag-123' });
+      expect(mockWebdavApi.upload).toHaveBeenCalledWith({
+        path: '/sync/test.txt',
+        data: 'content',
+        isOverwrite: false,
+        expectedEtag: '',
+      });
+    });
+  });
+
+  describe('downloadFile with __meta_ and null localRev', () => {
+    beforeEach(() => {
+      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(mockCfg));
+    });
+
+    it('should handle __meta_ file with null localRev', async () => {
+      const mockResponse = {
+        rev: 'meta-etag',
+        dataStr: '{"meta": "data"}',
+      };
+      mockWebdavApi.download.and.returnValue(Promise.resolve(mockResponse));
+
+      const result = await webdav.downloadFile('__meta_', null as any);
+
+      expect(result).toEqual(mockResponse);
+      expect(mockWebdavApi.download).toHaveBeenCalledWith({
+        path: '/sync/__meta_',
+        localRev: null,
+      });
+    });
+  });
 });
