@@ -105,6 +105,27 @@
       </ng-container>
     </task-detail-item>
   }
+
+  <!-- Progress Item -->
+  <task-detail-item
+    (collapseParent)="collapseParent()"
+    (keyPress)="onItemKeyPress($event)"
+    [expanded]="true"
+    [type]="'panel'"
+    class="progress-panel"
+  >
+    <ng-container panel-header>
+      <mat-icon class="panel-header-icon">trending_up</mat-icon>
+      <span>Progress</span>
+    </ng-container>
+    <ng-container panel-content>
+      <task-progress-item
+        [task]="task"
+        (progressChange)="onProgressChange($event)"
+      >
+      </task-progress-item>
+    </ng-container>
+  </task-detail-item>
   <task-detail-item
     (collapseParent)="collapseParent()"
     (editActionTriggered)="scheduleTask()"

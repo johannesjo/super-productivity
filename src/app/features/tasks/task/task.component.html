@@ -137,6 +137,19 @@
           [task]="t"
           [isShowProjectTagNever]="isInSubTaskList()"
         ></tag-list>
+
+        <!-- Progress indicator -->
+        @if (t.progress && t.progress > 0 && !t.isDone) {
+          <div class="progress-indicator">
+            <div class="progress-bar-mini">
+              <div
+                class="progress-fill-mini"
+                [style.width.%]="t.progress"
+              ></div>
+            </div>
+            <span class="progress-text">{{ t.progress }}%</span>
+          </div>
+        }
       </div>
     </div>
 

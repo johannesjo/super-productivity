@@ -80,6 +80,7 @@ import { IssueContentComponent } from '../../issue/issue-content/issue-content.c
 import { InlineMarkdownComponent } from '../../../ui/inline-markdown/inline-markdown.component';
 import { TaskAttachmentListComponent } from '../task-attachment/task-attachment-list/task-attachment-list.component';
 import { TagEditComponent } from '../../tag/tag-edit/tag-edit.component';
+import { TaskProgressItemComponent } from './task-progress-item/task-progress-item.component';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
@@ -114,6 +115,7 @@ interface IssueDataAndType {
     InlineMarkdownComponent,
     TaskAttachmentListComponent,
     TagEditComponent,
+    TaskProgressItemComponent,
     AsyncPipe,
     DatePipe,
     MsToStringPipe,
@@ -569,6 +571,12 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
 
       this.taskService.update(this._taskData.id, { title: newTitle });
     }
+  }
+
+  onProgressChange(progress: number): void {
+    // Progress change is already handled by the TaskProgressItemComponent
+    // This method can be used for additional logic if needed
+    this._cd.detectChanges();
   }
 
   private _focusFirst(): void {
