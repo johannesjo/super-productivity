@@ -535,10 +535,16 @@ export class WebdavApi {
       // Check response status before processing
       if (response.status === 412) {
         // Precondition Failed - conditional header failed
-        throw new NoEtagAPIError(path);
+        if (expectedEtag) {
+          throw new Error(
+            `Upload failed: file was modified (expected validator: ${expectedEtag})`,
+          );
+        } else {
+          throw new FileExistsAPIError();
+        }
       } else if (response.status === 423) {
-        // Locked
-        throw new HttpNotOkAPIError(response);
+        // Locked - Resource is locked
+        throw new Error(`Upload failed: Resource is locked`);
       } else if (response.status === 409) {
         // Conflict - parent directory doesn't exist
         return await this._retryUploadWithDirectoryCreation(

@@ -2,6 +2,7 @@
 import { WebdavApi } from './webdav-api';
 import { WebdavPrivateCfg } from './webdav';
 import {
+  FileExistsAPIError,
   HttpNotOkAPIError,
   NoEtagAPIError,
   RemoteFileNotFoundAPIError,
@@ -129,7 +130,7 @@ describe('WebdavApi - Upload Operations', () => {
           isOverwrite: false,
           expectedEtag: null,
         }),
-      ).toBeRejectedWith(jasmine.any(NoEtagAPIError));
+      ).toBeRejectedWith(jasmine.any(FileExistsAPIError));
     });
 
     it('should throw error on 412 status when overwriting with wrong etag', async () => {
@@ -143,7 +144,11 @@ describe('WebdavApi - Upload Operations', () => {
           isOverwrite: true,
           expectedEtag: 'wrong-etag',
         }),
-      ).toBeRejectedWith(jasmine.any(NoEtagAPIError));
+      ).toBeRejectedWith(
+        jasmine.objectContaining({
+          message: jasmine.stringMatching(/file was modified.*wrong-etag/),
+        }),
+      );
     });
 
     it('should clean etag by removing quotes but keeping weak prefix', async () => {
@@ -422,7 +427,11 @@ describe('WebdavApi - Upload Operations', () => {
           isOverwrite: true,
           expectedEtag: null,
         }),
-      ).toBeRejectedWith(jasmine.any(NoEtagAPIError));
+      ).toBeRejectedWith(
+        jasmine.objectContaining({
+          message: jasmine.stringMatching(/Resource is locked/),
+        }),
+      );
     });
 
     it('should handle retry after 404 but etag retrieval fails', async () => {
@@ -455,7 +464,7 @@ describe('WebdavApi - Upload Operations', () => {
       ).toBeRejectedWith(jasmine.any(NoEtagAPIError));
     });
 
-    it('should handle retry after 409 with NoEtagAPIError when all fallbacks fail', async () => {
+    it('should handle retry after 409 with RemoteFileNotFoundAPIError when all fallbacks fail', async () => {
       // First attempt fails with 409
       const firstResponse = createMockResponse(409);
       // Retry attempt fails with 404
@@ -474,7 +483,7 @@ describe('WebdavApi - Upload Operations', () => {
         Promise.resolve(),
       );
 
-      // Mock getFileMeta and download to fail so NoEtagAPIError is thrown
+      // Mock getFileMeta and download to fail so RemoteFileNotFoundAPIError is thrown
       spyOn(api, 'getFileMeta').and.returnValue(
         Promise.reject(new RemoteFileNotFoundAPIError('folder/test.txt')),
       );
@@ -489,7 +498,7 @@ describe('WebdavApi - Upload Operations', () => {
           isOverwrite: false,
           expectedEtag: null,
         }),
-      ).toBeRejectedWith(jasmine.any(NoEtagAPIError));
+      ).toBeRejectedWith(jasmine.any(RemoteFileNotFoundAPIError));
     });
   });
 });
