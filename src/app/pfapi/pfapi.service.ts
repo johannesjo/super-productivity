@@ -86,7 +86,7 @@ export class PfapiService {
       async () => 'UNKNOWN_OR_CHANGED' as SyncStatusChangePayload,
     ).pipe(shareReplay(1));
 
-  public readonly isSyncInProgress$: Observable<boolean> = this.syncState$.pipe(
+  private readonly _isSyncInProgress$: Observable<boolean> = this.syncState$.pipe(
     filter((state) => state !== 'UNKNOWN_OR_CHANGED'),
     map((state) => state === 'SYNCING'),
     startWith(false),
@@ -107,7 +107,7 @@ export class PfapiService {
   constructor() {
     // TODO check why it gets triggered twice always
     // this.syncState$.subscribe((v) => PFLog.log(`syncState$`, v));
-    this.isSyncInProgress$.subscribe((v) => {
+    this._isSyncInProgress$.subscribe((v) => {
       // PFLog.log('isSyncInProgress$', v);
       if (v) {
         this._globalProgressBarService.countUp('SYNC');

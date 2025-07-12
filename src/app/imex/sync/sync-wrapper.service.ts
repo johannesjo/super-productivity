@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
-import { Observable, of, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { catchError, first, map, switchMap, take, timeout } from 'rxjs/operators';
+import { first, map, switchMap, take } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -31,8 +31,8 @@ import { DialogSyncInitialCfgComponent } from './dialog-sync-initial-cfg/dialog-
 import { DialogIncompleteSyncComponent } from './dialog-incomplete-sync/dialog-incomplete-sync.component';
 import { DialogHandleDecryptErrorComponent } from './dialog-handle-decrypt-error/dialog-handle-decrypt-error.component';
 import { DialogIncoherentTimestampsErrorComponent } from './dialog-incoherent-timestamps-error/dialog-incoherent-timestamps-error.component';
-import { devError } from '../../util/dev-error';
 import { SyncLog } from '../../core/log';
+import { promiseTimeout } from '../../util/promise-timeout';
 
 @Injectable({
   providedIn: 'root',
@@ -45,9 +45,6 @@ export class SyncWrapperService {
   private _matDialog = inject(MatDialog);
   private _dataInitService = inject(DataInitService);
   private _reminderService = inject(ReminderService);
-
-  // NEW: Subject to track when data reload is complete after sync
-  private _dataReloadComplete$ = new Subject<void>();
 
   syncState$ = this._pfapiService.syncState$;
 
@@ -63,33 +60,24 @@ export class SyncWrapperService {
 
   isEnabledAndReady$: Observable<boolean> =
     this._pfapiService.isSyncProviderEnabledAndReady$.pipe();
-  isSyncInProgress$: Observable<boolean> = this._pfapiService.isSyncInProgress$.pipe();
 
-  _afterCurrentSyncDoneIfAny$: Observable<unknown> = this.isSyncInProgress$.pipe(
-    switchMap((isSyncing) =>
-      isSyncing
-        ? this._dataReloadComplete$.pipe(
-            // this step shouldn't take too long normally, so we use a timeout in case we have a race condition
-            timeout(30000),
-            catchError((e) => {
-              devError(e);
-              return of(undefined);
-            }),
-          )
-        : of(undefined),
-    ),
-  );
+  // NOTE we don't use this._pfapiService.isSyncInProgress$ since it does not include handling and re-init view model
+  private _isSyncInProgress$ = new BehaviorSubject(false);
+  isSyncInProgress$ = this._isSyncInProgress$.asObservable();
 
   afterCurrentSyncDoneOrSyncDisabled$: Observable<unknown> = this.isEnabledAndReady$.pipe(
-    switchMap((isEnabled) =>
-      isEnabled ? this._afterCurrentSyncDoneIfAny$ : of(undefined),
-    ),
+    switchMap((isEnabled) => (isEnabled ? this._isSyncInProgress$ : of(undefined))),
     first(),
   );
 
-  // TODO move someplace else
-
   async sync(): Promise<SyncStatus | 'HANDLED_ERROR'> {
+    this._isSyncInProgress$.next(true);
+    return this._sync().finally(() => {
+      this._isSyncInProgress$.next(false);
+    });
+  }
+
+  private async _sync(): Promise<SyncStatus | 'HANDLED_ERROR'> {
     const providerId = await this.syncProviderId$.pipe(take(1)).toPromise();
     if (!providerId) {
       throw new Error('No Sync Provider for sync()');
@@ -344,10 +332,10 @@ export class SyncWrapperService {
         this._dataInitService.reInit(),
         this._reminderService.reloadFromDatabase(),
       ]);
-
+      // wait an extra frame to potentially avoid follow up problems
+      await promiseTimeout(100);
       SyncLog.log('Data re-initialization complete');
       // Signal that data reload is complete
-      this._dataReloadComplete$.next();
     } catch (error) {
       SyncLog.err('Error during data re-initialization:', error);
       throw error;
