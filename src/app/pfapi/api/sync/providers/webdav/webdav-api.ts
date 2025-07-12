@@ -4,6 +4,7 @@ import {
   FileExistsAPIError,
   HttpNotOkAPIError,
   NoEtagAPIError,
+  NoRevAPIError,
   RemoteFileNotFoundAPIError,
 } from '../../../errors/errors';
 import { PFLog } from '../../../../../core/log';
@@ -220,19 +221,25 @@ export class WebdavApi {
   }
 
   /**
-   * Common ETag retrieval fallback chain: response headers -> PROPFIND -> GET (optional)
-   * Used by upload, download, and other operations that need ETags
+   * Common validator retrieval fallback chain: response headers -> PROPFIND -> GET (optional)
+   * Supports both ETag and Last-Modified validators
+   * Used by upload, download, and other operations that need validators
    */
   private async _retrieveEtagWithFallback(
     path: string,
     headers?: Record<string, string>,
     context: string = 'operation',
   ): Promise<string> {
-    // Try response headers first if provided
+    // Check server capabilities
+    const capabilities = await this._getOrDetectCapabilities();
+
+    // Try extracting validators from response headers first
     if (headers) {
-      const etag = this._findEtagInHeaders(headers);
-      if (etag) {
-        return etag;
+      const validators = this._extractValidators(headers);
+
+      // Return the preferred validator based on server capabilities
+      if (validators.validator) {
+        return validators.validator;
       }
     }
 
@@ -243,10 +250,10 @@ export class WebdavApi {
     } catch (metaError) {
       PFLog.err(`${WebdavApi.L}.${context}() failed to get etag via PROPFIND`, metaError);
 
-      // Last resort: try GET request to retrieve ETag
+      // Last resort: try GET request to retrieve validator
       try {
         PFLog.error(
-          `${WebdavApi.L}.${context}() attempting GET request fallback for etag`,
+          `${WebdavApi.L}.${context}() attempting GET request fallback for validator`,
         );
         const { rev } = await this.download({ path });
         return rev;
@@ -255,12 +262,36 @@ export class WebdavApi {
           `${WebdavApi.L}.${context}() GET request fallback also failed`,
           getError,
         );
+
+        // If server only supports Last-Modified and we can't get it, throw appropriate error
+        if (!capabilities.supportsETags && capabilities.supportsLastModified) {
+          throw new NoRevAPIError(path);
+        }
+
         throw new NoEtagAPIError({
           path,
           attemptedMethods: ['response-headers', 'PROPFIND', 'GET'],
         });
       }
     }
+  }
+
+  /**
+   * Get or detect server capabilities with caching
+   */
+  private async _getOrDetectCapabilities(): Promise<WebdavServerCapabilities> {
+    if (this._cachedCapabilities) {
+      return this._cachedCapabilities;
+    }
+
+    const cfg = await this._getCfgOrError();
+    if (cfg.serverCapabilities) {
+      this._cachedCapabilities = cfg.serverCapabilities;
+      return this._cachedCapabilities;
+    }
+
+    // Detect capabilities if not cached
+    return await this.detectServerCapabilities();
   }
   private _responseHeadersToObject(response: Response): Record<string, string> {
     const headers: Record<string, string> = {};
@@ -325,10 +356,18 @@ export class WebdavApi {
     isOverwrite?: boolean;
     expectedEtag?: string | null;
   }): Promise<string | undefined> {
+    // Get capabilities to determine validator type
+    const capabilities = await this._getOrDetectCapabilities();
+    const validatorType = capabilities.supportsETags
+      ? 'etag'
+      : capabilities.supportsLastModified
+        ? 'last-modified'
+        : 'none';
+
     const headers: Record<string, string> = {
       'Content-Type': 'application/octet-stream',
       'Content-Length': new Blob([data]).size.toString(),
-      ...this._createConditionalHeaders(isOverwrite, expectedEtag),
+      ...this._createConditionalHeaders(isOverwrite, expectedEtag, null, validatorType),
     };
 
     try {
@@ -339,15 +378,15 @@ export class WebdavApi {
         headers,
       });
 
-      // Extract etag from response headers
+      // Extract validator from response headers
       const responseHeaderObj = this._responseHeadersToObject(response);
-      const etag = this._findEtagInHeaders(responseHeaderObj);
+      const validators = this._extractValidators(responseHeaderObj);
 
-      if (!etag) {
+      if (!validators.validator) {
         return await this._retrieveEtagWithFallback(path, responseHeaderObj, 'upload');
       }
 
-      return etag;
+      return validators.validator;
     } catch (e: any) {
       PFLog.err(`${WebdavApi.L}.upload() error`, { path, error: e });
 
@@ -381,6 +420,21 @@ export class WebdavApi {
           // Locked
           throw new Error(`Resource is locked: ${path}`);
         default:
+          // Handle NoRevAPIError - server doesn't support ETags
+          if (e instanceof NoRevAPIError) {
+            PFLog.info(
+              `${WebdavApi.L}.upload() NoRevAPIError detected, checking server capabilities`,
+            );
+
+            // Clear cached capabilities to force re-detection
+            this._cachedCapabilities = undefined;
+
+            // Detect server capabilities
+            await this.detectServerCapabilities();
+
+            // Retry upload with updated capabilities
+            return await this.upload({ data, path, isOverwrite, expectedEtag });
+          }
           throw e;
       }
     }
@@ -420,7 +474,8 @@ export class WebdavApi {
           });
 
           const headers = this._responseHeadersToObject(headResponse);
-          const etag = this._findEtagInHeaders(headers);
+          const validators = this._extractValidators(headers);
+          const etag = validators.etag || validators.lastModified || '';
           const contentLength = headers['content-length'] || '0';
           const lastModified = headers['last-modified'] || '';
           const contentType = headers['content-type'] || '';
@@ -431,7 +486,7 @@ export class WebdavApi {
             lastmod: lastModified,
             size: parseInt(contentLength, 10),
             type: 'file',
-            etag: this._cleanRev(etag),
+            etag: validators.validatorType === 'etag' ? this._cleanRev(etag) : etag,
             data: {
               'content-type': contentType,
               'content-length': contentLength,
@@ -500,8 +555,16 @@ export class WebdavApi {
 
       // Add conditional headers for efficient downloading
       if (localRev) {
-        // Use If-None-Match to avoid downloading if file hasn't changed
-        headers['If-None-Match'] = localRev;
+        // Check server capabilities to determine which header to use
+        const capabilities = await this._getOrDetectCapabilities();
+
+        if (capabilities.supportsETags) {
+          // Use If-None-Match for ETag-based conditional requests
+          headers['If-None-Match'] = localRev;
+        } else if (capabilities.supportsLastModified) {
+          // Use If-Modified-Since for Last-Modified-based conditional requests
+          headers['If-Modified-Since'] = localRev;
+        }
       }
 
       // Add Range header for partial content requests (useful for large files)
@@ -528,10 +591,7 @@ export class WebdavApi {
       // Handle different response statuses
       if (response.status === 304) {
         // Not Modified - file hasn't changed
-        const error = new Error(`File not modified: ${path}`);
-        (error as any).status = 304;
-        (error as any).localRev = localRev;
-        throw error;
+        return undefined as any;
       }
 
       if (response.status === 206) {
@@ -554,15 +614,16 @@ export class WebdavApi {
       // Extract headers
       const headerObj = this._responseHeadersToObject(response);
 
-      // Get etag/revision
-      const rev = this._findEtagInHeaders(headerObj);
+      // Get validator (ETag or Last-Modified)
+      const validators = this._extractValidators(headerObj);
+      const rev = validators.validator;
 
       if (!rev) {
-        PFLog.error(`${WebdavApi.L}.download() no etag in response headers`, {
+        PFLog.error(`${WebdavApi.L}.download() no validator in response headers`, {
           path,
           headers: headerObj,
         });
-        // Try to get etag via PROPFIND as fallback
+        // Try to get validator via PROPFIND as fallback
         try {
           const meta = await this.getFileMeta(path, null);
           return {
@@ -631,8 +692,16 @@ export class WebdavApi {
 
       // Add conditional headers for safe deletion
       if (expectedEtag) {
-        // Use If-Match to ensure we're deleting the expected version
-        headers['If-Match'] = expectedEtag;
+        // Check server capabilities to determine which header to use
+        const capabilities = await this._getOrDetectCapabilities();
+
+        if (capabilities.supportsETags) {
+          // Use If-Match for ETag-based conditional deletion
+          headers['If-Match'] = expectedEtag;
+        } else if (capabilities.supportsLastModified) {
+          // Use If-Unmodified-Since for Last-Modified-based conditional deletion
+          headers['If-Unmodified-Since'] = expectedEtag;
+        }
       }
 
       // Check if resource exists before deletion (optional safety check)
@@ -1259,13 +1328,17 @@ export class WebdavApi {
     // Determine if it's a collection (directory) or file
     const isCollection = resourceType?.querySelector('collection') !== null;
 
+    // Determine the validator to use
+    const cleanedEtag = this._cleanRev(etag);
+    const validator = cleanedEtag || lastModified;
+
     return {
       filename: displayname || decodedHref.split('/').pop() || '',
       basename: displayname || decodedHref.split('/').pop() || '',
       lastmod: lastModified,
       size: parseInt(contentLength, 10),
       type: isCollection ? 'directory' : 'file',
-      etag: this._cleanRev(etag),
+      etag: validator,
       data: {
         'content-type': contentType,
         'content-length': contentLength,
