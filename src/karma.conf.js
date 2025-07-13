@@ -56,6 +56,10 @@ module.exports = function (config) {
         debug: true,
       },
     },
-    browserNoActivityTimeout: 120000,
+    browserNoActivityTimeout: 10000, // time before killing browser if no signal
+    browserDisconnectTimeout: 2000, // time to wait after disconnection
+    browserDisconnectTolerance: 1, // retry once if disconnect occurs
+    captureTimeout: 10000,
+    reportSlowerThan: 500,
   });
 };
