@@ -2,14 +2,14 @@ services:
   webdav:
     image: hacdias/webdav:latest
     ports:
-      - '8080:80'
+      - '2345:2345'
     volumes:
       - ./webdav.yaml:/config.yml:ro
       - ./e2e-webdav-data:/data
     environment:
       - WEBDAV_CONFIG=/config.yml
     healthcheck:
-      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost/']
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:2345/']
       interval: 10s
       timeout: 5s
       retries: 3
