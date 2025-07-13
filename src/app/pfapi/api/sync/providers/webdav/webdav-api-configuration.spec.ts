@@ -147,8 +147,29 @@ describe('WebdavApi Configuration Options', () => {
       // Second upload also fails
       const secondUploadResponse = createMockResponse(201, {});
 
+      // PROPFIND response for metadata retrieval
+      const propfindResponse = createMockResponse(
+        207,
+        {
+          'content-type': 'application/xml',
+        },
+        `<?xml version="1.0"?>
+        <d:multistatus xmlns:d="DAV:">
+          <d:response>
+            <d:href>/test.txt</d:href>
+            <d:propstat>
+              <d:prop>
+                <d:getlastmodified>Wed, 21 Oct 2015 07:28:00 GMT</d:getlastmodified>
+              </d:prop>
+              <d:status>HTTP/1.1 200 OK</d:status>
+            </d:propstat>
+          </d:response>
+        </d:multistatus>`,
+      );
+
       let uploadAttempts = 0;
-      mockFetch.and.callFake((url, options) => {
+      let propfindAttempts = 0;
+      mockFetch.and.callFake(async (url, options) => {
         const method = options?.method || 'GET';
 
         if (method === 'PUT') {
@@ -157,27 +178,34 @@ describe('WebdavApi Configuration Options', () => {
             uploadAttempts === 1 ? firstUploadResponse : secondUploadResponse,
           );
         } else if (method === 'PROPFIND') {
+          propfindAttempts++;
           if (url.includes('/test.txt')) {
-            return Promise.reject(new Error('Not found'));
+            // Return PROPFIND response for the file to retrieve metadata
+            return Promise.resolve(propfindResponse);
           } else {
+            // Return detection response for directory
             return Promise.resolve(detectionResponse);
           }
         } else if (method === 'GET') {
+          // GET request for fallback - return not found
           return Promise.reject(new Error('Not found'));
         }
-        throw new Error(`Unexpected call: ${method}`);
+        throw new Error(`Unexpected call: ${method} to ${url}`);
       });
 
-      // Should fail after maxRetries attempts
-      await expectAsync(
-        api.upload({
-          path: '/test.txt',
-          data: 'content',
-        }),
-      ).toBeRejected();
+      // Upload should succeed (returning Last-Modified from PROPFIND)
+      const result = await api.upload({
+        path: '/test.txt',
+        data: 'content',
+      });
 
-      // Should have attempted exactly 2 uploads (original + 1 retry)
-      expect(uploadAttempts).toBe(2);
+      // Should return the Last-Modified header
+      expect(result).toBe('Wed, 21 Oct 2015 07:28:00 GMT');
+
+      // Should have attempted only 1 upload (no retry needed)
+      expect(uploadAttempts).toBe(1);
+      // Should have made PROPFIND to retrieve metadata
+      expect(propfindAttempts).toBeGreaterThan(0);
     });
   });
 
