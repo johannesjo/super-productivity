@@ -1,5 +1,4 @@
 {
-  "includePatterns": ["**/*"],
   "permissions": {
     "allow": [
       "Bash(npm ci)",
