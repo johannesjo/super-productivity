@@ -113,14 +113,14 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   // private _prevSelectedQuickAccessDate: Date | null = null;
   // private _prevQuickAccessAction: number | null = null;
 
-  deadlineDate = this.task.deadline ? new Date(this.task.deadline) : null;
   dateClass = (date: Date): string => {
-    if (this.deadlineDate === null) return '';
+    const deadlineDate = this.task.deadline ? new Date(this.task.deadline) : null;
+    if (deadlineDate === null) return '';
 
     const isSameDay =
-      date.getDate() === this.deadlineDate.getDate() &&
-      date.getMonth() === this.deadlineDate.getMonth() &&
-      date.getFullYear() === this.deadlineDate.getFullYear();
+      date.getDate() === deadlineDate.getDate() &&
+      date.getMonth() === deadlineDate.getMonth() &&
+      date.getFullYear() === deadlineDate.getFullYear();
 
     return isSameDay ? 'deadline-highlight' : '';
   };
