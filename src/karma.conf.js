@@ -12,8 +12,6 @@ module.exports = function (config) {
     plugins: [
       require('karma-jasmine'),
       require('karma-chrome-launcher'),
-      require('karma-jasmine-html-reporter'),
-      require('karma-coverage-istanbul-reporter'),
       require('@angular-devkit/build-angular/plugins/karma'),
       require('./test-helpers/karma-running-spec-on-disconnect'),
     ],
@@ -21,12 +19,7 @@ module.exports = function (config) {
       clearContext: false, // leave Jasmine Spec Runner output visible in browser
       captureConsole: false,
     },
-    coverageIstanbulReporter: {
-      dir: require('path').join(__dirname, '../coverage'),
-      reports: ['html', 'lcovonly'],
-      fixWebpackSourcePaths: true,
-    },
-    reporters: ['progress', 'kjhtml', 'running-spec'],
+    reporters: ['progress', 'running-spec'],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
@@ -60,7 +53,7 @@ module.exports = function (config) {
     browserNoActivityTimeout: 6000, // time before killing browser if no signal
     browserDisconnectTimeout: 2000, // time to wait after disconnection
     browserDisconnectTolerance: 1, // retry once if disconnect occurs
-    captureTimeout: 6000,
+    captureTimeout: 10000,
     reportSlowerThan: 500,
   });
 };
