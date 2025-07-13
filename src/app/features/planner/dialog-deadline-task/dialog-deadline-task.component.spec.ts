@@ -7,18 +7,13 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { provideMockStore } from '@ngrx/store/testing';
 import { TranslateModule, TranslateService, TranslateStore } from '@ngx-translate/core';
 import { SnackService } from '../../../core/snack/snack.service';
 import { DatePipe } from '@angular/common';
 import { TaskService } from '../../../features/tasks/task.service';
 import { WorkContextService } from '../../../features/work-context/work-context.service';
 import { of } from 'rxjs';
-import { PlannerService } from '../planner.service';
-import { RootState } from '../../../root-store/root-state';
-import { CONFIG_FEATURE_NAME } from '../../config/store/global-config.reducer';
-import { TaskCopy, TaskReminderOptionId } from '../../tasks/task.model';
-import { ReminderService } from '../../reminder/reminder.service';
+import { TaskCopy } from '../../tasks/task.model';
 
 describe('DialogDeadlineTaskComponent', () => {
   let component: DialogDeadlineTaskComponent;
@@ -26,9 +21,7 @@ describe('DialogDeadlineTaskComponent', () => {
   let dialogRefSpy: jasmine.SpyObj<MatDialogRef<DialogDeadlineTaskComponent>>;
   let snackServiceSpy: jasmine.SpyObj<SnackService>;
   let taskServiceSpy: jasmine.SpyObj<TaskService>;
-  let plannerServiceSpy: jasmine.SpyObj<PlannerService>;
   let workContextServiceSpy: jasmine.SpyObj<WorkContextService>;
-  let reminderServiceSpy: jasmine.SpyObj<ReminderService>;
 
   const mockDialogData = {
     taskId: 'task123',
@@ -39,12 +32,7 @@ describe('DialogDeadlineTaskComponent', () => {
   beforeEach(async () => {
     dialogRefSpy = jasmine.createSpyObj('MatDialogRef', ['close']);
     snackServiceSpy = jasmine.createSpyObj('SnackService', ['open']);
-    plannerServiceSpy = jasmine.createSpyObj('PlannerService', [
-      'open',
-      'getSnackExtraStr',
-    ]);
-    reminderServiceSpy = jasmine.createSpyObj('ReminderService', ['getById']);
-    taskServiceSpy = jasmine.createSpyObj('TaskService', ['scheduleTask']);
+    taskServiceSpy = jasmine.createSpyObj('TaskService', ['update']);
     workContextServiceSpy = jasmine.createSpyObj(
       'WorkContextService',
       ['activeWorkContextId$'],
@@ -67,18 +55,9 @@ describe('DialogDeadlineTaskComponent', () => {
         TranslateModule.forRoot(),
       ],
       providers: [
-        provideMockStore<Partial<RootState>>({
-          initialState: {
-            [CONFIG_FEATURE_NAME]: {
-              sync: {},
-            } as any,
-          },
-        }),
         { provide: MatDialogRef, useValue: dialogRefSpy },
         { provide: MAT_DIALOG_DATA, useValue: mockDialogData },
         { provide: SnackService, useValue: snackServiceSpy },
-        { provide: ReminderService, useValue: reminderServiceSpy },
-        { provide: PlannerService, useValue: plannerServiceSpy },
         { provide: TaskService, useValue: taskServiceSpy },
         { provide: WorkContextService, useValue: workContextServiceSpy },
         TranslateService,
@@ -121,10 +100,9 @@ describe('DialogDeadlineTaskComponent', () => {
   });
 
   describe('submit()', () => {
-    it('should call taskService.scheduleTask with correct parameters when submit is called', async () => {
-      const testDate = new Date('2023-06-01');
-      const expectedDate = new Date(testDate);
-      expectedDate.setHours(10, 0, 0, 0); // Set time to 10:00 AM
+    it('should call taskService.update with correct parameters when submit is called', async () => {
+      const testDate = '2023-06-01';
+      const expectedDate = testDate;
 
       const mockTask = {
         id: 'task123',
@@ -141,43 +119,27 @@ describe('DialogDeadlineTaskComponent', () => {
       } as TaskCopy;
 
       component.selectedDate = testDate;
-      component.selectedTime = '10:00';
-      component.selectedReminderCfgId = TaskReminderOptionId.AtStart;
       component.task = mockTask;
       await component.submit();
 
-      expect(taskServiceSpy.scheduleTask).toHaveBeenCalledWith(
+      expect(taskServiceSpy.update).toHaveBeenCalledWith(
+        'task123',
         jasmine.objectContaining({
-          id: 'task123',
-          title: 'Test Task',
-          tagIds: [],
-          projectId: 'DEFAULT',
-          timeSpentOnDay: {},
-          attachments: [],
-          timeEstimate: 0,
-          timeSpent: 0,
-          isDone: false,
-          subTaskIds: [],
+          deadline: expectedDate,
         }),
-        expectedDate.getTime(),
-        TaskReminderOptionId.AtStart,
-        false,
       );
     });
 
-    it('should not schedule task or close dialog if no date is selected', async () => {
+    it('should not update task and close dialog if no date is selected', async () => {
       component.selectedDate = undefined as any;
-      component.selectedTime = undefined as any;
       await component.submit();
-      expect(taskServiceSpy.scheduleTask).not.toHaveBeenCalled();
+      expect(taskServiceSpy.update).not.toHaveBeenCalled();
       expect(dialogRefSpy.close).not.toHaveBeenCalled();
     });
 
-    it('should handle when scheduleTask throws (should not close dialog)', async () => {
-      const testDate = new Date('2023-12-01');
+    it('should handle when update throws (should not close dialog)', async () => {
+      const testDate = '2023-12-01';
       component.selectedDate = testDate;
-      component.selectedTime = '14:00';
-      component.selectedReminderCfgId = TaskReminderOptionId.AtStart;
       component.task = {
         id: 'taskThrow',
         title: 'Throw Task',
@@ -191,7 +153,7 @@ describe('DialogDeadlineTaskComponent', () => {
         created: 1640995200000, // Fixed timestamp
         subTaskIds: [],
       } as TaskCopy;
-      taskServiceSpy.scheduleTask.and.throwError('Schedule failed');
+      taskServiceSpy.update.and.throwError('Update failed');
       try {
         await component.submit();
       } catch {}
@@ -199,11 +161,9 @@ describe('DialogDeadlineTaskComponent', () => {
       expect(snackServiceSpy.open).not.toHaveBeenCalled();
     });
 
-    it('should close dialog with true when scheduling is successful', async () => {
-      const testDate = new Date('2024-01-01');
+    it('should close dialog with true when updating is successful', async () => {
+      const testDate = '2024-01-01';
       component.selectedDate = testDate;
-      component.selectedTime = '15:00';
-      component.selectedReminderCfgId = TaskReminderOptionId.AtStart;
       component.task = {
         id: 'taskClose',
         title: 'Close Task',
@@ -221,11 +181,9 @@ describe('DialogDeadlineTaskComponent', () => {
       expect(dialogRefSpy.close).toHaveBeenCalledWith(true);
     });
 
-    it('should not call snackService.open if scheduleTask fails', async () => {
-      const testDate = new Date('2024-02-01');
+    it('should not call snackService.open if update fails', async () => {
+      const testDate = '2024-02-01';
       component.selectedDate = testDate;
-      component.selectedTime = '16:00';
-      component.selectedReminderCfgId = TaskReminderOptionId.AtStart;
       component.task = {
         id: 'taskNoSnack',
         title: 'No Snack Task',
@@ -239,7 +197,7 @@ describe('DialogDeadlineTaskComponent', () => {
         created: 1640995200000, // Fixed timestamp
         subTaskIds: [],
       } as TaskCopy;
-      taskServiceSpy.scheduleTask.and.throwError('Error');
+      taskServiceSpy.update.and.throwError('Error');
       try {
         await component.submit();
       } catch {}
