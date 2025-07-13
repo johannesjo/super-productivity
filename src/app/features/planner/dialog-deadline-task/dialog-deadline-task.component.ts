@@ -14,7 +14,6 @@ import {
 import { Task, TaskCopy } from '../../tasks/task.model';
 import { T } from 'src/app/t.const';
 import { MatCalendar } from '@angular/material/datepicker';
-import { Store } from '@ngrx/store';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { DatePipe } from '@angular/common';
 import { SnackService } from '../../../core/snack/snack.service';
@@ -69,7 +68,6 @@ export class DialogDeadlineTaskComponent implements AfterViewInit {
   }>(MAT_DIALOG_DATA);
   private _matDialogRef = inject<MatDialogRef<DialogDeadlineTaskComponent>>(MatDialogRef);
   private _cd = inject(ChangeDetectorRef);
-  private _store = inject(Store);
   private _snackService = inject(SnackService);
   private _datePipe = inject(DatePipe);
   private _taskService = inject(TaskService);
@@ -164,7 +162,7 @@ export class DialogDeadlineTaskComponent implements AfterViewInit {
 
     this._snackService.open({
       type: 'SUCCESS',
-      msg: T.F.PLANNER.S.REMOVED_PLAN_DATE,
+      msg: T.F.TASK.D_DEADLINE_TASK.REMOVED_DEADLINE,
       translateParams: { taskTitle: truncate(this.data.task.title) },
     });
 
@@ -188,7 +186,7 @@ export class DialogDeadlineTaskComponent implements AfterViewInit {
       this._snackService.open({
         type: 'CUSTOM',
         ico: 'info',
-        msg: T.F.PLANNER.S.TASK_ALREADY_PLANNED,
+        msg: T.F.TASK.D_DEADLINE_TASK.DEADLINE_ALREADY_SET,
         translateParams: { date: formattedDate },
       });
     } else {

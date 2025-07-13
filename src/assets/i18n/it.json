@@ -1079,6 +1079,7 @@
         "REMINDER": "Promemoria",
         "REPEAT": "Ripeti",
         "SCHEDULE_TASK": "Pianifica attività",
+        "DEADLINE": "Deadline",
         "SUB_TASKS": "Attività secondarie ({{nr}})",
         "TIME": "Tempo",
         "TITLE_PLACEHOLDER": "Inserisci un titolo"
@@ -1183,6 +1184,16 @@
         "HELP": "Esempi:<br> 30m => 30 minuti<br> 2h => 2 ore<br> 2h 30m => 2 ore e 30 minuti",
         "TINE_SPENT": "Tempo speso",
         "TITLE": "Aggiungi per giorno"
+      },
+      "D_DEADLINE_TASK": {
+        "QA_TODAY": "Today",
+        "QA_TOMORROW": "Tomorrow",
+        "QA_NEXT_WEEK": "Next Week",
+        "QA_NEXT_MONTH": "Next Month",
+        "SET_DEADLINE": "Set",
+        "REMOVE_DEADLINE": "Remove",
+        "REMOVED_DEADLINE": "Deadline has been removed",
+        "DEADLINE_ALREADY_SET": "Deadline is already set on {{date}}"
       },
       "N": {
         "ESTIMATE_EXCEEDED": "Tempo stimato superato!",

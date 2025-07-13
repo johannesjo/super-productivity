@@ -1079,6 +1079,7 @@
         "REMINDER": "Напоминание",
         "REPEAT": "Повторение",
         "SCHEDULE_TASK": "Расписание задачи",
+        "DEADLINE": "Deadline",
         "SUB_TASKS": "Подзадачи ({{nr}})",
         "TIME": "Время",
         "TITLE_PLACEHOLDER": "Введите заголовок"
@@ -1181,6 +1182,16 @@
         "HELP": "Примеры:<br> 30m => 30 минут<br> 2h => 2 часа<br> 2h 30m => 2 часа 30 минут",
         "TINE_SPENT": "Времени потрачено",
         "TITLE": "Назначить на день"
+      },
+      "D_DEADLINE_TASK": {
+        "QA_TODAY": "Today",
+        "QA_TOMORROW": "Tomorrow",
+        "QA_NEXT_WEEK": "Next Week",
+        "QA_NEXT_MONTH": "Next Month",
+        "SET_DEADLINE": "Set",
+        "REMOVE_DEADLINE": "Remove",
+        "REMOVED_DEADLINE": "Deadline has been removed",
+        "DEADLINE_ALREADY_SET": "Deadline is already set on {{date}}"
       },
       "N": {
         "ESTIMATE_EXCEEDED": "Время превышено!",
