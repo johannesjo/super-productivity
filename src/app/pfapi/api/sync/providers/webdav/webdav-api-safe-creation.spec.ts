@@ -7,6 +7,7 @@ import { FileExistsAPIError } from '../../../errors/errors';
 
 describe('WebdavApi Safe Creation Methods', () => {
   let mockFetch: jasmine.Spy;
+  let originalFetch: typeof fetch;
 
   const mockConfig: WebdavPrivateCfg = {
     baseUrl: 'https://webdav.example.com',
@@ -16,7 +17,13 @@ describe('WebdavApi Safe Creation Methods', () => {
   };
 
   beforeEach(() => {
-    mockFetch = spyOn(globalThis, 'fetch');
+    originalFetch = window.fetch;
+    mockFetch = jasmine.createSpy('fetch');
+    window.fetch = mockFetch;
+  });
+
+  afterEach(() => {
+    window.fetch = originalFetch;
   });
 
   describe('Safe creation with If header', () => {

@@ -5,6 +5,7 @@ import { createMockResponse, createPropfindResponse } from './webdav-api-test-ut
 describe('WebdavApi Capability Detection', () => {
   let api: WebdavApi;
   let mockFetch: jasmine.Spy;
+  let originalFetch: typeof fetch;
 
   const mockConfig: WebdavPrivateCfg = {
     baseUrl: 'https://webdav.example.com',
@@ -14,8 +15,14 @@ describe('WebdavApi Capability Detection', () => {
   };
 
   beforeEach(() => {
-    mockFetch = spyOn(globalThis, 'fetch');
+    originalFetch = window.fetch;
+    mockFetch = jasmine.createSpy('fetch');
+    window.fetch = mockFetch;
     api = new WebdavApi(async () => mockConfig);
+  });
+
+  afterEach(() => {
+    window.fetch = originalFetch;
   });
 
   it('should detect ETag support from response headers', async () => {

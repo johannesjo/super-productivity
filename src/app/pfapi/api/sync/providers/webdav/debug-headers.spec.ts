@@ -4,6 +4,7 @@ import { createMockResponse } from './webdav-api-test-utils';
 
 describe('Debug Headers', () => {
   let mockFetch: jasmine.Spy;
+  let originalFetch: typeof fetch;
   let api: WebdavApi;
 
   const mockConfig: WebdavPrivateCfg = {
@@ -20,10 +21,15 @@ describe('Debug Headers', () => {
   };
 
   beforeEach(() => {
-    mockFetch = spyOn(globalThis, 'fetch');
+    originalFetch = window.fetch;
+    mockFetch = jasmine.createSpy('fetch');
+    window.fetch = mockFetch;
     api = new WebdavApi(async () => mockConfig);
   });
 
+  afterEach(() => {
+    window.fetch = originalFetch;
+  });
   it('should set If-None-Match for new file creation', async () => {
     const uploadResponse = createMockResponse(201, {
       etag: '"v1"',

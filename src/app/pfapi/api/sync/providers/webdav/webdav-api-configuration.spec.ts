@@ -10,6 +10,7 @@ import { createMockResponse } from './webdav-api-test-utils';
 
 describe('WebdavApi Configuration Options', () => {
   let mockFetch: jasmine.Spy;
+  let originalFetch: typeof fetch;
   let api: WebdavApi;
 
   const baseConfig: WebdavPrivateCfg = {
@@ -20,7 +21,13 @@ describe('WebdavApi Configuration Options', () => {
   };
 
   beforeEach(() => {
-    mockFetch = spyOn(globalThis, 'fetch');
+    originalFetch = window.fetch;
+    mockFetch = jasmine.createSpy('fetch');
+    window.fetch = mockFetch;
+  });
+
+  afterEach(() => {
+    window.fetch = originalFetch;
   });
 
   describe('basicCompatibilityMode', () => {
@@ -45,23 +52,30 @@ describe('WebdavApi Configuration Options', () => {
       });
 
       expect(result).toBe('Wed, 21 Oct 2015 07:28:00 GMT');
-      expect(mockFetch).toHaveBeenCalledWith(
-        jasmine.any(String),
-        jasmine.objectContaining({
-          method: 'PUT',
-          headers: jasmine.objectContaining({
-            'Content-Type': 'application/octet-stream',
-            'Content-Length': '7',
-          }),
-        }),
-      );
 
-      // Should not have any conditional headers
-      const headers = mockFetch.calls.mostRecent().args[1]?.headers || {};
-      expect(headers['If-Match']).toBeUndefined();
-      expect(headers['If-None-Match']).toBeUndefined();
-      expect(headers['If-Unmodified-Since']).toBeUndefined();
-      expect(headers['If']).toBeUndefined();
+      const call = mockFetch.calls.mostRecent();
+      expect(call.args[0]).toContain('test.txt');
+      expect(call.args[1].method).toBe('PUT');
+
+      // Check headers
+      const headers = call.args[1].headers;
+      if (headers instanceof Headers) {
+        expect(headers.get('Content-Type')).toBe('application/octet-stream');
+        expect(headers.get('Content-Length')).toBe('7');
+        // Should not have any conditional headers
+        expect(headers.get('If-Match')).toBeNull();
+        expect(headers.get('If-None-Match')).toBeNull();
+        expect(headers.get('If-Unmodified-Since')).toBeNull();
+        expect(headers.get('If')).toBeNull();
+      } else {
+        expect(headers['Content-Type']).toBe('application/octet-stream');
+        expect(headers['Content-Length']).toBe('7');
+        // Should not have any conditional headers
+        expect(headers['If-Match']).toBeUndefined();
+        expect(headers['If-None-Match']).toBeUndefined();
+        expect(headers['If-Unmodified-Since']).toBeUndefined();
+        expect(headers['If']).toBeUndefined();
+      }
     });
   });
 

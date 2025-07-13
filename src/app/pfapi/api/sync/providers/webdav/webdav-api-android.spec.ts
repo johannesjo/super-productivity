@@ -9,12 +9,19 @@ describe('WebdavApi - Android WebView', () => {
   let mockGetCfgOrError: jasmine.Spy;
   let mockFetch: jasmine.Spy;
   let capacitorHttpSpy: jasmine.Spy;
+  let originalFetch: typeof fetch;
 
   const mockCfg: WebdavPrivateCfg = {
     baseUrl: 'https://webdav.example.com',
     userName: 'testuser',
     password: 'testpass',
     syncFolderPath: '/sync',
+    serverCapabilities: {
+      supportsETags: true,
+      supportsIfHeader: true,
+      supportsLocking: false,
+      supportsLastModified: true,
+    },
   };
 
   // Test class that allows us to override isAndroidWebView
@@ -32,6 +39,7 @@ describe('WebdavApi - Android WebView', () => {
   }
 
   beforeEach(() => {
+    originalFetch = window.fetch;
     mockGetCfgOrError = jasmine
       .createSpy('getCfgOrError')
       .and.returnValue(Promise.resolve(mockCfg));
@@ -39,7 +47,7 @@ describe('WebdavApi - Android WebView', () => {
     mockFetch = jasmine
       .createSpy('fetch')
       .and.returnValue(Promise.resolve(new Response()));
-    (globalThis as any).fetch = mockFetch;
+    window.fetch = mockFetch;
 
     // Create spy for CapacitorHttp.request - use stub method to ensure it's called
     capacitorHttpSpy = spyOn(CapacitorHttp, 'request').and.stub();
@@ -54,7 +62,7 @@ describe('WebdavApi - Android WebView', () => {
   });
 
   afterEach(() => {
-    delete (globalThis as any).fetch;
+    window.fetch = originalFetch;
     // Clear any pending promise rejections
     if (capacitorHttpSpy && capacitorHttpSpy.calls) {
       capacitorHttpSpy.calls.reset();

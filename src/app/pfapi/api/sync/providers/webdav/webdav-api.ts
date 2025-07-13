@@ -559,15 +559,31 @@ export class WebdavApi {
       const responseHeaderObj = this._responseHeadersToObject(response);
       const validators = this._extractValidators(responseHeaderObj);
 
-      if (!validators.validator) {
+      // Respect the configured validator preference
+      let selectedValidator: string | undefined;
+      let selectedValidatorType: 'etag' | 'last-modified' | 'none' = 'none';
+
+      if (validatorType === 'last-modified' && validators.lastModified) {
+        selectedValidator = validators.lastModified;
+        selectedValidatorType = 'last-modified';
+      } else if (validatorType === 'etag' && validators.etag) {
+        selectedValidator = validators.etag;
+        selectedValidatorType = 'etag';
+      } else {
+        // Fall back to whatever is available
+        selectedValidator = validators.validator;
+        selectedValidatorType = validators.validatorType;
+      }
+
+      if (!selectedValidator) {
         return await this._retrieveEtagWithFallback(path, responseHeaderObj, 'upload');
       }
 
       // Clean ETag if it's an ETag validator
       const result =
-        validators.validatorType === 'etag'
-          ? this._cleanRev(validators.validator)
-          : validators.validator;
+        selectedValidatorType === 'etag'
+          ? this._cleanRev(selectedValidator)
+          : selectedValidator;
 
       return result;
     } catch (e: any) {
@@ -889,7 +905,7 @@ export class WebdavApi {
           }
           PFLog.err(`${WebdavApi.L}.download() PROPFIND fallback failed`, metaError);
           // Use content-based hash as last resort
-          const crypto = globalThis.crypto || (globalThis as any).msCrypto;
+          const crypto = globalThis.crypto;
           if (crypto && crypto.subtle) {
             try {
               const encoder = new TextEncoder();

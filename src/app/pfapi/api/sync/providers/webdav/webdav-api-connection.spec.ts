@@ -6,12 +6,19 @@ describe('WebdavApi - Connection Testing', () => {
   let api: WebdavApi;
   let mockGetCfgOrError: jasmine.Spy;
   let mockFetch: jasmine.Spy;
+  let originalFetch: typeof fetch;
 
   const mockCfg: WebdavPrivateCfg = {
     baseUrl: 'https://webdav.example.com',
     userName: 'testuser',
     password: 'testpass',
     syncFolderPath: '/sync',
+    serverCapabilities: {
+      supportsETags: true,
+      supportsIfHeader: true,
+      supportsLocking: false,
+      supportsLastModified: true,
+    },
   };
 
   const createMockResponse = (
@@ -30,17 +37,18 @@ describe('WebdavApi - Connection Testing', () => {
   };
 
   beforeEach(() => {
+    originalFetch = window.fetch;
     mockGetCfgOrError = jasmine
       .createSpy('getCfgOrError')
       .and.returnValue(Promise.resolve(mockCfg));
     api = new WebdavApi(mockGetCfgOrError);
 
     mockFetch = jasmine.createSpy('fetch');
-    (globalThis as any).fetch = mockFetch;
+    window.fetch = mockFetch;
   });
 
   afterEach(() => {
-    delete (globalThis as any).fetch;
+    window.fetch = originalFetch;
   });
 
   describe('testConnection', () => {

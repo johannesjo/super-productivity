@@ -11,12 +11,19 @@ describe('WebdavApi - Additional Coverage Tests', () => {
   let api: WebdavApi;
   let mockGetCfgOrError: jasmine.Spy;
   let mockFetch: jasmine.Spy;
+  let originalFetch: typeof fetch;
 
   const mockCfg: WebdavPrivateCfg = {
     baseUrl: 'https://webdav.example.com',
     userName: 'testuser',
     password: 'testpass',
     syncFolderPath: '/sync',
+    serverCapabilities: {
+      supportsETags: true,
+      supportsIfHeader: true,
+      supportsLocking: false,
+      supportsLastModified: true,
+    },
   };
 
   const createMockResponse = (
@@ -34,17 +41,18 @@ describe('WebdavApi - Additional Coverage Tests', () => {
   };
 
   beforeEach(() => {
+    originalFetch = window.fetch;
     mockGetCfgOrError = jasmine
       .createSpy('getCfgOrError')
       .and.returnValue(Promise.resolve(mockCfg));
     api = new WebdavApi(mockGetCfgOrError);
 
     mockFetch = jasmine.createSpy('fetch');
-    (globalThis as any).fetch = mockFetch;
+    window.fetch = mockFetch;
   });
 
   afterEach(() => {
-    delete (globalThis as any).fetch;
+    window.fetch = originalFetch;
   });
 
   describe('Additional Download Coverage', () => {
@@ -210,24 +218,24 @@ describe('WebdavApi - Additional Coverage Tests', () => {
 
   describe('Additional GetFileMeta Coverage', () => {
     xit('should use GET fallback when useGetFallback is true', async () => {
-      // First PROPFIND fails
-      const propfindError = new HttpNotOkAPIError(new Response(null, { status: 500 }));
-      // Then HEAD fails
-      const headError = new HttpNotOkAPIError(new Response(null, { status: 500 }));
-
       let callCount = 0;
-      mockFetch.and.callFake(() => {
+      mockFetch.and.callFake((url, options) => {
         callCount++;
-        if (callCount === 1) {
-          return Promise.reject(propfindError);
-        } else if (callCount === 2) {
-          return Promise.reject(headError);
-        } else {
+        const method = options?.method || 'GET';
+
+        if (method === 'PROPFIND' && callCount === 1) {
+          // First PROPFIND fails
+          return Promise.resolve(createMockResponse(500));
+        } else if (method === 'HEAD' && callCount === 2) {
+          // Then HEAD fails
+          return Promise.resolve(createMockResponse(500));
+        } else if (method === 'GET' && callCount === 3) {
           // GET request succeeds
           return Promise.resolve(
             createMockResponse(200, { etag: '"get-etag"' }, 'content'),
           );
         }
+        throw new Error(`Unexpected call: ${method} at call ${callCount}`);
       });
 
       const result = await api.getFileMeta('test.txt', null, true);

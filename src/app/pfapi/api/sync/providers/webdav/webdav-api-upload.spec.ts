@@ -12,6 +12,7 @@ describe('WebdavApi - Upload Operations', () => {
   let api: WebdavApi;
   let mockGetCfgOrError: jasmine.Spy;
   let mockFetch: jasmine.Spy;
+  let originalFetch: typeof fetch;
 
   const mockCfg: WebdavPrivateCfg = {
     baseUrl: 'https://webdav.example.com',
@@ -48,12 +49,13 @@ describe('WebdavApi - Upload Operations', () => {
       .and.returnValue(Promise.resolve(mockCfg));
     api = new WebdavApi(mockGetCfgOrError);
 
+    originalFetch = window.fetch;
     mockFetch = jasmine.createSpy('fetch');
-    (globalThis as any).fetch = mockFetch;
+    window.fetch = mockFetch;
   });
 
   afterEach(() => {
-    delete (globalThis as any).fetch;
+    window.fetch = originalFetch;
   });
 
   describe('upload', () => {
@@ -484,10 +486,10 @@ describe('WebdavApi - Upload Operations', () => {
       );
 
       // Mock getFileMeta and download to fail so RemoteFileNotFoundAPIError is thrown
-      spyOn(api, 'getFileMeta').and.returnValue(
+      spyOn(api, 'getFileMeta').and.callFake(() =>
         Promise.reject(new RemoteFileNotFoundAPIError('folder/test.txt')),
       );
-      spyOn(api, 'download').and.returnValue(
+      spyOn(api, 'download').and.callFake(() =>
         Promise.reject(new RemoteFileNotFoundAPIError('folder/test.txt')),
       );
 

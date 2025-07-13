@@ -20,6 +20,12 @@ describe('Webdav', () => {
     userName: 'testuser',
     password: 'testpass',
     syncFolderPath: '/sync',
+    serverCapabilities: {
+      supportsETags: true,
+      supportsIfHeader: true,
+      supportsLocking: false,
+      supportsLastModified: true,
+    },
   };
 
   beforeEach(() => {

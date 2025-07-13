@@ -12,6 +12,12 @@ describe('WebdavApi - Helper Methods', () => {
     userName: 'testuser',
     password: 'testpass',
     syncFolderPath: '/sync',
+    serverCapabilities: {
+      supportsETags: true,
+      supportsIfHeader: true,
+      supportsLocking: false,
+      supportsLastModified: true,
+    },
   };
 
   beforeEach(() => {
@@ -54,26 +60,41 @@ describe('WebdavApi - Helper Methods', () => {
   });
 
   describe('_createConditionalHeaders', () => {
-    it('should create If-None-Match header for non-overwrite without etag', () => {
-      const headers = (api as any)._createConditionalHeaders(false, null);
+    it('should create If-None-Match header for non-overwrite without etag', async () => {
+      const headers = await (api as any)._createConditionalHeaders(
+        false,
+        null,
+        null,
+        'etag',
+      );
       expect(headers['If-None-Match']).toBe('*');
       expect(headers['If-Match']).toBeUndefined();
     });
 
-    it('should create If-Match header for non-overwrite with etag', () => {
-      const headers = (api as any)._createConditionalHeaders(false, 'etag-123');
+    it('should create If-Match header for non-overwrite with etag', async () => {
+      const headers = await (api as any)._createConditionalHeaders(
+        false,
+        'etag-123',
+        null,
+        'etag',
+      );
       expect(headers['If-Match']).toBe('etag-123');
       expect(headers['If-None-Match']).toBeUndefined();
     });
 
-    it('should create If-Match header for overwrite with etag', () => {
-      const headers = (api as any)._createConditionalHeaders(true, 'etag-456');
+    it('should create If-Match header for overwrite with etag', async () => {
+      const headers = await (api as any)._createConditionalHeaders(
+        true,
+        'etag-456',
+        null,
+        'etag',
+      );
       expect(headers['If-Match']).toBe('etag-456');
       expect(headers['If-None-Match']).toBeUndefined();
     });
 
-    it('should create no headers for overwrite without etag', () => {
-      const headers = (api as any)._createConditionalHeaders(true, null);
+    it('should create no headers for overwrite without etag', async () => {
+      const headers = await (api as any)._createConditionalHeaders(true, null);
       expect(headers['If-Match']).toBeUndefined();
       expect(headers['If-None-Match']).toBeUndefined();
     });

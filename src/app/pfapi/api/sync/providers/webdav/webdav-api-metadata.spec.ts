@@ -13,6 +13,12 @@ describe('WebdavApi - Metadata Operations', () => {
     userName: 'testuser',
     password: 'testpass',
     syncFolderPath: '/sync',
+    serverCapabilities: {
+      supportsETags: true,
+      supportsIfHeader: true,
+      supportsLocking: false,
+      supportsLastModified: true,
+    },
   };
 
   const createMockResponse = (
@@ -37,11 +43,11 @@ describe('WebdavApi - Metadata Operations', () => {
     api = new WebdavApi(mockGetCfgOrError);
 
     mockFetch = jasmine.createSpy('fetch');
-    (globalThis as any).fetch = mockFetch;
+    window.fetch = mockFetch;
   });
 
   afterEach(() => {
-    delete (globalThis as any).fetch;
+    delete (window as any).fetch;
   });
 
   describe('getFileMeta', () => {

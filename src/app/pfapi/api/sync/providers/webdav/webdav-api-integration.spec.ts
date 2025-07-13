@@ -7,6 +7,7 @@ import { RemoteFileNotFoundAPIError, NoEtagAPIError } from '../../../errors/erro
 
 describe('WebdavApi Integration Tests - Last-Modified Fallbacks', () => {
   let mockFetch: jasmine.Spy;
+  let originalFetch: typeof fetch;
   let api: WebdavApi;
 
   const mockConfig: WebdavPrivateCfg = {
@@ -17,8 +18,14 @@ describe('WebdavApi Integration Tests - Last-Modified Fallbacks', () => {
   };
 
   beforeEach(() => {
-    mockFetch = spyOn(globalThis, 'fetch');
+    originalFetch = window.fetch;
+    mockFetch = jasmine.createSpy('fetch');
+    window.fetch = mockFetch;
     api = new WebdavApi(async () => mockConfig);
+  });
+
+  afterEach(() => {
+    window.fetch = originalFetch;
   });
 
   describe('Full workflow with ETag-only server', () => {

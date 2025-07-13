@@ -11,6 +11,12 @@ describe('WebdavApi Last-Modified Support', () => {
     userName: 'testuser',
     password: 'testpass',
     syncFolderPath: '/sync',
+    serverCapabilities: {
+      supportsETags: true,
+      supportsIfHeader: true,
+      supportsLocking: false,
+      supportsLastModified: true,
+    },
   };
 
   beforeEach(() => {
@@ -166,8 +172,20 @@ describe('WebdavApi Last-Modified Support', () => {
 
     it('should not create conditional headers for new file creation with Last-Modified only', async () => {
       // Last-Modified cannot safely handle resource creation
+      // Create API with no If header support for this test
+      const configNoIfHeader: WebdavPrivateCfg = {
+        ...mockConfig,
+        serverCapabilities: {
+          supportsETags: false,
+          supportsIfHeader: false,
+          supportsLocking: false,
+          supportsLastModified: true,
+        },
+      };
+      const apiNoIfHeader = new WebdavApi(async () => configNoIfHeader);
+
       // @ts-expect-error - accessing private method for testing
-      const headers = await api._createConditionalHeaders(
+      const headers = await apiNoIfHeader._createConditionalHeaders(
         false,
         null,
         null,

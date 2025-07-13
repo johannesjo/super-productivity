@@ -8,6 +8,12 @@ describe('WebdavApi Safe Creation Simple Test', () => {
       userName: 'testuser',
       password: 'testpass',
       syncFolderPath: '/sync',
+      serverCapabilities: {
+        supportsETags: true,
+        supportsIfHeader: true,
+        supportsLocking: false,
+        supportsLastModified: true,
+      },
     };
 
     const api = new WebdavApi(async () => mockConfig);

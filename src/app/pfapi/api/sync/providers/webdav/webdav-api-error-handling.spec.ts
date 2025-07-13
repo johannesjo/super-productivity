@@ -12,6 +12,7 @@ import {
 
 describe('WebdavApi Enhanced Error Handling', () => {
   let mockFetch: jasmine.Spy;
+  let originalFetch: typeof fetch;
   let api: WebdavApi;
 
   const mockConfig: WebdavPrivateCfg = {
@@ -22,8 +23,14 @@ describe('WebdavApi Enhanced Error Handling', () => {
   };
 
   beforeEach(() => {
-    mockFetch = spyOn(globalThis, 'fetch');
+    originalFetch = window.fetch;
+    mockFetch = jasmine.createSpy('fetch');
+    window.fetch = mockFetch;
     api = new WebdavApi(async () => mockConfig);
+  });
+
+  afterEach(() => {
+    window.fetch = originalFetch;
   });
 
   describe('NoRevAPIError vs NoEtagAPIError distinction', () => {
