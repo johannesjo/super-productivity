@@ -115,7 +115,7 @@
 }
 
 ::ng-deep .deadline-highlight .mat-calendar-body-cell-content {
-  background-color: #f09e9e !important; // lub dowolny inny
+  background-color: var(--color-warning) !important;
   color: black;
   border-radius: 100%;
 }
