@@ -162,10 +162,22 @@
       <mat-icon>hourglass_bottom</mat-icon>
       <span>{{ T.F.TASK.ADDITIONAL_INFO.DEADLINE | translate }}</span>
     </ng-container>
+
     <ng-container input-value>
       @if (task.deadline) {
-        <div class="reminder-value">
-          {{ task.deadline | date: 'shortDate' }}
+        <div
+          class="reminder-value red-highlight"
+          [ngClass]="{
+            'red-highlight': isDeadlineExceeded,
+            'orange-highlight': isDeadlineForLessThan7Days,
+          }"
+        >
+          @if (isDeadlineToday) {
+            <mat-icon>wb_sunny</mat-icon>
+            {{ T.G.TODAY_TAG_TITLE | translate }}
+          } @else {
+            {{ task.deadline | date: 'shortDate' }}
+          }
         </div>
       }
     </ng-container>

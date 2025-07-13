@@ -107,3 +107,11 @@ progress-bar {
   display: flex;
   z-index: 2;
 }
+
+.red-highlight {
+  color: var(--c-warn) !important;
+}
+
+.orange-highlight {
+  color: var(--color-warning) !important;
+}

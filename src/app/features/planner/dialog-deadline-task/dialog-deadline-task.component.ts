@@ -38,7 +38,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatInput } from '@angular/material/input';
 
 @Component({
-  selector: 'dialog-schedule-task',
+  selector: 'dialog-deadline-task',
   imports: [
     FormsModule,
     MatTooltip,
@@ -121,17 +121,8 @@ export class DialogDeadlineTaskComponent implements AfterViewInit {
   }
 
   onKeyDownOnCalendar(ev: KeyboardEvent): void {
-    // console.log(ev.key, ev.keyCode);
     if (ev.key === 'Enter' || ev.keyCode === 32) {
       this.isShowEnterMsg = true;
-      // console.log(
-      //   'check to submit',
-      //   this.selectedDate &&
-      //     new Date(this.selectedDate).getTime() ===
-      //       new Date(this.calendar.activeDate).getTime(),
-      //   this.selectedDate,
-      //   this.calendar.activeDate,
-      // );
       if (
         this.selectedDate &&
         new Date(this.selectedDate).getTime() ===

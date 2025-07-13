@@ -112,6 +112,19 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   todayStr = getWorklogStr();
   // private _prevSelectedQuickAccessDate: Date | null = null;
   // private _prevQuickAccessAction: number | null = null;
+
+  deadlineDate = this.task.deadline ? new Date(this.task.deadline) : null;
+  dateClass = (date: Date): string => {
+    if (this.deadlineDate === null) return '';
+
+    const isSameDay =
+      date.getDate() === this.deadlineDate.getDate() &&
+      date.getMonth() === this.deadlineDate.getMonth() &&
+      date.getFullYear() === this.deadlineDate.getFullYear();
+
+    return isSameDay ? 'deadline-highlight' : '';
+  };
+
   private _timeCheckVal: string | null = null;
 
   async ngAfterViewInit(): Promise<void> {
