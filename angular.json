@@ -222,7 +222,7 @@
             "preserveSymlinks": true,
             "karmaConfig": "src/karma.conf.js",
             "styles": ["src/styles.scss"],
-            "scripts": [],
+            "scripts": ["src/test-helpers/jasmine-spec-reporter-hook.js"],
             "assets": ["src/favicon.ico", "src/assets", "src/manifest.json"]
           }
         },
