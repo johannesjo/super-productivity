@@ -1613,7 +1613,8 @@ export class WebdavApi {
     const contentType = prop.querySelector('getcontenttype')?.textContent || '';
 
     // Determine if it's a collection (directory) or file
-    const isCollection = resourceType?.querySelector('collection') !== null;
+    const isCollection =
+      resourceType !== null && resourceType.querySelector('collection') !== null;
 
     // Determine the validator to use
     const cleanedEtag = this._cleanRev(etag);

@@ -16,6 +16,19 @@ export const createMockResponse = (
   return response;
 };
 
+/**
+ * Creates a mock response factory function that returns fresh Response objects on each call.
+ * This prevents "body stream already read" errors when the same response data is needed
+ * multiple times (e.g., for capability detection and the actual operation).
+ */
+export const createMockResponseFactory = (
+  status: number,
+  headers: Record<string, string> = {},
+  body: string = '',
+) => {
+  return () => createMockResponse(status, headers, body);
+};
+
 export const mockCfg: WebdavPrivateCfg = {
   baseUrl: 'https://webdav.example.com',
   userName: 'testuser',

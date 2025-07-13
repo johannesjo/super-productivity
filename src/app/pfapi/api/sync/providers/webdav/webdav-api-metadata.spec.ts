@@ -216,8 +216,8 @@ describe('WebdavApi - Metadata Operations', () => {
       expect(result.filename).toBe('test.txt');
       expect(result.size).toBe(0);
       expect(result.etag).toBe('');
-      // TODO: Should be 'file' but implementation returns 'directory' when resourcetype is missing
-      expect(result.type).toBe('directory');
+      // Empty resourcetype should default to 'file'
+      expect(result.type).toBe('file');
     });
 
     it('should handle multiple response elements', async () => {

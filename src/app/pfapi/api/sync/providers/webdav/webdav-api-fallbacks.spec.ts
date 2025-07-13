@@ -2,6 +2,7 @@
 import { WebdavApi } from './webdav-api';
 import { WebdavPrivateCfg } from './webdav';
 import { NoEtagAPIError, RemoteFileNotFoundAPIError } from '../../../errors/errors';
+import { createMockResponseFactory } from './webdav-api-test-utils';
 
 describe('WebdavApi - Fallback Paths', () => {
   let api: WebdavApi;
@@ -63,15 +64,15 @@ describe('WebdavApi - Fallback Paths', () => {
   describe('Upload ETag Fallback Chain', () => {
     it('should fallback from response headers to PROPFIND when no ETag in upload response', async () => {
       // Mock upload response without ETag
-      const uploadResponse = createMockResponse(201);
+      const uploadResponseFactory = createMockResponseFactory(201);
       // Mock PROPFIND response with ETag
-      const propfindResponse = createMockResponse(
+      const propfindResponseFactory = createMockResponseFactory(
         207,
         {},
         `<?xml version="1.0"?>
         <d:multistatus xmlns:d="DAV:">
           <d:response>
-            <d:href>/test.txt</d:href>
+            <d:href>test.txt</d:href>
             <d:propstat>
               <d:status>HTTP/1.1 200 OK</d:status>
               <d:prop>
@@ -84,12 +85,12 @@ describe('WebdavApi - Fallback Paths', () => {
 
       mockFetch.and.callFake((url: string, options: any) => {
         if (options.method === 'PUT') {
-          return Promise.resolve(uploadResponse);
+          return Promise.resolve(uploadResponseFactory());
         }
         if (options.method === 'PROPFIND') {
-          return Promise.resolve(propfindResponse);
+          return Promise.resolve(propfindResponseFactory());
         }
-        return Promise.resolve(createMockResponse(500));
+        return Promise.resolve(createMockResponseFactory(500)());
       });
 
       const result = await api.upload({
@@ -105,9 +106,9 @@ describe('WebdavApi - Fallback Paths', () => {
 
     it('should fallback from PROPFIND to GET when both upload response and PROPFIND fail', async () => {
       // Mock upload response without ETag
-      const uploadResponse = createMockResponse(201);
+      const uploadResponseFactory = createMockResponseFactory(201);
       // Mock GET response with ETag
-      const getResponse = createMockResponse(
+      const getResponseFactory = createMockResponseFactory(
         200,
         { etag: '"get-etag-456"' },
         'test content',
@@ -115,15 +116,15 @@ describe('WebdavApi - Fallback Paths', () => {
 
       mockFetch.and.callFake((url: string, options: any) => {
         if (options.method === 'PUT') {
-          return Promise.resolve(uploadResponse);
+          return Promise.resolve(uploadResponseFactory());
         }
         if (options.method === 'PROPFIND') {
           return Promise.reject(new Error('PROPFIND failed'));
         }
         if (options.method === 'GET') {
-          return Promise.resolve(getResponse);
+          return Promise.resolve(getResponseFactory());
         }
-        return Promise.resolve(createMockResponse(500));
+        return Promise.resolve(createMockResponseFactory(500)());
       });
 
       const result = await api.upload({
@@ -139,11 +140,11 @@ describe('WebdavApi - Fallback Paths', () => {
 
     it('should throw NoEtagAPIError when all ETag retrieval methods fail', async () => {
       // Mock upload response without ETag
-      const uploadResponse = createMockResponse(201);
+      const uploadResponseFactory = createMockResponseFactory(201);
 
       mockFetch.and.callFake((url: string, options: any) => {
         if (options.method === 'PUT') {
-          return Promise.resolve(uploadResponse);
+          return Promise.resolve(uploadResponseFactory());
         }
         if (options.method === 'PROPFIND') {
           return Promise.reject(new Error('PROPFIND failed'));
@@ -151,7 +152,7 @@ describe('WebdavApi - Fallback Paths', () => {
         if (options.method === 'GET') {
           return Promise.reject(new Error('GET failed'));
         }
-        return Promise.resolve(createMockResponse(500));
+        return Promise.resolve(createMockResponseFactory(500)());
       });
 
       await expectAsync(
@@ -251,6 +252,25 @@ describe('WebdavApi - Fallback Paths', () => {
       const conflictError = new Error('Conflict');
       (conflictError as any).status = 409;
 
+      const retryResponseFactory = createMockResponseFactory(201);
+      const mkcolResponseFactory = createMockResponseFactory(201);
+      const propfindResponseFactory = createMockResponseFactory(
+        207,
+        {},
+        `<?xml version="1.0"?>
+        <d:multistatus xmlns:d="DAV:">
+          <d:response>
+            <d:href>folder/test.txt</d:href>
+            <d:propstat>
+              <d:prop>
+                <d:getetag>"propfind-409-retry-etag"</d:getetag>
+              </d:prop>
+              <d:status>HTTP/1.1 200 OK</d:status>
+            </d:propstat>
+          </d:response>
+        </d:multistatus>`,
+      );
+
       mockFetch.and.callFake((url: string, options: any) => {
         if (options.method === 'PUT' && url.includes('test.txt')) {
           uploadAttempts++;
@@ -258,33 +278,16 @@ describe('WebdavApi - Fallback Paths', () => {
             return Promise.reject(conflictError);
           } else {
             // Retry succeeds but no ETag in response headers
-            return Promise.resolve(createMockResponse(201));
+            return Promise.resolve(retryResponseFactory());
           }
         }
         if (options.method === 'MKCOL') {
-          return Promise.resolve(createMockResponse(201));
+          return Promise.resolve(mkcolResponseFactory());
         }
         if (options.method === 'PROPFIND') {
-          return Promise.resolve(
-            createMockResponse(
-              207,
-              {},
-              `<?xml version="1.0"?>
-            <d:multistatus xmlns:d="DAV:">
-              <d:response>
-                <d:href>/test.txt</d:href>
-                <d:propstat>
-                  <d:prop>
-                    <d:getetag>"propfind-409-retry-etag"</d:getetag>
-                  </d:prop>
-                  <d:status>HTTP/1.1 200 OK</d:status>
-                </d:propstat>
-              </d:response>
-            </d:multistatus>`,
-            ),
-          );
+          return Promise.resolve(propfindResponseFactory());
         }
-        return Promise.resolve(createMockResponse(500));
+        return Promise.resolve(createMockResponseFactory(500)());
       });
 
       const result = await api.upload({
@@ -479,6 +482,25 @@ describe('WebdavApi - Fallback Paths', () => {
       let uploadAttempts = 0;
       const notFoundError = new RemoteFileNotFoundAPIError('folder/test.txt');
 
+      const retryResponseFactory = createMockResponseFactory(201);
+      const mkcolResponseFactory = createMockResponseFactory(201);
+      const propfindResponseFactory = createMockResponseFactory(
+        207,
+        {},
+        `<?xml version="1.0"?>
+        <d:multistatus xmlns:d="DAV:">
+          <d:response>
+            <d:href>folder/test.txt</d:href>
+            <d:propstat>
+              <d:prop>
+                <d:getetag>"propfind-404-retry-etag"</d:getetag>
+              </d:prop>
+              <d:status>HTTP/1.1 200 OK</d:status>
+            </d:propstat>
+          </d:response>
+        </d:multistatus>`,
+      );
+
       mockFetch.and.callFake((url: string, options: any) => {
         if (options.method === 'PUT' && url.includes('test.txt')) {
           uploadAttempts++;
@@ -486,33 +508,16 @@ describe('WebdavApi - Fallback Paths', () => {
             return Promise.reject(notFoundError);
           } else {
             // Retry succeeds but no ETag in response headers
-            return Promise.resolve(createMockResponse(201));
+            return Promise.resolve(retryResponseFactory());
           }
         }
         if (options.method === 'MKCOL') {
-          return Promise.resolve(createMockResponse(201));
+          return Promise.resolve(mkcolResponseFactory());
         }
         if (options.method === 'PROPFIND') {
-          return Promise.resolve(
-            createMockResponse(
-              207,
-              {},
-              `<?xml version="1.0"?>
-            <d:multistatus xmlns:d="DAV:">
-              <d:response>
-                <d:href>/test.txt</d:href>
-                <d:propstat>
-                  <d:prop>
-                    <d:getetag>"propfind-404-retry-etag"</d:getetag>
-                  </d:prop>
-                  <d:status>HTTP/1.1 200 OK</d:status>
-                </d:propstat>
-              </d:response>
-            </d:multistatus>`,
-            ),
-          );
+          return Promise.resolve(propfindResponseFactory());
         }
-        return Promise.resolve(createMockResponse(500));
+        return Promise.resolve(createMockResponseFactory(500)());
       });
 
       const result = await api.upload({
@@ -836,14 +841,14 @@ describe('WebdavApi - Fallback Paths', () => {
 
   describe('Download ETag Fallback Chain', () => {
     it('should fallback to PROPFIND when no ETag in download response', async () => {
-      const downloadResponse = createMockResponse(200, {}, 'file content');
-      const propfindResponse = createMockResponse(
+      const downloadResponseFactory = createMockResponseFactory(200, {}, 'file content');
+      const propfindResponseFactory = createMockResponseFactory(
         207,
         {},
         `<?xml version="1.0"?>
         <d:multistatus xmlns:d="DAV:">
           <d:response>
-            <d:href>/test.txt</d:href>
+            <d:href>test.txt</d:href>
             <d:propstat>
               <d:status>HTTP/1.1 200 OK</d:status>
               <d:prop>
@@ -856,12 +861,12 @@ describe('WebdavApi - Fallback Paths', () => {
 
       mockFetch.and.callFake((url: string, options: any) => {
         if (options.method === 'GET') {
-          return Promise.resolve(downloadResponse);
+          return Promise.resolve(downloadResponseFactory());
         }
         if (options.method === 'PROPFIND') {
-          return Promise.resolve(propfindResponse);
+          return Promise.resolve(propfindResponseFactory());
         }
-        return Promise.resolve(createMockResponse(500));
+        return Promise.resolve(createMockResponseFactory(500)());
       });
 
       const result = await api.download({ path: 'test.txt' });
@@ -1118,13 +1123,17 @@ describe('WebdavApi - Fallback Paths', () => {
 
   describe('Edge Case Fallbacks', () => {
     it('should handle empty or invalid XML responses in getFileMeta', async () => {
-      const invalidXmlResponse = createMockResponse(207, {}, 'invalid xml content');
+      const invalidXmlResponseFactory = createMockResponseFactory(
+        207,
+        {},
+        'invalid xml content',
+      );
 
       mockFetch.and.callFake((url: string, options: any) => {
         if (options.method === 'PROPFIND') {
-          return Promise.resolve(invalidXmlResponse);
+          return Promise.resolve(invalidXmlResponseFactory());
         }
-        return Promise.resolve(createMockResponse(500));
+        return Promise.resolve(createMockResponseFactory(500)());
       });
 
       await expectAsync(api.getFileMeta('test.txt', null)).toBeRejectedWith(
@@ -1133,7 +1142,7 @@ describe('WebdavApi - Fallback Paths', () => {
     });
 
     it('should handle HTML error pages instead of XML in getFileMeta', async () => {
-      const htmlResponse = createMockResponse(
+      const htmlResponseFactory = createMockResponseFactory(
         207,
         {},
         '<!DOCTYPE html><html><body>Error page</body></html>',
@@ -1141,9 +1150,9 @@ describe('WebdavApi - Fallback Paths', () => {
 
       mockFetch.and.callFake((url: string, options: any) => {
         if (options.method === 'PROPFIND') {
-          return Promise.resolve(htmlResponse);
+          return Promise.resolve(htmlResponseFactory());
         }
-        return Promise.resolve(createMockResponse(500));
+        return Promise.resolve(createMockResponseFactory(500)());
       });
 
       await expectAsync(api.getFileMeta('test.txt', null)).toBeRejectedWith(
@@ -1152,13 +1161,13 @@ describe('WebdavApi - Fallback Paths', () => {
     });
 
     it('should handle HTML error pages instead of file content in download', async () => {
-      const htmlResponse = createMockResponse(
+      const htmlResponseFactory = createMockResponseFactory(
         200,
         {},
         '<html><body>There is nothing here, sorry</body></html>',
       );
 
-      mockFetch.and.returnValue(Promise.resolve(htmlResponse));
+      mockFetch.and.callFake(() => Promise.resolve(htmlResponseFactory()));
 
       await expectAsync(api.download({ path: 'test.txt' })).toBeRejectedWith(
         jasmine.any(RemoteFileNotFoundAPIError),
@@ -1166,9 +1175,9 @@ describe('WebdavApi - Fallback Paths', () => {
     });
 
     it('should handle empty XML response in parsePropsFromXml', async () => {
-      const emptyResponse = createMockResponse(207, {}, '');
+      const emptyResponseFactory = createMockResponseFactory(207, {}, '');
 
-      mockFetch.and.returnValue(Promise.resolve(emptyResponse));
+      mockFetch.and.callFake(() => Promise.resolve(emptyResponseFactory()));
 
       await expectAsync(api.getFileMeta('test.txt', null)).toBeRejectedWith(
         jasmine.any(RemoteFileNotFoundAPIError),

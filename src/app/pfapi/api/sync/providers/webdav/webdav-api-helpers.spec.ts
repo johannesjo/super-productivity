@@ -178,14 +178,13 @@ describe('WebdavApi - Helper Methods', () => {
 
       const result = (api as any)._parseXmlResponseElement(responseElement!, '/test.txt');
 
-      // Temporarily accept current behavior while we investigate
       expect(result).toBeTruthy();
       expect(result.filename).toBe('test.txt');
       expect(result.basename).toBe('test.txt');
       expect(result.size).toBe(1234);
       expect(result.etag).toBe('etag-123');
-      // TODO: Fix this - should be 'file' but getting 'directory'
-      expect(result.type).toBe('directory');
+      // When resourcetype is missing, it defaults to 'file'
+      expect(result.type).toBe('file');
     });
 
     it('should handle collection/directory elements', () => {

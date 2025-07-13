@@ -1,6 +1,10 @@
 import { WebdavApi } from './webdav-api';
 import { WebdavPrivateCfg } from './webdav';
-import { createMockResponse, createPropfindResponse } from './webdav-api-test-utils';
+import {
+  createMockResponse,
+  createMockResponseFactory,
+  createPropfindResponse,
+} from './webdav-api-test-utils';
 import { RemoteFileNotFoundAPIError } from '../../../errors/errors';
 
 /* eslint-disable @typescript-eslint/naming-convention */
@@ -46,11 +50,11 @@ describe('WebdavApi Fallback Logic', () => {
 
       const apiWithCapabilities = new WebdavApi(async () => configWithCapabilities);
 
-      const uploadResponse = createMockResponse(201, {
+      const uploadResponseFactory = createMockResponseFactory(201, {
         'last-modified': lastModified,
       });
 
-      mockFetch.and.returnValue(Promise.resolve(uploadResponse));
+      mockFetch.and.callFake(() => Promise.resolve(uploadResponseFactory()));
 
       const result = await apiWithCapabilities.upload({
         path: '/test.txt',
@@ -84,11 +88,11 @@ describe('WebdavApi Fallback Logic', () => {
 
       const apiWithCapabilities = new WebdavApi(async () => configWithCapabilities);
 
-      const uploadResponse = createMockResponse(200, {
+      const uploadResponseFactory = createMockResponseFactory(200, {
         'last-modified': 'Thu, 22 Oct 2015 08:30:00 GMT',
       });
 
-      mockFetch.and.returnValue(Promise.resolve(uploadResponse));
+      mockFetch.and.callFake(() => Promise.resolve(uploadResponseFactory()));
 
       const result = await apiWithCapabilities.upload({
         path: '/test.txt',
@@ -123,7 +127,7 @@ describe('WebdavApi Fallback Logic', () => {
       const fileContent = 'file content';
       const lastModified = 'Wed, 21 Oct 2015 07:28:00 GMT';
 
-      const downloadResponse = createMockResponse(
+      const downloadResponseFactory = createMockResponseFactory(
         200,
         {
           'last-modified': lastModified,
@@ -132,7 +136,7 @@ describe('WebdavApi Fallback Logic', () => {
         fileContent,
       );
 
-      mockFetch.and.returnValue(Promise.resolve(downloadResponse));
+      mockFetch.and.callFake(() => Promise.resolve(downloadResponseFactory()));
 
       const result = await api.download({ path: '/test.txt' });
 
@@ -157,11 +161,11 @@ describe('WebdavApi Fallback Logic', () => {
       const apiWithCapabilities = new WebdavApi(async () => configWithCapabilities);
 
       // 304 Not Modified response
-      const notModifiedResponse = createMockResponse(304, {
+      const notModifiedResponseFactory = createMockResponseFactory(304, {
         'last-modified': lastModified,
       });
 
-      mockFetch.and.returnValue(Promise.resolve(notModifiedResponse));
+      mockFetch.and.callFake(() => Promise.resolve(notModifiedResponseFactory()));
 
       await expectAsync(
         apiWithCapabilities.download({ path: '/test.txt', localRev: lastModified }),
@@ -193,7 +197,7 @@ describe('WebdavApi Fallback Logic', () => {
     it('should extract Last-Modified from PROPFIND response', async () => {
       const lastModified = 'Wed, 21 Oct 2015 07:28:00 GMT';
 
-      const propfindResponse = createMockResponse(
+      const propfindResponseFactory = createMockResponseFactory(
         207,
         {
           'content-type': 'application/xml',
@@ -206,7 +210,7 @@ describe('WebdavApi Fallback Logic', () => {
         }),
       );
 
-      mockFetch.and.returnValue(Promise.resolve(propfindResponse));
+      mockFetch.and.callFake(() => Promise.resolve(propfindResponseFactory()));
 
       const result = await api.getFileMeta('/test.txt', null);
 
@@ -217,27 +221,45 @@ describe('WebdavApi Fallback Logic', () => {
     it('should use HEAD fallback when PROPFIND fails', async () => {
       const lastModified = 'Wed, 21 Oct 2015 07:28:00 GMT';
 
-      // PROPFIND fails
-      mockFetch.and.returnValues(
-        Promise.reject(new Error('PROPFIND not supported')),
-        // HEAD succeeds
-        Promise.resolve(
-          createMockResponse(200, {
-            'last-modified': lastModified,
-            'content-length': '1234',
-            'content-type': 'text/plain',
-          }),
-        ),
-      );
+      // Configure server to skip capability detection by providing pre-configured capabilities
+      const configWithCapabilities: WebdavPrivateCfg = {
+        ...mockConfig,
+        serverCapabilities: {
+          supportsETags: false,
+          supportsLastModified: true,
+          supportsIfHeader: false,
+          supportsLocking: false,
+        },
+      };
 
-      const result = await api.getFileMeta('/test.txt', null);
+      const apiWithCapabilities = new WebdavApi(async () => configWithCapabilities);
+
+      // Set up mock to fail PROPFIND but succeed with HEAD
+      mockFetch.and.callFake((url, options) => {
+        const method = options?.method || 'GET';
+        if (method === 'PROPFIND') {
+          return Promise.reject(new Error('PROPFIND not supported'));
+        } else if (method === 'HEAD') {
+          return Promise.resolve(
+            createMockResponse(200, {
+              'last-modified': lastModified,
+              'content-length': '1234',
+              'content-type': 'text/plain',
+            }),
+          );
+        }
+        return Promise.reject(new Error(`Unexpected method: ${method}`));
+      });
+
+      const result = await apiWithCapabilities.getFileMeta('/test.txt', null);
 
       expect(result.etag).toBe(lastModified);
-      expect(mockFetch).toHaveBeenCalledTimes(2);
 
       // Verify HEAD was used as fallback
-      const headCall = mockFetch.calls.all()[1];
-      expect(headCall.args[1].method).toBe('HEAD');
+      const headCalls = mockFetch.calls
+        .all()
+        .filter((call) => call.args[1]?.method === 'HEAD');
+      expect(headCalls.length).toBe(1);
     });
   });
 
@@ -271,8 +293,8 @@ describe('WebdavApi Fallback Logic', () => {
         }),
       );
 
-      const deleteResponse = createMockResponse(204, {});
-      mockFetch.and.returnValue(Promise.resolve(deleteResponse));
+      const deleteResponseFactory = createMockResponseFactory(204, {});
+      mockFetch.and.callFake(() => Promise.resolve(deleteResponseFactory()));
 
       await apiWithCapabilities.remove('/test.txt', lastModified);
 
@@ -363,7 +385,7 @@ describe('WebdavApi Fallback Logic', () => {
       const etag = '"abc123"';
       const lastModified = 'Wed, 21 Oct 2015 07:28:00 GMT';
 
-      const response = createMockResponse(
+      const responseFactory = createMockResponseFactory(
         200,
         {
           etag: etag,
@@ -372,7 +394,7 @@ describe('WebdavApi Fallback Logic', () => {
         'content',
       );
 
-      mockFetch.and.returnValue(Promise.resolve(response));
+      mockFetch.and.callFake(() => Promise.resolve(responseFactory()));
 
       const result = await api.download({ path: '/test.txt' });
 

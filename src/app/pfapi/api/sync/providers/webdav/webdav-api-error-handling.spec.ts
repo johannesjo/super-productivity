@@ -1,6 +1,6 @@
 import { WebdavApi } from './webdav-api';
 import { WebdavPrivateCfg } from './webdav';
-import { createMockResponse } from './webdav-api-test-utils';
+import { createMockResponse, createMockResponseFactory } from './webdav-api-test-utils';
 import {
   NoRevAPIError,
   NoEtagAPIError,
@@ -341,7 +341,7 @@ describe('WebdavApi Enhanced Error Handling', () => {
 
     it('should handle HTML error responses appropriately', async () => {
       const htmlError = '<html><body>404 Not Found</body></html>';
-      const htmlResponse = createMockResponse(
+      const htmlResponseFactory = createMockResponseFactory(
         200,
         {
           'content-type': 'text/html',
@@ -349,7 +349,7 @@ describe('WebdavApi Enhanced Error Handling', () => {
         htmlError,
       );
 
-      mockFetch.and.returnValue(Promise.resolve(htmlResponse));
+      mockFetch.and.callFake(() => Promise.resolve(htmlResponseFactory()));
 
       await expectAsync(api.download({ path: '/test.txt' })).toBeRejectedWith(
         jasmine.any(RemoteFileNotFoundAPIError),

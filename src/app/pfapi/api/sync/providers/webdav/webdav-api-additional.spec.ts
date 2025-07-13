@@ -144,39 +144,29 @@ describe('WebdavApi - Additional Coverage Tests', () => {
 
   describe('Additional Remove Coverage', () => {
     it('should include If-Match header when expectedEtag is provided', async () => {
-      // First call is PROPFIND to check file metadata
-      const propfindResponse = createMockResponse(
-        207,
-        {},
-        `<?xml version="1.0"?>
-        <d:multistatus xmlns:d="DAV:">
-          <d:response>
-            <d:href>/test.txt</d:href>
-            <d:propstat>
-              <d:prop>
-                <d:resourcetype/>
-              </d:prop>
-              <d:status>HTTP/1.1 200 OK</d:status>
-            </d:propstat>
-          </d:response>
-        </d:multistatus>`,
+      // Mock getFileMeta to return file metadata
+      spyOn(api, 'getFileMeta').and.returnValue(
+        Promise.resolve({
+          filename: 'test.txt',
+          basename: 'test.txt',
+          lastmod: '2023-01-01',
+          size: 100,
+          type: 'file',
+          etag: 'current-etag',
+          data: {},
+        }),
       );
 
-      // Second call is DELETE
+      // Mock DELETE request
       const deleteResponse = createMockResponse(204);
-
-      let callCount = 0;
-      mockFetch.and.callFake(() => {
-        callCount++;
-        return Promise.resolve(callCount === 1 ? propfindResponse : deleteResponse);
-      });
+      mockFetch.and.returnValue(Promise.resolve(deleteResponse));
 
       await api.remove('test.txt', 'expected-etag-123');
 
-      expect(mockFetch).toHaveBeenCalledTimes(2);
+      expect(mockFetch).toHaveBeenCalledTimes(1);
 
-      // Check the DELETE call specifically
-      const deleteCall = mockFetch.calls.all()[1];
+      // Check the DELETE call
+      const deleteCall = mockFetch.calls.mostRecent();
       expect(deleteCall.args[0]).toBe('https://webdav.example.com/test.txt');
       expect(deleteCall.args[1].method).toBe('DELETE');
       expect(deleteCall.args[1].headers.get('If-Match')).toBe('expected-etag-123');
@@ -207,6 +197,19 @@ describe('WebdavApi - Additional Coverage Tests', () => {
     });
 
     it('should handle invalid XML in multi-status response', async () => {
+      // Mock getFileMeta to return directory type
+      spyOn(api, 'getFileMeta').and.returnValue(
+        Promise.resolve({
+          filename: 'folder',
+          basename: 'folder',
+          lastmod: '2023-01-01',
+          size: 0,
+          type: 'directory',
+          etag: 'dir-etag',
+          data: {},
+        }),
+      );
+
       const invalidXml = 'not valid xml <<<<';
       const mockResponse = createMockResponse(207, {}, invalidXml);
       mockFetch.and.returnValue(Promise.resolve(mockResponse));
