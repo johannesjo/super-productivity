@@ -46,6 +46,16 @@ module.exports = function (config) {
           // Without a remote debugging port, Google Chrome exits immediately.
           '--remote-debugging-port=9222',
           '--disable-web-security',
+          // Additional performance optimizations
+          '--disable-dev-shm-usage', // Overcome limited resource problems
+          '--disable-software-rasterizer',
+          '--disable-extensions',
+          '--disable-setuid-sandbox',
+          '--disable-logging',
+          '--disable-background-networking',
+          '--disable-sync',
+          '--disable-features=VizDisplayCompositor', // Disable GPU compositor
+          '--enable-features=NetworkService,NetworkServiceInProcess',
         ],
         debug: true,
       },
