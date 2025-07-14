@@ -2,13 +2,8 @@
 
 # environment files
 .env
-.env.production
-.env.stage
 .env.local
 .env.*.local
-
-# auto-generated environment file
-src/environments/environment.ts
 
 # compiled output
 /.tmp

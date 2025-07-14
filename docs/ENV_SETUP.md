@@ -1,62 +1,122 @@
-# Environment Configuration
+# Environment Configuration Setup
 
-Super Productivity now uses `.env` files for environment-specific configuration instead of Angular's traditional environment files.
+This project uses a hybrid approach for environment configuration:
 
-## Setup
+- **Base configuration** (production/stage flags) are in static TypeScript files
+- **Secrets and dynamic values** are loaded from `.env` files at build time
 
-1. Copy `.env.example` to `.env` for local development:
+## Overview
+
+### Static Environment Files
+
+- `src/environments/environment.ts` - Development configuration
+- `src/environments/environment.prod.ts` - Production configuration
+- `src/environments/environment.stage.ts` - Staging configuration
+
+These files contain base configuration like `production`, `stage`, and `version` flags.
+
+### Dynamic Environment Variables
+
+- `.env` - Environment variables for all environments
+
+This file contains secrets and environment-specific values that should not be committed to version control.
+
+## Setup Instructions
+
+1. **Create your .env file**
 
    ```bash
    cp .env.example .env
    ```
 
-2. Create environment-specific files as needed:
-   - `.env` - Default development environment
-   - `.env.production` - Production environment
-   - `.env.stage` - Staging environment
+2. **Add your environment variables**
 
-## How it Works
+   ```bash
+   # .env
+   GOOGLE_DRIVE_TOKEN=your-token-here
+   DROPBOX_API_KEY=your-api-key-here
+   ```
 
-The build process automatically generates `src/environments/environment.ts` from the appropriate `.env` file using `tools/generate-env.js`.
+3. **Access environment variables in your code**
 
-## Available Variables
+   ```typescript
+   // Direct access (works everywhere)
+   const googleToken = process.env.GOOGLE_DRIVE_TOKEN;
 
-- `NODE_ENV` - Environment name (development, production, staging)
-- `PRODUCTION` - Set to "true" for production builds
-- `STAGE` - Set to "true" for staging builds
+   // Or using utility functions
+   import { getEnv, getEnvOrDefault } from './app/util/env';
 
-## Usage
+   const googleToken = getEnv('GOOGLE_DRIVE_TOKEN');
+   const dropboxKey = getEnvOrDefault('DROPBOX_API_KEY', 'default-key');
+   ```
 
-### Development
+## Running the Application
+
+The npm scripts automatically load the `.env` file:
 
 ```bash
+# Development
 npm run startFrontend
-```
 
-### Production
-
-```bash
+# Production configuration
 npm run startFrontend:prod
-# or
-npm run buildFrontend:prod:es6
+
+# Staging configuration
+npm run startFrontend:stage
 ```
 
-### Staging
+Note: All commands use the same `.env` file. The difference between environments is controlled by the Angular configuration (production/stage flags).
+
+## Build Commands
+
+Build commands also load the appropriate environment:
 
 ```bash
-npm run startFrontend:stage
-# or
+# Production build
+npm run buildFrontend:prod:es6
+
+# Staging build
 npm run buildFrontend:stage:es6
 ```
 
+## How It Works
+
+1. **dotenv-run** loads variables from `.env` file before running Angular commands
+2. **webpack DefinePlugin** injects these variables as `process.env.*` at build time
+3. **Pure utility functions** in `src/app/util/env.ts` provide helper functions (optional)
+4. **TypeScript declarations** in `src/types/environment.d.ts` provide type safety
+
+## Security Notes
+
+- Never commit `.env` files to version control
+- Secrets are injected at build time, not included in source code
+- Access variables directly via `process.env` or use the utility functions
+- Add new environment variables to both `.env.example` and `src/types/environment.d.ts`
+
 ## Adding New Environment Variables
 
-1. Add the variable to your `.env` files
-2. Update `tools/generate-env.js` to include the new variable in the generated environment
-3. Use the variable in your code via `environment.yourVariable`
+1. Add to `.env.example` as documentation:
 
-## Important Notes
+   ```bash
+   NEW_API_KEY=your-api-key-here
+   ```
 
-- The `src/environments/environment.ts` file is auto-generated and should not be edited directly
-- All `.env` files are gitignored for security
-- Always use `.env.example` as a template for required variables
+2. Add TypeScript declaration in `src/types/environment.d.ts`:
+
+   ```typescript
+   interface ProcessEnv {
+     NEW_API_KEY?: string;
+     // ... other variables
+   }
+   ```
+
+3. Use in your code:
+
+   ```typescript
+   // Direct access
+   const apiKey = process.env.NEW_API_KEY;
+
+   // Or with utility function
+   import { getEnv } from './app/util/env';
+   const apiKey = getEnv('NEW_API_KEY');
+   ```
