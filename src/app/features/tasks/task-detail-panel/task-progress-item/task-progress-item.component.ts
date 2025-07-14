@@ -141,11 +141,11 @@ import { CommonModule } from '@angular/common';
         width: 100%;
       }
 
-      .progress-input ::ng-deep .mat-mdc-form-field-wrapper {
+      .progress-input .mat-mdc-form-field-wrapper {
         padding-bottom: 0;
       }
 
-      .progress-input ::ng-deep .mat-mdc-text-field-wrapper {
+      .progress-input .mat-mdc-text-field-wrapper {
         height: 40px;
       }
 
