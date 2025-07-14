@@ -3,7 +3,7 @@
 This project uses a hybrid approach for environment configuration:
 
 - **Base configuration** (production/stage flags) are in static TypeScript files
-- **Secrets and dynamic values** are loaded from `.env` files at build time
+- **Secrets and dynamic values** are loaded from `.env` files and converted to TypeScript constants
 
 ## Overview
 
@@ -18,8 +18,9 @@ These files contain base configuration like `production`, `stage`, and `version`
 ### Dynamic Environment Variables
 
 - `.env` - Environment variables for all environments
+- `src/app/config/env.generated.ts` - Auto-generated TypeScript constants (gitignored)
 
-This file contains secrets and environment-specific values that should not be committed to version control.
+The `.env` file contains secrets and environment-specific values that should not be committed to version control.
 
 ## Setup Instructions
 
@@ -40,10 +41,13 @@ This file contains secrets and environment-specific values that should not be co
 3. **Access environment variables in your code**
 
    ```typescript
-   // Direct access (works everywhere)
-   const googleToken = process.env.GOOGLE_DRIVE_TOKEN;
+   // Import from the generated constants (type-safe!)
+   import { ENV } from './app/config/env.generated';
 
-   // Or using utility functions
+   // Direct access
+   const googleToken = ENV.GOOGLE_DRIVE_TOKEN;
+
+   // Or using utility functions (with type safety)
    import { getEnv, getEnvOrDefault } from './app/util/env';
 
    const googleToken = getEnv('GOOGLE_DRIVE_TOKEN');
@@ -52,7 +56,7 @@ This file contains secrets and environment-specific values that should not be co
 
 ## Running the Application
 
-The npm scripts automatically load the `.env` file:
+The npm scripts automatically generate TypeScript constants from `.env` before running:
 
 ```bash
 # Development
@@ -69,7 +73,7 @@ Note: All commands use the same `.env` file. The difference between environments
 
 ## Build Commands
 
-Build commands also load the appropriate environment:
+Build commands also generate constants before building:
 
 ```bash
 # Production build
@@ -81,42 +85,43 @@ npm run buildFrontend:stage:es6
 
 ## How It Works
 
-1. **dotenv-run** loads variables from `.env` file before running Angular commands
-2. **webpack DefinePlugin** injects these variables as `process.env.*` at build time
-3. **Pure utility functions** in `src/app/util/env.ts` provide helper functions (optional)
-4. **TypeScript declarations** in `src/types/environment.d.ts` provide type safety
+1. **load-env.js** reads the `.env` file and generates `src/app/config/env.generated.ts`
+2. **TypeScript constants** are imported and used throughout the app (no process.env needed!)
+3. **Type safety** - The utility functions use `keyof typeof ENV` for autocomplete and type checking
+4. **Gitignored** - The generated file is never committed, keeping secrets safe
 
 ## Security Notes
 
 - Never commit `.env` files to version control
-- Secrets are injected at build time, not included in source code
-- Access variables directly via `process.env` or use the utility functions
-- Add new environment variables to both `.env.example` and `src/types/environment.d.ts`
+- The generated `env.generated.ts` is gitignored automatically
+- Secrets are compiled into the bundle at build time (not exposed as environment variables)
+- Only add non-sensitive values to `.env.example`
 
 ## Adding New Environment Variables
 
-1. Add to `.env.example` as documentation:
+1. Add to `.env`:
 
    ```bash
    NEW_API_KEY=your-api-key-here
    ```
 
-2. Add TypeScript declaration in `src/types/environment.d.ts`:
+2. The TypeScript types are automatically generated when you run any build/serve command
+
+3. Use in your code with full type safety:
 
    ```typescript
-   interface ProcessEnv {
-     NEW_API_KEY?: string;
-     // ... other variables
-   }
-   ```
-
-3. Use in your code:
-
-   ```typescript
-   // Direct access
-   const apiKey = process.env.NEW_API_KEY;
+   import { ENV } from './app/config/env.generated';
+   const apiKey = ENV.NEW_API_KEY;
 
    // Or with utility function
    import { getEnv } from './app/util/env';
-   const apiKey = getEnv('NEW_API_KEY');
+   const apiKey = getEnv('NEW_API_KEY'); // TypeScript knows all available keys!
    ```
+
+## Benefits of This Approach
+
+- ✅ **Type Safety**: Full TypeScript support with autocomplete
+- ✅ **No Runtime Dependencies**: Constants are compiled into the bundle
+- ✅ **Works Everywhere**: No need for process.env or special webpack config
+- ✅ **Simple**: Just import and use the constants
+- ✅ **Secure**: Secrets stay in `.env` and never in version control

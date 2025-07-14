@@ -5,6 +5,9 @@
 .env.local
 .env.*.local
 
+# auto-generated environment constants
+src/app/config/env.generated.ts
+
 # compiled output
 /.tmp
 /dist
