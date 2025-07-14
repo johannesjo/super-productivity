@@ -131,3 +131,206 @@ header {
     font-size: 10px;
   }
 }
+
+
+// Sort controls styling
+.sort-controls {
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+  gap: 4px;
+
+  .sort-select {
+    min-width: 100px;
+    font-size: 12px;
+    
+    ::ng-deep {
+      .mat-mdc-select-trigger {
+        padding: 4px 8px;
+        min-height: 32px;
+      }
+      
+      .mat-mdc-select-value {
+        font-size: 12px;
+      }
+      
+      .mat-mdc-select-arrow {
+        margin-left: 4px;
+      }
+    }
+  }
+
+  .sort-direction-btn {
+    width: 32px;
+    height: 32px;
+    opacity: 0.7;
+    
+    &:hover {
+      opacity: 1;
+    }
+    
+    ::ng-deep .mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+@include mq(xs, max) {
+  .sort-controls {
+    .sort-select {
+      min-width: 80px;
+      font-size: 11px;
+      
+      ::ng-deep {
+        .mat-mdc-select-trigger {
+          padding: 2px 6px;
+          min-height: 28px;
+        }
+        
+        .mat-mdc-select-value {
+          font-size: 11px;
+        }
+      }
+    }
+    
+    .sort-direction-btn {
+      width: 28px;
+      height: 28px;
+      
+      ::ng-deep .mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
+}
+
+
+
+// Group controls styling
+.group-controls {
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+  gap: 4px;
+
+  .group-select {
+    min-width: 100px;
+    font-size: 12px;
+    
+    ::ng-deep {
+      .mat-mdc-select-trigger {
+        padding: 4px 8px;
+        min-height: 32px;
+      }
+      
+      .mat-mdc-select-value {
+        font-size: 12px;
+      }
+      
+      .mat-mdc-select-arrow {
+        margin-left: 4px;
+      }
+    }
+  }
+}
+
+// Task group styling
+.task-group {
+  margin-bottom: 16px;
+  
+  .group-header {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--bg-lighter);
+    border: 1px solid var(--extra-border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    margin-bottom: 8px;
+    transition: background-color 0.2s ease;
+    
+    &:hover {
+      background: var(--bg-light);
+    }
+    
+    .group-expand-icon {
+      margin-right: 8px;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      transition: transform 0.2s ease;
+    }
+    
+    .group-title {
+      font-weight: 500;
+      font-size: 13px;
+      flex-grow: 1;
+    }
+    
+    .group-count {
+      font-size: 12px;
+      opacity: 0.7;
+      margin-left: 8px;
+    }
+    
+    .group-estimate {
+      font-size: 12px;
+      opacity: 0.7;
+      margin-left: 8px;
+      font-style: italic;
+    }
+  }
+  
+  .group-tasks {
+    padding-left: 16px;
+    
+    .grouped-task {
+      margin-bottom: 6px;
+      margin-right: 4px;
+    }
+  }
+}
+
+@include mq(xs, max) {
+  .group-controls {
+    .group-select {
+      min-width: 80px;
+      font-size: 11px;
+      
+      ::ng-deep {
+        .mat-mdc-select-trigger {
+          padding: 2px 6px;
+          min-height: 28px;
+        }
+        
+        .mat-mdc-select-value {
+          font-size: 11px;
+        }
+      }
+    }
+  }
+  
+  .task-group {
+    .group-header {
+      padding: 6px 10px;
+      
+      .group-title {
+        font-size: 12px;
+      }
+      
+      .group-count,
+      .group-estimate {
+        font-size: 11px;
+      }
+    }
+    
+    .group-tasks {
+      padding-left: 12px;
+    }
+  }
+}
+
