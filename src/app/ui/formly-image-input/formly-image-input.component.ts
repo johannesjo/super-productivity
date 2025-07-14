@@ -7,7 +7,10 @@ import { MatIcon } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { DialogUnsplashPickerComponent } from '../dialog-unsplash-picker/dialog-unsplash-picker.component';
+import {
+  DialogUnsplashPickerComponent,
+  DialogUnsplashPickerData,
+} from '../dialog-unsplash-picker/dialog-unsplash-picker.component';
 
 @Component({
   selector: 'formly-image-input',
@@ -31,9 +34,14 @@ export class FormlyImageInputComponent extends FieldType<FormlyFieldConfig> {
   }
 
   openUnsplashPicker(): void {
+    const dialogData: DialogUnsplashPickerData = {
+      context: this.field.key as string, // This will be 'backgroundImageDark' or 'backgroundImageLight'
+    };
+
     const dialogRef = this._dialog.open(DialogUnsplashPickerComponent, {
       width: '900px',
       maxWidth: '95vw',
+      data: dialogData,
     });
 
     dialogRef.afterClosed().subscribe((selectedUrl: string | undefined) => {

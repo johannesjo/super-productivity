@@ -77,4 +77,38 @@ export class UnsplashService {
   ): string {
     return photo.urls[size];
   }
+
+  /**
+   * Get a custom resolution image URL using Unsplash's dynamic image API
+   * @param photo - The Unsplash photo object
+   * @param width - Desired width in pixels (max 2400 for free tier)
+   * @param options - Additional options like quality, format, dpr
+   * @returns URL string with custom parameters
+   */
+  getCustomPhotoUrl(
+    photo: UnsplashPhoto,
+    width: number,
+    options: {
+      quality?: number; // 1-100
+      format?: 'jpg' | 'webp' | 'avif' | 'auto';
+      dpr?: number; // Device pixel ratio 1-2
+      fit?:
+        | 'clamp'
+        | 'clip'
+        | 'crop'
+        | 'facearea'
+        | 'fill'
+        | 'fillmax'
+        | 'max'
+        | 'min'
+        | 'scale';
+    } = {},
+  ): string {
+    const { quality = 80, format = 'auto', dpr = 1, fit } = options;
+    let url = `${photo.urls.raw}&w=${width}&q=${quality}&auto=${format}&dpr=${dpr}`;
+    if (fit) {
+      url += `&fit=${fit}`;
+    }
+    return url;
+  }
 }

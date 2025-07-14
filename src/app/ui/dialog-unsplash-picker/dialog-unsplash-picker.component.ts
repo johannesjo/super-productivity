@@ -7,7 +7,12 @@ import {
   computed,
   inject,
 } from '@angular/core';
-import { MatDialogRef, MatDialogContent, MatDialogTitle } from '@angular/material/dialog';
+import {
+  MatDialogRef,
+  MatDialogContent,
+  MatDialogTitle,
+  MAT_DIALOG_DATA,
+} from '@angular/material/dialog';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
@@ -23,6 +28,15 @@ import {
 } from 'rxjs/operators';
 import { UnsplashService, UnsplashPhoto } from '../../core/unsplash/unsplash.service';
 import { GlobalThemeService } from '../../core/theme/global-theme.service';
+
+export interface DialogUnsplashPickerData {
+  context?:
+    | 'backgroundImageDark'
+    | 'backgroundImageLight'
+    | 'taskBackground'
+    | 'projectIcon'
+    | string;
+}
 
 @Component({
   selector: 'dialog-unsplash-picker',
@@ -57,11 +71,32 @@ export class DialogUnsplashPickerComponent implements OnInit, OnDestroy {
   private _searchSubject = new Subject<string>();
   private _destroy$ = new Subject<void>();
   private _globalThemeService = inject(GlobalThemeService);
+  public data: DialogUnsplashPickerData =
+    inject(MAT_DIALOG_DATA, { optional: true }) || {};
 
   constructor(
     private _dialogRef: MatDialogRef<DialogUnsplashPickerComponent>,
     private _unsplashService: UnsplashService,
   ) {}
+
+  private getDefaultSearchQuery(isDark: boolean): string {
+    const context = this.data.context;
+
+    // Context-specific defaults
+    switch (context) {
+      case 'backgroundImageDark':
+        return 'dark abstract night sky stars';
+      case 'backgroundImageLight':
+        return 'light abstract nature landscape';
+      case 'taskBackground':
+        return isDark ? 'dark texture pattern' : 'light texture pattern';
+      case 'projectIcon':
+        return 'icon symbol minimal abstract';
+      default:
+        // Default based on theme
+        return isDark ? 'night' : 'nature landscape';
+    }
+  }
 
   ngOnInit(): void {
     this._searchSubject
@@ -74,7 +109,7 @@ export class DialogUnsplashPickerComponent implements OnInit, OnDestroy {
             return this._globalThemeService.isDarkTheme$.pipe(
               take(1),
               switchMap((isDark) => {
-                const defaultQuery = isDark ? 'night' : 'nature landscape';
+                const defaultQuery = this.getDefaultSearchQuery(isDark);
                 return this._unsplashService.searchPhotos(defaultQuery);
               }),
             );
@@ -95,9 +130,9 @@ export class DialogUnsplashPickerComponent implements OnInit, OnDestroy {
         },
       });
 
-    // Initial search for background images based on theme
+    // Initial search for background images based on theme and context
     this._globalThemeService.isDarkTheme$.pipe(take(1)).subscribe((isDark) => {
-      this.onSearchChange(isDark ? 'night' : 'nature landscape');
+      this.onSearchChange(this.getDefaultSearchQuery(isDark));
     });
   }
 
@@ -112,8 +147,11 @@ export class DialogUnsplashPickerComponent implements OnInit, OnDestroy {
   }
 
   selectPhoto(photo: UnsplashPhoto): void {
-    // Return the regular size URL for better quality
-    this._dialogRef.close(photo.urls.regular);
+    // Return the raw URL with parameters for high quality
+    // Using raw URL allows dynamic resizing while maintaining quality
+    // Add width=2000 and quality=80 for good balance of quality and file size
+    const highResUrl = `${photo.urls.raw}&w=2560&q=90&auto=format`;
+    this._dialogRef.close(highResUrl);
   }
 
   getPhotoThumb(photo: UnsplashPhoto): string {
