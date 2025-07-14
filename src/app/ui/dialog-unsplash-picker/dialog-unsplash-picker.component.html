@@ -8,7 +8,7 @@
     <mat-label>Search images</mat-label>
     <input
       matInput
-      [(ngModel)]="searchQuery"
+      [ngModel]="searchQuery()"
       (ngModelChange)="onSearchChange($event)"
       placeholder="e.g., nature, mountains, abstract"
     />
@@ -16,18 +16,18 @@
 
   <div
     class="loading-container"
-    *ngIf="isLoading"
+    *ngIf="isLoading()"
   >
     <mat-spinner diameter="40"></mat-spinner>
   </div>
 
   <div
     class="image-grid"
-    *ngIf="!isLoading"
+    *ngIf="!isLoading()"
   >
     <div
       class="image-item"
-      *ngFor="let photo of photos"
+      *ngFor="let photo of photos()"
       (click)="selectPhoto(photo)"
     >
       <img
@@ -42,14 +42,14 @@
 
   <div
     class="no-results"
-    *ngIf="!isLoading && photos.length === 0 && searchQuery"
+    *ngIf="showNoResults()"
   >
     No images found. Try a different search term.
   </div>
 
   <div
     class="api-key-notice"
-    *ngIf="!isLoading && photos.length === 0 && !searchQuery"
+    *ngIf="showApiKeyNotice()"
   >
     <p>To use the Unsplash image picker, you need to:</p>
     <ol>

@@ -41,8 +41,6 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
-  color: white;
   padding: 0.5rem;
   opacity: 0;
   transition: opacity 0.2s ease;
@@ -55,12 +53,10 @@
 .no-results {
   text-align: center;
   padding: 2rem;
-  color: rgba(0, 0, 0, 0.6);
 }
 
 .api-key-notice {
   padding: 2rem;
-  background-color: #f5f5f5;
   border-radius: 4px;
   margin-top: 1rem;
 
