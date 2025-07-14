@@ -1,7 +1,7 @@
 import pkg from '../../package.json';
 
 export const environment = {
-  production: false,
+  production: true,
   stage: true,
   version: pkg.version,
 };
