@@ -203,6 +203,7 @@ export interface Task {
   created: number;
   updated?: number;
   subTaskIds: string[];
+  progress?: number; // Progress percentage (0-100)
 
   // Additional fields for internal use (plugins can read but shouldn't modify)
   timeSpentOnDay?: { [key: string]: number };

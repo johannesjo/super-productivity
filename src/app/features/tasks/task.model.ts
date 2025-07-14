@@ -95,6 +95,7 @@ export interface TaskCopy
   dueDay?: string;
   hasPlannedTime?: boolean;
   attachments: TaskAttachment[];
+  progress?: number; // Progress percentage (0-100)
 
   // Ensure type compatibility for internal fields
   modified?: number;
@@ -158,6 +159,7 @@ export const DEFAULT_TASK: Omit<TaskCopy, 'projectId'> = {
   title: '',
   tagIds: [],
   created: Date.now(),
+  progress: 0, // Default progress to 0%
 
   attachments: [],
 };

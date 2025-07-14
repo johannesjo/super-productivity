@@ -883,3 +883,39 @@ progress-bar {
   vertical-align: middle;
   margin-right: 4px;
 }
+
+// Progress indicator styles
+.progress-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 0.75em;
+  opacity: 0.8;
+}
+
+.progress-bar-mini {
+  width: 40px;
+  height: 3px;
+  background: var(--primary-lighter);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill-mini {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  color: var(--primary);
+  font-weight: 500;
+  font-size: 0.85em;
+}
+
+// Hide progress indicator when task is done
+:host.isDone .progress-indicator {
+  display: none;
+}
