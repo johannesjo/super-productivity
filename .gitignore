@@ -1,5 +1,15 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
+# environment files
+.env
+.env.production
+.env.stage
+.env.local
+.env.*.local
+
+# auto-generated environment file
+src/environments/environment.ts
+
 # compiled output
 /.tmp
 /dist
