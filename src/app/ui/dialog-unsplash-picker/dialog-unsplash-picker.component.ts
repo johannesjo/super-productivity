@@ -42,7 +42,7 @@ export class DialogUnsplashPickerComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this._searchSubject
       .pipe(
-        debounceTime(500),
+        debounceTime(1000), // Increased to 1 second to reduce API calls (50 req/hour limit)
         distinctUntilChanged(),
         switchMap((query) => {
           if (!query || query.trim() === '') {
