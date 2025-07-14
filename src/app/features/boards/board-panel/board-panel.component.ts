@@ -87,11 +87,17 @@ export class BoardPanelComponent {
   _matDialog = inject(MatDialog);
 
   // Sort-related signals
-  currentSortField = signal<BoardPanelSortField>(BoardPanelSortField.None);
-  currentSortDirection = signal<BoardPanelSortDirection>(BoardPanelSortDirection.Asc);
+  currentSortField = signal<BoardPanelSortField>(
+    this.panelCfg?.sortCfg?.field ?? BoardPanelSortField.None
+  );
+  currentSortDirection = signal<BoardPanelSortDirection>(
+    this.panelCfg?.sortCfg?.direction ?? BoardPanelSortDirection.Asc
+  );
 
   // Group-related signals
-  currentGroupField = signal<BoardPanelGroupField>(BoardPanelGroupField.None);
+  currentGroupField = signal<BoardPanelGroupField>(
+    this.panelCfg?.groupCfg?.field ?? BoardPanelGroupField.None
+  );
   collapsedGroups = signal<Set<string>>(new Set());
 
   allTasks$ = this.store.select(selectAllTasksWithoutHiddenProjects);
