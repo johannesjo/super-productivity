@@ -1,5 +1,13 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
+# environment files
+.env
+.env.local
+.env.*.local
+
+# auto-generated environment constants
+src/app/config/env.generated.ts
+
 # compiled output
 /.tmp
 /dist
