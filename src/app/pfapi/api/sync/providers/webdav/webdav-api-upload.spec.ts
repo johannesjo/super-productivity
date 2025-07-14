@@ -244,18 +244,32 @@ describe('WebdavApi - Upload Operations', () => {
     });
 
     it('should handle 409 conflict by creating parent directories', async () => {
-      // The upload method doesn't handle 409 specially - it just throws NoEtagAPIError
-      const mockResponse = createMockResponse(409);
-      mockFetch.and.returnValue(Promise.resolve(mockResponse));
+      // First upload returns 409, then after creating directories, second upload succeeds
+      const firstResponse = createMockResponse(409);
+      const secondResponse = createMockResponse(201, { etag: '"after-mkdir-etag"' });
 
-      await expectAsync(
-        api.upload({
-          data: 'test data',
-          path: 'folder/test.txt',
-          isOverwrite: false,
-          expectedEtag: null,
-        }),
-      ).toBeRejectedWith(jasmine.any(NoEtagAPIError));
+      let callCount = 0;
+      mockFetch.and.callFake((url: string, options: any) => {
+        if (options.method === 'PUT') {
+          callCount++;
+          return Promise.resolve(callCount === 1 ? firstResponse : secondResponse);
+        } else if (options.method === 'MKCOL') {
+          // Directory creation succeeds
+          return Promise.resolve(createMockResponse(201));
+        }
+        // Other requests
+        return Promise.resolve(createMockResponse(404));
+      });
+
+      const result = await api.upload({
+        data: 'test data',
+        path: 'folder/test.txt',
+        isOverwrite: false,
+        expectedEtag: null,
+      });
+
+      expect(result).toBe('after-mkdir-etag');
+      expect(callCount).toBe(2); // Initial attempt + retry after creating directories
     });
 
     it('should throw NoEtagAPIError after all retry attempts fail', async () => {

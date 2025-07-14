@@ -138,8 +138,7 @@ export class WebdavApi {
     data: string,
     headers: Record<string, string>,
     errorCode: number,
-  ): Promise<string> {
-    const context = errorCode === 404 ? 'upload-404-retry' : 'upload-409-retry';
+  ): Promise<string | undefined> {
     PFLog.error(
       `${WebdavApi.L}.upload() ${errorCode} ${errorCode === 404 ? 'not found' : 'conflict'}, attempting to create parent directories`,
       { path },
@@ -148,25 +147,14 @@ export class WebdavApi {
     try {
       await this._ensureParentDirectoryExists(path);
 
-      // Retry the upload
-      const retryResponse = await this._makeRequest({
-        method: 'PUT',
+      // Retry the upload with _retryAttempted flag to prevent infinite loops
+      return await this.upload({
+        data,
         path,
-        body: data,
-        headers,
+        isOverwrite: true, // After creating directories, we can overwrite
+        expectedEtag: null,
+        _retryAttempted: true, // Critical: prevent infinite retry loops
       });
-
-      const retryHeaderObj = this._responseHeadersToObject(retryResponse);
-      const validators = this._extractValidators(retryHeaderObj);
-
-      if (!validators.validator) {
-        return await this._retrieveEtagWithFallback(path, retryHeaderObj, context);
-      }
-
-      // Clean ETag if it's an ETag validator
-      return validators.validatorType === 'etag'
-        ? this._cleanRev(validators.validator)
-        : validators.validator;
     } catch (retryError: any) {
       PFLog.err(`${WebdavApi.L}.upload() retry after ${errorCode} failed`, retryError);
 
@@ -174,7 +162,8 @@ export class WebdavApi {
       if (
         retryError instanceof NoEtagAPIError ||
         retryError instanceof NoRevAPIError ||
-        retryError instanceof RemoteFileNotFoundAPIError
+        retryError instanceof RemoteFileNotFoundAPIError ||
+        retryError instanceof HttpNotOkAPIError
       ) {
         throw retryError;
       }
@@ -547,12 +536,18 @@ export class WebdavApi {
         throw new Error(`Upload failed: Resource is locked`);
       } else if (response.status === 409) {
         // Conflict - parent directory doesn't exist
-        return await this._retryUploadWithDirectoryCreation(
-          path,
-          data,
-          headers || {},
-          409,
-        );
+        if (!_retryAttempted) {
+          return await this._retryUploadWithDirectoryCreation(
+            path,
+            data,
+            headers || {},
+            409,
+          );
+        }
+        // If retry was already attempted, throw error with retry flag
+        const error = new HttpNotOkAPIError(response);
+        (error as any)._retryAttempted = true;
+        throw error;
       }
 
       // Extract validator from response headers
@@ -610,12 +605,16 @@ export class WebdavApi {
       switch (errorStatus) {
         case 409:
           // Conflict - parent directory doesn't exist
-          return await this._retryUploadWithDirectoryCreation(
-            path,
-            data,
-            headers || {},
-            409,
-          );
+          // Check both the method parameter and the error flag to prevent infinite loops
+          if (!_retryAttempted && !(e as any)?._retryAttempted) {
+            return await this._retryUploadWithDirectoryCreation(
+              path,
+              data,
+              headers || {},
+              409,
+            );
+          }
+          throw e;
         case 412:
           // Precondition Failed - conditional header failed
           if (expectedEtag) {
@@ -1569,8 +1568,8 @@ export class WebdavApi {
     // Construct the URL
     const url = new URL(normalizedPath, baseUrl).toString();
 
-    // Log for debugging - increased log level for better visibility
-    PFLog.error(`${WebdavApi.L}._getUrl() constructed URL`, {
+    // Log for debugging
+    PFLog.debug(`${WebdavApi.L}._getUrl() constructed URL`, {
       baseUrl,
       path,
       normalizedPath,

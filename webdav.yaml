@@ -31,8 +31,11 @@ cors:
 
 users:
   - username: alice
-    password: alicepassword
+    password: alice
     directory: /data/alice
   - username: bob
-    password: bobpassword
+    password: bob
     directory: /data/bob
+  - username: admin
+    password: admin
+    directory: /data/admin
