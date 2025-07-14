@@ -21,7 +21,7 @@ header {
 .notes {
   padding: calc(var(--s) * 1.5);
 
-  // Specify a max-height and overflow-y to scrolling in cdkDropList.
+  // Specify a max-height and overflow-y to allow scrolling in cdkDropList.
   max-height: calc(
     // window height - total header margin - header height
     100vh - var(--s3) - 36px
