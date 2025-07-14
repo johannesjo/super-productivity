@@ -35,6 +35,18 @@ export const AVAILABLE_CUSTOM_THEMES: CustomTheme[] = [
     requiredMode: 'dark',
   },
   {
+    id: 'rainbow',
+    name: 'Rainbow',
+    url: 'assets/themes/rainbow.css',
+    requiredMode: 'system',
+  },
+  {
+    id: 'glass',
+    name: 'Glass',
+    url: 'assets/themes/glass.css',
+    requiredMode: 'dark',
+  },
+  {
     id: 'nord-polar-night',
     name: 'Nord Polar Night',
     url: 'assets/themes/nord-polar-night.css',

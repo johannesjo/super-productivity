@@ -406,6 +406,8 @@ body {
     var(--palette-foreground-secondary-text),
     var(--palette-foreground-secondary-text-alpha, 1)
   );
+  --task-detail-bg: var(--dark10);
+  --task-detail-shadow: var(--whiteframe-shadow-1dp);
 
   // Grid colors
   --grid-color: #dadce0;
