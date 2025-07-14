@@ -141,7 +141,7 @@ export const WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<WorkContex
       },
       {
         key: 'backgroundImageDark',
-        type: 'input',
+        type: 'image-input',
         templateOptions: {
           label: T.F.PROJECT.FORM_THEME.L_BACKGROUND_IMAGE_DARK,
           description: '* https://some/cool.jpg, file:///home/user/bg.png',
@@ -149,7 +149,7 @@ export const WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<WorkContex
       },
       {
         key: 'backgroundImageLight',
-        type: 'input',
+        type: 'image-input',
         templateOptions: {
           label: T.F.PROJECT.FORM_THEME.L_BACKGROUND_IMAGE_LIGHT,
           description: '* https://some/cool.jpg, file:///home/user/bg.png',

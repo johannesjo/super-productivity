@@ -1,0 +1,70 @@
+<h2 mat-dialog-title>Select Background Image from Unsplash</h2>
+
+<mat-dialog-content>
+  <mat-form-field
+    appearance="outline"
+    style="width: 100%; margin-bottom: 1rem"
+  >
+    <mat-label>Search images</mat-label>
+    <input
+      matInput
+      [(ngModel)]="searchQuery"
+      (ngModelChange)="onSearchChange($event)"
+      placeholder="e.g., nature, mountains, abstract"
+    />
+  </mat-form-field>
+
+  <div
+    class="loading-container"
+    *ngIf="isLoading"
+  >
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <div
+    class="image-grid"
+    *ngIf="!isLoading"
+  >
+    <div
+      class="image-item"
+      *ngFor="let photo of photos"
+      (click)="selectPhoto(photo)"
+    >
+      <img
+        [src]="getPhotoThumb(photo)"
+        [alt]="photo.alt_description || photo.description || 'Unsplash photo'"
+      />
+      <div class="image-overlay">
+        <span class="photographer">by {{ photo.user.name }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="no-results"
+    *ngIf="!isLoading && photos.length === 0 && searchQuery"
+  >
+    No images found. Try a different search term.
+  </div>
+
+  <div
+    class="api-key-notice"
+    *ngIf="!isLoading && photos.length === 0 && !searchQuery"
+  >
+    <p>To use the Unsplash image picker, you need to:</p>
+    <ol>
+      <li>
+        Register at
+        <a
+          href="https://unsplash.com/developers"
+          target="_blank"
+          >unsplash.com/developers</a
+        >
+      </li>
+      <li>Create a new application (free)</li>
+      <li>Copy your Access Key</li>
+      <li>Update the ACCESS_KEY in unsplash.service.ts</li>
+    </ol>
+    <p>The free tier allows 50 requests per hour.</p>
+  </div>
+</mat-dialog-content>
