@@ -1,3 +1,14 @@
+# [14.2.0](https://github.com/johannesjo/super-productivity/compare/v14.1.0...v14.2.0) (2025-07-15)
+
+### Bug Fixes
+
+- **notes:** fix [#4758](https://github.com/johannesjo/super-productivity/issues/4758) to allow scrolling in notes view drag/drop ([dcd3ec4](https://github.com/johannesjo/super-productivity/commit/dcd3ec4d4dd8ef3ee651d427e0bb99f2d3ec5e8b))
+- **release:** update GitHub release notes configuration ([8ee4344](https://github.com/johannesjo/super-productivity/commit/8ee4344a7961a985f58ae8da650aa0de44d767e1))
+
+### Features
+
+- add glass and colorful theme ([930aa84](https://github.com/johannesjo/super-productivity/commit/930aa84bf79f7518e9109e96f6ecd108c7cde2f3))
+
 # [14.1.0](https://github.com/johannesjo/super-productivity/compare/v14.0.5...v14.1.0) (2025-07-12)
 
 ### Bug Fixes
