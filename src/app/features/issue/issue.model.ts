@@ -16,7 +16,6 @@ import { GiteaIssue } from './providers/gitea/gitea-issue.model';
 import { RedmineCfg } from './providers/redmine/redmine.model';
 import { RedmineIssue } from './providers/redmine/redmine-issue.model';
 import { EntityState } from '@ngrx/entity';
-import { MODEL_VERSION_KEY } from '../../app.constants';
 import {
   CalendarProviderCfg,
   ICalIssue,
@@ -124,7 +123,6 @@ export interface SearchResultItemWithProviderId extends SearchResultItem {
 export interface IssueProviderState extends EntityState<IssueProvider> {
   ids: string[];
   // additional entities state properties
-  [MODEL_VERSION_KEY]: number;
 }
 
 // export type IssueProviderState = EntityState<IssueProvider>;

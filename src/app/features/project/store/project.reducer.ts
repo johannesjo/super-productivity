@@ -25,8 +25,6 @@ import {
 import { filterOutId } from '../../../util/filter-out-id';
 
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
-import { migrateProjectState } from '../migrate-projects-state.util';
-import { MODEL_VERSION_KEY } from '../../../app.constants';
 import { devError } from '../../../util/dev-error';
 import {
   addProject,
@@ -56,7 +54,6 @@ import {
   moveNoteToOtherProject,
   updateNoteOrder,
 } from '../../note/store/note.actions';
-import { MODEL_VERSION } from '../../../core/model-version';
 import { INBOX_PROJECT } from '../project.const';
 import { Log } from '../../../core/log';
 
@@ -86,7 +83,6 @@ export const initialProjectState: ProjectState = _addInboxProjectIfNecessary(
   projectAdapter.getInitialState({
     ids: [],
     entities: {},
-    [MODEL_VERSION_KEY]: MODEL_VERSION.PROJECT,
   }),
 );
 
@@ -97,9 +93,7 @@ export const projectReducer = createReducer<ProjectState>(
   // ------------
   on(loadAllData, (oldState, { appDataComplete }) =>
     _addInboxProjectIfNecessary(
-      appDataComplete.project
-        ? migrateProjectState({ ...appDataComplete.project })
-        : oldState,
+      appDataComplete.project ? appDataComplete.project : oldState,
     ),
   ),
 

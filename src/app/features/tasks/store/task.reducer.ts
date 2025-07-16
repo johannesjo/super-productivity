@@ -28,7 +28,6 @@ import {
   updateTimeSpentForTask,
 } from './task.reducer.util';
 import { taskAdapter } from './task.adapter';
-export { taskAdapter };
 import { moveItemInList } from '../../work-context/store/work-context-meta.helper';
 import {
   arrayMoveLeft,
@@ -46,15 +45,14 @@ import { Update } from '@ngrx/entity';
 import { unique } from '../../../util/unique';
 import { roundDurationVanilla } from '../../../util/round-duration';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
-import { migrateTaskState } from '../migrate-task-state.util';
 import { createReducer, on } from '@ngrx/store';
-import { MODEL_VERSION_KEY } from '../../../app.constants';
-import { MODEL_VERSION } from '../../../core/model-version';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
 import { TaskLog } from '../../../core/log';
+
+export { taskAdapter };
 
 export const TASK_FEATURE_NAME = 'tasks';
 
@@ -70,7 +68,6 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
   taskDetailTargetPanel: TaskDetailTargetPanel.Default,
   lastCurrentTaskId: null,
   isDataLoaded: false,
-  [MODEL_VERSION_KEY]: MODEL_VERSION.TASK,
 }) as TaskState;
 
 export const taskReducer = createReducer<TaskState>(
@@ -80,13 +77,13 @@ export const taskReducer = createReducer<TaskState>(
   // ------------
   on(loadAllData, (state, { appDataComplete }) =>
     appDataComplete.task
-      ? migrateTaskState({
+      ? {
           ...appDataComplete.task,
           currentTaskId: null,
           selectedTaskId: null,
           lastCurrentTaskId: appDataComplete.task.currentTaskId,
           isDataLoaded: true,
-        })
+        }
       : state,
   ),
 

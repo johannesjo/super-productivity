@@ -7,7 +7,6 @@ import {
 import { Obstruction, ObstructionState } from '../obstruction.model';
 import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
 import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
-import { migrateObstructionState } from '../../migrate-metric-states.util';
 
 export const OBSTRUCTION_FEATURE_NAME = 'obstruction';
 
@@ -36,9 +35,7 @@ export const obstructionReducer = createReducer<ObstructionState>(
   initialObstructionState,
 
   on(loadAllData, (state, { appDataComplete }) =>
-    appDataComplete.obstruction?.ids
-      ? appDataComplete.obstruction
-      : migrateObstructionState(state),
+    appDataComplete.obstruction?.ids ? appDataComplete.obstruction : state,
   ),
 
   on(addObstruction, (state, { obstruction }) =>

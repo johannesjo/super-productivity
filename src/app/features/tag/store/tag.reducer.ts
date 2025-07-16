@@ -19,9 +19,6 @@ import {
 } from '../../../util/array-move';
 import { unique } from '../../../util/unique';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
-import { migrateTagState } from '../migrate-tag-state.util';
-import { MODEL_VERSION_KEY } from '../../../app.constants';
-import { MODEL_VERSION } from '../../../core/model-version';
 import {
   addTag,
   deleteTag,
@@ -106,7 +103,6 @@ const _addMyDayTagIfNecessary = (state: TagState): TagState => {
 export const initialTagState: TagState = _addMyDayTagIfNecessary(
   tagAdapter.getInitialState({
     // additional entity state properties
-    [MODEL_VERSION_KEY]: MODEL_VERSION.TAG,
   }),
 );
 
@@ -116,9 +112,7 @@ export const tagReducer = createReducer<TagState>(
   // META ACTIONS
   // ------------
   on(loadAllData, (oldState, { appDataComplete }) =>
-    _addMyDayTagIfNecessary(
-      appDataComplete.tag ? migrateTagState({ ...appDataComplete.tag }) : oldState,
-    ),
+    _addMyDayTagIfNecessary(appDataComplete.tag ? { ...appDataComplete.tag } : oldState),
   ),
 
   on(

@@ -10,7 +10,6 @@ import { Task } from '../tasks/task.model';
 import { NoteService } from '../note/note.service';
 import { T } from '../../t.const';
 import { filter, first, map, skipUntil } from 'rxjs/operators';
-import { migrateReminders } from './migrate-reminder.util';
 import { devError } from '../../util/dev-error';
 import { Note } from '../note/note.model';
 import { environment } from 'src/environments/environment';
@@ -225,7 +224,7 @@ export class ReminderService {
   }
 
   private async _loadFromDatabase(): Promise<Reminder[]> {
-    return migrateReminders((await this._pfapiService.m.reminders.load()) || []);
+    return (await this._pfapiService.m.reminders.load()) || [];
   }
 
   private async _saveModel(
