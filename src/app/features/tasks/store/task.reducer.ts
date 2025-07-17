@@ -47,7 +47,6 @@ import { roundDurationVanilla } from '../../../util/round-duration';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { createReducer, on } from '@ngrx/store';
 import { PlannerActions } from '../../planner/store/planner.actions';
-import { getWorklogStr } from '../../../util/get-work-log-str';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
 import { TaskLog } from '../../../core/log';
@@ -566,7 +565,7 @@ export const taskReducer = createReducer<TaskState>(
         {
           id: task.id,
           changes: {
-            dueDay: getWorklogStr(newDay),
+            dueDay: newDay,
             dueWithTime: undefined,
           },
         },
@@ -584,7 +583,7 @@ export const taskReducer = createReducer<TaskState>(
       {
         id: fromTask.id,
         changes: {
-          dueDay: getWorklogStr(targetTask.dueDay),
+          dueDay: targetTask.dueDay,
           dueWithTime: undefined,
         },
       },
