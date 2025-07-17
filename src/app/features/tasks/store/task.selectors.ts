@@ -131,7 +131,10 @@ export const selectOverdueTasks = createSelector(
       .map((id) => s.entities[id] as Task)
       .filter(
         (task) =>
-          (task.dueDay && new Date(task.dueDay) < today) ||
+          // Note: String comparison works correctly here because dueDay is in YYYY-MM-DD format
+          // which is lexicographically sortable. This avoids timezone conversion issues that occur
+          // when creating Date objects from date strings.
+          (task.dueDay && task.dueDay < todayStr) ||
           (task.dueWithTime && task.dueWithTime < todayStart.getTime()),
       );
   },
@@ -196,13 +199,15 @@ export const selectAllTasksDueAndOverdue = createSelector(
   selectTagFeatureState,
   selectTodayStr,
   (s, tagState, todayStr): Task[] => {
-    const today = new Date(todayStr);
     return s.ids
       .map((id) => s.entities[id] as Task)
       .filter(
         (task) =>
           task.dueDay &&
-          new Date(task.dueDay) <= today &&
+          // Note: String comparison works correctly here because dueDay is in YYYY-MM-DD format
+          // which is lexicographically sortable. This avoids timezone conversion issues that occur
+          // when creating Date objects from date strings.
+          task.dueDay <= todayStr &&
           !tagState.entities[TODAY_TAG.id]?.taskIds.includes(task.id),
       );
   },
@@ -433,9 +438,11 @@ export const selectTasksDueForDay = createSelector(
 export const selectTasksDueAndOverdueForDay = createSelector(
   selectAllTasks,
   (tasks: Task[], props: { day: string }): TaskWithDueDay[] => {
-    const dayDate = new Date(props.day);
     return tasks.filter(
-      (task) => typeof task.dueDay === 'string' && new Date(task.dueDay) <= dayDate,
+      // Note: String comparison works correctly here because dueDay is in YYYY-MM-DD format
+      // which is lexicographically sortable. This avoids timezone conversion issues that occur
+      // when creating Date objects from date strings.
+      (task) => typeof task.dueDay === 'string' && task.dueDay <= props.day,
     ) as TaskWithDueDay[];
   },
 );
