@@ -14,6 +14,10 @@ import { getWorklogStr } from '../../util/get-work-log-str';
 import { DEFAULT_PROJECT } from '../../features/project/project.const';
 import { DEFAULT_TAG } from '../../features/tag/tag.const';
 import { PlannerActions } from '../../features/planner/store/planner.actions';
+import {
+  plannerFeatureKey,
+  plannerInitialState,
+} from '../../features/planner/store/planner.reducer';
 
 describe('taskSharedMetaReducer', () => {
   let mockReducer: jasmine.Spy;
@@ -222,6 +226,7 @@ describe('taskSharedMetaReducer', () => {
         ids: ['project1'],
         entities: { project1: mockProject },
       },
+      [plannerFeatureKey]: plannerInitialState,
     } as any as RootState;
   });
 
