@@ -1,5 +1,6 @@
 <div
   #gridContainer
+  [style.--nr-of-days]="daysToShow().length"
   class="week-grid-container {{ containerExtraClass() }}"
   [class.isCtrlKeyPressed]="isCtrlPressed()"
   (click)="onGridClick($event)"
