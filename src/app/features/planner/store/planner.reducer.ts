@@ -1,7 +1,6 @@
 import { createFeature, createReducer, on } from '@ngrx/store';
 import { PlannerActions } from './planner.actions';
 import { moveItemInArray } from '../../../util/move-item-in-array';
-import { ADD_TASK_PANEL_ID, OVERDUE_LIST_ID } from '../planner.model';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { unique } from '../../../util/unique';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
@@ -109,48 +108,7 @@ export const plannerReducer = createReducer(
     },
   ),
 
-  on(PlannerActions.transferTask, (state, action) => {
-    const targetDays = state.days[action.newDay] || [];
-
-    // alert(action.prevDay);
-    const updatePrevDay =
-      // NOTE: it is possible that there is no data saved yet when moving from scheduled to unscheduled
-      // don't update for add task panel and today list
-      action.prevDay === ADD_TASK_PANEL_ID ||
-      action.prevDay === OVERDUE_LIST_ID ||
-      !state.days[action.prevDay] ||
-      action.prevDay === action.today
-        ? {}
-        : {
-            [action.prevDay]: state.days[action.prevDay].filter(
-              (id) => id !== action.task.id,
-            ),
-          };
-
-    const updateNextDay: Partial<any> =
-      // don't update for add task panel and today list
-      action.newDay === ADD_TASK_PANEL_ID || action.newDay === action.today
-        ? {}
-        : {
-            [action.newDay]: unique([
-              ...targetDays.slice(0, action.targetIndex),
-              action.task.id,
-              ...targetDays.slice(action.targetIndex),
-            ])
-              // when moving a parent to the day, remove all sub-tasks
-              .filter((id) => !action.task.subTaskIds.includes(id)),
-          };
-    Log.log({ updateNextDay, updatePrevDay });
-
-    return {
-      ...state,
-      days: {
-        ...state.days,
-        ...updatePrevDay,
-        ...updateNextDay,
-      },
-    };
-  }),
+  // NOTE: transferTask is now handled in planner-shared.reducer.ts
 
   on(PlannerActions.moveInList, (state, action) => {
     const targetDays = state.days[action.targetDay] || [];

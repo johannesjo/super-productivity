@@ -558,21 +558,7 @@ export const taskReducer = createReducer<TaskState>(
 
   // PLANNER STUFF
   // --------------
-  on(
-    PlannerActions.transferTask,
-    (state, { task, today, targetIndex, newDay, prevDay }) => {
-      return taskAdapter.updateOne(
-        {
-          id: task.id,
-          changes: {
-            dueDay: newDay,
-            dueWithTime: undefined,
-          },
-        },
-        state,
-      );
-    },
-  ),
+  // NOTE: transferTask is now handled in planner-shared.reducer.ts
   on(PlannerActions.moveBeforeTask, (state, { toTaskId, fromTask }) => {
     const targetTask = state.entities[toTaskId] as Task;
     if (!targetTask) {

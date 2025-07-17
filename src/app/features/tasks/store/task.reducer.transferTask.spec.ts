@@ -4,8 +4,36 @@ import { initialTaskState, taskReducer } from './task.reducer';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { DEFAULT_TASK } from '../task.model';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { createCombinedTaskSharedMetaReducer } from '../../../root-store/meta/task-shared-meta-reducers/test-helpers';
+import { RootState } from '../../../root-store/root-state';
+import { TASK_FEATURE_NAME } from './task.reducer';
+import { TAG_FEATURE_NAME } from '../../tag/store/tag.reducer';
+import { plannerFeatureKey } from '../../planner/store/planner.reducer';
+import { TODAY_TAG } from '../../tag/tag.const';
+import { initialTagState } from '../../tag/store/tag.reducer';
+import { plannerInitialState } from '../../planner/store/planner.reducer';
 
 describe('Task Reducer - transferTask action', () => {
+  // Apply meta-reducers to the root reducer
+  const reducerWithMetaReducers = createCombinedTaskSharedMetaReducer((state, action) => {
+    // Simulate the root state reduction by applying individual feature reducers
+    const rootState = (state as RootState) || {
+      [TASK_FEATURE_NAME]: initialTaskState,
+      [TAG_FEATURE_NAME]: {
+        ...initialTagState,
+        entities: {
+          [TODAY_TAG.id]: TODAY_TAG,
+        },
+        ids: [TODAY_TAG.id],
+      },
+      [plannerFeatureKey]: plannerInitialState,
+    };
+
+    return {
+      ...rootState,
+      [TASK_FEATURE_NAME]: taskReducer(rootState[TASK_FEATURE_NAME], action),
+    };
+  });
   const createTask = (id: string, partial: Partial<Task> = {}): Task => ({
     ...DEFAULT_TASK,
     id,
@@ -44,6 +72,8 @@ describe('Task Reducer - transferTask action', () => {
 
   let stateWithTasks: TaskState;
 
+  let rootState: RootState;
+
   beforeEach(() => {
     // Create initial state with some tasks
     stateWithTasks = {
@@ -60,15 +90,29 @@ describe('Task Reducer - transferTask action', () => {
       lastCurrentTaskId: null,
       isDataLoaded: true,
     };
+
+    // Create root state with all necessary slices
+    rootState = {
+      [TASK_FEATURE_NAME]: stateWithTasks,
+      [TAG_FEATURE_NAME]: {
+        ...initialTagState,
+        entities: {
+          [TODAY_TAG.id]: TODAY_TAG,
+        },
+        ids: [TODAY_TAG.id],
+      },
+      [plannerFeatureKey]: plannerInitialState,
+    } as RootState;
   });
 
   it('should update task dueDay to newDay', () => {
     const task = stateWithTasks.entities.task1 as Task;
     const action = createTransferTaskAction(task, '2025-01-15', '2025-01-17');
 
-    const result = taskReducer(stateWithTasks, action);
+    const result = reducerWithMetaReducers(rootState, action) as RootState;
+    const taskState = result[TASK_FEATURE_NAME];
 
-    expect(result.entities.task1).toEqual({
+    expect(taskState.entities.task1).toEqual({
       ...task,
       dueDay: '2025-01-17',
       dueWithTime: undefined,
@@ -80,9 +124,10 @@ describe('Task Reducer - transferTask action', () => {
     expect(task.dueWithTime).toBe(1234567890); // Verify it has a dueWithTime initially
 
     const action = createTransferTaskAction(task, '2025-01-15', '2025-01-17');
-    const result = taskReducer(stateWithTasks, action);
+    const result = reducerWithMetaReducers(rootState, action) as RootState;
+    const taskState = result[TASK_FEATURE_NAME];
 
-    expect(result.entities.task1?.dueWithTime).toBeUndefined();
+    expect(taskState.entities.task1?.dueWithTime).toBeUndefined();
   });
 
   it('should handle transferring task with no previous dueDay', () => {
@@ -90,9 +135,10 @@ describe('Task Reducer - transferTask action', () => {
     expect(task.dueDay).toBeUndefined(); // Verify it has no dueDay initially
 
     const action = createTransferTaskAction(task, 'ADD_TASK_PANEL_ID', '2025-01-18');
-    const result = taskReducer(stateWithTasks, action);
+    const result = reducerWithMetaReducers(rootState, action) as RootState;
+    const taskState = result[TASK_FEATURE_NAME];
 
-    expect(result.entities.task3).toEqual({
+    expect(taskState.entities.task3).toEqual({
       ...task,
       dueDay: '2025-01-18',
       dueWithTime: undefined,
@@ -103,9 +149,10 @@ describe('Task Reducer - transferTask action', () => {
     const task = stateWithTasks.entities.task2 as Task;
     const action = createTransferTaskAction(task, '2025-01-16', 'ADD_TASK_PANEL_ID');
 
-    const result = taskReducer(stateWithTasks, action);
+    const result = reducerWithMetaReducers(rootState, action) as RootState;
+    const taskState = result[TASK_FEATURE_NAME];
 
-    expect(result.entities.task2).toEqual({
+    expect(taskState.entities.task2).toEqual({
       ...task,
       dueDay: 'ADD_TASK_PANEL_ID',
       dueWithTime: undefined,
@@ -117,9 +164,10 @@ describe('Task Reducer - transferTask action', () => {
     const task = stateWithTasks.entities.task1 as Task;
     const action = createTransferTaskAction(task, '2025-01-15', today);
 
-    const result = taskReducer(stateWithTasks, action);
+    const result = reducerWithMetaReducers(rootState, action) as RootState;
+    const taskState = result[TASK_FEATURE_NAME];
 
-    expect(result.entities.task1).toEqual({
+    expect(taskState.entities.task1).toEqual({
       ...task,
       dueDay: today,
       dueWithTime: undefined,
@@ -130,11 +178,12 @@ describe('Task Reducer - transferTask action', () => {
     const task = stateWithTasks.entities.task1 as Task;
     const action = createTransferTaskAction(task, '2025-01-15', '2025-01-17');
 
-    const result = taskReducer(stateWithTasks, action);
+    const result = reducerWithMetaReducers(rootState, action) as RootState;
+    const taskState = result[TASK_FEATURE_NAME];
 
     // Other tasks should remain unchanged
-    expect(result.entities.task2).toEqual(stateWithTasks.entities.task2);
-    expect(result.entities.task3).toEqual(stateWithTasks.entities.task3);
+    expect(taskState.entities.task2).toEqual(stateWithTasks.entities.task2);
+    expect(taskState.entities.task3).toEqual(stateWithTasks.entities.task3);
   });
 
   it('should handle transferring with targetTaskId parameter', () => {
@@ -148,10 +197,11 @@ describe('Task Reducer - transferTask action', () => {
       'task2',
     );
 
-    const result = taskReducer(stateWithTasks, action);
+    const result = reducerWithMetaReducers(rootState, action) as RootState;
+    const taskState = result[TASK_FEATURE_NAME];
 
     // Should still update dueDay regardless of targetTaskId
-    expect(result.entities.task1).toEqual({
+    expect(taskState.entities.task1).toEqual({
       ...task,
       dueDay: '2025-01-17',
       dueWithTime: undefined,
@@ -175,10 +225,16 @@ describe('Task Reducer - transferTask action', () => {
       entities: { task4: task },
     };
 
-    const action = createTransferTaskAction(task, '2025-01-15', '2025-01-20');
-    const result = taskReducer(stateWithComplexTask, action);
+    const complexRootState = {
+      ...rootState,
+      [TASK_FEATURE_NAME]: stateWithComplexTask,
+    };
 
-    expect(result.entities.task4).toEqual({
+    const action = createTransferTaskAction(task, '2025-01-15', '2025-01-20');
+    const result = reducerWithMetaReducers(complexRootState, action) as RootState;
+    const taskState = result[TASK_FEATURE_NAME];
+
+    expect(taskState.entities.task4).toEqual({
       ...task,
       dueDay: '2025-01-20',
       dueWithTime: undefined,
@@ -195,10 +251,11 @@ describe('Task Reducer - transferTask action', () => {
     const task = stateWithTasks.entities.task1 as Task;
     const action = createTransferTaskAction(task, '2025-01-15', '2025-01-15');
 
-    const result = taskReducer(stateWithTasks, action);
+    const result = reducerWithMetaReducers(rootState, action) as RootState;
+    const taskState = result[TASK_FEATURE_NAME];
 
     // Should still update (clear dueWithTime)
-    expect(result.entities.task1).toEqual({
+    expect(taskState.entities.task1).toEqual({
       ...task,
       dueDay: '2025-01-15',
       dueWithTime: undefined,

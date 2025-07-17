@@ -115,42 +115,7 @@ export const tagReducer = createReducer<TagState>(
     _addMyDayTagIfNecessary(appDataComplete.tag ? { ...appDataComplete.tag } : oldState),
   ),
 
-  on(
-    PlannerActions.transferTask,
-    (state, { task, today, targetIndex, newDay, prevDay, targetTaskId }) => {
-      const todayTag = state.entities[TODAY_TAG.id] as Tag;
-
-      if (prevDay === today && newDay !== today) {
-        return tagAdapter.updateOne(
-          {
-            id: TODAY_TAG.id,
-            changes: {
-              taskIds: todayTag.taskIds.filter((id) => id !== task.id),
-            },
-          },
-          state,
-        );
-      }
-      if (prevDay !== today && newDay === today) {
-        const taskIds = [...todayTag.taskIds];
-        const targetIndexToUse = targetTaskId
-          ? todayTag.taskIds.findIndex((id) => id === targetTaskId)
-          : targetIndex;
-        taskIds.splice(targetIndexToUse, 0, task.id);
-        return tagAdapter.updateOne(
-          {
-            id: TODAY_TAG.id,
-            changes: {
-              taskIds: unique(taskIds),
-            },
-          },
-          state,
-        );
-      }
-
-      return state;
-    },
-  ),
+  // NOTE: transferTask is now handled in planner-shared.reducer.ts
 
   on(PlannerActions.planTaskForDay, (state, { task, day, isAddToTop }) => {
     const todayStr = getWorklogStr();
