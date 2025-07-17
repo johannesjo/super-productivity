@@ -29,7 +29,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 })
 export class IconInputComponent extends FieldType<FormlyFieldConfig> {
   filteredIcons = signal<string[]>([]);
-  isEmoji = signal(true);
+  isEmoji = signal(false);
 
   protected readonly IS_ELECTRON = IS_ELECTRON;
   isLinux = IS_ELECTRON && window.ea.isLinux();
@@ -57,14 +57,14 @@ export class IconInputComponent extends FieldType<FormlyFieldConfig> {
     } else if (!val) {
       this.formControl.setValue('');
     }
-    this.isEmoji.set(isEmoji);
+    this.isEmoji.set(isEmoji && !this.filteredIcons().includes(val));
   }
 
   onIconSelect(icon: string): void {
     this.formControl.setValue(icon);
     const isEmoji = /\p{Emoji}/u.test(icon);
     console.log(2, { isEmoji });
-    this.isEmoji.set(isEmoji);
+    this.isEmoji.set(false);
   }
 
   openEmojiPicker(): void {

@@ -1,10 +1,6 @@
-<!-- TODO make this work -->
-<!--<mat-icon matSuffix="">{{formControl.value}}</mat-icon>-->
-
 <mat-icon [style.visibility]="isEmoji() ? 'hidden' : 'visible'">{{
   formControl.value
 }}</mat-icon>
-{{ isEmoji() }}
 
 <input
   [ngModel]="formControl.value"
