@@ -36,11 +36,11 @@
 
   <div
     class="days"
-    [class.month-view]="isMonthView$ | async"
+    [class.month-view]="isMonthView()"
   >
-    @if (!(isMonthView$ | async)) {
+    @if (!isMonthView()) {
       <div class="filler"><!--for time --></div>
-      @for (day of daysToShow; track $index) {
+      @for (day of daysToShow(); track $index) {
         <div class="day">
           @if ($index === 0) {
             <mat-icon>wb_sunny</mat-icon>
@@ -51,27 +51,27 @@
       }
     }
 
-    @if (isMonthView$ | async) {
+    @if (isMonthView()) {
       <div class="month-header">
-        <div class="month-title">{{ daysToShow[14] | date: 'MMMM yyyy' }}</div>
+        <div class="month-title">{{ daysToShow()[14] | date: 'MMMM yyyy' }}</div>
       </div>
     }
   </div>
 </header>
 
-@if (isMonthView$ | async) {
+@if (isMonthView()) {
   <schedule-month
-    [events]="events$ | async"
-    [daysToShow]="daysToShow"
-    [weeksToShow]="weeksToShow"
+    [events]="events()"
+    [daysToShow]="daysToShow()"
+    [weeksToShow]="weeksToShow()"
   ></schedule-month>
 } @else {
   <schedule-week
-    [events]="events$ | async"
-    [beyondBudget]="beyondBudget$ | async"
-    [daysToShow]="daysToShow"
-    [workStartEnd]="workStartEnd$ | async"
-    [currentTimeRow]="currentTimeRow$ | async"
+    [events]="events()"
+    [beyondBudget]="beyondBudget()"
+    [daysToShow]="daysToShow()"
+    [workStartEnd]="workStartEnd()"
+    [currentTimeRow]="currentTimeRow()"
   ></schedule-week>
 }
 
