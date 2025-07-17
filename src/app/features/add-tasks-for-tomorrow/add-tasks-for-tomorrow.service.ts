@@ -204,37 +204,36 @@ export class AddTasksForTomorrowService {
 
   private _sortAll(tasks: TaskCopy[]): TaskCopy[] {
     return tasks.sort((a, b) => {
-      // Handle cases where properties might be undefined
-      const aDate = a.dueDay ? new Date(a.dueDay) : null;
-      const bDate = b.dueDay ? new Date(b.dueDay) : null;
+      // Handle null cases first - tasks without due dates go last
+      const aHasDue = a.dueWithTime || a.dueDay;
+      const bHasDue = b.dueWithTime || b.dueDay;
+      if (!aHasDue && !bHasDue) return 0;
+      if (!aHasDue) return 1;
+      if (!bHasDue) return -1;
 
-      // Get timestamp values, with fallbacks
-      const aTime =
-        a.dueWithTime || (aDate ? aDate.setHours(0, 0, 0, 0) : Number.MAX_SAFE_INTEGER);
-      const bTime =
-        b.dueWithTime || (bDate ? bDate.setHours(0, 0, 0, 0) : Number.MAX_SAFE_INTEGER);
+      // Check if tasks are on the same day
+      const aDay = a.dueWithTime ? getWorklogStr(new Date(a.dueWithTime)) : a.dueDay;
+      const bDay = b.dueWithTime ? getWorklogStr(new Date(b.dueWithTime)) : b.dueDay;
 
-      // For same day comparison
-      const aDay = a.dueWithTime
-        ? new Date(a.dueWithTime).setHours(0, 0, 0, 0)
-        : aDate
-          ? aDate.setHours(0, 0, 0, 0)
-          : null;
-      const bDay = b.dueWithTime
-        ? new Date(b.dueWithTime).setHours(0, 0, 0, 0)
-        : bDate
-          ? bDate.setHours(0, 0, 0, 0)
-          : null;
-
-      // Special handling for same day
-      if (aDay !== null && bDay !== null && aDay === bDay) {
-        // If one has dueDay without time and other has dueWithTime
+      if (aDay === bDay) {
+        // Same day: tasks with only dueDay (no time) come before tasks with dueWithTime
         if (a.dueDay && !a.dueWithTime && b.dueWithTime) return -1;
         if (b.dueDay && !b.dueWithTime && a.dueWithTime) return 1;
+
+        // Both have time on same day
+        if (a.dueWithTime && b.dueWithTime) {
+          return a.dueWithTime - b.dueWithTime;
+        }
       }
 
-      // Default chronological ordering
-      return aTime - bTime;
+      // Different days or both have only dueDay
+      // Note: String comparison works correctly here because dueDay is in YYYY-MM-DD format
+      // which is lexicographically sortable. This avoids timezone conversion issues.
+      if (aDay && bDay) {
+        return aDay.localeCompare(bDay);
+      }
+
+      return 0;
     });
   }
 }
