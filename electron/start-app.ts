@@ -201,7 +201,14 @@ export const startApp = (): void => {
 
       // don't update if the user is about to close
       if (!appIN.isQuiting && idleTime > CONFIG.MIN_IDLE_TIME) {
+        log(
+          `Sending idle time to frontend: ${idleTime}ms (threshold: ${CONFIG.MIN_IDLE_TIME}ms)`,
+        );
         mainWin.webContents.send(IPC.IDLE_TIME, idleTime);
+      } else {
+        log(
+          `NOT sending idle time: ${idleTime}ms (threshold: ${CONFIG.MIN_IDLE_TIME}ms, isQuiting: ${appIN.isQuiting})`,
+        );
       }
     };
 
@@ -220,26 +227,32 @@ export const startApp = (): void => {
     lazySetInterval(checkIdle, CONFIG.IDLE_PING_INTERVAL);
 
     powerMonitor.on('suspend', () => {
+      log('powerMonitor: System suspend detected');
       appIN.isLocked = true;
       suspendStart = Date.now();
       mainWin.webContents.send(IPC.SUSPEND);
     });
 
     powerMonitor.on('lock-screen', () => {
+      log('powerMonitor: Screen lock detected');
       appIN.isLocked = true;
       suspendStart = Date.now();
       mainWin.webContents.send(IPC.SUSPEND);
     });
 
     powerMonitor.on('resume', () => {
+      const idleTime = Date.now() - suspendStart;
+      log(`powerMonitor: System resume detected. Idle time: ${idleTime}ms`);
       appIN.isLocked = false;
-      sendIdleMsgIfOverMin(Date.now() - suspendStart);
+      sendIdleMsgIfOverMin(idleTime);
       mainWin.webContents.send(IPC.RESUME);
     });
 
     powerMonitor.on('unlock-screen', () => {
+      const idleTime = Date.now() - suspendStart;
+      log(`powerMonitor: Screen unlock detected. Idle time: ${idleTime}ms`);
       appIN.isLocked = false;
-      sendIdleMsgIfOverMin(Date.now() - suspendStart);
+      sendIdleMsgIfOverMin(idleTime);
       mainWin.webContents.send(IPC.RESUME);
     });
 
