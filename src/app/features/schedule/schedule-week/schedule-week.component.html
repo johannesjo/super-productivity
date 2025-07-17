@@ -1,7 +1,7 @@
 <div
   #gridContainer
-  class="week-grid-container {{ containerExtraClass }}"
-  [class.isCtrlKeyPressed]="isCtrlPressed"
+  class="week-grid-container {{ containerExtraClass() }}"
+  [class.isCtrlKeyPressed]="isCtrlPressed()"
   (click)="onGridClick($event)"
   (mousemove)="onMoveOverGrid($event)"
 >
@@ -24,12 +24,12 @@
   }
 
   <!-- Grid Cols -->
-  @for (day of daysToShow; track $index) {
+  @for (day of daysToShow(); track $index) {
     <div
       class="col"
       [attr.data-day]="day"
       style="grid-column: {{ $index + 2 }}; grid-row: 1 / span {{
-        ($index === 0 ? currentTimeRow : endOfDayColRowStart) - 1
+        ($index === 0 ? currentTimeRow() : endOfDayColRowStart()) - 1
       }}"
     >
       <div class="drop-label">{{ T.F.SCHEDULE.PLAN_START_DAY | translate }}</div>
@@ -38,24 +38,26 @@
       class="col end-of-day"
       [attr.data-day]="day"
       style="grid-column: {{ $index + 2 }}; grid-row: {{
-        $index === 0 ? currentTimeRow : endOfDayColRowStart
-      }} / span {{ totalRows - ($index === 0 ? currentTimeRow : endOfDayColRowStart) }}"
+        $index === 0 ? currentTimeRow() : endOfDayColRowStart()
+      }} / span {{
+        totalRows - ($index === 0 ? currentTimeRow() : endOfDayColRowStart())
+      }}"
     >
       <div class="drop-label">{{ T.F.SCHEDULE.PLAN_END_DAY | translate }}</div>
     </div>
   }
 
   <!-- Work Start and End -->
-  @if (workStartEnd) {
+  @if (workStartEnd()) {
     <div
       class="work-start"
-      style="grid-row: {{ workStartEnd.workStartRow }}"
+      style="grid-row: {{ workStartEnd()!.workStartRow }}"
     >
       <div>{{ T.F.SCHEDULE.START | translate }}</div>
     </div>
     <div
       class="work-end"
-      style="grid-row: {{ workStartEnd.workEndRow }}"
+      style="grid-row: {{ workStartEnd()!.workEndRow }}"
     >
       <div>{{ T.F.SCHEDULE.END | translate }}</div>
     </div>
@@ -63,13 +65,13 @@
 
   <div
     class="current-time"
-    style="grid-column: 2;  grid-row: {{ currentTimeRow }} / span 1"
+    style="grid-column: 2;  grid-row: {{ currentTimeRow() }} / span 1"
   >
     <div class="circle"></div>
   </div>
 
   <!-- Events -->
-  @for (ev of safeEvents; track ev.id) {
+  @for (ev of safeEvents(); track ev.id) {
     @if (
       ev.type === SVEType.Task ||
       ev.type === SVEType.SplitTask ||
@@ -92,7 +94,7 @@
   }
 
   <!-- Excess tasks planned for day -->
-  @for (beyondBudgetDay of safeBeyondBudget; track i; let i = $index) {
+  @for (beyondBudgetDay of safeBeyondBudget(); track i; let i = $index) {
     @if (beyondBudgetDay.length > 0) {
       <div
         class="excess-entries"
@@ -124,12 +126,12 @@
     }
   }
 
-  @if (newTaskPlaceholder$ | async; as newTaskPlaceholder) {
+  @if (newTaskPlaceholder(); as newTaskPlaceholder) {
     <create-task-placeholder
-      [isEditMode]="isCreateTaskActive"
+      [isEditMode]="isCreateTaskActive()"
       [time]="newTaskPlaceholder.time"
       [date]="newTaskPlaceholder.date"
-      (editEnd)="isCreateTaskActive = false; this.newTaskPlaceholder$.next(null)"
+      (editEnd)="isCreateTaskActive.set(false); this.newTaskPlaceholder.set(null)"
       [style]="newTaskPlaceholder.style"
     >
     </create-task-placeholder>
