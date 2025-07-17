@@ -78,11 +78,19 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
     .hour12;
 
   times: string[] = this.rowsByNr.map((_, index) => {
-    return this.is12HourFormat
-      ? index >= 13
-        ? (index - 12).toString() + ':00 PM'
-        : index.toString() + ':00 AM'
-      : index.toString() + ':00';
+    if (this.is12HourFormat) {
+      if (index === 0) {
+        return '12:00 AM'; // Midnight
+      } else if (index === 12) {
+        return '12:00 PM'; // Noon
+      } else if (index < 12) {
+        return index.toString() + ':00 AM';
+      } else {
+        return (index - 12).toString() + ':00 PM';
+      }
+    } else {
+      return index.toString() + ':00';
+    }
   });
 
   endOfDayColRowStart = signal<number>(D_HOURS * 0.5 * FH);
