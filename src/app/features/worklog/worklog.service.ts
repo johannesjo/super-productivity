@@ -33,6 +33,7 @@ import { PfapiService } from '../../pfapi/pfapi.service';
 import { DataInitStateService } from '../../core/data-init/data-init-state.service';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import { TaskArchiveService } from '../time-tracking/task-archive.service';
+import { getWorklogStr } from '../../util/get-work-log-str';
 
 @Injectable({ providedIn: 'root' })
 export class WorklogService {
@@ -175,15 +176,19 @@ export class WorklogService {
   ): Observable<WorklogTask[]> {
     const isProjectIdProvided: boolean = !!projectId || projectId === null;
 
+    // Convert date range to date strings for timezone-safe comparison
+    const rangeStartStr = getWorklogStr(rangeStart);
+    const rangeEndStr = getWorklogStr(rangeEnd);
+
     return this.worklogTasks$.pipe(
       map((tasks) => {
         tasks = tasks.filter((task: WorklogTask) => {
-          // NOTE: parsing date string to Date object
-          const taskDate = new Date(task.dateStr);
+          // Use date string comparison instead of Date object comparison
+          // to avoid timezone issues
           return (
             (!isProjectIdProvided || task.projectId === projectId) &&
-            taskDate >= rangeStart &&
-            taskDate <= rangeEnd
+            task.dateStr >= rangeStartStr &&
+            task.dateStr <= rangeEndStr
           );
         });
 
@@ -191,10 +196,9 @@ export class WorklogService {
           tasks = tasks.map((task): WorklogTask => {
             const timeSpentOnDay: any = {};
             Object.keys(task.timeSpentOnDay).forEach((dateStr) => {
-              // NOTE: parsing date string to Date object
-              const date = new Date(dateStr);
-
-              if (date >= rangeStart && date <= rangeEnd) {
+              // Use date string comparison instead of Date object comparison
+              // to avoid timezone issues
+              if (dateStr >= rangeStartStr && dateStr <= rangeEndStr) {
                 timeSpentOnDay[dateStr] = task.timeSpentOnDay[dateStr];
               }
             });
