@@ -4,112 +4,116 @@ This file lists all occurrences of `getWorklogStr()` called with parameters, whi
 
 ## List of Occurrences
 
-1. **date.service.ts**
+### Completed
 
-   - `src/app/core/date/date.service.ts`: `return getWorklogStr(date);`
-
-2. **task-repeat-cfg.service.ts**
+1. **task-repeat-cfg.service.ts** ✓ (No fix needed - tested and works correctly)
 
    - `src/app/features/task-repeat-cfg/task-repeat-cfg.service.ts`: `dueDay: getWorklogStr(targetCreated),`
 
-3. **dialog-edit-task-repeat-cfg.component.ts**
+2. **short-syntax.effects.ts** ✓ (No fix needed - tested and works correctly)
 
-   - `src/app/features/task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component.ts`: `startDate: getWorklogStr(this._data.task.dueWithTime || undefined),`
+   - `src/app/features/tasks/store/short-syntax.effects.ts`: `const plannedDayInIsoFormat = getWorklogStr(plannedDay);`
 
-4. **task-view-customizer.service.ts** (Already fixed)
+3. **dialog-schedule-task.component.ts** ✓ (No fix needed - already uses dateStrToUtcDate)
+
+   - `src/app/features/planner/dialog-schedule-task/dialog-schedule-task.component.ts`: `const newDay = getWorklogStr(newDayDate);`
+
+4. **work-context.service.ts** ✓ (No fix needed - works correctly)
+
+   - `src/app/features/work-context/work-context.service.ts`: `(t) => !!t && !t.parentId && t.doneOn && getWorklogStr(t.doneOn) === day,`
+
+5. **gitlab-common-interfaces.service.ts** ✓ (Fixed - use date string directly)
+
+   - `src/app/features/issue/providers/gitlab/gitlab-common-interfaces.service.ts`: `dueDay: issue.due_date ? getWorklogStr(issue.due_date) : undefined,`
+
+6. **open-project-common-interfaces.service.ts** ✓ (Fixed - use date string directly)
+
+   - `src/app/features/issue/providers/open-project/open-project-common-interfaces.service.ts`: `dueDay: issue.startDate ? getWorklogStr(issue.startDate) : undefined,`
+
+7. **task-view-customizer.service.ts** ✓ (Already fixed in previous session)
 
    - `src/app/features/task-view-customizer/task-view-customizer.service.ts`: Multiple occurrences for date calculations
 
-5. **metric.util.ts**
+8. **add-tasks-for-tomorrow.service.ts** ✓ (Already fixed in previous session)
 
-   - `src/app/features/metric/metric.util.ts`: `start: getWorklogStr(s.start),`
+   - `src/app/features/add-tasks-for-tomorrow/add-tasks-for-tomorrow.service.ts`: Multiple occurrences
 
-6. **archive.service.ts**
+9. **dialog-edit-task-repeat-cfg.component.ts** ✓ (No fix needed - converts timestamp to local date string correctly)
 
-   - `src/app/features/time-tracking/archive.service.ts`: `todayStr: getWorklogStr(now),`
+   - `src/app/features/task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component.ts`: `startDate: getWorklogStr(this._data.task.dueWithTime || undefined),`
 
-7. **map-archive-to-worklog-weeks.ts**
+10. **date.service.ts** ✓ (No fix needed - utility wrapper for converting timestamps to local date strings)
 
-   - `src/app/features/worklog/util/map-archive-to-worklog-weeks.ts`: `getWorklogStr(entities[task.parentId].created)`
-   - `src/app/features/worklog/util/map-archive-to-worklog-weeks.ts`: `return { [getWorklogStr(task.created)]: 1 };`
+- `src/app/core/date/date.service.ts`: `return getWorklogStr(date);`
 
-8. **map-archive-to-worklog.ts**
+11. **metric.util.ts** ✓ (No fix needed - converts timestamp to local date string for metrics display)
 
-   - `src/app/features/worklog/util/map-archive-to-worklog.ts`: `getWorklogStr(entities[task.parentId].doneOn || entities[task.parentId].created)`
-   - `src/app/features/worklog/util/map-archive-to-worklog.ts`: `return { [getWorklogStr(task.doneOn || task.created)]: 1 };`
+- `src/app/features/metric/metric.util.ts`: `start: getWorklogStr(s.start),`
 
-9. **worklog-export.component.ts**
+12. **archive.service.ts** ✓ (No fix needed - converts current timestamp to today string for archiving)
 
-   - `src/app/features/worklog/worklog-export/worklog-export.component.ts`: `'tasks' + getWorklogStr(rangeStart) + '-' + getWorklogStr(rangeEnd) + '.csv';`
+- `src/app/features/time-tracking/archive.service.ts`: `todayStr: getWorklogStr(now),`
 
-10. **short-syntax.effects.ts**
+13. **map-archive-to-worklog-weeks.ts** ✓ (No fix needed - converts timestamps to local date strings for worklog)
 
-    - `src/app/features/tasks/store/short-syntax.effects.ts`: `const plannedDayInIsoFormat = getWorklogStr(plannedDay);`
+- `src/app/features/worklog/util/map-archive-to-worklog-weeks.ts`: `getWorklogStr(entities[task.parentId].created)`
+- `src/app/features/worklog/util/map-archive-to-worklog-weeks.ts`: `return { [getWorklogStr(task.created)]: 1 };`
 
-11. **task-context-menu-inner.component.ts**
+14. **map-archive-to-worklog.ts** ✓ (No fix needed - converts doneOn/created timestamps to local date strings)
 
-    - `src/app/features/tasks/task-context-menu/task-context-menu-inner/task-context-menu-inner.component.ts`: `const newDay = getWorklogStr(newDayDate);`
+- `src/app/features/worklog/util/map-archive-to-worklog.ts`: `getWorklogStr(entities[task.parentId].doneOn || entities[task.parentId].created)`
+- `src/app/features/worklog/util/map-archive-to-worklog.ts`: `return { [getWorklogStr(task.doneOn || task.created)]: 1 };`
 
-12. **get-today-str.ts**
+15. **worklog-export.component.ts** ✓ (No fix needed - converts Date objects to date strings for filename)
 
-    - `src/app/features/tasks/util/get-today-str.ts`: `export const getTodayStr = (): string => getWorklogStr(new Date());`
+- `src/app/features/worklog/worklog-export/worklog-export.component.ts`: `'tasks' + getWorklogStr(rangeStart) + '-' + getWorklogStr(rangeEnd) + '.csv';`
 
-13. **dialog-view-task-reminders.component.ts**
+16. **task-context-menu-inner.component.ts** ✓ (No fix needed - converts Date objects for task scheduling)
 
-    - `src/app/features/tasks/dialog-view-task-reminders/dialog-view-task-reminders.component.ts`: `day: getWorklogStr(getTomorrow()),`
+- `src/app/features/tasks/task-context-menu/task-context-menu-inner/task-context-menu-inner.component.ts`: `const newDay = getWorklogStr(newDayDate);`
 
-14. **dialog-time-estimate.component.ts**
+17. **get-today-str.ts** ✓ (No fix needed - utility function for today's date string)
 
-    - `src/app/features/tasks/dialog-time-estimate/dialog-time-estimate.component.ts`: `[getWorklogStr(result.date)]: result.timeSpent,`
+- `src/app/features/tasks/util/get-today-str.ts`: `export const getTodayStr = (): string => getWorklogStr(new Date());`
 
-15. **tasks-by-tag.component.ts**
+18. **dialog-view-task-reminders.component.ts** ✓ (No fix needed - converts tomorrow Date to date string)
 
-    - `src/app/features/tasks/tasks-by-tag/tasks-by-tag.component.ts`: `const yesterdayDayStr = getWorklogStr(yesterdayDate);`
+- `src/app/features/tasks/dialog-view-task-reminders/dialog-view-task-reminders.component.ts`: `day: getWorklogStr(getTomorrow()),`
 
-16. **work-context.service.ts**
+### Remaining
 
-    - `src/app/features/work-context/work-context.service.ts`: `(t) => !!t && !t.parentId && t.doneOn && getWorklogStr(t.doneOn) === day,`
+1. **dialog-time-estimate.component.ts**
 
-17. **issue-panel-calendar-agenda.component.ts**
+   - `src/app/features/tasks/dialog-time-estimate/dialog-time-estimate.component.ts`: `[getWorklogStr(result.date)]: result.timeSpent,`
 
-    - `src/app/features/issue-panel/issue-panel-calendar-agenda/issue-panel-calendar-agenda.component.ts`: `const date = getWorklogStr((item.issueData as ICalIssueReduced).start);`
+2. **tasks-by-tag.component.ts**
 
-18. **dialog-schedule-task.component.ts**
+   - `src/app/features/tasks/tasks-by-tag/tasks-by-tag.component.ts`: `const yesterdayDayStr = getWorklogStr(yesterdayDate);`
 
-    - `src/app/features/planner/dialog-schedule-task/dialog-schedule-task.component.ts`: `const newDay = getWorklogStr(newDayDate);`
+3. **issue-panel-calendar-agenda.component.ts**
 
-19. **planner.service.ts**
+   - `src/app/features/issue-panel/issue-panel-calendar-agenda/issue-panel-calendar-agenda.component.ts`: `const date = getWorklogStr((item.issueData as ICalIssueReduced).start);`
 
-    - `src/app/features/planner/planner.service.ts`: `if (days[1]?.dayDate === getWorklogStr(tomorrow)) {`
+4. **planner.service.ts**
 
-20. **add-tasks-for-tomorrow.service.ts** (Already fixed)
+   - `src/app/features/planner/planner.service.ts`: `if (days[1]?.dayDate === getWorklogStr(tomorrow)) {`
 
-    - `src/app/features/add-tasks-for-tomorrow/add-tasks-for-tomorrow.service.ts`: Multiple occurrences
+5. **create-task-placeholder.component.ts**
 
-21. **gitlab-common-interfaces.service.ts**
+   - `src/app/features/schedule/create-task-placeholder/create-task-placeholder.component.ts`: `day: getWorklogStr(this.due()),`
 
-    - `src/app/features/issue/providers/gitlab/gitlab-common-interfaces.service.ts`: `dueDay: issue.due_date ? getWorklogStr(issue.due_date) : undefined,`
+6. **create-blocked-blocks-by-day-map.ts**
 
-22. **open-project-common-interfaces.service.ts**
+   - `src/app/features/schedule/map-schedule-data/create-blocked-blocks-by-day-map.ts`: `const dayStartDateStr = getWorklogStr(block.start);`
+   - `src/app/features/schedule/map-schedule-data/create-blocked-blocks-by-day-map.ts`: `const dayStr = getWorklogStr(curDateTs);`
 
-    - `src/app/features/issue/providers/open-project/open-project-common-interfaces.service.ts`: `dueDay: issue.startDate ? getWorklogStr(issue.startDate) : undefined,`
+7. **get-simple-counter-streak-duration.ts**
 
-23. **create-task-placeholder.component.ts**
+   - `src/app/features/simple-counter/get-simple-counter-streak-duration.ts`: Multiple occurrences
 
-    - `src/app/features/schedule/create-task-placeholder/create-task-placeholder.component.ts`: `day: getWorklogStr(this.due()),`
-
-24. **create-blocked-blocks-by-day-map.ts**
-
-    - `src/app/features/schedule/map-schedule-data/create-blocked-blocks-by-day-map.ts`: `const dayStartDateStr = getWorklogStr(block.start);`
-    - `src/app/features/schedule/map-schedule-data/create-blocked-blocks-by-day-map.ts`: `const dayStr = getWorklogStr(curDateTs);`
-
-25. **get-simple-counter-streak-duration.ts**
-
-    - `src/app/features/simple-counter/get-simple-counter-streak-duration.ts`: Multiple occurrences
-
-26. **navigate-to-task.service.ts**
-    - `src/app/core-ui/navigate-to-task/navigate-to-task.service.ts`: `return dateStr ?? getWorklogStr(parentTask.created);`
-    - `src/app/core-ui/navigate-to-task/navigate-to-task.service.ts`: `return getWorklogStr(task.created);`
+8. **navigate-to-task.service.ts**
+   - `src/app/core-ui/navigate-to-task/navigate-to-task.service.ts`: `return dateStr ?? getWorklogStr(parentTask.created);`
+   - `src/app/core-ui/navigate-to-task/navigate-to-task.service.ts`: `return getWorklogStr(task.created);`
 
 ## Analysis Plan
 
