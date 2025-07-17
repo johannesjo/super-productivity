@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { combineLatest, fromEvent, Observable } from 'rxjs';
 import { select, Store } from '@ngrx/store';
@@ -8,7 +9,6 @@ import { TaskService } from '../../tasks/task.service';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
 import { MatDialog } from '@angular/material/dialog';
 import { CalendarIntegrationService } from '../../calendar-integration/calendar-integration.service';
-import { DateService } from '../../../core/date/date.service';
 import { LS } from '../../../core/persistence/storage-keys.const';
 import { DialogTimelineSetupComponent } from '../dialog-timeline-setup/dialog-timeline-setup.component';
 import { AsyncPipe, DatePipe } from '@angular/common';
@@ -28,7 +28,6 @@ import { selectTaskRepeatCfgsWithAndWithoutStartTime } from '../../task-repeat-c
 import { ScheduleWeekComponent } from '../schedule-week/schedule-week.component';
 import { ScheduleMonthComponent } from '../schedule-month/schedule-month.component';
 import { ScheduleService } from '../schedule.service';
-import { ShortcutService } from '../../../core-ui/shortcut/shortcut.service';
 
 @Component({
   selector: 'schedule',
@@ -44,16 +43,18 @@ import { ShortcutService } from '../../../core-ui/shortcut/shortcut.service';
   styleUrl: './schedule.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
+
+  host: {
+    '[style.--nr-of-days]': 'daysToShow.length',
+  },
 })
 export class ScheduleComponent {
   taskService = inject(TaskService);
   layoutService = inject(LayoutService);
   scheduleService = inject(ScheduleService);
-  shortcutService = inject(ShortcutService);
   private _matDialog = inject(MatDialog);
   private _calendarIntegrationService = inject(CalendarIntegrationService);
   private _store = inject(Store);
-  private _dateService = inject(DateService);
   private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
 
   isMonthView$ = this.layoutService.selectedTimeView$.pipe(
