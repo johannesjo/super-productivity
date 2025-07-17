@@ -292,6 +292,10 @@
   .month-day-events .month-event:nth-child(n + 3) {
     display: none;
   }
+
+  ::ng-deep schedule-event .ico-wrapper {
+    display: none;
+  }
 }
 
 .event-dot {
