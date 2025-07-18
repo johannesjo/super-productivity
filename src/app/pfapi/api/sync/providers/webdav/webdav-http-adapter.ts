@@ -74,8 +74,8 @@ export class WebDavHttpAdapter {
         error: e,
       });
       // Create a fake Response object for the error
-      const errorResponse = new Response(null, {
-        status: 0,
+      const errorResponse = new Response('Network error', {
+        status: 500,
         statusText: `Network error: ${e}`,
       });
       throw new HttpNotOkAPIError(errorResponse);
@@ -118,7 +118,7 @@ export class WebDavHttpAdapter {
 
     if (status < 200 || status >= 300) {
       // Create a fake Response object for the error
-      const errorResponse = new Response(null, {
+      const errorResponse = new Response('', {
         status: status,
         statusText: `HTTP ${status} for ${url}`,
       });
