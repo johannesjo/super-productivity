@@ -1,4 +1,3 @@
-import { WebdavPrivateCfg, WebdavServerCapabilities } from './webdav';
 import {
   AuthFailSPError,
   FileExistsAPIError,
@@ -7,9 +6,10 @@ import {
   NoRevAPIError,
   RemoteFileNotFoundAPIError,
 } from '../../../errors/errors';
-import { PFLog } from '../../../../../core/log';
+import { Log, PFLog } from '../../../../../core/log';
 import { IS_ANDROID_WEB_VIEW } from '../../../../../util/is-android-web-view';
 import { CapacitorHttp } from '@capacitor/core';
+import { WebdavPrivateCfg, WebdavServerCapabilities } from './webdav.model';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
@@ -119,7 +119,15 @@ export class WebdavApi {
 
       PFLog.normal(`${WebdavApi.L}.detectServerCapabilities() detected`, capabilities);
     } catch (error: any) {
-      PFLog.err(`${WebdavApi.L}.detectServerCapabilities() failed`, error);
+      // Don't log 404 errors as errors - they're expected when the path doesn't exist yet
+      if (error?.status === 404 || error instanceof RemoteFileNotFoundAPIError) {
+        PFLog.debug(
+          `${WebdavApi.L}.detectServerCapabilities() path not found (expected on first sync)`,
+          { path: testPath, error: error?.message },
+        );
+      } else {
+        PFLog.err(`${WebdavApi.L}.detectServerCapabilities() failed`, error);
+      }
       // Assume minimal capabilities on detection failure
       capabilities.supportsLastModified = true; // Most basic HTTP servers support this
     }
@@ -147,12 +155,33 @@ export class WebdavApi {
     try {
       await this._ensureParentDirectoryExists(path);
 
+      // For 409 errors, try to delete existing file first
+      if (errorCode === 409) {
+        try {
+          PFLog.debug(
+            `${WebdavApi.L}.upload() attempting to delete existing file before retry`,
+            {
+              path,
+            },
+          );
+          await this.remove(path);
+          // Small delay to ensure delete is processed
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        } catch (deleteError: any) {
+          // Ignore delete errors - file might not exist
+          PFLog.debug(`${WebdavApi.L}.upload() delete before retry failed (ignored)`, {
+            path,
+            error: deleteError?.message,
+          });
+        }
+      }
+
       // Retry the upload with _retryAttempted flag to prevent infinite loops
       return await this.upload({
         data,
         path,
         isOverwrite: true, // After creating directories, we can overwrite
-        expectedEtag: null,
+        expectedEtag: null, // null = new file creation with If-None-Match: *
         _retryAttempted: true, // Critical: prevent infinite retry loops
       });
     } catch (retryError: any) {
@@ -297,8 +326,11 @@ export class WebdavApi {
     }
 
     // Detect capabilities if not cached
-    return await this.detectServerCapabilities();
+    // Use an empty path for capability detection to test the base URL
+    // This avoids 404 errors for paths that don't exist yet
+    return await this.detectServerCapabilities('');
   }
+
   private _responseHeadersToObject(response: Response): Record<string, string> {
     const headers: Record<string, string> = {};
     response.headers.forEach((value, key) => {
@@ -353,6 +385,13 @@ export class WebdavApi {
         headers['If-Match'] = expectedEtag;
       } else if (useLastModified && expectedLastModified) {
         headers['If-Unmodified-Since'] = expectedLastModified;
+      } else if (expectedEtag === undefined) {
+        // Unconditional overwrite - no headers needed, just do the PUT
+        // This is used when retrying after 409 errors
+      } else {
+        // expectedEtag is null - force overwrite if file exists
+        // Use If-Match: * to match any existing file
+        headers['If-Match'] = '*';
       }
     }
 
@@ -508,6 +547,17 @@ export class WebdavApi {
         'Content-Length': new Blob([data]).size.toString(),
         ...conditionalHeaders,
       };
+
+      // Debug log for 409 issue
+      if (path.includes('__meta_')) {
+        PFLog.debug(`${WebdavApi.L}.upload() headers for __meta_`, {
+          path,
+          headers,
+          isOverwrite,
+          expectedEtag,
+          _retryAttempted,
+        });
+      }
 
       // Add lock token to headers if we have one
       if (lockToken) {
@@ -1422,11 +1472,6 @@ export class WebdavApi {
         }
         return response;
       } catch (e) {
-        PFLog.err(`${WebdavApi.L}._makeRequest() CapacitorHttp error`, {
-          method,
-          path,
-          error: e,
-        });
         this._checkCommonErrors(e, path);
         throw e;
       }
@@ -1445,6 +1490,8 @@ export class WebdavApi {
         body,
       });
 
+      Log.x('res', response);
+
       // Handle 404 specifically to throw RemoteFileNotFoundAPIError consistently
       if (response.status === 404) {
         PFLog.normal(`${WebdavApi.L}._makeRequest() 404 Not Found`, {
@@ -1462,6 +1509,7 @@ export class WebdavApi {
         206, // Partial Content
         207, // Multi-Status
         304, // Not Modified (for conditional requests)
+        404, // File not existing
         405, // Method Not Allowed (let calling methods handle this)
         409, // Conflict (let calling methods handle this)
         412, // Precondition Failed (let calling methods handle this)
@@ -1480,11 +1528,6 @@ export class WebdavApi {
       }
       return response;
     } catch (e) {
-      PFLog.err(`${WebdavApi.L}._makeRequest() network error`, {
-        method,
-        path,
-        error: e,
-      });
       this._checkCommonErrors(e, path);
       throw e;
     }
@@ -1832,6 +1875,9 @@ export class WebdavApi {
       case 401:
       case 403:
         throw new AuthFailSPError(`WebDAV ${status}`, targetPath);
+      case 404:
+        throw new RemoteFileNotFoundAPIError();
+
       case 207:
         // Multi-Status is normal for WebDAV PROPFIND responses
         break;

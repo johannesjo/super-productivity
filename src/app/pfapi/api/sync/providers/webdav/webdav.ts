@@ -8,6 +8,7 @@ import {
   NoRevAPIError,
 } from '../../../errors/errors';
 import { WebdavPrivateCfg } from './webdav.model';
+import { Log, SyncLog } from '../../../../../core/log';
 
 export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDAV> {
   private static readonly L = 'Webdav';
@@ -52,6 +53,7 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
     localRev: string,
     isForceOverwrite: boolean = false,
   ): Promise<{ rev: string }> {
+    SyncLog.debug(Webdav.L, 'uploadFile', { targetPath, localRev, isForceOverwrite });
     const { filePath } = await this._getConfigAndPath(targetPath);
 
     const etag = await this._api.upload({
@@ -72,6 +74,7 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
     targetPath: string,
     localRev: string,
   ): Promise<{ rev: string; dataStr: string }> {
+    SyncLog.debug(Webdav.L, 'downloadFile', { targetPath, localRev });
     const { filePath } = await this._getConfigAndPath(targetPath);
 
     // For metadata file, don't send localRev if it might not exist remotely
@@ -112,6 +115,7 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
   }
 
   async removeFile(targetPath: string): Promise<void> {
+    SyncLog.debug(Webdav.L, 'removeFile', { targetPath });
     const { filePath } = await this._getConfigAndPath(targetPath);
     await this._api.remove(filePath);
   }

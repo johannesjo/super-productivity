@@ -51,10 +51,6 @@ export class MetaModelCtrl {
     public crossModelVersion: number,
   ) {
     //
-    console.log('XXXXXXXXXXXX');
-
-    console.log(this._generateClientId());
-
     this._initClientId();
     this.load().then((v) => {
       this._metaModelInMemory = v;
