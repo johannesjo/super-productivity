@@ -1,4 +1,4 @@
-import { Webdav, WebdavPrivateCfg } from './webdav';
+import { Webdav } from './webdav';
 import { WebdavApi } from './webdav-api';
 import { SyncProviderId } from '../../../pfapi.const';
 import { SyncProviderPrivateCfgStore } from '../../sync-provider-private-cfg-store';
@@ -7,6 +7,7 @@ import {
   MissingCredentialsSPError,
   NoRevAPIError,
 } from '../../../errors/errors';
+import { WebdavPrivateCfg } from './webdav.model';
 
 describe('Webdav', () => {
   let webdav: Webdav;

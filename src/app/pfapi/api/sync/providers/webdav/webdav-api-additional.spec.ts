@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { WebdavApi } from './webdav-api';
-import { WebdavPrivateCfg } from './webdav';
 import {
   RemoteFileNotFoundAPIError,
   NoEtagAPIError,
   HttpNotOkAPIError,
 } from '../../../errors/errors';
+import { WebdavPrivateCfg } from './webdav.model';
 
 describe('WebdavApi - Additional Coverage Tests', () => {
   let api: WebdavApi;

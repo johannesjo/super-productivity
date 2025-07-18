@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { WebdavPrivateCfg } from './webdav';
+
+import { WebdavPrivateCfg } from './webdav.model';
 
 export const createMockResponse = (
   status: number,

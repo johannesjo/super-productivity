@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { WebdavApi } from './webdav-api';
-import { WebdavPrivateCfg } from './webdav';
 import { NoEtagAPIError, RemoteFileNotFoundAPIError } from '../../../errors/errors';
 import { createMockResponseFactory } from './webdav-api-test-utils';
+import { WebdavPrivateCfg } from './webdav.model';
 
 describe('WebdavApi - Fallback Paths', () => {
   let api: WebdavApi;

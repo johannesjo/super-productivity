@@ -1,5 +1,4 @@
 import { WebdavApi } from './webdav-api';
-import { WebdavPrivateCfg } from './webdav';
 import { createMockResponse, createMockResponseFactory } from './webdav-api-test-utils';
 import {
   NoRevAPIError,
@@ -7,6 +6,7 @@ import {
   FileExistsAPIError,
   RemoteFileNotFoundAPIError,
 } from '../../../errors/errors';
+import { WebdavPrivateCfg } from './webdav.model';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 

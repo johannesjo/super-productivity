@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { WebdavApi } from './webdav-api';
-import { WebdavPrivateCfg } from './webdav';
 import { AuthFailSPError } from '../../../errors/errors';
+import { WebdavPrivateCfg } from './webdav.model';
 
 describe('WebdavApi - Helper Methods', () => {
   let api: WebdavApi;

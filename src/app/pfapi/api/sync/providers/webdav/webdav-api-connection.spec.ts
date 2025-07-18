@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { WebdavApi } from './webdav-api';
-import { WebdavPrivateCfg } from './webdav';
+
+import { WebdavPrivateCfg } from './webdav.model';
 
 describe('WebdavApi - Connection Testing', () => {
   let api: WebdavApi;

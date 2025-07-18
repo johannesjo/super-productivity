@@ -1,10 +1,7 @@
 import { WebdavApi } from './webdav-api';
-import {
-  WebdavPrivateCfg,
-  WebdavServerType,
-  getRecommendedServerCapabilities,
-} from './webdav';
 import { createMockResponse } from './webdav-api-test-utils';
+import { WebdavPrivateCfg, WebdavServerType } from './webdav.model';
+import { getRecommendedServerCapabilities } from './getRecommendedServerCapabilities';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 

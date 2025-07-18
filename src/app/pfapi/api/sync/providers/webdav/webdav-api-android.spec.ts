@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { WebdavApi } from './webdav-api';
-import { WebdavPrivateCfg } from './webdav';
 // import { HttpNotOkAPIError, RemoteFileNotFoundAPIError } from '../../../errors/errors';
 import { CapacitorHttp } from '@capacitor/core';
 import { IS_ANDROID_WEB_VIEW } from '../../../../../util/is-android-web-view';
+import { WebdavPrivateCfg } from './webdav.model';
 
 describe('WebdavApi - Android WebView', () => {
   let mockGetCfgOrError: jasmine.Spy;

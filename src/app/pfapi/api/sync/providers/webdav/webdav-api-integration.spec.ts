@@ -1,7 +1,7 @@
 import { WebdavApi } from './webdav-api';
-import { WebdavPrivateCfg } from './webdav';
 import { createMockResponse } from './webdav-api-test-utils';
 import { RemoteFileNotFoundAPIError, NoEtagAPIError } from '../../../errors/errors';
+import { WebdavPrivateCfg } from './webdav.model';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 

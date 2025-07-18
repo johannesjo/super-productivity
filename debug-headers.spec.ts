@@ -1,6 +1,6 @@
 import { WebdavApi } from './src/app/pfapi/api/sync/providers/webdav/webdav-api';
-import { WebdavPrivateCfg } from './src/app/pfapi/api/sync/providers/webdav/webdav';
 import { createMockResponse } from './src/app/pfapi/api/sync/providers/webdav/webdav-api-test-utils';
+import { WebdavPrivateCfg } from './src/app/pfapi/api/sync/providers/webdav/webdav.model';
 
 describe('Debug Headers', () => {
   let mockFetch: jasmine.Spy;

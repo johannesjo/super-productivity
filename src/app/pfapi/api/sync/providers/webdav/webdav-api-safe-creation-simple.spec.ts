@@ -1,5 +1,6 @@
 import { WebdavApi } from './webdav-api';
-import { WebdavPrivateCfg } from './webdav';
+
+import { WebdavPrivateCfg } from './webdav.model';
 
 describe('WebdavApi Safe Creation Simple Test', () => {
   it('should be created', () => {

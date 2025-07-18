@@ -1,6 +1,6 @@
 import { WebdavApi } from './webdav-api';
-import { WebdavPrivateCfg } from './webdav';
 import { createMockResponse } from './webdav-api-test-utils';
+import { WebdavPrivateCfg } from './webdav.model';
 
 describe('Debug Headers', () => {
   let mockFetch: jasmine.Spy;

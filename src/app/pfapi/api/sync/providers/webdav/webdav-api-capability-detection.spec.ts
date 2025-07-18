@@ -1,6 +1,6 @@
 import { WebdavApi } from './webdav-api';
-import { WebdavPrivateCfg } from './webdav';
 import { createMockResponse, createPropfindResponse } from './webdav-api-test-utils';
+import { WebdavPrivateCfg } from './webdav.model';
 
 describe('WebdavApi Capability Detection', () => {
   let api: WebdavApi;
