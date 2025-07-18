@@ -16,7 +16,7 @@ export class FormlyBtnComponent extends FieldType<FormlyFieldConfig> {
   onClick(): void {
     if (this.to.onClick) {
       const r = this.to.onClick(this.field, this.form, this.model);
-      if ('then' in r) {
+      if (r && 'then' in r) {
         r.then((v) => {
           Log.log('update', v, this);
           this.formControl.setValue(v);
