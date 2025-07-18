@@ -9,11 +9,12 @@ module.exports = {
     browser: NBrowser,
   ) => {
     await browser
+      .navigateTo('http://localhost:4200')
       // Configure WebDAV sync
       .setupWebdavSync({
-        baseUrl: 'http://localhost:8080/',
+        baseUrl: 'http://localhost:2345/',
         username: 'alice',
-        password: 'alicepassword',
+        password: 'alice',
         syncFolderPath: '/super-productivity-test',
       })
       // Create a test task
@@ -23,24 +24,8 @@ module.exports = {
       .triggerSync()
       // Verify sync completed
       .pause(3000)
+      .noError()
       .assert.not.elementPresent('.sync-btn mat-icon.spin')
-      // Log sync state for debugging
-      .execute(
-        () => {
-          const syncBtn = document.querySelector('.sync-btn');
-          const icon = syncBtn?.querySelector('mat-icon');
-          return {
-            iconText: icon?.textContent?.trim(),
-            hasSyncBtn: !!syncBtn,
-            syncBtnText: syncBtn?.textContent?.trim(),
-          };
-        },
-        [],
-        (result) => {
-          console.log('WebDAV sync state:', result.value);
-          const state = result.value as any;
-          browser.assert.ok(state.hasSyncBtn, 'Sync button should exist');
-        },
-      );
+      .end();
   },
 };

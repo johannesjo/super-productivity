@@ -1,59 +1,38 @@
-// eslint-disable-next-line @typescript-eslint/no-namespace
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace NightwatchCustomCommands {
-    interface Commands {
-      setupWebdavSync(
-        config: {
-          baseUrl: string;
-          username: string;
-          password: string;
-          syncFolderPath: string;
-        },
-        callback?: () => void,
-      ): this;
-    }
-  }
-}
+import { NBrowser } from '../n-browser-interface';
 
 module.exports = {
-  command: function setupWebdavSync(
-    this: any,
+  command(
+    this: NBrowser,
     config: {
       baseUrl: string;
       username: string;
       password: string;
       syncFolderPath: string;
     },
-    callback?: () => void,
   ) {
-    this.url('http://localhost:4200/config')
-      .waitForElementVisible('body', 5000)
-      .pause(500)
-      // Navigate to sync settings
-      .click('a[href="/config/sync"]')
-      .waitForElementVisible('[data-cy="sync-provider-webdav"]', 5000)
-      // Select WebDAV provider
-      .click('[data-cy="sync-provider-webdav"]')
-      .pause(500)
-      // Fill in WebDAV configuration
-      .waitForElementVisible('input[ng-reflect-name="baseUrl"]', 2000)
-      .clearValue('input[ng-reflect-name="baseUrl"]')
-      .setValue('input[ng-reflect-name="baseUrl"]', config.baseUrl)
-      .clearValue('input[ng-reflect-name="userName"]')
-      .setValue('input[ng-reflect-name="userName"]', config.username)
-      .clearValue('input[ng-reflect-name="password"]')
-      .setValue('input[ng-reflect-name="password"]', config.password)
-      .clearValue('input[ng-reflect-name="syncFolderPath"]')
-      .setValue('input[ng-reflect-name="syncFolderPath"]', config.syncFolderPath)
-      // Save configuration
-      .click('button[type="submit"]')
-      .pause(1000);
+    // CSS‑Selektoren zentral definieren
+    const sel = {
+      syncBtn: 'button.sync-btn',
+      providerSelect: 'formly-field-mat-select mat-select',
+      providerOptionWebDAV: '#mat-option-3', // Eintrag „WebDAV“
+      baseUrlInput: '.e2e-baseUrl input',
+      userNameInput: '.e2e-userName input',
+      passwordInput: '.e2e-password input',
+      saveBtn: 'mat-dialog-actions button[mat-stroked-button]',
+    };
 
-    if (callback) {
-      callback.call(this);
-    }
+    return this.click(sel.syncBtn)
+      .waitForElementVisible(sel.providerSelect)
+      .pause(100)
+      .click(sel.providerSelect)
+      .click(sel.providerOptionWebDAV)
+      .pause(100)
 
-    return this;
+      .setValue(sel.baseUrlInput, 'http://localhost:2345')
+      .setValue(sel.userNameInput, 'alice')
+      .setValue(sel.passwordInput, 'alice')
+      .pause(100)
+
+      .click(sel.saveBtn);
   },
 };

@@ -20,4 +20,11 @@ export interface NBrowser extends NightwatchAPI {
   navigateToPluginSettings: () => NBrowser;
   checkPluginStatus: (pluginName: string, expectedEnabled?: boolean) => NBrowser;
   enableTestPlugin: (pluginName?: string) => NBrowser;
+  setupWebdavSync: (config: {
+    baseUrl: string;
+    username: string;
+    password: string;
+    syncFolderPath: string;
+  }) => NBrowser;
+  triggerSync: () => NBrowser;
 }
