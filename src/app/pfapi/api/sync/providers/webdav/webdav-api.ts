@@ -5,10 +5,10 @@ import { WebDavHttpAdapter, WebDavHttpResponse } from './webdav-http-adapter';
 import {
   HttpNotOkAPIError,
   InvalidDataSPError,
-  RemoteFileNotFoundAPIError,
   RemoteFileChangedUnexpectedly,
+  RemoteFileNotFoundAPIError,
 } from '../../../errors/errors';
-import { WebDavHttpStatus, WebDavHttpMethod, WebDavHttpHeader } from './webdav.const';
+import { WebDavHttpHeader, WebDavHttpMethod, WebDavHttpStatus } from './webdav.const';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
@@ -207,11 +207,13 @@ export class WebdavApi {
           );
         }
 
-        // If we get a 409 Conflict, it might be because parent directory doesn't exist
         if (
-          uploadError instanceof HttpNotOkAPIError &&
-          uploadError.response &&
-          uploadError.response.status === WebDavHttpStatus.CONFLICT
+          // if we get a 404 on upload this also indicates that the directory does not exist (for nextcloud)
+          uploadError instanceof RemoteFileNotFoundAPIError ||
+          (uploadError instanceof HttpNotOkAPIError &&
+            uploadError.response &&
+            // If we get a 409 Conflict, it might be because parent directory doesn't exist
+            uploadError.response.status === WebDavHttpStatus.CONFLICT)
         ) {
           PFLog.debug(
             `${WebdavApi.L}.upload() got 409, attempting to create parent directory`,
