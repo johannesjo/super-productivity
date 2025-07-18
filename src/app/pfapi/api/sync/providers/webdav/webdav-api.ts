@@ -54,9 +54,9 @@ export class WebdavApi {
       }
 
       // If PROPFIND fails or returns no data, try HEAD request as fallback
-      // if (useGetFallback) {
-      //   return await this._getFileMetaViaHead(fullPath);
-      // }
+      if (useGetFallback) {
+        return await this._getFileMetaViaHead(fullPath);
+      }
 
       throw new RemoteFileNotFoundAPIError(path);
     } catch (e) {
