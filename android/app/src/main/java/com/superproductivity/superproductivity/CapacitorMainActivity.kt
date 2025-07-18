@@ -13,6 +13,7 @@ import com.superproductivity.superproductivity.util.printWebViewVersion
 import com.superproductivity.superproductivity.webview.JavaScriptInterface
 import com.superproductivity.superproductivity.webview.WebHelper
 import com.superproductivity.superproductivity.plugins.SafBridgePlugin
+import com.superproductivity.plugins.webdavhttp.WebDavHttpPlugin
 
 /**
  * All new Super-Productivity main activity, based on Capacitor to support offline use of the entire application
@@ -26,7 +27,8 @@ class CapacitorMainActivity : BridgeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         // Register plugins before calling super.onCreate()
         registerPlugin(SafBridgePlugin::class.java)
-        
+        registerPlugin(WebDavHttpPlugin::class.java)
+
         super.onCreate(savedInstanceState)
         printWebViewVersion(bridge.webView)
 

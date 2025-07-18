@@ -1,4 +1,4 @@
-import { CapacitorHttp, HttpResponse } from '@capacitor/core';
+import { CapacitorHttp, HttpResponse, registerPlugin } from '@capacitor/core';
 import { IS_ANDROID_WEB_VIEW } from '../../../../../util/is-android-web-view';
 import { PFLog } from '../../../../../core/log';
 import {
@@ -8,6 +8,13 @@ import {
   TooManyRequestsAPIError,
 } from '../../../errors/errors';
 import { WebDavHttpStatus } from './webdav.const';
+
+// Define and register our WebDAV plugin
+interface WebDavHttpPlugin {
+  request(options: any): Promise<any>;
+}
+
+const WebDavHttp = registerPlugin<WebDavHttpPlugin>('WebDavHttp');
 
 export interface WebDavHttpRequest {
   url: string;
@@ -24,6 +31,15 @@ export interface WebDavHttpResponse {
 
 export class WebDavHttpAdapter {
   private static readonly L = 'WebDavHttpAdapter';
+  private static readonly WEBDAV_METHODS = [
+    'PROPFIND',
+    'MKCOL',
+    'MOVE',
+    'COPY',
+    'LOCK',
+    'UNLOCK',
+    'PROPPATCH',
+  ];
 
   // Make IS_ANDROID_WEB_VIEW testable by making it a class property
   protected get isAndroidWebView(): boolean {
@@ -35,15 +51,33 @@ export class WebDavHttpAdapter {
       let response: WebDavHttpResponse;
 
       if (this.isAndroidWebView) {
-        // Use CapacitorHttp for Android WebView
-        const capacitorResponse = await CapacitorHttp.request({
-          url: options.url,
-          method: options.method,
-          headers: options.headers,
-          data: options.body,
-        });
+        // Check if this is a WebDAV method
+        const isWebDavMethod = WebDavHttpAdapter.WEBDAV_METHODS.includes(
+          options.method.toUpperCase(),
+        );
 
-        response = this._convertCapacitorResponse(capacitorResponse);
+        if (isWebDavMethod) {
+          // Use our custom WebDAV plugin for WebDAV methods
+          PFLog.log(
+            `${WebDavHttpAdapter.L}.request() using WebDavHttp for ${options.method}`,
+          );
+          const webdavResponse = await WebDavHttp.request({
+            url: options.url,
+            method: options.method,
+            headers: options.headers,
+            data: options.body,
+          });
+          response = this._convertWebDavResponse(webdavResponse);
+        } else {
+          // Use standard CapacitorHttp for regular HTTP methods
+          const capacitorResponse = await CapacitorHttp.request({
+            url: options.url,
+            method: options.method,
+            headers: options.headers,
+            data: options.body,
+          });
+          response = this._convertCapacitorResponse(capacitorResponse);
+        }
       } else {
         // Use fetch for other platforms
         const fetchResponse = await fetch(options.url, {
@@ -84,6 +118,14 @@ export class WebDavHttpAdapter {
   }
 
   private _convertCapacitorResponse(response: HttpResponse): WebDavHttpResponse {
+    return {
+      status: response.status,
+      headers: response.headers || {},
+      data: response.data || '',
+    };
+  }
+
+  private _convertWebDavResponse(response: any): WebDavHttpResponse {
     return {
       status: response.status,
       headers: response.headers || {},
