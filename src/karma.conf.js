@@ -12,20 +12,14 @@ module.exports = function (config) {
     plugins: [
       require('karma-jasmine'),
       require('karma-chrome-launcher'),
-      require('karma-jasmine-html-reporter'),
-      require('karma-coverage-istanbul-reporter'),
       require('@angular-devkit/build-angular/plugins/karma'),
+      require('./test-helpers/karma-running-spec-on-disconnect'),
     ],
     client: {
       clearContext: false, // leave Jasmine Spec Runner output visible in browser
       captureConsole: false,
     },
-    coverageIstanbulReporter: {
-      dir: require('path').join(__dirname, '../coverage'),
-      reports: ['html', 'lcovonly'],
-      fixWebpackSourcePaths: true,
-    },
-    reporters: ['progress', 'kjhtml'],
+    reporters: ['progress', 'running-spec'],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
@@ -52,10 +46,24 @@ module.exports = function (config) {
           // Without a remote debugging port, Google Chrome exits immediately.
           '--remote-debugging-port=9222',
           '--disable-web-security',
+          // Additional performance optimizations
+          '--disable-dev-shm-usage', // Overcome limited resource problems
+          '--disable-software-rasterizer',
+          '--disable-extensions',
+          '--disable-setuid-sandbox',
+          '--disable-logging',
+          '--disable-background-networking',
+          '--disable-sync',
+          '--disable-features=VizDisplayCompositor', // Disable GPU compositor
+          '--enable-features=NetworkService,NetworkServiceInProcess',
         ],
         debug: true,
       },
     },
-    browserNoActivityTimeout: 120000,
+    browserNoActivityTimeout: 6000, // time before killing browser if no signal
+    browserDisconnectTimeout: 2000, // time to wait after disconnection
+    browserDisconnectTolerance: 1, // retry once if disconnect occurs
+    captureTimeout: 10000,
+    reportSlowerThan: 500,
   });
 };

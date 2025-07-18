@@ -14,6 +14,10 @@ declare global {
   }
 }
 
+beforeAll(() => {
+  jasmine.DEFAULT_TIMEOUT_INTERVAL = 2000;
+});
+
 // Mock browser dialogs globally for tests
 // We need to handle tests that try to spy on alert/confirm after we've already mocked them
 // First check if alert/confirm are already spies (from previous test runs)

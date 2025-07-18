@@ -17,7 +17,7 @@ interface LogEntry {
 }
 
 // Map old numeric levels to new enum for backwards compatibility
-const LOG_LEVEL = environment.production ? LogLevel.DEBUG : LogLevel.NORMAL;
+const LOG_LEVEL = environment.production ? LogLevel.DEBUG : LogLevel.DEBUG;
 
 const MAX_DATA_LENGTH = 400;
 

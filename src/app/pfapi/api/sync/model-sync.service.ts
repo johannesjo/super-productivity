@@ -102,7 +102,6 @@ export class ModelSyncService<MD extends ModelCfgs> {
       const syncProvider = this._currentSyncProvider$.getOrError();
       const { rev, dataStr } = await syncProvider.downloadFile(
         this._filePathForModelId(modelId),
-        expectedRev,
       );
       if (expectedRev) {
         if (!rev || !this._isSameRev(rev, expectedRev)) {

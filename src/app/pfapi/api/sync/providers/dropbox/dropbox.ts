@@ -112,14 +112,10 @@ export class Dropbox implements SyncProviderServiceInterface<SyncProviderId.Drop
    * @throws RemoteFileNotFoundAPIError if the file doesn't exist
    * @throws InvalidDataSPError if the data is invalid
    */
-  async downloadFile(
-    targetPath: string,
-    localRev: string,
-  ): Promise<{ rev: string; dataStr: string }> {
+  async downloadFile(targetPath: string): Promise<{ rev: string; dataStr: string }> {
     try {
       const r = await this._api.download({
         path: this._getPath(targetPath),
-        localRev,
       });
 
       if (!r.meta.rev) {
@@ -143,7 +139,7 @@ export class Dropbox implements SyncProviderServiceInterface<SyncProviderId.Drop
       if (this._isTokenError(e)) {
         PFLog.critical('EXPIRED or INVALID TOKEN, trying to refresh');
         await this._api.updateAccessTokenFromRefreshTokenIfAvailable();
-        return this.downloadFile(targetPath, localRev);
+        return this.downloadFile(targetPath);
       }
       throw e;
     }
