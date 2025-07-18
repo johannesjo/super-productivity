@@ -20,4 +20,10 @@ services:
       - '2345:2345'
     volumes:
       - ./webdav.yaml:/config.yml:ro
-      - ./data:/data
+      - ${WEBDAV_DATA_DIR:-./data}:/data
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:2345/']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

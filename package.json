@@ -55,7 +55,7 @@
     "droid": "npm run buildFrontend:stageWeb:unminified && npx cap sync",
     "e2e": "cross-env TZ='Europe/Berlin' DETECT_CHROMEDRIVER_VERSION=true SKIP_POST_INSTALL=true npm i -D chromedriver --legacy-peer-deps && tsc --project e2e/tsconfig.e2e.json && start-server-and-test 'ng serve --no-live-reload' http://localhost:4200 'nightwatch -c ./e2e/nightwatch.conf.js --suiteRetries 1 --retries 1'",
     "e2e:tag": "killall chromedriver; rm -R ./.tmp/out-tsc; tsc --project e2e/tsconfig.e2e.json && nightwatch -c ./e2e/nightwatch.conf.js --suiteRetries 0 --retries 0 --tag ",
-    "e2e:webdav": "docker compose -f docker-compose.webdav-e2e.yaml up -d && sleep 5 && npm run e2e:tag webdav; docker compose -f docker-compose.webdav-e2e.yaml down",
+    "e2e:webdav": "WEBDAV_DATA_DIR=./e2e-webdav-data docker compose up -d webdav && sleep 5 && npm run e2e:tag webdav; docker compose down",
     "electron": "NODE_ENV=PROD electron .",
     "electron:build": "tsc -p electron/tsconfig.electron.json",
     "electron:watch": "tsc -p electron/tsconfig.electron.json --watch",

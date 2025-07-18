@@ -26,7 +26,7 @@ module.exports = {
       .pause(3000)
       // .noError()
       .assert.not.elementPresent('.sync-btn mat-icon.spin')
-      .assert.textContains('.sync-btn mat-icon', 'check')
+      .assert.textContains('.sync-btn mat-icon:nth-of-type(2)', 'check')
       .end();
   },
 };

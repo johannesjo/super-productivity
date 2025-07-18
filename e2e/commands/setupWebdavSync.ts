@@ -30,8 +30,8 @@ module.exports = {
       .pause(100)
 
       .setValue(sel.baseUrlInput, 'http://localhost:2345')
-      .setValue(sel.userNameInput, 'alice')
-      .setValue(sel.passwordInput, 'alice')
+      .setValue(sel.userNameInput, 'admin')
+      .setValue(sel.passwordInput, 'admin')
       .setValue(sel.syncFolder, '/')
       .pause(100)
 
