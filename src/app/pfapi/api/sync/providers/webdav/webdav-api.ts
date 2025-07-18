@@ -67,71 +67,19 @@ export class WebdavApi {
     }
   }
 
-  async download({
-    path,
-    localRev,
-  }: {
-    path: string;
-    localRev?: string | null;
-    // TODO remove
-  }): Promise<{
+  async download({ path }: { path: string }): Promise<{
     rev: string;
     dataStr: string;
     lastModified?: string;
-    notModified?: boolean;
   }> {
     const cfg = await this._getCfgOrError();
     const fullPath = this._buildFullPath(cfg.baseUrl, path);
 
     try {
-      const headers: Record<string, string> = {};
-
-      // Add conditional headers if we have a local revision
-      if (localRev) {
-        if (this._isLikelyTimestamp(localRev)) {
-          // Convert timestamp to HTTP date
-          const date = new Date(parseInt(localRev));
-          if (isNaN(date.getTime())) {
-            PFLog.warn(
-              `${WebdavApi.L}.download() Invalid timestamp for conditional request: ${localRev}`,
-            );
-          } else {
-            headers[WebDavHttpHeader.IF_MODIFIED_SINCE] = date.toUTCString();
-          }
-        } else if (this._isLikelyDateString(localRev)) {
-          // Validate and normalize the date string
-          const parsedDate = new Date(localRev);
-          if (isNaN(parsedDate.getTime())) {
-            PFLog.warn(
-              `${WebdavApi.L}.download() Invalid date string for conditional request: ${localRev}`,
-            );
-            // Fall back to treating it as an ETag
-            headers[WebDavHttpHeader.IF_NONE_MATCH] = localRev;
-          } else {
-            // Use normalized UTC format
-            headers[WebDavHttpHeader.IF_MODIFIED_SINCE] = parsedDate.toUTCString();
-          }
-        } else {
-          // Assume it's an ETag
-          headers[WebDavHttpHeader.IF_NONE_MATCH] = localRev;
-        }
-      }
-
       const response = await this._makeRequest({
         url: fullPath,
         method: WebDavHttpMethod.GET,
-        headers,
       });
-
-      // Handle 304 Not Modified
-      if (response.status === WebDavHttpStatus.NOT_MODIFIED) {
-        // File hasn't changed - return the current revision
-        return {
-          rev: localRev || '',
-          dataStr: '',
-          notModified: true,
-        };
-      }
 
       // Validate it's not an HTML error page
       this.xmlParser.validateResponseContent(

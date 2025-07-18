@@ -175,10 +175,7 @@ describe('ModelSyncService', () => {
         data: 'remote-model-data',
       });
       expect(result.rev).toBe('rev-123');
-      expect(mockSyncProvider.downloadFile).toHaveBeenCalledWith(
-        'singleModel',
-        'rev-123',
-      );
+      expect(mockSyncProvider.downloadFile).toHaveBeenCalledWith('singleModel');
     });
 
     it('should handle NoRemoteModelFile error', async () => {
@@ -191,10 +188,10 @@ describe('ModelSyncService', () => {
 
     it('should handle RevMismatchForModelError', async () => {
       mockSyncProvider.downloadFile.and.returnValue(
-        Promise.resolve(JSON.stringify({ data: 'remote-model-data' })),
-      );
-      mockSyncProvider.downloadFile.and.throwError(
-        new RevMismatchForModelError('singleModel'),
+        Promise.resolve({
+          rev: 'different-rev',
+          dataStr: JSON.stringify({ data: 'remote-model-data' }),
+        }),
       );
 
       await expectAsync(service.download('singleModel', 'rev-123')).toBeRejectedWithError(

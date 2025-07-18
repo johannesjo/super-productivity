@@ -149,7 +149,6 @@ describe('WebdavApi', () => {
 
       const result = await api.download({
         path: '/test.txt',
-        localRev: null,
       });
 
       expect(mockHttpAdapter.request).toHaveBeenCalledWith(
@@ -189,7 +188,6 @@ describe('WebdavApi', () => {
 
       const result = await api.download({
         path: '/test.txt',
-        localRev: null,
       });
 
       expect(result.rev).toBe('cleanedAbc123');
@@ -208,180 +206,18 @@ describe('WebdavApi', () => {
 
       const result = await api.download({
         path: '/test.txt',
-        localRev: null,
       });
 
       expect(result.rev).toBe('Wed, 15 Jan 2025 10:00:00 GMT');
     });
 
-    it('should add If-None-Match header when localRev is an ETag', async () => {
-      const mockResponse = {
-        status: 200,
-        headers: {
-          etag: '"newrev123"',
-        },
-        data: 'content',
-      };
-      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
-      mockXmlParser.validateResponseContent.and.stub();
-
-      await api.download({
-        path: '/test.txt',
-        localRev: 'abc123',
-      });
-
-      expect(mockHttpAdapter.request).toHaveBeenCalledWith(
-        jasmine.objectContaining({
-          headers: jasmine.objectContaining({
-            'If-None-Match': 'abc123',
-          }),
-        }),
-      );
-    });
-
-    it('should add If-Modified-Since header when localRev is a timestamp', async () => {
-      const mockResponse = {
-        status: 200,
-        headers: {
-          etag: '"newrev123"',
-        },
-        data: 'content',
-      };
-      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
-      mockXmlParser.validateResponseContent.and.stub();
-
-      const timestamp = '1642248000000'; // 2022-01-15T12:00:00.000Z
-
-      await api.download({
-        path: '/test.txt',
-        localRev: timestamp,
-      });
-
-      expect(mockHttpAdapter.request).toHaveBeenCalledWith(
-        jasmine.objectContaining({
-          headers: jasmine.objectContaining({
-            'If-Modified-Since': 'Sat, 15 Jan 2022 12:00:00 GMT',
-          }),
-        }),
-      );
-    });
-
-    it('should add If-Modified-Since header when localRev is already a date string', async () => {
-      const mockResponse = {
-        status: 200,
-        headers: {
-          etag: '"newrev123"',
-        },
-        data: 'content',
-      };
-      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
-      mockXmlParser.validateResponseContent.and.stub();
-
-      const dateString = 'Wed, 15 Jan 2025 10:00:00 GMT';
-
-      await api.download({
-        path: '/test.txt',
-        localRev: dateString,
-      });
-
-      expect(mockHttpAdapter.request).toHaveBeenCalledWith(
-        jasmine.objectContaining({
-          headers: jasmine.objectContaining({
-            'If-Modified-Since': dateString,
-          }),
-        }),
-      );
-    });
-
-    it('should handle 304 Not Modified response', async () => {
-      const mockResponse = {
-        status: 304,
-        headers: {},
-        data: '',
-      };
-      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
-
-      const result = await api.download({
-        path: '/test.txt',
-        localRev: 'abc123',
-      });
-
-      expect(result.notModified).toBe(true);
-      expect(result.rev).toBe('abc123');
-      expect(result.dataStr).toBe('');
-    });
-
-    it('should handle 304 response without localRev', async () => {
-      const mockResponse = {
-        status: 304,
-        headers: {},
-        data: '',
-      };
-      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
-
-      const result = await api.download({
-        path: '/test.txt',
-        localRev: null,
-      });
-
-      expect(result.notModified).toBe(true);
-      expect(result.rev).toBe('');
-      expect(result.dataStr).toBe('');
-    });
-
-    it('should handle invalid timestamp in localRev', async () => {
-      const mockResponse = {
-        status: 200,
-        headers: {
-          etag: '"abc123"',
-        },
-        data: 'content',
-      };
-      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
-      mockXmlParser.validateResponseContent.and.stub();
-
-      await api.download({
-        path: '/test.txt',
-        localRev: '999999999999999999999', // Invalid timestamp
-      });
-
-      // Should not add If-Modified-Since header
-      expect(mockHttpAdapter.request).toHaveBeenCalledWith(
-        jasmine.objectContaining({
-          headers: jasmine.objectContaining({
-            Authorization: jasmine.any(String),
-          }),
-        }),
-      );
-      const callArgs = mockHttpAdapter.request.calls.mostRecent().args[0];
-      expect(callArgs.headers?.['If-Modified-Since']).toBeUndefined();
-    });
-
-    it('should handle invalid date string and fall back to ETag', async () => {
-      const mockResponse = {
-        status: 200,
-        headers: {
-          etag: '"abc123"',
-        },
-        data: 'content',
-      };
-      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
-      mockXmlParser.validateResponseContent.and.stub();
-
-      await api.download({
-        path: '/test.txt',
-        localRev: 'Invalid Date String',
-      });
-
-      // Should fall back to If-None-Match
-      expect(mockHttpAdapter.request).toHaveBeenCalledWith(
-        jasmine.objectContaining({
-          headers: jasmine.objectContaining({
-            'If-None-Match': 'Invalid Date String',
-          }),
-        }),
-      );
-    });
+    // Test removed: If-None-Match header functionality has been removed
+    // Test removed: If-Modified-Since header functionality has been removed
+    // Test removed: If-Modified-Since header functionality has been removed
+    // Test removed: 304 Not Modified handling has been removed
+    // Test removed: 304 Not Modified handling has been removed
+    // Test removed: localRev parameter has been removed from download method
+    // Test removed: localRev parameter has been removed from download method
   });
 
   describe('upload', () => {

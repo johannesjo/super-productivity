@@ -83,10 +83,8 @@ export class DropboxApi {
    */
   async download<T>({
     path,
-    localRev,
   }: {
     path: string;
-    localRev?: string | null;
   }): Promise<{ meta: DropboxFileMetadata; data: T }> {
     try {
       const response = await this._request({
@@ -96,8 +94,6 @@ export class DropboxApi {
           'Dropbox-API-Arg': JSON.stringify({ path }),
           'Content-Type': 'application/octet-stream',
           // Don't send If-None-Match - always download full content
-          // localRev parameter kept for API consistency but not used
-          // ...(localRev ? { 'If-None-Match': localRev } : {}),
         },
       });
 

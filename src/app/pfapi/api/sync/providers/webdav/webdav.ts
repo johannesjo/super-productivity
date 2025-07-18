@@ -70,27 +70,13 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
     return { rev: result.rev };
   }
 
-  async downloadFile(
-    targetPath: string,
-    localRev: string,
-  ): Promise<{ rev: string; dataStr: string }> {
-    SyncLog.debug(Webdav.L, 'downloadFile', { targetPath, localRev });
+  async downloadFile(targetPath: string): Promise<{ rev: string; dataStr: string }> {
+    SyncLog.debug(Webdav.L, 'downloadFile', { targetPath });
     const { filePath } = await this._getConfigAndPath(targetPath);
-
-    // For metadata file, don't send localRev if it might not exist remotely
-    const effectiveLocalRev = targetPath === '__meta_' && localRev ? null : localRev;
 
     const result = await this._api.download({
       path: filePath,
-      localRev: effectiveLocalRev,
     });
-
-    // If the file wasn't modified (304), we should have notModified flag
-    if (result.notModified) {
-      // Return current revision with empty data - the sync system should handle this
-      // TODO handle this in syncService
-      return { rev: localRev || result.rev, dataStr: '' };
-    }
 
     if (!result.dataStr && result.dataStr !== '') {
       throw new InvalidDataSPError(targetPath);
