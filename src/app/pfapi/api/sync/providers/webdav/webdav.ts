@@ -8,7 +8,7 @@ import {
   NoRevAPIError,
 } from '../../../errors/errors';
 import { WebdavPrivateCfg } from './webdav.model';
-import { Log, SyncLog } from '../../../../../core/log';
+import { SyncLog } from '../../../../../core/log';
 
 export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDAV> {
   private static readonly L = 'Webdav';

@@ -1,17 +1,14 @@
+import { WebdavPrivateCfg } from './webdav.model';
 import {
   AuthFailSPError,
   FileExistsAPIError,
   HttpNotOkAPIError,
   NoEtagAPIError,
-  NoRevAPIError,
   RemoteFileNotFoundAPIError,
 } from '../../../errors/errors';
-import { Log, PFLog } from '../../../../../core/log';
+import { PFLog } from '../../../../../core/log';
 import { IS_ANDROID_WEB_VIEW } from '../../../../../util/is-android-web-view';
 import { CapacitorHttp } from '@capacitor/core';
-import { WebdavPrivateCfg, WebdavServerCapabilities } from './webdav.model';
-import { WebdavCapabilitiesDetector } from './webdav-capabilities-detector';
-import { WebdavXmlParser, FileMeta } from './webdav-xml-parser';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
@@ -23,32 +20,36 @@ interface WebDavRequestOptions {
   ifNoneMatch?: string | null;
 }
 
+interface FileMeta {
+  filename: string;
+  basename: string;
+  lastmod: string;
+  size: number;
+  type: string;
+  etag: string;
+  data: Record<string, string>;
+}
+
 export class WebdavApi {
   private static readonly L = 'WebdavApi';
-  private static readonly PROPFIND_XML = WebdavXmlParser.PROPFIND_XML;
-
-  private _capabilitiesDetector: WebdavCapabilitiesDetector;
-  private _xmlParser: WebdavXmlParser;
+  private static readonly PROPFIND_XML = `<?xml version="1.0" encoding="utf-8" ?>
+<D:propfind xmlns:D="DAV:">
+  <D:prop>
+    <D:displayname/>
+    <D:getcontentlength/>
+    <D:getlastmodified/>
+    <D:getetag/>
+    <D:resourcetype/>
+    <D:getcontenttype/>
+  </D:prop>
+</D:propfind>`;
 
   // Make IS_ANDROID_WEB_VIEW testable by making it a class property
   protected get isAndroidWebView(): boolean {
     return IS_ANDROID_WEB_VIEW;
   }
 
-  constructor(private _getCfgOrError: () => Promise<WebdavPrivateCfg>) {
-    this._capabilitiesDetector = new WebdavCapabilitiesDetector(
-      this._makeRequest.bind(this),
-    );
-    this._xmlParser = new WebdavXmlParser(this._cleanRev.bind(this));
-  }
-
-  /**
-   * Detect server capabilities by testing a simple file operation
-   * Delegates to WebdavCapabilitiesDetector
-   */
-  async detectServerCapabilities(testPath?: string): Promise<WebdavServerCapabilities> {
-    return this._capabilitiesDetector.detectServerCapabilities(testPath);
-  }
+  constructor(private _getCfgOrError: () => Promise<WebdavPrivateCfg>) {}
 
   // Utility methods to reduce duplication
   /**
@@ -60,7 +61,8 @@ export class WebdavApi {
     data: string,
     headers: Record<string, string>,
     errorCode: number,
-  ): Promise<string | undefined> {
+  ): Promise<string> {
+    const context = errorCode === 404 ? 'upload-404-retry' : 'upload-409-retry';
     PFLog.error(
       `${WebdavApi.L}.upload() ${errorCode} ${errorCode === 404 ? 'not found' : 'conflict'}, attempting to create parent directories`,
       { path },
@@ -69,78 +71,92 @@ export class WebdavApi {
     try {
       await this._ensureParentDirectoryExists(path);
 
-      // For 409 errors, try to delete existing file first
-      if (errorCode === 409) {
-        try {
-          PFLog.debug(
-            `${WebdavApi.L}.upload() attempting to delete existing file before retry`,
-            {
-              path,
-            },
-          );
-          await this.remove(path);
-          // Small delay to ensure delete is processed
-          await new Promise((resolve) => setTimeout(resolve, 100));
-        } catch (deleteError: any) {
-          // Ignore delete errors - file might not exist
-          PFLog.debug(`${WebdavApi.L}.upload() delete before retry failed (ignored)`, {
-            path,
-            error: deleteError?.message,
-          });
-        }
+      // Retry the upload
+      const retryResponse = await this._makeRequest({
+        method: 'PUT',
+        path,
+        body: data,
+        headers,
+      });
+
+      const retryHeaderObj = this._responseHeadersToObject(retryResponse);
+      const retryEtag = this._findEtagInHeaders(retryHeaderObj);
+
+      if (!retryEtag) {
+        return await this._retrieveEtagWithFallback(path, retryHeaderObj, context);
       }
 
-      // Retry the upload with _retryAttempted flag to prevent infinite loops
-      return await this.upload({
-        data,
-        path,
-        isOverwrite: true, // After creating directories, we can overwrite
-        expectedEtag: null, // null = new file creation with If-None-Match: *
-        _retryAttempted: true, // Critical: prevent infinite retry loops
-      });
+      return retryEtag;
     } catch (retryError: any) {
       PFLog.err(`${WebdavApi.L}.upload() retry after ${errorCode} failed`, retryError);
-
-      // Preserve all API error types to maintain test compatibility
-      if (
-        retryError instanceof NoEtagAPIError ||
-        retryError instanceof NoRevAPIError ||
-        retryError instanceof RemoteFileNotFoundAPIError ||
-        retryError instanceof HttpNotOkAPIError
-      ) {
+      if (retryError instanceof RemoteFileNotFoundAPIError) {
         throw retryError;
       }
-
-      // For other errors, wrap with context but preserve original message
+      if (retryError instanceof NoEtagAPIError) {
+        throw retryError;
+      }
       throw new Error(
-        `Upload failed after creating directories: ${path} - ${retryError?.message || 'Unknown error'}`,
+        `Upload failed after creating directories: ${retryError?.message || 'Unknown error'}`,
       );
     }
   }
 
   /**
-   * Common validator retrieval fallback chain: response headers -> PROPFIND -> GET (optional)
-   * Supports both ETag and Last-Modified validators
-   * Used by upload, download, and other operations that need validators
+   * Validates that response content is not an HTML error page
+   * Used by operations that expect specific content types
+   */
+  private _validateResponseContent(
+    content: string,
+    path: string,
+    operation: string,
+    expectedContentDescription: string = 'content',
+  ): void {
+    if (this._isHtmlResponse(content)) {
+      PFLog.error(
+        `${WebdavApi.L}.${operation}() received HTML error page instead of ${expectedContentDescription}`,
+        {
+          path,
+          responseSnippet: content.substring(0, 200),
+        },
+      );
+      throw new RemoteFileNotFoundAPIError(path);
+    }
+  }
+
+  /**
+   * Validates XML response and throws appropriate error if HTML error page is received
+   * Used by operations that expect XML responses (PROPFIND, etc.)
+   */
+  private _validateAndParseXmlResponse(
+    xmlText: string,
+    path: string,
+    operation: string = 'XML operation',
+  ): FileMeta {
+    this._validateResponseContent(xmlText, path, operation, 'XML');
+
+    const fileMeta = this._parsePropsFromXml(xmlText, path);
+
+    if (!fileMeta) {
+      throw new RemoteFileNotFoundAPIError(path);
+    }
+
+    return fileMeta;
+  }
+
+  /**
+   * Common ETag retrieval fallback chain: response headers -> PROPFIND -> GET (optional)
+   * Used by upload, download, and other operations that need ETags
    */
   private async _retrieveEtagWithFallback(
     path: string,
     headers?: Record<string, string>,
     context: string = 'operation',
   ): Promise<string> {
-    // Check server capabilities
-    const capabilities = await this._getOrDetectCapabilities();
-
-    // Try extracting validators from response headers first
+    // Try response headers first if provided
     if (headers) {
-      const validators = this._extractValidators(headers);
-
-      // Return the preferred validator based on server capabilities
-      if (validators.validator) {
-        // Clean ETag if it's an ETag validator
-        return validators.validatorType === 'etag'
-          ? this._cleanRev(validators.validator)
-          : validators.validator;
+      const etag = this._findEtagInHeaders(headers);
+      if (etag) {
+        return etag;
       }
     }
 
@@ -151,10 +167,10 @@ export class WebdavApi {
     } catch (metaError) {
       PFLog.err(`${WebdavApi.L}.${context}() failed to get etag via PROPFIND`, metaError);
 
-      // Last resort: try GET request to retrieve validator
+      // Last resort: try GET request to retrieve ETag
       try {
         PFLog.error(
-          `${WebdavApi.L}.${context}() attempting GET request fallback for validator`,
+          `${WebdavApi.L}.${context}() attempting GET request fallback for etag`,
         );
         const { rev } = await this.download({ path });
         return rev;
@@ -163,32 +179,12 @@ export class WebdavApi {
           `${WebdavApi.L}.${context}() GET request fallback also failed`,
           getError,
         );
-
-        // If server only supports Last-Modified and we can't get it, throw appropriate error
-        if (!capabilities.supportsETags && capabilities.supportsLastModified) {
-          throw new NoRevAPIError(path);
-        }
-
-        // Include attempted methods and context for better debugging
-        const additionalLog = {
+        throw new NoEtagAPIError({
+          path,
           attemptedMethods: ['response-headers', 'PROPFIND', 'GET'],
-          context,
-          capabilities,
-        };
-
-        const error = new NoEtagAPIError(path);
-        (error as any).additionalLog = additionalLog;
-        throw error;
+        });
       }
     }
-  }
-
-  /**
-   * Get or detect server capabilities with caching
-   */
-  private async _getOrDetectCapabilities(): Promise<WebdavServerCapabilities> {
-    const cfg = await this._getCfgOrError();
-    return this._capabilitiesDetector.getOrDetectCapabilities(cfg);
   }
 
   private _responseHeadersToObject(response: Response): Record<string, string> {
@@ -199,61 +195,30 @@ export class WebdavApi {
     return headers;
   }
 
-  private async _createConditionalHeaders(
+  private _createConditionalHeaders(
     isOverwrite?: boolean,
     expectedEtag?: string | null,
-    expectedLastModified?: string | null,
-    validatorType?: 'etag' | 'last-modified' | 'none',
-  ): Promise<Record<string, string>> {
+  ): Record<string, string> {
     const headers: Record<string, string> = {};
-
-    // Determine validator preference - default to etag for backward compatibility
-    const useLastModified = validatorType === 'last-modified' && !expectedEtag;
-
     if (!isOverwrite) {
-      // For updates/conditional operations
-      if (expectedEtag && !useLastModified) {
+      if (expectedEtag) {
         headers['If-Match'] = expectedEtag;
-      } else if (useLastModified && expectedLastModified) {
-        headers['If-Unmodified-Since'] = expectedLastModified;
-      } else if (!useLastModified) {
-        // For new resource creation - only works with ETag
+      } else {
         headers['If-None-Match'] = '*';
-      } else {
-        // Last-Modified cannot safely handle resource creation with standard headers
-        // Check for alternative safe creation methods
-        const capabilities = await this._getOrDetectCapabilities();
-
-        if (capabilities.supportsIfHeader) {
-          // Use WebDAV If header with Not token for safe creation
-          // Format: If: <Not> <*> means "if resource does not exist"
-          headers['If'] = '<Not> <*>';
-        } else {
-          // No safe creation method available - warn but continue
-          // Use console.warn for visibility in tests
-          console.warn(`WARNING: No safe creation method available for WebDAV`, {
-            supportsETags: capabilities.supportsETags,
-            supportsIfHeader: capabilities.supportsIfHeader,
-          });
-        }
       }
-    } else {
-      // For overwrite operations
-      if (expectedEtag && !useLastModified) {
-        headers['If-Match'] = expectedEtag;
-      } else if (useLastModified && expectedLastModified) {
-        headers['If-Unmodified-Since'] = expectedLastModified;
-      } else if (expectedEtag === undefined) {
-        // Unconditional overwrite - no headers needed, just do the PUT
-        // This is used when retrying after 409 errors
-      } else {
-        // expectedEtag is null - force overwrite if file exists
-        // Use If-Match: * to match any existing file
-        headers['If-Match'] = '*';
-      }
+    } else if (expectedEtag) {
+      headers['If-Match'] = expectedEtag;
     }
-
     return headers;
+  }
+
+  private _isHtmlResponse(text: string): boolean {
+    const trimmed = text.trim().toLowerCase();
+    return (
+      trimmed.startsWith('<!doctype html') ||
+      trimmed.startsWith('<html') ||
+      text.includes('There is nothing here, sorry')
+    );
   }
 
   async upload({
@@ -261,73 +226,19 @@ export class WebdavApi {
     path,
     isOverwrite,
     expectedEtag,
-    _retryAttempted,
   }: {
     data: string;
     path: string;
     isOverwrite?: boolean;
     expectedEtag?: string | null;
-    _retryAttempted?: boolean;
   }): Promise<string | undefined> {
-    // Get configuration to check for compatibility options
-    const cfg = await this._getCfgOrError();
-
-    // Check for basic compatibility mode
-    if (cfg.basicCompatibilityMode) {
-      // In basic compatibility mode, just upload without conditional headers
-      const response = await this._makeRequest({
-        method: 'PUT',
-        path,
-        body: data,
-        headers: {
-          'Content-Type': 'application/octet-stream',
-          'Content-Length': new Blob([data]).size.toString(),
-        },
-      });
-
-      const responseHeaderObj = this._responseHeadersToObject(response);
-      const validators = this._extractValidators(responseHeaderObj);
-      return validators.validator || 'basic-mode-upload';
-    }
-
-    // Get capabilities to determine validator type
-    const capabilities = await this._getOrDetectCapabilities();
-    const validatorType =
-      cfg.preferLastModified && capabilities.supportsLastModified
-        ? 'last-modified'
-        : capabilities.supportsETags
-          ? 'etag'
-          : capabilities.supportsLastModified
-            ? 'last-modified'
-            : 'none';
-
-    let headers: Record<string, string> = {};
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/octet-stream',
+      'Content-Length': new Blob([data]).size.toString(),
+      ...this._createConditionalHeaders(isOverwrite, expectedEtag),
+    };
 
     try {
-      const conditionalHeaders = await this._createConditionalHeaders(
-        isOverwrite,
-        validatorType === 'etag' ? expectedEtag : null,
-        validatorType === 'last-modified' ? expectedEtag : null,
-        validatorType,
-      );
-
-      headers = {
-        'Content-Type': 'application/octet-stream',
-        'Content-Length': new Blob([data]).size.toString(),
-        ...conditionalHeaders,
-      };
-
-      // Debug log for 409 issue
-      if (path.includes('__meta_')) {
-        PFLog.debug(`${WebdavApi.L}.upload() headers for __meta_`, {
-          path,
-          headers,
-          isOverwrite,
-          expectedEtag,
-          _retryAttempted,
-        });
-      }
-
       const response = await this._makeRequest({
         method: 'PUT',
         path,
@@ -335,173 +246,48 @@ export class WebdavApi {
         headers,
       });
 
-      // Check response status before processing
-      if (response.status === 412) {
-        // Precondition Failed - conditional header failed
-        if (expectedEtag) {
-          throw new Error(
-            `Upload failed: file was modified (expected validator: ${expectedEtag})`,
-          );
-        } else {
-          throw new FileExistsAPIError();
-        }
-      } else if (response.status === 423) {
-        // Locked - Resource is locked
-        throw new Error(`Upload failed: Resource is locked`);
-      } else if (response.status === 409) {
-        // Conflict - parent directory doesn't exist
-        if (!_retryAttempted) {
-          return await this._retryUploadWithDirectoryCreation(
-            path,
-            data,
-            headers || {},
-            409,
-          );
-        }
-        // If retry was already attempted, throw error with retry flag
-        const error = new HttpNotOkAPIError(response);
-        (error as any)._retryAttempted = true;
-        throw error;
-      }
-
-      // Extract validator from response headers
+      // Extract etag from response headers
       const responseHeaderObj = this._responseHeadersToObject(response);
-      const validators = this._extractValidators(responseHeaderObj);
+      const etag = this._findEtagInHeaders(responseHeaderObj);
 
-      // Respect the configured validator preference
-      let selectedValidator: string | undefined;
-      let selectedValidatorType: 'etag' | 'last-modified' | 'none' = 'none';
-
-      if (validatorType === 'last-modified' && validators.lastModified) {
-        selectedValidator = validators.lastModified;
-        selectedValidatorType = 'last-modified';
-      } else if (validatorType === 'etag' && validators.etag) {
-        selectedValidator = validators.etag;
-        selectedValidatorType = 'etag';
-      } else {
-        // Fall back to whatever is available
-        selectedValidator = validators.validator;
-        selectedValidatorType = validators.validatorType;
-      }
-
-      if (!selectedValidator) {
+      if (!etag) {
         return await this._retrieveEtagWithFallback(path, responseHeaderObj, 'upload');
       }
 
-      // Clean ETag if it's an ETag validator
-      const result =
-        selectedValidatorType === 'etag'
-          ? this._cleanRev(selectedValidator)
-          : selectedValidator;
-
-      return result;
+      return etag;
     } catch (e: any) {
       PFLog.err(`${WebdavApi.L}.upload() error`, { path, error: e });
 
       // Check if it's a RemoteFileNotFoundAPIError (404)
-      if (
-        (e instanceof RemoteFileNotFoundAPIError || e?.status === 404) &&
-        !_retryAttempted
-      ) {
+      if (e instanceof RemoteFileNotFoundAPIError || e?.status === 404) {
         // Not found - parent directory might not exist (some WebDAV servers return 404 instead of 409)
-        return await this._retryUploadWithDirectoryCreation(
-          path,
-          data,
-          headers || {},
-          404,
-        );
+        return await this._retryUploadWithDirectoryCreation(path, data, headers, 404);
       }
 
-      // Check for HttpNotOkAPIError which has response.status
-      const errorStatus = e instanceof HttpNotOkAPIError ? e.response.status : e?.status;
-
       // Enhanced error handling for WebDAV-specific scenarios
-      switch (errorStatus) {
+      switch (e?.status) {
         case 409:
           // Conflict - parent directory doesn't exist
-          // Check both the method parameter and the error flag to prevent infinite loops
-          if (!_retryAttempted && !(e as any)?._retryAttempted) {
-            return await this._retryUploadWithDirectoryCreation(
-              path,
-              data,
-              headers || {},
-              409,
-            );
-          }
-          throw e;
+          return await this._retryUploadWithDirectoryCreation(path, data, headers, 409);
         case 412:
           // Precondition Failed - conditional header failed
           if (expectedEtag) {
             throw new Error(
-              `Upload failed: file was modified (expected validator: ${expectedEtag})`,
+              `Upload failed: file was modified (expected etag: ${expectedEtag})`,
             );
           } else {
             throw new FileExistsAPIError();
           }
         case 413:
           // Payload Too Large
-          throw new HttpNotOkAPIError(e.response || ({ status: 413 } as Response));
+          throw new Error(`File too large: ${path}`);
         case 507:
           // Insufficient Storage
-          throw new HttpNotOkAPIError(e.response || ({ status: 507 } as Response));
+          throw new Error(`Insufficient storage space for: ${path}`);
         case 423:
           // Locked
-          throw new HttpNotOkAPIError(e.response || ({ status: 423 } as Response));
+          throw new Error(`Resource is locked: ${path}`);
         default:
-          // Handle NoRevAPIError - server doesn't support ETags or had retrieval issues
-          if (e instanceof NoRevAPIError) {
-            // Get current capabilities to check if this was from initial detection
-            const retryCapabilities = await this._getOrDetectCapabilities();
-
-            // Only retry if:
-            // 1. Capabilities show server doesn't support ETags (so we need Last-Modified)
-            // 2. This is not a retry attempt
-            // 3. Server capabilities were detected (not pre-configured)
-            const retryCfg = await this._getCfgOrError();
-            const wasDetected = !retryCfg.serverCapabilities; // If not in config, they were detected
-
-            // Check retry limits
-            const maxRetries = retryCfg.maxRetries ?? 2;
-            const retryCount = (e as any)._retryCount || 0;
-
-            // Only retry if server supports Last-Modified and we haven't exceeded retry limit
-            if (
-              retryCount < maxRetries &&
-              wasDetected &&
-              retryCapabilities.supportsLastModified
-            ) {
-              PFLog.info(
-                `${WebdavApi.L}.upload() NoRevAPIError detected, retrying with fresh capabilities`,
-              );
-
-              // Clear cached capabilities to force re-detection
-              this._capabilitiesDetector.clearCache();
-
-              // Detect server capabilities fresh
-              await this.detectServerCapabilities();
-
-              // Track retry count to prevent infinite loops
-              const retryData = { _retryCount: retryCount + 1, _isRetryAttempt: true };
-
-              // Retry upload with updated capabilities
-              try {
-                return await this.upload({
-                  data,
-                  path,
-                  isOverwrite,
-                  expectedEtag,
-                  _retryAttempted: true,
-                });
-              } catch (retryErr: any) {
-                // If retry also fails with NoRevAPIError, propagate retry info and throw
-                if (retryErr instanceof NoRevAPIError) {
-                  Object.assign(retryErr, retryData);
-                  throw retryErr;
-                }
-                throw retryErr;
-              }
-            }
-          }
           throw e;
       }
     }
@@ -525,7 +311,7 @@ export class WebdavApi {
       });
 
       const xmlText = await response.text();
-      return this._xmlParser.validateAndParseXmlResponse(xmlText, path, 'getFileMeta');
+      return this._validateAndParseXmlResponse(xmlText, path, 'getFileMeta');
     } catch (e: any) {
       if (e?.status === 404) {
         throw new RemoteFileNotFoundAPIError(path);
@@ -541,8 +327,7 @@ export class WebdavApi {
           });
 
           const headers = this._responseHeadersToObject(headResponse);
-          const validators = this._extractValidators(headers);
-          const etag = validators.etag || validators.lastModified || '';
+          const etag = this._findEtagInHeaders(headers);
           const contentLength = headers['content-length'] || '0';
           const lastModified = headers['last-modified'] || '';
           const contentType = headers['content-type'] || '';
@@ -553,7 +338,7 @@ export class WebdavApi {
             lastmod: lastModified,
             size: parseInt(contentLength, 10),
             type: 'file',
-            etag: validators.validatorType === 'etag' ? this._cleanRev(etag) : etag,
+            etag: this._cleanRev(etag),
             data: {
               'content-type': contentType,
               'content-length': contentLength,
@@ -622,16 +407,8 @@ export class WebdavApi {
 
       // Add conditional headers for efficient downloading
       if (localRev) {
-        // Check server capabilities to determine which header to use
-        const capabilities = await this._getOrDetectCapabilities();
-
-        if (capabilities.supportsETags) {
-          // Use If-None-Match for ETag-based conditional requests
-          headers['If-None-Match'] = localRev;
-        } else if (capabilities.supportsLastModified) {
-          // Use If-Modified-Since for Last-Modified-based conditional requests
-          headers['If-Modified-Since'] = localRev;
-        }
+        // Use If-None-Match to avoid downloading if file hasn't changed
+        headers['If-None-Match'] = localRev;
       }
 
       // Add Range header for partial content requests (useful for large files)
@@ -658,7 +435,6 @@ export class WebdavApi {
       // Handle different response statuses
       if (response.status === 304) {
         // Not Modified - file hasn't changed
-        // For backward compatibility, throw an error like before
         const error = new Error(`File not modified: ${path}`);
         (error as any).status = 304;
         (error as any).localRev = localRev;
@@ -674,7 +450,7 @@ export class WebdavApi {
       const dataStr = await response.text();
 
       // Validate that we didn't receive an HTML error page
-      this._xmlParser.validateResponseContent(dataStr, path, 'download', 'file content');
+      this._validateResponseContent(dataStr, path, 'download', 'file content');
 
       // Validate response content
       if (!dataStr && response.status === 200) {
@@ -685,21 +461,15 @@ export class WebdavApi {
       // Extract headers
       const headerObj = this._responseHeadersToObject(response);
 
-      // Get validator (ETag or Last-Modified)
-      const validators = this._extractValidators(headerObj);
-      let rev = validators.validator;
-
-      // Clean ETag if it's an ETag validator
-      if (rev && validators.validatorType === 'etag') {
-        rev = this._cleanRev(rev);
-      }
+      // Get etag/revision
+      const rev = this._findEtagInHeaders(headerObj);
 
       if (!rev) {
-        PFLog.error(`${WebdavApi.L}.download() no validator in response headers`, {
+        PFLog.error(`${WebdavApi.L}.download() no etag in response headers`, {
           path,
           headers: headerObj,
         });
-        // Try to get validator via PROPFIND as fallback
+        // Try to get etag via PROPFIND as fallback
         try {
           const meta = await this.getFileMeta(path, null);
           return {
@@ -713,7 +483,7 @@ export class WebdavApi {
           }
           PFLog.err(`${WebdavApi.L}.download() PROPFIND fallback failed`, metaError);
           // Use content-based hash as last resort
-          const crypto = globalThis.crypto;
+          const crypto = globalThis.crypto || (globalThis as any).msCrypto;
           if (crypto && crypto.subtle) {
             try {
               const encoder = new TextEncoder();
@@ -742,17 +512,11 @@ export class WebdavApi {
     } catch (e: any) {
       PFLog.err(`${WebdavApi.L}.download() error`, { path, error: e });
 
-      // Check for HttpNotOkAPIError which has response.status
-      const errorStatus = e instanceof HttpNotOkAPIError ? e.response.status : e?.status;
-
       // Enhanced error handling
-      switch (errorStatus) {
+      switch (e?.status) {
         case 304:
-          // Not Modified - create custom error with needed info
-          const notModifiedError = new Error(`File not modified since: ${localRev}`);
-          (notModifiedError as any).status = 304;
-          (notModifiedError as any).localRev = localRev;
-          throw notModifiedError;
+          // Not Modified - rethrow as is since this might be expected
+          throw e;
         case 404:
           // Not Found - file doesn't exist
           throw new RemoteFileNotFoundAPIError(path);
@@ -774,16 +538,8 @@ export class WebdavApi {
 
       // Add conditional headers for safe deletion
       if (expectedEtag) {
-        // Check server capabilities to determine which header to use
-        const capabilities = await this._getOrDetectCapabilities();
-
-        if (capabilities.supportsETags) {
-          // Use If-Match for ETag-based conditional deletion
-          headers['If-Match'] = expectedEtag;
-        } else if (capabilities.supportsLastModified) {
-          // Use If-Unmodified-Since for Last-Modified-based conditional deletion
-          headers['If-Unmodified-Since'] = expectedEtag;
-        }
+        // Use If-Match to ensure we're deleting the expected version
+        headers['If-Match'] = expectedEtag;
       }
 
       // Check if resource exists before deletion (optional safety check)
@@ -824,22 +580,10 @@ export class WebdavApi {
       // Check for multi-status response (207) which might contain partial failures
       if (response.status === 207) {
         const xmlText = await response.text();
-        const hasErrors = await this._xmlParser.checkDeleteMultiStatusResponse(
-          xmlText,
-          path,
-        );
+        const hasErrors = await this._checkDeleteMultiStatusResponse(xmlText, path);
         if (hasErrors) {
           throw new Error(`Partial deletion failure for: ${path}`);
         }
-      }
-
-      // Check for other error statuses that might not throw from _makeRequest
-      if (response.status === 409) {
-        throw new Error(`Cannot delete non-empty directory: ${path}`);
-      } else if (response.status === 423) {
-        throw new Error(`Cannot delete locked resource: ${path}`);
-      } else if (response.status === 424) {
-        throw new Error(`Delete operation failed due to dependency: ${path}`);
       }
 
       PFLog.normal(`${WebdavApi.L}.remove() successfully deleted: ${path}`);
@@ -855,10 +599,7 @@ export class WebdavApi {
         return;
       }
 
-      // Check for HttpNotOkAPIError which has response.status
-      const errorStatus = e instanceof HttpNotOkAPIError ? e.response.status : e?.status;
-
-      switch (errorStatus) {
+      switch (e?.status) {
         case 412:
           // Precondition Failed - etag mismatch
           if (expectedEtag) {
@@ -872,13 +613,51 @@ export class WebdavApi {
           throw new Error(`Cannot delete locked resource: ${path}`);
         case 424:
           // Failed Dependency
-          throw new Error(`Delete operation failed due to dependency: ${path}`);
+          throw new Error(`Delete failed due to dependency: ${path}`);
         case 409:
           // Conflict - might be non-empty directory
-          throw new Error(`Cannot delete non-empty directory: ${path}`);
+          throw new Error(`Delete conflict (non-empty directory?): ${path}`);
         default:
           throw e;
       }
+    }
+  }
+
+  private async _checkDeleteMultiStatusResponse(
+    xmlText: string,
+    requestPath: string,
+  ): Promise<boolean> {
+    try {
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+
+      const responses = xmlDoc.querySelectorAll('response');
+      let hasErrors = false;
+
+      for (const response of Array.from(responses)) {
+        const href = response.querySelector('href')?.textContent?.trim();
+        const status = response.querySelector('status')?.textContent;
+
+        if (href && status && !status.includes('200') && !status.includes('204')) {
+          PFLog.err(
+            `${WebdavApi.L}._checkDeleteMultiStatusResponse() deletion failed for`,
+            {
+              href,
+              status,
+              requestPath,
+            },
+          );
+          hasErrors = true;
+        }
+      }
+
+      return hasErrors;
+    } catch (parseError) {
+      PFLog.err(
+        `${WebdavApi.L}._checkDeleteMultiStatusResponse() XML parsing error`,
+        parseError,
+      );
+      return false; // Assume success if we can't parse the response
     }
   }
 
@@ -1183,7 +962,6 @@ export class WebdavApi {
           412, // Precondition Failed (let calling methods handle this)
           416, // Range Not Satisfiable (let calling methods handle this)
           423, // Locked (let calling methods handle this)
-          424, // Failed Dependency (let calling methods handle this)
         ];
 
         if (!validWebDavStatuses.includes(response.status)) {
@@ -1196,6 +974,11 @@ export class WebdavApi {
         }
         return response;
       } catch (e) {
+        PFLog.err(`${WebdavApi.L}._makeRequest() CapacitorHttp error`, {
+          method,
+          path,
+          error: e,
+        });
         this._checkCommonErrors(e, path);
         throw e;
       }
@@ -1214,8 +997,6 @@ export class WebdavApi {
         body,
       });
 
-      Log.x('res', response);
-
       // Handle 404 specifically to throw RemoteFileNotFoundAPIError consistently
       if (response.status === 404) {
         PFLog.normal(`${WebdavApi.L}._makeRequest() 404 Not Found`, {
@@ -1233,7 +1014,6 @@ export class WebdavApi {
         206, // Partial Content
         207, // Multi-Status
         304, // Not Modified (for conditional requests)
-        404, // File not existing
         405, // Method Not Allowed (let calling methods handle this)
         409, // Conflict (let calling methods handle this)
         412, // Precondition Failed (let calling methods handle this)
@@ -1252,9 +1032,19 @@ export class WebdavApi {
       }
       return response;
     } catch (e) {
+      PFLog.err(`${WebdavApi.L}._makeRequest() network error`, {
+        method,
+        path,
+        error: e,
+      });
       this._checkCommonErrors(e, path);
       throw e;
     }
+  }
+
+  private _findEtagInHeaders(headers: Record<string, string>): string {
+    const etagKey = this._findEtagKeyInObject(headers);
+    return etagKey ? this._cleanRev(headers[etagKey]) : '';
   }
 
   private _findEtagKeyInObject(obj: Record<string, any>): string | undefined {
@@ -1262,49 +1052,6 @@ export class WebdavApi {
     const possibleEtagKeys = ['etag', 'oc-etag', 'oc:etag', 'getetag', 'x-oc-etag'];
 
     return Object.keys(obj).find((key) => possibleEtagKeys.includes(key.toLowerCase()));
-  }
-
-  /**
-   * Extract validators (ETag and Last-Modified) from response headers
-   * Returns the preferred validator and type for conditional requests
-   */
-  private _extractValidators(headers: Record<string, string>): {
-    etag?: string;
-    lastModified?: string;
-    validator?: string;
-    validatorType: 'etag' | 'last-modified' | 'none';
-  } {
-    // Find ETag (case-insensitive)
-    const etagKey = this._findEtagKeyInObject(headers);
-    const etag = etagKey ? headers[etagKey] : undefined;
-
-    // Find Last-Modified (case-insensitive)
-    const lastModifiedKey = Object.keys(headers).find(
-      (key) => key.toLowerCase() === 'last-modified',
-    );
-    const lastModified = lastModifiedKey ? headers[lastModifiedKey] : undefined;
-
-    // Determine the preferred validator
-    // ETags are preferred over Last-Modified per RFC 7232
-    let validator: string | undefined;
-    let validatorType: 'etag' | 'last-modified' | 'none';
-
-    if (etag && etag.trim()) {
-      validator = etag;
-      validatorType = 'etag';
-    } else if (lastModified && lastModified.trim()) {
-      validator = lastModified;
-      validatorType = 'last-modified';
-    } else {
-      validatorType = 'none';
-    }
-
-    return {
-      etag,
-      lastModified,
-      validator,
-      validatorType,
-    };
   }
 
   private _cleanRev(rev: string): string {
@@ -1330,8 +1077,8 @@ export class WebdavApi {
     // Construct the URL
     const url = new URL(normalizedPath, baseUrl).toString();
 
-    // Log for debugging
-    PFLog.debug(`${WebdavApi.L}._getUrl() constructed URL`, {
+    // Log for debugging - increased log level for better visibility
+    PFLog.error(`${WebdavApi.L}._getUrl() constructed URL`, {
       baseUrl,
       path,
       normalizedPath,
@@ -1344,6 +1091,111 @@ export class WebdavApi {
 
   private _getAuthHeader(cfg: WebdavPrivateCfg): string {
     return `Basic ${btoa(`${cfg.userName}:${cfg.password}`)}`;
+  }
+
+  private _parseXmlResponseElement(
+    response: Element,
+    requestPath: string,
+  ): FileMeta | null {
+    const href = response.querySelector('href')?.textContent?.trim();
+    if (!href) return null;
+
+    // Decode the href for processing
+    const decodedHref = decodeURIComponent(href);
+
+    const propstat = response.querySelector('propstat');
+    if (!propstat) return null;
+
+    const status = propstat.querySelector('status')?.textContent;
+    if (!status?.includes('200 OK')) return null;
+
+    const prop = propstat.querySelector('prop');
+    if (!prop) return null;
+
+    // Extract properties
+    const displayname = prop.querySelector('displayname')?.textContent || '';
+    const contentLength = prop.querySelector('getcontentlength')?.textContent || '0';
+    const lastModified = prop.querySelector('getlastmodified')?.textContent || '';
+    const etag = prop.querySelector('getetag')?.textContent || '';
+    const resourceType = prop.querySelector('resourcetype');
+    const contentType = prop.querySelector('getcontenttype')?.textContent || '';
+
+    // Determine if it's a collection (directory) or file
+    const isCollection = resourceType?.querySelector('collection') !== null;
+
+    return {
+      filename: displayname || decodedHref.split('/').pop() || '',
+      basename: displayname || decodedHref.split('/').pop() || '',
+      lastmod: lastModified,
+      size: parseInt(contentLength, 10),
+      type: isCollection ? 'directory' : 'file',
+      etag: this._cleanRev(etag),
+      data: {
+        'content-type': contentType,
+        'content-length': contentLength,
+        'last-modified': lastModified,
+        etag: etag,
+        href: decodedHref,
+      },
+    };
+  }
+
+  private _parsePropsFromXml(xmlText: string, requestPath: string): FileMeta | null {
+    try {
+      // Check if xmlText is empty or not valid XML
+      if (!xmlText || xmlText.trim() === '') {
+        PFLog.err(`${WebdavApi.L}._parsePropsFromXml() Empty XML response`);
+        return null;
+      }
+
+      // Check if response is HTML instead of XML
+      if (this._isHtmlResponse(xmlText)) {
+        PFLog.err(`${WebdavApi.L}._parsePropsFromXml() Received HTML instead of XML`, {
+          requestPath,
+          responseSnippet: xmlText.substring(0, 200),
+        });
+        return null;
+      }
+
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+
+      // Check for parsing errors
+      const parserError = xmlDoc.querySelector('parsererror');
+      if (parserError) {
+        PFLog.err(
+          `${WebdavApi.L}._parsePropsFromXml() XML parsing error`,
+          parserError.textContent,
+        );
+        return null;
+      }
+
+      // Find the response element for our file
+      const responses = xmlDoc.querySelectorAll('response');
+      for (const response of Array.from(responses)) {
+        const href = response.querySelector('href')?.textContent?.trim();
+        if (!href) continue;
+
+        const decodedHref = decodeURIComponent(href);
+        const normalizedHref = decodedHref.replace(/\/$/, '');
+        const normalizedPath = requestPath.replace(/\/$/, '');
+
+        if (
+          normalizedHref.endsWith(normalizedPath) ||
+          normalizedPath.endsWith(normalizedHref)
+        ) {
+          return this._parseXmlResponseElement(response, requestPath);
+        }
+      }
+
+      PFLog.err(
+        `${WebdavApi.L}._parsePropsFromXml() No matching response found for path: ${requestPath}`,
+      );
+      return null;
+    } catch (error) {
+      PFLog.err(`${WebdavApi.L}._parsePropsFromXml() parsing error`, error);
+      return null;
+    }
   }
 
   async listFolder(folderPath: string): Promise<FileMeta[]> {
@@ -1359,13 +1211,58 @@ export class WebdavApi {
       });
 
       const xmlText = await response.text();
-      return this._xmlParser.parseMultiplePropsFromXml(xmlText, folderPath);
+      return this._parseMultiplePropsFromXml(xmlText, folderPath);
     } catch (e: any) {
       // Return empty array if PROPFIND is not supported
       if (e?.message?.includes('PROPFIND')) {
         return [];
       }
       throw e;
+    }
+  }
+
+  private _parseMultiplePropsFromXml(xmlText: string, basePath: string): FileMeta[] {
+    try {
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+
+      const parserError = xmlDoc.querySelector('parsererror');
+      if (parserError) {
+        PFLog.err(
+          `${WebdavApi.L}._parseMultiplePropsFromXml() XML parsing error`,
+          parserError.textContent,
+        );
+        return [];
+      }
+
+      const results: FileMeta[] = [];
+      const responses = xmlDoc.querySelectorAll('response');
+
+      for (const response of Array.from(responses)) {
+        const href = response.querySelector('href')?.textContent?.trim();
+        if (!href) continue;
+
+        const decodedHref = decodeURIComponent(href);
+
+        // Skip the base path itself (we only want children)
+        // Normalize both paths: remove leading/trailing slashes for comparison
+        const normalizedHref = decodedHref.replace(/^\//, '').replace(/\/$/, '');
+        const normalizedBasePath = basePath.replace(/^\//, '').replace(/\/$/, '');
+
+        if (normalizedHref === normalizedBasePath) {
+          continue;
+        }
+
+        const fileMeta = this._parseXmlResponseElement(response, decodedHref);
+        if (fileMeta) {
+          results.push(fileMeta);
+        }
+      }
+
+      return results;
+    } catch (error) {
+      PFLog.err(`${WebdavApi.L}._parseMultiplePropsFromXml() parsing error`, error);
+      return [];
     }
   }
 
@@ -1439,9 +1336,6 @@ export class WebdavApi {
       case 401:
       case 403:
         throw new AuthFailSPError(`WebDAV ${status}`, targetPath);
-      case 404:
-        throw new RemoteFileNotFoundAPIError();
-
       case 207:
         // Multi-Status is normal for WebDAV PROPFIND responses
         break;
