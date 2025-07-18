@@ -13,6 +13,9 @@ export interface FileMeta {
 
 export class WebdavXmlParser {
   private static readonly L = 'WebdavXmlParser';
+  // Maximum size for XML responses to prevent DoS attacks (10MB)
+  private static readonly MAX_XML_SIZE = 10 * 1024 * 1024;
+
   static readonly PROPFIND_XML = `<?xml version="1.0" encoding="utf-8" ?>
 <D:propfind xmlns:D="DAV:">
   <D:prop>
@@ -37,6 +40,21 @@ export class WebdavXmlParser {
     operation: string,
     expectedContentDescription: string = 'content',
   ): void {
+    // Check for size limits on file content
+    const maxSize =
+      expectedContentDescription === 'XML'
+        ? WebdavXmlParser.MAX_XML_SIZE
+        : WebdavXmlParser.MAX_XML_SIZE * 10; // Allow larger files for actual file content (100MB)
+
+    if (content.length > maxSize) {
+      PFLog.error(
+        `${WebdavXmlParser.L}.validateResponseContent() Content too large: ${content.length} bytes`,
+      );
+      throw new Error(
+        `Response too large for ${operation} of ${path} (${content.length} bytes, max: ${maxSize})`,
+      );
+    }
+
     if (this.isHtmlResponse(content)) {
       PFLog.error(
         `${WebdavXmlParser.L}.${operation}() received HTML error page instead of ${expectedContentDescription}`,
@@ -47,26 +65,6 @@ export class WebdavXmlParser {
       );
       throw new RemoteFileNotFoundAPIError(path);
     }
-  }
-
-  /**
-   * Validates XML response and throws appropriate error if HTML error page is received
-   * Used by operations that expect XML responses (PROPFIND, etc.)
-   */
-  validateAndParseXmlResponse(
-    xmlText: string,
-    path: string,
-    operation: string = 'XML operation',
-  ): FileMeta {
-    this.validateResponseContent(xmlText, path, operation, 'XML');
-
-    const fileMeta = this.parsePropsFromXml(xmlText, path);
-
-    if (!fileMeta) {
-      throw new RemoteFileNotFoundAPIError(path);
-    }
-
-    return fileMeta;
   }
 
   /**
@@ -82,73 +80,27 @@ export class WebdavXmlParser {
   }
 
   /**
-   * Parse XML response from PROPFIND into FileMeta
-   */
-  parsePropsFromXml(xmlText: string, requestPath: string): FileMeta | null {
-    try {
-      // Check if xmlText is empty or not valid XML
-      if (!xmlText || xmlText.trim() === '') {
-        PFLog.err(`${WebdavXmlParser.L}.parsePropsFromXml() Empty XML response`);
-        return null;
-      }
-
-      // Check if response is HTML instead of XML
-      if (this.isHtmlResponse(xmlText)) {
-        PFLog.err(
-          `${WebdavXmlParser.L}.parsePropsFromXml() Received HTML instead of XML`,
-          {
-            requestPath,
-            responseSnippet: xmlText.substring(0, 200),
-          },
-        );
-        return null;
-      }
-
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-
-      // Check for parsing errors
-      const parserError = xmlDoc.querySelector('parsererror');
-      if (parserError) {
-        PFLog.err(
-          `${WebdavXmlParser.L}.parsePropsFromXml() XML parsing error`,
-          parserError.textContent,
-        );
-        return null;
-      }
-
-      // Find the response element for our file
-      const responses = xmlDoc.querySelectorAll('response');
-      for (const response of Array.from(responses)) {
-        const href = response.querySelector('href')?.textContent?.trim();
-        if (!href) continue;
-
-        const decodedHref = decodeURIComponent(href);
-        const normalizedHref = decodedHref.replace(/\/$/, '');
-        const normalizedPath = requestPath.replace(/\/$/, '');
-
-        if (
-          normalizedHref.endsWith(normalizedPath) ||
-          normalizedPath.endsWith(normalizedHref)
-        ) {
-          return this.parseXmlResponseElement(response, requestPath);
-        }
-      }
-
-      PFLog.err(
-        `${WebdavXmlParser.L}.parsePropsFromXml() No matching response found for path: ${requestPath}`,
-      );
-      return null;
-    } catch (error) {
-      PFLog.err(`${WebdavXmlParser.L}.parsePropsFromXml() parsing error`, error);
-      return null;
-    }
-  }
-
-  /**
    * Parse multiple file entries from PROPFIND XML response
    */
   parseMultiplePropsFromXml(xmlText: string, basePath: string): FileMeta[] {
+    // Validate XML size
+    if (xmlText.length > WebdavXmlParser.MAX_XML_SIZE) {
+      PFLog.error(
+        `${WebdavXmlParser.L}.parseMultiplePropsFromXml() XML too large: ${xmlText.length} bytes`,
+      );
+      throw new RemoteFileNotFoundAPIError(
+        `XML response too large (${xmlText.length} bytes)`,
+      );
+    }
+
+    // Basic XML validation
+    if (!xmlText.trim().startsWith('<?xml') && !xmlText.trim().startsWith('<')) {
+      PFLog.error(
+        `${WebdavXmlParser.L}.parseMultiplePropsFromXml() Invalid XML: doesn't start with <?xml or <`,
+      );
+      return [];
+    }
+
     try {
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
@@ -251,46 +203,5 @@ export class WebdavXmlParser {
         href: decodedHref,
       },
     };
-  }
-
-  /**
-   * Check multi-status response for errors (used by DELETE operations)
-   */
-  async checkDeleteMultiStatusResponse(
-    xmlText: string,
-    requestPath: string,
-  ): Promise<boolean> {
-    try {
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-
-      const responses = xmlDoc.querySelectorAll('response');
-      let hasErrors = false;
-
-      for (const response of Array.from(responses)) {
-        const href = response.querySelector('href')?.textContent?.trim();
-        const status = response.querySelector('status')?.textContent;
-
-        if (href && status && !status.includes('200') && !status.includes('204')) {
-          PFLog.err(
-            `${WebdavXmlParser.L}.checkDeleteMultiStatusResponse() deletion failed for`,
-            {
-              href,
-              status,
-              requestPath,
-            },
-          );
-          hasErrors = true;
-        }
-      }
-
-      return hasErrors;
-    } catch (parseError) {
-      PFLog.err(
-        `${WebdavXmlParser.L}.checkDeleteMultiStatusResponse() XML parsing error`,
-        parseError,
-      );
-      return false; // Assume success if we can't parse the response
-    }
   }
 }

@@ -173,35 +173,6 @@ describe('WebdavApi', () => {
       });
     });
 
-    it('should handle range requests', async () => {
-      const mockResponse = {
-        status: 206,
-        headers: {
-          etag: '"abc123"',
-        },
-        data: 'partial content',
-      };
-      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
-      mockXmlParser.validateResponseContent.and.stub();
-
-      await api.download({
-        path: '/test.txt',
-        localRev: null,
-        rangeStart: 100,
-        rangeEnd: 200,
-      });
-
-      expect(mockHttpAdapter.request).toHaveBeenCalledWith(
-        jasmine.objectContaining({
-          url: 'http://example.com/webdav/test.txt',
-          method: 'GET',
-          headers: jasmine.objectContaining({
-            Range: 'bytes=100-200',
-          }),
-        }),
-      );
-    });
-
     it('should clean etag values', async () => {
       const mockResponse = {
         status: 200,

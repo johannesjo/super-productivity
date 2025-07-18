@@ -80,38 +80,26 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
     // For metadata file, don't send localRev if it might not exist remotely
     const effectiveLocalRev = targetPath === '__meta_' && localRev ? null : localRev;
 
-    try {
-      const { rev, dataStr } = await this._api.download({
-        path: filePath,
-        localRev: effectiveLocalRev,
-      });
+    const result = await this._api.download({
+      path: filePath,
+      localRev: effectiveLocalRev,
+    });
 
-      if (!dataStr && dataStr !== '') {
-        throw new InvalidDataSPError(targetPath);
-      }
-      if (typeof rev !== 'string') {
-        throw new NoRevAPIError();
-      }
-
-      return { rev, dataStr };
-    } catch (e: unknown) {
-      // Handle 304 Not Modified by retrying without localRev
-      if (e && typeof e === 'object' && 'status' in e && e.status === 304) {
-        const { rev, dataStr } = await this._api.download({
-          path: filePath,
-          localRev: null,
-        });
-        if (!dataStr && dataStr !== '') {
-          throw new InvalidDataSPError(targetPath);
-        }
-        if (typeof rev !== 'string') {
-          throw new NoRevAPIError();
-        }
-
-        return { rev, dataStr };
-      }
-      throw e;
+    // If the file wasn't modified (304), we should have notModified flag
+    if (result.notModified) {
+      // Return current revision with empty data - the sync system should handle this
+      // TODO handle this in syncService
+      return { rev: localRev || result.rev, dataStr: '' };
     }
+
+    if (!result.dataStr && result.dataStr !== '') {
+      throw new InvalidDataSPError(targetPath);
+    }
+    if (typeof result.rev !== 'string') {
+      throw new NoRevAPIError();
+    }
+
+    return { rev: result.rev, dataStr: result.dataStr };
   }
 
   async removeFile(targetPath: string): Promise<void> {

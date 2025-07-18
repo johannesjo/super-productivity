@@ -8,6 +8,7 @@ import {
   RemoteFileNotFoundAPIError,
   RemoteFileChangedUnexpectedly,
 } from '../../../errors/errors';
+import { WebDavHttpStatus, WebDavHttpMethod, WebDavHttpHeader } from './webdav.const';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
@@ -15,6 +16,7 @@ export class WebdavApi {
   private static readonly L = 'WebdavApi';
   private xmlParser: WebdavXmlParser;
   private httpAdapter: WebDavHttpAdapter;
+  private directoryCreationQueue = new Map<string, Promise<void>>();
 
   constructor(private _getCfgOrError: () => Promise<WebdavPrivateCfg>) {
     this.xmlParser = new WebdavXmlParser((rev: string) => this._cleanRev(rev));
@@ -33,15 +35,15 @@ export class WebdavApi {
       // Try PROPFIND first
       const response = await this._makeRequest({
         url: fullPath,
-        method: 'PROPFIND',
+        method: WebDavHttpMethod.PROPFIND,
         body: WebdavXmlParser.PROPFIND_XML,
         headers: {
-          'Content-Type': 'application/xml; charset=utf-8',
-          Depth: '0',
+          [WebDavHttpHeader.CONTENT_TYPE]: 'application/xml; charset=utf-8',
+          [WebDavHttpHeader.DEPTH]: '0',
         },
       });
 
-      if (response.status === 207) {
+      if (response.status === WebDavHttpStatus.MULTI_STATUS) {
         const files = this.xmlParser.parseMultiplePropsFromXml(response.data, path);
         if (files && files.length > 0) {
           const meta = files[0];
@@ -67,30 +69,53 @@ export class WebdavApi {
 
   async download({
     path,
-    localRev: _localRev,
-    rangeStart,
-    rangeEnd,
+    localRev,
   }: {
     path: string;
     localRev?: string | null;
-    rangeStart?: number;
-    rangeEnd?: number;
-  }): Promise<{ rev: string; dataStr: string; lastModified?: string }> {
+    // TODO remove
+  }): Promise<{
+    rev: string;
+    dataStr: string;
+    lastModified?: string;
+    notModified?: boolean;
+  }> {
     const cfg = await this._getCfgOrError();
     const fullPath = this._buildFullPath(cfg.baseUrl, path);
 
     try {
       const headers: Record<string, string> = {};
 
-      if (rangeStart !== undefined && rangeEnd !== undefined) {
-        headers['Range'] = `bytes=${rangeStart}-${rangeEnd}`;
+      // Add conditional headers if we have a local revision
+      if (localRev) {
+        if (this._isLikelyTimestamp(localRev)) {
+          // Convert timestamp to HTTP date
+          const date = new Date(parseInt(localRev));
+          headers[WebDavHttpHeader.IF_MODIFIED_SINCE] = date.toUTCString();
+        } else if (this._isLikelyDateString(localRev)) {
+          // It's already a date string
+          headers[WebDavHttpHeader.IF_MODIFIED_SINCE] = localRev;
+        } else {
+          // Assume it's an ETag
+          headers[WebDavHttpHeader.IF_NONE_MATCH] = localRev;
+        }
       }
 
       const response = await this._makeRequest({
         url: fullPath,
-        method: 'GET',
+        method: WebDavHttpMethod.GET,
         headers,
       });
+
+      // Handle 304 Not Modified
+      if (response.status === WebDavHttpStatus.NOT_MODIFIED) {
+        // File hasn't changed - return the current revision
+        return {
+          rev: localRev || '',
+          dataStr: '',
+          notModified: true,
+        };
+      }
 
       // Validate it's not an HTML error page
       this.xmlParser.validateResponseContent(
@@ -141,7 +166,7 @@ export class WebdavApi {
     try {
       // Prepare headers for upload
       const headers: Record<string, string> = {
-        'Content-Type': 'application/octet-stream',
+        [WebDavHttpHeader.CONTENT_TYPE]: 'application/octet-stream',
       };
 
       // Set conditional headers based on revision type
@@ -150,14 +175,14 @@ export class WebdavApi {
           // Convert timestamp to HTTP date
           const date = new Date(parseInt(expectedRev));
           Log.verbose(WebdavApi.L, 'isLikelyTimestamp()', expectedRev, date);
-          headers['If-Unmodified-Since'] = date.toUTCString();
+          headers[WebDavHttpHeader.IF_UNMODIFIED_SINCE] = date.toUTCString();
         } else if (this._isLikelyDateString(expectedRev)) {
           // It's already a date string, use as-is
           Log.verbose(WebdavApi.L, '_isLikelyDateString()', expectedRev);
-          headers['If-Unmodified-Since'] = expectedRev;
+          headers[WebDavHttpHeader.IF_UNMODIFIED_SINCE] = expectedRev;
         } else {
           // Assume it's an ETag
-          headers['If-Match'] = expectedRev;
+          headers[WebDavHttpHeader.IF_MATCH] = expectedRev;
         }
       }
 
@@ -166,7 +191,7 @@ export class WebdavApi {
       try {
         response = await this._makeRequest({
           url: fullPath,
-          method: 'PUT',
+          method: WebDavHttpMethod.PUT,
           body: data,
           headers,
         });
@@ -175,7 +200,7 @@ export class WebdavApi {
         if (
           uploadError instanceof HttpNotOkAPIError &&
           uploadError.response &&
-          uploadError.response.status === 412
+          uploadError.response.status === WebDavHttpStatus.PRECONDITION_FAILED
         ) {
           throw new RemoteFileChangedUnexpectedly(
             `File ${path} was modified on remote (expected rev: ${expectedRev})`,
@@ -186,7 +211,7 @@ export class WebdavApi {
         if (
           uploadError instanceof HttpNotOkAPIError &&
           uploadError.response &&
-          uploadError.response.status === 409
+          uploadError.response.status === WebDavHttpStatus.CONFLICT
         ) {
           PFLog.debug(
             `${WebdavApi.L}.upload() got 409, attempting to create parent directory`,
@@ -198,7 +223,7 @@ export class WebdavApi {
           // Retry the upload
           response = await this._makeRequest({
             url: fullPath,
-            method: 'PUT',
+            method: WebDavHttpMethod.PUT,
             body: data,
             headers,
           });
@@ -212,10 +237,36 @@ export class WebdavApi {
       const lastModified =
         response.headers['last-modified'] || response.headers['Last-Modified'];
 
-      const rev = etag ? this._cleanRev(etag) : lastModified || '';
+      let rev = etag ? this._cleanRev(etag) : lastModified || '';
 
       if (!rev) {
-        // If no ETag/Last-Modified in response, fetch metadata
+        // Some WebDAV servers don't return ETag/Last-Modified on PUT
+        // Try to get it from a HEAD request first (cheaper than PROPFIND)
+        PFLog.verbose(
+          `${WebdavApi.L}.upload() no ETag/Last-Modified in PUT response, fetching via HEAD`,
+        );
+        try {
+          const headResponse = await this._makeRequest({
+            url: fullPath,
+            method: WebDavHttpMethod.HEAD,
+          });
+          const headEtag = headResponse.headers['etag'] || headResponse.headers['ETag'];
+          const headLastMod =
+            headResponse.headers['last-modified'] ||
+            headResponse.headers['Last-Modified'];
+          rev = headEtag ? this._cleanRev(headEtag) : headLastMod || '';
+
+          if (rev) {
+            return { rev, lastModified: headLastMod };
+          }
+        } catch (headError) {
+          PFLog.verbose(
+            `${WebdavApi.L}.upload() HEAD request failed, falling back to PROPFIND`,
+            headError,
+          );
+        }
+
+        // If HEAD didn't work, fall back to PROPFIND
         const meta = await this.getFileMeta(path, null, true);
         return {
           rev: meta.etag || meta.lastmod,
@@ -238,12 +289,12 @@ export class WebdavApi {
       const headers: Record<string, string> = {};
 
       if (expectedEtag) {
-        headers['If-Match'] = expectedEtag;
+        headers[WebDavHttpHeader.IF_MATCH] = expectedEtag;
       }
 
       await this._makeRequest({
         url: fullPath,
-        method: 'DELETE',
+        method: WebDavHttpMethod.DELETE,
         headers,
       });
 
@@ -270,7 +321,7 @@ export class WebdavApi {
     // Build authorization header
     const auth = btoa(`${cfg.userName}:${cfg.password}`);
     const allHeaders = {
-      Authorization: `Basic ${auth}`,
+      [WebDavHttpHeader.AUTHORIZATION]: `Basic ${auth}`,
       ...headers,
     };
 
@@ -291,28 +342,72 @@ export class WebdavApi {
       return;
     }
 
-    try {
-      // Try to create parent directory
-      await this._makeRequest({
-        url: parentPath,
-        method: 'MKCOL',
-      });
-      PFLog.verbose(`${WebdavApi.L}._ensureParentDirectory() created ${parentPath}`);
-    } catch (e) {
-      // Ignore errors - directory might already exist
-      // Most errors mean directory already exists or we don't have permissions
+    // Check if we're already creating this directory
+    const existingPromise = this.directoryCreationQueue.get(parentPath);
+    if (existingPromise) {
       PFLog.verbose(
-        `${WebdavApi.L}._ensureParentDirectory() directory creation attempt for ${parentPath}`,
-        e,
+        `${WebdavApi.L}._ensureParentDirectory() waiting for existing creation of ${parentPath}`,
       );
+      await existingPromise;
+      return;
+    }
+
+    // Create a new promise for this directory
+    const creationPromise = this._createDirectory(parentPath);
+    this.directoryCreationQueue.set(parentPath, creationPromise);
+
+    try {
+      await creationPromise;
+    } finally {
+      // Clean up the queue
+      this.directoryCreationQueue.delete(parentPath);
+    }
+  }
+
+  private async _createDirectory(path: string): Promise<void> {
+    try {
+      // Try to create directory
+      await this._makeRequest({
+        url: path,
+        method: WebDavHttpMethod.MKCOL,
+      });
+      PFLog.verbose(`${WebdavApi.L}._createDirectory() created ${path}`);
+    } catch (e) {
+      // Check if error is due to directory already existing (405 Method Not Allowed or 409 Conflict)
+      if (
+        e instanceof HttpNotOkAPIError &&
+        e.response &&
+        (e.response.status === WebDavHttpStatus.METHOD_NOT_ALLOWED || // Method not allowed - directory exists
+          e.response.status === WebDavHttpStatus.CONFLICT || // Conflict - parent doesn't exist
+          e.response.status === WebDavHttpStatus.MOVED_PERMANENTLY || // Moved permanently - directory exists
+          e.response.status === WebDavHttpStatus.OK) // OK - directory exists
+      ) {
+        PFLog.verbose(
+          `${WebdavApi.L}._createDirectory() directory likely exists: ${path} (status: ${e.response.status})`,
+        );
+      } else {
+        // Log other errors but don't throw - we'll let the actual upload fail if needed
+        PFLog.warn(`${WebdavApi.L}._createDirectory() unexpected error for ${path}`, e);
+      }
     }
   }
 
   private _buildFullPath(baseUrl: string, path: string): string {
+    // Validate path to prevent directory traversal attacks
+    if (path.includes('..') || path.includes('//')) {
+      throw new Error(
+        `Invalid path: ${path}. Path cannot contain '..' or '//' sequences`,
+      );
+    }
+
     // Ensure baseUrl doesn't end with / and path starts with /
     const cleanBase = baseUrl.replace(/\/$/, '');
     const cleanPath = path.startsWith('/') ? path : `/${path}`;
-    return `${cleanBase}${cleanPath}`;
+
+    // Additional validation: ensure the path doesn't try to escape the base path
+    const normalizedPath = cleanPath.replace(/\/+/g, '/'); // Replace multiple slashes with single slash
+
+    return `${cleanBase}${normalizedPath}`;
   }
 
   private _cleanRev(rev: string): string {
@@ -323,7 +418,6 @@ export class WebdavApi {
       .replace(/&quot;/g, '')
       .trim();
     PFLog.verbose(`${WebdavApi.L}.cleanRev() "${rev}" -> "${result}"`);
-    console.log('REV', result);
 
     return result;
   }
@@ -346,16 +440,15 @@ export class WebdavApi {
   private async _getFileMetaViaHead(fullPath: string): Promise<FileMeta> {
     const response = await this._makeRequest({
       url: fullPath,
-      method: 'HEAD',
+      method: WebDavHttpMethod.HEAD,
     });
 
-    const etag = response.headers['etag'] || response.headers['ETag'];
-    const lastModified =
-      response.headers['last-modified'] || response.headers['Last-Modified'];
-    const contentLength =
-      response.headers['content-length'] || response.headers['Content-Length'];
-    const contentType =
-      response.headers['content-type'] || response.headers['Content-Type'];
+    // Safely access headers with null checks
+    const headers = response.headers || {};
+    const etag = headers['etag'] || headers['ETag'] || '';
+    const lastModified = headers['last-modified'] || headers['Last-Modified'] || '';
+    const contentLength = headers['content-length'] || headers['Content-Length'] || '0';
+    const contentType = headers['content-type'] || headers['Content-Type'] || '';
 
     if (!lastModified) {
       throw new InvalidDataSPError('No Last-Modified header in HEAD response');
@@ -364,11 +457,24 @@ export class WebdavApi {
     // Extract filename from path
     const filename = fullPath.split('/').pop() || '';
 
+    // Safely parse content length with validation
+    let size = 0;
+    try {
+      const parsedSize = parseInt(contentLength, 10);
+      if (!isNaN(parsedSize) && parsedSize >= 0) {
+        size = parsedSize;
+      }
+    } catch (e) {
+      PFLog.warn(
+        `${WebdavApi.L}._getFileMetaViaHead() invalid content-length: ${contentLength}`,
+      );
+    }
+
     return {
       filename,
       basename: filename,
       lastmod: lastModified,
-      size: parseInt(contentLength || '0', 10),
+      size,
       type: contentType || 'application/octet-stream',
       etag: etag ? this._cleanRev(etag) : '',
       data: {},

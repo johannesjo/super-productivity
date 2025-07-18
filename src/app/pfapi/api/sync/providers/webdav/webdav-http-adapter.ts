@@ -7,6 +7,7 @@ import {
   RemoteFileNotFoundAPIError,
   TooManyRequestsAPIError,
 } from '../../../errors/errors';
+import { WebDavHttpStatus } from './webdav.const';
 
 export interface WebDavHttpRequest {
   url: string;
@@ -75,7 +76,7 @@ export class WebDavHttpAdapter {
       });
       // Create a fake Response object for the error
       const errorResponse = new Response('Network error', {
-        status: 500,
+        status: WebDavHttpStatus.INTERNAL_SERVER_ERROR,
         statusText: `Network error: ${e}`,
       });
       throw new HttpNotOkAPIError(errorResponse);
@@ -104,15 +105,20 @@ export class WebDavHttpAdapter {
   }
 
   private _checkHttpStatus(status: number, url: string): void {
-    if (status === 401) {
+    if (status === WebDavHttpStatus.NOT_MODIFIED) {
+      // 304 Not Modified is not an error - let it pass through
+      return;
+    }
+
+    if (status === WebDavHttpStatus.UNAUTHORIZED) {
       throw new AuthFailSPError();
     }
 
-    if (status === 404) {
+    if (status === WebDavHttpStatus.NOT_FOUND) {
       throw new RemoteFileNotFoundAPIError(url);
     }
 
-    if (status === 429) {
+    if (status === WebDavHttpStatus.TOO_MANY_REQUESTS) {
       throw new TooManyRequestsAPIError();
     }
 
