@@ -5,6 +5,7 @@ import {
   RemoteFileNotFoundAPIError,
   TooManyRequestsAPIError,
 } from '../../../errors/errors';
+import { CapacitorHttp } from '@capacitor/core';
 
 describe('WebDavHttpAdapter', () => {
   let adapter: WebDavHttpAdapter;
@@ -232,16 +233,135 @@ describe('WebDavHttpAdapter', () => {
     });
   });
 
-  // Skip CapacitorHttp tests as they require a proper Capacitor environment
-  // These would be better as integration tests
-  xdescribe('CapacitorHttp mode (Android)', () => {
+  // CapacitorHttp tests for Android WebView mode
+  describe('CapacitorHttp mode (Android)', () => {
+    let capacitorHttpSpy: jasmine.Spy;
+
     beforeEach(() => {
       adapter = new TestableWebDavHttpAdapter(true);
+      capacitorHttpSpy = spyOn(CapacitorHttp, 'request');
     });
 
-    it('should use CapacitorHttp when in Android WebView mode', () => {
-      // This is a placeholder - real tests would require Capacitor environment
-      expect(adapter).toBeDefined();
+    it('should use CapacitorHttp for PROPFIND method', async () => {
+      const mockResponse = {
+        status: 207,
+        headers: { content_type: 'application/xml' },
+        data: '<xml>response</xml>',
+        url: 'http://example.com/test',
+      };
+      capacitorHttpSpy.and.returnValue(Promise.resolve(mockResponse));
+
+      const result = await adapter.request({
+        url: 'http://example.com/test',
+        method: 'PROPFIND',
+        headers: { CONTENT_TYPE: 'application/xml' },
+        body: '<xml>propfind</xml>',
+      });
+
+      expect(capacitorHttpSpy).toHaveBeenCalledWith({
+        url: 'http://example.com/test',
+        method: 'PROPFIND',
+        headers: { CONTENT_TYPE: 'application/xml' },
+        data: '<xml>propfind</xml>',
+      });
+      expect(result.status).toBe(207);
+    });
+
+    it('should use WebDavHttp for MKCOL method', async () => {
+      const mockResponse = {
+        status: 201,
+        headers: {},
+        data: '',
+        url: 'http://example.com/newfolder',
+      };
+      webDavHttpSpy.and.returnValue(Promise.resolve(mockResponse));
+
+      const result = await adapter.request({
+        url: 'http://example.com/newfolder',
+        method: 'MKCOL',
+      });
+
+      expect(webDavHttpSpy).toHaveBeenCalledWith({
+        url: 'http://example.com/newfolder',
+        method: 'MKCOL',
+        headers: undefined,
+        data: null,
+      });
+      expect(capacitorHttpSpy).not.toHaveBeenCalled();
+      expect(result.status).toBe(201);
+    });
+
+    it('should use CapacitorHttp for standard HTTP methods', async () => {
+      const mockResponse = {
+        status: 200,
+        headers: { content_type: 'text/plain' },
+        data: 'file content',
+      };
+      capacitorHttpSpy.and.returnValue(Promise.resolve(mockResponse));
+
+      const result = await adapter.request({
+        url: 'http://example.com/file.txt',
+        method: 'GET',
+      });
+
+      expect(capacitorHttpSpy).toHaveBeenCalledWith({
+        url: 'http://example.com/file.txt',
+        method: 'GET',
+        headers: undefined,
+        data: null,
+      });
+      expect(webDavHttpSpy).not.toHaveBeenCalled();
+      expect(result.status).toBe(200);
+    });
+
+    it('should handle WebDAV methods case-insensitively', async () => {
+      const mockResponse = {
+        status: 207,
+        headers: {},
+        data: '<xml/>',
+        url: 'http://example.com/test',
+      };
+      webDavHttpSpy.and.returnValue(Promise.resolve(mockResponse));
+
+      await adapter.request({
+        url: 'http://example.com/test',
+        method: 'propfind', // lowercase
+      });
+
+      expect(webDavHttpSpy).toHaveBeenCalled();
+      expect(capacitorHttpSpy).not.toHaveBeenCalled();
+    });
+
+    it('should handle all WebDAV methods', async () => {
+      const webDavMethods = [
+        'PROPFIND',
+        'MKCOL',
+        'MOVE',
+        'COPY',
+        'LOCK',
+        'UNLOCK',
+        'PROPPATCH',
+      ];
+      const mockResponse = {
+        status: 200,
+        headers: {},
+        data: '',
+        url: 'http://example.com/test',
+      };
+      webDavHttpSpy.and.returnValue(Promise.resolve(mockResponse));
+
+      for (const method of webDavMethods) {
+        webDavHttpSpy.calls.reset();
+        capacitorHttpSpy.calls.reset();
+
+        await adapter.request({
+          url: 'http://example.com/test',
+          method: method,
+        });
+
+        expect(webDavHttpSpy).toHaveBeenCalled();
+        expect(capacitorHttpSpy).not.toHaveBeenCalled();
+      }
     });
   });
 });
