@@ -49,9 +49,9 @@ export class WebdavApi {
       }
 
       // If PROPFIND fails or returns no data, try HEAD request as fallback
-      if (useGetFallback) {
-        return await this._getFileMetaViaHead(fullPath);
-      }
+      // if (useGetFallback) {
+      //   return await this._getFileMetaViaHead(fullPath);
+      // }
 
       throw new RemoteFileNotFoundAPIError(path);
     } catch (e) {
@@ -244,38 +244,6 @@ export class WebdavApi {
     });
   }
 
-  private async _getFileMetaViaHead(fullPath: string): Promise<FileMeta> {
-    const response = await this._makeRequest({
-      url: fullPath,
-      method: 'HEAD',
-    });
-
-    const etag = response.headers['etag'] || response.headers['ETag'];
-    const lastModified =
-      response.headers['last-modified'] || response.headers['Last-Modified'];
-    const contentLength =
-      response.headers['content-length'] || response.headers['Content-Length'];
-    const contentType =
-      response.headers['content-type'] || response.headers['Content-Type'];
-
-    if (!lastModified) {
-      throw new InvalidDataSPError('No Last-Modified header in HEAD response');
-    }
-
-    // Extract filename from path
-    const filename = fullPath.split('/').pop() || '';
-
-    return {
-      filename,
-      basename: filename,
-      lastmod: lastModified,
-      size: parseInt(contentLength || '0', 10),
-      type: contentType || 'application/octet-stream',
-      etag: etag ? this._cleanRev(etag) : '',
-      data: {},
-    };
-  }
-
   private async _ensureParentDirectory(fullPath: string): Promise<void> {
     const pathParts = fullPath.split('/');
     pathParts.pop(); // Remove filename
@@ -318,5 +286,37 @@ export class WebdavApi {
       .trim();
     PFLog.verbose(`${WebdavApi.L}.cleanRev() "${rev}" -> "${result}"`);
     return result;
+  }
+
+  private async _getFileMetaViaHead(fullPath: string): Promise<FileMeta> {
+    const response = await this._makeRequest({
+      url: fullPath,
+      method: 'HEAD',
+    });
+
+    const etag = response.headers['etag'] || response.headers['ETag'];
+    const lastModified =
+      response.headers['last-modified'] || response.headers['Last-Modified'];
+    const contentLength =
+      response.headers['content-length'] || response.headers['Content-Length'];
+    const contentType =
+      response.headers['content-type'] || response.headers['Content-Type'];
+
+    if (!lastModified) {
+      throw new InvalidDataSPError('No Last-Modified header in HEAD response');
+    }
+
+    // Extract filename from path
+    const filename = fullPath.split('/').pop() || '';
+
+    return {
+      filename,
+      basename: filename,
+      lastmod: lastModified,
+      size: parseInt(contentLength || '0', 10),
+      type: contentType || 'application/octet-stream',
+      etag: etag ? this._cleanRev(etag) : '',
+      data: {},
+    };
   }
 }

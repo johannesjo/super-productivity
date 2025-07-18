@@ -128,6 +128,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         {
           key: 'syncFolderPath',
           type: 'input',
+          className: 'e2e-syncFolderPath',
           templateOptions: {
             required: true,
             label: T.F.SYNC.FORM.WEB_DAV.L_SYNC_FOLDER_PATH,

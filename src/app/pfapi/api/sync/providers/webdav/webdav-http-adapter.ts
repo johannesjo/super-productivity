@@ -59,7 +59,12 @@ export class WebDavHttpAdapter {
 
       return response;
     } catch (e) {
-      if (e instanceof AuthFailSPError || e instanceof HttpNotOkAPIError) {
+      if (
+        e instanceof AuthFailSPError ||
+        e instanceof HttpNotOkAPIError ||
+        e instanceof RemoteFileNotFoundAPIError ||
+        e instanceof TooManyRequestsAPIError
+      ) {
         throw e;
       }
 

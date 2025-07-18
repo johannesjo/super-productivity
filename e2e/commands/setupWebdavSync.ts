@@ -18,6 +18,7 @@ module.exports = {
       baseUrlInput: '.e2e-baseUrl input',
       userNameInput: '.e2e-userName input',
       passwordInput: '.e2e-password input',
+      syncFolder: '.e2e-syncFolderPath input',
       saveBtn: 'mat-dialog-actions button[mat-stroked-button]',
     };
 
@@ -31,6 +32,7 @@ module.exports = {
       .setValue(sel.baseUrlInput, 'http://localhost:2345')
       .setValue(sel.userNameInput, 'alice')
       .setValue(sel.passwordInput, 'alice')
+      .setValue(sel.syncFolder, '/')
       .pause(100)
 
       .click(sel.saveBtn);
