@@ -196,10 +196,7 @@ export class WebdavXmlParser {
   /**
    * Parse a single response element from WebDAV XML
    */
-  private parseXmlResponseElement(
-    response: Element,
-    requestPath: string,
-  ): FileMeta | null {
+  parseXmlResponseElement(response: Element, requestPath: string): FileMeta | null {
     const href = response.querySelector('href')?.textContent?.trim();
     if (!href) return null;
 
