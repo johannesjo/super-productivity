@@ -91,10 +91,26 @@ export class WebdavApi {
         if (this._isLikelyTimestamp(localRev)) {
           // Convert timestamp to HTTP date
           const date = new Date(parseInt(localRev));
-          headers[WebDavHttpHeader.IF_MODIFIED_SINCE] = date.toUTCString();
+          if (isNaN(date.getTime())) {
+            PFLog.warn(
+              `${WebdavApi.L}.download() Invalid timestamp for conditional request: ${localRev}`,
+            );
+          } else {
+            headers[WebDavHttpHeader.IF_MODIFIED_SINCE] = date.toUTCString();
+          }
         } else if (this._isLikelyDateString(localRev)) {
-          // It's already a date string
-          headers[WebDavHttpHeader.IF_MODIFIED_SINCE] = localRev;
+          // Validate and normalize the date string
+          const parsedDate = new Date(localRev);
+          if (isNaN(parsedDate.getTime())) {
+            PFLog.warn(
+              `${WebdavApi.L}.download() Invalid date string for conditional request: ${localRev}`,
+            );
+            // Fall back to treating it as an ETag
+            headers[WebDavHttpHeader.IF_NONE_MATCH] = localRev;
+          } else {
+            // Use normalized UTC format
+            headers[WebDavHttpHeader.IF_MODIFIED_SINCE] = parsedDate.toUTCString();
+          }
         } else {
           // Assume it's an ETag
           headers[WebDavHttpHeader.IF_NONE_MATCH] = localRev;
@@ -174,15 +190,37 @@ export class WebdavApi {
         if (this._isLikelyTimestamp(expectedRev)) {
           // Convert timestamp to HTTP date
           const date = new Date(parseInt(expectedRev));
-          Log.verbose(WebdavApi.L, 'isLikelyTimestamp()', expectedRev, date);
-          headers[WebDavHttpHeader.IF_UNMODIFIED_SINCE] = date.toUTCString();
+          if (isNaN(date.getTime())) {
+            PFLog.warn(
+              `${WebdavApi.L}.upload() Invalid timestamp for conditional request: ${expectedRev}`,
+            );
+            // Skip conditional header - let server handle as unconditional
+          } else {
+            headers[WebDavHttpHeader.IF_UNMODIFIED_SINCE] = date.toUTCString();
+            Log.verbose(WebdavApi.L, 'Using If-Unmodified-Since', date.toUTCString());
+          }
         } else if (this._isLikelyDateString(expectedRev)) {
-          // It's already a date string, use as-is
-          Log.verbose(WebdavApi.L, '_isLikelyDateString()', expectedRev);
-          headers[WebDavHttpHeader.IF_UNMODIFIED_SINCE] = expectedRev;
+          // Validate and normalize the date string
+          const parsedDate = new Date(expectedRev);
+          if (isNaN(parsedDate.getTime())) {
+            PFLog.warn(
+              `${WebdavApi.L}.upload() Invalid date string for conditional request: ${expectedRev}`,
+            );
+            // Fall back to treating it as an ETag
+            headers[WebDavHttpHeader.IF_MATCH] = expectedRev;
+          } else {
+            // Use normalized UTC format
+            headers[WebDavHttpHeader.IF_UNMODIFIED_SINCE] = parsedDate.toUTCString();
+            Log.verbose(
+              WebdavApi.L,
+              'Using If-Unmodified-Since',
+              parsedDate.toUTCString(),
+            );
+          }
         } else {
           // Assume it's an ETag
           headers[WebDavHttpHeader.IF_MATCH] = expectedRev;
+          Log.verbose(WebdavApi.L, 'Using If-Match', expectedRev);
         }
       }
 

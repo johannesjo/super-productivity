@@ -328,6 +328,60 @@ describe('WebdavApi', () => {
       expect(result.rev).toBe('');
       expect(result.dataStr).toBe('');
     });
+
+    it('should handle invalid timestamp in localRev', async () => {
+      const mockResponse = {
+        status: 200,
+        headers: {
+          etag: '"abc123"',
+        },
+        data: 'content',
+      };
+      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
+      mockXmlParser.validateResponseContent.and.stub();
+
+      await api.download({
+        path: '/test.txt',
+        localRev: '999999999999999999999', // Invalid timestamp
+      });
+
+      // Should not add If-Modified-Since header
+      expect(mockHttpAdapter.request).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          headers: jasmine.objectContaining({
+            Authorization: jasmine.any(String),
+          }),
+        }),
+      );
+      const callArgs = mockHttpAdapter.request.calls.mostRecent().args[0];
+      expect(callArgs.headers?.['If-Modified-Since']).toBeUndefined();
+    });
+
+    it('should handle invalid date string and fall back to ETag', async () => {
+      const mockResponse = {
+        status: 200,
+        headers: {
+          etag: '"abc123"',
+        },
+        data: 'content',
+      };
+      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
+      mockXmlParser.validateResponseContent.and.stub();
+
+      await api.download({
+        path: '/test.txt',
+        localRev: 'Invalid Date String',
+      });
+
+      // Should fall back to If-None-Match
+      expect(mockHttpAdapter.request).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          headers: jasmine.objectContaining({
+            'If-None-Match': 'Invalid Date String',
+          }),
+        }),
+      );
+    });
   });
 
   describe('upload', () => {
