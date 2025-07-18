@@ -2,7 +2,11 @@ import { WebdavPrivateCfg } from './webdav.model';
 import { PFLog } from '../../../../../core/log';
 import { FileMeta, WebdavXmlParser } from './webdav-xml-parser';
 import { WebDavHttpAdapter, WebDavHttpResponse } from './webdav-http-adapter';
-import { InvalidDataSPError, RemoteFileNotFoundAPIError } from '../../../errors/errors';
+import {
+  HttpNotOkAPIError,
+  InvalidDataSPError,
+  RemoteFileNotFoundAPIError,
+} from '../../../errors/errors';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
@@ -156,18 +160,44 @@ export class WebdavApi {
         }
       }
 
-      // Try to create parent directory if needed
-      await this._ensureParentDirectory(fullPath);
+      // Try to upload the file
+      let response: WebDavHttpResponse;
+      try {
+        response = await this._makeRequest({
+          url: fullPath,
+          method: 'PUT',
+          body: data,
+          headers: {
+            'Content-Type': 'application/octet-stream',
+          },
+        });
+      } catch (uploadError) {
+        // If we get a 409 Conflict, it might be because parent directory doesn't exist
+        if (
+          uploadError instanceof HttpNotOkAPIError &&
+          uploadError.response &&
+          uploadError.response.status === 409
+        ) {
+          PFLog.debug(
+            `${WebdavApi.L}.upload() got 409, attempting to create parent directory`,
+          );
 
-      // Upload the file
-      const response = await this._makeRequest({
-        url: fullPath,
-        method: 'PUT',
-        body: data,
-        headers: {
-          'Content-Type': 'application/octet-stream',
-        },
-      });
+          // Try to create parent directory
+          await this._ensureParentDirectory(fullPath);
+
+          // Retry the upload
+          response = await this._makeRequest({
+            url: fullPath,
+            method: 'PUT',
+            body: data,
+            headers: {
+              'Content-Type': 'application/octet-stream',
+            },
+          });
+        } else {
+          throw uploadError;
+        }
+      }
 
       // Get the new revision
       const etag = response.headers['etag'] || response.headers['ETag'];
