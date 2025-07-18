@@ -43,7 +43,7 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
     localRev: string | null,
   ): Promise<{ rev: string }> {
     const { filePath } = await this._getConfigAndPath(targetPath);
-    const meta = await this._api.getFileMeta(filePath, localRev);
+    const meta = await this._api.getFileMeta(filePath, localRev, true);
     return { rev: meta.etag };
   }
 
