@@ -290,27 +290,4 @@ export class WebdavXmlParser {
       return false; // Assume success if we can't parse the response
     }
   }
-
-  /**
-   * Create XML for LOCK request
-   */
-  static createLockXml(userName: string): string {
-    return `<?xml version="1.0" encoding="utf-8"?>
-<D:lockinfo xmlns:D="DAV:">
-  <D:lockscope><D:exclusive/></D:lockscope>
-  <D:locktype><D:write/></D:locktype>
-  <D:owner>${userName}</D:owner>
-</D:lockinfo>`;
-  }
-
-  /**
-   * Parse lock token from LOCK response
-   */
-  parseLockToken(responseText: string): string | null {
-    const lockTokenMatch = responseText.match(/<d:href>([^<]+)<\/d:href>/i);
-    if (lockTokenMatch) {
-      return lockTokenMatch[1];
-    }
-    return null;
-  }
 }

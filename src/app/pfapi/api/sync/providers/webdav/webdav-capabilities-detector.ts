@@ -69,7 +69,6 @@ export class WebdavCapabilitiesDetector {
     const capabilities: WebdavServerCapabilities = {
       supportsETags: false,
       supportsIfHeader: false,
-      supportsLocking: false,
       supportsLastModified: false,
     };
 

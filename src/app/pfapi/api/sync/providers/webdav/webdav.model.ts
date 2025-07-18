@@ -5,8 +5,6 @@ export interface WebdavServerCapabilities {
   supportsETags: boolean;
   /** Whether the server supports WebDAV If headers (RFC 4918) */
   supportsIfHeader: boolean;
-  /** Whether the server supports WebDAV LOCK/UNLOCK operations */
-  supportsLocking: boolean;
   /** Whether the server supports Last-Modified headers for versioning */
   supportsLastModified: boolean;
 }
@@ -23,9 +21,9 @@ export interface WebdavPrivateCfg extends SyncProviderPrivateCfgBase {
    * improve performance by skipping detection and ensure consistent behavior.
    *
    * Recommended settings for common servers:
-   * - Nextcloud/ownCloud: { supportsETags: true, supportsIfHeader: true, supportsLocking: true, supportsLastModified: true }
-   * - Apache mod_dav: { supportsETags: true, supportsIfHeader: false, supportsLocking: true, supportsLastModified: true }
-   * - Basic WebDAV: { supportsETags: false, supportsIfHeader: false, supportsLocking: false, supportsLastModified: true }
+   * - Nextcloud/ownCloud: { supportsETags: true, supportsIfHeader: true, supportsLastModified: true }
+   * - Apache mod_dav: { supportsETags: true, supportsIfHeader: false, supportsLastModified: true }
+   * - Basic WebDAV: { supportsETags: false, supportsIfHeader: false, supportsLastModified: true }
    */
   serverCapabilities?: WebdavServerCapabilities;
 

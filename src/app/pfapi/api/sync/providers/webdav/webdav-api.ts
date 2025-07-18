@@ -228,16 +228,14 @@ export class WebdavApi {
           // Use WebDAV If header with Not token for safe creation
           // Format: If: <Not> <*> means "if resource does not exist"
           headers['If'] = '<Not> <*>';
-        } else if (!capabilities.supportsLocking) {
+        } else {
           // No safe creation method available - warn but continue
           // Use console.warn for visibility in tests
           console.warn(`WARNING: No safe creation method available for WebDAV`, {
             supportsETags: capabilities.supportsETags,
             supportsIfHeader: capabilities.supportsIfHeader,
-            supportsLocking: capabilities.supportsLocking,
           });
         }
-        // Note: Locking-based safe creation is handled separately in upload method
       }
     } else {
       // For overwrite operations
@@ -256,65 +254,6 @@ export class WebdavApi {
     }
 
     return headers;
-  }
-
-  /**
-   * Lock a resource for exclusive write access
-   * Returns the lock token if successful
-   */
-  private async _lockResource(path: string): Promise<string | null> {
-    const cfg = await this._getCfgOrError();
-    const lockXml = WebdavXmlParser.createLockXml(cfg.userName);
-
-    try {
-      const response = await this._makeRequest({
-        method: 'LOCK',
-        path,
-        body: lockXml,
-        headers: {
-          'Content-Type': 'application/xml',
-          Depth: '0',
-          Timeout: 'Second-600', // 10 minute timeout
-        },
-      });
-
-      // Extract lock token from response
-      const lockTokenHeader = response.headers.get('lock-token');
-      if (lockTokenHeader) {
-        // Remove angle brackets if present
-        return lockTokenHeader.replace(/[<>]/g, '');
-      }
-
-      // Try to extract from response body
-      const responseText = await response.text();
-      const lockToken = this._xmlParser.parseLockToken(responseText);
-      if (lockToken) {
-        return lockToken;
-      }
-
-      return null;
-    } catch (e: any) {
-      PFLog.error(`${WebdavApi.L}._lockResource() failed`, { path, error: e });
-      return null;
-    }
-  }
-
-  /**
-   * Unlock a previously locked resource
-   */
-  private async _unlockResource(path: string, lockToken: string): Promise<void> {
-    try {
-      await this._makeRequest({
-        method: 'UNLOCK',
-        path,
-        headers: {
-          'Lock-Token': `<${lockToken}>`,
-        },
-      });
-    } catch (e: any) {
-      PFLog.err(`${WebdavApi.L}._unlockResource() failed`, { path, lockToken, error: e });
-      // Don't throw - unlock failure is not critical
-    }
   }
 
   async upload({
@@ -362,26 +301,9 @@ export class WebdavApi {
             ? 'last-modified'
             : 'none';
 
-    // Check if we need locking for safe creation
-    const needsLockingForCreation =
-      !isOverwrite &&
-      !capabilities.supportsETags &&
-      !capabilities.supportsIfHeader &&
-      capabilities.supportsLocking &&
-      !expectedEtag; // Only for new file creation
-
-    let lockToken: string | null = null;
     let headers: Record<string, string> = {};
 
     try {
-      if (needsLockingForCreation) {
-        // Try to lock the resource for safe creation
-        lockToken = await this._lockResource(path);
-        if (!lockToken) {
-          console.error(`Failed to acquire lock for safe creation`, { path });
-        }
-      }
-
       const conditionalHeaders = await this._createConditionalHeaders(
         isOverwrite,
         validatorType === 'etag' ? expectedEtag : null,
@@ -404,11 +326,6 @@ export class WebdavApi {
           expectedEtag,
           _retryAttempted,
         });
-      }
-
-      // Add lock token to headers if we have one
-      if (lockToken) {
-        headers['If'] = `(<${lockToken}>)`;
       }
 
       const response = await this._makeRequest({
@@ -586,11 +503,6 @@ export class WebdavApi {
             }
           }
           throw e;
-      }
-    } finally {
-      // Always unlock if we acquired a lock
-      if (lockToken) {
-        await this._unlockResource(path, lockToken);
       }
     }
   }

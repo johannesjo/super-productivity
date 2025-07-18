@@ -12,7 +12,6 @@ export const getRecommendedServerCapabilities = (
       return {
         supportsETags: true,
         supportsIfHeader: true,
-        supportsLocking: true,
         supportsLastModified: true,
       };
 
@@ -20,7 +19,6 @@ export const getRecommendedServerCapabilities = (
       return {
         supportsETags: true,
         supportsIfHeader: false, // mod_dav has limited If header support
-        supportsLocking: true,
         supportsLastModified: true,
       };
 
@@ -28,7 +26,6 @@ export const getRecommendedServerCapabilities = (
       return {
         supportsETags: false, // nginx dav module has limited ETag support
         supportsIfHeader: false,
-        supportsLocking: false,
         supportsLastModified: true,
       };
 
@@ -36,7 +33,6 @@ export const getRecommendedServerCapabilities = (
       return {
         supportsETags: false,
         supportsIfHeader: false,
-        supportsLocking: false,
         supportsLastModified: true,
       };
 
@@ -46,7 +42,6 @@ export const getRecommendedServerCapabilities = (
       return {
         supportsETags: false,
         supportsIfHeader: false,
-        supportsLocking: false,
         supportsLastModified: false,
       };
   }
