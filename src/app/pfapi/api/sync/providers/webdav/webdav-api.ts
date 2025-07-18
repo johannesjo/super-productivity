@@ -1,11 +1,12 @@
 import { WebdavPrivateCfg } from './webdav.model';
-import { PFLog } from '../../../../../core/log';
+import { Log, PFLog } from '../../../../../core/log';
 import { FileMeta, WebdavXmlParser } from './webdav-xml-parser';
 import { WebDavHttpAdapter, WebDavHttpResponse } from './webdav-http-adapter';
 import {
   HttpNotOkAPIError,
   InvalidDataSPError,
   RemoteFileNotFoundAPIError,
+  RemoteFileChangedUnexpectedly,
 } from '../../../errors/errors';
 
 /* eslint-disable @typescript-eslint/naming-convention */
@@ -138,25 +139,25 @@ export class WebdavApi {
     const fullPath = this._buildFullPath(cfg.baseUrl, path);
 
     try {
-      // Check if file exists and verify expected revision if not forcing overwrite
-      if (!isForceOverwrite && expectedRev) {
-        try {
-          const currentMeta = await this.getFileMeta(path, null, true);
-          const currentRev = currentMeta.etag || currentMeta.lastmod;
+      // Prepare headers for upload
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/octet-stream',
+      };
 
-          if (currentRev && currentRev !== expectedRev) {
-            PFLog.error(`${WebdavApi.L}.upload() revision mismatch`, {
-              path,
-              expected: expectedRev,
-              current: currentRev,
-            });
-            throw new InvalidDataSPError('Revision mismatch - file was modified');
-          }
-        } catch (e) {
-          if (!(e instanceof RemoteFileNotFoundAPIError)) {
-            throw e;
-          }
-          // File doesn't exist, which is fine for upload
+      // Set conditional headers based on revision type
+      if (!isForceOverwrite && expectedRev) {
+        if (this._isLikelyTimestamp(expectedRev)) {
+          // Convert timestamp to HTTP date
+          const date = new Date(parseInt(expectedRev));
+          Log.verbose(WebdavApi.L, 'isLikelyTimestamp()', expectedRev, date);
+          headers['If-Unmodified-Since'] = date.toUTCString();
+        } else if (this._isLikelyDateString(expectedRev)) {
+          // It's already a date string, use as-is
+          Log.verbose(WebdavApi.L, '_isLikelyDateString()', expectedRev);
+          headers['If-Unmodified-Since'] = expectedRev;
+        } else {
+          // Assume it's an ETag
+          headers['If-Match'] = expectedRev;
         }
       }
 
@@ -167,11 +168,20 @@ export class WebdavApi {
           url: fullPath,
           method: 'PUT',
           body: data,
-          headers: {
-            'Content-Type': 'application/octet-stream',
-          },
+          headers,
         });
       } catch (uploadError) {
+        // Check for 412 Precondition Failed - means file was modified
+        if (
+          uploadError instanceof HttpNotOkAPIError &&
+          uploadError.response &&
+          uploadError.response.status === 412
+        ) {
+          throw new RemoteFileChangedUnexpectedly(
+            `File ${path} was modified on remote (expected rev: ${expectedRev})`,
+          );
+        }
+
         // If we get a 409 Conflict, it might be because parent directory doesn't exist
         if (
           uploadError instanceof HttpNotOkAPIError &&
@@ -190,9 +200,7 @@ export class WebdavApi {
             url: fullPath,
             method: 'PUT',
             body: data,
-            headers: {
-              'Content-Type': 'application/octet-stream',
-            },
+            headers,
           });
         } else {
           throw uploadError;
@@ -315,7 +323,24 @@ export class WebdavApi {
       .replace(/&quot;/g, '')
       .trim();
     PFLog.verbose(`${WebdavApi.L}.cleanRev() "${rev}" -> "${result}"`);
+    console.log('REV', result);
+
     return result;
+  }
+
+  private _isLikelyTimestamp(val: string): boolean {
+    return /^\d{10,13}$/.test(val); // Unix timestamp (seconds or milliseconds)
+  }
+
+  private _isLikelyDateString(val: string): boolean {
+    // Check for common date patterns
+    return (
+      val.includes('GMT') ||
+      val.includes('Z') ||
+      val.includes('T') ||
+      /\d{4}-\d{2}-\d{2}/.test(val) || // ISO date
+      /\w{3},\s\d{1,2}\s\w{3}\s\d{4}/.test(val) // RFC format
+    );
   }
 
   private async _getFileMetaViaHead(fullPath: string): Promise<FileMeta> {

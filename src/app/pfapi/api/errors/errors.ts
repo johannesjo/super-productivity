@@ -120,6 +120,10 @@ export class NoRemoteMetaFile extends Error {
   override name = 'NoRemoteMetaFile';
 }
 
+export class RemoteFileChangedUnexpectedly extends AdditionalLogErrorBase {
+  override name = 'RemoteFileChangedUnexpectedly';
+}
+
 // --------------LOCKFILE ERRORS--------------
 export class LockPresentError extends Error {
   override name = 'LockPresentError';
