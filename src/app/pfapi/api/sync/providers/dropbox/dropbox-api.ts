@@ -144,7 +144,8 @@ export class DropboxApi {
     if (!isForceOverwrite) {
       args.mode = revToMatch
         ? ({ '.tag': 'update', update: revToMatch } as any)
-        : { '.tag': 'update', update: '01630c96b4d421c00000001ce2a2770' };
+        : // TODO why is update hardcoded????
+          { '.tag': 'update', update: '01630c96b4d421c00000001ce2a2770' };
     }
 
     try {

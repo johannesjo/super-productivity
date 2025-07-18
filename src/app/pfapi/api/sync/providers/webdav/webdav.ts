@@ -56,18 +56,18 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
     SyncLog.debug(Webdav.L, 'uploadFile', { targetPath, localRev, isForceOverwrite });
     const { filePath } = await this._getConfigAndPath(targetPath);
 
-    const etag = await this._api.upload({
+    const result = await this._api.upload({
       path: filePath,
       data: dataStr,
-      isOverwrite: isForceOverwrite,
-      expectedEtag: isForceOverwrite ? null : localRev,
+      isForceOverwrite: isForceOverwrite,
+      expectedRev: isForceOverwrite ? null : localRev,
     });
 
-    if (!etag) {
+    if (!result.rev) {
       throw new NoRevAPIError();
     }
 
-    return { rev: etag };
+    return { rev: result.rev };
   }
 
   async downloadFile(
