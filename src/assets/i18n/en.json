@@ -920,6 +920,7 @@
         "POSSIBLE_LEGACY_DATA": "Super Productivity has improved syncing by now using two separate files rather than a single one, allowing for much less data transfer. It is recommended to update all instances of Super Productivity and to first sync data from the app instance where the data is newest. If this is the data from your local device then please ignore this warning and just proceed to upload it by confirming the next dialog.",
         "REMOTE_MODEL_VERSION_NEWER": "The remote model version is newer than the local one. Please update your local app to the newest version!"
       },
+      "BTN_SYNC_NOW": "Sync Now",
       "C": {
         "EMPTY_SYNC": "You're trying to sync an empty data object. If you are trying to setup syncing from a new app instance, just press OK to load the data from the server. Otherwise, please check your data.",
         "FORCE_UPLOAD": "Forcing an upload of your data could lead to data loss. Continue?",
