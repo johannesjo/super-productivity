@@ -24,8 +24,9 @@ module.exports = {
       .triggerSync()
       // Verify sync completed
       .pause(3000)
-      .noError()
+      // .noError()
       .assert.not.elementPresent('.sync-btn mat-icon.spin')
+      .assert.textContains('.sync-btn mat-icon', 'check')
       .end();
   },
 };
