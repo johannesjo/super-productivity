@@ -9,6 +9,7 @@ import {
 import { PFLog } from '../../../../../core/log';
 import { IS_ANDROID_WEB_VIEW } from '../../../../../util/is-android-web-view';
 import { CapacitorHttp } from '@capacitor/core';
+import { WebdavXmlParser, FileMeta } from './webdav-xml-parser';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
@@ -20,36 +21,18 @@ interface WebDavRequestOptions {
   ifNoneMatch?: string | null;
 }
 
-interface FileMeta {
-  filename: string;
-  basename: string;
-  lastmod: string;
-  size: number;
-  type: string;
-  etag: string;
-  data: Record<string, string>;
-}
-
 export class WebdavApi {
   private static readonly L = 'WebdavApi';
-  private static readonly PROPFIND_XML = `<?xml version="1.0" encoding="utf-8" ?>
-<D:propfind xmlns:D="DAV:">
-  <D:prop>
-    <D:displayname/>
-    <D:getcontentlength/>
-    <D:getlastmodified/>
-    <D:getetag/>
-    <D:resourcetype/>
-    <D:getcontenttype/>
-  </D:prop>
-</D:propfind>`;
+  private xmlParser: WebdavXmlParser;
 
   // Make IS_ANDROID_WEB_VIEW testable by making it a class property
   protected get isAndroidWebView(): boolean {
     return IS_ANDROID_WEB_VIEW;
   }
 
-  constructor(private _getCfgOrError: () => Promise<WebdavPrivateCfg>) {}
+  constructor(private _getCfgOrError: () => Promise<WebdavPrivateCfg>) {
+    this.xmlParser = new WebdavXmlParser((rev: string) => this._cleanRev(rev));
+  }
 
   // Utility methods to reduce duplication
   /**
@@ -111,7 +94,7 @@ export class WebdavApi {
     operation: string,
     expectedContentDescription: string = 'content',
   ): void {
-    if (this._isHtmlResponse(content)) {
+    if (this.xmlParser.isHtmlResponse(content)) {
       PFLog.error(
         `${WebdavApi.L}.${operation}() received HTML error page instead of ${expectedContentDescription}`,
         {
@@ -132,15 +115,7 @@ export class WebdavApi {
     path: string,
     operation: string = 'XML operation',
   ): FileMeta {
-    this._validateResponseContent(xmlText, path, operation, 'XML');
-
-    const fileMeta = this._parsePropsFromXml(xmlText, path);
-
-    if (!fileMeta) {
-      throw new RemoteFileNotFoundAPIError(path);
-    }
-
-    return fileMeta;
+    return this.xmlParser.validateAndParseXmlResponse(xmlText, path, operation);
   }
 
   /**
@@ -210,15 +185,6 @@ export class WebdavApi {
       headers['If-Match'] = expectedEtag;
     }
     return headers;
-  }
-
-  private _isHtmlResponse(text: string): boolean {
-    const trimmed = text.trim().toLowerCase();
-    return (
-      trimmed.startsWith('<!doctype html') ||
-      trimmed.startsWith('<html') ||
-      text.includes('There is nothing here, sorry')
-    );
   }
 
   async upload({
@@ -302,7 +268,7 @@ export class WebdavApi {
       const response = await this._makeRequest({
         method: 'PROPFIND',
         path,
-        body: WebdavApi.PROPFIND_XML,
+        body: WebdavXmlParser.PROPFIND_XML,
         headers: {
           'Content-Type': 'application/xml',
           Depth: '0',
@@ -701,7 +667,7 @@ export class WebdavApi {
       const response = await this._makeRequest({
         method: 'PROPFIND',
         path: '',
-        body: WebdavApi.PROPFIND_XML,
+        body: WebdavXmlParser.PROPFIND_XML,
         headers: {
           'Content-Type': 'application/xml',
           Depth: '0',
@@ -1091,179 +1057,6 @@ export class WebdavApi {
 
   private _getAuthHeader(cfg: WebdavPrivateCfg): string {
     return `Basic ${btoa(`${cfg.userName}:${cfg.password}`)}`;
-  }
-
-  private _parseXmlResponseElement(
-    response: Element,
-    requestPath: string,
-  ): FileMeta | null {
-    const href = response.querySelector('href')?.textContent?.trim();
-    if (!href) return null;
-
-    // Decode the href for processing
-    const decodedHref = decodeURIComponent(href);
-
-    const propstat = response.querySelector('propstat');
-    if (!propstat) return null;
-
-    const status = propstat.querySelector('status')?.textContent;
-    if (!status?.includes('200 OK')) return null;
-
-    const prop = propstat.querySelector('prop');
-    if (!prop) return null;
-
-    // Extract properties
-    const displayname = prop.querySelector('displayname')?.textContent || '';
-    const contentLength = prop.querySelector('getcontentlength')?.textContent || '0';
-    const lastModified = prop.querySelector('getlastmodified')?.textContent || '';
-    const etag = prop.querySelector('getetag')?.textContent || '';
-    const resourceType = prop.querySelector('resourcetype');
-    const contentType = prop.querySelector('getcontenttype')?.textContent || '';
-
-    // Determine if it's a collection (directory) or file
-    const isCollection = resourceType?.querySelector('collection') !== null;
-
-    return {
-      filename: displayname || decodedHref.split('/').pop() || '',
-      basename: displayname || decodedHref.split('/').pop() || '',
-      lastmod: lastModified,
-      size: parseInt(contentLength, 10),
-      type: isCollection ? 'directory' : 'file',
-      etag: this._cleanRev(etag),
-      data: {
-        'content-type': contentType,
-        'content-length': contentLength,
-        'last-modified': lastModified,
-        etag: etag,
-        href: decodedHref,
-      },
-    };
-  }
-
-  private _parsePropsFromXml(xmlText: string, requestPath: string): FileMeta | null {
-    try {
-      // Check if xmlText is empty or not valid XML
-      if (!xmlText || xmlText.trim() === '') {
-        PFLog.err(`${WebdavApi.L}._parsePropsFromXml() Empty XML response`);
-        return null;
-      }
-
-      // Check if response is HTML instead of XML
-      if (this._isHtmlResponse(xmlText)) {
-        PFLog.err(`${WebdavApi.L}._parsePropsFromXml() Received HTML instead of XML`, {
-          requestPath,
-          responseSnippet: xmlText.substring(0, 200),
-        });
-        return null;
-      }
-
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-
-      // Check for parsing errors
-      const parserError = xmlDoc.querySelector('parsererror');
-      if (parserError) {
-        PFLog.err(
-          `${WebdavApi.L}._parsePropsFromXml() XML parsing error`,
-          parserError.textContent,
-        );
-        return null;
-      }
-
-      // Find the response element for our file
-      const responses = xmlDoc.querySelectorAll('response');
-      for (const response of Array.from(responses)) {
-        const href = response.querySelector('href')?.textContent?.trim();
-        if (!href) continue;
-
-        const decodedHref = decodeURIComponent(href);
-        const normalizedHref = decodedHref.replace(/\/$/, '');
-        const normalizedPath = requestPath.replace(/\/$/, '');
-
-        if (
-          normalizedHref.endsWith(normalizedPath) ||
-          normalizedPath.endsWith(normalizedHref)
-        ) {
-          return this._parseXmlResponseElement(response, requestPath);
-        }
-      }
-
-      PFLog.err(
-        `${WebdavApi.L}._parsePropsFromXml() No matching response found for path: ${requestPath}`,
-      );
-      return null;
-    } catch (error) {
-      PFLog.err(`${WebdavApi.L}._parsePropsFromXml() parsing error`, error);
-      return null;
-    }
-  }
-
-  async listFolder(folderPath: string): Promise<FileMeta[]> {
-    try {
-      const response = await this._makeRequest({
-        method: 'PROPFIND',
-        path: folderPath,
-        body: WebdavApi.PROPFIND_XML,
-        headers: {
-          'Content-Type': 'application/xml',
-          Depth: '1', // Get immediate children
-        },
-      });
-
-      const xmlText = await response.text();
-      return this._parseMultiplePropsFromXml(xmlText, folderPath);
-    } catch (e: any) {
-      // Return empty array if PROPFIND is not supported
-      if (e?.message?.includes('PROPFIND')) {
-        return [];
-      }
-      throw e;
-    }
-  }
-
-  private _parseMultiplePropsFromXml(xmlText: string, basePath: string): FileMeta[] {
-    try {
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-
-      const parserError = xmlDoc.querySelector('parsererror');
-      if (parserError) {
-        PFLog.err(
-          `${WebdavApi.L}._parseMultiplePropsFromXml() XML parsing error`,
-          parserError.textContent,
-        );
-        return [];
-      }
-
-      const results: FileMeta[] = [];
-      const responses = xmlDoc.querySelectorAll('response');
-
-      for (const response of Array.from(responses)) {
-        const href = response.querySelector('href')?.textContent?.trim();
-        if (!href) continue;
-
-        const decodedHref = decodeURIComponent(href);
-
-        // Skip the base path itself (we only want children)
-        // Normalize both paths: remove leading/trailing slashes for comparison
-        const normalizedHref = decodedHref.replace(/^\//, '').replace(/\/$/, '');
-        const normalizedBasePath = basePath.replace(/^\//, '').replace(/\/$/, '');
-
-        if (normalizedHref === normalizedBasePath) {
-          continue;
-        }
-
-        const fileMeta = this._parseXmlResponseElement(response, decodedHref);
-        if (fileMeta) {
-          results.push(fileMeta);
-        }
-      }
-
-      return results;
-    } catch (error) {
-      PFLog.err(`${WebdavApi.L}._parseMultiplePropsFromXml() parsing error`, error);
-      return [];
-    }
   }
 
   private async _ensureParentDirectoryExists(filePath: string): Promise<void> {
