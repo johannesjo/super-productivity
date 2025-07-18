@@ -171,13 +171,19 @@ export class WebdavXmlParser {
 
         const decodedHref = decodeURIComponent(href);
 
-        // Skip the base path itself (we only want children)
-        // Normalize both paths: remove leading/trailing slashes for comparison
-        const normalizedHref = decodedHref.replace(/^\//, '').replace(/\/$/, '');
-        const normalizedBasePath = basePath.replace(/^\//, '').replace(/\/$/, '');
+        // For single file queries (when we're looking for a specific file),
+        // we should NOT skip the base path itself
+        // Only skip if it's a directory listing (ends with /)
+        const isDirectoryListing = basePath.endsWith('/');
+        if (isDirectoryListing) {
+          // Skip the base path itself (we only want children)
+          // Normalize both paths: remove leading/trailing slashes for comparison
+          const normalizedHref = decodedHref.replace(/^\//, '').replace(/\/$/, '');
+          const normalizedBasePath = basePath.replace(/^\//, '').replace(/\/$/, '');
 
-        if (normalizedHref === normalizedBasePath) {
-          continue;
+          if (normalizedHref === normalizedBasePath) {
+            continue;
+          }
         }
 
         const fileMeta = this.parseXmlResponseElement(response, decodedHref);
