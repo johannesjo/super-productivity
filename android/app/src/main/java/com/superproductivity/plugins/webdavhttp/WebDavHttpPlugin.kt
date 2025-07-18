@@ -5,30 +5,28 @@ import com.getcapacitor.Plugin
 import com.getcapacitor.PluginCall
 import com.getcapacitor.PluginMethod
 import com.getcapacitor.annotation.CapacitorPlugin
-import java.io.BufferedReader
-import java.io.DataOutputStream
-import java.io.InputStreamReader
-import java.net.HttpURLConnection
-import java.net.URL
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 @CapacitorPlugin(name = "WebDavHttp")
 class WebDavHttpPlugin : Plugin() {
 
     companion object {
-        private val WEBDAV_METHODS = arrayOf(
-            "PROPFIND", "PROPPATCH", "MKCOL", "COPY", "MOVE", "LOCK", "UNLOCK"
-        )
-    }
-
-    private fun isWebDavMethod(method: String): Boolean {
-        return WEBDAV_METHODS.any { it.equals(method, ignoreCase = true) }
+        private val client = OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build()
     }
 
     @PluginMethod
     fun request(call: PluginCall) {
         val urlString = call.getString("url")
-        val method = call.getString("method", "GET")
-        val headers = call.getObject("headers", JSObject())
+        val method = call.getString("method") ?: "GET"
+        val headers = call.getObject("headers") ?: JSObject()
         val data = call.getString("data")
 
         if (urlString == null) {
@@ -37,96 +35,77 @@ class WebDavHttpPlugin : Plugin() {
         }
 
         try {
-            val url = URL(urlString)
-            val connection = url.openConnection() as HttpURLConnection
+            // Build request
+            val requestBuilder = Request.Builder()
+                .url(urlString)
 
-            // For WebDAV methods, we need to use reflection since HttpURLConnection
-            // only supports standard HTTP methods
-            if (isWebDavMethod(method)) {
-                try {
-                    // First set it as POST to allow output
-                    connection.requestMethod = "POST"
-                    
-                    // Then use reflection to set the actual method
-                    val methodField = HttpURLConnection::class.java.getDeclaredField("method")
-                    methodField.isAccessible = true
-                    methodField.set(connection, method)
-                    
-                    // Also update the delegate if using OkHttp
-                    try {
-                        val delegateField = connection.javaClass.getDeclaredField("delegate")
-                        delegateField.isAccessible = true
-                        val delegate = delegateField.get(connection)
-                        
-                        if (delegate != null) {
-                            val delegateMethodField = delegate.javaClass.superclass?.getDeclaredField("method")
-                            delegateMethodField?.isAccessible = true
-                            delegateMethodField?.set(delegate, method)
-                        }
-                    } catch (e: Exception) {
-                        // OkHttp delegate not present, that's OK
-                    }
-                } catch (e: Exception) {
-                    call.reject("Failed to set WebDAV method: $method", e)
-                    return
-                }
-            } else {
-                // Standard HTTP method
-                connection.requestMethod = method
-            }
-
-            // Set headers
+            // Add headers
             headers.keys().forEach { key ->
                 headers.getString(key)?.let { value ->
-                    connection.setRequestProperty(key, value)
+                    requestBuilder.addHeader(key, value)
                 }
             }
 
             // Handle request body
-            if (!data.isNullOrEmpty()) {
-                connection.doOutput = true
-                DataOutputStream(connection.outputStream).use { outputStream ->
-                    outputStream.writeBytes(data)
-                    outputStream.flush()
-                }
+            val requestBody: RequestBody? = if (!data.isNullOrEmpty()) {
+                val contentType = headers.getString("Content-Type") ?: "application/xml"
+                data.toRequestBody(contentType.toMediaType())
+            } else {
+                null
             }
 
-            // Get response
-            val responseCode = connection.responseCode
-
-            // Read response body
-            val reader = BufferedReader(
-                InputStreamReader(
-                    if (responseCode in 200..299) {
-                        connection.inputStream
+            // Set method with body
+            when (method.uppercase()) {
+                "GET" -> requestBuilder.get()
+                "POST" -> requestBuilder.post(requestBody ?: "".toRequestBody())
+                "PUT" -> requestBuilder.put(requestBody ?: "".toRequestBody())
+                "DELETE" -> {
+                    if (requestBody != null) {
+                        requestBuilder.delete(requestBody)
                     } else {
-                        connection.errorStream
+                        requestBuilder.delete()
                     }
-                )
-            )
-            
-            val responseBody = reader.use { it.readText() }
-
-            // Get response headers
-            val responseHeaders = JSObject()
-            connection.headerFields.forEach { (key, value) ->
-                if (key != null && value.isNotEmpty()) {
-                    responseHeaders.put(key, value.first())
+                }
+                "HEAD" -> requestBuilder.head()
+                "PATCH" -> requestBuilder.patch(requestBody ?: "".toRequestBody())
+                // WebDAV methods
+                "PROPFIND", "PROPPATCH", "MKCOL", "COPY", "MOVE", "LOCK", "UNLOCK" -> {
+                    requestBuilder.method(method, requestBody)
+                }
+                else -> {
+                    call.reject("Unsupported HTTP method: $method")
+                    return
                 }
             }
 
-            // Return response
-            val result = JSObject().apply {
-                put("data", responseBody)
-                put("status", responseCode)
-                put("headers", responseHeaders)
-                put("url", connection.url.toString())
+            val request = requestBuilder.build()
+
+            // Execute request
+            client.newCall(request).execute().use { response ->
+                // Get response headers
+                val responseHeaders = JSObject()
+                response.headers.forEach { (name, value) ->
+                    responseHeaders.put(name, value)
+                }
+
+                // Get response body
+                val responseBody = response.body?.string() ?: ""
+
+                // Return response
+                val result = JSObject().apply {
+                    put("data", responseBody)
+                    put("status", response.code)
+                    put("headers", responseHeaders)
+                    put("url", response.request.url.toString())
+                }
+
+                call.resolve(result)
             }
 
-            call.resolve(result)
-
+        } catch (e: IOException) {
+            call.reject("Request failed: ${e.message}", e)
         } catch (e: Exception) {
-            call.reject("Request failed", e)
+            call.reject("Unexpected error: ${e.message}", e)
         }
     }
 }
