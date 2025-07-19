@@ -784,6 +784,7 @@
         "REMINDER": "提醒",
         "REPEAT": "重复",
         "SCHEDULE_TASK": "安排任务",
+        "DEADLINE": "Deadline",
         "DUE": "计划时间",
         "SUB_TASKS": "子任务（{{nr}}）",
         "TIME": "时间",
@@ -867,6 +868,16 @@
         "HELP": "示例：<br> 30m => 30分钟<br> 2h => 2小时<br> 2h 30m => 2小时30分钟",
         "TINE_SPENT": "所花费的时间",
         "TITLE": "添加今天任务"
+      },
+      "D_DEADLINE_TASK": {
+        "QA_TODAY": "Today",
+        "QA_TOMORROW": "Tomorrow",
+        "QA_NEXT_WEEK": "Next Week",
+        "QA_NEXT_MONTH": "Next Month",
+        "SET_DEADLINE": "Set",
+        "REMOVE_DEADLINE": "Remove",
+        "REMOVED_DEADLINE": "Deadline has been removed",
+        "DEADLINE_ALREADY_SET": "Deadline is already set on {{date}}"
       },
       "N": {
         "ESTIMATE_EXCEEDED": "超出预估时间！",

@@ -1079,6 +1079,7 @@
         "REMINDER": "Hatırlatma",
         "REPEAT": "Tekrar et",
         "SCHEDULE_TASK": "Görev Takvimi",
+        "DEADLINE": "Deadline",
         "SUB_TASKS": "Alt Görevler ({{nr}})",
         "TIME": "Zaman",
         "TITLE_PLACEHOLDER": "Bir başlık girin"
@@ -1181,6 +1182,16 @@
         "HELP": "Örnekler:<br> 30m => 30 dakika<br> 2h => 2 saat<br> 2h 30m => 2 saat ve 30 dakika",
         "TINE_SPENT": "Harcanan zaman",
         "TITLE": "Güne Ekle"
+      },
+      "D_DEADLINE_TASK": {
+        "QA_TODAY": "Today",
+        "QA_TOMORROW": "Tomorrow",
+        "QA_NEXT_WEEK": "Next Week",
+        "QA_NEXT_MONTH": "Next Month",
+        "SET_DEADLINE": "Set",
+        "REMOVE_DEADLINE": "Remove",
+        "REMOVED_DEADLINE": "Deadline has been removed",
+        "DEADLINE_ALREADY_SET": "Deadline is already set on {{date}}"
       },
       "N": {
         "ESTIMATE_EXCEEDED": "Zaman tahmini aşıldı!",

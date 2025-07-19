@@ -1079,6 +1079,7 @@
         "REMINDER": "Нагадування",
         "REPEAT": "Повторення",
         "SCHEDULE_TASK": "Запланувати завдання",
+        "DEADLINE": "Deadline",
         "SUB_TASKS": "Підзавдання ({{nr}})",
         "TIME": "Час",
         "TITLE_PLACEHOLDER": "Введіть назву"
@@ -1181,6 +1182,16 @@
         "HELP": "Приклади:<br> 30м => 30 хвилин<br> 2г => 2 години<br> 2г 30м => 2 години та 30 хвилин",
         "TINE_SPENT": "Витрачений час",
         "TITLE": "Додати на день"
+      },
+      "D_DEADLINE_TASK": {
+        "QA_TODAY": "Today",
+        "QA_TOMORROW": "Tomorrow",
+        "QA_NEXT_WEEK": "Next Week",
+        "QA_NEXT_MONTH": "Next Month",
+        "SET_DEADLINE": "Set",
+        "REMOVE_DEADLINE": "Remove",
+        "REMOVED_DEADLINE": "Deadline has been removed",
+        "DEADLINE_ALREADY_SET": "Deadline is already set on {{date}}"
       },
       "N": {
         "ESTIMATE_EXCEEDED": "Перевищено оцінку часу!",

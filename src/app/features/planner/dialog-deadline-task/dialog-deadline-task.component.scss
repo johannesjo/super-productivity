@@ -113,9 +113,3 @@
     border-left: 1px solid var(--extra-border-color);
   }
 }
-
-::ng-deep .deadline-highlight .mat-calendar-body-cell-content {
-  background-color: var(--color-warning) !important;
-  color: black;
-  border-radius: 100%;
-}

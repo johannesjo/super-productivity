@@ -1,0 +1,78 @@
+<div class="quick-access">
+  <button
+    mat-icon-button
+    (click)="quickAccessBtnClick(1)"
+    [matTooltip]="T.F.TASK.D_DEADLINE_TASK.QA_TODAY | translate"
+  >
+    <mat-icon>wb_sunny</mat-icon>
+  </button>
+
+  <button
+    mat-icon-button
+    (click)="quickAccessBtnClick(2)"
+    [matTooltip]="T.F.TASK.D_DEADLINE_TASK.QA_TOMORROW | translate"
+  >
+    <mat-icon svgIcon="tomorrow"></mat-icon>
+  </button>
+  <button
+    mat-icon-button
+    (click)="quickAccessBtnClick(3)"
+    [matTooltip]="T.F.TASK.D_DEADLINE_TASK.QA_NEXT_WEEK | translate"
+  >
+    <mat-icon svgIcon="next_week"></mat-icon>
+  </button>
+  <button
+    mat-icon-button
+    (click)="quickAccessBtnClick(4)"
+    [matTooltip]="T.F.TASK.D_DEADLINE_TASK.QA_NEXT_MONTH | translate"
+  >
+    <mat-icon>bedtime</mat-icon>
+  </button>
+</div>
+
+<mat-calendar
+  (keydown)="onKeyDownOnCalendar($event)"
+  [selected]="selectedDate"
+  [minDate]="minDate"
+  (selectedChange)="dateSelected($event)"
+  #calendar
+></mat-calendar>
+
+@if (isShowEnterMsg) {
+  <div
+    class="press-enter-msg"
+    @fade
+  >
+    {{ T.DATETIME_SCHEDULE.PRESS_ENTER_AGAIN | translate }}
+  </div>
+}
+
+<mat-dialog-actions align="end">
+  <button
+    color="primary"
+    mat-button
+    type="button"
+    (click)="close()"
+  >
+    {{ T.G.CANCEL | translate }}
+  </button>
+  @if (data.task.deadline || setDeadlineForTask) {
+    <button
+      (click)="remove()"
+      color="warn"
+      mat-stroked-button
+    >
+      <mat-icon>event_busy</mat-icon>
+      {{ T.F.TASK.D_DEADLINE_TASK.REMOVE_DEADLINE | translate }}
+    </button>
+  }
+
+  <button
+    color="primary"
+    mat-stroked-button
+    (click)="submit()"
+  >
+    <mat-icon>today</mat-icon>
+    {{ T.F.TASK.D_DEADLINE_TASK.SET_DEADLINE | translate }}
+  </button>
+</mat-dialog-actions>

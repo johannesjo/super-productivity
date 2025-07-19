@@ -1079,6 +1079,7 @@
         "REMINDER": "Påminnelse",
         "REPEAT": "Gjenta",
         "SCHEDULE_TASK": "Planlegg oppgave",
+        "DEADLINE": "Deadline",
         "SUB_TASKS": "Underoppgaver ({{nr}})",
         "TIME": "Tid",
         "TITLE_PLACEHOLDER": "Skriv inn en tittel"
@@ -1181,6 +1182,16 @@
         "HELP": "Eksempler:<br> 30m =&gt; 30 minutter<br> 2t =&gt; 2 timer<br> 2t 30m =&gt; 2 timer og 30 minutter",
         "TINE_SPENT": "Tid brukt",
         "TITLE": "Legg til for dagen"
+      },
+      "D_DEADLINE_TASK": {
+        "QA_TODAY": "Today",
+        "QA_TOMORROW": "Tomorrow",
+        "QA_NEXT_WEEK": "Next Week",
+        "QA_NEXT_MONTH": "Next Month",
+        "SET_DEADLINE": "Set",
+        "REMOVE_DEADLINE": "Remove",
+        "REMOVED_DEADLINE": "Deadline has been removed",
+        "DEADLINE_ALREADY_SET": "Deadline is already set on {{date}}"
       },
       "N": {
         "ESTIMATE_EXCEEDED": "Tidsoverslag overskredet!",

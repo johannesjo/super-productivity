@@ -1079,6 +1079,7 @@
         "REMINDER": "Herinnering",
         "REPEAT": "Herhaling",
         "SCHEDULE_TASK": "Taak plannen",
+        "DEADLINE": "Deadline",
         "SUB_TASKS": "Subtaken ({{nr}})",
         "TIME": "Tijd",
         "TITLE_PLACEHOLDER": "Voer een titel in"
@@ -1181,6 +1182,16 @@
         "HELP": "Voorbeelden:<br> 30 m => 30 minuten<br> 2h => 2 uren<br> 2h 30m => 2 uur en 30 minuten",
         "TINE_SPENT": "Tijd besteed",
         "TITLE": "Toevoegen voor dag"
+      },
+      "D_DEADLINE_TASK": {
+        "QA_TODAY": "Today",
+        "QA_TOMORROW": "Tomorrow",
+        "QA_NEXT_WEEK": "Next Week",
+        "QA_NEXT_MONTH": "Next Month",
+        "SET_DEADLINE": "Set",
+        "REMOVE_DEADLINE": "Remove",
+        "REMOVED_DEADLINE": "Deadline has been removed",
+        "DEADLINE_ALREADY_SET": "Deadline is already set on {{date}}"
       },
       "N": {
         "ESTIMATE_EXCEEDED": "Tijdschatting overschreden!",

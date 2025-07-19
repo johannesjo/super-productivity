@@ -1079,6 +1079,7 @@
         "REMINDER": "Podsjetnik",
         "REPEAT": "Ponovi",
         "SCHEDULE_TASK": "Terminiraj zadatak",
+        "DEADLINE": "Deadline",
         "SUB_TASKS": "Broj podzadataka ({{nr}})",
         "TIME": "Vrijeme",
         "TITLE_PLACEHOLDER": "Antre yon tit"
@@ -1181,6 +1182,16 @@
         "HELP": "Primjer:<br> 30 min => 30 minuta<br> 2 h => 2 sata<br> 2 h 30 min  => 2 sata i 30 minuta",
         "TINE_SPENT": "Utrošeno vrijeme",
         "TITLE": "Dodaj za dan"
+      },
+      "D_DEADLINE_TASK": {
+        "QA_TODAY": "Today",
+        "QA_TOMORROW": "Tomorrow",
+        "QA_NEXT_WEEK": "Next Week",
+        "QA_NEXT_MONTH": "Next Month",
+        "SET_DEADLINE": "Set",
+        "REMOVE_DEADLINE": "Remove",
+        "REMOVED_DEADLINE": "Deadline has been removed",
+        "DEADLINE_ALREADY_SET": "Deadline is already set on {{date}}"
       },
       "N": {
         "ESTIMATE_EXCEEDED": "Procijenjeno vrijeme je premašeno!",

@@ -66,6 +66,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { getTaskRepeatInfoText } from './get-task-repeat-info-text.util';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
+import { DialogDeadlineTaskComponent } from '../../planner/dialog-deadline-task/dialog-deadline-task.component';
 import { Store } from '@ngrx/store';
 import { selectIssueProviderById } from '../../issue/store/issue-provider.selectors';
 import { isMarkdownChecklist } from '../../markdown-checklist/is-markdown-checklist';
@@ -80,7 +81,7 @@ import { IssueContentComponent } from '../../issue/issue-content/issue-content.c
 import { InlineMarkdownComponent } from '../../../ui/inline-markdown/inline-markdown.component';
 import { TaskAttachmentListComponent } from '../task-attachment/task-attachment-list/task-attachment-list.component';
 import { TagEditComponent } from '../../tag/tag-edit/tag-edit.component';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { AsyncPipe, DatePipe, NgClass } from '@angular/common';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { getWorklogStr } from '../../../util/get-work-log-str';
@@ -118,6 +119,7 @@ interface IssueDataAndType {
     MsToStringPipe,
     TranslatePipe,
     IssueIconPipe,
+    NgClass,
   ],
 })
 export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -260,6 +262,10 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   isPlannedForTodayDay: boolean = false;
   isExpandedAttachmentPanel: boolean = !IS_MOBILE;
 
+  isDeadlineToday: boolean = false;
+  isDeadlineExceeded: boolean = false;
+  isDeadlineForLessThan7Days: boolean = false;
+
   private _focusTimeout?: number;
   private _dragEnterTarget?: HTMLElement;
 
@@ -347,6 +353,9 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
       this.isMarkdownChecklist = false;
       this.isExpandedIssuePanel = false;
       this.isExpandedNotesPanel = false;
+      this.isDeadlineToday = false;
+      this.isDeadlineExceeded = false;
+      this.isDeadlineForLessThan7Days = false;
       return;
     }
 
@@ -386,6 +395,19 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     this.isPlannedForTodayDay = !!newVal.dueDay && newVal.dueDay === getWorklogStr();
+
+    const d = newVal.deadline;
+    const dd = d ? new Date(d) : null;
+    const now = new Date();
+    dd?.setHours(0, 0, 0, 0);
+    now.setHours(0, 0, 0, 0);
+    this.isDeadlineToday = !!d && d === getWorklogStr();
+    this.isDeadlineExceeded = !!dd && dd.getDate() < now.getDate();
+    const week = 7 * 24 * 60 * 60 * 1000;
+    this.isDeadlineForLessThan7Days =
+      !!dd &&
+      dd.getTime() >= now.getTime() &&
+      dd.getTime() <= new Date(now.getTime() + week).getTime();
 
     // panel states
     this.isMarkdownChecklist = isMarkdownChecklist(newVal.notes || '');
@@ -488,6 +510,14 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   scheduleTask(): void {
     this._matDialog.open(DialogScheduleTaskComponent, {
       // we focus inside dialog instead
+      autoFocus: false,
+      restoreFocus: true,
+      data: { task: this.task },
+    });
+  }
+
+  setDeadlineTask(): void {
+    this._matDialog.open(DialogDeadlineTaskComponent, {
       autoFocus: false,
       restoreFocus: true,
       data: { task: this.task },

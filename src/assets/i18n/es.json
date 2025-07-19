@@ -1079,6 +1079,7 @@
         "REMINDER": "Recordatorio",
         "REPEAT": "Repetir",
         "SCHEDULE_TASK": "Tarea programada",
+        "DEADLINE": "Deadline",
         "SUB_TASKS": "Subtareas ({{nr}})",
         "TIME": "hora",
         "TITLE_PLACEHOLDER": "Introduzca un título"
@@ -1183,6 +1184,16 @@
         "HELP": "Ejemplos:<br> 30m => 30 minutos<br> 2h => 2 horas<br> 2h 30m => 2 horas y 30 minutos",
         "TINE_SPENT": "Tiempo empleado",
         "TITLE": "Agregar para el día"
+      },
+      "D_DEADLINE_TASK": {
+        "QA_TODAY": "Today",
+        "QA_TOMORROW": "Tomorrow",
+        "QA_NEXT_WEEK": "Next Week",
+        "QA_NEXT_MONTH": "Next Month",
+        "SET_DEADLINE": "Set",
+        "REMOVE_DEADLINE": "Remove",
+        "REMOVED_DEADLINE": "Deadline has been removed",
+        "DEADLINE_ALREADY_SET": "Deadline is already set on {{date}}"
       },
       "N": {
         "ESTIMATE_EXCEEDED": "¡Tiempo estimado superado!",

@@ -205,6 +205,7 @@
             <mat-icon>attach_file</mat-icon>
           </button>
         }
+
         @if (t.reminderId) {
           <button
             (click)="scheduleTask()"
@@ -251,6 +252,17 @@
               <mat-icon>today</mat-icon>
             }
             <div class="time-badge">{{ t.dueDay | localDateStr: todayStr() }}</div>
+          </button>
+        } @else if (t.deadline) {
+          <button
+            (click)="scheduleTask()"
+            [title]="T.F.TASK.CMP.EDIT_SCHEDULED | translate"
+            class="ico-btn schedule-btn"
+            [color]="isDeadlineWarn()"
+            mat-icon-button
+          >
+            <mat-icon>hourglass_bottom</mat-icon>
+            <div class="time-badge">{{ t.deadline | localDateStr: todayStr() }}</div>
           </button>
         }
 

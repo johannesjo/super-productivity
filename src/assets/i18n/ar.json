@@ -1079,6 +1079,7 @@
         "REMINDER": "تذكير",
         "REPEAT": "كرر",
         "SCHEDULE_TASK": "جدولة مهمة",
+        "DEADLINE": "Deadline",
         "SUB_TASKS": "المهام الفرعية ({{nr}})",
         "TIME": "زمن",
         "TITLE_PLACEHOLDER": "أدخل عنوانا"
@@ -1181,6 +1182,16 @@
         "HELP": "أمثلة:<br> 30m => 30 دقيقة<br> 2h => ساعتان<br> 2h 30m => ساعتان و 30 دقيقة",
         "TINE_SPENT": "قضاء الوقت",
         "TITLE": "أضف ليوم"
+      },
+      "D_DEADLINE_TASK": {
+        "QA_TODAY": "Today",
+        "QA_TOMORROW": "Tomorrow",
+        "QA_NEXT_WEEK": "Next Week",
+        "QA_NEXT_MONTH": "Next Month",
+        "SET_DEADLINE": "Set",
+        "REMOVE_DEADLINE": "Remove",
+        "REMOVED_DEADLINE": "Deadline has been removed",
+        "DEADLINE_ALREADY_SET": "Deadline is already set on {{date}}"
       },
       "N": {
         "ESTIMATE_EXCEEDED": "تجاوز تقدير الوقت!",
