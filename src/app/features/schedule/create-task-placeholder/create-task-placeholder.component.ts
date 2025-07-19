@@ -16,16 +16,18 @@ import {
 } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { TaskService } from '../../tasks/task.service';
-import { TaskReminderOptionId } from '../../tasks/task.model';
+import { Task, TaskReminderOptionId } from '../../tasks/task.model';
 import { DatePipe } from '@angular/common';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { Store } from '@ngrx/store';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 import { ShortTime2Pipe } from '../../../ui/pipes/short-time2.pipe';
+import { SelectTaskMinimalComponent } from '../../tasks/select-task/select-task-minimal/select-task-minimal.component';
+import { devError } from '../../../util/dev-error';
 
 @Component({
   selector: 'create-task-placeholder',
-  imports: [MatIcon, DatePipe, ShortTime2Pipe],
+  imports: [MatIcon, DatePipe, ShortTime2Pipe, SelectTaskMinimalComponent],
   templateUrl: './create-task-placeholder.component.html',
   styleUrl: './create-task-placeholder.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,6 +39,11 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
   isEditMode = input.required<boolean>();
   time = input<string>();
   date = input<string>();
+
+  // Task selection state
+  selectedTask = signal<Task | null>(null);
+  newTaskTitle = signal<string>('');
+  isCreate = signal<boolean>(false);
   isForDayMode = signal<boolean>(false);
   due: Signal<number> = computed(() => {
     if (this.date() && this.time()) {
@@ -47,14 +54,18 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
     return 0;
   });
 
-  // time = computed(() => {})
   editEnd = output<void>();
 
-  readonly textAreaElement = viewChild('textAreaElement', { read: ElementRef });
+  readonly selectTaskMinimal = viewChild('selectTaskMinimal', { read: ElementRef });
 
-  private _editEndTimeout: number | undefined;
+  private _interactionState: 'Idle' | 'Editing' | 'Selecting' = 'Idle';
+  private _blurTimeout: number | undefined;
 
-  @HostBinding('class.isEditMode')
+  // Timeout constants for better maintainability
+  private readonly BLUR_DELAY = 150;
+  private readonly SELECTION_DELAY = 100;
+
+  @HostBinding('class.edit-mode')
   get isEditModeClass(): boolean {
     return this.isEditMode();
   }
@@ -62,47 +73,168 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
   @HostListener('click', ['$event'])
   onClick(event: MouseEvent): void {
     event.stopPropagation();
-    this.textAreaElement()?.nativeElement.focus();
-    // cancel blur
-    window.clearTimeout(this._editEndTimeout);
+    this._setState('Editing');
+    this._focusSelectTaskMinimal();
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.isEditMode()) {
+      const target = event.target as HTMLElement;
+      const component = target.closest('create-task-placeholder');
+      const autocompleteOption = target.closest('mat-option');
+
+      // If click is outside the component and not on an autocomplete option, close it
+      if (!component && !autocompleteOption) {
+        this._closeAndReset();
+      }
+    }
   }
 
   constructor() {
     effect(() => {
       if (this.isEditMode()) {
-        this.textAreaElement()?.nativeElement.focus();
+        this._focusSelectTaskMinimal();
       }
     });
   }
 
   ngOnDestroy(): void {
-    window.clearTimeout(this._editEndTimeout);
-    // otherwise the element  might not reappear always
+    this._clearTimeouts();
+    this.editEnd.emit();
+  }
+  onTaskChange(taskOrTaskTitle: Task | string): void {
+    this.isCreate.set(typeof taskOrTaskTitle === 'string');
+
+    if (this.isCreate()) {
+      // New task creation
+      this.newTaskTitle.set(taskOrTaskTitle as string);
+      this.selectedTask.set(null);
+    } else {
+      // Existing task selection
+      this.selectedTask.set(taskOrTaskTitle as Task);
+      this.newTaskTitle.set('');
+    }
+  }
+
+  async onTaskSelected(task: Task): Promise<void> {
+    this._setState('Selecting');
+    this.selectedTask.set(task);
+    this.newTaskTitle.set('');
+    this.isCreate.set(false);
+
+    if (this.due()) {
+      await this.addTask();
+      this._closeAndReset();
+    } else {
+      this._setState('Idle');
+    }
+  }
+
+  onTextChanged(text: string): void {
+    this.isCreate.set(true);
+    this.newTaskTitle.set(text);
+    this.selectedTask.set(null);
+  }
+
+  onSimpleTaskInputBlur(): void {
+    this._clearTimeouts();
+    // Only close if we're in idle state (not editing autocomplete or selecting)
+    if (this._interactionState === 'Idle') {
+      this._blurTimeout = window.setTimeout(() => this._closeAndReset(), this.BLUR_DELAY);
+    }
+  }
+
+  private _clearTimeouts(): void {
+    window.clearTimeout(this._blurTimeout);
+  }
+
+  private _resetTaskState(): void {
+    this.newTaskTitle.set('');
+    this.selectedTask.set(null);
+    this.isCreate.set(false);
+  }
+
+  private _setState(state: 'Idle' | 'Editing' | 'Selecting'): void {
+    this._interactionState = state;
+    if (state === 'Editing') {
+      this._clearTimeouts();
+    }
+  }
+
+  private _closeAndReset(): void {
+    this._clearTimeouts();
+    this._resetTaskState();
+    this._setState('Idle');
     this.editEnd.emit();
   }
 
-  onBlur(): void {
-    window.clearTimeout(this._editEndTimeout);
-    this._editEndTimeout = window.setTimeout(() => this.editEnd.emit(), 200);
+  onAutocompleteOpened(): void {
+    this._setState('Editing');
   }
 
-  async onKeyDown(event: KeyboardEvent): Promise<void> {
-    const textAreaElement = this.textAreaElement();
+  onAutocompleteClosed(): void {
+    // Add a small delay to ensure option selection is processed first
+    setTimeout(() => {
+      if (this._interactionState !== 'Selecting') {
+        this._setState('Idle');
+      }
+    }, this.SELECTION_DELAY);
+  }
+
+  async onSelectTaskKeyDown(event: KeyboardEvent): Promise<void> {
     if (
       event.key === 'Enter' &&
-      typeof this.due() === 'number' &&
-      textAreaElement?.nativeElement.value
+      this.due() &&
+      (this.selectedTask() || this.newTaskTitle())
     ) {
-      this.editEnd.emit();
+      await this.addTask();
+      this._closeAndReset();
+    } else if (event.key === 'Escape') {
+      this._closeAndReset();
+    } else if (event.key === '1' && event.ctrlKey) {
+      this.isForDayMode.set(!this.isForDayMode());
+    }
+  }
+
+  private _focusSelectTaskMinimal(): void {
+    const tryFocus: () => boolean = () => {
+      const selectTaskInput =
+        this.selectTaskMinimal()?.nativeElement?.querySelector('input');
+      if (selectTaskInput) {
+        selectTaskInput.focus();
+        return true;
+      }
+      return false;
+    };
+
+    // Try immediate focus, fallback to next tick if needed
+    if (!tryFocus()) {
+      setTimeout(tryFocus, 0);
+    }
+  }
+
+  private async addTask(): Promise<void> {
+    if (this.isCreate() && this.newTaskTitle()) {
+      // Create new task
+      await this.createNewTask(this.newTaskTitle());
+    } else if (!this.isCreate() && this.selectedTask()) {
+      // Schedule existing task
+      await this.scheduleExistingTask(this.selectedTask()!);
+    }
+  }
+
+  private async createNewTask(title: string): Promise<void> {
+    try {
       if (this.isForDayMode()) {
-        const id = this._taskService.add(
-          textAreaElement?.nativeElement.value || '',
-          false,
-          {
-            timeEstimate: 30 * 60 * 1000,
-          },
-        );
+        // Plan task for day (no specific time)
+        const id = this._taskService.add(title, false, {
+          timeEstimate: 30 * 60 * 1000,
+        });
         const task = await this._taskService.getByIdOnce$(id).toPromise();
+        if (!task) {
+          throw new Error(`Could not resolve task with id ${id}`);
+        }
         this._store.dispatch(
           PlannerActions.planTaskForDay({
             task: task,
@@ -110,8 +242,9 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
           }),
         );
       } else {
+        // Schedule task with specific time
         this._taskService.addAndSchedule(
-          textAreaElement?.nativeElement.value || '',
+          title,
           {
             timeEstimate: 30 * 60 * 1000,
           },
@@ -119,10 +252,23 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
           TaskReminderOptionId.AtStart,
         );
       }
-    } else if (event.key === 'Escape') {
-      this.editEnd.emit();
-    } else if (event.key === '1' && event.ctrlKey) {
-      this.isForDayMode.set(!this.isForDayMode());
+    } catch (error) {
+      devError(`Failed to create/schedule task: ${error}`);
+    }
+  }
+
+  private async scheduleExistingTask(task: Task): Promise<void> {
+    if (this.isForDayMode()) {
+      // Plan existing task for day
+      this._store.dispatch(
+        PlannerActions.planTaskForDay({
+          task: task,
+          day: getWorklogStr(this.due()),
+        }),
+      );
+    } else {
+      // Schedule existing task with specific time
+      this._taskService.scheduleTask(task, this.due(), TaskReminderOptionId.AtStart);
     }
   }
 
