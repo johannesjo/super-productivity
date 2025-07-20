@@ -128,6 +128,7 @@ export class PluginService implements OnDestroy {
             if (icon) {
               state.icon = icon;
               this._pluginIcons.set(manifest.id, icon);
+              this._updatePluginIcons();
             }
           } catch (e) {
             // Icon is optional - silently ignore 404s and other errors
@@ -140,8 +141,6 @@ export class PluginService implements OnDestroy {
         PluginLog.err(`Failed to discover plugin at ${path}:`, error);
       }
     }
-
-    this._updatePluginStates();
   }
 
   private async _loadBuiltInPlugins(): Promise<void> {
@@ -184,13 +183,12 @@ export class PluginService implements OnDestroy {
 
           if (cachedPlugin.icon) {
             this._pluginIcons.set(cachedPlugin.id, cachedPlugin.icon);
+            this._updatePluginIcons();
           }
         } catch (error) {
           PluginLog.err(`Failed to discover cached plugin ${cachedPlugin.id}:`, error);
         }
       }
-
-      this._updatePluginStates();
     } catch (error) {
       PluginLog.err('Failed to discover cached plugins:', error);
     }
@@ -216,9 +214,7 @@ export class PluginService implements OnDestroy {
     }
   }
 
-  private _updatePluginStates(): void {
-    // Force signal update by creating a new Map
-    this._pluginStates.set(new Map(this._pluginStates()));
+  private _updatePluginIcons(): void {
     this._pluginIconsSignal.set(new Map(this._pluginIcons));
   }
 
@@ -301,16 +297,20 @@ export class PluginService implements OnDestroy {
     }
 
     // Load the plugin
-    state.status = 'loading';
-    this._updatePluginStates();
+    this._setPluginState(pluginId, {
+      ...state,
+      status: 'loading',
+    });
 
     try {
       PluginLog.log(`Activating plugin: ${pluginId}`);
       const instance = await this._loadPluginLazy(state);
 
-      state.status = 'loaded';
-      state.instance = instance;
-      this._updatePluginStates();
+      this._setPluginState(pluginId, {
+        ...state,
+        status: 'loaded',
+        instance: instance,
+      });
 
       // Add to loaded plugins list for compatibility
       if (!this._loadedPlugins.find((p) => p.manifest.id === pluginId)) {
@@ -320,9 +320,11 @@ export class PluginService implements OnDestroy {
       return instance;
     } catch (error) {
       PluginLog.err(`Failed to activate plugin ${pluginId}:`, error);
-      state.status = 'error';
-      state.error = error instanceof Error ? error.message : String(error);
-      this._updatePluginStates();
+      this._setPluginState(pluginId, {
+        ...state,
+        status: 'error',
+        error: error instanceof Error ? error.message : String(error),
+      });
       return null;
     }
   }
@@ -935,7 +937,6 @@ export class PluginService implements OnDestroy {
           icon: iconContent || undefined,
         };
         this._setPluginState(manifest.id, state);
-        this._updatePluginStates();
 
         PluginLog.log(
           `Uploaded plugin ${manifest.id} requires desktop version, creating placeholder`,
@@ -973,7 +974,6 @@ export class PluginService implements OnDestroy {
           icon: iconContent || undefined,
         };
         this._setPluginState(manifest.id, state);
-        this._updatePluginStates();
 
         PluginLog.log(`Uploaded plugin ${manifest.id} is disabled, skipping load`);
         return placeholderInstance;
@@ -1012,7 +1012,6 @@ export class PluginService implements OnDestroy {
           icon: iconContent || undefined,
         };
         this._setPluginState(manifest.id, state);
-        this._updatePluginStates();
 
         PluginLog.log(`Uploaded plugin ${manifest.id} loaded successfully`);
       } else {
@@ -1032,7 +1031,6 @@ export class PluginService implements OnDestroy {
           icon: iconContent || undefined,
         };
         this._setPluginState(manifest.id, state);
-        this._updatePluginStates();
       }
 
       return pluginInstance;
@@ -1109,7 +1107,6 @@ export class PluginService implements OnDestroy {
 
     // Remove from plugin states
     this._deletePluginState(pluginId);
-    this._updatePluginStates();
 
     PluginLog.log(`Uploaded plugin ${pluginId} removed completely`);
   }
@@ -1129,9 +1126,12 @@ export class PluginService implements OnDestroy {
     }
 
     // Update state to not-loaded
-    state.status = 'not-loaded';
-    state.instance = undefined;
-    this._updatePluginStates();
+    const updatedState: PluginState = {
+      ...state,
+      status: 'not-loaded',
+      instance: undefined,
+    };
+    this._setPluginState(pluginId, updatedState);
 
     // Remove from loaded plugins list
     const index = this._loadedPlugins.findIndex((p) => p.manifest.id === pluginId);

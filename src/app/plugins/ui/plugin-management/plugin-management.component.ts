@@ -1,13 +1,12 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
-  OnInit,
   signal,
 } from '@angular/core';
 import { PluginService } from '../../plugin.service';
 import { PluginInstance } from '../../plugin-api.model';
-import { PluginState } from '../../plugin-state.model';
 import { PluginMetaPersistenceService } from '../../plugin-meta-persistence.service';
 import { PluginCacheService } from '../../plugin-cache.service';
 import { PluginConfigService } from '../../plugin-config.service';
@@ -33,7 +32,6 @@ import { T } from '../../../t.const';
 import { PluginIconComponent } from '../plugin-icon/plugin-icon.component';
 import { PluginConfigDialogComponent } from '../plugin-config-dialog/plugin-config-dialog.component';
 import { IS_ELECTRON } from '../../../app.constants';
-import { effect } from '@angular/core';
 import { PluginLog } from '../../../core/log';
 
 @Component({
@@ -61,7 +59,7 @@ import { PluginLog } from '../../../core/log';
     PluginIconComponent,
   ],
 })
-export class PluginManagementComponent implements OnInit {
+export class PluginManagementComponent {
   private readonly _pluginService = inject(PluginService);
   private readonly _pluginMetaPersistenceService = inject(PluginMetaPersistenceService);
   private readonly _pluginCacheService = inject(PluginCacheService);
@@ -75,42 +73,12 @@ export class PluginManagementComponent implements OnInit {
   // Plugin size limits for display
   readonly maxPluginSizeMB = (MAX_PLUGIN_ZIP_SIZE / 1024 / 1024).toFixed(1);
 
-  // Signal for all plugins (loaded + disabled with isEnabled state)
-  readonly allPlugins = signal<PluginInstance[]>([]);
-
-  // Signal for plugin states (for lazy loading)
-  readonly pluginStates = signal<Map<string, PluginState>>(new Map());
-
-  // Upload state
-  readonly isUploading = signal<boolean>(false);
-  readonly uploadError = signal<string | null>(null);
-
-  constructor() {
-    // React to plugin state changes using signals
-    effect(() => {
-      const states = this._pluginService.pluginStates();
-      this.pluginStates.set(states);
-      this.updatePluginsFromStates();
-    });
-  }
-
-  async ngOnInit(): Promise<void> {
-    // Wait for plugin system to initialize before loading plugins
-    while (!this._pluginService.isInitialized()) {
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    }
-    await this.loadPlugins();
-  }
-
-  async loadPlugins(): Promise<void> {
-    const allPlugins = await this._pluginService.getAllPlugins();
-    this.allPlugins.set(allPlugins);
-  }
-
-  private updatePluginsFromStates(): void {
+  // Computed signal for all plugins derived from pluginStates
+  readonly allPlugins = computed(() => {
     const plugins: PluginInstance[] = [];
+    const states = this._pluginService.pluginStates();
 
-    for (const state of this.pluginStates().values()) {
+    for (const state of states.values()) {
       if (state.instance) {
         // Plugin is loaded, use the instance
         plugins.push(state.instance);
@@ -124,9 +92,13 @@ export class PluginManagementComponent implements OnInit {
         });
       }
     }
+    console.log(plugins);
+    return plugins;
+  });
 
-    this.allPlugins.set(plugins);
-  }
+  // Upload state
+  readonly isUploading = signal<boolean>(false);
+  readonly uploadError = signal<string | null>(null);
 
   onPluginToggle(plugin: PluginInstance, event: MatSlideToggleChange): void {
     if (event.checked) {
@@ -150,7 +122,6 @@ export class PluginManagementComponent implements OnInit {
           plugin.manifest.id,
         );
         // Reset the toggle state
-        await this.loadPlugins();
         return;
       }
 
@@ -165,11 +136,8 @@ export class PluginManagementComponent implements OnInit {
       }
 
       // Refresh UI with updated plugin states
-      await this.loadPlugins();
     } catch (error) {
       PluginLog.err('Failed to enable plugin:', error);
-      // Refresh UI to reset state on error
-      await this.loadPlugins();
     }
   }
 
@@ -187,32 +155,13 @@ export class PluginManagementComponent implements OnInit {
       this._pluginService.unloadPlugin(plugin.manifest.id);
 
       // Reload plugins to get the updated state from the service
-      await this.loadPlugins();
     } catch (error) {
       PluginLog.err('Failed to disable plugin:', error);
     }
   }
 
-  async reloadPlugin(plugin: PluginInstance): Promise<void> {
-    PluginLog.log('Reloading plugin:', plugin.manifest.id);
-
-    try {
-      const success = await this._pluginService.reloadPlugin(plugin.manifest.id);
-      if (success) {
-        PluginLog.log('Plugin reloaded successfully:', plugin.manifest.id);
-      } else {
-        PluginLog.err('Failed to reload plugin:', plugin.manifest.id);
-      }
-    } catch (error) {
-      PluginLog.err('Failed to reload plugin:', error);
-    }
-
-    // Refresh the UI
-    this.loadPlugins();
-  }
-
   isPluginLoading(plugin: PluginInstance): boolean {
-    const state = this.pluginStates().get(plugin.manifest.id);
+    const state = this._pluginService.pluginStates().get(plugin.manifest.id);
     return state?.status === 'loading' || false;
   }
 
@@ -265,7 +214,6 @@ export class PluginManagementComponent implements OnInit {
 
     try {
       await this._pluginService.loadPluginFromZip(file);
-      await this.loadPlugins(); // Refresh the plugin list
 
       // Clear the input
       input.value = '';
@@ -287,7 +235,6 @@ export class PluginManagementComponent implements OnInit {
       this.uploadError.set(null);
 
       await this._pluginCacheService.clearCache();
-      await this.loadPlugins(); // Refresh the plugin list
 
       PluginLog.log('Plugin cache cleared successfully');
     } catch (error) {
@@ -327,7 +274,6 @@ export class PluginManagementComponent implements OnInit {
       this.uploadError.set(null);
 
       await this._pluginService.removeUploadedPlugin(plugin.manifest.id);
-      await this.loadPlugins(); // Refresh the plugin list
 
       PluginLog.log(`Plugin ${plugin.manifest.id} removed successfully`);
     } catch (error) {
