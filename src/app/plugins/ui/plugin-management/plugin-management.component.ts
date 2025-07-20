@@ -1,7 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   inject,
   OnInit,
   signal,
@@ -34,7 +33,7 @@ import { T } from '../../../t.const';
 import { PluginIconComponent } from '../plugin-icon/plugin-icon.component';
 import { PluginConfigDialogComponent } from '../plugin-config-dialog/plugin-config-dialog.component';
 import { IS_ELECTRON } from '../../../app.constants';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { effect } from '@angular/core';
 import { PluginLog } from '../../../core/log';
 
 @Component({
@@ -69,7 +68,6 @@ export class PluginManagementComponent implements OnInit {
   private readonly _pluginConfigService = inject(PluginConfigService);
   private readonly _translateService = inject(TranslateService);
   private readonly _dialog = inject(MatDialog);
-  private readonly _destroyRef = inject(DestroyRef);
 
   T: typeof T = T;
   readonly IS_ELECTRON = IS_ELECTRON;
@@ -88,13 +86,12 @@ export class PluginManagementComponent implements OnInit {
   readonly uploadError = signal<string | null>(null);
 
   constructor() {
-    // Subscribe to plugin states for lazy loading
-    this._pluginService.pluginStates$
-      .pipe(takeUntilDestroyed(this._destroyRef))
-      .subscribe((states) => {
-        this.pluginStates.set(states);
-        this.updatePluginsFromStates();
-      });
+    // React to plugin state changes using signals
+    effect(() => {
+      const states = this._pluginService.pluginStates();
+      this.pluginStates.set(states);
+      this.updatePluginsFromStates();
+    });
   }
 
   async ngOnInit(): Promise<void> {
@@ -129,17 +126,6 @@ export class PluginManagementComponent implements OnInit {
     }
 
     this.allPlugins.set(plugins);
-  }
-
-  /**
-   * Check if a plugin is enabled
-   */
-  isPluginEnabledSync(plugin: PluginInstance): boolean {
-    // Get the latest plugin state from the signal to ensure reactivity
-    const currentPlugin = this.allPlugins().find(
-      (p) => p.manifest.id === plugin.manifest.id,
-    );
-    return currentPlugin?.isEnabled ?? false;
   }
 
   onPluginToggle(plugin: PluginInstance, event: MatSlideToggleChange): void {

@@ -104,7 +104,7 @@
         }
       </mat-card-subtitle>
       <div class="plugin-controls">
-        @if (plugin.manifest?.jsonSchemaCfg && isPluginEnabledSync(plugin)) {
+        @if (plugin.manifest?.jsonSchemaCfg && plugin.isEnabled) {
           <button
             mat-icon-button
             (click)="openConfigDialog(plugin)"
@@ -115,7 +115,7 @@
           </button>
         }
         <mat-slide-toggle
-          [checked]="isPluginEnabledSync(plugin)"
+          [checked]="plugin.isEnabled"
           [disabled]="!canEnablePlugin(plugin) || isPluginLoading(plugin)"
           (change)="onPluginToggle(plugin, $event)"
           [attr.aria-label]="
