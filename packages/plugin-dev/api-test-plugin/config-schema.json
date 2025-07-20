@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "API Test Plugin Configuration",
+  "description": "Configuration options for the API Test Plugin",
+  "type": "object",
+  "properties": {
+    "apiUrl": {
+      "type": "string",
+      "title": "API URL",
+      "description": "The base URL for the API endpoints",
+      "default": "https://api.example.com"
+    },
+    "apiKey": {
+      "type": "string",
+      "title": "API Key",
+      "description": "Your API key for authentication",
+      "minLength": 10
+    },
+    "enabled": {
+      "type": "boolean",
+      "title": "Enable API Integration",
+      "description": "Enable or disable the API integration",
+      "default": true
+    },
+    "logLevel": {
+      "type": "string",
+      "title": "Log Level",
+      "description": "Set the logging verbosity",
+      "enum": ["debug", "info", "warn", "error"],
+      "default": "info"
+    },
+    "requestTimeout": {
+      "type": "number",
+      "title": "Request Timeout (ms)",
+      "description": "Timeout for API requests in milliseconds",
+      "minimum": 1000,
+      "maximum": 60000,
+      "default": 5000
+    },
+    "retryAttempts": {
+      "type": "integer",
+      "title": "Retry Attempts",
+      "description": "Number of times to retry failed API requests",
+      "minimum": 0,
+      "maximum": 5,
+      "default": 3
+    },
+    "autoSync": {
+      "type": "boolean",
+      "title": "Auto Sync",
+      "description": "Automatically sync data with the API",
+      "default": false
+    },
+    "notifications": {
+      "type": "boolean",
+      "title": "Enable Notifications",
+      "description": "Show notifications for API events",
+      "default": true
+    },
+    "batchOperations": {
+      "type": "boolean",
+      "title": "Batch Operations",
+      "description": "Enable batch API operations for better performance",
+      "default": false
+    }
+  },
+  "required": ["apiUrl", "apiKey"]
+}

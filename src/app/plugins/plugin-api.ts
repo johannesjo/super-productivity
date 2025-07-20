@@ -260,6 +260,11 @@ export class PluginAPI implements PluginAPIInterface {
     return this._boundMethods.loadPersistedData();
   }
 
+  async getConfig<T>(): Promise<T> {
+    PluginLog.log(`Plugin ${this._pluginId} requested configuration`);
+    return this._boundMethods.getConfig();
+  }
+
   async openDialog(dialogCfg: DialogCfg): Promise<void> {
     PluginLog.log(`Plugin ${this._pluginId} requested to open dialog:`, dialogCfg);
     return this._pluginBridge.openDialog(dialogCfg);
