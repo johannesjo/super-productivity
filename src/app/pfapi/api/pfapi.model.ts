@@ -2,8 +2,8 @@ import { DatabaseAdapter } from './db/database-adapter.model';
 import { ModelCtrl } from './model-ctrl/model-ctrl';
 import { ConflictReason, SyncProviderId, SyncStatus } from './pfapi.const';
 import { DropboxPrivateCfg } from './sync/providers/dropbox/dropbox';
-import { WebdavPrivateCfg } from './sync/providers/webdav/webdav';
 import { IValidation } from 'typia';
+import { WebdavPrivateCfg } from './sync/providers/webdav/webdav.model';
 
 type JSONPrimitive = string | number | boolean | null;
 type Serializable = JSONPrimitive | SerializableObject | SerializableArray;

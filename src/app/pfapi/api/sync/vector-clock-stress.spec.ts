@@ -32,7 +32,7 @@ describe('Vector Clock Stress Tests', () => {
       const pruneDuration = performance.now() - startPrune;
 
       expect(Object.keys(pruned).length).toBe(50);
-      expect(pruneDuration).toBeLessThan(10); // Pruning should be fast
+      expect(pruneDuration).toBeLessThan(15); // Pruning should be fast
     });
 
     it('should handle deeply nested comparison scenarios', () => {

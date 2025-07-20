@@ -1,15 +1,15 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
-  OnInit,
   signal,
 } from '@angular/core';
 import { PluginService } from '../../plugin.service';
 import { PluginInstance } from '../../plugin-api.model';
-import { PluginState } from '../../plugin-state.model';
 import { PluginMetaPersistenceService } from '../../plugin-meta-persistence.service';
 import { PluginCacheService } from '../../plugin-cache.service';
+import { PluginConfigService } from '../../plugin-config.service';
 import { MAX_PLUGIN_ZIP_SIZE } from '../../plugin.const';
 import { CommonModule } from '@angular/common';
 import {
@@ -22,15 +22,16 @@ import {
 } from '@angular/material/card';
 import { MatSlideToggle, MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { MatIcon } from '@angular/material/icon';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatChip, MatChipSet } from '@angular/material/chips';
+import { MatTooltip } from '@angular/material/tooltip';
 import { MatError } from '@angular/material/form-field';
+import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { T } from '../../../t.const';
 import { PluginIconComponent } from '../plugin-icon/plugin-icon.component';
+import { PluginConfigDialogComponent } from '../plugin-config-dialog/plugin-config-dialog.component';
 import { IS_ELECTRON } from '../../../app.constants';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DestroyRef } from '@angular/core';
 import { PluginLog } from '../../../core/log';
 
 @Component({
@@ -49,19 +50,22 @@ import { PluginLog } from '../../../core/log';
     MatSlideToggle,
     MatIcon,
     MatButton,
+    MatIconButton,
     MatChip,
     MatChipSet,
     MatError,
+    MatTooltip,
     TranslatePipe,
     PluginIconComponent,
   ],
 })
-export class PluginManagementComponent implements OnInit {
+export class PluginManagementComponent {
   private readonly _pluginService = inject(PluginService);
   private readonly _pluginMetaPersistenceService = inject(PluginMetaPersistenceService);
   private readonly _pluginCacheService = inject(PluginCacheService);
+  private readonly _pluginConfigService = inject(PluginConfigService);
   private readonly _translateService = inject(TranslateService);
-  private readonly _destroyRef = inject(DestroyRef);
+  private readonly _dialog = inject(MatDialog);
 
   T: typeof T = T;
   readonly IS_ELECTRON = IS_ELECTRON;
@@ -69,43 +73,12 @@ export class PluginManagementComponent implements OnInit {
   // Plugin size limits for display
   readonly maxPluginSizeMB = (MAX_PLUGIN_ZIP_SIZE / 1024 / 1024).toFixed(1);
 
-  // Signal for all plugins (loaded + disabled with isEnabled state)
-  readonly allPlugins = signal<PluginInstance[]>([]);
-
-  // Signal for plugin states (for lazy loading)
-  readonly pluginStates = signal<Map<string, PluginState>>(new Map());
-
-  // Upload state
-  readonly isUploading = signal<boolean>(false);
-  readonly uploadError = signal<string | null>(null);
-
-  constructor() {
-    // Subscribe to plugin states for lazy loading
-    this._pluginService.pluginStates$
-      .pipe(takeUntilDestroyed(this._destroyRef))
-      .subscribe((states) => {
-        this.pluginStates.set(states);
-        this.updatePluginsFromStates();
-      });
-  }
-
-  async ngOnInit(): Promise<void> {
-    // Wait for plugin system to initialize before loading plugins
-    while (!this._pluginService.isInitialized()) {
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    }
-    await this.loadPlugins();
-  }
-
-  async loadPlugins(): Promise<void> {
-    const allPlugins = await this._pluginService.getAllPlugins();
-    this.allPlugins.set(allPlugins);
-  }
-
-  private updatePluginsFromStates(): void {
+  // Computed signal for all plugins derived from pluginStates
+  readonly allPlugins = computed(() => {
     const plugins: PluginInstance[] = [];
+    const states = this._pluginService.pluginStates();
 
-    for (const state of this.pluginStates().values()) {
+    for (const state of states.values()) {
       if (state.instance) {
         // Plugin is loaded, use the instance
         plugins.push(state.instance);
@@ -119,16 +92,12 @@ export class PluginManagementComponent implements OnInit {
         });
       }
     }
+    return plugins;
+  });
 
-    this.allPlugins.set(plugins);
-  }
-
-  /**
-   * Check if a plugin is enabled
-   */
-  isPluginEnabledSync(plugin: PluginInstance): boolean {
-    return plugin.isEnabled;
-  }
+  // Upload state
+  readonly isUploading = signal<boolean>(false);
+  readonly uploadError = signal<string | null>(null);
 
   onPluginToggle(plugin: PluginInstance, event: MatSlideToggleChange): void {
     if (event.checked) {
@@ -152,15 +121,11 @@ export class PluginManagementComponent implements OnInit {
           plugin.manifest.id,
         );
         // Reset the toggle state
-        await this.loadPlugins();
         return;
       }
 
       // Set plugin as enabled in persistence ONLY after consent is granted
       await this._pluginMetaPersistenceService.setPluginEnabled(plugin.manifest.id, true);
-
-      // Update the plugin state immediately
-      plugin.isEnabled = true;
 
       // Activate the plugin (lazy load if needed)
       // Pass true to indicate this is a manual activation from UI
@@ -169,8 +134,7 @@ export class PluginManagementComponent implements OnInit {
         PluginLog.log('Plugin activated successfully:', plugin.manifest.id);
       }
 
-      // Refresh UI
-      await this.loadPlugins();
+      // Refresh UI with updated plugin states
     } catch (error) {
       PluginLog.err('Failed to enable plugin:', error);
     }
@@ -186,72 +150,22 @@ export class PluginManagementComponent implements OnInit {
         false,
       );
 
-      // Update the plugin state immediately
-      plugin.isEnabled = false;
-      plugin.loaded = false;
-
       // Unload the plugin (this will unregister hooks and remove from loaded plugins)
       this._pluginService.unloadPlugin(plugin.manifest.id);
 
       // Reload plugins to get the updated state from the service
-      await this.loadPlugins();
     } catch (error) {
       PluginLog.err('Failed to disable plugin:', error);
     }
   }
 
-  async reloadPlugin(plugin: PluginInstance): Promise<void> {
-    PluginLog.log('Reloading plugin:', plugin.manifest.id);
-
-    try {
-      const success = await this._pluginService.reloadPlugin(plugin.manifest.id);
-      if (success) {
-        PluginLog.log('Plugin reloaded successfully:', plugin.manifest.id);
-      } else {
-        PluginLog.err('Failed to reload plugin:', plugin.manifest.id);
-      }
-    } catch (error) {
-      PluginLog.err('Failed to reload plugin:', error);
-    }
-
-    // Refresh the UI
-    this.loadPlugins();
-  }
-
-  getPluginStatusColor(plugin: PluginInstance): string {
-    if (plugin.error) {
-      return 'warn';
-    }
-    return plugin.loaded ? 'primary' : 'accent';
-  }
-
-  getPluginStatusText(plugin: PluginInstance): string {
-    if (plugin.error) {
-      return this._translateService.instant(T.PLUGINS.ERROR);
-    }
-
-    // Check if plugin is loading
-    const state = this.pluginStates().get(plugin.manifest.id);
-    if (state && state.status === 'loading') {
-      return this._translateService.instant(T.PLUGINS.LOADING_PLUGIN);
-    }
-
-    return plugin.isEnabled
-      ? this._translateService.instant(T.PLUGINS.ENABLED)
-      : this._translateService.instant(T.PLUGINS.DISABLED);
-  }
-
   isPluginLoading(plugin: PluginInstance): boolean {
-    const state = this.pluginStates().get(plugin.manifest.id);
+    const state = this._pluginService.pluginStates().get(plugin.manifest.id);
     return state?.status === 'loading' || false;
   }
 
   requiresNodeExecution(plugin: PluginInstance): boolean {
-    return (
-      plugin.manifest.permissions?.includes('nodeExecution') ||
-      plugin.manifest.permissions?.includes('executeNodeScript') ||
-      false
-    );
+    return plugin.manifest.permissions?.includes('nodeExecution') || false;
   }
 
   canEnablePlugin(plugin: PluginInstance): boolean {
@@ -295,7 +209,6 @@ export class PluginManagementComponent implements OnInit {
 
     try {
       await this._pluginService.loadPluginFromZip(file);
-      await this.loadPlugins(); // Refresh the plugin list
 
       // Clear the input
       input.value = '';
@@ -317,7 +230,6 @@ export class PluginManagementComponent implements OnInit {
       this.uploadError.set(null);
 
       await this._pluginCacheService.clearCache();
-      await this.loadPlugins(); // Refresh the plugin list
 
       PluginLog.log('Plugin cache cleared successfully');
     } catch (error) {
@@ -357,7 +269,6 @@ export class PluginManagementComponent implements OnInit {
       this.uploadError.set(null);
 
       await this._pluginService.removeUploadedPlugin(plugin.manifest.id);
-      await this.loadPlugins(); // Refresh the plugin list
 
       PluginLog.log(`Plugin ${plugin.manifest.id} removed successfully`);
     } catch (error) {
@@ -408,5 +319,44 @@ export class PluginManagementComponent implements OnInit {
     return features.length > 0
       ? features.join(' • ')
       : this._translateService.instant(T.PLUGINS.NO_ADDITIONAL_INFO);
+  }
+
+  async openConfigDialog(plugin: PluginInstance): Promise<void> {
+    try {
+      // Get the plugin path
+      const pluginPath = this._pluginService.getPluginPath(plugin.manifest.id);
+      if (!pluginPath) {
+        throw new Error(`Plugin path not found for ${plugin.manifest.id}`);
+      }
+
+      // Load the JSON schema
+      const schema = await this._pluginConfigService.loadPluginConfigSchema(
+        plugin.manifest,
+        pluginPath,
+      );
+
+      // Open the config dialog
+      const dialogRef = this._dialog.open(PluginConfigDialogComponent, {
+        data: {
+          manifest: plugin.manifest,
+          schema,
+        },
+        width: '600px',
+        maxHeight: '80vh',
+      });
+
+      const result = await dialogRef.afterClosed().toPromise();
+      if (result) {
+        PluginLog.log(`Configuration saved for plugin ${plugin.manifest.id}`);
+      }
+    } catch (error) {
+      PluginLog.err('Failed to open config dialog:', error);
+      // Show error to user
+      this.uploadError.set(
+        error instanceof Error
+          ? error.message
+          : this._translateService.instant(T.PLUGINS.FAILED_TO_LOAD_CONFIG),
+      );
+    }
   }
 }

@@ -1,5 +1,4 @@
 import { isRelatedModelDataValid } from './is-related-model-data-valid';
-import { MODEL_VERSION_KEY } from '../../app.constants';
 import { DEFAULT_TASK, Task } from '../../features/tasks/task.model';
 import { fakeEntityStateFromArray } from '../../util/fake-entity-state-from-array';
 import { Project } from '../../features/project/project.model';
@@ -39,13 +38,12 @@ describe('isRelatedModelDataValid', () => {
     it('should return true for minimal valid data structure', () => {
       const minimalData = {
         ...mockAppData,
-        task: { ids: [], entities: {}, [MODEL_VERSION_KEY]: 5 },
+        task: { ids: [], entities: {} },
         project: {
           ids: [INBOX_PROJECT.id],
           entities: { [INBOX_PROJECT.id]: INBOX_PROJECT },
-          [MODEL_VERSION_KEY]: 5,
         },
-        tag: { ids: [], entities: {}, [MODEL_VERSION_KEY]: 5 },
+        tag: { ids: [], entities: {} },
       };
 
       const result = isRelatedModelDataValid(minimalData as any);
@@ -69,7 +67,6 @@ describe('isRelatedModelDataValid', () => {
                 backlogTaskIds: [],
               },
             ] as Partial<Project>[]),
-            [MODEL_VERSION_KEY]: 5,
           },
         };
 
@@ -91,7 +88,6 @@ describe('isRelatedModelDataValid', () => {
                 backlogTaskIds: ['missing-backlog-task'],
               },
             ] as Partial<Project>[]),
-            [MODEL_VERSION_KEY]: 5,
           },
         };
 
@@ -113,7 +109,6 @@ describe('isRelatedModelDataValid', () => {
                 backlogTaskIds: [],
               },
             ] as Partial<Project>[]),
-            [MODEL_VERSION_KEY]: 5,
           },
         };
 
@@ -137,7 +132,6 @@ describe('isRelatedModelDataValid', () => {
                 noteIds: ['missing-note-id'],
               },
             ] as Partial<Project>[]),
-            [MODEL_VERSION_KEY]: 5,
           },
         };
 
@@ -201,7 +195,6 @@ describe('isRelatedModelDataValid', () => {
               taskIds: ['missing-task-for-tag'],
             },
           ] as Partial<Tag>[]),
-          [MODEL_VERSION_KEY]: 5,
         },
       };
 
@@ -344,7 +337,6 @@ describe('isRelatedModelDataValid', () => {
             taskIds: ['task-with-reminder'],
           },
         ]),
-        [MODEL_VERSION_KEY]: 5,
       };
 
       const invalidData = {
@@ -568,14 +560,13 @@ describe('isRelatedModelDataValid', () => {
     it('should handle empty entity states without errors', () => {
       const emptyData = {
         ...mockAppData,
-        task: { ids: [], entities: {}, [MODEL_VERSION_KEY]: 5 },
+        task: { ids: [], entities: {} },
         project: {
           ids: [INBOX_PROJECT.id],
           entities: { [INBOX_PROJECT.id]: INBOX_PROJECT },
-          [MODEL_VERSION_KEY]: 5,
         },
-        tag: { ids: [], entities: {}, [MODEL_VERSION_KEY]: 5 },
-        note: { ids: [], entities: {}, todayOrder: [], [MODEL_VERSION_KEY]: 5 },
+        tag: { ids: [], entities: {} },
+        note: { ids: [], entities: {}, todayOrder: [] },
       };
 
       expect(() => isRelatedModelDataValid(emptyData as any)).not.toThrow();
@@ -617,7 +608,6 @@ describe('isRelatedModelDataValid', () => {
             taskIds: largeTasks.map((t) => t.id),
           },
         ]),
-        [MODEL_VERSION_KEY]: 5,
       };
 
       const largeData = {
@@ -672,7 +662,6 @@ describe('isRelatedModelDataValid', () => {
             taskIds: ['parent-1'],
           },
         ]),
-        [MODEL_VERSION_KEY]: 5,
       };
 
       const complexData = {

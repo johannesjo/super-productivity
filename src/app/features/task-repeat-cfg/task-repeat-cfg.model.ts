@@ -1,5 +1,4 @@
 import { EntityState } from '@ngrx/entity';
-import { MODEL_VERSION_KEY } from '../../app.constants';
 import { TaskReminderOptionId } from '../tasks/task.model';
 
 export const TASK_REPEAT_WEEKDAY_MAP: (keyof TaskRepeatCfg)[] = [
@@ -55,10 +54,7 @@ export interface TaskRepeatCfgCopy {
 
 export type TaskRepeatCfg = Readonly<TaskRepeatCfgCopy>;
 
-export interface TaskRepeatCfgState extends EntityState<TaskRepeatCfg> {
-  // additional entities state properties
-  [MODEL_VERSION_KEY]?: number;
-}
+export type TaskRepeatCfgState = EntityState<TaskRepeatCfg>;
 
 export const DEFAULT_TASK_REPEAT_CFG: Omit<TaskRepeatCfgCopy, 'id'> = {
   lastTaskCreation: Date.now(),

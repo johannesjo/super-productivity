@@ -1,0 +1,13 @@
+
+### Bug Fixes
+
+* **plugin:** plugin state not properly updating when plugin is enabled
+* styling issue (389c2ee), closes #4807
+
+
+### Features
+
+* **plugin:** add basic json schema form cfg for plugins
+* **plugin:** simplify management stuff
+* **plugin:** simplify management stuff 2
+* **plugin:** simplify management stuff 3

@@ -4,7 +4,8 @@ import {
   WorkContextCommon,
 } from '../work-context/work-context.model';
 import { EntityState } from '@ngrx/entity';
-import { MODEL_VERSION_KEY } from '../../app.constants';
+// Import the unified Project type from plugin-api
+import { Project as PluginProject } from '@super-productivity/plugin-api';
 
 export type RoundTimeOption = '5M' | 'QUARTER' | 'HALF' | 'HOUR' | null | undefined;
 
@@ -18,9 +19,6 @@ export interface ProjectBasicCfg {
   backlogTaskIds: string[];
   noteIds: string[];
 }
-
-// Import the unified Project type from plugin-api
-import { Project as PluginProject } from '@super-productivity/plugin-api';
 
 // Omit conflicting properties from PluginProject when extending
 export interface ProjectCopy
@@ -39,6 +37,4 @@ export type ProjectCfgFormKey =
   | 'basic'
   | 'theme';
 
-export interface ProjectState extends EntityState<Project> {
-  [MODEL_VERSION_KEY]?: number;
-}
+export type ProjectState = EntityState<Project>;

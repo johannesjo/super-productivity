@@ -44,7 +44,7 @@ export abstract class LocalFileSyncBase
       localRev,
     });
     try {
-      const r = await this.downloadFile(targetPath, localRev);
+      const r = await this.downloadFile(targetPath);
       return { rev: r.rev };
     } catch (e) {
       PFLog.critical(`${LocalFileSyncBase.LB}.${this.getFileRev.name} error`, e);
@@ -52,13 +52,9 @@ export abstract class LocalFileSyncBase
     }
   }
 
-  async downloadFile(
-    targetPath: string,
-    localRev: string,
-  ): Promise<{ rev: string; dataStr: string }> {
+  async downloadFile(targetPath: string): Promise<{ rev: string; dataStr: string }> {
     PFLog.normal(`${LocalFileSyncBase.LB}.${this.downloadFile.name}()`, {
       targetPath,
-      localRev,
     });
 
     try {
@@ -109,7 +105,7 @@ export abstract class LocalFileSyncBase
       // Check if file exists and compare revs if not force overwrite
       if (!isForceOverwrite && revToMatch) {
         try {
-          const existingFile = await this.downloadFile(targetPath, revToMatch);
+          const existingFile = await this.downloadFile(targetPath);
           if (existingFile.rev !== revToMatch) {
             PFLog.critical(
               `${LocalFileSyncBase.LB}.${this.uploadFile.name}() rev mismatch`,

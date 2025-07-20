@@ -103,15 +103,27 @@
           </mat-chip>
         }
       </mat-card-subtitle>
-      <mat-slide-toggle
-        [checked]="isPluginEnabledSync(plugin)"
-        [disabled]="!canEnablePlugin(plugin) || isPluginLoading(plugin)"
-        (change)="onPluginToggle(plugin, $event)"
-        [attr.aria-label]="
-          'PLUGINS.TOGGLE_PLUGIN' | translate: { pluginName: plugin.manifest.name }
-        "
-      >
-      </mat-slide-toggle>
+      <div class="plugin-controls">
+        @if (plugin.manifest?.jsonSchemaCfg && plugin.isEnabled) {
+          <button
+            mat-icon-button
+            (click)="openConfigDialog(plugin)"
+            [disabled]="isPluginLoading(plugin)"
+            [matTooltip]="T.PLUGINS.CONFIGURE | translate"
+          >
+            <mat-icon>settings</mat-icon>
+          </button>
+        }
+        <mat-slide-toggle
+          [checked]="plugin.isEnabled"
+          [disabled]="!canEnablePlugin(plugin) || isPluginLoading(plugin)"
+          (change)="onPluginToggle(plugin, $event)"
+          [attr.aria-label]="
+            'PLUGINS.TOGGLE_PLUGIN' | translate: { pluginName: plugin.manifest.name }
+          "
+        >
+        </mat-slide-toggle>
+      </div>
     </mat-card-header>
 
     <mat-card-content>
@@ -170,17 +182,8 @@
       }
     </mat-card-content>
 
-    <mat-card-actions [align]="'end'">
-      <button
-        mat-button
-        color="primary"
-        (click)="reloadPlugin(plugin)"
-        [disabled]="!!plugin.error || isPluginLoading(plugin)"
-      >
-        <mat-icon>refresh</mat-icon>
-        {{ T.PS.RELOAD | translate }}
-      </button>
-      @if (isUploadedPlugin(plugin)) {
+    @if (isUploadedPlugin(plugin)) {
+      <mat-card-actions [align]="'end'">
         <button
           mat-button
           color="warn"
@@ -190,8 +193,8 @@
           <mat-icon>delete</mat-icon>
           {{ 'PLUGINS.REMOVE' | translate }}
         </button>
-      }
-    </mat-card-actions>
+      </mat-card-actions>
+    }
   </mat-card>
 }
 

@@ -1,5 +1,4 @@
 import { EntityState } from '@ngrx/entity';
-import { MODEL_VERSION_KEY } from '../../app.constants';
 
 export enum SimpleCounterType {
   StopWatch = 'StopWatch',
@@ -41,6 +40,4 @@ export type SimpleCounterConfig = Readonly<{
 
 export interface SimpleCounterState extends EntityState<SimpleCounter> {
   ids: string[];
-  // additional entities state properties
-  [MODEL_VERSION_KEY]?: number;
 }

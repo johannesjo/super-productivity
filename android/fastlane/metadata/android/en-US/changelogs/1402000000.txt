@@ -1,0 +1,8 @@
+
+### Bug Fixes
+
+* **notes:** fix #4758 to allow scrolling in notes view drag/drop
+* **release:** update GitHub release notes configuration
+### Features
+
+* add glass and colorful theme

@@ -38,6 +38,7 @@ import typia from 'typia';
 import { first } from 'rxjs/operators';
 import { selectTaskByIdWithSubTaskData } from '../features/tasks/store/task.selectors';
 import { PluginUserPersistenceService } from './plugin-user-persistence.service';
+import { PluginConfigService } from './plugin-config.service';
 import { TaskArchiveService } from '../features/time-tracking/task-archive.service';
 import { Router } from '@angular/router';
 import { PluginDialogComponent } from './ui/plugin-dialog/plugin-dialog.component';
@@ -73,6 +74,7 @@ export class PluginBridgeService implements OnDestroy {
   private _projectService = inject(ProjectService);
   private _tagService = inject(TagService);
   private _pluginUserPersistenceService = inject(PluginUserPersistenceService);
+  private _pluginConfigService = inject(PluginConfigService);
   private _taskArchiveService = inject(TaskArchiveService);
   private _router = inject(Router);
   private _injector = inject(Injector);
@@ -109,6 +111,7 @@ export class PluginBridgeService implements OnDestroy {
   ): {
     persistDataSynced: (dataStr: string) => Promise<void>;
     loadPersistedData: () => Promise<string | null>;
+    getConfig: <T>() => Promise<T>;
     registerHeaderButton: (cfg: PluginHeaderBtnCfg) => void;
     registerMenuEntry: (cfg: Omit<PluginMenuEntryCfg, 'pluginId'>) => void;
     registerSidePanelButton: (cfg: Omit<PluginSidePanelBtnCfg, 'pluginId'>) => void;
@@ -125,6 +128,7 @@ export class PluginBridgeService implements OnDestroy {
       // Data persistence
       persistDataSynced: (dataStr: string) => this._persistDataSynced(pluginId, dataStr),
       loadPersistedData: () => this._loadPersistedData(pluginId),
+      getConfig: () => this._getConfig(pluginId),
 
       // UI registration
       registerHeaderButton: (cfg: PluginHeaderBtnCfg) =>
@@ -609,6 +613,18 @@ export class PluginBridgeService implements OnDestroy {
       return await this._pluginUserPersistenceService.loadPluginUserData(pluginId);
     } catch (error) {
       PluginLog.err('PluginBridge: Failed to get persisted plugin data:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Internal method to get plugin configuration
+   */
+  private async _getConfig(pluginId: string): Promise<any> {
+    try {
+      return await this._pluginConfigService.getPluginConfig(pluginId);
+    } catch (error) {
+      PluginLog.err('PluginBridge: Failed to get plugin config:', error);
       return null;
     }
   }

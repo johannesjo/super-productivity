@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FieldType } from '@ngx-formly/material';
 import { MATERIAL_ICONS } from '../../../ui/material-icons.const';
 import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
@@ -28,7 +28,9 @@ import { MatTooltip } from '@angular/material/tooltip';
   ],
 })
 export class IconInputComponent extends FieldType<FormlyFieldConfig> {
-  filteredIcons: string[] = [];
+  filteredIcons = signal<string[]>([]);
+  isEmoji = signal(false);
+
   protected readonly IS_ELECTRON = IS_ELECTRON;
   isLinux = IS_ELECTRON && window.ea.isLinux();
 
@@ -45,18 +47,24 @@ export class IconInputComponent extends FieldType<FormlyFieldConfig> {
       (icoStr) => icoStr && icoStr.toLowerCase().includes(val.toLowerCase()),
     );
     arr.length = Math.min(150, arr.length);
-    this.filteredIcons = arr;
+    this.filteredIcons.set(arr);
 
     const isEmoji = /\p{Emoji}/u.test(val);
+    console.log(1, { isEmoji });
+
     if (isEmoji) {
       this.formControl.setValue(val);
     } else if (!val) {
       this.formControl.setValue('');
     }
+    this.isEmoji.set(isEmoji && !this.filteredIcons().includes(val));
   }
 
   onIconSelect(icon: string): void {
     this.formControl.setValue(icon);
+    const isEmoji = /\p{Emoji}/u.test(icon);
+    console.log(2, { isEmoji });
+    this.isEmoji.set(false);
   }
 
   openEmojiPicker(): void {

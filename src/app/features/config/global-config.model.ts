@@ -1,6 +1,6 @@
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { ProjectCfgFormKey } from '../project/project.model';
-import { LanguageCode, MODEL_VERSION_KEY } from '../../app.constants';
+import { LanguageCode } from '../../app.constants';
 import { LegacySyncProvider } from '../../imex/sync/legacy-sync-provider.model';
 import { KeyboardConfig } from './keyboard-config.model';
 
@@ -193,8 +193,6 @@ export type GlobalConfigState = Readonly<{
 
   sync: SyncConfig;
   dailySummaryNote?: DailySummaryNote;
-
-  [MODEL_VERSION_KEY]?: number;
 }>;
 
 export type GlobalConfigSectionKey = keyof GlobalConfigState | 'EMPTY';

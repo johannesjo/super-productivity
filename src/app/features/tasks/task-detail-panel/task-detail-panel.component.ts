@@ -84,7 +84,6 @@ import { TagEditComponent } from '../../tag/tag-edit/tag-edit.component';
 import { AsyncPipe, DatePipe, NgClass } from '@angular/common';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
-import { isToday } from '../../../util/is-today.util';
 import { getWorklogStr } from '../../../util/get-work-log-str';
 interface IssueAndType {
   id?: string | number;
@@ -330,7 +329,10 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
     return !!(
       !t.isDone &&
       ((t.dueWithTime && t.dueWithTime < Date.now()) ||
-        (t.dueDay && !isToday(new Date(t.dueDay)) && new Date(t.dueDay) < new Date()))
+        // Note: String comparison works correctly here because dueDay is in YYYY-MM-DD format
+        // which is lexicographically sortable. This avoids timezone conversion issues that occur
+        // when creating Date objects from date strings.
+        (t.dueDay && t.dueDay !== getWorklogStr() && t.dueDay < getWorklogStr()))
     );
   }
 

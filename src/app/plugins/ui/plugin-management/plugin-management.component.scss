@@ -20,6 +20,13 @@ mat-card-header {
   mat-slide-toggle {
     margin-left: auto;
   }
+
+  .plugin-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+  }
 }
 
 plugin-icon {

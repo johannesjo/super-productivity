@@ -1,3 +1,93 @@
+## [14.2.2](https://github.com/johannesjo/super-productivity/compare/v14.2.1...v14.2.2) (2025-07-20)
+
+### Bug Fixes
+
+- **plugin:** plugin state not properly updating when plugin is enabled ([84b1296](https://github.com/johannesjo/super-productivity/commit/84b1296fc153ec37360d7b9ce9cfbdfba9abcbb1))
+- styling issue ([389c2ee](https://github.com/johannesjo/super-productivity/commit/389c2ee39debddd46a9b2d99ea54226f06d1dd37)), closes [#4807](https://github.com/johannesjo/super-productivity/issues/4807)
+
+### Features
+
+- **plugin:** add basic json schema form cfg for plugins ([0434715](https://github.com/johannesjo/super-productivity/commit/0434715a58f5b62db322f74ca6d36f7486baa898))
+- **plugin:** simplify management stuff ([fa11d88](https://github.com/johannesjo/super-productivity/commit/fa11d88951a6f20054406f3386883fa3adcdf541))
+- **plugin:** simplify management stuff 2 ([7a95e64](https://github.com/johannesjo/super-productivity/commit/7a95e6479bb16ffcc14f73ed064037df539c9caf))
+- **plugin:** simplify management stuff 3 ([12d97fc](https://github.com/johannesjo/super-productivity/commit/12d97fc8bd0b046c6aaa2298749042d73e76760e))
+
+## [14.2.1](https://github.com/johannesjo/super-productivity/compare/v14.1.0...v14.2.1) (2025-07-19)
+
+### Bug Fixes
+
+- 12 am should be 12 pm (even though I think it is not logical :D) ([5816456](https://github.com/johannesjo/super-productivity/commit/5816456447e729c60323db4573d2a5a501b8d91d)), closes [#4741](https://github.com/johannesjo/super-productivity/issues/4741)
+- add planner state to baseState in task-shared.reducer.spec.ts ([f9eb77b](https://github.com/johannesjo/super-productivity/commit/f9eb77b792a94b13f8489cbc2252457a658e88e5))
+- **android:** improve WebDavHttpPlugin reliability and compatibility ([7b79119](https://github.com/johannesjo/super-productivity/commit/7b791199dd7a6a4a28d5c4e97f816354656e5659))
+- auth token dialog not showing up when configuring sync from settings ([6ed3419](https://github.com/johannesjo/super-productivity/commit/6ed3419c4eab19e8a93afa537da49e1180029ff5)), closes [#4659](https://github.com/johannesjo/super-productivity/issues/4659)
+- auth token dialog not showing up when configuring sync from settings ([be03674](https://github.com/johannesjo/super-productivity/commit/be0367450ceb8ed5e14e6a521c91536f918a4aca)), closes [#4659](https://github.com/johannesjo/super-productivity/issues/4659)
+- disable more shortcuts for task description context ([413a73e](https://github.com/johannesjo/super-productivity/commit/413a73e529bed6830142ed70e4caee4ef0398d17)), closes [#4779](https://github.com/johannesjo/super-productivity/issues/4779)
+- disable more shortcuts for task description context ([e01a0c9](https://github.com/johannesjo/super-productivity/commit/e01a0c9dc8b0cd127abb443087567e5b1c75c77d)), closes [#4779](https://github.com/johannesjo/super-productivity/issues/4779)
+- emoji problem ([6ff9afb](https://github.com/johannesjo/super-productivity/commit/6ff9afb0f7af24e447c0aaed700449afead29708)), closes [#4767](https://github.com/johannesjo/super-productivity/issues/4767)
+- formly button error for undefined values ([f0b6945](https://github.com/johannesjo/super-productivity/commit/f0b6945ed5110d7424ab170d8676885bcb921307))
+- formly button error for undefined values ([6a76492](https://github.com/johannesjo/super-productivity/commit/6a76492a9b9cfec837d76eec4956efb9f5ea7372))
+- **issue-providers:** use date strings directly to avoid timezone conversion issues ([d22d0ff](https://github.com/johannesjo/super-productivity/commit/d22d0ff97f77f43fdc630b7dcbd188259c453072))
+- **notes:** fix [#4758](https://github.com/johannesjo/super-productivity/issues/4758) to allow scrolling in notes view drag/drop ([dcd3ec4](https://github.com/johannesjo/super-productivity/commit/dcd3ec4d4dd8ef3ee651d427e0bb99f2d3ec5e8b))
+- **planner:** wrong day assigned [#4714](https://github.com/johannesjo/super-productivity/issues/4714) ([bc43c49](https://github.com/johannesjo/super-productivity/commit/bc43c490c202f8cd1196666e8b7fe8a6a8315df0))
+- **release:** update GitHub release notes configuration ([8ee4344](https://github.com/johannesjo/super-productivity/commit/8ee4344a7961a985f58ae8da650aa0de44d767e1))
+- **schedule:** mobile week planner ([be8e102](https://github.com/johannesjo/super-productivity/commit/be8e102f47a09e5049de5b31a9f0c15a54e206a5))
+- **schedule:** remove date string from schedule event ([86dc140](https://github.com/johannesjo/super-productivity/commit/86dc1409da7f61cc6a5f395c046e66fdbc32a52a))
+- **sync:** enable HEAD fallback in WebDAV getFileMeta ([ed2abe9](https://github.com/johannesjo/super-productivity/commit/ed2abe93fde20c7985148895c731c0c8153af83f))
+- **sync:** error in xml parser ([3ced51b](https://github.com/johannesjo/super-productivity/commit/3ced51b168e163427c0c185a5b76cf4e688c74d6))
+- **sync:** improve WebDAV conditional headers validation and error handling ([dd419a1](https://github.com/johannesjo/super-productivity/commit/dd419a1d3cf5836244f82596f788a8970b9c44f8))
+- **sync:** new kotlin plugin ([291329e](https://github.com/johannesjo/super-productivity/commit/291329e4d7e2613a4ed4fcd413c7e0056100e40e))
+- timezone issues with task due date comparisons ([5353e11](https://github.com/johannesjo/super-productivity/commit/5353e1177cb8feba9fe7ee1f725fd1a4422daaaa)), closes [#4714](https://github.com/johannesjo/super-productivity/issues/4714)
+- **webdav:** fix failing unit tests for improved error handling ([b757cb2](https://github.com/johannesjo/super-productivity/commit/b757cb2592b82bc4147ff06623b6dec8d5c0d4b0))
+- **webdav:** prevent infinite loop in WebDAV 409 retry logic ([3958b39](https://github.com/johannesjo/super-productivity/commit/3958b39f1300074f869d896637347f0ccba79145))
+- worklog export in other timezones ([f499802](https://github.com/johannesjo/super-productivity/commit/f499802306886531062d06618bdb84905ee65972)), closes [#4763](https://github.com/johannesjo/super-productivity/issues/4763)
+- wrong day comparison in other timezones [#4714](https://github.com/johannesjo/super-productivity/issues/4714) ([e8438b6](https://github.com/johannesjo/super-productivity/commit/e8438b6929a088876fcea6fe309cba1961caf45d))
+- wrong day comparison in other timezones 2 [#4714](https://github.com/johannesjo/super-productivity/issues/4714) ([5b49ba5](https://github.com/johannesjo/super-productivity/commit/5b49ba5aa1c4a1e704d4c78cc6b1842ae40f76ae))
+
+### Features
+
+- add glass and colorful theme ([930aa84](https://github.com/johannesjo/super-productivity/commit/930aa84bf79f7518e9109e96f6ecd108c7cde2f3))
+- cleanup all old migration functions from last year and remove MODEL_VERSION and MODEL_VERSION_KEY ([4b7bdf1](https://github.com/johannesjo/super-productivity/commit/4b7bdf1b14bcbf33ec0b3810cbb274130616cd5e))
+- **e2e:** add minimal WebDAV e2e testing setup ([017dbf8](https://github.com/johannesjo/super-productivity/commit/017dbf80e6b1ed3293067ed7370054fcf194d118))
+- **electron:** add debug logging for suspend/resume idle detection [#4734](https://github.com/johannesjo/super-productivity/issues/4734) ([e295655](https://github.com/johannesjo/super-productivity/commit/e295655127575bb70f74c8474351767588403558))
+- migrate transferTask logic to planner-shared.reducer ([18dca49](https://github.com/johannesjo/super-productivity/commit/18dca49befc85a19d786b27c53a854e12529fbdf))
+- **schedule:** make mobile month view slightly more useful ([a92fbfd](https://github.com/johannesjo/super-productivity/commit/a92fbfdf4364cda2e0d00a9913a3699c2c4a61ba))
+- **schedule:** make mobile week headers also work ([fab310e](https://github.com/johannesjo/super-productivity/commit/fab310ef14bd27217a6a9c705ae73f4d90d8b761))
+- **sync:** add custom cap http plugin for webdav methods ([84c24eb](https://github.com/johannesjo/super-productivity/commit/84c24ebf7911c2aedabb1c167e5b2c502848c952))
+- **sync:** add logs ([264c2fb](https://github.com/johannesjo/super-productivity/commit/264c2fb43f9c5e2a8066a5eb5d1a2a2e6e19f981))
+- **sync:** also enable fallback for webdav ([cf1ef4a](https://github.com/johannesjo/super-productivity/commit/cf1ef4ae6d3e44e5cc0c3484363042a00d1e4ec9))
+- **sync:** extract webdav-capabilities-detector.ts ([18f7f6a](https://github.com/johannesjo/super-productivity/commit/18f7f6a42c3ea0a163fef9e8177ec71afaf864ba))
+- **sync:** extract webdav-xml-parser.ts ([e9cc5f7](https://github.com/johannesjo/super-productivity/commit/e9cc5f703839cf4e3f396f6042e36b14c96d3d81))
+- **sync:** extract xml parser ([2a02c39](https://github.com/johannesjo/super-productivity/commit/2a02c3991cbe4d3f6483f31c118c74deea0c7250))
+- **sync:** half way remove lock stuff ([aaf6e8c](https://github.com/johannesjo/super-productivity/commit/aaf6e8c34c0ca2f3d6e182d660d03387b3a49316))
+- **sync:** handle next cloud case for directory missing ([10cf397](https://github.com/johannesjo/super-productivity/commit/10cf397d4d59feaa92ef78f8e345f71a5b0371ce))
+- **sync:** improve webdav provider ([27f709d](https://github.com/johannesjo/super-productivity/commit/27f709dbd294f1ff46ce886be0e9c265465909f7))
+- **sync:** make basic new sync work ([9bee385](https://github.com/johannesjo/super-productivity/commit/9bee38597c0641cf6069c29902955a9ea43f331e))
+- **sync:** only try to create directory on error ([e9d01f3](https://github.com/johannesjo/super-productivity/commit/e9d01f3cea7eb656a768e6a2b29121b1770637d4))
+- **sync:** prevent concurrent write edge case better ([1689b6c](https://github.com/johannesjo/super-productivity/commit/1689b6c34b275aa29ce8864a7749b4a22c1eb276))
+- **sync:** revert to older webdav-api.ts ([ff541d0](https://github.com/johannesjo/super-productivity/commit/ff541d0e1fba5f4c42a065a868930e277b7e2d07))
+- **sync:** split up webdav model stuff into different files ([8201f74](https://github.com/johannesjo/super-productivity/commit/8201f745ba7d3240eb4017765dcfd9c729fbfb09))
+- **sync:** start fresh ([62a2ec2](https://github.com/johannesjo/super-productivity/commit/62a2ec2105d3979a7445357b3e4f2976827176fa))
+- **sync:** webdav new simpler approach first draft ([ddfa4dd](https://github.com/johannesjo/super-productivity/commit/ddfa4ddb15257d5e6bc523a1157b1488e14ce539))
+- **webdav:** add comprehensive Last-Modified fallback support ([8238606](https://github.com/johannesjo/super-productivity/commit/8238606f469e05b196a5783bb9c53e9230cae9b6))
+- **webdav:** add server capability detection for non-ETag servers ([5b8c33c](https://github.com/johannesjo/super-productivity/commit/5b8c33caa0066c9128551b325b90b08137c5c152))
+- **webdav:** enhance conditional headers method for Last-Modified support ([a129066](https://github.com/johannesjo/super-productivity/commit/a129066fb3cd2521b3a380b5cfe124c3ffb401e4))
+- **webdav:** implement \_extractValidators method for ETag and Last-Modified support ([9a71ce7](https://github.com/johannesjo/super-productivity/commit/9a71ce7ecc81b4dd12533872ea5671a4971252c8))
+- **webdav:** implement core methods with Last-Modified fallback support ([911af8d](https://github.com/johannesjo/super-productivity/commit/911af8d471d43baa82e676822a071315e92831b8))
+- **webdav:** implement Phase 3.3 - core methods with Last-Modified fallback logic ([642edbc](https://github.com/johannesjo/super-productivity/commit/642edbc55a60daf812d8b9ab5d8a8abb858bb198))
+- **webdav:** implement Phase 4 - alternative safe creation methods ([0ba66bc](https://github.com/johannesjo/super-productivity/commit/0ba66bc2667ef205eb89df0ee3b8772ce9081cc1))
+- **webdav:** simplify webdav-api.ts ([f242251](https://github.com/johannesjo/super-productivity/commit/f24225156e4c0739e1e5f3030057c4436c1b8e5c))
+
+# [14.2.0](https://github.com/johannesjo/super-productivity/compare/v14.1.0...v14.2.0) (2025-07-15)
+
+### Bug Fixes
+
+- **notes:** fix [#4758](https://github.com/johannesjo/super-productivity/issues/4758) to allow scrolling in notes view drag/drop ([dcd3ec4](https://github.com/johannesjo/super-productivity/commit/dcd3ec4d4dd8ef3ee651d427e0bb99f2d3ec5e8b))
+- **release:** update GitHub release notes configuration ([8ee4344](https://github.com/johannesjo/super-productivity/commit/8ee4344a7961a985f58ae8da650aa0de44d767e1))
+
+### Features
+
+- add glass and colorful theme ([930aa84](https://github.com/johannesjo/super-productivity/commit/930aa84bf79f7518e9109e96f6ecd108c7cde2f3))
+
 # [14.1.0](https://github.com/johannesjo/super-productivity/compare/v14.0.5...v14.1.0) (2025-07-12)
 
 ### Bug Fixes
