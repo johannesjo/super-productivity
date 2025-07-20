@@ -17,7 +17,6 @@
     "addTask",
     "deleteTask",
     "getAllProjects",
-    "executeNodeScript",
     "nodeExecution",
     "persistDataSynced",
     "loadSyncedData",

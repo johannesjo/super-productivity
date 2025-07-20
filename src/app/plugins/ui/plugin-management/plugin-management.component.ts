@@ -165,11 +165,7 @@ export class PluginManagementComponent {
   }
 
   requiresNodeExecution(plugin: PluginInstance): boolean {
-    return (
-      plugin.manifest.permissions?.includes('nodeExecution') ||
-      plugin.manifest.permissions?.includes('executeNodeScript') ||
-      false
-    );
+    return plugin.manifest.permissions?.includes('nodeExecution') || false;
   }
 
   canEnablePlugin(plugin: PluginInstance): boolean {
