@@ -114,6 +114,7 @@ export interface PluginManifest {
   icon?: string; // Path to SVG icon file relative to plugin root
   nodeScriptConfig?: PluginNodeScriptConfig;
   sidePanel?: boolean; // If true, plugin loads in right panel instead of route
+  jsonSchemaCfg?: string; // Path to JSON schema file for plugin configuration relative to plugin root
 }
 
 // Hook payload types
@@ -230,7 +231,7 @@ export interface Project {
   theme: {
     primary?: string;
     isAutoContrast?: boolean;
-    [key: string]: any;
+    [key: string]: unknown;
   };
   isArchived?: boolean;
   created?: number;
@@ -242,7 +243,7 @@ export interface Project {
   isHiddenFromMenu?: boolean;
 
   // Advanced config (internal) - must be any to match WorkContextCommon
-  advancedCfg: any;
+  advancedCfg: unknown;
   icon?: string | null;
 }
 
@@ -256,8 +257,8 @@ export interface Tag {
   icon?: string | null;
 
   // Advanced config (internal) - must be any to match WorkContextCommon
-  theme: any;
-  advancedCfg: any;
+  theme: unknown;
+  advancedCfg: unknown;
 }
 
 // Legacy aliases for backward compatibility
@@ -307,7 +308,7 @@ export interface PluginAPI {
   registerSidePanelButton(sidePanelBtnCfg: Omit<PluginSidePanelBtnCfg, 'pluginId'>): void;
 
   // cross-process communication
-  onMessage?(handler: (message: any) => Promise<any> | any): void;
+  onMessage?(handler: (message: unknown) => Promise<unknown> | unknown): void;
 
   // ui bridge
   showSnack(snackCfg: SnackCfg): void;
@@ -372,11 +373,13 @@ export interface PluginAPI {
 
   loadSyncedData(): Promise<string | null>;
 
+  getConfig<T = Record<string, unknown>>(): Promise<T | null>;
+
   // node execution (only available in Electron with nodeExecution permission)
   executeNodeScript?(request: PluginNodeScriptRequest): Promise<PluginNodeScriptResult>;
 
   // action execution - dispatch NgRx actions (limited to allowed subset)
-  dispatchAction(action: any): void;
+  dispatchAction(action: { type: string; [key: string]: unknown }): void;
 
   // window state
   isWindowFocused(): boolean;

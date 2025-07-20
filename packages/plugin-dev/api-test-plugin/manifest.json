@@ -7,6 +7,7 @@
   "description": "Plugin that demonstrates and tests all available API methods",
   "author": "Super Productivity",
   "iFrame": true,
+  "jsonSchemaCfg": "config-schema.json",
   "permissions": [
     "getTasks",
     "getArchivedTasks",

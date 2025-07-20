@@ -10,6 +10,7 @@ import { PluginInstance } from '../../plugin-api.model';
 import { PluginState } from '../../plugin-state.model';
 import { PluginMetaPersistenceService } from '../../plugin-meta-persistence.service';
 import { PluginCacheService } from '../../plugin-cache.service';
+import { PluginConfigService } from '../../plugin-config.service';
 import { MAX_PLUGIN_ZIP_SIZE } from '../../plugin.const';
 import { CommonModule } from '@angular/common';
 import {
@@ -22,12 +23,15 @@ import {
 } from '@angular/material/card';
 import { MatSlideToggle, MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { MatIcon } from '@angular/material/icon';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatChip, MatChipSet } from '@angular/material/chips';
+import { MatTooltip } from '@angular/material/tooltip';
 import { MatError } from '@angular/material/form-field';
+import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { T } from '../../../t.const';
 import { PluginIconComponent } from '../plugin-icon/plugin-icon.component';
+import { PluginConfigDialogComponent } from '../plugin-config-dialog/plugin-config-dialog.component';
 import { IS_ELECTRON } from '../../../app.constants';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DestroyRef } from '@angular/core';
@@ -49,9 +53,11 @@ import { PluginLog } from '../../../core/log';
     MatSlideToggle,
     MatIcon,
     MatButton,
+    MatIconButton,
     MatChip,
     MatChipSet,
     MatError,
+    MatTooltip,
     TranslatePipe,
     PluginIconComponent,
   ],
@@ -60,7 +66,9 @@ export class PluginManagementComponent implements OnInit {
   private readonly _pluginService = inject(PluginService);
   private readonly _pluginMetaPersistenceService = inject(PluginMetaPersistenceService);
   private readonly _pluginCacheService = inject(PluginCacheService);
+  private readonly _pluginConfigService = inject(PluginConfigService);
   private readonly _translateService = inject(TranslateService);
+  private readonly _dialog = inject(MatDialog);
   private readonly _destroyRef = inject(DestroyRef);
 
   T: typeof T = T;
@@ -408,5 +416,48 @@ export class PluginManagementComponent implements OnInit {
     return features.length > 0
       ? features.join(' • ')
       : this._translateService.instant(T.PLUGINS.NO_ADDITIONAL_INFO);
+  }
+
+  hasConfigSchema(plugin: PluginInstance): boolean {
+    return this._pluginConfigService.hasConfigSchema(plugin.manifest);
+  }
+
+  async openConfigDialog(plugin: PluginInstance): Promise<void> {
+    try {
+      // Get the plugin path
+      const pluginPath = this._pluginService.getPluginPath(plugin.manifest.id);
+      if (!pluginPath) {
+        throw new Error(`Plugin path not found for ${plugin.manifest.id}`);
+      }
+
+      // Load the JSON schema
+      const schema = await this._pluginConfigService.loadPluginConfigSchema(
+        plugin.manifest,
+        pluginPath,
+      );
+
+      // Open the config dialog
+      const dialogRef = this._dialog.open(PluginConfigDialogComponent, {
+        data: {
+          manifest: plugin.manifest,
+          schema,
+        },
+        width: '600px',
+        maxHeight: '80vh',
+      });
+
+      const result = await dialogRef.afterClosed().toPromise();
+      if (result) {
+        PluginLog.log(`Configuration saved for plugin ${plugin.manifest.id}`);
+      }
+    } catch (error) {
+      PluginLog.err('Failed to open config dialog:', error);
+      // Show error to user
+      this.uploadError.set(
+        error instanceof Error
+          ? error.message
+          : this._translateService.instant(T.PLUGINS.FAILED_TO_LOAD_CONFIG),
+      );
+    }
   }
 }

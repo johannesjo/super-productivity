@@ -7,6 +7,7 @@ import { InputDurationFormlyComponent } from './duration/input-duration-formly/i
 import { ValidationModule } from './validation/validation.module';
 import { TranslateService } from '@ngx-translate/core';
 import { FormlyMaterialModule } from '@ngx-formly/material';
+import { FormlyJsonschema } from '@ngx-formly/core/json-schema';
 import { registerTranslateExtension } from './formly-translate-extension/formly-translate-extension';
 import { FormlyTranslatedTemplateComponent } from './formly-translated-template/formly-translated-template.component';
 import { FormlyMatToggleModule } from '@ngx-formly/material/toggle';
@@ -115,6 +116,7 @@ import { FormlyBtnComponent } from './formly-button/formly-btn.component';
       useFactory: registerTranslateExtension,
       deps: [TranslateService],
     },
+    FormlyJsonschema,
   ],
 })
 export class FormlyConfigModule {}

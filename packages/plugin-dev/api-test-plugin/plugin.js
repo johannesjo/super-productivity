@@ -1,8 +1,43 @@
 // API Test Plugin - Comprehensive test of all plugin API methods
 console.log('API Test Plugin initializing...', PluginAPI);
 
+// Plugin configuration
+let pluginConfig = null;
+
+// Load plugin configuration on startup
+async function loadPluginConfig() {
+  try {
+    pluginConfig = await PluginAPI.getConfig();
+    console.log('Plugin configuration loaded:', pluginConfig);
+
+    if (pluginConfig) {
+      // Apply configuration settings
+      if (pluginConfig.logLevel) {
+        console.log(`Log level set to: ${pluginConfig.logLevel}`);
+      }
+      if (pluginConfig.enabled === false) {
+        console.log('Plugin is disabled by configuration');
+        PluginAPI.showSnack({
+          msg: 'API Test Plugin is disabled',
+          type: 'WARNING',
+        });
+      }
+    } else {
+      console.log('No configuration found, using defaults');
+    }
+  } catch (error) {
+    console.error('Failed to load plugin configuration:', error);
+  }
+}
+
+// Initialize configuration
+loadPluginConfig();
+
 // Helper function to log results
 function logResult(method, result, error = null) {
+  // Check log level from config
+  const logLevel = pluginConfig?.logLevel || 'info';
+
   if (error) {
     console.error(`API Test - ${method} failed:`, error);
     PluginAPI.showSnack({
@@ -10,7 +45,9 @@ function logResult(method, result, error = null) {
       type: 'ERROR',
     });
   } else {
-    console.log(`API Test - ${method} success:`, result);
+    if (logLevel === 'debug' || logLevel === 'info') {
+      console.log(`API Test - ${method} success:`, result);
+    }
   }
 }
 
