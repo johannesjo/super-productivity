@@ -104,11 +104,4 @@ export class PluginConfigService {
 
     PluginLog.log(`Saved config for plugin ${pluginId}`);
   }
-
-  /**
-   * Check if a plugin has configuration
-   */
-  hasConfigSchema(manifest: PluginManifest): boolean {
-    return !!manifest.jsonSchemaCfg;
-  }
 }

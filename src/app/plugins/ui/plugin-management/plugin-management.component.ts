@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   inject,
   OnInit,
   signal,
@@ -34,7 +35,6 @@ import { PluginIconComponent } from '../plugin-icon/plugin-icon.component';
 import { PluginConfigDialogComponent } from '../plugin-config-dialog/plugin-config-dialog.component';
 import { IS_ELECTRON } from '../../../app.constants';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DestroyRef } from '@angular/core';
 import { PluginLog } from '../../../core/log';
 
 @Component({
@@ -135,7 +135,11 @@ export class PluginManagementComponent implements OnInit {
    * Check if a plugin is enabled
    */
   isPluginEnabledSync(plugin: PluginInstance): boolean {
-    return plugin.isEnabled;
+    // Get the latest plugin state from the signal to ensure reactivity
+    const currentPlugin = this.allPlugins().find(
+      (p) => p.manifest.id === plugin.manifest.id,
+    );
+    return currentPlugin?.isEnabled ?? false;
   }
 
   onPluginToggle(plugin: PluginInstance, event: MatSlideToggleChange): void {
@@ -167,9 +171,6 @@ export class PluginManagementComponent implements OnInit {
       // Set plugin as enabled in persistence ONLY after consent is granted
       await this._pluginMetaPersistenceService.setPluginEnabled(plugin.manifest.id, true);
 
-      // Update the plugin state immediately
-      plugin.isEnabled = true;
-
       // Activate the plugin (lazy load if needed)
       // Pass true to indicate this is a manual activation from UI
       const instance = await this._pluginService.activatePlugin(plugin.manifest.id, true);
@@ -177,10 +178,12 @@ export class PluginManagementComponent implements OnInit {
         PluginLog.log('Plugin activated successfully:', plugin.manifest.id);
       }
 
-      // Refresh UI
+      // Refresh UI with updated plugin states
       await this.loadPlugins();
     } catch (error) {
       PluginLog.err('Failed to enable plugin:', error);
+      // Refresh UI to reset state on error
+      await this.loadPlugins();
     }
   }
 
@@ -193,10 +196,6 @@ export class PluginManagementComponent implements OnInit {
         plugin.manifest.id,
         false,
       );
-
-      // Update the plugin state immediately
-      plugin.isEnabled = false;
-      plugin.loaded = false;
 
       // Unload the plugin (this will unregister hooks and remove from loaded plugins)
       this._pluginService.unloadPlugin(plugin.manifest.id);
@@ -224,29 +223,6 @@ export class PluginManagementComponent implements OnInit {
 
     // Refresh the UI
     this.loadPlugins();
-  }
-
-  getPluginStatusColor(plugin: PluginInstance): string {
-    if (plugin.error) {
-      return 'warn';
-    }
-    return plugin.loaded ? 'primary' : 'accent';
-  }
-
-  getPluginStatusText(plugin: PluginInstance): string {
-    if (plugin.error) {
-      return this._translateService.instant(T.PLUGINS.ERROR);
-    }
-
-    // Check if plugin is loading
-    const state = this.pluginStates().get(plugin.manifest.id);
-    if (state && state.status === 'loading') {
-      return this._translateService.instant(T.PLUGINS.LOADING_PLUGIN);
-    }
-
-    return plugin.isEnabled
-      ? this._translateService.instant(T.PLUGINS.ENABLED)
-      : this._translateService.instant(T.PLUGINS.DISABLED);
   }
 
   isPluginLoading(plugin: PluginInstance): boolean {
@@ -416,10 +392,6 @@ export class PluginManagementComponent implements OnInit {
     return features.length > 0
       ? features.join(' • ')
       : this._translateService.instant(T.PLUGINS.NO_ADDITIONAL_INFO);
-  }
-
-  hasConfigSchema(plugin: PluginInstance): boolean {
-    return this._pluginConfigService.hasConfigSchema(plugin.manifest);
   }
 
   async openConfigDialog(plugin: PluginInstance): Promise<void> {

@@ -104,7 +104,7 @@
         }
       </mat-card-subtitle>
       <div class="plugin-controls">
-        @if (hasConfigSchema(plugin) && isPluginEnabledSync(plugin)) {
+        @if (plugin.manifest?.jsonSchemaCfg && isPluginEnabledSync(plugin)) {
           <button
             mat-icon-button
             (click)="openConfigDialog(plugin)"
