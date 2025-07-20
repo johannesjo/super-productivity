@@ -406,7 +406,7 @@ body {
     var(--palette-foreground-secondary-text),
     var(--palette-foreground-secondary-text-alpha, 1)
   );
-  --task-detail-bg: var(--dark10);
+  --task-detail-bg: var(--card-bg);
   --task-detail-shadow: var(--whiteframe-shadow-1dp);
 
   // Grid colors
@@ -512,4 +512,5 @@ body.isDarkTheme {
 
   // Task detail item
   --task-detail-value-color: rgba(255, 255, 255, 0.7);
+  --task-detail-bg: var(--dark10);
 }
