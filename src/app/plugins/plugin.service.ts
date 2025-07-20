@@ -252,6 +252,14 @@ export class PluginService implements OnDestroy {
       return null;
     }
 
+    // If manually activated, ensure the state reflects that it's enabled
+    if (isManualActivation && !state.isEnabled) {
+      this._setPluginState(pluginId, {
+        ...state,
+        isEnabled: true,
+      });
+    }
+
     // If already loaded, return the instance
     if (state.status === 'loaded' && state.instance) {
       return state.instance;
@@ -274,12 +282,17 @@ export class PluginService implements OnDestroy {
       return updatedState?.instance || null;
     }
 
+    // Get the updated state if it was just enabled
+    const currentState = isManualActivation
+      ? this._getPluginState(pluginId) || state
+      : state;
+
     // Only check for permission if plugin is actually enabled
-    if (state.isEnabled) {
+    if (currentState.isEnabled) {
       // Only check permission on startup - manual activation already checked in UI
       if (!isManualActivation) {
         const hasConsent = await this._checkNodeExecutionPermissionForStartup(
-          state.manifest,
+          currentState.manifest,
         );
         if (!hasConsent) {
           console.log(
@@ -298,16 +311,16 @@ export class PluginService implements OnDestroy {
 
     // Load the plugin
     this._setPluginState(pluginId, {
-      ...state,
+      ...currentState,
       status: 'loading',
     });
 
     try {
       PluginLog.log(`Activating plugin: ${pluginId}`);
-      const instance = await this._loadPluginLazy(state);
+      const instance = await this._loadPluginLazy(currentState);
 
       this._setPluginState(pluginId, {
-        ...state,
+        ...currentState,
         status: 'loaded',
         instance: instance,
       });
@@ -321,7 +334,7 @@ export class PluginService implements OnDestroy {
     } catch (error) {
       PluginLog.err(`Failed to activate plugin ${pluginId}:`, error);
       this._setPluginState(pluginId, {
-        ...state,
+        ...currentState,
         status: 'error',
         error: error instanceof Error ? error.message : String(error),
       });
@@ -1125,11 +1138,12 @@ export class PluginService implements OnDestroy {
       this.setActiveSidePanelPlugin(null);
     }
 
-    // Update state to not-loaded
+    // Update state to not-loaded and disabled
     const updatedState: PluginState = {
       ...state,
       status: 'not-loaded',
       instance: undefined,
+      isEnabled: false,
     };
     this._setPluginState(pluginId, updatedState);
 

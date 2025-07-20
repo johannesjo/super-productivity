@@ -92,7 +92,6 @@ export class PluginManagementComponent {
         });
       }
     }
-    console.log(plugins);
     return plugins;
   });
 
