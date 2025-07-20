@@ -1,3 +1,17 @@
+## [14.2.2](https://github.com/johannesjo/super-productivity/compare/v14.2.1...v14.2.2) (2025-07-20)
+
+### Bug Fixes
+
+- **plugin:** plugin state not properly updating when plugin is enabled ([84b1296](https://github.com/johannesjo/super-productivity/commit/84b1296fc153ec37360d7b9ce9cfbdfba9abcbb1))
+- styling issue ([389c2ee](https://github.com/johannesjo/super-productivity/commit/389c2ee39debddd46a9b2d99ea54226f06d1dd37)), closes [#4807](https://github.com/johannesjo/super-productivity/issues/4807)
+
+### Features
+
+- **plugin:** add basic json schema form cfg for plugins ([0434715](https://github.com/johannesjo/super-productivity/commit/0434715a58f5b62db322f74ca6d36f7486baa898))
+- **plugin:** simplify management stuff ([fa11d88](https://github.com/johannesjo/super-productivity/commit/fa11d88951a6f20054406f3386883fa3adcdf541))
+- **plugin:** simplify management stuff 2 ([7a95e64](https://github.com/johannesjo/super-productivity/commit/7a95e6479bb16ffcc14f73ed064037df539c9caf))
+- **plugin:** simplify management stuff 3 ([12d97fc](https://github.com/johannesjo/super-productivity/commit/12d97fc8bd0b046c6aaa2298749042d73e76760e))
+
 ## [14.2.1](https://github.com/johannesjo/super-productivity/compare/v14.1.0...v14.2.1) (2025-07-19)
 
 ### Bug Fixes
