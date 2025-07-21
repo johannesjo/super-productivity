@@ -658,6 +658,8 @@ export class TaskService {
     }
     // NOTE: we only update real parents since otherwise we move sub-tasks without their parent into the archive
     const subTasks = tasks.filter((t) => t.parentId);
+    const parentTasks = tasks.filter((t) => !t.parentId);
+
     if (subTasks.length) {
       if (this._workContextService.activeWorkContextType !== WorkContextType.TAG) {
         throw new Error('Trying to move sub tasks into archive for project');
@@ -672,10 +674,13 @@ export class TaskService {
         );
       });
     }
-    this._store.dispatch(
-      TaskSharedActions.moveToArchive({ tasks: tasks.filter((t) => !t.parentId) }),
-    );
-    this._archiveService.moveTasksToArchiveAndFlushArchiveIfDue(tasks);
+
+    if (parentTasks.length) {
+      // Only move parent tasks to archive, never subtasks
+      this._store.dispatch(TaskSharedActions.moveToArchive({ tasks: parentTasks }));
+      // Only archive parent tasks to prevent orphaned subtasks
+      this._archiveService.moveTasksToArchiveAndFlushArchiveIfDue(parentTasks);
+    }
   }
 
   moveToProject(task: TaskWithSubTasks, projectId: string): void {
