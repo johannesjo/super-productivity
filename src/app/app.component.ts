@@ -30,10 +30,11 @@ import { ImexViewService } from './imex/imex-meta/imex-view.service';
 import { IS_ANDROID_WEB_VIEW } from './util/is-android-web-view';
 import { isOnline$ } from './util/is-online';
 import { SyncTriggerService } from './imex/sync/sync-trigger.service';
+import { SyncWrapperService } from './imex/sync/sync-wrapper.service';
 import { environment } from '../environments/environment';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { TrackingReminderService } from './features/tracking-reminder/tracking-reminder.service';
-import { map } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 import { IS_MOBILE } from './util/is-mobile';
 import { warpAnimation, warpInAnimation } from './ui/animations/warp.ani';
 import { GlobalConfigState } from './features/config/global-config.model';
@@ -124,6 +125,7 @@ export class AppComponent implements OnDestroy {
   private _markdownPasteService = inject(MarkdownPasteService);
   private _taskService = inject(TaskService);
   private _pluginService = inject(PluginService);
+  private _syncWrapperService = inject(SyncWrapperService);
 
   // needs to be imported for initialization
   private _syncSafetyBackupService = inject(SyncSafetyBackupService);
@@ -224,8 +226,12 @@ export class AppComponent implements OnDestroy {
 
       // Initialize plugin system
       try {
+        // Wait for sync to complete before initializing plugins to avoid DB lock conflicts
+        await this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$
+          .pipe(take(1))
+          .toPromise();
         await this._pluginService.initializePlugins();
-        Log.log('Plugin system initialized');
+        Log.log('Plugin system initialized after sync completed');
       } catch (error) {
         Log.err('Failed to initialize plugin system:', error);
       }
