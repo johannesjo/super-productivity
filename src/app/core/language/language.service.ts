@@ -37,7 +37,7 @@ export class LanguageService {
       if (lng) {
         Log.err('Invalid language code', lng);
       } else {
-        Log.err('No language code provided');
+        Log.normal('No language code provided');
       }
       this.setFromBrowserLngIfAutoSwitchLng();
     }

@@ -34,26 +34,7 @@ async function buildPlugin() {
       banner: {
         js: `// sync-md plugin v2.0.0
 // This file is auto-generated. Do not edit directly.
-(function() {
-  'use strict';
-  console.log('[sync-md] Plugin script loaded');
 `,
-      },
-      footer: {
-        js: `
-  // Assign SyncMdPlugin to window
-  window.SyncMdPlugin = SyncMdPlugin;
-  
-  // Initialize plugin
-  console.log('[Plugin Build] Setting up initPlugin...');
-  if (typeof window.SyncMdPlugin !== 'undefined' && typeof window.SyncMdPlugin.initPlugin === 'function') {
-    console.log('[Plugin Build] initPlugin found on SyncMdPlugin, calling it now');
-    // Call initPlugin immediately
-    window.SyncMdPlugin.initPlugin();
-  } else {
-    console.error('[Plugin Build] initPlugin function not found on SyncMdPlugin!', window.SyncMdPlugin);
-  }
-})();`,
       },
       external: ['fs', 'path', 'child_process'],
       logLevel: 'info',
@@ -89,13 +70,7 @@ async function buildPlugin() {
 </svg>`;
       fs.writeFileSync(path.join(DIST_DIR, 'icon.svg'), defaultIcon);
     }
-
     console.log('\nBuild complete! Output in dist/');
-    console.log('Files created:');
-    console.log('  - plugin.js');
-    console.log('  - index.html');
-    console.log('  - manifest.json');
-    console.log('  - icon.svg');
   } catch (error) {
     console.error('Build failed:', error);
     process.exit(1);
