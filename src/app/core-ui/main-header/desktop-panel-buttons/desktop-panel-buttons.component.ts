@@ -39,7 +39,7 @@ import { KeyboardConfig } from '../../../features/config/keyboard-config.model';
         kb()?.toggleIssuePanel ? '[' + kb()?.toggleIssuePanel + ']' : ''
       }}"
     >
-      <mat-icon>playlist_add</mat-icon>
+      <mat-icon>dashboard_customize</mat-icon>
     </button>
 
     <button
