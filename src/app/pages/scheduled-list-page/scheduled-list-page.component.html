@@ -37,9 +37,16 @@
                       [task]="taskRepeatCfg"
                     ></tag-list>
                   </div>
+
                   <div
                     (click)="editTaskRepeatCfg(taskRepeatCfg)"
                     class="repeat-text-and-icon"
+                    [matTooltip]="
+                      'Next ' +
+                      (getNextOccurrence(taskRepeatCfg) | shortDate2) +
+                      ', Last: ' +
+                      (taskRepeatCfg.lastTaskCreation | shortDate2)
+                    "
                     mat-ripple
                   >
                     <div class="repeat-text">{{ getRepeatInfoText(taskRepeatCfg) }}</div>

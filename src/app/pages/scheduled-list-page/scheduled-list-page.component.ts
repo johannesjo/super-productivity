@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, LOCALE_ID } from '@angular/core';
 import { T } from '../../t.const';
 import { MatDialog } from '@angular/material/dialog';
-import { TaskCopy, TaskWithReminderData } from '../../features/tasks/task.model';
+import { TaskCopy } from '../../features/tasks/task.model';
 import { standardListAnimation } from '../../ui/animations/standard-list.ani';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { Tag } from '../../features/tag/tag.model';
@@ -26,6 +26,9 @@ import {
   selectAllUndoneTasksWithDueDay,
 } from '../../features/tasks/store/task.selectors';
 import { selectTaskRepeatCfgsSortedByTitleAndProject } from '../../features/task-repeat-cfg/store/task-repeat-cfg.selectors';
+import { getNextRepeatOccurrence } from '../../features/task-repeat-cfg/store/get-next-repeat-occurrence.util';
+import { ShortDate2Pipe } from '../../ui/pipes/short-date2.pipe';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
   selector: 'scheduled-list-page',
@@ -46,6 +49,8 @@ import { selectTaskRepeatCfgsSortedByTitleAndProject } from '../../features/task
     TranslatePipe,
     TagListComponent,
     PlannerTaskComponent,
+    ShortDate2Pipe,
+    MatTooltip,
   ],
 })
 export class ScheduledListPageComponent {
@@ -95,12 +100,12 @@ export class ScheduledListPageComponent {
     }
   }
 
-  trackByFn(i: number, task: TaskWithReminderData): string {
-    return task.id;
-  }
-
   getRepeatInfoText(repeatCfg: TaskRepeatCfg): string {
     const [key, params] = getTaskRepeatInfoText(repeatCfg, this.locale);
     return this._translateService.instant(key, params);
+  }
+
+  getNextOccurrence(repeatCfg: TaskRepeatCfg): number | null {
+    return getNextRepeatOccurrence(repeatCfg, new Date())?.getTime() || null;
   }
 }
