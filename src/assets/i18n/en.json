@@ -1952,6 +1952,8 @@
     "RISK_SYSTEM_ACCESS": "Desktop plugins with Node.js permissions can execute system commands",
     "RISK_PERFORMANCE": "Poorly written plugins may cause performance issues or crashes",
     "RECOMMENDATION": "Only install plugins from trusted sources and review their code if possible. Always backup your data before installing new plugins.",
+    "CONFIGURATION": "Configuration",
+    "CONFIGURE": "Configure",
     "INSTALL_WARNING": "Before installing a plugin, ensure you trust its source and understand the permissions it requests.",
     "SYSTEM_ACCESS_REQUEST_TITLE": "System Access Request",
     "SYSTEM_ACCESS_REQUEST_DESC": "This plugin is requesting permission to execute Node.js code on your system. This will allow it to:",
