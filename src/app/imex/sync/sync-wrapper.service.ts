@@ -10,6 +10,7 @@ import {
   AuthFailSPError,
   CanNotMigrateMajorDownError,
   ConflictData,
+  PotentialCorsError,
   DecryptError,
   DecryptNoPasswordError,
   LockPresentError,
@@ -164,7 +165,15 @@ export class SyncWrapperService {
     } catch (error: any) {
       SyncLog.err(error);
 
-      if (error instanceof AuthFailSPError) {
+      if (error instanceof PotentialCorsError) {
+        this._snackService.open({
+          msg: T.F.SYNC.S.ERROR_CORS,
+          type: 'ERROR',
+          // a bit longer since it is a long message
+          config: { duration: 12000 },
+        });
+        return 'HANDLED_ERROR';
+      } else if (error instanceof AuthFailSPError) {
         this._snackService.open({
           msg: T.F.SYNC.S.INCOMPLETE_CFG,
           type: 'ERROR',

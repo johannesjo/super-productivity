@@ -73,6 +73,20 @@ export class HttpNotOkAPIError extends AdditionalLogErrorBase {
   }
 }
 
+// NOTE: we can't know for sure without complicating things
+export class PotentialCorsError extends AdditionalLogErrorBase {
+  override name = 'PotentialCorsError';
+  url: string;
+
+  constructor(url: string, ...args: unknown[]) {
+    super(
+      `Cross-Origin Request Blocked: The request to ${url} was blocked by CORS policy`,
+      ...args,
+    );
+    this.url = url;
+  }
+}
+
 // --------------SYNC PROVIDER ERRORS--------------
 
 export class MissingCredentialsSPError extends Error {
