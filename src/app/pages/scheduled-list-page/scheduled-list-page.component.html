@@ -42,9 +42,12 @@
                     (click)="editTaskRepeatCfg(taskRepeatCfg)"
                     class="repeat-text-and-icon"
                     [matTooltip]="
-                      'Next ' +
+                      T.SCHEDULE.NEXT +
+                      ' ' +
                       (getNextOccurrence(taskRepeatCfg) | shortDate2) +
-                      ', Last: ' +
+                      ', ' +
+                      T.SCHEDULE.LAST +
+                      ' ' +
                       (taskRepeatCfg.lastTaskCreation | shortDate2)
                     "
                     mat-ripple
