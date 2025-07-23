@@ -2021,6 +2021,8 @@
     "ERROR_LOADING_PLUGIN": "Error loading plugin",
     "GO_BACK": "Go Back",
     "FAILED_TO_LOAD": "Failed to load plugin",
+    "FAILED_TO_LOAD_CONFIG": "Failed to load plugin configuration",
+    "FAILED_TO_SAVE_CONFIG": "Failed to save plugin configuration",
     "PLUGIN_ID_NOT_PROVIDED": "Plugin ID not provided",
     "PLUGIN_SYSTEM_FAILED_INIT": "Plugin system failed to initialize",
     "PLUGIN_NOT_FOUND": "Plugin not found",
