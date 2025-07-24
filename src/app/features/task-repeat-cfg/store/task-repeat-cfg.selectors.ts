@@ -72,9 +72,9 @@ export const selectTaskRepeatCfgsSortedByTitleAndProject = createSelector(
     });
   },
 );
-// filter out the configs which have been created today already
-// and those which are not scheduled for the current week day
-export const selectTaskRepeatCfgsDueOnDayOnly = createSelector(
+// Returns task repeat configs where the calculated due date matches the specified day
+// Note: This includes overdue tasks if their calculated due date happens to be the specified day
+export const selectTaskRepeatCfgsForExactDay = createSelector(
   selectAllTaskRepeatCfgs,
   (
     taskRepeatCfgs: TaskRepeatCfg[],
@@ -100,7 +100,9 @@ export const selectTaskRepeatCfgsDueOnDayOnly = createSelector(
     );
   },
 );
-export const selectTaskRepeatCfgsDueOnDayIncludingOverdue = createSelector(
+// Returns all task repeat configs that need task creation up to the specified day
+// This includes all overdue tasks regardless of their specific due date
+export const selectAllUnprocessedTaskRepeatCfgs = createSelector(
   selectAllTaskRepeatCfgs,
   (
     taskRepeatCfgs: TaskRepeatCfg[],
@@ -133,7 +135,7 @@ export const selectTaskRepeatCfgByIdAllowUndefined = createSelector(
 );
 
 // FOR DEBUG
-// export const selectTaskRepeatCfgsDueOnDayOnly = createSelector(
+// export const selectTaskRepeatCfgsForExactDay = createSelector(
 //   selectAllTaskRepeatCfgs,
 //   (
 //     taskRepeatCfgs: TaskRepeatCfg[],
@@ -142,7 +144,7 @@ export const selectTaskRepeatCfgByIdAllowUndefined = createSelector(
 //     return taskRepeatCfgs;
 //   },
 // );
-// export const selectTaskRepeatCfgsDueOnDayIncludingOverdue = createSelector(
+// export const selectAllUnprocessedTaskRepeatCfgs = createSelector(
 //   selectAllTaskRepeatCfgs,
 //   (
 //     taskRepeatCfgs: TaskRepeatCfg[],

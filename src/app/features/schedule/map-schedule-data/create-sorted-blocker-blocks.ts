@@ -10,7 +10,7 @@ import {
   ScheduleLunchBreakCfg,
   ScheduleWorkStartEndCfg,
 } from '../schedule.model';
-import { selectTaskRepeatCfgsDueOnDayOnly } from '../../task-repeat-cfg/store/task-repeat-cfg.selectors';
+import { selectTaskRepeatCfgsForExactDay } from '../../task-repeat-cfg/store/task-repeat-cfg.selectors';
 const PROJECTION_DAYS: number = 30;
 
 export const createSortedBlockerBlocks = (
@@ -68,7 +68,7 @@ const createBlockerBlocksForScheduledRepeatProjections = (
     targetDate.setHours(0, 0, 0, 0);
     const currentDayTimestamp = targetDate.getTime();
 
-    const allRepeatableTasksForDay = selectTaskRepeatCfgsDueOnDayOnly.projector(
+    const allRepeatableTasksForDay = selectTaskRepeatCfgsForExactDay.projector(
       scheduledTaskRepeatCfgs,
       {
         dayDate: currentDayTimestamp,

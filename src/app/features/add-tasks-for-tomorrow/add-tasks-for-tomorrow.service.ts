@@ -36,7 +36,7 @@ export class AddTasksForTomorrowService {
   );
   private _repeatableForTomorrow$: Observable<TaskRepeatCfg[]> = this._tomorrowDate$.pipe(
     switchMap((d) =>
-      this._taskRepeatCfgService.getRepeatableTasksDueForDayOnly$(d.getTime()),
+      this._taskRepeatCfgService.getRepeatableTasksForExactDay$(d.getTime()),
     ),
   );
 
@@ -131,7 +131,7 @@ export class AddTasksForTomorrowService {
     TaskLog.log('[AddTasksForTomorrow] Starting addAllDueToday', { todayStr });
 
     const dueRepeatCfgs = await this._taskRepeatCfgService
-      .getRepeatableTasksDueForDayOnly$(todayDate.getTime())
+      .getAllUnprocessedRepeatableTasks$(todayDate.getTime())
       .pipe(first())
       .toPromise();
 

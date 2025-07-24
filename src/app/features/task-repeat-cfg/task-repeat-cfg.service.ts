@@ -35,8 +35,8 @@ import {
   selectAllTaskRepeatCfgs,
   selectTaskRepeatCfgById,
   selectTaskRepeatCfgByIdAllowUndefined,
-  selectTaskRepeatCfgsDueOnDayIncludingOverdue,
-  selectTaskRepeatCfgsDueOnDayOnly,
+  selectAllUnprocessedTaskRepeatCfgs,
+  selectTaskRepeatCfgsForExactDay,
 } from './store/task-repeat-cfg.selectors';
 import { devError } from '../../util/dev-error';
 
@@ -53,17 +53,15 @@ export class TaskRepeatCfgService {
     select(selectAllTaskRepeatCfgs),
   );
 
-  getRepeatableTasksDueForDayOnly$(dayDate: number): Observable<TaskRepeatCfg[]> {
-    // ===> taskRepeatCfgs scheduled for today and not yet created already
-    return this._store$.select(selectTaskRepeatCfgsDueOnDayOnly, { dayDate });
+  getRepeatableTasksForExactDay$(dayDate: number): Observable<TaskRepeatCfg[]> {
+    // ===> taskRepeatCfgs where calculated due date matches the specified day
+    return this._store$.select(selectTaskRepeatCfgsForExactDay, { dayDate });
   }
 
-  getRepeatableTasksDueForDayIncludingOverdue$(
-    dayDate: number,
-  ): Observable<TaskRepeatCfg[]> {
+  getAllUnprocessedRepeatableTasks$(dayDate: number): Observable<TaskRepeatCfg[]> {
     // ===> taskRepeatCfgs scheduled for today and not yet created already
     return this._store$
-      .select(selectTaskRepeatCfgsDueOnDayIncludingOverdue, { dayDate })
+      .select(selectAllUnprocessedTaskRepeatCfgs, { dayDate })
       .pipe(first());
   }
 

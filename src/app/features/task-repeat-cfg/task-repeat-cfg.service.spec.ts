@@ -16,8 +16,8 @@ import { DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfg } from './task-repeat-cfg.model'
 import { of } from 'rxjs';
 import { WorkContextType } from '../work-context/work-context.model';
 import {
-  selectTaskRepeatCfgsDueOnDayOnly,
-  selectTaskRepeatCfgsDueOnDayIncludingOverdue,
+  selectTaskRepeatCfgsForExactDay,
+  selectAllUnprocessedTaskRepeatCfgs,
 } from './store/task-repeat-cfg.selectors';
 import { Task, DEFAULT_TASK, TaskWithSubTasks } from '../tasks/task.model';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
@@ -117,16 +117,16 @@ describe('TaskRepeatCfgService', () => {
     });
   });
 
-  describe('getRepeatableTasksDueForDayOnly$', () => {
+  describe('getRepeatableTasksForExactDay$', () => {
     it('should return configs due for the specified day', (done) => {
       const dayDate = new Date('2022-01-10').getTime();
       const mockConfigs = [mockTaskRepeatCfg];
 
       // Mock the selector to return our test data
-      store.overrideSelector(selectTaskRepeatCfgsDueOnDayOnly, mockConfigs);
+      store.overrideSelector(selectTaskRepeatCfgsForExactDay, mockConfigs);
       store.refreshState();
 
-      service.getRepeatableTasksDueForDayOnly$(dayDate).subscribe((configs) => {
+      service.getRepeatableTasksForExactDay$(dayDate).subscribe((configs) => {
         expect(configs).toEqual(mockConfigs);
         done();
       });
@@ -468,21 +468,19 @@ describe('TaskRepeatCfgService', () => {
     });
   });
 
-  describe('getRepeatableTasksDueForDayIncludingOverdue$', () => {
+  describe('getAllUnprocessedRepeatableTasks$', () => {
     it('should return configs including overdue', (done) => {
       const dayDate = new Date('2022-01-10').getTime();
       const mockConfigs = [mockTaskRepeatCfg];
 
       // Mock the selector to return our test data
-      store.overrideSelector(selectTaskRepeatCfgsDueOnDayIncludingOverdue, mockConfigs);
+      store.overrideSelector(selectAllUnprocessedTaskRepeatCfgs, mockConfigs);
       store.refreshState();
 
-      service
-        .getRepeatableTasksDueForDayIncludingOverdue$(dayDate)
-        .subscribe((configs) => {
-          expect(configs).toEqual(mockConfigs);
-          done();
-        });
+      service.getAllUnprocessedRepeatableTasks$(dayDate).subscribe((configs) => {
+        expect(configs).toEqual(mockConfigs);
+        done();
+      });
     });
 
     it('should use first() operator', () => {
@@ -491,7 +489,7 @@ describe('TaskRepeatCfgService', () => {
         pipe: jasmine.createSpy('pipe').and.returnValue(of([])),
       } as any);
 
-      service.getRepeatableTasksDueForDayIncludingOverdue$(dayDate);
+      service.getAllUnprocessedRepeatableTasks$(dayDate);
 
       expect(service['_store$'].select).toHaveBeenCalled();
     });
