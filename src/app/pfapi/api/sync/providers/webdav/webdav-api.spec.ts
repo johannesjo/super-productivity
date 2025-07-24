@@ -139,7 +139,6 @@ describe('WebdavApi', () => {
       const mockResponse = {
         status: 200,
         headers: {
-          etag: '"abc123"',
           'last-modified': 'Wed, 15 Jan 2025 10:00:00 GMT',
         },
         data: 'file content',
@@ -166,31 +165,10 @@ describe('WebdavApi', () => {
       );
 
       expect(result).toEqual({
-        rev: 'abc123',
+        rev: 'Wed, 15 Jan 2025 10:00:00 GMT',
         dataStr: 'file content',
         lastModified: 'Wed, 15 Jan 2025 10:00:00 GMT',
       });
-    });
-
-    it('should clean etag values', async () => {
-      const mockResponse = {
-        status: 200,
-        headers: {
-          etag: '"abc123"',
-        },
-        data: 'content',
-      };
-      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
-      mockXmlParser.validateResponseContent.and.stub();
-
-      // Override _cleanRev for testing
-      spyOn<any>(api, '_cleanRev').and.returnValue('cleanedAbc123');
-
-      const result = await api.download({
-        path: '/test.txt',
-      });
-
-      expect(result.rev).toBe('cleanedAbc123');
     });
 
     it('should use last-modified as rev when no etag', async () => {
@@ -225,7 +203,6 @@ describe('WebdavApi', () => {
       const mockResponse = {
         status: 201,
         headers: {
-          etag: '"newrev123"',
           'last-modified': 'Wed, 15 Jan 2025 11:00:00 GMT',
         },
         data: '',
@@ -250,16 +227,16 @@ describe('WebdavApi', () => {
       );
 
       expect(result).toEqual({
-        rev: 'newrev123',
+        rev: 'Wed, 15 Jan 2025 11:00:00 GMT',
         lastModified: 'Wed, 15 Jan 2025 11:00:00 GMT',
       });
     });
 
-    it('should handle conditional upload with etag', async () => {
+    it('should handle conditional upload with date string', async () => {
       const mockResponse = {
         status: 200,
         headers: {
-          etag: '"newrev123"',
+          'last-modified': 'Wed, 15 Jan 2025 11:00:00 GMT',
         },
         data: '',
       };
@@ -268,13 +245,13 @@ describe('WebdavApi', () => {
       await api.upload({
         path: '/test.txt',
         data: 'new content',
-        expectedRev: 'oldrev123',
+        expectedRev: 'Wed, 15 Jan 2025 10:00:00 GMT',
       });
 
       expect(mockHttpAdapter.request).toHaveBeenCalledWith(
         jasmine.objectContaining({
           headers: jasmine.objectContaining({
-            'If-Match': 'oldrev123',
+            'If-Unmodified-Since': jasmine.any(String),
           }),
         }),
       );
@@ -284,7 +261,7 @@ describe('WebdavApi', () => {
       const mockResponse = {
         status: 200,
         headers: {
-          etag: '"newrev123"',
+          'last-modified': 'Wed, 15 Jan 2025 11:00:00 GMT',
         },
         data: '',
       };
@@ -337,7 +314,7 @@ describe('WebdavApi', () => {
         Promise.resolve({ status: 201, headers: {}, data: '' }),
         Promise.resolve({
           status: 201,
-          headers: { etag: '"newrev123"' },
+          headers: { 'last-modified': 'Wed, 15 Jan 2025 11:00:00 GMT' },
           data: '',
         }),
       ];
@@ -358,7 +335,7 @@ describe('WebdavApi', () => {
           method: 'MKCOL',
         }),
       );
-      expect(result.rev).toBe('newrev123');
+      expect(result.rev).toBe('Wed, 15 Jan 2025 11:00:00 GMT');
     });
 
     it('should fetch metadata when no rev in response headers', async () => {
@@ -377,7 +354,7 @@ describe('WebdavApi', () => {
           lastmod: 'Wed, 15 Jan 2025 12:00:00 GMT',
           size: 100,
           type: 'file',
-          etag: 'fetched123',
+          etag: 'Wed, 15 Jan 2025 12:00:00 GMT', // Using lastmod as etag
           data: {},
         }),
       );
@@ -390,7 +367,7 @@ describe('WebdavApi', () => {
 
       expect(api.getFileMeta).toHaveBeenCalledWith('/test.txt', null, true);
       expect(result).toEqual({
-        rev: 'fetched123',
+        rev: 'Wed, 15 Jan 2025 12:00:00 GMT',
         lastModified: 'Wed, 15 Jan 2025 12:00:00 GMT',
       });
     });
@@ -415,7 +392,7 @@ describe('WebdavApi', () => {
       );
     });
 
-    it('should handle conditional delete with etag', async () => {
+    it('should handle conditional delete with date string', async () => {
       const mockResponse = {
         status: 204,
         headers: {},
@@ -423,14 +400,14 @@ describe('WebdavApi', () => {
       };
       mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
 
-      await api.remove('/test.txt', 'abc123');
+      await api.remove('/test.txt', 'Wed, 15 Jan 2025 10:00:00 GMT');
 
       expect(mockHttpAdapter.request).toHaveBeenCalledWith(
         jasmine.objectContaining({
           url: 'http://example.com/webdav/test.txt',
           method: 'DELETE',
           headers: jasmine.objectContaining({
-            'If-Match': 'abc123',
+            'If-Unmodified-Since': jasmine.any(String),
           }),
         }),
       );
@@ -438,11 +415,9 @@ describe('WebdavApi', () => {
   });
 
   describe('_cleanRev', () => {
-    it('should clean revision strings', () => {
-      expect((api as any)._cleanRev('"abc123"')).toBe('abc123');
-      expect((api as any)._cleanRev('abc/123')).toBe('abc123');
-      expect((api as any)._cleanRev('"abc/123"')).toBe('abc123');
-      expect((api as any)._cleanRev('&quot;abc123&quot;')).toBe('abc123');
+    it('should just trim revision strings (no longer cleans ETags)', () => {
+      expect((api as any)._cleanRev('"abc123"')).toBe('"abc123"');
+      expect((api as any)._cleanRev('  abc123  ')).toBe('abc123');
       expect((api as any)._cleanRev('')).toBe('');
     });
   });
@@ -453,17 +428,6 @@ describe('WebdavApi', () => {
       expect((api as any)._isLikelyTimestamp('1642248000000')).toBe(true); // 13 digits
       expect((api as any)._isLikelyTimestamp('abc123')).toBe(false);
       expect((api as any)._isLikelyTimestamp('123')).toBe(false); // too short
-    });
-  });
-
-  describe('_isLikelyDateString', () => {
-    it('should identify date strings', () => {
-      expect((api as any)._isLikelyDateString('Wed, 15 Jan 2025 10:00:00 GMT')).toBe(
-        true,
-      );
-      expect((api as any)._isLikelyDateString('2025-01-15')).toBe(true);
-      expect((api as any)._isLikelyDateString('2025-01-15T10:00:00Z')).toBe(true);
-      expect((api as any)._isLikelyDateString('abc123')).toBe(false);
     });
   });
 
@@ -496,7 +460,7 @@ describe('WebdavApi', () => {
           lastmod: '',
           size: 0,
           type: 'file',
-          etag: 'abc',
+          etag: 'Wed, 15 Jan 2025 10:00:00 GMT', // Using lastmod as etag
           data: {},
         },
       ]);

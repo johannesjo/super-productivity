@@ -76,7 +76,7 @@ describe('WebdavXmlParser', () => {
       expect(results[0].lastmod).toBe('Wed, 15 Jan 2025 10:00:00 GMT');
       expect(results[0].size).toBe(1234);
       expect(results[0].type).toBe('file');
-      expect(results[0].etag).toBe('abc123');
+      expect(results[0].etag).toBe('Wed, 15 Jan 2025 10:00:00 GMT'); // Now using lastmod as etag
       expect(results[0].data['content-type']).toBe('text/plain');
     });
 
@@ -110,9 +110,9 @@ describe('WebdavXmlParser', () => {
       const results = parser.parseMultiplePropsFromXml(xml, '/folder/');
       expect(results.length).toBe(2);
       expect(results[0].filename).toBe('file1.txt');
-      expect(results[0].etag).toBe('abc123');
+      expect(results[0].etag).toBe('Wed, 15 Jan 2025 10:00:00 GMT'); // Now using lastmod as etag
       expect(results[1].filename).toBe('file2.txt');
-      expect(results[1].etag).toBe('def456');
+      expect(results[1].etag).toBe('Wed, 15 Jan 2025 11:00:00 GMT'); // Now using lastmod as etag
     });
 
     it('should handle encoded URLs', () => {
@@ -182,7 +182,7 @@ describe('WebdavXmlParser', () => {
       const results = parser.parseMultiplePropsFromXml(xml, '/__meta_');
       expect(results.length).toBe(1);
       expect(results[0].filename).toBe('__meta_');
-      expect(results[0].etag).toBe('meta123');
+      expect(results[0].etag).toBe('Wed, 15 Jan 2025 10:00:00 GMT'); // Now using lastmod as etag
     });
 
     it('should handle invalid XML gracefully', () => {
@@ -200,7 +200,7 @@ describe('WebdavXmlParser', () => {
       expect(results).toEqual([]);
     });
 
-    it('should clean etag values using cleanRevFn', () => {
+    it('should use lastmod as etag when present', () => {
       const cleanRevFn = jasmine
         .createSpy('cleanRevFn')
         .and.callFake((rev: string) => rev.replace(/"/g, '').toUpperCase());
@@ -214,14 +214,15 @@ describe('WebdavXmlParser', () => {
               <d:status>HTTP/1.1 200 OK</d:status>
               <d:prop>
                 <d:getetag>"abc123"</d:getetag>
+                <d:getlastmodified>Wed, 15 Jan 2025 10:00:00 GMT</d:getlastmodified>
               </d:prop>
             </d:propstat>
           </d:response>
         </d:multistatus>`;
 
       const results = customParser.parseMultiplePropsFromXml(xml, '/test.txt');
-      expect(cleanRevFn).toHaveBeenCalledWith('"abc123"');
-      expect(results[0].etag).toBe('ABC123');
+      // cleanRevFn should no longer be called for the etag
+      expect(results[0].etag).toBe('Wed, 15 Jan 2025 10:00:00 GMT');
     });
 
     it('should handle missing properties gracefully', () => {

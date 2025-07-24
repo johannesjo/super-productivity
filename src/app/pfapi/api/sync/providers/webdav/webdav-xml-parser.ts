@@ -7,7 +7,7 @@ export interface FileMeta {
   lastmod: string;
   size: number;
   type: string;
-  etag: string;
+  // etag: string;
   data: Record<string, string>;
 }
 
@@ -182,24 +182,19 @@ export class WebdavXmlParser {
     const isCollection =
       resourceType !== null && resourceType.querySelector('collection') !== null;
 
-    // Determine the validator to use
-    const cleanedEtag = this._cleanRev(etag);
-    const validator = cleanedEtag || lastModified;
-
     return {
       filename: displayname || decodedHref.split('/').pop() || '',
       basename: displayname || decodedHref.split('/').pop() || '',
       lastmod: lastModified,
       size: parseInt(contentLength, 10),
       type: isCollection ? 'directory' : 'file',
-      etag: validator,
       data: {
         /* eslint-disable @typescript-eslint/naming-convention */
         'content-type': contentType,
         'content-length': contentLength,
         'last-modified': lastModified,
         /* eslint-enable @typescript-eslint/naming-convention */
-        etag: etag,
+        etag: etag, // Keep original etag in data for reference
         href: decodedHref,
       },
     };

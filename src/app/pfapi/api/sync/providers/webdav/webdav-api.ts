@@ -5,6 +5,7 @@ import { WebDavHttpAdapter, WebDavHttpResponse } from './webdav-http-adapter';
 import {
   HttpNotOkAPIError,
   InvalidDataSPError,
+  NoRevAPIError,
   RemoteFileChangedUnexpectedly,
   RemoteFileNotFoundAPIError,
 } from '../../../errors/errors';
@@ -48,7 +49,6 @@ export class WebdavApi {
         if (files && files.length > 0) {
           const meta = files[0];
           PFLog.verbose(`${WebdavApi.L}.getFileMeta() PROPFIND success for ${path}`, {
-            etag: meta.etag,
             lastmod: meta.lastmod,
           });
           return meta;
@@ -89,17 +89,15 @@ export class WebdavApi {
         'file content',
       );
 
-      // Get revision from ETag or Last-Modified
-      const etag = response.headers['etag'] || response.headers['ETag'];
+      // Get revision from Last-Modified
       const lastModified =
         response.headers['last-modified'] || response.headers['Last-Modified'];
 
-      const rev = etag ? this._cleanRev(etag) : lastModified || '';
+      const rev = lastModified || '';
 
       if (!rev) {
-        PFLog.warn(
-          `${WebdavApi.L}.download() no ETag or Last-Modified found for ${path}`,
-        );
+        PFLog.err(`${WebdavApi.L}.download() no Last-Modified found for ${path}`);
+        throw new NoRevAPIError(rev);
       }
 
       return {
@@ -133,7 +131,7 @@ export class WebdavApi {
         [WebDavHttpHeader.CONTENT_TYPE]: 'application/octet-stream',
       };
 
-      // Set conditional headers based on revision type
+      // Set conditional headers based on Last-Modified date
       if (!isForceOverwrite && expectedRev) {
         if (this._isLikelyTimestamp(expectedRev)) {
           // Convert timestamp to HTTP date
@@ -147,15 +145,14 @@ export class WebdavApi {
             headers[WebDavHttpHeader.IF_UNMODIFIED_SINCE] = date.toUTCString();
             Log.verbose(WebdavApi.L, 'Using If-Unmodified-Since', date.toUTCString());
           }
-        } else if (this._isLikelyDateString(expectedRev)) {
-          // Validate and normalize the date string
+        } else {
+          // Assume it's a date string and try to parse it
           const parsedDate = new Date(expectedRev);
           if (isNaN(parsedDate.getTime())) {
             PFLog.warn(
               `${WebdavApi.L}.upload() Invalid date string for conditional request: ${expectedRev}`,
             );
-            // Fall back to treating it as an ETag
-            headers[WebDavHttpHeader.IF_MATCH] = expectedRev;
+            // Skip conditional header - let server handle as unconditional
           } else {
             // Use normalized UTC format
             headers[WebDavHttpHeader.IF_UNMODIFIED_SINCE] = parsedDate.toUTCString();
@@ -165,10 +162,6 @@ export class WebdavApi {
               parsedDate.toUTCString(),
             );
           }
-        } else {
-          // Assume it's an ETag
-          headers[WebDavHttpHeader.IF_MATCH] = expectedRev;
-          Log.verbose(WebdavApi.L, 'Using If-Match', expectedRev);
         }
       }
 
@@ -220,32 +213,30 @@ export class WebdavApi {
         }
       }
 
-      // Get the new revision
-      const etag = response.headers['etag'] || response.headers['ETag'];
+      // Get the new revision from Last-Modified
       const lastModified =
         response.headers['last-modified'] || response.headers['Last-Modified'];
 
-      let rev = etag ? this._cleanRev(etag) : lastModified || '';
+      let rev = lastModified || '';
 
       if (!rev) {
-        // Some WebDAV servers don't return ETag/Last-Modified on PUT
+        // Some WebDAV servers don't return Last-Modified on PUT
         // Try to get it from a HEAD request first (cheaper than PROPFIND)
         PFLog.verbose(
-          `${WebdavApi.L}.upload() no ETag/Last-Modified in PUT response, fetching via HEAD`,
+          `${WebdavApi.L}.upload() no Last-Modified in PUT response, fetching via HEAD`,
         );
         try {
           const headResponse = await this._makeRequest({
             url: fullPath,
             method: WebDavHttpMethod.HEAD,
           });
-          const headEtag = headResponse.headers['etag'] || headResponse.headers['ETag'];
           const headLastMod =
             headResponse.headers['last-modified'] ||
             headResponse.headers['Last-Modified'];
-          rev = headEtag ? this._cleanRev(headEtag) : headLastMod || '';
+          rev = headLastMod || '';
 
           if (rev) {
-            return { rev, lastModified: headLastMod };
+            return { rev, lastModified: rev };
           }
         } catch (headError) {
           PFLog.verbose(
@@ -257,7 +248,7 @@ export class WebdavApi {
         // If HEAD didn't work, fall back to PROPFIND
         const meta = await this.getFileMeta(path, null, true);
         return {
-          rev: meta.etag || meta.lastmod,
+          rev: meta.lastmod,
           lastModified: meta.lastmod,
         };
       }
@@ -269,15 +260,19 @@ export class WebdavApi {
     }
   }
 
-  async remove(path: string, expectedEtag?: string): Promise<void> {
+  async remove(path: string, expectedRev?: string): Promise<void> {
     const cfg = await this._getCfgOrError();
     const fullPath = this._buildFullPath(cfg.baseUrl, path);
 
     try {
       const headers: Record<string, string> = {};
 
-      if (expectedEtag) {
-        headers[WebDavHttpHeader.IF_MATCH] = expectedEtag;
+      if (expectedRev) {
+        // Try to parse as date for If-Unmodified-Since
+        const parsedDate = new Date(expectedRev);
+        if (!isNaN(parsedDate.getTime())) {
+          headers[WebDavHttpHeader.IF_UNMODIFIED_SINCE] = parsedDate.toUTCString();
+        }
       }
 
       await this._makeRequest({
@@ -399,30 +394,13 @@ export class WebdavApi {
   }
 
   private _cleanRev(rev: string): string {
-    if (!rev) return '';
-    const result = rev
-      .replace(/\//g, '')
-      .replace(/"/g, '')
-      .replace(/&quot;/g, '')
-      .trim();
-    PFLog.verbose(`${WebdavApi.L}.cleanRev() "${rev}" -> "${result}"`);
-
-    return result;
+    // This method is no longer needed for WebDAV as we're using Last-Modified dates
+    // Keeping it for potential compatibility but it just returns the input
+    return rev ? rev.trim() : '';
   }
 
   private _isLikelyTimestamp(val: string): boolean {
     return /^\d{10,13}$/.test(val); // Unix timestamp (seconds or milliseconds)
-  }
-
-  private _isLikelyDateString(val: string): boolean {
-    // Check for common date patterns
-    return (
-      val.includes('GMT') ||
-      val.includes('Z') ||
-      val.includes('T') ||
-      /\d{4}-\d{2}-\d{2}/.test(val) || // ISO date
-      /\w{3},\s\d{1,2}\s\w{3}\s\d{4}/.test(val) // RFC format
-    );
   }
 
   private async _getFileMetaViaHead(fullPath: string): Promise<FileMeta> {
@@ -433,7 +411,6 @@ export class WebdavApi {
 
     // Safely access headers with null checks
     const headers = response.headers || {};
-    const etag = headers['etag'] || headers['ETag'] || '';
     const lastModified = headers['last-modified'] || headers['Last-Modified'] || '';
     const contentLength = headers['content-length'] || headers['Content-Length'] || '0';
     const contentType = headers['content-type'] || headers['Content-Type'] || '';
@@ -464,7 +441,6 @@ export class WebdavApi {
       lastmod: lastModified,
       size,
       type: contentType || 'application/octet-stream',
-      etag: etag ? this._cleanRev(etag) : '',
       data: {},
     };
   }

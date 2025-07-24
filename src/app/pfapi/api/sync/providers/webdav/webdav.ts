@@ -44,7 +44,7 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
   ): Promise<{ rev: string }> {
     const { filePath } = await this._getConfigAndPath(targetPath);
     const meta = await this._api.getFileMeta(filePath, localRev, true);
-    return { rev: meta.etag };
+    return { rev: meta.lastmod };
   }
 
   async uploadFile(
