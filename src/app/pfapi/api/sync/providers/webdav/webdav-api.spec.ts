@@ -432,6 +432,117 @@ describe('WebdavApi', () => {
       );
       expect(result.legacyRev).toBeUndefined();
     });
+
+    it('should return legacyRev from HEAD request when PUT returns no headers', async () => {
+      // First request (PUT) returns no headers
+      const putResponse = {
+        status: 201,
+        headers: {},
+        data: '',
+      };
+
+      // HEAD request returns both Last-Modified and ETag
+      const headResponse = {
+        status: 200,
+        headers: {
+          'last-modified': 'Wed, 15 Jan 2025 13:00:00 GMT',
+          etag: '"head-etag-123"',
+        },
+        data: '',
+      };
+
+      mockHttpAdapter.request.and.callFake((params) => {
+        if (params.method === 'PUT') {
+          return Promise.resolve(putResponse);
+        } else if (params.method === 'HEAD') {
+          return Promise.resolve(headResponse);
+        } else {
+          return Promise.reject(new Error('Unexpected method'));
+        }
+      });
+
+      const result = await api.upload({
+        path: '/test.txt',
+        data: 'new content',
+        expectedRev: null,
+      });
+
+      expect(result).toEqual({
+        rev: 'Wed, 15 Jan 2025 13:00:00 GMT',
+        legacyRev: 'head-etag-123',
+        lastModified: 'Wed, 15 Jan 2025 13:00:00 GMT',
+      });
+    });
+
+    it('should extract legacyRev from PROPFIND meta when HEAD fails', async () => {
+      // PUT returns no headers
+      const putResponse = {
+        status: 201,
+        headers: {},
+        data: '',
+      };
+
+      mockHttpAdapter.request.and.callFake((params) => {
+        if (params.method === 'PUT') {
+          return Promise.resolve(putResponse);
+        } else if (params.method === 'HEAD') {
+          return Promise.reject(new Error('HEAD failed'));
+        } else {
+          return Promise.reject(new Error('Unexpected method'));
+        }
+      });
+
+      // Mock getFileMeta to return data with etag
+      spyOn(api, 'getFileMeta').and.returnValue(
+        Promise.resolve({
+          filename: 'test.txt',
+          basename: 'test.txt',
+          lastmod: 'Wed, 15 Jan 2025 14:00:00 GMT',
+          size: 100,
+          type: 'file',
+          etag: 'Wed, 15 Jan 2025 14:00:00 GMT',
+          data: {
+            etag: '"propfind-etag-456"', // Original ETag in data
+          },
+        }),
+      );
+
+      const result = await api.upload({
+        path: '/test.txt',
+        data: 'new content',
+        expectedRev: null,
+      });
+
+      expect(result).toEqual({
+        rev: 'Wed, 15 Jan 2025 14:00:00 GMT',
+        legacyRev: 'propfind-etag-456',
+        lastModified: 'Wed, 15 Jan 2025 14:00:00 GMT',
+      });
+    });
+
+    it('should handle upload with ETag in initial response', async () => {
+      const mockResponse = {
+        status: 201,
+        headers: {
+          'last-modified': 'Wed, 15 Jan 2025 15:00:00 GMT',
+          ETag: '"W/\\"weak-etag-789\\""', // Weak ETag with nested quotes
+        },
+        data: '',
+      };
+      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
+
+      const result = await api.upload({
+        path: '/test.txt',
+        data: 'new content',
+        expectedRev: null,
+      });
+
+      expect(result).toEqual({
+        rev: 'Wed, 15 Jan 2025 15:00:00 GMT',
+        legacyRev: 'W\\weak-etag-789\\', // Cleaned (removes / and " but not \)
+        lastModified: 'Wed, 15 Jan 2025 15:00:00 GMT',
+      });
+    });
   });
 
   describe('remove', () => {
@@ -482,6 +593,35 @@ describe('WebdavApi', () => {
       expect((api as any)._cleanRev('"abc/123"')).toBe('abc123');
       expect((api as any)._cleanRev('&quot;abc123&quot;')).toBe('abc123');
       expect((api as any)._cleanRev('')).toBe('');
+    });
+
+    it('should handle various ETag formats', () => {
+      // Standard ETag with quotes
+      expect((api as any)._cleanRev('"12345"')).toBe('12345');
+
+      // Weak ETag
+      expect((api as any)._cleanRev('W/"weak-etag"')).toBe('Wweak-etag');
+
+      // ETag with escaped quotes
+      expect((api as any)._cleanRev('"escaped\\\\"quotes\\\\""')).toBe(
+        'escaped\\\\quotes\\\\',
+      );
+
+      // ETag with HTML entities
+      expect((api as any)._cleanRev('&quot;html-entity&quot;')).toBe('html-entity');
+
+      // Complex ETag with multiple special characters
+      expect((api as any)._cleanRev('"complex/etag/with/slashes"')).toBe(
+        'complexetagwithslashes',
+      );
+
+      // Empty or null cases
+      expect((api as any)._cleanRev(null)).toBe('');
+      expect((api as any)._cleanRev(undefined)).toBe('');
+      expect((api as any)._cleanRev('   ')).toBe('');
+
+      // ETag with surrounding whitespace
+      expect((api as any)._cleanRev('  "whitespace"  ')).toBe('whitespace');
     });
   });
 
