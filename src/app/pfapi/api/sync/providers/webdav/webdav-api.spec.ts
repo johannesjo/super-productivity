@@ -257,7 +257,7 @@ describe('WebdavApi', () => {
       );
     });
 
-    it('should handle conditional upload with timestamp', async () => {
+    it('should handle conditional upload with ISO date string', async () => {
       const mockResponse = {
         status: 200,
         headers: {
@@ -267,12 +267,12 @@ describe('WebdavApi', () => {
       };
       mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
 
-      const timestamp = '1642248000000'; // Unix timestamp
+      const isoDate = '2022-01-15T12:00:00.000Z'; // ISO date string
 
       await api.upload({
         path: '/test.txt',
         data: 'new content',
-        expectedRev: timestamp,
+        expectedRev: isoDate,
       });
 
       expect(mockHttpAdapter.request).toHaveBeenCalledWith(
@@ -419,15 +419,6 @@ describe('WebdavApi', () => {
       expect((api as any)._cleanRev('"abc123"')).toBe('"abc123"');
       expect((api as any)._cleanRev('  abc123  ')).toBe('abc123');
       expect((api as any)._cleanRev('')).toBe('');
-    });
-  });
-
-  describe('_isLikelyTimestamp', () => {
-    it('should identify valid timestamps', () => {
-      expect((api as any)._isLikelyTimestamp('1642248000')).toBe(true); // 10 digits
-      expect((api as any)._isLikelyTimestamp('1642248000000')).toBe(true); // 13 digits
-      expect((api as any)._isLikelyTimestamp('abc123')).toBe(false);
-      expect((api as any)._isLikelyTimestamp('123')).toBe(false); // too short
     });
   });
 

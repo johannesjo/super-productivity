@@ -7,7 +7,7 @@ export interface FileMeta {
   lastmod: string;
   size: number;
   type: string;
-  // etag: string;
+  etag: string;
   data: Record<string, string>;
 }
 
@@ -188,6 +188,7 @@ export class WebdavXmlParser {
       lastmod: lastModified,
       size: parseInt(contentLength, 10),
       type: isCollection ? 'directory' : 'file',
+      etag: lastModified, // Use lastmod as etag for consistency
       data: {
         /* eslint-disable @typescript-eslint/naming-convention */
         'content-type': contentType,

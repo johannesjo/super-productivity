@@ -133,35 +133,17 @@ export class WebdavApi {
 
       // Set conditional headers based on Last-Modified date
       if (!isForceOverwrite && expectedRev) {
-        if (this._isLikelyTimestamp(expectedRev)) {
-          // Convert timestamp to HTTP date
-          const date = new Date(parseInt(expectedRev));
-          if (isNaN(date.getTime())) {
-            PFLog.warn(
-              `${WebdavApi.L}.upload() Invalid timestamp for conditional request: ${expectedRev}`,
-            );
-            // Skip conditional header - let server handle as unconditional
-          } else {
-            headers[WebDavHttpHeader.IF_UNMODIFIED_SINCE] = date.toUTCString();
-            Log.verbose(WebdavApi.L, 'Using If-Unmodified-Since', date.toUTCString());
-          }
+        // Parse the date string and validate it
+        const parsedDate = new Date(expectedRev);
+        if (isNaN(parsedDate.getTime())) {
+          PFLog.warn(
+            `${WebdavApi.L}.upload() Invalid date string for conditional request: ${expectedRev}`,
+          );
+          // Skip conditional header - let server handle as unconditional
         } else {
-          // Assume it's a date string and try to parse it
-          const parsedDate = new Date(expectedRev);
-          if (isNaN(parsedDate.getTime())) {
-            PFLog.warn(
-              `${WebdavApi.L}.upload() Invalid date string for conditional request: ${expectedRev}`,
-            );
-            // Skip conditional header - let server handle as unconditional
-          } else {
-            // Use normalized UTC format
-            headers[WebDavHttpHeader.IF_UNMODIFIED_SINCE] = parsedDate.toUTCString();
-            Log.verbose(
-              WebdavApi.L,
-              'Using If-Unmodified-Since',
-              parsedDate.toUTCString(),
-            );
-          }
+          // Use normalized UTC format
+          headers[WebDavHttpHeader.IF_UNMODIFIED_SINCE] = parsedDate.toUTCString();
+          Log.verbose(WebdavApi.L, 'Using If-Unmodified-Since', parsedDate.toUTCString());
         }
       }
 
@@ -399,10 +381,6 @@ export class WebdavApi {
     return rev ? rev.trim() : '';
   }
 
-  private _isLikelyTimestamp(val: string): boolean {
-    return /^\d{10,13}$/.test(val); // Unix timestamp (seconds or milliseconds)
-  }
-
   private async _getFileMetaViaHead(fullPath: string): Promise<FileMeta> {
     const response = await this._makeRequest({
       url: fullPath,
@@ -441,6 +419,7 @@ export class WebdavApi {
       lastmod: lastModified,
       size,
       type: contentType || 'application/octet-stream',
+      etag: lastModified, // Use lastmod as etag for consistency
       data: {},
     };
   }
