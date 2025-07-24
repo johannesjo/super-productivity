@@ -234,7 +234,7 @@ export const PFAPI_SYNC_PROVIDERS = [
     appKey: DROPBOX_APP_KEY,
     basePath: environment.production ? `/` : `/DEV/`,
   }),
-  new Webdav(environment.production ? undefined : undefined),
+  new Webdav(environment.production ? undefined : `/DEV`),
   ...(IS_ELECTRON ? [fileSyncElectron] : []),
   ...(IS_ANDROID_WEB_VIEW ? [fileSyncDroid] : []),
 ];
