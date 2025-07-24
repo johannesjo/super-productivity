@@ -131,8 +131,8 @@ describe('AddTasksForTomorrowService', () => {
   // Setup before each test
   beforeEach(() => {
     taskRepeatCfgServiceMock = jasmine.createSpyObj('TaskRepeatCfgService', [
-      'getRepeatableTasksDueForDayOnly$',
-      'getRepeatableTasksDueForDayIncludingOverdue$',
+      'getRepeatableTasksForExactDay$',
+      'getAllUnprocessedRepeatableTasks$',
       'createRepeatableTask',
     ]);
 
@@ -144,10 +144,8 @@ describe('AddTasksForTomorrowService', () => {
     };
 
     // Configure mock return values
-    taskRepeatCfgServiceMock.getRepeatableTasksDueForDayOnly$.and.returnValue(of([]));
-    taskRepeatCfgServiceMock.getRepeatableTasksDueForDayIncludingOverdue$.and.returnValue(
-      of([]),
-    );
+    taskRepeatCfgServiceMock.getRepeatableTasksForExactDay$.and.returnValue(of([]));
+    taskRepeatCfgServiceMock.getAllUnprocessedRepeatableTasks$.and.returnValue(of([]));
     taskRepeatCfgServiceMock.createRepeatableTask.and.returnValue(Promise.resolve());
 
     TestBed.configureTestingModule({
@@ -178,7 +176,7 @@ describe('AddTasksForTomorrowService', () => {
 
   describe('nrOfPlannerItemsForTomorrow$', () => {
     it('should count repeatable tasks due tomorrow', (done) => {
-      taskRepeatCfgServiceMock.getRepeatableTasksDueForDayOnly$.and.returnValue(
+      taskRepeatCfgServiceMock.getRepeatableTasksForExactDay$.and.returnValue(
         of([mockRepeatCfg, mockRepeatCfg2]),
       );
       store.overrideSelector(selectTasksWithDueTimeForRange, []);
@@ -192,7 +190,7 @@ describe('AddTasksForTomorrowService', () => {
     });
 
     it('should count tasks with due time tomorrow', (done) => {
-      taskRepeatCfgServiceMock.getRepeatableTasksDueForDayOnly$.and.returnValue(of([]));
+      taskRepeatCfgServiceMock.getRepeatableTasksForExactDay$.and.returnValue(of([]));
       store.overrideSelector(selectTasksWithDueTimeForRange, [
         mockTaskWithDueTimeTomorrow,
       ]);
@@ -206,7 +204,7 @@ describe('AddTasksForTomorrowService', () => {
     });
 
     it('should count tasks with due day tomorrow', (done) => {
-      taskRepeatCfgServiceMock.getRepeatableTasksDueForDayOnly$.and.returnValue(of([]));
+      taskRepeatCfgServiceMock.getRepeatableTasksForExactDay$.and.returnValue(of([]));
       store.overrideSelector(selectTasksWithDueTimeForRange, []);
       store.overrideSelector(selectTasksDueForDay, [mockTaskWithDueDayTomorrow]);
       store.overrideSelector(selectTodayTaskIds, []);
@@ -218,7 +216,7 @@ describe('AddTasksForTomorrowService', () => {
     });
 
     it('should exclude tasks that are already in today list', (done) => {
-      taskRepeatCfgServiceMock.getRepeatableTasksDueForDayOnly$.and.returnValue(of([]));
+      taskRepeatCfgServiceMock.getRepeatableTasksForExactDay$.and.returnValue(of([]));
       store.overrideSelector(selectTasksWithDueTimeForRange, [
         mockTaskWithDueTimeTomorrow,
       ]);
@@ -232,7 +230,7 @@ describe('AddTasksForTomorrowService', () => {
     });
 
     it('should count all types of tasks combined', (done) => {
-      taskRepeatCfgServiceMock.getRepeatableTasksDueForDayOnly$.and.returnValue(
+      taskRepeatCfgServiceMock.getRepeatableTasksForExactDay$.and.returnValue(
         of([mockRepeatCfg]),
       );
       store.overrideSelector(selectTasksWithDueTimeForRange, [
@@ -250,7 +248,7 @@ describe('AddTasksForTomorrowService', () => {
 
   describe('addAllDueTomorrow()', () => {
     it('should create repeatable tasks for tomorrow but not dispatch if no tasks to move', async () => {
-      taskRepeatCfgServiceMock.getRepeatableTasksDueForDayOnly$.and.returnValue(
+      taskRepeatCfgServiceMock.getRepeatableTasksForExactDay$.and.returnValue(
         of([mockRepeatCfg, mockRepeatCfg2]),
       );
 
@@ -281,7 +279,7 @@ describe('AddTasksForTomorrowService', () => {
     });
 
     it('should add due tasks to today', async () => {
-      taskRepeatCfgServiceMock.getRepeatableTasksDueForDayOnly$.and.returnValue(of([]));
+      taskRepeatCfgServiceMock.getRepeatableTasksForExactDay$.and.returnValue(of([]));
       store.overrideSelector(selectTasksWithDueTimeForRange, [
         mockTaskWithDueTimeTomorrow,
       ]);
@@ -311,7 +309,7 @@ describe('AddTasksForTomorrowService', () => {
     });
 
     it('should not dispatch action when no tasks due', async () => {
-      taskRepeatCfgServiceMock.getRepeatableTasksDueForDayOnly$.and.returnValue(of([]));
+      taskRepeatCfgServiceMock.getRepeatableTasksForExactDay$.and.returnValue(of([]));
       store.overrideSelector(selectTasksWithDueTimeForRange, []);
       store.overrideSelector(selectTasksDueForDay, []);
       store.overrideSelector(
@@ -328,7 +326,7 @@ describe('AddTasksForTomorrowService', () => {
     });
 
     it('should filter out tasks already in today list', async () => {
-      taskRepeatCfgServiceMock.getRepeatableTasksDueForDayOnly$.and.returnValue(of([]));
+      taskRepeatCfgServiceMock.getRepeatableTasksForExactDay$.and.returnValue(of([]));
       store.overrideSelector(selectTasksWithDueTimeForRange, [
         mockTaskWithDueTimeTomorrow,
       ]);
@@ -354,7 +352,7 @@ describe('AddTasksForTomorrowService', () => {
 
   describe('addAllDueToday()', () => {
     it('should create repeatable tasks for today but not dispatch if no tasks to move', async () => {
-      taskRepeatCfgServiceMock.getRepeatableTasksDueForDayIncludingOverdue$.and.returnValue(
+      taskRepeatCfgServiceMock.getAllUnprocessedRepeatableTasks$.and.returnValue(
         of([mockRepeatCfg, mockRepeatCfg2]),
       );
       store.overrideSelector(selectTasksWithDueTimeForRange, []);
@@ -373,9 +371,7 @@ describe('AddTasksForTomorrowService', () => {
     });
 
     it('should add due tasks to today', async () => {
-      taskRepeatCfgServiceMock.getRepeatableTasksDueForDayIncludingOverdue$.and.returnValue(
-        of([]),
-      );
+      taskRepeatCfgServiceMock.getAllUnprocessedRepeatableTasks$.and.returnValue(of([]));
       store.overrideSelector(selectTasksWithDueTimeForRange, [mockTaskWithDueTimeToday]);
       store.overrideSelector(selectTasksDueForDay, [mockTaskWithDueDayToday]);
       store.overrideSelector(selectTasksForPlannerDay(getWorklogStr(today)), [
@@ -413,7 +409,7 @@ describe('AddTasksForTomorrowService', () => {
         lastTaskCreation: new Date('2024-01-01').getTime(), // Last created months ago
       };
 
-      taskRepeatCfgServiceMock.getRepeatableTasksDueForDayIncludingOverdue$.and.returnValue(
+      taskRepeatCfgServiceMock.getAllUnprocessedRepeatableTasks$.and.returnValue(
         of([overdueWeeklyTask]),
       );
       store.overrideSelector(selectTasksWithDueTimeForRange, []);
@@ -455,7 +451,7 @@ describe('AddTasksForTomorrowService', () => {
         lastTaskCreation: Date.now() - 35 * 24 * 60 * 60 * 1000, // 35 days ago
       };
 
-      taskRepeatCfgServiceMock.getRepeatableTasksDueForDayIncludingOverdue$.and.returnValue(
+      taskRepeatCfgServiceMock.getAllUnprocessedRepeatableTasks$.and.returnValue(
         of([overdueDaily, overdueMonthly]),
       );
       store.overrideSelector(selectTasksWithDueTimeForRange, []);
