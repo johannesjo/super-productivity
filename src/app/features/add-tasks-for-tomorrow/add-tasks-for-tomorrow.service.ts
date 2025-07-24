@@ -131,7 +131,7 @@ export class AddTasksForTomorrowService {
     TaskLog.log('[AddTasksForTomorrow] Starting addAllDueToday', { todayStr });
 
     const dueRepeatCfgs = await this._taskRepeatCfgService
-      .getRepeatableTasksDueForDayOnly$(todayDate.getTime())
+      .getRepeatableTasksDueForDayIncludingOverdue$(todayDate.getTime())
       .pipe(first())
       .toPromise();
 
