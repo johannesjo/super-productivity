@@ -70,7 +70,9 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
     return { rev: result.rev };
   }
 
-  async downloadFile(targetPath: string): Promise<{ rev: string; dataStr: string }> {
+  async downloadFile(
+    targetPath: string,
+  ): Promise<{ rev: string; legacyRev?: string; dataStr: string }> {
     SyncLog.debug(Webdav.L, 'downloadFile', { targetPath });
     const { filePath } = await this._getConfigAndPath(targetPath);
 
@@ -85,7 +87,7 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
       throw new NoRevAPIError();
     }
 
-    return { rev: result.rev, dataStr: result.dataStr };
+    return { rev: result.rev, legacyRev: result.legacyRev, dataStr: result.dataStr };
   }
 
   async removeFile(targetPath: string): Promise<void> {

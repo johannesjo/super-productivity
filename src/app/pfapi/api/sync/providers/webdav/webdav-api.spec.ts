@@ -164,11 +164,40 @@ describe('WebdavApi', () => {
         'file content',
       );
 
-      expect(result).toEqual({
-        rev: 'Wed, 15 Jan 2025 10:00:00 GMT',
-        dataStr: 'file content',
-        lastModified: 'Wed, 15 Jan 2025 10:00:00 GMT',
+      expect(result).toEqual(
+        jasmine.objectContaining({
+          rev: 'Wed, 15 Jan 2025 10:00:00 GMT',
+          dataStr: 'file content',
+          lastModified: 'Wed, 15 Jan 2025 10:00:00 GMT',
+        }),
+      );
+      expect(result.legacyRev).toBeUndefined();
+    });
+
+    it('should return legacyRev when ETag is present', async () => {
+      const mockResponse = {
+        status: 200,
+        headers: {
+          'last-modified': 'Wed, 15 Jan 2025 10:00:00 GMT',
+          etag: '"abc123"',
+        },
+        data: 'file content',
+      };
+      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
+      mockXmlParser.validateResponseContent.and.stub();
+
+      const result = await api.download({
+        path: '/test.txt',
       });
+
+      expect(result).toEqual(
+        jasmine.objectContaining({
+          rev: 'Wed, 15 Jan 2025 10:00:00 GMT',
+          legacyRev: 'abc123', // Cleaned ETag
+          dataStr: 'file content',
+          lastModified: 'Wed, 15 Jan 2025 10:00:00 GMT',
+        }),
+      );
     });
 
     it('should use last-modified as rev when no etag', async () => {
@@ -226,10 +255,39 @@ describe('WebdavApi', () => {
         }),
       );
 
-      expect(result).toEqual({
-        rev: 'Wed, 15 Jan 2025 11:00:00 GMT',
-        lastModified: 'Wed, 15 Jan 2025 11:00:00 GMT',
+      expect(result).toEqual(
+        jasmine.objectContaining({
+          rev: 'Wed, 15 Jan 2025 11:00:00 GMT',
+          lastModified: 'Wed, 15 Jan 2025 11:00:00 GMT',
+        }),
+      );
+      expect(result.legacyRev).toBeUndefined();
+    });
+
+    it('should return legacyRev when ETag is present in upload response', async () => {
+      const mockResponse = {
+        status: 201,
+        headers: {
+          'last-modified': 'Wed, 15 Jan 2025 11:00:00 GMT',
+          etag: '"newrev123"',
+        },
+        data: '',
+      };
+      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
+
+      const result = await api.upload({
+        path: '/test.txt',
+        data: 'new content',
+        expectedRev: null,
       });
+
+      expect(result).toEqual(
+        jasmine.objectContaining({
+          rev: 'Wed, 15 Jan 2025 11:00:00 GMT',
+          legacyRev: 'newrev123', // Cleaned ETag
+          lastModified: 'Wed, 15 Jan 2025 11:00:00 GMT',
+        }),
+      );
     });
 
     it('should handle conditional upload with date string', async () => {
@@ -366,10 +424,13 @@ describe('WebdavApi', () => {
       });
 
       expect(api.getFileMeta).toHaveBeenCalledWith('/test.txt', null, true);
-      expect(result).toEqual({
-        rev: 'Wed, 15 Jan 2025 12:00:00 GMT',
-        lastModified: 'Wed, 15 Jan 2025 12:00:00 GMT',
-      });
+      expect(result).toEqual(
+        jasmine.objectContaining({
+          rev: 'Wed, 15 Jan 2025 12:00:00 GMT',
+          lastModified: 'Wed, 15 Jan 2025 12:00:00 GMT',
+        }),
+      );
+      expect(result.legacyRev).toBeUndefined();
     });
   });
 
@@ -415,9 +476,11 @@ describe('WebdavApi', () => {
   });
 
   describe('_cleanRev', () => {
-    it('should just trim revision strings (no longer cleans ETags)', () => {
-      expect((api as any)._cleanRev('"abc123"')).toBe('"abc123"');
-      expect((api as any)._cleanRev('  abc123  ')).toBe('abc123');
+    it('should clean revision strings', () => {
+      expect((api as any)._cleanRev('"abc123"')).toBe('abc123');
+      expect((api as any)._cleanRev('abc/123')).toBe('abc123');
+      expect((api as any)._cleanRev('"abc/123"')).toBe('abc123');
+      expect((api as any)._cleanRev('&quot;abc123&quot;')).toBe('abc123');
       expect((api as any)._cleanRev('')).toBe('');
     });
   });

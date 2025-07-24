@@ -100,13 +100,19 @@ export class ModelSyncService<MD extends ModelCfgs> {
 
     try {
       const syncProvider = this._currentSyncProvider$.getOrError();
-      const { rev, dataStr } = await syncProvider.downloadFile(
+      const { rev, legacyRev, dataStr } = await syncProvider.downloadFile(
         this._filePathForModelId(modelId),
       );
       if (expectedRev) {
-        if (!rev || !this._isSameRev(rev, expectedRev)) {
-          PFLog.normal('Rev mismatch', rev, expectedRev);
-          throw new RevMismatchForModelError(modelId, { rev, expectedRev });
+        if (
+          !rev ||
+          !(
+            this._isSameRev(rev, expectedRev) ||
+            (legacyRev && this._isSameRev(legacyRev, expectedRev))
+          )
+        ) {
+          PFLog.normal('Rev mismatch', rev, expectedRev, legacyRev);
+          throw new RevMismatchForModelError(modelId, { rev, expectedRev, legacyRev });
         }
       }
       const data = await this._encryptAndCompressHandler.decompressAndDecryptData<

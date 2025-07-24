@@ -69,6 +69,7 @@ export class WebdavApi {
 
   async download({ path }: { path: string }): Promise<{
     rev: string;
+    legacyRev?: string;
     dataStr: string;
     lastModified?: string;
   }> {
@@ -93,6 +94,10 @@ export class WebdavApi {
       const lastModified =
         response.headers['last-modified'] || response.headers['Last-Modified'];
 
+      // Get ETag for legacy compatibility
+      const etag = response.headers['etag'] || response.headers['ETag'];
+      const legacyRev = etag ? this._cleanRev(etag) : undefined;
+
       const rev = lastModified || '';
 
       if (!rev) {
@@ -102,6 +107,7 @@ export class WebdavApi {
 
       return {
         rev,
+        legacyRev,
         dataStr: response.data,
         lastModified,
       };
@@ -121,7 +127,7 @@ export class WebdavApi {
     data: string;
     expectedRev?: string | null;
     isForceOverwrite?: boolean;
-  }): Promise<{ rev: string; lastModified?: string }> {
+  }): Promise<{ rev: string; legacyRev?: string; lastModified?: string }> {
     const cfg = await this._getCfgOrError();
     const fullPath = this._buildFullPath(cfg.baseUrl, path);
 
@@ -199,6 +205,10 @@ export class WebdavApi {
       const lastModified =
         response.headers['last-modified'] || response.headers['Last-Modified'];
 
+      // Get ETag for legacy compatibility
+      const etag = response.headers['etag'] || response.headers['ETag'];
+      const legacyRev = etag ? this._cleanRev(etag) : undefined;
+
       let rev = lastModified || '';
 
       if (!rev) {
@@ -218,7 +228,10 @@ export class WebdavApi {
           rev = headLastMod || '';
 
           if (rev) {
-            return { rev, lastModified: rev };
+            // Try to get ETag from HEAD response for legacy compatibility
+            const headEtag = headResponse.headers['etag'] || headResponse.headers['ETag'];
+            const headLegacyRev = headEtag ? this._cleanRev(headEtag) : undefined;
+            return { rev, legacyRev: headLegacyRev, lastModified: rev };
           }
         } catch (headError) {
           PFLog.verbose(
@@ -229,13 +242,17 @@ export class WebdavApi {
 
         // If HEAD didn't work, fall back to PROPFIND
         const meta = await this.getFileMeta(path, null, true);
+        // Extract original ETag from meta.data if available
+        const metaEtag = meta.data?.etag;
+        const metaLegacyRev = metaEtag ? this._cleanRev(metaEtag) : undefined;
         return {
           rev: meta.lastmod,
+          legacyRev: metaLegacyRev,
           lastModified: meta.lastmod,
         };
       }
 
-      return { rev, lastModified };
+      return { rev, legacyRev, lastModified };
     } catch (e) {
       PFLog.error(`${WebdavApi.L}.upload() error`, { path, error: e });
       throw e;
@@ -376,9 +393,14 @@ export class WebdavApi {
   }
 
   private _cleanRev(rev: string): string {
-    // This method is no longer needed for WebDAV as we're using Last-Modified dates
-    // Keeping it for potential compatibility but it just returns the input
-    return rev ? rev.trim() : '';
+    // Clean ETag values for legacy compatibility
+    // Remove quotes, slashes, and HTML entities
+    if (!rev) return '';
+    return rev
+      .replace(/"/g, '')
+      .replace(/\//g, '')
+      .replace(/&quot;/g, '')
+      .trim();
   }
 
   private async _getFileMetaViaHead(fullPath: string): Promise<FileMeta> {
