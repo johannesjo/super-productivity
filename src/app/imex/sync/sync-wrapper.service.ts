@@ -202,7 +202,9 @@ export class SyncWrapperService {
         error instanceof NoRemoteModelFile
       ) {
         SyncLog.log(error, Object.keys(error));
-        const modelId = error.additionalLog;
+        const modelId =
+          (error.additionalLog && error.additionalLog[0]) || error.additionalLog;
+
         this._matDialog
           .open(DialogIncompleteSyncComponent, {
             data: { modelId },
