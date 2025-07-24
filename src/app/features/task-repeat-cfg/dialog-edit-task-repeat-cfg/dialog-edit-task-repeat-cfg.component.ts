@@ -115,8 +115,12 @@ export class DialogEditTaskRepeatCfgComponent {
 
   private _initializeRepeatCfg(): Omit<TaskRepeatCfgCopy, 'id'> | TaskRepeatCfg {
     if (this._data.repeatCfg) {
-      this._setRepeatCfgInitiallyForEditOnly(this._data.repeatCfg);
-      return { ...this._data.repeatCfg };
+      // Process the repeat config to determine if quickSetting needs to be changed to CUSTOM
+      const processedCfg = this._processQuickSettingForDate(this._data.repeatCfg);
+
+      // Set initial value for comparison
+      this.repeatCfgInitial.set({ ...this._data.repeatCfg });
+      return processedCfg;
     } else if (this._data.task) {
       const startTime = this._data.task.dueWithTime
         ? clockStringFromDate(this._data.task.dueWithTime)
@@ -282,37 +286,44 @@ export class DialogEditTaskRepeatCfgComponent {
   }
 
   private _setRepeatCfgInitiallyForEditOnly(repeatCfg: TaskRepeatCfg): void {
-    let updatedCfg = { ...repeatCfg };
+    const processedCfg = this._processQuickSettingForDate(repeatCfg);
+    this.repeatCfg.set(processedCfg);
+    this.repeatCfgInitial.set({ ...repeatCfg });
+  }
 
-    if (updatedCfg.quickSetting === 'WEEKLY_CURRENT_WEEKDAY') {
-      if (!updatedCfg.startDate) {
+  private _processQuickSettingForDate<
+    T extends { quickSetting?: string; startDate?: string },
+  >(cfg: T): T {
+    let processedCfg = { ...cfg };
+
+    if (processedCfg.quickSetting === 'WEEKLY_CURRENT_WEEKDAY') {
+      if (!processedCfg.startDate) {
         throw new Error('Invalid repeat cfg');
       }
-      if (new Date(updatedCfg.startDate).getDay() !== new Date().getDay()) {
-        updatedCfg = { ...updatedCfg, quickSetting: 'CUSTOM' };
+      if (new Date(processedCfg.startDate).getDay() !== new Date().getDay()) {
+        processedCfg = { ...processedCfg, quickSetting: 'CUSTOM' };
       }
     }
-    if (updatedCfg.quickSetting === 'YEARLY_CURRENT_DATE') {
-      if (!updatedCfg.startDate) {
+    if (processedCfg.quickSetting === 'YEARLY_CURRENT_DATE') {
+      if (!processedCfg.startDate) {
         throw new Error('Invalid repeat cfg');
       }
       if (
-        new Date(updatedCfg.startDate).getDate() !== new Date().getDate() ||
-        new Date(updatedCfg.startDate).getMonth() !== new Date().getMonth()
+        new Date(processedCfg.startDate).getDate() !== new Date().getDate() ||
+        new Date(processedCfg.startDate).getMonth() !== new Date().getMonth()
       ) {
-        updatedCfg = { ...updatedCfg, quickSetting: 'CUSTOM' };
+        processedCfg = { ...processedCfg, quickSetting: 'CUSTOM' };
       }
     }
-    if (updatedCfg.quickSetting === 'MONTHLY_CURRENT_DATE') {
-      if (!updatedCfg.startDate) {
+    if (processedCfg.quickSetting === 'MONTHLY_CURRENT_DATE') {
+      if (!processedCfg.startDate) {
         throw new Error('Invalid repeat cfg');
       }
-      if (new Date(updatedCfg.startDate).getDate() !== new Date().getDate()) {
-        updatedCfg = { ...updatedCfg, quickSetting: 'CUSTOM' };
+      if (new Date(processedCfg.startDate).getDate() !== new Date().getDate()) {
+        processedCfg = { ...processedCfg, quickSetting: 'CUSTOM' };
       }
     }
 
-    this.repeatCfg.set(updatedCfg);
-    this.repeatCfgInitial.set({ ...repeatCfg });
+    return processedCfg;
   }
 }
