@@ -4,12 +4,23 @@ FROM --platform=$BUILDPLATFORM node:20 AS build
 WORKDIR /app
 
 # Install git and configure for HTTPS
-RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/* && \
-    git config --global url."https://github.com/".insteadOf ssh://git@github.com/
+# Use single apt-get command to avoid GPG issues
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    --no-install-recommends \
+    git \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && git config --global url."https://github.com/".insteadOf ssh://git@github.com/
 
 # Copy and install dependencies
 COPY package*.json ./
-RUN npm ci || npm i
+COPY packages/plugin-api/package*.json ./packages/plugin-api/
+COPY packages/plugin-api/tsconfig.json ./packages/plugin-api/
+COPY packages/plugin-api/src ./packages/plugin-api/src
+COPY tsconfig.json ./
+RUN npm ci --ignore-scripts || npm i --ignore-scripts
+RUN npm run prepare
 
 # Copy source and build
 COPY . .
