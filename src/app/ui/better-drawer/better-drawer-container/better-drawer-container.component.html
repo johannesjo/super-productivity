@@ -5,7 +5,7 @@
   <ng-content select="[better-drawer-content]"></ng-content>
 </div>
 
-@if (isOpenGet && isOverGet) {
+@if (isOpen() && isOver()) {
   <div
     (click)="close()"
     @fade
@@ -15,7 +15,7 @@
 
 <div
   (swiperight)="IS_TOUCH_PRIMARY && close()"
-  [style]="sideStyle"
+  [style]="sideStyle()"
   class="side"
   (transitionend)="updateStyleAfterTransition()"
 >
