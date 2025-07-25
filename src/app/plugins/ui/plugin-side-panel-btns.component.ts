@@ -29,13 +29,10 @@ import { PluginLog } from '../../core/log';
     @for (button of sidePanelButtons(); track button.pluginId) {
       <button
         mat-icon-button
-        [matTooltip]="
-          button.label + (isWorkView() ? '' : ' (only available in work views)')
-        "
+        [matTooltip]="button.label"
         (click)="onButtonClick(button)"
         class="plugin-side-panel-btn"
         [class.active]="activePluginId() === button.pluginId && isShowPanel()"
-        [disabled]="!isWorkView()"
       >
         <plugin-icon
           [pluginId]="button.pluginId"
@@ -86,18 +83,8 @@ import { PluginLog } from '../../core/log';
         z-index: -1;
       }
 
-      .plugin-side-panel-btn:hover:not(.active):not(:disabled) {
+      .plugin-side-panel-btn:hover:not(.active) {
         background-color: var(--hover-color, rgba(0, 0, 0, 0.04));
-      }
-
-      .plugin-side-panel-btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-        background: transparent !important;
-      }
-
-      .plugin-side-panel-btn:disabled::after {
-        background: transparent !important;
       }
     `,
   ],
@@ -134,12 +121,6 @@ export class PluginSidePanelBtnsComponent {
 
   onButtonClick(button: PluginSidePanelBtnCfg): void {
     PluginLog.log('Side panel button clicked:', button.pluginId, button.label);
-
-    // Prevent action if not in work view
-    if (!this.isWorkView()) {
-      PluginLog.log('Not in work view, ignoring click');
-      return;
-    }
 
     PluginLog.log('Dispatching togglePluginPanel action for:', button.pluginId);
     // Dispatch action to toggle the plugin panel

@@ -7,7 +7,14 @@ import {
 } from '@angular/core';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { TaskDetailTargetPanel, TaskWithSubTasks } from '../tasks/task.model';
-import { delay, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
+import {
+  delay,
+  distinctUntilChanged,
+  map,
+  switchMap,
+  filter,
+  pairwise,
+} from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { slideInFromTopAni } from '../../ui/animations/slide-in-from-top.ani';
@@ -30,6 +37,7 @@ import {
 import { hidePluginPanel } from '../../core-ui/layout/store/layout.actions';
 import { fastArrayCompare } from '../../util/fast-array-compare';
 import { Log } from '../../core/log';
+import { NavigationEnd, Router } from '@angular/router';
 
 @Component({
   selector: 'right-panel',
@@ -56,6 +64,7 @@ export class RightPanelComponent implements OnDestroy {
   layoutService = inject(LayoutService);
   pluginService = inject(PluginService);
   store = inject(Store);
+  private _router = inject(Router);
 
   // NOTE: used for debugging
   readonly isAlwaysOver = input<boolean>(false);
@@ -171,6 +180,30 @@ export class RightPanelComponent implements OnDestroy {
         this.isDisableTaskPanelAni = !isOpen;
       }),
     );
+
+    // Add navigation handling to close panel when navigating between non-work-view routes
+    this._subs.add(
+      this._router.events
+        .pipe(
+          filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+          map((event) => this._isWorkViewUrl(event.urlAfterRedirects)),
+          pairwise(),
+          filter(([wasWorkView, isWorkView]) => {
+            // Close panel when:
+            // 1. Navigating from work-view to non-work-view
+            // 2. Navigating between different non-work-view routes
+            return !isWorkView;
+          }),
+        )
+        .subscribe(() => {
+          // Close all panels when navigating to non-work-view
+          this.close();
+        }),
+    );
+  }
+
+  private _isWorkViewUrl(url: string): boolean {
+    return url.includes('/active/') || url.includes('/tag/') || url.includes('/project/');
   }
 
   ngOnDestroy(): void {
@@ -180,6 +213,8 @@ export class RightPanelComponent implements OnDestroy {
   close(): void {
     this.taskService.setSelectedId(null);
     this.layoutService.hideNotes();
+    this.layoutService.hideAddTaskPanel();
+    this.layoutService.hideTaskViewCustomizerPanel();
     this.store.dispatch(hidePluginPanel());
     this.onClose();
   }
