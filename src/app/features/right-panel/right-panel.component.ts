@@ -4,6 +4,7 @@ import {
   inject,
   input,
   OnDestroy,
+  computed,
 } from '@angular/core';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { TaskDetailTargetPanel, TaskWithSubTasks } from '../tasks/task.model';
@@ -68,6 +69,17 @@ export class RightPanelComponent implements OnDestroy {
 
   // NOTE: used for debugging
   readonly isAlwaysOver = input<boolean>(false);
+
+  // Use the computed signal from layout service
+  readonly isCustomOver = computed(() => {
+    // Always use "over" mode for debugging
+    if (this.isAlwaysOver()) {
+      return true;
+    }
+
+    // Use the layout service's computed signal
+    return this.layoutService.isRightPanelOverCustom();
+  });
 
   // to still display its data when panel is closing
   selectedTaskWithDelayForNone$: Observable<TaskWithSubTasks | null> =

@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, computed } from '@angular/core';
 import {
   hideAddTaskBar,
   hideIssuePanel,
@@ -22,16 +22,18 @@ import {
   selectIsShowSideNav,
   selectIsShowTaskViewCustomizerPanel,
 } from './store/layout.reducer';
-import { filter, map, switchMap, withLatestFrom } from 'rxjs/operators';
+import { filter, map, switchMap, withLatestFrom, startWith } from 'rxjs/operators';
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { NavigationStart, Router } from '@angular/router';
+import { NavigationStart, NavigationEnd, Router } from '@angular/router';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { selectMiscConfig } from '../../features/config/store/global-config.reducer';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 const NAV_ALWAYS_VISIBLE = 1200;
 const NAV_OVER_RIGHT_PANEL_NEXT = 800;
 const BOTH_OVER = 720;
 const XS_MAX = 599;
+const VERY_BIG_SCREEN = 1270;
 
 @Injectable({
   providedIn: 'root',
@@ -62,6 +64,46 @@ export class LayoutService {
   isRightPanelOver$: Observable<boolean> = this._breakPointObserver
     .observe([`(min-width: ${BOTH_OVER}px)`])
     .pipe(map((result) => !result.matches));
+
+  // Signals for custom right panel behavior
+  private readonly _isVeryBigScreen = toSignal(
+    this._breakPointObserver
+      .observe([`(min-width: ${VERY_BIG_SCREEN}px)`])
+      .pipe(map((result) => result.matches)),
+    { initialValue: false },
+  );
+
+  private readonly _isWorkViewRoute = toSignal(
+    this._router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map((event) => this._isWorkViewUrl(event.urlAfterRedirects)),
+      startWith(this._isWorkViewUrl(this._router.url)),
+    ),
+    { initialValue: this._isWorkViewUrl(this._router.url) },
+  );
+
+  private readonly _isRightPanelOverDefault = toSignal(this.isRightPanelOver$, {
+    initialValue: false,
+  });
+
+  // Computed signal for custom right panel over behavior
+  readonly isRightPanelOverCustom = computed(() => {
+    const isWorkView = this._isWorkViewRoute();
+    const isVeryBigScreen = this._isVeryBigScreen();
+    const defaultIsOver = this._isRightPanelOverDefault();
+
+    // Use default behavior if on work view
+    if (isWorkView) {
+      return defaultIsOver;
+    }
+
+    // For non-work-view routes: use "over" mode unless on very big screen
+    return !isVeryBigScreen;
+  });
+
+  private _isWorkViewUrl(url: string): boolean {
+    return url.includes('/active/') || url.includes('/tag/') || url.includes('/project/');
+  }
   isNavOver$: Observable<boolean> = this._store$.select(selectMiscConfig).pipe(
     switchMap((miscCfg) => {
       if (miscCfg.isUseMinimalNav) {
