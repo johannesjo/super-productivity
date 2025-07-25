@@ -1,4 +1,4 @@
-import { computed, effect, inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import {
   hideAddTaskBar,
   hideIssuePanel,
@@ -149,29 +149,18 @@ export class LayoutService {
 
   readonly isShowIssuePanel = toSignal(this.isShowIssuePanel$, { initialValue: false });
 
-  // Signal to track navigation events
-  private readonly _navigationEvents = toSignal(
+  // Subscribe to navigation events to hide sidenav
+  constructor() {
+    // Only hide sidenav on actual navigation, not on initial load
     merge(
       this._router.events.pipe(filter((ev) => ev instanceof NavigationStart)),
       this._workContextService.onWorkContextChange$,
-    ),
-    { initialValue: null },
-  );
-
-  // Effect to handle nav hiding
-  private _navHideEffect = effect(
-    () => {
-      const navEvent = this._navigationEvents();
-      const isNavOver = this.isNavOver();
-      const isShowSideNav = this._isShowSideNav();
-
-      if (navEvent && isNavOver && isShowSideNav) {
-        // Use setTimeout to avoid state changes during effect execution
-        setTimeout(() => this.hideSideNav(), 0);
+    ).subscribe(() => {
+      if (this.isNavOver() && this._isShowSideNav()) {
+        this.hideSideNav();
       }
-    },
-    { allowSignalWrites: true },
-  );
+    });
+  }
 
   showAddTaskBar(): void {
     this._store$.dispatch(showAddTaskBar());
