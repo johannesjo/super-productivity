@@ -22,6 +22,7 @@ import {
   MatAutocompleteTrigger,
   MatOption,
 } from '@angular/material/autocomplete';
+import { MatOptionSelectionChange } from '@angular/material/core';
 import { AsyncPipe } from '@angular/common';
 import { Task } from '../../task.model';
 import { WorkContextService } from '../../../work-context/work-context.service';
@@ -79,7 +80,7 @@ export class SelectTaskMinimalComponent
   filteredTasks$!: Observable<Task[]>;
 
   private _destroy$ = new Subject<void>();
-  private _onChange: (value: Task | string) => void = (value: Task | string): void => {};
+  private _onChange: (value: Task | string) => void = (): void => {};
   private _onTouched: () => void = (): void => {};
 
   readonly inputElement = viewChild<ElementRef>('input');
@@ -177,8 +178,8 @@ export class SelectTaskMinimalComponent
   }
 
   // Event handlers
-  onOptionSelected(event: any): void {
-    const selectedTask: Task = event.option.value;
+  onOptionSelected(event: MatOptionSelectionChange): void {
+    const selectedTask: Task = event.source.value;
 
     // Explicitly set the FormControl value to ensure consistency
     this.taskSelectCtrl.setValue(selectedTask, { emitEvent: false });

@@ -24,6 +24,9 @@ import { getWorklogStr } from '../../../util/get-work-log-str';
 import { ShortTime2Pipe } from '../../../ui/pipes/short-time2.pipe';
 import { SelectTaskMinimalComponent } from '../../tasks/select-task/select-task-minimal/select-task-minimal.component';
 import { devError } from '../../../util/dev-error';
+import { SnackService } from '../../../core/snack/snack.service';
+
+type Timeout = NodeJS.Timeout | number | undefined;
 
 @Component({
   selector: 'create-task-placeholder',
@@ -35,6 +38,7 @@ import { devError } from '../../../util/dev-error';
 export class CreateTaskPlaceholderComponent implements OnDestroy {
   private _taskService = inject(TaskService);
   private _store = inject(Store);
+  private readonly _snackService = inject(SnackService);
 
   isEditMode = input.required<boolean>();
   time = input<string>();
@@ -59,7 +63,8 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
   readonly selectTaskMinimal = viewChild('selectTaskMinimal', { read: ElementRef });
 
   private _interactionState: 'Idle' | 'Editing' | 'Selecting' = 'Idle';
-  private _blurTimeout: number | undefined;
+  private _blurTimeout: Timeout;
+  private _selectionTimeout: Timeout;
 
   // Timeout constants for better maintainability
   private readonly BLUR_DELAY = 150;
@@ -147,6 +152,7 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
 
   private _clearTimeouts(): void {
     window.clearTimeout(this._blurTimeout);
+    window.clearTimeout(this._selectionTimeout);
   }
 
   private _resetTaskState(): void {
@@ -175,7 +181,7 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
 
   onAutocompleteClosed(): void {
     // Add a small delay to ensure option selection is processed first
-    setTimeout(() => {
+    this._selectionTimeout = setTimeout(() => {
       if (this._interactionState !== 'Selecting') {
         this._setState('Idle');
       }
@@ -198,20 +204,20 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
   }
 
   private _focusSelectTaskMinimal(): void {
-    const tryFocus: () => boolean = () => {
-      const selectTaskInput =
-        this.selectTaskMinimal()?.nativeElement?.querySelector('input');
-      if (selectTaskInput) {
-        selectTaskInput.focus();
-        return true;
-      }
-      return false;
-    };
-
     // Try immediate focus, fallback to next tick if needed
-    if (!tryFocus()) {
-      setTimeout(tryFocus, 0);
+    if (!this._tryFocus()) {
+      setTimeout(() => this._tryFocus(), 0);
     }
+  }
+
+  private _tryFocus(): boolean {
+    const selectTaskInput =
+      this.selectTaskMinimal()?.nativeElement?.querySelector('input');
+    if (selectTaskInput) {
+      selectTaskInput.focus();
+      return true;
+    }
+    return false;
   }
 
   private async addTask(): Promise<void> {
@@ -233,7 +239,7 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
         });
         const task = await this._taskService.getByIdOnce$(id).toPromise();
         if (!task) {
-          throw new Error(`Could not resolve task with id ${id}`);
+          throw new Error(`Failed to retrieve task after creation. Task ID: ${id}`);
         }
         this._store.dispatch(
           PlannerActions.planTaskForDay({
@@ -253,7 +259,11 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
         );
       }
     } catch (error) {
-      devError(`Failed to create/schedule task: ${error}`);
+      devError(`Failed to create or schedule task: ${error}`);
+      this._snackService.open({
+        type: 'ERROR',
+        msg: 'Failed to create or schedule task',
+      });
     }
   }
 
