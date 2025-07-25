@@ -3,20 +3,15 @@ import {
   Component,
   inject,
   input,
-  OnDestroy,
   computed,
+  effect,
+  signal,
+  untracked,
+  OnDestroy,
 } from '@angular/core';
-import { combineLatest, Observable, of, Subscription, merge } from 'rxjs';
+import { merge } from 'rxjs';
 import { TaskDetailTargetPanel, TaskWithSubTasks } from '../tasks/task.model';
-import {
-  delay,
-  distinctUntilChanged,
-  map,
-  switchMap,
-  filter,
-  pairwise,
-  startWith,
-} from 'rxjs/operators';
+import { distinctUntilChanged, map, filter, startWith } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { slideInFromTopAni } from '../../ui/animations/slide-in-from-top.ani';
@@ -27,7 +22,6 @@ import { IssuePanelComponent } from '../issue-panel/issue-panel.component';
 import { NotesComponent } from '../note/notes/notes.component';
 import { TaskDetailPanelComponent } from '../tasks/task-detail-panel/task-detail-panel.component';
 import { TaskViewCustomizerPanelComponent } from '../task-view-customizer/task-view-customizer-panel/task-view-customizer-panel.component';
-import { AsyncPipe } from '@angular/common';
 import { PluginService } from '../../plugins/plugin.service';
 import { PluginPanelContainerComponent } from '../../plugins/ui/plugin-panel-container/plugin-panel-container.component';
 import { Store } from '@ngrx/store';
@@ -37,9 +31,9 @@ import {
   selectLayoutFeatureState,
 } from '../../core-ui/layout/store/layout.reducer';
 import { hidePluginPanel } from '../../core-ui/layout/store/layout.actions';
-import { fastArrayCompare } from '../../util/fast-array-compare';
 import { Log } from '../../core/log';
 import { NavigationEnd, Router, NavigationStart } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'right-panel',
@@ -57,7 +51,6 @@ import { NavigationEnd, Router, NavigationStart } from '@angular/router';
     NotesComponent,
     TaskDetailPanelComponent,
     TaskViewCustomizerPanelComponent,
-    AsyncPipe,
     PluginPanelContainerComponent,
   ],
 })
@@ -82,13 +75,74 @@ export class RightPanelComponent implements OnDestroy {
     return this.layoutService.isRightPanelOverCustom();
   });
 
-  // to still display its data when panel is closing
-  selectedTaskWithDelayForNone$: Observable<TaskWithSubTasks | null> =
-    this.taskService.selectedTask$.pipe(
-      switchMap((task) => (task ? of(task) : of(null).pipe(delay(200)))),
-    );
+  // Convert observables to signals
+  private readonly _selectedTask = toSignal(this.taskService.selectedTask$, {
+    initialValue: null,
+  });
 
-  panelContent$: Observable<
+  private readonly _taskDetailPanelTargetPanel = toSignal(
+    this.taskService.taskDetailPanelTargetPanel$,
+    { initialValue: null },
+  );
+
+  private readonly _layoutFeatureState = toSignal(
+    this.store.select(selectLayoutFeatureState),
+    {
+      initialValue: {
+        isShowAddTaskBar: false,
+        isShowNotes: false,
+        isShowIssuePanel: false,
+        isShowSideNav: false,
+        isShowCelebrate: false,
+        isShowTaskViewCustomizerPanel: false,
+        isShowPluginPanel: false,
+        activePluginId: null,
+      },
+    },
+  );
+
+  private readonly _isShowPluginPanel = toSignal(
+    this.store.select(selectIsShowPluginPanel),
+    { initialValue: false },
+  );
+
+  private readonly _activePluginId = toSignal(this.store.select(selectActivePluginId), {
+    initialValue: null,
+  });
+
+  // to still display its data when panel is closing
+  private _selectedTaskDelayedSignal = signal<TaskWithSubTasks | null>(null);
+
+  // Effect to handle delayed task clearing
+  private _selectedTaskDelayTimer: any;
+  private _selectedTaskDelayEffect = effect(
+    () => {
+      const task = this._selectedTask();
+
+      // Clear any existing timer
+      if (this._selectedTaskDelayTimer) {
+        clearTimeout(this._selectedTaskDelayTimer);
+        this._selectedTaskDelayTimer = null;
+      }
+
+      if (task) {
+        this._selectedTaskDelayedSignal.set(task);
+      } else {
+        // Delay clearing the task to allow animations
+        this._selectedTaskDelayTimer = setTimeout(() => {
+          this._selectedTaskDelayedSignal.set(null);
+        }, 200);
+      }
+    },
+    { allowSignalWrites: true },
+  );
+
+  readonly selectedTaskWithDelayForNone = computed(() =>
+    this._selectedTaskDelayedSignal(),
+  );
+
+  // Computed signal for panel content
+  readonly panelContent = computed<
     | 'NOTES'
     | 'TASK'
     | 'ADD_TASK_PANEL'
@@ -96,184 +150,219 @@ export class RightPanelComponent implements OnDestroy {
     | 'TASK_VIEW_CUSTOMIZER_PANEL'
     | 'PLUGIN'
     | undefined
-  > = combineLatest([
-    this.store.select(selectLayoutFeatureState),
-    this.taskService.selectedTask$,
-  ] as const).pipe(
-    map(([layoutState, selectedTask]) => {
-      const {
-        isShowNotes,
-        isShowIssuePanel,
-        isShowTaskViewCustomizerPanel,
-        isShowPluginPanel,
-      } = layoutState;
+  >(() => {
+    const layoutState = this._layoutFeatureState();
+    const selectedTask = this._selectedTask();
 
-      if (isShowNotes) {
-        return 'NOTES';
-      } else if (isShowIssuePanel) {
-        return 'ISSUE_PANEL';
-      } else if (isShowTaskViewCustomizerPanel) {
-        return 'TASK_VIEW_CUSTOMIZER_PANEL';
-      } else if (isShowPluginPanel) {
-        return 'PLUGIN';
-      } else if (selectedTask) {
-        // Task content comes last so we can avoid an extra effect to unset selected task
-        return 'TASK';
-      }
+    if (!layoutState) {
       return undefined;
-    }),
-    distinctUntilChanged(),
-  );
+    }
 
-  // Observable that includes plugin ID for component recreation
-  pluginPanelKeys$: Observable<string[]> = combineLatest([
-    this.store.select(selectIsShowPluginPanel),
-    this.store.select(selectActivePluginId),
-  ] as const).pipe(
-    map(([isShowPluginPanel, activePluginId]) => {
-      const keys =
-        isShowPluginPanel && activePluginId ? [`plugin-${activePluginId}`] : [];
-      Log.log('RightPanel: pluginPanelKeys$ emitted:', {
-        isShowPluginPanel,
-        activePluginId,
-        keys,
-      });
-      return keys;
-    }),
-    distinctUntilChanged((a, b) => fastArrayCompare(a, b)),
-  );
+    const {
+      isShowNotes,
+      isShowIssuePanel,
+      isShowTaskViewCustomizerPanel,
+      isShowPluginPanel,
+    } = layoutState;
 
-  // Observable to track current route
-  private _currentRoute$: Observable<string> = this._router.events.pipe(
-    filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-    map((event) => event.urlAfterRedirects),
-    startWith(this._router.url),
-  );
+    if (isShowNotes) {
+      return 'NOTES';
+    } else if (isShowIssuePanel) {
+      return 'ISSUE_PANEL';
+    } else if (isShowTaskViewCustomizerPanel) {
+      return 'TASK_VIEW_CUSTOMIZER_PANEL';
+    } else if (isShowPluginPanel) {
+      return 'PLUGIN';
+    } else if (selectedTask) {
+      // Task content comes last so we can avoid an extra effect to unset selected task
+      return 'TASK';
+    }
+    return undefined;
+  });
 
-  // Observable to track if navigation is in progress
-  private _isNavigating$: Observable<boolean> = merge(
+  // Computed signal that includes plugin ID for component recreation
+  readonly pluginPanelKeys = computed<string[]>(() => {
+    const isShowPluginPanel = this._isShowPluginPanel();
+    const activePluginId = this._activePluginId();
+
+    const keys = isShowPluginPanel && activePluginId ? [`plugin-${activePluginId}`] : [];
+    Log.log('RightPanel: pluginPanelKeys computed:', {
+      isShowPluginPanel,
+      activePluginId,
+      keys,
+    });
+    return keys;
+  });
+
+  // Signal to track current route
+  private readonly _currentRoute = toSignal(
     this._router.events.pipe(
-      filter((event) => event instanceof NavigationStart),
-      map(() => true),
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map((event) => event.urlAfterRedirects),
+      startWith(this._router.url),
     ),
-    this._router.events.pipe(
-      filter((event) => event instanceof NavigationEnd),
-      map(() => false),
-    ),
-  ).pipe(startWith(false), distinctUntilChanged());
-
-  isOpen$: Observable<boolean> = combineLatest([
-    this.taskService.selectedTask$,
-    this.taskService.taskDetailPanelTargetPanel$,
-    this.layoutService.isShowNotes$,
-    this.layoutService.isShowIssuePanel$,
-    this.layoutService.isShowTaskViewCustomizerPanel$,
-    this.store.select(selectIsShowPluginPanel),
-    this._currentRoute$,
-    this._isNavigating$,
-  ] as const).pipe(
-    map(
-      ([
-        selectedTask,
-        targetPanel,
-        isShowNotes,
-        isShowAddTaskPanel,
-        isShowTaskViewCustomizerPanel,
-        isShowPluginPanel,
-        currentRoute,
-        isNavigating,
-      ]) => {
-        // Don't open panel during navigation to prevent flashing
-        if (isNavigating) {
-          return false;
-        }
-
-        const isWorkView = this._isWorkViewUrl(currentRoute as string);
-
-        // For non-work-view routes, only allow panels that are explicitly opened
-        // This prevents panels from persisting when navigating from work-view to non-work-view
-        if (!isWorkView) {
-          // You might want to allow certain panels on non-work-view routes
-          // For now, let's allow all panels but they'll be in "over" mode
-        }
-
-        return (
-          !!(
-            selectedTask ||
-            isShowNotes ||
-            isShowAddTaskPanel ||
-            isShowTaskViewCustomizerPanel ||
-            isShowPluginPanel
-          ) && targetPanel !== TaskDetailTargetPanel.DONT_OPEN_PANEL
-        );
-      },
-    ),
-    distinctUntilChanged(),
+    { initialValue: this._router.url },
   );
+
+  // Signal to track if navigation is in progress
+  private readonly _isNavigating = toSignal(
+    merge(
+      this._router.events.pipe(
+        filter((event) => event instanceof NavigationStart),
+        map(() => true),
+      ),
+      this._router.events.pipe(
+        filter((event) => event instanceof NavigationEnd),
+        map(() => false),
+      ),
+    ).pipe(startWith(false), distinctUntilChanged()),
+    { initialValue: false },
+  );
+
+  // Computed signal for panel open state
+  readonly isOpen = computed<boolean>(() => {
+    const selectedTask = this._selectedTask();
+    const targetPanel = this._taskDetailPanelTargetPanel();
+    const layoutState = this._layoutFeatureState();
+    const currentRoute = this._currentRoute();
+    const isNavigating = this._isNavigating();
+
+    // Don't open panel during navigation to prevent flashing
+    if (isNavigating) {
+      return false;
+    }
+
+    if (!layoutState) {
+      return false;
+    }
+
+    const {
+      isShowNotes,
+      isShowIssuePanel: isShowAddTaskPanel,
+      isShowTaskViewCustomizerPanel,
+      isShowPluginPanel,
+    } = layoutState;
+
+    const isWorkView = this._isWorkViewUrl(currentRoute);
+
+    // For non-work-view routes, only allow panels that are explicitly opened
+    // This prevents panels from persisting when navigating from work-view to non-work-view
+    if (!isWorkView) {
+      // You might want to allow certain panels on non-work-view routes
+      // For now, let's allow all panels but they'll be in "over" mode
+    }
+
+    return (
+      !!(
+        selectedTask ||
+        isShowNotes ||
+        isShowAddTaskPanel ||
+        isShowTaskViewCustomizerPanel ||
+        isShowPluginPanel
+      ) && targetPanel !== TaskDetailTargetPanel.DONT_OPEN_PANEL
+    );
+  });
 
   // NOTE: prevents the inner animation from happening file panel is expanding
-  isDisableTaskPanelAni = true;
+  readonly isDisableTaskPanelAni = signal(true);
 
-  private _subs = new Subscription();
+  // Track previous isOpen state to avoid infinite loops
+  private _previousIsOpen = signal<boolean | null>(null);
+
+  // Effect to handle panel close
+  private _isOpenEffect = effect(
+    () => {
+      const isOpen = this.isOpen();
+      const previousIsOpen = this._previousIsOpen();
+
+      // Only trigger onClose when transitioning from open to closed
+      if (previousIsOpen === true && isOpen === false) {
+        // Use setTimeout to avoid triggering state changes during effect execution
+        setTimeout(() => this.onClose(), 0);
+      }
+
+      this._previousIsOpen.set(isOpen);
+    },
+    { allowSignalWrites: true },
+  );
+
+  // Effect to handle animation state with delay
+  private _animationTimer: any;
+  private _animationEffect = effect(
+    () => {
+      const isOpen = this.isOpen();
+
+      // Clear any existing timer
+      if (this._animationTimer) {
+        clearTimeout(this._animationTimer);
+        this._animationTimer = null;
+      }
+
+      // Delay is needed for timing
+      this._animationTimer = setTimeout(() => {
+        this.isDisableTaskPanelAni.set(!isOpen);
+      }, 500);
+    },
+    { allowSignalWrites: true },
+  );
+
+  // Signal to track previous route for navigation handling
+  private _previousRoute = signal<{ url: string; isWorkView: boolean } | null>(null);
+
+  // Effect for navigation handling
+  private _navigationEffect = effect(
+    () => {
+      const currentRoute = this._currentRoute();
+      const isCurrentWorkView = this._isWorkViewUrl(currentRoute);
+
+      untracked(() => {
+        const prev = this._previousRoute();
+
+        if (prev) {
+          // Close panel ONLY when:
+          // 1. Navigating from any route to a non-work-view route
+          // 2. Navigating from non-work-view to work-view (to prevent style flash)
+          // Do NOT close when navigating between work-view routes
+          const shouldClose =
+            !isCurrentWorkView || (!prev.isWorkView && isCurrentWorkView);
+
+          // Debug logging
+          if (shouldClose) {
+            Log.log('RightPanel: Closing panel on navigation', {
+              from: prev.url,
+              to: currentRoute,
+              fromIsWorkView: prev.isWorkView,
+              toIsWorkView: isCurrentWorkView,
+            });
+            // Close all panels when navigating to incompatible routes
+            // Use setTimeout to avoid state changes during effect execution
+            setTimeout(() => this.close(), 0);
+          }
+        }
+
+        // Update previous route
+        this._previousRoute.set({ url: currentRoute, isWorkView: isCurrentWorkView });
+      });
+    },
+    { allowSignalWrites: true },
+  );
 
   constructor() {
-    this._subs.add(
-      this.isOpen$.subscribe((isOpen) => {
-        if (!isOpen) {
-          this.onClose();
-        }
-      }),
-    );
-    this._subs.add(
-      // NOTE: delay is needed, because otherwise timing won't work
-      this.isOpen$.pipe(delay(500)).subscribe((isOpen) => {
-        this.isDisableTaskPanelAni = !isOpen;
-      }),
-    );
+    // No longer need subscriptions as we're using effects
+  }
 
-    // Add navigation handling to close panel when appropriate
-    this._subs.add(
-      this._router.events
-        .pipe(
-          filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-          map((event) => ({
-            url: event.urlAfterRedirects,
-            isWorkView: this._isWorkViewUrl(event.urlAfterRedirects),
-          })),
-          pairwise(),
-          filter(([prev, curr]) => {
-            // Close panel ONLY when:
-            // 1. Navigating from any route to a non-work-view route
-            // 2. Navigating from non-work-view to work-view (to prevent style flash)
-            // Do NOT close when navigating between work-view routes
-            const shouldClose = !curr.isWorkView || (!prev.isWorkView && curr.isWorkView);
-
-            // Debug logging
-            if (shouldClose) {
-              Log.log('RightPanel: Closing panel on navigation', {
-                from: prev.url,
-                to: curr.url,
-                fromIsWorkView: prev.isWorkView,
-                toIsWorkView: curr.isWorkView,
-              });
-            }
-
-            return shouldClose;
-          }),
-        )
-        .subscribe(() => {
-          // Close all panels when navigating to incompatible routes
-          this.close();
-        }),
-    );
+  ngOnDestroy(): void {
+    // Clean up timers to prevent memory leaks
+    if (this._selectedTaskDelayTimer) {
+      clearTimeout(this._selectedTaskDelayTimer);
+    }
+    if (this._animationTimer) {
+      clearTimeout(this._animationTimer);
+    }
   }
 
   private _isWorkViewUrl(url: string): boolean {
     return url.includes('/active/') || url.includes('/tag/') || url.includes('/project/');
-  }
-
-  ngOnDestroy(): void {
-    this._subs.unsubscribe();
   }
 
   close(): void {

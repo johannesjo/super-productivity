@@ -1,6 +1,6 @@
 <better-drawer-container
   (wasClosed)="close()"
-  [isOpen]="isOpen$ | async"
+  [isOpen]="isOpen()"
   [isOver]="isCustomOver()"
   [sideWidth]="40"
 >
@@ -9,26 +9,24 @@
   </ng-container>
 
   <ng-container better-drawer-side>
-    @let panelContent = panelContent$ | async;
     <div class="right-panel">
-      @if (panelContent === 'ISSUE_PANEL') {
+      @if (panelContent() === 'ISSUE_PANEL') {
         <issue-panel [@slideInFromRight]></issue-panel>
-      } @else if (panelContent === 'NOTES') {
+      } @else if (panelContent() === 'NOTES') {
         <notes [@slideInFromRight]></notes>
-      } @else if (panelContent === 'TASK_VIEW_CUSTOMIZER_PANEL') {
+      } @else if (panelContent() === 'TASK_VIEW_CUSTOMIZER_PANEL') {
         <task-view-customizer-panel [@slideInFromRight]></task-view-customizer-panel>
-      } @else if (panelContent === 'PLUGIN') {
-        @for (key of pluginPanelKeys$ | async; track key) {
+      } @else if (panelContent() === 'PLUGIN') {
+        @for (key of pluginPanelKeys(); track key) {
           <plugin-panel-container [@slideInFromRight]></plugin-panel-container>
         }
         <!-- Task content comes last so we can avoid an extra effect to unset selected task -->
-      } @else if (selectedTaskWithDelayForNone$ | async) {
-        @let selectedTaskWithDelayForNone = selectedTaskWithDelayForNone$ | async;
+      } @else if (selectedTaskWithDelayForNone()) {
         <task-detail-panel
           [isOver]="isCustomOver()"
-          [@taskDetailPanelTaskChange]="selectedTaskWithDelayForNone?.id"
-          [@.disabled]="isDisableTaskPanelAni"
-          [task]="selectedTaskWithDelayForNone"
+          [@taskDetailPanelTaskChange]="selectedTaskWithDelayForNone()?.id"
+          [@.disabled]="isDisableTaskPanelAni()"
+          [task]="selectedTaskWithDelayForNone()"
         ></task-detail-panel>
       }
     </div>
