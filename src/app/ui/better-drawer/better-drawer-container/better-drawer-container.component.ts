@@ -17,6 +17,9 @@ import { MainContainerClass } from '../../../app.constants';
 import { LanguageService } from '../../../core/language/language.service';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, NavigationStart, Router } from '@angular/router';
+import { filter, map, switchMap, startWith } from 'rxjs/operators';
+import { of, timer } from 'rxjs';
 
 const SMALL_CONTAINER_WIDTH = 620;
 const VERY_SMALL_CONTAINER_WIDTH = 450;
@@ -38,6 +41,7 @@ export class BetterDrawerContainerComponent implements OnDestroy {
   private _elementRef = inject(ElementRef);
   private _domSanitizer = inject(DomSanitizer);
   private _languageService = inject(LanguageService);
+  private _router = inject(Router);
 
   readonly sideWidth = input<number>(0);
   readonly isOpen = input<boolean>(false);
@@ -47,7 +51,6 @@ export class BetterDrawerContainerComponent implements OnDestroy {
   readonly contentElRef = viewChild<ElementRef>('contentElRef');
 
   private _containerWidth = signal<number>(0);
-  private _isFirstRender = signal(true);
   private _resizeObserver: ResizeObserver | null = null;
 
   readonly isRTL = toSignal(this._languageService.isLangRTL, { initialValue: false });
@@ -62,11 +65,32 @@ export class BetterDrawerContainerComponent implements OnDestroy {
 
   readonly sideStyle = computed<SafeStyle>(() => {
     const styles =
-      this._getWidthRelatedStyles() + (this._isFirstRender() ? ' transition: none;' : '');
+      this._getWidthRelatedStyles() +
+      (this._shouldSkipAnimation() ? ' transition: none;' : '');
     return this._domSanitizer.bypassSecurityTrustStyle(styles);
   });
 
-  // Effect to setup resize observer when content element is available
+  // Skip animations during navigation using RxJS
+  private readonly _skipAnimationDuringNav = toSignal(
+    this._router.events.pipe(
+      filter(
+        (event) => event instanceof NavigationStart || event instanceof NavigationEnd,
+      ),
+      map((event) => event instanceof NavigationStart),
+      // When navigation starts, immediately return true
+      // When navigation ends, delay returning false by 100ms
+      switchMap((isNavigating) =>
+        isNavigating ? of(true) : timer(100).pipe(map(() => false)),
+      ),
+      startWith(true), // Start with animations disabled
+    ),
+    { initialValue: true },
+  );
+
+  // Computed signal that determines if animations should be skipped
+  private readonly _shouldSkipAnimation = computed(() => this._skipAnimationDuringNav());
+
+  // Effect to set up resize observer when content element is available
   private _contentElEffect = effect(() => {
     const elRef = this.contentElRef();
     if (elRef) {
@@ -92,21 +116,6 @@ export class BetterDrawerContainerComponent implements OnDestroy {
       containerEl.classList.remove(MainContainerClass.isVerySmallMainContainer);
     }
   });
-
-  // Effect to handle first render reset
-  private _firstRenderEffect = effect(
-    () => {
-      // Trigger on style change
-      this.sideStyle();
-
-      if (this._isFirstRender()) {
-        setTimeout(() => {
-          this._isFirstRender.set(false);
-        });
-      }
-    },
-    { allowSignalWrites: true },
-  );
 
   ngOnDestroy(): void {
     if (this._resizeObserver) {
