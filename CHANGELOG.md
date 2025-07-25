@@ -1,3 +1,34 @@
+## [14.2.3](https://github.com/johannesjo/super-productivity/compare/v14.2.2...v14.2.3) (2025-07-25)
+
+### Bug Fixes
+
+- "No encryption password provided" [#4642](https://github.com/johannesjo/super-productivity/issues/4642) ([c3e9304](https://github.com/johannesjo/super-productivity/commit/c3e9304c76267a420ca648bd79d1f2baf5db9b78))
+- add missing translations ([abd6122](https://github.com/johannesjo/super-productivity/commit/abd612260ca7da7fd609ee967b9320444cc25c07))
+- all console errors ([dab4593](https://github.com/johannesjo/super-productivity/commit/dab4593c880750a9dd40e9a4997a083d478cd25b))
+- animation not playing correctly on side panel close ([8c5521d](https://github.com/johannesjo/super-productivity/commit/8c5521da7fe80abe80156f1e384c40e33e01135f))
+- **docker:** resolve build failures in multi-platform environments ([29c55bf](https://github.com/johannesjo/super-productivity/commit/29c55bf956073aa35bf25481d25c45c22a2759b1))
+- error when moving sub tasks to archive ([dcb471e](https://github.com/johannesjo/super-productivity/commit/dcb471e5c4250c0d0dcd3be0dd2914aabea2cf9f)), closes [#4815](https://github.com/johannesjo/super-productivity/issues/4815)
+- **recurring-tasks:** show overdue recurring tasks in Today view [#4825](https://github.com/johannesjo/super-productivity/issues/4825) ([47fb1b6](https://github.com/johannesjo/super-productivity/commit/47fb1b61b19615c65f12c4f859540a3e80b48d8a))
+- styling issue ([9906e45](https://github.com/johannesjo/super-productivity/commit/9906e4581a6c34755deb330ceed07d867b8efa79))
+- wrong icon for kde title bar ([4fb84de](https://github.com/johannesjo/super-productivity/commit/4fb84de516d70bf9016cc8ba3dd47d88fdbe750a))
+
+### Features
+
+- add back in different folder for DEV webdav sync ([d0d8cf2](https://github.com/johannesjo/super-productivity/commit/d0d8cf2108cc4c747903a57b62aab87b49268cc0))
+- add better icon for issue integration panel ([2f63734](https://github.com/johannesjo/super-productivity/commit/2f637348f18a1628ff9e8d87198ae594c9aad211))
+- better inform about potential cors issues +[#4834](https://github.com/johannesjo/super-productivity/issues/4834) ([a5828fc](https://github.com/johannesjo/super-productivity/commit/a5828fc7d406802d89e857ce48778641571efd25))
+- enable domina mode for firefox [#4808](https://github.com/johannesjo/super-productivity/issues/4808) ([c266340](https://github.com/johannesjo/super-productivity/commit/c266340d2f1063fc5f68d7e3804dddc763f4efc8))
+- improve dialog-incomplete sync content ([6f22842](https://github.com/johannesjo/super-productivity/commit/6f22842321b347f7e87e3ec227abf4f51faa50c7))
+- **plugin:** wait with plugin init until initial sync is done to avoid initial db write conflicts ([e1babc5](https://github.com/johannesjo/super-productivity/commit/e1babc53be5c4a94deb755f776c1fa2f032f79ed))
+- show next and last creation date for repeatable tasks in overview [#4825](https://github.com/johannesjo/super-productivity/issues/4825) ([9ebaf68](https://github.com/johannesjo/super-productivity/commit/9ebaf68bab0c5694ec804b4cf9f059ec33081613))
+- **sync-md:** add support for markdown content before tasks as needed for joplin [#4751](https://github.com/johannesjo/super-productivity/issues/4751) ([cfff136](https://github.com/johannesjo/super-productivity/commit/cfff1368524dc81cdff9684e0ebf601a20dbdfc7))
+- translate stuff ([1ddb3cc](https://github.com/johannesjo/super-productivity/commit/1ddb3cc225aabb72d99edd7f33854a09206c16e7))
+- translate stuff 2 ([615f79b](https://github.com/johannesjo/super-productivity/commit/615f79b4a16268a2da7c89e225b7803c200fb9c3))
+- update privacy policy link ([c7dd0f2](https://github.com/johannesjo/super-productivity/commit/c7dd0f2b1a73c24ffe65bfca2023fb6c0320f293))
+- **webdav:** add legacy support for webdav [#4829](https://github.com/johannesjo/super-productivity/issues/4829) ([e6fd4a5](https://github.com/johannesjo/super-productivity/commit/e6fd4a5e69c4f39327b15105a8620f3d5879331f))
+- **webdav:** get rid of etag completely in favor of last-modified [#4829](https://github.com/johannesjo/super-productivity/issues/4829) ([495530f](https://github.com/johannesjo/super-productivity/commit/495530fcd871f7f993e9ff2dfa17428722dbf5a9))
+- **webdav:** remove isLikelyTimestamp stuff ([80cfd04](https://github.com/johannesjo/super-productivity/commit/80cfd0415f62aee6aad48fcc5d346d0fa3e2a0a8))
+
 ## [14.2.2](https://github.com/johannesjo/super-productivity/compare/v14.2.1...v14.2.2) (2025-07-20)
 
 ### Bug Fixes
