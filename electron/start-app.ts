@@ -23,6 +23,10 @@ import { quitApp, showOrFocus } from './various-shared';
 import { createWindow } from './main-window';
 import { IdleTimeHandler } from './idle-time-handler';
 import { destroyOverlayWindow } from './overlay-indicator/overlay-indicator';
+import {
+  initializeProtocolHandling,
+  processPendingProtocolUrls,
+} from './protocol-handler';
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
@@ -52,6 +56,16 @@ let mainWin: BrowserWindow;
 let idleTimeHandler: IdleTimeHandler;
 
 export const startApp = (): void => {
+  // Initialize protocol handling
+  initializeProtocolHandling(IS_DEV, app, () => mainWin);
+
+  // Handle single instance lock
+  const gotTheLock = app.requestSingleInstanceLock();
+  if (!gotTheLock) {
+    app.quit();
+    return;
+  }
+
   // LOAD IPC STUFF
   initIpcInterfaces();
 
@@ -341,6 +355,11 @@ export const startApp = (): void => {
       quitApp,
       customUrl,
     });
+
+    // Process any pending protocol URLs after window is created
+    setTimeout(() => {
+      processPendingProtocolUrls(mainWin);
+    }, 1000);
   }
 
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions

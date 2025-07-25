@@ -19,6 +19,8 @@ import {
   unPauseFocusSession,
 } from '../../focus-mode/store/focus-mode.actions';
 import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
+import { ipcAddTask$ } from '../../../core/ipc-events';
+import { TaskService } from '../task.service';
 
 // TODO send message to electron when current task changes here
 
@@ -29,6 +31,7 @@ export class TaskElectronEffects {
   private _configService = inject(GlobalConfigService);
   private _pomodoroService = inject(PomodoroService);
   private _focusModeService = inject(FocusModeService);
+  private _taskService = inject(TaskService);
 
   // -----------------------------------------------------------------------------------
   // NOTE: IS_ELECTRON checks not necessary, since we check before importing this module
@@ -149,6 +152,18 @@ export class TaskElectronEffects {
             progress,
             progressBarMode: 'normal',
           });
+        }),
+      ),
+    { dispatch: false },
+  );
+
+  handleAddTaskFromProtocol$ = createEffect(
+    () =>
+      ipcAddTask$.pipe(
+        tap(({ title }) => {
+          if (title) {
+            this._taskService.add(title);
+          }
         }),
       ),
     { dispatch: false },
