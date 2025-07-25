@@ -1,5 +1,5 @@
 import { Task } from '@super-productivity/plugin-api';
-import { ParsedTask } from '../sync/types';
+import { ParsedTask } from '../sync/markdown-parser';
 import { LocalUserCfg } from '../local-config';
 
 /**
@@ -167,7 +167,7 @@ export const createMockConfig = (overrides?: Partial<LocalUserCfg>): LocalUserCf
   ...overrides,
 });
 
-export const createMockPluginAPI = () => {
+export const createMockPluginAPI = (): any => {
   const mockAPI = {
     registerHook: jest.fn(),
     onWindowFocusChange: jest.fn(),
@@ -176,6 +176,19 @@ export const createMockPluginAPI = () => {
       .fn()
       .mockResolvedValue([{ id: 'test-project', title: 'Test Project' }]),
     batchUpdateForProject: jest.fn().mockResolvedValue(undefined),
+    log: {
+      critical: jest.fn(),
+      err: jest.fn(),
+      error: jest.fn(),
+      log: jest.fn(),
+      normal: jest.fn(),
+      info: jest.fn(),
+      verbose: jest.fn(),
+      debug: jest.fn(),
+      warn: jest.fn(),
+    },
+    persistDataSynced: jest.fn(),
+    loadSyncedData: jest.fn(),
   };
 
   (global as any).PluginAPI = mockAPI;
@@ -242,7 +255,8 @@ export const generateLargeMarkdown = (taskCount: number): string => {
   return builder.build();
 };
 
-export const waitForAsync = () => new Promise((resolve) => setImmediate(resolve));
+export const waitForAsync = (): Promise<void> =>
+  new Promise((resolve) => setImmediate(resolve));
 
 export const measureExecutionTime = async (
   fn: () => void | Promise<void>,
@@ -256,7 +270,7 @@ export const measureExecutionTime = async (
  * Custom Jest matchers
  */
 export const customMatchers = {
-  toBeValidTask(received: any) {
+  toBeValidTask: (received: any) => {
     const pass =
       received &&
       typeof received.id === 'string' &&
@@ -273,7 +287,7 @@ export const customMatchers = {
     };
   },
 
-  toBeValidParsedTask(received: any) {
+  toBeValidParsedTask: (received: any) => {
     const pass =
       received &&
       typeof received.line === 'number' &&

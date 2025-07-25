@@ -16,6 +16,7 @@ export interface ParsedTask {
 export interface TaskParseResult {
   tasks: ParsedTask[];
   errors: string[];
+  header?: string;
 }
 
 /**
@@ -62,6 +63,14 @@ export const parseMarkdown = (content: string): ParsedTask[] => {
 };
 
 /**
+ * Parse markdown content and return header content
+ * Returns everything before the first task
+ */
+export const parseMarkdownWithHeader = (content: string): TaskParseResult => {
+  return parseMarkdownWithErrors(content);
+};
+
+/**
  * Parse markdown content into task objects with error collection
  * Handles tasks and subtasks (first two levels) and converts deeper levels to notes
  */
@@ -80,6 +89,8 @@ export const parseMarkdownWithErrors = (content: string): TaskParseResult => {
   console.log(`[sync-md] Detected indent size: ${detectedIndentSize} spaces`);
 
   let currentTaskIndex = -1;
+  let firstTaskLineIndex = -1;
+  let header: string | undefined;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -88,6 +99,15 @@ export const parseMarkdownWithErrors = (content: string): TaskParseResult => {
     const taskMatch = line.match(/^(\s*)- \[([ x])\]\s*(?:<!--([^>]+)-->\s*)?(.*)$/);
 
     if (taskMatch) {
+      // Mark the first task line if not already marked
+      if (firstTaskLineIndex === -1) {
+        firstTaskLineIndex = i;
+        // Extract header content (everything before the first task)
+        if (i > 0) {
+          header = lines.slice(0, i).join('\n');
+        }
+      }
+
       const [, indent, completed, id, title] = taskMatch;
       const indentLevel = indent.length;
       const depth = indentLevel === 0 ? 0 : Math.floor(indentLevel / detectedIndentSize);
@@ -200,7 +220,12 @@ export const parseMarkdownWithErrors = (content: string): TaskParseResult => {
     }
   }
 
-  return { tasks, errors };
+  // If no tasks were found, the entire content is considered header
+  if (firstTaskLineIndex === -1 && lines.length > 0) {
+    header = content;
+  }
+
+  return { tasks, errors, header };
 };
 
 /**

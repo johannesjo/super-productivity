@@ -1,4 +1,4 @@
-import { parseMarkdown } from './markdown-parser';
+import { parseMarkdownWithHeader } from './markdown-parser';
 import { generateTaskOperations } from './generate-task-operations';
 // import { Task } from '@super-productivity/plugin-api';
 
@@ -10,7 +10,9 @@ export const mdToSp = async (
   markdownContent: string,
   projectId: string,
 ): Promise<void> => {
-  const parsedTasks = parseMarkdown(markdownContent);
+  // Use parseMarkdownWithHeader to get header, but handle backward compatibility
+  const parseResult = parseMarkdownWithHeader(markdownContent);
+  const parsedTasks = parseResult.tasks;
 
   // Get current state
   const currentTasks = await PluginAPI.getTasks();

@@ -5,7 +5,6 @@ import * as fileUtils from '../../helper/file-utils';
 import { spToMd } from '../../sync/sp-to-md';
 import { mdToSp } from '../../sync/md-to-sp';
 import { verifySyncState, logSyncVerification } from '../../sync/verify-sync';
-import { PluginHooks } from '@super-productivity/plugin-api';
 
 // Mock dependencies
 jest.mock('../../sync/file-watcher');
@@ -13,6 +12,38 @@ jest.mock('../../helper/file-utils');
 jest.mock('../../sync/sp-to-md');
 jest.mock('../../sync/md-to-sp');
 jest.mock('../../sync/verify-sync');
+jest.mock('../../../shared/logger', () => ({
+  log: {
+    critical: jest.fn(),
+    err: jest.fn(),
+    error: jest.fn(),
+    log: jest.fn(),
+    normal: jest.fn(),
+    info: jest.fn(),
+    verbose: jest.fn(),
+    debug: jest.fn(),
+    warn: jest.fn(),
+  },
+}));
+
+// Mock PluginAPI
+(global as any).PluginAPI = {
+  registerHook: jest.fn(),
+  onWindowFocusChange: jest.fn(),
+  log: {
+    critical: jest.fn(),
+    err: jest.fn(),
+    error: jest.fn(),
+    log: jest.fn(),
+    normal: jest.fn(),
+    info: jest.fn(),
+    verbose: jest.fn(),
+    debug: jest.fn(),
+    warn: jest.fn(),
+  },
+  persistDataSynced: jest.fn(),
+  loadSyncedData: jest.fn(),
+};
 
 describe('Sync Manager - Edge Cases', () => {
   const mockConfig: LocalUserCfg = {

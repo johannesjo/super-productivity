@@ -2,11 +2,7 @@ import { startFileWatcher, stopFileWatcher } from './file-watcher';
 import { spToMd } from './sp-to-md';
 import { mdToSp } from './md-to-sp';
 import { getFileStats, readTasksFile } from '../helper/file-utils';
-import {
-  SYNC_DEBOUNCE_MS,
-  SYNC_DEBOUNCE_MS_UNFOCUSED,
-  SYNC_DEBOUNCE_MS_MD_TO_SP,
-} from '../config.const';
+import { SYNC_DEBOUNCE_MS, SYNC_DEBOUNCE_MS_MD_TO_SP } from '../config.const';
 import { PluginHooks } from '@super-productivity/plugin-api';
 import { LocalUserCfg } from '../local-config';
 import { logSyncVerification, verifySyncState } from './verify-sync';
@@ -26,7 +22,9 @@ export const initSyncManager = (config: LocalUserCfg): void => {
   setupWindowFocusTracking();
 
   // Perform initial sync
-  performInitialSync(config).then((r) => log.log('SyncMD initial sync', r));
+  performInitialSync(config)
+    .then(() => log.debug('SyncMD initial sync completed'))
+    .catch((error) => log.error('SyncMD initial sync failed', error));
 
   // Set up file watcher for ongoing sync
   startFileWatcher(config.filePath, () => {

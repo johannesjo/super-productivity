@@ -7,7 +7,7 @@ import { Task } from '@super-productivity/plugin-api';
 jest.mock('../../helper/file-utils');
 
 // Mock PluginAPI
-global.PluginAPI = {
+(global as any).PluginAPI = {
   getTasks: jest.fn(),
   getAllProjects: jest.fn(),
 } as any;
@@ -20,7 +20,6 @@ describe('verifySyncState', () => {
   const mockConfig: LocalUserCfg = {
     filePath: '/test/tasks.md',
     projectId: 'test-project',
-    enabled: true,
   };
 
   beforeEach(() => {
@@ -55,8 +54,8 @@ describe('verifySyncState', () => {
     const mockMarkdown = `- [ ] <!--task1--> Task 1
 - [x] <!--task2--> Task 2`;
 
-    (global.PluginAPI.getTasks as jest.Mock).mockResolvedValue(mockTasks);
-    (global.PluginAPI.getAllProjects as jest.Mock).mockResolvedValue([]);
+    ((global as any).PluginAPI.getTasks as jest.Mock).mockResolvedValue(mockTasks);
+    ((global as any).PluginAPI.getAllProjects as jest.Mock).mockResolvedValue([]);
     (fileUtils.readTasksFile as jest.Mock).mockResolvedValue(mockMarkdown);
 
     const result = await verifySyncState(mockConfig);
@@ -85,8 +84,8 @@ describe('verifySyncState', () => {
 
     const mockMarkdown = `- [ ] <!--task1--> Task 1`;
 
-    (global.PluginAPI.getTasks as jest.Mock).mockResolvedValue(mockTasks);
-    (global.PluginAPI.getAllProjects as jest.Mock).mockResolvedValue([]);
+    ((global as any).PluginAPI.getTasks as jest.Mock).mockResolvedValue(mockTasks);
+    ((global as any).PluginAPI.getAllProjects as jest.Mock).mockResolvedValue([]);
     (fileUtils.readTasksFile as jest.Mock).mockResolvedValue(mockMarkdown);
 
     const result = await verifySyncState(mockConfig);
@@ -114,8 +113,8 @@ describe('verifySyncState', () => {
     const mockMarkdown = `- [ ] <!--task1--> Task 1
 - [ ] <!--task2--> Task 2`;
 
-    (global.PluginAPI.getTasks as jest.Mock).mockResolvedValue(mockTasks);
-    (global.PluginAPI.getAllProjects as jest.Mock).mockResolvedValue([]);
+    ((global as any).PluginAPI.getTasks as jest.Mock).mockResolvedValue(mockTasks);
+    ((global as any).PluginAPI.getAllProjects as jest.Mock).mockResolvedValue([]);
     (fileUtils.readTasksFile as jest.Mock).mockResolvedValue(mockMarkdown);
 
     const result = await verifySyncState(mockConfig);
@@ -142,8 +141,8 @@ describe('verifySyncState', () => {
 
     const mockMarkdown = `- [ ] <!--task1--> Task 1 MD`;
 
-    (global.PluginAPI.getTasks as jest.Mock).mockResolvedValue(mockTasks);
-    (global.PluginAPI.getAllProjects as jest.Mock).mockResolvedValue([]);
+    ((global as any).PluginAPI.getTasks as jest.Mock).mockResolvedValue(mockTasks);
+    ((global as any).PluginAPI.getAllProjects as jest.Mock).mockResolvedValue([]);
     (fileUtils.readTasksFile as jest.Mock).mockResolvedValue(mockMarkdown);
 
     const result = await verifySyncState(mockConfig);
@@ -171,8 +170,8 @@ describe('verifySyncState', () => {
 
     const mockMarkdown = `- [ ] <!--task1--> Task 1`;
 
-    (global.PluginAPI.getTasks as jest.Mock).mockResolvedValue(mockTasks);
-    (global.PluginAPI.getAllProjects as jest.Mock).mockResolvedValue([]);
+    ((global as any).PluginAPI.getTasks as jest.Mock).mockResolvedValue(mockTasks);
+    ((global as any).PluginAPI.getAllProjects as jest.Mock).mockResolvedValue([]);
     (fileUtils.readTasksFile as jest.Mock).mockResolvedValue(mockMarkdown);
 
     const result = await verifySyncState(mockConfig);
@@ -216,8 +215,10 @@ describe('verifySyncState', () => {
     const mockMarkdown = `- [ ] <!--task2--> Task 2
 - [ ] <!--task1--> Task 1`;
 
-    (global.PluginAPI.getTasks as jest.Mock).mockResolvedValue(mockTasks);
-    (global.PluginAPI.getAllProjects as jest.Mock).mockResolvedValue(mockProjects);
+    ((global as any).PluginAPI.getTasks as jest.Mock).mockResolvedValue(mockTasks);
+    ((global as any).PluginAPI.getAllProjects as jest.Mock).mockResolvedValue(
+      mockProjects,
+    );
     (fileUtils.readTasksFile as jest.Mock).mockResolvedValue(mockMarkdown);
 
     const result = await verifySyncState(mockConfig);
@@ -261,8 +262,8 @@ describe('verifySyncState', () => {
   - [ ] <!--child2--> Child 2
   - [ ] <!--child1--> Child 1`;
 
-    (global.PluginAPI.getTasks as jest.Mock).mockResolvedValue(mockTasks);
-    (global.PluginAPI.getAllProjects as jest.Mock).mockResolvedValue([]);
+    ((global as any).PluginAPI.getTasks as jest.Mock).mockResolvedValue(mockTasks);
+    ((global as any).PluginAPI.getAllProjects as jest.Mock).mockResolvedValue([]);
     (fileUtils.readTasksFile as jest.Mock).mockResolvedValue(mockMarkdown);
 
     const result = await verifySyncState(mockConfig);
@@ -288,8 +289,8 @@ describe('verifySyncState', () => {
       } as Task,
     ];
 
-    (global.PluginAPI.getTasks as jest.Mock).mockResolvedValue(mockTasks);
-    (global.PluginAPI.getAllProjects as jest.Mock).mockResolvedValue([]);
+    ((global as any).PluginAPI.getTasks as jest.Mock).mockResolvedValue(mockTasks);
+    ((global as any).PluginAPI.getAllProjects as jest.Mock).mockResolvedValue([]);
     (fileUtils.readTasksFile as jest.Mock).mockResolvedValue('');
 
     const result = await verifySyncState(mockConfig);
@@ -323,8 +324,8 @@ describe('verifySyncState', () => {
     const mockMarkdown = `- [ ] <!--task1--> Task 1
 - [ ] <!--task2--> Task 2`;
 
-    (global.PluginAPI.getTasks as jest.Mock).mockResolvedValue(mockTasks);
-    (global.PluginAPI.getAllProjects as jest.Mock).mockResolvedValue([]);
+    ((global as any).PluginAPI.getTasks as jest.Mock).mockResolvedValue(mockTasks);
+    ((global as any).PluginAPI.getAllProjects as jest.Mock).mockResolvedValue([]);
     (fileUtils.readTasksFile as jest.Mock).mockResolvedValue(mockMarkdown);
 
     const result = await verifySyncState(mockConfig);
@@ -348,8 +349,8 @@ describe('verifySyncState', () => {
     const mockMarkdown = `- [ ] <!--task1--> Task 1
   MD notes`;
 
-    (global.PluginAPI.getTasks as jest.Mock).mockResolvedValue(mockTasks);
-    (global.PluginAPI.getAllProjects as jest.Mock).mockResolvedValue([]);
+    ((global as any).PluginAPI.getTasks as jest.Mock).mockResolvedValue(mockTasks);
+    ((global as any).PluginAPI.getAllProjects as jest.Mock).mockResolvedValue([]);
     (fileUtils.readTasksFile as jest.Mock).mockResolvedValue(mockMarkdown);
 
     const result = await verifySyncState(mockConfig);

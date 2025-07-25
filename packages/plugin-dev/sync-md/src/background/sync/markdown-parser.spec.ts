@@ -1,4 +1,7 @@
-import { parseMarkdownWithErrors as parseTasks } from './markdown-parser';
+import {
+  parseMarkdownWithErrors as parseTasks,
+  parseMarkdownWithHeader,
+} from './markdown-parser';
 
 describe('markdown-parser', () => {
   describe('parseTasks', () => {
@@ -236,6 +239,96 @@ describe('markdown-parser', () => {
       // Check notes
       expect(result.tasks[2].notes).toBe('Note for subtask 1.2');
       expect(result.tasks[4].notes).toBe('Note line 1\nNote line 2');
+    });
+  });
+
+  describe('parseMarkdownWithHeader', () => {
+    it('should extract header content before first task', () => {
+      const markdown = `# My Tasks
+This is a description of my tasks.
+
+Some more text here.
+
+- [ ] Task 1
+- [ ] Task 2`;
+
+      const result = parseMarkdownWithHeader(markdown);
+
+      expect(result.header).toBe(
+        '# My Tasks\nThis is a description of my tasks.\n\nSome more text here.\n',
+      );
+      expect(result.tasks.length).toBe(2);
+      expect(result.tasks[0].title).toBe('Task 1');
+      expect(result.tasks[1].title).toBe('Task 2');
+    });
+
+    it('should handle markdown with no header', () => {
+      const markdown = `- [ ] Task 1
+- [ ] Task 2`;
+
+      const result = parseMarkdownWithHeader(markdown);
+
+      expect(result.header).toBeUndefined();
+      expect(result.tasks.length).toBe(2);
+    });
+
+    it('should handle markdown with only header and no tasks', () => {
+      const markdown = `# My Header
+This is just a header with no tasks.`;
+
+      const result = parseMarkdownWithHeader(markdown);
+
+      expect(result.header).toBe('# My Header\nThis is just a header with no tasks.');
+      expect(result.tasks.length).toBe(0);
+    });
+
+    it('should preserve complex header with metadata', () => {
+      const markdown = `---
+title: My Project Tasks
+date: 2024-01-01
+tags: [project, tasks]
+---
+
+# Project Overview
+
+This document contains all the tasks for my project.
+
+## Important Notes
+- Remember to check dependencies
+- Update documentation
+
+- [ ] Task 1
+- [ ] Task 2`;
+
+      const result = parseMarkdownWithHeader(markdown);
+
+      expect(result.header).toBe(`---
+title: My Project Tasks
+date: 2024-01-01
+tags: [project, tasks]
+---
+
+# Project Overview
+
+This document contains all the tasks for my project.
+
+## Important Notes
+- Remember to check dependencies
+- Update documentation
+`);
+      expect(result.tasks.length).toBe(2);
+    });
+
+    it('should handle empty lines before first task', () => {
+      const markdown = `# Header
+
+
+- [ ] Task 1`;
+
+      const result = parseMarkdownWithHeader(markdown);
+
+      expect(result.header).toBe('# Header\n\n');
+      expect(result.tasks.length).toBe(1);
     });
   });
 });
