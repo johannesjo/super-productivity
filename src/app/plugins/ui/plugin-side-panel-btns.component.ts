@@ -61,7 +61,8 @@ import { PluginLog } from '../../core/log';
       }
 
       .plugin-side-panel-btn plugin-icon {
-        transition: all 0.2s ease;
+        transition: transform 0.2s ease;
+        display: block;
       }
 
       .plugin-side-panel-btn.active plugin-icon {

@@ -66,11 +66,15 @@ import { KeyboardConfig } from '../../../features/config/keyboard-config.model';
         transition: all 0.2s ease;
         overflow: visible !important;
 
+        .mat-icon {
+          transition: transform 0.2s ease;
+          display: block;
+        }
+
         &.isActive {
           background-color: transparent;
 
           .mat-icon {
-            transition: all 0.2s ease;
             transform: rotate(45deg);
           }
 
