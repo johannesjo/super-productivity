@@ -6,7 +6,7 @@ import {
   OnDestroy,
   computed,
 } from '@angular/core';
-import { combineLatest, Observable, of, Subscription } from 'rxjs';
+import { combineLatest, Observable, of, Subscription, merge } from 'rxjs';
 import { TaskDetailTargetPanel, TaskWithSubTasks } from '../tasks/task.model';
 import {
   delay,
@@ -15,6 +15,7 @@ import {
   switchMap,
   filter,
   pairwise,
+  startWith,
 } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { LayoutService } from '../../core-ui/layout/layout.service';
@@ -38,7 +39,7 @@ import {
 import { hidePluginPanel } from '../../core-ui/layout/store/layout.actions';
 import { fastArrayCompare } from '../../util/fast-array-compare';
 import { Log } from '../../core/log';
-import { NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, Router, NavigationStart } from '@angular/router';
 
 @Component({
   selector: 'right-panel',
@@ -98,32 +99,29 @@ export class RightPanelComponent implements OnDestroy {
   > = combineLatest([
     this.store.select(selectLayoutFeatureState),
     this.taskService.selectedTask$,
-  ]).pipe(
-    map(
-      ([
-        {
-          isShowNotes,
-          isShowIssuePanel,
-          isShowTaskViewCustomizerPanel,
-          isShowPluginPanel,
-        },
-        selectedTask,
-      ]) => {
-        if (isShowNotes) {
-          return 'NOTES';
-        } else if (isShowIssuePanel) {
-          return 'ISSUE_PANEL';
-        } else if (isShowTaskViewCustomizerPanel) {
-          return 'TASK_VIEW_CUSTOMIZER_PANEL';
-        } else if (isShowPluginPanel) {
-          return 'PLUGIN';
-        } else if (selectedTask) {
-          // Task content comes last so we can avoid an extra effect to unset selected task
-          return 'TASK';
-        }
-        return undefined;
-      },
-    ),
+  ] as const).pipe(
+    map(([layoutState, selectedTask]) => {
+      const {
+        isShowNotes,
+        isShowIssuePanel,
+        isShowTaskViewCustomizerPanel,
+        isShowPluginPanel,
+      } = layoutState;
+
+      if (isShowNotes) {
+        return 'NOTES';
+      } else if (isShowIssuePanel) {
+        return 'ISSUE_PANEL';
+      } else if (isShowTaskViewCustomizerPanel) {
+        return 'TASK_VIEW_CUSTOMIZER_PANEL';
+      } else if (isShowPluginPanel) {
+        return 'PLUGIN';
+      } else if (selectedTask) {
+        // Task content comes last so we can avoid an extra effect to unset selected task
+        return 'TASK';
+      }
+      return undefined;
+    }),
     distinctUntilChanged(),
   );
 
@@ -131,7 +129,7 @@ export class RightPanelComponent implements OnDestroy {
   pluginPanelKeys$: Observable<string[]> = combineLatest([
     this.store.select(selectIsShowPluginPanel),
     this.store.select(selectActivePluginId),
-  ]).pipe(
+  ] as const).pipe(
     map(([isShowPluginPanel, activePluginId]) => {
       const keys =
         isShowPluginPanel && activePluginId ? [`plugin-${activePluginId}`] : [];
@@ -145,6 +143,25 @@ export class RightPanelComponent implements OnDestroy {
     distinctUntilChanged((a, b) => fastArrayCompare(a, b)),
   );
 
+  // Observable to track current route
+  private _currentRoute$: Observable<string> = this._router.events.pipe(
+    filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+    map((event) => event.urlAfterRedirects),
+    startWith(this._router.url),
+  );
+
+  // Observable to track if navigation is in progress
+  private _isNavigating$: Observable<boolean> = merge(
+    this._router.events.pipe(
+      filter((event) => event instanceof NavigationStart),
+      map(() => true),
+    ),
+    this._router.events.pipe(
+      filter((event) => event instanceof NavigationEnd),
+      map(() => false),
+    ),
+  ).pipe(startWith(false), distinctUntilChanged());
+
   isOpen$: Observable<boolean> = combineLatest([
     this.taskService.selectedTask$,
     this.taskService.taskDetailPanelTargetPanel$,
@@ -152,7 +169,9 @@ export class RightPanelComponent implements OnDestroy {
     this.layoutService.isShowIssuePanel$,
     this.layoutService.isShowTaskViewCustomizerPanel$,
     this.store.select(selectIsShowPluginPanel),
-  ]).pipe(
+    this._currentRoute$,
+    this._isNavigating$,
+  ] as const).pipe(
     map(
       ([
         selectedTask,
@@ -161,14 +180,33 @@ export class RightPanelComponent implements OnDestroy {
         isShowAddTaskPanel,
         isShowTaskViewCustomizerPanel,
         isShowPluginPanel,
-      ]) =>
-        !!(
-          selectedTask ||
-          isShowNotes ||
-          isShowAddTaskPanel ||
-          isShowTaskViewCustomizerPanel ||
-          isShowPluginPanel
-        ) && targetPanel !== TaskDetailTargetPanel.DONT_OPEN_PANEL,
+        currentRoute,
+        isNavigating,
+      ]) => {
+        // Don't open panel during navigation to prevent flashing
+        if (isNavigating) {
+          return false;
+        }
+
+        const isWorkView = this._isWorkViewUrl(currentRoute as string);
+
+        // For non-work-view routes, only allow panels that are explicitly opened
+        // This prevents panels from persisting when navigating from work-view to non-work-view
+        if (!isWorkView) {
+          // You might want to allow certain panels on non-work-view routes
+          // For now, let's allow all panels but they'll be in "over" mode
+        }
+
+        return (
+          !!(
+            selectedTask ||
+            isShowNotes ||
+            isShowAddTaskPanel ||
+            isShowTaskViewCustomizerPanel ||
+            isShowPluginPanel
+          ) && targetPanel !== TaskDetailTargetPanel.DONT_OPEN_PANEL
+        );
+      },
     ),
     distinctUntilChanged(),
   );
@@ -193,22 +231,38 @@ export class RightPanelComponent implements OnDestroy {
       }),
     );
 
-    // Add navigation handling to close panel when navigating between non-work-view routes
+    // Add navigation handling to close panel when appropriate
     this._subs.add(
       this._router.events
         .pipe(
           filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-          map((event) => this._isWorkViewUrl(event.urlAfterRedirects)),
+          map((event) => ({
+            url: event.urlAfterRedirects,
+            isWorkView: this._isWorkViewUrl(event.urlAfterRedirects),
+          })),
           pairwise(),
-          filter(([wasWorkView, isWorkView]) => {
-            // Close panel when:
-            // 1. Navigating from work-view to non-work-view
-            // 2. Navigating between different non-work-view routes
-            return !isWorkView;
+          filter(([prev, curr]) => {
+            // Close panel ONLY when:
+            // 1. Navigating from any route to a non-work-view route
+            // 2. Navigating from non-work-view to work-view (to prevent style flash)
+            // Do NOT close when navigating between work-view routes
+            const shouldClose = !curr.isWorkView || (!prev.isWorkView && curr.isWorkView);
+
+            // Debug logging
+            if (shouldClose) {
+              Log.log('RightPanel: Closing panel on navigation', {
+                from: prev.url,
+                to: curr.url,
+                fromIsWorkView: prev.isWorkView,
+                toIsWorkView: curr.isWorkView,
+              });
+            }
+
+            return shouldClose;
           }),
         )
         .subscribe(() => {
-          // Close all panels when navigating to non-work-view
+          // Close all panels when navigating to incompatible routes
           this.close();
         }),
     );
