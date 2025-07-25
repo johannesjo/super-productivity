@@ -55,16 +55,8 @@ export class OpenProjectApiService {
         url: `${cfg.host}/api/v3/projects/${cfg.projectId}/work_packages`,
         params: {
           pageSize: 100,
-          // see: https://www.openproject.org/docs/api/filters/
-          filters: JSON.stringify(
-            [
-              { subjectOrId: { operator: '**', values: [searchText] } },
-              // only list open issues
-              { status: { operator: 'o', values: [] } },
-            ].concat(this._getScopeParamFilter(cfg)),
-          ),
           // Default: [["id", "asc"]]
-          sortBy: '[["updatedAt","desc"]]',
+          sortBy: '[["updatedAt", "desc"]]',
         },
       },
       cfg,
