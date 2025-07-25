@@ -82,9 +82,9 @@ export class BetterDrawerContainerComponent implements OnDestroy {
       switchMap((isNavigating) =>
         isNavigating ? of(true) : timer(100).pipe(map(() => false)),
       ),
-      startWith(true), // Start with animations disabled
+      startWith(false), // Start with animations enabled
     ),
-    { initialValue: true },
+    { initialValue: false },
   );
 
   // Computed signal that determines if animations should be skipped
