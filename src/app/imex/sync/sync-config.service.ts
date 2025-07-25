@@ -90,7 +90,12 @@ export class SyncConfigService {
       ? await this._pfapiService.pf.getSyncProviderById(syncProviderId)
       : this._pfapiService.pf.getActiveSyncProvider();
     if (!activeProvider) {
-      throw new Error('No active sync provider');
+      // If no provider is active yet, we can't save the encryption key
+      // This can happen during initial setup
+      SyncLog.err(
+        'No active sync provider found when trying to update encryption password',
+      );
+      return;
     }
     const oldConfig = await activeProvider.privateCfg.load();
 
@@ -123,7 +128,20 @@ export class SyncConfigService {
       return;
     }
     const prop = PROP_MAP_TO_FORM[providerId];
+
+    // For Dropbox (prop is null), we need to ensure encryptKey is saved
     if (!prop) {
+      // For Dropbox, we need to save the private config with encryptKey
+      if (providerId === SyncProviderId.Dropbox && encryptKey) {
+        const provider = await this._pfapiService.pf.getSyncProviderById(providerId);
+        if (provider) {
+          const oldConfig = await provider.privateCfg.load();
+          await this._pfapiService.pf.setPrivateCfgForSyncProvider(providerId, {
+            ...oldConfig,
+            encryptKey,
+          } as PrivateCfgByProviderId<SyncProviderId>);
+        }
+      }
       return;
     }
 
