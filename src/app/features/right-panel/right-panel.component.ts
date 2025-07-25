@@ -301,9 +301,9 @@ export class RightPanelComponent implements OnDestroy {
               fromIsWorkView: prev.isWorkView,
               toIsWorkView: isCurrentWorkView,
             });
-            // Close all panels when navigating to incompatible routes
-            // Use setTimeout to avoid state changes during effect execution
-            setTimeout(() => this.close(), 0);
+            // Close all panels immediately when navigating away from work views
+            // to prevent the overlay mode from briefly showing
+            this.close();
           }
         }
 
