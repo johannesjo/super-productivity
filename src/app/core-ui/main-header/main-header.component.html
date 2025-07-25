@@ -18,7 +18,7 @@
     <div class="week-month-selector">
       <button
         (click)="selectTimeView('week')"
-        [class.active]="(selectedTimeView$ | async) === 'week'"
+        [class.active]="selectedTimeView() === 'week'"
         class="week-month-btn week-btn"
         matTooltip="View Week"
         mat-button
@@ -27,7 +27,7 @@
       </button>
       <button
         (click)="selectTimeView('month')"
-        [class.active]="(selectedTimeView$ | async) === 'month'"
+        [class.active]="selectedTimeView() === 'month'"
         class="week-month-btn month-btn"
         matTooltip="View Month"
         mat-button

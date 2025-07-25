@@ -255,9 +255,9 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     this._subs.add(
       this.upperContainerScroll$.subscribe(({ target }) => {
         if ((target as HTMLElement).scrollTop !== 0) {
-          this.layoutService.isScrolled$.next(true);
+          this.layoutService.isScrolled.set(true);
         } else {
-          this.layoutService.isScrolled$.next(false);
+          this.layoutService.isScrolled.set(false);
         }
       }),
     );
@@ -267,7 +267,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     if (this._switchListAnimationTimeout) {
       window.clearTimeout(this._switchListAnimationTimeout);
     }
-    this.layoutService.isScrolled$.next(false);
+    this.layoutService.isScrolled.set(false);
   }
 
   planMore(): void {

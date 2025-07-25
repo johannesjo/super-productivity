@@ -165,15 +165,10 @@ export class MobileSidePanelMenuComponent {
   });
 
   // Panel state signals
-  readonly isShowNotes = toSignal(this.layoutService.isShowNotes$, {
-    initialValue: false,
-  });
-  readonly isShowIssuePanel = toSignal(this.layoutService.isShowIssuePanel$, {
-    initialValue: false,
-  });
-  readonly isShowTaskViewCustomizerPanel = toSignal(
-    this.layoutService.isShowTaskViewCustomizerPanel$,
-    { initialValue: false },
+  readonly isShowNotes = computed(() => this.layoutService.isShowNotes());
+  readonly isShowIssuePanel = computed(() => this.layoutService.isShowIssuePanel());
+  readonly isShowTaskViewCustomizerPanel = computed(() =>
+    this.layoutService.isShowTaskViewCustomizerPanel(),
   );
 
   // Computed signal for active panel
