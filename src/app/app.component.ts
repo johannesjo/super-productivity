@@ -52,6 +52,7 @@ import { GlobalProgressBarComponent } from './core-ui/global-progress-bar/global
 import { FocusModeOverlayComponent } from './features/focus-mode/focus-mode-overlay/focus-mode-overlay.component';
 import { ShepherdComponent } from './features/shepherd/shepherd.component';
 import { AsyncPipe } from '@angular/common';
+import { RightPanelComponent } from './features/right-panel/right-panel.component';
 import { selectIsFocusOverlayShown } from './features/focus-mode/store/focus-mode.selectors';
 import { Store } from '@ngrx/store';
 import { PfapiService } from './pfapi/pfapi.service';
@@ -97,6 +98,7 @@ const productivityTip: string[] = w.productivityTips && w.productivityTips[w.ran
     MatSidenavContent,
     MainHeaderComponent,
     BannerComponent,
+    RightPanelComponent,
     RouterOutlet,
     GlobalProgressBarComponent,
     FocusModeOverlayComponent,

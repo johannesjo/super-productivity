@@ -44,14 +44,17 @@
 
           <banner></banner>
         </header>
-        <div
-          #routeWrapper
-          [@warpRoute]="getPage(o)"
-          class="route-wrapper"
-        >
-          <router-outlet #o="outlet"></router-outlet>
-        </div>
-        <global-progress-bar></global-progress-bar>
+
+        <right-panel>
+          <div
+            #routeWrapper
+            [@warpRoute]="getPage(o)"
+            class="route-wrapper"
+          >
+            <router-outlet #o="outlet"></router-outlet>
+          </div>
+          <global-progress-bar></global-progress-bar>
+        </right-panel>
       </mat-sidenav-content>
     </mat-sidenav-container>
   }

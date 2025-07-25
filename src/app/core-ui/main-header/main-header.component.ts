@@ -124,10 +124,10 @@ export class MainHeaderComponent implements OnDestroy {
 
   private _isRouteWithSidePanel$ = this._router.events.pipe(
     filter((event: any) => event instanceof NavigationEnd),
-    map((event) => !!event.urlAfterRedirects.match(/(tasks|daily-summary)$/)),
-    startWith(!!this._router.url.match(/(tasks|daily-summary)$/)),
+    map((event) => true), // Always true since right-panel is now global
+    startWith(true), // Always true since right-panel is now global
   );
-  isRouteWithSidePanel = toSignal(this._isRouteWithSidePanel$, { initialValue: false });
+  isRouteWithSidePanel = toSignal(this._isRouteWithSidePanel$, { initialValue: true });
 
   private _isScheduleSection$ = this._router.events.pipe(
     filter((event: any) => event instanceof NavigationEnd),
@@ -135,6 +135,13 @@ export class MainHeaderComponent implements OnDestroy {
     startWith(!!this._router.url.match(/(schedule)$/)),
   );
   isScheduleSection = toSignal(this._isScheduleSection$, { initialValue: false });
+
+  private _isWorkViewPage$ = this._router.events.pipe(
+    filter((event: any) => event instanceof NavigationEnd),
+    map((event) => !!event.urlAfterRedirects.match(/tasks$/)),
+    startWith(!!this._router.url.match(/tasks$/)),
+  );
+  isWorkViewPage = toSignal(this._isWorkViewPage$, { initialValue: false });
 
   // Convert more observables to signals
   activeWorkContextTypeAndId = toSignal(
