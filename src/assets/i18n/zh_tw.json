@@ -667,6 +667,7 @@
         "REMINDER": "提醒",
         "REPEAT": "重複",
         "SCHEDULE_TASK": "安排任務",
+        "DEADLINE": "Deadline",
         "SUB_TASKS": "子任務（{{nr}}）",
         "TIME": "時間",
         "TITLE_PLACEHOLDER": "輸入標題"
@@ -760,6 +761,16 @@
         "HELP": "範例：<br>30m => 30分鐘<br><br> 2h => 2小時<br><br> 2h 30m => 2小時30分鐘",
         "TINE_SPENT": "所花費的時間",
         "TITLE": "添加今天任務"
+      },
+      "D_DEADLINE_TASK": {
+        "QA_TODAY": "Today",
+        "QA_TOMORROW": "Tomorrow",
+        "QA_NEXT_WEEK": "Next Week",
+        "QA_NEXT_MONTH": "Next Month",
+        "SET_DEADLINE": "Set",
+        "REMOVE_DEADLINE": "Remove",
+        "REMOVED_DEADLINE": "Deadline has been removed",
+        "DEADLINE_ALREADY_SET": "Deadline is already set on {{date}}"
       },
       "N": {
         "ESTIMATE_EXCEEDED": "超出預估時間！",

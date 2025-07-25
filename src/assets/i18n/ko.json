@@ -1079,6 +1079,7 @@
         "REMINDER": "조언",
         "REPEAT": "반복",
         "SCHEDULE_TASK": "작업 예약",
+        "DEADLINE": "Deadline",
         "SUB_TASKS": "하위 작업 ({{nr}})",
         "TIME": "시각",
         "TITLE_PLACEHOLDER": "제목 입력"
@@ -1181,6 +1182,16 @@
         "HELP": "예 :<br> 30m => 30 분<br> 2 시간 => 2 시간<br> 2 시간 30 분 => 2 시간 30 분",
         "TINE_SPENT": "지출 된 시간",
         "TITLE": "오늘 추가"
+      },
+      "D_DEADLINE_TASK": {
+        "QA_TODAY": "Today",
+        "QA_TOMORROW": "Tomorrow",
+        "QA_NEXT_WEEK": "Next Week",
+        "QA_NEXT_MONTH": "Next Month",
+        "SET_DEADLINE": "Set",
+        "REMOVE_DEADLINE": "Remove",
+        "REMOVED_DEADLINE": "Deadline has been removed",
+        "DEADLINE_ALREADY_SET": "Deadline is already set on {{date}}"
       },
       "N": {
         "ESTIMATE_EXCEEDED": "예상 시간을 초과했습니다!",

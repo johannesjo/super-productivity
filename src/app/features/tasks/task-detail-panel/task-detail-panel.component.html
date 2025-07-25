@@ -148,6 +148,39 @@
     </ng-container>
   </task-detail-item>
 
+  <task-detail-item
+    (collapseParent)="collapseParent()"
+    (editActionTriggered)="setDeadlineTask()"
+    (keyPress)="onItemKeyPress($event)"
+    [inputIcon]="task.deadline ? 'edit' : 'add'"
+    class="input-item"
+    [class.color-warn]="isOverdue"
+  >
+    <ng-container input-title>
+      <mat-icon>hourglass_bottom</mat-icon>
+      <span>{{ T.F.TASK.ADDITIONAL_INFO.DEADLINE | translate }}</span>
+    </ng-container>
+
+    <ng-container input-value>
+      @if (task.deadline) {
+        <div
+          class="reminder-value red-highlight"
+          [ngClass]="{
+            'red-highlight': isDeadlineExceeded,
+            'orange-highlight': isDeadlineForLessThan7Days,
+          }"
+        >
+          @if (isDeadlineToday) {
+            <mat-icon>wb_sunny</mat-icon>
+            {{ T.G.TODAY_TAG_TITLE | translate }}
+          } @else {
+            {{ task.deadline | date: 'shortDate' }}
+          }
+        </div>
+      }
+    </ng-container>
+  </task-detail-item>
+
   @if (task?.issueId && task?.issueType !== ICAL_TYPE) {
     <task-detail-item
       (collapseParent)="collapseParent()"

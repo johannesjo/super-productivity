@@ -835,6 +835,10 @@ progress-bar {
   &.mat-warn mat-icon {
     color: var(--c-warn) !important;
   }
+
+  &.mat-soft-warn mat-icon {
+    color: var(--color-warning) !important;
+  }
 }
 
 .repeat-date-badge,

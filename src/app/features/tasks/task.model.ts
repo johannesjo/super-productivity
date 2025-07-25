@@ -90,6 +90,7 @@ export interface TaskCopy
   dueWithTime?: number;
   dueDay?: string;
   hasPlannedTime?: boolean;
+  deadline?: string;
   attachments: TaskAttachment[];
 
   // Ensure type compatibility for internal fields

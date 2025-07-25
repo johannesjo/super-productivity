@@ -1079,6 +1079,7 @@
         "REMINDER": "リマインダー",
         "REPEAT": "繰り返す",
         "SCHEDULE_TASK": "タスクのスケジュール",
+        "DEADLINE": "Deadline",
         "SUB_TASKS": "サブタスク（{{nr}}）",
         "TIME": "時間",
         "TITLE_PLACEHOLDER": "タイトルを入力"
@@ -1181,6 +1182,16 @@
         "HELP": "例：<br> 30m => 30分<br> 2h => 2時間<br> 2h 30m => 2時間30分",
         "TINE_SPENT": "消費時間",
         "TITLE": "他の日に追加"
+      },
+      "D_DEADLINE_TASK": {
+        "QA_TODAY": "Today",
+        "QA_TOMORROW": "Tomorrow",
+        "QA_NEXT_WEEK": "Next Week",
+        "QA_NEXT_MONTH": "Next Month",
+        "SET_DEADLINE": "Set",
+        "REMOVE_DEADLINE": "Remove",
+        "REMOVED_DEADLINE": "Deadline has been removed",
+        "DEADLINE_ALREADY_SET": "Deadline is already set on {{date}}"
       },
       "N": {
         "ESTIMATE_EXCEEDED": "時間見積もりを超えました！",

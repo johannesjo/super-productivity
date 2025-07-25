@@ -177,7 +177,6 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
       (t.dueDay && t.dueDay === this.todayStr())
     );
   });
-
   isShowDueDayBtn = computed(() => {
     return (
       this.task().dueDay &&
@@ -186,6 +185,24 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
         this.task().dueDay !== this.todayStr() ||
         !environment.production)
     );
+  });
+  isDeadlineWarn = computed(() => {
+    const d = this.task().deadline;
+    if (!!d) {
+      const dd = d ? new Date(d) : null;
+      const now = new Date();
+      dd?.setHours(0, 0, 0, 0);
+      now.setHours(0, 0, 0, 0);
+      if (!!dd && dd.getTime() < now.getTime()) return 'warn';
+      const week = 7 * 24 * 60 * 60 * 1000;
+      if (
+        !!dd &&
+        dd.getTime() >= now.getTime() &&
+        dd.getTime() <= new Date(now.getTime() + week).getTime()
+      )
+        return 'soft-warn';
+    }
+    return '';
   });
 
   progress = computed<number>(() => {
