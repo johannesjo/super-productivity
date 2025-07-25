@@ -24,3 +24,7 @@ export const ipcResume$: Observable<unknown> = IS_ELECTRON
 export const ipcSuspend$: Observable<unknown> = IS_ELECTRON
   ? ipcEvent$(IPC.SUSPEND).pipe()
   : EMPTY;
+
+export const ipcAddTask$: Observable<{ title: string }> = IS_ELECTRON
+  ? ipcEvent$(IPC.ADD_TASK).pipe(map(([ev, data]: any) => data as { title: string }))
+  : EMPTY;
