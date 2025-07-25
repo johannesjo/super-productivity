@@ -15,7 +15,7 @@ import { KeyboardConfig } from '../../../features/config/keyboard-config.model';
   template: `
     <button
       class="panel-btn"
-      [disabled]="!isRouteWithSidePanel()"
+      [disabled]="!isWorkViewPage()"
       [class.isActive]="isShowTaskViewCustomizerPanel()"
       [class.isCustomized]="taskViewCustomizerService.isCustomized()"
       (click)="layoutService.toggleTaskViewCustomizerPanel()"
@@ -121,6 +121,7 @@ export class DesktopPanelButtonsComponent {
 
   readonly kb = input<KeyboardConfig | null>();
   readonly isRouteWithSidePanel = input.required<boolean>();
+  readonly isWorkViewPage = input.required<boolean>();
   readonly isShowTaskViewCustomizerPanel = input.required<boolean>();
   readonly isShowIssuePanel = input.required<boolean>();
   readonly isShowNotes = input.required<boolean>();

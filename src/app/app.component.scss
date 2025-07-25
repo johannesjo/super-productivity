@@ -25,6 +25,7 @@
   position: relative;
   overflow: hidden;
   -webkit-app-region: no-drag !important;
+  height: 100%;
 
   > ::ng-deep router-outlet + * {
     position: absolute;

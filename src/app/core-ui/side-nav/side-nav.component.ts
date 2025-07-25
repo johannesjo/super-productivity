@@ -8,6 +8,7 @@ import {
   OnDestroy,
   viewChild,
   viewChildren,
+  effect,
 } from '@angular/core';
 import { ProjectService } from '../../features/project/project.service';
 import { T } from '../../t.const';
@@ -155,23 +156,23 @@ export class SideNavComponent implements OnDestroy {
       ),
     );
 
-    this._subs.add(
-      this._layoutService.isShowSideNav$.subscribe((isShow) => {
-        const navEntries = this.navEntries();
-        if (navEntries && isShow) {
-          this.keyManager = new FocusKeyManager<MatMenuItem>(
-            navEntries,
-          ).withVerticalOrientation(true);
-          window.clearTimeout(this.keyboardFocusTimeout);
-          this.keyboardFocusTimeout = window.setTimeout(() => {
-            this.keyManager?.setFirstItemActive();
-          }, 100);
-          // this.keyManager.change.subscribe((v) => Log.log('this.keyManager.change', v));
-        } else if (!isShow) {
-          this._taskService.focusFirstTaskIfVisible();
-        }
-      }),
-    );
+    // Effect to handle side nav visibility changes
+    effect(() => {
+      const isShow = this._layoutService.isShowSideNav();
+      const navEntries = this.navEntries();
+      if (navEntries && isShow) {
+        this.keyManager = new FocusKeyManager<MatMenuItem>(
+          navEntries,
+        ).withVerticalOrientation(true);
+        window.clearTimeout(this.keyboardFocusTimeout);
+        this.keyboardFocusTimeout = window.setTimeout(() => {
+          this.keyManager?.setFirstItemActive();
+        }, 100);
+        // this.keyManager.change.subscribe((v) => Log.log('this.keyManager.change', v));
+      } else if (!isShow) {
+        this._taskService.focusFirstTaskIfVisible();
+      }
+    });
   }
 
   @HostListener('keydown', ['$event'])

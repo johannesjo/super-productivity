@@ -55,7 +55,7 @@ export class ScheduleComponent {
   private _store = inject(Store);
   private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
 
-  private _selectedTimeView = toSignal(this.layoutService.selectedTimeView$);
+  private _selectedTimeView = computed(() => this.layoutService.selectedTimeView());
   isMonthView = computed(() => this._selectedTimeView() === 'month');
 
   private _todayDateStr = toSignal(this._globalTrackingIntervalService.todayDateStr$);
@@ -199,7 +199,7 @@ export class ScheduleComponent {
   });
 
   constructor() {
-    this.layoutService.setTimeView('week');
+    this.layoutService.selectedTimeView.set('week');
 
     if (!localStorage.getItem(LS.WAS_SCHEDULE_INITIAL_DIALOG_SHOWN)) {
       this._matDialog.open(DialogTimelineSetupComponent, {

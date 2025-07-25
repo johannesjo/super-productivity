@@ -12,9 +12,7 @@
       <!--    </button>-->
     </header>
   }
-  @if (
-    task && !task.parentId && ((layoutService.isRightPanelOver$ | async) || isDialogMode)
-  ) {
+  @if (task && !task.parentId && (layoutService.isRightPanelOver() || isDialogMode)) {
     <task-detail-item
       (collapseParent)="collapseParent()"
       (keyPress)="onItemKeyPress($event)"

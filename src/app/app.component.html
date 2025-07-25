@@ -6,14 +6,14 @@
     ></div>
   }
   <!--TODO move inside page container somehow -->
-  @if (layoutService.isShowAddTaskBar$ | async) {
+  @if (layoutService.isShowAddTaskBar()) {
     <add-task-bar
       (blurred)="layoutService.hideAddTaskBar()"
       [isElevated]="true"
       class="global"
     ></add-task-bar>
   }
-  @if (layoutService.isShowAddTaskBar$ | async) {
+  @if (layoutService.isShowAddTaskBar()) {
     <div
       (click)="layoutService.hideAddTaskBar()"
       @fade
@@ -27,9 +27,9 @@
     <mat-sidenav-container [dir]="isRTL ? 'rtl' : 'ltr'">
       <mat-sidenav
         (closedStart)="layoutService.hideSideNav()"
-        [mode]="(layoutService.isNavOver$ | async) ? 'over' : 'side'"
-        [opened]="layoutService.isShowSideNav$ | async"
-        [disableClose]="layoutService.isNavAlwaysVisible$ | async"
+        [mode]="layoutService.isNavOver() ? 'over' : 'side'"
+        [opened]="layoutService.isShowSideNav()"
+        [disableClose]="layoutService.isNavAlwaysVisible()"
         position="start"
       >
         <side-nav></side-nav>
@@ -37,20 +37,23 @@
       </mat-sidenav>
       <mat-sidenav-content>
         <header
-          [class.isNotScrolled]="!(layoutService.isScrolled$ | async)"
+          [class.isNotScrolled]="!layoutService.isScrolled()"
           class="header-wrapper"
         >
           <main-header></main-header>
 
           <banner></banner>
         </header>
-        <div
-          #routeWrapper
-          [@warpRoute]="getPage(o)"
-          class="route-wrapper"
-        >
-          <router-outlet #o="outlet"></router-outlet>
-        </div>
+
+        <right-panel>
+          <div
+            #routeWrapper
+            [@warpRoute]="getPage(o)"
+            class="route-wrapper"
+          >
+            <router-outlet #o="outlet"></router-outlet>
+          </div>
+        </right-panel>
         <global-progress-bar></global-progress-bar>
       </mat-sidenav-content>
     </mat-sidenav-container>

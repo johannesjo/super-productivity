@@ -56,7 +56,6 @@ import { BreakpointObserver } from '@angular/cdk/layout';
             [matTooltip]="button.label"
             (click)="onPluginButtonClick(button)"
             [class.active]="activePluginId() === button.pluginId && isShowPluginPanel()"
-            [disabled]="!isWorkView()"
           >
             <plugin-icon
               [pluginId]="button.pluginId"
@@ -71,7 +70,7 @@ import { BreakpointObserver } from '@angular/cdk/layout';
           color=""
           [class.active]="isShowTaskViewCustomizerPanel()"
           [class.isCustomized]="taskViewCustomizerService.isCustomized()"
-          [disabled]="!isRouteWithSidePanel()"
+          [disabled]="!isWorkViewPage()"
           (click)="toggleTaskViewCustomizer()"
           [matTooltip]="T.GCF.KEYBOARD.TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL | translate"
         >
@@ -127,10 +126,19 @@ export class MobileSidePanelMenuComponent {
   readonly isRouteWithSidePanel = toSignal(
     this._router.events.pipe(
       filter((event: any) => event instanceof NavigationEnd),
-      map((event) => !!event.urlAfterRedirects.match(/(tasks|daily-summary)$/)),
-      startWith(!!this._router.url.match(/(tasks|daily-summary)$/)),
+      map((event) => true), // Always true since right-panel is now global
+      startWith(true), // Always true since right-panel is now global
     ),
-    { initialValue: !!this._router.url.match(/(tasks|daily-summary)$/) },
+    { initialValue: true },
+  );
+
+  readonly isWorkViewPage = toSignal(
+    this._router.events.pipe(
+      filter((event: any) => event instanceof NavigationEnd),
+      map((event) => !!event.urlAfterRedirects.match(/tasks$/)),
+      startWith(!!this._router.url.match(/tasks$/)),
+    ),
+    { initialValue: !!this._router.url.match(/tasks$/) },
   );
 
   readonly kb: KeyboardConfig = this._globalConfigService.cfg?.keyboard || {};
@@ -157,15 +165,10 @@ export class MobileSidePanelMenuComponent {
   });
 
   // Panel state signals
-  readonly isShowNotes = toSignal(this.layoutService.isShowNotes$, {
-    initialValue: false,
-  });
-  readonly isShowIssuePanel = toSignal(this.layoutService.isShowIssuePanel$, {
-    initialValue: false,
-  });
-  readonly isShowTaskViewCustomizerPanel = toSignal(
-    this.layoutService.isShowTaskViewCustomizerPanel$,
-    { initialValue: false },
+  readonly isShowNotes = computed(() => this.layoutService.isShowNotes());
+  readonly isShowIssuePanel = computed(() => this.layoutService.isShowIssuePanel());
+  readonly isShowTaskViewCustomizerPanel = computed(() =>
+    this.layoutService.isShowTaskViewCustomizerPanel(),
   );
 
   // Computed signal for active panel
@@ -183,10 +186,6 @@ export class MobileSidePanelMenuComponent {
   }
 
   onPluginButtonClick(button: any): void {
-    if (!this.isWorkView()) {
-      return;
-    }
-
     this._store.dispatch(togglePluginPanel(button.pluginId));
 
     if (button.onClick) {
