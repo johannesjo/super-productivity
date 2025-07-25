@@ -32,7 +32,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 const NAV_ALWAYS_VISIBLE = 1200;
 const NAV_OVER_RIGHT_PANEL_NEXT = 800;
 const BOTH_OVER = 720;
-const VERY_BIG_SCREEN = 1270;
+const VERY_BIG_SCREEN = NAV_ALWAYS_VISIBLE;
 
 @Injectable({
   providedIn: 'root',
@@ -96,18 +96,18 @@ export class LayoutService {
     { initialValue: this._isWorkViewUrl(this._router.url) },
   );
 
-  // Computed signal for custom right panel over behavior
-  readonly isRightPanelOverCustom = computed(() => {
+  // Computed signal to determine if right panel should be in overlay mode based on route and screen size
+  readonly shouldRightPanelOverlay = computed(() => {
     const isWorkView = this._isWorkViewRoute();
     const isVeryBigScreen = this._isVeryBigScreen();
     const defaultIsOver = this.isRightPanelOver();
 
-    // Use default behavior if on work view
+    // For work-view routes, use default responsive behavior
     if (isWorkView) {
       return defaultIsOver;
     }
 
-    // For non-work-view routes: use "over" mode unless on very big screen
+    // For non-work-view routes: always use overlay mode unless on very big screen
     return !isVeryBigScreen;
   });
 

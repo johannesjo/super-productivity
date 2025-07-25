@@ -1,17 +1,17 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  inject,
-  input,
   computed,
   effect,
+  inject,
+  input,
+  OnDestroy,
   signal,
   untracked,
-  OnDestroy,
 } from '@angular/core';
 import { merge } from 'rxjs';
 import { TaskDetailTargetPanel, TaskWithSubTasks } from '../tasks/task.model';
-import { distinctUntilChanged, map, filter, startWith } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, startWith } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { slideInFromTopAni } from '../../ui/animations/slide-in-from-top.ani';
@@ -26,13 +26,14 @@ import { PluginService } from '../../plugins/plugin.service';
 import { PluginPanelContainerComponent } from '../../plugins/ui/plugin-panel-container/plugin-panel-container.component';
 import { Store } from '@ngrx/store';
 import {
+  INITIAL_LAYOUT_STATE,
   selectActivePluginId,
   selectIsShowPluginPanel,
   selectLayoutFeatureState,
 } from '../../core-ui/layout/store/layout.reducer';
 import { hidePluginPanel } from '../../core-ui/layout/store/layout.actions';
 import { Log } from '../../core/log';
-import { NavigationEnd, Router, NavigationStart } from '@angular/router';
+import { NavigationEnd, NavigationStart, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -64,15 +65,15 @@ export class RightPanelComponent implements OnDestroy {
   // NOTE: used for debugging
   readonly isAlwaysOver = input<boolean>(false);
 
-  // Use the computed signal from layout service
-  readonly isCustomOver = computed(() => {
-    // Always use "over" mode for debugging
+  // Determines if the panel should be in overlay mode based on route and screen size
+  readonly isOverlayMode = computed(() => {
+    // Force overlay mode for debugging purposes
     if (this.isAlwaysOver()) {
       return true;
     }
 
-    // Use the layout service's computed signal
-    return this.layoutService.isRightPanelOverCustom();
+    // Check if panel should be in overlay mode based on current route and screen size
+    return this.layoutService.shouldRightPanelOverlay();
   });
 
   // Convert observables to signals
@@ -88,16 +89,7 @@ export class RightPanelComponent implements OnDestroy {
   private readonly _layoutFeatureState = toSignal(
     this.store.select(selectLayoutFeatureState),
     {
-      initialValue: {
-        isShowAddTaskBar: false,
-        isShowNotes: false,
-        isShowIssuePanel: false,
-        isShowSideNav: false,
-        isShowCelebrate: false,
-        isShowTaskViewCustomizerPanel: false,
-        isShowPluginPanel: false,
-        activePluginId: null,
-      },
+      initialValue: INITIAL_LAYOUT_STATE,
     },
   );
 
@@ -287,7 +279,7 @@ export class RightPanelComponent implements OnDestroy {
   );
 
   // Effect to handle animation state with delay
-  private _animationTimer: any;
+  private _animationTimer: number | null = null;
   private _animationEffect = effect(
     () => {
       const isOpen = this.isOpen();
@@ -299,7 +291,7 @@ export class RightPanelComponent implements OnDestroy {
       }
 
       // Delay is needed for timing
-      this._animationTimer = setTimeout(() => {
+      this._animationTimer = window.setTimeout(() => {
         this.isDisableTaskPanelAni.set(!isOpen);
       }, 500);
     },
@@ -319,12 +311,9 @@ export class RightPanelComponent implements OnDestroy {
         const prev = this._previousRoute();
 
         if (prev) {
-          // Close panel ONLY when:
-          // 1. Navigating from any route to a non-work-view route
-          // 2. Navigating from non-work-view to work-view (to prevent style flash)
-          // Do NOT close when navigating between work-view routes
-          const shouldClose =
-            !isCurrentWorkView || (!prev.isWorkView && isCurrentWorkView);
+          // Close panel ONLY when navigating TO a non-work-view route
+          // Do NOT close when navigating TO work-view routes (to prevent flash)
+          const shouldClose = !isCurrentWorkView;
 
           // Debug logging
           if (shouldClose) {
@@ -347,17 +336,13 @@ export class RightPanelComponent implements OnDestroy {
     { allowSignalWrites: true },
   );
 
-  constructor() {
-    // No longer need subscriptions as we're using effects
-  }
-
   ngOnDestroy(): void {
     // Clean up timers to prevent memory leaks
     if (this._selectedTaskDelayTimer) {
-      clearTimeout(this._selectedTaskDelayTimer);
+      window.clearTimeout(this._selectedTaskDelayTimer);
     }
     if (this._animationTimer) {
-      clearTimeout(this._animationTimer);
+      window.clearTimeout(this._animationTimer);
     }
   }
 

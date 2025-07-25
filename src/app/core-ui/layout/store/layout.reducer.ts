@@ -33,7 +33,7 @@ export interface LayoutState {
   activePluginId: string | null;
 }
 
-const _initialLayoutState: LayoutState = {
+export const INITIAL_LAYOUT_STATE: LayoutState = {
   isShowAddTaskBar: false,
   isShowSideNav: false,
   isShowNotes: false,
@@ -96,7 +96,7 @@ const ALL_PANEL_CONTENT_HIDDEN: Partial<LayoutState> = {
 };
 
 const _reducer = createReducer<LayoutState>(
-  _initialLayoutState,
+  INITIAL_LAYOUT_STATE,
 
   on(showAddTaskBar, (state) => ({ ...state, isShowAddTaskBar: true })),
 
@@ -160,6 +160,6 @@ const _reducer = createReducer<LayoutState>(
 );
 
 export const layoutReducer = (
-  state: LayoutState = _initialLayoutState,
+  state: LayoutState = INITIAL_LAYOUT_STATE,
   action: Action,
 ): LayoutState => _reducer(state, action);
