@@ -9,9 +9,8 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { merge } from 'rxjs';
 import { TaskDetailTargetPanel, TaskWithSubTasks } from '../tasks/task.model';
-import { distinctUntilChanged, filter, map, startWith } from 'rxjs/operators';
+import { filter, map, startWith } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { slideInFromTopAni } from '../../ui/animations/slide-in-from-top.ani';
@@ -33,7 +32,7 @@ import {
 } from '../../core-ui/layout/store/layout.reducer';
 import { hidePluginPanel } from '../../core-ui/layout/store/layout.actions';
 import { Log } from '../../core/log';
-import { NavigationEnd, NavigationStart, Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -196,33 +195,12 @@ export class RightPanelComponent implements OnDestroy {
     { initialValue: this._router.url },
   );
 
-  // Signal to track if navigation is in progress
-  private readonly _isNavigating = toSignal(
-    merge(
-      this._router.events.pipe(
-        filter((event) => event instanceof NavigationStart),
-        map(() => true),
-      ),
-      this._router.events.pipe(
-        filter((event) => event instanceof NavigationEnd),
-        map(() => false),
-      ),
-    ).pipe(startWith(false), distinctUntilChanged()),
-    { initialValue: false },
-  );
-
   // Computed signal for panel open state
   readonly isOpen = computed<boolean>(() => {
     const selectedTask = this._selectedTask();
     const targetPanel = this._taskDetailPanelTargetPanel();
     const layoutState = this._layoutFeatureState();
     const currentRoute = this._currentRoute();
-    const isNavigating = this._isNavigating();
-
-    // Don't open panel during navigation to prevent flashing
-    if (isNavigating) {
-      return false;
-    }
 
     if (!layoutState) {
       return false;
@@ -311,9 +289,9 @@ export class RightPanelComponent implements OnDestroy {
         const prev = this._previousRoute();
 
         if (prev) {
-          // Close panel ONLY when navigating TO a non-work-view route
-          // Do NOT close when navigating TO work-view routes (to prevent flash)
-          const shouldClose = !isCurrentWorkView;
+          // Only close panel when navigating FROM work-view TO non-work-view
+          // Never close when navigating between work-views or to a work-view
+          const shouldClose = prev.isWorkView && !isCurrentWorkView;
 
           // Debug logging
           if (shouldClose) {
