@@ -1,21 +1,18 @@
 import {
-  TaskBuilder,
-  ParsedTaskBuilder,
-  MarkdownBuilder,
-  createMockConfig,
   createMockPluginAPI,
   createTaskHierarchy,
   generateLargeMarkdown,
+  MarkdownBuilder,
   measureExecutionTime,
+  ParsedTaskBuilder,
+  TaskBuilder,
 } from '../test-utils';
-import { parseMarkdown } from '../../sync/markdown-parser';
+import { parseMarkdown, parseMarkdownWithHeader } from '../../sync/markdown-parser';
 import { generateTaskOperations } from '../../sync/generate-task-operations';
 import { convertTasksToMarkdown } from '../../sync/sp-to-md';
 import { mdToSp } from '../../sync/md-to-sp';
-import { spToMd } from '../../sync/sp-to-md';
 
 // Mock dependencies
-jest.mock('../../sync/markdown-parser');
 jest.mock('../../sync/generate-task-operations');
 jest.mock('../../helper/file-utils');
 
@@ -117,44 +114,7 @@ describe('Comprehensive Sync Tests', () => {
         .addTask('Add animations', { id: 'animations', indent: 4 })
         .build();
 
-      // Mock parser to return appropriate structure
-      (parseMarkdown as jest.Mock).mockReturnValue([
-        new ParsedTaskBuilder()
-          .withId('overview')
-          .withTitle('Project Overview')
-          .withNotes('This project contains multiple features')
-          .build(),
-        new ParsedTaskBuilder().withId('feature1').withTitle('Feature 1').build(),
-        new ParsedTaskBuilder()
-          .withId('api')
-          .withTitle('Implement API')
-          .withParentId('feature1')
-          .withIsSubtask(true)
-          .build(),
-        new ParsedTaskBuilder()
-          .withId('tests')
-          .withTitle('Write tests')
-          .withParentId('feature1')
-          .withIsSubtask(true)
-          .withCompleted(true)
-          .withNotes('Unit and integration tests')
-          .build(),
-        new ParsedTaskBuilder().withId('feature2').withTitle('Feature 2').build(),
-        new ParsedTaskBuilder()
-          .withId('ui')
-          .withTitle('Design UI')
-          .withParentId('feature2')
-          .withIsSubtask(true)
-          .build(),
-        new ParsedTaskBuilder()
-          .withId('animations')
-          .withTitle('Add animations')
-          .withParentId('ui')
-          .withIsSubtask(true)
-          .build(),
-      ]);
-
-      // Mock operations
+      // Mock operations instead of parser since we're testing integration
       (generateTaskOperations as jest.Mock).mockReturnValue([
         {
           type: 'create',
@@ -165,7 +125,6 @@ describe('Comprehensive Sync Tests', () => {
 
       await mdToSp(markdown, 'test-project');
 
-      expect(parseMarkdown).toHaveBeenCalledWith(markdown);
       expect(generateTaskOperations).toHaveBeenCalled();
       expect(mockPluginAPI.batchUpdateForProject).toHaveBeenCalled();
     });
@@ -175,20 +134,12 @@ describe('Comprehensive Sync Tests', () => {
     it('should handle large markdown efficiently', async () => {
       const largeMarkdown = generateLargeMarkdown(1000);
 
-      // Mock parseMarkdown to simulate parsing
-      (parseMarkdown as jest.Mock).mockImplementation((content) => {
-        // Simulate parsing time
-        const lines = content.split('\n');
-        return lines
-          .filter((line: string) => line.match(/^[\s]*- \[/))
-          .map((line: string, index: number) =>
-            new ParsedTaskBuilder().withLine(index).withTitle(`Task ${index}`).build(),
-          );
-      });
-
+      // Test actual parsing performance without mocking
       const time = await measureExecutionTime(() => {
         const result = parseMarkdown(largeMarkdown);
-        expect(result.length).toBeGreaterThan(900); // Some have notes
+        // The parser only returns tasks at depth 0 and 1 (parents and subtasks)
+        // Tasks with indent >= 4 (depth >= 2) are converted to notes
+        expect(result.length).toBeGreaterThan(200); // Should have many tasks
       });
 
       expect(time).toBeLessThan(100); // Should parse in under 100ms
@@ -201,9 +152,9 @@ describe('Comprehensive Sync Tests', () => {
       });
 
       // Convert to markdown
-      const markdownTime = await measureExecutionTime(() =>
-        convertTasksToMarkdown(tasks),
-      );
+      const markdownTime = await measureExecutionTime(() => {
+        convertTasksToMarkdown(tasks);
+      });
 
       expect(markdownTime).toBeLessThan(50);
 
@@ -216,9 +167,9 @@ describe('Comprehensive Sync Tests', () => {
         })),
       );
 
-      const opsTime = await measureExecutionTime(() =>
-        generateTaskOperations([], tasks, 'test-project'),
-      );
+      const opsTime = await measureExecutionTime(() => {
+        generateTaskOperations([], tasks, 'test-project');
+      });
 
       expect(opsTime).toBeLessThan(50);
     });
@@ -323,20 +274,9 @@ describe('Comprehensive Sync Tests', () => {
       // First cycle: SP to MD
       const markdown1 = convertTasksToMarkdown(initialTasks);
 
-      // Mock parse to return equivalent structure
-      (parseMarkdown as jest.Mock).mockReturnValue(
-        initialTasks.map((t) =>
-          new ParsedTaskBuilder()
-            .withId(t.id)
-            .withTitle(t.title)
-            .withCompleted(t.isDone)
-            .withParentId(t.parentId)
-            .build(),
-        ),
-      );
-
-      // Second cycle: MD to SP
-      const parsed = parseMarkdown(markdown1);
+      // Second cycle: MD to SP - parse the actual markdown
+      const result = parseMarkdownWithHeader(markdown1);
+      const parsed = result.tasks;
 
       // Verify consistency
       expect(parsed).toHaveLength(initialTasks.length);

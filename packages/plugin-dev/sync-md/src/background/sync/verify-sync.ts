@@ -134,7 +134,6 @@ export const verifySyncState = async (
     }
 
     // Check task order
-    const spParentTasks = spTasks.filter((t) => !t.parentId);
     const mdParentTasks = mdTasks.filter((t) => !t.parentId);
 
     // If project has taskIds, use them for ordering

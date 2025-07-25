@@ -1,6 +1,11 @@
 import { Task } from '@super-productivity/plugin-api';
-import { writeTasksFile, ensureDirectoryExists } from '../helper/file-utils';
+import {
+  writeTasksFile,
+  ensureDirectoryExists,
+  readTasksFile,
+} from '../helper/file-utils';
 import { LocalUserCfg } from '../local-config';
+import { parseMarkdownWithHeader } from './markdown-parser';
 
 /**
  * Replicate Super Productivity tasks to markdown file
@@ -44,8 +49,27 @@ export const spToMd = async (config: LocalUserCfg): Promise<void> => {
   // Convert project tasks to markdown
   const markdown = convertTasksToMarkdown(orderedTasks);
 
+  // Get existing header from file
+  let header = '';
+  try {
+    const existingContent = await readTasksFile(config.filePath);
+    if (existingContent) {
+      const parsed = parseMarkdownWithHeader(existingContent);
+      header = parsed.header || '';
+    }
+  } catch (error) {
+    // File doesn't exist yet, no header to preserve
+  }
+
+  // Combine header and tasks
+  let finalContent = markdown;
+  if (header) {
+    // Add newline between header and tasks if both exist
+    finalContent = header + (markdown ? '\n' + markdown : '');
+  }
+
   // Write to file
-  await writeTasksFile(config.filePath, markdown);
+  await writeTasksFile(config.filePath, finalContent);
 };
 
 /**

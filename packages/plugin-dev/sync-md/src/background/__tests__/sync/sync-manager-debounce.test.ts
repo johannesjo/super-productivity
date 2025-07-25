@@ -10,6 +10,19 @@ jest.mock('../../sync/sp-to-md');
 jest.mock('../../sync/md-to-sp');
 jest.mock('../../helper/file-utils');
 jest.mock('../../sync/verify-sync');
+jest.mock('../../../shared/logger', () => ({
+  log: {
+    critical: jest.fn(),
+    err: jest.fn(),
+    error: jest.fn(),
+    log: jest.fn(),
+    normal: jest.fn(),
+    info: jest.fn(),
+    verbose: jest.fn(),
+    debug: jest.fn(),
+    warn: jest.fn(),
+  },
+}));
 
 // Import after mocking
 import { spToMd } from '../../sync/sp-to-md';
@@ -20,6 +33,23 @@ import {
   ensureDirectoryExists,
 } from '../../helper/file-utils';
 import { verifySyncState, logSyncVerification } from '../../sync/verify-sync';
+
+// Mock PluginAPI with log methods
+(global as any).PluginAPI = {
+  log: {
+    critical: jest.fn(),
+    err: jest.fn(),
+    error: jest.fn(),
+    log: jest.fn(),
+    normal: jest.fn(),
+    info: jest.fn(),
+    verbose: jest.fn(),
+    debug: jest.fn(),
+    warn: jest.fn(),
+  },
+  persistDataSynced: jest.fn(),
+  loadSyncedData: jest.fn(),
+};
 
 // Mock console to reduce noise
 beforeAll(() => {
@@ -55,8 +85,8 @@ describe('Sync Manager Debounce Behavior', () => {
       return Promise.resolve();
     });
     (mdToSp as jest.Mock).mockImplementation(() => {
-      // Return a resolved promise
-      return Promise.resolve();
+      // Return a resolved promise with the expected structure
+      return Promise.resolve({ header: undefined });
     });
     (verifySyncState as jest.Mock).mockResolvedValue({ isInSync: true, differences: [] });
     (logSyncVerification as jest.Mock).mockReturnValue(undefined);

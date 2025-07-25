@@ -5,18 +5,43 @@ import { Task } from '@super-productivity/plugin-api';
 
 // Mock dependencies
 jest.mock('../../helper/file-utils');
+jest.mock('../../../shared/logger', () => ({
+  log: {
+    critical: jest.fn(),
+    err: jest.fn(),
+    error: jest.fn(),
+    log: jest.fn(),
+    normal: jest.fn(),
+    info: jest.fn(),
+    verbose: jest.fn(),
+    debug: jest.fn(),
+    warn: jest.fn(),
+  },
+}));
 
 // Mock PluginAPI
-global.PluginAPI = {
+(global as any).PluginAPI = {
   getTasks: jest.fn(),
   getAllProjects: jest.fn(),
+  log: {
+    critical: jest.fn(),
+    err: jest.fn(),
+    error: jest.fn(),
+    log: jest.fn(),
+    normal: jest.fn(),
+    info: jest.fn(),
+    verbose: jest.fn(),
+    debug: jest.fn(),
+    warn: jest.fn(),
+  },
+  persistDataSynced: jest.fn(),
+  loadSyncedData: jest.fn(),
 } as any;
 
 describe('spToMd', () => {
   const mockConfig: LocalUserCfg = {
     filePath: '/test/tasks.md',
     projectId: 'test-project',
-    enabled: true,
   };
 
   beforeEach(() => {
@@ -66,8 +91,10 @@ describe('spToMd', () => {
       },
     ];
 
-    (global.PluginAPI.getTasks as jest.Mock).mockResolvedValue(mockTasks);
-    (global.PluginAPI.getAllProjects as jest.Mock).mockResolvedValue(mockProjects);
+    ((global as any).PluginAPI.getTasks as jest.Mock).mockResolvedValue(mockTasks);
+    ((global as any).PluginAPI.getAllProjects as jest.Mock).mockResolvedValue(
+      mockProjects,
+    );
 
     await spToMd(mockConfig);
 
@@ -131,8 +158,10 @@ describe('spToMd', () => {
       },
     ];
 
-    (global.PluginAPI.getTasks as jest.Mock).mockResolvedValue(mockTasks);
-    (global.PluginAPI.getAllProjects as jest.Mock).mockResolvedValue(mockProjects);
+    ((global as any).PluginAPI.getTasks as jest.Mock).mockResolvedValue(mockTasks);
+    ((global as any).PluginAPI.getAllProjects as jest.Mock).mockResolvedValue(
+      mockProjects,
+    );
 
     await spToMd(mockConfig);
 
@@ -185,8 +214,10 @@ describe('spToMd', () => {
       },
     ];
 
-    (global.PluginAPI.getTasks as jest.Mock).mockResolvedValue(mockTasks);
-    (global.PluginAPI.getAllProjects as jest.Mock).mockResolvedValue(mockProjects);
+    ((global as any).PluginAPI.getTasks as jest.Mock).mockResolvedValue(mockTasks);
+    ((global as any).PluginAPI.getAllProjects as jest.Mock).mockResolvedValue(
+      mockProjects,
+    );
 
     await spToMd(mockConfig);
 

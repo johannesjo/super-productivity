@@ -1,6 +1,5 @@
 import { parseMarkdown, parseMarkdownWithErrors } from '../../sync/markdown-parser';
 import { generateTaskOperations } from '../../sync/generate-task-operations';
-import { Task } from '@super-productivity/plugin-api';
 
 describe('Error Scenarios and Boundary Conditions', () => {
   describe('Markdown Parser - Error Scenarios', () => {
@@ -313,7 +312,7 @@ describe('Error Scenarios and Boundary Conditions', () => {
 
       maliciousPatterns.forEach((pattern) => {
         const start = Date.now();
-        const tasks = parseMarkdown(pattern);
+        parseMarkdown(pattern);
         const duration = Date.now() - start;
 
         // Should not hang or take excessive time

@@ -1,5 +1,5 @@
 import { mdToSp } from '../../sync/md-to-sp';
-import { parseMarkdown } from '../../sync/markdown-parser';
+import { parseMarkdownWithHeader } from '../../sync/markdown-parser';
 import { generateTaskOperations } from '../../sync/generate-task-operations';
 import { Task } from '@super-productivity/plugin-api';
 
@@ -12,6 +12,19 @@ const mockPluginAPI = {
   getTasks: jest.fn(),
   batchUpdateForProject: jest.fn(),
   getAllProjects: jest.fn(),
+  log: {
+    critical: jest.fn(),
+    err: jest.fn(),
+    error: jest.fn(),
+    log: jest.fn(),
+    normal: jest.fn(),
+    info: jest.fn(),
+    verbose: jest.fn(),
+    debug: jest.fn(),
+    warn: jest.fn(),
+  },
+  persistDataSynced: jest.fn(),
+  loadSyncedData: jest.fn(),
 };
 
 (global as any).PluginAPI = mockPluginAPI;
@@ -71,12 +84,15 @@ describe('MD to SP Sync - Complete Tests', () => {
         },
       ];
 
-      (parseMarkdown as jest.Mock).mockReturnValue(mockParsedTasks);
+      (parseMarkdownWithHeader as jest.Mock).mockReturnValue({
+        tasks: mockParsedTasks,
+        errors: [],
+      });
       (generateTaskOperations as jest.Mock).mockReturnValue(mockOperations);
 
       await mdToSp(mockMarkdownContent, mockProjectId);
 
-      expect(parseMarkdown).toHaveBeenCalledWith(mockMarkdownContent);
+      expect(parseMarkdownWithHeader).toHaveBeenCalledWith(mockMarkdownContent);
       expect(mockPluginAPI.getTasks).toHaveBeenCalledWith();
       expect(generateTaskOperations).toHaveBeenCalledWith(
         mockParsedTasks,
@@ -90,12 +106,12 @@ describe('MD to SP Sync - Complete Tests', () => {
     });
 
     it('should handle empty markdown content', async () => {
-      (parseMarkdown as jest.Mock).mockReturnValue([]);
+      (parseMarkdownWithHeader as jest.Mock).mockReturnValue({ tasks: [], errors: [] });
       (generateTaskOperations as jest.Mock).mockReturnValue([]);
 
       await mdToSp('', mockProjectId);
 
-      expect(parseMarkdown).toHaveBeenCalledWith('');
+      expect(parseMarkdownWithHeader).toHaveBeenCalledWith('');
       // batchUpdateForProject won't be called with empty operations
       expect(mockPluginAPI.batchUpdateForProject).not.toHaveBeenCalled();
     });
@@ -103,12 +119,12 @@ describe('MD to SP Sync - Complete Tests', () => {
     it('should handle markdown with only whitespace', async () => {
       const whitespaceContent = '   \n\n   \t   ';
 
-      (parseMarkdown as jest.Mock).mockReturnValue([]);
+      (parseMarkdownWithHeader as jest.Mock).mockReturnValue({ tasks: [], errors: [] });
       (generateTaskOperations as jest.Mock).mockReturnValue([]);
 
       await mdToSp(whitespaceContent, mockProjectId);
 
-      expect(parseMarkdown).toHaveBeenCalledWith(whitespaceContent);
+      expect(parseMarkdownWithHeader).toHaveBeenCalledWith(whitespaceContent);
       // batchUpdateForProject won't be called with empty operations
       expect(mockPluginAPI.batchUpdateForProject).not.toHaveBeenCalled();
     });
@@ -150,7 +166,10 @@ describe('MD to SP Sync - Complete Tests', () => {
       ];
 
       mockPluginAPI.getTasks.mockResolvedValue(existingTasks);
-      (parseMarkdown as jest.Mock).mockReturnValue(mockParsedTasks);
+      (parseMarkdownWithHeader as jest.Mock).mockReturnValue({
+        tasks: mockParsedTasks,
+        errors: [],
+      });
       (generateTaskOperations as jest.Mock).mockReturnValue(mockOperations);
 
       await mdToSp(mockMarkdownContent, mockProjectId);
@@ -190,7 +209,7 @@ describe('MD to SP Sync - Complete Tests', () => {
     it('should handle parseMarkdown error', async () => {
       const error = new Error('Parse error');
 
-      (parseMarkdown as jest.Mock).mockImplementation(() => {
+      (parseMarkdownWithHeader as jest.Mock).mockImplementation(() => {
         throw error;
       });
 
@@ -211,7 +230,10 @@ describe('MD to SP Sync - Complete Tests', () => {
         },
       ];
 
-      (parseMarkdown as jest.Mock).mockReturnValue(parsedTasks);
+      (parseMarkdownWithHeader as jest.Mock).mockReturnValue({
+        tasks: parsedTasks,
+        errors: [],
+      });
       (generateTaskOperations as jest.Mock).mockReturnValue([
         { type: 'create', data: { title: 'test' } },
       ]);
@@ -238,7 +260,10 @@ describe('MD to SP Sync - Complete Tests', () => {
         },
       }));
 
-      (parseMarkdown as jest.Mock).mockReturnValue(largeTasks);
+      (parseMarkdownWithHeader as jest.Mock).mockReturnValue({
+        tasks: largeTasks,
+        errors: [],
+      });
       (generateTaskOperations as jest.Mock).mockReturnValue(largeOperations);
 
       await mdToSp('large content', mockProjectId);
@@ -277,7 +302,10 @@ describe('MD to SP Sync - Complete Tests', () => {
         },
       ];
 
-      (parseMarkdown as jest.Mock).mockReturnValue(orderedTasks);
+      (parseMarkdownWithHeader as jest.Mock).mockReturnValue({
+        tasks: orderedTasks,
+        errors: [],
+      });
       (generateTaskOperations as jest.Mock).mockImplementation((tasks) => {
         // Verify tasks are passed in the correct order
         expect(tasks).toEqual(orderedTasks);
@@ -314,7 +342,10 @@ describe('MD to SP Sync - Complete Tests', () => {
         },
       ];
 
-      (parseMarkdown as jest.Mock).mockReturnValue(specialTasks);
+      (parseMarkdownWithHeader as jest.Mock).mockReturnValue({
+        tasks: specialTasks,
+        errors: [],
+      });
       (generateTaskOperations as jest.Mock).mockReturnValue([]);
 
       await mdToSp(mockMarkdownContent, mockProjectId);
@@ -352,7 +383,10 @@ describe('MD to SP Sync - Complete Tests', () => {
         },
       ];
 
-      (parseMarkdown as jest.Mock).mockReturnValue(nestedTasks);
+      (parseMarkdownWithHeader as jest.Mock).mockReturnValue({
+        tasks: nestedTasks,
+        errors: [],
+      });
       (generateTaskOperations as jest.Mock).mockReturnValue([]);
 
       await mdToSp(mockMarkdownContent, mockProjectId);
@@ -361,7 +395,7 @@ describe('MD to SP Sync - Complete Tests', () => {
     });
 
     it('should skip sync when no operations are needed', async () => {
-      (parseMarkdown as jest.Mock).mockReturnValue([]);
+      (parseMarkdownWithHeader as jest.Mock).mockReturnValue({ tasks: [], errors: [] });
       (generateTaskOperations as jest.Mock).mockReturnValue([]);
 
       await mdToSp(mockMarkdownContent, mockProjectId);

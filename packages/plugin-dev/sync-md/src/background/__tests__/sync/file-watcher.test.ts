@@ -1,9 +1,8 @@
 import { startFileWatcher, stopFileWatcher } from '../../sync/file-watcher';
-import * as path from 'path';
 
 // Set up Node.js environment for tests
 if (typeof setImmediate === 'undefined') {
-  (global as any).setImmediate = (fn: Function) => setTimeout(fn, 0);
+  (global as any).setImmediate = (fn: () => void) => setTimeout(fn, 0);
 }
 
 // Mock PluginAPI globally
