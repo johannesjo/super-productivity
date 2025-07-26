@@ -10,11 +10,11 @@ import {
   AuthFailSPError,
   CanNotMigrateMajorDownError,
   ConflictData,
-  PotentialCorsError,
   DecryptError,
   DecryptNoPasswordError,
   LockPresentError,
   NoRemoteModelFile,
+  PotentialCorsError,
   RevMismatchForModelError,
   SyncInvalidTimeValuesError,
   SyncProviderId,
@@ -122,6 +122,7 @@ export class SyncWrapperService {
           return r.status;
 
         case SyncStatus.NotConfigured:
+          alert('aaaa');
           this.configuredAuthForSyncProviderIfNecessary(providerId);
           return r.status;
 
@@ -284,6 +285,11 @@ export class SyncWrapperService {
     }
 
     if (!provider.getAuthHelper) {
+      return { wasConfigured: false };
+    }
+
+    if (await provider.isReady()) {
+      SyncLog.warn('Provider already configured');
       return { wasConfigured: false };
     }
 

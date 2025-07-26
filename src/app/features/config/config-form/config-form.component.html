@@ -4,12 +4,12 @@
 >
   <formly-form
     (modelChange)="updateCfg($event)"
-    [fields]="fields"
+    [fields]="fields()"
     [form]="form"
-    [model]="config"
+    [model]="cfg()"
     [options]="options"
   >
   </formly-form>
 </form>
 
-<!--<pre><code>{{config|json}}</code></pre>-->
+<!--<pre><code>{{cfg()|json}}</code></pre>-->
