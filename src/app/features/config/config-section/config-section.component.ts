@@ -120,7 +120,6 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
     sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey | TagCfgFormKey;
     config: any;
   }): void {
-    this.isExpanded = false;
     this.save.emit($event);
   }
 
