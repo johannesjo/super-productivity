@@ -69,11 +69,13 @@ export class SyncConfigService {
                   ...baseConfig.webDav,
                   ...defaultOverride.webDav,
                 },
+                encryptKey: '',
               };
             })
             .catch(() => {
               return {
                 ...baseConfig,
+                encryptKey: '',
               };
             }),
         );
@@ -153,15 +155,22 @@ export class SyncConfigService {
   ): Promise<void> {
     const prop = PROP_MAP_TO_FORM[providerId];
 
+    // Load existing config to preserve OAuth tokens and other settings
+    const activeProvider = await this._pfapiService.pf.getSyncProviderById(providerId);
+    const oldConfig = activeProvider ? await activeProvider.privateCfg.load() : {};
+
     // Form fields contain provider-specific settings, but Dropbox uses OAuth tokens
     // stored elsewhere, so it only needs the encryption key
-    const privateConfig = prop ? settings[prop] || {} : {};
+    const privateConfigProviderSpecific = prop ? settings[prop] || {} : {};
 
     // Start with defaults to ensure API calls won't fail due to undefined values,
+    // then overlay old config to preserve existing data (like OAuth tokens),
     // then overlay user settings, and always include encryption key for data security
+    // NOTE: that we need the old config here in order not to overwrite other private stuff like tokens
     const configWithDefaults = {
       ...PROVIDER_FIELD_DEFAULTS[providerId],
-      ...(privateConfig as Record<string, unknown>),
+      ...oldConfig,
+      ...(privateConfigProviderSpecific as Record<string, unknown>),
       encryptKey: settings.encryptKey || '',
     };
 
