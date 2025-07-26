@@ -59,8 +59,10 @@ describe('SyncConfigService', () => {
 
   describe('updateSettingsFromForm', () => {
     it('should update global config with non-private data only', async () => {
-      const globalConfigService = TestBed.inject(GlobalConfigService) as jasmine.SpyObj<GlobalConfigService>;
-      
+      const globalConfigService = TestBed.inject(
+        GlobalConfigService,
+      ) as jasmine.SpyObj<GlobalConfigService>;
+
       const settings: SyncConfig = {
         isEnabled: true,
         syncProvider: LegacySyncProvider.WebDAV,
@@ -86,7 +88,26 @@ describe('SyncConfigService', () => {
       });
     });
 
-    it('should apply default values for WebDAV provider fields', async () => {
+    it('should apply default values for WebDAV provider fields and preserve existing config', async () => {
+      // Mock existing provider with old config
+      const mockProvider = {
+        id: SyncProviderId.WebDAV,
+        privateCfg: {
+          load: jasmine.createSpy('load').and.returnValue(
+            Promise.resolve({
+              baseUrl: 'https://old.example.com',
+              userName: 'olduser',
+              password: 'oldpass',
+              syncFolderPath: '/old',
+              encryptKey: 'old-key',
+            }),
+          ),
+        },
+      };
+      (pfapiService.pf.getSyncProviderById as jasmine.Spy).and.returnValue(
+        Promise.resolve(mockProvider),
+      );
+
       const settings: SyncConfig = {
         isEnabled: true,
         syncProvider: LegacySyncProvider.WebDAV,
@@ -95,7 +116,7 @@ describe('SyncConfigService', () => {
         encryptKey: 'test-key',
         webDav: {
           baseUrl: 'https://example.com',
-          // Missing userName, password, syncFolderPath
+          // Missing userName, password, syncFolderPath - should use old values
         } as any,
       };
 
@@ -105,15 +126,20 @@ describe('SyncConfigService', () => {
         SyncProviderId.WebDAV,
         {
           baseUrl: 'https://example.com',
-          userName: '',
-          password: '',
-          syncFolderPath: '',
-          encryptKey: 'test-key',
+          userName: 'olduser', // Preserved from old config
+          password: 'oldpass', // Preserved from old config
+          syncFolderPath: '/old', // Preserved from old config
+          encryptKey: 'test-key', // New value from settings
         },
       );
     });
 
-    it('should apply default values for LocalFile provider fields', async () => {
+    it('should apply default values for LocalFile provider fields when no existing config', async () => {
+      // Mock no existing provider
+      (pfapiService.pf.getSyncProviderById as jasmine.Spy).and.returnValue(
+        Promise.resolve(null),
+      );
+
       const settings: SyncConfig = {
         isEnabled: true,
         syncProvider: LegacySyncProvider.LocalFile,
@@ -136,7 +162,24 @@ describe('SyncConfigService', () => {
       );
     });
 
-    it('should handle Dropbox provider with only encryptKey', async () => {
+    it('should handle Dropbox provider and preserve OAuth tokens', async () => {
+      // Mock existing Dropbox provider with OAuth tokens
+      const mockProvider = {
+        id: SyncProviderId.Dropbox,
+        privateCfg: {
+          load: jasmine.createSpy('load').and.returnValue(
+            Promise.resolve({
+              accessToken: 'existing-access-token',
+              refreshToken: 'existing-refresh-token',
+              encryptKey: 'old-key',
+            }),
+          ),
+        },
+      };
+      (pfapiService.pf.getSyncProviderById as jasmine.Spy).and.returnValue(
+        Promise.resolve(mockProvider),
+      );
+
       const settings: SyncConfig = {
         isEnabled: true,
         syncProvider: LegacySyncProvider.Dropbox,
@@ -150,17 +193,35 @@ describe('SyncConfigService', () => {
       expect(pfapiService.pf.setPrivateCfgForSyncProvider).toHaveBeenCalledWith(
         SyncProviderId.Dropbox,
         {
-          encryptKey: 'dropbox-key',
+          accessToken: 'existing-access-token', // Preserved OAuth tokens
+          refreshToken: 'existing-refresh-token', // Preserved OAuth tokens
+          encryptKey: 'dropbox-key', // Updated from settings
         },
       );
     });
 
     it('should prevent duplicate saves when settings are unchanged', async () => {
+      // Mock provider for the test
+      (pfapiService.pf.getSyncProviderById as jasmine.Spy).and.returnValue(
+        Promise.resolve({
+          id: SyncProviderId.WebDAV,
+          privateCfg: {
+            load: jasmine.createSpy('load').and.returnValue(Promise.resolve({})),
+          },
+        }),
+      );
+
       const settings: SyncConfig = {
         isEnabled: true,
         syncProvider: LegacySyncProvider.WebDAV,
         syncInterval: 300000,
         isEncryptionEnabled: false,
+        webDav: {
+          baseUrl: '',
+          userName: '',
+          password: '',
+          syncFolderPath: '',
+        },
       };
 
       // First call
@@ -187,6 +248,40 @@ describe('SyncConfigService', () => {
       await service.updateSettingsFromForm(settings);
 
       expect(pfapiService.pf.setPrivateCfgForSyncProvider).not.toHaveBeenCalled();
+    });
+
+    it('should handle provider with no existing config', async () => {
+      // Mock no existing provider (e.g., initial setup)
+      (pfapiService.pf.getSyncProviderById as jasmine.Spy).and.returnValue(
+        Promise.resolve(null),
+      );
+
+      const settings: SyncConfig = {
+        isEnabled: true,
+        syncProvider: LegacySyncProvider.WebDAV,
+        syncInterval: 300000,
+        isEncryptionEnabled: true,
+        encryptKey: 'new-key',
+        webDav: {
+          baseUrl: 'https://example.com',
+          userName: 'newuser',
+          password: 'newpass',
+          syncFolderPath: '/new',
+        },
+      };
+
+      await service.updateSettingsFromForm(settings);
+
+      expect(pfapiService.pf.setPrivateCfgForSyncProvider).toHaveBeenCalledWith(
+        SyncProviderId.WebDAV,
+        {
+          baseUrl: 'https://example.com',
+          userName: 'newuser',
+          password: 'newpass',
+          syncFolderPath: '/new',
+          encryptKey: 'new-key',
+        },
+      );
     });
   });
 
