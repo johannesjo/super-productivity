@@ -17,7 +17,8 @@ describe('SyncConfigService', () => {
 
   beforeEach(() => {
     // Mock fetch for the sync-config-default-override.json
-    spyOn(window, 'fetch').and.returnValue(
+    // @ts-ignore - fetch might not exist in test environment
+    globalThis.fetch = jasmine.createSpy('fetch').and.returnValue(
       Promise.resolve({
         json: () => Promise.resolve({}),
       } as Response),
