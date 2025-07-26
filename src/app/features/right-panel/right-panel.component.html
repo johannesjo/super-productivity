@@ -21,13 +21,15 @@
           <plugin-panel-container [@slideInFromRight]></plugin-panel-container>
         }
         <!-- Task content comes last so we can avoid an extra effect to unset selected task -->
-      } @else if (selectedTaskWithDelayForNone()) {
-        <task-detail-panel
-          [isOver]="isOverlayMode()"
-          [@taskDetailPanelTaskChange]="selectedTaskWithDelayForNone()?.id"
-          [@.disabled]="isDisableTaskPanelAni()"
-          [task]="selectedTaskWithDelayForNone()"
-        ></task-detail-panel>
+      } @else {
+        @if (selectedTaskWithDelayForNone(); as task) {
+          <task-detail-panel
+            [isOver]="isOverlayMode()"
+            [@taskDetailPanelTaskChange]="task.id"
+            [@.disabled]="isDisableTaskPanelAni()"
+            [task]="task"
+          ></task-detail-panel>
+        }
       }
     </div>
   </ng-container>
