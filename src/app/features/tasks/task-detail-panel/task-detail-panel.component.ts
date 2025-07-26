@@ -22,9 +22,11 @@ import { of } from 'rxjs';
 import {
   catchError,
   delay,
+  distinctUntilChanged,
   filter,
   map,
   shareReplay,
+  skip,
   switchMap,
   withLatestFrom,
 } from 'rxjs/operators';
@@ -174,6 +176,7 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
 
   // Issue data reactive loading (replacing async effect)
   private _issueData$ = this._task$.pipe(
+    takeUntilDestroyed(this._destroyRef),
     switchMap((task) => {
       const { issueId, issueType, issueProviderId } = task;
 
@@ -185,9 +188,10 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
         return of(null);
       }
 
-      return this._issueService
-        .getById$(issueType, issueId, issueProviderId)
-        .pipe(catchError(() => of(null)));
+      return this._issueService.getById$(issueType, issueId, issueProviderId).pipe(
+        takeUntilDestroyed(this._destroyRef),
+        catchError(() => of(null)),
+      );
     }),
     shareReplay(1),
   );
@@ -316,13 +320,14 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
     }
   });
 
-  private focusOnTaskChangeEffect = effect(() => {
-    const task = this.task();
-    // Trigger focus on task change
-    if (task) {
-      this._focusFirst();
-    }
-  });
+  private _focusOnTaskIdChange = this._task$
+    .pipe(
+      map((task) => task.id),
+      distinctUntilChanged(),
+      skip(1), // Skip initial emission
+      takeUntilDestroyed(this._destroyRef),
+    )
+    .subscribe(() => this._focusFirst());
   // -------
 
   private _focusTimeout?: number;
