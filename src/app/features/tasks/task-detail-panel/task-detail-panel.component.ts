@@ -4,7 +4,6 @@ import {
   Component,
   computed,
   DestroyRef,
-  effect,
   HostListener,
   inject,
   input,
@@ -302,23 +301,30 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
 
   // EFFECTS
   // -------
-  private jiraImageHeadersEffect = effect(() => {
-    if (!IS_ELECTRON) return;
-
-    const task = this.task();
-    const { issueType, issueProviderId } = task;
-
-    if (issueType === JIRA_TYPE && issueProviderId) {
-      this._store
-        .select(selectIssueProviderById<IssueProviderJira>(issueProviderId, 'JIRA'))
-        .pipe(takeUntilDestroyed(this._destroyRef))
+  private _jiraImageHeaders = IS_ELECTRON
+    ? this._task$
+        .pipe(
+          map((task) =>
+            task.issueType === JIRA_TYPE && task.issueProviderId
+              ? task.issueProviderId
+              : null,
+          ),
+          distinctUntilChanged(),
+          switchMap((issueProviderId) =>
+            issueProviderId
+              ? this._store.select(
+                  selectIssueProviderById<IssueProviderJira>(issueProviderId, 'JIRA'),
+                )
+              : of(null),
+          ),
+          takeUntilDestroyed(this._destroyRef),
+        )
         .subscribe((jiraCfg) => {
           if (jiraCfg?.isEnabled) {
             window.ea.jiraSetupImgHeaders({ jiraCfg });
           }
-        });
-    }
-  });
+        })
+    : null;
 
   private _focusOnTaskIdChange = this._task$
     .pipe(
@@ -494,9 +500,9 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
     this._focusTimeout = window.setTimeout(() => {
       const itemEls = this.itemEls();
       if (!itemEls) {
-        throw new Error();
+        throw new Error('No items found');
       }
-      if (itemEls.length) {
+      if (itemEls.length && itemEls[0]) {
         this.focusItem(itemEls[0], 0);
       }
     }, 150);
