@@ -12,9 +12,7 @@
       <!--    </button>-->
     </header>
   }
-  @if (
-    task() && !task().parentId && (layoutService.isRightPanelOver() || isDialogMode())
-  ) {
+  @if (showSubTasksPanel()) {
     <task-detail-item
       (collapseParent)="collapseParent()"
       (keyPress)="onItemKeyPress($event)"
@@ -78,7 +76,7 @@
       </ng-container>
     </task-detail-item>
   }
-  @if (!task().subTasks?.length) {
+  @if (showTimeEstimate()) {
     <task-detail-item
       (collapseParent)="collapseParent()"
       (editActionTriggered)="estimateTime()"
@@ -114,19 +112,8 @@
     [class.color-warn]="isOverdue()"
   >
     <ng-container input-title>
-      @if (task().dueDay) {
-        <mat-icon>today</mat-icon>
-      } @else if (task().dueWithTime && !task().reminderId) {
-        <mat-icon>schedule</mat-icon>
-      } @else {
-        <mat-icon>alarm</mat-icon>
-      }
-      @if (task().dueWithTime || task().dueDay) {
-        <span>{{ T.F.TASK.ADDITIONAL_INFO.DUE | translate }}</span>
-      }
-      @if (!(task().dueWithTime || task().dueDay)) {
-        <span>{{ T.F.TASK.ADDITIONAL_INFO.SCHEDULE_TASK | translate }}</span>
-      }
+      <mat-icon>{{ showScheduleIcon() }}</mat-icon>
+      <span>{{ scheduleLabelKey() | translate }}</span>
     </ng-container>
     <ng-container input-value>
       @if (task().dueWithTime) {
@@ -154,7 +141,7 @@
     <task-detail-item
       (collapseParent)="collapseParent()"
       (keyPress)="onItemKeyPress($event)"
-      [expanded]="isExpandedIssuePanel() && !isDialogMode()"
+      [expanded]="panelState.isExpandedIssuePanel() && !isDialogMode()"
       [type]="'panel'"
     >
       <ng-container panel-header>
@@ -179,9 +166,9 @@
   <task-detail-item
     #noteWrapperElRef
     (collapseParent)="collapseParent()"
-    (editActionTriggered)="isFocusNotes.set(true)"
+    (editActionTriggered)="panelState.isFocusNotes.set(true)"
     (keyPress)="onItemKeyPress($event)"
-    [expanded]="isExpandedNotesPanel() && !isDialogMode()"
+    [expanded]="panelState.isExpandedNotesPanel() && !isDialogMode()"
     [type]="'panel'"
   >
     <ng-container panel-header>
@@ -202,32 +189,31 @@
 
     <ng-container panel-content>
       <inline-markdown
-        (blur)="isFocusNotes.set(false)"
-        (blurred)="isFocusNotes.set(false)"
-        (changed)="changeTaskNotes($event); isFocusNotes.set(false)"
+        (blur)="panelState.isFocusNotes.set(false)"
+        (blurred)="panelState.isFocusNotes.set(false)"
+        (changed)="changeTaskNotes($event); panelState.isFocusNotes.set(false)"
         (keyboardUnToggle)="focusItem(noteWrapperElRef)"
-        [isFocus]="isFocusNotes()"
+        [isFocus]="panelState.isFocusNotes()"
         [isShowControls]="true"
         [isShowChecklistToggle]="true"
         [isDefaultText]="!task().notes"
-        [model]="task().notes || defaultTaskNotes()"
+        [model]="task().notes || panelState.defaultTaskNotes()"
       ></inline-markdown>
     </ng-container>
   </task-detail-item>
 
-  @if (issueAttachments().length || localAttachments().length) {
+  @if (hasAttachments()) {
     <task-detail-item
       #attachmentPanelElRef
       (collapseParent)="collapseParent()"
       (keyPress)="onItemKeyPress($event)"
-      [expanded]="isExpandedAttachmentPanel() && !isDialogMode()"
+      [expanded]="panelState.isExpandedAttachmentPanel() && !isDialogMode()"
       [type]="'panel'"
     >
       <ng-container panel-header>
         <mat-icon>attachment</mat-icon>
         <span>{{
-          T.F.TASK.ADDITIONAL_INFO.ATTACHMENTS
-            | translate: { nr: issueAttachments().length + localAttachments().length }
+          T.F.TASK.ADDITIONAL_INFO.ATTACHMENTS | translate: { nr: totalAttachments() }
         }}</span>
       </ng-container>
       <ng-container panel-content>
@@ -242,7 +228,7 @@
               [taskId]="task().id || ''"
             ></task-attachment-list>
           }
-          @if (issueAttachments().length && localAttachments().length) {
+          @if (issueAttachments().length && panelState.localAttachments().length) {
             <h3
               class="mat-h3"
               style="margin-bottom: 0"
@@ -251,7 +237,7 @@
             </h3>
           }
           <task-attachment-list
-            [attachments]="localAttachments()"
+            [attachments]="panelState.localAttachments()"
             [taskId]="task().id || ''"
           ></task-attachment-list>
           <div style="text-align: center">
@@ -267,7 +253,7 @@
       </ng-container>
     </task-detail-item>
   }
-  @if (!issueAttachments().length && !localAttachments().length) {
+  @if (!hasAttachments()) {
     <task-detail-item
       (collapseParent)="collapseParent()"
       (editActionTriggered)="addAttachment()"
@@ -336,7 +322,7 @@
   </div>
 </div>
 
-@if (isDragOver()) {
+@if (panelState.isDragOver()) {
   <div class="bgc-accent drag-over-msg">
     <mat-icon>add</mat-icon>
     {{ T.F.TASK.CMP.DROP_ATTACHMENT | translate: { title: task().title } }}

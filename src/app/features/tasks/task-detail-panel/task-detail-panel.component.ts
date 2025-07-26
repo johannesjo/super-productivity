@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   effect,
   HostListener,
   inject,
@@ -17,9 +18,17 @@ import {
 import { HideSubTasksMode, TaskDetailTargetPanel, TaskWithSubTasks } from '../task.model';
 import { IssueService } from '../../issue/issue.service';
 import { TaskAttachmentService } from '../task-attachment/task-attachment.service';
-import { Subject, of } from 'rxjs';
+import { of } from 'rxjs';
 import { TaskAttachment } from '../task-attachment/task-attachment.model';
-import { delay, filter, switchMap, takeUntil, withLatestFrom } from 'rxjs/operators';
+import {
+  catchError,
+  delay,
+  filter,
+  map,
+  shareReplay,
+  switchMap,
+  withLatestFrom,
+} from 'rxjs/operators';
 import { T } from '../../../t.const';
 import { TaskService } from '../task.service';
 import {
@@ -48,7 +57,6 @@ import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { Store } from '@ngrx/store';
 import { selectIssueProviderById } from '../../issue/store/issue-provider.selectors';
-import { isMarkdownChecklist } from '../../markdown-checklist/is-markdown-checklist';
 import { TaskTitleComponent } from '../../../ui/task-title/task-title.component';
 import { MatIcon } from '@angular/material/icon';
 import { TaskListComponent } from '../task-list/task-list.component';
@@ -63,8 +71,9 @@ import { TagEditComponent } from '../../tag/tag-edit/tag-edit.component';
 import { DatePipe } from '@angular/common';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { getWorklogStr } from '../../../util/get-work-log-str';
-import { toSignal, toObservable } from '@angular/core/rxjs-interop';
+import { isMarkdownChecklist } from '../../markdown-checklist/is-markdown-checklist';
 
 @Component({
   selector: 'task-detail-panel',
@@ -92,17 +101,19 @@ import { toSignal, toObservable } from '@angular/core/rxjs-interop';
   ],
 })
 export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestroy {
+  // Services
   attachmentService = inject(TaskAttachmentService);
   taskService = inject(TaskService);
   layoutService = inject(LayoutService);
+
   private _globalConfigService = inject(GlobalConfigService);
   private _issueService = inject(IssueService);
   private _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private _matDialog = inject(MatDialog);
   private _store = inject(Store);
-  private _attachmentService = inject(TaskAttachmentService);
   private _translateService = inject(TranslateService);
-  private locale = inject(LOCALE_ID);
+  private _destroyRef = inject(DestroyRef);
+  private _locale = inject(LOCALE_ID);
 
   // Inputs
   task = input.required<TaskWithSubTasks>();
@@ -115,23 +126,100 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
 
   // Constants
   IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
-  ShowSubTasksMode: typeof HideSubTasksMode = HideSubTasksMode;
-  T: typeof T = T;
+  ShowSubTasksMode = HideSubTasksMode;
+  T = T;
+  ICAL_TYPE = ICAL_TYPE;
 
-  // Lifecycle
-  private _onDestroy$ = new Subject<void>();
+  // Panel state signals grouped together
+  panelState = {
+    selectedItemIndex: signal(0),
+    isFocusNotes: signal(false),
+    isDragOver: signal(false),
+    defaultTaskNotes: signal(''),
+    localAttachments: signal<TaskAttachment[]>([]),
+    isExpandedIssuePanel: signal(!IS_MOBILE),
+    isExpandedNotesPanel: signal(false),
+    isExpandedAttachmentPanel: signal(!IS_MOBILE),
+  };
 
-  // Component state as signals
-  selectedItemIndex = signal(0);
-  isFocusNotes = signal(false);
-  isDragOver = signal(false);
-  defaultTaskNotes = signal('');
-  localAttachments = signal<TaskAttachment[]>([]);
-  isExpandedIssuePanel = signal(!IS_MOBILE);
-  isExpandedNotesPanel = signal(false);
-  isExpandedAttachmentPanel = signal(!IS_MOBILE);
+  // Observable conversions
+  private _task$ = toObservable(this.task);
 
-  // Computed signals
+  // Parent task data
+  parentTaskData = toSignal(
+    this._task$.pipe(
+      switchMap((task) =>
+        task.parentId
+          ? this.taskService.getByIdWithSubTaskData$(task.parentId)
+          : of(null),
+      ),
+    ),
+    { initialValue: null },
+  );
+
+  // Repeat config label
+  private _repeatCfg$ = this._task$.pipe(
+    switchMap((task) =>
+      task.repeatCfgId
+        ? this._taskRepeatCfgService.getTaskRepeatCfgByIdAllowUndefined$(task.repeatCfgId)
+        : of(null),
+    ),
+  );
+
+  repeatCfgLabel = toSignal(
+    this._repeatCfg$.pipe(
+      filter((cfg): cfg is NonNullable<typeof cfg> => !!cfg),
+      map((repeatCfg) => {
+        const [key, params] = getTaskRepeatInfoText(repeatCfg, this._locale);
+        return this._translateService.instant(key, params);
+      }),
+    ),
+    { initialValue: null },
+  );
+
+  // Issue data reactive loading (replacing async effect)
+  private _issueData$ = this._task$.pipe(
+    switchMap((task) => {
+      const { issueId, issueType, issueProviderId } = task;
+
+      if (!issueId || !issueType || !issueProviderId) {
+        return of(null);
+      }
+
+      if (issueType === ICAL_TYPE) {
+        return of(null);
+      }
+
+      return this._issueService
+        .getById$(issueType, issueId, issueProviderId)
+        .pipe(catchError(() => of(null)));
+    }),
+    shareReplay(1),
+  );
+
+  issueData = toSignal(this._issueData$, {
+    initialValue: null as IssueData | null,
+  });
+
+  isIssueDataLoadedForCurrentType = computed(() => {
+    const data = this.issueData();
+    return data !== null;
+  });
+
+  // Issue attachments
+  issueAttachments = computed(() => {
+    const data = this.issueData();
+    const task = this.task();
+    if (data && task.issueType) {
+      return this._issueService.getMappedAttachments(task.issueType, data);
+    }
+    return [];
+  });
+
+  // Misc config signal
+  private _miscSignal = toSignal(this._globalConfigService.misc$);
+
+  // Task-based computed signals
   isMarkdownChecklist = computed(() => {
     const notes = this.task().notes;
     return isMarkdownChecklist(notes || '');
@@ -156,147 +244,90 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
     );
   });
 
-  // Convert parent task data to signal
-  private task$ = toObservable(this.task);
-  parentTaskData = toSignal(
-    this.task$.pipe(
-      switchMap((task) =>
-        task.parentId
-          ? this.taskService.getByIdWithSubTaskData$(task.parentId)
-          : of(null),
-      ),
-    ),
-    { initialValue: null },
-  );
-
-  // Repeat config label
-  private repeatCfg$ = this.task$.pipe(
-    switchMap((task) =>
-      task.repeatCfgId
-        ? this._taskRepeatCfgService.getTaskRepeatCfgByIdAllowUndefined$(task.repeatCfgId)
-        : of(null),
-    ),
-  );
-  repeatCfgLabel = toSignal(
-    this.repeatCfg$.pipe(
-      filter((cfg): cfg is NonNullable<typeof cfg> => !!cfg),
-      switchMap((repeatCfg) => {
-        const [key, params] = getTaskRepeatInfoText(repeatCfg, this.locale);
-        return of(this._translateService.instant(key, params));
-      }),
-    ),
-    { initialValue: null },
-  );
-
-  // Issue data handling
-  private _issueDataSignal = signal<IssueData | null | false>(null);
-  issueData = computed(() => this._issueDataSignal());
-
-  private _issueDataLoading = signal(false);
-  isIssueDataLoadedForCurrentType = computed(() => {
-    const data = this.issueData();
-    const loading = this._issueDataLoading();
-    return !loading && data !== null;
-  });
-
-  // Issue attachments
-  issueAttachments = computed(() => {
-    const data = this.issueData();
+  // Template helper computed signals
+  showSubTasksPanel = computed(() => {
     const task = this.task();
-    if (data && task.issueType) {
-      return this._issueService.getMappedAttachments(task.issueType, data);
-    }
-    return [];
+    return (
+      task &&
+      !task.parentId &&
+      (this.layoutService.isRightPanelOver() || this.isDialogMode())
+    );
   });
 
-  // Misc config signal
-  private _miscSignal = toSignal(this._globalConfigService.misc$);
+  showTimeEstimate = computed(() => !this.task().subTasks?.length);
 
-  // Effects
-  constructor() {
-    // Default task notes effect
-    effect(() => {
-      const misc = this._miscSignal();
-      if (misc) {
-        this.defaultTaskNotes.set(misc.taskNotesTpl);
-      }
-    });
+  hasAttachments = computed(() => {
+    return (
+      this.issueAttachments().length > 0 || this.panelState.localAttachments().length > 0
+    );
+  });
 
-    // Task update effect
-    effect(() => {
-      const task = this.task();
+  totalAttachments = computed(() => {
+    return this.issueAttachments().length + this.panelState.localAttachments().length;
+  });
 
-      // Update local attachments
-      this.localAttachments.set(task.attachments || []);
+  showScheduleIcon = computed(() => {
+    const task = this.task();
+    if (task.dueDay) return 'today';
+    if (task.dueWithTime && !task.reminderId) return 'schedule';
+    return 'alarm';
+  });
 
-      // Update panel states
-      this.isExpandedIssuePanel.set(!IS_MOBILE && !!this.issueData());
-      this.isExpandedNotesPanel.set(
-        IS_MOBILE
-          ? this.isMarkdownChecklist()
-          : !!task.notes || (!task.issueId && !task.attachments?.length),
-      );
-    });
+  scheduleLabelKey = computed(() => {
+    const task = this.task();
+    return task.dueWithTime || task.dueDay
+      ? this.T.F.TASK.ADDITIONAL_INFO.DUE
+      : this.T.F.TASK.ADDITIONAL_INFO.SCHEDULE_TASK;
+  });
 
-    // Issue data effect
-    effect(async () => {
-      const task = this.task();
-      const { issueId, issueType, issueProviderId } = task;
+  // Effects moved out of constructor
+  private defaultTaskNotesEffect = effect(() => {
+    const misc = this._miscSignal();
+    if (misc) {
+      this.panelState.defaultTaskNotes.set(misc.taskNotesTpl);
+    }
+  });
 
-      if (!issueId || !issueType || !issueProviderId) {
-        this._issueDataSignal.set(null);
-        return;
-      }
+  private taskUpdateEffect = effect(() => {
+    const task = this.task();
 
-      if (issueType === ICAL_TYPE) {
-        this._issueDataSignal.set(null);
-        return;
-      }
+    // Update local attachments
+    this.panelState.localAttachments.set(task.attachments || []);
 
-      this._issueDataLoading.set(true);
+    // Update panel states
+    this.panelState.isExpandedIssuePanel.set(!IS_MOBILE && !!this.issueData());
+    this.panelState.isExpandedNotesPanel.set(
+      IS_MOBILE
+        ? this.isMarkdownChecklist()
+        : !!task.notes || (!task.issueId && !task.attachments?.length),
+    );
+  });
 
-      try {
-        const data = await this._issueService.getById(
-          issueType,
-          issueId,
-          issueProviderId,
-        );
-        this._issueDataSignal.set(data || false);
-      } catch (error) {
-        this._issueDataSignal.set(false);
-      } finally {
-        this._issueDataLoading.set(false);
-      }
-    });
+  private jiraImageHeadersEffect = effect(() => {
+    if (!IS_ELECTRON) return;
 
-    // JIRA image headers effect
-    effect(() => {
-      if (!IS_ELECTRON) return;
+    const task = this.task();
+    const { issueType, issueProviderId } = task;
 
-      const task = this.task();
-      const { issueType, issueProviderId } = task;
+    if (issueType === JIRA_TYPE && issueProviderId) {
+      this._store
+        .select(selectIssueProviderById<IssueProviderJira>(issueProviderId, 'JIRA'))
+        .pipe(takeUntilDestroyed(this._destroyRef))
+        .subscribe((jiraCfg) => {
+          if (jiraCfg?.isEnabled) {
+            window.ea.jiraSetupImgHeaders({ jiraCfg });
+          }
+        });
+    }
+  });
 
-      if (issueType === JIRA_TYPE && issueProviderId) {
-        this._store
-          .select(selectIssueProviderById<IssueProviderJira>(issueProviderId, 'JIRA'))
-          .pipe(takeUntil(this._onDestroy$))
-          .subscribe((jiraCfg) => {
-            if (jiraCfg?.isEnabled) {
-              window.ea.jiraSetupImgHeaders({ jiraCfg });
-            }
-          });
-      }
-    });
-
-    // Focus first item when task changes
-    effect(() => {
-      const task = this.task();
-      // Trigger focus on task change
-      if (task) {
-        this._focusFirst();
-      }
-    });
-  }
+  private focusOnTaskChangeEffect = effect(() => {
+    const task = this.task();
+    // Trigger focus on task change
+    if (task) {
+      this._focusFirst();
+    }
+  });
 
   private _focusTimeout?: number;
   private _dragEnterTarget?: HTMLElement;
@@ -305,21 +336,21 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
     this._dragEnterTarget = ev.target as HTMLElement;
     ev.preventDefault();
     ev.stopPropagation();
-    this.isDragOver.set(true);
+    this.panelState.isDragOver.set(true);
   }
 
   @HostListener('dragleave', ['$event']) onDragLeave(ev: DragEvent): void {
     if (this._dragEnterTarget === (ev.target as HTMLElement)) {
       ev.preventDefault();
       ev.stopPropagation();
-      this.isDragOver.set(false);
+      this.panelState.isDragOver.set(false);
     }
   }
 
   @HostListener('drop', ['$event']) onDrop(ev: DragEvent): void {
-    this._attachmentService.createFromDrop(ev, this.task().id);
+    this.attachmentService.createFromDrop(ev, this.task().id);
     ev.stopPropagation();
-    this.isDragOver.set(false);
+    this.panelState.isDragOver.set(false);
   }
 
   @HostListener('window:popstate') onBack(): void {
@@ -333,7 +364,7 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   ngAfterViewInit(): void {
     this.taskService.taskDetailPanelTargetPanel$
       .pipe(
-        takeUntil(this._onDestroy$),
+        takeUntilDestroyed(this._destroyRef),
         delay(50),
         withLatestFrom(this.taskService.selectedTaskId$),
         filter(([, id]) => !!id),
@@ -357,14 +388,11 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
     if (window.history.state.taskDetailPanel) {
       window.history.back();
     }
-
-    this._onDestroy$.next();
-    this._onDestroy$.complete();
     window.clearTimeout(this._focusTimeout);
   }
 
   changeTaskNotes($event: string): void {
-    const defaultNotes = this.defaultTaskNotes();
+    const defaultNotes = this.panelState.defaultTaskNotes();
     if (!defaultNotes || !$event || $event.trim() !== defaultNotes.trim()) {
       this.taskService.update(this.task().id, { notes: $event });
     }
@@ -427,12 +455,12 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
       throw new Error();
     }
 
-    const currentIndex = this.selectedItemIndex();
+    const currentIndex = this.panelState.selectedItemIndex();
     if (ev.key === 'ArrowUp' && currentIndex > 0) {
-      this.selectedItemIndex.set(currentIndex - 1);
+      this.panelState.selectedItemIndex.set(currentIndex - 1);
       itemEls[currentIndex - 1].focusEl();
     } else if (ev.key === 'ArrowDown' && itemEls.length > currentIndex + 1) {
-      this.selectedItemIndex.set(currentIndex + 1);
+      this.panelState.selectedItemIndex.set(currentIndex + 1);
       itemEls[currentIndex + 1].focusEl();
     }
   }
@@ -449,7 +477,7 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
       if (i === -1) {
         this.focusItem(cmpInstance);
       } else {
-        this.selectedItemIndex.set(i);
+        this.panelState.selectedItemIndex.set(i);
         cmpInstance.elementRef.nativeElement.focus();
       }
     }, timeoutDuration);
@@ -472,6 +500,4 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
       }
     }, 150);
   }
-
-  protected ICAL_TYPE = ICAL_TYPE;
 }
