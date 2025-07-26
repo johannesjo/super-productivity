@@ -1,3 +1,28 @@
+## [14.2.4](https://github.com/johannesjo/super-productivity/compare/v14.2.3...v14.2.4) (2025-07-26)
+
+### Bug Fixes
+
+- Error: Trying to move sub tasks into archive for project [#4846](https://github.com/johannesjo/super-productivity/issues/4846) ([80c9b76](https://github.com/johannesjo/super-productivity/commit/80c9b76990cf84db983e539b63f6cb728dbedc42))
+- flashing side panel ([fb28dd1](https://github.com/johannesjo/super-productivity/commit/fb28dd12337c54bd0350bf35d011445c1b860db1))
+- focus behavior ([6e26dc6](https://github.com/johannesjo/super-productivity/commit/6e26dc6e3417f8c3d3c2f37187fc69e27e12212a))
+- formly collapsible from closing every change ([3af6669](https://github.com/johannesjo/super-productivity/commit/3af66697527ea964191fd7478e7f001da2f128dd))
+- make config form more reliable ([9b8fab8](https://github.com/johannesjo/super-productivity/commit/9b8fab8e18177d49893e9a2656b3b03d4631dea2))
+- make saving encryption password work as it should ([4b0cfcc](https://github.com/johannesjo/super-productivity/commit/4b0cfcc0374032a14b76335b09aec0803300ff73))
+- make saving encryption password work as it should 2 [#4844](https://github.com/johannesjo/super-productivity/issues/4844) ([41de35e](https://github.com/johannesjo/super-productivity/commit/41de35e92b8853fa53b1ce167ecb639cb6c90cd9))
+- memory leak ([0047b1f](https://github.com/johannesjo/super-productivity/commit/0047b1f2a200a86ec1764625273c71f5872eb17d))
+- navi not opening on mobile ([1a83914](https://github.com/johannesjo/super-productivity/commit/1a839144dbee99ca9500ba029da607febaf6cbe2))
+- panel animation not playing ([1018b44](https://github.com/johannesjo/super-productivity/commit/1018b445f8501f4bb425dcd0c2bbfb8a4c52be31))
+- prevent side panel flash when navigating to work-view routes ([9a3609f](https://github.com/johannesjo/super-productivity/commit/9a3609f7943c00822939d4b3e1c5aa07379f06fb))
+- **right-panel:** close panel immediately on navigation to prevent overlay flash ([fa218e7](https://github.com/johannesjo/super-productivity/commit/fa218e762ff8b8cb1ba6bcf50d8e1dc473b2389d))
+- **sync:** credentials dialog showing up when it shouldn't ([db6466b](https://github.com/johannesjo/super-productivity/commit/db6466b4ab5a307972ab5a89a7ab43d8a600e364))
+- the potential of [#4847](https://github.com/johannesjo/super-productivity/issues/4847) happening ([b1e24c4](https://github.com/johannesjo/super-productivity/commit/b1e24c4cd5f636202645e5d8d88438c894467953))
+
+### Features
+
+- add protocol handling to allow adding tasks from other apps ([cf1031c](https://github.com/johannesjo/super-productivity/commit/cf1031c9358bc74c5d5b7734184c8f64e63e0942))
+- enable plugin panels on all routes and auto-close on navigation ([b99a165](https://github.com/johannesjo/super-productivity/commit/b99a1654cbdae6c1a1aea71fdcf1d6ea1b6d5af2))
+- make side panels work everywhere ([bda5a18](https://github.com/johannesjo/super-productivity/commit/bda5a1874182b15cbf470021e4fb1c016f778efb))
+
 ## [14.2.3](https://github.com/johannesjo/super-productivity/compare/v14.2.2...v14.2.3) (2025-07-25)
 
 ### Bug Fixes
