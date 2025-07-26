@@ -141,7 +141,7 @@
     <task-detail-item
       (collapseParent)="collapseParent()"
       (keyPress)="onItemKeyPress($event)"
-      [expanded]="panelState.isExpandedIssuePanel() && !isDialogMode()"
+      [expanded]="isExpandedIssuePanel() && !isDialogMode()"
       [type]="'panel'"
     >
       <ng-container panel-header>
@@ -168,7 +168,7 @@
     (collapseParent)="collapseParent()"
     (editActionTriggered)="panelState.isFocusNotes.set(true)"
     (keyPress)="onItemKeyPress($event)"
-    [expanded]="panelState.isExpandedNotesPanel() && !isDialogMode()"
+    [expanded]="isExpandedNotesPanel() && !isDialogMode()"
     [type]="'panel'"
   >
     <ng-container panel-header>
@@ -197,7 +197,7 @@
         [isShowControls]="true"
         [isShowChecklistToggle]="true"
         [isDefaultText]="!task().notes"
-        [model]="task().notes || panelState.defaultTaskNotes()"
+        [model]="task().notes || defaultTaskNotes()"
       ></inline-markdown>
     </ng-container>
   </task-detail-item>
@@ -228,7 +228,7 @@
               [taskId]="task().id || ''"
             ></task-attachment-list>
           }
-          @if (issueAttachments().length && panelState.localAttachments().length) {
+          @if (issueAttachments().length && localAttachments().length) {
             <h3
               class="mat-h3"
               style="margin-bottom: 0"
@@ -237,7 +237,7 @@
             </h3>
           }
           <task-attachment-list
-            [attachments]="panelState.localAttachments()"
+            [attachments]="localAttachments()"
             [taskId]="task().id || ''"
           ></task-attachment-list>
           <div style="text-align: center">

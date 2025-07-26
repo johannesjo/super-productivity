@@ -19,7 +19,6 @@ import { HideSubTasksMode, TaskDetailTargetPanel, TaskWithSubTasks } from '../ta
 import { IssueService } from '../../issue/issue.service';
 import { TaskAttachmentService } from '../task-attachment/task-attachment.service';
 import { of } from 'rxjs';
-import { TaskAttachment } from '../task-attachment/task-attachment.model';
 import {
   catchError,
   delay,
@@ -135,10 +134,6 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
     selectedItemIndex: signal(0),
     isFocusNotes: signal(false),
     isDragOver: signal(false),
-    defaultTaskNotes: signal(''),
-    localAttachments: signal<TaskAttachment[]>([]),
-    isExpandedIssuePanel: signal(!IS_MOBILE),
-    isExpandedNotesPanel: signal(false),
     isExpandedAttachmentPanel: signal(!IS_MOBILE),
   };
 
@@ -217,7 +212,30 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   });
 
   // Misc config signal
-  private _miscSignal = toSignal(this._globalConfigService.misc$);
+  private _miscCfg = toSignal(this._globalConfigService.misc$);
+
+  // Default task notes computed signal
+  defaultTaskNotes = computed(() => {
+    const misc = this._miscCfg();
+    return misc?.taskNotesTpl || '';
+  });
+
+  // Local attachments computed signal
+  localAttachments = computed(() => {
+    return this.task().attachments || [];
+  });
+
+  // Panel expansion computed signals
+  isExpandedIssuePanel = computed(() => {
+    return !IS_MOBILE && !!this.issueData();
+  });
+
+  isExpandedNotesPanel = computed(() => {
+    const task = this.task();
+    return IS_MOBILE
+      ? this.isMarkdownChecklist()
+      : !!task.notes || (!task.issueId && !task.attachments?.length);
+  });
 
   // Task-based computed signals
   isMarkdownChecklist = computed(() => {
@@ -257,13 +275,11 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   showTimeEstimate = computed(() => !this.task().subTasks?.length);
 
   hasAttachments = computed(() => {
-    return (
-      this.issueAttachments().length > 0 || this.panelState.localAttachments().length > 0
-    );
+    return this.issueAttachments().length > 0 || this.localAttachments().length > 0;
   });
 
   totalAttachments = computed(() => {
-    return this.issueAttachments().length + this.panelState.localAttachments().length;
+    return this.issueAttachments().length + this.localAttachments().length;
   });
 
   showScheduleIcon = computed(() => {
@@ -280,29 +296,8 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
       : this.T.F.TASK.ADDITIONAL_INFO.SCHEDULE_TASK;
   });
 
-  // Effects moved out of constructor
-  private defaultTaskNotesEffect = effect(() => {
-    const misc = this._miscSignal();
-    if (misc) {
-      this.panelState.defaultTaskNotes.set(misc.taskNotesTpl);
-    }
-  });
-
-  private taskUpdateEffect = effect(() => {
-    const task = this.task();
-
-    // Update local attachments
-    this.panelState.localAttachments.set(task.attachments || []);
-
-    // Update panel states
-    this.panelState.isExpandedIssuePanel.set(!IS_MOBILE && !!this.issueData());
-    this.panelState.isExpandedNotesPanel.set(
-      IS_MOBILE
-        ? this.isMarkdownChecklist()
-        : !!task.notes || (!task.issueId && !task.attachments?.length),
-    );
-  });
-
+  // EFFECTS
+  // -------
   private jiraImageHeadersEffect = effect(() => {
     if (!IS_ELECTRON) return;
 
@@ -328,6 +323,7 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
       this._focusFirst();
     }
   });
+  // -------
 
   private _focusTimeout?: number;
   private _dragEnterTarget?: HTMLElement;
@@ -392,7 +388,7 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   changeTaskNotes($event: string): void {
-    const defaultNotes = this.panelState.defaultTaskNotes();
+    const defaultNotes = this.defaultTaskNotes();
     if (!defaultNotes || !$event || $event.trim() !== defaultNotes.trim()) {
       this.taskService.update(this.task().id, { notes: $event });
     }
