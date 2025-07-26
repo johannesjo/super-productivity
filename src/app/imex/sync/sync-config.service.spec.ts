@@ -16,6 +16,13 @@ describe('SyncConfigService', () => {
   let mockCurrentProviderPrivateCfg$: BehaviorSubject<any>;
 
   beforeEach(() => {
+    // Mock fetch for the sync-config-default-override.json
+    spyOn(window, 'fetch').and.returnValue(
+      Promise.resolve({
+        json: () => Promise.resolve({}),
+      } as Response),
+    );
+
     // Create mock sync config
     mockSyncConfig$ = new BehaviorSubject<SyncConfig>({
       ...DEFAULT_GLOBAL_CONFIG.sync,
@@ -197,6 +204,48 @@ describe('SyncConfigService', () => {
           refreshToken: 'existing-refresh-token', // Preserved OAuth tokens
           encryptKey: 'dropbox-key', // Updated from settings
         },
+      );
+    });
+
+    it('should preserve Dropbox OAuth token when updating unrelated settings', async () => {
+      // This test specifically verifies the reported issue
+      const existingToken = 'GicjnVuuGSMAAAAAAAxOv3tqe032pTcRxBvMOgHc';
+
+      // Mock existing Dropbox provider with the specific token
+      const mockProvider = {
+        id: SyncProviderId.Dropbox,
+        privateCfg: {
+          load: jasmine.createSpy('load').and.returnValue(
+            Promise.resolve({
+              accessToken: existingToken,
+              refreshToken: 'some-refresh-token',
+              encryptKey: 'existing-key',
+            }),
+          ),
+        },
+      };
+      (pfapiService.pf.getSyncProviderById as jasmine.Spy).and.returnValue(
+        Promise.resolve(mockProvider),
+      );
+
+      // Update settings without changing the provider
+      const settings: SyncConfig = {
+        isEnabled: true,
+        syncProvider: LegacySyncProvider.Dropbox,
+        syncInterval: 600000, // Changed interval
+        isEncryptionEnabled: true,
+        encryptKey: 'existing-key', // Same key
+      };
+
+      await service.updateSettingsFromForm(settings);
+
+      // Verify the token is preserved
+      expect(pfapiService.pf.setPrivateCfgForSyncProvider).toHaveBeenCalledWith(
+        SyncProviderId.Dropbox,
+        jasmine.objectContaining({
+          accessToken: existingToken, // Must be preserved!
+          refreshToken: 'some-refresh-token',
+        }),
       );
     });
 
