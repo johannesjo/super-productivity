@@ -88,6 +88,7 @@ import { getWorklogStr } from '../../util/get-work-log-str';
 import { INBOX_PROJECT } from '../project/project.const';
 import { GlobalConfigService } from '../config/global-config.service';
 import { TaskLog } from '../../core/log';
+import { devError } from '../../util/dev-error';
 
 @Injectable({
   providedIn: 'root',
@@ -662,17 +663,18 @@ export class TaskService {
 
     if (subTasks.length) {
       if (this._workContextService.activeWorkContextType !== WorkContextType.TAG) {
-        throw new Error('Trying to move sub tasks into archive for project');
+        // this should be handled by moving parentTasks to archive
+        devError('Trying to move sub tasks into archive for project');
+      } else {
+        // when on a tag such as today, we simply remove the tag instead of attempting to move to archive
+        const tagToRemove = this._workContextService.activeWorkContextId;
+        subTasks.forEach((st) => {
+          this.updateTags(
+            st,
+            st.tagIds.filter((tid) => tid !== tagToRemove),
+          );
+        });
       }
-
-      // when on a tag such as today, we simply remove the tag instead of attempting to move to archive
-      const tagToRemove = this._workContextService.activeWorkContextId;
-      subTasks.forEach((st) => {
-        this.updateTags(
-          st,
-          st.tagIds.filter((tid) => tid !== tagToRemove),
-        );
-      });
     }
 
     if (parentTasks.length) {
