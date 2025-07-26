@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, Input, input, output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+  output,
+} from '@angular/core';
 import { FormlyFieldConfig, FormlyFormOptions, FormlyModule } from '@ngx-formly/core';
 import { FormsModule, ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
 import { GlobalConfigSectionKey } from '../global-config.model';
@@ -17,46 +23,31 @@ import { Log } from '../../../core/log';
 })
 export class ConfigFormComponent {
   T: typeof T = T;
-  config?: Record<string, unknown>;
-  readonly sectionKey = input<GlobalConfigSectionKey | ProjectCfgFormKey>();
-  readonly save = output<{
+  cfg = input.required<Record<string, unknown>>();
+  formCfg = input.required<FormlyFieldConfig[]>();
+  sectionKey = input<GlobalConfigSectionKey | ProjectCfgFormKey>();
+  fields = computed(() => adjustToLiveFormlyForm(this.formCfg()));
+
+  save = output<{
     sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;
     config: unknown;
   }>();
-  fields?: FormlyFieldConfig[];
   form: UntypedFormGroup = new UntypedFormGroup({});
   options: FormlyFormOptions = {};
-
-  constructor() {}
-
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
-  @Input() set cfg(cfg: Record<string, unknown>) {
-    this.config = { ...cfg };
-  }
-
-  // NOTE: updating the input before assigning to local var is somehow needed for the form to work
-  // NOTE2: since we don't have a save button anymore we need to debounce inputs
-
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
-  @Input() set formCfg(val: FormlyFieldConfig[]) {
-    this.fields = adjustToLiveFormlyForm(val);
-  }
 
   updateCfg(cfg: Record<string, unknown>): void {
     if (!cfg) {
       throw new Error('No config for ' + this.sectionKey());
     }
-    this.config = cfg;
 
     // Mark all fields as touched to show validation errors
     this.form.markAllAsTouched();
+    this.form.updateValueAndValidity();
 
     if (this.form.valid) {
       this.save.emit({
         sectionKey: exists(this.sectionKey()),
-        config: this.config,
+        config: cfg,
       });
     } else {
       // Update validity to ensure error messages are shown
