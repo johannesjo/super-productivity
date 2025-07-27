@@ -102,7 +102,7 @@ class PluginNodeExecutor {
   private canExecuteDirectly(script: string): boolean {
     // Check if script only uses safe operations
     const dangerousPatterns =
-      /require\s*\(\s*['"`](?!fs|path)[^'"]+['"`]\s*\)|child_process|exec|spawn|eval|Function|process\.exit/;
+      /require\s*\(\s*['"`](?!fs|path|os)[^'"]+['"`]\s*\)|child_process|exec|spawn|eval|Function|process\.exit/;
     return !dangerousPatterns.test(script);
   }
 
@@ -110,12 +110,14 @@ class PluginNodeExecutor {
     // Safe modules
     const fs = await import('fs');
     const path = await import('path');
+    const os = await import('os');
 
     // Create sandboxed context
     const sandbox = {
       require: (module: string) => {
         if (module === 'fs') return fs;
         if (module === 'path') return path;
+        if (module === 'os') return os;
         throw new Error(`Module '${module}' is not allowed`);
       },
       console: {
