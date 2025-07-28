@@ -155,7 +155,7 @@ export const initIpcInterfaces = (): void => {
               actionFn = () => {
                 showOrFocus(mainWin);
                 // NOTE: delay slightly to make sure app is ready
-                mainWin.webContents.send(IPC.ADD_TASK);
+                mainWin.webContents.send(IPC.SHOW_ADD_TASK_BAR);
               };
               break;
 

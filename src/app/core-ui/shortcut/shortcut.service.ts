@@ -57,7 +57,7 @@ export class ShortcutService {
       window.ea.on(IPC.TASK_TOGGLE_START, () => {
         this._taskService.toggleStartTask();
       });
-      window.ea.on(IPC.ADD_TASK, () => {
+      window.ea.on(IPC.SHOW_ADD_TASK_BAR, () => {
         this._layoutService.showAddTaskBar();
       });
       window.ea.on(IPC.ADD_NOTE, () => {

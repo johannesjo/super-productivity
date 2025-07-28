@@ -25,6 +25,12 @@ export const ipcSuspend$: Observable<unknown> = IS_ELECTRON
   ? ipcEvent$(IPC.SUSPEND).pipe()
   : EMPTY;
 
-export const ipcAddTask$: Observable<{ title: string }> = IS_ELECTRON
-  ? ipcEvent$(IPC.ADD_TASK).pipe(map(([ev, data]: any) => data as { title: string }))
+export const ipcShowAddTaskBar$: Observable<unknown> = IS_ELECTRON
+  ? ipcEvent$(IPC.SHOW_ADD_TASK_BAR).pipe()
+  : EMPTY;
+
+export const ipcAddTaskFromAppUri$: Observable<{ title: string }> = IS_ELECTRON
+  ? ipcEvent$(IPC.ADD_TASK_FROM_APP_URI).pipe(
+      map(([ev, data]: any) => data as { title: string }),
+    )
   : EMPTY;

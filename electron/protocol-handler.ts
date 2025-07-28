@@ -40,7 +40,7 @@ export const processProtocolUrl = (url: string, mainWin: BrowserWindow | null): 
 
           // Send IPC message to create task
           if (mainWin && mainWin.webContents) {
-            mainWin.webContents.send(IPC.ADD_TASK, { title: taskTitle });
+            mainWin.webContents.send(IPC.ADD_TASK_FROM_APP_URI, { title: taskTitle });
           }
         }
         break;

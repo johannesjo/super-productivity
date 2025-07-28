@@ -19,7 +19,7 @@ import {
   unPauseFocusSession,
 } from '../../focus-mode/store/focus-mode.actions';
 import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
-import { ipcAddTask$ } from '../../../core/ipc-events';
+import { ipcAddTaskFromAppUri$ } from '../../../core/ipc-events';
 import { TaskService } from '../task.service';
 
 // TODO send message to electron when current task changes here
@@ -159,11 +159,9 @@ export class TaskElectronEffects {
 
   handleAddTaskFromProtocol$ = createEffect(
     () =>
-      ipcAddTask$.pipe(
-        tap(({ title }) => {
-          if (title) {
-            this._taskService.add(title);
-          }
+      ipcAddTaskFromAppUri$.pipe(
+        tap((data) => {
+          this._taskService.add(data.title);
         }),
       ),
     { dispatch: false },
