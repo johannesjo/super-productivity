@@ -445,7 +445,7 @@ export const SHEPHERD_STEPS = (
       id: TourId.IssueProviders,
       beforeShowPromise: () => router.navigate(['tag/TODAY/tasks']),
       title: 'Issue Integrations & Calendars',
-      text: 'You can import tasks from a variety of third party tools. To do so click on this icon <span class="material-icons">playlist_add</span> in the top right corner.',
+      text: 'You can import tasks from a variety of third party tools. To do so click on this icon <span class="material-icons">dashboard_customize</span> in the top right corner.',
       attachTo: {
         element: '.tour-issuePanelTrigger',
         on: 'bottom',
