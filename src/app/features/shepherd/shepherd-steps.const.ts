@@ -434,6 +434,15 @@ export const SHEPHERD_STEPS = (
         on: 'bottom',
       },
       text: 'Open the menu (<span class="material-icons">menu</span>)',
+      beforeShowPromise: () => {
+        alert('aa');
+        // If nav is always visible, skip this step
+        if (layoutService.isNavAlwaysVisible()) {
+          setTimeout(() => shepherdService.next(), 0);
+          return Promise.resolve();
+        }
+        return Promise.resolve();
+      },
       when: nextOnObs(
         layoutService.isShowSideNav$.pipe(filter((v) => !!v)),
         shepherdService,
@@ -480,7 +489,14 @@ export const SHEPHERD_STEPS = (
         element: '.tour-burgerTrigger',
         on: 'bottom',
       },
-      beforeShowPromise: () => router.navigate(['']),
+      beforeShowPromise: () => {
+        return router.navigate(['']).then(() => {
+          // If nav is always visible, skip this step
+          if (layoutService.isNavAlwaysVisible()) {
+            setTimeout(() => shepherdService.next(), 0);
+          }
+        });
+      },
       text: 'Open the menu (<span class="material-icons">menu</span>)',
       when: nextOnObs(
         layoutService.isShowSideNav$.pipe(filter((v) => !!v)),
