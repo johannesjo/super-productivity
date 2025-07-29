@@ -1,3 +1,18 @@
+## [14.2.5](https://github.com/johannesjo/super-productivity/compare/v14.2.4...v14.2.5) (2025-07-29)
+
+### Bug Fixes
+
+- consistent issue panel button [#4862](https://github.com/johannesjo/super-productivity/issues/4862) ([b723b3c](https://github.com/johannesjo/super-productivity/commit/b723b3c0ac52bd74145f74c9ebf97a75d2648064))
+- data repair not working as it should [#4459](https://github.com/johannesjo/super-productivity/issues/4459) ([691a17f](https://github.com/johannesjo/super-productivity/commit/691a17f3824c13ffd9ed9c24e3851f288ec7e8e2))
+- error when using global add task shortcut ([fb7f925](https://github.com/johannesjo/super-productivity/commit/fb7f925e9269ff374f05ab08c13f8ffd573e7ca0)), closes [#4859](https://github.com/johannesjo/super-productivity/issues/4859)
+- only show right panel when open – issue for wide viewport ([bbd1531](https://github.com/johannesjo/super-productivity/commit/bbd15313116f3c7a8d5081610526fa1ca5d03661)), closes [#4858](https://github.com/johannesjo/super-productivity/issues/4858) [#4868](https://github.com/johannesjo/super-productivity/issues/4868)
+- potentially fix idle race condition ([a978d22](https://github.com/johannesjo/super-productivity/commit/a978d2299afd0242a2d7e70e2cb83b0aba3c0dde))
+- Tutorial expects menu button even if it doesn't exist [#4861](https://github.com/johannesjo/super-productivity/issues/4861) ([be169d0](https://github.com/johannesjo/super-productivity/commit/be169d075cdb3a229d5104175464a1211fc118e0))
+
+### Features
+
+- add os module support to plugin node executor ([6ab71c8](https://github.com/johannesjo/super-productivity/commit/6ab71c870e3613c0957541b9c2315561aee91bf6))
+
 ## [14.2.4](https://github.com/johannesjo/super-productivity/compare/v14.2.3...v14.2.4) (2025-07-26)
 
 ### Bug Fixes
