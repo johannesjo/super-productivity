@@ -110,7 +110,7 @@ body:not(.isDarkTheme) {
 
   /* Dark accent for contrast on light background */
   --palette-accent-500: var(--nord0);
-  --c-accent: var(--nord0);
+  --c-accent: var(--nord4);
   --palette-accent-100: #9fa5b0;
   --palette-accent-200: #7f879a;
   --palette-accent-300: #5f6984;
