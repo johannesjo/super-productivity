@@ -714,6 +714,48 @@ describe('dataRepair()', () => {
     });
   });
 
+  it('should convert orphaned archived subtask to main task by setting parentId to undefined', () => {
+    const taskStateBefore = {
+      ...mock.task,
+      ...fakeEntityStateFromArray<Task>([
+        // No parent task exists in regular tasks
+      ]),
+    } as any;
+
+    const taskArchiveStateBefore = {
+      ...mock.archiveYoung.task,
+      ...fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'orphanedSubTask',
+          title: 'Orphaned SubTask',
+          parentId: 'nonExistentParent', // Parent doesn't exist anywhere
+          projectId: FAKE_PROJECT_ID,
+        },
+      ]),
+    } as any;
+
+    const result = dataRepair({
+      ...mock,
+      task: taskStateBefore,
+      archiveYoung: {
+        lastTimeTrackingFlush: 0,
+        timeTracking: mock.archiveYoung.timeTracking,
+        task: taskArchiveStateBefore,
+      },
+    });
+
+    // The orphaned subtask should remain in archive but have parentId set to undefined
+    expect(result.archiveYoung.task.entities['orphanedSubTask']).toEqual({
+      ...DEFAULT_TASK,
+      id: 'orphanedSubTask',
+      title: 'Orphaned SubTask',
+      parentId: undefined, // parentId should be set to undefined
+      projectId: FAKE_PROJECT_ID,
+    });
+    expect(result.archiveYoung.task.ids).toContain('orphanedSubTask');
+  });
+
   it('should move archived sub tasks back to their unarchived parents', () => {
     const taskStateBefore = {
       ...mock.task,

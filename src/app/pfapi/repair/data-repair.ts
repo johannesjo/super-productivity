@@ -180,8 +180,7 @@ const _moveArchivedSubTasksToUnarchivedParents = (
     }
     // make main if it doesn't
     else {
-      // @ts-ignore
-      t.parentId = null;
+      t.parentId = undefined;
     }
   });
 
@@ -223,8 +222,7 @@ const _moveUnArchivedSubTasksToArchivedParents = (
     }
     // make main if it doesn't
     else {
-      // @ts-ignore
-      t.parentId = null;
+      t.parentId = undefined;
     }
   });
 
@@ -323,7 +321,13 @@ const _addOrphanedTasksToProjectLists = (
     if (!taskItem) {
       throw new Error('Missing task');
     }
-    project.entities[taskItem.projectId as string]?.taskIds.push(tid);
+    const targetProject = project.entities[taskItem.projectId as string];
+    if (targetProject) {
+      project.entities[taskItem.projectId as string] = {
+        ...targetProject,
+        taskIds: [...targetProject.taskIds, tid],
+      };
+    }
   });
 
   if (orphanedTaskIds.length > 0) {
@@ -339,23 +343,23 @@ const _addInboxProjectIdIfNecessary = (data: AppDataCompleteNew): AppDataComplet
   const taskArchiveIds: string[] = archiveYoung.task.ids as string[];
 
   if (!data.project.entities[INBOX_PROJECT.id]) {
-    // @ts-ignore
     data.project.entities[INBOX_PROJECT.id] = {
       ...INBOX_PROJECT,
     };
-    // @ts-ignore
-    data.project.ids = [INBOX_PROJECT.id, ...data.project.ids];
+
+    data.project.ids = [INBOX_PROJECT.id, ...data.project.ids] as string[];
   }
 
   taskIds.forEach((id) => {
     const t = task.entities[id] as TaskCopy;
     if (!t.projectId) {
       PFLog.log('Set inbox project id for task  ' + t.id);
-      // @ts-ignore
-      data.project.entities[INBOX_PROJECT.id].taskIds = [
-        ...(data.project.entities[INBOX_PROJECT.id]!.taskIds as string[]),
-        t.id,
-      ];
+
+      const inboxProject = data.project.entities[INBOX_PROJECT.id]!;
+      data.project.entities[INBOX_PROJECT.id] = {
+        ...inboxProject,
+        taskIds: [...(inboxProject.taskIds as string[]), t.id],
+      };
       t.projectId = INBOX_PROJECT.id;
     }
 
@@ -386,17 +390,17 @@ const _addInboxProjectIdIfNecessary = (data: AppDataCompleteNew): AppDataComplet
 const _createInboxProjectIfNecessary = (data: AppDataCompleteNew): AppDataCompleteNew => {
   const { project } = data;
   if (!project.entities[INBOX_PROJECT.id]) {
-    // @ts-ignore
     data.project.entities[INBOX_PROJECT.id] = {
       ...INBOX_PROJECT,
     };
-    // @ts-ignore
-    data.project.ids = [INBOX_PROJECT.id, ...data.project.ids];
+
+    data.project.ids = [INBOX_PROJECT.id, ...data.project.ids] as string[];
   }
 
   return data;
 };
 
+// TODO replace with INBOX_PROJECT.id
 const _removeNonExistentProjectIdsFromTasks = (
   data: AppDataCompleteNew,
 ): AppDataCompleteNew => {
@@ -408,8 +412,7 @@ const _removeNonExistentProjectIdsFromTasks = (
     const t = task.entities[id] as TaskCopy;
     if (t.projectId && !projectIds.includes(t.projectId)) {
       PFLog.log('Delete missing project id from task ' + t.projectId);
-      // @ts-ignore
-      delete t.projectId;
+      t.projectId = INBOX_PROJECT.id;
     }
   });
 
@@ -420,8 +423,7 @@ const _removeNonExistentProjectIdsFromTasks = (
     const t = archiveYoung.task.entities[id] as TaskCopy;
     if (t.projectId && !projectIds.includes(t.projectId)) {
       PFLog.log('Delete missing project id from archive task ' + t.projectId);
-      // @ts-ignore
-      delete t.projectId;
+      t.projectId = INBOX_PROJECT.id;
     }
   });
 
@@ -605,21 +607,21 @@ const _fixOrphanedNotes = (data: AppDataCompleteNew): AppDataCompleteNew => {
     // missing project case
     if (note.projectId) {
       if (data.project.entities[note.projectId]) {
-        // @ts-ignore
         if (!data.project.entities[note.projectId]!.noteIds.includes(note.id)) {
           PFLog.log(
             'Add orphaned note back to project list ' + note.projectId + ' ' + note.id,
           );
-          // @ts-ignore
-          data.project.entities[note.projectId]!.noteIds = [
-            ...data.project.entities[note.projectId]!.noteIds,
-            note.id,
-          ];
+
+          const project = data.project.entities[note.projectId]!;
+          data.project.entities[note.projectId] = {
+            ...project,
+            noteIds: [...project.noteIds, note.id],
+          };
         }
       } else {
         PFLog.log('Delete missing project id from note ' + note.id);
         note.projectId = null;
-        // @ts-ignore
+
         if (!data.note.todayOrder.includes(note.id)) {
           data.note.todayOrder = [...data.note.todayOrder, note.id];
         }
@@ -627,7 +629,7 @@ const _fixOrphanedNotes = (data: AppDataCompleteNew): AppDataCompleteNew => {
     } // orphaned note case
     else if (!data.note.todayOrder.includes(note.id)) {
       PFLog.log('Add orphaned note to today list ' + note.id);
-      // @ts-ignore
+
       if (!data.note.todayOrder.includes(note.id)) {
         data.note.todayOrder = [...data.note.todayOrder, note.id];
       }
