@@ -126,7 +126,7 @@ export class IssueService {
     isEmptySearch = false,
   ): Promise<SearchResultItem[]> {
     // check if text is more than just special chars
-    if (searchTerm.replace(/[\W_]+/g, '').trim().length === 0 && !isEmptySearch) {
+    if (searchTerm.replace(/[^\p{L}\p{N}]+/gu, '').length === 0 && !isEmptySearch) {
       return Promise.resolve([]);
     }
     return this.ISSUE_SERVICE_MAP[issueProviderKey].searchIssues(
