@@ -43,7 +43,7 @@ import {
 import { isNotNullOrUndefined } from '../../../util/is-not-null-or-undefined';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { T } from '../../../t.const';
-import { DateService } from 'src/app/core/date/date.service';
+import { DateService } from '../../../core/date/date.service';
 import { ipcIdleTime$ } from '../../../core/ipc-events';
 import { selectIsFocusSessionRunning } from '../../focus-mode/store/focus-mode.selectors';
 import {
@@ -67,7 +67,6 @@ export class IdleEffects {
   private _uiHelperService = inject(UiHelperService);
   private _dateService = inject(DateService);
 
-  private _isFrontEndIdlePollRunning = false;
   private _clearIdlePollInterval?: () => void;
   private _isDialogOpen: boolean = false;
 
@@ -109,9 +108,7 @@ export class IdleEffects {
                     return of(resetIdle());
                   }
                   const idleTime = idleTimeInMs as number;
-                  return idleTime >= minIdleTime && !this._isFrontEndIdlePollRunning
-                    ? of(triggerIdle({ idleTime }))
-                    : EMPTY;
+                  return idleTime >= minIdleTime ? of(triggerIdle({ idleTime })) : EMPTY;
                 }),
               ),
       ),
@@ -347,7 +344,6 @@ export class IdleEffects {
       const delta = Date.now() - idleStart;
       this._store.dispatch(setIdleTime({ idleTime: initialIdleTime + delta }));
     }, IDLE_POLL_INTERVAL);
-    this._isFrontEndIdlePollRunning = true;
   }
 
   private _cancelIdlePoll(): void {
@@ -355,7 +351,6 @@ export class IdleEffects {
       this._clearIdlePollInterval();
       this._clearIdlePollInterval = undefined;
     }
-    this._isFrontEndIdlePollRunning = false;
   }
 
   private async _updateSimpleCounterValues(
