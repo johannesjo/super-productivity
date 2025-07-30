@@ -24,10 +24,7 @@ export default defineConfig({
         ],
         ['junit', { outputFile: '../.tmp/e2e-test-results/results.xml' }],
       ]
-    : [
-        ['list', { printSteps: false }],
-        ['json', { outputFile: 'test-results.json' }],
-      ],
+    : 'line',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
