@@ -16,13 +16,18 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: [
-    [
-      'html',
-      { outputFolder: '../.tmp/e2e-test-results/playwright-report', open: 'never' },
-    ],
-    ['junit', { outputFile: '../.tmp/e2e-test-results/results.xml' }],
-  ],
+  reporter: process.env.CI
+    ? [
+        [
+          'html',
+          { outputFolder: '../.tmp/e2e-test-results/playwright-report', open: 'never' },
+        ],
+        ['junit', { outputFile: '../.tmp/e2e-test-results/results.xml' }],
+      ]
+    : [
+        ['list', { printSteps: false }],
+        ['json', { outputFile: 'test-results.json' }],
+      ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
@@ -80,7 +85,7 @@ export default defineConfig({
   outputDir: '../.tmp/e2e-test-results/test-results',
 
   /* Global timeout for each test */
-  timeout: 20 * 1000,
+  timeout: 10 * 1000,
 
   /* Global timeout for each assertion */
   expect: {
