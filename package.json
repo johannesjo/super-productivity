@@ -64,6 +64,7 @@
     "e2e:playwright:failures": "cd e2e-playwright && npx playwright test --reporter=list --grep-invert @skip || true",
     "e2e:playwright:summary": "cd e2e-playwright && node ../tools/test-summary.js",
     "e2e:playwright:quick": "cd e2e-playwright && npx playwright test --config=playwright.config.minimal.ts",
+    "e2e:playwright:file": "cd e2e-playwright && npx playwright test",
     "electron": "NODE_ENV=PROD electron .",
     "electron:build": "tsc -p electron/tsconfig.electron.json",
     "electron:watch": "tsc -p electron/tsconfig.electron.json --watch",

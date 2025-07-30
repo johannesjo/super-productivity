@@ -56,6 +56,7 @@ npm run test:file <filepath>
   - `npm run e2e:playwright:quick` - Run tests with minimal output (faster debugging)
   - `npm run e2e:playwright:summary` - Show concise test summary after run
   - `npm run e2e:playwright:failures` - Show only failing tests
+  - `npm run e2e:playwright:file <path>` - Run a single test file (e.g., `npm run e2e:playwright:file tests/work-view/work-view.spec.ts`)
 - Linting: `npm run lint` - ESLint for TypeScript, Stylelint for SCSS
 
 ## Architecture Overview
