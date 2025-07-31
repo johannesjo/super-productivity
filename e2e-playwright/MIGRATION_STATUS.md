@@ -3,12 +3,12 @@
 ## Summary
 
 - **Total Nightwatch Tests**: 34
-- **Successfully Migrated**: 20 (58.8%)
-- **Still Need Migration**: 12
+- **Successfully Migrated**: 21 (61.8%)
+- **Still Need Migration**: 11
 - **Skipped/Commented**: 3
 - **New Tests Created**: 2
 
-## Successfully Migrated Tests (20)
+## Successfully Migrated Tests (21)
 
 - ✅ all-basic-routes-without-error
 - ✅ autocomplete/autocomplete-dropdown
@@ -19,6 +19,7 @@
 - ✅ plugins/enable-plugin-test
 - ✅ plugins/plugin-enable-verify
 - ✅ plugins/plugin-feature-check
+- ✅ plugins/plugin-loading
 - ✅ plugins/plugin-structure-test
 - ✅ plugins/test-plugin-visibility
 - ✅ project/project
@@ -31,18 +32,17 @@
 - ✅ task-list-basic/task-list-start-stop
 - ✅ work-view/work-view
 
-## Tests Still Needing Migration (12)
+## Tests Still Needing Migration (11)
 
 ### Sync Tests (1)
 
 - sync/webdav-basic
 
-### Plugin Tests (4)
+### Plugin Tests (3)
 
 - plugins/plugin-upload
 - plugins/plugin-lifecycle
 - plugins/plugin-iframe
-- plugins/plugin-loading
 
 ### Planner Tests (6)
 
