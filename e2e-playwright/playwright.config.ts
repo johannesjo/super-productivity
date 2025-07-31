@@ -1,12 +1,13 @@
 import { defineConfig, devices } from '@playwright/test';
+import path from 'path';
 
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: './tests',
+  testDir: path.join(__dirname, 'tests'),
   /* Global setup */
-  globalSetup: require.resolve('./global-setup'),
+  globalSetup: require.resolve(path.join(__dirname, 'global-setup')),
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -20,9 +21,29 @@ export default defineConfig({
     ? [
         [
           'html',
-          { outputFolder: '../.tmp/e2e-test-results/playwright-report', open: 'never' },
+          {
+            outputFolder: path.join(
+              __dirname,
+              '..',
+              '.tmp',
+              'e2e-test-results',
+              'playwright-report',
+            ),
+            open: 'never',
+          },
         ],
-        ['junit', { outputFile: '../.tmp/e2e-test-results/results.xml' }],
+        [
+          'junit',
+          {
+            outputFile: path.join(
+              __dirname,
+              '..',
+              '.tmp',
+              'e2e-test-results',
+              'results.xml',
+            ),
+          },
+        ],
       ]
     : 'line',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
@@ -79,7 +100,7 @@ export default defineConfig({
   },
 
   /* Folder for test artifacts such as screenshots, videos, traces, etc. */
-  outputDir: '../.tmp/e2e-test-results/test-results',
+  outputDir: path.join(__dirname, '..', '.tmp', 'e2e-test-results', 'test-results'),
 
   /* Global timeout for each test */
   timeout: 10 * 1000,
