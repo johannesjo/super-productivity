@@ -1,6 +1,6 @@
 import { FullConfig } from '@playwright/test';
 
-async function globalSetup(config: FullConfig) {
+const globalSetup = async (config: FullConfig): Promise<void> => {
   console.log('Running global setup...');
 
   // Set test environment variables
@@ -9,6 +9,6 @@ async function globalSetup(config: FullConfig) {
 
   // Any other global setup needed
   console.log(`Running tests with ${config.workers} workers`);
-}
+};
 
 export default globalSetup;
