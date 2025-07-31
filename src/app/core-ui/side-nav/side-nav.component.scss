@@ -67,6 +67,13 @@
   }
 }
 
+@media (max-width: 500px) {
+  :host {
+    max-width: var(--side-nav-width-mobile);
+    width: var(--side-nav-width-mobile);
+  }
+}
+
 section {
   display: flex;
   flex-direction: column;
