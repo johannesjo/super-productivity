@@ -3,12 +3,12 @@
 ## Summary
 
 - **Total Nightwatch Tests**: 34
-- **Successfully Migrated**: 16 (47.1%)
-- **Still Need Migration**: 16
+- **Successfully Migrated**: 17 (50%)
+- **Still Need Migration**: 15
 - **Skipped/Commented**: 3
 - **New Tests Created**: 2
 
-## Successfully Migrated Tests (16)
+## Successfully Migrated Tests (17)
 
 - ✅ all-basic-routes-without-error
 - ✅ autocomplete/autocomplete-dropdown
@@ -19,6 +19,7 @@
 - ✅ plugins/plugin-feature-check
 - ✅ plugins/test-plugin-visibility
 - ✅ project/project
+- ✅ reminders/reminders-schedule-page
 - ✅ reminders/reminders-view-task
 - ✅ short-syntax/short-syntax
 - ✅ task-basic/task-crud (new test)
@@ -52,11 +53,10 @@
 - planner/planner-time-estimates
 - planner/planner-basic (commented out but could be migrated)
 
-### Reminder Tests (3)
+### Reminder Tests (2)
 
 - reminders/reminders-view-task2
 - reminders/reminders-view-task4
-- reminders/reminders-schedule-page
 
 ## Skipped/Commented Tests (3)
 
