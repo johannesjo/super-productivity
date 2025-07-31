@@ -11,7 +11,7 @@ test.describe('Basic Navigation', () => {
 
     // Navigate to schedule view
     await page.goto('/#/schedule');
-    await expect(page).toHaveURL(/\/#\/tag\/TODAY\/(schedule)/);
+    await expect(page).toHaveURL(/\/#\/schedule/);
     await expect(page.locator('.route-wrapper')).toBeVisible();
 
     // Navigate to quick history
@@ -31,7 +31,7 @@ test.describe('Basic Navigation', () => {
 
     // Navigate to planner
     await page.goto('/#/planner');
-    await expect(page).toHaveURL(/\/#\/tag\/TODAY\/(planner)/);
+    await expect(page).toHaveURL(/\/#\/planner/);
     await expect(page.locator('.route-wrapper')).toBeVisible();
 
     // Navigate to daily summary
