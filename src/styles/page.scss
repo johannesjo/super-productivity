@@ -121,7 +121,7 @@ body {
 }
 
 .task-list-wrapper {
-  padding: 0 0 var(--s7);
+  padding: 0 var(--s) var(--s7);
   // for a little bit of extra space for 800 width
   max-width: calc(var(--component-max-width) - 40px);
   margin: auto;
