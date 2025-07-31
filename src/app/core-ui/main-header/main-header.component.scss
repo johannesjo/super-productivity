@@ -1,5 +1,7 @@
 @import '../../../common';
 
+// TODO split up into more manageable bits
+
 @mixin btn-transition {
   transition: var(--transition-standard);
   opacity: 0;

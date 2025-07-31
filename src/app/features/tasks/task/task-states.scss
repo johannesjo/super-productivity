@@ -1,8 +1,6 @@
 // Task state-specific styles (selected, current, done, etc.)
 // This file contains styles extracted from task.component.scss to reduce file size
 
-@import '../../../../common';
-
 // Selected state styles
 :host.isSelected {
   z-index: var(--z-is-selected-host);
