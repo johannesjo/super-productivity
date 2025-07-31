@@ -45,8 +45,8 @@ test.describe('Plugin Visibility', () => {
       return results;
     });
 
-    // Log debugging information
-    console.log('Page structure results:', pluginStructure);
+    // Log debugging information (commented out to reduce noise)
+    // console.log('Page structure results:', pluginStructure);
 
     // Verify that we have the expected page structure
     expect(pluginStructure).toBeTruthy();
@@ -67,6 +67,6 @@ test.describe('Plugin Visibility', () => {
       };
     });
 
-    console.log('Content analysis:', contentAnalysis);
+    // console.log('Content analysis:', contentAnalysis);
   });
 });

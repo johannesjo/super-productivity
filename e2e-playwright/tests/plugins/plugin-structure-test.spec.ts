@@ -72,8 +72,8 @@ test.describe('Plugin Structure Test', () => {
       };
     });
 
-    // Log the plugin card structure for debugging
-    console.log('Plugin card structure:', JSON.stringify(pluginCardStructure, null, 2));
+    // Log the plugin card structure for debugging (commented out to reduce noise)
+    // console.log('Plugin card structure:', JSON.stringify(pluginCardStructure, null, 2));
 
     // Verify the API Test Plugin card was found
     expect(pluginCardStructure.found).toBe(true);
@@ -85,17 +85,17 @@ test.describe('Plugin Structure Test', () => {
     const hasAnyToggle = pluginCardStructure.toggleResults.some((result) => result.found);
     expect(hasAnyToggle).toBe(true);
 
-    // Log detailed information about toggle controls found
-    console.log('Toggle control analysis:');
-    pluginCardStructure.toggleResults.forEach((result) => {
-      if (result.found) {
-        console.log(`  ✓ Found: ${result.selector} (${result.element})`);
-      }
-    });
+    // Log detailed information about toggle controls found (commented out to reduce noise)
+    // console.log('Toggle control analysis:');
+    // pluginCardStructure.toggleResults.forEach((result) => {
+    //   if (result.found) {
+    //     console.log(`  ✓ Found: ${result.selector} (${result.element})`);
+    //   }
+    // });
 
     // Log information about all inputs found
-    if (pluginCardStructure.allInputs.length > 0) {
-      console.log('All inputs in card:', pluginCardStructure.allInputs);
-    }
+    // if (pluginCardStructure.allInputs.length > 0) {
+    //   console.log('All inputs in card:', pluginCardStructure.allInputs);
+    // }
   });
 });
