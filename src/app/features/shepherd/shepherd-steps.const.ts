@@ -435,7 +435,6 @@ export const SHEPHERD_STEPS = (
       },
       text: 'Open the menu (<span class="material-icons">menu</span>)',
       beforeShowPromise: () => {
-        alert('aa');
         // If nav is always visible, skip this step
         if (layoutService.isNavAlwaysVisible()) {
           setTimeout(() => shepherdService.next(), 0);
