@@ -45,7 +45,23 @@ export default defineConfig({
           },
         ],
       ]
-    : 'line',
+    : process.env.PLAYWRIGHT_HTML_REPORT
+      ? [
+          [
+            'html',
+            {
+              outputFolder: path.join(
+                __dirname,
+                '..',
+                '.tmp',
+                'e2e-test-results',
+                'playwright-report',
+              ),
+              open: 'always',
+            },
+          ],
+        ]
+      : 'line',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
