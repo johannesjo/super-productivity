@@ -122,7 +122,6 @@ export class SyncWrapperService {
           return r.status;
 
         case SyncStatus.NotConfigured:
-          alert('aaaa');
           this.configuredAuthForSyncProviderIfNecessary(providerId);
           return r.status;
 
