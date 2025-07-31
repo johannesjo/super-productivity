@@ -1,15 +1,6 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../fixtures/test.fixture';
 
 test.describe('Plugin Visibility', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-    // Click away welcome dialog if present
-    await page
-      .getByRole('button', { name: 'I understand' })
-      .click({ timeout: 5000 })
-      .catch(() => {});
-  });
-
   test('should navigate to settings and check plugin section visibility', async ({
     page,
   }) => {
@@ -21,7 +12,24 @@ test.describe('Plugin Visibility', () => {
 
     // Check for plugin-related DOM elements
     const pluginStructure = await page.evaluate(() => {
-      const results: any = {};
+      const results: {
+        hasPluginSection: boolean;
+        hasPluginManagement: boolean;
+        hasCollapsible: boolean;
+        pluginHeading?: Element;
+        headingText: string;
+        sectionCount: number;
+        sectionClasses: string[];
+        hasConfigPage: boolean;
+      } = {
+        hasPluginSection: false,
+        hasPluginManagement: false,
+        hasCollapsible: false,
+        headingText: 'Not found',
+        sectionCount: 0,
+        sectionClasses: [],
+        hasConfigPage: false,
+      };
 
       // Check for plugin section
       results.hasPluginSection = !!document.querySelector('.plugin-section');
@@ -51,22 +59,5 @@ test.describe('Plugin Visibility', () => {
     // Verify that we have the expected page structure
     expect(pluginStructure).toBeTruthy();
     expect(pluginStructure.hasConfigPage).toBe(true);
-
-    // Additional content analysis for debugging
-    const contentAnalysis = await page.evaluate(() => {
-      const configContent =
-        document.querySelector('.page-settings')?.innerHTML || 'No config page found';
-
-      // Look for any mentions of plugin
-      const pluginMentions = configContent.match(/plugin/gi) || [];
-
-      return {
-        contentLength: configContent.length,
-        pluginMentions: pluginMentions.length,
-        hasPluginText: configContent.toLowerCase().includes('plugin'),
-      };
-    });
-
-    // console.log('Content analysis:', contentAnalysis);
   });
 });

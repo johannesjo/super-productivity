@@ -1,4 +1,4 @@
-import { test, expect } from '../../fixtures/app.fixture';
+import { test, expect } from '../../fixtures/test.fixture';
 
 test.describe('Performance Tests - Adding Multiple Tasks', () => {
   test('performance: adding 20 tasks sequentially', async ({ page, workViewPage }) => {
