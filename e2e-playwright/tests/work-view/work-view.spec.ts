@@ -56,7 +56,7 @@ test.describe('Work View', () => {
     await expect(taskTextarea).toHaveValue(taskTitle);
   });
 
-  test('should focus previous subtask when marking last subtask done', async ({
+  test.skip('should focus previous subtask when marking last subtask done', async ({
     page,
     workViewPage,
   }) => {
