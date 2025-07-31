@@ -118,7 +118,8 @@ export const createWindow = ({
     removeKeyInAnyCase(requestHeaders, 'accept');
 
     // NOTE this is needed for GitHub api requests to work :(
-    if (!details.url.includes('github.com')) {
+    // office365 needs a User-Agent as well (#4677)
+    if (!details.url.includes('github.com') && !details.url.includes('office365.com')) {
       removeKeyInAnyCase(requestHeaders, 'User-Agent');
     }
     callback({ requestHeaders });
