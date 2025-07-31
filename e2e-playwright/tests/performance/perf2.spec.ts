@@ -13,7 +13,9 @@ test.describe('Performance Tests - Adding Multiple Tasks', () => {
 
     // Add 20 tasks sequentially
     for (let i = 1; i <= 20; i++) {
-      await workViewPage.addTask(`${i} test task koko`);
+      // Keep the add task dialog open for all tasks except the last one
+      const isLastTask = i === 20;
+      await workViewPage.addTask(`${i} test task koko`, !isLastTask);
     }
 
     // Calculate total time

@@ -18,17 +18,21 @@ export abstract class BasePage {
 
     if ((await inputEl.count()) === 0) {
       await this.page.locator('.tour-addBtn ').click();
+      await inputEl.waitFor({ state: 'visible' });
     }
 
     await inputEl.fill(taskName);
     await this.page.locator('.e2e-add-task-submit ').click();
-    await this.page.locator('body').click();
-    await this.page.locator('.backdrop').click();
-    await this.page.waitForTimeout(200);
+
+    // Wait for the task to be added
+    await this.page.waitForTimeout(10);
 
     if (!skipClose) {
-      await this.backdrop.click();
-      await inputEl.waitFor({ state: 'hidden' });
+      // Only click backdrop once if it's visible
+      if (await this.backdrop.isVisible()) {
+        await this.backdrop.click();
+      }
+      // Don't wait for input to be hidden as it might stay visible for multiple tasks
     }
   }
 }
