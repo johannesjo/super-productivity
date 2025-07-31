@@ -50,6 +50,7 @@ export class Log {
   /** Pre-bound console functions that preserve line numbers */
   private static readonly c = console.log.bind(console); // critical
   private static readonly e = (console.error || console.log).bind(console);
+  private static readonly w = (console.warn || console.log).bind(console);
   private static readonly l = console.log.bind(console); // log (formerly normal)
   private static readonly i = (console.info || console.log).bind(console); // info
   private static readonly v = console.log.bind(console); // verbose
@@ -101,6 +102,13 @@ export class Log {
     }
   }
 
+  static warn(...args: unknown[]): void {
+    if (this.level >= LogLevel.ERROR) {
+      this.recordLog('WARN', this.context, args);
+      this.w(this.getPrefix(), ...args);
+    }
+  }
+
   static log(...args: unknown[]): void {
     if (this.level >= LogLevel.NORMAL) {
       this.recordLog('LOG', this.context, args);
@@ -140,7 +148,6 @@ export class Log {
   // Backwards compatibility aliases
   static error = Log.err;
   static normal = Log.log;
-  static warn = Log.err;
 
   /** Get the current log history */
   static getLogHistory(): LogEntry[] {

@@ -551,7 +551,7 @@ export class AppComponent implements OnDestroy {
               // NOTE: we never execute for android web view, because it is always true
               else if (!IS_ANDROID_WEB_VIEW) {
                 const msg = T.GLOBAL_SNACK.PERSISTENCE_DISALLOWED;
-                Log.err('Persistence not allowed');
+                Log.warn('Persistence not allowed');
                 this._snackService.open({ msg });
               }
             });
