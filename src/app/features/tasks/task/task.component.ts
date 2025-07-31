@@ -91,7 +91,7 @@ import { TaskLog } from '../../../core/log';
 @Component({
   selector: 'task',
   templateUrl: './task.component.html',
-  styleUrls: ['./task.component.scss'],
+  styleUrls: ['./task.component.scss', './task-states.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation, fadeAnimation, swirlAnimation, expandInOnlyAnimation],
   /* eslint-disable @typescript-eslint/naming-convention*/

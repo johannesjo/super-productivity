@@ -31,10 +31,6 @@
   &.isImg {
     border: 0;
   }
-
-  :host.gu-mirror & {
-    box-shadow: var(--whiteframe-shadow-8dp) !important;
-  }
 }
 
 .controls {
