@@ -9,7 +9,11 @@ const DONE_TASKS_SECTION = '.tour-doneList';
 const TOGGLE_DONE_TASKS_BTN = '.tour-doneList .mat-expansion-indicator';
 
 test.describe('Work View Features', () => {
-  test.skip('should show undone and done task lists', async ({ page, workViewPage }) => {
+  test.skip('should show undone and done task lists', async ({
+    page,
+    workViewPage,
+    testPrefix,
+  }) => {
     test.setTimeout(30000); // Increase timeout
 
     // Wait for work view to be ready
