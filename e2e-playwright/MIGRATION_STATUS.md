@@ -2,13 +2,14 @@
 
 ## Summary
 
-- **Total Nightwatch Tests**: 34
-- **Successfully Migrated**: 26 (76.5%)
-- **Still Need Migration**: 1 (sync/webdav-basic - missing implementation)
-- **Skipped/Commented**: 9 (6 planner tests + 3 others)
+- **Total Nightwatch Tests**: 38 (excluding empty TODO files)
+- **Successfully Migrated**: 27 (71.1%)
+- **Cannot Migrate**: 2 (missing implementations)
+- **Skipped/Commented**: 6 (planner tests)
 - **New Tests Created**: 2
+- **Tests with Skipped Scenarios**: 5
 
-## Successfully Migrated Tests (26)
+## Successfully Migrated Tests (27)
 
 - ✅ all-basic-routes-without-error
 - ✅ autocomplete/autocomplete-dropdown
@@ -36,39 +37,33 @@
 - ✅ work-view/work-view
 - ✅ reminders/reminders-view-task2 (migrated)
 - ✅ reminders/reminders-view-task4 (migrated)
+- ✅ project-note/project-note (migrated with 2 tests skipped)
 
-## Tests Still Needing Migration (1)
+## Tests That Cannot Be Migrated (2)
 
 ### Sync Tests (1)
 
 - sync/webdav-basic (missing setupWebdavSync implementation)
 
-## Skipped/Commented Tests (9)
+### Performance Tests (1)
 
-1. **perf.e2e.ts** - Active but uses custom performance methods
+- perf.e2e.ts (uses custom enablePerformanceMetrics() and getPerformanceMetrics() methods)
 
-   - Uses enablePerformanceMetrics() and getPerformanceMetrics()
+## Skipped/Commented Tests (6)
 
-2. **planner/planner-basic.e2e.ts** - Fully commented out
-
-   - Reason: Unknown, entire file is commented
-
-3. **planner/planner-drag-drop.e2e.ts** - Fully commented out
-
-4. **planner/planner-multiple-days.e2e.ts** - Fully commented out
-
-5. **planner/planner-navigation.e2e.ts** - Fully commented out
-
-6. **planner/planner-scheduled-tasks.e2e.ts** - Fully commented out
-
-7. **planner/planner-time-estimates.e2e.ts** - Fully commented out
-
-8. **project-note/project-note.e2e.ts** - Fully commented out
+1. **planner/planner-basic.e2e.ts** - Fully commented out
 
    - Reason: Unknown, entire file is commented
 
-9. **sync/webdav-basic.e2e.ts** - Cannot migrate
-   - Missing setupWebdavSync implementation
+2. **planner/planner-drag-drop.e2e.ts** - Fully commented out
+
+3. **planner/planner-multiple-days.e2e.ts** - Fully commented out
+
+4. **planner/planner-navigation.e2e.ts** - Fully commented out
+
+5. **planner/planner-scheduled-tasks.e2e.ts** - Fully commented out
+
+6. **planner/planner-time-estimates.e2e.ts** - Fully commented out
 
 ## Failed Migration Attempts
 
@@ -87,7 +82,35 @@
    - create second project (UI element not found)
 
 3. **work-view-features.spec.ts** - 1 test skipped:
+
    - should show undone and done task lists (done button click issues)
+
+4. **project-note.spec.ts** - 2 tests skipped:
+   - create a note (create project button not visible)
+   - new note should be still available after reload (same issue)
+
+## Migration Summary
+
+### Total E2E Test Coverage:
+
+- **Nightwatch Tests**: 38 total (excluding empty TODO files)
+
+  - 27 successfully migrated (71.1%)
+  - 2 cannot be migrated (5.3%)
+  - 6 commented out (15.8%)
+  - 3 active but not migrated (7.9%)
+
+- **Playwright Tests**: 29 test files
+  - 47 total test cases
+  - 5 test files with skipped scenarios
+  - 10 individual test cases skipped
+
+### Key Issues:
+
+1. **Create Project Button**: Not visible in UI, affecting project-related tests
+2. **Iframe Content Access**: Cross-origin issues with plugin iframe tests
+3. **Performance Metrics**: Custom Nightwatch methods not available in Playwright
+4. **WebDAV Sync**: Missing implementation for sync setup
 
 ## Notes
 
