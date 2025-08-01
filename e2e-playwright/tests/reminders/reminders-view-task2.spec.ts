@@ -14,7 +14,7 @@ const SCHEDULE_DIALOG = 'mat-dialog-container';
 const DIALOG_SUBMIT = `${SCHEDULE_DIALOG} mat-dialog-actions button:last-of-type`;
 const TIME_INP = 'input[type="time"]';
 const SIDE_INNER = '.right-panel';
-const DEFAULT_DELTA = 1.2 * 60 * 1000;
+const DEFAULT_DELTA = 5000; // 5 seconds instead of 1.2 minutes
 
 test.describe.serial('Reminders View Task 2', () => {
   const addTaskWithReminder = async (
@@ -66,7 +66,7 @@ test.describe.serial('Reminders View Task 2', () => {
     const task2Name = `${testPrefix}-1 B task`;
 
     await addTaskWithReminder(page, workViewPage, task1Name);
-    await addTaskWithReminder(page, workViewPage, task2Name, Date.now() + 10000);
+    await addTaskWithReminder(page, workViewPage, task2Name, Date.now() + 5000);
 
     // Wait for reminder dialog
     await page.waitForSelector(DIALOG, {
