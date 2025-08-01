@@ -22,6 +22,7 @@ import {
 import { Task, DEFAULT_TASK, TaskWithSubTasks } from '../tasks/task.model';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { getLocalDateStr } from '../../util/get-local-date-str';
+import { getWorklogStr } from '../../util/get-work-log-str';
 import { TODAY_TAG } from '../tag/tag.const';
 
 describe('TaskRepeatCfgService', () => {
@@ -39,7 +40,9 @@ describe('TaskRepeatCfgService', () => {
     repeatCycle: 'DAILY',
     startDate: new Date().toISOString().split('T')[0], // Use today's date
     // eslint-disable-next-line no-mixed-operators
-    lastTaskCreation: Date.now() - 24 * 60 * 60 * 1000, // Yesterday
+    lastTaskCreationDay: new Date(Date.now() - 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split('T')[0], // Yesterday
     repeatEvery: 1,
     defaultEstimate: 3600000,
     notes: 'Test notes',
@@ -335,7 +338,7 @@ describe('TaskRepeatCfgService', () => {
           taskRepeatCfg: {
             id: mockTaskRepeatCfg.id,
             changes: {
-              lastTaskCreation: targetDayDate,
+              lastTaskCreationDay: getWorklogStr(targetDayDate),
             },
           },
         }),
@@ -524,6 +527,70 @@ describe('TaskRepeatCfgService', () => {
         expect(config).toBeUndefined();
         done();
       });
+    });
+  });
+
+  describe('Timezone Edge Cases', () => {
+    it('should correctly update lastTaskCreationDay for late night task creation', async () => {
+      // Simulate creating a task at 11 PM
+      const lateNightTime = new Date('2025-08-01T23:00:00');
+      const targetDayDate = lateNightTime.getTime();
+
+      // Set up a task repeat config with dates relative to the test date
+      const testTaskRepeatCfg = {
+        ...mockTaskRepeatCfg,
+        startDate: '2025-07-01', // Start date a month before
+        lastTaskCreationDay: '2025-07-31', // Last created day before Aug 1st
+      };
+
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
+      taskService.createNewTaskWithDefaults.and.returnValue(mockTask);
+
+      await service.createRepeatableTask(testTaskRepeatCfg, targetDayDate);
+
+      // Verify that lastTaskCreationDay is set to the date string of when the task was created
+      expect(dispatchSpy.calls.argsFor(1)[0]).toEqual(
+        jasmine.objectContaining({
+          type: updateTaskRepeatCfg.type,
+          taskRepeatCfg: {
+            id: testTaskRepeatCfg.id,
+            changes: {
+              lastTaskCreationDay: '2025-08-01', // Should be Aug 1st, not Aug 2nd
+            },
+          },
+        }),
+      );
+    });
+
+    it('should correctly handle task creation across day boundaries', async () => {
+      // Test creating task just after midnight
+      const earlyMorning = new Date('2025-08-02T00:30:00');
+      const targetDayDate = earlyMorning.getTime();
+
+      // Set up a task repeat config with dates relative to the test date
+      const testTaskRepeatCfg = {
+        ...mockTaskRepeatCfg,
+        startDate: '2025-07-01', // Start date a month before
+        lastTaskCreationDay: '2025-08-01', // Last created day before Aug 2nd
+      };
+
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
+      taskService.createNewTaskWithDefaults.and.returnValue(mockTask);
+
+      await service.createRepeatableTask(testTaskRepeatCfg, targetDayDate);
+
+      // Verify correct date string
+      expect(dispatchSpy.calls.argsFor(1)[0]).toEqual(
+        jasmine.objectContaining({
+          type: updateTaskRepeatCfg.type,
+          taskRepeatCfg: {
+            id: testTaskRepeatCfg.id,
+            changes: {
+              lastTaskCreationDay: '2025-08-02', // Should be Aug 2nd
+            },
+          },
+        }),
+      );
     });
   });
 });

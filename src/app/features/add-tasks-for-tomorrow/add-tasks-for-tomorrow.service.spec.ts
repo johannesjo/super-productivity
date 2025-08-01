@@ -102,7 +102,7 @@ describe('AddTasksForTomorrowService', () => {
     id: 'repeat1',
     title: 'Repeatable task',
     projectId: 'project1',
-    lastTaskCreation: 0,
+    lastTaskCreationDay: '1970-01-01',
     tagIds: [],
     order: 0,
     isPaused: false,
@@ -117,7 +117,7 @@ describe('AddTasksForTomorrowService', () => {
     id: 'repeat2',
     title: 'Another Repeatable task',
     projectId: 'project1',
-    lastTaskCreation: 0,
+    lastTaskCreationDay: '1970-01-01',
     tagIds: [],
     order: 1,
     isPaused: false,
@@ -406,7 +406,7 @@ describe('AddTasksForTomorrowService', () => {
         repeatCycle: 'WEEKLY',
         repeatEvery: 1,
         startDate: '2024-01-01', // Started months ago
-        lastTaskCreation: new Date(2024, 0, 1).getTime(), // Last created months ago
+        lastTaskCreationDay: '2024-01-01', // Last created months ago
       };
 
       taskRepeatCfgServiceMock.getAllUnprocessedRepeatableTasks$.and.returnValue(
@@ -438,7 +438,9 @@ describe('AddTasksForTomorrowService', () => {
         repeatCycle: 'DAILY',
         repeatEvery: 1,
         // eslint-disable-next-line no-mixed-operators
-        lastTaskCreation: Date.now() - 4 * 24 * 60 * 60 * 1000, // 4 days ago
+        lastTaskCreationDay: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0], // 4 days ago
       };
 
       const overdueMonthly: TaskRepeatCfg = {
@@ -448,7 +450,9 @@ describe('AddTasksForTomorrowService', () => {
         repeatCycle: 'MONTHLY',
         repeatEvery: 1,
         // eslint-disable-next-line no-mixed-operators
-        lastTaskCreation: Date.now() - 35 * 24 * 60 * 60 * 1000, // 35 days ago
+        lastTaskCreationDay: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0], // 35 days ago
       };
 
       taskRepeatCfgServiceMock.getAllUnprocessedRepeatableTasks$.and.returnValue(

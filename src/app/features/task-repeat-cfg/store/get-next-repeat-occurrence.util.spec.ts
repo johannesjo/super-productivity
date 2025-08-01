@@ -1,6 +1,7 @@
 import { getNextRepeatOccurrence } from './get-next-repeat-occurrence.util';
 import { DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfg } from '../task-repeat-cfg.model';
 import { getLocalDateStr } from '../../../util/get-local-date-str';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 /* eslint-disable no-mixed-operators */
 
@@ -11,7 +12,7 @@ const DUMMY_REPEATABLE_TASK: TaskRepeatCfg = {
   id: 'REPEATABLE_DEFAULT',
   title: 'REPEATABLE_DEFAULT',
   quickSetting: 'DAILY',
-  lastTaskCreation: FAKE_MONDAY_THE_10TH,
+  lastTaskCreationDay: getLocalDateStr(FAKE_MONDAY_THE_10TH),
   defaultEstimate: undefined,
   projectId: null,
   startTime: undefined,
@@ -103,7 +104,7 @@ describe('getNextRepeatOccurrence()', () => {
       const cfg = dummyRepeatable('ID1', {
         repeatCycle: 'DAILY',
         repeatEvery: 1,
-        lastTaskCreation: today.getTime(),
+        lastTaskCreationDay: getLocalDateStr(today),
       });
       testCase(cfg, today, today, tomorrow);
     });
@@ -116,7 +117,7 @@ describe('getNextRepeatOccurrence()', () => {
       const cfg = dummyRepeatable('ID1', {
         repeatCycle: 'DAILY',
         repeatEvery: 2,
-        lastTaskCreation: lastCreation.getTime(),
+        lastTaskCreationDay: getLocalDateStr(lastCreation),
       });
       testCase(cfg, fromDate, startDate, expected);
     });
@@ -129,7 +130,7 @@ describe('getNextRepeatOccurrence()', () => {
       const cfg = dummyRepeatable('ID1', {
         repeatCycle: 'DAILY',
         repeatEvery: 1,
-        lastTaskCreation: lastCreation.getTime(),
+        lastTaskCreationDay: getLocalDateStr(lastCreation),
       });
       testCase(cfg, fromDate, startDate, expected);
     });
@@ -142,7 +143,7 @@ describe('getNextRepeatOccurrence()', () => {
       const cfg = dummyRepeatable('ID1', {
         repeatCycle: 'DAILY',
         repeatEvery: 3,
-        lastTaskCreation: lastCreation.getTime(),
+        lastTaskCreationDay: getLocalDateStr(lastCreation),
       });
       testCase(cfg, fromDate, startDate, expected);
     });
@@ -158,7 +159,7 @@ describe('getNextRepeatOccurrence()', () => {
         repeatCycle: 'WEEKLY',
         repeatEvery: 1,
         monday: true,
-        lastTaskCreation: lastCreation.getTime(),
+        lastTaskCreationDay: getLocalDateStr(lastCreation),
       });
       testCase(cfg, fromDate, startDate, expected);
     });
@@ -174,7 +175,7 @@ describe('getNextRepeatOccurrence()', () => {
         monday: true,
         wednesday: true,
         friday: true,
-        lastTaskCreation: lastCreation.getTime(),
+        lastTaskCreationDay: getLocalDateStr(lastCreation),
       });
       testCase(cfg, fromDate, startDate, expected);
     });
@@ -188,7 +189,7 @@ describe('getNextRepeatOccurrence()', () => {
         repeatCycle: 'WEEKLY',
         repeatEvery: 2,
         monday: true,
-        lastTaskCreation: lastCreation.getTime(),
+        lastTaskCreationDay: getLocalDateStr(lastCreation),
       });
       testCase(cfg, fromDate, startDate, expected);
     });
@@ -203,7 +204,7 @@ describe('getNextRepeatOccurrence()', () => {
         repeatEvery: 1,
         tuesday: true,
         thursday: true,
-        lastTaskCreation: lastCreation.getTime(),
+        lastTaskCreationDay: getLocalDateStr(lastCreation),
       });
       testCase(cfg, fromDate, startDate, expected);
     });
@@ -218,7 +219,7 @@ describe('getNextRepeatOccurrence()', () => {
       const cfg = dummyRepeatable('ID1', {
         repeatCycle: 'MONTHLY',
         repeatEvery: 1,
-        lastTaskCreation: lastCreation.getTime(),
+        lastTaskCreationDay: getLocalDateStr(lastCreation),
       });
       testCase(cfg, fromDate, startDate, expected);
     });
@@ -231,7 +232,7 @@ describe('getNextRepeatOccurrence()', () => {
       const cfg = dummyRepeatable('ID1', {
         repeatCycle: 'MONTHLY',
         repeatEvery: 1,
-        lastTaskCreation: lastCreation.getTime(),
+        lastTaskCreationDay: getLocalDateStr(lastCreation),
       });
       testCase(cfg, fromDate, startDate, expected);
     });
@@ -244,7 +245,7 @@ describe('getNextRepeatOccurrence()', () => {
       const cfg = dummyRepeatable('ID1', {
         repeatCycle: 'MONTHLY',
         repeatEvery: 2,
-        lastTaskCreation: lastCreation.getTime(),
+        lastTaskCreationDay: getLocalDateStr(lastCreation),
       });
       testCase(cfg, fromDate, startDate, expected);
     });
@@ -257,7 +258,7 @@ describe('getNextRepeatOccurrence()', () => {
       const cfg = dummyRepeatable('ID1', {
         repeatCycle: 'MONTHLY',
         repeatEvery: 1,
-        lastTaskCreation: lastCreation.getTime(),
+        lastTaskCreationDay: getLocalDateStr(lastCreation),
       });
       testCase(cfg, fromDate, startDate, expected);
     });
@@ -272,7 +273,7 @@ describe('getNextRepeatOccurrence()', () => {
       const cfg = dummyRepeatable('ID1', {
         repeatCycle: 'YEARLY',
         repeatEvery: 1,
-        lastTaskCreation: lastCreation.getTime(),
+        lastTaskCreationDay: getLocalDateStr(lastCreation),
       });
       testCase(cfg, fromDate, startDate, expected);
     });
@@ -285,7 +286,7 @@ describe('getNextRepeatOccurrence()', () => {
       const cfg = dummyRepeatable('ID1', {
         repeatCycle: 'YEARLY',
         repeatEvery: 2,
-        lastTaskCreation: lastCreation.getTime(),
+        lastTaskCreationDay: getLocalDateStr(lastCreation),
       });
       testCase(cfg, fromDate, startDate, expected);
     });
@@ -298,7 +299,7 @@ describe('getNextRepeatOccurrence()', () => {
       const cfg = dummyRepeatable('ID1', {
         repeatCycle: 'YEARLY',
         repeatEvery: 1,
-        lastTaskCreation: lastCreation.getTime(),
+        lastTaskCreationDay: getLocalDateStr(lastCreation),
       });
       testCase(cfg, fromDate, startDate, expected);
     });
@@ -311,7 +312,7 @@ describe('getNextRepeatOccurrence()', () => {
       const cfg = dummyRepeatable('ID1', {
         repeatCycle: 'YEARLY',
         repeatEvery: 1,
-        lastTaskCreation: lastCreation.getTime(),
+        lastTaskCreationDay: getLocalDateStr(lastCreation),
       });
       testCase(cfg, fromDate, startDate, expected);
     });
@@ -324,7 +325,7 @@ describe('getNextRepeatOccurrence()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'DAILY',
           repeatEvery: 1,
-          lastTaskCreation: new Date(2022, 2, 12).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2022, 2, 12).getTime()),
         });
         const fromDate = new Date(2022, 2, 12);
         const startDate = new Date(2022, 2, 12);
@@ -343,7 +344,7 @@ describe('getNextRepeatOccurrence()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'DAILY',
           repeatEvery: 1,
-          lastTaskCreation: new Date(2022, 10, 5).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2022, 10, 5).getTime()),
         });
         const fromDate = new Date(2022, 10, 5);
         const startDate = new Date(2022, 10, 5);
@@ -363,7 +364,7 @@ describe('getNextRepeatOccurrence()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'DAILY',
           repeatEvery: 1,
-          lastTaskCreation: new Date(2021, 11, 31).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2021, 11, 31).getTime()),
         });
         const fromDate = new Date(2021, 11, 31);
         const startDate = new Date(2021, 11, 30);
@@ -381,7 +382,7 @@ describe('getNextRepeatOccurrence()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'WEEKLY',
           repeatEvery: 1,
-          lastTaskCreation: new Date(2021, 11, 27).getTime(), // Monday
+          lastTaskCreationDay: getWorklogStr(new Date(2021, 11, 27).getTime()), // Monday
           monday: true,
         });
         const fromDate = new Date(2021, 11, 28); // Tuesday
@@ -400,7 +401,7 @@ describe('getNextRepeatOccurrence()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'MONTHLY',
           repeatEvery: 1,
-          lastTaskCreation: new Date(2021, 11, 15).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2021, 11, 15).getTime()),
         });
         const fromDate = new Date(2021, 11, 16);
         const startDate = new Date(2021, 10, 15);
@@ -418,7 +419,7 @@ describe('getNextRepeatOccurrence()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'YEARLY',
           repeatEvery: 1,
-          lastTaskCreation: new Date(2019, 5, 15).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2019, 5, 15).getTime()),
         });
         const fromDate = new Date(2019, 5, 16);
         const startDate = new Date(2019, 5, 15);
@@ -438,7 +439,7 @@ describe('getNextRepeatOccurrence()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'MONTHLY',
           repeatEvery: 1,
-          lastTaskCreation: new Date(2024, 0, 29).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2024, 0, 29).getTime()),
         });
         const fromDate = new Date(2024, 0, 30);
         const startDate = new Date(2024, 0, 29);
@@ -456,7 +457,7 @@ describe('getNextRepeatOccurrence()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'YEARLY',
           repeatEvery: 1,
-          lastTaskCreation: new Date(2024, 1, 29).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2024, 1, 29).getTime()),
         });
         const fromDate = new Date(2024, 2, 1);
         const startDate = new Date(2024, 1, 29);
@@ -476,7 +477,7 @@ describe('getNextRepeatOccurrence()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'YEARLY',
           repeatEvery: 1,
-          lastTaskCreation: new Date(2024, 1, 29).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2024, 1, 29).getTime()),
         });
         const fromDate = new Date(2024, 2, 1);
         const startDate = new Date(2024, 1, 29);
@@ -496,7 +497,7 @@ describe('getNextRepeatOccurrence()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'YEARLY',
           repeatEvery: 1,
-          lastTaskCreation: new Date(2099, 1, 28).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2099, 1, 28).getTime()),
         });
         const fromDate = new Date(2099, 2, 1);
         const startDate = new Date(2099, 1, 28);
@@ -517,7 +518,7 @@ describe('getNextRepeatOccurrence()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'DAILY',
           repeatEvery: 1,
-          lastTaskCreation: lastCreation.getTime(),
+          lastTaskCreationDay: getWorklogStr(lastCreation.getTime()),
         });
         const fromDate = new Date(2022, 0, 10, 23, 59, 59, 999);
         const startDate = new Date(2022, 0, 10);
@@ -538,7 +539,7 @@ describe('getNextRepeatOccurrence()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'DAILY',
           repeatEvery: 1,
-          lastTaskCreation: lastCreation.getTime(),
+          lastTaskCreationDay: getWorklogStr(lastCreation.getTime()),
         });
         const fromDate = new Date(2022, 0, 11, 0, 0, 1, 0);
         const startDate = new Date(2022, 0, 10);
@@ -556,7 +557,7 @@ describe('getNextRepeatOccurrence()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'WEEKLY',
           repeatEvery: 1,
-          lastTaskCreation: lastCreation.getTime(),
+          lastTaskCreationDay: getWorklogStr(lastCreation.getTime()),
           monday: true,
         });
         const fromDate = new Date(2022, 0, 10, 0, 0, 1, 0); // Monday morning
@@ -577,7 +578,7 @@ describe('getNextRepeatOccurrence()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'MONTHLY',
           repeatEvery: 1,
-          lastTaskCreation: new Date(2022, 2, 31).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2022, 2, 31).getTime()),
         });
         const fromDate = new Date(2022, 3, 1);
         const startDate = new Date(2022, 0, 31);
@@ -595,7 +596,7 @@ describe('getNextRepeatOccurrence()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'MONTHLY',
           repeatEvery: 1,
-          lastTaskCreation: new Date(2022, 0, 30).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2022, 0, 30).getTime()),
         });
         const fromDate = new Date(2022, 0, 31);
         const startDate = new Date(2021, 10, 30);
@@ -627,7 +628,7 @@ describe('getNextRepeatOccurrence()', () => {
           const cfg = dummyRepeatable('ID1', {
             repeatCycle: 'MONTHLY',
             repeatEvery: 1,
-            lastTaskCreation: lastCreation.getTime(),
+            lastTaskCreationDay: getWorklogStr(lastCreation.getTime()),
           });
 
           const fromDate = new Date(year, monthNum - 1, 1);
@@ -651,7 +652,7 @@ describe('getNextRepeatOccurrence()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'DAILY',
           repeatEvery: 1,
-          lastTaskCreation: lastCreationLA.getTime(),
+          lastTaskCreationDay: getWorklogStr(lastCreationLA.getTime()),
         });
 
         // Check on Jan 11
@@ -673,7 +674,7 @@ describe('getNextRepeatOccurrence()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'WEEKLY',
           repeatEvery: 1,
-          lastTaskCreation: lastCreation.getTime(),
+          lastTaskCreationDay: getWorklogStr(lastCreation.getTime()),
           monday: true,
         });
 
@@ -696,7 +697,7 @@ describe('getNextRepeatOccurrence()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'DAILY',
           repeatEvery: 1,
-          lastTaskCreation: lastCreation.getTime(),
+          lastTaskCreationDay: getWorklogStr(lastCreation.getTime()),
         });
 
         // Check on Jan 12
@@ -719,7 +720,7 @@ describe('getNextRepeatOccurrence()', () => {
     it('should return null for unknown repeat cycle', () => {
       const cfg = dummyRepeatable('ID1', {
         repeatCycle: 'UNKNOWN' as any,
-        lastTaskCreation: FAKE_MONDAY_THE_10TH,
+        lastTaskCreationDay: getLocalDateStr(FAKE_MONDAY_THE_10TH),
       });
       expect(getNextRepeatOccurrence(cfg, new Date())).toBeNull();
     });
@@ -732,7 +733,7 @@ describe('getNextRepeatOccurrence()', () => {
       const cfg = dummyRepeatable('ID1', {
         repeatCycle: 'DAILY',
         repeatEvery: 1,
-        lastTaskCreation: lastCreation.getTime(),
+        lastTaskCreationDay: getLocalDateStr(lastCreation),
       });
       testCase(cfg, fromDate, startDate, expected);
     });
@@ -746,7 +747,7 @@ describe('getNextRepeatOccurrence()', () => {
       const cfg = dummyRepeatable('ID1', {
         repeatCycle: 'DAILY',
         repeatEvery: 1,
-        lastTaskCreation: today.getTime() - DAY, // Yesterday
+        lastTaskCreationDay: getWorklogStr(today.getTime() - DAY), // Yesterday
         startDate: getLocalDateStr(today.getTime() - DAY),
       });
 

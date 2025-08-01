@@ -1,6 +1,7 @@
 import { getNewestPossibleDueDate } from './get-newest-possible-due-date.util';
 import { DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfg } from '../task-repeat-cfg.model';
 import { getLocalDateStr } from '../../../util/get-local-date-str';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 
 /* eslint-disable no-mixed-operators */
@@ -12,7 +13,7 @@ const DUMMY_REPEATABLE_TASK: TaskRepeatCfg = {
   id: 'REPEATABLE_DEFAULT',
   title: 'REPEATABLE_DEFAULT',
   quickSetting: 'DAILY',
-  lastTaskCreation: FAKE_MONDAY_THE_10TH,
+  lastTaskCreationDay: getWorklogStr(FAKE_MONDAY_THE_10TH),
   defaultEstimate: undefined,
   projectId: null,
   startTime: undefined,
@@ -103,7 +104,7 @@ describe('getNewestPossibleDueDate()', () => {
         description: 'should return today date if today is due day',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'DAILY',
-          lastTaskCreation: new Date(2022, 0, 10).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2022, 0, 10).getTime()),
         }),
         today: new Date(2022, 1, 11),
         startDate: new Date(2022, 0, 10),
@@ -113,7 +114,7 @@ describe('getNewestPossibleDueDate()', () => {
         description: 'should return date if today is after due',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'DAILY',
-          lastTaskCreation: new Date(2022, 0, 14).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2022, 0, 14).getTime()),
         }),
         startDate: new Date(2022, 0, 14),
         today: dateStrToUtcDate('2022-03-14'),
@@ -124,7 +125,7 @@ describe('getNewestPossibleDueDate()', () => {
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'DAILY',
           repeatEvery: 3,
-          lastTaskCreation: new Date(2022, 0, 14).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2022, 0, 14).getTime()),
         }),
         startDate: new Date(2022, 0, 14),
         today: dateStrToUtcDate('2022-03-14'),
@@ -134,7 +135,7 @@ describe('getNewestPossibleDueDate()', () => {
         description: 'should return null if today and already created',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'DAILY',
-          lastTaskCreation: new Date(2022, 0, 14).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2022, 0, 14).getTime()),
         }),
         today: new Date(2022, 0, 14),
         startDate: new Date(2022, 0, 14),
@@ -145,7 +146,7 @@ describe('getNewestPossibleDueDate()', () => {
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'DAILY',
           repeatEvery: 5,
-          lastTaskCreation: new Date(2022, 0, 15).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2022, 0, 15).getTime()),
         }),
         today: new Date(2022, 0, 17),
         startDate: new Date(2022, 0, 10),
@@ -169,7 +170,7 @@ describe('getNewestPossibleDueDate()', () => {
         description: 'should return today date if today is due day',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'WEEKLY',
-          lastTaskCreation: new Date(2022, 0, 10).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2022, 0, 10).getTime()),
           monday: true,
         }),
         today: new Date(2022, 0, 17),
@@ -181,7 +182,7 @@ describe('getNewestPossibleDueDate()', () => {
         description: 'should return null if no weekday is set',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'WEEKLY',
-          lastTaskCreation: new Date(2022, 0, 10).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2022, 0, 10).getTime()),
         }),
         today: new Date(2022, 0, 17),
         startDate: new Date(2022, 0, 10),
@@ -191,7 +192,7 @@ describe('getNewestPossibleDueDate()', () => {
         description: 'should work also if there is a weird lastTaskCreation date',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'WEEKLY',
-          lastTaskCreation: new Date(2022, 0, 16).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2022, 0, 16).getTime()),
           monday: true,
         }),
         today: new Date(2022, 0, 17),
@@ -202,7 +203,7 @@ describe('getNewestPossibleDueDate()', () => {
         description: 'should return date for the proper weekday',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'WEEKLY',
-          lastTaskCreation: new Date(2022, 0, 7).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2022, 0, 7).getTime()),
           friday: true,
         }),
         // is a friday
@@ -216,7 +217,7 @@ describe('getNewestPossibleDueDate()', () => {
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'WEEKLY',
           repeatEvery: 2,
-          lastTaskCreation: new Date(2022, 0, 3).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2022, 0, 3).getTime()),
           monday: true,
         }),
         // monday
@@ -229,7 +230,7 @@ describe('getNewestPossibleDueDate()', () => {
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'WEEKLY',
           repeatEvery: 2,
-          lastTaskCreation: new Date(2022, 0, 3).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2022, 0, 3).getTime()),
           monday: true,
           tuesday: true,
         }),
@@ -242,7 +243,7 @@ describe('getNewestPossibleDueDate()', () => {
         description: 'should return null if today and already created',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'WEEKLY',
-          lastTaskCreation: new Date(2022, 0, 10).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2022, 0, 10).getTime()),
           monday: true,
         }),
         today: new Date(2022, 0, 10),
@@ -255,7 +256,7 @@ describe('getNewestPossibleDueDate()', () => {
           repeatCycle: 'WEEKLY',
           repeatEvery: 2,
           monday: true,
-          lastTaskCreation: new Date(2022, 0, 17).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2022, 0, 17).getTime()),
         }),
         today: dateStrToUtcDate('2022-01-27'),
         startDate: new Date(2022, 0, 3),
@@ -265,7 +266,7 @@ describe('getNewestPossibleDueDate()', () => {
         description: 'should return last week if last week was due and not set',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'WEEKLY',
-          lastTaskCreation: 0,
+          lastTaskCreationDay: '1970-01-01',
           monday: true,
         }),
         today: new Date(FAKE_MONDAY_THE_10TH - DAY),
@@ -277,7 +278,7 @@ describe('getNewestPossibleDueDate()', () => {
           'should return last week if last week was due and last creation is long ago',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'WEEKLY',
-          lastTaskCreation: new Date(2022, 0, 17).getTime(), // Jan 17, 2022 (Monday)
+          lastTaskCreationDay: getWorklogStr(new Date(2022, 0, 17).getTime()), // Jan 17, 2022 (Monday)
           monday: true,
         }),
         startDate: new Date(2022, 0, 10), // Jan 10, 2022 (Monday)
@@ -289,7 +290,7 @@ describe('getNewestPossibleDueDate()', () => {
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'WEEKLY',
           repeatEvery: 5,
-          lastTaskCreation: FAKE_MONDAY_THE_10TH + DAY * (7 * 5 + 0),
+          lastTaskCreationDay: getWorklogStr(FAKE_MONDAY_THE_10TH + DAY * (7 * 5 + 0)),
           monday: true,
         }),
         startDate: new Date(FAKE_MONDAY_THE_10TH),
@@ -300,7 +301,7 @@ describe('getNewestPossibleDueDate()', () => {
         description: 'should return NULL if start date is in the future',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'WEEKLY',
-          lastTaskCreation: FAKE_MONDAY_THE_10TH - DAY * 7,
+          lastTaskCreationDay: getWorklogStr(FAKE_MONDAY_THE_10TH - DAY * 7),
           monday: true,
         }),
         startDate: new Date(FAKE_MONDAY_THE_10TH),
@@ -311,7 +312,7 @@ describe('getNewestPossibleDueDate()', () => {
         description: 'should respect start date is in the future',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'WEEKLY',
-          lastTaskCreation: FAKE_MONDAY_THE_10TH - DAY * 7,
+          lastTaskCreationDay: getWorklogStr(FAKE_MONDAY_THE_10TH - DAY * 7),
           monday: true,
           tuesday: true,
           wednesday: true,
@@ -337,7 +338,7 @@ describe('getNewestPossibleDueDate()', () => {
         description: 'should return today date if today is due day',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'MONTHLY',
-          lastTaskCreation: new Date(2022, 0, 10).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2022, 0, 10).getTime()),
         }),
         today: new Date(2022, 1, 10),
         startDate: new Date(2022, 0, 10),
@@ -348,7 +349,7 @@ describe('getNewestPossibleDueDate()', () => {
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'MONTHLY',
           repeatEvery: 3,
-          lastTaskCreation: new Date(2022, 0, 14).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2022, 0, 14).getTime()),
         }),
         today: dateStrToUtcDate('2022-08-14'),
         startDate: new Date(2022, 0, 14),
@@ -359,7 +360,7 @@ describe('getNewestPossibleDueDate()', () => {
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'MONTHLY',
           repeatEvery: 3,
-          lastTaskCreation: dateStrToUtcDate('2022-07-14').getTime(),
+          lastTaskCreationDay: '2022-07-14',
         }),
         today: dateStrToUtcDate('2022-08-14'),
         startDate: new Date(2022, 0, 14),
@@ -370,7 +371,7 @@ describe('getNewestPossibleDueDate()', () => {
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'MONTHLY',
           repeatEvery: 1,
-          lastTaskCreation: dateStrToUtcDate('2024-06-26').getTime(),
+          lastTaskCreationDay: '2024-06-26',
         }),
         today: dateStrToUtcDate('2024-07-16'),
         startDate: new Date(2024, 0, 26),
@@ -381,7 +382,7 @@ describe('getNewestPossibleDueDate()', () => {
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'MONTHLY',
           repeatEvery: 1,
-          lastTaskCreation: dateStrToUtcDate('2022-01-31').getTime(),
+          lastTaskCreationDay: '2022-01-31',
         }),
         today: dateStrToUtcDate('2022-03-01'),
         startDate: dateStrToUtcDate('2022-01-31'),
@@ -392,7 +393,7 @@ describe('getNewestPossibleDueDate()', () => {
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'MONTHLY',
           repeatEvery: 1,
-          lastTaskCreation: dateStrToUtcDate('2020-01-31').getTime(),
+          lastTaskCreationDay: '2020-01-31',
         }),
         today: dateStrToUtcDate('2020-03-01'),
         startDate: dateStrToUtcDate('2020-01-31'),
@@ -403,7 +404,7 @@ describe('getNewestPossibleDueDate()', () => {
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'MONTHLY',
           repeatEvery: 1,
-          lastTaskCreation: dateStrToUtcDate('2022-01-30').getTime(),
+          lastTaskCreationDay: '2022-01-30',
         }),
         today: dateStrToUtcDate('2022-03-01'),
         startDate: dateStrToUtcDate('2022-01-30'),
@@ -414,7 +415,7 @@ describe('getNewestPossibleDueDate()', () => {
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'MONTHLY',
           repeatEvery: 1,
-          lastTaskCreation: dateStrToUtcDate('2022-01-31').getTime(),
+          lastTaskCreationDay: '2022-01-31',
         }),
         today: dateStrToUtcDate('2022-05-01'),
         startDate: dateStrToUtcDate('2022-01-31'),
@@ -441,7 +442,7 @@ describe('getNewestPossibleDueDate()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'DAILY',
           repeatEvery: 1,
-          lastTaskCreation: dateStrToUtcDate('2022-03-12').getTime(),
+          lastTaskCreationDay: getWorklogStr(dateStrToUtcDate('2022-03-12').getTime()),
         });
         const today = dateStrToUtcDate('2022-03-14');
         const startDate = dateStrToUtcDate('2022-03-12');
@@ -460,7 +461,7 @@ describe('getNewestPossibleDueDate()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'DAILY',
           repeatEvery: 1,
-          lastTaskCreation: dateStrToUtcDate('2022-11-05').getTime(),
+          lastTaskCreationDay: getWorklogStr(dateStrToUtcDate('2022-11-05').getTime()),
         });
         const today = dateStrToUtcDate('2022-11-07');
         const startDate = dateStrToUtcDate('2022-11-05');
@@ -480,7 +481,7 @@ describe('getNewestPossibleDueDate()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'DAILY',
           repeatEvery: 1,
-          lastTaskCreation: dateStrToUtcDate('2021-12-30').getTime(),
+          lastTaskCreationDay: getWorklogStr(dateStrToUtcDate('2021-12-30').getTime()),
         });
         const today = dateStrToUtcDate('2022-01-02');
         const startDate = dateStrToUtcDate('2021-12-30');
@@ -498,7 +499,7 @@ describe('getNewestPossibleDueDate()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'WEEKLY',
           repeatEvery: 1,
-          lastTaskCreation: dateStrToUtcDate('2021-12-27').getTime(), // Monday
+          lastTaskCreationDay: getWorklogStr(dateStrToUtcDate('2021-12-27').getTime()), // Monday
           monday: true,
         });
         const today = new Date(2022, 0, 3); // Monday
@@ -517,7 +518,7 @@ describe('getNewestPossibleDueDate()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'MONTHLY',
           repeatEvery: 1,
-          lastTaskCreation: dateStrToUtcDate('2021-12-15').getTime(),
+          lastTaskCreationDay: getWorklogStr(dateStrToUtcDate('2021-12-15').getTime()),
         });
         const today = new Date(2022, 0, 15);
         const startDate = dateStrToUtcDate('2021-12-15');
@@ -537,7 +538,7 @@ describe('getNewestPossibleDueDate()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'MONTHLY',
           repeatEvery: 1,
-          lastTaskCreation: dateStrToUtcDate('2020-01-29').getTime(),
+          lastTaskCreationDay: getWorklogStr(dateStrToUtcDate('2020-01-29').getTime()),
         });
         const today = dateStrToUtcDate('2020-03-01');
         const startDate = dateStrToUtcDate('2020-01-29');
@@ -555,7 +556,7 @@ describe('getNewestPossibleDueDate()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'YEARLY',
           repeatEvery: 1,
-          lastTaskCreation: dateStrToUtcDate('2020-02-29').getTime(),
+          lastTaskCreationDay: getWorklogStr(dateStrToUtcDate('2020-02-29').getTime()),
         });
         const today = dateStrToUtcDate('2021-03-01');
         const startDate = dateStrToUtcDate('2020-02-29');
@@ -578,7 +579,7 @@ describe('getNewestPossibleDueDate()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'DAILY',
           repeatEvery: 1,
-          lastTaskCreation: lastCreation.getTime(),
+          lastTaskCreationDay: getWorklogStr(lastCreation.getTime()),
         });
         const today = new Date(2022, 0, 12);
         const startDate = new Date(2022, 0, 10);
@@ -597,7 +598,7 @@ describe('getNewestPossibleDueDate()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'DAILY',
           repeatEvery: 1,
-          lastTaskCreation: lastCreation.getTime(),
+          lastTaskCreationDay: getWorklogStr(lastCreation.getTime()),
         });
         const today = new Date(2022, 0, 12);
         const startDate = new Date(2022, 0, 10);
@@ -618,7 +619,7 @@ describe('getNewestPossibleDueDate()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'DAILY',
           repeatEvery: 1,
-          lastTaskCreation: new Date(2022, 0, 10, 23, 0, 0).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2022, 0, 10, 23, 0, 0).getTime()),
         });
         const today = new Date(2022, 0, 12, 1, 0, 0);
         const startDate = new Date(2022, 0, 10, 12, 0, 0);
@@ -642,7 +643,7 @@ describe('getNewestPossibleDueDate()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'DAILY',
           repeatEvery: 1,
-          lastTaskCreation: lastCreationLA.getTime(),
+          lastTaskCreationDay: getWorklogStr(lastCreationLA.getTime()),
         });
 
         const todayBerlin = new Date(2022, 0, 12, 9, 0, 0);
@@ -663,7 +664,7 @@ describe('getNewestPossibleDueDate()', () => {
         const cfg = dummyRepeatable('ID1', {
           repeatCycle: 'WEEKLY',
           repeatEvery: 1,
-          lastTaskCreation: lastCreation.getTime(),
+          lastTaskCreationDay: getWorklogStr(lastCreation.getTime()),
           monday: true,
         });
 
@@ -687,7 +688,7 @@ describe('getNewestPossibleDueDate()', () => {
         description: 'should return date if applicable',
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'YEARLY',
-          lastTaskCreation: FAKE_MONDAY_THE_10TH,
+          lastTaskCreationDay: getWorklogStr(FAKE_MONDAY_THE_10TH),
         }),
         today: new Date(FAKE_MONDAY_THE_10TH + DAY * 366),
         startDate: FAKE_MONDAY_THE_10TH,
@@ -698,7 +699,7 @@ describe('getNewestPossibleDueDate()', () => {
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'YEARLY',
           repeatEvery: 2,
-          lastTaskCreation: FAKE_MONDAY_THE_10TH,
+          lastTaskCreationDay: getWorklogStr(FAKE_MONDAY_THE_10TH),
         }),
         today: new Date(FAKE_MONDAY_THE_10TH + DAY * 365),
         startDate: FAKE_MONDAY_THE_10TH,
@@ -709,7 +710,7 @@ describe('getNewestPossibleDueDate()', () => {
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'YEARLY',
           repeatEvery: 2,
-          lastTaskCreation: FAKE_MONDAY_THE_10TH,
+          lastTaskCreationDay: getWorklogStr(FAKE_MONDAY_THE_10TH),
         }),
         today: new Date(FAKE_MONDAY_THE_10TH + DAY * 365 * 3),
         startDate: FAKE_MONDAY_THE_10TH,
@@ -720,7 +721,7 @@ describe('getNewestPossibleDueDate()', () => {
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'YEARLY',
           repeatEvery: 3,
-          lastTaskCreation: new Date(2022, 0, 10).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2022, 0, 10).getTime()),
         }),
         today: new Date(2026, 0, 10),
         startDate: FAKE_MONDAY_THE_10TH,
@@ -731,7 +732,7 @@ describe('getNewestPossibleDueDate()', () => {
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'YEARLY',
           repeatEvery: 2,
-          lastTaskCreation: new Date(2022, 0, 10).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2022, 0, 10).getTime()),
         }),
         today: new Date(2023, 0, 10),
         startDate: new Date(2022, 0, 10).getTime(),
@@ -742,7 +743,7 @@ describe('getNewestPossibleDueDate()', () => {
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'YEARLY',
           repeatEvery: 1,
-          lastTaskCreation: new Date(2024, 0, 26).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2024, 0, 26).getTime()),
         }),
         today: dateStrToUtcDate('2024-07-16'),
         startDate: dateStrToUtcDate('2023-01-26'),
@@ -753,7 +754,7 @@ describe('getNewestPossibleDueDate()', () => {
         taskRepeatCfg: dummyRepeatable('ID1', {
           repeatCycle: 'YEARLY',
           repeatEvery: 1,
-          lastTaskCreation: new Date(2024, 0, 26).getTime(),
+          lastTaskCreationDay: getWorklogStr(new Date(2024, 0, 26).getTime()),
         }),
         today: dateStrToUtcDate('2024-05-27'),
         startDate: dateStrToUtcDate('2023-01-26'),

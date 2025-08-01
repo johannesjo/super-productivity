@@ -30,6 +30,7 @@ import { isSameDay } from '../../util/is-same-day';
 import { remindOptionToMilliseconds } from '../tasks/util/remind-option-to-milliseconds';
 import { getNewestPossibleDueDate } from './store/get-newest-possible-due-date.util';
 import { getLocalDateStr } from '../../util/get-local-date-str';
+import { getWorklogStr } from '../../util/get-work-log-str';
 import { TODAY_TAG } from '../tag/tag.const';
 import {
   selectAllTaskRepeatCfgs,
@@ -218,7 +219,7 @@ export class TaskRepeatCfgService {
         taskRepeatCfg: {
           id: taskRepeatCfg.id,
           changes: {
-            lastTaskCreation: targetDayDate,
+            lastTaskCreationDay: getWorklogStr(targetCreated),
           },
         },
       }),

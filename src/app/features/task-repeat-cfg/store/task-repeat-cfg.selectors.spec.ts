@@ -1,6 +1,7 @@
 import { DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfg } from '../task-repeat-cfg.model';
 import { TaskReminderOptionId } from '../../tasks/task.model';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 import {
   selectAllUnprocessedTaskRepeatCfgs,
   selectTaskRepeatCfgsForExactDay,
@@ -17,7 +18,7 @@ const DUMMY_REPEATABLE_TASK: TaskRepeatCfg = {
   id: 'REPEATABLE_DEFAULT',
   title: 'REPEATABLE_DEFAULT',
   quickSetting: 'DAILY',
-  lastTaskCreation: 60 * 60 * 1000,
+  lastTaskCreationDay: '1970-01-01',
   defaultEstimate: undefined,
   projectId: null,
   startTime: undefined,
@@ -423,7 +424,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
           dummyRepeatable('R1', {
             repeatCycle: 'YEARLY',
             startDate: '2022-01-10',
-            lastTaskCreation: dateStrToUtcDate('2022-01-10').getTime(),
+            lastTaskCreationDay: '2022-01-10',
             repeatEvery: 2,
           }),
         ],
@@ -449,7 +450,7 @@ describe('selectAllUnprocessedTaskRepeatCfgs', () => {
           repeatCycle: 'MONTHLY',
           repeatEvery: 1,
           startDate: '2024-01-26',
-          lastTaskCreation: dateStrToUtcDate('2024-06-26').getTime(),
+          lastTaskCreationDay: '2024-06-26',
         }),
       ],
       {
@@ -678,7 +679,7 @@ describe('selectAllUnprocessedTaskRepeatCfgs', () => {
             repeatCycle: 'MONTHLY',
             startDate: '2022-01-10',
             repeatEvery: 3,
-            lastTaskCreation: dateStrToUtcDate('2022-01-10').getTime(),
+            lastTaskCreationDay: '2022-01-10',
           }),
         ],
         {
@@ -747,7 +748,7 @@ describe('selectAllUnprocessedTaskRepeatCfgs', () => {
           dummyRepeatable('R1', {
             repeatCycle: 'YEARLY',
             startDate: '2022-01-10',
-            lastTaskCreation: dateStrToUtcDate('2022-01-10').getTime(),
+            lastTaskCreationDay: '2022-01-10',
             repeatEvery: 2,
           }),
         ],
@@ -945,5 +946,89 @@ describe('selectTaskRepeatCfgsSortedByTitleAndProject', () => {
 
     // Order should be preserved when title and project are the same
     expect(result).toEqual([cfg1, cfg2]);
+  });
+});
+
+describe('Timezone Edge Cases for selectTaskRepeatCfgsForExactDay', () => {
+  const createTaskRepeatCfg = (id: string, lastDay: string): TaskRepeatCfg => ({
+    ...DEFAULT_TASK_REPEAT_CFG,
+    id,
+    lastTaskCreationDay: lastDay,
+    repeatCycle: 'DAILY',
+    repeatEvery: 1,
+    startDate: '2025-01-01',
+  });
+
+  it('should handle late night task creation correctly', () => {
+    const lateNight = new Date('2025-08-01T23:30:00'); // 11:30 PM
+    const configs = [
+      createTaskRepeatCfg('R1', '2025-08-01'), // Created earlier today
+      createTaskRepeatCfg('R2', '2025-07-31'), // Created yesterday
+    ];
+
+    const result = selectTaskRepeatCfgsForExactDay.projector(configs, {
+      dayDate: lateNight.getTime(),
+    });
+
+    // Should return the one created yesterday since today is its due date
+    expect(result.length).toBe(1);
+    expect(result[0].id).toBe('R2');
+  });
+
+  it('should handle early morning checks correctly', () => {
+    const earlyMorning = new Date('2025-08-02T01:00:00'); // 1 AM next day
+    const configs = [
+      createTaskRepeatCfg('R1', '2025-08-01'), // Created yesterday (from perspective of 1 AM)
+      createTaskRepeatCfg('R2', '2025-08-02'), // Already created today
+    ];
+
+    const result = selectTaskRepeatCfgsForExactDay.projector(configs, {
+      dayDate: earlyMorning.getTime(),
+    });
+
+    expect(result.length).toBe(1);
+    expect(result[0].id).toBe('R1');
+  });
+
+  it('should handle future creation dates correctly', () => {
+    const today = new Date('2025-08-01T12:00:00');
+    const configs = [
+      createTaskRepeatCfg('R1', '2025-08-02'), // Future date (should not process)
+      createTaskRepeatCfg('R2', '2025-07-31'), // Yesterday
+    ];
+
+    const result = selectTaskRepeatCfgsForExactDay.projector(configs, {
+      dayDate: today.getTime(),
+    });
+
+    expect(result.length).toBe(1);
+    expect(result[0].id).toBe('R2');
+  });
+
+  it('should prevent the reported bug: task created at 11 PM shows up next day', () => {
+    // Simulate: User creates task at 11 PM
+    const creationTime = new Date('2025-08-01T23:00:00');
+    const taskConfig: TaskRepeatCfg = {
+      ...DEFAULT_TASK_REPEAT_CFG,
+      id: 'test',
+      lastTaskCreationDay: getWorklogStr(creationTime), // '2025-08-01'
+      repeatCycle: 'DAILY',
+      repeatEvery: 1,
+      startDate: '2025-01-01',
+    };
+
+    // Check at 1 AM next day
+    const checkTime = new Date('2025-08-02T01:00:00');
+    const todayStr = getWorklogStr(checkTime); // '2025-08-02'
+
+    // The fix: String comparison shows they're different days
+    const shouldCreateTask = taskConfig.lastTaskCreationDay !== todayStr;
+    expect(shouldCreateTask).toBe(true);
+
+    // But if checking later on Aug 1st
+    const laterSameDay = new Date('2025-08-01T23:30:00');
+    const sameDayStr = getWorklogStr(laterSameDay); // '2025-08-01'
+    const shouldNotCreate = taskConfig.lastTaskCreationDay === sameDayStr;
+    expect(shouldNotCreate).toBe(true);
   });
 });

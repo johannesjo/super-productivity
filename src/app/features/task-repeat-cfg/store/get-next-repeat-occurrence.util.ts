@@ -18,7 +18,7 @@ export const getNextRepeatOccurrence = (
 
   const checkDate = new Date(fromDate);
   const startDateDate = dateStrToUtcDate(taskRepeatCfg.startDate);
-  const lastTaskCreation = new Date(taskRepeatCfg.lastTaskCreation);
+  const lastTaskCreation = dateStrToUtcDate(taskRepeatCfg.lastTaskCreationDay);
   // Use noon (12:00) to avoid DST issues - noon is never affected by DST transitions
   checkDate.setHours(12, 0, 0, 0);
   lastTaskCreation.setHours(12, 0, 0, 0);

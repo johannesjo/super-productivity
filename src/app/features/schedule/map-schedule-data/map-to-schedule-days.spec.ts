@@ -1,6 +1,7 @@
 import { mapToScheduleDays } from './map-to-schedule-days';
 import { TaskCopy, TaskWithDueTime } from '../../tasks/task.model';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 
 const NDS = '1970-01-01';
 const N = new Date(1970, 0, 1, 0, 0, 0, 0).getTime();
@@ -70,7 +71,7 @@ const fakeRepeatCfg = (
     startDate: '1969-01-01',
     startTime,
     // eslint-disable-next-line no-mixed-operators
-    lastTaskCreation: N - 24 * 60 * 60 * 1000,
+    lastTaskCreationDay: getWorklogStr(N - 24 * 60 * 60 * 1000),
     monday: true,
     tuesday: true,
     wednesday: true,
@@ -462,7 +463,7 @@ describe('mapToScheduleDays()', () => {
       [
         fakeRepeatCfg('R1', undefined, {
           defaultEstimate: h(2),
-          lastTaskCreation: N + 60000,
+          lastTaskCreationDay: getWorklogStr(N + 60000),
         }),
       ],
       [],
@@ -527,7 +528,7 @@ describe('mapToScheduleDays()', () => {
         fakeRepeatCfg('R1', undefined, {
           defaultEstimate: h(2),
           startTime: '9:00',
-          lastTaskCreation: N + 60000,
+          lastTaskCreationDay: getWorklogStr(N + 60000),
         }),
       ],
       [],
@@ -739,7 +740,7 @@ describe('mapToScheduleDays()', () => {
               defaultEstimate: h(4),
               friday: true,
               id: 'R1',
-              lastTaskCreation: dhTz(-1, 0),
+              lastTaskCreationDay: '1969-12-31',
               monday: true,
               repeatCycle: 'DAILY',
               repeatEvery: 1,
@@ -783,7 +784,7 @@ describe('mapToScheduleDays()', () => {
               defaultEstimate: h(4),
               friday: true,
               id: 'R1',
-              lastTaskCreation: jasmine.any(Number),
+              lastTaskCreationDay: jasmine.any(String),
               monday: true,
               repeatCycle: 'DAILY',
               repeatEvery: 1,
@@ -843,7 +844,7 @@ describe('mapToScheduleDays()', () => {
       [
         fakeRepeatCfg('R2', undefined, {
           defaultEstimate: h(2),
-          lastTaskCreation: N + 60000,
+          lastTaskCreationDay: getWorklogStr(N + 60000),
         }),
       ],
       [],
@@ -973,7 +974,7 @@ describe('mapToScheduleDays()', () => {
             defaultEstimate: 3600000,
             friday: true,
             id: 'R1',
-            lastTaskCreation: jasmine.any(Number),
+            lastTaskCreationDay: jasmine.any(String),
             monday: true,
             repeatCycle: 'DAILY',
             repeatEvery: 1,
@@ -1009,7 +1010,7 @@ describe('mapToScheduleDays()', () => {
             defaultEstimate: 7200000,
             friday: true,
             id: 'R2',
-            lastTaskCreation: jasmine.any(Number),
+            lastTaskCreationDay: jasmine.any(String),
             monday: true,
             repeatCycle: 'DAILY',
             repeatEvery: 1,
@@ -1040,7 +1041,7 @@ describe('mapToScheduleDays()', () => {
             defaultEstimate: 7200000,
             friday: true,
             id: 'R2',
-            lastTaskCreation: jasmine.any(Number),
+            lastTaskCreationDay: jasmine.any(String),
             monday: true,
             repeatCycle: 'DAILY',
             repeatEvery: 1,

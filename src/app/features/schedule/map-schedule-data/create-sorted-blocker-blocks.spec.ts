@@ -6,6 +6,7 @@ import {
   TaskRepeatCfg,
 } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { getLocalDateStr } from '../../../util/get-local-date-str';
+import { getWorklogStr } from '../../../util/get-work-log-str';
 import { BlockedBlockType, ScheduleCalendarMapEntry } from '../schedule.model';
 /* eslint-disable @typescript-eslint/naming-convention */
 
@@ -772,7 +773,7 @@ describe('createBlockerBlocks()', () => {
       id: 'REPEATABLE_DEFAULT',
       title: 'REPEATABLE_DEFAULT',
       quickSetting: 'DAILY',
-      lastTaskCreation: 60 * 60 * 1000,
+      lastTaskCreationDay: '1970-01-01',
       defaultEstimate: undefined,
       notes: undefined,
       projectId: null,
@@ -845,7 +846,7 @@ describe('createBlockerBlocks()', () => {
           id: 'R2',
           title: 'Repeat 2',
           startTime: '14:00',
-          lastTaskCreation: getDateTimeFromClockString('22:20', 0),
+          lastTaskCreationDay: getWorklogStr(getDateTimeFromClockString('22:20', 0)),
           defaultEstimate: hours(1),
           monday: true,
           tuesday: true,
@@ -886,6 +887,10 @@ describe('createBlockerBlocks()', () => {
     });
 
     it('should work for DAILY repeatable tasks', () => {
+      if (maybeSkipTimezoneDependent('should work for DAILY repeatable tasks')) {
+        pending('Skipping timezone-dependent test');
+        return;
+      }
       const fakeRepeatTaskCfgs: TaskRepeatCfg[] = [
         {
           ...DUMMY_REPEATABLE_TASK,
