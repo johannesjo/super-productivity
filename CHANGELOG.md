@@ -1,3 +1,24 @@
+## [14.2.6](https://github.com/johannesjo/super-productivity/compare/v14.2.5...v14.2.6) (2025-08-01)
+
+### Bug Fixes
+
+- button only shown if there are any visible projects ([1c6d1b8](https://github.com/johannesjo/super-productivity/commit/1c6d1b838ae8816c6bb04ec974434693966eff6e)), closes [#4883](https://github.com/johannesjo/super-productivity/issues/4883)
+- drop attachment on task only working if not hitting textarea ([50d7117](https://github.com/johannesjo/super-productivity/commit/50d711766b62b35ea7be9a5046ae9f024b89eee0))
+- exit behavior to be faster ([6db418f](https://github.com/johannesjo/super-productivity/commit/6db418fb4329cf1e9489c240a3b7face9b4ff6ac))
+- input duration not accepting values like 90m ([fdf7fb0](https://github.com/johannesjo/super-productivity/commit/fdf7fb0baa9af62910212801ebdbb384e592e786))
+- model validation error ([600e7cd](https://github.com/johannesjo/super-productivity/commit/600e7cde04a2f668b20a7e238cde043c2fea1fb5)), closes [#4881](https://github.com/johannesjo/super-productivity/issues/4881)
+- only show non inbox projects for hide and show ([8c6fe48](https://github.com/johannesjo/super-productivity/commit/8c6fe482f34d57d0341602a53bed1abb2e9c7036)), closes [#4883](https://github.com/johannesjo/super-productivity/issues/4883)
+- overlay indicator ([287a8f6](https://github.com/johannesjo/super-productivity/commit/287a8f6a628933c239864852a484566386fbd5c6))
+- reminder for done task being shown [#4656](https://github.com/johannesjo/super-productivity/issues/4656) ([d808e80](https://github.com/johannesjo/super-productivity/commit/d808e80abc4cbe563dc77b510f748cf96dd15cce))
+- Send User-Agent to office365.com as it appearently needs it since a ([0fbb25f](https://github.com/johannesjo/super-productivity/commit/0fbb25fd10bc338f5f0ac0f732bb1b1281dbbe64)), closes [#4677](https://github.com/johannesjo/super-productivity/issues/4677)
+- **styles:** fix CSS linting warnings and optimize SCSS files ([804dd42](https://github.com/johannesjo/super-productivity/commit/804dd4292ed3b87849d8c35c0fc3ace9ba9c24a5))
+- sub-tasks getting duplicated on move to project ([a7b0517](https://github.com/johannesjo/super-productivity/commit/a7b0517c130e22a341c6166840d5275342e9dc3a)), closes [#4882](https://github.com/johannesjo/super-productivity/issues/4882)
+- task focus border ([8604cab](https://github.com/johannesjo/super-productivity/commit/8604cab6f496aa7f39310df799ff03ec11cc33f9))
+
+### Features
+
+- add task toggle start action to protocol handler ([9efa649](https://github.com/johannesjo/super-productivity/commit/9efa64985757d8f175275d17551e75244023a13b))
+
 ## [14.2.5](https://github.com/johannesjo/super-productivity/compare/v14.2.4...v14.2.5) (2025-07-29)
 
 ### Bug Fixes
