@@ -1,6 +1,6 @@
 import { test } from '../fixtures/test.fixture';
 
-const CANCEL_BTN = 'mat-dialog-actions button:nth-of-type(1)';
+const CANCEL_BTN = 'mat-dialog-actions button:first-child';
 
 test.describe('All Basic Routes Without Error', () => {
   test('should open all basic routes from menu without error', async ({
@@ -15,16 +15,16 @@ test.describe('All Basic Routes Without Error', () => {
 
     // Click main side nav item
     await page.click('side-nav section.main > side-nav-item > button');
-    await page.click('side-nav section.main > button:nth-of-type(1)');
+    await page.locator('side-nav section.main > button').nth(0).click();
     await page.waitForSelector(CANCEL_BTN, { state: 'visible' });
     await page.click(CANCEL_BTN);
 
-    await page.click('side-nav section.main > button:nth-of-type(2)');
+    await page.locator('side-nav section.main > button').nth(1).click();
 
     await page.click('side-nav section.projects button');
     await page.click('side-nav section.tags button');
 
-    await page.click('side-nav section.app > button:nth-of-type(1)');
+    await page.locator('side-nav section.app > button').nth(0).click();
     await page.click('button.tour-settingsMenuBtn');
 
     // Navigate to different routes

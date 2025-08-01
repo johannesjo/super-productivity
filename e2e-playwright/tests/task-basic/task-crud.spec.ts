@@ -2,8 +2,8 @@ import { test, expect } from '../../fixtures/test.fixture';
 
 const TASK = 'task';
 const TASK_TEXTAREA = 'task textarea';
-const FIRST_TASK = 'task:first-of-type';
-const SECOND_TASK = 'task:nth-of-type(2)';
+const FIRST_TASK = 'task:first-child';
+const SECOND_TASK = 'task:nth-child(2)';
 const TASK_DONE_BTN = '.task-done-btn';
 
 test.describe('Task CRUD Operations', () => {

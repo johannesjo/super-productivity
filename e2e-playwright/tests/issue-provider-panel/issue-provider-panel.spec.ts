@@ -1,10 +1,10 @@
 import { test } from '../../fixtures/test.fixture';
 
 const PANEL_BTN = '.e2e-toggle-issue-provider-panel';
-const ITEMS1 = '.items:nth-of-type(1)';
-const ITEMS2 = '.items:nth-of-type(2)';
+const ITEMS1 = '.items:first-child';
+const ITEMS2 = '.items:nth-child(2)';
 
-const CANCEL_BTN = 'mat-dialog-actions button:nth-of-type(1)';
+const CANCEL_BTN = 'mat-dialog-actions button:first-child';
 
 test.describe('Issue Provider Panel', () => {
   test('should open all dialogs without error', async ({ page, workViewPage }) => {
@@ -18,35 +18,35 @@ test.describe('Issue Provider Panel', () => {
     await page.click('mat-tab-group .mat-mdc-tab:last-child');
     await page.waitForSelector('issue-provider-setup-overview', { state: 'visible' });
 
-    await page.click(`${ITEMS1} > button:nth-of-type(1)`);
+    await page.locator(`${ITEMS1} > button`).nth(0).click();
     await page.waitForSelector(CANCEL_BTN, { state: 'visible' });
     await page.click(CANCEL_BTN);
-    await page.click(`${ITEMS1} > button:nth-of-type(2)`);
+    await page.locator(`${ITEMS1} > button`).nth(1).click();
     await page.waitForSelector(CANCEL_BTN, { state: 'visible' });
     await page.click(CANCEL_BTN);
-    await page.click(`${ITEMS1} > button:nth-of-type(3)`);
+    await page.locator(`${ITEMS1} > button`).nth(2).click();
     await page.waitForSelector(CANCEL_BTN, { state: 'visible' });
     await page.click(CANCEL_BTN);
 
-    await page.click(`${ITEMS2} > button:nth-of-type(1)`);
+    await page.locator(`${ITEMS2} > button`).nth(0).click();
     await page.waitForSelector(CANCEL_BTN, { state: 'visible' });
     await page.click(CANCEL_BTN);
-    await page.click(`${ITEMS2} > button:nth-of-type(2)`);
+    await page.locator(`${ITEMS2} > button`).nth(1).click();
     await page.waitForSelector(CANCEL_BTN, { state: 'visible' });
     await page.click(CANCEL_BTN);
-    await page.click(`${ITEMS2} > button:nth-of-type(3)`);
+    await page.locator(`${ITEMS2} > button`).nth(2).click();
     await page.waitForSelector(CANCEL_BTN, { state: 'visible' });
     await page.click(CANCEL_BTN);
-    await page.click(`${ITEMS2} > button:nth-of-type(4)`);
+    await page.locator(`${ITEMS2} > button`).nth(3).click();
     await page.waitForSelector(CANCEL_BTN, { state: 'visible' });
     await page.click(CANCEL_BTN);
-    await page.click(`${ITEMS2} > button:nth-of-type(5)`);
+    await page.locator(`${ITEMS2} > button`).nth(4).click();
     await page.waitForSelector(CANCEL_BTN, { state: 'visible' });
     await page.click(CANCEL_BTN);
-    await page.click(`${ITEMS2} > button:nth-of-type(6)`);
+    await page.locator(`${ITEMS2} > button`).nth(5).click();
     await page.waitForSelector(CANCEL_BTN, { state: 'visible' });
     await page.click(CANCEL_BTN);
-    await page.click(`${ITEMS2} > button:nth-of-type(7)`);
+    await page.locator(`${ITEMS2} > button`).nth(6).click();
     await page.waitForSelector(CANCEL_BTN, { state: 'visible' });
     await page.click(CANCEL_BTN);
 
