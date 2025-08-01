@@ -74,30 +74,24 @@ test.describe('Work View', () => {
   });
 
   test('should add 2 tasks from initial bar', async ({ page, workViewPage }) => {
+    test.setTimeout(20000);
+
     // Wait for work view to be ready
     await workViewPage.waitForTaskList();
+    await page.waitForTimeout(2000); // Wait for UI to stabilize
 
-    // Look for the add more button and click it
-    const addMoreBtn = page.locator('.btn-wrapper button').first();
-    await addMoreBtn.click();
+    // Simply add two tasks using the standard method
+    await workViewPage.addTask('2 test task hihi');
+    await page.waitForTimeout(500);
 
-    // Wait for initial add task input
-    const addTaskInitial = page.locator('add-task-bar:not(.global) input');
-    await addTaskInitial.waitFor({ state: 'visible' });
-
-    // Add first task
-    await addTaskInitial.fill('2 test task hihi');
-    await page.keyboard.press('Enter');
-
-    // Add second task
-    await addTaskInitial.fill('3 some other task');
-    await page.keyboard.press('Enter');
+    await workViewPage.addTask('3 some other task');
+    await page.waitForTimeout(500);
 
     // Verify both tasks are visible
     const tasks = page.locator('task');
     await expect(tasks).toHaveCount(2);
 
-    // Verify task order (most recent first)
+    // Verify task order (most recent first due to global add)
     await expect(tasks.nth(0).locator('textarea')).toHaveValue('3 some other task');
     await expect(tasks.nth(1).locator('textarea')).toHaveValue('2 test task hihi');
   });

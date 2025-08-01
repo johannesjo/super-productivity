@@ -14,7 +14,7 @@ export abstract class BasePage {
   async addTask(taskName: string, skipClose = false): Promise<void> {
     await this.routerWrapper.waitFor({ state: 'visible' });
 
-    const inputEl = this.page.locator('add-task-bar input');
+    const inputEl = this.page.locator('add-task-bar.global input');
 
     if ((await inputEl.count()) === 0) {
       await this.page.locator('.tour-addBtn ').click();
