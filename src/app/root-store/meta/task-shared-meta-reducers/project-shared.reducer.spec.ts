@@ -4,7 +4,7 @@ import { TaskSharedActions } from '../task-shared.actions';
 import { RootState } from '../../root-state';
 import { TASK_FEATURE_NAME } from '../../../features/tasks/store/task.reducer';
 import { PROJECT_FEATURE_NAME } from '../../../features/project/store/project.reducer';
-import { TaskWithSubTasks } from '../../../features/tasks/task.model';
+import { Task, TaskWithSubTasks } from '../../../features/tasks/task.model';
 import { Action, ActionReducer } from '@ngrx/store';
 import {
   createBaseState,
@@ -121,7 +121,8 @@ describe('projectSharedMetaReducer', () => {
                 taskIds: [],
               }),
               project2: jasmine.objectContaining({
-                taskIds: ['task1', 'subtask1', 'subtask2'],
+                // Only parent task should be in taskIds, not subtasks
+                taskIds: ['task1'],
               }),
             }),
           }),
@@ -142,6 +143,97 @@ describe('projectSharedMetaReducer', () => {
         action,
         mockReducer,
         testState,
+      );
+    });
+
+    it('should not duplicate subtasks in target project taskIds', () => {
+      // This test specifically verifies the fix for issue #4882
+      const testState = createStateWithExistingTasks(
+        ['parent-task', 'subtask1', 'subtask2', 'subtask3'],
+        [],
+        [],
+      );
+
+      // Setup parent-child relationships
+      testState[TASK_FEATURE_NAME].entities['parent-task'] = {
+        ...testState[TASK_FEATURE_NAME].entities['parent-task'],
+        subTaskIds: ['subtask1', 'subtask2', 'subtask3'],
+      } as Task;
+      testState[TASK_FEATURE_NAME].entities['subtask1'] = {
+        ...testState[TASK_FEATURE_NAME].entities['subtask1'],
+        parentId: 'parent-task',
+      } as Task;
+      testState[TASK_FEATURE_NAME].entities['subtask2'] = {
+        ...testState[TASK_FEATURE_NAME].entities['subtask2'],
+        parentId: 'parent-task',
+      } as Task;
+      testState[TASK_FEATURE_NAME].entities['subtask3'] = {
+        ...testState[TASK_FEATURE_NAME].entities['subtask3'],
+        parentId: 'parent-task',
+      } as Task;
+
+      // Add target project
+      testState[PROJECT_FEATURE_NAME].entities.project2 = createMockProject({
+        id: 'project2',
+        title: 'Target Project',
+      });
+      (testState[PROJECT_FEATURE_NAME].ids as string[]) = [
+        ...(testState[PROJECT_FEATURE_NAME].ids as string[]),
+        'project2',
+      ];
+
+      const task: TaskWithSubTasks = {
+        ...createMockTask({ id: 'parent-task', projectId: 'project1' }),
+        subTasks: [
+          createMockTask({
+            id: 'subtask1',
+            projectId: 'project1',
+            parentId: 'parent-task',
+          }),
+          createMockTask({
+            id: 'subtask2',
+            projectId: 'project1',
+            parentId: 'parent-task',
+          }),
+          createMockTask({
+            id: 'subtask3',
+            projectId: 'project1',
+            parentId: 'parent-task',
+          }),
+        ],
+        subTaskIds: ['subtask1', 'subtask2', 'subtask3'],
+      };
+
+      const action = createMoveToOtherProjectAction(task, 'project2');
+
+      metaReducer(testState, action);
+
+      // Get the updated state
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+      const targetProjectTaskIds =
+        updatedState[PROJECT_FEATURE_NAME].entities.project2.taskIds;
+
+      // Verify only parent task is in taskIds
+      expect(targetProjectTaskIds).toEqual(['parent-task']);
+      expect(targetProjectTaskIds.length).toBe(1);
+
+      // Verify subtasks are NOT in taskIds
+      expect(targetProjectTaskIds).not.toContain('subtask1');
+      expect(targetProjectTaskIds).not.toContain('subtask2');
+      expect(targetProjectTaskIds).not.toContain('subtask3');
+
+      // But all tasks should have updated projectId
+      expect(updatedState[TASK_FEATURE_NAME].entities['parent-task'].projectId).toBe(
+        'project2',
+      );
+      expect(updatedState[TASK_FEATURE_NAME].entities['subtask1'].projectId).toBe(
+        'project2',
+      );
+      expect(updatedState[TASK_FEATURE_NAME].entities['subtask2'].projectId).toBe(
+        'project2',
+      );
+      expect(updatedState[TASK_FEATURE_NAME].entities['subtask3'].projectId).toBe(
+        'project2',
       );
     });
 

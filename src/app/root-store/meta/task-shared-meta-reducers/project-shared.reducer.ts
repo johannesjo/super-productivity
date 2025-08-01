@@ -46,10 +46,10 @@ const handleMoveToOtherProject = (
   // Add tasks to target project
   if (state[PROJECT_FEATURE_NAME].entities[targetProjectId]) {
     const targetProject = getProject(updatedState, targetProjectId);
-    // Add all tasks to the regular task list (not backlog) when moving projects
-    // This ensures tasks are visible in the new project
+    // Only add the parent task to the task list, not subtasks
+    // Subtasks are displayed through their parent's subTaskIds property
     updatedState = updateProject(updatedState, targetProjectId, {
-      taskIds: unique([...targetProject.taskIds, ...allTaskIds]),
+      taskIds: unique([...targetProject.taskIds, task.id]),
     });
   }
 
