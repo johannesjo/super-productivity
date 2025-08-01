@@ -50,15 +50,25 @@ export class TaskAttachmentService {
 
   // HANDLE INPUT
   // ------------
-  createFromDrop(ev: DragEvent, taskId: string): void {
-    this._handleInput(createFromDrop(ev) as DropPasteInput, ev, taskId);
+  createFromDrop(ev: DragEvent, taskId: string, isSkipTextareaCheck = false): void {
+    this._handleInput(
+      createFromDrop(ev) as DropPasteInput,
+      ev,
+      taskId,
+      isSkipTextareaCheck,
+    );
   }
 
   // createFromPaste(ev, taskId: string): void {
   //   this._handleInput(createFromPaste(ev), ev, taskId);
   // }
 
-  private _handleInput(attachment: DropPasteInput, ev: Event, taskId: string): void {
+  private _handleInput(
+    attachment: DropPasteInput,
+    ev: Event,
+    taskId: string,
+    isSkipTextareaCheck = false,
+  ): void {
     // properly not intentional so we leave
     if (!attachment || !attachment.path) {
       return;
@@ -67,9 +77,10 @@ export class TaskAttachmentService {
     // don't intervene with text inputs
     const targetEl = ev.target as HTMLElement;
     if (
-      targetEl.tagName === 'INPUT' ||
-      (targetEl.tagName === 'TEXTAREA' &&
-        targetEl.parentElement?.tagName.toLowerCase() !== 'inline-multiline-input')
+      !isSkipTextareaCheck &&
+      (targetEl.tagName === 'INPUT' ||
+        (targetEl.tagName === 'TEXTAREA' &&
+          targetEl.parentElement?.tagName.toLowerCase() !== 'inline-multiline-input'))
     ) {
       return;
     }
