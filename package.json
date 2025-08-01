@@ -186,7 +186,7 @@
     "@types/node": "20.12.4",
     "@types/node-fetch": "^2.6.6",
     "@types/object-path": "^0.11.4",
-    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
     "@typescript-eslint/parser": "7.18.0",
     "@typescript-eslint/types": "^8.17.0",
     "@typescript-eslint/utils": "^8.35.1",
