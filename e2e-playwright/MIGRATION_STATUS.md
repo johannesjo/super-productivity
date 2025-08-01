@@ -3,12 +3,12 @@
 ## Summary
 
 - **Total Nightwatch Tests**: 34
-- **Successfully Migrated**: 24 (70.6%)
-- **Still Need Migration**: 8
-- **Skipped/Commented**: 3
+- **Successfully Migrated**: 26 (76.5%)
+- **Still Need Migration**: 1 (sync/webdav-basic - missing implementation)
+- **Skipped/Commented**: 9 (6 planner tests + 3 others)
 - **New Tests Created**: 2
 
-## Successfully Migrated Tests (24)
+## Successfully Migrated Tests (26)
 
 - ✅ all-basic-routes-without-error
 - ✅ autocomplete/autocomplete-dropdown
@@ -34,28 +34,16 @@
 - ✅ task-list-basic/finish-day-quick-history-with-subtasks
 - ✅ task-list-basic/task-list-start-stop
 - ✅ work-view/work-view
+- ✅ reminders/reminders-view-task2 (migrated)
+- ✅ reminders/reminders-view-task4 (migrated)
 
-## Tests Still Needing Migration (8)
+## Tests Still Needing Migration (1)
 
 ### Sync Tests (1)
 
-- sync/webdav-basic
+- sync/webdav-basic (missing setupWebdavSync implementation)
 
-### Planner Tests (6)
-
-- planner/planner-drag-drop
-- planner/planner-multiple-days
-- planner/planner-navigation
-- planner/planner-scheduled-tasks
-- planner/planner-time-estimates
-- planner/planner-basic (commented out but could be migrated)
-
-### Reminder Tests (2)
-
-- reminders/reminders-view-task2
-- reminders/reminders-view-task4
-
-## Skipped/Commented Tests (3)
+## Skipped/Commented Tests (9)
 
 1. **perf.e2e.ts** - Active but uses custom performance methods
 
@@ -64,11 +52,23 @@
 2. **planner/planner-basic.e2e.ts** - Fully commented out
 
    - Reason: Unknown, entire file is commented
-   - Was running with Nightwatch: No
 
-3. **project-note/project-note.e2e.ts** - Fully commented out
+3. **planner/planner-drag-drop.e2e.ts** - Fully commented out
+
+4. **planner/planner-multiple-days.e2e.ts** - Fully commented out
+
+5. **planner/planner-navigation.e2e.ts** - Fully commented out
+
+6. **planner/planner-scheduled-tasks.e2e.ts** - Fully commented out
+
+7. **planner/planner-time-estimates.e2e.ts** - Fully commented out
+
+8. **project-note/project-note.e2e.ts** - Fully commented out
+
    - Reason: Unknown, entire file is commented
-   - Was running with Nightwatch: No
+
+9. **sync/webdav-basic.e2e.ts** - Cannot migrate
+   - Missing setupWebdavSync implementation
 
 ## Failed Migration Attempts
 

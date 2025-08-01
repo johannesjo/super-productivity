@@ -1,0 +1,79 @@
+import { expect, test } from '../../fixtures/test.fixture';
+
+const DIALOG = 'dialog-view-task-reminder';
+const DIALOG_TASKS_WRAPPER = `${DIALOG} .tasks`;
+const DIALOG_TASK = `${DIALOG} .task`;
+const DIALOG_TASK1 = `${DIALOG_TASK}:first-of-type`;
+const DIALOG_TASK2 = `${DIALOG_TASK}:nth-of-type(2)`;
+const SCHEDULE_MAX_WAIT_TIME = 180000;
+
+// Helper selectors for task scheduling
+const TASK = 'task';
+const SCHEDULE_TASK_ITEM = 'task-detail-item:nth-child(2)';
+const SCHEDULE_DIALOG = 'mat-dialog-container';
+const DIALOG_SUBMIT = `${SCHEDULE_DIALOG} mat-dialog-actions button:last-of-type`;
+const TIME_INP = 'input[type="time"]';
+const SIDE_INNER = '.right-panel';
+const DEFAULT_DELTA = 1.2 * 60 * 1000;
+
+test.describe('Reminders View Task 2', () => {
+  const addTaskWithReminder = async (
+    page: any,
+    workViewPage: any,
+    title: string,
+    scheduleTime: number = Date.now() + DEFAULT_DELTA,
+  ): Promise<void> => {
+    // Add task
+    await workViewPage.addTask(title);
+
+    // Open task panel
+    const taskSel = page.locator(TASK).first();
+    await taskSel.waitFor({ state: 'visible' });
+    await taskSel.click();
+    await page.keyboard.press('ArrowRight');
+    await page.waitForSelector(SIDE_INNER, { state: 'visible' });
+
+    // Click schedule item
+    await page.click(SCHEDULE_TASK_ITEM);
+    await page.waitForSelector(SCHEDULE_DIALOG, { state: 'visible' });
+
+    // Set time
+    const d = new Date(scheduleTime);
+    const timeValue = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+
+    const timeInput = page.locator(TIME_INP);
+    await timeInput.click();
+    await timeInput.clear();
+    await timeInput.fill(timeValue);
+    await page.keyboard.press('Tab');
+
+    // Submit
+    await page.click(DIALOG_SUBMIT);
+    await page.waitForSelector(SCHEDULE_DIALOG, { state: 'hidden' });
+  };
+
+  test('should display a modal with 2 scheduled task if due', async ({
+    page,
+    workViewPage,
+  }) => {
+    test.setTimeout(SCHEDULE_MAX_WAIT_TIME);
+
+    await workViewPage.waitForTaskList();
+
+    // Add two tasks with reminders
+    await addTaskWithReminder(page, workViewPage, '0 B task');
+    await addTaskWithReminder(page, workViewPage, '1 B task', Date.now() + 10000);
+
+    // Wait for reminder dialog
+    await page.waitForSelector(DIALOG, {
+      state: 'visible',
+      timeout: SCHEDULE_MAX_WAIT_TIME,
+    });
+
+    // Verify both tasks are shown
+    await expect(page.locator(DIALOG_TASK1)).toBeVisible();
+    await expect(page.locator(DIALOG_TASK2)).toBeVisible();
+    await expect(page.locator(DIALOG_TASKS_WRAPPER)).toContainText('0 B task');
+    await expect(page.locator(DIALOG_TASKS_WRAPPER)).toContainText('1 B task');
+  });
+});
