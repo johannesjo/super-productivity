@@ -19,7 +19,7 @@ export class ShepherdComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     if (
-      !localStorage.getItem(LS.IS_SHOW_TOUR) &&
+      !localStorage.getItem(LS.IS_SKIP_TOUR) &&
       navigator.userAgent !== 'NIGHTWATCH' &&
       navigator.userAgent !== 'PLAYWRIGHT'
     ) {
@@ -32,7 +32,7 @@ export class ShepherdComponent implements AfterViewInit {
           if (projectList.length <= 2) {
             this.shepherdMyService.init();
           } else {
-            localStorage.setItem(LS.IS_SHOW_TOUR, 'true');
+            localStorage.setItem(LS.IS_SKIP_TOUR, 'true');
           }
         });
     }

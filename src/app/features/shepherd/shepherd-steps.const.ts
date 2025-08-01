@@ -593,7 +593,7 @@ export const SHEPHERD_STEPS = (
                 classes: PRIMARY_CLASSES,
                 action: () => {
                   shepherdService.show(TourId.KeyboardNav);
-                  localStorage.setItem(LS.IS_SHOW_TOUR, 'true');
+                  localStorage.setItem(LS.IS_SKIP_TOUR, 'true');
                 },
               } as any,
             ]
@@ -603,7 +603,7 @@ export const SHEPHERD_STEPS = (
           classes: PRIMARY_CLASSES,
           action: () => {
             shepherdService.complete();
-            localStorage.setItem(LS.IS_SHOW_TOUR, 'true');
+            localStorage.setItem(LS.IS_SKIP_TOUR, 'true');
           },
         } as any,
       ],
@@ -616,7 +616,7 @@ export const SHEPHERD_STEPS = (
       text: 'Do you want to show the tour again the next time you start the app? You can always show the tour again via the help button in the left menu.',
       when: {
         show: () => {
-          if (localStorage.getItem(LS.IS_SHOW_TOUR)) {
+          if (localStorage.getItem(LS.IS_SKIP_TOUR)) {
             shepherdService.complete();
           }
         },
@@ -626,7 +626,7 @@ export const SHEPHERD_STEPS = (
           text: 'Never again',
           classes: SECONDARY_CLASSES,
           action: () => {
-            localStorage.setItem(LS.IS_SHOW_TOUR, 'true');
+            localStorage.setItem(LS.IS_SKIP_TOUR, 'true');
             shepherdService.complete();
           },
         } as any,
@@ -634,7 +634,7 @@ export const SHEPHERD_STEPS = (
           text: 'Again next time',
           classes: PRIMARY_CLASSES,
           action: () => {
-            localStorage.removeItem(LS.IS_SHOW_TOUR);
+            localStorage.removeItem(LS.IS_SKIP_TOUR);
             shepherdService.complete();
           },
         } as any,
