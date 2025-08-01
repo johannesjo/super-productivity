@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  effect,
   ElementRef,
   HostBinding,
   HostListener,
@@ -8,7 +9,6 @@ import {
   OnDestroy,
   viewChild,
   viewChildren,
-  effect,
 } from '@angular/core';
 import { ProjectService } from '../../features/project/project.service';
 import { T } from '../../t.const';
@@ -37,14 +37,14 @@ import { LS } from '../../core/persistence/storage-keys.const';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { TourId } from '../../features/shepherd/shepherd-steps.const';
 import { ShepherdService } from '../../features/shepherd/shepherd.service';
-import { getGithubErrorUrl } from 'src/app/core/error-handler/global-error-handler.util';
+import { getGithubErrorUrl } from '../../core/error-handler/global-error-handler.util';
 import { IS_MOUSE_PRIMARY, IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { moveItemBeforeItem } from '../../util/move-item-before-item';
 import { Store } from '@ngrx/store';
 import {
-  selectAllProjects,
+  selectAllProjectsExceptInbox,
   selectUnarchivedHiddenProjectIds,
   selectUnarchivedVisibleProjects,
 } from '../../features/project/store/project.selectors';
@@ -107,7 +107,9 @@ export class SideNavComponent implements OnDestroy {
     this.isProjectsExpanded,
   );
 
-  allProjects$: Observable<Project[]> = this._store.select(selectAllProjects);
+  allNonInboxProjects$: Observable<Project[]> = this._store.select(
+    selectAllProjectsExceptInbox,
+  );
   nonHiddenProjects$: Observable<Project[]> = this.isProjectsExpanded$.pipe(
     switchMap((isExpanded) =>
       isExpanded

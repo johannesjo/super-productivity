@@ -100,7 +100,7 @@
       [rightClickTriggerEl]="projectExpandBtn"
     ></context-menu>
     <ng-template #contextMenu>
-      @for (project of allProjects$ | async; track project.id) {
+      @for (project of allNonInboxProjects$ | async; track project.id) {
         <button
           mat-menu-item
           (click)="toggleProjectVisibility(project)"

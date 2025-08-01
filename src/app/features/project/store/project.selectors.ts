@@ -8,6 +8,9 @@ export const selectProjectFeatureState =
   createFeatureSelector<ProjectState>(PROJECT_FEATURE_NAME);
 const { selectAll } = projectAdapter.getSelectors();
 export const selectAllProjects = createSelector(selectProjectFeatureState, selectAll);
+export const selectAllProjectsExceptInbox = createSelector(selectAllProjects, (ps) =>
+  ps.filter((p) => p.id !== INBOX_PROJECT.id),
+);
 export const selectUnarchivedProjects = createSelector(selectAllProjects, (projects) =>
   projects.filter((p) => !p.isArchived),
 );
