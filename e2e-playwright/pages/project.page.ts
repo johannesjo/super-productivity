@@ -121,32 +121,45 @@ export class ProjectPage extends BasePage {
   }
 
   async addNote(noteContent: string): Promise<void> {
-    // First toggle the notes panel to make it visible
-    const toggleNotesBtn = this.page.locator('.e2e-toggle-notes-btn');
-    await toggleNotesBtn.click();
+    // Wait for the app to be ready
+    const routerWrapper = this.page.locator('.route-wrapper');
+    await routerWrapper.waitFor({ state: 'visible' });
 
-    // Wait for the notes section to be visible
-    const notesSection = this.page.locator('notes');
-    await notesSection.waitFor({ state: 'visible' });
+    // Small pause to avoid stale element issues (as done in Nightwatch)
+    await this.page.waitForTimeout(200);
 
-    // Click on the add note button (force click to avoid tooltip interference)
-    const addNoteBtn = this.page.locator('#add-note-btn');
-    await addNoteBtn.click({ force: true });
+    // Use keyboard shortcut 'N' to directly open the note dialog
+    await this.page.keyboard.press('n');
 
-    // Wait for the dialog to appear in the CDK overlay (full-screen dialog)
-    const dialogContainer = this.page.locator('mat-dialog-container');
-    await dialogContainer.waitFor({ state: 'visible', timeout: 10000 });
-
-    // Wait for the textarea to appear and type the note content
-    const noteTextarea = this.page.locator('mat-dialog-container textarea');
+    // Wait for the dialog textarea (using the same selector as Nightwatch)
+    const noteTextarea = this.page.locator('dialog-fullscreen-markdown textarea');
     await noteTextarea.waitFor({ state: 'visible' });
     await noteTextarea.fill(noteContent);
 
     // Click the save button
-    const saveBtn = this.page.locator('mat-dialog-container #T-save-note');
+    const saveBtn = this.page.locator('#T-save-note');
+    await saveBtn.waitFor({ state: 'visible' });
     await saveBtn.click();
 
-    // Wait for the dialog to close
-    await dialogContainer.waitFor({ state: 'hidden', timeout: 5000 });
+    // Wait for dialog to close
+    await noteTextarea.waitFor({ state: 'hidden', timeout: 5000 });
+
+    // After saving, check if notes panel is visible
+    // If not, toggle it
+    const notesWrapper = this.page.locator('notes');
+    const isNotesVisible = await notesWrapper
+      .isVisible({ timeout: 1000 })
+      .catch(() => false);
+
+    if (!isNotesVisible) {
+      // Toggle the notes panel
+      const toggleNotesBtn = this.page.locator('.e2e-toggle-notes-btn');
+      await toggleNotesBtn.waitFor({ state: 'visible' });
+      await toggleNotesBtn.click();
+      await notesWrapper.waitFor({ state: 'visible', timeout: 5000 });
+    }
+
+    // Hover over the notes area like in Nightwatch
+    await notesWrapper.hover({ position: { x: 10, y: 50 } });
   }
 }

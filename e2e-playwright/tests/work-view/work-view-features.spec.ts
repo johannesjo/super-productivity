@@ -9,7 +9,7 @@ const DONE_TASKS_SECTION = '.tour-doneList';
 const TOGGLE_DONE_TASKS_BTN = '.tour-doneList .mat-expansion-indicator';
 
 test.describe('Work View Features', () => {
-  test.skip('should show undone and done task lists', async ({
+  test('should show undone and done task lists', async ({
     page,
     workViewPage,
     testPrefix,
@@ -36,30 +36,17 @@ test.describe('Work View Features', () => {
     // Verify we have 2 tasks
     await expect(page.locator(TASK)).toHaveCount(2);
 
-    // Mark first task as done using checkbox approach
+    // Mark first task as done
     const firstTask = page.locator(FIRST_TASK);
     await firstTask.waitFor({ state: 'visible' });
 
-    // Look for the checkbox/done button and click it
-    const checkbox = firstTask
-      .locator('mat-checkbox, [type="checkbox"], .task-done-btn')
-      .first();
+    // Hover over the task to show the done button
+    await firstTask.hover();
 
-    // Try to click it normally first
-    try {
-      await checkbox.click({ timeout: 2000 });
-    } catch {
-      // If that fails, use evaluate to click directly
-      await page.evaluate(() => {
-        const task = document.querySelector('task:first-of-type');
-        const checkboxEl = task?.querySelector(
-          'mat-checkbox, [type="checkbox"], .task-done-btn',
-        );
-        if (checkboxEl) {
-          (checkboxEl as HTMLElement).click();
-        }
-      });
-    }
+    // Click the done button
+    const doneBtn = firstTask.locator('.task-done-btn');
+    await doneBtn.waitFor({ state: 'visible' });
+    await doneBtn.click();
 
     // Wait a bit for the transition
     await page.waitForTimeout(2000);

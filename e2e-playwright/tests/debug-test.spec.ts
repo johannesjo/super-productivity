@@ -40,10 +40,34 @@ test.describe('Debug Project Note', () => {
           page.on('console', (msg) => console.log('PAGE LOG:', msg.text()));
           page.on('pageerror', (error) => console.log('PAGE ERROR:', error.message));
 
-          await addNoteBtn.click({ force: true });
+          // Try different click strategies
+          try {
+            await addNoteBtn.click();
+            console.log('Regular click succeeded');
+          } catch (e) {
+            console.log('Regular click failed, trying JavaScript click');
+            await addNoteBtn.evaluate((el) => (el as HTMLElement).click());
+          }
 
           // Wait a moment for potential async operations
           await page.waitForTimeout(1000);
+
+          // Check what dialogs/overlays exist in DOM
+          const allDialogs = await page.locator('*').evaluateAll((elements) => {
+            return elements
+              .filter(
+                (el) =>
+                  el.tagName.toLowerCase().includes('dialog') ||
+                  el.className.toString().includes('dialog') ||
+                  el.className.toString().includes('overlay'),
+              )
+              .map((el) => ({
+                tag: el.tagName,
+                class: el.className.toString(),
+                id: el.id,
+              }));
+          });
+          console.log('Dialog/Overlay elements found:', allDialogs);
 
           // Check for any overlay or dialog elements
           const allOverlays = page.locator('.cdk-overlay-container *');

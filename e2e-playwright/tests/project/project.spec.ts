@@ -43,7 +43,7 @@ test.describe('Project', () => {
     await expect(projectPage.globalErrorAlert).not.toBeVisible();
   });
 
-  test.skip('create second project', async ({ page, testPrefix }) => {
+  test('create second project', async ({ page, testPrefix }) => {
     // First click on Projects menu item to expand it
     await projectPage.projectAccordion.click();
 
