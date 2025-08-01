@@ -29,9 +29,15 @@ export class WorkViewPage extends BasePage {
     await this.routerWrapper.waitFor({ state: 'visible' });
   }
 
-  async getTaskByTitle(title: string): Promise<Locator> {
-    // Add test prefix to search
-    const prefixedTitle = this.testPrefix ? `${this.testPrefix}-${title}` : title;
-    return this.page.locator(`task-additional-info:has-text("${prefixedTitle}")`);
+  async addSubTask(task: Locator, subTaskName: string): Promise<void> {
+    await task.waitFor({ state: 'visible' });
+    await task.focus();
+    // need to wait for event handlers being attached
+    await this.page.waitForTimeout(100);
+    await task.press('a');
+
+    // Type the subtask content
+    await this.page.keyboard.type(subTaskName);
+    await this.page.keyboard.press('Enter');
   }
 }

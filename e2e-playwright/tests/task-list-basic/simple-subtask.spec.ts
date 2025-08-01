@@ -1,30 +1,19 @@
-import { test, expect } from '../../fixtures/test.fixture';
+import { expect, test } from '../../fixtures/test.fixture';
 
 test.describe('Simple Subtask', () => {
   test('should create subtask with keyboard shortcut', async ({ page, workViewPage }) => {
     // Add parent task
     await workViewPage.addTask('Parent Task');
 
-    // Wait for task to be visible
-    await page.waitForSelector('task', { state: 'visible' });
+    const task = page.locator('task');
 
-    // Focus on the task textarea
-    const taskTextarea = page.locator('task textarea').first();
-    await taskTextarea.focus();
+    await workViewPage.addSubTask(task, 'Sub Task 1');
 
-    // Send 'a' key to create subtask
-    await page.keyboard.press('a');
-
-    // Type the subtask content
-    await page.keyboard.type('Sub Task 1');
-    await page.keyboard.press('Enter');
-
-    // Wait for subtasks container to be visible
-    await page.waitForSelector('task .sub-tasks', { state: 'visible' });
-    await page.waitForSelector('task .sub-tasks task', { state: 'visible' });
+    const subTask = task.locator('.sub-tasks task');
+    await subTask.waitFor({ state: 'visible' });
 
     // Verify subtask was created with correct content
-    const subtaskTextarea = page.locator('task .sub-tasks task textarea');
+    const subtaskTextarea = subTask.locator('textarea');
     await expect(subtaskTextarea).toHaveValue('Sub Task 1');
   });
 });
