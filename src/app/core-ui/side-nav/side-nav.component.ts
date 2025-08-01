@@ -58,6 +58,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { AsyncPipe } from '@angular/common';
 import { toggleHideFromMenu } from '../../features/project/store/project.actions';
 import { PluginMenuComponent } from '../../plugins/ui/plugin-menu.component';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'side-nav',
@@ -107,9 +108,9 @@ export class SideNavComponent implements OnDestroy {
     this.isProjectsExpanded,
   );
 
-  allNonInboxProjects$: Observable<Project[]> = this._store.select(
-    selectAllProjectsExceptInbox,
-  );
+  allNonInboxProjects = toSignal(this._store.select(selectAllProjectsExceptInbox), {
+    initialValue: [],
+  });
   nonHiddenProjects$: Observable<Project[]> = this.isProjectsExpanded$.pipe(
     switchMap((isExpanded) =>
       isExpanded
