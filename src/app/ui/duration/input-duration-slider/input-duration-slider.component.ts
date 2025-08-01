@@ -1,13 +1,14 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
+  effect,
   ElementRef,
   inject,
-  Input,
+  input,
   OnDestroy,
   OnInit,
   output,
+  signal,
   viewChild,
 } from '@angular/core';
 import { nanoid } from 'nanoid';
@@ -27,13 +28,24 @@ import { TranslatePipe } from '@ngx-translate/core';
 })
 export class InputDurationSliderComponent implements OnInit, OnDestroy {
   private _el = inject(ElementRef);
-  private _cd = inject(ChangeDetectorRef);
 
   T: typeof T = T;
-  minutesBefore: number = 0;
-  dots: any[] = [];
-  uid: string = 'duration-input-slider' + nanoid();
-  el: HTMLElement;
+
+  // Convert to signals
+  readonly minutesBefore = signal(0);
+  readonly dots = signal<any[]>([]);
+  readonly uid = 'duration-input-slider' + nanoid();
+  readonly el: HTMLElement;
+
+  // Input signals
+  readonly label = input('');
+  readonly model = input(0);
+
+  // Output remains the same
+  readonly modelChange = output<number>();
+
+  // Internal model signal
+  readonly _model = signal(0);
 
   startHandler?: (ev: any) => void;
   endHandler?: () => void;
@@ -41,29 +53,18 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
 
   readonly circleEl = viewChild<ElementRef>('circleEl');
 
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
-  @Input() label: string = '';
-  readonly modelChange = output<number>();
-
   constructor() {
     this.el = this._el.nativeElement;
-  }
 
-  _model: number = 0;
-
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
-  @Input() set model(val: number) {
-    // Ensure val is a valid number
-    if (!Number.isFinite(val) || Number.isNaN(val)) {
-      val = 0;
-    }
-    if (this._model !== val) {
-      this._model = val;
-      this.setRotationFromValue(val);
-    }
+    // Effect to handle model input changes
+    effect(() => {
+      const val = this.model();
+      const validVal = !Number.isFinite(val) || Number.isNaN(val) ? 0 : val;
+      if (this._model() !== validVal) {
+        this._model.set(validVal);
+        this.setRotationFromValue(validVal);
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -190,7 +191,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
       hours = 0;
     }
 
-    this.dots = new Array(hours);
+    this.dots.set(new Array(hours));
   }
 
   setValueFromRotation(degrees: number): void {
@@ -210,9 +211,9 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
       minutesFromDegrees = 0;
     }
 
-    let hours = Math.floor(this._model / (1000 * 60 * 60));
+    let hours = Math.floor(this._model() / (1000 * 60 * 60));
 
-    const minuteDelta = minutesFromDegrees - this.minutesBefore;
+    const minuteDelta = minutesFromDegrees - this.minutesBefore();
 
     if (minuteDelta > THRESHOLD) {
       hours--;
@@ -228,35 +229,36 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
       this.setCircleRotation(minutesFromDegrees * 6);
     }
 
-    this.minutesBefore = minutesFromDegrees;
+    this.minutesBefore.set(minutesFromDegrees);
     this.setDots(hours);
     // eslint-disable-next-line no-mixed-operators
-    this._model = hours * 60 * 60 * 1000 + minutesFromDegrees * 60 * 1000;
+    const newValue = hours * 60 * 60 * 1000 + minutesFromDegrees * 60 * 1000;
+    this._model.set(newValue);
 
-    this.modelChange.emit(this._model);
-    this._cd.detectChanges();
+    this.modelChange.emit(newValue);
   }
 
   onInputChange($event: number): void {
-    this._model = $event;
-    this.modelChange.emit(this._model);
+    this._model.set($event);
+    this.modelChange.emit($event);
     this.setRotationFromValue();
   }
 
-  setRotationFromValue(val: number = this._model): void {
+  setRotationFromValue(val?: number): void {
+    const valueToUse = val ?? this._model();
     // Ensure val is a valid number, default to 0 if not
-    if (!Number.isFinite(val) || Number.isNaN(val) || val < 0) {
-      val = 0;
-    }
+    const validVal =
+      !Number.isFinite(valueToUse) || Number.isNaN(valueToUse) || valueToUse < 0
+        ? 0
+        : valueToUse;
 
-    const totalMinutes = Math.floor(val / (1000 * 60));
+    const totalMinutes = Math.floor(validVal / (1000 * 60));
     const minutes = totalMinutes % 60;
-    const hours = Math.floor(val / (1000 * 60 * 60));
+    const hours = Math.floor(validVal / (1000 * 60 * 60));
 
     this.setDots(hours);
     const degrees = (minutes * 360) / 60;
-    this.minutesBefore = minutes;
+    this.minutesBefore.set(minutes);
     this.setCircleRotation(degrees);
-    this._cd.detectChanges();
   }
 }
