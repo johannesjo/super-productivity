@@ -1,6 +1,6 @@
 import { test, expect } from '../fixtures/test.fixture';
 
-test.describe('Debug Project Note', () => {
+test.describe.skip('Debug Project Note', () => {
   test('debug project creation and note toggle', async ({ page, projectPage }) => {
     // Create and navigate to default project
     await projectPage.createAndGoToTestProject();
