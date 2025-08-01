@@ -15,7 +15,7 @@ const SCHEDULE_TASK_ITEM = 'task-detail-item:nth-child(2)';
 const SCHEDULE_DIALOG = 'mat-dialog-container';
 const DIALOG_SUBMIT = `${SCHEDULE_DIALOG} mat-dialog-actions button:last-of-type`;
 const TIME_INP = 'input[type="time"]';
-const SIDE_INNER = '.right-panel';
+const RIGHT_PANEL = '.right-panel';
 const DEFAULT_DELTA = 5000; // 5 seconds instead of 1.2 minutes
 
 test.describe.serial('Reminders View Task 4', () => {
@@ -28,12 +28,14 @@ test.describe.serial('Reminders View Task 4', () => {
     // Add task
     await workViewPage.addTask(title);
 
-    // Open task panel
+    // Open task panel by hovering and clicking the detail button
     const taskSel = page.locator(TASK).first();
     await taskSel.waitFor({ state: 'visible' });
-    await taskSel.click();
-    await page.keyboard.press('ArrowRight');
-    await page.waitForSelector(SIDE_INNER, { state: 'visible' });
+    await taskSel.hover();
+    const detailPanelBtn = page.locator('.show-additional-info-btn').first();
+    await detailPanelBtn.waitFor({ state: 'visible' });
+    await detailPanelBtn.click();
+    await page.waitForSelector(RIGHT_PANEL, { state: 'visible' });
 
     // Click schedule item
     await page.click(SCHEDULE_TASK_ITEM);

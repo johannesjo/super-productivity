@@ -26,11 +26,13 @@ test.describe.serial('Reminders View Task 2', () => {
     // Add task
     await workViewPage.addTask(title);
 
-    // Open task panel
+    // Open task panel by hovering and clicking the detail button
     const taskSel = page.locator(TASK).first();
     await taskSel.waitFor({ state: 'visible' });
-    await taskSel.click();
-    await page.keyboard.press('ArrowRight');
+    await taskSel.hover();
+    const detailPanelBtn = page.locator('.show-additional-info-btn').first();
+    await detailPanelBtn.waitFor({ state: 'visible' });
+    await detailPanelBtn.click();
     await page.waitForSelector(SIDE_INNER, { state: 'visible' });
 
     // Click schedule item
