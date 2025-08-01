@@ -611,8 +611,10 @@ export class AppComponent implements OnDestroy {
       el?.focus();
 
       if (el && IS_MOBILE) {
-        el.classList.add('mobile-highlight');
-        el.addEventListener('blur', () => el.classList.remove('mobile-highlight'));
+        el.classList.add('mobile-highlight-searched-item');
+        el.addEventListener('blur', () =>
+          el.classList.remove('mobile-highlight-searched-item'),
+        );
       }
 
       if ((el || counter === 4) && this._intervalTimer) {
