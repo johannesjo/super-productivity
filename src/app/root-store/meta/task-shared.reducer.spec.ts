@@ -1625,7 +1625,7 @@ describe('taskSharedMetaReducer', () => {
                 taskIds: [],
               }),
               project2: jasmine.objectContaining({
-                taskIds: ['task1', 'subtask1', 'subtask2'],
+                taskIds: ['task1'],
               }),
             }),
           }),
