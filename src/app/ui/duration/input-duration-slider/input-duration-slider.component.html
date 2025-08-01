@@ -1,7 +1,7 @@
 <div class="circle bg-primary">
   <div class="inner-circle"></div>
   <div class="dots">
-    @for (hour of dots; track $index) {
+    @for (hour of dots(); track $index) {
       <div
         @dot
         class="dot bg-100"
@@ -15,16 +15,16 @@
     <div class="handle"></div>
   </div>
   <div class="value-wrapper">
-    @if (label) {
+    @if (label()) {
       <label
         [for]="uid"
-        [innerHtml]="label"
+        [innerHtml]="label()"
       ></label>
     }
     <input
       (ngModelChange)="onInputChange($event)"
       [id]="uid"
-      [ngModel]="_model"
+      [ngModel]="_model()"
       [placeholder]="T.G.EXAMPLE_VAL | translate"
       class="value"
       inputDuration="optional"
