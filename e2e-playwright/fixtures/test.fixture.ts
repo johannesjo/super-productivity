@@ -16,8 +16,8 @@ export const test = base.extend<TestFixtures>({
     const context = await browser.newContext({
       // Each test gets its own storage state
       storageState: undefined,
-      // Add worker index to user agent for debugging
-      userAgent: `PLAYWRIGHT-WORKER-${testInfo.workerIndex}`,
+      // Preserve the base userAgent and add worker index for debugging
+      userAgent: `PLAYWRIGHT PLAYWRIGHT-WORKER-${testInfo.workerIndex}`,
     });
 
     await use(context);

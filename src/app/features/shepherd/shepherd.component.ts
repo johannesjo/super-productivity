@@ -21,7 +21,7 @@ export class ShepherdComponent implements AfterViewInit {
     if (
       !localStorage.getItem(LS.IS_SKIP_TOUR) &&
       navigator.userAgent !== 'NIGHTWATCH' &&
-      navigator.userAgent !== 'PLAYWRIGHT'
+      !navigator.userAgent.includes('PLAYWRIGHT')
     ) {
       this._dataInitStateService.isAllDataLoadedInitially$
         .pipe(
