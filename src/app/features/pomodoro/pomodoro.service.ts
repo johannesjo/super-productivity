@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { combineLatest, interval, merge, Observable, of } from 'rxjs';
 import { GlobalConfigService } from '../config/global-config.service';
 import {
@@ -112,22 +112,15 @@ export class PomodoroService {
     this.onStop$,
   ).pipe(
     withLatestFrom(this.isLongBreak$, this.isShortBreak$, this.isBreak$, this.cfg$),
-    map(([trigger, isLong, isShort, isBreak, cfg]) => {
-      // cfg = { ...cfg };
-      // // @ts-ignore
-      // cfg.duration = 5000;
-      // // @ts-ignore
-      // cfg.breakDuration = 15000;
-      // // @ts-ignore
-      // cfg.longerBreakDuration = 20000;
+    map(([trigger, isLong, isShort, isBreak, cfg]): number => {
       if (!isBreak) {
-        return cfg.duration || DEFAULT_GLOBAL_CONFIG.pomodoro.duration;
+        return (cfg.duration ?? DEFAULT_GLOBAL_CONFIG.pomodoro.duration) as number;
       } else if (isShort) {
-        return cfg.breakDuration || DEFAULT_GLOBAL_CONFIG.pomodoro.breakDuration;
+        return (cfg.breakDuration ??
+          DEFAULT_GLOBAL_CONFIG.pomodoro.breakDuration) as number;
       } else if (isLong) {
-        return (
-          cfg.longerBreakDuration || DEFAULT_GLOBAL_CONFIG.pomodoro.longerBreakDuration
-        );
+        return (cfg.longerBreakDuration ??
+          DEFAULT_GLOBAL_CONFIG.pomodoro.longerBreakDuration) as number;
       } else {
         throw new Error('Pomodoro: nextSession$');
       }

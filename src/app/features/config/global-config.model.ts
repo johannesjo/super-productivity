@@ -79,9 +79,10 @@ export type PomodoroConfig = Readonly<{
   // isGoToWorkView: boolean;
   isPlayTick: boolean;
 
-  duration: number;
-  breakDuration: number;
-  longerBreakDuration: number;
+  // due to formly not being reliable here we need to be more lenient
+  duration?: number | null;
+  breakDuration?: number | null;
+  longerBreakDuration?: number | null;
   cyclesBeforeLongerBreak: number;
 }>;
 
