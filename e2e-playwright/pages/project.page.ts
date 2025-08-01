@@ -1,4 +1,4 @@
-import { Locator, Page } from '@playwright/test';
+import { Locator, Page, expect } from '@playwright/test';
 import { BasePage } from './base.page';
 
 export class ProjectPage extends BasePage {
@@ -97,5 +97,40 @@ export class ProjectPage extends BasePage {
 
     await this.moveToArchiveBtn.waitFor({ state: 'visible' });
     await this.moveToArchiveBtn.click();
+  }
+
+  async createAndGoToDefaultProject(): Promise<void> {
+    // First click on Projects menu item to expand it
+    await this.projectAccordion.click();
+
+    // Create a new default project
+    await this.createProject('Default Project');
+
+    // Navigate to the created project
+    const projectName = this.testPrefix
+      ? `${this.testPrefix}-Default Project`
+      : 'Default Project';
+    const newProject = this.page.locator(`[role="menuitem"]:has-text("${projectName}")`);
+    await newProject.waitFor({ state: 'visible' });
+    await newProject.click();
+
+    // Verify we're in the project
+    await expect(this.workCtxTitle).toContainText(projectName);
+  }
+
+  async addNote(noteContent: string): Promise<void> {
+    // Click on the add note button
+    const addNoteBtn = this.page.locator('.add-note-btn, button[aria-label="Add Note"]');
+    await addNoteBtn.click();
+
+    // Type the note content
+    const noteTextarea = this.page
+      .locator('textarea[placeholder*="note"], textarea.mat-mdc-input-element')
+      .last();
+    await noteTextarea.waitFor({ state: 'visible' });
+    await noteTextarea.fill(noteContent);
+
+    // Press Enter to save the note
+    await noteTextarea.press('Enter');
   }
 }

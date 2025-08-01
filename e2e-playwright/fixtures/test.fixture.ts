@@ -1,8 +1,10 @@
 import { test as base, BrowserContext } from '@playwright/test';
 import { WorkViewPage } from '../pages/work-view.page';
+import { ProjectPage } from '../pages/project.page';
 
 type TestFixtures = {
   workViewPage: WorkViewPage;
+  projectPage: ProjectPage;
   isolatedContext: BrowserContext;
   testPrefix: string;
 };
@@ -71,6 +73,10 @@ export const test = base.extend<TestFixtures>({
 
   workViewPage: async ({ page, testPrefix }, use) => {
     await use(new WorkViewPage(page, testPrefix));
+  },
+
+  projectPage: async ({ page, testPrefix }, use) => {
+    await use(new ProjectPage(page, testPrefix));
   },
 });
 
