@@ -3,13 +3,13 @@
 ## Summary
 
 - **Total Nightwatch Tests**: 38 (excluding empty TODO files)
-- **Successfully Migrated**: 27 (71.1%)
+- **Successfully Migrated**: 28 (73.7%)
 - **Cannot Migrate**: 2 (missing implementations)
 - **Skipped/Commented**: 6 (planner tests)
 - **New Tests Created**: 2
 - **Tests with Skipped Scenarios**: 5
 
-## Successfully Migrated Tests (27)
+## Successfully Migrated Tests (28)
 
 - ✅ all-basic-routes-without-error
 - ✅ autocomplete/autocomplete-dropdown
@@ -38,6 +38,7 @@
 - ✅ reminders/reminders-view-task2 (migrated)
 - ✅ reminders/reminders-view-task4 (migrated)
 - ✅ project-note/project-note (migrated with 2 tests skipped)
+- ✅ task-list-basic/simple-subtask (migrated)
 
 ## Tests That Cannot Be Migrated (2)
 
@@ -95,12 +96,12 @@
 
 - **Nightwatch Tests**: 38 total (excluding empty TODO files)
 
-  - 27 successfully migrated (71.1%)
+  - 28 successfully migrated (73.7%)
   - 2 cannot be migrated (5.3%)
   - 6 commented out (15.8%)
-  - 3 active but not migrated (7.9%)
+  - 2 remaining unmigrated (5.3%)
 
-- **Playwright Tests**: 29 test files
+- **Playwright Tests**: 30 test files
   - 47 total test cases
   - 5 test files with skipped scenarios
   - 10 individual test cases skipped
