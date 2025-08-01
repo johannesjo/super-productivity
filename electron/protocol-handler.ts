@@ -44,6 +44,12 @@ export const processProtocolUrl = (url: string, mainWin: BrowserWindow | null): 
           }
         }
         break;
+      case 'task-toggle-start':
+        // Send IPC message to toggle task start
+        if (mainWin && mainWin.webContents) {
+          mainWin.webContents.send(IPC.TASK_TOGGLE_START);
+        }
+        break;
       default:
         log('Unknown protocol action:', action);
     }
