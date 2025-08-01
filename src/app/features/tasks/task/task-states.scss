@@ -48,11 +48,11 @@
   z-index: var(--z-focus-host);
   outline: none;
 
-  .box {
-    box-shadow: var(--task-focus-shadow);
-
-    @include lightTheme {
-      border-color: var(--c-accent);
+  > .inner-wrapper > .box {
+    @include noTouchOnly() {
+      border-color: var(--palette-primary-400);
+      border-width: 1px;
+      border-style: solid !important;
     }
   }
 }
