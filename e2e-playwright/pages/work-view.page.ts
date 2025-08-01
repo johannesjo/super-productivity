@@ -8,8 +8,8 @@ export class WorkViewPage extends BasePage {
   readonly backdrop: Locator;
   readonly routerWrapper: Locator;
 
-  constructor(page: Page) {
-    super(page);
+  constructor(page: Page, testPrefix: string = '') {
+    super(page, testPrefix);
 
     this.addTaskGlobalInput = page.locator('add-task-bar.global input');
     this.addBtn = page.locator('.switch-add-to-btn');
@@ -26,6 +26,8 @@ export class WorkViewPage extends BasePage {
   }
 
   async getTaskByTitle(title: string): Promise<Locator> {
-    return this.page.locator(`task-additional-info:has-text("${title}")`);
+    // Add test prefix to search
+    const prefixedTitle = this.testPrefix ? `${this.testPrefix}-${title}` : title;
+    return this.page.locator(`task-additional-info:has-text("${prefixedTitle}")`);
   }
 }

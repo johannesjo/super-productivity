@@ -13,7 +13,7 @@ const PLUGIN_CARD = 'plugin-management mat-card.ng-star-inserted';
 // Test plugin details
 const TEST_PLUGIN_ID = 'test-upload-plugin';
 
-test.describe('Plugin Upload', () => {
+test.describe.serial('Plugin Upload', () => {
   test.beforeEach(async ({ workViewPage }) => {
     await workViewPage.waitForTaskList();
   });

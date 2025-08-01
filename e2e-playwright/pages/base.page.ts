@@ -4,15 +4,22 @@ export abstract class BasePage {
   protected page: Page;
   protected routerWrapper: Locator;
   protected backdrop: Locator;
+  protected testPrefix: string;
 
-  constructor(page: Page) {
+  constructor(page: Page, testPrefix: string = '') {
     this.page = page;
     this.routerWrapper = page.locator('.route-wrapper');
     this.backdrop = page.locator('.backdrop');
+    this.testPrefix = testPrefix;
   }
 
   async addTask(taskName: string, skipClose = false): Promise<void> {
     await this.routerWrapper.waitFor({ state: 'visible' });
+
+    // Add test prefix to task name for isolation
+    const prefixedTaskName = this.testPrefix
+      ? `${this.testPrefix}-${taskName}`
+      : taskName;
 
     const inputEl = this.page.locator('add-task-bar.global input');
 
@@ -21,7 +28,7 @@ export abstract class BasePage {
       await inputEl.waitFor({ state: 'visible' });
     }
 
-    await inputEl.fill(taskName);
+    await inputEl.fill(prefixedTaskName);
     await this.page.locator('.e2e-add-task-submit ').click();
 
     // Wait for the task to be added

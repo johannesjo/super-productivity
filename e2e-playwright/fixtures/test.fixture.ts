@@ -1,12 +1,33 @@
-import { test as base } from '@playwright/test';
+import { test as base, BrowserContext } from '@playwright/test';
 import { WorkViewPage } from '../pages/work-view.page';
 
 type TestFixtures = {
   workViewPage: WorkViewPage;
+  isolatedContext: BrowserContext;
+  testPrefix: string;
 };
 
 export const test = base.extend<TestFixtures>({
-  page: async ({ page }, use) => {
+  // Create isolated context for each test
+  isolatedContext: async ({ browser }, use, testInfo) => {
+    // Create a new context with isolated storage
+    const context = await browser.newContext({
+      // Each test gets its own storage state
+      storageState: undefined,
+      // Add worker index to user agent for debugging
+      userAgent: `PLAYWRIGHT-WORKER-${testInfo.workerIndex}`,
+    });
+
+    await use(context);
+
+    // Cleanup
+    await context.close();
+  },
+
+  // Override page to use isolated context
+  page: async ({ isolatedContext }, use) => {
+    const page = await isolatedContext.newPage();
+
     // Navigate to the app first
     await page.goto('/');
 
@@ -32,10 +53,20 @@ export const test = base.extend<TestFixtures>({
     }
 
     await use(page);
+
+    // Cleanup
+    await page.close();
   },
 
-  workViewPage: async ({ page }, use) => {
-    await use(new WorkViewPage(page));
+  // Provide test prefix for data namespacing
+  testPrefix: async ({}, use, testInfo) => {
+    // Use worker index and parallel index for unique prefixes
+    const prefix = `W${testInfo.workerIndex}-P${testInfo.parallelIndex}`;
+    await use(prefix);
+  },
+
+  workViewPage: async ({ page, testPrefix }, use) => {
+    await use(new WorkViewPage(page, testPrefix));
   },
 });
 

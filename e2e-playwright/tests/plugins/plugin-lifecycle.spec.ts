@@ -8,7 +8,7 @@ const SETTINGS_BTN = `${SIDENAV} .tour-settingsMenuBtn`;
 const PLUGIN_MENU = `${SIDENAV} plugin-menu`;
 const PLUGIN_MENU_ITEM = `${PLUGIN_MENU} button`;
 
-test.describe('Plugin Lifecycle', () => {
+test.describe.serial('Plugin Lifecycle', () => {
   test.beforeEach(async ({ page, workViewPage }) => {
     await workViewPage.waitForTaskList();
 

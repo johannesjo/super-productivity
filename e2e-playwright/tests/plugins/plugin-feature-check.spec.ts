@@ -1,6 +1,6 @@
 import { test, expect } from '../../fixtures/test.fixture';
 
-test.describe('Plugin Feature Check', () => {
+test.describe.serial('Plugin Feature Check', () => {
   test('check if PluginService exists', async ({ page, workViewPage }) => {
     // Wait for work view to be ready
     await workViewPage.waitForTaskList();

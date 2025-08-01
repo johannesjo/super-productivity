@@ -10,7 +10,7 @@ const PLUGIN_ITEM = `${PLUGIN_CARD}`;
 const PLUGIN_MENU_ENTRY = `${SIDENAV} plugin-menu button`;
 const PLUGIN_IFRAME = 'plugin-index iframe';
 
-test.describe('Plugin Loading', () => {
+test.describe.serial('Plugin Loading', () => {
   test('full plugin loading lifecycle', async ({ page, workViewPage }) => {
     await workViewPage.waitForTaskList();
 

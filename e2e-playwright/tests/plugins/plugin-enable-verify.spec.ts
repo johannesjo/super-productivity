@@ -4,7 +4,7 @@ import { cssSelectors } from '../../../e2e/e2e.const';
 const { SIDENAV } = cssSelectors;
 const SETTINGS_BTN = `${SIDENAV} .tour-settingsMenuBtn`;
 
-test.describe('Plugin Enable Verify', () => {
+test.describe.serial('Plugin Enable Verify', () => {
   test('enable API Test Plugin and verify menu entry', async ({ page, workViewPage }) => {
     await workViewPage.waitForTaskList();
 

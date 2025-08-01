@@ -6,9 +6,9 @@ test.describe('Project', () => {
   let projectPage: ProjectPage;
   let workViewPage: WorkViewPage;
 
-  test.beforeEach(async ({ page }) => {
-    projectPage = new ProjectPage(page);
-    workViewPage = new WorkViewPage(page);
+  test.beforeEach(async ({ page, testPrefix }) => {
+    projectPage = new ProjectPage(page, testPrefix);
+    workViewPage = new WorkViewPage(page, testPrefix);
 
     // Wait for app to be ready
     await workViewPage.waitForTaskList();
@@ -41,22 +41,27 @@ test.describe('Project', () => {
     await expect(projectPage.globalErrorAlert).not.toBeVisible();
   });
 
-  test.skip('create second project', async ({ page }) => {
+  test.skip('create second project', async ({ page, testPrefix }) => {
     // First click on Projects menu item to expand it
     await projectPage.projectAccordion.click();
 
     // Create a new project
     await projectPage.createProject('Cool Test Project');
 
-    // Find the newly created project directly
-    const newProject = page.locator('[role="menuitem"]:has-text("Cool Test Project")');
+    // Find the newly created project directly (with test prefix)
+    const expectedProjectName = testPrefix
+      ? `${testPrefix}-Cool Test Project`
+      : 'Cool Test Project';
+    const newProject = page.locator(
+      `[role="menuitem"]:has-text("${expectedProjectName}")`,
+    );
     await expect(newProject).toBeVisible();
 
     // Click on the new project
     await newProject.click();
 
     // Verify we're in the new project
-    await expect(projectPage.workCtxTitle).toContainText('Cool Test Project');
+    await expect(projectPage.workCtxTitle).toContainText(expectedProjectName);
   });
 
   test('navigate to project settings', async ({ page }) => {

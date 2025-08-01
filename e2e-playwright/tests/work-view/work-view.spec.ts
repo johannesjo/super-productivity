@@ -12,9 +12,9 @@ test.describe('Work View', () => {
     const task = page.locator('task').first();
     await expect(task).toBeVisible();
 
-    // Verify task content
+    // Verify task content (accounting for test prefix)
     const taskTextarea = task.locator('textarea');
-    await expect(taskTextarea).toHaveValue('0 test task koko');
+    await expect(taskTextarea).toHaveValue(/.*0 test task koko/);
   });
 
   test('should still show created task after reload', async ({ page, workViewPage }) => {
@@ -37,7 +37,7 @@ test.describe('Work View', () => {
     // Verify task is still visible after reload
     await expect(task).toBeVisible();
     const taskTextarea = task.locator('textarea');
-    await expect(taskTextarea).toHaveValue('0 test task lolo');
+    await expect(taskTextarea).toHaveValue(/.*0 test task lolo/);
   });
 
   test('should add multiple tasks from header button', async ({ page, workViewPage }) => {
@@ -69,8 +69,10 @@ test.describe('Work View', () => {
     await expect(tasks).toHaveCount(2);
 
     // NOTE: global adds to top rather than bottom
-    await expect(tasks.nth(0).locator('textarea')).toHaveValue('5 some other task xoxo');
-    await expect(tasks.nth(1).locator('textarea')).toHaveValue('4 test task hohoho');
+    await expect(tasks.nth(0).locator('textarea')).toHaveValue(
+      /.*5 some other task xoxo/,
+    );
+    await expect(tasks.nth(1).locator('textarea')).toHaveValue(/.*4 test task hohoho/);
   });
 
   test('should add 2 tasks from initial bar', async ({ page, workViewPage }) => {
@@ -92,7 +94,7 @@ test.describe('Work View', () => {
     await expect(tasks).toHaveCount(2);
 
     // Verify task order (most recent first due to global add)
-    await expect(tasks.nth(0).locator('textarea')).toHaveValue('3 some other task');
-    await expect(tasks.nth(1).locator('textarea')).toHaveValue('2 test task hihi');
+    await expect(tasks.nth(0).locator('textarea')).toHaveValue(/.*3 some other task/);
+    await expect(tasks.nth(1).locator('textarea')).toHaveValue(/.*2 test task hihi/);
   });
 });

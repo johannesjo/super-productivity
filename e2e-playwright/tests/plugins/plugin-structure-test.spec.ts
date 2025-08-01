@@ -4,7 +4,7 @@ import { cssSelectors } from '../../../e2e/e2e.const';
 const { SIDENAV } = cssSelectors;
 const SETTINGS_BTN = `${SIDENAV} .tour-settingsMenuBtn`;
 
-test.describe('Plugin Structure Test', () => {
+test.describe.serial('Plugin Structure Test', () => {
   test('check plugin card structure', async ({ page, workViewPage }) => {
     await workViewPage.waitForTaskList();
 

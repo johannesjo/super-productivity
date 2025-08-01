@@ -13,8 +13,8 @@ export class ProjectPage extends BasePage {
   readonly moveToArchiveBtn: Locator;
   readonly globalErrorAlert: Locator;
 
-  constructor(page: Page) {
-    super(page);
+  constructor(page: Page, testPrefix: string = '') {
+    super(page, testPrefix);
 
     this.sidenav = page.locator('side-nav');
     this.createProjectBtn = page.locator(
@@ -31,6 +31,11 @@ export class ProjectPage extends BasePage {
   }
 
   async createProject(projectName: string): Promise<void> {
+    // Add test prefix to project name
+    const prefixedProjectName = this.testPrefix
+      ? `${this.testPrefix}-${projectName}`
+      : projectName;
+
     // Hover over the Projects menu item to show the button
     const projectsMenuItem = this.page.locator('[role="menuitem"]:has-text("Projects")');
     await projectsMenuItem.hover();
@@ -44,7 +49,7 @@ export class ProjectPage extends BasePage {
 
     // Wait for the dialog to appear
     await this.projectNameInput.waitFor({ state: 'visible' });
-    await this.projectNameInput.fill(projectName);
+    await this.projectNameInput.fill(prefixedProjectName);
     await this.submitBtn.click();
 
     // Wait for dialog to close

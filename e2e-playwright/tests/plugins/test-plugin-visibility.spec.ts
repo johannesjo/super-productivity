@@ -4,7 +4,7 @@ const SIDENAV = 'side-nav';
 const ROUTER_WRAPPER = '.route-wrapper';
 const SETTINGS_BTN = `${SIDENAV} .tour-settingsMenuBtn`;
 
-test.describe('Plugin Visibility', () => {
+test.describe.serial('Plugin Visibility', () => {
   test('navigate to settings page', async ({ page, workViewPage }) => {
     // Wait for work view to be ready
     await workViewPage.waitForTaskList();

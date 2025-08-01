@@ -9,13 +9,13 @@ export default defineConfig({
   /* Global setup */
   globalSetup: require.resolve(path.join(__dirname, 'global-setup')),
   /* Run tests in files in parallel */
-  fullyParallel: false,
+  fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: 1,
+  /* Number of parallel workers - start with 2 for testing */
+  workers: process.env.CI ? 2 : 2,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: process.env.CI
     ? [
@@ -118,11 +118,11 @@ export default defineConfig({
   /* Folder for test artifacts such as screenshots, videos, traces, etc. */
   outputDir: path.join(__dirname, '..', '.tmp', 'e2e-test-results', 'test-results'),
 
-  /* Global timeout for each test */
-  timeout: 10 * 1000,
+  /* Global timeout for each test - increased for parallel execution */
+  timeout: 15 * 1000,
 
   /* Global timeout for each assertion */
   expect: {
-    timeout: 5 * 1000,
+    timeout: 7 * 1000,
   },
 });

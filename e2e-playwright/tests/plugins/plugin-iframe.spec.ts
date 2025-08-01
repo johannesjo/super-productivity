@@ -14,7 +14,7 @@ const TAG_COUNT = '#tagCount';
 const REFRESH_STATS_BTN = 'button:nth-of-type(2)';
 const LOG_ENTRY = '.log-entry';
 
-test.describe('Plugin Iframe', () => {
+test.describe.serial('Plugin Iframe', () => {
   test.beforeEach(async ({ page, workViewPage }) => {
     test.setTimeout(30000); // Increase timeout for setup
 
