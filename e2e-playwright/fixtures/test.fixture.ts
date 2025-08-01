@@ -31,6 +31,10 @@ export const test = base.extend<TestFixtures>({
     // Navigate to the app first
     await page.goto('/');
 
+    // Wait for app to be ready
+    await page.waitForLoadState('networkidle');
+    await page.waitForSelector('body', { state: 'visible' });
+
     // Set localStorage after navigation to avoid cross-origin issues
     // Note: The app checks for the presence of this key, not its value
     await page.evaluate(() => {

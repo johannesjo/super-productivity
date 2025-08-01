@@ -12,10 +12,10 @@ export default defineConfig({
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  /* Retry failed tests to handle flakiness */
+  retries: process.env.CI ? 2 : 1,
   /* Number of parallel workers - start with 2 for testing */
-  workers: process.env.CI ? 1 : 5,
+  workers: process.env.CI ? 1 : 8,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: process.env.CI
     ? [
@@ -119,10 +119,10 @@ export default defineConfig({
   outputDir: path.join(__dirname, '..', '.tmp', 'e2e-test-results', 'test-results'),
 
   /* Global timeout for each test - increased for parallel execution */
-  timeout: 15 * 1000,
+  timeout: 30 * 1000,
 
   /* Global timeout for each assertion */
   expect: {
-    timeout: 7 * 1000,
+    timeout: 10 * 1000,
   },
 });

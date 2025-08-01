@@ -13,8 +13,11 @@ test.describe.serial('Plugin Lifecycle', () => {
     await workViewPage.waitForTaskList();
 
     // Enable API Test Plugin
-    await page.click(SETTINGS_BTN);
-    await page.waitForTimeout(1000);
+    const settingsBtn = page.locator(SETTINGS_BTN);
+    await settingsBtn.waitFor({ state: 'visible' });
+    await settingsBtn.click();
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(100);
 
     await page.evaluate(() => {
       const configPage = document.querySelector('.page-settings');
@@ -40,7 +43,7 @@ test.describe.serial('Plugin Lifecycle', () => {
       }
     });
 
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(100);
     await expect(page.locator('plugin-management')).toBeVisible({ timeout: 5000 });
 
     // Enable the plugin
@@ -76,12 +79,12 @@ test.describe.serial('Plugin Lifecycle', () => {
     expect(enableResult.found).toBe(true);
 
     // Wait for plugin to initialize (3 seconds like successful tests)
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(100);
 
     // Go back to work view
     await page.goto('/#/tag/TODAY');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(100);
 
     // Wait for task list to be visible
     await page.waitForSelector('task-list', { state: 'visible', timeout: 10000 });
@@ -89,7 +92,7 @@ test.describe.serial('Plugin Lifecycle', () => {
 
   test('verify plugin is initially loaded', async ({ page }) => {
     test.setTimeout(20000); // Increase timeout
-    await page.waitForTimeout(2000); // Wait for plugins to initialize
+    await page.waitForTimeout(100); // Wait for plugins to initialize
 
     // Plugin doesn't show snack bar on load, check plugin menu instead
     await expect(page.locator(PLUGIN_MENU_ITEM)).toBeVisible({ timeout: 10000 });
@@ -102,7 +105,7 @@ test.describe.serial('Plugin Lifecycle', () => {
     // Click on the plugin menu item to navigate to plugin
     await expect(page.locator(PLUGIN_MENU_ITEM)).toBeVisible();
     await page.click(PLUGIN_MENU_ITEM);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(100);
 
     // Verify we navigated to the plugin page
     await expect(page).toHaveURL(/\/plugins\/api-test-plugin\/index/);
@@ -117,7 +120,7 @@ test.describe.serial('Plugin Lifecycle', () => {
 
     // First enable the plugin
     await page.click(SETTINGS_BTN);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(100);
 
     await page.evaluate(() => {
       const pluginSection = document.querySelector('.plugin-section');
@@ -134,7 +137,7 @@ test.describe.serial('Plugin Lifecycle', () => {
       }
     });
 
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(100);
 
     // Enable the plugin first
     await page.evaluate((pluginName: string) => {
@@ -154,7 +157,7 @@ test.describe.serial('Plugin Lifecycle', () => {
       }
     }, 'API Test Plugin');
 
-    await page.waitForTimeout(3000); // Wait for plugin to enable
+    await page.waitForTimeout(100); // Wait for plugin to enable
 
     // Find and disable the API Test Plugin
     await page.evaluate((pluginName: string) => {
@@ -174,17 +177,17 @@ test.describe.serial('Plugin Lifecycle', () => {
       }
     }, 'API Test Plugin');
 
-    await page.waitForTimeout(3000); // Wait for plugin to disable
+    await page.waitForTimeout(100); // Wait for plugin to disable
 
     // Go back and verify menu entry is removed
     await page.goto('/#/tag/TODAY');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(100);
 
     // Reload to ensure plugin state is refreshed
     await page.reload();
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(100);
 
     await expect(page.locator(PLUGIN_MENU_ITEM)).not.toBeVisible();
   });

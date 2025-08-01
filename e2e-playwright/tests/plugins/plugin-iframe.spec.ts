@@ -21,7 +21,10 @@ test.describe.serial('Plugin Iframe', () => {
     await workViewPage.waitForTaskList();
 
     // Enable API Test Plugin
-    await page.click(`${SIDENAV} .tour-settingsMenuBtn`);
+    const settingsBtn = page.locator(`${SIDENAV} .tour-settingsMenuBtn`);
+    await settingsBtn.waitFor({ state: 'visible' });
+    await settingsBtn.click();
+    await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
 
     await page.evaluate(() => {

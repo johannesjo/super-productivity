@@ -18,7 +18,7 @@ const TIME_INP = 'input[type="time"]';
 const SIDE_INNER = '.right-panel';
 const DEFAULT_DELTA = 1.2 * 60 * 1000;
 
-test.describe('Reminders View Task 4', () => {
+test.describe.serial('Reminders View Task 4', () => {
   const addTaskWithReminder = async (
     page: any,
     workViewPage: any,
@@ -54,17 +54,25 @@ test.describe('Reminders View Task 4', () => {
     await page.waitForSelector(SCHEDULE_DIALOG, { state: 'hidden' });
   };
 
-  test('should manually empty list via add to today', async ({ page, workViewPage }) => {
+  test('should manually empty list via add to today', async ({
+    page,
+    workViewPage,
+    testPrefix,
+  }) => {
     test.setTimeout(SCHEDULE_MAX_WAIT_TIME + 120000);
 
     await workViewPage.waitForTaskList();
 
     const start = Date.now() + 100000;
 
-    // Add three tasks with reminders
-    await addTaskWithReminder(page, workViewPage, '0 D task xyz', start);
-    await addTaskWithReminder(page, workViewPage, '1 D task xyz', start);
-    await addTaskWithReminder(page, workViewPage, '2 D task xyz', Date.now() + 10000);
+    // Add three tasks with reminders using test prefix
+    const task1Name = `${testPrefix}-0 D task xyz`;
+    const task2Name = `${testPrefix}-1 D task xyz`;
+    const task3Name = `${testPrefix}-2 D task xyz`;
+
+    await addTaskWithReminder(page, workViewPage, task1Name, start);
+    await addTaskWithReminder(page, workViewPage, task2Name, start);
+    await addTaskWithReminder(page, workViewPage, task3Name, Date.now() + 10000);
 
     // Wait for reminder dialog
     await page.waitForSelector(DIALOG, {
@@ -78,15 +86,15 @@ test.describe('Reminders View Task 4', () => {
     await page.waitForSelector(DIALOG_TASK3, { state: 'visible' });
 
     // Verify all tasks are shown
-    await expect(page.locator(DIALOG_TASKS_WRAPPER)).toContainText('0 D task xyz');
-    await expect(page.locator(DIALOG_TASKS_WRAPPER)).toContainText('1 D task xyz');
-    await expect(page.locator(DIALOG_TASKS_WRAPPER)).toContainText('2 D task xyz');
+    await expect(page.locator(DIALOG_TASKS_WRAPPER)).toContainText(task1Name);
+    await expect(page.locator(DIALOG_TASKS_WRAPPER)).toContainText(task2Name);
+    await expect(page.locator(DIALOG_TASKS_WRAPPER)).toContainText(task3Name);
 
     // Click "add to today" buttons
     await page.click(DIALOG_TASK1 + TO_TODAY_SUF);
     await page.click(DIALOG_TASK2 + TO_TODAY_SUF);
 
-    // Verify remaining task
+    // Verify remaining task contains 'D task xyz'
     await expect(page.locator(DIALOG_TASK1)).toContainText('D task xyz');
   });
 });

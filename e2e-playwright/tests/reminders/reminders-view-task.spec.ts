@@ -23,13 +23,14 @@ test.describe('Reminders View Task', () => {
   test('should display a modal with a scheduled task if due', async ({
     page,
     workViewPage,
+    testPrefix,
   }) => {
     test.setTimeout(SCHEDULE_MAX_WAIT_TIME + 30000); // Add extra time for test setup
 
     // Wait for work view to be ready
     await workViewPage.waitForTaskList();
 
-    const taskTitle = '0 A task';
+    const taskTitle = `${testPrefix}-0 A task`;
     const scheduleTime = Date.now() + 10000; // Add 10 seconds buffer
     const d = new Date(scheduleTime);
     const timeValue = getTimeVal(d);

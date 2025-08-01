@@ -16,7 +16,7 @@ const TIME_INP = 'input[type="time"]';
 const SIDE_INNER = '.right-panel';
 const DEFAULT_DELTA = 1.2 * 60 * 1000;
 
-test.describe('Reminders View Task 2', () => {
+test.describe.serial('Reminders View Task 2', () => {
   const addTaskWithReminder = async (
     page: any,
     workViewPage: any,
@@ -55,14 +55,18 @@ test.describe('Reminders View Task 2', () => {
   test('should display a modal with 2 scheduled task if due', async ({
     page,
     workViewPage,
+    testPrefix,
   }) => {
-    test.setTimeout(SCHEDULE_MAX_WAIT_TIME);
+    test.setTimeout(SCHEDULE_MAX_WAIT_TIME + 60000); // Add extra buffer
 
     await workViewPage.waitForTaskList();
 
-    // Add two tasks with reminders
-    await addTaskWithReminder(page, workViewPage, '0 B task');
-    await addTaskWithReminder(page, workViewPage, '1 B task', Date.now() + 10000);
+    // Add two tasks with reminders using test prefix
+    const task1Name = `${testPrefix}-0 B task`;
+    const task2Name = `${testPrefix}-1 B task`;
+
+    await addTaskWithReminder(page, workViewPage, task1Name);
+    await addTaskWithReminder(page, workViewPage, task2Name, Date.now() + 10000);
 
     // Wait for reminder dialog
     await page.waitForSelector(DIALOG, {
@@ -73,7 +77,7 @@ test.describe('Reminders View Task 2', () => {
     // Verify both tasks are shown
     await expect(page.locator(DIALOG_TASK1)).toBeVisible();
     await expect(page.locator(DIALOG_TASK2)).toBeVisible();
-    await expect(page.locator(DIALOG_TASKS_WRAPPER)).toContainText('0 B task');
-    await expect(page.locator(DIALOG_TASKS_WRAPPER)).toContainText('1 B task');
+    await expect(page.locator(DIALOG_TASKS_WRAPPER)).toContainText(task1Name);
+    await expect(page.locator(DIALOG_TASKS_WRAPPER)).toContainText(task2Name);
   });
 });

@@ -11,41 +11,49 @@ test.describe('Basic Navigation', () => {
 
     // Navigate to schedule view
     await page.goto('/#/schedule');
+    await page.waitForLoadState('networkidle');
     await expect(page).toHaveURL(/\/#\/schedule/);
     await expect(page.locator('.route-wrapper')).toBeVisible();
 
     // Navigate to quick history
     await page.goto('/#/tag/TODAY/quick-history');
+    await page.waitForLoadState('networkidle');
     await expect(page).toHaveURL(/\/#\/tag\/TODAY\/quick-history/);
     await expect(page.locator('quick-history')).toBeVisible();
 
     // Navigate to worklog
     await page.goto('/#/tag/TODAY/worklog');
+    await page.waitForLoadState('networkidle');
     await expect(page).toHaveURL(/\/#\/tag\/TODAY\/worklog/);
     await expect(page.locator('.route-wrapper')).toBeVisible();
 
     // Navigate to metrics
     await page.goto('/#/tag/TODAY/metrics');
+    await page.waitForLoadState('networkidle');
     await expect(page).toHaveURL(/\/#\/tag\/TODAY\/metrics/);
     await expect(page.locator('.route-wrapper')).toBeVisible();
 
     // Navigate to planner
     await page.goto('/#/planner');
+    await page.waitForLoadState('networkidle');
     await expect(page).toHaveURL(/\/#\/planner/);
     await expect(page.locator('.route-wrapper')).toBeVisible();
 
     // Navigate to daily summary
     await page.goto('/#/tag/TODAY/daily-summary');
+    await page.waitForLoadState('networkidle');
     await expect(page).toHaveURL(/\/#\/tag\/TODAY\/daily-summary/);
     await expect(page.locator('daily-summary')).toBeVisible();
 
     // Navigate to settings
     await page.goto('/#/config');
+    await page.waitForLoadState('networkidle');
     await expect(page).toHaveURL(/\/#\/config/);
     await expect(page.locator('.page-settings')).toBeVisible();
 
     // Navigate back to work view
     await page.goto('/#/tag/TODAY');
+    await page.waitForLoadState('networkidle');
     await expect(page).toHaveURL(/\/#\/tag\/TODAY/);
     await expect(page.locator('task-list').first()).toBeVisible();
   });
@@ -56,11 +64,13 @@ test.describe('Basic Navigation', () => {
 
     // Click settings button
     await page.click('side-nav .tour-settingsMenuBtn');
+    await page.waitForLoadState('networkidle');
     await expect(page).toHaveURL(/\/#\/config/);
     await expect(page.locator('.page-settings')).toBeVisible();
 
     // Click on work context to go back
     await page.click('.current-work-context-title');
+    await page.waitForLoadState('networkidle');
     await expect(page).toHaveURL(/\/#\/tag\/TODAY/);
     await expect(page.locator('task-list').first()).toBeVisible();
   });

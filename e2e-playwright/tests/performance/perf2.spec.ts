@@ -1,6 +1,6 @@
 import { expect, test } from '../../fixtures/test.fixture';
 
-test.describe('Performance Tests - Adding Multiple Tasks', () => {
+test.describe.serial('Performance Tests - Adding Multiple Tasks', () => {
   test('performance: adding 20 tasks sequentially', async ({ page, workViewPage }) => {
     // Set a longer timeout for this performance test
     test.setTimeout(20000);
