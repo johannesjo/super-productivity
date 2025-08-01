@@ -9,10 +9,10 @@ import { TaskService } from '../tasks/task.service';
 import { Task } from '../tasks/task.model';
 import { NoteService } from '../note/note.service';
 import { T } from '../../t.const';
-import { filter, first, map, skipUntil } from 'rxjs/operators';
+import { filter, first, skipUntil } from 'rxjs/operators';
 import { devError } from '../../util/dev-error';
 import { Note } from '../note/note.model';
-import { environment } from 'src/environments/environment';
+import { environment } from '../../../environments/environment';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { Log } from '../../core/log';
 
@@ -96,14 +96,6 @@ export class ReminderService {
     const _foundReminder =
       this._reminders && this._reminders.find((reminder) => reminder.id === reminderId);
     return !!_foundReminder ? dirtyDeepCopy<ReminderCopy>(_foundReminder) : null;
-  }
-
-  getById$(reminderId: string): Observable<ReminderCopy | null> {
-    return this.reminders$.pipe(
-      map(
-        (reminders) => reminders.find((reminder) => reminder.id === reminderId) || null,
-      ),
-    );
   }
 
   getByRelatedId(relatedId: string): ReminderCopy | null {
@@ -202,22 +194,35 @@ export class ReminderService {
 
   private async _onReminderActivated(msg: MessageEvent): Promise<void> {
     const reminders = msg.data as Reminder[];
+    Log.log(`ReminderService: Worker activated ${reminders.length} reminder(s)`);
+
     const remindersWithData: Reminder[] = (await Promise.all(
       reminders.map(async (reminder) => {
         const relatedModel = await this._getRelatedDataForReminder(reminder);
         // Log.log('RelatedModel for Reminder', relatedModel);
         // only show when not currently syncing and related model still exists
         if (!relatedModel) {
-          devError('No Reminder Related Data found, removing reminder...');
+          Log.warn(
+            `ReminderService: No related data found for reminder ${reminder.id} (${reminder.type}: ${reminder.relatedId}), removing...`,
+          );
           this.removeReminder(reminder.id);
           return null;
         } else {
+          // Check if task is already done (defensive check)
+          if (reminder.type === 'TASK' && (relatedModel as Task).isDone) {
+            Log.warn(
+              `ReminderService: Task ${relatedModel.id} is already done but reminder ${reminder.id} still exists, removing...`,
+            );
+            this.removeReminder(reminder.id);
+            return null;
+          }
           return reminder;
         }
       }),
     )) as Reminder[];
     const finalReminders = remindersWithData.filter((reminder) => !!reminder);
 
+    Log.log(`ReminderService: ${finalReminders.length} valid reminder(s) to show`);
     if (finalReminders.length > 0) {
       this._onRemindersActive$.next(finalReminders);
     }
