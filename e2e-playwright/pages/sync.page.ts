@@ -1,0 +1,68 @@
+import { type Page, type Locator } from '@playwright/test';
+import { BasePage } from './base.page';
+
+export class SyncPage extends BasePage {
+  readonly syncBtn: Locator;
+  readonly providerSelect: Locator;
+  readonly baseUrlInput: Locator;
+  readonly userNameInput: Locator;
+  readonly passwordInput: Locator;
+  readonly syncFolderInput: Locator;
+  readonly saveBtn: Locator;
+  readonly syncSpinner: Locator;
+  readonly syncCheckIcon: Locator;
+
+  constructor(page: Page) {
+    super(page);
+    this.syncBtn = page.locator('button.sync-btn');
+    this.providerSelect = page.locator('formly-field-mat-select mat-select');
+    this.baseUrlInput = page.locator('.e2e-baseUrl input');
+    this.userNameInput = page.locator('.e2e-userName input');
+    this.passwordInput = page.locator('.e2e-password input');
+    this.syncFolderInput = page.locator('.e2e-syncFolderPath input');
+    this.saveBtn = page.locator('mat-dialog-actions button[mat-stroked-button]');
+    this.syncSpinner = page.locator('.sync-btn mat-icon.spin');
+    this.syncCheckIcon = page.locator('.sync-btn mat-icon.sync-state-ico');
+  }
+
+  async setupWebdavSync(config: {
+    baseUrl: string;
+    username: string;
+    password: string;
+    syncFolderPath: string;
+  }): Promise<void> {
+    await this.syncBtn.click();
+    await this.providerSelect.waitFor({ state: 'visible' });
+    await this.page.waitForTimeout(100);
+
+    // Click on provider select to open dropdown
+    await this.providerSelect.click();
+
+    // Select WebDAV option - using more robust selector
+    const webdavOption = this.page.locator('mat-option').filter({ hasText: 'WebDAV' });
+    await webdavOption.click();
+    await this.page.waitForTimeout(100);
+
+    // Fill in the configuration
+    await this.baseUrlInput.fill(config.baseUrl);
+    await this.userNameInput.fill(config.username);
+    await this.passwordInput.fill(config.password);
+    await this.syncFolderInput.fill(config.syncFolderPath);
+    await this.page.waitForTimeout(100);
+
+    // Save the configuration
+    await this.saveBtn.click();
+  }
+
+  async triggerSync(): Promise<void> {
+    await this.syncBtn.click();
+    await this.page.waitForTimeout(500);
+  }
+
+  async waitForSyncComplete(): Promise<void> {
+    // Wait for sync spinner to disappear
+    await this.syncSpinner.waitFor({ state: 'hidden', timeout: 30000 });
+    // Verify check icon appears
+    await this.syncCheckIcon.waitFor({ state: 'visible' });
+  }
+}
