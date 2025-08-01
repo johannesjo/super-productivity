@@ -7,13 +7,13 @@ test.describe('Simple Subtask', () => {
 
     const task = page.locator('task');
 
-    await workViewPage.addSubTask(task, 'Sub Task 1');
+    await workViewPage.addSubTask(task, 'SubTask 1');
 
     const subTask = task.locator('.sub-tasks task');
     await subTask.waitFor({ state: 'visible' });
 
     // Verify subtask was created with correct content
     const subtaskTextarea = subTask.locator('textarea');
-    await expect(subtaskTextarea).toHaveValue('Sub Task 1');
+    await expect(subtaskTextarea).toHaveValue('SubTask 1');
   });
 });

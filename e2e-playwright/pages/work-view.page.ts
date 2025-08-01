@@ -36,6 +36,9 @@ export class WorkViewPage extends BasePage {
     await this.page.waitForTimeout(100);
     await task.press('a');
 
+    // need to wait for textarea to come into focus
+    await this.page.waitForTimeout(100);
+
     // Type the subtask content
     await this.page.keyboard.type(subTaskName);
     await this.page.keyboard.press('Enter');
