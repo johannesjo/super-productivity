@@ -36,16 +36,8 @@ export abstract class BasePage {
     const submitBtn = this.page.locator('.e2e-add-task-submit');
     await submitBtn.waitFor({ state: 'visible' });
     await submitBtn.click();
-
-    // Wait for the task to appear in the DOM
-    await this.page
-      .waitForSelector(`text="${prefixedTaskName}"`, {
-        timeout: 2000,
-        state: 'visible',
-      })
-      .catch(() => {
-        // If the exact text is not found, that's okay - task might be processed differently
-      });
+    // wait two frames
+    await this.page.waitForTimeout(120);
 
     if (!skipClose) {
       // Only click backdrop once if it's visible
