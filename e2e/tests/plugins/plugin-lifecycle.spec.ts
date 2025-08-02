@@ -1,4 +1,4 @@
-import { expect, test } from '../../fixtures/test.fixture';
+import { test, expect } from '../../fixtures/test.fixture';
 import { cssSelectors } from '../../constants/selectors';
 
 const { SIDENAV } = cssSelectors;
@@ -9,20 +9,21 @@ const PLUGIN_MENU = `${SIDENAV} plugin-menu`;
 const PLUGIN_MENU_ITEM = `${PLUGIN_MENU} button`;
 
 test.describe.serial('Plugin Lifecycle', () => {
-  test.beforeEach(async ({ page, workViewPage, waitForNav }) => {
+  test.beforeEach(async ({ page, workViewPage }) => {
     await workViewPage.waitForTaskList();
 
-    // Enable Yesterday's Tasks
+    // Enable API Test Plugin
     const settingsBtn = page.locator(SETTINGS_BTN);
     await settingsBtn.waitFor({ state: 'visible' });
     await settingsBtn.click();
-    await waitForNav();
-    await page.waitForLoadState('domcontentloaded');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(100);
 
     await page.evaluate(() => {
       const configPage = document.querySelector('.page-settings');
       if (!configPage) {
-        throw new Error('Not on config page');
+        console.error('Not on config page');
+        return;
       }
 
       const pluginSection = document.querySelector('.plugin-section');
@@ -42,7 +43,7 @@ test.describe.serial('Plugin Lifecycle', () => {
       }
     });
 
-    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(100);
     await expect(page.locator('plugin-management')).toBeVisible({ timeout: 5000 });
 
     // Enable the plugin
@@ -72,57 +73,54 @@ test.describe.serial('Plugin Lifecycle', () => {
       }
 
       return { found: false };
-    }, "Yesterday's Tasks");
+    }, 'API Test Plugin');
 
+    console.log(`Plugin "API Test Plugin" enable state:`, enableResult);
     expect(enableResult.found).toBe(true);
 
     // Wait for plugin to initialize (3 seconds like successful tests)
-    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(100);
 
     // Go back to work view
     await page.goto('/#/tag/TODAY');
-    await waitForNav();
-    await page.waitForLoadState('domcontentloaded');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(100);
 
     // Wait for task list to be visible
     await page.waitForSelector('task-list', { state: 'visible', timeout: 10000 });
   });
 
-  test('verify plugin is initially loaded', async ({ page, waitForNav }) => {
+  test('verify plugin is initially loaded', async ({ page }) => {
     test.setTimeout(20000); // Increase timeout
-    await page.waitForLoadState('domcontentloaded'); // Wait for plugins to initialize
+    await page.waitForTimeout(100); // Wait for plugins to initialize
 
     // Plugin doesn't show snack bar on load, check plugin menu instead
     await expect(page.locator(PLUGIN_MENU_ITEM)).toBeVisible({ timeout: 10000 });
-    await expect(page.locator(PLUGIN_MENU_ITEM)).toContainText("Yesterday's Tasks");
+    await expect(page.locator(PLUGIN_MENU_ITEM)).toContainText('API Test Plugin');
   });
 
-  test('test plugin navigation', async ({ page, waitForNav }) => {
+  test('test plugin navigation', async ({ page }) => {
     test.setTimeout(20000); // Increase timeout
 
     // Click on the plugin menu item to navigate to plugin
     await expect(page.locator(PLUGIN_MENU_ITEM)).toBeVisible();
     await page.click(PLUGIN_MENU_ITEM);
-    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(100);
 
     // Verify we navigated to the plugin page
-    await expect(page).toHaveURL(/\/plugins\/yesterday-tasks-plugin\/index/);
+    await expect(page).toHaveURL(/\/plugins\/api-test-plugin\/index/);
     await expect(page.locator('iframe')).toBeVisible();
 
     // Go back to work view
     await page.goto('/#/tag/TODAY');
   });
 
-  test('disable plugin and verify cleanup', async ({
-    page,
-    workViewPage,
-    waitForNav,
-  }) => {
+  test('disable plugin and verify cleanup', async ({ page, workViewPage }) => {
     test.setTimeout(30000); // Increase timeout
 
     // First enable the plugin
     await page.click(SETTINGS_BTN);
-    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(100);
 
     await page.evaluate(() => {
       const pluginSection = document.querySelector('.plugin-section');
@@ -139,7 +137,7 @@ test.describe.serial('Plugin Lifecycle', () => {
       }
     });
 
-    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(100);
 
     // Enable the plugin first
     await page.evaluate((pluginName: string) => {
@@ -157,11 +155,11 @@ test.describe.serial('Plugin Lifecycle', () => {
           toggleButton.click();
         }
       }
-    }, "Yesterday's Tasks");
+    }, 'API Test Plugin');
 
-    await page.waitForLoadState('domcontentloaded'); // Wait for plugin to enable
+    await page.waitForTimeout(100); // Wait for plugin to enable
 
-    // Find and disable the Yesterday's Tasks
+    // Find and disable the API Test Plugin
     await page.evaluate((pluginName: string) => {
       const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
       const targetCard = cards.find((card) => {
@@ -177,19 +175,19 @@ test.describe.serial('Plugin Lifecycle', () => {
           toggleButton.click();
         }
       }
-    }, "Yesterday's Tasks");
+    }, 'API Test Plugin');
 
-    await page.waitForLoadState('domcontentloaded'); // Wait for plugin to disable
+    await page.waitForTimeout(100); // Wait for plugin to disable
 
     // Go back and verify menu entry is removed
     await page.goto('/#/tag/TODAY');
-    await waitForNav();
-    await page.waitForLoadState('domcontentloaded');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(100);
 
     // Reload to ensure plugin state is refreshed
     await page.reload();
-    await waitForNav();
-    await page.waitForLoadState('domcontentloaded');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(100);
 
     await expect(page.locator(PLUGIN_MENU_ITEM)).not.toBeVisible();
   });

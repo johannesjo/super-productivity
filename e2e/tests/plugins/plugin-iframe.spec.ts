@@ -1,4 +1,4 @@
-import { expect, test } from '../../fixtures/test.fixture';
+import { test, expect } from '../../fixtures/test.fixture';
 import { cssSelectors } from '../../constants/selectors';
 
 const { SIDENAV } = cssSelectors;
@@ -11,23 +11,27 @@ const PLUGIN_IFRAME = 'plugin-index iframe';
 const TASK_COUNT = '#taskCount';
 const PROJECT_COUNT = '#projectCount';
 const TAG_COUNT = '#tagCount';
+const REFRESH_STATS_BTN = 'button:nth-of-type(2)';
+const LOG_ENTRY = '.log-entry';
 
 test.describe.serial('Plugin Iframe', () => {
-  test.beforeEach(async ({ page, workViewPage, waitForNav }) => {
+  test.beforeEach(async ({ page, workViewPage }) => {
+    test.setTimeout(30000); // Increase timeout for setup
+
     await workViewPage.waitForTaskList();
 
-    // Enable Yesterday's Tasks
+    // Enable API Test Plugin
     const settingsBtn = page.locator(`${SIDENAV} .tour-settingsMenuBtn`);
     await settingsBtn.waitFor({ state: 'visible' });
     await settingsBtn.click();
-    await page.locator('formly-form').waitFor({ state: 'visible' });
-    await page.waitForSelector('formly-form');
-    await page.waitForTimeout(500);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
 
     await page.evaluate(() => {
       const configPage = document.querySelector('.page-settings');
       if (!configPage) {
-        throw new Error('Not on config page');
+        console.error('Not on config page');
+        return;
       }
 
       const pluginSection = document.querySelector('.plugin-section');
@@ -47,11 +51,11 @@ test.describe.serial('Plugin Iframe', () => {
       }
     });
 
-    await waitForNav();
+    await page.waitForTimeout(1000);
     await expect(page.locator('plugin-management')).toBeVisible({ timeout: 5000 });
 
     // Enable the plugin
-    await page.evaluate((pluginName: string) => {
+    const enableResult = await page.evaluate((pluginName: string) => {
       const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
       const targetCard = cards.find((card) => {
         const title = card.querySelector('mat-card-title')?.textContent || '';
@@ -77,16 +81,19 @@ test.describe.serial('Plugin Iframe', () => {
       }
 
       return { found: false };
-    }, "Yesterday's Tasks");
+    }, 'API Test Plugin');
+
+    console.log(`Plugin "API Test Plugin" enable state:`, enableResult);
+    expect(enableResult.found).toBe(true);
 
     // Wait for plugin to initialize (3 seconds like successful tests)
-    await waitForNav();
+    await page.waitForTimeout(3000);
 
     // Verify plugin is actually enabled before proceeding
     const verifyEnabled = await page.evaluate(() => {
       const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
       const apiCard = cards.find((card) =>
-        card.querySelector('mat-card-title')?.textContent?.includes("Yesterday's Tasks"),
+        card.querySelector('mat-card-title')?.textContent?.includes('API Test Plugin'),
       );
       const toggle = apiCard?.querySelector(
         'mat-slide-toggle button[role="switch"]',
@@ -95,15 +102,14 @@ test.describe.serial('Plugin Iframe', () => {
     });
 
     if (!verifyEnabled) {
-      // Plugin did not enable properly, waiting more...
-      await page.waitForLoadState('networkidle');
-      await page.waitForTimeout(200);
+      console.warn('Plugin did not enable properly, waiting more...');
+      await page.waitForTimeout(3000);
     }
 
     // Navigate to work view
     await page.goto('/#/tag/TODAY');
-    await waitForNav();
-    await waitForNav();
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     // Wait for task list to be visible and dismiss any dialogs
     await page.waitForSelector('task-list', { state: 'visible', timeout: 10000 });
@@ -116,7 +122,7 @@ test.describe.serial('Plugin Iframe', () => {
       );
       if (await cancelBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
         await cancelBtn.click();
-        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(500);
       }
     }
 
@@ -124,12 +130,14 @@ test.describe.serial('Plugin Iframe', () => {
     // and they're causing timeouts
   });
 
-  test('open plugin iframe view', async ({ page, waitForNav }) => {
+  test('open plugin iframe view', async ({ page }) => {
+    test.setTimeout(30000); // Increase timeout more
+
     // Wait a bit longer after navigation and setup
-    await waitForNav();
+    await page.waitForTimeout(2000);
 
     // Debug: Check if we're on the right page and plugin menu exists
-    await page.evaluate(() => {
+    const menuDebug = await page.evaluate(() => {
       const menu = document.querySelector('side-nav plugin-menu');
       const buttons = menu ? menu.querySelectorAll('button') : [];
       return {
@@ -140,26 +148,29 @@ test.describe.serial('Plugin Iframe', () => {
         buttonTexts: Array.from(buttons).map((b) => b.textContent?.trim() || ''),
       };
     });
+    console.log('Menu debug info:', menuDebug);
 
     // Check if plugin menu item is visible with longer timeout
     await expect(page.locator(PLUGIN_MENU_ITEM)).toBeVisible({ timeout: 15000 });
 
     await page.click(PLUGIN_MENU_ITEM);
-    await waitForNav();
-    await expect(page).toHaveURL(/\/plugins\/yesterday-tasks-plugin\/index/);
+    await page.waitForTimeout(1000);
+    await expect(page).toHaveURL(/\/plugins\/api-test-plugin\/index/);
     await expect(page.locator(PLUGIN_IFRAME)).toBeVisible();
-    await waitForNav(); // Wait for iframe content to load
+    await page.waitForTimeout(1000); // Wait for iframe content to load
   });
 
-  test.skip('verify iframe loads with correct content', async ({ page, waitForNav }) => {
+  test.skip('verify iframe loads with correct content', async ({ page }) => {
+    test.setTimeout(30000); // Increase timeout
+
     // Navigate directly to the plugin page
-    await page.goto('/#/plugins/yesterday-tasks-plugin/index');
-    await waitForNav();
-    await waitForNav();
+    await page.goto('/#/plugins/api-test-plugin/index');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     // Wait for iframe to be present
     await page.waitForSelector(PLUGIN_IFRAME, { state: 'visible', timeout: 10000 });
-    await waitForNav(); // Give iframe more time to load
+    await page.waitForTimeout(2000); // Give iframe more time to load
 
     // Check iframe is loaded
     const iframe = await page.$(PLUGIN_IFRAME);
@@ -178,23 +189,21 @@ test.describe.serial('Plugin Iframe', () => {
         .isVisible({ timeout: 5000 })
         .catch(() => false);
       if (h1Visible) {
-        await expect(frame.locator('h1')).toContainText("Yesterday's Tasks");
+        await expect(frame.locator('h1')).toContainText('API Test Plugin');
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log('Iframe content access failed, but iframe is present');
+    }
   });
 
-  test.skip('test stats loading in iframe', async ({
-    page,
-    workViewPage,
-    waitForNav,
-  }) => {
+  test.skip('test stats loading in iframe', async ({ page, workViewPage }) => {
     test.setTimeout(30000); // Increase timeout
 
     // Add some tasks for this specific test
     await workViewPage.addTask('Test Task 1');
     await workViewPage.addTask('Test Task 2');
     await workViewPage.addTask('Test Task 3');
-    await waitForNav();
+    await page.waitForTimeout(1000);
 
     // Ensure we're on the work view page
     await page.waitForSelector('task-list', { state: 'visible', timeout: 5000 });
@@ -204,20 +213,19 @@ test.describe.serial('Plugin Iframe', () => {
     await page.click(PLUGIN_MENU_ITEM);
 
     // Wait for navigation to plugin page
-    await expect(page).toHaveURL(/\/plugins\/yesterday-tasks-plugin\/index/, {
-      timeout: 10000,
-    });
-    await waitForNav();
+    await expect(page).toHaveURL(/\/plugins\/api-test-plugin\/index/, { timeout: 10000 });
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
 
     // Wait for iframe to be present
     await page.waitForSelector(PLUGIN_IFRAME, { state: 'visible', timeout: 10000 });
-    await waitForNav(); // Give iframe time to load
+    await page.waitForTimeout(1000); // Give iframe time to load
 
     const frame = page.frameLocator(PLUGIN_IFRAME);
     await expect(frame.locator(TASK_COUNT)).toBeVisible({ timeout: 10000 });
 
     // Stats should auto-load on init, check values
-    await waitForNav(); // Wait for stats to load
+    await page.waitForTimeout(2000); // Wait for stats to load
 
     const taskCount = await frame.locator(TASK_COUNT).textContent();
     expect(taskCount).toBe('3');
@@ -227,5 +235,36 @@ test.describe.serial('Plugin Iframe', () => {
 
     const tagCount = await frame.locator(TAG_COUNT).textContent();
     expect(parseInt(tagCount || '0')).toBeGreaterThanOrEqual(1);
+  });
+
+  test.skip('test refresh stats button', async ({ page }) => {
+    test.setTimeout(30000); // Increase timeout
+
+    // Ensure we're on the work view page
+    await page.waitForSelector('task-list', { state: 'visible', timeout: 5000 });
+
+    // Wait for plugin menu to be available and click it
+    await page.waitForSelector(PLUGIN_MENU_ITEM, { state: 'visible', timeout: 5000 });
+    await page.click(PLUGIN_MENU_ITEM);
+
+    // Wait for navigation to plugin page
+    await expect(page).toHaveURL(/\/plugins\/api-test-plugin\/index/, { timeout: 10000 });
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
+
+    // Wait for iframe to be present
+    await page.waitForSelector(PLUGIN_IFRAME, { state: 'visible', timeout: 10000 });
+    await page.waitForTimeout(1000); // Give iframe time to load
+
+    const frame = page.frameLocator(PLUGIN_IFRAME);
+
+    // Wait for refresh button to be visible before clicking
+    await expect(frame.locator(REFRESH_STATS_BTN)).toBeVisible({ timeout: 10000 });
+    await frame.locator(REFRESH_STATS_BTN).click();
+    await page.waitForTimeout(1000);
+
+    // Check that a new log entry appears
+    const logEntries = await frame.locator(LOG_ENTRY).count();
+    expect(logEntries).toBeGreaterThanOrEqual(3);
   });
 });

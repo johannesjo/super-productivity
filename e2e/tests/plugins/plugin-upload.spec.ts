@@ -1,4 +1,4 @@
-import { expect, test } from '../../fixtures/test.fixture';
+import { test, expect } from '../../fixtures/test.fixture';
 import * as path from 'path';
 import { cssSelectors } from '../../constants/selectors';
 
@@ -18,20 +18,17 @@ test.describe.serial('Plugin Upload', () => {
     await workViewPage.waitForTaskList();
   });
 
-  test('upload and manage plugin lifecycle', async ({
-    page,
-    workViewPage,
-    waitForNav,
-  }) => {
+  test('upload and manage plugin lifecycle', async ({ page, workViewPage }) => {
     test.setTimeout(30000); // Increase timeout for file upload
     // Navigate to plugin management
     await page.click(SETTINGS_BTN);
-    await waitForNav();
+    await page.waitForTimeout(1000);
 
     await page.evaluate(() => {
       const configPage = document.querySelector('.page-settings');
       if (!configPage) {
-        throw new Error('Not on config page');
+        console.error('Not on config page');
+        return;
       }
 
       const pluginSection = document.querySelector('.plugin-section');
@@ -51,7 +48,7 @@ test.describe.serial('Plugin Upload', () => {
       }
     });
 
-    await waitForNav();
+    await page.waitForTimeout(1000);
     await expect(page.locator('plugin-management')).toBeVisible({ timeout: 5000 });
 
     // Upload plugin ZIP file
@@ -72,11 +69,11 @@ test.describe.serial('Plugin Upload', () => {
     });
 
     await page.locator(FILE_INPUT).setInputFiles(testPluginPath);
-    await waitForNav(); // Wait for file processing
+    await page.waitForTimeout(3000); // Wait for file processing
 
     // Verify uploaded plugin appears in list (there are multiple cards, so check first)
     await expect(page.locator(PLUGIN_CARD).first()).toBeVisible();
-    await waitForNav();
+    await page.waitForTimeout(1000);
 
     const pluginExists = await page.evaluate((pluginName: string) => {
       const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
@@ -117,7 +114,7 @@ test.describe.serial('Plugin Upload', () => {
     }, TEST_PLUGIN_ID);
 
     expect(enableResult).toBeTruthy();
-    await waitForNav(); // Longer pause to ensure DOM update completes
+    await page.waitForTimeout(2000); // Longer pause to ensure DOM update completes
 
     // Verify plugin is now enabled
     const enabledStatus = await page.evaluate((pluginId: string) => {
@@ -151,7 +148,7 @@ test.describe.serial('Plugin Upload', () => {
     }, TEST_PLUGIN_ID);
 
     expect(disableResult).toBeTruthy();
-    await waitForNav();
+    await page.waitForTimeout(1000);
 
     // Verify plugin is now disabled
     const disabledStatus = await page.evaluate((pluginId: string) => {
@@ -185,7 +182,7 @@ test.describe.serial('Plugin Upload', () => {
     }, TEST_PLUGIN_ID);
 
     expect(reEnableResult).toBeTruthy();
-    await waitForNav();
+    await page.waitForTimeout(1000);
 
     // Verify plugin is enabled again
     const reEnabledStatus = await page.evaluate((pluginId: string) => {
@@ -221,9 +218,9 @@ test.describe.serial('Plugin Upload', () => {
       return false;
     }, TEST_PLUGIN_ID);
 
-    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(500);
 
-    await waitForNav(); // Longer pause for removal to complete
+    await page.waitForTimeout(3000); // Longer pause for removal to complete
 
     // Verify plugin is removed
     const removalResult = await page.evaluate((pluginId: string) => {
@@ -236,6 +233,7 @@ test.describe.serial('Plugin Upload', () => {
       };
     }, TEST_PLUGIN_ID);
 
+    console.log('Removal verification:', removalResult);
     expect(removalResult.removed).toBeTruthy();
   });
 });

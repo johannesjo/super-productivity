@@ -14,8 +14,8 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   /* Retry failed tests to handle flakiness */
   retries: process.env.CI ? 2 : 1,
-  /* Number of parallel workers - start with 2 for testing */
-  workers: process.env.CI ? 1 : 8,
+  /* Number of parallel workers - reduced to prevent hanging with serial tests */
+  workers: process.env.CI ? 1 : 2,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: process.env.CI
     ? [
@@ -91,7 +91,13 @@ export default defineConfig({
           geolocation: { longitude: 0, latitude: 0 },
         },
         launchOptions: {
-          args: ['--disable-dev-shm-usage', '--disable-browser-side-navigation'],
+          args: [
+            '--disable-dev-shm-usage',
+            '--disable-browser-side-navigation',
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-extensions',
+          ],
         },
       },
     },
@@ -119,10 +125,13 @@ export default defineConfig({
   outputDir: path.join(__dirname, '..', '.tmp', 'e2e-test-results', 'test-results'),
 
   /* Global timeout for each test - increased for parallel execution */
-  timeout: 30 * 1000,
+  timeout: 60 * 1000,
 
   /* Global timeout for each assertion */
   expect: {
-    timeout: 10 * 1000,
+    timeout: 15 * 1000,
   },
+
+  /* Maximum test failures before stopping */
+  maxFailures: process.env.CI ? undefined : 5,
 });

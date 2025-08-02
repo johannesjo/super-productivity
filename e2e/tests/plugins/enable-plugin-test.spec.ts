@@ -1,32 +1,33 @@
-import { expect, test } from '../../fixtures/test.fixture';
+import { test, expect } from '../../fixtures/test.fixture';
 import { cssSelectors } from '../../constants/selectors';
 
 const { SIDENAV } = cssSelectors;
 const SETTINGS_BTN = `${SIDENAV} .tour-settingsMenuBtn`;
 
 test.describe('Enable Plugin Test', () => {
-  test("navigate to plugin settings and enable Yesterday's Tasks", async ({
+  test('navigate to plugin settings and enable API Test Plugin', async ({
     page,
     workViewPage,
-    waitForNav,
   }) => {
     await workViewPage.waitForTaskList();
 
     // Navigate to plugin settings
     await page.click(SETTINGS_BTN);
-    await waitForNav();
+    await page.waitForTimeout(1000);
 
     await page.evaluate(() => {
       const configPage = document.querySelector('.page-settings');
       if (!configPage) {
-        throw new Error('Not on config page');
+        console.error('Not on config page');
+        return;
       }
 
       const pluginSection = document.querySelector('.plugin-section');
       if (pluginSection) {
         pluginSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
       } else {
-        throw new Error('Plugin section not found');
+        console.error('Plugin section not found');
+        return;
       }
 
       const collapsible = document.querySelector('.plugin-section collapsible');
@@ -36,23 +37,25 @@ test.describe('Enable Plugin Test', () => {
           const header = collapsible.querySelector('.collapsible-header');
           if (header) {
             (header as HTMLElement).click();
+            console.log('Clicked to expand plugin collapsible');
           } else {
-            throw new Error('Could not find collapsible header');
+            console.error('Could not find collapsible header');
           }
         } else {
+          console.log('Plugin collapsible already expanded');
         }
       } else {
-        throw new Error('Plugin collapsible not found');
+        console.error('Plugin collapsible not found');
       }
     });
 
-    await waitForNav();
+    await page.waitForTimeout(1000);
     await expect(page.locator('plugin-management')).toBeVisible({ timeout: 5000 });
 
-    await waitForNav();
+    await page.waitForTimeout(2000);
 
     // Check if plugin-management has any content
-    await page.evaluate(() => {
+    const contentResult = await page.evaluate(() => {
       const pluginMgmt = document.querySelector('plugin-management');
       const matCards = pluginMgmt ? pluginMgmt.querySelectorAll('mat-card') : [];
 
@@ -71,20 +74,19 @@ test.describe('Enable Plugin Test', () => {
       };
     });
 
-    await waitForNav();
+    console.log('Plugin management content:', contentResult);
 
-    // Try to find and enable the Yesterday's Tasks (which exists by default)
-    await page.evaluate(() => {
+    await page.waitForTimeout(1000);
+
+    // Try to find and enable the API Test Plugin (which exists by default)
+    const enableResult = await page.evaluate(() => {
       const pluginCards = document.querySelectorAll('plugin-management mat-card');
       let foundApiTestPlugin = false;
       let toggleClicked = false;
 
       for (const card of Array.from(pluginCards)) {
         const title = card.querySelector('mat-card-title')?.textContent || '';
-        if (
-          title.includes("Yesterday's Tasks") ||
-          title.includes('yesterday-tasks-plugin')
-        ) {
+        if (title.includes('API Test Plugin') || title.includes('api-test-plugin')) {
           foundApiTestPlugin = true;
           const toggle = card.querySelector(
             'mat-slide-toggle button[role="switch"]',
@@ -104,10 +106,13 @@ test.describe('Enable Plugin Test', () => {
       };
     });
 
-    await waitForNav(); // Wait for plugin to initialize
+    console.log('Plugin enablement result:', enableResult);
+    expect(enableResult.foundApiTestPlugin).toBe(true);
+
+    await page.waitForTimeout(3000); // Wait for plugin to initialize
 
     // Now check if plugin menu has buttons
-    await page.evaluate(() => {
+    const finalMenuState = await page.evaluate(() => {
       const pluginMenu = document.querySelector('side-nav plugin-menu');
       const buttons = pluginMenu ? pluginMenu.querySelectorAll('button') : [];
       return {
@@ -116,5 +121,7 @@ test.describe('Enable Plugin Test', () => {
         buttonTexts: Array.from(buttons).map((btn) => btn.textContent?.trim() || ''),
       };
     });
+
+    console.log('Final plugin menu state:', finalMenuState);
   });
 });

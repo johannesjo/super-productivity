@@ -1,4 +1,4 @@
-import { expect, test } from '../../fixtures/test.fixture';
+import { test, expect } from '../../fixtures/test.fixture';
 
 const SIDENAV = 'side-nav';
 const ROUTER_WRAPPER = '.route-wrapper';
@@ -49,6 +49,7 @@ test.describe.serial('Plugin Visibility', () => {
       return pageResults;
     });
 
+    console.log('Page structure results:', results);
     expect(results).toBeTruthy();
   });
 
@@ -60,12 +61,14 @@ test.describe.serial('Plugin Visibility', () => {
     await page.click(SETTINGS_BTN);
     await page.waitForSelector(ROUTER_WRAPPER, { state: 'visible' });
 
-    await page.evaluate(() => {
+    const contentAnalysis = await page.evaluate(() => {
       const configContent =
         document.querySelector('.page-settings')?.innerHTML || 'No config page found';
+      console.log('Config page content length:', configContent.length);
 
       // Look for any mentions of plugin
       const pluginMentions = configContent.match(/plugin/gi) || [];
+      console.log('Plugin mentions found:', pluginMentions.length);
 
       return {
         contentLength: configContent.length,
@@ -73,5 +76,7 @@ test.describe.serial('Plugin Visibility', () => {
         hasPluginText: configContent.toLowerCase().includes('plugin'),
       };
     });
+
+    console.log('Content analysis:', contentAnalysis);
   });
 });

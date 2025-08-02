@@ -1,11 +1,11 @@
-import { test } from '../../fixtures/test.fixture';
+import { test, expect } from '../../fixtures/test.fixture';
 
 test.describe.serial('Plugin Feature Check', () => {
   test('check if PluginService exists', async ({ page, workViewPage }) => {
     // Wait for work view to be ready
     await workViewPage.waitForTaskList();
 
-    await page.evaluate(() => {
+    const result = await page.evaluate(() => {
       // Check if Angular is loaded
       const hasAngular = !!(window as any).ng;
 
@@ -18,10 +18,12 @@ test.describe.serial('Plugin Feature Check', () => {
           const ng = (window as any).ng;
           const appElement = document.querySelector('app-root');
           if (appElement) {
-            ng.getComponent(appElement);
+            const appComponent = ng.getComponent(appElement);
+            console.log('App component found:', !!appComponent);
 
             // Try to find PluginService in injector
             const injector = ng.getInjector(appElement);
+            console.log('Injector found:', !!injector);
 
             // Log available service tokens
             if (injector && injector.get) {
@@ -33,6 +35,7 @@ test.describe.serial('Plugin Feature Check', () => {
                     const service = injector.get(name);
                     if (service) {
                       hasPluginService = true;
+                      console.log(`Found service with name: ${name}`);
                       break;
                     }
                   } catch (e: any) {
@@ -55,6 +58,11 @@ test.describe.serial('Plugin Feature Check', () => {
         errorMessage,
       };
     });
+
+    console.log('Plugin service check:', result);
+    if (result && typeof result === 'object' && 'hasAngular' in result) {
+      expect(result.hasAngular).toBe(true);
+    }
   });
 
   test('check plugin UI elements in DOM', async ({ page, workViewPage }) => {
@@ -64,7 +72,7 @@ test.describe.serial('Plugin Feature Check', () => {
     // Navigate to config page
     await page.goto('/#/config');
 
-    await page.evaluate(() => {
+    const results = await page.evaluate(() => {
       const uiResults: any = {};
 
       // Check various plugin-related elements
@@ -86,5 +94,7 @@ test.describe.serial('Plugin Feature Check', () => {
 
       return uiResults;
     });
+
+    console.log('Plugin UI elements:', results);
   });
 });

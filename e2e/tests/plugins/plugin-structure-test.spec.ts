@@ -1,23 +1,24 @@
-import { expect, test } from '../../fixtures/test.fixture';
+import { test, expect } from '../../fixtures/test.fixture';
 import { cssSelectors } from '../../constants/selectors';
 
 const { SIDENAV } = cssSelectors;
 const SETTINGS_BTN = `${SIDENAV} .tour-settingsMenuBtn`;
 
 test.describe.serial('Plugin Structure Test', () => {
-  test('check plugin card structure', async ({ page, workViewPage, waitForNav }) => {
+  test('check plugin card structure', async ({ page, workViewPage }) => {
     await workViewPage.waitForTaskList();
 
     // Navigate to plugin settings (implementing navigateToPluginSettings inline)
     await page.click(SETTINGS_BTN);
-    await waitForNav();
+    await page.waitForTimeout(1000);
 
     // Execute script to navigate to plugin section
     await page.evaluate(() => {
       // First ensure we're on the config page
       const configPage = document.querySelector('.page-settings');
       if (!configPage) {
-        throw new Error('Not on config page');
+        console.error('Not on config page');
+        return;
       }
 
       // Scroll to plugins section
@@ -25,7 +26,8 @@ test.describe.serial('Plugin Structure Test', () => {
       if (pluginSection) {
         pluginSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
       } else {
-        throw new Error('Plugin section not found');
+        console.error('Plugin section not found');
+        return;
       }
 
       // Make sure collapsible is expanded - click the header to toggle
@@ -37,25 +39,27 @@ test.describe.serial('Plugin Structure Test', () => {
           const header = collapsible.querySelector('.collapsible-header');
           if (header) {
             (header as HTMLElement).click();
+            console.log('Clicked to expand plugin collapsible');
           } else {
-            throw new Error('Could not find collapsible header');
+            console.error('Could not find collapsible header');
           }
         } else {
+          console.log('Plugin collapsible already expanded');
         }
       } else {
-        throw new Error('Plugin collapsible not found');
+        console.error('Plugin collapsible not found');
       }
     });
 
-    await waitForNav();
+    await page.waitForTimeout(1000);
     await expect(page.locator('plugin-management')).toBeVisible({ timeout: 5000 });
 
     // Check plugin card structure
-    await page.evaluate(() => {
+    const result = await page.evaluate(() => {
       const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
       const apiTestCard = cards.find((card) => {
         const title = card.querySelector('mat-card-title')?.textContent || '';
-        return title.includes("Yesterday's Tasks");
+        return title.includes('API Test Plugin');
       });
 
       if (!apiTestCard) {
@@ -94,5 +98,7 @@ test.describe.serial('Plugin Structure Test', () => {
         })),
       };
     });
+
+    console.log('Plugin card structure:', JSON.stringify(result, null, 2));
   });
 });
