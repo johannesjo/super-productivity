@@ -1,19 +1,20 @@
-import { test, expect } from '../../fixtures/test.fixture';
+import { expect, test } from '../../fixtures/test.fixture';
 import { cssSelectors } from '../../constants/selectors';
 
 const { SIDENAV } = cssSelectors;
 const SETTINGS_BTN = `${SIDENAV} .tour-settingsMenuBtn`;
 
 test.describe('Enable Plugin Test', () => {
-  test('navigate to plugin settings and enable API Test Plugin', async ({
+  test("navigate to plugin settings and enable Yesterday's Tasks", async ({
     page,
     workViewPage,
+    waitForNav,
   }) => {
     await workViewPage.waitForTaskList();
 
     // Navigate to plugin settings
     await page.click(SETTINGS_BTN);
-    await page.waitForLoadState('networkidle');
+    await waitForNav();
 
     await page.evaluate(() => {
       const configPage = document.querySelector('.page-settings');
@@ -45,10 +46,10 @@ test.describe('Enable Plugin Test', () => {
       }
     });
 
-    await page.waitForLoadState('networkidle');
+    await waitForNav();
     await expect(page.locator('plugin-management')).toBeVisible({ timeout: 5000 });
 
-    await page.waitForLoadState('networkidle');
+    await waitForNav();
 
     // Check if plugin-management has any content
     await page.evaluate(() => {
@@ -70,9 +71,9 @@ test.describe('Enable Plugin Test', () => {
       };
     });
 
-    await page.waitForLoadState('networkidle');
+    await waitForNav();
 
-    // Try to find and enable the API Test Plugin (which exists by default)
+    // Try to find and enable the Yesterday's Tasks (which exists by default)
     await page.evaluate(() => {
       const pluginCards = document.querySelectorAll('plugin-management mat-card');
       let foundApiTestPlugin = false;
@@ -80,7 +81,10 @@ test.describe('Enable Plugin Test', () => {
 
       for (const card of Array.from(pluginCards)) {
         const title = card.querySelector('mat-card-title')?.textContent || '';
-        if (title.includes('API Test Plugin') || title.includes('api-test-plugin')) {
+        if (
+          title.includes("Yesterday's Tasks") ||
+          title.includes('yesterday-tasks-plugin')
+        ) {
           foundApiTestPlugin = true;
           const toggle = card.querySelector(
             'mat-slide-toggle button[role="switch"]',
@@ -100,7 +104,7 @@ test.describe('Enable Plugin Test', () => {
       };
     });
 
-    await page.waitForLoadState('networkidle'); // Wait for plugin to initialize
+    await waitForNav(); // Wait for plugin to initialize
 
     // Now check if plugin menu has buttons
     await page.evaluate(() => {

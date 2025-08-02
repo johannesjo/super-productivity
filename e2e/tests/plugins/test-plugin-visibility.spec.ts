@@ -1,4 +1,4 @@
-import { test, expect } from '../../fixtures/test.fixture';
+import { expect, test } from '../../fixtures/test.fixture';
 
 const SIDENAV = 'side-nav';
 const ROUTER_WRAPPER = '.route-wrapper';

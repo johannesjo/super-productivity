@@ -1,4 +1,4 @@
-import { test as base, BrowserContext } from '@playwright/test';
+import { BrowserContext, test as base } from '@playwright/test';
 import { WorkViewPage } from '../pages/work-view.page';
 import { ProjectPage } from '../pages/project.page';
 
@@ -6,6 +6,7 @@ type TestFixtures = {
   workViewPage: WorkViewPage;
   projectPage: ProjectPage;
   isolatedContext: BrowserContext;
+  waitForNav: (selector?: string) => Promise<void>;
   testPrefix: string;
 };
 
@@ -37,28 +38,10 @@ export const test = base.extend<TestFixtures>({
     await page.waitForLoadState('networkidle');
     await page.waitForSelector('body', { state: 'visible' });
 
-    // Set localStorage after navigation to avoid cross-origin issues
-    // Note: The app checks for the presence of this key, not its value
-    await page.evaluate(() => {
-      window.localStorage.setItem('SUP_IS_SHOW_TOUR', 'true');
-    });
-
     // Wait for the app to react to the localStorage change
     await page.waitForLoadState('domcontentloaded');
 
     // Double-check: Dismiss any tour dialog if it still appears
-    const tourDialog = page.locator('[data-shepherd-step-id="Welcome"]');
-    if (await tourDialog.isVisible({ timeout: 1000 }).catch(() => false)) {
-      const cancelBtn = page.locator(
-        'button:has-text("No thanks"), .shepherd-cancel-icon, .shepherd-button-secondary',
-      );
-      if (await cancelBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
-        await cancelBtn.click();
-        // Wait for the dialog to close
-        await tourDialog.waitFor({ state: 'hidden', timeout: 1000 }).catch(() => {});
-      }
-    }
-
     await use(page);
 
     // Cleanup
@@ -78,6 +61,19 @@ export const test = base.extend<TestFixtures>({
 
   projectPage: async ({ page, testPrefix }, use) => {
     await use(new ProjectPage(page, testPrefix));
+  },
+
+  waitForNav: async ({ page }, use) => {
+    const waitForNav = async (selector?: string): Promise<void> => {
+      await page.waitForLoadState('networkidle');
+      if (selector) {
+        await page.waitForSelector(selector);
+        await page.waitForTimeout(100);
+      } else {
+        await page.waitForTimeout(500);
+      }
+    };
+    await use(waitForNav);
   },
 });
 

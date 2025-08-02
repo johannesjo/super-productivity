@@ -1,4 +1,4 @@
-import { test, expect } from '../../fixtures/test.fixture';
+import { expect, test } from '../../fixtures/test.fixture';
 import * as path from 'path';
 import { cssSelectors } from '../../constants/selectors';
 
@@ -18,11 +18,15 @@ test.describe.serial('Plugin Upload', () => {
     await workViewPage.waitForTaskList();
   });
 
-  test('upload and manage plugin lifecycle', async ({ page, workViewPage }) => {
+  test('upload and manage plugin lifecycle', async ({
+    page,
+    workViewPage,
+    waitForNav,
+  }) => {
     test.setTimeout(30000); // Increase timeout for file upload
     // Navigate to plugin management
     await page.click(SETTINGS_BTN);
-    await page.waitForLoadState('networkidle');
+    await waitForNav();
 
     await page.evaluate(() => {
       const configPage = document.querySelector('.page-settings');
@@ -47,7 +51,7 @@ test.describe.serial('Plugin Upload', () => {
       }
     });
 
-    await page.waitForLoadState('networkidle');
+    await waitForNav();
     await expect(page.locator('plugin-management')).toBeVisible({ timeout: 5000 });
 
     // Upload plugin ZIP file
@@ -68,11 +72,11 @@ test.describe.serial('Plugin Upload', () => {
     });
 
     await page.locator(FILE_INPUT).setInputFiles(testPluginPath);
-    await page.waitForLoadState('networkidle'); // Wait for file processing
+    await waitForNav(); // Wait for file processing
 
     // Verify uploaded plugin appears in list (there are multiple cards, so check first)
     await expect(page.locator(PLUGIN_CARD).first()).toBeVisible();
-    await page.waitForLoadState('networkidle');
+    await waitForNav();
 
     const pluginExists = await page.evaluate((pluginName: string) => {
       const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
@@ -113,7 +117,7 @@ test.describe.serial('Plugin Upload', () => {
     }, TEST_PLUGIN_ID);
 
     expect(enableResult).toBeTruthy();
-    await page.waitForLoadState('networkidle'); // Longer pause to ensure DOM update completes
+    await waitForNav(); // Longer pause to ensure DOM update completes
 
     // Verify plugin is now enabled
     const enabledStatus = await page.evaluate((pluginId: string) => {
@@ -147,7 +151,7 @@ test.describe.serial('Plugin Upload', () => {
     }, TEST_PLUGIN_ID);
 
     expect(disableResult).toBeTruthy();
-    await page.waitForLoadState('networkidle');
+    await waitForNav();
 
     // Verify plugin is now disabled
     const disabledStatus = await page.evaluate((pluginId: string) => {
@@ -181,7 +185,7 @@ test.describe.serial('Plugin Upload', () => {
     }, TEST_PLUGIN_ID);
 
     expect(reEnableResult).toBeTruthy();
-    await page.waitForLoadState('networkidle');
+    await waitForNav();
 
     // Verify plugin is enabled again
     const reEnabledStatus = await page.evaluate((pluginId: string) => {
@@ -219,7 +223,7 @@ test.describe.serial('Plugin Upload', () => {
 
     await page.waitForLoadState('domcontentloaded');
 
-    await page.waitForLoadState('networkidle'); // Longer pause for removal to complete
+    await waitForNav(); // Longer pause for removal to complete
 
     // Verify plugin is removed
     const removalResult = await page.evaluate((pluginId: string) => {

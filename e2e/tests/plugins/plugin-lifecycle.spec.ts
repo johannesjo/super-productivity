@@ -1,4 +1,4 @@
-import { test, expect } from '../../fixtures/test.fixture';
+import { expect, test } from '../../fixtures/test.fixture';
 import { cssSelectors } from '../../constants/selectors';
 
 const { SIDENAV } = cssSelectors;
@@ -9,14 +9,14 @@ const PLUGIN_MENU = `${SIDENAV} plugin-menu`;
 const PLUGIN_MENU_ITEM = `${PLUGIN_MENU} button`;
 
 test.describe.serial('Plugin Lifecycle', () => {
-  test.beforeEach(async ({ page, workViewPage }) => {
+  test.beforeEach(async ({ page, workViewPage, waitForNav }) => {
     await workViewPage.waitForTaskList();
 
-    // Enable API Test Plugin
+    // Enable Yesterday's Tasks
     const settingsBtn = page.locator(SETTINGS_BTN);
     await settingsBtn.waitFor({ state: 'visible' });
     await settingsBtn.click();
-    await page.waitForLoadState('networkidle');
+    await waitForNav();
     await page.waitForLoadState('domcontentloaded');
 
     await page.evaluate(() => {
@@ -72,7 +72,7 @@ test.describe.serial('Plugin Lifecycle', () => {
       }
 
       return { found: false };
-    }, 'API Test Plugin');
+    }, "Yesterday's Tasks");
 
     expect(enableResult.found).toBe(true);
 
@@ -81,23 +81,23 @@ test.describe.serial('Plugin Lifecycle', () => {
 
     // Go back to work view
     await page.goto('/#/tag/TODAY');
-    await page.waitForLoadState('networkidle');
+    await waitForNav();
     await page.waitForLoadState('domcontentloaded');
 
     // Wait for task list to be visible
     await page.waitForSelector('task-list', { state: 'visible', timeout: 10000 });
   });
 
-  test('verify plugin is initially loaded', async ({ page }) => {
+  test('verify plugin is initially loaded', async ({ page, waitForNav }) => {
     test.setTimeout(20000); // Increase timeout
     await page.waitForLoadState('domcontentloaded'); // Wait for plugins to initialize
 
     // Plugin doesn't show snack bar on load, check plugin menu instead
     await expect(page.locator(PLUGIN_MENU_ITEM)).toBeVisible({ timeout: 10000 });
-    await expect(page.locator(PLUGIN_MENU_ITEM)).toContainText('API Test Plugin');
+    await expect(page.locator(PLUGIN_MENU_ITEM)).toContainText("Yesterday's Tasks");
   });
 
-  test('test plugin navigation', async ({ page }) => {
+  test('test plugin navigation', async ({ page, waitForNav }) => {
     test.setTimeout(20000); // Increase timeout
 
     // Click on the plugin menu item to navigate to plugin
@@ -106,14 +106,18 @@ test.describe.serial('Plugin Lifecycle', () => {
     await page.waitForLoadState('domcontentloaded');
 
     // Verify we navigated to the plugin page
-    await expect(page).toHaveURL(/\/plugins\/api-test-plugin\/index/);
+    await expect(page).toHaveURL(/\/plugins\/yesterday-tasks-plugin\/index/);
     await expect(page.locator('iframe')).toBeVisible();
 
     // Go back to work view
     await page.goto('/#/tag/TODAY');
   });
 
-  test('disable plugin and verify cleanup', async ({ page, workViewPage }) => {
+  test('disable plugin and verify cleanup', async ({
+    page,
+    workViewPage,
+    waitForNav,
+  }) => {
     test.setTimeout(30000); // Increase timeout
 
     // First enable the plugin
@@ -153,11 +157,11 @@ test.describe.serial('Plugin Lifecycle', () => {
           toggleButton.click();
         }
       }
-    }, 'API Test Plugin');
+    }, "Yesterday's Tasks");
 
     await page.waitForLoadState('domcontentloaded'); // Wait for plugin to enable
 
-    // Find and disable the API Test Plugin
+    // Find and disable the Yesterday's Tasks
     await page.evaluate((pluginName: string) => {
       const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
       const targetCard = cards.find((card) => {
@@ -173,18 +177,18 @@ test.describe.serial('Plugin Lifecycle', () => {
           toggleButton.click();
         }
       }
-    }, 'API Test Plugin');
+    }, "Yesterday's Tasks");
 
     await page.waitForLoadState('domcontentloaded'); // Wait for plugin to disable
 
     // Go back and verify menu entry is removed
     await page.goto('/#/tag/TODAY');
-    await page.waitForLoadState('networkidle');
+    await waitForNav();
     await page.waitForLoadState('domcontentloaded');
 
     // Reload to ensure plugin state is refreshed
     await page.reload();
-    await page.waitForLoadState('networkidle');
+    await waitForNav();
     await page.waitForLoadState('domcontentloaded');
 
     await expect(page.locator(PLUGIN_MENU_ITEM)).not.toBeVisible();

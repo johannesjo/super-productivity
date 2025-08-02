@@ -1,16 +1,16 @@
-import { test, expect } from '../../fixtures/test.fixture';
+import { expect, test } from '../../fixtures/test.fixture';
 import { cssSelectors } from '../../constants/selectors';
 
 const { SIDENAV } = cssSelectors;
 const SETTINGS_BTN = `${SIDENAV} .tour-settingsMenuBtn`;
 
 test.describe.serial('Plugin Structure Test', () => {
-  test('check plugin card structure', async ({ page, workViewPage }) => {
+  test('check plugin card structure', async ({ page, workViewPage, waitForNav }) => {
     await workViewPage.waitForTaskList();
 
     // Navigate to plugin settings (implementing navigateToPluginSettings inline)
     await page.click(SETTINGS_BTN);
-    await page.waitForLoadState('networkidle');
+    await waitForNav();
 
     // Execute script to navigate to plugin section
     await page.evaluate(() => {
@@ -47,7 +47,7 @@ test.describe.serial('Plugin Structure Test', () => {
       }
     });
 
-    await page.waitForLoadState('networkidle');
+    await waitForNav();
     await expect(page.locator('plugin-management')).toBeVisible({ timeout: 5000 });
 
     // Check plugin card structure
@@ -55,7 +55,7 @@ test.describe.serial('Plugin Structure Test', () => {
       const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
       const apiTestCard = cards.find((card) => {
         const title = card.querySelector('mat-card-title')?.textContent || '';
-        return title.includes('API Test Plugin');
+        return title.includes("Yesterday's Tasks");
       });
 
       if (!apiTestCard) {
