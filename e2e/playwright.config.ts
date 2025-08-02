@@ -15,7 +15,7 @@ export default defineConfig({
   /* Retry failed tests to handle flakiness */
   retries: process.env.CI ? 2 : 1,
   /* Number of parallel workers - reduced to prevent hanging with serial tests */
-  workers: process.env.CI ? 1 : 2,
+  workers: process.env.CI ? 1 : 8,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: process.env.CI
     ? [
