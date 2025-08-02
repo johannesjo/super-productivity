@@ -108,5 +108,7 @@ src/assets/bundled-plugins/**/*.*
 # testing webdav server
 e2e-webdav-data
 
+playwright-report/
+
 
 electron-builder-appx.yaml
