@@ -1,6 +1,6 @@
 import { test, expect } from '../../fixtures/test.fixture';
 import * as path from 'path';
-import { cssSelectors } from '../../../e2e/e2e.const';
+import { cssSelectors } from '../../constants/selectors';
 
 const { SIDENAV } = cssSelectors;
 
