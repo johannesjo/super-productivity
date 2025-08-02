@@ -51,7 +51,7 @@ npm run test:file <filepath>
 
 - Unit tests: `npm test` - Uses Jasmine/Karma, tests are co-located with source files (`.spec.ts`)
 - E2E tests: `npm run e2e` - Uses Nightwatch, located in `/e2e/src/`
-- Playwright E2E tests: Located in `/e2e-playwright/`
+- Playwright E2E tests: Located in `/e2e/`
   - `npm run e2e:playwright` - Run all tests with minimal output (shows failures clearly)
   - `npm run e2e:playwright:file <path>` - Run a single test file with detailed output
     - Example: `npm run e2e:playwright:file tests/work-view/work-view.spec.ts`

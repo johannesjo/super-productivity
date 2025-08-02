@@ -52,7 +52,6 @@ test.describe('Planner Navigation', () => {
     // Navigate to planner
     await plannerPage.navigateToPlanner();
     await plannerPage.waitForPlannerView();
-    const urlBeforeRefresh = page.url();
 
     // Refresh page
     await page.reload();
