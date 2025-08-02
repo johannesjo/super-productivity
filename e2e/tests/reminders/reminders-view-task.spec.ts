@@ -51,19 +51,19 @@ test.describe('Reminders View Task', () => {
 
     // Wait for dialog
     await page.waitForSelector(DIALOG_CONTAINER, { state: 'visible' });
-    await page.waitForTimeout(100);
+    await page.waitForLoadState('domcontentloaded');
 
     // Set time
     await page.waitForSelector(TIME_INP, { state: 'visible' });
-    await page.waitForTimeout(150);
+    await page.waitForLoadState('domcontentloaded');
 
     // Focus and set time value
     await page.click(TIME_INP);
-    await page.waitForTimeout(150);
+    await page.waitForLoadState('domcontentloaded');
 
     // Clear and set value
     await page.fill(TIME_INP, '');
-    await page.waitForTimeout(100);
+    await page.waitForLoadState('domcontentloaded');
 
     // Set the time value
     await page.evaluate(
@@ -78,15 +78,15 @@ test.describe('Reminders View Task', () => {
       { selector: TIME_INP, value: timeValue },
     );
 
-    await page.waitForTimeout(200);
+    await page.waitForLoadState('domcontentloaded');
 
     // Also set value normally
     await page.fill(TIME_INP, timeValue);
-    await page.waitForTimeout(200);
+    await page.waitForLoadState('domcontentloaded');
 
     // Tab to commit value
     await page.keyboard.press('Tab');
-    await page.waitForTimeout(200);
+    await page.waitForLoadState('domcontentloaded');
 
     // Submit dialog
     await page.waitForSelector(DIALOG_SUBMIT, { state: 'visible' });

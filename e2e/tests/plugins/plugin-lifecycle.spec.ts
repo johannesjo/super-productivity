@@ -22,8 +22,7 @@ test.describe.serial('Plugin Lifecycle', () => {
     await page.evaluate(() => {
       const configPage = document.querySelector('.page-settings');
       if (!configPage) {
-        console.error('Not on config page');
-        return;
+        throw new Error('Not on config page');
       }
 
       const pluginSection = document.querySelector('.plugin-section');
@@ -75,7 +74,6 @@ test.describe.serial('Plugin Lifecycle', () => {
       return { found: false };
     }, 'API Test Plugin');
 
-    console.log(`Plugin "API Test Plugin" enable state:`, enableResult);
     expect(enableResult.found).toBe(true);
 
     // Wait for plugin to initialize (3 seconds like successful tests)
@@ -92,7 +90,7 @@ test.describe.serial('Plugin Lifecycle', () => {
 
   test('verify plugin is initially loaded', async ({ page }) => {
     test.setTimeout(20000); // Increase timeout
-    await page.waitForTimeout(100); // Wait for plugins to initialize
+    await page.waitForLoadState('domcontentloaded'); // Wait for plugins to initialize
 
     // Plugin doesn't show snack bar on load, check plugin menu instead
     await expect(page.locator(PLUGIN_MENU_ITEM)).toBeVisible({ timeout: 10000 });
@@ -157,7 +155,7 @@ test.describe.serial('Plugin Lifecycle', () => {
       }
     }, 'API Test Plugin');
 
-    await page.waitForTimeout(100); // Wait for plugin to enable
+    await page.waitForLoadState('domcontentloaded'); // Wait for plugin to enable
 
     // Find and disable the API Test Plugin
     await page.evaluate((pluginName: string) => {
@@ -177,7 +175,7 @@ test.describe.serial('Plugin Lifecycle', () => {
       }
     }, 'API Test Plugin');
 
-    await page.waitForTimeout(100); // Wait for plugin to disable
+    await page.waitForLoadState('domcontentloaded'); // Wait for plugin to disable
 
     // Go back and verify menu entry is removed
     await page.goto('/#/tag/TODAY');

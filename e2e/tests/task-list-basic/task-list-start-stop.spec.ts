@@ -20,7 +20,7 @@ test.describe('Task List - Start/Stop', () => {
     await playBtn.click();
 
     // Wait a moment for the class to be applied
-    await page.waitForTimeout(200);
+    await page.waitForLoadState('domcontentloaded');
 
     // Verify the task has the 'isCurrent' class
     await expect(firstTask).toHaveClass(/isCurrent/);
@@ -32,7 +32,7 @@ test.describe('Task List - Start/Stop', () => {
     await playBtn.click();
 
     // Wait a moment for the class to be removed
-    await page.waitForTimeout(200);
+    await page.waitForLoadState('domcontentloaded');
 
     // Verify the task no longer has the 'isCurrent' class
     await expect(firstTask).not.toHaveClass(/isCurrent/);

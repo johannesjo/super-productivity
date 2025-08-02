@@ -17,8 +17,7 @@ test.describe.serial('Plugin Structure Test', () => {
       // First ensure we're on the config page
       const configPage = document.querySelector('.page-settings');
       if (!configPage) {
-        console.error('Not on config page');
-        return;
+        throw new Error('Not on config page');
       }
 
       // Scroll to plugins section
@@ -26,8 +25,7 @@ test.describe.serial('Plugin Structure Test', () => {
       if (pluginSection) {
         pluginSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
       } else {
-        console.error('Plugin section not found');
-        return;
+        throw new Error('Plugin section not found');
       }
 
       // Make sure collapsible is expanded - click the header to toggle
@@ -39,23 +37,21 @@ test.describe.serial('Plugin Structure Test', () => {
           const header = collapsible.querySelector('.collapsible-header');
           if (header) {
             (header as HTMLElement).click();
-            console.log('Clicked to expand plugin collapsible');
           } else {
-            console.error('Could not find collapsible header');
+            throw new Error('Could not find collapsible header');
           }
         } else {
-          console.log('Plugin collapsible already expanded');
         }
       } else {
-        console.error('Plugin collapsible not found');
+        throw new Error('Plugin collapsible not found');
       }
     });
 
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
     await expect(page.locator('plugin-management')).toBeVisible({ timeout: 5000 });
 
     // Check plugin card structure
-    const result = await page.evaluate(() => {
+    await page.evaluate(() => {
       const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
       const apiTestCard = cards.find((card) => {
         const title = card.querySelector('mat-card-title')?.textContent || '';
@@ -98,7 +94,5 @@ test.describe.serial('Plugin Structure Test', () => {
         })),
       };
     });
-
-    console.log('Plugin card structure:', JSON.stringify(result, null, 2));
   });
 });

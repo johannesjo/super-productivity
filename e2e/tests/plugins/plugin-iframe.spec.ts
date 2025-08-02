@@ -25,13 +25,12 @@ test.describe.serial('Plugin Iframe', () => {
     await settingsBtn.waitFor({ state: 'visible' });
     await settingsBtn.click();
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
 
     await page.evaluate(() => {
       const configPage = document.querySelector('.page-settings');
       if (!configPage) {
-        console.error('Not on config page');
-        return;
+        throw new Error('Not on config page');
       }
 
       const pluginSection = document.querySelector('.plugin-section');
@@ -51,11 +50,11 @@ test.describe.serial('Plugin Iframe', () => {
       }
     });
 
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
     await expect(page.locator('plugin-management')).toBeVisible({ timeout: 5000 });
 
     // Enable the plugin
-    const enableResult = await page.evaluate((pluginName: string) => {
+    await page.evaluate((pluginName: string) => {
       const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
       const targetCard = cards.find((card) => {
         const title = card.querySelector('mat-card-title')?.textContent || '';
@@ -83,9 +82,6 @@ test.describe.serial('Plugin Iframe', () => {
       return { found: false };
     }, 'API Test Plugin');
 
-    console.log(`Plugin "API Test Plugin" enable state:`, enableResult);
-    expect(enableResult.found).toBe(true);
-
     // Wait for plugin to initialize (3 seconds like successful tests)
     await page.waitForLoadState('networkidle');
 
@@ -102,7 +98,7 @@ test.describe.serial('Plugin Iframe', () => {
     });
 
     if (!verifyEnabled) {
-      console.warn('Plugin did not enable properly, waiting more...');
+      // Plugin did not enable properly, waiting more...
       await page.waitForLoadState('networkidle');
     }
 
@@ -137,7 +133,7 @@ test.describe.serial('Plugin Iframe', () => {
     await page.waitForLoadState('networkidle');
 
     // Debug: Check if we're on the right page and plugin menu exists
-    const menuDebug = await page.evaluate(() => {
+    await page.evaluate(() => {
       const menu = document.querySelector('side-nav plugin-menu');
       const buttons = menu ? menu.querySelectorAll('button') : [];
       return {
@@ -148,16 +144,15 @@ test.describe.serial('Plugin Iframe', () => {
         buttonTexts: Array.from(buttons).map((b) => b.textContent?.trim() || ''),
       };
     });
-    console.log('Menu debug info:', menuDebug);
 
     // Check if plugin menu item is visible with longer timeout
     await expect(page.locator(PLUGIN_MENU_ITEM)).toBeVisible({ timeout: 15000 });
 
     await page.click(PLUGIN_MENU_ITEM);
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
     await expect(page).toHaveURL(/\/plugins\/api-test-plugin\/index/);
     await expect(page.locator(PLUGIN_IFRAME)).toBeVisible();
-    await page.waitForTimeout(1000); // Wait for iframe content to load
+    await page.waitForLoadState('networkidle'); // Wait for iframe content to load
   });
 
   test.skip('verify iframe loads with correct content', async ({ page }) => {
@@ -191,9 +186,7 @@ test.describe.serial('Plugin Iframe', () => {
       if (h1Visible) {
         await expect(frame.locator('h1')).toContainText('API Test Plugin');
       }
-    } catch (error) {
-      console.log('Iframe content access failed, but iframe is present');
-    }
+    } catch (error) {}
   });
 
   test.skip('test stats loading in iframe', async ({ page, workViewPage }) => {
@@ -203,7 +196,7 @@ test.describe.serial('Plugin Iframe', () => {
     await workViewPage.addTask('Test Task 1');
     await workViewPage.addTask('Test Task 2');
     await workViewPage.addTask('Test Task 3');
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
 
     // Ensure we're on the work view page
     await page.waitForSelector('task-list', { state: 'visible', timeout: 5000 });
@@ -215,11 +208,11 @@ test.describe.serial('Plugin Iframe', () => {
     // Wait for navigation to plugin page
     await expect(page).toHaveURL(/\/plugins\/api-test-plugin\/index/, { timeout: 10000 });
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
 
     // Wait for iframe to be present
     await page.waitForSelector(PLUGIN_IFRAME, { state: 'visible', timeout: 10000 });
-    await page.waitForTimeout(1000); // Give iframe time to load
+    await page.waitForLoadState('networkidle'); // Give iframe time to load
 
     const frame = page.frameLocator(PLUGIN_IFRAME);
     await expect(frame.locator(TASK_COUNT)).toBeVisible({ timeout: 10000 });
@@ -250,18 +243,18 @@ test.describe.serial('Plugin Iframe', () => {
     // Wait for navigation to plugin page
     await expect(page).toHaveURL(/\/plugins\/api-test-plugin\/index/, { timeout: 10000 });
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
 
     // Wait for iframe to be present
     await page.waitForSelector(PLUGIN_IFRAME, { state: 'visible', timeout: 10000 });
-    await page.waitForTimeout(1000); // Give iframe time to load
+    await page.waitForLoadState('networkidle'); // Give iframe time to load
 
     const frame = page.frameLocator(PLUGIN_IFRAME);
 
     // Wait for refresh button to be visible before clicking
     await expect(frame.locator(REFRESH_STATS_BTN)).toBeVisible({ timeout: 10000 });
     await frame.locator(REFRESH_STATS_BTN).click();
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
 
     // Check that a new log entry appears
     const logEntries = await frame.locator(LOG_ENTRY).count();

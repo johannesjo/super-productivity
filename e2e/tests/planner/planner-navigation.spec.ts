@@ -32,7 +32,7 @@ test.describe('Planner Navigation', () => {
   test('should maintain tasks when navigating', async ({ page, workViewPage }) => {
     // Add tasks in work view
     await workViewPage.addTask('Navigation test task');
-    await page.waitForTimeout(500);
+    // Wait for task to appear in DOM
     await expect(page.locator('task')).toHaveCount(1);
 
     // Navigate to planner

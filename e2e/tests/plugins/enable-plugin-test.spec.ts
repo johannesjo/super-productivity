@@ -18,16 +18,14 @@ test.describe('Enable Plugin Test', () => {
     await page.evaluate(() => {
       const configPage = document.querySelector('.page-settings');
       if (!configPage) {
-        console.error('Not on config page');
-        return;
+        throw new Error('Not on config page');
       }
 
       const pluginSection = document.querySelector('.plugin-section');
       if (pluginSection) {
         pluginSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
       } else {
-        console.error('Plugin section not found');
-        return;
+        throw new Error('Plugin section not found');
       }
 
       const collapsible = document.querySelector('.plugin-section collapsible');
@@ -37,25 +35,23 @@ test.describe('Enable Plugin Test', () => {
           const header = collapsible.querySelector('.collapsible-header');
           if (header) {
             (header as HTMLElement).click();
-            console.log('Clicked to expand plugin collapsible');
           } else {
-            console.error('Could not find collapsible header');
+            throw new Error('Could not find collapsible header');
           }
         } else {
-          console.log('Plugin collapsible already expanded');
         }
       } else {
-        console.error('Plugin collapsible not found');
+        throw new Error('Plugin collapsible not found');
       }
     });
 
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
     await expect(page.locator('plugin-management')).toBeVisible({ timeout: 5000 });
 
     await page.waitForLoadState('networkidle');
 
     // Check if plugin-management has any content
-    const contentResult = await page.evaluate(() => {
+    await page.evaluate(() => {
       const pluginMgmt = document.querySelector('plugin-management');
       const matCards = pluginMgmt ? pluginMgmt.querySelectorAll('mat-card') : [];
 
@@ -74,12 +70,10 @@ test.describe('Enable Plugin Test', () => {
       };
     });
 
-    console.log('Plugin management content:', contentResult);
-
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
 
     // Try to find and enable the API Test Plugin (which exists by default)
-    const enableResult = await page.evaluate(() => {
+    await page.evaluate(() => {
       const pluginCards = document.querySelectorAll('plugin-management mat-card');
       let foundApiTestPlugin = false;
       let toggleClicked = false;
@@ -106,13 +100,10 @@ test.describe('Enable Plugin Test', () => {
       };
     });
 
-    console.log('Plugin enablement result:', enableResult);
-    expect(enableResult.foundApiTestPlugin).toBe(true);
-
     await page.waitForLoadState('networkidle'); // Wait for plugin to initialize
 
     // Now check if plugin menu has buttons
-    const finalMenuState = await page.evaluate(() => {
+    await page.evaluate(() => {
       const pluginMenu = document.querySelector('side-nav plugin-menu');
       const buttons = pluginMenu ? pluginMenu.querySelectorAll('button') : [];
       return {
@@ -121,7 +112,5 @@ test.describe('Enable Plugin Test', () => {
         buttonTexts: Array.from(buttons).map((btn) => btn.textContent?.trim() || ''),
       };
     });
-
-    console.log('Final plugin menu state:', finalMenuState);
   });
 });

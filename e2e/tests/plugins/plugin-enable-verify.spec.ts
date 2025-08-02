@@ -15,16 +15,14 @@ test.describe.serial('Plugin Enable Verify', () => {
     await page.evaluate(() => {
       const configPage = document.querySelector('.page-settings');
       if (!configPage) {
-        console.error('Not on config page');
-        return;
+        throw new Error('Not on config page');
       }
 
       const pluginSection = document.querySelector('.plugin-section');
       if (pluginSection) {
         pluginSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
       } else {
-        console.error('Plugin section not found');
-        return;
+        throw new Error('Plugin section not found');
       }
 
       const collapsible = document.querySelector('.plugin-section collapsible');
@@ -34,19 +32,17 @@ test.describe.serial('Plugin Enable Verify', () => {
           const header = collapsible.querySelector('.collapsible-header');
           if (header) {
             (header as HTMLElement).click();
-            console.log('Clicked to expand plugin collapsible');
           } else {
-            console.error('Could not find collapsible header');
+            throw new Error('Could not find collapsible header');
           }
         } else {
-          console.log('Plugin collapsible already expanded');
         }
       } else {
-        console.error('Plugin collapsible not found');
+        throw new Error('Plugin collapsible not found');
       }
     });
 
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
     await expect(page.locator('plugin-management')).toBeVisible({ timeout: 5000 });
 
     // Enable API Test Plugin
@@ -81,7 +77,6 @@ test.describe.serial('Plugin Enable Verify', () => {
       };
     });
 
-    console.log('Enable plugin result:', result);
     expect(result.found).toBe(true);
     expect(result.clicked || result.wasEnabled).toBe(true);
 
@@ -92,7 +87,7 @@ test.describe.serial('Plugin Enable Verify', () => {
     await page.waitForLoadState('domcontentloaded');
     await page.goto('/#/tag/TODAY');
     await page.waitForLoadState('networkidle'); // Wait for plugin to initialize
-    await page.waitForTimeout(200);
+    await page.waitForLoadState('domcontentloaded');
 
     // Check plugin menu exists
     const menuResult = await page.evaluate(() => {
@@ -107,7 +102,6 @@ test.describe.serial('Plugin Enable Verify', () => {
       };
     });
 
-    console.log('Plugin menu state:', menuResult);
     expect(menuResult.hasPluginMenu).toBe(true);
     expect(menuResult.buttonCount).toBeGreaterThan(0);
 

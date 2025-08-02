@@ -21,8 +21,7 @@ test.describe.serial('Plugin Loading', () => {
     await page.evaluate(() => {
       const configPage = document.querySelector('.page-settings');
       if (!configPage) {
-        console.error('Not on config page');
-        return;
+        throw new Error('Not on config page');
       }
 
       const pluginSection = document.querySelector('.plugin-section');
@@ -42,11 +41,11 @@ test.describe.serial('Plugin Loading', () => {
       }
     });
 
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
     await expect(page.locator('plugin-management')).toBeVisible({ timeout: 5000 });
 
     // Enable the plugin
-    const enableResult = await page.evaluate((pluginName: string) => {
+    await page.evaluate((pluginName: string) => {
       const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
       const targetCard = cards.find((card) => {
         const title = card.querySelector('mat-card-title')?.textContent || '';
@@ -76,9 +75,6 @@ test.describe.serial('Plugin Loading', () => {
       return { enabled: false, found: false };
     }, 'API Test Plugin');
 
-    console.log(`Plugin "API Test Plugin" enable state:`, enableResult);
-    expect(enableResult.found).toBe(true);
-
     await page.waitForLoadState('networkidle'); // Wait for plugin to initialize
 
     // Navigate to plugin management
@@ -98,7 +94,6 @@ test.describe.serial('Plugin Loading', () => {
       };
     });
 
-    console.log('Plugin cards found:', pluginCardsResult);
     expect(pluginCardsResult.pluginCardsCount).toBeGreaterThanOrEqual(1);
     expect(pluginCardsResult.pluginTitles).toContain('API Test Plugin');
 
@@ -111,7 +106,7 @@ test.describe.serial('Plugin Loading', () => {
     await page.click(PLUGIN_MENU_ENTRY);
     await expect(page.locator(PLUGIN_IFRAME)).toBeVisible();
     await expect(page).toHaveURL(/\/plugins\/api-test-plugin\/index/);
-    await page.waitForTimeout(1000); // Wait for iframe to load
+    await page.waitForLoadState('networkidle'); // Wait for iframe to load
 
     // Switch to iframe context and verify content
     const frame = page.frameLocator(PLUGIN_IFRAME);
@@ -136,8 +131,7 @@ test.describe.serial('Plugin Loading', () => {
     await page.evaluate(() => {
       const configPage = document.querySelector('.page-settings');
       if (!configPage) {
-        console.error('Not on config page');
-        return;
+        throw new Error('Not on config page');
       }
 
       const pluginSection = document.querySelector('.plugin-section');
@@ -157,7 +151,7 @@ test.describe.serial('Plugin Loading', () => {
       }
     });
 
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
     await expect(page.locator('plugin-management')).toBeVisible({ timeout: 5000 });
 
     // Enable the plugin first
@@ -187,7 +181,7 @@ test.describe.serial('Plugin Loading', () => {
     await expect(page.locator(PLUGIN_ITEM).first()).toBeVisible();
 
     // Find the toggle for API Test Plugin and disable it
-    const disableResult = await page.evaluate(() => {
+    await page.evaluate(() => {
       const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
       const apiTestCard = cards.find((card) => {
         const title = card.querySelector('mat-card-title')?.textContent || '';
@@ -212,7 +206,6 @@ test.describe.serial('Plugin Loading', () => {
       return result;
     });
 
-    console.log('Disable plugin result:', disableResult);
     await page.waitForLoadState('networkidle'); // Give more time for plugin to unload
 
     // Stay on the settings page, just wait for state to update
@@ -229,9 +222,9 @@ test.describe.serial('Plugin Loading', () => {
       }
     });
 
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
 
-    const enableResult = await page.evaluate(() => {
+    await page.evaluate(() => {
       const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
       const apiTestCard = cards.find((card) => {
         const title = card.querySelector('mat-card-title')?.textContent || '';
@@ -256,13 +249,12 @@ test.describe.serial('Plugin Loading', () => {
       return result;
     });
 
-    console.log('Re-enable plugin result:', enableResult);
     await page.waitForLoadState('networkidle'); // Give time for plugin to reload
 
     // Navigate back to main view
     await page.click('.tour-projects'); // Click on projects/home navigation
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
 
     // Verify menu entry is back
     await expect(page.locator(PLUGIN_MENU_ENTRY)).toBeVisible();

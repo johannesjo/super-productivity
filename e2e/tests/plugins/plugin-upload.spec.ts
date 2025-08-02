@@ -27,8 +27,7 @@ test.describe.serial('Plugin Upload', () => {
     await page.evaluate(() => {
       const configPage = document.querySelector('.page-settings');
       if (!configPage) {
-        console.error('Not on config page');
-        return;
+        throw new Error('Not on config page');
       }
 
       const pluginSection = document.querySelector('.plugin-section');
@@ -48,7 +47,7 @@ test.describe.serial('Plugin Upload', () => {
       }
     });
 
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
     await expect(page.locator('plugin-management')).toBeVisible({ timeout: 5000 });
 
     // Upload plugin ZIP file
@@ -73,7 +72,7 @@ test.describe.serial('Plugin Upload', () => {
 
     // Verify uploaded plugin appears in list (there are multiple cards, so check first)
     await expect(page.locator(PLUGIN_CARD).first()).toBeVisible();
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
 
     const pluginExists = await page.evaluate((pluginName: string) => {
       const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
@@ -148,7 +147,7 @@ test.describe.serial('Plugin Upload', () => {
     }, TEST_PLUGIN_ID);
 
     expect(disableResult).toBeTruthy();
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
 
     // Verify plugin is now disabled
     const disabledStatus = await page.evaluate((pluginId: string) => {
@@ -182,7 +181,7 @@ test.describe.serial('Plugin Upload', () => {
     }, TEST_PLUGIN_ID);
 
     expect(reEnableResult).toBeTruthy();
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
 
     // Verify plugin is enabled again
     const reEnabledStatus = await page.evaluate((pluginId: string) => {
@@ -233,7 +232,6 @@ test.describe.serial('Plugin Upload', () => {
       };
     }, TEST_PLUGIN_ID);
 
-    console.log('Removal verification:', removalResult);
     expect(removalResult.removed).toBeTruthy();
   });
 });

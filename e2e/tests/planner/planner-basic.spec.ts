@@ -21,7 +21,7 @@ test.describe('Planner Basic', () => {
   test('should add task and navigate to planner', async ({ page, workViewPage }) => {
     // Add a task first
     await workViewPage.addTask('Task for planner');
-    await page.waitForTimeout(500);
+    await page.waitForLoadState('networkidle');
 
     // Verify task was created
     await expect(page.locator('task')).toHaveCount(1);
@@ -39,7 +39,7 @@ test.describe('Planner Basic', () => {
     await workViewPage.addTask('First task');
     await workViewPage.addTask('Second task');
     await workViewPage.addTask('Third task');
-    await page.waitForTimeout(500);
+    await page.waitForLoadState('networkidle');
 
     // Verify tasks were created
     await expect(page.locator('task')).toHaveCount(3);
@@ -59,7 +59,7 @@ test.describe('Planner Basic', () => {
 
     // Add a task
     await workViewPage.addTask('Test task');
-    await page.waitForTimeout(500);
+    await page.waitForLoadState('networkidle');
 
     // Navigate to planner
     await plannerPage.navigateToPlanner();

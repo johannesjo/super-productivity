@@ -22,8 +22,6 @@ test.describe.serial('Performance Tests - Adding Multiple Tasks', () => {
     const totalTime = performance.now() - startTime;
 
     // Log performance metrics (only if test fails or in verbose mode)
-    // console.log(`Time to create 20 tasks: ${totalTime.toFixed(2)}ms`);
-    // console.log(`Average time per task: ${(totalTime / 20).toFixed(2)}ms`);
 
     // Verify all tasks were created
     const tasks = page.locator('task');

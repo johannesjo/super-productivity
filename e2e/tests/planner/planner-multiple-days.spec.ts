@@ -24,7 +24,7 @@ test.describe('Planner Multiple Days', () => {
     await workViewPage.addTask('Task for today');
     await workViewPage.addTask('Task for tomorrow');
     await workViewPage.addTask('Task for next week');
-    await page.waitForTimeout(500);
+    await page.waitForLoadState('networkidle');
 
     // Verify tasks were created
     await expect(page.locator('task')).toHaveCount(3);
@@ -42,7 +42,7 @@ test.describe('Planner Multiple Days', () => {
     await workViewPage.addTask('Monday meeting');
     await workViewPage.addTask('Tuesday review');
     await workViewPage.addTask('Wednesday deadline');
-    await page.waitForTimeout(500);
+    await page.waitForLoadState('networkidle');
 
     // Navigate to planner
     await plannerPage.navigateToPlanner();
@@ -61,7 +61,7 @@ test.describe('Planner Multiple Days', () => {
 
     for (const taskName of taskNames) {
       await workViewPage.addTask(taskName);
-      await page.waitForTimeout(200);
+      await page.waitForLoadState('domcontentloaded');
     }
 
     // Verify all tasks created
