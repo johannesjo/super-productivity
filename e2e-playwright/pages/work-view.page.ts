@@ -23,21 +23,26 @@ export class WorkViewPage extends BasePage {
       state: 'visible',
       timeout: 8000,
     });
-    // Wait for any initial animations/transitions
-    await this.page.waitForTimeout(100);
     // Ensure route wrapper is fully loaded
     await this.routerWrapper.waitFor({ state: 'visible' });
+    // Wait for network to settle
+    await this.page.waitForLoadState('networkidle');
   }
 
   async addSubTask(task: Locator, subTaskName: string): Promise<void> {
     await task.waitFor({ state: 'visible' });
     await task.focus();
-    // need to wait for event handlers being attached
-    await this.page.waitForTimeout(100);
+    // Wait for focus to be established
+    await this.page.waitForFunction(
+      (el) => el === document.activeElement,
+      await task.elementHandle(),
+      { timeout: 1000 },
+    );
     await task.press('a');
 
-    // need to wait for textarea to come into focus
-    await this.page.waitForTimeout(100);
+    // Wait for textarea to appear and be focused
+    const textarea = this.page.locator('textarea:focus, input[type="text"]:focus');
+    await textarea.waitFor({ state: 'visible', timeout: 1000 });
 
     // Type the subtask content
     await this.page.keyboard.type(subTaskName);

@@ -37,14 +37,22 @@ export abstract class BasePage {
     await submitBtn.waitFor({ state: 'visible' });
     await submitBtn.click();
 
-    // Wait for the task to be added
-    await this.page.waitForTimeout(20);
+    // Wait for the task to appear in the DOM
+    await this.page
+      .waitForSelector(`text="${prefixedTaskName}"`, {
+        timeout: 2000,
+        state: 'visible',
+      })
+      .catch(() => {
+        // If the exact text is not found, that's okay - task might be processed differently
+      });
 
     if (!skipClose) {
       // Only click backdrop once if it's visible
       if (await this.backdrop.isVisible()) {
         await this.backdrop.click();
-        await this.page.waitForTimeout(200);
+        // Wait for backdrop to be hidden
+        await this.backdrop.waitFor({ state: 'hidden', timeout: 1000 }).catch(() => {});
       }
       // Don't wait for input to be hidden as it might stay visible for multiple tasks
     }

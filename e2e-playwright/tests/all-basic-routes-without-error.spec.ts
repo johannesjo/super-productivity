@@ -29,17 +29,17 @@ test.describe('All Basic Routes Without Error', () => {
 
     // Navigate to different routes
     await page.goto('/#/tag/TODAY/quick-history');
-    await page.waitForTimeout(500);
+    await page.waitForLoadState('networkidle');
     await page.goto('/#/tag/TODAY/worklog');
-    await page.waitForTimeout(500);
+    await page.waitForLoadState('networkidle');
     await page.goto('/#/tag/TODAY/metrics');
-    await page.waitForTimeout(500);
+    await page.waitForLoadState('networkidle');
     await page.goto('/#/tag/TODAY/planner');
-    await page.waitForTimeout(500);
+    await page.waitForLoadState('networkidle');
     await page.goto('/#/tag/TODAY/daily-summary');
-    await page.waitForTimeout(500);
+    await page.waitForLoadState('networkidle');
     await page.goto('/#/tag/TODAY/settings');
-    await page.waitForTimeout(500);
+    await page.waitForLoadState('networkidle');
 
     // Send 'n' key to open notes dialog
     await page.keyboard.press('n');

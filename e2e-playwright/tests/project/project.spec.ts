@@ -12,8 +12,6 @@ test.describe('Project', () => {
 
     // Wait for app to be ready
     await workViewPage.waitForTaskList();
-    // Additional wait for stability in parallel execution
-    await page.waitForTimeout(50);
   });
 
   test('move done tasks to archive without error', async ({ page }) => {

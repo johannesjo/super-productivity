@@ -10,7 +10,7 @@ test.describe.serial('Plugin Enable Verify', () => {
 
     // Navigate to plugin settings
     await page.click(SETTINGS_BTN);
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
 
     await page.evaluate(() => {
       const configPage = document.querySelector('.page-settings');
@@ -85,13 +85,14 @@ test.describe.serial('Plugin Enable Verify', () => {
     expect(result.found).toBe(true);
     expect(result.clicked || result.wasEnabled).toBe(true);
 
-    await page.waitForTimeout(3000); // Wait for plugin to initialize
+    await page.waitForLoadState('networkidle'); // Wait for plugin to initialize
 
     // Navigate back to main view
     await page.click(SIDENAV);
-    await page.waitForTimeout(500);
+    await page.waitForLoadState('domcontentloaded');
     await page.goto('/#/tag/TODAY');
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle'); // Wait for plugin to initialize
+    await page.waitForTimeout(200);
 
     // Check plugin menu exists
     const menuResult = await page.evaluate(() => {

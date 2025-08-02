@@ -13,7 +13,7 @@ test.describe('Enable Plugin Test', () => {
 
     // Navigate to plugin settings
     await page.click(SETTINGS_BTN);
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
 
     await page.evaluate(() => {
       const configPage = document.querySelector('.page-settings');
@@ -52,7 +52,7 @@ test.describe('Enable Plugin Test', () => {
     await page.waitForTimeout(1000);
     await expect(page.locator('plugin-management')).toBeVisible({ timeout: 5000 });
 
-    await page.waitForTimeout(2000);
+    await page.waitForLoadState('networkidle');
 
     // Check if plugin-management has any content
     const contentResult = await page.evaluate(() => {
@@ -109,7 +109,7 @@ test.describe('Enable Plugin Test', () => {
     console.log('Plugin enablement result:', enableResult);
     expect(enableResult.foundApiTestPlugin).toBe(true);
 
-    await page.waitForTimeout(3000); // Wait for plugin to initialize
+    await page.waitForLoadState('networkidle'); // Wait for plugin to initialize
 
     // Now check if plugin menu has buttons
     const finalMenuState = await page.evaluate(() => {

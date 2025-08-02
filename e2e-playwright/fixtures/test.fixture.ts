@@ -43,8 +43,8 @@ export const test = base.extend<TestFixtures>({
       window.localStorage.setItem('SUP_IS_SHOW_TOUR', 'true');
     });
 
-    // Wait a bit for the app to process localStorage
-    await page.waitForTimeout(500);
+    // Wait for the app to react to the localStorage change
+    await page.waitForLoadState('domcontentloaded');
 
     // Double-check: Dismiss any tour dialog if it still appears
     const tourDialog = page.locator('[data-shepherd-step-id="Welcome"]');
@@ -54,7 +54,8 @@ export const test = base.extend<TestFixtures>({
       );
       if (await cancelBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
         await cancelBtn.click();
-        await page.waitForTimeout(500);
+        // Wait for the dialog to close
+        await tourDialog.waitFor({ state: 'hidden', timeout: 1000 }).catch(() => {});
       }
     }
 

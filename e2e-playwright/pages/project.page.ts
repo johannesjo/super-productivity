@@ -41,19 +41,19 @@ export class ProjectPage extends BasePage {
     // Hover over the Projects menu item to show the button
     const projectsMenuItem = this.page.locator('.e2e-projects-btn');
     await projectsMenuItem.hover();
-    await this.page.waitForTimeout(200);
 
-    // Force click the button even if not visible
+    // Wait for the create button to appear after hovering
     const createProjectBtn = this.page.locator('.e2e-add-project-btn');
-    await createProjectBtn.click({ force: true });
+    await createProjectBtn.waitFor({ state: 'visible', timeout: 1000 });
+    await createProjectBtn.click();
 
     // Wait for the dialog to appear
     await this.projectNameInput.waitFor({ state: 'visible' });
     await this.projectNameInput.fill(prefixedProjectName);
     await this.submitBtn.click();
 
-    // Wait for dialog to close
-    await this.page.waitForTimeout(500);
+    // Wait for dialog to close by waiting for input to be hidden
+    await this.projectNameInput.waitFor({ state: 'hidden', timeout: 2000 });
   }
 
   async getProject(index: number): Promise<Locator> {
@@ -93,7 +93,8 @@ export class ProjectPage extends BasePage {
       const collapsibleHeader = this.page.locator('.collapsible-header');
       if ((await collapsibleHeader.count()) > 0) {
         await collapsibleHeader.click();
-        await this.page.waitForTimeout(100);
+        // Wait for the section to expand
+        await this.moveToArchiveBtn.waitFor({ state: 'visible', timeout: 1000 });
       }
     }
 
@@ -125,8 +126,8 @@ export class ProjectPage extends BasePage {
     const routerWrapper = this.page.locator('.route-wrapper');
     await routerWrapper.waitFor({ state: 'visible' });
 
-    // Small pause to avoid stale element issues (as done in Nightwatch)
-    await this.page.waitForTimeout(200);
+    // Wait for the page to be interactive
+    await this.page.waitForLoadState('domcontentloaded');
 
     // Use keyboard shortcut 'N' to directly open the note dialog
     await this.page.keyboard.press('n');

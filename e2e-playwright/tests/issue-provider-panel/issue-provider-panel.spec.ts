@@ -15,8 +15,8 @@ test.describe('Issue Provider Panel', () => {
     await page.click('mat-tab-group .mat-mdc-tab:last-child');
     await page.waitForSelector('issue-provider-setup-overview', { state: 'visible' });
 
-    // Wait for the setup overview to be fully loaded
-    await page.waitForTimeout(1000);
+    // Wait for the setup overview content to be fully loaded
+    await page.waitForLoadState('networkidle');
 
     // Get all buttons in the issue provider setup overview
     const setupButtons = page.locator('issue-provider-setup-overview button');
@@ -43,8 +43,10 @@ test.describe('Issue Provider Panel', () => {
 
         if (dialogOpened) {
           await page.click(CANCEL_BTN);
-          // Wait for dialog to close
-          await page.waitForTimeout(500);
+          // Wait for dialog to close by waiting for cancel button to be hidden
+          await page
+            .waitForSelector(CANCEL_BTN, { state: 'hidden', timeout: 2000 })
+            .catch(() => {});
         }
       }
     }

@@ -87,7 +87,7 @@ test.describe.serial('Plugin Iframe', () => {
     expect(enableResult.found).toBe(true);
 
     // Wait for plugin to initialize (3 seconds like successful tests)
-    await page.waitForTimeout(3000);
+    await page.waitForLoadState('networkidle');
 
     // Verify plugin is actually enabled before proceeding
     const verifyEnabled = await page.evaluate(() => {
@@ -103,13 +103,13 @@ test.describe.serial('Plugin Iframe', () => {
 
     if (!verifyEnabled) {
       console.warn('Plugin did not enable properly, waiting more...');
-      await page.waitForTimeout(3000);
+      await page.waitForLoadState('networkidle');
     }
 
     // Navigate to work view
     await page.goto('/#/tag/TODAY');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+    await page.waitForLoadState('networkidle');
 
     // Wait for task list to be visible and dismiss any dialogs
     await page.waitForSelector('task-list', { state: 'visible', timeout: 10000 });
@@ -122,7 +122,7 @@ test.describe.serial('Plugin Iframe', () => {
       );
       if (await cancelBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
         await cancelBtn.click();
-        await page.waitForTimeout(500);
+        await page.waitForLoadState('domcontentloaded');
       }
     }
 
@@ -134,7 +134,7 @@ test.describe.serial('Plugin Iframe', () => {
     test.setTimeout(30000); // Increase timeout more
 
     // Wait a bit longer after navigation and setup
-    await page.waitForTimeout(2000);
+    await page.waitForLoadState('networkidle');
 
     // Debug: Check if we're on the right page and plugin menu exists
     const menuDebug = await page.evaluate(() => {
@@ -166,11 +166,11 @@ test.describe.serial('Plugin Iframe', () => {
     // Navigate directly to the plugin page
     await page.goto('/#/plugins/api-test-plugin/index');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+    await page.waitForLoadState('networkidle');
 
     // Wait for iframe to be present
     await page.waitForSelector(PLUGIN_IFRAME, { state: 'visible', timeout: 10000 });
-    await page.waitForTimeout(2000); // Give iframe more time to load
+    await page.waitForLoadState('networkidle'); // Give iframe more time to load
 
     // Check iframe is loaded
     const iframe = await page.$(PLUGIN_IFRAME);
@@ -225,7 +225,7 @@ test.describe.serial('Plugin Iframe', () => {
     await expect(frame.locator(TASK_COUNT)).toBeVisible({ timeout: 10000 });
 
     // Stats should auto-load on init, check values
-    await page.waitForTimeout(2000); // Wait for stats to load
+    await page.waitForLoadState('networkidle'); // Wait for stats to load
 
     const taskCount = await frame.locator(TASK_COUNT).textContent();
     expect(taskCount).toBe('3');

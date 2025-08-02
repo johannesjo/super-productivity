@@ -16,7 +16,7 @@ test.describe.serial('Plugin Loading', () => {
 
     // Enable API Test Plugin first (implementing enableTestPlugin inline)
     await page.click(SETTINGS_BTN);
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
 
     await page.evaluate(() => {
       const configPage = document.querySelector('.page-settings');
@@ -79,11 +79,11 @@ test.describe.serial('Plugin Loading', () => {
     console.log(`Plugin "API Test Plugin" enable state:`, enableResult);
     expect(enableResult.found).toBe(true);
 
-    await page.waitForTimeout(2000); // Wait for plugin to initialize
+    await page.waitForLoadState('networkidle'); // Wait for plugin to initialize
 
     // Navigate to plugin management
     await expect(page.locator(PLUGIN_CARD).first()).toBeVisible();
-    await page.waitForTimeout(500);
+    await page.waitForLoadState('domcontentloaded');
 
     // Check example plugin is loaded and enabled
     const pluginCardsResult = await page.evaluate(() => {
@@ -118,7 +118,7 @@ test.describe.serial('Plugin Loading', () => {
     await expect(frame.locator('h1')).toBeVisible();
     await expect(frame.locator('h1')).toContainText('API Test Plugin');
 
-    await page.waitForTimeout(500);
+    await page.waitForLoadState('domcontentloaded');
 
     // Verify plugin functionality - show notification
     await expect(page.locator(PLUGIN_MENU_ENTRY)).toBeVisible();
@@ -131,7 +131,7 @@ test.describe.serial('Plugin Loading', () => {
 
     // Enable API Test Plugin first (implementing enableTestPlugin inline)
     await page.click(SETTINGS_BTN);
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
 
     await page.evaluate(() => {
       const configPage = document.querySelector('.page-settings');
@@ -181,7 +181,7 @@ test.describe.serial('Plugin Loading', () => {
       }
     }, 'API Test Plugin');
 
-    await page.waitForTimeout(2000); // Wait for plugin to initialize
+    await page.waitForLoadState('networkidle'); // Wait for plugin to initialize
 
     // Navigate to plugin management
     await expect(page.locator(PLUGIN_ITEM).first()).toBeVisible();
@@ -213,14 +213,14 @@ test.describe.serial('Plugin Loading', () => {
     });
 
     console.log('Disable plugin result:', disableResult);
-    await page.waitForTimeout(2000); // Give more time for plugin to unload
+    await page.waitForLoadState('networkidle'); // Give more time for plugin to unload
 
     // Stay on the settings page, just wait for state to update
-    await page.waitForTimeout(2000);
+    await page.waitForLoadState('networkidle');
 
     // Re-enable the plugin
     await page.click(SETTINGS_BTN);
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
 
     await page.evaluate(() => {
       const pluginSection = document.querySelector('.plugin-section');
@@ -257,7 +257,7 @@ test.describe.serial('Plugin Loading', () => {
     });
 
     console.log('Re-enable plugin result:', enableResult);
-    await page.waitForTimeout(2000); // Give time for plugin to reload
+    await page.waitForLoadState('networkidle'); // Give time for plugin to reload
 
     // Navigate back to main view
     await page.click('.tour-projects'); // Click on projects/home navigation

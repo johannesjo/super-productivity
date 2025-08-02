@@ -33,22 +33,23 @@ export class SyncPage extends BasePage {
   }): Promise<void> {
     await this.syncBtn.click();
     await this.providerSelect.waitFor({ state: 'visible' });
-    await this.page.waitForTimeout(100);
 
     // Click on provider select to open dropdown
     await this.providerSelect.click();
 
     // Select WebDAV option - using more robust selector
     const webdavOption = this.page.locator('mat-option').filter({ hasText: 'WebDAV' });
+    await webdavOption.waitFor({ state: 'visible' });
     await webdavOption.click();
-    await this.page.waitForTimeout(100);
+
+    // Wait for form fields to be visible before filling
+    await this.baseUrlInput.waitFor({ state: 'visible' });
 
     // Fill in the configuration
     await this.baseUrlInput.fill(config.baseUrl);
     await this.userNameInput.fill(config.username);
     await this.passwordInput.fill(config.password);
     await this.syncFolderInput.fill(config.syncFolderPath);
-    await this.page.waitForTimeout(100);
 
     // Save the configuration
     await this.saveBtn.click();
@@ -56,7 +57,11 @@ export class SyncPage extends BasePage {
 
   async triggerSync(): Promise<void> {
     await this.syncBtn.click();
-    await this.page.waitForTimeout(500);
+    // Wait for any sync operation to start (spinner appears or completes immediately)
+    await Promise.race([
+      this.syncSpinner.waitFor({ state: 'visible', timeout: 1000 }).catch(() => {}),
+      this.syncCheckIcon.waitFor({ state: 'visible', timeout: 1000 }).catch(() => {}),
+    ]);
   }
 
   async waitForSyncComplete(): Promise<void> {

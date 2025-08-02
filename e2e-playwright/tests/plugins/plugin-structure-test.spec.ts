@@ -10,7 +10,7 @@ test.describe.serial('Plugin Structure Test', () => {
 
     // Navigate to plugin settings (implementing navigateToPluginSettings inline)
     await page.click(SETTINGS_BTN);
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
 
     // Execute script to navigate to plugin section
     await page.evaluate(() => {

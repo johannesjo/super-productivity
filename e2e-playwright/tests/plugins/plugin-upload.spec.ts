@@ -22,7 +22,7 @@ test.describe.serial('Plugin Upload', () => {
     test.setTimeout(30000); // Increase timeout for file upload
     // Navigate to plugin management
     await page.click(SETTINGS_BTN);
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
 
     await page.evaluate(() => {
       const configPage = document.querySelector('.page-settings');
@@ -69,7 +69,7 @@ test.describe.serial('Plugin Upload', () => {
     });
 
     await page.locator(FILE_INPUT).setInputFiles(testPluginPath);
-    await page.waitForTimeout(3000); // Wait for file processing
+    await page.waitForLoadState('networkidle'); // Wait for file processing
 
     // Verify uploaded plugin appears in list (there are multiple cards, so check first)
     await expect(page.locator(PLUGIN_CARD).first()).toBeVisible();
@@ -114,7 +114,7 @@ test.describe.serial('Plugin Upload', () => {
     }, TEST_PLUGIN_ID);
 
     expect(enableResult).toBeTruthy();
-    await page.waitForTimeout(2000); // Longer pause to ensure DOM update completes
+    await page.waitForLoadState('networkidle'); // Longer pause to ensure DOM update completes
 
     // Verify plugin is now enabled
     const enabledStatus = await page.evaluate((pluginId: string) => {
@@ -218,9 +218,9 @@ test.describe.serial('Plugin Upload', () => {
       return false;
     }, TEST_PLUGIN_ID);
 
-    await page.waitForTimeout(500);
+    await page.waitForLoadState('domcontentloaded');
 
-    await page.waitForTimeout(3000); // Longer pause for removal to complete
+    await page.waitForLoadState('networkidle'); // Longer pause for removal to complete
 
     // Verify plugin is removed
     const removalResult = await page.evaluate((pluginId: string) => {

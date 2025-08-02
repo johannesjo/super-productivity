@@ -18,15 +18,11 @@ test.describe('WebDAV Sync', () => {
       syncFolderPath: '/super-productivity-test',
     });
 
-    // Wait for dialog to close
-    await page.waitForTimeout(1000);
-
-    // The sync button should exist after configuration
-    await expect(syncPage.syncBtn).toBeVisible();
+    // Wait for sync dialog to close and sync button to be visible
+    await expect(syncPage.syncBtn).toBeVisible({ timeout: 3000 });
 
     // Create a test task to ensure app is working
     await workViewPage.addTask('Test task for WebDAV sync');
-    await page.waitForTimeout(500);
 
     // Verify task was created
     await expect(page.locator('task')).toHaveCount(1);
@@ -41,12 +37,12 @@ test.describe('WebDAV Sync', () => {
       syncFolderPath: '/super-productivity-test-2',
     });
 
-    await page.waitForTimeout(1000);
+    // Wait for sync dialog to close
+    await expect(syncPage.syncBtn).toBeVisible({ timeout: 3000 });
 
     // Create multiple test tasks
     await workViewPage.addTask('First sync task');
     await workViewPage.addTask('Second sync task');
-    await page.waitForTimeout(500);
 
     // Verify tasks are present
     await expect(page.locator('task')).toHaveCount(2);
@@ -54,8 +50,8 @@ test.describe('WebDAV Sync', () => {
     // Trigger sync
     await syncPage.triggerSync();
 
-    // Wait a reasonable time for sync
-    await page.waitForTimeout(5000);
+    // Wait for sync to complete (wait for spinner to disappear or check icon to appear)
+    await syncPage.waitForSyncComplete();
 
     // Verify sync button is still visible (basic check)
     await expect(syncPage.syncBtn).toBeVisible();
