@@ -12,10 +12,31 @@ export const waitForPluginAssets = async (
   maxRetries: number = 10,
   retryDelay: number = 1000,
 ): Promise<boolean> => {
+  // In CI, increase retries and delay
+  if (process.env.CI) {
+    maxRetries = 20;
+    retryDelay = 3000;
+    console.log('[Plugin Test] CI environment detected, using extended timeouts');
+    // Wait for server to be fully ready in CI
+    await page.waitForTimeout(10000);
+  }
+
   const baseUrl = page.url().split('#')[0];
   const testUrl = `${baseUrl}assets/bundled-plugins/api-test-plugin/manifest.json`;
 
   console.log(`[Plugin Test] Checking plugin assets availability at: ${testUrl}`);
+
+  // First ensure the app is loaded
+  try {
+    await page.waitForSelector('app-root', { state: 'visible', timeout: 30000 });
+    await page.waitForSelector('task-list, .tour-settingsMenuBtn', {
+      state: 'attached',
+      timeout: 20000,
+    });
+    console.log('[Plugin Test] App is loaded');
+  } catch (e) {
+    console.error('[Plugin Test] App not fully loaded:', e.message);
+  }
 
   for (let i = 0; i < maxRetries; i++) {
     try {
@@ -28,6 +49,19 @@ export const waitForPluginAssets = async (
         console.log(
           `[Plugin Test] Attempt ${i + 1}/${maxRetries}: HTTP ${response.status()}`,
         );
+
+        // Debug: Check if basic assets work
+        if (response.status() === 404 && i === 3) {
+          const iconUrl = `${baseUrl}assets/icons/sp.svg`;
+          try {
+            const iconResponse = await page.request.get(iconUrl);
+            console.log(
+              `[Plugin Test] Basic asset test (${iconUrl}): ${iconResponse.status()}`,
+            );
+          } catch (e) {
+            console.log(`[Plugin Test] Basic asset test failed:`, e.message);
+          }
+        }
       }
     } catch (error) {
       console.log(
@@ -41,6 +75,14 @@ export const waitForPluginAssets = async (
   }
 
   console.error('[Plugin Test] Failed to load plugin assets after all retries');
+
+  // In CI, this might be expected if assets aren't built properly
+  if (process.env.CI) {
+    console.warn(
+      '[Plugin Test] Plugin assets not available in CI - this is a known issue',
+    );
+  }
+
   return false;
 };
 
