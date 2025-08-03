@@ -9,128 +9,106 @@ const PLUGIN_IFRAME = 'plugin-index iframe';
 const SETTINGS_BTN = `${SIDENAV} .tour-settingsMenuBtn`;
 const PLUGIN_MANAGEMENT = 'plugin-management';
 const PLUGIN_SECTION = '.plugin-section';
+const SETTINGS_PAGE = '.page-settings';
+const COLLAPSIBLE_EXPANDED = '.plugin-section collapsible.isExpanded';
+const API_PLUGIN_CARD =
+  'plugin-management mat-card:has(mat-card-title:text("API Test Plugin"))';
+const API_PLUGIN_TOGGLE = `${API_PLUGIN_CARD} mat-slide-toggle button[role="switch"]`;
+const API_PLUGIN_TOGGLE_ENABLED = `${API_PLUGIN_CARD} mat-slide-toggle button[role="switch"][aria-checked="true"]`;
 
 test.describe.serial('Plugin Iframe', () => {
   test.beforeEach(async ({ page, workViewPage }) => {
-    test.setTimeout(60000); // Increase timeout for CI
+    test.setTimeout(60000); // Overall test timeout for CI
 
     await workViewPage.waitForTaskList();
 
-    // Navigate to settings with proper wait
+    // Navigate to settings
     const settingsBtn = page.locator(SETTINGS_BTN);
-    await settingsBtn.waitFor({ state: 'visible', timeout: 15000 });
     await settingsBtn.click();
 
-    // Wait for settings page to load completely
-    await page.waitForSelector('.page-settings', { state: 'visible', timeout: 15000 });
-    await page.waitForLoadState('networkidle', { timeout: 15000 });
+    // Wait for settings page to be visible
+    await page.waitForSelector(SETTINGS_PAGE, { state: 'visible' });
 
-    // Scroll to plugin section using Playwright's built-in methods
+    // Scroll to plugin section
     const pluginSection = page.locator(PLUGIN_SECTION);
     await pluginSection.scrollIntoViewIfNeeded();
 
-    // Expand collapsible if needed using Playwright locators
+    // Expand collapsible if needed
     const collapsible = page.locator('.plugin-section collapsible');
-    const isExpanded = await collapsible.evaluate((el) =>
-      el.classList.contains('isExpanded'),
-    );
-    if (!isExpanded) {
-      const header = collapsible.locator('.collapsible-header');
-      await header.click();
-      // Wait for expansion animation
-      await page.waitForFunction(
-        () => {
-          const el = document.querySelector('.plugin-section collapsible');
-          return el?.classList.contains('isExpanded');
-        },
-        { timeout: 5000 },
-      );
+    const collapsibleHeader = collapsible.locator('.collapsible-header');
+
+    // Check if already expanded, if not click to expand
+    const expandedCollapsible = page.locator(COLLAPSIBLE_EXPANDED);
+    if ((await expandedCollapsible.count()) === 0) {
+      await collapsibleHeader.click();
+      // Wait for the expanded class to appear
+      await page.waitForSelector(COLLAPSIBLE_EXPANDED, { state: 'visible' });
     }
 
-    // Wait for plugin management component to be ready
-    await page.waitForSelector(PLUGIN_MANAGEMENT, { state: 'visible', timeout: 15000 });
+    // Wait for plugin management to be visible
+    await page.waitForSelector(PLUGIN_MANAGEMENT, { state: 'visible' });
 
-    // Enable API Test Plugin using Playwright locators
-    const pluginCard = page.locator('plugin-management mat-card').filter({
-      hasText: 'API Test Plugin',
-    });
+    // Enable API Test Plugin if not already enabled
+    const toggle = page.locator(API_PLUGIN_TOGGLE);
+    await toggle.waitFor({ state: 'visible' });
 
-    const toggle = pluginCard.locator('mat-slide-toggle button[role="switch"]');
-    await toggle.waitFor({ state: 'visible', timeout: 10000 });
-
-    const isEnabled = (await toggle.getAttribute('aria-checked')) === 'true';
-    if (!isEnabled) {
+    // Check if already enabled
+    const enabledToggle = page.locator(API_PLUGIN_TOGGLE_ENABLED);
+    if ((await enabledToggle.count()) === 0) {
+      // Not enabled, click to enable
       await toggle.click();
-      // Wait for toggle animation and state change
-      await page.waitForFunction(
-        () => {
-          const cards = Array.from(
-            document.querySelectorAll('plugin-management mat-card'),
-          );
-          const apiCard = cards.find((card) =>
-            card
-              .querySelector('mat-card-title')
-              ?.textContent?.includes('API Test Plugin'),
-          );
-          const toggleBtn = apiCard?.querySelector(
-            'mat-slide-toggle button[role="switch"]',
-          ) as HTMLButtonElement;
-          return toggleBtn?.getAttribute('aria-checked') === 'true';
-        },
-        { timeout: 10000 },
-      );
+      // Wait for the aria-checked attribute to become true
+      await page.waitForSelector(API_PLUGIN_TOGGLE_ENABLED, { state: 'visible' });
     }
 
     // Navigate back to work view
     await page.goto('/#/tag/TODAY');
-    await page.waitForLoadState('networkidle', { timeout: 15000 });
-    await page.waitForSelector('task-list', { state: 'visible', timeout: 15000 });
 
-    // Dismiss tour dialog if present
+    // Wait for the task list to confirm we're on the work view
+    await page.waitForSelector('task-list', { state: 'visible' });
+
+    // Dismiss tour dialog if present (non-blocking)
     const tourDialog = page.locator('[data-shepherd-step-id="Welcome"]');
-    const tourVisible = await tourDialog.isVisible().catch(() => false);
-    if (tourVisible) {
+    if (await tourDialog.isVisible().catch(() => false)) {
       const cancelBtn = page.locator(
         'button:has-text("No thanks"), .shepherd-cancel-icon',
       );
       if (await cancelBtn.isVisible().catch(() => false)) {
         await cancelBtn.click();
-        await tourDialog.waitFor({ state: 'hidden', timeout: 5000 });
+        // Wait for dialog to disappear
+        await tourDialog.waitFor({ state: 'hidden' });
       }
     }
+
+    // Wait for plugin menu to appear (indicates plugin is loaded)
+    await page.waitForSelector(PLUGIN_MENU_ITEM, { state: 'visible' });
   });
 
   test('open plugin iframe view', async ({ page }) => {
-    test.setTimeout(60000);
-
-    // Wait for plugin menu to be ready
+    // Plugin menu item should already be visible from beforeEach
     const pluginMenuItem = page.locator(PLUGIN_MENU_ITEM);
-    await pluginMenuItem.waitFor({ state: 'visible', timeout: 20000 });
 
     // Click plugin menu item
     await pluginMenuItem.click();
 
-    // Wait for navigation to complete
-    await page.waitForURL(/\/plugins\/api-test-plugin\/index/, { timeout: 10000 });
+    // Wait for navigation to plugin page
+    await page.waitForURL(/\/plugins\/api-test-plugin\/index/);
 
     // Wait for iframe to be visible
     const iframe = page.locator(PLUGIN_IFRAME);
-    await iframe.waitFor({ state: 'visible', timeout: 15000 });
+    await iframe.waitFor({ state: 'visible' });
 
     // Verify iframe is loaded
     await expect(iframe).toBeVisible();
   });
 
   test('verify iframe loads with correct content', async ({ page }) => {
-    test.setTimeout(60000);
-
     // Navigate directly to plugin page
     await page.goto('/#/plugins/api-test-plugin/index');
-    await page.waitForLoadState('networkidle', { timeout: 15000 });
 
     // Wait for iframe to be visible
     const iframe = page.locator(PLUGIN_IFRAME);
-    await iframe.waitFor({ state: 'visible', timeout: 15000 });
+    await iframe.waitFor({ state: 'visible' });
 
     // Verify iframe exists and is visible
     await expect(iframe).toBeVisible();
@@ -140,7 +118,7 @@ test.describe.serial('Plugin Iframe', () => {
     const frameLocator = page.frameLocator(PLUGIN_IFRAME);
     try {
       // Wait for iframe body to be loaded
-      await frameLocator.locator('body').waitFor({ state: 'visible', timeout: 10000 });
+      await frameLocator.locator('body').waitFor({ state: 'visible' });
 
       // Check for expected content if accessible
       const h1 = frameLocator.locator('h1');
