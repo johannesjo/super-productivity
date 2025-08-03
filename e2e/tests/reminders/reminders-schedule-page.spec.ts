@@ -7,54 +7,73 @@ const SCHEDULE_ROUTE_BTN = 'button[routerlink="scheduled-list"]';
 const SCHEDULE_PAGE_CMP = 'scheduled-list-page';
 const SCHEDULE_PAGE_TASKS = `${SCHEDULE_PAGE_CMP} .tasks planner-task`;
 const SCHEDULE_PAGE_TASK_1 = `${SCHEDULE_PAGE_TASKS}:first-of-type`;
-// Note: not sure why this is the second child, but it is
-const SCHEDULE_PAGE_TASK_2 = `${SCHEDULE_PAGE_TASKS}:nth-of-type(2)`;
 const SCHEDULE_PAGE_TASK_1_TITLE_EL = `${SCHEDULE_PAGE_TASK_1} .title`;
-// Note: not sure why this is the second child, but it is
-const SCHEDULE_PAGE_TASK_2_TITLE_EL = `${SCHEDULE_PAGE_TASK_2} .title`;
 
-// Skip in CI until we fix the flakiness
-test.describe.skip('Reminders Schedule Page', () => {
+test.describe('Reminders Schedule Page', () => {
   test('should add a scheduled tasks', async ({ page, workViewPage, testPrefix }) => {
     await workViewPage.waitForTaskList();
 
-    // Add task with reminder (manually implementing addTaskWithReminder)
-    const title = `${testPrefix}-0 test task koko`;
-    const scheduleTime = Date.now() + 10000; // Add 10 seconds buffer
+    // Add task with reminder
+    const title = `${testPrefix}-scheduled-task`;
+    const scheduleTime = Date.now() + 60000; // Add 1 minute buffer for CI
 
     // Add task
     await workViewPage.addTask(title);
-    await page.waitForSelector(TASK, { state: 'visible' });
 
-    // Schedule task - use first() to avoid ambiguity
-    const firstTask = page.locator(TASK).first();
-    await firstTask.hover();
-    const scheduleBtn = firstTask.locator(TASK_SCHEDULE_BTN);
-    await scheduleBtn.waitFor({ state: 'visible' });
+    // Wait for task to be fully rendered
+    await page.waitForSelector(TASK, { state: 'visible', timeout: 10000 });
+    await page.waitForTimeout(500); // Let Angular settle
+
+    // Find the task with our title
+    const targetTask = page.locator(TASK).filter({ hasText: title }).first();
+    await expect(targetTask).toBeVisible({ timeout: 5000 });
+
+    // Hover and click schedule button
+    await targetTask.hover();
+    await page.waitForTimeout(200); // Wait for hover effects
+
+    const scheduleBtn = targetTask.locator(TASK_SCHEDULE_BTN);
+    await scheduleBtn.waitFor({ state: 'visible', timeout: 5000 });
     await scheduleBtn.click();
 
-    // Set schedule time in dialog
+    // Wait for and handle schedule dialog
     const dialog = page.locator('dialog-schedule-task');
-    await expect(dialog).toBeVisible();
+    await expect(dialog).toBeVisible({ timeout: 5000 });
+    await page.waitForTimeout(500); // Let dialog fully render
 
     // Set time (convert timestamp to time string)
     const date = new Date(scheduleTime);
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
-    await page.fill('input[type="time"]', `${hours}:${minutes}`);
+    const timeInput = page.locator('input[type="time"]');
+    await timeInput.waitFor({ state: 'visible', timeout: 5000 });
+    await timeInput.fill(`${hours}:${minutes}`);
 
-    // Confirm
-    await page.click('mat-dialog-actions button:last-of-type');
+    // Confirm scheduling
+    const confirmBtn = page.locator('mat-dialog-actions button').last();
+    await confirmBtn.click();
 
-    // Verify schedule button is present
-    await expect(firstTask.locator(TASK_SCHEDULE_BTN)).toBeVisible();
+    // Wait for dialog to close
+    await dialog.waitFor({ state: 'hidden', timeout: 5000 });
+    await page.waitForTimeout(500); // Let UI update
 
-    // Navigate to scheduled page and check if entry is there
-    await page.click(SCHEDULE_ROUTE_BTN);
-    await expect(page.locator(SCHEDULE_PAGE_CMP)).toBeVisible();
-    await expect(page.locator(SCHEDULE_PAGE_TASK_1)).toBeVisible();
-    await expect(page.locator(SCHEDULE_PAGE_TASK_1_TITLE_EL)).toBeVisible();
-    await expect(page.locator(SCHEDULE_PAGE_TASK_1_TITLE_EL)).toContainText(title);
+    // Verify schedule indicator is present on the task
+    await expect(targetTask.locator(TASK_SCHEDULE_BTN)).toBeVisible({ timeout: 5000 });
+
+    // Navigate to scheduled page
+    const scheduleRouteBtn = page.locator(SCHEDULE_ROUTE_BTN);
+    await scheduleRouteBtn.waitFor({ state: 'visible', timeout: 5000 });
+    await scheduleRouteBtn.click();
+
+    // Wait for navigation to complete
+    await page.waitForLoadState('networkidle');
+    await expect(page.locator(SCHEDULE_PAGE_CMP)).toBeVisible({ timeout: 10000 });
+
+    // Verify task appears in scheduled list
+    await expect(page.locator(SCHEDULE_PAGE_TASK_1)).toBeVisible({ timeout: 5000 });
+    await expect(page.locator(SCHEDULE_PAGE_TASK_1_TITLE_EL)).toContainText(title, {
+      timeout: 5000,
+    });
   });
 
   test('should add multiple scheduled tasks', async ({
@@ -64,76 +83,91 @@ test.describe.skip('Reminders Schedule Page', () => {
   }) => {
     await workViewPage.waitForTaskList();
 
-    // Add first task
-    const title1 = `${testPrefix}-1 first scheduled task`;
-    const scheduleTime1 = Date.now() + 10000;
+    // Helper function to schedule a task
+    const scheduleTask = async (
+      taskTitle: string,
+      scheduleTime: number,
+    ): Promise<void> => {
+      // Find the specific task
+      const task = page.locator(TASK).filter({ hasText: taskTitle }).first();
+      await expect(task).toBeVisible({ timeout: 5000 });
+
+      // Hover and click schedule button
+      await task.hover();
+      await page.waitForTimeout(200);
+
+      const scheduleBtn = task.locator(TASK_SCHEDULE_BTN);
+      await scheduleBtn.waitFor({ state: 'visible', timeout: 5000 });
+      await scheduleBtn.click();
+
+      // Handle dialog
+      const dialog = page.locator('dialog-schedule-task');
+      await expect(dialog).toBeVisible({ timeout: 5000 });
+      await page.waitForTimeout(500);
+
+      // Set time
+      const date = new Date(scheduleTime);
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      const timeInput = page.locator('input[type="time"]');
+      await timeInput.waitFor({ state: 'visible', timeout: 5000 });
+      await timeInput.fill(`${hours}:${minutes}`);
+
+      // Confirm
+      const confirmBtn = page.locator('mat-dialog-actions button').last();
+      await confirmBtn.click();
+      await dialog.waitFor({ state: 'hidden', timeout: 5000 });
+      await page.waitForTimeout(500);
+    };
+
+    // Add and schedule first task
+    const title1 = `${testPrefix}-task-1`;
+    const scheduleTime1 = Date.now() + 60000; // 1 minute from now
 
     await workViewPage.addTask(title1);
     await page.waitForSelector(TASK, { state: 'visible', timeout: 10000 });
+    await page.waitForTimeout(500);
 
-    // Schedule first task
-    const firstTask = page.locator(TASK).first();
-    await firstTask.hover();
-    const scheduleBtn1 = firstTask.locator(TASK_SCHEDULE_BTN);
-    await scheduleBtn1.waitFor({ state: 'visible', timeout: 5000 });
-    await scheduleBtn1.click();
+    await scheduleTask(title1, scheduleTime1);
 
-    const dialog1 = page.locator('dialog-schedule-task');
-    await expect(dialog1).toBeVisible({ timeout: 5000 });
-
-    const date1 = new Date(scheduleTime1);
-    const hours1 = date1.getHours().toString().padStart(2, '0');
-    const minutes1 = date1.getMinutes().toString().padStart(2, '0');
-    await page.fill('input[type="time"]', `${hours1}:${minutes1}`);
-    await page.click('mat-dialog-actions button:last-of-type');
-    await dialog1.waitFor({ state: 'hidden', timeout: 5000 });
-
-    // Click to go back to work context
-    await page.click('.current-work-context-title');
-    await workViewPage.waitForTaskList();
-
-    // Add second task with reminder
-    const title2 = `${testPrefix}-2 hihihi`;
-    const scheduleTime2 = Date.now() + 10000;
+    // Add and schedule second task
+    const title2 = `${testPrefix}-task-2`;
+    const scheduleTime2 = Date.now() + 120000; // 2 minutes from now
 
     await workViewPage.addTask(title2);
 
-    // Wait for both tasks to be visible
-    await page.waitForFunction(() => {
-      const tasks = document.querySelectorAll('task');
-      return tasks.length >= 2;
+    // Wait for both tasks to be present
+    await page.waitForFunction(() => document.querySelectorAll('task').length >= 2, {
+      timeout: 5000,
     });
+    await page.waitForTimeout(500);
 
-    // Schedule the second task (which will be the first in the list due to newest first)
-    const allTasks = page.locator(TASK);
-    const newestTask = allTasks.first();
-    await newestTask.hover();
-    const scheduleBtn2 = newestTask.locator(TASK_SCHEDULE_BTN);
-    await scheduleBtn2.waitFor({ state: 'visible', timeout: 5000 });
-    await scheduleBtn2.click();
+    await scheduleTask(title2, scheduleTime2);
 
-    const dialog2 = page.locator('dialog-schedule-task');
-    await expect(dialog2).toBeVisible({ timeout: 5000 });
-
-    const date2 = new Date(scheduleTime2);
-    const hours2 = date2.getHours().toString().padStart(2, '0');
-    const minutes2 = date2.getMinutes().toString().padStart(2, '0');
-    await page.fill('input[type="time"]', `${hours2}:${minutes2}`);
-    await page.click('mat-dialog-actions button:last-of-type');
-    await dialog2.waitFor({ state: 'hidden', timeout: 5000 });
-
-    // Verify both tasks have schedule buttons
+    // Verify both tasks have schedule indicators
     const task1 = page.locator(TASK).filter({ hasText: title1 });
     const task2 = page.locator(TASK).filter({ hasText: title2 });
-    await expect(task1.locator(TASK_SCHEDULE_BTN)).toBeVisible();
-    await expect(task2.locator(TASK_SCHEDULE_BTN)).toBeVisible();
 
-    // Navigate to scheduled page and check if entries are there
-    await page.click(SCHEDULE_ROUTE_BTN);
-    await expect(page.locator(SCHEDULE_PAGE_CMP)).toBeVisible();
-    await expect(page.locator(SCHEDULE_PAGE_TASK_1)).toBeVisible();
-    await expect(page.locator(SCHEDULE_PAGE_TASK_1_TITLE_EL)).toBeVisible();
-    await expect(page.locator(SCHEDULE_PAGE_TASK_1_TITLE_EL)).toContainText(title1);
-    await expect(page.locator(SCHEDULE_PAGE_TASK_2_TITLE_EL)).toContainText(title2);
+    await expect(task1.locator(TASK_SCHEDULE_BTN)).toBeVisible({ timeout: 5000 });
+    await expect(task2.locator(TASK_SCHEDULE_BTN)).toBeVisible({ timeout: 5000 });
+
+    // Navigate to scheduled page
+    const scheduleRouteBtn = page.locator(SCHEDULE_ROUTE_BTN);
+    await scheduleRouteBtn.waitFor({ state: 'visible', timeout: 5000 });
+    await scheduleRouteBtn.click();
+
+    // Wait for navigation
+    await page.waitForLoadState('networkidle');
+    await expect(page.locator(SCHEDULE_PAGE_CMP)).toBeVisible({ timeout: 10000 });
+
+    // Verify both tasks appear in scheduled list
+    // Note: The order might vary, so we check for presence rather than specific positions
+    const scheduledTasks = page.locator(SCHEDULE_PAGE_TASKS);
+    await expect(scheduledTasks).toHaveCount(2, { timeout: 5000 });
+
+    // Check that both titles are present somewhere in the scheduled list
+    const allTaskTitles = page.locator(`${SCHEDULE_PAGE_TASKS} .title`);
+    await expect(allTaskTitles).toContainText([title1], { timeout: 5000 });
+    await expect(allTaskTitles).toContainText([title2], { timeout: 5000 });
   });
 });
