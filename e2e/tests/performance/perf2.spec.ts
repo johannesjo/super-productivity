@@ -2,8 +2,8 @@ import { expect, test } from '../../fixtures/test.fixture';
 
 test.describe.serial('Performance Tests - Adding Multiple Tasks', () => {
   test('performance: adding 20 tasks sequentially', async ({ page, workViewPage }) => {
-    // Set a longer timeout for this performance test
-    test.setTimeout(60000);
+    // Set a longer timeout for this performance test (even longer in CI)
+    test.setTimeout(process.env.CI ? 120000 : 60000);
 
     // Wait for work view to be ready
     await workViewPage.waitForTaskList();
