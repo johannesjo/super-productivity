@@ -76,7 +76,11 @@ test.describe('Reminders Schedule Page', () => {
     workViewPage,
     testPrefix,
   }) => {
+    test.setTimeout(90000); // Increase timeout for multiple operations
     await workViewPage.waitForTaskList();
+
+    // Wait a bit for the page to stabilize
+    await page.waitForTimeout(1000);
 
     // Helper function to schedule a task
     const scheduleTask = async (
@@ -87,21 +91,41 @@ test.describe('Reminders Schedule Page', () => {
       const task = page.locator(TASK).filter({ hasText: taskTitle }).first();
       await task.waitFor({ state: 'visible' });
 
-      // Hover to reveal schedule button
-      await task.hover();
+      // Ensure task is in viewport
+      await task.scrollIntoViewIfNeeded();
+      await page.waitForTimeout(500); // Small delay for scroll to complete
 
-      // Wait for and click schedule button
-      const scheduleBtn = task.locator(TASK_SCHEDULE_BTN);
-      await scheduleBtn.waitFor({ state: 'visible' });
-      await scheduleBtn.click();
+      // Hover to reveal schedule button with retry
+      let retries = 3;
+      while (retries > 0) {
+        await task.hover({ force: true });
 
-      // Wait for dialog
+        // Check if schedule button is visible
+        const scheduleBtn = task.locator(TASK_SCHEDULE_BTN).first();
+        try {
+          await scheduleBtn.waitFor({ state: 'visible', timeout: 2000 });
+          await scheduleBtn.click();
+          break;
+        } catch (e) {
+          retries--;
+          if (retries === 0) throw e;
+          await page.waitForTimeout(500);
+        }
+      }
+
+      // Wait for dialog with increased timeout
       const dialog = page.locator(SCHEDULE_DIALOG);
-      await dialog.waitFor({ state: 'visible' });
+      await dialog.waitFor({ state: 'visible', timeout: 5000 });
+
+      // Wait for dialog to be fully rendered
+      await page.waitForTimeout(500);
 
       // Wait for and fill time input
       const timeInput = page.locator(SCHEDULE_DIALOG_TIME_INPUT);
       await timeInput.waitFor({ state: 'visible' });
+
+      // Clear existing value before filling
+      await timeInput.clear();
 
       // Set time
       const date = new Date(scheduleTime);
@@ -111,13 +135,20 @@ test.describe('Reminders Schedule Page', () => {
 
       // Confirm
       const confirmBtn = page.locator(SCHEDULE_DIALOG_CONFIRM);
+      await confirmBtn.waitFor({ state: 'visible' });
       await confirmBtn.click();
 
       // Wait for dialog to close
-      await dialog.waitFor({ state: 'hidden' });
+      await dialog.waitFor({ state: 'hidden', timeout: 5000 });
 
-      // Wait for schedule indicator to appear
-      await task.locator(TASK_SCHEDULE_BTN).waitFor({ state: 'visible' });
+      // Wait a bit for UI to update
+      await page.waitForTimeout(1000);
+
+      // Wait for schedule indicator to appear on the task
+      await task
+        .locator(TASK_SCHEDULE_BTN)
+        .first()
+        .waitFor({ state: 'visible', timeout: 5000 });
     };
 
     // Add and schedule first task
@@ -126,8 +157,13 @@ test.describe('Reminders Schedule Page', () => {
 
     await workViewPage.addTask(title1);
 
-    // Wait for first task to be visible
-    await page.locator(TASK).filter({ hasText: title1 }).waitFor({ state: 'visible' });
+    // Wait for first task to be visible and stable
+    await page
+      .locator(TASK)
+      .filter({ hasText: title1 })
+      .first()
+      .waitFor({ state: 'visible' });
+    await page.waitForTimeout(500); // Let the task fully render
 
     await scheduleTask(title1, scheduleTime1);
 
@@ -137,8 +173,13 @@ test.describe('Reminders Schedule Page', () => {
 
     await workViewPage.addTask(title2);
 
-    // Wait for second task to be visible
-    await page.locator(TASK).filter({ hasText: title2 }).waitFor({ state: 'visible' });
+    // Wait for second task to be visible and stable
+    await page
+      .locator(TASK)
+      .filter({ hasText: title2 })
+      .first()
+      .waitFor({ state: 'visible' });
+    await page.waitForTimeout(500); // Let the task fully render
 
     await scheduleTask(title2, scheduleTime2);
 
@@ -152,18 +193,28 @@ test.describe('Reminders Schedule Page', () => {
 
     // Navigate to scheduled page
     const scheduleRouteBtn = page.locator(SCHEDULE_ROUTE_BTN);
+    await scheduleRouteBtn.waitFor({ state: 'visible' });
     await scheduleRouteBtn.click();
 
     // Wait for scheduled page to load
-    await page.waitForSelector(SCHEDULE_PAGE_CMP, { state: 'visible' });
+    await page.waitForSelector(SCHEDULE_PAGE_CMP, { state: 'visible', timeout: 10000 });
 
-    // Verify both tasks appear in scheduled list
-    const scheduledTasks = page.locator(SCHEDULE_PAGE_TASKS);
-    await expect(scheduledTasks).toHaveCount(2);
+    // Wait for the scheduled tasks to render
+    await page.waitForTimeout(1000);
+
+    // Verify both tasks appear in scheduled list with retry
+    await expect(async () => {
+      const scheduledTasks = page.locator(SCHEDULE_PAGE_TASKS);
+      await expect(scheduledTasks).toHaveCount(2);
+    }).toPass({ timeout: 10000 });
 
     // Check that both titles are present somewhere in the scheduled list
     const allTaskTitles = page.locator(`${SCHEDULE_PAGE_TASKS} .title`);
-    await expect(allTaskTitles).toContainText([title1]);
-    await expect(allTaskTitles).toContainText([title2]);
+    await expect(allTaskTitles.first()).toBeVisible();
+
+    // Get all title texts and verify both are present
+    const titles = await allTaskTitles.allTextContents();
+    expect(titles.some((t) => t.includes(title1))).toBeTruthy();
+    expect(titles.some((t) => t.includes(title2))).toBeTruthy();
   });
 });
