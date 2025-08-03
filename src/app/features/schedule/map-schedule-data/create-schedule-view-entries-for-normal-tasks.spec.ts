@@ -17,8 +17,8 @@ const hours = (n: number): number => 60 * minutes(n);
 // Helper function to conditionally skip tests that are timezone-dependent
 // These tests were written with hardcoded expectations for Europe/Berlin timezone
 const TZ_OFFSET = new Date('1970-01-01').getTimezoneOffset() * 60000;
-const isEuropeBerlinTimezone = () => TZ_OFFSET === -3600000; // UTC+1 = -1 hour offset
-const maybeSkipTimezoneDependent = (testName: string) => {
+const isEuropeBerlinTimezone = (): boolean => TZ_OFFSET === -3600000; // UTC+1 = -1 hour offset
+const maybeSkipTimezoneDependent = (testName: string): boolean => {
   if (!isEuropeBerlinTimezone()) {
     console.warn(
       `Skipping timezone-dependent test "${testName}" - only runs in Europe/Berlin timezone`,

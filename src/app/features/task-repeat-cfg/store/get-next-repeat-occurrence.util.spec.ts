@@ -1,7 +1,6 @@
 import { getNextRepeatOccurrence } from './get-next-repeat-occurrence.util';
 import { DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfg } from '../task-repeat-cfg.model';
 import { getLocalDateStr } from '../../../util/get-local-date-str';
-import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 
 /* eslint-disable no-mixed-operators */
 
