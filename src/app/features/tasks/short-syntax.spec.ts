@@ -250,10 +250,12 @@ describe('shortSyntax', () => {
         ...TASK,
         title: 'Test @4pm',
       };
-      const parsedDateInMilliseconds =
-        getPlannedDateTimestampFromShortSyntaxReturnValue(t);
-      const parsedDate = new Date(parsedDateInMilliseconds);
       const now = new Date();
+      const parsedDateInMilliseconds = getPlannedDateTimestampFromShortSyntaxReturnValue(
+        t,
+        now,
+      );
+      const parsedDate = new Date(parsedDateInMilliseconds);
       if (now.getHours() > 16 || (now.getHours() === 16 && now.getMinutes() > 0)) {
         const isSetToTomorrow = checkIfADateIsTomorrow(now, parsedDate);
         expect(isSetToTomorrow).toBeTrue();
