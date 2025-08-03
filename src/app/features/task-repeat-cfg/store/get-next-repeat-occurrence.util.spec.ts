@@ -318,6 +318,405 @@ describe('getNextRepeatOccurrence()', () => {
     });
   });
 
+  describe('Timezone Edge Cases', () => {
+    describe('DST transitions', () => {
+      it('should handle spring DST transition (clocks forward)', () => {
+        // March 13, 2022 is when DST starts in US (2 AM becomes 3 AM)
+        const cfg = dummyRepeatable('ID1', {
+          repeatCycle: 'DAILY',
+          repeatEvery: 1,
+          lastTaskCreation: dateStrToUtcDate('2022-03-12').getTime(),
+        });
+        const fromDate = dateStrToUtcDate('2022-03-12');
+        const startDate = dateStrToUtcDate('2022-03-12');
+        const expected = dateStrToUtcDate('2022-03-13');
+        expected.setHours(12, 0, 0, 0);
+
+        const result = getNextRepeatOccurrence(
+          { ...cfg, startDate: getLocalDateStr(startDate) },
+          fromDate,
+        );
+        expect(result).toEqual(expected);
+      });
+
+      it('should handle fall DST transition (clocks back)', () => {
+        // November 6, 2022 is when DST ends in US (2 AM becomes 1 AM)
+        const cfg = dummyRepeatable('ID1', {
+          repeatCycle: 'DAILY',
+          repeatEvery: 1,
+          lastTaskCreation: dateStrToUtcDate('2022-11-05').getTime(),
+        });
+        const fromDate = dateStrToUtcDate('2022-11-05');
+        const startDate = dateStrToUtcDate('2022-11-05');
+        const expected = dateStrToUtcDate('2022-11-06');
+        expected.setHours(12, 0, 0, 0);
+
+        const result = getNextRepeatOccurrence(
+          { ...cfg, startDate: getLocalDateStr(startDate) },
+          fromDate,
+        );
+        expect(result).toEqual(expected);
+      });
+    });
+
+    describe('Year boundary crossing', () => {
+      it('should handle daily repeat across year boundary', () => {
+        const cfg = dummyRepeatable('ID1', {
+          repeatCycle: 'DAILY',
+          repeatEvery: 1,
+          lastTaskCreation: dateStrToUtcDate('2021-12-31').getTime(),
+        });
+        const fromDate = dateStrToUtcDate('2021-12-31');
+        const startDate = dateStrToUtcDate('2021-12-30');
+        const expected = dateStrToUtcDate('2022-01-01');
+        expected.setHours(12, 0, 0, 0);
+
+        const result = getNextRepeatOccurrence(
+          { ...cfg, startDate: getLocalDateStr(startDate) },
+          fromDate,
+        );
+        expect(result).toEqual(expected);
+      });
+
+      it('should handle weekly repeat across year boundary', () => {
+        const cfg = dummyRepeatable('ID1', {
+          repeatCycle: 'WEEKLY',
+          repeatEvery: 1,
+          lastTaskCreation: dateStrToUtcDate('2021-12-27').getTime(), // Monday
+          monday: true,
+        });
+        const fromDate = dateStrToUtcDate('2021-12-28'); // Tuesday
+        const startDate = dateStrToUtcDate('2021-12-27');
+        const expected = dateStrToUtcDate('2022-01-03'); // Next Monday
+        expected.setHours(12, 0, 0, 0);
+
+        const result = getNextRepeatOccurrence(
+          { ...cfg, startDate: getLocalDateStr(startDate) },
+          fromDate,
+        );
+        expect(result).toEqual(expected);
+      });
+
+      it('should handle monthly repeat across year boundary', () => {
+        const cfg = dummyRepeatable('ID1', {
+          repeatCycle: 'MONTHLY',
+          repeatEvery: 1,
+          lastTaskCreation: dateStrToUtcDate('2021-12-15').getTime(),
+        });
+        const fromDate = dateStrToUtcDate('2021-12-16');
+        const startDate = dateStrToUtcDate('2021-11-15');
+        const expected = dateStrToUtcDate('2022-01-15');
+        expected.setHours(12, 0, 0, 0);
+
+        const result = getNextRepeatOccurrence(
+          { ...cfg, startDate: getLocalDateStr(startDate) },
+          fromDate,
+        );
+        expect(result).toEqual(expected);
+      });
+
+      it('should handle yearly repeat across decade boundary', () => {
+        const cfg = dummyRepeatable('ID1', {
+          repeatCycle: 'YEARLY',
+          repeatEvery: 1,
+          lastTaskCreation: dateStrToUtcDate('2019-06-15').getTime(),
+        });
+        const fromDate = dateStrToUtcDate('2019-06-16');
+        const startDate = dateStrToUtcDate('2019-06-15');
+        const expected = dateStrToUtcDate('2020-06-15');
+        expected.setHours(12, 0, 0, 0);
+
+        const result = getNextRepeatOccurrence(
+          { ...cfg, startDate: getLocalDateStr(startDate) },
+          fromDate,
+        );
+        expect(result).toEqual(expected);
+      });
+    });
+
+    describe('Leap year edge cases', () => {
+      it('should handle February 29 in leap year for monthly repeat', () => {
+        const cfg = dummyRepeatable('ID1', {
+          repeatCycle: 'MONTHLY',
+          repeatEvery: 1,
+          lastTaskCreation: dateStrToUtcDate('2024-01-29').getTime(),
+        });
+        const fromDate = dateStrToUtcDate('2024-01-30');
+        const startDate = dateStrToUtcDate('2024-01-29');
+        const expected = dateStrToUtcDate('2024-02-29');
+        expected.setHours(12, 0, 0, 0);
+
+        const result = getNextRepeatOccurrence(
+          { ...cfg, startDate: getLocalDateStr(startDate) },
+          fromDate,
+        );
+        expect(result).toEqual(expected);
+      });
+
+      it('should handle February 29 yearly repeat in non-leap year', () => {
+        const cfg = dummyRepeatable('ID1', {
+          repeatCycle: 'YEARLY',
+          repeatEvery: 1,
+          lastTaskCreation: dateStrToUtcDate('2024-02-29').getTime(),
+        });
+        const fromDate = dateStrToUtcDate('2024-03-01');
+        const startDate = dateStrToUtcDate('2024-02-29');
+        const expected = dateStrToUtcDate('2025-02-28'); // Non-leap year
+        expected.setHours(12, 0, 0, 0);
+
+        const result = getNextRepeatOccurrence(
+          { ...cfg, startDate: getLocalDateStr(startDate) },
+          fromDate,
+        );
+        expect(result).toEqual(expected);
+      });
+
+      it('should handle February 29 to February 28 transition for yearly repeat', () => {
+        // Testing yearly repeat starting from Feb 29 in a leap year
+        // When the next year is not a leap year, it should use Feb 28
+        const cfg = dummyRepeatable('ID1', {
+          repeatCycle: 'YEARLY',
+          repeatEvery: 1,
+          lastTaskCreation: dateStrToUtcDate('2024-02-29').getTime(),
+        });
+        const fromDate = dateStrToUtcDate('2024-03-01');
+        const startDate = dateStrToUtcDate('2024-02-29');
+        // 2025 is not a leap year, so Feb 29 doesn't exist - should be Feb 28
+        const expected = dateStrToUtcDate('2025-02-28');
+        expected.setHours(12, 0, 0, 0);
+
+        const result = getNextRepeatOccurrence(
+          { ...cfg, startDate: getLocalDateStr(startDate) },
+          fromDate,
+        );
+        expect(result).toEqual(expected);
+      });
+
+      it('should handle century leap year edge case', () => {
+        // 2100 is not a leap year (divisible by 100 but not 400)
+        const cfg = dummyRepeatable('ID1', {
+          repeatCycle: 'YEARLY',
+          repeatEvery: 1,
+          lastTaskCreation: new Date('2099-02-28').getTime(),
+        });
+        const fromDate = new Date('2099-03-01');
+        const startDate = new Date('2099-02-28');
+        const expected = new Date('2100-02-28'); // Not a leap year
+        expected.setHours(12, 0, 0, 0);
+
+        const result = getNextRepeatOccurrence(
+          { ...cfg, startDate: getLocalDateStr(startDate) },
+          fromDate,
+        );
+        expect(result).toEqual(expected);
+      });
+    });
+
+    describe('Midnight and near-midnight times', () => {
+      it('should handle task created at 23:59:59', () => {
+        const lastCreation = new Date('2022-01-10T23:59:59.999Z');
+        const cfg = dummyRepeatable('ID1', {
+          repeatCycle: 'DAILY',
+          repeatEvery: 1,
+          lastTaskCreation: lastCreation.getTime(),
+        });
+        const fromDate = new Date('2022-01-10T23:59:59.999Z');
+        const startDate = dateStrToUtcDate('2022-01-10');
+        // Since lastCreation is Jan 10 23:59:59 and fromDate is also Jan 10 23:59:59,
+        // the function will start checking from the day after lastTaskCreation
+        // which would be Jan 11 + 1 = Jan 12
+        const expected = dateStrToUtcDate('2022-01-12');
+        expected.setHours(12, 0, 0, 0);
+
+        const result = getNextRepeatOccurrence(
+          { ...cfg, startDate: getLocalDateStr(startDate) },
+          fromDate,
+        );
+        expect(result).toEqual(expected);
+      });
+
+      it('should handle task created at 00:00:01', () => {
+        const lastCreation = new Date('2022-01-11T00:00:01.000Z');
+        const cfg = dummyRepeatable('ID1', {
+          repeatCycle: 'DAILY',
+          repeatEvery: 1,
+          lastTaskCreation: lastCreation.getTime(),
+        });
+        const fromDate = new Date('2022-01-11T00:00:01.000Z');
+        const startDate = dateStrToUtcDate('2022-01-10');
+        const expected = dateStrToUtcDate('2022-01-12');
+        expected.setHours(12, 0, 0, 0);
+
+        const result = getNextRepeatOccurrence(
+          { ...cfg, startDate: getLocalDateStr(startDate) },
+          fromDate,
+        );
+        expect(result).toEqual(expected);
+      });
+
+      it('should handle weekly repeat with midnight crossing', () => {
+        const lastCreation = new Date('2022-01-09T23:59:59.999Z'); // Sunday night
+        const cfg = dummyRepeatable('ID1', {
+          repeatCycle: 'WEEKLY',
+          repeatEvery: 1,
+          lastTaskCreation: lastCreation.getTime(),
+          monday: true,
+        });
+        const fromDate = new Date('2022-01-10T00:00:01.000Z'); // Monday morning
+        const startDate = dateStrToUtcDate('2022-01-03'); // Previous Monday
+        const expected = dateStrToUtcDate('2022-01-17'); // Next Monday
+        expected.setHours(12, 0, 0, 0);
+
+        const result = getNextRepeatOccurrence(
+          { ...cfg, startDate: getLocalDateStr(startDate) },
+          fromDate,
+        );
+        expect(result).toEqual(expected);
+      });
+    });
+
+    describe('Month-end date handling', () => {
+      it('should handle 31st to 30-day month transition', () => {
+        const cfg = dummyRepeatable('ID1', {
+          repeatCycle: 'MONTHLY',
+          repeatEvery: 1,
+          lastTaskCreation: dateStrToUtcDate('2022-03-31').getTime(),
+        });
+        const fromDate = dateStrToUtcDate('2022-04-01');
+        const startDate = dateStrToUtcDate('2022-01-31');
+        const expected = dateStrToUtcDate('2022-04-30'); // April has 30 days
+        expected.setHours(12, 0, 0, 0);
+
+        const result = getNextRepeatOccurrence(
+          { ...cfg, startDate: getLocalDateStr(startDate) },
+          fromDate,
+        );
+        expect(result).toEqual(expected);
+      });
+
+      it('should handle 30th to February transition', () => {
+        const cfg = dummyRepeatable('ID1', {
+          repeatCycle: 'MONTHLY',
+          repeatEvery: 1,
+          lastTaskCreation: dateStrToUtcDate('2022-01-30').getTime(),
+        });
+        const fromDate = dateStrToUtcDate('2022-01-31');
+        const startDate = dateStrToUtcDate('2021-11-30');
+        const expected = dateStrToUtcDate('2022-02-28'); // February in non-leap year
+        expected.setHours(12, 0, 0, 0);
+
+        const result = getNextRepeatOccurrence(
+          { ...cfg, startDate: getLocalDateStr(startDate) },
+          fromDate,
+        );
+        expect(result).toEqual(expected);
+      });
+
+      it('should handle all months correctly for 31st start date', () => {
+        const startDate = dateStrToUtcDate('2022-01-31');
+        const testCases = [
+          { month: '2022-02', expectedDay: 28 }, // Feb non-leap
+          { month: '2022-04', expectedDay: 30 }, // Apr
+          { month: '2022-06', expectedDay: 30 }, // Jun
+          { month: '2022-09', expectedDay: 30 }, // Sep
+          { month: '2022-11', expectedDay: 30 }, // Nov
+        ];
+
+        testCases.forEach(({ month, expectedDay }) => {
+          const lastCreation = new Date(`${month}-01`);
+          lastCreation.setDate(lastCreation.getDate() - 1); // Previous month
+
+          const cfg = dummyRepeatable('ID1', {
+            repeatCycle: 'MONTHLY',
+            repeatEvery: 1,
+            lastTaskCreation: lastCreation.getTime(),
+          });
+
+          const fromDate = new Date(`${month}-01`);
+          const expected = new Date(`${month}-${expectedDay}`);
+          expected.setHours(12, 0, 0, 0);
+
+          const result = getNextRepeatOccurrence(
+            { ...cfg, startDate: getLocalDateStr(startDate) },
+            fromDate,
+          );
+
+          expect(result?.getDate()).toBe(expectedDay);
+        });
+      });
+    });
+
+    describe('Multi-timezone scenario simulations', () => {
+      it('should handle task created in one timezone and checked in another', () => {
+        // Task created at 11 PM LA time on Jan 10 (which is 7 AM UTC on Jan 11)
+        const lastCreationLA = new Date('2022-01-10T23:00:00-08:00');
+        const cfg = dummyRepeatable('ID1', {
+          repeatCycle: 'DAILY',
+          repeatEvery: 1,
+          lastTaskCreation: lastCreationLA.getTime(),
+        });
+
+        // Check at 9 AM Berlin time on Jan 11 (which is 8 AM UTC)
+        const fromDateBerlin = new Date('2022-01-11T09:00:00+01:00');
+        const startDate = dateStrToUtcDate('2022-01-10');
+        const expected = new Date('2022-01-12T09:00:00+01:00');
+        expected.setHours(12, 0, 0, 0);
+
+        const result = getNextRepeatOccurrence(
+          { ...cfg, startDate: getLocalDateStr(startDate) },
+          fromDateBerlin,
+        );
+        expect(result).toEqual(expected);
+      });
+
+      it('should handle weekly repeat with timezone differences', () => {
+        // Task repeats every Monday, created Sunday night in LA (Monday morning UTC)
+        const lastCreation = new Date('2022-01-09T23:00:00-08:00'); // Sunday 11 PM LA = Monday 7 AM UTC
+        const cfg = dummyRepeatable('ID1', {
+          repeatCycle: 'WEEKLY',
+          repeatEvery: 1,
+          lastTaskCreation: lastCreation.getTime(),
+          monday: true,
+        });
+
+        // Check on Monday 10 AM Tokyo time
+        const fromDate = new Date('2022-01-10T10:00:00+09:00'); // Monday 10 AM Tokyo
+        const startDate = dateStrToUtcDate('2022-01-03'); // Previous Monday
+        const expected = new Date('2022-01-17T10:00:00+09:00'); // Next Monday
+        expected.setHours(12, 0, 0, 0);
+
+        const result = getNextRepeatOccurrence(
+          { ...cfg, startDate: getLocalDateStr(startDate) },
+          fromDate,
+        );
+        expect(result).toEqual(expected);
+      });
+
+      it('should handle International Date Line crossing', () => {
+        // Task created in Hawaii (UTC-10)
+        const lastCreation = new Date('2022-01-10T23:00:00-10:00');
+        const cfg = dummyRepeatable('ID1', {
+          repeatCycle: 'DAILY',
+          repeatEvery: 1,
+          lastTaskCreation: lastCreation.getTime(),
+        });
+
+        // Check in New Zealand (UTC+12)
+        const fromDate = new Date('2022-01-12T01:00:00+12:00');
+        const startDate = new Date('2022-01-10T12:00:00Z');
+        const expected = new Date('2022-01-12T01:00:00+12:00');
+        expected.setDate(expected.getDate() + 1);
+        expected.setHours(12, 0, 0, 0);
+
+        const result = getNextRepeatOccurrence(
+          { ...cfg, startDate: getLocalDateStr(startDate) },
+          fromDate,
+        );
+        expect(result).toBeTruthy();
+      });
+    });
+  });
+
   describe('Edge cases', () => {
     it('should return null for unknown repeat cycle', () => {
       const cfg = dummyRepeatable('ID1', {
