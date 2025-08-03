@@ -3,7 +3,7 @@ import { plannerSharedMetaReducer } from './planner-shared.reducer';
 import { RootState } from '../../root-state';
 import { Task } from '../../../features/tasks/task.model';
 import { Action, ActionReducer } from '@ngrx/store';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getLocalDateStr } from '../../../util/get-local-date-str';
 import { PlannerActions } from '../../../features/planner/store/planner.actions';
 import {
   createBaseState,
@@ -43,7 +43,7 @@ describe('plannerSharedMetaReducer', () => {
       });
 
     it('should remove task from Today tag when moving from today to different day', () => {
-      const todayStr = getWorklogStr();
+      const todayStr = getLocalDateStr();
       const testState = createStateWithExistingTasks([], [], [], ['task1', 'other-task']);
       const task = createMockTask({ id: 'task1' });
       const action = createTransferTaskAction(task, todayStr, 0, 'tomorrow', todayStr);
@@ -58,7 +58,7 @@ describe('plannerSharedMetaReducer', () => {
     });
 
     it('should add task to Today tag when moving from different day to today', () => {
-      const todayStr = getWorklogStr();
+      const todayStr = getLocalDateStr();
       const testState = createStateWithExistingTasks([], [], [], ['existing-task']);
       const task = createMockTask({ id: 'task1' });
       const action = createTransferTaskAction(task, todayStr, 1, todayStr, 'yesterday');
@@ -73,7 +73,7 @@ describe('plannerSharedMetaReducer', () => {
     });
 
     it('should insert task at specific position when targetTaskId is provided', () => {
-      const todayStr = getWorklogStr();
+      const todayStr = getLocalDateStr();
       const testState = createStateWithExistingTasks(
         [],
         [],
@@ -102,7 +102,7 @@ describe('plannerSharedMetaReducer', () => {
     });
 
     it('should not change state when transferring within same day', () => {
-      const todayStr = getWorklogStr();
+      const todayStr = getLocalDateStr();
       const task = createMockTask({ id: 'task1' });
       const action = createTransferTaskAction(task, todayStr, 0, todayStr, todayStr);
 
@@ -111,7 +111,7 @@ describe('plannerSharedMetaReducer', () => {
     });
 
     it('should handle unique task IDs when adding to Today', () => {
-      const todayStr = getWorklogStr();
+      const todayStr = getLocalDateStr();
       const testState = createStateWithExistingTasks([], [], [], ['task1', 'other-task']);
       const task = createMockTask({ id: 'task1' });
       const action = createTransferTaskAction(task, todayStr, 0, todayStr, 'yesterday');
@@ -139,7 +139,7 @@ describe('plannerSharedMetaReducer', () => {
       });
 
     it('should add task to Today tag when planning for today', () => {
-      const todayStr = getWorklogStr();
+      const todayStr = getLocalDateStr();
       const testState = createStateWithExistingTasks([], [], [], ['existing-task']);
       const task = createMockTask({ id: 'task1' });
       const action = createPlanTaskForDayAction(task, todayStr, false);
@@ -154,7 +154,7 @@ describe('plannerSharedMetaReducer', () => {
     });
 
     it('should add task to top of Today tag when isAddToTop is true', () => {
-      const todayStr = getWorklogStr();
+      const todayStr = getLocalDateStr();
       const testState = createStateWithExistingTasks([], [], [], ['existing-task']);
       const task = createMockTask({ id: 'task1' });
       const action = createPlanTaskForDayAction(task, todayStr, true);
@@ -183,7 +183,7 @@ describe('plannerSharedMetaReducer', () => {
     });
 
     it('should not change state when task is already in Today and planned for today', () => {
-      const todayStr = getWorklogStr();
+      const todayStr = getLocalDateStr();
       const testState = createStateWithExistingTasks([], [], [], ['task1', 'other-task']);
       const task = createMockTask({ id: 'task1' });
       const action = createPlanTaskForDayAction(task, todayStr, false);

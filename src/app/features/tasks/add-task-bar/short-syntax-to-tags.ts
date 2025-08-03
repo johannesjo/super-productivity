@@ -7,7 +7,7 @@ import {
 } from '../../work-context/work-context.const';
 import { Tag } from '../../tag/tag.model';
 import { Project } from '../../project/project.model';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getLocalDateStr } from '../../../util/get-local-date-str';
 import { ShortSyntaxConfig } from '../../config/global-config.model';
 import { TaskLog } from '../../../core/log';
 
@@ -64,8 +64,8 @@ export const shortSyntaxToTags = ({
   if (r.taskChanges.timeEstimate) {
     let time = msToString(r.taskChanges.timeEstimate);
 
-    if (r.taskChanges.timeSpentOnDay && r.taskChanges.timeSpentOnDay[getWorklogStr()]) {
-      time = msToString(r.taskChanges.timeSpentOnDay[getWorklogStr()]) + '/' + time;
+    if (r.taskChanges.timeSpentOnDay && r.taskChanges.timeSpentOnDay[getLocalDateStr()]) {
+      time = msToString(r.taskChanges.timeSpentOnDay[getLocalDateStr()]) + '/' + time;
     }
     TaskLog.log(time);
 

@@ -1,4 +1,4 @@
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getLocalDateStr } from '../../../util/get-local-date-str';
 
 describe('ShortSyntaxEffects timezone test', () => {
   describe('plannedDayInIsoFormat calculation', () => {
@@ -10,7 +10,7 @@ describe('ShortSyntaxEffects timezone test', () => {
       // Test case 1: Midnight LA time on 2025-01-17
       const dueWithTime1 = new Date('2025-01-17T00:00:00-08:00').getTime();
       const plannedDay1 = new Date(dueWithTime1);
-      const plannedDayInIsoFormat1 = getWorklogStr(plannedDay1);
+      const plannedDayInIsoFormat1 = getLocalDateStr(plannedDay1);
 
       // In LA timezone, this should be 2025-01-17
       // In Berlin timezone, this might also be 2025-01-17 because getWorklogStr uses local date
@@ -25,7 +25,7 @@ describe('ShortSyntaxEffects timezone test', () => {
       // Test case 2: 11 PM LA time on 2025-01-16 (which is 7 AM UTC on 2025-01-17)
       const dueWithTime2 = new Date('2025-01-16T23:00:00-08:00').getTime();
       const plannedDay2 = new Date(dueWithTime2);
-      const plannedDayInIsoFormat2 = getWorklogStr(plannedDay2);
+      const plannedDayInIsoFormat2 = getLocalDateStr(plannedDay2);
 
       // In LA timezone, this should be 2025-01-16
       // In Berlin timezone, this would be 2025-01-17
@@ -56,7 +56,7 @@ describe('ShortSyntaxEffects timezone test', () => {
       const timestamp = 1737094800000; // Fixed timestamp
 
       const date = new Date(timestamp);
-      const dayStr = getWorklogStr(date);
+      const dayStr = getLocalDateStr(date);
 
       const tzOffset = date.getTimezoneOffset();
       console.log('Timezone offset in minutes:', tzOffset);

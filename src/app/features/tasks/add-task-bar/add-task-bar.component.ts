@@ -24,7 +24,7 @@ import { LS, SS } from '../../../core/persistence/storage-keys.const';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { Store } from '@ngrx/store';
 import { PlannerActions } from '../../planner/store/planner.actions';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getLocalDateStr } from '../../../util/get-local-date-str';
 import { MentionConfig } from 'angular-mentions/lib/mention-config';
 import { AddTaskBarService } from './add-task-bar.service';
 import { map } from 'rxjs/operators';
@@ -343,7 +343,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
 
   private _planTaskForDay(taskId: string, day: string): void {
     this._taskService.getByIdOnce$(taskId).subscribe((task) => {
-      if (getWorklogStr() !== day) {
+      if (getLocalDateStr() !== day) {
         this._store.dispatch(
           PlannerActions.planTaskForDay({
             task: task,

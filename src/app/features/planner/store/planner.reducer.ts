@@ -4,7 +4,7 @@ import { moveItemInArray } from '../../../util/move-item-in-array';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { unique } from '../../../util/unique';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getLocalDateStr } from '../../../util/get-local-date-str';
 import { Log } from '../../../core/log';
 
 export const plannerFeatureKey = 'planner';
@@ -158,7 +158,7 @@ export const plannerReducer = createReducer(
     Object.keys(daysCopy).forEach((dayI) => {
       daysCopy[dayI] = daysCopy[dayI].filter((id) => id !== task.id);
     });
-    const isPlannedForToday = day === getWorklogStr();
+    const isPlannedForToday = day === getLocalDateStr();
     return {
       ...state,
       days: {

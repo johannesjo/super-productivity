@@ -1,5 +1,5 @@
 import { inject, LOCALE_ID, Pipe, PipeTransform } from '@angular/core';
-import { isWorklogStr } from '../../util/get-work-log-str';
+import { isWorklogStr } from '../../util/get-local-date-str';
 import { dateStrToUtcDate } from '../../util/date-str-to-utc-date';
 import { formatMonthDay } from '../../util/format-month-day.util';
 

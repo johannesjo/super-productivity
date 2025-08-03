@@ -1,4 +1,4 @@
-import { getWorklogStr } from '../../util/get-work-log-str';
+import { getLocalDateStr } from '../../util/get-local-date-str';
 
 describe('ArchiveService timezone test', () => {
   describe('todayStr calculation', () => {
@@ -7,7 +7,7 @@ describe('ArchiveService timezone test', () => {
       // todayStr: getWorklogStr(now),
 
       const now = Date.now();
-      const todayStr = getWorklogStr(now);
+      const todayStr = getLocalDateStr(now);
 
       console.log('Archive service todayStr test:', {
         now: new Date(now).toISOString(),
@@ -30,7 +30,7 @@ describe('ArchiveService timezone test', () => {
       // Test at a specific time that crosses midnight in different timezones
       const testTime = new Date('2025-01-17T07:00:00Z').getTime(); // 7 AM UTC
 
-      const todayStr = getWorklogStr(testTime);
+      const todayStr = getLocalDateStr(testTime);
 
       console.log('Archive service midnight edge case:', {
         testTime: new Date(testTime).toISOString(),
@@ -54,7 +54,7 @@ describe('ArchiveService timezone test', () => {
     it('should be used for sorting time tracking data', () => {
       // This simulates how todayStr is used in sortTimeTrackingDataToArchiveYoung
       const now = Date.now();
-      const todayStr = getWorklogStr(now);
+      const todayStr = getLocalDateStr(now);
 
       // Mock time tracking data structure
       const timeTrackingData = {

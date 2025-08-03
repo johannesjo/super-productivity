@@ -11,7 +11,7 @@ import { DateService } from '../../core/date/date.service';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 import { selectTodayTaskIds } from '../work-context/store/work-context.selectors';
 import { msToString } from '../../ui/duration/ms-to-string.pipe';
-import { getWorklogStr } from '../../util/get-work-log-str';
+import { getLocalDateStr } from '../../util/get-local-date-str';
 import { selectAllTaskRepeatCfgs } from '../task-repeat-cfg/store/task-repeat-cfg.selectors';
 import { Log } from '../../core/log';
 
@@ -83,7 +83,7 @@ export class PlannerService {
     map((days) => {
       const tomorrow = new Date(this._dateService.todayStr());
       tomorrow.setDate(tomorrow.getDate() + 1);
-      if (days[1]?.dayDate === getWorklogStr(tomorrow)) {
+      if (days[1]?.dayDate === getLocalDateStr(tomorrow)) {
         return days[1];
       }
       return null;

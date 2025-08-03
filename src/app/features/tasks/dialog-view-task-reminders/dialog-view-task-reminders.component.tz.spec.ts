@@ -1,4 +1,4 @@
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getLocalDateStr } from '../../../util/get-local-date-str';
 import { getTomorrow } from '../../../util/get-tomorrow';
 
 describe('DialogViewTaskRemindersComponent timezone test', () => {
@@ -8,7 +8,7 @@ describe('DialogViewTaskRemindersComponent timezone test', () => {
       // day: getWorklogStr(getTomorrow()),
 
       const tomorrow = getTomorrow();
-      const tomorrowStr = getWorklogStr(tomorrow);
+      const tomorrowStr = getLocalDateStr(tomorrow);
 
       console.log('Plan for tomorrow test:', {
         tomorrow: tomorrow.toISOString(),
@@ -40,7 +40,7 @@ describe('DialogViewTaskRemindersComponent timezone test', () => {
 
       // getTomorrow() should still return tomorrow's date
       const tomorrow = getTomorrow();
-      const tomorrowStr = getWorklogStr(tomorrow);
+      const tomorrowStr = getLocalDateStr(tomorrow);
 
       console.log('Near midnight test:', {
         currentTime: nearMidnight.toISOString(),
@@ -53,7 +53,7 @@ describe('DialogViewTaskRemindersComponent timezone test', () => {
       expect(tomorrowStr).toMatch(/^\d{4}-\d{2}-\d{2}$/);
 
       // Verify it's not today
-      const todayStr = getWorklogStr(new Date());
+      const todayStr = getLocalDateStr(new Date());
       expect(tomorrowStr).not.toBe(todayStr);
     });
 
@@ -63,7 +63,7 @@ describe('DialogViewTaskRemindersComponent timezone test', () => {
 
       for (let i = 0; i < 3; i++) {
         const tomorrow = getTomorrow();
-        const tomorrowStr = getWorklogStr(tomorrow);
+        const tomorrowStr = getLocalDateStr(tomorrow);
         results.push(tomorrowStr);
       }
 

@@ -32,7 +32,7 @@ import { TagService } from '../../tag/tag.service';
 import { unique } from '../../../util/unique';
 import { exists } from '../../../util/exists';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getLocalDateStr } from '../../../util/get-local-date-str';
 import { first } from 'rxjs/operators';
 import { getQuickSettingUpdates } from './get-quick-setting-updates';
 import { clockStringFromDate } from '../../../ui/duration/clock-string-from-date';
@@ -127,7 +127,7 @@ export class DialogEditTaskRepeatCfgComponent {
         : undefined;
       return {
         ...DEFAULT_TASK_REPEAT_CFG,
-        startDate: getWorklogStr(this._data.task.dueWithTime || undefined),
+        startDate: getLocalDateStr(this._data.task.dueWithTime || undefined),
         startTime,
         remindAt: startTime ? TaskReminderOptionId.AtStart : undefined,
         title: this._data.task.title,

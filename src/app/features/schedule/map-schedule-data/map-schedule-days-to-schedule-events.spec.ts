@@ -22,7 +22,7 @@ const FAKE_TASK_ENTRY: SVETask = {
     subTaskIds: [],
   } as Partial<TaskCopy> as TaskCopy,
   duration: H,
-  start: new Date('2020-1-1 00:00').getUTCMilliseconds(),
+  start: new Date(2020, 0, 1, 0, 0).getUTCMilliseconds(),
   type: SVEType.Task,
 };
 
@@ -63,11 +63,11 @@ describe('mapScheduleDaysToScheduleEvents()', () => {
         fakeDay({
           entries: [
             fakeTaskEntry('AAA', {
-              start: new Date('2020-1-1 05:00').getTime(),
+              start: new Date(2020, 0, 1, 5, 0).getTime(),
               duration: H,
             }),
             fakeTaskEntry('BBB', {
-              start: new Date('2020-1-1 06:00').getTime(),
+              start: new Date(2020, 0, 1, 6, 0).getTime(),
               duration: 0.5 * H,
             }),
           ],

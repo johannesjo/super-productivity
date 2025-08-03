@@ -46,7 +46,7 @@ import { CalendarIntegrationService } from '../calendar-integration/calendar-int
 import { Store } from '@ngrx/store';
 import { selectEnabledIssueProviders } from './store/issue-provider.selectors';
 import { getErrorTxt } from '../../util/get-error-text';
-import { getWorklogStr } from '../../util/get-work-log-str';
+import { getLocalDateStr } from '../../util/get-local-date-str';
 import { TODAY_TAG } from '../tag/tag.const';
 
 @Injectable({
@@ -465,7 +465,7 @@ export class IssueService {
       issueId: issueDataReduced.id.toString(),
       issueWasUpdated: false,
       issueLastUpdated: Date.now(),
-      dueDay: getWorklogStr(),
+      dueDay: getLocalDateStr(),
       ...additionalFromProviderIssueService,
       // NOTE: if we were to add tags, this could be overwritten here
       ...(await getProjectOrTagId()),

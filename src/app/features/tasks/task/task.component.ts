@@ -57,7 +57,7 @@ import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.serv
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { Update } from '@ngrx/entity';
 import { isToday } from '../../../util/is-today.util';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getLocalDateStr } from '../../../util/get-local-date-str';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { KeyboardConfig } from '../../config/keyboard-config.model';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
@@ -167,7 +167,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
         // Note: String comparison works correctly here because dueDay is in YYYY-MM-DD format
         // which is lexicographically sortable. This avoids timezone conversion issues that occur
         // when creating Date objects from date strings.
-        (t.dueDay && t.dueDay !== getWorklogStr() && t.dueDay < getWorklogStr()))
+        (t.dueDay && t.dueDay !== getLocalDateStr() && t.dueDay < getLocalDateStr()))
     );
   });
   isScheduledToday = computed(() => {

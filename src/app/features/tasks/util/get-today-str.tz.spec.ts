@@ -1,10 +1,10 @@
 import { getTodayStr } from './get-today-str';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getLocalDateStr } from '../../../util/get-local-date-str';
 
 describe('getTodayStr timezone test', () => {
   it("should return today's date string in local timezone", () => {
     const result = getTodayStr();
-    const expected = getWorklogStr(new Date());
+    const expected = getLocalDateStr(new Date());
 
     console.log('getTodayStr test:', {
       result: result,

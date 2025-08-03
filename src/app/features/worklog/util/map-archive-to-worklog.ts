@@ -10,7 +10,7 @@ import {
   WorklogWeek,
   WorklogYear,
 } from '../worklog.model';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getLocalDateStr } from '../../../util/get-local-date-str';
 import { WorkStartEnd } from '../../work-context/work-context.model';
 import { formatDayStr } from '../../../util/format-day-str';
 
@@ -25,10 +25,12 @@ const _getTimeSpentOnDay = (entities: any, task: Task): { [key: string]: number 
     const parentLogEntryDate =
       parentSpentOnDay &&
       (Object.keys(parentSpentOnDay)[0] ||
-        getWorklogStr(entities[task.parentId].doneOn || entities[task.parentId].created));
+        getLocalDateStr(
+          entities[task.parentId].doneOn || entities[task.parentId].created,
+        ));
     return { [parentLogEntryDate]: 1 };
   } else {
-    return { [getWorklogStr(task.doneOn || task.created)]: 1 };
+    return { [getLocalDateStr(task.doneOn || task.created)]: 1 };
   }
 };
 

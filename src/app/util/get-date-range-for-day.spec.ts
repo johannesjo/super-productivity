@@ -179,9 +179,10 @@ describe('getDateRangeForDay', () => {
       const duration = end - start;
       const hours = duration / (1000 * 60 * 60);
 
-      // In DST-observing timezones, this will be ~23 hours
-      // In non-DST timezones, this will be exactly 24 hours
-      expect(hours).toBeGreaterThanOrEqual(23);
+      // In DST-observing timezones, this will be ~23 hours (actually 22.999...)
+      // In non-DST timezones, this will be exactly 24 hours (actually 23.999...)
+      // Allow for minor rounding due to 59:59 end time
+      expect(hours).toBeGreaterThanOrEqual(22.999);
       expect(hours).toBeLessThanOrEqual(24);
     });
 

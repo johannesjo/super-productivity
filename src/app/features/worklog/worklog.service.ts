@@ -33,7 +33,7 @@ import { PfapiService } from '../../pfapi/pfapi.service';
 import { DataInitStateService } from '../../core/data-init/data-init-state.service';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import { TaskArchiveService } from '../time-tracking/task-archive.service';
-import { getWorklogStr } from '../../util/get-work-log-str';
+import { getLocalDateStr } from '../../util/get-local-date-str';
 
 @Injectable({ providedIn: 'root' })
 export class WorklogService {
@@ -177,8 +177,8 @@ export class WorklogService {
     const isProjectIdProvided: boolean = !!projectId || projectId === null;
 
     // Convert date range to date strings for timezone-safe comparison
-    const rangeStartStr = getWorklogStr(rangeStart);
-    const rangeEndStr = getWorklogStr(rangeEnd);
+    const rangeStartStr = getLocalDateStr(rangeStart);
+    const rangeEndStr = getLocalDateStr(rangeEnd);
 
     return this.worklogTasks$.pipe(
       map((tasks) => {

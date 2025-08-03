@@ -70,9 +70,9 @@ describe('mapArchiveToWorklogWeeks timezone test', () => {
     });
 
     it('should handle parent task creation date for subtasks', () => {
-      // Test case: Parent and subtask created at different times
-      const parentCreatedTime = new Date('2025-01-16T23:00:00Z').getTime(); // 11 PM UTC
-      const subtaskCreatedTime = new Date('2025-01-17T01:00:00Z').getTime(); // 1 AM UTC
+      // Test case: Parent and subtask created at different times using local date constructors
+      const parentCreatedTime = new Date(2025, 0, 16, 23, 0, 0).getTime(); // Jan 16, 2025 at 11 PM local time
+      const subtaskCreatedTime = new Date(2025, 0, 17, 1, 0, 0).getTime(); // Jan 17, 2025 at 1 AM local time
 
       const taskState: EntityState<Task> = taskAdapter.addMany(
         [
@@ -120,39 +120,19 @@ describe('mapArchiveToWorklogWeeks timezone test', () => {
           'Subtask should use parent creation date when no timeSpentOnDay',
       });
 
-      // The subtask should use parent's creation date
-      // In LA (UTC-8): Parent created at Jan 16 3 PM -> worklog for Jan 16
-      // In Berlin (UTC+1): Parent created at Jan 17 midnight -> worklog for Jan 17
-      const tzOffset = new Date().getTimezoneOffset();
+      // When using local date constructor, the parent is created on Jan 16 regardless of timezone
       const year2025 = result['2025'];
-
-      if (tzOffset > 0) {
-        // LA
-        const foundEntry = year2025?.some(
-          (week) =>
-            week &&
-            week.ent &&
-            Object.values(week.ent).some(
-              (day) =>
-                day.dateStr === '2025-01-16' &&
-                day.logEntries.some((entry) => entry.task.id === 'subtask1'),
-            ),
-        );
-        expect(foundEntry).toBe(true);
-      } else {
-        // Berlin
-        const foundEntry = year2025?.some(
-          (week) =>
-            week &&
-            week.ent &&
-            Object.values(week.ent).some(
-              (day) =>
-                day.dateStr === '2025-01-17' &&
-                day.logEntries.some((entry) => entry.task.id === 'subtask1'),
-            ),
-        );
-        expect(foundEntry).toBe(true);
-      }
+      const foundEntry = year2025?.some(
+        (week) =>
+          week &&
+          week.ent &&
+          Object.values(week.ent).some(
+            (day) =>
+              day.dateStr === '2025-01-16' &&
+              day.logEntries.some((entry) => entry.task.id === 'subtask1'),
+          ),
+      );
+      expect(foundEntry).toBe(true);
     });
 
     it('should use existing timeSpentOnDay when available', () => {

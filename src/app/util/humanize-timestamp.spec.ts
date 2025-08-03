@@ -8,7 +8,7 @@ describe('humanizeTimestamp', () => {
   let mockTranslateService: jasmine.SpyObj<TranslateService>;
 
   beforeEach(() => {
-    now = new Date('2024-01-15T12:00:00');
+    now = new Date(2024, 0, 15, 12, 0, 0);
     jasmine.clock().install();
     jasmine.clock().mockDate(now);
 

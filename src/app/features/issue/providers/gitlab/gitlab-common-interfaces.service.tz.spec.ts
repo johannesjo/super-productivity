@@ -1,4 +1,4 @@
-import { getWorklogStr } from '../../../../util/get-work-log-str';
+import { getLocalDateStr } from '../../../../util/get-local-date-str';
 
 describe('GitlabCommonInterfacesService timezone test', () => {
   describe('getAddTaskData due_date handling', () => {
@@ -8,7 +8,7 @@ describe('GitlabCommonInterfacesService timezone test', () => {
       // Test 1: ISO date string (most common from GitLab API)
       // This represents 2025-01-17 in the API response
       const gitlabDueDate1 = '2025-01-17';
-      const result1 = getWorklogStr(gitlabDueDate1);
+      const result1 = getLocalDateStr(gitlabDueDate1);
 
       console.log('Test 1 - GitLab date string:', {
         input: gitlabDueDate1,
@@ -33,7 +33,7 @@ describe('GitlabCommonInterfacesService timezone test', () => {
 
       // Test 2: What if GitLab returns ISO 8601 with time?
       const gitlabDueDate2 = '2025-01-17T00:00:00Z';
-      const result2 = getWorklogStr(gitlabDueDate2);
+      const result2 = getLocalDateStr(gitlabDueDate2);
 
       console.log('Test 2 - GitLab ISO 8601:', {
         input: gitlabDueDate2,
@@ -62,7 +62,7 @@ describe('GitlabCommonInterfacesService timezone test', () => {
 
       // This is what the service does:
       const dueDay = mockGitlabIssue.due_date
-        ? getWorklogStr(mockGitlabIssue.due_date)
+        ? getLocalDateStr(mockGitlabIssue.due_date)
         : undefined;
 
       console.log('GitLab issue due_date processing:', {

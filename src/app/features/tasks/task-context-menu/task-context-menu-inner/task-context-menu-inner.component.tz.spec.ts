@@ -1,4 +1,4 @@
-import { getWorklogStr } from '../../../../util/get-work-log-str';
+import { getLocalDateStr } from '../../../../util/get-local-date-str';
 
 describe('TaskContextMenuInnerComponent timezone test', () => {
   describe('_schedule method date handling', () => {
@@ -6,10 +6,10 @@ describe('TaskContextMenuInnerComponent timezone test', () => {
       // This test demonstrates the usage in task-context-menu-inner.component.ts line 590:
       // const newDay = getWorklogStr(newDayDate);
 
-      // Test case: Scheduling a task for a specific date
-      const selectedDate = new Date('2025-01-17T15:00:00Z'); // 3 PM UTC
+      // Test case: Scheduling a task for a specific date using local date constructor
+      const selectedDate = new Date(2025, 0, 17, 15, 0, 0); // Jan 17, 2025 at 3 PM local time
       const newDayDate = new Date(selectedDate);
-      const newDay = getWorklogStr(newDayDate);
+      const newDay = getLocalDateStr(newDayDate);
 
       console.log('Task scheduling test:', {
         selectedDate: selectedDate.toISOString(),
@@ -18,35 +18,23 @@ describe('TaskContextMenuInnerComponent timezone test', () => {
         offset: new Date().getTimezoneOffset(),
       });
 
-      // The newDay should be the local date
-      // In LA (UTC-8): 2025-01-17 at 7 AM local -> '2025-01-17'
-      // In Berlin (UTC+1): 2025-01-17 at 4 PM local -> '2025-01-17'
+      // When using local date constructor, the date should always be the same regardless of timezone
       expect(newDay).toBe('2025-01-17');
     });
 
     it('should handle edge case when scheduling near midnight', () => {
-      // Test case: Scheduling near midnight in different timezones
-      const selectedDate = new Date('2025-01-16T23:30:00Z'); // 11:30 PM UTC
+      // Test case: Scheduling near midnight using local date constructor
+      const selectedDate = new Date(2025, 0, 16, 23, 30, 0); // Jan 16, 2025 at 11:30 PM local time
       const newDayDate = new Date(selectedDate);
-      const newDay = getWorklogStr(newDayDate);
+      const newDay = getLocalDateStr(newDayDate);
 
       console.log('Midnight edge case test:', {
         selectedDate: selectedDate.toISOString(),
         newDay: newDay,
-        expectedInLA: '2025-01-16',
-        expectedInBerlin: '2025-01-17',
       });
 
-      // In LA (UTC-8): 2025-01-16 at 3:30 PM local -> '2025-01-16'
-      // In Berlin (UTC+1): 2025-01-17 at 12:30 AM local -> '2025-01-17'
-      const tzOffset = new Date().getTimezoneOffset();
-      if (tzOffset > 0) {
-        // LA
-        expect(newDay).toBe('2025-01-16');
-      } else {
-        // Berlin
-        expect(newDay).toBe('2025-01-17');
-      }
+      // When using local date constructor, the date should always be Jan 16 regardless of timezone
+      expect(newDay).toBe('2025-01-16');
     });
   });
 
@@ -55,7 +43,7 @@ describe('TaskContextMenuInnerComponent timezone test', () => {
       // This test demonstrates the usage in line 523:
       // if (this.task.dueDay === getWorklogStr() || ...)
 
-      const todayStr = getWorklogStr();
+      const todayStr = getLocalDateStr();
 
       // Test various task due days
       const taskDueToday = { dueDay: todayStr };
@@ -69,15 +57,15 @@ describe('TaskContextMenuInnerComponent timezone test', () => {
       });
 
       // Check if task is due today
-      expect(taskDueToday.dueDay === getWorklogStr()).toBe(true);
-      expect(taskDueTomorrow.dueDay === getWorklogStr()).toBe(false);
-      expect(taskDueYesterday.dueDay === getWorklogStr()).toBe(false);
+      expect(taskDueToday.dueDay === getLocalDateStr()).toBe(true);
+      expect(taskDueTomorrow.dueDay === getLocalDateStr()).toBe(false);
+      expect(taskDueYesterday.dueDay === getLocalDateStr()).toBe(false);
     });
 
     it('should handle getWorklogStr() without parameters correctly', () => {
       // When called without parameters, getWorklogStr() returns today's date
       const now = Date.now();
-      const todayStr = getWorklogStr();
+      const todayStr = getLocalDateStr();
       const expectedDate = new Date(now);
 
       const year = expectedDate.getFullYear();

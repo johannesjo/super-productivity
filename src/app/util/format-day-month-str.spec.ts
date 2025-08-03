@@ -2,19 +2,33 @@ import { formatDayMonthStr } from './format-day-month-str';
 
 describe('formatDayMonthStr', () => {
   it('should format day and month strings correctly with en-US locale', () => {
-    expect(formatDayMonthStr('2023-01-15', 'en-US')).toBe('Sun 1/15');
-    expect(formatDayMonthStr('2023-02-16', 'en-US')).toBe('Thu 2/16');
-    expect(formatDayMonthStr('2023-12-25', 'en-US')).toBe('Mon 12/25');
-    expect(formatDayMonthStr('2023-10-01', 'en-US')).toBe('Sun 10/1');
-    expect(formatDayMonthStr('2023-07-04', 'en-US')).toBe('Tue 7/4');
+    const result1 = formatDayMonthStr('2023-01-15', 'en-US');
+    expect(result1).toBe('Sun 1/15');
+
+    const result2 = formatDayMonthStr('2023-02-16', 'en-US');
+    expect(result2).toBe('Thu 2/16');
+
+    const result3 = formatDayMonthStr('2023-12-25', 'en-US');
+    expect(result3).toBe('Mon 12/25');
+
+    const result4 = formatDayMonthStr('2023-10-01', 'en-US');
+    expect(result4).toBe('Sun 10/1');
+
+    const result5 = formatDayMonthStr('2023-07-04', 'en-US');
+    expect(result5).toBe('Tue 7/4');
   });
 
   it('should format day and month strings with locale', () => {
-    expect(formatDayMonthStr('2023-01-15', 'en-US')).toBe('Sun 1/15');
-    expect(formatDayMonthStr('2023-02-16', 'en-US')).toBe('Thu 2/16');
+    const result1 = formatDayMonthStr('2023-01-15', 'en-US');
+    const result2 = formatDayMonthStr('2023-02-16', 'en-US');
+
     // Test that locale parameter is used for day names at least
-    expect(formatDayMonthStr('2023-01-15', 'en-US')).toContain('Sun');
-    expect(formatDayMonthStr('2023-02-16', 'en-US')).toContain('Thu');
+    expect(result1).toBe('Sun 1/15');
+    expect(result2).toBe('Thu 2/16');
+
+    // Test format includes date
+    expect(result1).toContain('1/15');
+    expect(result2).toContain('2/16');
   });
 
   describe('timezone edge cases', () => {
