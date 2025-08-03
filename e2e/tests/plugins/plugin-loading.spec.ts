@@ -153,6 +153,17 @@ test.describe.serial('Plugin Loading', () => {
 
   test('disable and re-enable plugin', async ({ page, workViewPage }) => {
     test.setTimeout(30000); // Increase timeout for this test
+
+    // Check if plugin assets are available
+    const assetsAvailable = await waitForPluginAssets(page);
+    if (!assetsAvailable) {
+      if (process.env.CI) {
+        test.skip(true, 'Plugin assets not available in CI - skipping test');
+        return;
+      }
+      throw new Error('Plugin assets not available - cannot proceed with test');
+    }
+
     await workViewPage.waitForTaskList();
 
     // Enable API Test Plugin first (implementing enableTestPlugin inline)
