@@ -11,10 +11,6 @@ const PLUGIN_MANAGEMENT = 'plugin-management';
 const PLUGIN_SECTION = '.plugin-section';
 const SETTINGS_PAGE = '.page-settings';
 const COLLAPSIBLE_EXPANDED = '.plugin-section collapsible.isExpanded';
-const API_PLUGIN_CARD =
-  'plugin-management mat-card:has(mat-card-title:text("API Test Plugin"))';
-const API_PLUGIN_TOGGLE = `${API_PLUGIN_CARD} mat-slide-toggle button[role="switch"]`;
-const API_PLUGIN_TOGGLE_ENABLED = `${API_PLUGIN_CARD} mat-slide-toggle button[role="switch"][aria-checked="true"]`;
 
 test.describe.serial('Plugin Iframe', () => {
   test.beforeEach(async ({ page, workViewPage }) => {
@@ -24,6 +20,7 @@ test.describe.serial('Plugin Iframe', () => {
 
     // Navigate to settings
     const settingsBtn = page.locator(SETTINGS_BTN);
+    await settingsBtn.waitFor({ state: 'visible' });
     await settingsBtn.click();
 
     // Wait for settings page to be visible
@@ -48,17 +45,37 @@ test.describe.serial('Plugin Iframe', () => {
     // Wait for plugin management to be visible
     await page.waitForSelector(PLUGIN_MANAGEMENT, { state: 'visible' });
 
-    // Enable API Test Plugin if not already enabled
-    const toggle = page.locator(API_PLUGIN_TOGGLE);
+    // Find API Test Plugin card using filter
+    const pluginCards = page.locator('plugin-management mat-card');
+    const apiPluginCard = pluginCards.filter({ hasText: 'API Test Plugin' });
+
+    // Find the toggle within the API Test Plugin card
+    const toggle = apiPluginCard.locator('mat-slide-toggle button[role="switch"]');
     await toggle.waitFor({ state: 'visible' });
 
-    // Check if already enabled
-    const enabledToggle = page.locator(API_PLUGIN_TOGGLE_ENABLED);
-    if ((await enabledToggle.count()) === 0) {
+    // Check if already enabled by checking aria-checked attribute
+    const isEnabled = (await toggle.getAttribute('aria-checked')) === 'true';
+    if (!isEnabled) {
       // Not enabled, click to enable
       await toggle.click();
       // Wait for the aria-checked attribute to become true
-      await page.waitForSelector(API_PLUGIN_TOGGLE_ENABLED, { state: 'visible' });
+      await page.waitForFunction(
+        () => {
+          const cards = Array.from(
+            document.querySelectorAll('plugin-management mat-card'),
+          );
+          const apiCard = cards.find((card) =>
+            card
+              .querySelector('mat-card-title')
+              ?.textContent?.includes('API Test Plugin'),
+          );
+          const toggleBtn = apiCard?.querySelector(
+            'mat-slide-toggle button[role="switch"]',
+          ) as HTMLButtonElement;
+          return toggleBtn?.getAttribute('aria-checked') === 'true';
+        },
+        { timeout: 10000 },
+      );
     }
 
     // Navigate back to work view
