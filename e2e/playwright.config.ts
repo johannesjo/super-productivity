@@ -1,5 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 import path from 'path';
+import os from 'os';
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -14,8 +15,8 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   /* Retry failed tests to handle flakiness */
   retries: process.env.CI ? 2 : 1,
-  /* Number of parallel workers - reduced to prevent hanging with serial tests */
-  workers: process.env.CI ? 1 : 8,
+  /* Number of parallel workers - reduced in CI to prevent resource issues */
+  workers: process.env.CI ? 1 : Math.min(4, os.cpus().length),
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: process.env.CI
     ? [
@@ -117,8 +118,10 @@ export default defineConfig({
   webServer: {
     command: 'ng serve --port 4242',
     url: 'http://localhost:4242',
-    reuseExistingServer: true,
-    timeout: 30 * 1000,
+    reuseExistingServer: !process.env.CI, // Don't reuse in CI to ensure clean state
+    timeout: process.env.CI ? 300 * 1000 : 60 * 1000, // 5 minutes in CI, 1 minute locally
+    stdout: process.env.CI ? 'pipe' : 'ignore', // Show output in CI for debugging
+    stderr: process.env.CI ? 'pipe' : 'ignore',
   },
 
   /* Folder for test artifacts such as screenshots, videos, traces, etc. */
