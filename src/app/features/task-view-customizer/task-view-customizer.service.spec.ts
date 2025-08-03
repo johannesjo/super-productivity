@@ -12,8 +12,10 @@ describe('TaskViewCustomizerService', () => {
   let service: TaskViewCustomizerService;
 
   const today = new Date();
-  const todayStr = today.toISOString().slice(0, 10);
-  const tomorrowStr = getTomorrow().toISOString().slice(0, 10);
+  // Use local date strings to avoid timezone issues
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  const tomorrow = getTomorrow();
+  const tomorrowStr = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`;
 
   const mockProjects: Project[] = [
     { id: 'p1', title: 'Project One' } as Project,

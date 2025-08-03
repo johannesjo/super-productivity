@@ -24,7 +24,17 @@ describe('DateService timezone test', () => {
       // This should return the local date string
       // In LA (UTC-8): 2025-01-17 at 7 AM local -> '2025-01-17'
       // In Berlin (UTC+1): 2025-01-17 at 4 PM local -> '2025-01-17'
-      expect(result).toBe('2025-01-17');
+      // In Tokyo (UTC+9): 2025-01-18 at 12 AM local -> '2025-01-18'
+      // In UTC: 2025-01-17 at 3 PM local -> '2025-01-17'
+
+      const tzOffset = new Date().getTimezoneOffset();
+      if (tzOffset <= -540) {
+        // Tokyo and further east (UTC+9 or more)
+        expect(result).toBe('2025-01-18');
+      } else {
+        // LA, Berlin, UTC, and most other timezones
+        expect(result).toBe('2025-01-17');
+      }
     });
 
     it('should handle edge case near midnight', () => {
@@ -43,12 +53,14 @@ describe('DateService timezone test', () => {
       // This correctly returns different dates based on timezone
       // In LA (UTC-8): 2025-01-16 at 3 PM local -> '2025-01-16'
       // In Berlin (UTC+1): 2025-01-17 at 12 AM local -> '2025-01-17'
+      // In UTC: 2025-01-16 at 11 PM local -> '2025-01-16'
+      // In Tokyo (UTC+9): 2025-01-17 at 8 AM local -> '2025-01-17'
       const tzOffset = new Date().getTimezoneOffset();
-      if (tzOffset > 0) {
-        // LA
+      if (tzOffset >= 0) {
+        // LA, UTC, and western timezones
         expect(result).toBe('2025-01-16');
       } else {
-        // Berlin
+        // Berlin, Tokyo, and eastern timezones
         expect(result).toBe('2025-01-17');
       }
     });

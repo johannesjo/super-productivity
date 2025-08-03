@@ -122,12 +122,26 @@ describe('mapArchiveToWorklogWeeks timezone test', () => {
 
       // The subtask should use parent's creation date
       // In LA (UTC-8): Parent created at Jan 16 3 PM -> worklog for Jan 16
+      // In UTC: Parent created at Jan 16 11 PM -> worklog for Jan 16
       // In Berlin (UTC+1): Parent created at Jan 17 midnight -> worklog for Jan 17
       const tzOffset = new Date().getTimezoneOffset();
       const year2025 = result['2025'];
 
       if (tzOffset > 0) {
-        // LA
+        // LA (positive offset means west of UTC)
+        const foundEntry = year2025?.some(
+          (week) =>
+            week &&
+            week.ent &&
+            Object.values(week.ent).some(
+              (day) =>
+                day.dateStr === '2025-01-16' &&
+                day.logEntries.some((entry) => entry.task.id === 'subtask1'),
+            ),
+        );
+        expect(foundEntry).toBe(true);
+      } else if (tzOffset === 0) {
+        // UTC
         const foundEntry = year2025?.some(
           (week) =>
             week &&
@@ -140,7 +154,7 @@ describe('mapArchiveToWorklogWeeks timezone test', () => {
         );
         expect(foundEntry).toBe(true);
       } else {
-        // Berlin
+        // Berlin and other timezones east of UTC (negative offset)
         const foundEntry = year2025?.some(
           (week) =>
             week &&

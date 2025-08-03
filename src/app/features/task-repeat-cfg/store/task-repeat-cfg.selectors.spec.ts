@@ -40,7 +40,7 @@ const DUMMY_REPEATABLE_TASK: TaskRepeatCfg = {
 const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;
 
-const FAKE_MONDAY_THE_10TH = dateStrToUtcDate('2022-01-10').getTime();
+const FAKE_MONDAY_THE_10TH = new Date(2022, 0, 10).getTime();
 
 const dummyRepeatable = (id: string, fields: Partial<TaskRepeatCfg>): TaskRepeatCfg => ({
   ...DUMMY_REPEATABLE_TASK,
@@ -67,16 +67,12 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
     });
 
     [
-      FAKE_MONDAY_THE_10TH,
-      // eslint-disable-next-line no-mixed-operators
-      FAKE_MONDAY_THE_10TH + DAY * 3,
-      // eslint-disable-next-line no-mixed-operators
-      FAKE_MONDAY_THE_10TH + DAY * 6,
-      // eslint-disable-next-line no-mixed-operators
-      FAKE_MONDAY_THE_10TH + DAY * 300,
-      // eslint-disable-next-line no-mixed-operators
-      FAKE_MONDAY_THE_10TH + DAY * 150,
-    ].forEach((dayDateStr) => {
+      new Date(2022, 0, 10), // Jan 10, 2022 (start date, day 0)
+      new Date(2022, 0, 13), // Jan 13, 2022 (day 3)
+      new Date(2022, 0, 16), // Jan 16, 2022 (day 6)
+      new Date(2022, 10, 6), // Nov 6, 2022 (day 300)
+      new Date(2022, 6, 9), // Jul 9, 2022 (day 150)
+    ].forEach((testDate) => {
       it('should return cfg for a for repeatEvery correctly', () => {
         const result = selectTaskRepeatCfgsForExactDay.projector(
           [
@@ -87,7 +83,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
             }),
           ],
           {
-            dayDate: new Date(dayDateStr).getTime(),
+            dayDate: testDate.getTime(),
           },
         );
         const resultIds = result.map((item) => item.id);

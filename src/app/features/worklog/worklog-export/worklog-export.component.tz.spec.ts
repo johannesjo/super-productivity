@@ -24,12 +24,14 @@ describe('WorklogExportComponent timezone test', () => {
       // The filename should use local dates
       // In LA (UTC-8): Jan 13 midnight -> Jan 17 noon
       // In Berlin (UTC+1): Jan 13 9 AM -> Jan 17 9 PM
+      // In Tokyo (UTC+9): Jan 13 5 PM -> Jan 18 5 AM
+      // In UTC: Jan 13 8 AM -> Jan 17 8 PM
       const tzOffset = new Date().getTimezoneOffset();
-      if (tzOffset > 0) {
-        // LA
-        expect(fileName).toBe('tasks2025-01-13-2025-01-17.csv');
+      if (tzOffset <= -540) {
+        // Tokyo and further east (UTC+9 or more)
+        expect(fileName).toBe('tasks2025-01-13-2025-01-18.csv');
       } else {
-        // Berlin
+        // LA, Berlin, UTC, and most other timezones
         expect(fileName).toBe('tasks2025-01-13-2025-01-17.csv');
       }
     });
@@ -52,12 +54,17 @@ describe('WorklogExportComponent timezone test', () => {
 
       // In LA (UTC-8): Both times are on Jan 16 (3 PM to 5 PM)
       // In Berlin (UTC+1): Both times are on Jan 17 (midnight to 2 AM)
+      // In Tokyo (UTC+9): Both times are on Jan 17 (8 AM to 10 AM)
+      // In UTC: Jan 16 11 PM to Jan 17 1 AM (crosses date boundary)
       const tzOffset = new Date().getTimezoneOffset();
       if (tzOffset > 0) {
-        // LA
+        // Western timezones (LA, etc) - negative UTC offset
         expect(fileName).toBe('tasks2025-01-16-2025-01-16.csv');
+      } else if (tzOffset === 0) {
+        // UTC - crosses date boundary
+        expect(fileName).toBe('tasks2025-01-16-2025-01-17.csv');
       } else {
-        // Berlin
+        // Eastern timezones (Berlin, Tokyo, etc) - positive UTC offset
         expect(fileName).toBe('tasks2025-01-17-2025-01-17.csv');
       }
     });

@@ -100,17 +100,23 @@ describe('mapArchiveToWorklog timezone test', () => {
 
       // Should use created date
       // In LA (UTC-8): 2025-01-16 at 3 PM local -> worklog for Jan 16
+      // In UTC: 2025-01-16 at 11 PM UTC -> worklog for Jan 16
       // In Berlin (UTC+1): 2025-01-17 at midnight local -> worklog for Jan 17
       const tzOffset = new Date().getTimezoneOffset();
       const year2025 = result.worklog['2025'];
 
       if (tzOffset > 0) {
-        // LA
+        // LA (positive offset means west of UTC)
+        const foundEntry = year2025?.ent[1]?.ent[16];
+        expect(foundEntry).toBeDefined();
+        expect(foundEntry?.dateStr).toBe('2025-01-16');
+      } else if (tzOffset === 0) {
+        // UTC
         const foundEntry = year2025?.ent[1]?.ent[16];
         expect(foundEntry).toBeDefined();
         expect(foundEntry?.dateStr).toBe('2025-01-16');
       } else {
-        // Berlin
+        // Berlin and other timezones east of UTC (negative offset)
         const foundEntry = year2025?.ent[1]?.ent[17];
         expect(foundEntry).toBeDefined();
         expect(foundEntry?.dateStr).toBe('2025-01-17');

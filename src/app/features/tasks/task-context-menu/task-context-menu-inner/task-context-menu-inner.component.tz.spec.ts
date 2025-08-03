@@ -21,7 +21,17 @@ describe('TaskContextMenuInnerComponent timezone test', () => {
       // The newDay should be the local date
       // In LA (UTC-8): 2025-01-17 at 7 AM local -> '2025-01-17'
       // In Berlin (UTC+1): 2025-01-17 at 4 PM local -> '2025-01-17'
-      expect(newDay).toBe('2025-01-17');
+      // In Tokyo (UTC+9): 2025-01-18 at 12 AM local -> '2025-01-18'
+      // In UTC: 2025-01-17 at 3 PM local -> '2025-01-17'
+
+      const tzOffset = new Date().getTimezoneOffset();
+      if (tzOffset <= -540) {
+        // Tokyo and further east (UTC+9 or more)
+        expect(newDay).toBe('2025-01-18');
+      } else {
+        // LA, Berlin, UTC, and most other timezones
+        expect(newDay).toBe('2025-01-17');
+      }
     });
 
     it('should handle edge case when scheduling near midnight', () => {
@@ -39,12 +49,14 @@ describe('TaskContextMenuInnerComponent timezone test', () => {
 
       // In LA (UTC-8): 2025-01-16 at 3:30 PM local -> '2025-01-16'
       // In Berlin (UTC+1): 2025-01-17 at 12:30 AM local -> '2025-01-17'
+      // In Tokyo (UTC+9): 2025-01-17 at 8:30 AM local -> '2025-01-17'
+      // In UTC: 2025-01-16 at 11:30 PM local -> '2025-01-16'
       const tzOffset = new Date().getTimezoneOffset();
-      if (tzOffset > 0) {
-        // LA
+      if (tzOffset >= 0) {
+        // LA, UTC, and western timezones
         expect(newDay).toBe('2025-01-16');
       } else {
-        // Berlin
+        // Berlin, Tokyo, and eastern timezones
         expect(newDay).toBe('2025-01-17');
       }
     });
