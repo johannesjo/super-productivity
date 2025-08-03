@@ -1,20 +1,37 @@
 import { test, expect } from '../../fixtures/test.fixture';
 import { cssSelectors } from '../../constants/selectors';
+import {
+  waitForPluginAssets,
+  waitForPluginSystemInit,
+  getCITimeoutMultiplier,
+} from '../../helpers/plugin-test.helpers';
 
 const { SIDENAV } = cssSelectors;
 const SETTINGS_BTN = `${SIDENAV} .tour-settingsMenuBtn`;
 
 test.describe('Enable Plugin Test', () => {
-  // Skip in CI - bundled plugins not loading reliably
-  test.skip(
-    !!process.env.CI,
-    'Skipping plugin tests in CI - bundled plugins not loading reliably',
-  );
   test('navigate to plugin settings and enable API Test Plugin', async ({
     page,
     workViewPage,
   }) => {
+    const timeoutMultiplier = getCITimeoutMultiplier();
+    test.setTimeout(60000 * timeoutMultiplier);
+
+    console.log('[Plugin Test] Starting enable plugin test...');
+
+    // First, ensure plugin assets are available
+    const assetsAvailable = await waitForPluginAssets(page);
+    if (!assetsAvailable) {
+      throw new Error('Plugin assets not available - cannot proceed with test');
+    }
+
     await workViewPage.waitForTaskList();
+
+    // Wait for plugin system to initialize
+    const pluginSystemReady = await waitForPluginSystemInit(page);
+    if (!pluginSystemReady) {
+      console.warn('[Plugin Test] Plugin system may not be fully initialized');
+    }
 
     // Navigate to plugin settings
     await page.click(SETTINGS_BTN);

@@ -1,5 +1,13 @@
 import { test, expect } from '../../fixtures/test.fixture';
 import { cssSelectors } from '../../constants/selectors';
+import {
+  waitForPluginAssets,
+  waitForPluginSystemInit,
+  enablePluginWithVerification,
+  waitForPluginInMenu,
+  logPluginState,
+  getCITimeoutMultiplier,
+} from '../../helpers/plugin-test.helpers';
 
 const { SIDENAV } = cssSelectors;
 
@@ -13,15 +21,26 @@ const SETTINGS_PAGE = '.page-settings';
 const COLLAPSIBLE_EXPANDED = '.plugin-section collapsible.isExpanded';
 
 test.describe.serial('Plugin Iframe', () => {
-  // Skip in CI - bundled plugins not loading reliably
-  test.skip(
-    !!process.env.CI,
-    'Skipping plugin tests in CI - bundled plugins not loading reliably',
-  );
   test.beforeEach(async ({ page, workViewPage }) => {
-    test.setTimeout(60000); // Overall test timeout for CI
+    // Increase timeout for CI environment
+    const timeoutMultiplier = getCITimeoutMultiplier();
+    test.setTimeout(60000 * timeoutMultiplier);
+
+    console.log('[Plugin Test] Starting test setup...');
+
+    // First, ensure plugin assets are available
+    const assetsAvailable = await waitForPluginAssets(page);
+    if (!assetsAvailable) {
+      throw new Error('Plugin assets not available - cannot proceed with test');
+    }
 
     await workViewPage.waitForTaskList();
+
+    // Wait for plugin system to initialize
+    const pluginSystemReady = await waitForPluginSystemInit(page);
+    if (!pluginSystemReady) {
+      console.warn('[Plugin Test] Plugin system may not be fully initialized');
+    }
 
     // Navigate to settings
     const settingsBtn = page.locator(SETTINGS_BTN);
@@ -48,46 +67,39 @@ test.describe.serial('Plugin Iframe', () => {
     }
 
     // Wait for plugin management to be visible
-    await page.waitForSelector(PLUGIN_MANAGEMENT, { state: 'visible' });
+    await page.waitForSelector(PLUGIN_MANAGEMENT, {
+      state: 'visible',
+      timeout: 10000 * timeoutMultiplier,
+    });
 
-    // Find API Test Plugin card using filter
-    const pluginCards = page.locator('plugin-management mat-card');
-    const apiPluginCard = pluginCards.filter({ hasText: 'API Test Plugin' });
-
-    // Find the toggle within the API Test Plugin card
-    const toggle = apiPluginCard.locator('mat-slide-toggle button[role="switch"]');
-    await toggle.waitFor({ state: 'visible' });
-
-    // Check if already enabled by checking aria-checked attribute
-    const isEnabled = (await toggle.getAttribute('aria-checked')) === 'true';
-    if (!isEnabled) {
-      // Not enabled, click to enable
-      await toggle.click();
-      // Wait for the aria-checked attribute to become true
-      await page.waitForFunction(
-        () => {
-          const cards = Array.from(
-            document.querySelectorAll('plugin-management mat-card'),
-          );
-          const apiCard = cards.find((card) =>
-            card
-              .querySelector('mat-card-title')
-              ?.textContent?.includes('API Test Plugin'),
-          );
-          const toggleBtn = apiCard?.querySelector(
-            'mat-slide-toggle button[role="switch"]',
-          ) as HTMLButtonElement;
-          return toggleBtn?.getAttribute('aria-checked') === 'true';
-        },
-        { timeout: 10000 },
-      );
+    // Log current plugin state for debugging
+    if (process.env.CI) {
+      await logPluginState(page);
     }
 
-    // Navigate back to work view
-    await page.goto('/#/tag/TODAY');
+    // Enable API Test Plugin with verification
+    const pluginEnabled = await enablePluginWithVerification(
+      page,
+      'API Test Plugin',
+      15000 * timeoutMultiplier,
+    );
 
-    // Wait for the task list to confirm we're on the work view
-    await page.waitForSelector('task-list', { state: 'visible' });
+    if (!pluginEnabled) {
+      throw new Error('Failed to enable API Test Plugin');
+    }
+
+    // Wait for plugin to appear in menu (navigates to work view internally)
+    const pluginInMenu = await waitForPluginInMenu(
+      page,
+      'API Test Plugin',
+      20000 * timeoutMultiplier,
+    );
+
+    if (!pluginInMenu) {
+      // Log state for debugging
+      await logPluginState(page);
+      throw new Error('API Test Plugin not found in menu after enabling');
+    }
 
     // Dismiss tour dialog if present (non-blocking)
     const tourDialog = page.locator('[data-shepherd-step-id="Welcome"]');
@@ -102,8 +114,7 @@ test.describe.serial('Plugin Iframe', () => {
       }
     }
 
-    // Wait for plugin menu to appear (indicates plugin is loaded)
-    await page.waitForSelector(PLUGIN_MENU_ITEM, { state: 'visible' });
+    console.log('[Plugin Test] Setup completed successfully');
   });
 
   test('open plugin iframe view', async ({ page }) => {

@@ -1,5 +1,10 @@
 import { test, expect } from '../../fixtures/test.fixture';
 import { cssSelectors } from '../../constants/selectors';
+import {
+  waitForPluginAssets,
+  waitForPluginSystemInit,
+  getCITimeoutMultiplier,
+} from '../../helpers/plugin-test.helpers';
 
 const { SIDENAV } = cssSelectors;
 
@@ -11,13 +16,25 @@ const PLUGIN_MENU_ENTRY = `${SIDENAV} plugin-menu button`;
 const PLUGIN_IFRAME = 'plugin-index iframe';
 
 test.describe.serial('Plugin Loading', () => {
-  // Skip in CI - bundled plugins not loading reliably
-  test.skip(
-    !!process.env.CI,
-    'Skipping plugin tests in CI - bundled plugins not loading reliably',
-  );
   test('full plugin loading lifecycle', async ({ page, workViewPage }) => {
+    const timeoutMultiplier = getCITimeoutMultiplier();
+    test.setTimeout(60000 * timeoutMultiplier);
+
+    console.log('[Plugin Test] Starting full plugin loading lifecycle test...');
+
+    // First, ensure plugin assets are available
+    const assetsAvailable = await waitForPluginAssets(page);
+    if (!assetsAvailable) {
+      throw new Error('Plugin assets not available - cannot proceed with test');
+    }
+
     await workViewPage.waitForTaskList();
+
+    // Wait for plugin system to initialize
+    const pluginSystemReady = await waitForPluginSystemInit(page);
+    if (!pluginSystemReady) {
+      console.warn('[Plugin Test] Plugin system may not be fully initialized');
+    }
 
     // Enable API Test Plugin first (implementing enableTestPlugin inline)
     await page.click(SETTINGS_BTN);

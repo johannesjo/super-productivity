@@ -1,104 +1,91 @@
 import { test, expect } from '../../fixtures/test.fixture';
 import { cssSelectors } from '../../constants/selectors';
+import {
+  waitForPluginAssets,
+  waitForPluginSystemInit,
+  enablePluginWithVerification,
+  waitForPluginInMenu,
+  logPluginState,
+  getCITimeoutMultiplier,
+} from '../../helpers/plugin-test.helpers';
 
 const { SIDENAV } = cssSelectors;
 const SETTINGS_BTN = `${SIDENAV} .tour-settingsMenuBtn`;
 
 test.describe.serial('Plugin Enable Verify', () => {
-  // Skip in CI - bundled plugins not loading reliably
-  test.skip(
-    !!process.env.CI,
-    'Skipping plugin tests in CI - bundled plugins not loading reliably',
-  );
   test('enable API Test Plugin and verify menu entry', async ({ page, workViewPage }) => {
+    const timeoutMultiplier = getCITimeoutMultiplier();
+    test.setTimeout(60000 * timeoutMultiplier);
+
+    console.log('[Plugin Test] Starting plugin enable verification test...');
+
+    // First, ensure plugin assets are available
+    const assetsAvailable = await waitForPluginAssets(page);
+    if (!assetsAvailable) {
+      throw new Error('Plugin assets not available - cannot proceed with test');
+    }
+
     await workViewPage.waitForTaskList();
+
+    // Wait for plugin system to initialize
+    const pluginSystemReady = await waitForPluginSystemInit(page);
+    if (!pluginSystemReady) {
+      console.warn('[Plugin Test] Plugin system may not be fully initialized');
+    }
 
     // Navigate to plugin settings
     await page.click(SETTINGS_BTN);
-    await page.waitForTimeout(1000);
+    await page.waitForSelector('.page-settings', {
+      state: 'visible',
+      timeout: 10000 * timeoutMultiplier,
+    });
 
+    // Expand plugin section
     await page.evaluate(() => {
-      const configPage = document.querySelector('.page-settings');
-      if (!configPage) {
-        console.error('Not on config page');
-        return;
-      }
-
       const pluginSection = document.querySelector('.plugin-section');
       if (pluginSection) {
         pluginSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      } else {
-        console.error('Plugin section not found');
-        return;
       }
 
       const collapsible = document.querySelector('.plugin-section collapsible');
-      if (collapsible) {
-        const isExpanded = collapsible.classList.contains('isExpanded');
-        if (!isExpanded) {
-          const header = collapsible.querySelector('.collapsible-header');
-          if (header) {
-            (header as HTMLElement).click();
-            console.log('Clicked to expand plugin collapsible');
-          } else {
-            console.error('Could not find collapsible header');
-          }
-        } else {
-          console.log('Plugin collapsible already expanded');
+      if (collapsible && !collapsible.classList.contains('isExpanded')) {
+        const header = collapsible.querySelector('.collapsible-header');
+        if (header) {
+          (header as HTMLElement).click();
         }
-      } else {
-        console.error('Plugin collapsible not found');
       }
     });
 
-    await page.waitForTimeout(1000);
-    await expect(page.locator('plugin-management')).toBeVisible({ timeout: 5000 });
-
-    // Enable API Test Plugin
-    const result = await page.evaluate(() => {
-      const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
-      const apiTestCard = cards.find((card) => {
-        const title = card.querySelector('mat-card-title')?.textContent || '';
-        return title.includes('API Test Plugin');
-      });
-
-      if (!apiTestCard) {
-        return { found: false };
-      }
-
-      const toggle = apiTestCard.querySelector(
-        'mat-slide-toggle button[role="switch"]',
-      ) as HTMLButtonElement;
-      if (!toggle) {
-        return { found: true, hasToggle: false };
-      }
-
-      const wasEnabled = toggle.getAttribute('aria-checked') === 'true';
-      if (!wasEnabled) {
-        toggle.click();
-      }
-
-      return {
-        found: true,
-        hasToggle: true,
-        wasEnabled,
-        clicked: !wasEnabled,
-      };
+    // Wait for plugin management to be visible
+    await page.waitForSelector('plugin-management', {
+      state: 'visible',
+      timeout: 10000 * timeoutMultiplier,
     });
 
-    console.log('Enable plugin result:', result);
-    expect(result.found).toBe(true);
-    expect(result.clicked || result.wasEnabled).toBe(true);
+    // Log current plugin state for debugging
+    if (process.env.CI) {
+      await logPluginState(page);
+    }
 
-    await page.waitForTimeout(3000); // Wait for plugin to initialize
+    // Enable API Test Plugin with verification
+    const pluginEnabled = await enablePluginWithVerification(
+      page,
+      'API Test Plugin',
+      15000 * timeoutMultiplier,
+    );
 
-    // Navigate back to main view
-    await page.click(SIDENAV);
-    await page.waitForTimeout(500);
-    await page.goto('/#/tag/TODAY');
-    await page.waitForTimeout(1000);
+    expect(pluginEnabled).toBe(true);
 
-    // Check plugin menu exists
+    // Wait for plugin to appear in menu
+    const pluginInMenu = await waitForPluginInMenu(
+      page,
+      'API Test Plugin',
+      20000 * timeoutMultiplier,
+    );
+
+    expect(pluginInMenu).toBe(true);
+
+    // Additional verification - check menu structure
     const menuResult = await page.evaluate(() => {
       const pluginMenu = document.querySelector('side-nav plugin-menu');
       const buttons = pluginMenu ? Array.from(pluginMenu.querySelectorAll('button')) : [];
@@ -107,18 +94,18 @@ test.describe.serial('Plugin Enable Verify', () => {
         hasPluginMenu: !!pluginMenu,
         buttonCount: buttons.length,
         buttonTexts: buttons.map((btn) => btn.textContent?.trim() || ''),
-        menuHTML: pluginMenu?.outerHTML?.substring(0, 200),
       };
     });
 
-    console.log('Plugin menu state:', menuResult);
+    console.log('[Plugin Test] Plugin menu state:', menuResult);
     expect(menuResult.hasPluginMenu).toBe(true);
     expect(menuResult.buttonCount).toBeGreaterThan(0);
-
-    // Verify API Test Plugin menu entry
-    await expect(page.locator(`${SIDENAV} plugin-menu button`)).toBeVisible();
-    await expect(page.locator(`${SIDENAV} plugin-menu button`)).toContainText(
-      'API Test Plugin',
+    // Check if any button text contains "API Test Plugin" (handle whitespace)
+    const hasApiTestPlugin = menuResult.buttonTexts.some((text: string) =>
+      text.includes('API Test Plugin'),
     );
+    expect(hasApiTestPlugin).toBe(true);
+
+    console.log('[Plugin Test] Plugin enable verification test completed successfully');
   });
 });
