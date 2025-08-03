@@ -152,7 +152,8 @@ test.describe.serial('Plugin Loading', () => {
   });
 
   test('disable and re-enable plugin', async ({ page, workViewPage }) => {
-    test.setTimeout(30000); // Increase timeout for this test
+    // Increase timeout to account for asset checking in CI
+    test.setTimeout(process.env.CI ? 90000 : 30000);
 
     // Check if plugin assets are available
     const assetsAvailable = await waitForPluginAssets(page);
