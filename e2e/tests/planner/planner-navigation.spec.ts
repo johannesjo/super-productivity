@@ -77,8 +77,28 @@ test.describe('Planner Navigation', () => {
     await expect(plannerPage.routerWrapper).toBeVisible();
   });
 
-  test.skip('should navigate to project planner', async ({ page, projectPage }) => {
-    // Skip this test as project creation doesn't auto-navigate to project
-    // This would require additional setup/implementation
+  test('should navigate to project planner', async ({
+    page,
+    projectPage,
+    workViewPage,
+  }) => {
+    // Create and navigate to a test project
+    await projectPage.createAndGoToTestProject();
+
+    // Wait for project to be fully loaded
+    await page.waitForTimeout(1000);
+
+    // Add a task with schedule to ensure planner has content
+    await workViewPage.addTask('Scheduled task for planner');
+    await page.waitForTimeout(500);
+
+    // Navigate to planner using the button
+    await plannerPage.navigateToPlanner();
+    await plannerPage.waitForPlannerView();
+
+    // Should be on planner or tasks view - the app may redirect based on content
+    // We just verify that navigation to planner works, regardless of final URL
+    await expect(page).toHaveURL(/\/(planner|tasks)/);
+    await expect(plannerPage.routerWrapper).toBeVisible();
   });
 });

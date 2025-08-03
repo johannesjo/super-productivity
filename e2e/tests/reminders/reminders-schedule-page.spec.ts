@@ -13,7 +13,7 @@ const SCHEDULE_PAGE_TASK_1_TITLE_EL = `${SCHEDULE_PAGE_TASK_1} .title`;
 // Note: not sure why this is the second child, but it is
 const SCHEDULE_PAGE_TASK_2_TITLE_EL = `${SCHEDULE_PAGE_TASK_2} .title`;
 
-test.describe.skip('Reminders Schedule Page', () => {
+test.describe('Reminders Schedule Page', () => {
   test('should add a scheduled tasks', async ({ page, workViewPage, testPrefix }) => {
     await workViewPage.waitForTaskList();
 
@@ -63,29 +63,29 @@ test.describe.skip('Reminders Schedule Page', () => {
   }) => {
     await workViewPage.waitForTaskList();
 
-    // First add the first task from previous test (needed for continuity)
-    const title1 = `${testPrefix}-0 test task koko`;
+    // Add first task
+    const title1 = `${testPrefix}-1 first scheduled task`;
     const scheduleTime1 = Date.now() + 10000;
 
     await workViewPage.addTask(title1);
-    await page.waitForSelector(TASK, { state: 'visible' });
+    await page.waitForSelector(TASK, { state: 'visible', timeout: 10000 });
 
     // Schedule first task
     const firstTask = page.locator(TASK).first();
     await firstTask.hover();
     const scheduleBtn1 = firstTask.locator(TASK_SCHEDULE_BTN);
-    await scheduleBtn1.waitFor({ state: 'visible' });
+    await scheduleBtn1.waitFor({ state: 'visible', timeout: 5000 });
     await scheduleBtn1.click();
 
     const dialog1 = page.locator('dialog-schedule-task');
-    await expect(dialog1).toBeVisible();
+    await expect(dialog1).toBeVisible({ timeout: 5000 });
 
     const date1 = new Date(scheduleTime1);
     const hours1 = date1.getHours().toString().padStart(2, '0');
     const minutes1 = date1.getMinutes().toString().padStart(2, '0');
     await page.fill('input[type="time"]', `${hours1}:${minutes1}`);
     await page.click('mat-dialog-actions button:last-of-type');
-    await dialog1.waitFor({ state: 'hidden' });
+    await dialog1.waitFor({ state: 'hidden', timeout: 5000 });
 
     // Click to go back to work context
     await page.click('.current-work-context-title');
@@ -108,18 +108,18 @@ test.describe.skip('Reminders Schedule Page', () => {
     const newestTask = allTasks.first();
     await newestTask.hover();
     const scheduleBtn2 = newestTask.locator(TASK_SCHEDULE_BTN);
-    await scheduleBtn2.waitFor({ state: 'visible' });
+    await scheduleBtn2.waitFor({ state: 'visible', timeout: 5000 });
     await scheduleBtn2.click();
 
     const dialog2 = page.locator('dialog-schedule-task');
-    await expect(dialog2).toBeVisible();
+    await expect(dialog2).toBeVisible({ timeout: 5000 });
 
     const date2 = new Date(scheduleTime2);
     const hours2 = date2.getHours().toString().padStart(2, '0');
     const minutes2 = date2.getMinutes().toString().padStart(2, '0');
     await page.fill('input[type="time"]', `${hours2}:${minutes2}`);
     await page.click('mat-dialog-actions button:last-of-type');
-    await dialog2.waitFor({ state: 'hidden' });
+    await dialog2.waitFor({ state: 'hidden', timeout: 5000 });
 
     // Verify both tasks have schedule buttons
     const task1 = page.locator(TASK).filter({ hasText: title1 });

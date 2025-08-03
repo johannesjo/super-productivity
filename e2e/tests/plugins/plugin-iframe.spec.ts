@@ -11,10 +11,10 @@ const PLUGIN_IFRAME = 'plugin-index iframe';
 const TASK_COUNT = '#taskCount';
 const PROJECT_COUNT = '#projectCount';
 const TAG_COUNT = '#tagCount';
-const REFRESH_STATS_BTN = 'button:nth-of-type(2)';
+const REFRESH_STATS_BTN = 'button:has-text("Refresh Stats")';
 const LOG_ENTRY = '.log-entry';
 
-test.describe.serial('Plugin Iframe', () => {
+test.describe('Plugin Iframe', () => {
   test.beforeEach(async ({ page, workViewPage }) => {
     test.setTimeout(30000); // Increase timeout for setup
 
@@ -22,9 +22,9 @@ test.describe.serial('Plugin Iframe', () => {
 
     // Enable API Test Plugin
     const settingsBtn = page.locator(`${SIDENAV} .tour-settingsMenuBtn`);
-    await settingsBtn.waitFor({ state: 'visible' });
+    await settingsBtn.waitFor({ state: 'visible', timeout: 10000 });
     await settingsBtn.click();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('networkidle', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     await page.evaluate(() => {
@@ -52,9 +52,9 @@ test.describe.serial('Plugin Iframe', () => {
     });
 
     await page.waitForTimeout(1000);
-    await expect(page.locator('plugin-management')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('plugin-management')).toBeVisible({ timeout: 10000 });
 
-    // Enable the plugin
+    // Enable the plugin (only if not already enabled)
     const enableResult = await page.evaluate((pluginName: string) => {
       const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
       const targetCard = cards.find((card) => {
@@ -70,11 +70,16 @@ test.describe.serial('Plugin Iframe', () => {
           const wasChecked = toggleButton.getAttribute('aria-checked') === 'true';
           if (!wasChecked) {
             toggleButton.click();
+            return {
+              found: true,
+              wasEnabled: false,
+              clicked: true,
+            };
           }
           return {
             found: true,
-            wasEnabled: wasChecked,
-            clicked: !wasChecked,
+            wasEnabled: true,
+            clicked: false,
           };
         }
         return { found: true, hasToggle: false };
@@ -86,8 +91,12 @@ test.describe.serial('Plugin Iframe', () => {
     console.log(`Plugin "API Test Plugin" enable state:`, enableResult);
     expect(enableResult.found).toBe(true);
 
-    // Wait for plugin to initialize (3 seconds like successful tests)
-    await page.waitForTimeout(3000);
+    // Wait for plugin to initialize only if we just enabled it
+    if (enableResult.clicked) {
+      await page.waitForTimeout(3000);
+    } else {
+      await page.waitForTimeout(1000);
+    }
 
     // Verify plugin is actually enabled before proceeding
     const verifyEnabled = await page.evaluate(() => {
@@ -102,13 +111,13 @@ test.describe.serial('Plugin Iframe', () => {
     });
 
     if (!verifyEnabled) {
-      console.warn('Plugin did not enable properly, waiting more...');
-      await page.waitForTimeout(3000);
+      console.warn('Plugin is not enabled, something went wrong');
+      throw new Error('Plugin is not enabled');
     }
 
     // Navigate to work view
     await page.goto('/#/tag/TODAY');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('networkidle', { timeout: 10000 });
     await page.waitForTimeout(2000);
 
     // Wait for task list to be visible and dismiss any dialogs
@@ -160,7 +169,7 @@ test.describe.serial('Plugin Iframe', () => {
     await page.waitForTimeout(1000); // Wait for iframe content to load
   });
 
-  test.skip('verify iframe loads with correct content', async ({ page }) => {
+  test('verify iframe loads with correct content', async ({ page }) => {
     test.setTimeout(30000); // Increase timeout
 
     // Navigate directly to the plugin page
@@ -196,7 +205,7 @@ test.describe.serial('Plugin Iframe', () => {
     }
   });
 
-  test.skip('test stats loading in iframe', async ({ page, workViewPage }) => {
+  test('test stats loading in iframe', async ({ page, workViewPage }) => {
     test.setTimeout(30000); // Increase timeout
 
     // Add some tasks for this specific test
@@ -237,7 +246,7 @@ test.describe.serial('Plugin Iframe', () => {
     expect(parseInt(tagCount || '0')).toBeGreaterThanOrEqual(1);
   });
 
-  test.skip('test refresh stats button', async ({ page }) => {
+  test('test refresh stats button', async ({ page }) => {
     test.setTimeout(30000); // Increase timeout
 
     // Ensure we're on the work view page
