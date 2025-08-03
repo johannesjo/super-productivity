@@ -116,12 +116,12 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'ng serve --port 4242',
+    command: 'npm run startFrontend:e2e',
     url: 'http://localhost:4242',
     reuseExistingServer: !process.env.CI, // Don't reuse in CI to ensure clean state
-    timeout: process.env.CI ? 300 * 1000 : 60 * 1000, // 5 minutes in CI, 1 minute locally
-    stdout: process.env.CI ? 'pipe' : 'ignore', // Show output in CI for debugging
-    stderr: process.env.CI ? 'pipe' : 'ignore',
+    timeout: 60 * 1000, // 1 minute should be enough if server starts properly
+    stdout: 'pipe', // Always show output for debugging
+    stderr: 'pipe',
   },
 
   /* Folder for test artifacts such as screenshots, videos, traces, etc. */
