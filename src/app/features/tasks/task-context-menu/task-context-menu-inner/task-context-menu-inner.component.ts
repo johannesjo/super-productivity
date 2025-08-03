@@ -56,7 +56,7 @@ import { Store } from '@ngrx/store';
 import { selectTaskByIdWithSubTaskData } from '../../store/task.selectors';
 import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
-import { getWorklogStr } from '../../../../util/get-work-log-str';
+import { getLocalDateStr } from '../../../../util/get-local-date-str';
 import { PlannerActions } from '../../../planner/store/planner.actions';
 import { addSubTask } from '../../../tasks/store/task.actions';
 import { combineDateAndTime } from '../../../../util/combine-date-and-time';
@@ -520,7 +520,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     if (this.task.projectId && !this.task.parentId) {
       this._projectService.moveTaskToBacklog(this.task.id, this.task.projectId);
       if (
-        this.task.dueDay === getWorklogStr() ||
+        this.task.dueDay === getLocalDateStr() ||
         (this.task.dueWithTime && isToday(this.task.dueWithTime))
       ) {
         this.unschedule();
@@ -587,13 +587,13 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     }
 
     const newDayDate = new Date(selectedDate);
-    const newDay = getWorklogStr(newDayDate);
+    const newDay = getLocalDateStr(newDayDate);
 
     if (isRemoveFromToday) {
       this.unschedule();
     } else if (this.task.dueDay === newDay) {
       const formattedDate =
-        newDay == getWorklogStr()
+        newDay == getLocalDateStr()
           ? this._translateService.instant(T.G.TODAY_TAG_TITLE)
           : (this._datePipe.transform(newDay, 'shortDate') as string);
       this._snackService.open({
@@ -613,7 +613,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
         false,
       );
     } else {
-      if (newDay === getWorklogStr()) {
+      if (newDay === getLocalDateStr()) {
         this.addToMyDay();
       } else {
         this._store.dispatch(

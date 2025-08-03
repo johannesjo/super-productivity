@@ -27,7 +27,7 @@ import { TagListComponent } from '../../tag/tag-list/tag-list.component';
 import { Store } from '@ngrx/store';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { PlannerActions } from '../../planner/store/planner.actions';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getLocalDateStr } from '../../../util/get-local-date-str';
 import { selectTodayTagTaskIds } from '../../tag/store/tag.reducer';
 
 const M = 1000 * 60;
@@ -177,7 +177,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     this._store.dispatch(
       PlannerActions.planTaskForDay({
         task,
-        day: getWorklogStr(getTomorrow()),
+        day: getLocalDateStr(getTomorrow()),
         isShowSnack: true,
       }),
     );

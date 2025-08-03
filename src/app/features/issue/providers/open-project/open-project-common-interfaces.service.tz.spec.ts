@@ -1,4 +1,4 @@
-import { getWorklogStr } from '../../../../util/get-work-log-str';
+import { getLocalDateStr } from '../../../../util/get-local-date-str';
 
 describe('OpenProjectCommonInterfacesService timezone test', () => {
   describe('getAddTaskData startDate handling', () => {
@@ -8,7 +8,7 @@ describe('OpenProjectCommonInterfacesService timezone test', () => {
       // Test 1: ISO date string (most common from OpenProject API)
       // This represents 2025-01-17 in the API response
       const openProjectStartDate1 = '2025-01-17';
-      const result1 = getWorklogStr(openProjectStartDate1);
+      const result1 = getLocalDateStr(openProjectStartDate1);
 
       console.log('Test 1 - OpenProject date string:', {
         input: openProjectStartDate1,
@@ -40,7 +40,7 @@ describe('OpenProjectCommonInterfacesService timezone test', () => {
 
       // This is what the service does:
       const dueDay = mockOpenProjectIssue.startDate
-        ? getWorklogStr(mockOpenProjectIssue.startDate)
+        ? getLocalDateStr(mockOpenProjectIssue.startDate)
         : undefined;
 
       console.log('OpenProject issue startDate processing:', {

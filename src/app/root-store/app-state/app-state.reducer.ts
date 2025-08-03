@@ -1,6 +1,6 @@
 import { createFeature, createReducer, on } from '@ngrx/store';
 import { AppStateActions } from './app-state.actions';
-import { getWorklogStr } from '../../util/get-work-log-str';
+import { getLocalDateStr } from '../../util/get-local-date-str';
 
 export const appStateFeatureKey = 'appState';
 
@@ -9,7 +9,7 @@ export interface AppState {
 }
 
 export const appStateInitialState: AppState = {
-  todayStr: getWorklogStr(),
+  todayStr: getLocalDateStr(),
 };
 
 export const appStateReducer = createReducer(

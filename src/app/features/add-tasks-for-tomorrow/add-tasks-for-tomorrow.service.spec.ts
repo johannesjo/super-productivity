@@ -14,7 +14,7 @@ import {
 } from '../tasks/store/task.selectors';
 import { selectTodayTaskIds } from '../work-context/store/work-context.selectors';
 import { selectTasksForPlannerDay } from '../planner/store/planner.selectors';
-import { getWorklogStr } from '../../util/get-work-log-str';
+import { getLocalDateStr } from '../../util/get-local-date-str';
 
 // Helper to access private methods for testing
 type PrivateService = {
@@ -95,7 +95,7 @@ describe('AddTasksForTomorrowService', () => {
     created: Date.now(),
     isDone: false,
     attachments: [],
-    dueDay: getWorklogStr(today),
+    dueDay: getLocalDateStr(today),
   } as TaskWithDueDay;
 
   const mockRepeatCfg: TaskRepeatCfg = {
@@ -256,7 +256,7 @@ describe('AddTasksForTomorrowService', () => {
       store.overrideSelector(selectTasksDueForDay, []);
       // Empty planner day means no tasks to move to today
       store.overrideSelector(
-        selectTasksForPlannerDay(getWorklogStr(tomorrow.getTime())),
+        selectTasksForPlannerDay(getLocalDateStr(tomorrow.getTime())),
         [],
       );
       store.overrideSelector(selectTodayTaskIds, []);
@@ -285,7 +285,7 @@ describe('AddTasksForTomorrowService', () => {
       ]);
       store.overrideSelector(selectTasksDueForDay, [mockTaskWithDueDayTomorrow]);
       store.overrideSelector(
-        selectTasksForPlannerDay(getWorklogStr(tomorrow.getTime())),
+        selectTasksForPlannerDay(getLocalDateStr(tomorrow.getTime())),
         [mockTaskWithDueTimeTomorrow, mockTaskWithDueDayTomorrow],
       );
       store.overrideSelector(selectTodayTaskIds, []);
@@ -313,7 +313,7 @@ describe('AddTasksForTomorrowService', () => {
       store.overrideSelector(selectTasksWithDueTimeForRange, []);
       store.overrideSelector(selectTasksDueForDay, []);
       store.overrideSelector(
-        selectTasksForPlannerDay(getWorklogStr(tomorrow.getTime())),
+        selectTasksForPlannerDay(getLocalDateStr(tomorrow.getTime())),
         [],
       );
       store.overrideSelector(selectTodayTaskIds, []);
@@ -332,7 +332,7 @@ describe('AddTasksForTomorrowService', () => {
       ]);
       store.overrideSelector(selectTasksDueForDay, [mockTaskWithDueDayTomorrow]);
       store.overrideSelector(
-        selectTasksForPlannerDay(getWorklogStr(tomorrow.getTime())),
+        selectTasksForPlannerDay(getLocalDateStr(tomorrow.getTime())),
         [mockTaskWithDueTimeTomorrow, mockTaskWithDueDayTomorrow],
       );
       store.overrideSelector(selectTodayTaskIds, ['task1']); // task1 already in today
@@ -358,7 +358,7 @@ describe('AddTasksForTomorrowService', () => {
       store.overrideSelector(selectTasksWithDueTimeForRange, []);
       store.overrideSelector(selectTasksDueForDay, []);
       // Empty planner day means no tasks to move to today
-      store.overrideSelector(selectTasksForPlannerDay(getWorklogStr(today)), []);
+      store.overrideSelector(selectTasksForPlannerDay(getLocalDateStr(today)), []);
       store.overrideSelector(selectTodayTaskIds, []);
       const dispatchSpy = spyOn(store, 'dispatch');
 
@@ -374,7 +374,7 @@ describe('AddTasksForTomorrowService', () => {
       taskRepeatCfgServiceMock.getAllUnprocessedRepeatableTasks$.and.returnValue(of([]));
       store.overrideSelector(selectTasksWithDueTimeForRange, [mockTaskWithDueTimeToday]);
       store.overrideSelector(selectTasksDueForDay, [mockTaskWithDueDayToday]);
-      store.overrideSelector(selectTasksForPlannerDay(getWorklogStr(today)), [
+      store.overrideSelector(selectTasksForPlannerDay(getLocalDateStr(today)), [
         mockTaskWithDueTimeToday,
         mockTaskWithDueDayToday,
       ]);
@@ -414,7 +414,7 @@ describe('AddTasksForTomorrowService', () => {
       );
       store.overrideSelector(selectTasksWithDueTimeForRange, []);
       store.overrideSelector(selectTasksDueForDay, []);
-      store.overrideSelector(selectTasksForPlannerDay(getWorklogStr(today)), []);
+      store.overrideSelector(selectTasksForPlannerDay(getLocalDateStr(today)), []);
       store.overrideSelector(selectTodayTaskIds, []);
       const dispatchSpy = spyOn(store, 'dispatch');
 
@@ -456,7 +456,7 @@ describe('AddTasksForTomorrowService', () => {
       );
       store.overrideSelector(selectTasksWithDueTimeForRange, []);
       store.overrideSelector(selectTasksDueForDay, []);
-      store.overrideSelector(selectTasksForPlannerDay(getWorklogStr(today)), []);
+      store.overrideSelector(selectTasksForPlannerDay(getLocalDateStr(today)), []);
       store.overrideSelector(selectTodayTaskIds, []);
 
       await service.addAllDueToday();

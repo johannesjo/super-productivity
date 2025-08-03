@@ -9,7 +9,7 @@ import { PlannerActions } from './planner.actions';
 import { TaskCopy } from '../../tasks/task.model';
 import { DEFAULT_TASK } from '../../tasks/task.model';
 import { ADD_TASK_PANEL_ID, OVERDUE_LIST_ID } from '../planner.model';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getLocalDateStr } from '../../../util/get-local-date-str';
 import { createCombinedTaskSharedMetaReducer } from '../../../root-store/meta/task-shared-meta-reducers/test-helpers';
 import { RootState } from '../../../root-store/root-state';
 import { TASK_FEATURE_NAME, initialTaskState } from '../../tasks/store/task.reducer';
@@ -51,7 +51,7 @@ describe('Planner Reducer - transferTask action', () => {
     prevDay: string,
     newDay: string,
     targetIndex: number = 0,
-    today: string = getWorklogStr(),
+    today: string = getLocalDateStr(),
     targetTaskId?: string,
   ) =>
     PlannerActions.transferTask({
@@ -136,7 +136,7 @@ describe('Planner Reducer - transferTask action', () => {
     });
 
     it('should not update prevDay when it equals today', () => {
-      const today = getWorklogStr();
+      const today = getLocalDateStr();
       const task = createMockTask('task1');
       const action = createTransferTaskAction(task, today, '2025-01-17', 0, today);
 
@@ -204,7 +204,7 @@ describe('Planner Reducer - transferTask action', () => {
     });
 
     it('should not update newDay when it equals today', () => {
-      const today = getWorklogStr();
+      const today = getLocalDateStr();
       const task = createMockTask('task1');
       const action = createTransferTaskAction(task, '2025-01-15', today, 0, today);
 
@@ -276,7 +276,7 @@ describe('Planner Reducer - transferTask action', () => {
 
   describe('edge cases', () => {
     it('should handle transferring from today to future day', () => {
-      const today = getWorklogStr();
+      const today = getLocalDateStr();
       const task = createMockTask('task1');
       const stateWithToday: PlannerState = {
         ...baseState,
@@ -302,7 +302,7 @@ describe('Planner Reducer - transferTask action', () => {
     });
 
     it('should handle transferring to today from past day', () => {
-      const today = getWorklogStr();
+      const today = getLocalDateStr();
       const task = createMockTask('task1');
       const action = createTransferTaskAction(task, '2025-01-15', today, 0, today);
 

@@ -3,7 +3,7 @@ import { Task, TaskState } from '../task.model';
 import { initialTaskState, taskReducer } from './task.reducer';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { DEFAULT_TASK } from '../task.model';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getLocalDateStr } from '../../../util/get-local-date-str';
 import { createCombinedTaskSharedMetaReducer } from '../../../root-store/meta/task-shared-meta-reducers/test-helpers';
 import { RootState } from '../../../root-store/root-state';
 import { TASK_FEATURE_NAME } from './task.reducer';
@@ -58,7 +58,7 @@ describe('Task Reducer - transferTask action', () => {
     prevDay: string,
     newDay: string,
     targetIndex: number = 0,
-    today: string = getWorklogStr(),
+    today: string = getLocalDateStr(),
     targetTaskId?: string,
   ) =>
     PlannerActions.transferTask({
@@ -160,7 +160,7 @@ describe('Task Reducer - transferTask action', () => {
   });
 
   it('should handle transferring task to today', () => {
-    const today = getWorklogStr();
+    const today = getLocalDateStr();
     const task = stateWithTasks.entities.task1 as Task;
     const action = createTransferTaskAction(task, '2025-01-15', today);
 
@@ -193,7 +193,7 @@ describe('Task Reducer - transferTask action', () => {
       '2025-01-15',
       '2025-01-17',
       2,
-      getWorklogStr(),
+      getLocalDateStr(),
       'task2',
     );
 

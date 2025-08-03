@@ -1,6 +1,6 @@
 import { getNewestPossibleDueDate } from './get-newest-possible-due-date.util';
 import { DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfg } from '../task-repeat-cfg.model';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getLocalDateStr } from '../../../util/get-local-date-str';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 
 /* eslint-disable no-mixed-operators */
@@ -19,7 +19,7 @@ const DUMMY_REPEATABLE_TASK: TaskRepeatCfg = {
   remindAt: undefined,
   isPaused: false,
   repeatCycle: 'WEEKLY',
-  startDate: getWorklogStr(FAKE_MONDAY_THE_10TH),
+  startDate: getLocalDateStr(FAKE_MONDAY_THE_10TH),
   repeatEvery: 1,
   monday: false,
   tuesday: false,
@@ -55,7 +55,7 @@ const testCase = (
     getNewestPossibleDueDate(
       {
         ...cfg,
-        startDate: getWorklogStr(startDate),
+        startDate: getLocalDateStr(startDate),
       },
       today,
     ),

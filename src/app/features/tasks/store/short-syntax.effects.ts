@@ -29,7 +29,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
 import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getLocalDateStr } from '../../../util/get-local-date-str';
 import { WorkContextService } from '../../work-context/work-context.service';
 
 import { INBOX_PROJECT } from '../../project/project.const';
@@ -148,7 +148,7 @@ export class ShortSyntaxEffects {
           const { dueWithTime } = taskChanges;
           if (taskChanges.hasPlannedTime === false) {
             const plannedDay = new Date(dueWithTime);
-            const plannedDayInIsoFormat = getWorklogStr(plannedDay);
+            const plannedDayInIsoFormat = getLocalDateStr(plannedDay);
             const plan = PlannerActions.planTaskForDay({
               task,
               day: plannedDayInIsoFormat,

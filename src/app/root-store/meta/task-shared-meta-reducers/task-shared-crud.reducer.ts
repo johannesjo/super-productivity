@@ -19,7 +19,7 @@ import { Tag } from '../../../features/tag/tag.model';
 import { DEFAULT_TASK, Task, TaskWithSubTasks } from '../../../features/tasks/task.model';
 import { calcTotalTimeSpent } from '../../../features/tasks/util/calc-total-time-spent';
 import { TODAY_TAG } from '../../../features/tag/tag.const';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getLocalDateStr } from '../../../util/get-local-date-str';
 import { unique } from '../../../util/unique';
 import {
   ActionHandlerMap,
@@ -141,7 +141,7 @@ const handleAddTask = (
   }
 
   // Update tags - only update tags that exist
-  const shouldAddToToday = task.dueDay === getWorklogStr();
+  const shouldAddToToday = task.dueDay === getLocalDateStr();
 
   const tagIdsToUpdate = [
     ...task.tagIds,
@@ -195,7 +195,7 @@ const handleConvertToMainTask = (
         parentId: undefined,
         tagIds: [...parentTask.tagIds],
         modified: Date.now(),
-        ...(isPlanForToday ? { dueDay: getWorklogStr() } : {}),
+        ...(isPlanForToday ? { dueDay: getLocalDateStr() } : {}),
       },
     },
     taskStateAfterParentCleanup,

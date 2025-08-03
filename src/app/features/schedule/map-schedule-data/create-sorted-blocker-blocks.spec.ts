@@ -5,7 +5,7 @@ import {
   DEFAULT_TASK_REPEAT_CFG,
   TaskRepeatCfg,
 } from '../../task-repeat-cfg/task-repeat-cfg.model';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getLocalDateStr } from '../../../util/get-local-date-str';
 import { BlockedBlockType, ScheduleCalendarMapEntry } from '../schedule.model';
 /* eslint-disable @typescript-eslint/naming-convention */
 
@@ -766,7 +766,7 @@ describe('createBlockerBlocks()', () => {
       remindAt: undefined,
       isPaused: false,
       repeatCycle: 'WEEKLY',
-      startDate: getWorklogStr(new Date(0)),
+      startDate: getLocalDateStr(new Date(0)),
       repeatEvery: 1,
       monday: false,
       tuesday: false,

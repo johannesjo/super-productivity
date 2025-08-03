@@ -84,7 +84,7 @@ import { ArchiveService } from '../time-tracking/archive.service';
 import { TaskArchiveService } from '../time-tracking/task-archive.service';
 import { TODAY_TAG } from '../tag/tag.const';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
-import { getWorklogStr } from '../../util/get-work-log-str';
+import { getLocalDateStr } from '../../util/get-local-date-str';
 import { INBOX_PROJECT } from '../project/project.const';
 import { GlobalConfigService } from '../config/global-config.service';
 import { TaskLog } from '../../core/log';
@@ -1053,7 +1053,7 @@ export class TaskService {
           : [],
 
       ...(workContextId === TODAY_TAG.id && !additional.parentId
-        ? { dueDay: getWorklogStr() }
+        ? { dueDay: getLocalDateStr() }
         : {}),
 
       ...additional,
