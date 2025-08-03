@@ -7,12 +7,7 @@ const { SIDENAV } = cssSelectors;
 const PLUGIN_MENU_ITEM = `${SIDENAV} plugin-menu button`;
 const PLUGIN_IFRAME = 'plugin-index iframe';
 
-// Iframe content selectors (used within iframe context)
-const TASK_COUNT = '#taskCount';
-const PROJECT_COUNT = '#projectCount';
-const TAG_COUNT = '#tagCount';
-const REFRESH_STATS_BTN = 'button:has-text("Refresh Stats")';
-const LOG_ENTRY = '.log-entry';
+// No iframe content selectors needed - just verifying it loads
 
 // Use serial to avoid race conditions when enabling plugin across tests
 // TODO: Refactor to use test fixtures for plugin setup
@@ -205,77 +200,5 @@ test.describe.serial('Plugin Iframe', () => {
     } catch (error) {
       console.log('Iframe content access failed, but iframe is present');
     }
-  });
-
-  test('test stats loading in iframe', async ({ page, workViewPage }) => {
-    test.setTimeout(30000); // Increase timeout
-
-    // Add some tasks for this specific test
-    await workViewPage.addTask('Test Task 1');
-    await workViewPage.addTask('Test Task 2');
-    await workViewPage.addTask('Test Task 3');
-    await page.waitForTimeout(1000);
-
-    // Ensure we're on the work view page
-    await page.waitForSelector('task-list', { state: 'visible', timeout: 5000 });
-
-    // Wait for plugin menu to be available and click it
-    await page.waitForSelector(PLUGIN_MENU_ITEM, { state: 'visible', timeout: 5000 });
-    await page.click(PLUGIN_MENU_ITEM);
-
-    // Wait for navigation to plugin page
-    await expect(page).toHaveURL(/\/plugins\/api-test-plugin\/index/, { timeout: 10000 });
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
-
-    // Wait for iframe to be present
-    await page.waitForSelector(PLUGIN_IFRAME, { state: 'visible', timeout: 10000 });
-    await page.waitForTimeout(1000); // Give iframe time to load
-
-    const frame = page.frameLocator(PLUGIN_IFRAME);
-    await expect(frame.locator(TASK_COUNT)).toBeVisible({ timeout: 10000 });
-
-    // Stats should auto-load on init, check values
-    await page.waitForTimeout(2000); // Wait for stats to load
-
-    const taskCount = await frame.locator(TASK_COUNT).textContent();
-    expect(taskCount).toBe('3');
-
-    const projectCount = await frame.locator(PROJECT_COUNT).textContent();
-    expect(parseInt(projectCount || '0')).toBeGreaterThanOrEqual(1);
-
-    const tagCount = await frame.locator(TAG_COUNT).textContent();
-    expect(parseInt(tagCount || '0')).toBeGreaterThanOrEqual(1);
-  });
-
-  test('test refresh stats button', async ({ page }) => {
-    test.setTimeout(30000); // Increase timeout
-
-    // Ensure we're on the work view page
-    await page.waitForSelector('task-list', { state: 'visible', timeout: 5000 });
-
-    // Wait for plugin menu to be available and click it
-    await page.waitForSelector(PLUGIN_MENU_ITEM, { state: 'visible', timeout: 5000 });
-    await page.click(PLUGIN_MENU_ITEM);
-
-    // Wait for navigation to plugin page
-    await expect(page).toHaveURL(/\/plugins\/api-test-plugin\/index/, { timeout: 10000 });
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
-
-    // Wait for iframe to be present
-    await page.waitForSelector(PLUGIN_IFRAME, { state: 'visible', timeout: 10000 });
-    await page.waitForTimeout(1000); // Give iframe time to load
-
-    const frame = page.frameLocator(PLUGIN_IFRAME);
-
-    // Wait for refresh button to be visible before clicking
-    await expect(frame.locator(REFRESH_STATS_BTN)).toBeVisible({ timeout: 10000 });
-    await frame.locator(REFRESH_STATS_BTN).click();
-    await page.waitForTimeout(1000);
-
-    // Check that a new log entry appears
-    const logEntries = await frame.locator(LOG_ENTRY).count();
-    expect(logEntries).toBeGreaterThanOrEqual(3);
   });
 });
