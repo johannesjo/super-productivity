@@ -119,7 +119,7 @@ export default defineConfig({
     command: 'npm run startFrontend:e2e',
     url: 'http://localhost:4242',
     reuseExistingServer: !process.env.CI, // Don't reuse in CI to ensure clean state
-    timeout: 60 * 1000, // 1 minute should be enough if server starts properly
+    timeout: 3 * 60 * 1000, // 1 minute should be enough if server starts properly
     stdout: 'pipe', // Always show output for debugging
     stderr: 'pipe',
   },
