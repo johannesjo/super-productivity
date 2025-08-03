@@ -9,8 +9,6 @@ const PLUGIN_MENU = `${SIDENAV} plugin-menu`;
 const PLUGIN_MENU_ITEM = `${PLUGIN_MENU} button`;
 
 test.describe.serial('Plugin Lifecycle', () => {
-  // Skip in CI due to timing/environment issues
-  test.skip(!!process.env.CI, 'Skipping plugin lifecycle tests in CI');
   test.beforeEach(async ({ page, workViewPage }) => {
     await workViewPage.waitForTaskList();
 
@@ -92,7 +90,7 @@ test.describe.serial('Plugin Lifecycle', () => {
     await page.waitForSelector('task-list', { state: 'visible', timeout: 10000 });
   });
 
-  test.skip('verify plugin is initially loaded', async ({ page }) => {
+  test('verify plugin is initially loaded', async ({ page }) => {
     test.setTimeout(20000); // Increase timeout
     await page.waitForTimeout(100); // Wait for plugins to initialize
 
@@ -101,7 +99,7 @@ test.describe.serial('Plugin Lifecycle', () => {
     await expect(page.locator(PLUGIN_MENU_ITEM)).toContainText('API Test Plugin');
   });
 
-  test.skip('test plugin navigation', async ({ page }) => {
+  test('test plugin navigation', async ({ page }) => {
     test.setTimeout(20000); // Increase timeout
 
     // Click on the plugin menu item to navigate to plugin
@@ -117,7 +115,7 @@ test.describe.serial('Plugin Lifecycle', () => {
     await page.goto('/#/tag/TODAY');
   });
 
-  test.skip('disable plugin and verify cleanup', async ({ page, workViewPage }) => {
+  test('disable plugin and verify cleanup', async ({ page, workViewPage }) => {
     test.setTimeout(30000); // Increase timeout
 
     // First enable the plugin

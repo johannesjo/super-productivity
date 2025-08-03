@@ -14,8 +14,6 @@ const PLUGIN_CARD = 'plugin-management mat-card.ng-star-inserted';
 const TEST_PLUGIN_ID = 'test-upload-plugin';
 
 test.describe.serial('Plugin Upload', () => {
-  // Skip in CI due to file upload issues
-  test.skip(!!process.env.CI, 'Skipping plugin upload tests in CI');
   test.beforeEach(async ({ workViewPage }) => {
     await workViewPage.waitForTaskList();
   });

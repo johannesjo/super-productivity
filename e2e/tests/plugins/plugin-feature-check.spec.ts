@@ -1,9 +1,7 @@
 import { test, expect } from '../../fixtures/test.fixture';
 
 test.describe.serial('Plugin Feature Check', () => {
-  // Skip in CI due to timing/environment issues
-  test.skip(!!process.env.CI, 'Skipping plugin feature check tests in CI');
-  test.skip('check if PluginService exists', async ({ page, workViewPage }) => {
+  test('check if PluginService exists', async ({ page, workViewPage }) => {
     // Wait for work view to be ready
     await workViewPage.waitForTaskList();
 
@@ -67,7 +65,7 @@ test.describe.serial('Plugin Feature Check', () => {
     }
   });
 
-  test.skip('check plugin UI elements in DOM', async ({ page, workViewPage }) => {
+  test('check plugin UI elements in DOM', async ({ page, workViewPage }) => {
     // Wait for work view to be ready
     await workViewPage.waitForTaskList();
 

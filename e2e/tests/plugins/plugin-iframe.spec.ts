@@ -6,201 +6,153 @@ const { SIDENAV } = cssSelectors;
 // Plugin-related selectors
 const PLUGIN_MENU_ITEM = `${SIDENAV} plugin-menu button`;
 const PLUGIN_IFRAME = 'plugin-index iframe';
+const SETTINGS_BTN = `${SIDENAV} .tour-settingsMenuBtn`;
+const PLUGIN_MANAGEMENT = 'plugin-management';
+const PLUGIN_SECTION = '.plugin-section';
 
-// No iframe content selectors needed - just verifying it loads
-
-// Use serial to avoid race conditions when enabling plugin across tests
-// TODO: Refactor to use test fixtures for plugin setup
 test.describe.serial('Plugin Iframe', () => {
-  // Skip in CI due to timing/environment issues
-  test.skip(!!process.env.CI, 'Skipping plugin iframe tests in CI');
   test.beforeEach(async ({ page, workViewPage }) => {
-    test.setTimeout(30000); // Increase timeout for setup
+    test.setTimeout(60000); // Increase timeout for CI
 
     await workViewPage.waitForTaskList();
 
-    // Enable API Test Plugin
-    const settingsBtn = page.locator(`${SIDENAV} .tour-settingsMenuBtn`);
-    await settingsBtn.waitFor({ state: 'visible', timeout: 10000 });
+    // Navigate to settings with proper wait
+    const settingsBtn = page.locator(SETTINGS_BTN);
+    await settingsBtn.waitFor({ state: 'visible', timeout: 15000 });
     await settingsBtn.click();
-    await page.waitForLoadState('networkidle', { timeout: 10000 });
-    await page.waitForTimeout(1000);
 
-    await page.evaluate(() => {
-      const configPage = document.querySelector('.page-settings');
-      if (!configPage) {
-        console.error('Not on config page');
-        return;
-      }
+    // Wait for settings page to load completely
+    await page.waitForSelector('.page-settings', { state: 'visible', timeout: 15000 });
+    await page.waitForLoadState('networkidle', { timeout: 15000 });
 
-      const pluginSection = document.querySelector('.plugin-section');
-      if (pluginSection) {
-        pluginSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
+    // Scroll to plugin section using Playwright's built-in methods
+    const pluginSection = page.locator(PLUGIN_SECTION);
+    await pluginSection.scrollIntoViewIfNeeded();
 
-      const collapsible = document.querySelector('.plugin-section collapsible');
-      if (collapsible) {
-        const isExpanded = collapsible.classList.contains('isExpanded');
-        if (!isExpanded) {
-          const header = collapsible.querySelector('.collapsible-header');
-          if (header) {
-            (header as HTMLElement).click();
-          }
-        }
-      }
-    });
-
-    await page.waitForTimeout(1000);
-    await expect(page.locator('plugin-management')).toBeVisible({ timeout: 10000 });
-
-    // Enable the plugin (only if not already enabled)
-    const enableResult = await page.evaluate((pluginName: string) => {
-      const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
-      const targetCard = cards.find((card) => {
-        const title = card.querySelector('mat-card-title')?.textContent || '';
-        return title.includes(pluginName);
-      });
-
-      if (targetCard) {
-        const toggleButton = targetCard.querySelector(
-          'mat-slide-toggle button[role="switch"]',
-        ) as HTMLButtonElement;
-        if (toggleButton) {
-          const wasChecked = toggleButton.getAttribute('aria-checked') === 'true';
-          if (!wasChecked) {
-            toggleButton.click();
-            return {
-              found: true,
-              wasEnabled: false,
-              clicked: true,
-            };
-          }
-          return {
-            found: true,
-            wasEnabled: true,
-            clicked: false,
-          };
-        }
-        return { found: true, hasToggle: false };
-      }
-
-      return { found: false };
-    }, 'API Test Plugin');
-
-    console.log(`Plugin "API Test Plugin" enable state:`, enableResult);
-    expect(enableResult.found).toBe(true);
-
-    // Wait for plugin to initialize only if we just enabled it
-    if (enableResult.clicked) {
-      await page.waitForTimeout(3000);
-    } else {
-      await page.waitForTimeout(1000);
-    }
-
-    // Verify plugin is actually enabled before proceeding
-    const verifyEnabled = await page.evaluate(() => {
-      const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
-      const apiCard = cards.find((card) =>
-        card.querySelector('mat-card-title')?.textContent?.includes('API Test Plugin'),
+    // Expand collapsible if needed using Playwright locators
+    const collapsible = page.locator('.plugin-section collapsible');
+    const isExpanded = await collapsible.evaluate((el) =>
+      el.classList.contains('isExpanded'),
+    );
+    if (!isExpanded) {
+      const header = collapsible.locator('.collapsible-header');
+      await header.click();
+      // Wait for expansion animation
+      await page.waitForFunction(
+        () => {
+          const el = document.querySelector('.plugin-section collapsible');
+          return el?.classList.contains('isExpanded');
+        },
+        { timeout: 5000 },
       );
-      const toggle = apiCard?.querySelector(
-        'mat-slide-toggle button[role="switch"]',
-      ) as HTMLButtonElement;
-      return toggle?.getAttribute('aria-checked') === 'true';
-    });
-
-    if (!verifyEnabled) {
-      console.warn('Plugin is not enabled, something went wrong');
-      throw new Error('Plugin is not enabled');
     }
 
-    // Navigate to work view
+    // Wait for plugin management component to be ready
+    await page.waitForSelector(PLUGIN_MANAGEMENT, { state: 'visible', timeout: 15000 });
+
+    // Enable API Test Plugin using Playwright locators
+    const pluginCard = page.locator('plugin-management mat-card').filter({
+      hasText: 'API Test Plugin',
+    });
+
+    const toggle = pluginCard.locator('mat-slide-toggle button[role="switch"]');
+    await toggle.waitFor({ state: 'visible', timeout: 10000 });
+
+    const isEnabled = (await toggle.getAttribute('aria-checked')) === 'true';
+    if (!isEnabled) {
+      await toggle.click();
+      // Wait for toggle animation and state change
+      await page.waitForFunction(
+        () => {
+          const cards = Array.from(
+            document.querySelectorAll('plugin-management mat-card'),
+          );
+          const apiCard = cards.find((card) =>
+            card
+              .querySelector('mat-card-title')
+              ?.textContent?.includes('API Test Plugin'),
+          );
+          const toggleBtn = apiCard?.querySelector(
+            'mat-slide-toggle button[role="switch"]',
+          ) as HTMLButtonElement;
+          return toggleBtn?.getAttribute('aria-checked') === 'true';
+        },
+        { timeout: 10000 },
+      );
+    }
+
+    // Navigate back to work view
     await page.goto('/#/tag/TODAY');
-    await page.waitForLoadState('networkidle', { timeout: 10000 });
-    await page.waitForTimeout(2000);
+    await page.waitForLoadState('networkidle', { timeout: 15000 });
+    await page.waitForSelector('task-list', { state: 'visible', timeout: 15000 });
 
-    // Wait for task list to be visible and dismiss any dialogs
-    await page.waitForSelector('task-list', { state: 'visible', timeout: 10000 });
-
-    // Dismiss tour dialog if it appears
+    // Dismiss tour dialog if present
     const tourDialog = page.locator('[data-shepherd-step-id="Welcome"]');
-    if (await tourDialog.isVisible({ timeout: 1000 }).catch(() => false)) {
+    const tourVisible = await tourDialog.isVisible().catch(() => false);
+    if (tourVisible) {
       const cancelBtn = page.locator(
         'button:has-text("No thanks"), .shepherd-cancel-icon',
       );
-      if (await cancelBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
+      if (await cancelBtn.isVisible().catch(() => false)) {
         await cancelBtn.click();
-        await page.waitForTimeout(500);
+        await tourDialog.waitFor({ state: 'hidden', timeout: 5000 });
       }
     }
-
-    // Skip adding tasks for now - they're not essential for plugin tests
-    // and they're causing timeouts
   });
 
-  test.skip('open plugin iframe view', async ({ page }) => {
-    test.setTimeout(30000); // Increase timeout more
+  test('open plugin iframe view', async ({ page }) => {
+    test.setTimeout(60000);
 
-    // Wait a bit longer after navigation and setup
-    await page.waitForTimeout(2000);
+    // Wait for plugin menu to be ready
+    const pluginMenuItem = page.locator(PLUGIN_MENU_ITEM);
+    await pluginMenuItem.waitFor({ state: 'visible', timeout: 20000 });
 
-    // Debug: Check if we're on the right page and plugin menu exists
-    const menuDebug = await page.evaluate(() => {
-      const menu = document.querySelector('side-nav plugin-menu');
-      const buttons = menu ? menu.querySelectorAll('button') : [];
-      return {
-        url: window.location.href,
-        hasMenu: !!menu,
-        menuClass: menu?.className || '',
-        buttonCount: buttons.length,
-        buttonTexts: Array.from(buttons).map((b) => b.textContent?.trim() || ''),
-      };
-    });
-    console.log('Menu debug info:', menuDebug);
+    // Click plugin menu item
+    await pluginMenuItem.click();
 
-    // Check if plugin menu item is visible with longer timeout
-    await expect(page.locator(PLUGIN_MENU_ITEM)).toBeVisible({ timeout: 15000 });
+    // Wait for navigation to complete
+    await page.waitForURL(/\/plugins\/api-test-plugin\/index/, { timeout: 10000 });
 
-    await page.click(PLUGIN_MENU_ITEM);
-    await page.waitForTimeout(1000);
-    await expect(page).toHaveURL(/\/plugins\/api-test-plugin\/index/);
-    await expect(page.locator(PLUGIN_IFRAME)).toBeVisible();
-    await page.waitForTimeout(1000); // Wait for iframe content to load
+    // Wait for iframe to be visible
+    const iframe = page.locator(PLUGIN_IFRAME);
+    await iframe.waitFor({ state: 'visible', timeout: 15000 });
+
+    // Verify iframe is loaded
+    await expect(iframe).toBeVisible();
   });
 
-  test.skip('verify iframe loads with correct content', async ({ page }) => {
-    test.setTimeout(30000); // Increase timeout
+  test('verify iframe loads with correct content', async ({ page }) => {
+    test.setTimeout(60000);
 
-    // Navigate directly to the plugin page
+    // Navigate directly to plugin page
     await page.goto('/#/plugins/api-test-plugin/index');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+    await page.waitForLoadState('networkidle', { timeout: 15000 });
 
-    // Wait for iframe to be present
-    await page.waitForSelector(PLUGIN_IFRAME, { state: 'visible', timeout: 10000 });
-    await page.waitForTimeout(2000); // Give iframe more time to load
+    // Wait for iframe to be visible
+    const iframe = page.locator(PLUGIN_IFRAME);
+    await iframe.waitFor({ state: 'visible', timeout: 15000 });
 
-    // Check iframe is loaded
-    const iframe = await page.$(PLUGIN_IFRAME);
-    expect(iframe).toBeTruthy();
+    // Verify iframe exists and is visible
+    await expect(iframe).toBeVisible();
 
-    // Try to access iframe content with better error handling
+    // Try to verify iframe content if possible
+    // Note: Cross-origin iframes may not allow content access
+    const frameLocator = page.frameLocator(PLUGIN_IFRAME);
     try {
-      const frame = page.frameLocator(PLUGIN_IFRAME);
+      // Wait for iframe body to be loaded
+      await frameLocator.locator('body').waitFor({ state: 'visible', timeout: 10000 });
 
-      // Wait for any element in the iframe to ensure it's loaded
-      await frame.locator('body').waitFor({ state: 'visible', timeout: 5000 });
-
-      // Check for h1 element
-      const h1Visible = await frame
-        .locator('h1')
-        .isVisible({ timeout: 5000 })
-        .catch(() => false);
-      if (h1Visible) {
-        await expect(frame.locator('h1')).toContainText('API Test Plugin');
+      // Check for expected content if accessible
+      const h1 = frameLocator.locator('h1');
+      const hasH1 = (await h1.count()) > 0;
+      if (hasH1) {
+        await expect(h1).toContainText('API Test Plugin');
       }
     } catch (error) {
-      console.log('Iframe content access failed, but iframe is present');
+      // If iframe content is not accessible due to cross-origin restrictions,
+      // at least verify the iframe element itself is present
+      console.log('Note: Iframe content verification skipped (possibly cross-origin)');
+      await expect(iframe).toBeVisible();
     }
   });
 });

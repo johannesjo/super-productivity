@@ -11,9 +11,7 @@ const PLUGIN_MENU_ENTRY = `${SIDENAV} plugin-menu button`;
 const PLUGIN_IFRAME = 'plugin-index iframe';
 
 test.describe.serial('Plugin Loading', () => {
-  // Skip in CI due to timing/environment issues
-  test.skip(!!process.env.CI, 'Skipping plugin loading tests in CI');
-  test.skip('full plugin loading lifecycle', async ({ page, workViewPage }) => {
+  test('full plugin loading lifecycle', async ({ page, workViewPage }) => {
     await workViewPage.waitForTaskList();
 
     // Enable API Test Plugin first (implementing enableTestPlugin inline)
@@ -127,7 +125,7 @@ test.describe.serial('Plugin Loading', () => {
     await expect(page.locator(PLUGIN_MENU_ENTRY)).toContainText('API Test Plugin');
   });
 
-  test.skip('disable and re-enable plugin', async ({ page, workViewPage }) => {
+  test('disable and re-enable plugin', async ({ page, workViewPage }) => {
     test.setTimeout(30000); // Increase timeout for this test
     await workViewPage.waitForTaskList();
 

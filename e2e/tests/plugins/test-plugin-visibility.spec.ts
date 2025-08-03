@@ -5,9 +5,7 @@ const ROUTER_WRAPPER = '.route-wrapper';
 const SETTINGS_BTN = `${SIDENAV} .tour-settingsMenuBtn`;
 
 test.describe.serial('Plugin Visibility', () => {
-  // Skip in CI due to timing/environment issues
-  test.skip(!!process.env.CI, 'Skipping plugin visibility tests in CI');
-  test.skip('navigate to settings page', async ({ page, workViewPage }) => {
+  test('navigate to settings page', async ({ page, workViewPage }) => {
     // Wait for work view to be ready
     await workViewPage.waitForTaskList();
 
@@ -16,7 +14,7 @@ test.describe.serial('Plugin Visibility', () => {
     await expect(page).toHaveURL(/\/config/);
   });
 
-  test.skip('check page structure', async ({ page, workViewPage }) => {
+  test('check page structure', async ({ page, workViewPage }) => {
     // Wait for work view to be ready
     await workViewPage.waitForTaskList();
 
@@ -55,7 +53,7 @@ test.describe.serial('Plugin Visibility', () => {
     expect(results).toBeTruthy();
   });
 
-  test.skip('log page content for debugging', async ({ page, workViewPage }) => {
+  test('log page content for debugging', async ({ page, workViewPage }) => {
     // Wait for work view to be ready
     await workViewPage.waitForTaskList();
 

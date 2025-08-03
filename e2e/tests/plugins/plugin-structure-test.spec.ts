@@ -5,9 +5,7 @@ const { SIDENAV } = cssSelectors;
 const SETTINGS_BTN = `${SIDENAV} .tour-settingsMenuBtn`;
 
 test.describe.serial('Plugin Structure Test', () => {
-  // Skip in CI due to timing/environment issues
-  test.skip(!!process.env.CI, 'Skipping plugin structure tests in CI');
-  test.skip('check plugin card structure', async ({ page, workViewPage }) => {
+  test('check plugin card structure', async ({ page, workViewPage }) => {
     await workViewPage.waitForTaskList();
 
     // Navigate to plugin settings (implementing navigateToPluginSettings inline)

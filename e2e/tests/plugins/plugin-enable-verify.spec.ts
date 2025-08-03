@@ -5,12 +5,7 @@ const { SIDENAV } = cssSelectors;
 const SETTINGS_BTN = `${SIDENAV} .tour-settingsMenuBtn`;
 
 test.describe.serial('Plugin Enable Verify', () => {
-  // Skip in CI due to timing/environment issues
-  test.skip(!!process.env.CI, 'Skipping plugin enable verify tests in CI');
-  test.skip('enable API Test Plugin and verify menu entry', async ({
-    page,
-    workViewPage,
-  }) => {
+  test('enable API Test Plugin and verify menu entry', async ({ page, workViewPage }) => {
     await workViewPage.waitForTaskList();
 
     // Navigate to plugin settings
