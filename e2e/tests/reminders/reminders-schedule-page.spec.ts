@@ -143,11 +143,12 @@ test.describe('Reminders Schedule Page', () => {
     await scheduleTask(title2, scheduleTime2);
 
     // Verify both tasks have schedule indicators
-    const task1 = page.locator(TASK).filter({ hasText: title1 });
-    const task2 = page.locator(TASK).filter({ hasText: title2 });
+    // Use first() to avoid multiple element issues if there are duplicates
+    const task1 = page.locator(TASK).filter({ hasText: title1 }).first();
+    const task2 = page.locator(TASK).filter({ hasText: title2 }).first();
 
-    await expect(task1.locator(TASK_SCHEDULE_BTN)).toBeVisible();
-    await expect(task2.locator(TASK_SCHEDULE_BTN)).toBeVisible();
+    await expect(task1.locator(TASK_SCHEDULE_BTN).first()).toBeVisible();
+    await expect(task2.locator(TASK_SCHEDULE_BTN).first()).toBeVisible();
 
     // Navigate to scheduled page
     const scheduleRouteBtn = page.locator(SCHEDULE_ROUTE_BTN);
