@@ -14,7 +14,9 @@ const TAG_COUNT = '#tagCount';
 const REFRESH_STATS_BTN = 'button:has-text("Refresh Stats")';
 const LOG_ENTRY = '.log-entry';
 
-test.describe('Plugin Iframe', () => {
+// Use serial to avoid race conditions when enabling plugin across tests
+// TODO: Refactor to use test fixtures for plugin setup
+test.describe.serial('Plugin Iframe', () => {
   test.beforeEach(async ({ page, workViewPage }) => {
     test.setTimeout(30000); // Increase timeout for setup
 
