@@ -119,7 +119,7 @@ describe('TaskRepeatCfgService', () => {
 
   describe('getRepeatableTasksForExactDay$', () => {
     it('should return configs due for the specified day', (done) => {
-      const dayDate = new Date('2022-01-10').getTime();
+      const dayDate = new Date(2022, 0, 10).getTime();
       const mockConfigs = [mockTaskRepeatCfg];
 
       // Mock the selector to return our test data
@@ -442,9 +442,9 @@ describe('TaskRepeatCfgService', () => {
     });
 
     it('should return empty array when due date is in the future', async () => {
-      const futureDate = new Date('2025-01-01').toISOString();
+      const futureDate = new Date(2025, 0, 1).toISOString();
       const cfgFutureStart = { ...mockTaskRepeatCfg, startDate: futureDate };
-      const pastTargetDate = new Date('2022-01-01').getTime();
+      const pastTargetDate = new Date(2022, 0, 1).getTime();
       taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
 
       // Mock confirm to return false to prevent throwing
@@ -470,7 +470,7 @@ describe('TaskRepeatCfgService', () => {
 
   describe('getAllUnprocessedRepeatableTasks$', () => {
     it('should return configs including overdue', (done) => {
-      const dayDate = new Date('2022-01-10').getTime();
+      const dayDate = new Date(2022, 0, 10).getTime();
       const mockConfigs = [mockTaskRepeatCfg];
 
       // Mock the selector to return our test data
@@ -484,7 +484,7 @@ describe('TaskRepeatCfgService', () => {
     });
 
     it('should use first() operator', () => {
-      const dayDate = new Date('2022-01-10').getTime();
+      const dayDate = new Date(2022, 0, 10).getTime();
       spyOn(service['_store$'], 'select').and.returnValue({
         pipe: jasmine.createSpy('pipe').and.returnValue(of([])),
       } as any);

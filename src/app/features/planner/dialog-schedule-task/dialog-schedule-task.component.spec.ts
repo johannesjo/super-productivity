@@ -114,7 +114,7 @@ describe('DialogScheduleTaskComponent', () => {
   });
 
   it('should close dialog with form data when submit is clicked', async () => {
-    const testDate = new Date('2023-05-15');
+    const testDate = new Date(2023, 4, 15);
     component.selectedDate = testDate;
     await component.submit();
     expect(dialogRefSpy.close).toHaveBeenCalledWith(true);
@@ -122,7 +122,7 @@ describe('DialogScheduleTaskComponent', () => {
 
   describe('submit()', () => {
     it('should call taskService.scheduleTask with correct parameters when submit is called', async () => {
-      const testDate = new Date('2023-06-01');
+      const testDate = new Date(2023, 5, 1);
       const expectedDate = new Date(testDate);
       expectedDate.setHours(10, 0, 0, 0); // Set time to 10:00 AM
 
@@ -174,7 +174,7 @@ describe('DialogScheduleTaskComponent', () => {
     });
 
     it('should handle when scheduleTask throws (should not close dialog)', async () => {
-      const testDate = new Date('2023-12-01');
+      const testDate = new Date(2023, 11, 1);
       component.selectedDate = testDate;
       component.selectedTime = '14:00';
       component.selectedReminderCfgId = TaskReminderOptionId.AtStart;
@@ -200,7 +200,7 @@ describe('DialogScheduleTaskComponent', () => {
     });
 
     it('should close dialog with true when scheduling is successful', async () => {
-      const testDate = new Date('2024-01-01');
+      const testDate = new Date(2024, 0, 1);
       component.selectedDate = testDate;
       component.selectedTime = '15:00';
       component.selectedReminderCfgId = TaskReminderOptionId.AtStart;
@@ -222,7 +222,7 @@ describe('DialogScheduleTaskComponent', () => {
     });
 
     it('should not call snackService.open if scheduleTask fails', async () => {
-      const testDate = new Date('2024-02-01');
+      const testDate = new Date(2024, 1, 1);
       component.selectedDate = testDate;
       component.selectedTime = '16:00';
       component.selectedReminderCfgId = TaskReminderOptionId.AtStart;

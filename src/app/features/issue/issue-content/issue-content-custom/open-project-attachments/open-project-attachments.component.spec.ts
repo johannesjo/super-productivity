@@ -2,7 +2,7 @@ describe('OpenProjectAttachmentsComponent moment replacement', () => {
   describe('date time formatting for file names', () => {
     it('should format current date time as YYYYMMDD_HHmmss', () => {
       // Test the formatting pattern
-      const testDate = new Date('2023-10-15T14:30:45.123Z');
+      const testDate = new Date(2023, 9, 15, 14, 30, 45, 123);
       const pad = (num: number): string => String(num).padStart(2, '0');
       const year = testDate.getFullYear();
       const month = pad(testDate.getMonth() + 1);

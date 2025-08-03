@@ -406,7 +406,7 @@ describe('AddTasksForTomorrowService', () => {
         repeatCycle: 'WEEKLY',
         repeatEvery: 1,
         startDate: '2024-01-01', // Started months ago
-        lastTaskCreation: new Date('2024-01-01').getTime(), // Last created months ago
+        lastTaskCreation: new Date(2024, 0, 1).getTime(), // Last created months ago
       };
 
       taskRepeatCfgServiceMock.getAllUnprocessedRepeatableTasks$.and.returnValue(
@@ -513,7 +513,7 @@ describe('AddTasksForTomorrowService', () => {
       const taskWithTime: TaskCopy = {
         ...mockTaskWithDueTimeTomorrow,
         // eslint-disable-next-line no-mixed-operators
-        dueWithTime: new Date('2024-01-01').getTime() + 1000 * 60 * 60 * 14,
+        dueWithTime: new Date(2024, 0, 1).getTime() + 1000 * 60 * 60 * 14,
       };
       const taskWithoutDue: TaskCopy = {
         ...mockTaskWithDueDayTomorrow,
@@ -533,7 +533,7 @@ describe('AddTasksForTomorrowService', () => {
     });
 
     it('should place tasks with dueDay without time before tasks with dueWithTime on same day', () => {
-      const sameDay = new Date('2024-01-01');
+      const sameDay = new Date(2024, 0, 1);
       const taskWithDay: TaskCopy = {
         ...mockTaskWithDueDayTomorrow,
         dueDay: '2024-01-01',

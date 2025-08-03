@@ -8,20 +8,20 @@ import {
 describe('getDateRangeForWeek', () => {
   it('should return a valid range', () => {
     const result = getDateRangeForWeek(2020, 28);
-    expect(result.rangeStart).toEqual(rangeStartWithTime(new Date('2020-07-06')));
-    expect(result.rangeEnd).toEqual(rangeEndWithTime(new Date('2020-07-12')));
+    expect(result.rangeStart).toEqual(rangeStartWithTime(new Date(2020, 6, 6))); // July 6, 2020 local time
+    expect(result.rangeEnd).toEqual(rangeEndWithTime(new Date(2020, 6, 12))); // July 12, 2020 local time
   });
 
   it('should return a valid range for last week of the year', () => {
     const result = getDateRangeForWeek(2020, 53);
-    expect(result.rangeStart).toEqual(rangeStartWithTime(new Date('2020-12-28')));
-    expect(result.rangeEnd).toEqual(rangeEndWithTime(new Date('2021-01-03')));
+    expect(result.rangeStart).toEqual(rangeStartWithTime(new Date(2020, 11, 28))); // December 28, 2020 local time
+    expect(result.rangeEnd).toEqual(rangeEndWithTime(new Date(2021, 0, 3))); // January 3, 2021 local time
   });
 
   it('should return a valid value for first week of the year', () => {
     const result = getDateRangeForWeek(2021, 1);
-    expect(result.rangeStart).toEqual(rangeStartWithTime(new Date('2021-01-04')));
-    expect(result.rangeEnd).toEqual(rangeEndWithTime(new Date('2021-01-10')));
+    expect(result.rangeStart).toEqual(rangeStartWithTime(new Date(2021, 0, 4))); // January 4, 2021 local time
+    expect(result.rangeEnd).toEqual(rangeEndWithTime(new Date(2021, 0, 10))); // January 10, 2021 local time
   });
 
   describe('timezone behavior', () => {
