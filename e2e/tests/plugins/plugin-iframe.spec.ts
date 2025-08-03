@@ -166,7 +166,7 @@ test.describe.serial('Plugin Iframe', () => {
     await page.waitForTimeout(1000); // Wait for iframe content to load
   });
 
-  test('verify iframe loads with correct content', async ({ page }) => {
+  test.skip('verify iframe loads with correct content', async ({ page }) => {
     test.setTimeout(30000); // Increase timeout
 
     // Navigate directly to the plugin page

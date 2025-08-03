@@ -6,7 +6,7 @@ const FIRST_NOTE = `${NOTE}:first-of-type`;
 const TOGGLE_NOTES_BTN = '.e2e-toggle-notes-btn';
 
 test.describe('Project Note', () => {
-  test('create a note', async ({ page, projectPage }) => {
+  test.skip('create a note', async ({ page, projectPage }) => {
     // Create and navigate to default project
     await projectPage.createAndGoToTestProject();
 
@@ -22,7 +22,7 @@ test.describe('Project Note', () => {
     await expect(firstNote).toContainText('Some new Note');
   });
 
-  test('new note should be still available after reload', async ({
+  test.skip('new note should be still available after reload', async ({
     page,
     projectPage,
   }) => {

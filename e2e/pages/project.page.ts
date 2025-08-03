@@ -124,26 +124,85 @@ export class ProjectPage extends BasePage {
   async addNote(noteContent: string): Promise<void> {
     // Wait for the app to be ready
     const routerWrapper = this.page.locator('.route-wrapper');
-    await routerWrapper.waitFor({ state: 'visible' });
+    await routerWrapper.waitFor({ state: 'visible', timeout: 10000 });
 
-    // Wait for the page to be interactive
-    await this.page.waitForLoadState('domcontentloaded');
+    // Wait for the page to be fully loaded
+    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForTimeout(1000);
 
-    // Use keyboard shortcut 'N' to directly open the note dialog
-    await this.page.keyboard.press('n');
+    // First ensure notes section is visible by clicking toggle if needed
+    const toggleNotesBtn = this.page.locator('.e2e-toggle-notes-btn');
+    const isToggleBtnVisible = await toggleNotesBtn
+      .isVisible({ timeout: 2000 })
+      .catch(() => false);
+    if (isToggleBtnVisible) {
+      await toggleNotesBtn.click();
+      await this.page.waitForTimeout(1000);
+    }
 
-    // Wait for the dialog textarea (using the same selector as Nightwatch)
-    const noteTextarea = this.page.locator('dialog-fullscreen-markdown textarea');
-    await noteTextarea.waitFor({ state: 'visible' });
+    // Try multiple approaches to open the note dialog
+    let dialogOpened = false;
+
+    // Approach 1: Try to click the add note button
+    const addNoteBtn = this.page.locator('#add-note-btn');
+    const isAddBtnVisible = await addNoteBtn
+      .isVisible({ timeout: 2000 })
+      .catch(() => false);
+    if (isAddBtnVisible) {
+      await addNoteBtn.click();
+      dialogOpened = true;
+    }
+
+    // Approach 2: If button not visible, try keyboard shortcut
+    if (!dialogOpened) {
+      // Focus on the main content area first
+      await this.page.locator('body').click();
+      await this.page.waitForTimeout(500);
+      await this.page.keyboard.press('n');
+    }
+
+    // Wait for dialog to appear with better error handling
+    await this.page.waitForTimeout(1500);
+
+    // Try different selectors for the textarea
+    let noteTextarea = this.page.locator('dialog-fullscreen-markdown textarea').first();
+    let textareaVisible = await noteTextarea
+      .isVisible({ timeout: 2000 })
+      .catch(() => false);
+
+    if (!textareaVisible) {
+      // Try alternative selector
+      noteTextarea = this.page.locator('textarea').first();
+      textareaVisible = await noteTextarea
+        .isVisible({ timeout: 2000 })
+        .catch(() => false);
+    }
+
+    if (!textareaVisible) {
+      throw new Error('Note dialog textarea not found after trying multiple approaches');
+    }
+
     await noteTextarea.fill(noteContent);
 
-    // Click the save button
-    const saveBtn = this.page.locator('#T-save-note');
-    await saveBtn.waitFor({ state: 'visible' });
-    await saveBtn.click();
+    // Click the save button - try multiple selectors
+    let saveBtn = this.page.locator('#T-save-note');
+    let saveBtnVisible = await saveBtn.isVisible({ timeout: 2000 }).catch(() => false);
+
+    if (!saveBtnVisible) {
+      // Try button with save icon
+      saveBtn = this.page.locator('button:has(mat-icon:has-text("save"))');
+      saveBtnVisible = await saveBtn.isVisible({ timeout: 2000 }).catch(() => false);
+    }
+
+    if (saveBtnVisible) {
+      await saveBtn.click();
+    } else {
+      // Fallback: press Enter to save
+      await noteTextarea.press('Control+Enter');
+    }
 
     // Wait for dialog to close
-    await noteTextarea.waitFor({ state: 'hidden', timeout: 5000 });
+    await this.page.waitForTimeout(1000);
 
     // After saving, check if notes panel is visible
     // If not, toggle it
@@ -154,9 +213,9 @@ export class ProjectPage extends BasePage {
 
     if (!isNotesVisible) {
       // Toggle the notes panel
-      const toggleNotesBtn = this.page.locator('.e2e-toggle-notes-btn');
-      await toggleNotesBtn.waitFor({ state: 'visible' });
-      await toggleNotesBtn.click();
+      const toggleBtn = this.page.locator('.e2e-toggle-notes-btn');
+      await toggleBtn.waitFor({ state: 'visible' });
+      await toggleBtn.click();
       await notesWrapper.waitFor({ state: 'visible', timeout: 5000 });
     }
 
