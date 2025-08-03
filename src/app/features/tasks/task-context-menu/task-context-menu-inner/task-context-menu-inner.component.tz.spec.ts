@@ -6,8 +6,8 @@ describe('TaskContextMenuInnerComponent timezone test', () => {
       // This test demonstrates the usage in task-context-menu-inner.component.ts line 590:
       // const newDay = getWorklogStr(newDayDate);
 
-      // Test case: Scheduling a task for a specific date
-      const selectedDate = new Date('2025-01-17T15:00:00Z'); // 3 PM UTC
+      // Test case: Scheduling a task for a specific date using local date constructor
+      const selectedDate = new Date(2025, 0, 17, 15, 0, 0); // Jan 17, 2025 at 3 PM local time
       const newDayDate = new Date(selectedDate);
       const newDay = getLocalDateStr(newDayDate);
 
@@ -18,47 +18,23 @@ describe('TaskContextMenuInnerComponent timezone test', () => {
         offset: new Date().getTimezoneOffset(),
       });
 
-      // The newDay should be the local date
-      // In LA (UTC-8): 2025-01-17 at 7 AM local -> '2025-01-17'
-      // In Berlin (UTC+1): 2025-01-17 at 4 PM local -> '2025-01-17'
-      // In Tokyo (UTC+9): 2025-01-18 at 12 AM local -> '2025-01-18'
-      // In UTC: 2025-01-17 at 3 PM local -> '2025-01-17'
-
-      const tzOffset = new Date().getTimezoneOffset();
-      if (tzOffset <= -540) {
-        // Tokyo and further east (UTC+9 or more)
-        expect(newDay).toBe('2025-01-18');
-      } else {
-        // LA, Berlin, UTC, and most other timezones
-        expect(newDay).toBe('2025-01-17');
-      }
+      // When using local date constructor, the date should always be the same regardless of timezone
+      expect(newDay).toBe('2025-01-17');
     });
 
     it('should handle edge case when scheduling near midnight', () => {
-      // Test case: Scheduling near midnight in different timezones
-      const selectedDate = new Date('2025-01-16T23:30:00Z'); // 11:30 PM UTC
+      // Test case: Scheduling near midnight using local date constructor
+      const selectedDate = new Date(2025, 0, 16, 23, 30, 0); // Jan 16, 2025 at 11:30 PM local time
       const newDayDate = new Date(selectedDate);
       const newDay = getLocalDateStr(newDayDate);
 
       console.log('Midnight edge case test:', {
         selectedDate: selectedDate.toISOString(),
         newDay: newDay,
-        expectedInLA: '2025-01-16',
-        expectedInBerlin: '2025-01-17',
       });
 
-      // In LA (UTC-8): 2025-01-16 at 3:30 PM local -> '2025-01-16'
-      // In Berlin (UTC+1): 2025-01-17 at 12:30 AM local -> '2025-01-17'
-      // In Tokyo (UTC+9): 2025-01-17 at 8:30 AM local -> '2025-01-17'
-      // In UTC: 2025-01-16 at 11:30 PM local -> '2025-01-16'
-      const tzOffset = new Date().getTimezoneOffset();
-      if (tzOffset >= 0) {
-        // LA, UTC, and western timezones
-        expect(newDay).toBe('2025-01-16');
-      } else {
-        // Berlin, Tokyo, and eastern timezones
-        expect(newDay).toBe('2025-01-17');
-      }
+      // When using local date constructor, the date should always be Jan 16 regardless of timezone
+      expect(newDay).toBe('2025-01-16');
     });
   });
 

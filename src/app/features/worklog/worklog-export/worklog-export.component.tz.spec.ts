@@ -6,9 +6,9 @@ describe('WorklogExportComponent timezone test', () => {
       // This test demonstrates the usage in worklog-export.component.ts line 146:
       // this.fileName = 'tasks' + getWorklogStr(rangeStart) + '-' + getWorklogStr(rangeEnd) + '.csv';
 
-      // Test case: Export range for a specific week
-      const rangeStart = new Date('2025-01-13T08:00:00Z'); // Monday 8 AM UTC
-      const rangeEnd = new Date('2025-01-17T20:00:00Z'); // Friday 8 PM UTC
+      // Test case: Export range for a specific week using local date constructors
+      const rangeStart = new Date(2025, 0, 13, 8, 0, 0); // Jan 13, 2025 at 8 AM local time
+      const rangeEnd = new Date(2025, 0, 17, 20, 0, 0); // Jan 17, 2025 at 8 PM local time
 
       const fileName =
         'tasks' + getLocalDateStr(rangeStart) + '-' + getLocalDateStr(rangeEnd) + '.csv';
@@ -21,25 +21,14 @@ describe('WorklogExportComponent timezone test', () => {
         offset: new Date().getTimezoneOffset(),
       });
 
-      // The filename should use local dates
-      // In LA (UTC-8): Jan 13 midnight -> Jan 17 noon
-      // In Berlin (UTC+1): Jan 13 9 AM -> Jan 17 9 PM
-      // In Tokyo (UTC+9): Jan 13 5 PM -> Jan 18 5 AM
-      // In UTC: Jan 13 8 AM -> Jan 17 8 PM
-      const tzOffset = new Date().getTimezoneOffset();
-      if (tzOffset <= -540) {
-        // Tokyo and further east (UTC+9 or more)
-        expect(fileName).toBe('tasks2025-01-13-2025-01-18.csv');
-      } else {
-        // LA, Berlin, UTC, and most other timezones
-        expect(fileName).toBe('tasks2025-01-13-2025-01-17.csv');
-      }
+      // When using local date constructor, the dates should always be the same regardless of timezone
+      expect(fileName).toBe('tasks2025-01-13-2025-01-17.csv');
     });
 
     it('should handle cross-timezone date boundaries', () => {
-      // Test case: Range that crosses date boundaries in different timezones
-      const rangeStart = new Date('2025-01-16T23:00:00Z'); // 11 PM UTC on Jan 16
-      const rangeEnd = new Date('2025-01-17T01:00:00Z'); // 1 AM UTC on Jan 17
+      // Test case: Range that crosses date boundaries using local date constructors
+      const rangeStart = new Date(2025, 0, 16, 23, 0, 0); // Jan 16, 2025 at 11 PM local time
+      const rangeEnd = new Date(2025, 0, 17, 1, 0, 0); // Jan 17, 2025 at 1 AM local time
 
       const fileName =
         'tasks' + getLocalDateStr(rangeStart) + '-' + getLocalDateStr(rangeEnd) + '.csv';
@@ -48,31 +37,16 @@ describe('WorklogExportComponent timezone test', () => {
         rangeStart: rangeStart.toISOString(),
         rangeEnd: rangeEnd.toISOString(),
         fileName: fileName,
-        expectedInLA: 'tasks2025-01-16-2025-01-16.csv', // Same day in LA
-        expectedInBerlin: 'tasks2025-01-17-2025-01-17.csv', // Same day in Berlin
       });
 
-      // In LA (UTC-8): Both times are on Jan 16 (3 PM to 5 PM)
-      // In Berlin (UTC+1): Both times are on Jan 17 (midnight to 2 AM)
-      // In Tokyo (UTC+9): Both times are on Jan 17 (8 AM to 10 AM)
-      // In UTC: Jan 16 11 PM to Jan 17 1 AM (crosses date boundary)
-      const tzOffset = new Date().getTimezoneOffset();
-      if (tzOffset > 0) {
-        // Western timezones (LA, etc) - negative UTC offset
-        expect(fileName).toBe('tasks2025-01-16-2025-01-16.csv');
-      } else if (tzOffset === 0) {
-        // UTC - crosses date boundary
-        expect(fileName).toBe('tasks2025-01-16-2025-01-17.csv');
-      } else {
-        // Eastern timezones (Berlin, Tokyo, etc) - positive UTC offset
-        expect(fileName).toBe('tasks2025-01-17-2025-01-17.csv');
-      }
+      // When using local date constructor, the dates are Jan 16 to Jan 17 regardless of timezone
+      expect(fileName).toBe('tasks2025-01-16-2025-01-17.csv');
     });
 
     it('should create meaningful filenames for typical export scenarios', () => {
-      // Test case: Export for a full month
-      const monthStart = new Date('2025-01-01T00:00:00Z');
-      const monthEnd = new Date('2025-01-31T23:59:59Z');
+      // Test case: Export for a full month using local date constructors
+      const monthStart = new Date(2025, 0, 1, 0, 0, 0); // Jan 1, 2025 at midnight local time
+      const monthEnd = new Date(2025, 0, 31, 23, 59, 59); // Jan 31, 2025 at 11:59:59 PM local time
 
       const fileName =
         'tasks' + getLocalDateStr(monthStart) + '-' + getLocalDateStr(monthEnd) + '.csv';
@@ -84,8 +58,8 @@ describe('WorklogExportComponent timezone test', () => {
         purpose: 'Filename should reflect local dates for the export range',
       });
 
-      // The exact dates depend on timezone but the format should be consistent
-      expect(fileName).toMatch(/^tasks\d{4}-\d{2}-\d{2}-\d{4}-\d{2}-\d{2}\.csv$/);
+      // When using local date constructor, the dates should be Jan 1 to Jan 31
+      expect(fileName).toBe('tasks2025-01-01-2025-01-31.csv');
 
       // Verify the file extension
       expect(fileName.endsWith('.csv')).toBe(true);

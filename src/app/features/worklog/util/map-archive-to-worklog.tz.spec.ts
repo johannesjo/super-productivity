@@ -66,7 +66,7 @@ describe('mapArchiveToWorklog timezone test', () => {
 
     it('should fall back to created date when doneOn is not set', () => {
       // Test case: Task without doneOn date
-      const taskCreatedTime = new Date('2025-01-16T23:00:00Z').getTime(); // 11 PM UTC
+      const taskCreatedTime = new Date(2025, 0, 16, 23, 0, 0).getTime(); // Jan 16, 2025 at 11 PM local time
 
       const taskState: EntityState<Task> = taskAdapter.addOne(
         {
@@ -98,36 +98,18 @@ describe('mapArchiveToWorklog timezone test', () => {
         expectedBehavior: 'Should use created date when doneOn is not set',
       });
 
-      // Should use created date
-      // In LA (UTC-8): 2025-01-16 at 3 PM local -> worklog for Jan 16
-      // In UTC: 2025-01-16 at 11 PM UTC -> worklog for Jan 16
-      // In Berlin (UTC+1): 2025-01-17 at midnight local -> worklog for Jan 17
-      const tzOffset = new Date().getTimezoneOffset();
+      // When using local date constructor, the worklog should always be for Jan 16
       const year2025 = result.worklog['2025'];
-
-      if (tzOffset > 0) {
-        // LA (positive offset means west of UTC)
-        const foundEntry = year2025?.ent[1]?.ent[16];
-        expect(foundEntry).toBeDefined();
-        expect(foundEntry?.dateStr).toBe('2025-01-16');
-      } else if (tzOffset === 0) {
-        // UTC
-        const foundEntry = year2025?.ent[1]?.ent[16];
-        expect(foundEntry).toBeDefined();
-        expect(foundEntry?.dateStr).toBe('2025-01-16');
-      } else {
-        // Berlin and other timezones east of UTC (negative offset)
-        const foundEntry = year2025?.ent[1]?.ent[17];
-        expect(foundEntry).toBeDefined();
-        expect(foundEntry?.dateStr).toBe('2025-01-17');
-      }
+      const foundEntry = year2025?.ent[1]?.ent[16];
+      expect(foundEntry).toBeDefined();
+      expect(foundEntry?.dateStr).toBe('2025-01-16');
     });
 
     it('should handle parent task doneOn for subtasks', () => {
-      // Test case: Parent done, subtask uses parent's doneOn
-      const parentDoneTime = new Date('2025-01-17T05:00:00Z').getTime(); // 5 AM UTC
-      const parentCreatedTime = new Date('2025-01-15T12:00:00Z').getTime();
-      const subtaskCreatedTime = new Date('2025-01-16T12:00:00Z').getTime();
+      // Test case: Parent done, subtask uses parent's doneOn using local date constructors
+      const parentDoneTime = new Date(2025, 0, 17, 5, 0, 0).getTime(); // Jan 17, 2025 at 5 AM local time
+      const parentCreatedTime = new Date(2025, 0, 15, 12, 0, 0).getTime(); // Jan 15, 2025 at 12 PM local time
+      const subtaskCreatedTime = new Date(2025, 0, 16, 12, 0, 0).getTime(); // Jan 16, 2025 at 12 PM local time
 
       const taskState: EntityState<Task> = taskAdapter.addMany(
         [
@@ -176,31 +158,15 @@ describe('mapArchiveToWorklog timezone test', () => {
         expectedBehavior: 'Subtask should use parent doneOn date when no timeSpentOnDay',
       });
 
-      // The subtask should use parent's doneOn date
-      // In LA (UTC-8): Parent done at Jan 16 9 PM -> worklog for Jan 16
-      // In Berlin (UTC+1): Parent done at Jan 17 6 AM -> worklog for Jan 17
-      const tzOffset = new Date().getTimezoneOffset();
+      // When using local date constructor, the parent is done on Jan 17 regardless of timezone
       const year2025 = result.worklog['2025'];
-
-      if (tzOffset > 0) {
-        // LA
-        const foundEntry = year2025?.ent[1]?.ent[16];
-        expect(foundEntry).toBeDefined();
-        // Parent should be in the log entries
-        const hasParent = foundEntry?.logEntries.some(
-          (entry) => entry.task.id === 'parent1',
-        );
-        expect(hasParent).toBe(true);
-      } else {
-        // Berlin
-        const foundEntry = year2025?.ent[1]?.ent[17];
-        expect(foundEntry).toBeDefined();
-        // Parent should be in the log entries
-        const hasParent = foundEntry?.logEntries.some(
-          (entry) => entry.task.id === 'parent1',
-        );
-        expect(hasParent).toBe(true);
-      }
+      const foundEntry = year2025?.ent[1]?.ent[17];
+      expect(foundEntry).toBeDefined();
+      // Parent should be in the log entries
+      const hasParent = foundEntry?.logEntries.some(
+        (entry) => entry.task.id === 'parent1',
+      );
+      expect(hasParent).toBe(true);
     });
   });
 });

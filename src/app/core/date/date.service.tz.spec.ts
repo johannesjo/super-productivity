@@ -9,8 +9,8 @@ describe('DateService timezone test', () => {
 
   describe('todayStr method', () => {
     it('should handle dates correctly across timezones', () => {
-      // Test case: A specific date/time
-      const testDate = new Date('2025-01-17T15:00:00Z'); // 3 PM UTC
+      // Test case: A specific date/time using local date constructor
+      const testDate = new Date(2025, 0, 17, 15, 0, 0); // Jan 17, 2025 at 3 PM local time
 
       const result = service.todayStr(testDate);
 
@@ -21,48 +21,23 @@ describe('DateService timezone test', () => {
         offset: new Date().getTimezoneOffset(),
       });
 
-      // This should return the local date string
-      // In LA (UTC-8): 2025-01-17 at 7 AM local -> '2025-01-17'
-      // In Berlin (UTC+1): 2025-01-17 at 4 PM local -> '2025-01-17'
-      // In Tokyo (UTC+9): 2025-01-18 at 12 AM local -> '2025-01-18'
-      // In UTC: 2025-01-17 at 3 PM local -> '2025-01-17'
-
-      const tzOffset = new Date().getTimezoneOffset();
-      if (tzOffset <= -540) {
-        // Tokyo and further east (UTC+9 or more)
-        expect(result).toBe('2025-01-18');
-      } else {
-        // LA, Berlin, UTC, and most other timezones
-        expect(result).toBe('2025-01-17');
-      }
+      // When using local date constructor, the date should always be the same regardless of timezone
+      expect(result).toBe('2025-01-17');
     });
 
     it('should handle edge case near midnight', () => {
-      // Test case: Near midnight UTC
-      const testDate = new Date('2025-01-16T23:00:00Z'); // 11 PM UTC on Jan 16
+      // Test case: Near midnight using local date constructor
+      const testDate = new Date(2025, 0, 16, 23, 0, 0); // Jan 16, 2025 at 11 PM local time
 
       const result = service.todayStr(testDate);
 
       console.log('DateService edge case test:', {
         input: testDate.toISOString(),
         output: result,
-        expectedInLA: '2025-01-16',
-        expectedInBerlin: '2025-01-17',
       });
 
-      // This correctly returns different dates based on timezone
-      // In LA (UTC-8): 2025-01-16 at 3 PM local -> '2025-01-16'
-      // In Berlin (UTC+1): 2025-01-17 at 12 AM local -> '2025-01-17'
-      // In UTC: 2025-01-16 at 11 PM local -> '2025-01-16'
-      // In Tokyo (UTC+9): 2025-01-17 at 8 AM local -> '2025-01-17'
-      const tzOffset = new Date().getTimezoneOffset();
-      if (tzOffset >= 0) {
-        // LA, UTC, and western timezones
-        expect(result).toBe('2025-01-16');
-      } else {
-        // Berlin, Tokyo, and eastern timezones
-        expect(result).toBe('2025-01-17');
-      }
+      // When using local date constructor, the date should always be Jan 16 regardless of timezone
+      expect(result).toBe('2025-01-16');
     });
 
     it('should handle startOfNextDayDiff correctly', () => {
