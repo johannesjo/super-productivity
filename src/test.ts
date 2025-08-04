@@ -6,13 +6,8 @@ import {
   platformBrowserDynamicTesting,
 } from '@angular/platform-browser-dynamic/testing';
 import { provideExperimentalZonelessChangeDetection } from '@angular/core';
-import { ElectronAPI } from '../electron/electronAPI';
-
-declare global {
-  interface Window {
-    ea: ElectronAPI;
-  }
-}
+// Import type definitions for window.ea
+import './app/core/window-ea.d';
 
 beforeAll(() => {
   jasmine.DEFAULT_TIMEOUT_INTERVAL = 2000;

@@ -11,7 +11,7 @@ import { environment } from './environments/environment';
 import { IS_ELECTRON, LanguageCode } from './app/app.constants';
 import { IS_ANDROID_WEB_VIEW } from './app/util/is-android-web-view';
 import { androidInterface } from './app/features/android/android-interface';
-import { ElectronAPI } from '../electron/electronAPI.d';
+import './app/core/window-ea.d';
 import { App as CapacitorApp } from '@capacitor/app';
 import { GlobalErrorHandler } from './app/core/error-handler/global-error-handler.class';
 import {
@@ -77,11 +77,7 @@ if (environment.production || environment.stage) {
   enableProdMode();
 }
 
-declare global {
-  interface Window {
-    ea: ElectronAPI;
-  }
-}
+// Window.ea declaration is in src/app/core/window-ea.d.ts
 
 const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
   new TranslateHttpLoader(http, './assets/i18n/', '.json');
