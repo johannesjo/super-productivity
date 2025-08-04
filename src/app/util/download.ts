@@ -2,7 +2,7 @@ import { saveAs } from 'file-saver';
 import { Directory, Encoding, Filesystem, WriteFileResult } from '@capacitor/filesystem';
 import { IS_ANDROID_WEB_VIEW } from './is-android-web-view';
 import { Log } from '../core/log';
-import '../core/window-ea';
+import '../core/window-ea.d';
 
 const isRunningInSnap = (): boolean => {
   return !!window.ea?.isSnap?.();
