@@ -67,7 +67,7 @@ export class Dropbox implements SyncProviderServiceInterface<SyncProviderId.Drop
   }
 
   async setPrivateCfg(privateCfg: DropboxPrivateCfg): Promise<void> {
-    await this.privateCfg.save(privateCfg);
+    await this.privateCfg.setComplete(privateCfg);
   }
 
   /**

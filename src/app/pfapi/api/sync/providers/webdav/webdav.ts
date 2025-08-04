@@ -35,7 +35,7 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
   }
 
   async setPrivateCfg(privateCfg: WebdavPrivateCfg): Promise<void> {
-    await this.privateCfg.save(privateCfg);
+    await this.privateCfg.setComplete(privateCfg);
   }
 
   async getFileRev(

@@ -246,7 +246,7 @@ export class DropboxApi {
       const data = (await response.json()) as TokenResponse;
       PFLog.normal('Dropbox: Refresh access token Response', data);
 
-      await this._parent.privateCfg.save({
+      await this._parent.privateCfg.updatePartial({
         accessToken: data.access_token,
         refreshToken: data.refresh_token || privateCfg?.refreshToken,
       });

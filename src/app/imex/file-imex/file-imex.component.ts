@@ -194,11 +194,13 @@ export class FileImexComponent implements OnInit {
 
   async downloadBackup(): Promise<void> {
     const data = await this._pfapiService.pf.loadCompleteBackup();
-    download('super-productivity-backup.json', JSON.stringify(data));
-    if (IS_ANDROID_WEB_VIEW) {
+    const result = await download('super-productivity-backup.json', JSON.stringify(data));
+    if (IS_ANDROID_WEB_VIEW || result.isSnap) {
       this._snackService.open({
         type: 'SUCCESS',
-        msg: T.FILE_IMEX.S_BACKUP_DOWNLOADED,
+        msg: result.path
+          ? `Backup saved to: ${result.path}`
+          : T.FILE_IMEX.S_BACKUP_DOWNLOADED,
       });
     }
     // download('super-productivity-backup.json', privacyExport(data));
@@ -206,11 +208,13 @@ export class FileImexComponent implements OnInit {
 
   async privacyAppDataDownload(): Promise<void> {
     const data = await this._pfapiService.pf.loadCompleteBackup();
-    download('super-productivity-backup.json', privacyExport(data));
-    if (IS_ANDROID_WEB_VIEW) {
+    const result = await download('super-productivity-backup.json', privacyExport(data));
+    if (IS_ANDROID_WEB_VIEW || result.isSnap) {
       this._snackService.open({
         type: 'SUCCESS',
-        msg: T.FILE_IMEX.S_BACKUP_DOWNLOADED,
+        msg: result.path
+          ? `Backup saved to: ${result.path}`
+          : T.FILE_IMEX.S_BACKUP_DOWNLOADED,
       });
     }
   }
