@@ -51,19 +51,22 @@ test.describe('Reminders View Task', () => {
 
     // Wait for dialog
     await page.waitForSelector(DIALOG_CONTAINER, { state: 'visible' });
-    await page.waitForTimeout(100);
+    await page.locator(DIALOG_CONTAINER).waitFor({ state: 'visible' });
+    await page.waitForTimeout(50); // Small delay for dialog animation
 
     // Set time
     await page.waitForSelector(TIME_INP, { state: 'visible' });
-    await page.waitForTimeout(150);
+    await page.locator(TIME_INP).waitFor({ state: 'visible' });
+    await page.waitForTimeout(50); // Small delay for UI settling
 
     // Focus and set time value
     await page.click(TIME_INP);
-    await page.waitForTimeout(150);
+    await page.locator(TIME_INP).focus();
+    await page.waitForTimeout(50); // Small delay for focus
 
     // Clear and set value
     await page.fill(TIME_INP, '');
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(50); // Small delay for clear
 
     // Set the time value
     await page.evaluate(
@@ -78,15 +81,17 @@ test.describe('Reminders View Task', () => {
       { selector: TIME_INP, value: timeValue },
     );
 
-    await page.waitForTimeout(200);
+    // Wait for value to be updated in the input
+    await page.locator(TIME_INP).waitFor({ state: 'visible' });
+    await page.waitForTimeout(50); // Small delay for value update
 
     // Also set value normally
     await page.fill(TIME_INP, timeValue);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(50); // Small delay for value setting
 
     // Tab to commit value
     await page.keyboard.press('Tab');
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(50); // Small delay for tab action
 
     // Submit dialog
     await page.waitForSelector(DIALOG_SUBMIT, { state: 'visible' });

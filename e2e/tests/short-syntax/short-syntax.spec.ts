@@ -11,12 +11,15 @@ test.describe('Short Syntax', () => {
     // Add a task with project short syntax
     await workViewPage.addTask('0 test task koko +i');
 
+    // Wait a moment for the task to be processed
+    await page.waitForTimeout(500);
+
     // Verify task is visible
     const task = page.locator('task').first();
-    await expect(task).toBeVisible();
+    await expect(task).toBeVisible({ timeout: 10000 });
 
     // Verify the task has the Inbox tag
     const taskTags = task.locator('tag');
-    await expect(taskTags).toContainText('Inbox');
+    await expect(taskTags).toContainText('Inbox', { timeout: 5000 });
   });
 });

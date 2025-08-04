@@ -33,11 +33,22 @@ export abstract class BasePage {
     await inputEl.clear();
     await inputEl.fill(prefixedTaskName);
 
+    // Store the initial count BEFORE submitting
+    const initialCount = await this.page.locator('task').count();
+
     const submitBtn = this.page.locator('.e2e-add-task-submit');
     await submitBtn.waitFor({ state: 'visible' });
     await submitBtn.click();
-    // wait two frames
-    await this.page.waitForTimeout(120);
+
+    // Wait for task count to increase
+    await this.page.waitForFunction(
+      (expectedCount) => document.querySelectorAll('task').length > expectedCount,
+      initialCount,
+      { timeout: 10000 },
+    );
+
+    // Small delay to ensure task is fully rendered
+    await this.page.waitForTimeout(100);
 
     if (!skipClose) {
       // Only click backdrop once if it's visible

@@ -70,7 +70,9 @@ export const test = base.extend<TestFixtures>({
         await page.waitForSelector(selector);
         await page.waitForTimeout(100);
       } else {
-        await page.waitForTimeout(500);
+        // Wait for the main app container to be stable
+        await page.locator('.route-wrapper').waitFor({ state: 'visible' });
+        await page.waitForTimeout(200);
       }
     };
     await use(waitForNav);

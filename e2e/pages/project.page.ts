@@ -128,7 +128,9 @@ export class ProjectPage extends BasePage {
 
     // Wait for the page to be fully loaded
     await this.page.waitForLoadState('networkidle');
-    await this.page.waitForTimeout(1000);
+    // Wait for project view to be ready
+    await this.page.locator('.page-project').waitFor({ state: 'visible' });
+    await this.page.waitForTimeout(100);
 
     // First ensure notes section is visible by clicking toggle if needed
     const toggleNotesBtn = this.page.locator('.e2e-toggle-notes-btn');
@@ -137,7 +139,8 @@ export class ProjectPage extends BasePage {
       .catch(() => false);
     if (isToggleBtnVisible) {
       await toggleNotesBtn.click();
-      await this.page.waitForTimeout(1000);
+      // Wait for notes section to appear after toggle
+      await this.page.locator('notes').waitFor({ state: 'visible', timeout: 5000 });
     }
 
     // Try multiple approaches to open the note dialog
@@ -162,7 +165,10 @@ export class ProjectPage extends BasePage {
     }
 
     // Wait for dialog to appear with better error handling
-    await this.page.waitForTimeout(1500);
+    await this.page.locator('dialog-fullscreen-markdown, mat-dialog-container').waitFor({
+      state: 'visible',
+      timeout: 5000,
+    });
 
     // Try different selectors for the textarea
     let noteTextarea = this.page.locator('dialog-fullscreen-markdown textarea').first();
@@ -202,7 +208,10 @@ export class ProjectPage extends BasePage {
     }
 
     // Wait for dialog to close
-    await this.page.waitForTimeout(1000);
+    await this.page.locator('dialog-fullscreen-markdown, mat-dialog-container').waitFor({
+      state: 'hidden',
+      timeout: 5000,
+    });
 
     // After saving, check if notes panel is visible
     // If not, toggle it

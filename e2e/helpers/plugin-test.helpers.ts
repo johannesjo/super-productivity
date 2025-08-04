@@ -18,7 +18,10 @@ export const waitForPluginAssets = async (
     retryDelay = 3000;
     console.log('[Plugin Test] CI environment detected, using extended timeouts');
     // Wait for server to be fully ready in CI
-    await page.waitForTimeout(10000);
+    await page.waitForLoadState('networkidle');
+    await page.locator('app-root').waitFor({ state: 'visible', timeout: 15000 });
+    // Small delay for UI to stabilize
+    await page.waitForTimeout(200);
   }
 
   const baseUrl = page.url().split('#')[0];
@@ -70,6 +73,7 @@ export const waitForPluginAssets = async (
     }
 
     if (i < maxRetries - 1) {
+      // Wait before retry - network request, so timeout is appropriate here
       await page.waitForTimeout(retryDelay);
     }
   }
