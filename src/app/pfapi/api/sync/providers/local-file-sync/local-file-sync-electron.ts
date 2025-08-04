@@ -21,7 +21,7 @@ export class LocalFileSyncElectron extends LocalFileSyncBase {
   }
 
   async setPrivateCfg(privateCfg: LocalFileSyncPrivateCfg): Promise<void> {
-    await this.privateCfg.save(privateCfg);
+    await this.privateCfg.setComplete(privateCfg);
   }
 
   async getFilePath(targetPath: string): Promise<string> {
@@ -88,7 +88,7 @@ export class LocalFileSyncElectron extends LocalFileSyncBase {
     try {
       const dir = await (window as any).ea.pickDirectory();
       if (dir) {
-        await this.privateCfg.save({ syncFolderPath: dir });
+        await this.privateCfg.updatePartial({ syncFolderPath: dir });
       }
       return dir;
     } catch (e) {

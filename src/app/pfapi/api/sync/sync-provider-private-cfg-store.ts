@@ -54,14 +54,41 @@ export class SyncProviderPrivateCfgStore<PID extends SyncProviderId> {
   }
 
   /**
-   * Saves the provider's private configuration
-   * @param privateCfg Configuration to save
+   * Sets the complete provider's private configuration
+   * Use this only for initial setup or complete replacement
+   * For updates, use updatePartial() instead
+   * @param privateCfg Complete configuration to set
    * @returns Promise resolving after save completes
    * @throws Error if database save operation fails
    */
-  async save(privateCfg: PrivateCfgByProviderId<PID>): Promise<unknown> {
+  async setComplete(privateCfg: PrivateCfgByProviderId<PID>): Promise<unknown> {
+    return this._save(privateCfg);
+  }
+
+  /**
+   * Updates the provider's private configuration with partial data
+   * Safely merges updates with existing configuration to prevent data loss
+   * @param updates Partial configuration updates to apply
+   * @returns Promise resolving after save completes
+   * @throws Error if no existing configuration found or save fails
+   */
+  async updatePartial(updates: Partial<PrivateCfgByProviderId<PID>>): Promise<unknown> {
+    const existing = await this.load();
+    if (!existing) {
+      throw new Error(
+        `Cannot update private config for ${this._providerId}: no existing config found`,
+      );
+    }
+    return this._save({ ...existing, ...updates });
+  }
+
+  /**
+   * Internal method to save configuration
+   * @private
+   */
+  private async _save(privateCfg: PrivateCfgByProviderId<PID>): Promise<unknown> {
     const key = this._providerId;
-    PFLog.normal(`${SyncProviderPrivateCfgStore.L}.${this.save.name}()`, key, privateCfg);
+    PFLog.normal(`${SyncProviderPrivateCfgStore.L}._save()`, key, privateCfg);
 
     this._privateCfgInMemory = privateCfg;
 
