@@ -54,11 +54,7 @@ jobs:
 
       - name: Test E2E
         run: npm run e2e
-      - name: Upload performance metrics as an artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: nightwatch-performance-metrics
-          path: perf-metrics*.json
+
       - name: 'Upload E2E results on failure'
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4
