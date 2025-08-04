@@ -65,6 +65,11 @@ export interface ElectronAPI {
 
   openExternalUrl(url: string): void;
 
+  saveFileDialog(
+    filename: string,
+    data: string,
+  ): Promise<{ success: boolean; path?: string }>;
+
   isLinux(): boolean;
 
   isMacOS(): boolean;

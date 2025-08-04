@@ -54,6 +54,23 @@ export const initIpcInterfaces = (): void => {
   ipcMain.on(IPC.OPEN_PATH, (ev, path: string) => shell.openPath(path));
   ipcMain.on(IPC.OPEN_EXTERNAL, (ev, url: string) => shell.openExternal(url));
 
+  ipcMain.handle(IPC.SAVE_FILE_DIALOG, async (ev, { filename, data }) => {
+    const result = await dialog.showSaveDialog(getWin(), {
+      defaultPath: filename,
+      filters: [
+        { name: 'JSON Files', extensions: ['json'] },
+        { name: 'All Files', extensions: ['*'] },
+      ],
+    });
+
+    if (!result.canceled && result.filePath) {
+      const fs = await import('fs');
+      await fs.promises.writeFile(result.filePath, data, 'utf-8');
+      return { success: true, path: result.filePath };
+    }
+    return { success: false };
+  });
+
   ipcMain.on(IPC.LOCK_SCREEN, () => {
     if ((app as any).isLocked) {
       return;
