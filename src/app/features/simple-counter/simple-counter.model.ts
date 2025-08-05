@@ -32,8 +32,6 @@ export interface SimpleCounterCopy extends SimpleCounterCfgFields {
 
 export type SimpleCounter = Readonly<SimpleCounterCopy>;
 
-// just an empty dummy actually
-// todo remove
 export type SimpleCounterConfig = Readonly<{
   counters: SimpleCounter[];
 }>;

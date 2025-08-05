@@ -314,7 +314,7 @@ export class GitlabApiService {
     const req = new HttpRequest(p.method, p.url, ...allArgs);
 
     return this._http.request(req).pipe(
-      // TODO remove type: 0 @see https://brianflove.com/2018/09/03/angular-http-client-observe-response/
+      // Filter out HttpEventType.Sent (type: 0) events to only process actual responses
       filter((res) => !(res === Object(res) && res.type === 0)),
       catchError((err) =>
         handleIssueProviderHttpError$<HttpEvent<unknown>>(

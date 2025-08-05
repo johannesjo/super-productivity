@@ -26,7 +26,6 @@ import {
   provideHttpClient,
   withInterceptorsFromDi,
 } from '@angular/common/http';
-import { DatePipe } from '@angular/common';
 import { MarkdownModule, MARKED_OPTIONS, provideMarkdown } from 'ngx-markdown';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { FeatureStoresModule } from './app/root-store/feature-stores.module';
@@ -65,7 +64,6 @@ import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { AppComponent } from './app/app.component';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
-import { ShortTime2Pipe } from './app/ui/pipes/short-time2.pipe';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { BackgroundTask } from '@capawesome/capacitor-background-task';
 import { promiseTimeout } from './app/util/promise-timeout';
@@ -169,9 +167,6 @@ bootstrapApplication(AppComponent, {
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     { provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig },
     provideHttpClient(withInterceptorsFromDi()),
-    // TODO check if these can be removed
-    DatePipe,
-    ShortTime2Pipe,
     provideCharts(withDefaultRegisterables()),
     provideMarkdown(),
     {

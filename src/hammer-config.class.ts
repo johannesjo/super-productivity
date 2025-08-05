@@ -1,6 +1,6 @@
 import { HammerGestureConfig } from '@angular/platform-browser';
 import { Injectable } from '@angular/core';
-// TODO remove once https://github.com/angular/angular/issues/37907 is resolved
+// Required for custom touch gestures (swipe, pan) to work
 import 'hammerjs';
 
 const DIRECTION_LEFT = 2;
