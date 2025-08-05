@@ -2,7 +2,7 @@ import { saveAs } from 'file-saver';
 import { Directory, Encoding, Filesystem, WriteFileResult } from '@capacitor/filesystem';
 import { IS_ANDROID_WEB_VIEW } from './is-android-web-view';
 import { Log } from '../core/log';
-import '../core/window-ea.d';
+// Type definitions for window.ea are in ../core/window-ea.d.ts
 
 const isRunningInSnap = (): boolean => {
   return !!window.ea?.isSnap?.();

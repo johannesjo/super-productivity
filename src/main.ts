@@ -11,7 +11,7 @@ import { environment } from './environments/environment';
 import { IS_ELECTRON, LanguageCode } from './app/app.constants';
 import { IS_ANDROID_WEB_VIEW } from './app/util/is-android-web-view';
 import { androidInterface } from './app/features/android/android-interface';
-import './app/core/window-ea.d';
+// Type definitions for window.ea are in ./app/core/window-ea.d.ts
 import { App as CapacitorApp } from '@capacitor/app';
 import { GlobalErrorHandler } from './app/core/error-handler/global-error-handler.class';
 import {
