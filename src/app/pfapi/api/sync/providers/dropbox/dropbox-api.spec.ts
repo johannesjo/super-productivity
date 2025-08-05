@@ -23,13 +23,9 @@ describe('DropboxApi', () => {
 
     dropboxApi = new DropboxApi('test-app-key', mockDropbox);
 
-    // Check if fetch is already a spy before creating a new one
-    if (jasmine.isSpy(window.fetch)) {
-      fetchSpy = window.fetch as jasmine.Spy;
-      fetchSpy.calls.reset();
-    } else {
-      fetchSpy = spyOn(window, 'fetch');
-    }
+    // Mock fetch on globalThis for test environment
+    fetchSpy = jasmine.createSpy('fetch');
+    (globalThis as any).fetch = fetchSpy;
   });
 
   afterEach(() => {
