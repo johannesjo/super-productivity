@@ -1,9 +1,9 @@
-import { test, expect } from '../../fixtures/test.fixture';
+import { expect, test } from '../../fixtures/test.fixture';
 import { cssSelectors } from '../../constants/selectors';
 import {
-  waitForPluginAssets,
-  waitForPluginSystemInit,
   getCITimeoutMultiplier,
+  waitForPluginAssets,
+  waitForPluginManagementInit,
 } from '../../helpers/plugin-test.helpers';
 
 const { SIDENAV } = cssSelectors;
@@ -31,11 +31,7 @@ test.describe('Enable Plugin Test', () => {
 
     await workViewPage.waitForTaskList();
 
-    // Wait for plugin system to initialize
-    const pluginSystemReady = await waitForPluginSystemInit(page);
-    if (!pluginSystemReady) {
-      console.warn('[Plugin Test] Plugin system may not be fully initialized');
-    }
+    await waitForPluginManagementInit(page);
 
     // Navigate to plugin settings
     await page.click(SETTINGS_BTN);

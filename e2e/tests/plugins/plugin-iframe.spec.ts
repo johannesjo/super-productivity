@@ -1,12 +1,12 @@
-import { test, expect } from '../../fixtures/test.fixture';
+import { expect, test } from '../../fixtures/test.fixture';
 import { cssSelectors } from '../../constants/selectors';
 import {
-  waitForPluginAssets,
-  waitForPluginSystemInit,
   enablePluginWithVerification,
-  waitForPluginInMenu,
-  logPluginState,
   getCITimeoutMultiplier,
+  logPluginState,
+  waitForPluginAssets,
+  waitForPluginInMenu,
+  waitForPluginManagementInit,
 } from '../../helpers/plugin-test.helpers';
 
 const { SIDENAV } = cssSelectors;
@@ -26,8 +26,6 @@ test.describe.serial('Plugin Iframe', () => {
     const timeoutMultiplier = getCITimeoutMultiplier();
     test.setTimeout(60000 * timeoutMultiplier);
 
-    console.log('[Plugin Test] Starting test setup...');
-
     // First, ensure plugin assets are available
     const assetsAvailable = await waitForPluginAssets(page);
     if (!assetsAvailable) {
@@ -40,11 +38,7 @@ test.describe.serial('Plugin Iframe', () => {
 
     await workViewPage.waitForTaskList();
 
-    // Wait for plugin system to initialize
-    const pluginSystemReady = await waitForPluginSystemInit(page);
-    if (!pluginSystemReady) {
-      console.warn('[Plugin Test] Plugin system may not be fully initialized');
-    }
+    await waitForPluginManagementInit(page);
 
     // Navigate to settings
     const settingsBtn = page.locator(SETTINGS_BTN);
@@ -117,8 +111,6 @@ test.describe.serial('Plugin Iframe', () => {
         await tourDialog.waitFor({ state: 'hidden' });
       }
     }
-
-    console.log('[Plugin Test] Setup completed successfully');
   });
 
   test('open plugin iframe view', async ({ page }) => {

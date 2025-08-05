@@ -2,7 +2,7 @@ import { test, expect } from '../../fixtures/test.fixture';
 import { cssSelectors } from '../../constants/selectors';
 import {
   waitForPluginAssets,
-  waitForPluginSystemInit,
+  waitForPluginManagementInit,
   getCITimeoutMultiplier,
 } from '../../helpers/plugin-test.helpers';
 
@@ -13,8 +13,6 @@ test.describe.serial('Plugin Structure Test', () => {
   test('check plugin card structure', async ({ page, workViewPage }) => {
     const timeoutMultiplier = getCITimeoutMultiplier();
     test.setTimeout(60000 * timeoutMultiplier);
-
-    console.log('[Plugin Test] Starting plugin structure test...');
 
     // First, ensure plugin assets are available
     const assetsAvailable = await waitForPluginAssets(page);
@@ -28,11 +26,7 @@ test.describe.serial('Plugin Structure Test', () => {
 
     await workViewPage.waitForTaskList();
 
-    // Wait for plugin system to initialize
-    const pluginSystemReady = await waitForPluginSystemInit(page);
-    if (!pluginSystemReady) {
-      console.warn('[Plugin Test] Plugin system may not be fully initialized');
-    }
+    await waitForPluginManagementInit(page);
 
     // Navigate to plugin settings (implementing navigateToPluginSettings inline)
     await page.click(SETTINGS_BTN);
@@ -81,7 +75,7 @@ test.describe.serial('Plugin Structure Test', () => {
     await expect(page.locator('plugin-management')).toBeVisible({ timeout: 5000 });
 
     // Check plugin card structure
-    const result = await page.evaluate(() => {
+    await page.evaluate(() => {
       const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
       const apiTestCard = cards.find((card) => {
         const title = card.querySelector('mat-card-title')?.textContent || '';
@@ -124,7 +118,5 @@ test.describe.serial('Plugin Structure Test', () => {
         })),
       };
     });
-
-    console.log('Plugin card structure:', JSON.stringify(result, null, 2));
   });
 });

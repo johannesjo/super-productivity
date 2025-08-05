@@ -2,7 +2,7 @@ import { test, expect } from '../../fixtures/test.fixture';
 import { cssSelectors } from '../../constants/selectors';
 import {
   waitForPluginAssets,
-  waitForPluginSystemInit,
+  waitForPluginManagementInit,
   getCITimeoutMultiplier,
 } from '../../helpers/plugin-test.helpers';
 
@@ -20,8 +20,6 @@ test.describe.serial('Plugin Loading', () => {
     const timeoutMultiplier = getCITimeoutMultiplier();
     test.setTimeout(60000 * timeoutMultiplier);
 
-    console.log('[Plugin Test] Starting full plugin loading lifecycle test...');
-
     // First, ensure plugin assets are available
     const assetsAvailable = await waitForPluginAssets(page);
     if (!assetsAvailable) {
@@ -34,11 +32,7 @@ test.describe.serial('Plugin Loading', () => {
 
     await workViewPage.waitForTaskList();
 
-    // Wait for plugin system to initialize
-    const pluginSystemReady = await waitForPluginSystemInit(page);
-    if (!pluginSystemReady) {
-      console.warn('[Plugin Test] Plugin system may not be fully initialized');
-    }
+    await waitForPluginManagementInit(page);
 
     // Enable API Test Plugin first (implementing enableTestPlugin inline)
     await page.click(SETTINGS_BTN);
@@ -102,7 +96,6 @@ test.describe.serial('Plugin Loading', () => {
       return { enabled: false, found: false };
     }, 'API Test Plugin');
 
-    console.log(`Plugin "API Test Plugin" enable state:`, enableResult);
     expect(enableResult.found).toBe(true);
 
     await page.waitForTimeout(2000); // Wait for plugin to initialize
@@ -124,7 +117,6 @@ test.describe.serial('Plugin Loading', () => {
       };
     });
 
-    console.log('Plugin cards found:', pluginCardsResult);
     expect(pluginCardsResult.pluginCardsCount).toBeGreaterThanOrEqual(1);
     expect(pluginCardsResult.pluginTitles).toContain('API Test Plugin');
 
@@ -225,7 +217,7 @@ test.describe.serial('Plugin Loading', () => {
     await expect(page.locator(PLUGIN_ITEM).first()).toBeVisible();
 
     // Find the toggle for API Test Plugin and disable it
-    const disableResult = await page.evaluate(() => {
+    await page.evaluate(() => {
       const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
       const apiTestCard = cards.find((card) => {
         const title = card.querySelector('mat-card-title')?.textContent || '';
@@ -250,7 +242,6 @@ test.describe.serial('Plugin Loading', () => {
       return result;
     });
 
-    console.log('Disable plugin result:', disableResult);
     await page.waitForTimeout(2000); // Give more time for plugin to unload
 
     // Stay on the settings page, just wait for state to update
@@ -269,7 +260,7 @@ test.describe.serial('Plugin Loading', () => {
 
     await page.waitForTimeout(1000);
 
-    const enableResult = await page.evaluate(() => {
+    await page.evaluate(() => {
       const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
       const apiTestCard = cards.find((card) => {
         const title = card.querySelector('mat-card-title')?.textContent || '';
@@ -294,7 +285,6 @@ test.describe.serial('Plugin Loading', () => {
       return result;
     });
 
-    console.log('Re-enable plugin result:', enableResult);
     await page.waitForTimeout(2000); // Give time for plugin to reload
 
     // Navigate back to main view

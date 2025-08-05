@@ -1,12 +1,12 @@
-import { test, expect } from '../../fixtures/test.fixture';
+import { expect, test } from '../../fixtures/test.fixture';
 import { cssSelectors } from '../../constants/selectors';
 import {
-  waitForPluginAssets,
-  waitForPluginSystemInit,
   enablePluginWithVerification,
-  waitForPluginInMenu,
-  logPluginState,
   getCITimeoutMultiplier,
+  logPluginState,
+  waitForPluginAssets,
+  waitForPluginInMenu,
+  waitForPluginManagementInit,
 } from '../../helpers/plugin-test.helpers';
 
 const { SIDENAV } = cssSelectors;
@@ -16,8 +16,6 @@ test.describe.serial('Plugin Enable Verify', () => {
   test('enable API Test Plugin and verify menu entry', async ({ page, workViewPage }) => {
     const timeoutMultiplier = getCITimeoutMultiplier();
     test.setTimeout(60000 * timeoutMultiplier);
-
-    console.log('[Plugin Test] Starting plugin enable verification test...');
 
     // First, ensure plugin assets are available
     const assetsAvailable = await waitForPluginAssets(page);
@@ -31,11 +29,7 @@ test.describe.serial('Plugin Enable Verify', () => {
 
     await workViewPage.waitForTaskList();
 
-    // Wait for plugin system to initialize
-    const pluginSystemReady = await waitForPluginSystemInit(page);
-    if (!pluginSystemReady) {
-      console.warn('[Plugin Test] Plugin system may not be fully initialized');
-    }
+    await waitForPluginManagementInit(page);
 
     // Navigate to plugin settings
     await page.click(SETTINGS_BTN);
@@ -101,7 +95,6 @@ test.describe.serial('Plugin Enable Verify', () => {
       };
     });
 
-    console.log('[Plugin Test] Plugin menu state:', menuResult);
     expect(menuResult.hasPluginMenu).toBe(true);
     expect(menuResult.buttonCount).toBeGreaterThan(0);
     // Check if any button text contains "API Test Plugin" (handle whitespace)
@@ -109,7 +102,5 @@ test.describe.serial('Plugin Enable Verify', () => {
       text.includes('API Test Plugin'),
     );
     expect(hasApiTestPlugin).toBe(true);
-
-    console.log('[Plugin Test] Plugin enable verification test completed successfully');
   });
 });

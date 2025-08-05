@@ -16,7 +16,6 @@ export const waitForPluginAssets = async (
   if (process.env.CI) {
     maxRetries = 20;
     retryDelay = 3000;
-    console.log('[Plugin Test] CI environment detected, using extended timeouts');
     // Wait for server to be fully ready in CI
     await page.waitForLoadState('networkidle');
     await page.locator('app-root').waitFor({ state: 'visible', timeout: 15000 });
@@ -27,8 +26,6 @@ export const waitForPluginAssets = async (
   const baseUrl = page.url().split('#')[0];
   const testUrl = `${baseUrl}assets/bundled-plugins/api-test-plugin/manifest.json`;
 
-  console.log(`[Plugin Test] Checking plugin assets availability at: ${testUrl}`);
-
   // First ensure the app is loaded
   try {
     await page.waitForSelector('app-root', { state: 'visible', timeout: 30000 });
@@ -36,38 +33,29 @@ export const waitForPluginAssets = async (
       state: 'attached',
       timeout: 20000,
     });
-    console.log('[Plugin Test] App is loaded');
   } catch (e) {
-    console.error('[Plugin Test] App not fully loaded:', e.message);
+    throw new Error('[Plugin Test] App not fully loaded:', e.message);
   }
 
   for (let i = 0; i < maxRetries; i++) {
     try {
       const response = await page.request.get(testUrl);
       if (response.ok()) {
-        const manifest = await response.json();
-        console.log(`[Plugin Test] Plugin manifest loaded successfully:`, manifest.id);
+        await response.json();
         return true;
       } else {
-        console.log(
-          `[Plugin Test] Attempt ${i + 1}/${maxRetries}: HTTP ${response.status()}`,
-        );
-
         // Debug: Check if basic assets work
         if (response.status() === 404 && i === 3) {
           const iconUrl = `${baseUrl}assets/icons/sp.svg`;
           try {
-            const iconResponse = await page.request.get(iconUrl);
-            console.log(
-              `[Plugin Test] Basic asset test (${iconUrl}): ${iconResponse.status()}`,
-            );
+            await page.request.get(iconUrl);
           } catch (e) {
-            console.log(`[Plugin Test] Basic asset test failed:`, e.message);
+            console.error(`[Plugin Test] Basic asset test failed:`, e.message);
           }
         }
       }
     } catch (error) {
-      console.log(
+      console.error(
         `[Plugin Test] Attempt ${i + 1}/${maxRetries}: Error - ${error.message}`,
       );
     }
@@ -93,45 +81,36 @@ export const waitForPluginAssets = async (
 /**
  * Wait for plugin system to be initialized
  */
-export const waitForPluginSystemInit = async (
+export const waitForPluginManagementInit = async (
   page: Page,
   timeout: number = 30000,
 ): Promise<boolean> => {
-  console.log('[Plugin Test] Waiting for plugin system initialization...');
+  // Check if plugin system is initialized by looking for plugin management in settings
+  const result = await page.waitForFunction(
+    () => {
+      // Check if we can access the Angular app
+      const appRoot = document.querySelector('app-root');
+      if (!appRoot) {
+        throw new Error('No root');
+      }
 
-  try {
-    // Check if plugin system is initialized by looking for plugin management in settings
-    const result = await page.waitForFunction(
-      () => {
-        // Check if we can access the Angular app
-        const appRoot = document.querySelector('app-root');
-        if (!appRoot) {
-          console.log('[Plugin Test] App root not found');
-          return false;
-        }
+      // Check if plugin service exists in Angular's injector (if accessible)
+      // This is a more indirect check since we can't directly access Angular internals
+      const hasPluginElements =
+        document.querySelector('plugin-management') !== null ||
+        document.querySelector('plugin-menu') !== null ||
+        document.querySelector('[class*="plugin"]') !== null;
 
-        // Check if plugin service exists in Angular's injector (if accessible)
-        // This is a more indirect check since we can't directly access Angular internals
-        const hasPluginElements =
-          document.querySelector('plugin-management') !== null ||
-          document.querySelector('plugin-menu') !== null ||
-          document.querySelector('[class*="plugin"]') !== null;
+      if (!hasPluginElements) {
+        throw new Error('Plugin management not ready');
+      }
 
-        if (hasPluginElements) {
-          console.log('[Plugin Test] Plugin elements detected');
-        }
+      return hasPluginElements;
+    },
+    { timeout },
+  );
 
-        return hasPluginElements;
-      },
-      { timeout },
-    );
-
-    console.log('[Plugin Test] Plugin system initialized');
-    return !!result;
-  } catch (error) {
-    console.error('[Plugin Test] Plugin system initialization timeout:', error.message);
-    return false;
-  }
+  return !!result;
 };
 
 /**
@@ -142,8 +121,6 @@ export const enablePluginWithVerification = async (
   pluginName: string,
   timeout: number = 15000,
 ): Promise<boolean> => {
-  console.log(`[Plugin Test] Attempting to enable plugin: ${pluginName}`);
-
   const startTime = Date.now();
 
   // First, verify the plugin card exists
@@ -157,7 +134,6 @@ export const enablePluginWithVerification = async (
         });
 
         if (targetCard) {
-          console.log(`[Plugin Test] Found plugin card for: ${name}`);
           return true;
         }
         return false;
@@ -195,9 +171,6 @@ export const enablePluginWithVerification = async (
     const wasEnabled = toggle.getAttribute('aria-checked') === 'true';
     if (!wasEnabled) {
       toggle.click();
-      console.log(`[Plugin Test] Clicked toggle to enable ${name}`);
-    } else {
-      console.log(`[Plugin Test] ${name} was already enabled`);
     }
 
     return { success: true, wasEnabled };
@@ -227,7 +200,6 @@ export const enablePluginWithVerification = async (
     { timeout: timeout - (Date.now() - startTime) },
   );
 
-  console.log(`[Plugin Test] Plugin ${pluginName} enabled successfully`);
   return true;
 };
 
@@ -239,8 +211,6 @@ export const waitForPluginInMenu = async (
   pluginName: string,
   timeout: number = 20000,
 ): Promise<boolean> => {
-  console.log(`[Plugin Test] Waiting for ${pluginName} to appear in menu...`);
-
   try {
     // Navigate to main view to see the menu
     await page.goto('/#/tag/TODAY');
@@ -256,7 +226,6 @@ export const waitForPluginInMenu = async (
       (name) => {
         const pluginMenu = document.querySelector('plugin-menu');
         if (!pluginMenu) {
-          console.log('[Plugin Test] Plugin menu not found');
           return false;
         }
 
@@ -266,17 +235,12 @@ export const waitForPluginInMenu = async (
           return text.includes(name);
         });
 
-        if (found) {
-          console.log(`[Plugin Test] Found ${name} in plugin menu`);
-        }
-
         return found;
       },
       pluginName,
       { timeout },
     );
 
-    console.log(`[Plugin Test] Plugin ${pluginName} is available in menu`);
     return !!result;
   } catch (error) {
     console.error(`[Plugin Test] Plugin ${pluginName} not found in menu:`, error.message);
@@ -288,7 +252,7 @@ export const waitForPluginInMenu = async (
  * Debug helper to log current plugin state
  */
 export const logPluginState = async (page: Page): Promise<void> => {
-  const state = await page.evaluate(() => {
+  await page.evaluate(() => {
     const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
     const plugins = cards.map((card) => {
       const title =
@@ -312,7 +276,7 @@ export const logPluginState = async (page: Page): Promise<void> => {
     };
   });
 
-  console.log('[Plugin Test] Current plugin state:', JSON.stringify(state, null, 2));
+  // Plugin state debugging removed to reduce test output
 };
 
 /**

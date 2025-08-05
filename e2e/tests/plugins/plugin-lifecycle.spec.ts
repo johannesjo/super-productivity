@@ -2,7 +2,7 @@ import { test, expect } from '../../fixtures/test.fixture';
 import { cssSelectors } from '../../constants/selectors';
 import {
   waitForPluginAssets,
-  waitForPluginSystemInit,
+  waitForPluginManagementInit,
   getCITimeoutMultiplier,
 } from '../../helpers/plugin-test.helpers';
 
@@ -18,8 +18,6 @@ test.describe('Plugin Lifecycle', () => {
     const timeoutMultiplier = getCITimeoutMultiplier();
     test.setTimeout(60000 * timeoutMultiplier);
 
-    console.log('[Plugin Test] Starting plugin lifecycle test setup...');
-
     // First, ensure plugin assets are available
     const assetsAvailable = await waitForPluginAssets(page);
     if (!assetsAvailable) {
@@ -32,25 +30,21 @@ test.describe('Plugin Lifecycle', () => {
 
     await workViewPage.waitForTaskList();
 
-    // Wait for plugin system to initialize
-    const pluginSystemReady = await waitForPluginSystemInit(page);
-    if (!pluginSystemReady) {
-      console.warn('[Plugin Test] Plugin system may not be fully initialized');
-    }
+    await waitForPluginManagementInit(page);
 
     // Enable API Test Plugin
     const settingsBtn = page.locator(SETTINGS_BTN);
     await settingsBtn.waitFor({ state: 'visible' });
     await settingsBtn.click();
-    await page.waitForLoadState('networkidle');
-    // Wait for settings page to be fully visible
-    await page.locator('.page-settings').waitFor({ state: 'visible' });
+    // Wait for navigation to settings page
+    await page.waitForTimeout(500); // Give time for navigation
+    // Wait for settings page to be fully visible - use first() to avoid multiple matches
+    await page.locator('.page-settings').first().waitFor({ state: 'visible' });
     await page.waitForTimeout(50); // Small delay for UI settling
 
     await page.evaluate(() => {
       const configPage = document.querySelector('.page-settings');
       if (!configPage) {
-        console.error('Not on config page');
         return;
       }
 
@@ -104,7 +98,6 @@ test.describe('Plugin Lifecycle', () => {
       return { found: false };
     }, 'API Test Plugin');
 
-    console.log(`Plugin "API Test Plugin" enable state:`, enableResult);
     expect(enableResult.found).toBe(true);
 
     // Wait for plugin to initialize
@@ -112,8 +105,8 @@ test.describe('Plugin Lifecycle', () => {
 
     // Go back to work view
     await page.goto('/#/tag/TODAY');
-    await page.waitForLoadState('networkidle');
-    // Wait for work view to be ready
+    // Wait for navigation and work view to be ready
+    await page.waitForTimeout(500); // Give time for navigation
     await page.locator('.route-wrapper').waitFor({ state: 'visible' });
     await page.waitForTimeout(50); // Small delay for UI settling
 
@@ -138,8 +131,8 @@ test.describe('Plugin Lifecycle', () => {
     // Click on the plugin menu item to navigate to plugin
     await expect(page.locator(PLUGIN_MENU_ITEM)).toBeVisible();
     await page.click(PLUGIN_MENU_ITEM);
-    // Wait for navigation to complete
-    await page.waitForLoadState('networkidle');
+    // Wait for navigation to plugin page
+    await page.waitForTimeout(500); // Give time for navigation
     await page.waitForTimeout(50); // Small delay for UI settling
 
     // Verify we navigated to the plugin page
@@ -155,8 +148,10 @@ test.describe('Plugin Lifecycle', () => {
 
     // Navigate to settings
     await page.click(SETTINGS_BTN);
-    await page.waitForLoadState('networkidle');
-    await page.locator('.page-settings').waitFor({ state: 'visible' });
+    // Wait for navigation to settings page
+    await page.waitForTimeout(500); // Give time for navigation
+    // Wait for settings page to be visible - use first() to avoid multiple matches
+    await page.locator('.page-settings').first().waitFor({ state: 'visible' });
     await page.waitForTimeout(200); // Small delay for UI settling
 
     // Expand plugin section
@@ -203,8 +198,6 @@ test.describe('Plugin Lifecycle', () => {
       return { found: false };
     }, 'API Test Plugin');
 
-    console.log('Plugin state before disable:', currentState);
-
     // If we just enabled it, wait for it to be enabled
     if (currentState.clicked) {
       await page.waitForFunction(
@@ -228,7 +221,7 @@ test.describe('Plugin Lifecycle', () => {
     }
 
     // Now disable the plugin
-    const disableResult = await page.evaluate((pluginName: string) => {
+    await page.evaluate((pluginName: string) => {
       const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
       const targetCard = cards.find((card) => {
         const title = card.querySelector('mat-card-title')?.textContent || '';
@@ -247,8 +240,6 @@ test.describe('Plugin Lifecycle', () => {
       }
       return { found: false };
     }, 'API Test Plugin');
-
-    console.log('Disable result:', disableResult);
 
     // Wait for toggle state to update to disabled
     await page.waitForFunction(
@@ -270,7 +261,8 @@ test.describe('Plugin Lifecycle', () => {
 
     // Go back to work view
     await page.goto('/#/tag/TODAY');
-    await page.waitForLoadState('networkidle');
+    // Wait for navigation and work view to be ready
+    await page.waitForTimeout(500); // Give time for navigation
     await page.locator('.route-wrapper').waitFor({ state: 'visible' });
     await page.waitForTimeout(500); // Small delay for UI settling
 

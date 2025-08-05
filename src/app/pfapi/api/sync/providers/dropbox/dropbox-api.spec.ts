@@ -23,13 +23,20 @@ describe('DropboxApi', () => {
 
     dropboxApi = new DropboxApi('test-app-key', mockDropbox);
 
-    // Set up fetch spy once in beforeEach
-    fetchSpy = spyOn(window, 'fetch');
+    // Check if fetch is already a spy before creating a new one
+    if (jasmine.isSpy(window.fetch)) {
+      fetchSpy = window.fetch as jasmine.Spy;
+      fetchSpy.calls.reset();
+    } else {
+      fetchSpy = spyOn(window, 'fetch');
+    }
   });
 
   afterEach(() => {
-    // Clean up any spies
-    fetchSpy.and.callThrough();
+    // Reset the spy but don't remove it
+    if (fetchSpy) {
+      fetchSpy.calls.reset();
+    }
   });
 
   describe('updateAccessTokenFromRefreshTokenIfAvailable', () => {
