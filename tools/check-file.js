@@ -19,12 +19,22 @@ try {
     encoding: 'utf8',
   });
 
-  // Run lint
+  // Run lint based on file type
   console.log(`🔍 Linting ${path.basename(file)}...`);
-  const lintOutput = execSync(`npm run lint:file ${absolutePath}`, {
-    stdio: 'pipe',
-    encoding: 'utf8',
-  });
+
+  if (file.endsWith('.scss')) {
+    // Use stylelint for SCSS files
+    execSync(`npx stylelint ${absolutePath}`, {
+      stdio: 'pipe',
+      encoding: 'utf8',
+    });
+  } else {
+    // Use ng lint for TypeScript/JavaScript files
+    const lintOutput = execSync(`npm run lint:file ${absolutePath}`, {
+      stdio: 'pipe',
+      encoding: 'utf8',
+    });
+  }
 
   // If we get here, both commands succeeded
   console.log(`✅ ${path.basename(file)} - All checks passed!`);
