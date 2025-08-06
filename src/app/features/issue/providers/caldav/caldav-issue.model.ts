@@ -1,15 +1,22 @@
+export type CaldavIssueStatus = 'NEEDS-ACTION' | 'COMPLETED' | 'IN-PROCESS' | 'CANCELLED';
+
 export type CaldavIssueReduced = Readonly<{
   id: string;
   completed: boolean;
   item_url: string;
   summary: string;
-  due: string;
-  start: string;
+  start?: number;
   labels: string[];
   etag_hash: number;
 }>;
 
 export type CaldavIssue = CaldavIssueReduced &
   Readonly<{
-    note: string;
+    due?: number;
+    note?: string;
+    status?: CaldavIssueStatus;
+    priority?: number;
+    percent_complete?: number;
+    location?: string;
+    duration?: number;
   }>;

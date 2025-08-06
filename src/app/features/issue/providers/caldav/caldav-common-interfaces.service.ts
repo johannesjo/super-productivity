@@ -40,10 +40,12 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
       .then((result) => result ?? false);
   }
 
-  getAddTaskData(issueData: CaldavIssueReduced): Partial<Task> & { title: string } {
+  getAddTaskData(issueData: CaldavIssue): Partial<Task> & { title: string } {
     return {
       issueLastUpdated: issueData.etag_hash,
       title: issueData.summary,
+      notes: issueData.note,
+      dueWithTime: issueData.start,
     };
   }
 

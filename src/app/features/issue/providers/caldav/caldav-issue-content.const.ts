@@ -14,22 +14,85 @@ export const CALDAV_ISSUE_CONTENT_CONFIG: IssueContentConfig<CaldavIssue> = {
       value: 'summary',
       type: IssueFieldType.TEXT,
     },
+    // todo improve display off `due` and `start` using right time format (searching for method)
+    {
+      label: T.F.ISSUE.ISSUE_CONTENT.START,
+      value: 'start',
+      type: IssueFieldType.TEXT,
+      isVisible: (issue: CaldavIssue) => !!issue.start,
+    },
+    {
+      label: T.F.ISSUE.ISSUE_CONTENT.DUE_DATE,
+      value: 'due',
+      type: IssueFieldType.TEXT,
+      isVisible: (issue: CaldavIssue) => !!issue.due,
+    },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.DESCRIPTION,
-      value: 'description',
+      value: 'note',
+      isVisible: (issue: CaldavIssue) => !!issue.note,
+      type: IssueFieldType.MARKDOWN,
+    },
+    {
+      label: 'Status',
+      value: (issue: CaldavIssue) => {
+        switch (issue.status) {
+          case 'NEEDS-ACTION':
+            return 'Needs Action';
+          case 'COMPLETED':
+            return 'Completed';
+          case 'IN-PROCESS':
+            return 'In Process';
+          case 'CANCELLED':
+            return 'Cancelled';
+          default:
+            return issue.status || '';
+        }
+      },
       type: IssueFieldType.TEXT,
-      isVisible: (issue: CaldavIssue) => !!(issue as any).description,
+      isVisible: (issue: CaldavIssue) => !!issue.status,
+    },
+    {
+      label: 'Priority',
+      value: (issue: CaldavIssue) => {
+        if (issue.priority === undefined || issue.priority < 1 || issue.priority > 9) {
+          return '';
+        }
+
+        let cua: string;
+        if (issue.priority <= 4) {
+          cua = 'Low';
+        } else if (issue.priority === 5) {
+          cua = 'Medium';
+        } else {
+          cua = 'High';
+        }
+        return `${cua} (${issue.priority})`;
+      },
+      type: IssueFieldType.TEXT,
+      isVisible: (issue: CaldavIssue) =>
+        issue.priority !== undefined && issue.priority > 0,
+    },
+    {
+      label: 'Percentage',
+      value: (issue: CaldavIssue) => `${issue.percent_complete}%`,
+      type: IssueFieldType.TEXT,
+      isVisible: (issue: CaldavIssue) =>
+        issue.percent_complete !== undefined &&
+        issue.percent_complete > 0 &&
+        issue.percent_complete < 100,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.LOCATION,
       value: 'location',
       type: IssueFieldType.TEXT,
-      isVisible: (issue: CaldavIssue) => !!(issue as any).location,
+      isVisible: (issue: CaldavIssue) => !!issue.location,
     },
     {
-      label: T.F.ISSUE.ISSUE_CONTENT.START,
-      value: 'start',
+      label: 'Labels',
+      value: (issue: CaldavIssue) => issue.labels?.join(', '),
       type: IssueFieldType.TEXT,
+      isVisible: (issue: CaldavIssue) => !!issue.labels && issue.labels.length > 0,
     },
   ],
 };

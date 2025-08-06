@@ -8,7 +8,7 @@ import Calendar from 'cdav-library/models/calendar';
 import ICAL from 'ical.js';
 
 import { from, Observable, throwError } from 'rxjs';
-import { CaldavIssue } from './caldav-issue.model';
+import { CaldavIssue, CaldavIssueStatus } from './caldav-issue.model';
 import { CALDAV_TYPE, ISSUE_PROVIDER_HUMANIZED } from '../../issue.const';
 import { SearchResultItem } from '../../issue.model';
 import { SnackService } from '../../../../core/snack/snack.service';
@@ -119,24 +119,28 @@ export class CaldavClientService {
       throw new Error('No todo found for task');
     }
 
-    let categories: string[] = [];
-    for (const cats of todo.getAllProperties('categories')) {
-      if (cats) {
-        categories = categories.concat(cats.getValues());
-      }
-    }
+    const categories: string[] = todo.getFirstProperty('categories')?.getValues() || [];
 
-    const completed = todo.getFirstPropertyValue('completed');
 
     return {
       id: todo.getFirstPropertyValue('uid') as string,
-      completed: !!completed,
+      completed: !!todo.getFirstPropertyValue('completed'),
       item_url: task.url,
       summary: (todo.getFirstPropertyValue('summary') as string) || '',
-      due: (todo.getFirstPropertyValue('due') as string) || '',
-      start: (todo.getFirstPropertyValue('dtstart') as string) || '',
-      labels: categories,
+      start: (todo.getFirstPropertyValue('dtstart') as ICAL.Time | undefined)
+        ?.toJSDate()
+        .getTime(),
+      due: (todo.getFirstPropertyValue('due') as ICAL.Time | undefined)
+        ?.toJSDate()
+        .getTime(),
       note: (todo.getFirstPropertyValue('description') as string) || '',
+      status: todo.getFirstPropertyValue('status') as CaldavIssueStatus,
+      priority: parseInt(todo.getFirstPropertyValue('priority') as string),
+      percent_complete: parseInt(
+        todo.getFirstPropertyValue('percent-complete') as string,
+      ),
+      location: todo.getFirstPropertyValue('location') as string,
+      labels: categories,
       etag_hash: this._hashEtag(task.etag),
     };
   }
