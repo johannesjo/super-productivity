@@ -16,6 +16,7 @@ import { selectUnarchivedVisibleProjects } from '../../project/store/project.sel
 import { selectAllTasksWithoutHiddenProjects } from '../../tasks/store/task.selectors';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { ProjectService } from '../../project/project.service';
+import { signal } from '@angular/core';
 
 describe('BoardPanelComponent - Backlog Feature', () => {
   let component: BoardPanelComponent;
@@ -102,7 +103,7 @@ describe('BoardPanelComponent - Backlog Feature', () => {
         provideMockStore({}),
         provideMockActions(() => actions$),
         { provide: Store, useValue: storeMock },
-        { provide: TaskService, useValue: {} },
+        { provide: TaskService, useValue: { currentTaskId: signal(null) } },
         { provide: MatDialog, useValue: {} },
         { provide: WorkContextService, useValue: workContextServiceMock },
         { provide: ProjectService, useValue: projectServiceMock },
