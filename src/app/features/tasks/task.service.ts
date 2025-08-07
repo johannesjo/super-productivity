@@ -89,6 +89,7 @@ import { INBOX_PROJECT } from '../project/project.const';
 import { GlobalConfigService } from '../config/global-config.service';
 import { TaskLog } from '../../core/log';
 import { devError } from '../../util/dev-error';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Injectable({
   providedIn: 'root',
@@ -104,12 +105,11 @@ export class TaskService {
   private readonly _taskArchiveService = inject(TaskArchiveService);
   private readonly _globalConfigService = inject(GlobalConfigService);
 
-  // Currently used in idle service TODO remove
-  currentTaskId: string | null = null;
   currentTaskId$: Observable<string | null> = this._store.pipe(
     select(selectCurrentTaskId),
     // NOTE: we can't use share here, as we need the last emitted value
   );
+  currentTaskId = toSignal(this.currentTaskId$, { initialValue: null });
 
   currentTask$: Observable<Task | null> = this._store.pipe(
     select(selectCurrentTask),
@@ -185,8 +185,6 @@ export class TaskService {
       true,
     );
 
-    this.currentTaskId$.subscribe((val) => (this.currentTaskId = val));
-
     // time tracking
     this._timeTrackingService.tick$
       .pipe(
@@ -258,7 +256,7 @@ export class TaskService {
     this._workContextService.startableTasksForActiveContext$
       .pipe(take(1))
       .subscribe((tasks) => {
-        if (tasks[0] && !this.currentTaskId) {
+        if (tasks[0] && !this.currentTaskId()) {
           this.setCurrentId(tasks[0].id);
         }
       });

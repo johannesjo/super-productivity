@@ -83,7 +83,7 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
 
   @HostBinding('class.isCurrent')
   get isCurrent(): boolean {
-    return this.task.id === this._taskService.currentTaskId;
+    return this.task.id === this._taskService.currentTaskId();
   }
 
   @HostListener('click', ['$event'])

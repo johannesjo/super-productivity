@@ -86,7 +86,7 @@ export class ReminderModule {
 
         const oldest = reminders[0];
         if (oldest.type === 'TASK') {
-          if (this._taskService.currentTaskId === oldest.relatedId) {
+          if (this._taskService.currentTaskId() === oldest.relatedId) {
             this._snackService.open({
               type: 'CUSTOM',
               msg: T.F.REMINDER.S_ACTIVE_TASK_DUE,

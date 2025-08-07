@@ -170,7 +170,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   //  Accessor inputs cannot be migrated as they are too complex.
   @Input('task') set taskSet(v: TaskWithSubTasks | Task) {
     this.task = v;
-    this.isCurrent = this._taskService.currentTaskId === v.id;
+    this.isCurrent = this._taskService.currentTaskId() === v.id;
     this._task$.next(v);
   }
 

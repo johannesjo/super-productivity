@@ -104,7 +104,10 @@ export class IdleEffects {
             ? of(resetIdle())
             : this._triggerIdleApis$.pipe(
                 switchMap((idleTimeInMs) => {
-                  if (isOnlyOpenIdleWhenCurrentTask && !this._taskService.currentTaskId) {
+                  if (
+                    isOnlyOpenIdleWhenCurrentTask &&
+                    !this._taskService.currentTaskId()
+                  ) {
                     return of(resetIdle());
                   }
                   const idleTime = idleTimeInMs as number;
@@ -133,10 +136,11 @@ export class IdleEffects {
 
         // untrack current task time und unselect
         let lastCurrentTaskId: string | null;
-        if (this._taskService.currentTaskId) {
-          lastCurrentTaskId = this._taskService.currentTaskId;
+        const tid = this._taskService.currentTaskId();
+        if (tid) {
+          lastCurrentTaskId = tid;
           // remove idle time already tracked
-          this._taskService.removeTimeSpent(this._taskService.currentTaskId, idleTime);
+          this._taskService.removeTimeSpent(tid, idleTime);
           this._taskService.setCurrentId(null);
         } else {
           lastCurrentTaskId = null;
