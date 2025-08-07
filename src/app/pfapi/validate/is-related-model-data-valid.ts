@@ -13,11 +13,14 @@ export const isRelatedModelDataValid = (d: AppDataCompleteNew): boolean => {
   const projectIds = new Set<string>(d.project.ids as string[]);
   const tagIds = new Set<string>(d.tag.ids as string[]);
   const taskIds = new Set<string>(d.task.ids as string[]);
-  const archiveTaskIds = new Set<string>(d.archiveYoung.task.ids as string[]);
+  const archiveYoungTaskIds = new Set<string>(d.archiveYoung.task.ids as string[]);
+  const archiveOldTaskIds = new Set<string>(d.archiveOld.task.ids as string[]);
   const noteIds = new Set<string>(d.note.ids as string[]);
 
   // Validate projects, tasks and tags relationships
-  if (!validateTasksToProjectsAndTags(d, projectIds, tagIds, taskIds, archiveTaskIds)) {
+  if (
+    !validateTasksToProjectsAndTags(d, projectIds, tagIds, taskIds, archiveYoungTaskIds)
+  ) {
     return false;
   }
 
@@ -27,7 +30,7 @@ export const isRelatedModelDataValid = (d: AppDataCompleteNew): boolean => {
   }
 
   // Validate subtasks
-  if (!validateSubTasks(d, taskIds, archiveTaskIds)) {
+  if (!validateSubTasks(d, taskIds, archiveYoungTaskIds, archiveOldTaskIds)) {
     return false;
   }
 
@@ -72,7 +75,7 @@ const validateTasksToProjectsAndTags = (
   projectIds: Set<string>,
   tagIds: Set<string>,
   taskIds: Set<string>,
-  archiveTaskIds: Set<string>,
+  archiveYoungTaskIds: Set<string>,
 ): boolean => {
   // Track project-task relationships and ids for consistency validation
   const projectTaskMap = new Map<string, Set<string>>();
@@ -220,7 +223,8 @@ const validateNotes = (
 const validateSubTasks = (
   d: AppDataCompleteNew,
   taskIds: Set<string>,
-  archiveTaskIds: Set<string>,
+  archiveYoungTaskIds: Set<string>,
+  archiveOldTaskIds: Set<string>,
 ): boolean => {
   // Check for lonely sub tasks and missing sub tasks in active tasks
   for (const tid of taskIds) {
@@ -248,26 +252,65 @@ const validateSubTasks = (
     }
   }
 
-  // Same for archive tasks
-  for (const tid of archiveTaskIds) {
+  // Same for archiveYoung tasks
+  for (const tid of archiveYoungTaskIds) {
     const task = d.archiveYoung.task.entities[tid];
     if (!task) continue;
 
     if (task.parentId && !d.archiveYoung.task.entities[task.parentId]) {
-      _validityError(`Inconsistent Task State: Lonely Sub Task in Archive ${task.id}`, {
-        task,
-        d,
-      });
-      return false;
+      // Check if parent exists in archiveOld before considering it a lonely subtask
+      if (!d.archiveOld.task.entities[task.parentId]) {
+        _validityError(`Inconsistent Task State: Lonely Sub Task in Archive ${task.id}`, {
+          task,
+          d,
+        });
+        return false;
+      }
     }
 
     for (const subId of task.subTaskIds) {
       if (!d.archiveYoung.task.entities[subId]) {
+        // Check if subtask exists in archiveOld before considering it missing
+        if (!d.archiveOld.task.entities[subId]) {
+          _validityError(
+            `Inconsistent Task State: Missing sub task data in archive ${subId}`,
+            { task, d },
+          );
+          return false;
+        }
+      }
+    }
+  }
+
+  // Validate archiveOld tasks
+  for (const tid of archiveOldTaskIds) {
+    const task = d.archiveOld.task.entities[tid];
+    if (!task) continue;
+
+    if (task.parentId && !d.archiveOld.task.entities[task.parentId]) {
+      // Check if parent exists in archiveYoung before considering it a lonely subtask
+      if (!d.archiveYoung.task.entities[task.parentId]) {
         _validityError(
-          `Inconsistent Task State: Missing sub task data in archive ${subId}`,
-          { task, d },
+          `Inconsistent Task State: Lonely Sub Task in Old Archive ${task.id}`,
+          {
+            task,
+            d,
+          },
         );
         return false;
+      }
+    }
+
+    for (const subId of task.subTaskIds) {
+      if (!d.archiveOld.task.entities[subId]) {
+        // Check if subtask exists in archiveYoung before considering it missing
+        if (!d.archiveYoung.task.entities[subId]) {
+          _validityError(
+            `Inconsistent Task State: Missing sub task data in old archive ${subId}`,
+            { task, d },
+          );
+          return false;
+        }
       }
     }
   }
