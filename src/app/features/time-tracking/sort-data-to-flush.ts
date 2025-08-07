@@ -167,6 +167,7 @@ export const splitArchiveTasksByDoneOnThreshold = ({
   tasksToMove.forEach((task) => {
     delete newYoungEntities[task.id];
     newOldEntities[task.id] = task;
+    // Always move subtasks together with their parent
     if (task.subTaskIds) {
       task.subTaskIds.forEach((subTaskId) => {
         const subTask = newYoungEntities[subTaskId];
