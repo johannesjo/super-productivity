@@ -6,6 +6,7 @@ import {
   provideExperimentalZonelessChangeDetection,
   SecurityContext,
 } from '@angular/core';
+import { DatePipe } from '@angular/common';
 
 import { environment } from './environments/environment';
 import { IS_ELECTRON, LanguageCode } from './app/app.constants';
@@ -64,6 +65,7 @@ import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { AppComponent } from './app/app.component';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+import { ShortTime2Pipe } from './app/ui/pipes/short-time2.pipe';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { BackgroundTask } from '@capawesome/capacitor-background-task';
 import { promiseTimeout } from './app/util/promise-timeout';
@@ -167,6 +169,8 @@ bootstrapApplication(AppComponent, {
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     { provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig },
     provideHttpClient(withInterceptorsFromDi()),
+    DatePipe,
+    ShortTime2Pipe,
     provideCharts(withDefaultRegisterables()),
     provideMarkdown(),
     {
