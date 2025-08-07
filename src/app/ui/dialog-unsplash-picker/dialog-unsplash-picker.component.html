@@ -1,11 +1,5 @@
 <h2 mat-dialog-title>
-  Select Background Image from
-  <a
-    href="https://unsplash.com"
-    target="_blank"
-    style="color: inherit"
-    >Unsplash</a
-  >
+  {{ T.DIALOG_UNSPLASH_PICKER.TITLE | translate }}
 </h2>
 
 <mat-dialog-content>
@@ -13,12 +7,12 @@
     appearance="outline"
     style="width: 100%; margin-bottom: 1rem; margin-top: 4px"
   >
-    <mat-label>Search images</mat-label>
+    <mat-label>{{ T.DIALOG_UNSPLASH_PICKER.SEARCH_LABEL | translate }}</mat-label>
     <input
       matInput
       [ngModel]="searchQuery()"
       (ngModelChange)="onSearchChange($event)"
-      placeholder="e.g., nature, mountains, abstract"
+      [placeholder]="T.DIALOG_UNSPLASH_PICKER.SEARCH_PLACEHOLDER | translate"
     />
   </mat-form-field>
 
@@ -43,7 +37,7 @@
         [alt]="photo.alt_description || photo.description || 'Unsplash photo'"
       />
       <div class="photographer">
-        by
+        {{ T.DIALOG_UNSPLASH_PICKER.BY | translate }}
         <a
           *ngIf="photo.user.links?.html"
           [href]="photo.user.links?.html || '#'"
@@ -62,6 +56,6 @@
     class="no-results"
     *ngIf="showNoResults()"
   >
-    No images found. Try a different search term.
+    {{ T.DIALOG_UNSPLASH_PICKER.NO_RESULTS | translate }}
   </div>
 </mat-dialog-content>

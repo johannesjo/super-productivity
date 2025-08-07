@@ -38,6 +38,13 @@
     "PRESS_ENTER_AGAIN": "Press enter again to save",
     "TOMORROW": "Tomorrow"
   },
+  "DIALOG_UNSPLASH_PICKER": {
+    "TITLE": "Select Background Image from Unsplash",
+    "SEARCH_LABEL": "Search images",
+    "SEARCH_PLACEHOLDER": "e.g., nature, mountains, abstract",
+    "NO_RESULTS": "No images found. Try a different search term.",
+    "BY": "by"
+  },
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {

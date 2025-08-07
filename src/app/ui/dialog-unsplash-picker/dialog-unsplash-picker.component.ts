@@ -28,6 +28,8 @@ import {
 } from 'rxjs/operators';
 import { UnsplashService, UnsplashPhoto } from '../../core/unsplash/unsplash.service';
 import { GlobalThemeService } from '../../core/theme/global-theme.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { T } from '../../t.const';
 
 export interface DialogUnsplashPickerData {
   context?:
@@ -50,12 +52,14 @@ export interface DialogUnsplashPickerData {
     MatLabel,
     MatInput,
     MatProgressSpinner,
+    TranslateModule,
   ],
   templateUrl: './dialog-unsplash-picker.component.html',
   styleUrls: ['./dialog-unsplash-picker.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogUnsplashPickerComponent implements OnInit, OnDestroy {
+  readonly T = T;
   searchQuery = signal('');
   photos = signal<UnsplashPhoto[]>([]);
   isLoading = signal(false);
