@@ -34,9 +34,7 @@
         [src]="getPhotoThumb(photo)"
         [alt]="photo.alt_description || photo.description || 'Unsplash photo'"
       />
-      <div class="image-overlay">
-        <span class="photographer">by {{ photo.user.name }}</span>
-      </div>
+      <div class="photographer">by {{ photo.user.name }}</div>
     </div>
   </div>
 
@@ -45,26 +43,5 @@
     *ngIf="showNoResults()"
   >
     No images found. Try a different search term.
-  </div>
-
-  <div
-    class="api-key-notice"
-    *ngIf="showApiKeyNotice()"
-  >
-    <p>To use the Unsplash image picker, you need to:</p>
-    <ol>
-      <li>
-        Register at
-        <a
-          href="https://unsplash.com/developers"
-          target="_blank"
-          >unsplash.com/developers</a
-        >
-      </li>
-      <li>Create a new application (free)</li>
-      <li>Copy your Access Key</li>
-      <li>Update the ACCESS_KEY in unsplash.service.ts</li>
-    </ol>
-    <p>The free tier allows 50 requests per hour.</p>
   </div>
 </mat-dialog-content>

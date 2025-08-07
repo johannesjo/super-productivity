@@ -64,9 +64,6 @@ export class DialogUnsplashPickerComponent implements OnInit, OnDestroy {
   showNoResults = computed(
     () => !this.isLoading() && this.photos().length === 0 && this.searchQuery(),
   );
-  showApiKeyNotice = computed(
-    () => !this.isLoading() && this.photos().length === 0 && !this.searchQuery(),
-  );
 
   private _searchSubject = new Subject<string>();
   private _destroy$ = new Subject<void>();
@@ -82,30 +79,31 @@ export class DialogUnsplashPickerComponent implements OnInit, OnDestroy {
   private getDefaultSearchQuery(isDark: boolean): string {
     const context = this.data.context;
 
-    // Context-specific defaults
+    // Simplified, more focused default searches
     switch (context) {
       case 'backgroundImageDark':
-        return 'dark abstract night sky stars';
+        return 'dark abstract gradient';
       case 'backgroundImageLight':
-        return 'light abstract nature landscape';
+        return 'minimal landscape';
       case 'taskBackground':
-        return isDark ? 'dark texture pattern' : 'light texture pattern';
+        return 'texture pattern';
       case 'projectIcon':
-        return 'icon symbol minimal abstract';
+        return 'minimal abstract';
       default:
-        // Default based on theme
-        return isDark ? 'night' : 'nature landscape';
+        return isDark ? 'dark abstract' : 'minimal nature';
     }
   }
 
   ngOnInit(): void {
+    // Setup search subscription
     this._searchSubject
       .pipe(
-        debounceTime(1000), // Increased to 1 second to reduce API calls (50 req/hour limit)
+        debounceTime(800), // Balance between responsiveness and API limits
         distinctUntilChanged(),
         switchMap((query) => {
-          if (!query || query.trim() === '') {
-            // Use 'night' as default for dark theme, 'nature landscape' for light theme
+          this.isLoading.set(true);
+          // If empty query, use context-aware default
+          if (!query.trim()) {
             return this._globalThemeService.isDarkTheme$.pipe(
               take(1),
               switchMap((isDark) => {
@@ -114,7 +112,6 @@ export class DialogUnsplashPickerComponent implements OnInit, OnDestroy {
               }),
             );
           }
-          this.isLoading.set(true);
           return this._unsplashService.searchPhotos(query);
         }),
         takeUntil(this._destroy$),
@@ -130,7 +127,7 @@ export class DialogUnsplashPickerComponent implements OnInit, OnDestroy {
         },
       });
 
-    // Initial search for background images based on theme and context
+    // Initial load with context-aware defaults
     this._globalThemeService.isDarkTheme$.pipe(take(1)).subscribe((isDark) => {
       this.onSearchChange(this.getDefaultSearchQuery(isDark));
     });
@@ -147,11 +144,9 @@ export class DialogUnsplashPickerComponent implements OnInit, OnDestroy {
   }
 
   selectPhoto(photo: UnsplashPhoto): void {
-    // Return the raw URL with parameters for high quality
-    // Using raw URL allows dynamic resizing while maintaining quality
-    // Add width=2000 and quality=80 for good balance of quality and file size
-    const highResUrl = `${photo.urls.raw}&w=2560&q=90&auto=format`;
-    this._dialogRef.close(highResUrl);
+    // Use optimized background image URL
+    const backgroundUrl = this._unsplashService.getBackgroundImageUrl(photo);
+    this._dialogRef.close(backgroundUrl);
   }
 
   getPhotoThumb(photo: UnsplashPhoto): string {
