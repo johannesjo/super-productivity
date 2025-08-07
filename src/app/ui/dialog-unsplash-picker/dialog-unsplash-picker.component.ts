@@ -144,9 +144,21 @@ export class DialogUnsplashPickerComponent implements OnInit, OnDestroy {
   }
 
   selectPhoto(photo: UnsplashPhoto): void {
-    // Use optimized background image URL
-    const backgroundUrl = this._unsplashService.getBackgroundImageUrl(photo);
-    this._dialogRef.close(backgroundUrl);
+    // Track download as required by Unsplash API guidelines
+    this._unsplashService.trackPhotoDownload(photo).subscribe(() => {
+      // After tracking, return the optimized background image URL
+      const backgroundUrl = this._unsplashService.getBackgroundImageUrl(photo);
+
+      // Include attribution data with the URL for potential future use
+      this._dialogRef.close({
+        url: backgroundUrl,
+        attribution: {
+          photographerName: photo.user.name,
+          photographerUrl: photo.user.links?.html,
+          photoUrl: photo.links?.html,
+        },
+      });
+    });
   }
 
   getPhotoThumb(photo: UnsplashPhoto): string {

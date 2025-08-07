@@ -44,9 +44,14 @@ export class FormlyImageInputComponent extends FieldType<FormlyFieldConfig> {
       data: dialogData,
     });
 
-    dialogRef.afterClosed().subscribe((selectedUrl: string | undefined) => {
-      if (selectedUrl) {
-        this.formControl.setValue(selectedUrl);
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result) {
+        // Handle both string (legacy) and object (new) return formats
+        const url = typeof result === 'string' ? result : result.url;
+        if (url) {
+          this.formControl.setValue(url);
+          // TODO: Store attribution data if needed for compliance display
+        }
       }
     });
   }

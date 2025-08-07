@@ -1,4 +1,12 @@
-<h2 mat-dialog-title>Select Background Image from Unsplash</h2>
+<h2 mat-dialog-title>
+  Select Background Image from
+  <a
+    href="https://unsplash.com"
+    target="_blank"
+    style="color: inherit"
+    >Unsplash</a
+  >
+</h2>
 
 <mat-dialog-content>
   <mat-form-field
@@ -34,7 +42,19 @@
         [src]="getPhotoThumb(photo)"
         [alt]="photo.alt_description || photo.description || 'Unsplash photo'"
       />
-      <div class="photographer">by {{ photo.user.name }}</div>
+      <div class="photographer">
+        by
+        <a
+          *ngIf="photo.user.links?.html"
+          [href]="photo.user.links?.html || '#'"
+          target="_blank"
+          (click)="$event.stopPropagation()"
+          style="color: inherit"
+        >
+          {{ photo.user.name }}
+        </a>
+        <span *ngIf="!photo.user.links?.html">{{ photo.user.name }}</span>
+      </div>
     </div>
   </div>
 

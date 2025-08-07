@@ -13,10 +13,19 @@ export interface UnsplashPhoto {
     small: string;
     thumb: string;
   };
+  links?: {
+    self?: string;
+    html?: string;
+    download?: string;
+    download_location?: string;
+  };
   description: string | null;
   alt_description: string | null;
   user: {
     name: string;
+    links?: {
+      html?: string;
+    };
   };
 }
 
@@ -81,5 +90,30 @@ export class UnsplashService {
    */
   getBackgroundImageUrl(photo: UnsplashPhoto, width = 2560, quality = 85): string {
     return `${photo.urls.raw}&w=${width}&q=${quality}&auto=format`;
+  }
+
+  /**
+   * Trigger download tracking as required by Unsplash API guidelines
+   * This must be called when a user selects a photo for use
+   * @param photo - The selected photo
+   */
+  trackPhotoDownload(photo: UnsplashPhoto): Observable<any> {
+    if (!photo.links?.download_location) {
+      console.warn('No download_location available for photo', photo.id);
+      return of(null);
+    }
+
+    const headers = {
+      Authorization: `Client-ID ${this.API_KEY}`,
+    };
+
+    // Call the download endpoint to track usage
+    return this._http.get(photo.links.download_location, { headers }).pipe(
+      catchError((error) => {
+        console.error('Failed to track photo download:', error);
+        // Don't fail the selection if tracking fails
+        return of(null);
+      }),
+    );
   }
 }
