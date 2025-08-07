@@ -425,6 +425,65 @@ describe('isRelatedModelDataValid', () => {
     //   );
     // });
 
+    it('should not throw error when parent task is in archiveOld and subtask is in archiveYoung', () => {
+      const taskData = fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'parent-task',
+          subTaskIds: [],
+          projectId: INBOX_PROJECT.id,
+        },
+      ]);
+
+      const archiveYoungTaskData = fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'sub-task-in-young',
+          parentId: 'parent-task-in-old', // parent is in archiveOld
+          projectId: INBOX_PROJECT.id,
+        },
+      ]);
+
+      const archiveOldTaskData = fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'parent-task-in-old',
+          subTaskIds: ['sub-task-in-young'], // subtask is in archiveYoung
+          projectId: INBOX_PROJECT.id,
+        },
+      ]);
+
+      const projectData = {
+        ...mockAppData.project,
+        ...fakeEntityStateFromArray<Project>([
+          {
+            ...DEFAULT_PROJECT,
+            id: INBOX_PROJECT.id,
+            taskIds: ['parent-task'],
+          },
+        ]),
+      };
+
+      const validData = {
+        ...mockAppData,
+        task: taskData,
+        project: projectData,
+        archiveYoung: {
+          lastTimeTrackingFlush: 0,
+          timeTracking: mockAppData.archiveYoung.timeTracking,
+          task: archiveYoungTaskData,
+        },
+        archiveOld: {
+          lastTimeTrackingFlush: 0,
+          timeTracking: mockAppData.archiveOld.timeTracking,
+          task: archiveOldTaskData,
+        },
+      };
+
+      // Should not throw error since parent-child relationship spans archives correctly
+      expect(() => isRelatedModelDataValid(validData as any)).not.toThrow();
+    });
+
     it('should throw error for missing sub-task data in today list', () => {
       const taskData = fakeEntityStateFromArray<Task>([
         {
