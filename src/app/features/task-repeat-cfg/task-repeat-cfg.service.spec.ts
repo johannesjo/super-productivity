@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { TaskRepeatCfgService } from './task-repeat-cfg.service';
-import { provideMockStore, MockStore } from '@ngrx/store/testing';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { TaskService } from '../tasks/task.service';
 import { WorkContextService } from '../work-context/work-context.service';
@@ -16,10 +16,10 @@ import { DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfg } from './task-repeat-cfg.model'
 import { of } from 'rxjs';
 import { WorkContextType } from '../work-context/work-context.model';
 import {
-  selectTaskRepeatCfgsForExactDay,
   selectAllUnprocessedTaskRepeatCfgs,
+  selectTaskRepeatCfgsForExactDay,
 } from './store/task-repeat-cfg.selectors';
-import { Task, DEFAULT_TASK, TaskWithSubTasks } from '../tasks/task.model';
+import { DEFAULT_TASK, Task, TaskWithSubTasks } from '../tasks/task.model';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { getLocalDateStr } from '../../util/get-local-date-str';
 import { getWorklogStr } from '../../util/get-work-log-str';
@@ -331,13 +331,14 @@ describe('TaskRepeatCfgService', () => {
         }),
       );
 
-      // Check updateTaskRepeatCfg action
+      // Check updateTaskRepeatCfg action - should update both fields
       expect(dispatchSpy.calls.argsFor(1)[0]).toEqual(
         jasmine.objectContaining({
           type: updateTaskRepeatCfg.type,
           taskRepeatCfg: {
             id: mockTaskRepeatCfg.id,
             changes: {
+              lastTaskCreation: jasmine.any(Number),
               lastTaskCreationDay: getWorklogStr(targetDayDate),
             },
           },
@@ -530,6 +531,28 @@ describe('TaskRepeatCfgService', () => {
     });
   });
 
+  describe('Backward Compatibility', () => {
+    it('should update both lastTaskCreation and lastTaskCreationDay when creating task', async () => {
+      const targetDayDate = new Date('2025-08-15T10:00:00').getTime();
+
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
+      taskService.createNewTaskWithDefaults.and.returnValue(mockTask);
+
+      await service.createRepeatableTask(mockTaskRepeatCfg, targetDayDate);
+
+      // Verify both fields are set
+      const updateAction = dispatchSpy.calls.argsFor(1)[0];
+      expect(updateAction.type).toBe(updateTaskRepeatCfg.type);
+      expect(updateAction.taskRepeatCfg.changes.lastTaskCreation).toBeDefined();
+      expect(updateAction.taskRepeatCfg.changes.lastTaskCreationDay).toBeDefined();
+
+      // Verify they represent the same date
+      const actualTimestamp = updateAction.taskRepeatCfg.changes.lastTaskCreation;
+      const actualDay = new Date(actualTimestamp).toISOString().split('T')[0];
+      expect(actualDay).toBe(updateAction.taskRepeatCfg.changes.lastTaskCreationDay);
+    });
+  });
+
   describe('Timezone Edge Cases', () => {
     it('should correctly update lastTaskCreationDay for late night task creation', async () => {
       // Simulate creating a task at 11 PM
@@ -548,18 +571,15 @@ describe('TaskRepeatCfgService', () => {
 
       await service.createRepeatableTask(testTaskRepeatCfg, targetDayDate);
 
-      // Verify that lastTaskCreationDay is set to the date string of when the task was created
-      expect(dispatchSpy.calls.argsFor(1)[0]).toEqual(
-        jasmine.objectContaining({
-          type: updateTaskRepeatCfg.type,
-          taskRepeatCfg: {
-            id: testTaskRepeatCfg.id,
-            changes: {
-              lastTaskCreationDay: '2025-08-01', // Should be Aug 1st, not Aug 2nd
-            },
-          },
-        }),
-      );
+      // Verify that both fields are updated correctly
+      // Note: lastTaskCreation will be set to noon (12:00) of the target day
+      const updateAction = dispatchSpy.calls.argsFor(1)[0];
+      expect(updateAction.type).toBe(updateTaskRepeatCfg.type);
+      expect(updateAction.taskRepeatCfg.id).toBe(testTaskRepeatCfg.id);
+      expect(updateAction.taskRepeatCfg.changes.lastTaskCreationDay).toBe('2025-08-01');
+      // Verify timestamp is for the same day (at noon)
+      const actualDate = new Date(updateAction.taskRepeatCfg.changes.lastTaskCreation);
+      expect(actualDate.toISOString().split('T')[0]).toBe('2025-08-01');
     });
 
     it('should correctly handle task creation across day boundaries', async () => {
@@ -579,18 +599,15 @@ describe('TaskRepeatCfgService', () => {
 
       await service.createRepeatableTask(testTaskRepeatCfg, targetDayDate);
 
-      // Verify correct date string
-      expect(dispatchSpy.calls.argsFor(1)[0]).toEqual(
-        jasmine.objectContaining({
-          type: updateTaskRepeatCfg.type,
-          taskRepeatCfg: {
-            id: testTaskRepeatCfg.id,
-            changes: {
-              lastTaskCreationDay: '2025-08-02', // Should be Aug 2nd
-            },
-          },
-        }),
-      );
+      // Verify both fields are updated correctly
+      // Note: lastTaskCreation will be set to noon (12:00) of the target day
+      const updateAction = dispatchSpy.calls.argsFor(1)[0];
+      expect(updateAction.type).toBe(updateTaskRepeatCfg.type);
+      expect(updateAction.taskRepeatCfg.id).toBe(testTaskRepeatCfg.id);
+      expect(updateAction.taskRepeatCfg.changes.lastTaskCreationDay).toBe('2025-08-02');
+      // Verify timestamp is for the same day (at noon)
+      const actualDate = new Date(updateAction.taskRepeatCfg.changes.lastTaskCreation);
+      expect(actualDate.toISOString().split('T')[0]).toBe('2025-08-02');
     });
   });
 });

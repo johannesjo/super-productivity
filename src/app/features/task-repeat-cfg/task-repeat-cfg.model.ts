@@ -23,7 +23,9 @@ export type RepeatQuickSetting =
 export interface TaskRepeatCfgCopy {
   id: string;
   projectId: string | null;
-  lastTaskCreationDay: string;
+  // TODO remove at some point
+  lastTaskCreation?: number;
+  lastTaskCreationDay?: string;
   title: string | null;
   tagIds: string[];
   order: number;
@@ -57,6 +59,7 @@ export type TaskRepeatCfg = Readonly<TaskRepeatCfgCopy>;
 export type TaskRepeatCfgState = EntityState<TaskRepeatCfg>;
 
 export const DEFAULT_TASK_REPEAT_CFG: Omit<TaskRepeatCfgCopy, 'id'> = {
+  lastTaskCreation: Date.now(),
   lastTaskCreationDay: new Date().toISOString().split('T')[0],
   title: null,
   defaultEstimate: undefined,

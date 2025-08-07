@@ -4,6 +4,7 @@ import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import { isSameDay } from '../../../util/is-same-day';
 import { getNewestPossibleDueDate } from './get-newest-possible-due-date.util';
 import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getEffectiveLastTaskCreationDay } from './get-effective-last-task-creation-day.util';
 
 export const adapter: EntityAdapter<TaskRepeatCfg> = createEntityAdapter<TaskRepeatCfg>();
 export const TASK_REPEAT_CFG_FEATURE_NAME = 'taskRepeatCfg';
@@ -87,10 +88,11 @@ export const selectTaskRepeatCfgsForExactDay = createSelector(
     return (
       taskRepeatCfgs &&
       taskRepeatCfgs.filter((taskRepeatCfg: TaskRepeatCfg) => {
+        const effectiveLastDay = getEffectiveLastTaskCreationDay(taskRepeatCfg);
         if (
-          taskRepeatCfg.lastTaskCreationDay === getWorklogStr(dateToCheckTimestamp) ||
+          effectiveLastDay === getWorklogStr(dateToCheckTimestamp) ||
           // also check for if future instance was already created via the work-view button
-          taskRepeatCfg.lastTaskCreationDay > getWorklogStr(dateToCheckTimestamp)
+          (effectiveLastDay && effectiveLastDay > getWorklogStr(dateToCheckTimestamp))
         ) {
           return false;
         }
@@ -115,10 +117,11 @@ export const selectAllUnprocessedTaskRepeatCfgs = createSelector(
     return (
       taskRepeatCfgs &&
       taskRepeatCfgs.filter((taskRepeatCfg: TaskRepeatCfg) => {
+        const effectiveLastDay = getEffectiveLastTaskCreationDay(taskRepeatCfg);
         if (
-          taskRepeatCfg.lastTaskCreationDay === getWorklogStr(dateToCheckTimestamp) ||
+          effectiveLastDay === getWorklogStr(dateToCheckTimestamp) ||
           // also check for if future instance was already created via the work-view button
-          taskRepeatCfg.lastTaskCreationDay > getWorklogStr(dateToCheckTimestamp)
+          (effectiveLastDay && effectiveLastDay > getWorklogStr(dateToCheckTimestamp))
         ) {
           return false;
         }

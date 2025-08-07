@@ -219,6 +219,7 @@ export class TaskRepeatCfgService {
         taskRepeatCfg: {
           id: taskRepeatCfg.id,
           changes: {
+            lastTaskCreation: targetCreated.getTime(),
             lastTaskCreationDay: getWorklogStr(targetCreated),
           },
         },

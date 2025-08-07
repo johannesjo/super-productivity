@@ -4,6 +4,7 @@ import { getDiffInMonth } from '../../../util/get-diff-in-month';
 import { getDiffInYears } from '../../../util/get-diff-in-years';
 import { getDiffInWeeks } from '../../../util/get-diff-in-weeks';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
+import { getEffectiveLastTaskCreationDay } from './get-effective-last-task-creation-day.util';
 
 export const getNextRepeatOccurrence = (
   taskRepeatCfg: TaskRepeatCfg,
@@ -18,7 +19,11 @@ export const getNextRepeatOccurrence = (
 
   const checkDate = new Date(fromDate);
   const startDateDate = dateStrToUtcDate(taskRepeatCfg.startDate);
-  const lastTaskCreation = dateStrToUtcDate(taskRepeatCfg.lastTaskCreationDay);
+
+  // Get the effective last task creation day with fallback logic
+  const lastTaskCreationDateStr =
+    getEffectiveLastTaskCreationDay(taskRepeatCfg) || '1970-01-01';
+  const lastTaskCreation = dateStrToUtcDate(lastTaskCreationDateStr);
   // Use noon (12:00) to avoid DST issues - noon is never affected by DST transitions
   checkDate.setHours(12, 0, 0, 0);
   lastTaskCreation.setHours(12, 0, 0, 0);

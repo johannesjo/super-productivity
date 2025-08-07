@@ -10,19 +10,37 @@ export const crossModelMigration4_2: CrossModelMigrateFn = ((
   PFLog.log('____________________Migrate4.2__________________');
   const copy = fullData;
 
-  // Migrate lastTaskCreation (timestamp) to lastTaskCreationDay (date string)
+  // Ensure both lastTaskCreation and lastTaskCreationDay exist for backward compatibility
   Object.keys(copy.taskRepeatCfg.entities).forEach((id) => {
-    const repeatCfg = copy.taskRepeatCfg.entities[id]!;
-    if ('lastTaskCreation' in repeatCfg) {
-      // Convert timestamp to date string
+    const repeatCfg = copy.taskRepeatCfg.entities[id];
+    if (!repeatCfg) {
+      return; // Skip if entity is null/undefined
+    }
+
+    // If only lastTaskCreation exists, add lastTaskCreationDay
+    if ('lastTaskCreation' in repeatCfg && !('lastTaskCreationDay' in repeatCfg)) {
       const timestamp = (repeatCfg as any).lastTaskCreation;
-      // @ts-ignore - We're migrating from old field to new field
-      repeatCfg.lastTaskCreationDay = getWorklogStr(timestamp);
-      // @ts-ignore - Remove old field
-      delete (repeatCfg as any).lastTaskCreation;
+      if (timestamp != null && !isNaN(timestamp)) {
+        // @ts-ignore - We're adding the new field
+        repeatCfg.lastTaskCreationDay = getWorklogStr(timestamp);
+      }
+    }
+
+    // If only lastTaskCreationDay exists, add lastTaskCreation
+    if ('lastTaskCreationDay' in repeatCfg && !('lastTaskCreation' in repeatCfg)) {
+      const dateStr = (repeatCfg as any).lastTaskCreationDay;
+      if (dateStr && typeof dateStr === 'string') {
+        // Parse as UTC date at noon to avoid timezone issues
+        // This matches how the dates are handled in get-newest-possible-due-date.util.ts
+        const date = new Date(dateStr + 'T12:00:00Z');
+        if (!isNaN(date.getTime())) {
+          // @ts-ignore - We're adding the old field for compatibility
+          repeatCfg.lastTaskCreation = date.getTime();
+        }
+      }
     }
   });
 
-  PFLog.log('Migrated lastTaskCreation to lastTaskCreationDay', copy);
+  PFLog.log('Ensured both lastTaskCreation and lastTaskCreationDay exist', copy);
   return copy;
 }) as CrossModelMigrateFn;
