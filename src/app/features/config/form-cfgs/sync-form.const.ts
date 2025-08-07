@@ -96,6 +96,13 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
             ]
           : []),
         {
+          type: 'tpl',
+          templateOptions: {
+            tag: 'p',
+            text: T.F.SYNC.FORM.WEB_DAV.INFO,
+          },
+        },
+        {
           key: 'baseUrl',
           type: 'input',
           className: 'e2e-baseUrl',
