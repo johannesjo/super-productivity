@@ -73,6 +73,7 @@ import {
 import { promiseTimeout } from '../../util/promise-timeout';
 import { TaskArchiveService } from '../../features/time-tracking/task-archive.service';
 import { IS_TOUCH_ONLY } from '../../util/is-touch-only';
+import { Log } from '../../core/log';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
@@ -376,9 +377,21 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private async _moveDoneToArchive(): Promise<void> {
     const doneTasks = await this.workContextService.doneTasks$.pipe(take(1)).toPromise();
+    Log.log('[DailySummary] Moving done tasks to archive:', {
+      count: doneTasks.length,
+      taskIds: doneTasks.map((t) => t.id),
+      tasks: doneTasks,
+    });
+
+    if (doneTasks.length === 0) {
+      Log.log('[DailySummary] No done tasks to archive');
+      return;
+    }
+
     this._taskService.moveToArchive(doneTasks);
     // wait for tasks being actually moved to archive and all database stuff to be completed...
     await promiseTimeout(50);
+    Log.log('[DailySummary] Archive operation completed');
   }
 
   private async _finishDayForGood(cb?: any): Promise<void> {
