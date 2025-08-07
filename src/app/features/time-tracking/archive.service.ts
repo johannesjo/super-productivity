@@ -52,7 +52,15 @@ export class ArchiveService {
   async moveTasksToArchiveAndFlushArchiveIfDue(tasks: TaskWithSubTasks[]): Promise<void> {
     const now = Date.now();
     const flatTasks = flattenTasks(tasks);
+
+    Log.log('[ArchiveService] moveTasksToArchiveAndFlushArchiveIfDue:', {
+      inputTasksCount: tasks.length,
+      flatTasksCount: flatTasks.length,
+      taskIds: flatTasks.map((t) => t.id),
+    });
+
     if (!flatTasks.length) {
+      Log.log('[ArchiveService] No tasks to archive after flattening');
       return;
     }
 
@@ -95,6 +103,12 @@ export class ArchiveService {
     await this._pfapiService.m.archiveYoung.save(newArchiveYoung, {
       isUpdateRevAndLastUpdate: true,
     });
+
+    Log.log('[ArchiveService] Saved tasks to archiveYoung:', {
+      archivedTaskCount: Object.keys(newTaskArchive.entities).length,
+      archivedTaskIds: newTaskArchive.ids,
+    });
+
     this._store.dispatch(
       TimeTrackingActions.updateWholeState({
         newState: newSorted1.timeTracking,

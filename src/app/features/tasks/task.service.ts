@@ -657,9 +657,20 @@ export class TaskService {
     if (!Array.isArray(tasks)) {
       tasks = [tasks];
     }
+
+    TaskLog.log('[TaskService] moveToArchive called with:', {
+      count: tasks.length,
+      taskIds: tasks.map((t) => t.id),
+    });
+
     // NOTE: we only update real parents since otherwise we move sub-tasks without their parent into the archive
     const subTasks = tasks.filter((t) => t.parentId);
     const parentTasks = tasks.filter((t) => !t.parentId);
+
+    TaskLog.log('[TaskService] Filtered tasks:', {
+      parentTasks: parentTasks.map((t) => t.id),
+      subTasks: subTasks.map((t) => t.id),
+    });
 
     if (subTasks.length) {
       if (this._workContextService.activeWorkContextType !== WorkContextType.TAG) {
@@ -668,6 +679,7 @@ export class TaskService {
       } else {
         // when on a tag such as today, we simply remove the tag instead of attempting to move to archive
         const tagToRemove = this._workContextService.activeWorkContextId;
+        TaskLog.log('[TaskService] Removing tag from subtasks:', tagToRemove);
         subTasks.forEach((st) => {
           this.updateTags(
             st,
@@ -678,10 +690,14 @@ export class TaskService {
     }
 
     if (parentTasks.length) {
+      TaskLog.log('[TaskService] Dispatching moveToArchive action for parent tasks');
       // Only move parent tasks to archive, never subtasks
       this._store.dispatch(TaskSharedActions.moveToArchive({ tasks: parentTasks }));
       // Only archive parent tasks to prevent orphaned subtasks
+      TaskLog.log('[TaskService] Calling archive service to persist tasks');
       this._archiveService.moveTasksToArchiveAndFlushArchiveIfDue(parentTasks);
+    } else {
+      TaskLog.log('[TaskService] No parent tasks to archive');
     }
   }
 
