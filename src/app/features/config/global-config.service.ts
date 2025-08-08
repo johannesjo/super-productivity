@@ -8,6 +8,7 @@ import {
   GlobalConfigState,
   GlobalSectionConfig,
   IdleConfig,
+  LanguageConfig,
   MiscConfig,
   ScheduleConfig,
   ShortSyntaxConfig,
@@ -19,6 +20,7 @@ import {
   selectConfigFeatureState,
   selectEvaluationConfig,
   selectIdleConfig,
+  selectLanguageConfig,
   selectMiscConfig,
   selectShortSyntaxConfig,
   selectSoundConfig,
@@ -36,6 +38,11 @@ export class GlobalConfigService {
   private readonly _store = inject<Store<any>>(Store);
 
   cfg$: Observable<GlobalConfigState>;
+
+  lang$: Observable<LanguageConfig> = this._store.pipe(
+    select(selectLanguageConfig),
+    shareReplay(1),
+  );
 
   misc$: Observable<MiscConfig> = this._store.pipe(
     select(selectMiscConfig),

@@ -9,6 +9,7 @@ export const DEFAULT_DAY_START = '9:00';
 export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   lang: {
     lng: null,
+    timeLocale: undefined,
   },
   misc: {
     isConfirmBeforeExit: false,

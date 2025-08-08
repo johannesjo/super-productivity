@@ -6,6 +6,7 @@ import {
   FocusModeConfig,
   GlobalConfigState,
   IdleConfig,
+  LanguageConfig,
   MiscConfig,
   PomodoroConfig,
   ReminderConfig,
@@ -22,6 +23,10 @@ import { getHoursFromClockString } from '../../../util/get-hours-from-clock-stri
 export const CONFIG_FEATURE_NAME = 'globalConfig';
 export const selectConfigFeatureState =
   createFeatureSelector<GlobalConfigState>(CONFIG_FEATURE_NAME);
+export const selectLanguageConfig = createSelector(
+  selectConfigFeatureState,
+  (cfg): LanguageConfig => cfg.lang,
+);
 export const selectMiscConfig = createSelector(
   selectConfigFeatureState,
   (cfg): MiscConfig => cfg.misc,

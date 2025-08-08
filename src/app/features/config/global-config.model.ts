@@ -110,6 +110,7 @@ export type LocalBackupConfig = Readonly<{
 
 export type LanguageConfig = Readonly<{
   lng: LanguageCode | null;
+  timeLocale?: string;
 }>;
 
 export type SoundConfig = Readonly<{
