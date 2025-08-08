@@ -41,7 +41,8 @@ export interface UnsplashSearchResponse {
 export class UnsplashService {
   private readonly API_URL = 'https://api.unsplash.com';
   // Register your app at https://unsplash.com/developers for a free API key (50 req/hour)
-  private readonly API_KEY = getEnv('UNSPLASH_KEY') || getEnv('UNSPLASH_CLIENT_ID');
+  private readonly API_KEY = getEnv('UNSPLASH_KEY');
+  private readonly API_CLIENT_ID = getEnv('UNSPLASH_CLIENT_ID');
 
   constructor(private _http: HttpClient) {}
 
