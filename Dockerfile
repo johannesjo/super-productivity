@@ -1,6 +1,14 @@
 # Build stage
 FROM --platform=$BUILDPLATFORM node:20 AS build
 
+# Accept build arguments for environment variables with defaults
+ARG UNSPLASH_KEY=DUMMY_UNSPLASH_KEY
+ARG UNSPLASH_CLIENT_ID=DUMMY_UNSPLASH_CLIENT_ID
+
+# Set as environment variables for the build
+ENV UNSPLASH_KEY=$UNSPLASH_KEY
+ENV UNSPLASH_CLIENT_ID=$UNSPLASH_CLIENT_ID
+
 WORKDIR /app
 
 # Install git and configure for HTTPS
@@ -24,7 +32,7 @@ RUN npm run prepare
 
 # Copy source and build
 COPY . .
-RUN npm run lint && npm run buildFrontend:prodWeb
+RUN npm run env && npm run lint && npm run buildFrontend:prodWeb
 
 # Production stage
 FROM nginx:1-alpine
