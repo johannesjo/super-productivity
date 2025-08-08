@@ -12,6 +12,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { DialogEditTaskRepeatCfgComponent } from '../../features/task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component';
 import { TaskRepeatCfgService } from '../../features/task-repeat-cfg/task-repeat-cfg.service';
 import { DialogScheduleTaskComponent } from '../../features/planner/dialog-schedule-task/dialog-schedule-task.component';
+import { DateTimeFormatService } from '../../core/date-time-format/date-time-format.service';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { TaskTitleComponent } from '../../ui/task-title/task-title.component';
 import { MatRipple } from '@angular/material/core';
@@ -28,6 +29,7 @@ import {
 import { selectTaskRepeatCfgsSortedByTitleAndProject } from '../../features/task-repeat-cfg/store/task-repeat-cfg.selectors';
 import { getNextRepeatOccurrence } from '../../features/task-repeat-cfg/store/get-next-repeat-occurrence.util';
 import { ShortDate2Pipe } from '../../ui/pipes/short-date2.pipe';
+import { ShortTimePipe } from '../../ui/pipes/short-time.pipe';
 import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
@@ -50,6 +52,7 @@ import { MatTooltip } from '@angular/material/tooltip';
     TagListComponent,
     PlannerTaskComponent,
     ShortDate2Pipe,
+    ShortTimePipe,
     MatTooltip,
   ],
 })
@@ -58,6 +61,7 @@ export class ScheduledListPageComponent {
   private _store = inject(Store);
   private _translateService = inject(TranslateService);
   private _taskRepeatCfgService = inject(TaskRepeatCfgService);
+  private _dateTimeFormatService = inject(DateTimeFormatService);
   private locale = inject(LOCALE_ID);
 
   T: typeof T = T;
@@ -101,7 +105,11 @@ export class ScheduledListPageComponent {
   }
 
   getRepeatInfoText(repeatCfg: TaskRepeatCfg): string {
-    const [key, params] = getTaskRepeatInfoText(repeatCfg, this.locale);
+    const [key, params] = getTaskRepeatInfoText(
+      repeatCfg,
+      this._dateTimeFormatService.currentLocale,
+      this._dateTimeFormatService,
+    );
     return this._translateService.instant(key, params);
   }
 

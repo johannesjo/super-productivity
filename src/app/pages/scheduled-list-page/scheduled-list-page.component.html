@@ -88,11 +88,11 @@
               <div class="date-and-time-left">
                 <div class="date hide-xs">
                   {{ task.dueWithTime | date: 'EE, d MMM, ' }}
-                  {{ task.dueWithTime | date: 'shortTime' }}
+                  {{ task.dueWithTime | shortTime }}
                 </div>
                 <div class="date show-xs-only">
                   {{ task.dueWithTime | date: 'd MMM, ' }},
-                  {{ task.dueWithTime | date: 'shortTime' }}
+                  {{ task.dueWithTime | shortTime }}
                 </div>
                 <div class="time-left">({{ task.dueWithTime | humanizeTimestamp }})</div>
               </div>

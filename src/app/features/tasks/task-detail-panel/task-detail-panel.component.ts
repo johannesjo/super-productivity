@@ -53,6 +53,7 @@ import { IS_MOBILE } from '../../../util/is-mobile';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { getTaskRepeatInfoText } from './get-task-repeat-info-text.util';
+import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { Store } from '@ngrx/store';
@@ -114,6 +115,7 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   private _translateService = inject(TranslateService);
   private _destroyRef = inject(DestroyRef);
   private _locale = inject(LOCALE_ID);
+  private _dateTimeFormatService = inject(DateTimeFormatService);
 
   // Inputs
   task = input.required<TaskWithSubTasks>();
@@ -166,7 +168,11 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
     this._repeatCfg$.pipe(
       filter((cfg): cfg is NonNullable<typeof cfg> => !!cfg),
       map((repeatCfg) => {
-        const [key, params] = getTaskRepeatInfoText(repeatCfg, this._locale);
+        const [key, params] = getTaskRepeatInfoText(
+          repeatCfg,
+          this._locale,
+          this._dateTimeFormatService,
+        );
         return this._translateService.instant(key, params);
       }),
     ),

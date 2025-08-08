@@ -6,7 +6,7 @@
   (mousemove)="onMoveOverGrid($event)"
 >
   <!-- Time -->
-  @for (time of times; track $index) {
+  @for (time of times(); track $index) {
     <div
       class="time"
       style="grid-row: {{ $index * FH + 1 }}"

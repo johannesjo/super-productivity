@@ -1,15 +1,14 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   ElementRef,
   inject,
   input,
-  LOCALE_ID,
   OnDestroy,
   OnInit,
-  viewChild,
   signal,
-  computed,
+  viewChild,
 } from '@angular/core';
 import { ScheduleEvent } from '../schedule.model';
 import {
@@ -31,6 +30,7 @@ import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { DRAG_DELAY_FOR_TOUCH } from '../../../app.constants';
 import { MatTooltip } from '@angular/material/tooltip';
 import { Log } from '../../../core/log';
+import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
 
 const D_HOURS = 24;
 const DRAG_CLONE_CLASS = 'drag-clone';
@@ -55,7 +55,7 @@ const IS_NOT_DRAGGING_CLASS = 'is-not-dragging';
 })
 export class ScheduleWeekComponent implements OnInit, OnDestroy {
   private _store = inject(Store);
-  private locale = inject(LOCALE_ID);
+  private _dateTimeFormatService = inject(DateTimeFormatService);
 
   events = input<ScheduleEvent[] | null>([]);
   beyondBudget = input<ScheduleEvent[][] | null>([]);
@@ -74,23 +74,23 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
     (_, index) => index % FH === 0,
   );
 
-  is12HourFormat = Intl.DateTimeFormat(this.locale, { hour: 'numeric' }).resolvedOptions()
-    .hour12;
-
-  times: string[] = this.rowsByNr.map((_, index) => {
-    if (this.is12HourFormat) {
-      if (index === 0) {
-        return '12:00 AM'; // Midnight
-      } else if (index === 12) {
-        return '12:00 PM'; // Noon
-      } else if (index < 12) {
-        return index.toString() + ':00 AM';
+  times = computed(() => {
+    const is12Hour = !this._dateTimeFormatService.is24HourFormat;
+    return this.rowsByNr.map((_, index) => {
+      if (is12Hour) {
+        if (index === 0) {
+          return '12:00 AM'; // Midnight
+        } else if (index === 12) {
+          return '12:00 PM'; // Noon
+        } else if (index < 12) {
+          return index.toString() + ':00 AM';
+        } else {
+          return (index - 12).toString() + ':00 PM';
+        }
       } else {
-        return (index - 12).toString() + ':00 PM';
+        return index.toString() + ':00';
       }
-    } else {
-      return index.toString() + ':00';
-    }
+    });
   });
 
   endOfDayColRowStart = signal<number>(D_HOURS * 0.5 * FH);

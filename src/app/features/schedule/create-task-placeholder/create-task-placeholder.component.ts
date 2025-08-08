@@ -21,11 +21,11 @@ import { DatePipe } from '@angular/common';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { Store } from '@ngrx/store';
 import { getLocalDateStr } from '../../../util/get-local-date-str';
-import { ShortTime2Pipe } from '../../../ui/pipes/short-time2.pipe';
+import { ShortTimeHtmlPipe } from '../../../ui/pipes/short-time-html.pipe';
 
 @Component({
   selector: 'create-task-placeholder',
-  imports: [MatIcon, DatePipe, ShortTime2Pipe],
+  imports: [MatIcon, DatePipe, ShortTimeHtmlPipe],
   templateUrl: './create-task-placeholder.component.html',
   styleUrl: './create-task-placeholder.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

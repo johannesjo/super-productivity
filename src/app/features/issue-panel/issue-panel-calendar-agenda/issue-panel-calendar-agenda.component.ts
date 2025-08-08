@@ -19,12 +19,19 @@ import { ICalIssueReduced } from '../../issue/providers/calendar/calendar.model'
 import { getErrorTxt } from 'src/app/util/get-error-text';
 import { getLocalDateStr } from '../../../util/get-local-date-str';
 import { DatePipe } from '@angular/common';
+import { ShortTimePipe } from '../../../ui/pipes/short-time.pipe';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 import { Log } from '../../../core/log';
 
 @Component({
   selector: 'issue-panel-calendar-agenda',
-  imports: [ErrorCardComponent, IssuePreviewItemComponent, MatProgressSpinner, DatePipe],
+  imports: [
+    ErrorCardComponent,
+    IssuePreviewItemComponent,
+    MatProgressSpinner,
+    DatePipe,
+    ShortTimePipe,
+  ],
   templateUrl: './issue-panel-calendar-agenda.component.html',
   styleUrl: './issue-panel-calendar-agenda.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

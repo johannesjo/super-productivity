@@ -1,22 +1,26 @@
 import { inject, LOCALE_ID, Pipe, PipeTransform } from '@angular/core';
 import { isToday } from '../../util/is-today.util';
-import { ShortTime2Pipe } from './short-time2.pipe';
+import { ShortTimeHtmlPipe } from './short-time-html.pipe';
 import { formatMonthDay } from '../../util/format-month-day.util';
+import { DateTimeFormatService } from '../../core/date-time-format/date-time-format.service';
 
 @Pipe({ name: 'shortPlannedAt', standalone: true })
 export class ShortPlannedAtPipe implements PipeTransform {
-  private _shortTime2Pipe = inject(ShortTime2Pipe);
-  private locale = inject(LOCALE_ID);
+  private _shortTimeHtmlPipe = inject(ShortTimeHtmlPipe);
+  private _dateTimeFormatService = inject(DateTimeFormatService);
+  private _defaultLocale = inject(LOCALE_ID);
 
-  transform(value?: number | null, ...args: unknown[]): string | null {
+  transform(value?: number | null, timeOnly?: boolean): string | null {
     if (typeof value !== 'number') {
       return null;
     }
 
-    if (isToday(value) || args[0] === 'timeOnly') {
-      return this._shortTime2Pipe.transform(value, ...args);
+    if (isToday(value) || timeOnly) {
+      return this._shortTimeHtmlPipe.transform(value);
     } else {
-      return formatMonthDay(new Date(value), this.locale);
+      // Use the configured locale if available, otherwise fall back to default
+      const locale = this._dateTimeFormatService.currentLocale || this._defaultLocale;
+      return formatMonthDay(new Date(value), locale);
     }
   }
 }
