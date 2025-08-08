@@ -110,21 +110,39 @@ export class AddTaskBarSearchModeComponent implements AfterViewInit {
                 }) as AddTaskSuggestion,
             ),
           ),
-          catchError(() => of([])),
+          tap(() => this.isLoading.set(false)),
+          catchError(() => {
+            this.isLoading.set(false);
+            return of([]);
+          }),
         );
       } else {
-        return this._workContextService.activeWorkContextTypeAndId$.pipe(
-          switchMap(({ activeType, activeId }) => {
-            return this._addTaskBarService.getFilteredIssueSuggestions$(
-              this.searchControl,
-              of(false),
-              this.isLoading,
-            );
+        // Search existing tasks
+        return this._taskService.taskFeatureStore$.pipe(
+          map((tasks) => {
+            const searchLower = searchTerm.toLowerCase();
+            return tasks
+              .filter(
+                (task) => !task.isDone && task.title.toLowerCase().includes(searchLower),
+              )
+              .slice(0, 20) // Limit results
+              .map(
+                (task) =>
+                  ({
+                    title: task.title,
+                    taskId: task.id,
+                    projectId: task.projectId,
+                  }) as AddTaskSuggestion,
+              );
+          }),
+          tap(() => this.isLoading.set(false)),
+          catchError(() => {
+            this.isLoading.set(false);
+            return of([]);
           }),
         );
       }
     }),
-    tap(() => this.isLoading.set(false)),
     map((suggestions) => {
       const taskIdsToExclude = this.taskIdsToExclude() || [];
       return suggestions.filter((s) => {
