@@ -1,3 +1,67 @@
+# [14.3.0](https://github.com/johannesjo/super-productivity/compare/v14.2.6...v14.3.0) (2025-08-08)
+
+### Bug Fixes
+
+- allow hostnames in caldav url ([f7c9af6](https://github.com/johannesjo/super-productivity/commit/f7c9af6478321dcaa7c78b47753cfe5967af0d71))
+- app not starting ([1033eac](https://github.com/johannesjo/super-productivity/commit/1033eacb7d38ed6dd3f9d3a4bc5887eed8b2d536))
+- button only shown if there are any visible projects ([1ca503c](https://github.com/johannesjo/super-productivity/commit/1ca503cb5924d302a114efbd7fe252c1f441bbbf)), closes [#4883](https://github.com/johannesjo/super-productivity/issues/4883)
+- **ci:** correct e2e test result path and improve test stability ([9134bb9](https://github.com/johannesjo/super-productivity/commit/9134bb9f4b2fc1bb3963b05ca508c9a3d2b87f36))
+- **ci:** install Playwright browsers before running e2e tests ([2a0dbad](https://github.com/johannesjo/super-productivity/commit/2a0dbad7dfa4076df7070946d1dec4456501cd0e))
+- drop attachment on task only working if not hitting textarea ([35d7e49](https://github.com/johannesjo/super-productivity/commit/35d7e49f309ca629e5c86f5c0c48ed7858431d34))
+- **e2e:** add asset check to 'disable and re-enable plugin' test ([ad81f73](https://github.com/johannesjo/super-productivity/commit/ad81f7377468197a0aa5918f8c73ddf684b8c90a))
+- **e2e:** handle plugin asset loading issues in CI ([9f03a3a](https://github.com/johannesjo/super-productivity/commit/9f03a3ad536fa54ed9a40db5439d32ce568ed4d4))
+- **e2e:** increase timeout for performance test to 60 seconds ([43230c3](https://github.com/johannesjo/super-productivity/commit/43230c3f0c909c79fac89a4067ed16677728e8e7))
+- **e2e:** make 'should add multiple scheduled tasks' test more reliable ([55251f5](https://github.com/johannesjo/super-productivity/commit/55251f5e0d3b3e900dbce6441443f0621efc4214))
+- **e2e:** make plugin tests reliable in CI environment ([e2722f1](https://github.com/johannesjo/super-productivity/commit/e2722f17f969d2dcf2d2ecf2165d3f2bf5467f5f))
+- **e2e:** remove :has() selector that may not be supported in CI ([bea031b](https://github.com/johannesjo/super-productivity/commit/bea031b3e16cd03d5a3ac8c4d8bb6256383ae1a7))
+- encode other special chars for github api [#4913](https://github.com/johannesjo/super-productivity/issues/4913) ([960330d](https://github.com/johannesjo/super-productivity/commit/960330dd56c21cf64f8c88deae9c2817af051957))
+- encryption password being overwritten by certain actions [#4642](https://github.com/johannesjo/super-productivity/issues/4642) ([ec44bd1](https://github.com/johannesjo/super-productivity/commit/ec44bd1391ed87be7ec36a0395f8700d87862850))
+- exit behavior to be faster ([0140beb](https://github.com/johannesjo/super-productivity/commit/0140bebfaa265df44bccef41f5d3d8f9d8866f14))
+- file saving not working on Ubuntu snap [#4901](https://github.com/johannesjo/super-productivity/issues/4901) ([62c2649](https://github.com/johannesjo/super-productivity/commit/62c2649320d3edd1abdaf0eb979d79849bd32270))
+- handle error more gracefully [#4907](https://github.com/johannesjo/super-productivity/issues/4907) ([e3015b3](https://github.com/johannesjo/super-productivity/commit/e3015b3b7a189e498c9eec50dcc96ed62bf103dd))
+- input duration not accepting values like 90m ([8c0692a](https://github.com/johannesjo/super-productivity/commit/8c0692a90409e7c980ce03d4e86a36200bcb64e7))
+- model validation error ([e16fd55](https://github.com/johannesjo/super-productivity/commit/e16fd55d75cf9dcbd3ba28dc64ce4ba73bce77e9)), closes [#4881](https://github.com/johannesjo/super-productivity/issues/4881)
+- old archive sub tasks not being properly validated [#4459](https://github.com/johannesjo/super-productivity/issues/4459) ([e8624f7](https://github.com/johannesjo/super-productivity/commit/e8624f72107911765a413ce09971fc1fd9ae842a))
+- only show non inbox projects for hide and show ([f53bd27](https://github.com/johannesjo/super-productivity/commit/f53bd27bb2fc68f392be98ff460013f05ee6cbc2)), closes [#4883](https://github.com/johannesjo/super-productivity/issues/4883)
+- overlay indicator ([55a92e4](https://github.com/johannesjo/super-productivity/commit/55a92e44d9a2339f379172983e9494545b40a1ce))
+- reminder for done task being shown [#4656](https://github.com/johannesjo/super-productivity/issues/4656) ([dc8116c](https://github.com/johannesjo/super-productivity/commit/dc8116cce19f3b71107679f0cae6595b599f1542))
+- **styles:** fix CSS linting warnings and optimize SCSS files ([6560288](https://github.com/johannesjo/super-productivity/commit/6560288ac06368f4095dd0c640f075de5986a728))
+- styling for simple counter nav ([9258e9f](https://github.com/johannesjo/super-productivity/commit/9258e9ff13a347bd5b88431cd2caa35940391f41)), closes [#4912](https://github.com/johannesjo/super-productivity/issues/4912)
+- sub-tasks getting duplicated on move to project ([b8372bc](https://github.com/johannesjo/super-productivity/commit/b8372bce9a7edabbeb84f7ab4ea6d744bd67b45e)), closes [#4882](https://github.com/johannesjo/super-productivity/issues/4882)
+- task focus border ([0880bf2](https://github.com/johannesjo/super-productivity/commit/0880bf2e1c2588dae6b62dff4f8012eb55ee2c98))
+- **test:** fix failing dropbox tests and scss lint issues ([3777672](https://github.com/johannesjo/super-productivity/commit/3777672711b33526c482126d7503009776f5d64a))
+- **timezone:** improve timezone-independent tests and date formatting ([413c857](https://github.com/johannesjo/super-productivity/commit/413c85733248a8ba914988aef162729bf078defe))
+- typing ([5c3b57d](https://github.com/johannesjo/super-productivity/commit/5c3b57d84adbd621e6478b804dec3aab274d4cc6))
+- typing errors ([f56f24e](https://github.com/johannesjo/super-productivity/commit/f56f24efe96112ae31219822f529e9dcf16385c0))
+- typing errors ([6b93b6d](https://github.com/johannesjo/super-productivity/commit/6b93b6dc359bb50513db9e21ff90eccbf35e2695))
+- **unsplash:** use environment variables for API authentication and increase debounce time ([0971ddb](https://github.com/johannesjo/super-productivity/commit/0971ddb7ce77b83b9df01b778bcbb6eed80feece))
+
+### Code Refactoring
+
+- **e2e:** simplify Playwright commands to essentials ([41b287f](https://github.com/johannesjo/super-productivity/commit/41b287fd9df937df99a2b25859d143d9d8621862))
+
+### Features
+
+- add info for webdav ([5025cc4](https://github.com/johannesjo/super-productivity/commit/5025cc4ec5dbc3e31c86334a57c421c804a5f897))
+- add task toggle start action to protocol handler ([1e91815](https://github.com/johannesjo/super-productivity/commit/1e91815bc2c99643db9a5792e54b6eeab6e68f14))
+- **dateFormat:** add more consistent date handling [#359](https://github.com/johannesjo/super-productivity/issues/359) ([909c20f](https://github.com/johannesjo/super-productivity/commit/909c20fdf11555adb45102de1d8a0ca3f0ffcd52))
+- **dateFormat:** make locale configurable [#359](https://github.com/johannesjo/super-productivity/issues/359) ([f2043e8](https://github.com/johannesjo/super-productivity/commit/f2043e80c540e700dfb551e92279ac9993a48f17))
+- **imagePicker:** first draft ([b33e63a](https://github.com/johannesjo/super-productivity/commit/b33e63aff5b508f686ff1a67e6aa5c5000b700db))
+- migrate currentTaskId to signal ([9f79098](https://github.com/johannesjo/super-productivity/commit/9f79098a8402fd21a2bfe59c0ae3b4fe1ee644a4))
+- **pipes:** add LocaleDatePipe to replace Angular's DatePipe [#359](https://github.com/johannesjo/super-productivity/issues/359) ([82f9e21](https://github.com/johannesjo/super-productivity/commit/82f9e21577bfd2f76603fd951c6af3155068e16e))
+- **taskRepeat:** adjust model for last creation to be day string instead of timestamp to avoid timezone issues ([4f186f4](https://github.com/johannesjo/super-productivity/commit/4f186f402cd455c5300d04bb1530cf117339d138))
+- **taskRepeat:** make new model work with old model ([64431b3](https://github.com/johannesjo/super-productivity/commit/64431b376bb443952d37129c7b444d6aa2ea7e9c))
+- **unsplash-picker:** add context-aware search defaults and higher resolution images ([0129cdc](https://github.com/johannesjo/super-productivity/commit/0129cdc51f582a62f42a80d9daf6ab1ca48bdb39))
+- **unsplash-picker:** confirm with requirements of unsplash api ([f2811c6](https://github.com/johannesjo/super-productivity/commit/f2811c680193c8384a17c067286483347e9d734b))
+- **unsplash-picker:** convert to signals and add dark theme support ([62d0e1f](https://github.com/johannesjo/super-productivity/commit/62d0e1f217dc9fda32384c4c9c29af72da6f721c))
+- **unsplash-picker:** extract translations ([654b956](https://github.com/johannesjo/super-productivity/commit/654b9562a1f8ffda467d14553c8087a6545de682))
+- **unsplash-picker:** make more visible by whom the images are ([a98f57c](https://github.com/johannesjo/super-productivity/commit/a98f57c2d06d42ea47c7fd2909f18d553fe18dc2))
+- **unsplash-picker:** polish ([ee2966f](https://github.com/johannesjo/super-productivity/commit/ee2966f3bc4b3e668dec2d8024019f386cba7254))
+
+### BREAKING CHANGES
+
+- **e2e:** Removed e2e:playwright:quick, e2e:playwright:failures, and e2e:playwright:summary commands
+
 ## [14.2.6](https://github.com/johannesjo/super-productivity/compare/v14.2.5...v14.2.6) (2025-08-01)
 
 ### Bug Fixes
