@@ -1,7 +1,7 @@
 import { AppDataCompleteNew } from '../pfapi-config';
 import { CrossModelMigrateFn } from '../api';
 import { TODAY_TAG } from '../../features/tag/tag.const';
-import { getLocalDateStr } from '../../util/get-local-date-str';
+import { getDbDateStr } from '../../util/get-db-date-str';
 import { isToday } from '../../util/is-today.util';
 import { TaskCopy } from '../../features/tasks/task.model';
 import { EntityState } from '@ngrx/entity';
@@ -51,7 +51,7 @@ export const crossModelMigration3: CrossModelMigrateFn = ((
           }
         } else {
           // @ts-ignore
-          task.dueDay = getLocalDateStr();
+          task.dueDay = getDbDateStr();
         }
       }
     });

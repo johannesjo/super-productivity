@@ -16,7 +16,7 @@ import { selectOverdueTasksOnToday, selectTasksDueForDay } from './task.selector
 import { SyncWrapperService } from '../../../imex/sync/sync-wrapper.service';
 import { selectTodayTaskIds } from '../../work-context/store/work-context.selectors';
 import { AddTasksForTomorrowService } from '../../add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
-import { getLocalDateStr } from '../../../util/get-local-date-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import { environment } from '../../../../environments/environment';
 import { TaskLog } from '../../../core/log';
 import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
@@ -101,7 +101,7 @@ export class TaskDueEffects {
           debounceTime(2000), // Wait a bit longer to ensure all other effects have run
           switchMap(() => this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$),
           switchMap(() => {
-            const todayStr = getLocalDateStr();
+            const todayStr = getDbDateStr();
             return this._store$.select(selectTasksDueForDay, { day: todayStr }).pipe(
               first(),
               withLatestFrom(this._store$.select(selectTodayTaskIds)),

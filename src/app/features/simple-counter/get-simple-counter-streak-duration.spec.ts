@@ -1,17 +1,17 @@
 import { getSimpleCounterStreakDuration } from './get-simple-counter-streak-duration';
 import { SimpleCounterCopy } from './simple-counter.model';
-import { getLocalDateStr } from '../../util/get-local-date-str';
+import { getDbDateStr } from '../../util/get-db-date-str';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable no-mixed-operators */
 describe('getSimpleCounterStreakDuration()', () => {
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
-  const Y_STR = getLocalDateStr(yesterday);
+  const Y_STR = getDbDateStr(yesterday);
 
   const twoDaysAgo = new Date();
   twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-  const TWO_DAYS_AGO_STR = getLocalDateStr(twoDaysAgo);
+  const TWO_DAYS_AGO_STR = getDbDateStr(twoDaysAgo);
 
   const T1: Partial<SimpleCounterCopy>[] = [
     {
@@ -21,7 +21,7 @@ describe('getSimpleCounterStreakDuration()', () => {
     },
     {
       id: '1',
-      countOnDay: { [getLocalDateStr()]: 1 },
+      countOnDay: { [getDbDateStr()]: 1 },
       isTrackStreaks: true,
       streakMinValue: 2,
       // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -29,7 +29,7 @@ describe('getSimpleCounterStreakDuration()', () => {
     },
     {
       id: '1',
-      countOnDay: { [getLocalDateStr()]: 1 },
+      countOnDay: { [getDbDateStr()]: 1 },
       isTrackStreaks: true,
       streakMinValue: 1,
       streakWeekDays: {
@@ -52,7 +52,7 @@ describe('getSimpleCounterStreakDuration()', () => {
   const T2: Partial<SimpleCounterCopy>[] = [
     {
       id: '1',
-      countOnDay: { [getLocalDateStr()]: 1 },
+      countOnDay: { [getDbDateStr()]: 1 },
       isTrackStreaks: true,
       streakMinValue: 1,
       streakWeekDays: {
@@ -67,7 +67,7 @@ describe('getSimpleCounterStreakDuration()', () => {
     },
     {
       id: '1',
-      countOnDay: { [getLocalDateStr()]: 3, [Y_STR]: 3, [TWO_DAYS_AGO_STR]: 0 },
+      countOnDay: { [getDbDateStr()]: 3, [Y_STR]: 3, [TWO_DAYS_AGO_STR]: 0 },
       isTrackStreaks: true,
       streakMinValue: 1,
       streakWeekDays: {
@@ -93,7 +93,7 @@ describe('getSimpleCounterStreakDuration()', () => {
   const T3: Partial<SimpleCounterCopy>[] = [
     {
       id: '1',
-      countOnDay: { [getLocalDateStr()]: 1, [Y_STR]: 1 },
+      countOnDay: { [getDbDateStr()]: 1, [Y_STR]: 1 },
       isTrackStreaks: true,
       streakMinValue: 1,
       streakWeekDays: {
@@ -108,7 +108,7 @@ describe('getSimpleCounterStreakDuration()', () => {
     },
     {
       id: '1',
-      countOnDay: { [getLocalDateStr()]: 3, [Y_STR]: 3, [TWO_DAYS_AGO_STR]: 3 },
+      countOnDay: { [getDbDateStr()]: 3, [Y_STR]: 3, [TWO_DAYS_AGO_STR]: 3 },
       isTrackStreaks: true,
       streakMinValue: 1,
       streakWeekDays: {
@@ -135,20 +135,20 @@ describe('getSimpleCounterStreakDuration()', () => {
     {
       id: '1',
       countOnDay: {
-        [getLocalDateStr()]: 1,
-        [getLocalDateStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 4 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 5 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 8 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 9 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 10 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 11 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 12 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 13 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr()]: 1,
+        [getDbDateStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 4 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 5 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 8 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 9 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 10 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 11 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 12 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 13 * 24 * 60 * 60 * 1000))]: 1,
       },
       isTrackStreaks: true,
       streakMinValue: 1,
@@ -165,22 +165,22 @@ describe('getSimpleCounterStreakDuration()', () => {
     {
       id: '1',
       countOnDay: {
-        [getLocalDateStr()]: 1,
-        [getLocalDateStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 4 * 24 * 60 * 60 * 1000))]: 0,
-        [getLocalDateStr(new Date(Date.now() - 5 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 8 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 9 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 10 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 11 * 24 * 60 * 60 * 1000))]: 0,
-        [getLocalDateStr(new Date(Date.now() - 12 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 13 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 14 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 15 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr()]: 1,
+        [getDbDateStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 4 * 24 * 60 * 60 * 1000))]: 0,
+        [getDbDateStr(new Date(Date.now() - 5 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 8 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 9 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 10 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 11 * 24 * 60 * 60 * 1000))]: 0,
+        [getDbDateStr(new Date(Date.now() - 12 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 13 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 14 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 15 * 24 * 60 * 60 * 1000))]: 1,
       },
       isTrackStreaks: true,
       streakMinValue: 1,
@@ -208,19 +208,19 @@ describe('getSimpleCounterStreakDuration()', () => {
     {
       id: '1',
       countOnDay: {
-        [getLocalDateStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 4 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 5 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 8 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 9 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 10 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 11 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 12 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 13 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 4 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 5 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 8 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 9 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 10 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 11 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 12 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 13 * 24 * 60 * 60 * 1000))]: 1,
       },
       isTrackStreaks: true,
       streakMinValue: 1,
@@ -237,22 +237,22 @@ describe('getSimpleCounterStreakDuration()', () => {
     {
       id: '1',
       countOnDay: {
-        [getLocalDateStr()]: 1,
-        [getLocalDateStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 4 * 24 * 60 * 60 * 1000))]: 0,
-        [getLocalDateStr(new Date(Date.now() - 5 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 8 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 9 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 10 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 11 * 24 * 60 * 60 * 1000))]: 0,
-        [getLocalDateStr(new Date(Date.now() - 12 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 13 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 14 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 15 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr()]: 1,
+        [getDbDateStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 4 * 24 * 60 * 60 * 1000))]: 0,
+        [getDbDateStr(new Date(Date.now() - 5 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 8 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 9 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 10 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 11 * 24 * 60 * 60 * 1000))]: 0,
+        [getDbDateStr(new Date(Date.now() - 12 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 13 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 14 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 15 * 24 * 60 * 60 * 1000))]: 2,
       },
       isTrackStreaks: true,
       streakMinValue: 2,
@@ -279,19 +279,19 @@ describe('getSimpleCounterStreakDuration()', () => {
     {
       id: '1',
       countOnDay: {
-        [getLocalDateStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))]: 0,
-        [getLocalDateStr(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 4 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 5 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 8 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 9 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 10 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 11 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 12 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 13 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))]: 0,
+        [getDbDateStr(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 4 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 5 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 8 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 9 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 10 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 11 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 12 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 13 * 24 * 60 * 60 * 1000))]: 1,
       },
       isTrackStreaks: true,
       streakMinValue: 1,
@@ -308,22 +308,22 @@ describe('getSimpleCounterStreakDuration()', () => {
     {
       id: '1',
       countOnDay: {
-        [getLocalDateStr()]: 1,
-        [getLocalDateStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))]: 0,
-        [getLocalDateStr(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 4 * 24 * 60 * 60 * 1000))]: 0,
-        [getLocalDateStr(new Date(Date.now() - 5 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 8 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 9 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 10 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 11 * 24 * 60 * 60 * 1000))]: 0,
-        [getLocalDateStr(new Date(Date.now() - 12 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 13 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 14 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 15 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr()]: 1,
+        [getDbDateStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))]: 0,
+        [getDbDateStr(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 4 * 24 * 60 * 60 * 1000))]: 0,
+        [getDbDateStr(new Date(Date.now() - 5 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 8 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 9 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 10 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 11 * 24 * 60 * 60 * 1000))]: 0,
+        [getDbDateStr(new Date(Date.now() - 12 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 13 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 14 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 15 * 24 * 60 * 60 * 1000))]: 2,
       },
       isTrackStreaks: true,
       streakMinValue: 2,
@@ -345,7 +345,7 @@ describe('getSimpleCounterStreakDuration()', () => {
       expect(getSimpleCounterStreakDuration(sc as SimpleCounterCopy)).toBe(0);
 
       (sc as SimpleCounterCopy).countOnDay[
-        getLocalDateStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))
+        getDbDateStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))
       ] = 2;
 
       expect(getSimpleCounterStreakDuration(sc as SimpleCounterCopy)).toBe(13);
@@ -356,19 +356,19 @@ describe('getSimpleCounterStreakDuration()', () => {
     {
       id: '1',
       countOnDay: {
-        [getLocalDateStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 4 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 5 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 8 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 9 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 10 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 11 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 12 * 24 * 60 * 60 * 1000))]: 1,
-        [getLocalDateStr(new Date(Date.now() - 13 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 4 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 5 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 8 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 9 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 10 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 11 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 12 * 24 * 60 * 60 * 1000))]: 1,
+        [getDbDateStr(new Date(Date.now() - 13 * 24 * 60 * 60 * 1000))]: 1,
       },
       isTrackStreaks: true,
       streakMinValue: 1,
@@ -385,22 +385,22 @@ describe('getSimpleCounterStreakDuration()', () => {
     {
       id: '1',
       countOnDay: {
-        [getLocalDateStr()]: 1,
-        [getLocalDateStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 4 * 24 * 60 * 60 * 1000))]: 0,
-        [getLocalDateStr(new Date(Date.now() - 5 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 8 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 9 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 10 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 11 * 24 * 60 * 60 * 1000))]: 0,
-        [getLocalDateStr(new Date(Date.now() - 12 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 13 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 14 * 24 * 60 * 60 * 1000))]: 2,
-        [getLocalDateStr(new Date(Date.now() - 15 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr()]: 1,
+        [getDbDateStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 4 * 24 * 60 * 60 * 1000))]: 0,
+        [getDbDateStr(new Date(Date.now() - 5 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 8 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 9 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 10 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 11 * 24 * 60 * 60 * 1000))]: 0,
+        [getDbDateStr(new Date(Date.now() - 12 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 13 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 14 * 24 * 60 * 60 * 1000))]: 2,
+        [getDbDateStr(new Date(Date.now() - 15 * 24 * 60 * 60 * 1000))]: 2,
       },
       isTrackStreaks: true,
       streakMinValue: 2,
@@ -422,7 +422,7 @@ describe('getSimpleCounterStreakDuration()', () => {
       expect(getSimpleCounterStreakDuration(sc as SimpleCounterCopy)).toBe(13);
 
       (sc as SimpleCounterCopy).countOnDay[
-        getLocalDateStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))
+        getDbDateStr(new Date(Date.now() - 1 * 24 * 60 * 60 * 1000))
       ] = 0;
 
       expect(getSimpleCounterStreakDuration(sc as SimpleCounterCopy)).toBe(0);

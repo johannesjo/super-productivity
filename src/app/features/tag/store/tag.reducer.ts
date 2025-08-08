@@ -29,7 +29,7 @@ import {
   upsertTag,
 } from './tag.actions';
 import { PlannerActions } from '../../planner/store/planner.actions';
-import { getLocalDateStr } from '../../../util/get-local-date-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import { Log } from '../../../core/log';
 
 export const TAG_FEATURE_NAME = 'tag';
@@ -118,7 +118,7 @@ export const tagReducer = createReducer<TagState>(
   // NOTE: transferTask is now handled in planner-shared.reducer.ts
 
   on(PlannerActions.planTaskForDay, (state, { task, day, isAddToTop }) => {
-    const todayStr = getLocalDateStr();
+    const todayStr = getDbDateStr();
     const todayTag = state.entities[TODAY_TAG.id] as Tag;
 
     if (day === todayStr && !todayTag.taskIds.includes(task.id)) {

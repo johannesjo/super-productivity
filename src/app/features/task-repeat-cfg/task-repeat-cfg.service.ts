@@ -29,8 +29,7 @@ import { getDateTimeFromClockString } from '../../util/get-date-time-from-clock-
 import { isSameDay } from '../../util/is-same-day';
 import { remindOptionToMilliseconds } from '../tasks/util/remind-option-to-milliseconds';
 import { getNewestPossibleDueDate } from './store/get-newest-possible-due-date.util';
-import { getLocalDateStr } from '../../util/get-local-date-str';
-import { getWorklogStr } from '../../util/get-work-log-str';
+import { getDbDateStr } from '../../util/get-db-date-str';
 import { TODAY_TAG } from '../tag/tag.const';
 import {
   selectAllTaskRepeatCfgs,
@@ -207,7 +206,7 @@ export class TaskRepeatCfgService {
           // NOTE if moving this to top isCreateNew check above would not work as intended
           // we use created also for the repeat day label for past tasks
           created: targetCreated.getTime(),
-          dueDay: getLocalDateStr(targetCreated),
+          dueDay: getDbDateStr(targetCreated),
         },
         workContextType: this._workContextService
           .activeWorkContextType as WorkContextType,
@@ -220,7 +219,7 @@ export class TaskRepeatCfgService {
           id: taskRepeatCfg.id,
           changes: {
             lastTaskCreation: targetCreated.getTime(),
-            lastTaskCreationDay: getWorklogStr(targetCreated),
+            lastTaskCreationDay: getDbDateStr(targetCreated),
           },
         },
       }),
@@ -259,7 +258,7 @@ export class TaskRepeatCfgService {
           projectId: taskRepeatCfg.projectId || undefined,
           notes: taskRepeatCfg.notes || '',
           // always due for today
-          dueDay: getLocalDateStr(),
+          dueDay: getDbDateStr(),
           tagIds: taskRepeatCfg.tagIds.filter((tagId) => tagId !== TODAY_TAG.id),
         },
       }),

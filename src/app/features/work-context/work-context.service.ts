@@ -64,7 +64,7 @@ import { TimeTrackingActions } from '../time-tracking/store/time-tracking.action
 import { TaskArchiveService } from '../time-tracking/task-archive.service';
 import { INBOX_PROJECT } from '../project/project.const';
 import { selectProjectById } from '../project/store/project.selectors';
-import { getLocalDateStr } from '../../util/get-local-date-str';
+import { getDbDateStr } from '../../util/get-db-date-str';
 import { Log } from '../../core/log';
 
 @Injectable({
@@ -467,7 +467,7 @@ export class WorkContextService {
     const tasksDoneToday: ArchiveTask[] = ids
       .map((id) => entities[id])
       .filter(
-        (t) => !!t && !t.parentId && t.doneOn && getLocalDateStr(t.doneOn) === day,
+        (t) => !!t && !t.parentId && t.doneOn && getDbDateStr(t.doneOn) === day,
       ) as ArchiveTask[];
 
     let tasksToConsider: ArchiveTask[] = [];

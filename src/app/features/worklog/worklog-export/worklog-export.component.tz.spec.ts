@@ -1,4 +1,4 @@
-import { getLocalDateStr } from '../../../util/get-local-date-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 
 describe('WorklogExportComponent timezone test', () => {
   describe('fileName generation', () => {
@@ -11,7 +11,7 @@ describe('WorklogExportComponent timezone test', () => {
       const rangeEnd = new Date(2025, 0, 17, 20, 0, 0); // Jan 17, 2025 at 8 PM local time
 
       const fileName =
-        'tasks' + getLocalDateStr(rangeStart) + '-' + getLocalDateStr(rangeEnd) + '.csv';
+        'tasks' + getDbDateStr(rangeStart) + '-' + getDbDateStr(rangeEnd) + '.csv';
 
       console.log('WorklogExport fileName test:', {
         rangeStart: rangeStart.toISOString(),
@@ -31,7 +31,7 @@ describe('WorklogExportComponent timezone test', () => {
       const rangeEnd = new Date(2025, 0, 17, 1, 0, 0); // Jan 17, 2025 at 1 AM local time
 
       const fileName =
-        'tasks' + getLocalDateStr(rangeStart) + '-' + getLocalDateStr(rangeEnd) + '.csv';
+        'tasks' + getDbDateStr(rangeStart) + '-' + getDbDateStr(rangeEnd) + '.csv';
 
       console.log('WorklogExport cross-timezone test:', {
         rangeStart: rangeStart.toISOString(),
@@ -49,7 +49,7 @@ describe('WorklogExportComponent timezone test', () => {
       const monthEnd = new Date(2025, 0, 31, 23, 59, 59); // Jan 31, 2025 at 11:59:59 PM local time
 
       const fileName =
-        'tasks' + getLocalDateStr(monthStart) + '-' + getLocalDateStr(monthEnd) + '.csv';
+        'tasks' + getDbDateStr(monthStart) + '-' + getDbDateStr(monthEnd) + '.csv';
 
       console.log('WorklogExport month export test:', {
         monthStart: monthStart.toISOString(),

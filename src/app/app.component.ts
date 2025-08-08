@@ -66,7 +66,7 @@ import { AppDataCompleteNew } from './pfapi/pfapi-config';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogPleaseRateComponent } from './features/dialog-please-rate/dialog-please-rate.component';
-import { getLocalDateStr } from './util/get-local-date-str';
+import { getDbDateStr } from './util/get-db-date-str';
 import { PluginService } from './plugins/plugin.service';
 import { MarkdownPasteService } from './features/tasks/markdown-paste.service';
 import { TaskService } from './features/tasks/task.service';
@@ -216,7 +216,7 @@ export class AppComponent implements OnDestroy {
 
       const appStarts = +(localStorage.getItem(LS.APP_START_COUNT) || 0);
       const lastStartDay = localStorage.getItem(LS.APP_START_COUNT_LAST_START_DAY);
-      const todayStr = getLocalDateStr();
+      const todayStr = getDbDateStr();
       if (appStarts === 32 || appStarts === 96) {
         this._matDialog.open(DialogPleaseRateComponent);
         localStorage.setItem(LS.APP_START_COUNT, (appStarts + 1).toString());

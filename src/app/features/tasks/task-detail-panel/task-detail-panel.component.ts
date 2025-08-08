@@ -73,7 +73,7 @@ import { LocaleDatePipe } from '../../../ui/pipes/locale-date.pipe';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { getLocalDateStr } from '../../../util/get-local-date-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import { isMarkdownChecklist } from '../../markdown-checklist/is-markdown-checklist';
 
 @Component({
@@ -254,7 +254,7 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
 
   isPlannedForTodayDay = computed(() => {
     const task = this.task();
-    return !!task.dueDay && task.dueDay === getLocalDateStr();
+    return !!task.dueDay && task.dueDay === getDbDateStr();
   });
 
   progress = computed(() => {
@@ -267,7 +267,7 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
     return !!(
       !t.isDone &&
       ((t.dueWithTime && t.dueWithTime < Date.now()) ||
-        (t.dueDay && t.dueDay !== getLocalDateStr() && t.dueDay < getLocalDateStr()))
+        (t.dueDay && t.dueDay !== getDbDateStr() && t.dueDay < getDbDateStr()))
     );
   });
 

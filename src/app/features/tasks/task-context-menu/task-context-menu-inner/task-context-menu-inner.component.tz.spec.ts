@@ -1,4 +1,4 @@
-import { getLocalDateStr } from '../../../../util/get-local-date-str';
+import { getDbDateStr } from '../../../../util/get-db-date-str';
 
 describe('TaskContextMenuInnerComponent timezone test', () => {
   describe('_schedule method date handling', () => {
@@ -9,7 +9,7 @@ describe('TaskContextMenuInnerComponent timezone test', () => {
       // Test case: Scheduling a task for a specific date using local date constructor
       const selectedDate = new Date(2025, 0, 17, 15, 0, 0); // Jan 17, 2025 at 3 PM local time
       const newDayDate = new Date(selectedDate);
-      const newDay = getLocalDateStr(newDayDate);
+      const newDay = getDbDateStr(newDayDate);
 
       console.log('Task scheduling test:', {
         selectedDate: selectedDate.toISOString(),
@@ -26,7 +26,7 @@ describe('TaskContextMenuInnerComponent timezone test', () => {
       // Test case: Scheduling near midnight using local date constructor
       const selectedDate = new Date(2025, 0, 16, 23, 30, 0); // Jan 16, 2025 at 11:30 PM local time
       const newDayDate = new Date(selectedDate);
-      const newDay = getLocalDateStr(newDayDate);
+      const newDay = getDbDateStr(newDayDate);
 
       console.log('Midnight edge case test:', {
         selectedDate: selectedDate.toISOString(),
@@ -43,7 +43,7 @@ describe('TaskContextMenuInnerComponent timezone test', () => {
       // This test demonstrates the usage in line 523:
       // if (this.task.dueDay === getWorklogStr() || ...)
 
-      const todayStr = getLocalDateStr();
+      const todayStr = getDbDateStr();
 
       // Test various task due days
       const taskDueToday = { dueDay: todayStr };
@@ -57,15 +57,15 @@ describe('TaskContextMenuInnerComponent timezone test', () => {
       });
 
       // Check if task is due today
-      expect(taskDueToday.dueDay === getLocalDateStr()).toBe(true);
-      expect(taskDueTomorrow.dueDay === getLocalDateStr()).toBe(false);
-      expect(taskDueYesterday.dueDay === getLocalDateStr()).toBe(false);
+      expect(taskDueToday.dueDay === getDbDateStr()).toBe(true);
+      expect(taskDueTomorrow.dueDay === getDbDateStr()).toBe(false);
+      expect(taskDueYesterday.dueDay === getDbDateStr()).toBe(false);
     });
 
     it('should handle getWorklogStr() without parameters correctly', () => {
       // When called without parameters, getWorklogStr() returns today's date
       const now = Date.now();
-      const todayStr = getLocalDateStr();
+      const todayStr = getDbDateStr();
       const expectedDate = new Date(now);
 
       const year = expectedDate.getFullYear();

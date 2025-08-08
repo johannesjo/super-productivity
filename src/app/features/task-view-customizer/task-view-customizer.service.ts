@@ -9,7 +9,7 @@ import { Project } from '../project/project.model';
 import { Tag } from '../tag/tag.model';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { computed } from '@angular/core';
-import { getLocalDateStr } from '../../util/get-local-date-str';
+import { getDbDateStr } from '../../util/get-db-date-str';
 
 @Injectable({ providedIn: 'root' })
 export class TaskViewCustomizerService {
@@ -97,10 +97,10 @@ export class TaskViewCustomizerService {
         return tasks.filter((task) => {
           if (!task.dueDay) return false;
 
-          const todayStr = getLocalDateStr();
+          const todayStr = getDbDateStr();
           const tomorrow = new Date();
           tomorrow.setDate(tomorrow.getDate() + 1);
-          const tomorrowStr = getLocalDateStr(tomorrow);
+          const tomorrowStr = getDbDateStr(tomorrow);
 
           switch (filterVal) {
             case 'today':
@@ -113,7 +113,7 @@ export class TaskViewCustomizerService {
               const now = new Date();
               const endOfWeek = new Date(now);
               endOfWeek.setDate(now.getDate() + (7 - now.getDay()));
-              const endOfWeekStr = getLocalDateStr(endOfWeek);
+              const endOfWeekStr = getDbDateStr(endOfWeek);
               // Note: String comparison works correctly here because dueDay is in YYYY-MM-DD format
               // which is lexicographically sortable. This avoids timezone conversion issues.
               return task.dueDay >= todayStr && task.dueDay <= endOfWeekStr;
@@ -123,16 +123,16 @@ export class TaskViewCustomizerService {
               const now = new Date();
               const startNextWeek = new Date(now);
               startNextWeek.setDate(now.getDate() + (7 - now.getDay()) + 1);
-              const startNextWeekStr = getLocalDateStr(startNextWeek);
+              const startNextWeekStr = getDbDateStr(startNextWeek);
               const endNextWeek = new Date(startNextWeek);
               endNextWeek.setDate(startNextWeek.getDate() + 6);
-              const endNextWeekStr = getLocalDateStr(endNextWeek);
+              const endNextWeekStr = getDbDateStr(endNextWeek);
               return task.dueDay >= startNextWeekStr && task.dueDay <= endNextWeekStr;
             }
 
             case 'thisMonth': {
               const now = new Date();
-              const yearMonth = getLocalDateStr(now).substring(0, 7); // YYYY-MM
+              const yearMonth = getDbDateStr(now).substring(0, 7); // YYYY-MM
               return task.dueDay.startsWith(yearMonth);
             }
 
@@ -140,7 +140,7 @@ export class TaskViewCustomizerService {
               const now = new Date();
               const nextMonth = new Date(now);
               nextMonth.setMonth(now.getMonth() + 1);
-              const yearMonth = getLocalDateStr(nextMonth).substring(0, 7); // YYYY-MM
+              const yearMonth = getDbDateStr(nextMonth).substring(0, 7); // YYYY-MM
               return task.dueDay.startsWith(yearMonth);
             }
 

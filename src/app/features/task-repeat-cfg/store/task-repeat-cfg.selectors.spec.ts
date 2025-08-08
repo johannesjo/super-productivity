@@ -1,7 +1,7 @@
 import { DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfg } from '../task-repeat-cfg.model';
 import { TaskReminderOptionId } from '../../tasks/task.model';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import {
   selectAllUnprocessedTaskRepeatCfgs,
   selectTaskRepeatCfgsForExactDay,
@@ -1011,7 +1011,7 @@ describe('Timezone Edge Cases for selectTaskRepeatCfgsForExactDay', () => {
     const taskConfig: TaskRepeatCfg = {
       ...DEFAULT_TASK_REPEAT_CFG,
       id: 'test',
-      lastTaskCreationDay: getWorklogStr(creationTime), // '2025-08-01'
+      lastTaskCreationDay: getDbDateStr(creationTime), // '2025-08-01'
       repeatCycle: 'DAILY',
       repeatEvery: 1,
       startDate: '2025-01-01',
@@ -1019,7 +1019,7 @@ describe('Timezone Edge Cases for selectTaskRepeatCfgsForExactDay', () => {
 
     // Check at 1 AM next day
     const checkTime = new Date('2025-08-02T01:00:00');
-    const todayStr = getWorklogStr(checkTime); // '2025-08-02'
+    const todayStr = getDbDateStr(checkTime); // '2025-08-02'
 
     // The fix: String comparison shows they're different days
     const shouldCreateTask = taskConfig.lastTaskCreationDay !== todayStr;
@@ -1027,7 +1027,7 @@ describe('Timezone Edge Cases for selectTaskRepeatCfgsForExactDay', () => {
 
     // But if checking later on Aug 1st
     const laterSameDay = new Date('2025-08-01T23:30:00');
-    const sameDayStr = getWorklogStr(laterSameDay); // '2025-08-01'
+    const sameDayStr = getDbDateStr(laterSameDay); // '2025-08-01'
     const shouldNotCreate = taskConfig.lastTaskCreationDay === sameDayStr;
     expect(shouldNotCreate).toBe(true);
   });

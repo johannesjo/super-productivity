@@ -2,7 +2,7 @@ import { EntityState } from '@ngrx/entity';
 import { Task } from '../../tasks/task.model';
 import { getWeekNumber } from '../../../util/get-week-number';
 import { WorklogYearsWithWeeks } from '../worklog.model';
-import { getLocalDateStr } from '../../../util/get-local-date-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import { WorkStartEnd } from '../../work-context/work-context.model';
 import { formatDayMonthStr } from '../../../util/format-day-month-str';
 
@@ -16,11 +16,10 @@ const _getTimeSpentOnDay = (entities: any, task: Task): { [key: string]: number 
     const parentSpentOnDay = task.parentId && entities[task.parentId].timeSpentOnDay;
     const parentLogEntryDate =
       parentSpentOnDay &&
-      (Object.keys(parentSpentOnDay)[0] ||
-        getLocalDateStr(entities[task.parentId].created));
+      (Object.keys(parentSpentOnDay)[0] || getDbDateStr(entities[task.parentId].created));
     return { [parentLogEntryDate]: 1 };
   } else {
-    return { [getLocalDateStr(task.created)]: 1 };
+    return { [getDbDateStr(task.created)]: 1 };
   }
 };
 

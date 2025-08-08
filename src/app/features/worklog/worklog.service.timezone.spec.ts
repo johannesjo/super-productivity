@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { getLocalDateStr } from '../../util/get-local-date-str';
+import { getDbDateStr } from '../../util/get-db-date-str';
 
 describe('WorklogService timezone fix', () => {
   it('should correctly filter tasks by date range regardless of timezone', () => {
@@ -33,8 +33,8 @@ describe('WorklogService timezone fix', () => {
     console.log('Range end:', rangeEnd.toISOString());
 
     // Convert date range to date strings for timezone-safe comparison (the fix)
-    const rangeStartStr = getLocalDateStr(rangeStart);
-    const rangeEndStr = getLocalDateStr(rangeEnd);
+    const rangeStartStr = getDbDateStr(rangeStart);
+    const rangeEndStr = getDbDateStr(rangeEnd);
 
     console.log('Range start string:', rangeStartStr);
     console.log('Range end string:', rangeEndStr);

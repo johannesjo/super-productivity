@@ -3,7 +3,7 @@ import { TaskRepeatCfg, TaskRepeatCfgState } from '../task-repeat-cfg.model';
 import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import { isSameDay } from '../../../util/is-same-day';
 import { getNewestPossibleDueDate } from './get-newest-possible-due-date.util';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import { getEffectiveLastTaskCreationDay } from './get-effective-last-task-creation-day.util';
 
 export const adapter: EntityAdapter<TaskRepeatCfg> = createEntityAdapter<TaskRepeatCfg>();
@@ -90,9 +90,9 @@ export const selectTaskRepeatCfgsForExactDay = createSelector(
       taskRepeatCfgs.filter((taskRepeatCfg: TaskRepeatCfg) => {
         const effectiveLastDay = getEffectiveLastTaskCreationDay(taskRepeatCfg);
         if (
-          effectiveLastDay === getWorklogStr(dateToCheckTimestamp) ||
+          effectiveLastDay === getDbDateStr(dateToCheckTimestamp) ||
           // also check for if future instance was already created via the work-view button
-          (effectiveLastDay && effectiveLastDay > getWorklogStr(dateToCheckTimestamp))
+          (effectiveLastDay && effectiveLastDay > getDbDateStr(dateToCheckTimestamp))
         ) {
           return false;
         }
@@ -119,9 +119,9 @@ export const selectAllUnprocessedTaskRepeatCfgs = createSelector(
       taskRepeatCfgs.filter((taskRepeatCfg: TaskRepeatCfg) => {
         const effectiveLastDay = getEffectiveLastTaskCreationDay(taskRepeatCfg);
         if (
-          effectiveLastDay === getWorklogStr(dateToCheckTimestamp) ||
+          effectiveLastDay === getDbDateStr(dateToCheckTimestamp) ||
           // also check for if future instance was already created via the work-view button
-          (effectiveLastDay && effectiveLastDay > getWorklogStr(dateToCheckTimestamp))
+          (effectiveLastDay && effectiveLastDay > getDbDateStr(dateToCheckTimestamp))
         ) {
           return false;
         }

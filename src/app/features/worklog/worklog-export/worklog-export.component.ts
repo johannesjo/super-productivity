@@ -9,7 +9,7 @@ import {
   output,
 } from '@angular/core';
 import { combineLatest, from, Subscription } from 'rxjs';
-import { getLocalDateStr } from '../../../util/get-local-date-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 // @ts-ignore
 import Clipboard from 'clipboard';
 import { SnackService } from '../../../core/snack/snack.service';
@@ -143,7 +143,7 @@ export class WorklogExportComponent implements OnInit, OnDestroy {
       throw new Error('Worklog: Invalid date range');
     }
     this.fileName =
-      'tasks' + getLocalDateStr(rangeStart) + '-' + getLocalDateStr(rangeEnd) + '.csv';
+      'tasks' + getDbDateStr(rangeStart) + '-' + getDbDateStr(rangeEnd) + '.csv';
 
     this._subs.add(
       this._workContextService.advancedCfg$

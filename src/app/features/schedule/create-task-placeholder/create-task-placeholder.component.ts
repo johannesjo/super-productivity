@@ -20,7 +20,7 @@ import { TaskReminderOptionId } from '../../tasks/task.model';
 import { DatePipe } from '@angular/common';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { Store } from '@ngrx/store';
-import { getLocalDateStr } from '../../../util/get-local-date-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import { ShortTimeHtmlPipe } from '../../../ui/pipes/short-time-html.pipe';
 
 @Component({
@@ -106,7 +106,7 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
         this._store.dispatch(
           PlannerActions.planTaskForDay({
             task: task,
-            day: getLocalDateStr(this.due()),
+            day: getDbDateStr(this.due()),
           }),
         );
       } else {

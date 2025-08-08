@@ -13,7 +13,7 @@ import {
 import { getDateRangeForDay } from '../../util/get-date-range-for-day';
 import { first, map, switchMap, withLatestFrom } from 'rxjs/operators';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
-import { getLocalDateStr } from '../../util/get-local-date-str';
+import { getDbDateStr } from '../../util/get-db-date-str';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { selectTodayTaskIds } from '../work-context/store/work-context.selectors';
 import { selectTasksForPlannerDay } from '../planner/store/planner.selectors';
@@ -50,9 +50,7 @@ export class AddTasksForTomorrowService {
     );
 
   private _dueForDayForTomorrow$: Observable<TaskWithDueDay[]> = this._tomorrowDate$.pipe(
-    switchMap((d) =>
-      this._store.select(selectTasksDueForDay, { day: getLocalDateStr(d) }),
-    ),
+    switchMap((d) => this._store.select(selectTasksDueForDay, { day: getDbDateStr(d) })),
   );
 
   nrOfPlannerItemsForTomorrow$: Observable<number> = combineLatest([
@@ -89,7 +87,7 @@ export class AddTasksForTomorrowService {
 
     // we do this to keep the order of the tasks in planner
     const tomorrowTasksFromPlanner = await this._store
-      .select(selectTasksForPlannerDay(getLocalDateStr(tomorrow)))
+      .select(selectTasksForPlannerDay(getDbDateStr(tomorrow)))
       .pipe(first())
       .toPromise();
 
@@ -128,7 +126,7 @@ export class AddTasksForTomorrowService {
     const todayDate = new Date();
     // Use current timestamp for today
     const todayTS = Date.now();
-    const todayStr = getLocalDateStr();
+    const todayStr = getDbDateStr();
 
     TaskLog.log('[AddTasksForTomorrow] Starting addAllDueToday', { todayStr });
 
@@ -147,7 +145,7 @@ export class AddTasksForTomorrowService {
       this._store.select(selectTasksWithDueTimeForRange, {
         ...getDateRangeForDay(todayDate.getTime()),
       }),
-      this._store.select(selectTasksDueForDay, { day: getLocalDateStr(todayDate) }),
+      this._store.select(selectTasksDueForDay, { day: getDbDateStr(todayDate) }),
     ])
       .pipe(first())
       .toPromise();
@@ -214,8 +212,8 @@ export class AddTasksForTomorrowService {
       if (!bHasDue) return -1;
 
       // Check if tasks are on the same day
-      const aDay = a.dueWithTime ? getLocalDateStr(new Date(a.dueWithTime)) : a.dueDay;
-      const bDay = b.dueWithTime ? getLocalDateStr(new Date(b.dueWithTime)) : b.dueDay;
+      const aDay = a.dueWithTime ? getDbDateStr(new Date(a.dueWithTime)) : a.dueDay;
+      const bDay = b.dueWithTime ? getDbDateStr(new Date(b.dueWithTime)) : b.dueDay;
 
       if (aDay === bDay) {
         // Same day: tasks with only dueDay (no time) come before tasks with dueWithTime

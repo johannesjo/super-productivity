@@ -10,7 +10,7 @@ import { Tag } from '../../../features/tag/tag.model';
 import { Project } from '../../../features/project/project.model';
 import { WorkContextType } from '../../../features/work-context/work-context.model';
 import { Action, ActionReducer } from '@ngrx/store';
-import { getLocalDateStr } from '../../../util/get-local-date-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import {
   createBaseState,
   createMockTag,
@@ -126,7 +126,7 @@ describe('taskSharedCrudMetaReducer', () => {
     });
 
     it('should add task to Today tag when due today', () => {
-      const action = createAddTaskAction({ dueDay: getLocalDateStr() });
+      const action = createAddTaskAction({ dueDay: getDbDateStr() });
 
       metaReducer(baseState, action);
       expectStateUpdate(

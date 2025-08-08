@@ -1,5 +1,5 @@
 import { inject, LOCALE_ID, Pipe, PipeTransform } from '@angular/core';
-import { isWorklogStr } from '../../util/get-local-date-str';
+import { isDBDateStr } from '../../util/get-db-date-str';
 import { dateStrToUtcDate } from '../../util/date-str-to-utc-date';
 import { formatMonthDay } from '../../util/format-month-day.util';
 import { DateTimeFormatService } from '../../core/date-time-format/date-time-format.service';
@@ -15,7 +15,7 @@ export class ShortDate2Pipe implements PipeTransform {
     }
 
     const date =
-      typeof value === 'string' && isWorklogStr(value)
+      typeof value === 'string' && isDBDateStr(value)
         ? dateStrToUtcDate(value)
         : new Date(value);
 

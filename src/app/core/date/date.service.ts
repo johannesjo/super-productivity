@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { getLocalDateStr } from '../../util/get-local-date-str';
+import { getDbDateStr } from '../../util/get-db-date-str';
 
 @Injectable({ providedIn: 'root' })
 export class DateService {
@@ -13,6 +13,6 @@ export class DateService {
     if (!date) {
       date = new Date(Date.now() - this.startOfNextDayDiff);
     }
-    return getLocalDateStr(date);
+    return getDbDateStr(date);
   }
 }

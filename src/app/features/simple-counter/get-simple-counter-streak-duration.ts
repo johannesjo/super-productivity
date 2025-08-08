@@ -1,5 +1,5 @@
 import { SimpleCounterCopy } from './simple-counter.model';
-import { getLocalDateStr } from '../../util/get-local-date-str';
+import { getDbDateStr } from '../../util/get-db-date-str';
 
 export const getSimpleCounterStreakDuration = (
   simpleCounter: SimpleCounterCopy,
@@ -16,15 +16,15 @@ export const getSimpleCounterStreakDuration = (
   setDayToLastConsideredWeekday(date, simpleCounter.streakWeekDays);
 
   if (
-    getLocalDateStr(date) === getLocalDateStr(new Date()) &&
-    (!countOnDay[getLocalDateStr(date)] ||
-      countOnDay[getLocalDateStr(date)] < simpleCounter.streakMinValue)
+    getDbDateStr(date) === getDbDateStr(new Date()) &&
+    (!countOnDay[getDbDateStr(date)] ||
+      countOnDay[getDbDateStr(date)] < simpleCounter.streakMinValue)
   ) {
     date.setDate(date.getDate() - 1);
     setDayToLastConsideredWeekday(date, simpleCounter.streakWeekDays);
   }
 
-  while (countOnDay[getLocalDateStr(date)] >= simpleCounter.streakMinValue) {
+  while (countOnDay[getDbDateStr(date)] >= simpleCounter.streakMinValue) {
     streak++;
     date.setDate(date.getDate() - 1);
     setDayToLastConsideredWeekday(date, simpleCounter.streakWeekDays);

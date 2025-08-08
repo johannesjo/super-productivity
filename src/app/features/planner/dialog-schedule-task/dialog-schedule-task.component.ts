@@ -21,7 +21,7 @@ import { T } from 'src/app/t.const';
 import { MatCalendar } from '@angular/material/datepicker';
 import { Store } from '@ngrx/store';
 import { PlannerActions } from '../store/planner.actions';
-import { getLocalDateStr } from '../../../util/get-local-date-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import { DatePipe } from '@angular/common';
 import { SnackService } from '../../../core/snack/snack.service';
 import { removeReminderFromTask } from '../../tasks/store/task.actions';
@@ -109,7 +109,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   isInitValOnTimeFocus: boolean = true;
 
   isShowEnterMsg = false;
-  todayStr = getLocalDateStr();
+  todayStr = getDbDateStr();
   // private _prevSelectedQuickAccessDate: Date | null = null;
   // private _prevQuickAccessAction: number | null = null;
   private _timeCheckVal: string | null = null;
@@ -244,7 +244,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
           reminderId: this.data.task.reminderId,
         }),
       );
-    } else if (this.plannedDayForTask === getLocalDateStr()) {
+    } else if (this.plannedDayForTask === getDbDateStr()) {
       // to cover edge cases
       this._store.dispatch(
         TaskSharedActions.unscheduleTask({
@@ -309,7 +309,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     }
 
     const newDayDate = new Date(this.selectedDate);
-    const newDay = getLocalDateStr(newDayDate);
+    const newDay = getDbDateStr(newDayDate);
 
     this._handleReminderRemoval();
 
@@ -317,7 +317,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       this._scheduleWithTime();
     } else if (this.data.task.dueDay === newDay) {
       const formattedDate =
-        newDay == getLocalDateStr()
+        newDay == getDbDateStr()
           ? this._translateService.instant(T.G.TODAY_TAG_TITLE)
           : (this._datePipe.transform(newDay, 'shortDate') as string);
       this._snackService.open({

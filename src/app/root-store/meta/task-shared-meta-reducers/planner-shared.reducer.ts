@@ -3,7 +3,7 @@ import { RootState } from '../../root-state';
 import { PlannerActions } from '../../../features/planner/store/planner.actions';
 import { Task } from '../../../features/tasks/task.model';
 import { TODAY_TAG } from '../../../features/tag/tag.const';
-import { getLocalDateStr } from '../../../util/get-local-date-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import { unique } from '../../../util/unique';
 import { ActionHandlerMap, getTag, updateTags } from './task-shared-helpers';
 import {
@@ -121,7 +121,7 @@ const handlePlanTaskForDay = (
   day: string,
   isAddToTop: boolean,
 ): RootState => {
-  const todayStr = getLocalDateStr();
+  const todayStr = getDbDateStr();
   const todayTag = getTag(state, TODAY_TAG.id);
 
   if (day === todayStr && !todayTag.taskIds.includes(task.id)) {

@@ -1,5 +1,5 @@
 import { TaskRepeatCfg } from '../task-repeat-cfg.model';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 
 /**
  * Gets the effective last task creation day string, with fallback logic for backward compatibility.
@@ -15,7 +15,7 @@ export const getEffectiveLastTaskCreationDay = (
     return cfg.lastTaskCreationDay;
   }
   if (cfg.lastTaskCreation) {
-    return getWorklogStr(cfg.lastTaskCreation);
+    return getDbDateStr(cfg.lastTaskCreation);
   }
   return undefined;
 };

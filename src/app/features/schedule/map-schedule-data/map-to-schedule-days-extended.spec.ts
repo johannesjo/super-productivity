@@ -1,5 +1,5 @@
 import { mapToScheduleDays } from './map-to-schedule-days';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
@@ -32,7 +32,7 @@ describe('mapToScheduleDays()', () => {
       dayDates: ['2024-08-02', '2024-08-03', '2024-08-04', '2024-08-05', '2024-08-06'],
       scheduledTaskRepeatCfgs: [
         {
-          lastTaskCreationDay: getWorklogStr(1722325722970),
+          lastTaskCreationDay: getDbDateStr(1722325722970),
           title: 'Do something scheduled on a regular basis',
           defaultEstimate: 900000,
           projectId: 'lMLlW2yO',
@@ -51,7 +51,7 @@ describe('mapToScheduleDays()', () => {
       ],
       unScheduledTaskRepeatCfgs: [
         {
-          lastTaskCreationDay: getWorklogStr(1722275904553),
+          lastTaskCreationDay: getDbDateStr(1722275904553),
           title: 'Plan Week',
           defaultEstimate: 1800000,
           projectId: 'lMLlW2yO',
@@ -72,7 +72,7 @@ describe('mapToScheduleDays()', () => {
           id: 'lmjFQzTdJh8aSak3cu9SN',
         },
         {
-          lastTaskCreationDay: getWorklogStr(1722617221091),
+          lastTaskCreationDay: getDbDateStr(1722617221091),
           title: 'Also scheduled in the morning',
           defaultEstimate: 1200000,
           projectId: 'DEFAULT',
@@ -93,7 +93,7 @@ describe('mapToScheduleDays()', () => {
           id: 'Foclw2saS0jZ3LfLVM5fd',
         },
         {
-          lastTaskCreationDay: getWorklogStr(1722617221091),
+          lastTaskCreationDay: getDbDateStr(1722617221091),
           title: 'Yap about my daily plans on mastodon',
           defaultEstimate: 300000,
           projectId: 'DEFAULT',
@@ -140,7 +140,7 @@ describe('mapToScheduleDays()', () => {
             defaultEstimate: 900000,
             id: 'wSs2q4YWkZZjthJrUeIos',
             isPaused: false,
-            lastTaskCreationDay: getWorklogStr(1722325722970),
+            lastTaskCreationDay: getDbDateStr(1722325722970),
             monday: true,
             order: 0,
             projectId: 'lMLlW2yO',
@@ -164,7 +164,7 @@ describe('mapToScheduleDays()', () => {
             friday: false,
             id: 'lmjFQzTdJh8aSak3cu9SN',
             isPaused: false,
-            lastTaskCreationDay: getWorklogStr(1722275904553),
+            lastTaskCreationDay: getDbDateStr(1722275904553),
             monday: true,
             order: 0,
             projectId: 'lMLlW2yO',
@@ -191,7 +191,7 @@ describe('mapToScheduleDays()', () => {
             friday: true,
             id: 'Foclw2saS0jZ3LfLVM5fd',
             isPaused: false,
-            lastTaskCreationDay: getWorklogStr(1722617221091),
+            lastTaskCreationDay: getDbDateStr(1722617221091),
             monday: true,
             order: 32,
             projectId: 'DEFAULT',
@@ -218,7 +218,7 @@ describe('mapToScheduleDays()', () => {
             friday: true,
             id: 'QRZ1qaGbKJSO-1-RoIh7F',
             isPaused: false,
-            lastTaskCreationDay: getWorklogStr(1722617221091),
+            lastTaskCreationDay: getDbDateStr(1722617221091),
             monday: true,
             order: 0,
             projectId: 'DEFAULT',

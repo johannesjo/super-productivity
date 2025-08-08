@@ -1,6 +1,6 @@
 import { TaskCopy } from './task.model';
 import { shortSyntax } from './short-syntax';
-import { getLocalDateStr } from '../../util/get-local-date-str';
+import { getDbDateStr } from '../../util/get-db-date-str';
 import {
   MONTH_SHORT_NAMES,
   oneDayInMilliseconds,
@@ -168,7 +168,7 @@ describe('shortSyntax', () => {
           title: 'Fun title',
           // timeSpent: 7200000,
           timeSpentOnDay: {
-            [getLocalDateStr()]: 600000,
+            [getDbDateStr()]: 600000,
           },
           timeEstimate: 3600000,
         },
@@ -189,7 +189,7 @@ describe('shortSyntax', () => {
           title: 'Fun title whatever',
           // timeSpent: 7200000,
           timeSpentOnDay: {
-            [getLocalDateStr()]: 3600000,
+            [getDbDateStr()]: 3600000,
           },
           timeEstimate: 7200000,
         },
@@ -227,7 +227,7 @@ describe('shortSyntax', () => {
           title: 'Fun title whatever',
           // timeSpent: 7200000,
           timeSpentOnDay: {
-            [getLocalDateStr()]: 5400000,
+            [getDbDateStr()]: 5400000,
           },
           timeEstimate: 9000000,
         },
@@ -646,7 +646,7 @@ describe('shortSyntax', () => {
           title: 'Fun title',
           // timeSpent: 7200000,
           timeSpentOnDay: {
-            [getLocalDateStr()]: 600000,
+            [getDbDateStr()]: 600000,
           },
           timeEstimate: 3600000,
           tagIds: ['blu_id'],
@@ -667,7 +667,7 @@ describe('shortSyntax', () => {
         taskChanges: {
           title: 'Fun title',
           timeSpentOnDay: {
-            [getLocalDateStr()]: 600000,
+            [getDbDateStr()]: 600000,
           },
           timeEstimate: 3600000,
           tagIds: ['blu_id'],
@@ -705,7 +705,7 @@ describe('shortSyntax', () => {
         taskChanges: {
           title: 'Fun title #blu',
           timeSpentOnDay: {
-            [getLocalDateStr()]: 600000,
+            [getDbDateStr()]: 600000,
           },
           timeEstimate: 3600000,
         },
@@ -776,7 +776,7 @@ describe('shortSyntax', () => {
           title: 'Fun title',
           // timeSpent: 7200000,
           timeSpentOnDay: {
-            [getLocalDateStr()]: 600000,
+            [getDbDateStr()]: 600000,
           },
           timeEstimate: 3600000,
         },
@@ -797,7 +797,7 @@ describe('shortSyntax', () => {
           title: 'Fun title +ProjectEasyShort',
           // timeSpent: 7200000,
           timeSpentOnDay: {
-            [getLocalDateStr()]: 600000,
+            [getDbDateStr()]: 600000,
           },
           timeEstimate: 3600000,
         },
@@ -915,7 +915,7 @@ describe('shortSyntax', () => {
           title: 'Fun title',
           // timeSpent: 7200000,
           timeSpentOnDay: {
-            [getLocalDateStr()]: 600000,
+            [getDbDateStr()]: 600000,
           },
           timeEstimate: 3600000,
         },

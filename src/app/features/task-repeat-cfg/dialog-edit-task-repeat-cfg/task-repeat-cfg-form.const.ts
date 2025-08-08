@@ -2,7 +2,7 @@ import { FormlyFieldConfig } from '@ngx-formly/core';
 import { T } from '../../../t.const';
 import { isValidSplitTime } from '../../../util/is-valid-split-time';
 import { TASK_REMINDER_OPTIONS } from '../../planner/dialog-schedule-task/task-reminder-options.const';
-import { getLocalDateStr } from '../../../util/get-local-date-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import { RepeatQuickSetting, TaskRepeatCfg } from '../task-repeat-cfg.model';
 import { getQuickSettingUpdates } from './get-quick-setting-updates';
 
@@ -91,7 +91,7 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
     key: 'startDate',
     type: 'input',
     hideExpression: (model: any) => model.quickSetting !== 'CUSTOM',
-    defaultValue: getLocalDateStr(),
+    defaultValue: getDbDateStr(),
     templateOptions: {
       label: T.F.TASK_REPEAT.F.START_DATE,
       required: true,

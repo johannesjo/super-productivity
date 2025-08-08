@@ -10,7 +10,7 @@ import {
 } from './sort-data-to-flush';
 import { Store } from '@ngrx/store';
 import { TimeTrackingActions } from './store/time-tracking.actions';
-import { getLocalDateStr } from '../../util/get-local-date-str';
+import { getDbDateStr } from '../../util/get-db-date-str';
 import { Log } from '../../core/log';
 
 /*
@@ -93,7 +93,7 @@ export class ArchiveService {
       // TODO think if it is better to get this from store as it is fresher potentially
       timeTracking: await this._pfapiService.m.timeTracking.load(),
       archiveYoung,
-      todayStr: getLocalDateStr(now),
+      todayStr: getDbDateStr(now),
     });
     const newArchiveYoung = {
       ...newSorted1.archiveYoung,

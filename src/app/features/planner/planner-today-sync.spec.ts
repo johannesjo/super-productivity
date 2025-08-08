@@ -8,7 +8,7 @@ import { WorkContextService } from '../work-context/work-context.service';
 import { selectTodayTaskIds } from '../work-context/store/work-context.selectors';
 import { DEFAULT_TASK, Task } from '../tasks/task.model';
 import { WorkContextType } from '../work-context/work-context.model';
-import { getLocalDateStr } from '../../util/get-local-date-str';
+import { getDbDateStr } from '../../util/get-db-date-str';
 import { TODAY_TAG } from '../tag/tag.const';
 
 describe('Planner Today Sync Integration', () => {
@@ -74,7 +74,7 @@ describe('Planner Today Sync Integration', () => {
   describe('Planning tasks for today', () => {
     it('should add task to TODAY tag when planning for today', (done) => {
       const task = createMockTask();
-      const todayStr = getLocalDateStr();
+      const todayStr = getDbDateStr();
 
       // Add task to state
       currentState = {
@@ -129,7 +129,7 @@ describe('Planner Today Sync Integration', () => {
 
     it('should handle repeat task creation and today assignment', (done) => {
       const task = createMockTask({
-        dueDay: getLocalDateStr(),
+        dueDay: getDbDateStr(),
         repeatCfgId: 'test-repeat-cfg',
       });
 
@@ -291,7 +291,7 @@ describe('Planner Today Sync Integration', () => {
       const repeatTask = createMockTask({
         id: 'repeat-task',
         title: 'Daily Repeat Task',
-        dueDay: getLocalDateStr(),
+        dueDay: getDbDateStr(),
         repeatCfgId: 'daily-repeat',
       });
 

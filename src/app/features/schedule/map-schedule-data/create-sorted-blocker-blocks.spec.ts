@@ -5,8 +5,7 @@ import {
   DEFAULT_TASK_REPEAT_CFG,
   TaskRepeatCfg,
 } from '../../task-repeat-cfg/task-repeat-cfg.model';
-import { getLocalDateStr } from '../../../util/get-local-date-str';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import { BlockedBlockType, ScheduleCalendarMapEntry } from '../schedule.model';
 /* eslint-disable @typescript-eslint/naming-convention */
 
@@ -781,7 +780,7 @@ describe('createBlockerBlocks()', () => {
       remindAt: undefined,
       isPaused: false,
       repeatCycle: 'WEEKLY',
-      startDate: getLocalDateStr(new Date(0)),
+      startDate: getDbDateStr(new Date(0)),
       repeatEvery: 1,
       monday: false,
       tuesday: false,
@@ -846,7 +845,7 @@ describe('createBlockerBlocks()', () => {
           id: 'R2',
           title: 'Repeat 2',
           startTime: '14:00',
-          lastTaskCreationDay: getWorklogStr(getDateTimeFromClockString('22:20', 0)),
+          lastTaskCreationDay: getDbDateStr(getDateTimeFromClockString('22:20', 0)),
           defaultEstimate: hours(1),
           monday: true,
           tuesday: true,

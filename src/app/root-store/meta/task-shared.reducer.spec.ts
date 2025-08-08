@@ -10,7 +10,7 @@ import { Tag } from '../../features/tag/tag.model';
 import { Project } from '../../features/project/project.model';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { Action, ActionReducer } from '@ngrx/store';
-import { getLocalDateStr } from '../../util/get-local-date-str';
+import { getDbDateStr } from '../../util/get-db-date-str';
 import { DEFAULT_PROJECT } from '../../features/project/project.const';
 import { DEFAULT_TAG } from '../../features/tag/tag.const';
 import { PlannerActions } from '../../features/planner/store/planner.actions';
@@ -312,7 +312,7 @@ describe('taskSharedMetaReducer', () => {
     });
 
     it('should add task to Today tag when due today', () => {
-      const action = createAddTaskAction({ dueDay: getLocalDateStr() });
+      const action = createAddTaskAction({ dueDay: getDbDateStr() });
 
       expectStateUpdate(
         expectTagUpdates({
@@ -2247,7 +2247,7 @@ describe('taskSharedMetaReducer', () => {
       });
 
     it('should remove task from Today tag when moving from today to different day', () => {
-      const todayStr = getLocalDateStr();
+      const todayStr = getDbDateStr();
       const testState = createStateWithExistingTasks([], [], [], ['task1', 'other-task']);
       const task = createMockTask({ id: 'task1' });
       const action = createTransferTaskAction(task, todayStr, 0, 'tomorrow', todayStr);
@@ -2260,7 +2260,7 @@ describe('taskSharedMetaReducer', () => {
     });
 
     it('should add task to Today tag when moving from different day to today', () => {
-      const todayStr = getLocalDateStr();
+      const todayStr = getDbDateStr();
       const testState = createStateWithExistingTasks([], [], [], ['existing-task']);
       const task = createMockTask({ id: 'task1' });
       const action = createTransferTaskAction(task, todayStr, 1, todayStr, 'yesterday');
@@ -2273,7 +2273,7 @@ describe('taskSharedMetaReducer', () => {
     });
 
     it('should insert task at specific position when targetTaskId is provided', () => {
-      const todayStr = getLocalDateStr();
+      const todayStr = getDbDateStr();
       const testState = createStateWithExistingTasks(
         [],
         [],
@@ -2300,7 +2300,7 @@ describe('taskSharedMetaReducer', () => {
     });
 
     it('should not change state when transferring within same day', () => {
-      const todayStr = getLocalDateStr();
+      const todayStr = getDbDateStr();
       const task = createMockTask({ id: 'task1' });
       const action = createTransferTaskAction(task, todayStr, 0, todayStr, todayStr);
 
@@ -2309,7 +2309,7 @@ describe('taskSharedMetaReducer', () => {
     });
 
     it('should handle unique task IDs when adding to Today', () => {
-      const todayStr = getLocalDateStr();
+      const todayStr = getDbDateStr();
       const testState = createStateWithExistingTasks([], [], [], ['task1', 'other-task']);
       const task = createMockTask({ id: 'task1' });
       const action = createTransferTaskAction(task, todayStr, 0, todayStr, 'yesterday');
@@ -2335,7 +2335,7 @@ describe('taskSharedMetaReducer', () => {
       });
 
     it('should add task to Today tag when planning for today', () => {
-      const todayStr = getLocalDateStr();
+      const todayStr = getDbDateStr();
       const testState = createStateWithExistingTasks([], [], [], ['existing-task']);
       const task = createMockTask({ id: 'task1' });
       const action = createPlanTaskForDayAction(task, todayStr, false);
@@ -2348,7 +2348,7 @@ describe('taskSharedMetaReducer', () => {
     });
 
     it('should add task to top of Today tag when isAddToTop is true', () => {
-      const todayStr = getLocalDateStr();
+      const todayStr = getDbDateStr();
       const testState = createStateWithExistingTasks([], [], [], ['existing-task']);
       const task = createMockTask({ id: 'task1' });
       const action = createPlanTaskForDayAction(task, todayStr, true);
@@ -2373,7 +2373,7 @@ describe('taskSharedMetaReducer', () => {
     });
 
     it('should not change state when task is already in Today and planned for today', () => {
-      const todayStr = getLocalDateStr();
+      const todayStr = getDbDateStr();
       const testState = createStateWithExistingTasks([], [], [], ['task1', 'other-task']);
       const task = createMockTask({ id: 'task1' });
       const action = createPlanTaskForDayAction(task, todayStr, false);

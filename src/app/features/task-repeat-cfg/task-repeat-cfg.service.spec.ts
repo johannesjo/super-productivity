@@ -21,8 +21,7 @@ import {
 } from './store/task-repeat-cfg.selectors';
 import { DEFAULT_TASK, Task, TaskWithSubTasks } from '../tasks/task.model';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
-import { getLocalDateStr } from '../../util/get-local-date-str';
-import { getWorklogStr } from '../../util/get-work-log-str';
+import { getDbDateStr } from '../../util/get-db-date-str';
 import { TODAY_TAG } from '../tag/tag.const';
 
 describe('TaskRepeatCfgService', () => {
@@ -322,7 +321,7 @@ describe('TaskRepeatCfgService', () => {
           type: TaskSharedActions.addTask.type,
           task: jasmine.objectContaining({
             title: mockTaskRepeatCfg.title,
-            dueDay: getLocalDateStr(new Date(targetDayDate)),
+            dueDay: getDbDateStr(new Date(targetDayDate)),
           }),
           workContextType: WorkContextType.PROJECT,
           workContextId: 'test-project',
@@ -339,7 +338,7 @@ describe('TaskRepeatCfgService', () => {
             id: mockTaskRepeatCfg.id,
             changes: {
               lastTaskCreation: jasmine.any(Number),
-              lastTaskCreationDay: getWorklogStr(targetDayDate),
+              lastTaskCreationDay: getDbDateStr(targetDayDate),
             },
           },
         }),

@@ -1,4 +1,4 @@
-import { getLocalDateStr } from '../../../util/get-local-date-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 
 describe('DialogEditTaskRepeatCfgComponent timezone test', () => {
   describe('startDate calculation from dueWithTime', () => {
@@ -10,7 +10,7 @@ describe('DialogEditTaskRepeatCfgComponent timezone test', () => {
       const taskDueWithTime = new Date('2025-01-17T00:00:00-08:00').getTime();
 
       // This is what the component does:
-      const startDate = getLocalDateStr(taskDueWithTime);
+      const startDate = getDbDateStr(taskDueWithTime);
 
       console.log('Task repeat config startDate:', {
         dueWithTime: taskDueWithTime,
@@ -35,7 +35,7 @@ describe('DialogEditTaskRepeatCfgComponent timezone test', () => {
       // Test case: Task scheduled for 11 PM on 2025-01-16 in LA (which is 7 AM on 2025-01-17 in UTC)
       const taskDueWithTime = new Date('2025-01-16T23:00:00-08:00').getTime();
 
-      const startDate = getLocalDateStr(taskDueWithTime);
+      const startDate = getDbDateStr(taskDueWithTime);
 
       console.log('Cross-timezone task repeat config:', {
         dueWithTime: taskDueWithTime,

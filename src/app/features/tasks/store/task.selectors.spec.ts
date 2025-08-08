@@ -2,16 +2,16 @@ import * as fromSelectors from './task.selectors';
 import { Task, TaskState } from '../task.model';
 import { TASK_FEATURE_NAME } from './task.reducer';
 import { TODAY_TAG } from '../../tag/tag.const';
-import { getLocalDateStr } from '../../../util/get-local-date-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import { PROJECT_FEATURE_NAME } from '../../project/store/project.reducer';
 import { TAG_FEATURE_NAME } from '../../tag/store/tag.reducer';
 import { appStateFeatureKey } from '../../../root-store/app-state/app-state.reducer';
 
 describe('Task Selectors', () => {
   // Define mock tasks
-  const today = getLocalDateStr();
-  const yesterday = getLocalDateStr(new Date(Date.now() - 86400000));
-  const tomorrow = getLocalDateStr(new Date(Date.now() + 86400000));
+  const today = getDbDateStr();
+  const yesterday = getDbDateStr(new Date(Date.now() - 86400000));
+  const tomorrow = getDbDateStr(new Date(Date.now() + 86400000));
 
   const mockTasks: { [id: string]: Task } = {
     task1: {

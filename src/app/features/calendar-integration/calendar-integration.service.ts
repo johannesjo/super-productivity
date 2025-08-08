@@ -30,7 +30,7 @@ import { loadFromRealLs, saveToRealLs } from '../../core/persistence/local-stora
 import { LS } from '../../core/persistence/storage-keys.const';
 import { Store } from '@ngrx/store';
 import { ScheduleCalendarMapEntry } from '../schedule/schedule.model';
-import { getLocalDateStr } from '../../util/get-local-date-str';
+import { getDbDateStr } from '../../util/get-db-date-str';
 import { selectCalendarProviders } from '../issue/store/issue-provider.selectors';
 import { IssueProviderCalendar } from '../issue/issue.model';
 import { CalendarProviderCfg } from '../issue/providers/calendar/calendar.model';
@@ -111,7 +111,7 @@ export class CalendarIntegrationService {
     //   localStorage.getItem(LS.CAL_EVENTS_CACHE),
     // );
 
-    if (localStorage.getItem(LS.CALENDER_EVENTS_LAST_SKIP_DAY) === getLocalDateStr()) {
+    if (localStorage.getItem(LS.CALENDER_EVENTS_LAST_SKIP_DAY) === getDbDateStr()) {
       try {
         const skippedEvIds = JSON.parse(
           localStorage.getItem(LS.CALENDER_EVENTS_SKIPPED_TODAY) as string,
@@ -147,7 +147,7 @@ export class CalendarIntegrationService {
       LS.CALENDER_EVENTS_SKIPPED_TODAY,
       JSON.stringify(this.skippedEventIds$.getValue()),
     );
-    localStorage.setItem(LS.CALENDER_EVENTS_LAST_SKIP_DAY, getLocalDateStr());
+    localStorage.setItem(LS.CALENDER_EVENTS_LAST_SKIP_DAY, getDbDateStr());
   }
 
   requestEvents$(

@@ -1,7 +1,7 @@
 import { AppDataCompleteNew } from '../pfapi-config';
 import { CrossModelMigrateFn } from '../api';
 import { PFLog } from '../../core/log';
-import { getWorklogStr } from '../../util/get-work-log-str';
+import { getDbDateStr } from '../../util/get-db-date-str';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const crossModelMigration4_2: CrossModelMigrateFn = ((
@@ -22,7 +22,7 @@ export const crossModelMigration4_2: CrossModelMigrateFn = ((
       const timestamp = (repeatCfg as any).lastTaskCreation;
       if (timestamp != null && !isNaN(timestamp)) {
         // @ts-ignore - We're adding the new field
-        repeatCfg.lastTaskCreationDay = getWorklogStr(timestamp);
+        repeatCfg.lastTaskCreationDay = getDbDateStr(timestamp);
       }
     }
 

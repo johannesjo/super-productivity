@@ -8,7 +8,7 @@ import { DateService } from '../../../core/date/date.service';
 import { Store } from '@ngrx/store';
 import { selectAllTags } from '../../tag/store/tag.reducer';
 import { Tag } from '../../tag/tag.model';
-import { getLocalDateStr } from '../../../util/get-local-date-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import { AsyncPipe } from '@angular/common';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -66,7 +66,7 @@ export class TasksByTagComponent {
     // if (this.isShowYesterday && this.isForToday) {
     const yesterdayDate = new Date();
     yesterdayDate.setDate(yesterdayDate.getDate() - 1);
-    const yesterdayDayStr = getLocalDateStr(yesterdayDate);
+    const yesterdayDayStr = getDbDateStr(yesterdayDate);
 
     const tagWithTasks: TagWithTimeSpent = {
       id: tag.id,

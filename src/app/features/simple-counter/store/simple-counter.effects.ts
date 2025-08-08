@@ -15,7 +15,7 @@ import { EMPTY, Observable } from 'rxjs';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
 import { DateService } from 'src/app/core/date/date.service';
-import { getLocalDateStr } from '../../../util/get-local-date-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import { getSimpleCounterStreakDuration } from '../get-simple-counter-streak-duration';
 import { TranslateService } from '@ngx-translate/core';
 import { PfapiService } from '../../../pfapi/pfapi.service';
@@ -78,7 +78,7 @@ export class SimpleCounterEffects {
         ),
         tap((sc) => {
           if (sc && !this.successFullCountersMap[sc.id] && sc.isTrackStreaks) {
-            if (sc.countOnDay[getLocalDateStr()] >= (sc.streakMinValue || 0)) {
+            if (sc.countOnDay[getDbDateStr()] >= (sc.streakMinValue || 0)) {
               const streakDuration = getSimpleCounterStreakDuration(sc);
               // eslint-disable-next-line max-len
               const msg = `<strong>${sc.title}</strong> <br />${this._translateService.instant(T.F.SIMPLE_COUNTER.S.GOAL_REACHED_1)}<br /> ${this._translateService.instant(T.F.SIMPLE_COUNTER.S.GOAL_REACHED_2)} <strong>${streakDuration}🔥</strong>`;

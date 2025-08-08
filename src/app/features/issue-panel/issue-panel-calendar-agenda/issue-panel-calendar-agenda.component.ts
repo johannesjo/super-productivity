@@ -17,7 +17,7 @@ import { CdkDropList } from '@angular/cdk/drag-drop';
 import { T } from 'src/app/t.const';
 import { ICalIssueReduced } from '../../issue/providers/calendar/calendar.model';
 import { getErrorTxt } from 'src/app/util/get-error-text';
-import { getLocalDateStr } from '../../../util/get-local-date-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import { DatePipe } from '@angular/common';
 import { ShortTimePipe } from '../../../ui/pipes/short-time.pipe';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
@@ -129,7 +129,7 @@ export class IssuePanelCalendarAgendaComponent implements OnInit {
   private _setAgendaItems(items: SearchResultItem<'ICAL'>[]): void {
     const agenda = items.reduce(
       (acc, item) => {
-        const date = getLocalDateStr((item.issueData as ICalIssueReduced).start);
+        const date = getDbDateStr((item.issueData as ICalIssueReduced).start);
 
         const existingDay = acc.find((day) => day.dayStr === date);
         if (existingDay) {

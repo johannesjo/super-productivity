@@ -1,7 +1,7 @@
 import { mapToScheduleDays } from './map-to-schedule-days';
 import { TaskCopy, TaskWithDueTime } from '../../tasks/task.model';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 
 const NDS = '1970-01-01';
 const N = new Date(1970, 0, 1, 0, 0, 0, 0).getTime();
@@ -71,7 +71,7 @@ const fakeRepeatCfg = (
     startDate: '1969-01-01',
     startTime,
     // eslint-disable-next-line no-mixed-operators
-    lastTaskCreationDay: getWorklogStr(N - 24 * 60 * 60 * 1000),
+    lastTaskCreationDay: getDbDateStr(N - 24 * 60 * 60 * 1000),
     monday: true,
     tuesday: true,
     wednesday: true,
@@ -463,7 +463,7 @@ describe('mapToScheduleDays()', () => {
       [
         fakeRepeatCfg('R1', undefined, {
           defaultEstimate: h(2),
-          lastTaskCreationDay: getWorklogStr(N + 60000),
+          lastTaskCreationDay: getDbDateStr(N + 60000),
         }),
       ],
       [],
@@ -528,7 +528,7 @@ describe('mapToScheduleDays()', () => {
         fakeRepeatCfg('R1', undefined, {
           defaultEstimate: h(2),
           startTime: '9:00',
-          lastTaskCreationDay: getWorklogStr(N + 60000),
+          lastTaskCreationDay: getDbDateStr(N + 60000),
         }),
       ],
       [],
@@ -844,7 +844,7 @@ describe('mapToScheduleDays()', () => {
       [
         fakeRepeatCfg('R2', undefined, {
           defaultEstimate: h(2),
-          lastTaskCreationDay: getWorklogStr(N + 60000),
+          lastTaskCreationDay: getDbDateStr(N + 60000),
         }),
       ],
       [],
