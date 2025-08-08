@@ -36,8 +36,28 @@
     font-family: inherit;
   }
 
-  .search-toggle-btn {
+  .button-controls {
     margin-left: auto;
+    z-index: 2;
+    display: flex;
+  }
+
+  .separator-box {
+    border-right: 1px dashed var(--extra-border-color);
+    border-left: 1px dashed var(--extra-border-color);
+    border-color: var(--extra-border-color);
+  }
+
+  .switch-add-to-btn,
+  .switch-add-to-bot-btn {
+    opacity: 0.4;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  .search-toggle-btn {
     opacity: 0.4;
 
     &:hover {

@@ -11,6 +11,7 @@ import {
   AfterViewInit,
   OnInit,
   DestroyRef,
+  effect,
 } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MentionModule } from 'angular-mentions';
@@ -82,9 +83,13 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   isElevated = input<boolean>(false);
   isDisableAutoFocus = input<boolean>(false);
   planForDay = input<string | undefined>(undefined);
-  isAddToBottom = input<boolean>(false);
-  isAddToBacklog = input<boolean>(false);
+  isAddToBottomInput = input<boolean>(false, { alias: 'isAddToBottom' });
+  isAddToBacklogInput = input<boolean>(false, { alias: 'isAddToBacklog' });
   additionalFields = input<Partial<TaskCopy>>();
+
+  // Local state for toggles
+  localIsAddToBottom = signal<boolean>(false);
+  localIsAddToBacklog = signal<boolean>(false);
 
   afterTaskAdd = output<{ taskId: string; isAddToBottom: boolean }>();
   blurred = output<void>();
@@ -183,7 +188,16 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   isDateAutoDetected = signal<boolean>(false);
   isEstimateAutoDetected = signal<boolean>(false);
 
-  constructor() {}
+  constructor() {
+    // Initialize local state from inputs
+    effect(
+      () => {
+        this.localIsAddToBottom.set(this.isAddToBottomInput());
+        this.localIsAddToBacklog.set(this.isAddToBacklogInput());
+      },
+      { allowSignalWrites: true },
+    );
+  }
 
   ngOnInit(): void {
     // Set up short syntax parsing with debounce
@@ -370,14 +384,14 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
 
     const taskId = this._taskService.add(
       title,
-      this.isAddToBacklog(),
+      this.localIsAddToBacklog(),
       taskData,
-      this.isAddToBottom(),
+      this.localIsAddToBottom(),
     );
 
     this.afterTaskAdd.emit({
       taskId,
-      isAddToBottom: this.isAddToBottom(),
+      isAddToBottom: this.localIsAddToBottom(),
     });
 
     const planForDay = this.planForDay();
@@ -406,7 +420,7 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
           PlannerActions.planTaskForDay({
             task,
             day,
-            isAddToTop: !this.isAddToBottom(),
+            isAddToTop: !this.localIsAddToBottom(),
           }),
         );
       }
@@ -484,5 +498,13 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
       this.selectedEstimate.set(null);
       this.isEstimateAutoDetected.set(false);
     }
+  }
+
+  toggleIsAddToBottom(): void {
+    this.localIsAddToBottom.update((v) => !v);
+  }
+
+  toggleIsAddToBacklog(): void {
+    this.localIsAddToBacklog.update((v) => !v);
   }
 }
