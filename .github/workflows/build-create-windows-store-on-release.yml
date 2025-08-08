@@ -12,6 +12,9 @@ on:
 jobs:
   windows-store-artifact:
     runs-on: windows-latest
+    env:
+      UNSPLASH_KEY: ${{ secrets.UNSPLASH_KEY }}
+      UNSPLASH_CLIENT_ID: ${{ secrets.UNSPLASH_CLIENT_ID }}
 
     if: '!github.event.release.prerelease'
 
@@ -59,9 +62,6 @@ jobs:
       - name: Install npm Packages
         #  if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm i
-
-      - name: Generate env.generated.ts
-        run: node ./tools/load-env.js
 
       - name: Lint
         run: npm run lint:ci

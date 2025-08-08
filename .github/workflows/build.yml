@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+      UNSPLASH_KEY: ${{ secrets.UNSPLASH_KEY }}
+      UNSPLASH_CLIENT_ID: ${{ secrets.UNSPLASH_CLIENT_ID }}
 
     steps:
       - uses: actions/setup-node@v3
@@ -45,12 +47,6 @@ jobs:
         run: |
           npx playwright install --with-deps chromium
           npx playwright install-deps chromium
-
-      - name: Generate env.generated.ts
-        run: node ./tools/load-env.js
-        env:
-          UNSPLASH_KEY: ${{ secrets.UNSPLASH_KEY }}
-          UNSPLASH_CLIENT_ID: ${{ secrets.UNSPLASH_CLIENT_ID }}
 
       - name: Lint
         run: npm run lint:ci
@@ -100,6 +96,9 @@ jobs:
   mac-bin:
     runs-on: macos-latest
     if: startsWith(github.ref, 'refs/tags/v')
+    env:
+      UNSPLASH_KEY: ${{ secrets.UNSPLASH_KEY }}
+      UNSPLASH_CLIENT_ID: ${{ secrets.UNSPLASH_CLIENT_ID }}
 
     steps:
       - uses: actions/setup-node@v3
@@ -150,12 +149,6 @@ jobs:
           mkdir -p ~/private_keys/
           echo '${{ secrets.mac_api_key }}' > ~/private_keys/AuthKey_${{ secrets.mac_api_key_id }}.p8
 
-      - name: Generate env.generated.ts
-        run: node ./tools/load-env.js
-        env:
-          UNSPLASH_KEY: ${{ secrets.UNSPLASH_KEY }}
-          UNSPLASH_CLIENT_ID: ${{ secrets.UNSPLASH_CLIENT_ID }}
-
       - name: Lint
         run: npm run lint:ci
 
@@ -193,6 +186,9 @@ jobs:
   windows-bin:
     runs-on: windows-latest
     if: startsWith(github.ref, 'refs/tags/v')
+    env:
+      UNSPLASH_KEY: ${{ secrets.UNSPLASH_KEY }}
+      UNSPLASH_CLIENT_ID: ${{ secrets.UNSPLASH_CLIENT_ID }}
 
     steps:
       - uses: actions/setup-node@v3
@@ -232,12 +228,6 @@ jobs:
       - name: Install npm Packages
         #  if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm i
-
-      - name: Generate env.generated.ts
-        run: node ./tools/load-env.js
-        env:
-          UNSPLASH_KEY: ${{ secrets.UNSPLASH_KEY }}
-          UNSPLASH_CLIENT_ID: ${{ secrets.UNSPLASH_CLIENT_ID }}
 
       - name: Lint
         run: npm run lint:ci
