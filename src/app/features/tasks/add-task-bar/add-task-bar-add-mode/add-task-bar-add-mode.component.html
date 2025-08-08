@@ -17,15 +17,54 @@
       (keydown.enter)="$event.preventDefault(); addTask()"
     ></textarea>
 
-    <button
-      mat-icon-button
-      class="search-toggle-btn"
-      (click)="switchToSearchMode.emit()"
-      [matTooltip]="'Search for issues'"
-      matTooltipPosition="above"
-    >
-      <mat-icon>search</mat-icon>
-    </button>
+    <div class="button-controls">
+      @if (titleControl.value?.trim()) {
+        <div class="separator-box">
+          <button
+            mat-icon-button
+            class="switch-add-to-btn"
+            (click)="addTask()"
+            type="submit"
+            [matTooltip]="'Add task'"
+            matTooltipPosition="above"
+          >
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+      }
+
+      <button
+        mat-icon-button
+        class="switch-add-to-bot-btn"
+        (click)="toggleIsAddToBottom()"
+        [matTooltip]="localIsAddToBottom() ? 'Add to top' : 'Add to bottom'"
+        matTooltipPosition="above"
+      >
+        <mat-icon>{{
+          localIsAddToBottom() ? 'vertical_align_bottom' : 'vertical_align_top'
+        }}</mat-icon>
+      </button>
+
+      <button
+        mat-icon-button
+        class="switch-add-to-btn"
+        (click)="toggleIsAddToBacklog()"
+        [matTooltip]="localIsAddToBacklog() ? 'Add to today' : 'Add to backlog'"
+        matTooltipPosition="above"
+      >
+        <mat-icon>{{ localIsAddToBacklog() ? 'inbox' : 'today' }}</mat-icon>
+      </button>
+
+      <button
+        mat-icon-button
+        class="search-toggle-btn"
+        (click)="switchToSearchMode.emit()"
+        [matTooltip]="'Search for issues'"
+        matTooltipPosition="above"
+      >
+        <mat-icon>search</mat-icon>
+      </button>
+    </div>
   </div>
 
   <div class="action-buttons">
@@ -111,17 +150,6 @@
           >close</mat-icon
         >
       }
-    </button>
-
-    <button
-      mat-raised-button
-      color="primary"
-      class="add-task-btn"
-      (click)="addTask()"
-      [disabled]="!titleControl.value?.trim()"
-    >
-      <mat-icon>add</mat-icon>
-      Add Task
     </button>
   </div>
 

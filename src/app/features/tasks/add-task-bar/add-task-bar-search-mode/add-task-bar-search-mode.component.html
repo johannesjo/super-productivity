@@ -3,16 +3,6 @@
   [class.isElevated]="isElevated()"
 >
   <div class="search-header">
-    <button
-      mat-icon-button
-      class="back-btn"
-      (click)="switchToAddMode.emit()"
-      [matTooltip]="'Back to add mode'"
-      matTooltipPosition="below"
-    >
-      <mat-icon>arrow_back</mat-icon>
-    </button>
-
     <div class="search-input-wrapper">
       @if (isLoading()) {
         <div class="spinner">
@@ -32,17 +22,29 @@
         matInput
       />
 
-      <button
-        mat-icon-button
-        class="search-type-toggle"
-        (click)="toggleSearchType()"
-        [matTooltip]="
-          searchType() === 'tasks' ? 'Switch to issue search' : 'Switch to task search'
-        "
-        matTooltipPosition="below"
-      >
-        <mat-icon>{{ searchType() === 'tasks' ? 'task' : 'bug_report' }}</mat-icon>
-      </button>
+      <div class="button-controls">
+        <button
+          mat-icon-button
+          class="search-toggle-btn"
+          (click)="switchToAddMode.emit()"
+          [matTooltip]="'Switch to add mode'"
+          matTooltipPosition="above"
+        >
+          <mat-icon>add</mat-icon>
+        </button>
+
+        <button
+          mat-icon-button
+          class="search-type-toggle"
+          (click)="toggleSearchType()"
+          [matTooltip]="
+            searchType() === 'tasks' ? 'Switch to issue search' : 'Switch to task search'
+          "
+          matTooltipPosition="above"
+        >
+          <mat-icon>{{ searchType() === 'tasks' ? 'task' : 'bug_report' }}</mat-icon>
+        </button>
+      </div>
     </div>
   </div>
 

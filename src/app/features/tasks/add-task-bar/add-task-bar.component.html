@@ -29,42 +29,4 @@
       @fade
     ></add-task-bar-search-mode>
   }
-
-  <div class="mode-indicator">
-    <button
-      class="mode-toggle"
-      [class.active]="mode() === 'add'"
-      (click)="switchToAddMode()"
-      [attr.aria-label]="'Add mode'"
-    >
-      <span class="mode-icon">+</span>
-    </button>
-    <button
-      class="mode-toggle"
-      [class.active]="mode() === 'search'"
-      (click)="switchToSearchMode()"
-      [attr.aria-label]="'Search mode'"
-    >
-      <span class="mode-icon">🔍</span>
-    </button>
-  </div>
-
-  <div class="quick-toggles">
-    <button
-      class="quick-toggle"
-      (click)="toggleIsAddToBottom()"
-      [attr.aria-label]="isAddToBottom() ? 'Add to top' : 'Add to bottom'"
-      [class.active]="isAddToBottom()"
-    >
-      <span class="toggle-icon">{{ isAddToBottom() ? '⬇' : '⬆' }}</span>
-    </button>
-    <button
-      class="quick-toggle"
-      (click)="toggleIsAddToBacklog()"
-      [attr.aria-label]="isAddToBacklog() ? 'Add to today' : 'Add to backlog'"
-      [class.active]="isAddToBacklog()"
-    >
-      <span class="toggle-icon">{{ isAddToBacklog() ? '📋' : '📅' }}</span>
-    </button>
-  </div>
 </div>

@@ -55,10 +55,15 @@
       }
     }
 
+    .button-controls {
+      margin-left: auto;
+      z-index: 2;
+      display: flex;
+    }
+
+    .search-toggle-btn,
     .search-type-toggle {
-      position: absolute;
-      right: 4px;
-      opacity: 0.6;
+      opacity: 0.4;
 
       &:hover {
         opacity: 1;
