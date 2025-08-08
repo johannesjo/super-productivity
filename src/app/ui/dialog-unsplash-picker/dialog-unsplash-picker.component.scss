@@ -1,0 +1,51 @@
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.image-item {
+  position: relative;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+
+    .image-overlay {
+      opacity: 1;
+    }
+  }
+
+  img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+.photographer {
+  font-weight: bold;
+  padding-top: 2px;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  opacity: 1;
+  line-height: 1;
+  font-size: 10px;
+}
+
+.no-results {
+  text-align: center;
+  padding: 2rem;
+}

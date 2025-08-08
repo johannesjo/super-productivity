@@ -1,0 +1,14 @@
+.image-input-container {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+
+  input {
+    flex: 1;
+  }
+
+  .unsplash-button {
+    margin-top: 0.75rem;
+    white-space: nowrap;
+  }
+}

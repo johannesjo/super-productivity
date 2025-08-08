@@ -2,6 +2,7 @@ import { WorkContextCommon, WorkContextThemeCfg } from './work-context.model';
 import { WorklogExportSettings, WorklogGrouping } from '../worklog/worklog.model';
 import { ConfigFormSection } from '../config/global-config.model';
 import { T } from '../../t.const';
+import { FormlyFieldConfig } from '@ngx-formly/core/lib/models/fieldconfig';
 
 export const WORKLOG_EXPORT_DEFAULTS: WorklogExportSettings = {
   cols: ['DATE', 'START', 'END', 'TIME_CLOCK', 'TITLES_INCLUDING_SUB'],
@@ -135,13 +136,17 @@ export const WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<WorkContex
       {
         key: 'isDisableBackgroundGradient',
         type: 'checkbox',
+        expressions: {
+          hide: (fCfg: FormlyFieldConfig) =>
+            fCfg.model.backgroundImageDark || fCfg.model.backgroundImageLight,
+        },
         templateOptions: {
           label: T.F.PROJECT.FORM_THEME.L_IS_DISABLE_BACKGROUND_GRADIENT,
         },
       },
       {
         key: 'backgroundImageDark',
-        type: 'input',
+        type: 'image-input',
         templateOptions: {
           label: T.F.PROJECT.FORM_THEME.L_BACKGROUND_IMAGE_DARK,
           description: '* https://some/cool.jpg, file:///home/user/bg.png',
@@ -149,7 +154,7 @@ export const WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<WorkContex
       },
       {
         key: 'backgroundImageLight',
-        type: 'input',
+        type: 'image-input',
         templateOptions: {
           label: T.F.PROJECT.FORM_THEME.L_BACKGROUND_IMAGE_LIGHT,
           description: '* https://some/cool.jpg, file:///home/user/bg.png',

@@ -24,6 +24,7 @@ export type MiscConfig = Readonly<{
   isTrayShowCurrentCountdown?: boolean;
   isOverlayIndicatorEnabled?: boolean;
   customTheme?: string;
+  unsplashApiKey?: string | null;
 }>;
 
 export type ShortSyntaxConfig = Readonly<{
