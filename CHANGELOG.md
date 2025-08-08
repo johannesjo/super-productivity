@@ -1,3 +1,5 @@
+## [14.3.2](https://github.com/johannesjo/super-productivity/compare/v14.3.1...v14.3.2) (2025-08-08)
+
 ## [14.3.1](https://github.com/johannesjo/super-productivity/compare/v14.3.0...v14.3.1) (2025-08-08)
 
 ### Bug Fixes
