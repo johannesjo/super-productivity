@@ -48,6 +48,8 @@ jobs:
         #  if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm i
 
+      - run: npm run env # Generate env.generated.ts
+
       - name: Lint
         run: npm run lint:ci
 
