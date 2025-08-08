@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, LOCALE_ID } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { T } from '../../t.const';
 import { MatDialog } from '@angular/material/dialog';
 import { TaskCopy } from '../../features/tasks/task.model';
@@ -18,7 +18,8 @@ import { TaskTitleComponent } from '../../ui/task-title/task-title.component';
 import { MatRipple } from '@angular/material/core';
 import { MatIcon } from '@angular/material/icon';
 import { FullPageSpinnerComponent } from '../../ui/full-page-spinner/full-page-spinner.component';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
+import { LocaleDatePipe } from '../../ui/pipes/locale-date.pipe';
 import { HumanizeTimestampPipe } from '../../ui/pipes/humanize-timestamp.pipe';
 import { TagListComponent } from '../../features/tag/tag-list/tag-list.component';
 import { PlannerTaskComponent } from '../../features/planner/planner-task/planner-task.component';
@@ -46,7 +47,7 @@ import { MatTooltip } from '@angular/material/tooltip';
     MatIcon,
     FullPageSpinnerComponent,
     AsyncPipe,
-    DatePipe,
+    LocaleDatePipe,
     HumanizeTimestampPipe,
     TranslatePipe,
     TagListComponent,
@@ -62,7 +63,6 @@ export class ScheduledListPageComponent {
   private _translateService = inject(TranslateService);
   private _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private _dateTimeFormatService = inject(DateTimeFormatService);
-  private locale = inject(LOCALE_ID);
 
   T: typeof T = T;
   TODAY_TAG: Tag = TODAY_TAG;

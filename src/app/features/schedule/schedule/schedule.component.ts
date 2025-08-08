@@ -11,7 +11,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { CalendarIntegrationService } from '../../calendar-integration/calendar-integration.service';
 import { LS } from '../../../core/persistence/storage-keys.const';
 import { DialogTimelineSetupComponent } from '../dialog-timeline-setup/dialog-timeline-setup.component';
-import { DatePipe } from '@angular/common';
+import { LocaleDatePipe } from '../../../ui/pipes/locale-date.pipe';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import {
   selectTimelineConfig,
@@ -31,7 +31,7 @@ import { ScheduleService } from '../schedule.service';
 @Component({
   selector: 'schedule',
   imports: [
-    DatePipe,
+    LocaleDatePipe,
     ScheduleWeekComponent,
     ScheduleMonthComponent,
     MatIcon,

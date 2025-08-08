@@ -87,11 +87,11 @@
             >
               <div class="date-and-time-left">
                 <div class="date hide-xs">
-                  {{ task.dueWithTime | date: 'EE, d MMM, ' }}
+                  {{ task.dueWithTime | localeDate: 'EE, d MMM, ' }}
                   {{ task.dueWithTime | shortTime }}
                 </div>
                 <div class="date show-xs-only">
-                  {{ task.dueWithTime | date: 'd MMM, ' }},
+                  {{ task.dueWithTime | localeDate: 'd MMM, ' }},
                   {{ task.dueWithTime | shortTime }}
                 </div>
                 <div class="time-left">({{ task.dueWithTime | humanizeTimestamp }})</div>
@@ -130,7 +130,7 @@
               mat-ripple
             >
               <div class="date-and-time-left">
-                <div class="date">{{ task.dueDay | date: 'EE, d MMM' }}</div>
+                <div class="date">{{ task.dueDay | localeDate: 'EE, d MMM' }}</div>
               </div>
               <mat-icon>today</mat-icon>
             </div>

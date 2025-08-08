@@ -121,7 +121,7 @@
           class="reminder-value"
           matTooltipPosition="left"
         >
-          {{ task().dueWithTime | date: 'short' }}
+          {{ task().dueWithTime | localeDate: 'short' }}
         </div>
       }
       @if (task().dueDay) {
@@ -130,7 +130,7 @@
             <mat-icon>wb_sunny</mat-icon>
             {{ T.G.TODAY_TAG_TITLE | translate }}
           } @else {
-            {{ task().dueDay | date: 'shortDate' }}
+            {{ task().dueDay | localeDate: 'shortDate' }}
           }
         </div>
       }
@@ -315,9 +315,9 @@
   </task-detail-item>
 
   <div class="date-info">
-    <div>Created on {{ task().created | date: 'short' }}</div>
+    <div>Created on {{ task().created | localeDate: 'short' }}</div>
     @if (task().doneOn) {
-      <div>Completed on {{ task().doneOn | date: 'short' }}</div>
+      <div>Completed on {{ task().doneOn | localeDate: 'short' }}</div>
     }
   </div>
 </div>

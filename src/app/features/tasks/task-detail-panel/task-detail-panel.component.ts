@@ -69,7 +69,7 @@ import { IssueContentComponent } from '../../issue/issue-content/issue-content.c
 import { InlineMarkdownComponent } from '../../../ui/inline-markdown/inline-markdown.component';
 import { TaskAttachmentListComponent } from '../task-attachment/task-attachment-list/task-attachment-list.component';
 import { TagEditComponent } from '../../tag/tag-edit/tag-edit.component';
-import { DatePipe } from '@angular/common';
+import { LocaleDatePipe } from '../../../ui/pipes/locale-date.pipe';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
@@ -95,7 +95,7 @@ import { isMarkdownChecklist } from '../../markdown-checklist/is-markdown-checkl
     InlineMarkdownComponent,
     TaskAttachmentListComponent,
     TagEditComponent,
-    DatePipe,
+    LocaleDatePipe,
     MsToStringPipe,
     TranslatePipe,
     IssueIconPipe,

@@ -45,15 +45,15 @@
           @if ($index === 0) {
             <mat-icon>wb_sunny</mat-icon>
           }
-          <div class="day-num">{{ day | date: 'd' }}</div>
-          <div class="day-day">{{ day | date: 'EEE' }}</div>
+          <div class="day-num">{{ day | localeDate: 'd' }}</div>
+          <div class="day-day">{{ day | localeDate: 'EEE' }}</div>
         </div>
       }
     }
 
     @if (isMonthView()) {
       <div class="month-header">
-        <div class="month-title">{{ daysToShow()[14] | date: 'MMMM yyyy' }}</div>
+        <div class="month-title">{{ daysToShow()[14] | localeDate: 'MMMM yyyy' }}</div>
       </div>
     }
   </div>
