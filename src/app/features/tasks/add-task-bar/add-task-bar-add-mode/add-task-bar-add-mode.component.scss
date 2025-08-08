@@ -1,17 +1,62 @@
 @import '../../../../../common';
 
-.task-input {
+.add-mode-container {
   width: 100%;
-  min-height: 40px;
-  resize: none;
+  position: relative;
+  border-radius: var(--card-border-radius);
+  background-color: var(--bg-lighter);
+  color: var(--text-color-most-intense);
+
+  &.isElevated {
+    background-color: var(--bg-lightest);
+  }
+}
+
+.input-section {
+  position: relative;
+  display: flex;
+  color: var(--text-color-most-intense);
+
+  .task-input {
+    flex: 1;
+    display: block;
+    width: 100%;
+    font-size: 16px;
+    box-sizing: border-box;
+    border-style: solid;
+    border-width: 0;
+    outline: 0;
+    padding-right: 4px;
+    padding-left: var(--s2);
+    line-height: 42px;
+    background: transparent;
+    color: inherit;
+    resize: none;
+    overflow: hidden;
+    font-family: inherit;
+  }
+
+  .search-toggle-btn {
+    margin-left: auto;
+    opacity: 0.4;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
 }
 
 .action-buttons {
+  padding: 0 var(--s2);
+  padding-bottom: var(--s);
   display: flex;
   flex-wrap: wrap;
   gap: var(--s);
-}
+  border-top: 1px dashed var(--extra-border-color);
 
-.action-btn.auto-detected {
-  border-style: dashed;
+  .action-btn {
+    &.auto-detected {
+      border-style: dashed;
+    }
+  }
 }

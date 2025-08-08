@@ -174,27 +174,15 @@
 </mat-menu>
 
 <mat-menu #dateMenu="matMenu">
-  <button
-    mat-menu-item
-    (click)="onDateSelect(getTodayDate())"
-  >
-    <mat-icon>today</mat-icon>
-    Today
-  </button>
-  <button
-    mat-menu-item
-    (click)="onDateSelect(getTomorrowDate())"
-  >
-    <mat-icon>event</mat-icon>
-    Tomorrow
-  </button>
-  <button
-    mat-menu-item
-    (click)="onDateSelect(getNextWeekDate())"
-  >
-    <mat-icon>date_range</mat-icon>
-    Next Week
-  </button>
+  @for (option of DATE_OPTIONS; track option.label) {
+    <button
+      mat-menu-item
+      (click)="onDateSelect(option.getDate())"
+    >
+      <mat-icon>{{ option.icon }}</mat-icon>
+      {{ option.label }}
+    </button>
+  }
   <button
     mat-menu-item
     (click)="onDateSelect(null)"
@@ -205,66 +193,14 @@
 </mat-menu>
 
 <mat-menu #timeMenu="matMenu">
-  <button
-    mat-menu-item
-    (click)="onTimeSelect('09:00')"
-  >
-    09:00
-  </button>
-  <button
-    mat-menu-item
-    (click)="onTimeSelect('10:00')"
-  >
-    10:00
-  </button>
-  <button
-    mat-menu-item
-    (click)="onTimeSelect('11:00')"
-  >
-    11:00
-  </button>
-  <button
-    mat-menu-item
-    (click)="onTimeSelect('12:00')"
-  >
-    12:00
-  </button>
-  <button
-    mat-menu-item
-    (click)="onTimeSelect('13:00')"
-  >
-    13:00
-  </button>
-  <button
-    mat-menu-item
-    (click)="onTimeSelect('14:00')"
-  >
-    14:00
-  </button>
-  <button
-    mat-menu-item
-    (click)="onTimeSelect('15:00')"
-  >
-    15:00
-  </button>
-  <button
-    mat-menu-item
-    (click)="onTimeSelect('16:00')"
-  >
-    16:00
-  </button>
-  <button
-    mat-menu-item
-    (click)="onTimeSelect('17:00')"
-  >
-    17:00
-  </button>
-  <button
-    mat-menu-item
-    (click)="onTimeSelect('18:00')"
-  >
-    18:00
-  </button>
+  @for (time of TIME_OPTIONS; track time) {
+    <button
+      mat-menu-item
+      (click)="onTimeSelect(time)"
+    >
+      {{ time }}
+    </button>
+  }
   <button
     mat-menu-item
     (click)="onTimeSelect(null)"
@@ -283,40 +219,12 @@
       (click)="stopPropagation($event)"
     />
   </div>
-  <button
-    mat-menu-item
-    (click)="onEstimateInput('15m')"
-  >
-    15 minutes
-  </button>
-  <button
-    mat-menu-item
-    (click)="onEstimateInput('30m')"
-  >
-    30 minutes
-  </button>
-  <button
-    mat-menu-item
-    (click)="onEstimateInput('1h')"
-  >
-    1 hour
-  </button>
-  <button
-    mat-menu-item
-    (click)="onEstimateInput('2h')"
-  >
-    2 hours
-  </button>
-  <button
-    mat-menu-item
-    (click)="onEstimateInput('4h')"
-  >
-    4 hours
-  </button>
-  <button
-    mat-menu-item
-    (click)="onEstimateInput('8h')"
-  >
-    8 hours
-  </button>
+  @for (option of ESTIMATE_OPTIONS; track option.value) {
+    <button
+      mat-menu-item
+      (click)="onEstimateInput(option.value)"
+    >
+      {{ option.label }}
+    </button>
+  }
 </mat-menu>
