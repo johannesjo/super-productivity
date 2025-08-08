@@ -1,10 +1,7 @@
 @import '../../../../common';
 
 :host {
-  --short-syntax-bar-height: 28px;
-
   display: block;
-  //overflow: hidden;
   text-align: start;
 
   &.global {
@@ -21,8 +18,8 @@
 
     @include mq(xs) {
       margin-top: 20px;
-      max-width: 632px;
-      width: 80%;
+      max-width: 720px;
+      width: 90%;
       top: var(--s6);
       left: 50%;
       right: auto;
@@ -36,105 +33,96 @@
   bottom: var(--s);
 }
 
-.add-task-form {
+.add-task-bar-container {
+  position: relative;
   width: 100%;
-  position: relative;
-  border-radius: var(--card-border-radius);
-  background: var(--bg);
-
-  // 58 overlay 53 normal
-  background-color: var(--bg-lighter);
-  color: var(--text-color-most-intense);
-
-  &.isElevated {
-    background-color: var(--bg-lightest);
-    color: var(--text-color-most-intense);
-  }
-
-  .input-wrapper {
-    position: relative;
-    display: flex;
-
-    color: var(--text-color-most-intense);
-  }
-
-  input {
-    flex: 1;
-    display: block;
-    width: 100%;
-    font-size: 16px;
-    box-sizing: border-box;
-    border-style: solid;
-    border-width: 0;
-    outline: 0;
-    padding-right: 4px;
-    padding-left: var(--s2);
-    line-height: 42px;
-    background: transparent;
-    color: inherit;
-  }
 }
 
-.spinner {
+.mode-indicator {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 2;
-}
-
-.is-loading {
-  padding: var(--s);
-}
-
-.button-controls {
-  margin-left: auto;
-  z-index: 2;
+  top: var(--s);
+  right: var(--s);
   display: flex;
-}
+  gap: 4px;
+  z-index: 10;
 
-.switch-add-to-bot-btn,
-.switch-add-to-btn {
-  opacity: 0.4;
+  .mode-toggle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--extra-border-color);
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
 
-  &:hover {
-    opacity: 1;
+    &:hover {
+      background: var(--bg-lighter);
+      border-color: var(--primary);
+    }
+
+    &.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .mode-icon {
+      font-size: 16px;
+    }
   }
 }
 
-.info-bar {
-  padding: 0 var(--s2);
-  height: var(--short-syntax-bar-height);
-  line-height: var(--short-syntax-bar-height);
-  border-top: 1px dashed var(--extra-border-color);
-  position: relative;
-  z-index: 1;
-  pointer-events: none;
+.quick-toggles {
+  position: absolute;
+  bottom: var(--s);
+  right: var(--s);
+  display: flex;
+  gap: 4px;
+  z-index: 10;
 
-  border-color: var(--extra-border-color);
-  color: var(--text-color-muted);
+  .quick-toggle {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    border: 1px solid var(--extra-border-color);
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0.6;
+
+    &:hover {
+      opacity: 1;
+      background: var(--bg-lighter);
+    }
+
+    &.active {
+      opacity: 1;
+      background: var(--primary-light);
+      border-color: var(--primary);
+    }
+
+    .toggle-icon {
+      font-size: 14px;
+    }
+  }
 }
 
-.info-text {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  vertical-align: middle;
-
-  &.add-existing {
-    font-weight: bold;
-
-    color: var(--text-color);
+@include mq(xs, max) {
+  .mode-indicator {
+    position: static;
+    justify-content: center;
+    margin-bottom: var(--s);
   }
 
-  > mat-icon {
-    vertical-align: middle;
+  .quick-toggles {
+    position: static;
+    justify-content: center;
+    margin-top: var(--s);
   }
-}
-
-.separator-box {
-  border-right: 1px dashed var(--extra-border-color);
-  border-left: 1px dashed var(--extra-border-color);
-
-  border-color: var(--extra-border-color);
 }

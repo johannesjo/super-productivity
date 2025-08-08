@@ -1,0 +1,322 @@
+<div
+  class="add-mode-container"
+  [class.isElevated]="isElevated()"
+>
+  <div class="input-section">
+    <textarea
+      #inputEl
+      class="task-input"
+      [formControl]="titleControl"
+      [tabindex]="tabindex()"
+      [mention]="(mentionConfig$ | async)?.mentions"
+      [mentionConfig]="mentionConfig$ | async"
+      placeholder="Add a task... (use + for project, # for tags, @ for dates, t for time estimates)"
+      matInput
+      spellcheck="false"
+      rows="1"
+      (keydown.enter)="$event.preventDefault(); addTask()"
+    ></textarea>
+
+    <button
+      mat-icon-button
+      class="search-toggle-btn"
+      (click)="switchToSearchMode.emit()"
+      [matTooltip]="'Search for issues'"
+      matTooltipPosition="above"
+    >
+      <mat-icon>search</mat-icon>
+    </button>
+  </div>
+
+  <div class="action-buttons">
+    <button
+      mat-button
+      class="action-btn project-btn"
+      [matMenuTriggerFor]="projectMenu"
+      [class.has-value]="selectedProject()"
+      [class.auto-detected]="isProjectAutoDetected()"
+    >
+      <mat-icon>folder</mat-icon>
+      <span>{{ selectedProject()?.title || 'Project' }}</span>
+      @if (selectedProject()) {
+        <mat-icon
+          class="clear-icon"
+          (click)="clearProject(); $event.stopPropagation()"
+          >close</mat-icon
+        >
+      }
+    </button>
+
+    <button
+      mat-button
+      class="action-btn tags-btn"
+      [matMenuTriggerFor]="tagsMenu"
+      [class.has-value]="selectedTags().length > 0"
+      [class.auto-detected]="isTagsAutoDetected()"
+    >
+      <mat-icon>label</mat-icon>
+      <span>
+        @if (selectedTags().length === 0) {
+          Tags
+        } @else if (selectedTags().length === 1) {
+          {{ selectedTags()[0].title }}
+        } @else {
+          {{ selectedTags().length }} tags
+        }
+      </span>
+    </button>
+
+    <button
+      mat-button
+      class="action-btn date-btn"
+      [matMenuTriggerFor]="dateMenu"
+      [class.has-value]="selectedDate()"
+      [class.auto-detected]="isDateAutoDetected()"
+    >
+      <mat-icon>event</mat-icon>
+      <span>{{ dateDisplay() || 'Due date' }}</span>
+      @if (selectedDate()) {
+        <mat-icon
+          class="clear-icon"
+          (click)="clearDate(); $event.stopPropagation()"
+          >close</mat-icon
+        >
+      }
+    </button>
+
+    <button
+      mat-button
+      class="action-btn time-btn"
+      [matMenuTriggerFor]="timeMenu"
+      [class.has-value]="selectedTime()"
+      [disabled]="!selectedDate()"
+    >
+      <mat-icon>schedule</mat-icon>
+      <span>{{ selectedTime() || 'Time' }}</span>
+    </button>
+
+    <button
+      mat-button
+      class="action-btn estimate-btn"
+      [matMenuTriggerFor]="estimateMenu"
+      [class.has-value]="selectedEstimate()"
+      [class.auto-detected]="isEstimateAutoDetected()"
+    >
+      <mat-icon>timer</mat-icon>
+      <span>{{ estimateDisplay() || 'Estimate' }}</span>
+      @if (selectedEstimate()) {
+        <mat-icon
+          class="clear-icon"
+          (click)="clearEstimate(); $event.stopPropagation()"
+          >close</mat-icon
+        >
+      }
+    </button>
+
+    <button
+      mat-raised-button
+      color="primary"
+      class="add-task-btn"
+      (click)="addTask()"
+      [disabled]="!titleControl.value?.trim()"
+    >
+      <mat-icon>add</mat-icon>
+      Add Task
+    </button>
+  </div>
+
+  <div class="selected-values">
+    @if (selectedProject()) {
+      <mat-chip-set>
+        <mat-chip [style.background-color]="selectedProject()!.theme.primary">
+          {{ selectedProject()!.title }}
+        </mat-chip>
+      </mat-chip-set>
+    }
+
+    @if (selectedTags().length > 0) {
+      <mat-chip-set>
+        @for (tag of selectedTags(); track tag.id) {
+          <mat-chip [style.background-color]="tag.color || tag.theme?.primary">
+            {{ tag.title }}
+          </mat-chip>
+        }
+      </mat-chip-set>
+    }
+  </div>
+</div>
+
+<mat-menu #projectMenu="matMenu">
+  @for (project of projects$ | async; track project.id) {
+    <button
+      mat-menu-item
+      (click)="onProjectSelect(project)"
+    >
+      <mat-icon [style.color]="project.theme.primary">folder</mat-icon>
+      {{ project.title }}
+    </button>
+  }
+</mat-menu>
+
+<mat-menu #tagsMenu="matMenu">
+  @for (tag of tags$ | async; track tag.id) {
+    <button
+      mat-menu-item
+      (click)="onTagToggle(tag)"
+      [class.selected]="hasSelectedTag(tag.id)"
+    >
+      <mat-icon [style.color]="tag.color || tag.theme?.primary">
+        {{ hasSelectedTag(tag.id) ? 'check_box' : 'check_box_outline_blank' }}
+      </mat-icon>
+      {{ tag.title }}
+    </button>
+  }
+</mat-menu>
+
+<mat-menu #dateMenu="matMenu">
+  <button
+    mat-menu-item
+    (click)="onDateSelect(getTodayDate())"
+  >
+    <mat-icon>today</mat-icon>
+    Today
+  </button>
+  <button
+    mat-menu-item
+    (click)="onDateSelect(getTomorrowDate())"
+  >
+    <mat-icon>event</mat-icon>
+    Tomorrow
+  </button>
+  <button
+    mat-menu-item
+    (click)="onDateSelect(getNextWeekDate())"
+  >
+    <mat-icon>date_range</mat-icon>
+    Next Week
+  </button>
+  <button
+    mat-menu-item
+    (click)="onDateSelect(null)"
+  >
+    <mat-icon>clear</mat-icon>
+    No Date
+  </button>
+</mat-menu>
+
+<mat-menu #timeMenu="matMenu">
+  <button
+    mat-menu-item
+    (click)="onTimeSelect('09:00')"
+  >
+    09:00
+  </button>
+  <button
+    mat-menu-item
+    (click)="onTimeSelect('10:00')"
+  >
+    10:00
+  </button>
+  <button
+    mat-menu-item
+    (click)="onTimeSelect('11:00')"
+  >
+    11:00
+  </button>
+  <button
+    mat-menu-item
+    (click)="onTimeSelect('12:00')"
+  >
+    12:00
+  </button>
+  <button
+    mat-menu-item
+    (click)="onTimeSelect('13:00')"
+  >
+    13:00
+  </button>
+  <button
+    mat-menu-item
+    (click)="onTimeSelect('14:00')"
+  >
+    14:00
+  </button>
+  <button
+    mat-menu-item
+    (click)="onTimeSelect('15:00')"
+  >
+    15:00
+  </button>
+  <button
+    mat-menu-item
+    (click)="onTimeSelect('16:00')"
+  >
+    16:00
+  </button>
+  <button
+    mat-menu-item
+    (click)="onTimeSelect('17:00')"
+  >
+    17:00
+  </button>
+  <button
+    mat-menu-item
+    (click)="onTimeSelect('18:00')"
+  >
+    18:00
+  </button>
+  <button
+    mat-menu-item
+    (click)="onTimeSelect(null)"
+  >
+    <mat-icon>clear</mat-icon>
+    No Time
+  </button>
+</mat-menu>
+
+<mat-menu #estimateMenu="matMenu">
+  <div class="estimate-input-container">
+    <input
+      matInput
+      placeholder="e.g., 30m, 2h"
+      (input)="onEstimateInputChange($event)"
+      (click)="stopPropagation($event)"
+    />
+  </div>
+  <button
+    mat-menu-item
+    (click)="onEstimateInput('15m')"
+  >
+    15 minutes
+  </button>
+  <button
+    mat-menu-item
+    (click)="onEstimateInput('30m')"
+  >
+    30 minutes
+  </button>
+  <button
+    mat-menu-item
+    (click)="onEstimateInput('1h')"
+  >
+    1 hour
+  </button>
+  <button
+    mat-menu-item
+    (click)="onEstimateInput('2h')"
+  >
+    2 hours
+  </button>
+  <button
+    mat-menu-item
+    (click)="onEstimateInput('4h')"
+  >
+    4 hours
+  </button>
+  <button
+    mat-menu-item
+    (click)="onEstimateInput('8h')"
+  >
+    8 hours
+  </button>
+</mat-menu>
