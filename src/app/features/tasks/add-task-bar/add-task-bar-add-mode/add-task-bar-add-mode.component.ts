@@ -92,6 +92,47 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
 
   T = T;
 
+  // Constants for menu options
+  readonly DATE_OPTIONS = [
+    {
+      icon: 'today',
+      label: 'Today',
+      getDate: () => this.getTodayDate(),
+    },
+    {
+      icon: 'event',
+      label: 'Tomorrow',
+      getDate: () => this.getTomorrowDate(),
+    },
+    {
+      icon: 'date_range',
+      label: 'Next Week',
+      getDate: () => this.getNextWeekDate(),
+    },
+  ];
+
+  readonly TIME_OPTIONS = [
+    '09:00',
+    '10:00',
+    '11:00',
+    '12:00',
+    '13:00',
+    '14:00',
+    '15:00',
+    '16:00',
+    '17:00',
+    '18:00',
+  ];
+
+  readonly ESTIMATE_OPTIONS = [
+    { value: '15m', label: '15 minutes' },
+    { value: '30m', label: '30 minutes' },
+    { value: '1h', label: '1 hour' },
+    { value: '2h', label: '2 hours' },
+    { value: '4h', label: '4 hours' },
+    { value: '8h', label: '8 hours' },
+  ];
+
   inputEl = viewChild<ElementRef>('inputEl');
   titleControl = new FormControl<string>('');
 
@@ -400,15 +441,15 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
     return this.selectedTags().some((t) => t.id === tagId);
   }
 
-  getTodayDate(): Date {
+  private getTodayDate(): Date {
     return new Date();
   }
 
-  getTomorrowDate(): Date {
+  private getTomorrowDate(): Date {
     return new Date(Date.now() + 86400000);
   }
 
-  getNextWeekDate(): Date {
+  private getNextWeekDate(): Date {
     return new Date(Date.now() + 604800000);
   }
 
