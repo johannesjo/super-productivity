@@ -40,14 +40,21 @@ export interface UnsplashSearchResponse {
 })
 export class UnsplashService {
   private readonly API_URL = 'https://api.unsplash.com';
-  // Register your app at https://unsplash.com/developers for a free API key (50 req/hour)
-  private readonly API_KEY = getEnv('UNSPLASH_KEY');
-  private readonly API_CLIENT_ID = getEnv('UNSPLASH_CLIENT_ID');
+  // Register your app at https://unsplash.com/developers for a free Access Key (50 req/hour)
+  // The Access Key is used with "Client-ID" prefix in the Authorization header
+  private readonly ACCESS_KEY = getEnv('UNSPLASH_KEY');
 
   constructor(private _http: HttpClient) {}
 
   searchPhotos(query: string, page = 1): Observable<UnsplashSearchResponse> {
     if (!query || query.trim() === '') {
+      return of({ results: [], total: 0, total_pages: 0 });
+    }
+
+    if (!this.ACCESS_KEY) {
+      console.warn(
+        'No Unsplash Access Key configured. Register at https://unsplash.com/developers',
+      );
       return of({ results: [], total: 0, total_pages: 0 });
     }
 
@@ -60,7 +67,7 @@ export class UnsplashService {
 
     const url = `${this.API_URL}/search/photos`;
     const headers = {
-      Authorization: `Client-ID ${this.API_KEY}`,
+      Authorization: `Client-ID ${this.ACCESS_KEY}`,
     };
 
     return this._http
@@ -104,8 +111,13 @@ export class UnsplashService {
       return of(null);
     }
 
+    if (!this.ACCESS_KEY) {
+      console.warn('No Unsplash Access Key configured');
+      return of(null);
+    }
+
     const headers = {
-      Authorization: `Client-ID ${this.API_KEY}`,
+      Authorization: `Client-ID ${this.ACCESS_KEY}`,
     };
 
     // Call the download endpoint to track usage
