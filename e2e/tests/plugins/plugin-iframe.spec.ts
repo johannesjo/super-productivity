@@ -158,7 +158,7 @@ test.describe.serial('Plugin Iframe', () => {
     } catch (error) {
       // If iframe content is not accessible due to cross-origin restrictions,
       // at least verify the iframe element itself is present
-      console.log('Note: Iframe content verification skipped (possibly cross-origin)');
+      // console.log('Note: Iframe content verification skipped (possibly cross-origin)');
       await expect(iframe).toBeVisible();
     }
   });

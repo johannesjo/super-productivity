@@ -59,12 +59,12 @@ test.describe.serial('Plugin Structure Test', () => {
           const header = collapsible.querySelector('.collapsible-header');
           if (header) {
             (header as HTMLElement).click();
-            console.log('Clicked to expand plugin collapsible');
+            // console.log('Clicked to expand plugin collapsible');
           } else {
             console.error('Could not find collapsible header');
           }
         } else {
-          console.log('Plugin collapsible already expanded');
+          // console.log('Plugin collapsible already expanded');
         }
       } else {
         console.error('Plugin collapsible not found');

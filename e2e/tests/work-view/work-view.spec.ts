@@ -99,13 +99,13 @@ test.describe('Work View', () => {
         const value = await textarea.inputValue();
         taskContents.push(value);
       } catch (e) {
-        console.log('Failed to get textarea value:', e);
+        // console.log('Failed to get textarea value:', e);
       }
     }
 
     // Debug log to see what we actually have
-    console.log('Number of tasks found:', await tasks.count());
-    console.log('Task contents found:', taskContents);
+    // console.log('Number of tasks found:', await tasks.count());
+    // console.log('Task contents found:', taskContents);
 
     // Check that both tasks are present (look for key parts that would be in any version)
     const hasHihi = taskContents.some((v) => v.includes('hihi'));
@@ -113,8 +113,8 @@ test.describe('Work View', () => {
 
     // More detailed assertion for debugging
     if (!hasHihi || !hasOther) {
-      console.log('Missing expected tasks. Found:', taskContents);
-      console.log('hasHihi:', hasHihi, 'hasOther:', hasOther);
+      // console.log('Missing expected tasks. Found:', taskContents);
+      // console.log('hasHihi:', hasHihi, 'hasOther:', hasOther);
     }
 
     expect(hasHihi).toBe(true);

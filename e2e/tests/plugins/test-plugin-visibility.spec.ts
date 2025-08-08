@@ -49,7 +49,7 @@ test.describe.serial('Plugin Visibility', () => {
       return pageResults;
     });
 
-    console.log('Page structure results:', results);
+    // console.log('Page structure results:', results);
     expect(results).toBeTruthy();
   });
 
@@ -61,14 +61,14 @@ test.describe.serial('Plugin Visibility', () => {
     await page.click(SETTINGS_BTN);
     await page.waitForSelector(ROUTER_WRAPPER, { state: 'visible' });
 
-    const contentAnalysis = await page.evaluate(() => {
+    await page.evaluate(() => {
       const configContent =
         document.querySelector('.page-settings')?.innerHTML || 'No config page found';
-      console.log('Config page content length:', configContent.length);
+      // console.log('Config page content length:', configContent.length);
 
       // Look for any mentions of plugin
       const pluginMentions = configContent.match(/plugin/gi) || [];
-      console.log('Plugin mentions found:', pluginMentions.length);
+      // console.log('Plugin mentions found:', pluginMentions.length);
 
       return {
         contentLength: configContent.length,
@@ -76,7 +76,5 @@ test.describe.serial('Plugin Visibility', () => {
         hasPluginText: configContent.toLowerCase().includes('plugin'),
       };
     });
-
-    console.log('Content analysis:', contentAnalysis);
   });
 });

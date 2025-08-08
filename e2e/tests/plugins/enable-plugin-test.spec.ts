@@ -17,7 +17,7 @@ test.describe('Enable Plugin Test', () => {
     const timeoutMultiplier = getCITimeoutMultiplier();
     test.setTimeout(60000 * timeoutMultiplier);
 
-    console.log('[Plugin Test] Starting enable plugin test...');
+    // console.log('[Plugin Test] Starting enable plugin test...');
 
     // First, ensure plugin assets are available
     const assetsAvailable = await waitForPluginAssets(page);
@@ -59,12 +59,12 @@ test.describe('Enable Plugin Test', () => {
           const header = collapsible.querySelector('.collapsible-header');
           if (header) {
             (header as HTMLElement).click();
-            console.log('Clicked to expand plugin collapsible');
+            // console.log('Clicked to expand plugin collapsible');
           } else {
             console.error('Could not find collapsible header');
           }
         } else {
-          console.log('Plugin collapsible already expanded');
+          // console.log('Plugin collapsible already expanded');
         }
       } else {
         console.error('Plugin collapsible not found');
@@ -77,7 +77,7 @@ test.describe('Enable Plugin Test', () => {
     await page.waitForTimeout(2000);
 
     // Check if plugin-management has any content
-    const contentResult = await page.evaluate(() => {
+    await page.evaluate(() => {
       const pluginMgmt = document.querySelector('plugin-management');
       const matCards = pluginMgmt ? pluginMgmt.querySelectorAll('mat-card') : [];
 
@@ -95,8 +95,6 @@ test.describe('Enable Plugin Test', () => {
         ),
       };
     });
-
-    console.log('Plugin management content:', contentResult);
 
     await page.waitForTimeout(1000);
 
@@ -128,13 +126,13 @@ test.describe('Enable Plugin Test', () => {
       };
     });
 
-    console.log('Plugin enablement result:', enableResult);
+    // console.log('Plugin enablement result:', enableResult);
     expect(enableResult.foundApiTestPlugin).toBe(true);
 
     await page.waitForTimeout(3000); // Wait for plugin to initialize
 
     // Now check if plugin menu has buttons
-    const finalMenuState = await page.evaluate(() => {
+    await page.evaluate(() => {
       const pluginMenu = document.querySelector('side-nav plugin-menu');
       const buttons = pluginMenu ? pluginMenu.querySelectorAll('button') : [];
       return {
@@ -143,7 +141,5 @@ test.describe('Enable Plugin Test', () => {
         buttonTexts: Array.from(buttons).map((btn) => btn.textContent?.trim() || ''),
       };
     });
-
-    console.log('Final plugin menu state:', finalMenuState);
   });
 });

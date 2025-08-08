@@ -233,7 +233,7 @@ test.describe.serial('Plugin Upload', () => {
       };
     }, TEST_PLUGIN_ID);
 
-    console.log('Removal verification:', removalResult);
+    // console.log('Removal verification:', removalResult);
     expect(removalResult.removed).toBeTruthy();
   });
 });

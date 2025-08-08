@@ -18,12 +18,9 @@ test.describe.serial('Plugin Feature Check', () => {
           const ng = (window as any).ng;
           const appElement = document.querySelector('app-root');
           if (appElement) {
-            const appComponent = ng.getComponent(appElement);
-            console.log('App component found:', !!appComponent);
-
             // Try to find PluginService in injector
             const injector = ng.getInjector(appElement);
-            console.log('Injector found:', !!injector);
+            // console.log('Injector found:', !!injector);
 
             // Log available service tokens
             if (injector && injector.get) {
@@ -35,7 +32,7 @@ test.describe.serial('Plugin Feature Check', () => {
                     const service = injector.get(name);
                     if (service) {
                       hasPluginService = true;
-                      console.log(`Found service with name: ${name}`);
+                      // console.log(`Found service with name: ${name}`);
                       break;
                     }
                   } catch (e: any) {
@@ -59,7 +56,7 @@ test.describe.serial('Plugin Feature Check', () => {
       };
     });
 
-    console.log('Plugin service check:', result);
+    // console.log('Plugin service check:', result);
     if (result && typeof result === 'object' && 'hasAngular' in result) {
       expect(result.hasAngular).toBe(true);
     }
@@ -72,7 +69,7 @@ test.describe.serial('Plugin Feature Check', () => {
     // Navigate to config page
     await page.goto('/#/config');
 
-    const results = await page.evaluate(() => {
+    await page.evaluate(() => {
       const uiResults: any = {};
 
       // Check various plugin-related elements
@@ -94,7 +91,5 @@ test.describe.serial('Plugin Feature Check', () => {
 
       return uiResults;
     });
-
-    console.log('Plugin UI elements:', results);
   });
 });
