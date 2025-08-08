@@ -104,3 +104,25 @@
 @defer {
   <shepherd></shepherd>
 }
+
+<!-- Background context menu -->
+@if (routeWrapper) {
+  <context-menu
+    [contextMenu]="backgroundContextMenu"
+    [rightClickTriggerEl]="routeWrapper.nativeElement"
+  ></context-menu>
+}
+
+<ng-template #backgroundContextMenu>
+  <div style="min-width: 200px; max-width: 300px">
+    <button
+      mat-menu-item
+      (click)="changeBackgroundFromUnsplash()"
+      class="background-menu-item"
+      style="width: 100%; overflow: hidden"
+    >
+      <mat-icon>image</mat-icon>
+      <span>{{ T.APP.CONTEXT_MENU.CHANGE_BACKGROUND | translate }}</span>
+    </button>
+  </div>
+</ng-template>

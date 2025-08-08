@@ -1,11 +1,15 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   effect,
+  ElementRef,
   HostBinding,
   HostListener,
   inject,
   OnDestroy,
+  ViewChild,
 } from '@angular/core';
 import { ChromeExtensionInterfaceService } from './core/chrome-extension-interface/chrome-extension-interface.service';
 import { ShortcutService } from './core-ui/shortcut/shortcut.service';
@@ -63,7 +67,7 @@ import { SyncStatus } from './pfapi/api';
 import { LocalBackupService } from './imex/local-backup/local-backup.service';
 import { DEFAULT_META_MODEL } from './pfapi/api/model-ctrl/meta-model-ctrl';
 import { AppDataCompleteNew } from './pfapi/pfapi-config';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogPleaseRateComponent } from './features/dialog-please-rate/dialog-please-rate.component';
 import { getDbDateStr } from './util/get-db-date-str';
@@ -73,6 +77,12 @@ import { TaskService } from './features/tasks/task.service';
 import { IpcRendererEvent } from 'electron';
 import { SyncSafetyBackupService } from './imex/sync/sync-safety-backup.service';
 import { Log } from './core/log';
+import { MatMenuItem } from '@angular/material/menu';
+import { MatIcon } from '@angular/material/icon';
+import { DialogUnsplashPickerComponent } from './ui/dialog-unsplash-picker/dialog-unsplash-picker.component';
+import { ProjectService } from './features/project/project.service';
+import { TagService } from './features/tag/tag.service';
+import { ContextMenuComponent } from './ui/context-menu/context-menu.component';
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -104,9 +114,13 @@ const productivityTip: string[] = w.productivityTips && w.productivityTips[w.ran
     FocusModeOverlayComponent,
     ShepherdComponent,
     AsyncPipe,
+    MatMenuItem,
+    MatIcon,
+    TranslatePipe,
+    ContextMenuComponent,
   ],
 })
-export class AppComponent implements OnDestroy {
+export class AppComponent implements OnDestroy, AfterViewInit {
   private _translateService = inject(TranslateService);
 
   private _globalConfigService = inject(GlobalConfigService);
@@ -128,6 +142,9 @@ export class AppComponent implements OnDestroy {
   private _taskService = inject(TaskService);
   private _pluginService = inject(PluginService);
   private _syncWrapperService = inject(SyncWrapperService);
+  private _projectService = inject(ProjectService);
+  private _tagService = inject(TagService);
+  private _cdr = inject(ChangeDetectorRef);
 
   // needs to be imported for initialization
   private _syncSafetyBackupService = inject(SyncSafetyBackupService);
@@ -138,9 +155,12 @@ export class AppComponent implements OnDestroy {
   readonly layoutService = inject(LayoutService);
   readonly globalThemeService = inject(GlobalThemeService);
   readonly _store = inject(Store);
+  readonly T = T;
 
   productivityTipTitle: string = productivityTip && productivityTip[0];
   productivityTipText: string = productivityTip && productivityTip[1];
+
+  @ViewChild('routeWrapper', { read: ElementRef }) routeWrapper?: ElementRef<HTMLElement>;
 
   @HostBinding('@.disabled') isDisableAnimations = false;
 
@@ -401,6 +421,62 @@ export class AppComponent implements OnDestroy {
 
   getPage(outlet: RouterOutlet): string {
     return outlet.activatedRouteData.page || 'one';
+  }
+
+  changeBackgroundFromUnsplash(): void {
+    this.globalThemeService.isDarkTheme$.pipe(take(1)).subscribe((isDarkMode) => {
+      const contextKey = isDarkMode ? 'backgroundImageDark' : 'backgroundImageLight';
+
+      const dialogRef = this._matDialog.open(DialogUnsplashPickerComponent, {
+        width: '900px',
+        maxWidth: '95vw',
+        data: {
+          context: contextKey,
+        },
+      });
+
+      dialogRef.afterClosed().subscribe((result) => {
+        if (result) {
+          // Get current work context
+          this.workContextService.activeWorkContext$
+            .pipe(take(1))
+            .subscribe((activeContext) => {
+              if (!activeContext) {
+                this._snackService.open({
+                  type: 'ERROR',
+                  msg: 'No active work context',
+                });
+                return;
+              }
+
+              // Extract the URL from the result object
+              const backgroundUrl = result.url || result;
+
+              // Update the theme based on context type
+              if (activeContext.type === 'PROJECT') {
+                this._projectService.update(activeContext.id, {
+                  theme: {
+                    ...activeContext.theme,
+                    [contextKey]: backgroundUrl,
+                  },
+                });
+              } else if (activeContext.type === 'TAG') {
+                this._tagService.updateTag(activeContext.id, {
+                  theme: {
+                    ...activeContext.theme,
+                    [contextKey]: backgroundUrl,
+                  },
+                });
+              }
+            });
+        }
+      });
+    });
+  }
+
+  ngAfterViewInit(): void {
+    // Trigger change detection to ensure the context menu component gets the element reference
+    this._cdr.detectChanges();
   }
 
   ngOnDestroy(): void {
