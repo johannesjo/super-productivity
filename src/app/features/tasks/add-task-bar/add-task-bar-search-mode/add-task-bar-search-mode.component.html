@@ -1,0 +1,119 @@
+<div
+  class="search-mode-container"
+  [class.isElevated]="isElevated()"
+>
+  <div class="search-header">
+    <button
+      mat-icon-button
+      class="back-btn"
+      (click)="switchToAddMode.emit()"
+      [matTooltip]="'Back to add mode'"
+      matTooltipPosition="below"
+    >
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+
+    <div class="search-input-wrapper">
+      @if (isLoading()) {
+        <div class="spinner">
+          <mat-spinner diameter="20"></mat-spinner>
+        </div>
+      }
+
+      <input
+        #inputEl
+        class="search-input"
+        [formControl]="searchControl"
+        [tabindex]="tabindex()"
+        [matAutocomplete]="autoEl"
+        placeholder="{{
+          searchType() === 'tasks' ? 'Search existing tasks...' : 'Search issues...'
+        }}"
+        matInput
+      />
+
+      <button
+        mat-icon-button
+        class="search-type-toggle"
+        (click)="toggleSearchType()"
+        [matTooltip]="
+          searchType() === 'tasks' ? 'Switch to issue search' : 'Switch to task search'
+        "
+        matTooltipPosition="below"
+      >
+        <mat-icon>{{ searchType() === 'tasks' ? 'task' : 'bug_report' }}</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="search-info">
+    @if (searchControl.value) {
+      <span class="info-text">
+        Searching {{ searchType() === 'tasks' ? 'tasks' : 'issues' }} for "{{
+          searchControl.value
+        }}"
+      </span>
+    } @else {
+      <span class="info-text muted">
+        {{
+          searchType() === 'tasks'
+            ? 'Search for existing tasks to add to your current context'
+            : 'Search for issues from connected providers'
+        }}
+      </span>
+    }
+  </div>
+
+  <mat-autocomplete
+    #autoEl="matAutocomplete"
+    class="search-autocomplete"
+    (optionActivated)="onOptionActivated($event?.option?.value)"
+    (optionSelected)="onOptionSelected($event.option.value)"
+    [autoActiveFirstOption]="true"
+  >
+    @for (
+      item of suggestions$ | async;
+      track item.taskId || (item.issueData && item.issueData.id)
+    ) {
+      <mat-option
+        [value]="item"
+        class="search-option"
+      >
+        <div class="option-content">
+          @if (item.issueType) {
+            <mat-icon
+              class="option-icon"
+              [svgIcon]="item.issueType | issueIcon"
+            ></mat-icon>
+          } @else if (!item.ctx) {
+            <mat-icon class="option-icon">library_books</mat-icon>
+          }
+
+          @if (item.ctx) {
+            <tag
+              [tag]="item.ctx"
+              [isHideTitle]="false"
+            ></tag>
+          }
+
+          <span
+            class="option-title"
+            [innerHTML]="item?.titleHighlighted || item?.title"
+          ></span>
+
+          @if (item.issueData?.id) {
+            <span class="issue-id">#{{ item.issueData.id }}</span>
+          }
+        </div>
+      </mat-option>
+    }
+
+    @if ((suggestions$ | async)?.length === 0 && searchControl.value && !isLoading()) {
+      <mat-option disabled>
+        <span class="no-results"
+          >No {{ searchType() === 'tasks' ? 'tasks' : 'issues' }} found</span
+        >
+      </mat-option>
+    }
+  </mat-autocomplete>
+</div>

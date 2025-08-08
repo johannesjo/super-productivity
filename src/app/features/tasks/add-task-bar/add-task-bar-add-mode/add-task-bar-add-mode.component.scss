@@ -1,0 +1,17 @@
+@import '../../../../../common';
+
+.task-input {
+  width: 100%;
+  min-height: 40px;
+  resize: none;
+}
+
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s);
+}
+
+.action-btn.auto-detected {
+  border-style: dashed;
+}

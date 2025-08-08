@@ -1,0 +1,143 @@
+@import '../../../../../common';
+
+.search-mode-container {
+  background: var(--bg-lighter);
+  border-radius: var(--card-border-radius);
+  padding: var(--s2);
+
+  &.isElevated {
+    background: var(--bg-lightest);
+  }
+}
+
+.search-header {
+  display: flex;
+  align-items: center;
+  gap: var(--s);
+  margin-bottom: var(--s2);
+
+  .back-btn {
+    opacity: 0.7;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  .search-input-wrapper {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    .spinner {
+      position: absolute;
+      left: var(--s2);
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 2;
+    }
+
+    .search-input {
+      flex: 1;
+      font-size: 16px;
+      padding: var(--s2);
+      padding-left: var(--s4);
+      border: 1px solid var(--extra-border-color);
+      border-radius: 24px;
+      background: var(--bg);
+      color: var(--text-color-most-intense);
+
+      &:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: var(--bg-lighter);
+      }
+    }
+
+    .search-type-toggle {
+      position: absolute;
+      right: 4px;
+      opacity: 0.6;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+.search-info {
+  padding: 0 var(--s2);
+  margin-bottom: var(--s);
+
+  .info-text {
+    font-size: 13px;
+    color: var(--text-color);
+
+    &.muted {
+      color: var(--text-color-muted);
+    }
+  }
+}
+
+.search-autocomplete {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.search-option {
+  .option-content {
+    display: flex;
+    align-items: center;
+    gap: var(--s);
+    padding: var(--s) 0;
+    width: 100%;
+
+    .option-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      opacity: 0.7;
+    }
+
+    .option-title {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .issue-id {
+      font-size: 12px;
+      color: var(--text-color-muted);
+      margin-left: auto;
+    }
+  }
+
+  &:hover {
+    .option-content {
+      background: var(--bg-lighter);
+    }
+  }
+}
+
+.no-results {
+  color: var(--text-color-muted);
+  font-style: italic;
+}
+
+@include mq(xs, max) {
+  .search-header {
+    flex-direction: column;
+    align-items: stretch;
+
+    .back-btn {
+      align-self: flex-start;
+    }
+
+    .search-input-wrapper {
+      width: 100%;
+    }
+  }
+}
