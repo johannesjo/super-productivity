@@ -118,7 +118,7 @@ export class AddTaskBarSearchModeComponent implements AfterViewInit {
         );
       } else {
         // Search existing tasks
-        return this._taskService.taskFeatureStore$.pipe(
+        return this._taskService.allTasks$.pipe(
           map((tasks) => {
             const searchLower = searchTerm.toLowerCase();
             return tasks
