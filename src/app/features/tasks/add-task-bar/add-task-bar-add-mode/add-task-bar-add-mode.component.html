@@ -37,7 +37,9 @@
         mat-icon-button
         class="switch-add-to-bot-btn"
         (click)="toggleIsAddToBottom()"
-        [matTooltip]="localIsAddToBottom() ? 'Add to top' : 'Add to bottom'"
+        [matTooltip]="
+          localIsAddToBottom() ? 'Add to top (Ctrl+1)' : 'Add to bottom (Ctrl+1)'
+        "
         matTooltipPosition="above"
       >
         <mat-icon>{{
@@ -59,7 +61,7 @@
         mat-icon-button
         class="search-toggle-btn"
         (click)="switchToSearchMode.emit()"
-        [matTooltip]="'Search for issues'"
+        [matTooltip]="'Search for issues (Ctrl+2)'"
         matTooltipPosition="above"
       >
         <mat-icon>search</mat-icon>

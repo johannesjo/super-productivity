@@ -189,7 +189,7 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   isEstimateAutoDetected = signal<boolean>(false);
 
   constructor() {
-    // Initialize local state from inputs
+    // Initialize local state from inputs and keep them in sync
     effect(
       () => {
         this.localIsAddToBottom.set(this.isAddToBottomInput());

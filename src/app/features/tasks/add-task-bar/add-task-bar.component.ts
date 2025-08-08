@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  output,
+  signal,
+  HostListener,
+} from '@angular/core';
 import { LS } from '../../../core/persistence/storage-keys.const';
 import { blendInOutAnimation } from 'src/app/ui/animations/blend-in-out.ani';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
@@ -60,5 +67,23 @@ export class AddTaskBarComponent {
 
   toggleIsAddToBacklog(): void {
     this.isAddToBacklog.set(!this.isAddToBacklog());
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardShortcuts(event: KeyboardEvent): void {
+    // Ctrl+1 to toggle add to top/bottom
+    if (event.ctrlKey && event.key === '1') {
+      event.preventDefault();
+      this.toggleIsAddToBottom();
+    }
+    // Ctrl+2 to toggle between add and search mode
+    else if (event.ctrlKey && event.key === '2') {
+      event.preventDefault();
+      if (this.mode() === 'add') {
+        this.switchToSearchMode();
+      } else {
+        this.switchToAddMode();
+      }
+    }
   }
 }
