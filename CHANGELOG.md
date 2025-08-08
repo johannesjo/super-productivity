@@ -1,3 +1,13 @@
+## [14.3.1](https://github.com/johannesjo/super-productivity/compare/v14.3.0...v14.3.1) (2025-08-08)
+
+### Bug Fixes
+
+- getWorklogStr not being completely replaced ([b526b25](https://github.com/johannesjo/super-productivity/commit/b526b25b6dd12a183aa7a1ce4b523d358b799eed))
+
+### Features
+
+- **unsplash-picker:** add context menu on background right click ([4352094](https://github.com/johannesjo/super-productivity/commit/4352094ad2315d957a9366997ae912b662b7a0bd))
+
 # [14.3.0](https://github.com/johannesjo/super-productivity/compare/v14.2.6...v14.3.0) (2025-08-08)
 
 ### Bug Fixes

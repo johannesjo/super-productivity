@@ -1,0 +1,7 @@
+
+### Bug Fixes
+
+* getWorklogStr not being completely replaced
+### Features
+
+* **unsplash-picker:** add context menu on background right click
