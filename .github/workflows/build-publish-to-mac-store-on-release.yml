@@ -49,6 +49,9 @@ jobs:
         env:
           PROVISION_PROFILE: ${{secrets.mas_provision_profile}}
 
+      - name: Generate env.generated.ts
+        run: node ./tools/load-env.js
+
       - name: Lint
         run: npm run lint:ci
 

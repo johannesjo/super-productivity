@@ -112,6 +112,9 @@ jobs:
           mkdir -p ~/private_keys/
           echo '${{ secrets.mac_api_key }}' > ~/private_keys/AuthKey_${{ secrets.mac_api_key_id }}.p8
 
+      - name: Generate env.generated.ts
+        run: node ./tools/load-env.js
+
       - name: Lint
         run: npm run lint:ci
 

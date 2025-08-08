@@ -43,6 +43,9 @@ jobs:
           npx playwright install --with-deps chromium
           npx playwright install-deps chromium
 
+      - name: Generate env.generated.ts
+        run: node ./tools/load-env.js
+
       - run: npm run lint:ci
       - run: npm run test
       - run: npm run e2e
