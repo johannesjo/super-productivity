@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { getEnv } from '../../util/env';
+import { getEnvOptional } from '../../util/env';
 
 export interface UnsplashPhoto {
   id: string;
@@ -42,9 +42,13 @@ export class UnsplashService {
   private readonly API_URL = 'https://api.unsplash.com';
   // Register your app at https://unsplash.com/developers for a free Access Key (50 req/hour)
   // The Access Key is used with "Client-ID" prefix in the Authorization header
-  private readonly ACCESS_KEY = getEnv('UNSPLASH_KEY');
+  private readonly ACCESS_KEY = getEnvOptional('UNSPLASH_KEY');
 
   constructor(private _http: HttpClient) {}
+
+  isAvailable(): boolean {
+    return !!this.ACCESS_KEY;
+  }
 
   searchPhotos(query: string, page = 1): Observable<UnsplashSearchResponse> {
     if (!query || query.trim() === '') {
