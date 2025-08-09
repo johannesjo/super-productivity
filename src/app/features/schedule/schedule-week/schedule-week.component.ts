@@ -20,7 +20,7 @@ import {
 import { Store } from '@ngrx/store';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { FH, SVEType, T_ID_PREFIX } from '../schedule.const';
-import { throttle } from 'helpful-decorators';
+import { throttle } from '../../../util/decorators';
 import { CreateTaskPlaceholderComponent } from '../create-task-placeholder/create-task-placeholder.component';
 import { ScheduleEventComponent } from '../schedule-event/schedule-event.component';
 import { TranslatePipe } from '@ngx-translate/core';

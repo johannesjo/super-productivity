@@ -52,7 +52,7 @@ import {
   MatMenuTrigger,
 } from '@angular/material/menu';
 import { WorkContextService } from '../../work-context/work-context.service';
-import { throttle } from 'helpful-decorators';
+import { throttle } from '../../../util/decorators';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { Update } from '@ngrx/entity';
