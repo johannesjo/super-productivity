@@ -282,9 +282,9 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     this.takeABreakService.resetTimer();
   }
 
-  moveDoneToArchive(): void {
+  async moveDoneToArchive(): Promise<void> {
     const doneTasks = this.doneTasks();
-    this.taskService.moveToArchive(doneTasks);
+    await this.taskService.moveToArchive(doneTasks);
     this._snackService.open({
       msg: T.F.TASK.S.MOVED_TO_ARCHIVE,
       type: 'SUCCESS',

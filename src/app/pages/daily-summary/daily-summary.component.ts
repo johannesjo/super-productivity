@@ -70,7 +70,6 @@ import {
   SimpleCounterSummaryItem,
   SimpleCounterSummaryItemComponent,
 } from './simple-counter-summary-item/simple-counter-summary-item.component';
-import { promiseTimeout } from '../../util/promise-timeout';
 import { TaskArchiveService } from '../../features/time-tracking/task-archive.service';
 import { IS_TOUCH_ONLY } from '../../util/is-touch-only';
 import { Log } from '../../core/log';
@@ -388,9 +387,8 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    this._taskService.moveToArchive(doneTasks);
-    // wait for tasks being actually moved to archive and all database stuff to be completed...
-    await promiseTimeout(50);
+    // Actually wait for the archive operation to complete
+    await this._taskService.moveToArchive(doneTasks);
     Log.log('[DailySummary] Archive operation completed');
   }
 

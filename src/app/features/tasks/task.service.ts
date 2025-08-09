@@ -651,7 +651,7 @@ export class TaskService {
     }
   }
 
-  moveToArchive(tasks: TaskWithSubTasks | TaskWithSubTasks[]): void {
+  async moveToArchive(tasks: TaskWithSubTasks | TaskWithSubTasks[]): Promise<void> {
     if (!Array.isArray(tasks)) {
       tasks = [tasks];
     }
@@ -693,7 +693,8 @@ export class TaskService {
       this._store.dispatch(TaskSharedActions.moveToArchive({ tasks: parentTasks }));
       // Only archive parent tasks to prevent orphaned subtasks
       TaskLog.log('[TaskService] Calling archive service to persist tasks');
-      this._archiveService.moveTasksToArchiveAndFlushArchiveIfDue(parentTasks);
+      await this._archiveService.moveTasksToArchiveAndFlushArchiveIfDue(parentTasks);
+      TaskLog.log('[TaskService] Archive operation completed successfully');
     } else {
       TaskLog.log('[TaskService] No parent tasks to archive');
     }
