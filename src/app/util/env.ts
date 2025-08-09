@@ -16,6 +16,16 @@ export const getEnv = (key: keyof typeof ENV): string | undefined => {
 };
 
 /**
+ * Get an optional environment variable that may not be in the required list.
+ * Use this for environment variables that are truly optional and may not be defined
+ * in the REQUIRED_ENV_KEYS list in load-env.js.
+ * Returns undefined if the variable is not set.
+ */
+export const getEnvOptional = (key: string): string | undefined => {
+  return (ENV as any)[key] || undefined;
+};
+
+/**
  * Get an environment variable as a number.
  * Returns undefined if the value is not a valid number.
  */
