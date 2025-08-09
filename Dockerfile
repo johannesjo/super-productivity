@@ -32,7 +32,8 @@ RUN npm run prepare
 
 # Copy source and build
 COPY . .
-RUN npm run env && npm run lint && npm run buildFrontend:prodWeb
+# Pass build args as environment variables for the build commands
+RUN UNSPLASH_KEY=$UNSPLASH_KEY UNSPLASH_CLIENT_ID=$UNSPLASH_CLIENT_ID npm run env && npm run lint && npm run buildFrontend:prodWeb
 
 # Production stage
 FROM nginx:1-alpine
