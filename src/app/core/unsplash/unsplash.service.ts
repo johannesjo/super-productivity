@@ -46,6 +46,10 @@ export class UnsplashService {
 
   constructor(private _http: HttpClient) {}
 
+  isAvailable(): boolean {
+    return !!this.ACCESS_KEY && this.ACCESS_KEY !== 'undefined';
+  }
+
   searchPhotos(query: string, page = 1): Observable<UnsplashSearchResponse> {
     if (!query || query.trim() === '') {
       return of({ results: [], total: 0, total_pages: 0 });

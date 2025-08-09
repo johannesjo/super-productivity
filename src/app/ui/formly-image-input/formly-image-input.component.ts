@@ -11,6 +11,7 @@ import {
   DialogUnsplashPickerComponent,
   DialogUnsplashPickerData,
 } from '../dialog-unsplash-picker/dialog-unsplash-picker.component';
+import { UnsplashService } from '../../core/unsplash/unsplash.service';
 
 @Component({
   selector: 'formly-image-input',
@@ -29,11 +30,22 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FormlyImageInputComponent extends FieldType<FormlyFieldConfig> {
-  constructor(private _dialog: MatDialog) {
+  constructor(
+    private _dialog: MatDialog,
+    private _unsplashService: UnsplashService,
+  ) {
     super();
   }
 
+  get isUnsplashAvailable(): boolean {
+    return this._unsplashService.isAvailable();
+  }
+
   openUnsplashPicker(): void {
+    if (!this.isUnsplashAvailable) {
+      console.warn('Unsplash service is not available - no API key configured');
+      return;
+    }
     const dialogData: DialogUnsplashPickerData = {
       context: this.field.key as string, // This will be 'backgroundImageDark' or 'backgroundImageLight'
     };

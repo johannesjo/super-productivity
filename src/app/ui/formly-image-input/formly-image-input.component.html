@@ -12,8 +12,9 @@
     mat-stroked-button
     type="button"
     (click)="openUnsplashPicker()"
-    [disabled]="props.readonly"
+    [disabled]="props.readonly || !isUnsplashAvailable"
     class="unsplash-button"
+    *ngIf="isUnsplashAvailable"
   >
     <mat-icon>image</mat-icon>
     Load from Unsplash
