@@ -20,6 +20,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, NavigationStart, Router } from '@angular/router';
 import { filter, map, switchMap, startWith } from 'rxjs/operators';
 import { of, timer } from 'rxjs';
+import { SwipeDirective } from '../../swipe-gesture/swipe.directive';
 
 const SMALL_CONTAINER_WIDTH = 620;
 const VERY_SMALL_CONTAINER_WIDTH = 450;
@@ -36,6 +37,8 @@ const VERY_SMALL_CONTAINER_WIDTH = 450;
     // eslint-disable-next-line @typescript-eslint/naming-convention
     '[class.isOver]': 'isOver()',
   },
+  imports: [SwipeDirective],
+  standalone: true,
 })
 export class BetterDrawerContainerComponent implements OnDestroy {
   private _elementRef = inject(ElementRef);

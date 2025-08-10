@@ -15,13 +15,7 @@ import { androidInterface } from './app/features/android/android-interface';
 // Type definitions for window.ea are in ./app/core/window-ea.d.ts
 import { App as CapacitorApp } from '@capacitor/app';
 import { GlobalErrorHandler } from './app/core/error-handler/global-error-handler.class';
-import {
-  bootstrapApplication,
-  BrowserModule,
-  HAMMER_GESTURE_CONFIG,
-  HammerModule,
-} from '@angular/platform-browser';
-import { MyHammerConfig } from './hammer-config.class';
+import { bootstrapApplication, BrowserModule } from '@angular/platform-browser';
 import {
   HttpClient,
   provideHttpClient,
@@ -102,7 +96,6 @@ bootstrapApplication(AppComponent, {
       MaterialCssVarsModule.forRoot(),
       // External
       BrowserModule,
-      HammerModule,
       // NOTE: both need to be present to use forFeature stores
       StoreModule.forRoot(reducers, {
         metaReducers: [
@@ -168,7 +161,6 @@ bootstrapApplication(AppComponent, {
         : 'en-US',
     },
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
-    { provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig },
     provideHttpClient(withInterceptorsFromDi()),
     DatePipe,
     ShortTimeHtmlPipe,

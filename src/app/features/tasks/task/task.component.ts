@@ -38,6 +38,7 @@ import {
   tap,
 } from 'rxjs/operators';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
+import { PanDirective } from '../../../ui/swipe-gesture/pan.directive';
 import { TaskAttachmentService } from '../task-attachment/task-attachment.service';
 import { DialogEditTaskAttachmentComponent } from '../task-attachment/dialog-edit-attachment/dialog-edit-task-attachment.component';
 import { swirlAnimation } from '../../../ui/animations/swirl-in-out.ani';
@@ -126,6 +127,7 @@ import { TaskLog } from '../../../core/log';
     TagListComponent,
     ShortPlannedAtPipe,
     TagToggleMenuListComponent,
+    PanDirective,
   ],
 })
 export class TaskComponent implements OnDestroy, AfterViewInit {
