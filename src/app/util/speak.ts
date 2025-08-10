@@ -15,7 +15,9 @@ export const speak = (text: string, volume: number, voice: string): void => {
     synth.getVoices().find((v) => voice.includes(v.name)) ||
     synth.getVoices().find((v) => v.default) ||
     null;
-  utter.volume = volume;
+
+  console.log(volume);
+  utter.volume = volume / 100;
 
   synth.speak(utter);
 };
