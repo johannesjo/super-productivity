@@ -1,12 +1,12 @@
 import {
   Directive,
-  EventEmitter,
   HostListener,
-  Output,
-  Input,
+  output,
+  input,
   ElementRef,
   Renderer2,
   NgZone,
+  inject,
 } from '@angular/core';
 
 export interface PanEvent {
@@ -28,18 +28,18 @@ export interface PanEvent {
   standalone: true,
 })
 export class PanDirective {
-  @Output() panstart = new EventEmitter<PanEvent>();
-  @Output() panmove = new EventEmitter<PanEvent>();
-  @Output() panend = new EventEmitter<PanEvent>();
-  @Output() panleft = new EventEmitter<PanEvent>();
-  @Output() panright = new EventEmitter<PanEvent>();
-  @Output() panup = new EventEmitter<PanEvent>();
-  @Output() pandown = new EventEmitter<PanEvent>();
-  @Output() pancancel = new EventEmitter<PanEvent>();
+  readonly panstart = output<PanEvent>();
+  readonly panmove = output<PanEvent>();
+  readonly panend = output<PanEvent>();
+  readonly panleft = output<PanEvent>();
+  readonly panright = output<PanEvent>();
+  readonly panup = output<PanEvent>();
+  readonly pandown = output<PanEvent>();
+  readonly pancancel = output<PanEvent>();
 
   // Configuration
-  @Input() panThreshold = 10; // Minimum distance to start panning
-  @Input() panEnabled = true;
+  readonly panThreshold = input(10); // Minimum distance to start panning
+  readonly panEnabled = input(true);
 
   private startX = 0;
   private startY = 0;
@@ -50,15 +50,13 @@ export class PanDirective {
   private touchIdentifier: number | null = null;
   private lastDirection: 'left' | 'right' | 'up' | 'down' | null = null;
 
-  constructor(
-    private elementRef: ElementRef,
-    private renderer: Renderer2,
-    private ngZone: NgZone,
-  ) {}
+  private readonly elementRef = inject(ElementRef);
+  private readonly renderer = inject(Renderer2);
+  private readonly ngZone = inject(NgZone);
 
   @HostListener('touchstart', ['$event'])
   onTouchStart(event: TouchEvent): void {
-    if (!this.panEnabled || this.touchIdentifier !== null) {
+    if (!this.panEnabled() || this.touchIdentifier !== null) {
       return;
     }
 
@@ -83,7 +81,7 @@ export class PanDirective {
 
   @HostListener('touchmove', ['$event'])
   onTouchMove(event: TouchEvent): void {
-    if (!this.panEnabled || this.touchIdentifier === null) {
+    if (!this.panEnabled() || this.touchIdentifier === null) {
       return;
     }
 
@@ -109,7 +107,7 @@ export class PanDirective {
     const distance = Math.sqrt(xSquared + ySquared);
 
     // Check if we should start panning
-    if (!this.isPanning && distance >= this.panThreshold) {
+    if (!this.isPanning && distance >= this.panThreshold()) {
       this.isPanning = true;
     }
 
@@ -162,7 +160,7 @@ export class PanDirective {
 
   @HostListener('touchend', ['$event'])
   onTouchEnd(event: TouchEvent): void {
-    if (!this.panEnabled || this.touchIdentifier === null) {
+    if (!this.panEnabled() || this.touchIdentifier === null) {
       return;
     }
 
@@ -197,7 +195,7 @@ export class PanDirective {
 
   @HostListener('touchcancel', ['$event'])
   onTouchCancel(event: TouchEvent): void {
-    if (!this.panEnabled || this.touchIdentifier === null) {
+    if (!this.panEnabled() || this.touchIdentifier === null) {
       return;
     }
 

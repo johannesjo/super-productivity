@@ -22,7 +22,7 @@
       class="btn btn-primary"
       mat-button
       type="button"
-      (keydown.ArrowRight)="focusNextButton(confirmButton)"
+      (keydown.ArrowRight)="focusNextButton(confirmButton())"
     >
       <mat-icon>close</mat-icon>
       {{ data.cancelTxt || T.G.CANCEL | translate }}
@@ -37,7 +37,7 @@
       color="primary"
       type="button"
       mat-stroked-button
-      (keydown.ArrowLeft)="focusNextButton(cancelButton)"
+      (keydown.ArrowLeft)="focusNextButton(cancelButton())"
     >
       <mat-icon>check</mat-icon>
       {{ data.okTxt || T.G.OK | translate }}

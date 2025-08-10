@@ -1,4 +1,4 @@
-import { Directive, EventEmitter, HostListener, Output, Input } from '@angular/core';
+import { Directive, HostListener, output, input } from '@angular/core';
 
 /**
  * Simple swipe directive for touch gestures
@@ -9,14 +9,14 @@ import { Directive, EventEmitter, HostListener, Output, Input } from '@angular/c
   standalone: true,
 })
 export class SwipeDirective {
-  @Output() swiperight = new EventEmitter<void>();
-  @Output() swipeleft = new EventEmitter<void>();
+  readonly swiperight = output<void>();
+  readonly swipeleft = output<void>();
 
   // Configuration options
-  @Input() swipeThreshold = 50; // Minimum distance in pixels
-  @Input() swipeVelocityThreshold = 0.3; // Minimum velocity in pixels/ms
-  @Input() swipeMaxTime = 1000; // Maximum time in ms for a swipe
-  @Input() swipeEnabled = true; // Enable/disable swipe detection
+  readonly swipeThreshold = input(50); // Minimum distance in pixels
+  readonly swipeVelocityThreshold = input(0.3); // Minimum velocity in pixels/ms
+  readonly swipeMaxTime = input(1000); // Maximum time in ms for a swipe
+  readonly swipeEnabled = input(true); // Enable/disable swipe detection
 
   private swipeStartX = 0;
   private swipeStartY = 0;
@@ -25,7 +25,7 @@ export class SwipeDirective {
 
   @HostListener('touchstart', ['$event'])
   onTouchStart(event: TouchEvent): void {
-    if (!this.swipeEnabled || this.touchIdentifier !== null) {
+    if (!this.swipeEnabled() || this.touchIdentifier !== null) {
       return;
     }
 
@@ -38,7 +38,7 @@ export class SwipeDirective {
 
   @HostListener('touchend', ['$event'])
   onTouchEnd(event: TouchEvent): void {
-    if (!this.swipeEnabled || this.touchIdentifier === null) {
+    if (!this.swipeEnabled() || this.touchIdentifier === null) {
       return;
     }
 
@@ -63,7 +63,7 @@ export class SwipeDirective {
     this.touchIdentifier = null;
 
     // Check if this qualifies as a swipe
-    if (deltaTime > this.swipeMaxTime) {
+    if (deltaTime > this.swipeMaxTime()) {
       return; // Too slow
     }
 
@@ -71,13 +71,13 @@ export class SwipeDirective {
     const absY = Math.abs(deltaY);
 
     // Check if horizontal movement is dominant
-    if (absX < this.swipeThreshold || absX < absY * 1.5) {
+    if (absX < this.swipeThreshold() || absX < absY * 1.5) {
       return; // Not enough horizontal movement or too much vertical movement
     }
 
     // Calculate velocity
     const velocity = absX / deltaTime;
-    if (velocity < this.swipeVelocityThreshold) {
+    if (velocity < this.swipeVelocityThreshold()) {
       return; // Too slow
     }
 
