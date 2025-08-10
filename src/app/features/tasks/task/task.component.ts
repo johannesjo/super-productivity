@@ -638,11 +638,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     ) {
       return;
     }
-    if (ev.deltaX > 0) {
-      this.isLockPanRight = true;
-    } else if (ev.deltaX < 0) {
-      this.isLockPanLeft = true;
-    }
+    this.isPreventPointerEventsWhilePanning = true;
   }
 
   onPanEnd(): void {
@@ -837,43 +833,55 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   }
 
   private _handlePan(ev: any): void {
-    if (
-      !IS_TOUCH_PRIMARY ||
-      (!this.isLockPanLeft && !this.isLockPanRight) ||
-      ev.eventType === 8
-    ) {
+    if (!IS_TOUCH_PRIMARY || ev.eventType === 8) {
       return;
     }
     const innerWrapperElRef = this.innerWrapperElRef();
-    if (!innerWrapperElRef) {
+    const blockLeftElRef = this.blockLeftElRef();
+    const blockRightElRef = this.blockRightElRef();
+    if (!innerWrapperElRef || !blockLeftElRef || !blockRightElRef) {
       throw new Error('No el');
     }
 
-    const targetRef = this.isLockPanRight
-      ? this.blockLeftElRef()
-      : this.blockRightElRef();
+    // Dynamically determine direction based on current pan position
+    const isPanningRight = ev.deltaX > 0;
+    const isPanningLeft = ev.deltaX < 0;
+
+    // Update lock state dynamically
+    this.isLockPanRight = isPanningRight;
+    this.isLockPanLeft = isPanningLeft;
+
+    // Select the appropriate block element based on current direction
+    const targetRef = isPanningRight ? blockLeftElRef : blockRightElRef;
 
     const MAGIC_FACTOR = 2;
     this.isPreventPointerEventsWhilePanning = true;
-    //  (this.task()TitleEditEl as any).textarea.nativeElement.blur();
-    if (targetRef) {
-      let scale = (ev.deltaX / this._elementRef.nativeElement.offsetWidth) * MAGIC_FACTOR;
-      scale = this.isLockPanLeft ? scale * -1 : scale;
+
+    // Reset both blocks first
+    this._renderer.setStyle(blockLeftElRef.nativeElement, 'width', '0');
+    this._renderer.setStyle(blockRightElRef.nativeElement, 'width', '0');
+    this._renderer.removeClass(blockLeftElRef.nativeElement, 'isActive');
+    this._renderer.removeClass(blockRightElRef.nativeElement, 'isActive');
+
+    if (targetRef && ev.deltaX !== 0) {
+      let scale =
+        (Math.abs(ev.deltaX) / this._elementRef.nativeElement.offsetWidth) * MAGIC_FACTOR;
       scale = Math.min(1, Math.max(0, scale));
+
       if (scale > 0.5) {
         this.isActionTriggered = true;
         this._renderer.addClass(targetRef.nativeElement, 'isActive');
       } else {
         this.isActionTriggered = false;
-        this._renderer.removeClass(targetRef.nativeElement, 'isActive');
       }
-      const moveBy = this.isLockPanLeft ? ev.deltaX * -1 : ev.deltaX;
+
+      const moveBy = Math.abs(ev.deltaX);
       this._renderer.setStyle(targetRef.nativeElement, 'width', `${moveBy}px`);
       this._renderer.setStyle(targetRef.nativeElement, 'transition', `none`);
       this._renderer.setStyle(
         innerWrapperElRef.nativeElement,
         'transform',
-        `translateX(${ev.deltaX}px`,
+        `translateX(${ev.deltaX}px)`,
       );
     }
   }
