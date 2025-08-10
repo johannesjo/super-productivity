@@ -75,27 +75,29 @@
         @if (metricService.improvementCountsPieChartData$ | async; as improvementCounts) {
           <section>
             <h3>{{ T.F.METRIC.CMP.IMPROVEMENT_SELECTION_COUNT | translate }}</h3>
-            <canvas
+            <lazy-chart
               [type]="pieChartType"
-              [data]="improvementCounts"
+              [datasets]="improvementCounts.datasets"
+              [labels]="improvementCounts.labels"
               [legend]="improvementCounts?.datasets[0].data.length < 12"
               [options]="pieChartOptions"
-              baseChart
+              height="300px"
             >
-            </canvas>
+            </lazy-chart>
           </section>
         }
         @if (metricService.obstructionCountsPieChartData$ | async; as obstructionCounts) {
           <section>
             <h3>{{ T.F.METRIC.CMP.OBSTRUCTION_SELECTION_COUNT | translate }}</h3>
-            <canvas
+            <lazy-chart
               [type]="pieChartType"
-              [data]="obstructionCounts"
+              [datasets]="obstructionCounts.datasets"
+              [labels]="obstructionCounts.labels"
               [legend]="obstructionCounts?.datasets[0].data.length < 12"
               [options]="pieChartOptions"
-              baseChart
+              height="300px"
             >
-            </canvas>
+            </lazy-chart>
           </section>
         }
       </section>
@@ -103,17 +105,14 @@
         @if (productivityHappiness$ | async; as productivityHappiness) {
           <section>
             <h3>{{ T.F.METRIC.CMP.MOOD_PRODUCTIVITY_OVER_TIME | translate }}</h3>
-            <div class="chart-wrapper">
-              <div class="inner-chart-wrapper">
-                <canvas
-                  [type]="lineChartType"
-                  [data]="productivityHappiness"
-                  [legend]="true"
-                  [options]="lineChartOptions"
-                  baseChart
-                ></canvas>
-              </div>
-            </div>
+            <lazy-chart
+              [type]="lineChartType"
+              [datasets]="productivityHappiness.datasets"
+              [labels]="productivityHappiness.labels"
+              [legend]="true"
+              [options]="lineChartOptions"
+              height="400px"
+            ></lazy-chart>
           </section>
         }
       </section>
@@ -126,37 +125,29 @@
         @if (simpleClickCounterData$ | async; as simpleCounterClickData) {
           <section>
             <h3>{{ T.F.METRIC.CMP.SIMPLE_CLICK_COUNTERS_OVER_TIME | translate }}</h3>
-            <div class="chart-wrapper">
-              <div class="inner-chart-wrapper">
-                <canvas
-                  [type]="lineChartType"
-                  [data]="simpleCounterClickData"
-                  [labels]="simpleCounterClickData.labels"
-                  [options]="lineChartOptions"
-                  [legend]="true"
-                  baseChart
-                >
-                </canvas>
-              </div>
-            </div>
+            <lazy-chart
+              [type]="lineChartType"
+              [datasets]="simpleCounterClickData.datasets"
+              [labels]="simpleCounterClickData.labels"
+              [options]="lineChartOptions"
+              [legend]="true"
+              height="400px"
+            >
+            </lazy-chart>
           </section>
         }
         @if (simpleCounterStopWatchData$ | async; as simpleCounterStopWatchData) {
           <section>
             <h3>{{ T.F.METRIC.CMP.SIMPLE_STOPWATCH_COUNTERS_OVER_TIME | translate }}</h3>
-            <div class="chart-wrapper">
-              <div class="inner-chart-wrapper">
-                <canvas
-                  [type]="lineChartType"
-                  [data]="simpleCounterStopWatchData"
-                  [labels]="simpleCounterStopWatchData.labels"
-                  [options]="lineChartOptions"
-                  [legend]="true"
-                  baseChart
-                >
-                </canvas>
-              </div>
-            </div>
+            <lazy-chart
+              [type]="lineChartType"
+              [datasets]="simpleCounterStopWatchData.datasets"
+              [labels]="simpleCounterStopWatchData.labels"
+              [options]="lineChartOptions"
+              [legend]="true"
+              height="400px"
+            >
+            </lazy-chart>
           </section>
         }
       </section>

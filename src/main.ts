@@ -61,7 +61,6 @@ import { AppComponent } from './app/app.component';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { ShortTimeHtmlPipe } from './app/ui/pipes/short-time-html.pipe';
 import { ShortTimePipe } from './app/ui/pipes/short-time.pipe';
-import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { BackgroundTask } from '@capawesome/capacitor-background-task';
 import { promiseTimeout } from './app/util/promise-timeout';
 import { PLUGIN_INITIALIZER_PROVIDER } from './app/plugins/plugin-initializer';
@@ -165,7 +164,6 @@ bootstrapApplication(AppComponent, {
     DatePipe,
     ShortTimeHtmlPipe,
     ShortTimePipe,
-    provideCharts(withDefaultRegisterables()),
     provideMarkdown(),
     {
       provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,

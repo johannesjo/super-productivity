@@ -24,11 +24,11 @@ import { InputDurationDirective } from '../../../ui/duration/input-duration.dire
 import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
 import { TranslatePipe } from '@ngx-translate/core';
-import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration } from 'chart.js';
 import { LineChartData } from '../../metric/metric.model';
 import { getSimpleCounterStreakDuration } from '../get-simple-counter-streak-duration';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
+import { LazyChartComponent } from '../../metric/lazy-chart/lazy-chart.component';
 
 const CHART_DAYS = 28;
 const CHART_COLOR = '#4bc0c0';
@@ -49,7 +49,7 @@ const CHART_COLOR = '#4bc0c0';
     MatDialogActions,
     MatButton,
     TranslatePipe,
-    BaseChartDirective,
+    LazyChartComponent,
     MsToStringPipe,
   ],
 })
@@ -126,7 +126,7 @@ export class DialogSimpleCounterEditComponent {
     },
   };
 
-  onChartClick(event: { active?: any[] }): void {
+  onChartClick(event: { active: { index: number }[] }): void {
     if (!event.active?.length) return;
 
     const index = event.active[0].index;
