@@ -61,11 +61,11 @@ export const CALDAV_ISSUE_CONTENT_CONFIG: IssueContentConfig<CaldavIssue> = {
 
         let cua: string;
         if (issue.priority <= 4) {
-          cua = 'Low';
+          cua = 'High';
         } else if (issue.priority === 5) {
           cua = 'Medium';
         } else {
-          cua = 'High';
+          cua = 'Low';
         }
         return `${cua} (${issue.priority})`;
       },
