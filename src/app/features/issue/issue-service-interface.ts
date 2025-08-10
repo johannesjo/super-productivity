@@ -4,7 +4,7 @@ import {
   IssueIntegrationCfg,
   SearchResultItem,
 } from './issue.model';
-import { Task } from '../tasks/task.model';
+import { IssueTask, Task } from '../tasks/task.model';
 import { TaskAttachment } from '../tasks/task-attachment/task-attachment.model';
 
 export interface IssueServiceInterface {
@@ -20,7 +20,7 @@ export interface IssueServiceInterface {
 
   getById(id: string | number, issueProviderId: string): Promise<IssueData | null>;
 
-  getAddTaskData(issueData: IssueDataReduced): Partial<Task> & { title: string };
+  getAddTaskData(issueData: IssueDataReduced): IssueTask;
 
   searchIssues(searchTerm: string, issueProviderId: string): Promise<SearchResultItem[]>;
 

@@ -425,9 +425,12 @@ export class IssueService {
       return undefined;
     }
 
-    const { title = null, ...additionalFromProviderIssueService } =
-      this.ISSUE_SERVICE_MAP[issueProviderKey].getAddTaskData(issueDataReduced);
-    IssueLog.log({ title, additionalFromProviderIssueService });
+    const {
+      title = null,
+      related_to,
+      ...additionalFromProviderIssueService
+    } = this.ISSUE_SERVICE_MAP[issueProviderKey].getAddTaskData(issueDataReduced);
+    IssueLog.log({ title, related_to, additionalFromProviderIssueService });
 
     const getProjectOrTagId = async (): Promise<Partial<TaskCopy>> => {
       const defaultProjectId = (
@@ -472,16 +475,59 @@ export class IssueService {
       ...additional,
     };
 
-    const taskId = taskData.dueWithTime
-      ? await this._taskService.addAndSchedule(title, taskData, taskData.dueWithTime)
-      : this._taskService.add(title, isAddToBacklog, taskData);
+    let taskId: string | undefined;
 
-    // TODO more elegant solution for skipped calendar events
-    if (issueProviderKey === ICAL_TYPE) {
-      this._calendarIntegrationService.skipCalendarEvent(issueDataReduced.id.toString());
+    if (related_to) {
+      taskId = await this._tryAddSubTask({
+        title: title as string,
+        taskData,
+        issueParentId: related_to,
+        issueProviderId,
+        issueProviderKey,
+      });
+    }
+
+    // add new task (also fallback when parent id of subtask is not found)
+    if (!taskId) {
+      taskId = taskData.dueWithTime
+        ? await this._taskService.addAndSchedule(title, taskData, taskData.dueWithTime)
+        : this._taskService.add(title, isAddToBacklog, taskData);
+
+      // TODO more elegant solution for skipped calendar events
+      if (issueProviderKey === ICAL_TYPE) {
+        this._calendarIntegrationService.skipCalendarEvent(
+          issueDataReduced.id.toString(),
+        );
+      }
     }
 
     return taskId;
+  }
+
+  private async _tryAddSubTask({
+    title,
+    taskData,
+    issueParentId,
+    issueProviderId,
+    issueProviderKey,
+  }: {
+    title: string;
+    taskData: Partial<Task>;
+    issueParentId: string;
+    issueProviderId: string;
+    issueProviderKey: IssueProviderKey;
+  }): Promise<string | undefined> {
+    const parentTask = await this._taskService.checkForTaskWithIssueEverywhere(
+      issueParentId,
+      issueProviderKey,
+      issueProviderId,
+    );
+
+    if (parentTask) {
+      return this._taskService.addSubTaskTo(parentTask.task.id, { title, ...taskData });
+    }
+
+    return undefined;
   }
 
   private async _checkAndHandleIssueAlreadyAdded(

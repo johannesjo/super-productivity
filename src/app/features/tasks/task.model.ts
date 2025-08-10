@@ -144,6 +144,12 @@ export interface TaskWithSubTasks extends Task {
   readonly subTasks: Task[];
 }
 
+// make title required and add optional property for possible related (parent) task
+export type IssueTask = Partial<Task> & {
+  title: string;
+  related_to?: string;
+};
+
 export const DEFAULT_TASK: Omit<TaskCopy, 'projectId'> = {
   id: '',
   subTaskIds: [],
