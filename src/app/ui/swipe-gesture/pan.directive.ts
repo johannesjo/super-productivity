@@ -35,38 +35,38 @@ export class PanDirective implements OnDestroy {
   // Configuration
   readonly panThreshold = input(10); // Minimum distance to start panning
 
-  private startX = 0;
-  private startY = 0;
-  private startTime = 0;
-  private isPanning = false;
-  private touchIdentifier: number | null = null;
-  private isScrolling = false;
-  private scrollTimeout: any = null;
-  private scrollListener: (() => void) | null = null;
-  private scrollableParent: HTMLElement | null = null;
+  private _startX = 0;
+  private _startY = 0;
+  private _startTime = 0;
+  private _isPanning = false;
+  private _touchIdentifier: number | null = null;
+  private _isScrolling = false;
+  private _scrollTimeout: any = null;
+  private _scrollListener: (() => void) | null = null;
+  private _scrollableParent: HTMLElement | null = null;
 
-  private readonly ngZone = inject(NgZone);
+  private readonly _ngZone = inject(NgZone);
 
   ngOnDestroy(): void {
-    this.cleanup();
+    this._cleanup();
   }
 
-  private cleanup(): void {
+  private _cleanup(): void {
     // Clean up any pending timeout when directive is destroyed
-    if (this.scrollTimeout) {
-      clearTimeout(this.scrollTimeout);
-      this.scrollTimeout = null;
+    if (this._scrollTimeout) {
+      clearTimeout(this._scrollTimeout);
+      this._scrollTimeout = null;
     }
 
     // Remove scroll listener if attached
-    if (this.scrollListener && this.scrollableParent) {
-      this.scrollableParent.removeEventListener('scroll', this.scrollListener);
-      this.scrollListener = null;
-      this.scrollableParent = null;
+    if (this._scrollListener && this._scrollableParent) {
+      this._scrollableParent.removeEventListener('scroll', this._scrollListener);
+      this._scrollListener = null;
+      this._scrollableParent = null;
     }
   }
 
-  private findScrollableParent(element: HTMLElement): HTMLElement | null {
+  private _findScrollableParent(element: HTMLElement): HTMLElement | null {
     let parent = element.parentElement;
     while (parent) {
       const style = window.getComputedStyle(parent);
@@ -83,32 +83,32 @@ export class PanDirective implements OnDestroy {
     return document.documentElement; // Fallback to document scroll
   }
 
-  private attachScrollListener(element: HTMLElement): void {
+  private _attachScrollListener(element: HTMLElement): void {
     // Only attach if we haven't already
-    if (this.scrollListener) {
+    if (this._scrollListener) {
       return;
     }
 
-    this.scrollableParent = this.findScrollableParent(element);
-    if (!this.scrollableParent) {
+    this._scrollableParent = this._findScrollableParent(element);
+    if (!this._scrollableParent) {
       return;
     }
 
-    this.scrollListener = () => {
-      this.isScrolling = true;
+    this._scrollListener = () => {
+      this._isScrolling = true;
 
       // Clear any existing timeout
-      if (this.scrollTimeout) {
-        clearTimeout(this.scrollTimeout);
+      if (this._scrollTimeout) {
+        clearTimeout(this._scrollTimeout);
       }
 
       // Set scrolling to false after scroll stops
-      this.scrollTimeout = setTimeout(() => {
-        this.isScrolling = false;
+      this._scrollTimeout = setTimeout(() => {
+        this._isScrolling = false;
       }, 150);
     };
 
-    this.scrollableParent.addEventListener('scroll', this.scrollListener, {
+    this._scrollableParent.addEventListener('scroll', this._scrollListener, {
       passive: true,
     });
   }
@@ -116,8 +116,8 @@ export class PanDirective implements OnDestroy {
   @HostListener('touchstart', ['$event'])
   onTouchStart(event: TouchEvent): void {
     // Reset if we have a stale touchIdentifier
-    if (this.touchIdentifier !== null) {
-      this.reset();
+    if (this._touchIdentifier !== null) {
+      this._reset();
     }
 
     const touch = event.touches[0];
@@ -126,25 +126,25 @@ export class PanDirective implements OnDestroy {
     }
 
     // Attach scroll listener on demand when touch starts
-    this.attachScrollListener(event.target as HTMLElement);
+    this._attachScrollListener(event.target as HTMLElement);
 
-    this.touchIdentifier = touch.identifier;
-    this.startX = touch.clientX;
-    this.startY = touch.clientY;
-    this.startTime = Date.now();
-    this.isPanning = false;
+    this._touchIdentifier = touch.identifier;
+    this._startX = touch.clientX;
+    this._startY = touch.clientY;
+    this._startTime = Date.now();
+    this._isPanning = false;
   }
 
   @HostListener('touchmove', ['$event'])
   onTouchMove(event: TouchEvent): void {
-    if (this.touchIdentifier === null) {
+    if (this._touchIdentifier === null) {
       return;
     }
 
     // Find matching touch
     let touch: Touch | null = null;
     for (let i = 0; i < event.touches.length; i++) {
-      if (event.touches[i].identifier === this.touchIdentifier) {
+      if (event.touches[i].identifier === this._touchIdentifier) {
         touch = event.touches[i];
         break;
       }
@@ -156,44 +156,44 @@ export class PanDirective implements OnDestroy {
 
     const currentX = touch.clientX;
     const currentY = touch.clientY;
-    const deltaX = currentX - this.startX;
-    const deltaY = currentY - this.startY;
+    const deltaX = currentX - this._startX;
+    const deltaY = currentY - this._startY;
     const absX = Math.abs(deltaX);
     const absY = Math.abs(deltaY);
 
     // Don't start panning if scrolling is detected
-    if (this.isScrolling && !this.isPanning) {
+    if (this._isScrolling && !this._isPanning) {
       return;
     }
 
     // Check if we should start panning
     // Only start panning for primarily horizontal movements
     // Use a higher threshold for horizontal movement and ensure it's more horizontal than vertical
-    if (!this.isPanning && absX >= this.panThreshold() && absX > absY * 1.5) {
+    if (!this._isPanning && absX >= this.panThreshold() && absX > absY * 1.5) {
       // Additional check: if vertical movement is significant, likely scrolling
       if (absY > 20) {
-        this.isScrolling = true;
+        this._isScrolling = true;
         return;
       }
 
-      this.isPanning = true;
+      this._isPanning = true;
 
       // Emit panstart when we first start panning
-      const startEvent = this.createPanEvent(event, deltaX, deltaY, false, 1); // eventType: 1 = start
-      this.ngZone.run(() => {
+      const startEvent = this._createPanEvent(event, deltaX, deltaY, false, 1); // eventType: 1 = start
+      this._ngZone.run(() => {
         this.panstart.emit(startEvent);
       });
     }
 
-    if (this.isPanning) {
+    if (this._isPanning) {
       // Prevent default to avoid scrolling
       event.preventDefault();
 
-      const panEvent = this.createPanEvent(event, deltaX, deltaY, false, 2); // eventType: 2 = move
+      const panEvent = this._createPanEvent(event, deltaX, deltaY, false, 2); // eventType: 2 = move
 
       // Emit continuous pan events
       // Run in Angular zone for event emission
-      this.ngZone.run(() => {
+      this._ngZone.run(() => {
         // Emit direction-specific events for horizontal pan
         if (absX > absY) {
           if (deltaX < 0) {
@@ -208,14 +208,14 @@ export class PanDirective implements OnDestroy {
 
   @HostListener('touchend', ['$event'])
   onTouchEnd(event: TouchEvent): void {
-    if (this.touchIdentifier === null) {
+    if (this._touchIdentifier === null) {
       return;
     }
 
     // Find matching touch
     let touch: Touch | null = null;
     for (let i = 0; i < event.changedTouches.length; i++) {
-      if (event.changedTouches[i].identifier === this.touchIdentifier) {
+      if (event.changedTouches[i].identifier === this._touchIdentifier) {
         touch = event.changedTouches[i];
         break;
       }
@@ -225,47 +225,47 @@ export class PanDirective implements OnDestroy {
       return;
     }
 
-    if (this.isPanning) {
+    if (this._isPanning) {
       // Run in Angular zone for final event
-      this.ngZone.run(() => {
+      this._ngZone.run(() => {
         this.panend.emit();
       });
     }
 
     // Reset state
-    this.reset();
+    this._reset();
   }
 
   @HostListener('touchcancel')
   onTouchCancel(): void {
-    if (this.touchIdentifier === null) {
+    if (this._touchIdentifier === null) {
       return;
     }
 
     // Just reset on cancel
-    this.reset();
+    this._reset();
   }
 
-  private reset(): void {
-    this.startX = 0;
-    this.startY = 0;
-    this.startTime = 0;
-    this.isPanning = false;
-    this.touchIdentifier = null;
-    this.isScrolling = false;
+  private _reset(): void {
+    this._startX = 0;
+    this._startY = 0;
+    this._startTime = 0;
+    this._isPanning = false;
+    this._touchIdentifier = null;
+    this._isScrolling = false;
 
     // Clean up scroll listener when touch interaction ends
-    this.cleanup();
+    this._cleanup();
   }
 
-  private createPanEvent(
+  private _createPanEvent(
     originalEvent: TouchEvent,
     deltaX: number,
     deltaY: number,
     isFinal: boolean,
     eventType: number,
   ): PanEvent {
-    const deltaTime = Date.now() - this.startTime;
+    const deltaTime = Date.now() - this._startTime;
 
     return {
       deltaX,
