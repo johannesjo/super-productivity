@@ -121,7 +121,6 @@ export class CaldavClientService {
 
     const categories: string[] = todo.getFirstProperty('categories')?.getValues() || [];
 
-
     return {
       id: todo.getFirstPropertyValue('uid') as string,
       completed: !!todo.getFirstPropertyValue('completed'),
@@ -142,6 +141,7 @@ export class CaldavClientService {
       location: todo.getFirstPropertyValue('location') as string,
       labels: categories,
       etag_hash: this._hashEtag(task.etag),
+      related_to: (todo.getFirstPropertyValue('related-to') as string) || undefined,
     };
   }
 

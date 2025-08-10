@@ -8,6 +8,7 @@ export type CaldavIssueReduced = Readonly<{
   start?: number;
   labels: string[];
   etag_hash: number;
+  related_to?: string;
 }>;
 
 export type CaldavIssue = CaldavIssueReduced &

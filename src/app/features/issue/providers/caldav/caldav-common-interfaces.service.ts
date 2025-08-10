@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { Task } from 'src/app/features/tasks/task.model';
+import { IssueTask, Task } from 'src/app/features/tasks/task.model';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { IssueProviderCaldav, SearchResultItem } from '../../issue.model';
 import { CaldavIssue, CaldavIssueReduced } from './caldav-issue.model';
@@ -40,12 +40,13 @@ export class CaldavCommonInterfacesService implements IssueServiceInterface {
       .then((result) => result ?? false);
   }
 
-  getAddTaskData(issueData: CaldavIssue): Partial<Task> & { title: string } {
+  getAddTaskData(issueData: CaldavIssue): IssueTask {
     return {
-      issueLastUpdated: issueData.etag_hash,
       title: issueData.summary,
+      issueLastUpdated: issueData.etag_hash,
       notes: issueData.note,
       dueWithTime: issueData.start,
+      related_to: issueData.related_to,
     };
   }
 
