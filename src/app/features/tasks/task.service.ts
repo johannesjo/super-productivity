@@ -78,6 +78,7 @@ import {
   moveProjectTaskUpInBacklogList,
 } from '../project/store/project.actions';
 import { Update } from '@ngrx/entity';
+import { RootState } from '../../root-store/root-state';
 import { DateService } from '../../core/date/date.service';
 import { TimeTrackingActions } from '../time-tracking/store/time-tracking.actions';
 import { ArchiveService } from '../time-tracking/archive.service';
@@ -95,7 +96,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   providedIn: 'root',
 })
 export class TaskService {
-  private readonly _store = inject<Store<any>>(Store);
+  private readonly _store = inject<Store<RootState>>(Store);
   private readonly _workContextService = inject(WorkContextService);
   private readonly _imexMetaService = inject(ImexViewService);
   private readonly _timeTrackingService = inject(GlobalTrackingIntervalService);

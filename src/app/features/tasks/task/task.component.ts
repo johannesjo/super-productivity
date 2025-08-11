@@ -38,7 +38,7 @@ import {
   tap,
 } from 'rxjs/operators';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
-import { PanDirective } from '../../../ui/swipe-gesture/pan.directive';
+import { PanDirective, PanEvent } from '../../../ui/swipe-gesture/pan.directive';
 import { TaskAttachmentService } from '../task-attachment/task-attachment.service';
 import { DialogEditTaskAttachmentComponent } from '../task-attachment/dialog-edit-attachment/dialog-edit-task-attachment.component';
 import { swirlAnimation } from '../../../ui/animations/swirl-in-out.ani';
@@ -607,11 +607,10 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
       throw new Error('No el');
     }
     taskTitleEditEl.textarea().nativeElement.focus();
-    //  (this.taskTitleEditEl as any).textarea.nativeElement.focus();
   }
 
   openContextMenu(event: TouchEvent | MouseEvent): void {
-    (this.taskTitleEditEl() as any).textarea.nativeElement?.blur();
+    this.taskTitleEditEl()?.textarea().nativeElement?.blur();
     this.taskContextMenu()?.open(event);
   }
 
@@ -619,7 +618,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     this._taskService.updateTags(this.task(), tagIds);
   }
 
-  onPanStart(ev: any): void {
+  onPanStart(ev: PanEvent): void {
     if (!IS_TOUCH_PRIMARY) {
       return;
     }
@@ -633,7 +632,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     if (
       (targetEl.className.indexOf && targetEl.className.indexOf('drag-handle') > -1) ||
       Math.abs(ev.deltaY) > Math.abs(ev.deltaX) ||
-      document.activeElement === (taskTitleEditEl as any).textarea.nativeElement ||
+      document.activeElement === taskTitleEditEl.textarea().nativeElement ||
       ev.isFinal
     ) {
       return;
@@ -683,11 +682,11 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     }
   }
 
-  onPanLeft(ev: any): void {
+  onPanLeft(ev: PanEvent): void {
     this._handlePan(ev);
   }
 
-  onPanRight(ev: any): void {
+  onPanRight(ev: PanEvent): void {
     this._handlePan(ev);
   }
 
@@ -832,7 +831,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     return nextEl;
   }
 
-  private _handlePan(ev: any): void {
+  private _handlePan(ev: PanEvent): void {
     if (!IS_TOUCH_PRIMARY || ev.eventType === 8) {
       return;
     }
@@ -913,7 +912,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   get kb(): KeyboardConfig {
     if (IS_TOUCH_PRIMARY) {
-      return {} as any;
+      return {} as KeyboardConfig;
     }
     return (this._configService.cfg()?.keyboard as KeyboardConfig) || {};
   }
@@ -1003,7 +1002,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
     // collapse sub tasks
     if (ev.key === 'ArrowLeft' || checkKeyCombo(ev, keys.collapseSubTasks)) {
-      const hasSubTasks = t.subTasks && (t.subTasks as any).length > 0;
+      const hasSubTasks = t.subTasks && t.subTasks.length > 0;
       if (this.isSelected()) {
         this.hideDetailPanel();
       } else if (hasSubTasks && t._hideSubTasksMode !== HideSubTasksMode.HideAll) {
@@ -1018,7 +1017,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
     // expand sub tasks
     if (ev.key === 'ArrowRight' || checkKeyCombo(ev, keys.expandSubTasks)) {
-      const hasSubTasks = t.subTasks && (t.subTasks as any).length > 0;
+      const hasSubTasks = t.subTasks && t.subTasks.length > 0;
       if (hasSubTasks && t._hideSubTasksMode !== undefined) {
         this._taskService.toggleSubTaskMode(t.id, false, false);
       } else if (!this.isSelected()) {
