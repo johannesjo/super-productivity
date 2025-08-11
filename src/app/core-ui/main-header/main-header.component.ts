@@ -225,6 +225,6 @@ export class MainHeaderComponent implements OnDestroy {
   }
 
   get kb(): KeyboardConfig {
-    return (this._configService.cfg?.keyboard as KeyboardConfig) || {};
+    return (this._configService.cfg()?.keyboard as KeyboardConfig) || {};
   }
 }

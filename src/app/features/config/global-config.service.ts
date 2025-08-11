@@ -1,5 +1,6 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, Signal } from '@angular/core';
 import { select, Store } from '@ngrx/store';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { updateGlobalConfigSection } from './store/global-config.actions';
 import { Observable } from 'rxjs';
 import {
@@ -37,7 +38,12 @@ import { distinctUntilChangedObject } from '../../util/distinct-until-changed-ob
 export class GlobalConfigService {
   private readonly _store = inject<Store<any>>(Store);
 
-  cfg$: Observable<GlobalConfigState>;
+  // Keep observables for backward compatibility
+  cfg$: Observable<GlobalConfigState> = this._store.pipe(
+    select(selectConfigFeatureState),
+    distinctUntilChanged(distinctUntilChangedObject),
+    shareReplay(1),
+  );
 
   lang$: Observable<LanguageConfig> = this._store.pipe(
     select(selectLanguageConfig),
@@ -81,16 +87,38 @@ export class GlobalConfigService {
     select(selectTimelineConfig),
   );
 
-  cfg?: GlobalConfigState;
-
-  constructor() {
-    this.cfg$ = this._store.pipe(
-      select(selectConfigFeatureState),
-      distinctUntilChanged(distinctUntilChangedObject),
-      shareReplay(1),
-    );
-    this.cfg$.subscribe((cfg) => (this.cfg = cfg));
-  }
+  // Signal versions of the properties
+  readonly cfg: Signal<GlobalConfigState | undefined> = toSignal(this.cfg$, {
+    initialValue: undefined,
+  });
+  readonly lang: Signal<LanguageConfig | undefined> = toSignal(this.lang$, {
+    initialValue: undefined,
+  });
+  readonly misc: Signal<MiscConfig | undefined> = toSignal(this.misc$, {
+    initialValue: undefined,
+  });
+  readonly shortSyntax: Signal<ShortSyntaxConfig | undefined> = toSignal(
+    this.shortSyntax$,
+    { initialValue: undefined },
+  );
+  readonly sound: Signal<SoundConfig | undefined> = toSignal(this.sound$, {
+    initialValue: undefined,
+  });
+  readonly evaluation: Signal<EvaluationConfig | undefined> = toSignal(this.evaluation$, {
+    initialValue: undefined,
+  });
+  readonly idle: Signal<IdleConfig | undefined> = toSignal(this.idle$, {
+    initialValue: undefined,
+  });
+  readonly sync: Signal<SyncConfig | undefined> = toSignal(this.sync$, {
+    initialValue: undefined,
+  });
+  readonly takeABreak: Signal<TakeABreakConfig | undefined> = toSignal(this.takeABreak$, {
+    initialValue: undefined,
+  });
+  readonly timelineCfg: Signal<ScheduleConfig | undefined> = toSignal(this.timelineCfg$, {
+    initialValue: undefined,
+  });
 
   updateSection(
     sectionKey: GlobalConfigSectionKey,

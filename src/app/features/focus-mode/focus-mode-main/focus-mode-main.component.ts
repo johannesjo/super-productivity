@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  effect,
   HostBinding,
   HostListener,
   inject,
@@ -114,9 +115,13 @@ export class FocusModeMainComponent implements OnDestroy {
   private _dragEnterTarget?: HTMLElement;
 
   constructor() {
-    this._globalConfigService.misc$
-      .pipe(takeUntil(this._onDestroy$))
-      .subscribe((misc) => (this.defaultTaskNotes = misc.taskNotesTpl));
+    // Use effect to reactively update defaultTaskNotes
+    effect(() => {
+      const misc = this._globalConfigService.misc();
+      if (misc) {
+        this.defaultTaskNotes = misc.taskNotesTpl;
+      }
+    });
     this.taskService.currentTask$.pipe(takeUntil(this._onDestroy$)).subscribe((task) => {
       this.task = task;
     });

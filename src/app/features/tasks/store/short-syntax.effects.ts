@@ -104,7 +104,7 @@ export class ShortSyntaxEffects {
       mergeMap(([{ task, originalAction }, tags, projects, defaultProjectId]) => {
         const r = shortSyntax(
           task,
-          this._globalConfigService?.cfg?.shortSyntax ||
+          this._globalConfigService?.cfg()?.shortSyntax ||
             DEFAULT_GLOBAL_CONFIG.shortSyntax,
           tags,
           projects,

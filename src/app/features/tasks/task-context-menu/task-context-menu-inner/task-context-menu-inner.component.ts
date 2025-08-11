@@ -214,7 +214,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     if (IS_TOUCH_PRIMARY || !this.isAdvancedControls()) {
       return {} as any;
     }
-    return (this._globalConfigService.cfg?.keyboard as KeyboardConfig) || {};
+    return (this._globalConfigService.cfg()?.keyboard as KeyboardConfig) || {};
   }
 
   quickAccessKeydown(ev: KeyboardEvent): void {

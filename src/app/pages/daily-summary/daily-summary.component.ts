@@ -252,13 +252,13 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     todayStart.setHours(0, 0, 0, 0);
     this.isIncludeYesterday = Date.now() - todayStart.getTime() <= MAGIC_YESTERDAY_MARGIN;
 
+    const cfg = this.configService.cfg();
     if (
-      this.configService.cfg?.dailySummaryNote?.txt &&
-      this.configService.cfg?.dailySummaryNote?.lastUpdateDayStr !==
-        this._dateService.todayStr()
+      cfg?.dailySummaryNote?.txt &&
+      cfg?.dailySummaryNote?.lastUpdateDayStr !== this._dateService.todayStr()
     ) {
       this.dailySummaryNoteTxt.set(
-        unToggleCheckboxesInMarkdownTxt(this.configService.cfg.dailySummaryNote.txt),
+        unToggleCheckboxesInMarkdownTxt(cfg.dailySummaryNote.txt),
       );
     }
   }
@@ -393,7 +393,8 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private async _finishDayForGood(cb?: any): Promise<void> {
-    const syncCfg = this.configService.cfg?.sync;
+    const cfg = this.configService.cfg();
+    const syncCfg = cfg?.sync;
     if (syncCfg?.isEnabled) {
       await this._syncWrapperService.sync();
     }

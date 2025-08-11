@@ -915,7 +915,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     if (IS_TOUCH_PRIMARY) {
       return {} as any;
     }
-    return (this._configService.cfg?.keyboard as KeyboardConfig) || {};
+    return (this._configService.cfg()?.keyboard as KeyboardConfig) || {};
   }
 
   private _handleKeyboardShortcuts(ev: KeyboardEvent): void {
@@ -924,7 +924,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     }
 
     const t = this.task();
-    const cfg = this._configService.cfg;
+    const cfg = this._configService.cfg();
     if (!cfg) {
       throw new Error();
     }

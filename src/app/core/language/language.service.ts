@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, effect } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { DateAdapter } from '@angular/material/core';
 import {
@@ -9,7 +9,6 @@ import {
 } from '../../app.constants';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { GlobalConfigService } from 'src/app/features/config/global-config.service';
-import { map, startWith } from 'rxjs/operators';
 import { DEFAULT_GLOBAL_CONFIG } from 'src/app/features/config/default-global-config.const';
 import { Log } from '../log';
 
@@ -55,19 +54,19 @@ export class LanguageService {
   }
 
   private _initMonkeyPatchFirstDayOfWeek(): void {
-    let firstDayOfWeek = DEFAULT_GLOBAL_CONFIG.misc.firstDayOfWeek;
-    this._globalConfigService.misc$
-      .pipe(
-        map((cfg) => cfg.firstDayOfWeek),
-        startWith(1),
-      )
-      .subscribe((_firstDayOfWeek: number) => {
-        // default should be monday, if we have an invalid value for some reason
-        firstDayOfWeek =
-          _firstDayOfWeek === 0 || _firstDayOfWeek > 0 ? _firstDayOfWeek : 1;
-      });
-    // overwrites default method to make this configurable
-    this._dateAdapter.getFirstDayOfWeek = () => firstDayOfWeek;
+    // Use effect to reactively update firstDayOfWeek when config changes
+    effect(() => {
+      const miscConfig = this._globalConfigService.misc();
+      const firstDayOfWeek =
+        miscConfig?.firstDayOfWeek ?? DEFAULT_GLOBAL_CONFIG.misc.firstDayOfWeek;
+
+      // default should be monday, if we have an invalid value for some reason
+      const validFirstDayOfWeek =
+        firstDayOfWeek === 0 || firstDayOfWeek > 0 ? firstDayOfWeek : 1;
+
+      // overwrites default method to make this configurable
+      this._dateAdapter.getFirstDayOfWeek = () => validFirstDayOfWeek;
+    });
   }
 
   private _setFn(lng: LanguageCode): void {

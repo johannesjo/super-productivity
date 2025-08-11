@@ -141,7 +141,7 @@ export class MobileSidePanelMenuComponent {
     { initialValue: !!this._router.url.match(/tasks$/) },
   );
 
-  readonly kb: KeyboardConfig = this._globalConfigService.cfg?.keyboard || {};
+  readonly kb: KeyboardConfig = this._globalConfigService.cfg()?.keyboard || {};
 
   // Plugin-related signals
   readonly sidePanelButtons = toSignal(this._pluginBridge.sidePanelButtons$, {

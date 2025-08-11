@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { effect, inject, Injectable } from '@angular/core';
 import { BodyClass, IS_ELECTRON } from '../../app.constants';
 import { IS_MAC } from '../../util/is-mac';
 import {
@@ -89,8 +89,8 @@ export class GlobalThemeService {
       .pipe(skip(1))
       .subscribe((darkMode) => localStorage.setItem(LS.DARK_MODE, darkMode));
 
-    // Initialize custom theme
-    this._initCustomTheme();
+    // Set up reactive custom theme updates
+    this._setupCustomThemeEffect();
   }
 
   private _setDarkTheme(isDarkTheme: boolean): void {
@@ -231,8 +231,10 @@ export class GlobalThemeService {
       });
     }
 
-    this._globalConfigService.misc$.subscribe((misc) => {
-      if (misc.isDisableAnimations) {
+    // Use effect to reactively update animation class
+    effect(() => {
+      const misc = this._globalConfigService.misc();
+      if (misc?.isDisableAnimations) {
         this.document.body.classList.add(BodyClass.isDisableAnimations);
       } else {
         this.document.body.classList.remove(BodyClass.isDisableAnimations);
@@ -295,26 +297,20 @@ export class GlobalThemeService {
     this._chartThemeService.setColorschemesOptions(overrides);
   }
 
-  private _initCustomTheme(): void {
-    // Load initial theme
-    this._globalConfigService.misc$
-      .pipe(
-        take(1),
-        map((misc) => misc.customTheme || 'default'),
-      )
-      .subscribe((themeId) => {
-        this._customThemeService.loadTheme(themeId);
-      });
+  private _setupCustomThemeEffect(): void {
+    // Track previous theme to avoid unnecessary reloads
+    let previousThemeId: string | null = null;
 
-    // Watch for theme changes
-    this._globalConfigService.misc$
-      .pipe(
-        map((misc) => misc.customTheme || 'default'),
-        distinctUntilChanged(),
-        skip(1),
-      )
-      .subscribe((themeId) => {
+    // Set up effect to reactively update custom theme when config changes
+    effect(() => {
+      const misc = this._globalConfigService.misc();
+      const themeId = misc?.customTheme || 'default';
+
+      // Only load theme if it has changed
+      if (themeId !== previousThemeId) {
         this._customThemeService.loadTheme(themeId);
-      });
+        previousThemeId = themeId;
+      }
+    });
   }
 }

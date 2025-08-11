@@ -1057,7 +1057,7 @@ export class TaskService {
         ? { projectId: workContextId }
         : {
             projectId:
-              this._globalConfigService.cfg?.misc.defaultProjectId || INBOX_PROJECT.id,
+              this._globalConfigService.cfg()?.misc.defaultProjectId || INBOX_PROJECT.id,
           }),
 
       tagIds:

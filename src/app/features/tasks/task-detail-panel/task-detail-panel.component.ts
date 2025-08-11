@@ -220,12 +220,9 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
     return [];
   });
 
-  // Misc config signal
-  private _miscCfg = toSignal(this._globalConfigService.misc$);
-
   // Default task notes computed signal
   defaultTaskNotes = computed(() => {
-    const misc = this._miscCfg();
+    const misc = this._globalConfigService.misc();
     return misc?.taskNotesTpl || '';
   });
 

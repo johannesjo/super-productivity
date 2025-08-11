@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   effect,
   ElementRef,
   HostBinding,
@@ -162,7 +163,14 @@ export class AppComponent implements OnDestroy, AfterViewInit {
 
   @ViewChild('routeWrapper', { read: ElementRef }) routeWrapper?: ElementRef<HTMLElement>;
 
-  @HostBinding('@.disabled') isDisableAnimations = false;
+  @HostBinding('@.disabled') get isDisableAnimations(): boolean {
+    return this._isDisableAnimations();
+  }
+
+  private _isDisableAnimations = computed(() => {
+    const misc = this._globalConfigService.misc();
+    return misc?.isDisableAnimations ?? false;
+  });
 
   isRTL: boolean = false;
 
@@ -201,11 +209,6 @@ export class AppComponent implements OnDestroy, AfterViewInit {
         }
       }),
     );
-    this._subs.add(
-      this._globalConfigService.misc$.subscribe((misc) => {
-        this.isDisableAnimations = misc.isDisableAnimations;
-      }),
-    );
 
     // init theme and body class handlers
     this._globalThemeService.init();
@@ -220,7 +223,7 @@ export class AppComponent implements OnDestroy, AfterViewInit {
       // init offline banner in lack of a better place for it
       this._initOfflineBanner();
 
-      if (this._globalConfigService.cfg?.misc.isShowTipLonger) {
+      if (this._globalConfigService.misc()?.isShowTipLonger) {
         this._snackService.open({
           ico: 'lightbulb',
           config: {
@@ -285,13 +288,13 @@ export class AppComponent implements OnDestroy, AfterViewInit {
 
       window.ea.on(IPC.TRANSFER_SETTINGS_REQUESTED, () => {
         window.ea.sendAppSettingsToElectron(
-          this._globalConfigService.cfg as GlobalConfigState,
+          this._globalConfigService.cfg() as GlobalConfigState,
         );
       });
     } else {
       // WEB VERSION
       window.addEventListener('beforeunload', (e) => {
-        const gCfg = this._globalConfigService.cfg;
+        const gCfg = this._globalConfigService.cfg();
         if (!gCfg) {
           throw new Error();
         }

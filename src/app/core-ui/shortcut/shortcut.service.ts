@@ -73,7 +73,7 @@ export class ShortcutService {
   }
 
   async handleKeyDown(ev: KeyboardEvent): Promise<void> {
-    const cfg = this._configService.cfg;
+    const cfg = this._configService.cfg();
     if (!cfg) {
       throw new Error();
     }
