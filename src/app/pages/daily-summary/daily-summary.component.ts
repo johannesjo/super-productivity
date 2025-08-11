@@ -137,8 +137,8 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     startWith({
       params: { dayStr: this._dateService.todayStr() },
     }),
-    map((s: any) => {
-      if (s && s.params.dayStr) {
+    map((s) => {
+      if (s && 'params' in s && s.params.dayStr) {
         return s.params.dayStr;
       } else {
         return this._dateService.todayStr();
@@ -275,10 +275,11 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this._activatedRoute.paramMap
       .pipe(takeUntil(this._onDestroy$))
-      .subscribe((s: any) => {
-        if (s && s.params.dayStr) {
+      .subscribe((params) => {
+        const dayStr = params.get('dayStr');
+        if (dayStr) {
           this.isForToday = false;
-          this.dayStr = s.params.dayStr;
+          this.dayStr = dayStr;
         }
       });
   }
@@ -390,7 +391,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     Log.log('[DailySummary] Archive operation completed');
   }
 
-  private async _finishDayForGood(cb?: any): Promise<void> {
+  private async _finishDayForGood(cb?: () => void): Promise<void> {
     const cfg = this.configService.cfg();
     const syncCfg = cfg?.sync;
     if (syncCfg?.isEnabled) {
@@ -399,7 +400,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this._initSuccessAnimation(cb);
   }
 
-  private _initSuccessAnimation(cb?: any): void {
+  private _initSuccessAnimation(cb?: () => void): void {
     this.showSuccessAnimation = true;
     this._cd.detectChanges();
     this._successAnimationTimeout = window.setTimeout(() => {

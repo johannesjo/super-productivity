@@ -267,7 +267,7 @@ export class IdleTimeHandler {
     return this.getIdleTime();
   }
 
-  private logError(context: string, error: any): void {
+  private logError(context: string, error: unknown): void {
     const now = Date.now();
     if (now - this.lastErrorLog > this.ERROR_LOG_INTERVAL) {
       log.debug(`${context} (falling back to 0):`, error);

@@ -113,9 +113,9 @@ export class GithubApiService {
   }
 
   getImportToBacklogIssuesFromGraphQL(cfg: GithubCfg): Observable<GithubIssueReduced[]> {
-    const split: any = cfg.repo?.split('/');
-    const owner = encodeURIComponent(split[0]);
-    const repo = encodeURIComponent(split[1]);
+    const split = cfg.repo?.split('/') || [];
+    const owner = encodeURIComponent(split[0] || '');
+    const repo = encodeURIComponent(split[1] || '');
     const assigneeFilter = cfg.backlogQuery
       ? `, assignee: "${cfg.filterUsernameForIssueUpdates}"`
       : '';
@@ -210,7 +210,9 @@ query Issues {
     return this._http.request(req).pipe(
       // Filter out HttpEventType.Sent (type: 0) events to only process actual responses
       filter((res) => !(res === Object(res) && res.type === 0)),
-      map((res: any) => (res && res.body ? res.body : res)),
+      map((res) =>
+        res && (res as { body?: unknown }).body ? (res as { body: unknown }).body : res,
+      ),
       catchError(this._handleRequestError$.bind(this)),
     );
   }

@@ -24,7 +24,7 @@ export class TaskRelatedModelEffects {
   // EFFECTS ===> EXTERNAL
   // ---------------------
 
-  restoreTask$: any = createEffect(
+  restoreTask$ = createEffect(
     () =>
       this._actions$.pipe(
         ofType(TaskSharedActions.restoreTask),
@@ -38,7 +38,7 @@ export class TaskRelatedModelEffects {
       switchMap((misc) => (misc.isAutoAddWorkedOnToToday ? obs : EMPTY)),
     );
 
-  autoAddTodayTagOnTracking: any = createEffect(() =>
+  autoAddTodayTagOnTracking = createEffect(() =>
     this.ifAutoAddTodayEnabled$(
       this._actions$.pipe(
         ofType(TimeTrackingActions.addTimeSpent),

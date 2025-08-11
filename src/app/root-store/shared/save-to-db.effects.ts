@@ -128,7 +128,7 @@ export class SaveToDbEffects {
     [TimeTrackingActions.addTimeSpent.type],
   );
 
-  updateTimeTrackingStorageAuditTime$: any = createEffect(
+  updateTimeTrackingStorageAuditTime$ = createEffect(
     () =>
       this._actions.pipe(
         ofType(TimeTrackingActions.addTimeSpent),

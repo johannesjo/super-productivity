@@ -45,7 +45,7 @@ export class TaskUiEffects {
   private _globalConfigService = inject(GlobalConfigService);
   private _workContextService = inject(WorkContextService);
 
-  taskCreatedSnack$: any = createEffect(
+  taskCreatedSnack$ = createEffect(
     () =>
       this._actions$.pipe(
         ofType(TaskSharedActions.addTask),
@@ -63,7 +63,7 @@ export class TaskUiEffects {
     { dispatch: false },
   );
 
-  snackDelete$: any = createEffect(
+  snackDelete$ = createEffect(
     () =>
       this._actions$.pipe(
         ofType(TaskSharedActions.deleteTask),
@@ -82,7 +82,7 @@ export class TaskUiEffects {
     { dispatch: false },
   );
 
-  timeEstimateExceeded$: any = createEffect(
+  timeEstimateExceeded$ = createEffect(
     () =>
       this._store$.pipe(select(selectConfigFeatureState)).pipe(
         switchMap((globalCfg) =>
@@ -113,7 +113,7 @@ export class TaskUiEffects {
     { dispatch: false },
   );
 
-  timeEstimateExceededDismissBanner$: any = createEffect(
+  timeEstimateExceededDismissBanner$ = createEffect(
     () =>
       this._store$.pipe(select(selectConfigFeatureState)).pipe(
         switchMap((globalCfg) =>
@@ -138,7 +138,7 @@ export class TaskUiEffects {
     { dispatch: false },
   );
 
-  taskDoneSound$: any = createEffect(
+  taskDoneSound$ = createEffect(
     () =>
       this._actions$.pipe(
         ofType(TaskSharedActions.updateTask),

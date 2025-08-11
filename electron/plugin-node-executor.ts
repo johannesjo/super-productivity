@@ -121,8 +121,8 @@ class PluginNodeExecutor {
         throw new Error(`Module '${module}' is not allowed`);
       },
       console: {
-        log: (...logArgs: any[]) => console.log('[Plugin]:', ...logArgs),
-        error: (...errorArgs: any[]) => console.error('[Plugin]:', ...errorArgs),
+        log: (...logArgs: unknown[]) => console.log('[Plugin]:', ...logArgs),
+        error: (...errorArgs: unknown[]) => console.error('[Plugin]:', ...errorArgs),
       },
       JSON,
       args: args || [],

@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { Action } from '@ngrx/store';
 import { addNewTagsFromShortSyntax } from './task.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import {
@@ -16,7 +17,7 @@ import { TaskReminderOptionId } from '../task.model';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { unique } from '../../../util/unique';
 import { TaskService } from '../task.service';
-import { EMPTY, Observable, of } from 'rxjs';
+import { EMPTY, of } from 'rxjs';
 import { ProjectService } from '../../project/project.service';
 import { TagService } from '../../tag/tag.service';
 import { shortSyntax } from '../short-syntax';
@@ -48,7 +49,7 @@ export class ShortSyntaxEffects {
   private _layoutService = inject(LayoutService);
   private _workContextService = inject(WorkContextService);
 
-  shortSyntax$: any = createEffect(() =>
+  shortSyntax$ = createEffect(() =>
     this._actions$.pipe(
       ofType(TaskSharedActions.addTask, TaskSharedActions.updateTask),
       filter((action): boolean => {
@@ -63,7 +64,7 @@ export class ShortSyntaxEffects {
         return changeProps.length === 1 && changeProps[0] === 'title';
       }),
       // dirty fix to execute this after setDefaultProjectId$ effect
-      concatMap((originalAction): Observable<any> => {
+      concatMap((originalAction) => {
         return this._taskService.getByIdOnce$(originalAction.task.id as string).pipe(
           map((task) => ({
             task,
@@ -123,7 +124,7 @@ export class ShortSyntaxEffects {
           if (isAddDefaultProjectIfNecessary) {
             return [
               TaskSharedActions.moveToOtherProject({
-                task,
+                task: { ...task, subTasks: [] },
                 targetProjectId: defaultProjectId as string,
               }),
             ];
@@ -131,7 +132,7 @@ export class ShortSyntaxEffects {
           return EMPTY;
         }
 
-        const actions: any[] = [];
+        const actions: Action[] = [];
         const tagIds: string[] = [...(r.taskChanges.tagIds || task.tagIds)];
         const { taskChanges } = r;
 
@@ -176,7 +177,7 @@ export class ShortSyntaxEffects {
           } else {
             actions.push(
               TaskSharedActions.moveToOtherProject({
-                task,
+                task: { ...task, subTasks: [] },
                 targetProjectId: r.projectId,
               }),
             );
@@ -184,7 +185,7 @@ export class ShortSyntaxEffects {
         } else if (isAddDefaultProjectIfNecessary) {
           actions.push(
             TaskSharedActions.moveToOtherProject({
-              task,
+              task: { ...task, subTasks: [] },
               targetProjectId: defaultProjectId as string,
             }),
           );
@@ -220,7 +221,7 @@ export class ShortSyntaxEffects {
     ),
   );
 
-  shortSyntaxAddNewTags$: any = createEffect(() =>
+  shortSyntaxAddNewTags$ = createEffect(() =>
     this._actions$.pipe(
       ofType(addNewTagsFromShortSyntax),
       // needed cause otherwise task gets the focus after blur & hide
@@ -252,7 +253,7 @@ export class ShortSyntaxEffects {
             // NOTE: it is important to get a fresh task here, since otherwise we might run into #3728
             withLatestFrom(this._taskService.getByIdOnce$(taskId)),
             mergeMap(([isConfirm, task]) => {
-              const actions: any[] = [];
+              const actions: Action[] = [];
               if (isConfirm) {
                 const newTagIds = [...task.tagIds];
                 uniqueNewTitles.forEach((newTagTitle) => {

@@ -162,7 +162,7 @@ export class SyncWrapperService {
 
           return r.status;
       }
-    } catch (error: any) {
+    } catch (error) {
       SyncLog.err(error);
 
       if (error instanceof PotentialCorsError) {
@@ -236,7 +236,9 @@ export class SyncWrapperService {
       } else if (error instanceof CanNotMigrateMajorDownError) {
         alert(this._translateService.instant(T.F.SYNC.A.REMOTE_MODEL_VERSION_NEWER));
         return 'HANDLED_ERROR';
-      } else if (error?.message === 'Sync already in progress') {
+      } else if (
+        (error as { message?: string })?.message === 'Sync already in progress'
+      ) {
         // Silently ignore concurrent sync attempts
         SyncLog.log('Sync already in progress, skipping concurrent sync attempt');
         return 'HANDLED_ERROR';

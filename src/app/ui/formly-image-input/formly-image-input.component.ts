@@ -56,7 +56,7 @@ export class FormlyImageInputComponent extends FieldType<FormlyFieldConfig> {
       data: dialogData,
     });
 
-    dialogRef.afterClosed().subscribe((result: any) => {
+    dialogRef.afterClosed().subscribe((result: string | { url: string } | null) => {
       if (result) {
         // Handle both string (legacy) and object (new) return formats
         const url = typeof result === 'string' ? result : result.url;

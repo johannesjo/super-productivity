@@ -6,7 +6,7 @@ import { IS_IOS } from '../../util/is-ios';
 export class LongPressIOSDirective implements OnDestroy {
   readonly longPressIOS = output<MouseEvent | TouchEvent>();
 
-  private longPressTimeout: any;
+  private longPressTimeout: number | undefined;
 
   constructor() {
     const el = inject(ElementRef);

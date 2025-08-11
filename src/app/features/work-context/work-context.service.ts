@@ -624,7 +624,7 @@ export class WorkContextService {
 
   private _updateAdvancedCfgForCurrentContext(
     sectionKey: WorkContextAdvancedCfgKey,
-    data: any,
+    data: unknown,
   ): void {
     if (this.activeWorkContextType === WorkContextType.PROJECT) {
       this._store$.dispatch(

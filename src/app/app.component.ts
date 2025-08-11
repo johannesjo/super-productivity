@@ -85,6 +85,11 @@ import { ProjectService } from './features/project/project.service';
 import { TagService } from './features/tag/tag.service';
 import { ContextMenuComponent } from './ui/context-menu/context-menu.component';
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
+
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
 
@@ -269,8 +274,8 @@ export class AppComponent implements OnDestroy, AfterViewInit {
       effect(() => {
         window.ea.on(IPC.ERROR, (ev: IpcRendererEvent, ...args: unknown[]) => {
           const data = args[0] as {
-            error: any;
-            stack: any;
+            error: unknown;
+            stack: unknown;
             errorStr: string | unknown;
           };
           const errMsg =
@@ -390,7 +395,7 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   }
 
   @HostListener('window:beforeinstallprompt', ['$event']) onBeforeInstallPrompt(
-    e: any,
+    e: BeforeInstallPromptEvent,
   ): void {
     if (IS_ELECTRON || localStorage.getItem(LS.WEB_APP_INSTALL)) {
       return;
@@ -621,7 +626,7 @@ export class AppComponent implements OnDestroy, AfterViewInit {
     if (navigator.storage) {
       // try to avoid data-loss
       Promise.all([navigator.storage.persisted()])
-        .then(([persisted]): any => {
+        .then(([persisted]) => {
           if (!persisted) {
             return navigator.storage.persist().then((granted) => {
               if (granted) {
@@ -636,6 +641,7 @@ export class AppComponent implements OnDestroy, AfterViewInit {
             });
           } else {
             Log.log('Persistence already allowed');
+            return;
           }
         })
         .catch((e) => {

@@ -25,10 +25,10 @@ import {
 @Injectable()
 export class TaskInternalEffects {
   private _actions$ = inject(Actions);
-  private _store$ = inject<Store<any>>(Store);
+  private _store$ = inject(Store);
   private _workContextSession = inject(WorkContextService);
 
-  onAllSubTasksDone$: any = createEffect(() =>
+  onAllSubTasksDone$ = createEffect(() =>
     this._actions$.pipe(
       ofType(TaskSharedActions.updateTask),
       withLatestFrom(
@@ -65,7 +65,7 @@ export class TaskInternalEffects {
     ),
   );
 
-  setDefaultEstimateIfNonGiven$: any = createEffect(() =>
+  setDefaultEstimateIfNonGiven$ = createEffect(() =>
     this._actions$.pipe(
       ofType(TaskSharedActions.addTask, addSubTask),
       filter(({ task }) => !task.timeEstimate),
@@ -91,7 +91,7 @@ export class TaskInternalEffects {
     ),
   );
 
-  autoSetNextTask$: any = createEffect(() =>
+  autoSetNextTask$ = createEffect(() =>
     this._actions$.pipe(
       ofType(
         toggleStart,

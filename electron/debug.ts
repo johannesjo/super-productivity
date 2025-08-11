@@ -73,7 +73,15 @@ function inspectElements(): void {
 //   }
 // };
 
-export const initDebug = (opts: any, isAddReload: boolean): void => {
+export const initDebug = (
+  opts: {
+    enabled?: boolean | null;
+    showDevTools?: boolean;
+    devToolsMode?: string;
+    mode?: string;
+  },
+  isAddReload: boolean,
+): void => {
   opts = Object.assign(
     {
       enabled: null,

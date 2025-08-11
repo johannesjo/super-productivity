@@ -72,7 +72,7 @@ export class TaskElectronEffects {
     });
   }
 
-  taskChangeElectron$: any = createEffect(
+  taskChangeElectron$ = createEffect(
     () =>
       this._actions$.pipe(
         ofType(
@@ -133,7 +133,7 @@ export class TaskElectronEffects {
     { dispatch: false },
   );
 
-  setTaskBarProgress$: any = createEffect(
+  setTaskBarProgress$ = createEffect(
     () =>
       this._actions$.pipe(
         ofType(TimeTrackingActions.addTimeSpent),

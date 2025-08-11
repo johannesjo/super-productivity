@@ -258,7 +258,7 @@ export class ReminderService {
     this._w.postMessage(reminders);
   }
 
-  private _handleError(err: any): void {
+  private _handleError(err: unknown): void {
     Log.err(err);
     this._snackService.open({ type: 'ERROR', msg: T.F.REMINDER.S_REMINDER_ERR });
   }

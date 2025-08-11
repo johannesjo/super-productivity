@@ -5,7 +5,6 @@ import { getBeforeLastErrorActionLog } from '../../util/action-logger';
 import { download, downloadLogs } from '../../util/download';
 import { privacyExport } from '../../imex/file-imex/privacy-export';
 import { getAppVersionStr } from '../../util/get-app-version-str';
-import { CompleteBackup } from '../../pfapi/api';
 import { Log } from '../log';
 
 let isWasErrorAlertCreated = false;
@@ -14,7 +13,7 @@ let isWasErrorAlertCreated = false;
 const createSimpleThrottle = (limit: number, interval: number) => {
   const timestamps: number[] = [];
 
-  return <T extends (...args: any[]) => any>(fn: T) => {
+  return <T extends (...args: unknown[]) => unknown>(fn: T) => {
     return ((...args: Parameters<T>) => {
       const now = Date.now();
 
@@ -99,8 +98,8 @@ const _cleanHtml = (str: string): string => {
 export const createErrorAlert = (
   err: string = '',
   stackTrace: string,
-  origErr: any,
-  userData?: CompleteBackup<any> | undefined,
+  origErr: unknown,
+  userData?: unknown,
 ): void => {
   if (isWasErrorAlertCreated) {
     return;
@@ -165,9 +164,10 @@ export const createErrorAlert = (
     btnPrivacyExport.title =
       'Export anonymized data (to send to contact@super-productivity.com for debugging)';
     btnPrivacyExport.addEventListener('click', () => {
+      // Type assertion needed for privacy export function
       download(
         'ANONYMIZED-super-productivity-crash-user-data-export.json',
-        privacyExport(userData),
+        privacyExport(userData as Parameters<typeof privacyExport>[0]),
       );
     });
     innerWrapper.append(btnPrivacyExport);

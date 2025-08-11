@@ -4,7 +4,7 @@ export const lazySetInterval = (
   func: () => void,
   intervalDuration: number,
 ): (() => void) => {
-  let lastTimeoutId: any;
+  let lastTimeoutId: ReturnType<typeof setTimeout>;
 
   const interval = (): void => {
     lastTimeoutId = setTimeout(interval, intervalDuration);
