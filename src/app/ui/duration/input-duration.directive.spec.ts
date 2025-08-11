@@ -73,7 +73,7 @@ describe('InputDurationDirective', () => {
         return 0;
       });
 
-      mockMsToStringPipe.transform.and.callFake((ms: number) => {
+      mockMsToStringPipe.transform.and.callFake((ms: number | null | undefined) => {
         if (ms === 7380000) return '2h 3m';
         if (ms === 7200000) return '2h';
         if (ms === 3600000) return '1h';
@@ -200,7 +200,7 @@ describe('InputDurationDirective', () => {
         return 0;
       });
 
-      mockMsToStringPipe.transform.and.callFake((ms: number) => {
+      mockMsToStringPipe.transform.and.callFake((ms: number | null | undefined) => {
         if (ms === 3600000) return '1h';
         if (ms === 1800000) return '30m';
         if (ms === 5400000) return '1h 30m';

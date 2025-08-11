@@ -40,7 +40,7 @@ interface Suggestion {
   id: string;
   title: string;
 
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 @Component({

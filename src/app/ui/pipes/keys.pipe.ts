@@ -5,8 +5,12 @@ import { Pipe, PipeTransform } from '@angular/core';
   pure: false,
 })
 export class KeysPipe implements PipeTransform {
-  transform(value: any, sort: any, filterOutKeys?: any): any {
-    if (value === Object(value)) {
+  transform(
+    value: Record<string, unknown> | null | undefined,
+    sort: boolean | 'reverse',
+    filterOutKeys?: string | string[],
+  ): string[] | null {
+    if (value && value === Object(value)) {
       const keys = Object.keys(value);
 
       if (typeof filterOutKeys === 'string') {
@@ -14,6 +18,13 @@ export class KeysPipe implements PipeTransform {
         if (index > -1) {
           keys.splice(index, 1);
         }
+      } else if (Array.isArray(filterOutKeys)) {
+        filterOutKeys.forEach((key) => {
+          const index = keys.indexOf(key);
+          if (index > -1) {
+            keys.splice(index, 1);
+          }
+        });
       }
 
       if (sort) {

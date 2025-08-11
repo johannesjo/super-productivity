@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-export const stringToMs = (strValue: string, args?: any): number => {
+export const stringToMs = (strValue: string, args?: unknown): number => {
   if (!strValue) {
     return 0;
   }
@@ -87,5 +87,5 @@ export const stringToMs = (strValue: string, args?: any): number => {
 
 @Pipe({ name: 'stringToMs' })
 export class StringToMsPipe implements PipeTransform {
-  transform: (value: any, ...args: any[]) => any = stringToMs;
+  transform: (value: string, ...args: unknown[]) => number = stringToMs;
 }

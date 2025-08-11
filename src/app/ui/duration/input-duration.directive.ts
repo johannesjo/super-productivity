@@ -88,11 +88,11 @@ export class InputDurationDirective implements ControlValueAccessor, Validator, 
     this._formatDisplayValue();
   }
 
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (value: number | null) => void): void {
     this._onChange = fn;
   }
 
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this._onTouched = fn;
   }
 

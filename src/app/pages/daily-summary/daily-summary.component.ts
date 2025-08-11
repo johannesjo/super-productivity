@@ -57,7 +57,6 @@ import { MsToClockStringPipe } from '../../ui/duration/ms-to-clock-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TaskSummaryTablesComponent } from '../../features/tasks/task-summary-tables/task-summary-tables.component';
 import { TasksByTagComponent } from '../../features/tasks/tasks-by-tag/tasks-by-tag.component';
-import { RightPanelComponent } from '../../features/right-panel/right-panel.component';
 import { EvaluationSheetComponent } from '../../features/metric/evaluation-sheet/evaluation-sheet.component';
 import { WorklogWeekComponent } from '../../features/worklog/worklog-week/worklog-week.component';
 import { InlineMarkdownComponent } from '../../ui/inline-markdown/inline-markdown.component';
@@ -99,7 +98,6 @@ const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
     TranslatePipe,
     TaskSummaryTablesComponent,
     TasksByTagComponent,
-    RightPanelComponent,
     EvaluationSheetComponent,
     WorklogWeekComponent,
     InlineMarkdownComponent,

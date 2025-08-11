@@ -1,19 +1,21 @@
 import { isObject } from './is-object';
 import { HANDLED_ERROR_PROP_STR } from '../app.constants';
 
-export const getErrorTxt = (err: any): string => {
-  if (err && isObject(err.error)) {
+export const getErrorTxt = (err: unknown): string => {
+  if (err && isObject((err as any).error)) {
     return (
-      err.error.message ||
-      err.error.name ||
+      (err as any).error.message ||
+      (err as any).error.name ||
       // for ngx translate...
-      (isObject(err.error.error) ? err.error.error.toString() : err.error) ||
-      err.error
+      (isObject((err as any).error.error)
+        ? (err as any).error.error.toString()
+        : (err as any).error) ||
+      (err as any).error
     );
-  } else if (err && err[HANDLED_ERROR_PROP_STR]) {
-    return err[HANDLED_ERROR_PROP_STR];
-  } else if (err && err.toString) {
-    return err.toString();
+  } else if (err && (err as any)[HANDLED_ERROR_PROP_STR]) {
+    return (err as any)[HANDLED_ERROR_PROP_STR];
+  } else if (err && (err as any).toString) {
+    return (err as any).toString();
   } else if (typeof err === 'string') {
     return err;
   } else {

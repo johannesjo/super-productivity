@@ -32,7 +32,7 @@ export class DialogConfirmComponent {
 
   readonly T: typeof T = T;
 
-  close(res: any): void {
+  close(res: boolean | string | undefined): void {
     this._matDialogRef.close(res);
   }
 

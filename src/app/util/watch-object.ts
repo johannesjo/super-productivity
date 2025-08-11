@@ -2,7 +2,7 @@
 
 export const watchObject = <T extends object>(
   obj: T,
-  onChange: (prop: string, value: any) => void,
+  onChange: (prop: string, value: unknown) => void,
 ): T =>
   new Proxy(obj, {
     // eslint-disable-next-line prefer-arrow/prefer-arrow-functions

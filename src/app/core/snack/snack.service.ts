@@ -15,7 +15,7 @@ import { debounce } from '../../util/decorators';
   providedIn: 'root',
 })
 export class SnackService {
-  private _store$ = inject<Store<any>>(Store);
+  private _store$ = inject(Store);
   private _translateService = inject(TranslateService);
   private _actions$ = inject(Actions);
   private _matSnackBar = inject(MatSnackBar);
@@ -80,7 +80,7 @@ export class SnackService {
 
     if (showWhile$ || promise || isSpinner) {
       // TODO check if still needed
-      (cfg as any).panelClass = 'polling-snack';
+      (cfg as { panelClass: string }).panelClass = 'polling-snack';
     }
 
     switch (type) {

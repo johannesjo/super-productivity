@@ -38,7 +38,6 @@ import { WorkContextService } from '../work-context/work-context.service';
 import { ProjectService } from '../project/project.service';
 import { TaskViewCustomizerService } from '../task-view-customizer/task-view-customizer.service';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { RightPanelComponent } from '../right-panel/right-panel.component';
 import { CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -77,7 +76,6 @@ import { FinishDayBtnComponent } from './finish-day-btn/finish-day-btn.component
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    RightPanelComponent,
     CdkDropListGroup,
     CdkScrollable,
     MatTooltip,

@@ -39,7 +39,6 @@ import { clockStringFromDate } from '../../../ui/duration/clock-string-from-date
 import { HelpSectionComponent } from '../../../ui/help-section/help-section.component';
 import { ChipListInputComponent } from '../../../ui/chip-list-input/chip-list-input.component';
 import { MatButton } from '@angular/material/button';
-import { AsyncPipe } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import { Log } from '../../../core/log';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -59,7 +58,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
     ChipListInputComponent,
     MatDialogActions,
     MatButton,
-    AsyncPipe,
     MatIcon,
   ],
 })
