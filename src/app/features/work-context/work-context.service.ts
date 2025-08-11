@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, interval, Observable, of, timer } from 'rxjs';
 import {
   WorkContext,
@@ -301,14 +302,15 @@ export class WorkContextService {
     this.backlogTasks$,
   ]).pipe(map(([today, backlog]) => [...today, ...backlog]));
 
-  startableTasksForActiveContext$: Observable<Task[]> = this._afterDataLoadedOnce$.pipe(
-    switchMap(() => this._store$),
+  startableTasksForActiveContext$: Observable<Task[]> = this._store$.pipe(
     select(selectStartableTasksForActiveContext),
     shareReplay(1),
   );
+  startableTasksForActiveContext = toSignal(this.startableTasksForActiveContext$, {
+    initialValue: [],
+  });
 
-  trackableTasksForActiveContext$: Observable<Task[]> = this._afterDataLoadedOnce$.pipe(
-    switchMap(() => this._store$),
+  trackableTasksForActiveContext$: Observable<Task[]> = this._store$.pipe(
     select(selectTrackableTasksForActiveContext),
   );
 

@@ -7,7 +7,6 @@ import {
 } from '@angular/core';
 import { Task } from '../../tasks/task.model';
 import { TaskService } from '../../tasks/task.service';
-import { first } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import {
   setFocusSessionActivePage,
@@ -17,7 +16,6 @@ import { FocusModeMode, FocusModePage } from '../focus-mode.const';
 import { T } from 'src/app/t.const';
 import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
-import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { SelectTaskComponent } from '../../tasks/select-task/select-task.component';
 import { selectFocusModeMode } from '../store/focus-mode.selectors';
@@ -29,7 +27,7 @@ import { selectFocusModeConfig } from '../../config/store/global-config.reducer'
   templateUrl: './focus-mode-task-selection.component.html',
   styleUrls: ['./focus-mode-task-selection.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, MatButton, AsyncPipe, TranslatePipe, SelectTaskComponent],
+  imports: [FormsModule, MatButton, TranslatePipe, SelectTaskComponent],
 })
 export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy {
   readonly taskService = inject(TaskService);
@@ -39,7 +37,7 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
   cfg = toSignal(this._store.select(selectFocusModeConfig));
 
   selectedTask: string | Task | undefined;
-  initialTask$ = this.taskService.firstStartableTask$.pipe(first());
+  initialTask = this.taskService.firstStartableTask;
   focusTimeout = 0;
   T: typeof T = T;
 

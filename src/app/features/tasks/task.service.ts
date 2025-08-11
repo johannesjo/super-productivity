@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid';
 import { first, map, take, withLatestFrom } from 'rxjs/operators';
-import { inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
   ArchiveTask,
@@ -38,7 +38,6 @@ import {
   selectAllTasks,
   selectCurrentTask,
   selectCurrentTaskId,
-  selectCurrentTaskOrParentWithData,
   selectCurrentTaskParentOrCurrent,
   selectIsTaskDataLoaded,
   selectMainTasksWithoutTag,
@@ -135,21 +134,15 @@ export class TaskService {
     // NOTE: we can't use share here, as we need the last emitted value
   );
 
-  firstStartableTask$: Observable<Task | undefined> =
-    this._workContextService.startableTasksForActiveContext$.pipe(
-      map((tasks) => tasks[0]),
-    );
+  firstStartableTask = computed(
+    () => this._workContextService.startableTasksForActiveContext()[0],
+  );
 
   taskDetailPanelTargetPanel$: Observable<TaskDetailTargetPanel | null | undefined> =
     this._store.pipe(
       select(selectTaskDetailTargetPanel),
       // NOTE: we can't use share here, as we need the last emitted value
     );
-
-  currentTaskOrCurrentParent$: Observable<TaskWithSubTasks | null> = this._store.pipe(
-    select(selectCurrentTaskOrParentWithData),
-    // NOTE: we can't use share here, as we need the last emitted value
-  );
 
   isTaskDataLoaded$: Observable<boolean> = this._store.pipe(
     select(selectIsTaskDataLoaded),
