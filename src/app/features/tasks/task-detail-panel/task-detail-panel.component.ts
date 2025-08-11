@@ -27,7 +27,6 @@ import {
   shareReplay,
   skip,
   switchMap,
-  withLatestFrom,
 } from 'rxjs/operators';
 import { T } from '../../../t.const';
 import { TaskService } from '../task.service';
@@ -373,23 +372,20 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
 
   ngAfterViewInit(): void {
     this.taskService.taskDetailPanelTargetPanel$
-      .pipe(
-        takeUntilDestroyed(this._destroyRef),
-        delay(50),
-        withLatestFrom(this.taskService.selectedTaskId$),
-        filter(([, id]) => !!id),
-      )
-      .subscribe(([v]) => {
-        if (v === TaskDetailTargetPanel.Attachments) {
-          const attachmentPanelElRef = this.attachmentPanelElRef();
-          if (!attachmentPanelElRef) {
-            devError('this.attachmentPanelElRef not ready');
-            this._focusFirst();
+      .pipe(takeUntilDestroyed(this._destroyRef), delay(50))
+      .subscribe((v) => {
+        if (this.taskService.selectedTaskId()) {
+          if (v === TaskDetailTargetPanel.Attachments) {
+            const attachmentPanelElRef = this.attachmentPanelElRef();
+            if (!attachmentPanelElRef) {
+              devError('this.attachmentPanelElRef not ready');
+              this._focusFirst();
+            } else {
+              this.focusItem(attachmentPanelElRef);
+            }
           } else {
-            this.focusItem(attachmentPanelElRef);
+            this._focusFirst();
           }
-        } else {
-          this._focusFirst();
         }
       });
   }

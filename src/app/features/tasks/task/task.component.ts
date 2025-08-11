@@ -150,7 +150,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   // computed
   currentId = toSignal(this._taskService.currentTaskId$);
   isCurrent = computed(() => this.currentId() === this.task().id);
-  selectedId = toSignal(this._taskService.selectedTaskId$);
+  selectedId = this._taskService.selectedTaskId;
   isSelected = computed(() => this.selectedId() === this.task().id);
   todayStr = toSignal(this._globalTrackingIntervalService.todayDateStr$);
 

@@ -121,9 +121,12 @@ export class TaskService {
     // NOTE: we can't use share here, as we need the last emitted value
   );
 
-  selectedTaskId$: Observable<string | null> = this._store.pipe(
-    select(selectSelectedTaskId),
-    // NOTE: we can't use share here, as we need the last emitted value
+  selectedTaskId = toSignal(
+    this._store.pipe(
+      select(selectSelectedTaskId),
+      // NOTE: we can't use share here, as we need the last emitted value
+    ),
+    { initialValue: null },
   );
 
   selectedTask$: Observable<TaskWithSubTasks | null> = this._store.pipe(
