@@ -126,18 +126,13 @@ export class CaldavClientService {
       completed: !!todo.getFirstPropertyValue('completed'),
       item_url: task.url,
       summary: (todo.getFirstPropertyValue('summary') as string) || '',
-      start: (todo.getFirstPropertyValue('dtstart') as ICAL.Time | undefined)
-        ?.toJSDate()
-        .getTime(),
-      due: (todo.getFirstPropertyValue('due') as ICAL.Time | undefined)
-        ?.toJSDate()
-        .getTime(),
-      note: (todo.getFirstPropertyValue('description') as string) || '',
-      status: todo.getFirstPropertyValue('status') as CaldavIssueStatus,
-      priority: parseInt(todo.getFirstPropertyValue('priority') as string),
-      percent_complete: parseInt(
-        todo.getFirstPropertyValue('percent-complete') as string,
-      ),
+      start: (todo.getFirstPropertyValue('dtstart') as ICAL.Time)?.toJSDate().getTime(),
+      due: (todo.getFirstPropertyValue('due') as ICAL.Time)?.toJSDate().getTime(),
+      note: (todo.getFirstPropertyValue('description') as string) || undefined,
+      status: (todo.getFirstPropertyValue('status') as CaldavIssueStatus) || undefined,
+      priority: +(todo.getFirstPropertyValue('priority') as string) || undefined,
+      percent_complete:
+        +(todo.getFirstPropertyValue('percent-complete') as string) || undefined,
       location: todo.getFirstPropertyValue('location') as string,
       labels: categories,
       etag_hash: this._hashEtag(task.etag),
