@@ -32,14 +32,14 @@ describe('DateTimeFormatService', () => {
 
   it('should detect 24-hour format for appropriate locales', () => {
     // When no locale is set, is24HourFormat should work with system default
-    const is24Hour = service.is24HourFormat;
+    const is24Hour = service.is24HourFormat();
     expect(typeof is24Hour).toBe('boolean');
   });
 
   it('should maintain consistent behavior', () => {
     // Test that multiple calls return the same format detection
-    const firstCheck = service.is24HourFormat;
-    const secondCheck = service.is24HourFormat;
+    const firstCheck = service.is24HourFormat();
+    const secondCheck = service.is24HourFormat();
     expect(firstCheck).toBe(secondCheck);
 
     // Test that formatTime produces consistent output
