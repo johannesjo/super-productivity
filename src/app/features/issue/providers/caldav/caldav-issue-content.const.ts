@@ -18,13 +18,15 @@ export const CALDAV_ISSUE_CONTENT_CONFIG: IssueContentConfig<CaldavIssue> = {
     {
       label: T.F.ISSUE.ISSUE_CONTENT.START,
       value: 'start',
-      type: IssueFieldType.TEXT,
+      type: IssueFieldType.CUSTOM,
+      customTemplate: 'caldav-time',
       isVisible: (issue: CaldavIssue) => !!issue.start,
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.DUE_DATE,
       value: 'due',
-      type: IssueFieldType.TEXT,
+      type: IssueFieldType.CUSTOM,
+      customTemplate: 'caldav-time',
       isVisible: (issue: CaldavIssue) => !!issue.due,
     },
     {
