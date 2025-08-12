@@ -1,4 +1,5 @@
 import { effect, inject, Injectable } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { BodyClass, IS_ELECTRON } from '../../app.constants';
 import { IS_MAC } from '../../util/is-mac';
 import {
@@ -51,7 +52,7 @@ export class GlobalThemeService {
     (localStorage.getItem(LS.DARK_MODE) as DarkModeCfg) || 'system',
   );
 
-  isDarkTheme$: Observable<boolean> = this.darkMode$.pipe(
+  private _isDarkThemeObs$: Observable<boolean> = this.darkMode$.pipe(
     switchMap((darkMode) => {
       switch (darkMode) {
         case 'dark':
@@ -69,15 +70,19 @@ export class GlobalThemeService {
     distinctUntilChanged(),
   );
 
-  backgroundImg$: Observable<string | null | undefined> = combineLatest([
+  isDarkTheme = toSignal(this._isDarkThemeObs$, { initialValue: false });
+
+  private _backgroundImgObs$: Observable<string | null | undefined> = combineLatest([
     this._workContextService.currentTheme$,
-    this.isDarkTheme$,
+    this._isDarkThemeObs$,
   ]).pipe(
     map(([theme, isDarkMode]) =>
       isDarkMode ? theme.backgroundImageDark : theme.backgroundImageLight,
     ),
     distinctUntilChanged(),
   );
+
+  backgroundImg = toSignal(this._backgroundImgObs$);
 
   init(): void {
     // This is here to make web page reloads on non-work-context pages at least usable
@@ -190,7 +195,7 @@ export class GlobalThemeService {
     this._workContextService.currentTheme$.subscribe((theme: WorkContextThemeCfg) =>
       this._setColorTheme(theme),
     );
-    this.isDarkTheme$.subscribe((isDarkTheme) => this._setDarkTheme(isDarkTheme));
+    this._isDarkThemeObs$.subscribe((isDarkTheme) => this._setDarkTheme(isDarkTheme));
   }
 
   private _initHandlersForInitialBodyClasses(): void {

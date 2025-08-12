@@ -1,5 +1,5 @@
 @if (isShowUi$ | async) {
-  @if (globalThemeService.backgroundImg$ | async; as bgImage) {
+  @if (globalThemeService.backgroundImg(); as bgImage) {
     <div
       [style.background]="'url(' + bgImage + ')'"
       class="bg-image"
@@ -21,7 +21,7 @@
     ></div>
   }
   <!-- -->
-  @if (isShowFocusOverlay$ | async) {
+  @if (isShowFocusOverlay()) {
     <focus-mode-overlay @warp></focus-mode-overlay>
   } @else {
     <mat-sidenav-container [dir]="isRTL ? 'rtl' : 'ltr'">

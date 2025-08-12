@@ -19,13 +19,7 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
-import {
-  debounceTime,
-  distinctUntilChanged,
-  switchMap,
-  takeUntil,
-  take,
-} from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
 import { UnsplashService, UnsplashPhoto } from '../../core/unsplash/unsplash.service';
 import { GlobalThemeService } from '../../core/theme/global-theme.service';
 import { TranslateModule } from '@ngx-translate/core';
@@ -108,13 +102,9 @@ export class DialogUnsplashPickerComponent implements OnInit, OnDestroy {
           this.isLoading.set(true);
           // If empty query, use context-aware default
           if (!query.trim()) {
-            return this._globalThemeService.isDarkTheme$.pipe(
-              take(1),
-              switchMap((isDark) => {
-                const defaultQuery = this.getDefaultSearchQuery(isDark);
-                return this._unsplashService.searchPhotos(defaultQuery);
-              }),
-            );
+            const isDark = this._globalThemeService.isDarkTheme();
+            const defaultQuery = this.getDefaultSearchQuery(isDark);
+            return this._unsplashService.searchPhotos(defaultQuery);
           }
           return this._unsplashService.searchPhotos(query);
         }),
@@ -132,9 +122,8 @@ export class DialogUnsplashPickerComponent implements OnInit, OnDestroy {
       });
 
     // Initial load with context-aware defaults
-    this._globalThemeService.isDarkTheme$.pipe(take(1)).subscribe((isDark) => {
-      this.onSearchChange(this.getDefaultSearchQuery(isDark));
-    });
+    const isDark = this._globalThemeService.isDarkTheme();
+    this.onSearchChange(this.getDefaultSearchQuery(isDark));
   }
 
   ngOnDestroy(): void {

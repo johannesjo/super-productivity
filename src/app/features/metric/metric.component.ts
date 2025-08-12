@@ -1,8 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ChartConfiguration, ChartType } from 'chart.js';
 import { MetricService } from './metric.service';
-import { Observable } from 'rxjs';
-import { LineChartData } from './metric.model';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { T } from '../../t.const';
 import { ProjectMetricsService } from './project-metrics.service';
@@ -27,14 +26,15 @@ export class MetricComponent {
 
   T: typeof T = T;
 
-  productivityHappiness$: Observable<LineChartData> =
-    this.metricService.getProductivityHappinessChartData$();
+  productivityHappiness = toSignal(
+    this.metricService.getProductivityHappinessChartData$(),
+  );
 
-  simpleClickCounterData$: Observable<LineChartData> =
-    this.metricService.getSimpleClickCounterMetrics$();
+  simpleClickCounterData = toSignal(this.metricService.getSimpleClickCounterMetrics$());
 
-  simpleCounterStopWatchData$: Observable<LineChartData> =
-    this.metricService.getSimpleCounterStopwatchMetrics$();
+  simpleCounterStopWatchData = toSignal(
+    this.metricService.getSimpleCounterStopwatchMetrics$(),
+  );
 
   pieChartOptions: ChartConfiguration<'pie', number[], string>['options'] = {
     scales: {

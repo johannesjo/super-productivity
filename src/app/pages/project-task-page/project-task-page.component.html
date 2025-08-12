@@ -1,6 +1,6 @@
 <work-view
-  [backlogTasks]="workContextService.backlogTasks$ | async"
-  [doneTasks]="workContextService.doneTasks$ | async"
-  [isShowBacklog]="isShowBacklog$ | async"
-  [undoneTasks]="workContextService.undoneTasks$ | async"
+  [backlogTasks]="backlogTasks()"
+  [doneTasks]="doneTasks()"
+  [isShowBacklog]="isShowBacklog()"
+  [undoneTasks]="undoneTasks()"
 ></work-view>

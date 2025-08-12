@@ -1,5 +1,5 @@
-import { AsyncPipe } from '@angular/common';
 import { AfterViewInit, ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButton } from '@angular/material/button';
 
 import { of } from 'rxjs';
@@ -31,25 +31,26 @@ import {
   templateUrl: './focus-mode-task-done.component.html',
   styleUrls: ['./focus-mode-task-done.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatButton, AsyncPipe, MsToStringPipe, TranslatePipe],
+  imports: [MatButton, MsToStringPipe, TranslatePipe],
 })
 export class FocusModeTaskDoneComponent implements AfterViewInit {
   private _store = inject(Store);
   private readonly _confettiService = inject(ConfettiService);
 
-  mode$ = this._store.select(selectFocusModeMode);
-  currentTask$ = this._store.select(selectCurrentTask);
-  lastCurrentTask$ = this._store.select(selectLastCurrentTask);
-  taskTitle$ = this.lastCurrentTask$.pipe(
-    switchMap((lastCurrentTask) =>
-      lastCurrentTask
-        ? of(lastCurrentTask.title)
-        : this.currentTask$.pipe(map((task) => task?.title)),
+  mode = toSignal(this._store.select(selectFocusModeMode));
+  currentTask = toSignal(this._store.select(selectCurrentTask));
+  taskTitle = toSignal(
+    this._store.select(selectLastCurrentTask).pipe(
+      switchMap((lastCurrentTask) =>
+        lastCurrentTask
+          ? of(lastCurrentTask.title)
+          : this._store.select(selectCurrentTask).pipe(map((task) => task?.title)),
+      ),
+      take(1),
     ),
-    take(1),
   );
-  lastSessionTotalDuration$ = this._store.select(
-    selectLastSessionTotalDurationOrTimeElapsedFallback,
+  lastSessionTotalDuration = toSignal(
+    this._store.select(selectLastSessionTotalDurationOrTimeElapsedFallback),
   );
   T: typeof T = T;
 
