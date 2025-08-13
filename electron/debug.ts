@@ -77,7 +77,7 @@ export const initDebug = (
   opts: {
     enabled?: boolean | null;
     showDevTools?: boolean;
-    devToolsMode?: string;
+    devToolsMode?: 'bottom' | 'left' | 'right' | 'undocked' | 'detach' | 'previous';
     mode?: string;
   },
   isAddReload: boolean,
