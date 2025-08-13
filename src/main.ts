@@ -16,11 +16,7 @@ import { androidInterface } from './app/features/android/android-interface';
 import { App as CapacitorApp } from '@capacitor/app';
 import { GlobalErrorHandler } from './app/core/error-handler/global-error-handler.class';
 import { bootstrapApplication, BrowserModule } from '@angular/platform-browser';
-import {
-  HttpClient,
-  provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { MarkdownModule, MARKED_OPTIONS, provideMarkdown } from 'ngx-markdown';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { FeatureStoresModule } from './app/root-store/feature-stores.module';
@@ -46,8 +42,8 @@ import {
   plannerSharedMetaReducer,
   projectSharedMetaReducer,
   tagSharedMetaReducer,
-  taskSharedCrudMetaReducer,
   taskBatchUpdateMetaReducer,
+  taskSharedCrudMetaReducer,
   taskSharedLifecycleMetaReducer,
   taskSharedSchedulingMetaReducer,
 } from './app/root-store/meta/task-shared-meta-reducers';
@@ -55,10 +51,13 @@ import { EffectsModule } from '@ngrx/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ServiceWorkerModule } from '@angular/service-worker';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
+import {
+  TranslateHttpLoader,
+  TRANSLATE_HTTP_LOADER_CONFIG,
+} from '@ngx-translate/http-loader';
 import { CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { AppComponent } from './app/app.component';
-import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { ShortTimeHtmlPipe } from './app/ui/pipes/short-time-html.pipe';
 import { ShortTimePipe } from './app/ui/pipes/short-time.pipe';
 import { BackgroundTask } from '@capawesome/capacitor-background-task';
@@ -73,11 +72,16 @@ if (environment.production || environment.stage) {
 
 // Window.ea declaration is in src/app/core/window-ea.d.ts
 
-const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
-  new TranslateHttpLoader(http, './assets/i18n/', '.json');
-
 bootstrapApplication(AppComponent, {
   providers: [
+    // Provide configuration for TranslateHttpLoader
+    {
+      provide: TRANSLATE_HTTP_LOADER_CONFIG,
+      useValue: {
+        prefix: './assets/i18n/',
+        suffix: '.json',
+      },
+    },
     importProvidersFrom(
       FeatureStoresModule,
       MatNativeDateModule,
@@ -144,8 +148,7 @@ bootstrapApplication(AppComponent, {
       TranslateModule.forRoot({
         loader: {
           provide: TranslateLoader,
-          useFactory: createTranslateLoader,
-          deps: [HttpClient],
+          useClass: TranslateHttpLoader,
         },
       }),
       CdkDropListGroup,

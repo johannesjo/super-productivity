@@ -7,7 +7,7 @@ import { T } from '../../t.const';
 import { ProjectMetricsService } from './project-metrics.service';
 import { WorkContextService } from '../work-context/work-context.service';
 import { LazyChartComponent } from './lazy-chart/lazy-chart.component';
-import { AsyncPipe, DecimalPipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { MsToStringPipe } from '../../ui/duration/ms-to-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -17,7 +17,7 @@ import { TranslatePipe } from '@ngx-translate/core';
   styleUrls: ['./metric.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeAnimation],
-  imports: [LazyChartComponent, AsyncPipe, DecimalPipe, MsToStringPipe, TranslatePipe],
+  imports: [LazyChartComponent, DecimalPipe, MsToStringPipe, TranslatePipe],
 })
 export class MetricComponent {
   workContextService = inject(WorkContextService);
