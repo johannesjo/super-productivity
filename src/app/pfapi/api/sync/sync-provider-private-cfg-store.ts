@@ -83,6 +83,21 @@ export class SyncProviderPrivateCfgStore<PID extends SyncProviderId> {
   }
 
   /**
+   * Upserts the provider's private configuration with partial data
+   * If no existing configuration exists, creates a new one with the provided updates
+   * @param updates Partial configuration updates to apply
+   * @returns Promise resolving after save completes
+   * @throws Error if save fails
+   */
+  async upsertPartial(updates: Partial<PrivateCfgByProviderId<PID>>): Promise<unknown> {
+    const existing = await this.load();
+    const privateCfg = existing
+      ? { ...existing, ...updates }
+      : (updates as PrivateCfgByProviderId<PID>);
+    return this._save(privateCfg);
+  }
+
+  /**
    * Internal method to save configuration
    * @private
    */

@@ -88,7 +88,7 @@ export class LocalFileSyncElectron extends LocalFileSyncBase {
     try {
       const dir = await (window as any).ea.pickDirectory();
       if (dir) {
-        await this.privateCfg.updatePartial({ syncFolderPath: dir });
+        await this.privateCfg.upsertPartial({ syncFolderPath: dir });
       }
       return dir;
     } catch (e) {
