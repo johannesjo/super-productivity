@@ -34,7 +34,7 @@
 
 :host-context(.isMousePrimary task-detail-item) {
   ::ng-deep * {
-    //--mdc-chip-outline-color: transparent !important;
+    //--mat-chip-outline-color: transparent !important;
   }
   ::ng-deep .mdc-evolution-chip__cell--trailing {
     opacity: 0.05;
@@ -45,7 +45,7 @@
 
 :host-context(.isMousePrimary task-detail-item:hover) {
   ::ng-deep * {
-    --mdc-chip-outline-color: rgba(125, 125, 125, 0.4) !important;
+    --mat-chip-outline-color: rgba(125, 125, 125, 0.4) !important;
   }
 
   ::ng-deep .mdc-evolution-chip__cell--trailing {

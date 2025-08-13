@@ -205,7 +205,7 @@ body.isDarkTheme a[href]:hover {
 
 /* Material overrides */
 body.isDarkTheme {
-  --mdc-theme-surface: var(--card-bg);
-  --mdc-theme-on-surface: var(--text-color);
-  --mdc-theme-background: var(--bg);
+  --mat-theme-surface: var(--card-bg);
+  --mat-theme-on-surface: var(--text-color);
+  --mat-theme-background: var(--bg);
 }

@@ -158,10 +158,10 @@ body.isDarkTheme {
 
 /* Material Design overrides */
 body.isDarkTheme {
-  --mdc-theme-surface: var(--card-bg);
-  --mdc-theme-on-surface: var(--text-color);
-  --mdc-theme-background: var(--bg);
-  --mdc-theme-primary: var(--glass-primary);
+  --mat-theme-surface: var(--card-bg);
+  --mat-theme-on-surface: var(--text-color);
+  --mat-theme-background: var(--bg);
+  --mat-theme-primary: var(--glass-primary);
 }
 
 /* Glass buttons */

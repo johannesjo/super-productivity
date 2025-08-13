@@ -3,7 +3,7 @@ import {
   ErrorHandler,
   importProvidersFrom,
   LOCALE_ID,
-  provideExperimentalZonelessChangeDetection,
+  provideZonelessChangeDetection,
   SecurityContext,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
@@ -172,7 +172,7 @@ bootstrapApplication(AppComponent, {
     provideAnimations(),
     provideRouter(APP_ROUTES, withHashLocation(), withPreloading(PreloadAllModules)),
     PLUGIN_INITIALIZER_PROVIDER,
-    provideExperimentalZonelessChangeDetection(),
+    provideZonelessChangeDetection(),
   ],
 }).then(() => {
   // Initialize touch fix for Material menus
