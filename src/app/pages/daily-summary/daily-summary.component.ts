@@ -1,5 +1,4 @@
-import confetti from 'canvas-confetti';
-
+import { AsyncPipe } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -12,13 +11,17 @@ import {
   OnInit,
   Signal,
 } from '@angular/core';
-import { TaskService } from '../../features/tasks/task.service';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { IS_ELECTRON } from '../../app.constants';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { MatAnchor, MatButton, MatIconButton } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
+import { MatIcon } from '@angular/material/icon';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatTab, MatTabGroup } from '@angular/material/tabs';
+import { MatTooltip } from '@angular/material/tooltip';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+
+import confetti from 'canvas-confetti';
 import { combineLatest, from, merge, Observable, Subject } from 'rxjs';
-import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
-import { GlobalConfigService } from '../../features/config/global-config.service';
 import {
   delay,
   filter,
@@ -31,47 +34,46 @@ import {
   takeUntil,
   withLatestFrom,
 } from 'rxjs/operators';
-import { T } from '../../t.const';
-import { WorkContextService } from '../../features/work-context/work-context.service';
-import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
-import { SyncWrapperService } from '../../imex/sync/sync-wrapper.service';
-import { isToday, isYesterday } from '../../util/is-today.util';
-import { WorklogService } from '../../features/worklog/worklog.service';
-import { WorkContextType } from '../../features/work-context/work-context.model';
-import { EntityState } from '@ngrx/entity';
-import { TODAY_TAG } from '../../features/tag/tag.const';
-import { shareReplayUntil } from '../../util/share-replay-until';
 import { DateService } from 'src/app/core/date/date.service';
+
+import { EntityState } from '@ngrx/entity';
 import { Action } from '@ngrx/store';
-import { BeforeFinishDayService } from '../../features/before-finish-day/before-finish-day.service';
-import { MatAnchor, MatButton, MatIconButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
-import { InlineInputComponent } from '../../ui/inline-input/inline-input.component';
-import { MatTab, MatTabGroup } from '@angular/material/tabs';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { PlanTasksTomorrowComponent } from './plan-tasks-tomorrow/plan-tasks-tomorrow.component';
-import { MatTooltip } from '@angular/material/tooltip';
-import { AsyncPipe } from '@angular/common';
-import { MomentFormatPipe } from '../../ui/pipes/moment-format.pipe';
-import { MsToClockStringPipe } from '../../ui/duration/ms-to-clock-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
-import { TaskSummaryTablesComponent } from '../../features/tasks/task-summary-tables/task-summary-tables.component';
-import { TasksByTagComponent } from '../../features/tasks/tasks-by-tag/tasks-by-tag.component';
+
+import { IS_ELECTRON } from '../../app.constants';
+import { Log } from '../../core/log';
+import { BeforeFinishDayService } from '../../features/before-finish-day/before-finish-day.service';
+import { GlobalConfigService } from '../../features/config/global-config.service';
 import { EvaluationSheetComponent } from '../../features/metric/evaluation-sheet/evaluation-sheet.component';
-import { WorklogWeekComponent } from '../../features/worklog/worklog-week/worklog-week.component';
-import { InlineMarkdownComponent } from '../../ui/inline-markdown/inline-markdown.component';
-import { unToggleCheckboxesInMarkdownTxt } from '../../util/untoggle-checkboxes-in-markdown-txt';
-import { expandAnimation } from '../../ui/animations/expand.ani';
-import { SimpleCounterService } from '../../features/simple-counter/simple-counter.service';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { getSimpleCounterStreakDuration } from '../../features/simple-counter/get-simple-counter-streak-duration';
+import { SimpleCounterService } from '../../features/simple-counter/simple-counter.service';
+import { TODAY_TAG } from '../../features/tag/tag.const';
+import { TaskSummaryTablesComponent } from '../../features/tasks/task-summary-tables/task-summary-tables.component';
+import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
+import { TaskService } from '../../features/tasks/task.service';
+import { TasksByTagComponent } from '../../features/tasks/tasks-by-tag/tasks-by-tag.component';
+import { TaskArchiveService } from '../../features/time-tracking/task-archive.service';
+import { WorkContextType } from '../../features/work-context/work-context.model';
+import { WorkContextService } from '../../features/work-context/work-context.service';
+import { WorklogWeekComponent } from '../../features/worklog/worklog-week/worklog-week.component';
+import { WorklogService } from '../../features/worklog/worklog.service';
+import { SyncWrapperService } from '../../imex/sync/sync-wrapper.service';
+import { T } from '../../t.const';
+import { expandAnimation } from '../../ui/animations/expand.ani';
+import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
+import { MsToClockStringPipe } from '../../ui/duration/ms-to-clock-string.pipe';
+import { InlineInputComponent } from '../../ui/inline-input/inline-input.component';
+import { InlineMarkdownComponent } from '../../ui/inline-markdown/inline-markdown.component';
+import { MomentFormatPipe } from '../../ui/pipes/moment-format.pipe';
+import { isToday, isYesterday } from '../../util/is-today.util';
+import { IS_TOUCH_ONLY } from '../../util/is-touch-only';
+import { shareReplayUntil } from '../../util/share-replay-until';
+import { unToggleCheckboxesInMarkdownTxt } from '../../util/untoggle-checkboxes-in-markdown-txt';
+import { PlanTasksTomorrowComponent } from './plan-tasks-tomorrow/plan-tasks-tomorrow.component';
 import {
   SimpleCounterSummaryItem,
   SimpleCounterSummaryItemComponent,
 } from './simple-counter-summary-item/simple-counter-summary-item.component';
-import { TaskArchiveService } from '../../features/time-tracking/task-archive.service';
-import { IS_TOUCH_ONLY } from '../../util/is-touch-only';
-import { Log } from '../../core/log';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
@@ -285,6 +287,10 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    if (this.configService.misc()?.isDisableAnimations) {
+      return;
+    }
+
     this._startCelebrationTimeout = window.setTimeout(
       () => {
         this._celebrate();

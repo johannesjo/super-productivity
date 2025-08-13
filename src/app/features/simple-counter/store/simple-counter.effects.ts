@@ -1,24 +1,28 @@
 import { inject, Injectable } from '@angular/core';
+
+import confetti from 'canvas-confetti';
+import { EMPTY, Observable } from 'rxjs';
+import { map, mergeMap, switchMap, tap } from 'rxjs/operators';
+import { DateService } from 'src/app/core/date/date.service';
+
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
-import confetti from 'canvas-confetti';
+import { TranslateService } from '@ngx-translate/core';
+
+import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
+import { SnackService } from '../../../core/snack/snack.service';
+import { PfapiService } from '../../../pfapi/pfapi.service';
+import { T } from '../../../t.const';
+import { getDbDateStr } from '../../../util/get-db-date-str';
+import { GlobalConfigService } from '../../config/global-config.service';
+import { getSimpleCounterStreakDuration } from '../get-simple-counter-streak-duration';
+import { SimpleCounterType } from '../simple-counter.model';
+import { SimpleCounterService } from '../simple-counter.service';
 import {
   increaseSimpleCounterCounterToday,
   updateAllSimpleCounters,
 } from './simple-counter.actions';
-import { map, mergeMap, switchMap, tap } from 'rxjs/operators';
 import { selectSimpleCounterById } from './simple-counter.reducer';
-import { SimpleCounterType } from '../simple-counter.model';
-import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
-import { SimpleCounterService } from '../simple-counter.service';
-import { EMPTY, Observable } from 'rxjs';
-import { T } from '../../../t.const';
-import { SnackService } from '../../../core/snack/snack.service';
-import { DateService } from 'src/app/core/date/date.service';
-import { getDbDateStr } from '../../../util/get-db-date-str';
-import { getSimpleCounterStreakDuration } from '../get-simple-counter-streak-duration';
-import { TranslateService } from '@ngx-translate/core';
-import { PfapiService } from '../../../pfapi/pfapi.service';
 
 @Injectable()
 export class SimpleCounterEffects {
@@ -30,6 +34,7 @@ export class SimpleCounterEffects {
   private _simpleCounterService = inject(SimpleCounterService);
   private _snackService = inject(SnackService);
   private _translateService = inject(TranslateService);
+  private _configService = inject(GlobalConfigService);
 
   successFullCountersMap: { [key: string]: boolean } = {};
 
@@ -97,7 +102,10 @@ export class SimpleCounterEffects {
                 msg,
               });
               this.successFullCountersMap[sc.id] = true;
-              this._celebrate();
+
+              if (!this._configService.misc()?.isDisableAnimations) {
+                this._celebrate();
+              }
             }
             // else if (
             //   sc.type !== SimpleCounterType.StopWatch &&
