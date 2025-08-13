@@ -33,7 +33,7 @@ export class LocalFileSyncAndroid extends LocalFileSyncBase {
   async setupSaf(): Promise<string | undefined> {
     try {
       const uri = await SafService.selectFolder();
-      await this.privateCfg.updatePartial({
+      await this.privateCfg.upsertPartial({
         safFolderUri: uri,
       });
       return uri;
