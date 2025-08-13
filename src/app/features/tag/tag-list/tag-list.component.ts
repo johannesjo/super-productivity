@@ -37,13 +37,14 @@ export class TagListComponent {
   isShowCurrentContextTag = input(false);
   isShowProjectTagAlways = input(false);
   isShowProjectTagNever = input(false);
+
   workContext = toSignal(this._workContextService.activeWorkContextTypeAndId$);
-  // TODO this can be faster if we create a separate selector for just the stuff we need
+
   tagState = toSignal(this._store.select(selectTagFeatureState));
-  // TODO this can be faster if we create a separate selector for just the stuff we need
   projectState = toSignal(this._store.select(selectProjectFeatureState));
 
   tagIds = computed<string[]>(() => this.task().tagIds || []);
+
   tags = computed<Tag[]>(() => {
     const tagsToHide = this.tagsToHide();
     const tagIdsFiltered: string[] = !!tagsToHide
@@ -52,11 +53,15 @@ export class TagListComponent {
         : this.tagIds()
       : this.tagIds().filter((id) => id !== this.workContext()?.activeId);
 
+    // sort alphabetically by title
     const tagsI = tagIdsFiltered
       .map((id) => this.tagState()?.entities[id])
-      .filter((tag): tag is Tag => !!tag);
+      .filter((tag): tag is Tag => !!tag)
+      .sort((a, b) => a.title.localeCompare(b.title));
+
     const projectId = this.projectId();
     const project = projectId && this.projectState()?.entities[projectId];
+
     if (project && project.id) {
       const projectTag: Tag = {
         ...project,
@@ -64,8 +69,10 @@ export class TagListComponent {
         created: 0,
         icon: project.icon || 'folder_special',
       };
+      // project tag first then sorted tags
       return [projectTag, ...tagsI];
     }
+
     return tagsI;
   });
 
@@ -81,3 +88,4 @@ export class TagListComponent {
     return undefined;
   });
 }
+
