@@ -96,8 +96,8 @@ export const initDebug = (
     return;
   }
 
-  if (opts.devToolsMode !== 'previous') {
-    devToolsOptions.mode = opts.devToolsMode;
+  if (opts.devToolsMode !== 'previous' && opts.devToolsMode) {
+    devToolsOptions.mode = opts.devToolsMode as 'bottom' | 'left' | 'right' | 'undocked' | 'detach';
   }
 
   app.on('browser-window-created', (event, win) => {
