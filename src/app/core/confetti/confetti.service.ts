@@ -1,0 +1,20 @@
+import { inject, Injectable } from '@angular/core';
+
+import { GlobalConfigService } from '../../features/config/global-config.service';
+import { ConfettiConfig } from './confetti.model';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class ConfettiService {
+  private readonly _configService = inject(GlobalConfigService);
+
+  async createConfetti(props: ConfettiConfig): Promise<void> {
+    if (this._configService.misc()?.isDisableAnimations) {
+      return;
+    }
+
+    const confettiModule = await import('canvas-confetti');
+    confettiModule.default(props);
+  }
+}

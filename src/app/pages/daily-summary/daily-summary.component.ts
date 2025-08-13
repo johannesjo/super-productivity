@@ -20,7 +20,6 @@ import { MatTab, MatTabGroup } from '@angular/material/tabs';
 import { MatTooltip } from '@angular/material/tooltip';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
-import confetti from 'canvas-confetti';
 import { combineLatest, from, merge, Observable, Subject } from 'rxjs';
 import {
   delay,
@@ -41,6 +40,7 @@ import { Action } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { IS_ELECTRON } from '../../app.constants';
+import { ConfettiService } from '../../core/confetti/confetti.service';
 import { Log } from '../../core/log';
 import { BeforeFinishDayService } from '../../features/before-finish-day/before-finish-day.service';
 import { GlobalConfigService } from '../../features/config/global-config.service';
@@ -110,6 +110,7 @@ const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
 })
 export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly configService = inject(GlobalConfigService);
+  private readonly _confettiService = inject(ConfettiService);
   readonly workContextService = inject(WorkContextService);
   private readonly _taskService = inject(TaskService);
   private readonly _router = inject(Router);
@@ -566,12 +567,12 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
       const particleCount = 50 * (timeLeft / duration);
       // since particles fall down, start a bit higher than random
-      confetti({
+      this._confettiService.createConfetti({
         ...defaults,
         particleCount,
         origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
       });
-      confetti({
+      this._confettiService.createConfetti({
         ...defaults,
         particleCount,
         origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },

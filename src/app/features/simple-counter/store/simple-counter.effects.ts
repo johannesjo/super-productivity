@@ -1,6 +1,5 @@
 import { inject, Injectable } from '@angular/core';
 
-import confetti from 'canvas-confetti';
 import { EMPTY, Observable } from 'rxjs';
 import { map, mergeMap, switchMap, tap } from 'rxjs/operators';
 import { DateService } from 'src/app/core/date/date.service';
@@ -9,6 +8,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
 
+import { ConfettiService } from '../../../core/confetti/confetti.service';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { PfapiService } from '../../../pfapi/pfapi.service';
@@ -35,6 +35,7 @@ export class SimpleCounterEffects {
   private _snackService = inject(SnackService);
   private _translateService = inject(TranslateService);
   private _configService = inject(GlobalConfigService);
+  private readonly _confettiService = inject(ConfettiService);
 
   successFullCountersMap: { [key: string]: boolean } = {};
 
@@ -103,9 +104,7 @@ export class SimpleCounterEffects {
               });
               this.successFullCountersMap[sc.id] = true;
 
-              if (!this._configService.misc()?.isDisableAnimations) {
-                this._celebrate();
-              }
+              this._celebrate();
             }
             // else if (
             //   sc.type !== SimpleCounterType.StopWatch &&
@@ -128,7 +127,7 @@ export class SimpleCounterEffects {
   );
 
   private _celebrate(): void {
-    confetti({
+    this._confettiService.createConfetti({
       particleCount: 100,
       spread: 70,
       origin: { y: 0.6 },

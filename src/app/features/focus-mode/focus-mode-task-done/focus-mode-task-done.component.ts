@@ -9,8 +9,8 @@ import { T } from 'src/app/t.const';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { ConfettiService } from '../../../core/confetti/confetti.service';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
-import { GlobalConfigService } from '../../config/global-config.service';
 import {
   selectCurrentTask,
   selectLastCurrentTask,
@@ -35,7 +35,7 @@ import {
 })
 export class FocusModeTaskDoneComponent implements AfterViewInit {
   private _store = inject(Store);
-  private _configService = inject(GlobalConfigService);
+  private readonly _confettiService = inject(ConfettiService);
 
   mode$ = this._store.select(selectFocusModeMode);
   currentTask$ = this._store.select(selectCurrentTask);
@@ -54,24 +54,16 @@ export class FocusModeTaskDoneComponent implements AfterViewInit {
   T: typeof T = T;
 
   async ngAfterViewInit(): Promise<void> {
-    if (this._configService.misc()?.isDisableAnimations) {
-      return;
-    }
-
-    // Lazy load confetti library only when task is done
-    const confettiModule = await import('canvas-confetti');
-    const confetti = confettiModule.default;
-
     const defaults = { startVelocity: 80, spread: 720, ticks: 600, zIndex: 0 };
 
     const particleCount = 200;
     // since particles fall down, start a bit higher than random
-    confetti({
+    this._confettiService.createConfetti({
       ...defaults,
       particleCount,
       origin: { x: 0.5, y: 1 },
     });
-    confetti({
+    this._confettiService.createConfetti({
       ...defaults,
       particleCount,
       origin: { x: 0.5, y: 1 },
