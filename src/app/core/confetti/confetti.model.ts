@@ -21,3 +21,5 @@ interface Shape {
   matrix: DOMMatrix;
   bitmap?: ImageBitmap;
 }
+
+export type CanvasConfetti = (props: ConfettiConfig) => Promise<void> | null;

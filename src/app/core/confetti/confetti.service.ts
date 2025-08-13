@@ -10,7 +10,9 @@ export class ConfettiService {
   private readonly _configService = inject(GlobalConfigService);
 
   async createConfetti(props: ConfettiConfig): Promise<void> {
-    if (this._configService.misc()?.isDisableAnimations) {
+    const misc = this._configService.misc();
+
+    if (misc && misc.isDisableAnimations) {
       return;
     }
 
