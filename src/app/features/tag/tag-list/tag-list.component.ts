@@ -88,4 +88,3 @@ export class TagListComponent {
     return undefined;
   });
 }
-
