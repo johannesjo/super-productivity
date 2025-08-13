@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import {
   selectAllSimpleCounters,
@@ -12,8 +12,8 @@ import {
   deleteSimpleCounter,
   deleteSimpleCounters,
   increaseSimpleCounterCounterToday,
-  setSimpleCounterCounterToday,
   setSimpleCounterCounterForDate,
+  setSimpleCounterCounterToday,
   toggleSimpleCounterCounter,
   turnOffAllSimpleCounterCounters,
   updateAllSimpleCounters,
@@ -38,7 +38,9 @@ export class SimpleCounterService {
     select(selectAllSimpleCounters),
   );
   simpleCountersUpdatedOnCfgChange$: Observable<SimpleCounter[]> =
-    this.simpleCounters$.pipe(distinctUntilChanged(isEqualSimpleCounterCfg));
+    this.simpleCounters$.pipe(
+      distinctUntilChanged((a, b) => isEqualSimpleCounterCfg(a, b)),
+    );
 
   enabledSimpleCounters$: Observable<SimpleCounter[]> = this._store$.select(
     selectEnabledSimpleCounters,
@@ -46,9 +48,6 @@ export class SimpleCounterService {
   enabledSimpleStopWatchCounters$: Observable<SimpleCounter[]> = this._store$.select(
     selectEnabledSimpleStopWatchCounters,
   );
-
-  enabledSimpleCountersUpdatedOnCfgChange$: Observable<SimpleCounter[]> =
-    this.enabledSimpleCounters$.pipe(distinctUntilChanged(isEqualSimpleCounterCfg));
 
   enabledAndToggledSimpleCounters$: Observable<SimpleCounter[]> = this._store$.select(
     selectEnabledAndToggledSimpleCounters,

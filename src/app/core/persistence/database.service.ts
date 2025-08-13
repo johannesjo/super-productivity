@@ -86,7 +86,7 @@ export class DatabaseService {
     e: Error | unknown,
     // eslint-disable-next-line @typescript-eslint/ban-types
     fn: Function,
-    args: any[],
+    args: unknown[],
   ): Promise<void> {
     devError(e);
     if (confirm(this._translateService.instant(T.CONFIRM.RELOAD_AFTER_IDB_ERROR))) {

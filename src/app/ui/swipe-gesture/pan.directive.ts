@@ -41,7 +41,7 @@ export class PanDirective implements OnDestroy {
   private _isPanning = false;
   private _touchIdentifier: number | null = null;
   private _isScrolling = false;
-  private _scrollTimeout: any = null;
+  private _scrollTimeout: ReturnType<typeof setTimeout> | null = null;
   private _scrollListener: (() => void) | null = null;
   private _scrollableParent: HTMLElement | null = null;
 

@@ -57,7 +57,7 @@ export class TaskRelatedModelEffects {
     ),
   );
 
-  autoAddTodayTagOnMarkAsDone: any = createEffect(() =>
+  autoAddTodayTagOnMarkAsDone = createEffect(() =>
     this.ifAutoAddTodayEnabled$(
       this._actions$.pipe(
         ofType(TaskSharedActions.updateTask),
@@ -76,7 +76,7 @@ export class TaskRelatedModelEffects {
   // EXTERNAL ===> TASKS
   // -------------------
 
-  moveTaskToUnDone$: any = createEffect(() =>
+  moveTaskToUnDone$ = createEffect(() =>
     this._actions$.pipe(
       ofType(moveTaskInTodayList, moveProjectTaskToRegularList),
       filter(
@@ -95,7 +95,7 @@ export class TaskRelatedModelEffects {
     ),
   );
 
-  moveTaskToDone$: any = createEffect(() =>
+  moveTaskToDone$ = createEffect(() =>
     this._actions$.pipe(
       ofType(moveTaskInTodayList, moveProjectTaskToRegularList),
       filter(

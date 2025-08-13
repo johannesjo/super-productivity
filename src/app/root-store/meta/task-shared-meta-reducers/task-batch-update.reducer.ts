@@ -1,4 +1,4 @@
-import { Action } from '@ngrx/store';
+import { Action, ActionReducer } from '@ngrx/store';
 import { DEFAULT_TASK, Task, TaskCopy } from '../../../features/tasks/task.model';
 import { TaskSharedActions } from '../task-shared.actions';
 
@@ -21,28 +21,33 @@ import { validateAndFixDataConsistencyAfterBatchUpdate } from './validate-and-fi
  * Meta reducer for handling batch updates to tasks within a project
  * This reducer processes all operations in a single state update for efficiency
  */
-export const taskBatchUpdateMetaReducer = (
-  reducer: any,
-): ((state: any, action: any) => any) => {
-  return (state: any, action: Action) => {
+export const taskBatchUpdateMetaReducer = <T extends Partial<RootState> = RootState>(
+  reducer: ActionReducer<T>,
+): ActionReducer<T> => {
+  return (state: T | undefined, action: Action) => {
     if (action.type === TaskSharedActions.batchUpdateForProject.type) {
       const { projectId, operations, createdTaskIds } = action as ReturnType<
         typeof TaskSharedActions.batchUpdateForProject
       >;
 
       // Ensure state has required properties
-      if (!state[TASK_FEATURE_NAME] || !state[PROJECT_FEATURE_NAME]) {
+      const rootState = state as unknown as RootState;
+      if (
+        !rootState ||
+        !rootState[TASK_FEATURE_NAME] ||
+        !rootState[PROJECT_FEATURE_NAME]
+      ) {
         Log.error('taskBatchUpdateMetaReducer: Missing required state properties');
         return reducer(state, action);
       }
 
       // Validate project exists
-      if (!state[PROJECT_FEATURE_NAME].entities[projectId]) {
+      if (!rootState[PROJECT_FEATURE_NAME].entities[projectId]) {
         Log.error(`taskBatchUpdateMetaReducer: Project ${projectId} not found`);
         return reducer(state, action);
       }
 
-      let newState = { ...state } as RootState;
+      let newState = { ...rootState } as RootState;
       const tasksToAdd: Task[] = [];
       const tasksToUpdate: { id: string; changes: Partial<Task> }[] = [];
       const taskIdsToDelete: string[] = [];
@@ -346,7 +351,7 @@ export const taskBatchUpdateMetaReducer = (
         newTaskOrder,
       );
 
-      return reducer(newState, action);
+      return reducer(newState as T, action);
     }
 
     return reducer(state, action);
