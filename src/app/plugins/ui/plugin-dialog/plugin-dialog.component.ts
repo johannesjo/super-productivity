@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatButton } from '@angular/material/button';
@@ -94,13 +94,15 @@ export class PluginDialogComponent {
     },
   ];
 
-  constructor(@Inject(MAT_DIALOG_DATA) data: DialogCfg & { title?: string }) {
-    this.dialogData = data;
+  data = inject<DialogCfg & { title?: string }>(MAT_DIALOG_DATA);
+
+  constructor() {
+    this.dialogData = this.data;
 
     // Sanitize HTML content if provided
-    if (data.htmlContent) {
+    if (this.data.htmlContent) {
       this.sanitizedContent = this._sanitizer.bypassSecurityTrustHtml(
-        this._pluginSecurity.sanitizeHtml(data.htmlContent),
+        this._pluginSecurity.sanitizeHtml(this.data.htmlContent),
       );
     }
   }

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -39,12 +39,12 @@ export interface UnsplashSearchResponse {
   providedIn: 'root',
 })
 export class UnsplashService {
+  private _http = inject(HttpClient);
+
   private readonly API_URL = 'https://api.unsplash.com';
   // Register your app at https://unsplash.com/developers for a free Access Key (50 req/hour)
   // The Access Key is used with "Client-ID" prefix in the Authorization header
   private readonly ACCESS_KEY = getEnvOptional('UNSPLASH_KEY');
-
-  constructor(private _http: HttpClient) {}
 
   isAvailable(): boolean {
     return !!this.ACCESS_KEY;

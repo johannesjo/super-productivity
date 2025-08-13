@@ -6,12 +6,12 @@ declare module 'ical.js' {
       static now(): Time;
       icaltype: string;
     }
-    
+
     class VCardTime extends Time {
-      // Override the property to fix TypeScript error TS2610  
+      // Override the property to fix TypeScript error TS2610
       icaltype: string;
     }
-    
+
     class Component {
       constructor(jCal: any);
       getAllSubcomponents(name?: string): Component[];
@@ -21,22 +21,22 @@ declare module 'ical.js' {
       updatePropertyWithValue(name: string, value: any): void;
       removeProperty(name: string): void;
     }
-    
+
     class Timezone {
       constructor(options: any);
       tzid: string;
     }
-    
+
     const TimezoneService: {
       has(tzid: string): boolean;
       register(timezone: Timezone): void;
       remove(tzid: string): void;
     };
-    
+
     const helpers: {
       updateTimezones(comp: Component): Component;
     };
-    
+
     function parse(icalData: string): any;
     function stringify(jCal: any): string;
   }

@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { Observable, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { TaskWithSubTasks } from '../tasks/task.model';
@@ -13,6 +13,8 @@ import { getDbDateStr } from '../../util/get-db-date-str';
 
 @Injectable({ providedIn: 'root' })
 export class TaskViewCustomizerService {
+  private store = inject(Store);
+
   public selectedSort = signal<string>('default');
   public selectedGroup = signal<string>('default');
   public selectedFilter = signal<string>('default');
@@ -26,7 +28,7 @@ export class TaskViewCustomizerService {
       !!this.filterInputValue(),
   );
 
-  constructor(private store: Store) {
+  constructor() {
     this._initProjects();
     this._initTags();
   }

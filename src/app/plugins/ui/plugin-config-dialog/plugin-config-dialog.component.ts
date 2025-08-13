@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  Inject,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   MAT_DIALOG_DATA,
@@ -151,9 +145,11 @@ export class PluginConfigDialogComponent {
   loading = signal(true);
   error = signal<string | null>(null);
 
-  constructor(@Inject(MAT_DIALOG_DATA) data: PluginConfigDialogData) {
-    this.manifest = data.manifest;
-    this.schema = data.schema;
+  data = inject<PluginConfigDialogData>(MAT_DIALOG_DATA);
+
+  constructor() {
+    this.manifest = this.data.manifest;
+    this.schema = this.data.schema;
 
     this.initializeForm();
   }

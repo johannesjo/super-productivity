@@ -53,6 +53,9 @@ export interface DialogUnsplashPickerData {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogUnsplashPickerComponent implements OnInit, OnDestroy {
+  private _dialogRef = inject<MatDialogRef<DialogUnsplashPickerComponent>>(MatDialogRef);
+  private _unsplashService = inject(UnsplashService);
+
   readonly T = T;
   searchQuery = signal('');
   photos = signal<UnsplashPhoto[]>([]);
@@ -68,11 +71,6 @@ export class DialogUnsplashPickerComponent implements OnInit, OnDestroy {
   private _globalThemeService = inject(GlobalThemeService);
   public data: DialogUnsplashPickerData =
     inject(MAT_DIALOG_DATA, { optional: true }) || {};
-
-  constructor(
-    private _dialogRef: MatDialogRef<DialogUnsplashPickerComponent>,
-    private _unsplashService: UnsplashService,
-  ) {}
 
   private getDefaultSearchQuery(isDark: boolean): string {
     const context = this.data.context;
