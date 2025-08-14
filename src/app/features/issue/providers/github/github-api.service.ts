@@ -81,17 +81,19 @@ export class GithubApiService {
     cfg: GithubCfg,
     isSearchAllGithub: boolean = false,
   ): Observable<GithubIssueReduced[]> {
-    const repoQuery = isSearchAllGithub ? '' : `+repo:${cfg.repo}`;
-    const fullQuery = searchText + repoQuery;
-    // GitHub API requires parentheses to be encoded, but encodeURIComponent doesn't encode them
-    // So we need to manually encode them after encodeURIComponent
-    const encodedQuery = encodeURIComponent(fullQuery)
+    // Encode search text and repo query separately to preserve the + separator
+    const encodedSearchText = encodeURIComponent(searchText)
       .replace(/\(/g, '%28')
       .replace(/\)/g, '%29');
 
+    const encodedRepoQuery = isSearchAllGithub
+      ? ''
+      : `+repo:${encodeURIComponent(cfg.repo || '')}`;
+    const fullQuery = encodedSearchText + encodedRepoQuery;
+
     return this._sendRequest$(
       {
-        url: `${BASE}search/issues?q=${encodedQuery}`,
+        url: `${BASE}search/issues?q=${fullQuery}`,
       },
       cfg,
     ).pipe(

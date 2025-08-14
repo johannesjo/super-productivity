@@ -48,7 +48,7 @@ describe('GithubApiService', () => {
           request.url.startsWith(`${GITHUB_API_BASE_URL}search/issues`),
         );
 
-        expect(req.request.url).toContain('q=bug%20fix%2Brepo%3Aowner%2Frepo');
+        expect(req.request.url).toContain('q=bug%20fix+repo:owner%2Frepo');
         req.flush({ items: [] });
       });
 
@@ -92,7 +92,7 @@ describe('GithubApiService', () => {
         );
 
         // Forward slash in repo name should be encoded as %2F
-        expect(req.request.url).toContain('repo%3Aowner%2Frepo');
+        expect(req.request.url).toContain('repo:owner%2Frepo');
         req.flush({ items: [] });
       });
 
@@ -136,7 +136,7 @@ describe('GithubApiService', () => {
           request.url.startsWith(`${GITHUB_API_BASE_URL}search/issues`),
         );
 
-        expect(req.request.url).toContain('q=%2Brepo%3Aowner%2Frepo');
+        expect(req.request.url).toContain('q=+repo:owner%2Frepo');
         req.flush({ items: [] });
       });
 
@@ -231,8 +231,8 @@ describe('GithubApiService', () => {
           request.url.startsWith(`${GITHUB_API_BASE_URL}search/issues`),
         );
 
-        // The plus sign between search text and repo should be encoded as %2B
-        const expectedQuery = 'q=test%20search%2Brepo%3Aowner%2Frepo';
+        // The plus sign between search text and repo should remain unencoded
+        const expectedQuery = 'q=test%20search+repo:owner%2Frepo';
         expect(req.request.url).toContain(expectedQuery);
         req.flush({ items: [] });
       });
