@@ -138,6 +138,13 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
         this._cd.detectChanges();
       });
     }
+
+    // Use effect to react to plugin shortcuts changes for live updates
+    effect(() => {
+      const shortcuts = this._pluginBridgeService.shortcuts();
+      Log.log('Plugin shortcuts changed:', { shortcuts });
+      this._updateKeyboardFormWithPluginShortcuts(shortcuts);
+    });
   }
 
   ngOnInit(): void {
@@ -147,13 +154,6 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
         // this._cd.detectChanges();
       }),
     );
-
-    // Use effect to react to plugin shortcuts changes for live updates
-    effect(() => {
-      const shortcuts = this._pluginBridgeService.shortcuts();
-      Log.log('Plugin shortcuts changed:', { shortcuts });
-      this._updateKeyboardFormWithPluginShortcuts(shortcuts);
-    });
   }
 
   private _updateKeyboardFormWithPluginShortcuts(shortcuts: PluginShortcutCfg[]): void {
