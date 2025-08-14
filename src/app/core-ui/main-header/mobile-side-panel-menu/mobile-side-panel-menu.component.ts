@@ -144,9 +144,7 @@ export class MobileSidePanelMenuComponent {
   readonly kb: KeyboardConfig = this._globalConfigService.cfg()?.keyboard || {};
 
   // Plugin-related signals
-  readonly sidePanelButtons = toSignal(this._pluginBridge.sidePanelButtons$, {
-    initialValue: [],
-  });
+  readonly sidePanelButtons = this._pluginBridge.sidePanelButtons;
   readonly activePluginId = toSignal(this._store.select(selectActivePluginId));
   readonly isShowPluginPanel = toSignal(this._store.select(selectIsShowPluginPanel));
 

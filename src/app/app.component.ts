@@ -203,7 +203,9 @@ export class AppComponent implements OnDestroy, AfterViewInit {
 
     this._checkMigrationAndInitBackups();
 
-    this._subs = this._languageService.isLangRTL.subscribe((val) => {
+    // Use effect to react to language RTL changes
+    effect(() => {
+      const val = this._languageService.isLangRTL();
       this.isRTL = val;
       document.dir = this.isRTL ? 'rtl' : 'ltr';
     });

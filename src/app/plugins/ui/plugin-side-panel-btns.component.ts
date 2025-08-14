@@ -99,7 +99,7 @@ export class PluginSidePanelBtnsComponent {
   private _store = inject(Store);
   private _isXs$ = this._breakpointObserver.observe('(max-width: 600px)');
 
-  sidePanelButtons = toSignal(this._pluginBridge.sidePanelButtons$, { initialValue: [] });
+  sidePanelButtons = this._pluginBridge.sidePanelButtons;
 
   activePluginId = toSignal(this._store.select(selectActivePluginId));
   isShowPanel = toSignal(this._store.select(selectIsShowPluginPanel));

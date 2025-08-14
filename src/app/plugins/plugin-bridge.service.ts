@@ -1,5 +1,4 @@
-import { inject, Injectable, OnDestroy, Injector } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { inject, Injectable, Injector, OnDestroy, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { SnackService } from '../core/snack/snack.service';
@@ -9,21 +8,21 @@ import {
   Hooks,
   NotifyCfg,
   PluginCreateTaskData,
+  PluginHeaderBtnCfg,
   PluginHookHandler,
   PluginMenuEntryCfg,
-  PluginShortcutCfg,
-  PluginHeaderBtnCfg,
-  PluginSidePanelBtnCfg,
   PluginNodeScriptRequest,
   PluginNodeScriptResult,
+  PluginShortcutCfg,
+  PluginSidePanelBtnCfg,
 } from './plugin-api.model';
 
 import {
-  SnackCfg,
-  PluginManifest,
+  BatchTaskCreate,
   BatchUpdateRequest,
   BatchUpdateResult,
-  BatchTaskCreate,
+  PluginManifest,
+  SnackCfg,
 } from '@super-productivity/plugin-api';
 import { snackCfgToSnackParams } from './plugin-api-mapper';
 import { PluginHooksService } from './plugin-hooks';
@@ -47,7 +46,7 @@ import { isAllowedPluginAction } from './allowed-plugin-actions.const';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from '../t.const';
 import { SyncWrapperService } from '../imex/sync/sync-wrapper.service';
-import { PluginLog, Log } from '../core/log';
+import { Log, PluginLog } from '../core/log';
 import { TaskCopy } from '../features/tasks/task.model';
 import { ProjectCopy } from '../features/project/project.model';
 import { TagCopy } from '../features/tag/tag.model';
@@ -82,19 +81,19 @@ export class PluginBridgeService implements OnDestroy {
   private _syncWrapperService = inject(SyncWrapperService);
 
   // Track header buttons registered by plugins
-  private _headerButtons$ = new BehaviorSubject<PluginHeaderBtnCfg[]>([]);
-  public readonly headerButtons$ = this._headerButtons$.asObservable();
+  private readonly _headerButtons = signal<PluginHeaderBtnCfg[]>([]);
+  public readonly headerButtons = this._headerButtons.asReadonly();
 
   // Track menu entries registered by plugins
-  private _menuEntries$ = new BehaviorSubject<PluginMenuEntryCfg[]>([]);
-  public readonly menuEntries$ = this._menuEntries$.asObservable();
+  private readonly _menuEntries = signal<PluginMenuEntryCfg[]>([]);
+  public readonly menuEntries = this._menuEntries.asReadonly();
 
   // Track shortcuts registered by plugins
-  shortcuts$ = new BehaviorSubject<PluginShortcutCfg[]>([]);
+  readonly shortcuts = signal<PluginShortcutCfg[]>([]);
 
   // Track side panel buttons registered by plugins
-  private _sidePanelButtons$ = new BehaviorSubject<PluginSidePanelBtnCfg[]>([]);
-  public readonly sidePanelButtons$ = this._sidePanelButtons$.asObservable();
+  private readonly _sidePanelButtons = signal<PluginSidePanelBtnCfg[]>([]);
+  public readonly sidePanelButtons = this._sidePanelButtons.asReadonly();
 
   constructor() {
     // Initialize window focus tracking
@@ -690,8 +689,8 @@ export class PluginBridgeService implements OnDestroy {
       pluginId,
     };
 
-    const currentButtons = this._headerButtons$.value;
-    this._headerButtons$.next([...currentButtons, newButton]);
+    const currentButtons = this._headerButtons();
+    this._headerButtons.set([...currentButtons, newButton]);
 
     console.log('PluginBridge: Header button registered', {
       pluginId,
@@ -726,7 +725,7 @@ export class PluginBridgeService implements OnDestroy {
       pluginId,
     };
 
-    const currentEntries = this._menuEntries$.value;
+    const currentEntries = this._menuEntries();
 
     // Check for duplicate entry (same plugin ID and label)
     const isDuplicate = currentEntries.some(
@@ -744,7 +743,7 @@ export class PluginBridgeService implements OnDestroy {
       return;
     }
 
-    this._menuEntries$.next([...currentEntries, newMenuEntry]);
+    this._menuEntries.set([...currentEntries, newMenuEntry]);
 
     PluginLog.log('PluginBridge: Menu entry registered', {
       pluginId,
@@ -756,11 +755,11 @@ export class PluginBridgeService implements OnDestroy {
    * Remove all header buttons for a specific plugin
    */
   private _removePluginHeaderButtons(pluginId: string): void {
-    const currentButtons = this._headerButtons$.value;
+    const currentButtons = this._headerButtons();
     const filteredButtons = currentButtons.filter(
       (button) => button.pluginId !== pluginId,
     );
-    this._headerButtons$.next(filteredButtons);
+    this._headerButtons.set(filteredButtons);
 
     PluginLog.log('PluginBridge: Header buttons removed for plugin', { pluginId });
   }
@@ -769,9 +768,9 @@ export class PluginBridgeService implements OnDestroy {
    * Remove all menu entries for a specific plugin
    */
   private _removePluginMenuEntries(pluginId: string): void {
-    const currentEntries = this._menuEntries$.value;
+    const currentEntries = this._menuEntries();
     const filteredEntries = currentEntries.filter((entry) => entry.pluginId !== pluginId);
-    this._menuEntries$.next(filteredEntries);
+    this._menuEntries.set(filteredEntries);
 
     PluginLog.log('PluginBridge: Menu entries removed for plugin', { pluginId });
   }
@@ -800,7 +799,7 @@ export class PluginBridgeService implements OnDestroy {
       pluginId,
     };
 
-    const currentButtons = this._sidePanelButtons$.value;
+    const currentButtons = this._sidePanelButtons();
 
     // Check for duplicate button (same plugin ID)
     const isDuplicate = currentButtons.some((button) => button.pluginId === pluginId);
@@ -816,7 +815,7 @@ export class PluginBridgeService implements OnDestroy {
       return;
     }
 
-    this._sidePanelButtons$.next([...currentButtons, newButton]);
+    this._sidePanelButtons.set([...currentButtons, newButton]);
 
     PluginLog.log('PluginBridge: Side panel button registered', {
       pluginId,
@@ -828,11 +827,11 @@ export class PluginBridgeService implements OnDestroy {
    * Remove all side panel buttons for a specific plugin
    */
   private _removePluginSidePanelButtons(pluginId: string): void {
-    const currentButtons = this._sidePanelButtons$.value;
+    const currentButtons = this._sidePanelButtons();
     const filteredButtons = currentButtons.filter(
       (button) => button.pluginId !== pluginId,
     );
-    this._sidePanelButtons$.next(filteredButtons);
+    this._sidePanelButtons.set(filteredButtons);
 
     PluginLog.log('PluginBridge: Side panel buttons removed for plugin', { pluginId });
   }
@@ -846,8 +845,8 @@ export class PluginBridgeService implements OnDestroy {
       pluginId,
     };
 
-    const currentShortcuts = this.shortcuts$.value;
-    this.shortcuts$.next([...currentShortcuts, shortcutWithPluginId]);
+    const currentShortcuts = this.shortcuts();
+    this.shortcuts.set([...currentShortcuts, shortcutWithPluginId]);
 
     PluginLog.log('PluginBridge: Shortcut registered', {
       pluginId,
@@ -859,7 +858,7 @@ export class PluginBridgeService implements OnDestroy {
    * Execute a shortcut by its ID (pluginId:id)
    */
   async executeShortcut(shortcutId: string): Promise<boolean> {
-    const shortcuts = this.shortcuts$.value;
+    const shortcuts = this.shortcuts();
     const shortcut = shortcuts.find((s) => `${s.pluginId}:${s.id}` === shortcutId);
 
     if (shortcut) {
@@ -882,13 +881,13 @@ export class PluginBridgeService implements OnDestroy {
    * Unregister all shortcuts for a specific plugin
    */
   unregisterPluginShortcuts(pluginId: string): void {
-    const currentShortcuts = this.shortcuts$.value;
+    const currentShortcuts = this.shortcuts();
     const filteredShortcuts = currentShortcuts.filter(
       (shortcut) => shortcut.pluginId !== pluginId,
     );
 
     if (filteredShortcuts.length !== currentShortcuts.length) {
-      this.shortcuts$.next(filteredShortcuts);
+      this.shortcuts.set(filteredShortcuts);
       PluginLog.log(
         `Unregistered ${currentShortcuts.length - filteredShortcuts.length} shortcuts for plugin ${pluginId}`,
       );
@@ -1108,13 +1107,7 @@ export class PluginBridgeService implements OnDestroy {
    */
   ngOnDestroy(): void {
     PluginLog.log('PluginBridgeService: Cleaning up resources');
-
-    // Complete all BehaviorSubjects
-    this._headerButtons$.complete();
-    this._menuEntries$.complete();
-    this.shortcuts$.complete();
-    this._sidePanelButtons$.complete();
-
+    // Note: Signals don't need explicit cleanup like BehaviorSubjects
     PluginLog.log('PluginBridgeService: Cleanup complete');
   }
 }

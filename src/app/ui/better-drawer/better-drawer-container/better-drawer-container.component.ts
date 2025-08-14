@@ -56,7 +56,7 @@ export class BetterDrawerContainerComponent implements OnDestroy {
   private _containerWidth = signal<number>(0);
   private _resizeObserver: ResizeObserver | null = null;
 
-  readonly isRTL = toSignal(this._languageService.isLangRTL, { initialValue: false });
+  readonly isRTL = this._languageService.isLangRTL;
 
   readonly isSmallMainContainer = computed(
     () => this._containerWidth() < SMALL_CONTAINER_WIDTH,

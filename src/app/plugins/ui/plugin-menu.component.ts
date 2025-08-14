@@ -10,7 +10,7 @@ import { NavigationEnd, Router } from '@angular/router';
 @Component({
   selector: 'plugin-menu',
   template: `
-    @for (menuEntry of menuEntries$ | async; track menuEntry.pluginId + menuEntry.label) {
+    @for (menuEntry of menuEntries(); track menuEntry.pluginId + menuEntry.label) {
       <button
         mat-menu-item
         class="plugin-menu-entry"
@@ -62,7 +62,7 @@ export class PluginMenuComponent {
     { initialValue: this._router.url },
   );
 
-  readonly menuEntries$ = this._pluginBridge.menuEntries$;
+  readonly menuEntries = this._pluginBridge.menuEntries;
 
   isActive(pluginId: string): boolean {
     return this.currentRoute().includes(pluginId);
