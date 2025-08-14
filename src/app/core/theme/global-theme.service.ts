@@ -1,15 +1,8 @@
-import { effect, inject, Injectable } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { effect, inject, Injectable, signal } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { BodyClass, IS_ELECTRON } from '../../app.constants';
 import { IS_MAC } from '../../util/is-mac';
-import {
-  distinctUntilChanged,
-  map,
-  skip,
-  startWith,
-  switchMap,
-  take,
-} from 'rxjs/operators';
+import { distinctUntilChanged, map, startWith, switchMap, take } from 'rxjs/operators';
 import { IS_TOUCH_ONLY } from '../../util/is-touch-only';
 import { MaterialCssVarsService } from 'angular-material-css-vars';
 import { DOCUMENT } from '@angular/common';
@@ -20,7 +13,7 @@ import { ThemeService as NgChartThemeService } from 'ng2-charts';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { WorkContextThemeCfg } from '../../features/work-context/work-context.model';
 import { WorkContextService } from '../../features/work-context/work-context.service';
-import { BehaviorSubject, combineLatest, fromEvent, Observable, of } from 'rxjs';
+import { combineLatest, fromEvent, Observable, of } from 'rxjs';
 import { IS_FIREFOX } from '../../util/is-firefox';
 import { ImexViewService } from '../../imex/imex-meta/imex-view.service';
 import { IS_MOUSE_PRIMARY, IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
@@ -48,11 +41,11 @@ export class GlobalThemeService {
   private _http = inject(HttpClient);
   private _customThemeService = inject(CustomThemeService);
 
-  darkMode$ = new BehaviorSubject<DarkModeCfg>(
+  darkMode = signal<DarkModeCfg>(
     (localStorage.getItem(LS.DARK_MODE) as DarkModeCfg) || 'system',
   );
 
-  private _isDarkThemeObs$: Observable<boolean> = this.darkMode$.pipe(
+  private _isDarkThemeObs$: Observable<boolean> = toObservable(this.darkMode).pipe(
     switchMap((darkMode) => {
       switch (darkMode) {
         case 'dark':
@@ -90,9 +83,15 @@ export class GlobalThemeService {
     this._initIcons();
     this._initHandlersForInitialBodyClasses();
     this._initThemeWatchers();
-    this.darkMode$
-      .pipe(skip(1))
-      .subscribe((darkMode) => localStorage.setItem(LS.DARK_MODE, darkMode));
+
+    // Set up dark mode persistence effect
+    effect(
+      () => {
+        const darkMode = this.darkMode();
+        localStorage.setItem(LS.DARK_MODE, darkMode);
+      },
+      { allowSignalWrites: false },
+    );
 
     // Set up reactive custom theme updates
     this._setupCustomThemeEffect();
