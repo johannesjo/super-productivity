@@ -161,7 +161,7 @@ export class CaldavClientService {
     if (etag.length === 0) {
       return hash;
     }
-    for (i = 0; i < this.length; i++) {
+    for (i = 0; i < etag.length; i++) {
       chr = etag.charCodeAt(i);
       hash = (hash << 5) - hash + chr; //eslint-disable-line no-bitwise
       // Convert to 32bit integer
