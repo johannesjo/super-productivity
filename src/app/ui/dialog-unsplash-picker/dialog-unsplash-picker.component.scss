@@ -15,27 +15,24 @@
   position: relative;
   cursor: pointer;
   border-radius: 4px;
-  transition: transform 0.2s ease;
-
-  &:hover {
-    transform: scale(1.05);
-
-    .image-overlay {
-      opacity: 1;
-    }
-  }
 
   img {
     width: 100%;
     height: 150px;
     object-fit: cover;
     display: block;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      outline: 2px solid var(--c-primary);
+      border-radius: 8px;
+    }
   }
 }
 
 .photographer {
   font-weight: bold;
-  padding-top: 2px;
+  padding-top: 1px;
   position: absolute;
   top: 100%;
   left: 0;
@@ -43,6 +40,7 @@
   opacity: 1;
   line-height: 1;
   font-size: 10px;
+  text-align: right;
 }
 
 .no-results {

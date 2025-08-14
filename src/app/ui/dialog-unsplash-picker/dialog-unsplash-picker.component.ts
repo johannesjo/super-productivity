@@ -145,8 +145,12 @@ export class DialogUnsplashPickerComponent implements OnInit, OnDestroy {
         url: backgroundUrl,
         attribution: {
           photographerName: photo.user.name,
-          photographerUrl: photo.user.links?.html,
-          photoUrl: photo.links?.html,
+          photographerUrl: photo.user.links?.html
+            ? this._unsplashService.addUtmParams(photo.user.links.html)
+            : undefined,
+          photoUrl: photo.links?.html
+            ? this._unsplashService.addUtmParams(photo.links.html)
+            : undefined,
         },
       });
     });
@@ -154,5 +158,11 @@ export class DialogUnsplashPickerComponent implements OnInit, OnDestroy {
 
   getPhotoThumb(photo: UnsplashPhoto): string {
     return this._unsplashService.getPhotoUrl(photo, 'small');
+  }
+
+  getPhotographerUrl(photo: UnsplashPhoto): string {
+    return photo.user.links?.html
+      ? this._unsplashService.addUtmParams(photo.user.links.html)
+      : '#';
   }
 }
