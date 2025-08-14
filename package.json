@@ -232,6 +232,7 @@
     "karma-coverage-istanbul-reporter": "~3.0.2",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "^1.6.0",
+    "karma-spec-reporter": "^0.0.36",
     "marked": "^12.0.2",
     "nanoid": "^5.1.5",
     "new-github-issue-url": "^1.1.0",
