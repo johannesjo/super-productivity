@@ -132,7 +132,8 @@ export class CaldavClientService {
       throw new Error('No todo found for task');
     }
 
-    const categories: string[] = todo.getFirstProperty('categories')?.getValues() || [];
+    const categoriesProperty = todo.getAllProperties('categories')[0];
+    const categories: string[] = categoriesProperty?.getValues() || [];
 
     return {
       id: todo.getFirstPropertyValue('uid') as string,

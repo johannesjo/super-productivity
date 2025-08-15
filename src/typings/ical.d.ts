@@ -5,6 +5,7 @@ declare module 'ical.js' {
     class Time {
       static now(): Time;
       icaltype: string;
+      toJSDate(): Date;
     }
 
     class VCardTime extends Time {
