@@ -588,16 +588,20 @@ export class TaskService {
     }
   }
 
-  addSubTaskTo(parentId: string): void {
+  addSubTaskTo(parentId: string, additional: Partial<Task> = {}): string {
+    const task = this.createNewTaskWithDefaults({
+      title: additional.title || '',
+      additional: { dueDay: additional.dueDay || undefined, ...additional },
+    });
+
     this._store.dispatch(
       addSubTask({
-        task: this.createNewTaskWithDefaults({
-          title: '',
-          additional: { dueDay: undefined },
-        }),
+        task,
         parentId,
       }),
     );
+
+    return task.id;
   }
 
   addTimeSpent(
