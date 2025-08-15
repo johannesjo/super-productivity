@@ -21,6 +21,7 @@ import {
 import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
 import { ipcAddTaskFromAppUri$ } from '../../../core/ipc-events';
 import { TaskService } from '../task.service';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 
 // TODO send message to electron when current task changes here
 
@@ -124,8 +125,24 @@ export class TaskElectronEffects {
         tap(({ id }) => {
           if (!id) {
             window.ea.setProgressBar({
-              progress: 0,
-              progressBarMode: 'pause',
+              progress: -1,
+              progressBarMode: 'none',
+            });
+          }
+        }),
+      ),
+    { dispatch: false },
+  );
+
+  clearTaskBarOnTaskDone$ = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(TaskSharedActions.updateTask),
+        tap(({ task }) => {
+          if (task.changes.isDone) {
+            window.ea.setProgressBar({
+              progress: -1,
+              progressBarMode: 'none',
             });
           }
         }),
