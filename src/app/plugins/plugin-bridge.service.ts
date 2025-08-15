@@ -1,5 +1,4 @@
-import { inject, Injectable, OnDestroy, Injector } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { inject, Injectable, Injector, OnDestroy, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { SnackService } from '../core/snack/snack.service';
@@ -9,28 +8,36 @@ import {
   Hooks,
   NotifyCfg,
   PluginCreateTaskData,
+  PluginHeaderBtnCfg,
   PluginHookHandler,
   PluginMenuEntryCfg,
-  PluginShortcutCfg,
-  PluginHeaderBtnCfg,
-  PluginSidePanelBtnCfg,
   PluginNodeScriptRequest,
   PluginNodeScriptResult,
+  PluginShortcutCfg,
+  PluginSidePanelBtnCfg,
 } from './plugin-api.model';
-import { Task as TaskCopy } from '../features/tasks/task.model';
-import { Project as ProjectCopy } from '../features/project/project.model';
-import { Tag as TagCopy } from '../features/tag/tag.model';
-import { SnackCfg, PluginManifest } from '@super-productivity/plugin-api';
+
+import {
+  BatchTaskCreate,
+  BatchUpdateRequest,
+  BatchUpdateResult,
+  PluginManifest,
+  SnackCfg,
+} from '@super-productivity/plugin-api';
 import { snackCfgToSnackParams } from './plugin-api-mapper';
 import { PluginHooksService } from './plugin-hooks';
 import { TaskService } from '../features/tasks/task.service';
 import { addSubTask } from '../features/tasks/store/task.actions';
+import { TaskSharedActions } from '../root-store/meta/task-shared.actions';
+import { nanoid } from 'nanoid';
 import { WorkContextService } from '../features/work-context/work-context.service';
 import { ProjectService } from '../features/project/project.service';
 import { TagService } from '../features/tag/tag.service';
 import typia from 'typia';
 import { first } from 'rxjs/operators';
+import { selectTaskByIdWithSubTaskData } from '../features/tasks/store/task.selectors';
 import { PluginUserPersistenceService } from './plugin-user-persistence.service';
+import { PluginConfigService } from './plugin-config.service';
 import { TaskArchiveService } from '../features/time-tracking/task-archive.service';
 import { Router } from '@angular/router';
 import { PluginDialogComponent } from './ui/plugin-dialog/plugin-dialog.component';
@@ -39,7 +46,10 @@ import { isAllowedPluginAction } from './allowed-plugin-actions.const';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from '../t.const';
 import { SyncWrapperService } from '../imex/sync/sync-wrapper.service';
-import { PluginLog } from '../core/log';
+import { Log, PluginLog } from '../core/log';
+import { TaskCopy } from '../features/tasks/task.model';
+import { ProjectCopy } from '../features/project/project.model';
+import { TagCopy } from '../features/tag/tag.model';
 
 /**
  * PluginBridge acts as an intermediary layer between plugins and the main application services.
@@ -63,38 +73,88 @@ export class PluginBridgeService implements OnDestroy {
   private _projectService = inject(ProjectService);
   private _tagService = inject(TagService);
   private _pluginUserPersistenceService = inject(PluginUserPersistenceService);
+  private _pluginConfigService = inject(PluginConfigService);
   private _taskArchiveService = inject(TaskArchiveService);
   private _router = inject(Router);
   private _injector = inject(Injector);
   private _translateService = inject(TranslateService);
   private _syncWrapperService = inject(SyncWrapperService);
-  private _pluginRunner?: any; // Lazy loaded to avoid circular dependency
-
-  // Track which plugin is currently making calls to prevent cross-plugin access
-  private _currentPluginId: string | null = null;
-  private _currentPluginManifest: PluginManifest | null = null;
 
   // Track header buttons registered by plugins
-  private _headerButtons$ = new BehaviorSubject<PluginHeaderBtnCfg[]>([]);
-  public readonly headerButtons$ = this._headerButtons$.asObservable();
+  private readonly _headerButtons = signal<PluginHeaderBtnCfg[]>([]);
+  public readonly headerButtons = this._headerButtons.asReadonly();
 
   // Track menu entries registered by plugins
-  private _menuEntries$ = new BehaviorSubject<PluginMenuEntryCfg[]>([]);
-  public readonly menuEntries$ = this._menuEntries$.asObservable();
+  private readonly _menuEntries = signal<PluginMenuEntryCfg[]>([]);
+  public readonly menuEntries = this._menuEntries.asReadonly();
 
   // Track shortcuts registered by plugins
-  shortcuts$ = new BehaviorSubject<PluginShortcutCfg[]>([]);
+  readonly shortcuts = signal<PluginShortcutCfg[]>([]);
 
   // Track side panel buttons registered by plugins
-  private _sidePanelButtons$ = new BehaviorSubject<PluginSidePanelBtnCfg[]>([]);
-  public readonly sidePanelButtons$ = this._sidePanelButtons$.asObservable();
+  private readonly _sidePanelButtons = signal<PluginSidePanelBtnCfg[]>([]);
+  public readonly sidePanelButtons = this._sidePanelButtons.asReadonly();
+
+  constructor() {
+    // Initialize window focus tracking
+    this._initWindowFocusTracking();
+  }
 
   /**
-   * Set the current plugin context for secure operations
+   * Create bound methods for a specific plugin
+   * This ensures each plugin has its own set of methods with the pluginId already bound
    */
-  _setCurrentPlugin(pluginId: string, manifest?: PluginManifest): void {
-    this._currentPluginId = pluginId;
-    this._currentPluginManifest = manifest || null;
+  createBoundMethods(
+    pluginId: string,
+    manifest?: PluginManifest,
+  ): {
+    persistDataSynced: (dataStr: string) => Promise<void>;
+    loadPersistedData: () => Promise<string | null>;
+    getConfig: <T>() => Promise<T>;
+    registerHeaderButton: (cfg: PluginHeaderBtnCfg) => void;
+    registerMenuEntry: (cfg: Omit<PluginMenuEntryCfg, 'pluginId'>) => void;
+    registerSidePanelButton: (cfg: Omit<PluginSidePanelBtnCfg, 'pluginId'>) => void;
+    registerShortcut: (cfg: PluginShortcutCfg) => void;
+    showIndexHtmlAsView: () => void;
+    triggerSync: () => Promise<void>;
+    dispatchAction: (action: { type: string; [key: string]: unknown }) => void;
+    executeNodeScript: (
+      request: PluginNodeScriptRequest,
+    ) => Promise<PluginNodeScriptResult>;
+    log: ReturnType<typeof Log.withContext>;
+  } {
+    return {
+      // Data persistence
+      persistDataSynced: (dataStr: string) => this._persistDataSynced(pluginId, dataStr),
+      loadPersistedData: () => this._loadPersistedData(pluginId),
+      getConfig: () => this._getConfig(pluginId),
+
+      // UI registration
+      registerHeaderButton: (cfg: PluginHeaderBtnCfg) =>
+        this._registerHeaderButton(pluginId, cfg),
+      registerMenuEntry: (cfg: Omit<PluginMenuEntryCfg, 'pluginId'>) =>
+        this._registerMenuEntry(pluginId, cfg),
+      registerSidePanelButton: (cfg: Omit<PluginSidePanelBtnCfg, 'pluginId'>) =>
+        this._registerSidePanelButton(pluginId, cfg),
+      registerShortcut: (cfg: PluginShortcutCfg) => this._registerShortcut(pluginId, cfg),
+
+      // Navigation
+      showIndexHtmlAsView: () => this._showIndexHtmlAsView(pluginId),
+
+      // Sync
+      triggerSync: () => this._triggerSync(pluginId),
+
+      // Actions
+      dispatchAction: (action: { type: string; [key: string]: unknown }) =>
+        this._dispatchAction(pluginId, action),
+
+      // Node execution
+      executeNodeScript: (request: PluginNodeScriptRequest) =>
+        this._executeNodeScript(pluginId, manifest || null, request),
+
+      // Logging
+      log: Log.withContext(`${pluginId}`),
+    };
   }
 
   /**
@@ -154,21 +214,14 @@ export class PluginBridgeService implements OnDestroy {
   }
 
   /**
-   * Show the plugin's index.html as a view by navigating to the plugin index route
+   * Internal method to show plugin index.html as view
    */
-  showIndexHtmlAsView(pluginId?: string): void {
-    // Use provided pluginId or fall back to current context
-    const targetPluginId = pluginId || this._currentPluginId;
-    if (!targetPluginId) {
-      throw new Error(
-        this._translateService.instant(T.PLUGINS.NO_PLUGIN_ID_PROVIDED_FOR_HTML),
-      );
-    }
-    PluginLog.log('PluginBridge: Navigating to plugin index view', {
-      pluginId: targetPluginId,
+  private _showIndexHtmlAsView(pluginId: string): void {
+    console.log('PluginBridge: Navigating to plugin index view', {
+      pluginId,
     });
     // Navigate to the plugin index route
-    this._router.navigate(['/plugins', targetPluginId, 'index']);
+    this._router.navigate(['/plugins', pluginId, 'index']);
   }
 
   /**
@@ -256,7 +309,7 @@ export class PluginBridgeService implements OnDestroy {
         additional: {
           notes: taskData.notes || '',
           timeEstimate: taskData.timeEstimate || 0,
-          isDone: (taskData as any).isDone || false,
+          isDone: (taskData as { isDone?: boolean }).isDone || false,
           tagIds: [], // Subtasks don't have tags
           projectId: taskData.projectId || undefined,
         },
@@ -282,7 +335,7 @@ export class PluginBridgeService implements OnDestroy {
         tagIds: taskData.tagIds || [],
         notes: taskData.notes || '',
         timeEstimate: taskData.timeEstimate || 0,
-        isDone: (taskData as any).isDone || false,
+        isDone: (taskData as { isDone?: boolean }).isDone || false,
       };
 
       // Add the task using TaskService
@@ -295,6 +348,38 @@ export class PluginBridgeService implements OnDestroy {
 
       PluginLog.log('PluginBridge: Task added successfully', { taskId, taskData });
       return taskId;
+    }
+  }
+
+  /**
+   * Delete a task
+   */
+  async deleteTask(taskId: string): Promise<void> {
+    typia.assert<string>(taskId);
+
+    try {
+      // Get the task with its subtasks
+      const taskWithSubTasks = await this._store
+        .select(selectTaskByIdWithSubTaskData, { id: taskId })
+        .pipe(first())
+        .toPromise();
+
+      if (!taskWithSubTasks) {
+        throw new Error(
+          this._translateService.instant(T.PLUGINS.TASK_NOT_FOUND, { taskId }),
+        );
+      }
+
+      // Use the TaskService remove method which handles deletion properly
+      this._taskService.remove(taskWithSubTasks);
+
+      console.log('PluginBridge: Task deleted successfully', {
+        taskId,
+        hadSubTasks: taskWithSubTasks.subTasks.length > 0,
+      });
+    } catch (error) {
+      console.error('PluginBridge: Failed to delete task:', error);
+      throw error;
     }
   }
 
@@ -469,24 +554,49 @@ export class PluginBridgeService implements OnDestroy {
   }
 
   /**
-   * Persist plugin data - uses current plugin context for security
+   * Batch update tasks for a project
+   * Only generate IDs here - let the reducer handle all validation
    */
-  async persistDataSynced(dataStr: string): Promise<void> {
+  async batchUpdateForProject(request: BatchUpdateRequest): Promise<BatchUpdateResult> {
+    typia.assert<BatchUpdateRequest>(request);
+
+    // Generate IDs for all create operations
+    // We need to do this here so we can return them to the plugin immediately
+    const createdTaskIds: { [tempId: string]: string } = {};
+    request.operations.forEach((op) => {
+      if (op.type === 'create') {
+        const createOp = op as BatchTaskCreate;
+        createdTaskIds[createOp.tempId] = nanoid();
+      }
+    });
+
+    // Dispatch the batch update action - let the reducer handle all validation
+    this._store.dispatch(
+      TaskSharedActions.batchUpdateForProject({
+        projectId: request.projectId,
+        operations: request.operations,
+        createdTaskIds,
+      }),
+    );
+
+    // Return the generated IDs immediately
+    // The reducer will validate everything including project existence
+    return {
+      success: true,
+      createdTaskIds,
+    };
+  }
+
+  /**
+   * Internal method to persist plugin data
+   */
+  private async _persistDataSynced(pluginId: string, dataStr: string): Promise<void> {
     typia.assert<string>(dataStr);
 
-    if (!this._currentPluginId) {
-      throw new Error(
-        this._translateService.instant(T.PLUGINS.NO_PLUGIN_CONTEXT_PERSISTENCE),
-      );
-    }
-
     try {
-      await this._pluginUserPersistenceService.persistPluginUserData(
-        this._currentPluginId,
-        dataStr,
-      );
-      PluginLog.log('PluginBridge: Plugin data persisted successfully', {
-        pluginId: this._currentPluginId,
+      await this._pluginUserPersistenceService.persistPluginUserData(pluginId, dataStr);
+      console.log('PluginBridge: Plugin data persisted successfully', {
+        pluginId,
       });
     } catch (error) {
       PluginLog.err('PluginBridge: Failed to persist plugin data:', error);
@@ -495,19 +605,11 @@ export class PluginBridgeService implements OnDestroy {
   }
 
   /**
-   * Get persisted plugin data - uses current plugin context for security
+   * Internal method to load persisted plugin data
    */
-  async loadPersistedData(): Promise<string | null> {
-    if (!this._currentPluginId) {
-      throw new Error(
-        this._translateService.instant(T.PLUGINS.NO_PLUGIN_CONTEXT_LOADING),
-      );
-    }
-
+  private async _loadPersistedData(pluginId: string): Promise<string | null> {
     try {
-      return await this._pluginUserPersistenceService.loadPluginUserData(
-        this._currentPluginId,
-      );
+      return await this._pluginUserPersistenceService.loadPluginUserData(pluginId);
     } catch (error) {
       PluginLog.err('PluginBridge: Failed to get persisted plugin data:', error);
       return null;
@@ -515,15 +617,23 @@ export class PluginBridgeService implements OnDestroy {
   }
 
   /**
-   * Trigger a sync operation
+   * Internal method to get plugin configuration
    */
-  async triggerSync(): Promise<void> {
-    if (!this._currentPluginId) {
-      throw new Error(this._translateService.instant(T.PLUGINS.NO_PLUGIN_CONTEXT_SYNC));
-    }
-
+  private async _getConfig(pluginId: string): Promise<any> {
     try {
-      PluginLog.log('PluginBridge: Triggering sync for plugin', this._currentPluginId);
+      return await this._pluginConfigService.getPluginConfig(pluginId);
+    } catch (error) {
+      PluginLog.err('PluginBridge: Failed to get plugin config:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Internal method to trigger sync
+   */
+  private async _triggerSync(pluginId: string): Promise<void> {
+    try {
+      console.log('PluginBridge: Triggering sync for plugin', pluginId);
       await this._syncWrapperService.sync();
       PluginLog.log('PluginBridge: Sync completed successfully');
     } catch (error) {
@@ -535,10 +645,14 @@ export class PluginBridgeService implements OnDestroy {
   /**
    * Register a hook handler for a plugin
    */
-  registerHook(pluginId: string, hook: Hooks, handler: PluginHookHandler): void {
+  registerHook<T extends Hooks>(
+    pluginId: string,
+    hook: T,
+    handler: PluginHookHandler<T>,
+  ): void {
     typia.assert<string>(pluginId);
     typia.assert<Hooks>(hook);
-    typia.assert<PluginHookHandler>(handler);
+    // Note: Can't assert generic function type with typia
 
     this._pluginHooksService.registerHookHandler(pluginId, hook, handler);
   }
@@ -555,44 +669,42 @@ export class PluginBridgeService implements OnDestroy {
     this._removePluginSidePanelButtons(pluginId);
     this.unregisterPluginShortcuts(pluginId);
 
-    PluginLog.log('PluginBridge: All hooks unregistered for plugin', { pluginId });
+    // Clean up window focus handler
+    this._windowFocusHandlers.delete(pluginId);
+
+    console.log('PluginBridge: All hooks unregistered for plugin', { pluginId });
   }
 
   /**
-   * Register a header button for a plugin
+   * Internal method to register header button
    */
-  registerHeaderButton(headerBtnCfg: PluginHeaderBtnCfg): void {
-    if (!this._currentPluginId) {
-      throw new Error(
-        this._translateService.instant(T.PLUGINS.NO_PLUGIN_CONTEXT_HEADER_BUTTON),
-      );
-    }
+  private _registerHeaderButton(
+    pluginId: string,
+    headerBtnCfg: PluginHeaderBtnCfg,
+  ): void {
     typia.assert<Omit<PluginHeaderBtnCfg, 'pluginId'>>(headerBtnCfg);
 
     const newButton: PluginHeaderBtnCfg = {
       ...headerBtnCfg,
-      pluginId: this._currentPluginId,
+      pluginId,
     };
 
-    const currentButtons = this._headerButtons$.value;
-    this._headerButtons$.next([...currentButtons, newButton]);
+    const currentButtons = this._headerButtons();
+    this._headerButtons.set([...currentButtons, newButton]);
 
-    PluginLog.log('PluginBridge: Header button registered', {
-      pluginId: this._currentPluginId,
+    console.log('PluginBridge: Header button registered', {
+      pluginId,
       headerBtnCfg,
     });
   }
 
   /**
-   * Register a menu entry for a plugin
+   * Internal method to register menu entry
    */
-  registerMenuEntry(menuEntryCfg: Omit<PluginMenuEntryCfg, 'pluginId'>): void {
-    if (!this._currentPluginId) {
-      throw new Error(
-        this._translateService.instant(T.PLUGINS.NO_PLUGIN_CONTEXT_MENU_ENTRY),
-      );
-    }
-
+  private _registerMenuEntry(
+    pluginId: string,
+    menuEntryCfg: Omit<PluginMenuEntryCfg, 'pluginId'>,
+  ): void {
     // Validate required fields manually since typia has issues with optional fields
     if (!menuEntryCfg.label || typeof menuEntryCfg.label !== 'string') {
       throw new Error(
@@ -610,32 +722,31 @@ export class PluginBridgeService implements OnDestroy {
 
     const newMenuEntry: PluginMenuEntryCfg = {
       ...menuEntryCfg,
-      pluginId: this._currentPluginId,
+      pluginId,
     };
 
-    const currentEntries = this._menuEntries$.value;
+    const currentEntries = this._menuEntries();
 
     // Check for duplicate entry (same plugin ID and label)
     const isDuplicate = currentEntries.some(
-      (entry) =>
-        entry.pluginId === this._currentPluginId && entry.label === menuEntryCfg.label,
+      (entry) => entry.pluginId === pluginId && entry.label === menuEntryCfg.label,
     );
 
     if (isDuplicate) {
       PluginLog.err(
         'PluginBridge: Duplicate menu entry detected, skipping registration',
         {
-          pluginId: this._currentPluginId,
+          pluginId,
           label: menuEntryCfg.label,
         },
       );
       return;
     }
 
-    this._menuEntries$.next([...currentEntries, newMenuEntry]);
+    this._menuEntries.set([...currentEntries, newMenuEntry]);
 
     PluginLog.log('PluginBridge: Menu entry registered', {
-      pluginId: this._currentPluginId,
+      pluginId,
       menuEntryCfg,
     });
   }
@@ -644,11 +755,11 @@ export class PluginBridgeService implements OnDestroy {
    * Remove all header buttons for a specific plugin
    */
   private _removePluginHeaderButtons(pluginId: string): void {
-    const currentButtons = this._headerButtons$.value;
+    const currentButtons = this._headerButtons();
     const filteredButtons = currentButtons.filter(
       (button) => button.pluginId !== pluginId,
     );
-    this._headerButtons$.next(filteredButtons);
+    this._headerButtons.set(filteredButtons);
 
     PluginLog.log('PluginBridge: Header buttons removed for plugin', { pluginId });
   }
@@ -657,25 +768,20 @@ export class PluginBridgeService implements OnDestroy {
    * Remove all menu entries for a specific plugin
    */
   private _removePluginMenuEntries(pluginId: string): void {
-    const currentEntries = this._menuEntries$.value;
+    const currentEntries = this._menuEntries();
     const filteredEntries = currentEntries.filter((entry) => entry.pluginId !== pluginId);
-    this._menuEntries$.next(filteredEntries);
+    this._menuEntries.set(filteredEntries);
 
     PluginLog.log('PluginBridge: Menu entries removed for plugin', { pluginId });
   }
 
   /**
-   * Register a side panel button for a plugin
+   * Internal method to register side panel button
    */
-  registerSidePanelButton(
+  private _registerSidePanelButton(
+    pluginId: string,
     sidePanelBtnCfg: Omit<PluginSidePanelBtnCfg, 'pluginId'>,
   ): void {
-    if (!this._currentPluginId) {
-      throw new Error(
-        this._translateService.instant(T.PLUGINS.NO_PLUGIN_CONTEXT_SIDE_PANEL),
-      );
-    }
-
     // Validate required fields
     if (!sidePanelBtnCfg.label || typeof sidePanelBtnCfg.label !== 'string') {
       throw new Error(
@@ -690,31 +796,29 @@ export class PluginBridgeService implements OnDestroy {
 
     const newButton: PluginSidePanelBtnCfg = {
       ...sidePanelBtnCfg,
-      pluginId: this._currentPluginId,
+      pluginId,
     };
 
-    const currentButtons = this._sidePanelButtons$.value;
+    const currentButtons = this._sidePanelButtons();
 
     // Check for duplicate button (same plugin ID)
-    const isDuplicate = currentButtons.some(
-      (button) => button.pluginId === this._currentPluginId,
-    );
+    const isDuplicate = currentButtons.some((button) => button.pluginId === pluginId);
 
     if (isDuplicate) {
       PluginLog.err(
         'PluginBridge: Duplicate side panel button detected, skipping registration',
         {
-          pluginId: this._currentPluginId,
+          pluginId,
           label: sidePanelBtnCfg.label,
         },
       );
       return;
     }
 
-    this._sidePanelButtons$.next([...currentButtons, newButton]);
+    this._sidePanelButtons.set([...currentButtons, newButton]);
 
     PluginLog.log('PluginBridge: Side panel button registered', {
-      pluginId: this._currentPluginId,
+      pluginId,
       sidePanelBtnCfg,
     });
   }
@@ -723,35 +827,29 @@ export class PluginBridgeService implements OnDestroy {
    * Remove all side panel buttons for a specific plugin
    */
   private _removePluginSidePanelButtons(pluginId: string): void {
-    const currentButtons = this._sidePanelButtons$.value;
+    const currentButtons = this._sidePanelButtons();
     const filteredButtons = currentButtons.filter(
       (button) => button.pluginId !== pluginId,
     );
-    this._sidePanelButtons$.next(filteredButtons);
+    this._sidePanelButtons.set(filteredButtons);
 
     PluginLog.log('PluginBridge: Side panel buttons removed for plugin', { pluginId });
   }
 
   /**
-   * Register a keyboard shortcut for a plugin
+   * Internal method to register shortcut
    */
-  registerShortcut(shortcutCfg: PluginShortcutCfg): void {
-    if (!this._currentPluginId) {
-      throw new Error(
-        this._translateService.instant(T.PLUGINS.NO_PLUGIN_CONTEXT_SHORTCUT),
-      );
-    }
-
+  private _registerShortcut(pluginId: string, shortcutCfg: PluginShortcutCfg): void {
     const shortcutWithPluginId: PluginShortcutCfg = {
       ...shortcutCfg,
-      pluginId: this._currentPluginId,
+      pluginId,
     };
 
-    const currentShortcuts = this.shortcuts$.value;
-    this.shortcuts$.next([...currentShortcuts, shortcutWithPluginId]);
+    const currentShortcuts = this.shortcuts();
+    this.shortcuts.set([...currentShortcuts, shortcutWithPluginId]);
 
     PluginLog.log('PluginBridge: Shortcut registered', {
-      pluginId: this._currentPluginId,
+      pluginId,
       shortcut: shortcutWithPluginId,
     });
   }
@@ -760,7 +858,7 @@ export class PluginBridgeService implements OnDestroy {
    * Execute a shortcut by its ID (pluginId:id)
    */
   async executeShortcut(shortcutId: string): Promise<boolean> {
-    const shortcuts = this.shortcuts$.value;
+    const shortcuts = this.shortcuts();
     const shortcut = shortcuts.find((s) => `${s.pluginId}:${s.id}` === shortcutId);
 
     if (shortcut) {
@@ -783,13 +881,13 @@ export class PluginBridgeService implements OnDestroy {
    * Unregister all shortcuts for a specific plugin
    */
   unregisterPluginShortcuts(pluginId: string): void {
-    const currentShortcuts = this.shortcuts$.value;
+    const currentShortcuts = this.shortcuts();
     const filteredShortcuts = currentShortcuts.filter(
       (shortcut) => shortcut.pluginId !== pluginId,
     );
 
     if (filteredShortcuts.length !== currentShortcuts.length) {
-      this.shortcuts$.next(filteredShortcuts);
+      this.shortcuts.set(filteredShortcuts);
       PluginLog.log(
         `Unregistered ${currentShortcuts.length - filteredShortcuts.length} shortcuts for plugin ${pluginId}`,
       );
@@ -859,13 +957,12 @@ export class PluginBridgeService implements OnDestroy {
   }
 
   /**
-   * Execute an NgRx action if it's in the allowed list
+   * Internal method to dispatch action
    */
-  dispatchAction(action: any): void {
-    if (!this._currentPluginId) {
-      throw new Error(this._translateService.instant(T.PLUGINS.NO_PLUGIN_CONTEXT_ACTION));
-    }
-
+  private _dispatchAction(
+    pluginId: string,
+    action: { type: string; [key: string]: unknown },
+  ): void {
     // Check if the action is in the allowed list
     if (!isAllowedPluginAction(action)) {
       PluginLog.err(
@@ -880,16 +977,18 @@ export class PluginBridgeService implements OnDestroy {
 
     // Dispatch the action
     this._store.dispatch(action);
-    PluginLog.log(`PluginBridge: Dispatched action for plugin ${this._currentPluginId}`, {
+    PluginLog.log(`PluginBridge: Dispatched action for plugin ${pluginId}`, {
       actionType: action.type,
       payload: action,
     });
   }
 
   /**
-   * Execute Node.js script (only available in Electron)
+   * Internal method to execute Node.js script
    */
-  async executeNodeScript(
+  private async _executeNodeScript(
+    pluginId: string,
+    manifest: PluginManifest | null,
     request: PluginNodeScriptRequest,
   ): Promise<PluginNodeScriptResult> {
     if (!IS_ELECTRON) {
@@ -899,17 +998,10 @@ export class PluginBridgeService implements OnDestroy {
       };
     }
 
-    if (!this._currentPluginId) {
-      return {
-        success: false,
-        error: this._translateService.instant(T.PLUGINS.NO_PLUGIN_CONTEXT_NODE),
-      };
-    }
-
     try {
       typia.assert<PluginNodeScriptRequest>(request);
 
-      if (!this._currentPluginManifest) {
+      if (!manifest) {
         return {
           success: false,
           error: this._translateService.instant(T.PLUGINS.NO_PLUGIN_MANIFEST_NODE),
@@ -925,11 +1017,7 @@ export class PluginBridgeService implements OnDestroy {
       }
 
       // Call Electron main process via IPC
-      const result = await window.ea.pluginExecNodeScript(
-        this._currentPluginId,
-        this._currentPluginManifest,
-        request,
-      );
+      const result = await window.ea.pluginExecNodeScript(pluginId, manifest, request);
 
       return result;
     } catch (error) {
@@ -947,7 +1035,7 @@ export class PluginBridgeService implements OnDestroy {
   /**
    * Send a message to a plugin's message handler
    */
-  async sendMessageToPlugin(pluginId: string, message: any): Promise<any> {
+  async sendMessageToPlugin(pluginId: string, message: unknown): Promise<unknown> {
     // Import and get the plugin runner service
     // Using dynamic import to avoid circular dependency at compile time
     const { PluginRunner } = await import('./plugin-runner');
@@ -956,17 +1044,70 @@ export class PluginBridgeService implements OnDestroy {
   }
 
   /**
+   * Track window focus state
+   */
+  private _isWindowFocused = true;
+  private _windowFocusHandlers = new Map<string, (isFocused: boolean) => void>();
+
+  /**
+   * Initialize window focus tracking
+   */
+  private _initWindowFocusTracking(): void {
+    // Track window focus/blur events
+    window.addEventListener('focus', () => {
+      this._isWindowFocused = true;
+      this._notifyFocusHandlers(true);
+    });
+
+    window.addEventListener('blur', () => {
+      this._isWindowFocused = false;
+      this._notifyFocusHandlers(false);
+    });
+
+    // Also track document visibility changes
+    document.addEventListener('visibilitychange', () => {
+      const isFocused = !document.hidden;
+      this._isWindowFocused = isFocused;
+      this._notifyFocusHandlers(isFocused);
+    });
+  }
+
+  /**
+   * Notify all registered focus handlers
+   */
+  private _notifyFocusHandlers(isFocused: boolean): void {
+    this._windowFocusHandlers.forEach((handler) => {
+      try {
+        handler(isFocused);
+      } catch (error) {
+        console.error('Error in window focus handler:', error);
+      }
+    });
+  }
+
+  /**
+   * Check if the window is currently focused
+   */
+  isWindowFocused(): boolean {
+    return this._isWindowFocused;
+  }
+
+  /**
+   * Register a handler for window focus changes
+   */
+  onWindowFocusChange(pluginId: string, handler: (isFocused: boolean) => void): void {
+    this._windowFocusHandlers.set(pluginId, handler);
+
+    // Immediately notify the handler of the current state
+    handler(this._isWindowFocused);
+  }
+
+  /**
    * Clean up all resources when service is destroyed
    */
   ngOnDestroy(): void {
     PluginLog.log('PluginBridgeService: Cleaning up resources');
-
-    // Complete all BehaviorSubjects
-    this._headerButtons$.complete();
-    this._menuEntries$.complete();
-    this.shortcuts$.complete();
-    this._sidePanelButtons$.complete();
-
+    // Note: Signals don't need explicit cleanup like BehaviorSubjects
     PluginLog.log('PluginBridgeService: Cleanup complete');
   }
 }

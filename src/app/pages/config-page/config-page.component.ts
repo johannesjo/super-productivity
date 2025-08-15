@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  effect,
   inject,
   OnDestroy,
   OnInit,
@@ -43,6 +44,7 @@ import { ThemeSelectorComponent } from '../../core/theme/theme-selector/theme-se
 import { Log } from '../../core/log';
 import { downloadLogs } from '../../util/download';
 import { SnackService } from '../../core/snack/snack.service';
+import { SyncWrapperService } from '../../imex/sync/sync-wrapper.service';
 
 @Component({
   selector: 'config-page',
@@ -64,6 +66,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   private readonly _pfapiService = inject(PfapiService);
   readonly configService = inject(GlobalConfigService);
   readonly syncSettingsService = inject(SyncConfigService);
+  private readonly _syncWrapperService = inject(SyncWrapperService);
   private readonly _pluginBridgeService = inject(PluginBridgeService);
   private readonly _snackService = inject(SnackService);
 
@@ -71,7 +74,25 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   globalConfigFormCfg: ConfigFormConfig;
   globalImexFormCfg: ConfigFormConfig;
   globalProductivityConfigFormCfg: ConfigFormConfig;
-  globalSyncConfigFormCfg = { ...SYNC_FORM };
+  globalSyncConfigFormCfg = {
+    ...SYNC_FORM,
+    items: [
+      ...SYNC_FORM.items!,
+      {
+        hideExpression: (m, v, field) => !m.isEnabled || !field?.form?.valid,
+        key: '___',
+        type: 'btn',
+        className: 'mt3 block',
+        templateOptions: {
+          text: T.F.SYNC.BTN_SYNC_NOW,
+          required: false,
+          onClick: () => {
+            this._syncWrapperService.sync();
+          },
+        },
+      },
+    ],
+  };
 
   globalCfg?: GlobalConfigState;
 
@@ -117,6 +138,13 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
         this._cd.detectChanges();
       });
     }
+
+    // Use effect to react to plugin shortcuts changes for live updates
+    effect(() => {
+      const shortcuts = this._pluginBridgeService.shortcuts();
+      Log.log('Plugin shortcuts changed:', { shortcuts });
+      this._updateKeyboardFormWithPluginShortcuts(shortcuts);
+    });
   }
 
   ngOnInit(): void {
@@ -124,14 +152,6 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
       this.configService.cfg$.subscribe((cfg) => {
         this.globalCfg = cfg;
         // this._cd.detectChanges();
-      }),
-    );
-
-    // Subscribe to plugin shortcuts changes for live updates
-    this._subs.add(
-      this._pluginBridgeService.shortcuts$.subscribe((shortcuts) => {
-        Log.log('Plugin shortcuts changed:', { shortcuts });
-        this._updateKeyboardFormWithPluginShortcuts(shortcuts);
       }),
     );
   }

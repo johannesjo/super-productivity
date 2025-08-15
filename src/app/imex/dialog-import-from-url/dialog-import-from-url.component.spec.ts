@@ -225,7 +225,8 @@ describe('DialogImportFromUrlComponent', () => {
       const submitButtonElement = fixture.debugElement.query(
         By.css('button[color="primary"]'),
       );
-      expect(submitButtonElement.attributes['ng-reflect-disabled']).toBeDefined();
+      expect(submitButtonElement).toBeDefined();
+      expect(submitButtonElement.nativeElement.disabled).toBeDefined();
     });
 
     it('should always enable cancel button', () => {

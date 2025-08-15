@@ -19,7 +19,7 @@ import { Tag } from '../../../features/tag/tag.model';
 import { DEFAULT_TASK, Task, TaskWithSubTasks } from '../../../features/tasks/task.model';
 import { calcTotalTimeSpent } from '../../../features/tasks/util/calc-total-time-spent';
 import { TODAY_TAG } from '../../../features/tag/tag.const';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import { unique } from '../../../util/unique';
 import {
   ActionHandlerMap,
@@ -141,7 +141,7 @@ const handleAddTask = (
   }
 
   // Update tags - only update tags that exist
-  const shouldAddToToday = task.dueDay === getWorklogStr();
+  const shouldAddToToday = task.dueDay === getDbDateStr();
 
   const tagIdsToUpdate = [
     ...task.tagIds,
@@ -194,7 +194,8 @@ const handleConvertToMainTask = (
       changes: {
         parentId: undefined,
         tagIds: [...parentTask.tagIds],
-        ...(isPlanForToday ? { dueDay: getWorklogStr() } : {}),
+        modified: Date.now(),
+        ...(isPlanForToday ? { dueDay: getDbDateStr() } : {}),
       },
     },
     taskStateAfterParentCleanup,
@@ -408,7 +409,16 @@ const handleUpdateTask = (
     : taskState;
   taskState = updateTimeEstimateForTask(taskUpdate, timeEstimate, taskState);
   taskState = updateDoneOnForTask(taskUpdate, taskState);
-  taskState = taskAdapter.updateOne(taskUpdate, taskState);
+  taskState = taskAdapter.updateOne(
+    {
+      ...taskUpdate,
+      changes: {
+        ...taskUpdate.changes,
+        modified: Date.now(),
+      },
+    },
+    taskState,
+  );
 
   return {
     ...updatedState,

@@ -118,6 +118,7 @@
     font-style: italic;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     cursor: pointer;
     padding-left: var(--s);
     padding-right: var(--s);
@@ -153,6 +154,10 @@
       opacity: 1;
     }
   }
+}
+
+.next-occurrence {
+  color: var(--text-color-muted);
 }
 
 .project {

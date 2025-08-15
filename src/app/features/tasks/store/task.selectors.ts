@@ -18,6 +18,7 @@ import {
   selectTodayTagTaskIds,
 } from '../../tag/store/tag.reducer';
 import { selectTodayStr } from '../../../root-store/app-state/app-state.selectors';
+import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 
 const mapSubTasksToTasks = (tasksIN: Task[]): TaskWithSubTasks[] => {
   return tasksIN
@@ -131,7 +132,10 @@ export const selectOverdueTasks = createSelector(
       .map((id) => s.entities[id] as Task)
       .filter(
         (task) =>
-          (task.dueDay && new Date(task.dueDay) < today) ||
+          // Note: String comparison works correctly here because dueDay is in YYYY-MM-DD format
+          // which is lexicographically sortable. This avoids timezone conversion issues that occur
+          // when creating Date objects from date strings.
+          (task.dueDay && task.dueDay < todayStr) ||
           (task.dueWithTime && task.dueWithTime < todayStart.getTime()),
       );
   },
@@ -176,14 +180,18 @@ export const selectOverdueTasksWithSubTasks = createSelector(
         if (a.dueWithTime && b.dueWithTime) {
           return a.dueWithTime - b.dueWithTime;
         } else if (a.dueWithTime && b.dueDay) {
-          const bStartOfDueDay = new Date(b.dueDay);
+          // Use dateStrToUtcDate to avoid timezone issues
+          const bStartOfDueDay = dateStrToUtcDate(b.dueDay);
           bStartOfDueDay.setHours(0, 0, 0, 0);
           return a.dueWithTime - bStartOfDueDay.getTime();
         } else if (a.dueDay && b.dueWithTime) {
-          const aStartOfDueDay = new Date(a.dueDay);
+          // Use dateStrToUtcDate to avoid timezone issues
+          const aStartOfDueDay = dateStrToUtcDate(a.dueDay);
           aStartOfDueDay.setHours(0, 0, 0, 0);
           return aStartOfDueDay.getTime() - b.dueWithTime;
         } else if (a.dueDay && b.dueDay) {
+          // Note: String comparison works correctly here because dueDay is in YYYY-MM-DD format
+          // which is lexicographically sortable. This avoids timezone conversion issues.
           return a.dueDay.localeCompare(b.dueDay);
         }
         return 0;
@@ -196,13 +204,15 @@ export const selectAllTasksDueAndOverdue = createSelector(
   selectTagFeatureState,
   selectTodayStr,
   (s, tagState, todayStr): Task[] => {
-    const today = new Date(todayStr);
     return s.ids
       .map((id) => s.entities[id] as Task)
       .filter(
         (task) =>
           task.dueDay &&
-          new Date(task.dueDay) <= today &&
+          // Note: String comparison works correctly here because dueDay is in YYYY-MM-DD format
+          // which is lexicographically sortable. This avoids timezone conversion issues that occur
+          // when creating Date objects from date strings.
+          task.dueDay <= todayStr &&
           !tagState.entities[TODAY_TAG.id]?.taskIds.includes(task.id),
       );
   },
@@ -433,9 +443,11 @@ export const selectTasksDueForDay = createSelector(
 export const selectTasksDueAndOverdueForDay = createSelector(
   selectAllTasks,
   (tasks: Task[], props: { day: string }): TaskWithDueDay[] => {
-    const dayDate = new Date(props.day);
     return tasks.filter(
-      (task) => typeof task.dueDay === 'string' && new Date(task.dueDay) <= dayDate,
+      // Note: String comparison works correctly here because dueDay is in YYYY-MM-DD format
+      // which is lexicographically sortable. This avoids timezone conversion issues that occur
+      // when creating Date objects from date strings.
+      (task) => typeof task.dueDay === 'string' && task.dueDay <= props.day,
     ) as TaskWithDueDay[];
   },
 );

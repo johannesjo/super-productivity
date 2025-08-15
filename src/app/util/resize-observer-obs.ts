@@ -6,9 +6,11 @@ export const observeWidth = (target: HTMLElement): Observable<number> => {
     // eslint-disable-next-line
     if ((window as any).ResizeObserver) {
       // eslint-disable-next-line
-      const resizeObserver = new (window as any).ResizeObserver((entries: any[]) => {
-        observer.next(entries[0].contentRect.width);
-      });
+      const resizeObserver = new (window as any).ResizeObserver(
+        (entries: ResizeObserverEntry[]) => {
+          observer.next(entries[0].contentRect.width);
+        },
+      );
       resizeObserver.observe(target);
       return () => {
         resizeObserver.unobserve(target);

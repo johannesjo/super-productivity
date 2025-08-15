@@ -4,3 +4,4 @@ export { taskSharedSchedulingMetaReducer } from './task-shared-scheduling.reduce
 export { projectSharedMetaReducer } from './project-shared.reducer';
 export { tagSharedMetaReducer } from './tag-shared.reducer';
 export { plannerSharedMetaReducer } from './planner-shared.reducer';
+export { taskBatchUpdateMetaReducer } from './task-batch-update.reducer';

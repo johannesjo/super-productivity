@@ -14,10 +14,11 @@ import {
 import { ReplaySubject, Subscription } from 'rxjs';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
 import { IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
+import { SwipeDirective } from '../swipe-gesture/swipe.directive';
 
 @Component({
   selector: 'better-simple-drawer',
-  imports: [],
+  imports: [SwipeDirective],
   templateUrl: './better-simple-drawer.component.html',
   styleUrl: './better-simple-drawer.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { filter, map, take, tap } from 'rxjs/operators';
+import { filter, map, tap } from 'rxjs/operators';
 import {
   addProject,
   moveAllProjectBacklogTasksToRegularList,
@@ -37,8 +37,8 @@ export class ProjectEffects {
           this._timeTrackingService.cleanupDataEverywhereForProject(id);
 
           // we also might need to account for this unlikely but very nasty scenario
-          const cfg = await this._globalConfigService.cfg$.pipe(take(1)).toPromise();
-          if (id === cfg.misc.defaultProjectId) {
+          const cfg = this._globalConfigService.cfg();
+          if (cfg && id === cfg.misc.defaultProjectId) {
             this._globalConfigService.updateSection('misc', { defaultProjectId: null });
           }
         }),

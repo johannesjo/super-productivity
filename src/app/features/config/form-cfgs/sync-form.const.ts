@@ -96,8 +96,16 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
             ]
           : []),
         {
+          type: 'tpl',
+          templateOptions: {
+            tag: 'p',
+            text: T.F.SYNC.FORM.WEB_DAV.INFO,
+          },
+        },
+        {
           key: 'baseUrl',
           type: 'input',
+          className: 'e2e-baseUrl',
           templateOptions: {
             required: true,
             label: T.F.SYNC.FORM.WEB_DAV.L_BASE_URL,
@@ -108,6 +116,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         {
           key: 'userName',
           type: 'input',
+          className: 'e2e-userName',
           templateOptions: {
             required: true,
             label: T.F.SYNC.FORM.WEB_DAV.L_USER_NAME,
@@ -116,6 +125,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         {
           key: 'password',
           type: 'input',
+          className: 'e2e-password',
           templateOptions: {
             type: 'password',
             required: true,
@@ -125,6 +135,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         {
           key: 'syncFolderPath',
           type: 'input',
+          className: 'e2e-syncFolderPath',
           templateOptions: {
             required: true,
             label: T.F.SYNC.FORM.WEB_DAV.L_SYNC_FOLDER_PATH,

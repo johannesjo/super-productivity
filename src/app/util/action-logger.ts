@@ -6,7 +6,7 @@ const NUMBER_OF_ACTIONS_TO_SAVE = 30;
 const actionLog: string[] = [];
 let beforeLastErrorLog: string[] = [];
 
-export const actionLogger = (action: any): void => {
+export const actionLogger = (action: { type: string; [key: string]: unknown }): void => {
   if (action.type.indexOf('@ngrx') === 0) {
     return;
   }

@@ -1,10 +1,8 @@
 import { PersistenceBaseModelCfg, PersistenceEntityModelCfg } from './persistence.model';
 import { GlobalConfigState } from '../../features/config/global-config.model';
-import { migrateGlobalConfigState } from '../../features/config/migrate-global-config.util';
 import { Reminder } from '../../features/reminder/reminder.model';
 import { Project, ProjectState } from '../../features/project/project.model';
 import { projectReducer } from '../../features/project/store/project.reducer';
-import { migrateProjectState } from '../../features/project/migrate-projects-state.util';
 import { Tag, TagState } from '../../features/tag/tag.model';
 import { tagReducer } from '../../features/tag/store/tag.reducer';
 import {
@@ -16,11 +14,7 @@ import { Note, NoteState } from '../../features/note/note.model';
 import { noteReducer } from '../../features/note/store/note.reducer';
 import { Metric, MetricState } from '../../features/metric/metric.model';
 import { metricReducer } from '../../features/metric/store/metric.reducer';
-import {
-  migrateImprovementState,
-  migrateMetricState,
-  migrateObstructionState,
-} from '../../features/metric/migrate-metric-states.util';
+
 import {
   Improvement,
   ImprovementState,
@@ -39,24 +33,14 @@ import {
 } from '../../features/tasks/task.model';
 import { taskReducer } from '../../features/tasks/store/task.reducer';
 import {
-  migrateTaskArchiveState,
-  migrateTaskState,
-} from '../../features/tasks/migrate-task-state.util';
-import {
   TaskRepeatCfg,
   TaskRepeatCfgState,
 } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
 import { taskRepeatCfgReducer } from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
-import { migrateTaskRepeatCfgState } from '../../features/task-repeat-cfg/migrate-task-repeat-cfg-state.util';
-import { MODEL_VERSION } from '../model-version';
-import { migrateSimpleCounterState } from '../../features/simple-counter/migrate-simple-counter-state.util';
-import { migrateTagState } from '../../features/tag/migrate-tag-state.util';
-import { migrateNoteState } from '../../features/note/migrate-note-state.util';
 import { AppBaseData } from '../../imex/sync/sync.model';
 import { PlannerState } from '../../features/planner/store/planner.reducer';
 import { IssueProvider, IssueProviderState } from '../../features/issue/issue.model';
 import { issueProviderReducer } from '../../features/issue/store/issue-provider.reducer';
-import { migrateIssueProviderState } from '../../features/issue/migrate-issue-providers';
 import { BoardsState } from '../../features/boards/store/boards.reducer';
 
 interface PersistenceBaseModelCfgs {
@@ -88,24 +72,24 @@ interface PersistenceEntityModelCfgs {
 export const BASE_MODEL_CFGS: PersistenceBaseModelCfgs = {
   globalConfig: {
     appDataKey: 'globalConfig',
-    modelVersion: MODEL_VERSION.GLOBAL_CONFIG,
-    migrateFn: migrateGlobalConfigState,
+    modelVersion: 99,
+    migrateFn: (v) => v,
   },
   reminders: {
     appDataKey: 'reminders',
-    modelVersion: MODEL_VERSION.___NOT_USED_YET___,
+    modelVersion: 99,
     // no migrations needed yet
     migrateFn: (s: Reminder[]) => s,
   },
   planner: {
     appDataKey: 'planner',
-    modelVersion: MODEL_VERSION.___NOT_USED_YET___,
+    modelVersion: 99,
     // no migrations needed yet
     migrateFn: (s: PlannerState): PlannerState => s,
   },
   boards: {
     appDataKey: 'boards',
-    modelVersion: MODEL_VERSION.___NOT_USED_YET___,
+    modelVersion: 99,
     // no migrations needed yet
     migrateFn: (s: BoardsState): BoardsState => s,
   },
@@ -114,74 +98,74 @@ export const BASE_MODEL_CFGS: PersistenceBaseModelCfgs = {
 export const ENTITY_MODEL_CFGS: PersistenceEntityModelCfgs = {
   project: {
     appDataKey: 'project',
-    modelVersion: MODEL_VERSION.PROJECT,
+    modelVersion: 99,
     reducerFn: projectReducer as any,
-    migrateFn: migrateProjectState,
+    migrateFn: (v) => v,
   },
   issueProvider: {
     appDataKey: 'issueProvider',
-    modelVersion: MODEL_VERSION.ISSUE_PROVIDER,
+    modelVersion: 99,
     reducerFn: issueProviderReducer,
-    migrateFn: migrateIssueProviderState,
+    migrateFn: (v) => v,
   },
   tag: {
     appDataKey: 'tag',
-    modelVersion: MODEL_VERSION.TAG,
+    modelVersion: 99,
     reducerFn: tagReducer,
-    migrateFn: migrateTagState,
+    migrateFn: (v) => v,
   },
   simpleCounter: {
     appDataKey: 'simpleCounter',
-    modelVersion: MODEL_VERSION.SIMPLE_COUNTER,
+    modelVersion: 99,
     reducerFn: simpleCounterReducer,
-    migrateFn: migrateSimpleCounterState,
+    migrateFn: (v) => v,
   },
   note: {
     appDataKey: 'note',
-    modelVersion: MODEL_VERSION.NOTE,
+    modelVersion: 99,
     reducerFn: noteReducer,
-    migrateFn: migrateNoteState,
+    migrateFn: (v) => v,
   },
 
   // METRIC MODELS
   metric: {
     appDataKey: 'metric',
-    modelVersion: MODEL_VERSION.METRIC,
+    modelVersion: 99,
     reducerFn: metricReducer as any,
-    migrateFn: migrateMetricState,
+    migrateFn: (v) => v,
   },
   improvement: {
     appDataKey: 'improvement',
-    modelVersion: MODEL_VERSION.___NOT_USED_YET___,
+    modelVersion: 99,
     reducerFn: improvementReducer,
-    migrateFn: migrateImprovementState,
+    migrateFn: (v) => v,
   },
 
   obstruction: {
     appDataKey: 'obstruction',
-    modelVersion: MODEL_VERSION.___NOT_USED_YET___,
+    modelVersion: 99,
     reducerFn: obstructionReducer as any,
-    migrateFn: migrateObstructionState,
+    migrateFn: (v) => v,
   },
 
   // MAIN TASK MODELS
   task: {
     appDataKey: 'task',
-    modelVersion: MODEL_VERSION.TASK,
+    modelVersion: 99,
     reducerFn: taskReducer,
-    migrateFn: migrateTaskState,
+    migrateFn: (v) => v,
   },
   taskArchive: {
     appDataKey: 'taskArchive',
-    modelVersion: MODEL_VERSION.TASK_ARCHIVE,
+    modelVersion: 99,
     reducerFn: taskReducer as any,
-    migrateFn: migrateTaskArchiveState,
+    migrateFn: (v) => v,
   },
   taskRepeatCfg: {
     appDataKey: 'taskRepeatCfg',
-    modelVersion: MODEL_VERSION.TASK_REPEAT,
+    modelVersion: 99,
     reducerFn: taskRepeatCfgReducer as any,
-    migrateFn: migrateTaskRepeatCfgState,
+    migrateFn: (v) => v,
   },
 };
 

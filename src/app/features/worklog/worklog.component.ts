@@ -149,15 +149,15 @@ export class WorklogComponent implements AfterViewInit, OnDestroy {
       });
   }
 
-  sortWorklogItems(a: any, b: any): number {
+  sortWorklogItems(a: { key: number }, b: { key: number }): number {
     return b.key - a.key;
   }
 
-  sortWorklogItemsReverse(a: any, b: any): number {
+  sortWorklogItemsReverse(a: { key: number }, b: { key: number }): number {
     return a.key - b.key;
   }
 
-  trackByKey(i: number, val: { key: any; val: any }): number {
+  trackByKey(i: number, val: { key: number; val: unknown }): number {
     return val.key;
   }
 

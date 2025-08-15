@@ -1,0 +1,62 @@
+
+### Bug Fixes
+
+* allow hostnames in caldav url
+* app not starting
+* button only shown if there are any visible projects (1ca503c), closes #4883
+* **ci:** correct e2e test result path and improve test stability
+* **ci:** install Playwright browsers before running e2e tests
+* drop attachment on task only working if not hitting textarea
+* **e2e:** add asset check to 'disable and re-enable plugin' test
+* **e2e:** handle plugin asset loading issues in CI
+* **e2e:** increase timeout for performance test to 60 seconds
+* **e2e:** make 'should add multiple scheduled tasks' test more reliable
+* **e2e:** make plugin tests reliable in CI environment
+* **e2e:** remove :has() selector that may not be supported in CI
+* encode other special chars for github api #4913
+* encryption password being overwritten by certain actions #4642
+* exit behavior to be faster
+* file saving not working on Ubuntu snap #4901
+* handle error more gracefully #4907
+* input duration not accepting values like 90m
+* model validation error (e16fd55), closes #4881
+* old archive sub tasks not being properly validated #4459
+* only show non inbox projects for hide and show (f53bd27), closes #4883
+* overlay indicator
+* reminder for done task being shown #4656
+* **styles:** fix CSS linting warnings and optimize SCSS files
+* styling for simple counter nav (9258e9f), closes #4912
+* sub-tasks getting duplicated on move to project (b8372bc), closes #4882
+* task focus border
+* **test:** fix failing dropbox tests and scss lint issues
+* **timezone:** improve timezone-independent tests and date formatting
+* typing
+* typing errors
+* typing errors
+* **unsplash:** use environment variables for API authentication and increase debounce time
+### Code Refactoring
+
+* **e2e:** simplify Playwright commands to essentials
+### Features
+
+* add info for webdav
+* add task toggle start action to protocol handler
+* **dateFormat:** add more consistent date handling #359
+* **dateFormat:** make locale configurable #359
+* **imagePicker:** first draft
+* migrate currentTaskId to signal
+* **pipes:** add LocaleDatePipe to replace Angular's DatePipe #359
+* **taskRepeat:** adjust model for last creation to be day string instead of timestamp to avoid timezone issues
+* **taskRepeat:** make new model work with old model
+* **unsplash-picker:** add context-aware search defaults and higher resolution images
+* **unsplash-picker:** confirm with requirements of unsplash api
+* **unsplash-picker:** convert to signals and add dark theme support
+* **unsplash-picker:** extract translations
+* **unsplash-picker:** make more visible by whom the images are
+* **unsplash-picker:** polish
+### BREAKING CHANGES
+
+* **e2e:** Removed e2e:playwright:quick, e2e:playwright:failures, and e2e:playwright:summary commands
+
+
+

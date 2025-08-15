@@ -22,7 +22,7 @@ import { DatePipe, NgClass } from '@angular/common';
 import { PlannerCalendarEventComponent } from '../planner-calendar-event/planner-calendar-event.component';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { RoundDurationPipe } from '../../../ui/pipes/round-duration.pipe';
-import { ShortTime2Pipe } from '../../../ui/pipes/short-time2.pipe';
+import { ShortTimeHtmlPipe } from '../../../ui/pipes/short-time-html.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ShortDate2Pipe } from '../../../ui/pipes/short-date2.pipe';
 import { ProgressBarComponent } from '../../../ui/progress-bar/progress-bar.component';
@@ -44,7 +44,7 @@ import { ProgressBarComponent } from '../../../ui/progress-bar/progress-bar.comp
     DatePipe,
     MsToStringPipe,
     RoundDurationPipe,
-    ShortTime2Pipe,
+    ShortTimeHtmlPipe,
     TranslatePipe,
     ShortDate2Pipe,
     ProgressBarComponent,

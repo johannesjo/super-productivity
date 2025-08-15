@@ -39,6 +39,7 @@
   <div
     class="collapsible-panel ani-expand-collapse"
     [@expand]
+    [@.disabled]="!isAnimationEnabled()"
   >
     @for (field of field.fieldGroup; track field.id) {
       <formly-field [field]="field"></formly-field>

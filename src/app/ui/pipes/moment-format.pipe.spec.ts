@@ -12,19 +12,19 @@ describe('MomentFormatPipe', () => {
   });
 
   it('should format date with HH:mm format', () => {
-    const date = new Date('2024-01-15T14:30:00');
+    const date = new Date(2024, 0, 15, 14, 30, 0);
     expect(pipe.transform(date, 'HH:mm')).toBe('14:30');
   });
 
   it('should format date with different formats', () => {
-    const date = new Date('2024-01-15T14:30:45');
+    const date = new Date(2024, 0, 15, 14, 30, 45);
     expect(pipe.transform(date, 'YYYY-MM-DD')).toBe('2024-01-15');
     expect(pipe.transform(date, 'DD/MM/YYYY')).toBe('15/01/2024');
     expect(pipe.transform(date, 'MMM D, YYYY')).toBe('Jan 15, 2024');
   });
 
   it('should handle timestamps', () => {
-    const timestamp = new Date('2024-01-15T14:30:00').getTime();
+    const timestamp = new Date(2024, 0, 15, 14, 30, 0).getTime();
     expect(pipe.transform(timestamp, 'HH:mm')).toBe('14:30');
   });
 

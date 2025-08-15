@@ -1,6 +1,6 @@
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { ProjectCfgFormKey } from '../project/project.model';
-import { LanguageCode, MODEL_VERSION_KEY } from '../../app.constants';
+import { LanguageCode } from '../../app.constants';
 import { LegacySyncProvider } from '../../imex/sync/legacy-sync-provider.model';
 import { KeyboardConfig } from './keyboard-config.model';
 
@@ -24,6 +24,7 @@ export type MiscConfig = Readonly<{
   isTrayShowCurrentCountdown?: boolean;
   isOverlayIndicatorEnabled?: boolean;
   customTheme?: string;
+  unsplashApiKey?: string | null;
 }>;
 
 export type ShortSyntaxConfig = Readonly<{
@@ -79,9 +80,10 @@ export type PomodoroConfig = Readonly<{
   // isGoToWorkView: boolean;
   isPlayTick: boolean;
 
-  duration: number;
-  breakDuration: number;
-  longerBreakDuration: number;
+  // due to formly not being reliable here we need to be more lenient
+  duration?: number | null;
+  breakDuration?: number | null;
+  longerBreakDuration?: number | null;
   cyclesBeforeLongerBreak: number;
 }>;
 
@@ -109,6 +111,7 @@ export type LocalBackupConfig = Readonly<{
 
 export type LanguageConfig = Readonly<{
   lng: LanguageCode | null;
+  timeLocale?: string;
 }>;
 
 export type SoundConfig = Readonly<{
@@ -193,8 +196,6 @@ export type GlobalConfigState = Readonly<{
 
   sync: SyncConfig;
   dailySummaryNote?: DailySummaryNote;
-
-  [MODEL_VERSION_KEY]?: number;
 }>;
 
 export type GlobalConfigSectionKey = keyof GlobalConfigState | 'EMPTY';

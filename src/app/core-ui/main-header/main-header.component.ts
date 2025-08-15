@@ -27,7 +27,6 @@ import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
-import { AsyncPipe } from '@angular/common';
 import { SimpleCounterButtonComponent } from '../../features/simple-counter/simple-counter-button/simple-counter-button.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { DialogSyncInitialCfgComponent } from '../../imex/sync/dialog-sync-initial-cfg/dialog-sync-initial-cfg.component';
@@ -56,7 +55,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
     MatIcon,
     MatTooltip,
     TranslatePipe,
-    AsyncPipe,
     SimpleCounterButtonComponent,
     LongPressDirective,
     PluginHeaderBtnsComponent,
@@ -123,38 +121,45 @@ export class MainHeaderComponent implements OnDestroy {
   currentTaskContext = toSignal(this._currentTaskContext$);
 
   private _isRouteWithSidePanel$ = this._router.events.pipe(
-    filter((event: any) => event instanceof NavigationEnd),
-    map((event) => !!event.urlAfterRedirects.match(/(tasks|daily-summary)$/)),
-    startWith(!!this._router.url.match(/(tasks|daily-summary)$/)),
+    filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+    map((event) => true), // Always true since right-panel is now global
+    startWith(true), // Always true since right-panel is now global
   );
-  isRouteWithSidePanel = toSignal(this._isRouteWithSidePanel$, { initialValue: false });
+  isRouteWithSidePanel = toSignal(this._isRouteWithSidePanel$, { initialValue: true });
 
   private _isScheduleSection$ = this._router.events.pipe(
-    filter((event: any) => event instanceof NavigationEnd),
+    filter((event): event is NavigationEnd => event instanceof NavigationEnd),
     map((event) => !!event.urlAfterRedirects.match(/(schedule)$/)),
     startWith(!!this._router.url.match(/(schedule)$/)),
   );
   isScheduleSection = toSignal(this._isScheduleSection$, { initialValue: false });
+
+  private _isWorkViewPage$ = this._router.events.pipe(
+    filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+    map((event) => !!event.urlAfterRedirects.match(/tasks$/)),
+    startWith(!!this._router.url.match(/tasks$/)),
+  );
+  isWorkViewPage = toSignal(this._isWorkViewPage$, { initialValue: false });
 
   // Convert more observables to signals
   activeWorkContextTypeAndId = toSignal(
     this.workContextService.activeWorkContextTypeAndId$,
   );
   activeWorkContextTitle = toSignal(this.workContextService.activeWorkContextTitle$);
-  isNavAlwaysVisible = toSignal(this.layoutService.isNavAlwaysVisible$);
+  isNavAlwaysVisible = computed(() => this.layoutService.isNavAlwaysVisible());
   currentTask = toSignal(this.taskService.currentTask$);
-  currentTaskId = toSignal(this.taskService.currentTaskId$);
+  currentTaskId = this.taskService.currentTaskId;
   pomodoroIsEnabled = toSignal(this.pomodoroService.isEnabled$);
   pomodoroIsBreak = toSignal(this.pomodoroService.isBreak$);
   pomodoroCurrentSessionTime = toSignal(this.pomodoroService.currentSessionTime$);
   enabledSimpleCounters = toSignal(this.simpleCounterService.enabledSimpleCounters$, {
     initialValue: [],
   });
-  isShowTaskViewCustomizerPanel = toSignal(
-    this.layoutService.isShowTaskViewCustomizerPanel$,
+  isShowTaskViewCustomizerPanel = computed(() =>
+    this.layoutService.isShowTaskViewCustomizerPanel(),
   );
-  isShowIssuePanel = toSignal(this.layoutService.isShowIssuePanel$);
-  isShowNotes = toSignal(this.layoutService.isShowNotes$);
+  isShowIssuePanel = computed(() => this.layoutService.isShowIssuePanel());
+  isShowNotes = computed(() => this.layoutService.isShowNotes());
   syncIsEnabledAndReady = toSignal(this.syncWrapperService.isEnabledAndReady$);
   syncState = toSignal(this.syncWrapperService.syncState$);
   isSyncInProgress = toSignal(this.syncWrapperService.isSyncInProgress$);
@@ -165,10 +170,10 @@ export class MainHeaderComponent implements OnDestroy {
 
   private _subs: Subscription = new Subscription();
 
-  selectedTimeView$ = this.layoutService.selectedTimeView$;
+  selectedTimeView = computed(() => this.layoutService.selectedTimeView());
 
   selectTimeView(view: 'week' | 'month'): void {
-    this.layoutService.setTimeView(view);
+    this.layoutService.selectedTimeView.set(view);
   }
 
   ngOnDestroy(): void {
@@ -220,6 +225,6 @@ export class MainHeaderComponent implements OnDestroy {
   }
 
   get kb(): KeyboardConfig {
-    return (this._configService.cfg?.keyboard as KeyboardConfig) || {};
+    return (this._configService.cfg()?.keyboard as KeyboardConfig) || {};
   }
 }

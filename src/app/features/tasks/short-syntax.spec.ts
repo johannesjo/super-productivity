@@ -1,6 +1,6 @@
 import { TaskCopy } from './task.model';
 import { shortSyntax } from './short-syntax';
-import { getWorklogStr } from '../../util/get-work-log-str';
+import { getDbDateStr } from '../../util/get-db-date-str';
 import {
   MONTH_SHORT_NAMES,
   oneDayInMilliseconds,
@@ -168,7 +168,7 @@ describe('shortSyntax', () => {
           title: 'Fun title',
           // timeSpent: 7200000,
           timeSpentOnDay: {
-            [getWorklogStr()]: 600000,
+            [getDbDateStr()]: 600000,
           },
           timeEstimate: 3600000,
         },
@@ -189,7 +189,7 @@ describe('shortSyntax', () => {
           title: 'Fun title whatever',
           // timeSpent: 7200000,
           timeSpentOnDay: {
-            [getWorklogStr()]: 3600000,
+            [getDbDateStr()]: 3600000,
           },
           timeEstimate: 7200000,
         },
@@ -227,7 +227,7 @@ describe('shortSyntax', () => {
           title: 'Fun title whatever',
           // timeSpent: 7200000,
           timeSpentOnDay: {
-            [getWorklogStr()]: 5400000,
+            [getDbDateStr()]: 5400000,
           },
           timeEstimate: 9000000,
         },
@@ -250,10 +250,12 @@ describe('shortSyntax', () => {
         ...TASK,
         title: 'Test @4pm',
       };
-      const parsedDateInMilliseconds =
-        getPlannedDateTimestampFromShortSyntaxReturnValue(t);
-      const parsedDate = new Date(parsedDateInMilliseconds);
       const now = new Date();
+      const parsedDateInMilliseconds = getPlannedDateTimestampFromShortSyntaxReturnValue(
+        t,
+        now,
+      );
+      const parsedDate = new Date(parsedDateInMilliseconds);
       if (now.getHours() > 16 || (now.getHours() === 16 && now.getMinutes() > 0)) {
         const isSetToTomorrow = checkIfADateIsTomorrow(now, parsedDate);
         expect(isSetToTomorrow).toBeTrue();
@@ -644,7 +646,7 @@ describe('shortSyntax', () => {
           title: 'Fun title',
           // timeSpent: 7200000,
           timeSpentOnDay: {
-            [getWorklogStr()]: 600000,
+            [getDbDateStr()]: 600000,
           },
           timeEstimate: 3600000,
           tagIds: ['blu_id'],
@@ -665,7 +667,7 @@ describe('shortSyntax', () => {
         taskChanges: {
           title: 'Fun title',
           timeSpentOnDay: {
-            [getWorklogStr()]: 600000,
+            [getDbDateStr()]: 600000,
           },
           timeEstimate: 3600000,
           tagIds: ['blu_id'],
@@ -703,7 +705,7 @@ describe('shortSyntax', () => {
         taskChanges: {
           title: 'Fun title #blu',
           timeSpentOnDay: {
-            [getWorklogStr()]: 600000,
+            [getDbDateStr()]: 600000,
           },
           timeEstimate: 3600000,
         },
@@ -774,7 +776,7 @@ describe('shortSyntax', () => {
           title: 'Fun title',
           // timeSpent: 7200000,
           timeSpentOnDay: {
-            [getWorklogStr()]: 600000,
+            [getDbDateStr()]: 600000,
           },
           timeEstimate: 3600000,
         },
@@ -795,7 +797,7 @@ describe('shortSyntax', () => {
           title: 'Fun title +ProjectEasyShort',
           // timeSpent: 7200000,
           timeSpentOnDay: {
-            [getWorklogStr()]: 600000,
+            [getDbDateStr()]: 600000,
           },
           timeEstimate: 3600000,
         },
@@ -913,7 +915,7 @@ describe('shortSyntax', () => {
           title: 'Fun title',
           // timeSpent: 7200000,
           timeSpentOnDay: {
-            [getWorklogStr()]: 600000,
+            [getDbDateStr()]: 600000,
           },
           timeEstimate: 3600000,
         },

@@ -32,7 +32,7 @@ export const sendJiraRequest = ({
         }
       : {}),
   } as RequestInit)
-    .then(async (response: any) => {
+    .then(async (response) => {
       // log('JIRA_RAW_RESPONSE', response);
       if (!response.ok) {
         error('Jira Error Error Response ELECTRON: ', response);
@@ -50,8 +50,8 @@ export const sendJiraRequest = ({
       }
       return response;
     })
-    .then((res: any) => res.text())
-    .then((text: any) => {
+    .then((res) => res.text())
+    .then((text) => {
       try {
         return text ? JSON.parse(text) : {};
       } catch (e) {
@@ -61,13 +61,13 @@ export const sendJiraRequest = ({
         return text;
       }
     })
-    .then((response: any) => {
+    .then((response) => {
       mainWin.webContents.send(IPC.JIRA_CB_EVENT, {
         response,
         requestId,
       });
     })
-    .catch((err: any) => {
+    .catch((err: unknown) => {
       mainWin.webContents.send(IPC.JIRA_CB_EVENT, {
         error: err,
         requestId,

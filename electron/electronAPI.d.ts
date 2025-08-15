@@ -65,6 +65,11 @@ export interface ElectronAPI {
 
   openExternalUrl(url: string): void;
 
+  saveFileDialog(
+    filename: string,
+    data: string,
+  ): Promise<{ success: boolean; path?: string }>;
+
   isLinux(): boolean;
 
   isMacOS(): boolean;
@@ -99,7 +104,10 @@ export interface ElectronAPI {
 
   setDoneRegisterBeforeClose(id: string): void;
 
-  setProgressBar(args: { progress: number; progressBarMode: 'normal' | 'pause' }): void;
+  setProgressBar(args: {
+    progress: number;
+    progressBarMode: 'normal' | 'pause' | 'none';
+  }): void;
 
   sendAppSettingsToElectron(globalCfg: GlobalConfigState): void;
 

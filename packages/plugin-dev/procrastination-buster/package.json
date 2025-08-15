@@ -9,6 +9,7 @@
     "build": "vite build && node scripts/inline-assets.js",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
+    "deploy": "npm run build",
     "clean": "rm -rf dist node_modules *.zip",
     "lint": "tsc --noEmit"
   },

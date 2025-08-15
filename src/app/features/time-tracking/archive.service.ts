@@ -10,7 +10,7 @@ import {
 } from './sort-data-to-flush';
 import { Store } from '@ngrx/store';
 import { TimeTrackingActions } from './store/time-tracking.actions';
-import { getWorklogStr } from '../../util/get-work-log-str';
+import { getDbDateStr } from '../../util/get-db-date-str';
 import { Log } from '../../core/log';
 
 /*
@@ -52,7 +52,15 @@ export class ArchiveService {
   async moveTasksToArchiveAndFlushArchiveIfDue(tasks: TaskWithSubTasks[]): Promise<void> {
     const now = Date.now();
     const flatTasks = flattenTasks(tasks);
+
+    Log.log('[ArchiveService] moveTasksToArchiveAndFlushArchiveIfDue:', {
+      inputTasksCount: tasks.length,
+      flatTasksCount: flatTasks.length,
+      taskIds: flatTasks.map((t) => t.id),
+    });
+
     if (!flatTasks.length) {
+      Log.log('[ArchiveService] No tasks to archive after flattening');
       return;
     }
 
@@ -85,7 +93,7 @@ export class ArchiveService {
       // TODO think if it is better to get this from store as it is fresher potentially
       timeTracking: await this._pfapiService.m.timeTracking.load(),
       archiveYoung,
-      todayStr: getWorklogStr(now),
+      todayStr: getDbDateStr(now),
     });
     const newArchiveYoung = {
       ...newSorted1.archiveYoung,
@@ -95,6 +103,12 @@ export class ArchiveService {
     await this._pfapiService.m.archiveYoung.save(newArchiveYoung, {
       isUpdateRevAndLastUpdate: true,
     });
+
+    Log.log('[ArchiveService] Saved tasks to archiveYoung:', {
+      archivedTaskCount: Object.keys(newTaskArchive.entities).length,
+      archivedTaskIds: newTaskArchive.ids,
+    });
+
     this._store.dispatch(
       TimeTrackingActions.updateWholeState({
         newState: newSorted1.timeTracking,

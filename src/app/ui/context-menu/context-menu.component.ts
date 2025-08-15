@@ -27,6 +27,7 @@ export class ContextMenuComponent implements OnInit {
   leftClickTriggerEl = input<HTMLElement | MatMenuItem | MatIconButton | undefined>();
   rightClickTriggerEl = input.required<HTMLElement | MatMenuItem | MatIconButton>();
   contextMenu = input.required<TemplateRef<any>>();
+  allowedSelectors = input<string>('');
 
   readonly contextMenuTriggerEl = viewChild.required('contextMenuTriggerEl', {
     read: MatMenuTrigger,
@@ -57,6 +58,27 @@ export class ContextMenuComponent implements OnInit {
   }
 
   private openContextMenu(event: TouchEvent | MouseEvent): void {
+    // If allowedSelectors is provided, check if the target matches any of the selectors
+    const allowedSelectors = this.allowedSelectors();
+    if (allowedSelectors) {
+      const target = event.target as HTMLElement;
+      const selectors = allowedSelectors.split(',').map((s) => s.trim());
+
+      // Check if the target matches any of the allowed selectors
+      let isAllowed = false;
+      for (const selector of selectors) {
+        if (target.matches(selector)) {
+          isAllowed = true;
+          break;
+        }
+      }
+
+      // If target doesn't match any selector, don't open the menu
+      if (!isAllowed) {
+        return;
+      }
+    }
+
     event.preventDefault();
     event.stopPropagation();
     this.contextMenuPosition.x =

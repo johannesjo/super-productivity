@@ -19,6 +19,7 @@
   --s6: 48px; // 6 * 8px
   --s7: 56px; // 7 * 8px
   --s8: 64px; // 8 * 8px
+  --s9: 72px; // 9 * 8px
 
   // -----------------------------
   // Layout System
@@ -34,7 +35,9 @@
 
   // Component dimensions
   --component-max-width: 800px;
+  --side-nav-width-switch-mobile: 500px;
   --side-nav-width-switch-l: 1500px;
+  --side-nav-width-mobile: calc(100vw - var(--s9));
   --side-nav-width: 200px;
   --side-nav-width-l: 400px;
   --bar-height-large: 56px;
@@ -406,6 +409,8 @@ body {
     var(--palette-foreground-secondary-text),
     var(--palette-foreground-secondary-text-alpha, 1)
   );
+  --task-detail-bg: var(--card-bg);
+  --task-detail-shadow: var(--whiteframe-shadow-1dp);
 
   // Grid colors
   --grid-color: #dadce0;
@@ -510,4 +515,5 @@ body.isDarkTheme {
 
   // Task detail item
   --task-detail-value-color: rgba(255, 255, 255, 0.7);
+  --task-detail-bg: var(--dark10);
 }

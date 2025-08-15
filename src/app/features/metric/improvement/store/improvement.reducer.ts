@@ -13,7 +13,6 @@ import {
 import { Improvement, ImprovementState } from '../improvement.model';
 import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
 import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
-import { migrateImprovementState } from '../../migrate-metric-states.util';
 
 export const IMPROVEMENT_FEATURE_NAME = 'improvement';
 
@@ -69,9 +68,7 @@ export const improvementReducer = createReducer<ImprovementState>(
   initialImprovementState,
 
   on(loadAllData, (state, { appDataComplete }) =>
-    appDataComplete.improvement?.ids
-      ? appDataComplete.improvement
-      : migrateImprovementState(state),
+    appDataComplete.improvement?.ids ? appDataComplete.improvement : state,
   ),
 
   on(addImprovement, (state, { improvement }) => {

@@ -1,6 +1,5 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { restoreTask } from './task.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { filter, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { Task } from '../task.model';
@@ -25,10 +24,10 @@ export class TaskRelatedModelEffects {
   // EFFECTS ===> EXTERNAL
   // ---------------------
 
-  restoreTask$: any = createEffect(
+  restoreTask$ = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(restoreTask),
+        ofType(TaskSharedActions.restoreTask),
         tap(({ task }) => this._removeFromArchive(task)),
       ),
     { dispatch: false },
@@ -39,7 +38,7 @@ export class TaskRelatedModelEffects {
       switchMap((misc) => (misc.isAutoAddWorkedOnToToday ? obs : EMPTY)),
     );
 
-  autoAddTodayTagOnTracking: any = createEffect(() =>
+  autoAddTodayTagOnTracking = createEffect(() =>
     this.ifAutoAddTodayEnabled$(
       this._actions$.pipe(
         ofType(TimeTrackingActions.addTimeSpent),
@@ -58,7 +57,7 @@ export class TaskRelatedModelEffects {
     ),
   );
 
-  autoAddTodayTagOnMarkAsDone: any = createEffect(() =>
+  autoAddTodayTagOnMarkAsDone = createEffect(() =>
     this.ifAutoAddTodayEnabled$(
       this._actions$.pipe(
         ofType(TaskSharedActions.updateTask),
@@ -77,7 +76,7 @@ export class TaskRelatedModelEffects {
   // EXTERNAL ===> TASKS
   // -------------------
 
-  moveTaskToUnDone$: any = createEffect(() =>
+  moveTaskToUnDone$ = createEffect(() =>
     this._actions$.pipe(
       ofType(moveTaskInTodayList, moveProjectTaskToRegularList),
       filter(
@@ -96,7 +95,7 @@ export class TaskRelatedModelEffects {
     ),
   );
 
-  moveTaskToDone$: any = createEffect(() =>
+  moveTaskToDone$ = createEffect(() =>
     this._actions$.pipe(
       ofType(moveTaskInTodayList, moveProjectTaskToRegularList),
       filter(

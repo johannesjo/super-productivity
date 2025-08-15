@@ -1,0 +1,22 @@
+<div class="image-input-container">
+  <input
+    [name]="props.name"
+    [required]="!!props.required"
+    [readonly]="props.readonly"
+    [formControl]="formControl"
+    [formlyAttributes]="field"
+    matInput
+    placeholder="https://... or file://..."
+  />
+  <button
+    mat-stroked-button
+    type="button"
+    (click)="openUnsplashPicker()"
+    [disabled]="props.readonly || !isUnsplashAvailable"
+    class="unsplash-button"
+    *ngIf="isUnsplashAvailable"
+  >
+    <mat-icon>image</mat-icon>
+    Load from Unsplash
+  </button>
+</div>

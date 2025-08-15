@@ -81,11 +81,19 @@ export class GithubApiService {
     cfg: GithubCfg,
     isSearchAllGithub: boolean = false,
   ): Observable<GithubIssueReduced[]> {
-    const repoQuery = isSearchAllGithub ? '' : `+repo:${cfg.repo}`;
+    // Encode search text and repo query separately to preserve the + separator
+    const encodedSearchText = encodeURIComponent(searchText)
+      .replace(/\(/g, '%28')
+      .replace(/\)/g, '%29');
+
+    const encodedRepoQuery = isSearchAllGithub
+      ? ''
+      : `+repo:${encodeURIComponent(cfg.repo || '')}`;
+    const fullQuery = encodedSearchText + encodedRepoQuery;
 
     return this._sendRequest$(
       {
-        url: `${BASE}search/issues?q=${encodeURIComponent(searchText) + encodeURI(repoQuery)}`,
+        url: `${BASE}search/issues?q=${fullQuery}`,
       },
       cfg,
     ).pipe(
@@ -107,9 +115,9 @@ export class GithubApiService {
   }
 
   getImportToBacklogIssuesFromGraphQL(cfg: GithubCfg): Observable<GithubIssueReduced[]> {
-    const split: any = cfg.repo?.split('/');
-    const owner = encodeURIComponent(split[0]);
-    const repo = encodeURIComponent(split[1]);
+    const split = cfg.repo?.split('/') || [];
+    const owner = encodeURIComponent(split[0] || '');
+    const repo = encodeURIComponent(split[1] || '');
     const assigneeFilter = cfg.backlogQuery
       ? `, assignee: "${cfg.filterUsernameForIssueUpdates}"`
       : '';
@@ -202,9 +210,11 @@ query Issues {
     ];
     const req = new HttpRequest(p.method, p.url, ...allArgs);
     return this._http.request(req).pipe(
-      // TODO remove type: 0 @see https://brianflove.com/2018/09/03/angular-http-client-observe-response/
+      // Filter out HttpEventType.Sent (type: 0) events to only process actual responses
       filter((res) => !(res === Object(res) && res.type === 0)),
-      map((res: any) => (res && res.body ? res.body : res)),
+      map((res) =>
+        res && (res as { body?: unknown }).body ? (res as { body: unknown }).body : res,
+      ),
       catchError(this._handleRequestError$.bind(this)),
     );
   }

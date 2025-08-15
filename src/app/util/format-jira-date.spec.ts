@@ -25,19 +25,19 @@ describe('formatJiraDate', () => {
   });
 
   it('should handle Date objects', () => {
-    const date = new Date('2024-01-15T10:30:00.000Z');
+    const date = new Date(2024, 0, 15, 10, 30, 0);
     const result = formatJiraDate(date);
     expect(result).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{2}[+-]\d{4}$/);
   });
 
   it('should handle timestamps', () => {
-    const timestamp = new Date('2024-01-15T10:30:00.000Z').getTime();
+    const timestamp = new Date(2024, 0, 15, 10, 30, 0).getTime();
     const result = formatJiraDate(timestamp);
     expect(result).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{2}[+-]\d{4}$/);
   });
 
   it('should correctly format timezone offset without colon', () => {
-    const date = new Date('2024-01-15T10:30:00.000Z');
+    const date = new Date(2024, 0, 15, 10, 30, 0);
     const result = formatJiraDate(date);
 
     // Extract timezone part

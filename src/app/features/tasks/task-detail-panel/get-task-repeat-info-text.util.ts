@@ -6,18 +6,24 @@ import { T } from '../../../t.const';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 import { getWeekdaysMin } from '../../../util/get-weekdays-min';
+import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
 
 export const getTaskRepeatInfoText = (
   repeatCfg: TaskRepeatCfg,
-  locale: string,
+  locale: string | undefined,
+  dateTimeFormatService?: DateTimeFormatService,
 ): [string, { [key: string]: string | number }] => {
   const timeStr = repeatCfg.startTime
-    ? new Date(
-        getDateTimeFromClockString(repeatCfg.startTime, new Date()),
-      ).toLocaleTimeString(locale, {
-        hour: 'numeric',
-        minute: 'numeric',
-      })
+    ? dateTimeFormatService
+      ? dateTimeFormatService.formatTime(
+          getDateTimeFromClockString(repeatCfg.startTime, new Date()),
+        )
+      : new Date(
+          getDateTimeFromClockString(repeatCfg.startTime, new Date()),
+        ).toLocaleTimeString(locale, {
+          hour: 'numeric',
+          minute: 'numeric',
+        })
     : '';
 
   if (repeatCfg.repeatEvery !== 1) {

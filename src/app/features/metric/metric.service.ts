@@ -1,4 +1,5 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { select, Store } from '@ngrx/store';
 import {
   addMetric,
@@ -7,11 +8,10 @@ import {
   upsertMetric,
 } from './store/metric.actions';
 import { combineLatest, Observable, of } from 'rxjs';
-import { LineChartData, Metric, MetricState, PieChartData } from './metric.model';
+import { LineChartData, Metric, MetricState } from './metric.model';
 import {
   selectImprovementCountsPieChartData,
   selectMetricById,
-  selectMetricFeatureState,
   selectMetricHasData,
   selectObstructionCountsPieChartData,
   selectProductivityHappinessLineChartData,
@@ -24,7 +24,6 @@ import {
   selectCheckedImprovementIdsForDay,
   selectRepeatedImprovementIds,
 } from './improvement/store/improvement.reducer';
-import { selectHasSimpleCounterData } from '../simple-counter/store/simple-counter.reducer';
 import { DateService } from 'src/app/core/date/date.service';
 
 @Injectable({
@@ -34,18 +33,17 @@ export class MetricService {
   private _store$ = inject<Store<MetricState>>(Store);
   private _dateService = inject(DateService);
 
-  // metrics$: Observable<Metric[]> = this._store$.pipe(select(selectAllMetrics));
-  hasData$: Observable<boolean> = this._store$.pipe(select(selectMetricHasData));
-  hasSimpleCounterData$: Observable<boolean> = this._store$.pipe(
-    select(selectHasSimpleCounterData),
+  hasData = toSignal(this._store$.pipe(select(selectMetricHasData)), {
+    initialValue: false,
+  });
+  improvementCountsPieChartData = toSignal(
+    this._store$.pipe(select(selectImprovementCountsPieChartData)),
+    { initialValue: null },
   );
-  state$: Observable<MetricState> = this._store$.pipe(select(selectMetricFeatureState));
-  // lastTrackedMetric$: Observable<Metric> = this._store$.pipe(select(selectLastTrackedMetric));
-  improvementCountsPieChartData$: Observable<PieChartData | null> = this._store$.pipe(
-    select(selectImprovementCountsPieChartData),
-  );
-  obstructionCountsPieChartData$: Observable<PieChartData | null> = this._store$.pipe(
-    select(selectObstructionCountsPieChartData),
+
+  obstructionCountsPieChartData = toSignal(
+    this._store$.pipe(select(selectObstructionCountsPieChartData)),
+    { initialValue: null },
   );
 
   // getMetricForDay$(id: string = getWorklogStr()): Observable<Metric> {

@@ -1,0 +1,22 @@
+
+### Bug Fixes
+
+* Error: Trying to move sub tasks into archive for project #4846
+* flashing side panel
+* focus behavior
+* formly collapsible from closing every change
+* make config form more reliable
+* make saving encryption password work as it should
+* make saving encryption password work as it should 2 #4844
+* memory leak
+* navi not opening on mobile
+* panel animation not playing
+* prevent side panel flash when navigating to work-view routes
+* **right-panel:** close panel immediately on navigation to prevent overlay flash
+* **sync:** credentials dialog showing up when it shouldn't
+* the potential of #4847 happening
+### Features
+
+* add protocol handling to allow adding tasks from other apps
+* enable plugin panels on all routes and auto-close on navigation
+* make side panels work everywhere

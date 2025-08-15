@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { TaskRepeatCfgService } from './task-repeat-cfg.service';
-import { provideMockStore, MockStore } from '@ngrx/store/testing';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { TaskService } from '../tasks/task.service';
 import { WorkContextService } from '../work-context/work-context.service';
@@ -16,12 +16,12 @@ import { DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfg } from './task-repeat-cfg.model'
 import { of } from 'rxjs';
 import { WorkContextType } from '../work-context/work-context.model';
 import {
-  selectTaskRepeatCfgsDueOnDayOnly,
-  selectTaskRepeatCfgsDueOnDayIncludingOverdue,
+  selectAllUnprocessedTaskRepeatCfgs,
+  selectTaskRepeatCfgsForExactDay,
 } from './store/task-repeat-cfg.selectors';
-import { Task, DEFAULT_TASK, TaskWithSubTasks } from '../tasks/task.model';
+import { DEFAULT_TASK, Task, TaskWithSubTasks } from '../tasks/task.model';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
-import { getWorklogStr } from '../../util/get-work-log-str';
+import { getDbDateStr } from '../../util/get-db-date-str';
 import { TODAY_TAG } from '../tag/tag.const';
 
 describe('TaskRepeatCfgService', () => {
@@ -39,7 +39,9 @@ describe('TaskRepeatCfgService', () => {
     repeatCycle: 'DAILY',
     startDate: new Date().toISOString().split('T')[0], // Use today's date
     // eslint-disable-next-line no-mixed-operators
-    lastTaskCreation: Date.now() - 24 * 60 * 60 * 1000, // Yesterday
+    lastTaskCreationDay: new Date(Date.now() - 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split('T')[0], // Yesterday
     repeatEvery: 1,
     defaultEstimate: 3600000,
     notes: 'Test notes',
@@ -117,16 +119,16 @@ describe('TaskRepeatCfgService', () => {
     });
   });
 
-  describe('getRepeatableTasksDueForDayOnly$', () => {
+  describe('getRepeatableTasksForExactDay$', () => {
     it('should return configs due for the specified day', (done) => {
-      const dayDate = new Date('2022-01-10').getTime();
+      const dayDate = new Date(2022, 0, 10).getTime();
       const mockConfigs = [mockTaskRepeatCfg];
 
       // Mock the selector to return our test data
-      store.overrideSelector(selectTaskRepeatCfgsDueOnDayOnly, mockConfigs);
+      store.overrideSelector(selectTaskRepeatCfgsForExactDay, mockConfigs);
       store.refreshState();
 
-      service.getRepeatableTasksDueForDayOnly$(dayDate).subscribe((configs) => {
+      service.getRepeatableTasksForExactDay$(dayDate).subscribe((configs) => {
         expect(configs).toEqual(mockConfigs);
         done();
       });
@@ -319,7 +321,7 @@ describe('TaskRepeatCfgService', () => {
           type: TaskSharedActions.addTask.type,
           task: jasmine.objectContaining({
             title: mockTaskRepeatCfg.title,
-            dueDay: getWorklogStr(new Date(targetDayDate)),
+            dueDay: getDbDateStr(new Date(targetDayDate)),
           }),
           workContextType: WorkContextType.PROJECT,
           workContextId: 'test-project',
@@ -328,14 +330,15 @@ describe('TaskRepeatCfgService', () => {
         }),
       );
 
-      // Check updateTaskRepeatCfg action
+      // Check updateTaskRepeatCfg action - should update both fields
       expect(dispatchSpy.calls.argsFor(1)[0]).toEqual(
         jasmine.objectContaining({
           type: updateTaskRepeatCfg.type,
           taskRepeatCfg: {
             id: mockTaskRepeatCfg.id,
             changes: {
-              lastTaskCreation: targetDayDate,
+              lastTaskCreation: jasmine.any(Number),
+              lastTaskCreationDay: getDbDateStr(targetDayDate),
             },
           },
         }),
@@ -442,9 +445,9 @@ describe('TaskRepeatCfgService', () => {
     });
 
     it('should return empty array when due date is in the future', async () => {
-      const futureDate = new Date('2025-01-01').toISOString();
+      const futureDate = new Date(2025, 0, 1).toISOString();
       const cfgFutureStart = { ...mockTaskRepeatCfg, startDate: futureDate };
-      const pastTargetDate = new Date('2022-01-01').getTime();
+      const pastTargetDate = new Date(2022, 0, 1).getTime();
       taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
 
       // Mock confirm to return false to prevent throwing
@@ -468,30 +471,28 @@ describe('TaskRepeatCfgService', () => {
     });
   });
 
-  describe('getRepeatableTasksDueForDayIncludingOverdue$', () => {
+  describe('getAllUnprocessedRepeatableTasks$', () => {
     it('should return configs including overdue', (done) => {
-      const dayDate = new Date('2022-01-10').getTime();
+      const dayDate = new Date(2022, 0, 10).getTime();
       const mockConfigs = [mockTaskRepeatCfg];
 
       // Mock the selector to return our test data
-      store.overrideSelector(selectTaskRepeatCfgsDueOnDayIncludingOverdue, mockConfigs);
+      store.overrideSelector(selectAllUnprocessedTaskRepeatCfgs, mockConfigs);
       store.refreshState();
 
-      service
-        .getRepeatableTasksDueForDayIncludingOverdue$(dayDate)
-        .subscribe((configs) => {
-          expect(configs).toEqual(mockConfigs);
-          done();
-        });
+      service.getAllUnprocessedRepeatableTasks$(dayDate).subscribe((configs) => {
+        expect(configs).toEqual(mockConfigs);
+        done();
+      });
     });
 
     it('should use first() operator', () => {
-      const dayDate = new Date('2022-01-10').getTime();
+      const dayDate = new Date(2022, 0, 10).getTime();
       spyOn(service['_store$'], 'select').and.returnValue({
         pipe: jasmine.createSpy('pipe').and.returnValue(of([])),
       } as any);
 
-      service.getRepeatableTasksDueForDayIncludingOverdue$(dayDate);
+      service.getAllUnprocessedRepeatableTasks$(dayDate);
 
       expect(service['_store$'].select).toHaveBeenCalled();
     });
@@ -526,6 +527,86 @@ describe('TaskRepeatCfgService', () => {
         expect(config).toBeUndefined();
         done();
       });
+    });
+  });
+
+  describe('Backward Compatibility', () => {
+    it('should update both lastTaskCreation and lastTaskCreationDay when creating task', async () => {
+      const targetDayDate = new Date('2025-08-15T10:00:00').getTime();
+
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
+      taskService.createNewTaskWithDefaults.and.returnValue(mockTask);
+
+      await service.createRepeatableTask(mockTaskRepeatCfg, targetDayDate);
+
+      // Verify both fields are set
+      const updateAction = dispatchSpy.calls.argsFor(1)[0];
+      expect(updateAction.type).toBe(updateTaskRepeatCfg.type);
+      expect(updateAction.taskRepeatCfg.changes.lastTaskCreation).toBeDefined();
+      expect(updateAction.taskRepeatCfg.changes.lastTaskCreationDay).toBeDefined();
+
+      // Verify they represent the same date
+      const actualTimestamp = updateAction.taskRepeatCfg.changes.lastTaskCreation;
+      const actualDay = new Date(actualTimestamp).toISOString().split('T')[0];
+      expect(actualDay).toBe(updateAction.taskRepeatCfg.changes.lastTaskCreationDay);
+    });
+  });
+
+  describe('Timezone Edge Cases', () => {
+    it('should correctly update lastTaskCreationDay for late night task creation', async () => {
+      // Simulate creating a task at 11 PM
+      const lateNightTime = new Date('2025-08-01T23:00:00');
+      const targetDayDate = lateNightTime.getTime();
+
+      // Set up a task repeat config with dates relative to the test date
+      const testTaskRepeatCfg = {
+        ...mockTaskRepeatCfg,
+        startDate: '2025-07-01', // Start date a month before
+        lastTaskCreationDay: '2025-07-31', // Last created day before Aug 1st
+      };
+
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
+      taskService.createNewTaskWithDefaults.and.returnValue(mockTask);
+
+      await service.createRepeatableTask(testTaskRepeatCfg, targetDayDate);
+
+      // Verify that both fields are updated correctly
+      // Note: lastTaskCreation will be set to noon (12:00) of the target day
+      const updateAction = dispatchSpy.calls.argsFor(1)[0];
+      expect(updateAction.type).toBe(updateTaskRepeatCfg.type);
+      expect(updateAction.taskRepeatCfg.id).toBe(testTaskRepeatCfg.id);
+      expect(updateAction.taskRepeatCfg.changes.lastTaskCreationDay).toBe('2025-08-01');
+      // Verify timestamp is for the same day (at noon)
+      const actualDate = new Date(updateAction.taskRepeatCfg.changes.lastTaskCreation);
+      expect(actualDate.toISOString().split('T')[0]).toBe('2025-08-01');
+    });
+
+    it('should correctly handle task creation across day boundaries', async () => {
+      // Test creating task just after midnight
+      const earlyMorning = new Date('2025-08-02T00:30:00');
+      const targetDayDate = earlyMorning.getTime();
+
+      // Set up a task repeat config with dates relative to the test date
+      const testTaskRepeatCfg = {
+        ...mockTaskRepeatCfg,
+        startDate: '2025-07-01', // Start date a month before
+        lastTaskCreationDay: '2025-08-01', // Last created day before Aug 2nd
+      };
+
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
+      taskService.createNewTaskWithDefaults.and.returnValue(mockTask);
+
+      await service.createRepeatableTask(testTaskRepeatCfg, targetDayDate);
+
+      // Verify both fields are updated correctly
+      // Note: lastTaskCreation will be set to noon (12:00) of the target day
+      const updateAction = dispatchSpy.calls.argsFor(1)[0];
+      expect(updateAction.type).toBe(updateTaskRepeatCfg.type);
+      expect(updateAction.taskRepeatCfg.id).toBe(testTaskRepeatCfg.id);
+      expect(updateAction.taskRepeatCfg.changes.lastTaskCreationDay).toBe('2025-08-02');
+      // Verify timestamp is for the same day (at noon)
+      const actualDate = new Date(updateAction.taskRepeatCfg.changes.lastTaskCreation);
+      expect(actualDate.toISOString().split('T')[0]).toBe('2025-08-02');
     });
   });
 });

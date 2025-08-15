@@ -1,4 +1,3 @@
-import { MODEL_VERSION_KEY } from '../app.constants';
 import { DEFAULT_GLOBAL_CONFIG } from '../features/config/default-global-config.const';
 import { createEmptyEntity } from './create-empty-entity';
 import { AppDataCompleteNew } from '../pfapi/pfapi-config';
@@ -7,7 +6,6 @@ import { initialTimeTrackingState } from '../features/time-tracking/store/time-t
 export const createAppDataCompleteMock = (): AppDataCompleteNew => ({
   project: {
     ...createEmptyEntity(),
-    [MODEL_VERSION_KEY]: 5,
   },
   globalConfig: DEFAULT_GLOBAL_CONFIG,
 

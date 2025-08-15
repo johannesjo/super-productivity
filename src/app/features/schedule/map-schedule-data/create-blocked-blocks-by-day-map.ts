@@ -9,7 +9,7 @@ import {
   ScheduleWorkStartEndCfg,
 } from '../schedule.model';
 import { createSortedBlockerBlocks } from './create-sorted-blocker-blocks';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import { getDiffInDays } from '../../../util/get-diff-in-days';
 
 // TODO improve to even better algo for createSortedBlockerBlocks
@@ -38,7 +38,7 @@ export const createBlockedBlocksByDayMap = (
   const blockedBlocksByDay: BlockedBlockByDayMap = {};
 
   allBlockedBlocks.forEach((block) => {
-    const dayStartDateStr = getWorklogStr(block.start);
+    const dayStartDateStr = getDbDateStr(block.start);
     const startDayEndBoundaryTs = new Date(block.start).setHours(24, 0, 0, 0);
 
     if (!blockedBlocksByDay[dayStartDateStr]) {
@@ -68,7 +68,7 @@ export const createBlockedBlocksByDayMap = (
         const curDateTs = new Date(block.start).setDate(
           new Date(block.start).getDate() + i + 1,
         );
-        const dayStr = getWorklogStr(curDateTs);
+        const dayStr = getDbDateStr(curDateTs);
         const dayStartBoundaryTs = new Date(curDateTs).setHours(0, 0, 0, 0);
         const dayEndBoundaryTs = new Date(curDateTs).setHours(24, 0, 0, 0);
 

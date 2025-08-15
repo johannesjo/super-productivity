@@ -9,13 +9,13 @@ import { TranslateService } from '@ngx-translate/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { Actions, ofType } from '@ngrx/effects';
 import { setActiveWorkContext } from '../../features/work-context/store/work-context.actions';
-import { debounce } from 'helpful-decorators';
+import { debounce } from '../../util/decorators';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SnackService {
-  private _store$ = inject<Store<any>>(Store);
+  private _store$ = inject(Store);
   private _translateService = inject(TranslateService);
   private _actions$ = inject(Actions);
   private _matSnackBar = inject(MatSnackBar);
@@ -80,7 +80,7 @@ export class SnackService {
 
     if (showWhile$ || promise || isSpinner) {
       // TODO check if still needed
-      (cfg as any).panelClass = 'polling-snack';
+      (cfg as { panelClass: string }).panelClass = 'polling-snack';
     }
 
     switch (type) {

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -29,6 +29,8 @@ import { T } from 'src/app/t.const';
   ],
 })
 export class TaskViewCustomizerPanelComponent implements OnInit {
+  customizerService = inject(TaskViewCustomizerService);
+
   T = T;
   selectedSort: string = 'default';
   selectedGroup: string = 'default';
@@ -77,8 +79,6 @@ export class TaskViewCustomizerPanelComponent implements OnInit {
     { value: '3600000', label: T.F.TASK_VIEW.CUSTOMIZER.TIME_1HOUR },
     { value: '7200000', label: T.F.TASK_VIEW.CUSTOMIZER.TIME_2HOUR },
   ];
-
-  constructor(public customizerService: TaskViewCustomizerService) {}
 
   ngOnInit(): void {
     this.selectedSort = this.customizerService.selectedSort();

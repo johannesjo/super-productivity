@@ -11,8 +11,6 @@ import { initialObstructionState } from '../../features/metric/obstruction/store
 import { AppBaseData } from './sync.model';
 import { initialNoteState } from '../../features/note/store/note.reducer';
 import { initialGlobalConfigState } from '../../features/config/store/global-config.reducer';
-import { MODEL_VERSION } from '../../core/model-version';
-import { MODEL_VERSION_KEY } from '../../app.constants';
 import { plannerInitialState } from '../../features/planner/store/planner.reducer';
 import { GlobalConfigState } from '../../features/config/global-config.model';
 import { issueProviderInitialState } from '../../features/issue/store/issue-provider.reducer';
@@ -40,7 +38,6 @@ export const DEFAULT_APP_BASE_DATA: AppBaseData = {
   simpleCounter: initialSimpleCounterState,
   taskArchive: {
     ...(createEmptyEntity() as TaskArchive),
-    [MODEL_VERSION_KEY]: MODEL_VERSION.TASK_ARCHIVE,
   },
   taskRepeatCfg: initialTaskRepeatCfgState,
   note: initialNoteState,

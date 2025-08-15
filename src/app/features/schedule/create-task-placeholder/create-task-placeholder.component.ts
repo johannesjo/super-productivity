@@ -20,8 +20,8 @@ import { Task, TaskReminderOptionId } from '../../tasks/task.model';
 import { DatePipe } from '@angular/common';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { Store } from '@ngrx/store';
-import { getWorklogStr } from '../../../util/get-work-log-str';
-import { ShortTime2Pipe } from '../../../ui/pipes/short-time2.pipe';
+import { getDbDateStr } from '../../../util/get-db-date-str';
+import { ShortTimeHtmlPipe } from '../../../ui/pipes/short-time-html.pipe';
 import { SelectTaskMinimalComponent } from '../../tasks/select-task/select-task-minimal/select-task-minimal.component';
 import { devError } from '../../../util/dev-error';
 import { SnackService } from '../../../core/snack/snack.service';
@@ -30,7 +30,7 @@ type Timeout = NodeJS.Timeout | number | undefined;
 
 @Component({
   selector: 'create-task-placeholder',
-  imports: [MatIcon, DatePipe, ShortTime2Pipe, SelectTaskMinimalComponent],
+  imports: [MatIcon, DatePipe, ShortTimeHtmlPipe, SelectTaskMinimalComponent],
   templateUrl: './create-task-placeholder.component.html',
   styleUrl: './create-task-placeholder.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -244,7 +244,7 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
         this._store.dispatch(
           PlannerActions.planTaskForDay({
             task: task,
-            day: getWorklogStr(this.due()),
+            day: getDbDateStr(this.due()),
           }),
         );
       } else {
@@ -273,7 +273,7 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
       this._store.dispatch(
         PlannerActions.planTaskForDay({
           task: task,
-          day: getWorklogStr(this.due()),
+          day: getDbDateStr(this.due()),
         }),
       );
     } else {

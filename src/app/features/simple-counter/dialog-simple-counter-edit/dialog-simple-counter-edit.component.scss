@@ -23,6 +23,7 @@
   .chart-wrapper {
     height: 200px;
     position: relative;
+    overflow: hidden;
 
     @include mq(xs) {
       min-width: 500px;

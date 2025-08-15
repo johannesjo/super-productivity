@@ -1,16 +1,15 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
+  computed,
   ElementRef,
   inject,
-  Input,
-  LOCALE_ID,
+  input,
   OnDestroy,
   OnInit,
+  signal,
   viewChild,
 } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
 import { ScheduleEvent } from '../schedule.model';
 import {
   CdkDrag,
@@ -21,18 +20,17 @@ import {
 import { Store } from '@ngrx/store';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { FH, SVEType, T_ID_PREFIX } from '../schedule.const';
-import { throttle } from 'helpful-decorators';
+import { throttle } from '../../../util/decorators';
 import { CreateTaskPlaceholderComponent } from '../create-task-placeholder/create-task-placeholder.component';
 import { ScheduleEventComponent } from '../schedule-event/schedule-event.component';
-import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { T } from '../../../t.const';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { DRAG_DELAY_FOR_TOUCH } from '../../../app.constants';
 import { MatTooltip } from '@angular/material/tooltip';
-import { ShortcutService } from '../../../core-ui/shortcut/shortcut.service';
 import { Log } from '../../../core/log';
+import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
 
 const D_HOURS = 24;
 const DRAG_CLONE_CLASS = 'drag-clone';
@@ -43,7 +41,6 @@ const IS_NOT_DRAGGING_CLASS = 'is-not-dragging';
 @Component({
   selector: 'schedule-week',
   imports: [
-    AsyncPipe,
     ScheduleEventComponent,
     CdkDrag,
     CreateTaskPlaceholderComponent,
@@ -58,16 +55,14 @@ const IS_NOT_DRAGGING_CLASS = 'is-not-dragging';
 })
 export class ScheduleWeekComponent implements OnInit, OnDestroy {
   private _store = inject(Store);
-  shortcutService = inject(ShortcutService);
-  private locale = inject(LOCALE_ID);
-  destroyRef = inject(DestroyRef);
+  private _dateTimeFormatService = inject(DateTimeFormatService);
 
-  @Input() events: ScheduleEvent[] | null = [];
-  @Input() beyondBudget: ScheduleEvent[][] | null = [];
-  @Input() daysToShow: string[] = [];
-  @Input() workStartEnd: { workStartRow: number; workEndRow: number } | null = null;
-  @Input() currentTimeRow: number = 0;
-  @Input() isCtrlPressed: boolean = false;
+  events = input<ScheduleEvent[] | null>([]);
+  beyondBudget = input<ScheduleEvent[][] | null>([]);
+  daysToShow = input<string[]>([]);
+  workStartEnd = input<{ workStartRow: number; workEndRow: number } | null>(null);
+  currentTimeRow = input<number>(0);
+  isCtrlPressed = input<boolean>(false);
 
   FH = FH;
   IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
@@ -76,50 +71,54 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
   T: typeof T = T;
 
   rowsByNr = Array.from({ length: D_HOURS * FH }, (_, index) => index).filter(
-    (v, index) => index % FH === 0,
+    (_, index) => index % FH === 0,
   );
 
-  is12HourFormat = Intl.DateTimeFormat(this.locale, { hour: 'numeric' }).resolvedOptions()
-    .hour12;
-
-  times: string[] = this.rowsByNr.map((rowVal, index) => {
-    return this.is12HourFormat
-      ? index >= 13
-        ? (index - 12).toString() + ':00 PM'
-        : index.toString() + ':00 AM'
-      : index.toString() + ':00';
+  times = computed(() => {
+    const is12Hour = !this._dateTimeFormatService.is24HourFormat;
+    return this.rowsByNr.map((_, index) => {
+      if (is12Hour) {
+        if (index === 0) {
+          return '12:00 AM'; // Midnight
+        } else if (index === 12) {
+          return '12:00 PM'; // Noon
+        } else if (index < 12) {
+          return index.toString() + ':00 AM';
+        } else {
+          return (index - 12).toString() + ':00 PM';
+        }
+      } else {
+        return index.toString() + ':00';
+      }
+    });
   });
 
-  endOfDayColRowStart: number = D_HOURS * 0.5 * FH;
+  endOfDayColRowStart = signal<number>(D_HOURS * 0.5 * FH);
   totalRows: number = D_HOURS * FH;
 
-  get safeEvents(): ScheduleEvent[] {
-    return this.events || [];
-  }
+  safeEvents = computed(() => this.events() || []);
+  safeBeyondBudget = computed(() => this.beyondBudget() || []);
 
-  get safeBeyondBudget(): ScheduleEvent[][] {
-    return this.beyondBudget || [];
-  }
-
-  newTaskPlaceholder$ = new BehaviorSubject<{
+  newTaskPlaceholder = signal<{
     style: string;
     time: string;
     date: string;
   } | null>(null);
 
-  isDragging = false;
-  isDraggingDelayed = false;
-  isCreateTaskActive = false;
-  containerExtraClass = IS_NOT_DRAGGING_CLASS;
-  prevDragOverEl: HTMLElement | null = null;
-  dragCloneEl: HTMLElement | null = null;
+  isDragging = signal(false);
+  isDraggingDelayed = signal(false);
+  isCreateTaskActive = signal(false);
+  containerExtraClass = signal(IS_NOT_DRAGGING_CLASS);
+  prevDragOverEl = signal<HTMLElement | null>(null);
+  dragCloneEl = signal<HTMLElement | null>(null);
 
   readonly gridContainer = viewChild.required<ElementRef>('gridContainer');
 
   private _currentAniTimeout: number | undefined;
 
   ngOnInit(): void {
-    this.endOfDayColRowStart = this.workStartEnd?.workStartRow || D_HOURS * 0.5 * FH;
+    const workStartEnd = this.workStartEnd();
+    this.endOfDayColRowStart.set(workStartEnd?.workStartRow || D_HOURS * 0.5 * FH);
   }
 
   ngOnDestroy(): void {
@@ -129,17 +128,17 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
   onGridClick(ev: MouseEvent): void {
     if (ev.target instanceof HTMLElement) {
       if (ev.target.classList.contains('col')) {
-        this.isCreateTaskActive = true;
+        this.isCreateTaskActive.set(true);
       }
     }
   }
 
   @throttle(30)
   onMoveOverGrid(ev: MouseEvent): void {
-    if (this.isDragging || this.isDraggingDelayed) {
+    if (this.isDragging() || this.isDraggingDelayed()) {
       return;
     }
-    if (this.isCreateTaskActive) {
+    if (this.isCreateTaskActive()) {
       return;
     }
 
@@ -173,19 +172,19 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
       const minutes = Math.floor(((row - 1) % FH) * (60 / FH));
       const time = `${hours}:${minutes.toString().padStart(2, '0')}`;
 
-      this.newTaskPlaceholder$.next({
+      this.newTaskPlaceholder.set({
         style: `grid-row: ${row} / span 6; grid-column: ${targetColColOffset} / span 1`,
         time,
-        date: this.daysToShow[targetColColOffset - 2],
+        date: this.daysToShow()[targetColColOffset - 2],
       });
     } else {
-      this.newTaskPlaceholder$.next(null);
+      this.newTaskPlaceholder.set(null);
     }
   }
 
   @throttle(30)
   dragMoved(ev: CdkDragMove<ScheduleEvent>): void {
-    if (!this.isDragging) {
+    if (!this.isDragging()) {
       return;
     }
 
@@ -201,13 +200,14 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (targetEl !== this.prevDragOverEl) {
+    const prevEl = this.prevDragOverEl();
+    if (targetEl !== prevEl) {
       Log.log('dragMoved targetElChanged', targetEl);
 
-      if (this.prevDragOverEl) {
-        this.prevDragOverEl.classList.remove(DRAG_OVER_CLASS);
+      if (prevEl) {
+        prevEl.classList.remove(DRAG_OVER_CLASS);
       }
-      this.prevDragOverEl = targetEl;
+      this.prevDragOverEl.set(targetEl);
 
       if (
         targetEl.classList.contains(SVEType.Task) ||
@@ -224,38 +224,43 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
 
   dragStarted(ev: CdkDragStart<ScheduleEvent>): void {
     Log.log('dragStart', ev);
-    this.isDragging = this.isDraggingDelayed = true;
-    this.containerExtraClass = IS_DRAGGING_CLASS + '  ' + ev.source.data.type;
+    this.isDragging.set(true);
+    this.isDraggingDelayed.set(true);
+    this.containerExtraClass.set(IS_DRAGGING_CLASS + '  ' + ev.source.data.type);
 
     const cur = ev.source.element.nativeElement;
-    if (this.dragCloneEl) {
-      this.dragCloneEl.remove();
+    const cloneEl = this.dragCloneEl();
+    if (cloneEl) {
+      cloneEl.remove();
     }
-    this.dragCloneEl = cur.cloneNode(true) as HTMLElement;
-    this.dragCloneEl.style.transform = 'translateY(0)';
-    this.dragCloneEl.style.opacity = '.1';
-    this.dragCloneEl.classList.add(DRAG_CLONE_CLASS);
-    cur.parentNode?.insertBefore(this.dragCloneEl, cur);
+    const newCloneEl = cur.cloneNode(true) as HTMLElement;
+    newCloneEl.style.transform = 'translateY(0)';
+    newCloneEl.style.opacity = '.1';
+    newCloneEl.classList.add(DRAG_CLONE_CLASS);
+    cur.parentNode?.insertBefore(newCloneEl, cur);
+    this.dragCloneEl.set(newCloneEl);
   }
 
   dragReleased(ev: CdkDragRelease): void {
+    const prevEl = this.prevDragOverEl();
     Log.log('dragReleased', {
       target: ev.event.target,
       source: ev.source.element.nativeElement,
       ev,
-      dragOverEl: this.prevDragOverEl,
+      dragOverEl: prevEl,
     });
 
-    const target = (this.prevDragOverEl || ev.event.target) as HTMLElement;
-    if (this.prevDragOverEl) {
-      this.prevDragOverEl.classList.remove(DRAG_OVER_CLASS);
-      this.prevDragOverEl = null;
+    const target = (prevEl || ev.event.target) as HTMLElement;
+    if (prevEl) {
+      prevEl.classList.remove(DRAG_OVER_CLASS);
+      this.prevDragOverEl.set(null);
     }
-    if (this.dragCloneEl) {
-      this.dragCloneEl.remove();
+    const cloneEl = this.dragCloneEl();
+    if (cloneEl) {
+      cloneEl.remove();
     }
 
-    this.isDragging = false;
+    this.isDragging.set(false);
     ev.source.element.nativeElement.style.pointerEvents = '';
     ev.source.element.nativeElement.style.opacity = '0';
 
@@ -264,10 +269,10 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
         ev.source.element.nativeElement.style.opacity = '';
         ev.source.element.nativeElement.style.pointerEvents = '';
       }
-      this.isDraggingDelayed = false;
+      this.isDraggingDelayed.set(false);
     }, 100);
 
-    this.containerExtraClass = IS_NOT_DRAGGING_CLASS;
+    this.containerExtraClass.set(IS_NOT_DRAGGING_CLASS);
 
     if (target.tagName.toLowerCase() === 'div' && target.classList.contains('col')) {
       const isMoveToEndOfDay = target.classList.contains('end-of-day');

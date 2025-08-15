@@ -10,7 +10,7 @@ import { AbstractControl, NG_VALIDATORS, Validator, ValidatorFn } from '@angular
 
 import { maxValidator } from './max.validator';
 
-const MAX_VALIDATOR: any = {
+const MAX_VALIDATOR = {
   provide: NG_VALIDATORS,
   useExisting: forwardRef(() => MaxDirective),
   multi: true,
@@ -44,9 +44,11 @@ export class MaxDirective implements Validator, OnInit, OnChanges {
     }
   }
 
-  validate(c: AbstractControl): { [key: string]: any } | null {
+  validate(c: AbstractControl): { [key: string]: unknown } | null {
     if (this._validator) {
-      return this._validator(c) as { [key: string]: any };
+      return this._validator(c) as {
+        [key: string]: unknown;
+      };
     }
     return null;
   }

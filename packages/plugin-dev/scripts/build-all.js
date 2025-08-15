@@ -29,8 +29,27 @@ const plugins = [
     needsInstall: true,
     copyToAssets: true,
     buildCommand: async (pluginPath) => {
-      await execAsync(`cd ${pluginPath} && npm run deploy`);
-      return 'Built and deployed';
+      await execAsync(`cd ${pluginPath} && npm run build`);
+      // Copy to assets directory
+      const targetDir = path.join(
+        __dirname,
+        '../../../src/assets/bundled-plugins/procrastination-buster',
+      );
+      if (!fs.existsSync(targetDir)) {
+        fs.mkdirSync(targetDir, { recursive: true });
+      }
+      const distPath = path.join(pluginPath, 'dist');
+      if (fs.existsSync(distPath)) {
+        const files = fs.readdirSync(distPath);
+        for (const file of files) {
+          const src = path.join(distPath, file);
+          const dest = path.join(targetDir, file);
+          if (fs.statSync(src).isFile()) {
+            fs.copyFileSync(src, dest);
+          }
+        }
+      }
+      return 'Built and copied to assets';
     },
   },
   // Migrated built-in plugins
@@ -59,34 +78,43 @@ const plugins = [
       return 'Copied to assets';
     },
   },
-  // {
-  //   name: 'sync-md-plugin',
-  //   path: 'sync-md-plugin',
-  //   needsInstall: true,
-  //   copyToAssets: true,
-  //   buildCommand: async (pluginPath) => {
-  //     // Copy to assets directory
-  //     const targetDir = path.join(__dirname, '../../../src/assets/sync-md-plugin');
-  //     if (!fs.existsSync(targetDir)) {
-  //       fs.mkdirSync(targetDir, { recursive: true });
-  //     }
-  //     const files = [
-  //       'manifest.json',
-  //       'plugin.js',
-  //       'index.html',
-  //       'iframe-script.js',
-  //       'sync-md-icon.svg',
-  //     ];
-  //     for (const file of files) {
-  //       const src = path.join(pluginPath, file);
-  //       const dest = path.join(targetDir, file);
-  //       if (fs.existsSync(src)) {
-  //         fs.copyFileSync(src, dest);
-  //       }
-  //     }
-  //     return 'Copied to assets';
-  //   },
-  // },
+  {
+    name: 'sync-md',
+    path: 'sync-md',
+    needsInstall: true,
+    copyToAssets: true,
+    buildCommand: async (pluginPath) => {
+      try {
+        // Try normal build first
+        await execAsync(`cd ${pluginPath} && npm run build`);
+      } catch (buildError) {
+        // If normal build fails, try emergency build
+        console.log('  Normal build failed, trying emergency build...');
+        await execAsync(`cd ${pluginPath} && node scripts/emergency-build.js`);
+      }
+
+      // Copy to assets directory
+      const targetDir = path.join(
+        __dirname,
+        '../../../src/assets/bundled-plugins/sync-md',
+      );
+      if (!fs.existsSync(targetDir)) {
+        fs.mkdirSync(targetDir, { recursive: true });
+      }
+      const distPath = path.join(pluginPath, 'dist');
+      if (fs.existsSync(distPath)) {
+        const files = fs.readdirSync(distPath);
+        for (const file of files) {
+          const src = path.join(distPath, file);
+          const dest = path.join(targetDir, file);
+          if (fs.statSync(src).isFile()) {
+            fs.copyFileSync(src, dest);
+          }
+        }
+      }
+      return 'Built and copied to assets';
+    },
+  },
   {
     name: 'yesterday-tasks-plugin',
     path: 'yesterday-tasks-plugin',
@@ -129,9 +157,22 @@ async function buildPlugin(plugin) {
       const packageJsonPath = path.join(plugin.path, 'package.json');
       const nodeModulesPath = path.join(plugin.path, 'node_modules');
 
-      if (fs.existsSync(packageJsonPath) && !fs.existsSync(nodeModulesPath)) {
+      if (fs.existsSync(packageJsonPath)) {
         log(`  Installing dependencies...`, colors.yellow);
-        await execAsync(`cd ${plugin.path} && npm install`);
+        try {
+          // Try to install dependencies
+          await execAsync(`cd ${plugin.path} && npm install`);
+        } catch (installError) {
+          // If install fails, check if node_modules exists and continue
+          if (fs.existsSync(nodeModulesPath)) {
+            log(
+              `  Using existing dependencies (install failed but node_modules exists)`,
+              colors.yellow,
+            );
+          } else {
+            throw installError;
+          }
+        }
       }
     }
 

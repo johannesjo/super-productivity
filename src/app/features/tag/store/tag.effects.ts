@@ -26,7 +26,7 @@ import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.serv
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 import { TimeTrackingService } from '../../time-tracking/time-tracking.service';
 import { fastArrayCompare } from '../../../util/fast-array-compare';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import { TranslateService } from '@ngx-translate/core';
 import { PlannerService } from '../../planner/planner.service';
 import { selectAllTasksDueToday } from '../../planner/store/planner.selectors';
@@ -80,7 +80,7 @@ export class TagEffects {
             ico: 'today',
             translateParams: {
               date: formattedDate,
-              extra: await this._plannerService.getSnackExtraStr(getWorklogStr()),
+              extra: await this._plannerService.getSnackExtraStr(getDbDateStr()),
             },
           });
         }),

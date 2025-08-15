@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Hooks, PluginHookHandler } from './plugin-api.model';
+import { Hooks, PluginHookHandler } from '@super-productivity/plugin-api';
 import { PluginLog } from '../core/log';
 
 /**
@@ -10,12 +10,16 @@ import { PluginLog } from '../core/log';
   providedIn: 'root',
 })
 export class PluginHooksService {
-  private _handlers = new Map<Hooks, Map<string, PluginHookHandler>>();
+  private _handlers = new Map<Hooks, Map<string, PluginHookHandler<any>>>();
 
   /**
    * Register a hook handler
    */
-  registerHookHandler(pluginId: string, hook: Hooks, handler: PluginHookHandler): void {
+  registerHookHandler<T extends Hooks>(
+    pluginId: string,
+    hook: T,
+    handler: PluginHookHandler<T>,
+  ): void {
     if (!this._handlers.has(hook)) {
       this._handlers.set(hook, new Map());
     }
@@ -26,7 +30,7 @@ export class PluginHooksService {
   /**
    * Dispatch a hook to all registered handlers
    */
-  async dispatchHook(hook: Hooks, payload?: any): Promise<void> {
+  async dispatchHook(hook: Hooks, payload?: unknown): Promise<void> {
     const handlers = this._handlers.get(hook);
     if (!handlers || handlers.size === 0) {
       return;

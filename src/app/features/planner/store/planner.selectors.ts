@@ -22,7 +22,7 @@ import { selectConfigFeatureState } from '../../config/store/global-config.reduc
 import { ScheduleConfig } from '../../config/global-config.model';
 import { selectTodayStr } from '../../../root-store/app-state/app-state.selectors';
 import { isToday } from '../../../util/is-today.util';
-import { selectTaskRepeatCfgsDueOnDayOnly } from '../../task-repeat-cfg/store/task-repeat-cfg.selectors';
+import { selectTaskRepeatCfgsForExactDay } from '../../task-repeat-cfg/store/task-repeat-cfg.selectors';
 
 export const selectPlannerState = createFeatureSelector<fromPlanner.PlannerState>(
   fromPlanner.plannerFeatureKey,
@@ -230,7 +230,7 @@ const getAllRepeatableTasksForDay = (
 } => {
   const repeatProjectionsForDay: ScheduleItemRepeatProjection[] = [];
   const noStartTimeRepeatProjections: NoStartTimeRepeatProjection[] = [];
-  const allRepeatableTasksForDay = selectTaskRepeatCfgsDueOnDayOnly.projector(
+  const allRepeatableTasksForDay = selectTaskRepeatCfgsForExactDay.projector(
     taskRepeatCfgs,
     {
       dayDate: currentDayTimestamp,

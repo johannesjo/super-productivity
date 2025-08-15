@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 2. KISS (Keep It Simple, Stupid): Aim for simplicity and clarity in code. Avoid unnecessary complexity and abstractions.
 3. DRY (Don't Repeat Yourself): Reuse code where possible. Create utility functions or services for common logic, but avoid unnecessary abstractions.
 4. Confirm understanding before making changes: If you're unsure about the purpose of a piece of code, ask for clarification rather than making assumptions.
-5. Use `npm run prettier` and `npm run lint` to format and check code style before committing changes.
+5. **ALWAYS** use `npm run checkFile <filepath>` on each file you modify to ensure proper formatting and linting. This runs both prettier and lint checks on individual files. Unless you want to lint and format multiple files, then use `npm run prettier` and `npm run lint` instead.
 6. When creating html templates, prefer plain html like `<table>` and `<div>`. Keep CSS styles to a minimum. Keep nesting to a minimum. Keep css classes to a minimum. Use Angular Material components where appropriate, but avoid overusing them.
 
 ## Project Overview
@@ -38,12 +38,23 @@ npm run lint      # Linting
 
 # Build for production
 npm run dist      # All platforms Builds (all available in current environment)
+
+# IMPORTANT: Check individual files before committing
+# Example: npm run checkFile src/app/features/tasks/task.service.ts
+# Use this command OFTEN when modifying files to ensure code quality
+npm run checkFile <filepath>  # Runs prettier and lint on a single file
+# executes unit tests of a single spec file
+npm run test:file <filepath>
 ```
 
 ### Testing
 
-- Unit tests: `npm test`  - Uses Jasmine/Karma, tests are co-located with source files (`.spec.ts`)
+- Unit tests: `npm test` - Uses Jasmine/Karma, tests are co-located with source files (`.spec.ts`)
 - E2E tests: `npm run e2e` - Uses Nightwatch, located in `/e2e/src/`
+- Playwright E2E tests: Located in `/e2e/`
+  - `npm run e2e:playwright` - Run all tests with minimal output (shows failures clearly)
+  - `npm run e2e:playwright:file <path>` - Run a single test file with detailed output
+    - Example: `npm run e2e:playwright:file tests/work-view/work-view.spec.ts`
 - Linting: `npm run lint` - ESLint for TypeScript, Stylelint for SCSS
 
 ## Architecture Overview
@@ -81,7 +92,7 @@ The app uses NgRx (Redux pattern) for state management. Key state slices:
 ### Data Sync
 
 - Multiple sync providers: Dropbox, WebDAV, local file
-- Sync is conflict-aware with vector-clock  resolution
+- Sync is conflict-aware with vector-clock resolution
 - All sync operations go through `/src/app/imex/sync/`
 
 ## Important Development Notes

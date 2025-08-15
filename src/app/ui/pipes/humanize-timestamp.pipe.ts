@@ -6,7 +6,7 @@ import { humanizeTimestamp } from '../../util/humanize-timestamp';
 export class HumanizeTimestampPipe implements PipeTransform {
   private translateService = inject(TranslateService);
 
-  transform(value: any): any {
+  transform(value: number | Date | string): string {
     return humanizeTimestamp(value, this.translateService);
   }
 }

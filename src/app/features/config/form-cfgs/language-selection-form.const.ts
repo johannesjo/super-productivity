@@ -38,5 +38,27 @@ export const LANGUAGE_SELECTION_FORM_FORM: ConfigFormSection<LanguageConfig> = {
         ],
       },
     },
+    {
+      key: 'timeLocale',
+      type: 'select',
+      templateOptions: {
+        label: T.GCF.LANG.TIME_LOCALE,
+        description: T.GCF.LANG.TIME_LOCALE_DESCRIPTION,
+        options: [
+          { label: T.GCF.LANG.TIME_LOCALE_AUTO, value: undefined },
+          { label: T.GCF.LANG.TIME_LOCALE_EN_US, value: 'en-US' },
+          { label: T.GCF.LANG.TIME_LOCALE_EN_GB, value: 'en-GB' },
+          { label: T.GCF.LANG.TIME_LOCALE_DE_DE, value: 'de-DE' },
+          { label: T.GCF.LANG.TIME_LOCALE_FR_FR, value: 'fr-FR' },
+          { label: T.GCF.LANG.TIME_LOCALE_ES_ES, value: 'es-ES' },
+          { label: T.GCF.LANG.TIME_LOCALE_IT_IT, value: 'it-IT' },
+          { label: T.GCF.LANG.TIME_LOCALE_PT_BR, value: 'pt-BR' },
+          { label: T.GCF.LANG.TIME_LOCALE_RU_RU, value: 'ru-RU' },
+          { label: T.GCF.LANG.TIME_LOCALE_ZH_CN, value: 'zh-CN' },
+          { label: T.GCF.LANG.TIME_LOCALE_JA_JP, value: 'ja-JP' },
+          { label: T.GCF.LANG.TIME_LOCALE_KO_KR, value: 'ko-KR' },
+        ],
+      },
+    },
   ],
 };

@@ -3,30 +3,20 @@ import {
   ErrorHandler,
   importProvidersFrom,
   LOCALE_ID,
-  provideExperimentalZonelessChangeDetection,
+  provideZonelessChangeDetection,
   SecurityContext,
 } from '@angular/core';
+import { DatePipe } from '@angular/common';
 
 import { environment } from './environments/environment';
 import { IS_ELECTRON, LanguageCode } from './app/app.constants';
 import { IS_ANDROID_WEB_VIEW } from './app/util/is-android-web-view';
 import { androidInterface } from './app/features/android/android-interface';
-import { ElectronAPI } from '../electron/electronAPI.d';
+// Type definitions for window.ea are in ./app/core/window-ea.d.ts
 import { App as CapacitorApp } from '@capacitor/app';
 import { GlobalErrorHandler } from './app/core/error-handler/global-error-handler.class';
-import {
-  bootstrapApplication,
-  BrowserModule,
-  HAMMER_GESTURE_CONFIG,
-  HammerModule,
-} from '@angular/platform-browser';
-import { MyHammerConfig } from './hammer-config.class';
-import {
-  HttpClient,
-  provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
-import { DatePipe } from '@angular/common';
+import { bootstrapApplication, BrowserModule } from '@angular/platform-browser';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { MarkdownModule, MARKED_OPTIONS, provideMarkdown } from 'ngx-markdown';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { FeatureStoresModule } from './app/root-store/feature-stores.module';
@@ -52,6 +42,7 @@ import {
   plannerSharedMetaReducer,
   projectSharedMetaReducer,
   tagSharedMetaReducer,
+  taskBatchUpdateMetaReducer,
   taskSharedCrudMetaReducer,
   taskSharedLifecycleMetaReducer,
   taskSharedSchedulingMetaReducer,
@@ -60,12 +51,15 @@ import { EffectsModule } from '@ngrx/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ServiceWorkerModule } from '@angular/service-worker';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
+import {
+  TranslateHttpLoader,
+  TRANSLATE_HTTP_LOADER_CONFIG,
+} from '@ngx-translate/http-loader';
 import { CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { AppComponent } from './app/app.component';
-import { TranslateHttpLoader } from '@ngx-translate/http-loader';
-import { ShortTime2Pipe } from './app/ui/pipes/short-time2.pipe';
-import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
+import { ShortTimeHtmlPipe } from './app/ui/pipes/short-time-html.pipe';
+import { ShortTimePipe } from './app/ui/pipes/short-time.pipe';
 import { BackgroundTask } from '@capawesome/capacitor-background-task';
 import { promiseTimeout } from './app/util/promise-timeout';
 import { PLUGIN_INITIALIZER_PROVIDER } from './app/plugins/plugin-initializer';
@@ -76,17 +70,18 @@ if (environment.production || environment.stage) {
   enableProdMode();
 }
 
-declare global {
-  interface Window {
-    ea: ElectronAPI;
-  }
-}
-
-const createTranslateLoader = (http: HttpClient): TranslateHttpLoader =>
-  new TranslateHttpLoader(http, './assets/i18n/', '.json');
+// Window.ea declaration is in src/app/core/window-ea.d.ts
 
 bootstrapApplication(AppComponent, {
   providers: [
+    // Provide configuration for TranslateHttpLoader
+    {
+      provide: TRANSLATE_HTTP_LOADER_CONFIG,
+      useValue: {
+        prefix: './assets/i18n/',
+        suffix: '.json',
+      },
+    },
     importProvidersFrom(
       FeatureStoresModule,
       MatNativeDateModule,
@@ -104,12 +99,12 @@ bootstrapApplication(AppComponent, {
       MaterialCssVarsModule.forRoot(),
       // External
       BrowserModule,
-      HammerModule,
       // NOTE: both need to be present to use forFeature stores
       StoreModule.forRoot(reducers, {
         metaReducers: [
           undoTaskDeleteMetaReducer,
           taskSharedCrudMetaReducer,
+          taskBatchUpdateMetaReducer,
           taskSharedLifecycleMetaReducer,
           taskSharedSchedulingMetaReducer,
           projectSharedMetaReducer,
@@ -153,8 +148,7 @@ bootstrapApplication(AppComponent, {
       TranslateModule.forRoot({
         loader: {
           provide: TranslateLoader,
-          useFactory: createTranslateLoader,
-          deps: [HttpClient],
+          useClass: TranslateHttpLoader,
         },
       }),
       CdkDropListGroup,
@@ -169,12 +163,10 @@ bootstrapApplication(AppComponent, {
         : 'en-US',
     },
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
-    { provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig },
     provideHttpClient(withInterceptorsFromDi()),
-    // TODO check if these can be removed
     DatePipe,
-    ShortTime2Pipe,
-    provideCharts(withDefaultRegisterables()),
+    ShortTimeHtmlPipe,
+    ShortTimePipe,
     provideMarkdown(),
     {
       provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
@@ -183,7 +175,7 @@ bootstrapApplication(AppComponent, {
     provideAnimations(),
     provideRouter(APP_ROUTES, withHashLocation(), withPreloading(PreloadAllModules)),
     PLUGIN_INITIALIZER_PROVIDER,
-    provideExperimentalZonelessChangeDetection(),
+    provideZonelessChangeDetection(),
   ],
 }).then(() => {
   // Initialize touch fix for Material menus

@@ -38,13 +38,13 @@ xdescribe('Sync Fixes - TDD', () => {
   const oldTaskRepeatConfig = {
     id: 'repeat1',
     title: 'Daily Task',
-    lastTaskCreation: '2025-06-22', // Yesterday
+    lastTaskCreationDay: '2025-06-22', // Yesterday
   };
 
   const syncedTaskRepeatConfig = {
     id: 'repeat1',
     title: 'Daily Task',
-    lastTaskCreation: '2025-06-23', // Today - already created on mobile
+    lastTaskCreationDay: '2025-06-23', // Today - already created on mobile
   };
 
   beforeEach(() => {
@@ -279,7 +279,7 @@ xdescribe('Sync Fixes - TDD', () => {
       const loadedData = await mockPfapi.getAllSyncModelData(true);
 
       // ASSERTION: Should return synced data, not old data
-      expect(loadedData.taskRepeatCfg.entities.repeat1.lastTaskCreation).toBe(
+      expect(loadedData.taskRepeatCfg.entities.repeat1.lastTaskCreationDay).toBe(
         '2025-06-23',
         "Should return freshly synced data with today's date",
       );
@@ -289,7 +289,7 @@ xdescribe('Sync Fixes - TDD', () => {
       // This shows the complete correct flow
 
       const timeline: string[] = [];
-      let currentDataState = { lastTaskCreation: '2025-06-22' }; // Old
+      let currentDataState = { lastTaskCreationDay: '2025-06-22' }; // Old
 
       // Mock the fixed pfapi service
       const mockPfapi = {
@@ -298,7 +298,7 @@ xdescribe('Sync Fixes - TDD', () => {
         // Simulate sync downloading data
         sync: async () => {
           timeline.push('Sync: downloading remote data');
-          mockPfapi.syncedData = { lastTaskCreation: '2025-06-23' };
+          mockPfapi.syncedData = { lastTaskCreationDay: '2025-06-23' };
           timeline.push('Sync: data downloaded and saved to IndexedDB');
           return { status: 'UpdateLocal' };
         },
@@ -326,7 +326,7 @@ xdescribe('Sync Fixes - TDD', () => {
       console.log('Data after reInit:', dataAfterReInit);
 
       // Assertions
-      expect(dataAfterReInit.lastTaskCreation).toBe(
+      expect(dataAfterReInit.lastTaskCreationDay).toBe(
         '2025-06-23',
         'Should have synced data',
       );
@@ -348,7 +348,8 @@ xdescribe('Sync Fixes - TDD', () => {
         let currentState: any;
         store.select((state) => state).subscribe((state) => (currentState = state));
         if (
-          currentState?.taskRepeatCfg?.entities?.repeat1?.lastTaskCreation < '2025-06-23'
+          currentState?.taskRepeatCfg?.entities?.repeat1?.lastTaskCreationDay <
+          '2025-06-23'
         ) {
           finalTasksCreated++;
         }

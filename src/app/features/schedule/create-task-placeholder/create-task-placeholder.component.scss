@@ -142,14 +142,17 @@
     }
 
     .mode-hint {
-      font-size: 9px;
+      font-size: 11px;
       color: var(--text-tertiary);
       text-align: center;
       line-height: 1.2;
       opacity: 0.8;
+      margin-top: auto;
+      padding-top: 4px;
+      border-top: 1px dashed var(--extra-border-color);
 
       @include mq(xs, max) {
-        font-size: 8px;
+        font-size: 9px;
       }
 
       // Hide hint text when width is very small (< 150px)

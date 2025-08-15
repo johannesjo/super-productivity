@@ -12,6 +12,9 @@ on:
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
+    env:
+      UNSPLASH_KEY: ${{ secrets.UNSPLASH_KEY }}
+      UNSPLASH_CLIENT_ID: ${{ secrets.UNSPLASH_CLIENT_ID }}
     steps:
       - uses: actions/checkout@v4
 
@@ -22,6 +25,8 @@ jobs:
 
       - name: Install dependencies
         run: npm i
+
+      - run: npm run env # Generate env.generated.ts
 
       - name: Build production web app
         run: npm run buildFrontend:prodWeb

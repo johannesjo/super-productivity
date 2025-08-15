@@ -8,7 +8,7 @@ import {
 } from '../../../features/tasks/store/task.reducer';
 import { Task } from '../../../features/tasks/task.model';
 import { TODAY_TAG } from '../../../features/tag/tag.const';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import { unique } from '../../../util/unique';
 import { isToday } from '../../../util/is-today.util';
 import { moveItemBeforeItem } from '../../../util/move-item-before-item';
@@ -133,7 +133,7 @@ const handlePlanTasksForToday = (
   parentTaskMap: Record<string, string | undefined>,
 ): RootState => {
   const todayTag = getTag(state, TODAY_TAG.id);
-  const today = getWorklogStr();
+  const today = getDbDateStr();
 
   // Filter out tasks that are already in today or whose parent is in today
   const newTasksForToday = taskIds.filter((taskId) => {

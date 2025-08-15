@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import {
@@ -33,6 +33,7 @@ import { DialogConfirmComponent } from '../../../../ui/dialog-confirm/dialog-con
 import { isJiraEnabled } from './is-jira-enabled.util';
 import { IssueProviderService } from '../../issue-provider.service';
 import { assertTruthy } from '../../../../util/assert-truthy';
+import { devError } from '../../../../util/dev-error';
 
 @Injectable()
 export class JiraIssueEffects {
@@ -119,7 +120,13 @@ export class JiraIssueEffects {
         ),
         concatMap(([, currentTaskOrParent]) => {
           if (!currentTaskOrParent.issueProviderId) {
-            throw new Error('No issueProviderId for task');
+            // Log warning but don't crash - task has issue data but no provider ID
+            devError(
+              `Task ${currentTaskOrParent.id} has Jira issue ` +
+                `${currentTaskOrParent.issueId} but no issueProviderId. ` +
+                `Issue features will be disabled for this task.`,
+            );
+            return EMPTY;
           }
           return this._getCfgOnce$(currentTaskOrParent.issueProviderId).pipe(
             map((jiraCfg) => ({ jiraCfg, currentTaskOrParent })),
@@ -202,7 +209,13 @@ export class JiraIssueEffects {
         ),
         concatMap(([, currentTaskOrParent]) => {
           if (!currentTaskOrParent.issueProviderId) {
-            throw new Error('No issueProviderId for task');
+            // Log warning but don't crash - task has issue data but no provider ID
+            devError(
+              `Task ${currentTaskOrParent.id} has Jira issue ` +
+                `${currentTaskOrParent.issueId} but no issueProviderId. ` +
+                `Issue features will be disabled for this task.`,
+            );
+            return EMPTY;
           }
           return this._getCfgOnce$(currentTaskOrParent.issueProviderId).pipe(
             map((jiraCfg) => ({ jiraCfg, currentTaskOrParent })),
@@ -233,7 +246,12 @@ export class JiraIssueEffects {
         filter((task: Task) => task && task.issueType === JIRA_TYPE),
         concatMap((task: Task) => {
           if (!task.issueProviderId) {
-            throw new Error('No issueProviderId for task');
+            // Log warning but don't crash - task has issue data but no provider ID
+            devError(
+              `Task ${task.id} has Jira issue ${task.issueId} but no issueProviderId. ` +
+                `Issue features will be disabled for this task.`,
+            );
+            return EMPTY;
           }
           return this._getCfgOnce$(task.issueProviderId).pipe(
             map((jiraCfg) => ({ jiraCfg, task })),

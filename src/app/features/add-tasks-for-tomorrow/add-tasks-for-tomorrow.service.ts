@@ -13,7 +13,7 @@ import {
 import { getDateRangeForDay } from '../../util/get-date-range-for-day';
 import { first, map, switchMap, withLatestFrom } from 'rxjs/operators';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
-import { getWorklogStr } from '../../util/get-work-log-str';
+import { getDbDateStr } from '../../util/get-db-date-str';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { selectTodayTaskIds } from '../work-context/store/work-context.selectors';
 import { selectTasksForPlannerDay } from '../planner/store/planner.selectors';
@@ -36,7 +36,7 @@ export class AddTasksForTomorrowService {
   );
   private _repeatableForTomorrow$: Observable<TaskRepeatCfg[]> = this._tomorrowDate$.pipe(
     switchMap((d) =>
-      this._taskRepeatCfgService.getRepeatableTasksDueForDayOnly$(d.getTime()),
+      this._taskRepeatCfgService.getRepeatableTasksForExactDay$(d.getTime()),
     ),
   );
 
@@ -50,7 +50,7 @@ export class AddTasksForTomorrowService {
     );
 
   private _dueForDayForTomorrow$: Observable<TaskWithDueDay[]> = this._tomorrowDate$.pipe(
-    switchMap((d) => this._store.select(selectTasksDueForDay, { day: getWorklogStr(d) })),
+    switchMap((d) => this._store.select(selectTasksDueForDay, { day: getDbDateStr(d) })),
   );
 
   nrOfPlannerItemsForTomorrow$: Observable<number> = combineLatest([
@@ -87,7 +87,7 @@ export class AddTasksForTomorrowService {
 
     // we do this to keep the order of the tasks in planner
     const tomorrowTasksFromPlanner = await this._store
-      .select(selectTasksForPlannerDay(getWorklogStr(tomorrow)))
+      .select(selectTasksForPlannerDay(getDbDateStr(tomorrow)))
       .pipe(first())
       .toPromise();
 
@@ -126,12 +126,12 @@ export class AddTasksForTomorrowService {
     const todayDate = new Date();
     // Use current timestamp for today
     const todayTS = Date.now();
-    const todayStr = getWorklogStr();
+    const todayStr = getDbDateStr();
 
     TaskLog.log('[AddTasksForTomorrow] Starting addAllDueToday', { todayStr });
 
     const dueRepeatCfgs = await this._taskRepeatCfgService
-      .getRepeatableTasksDueForDayOnly$(todayDate.getTime())
+      .getAllUnprocessedRepeatableTasks$(todayDate.getTime())
       .pipe(first())
       .toPromise();
 
@@ -145,7 +145,7 @@ export class AddTasksForTomorrowService {
       this._store.select(selectTasksWithDueTimeForRange, {
         ...getDateRangeForDay(todayDate.getTime()),
       }),
-      this._store.select(selectTasksDueForDay, { day: getWorklogStr(todayDate) }),
+      this._store.select(selectTasksDueForDay, { day: getDbDateStr(todayDate) }),
     ])
       .pipe(first())
       .toPromise();
@@ -204,37 +204,36 @@ export class AddTasksForTomorrowService {
 
   private _sortAll(tasks: TaskCopy[]): TaskCopy[] {
     return tasks.sort((a, b) => {
-      // Handle cases where properties might be undefined
-      const aDate = a.dueDay ? new Date(a.dueDay) : null;
-      const bDate = b.dueDay ? new Date(b.dueDay) : null;
+      // Handle null cases first - tasks without due dates go last
+      const aHasDue = a.dueWithTime || a.dueDay;
+      const bHasDue = b.dueWithTime || b.dueDay;
+      if (!aHasDue && !bHasDue) return 0;
+      if (!aHasDue) return 1;
+      if (!bHasDue) return -1;
 
-      // Get timestamp values, with fallbacks
-      const aTime =
-        a.dueWithTime || (aDate ? aDate.setHours(0, 0, 0, 0) : Number.MAX_SAFE_INTEGER);
-      const bTime =
-        b.dueWithTime || (bDate ? bDate.setHours(0, 0, 0, 0) : Number.MAX_SAFE_INTEGER);
+      // Check if tasks are on the same day
+      const aDay = a.dueWithTime ? getDbDateStr(new Date(a.dueWithTime)) : a.dueDay;
+      const bDay = b.dueWithTime ? getDbDateStr(new Date(b.dueWithTime)) : b.dueDay;
 
-      // For same day comparison
-      const aDay = a.dueWithTime
-        ? new Date(a.dueWithTime).setHours(0, 0, 0, 0)
-        : aDate
-          ? aDate.setHours(0, 0, 0, 0)
-          : null;
-      const bDay = b.dueWithTime
-        ? new Date(b.dueWithTime).setHours(0, 0, 0, 0)
-        : bDate
-          ? bDate.setHours(0, 0, 0, 0)
-          : null;
-
-      // Special handling for same day
-      if (aDay !== null && bDay !== null && aDay === bDay) {
-        // If one has dueDay without time and other has dueWithTime
+      if (aDay === bDay) {
+        // Same day: tasks with only dueDay (no time) come before tasks with dueWithTime
         if (a.dueDay && !a.dueWithTime && b.dueWithTime) return -1;
         if (b.dueDay && !b.dueWithTime && a.dueWithTime) return 1;
+
+        // Both have time on same day
+        if (a.dueWithTime && b.dueWithTime) {
+          return a.dueWithTime - b.dueWithTime;
+        }
       }
 
-      // Default chronological ordering
-      return aTime - bTime;
+      // Different days or both have only dueDay
+      // Note: String comparison works correctly here because dueDay is in YYYY-MM-DD format
+      // which is lexicographically sortable. This avoids timezone conversion issues.
+      if (aDay && bDay) {
+        return aDay.localeCompare(bDay);
+      }
+
+      return 0;
     });
   }
 }

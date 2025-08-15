@@ -29,14 +29,14 @@ import { getDateTimeFromClockString } from '../../util/get-date-time-from-clock-
 import { isSameDay } from '../../util/is-same-day';
 import { remindOptionToMilliseconds } from '../tasks/util/remind-option-to-milliseconds';
 import { getNewestPossibleDueDate } from './store/get-newest-possible-due-date.util';
-import { getWorklogStr } from '../../util/get-work-log-str';
+import { getDbDateStr } from '../../util/get-db-date-str';
 import { TODAY_TAG } from '../tag/tag.const';
 import {
   selectAllTaskRepeatCfgs,
   selectTaskRepeatCfgById,
   selectTaskRepeatCfgByIdAllowUndefined,
-  selectTaskRepeatCfgsDueOnDayIncludingOverdue,
-  selectTaskRepeatCfgsDueOnDayOnly,
+  selectAllUnprocessedTaskRepeatCfgs,
+  selectTaskRepeatCfgsForExactDay,
 } from './store/task-repeat-cfg.selectors';
 import { devError } from '../../util/dev-error';
 
@@ -53,17 +53,15 @@ export class TaskRepeatCfgService {
     select(selectAllTaskRepeatCfgs),
   );
 
-  getRepeatableTasksDueForDayOnly$(dayDate: number): Observable<TaskRepeatCfg[]> {
-    // ===> taskRepeatCfgs scheduled for today and not yet created already
-    return this._store$.select(selectTaskRepeatCfgsDueOnDayOnly, { dayDate });
+  getRepeatableTasksForExactDay$(dayDate: number): Observable<TaskRepeatCfg[]> {
+    // ===> taskRepeatCfgs where calculated due date matches the specified day
+    return this._store$.select(selectTaskRepeatCfgsForExactDay, { dayDate });
   }
 
-  getRepeatableTasksDueForDayIncludingOverdue$(
-    dayDate: number,
-  ): Observable<TaskRepeatCfg[]> {
+  getAllUnprocessedRepeatableTasks$(dayDate: number): Observable<TaskRepeatCfg[]> {
     // ===> taskRepeatCfgs scheduled for today and not yet created already
     return this._store$
-      .select(selectTaskRepeatCfgsDueOnDayIncludingOverdue, { dayDate })
+      .select(selectAllUnprocessedTaskRepeatCfgs, { dayDate })
       .pipe(first());
   }
 
@@ -208,7 +206,7 @@ export class TaskRepeatCfgService {
           // NOTE if moving this to top isCreateNew check above would not work as intended
           // we use created also for the repeat day label for past tasks
           created: targetCreated.getTime(),
-          dueDay: getWorklogStr(targetCreated),
+          dueDay: getDbDateStr(targetCreated),
         },
         workContextType: this._workContextService
           .activeWorkContextType as WorkContextType,
@@ -220,7 +218,8 @@ export class TaskRepeatCfgService {
         taskRepeatCfg: {
           id: taskRepeatCfg.id,
           changes: {
-            lastTaskCreation: targetDayDate,
+            lastTaskCreation: targetCreated.getTime(),
+            lastTaskCreationDay: getDbDateStr(targetCreated),
           },
         },
       }),
@@ -259,7 +258,7 @@ export class TaskRepeatCfgService {
           projectId: taskRepeatCfg.projectId || undefined,
           notes: taskRepeatCfg.notes || '',
           // always due for today
-          dueDay: getWorklogStr(),
+          dueDay: getDbDateStr(),
           tagIds: taskRepeatCfg.tagIds.filter((tagId) => tagId !== TODAY_TAG.id),
         },
       }),

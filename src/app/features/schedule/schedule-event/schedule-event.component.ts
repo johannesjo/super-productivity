@@ -8,7 +8,6 @@ import {
   HostListener,
   inject,
   Input,
-  LOCALE_ID,
   OnInit,
   viewChild,
 } from '@angular/core';
@@ -39,6 +38,7 @@ import { DialogTaskDetailPanelComponent } from '../../tasks/dialog-task-detail-p
 import { TaskContextMenuComponent } from '../../tasks/task-context-menu/task-context-menu.component';
 import { BehaviorSubject, of } from 'rxjs';
 import { IssueService } from '../../issue/issue.service';
+import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
 
 @Component({
   selector: 'schedule-event',
@@ -53,7 +53,7 @@ export class ScheduleEventComponent implements OnInit {
   private _matDialog = inject(MatDialog);
   private _cd = inject(ChangeDetectorRef);
   private _issueService = inject(IssueService);
-  private locale = inject(LOCALE_ID);
+  private _dateTimeFormatService = inject(DateTimeFormatService);
 
   T: typeof T = T;
   @HostBinding('title') hoverTitle: string = '';
@@ -78,9 +78,6 @@ export class ScheduleEventComponent implements OnInit {
     | 'SPLIT_CONTINUE'
     | 'LUNCH_BREAK' = 'SPLIT_CONTINUE';
 
-  is12HourFormat = Intl.DateTimeFormat(this.locale, { hour: 'numeric' }).resolvedOptions()
-    .hour12;
-
   contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };
 
   readonly taskContextMenu = viewChild('taskContextMenu', {
@@ -101,13 +98,13 @@ export class ScheduleEventComponent implements OnInit {
       (this.se as any)?.data?.title ||
       (this.se.type === SVEType.LunchBreak ? 'Lunch Break' : 'TITLE');
 
+    const is12Hour = !this._dateTimeFormatService.is24HourFormat;
     const startClockStr = getClockStringFromHours(
-      this.is12HourFormat && this.se.startHours > 12
-        ? this.se.startHours - 12
-        : this.se.startHours,
+      is12Hour && this.se.startHours > 12 ? this.se.startHours - 12 : this.se.startHours,
     );
+    const endHours = this.se.startHours + this.se.timeLeftInHours;
     const endClockStr = getClockStringFromHours(
-      this.se.startHours + this.se.timeLeftInHours,
+      is12Hour && endHours > 12 ? endHours - 12 : endHours,
     );
     // this.durationStr = (this.se.timeLeftInHours * 60).toString().substring(0, 4);
     this.hoverTitle = startClockStr + ' - ' + endClockStr + '  ' + this.title;

@@ -5,15 +5,16 @@ const M = S * 60;
 const H = M * 60;
 
 export const msToString = (
-  value: any,
+  value: number | null | undefined,
   isShowSeconds?: boolean,
   isHideEmptyPlaceholder?: boolean,
 ): string => {
-  const hours = Math.floor(value / H);
+  const numValue = Number(value) || 0;
+  const hours = Math.floor(numValue / H);
   // prettier-ignore
-  const minutes = Math.floor((value - (hours * H)) / M);
+  const minutes = Math.floor((numValue - (hours * H)) / M);
   // prettier-ignore
-  const seconds = isShowSeconds ? Math.floor((value - (hours * H) - (minutes * M)) / S) : 0;
+  const seconds = isShowSeconds ? Math.floor((numValue - (hours * H) - (minutes * M)) / S) : 0;
 
   const parsed =
     // ((+md.days() > 0) ? (md.days() + 'd ') : '')
@@ -31,7 +32,7 @@ export const msToString = (
 @Pipe({ name: 'msToString' })
 export class MsToStringPipe implements PipeTransform {
   transform: (
-    value: any,
+    value: number | null | undefined,
     isShowSeconds?: boolean,
     isHideEmptyPlaceholder?: boolean,
   ) => string = msToString;

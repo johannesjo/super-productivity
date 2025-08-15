@@ -10,7 +10,7 @@ import { AbstractControl, NG_VALIDATORS, Validator, ValidatorFn } from '@angular
 
 import { minValidator } from './min.validator';
 
-const MIN_VALIDATOR: any = {
+const MIN_VALIDATOR = {
   provide: NG_VALIDATORS,
   useExisting: forwardRef(() => MinDirective),
   multi: true,
@@ -44,9 +44,11 @@ export class MinDirective implements Validator, OnInit, OnChanges {
     }
   }
 
-  validate(c: AbstractControl): { [key: string]: any } | null {
+  validate(c: AbstractControl): { [key: string]: unknown } | null {
     if (this._validator) {
-      return this._validator(c) as { [key: string]: any };
+      return this._validator(c) as {
+        [key: string]: unknown;
+      };
     }
     return null;
   }

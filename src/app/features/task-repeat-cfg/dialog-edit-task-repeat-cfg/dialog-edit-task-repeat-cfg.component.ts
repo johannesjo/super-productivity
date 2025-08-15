@@ -1,11 +1,11 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
+  computed,
+  effect,
   inject,
   LOCALE_ID,
-  OnDestroy,
-  OnInit,
+  signal,
 } from '@angular/core';
 import { Task, TaskReminderOptionId } from '../../tasks/task.model';
 import {
@@ -21,7 +21,6 @@ import {
   TaskRepeatCfg,
   TaskRepeatCfgCopy,
 } from '../task-repeat-cfg.model';
-import { Observable, Subscription } from 'rxjs';
 import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
 import { UntypedFormGroup } from '@angular/forms';
 import {
@@ -31,19 +30,18 @@ import {
 import { T } from '../../../t.const';
 import { TagService } from '../../tag/tag.service';
 import { unique } from '../../../util/unique';
-import { Tag } from '../../tag/tag.model';
 import { exists } from '../../../util/exists';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import { first } from 'rxjs/operators';
 import { getQuickSettingUpdates } from './get-quick-setting-updates';
 import { clockStringFromDate } from '../../../ui/duration/clock-string-from-date';
 import { HelpSectionComponent } from '../../../ui/help-section/help-section.component';
 import { ChipListInputComponent } from '../../../ui/chip-list-input/chip-list-input.component';
 import { MatButton } from '@angular/material/button';
-import { AsyncPipe } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import { Log } from '../../../core/log';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 // TASK_REPEAT_CFG_FORM_CFG
 @Component({
@@ -60,13 +58,11 @@ import { Log } from '../../../core/log';
     ChipListInputComponent,
     MatDialogActions,
     MatButton,
-    AsyncPipe,
     MatIcon,
   ],
 })
-export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
+export class DialogEditTaskRepeatCfgComponent {
   private _tagService = inject(TagService);
-  private _cd = inject(ChangeDetectorRef);
   private _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private _matDialogRef =
     inject<MatDialogRef<DialogEditTaskRepeatCfgComponent>>(MatDialogRef);
@@ -79,34 +75,57 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
 
   T: typeof T = T;
 
-  repeatCfgInitial?: TaskRepeatCfgCopy;
-  repeatCfg: Omit<TaskRepeatCfgCopy, 'id'> | TaskRepeatCfg;
-  isEdit: boolean;
+  repeatCfgInitial = signal<TaskRepeatCfgCopy | undefined>(undefined);
+  repeatCfg = signal<Omit<TaskRepeatCfgCopy, 'id'> | TaskRepeatCfg>(
+    this._initializeRepeatCfg(),
+  );
+  isEdit = computed(() => {
+    if (this._data.repeatCfg) return true;
+    if (this._data.task?.repeatCfgId) return true;
+    return false;
+  });
 
-  TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[];
-  TASK_REPEAT_CFG_ADVANCED_FORM_CFG: FormlyFieldConfig[];
+  TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS = signal<FormlyFieldConfig[]>([]);
+  TASK_REPEAT_CFG_ADVANCED_FORM_CFG = signal<FormlyFieldConfig[]>(
+    TASK_REPEAT_CFG_ADVANCED_FORM_CFG,
+  );
 
-  formGroup1: UntypedFormGroup = new UntypedFormGroup({});
-  formGroup2: UntypedFormGroup = new UntypedFormGroup({});
-  tagSuggestions$: Observable<Tag[]> = this._tagService.tags$;
-
-  private _subs: Subscription = new Subscription();
+  formGroup1 = signal(new UntypedFormGroup({}));
+  formGroup2 = signal(new UntypedFormGroup({}));
+  tagSuggestions = toSignal(this._tagService.tags$, { initialValue: [] });
 
   constructor() {
-    const _locale = this._locale;
+    // Initialize form config
+    this._initializeFormConfig();
 
+    // Set up effect to load task repeat config if editing
+    effect(() => {
+      if (this.isEdit() && this._data.task?.repeatCfgId) {
+        this._taskRepeatCfgService
+          .getTaskRepeatCfgById$(this._data.task.repeatCfgId)
+          .pipe(first())
+          .subscribe((cfg) => {
+            this._setRepeatCfgInitiallyForEditOnly(cfg);
+          });
+      }
+    });
+  }
+
+  private _initializeRepeatCfg(): Omit<TaskRepeatCfgCopy, 'id'> | TaskRepeatCfg {
     if (this._data.repeatCfg) {
-      // NOTE: just for typing....
-      this.repeatCfg = { ...this._data.repeatCfg };
-      this._setRepeatCfgInitiallyForEditOnly(this._data.repeatCfg);
-      this.isEdit = true;
+      // Process the repeat config to determine if quickSetting needs to be changed to CUSTOM
+      const processedCfg = this._processQuickSettingForDate(this._data.repeatCfg);
+
+      // Set initial value for comparison
+      this.repeatCfgInitial.set({ ...this._data.repeatCfg });
+      return processedCfg;
     } else if (this._data.task) {
       const startTime = this._data.task.dueWithTime
         ? clockStringFromDate(this._data.task.dueWithTime)
         : undefined;
-      this.repeatCfg = {
+      return {
         ...DEFAULT_TASK_REPEAT_CFG,
-        startDate: getWorklogStr(this._data.task.dueWithTime || undefined),
+        startDate: getDbDateStr(this._data.task.dueWithTime || undefined),
         startTime,
         remindAt: startTime ? TaskReminderOptionId.AtStart : undefined,
         title: this._data.task.title,
@@ -114,14 +133,13 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
         tagIds: unique(this._data.task.tagIds),
         defaultEstimate: this._data.task.timeEstimate,
       };
-      this.isEdit = !!this._data.task.repeatCfgId;
     } else {
       throw new Error('Invalid params given for repeat dialog!');
     }
+  }
 
-    this.TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS = TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS;
-    this.TASK_REPEAT_CFG_ADVANCED_FORM_CFG = TASK_REPEAT_CFG_ADVANCED_FORM_CFG;
-
+  private _initializeFormConfig(): void {
+    const _locale = this._locale;
     const today = new Date();
     const weekdayStr = today.toLocaleDateString(_locale, {
       weekday: 'long',
@@ -134,7 +152,8 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
       month: 'numeric',
     });
 
-    (this.TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS[1] as any).templateOptions.options = [
+    const formConfigBeforeTags = [...TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS];
+    (formConfigBeforeTags[1] as any).templateOptions.options = [
       {
         value: 'DAILY',
         label: this._translateService.instant(T.F.TASK_REPEAT.F.Q_DAILY),
@@ -167,63 +186,56 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
         label: this._translateService.instant(T.F.TASK_REPEAT.F.Q_CUSTOM, {}),
       },
     ];
-  }
 
-  ngOnInit(): void {
-    if (this.isEdit && this._data.task?.repeatCfgId) {
-      this._subs.add(
-        this._taskRepeatCfgService
-          .getTaskRepeatCfgById$(this._data.task.repeatCfgId)
-          .pipe(first())
-          .subscribe((cfg) => {
-            this._setRepeatCfgInitiallyForEditOnly(cfg);
-            this._cd.detectChanges();
-          }),
-      );
-    }
-  }
-
-  ngOnDestroy(): void {
-    this._subs.unsubscribe();
+    this.TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS.set(formConfigBeforeTags);
   }
 
   save(): void {
+    const formGroup1 = this.formGroup1();
+    const formGroup2 = this.formGroup2();
+
     // Check if both forms are valid
-    if (!this.formGroup1.valid || !this.formGroup2.valid) {
+    if (!formGroup1.valid || !formGroup2.valid) {
       // Mark all fields as touched to show validation errors
-      this.formGroup1.markAllAsTouched();
-      this.formGroup2.markAllAsTouched();
+      formGroup1.markAllAsTouched();
+      formGroup2.markAllAsTouched();
       Log.err('Form validation failed', {
-        form1Errors: this.formGroup1.errors,
-        form2Errors: this.formGroup2.errors,
+        form1Errors: formGroup1.errors,
+        form2Errors: formGroup2.errors,
       });
       return;
     }
 
+    const currentRepeatCfg = this.repeatCfg();
+
     // workaround for formly not always updating hidden fields correctly (in time??)
-    if (this.repeatCfg.quickSetting !== 'CUSTOM') {
-      const updatesForQuickSetting = getQuickSettingUpdates(this.repeatCfg.quickSetting);
+    if (currentRepeatCfg.quickSetting !== 'CUSTOM') {
+      const updatesForQuickSetting = getQuickSettingUpdates(
+        currentRepeatCfg.quickSetting,
+      );
       if (updatesForQuickSetting) {
-        this.repeatCfg = { ...this.repeatCfg, ...updatesForQuickSetting };
+        this.repeatCfg.update((cfg) => ({ ...cfg, ...updatesForQuickSetting }));
       }
     }
 
-    if (this.isEdit) {
-      if (!this.repeatCfgInitial) {
+    const finalRepeatCfg = this.repeatCfg();
+
+    if (this.isEdit()) {
+      const initial = this.repeatCfgInitial();
+      if (!initial) {
         throw new Error('Initial task repeat cfg missing (code error)');
       }
       const isRelevantChangesForUpdateAllTasks =
-        this.repeatCfgInitial.title !== this.repeatCfg.title ||
-        this.repeatCfgInitial.defaultEstimate !== this.repeatCfg.defaultEstimate ||
-        this.repeatCfgInitial.remindAt !== this.repeatCfg.remindAt ||
-        this.repeatCfgInitial.startTime !== this.repeatCfg.startTime ||
-        this.repeatCfgInitial.notes !== this.repeatCfg.notes ||
-        JSON.stringify(this.repeatCfgInitial.tagIds) !==
-          JSON.stringify(this.repeatCfg.tagIds);
+        initial.title !== finalRepeatCfg.title ||
+        initial.defaultEstimate !== finalRepeatCfg.defaultEstimate ||
+        initial.remindAt !== finalRepeatCfg.remindAt ||
+        initial.startTime !== finalRepeatCfg.startTime ||
+        initial.notes !== finalRepeatCfg.notes ||
+        JSON.stringify(initial.tagIds) !== JSON.stringify(finalRepeatCfg.tagIds);
 
       this._taskRepeatCfgService.updateTaskRepeatCfg(
-        exists((this.repeatCfg as TaskRepeatCfg).id),
-        this.repeatCfg,
+        exists((finalRepeatCfg as TaskRepeatCfg).id),
+        finalRepeatCfg,
         isRelevantChangesForUpdateAllTasks,
       );
       this.close();
@@ -231,15 +243,16 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
       this._taskRepeatCfgService.addTaskRepeatCfgToTask(
         (this._data.task as Task).id,
         (this._data.task as Task).projectId || null,
-        this.repeatCfg,
+        finalRepeatCfg,
       );
       this.close();
     }
   }
 
   remove(): void {
+    const currentRepeatCfg = this.repeatCfg();
     this._taskRepeatCfgService.deleteTaskRepeatCfgWithDialog(
-      exists((this.repeatCfg as TaskRepeatCfg).id),
+      exists((currentRepeatCfg as TaskRepeatCfg).id),
     );
     this.close();
   }
@@ -249,56 +262,66 @@ export class DialogEditTaskRepeatCfgComponent implements OnInit, OnDestroy {
   }
 
   addTag(id: string): void {
-    this._updateTags(unique([...this.repeatCfg.tagIds, id]));
+    this.repeatCfg.update((cfg) => ({
+      ...cfg,
+      tagIds: unique([...cfg.tagIds, id]),
+    }));
   }
 
   addNewTag(title: string): void {
     const id = this._tagService.addTag({ title });
-    this._updateTags(unique([...this.repeatCfg.tagIds, id]));
+    this.repeatCfg.update((cfg) => ({
+      ...cfg,
+      tagIds: unique([...cfg.tagIds, id]),
+    }));
   }
 
   removeTag(id: string): void {
-    const updatedTagIds = this.repeatCfg.tagIds.filter((tagId) => tagId !== id);
-    this._updateTags(updatedTagIds);
+    this.repeatCfg.update((cfg) => ({
+      ...cfg,
+      tagIds: cfg.tagIds.filter((tagId) => tagId !== id),
+    }));
   }
 
   private _setRepeatCfgInitiallyForEditOnly(repeatCfg: TaskRepeatCfg): void {
-    this.repeatCfg = { ...repeatCfg };
-    this.repeatCfgInitial = { ...repeatCfg };
+    const processedCfg = this._processQuickSettingForDate(repeatCfg);
+    this.repeatCfg.set(processedCfg);
+    this.repeatCfgInitial.set({ ...repeatCfg });
+  }
 
-    if (this.repeatCfg.quickSetting === 'WEEKLY_CURRENT_WEEKDAY') {
-      if (!this.repeatCfg.startDate) {
+  private _processQuickSettingForDate<
+    T extends { quickSetting?: string; startDate?: string },
+  >(cfg: T): T {
+    let processedCfg = { ...cfg };
+
+    if (processedCfg.quickSetting === 'WEEKLY_CURRENT_WEEKDAY') {
+      if (!processedCfg.startDate) {
         throw new Error('Invalid repeat cfg');
       }
-      if (new Date(this.repeatCfg.startDate).getDay() !== new Date().getDay()) {
-        this.repeatCfg = { ...this.repeatCfg, quickSetting: 'CUSTOM' };
+      if (new Date(processedCfg.startDate).getDay() !== new Date().getDay()) {
+        processedCfg = { ...processedCfg, quickSetting: 'CUSTOM' };
       }
     }
-    if (this.repeatCfg.quickSetting === 'YEARLY_CURRENT_DATE') {
-      if (!this.repeatCfg.startDate) {
+    if (processedCfg.quickSetting === 'YEARLY_CURRENT_DATE') {
+      if (!processedCfg.startDate) {
         throw new Error('Invalid repeat cfg');
       }
       if (
-        new Date(this.repeatCfg.startDate).getDate() !== new Date().getDate() ||
-        new Date(this.repeatCfg.startDate).getMonth() !== new Date().getMonth()
+        new Date(processedCfg.startDate).getDate() !== new Date().getDate() ||
+        new Date(processedCfg.startDate).getMonth() !== new Date().getMonth()
       ) {
-        this.repeatCfg = { ...this.repeatCfg, quickSetting: 'CUSTOM' };
+        processedCfg = { ...processedCfg, quickSetting: 'CUSTOM' };
       }
     }
-    if (this.repeatCfg.quickSetting === 'MONTHLY_CURRENT_DATE') {
-      if (!this.repeatCfg.startDate) {
+    if (processedCfg.quickSetting === 'MONTHLY_CURRENT_DATE') {
+      if (!processedCfg.startDate) {
         throw new Error('Invalid repeat cfg');
       }
-      if (new Date(this.repeatCfg.startDate).getDate() !== new Date().getDate()) {
-        this.repeatCfg = { ...this.repeatCfg, quickSetting: 'CUSTOM' };
+      if (new Date(processedCfg.startDate).getDate() !== new Date().getDate()) {
+        processedCfg = { ...processedCfg, quickSetting: 'CUSTOM' };
       }
     }
-  }
 
-  private _updateTags(newTagIds: string[]): void {
-    this.repeatCfg = {
-      ...this.repeatCfg,
-      tagIds: newTagIds,
-    };
+    return processedCfg;
   }
 }

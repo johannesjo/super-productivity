@@ -4,15 +4,15 @@ describe('formatDateTimeForFilename', () => {
   it('should format date as YYYYMMDD_HHmmss', () => {
     const testCases = [
       {
-        date: new Date('2023-10-15T14:30:45.123Z'),
+        date: new Date(2023, 9, 15, 14, 30, 45, 123),
         expected: '20231015_143045',
       },
       {
-        date: new Date('2024-01-01T00:00:00.000Z'),
+        date: new Date(2024, 0, 1, 0, 0, 0, 0),
         expected: '20240101_000000',
       },
       {
-        date: new Date('2024-12-31T23:59:59.999Z'),
+        date: new Date(2024, 11, 31, 23, 59, 59, 999),
         expected: '20241231_235959',
       },
     ];
@@ -49,7 +49,7 @@ describe('formatDateTimeForFilename', () => {
   });
 
   it('should pad single digit values with zeros', () => {
-    const date = new Date('2023-01-05T09:08:07');
+    const date = new Date(2023, 0, 5, 9, 8, 7);
     const result = formatDateTimeForFilename(date);
 
     // Check that single digits are padded

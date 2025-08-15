@@ -94,14 +94,14 @@
           >
             <span
               class="time-time"
-              [innerHTML]="scheduledItem.start | roundDuration | shortTime2"
+              [innerHTML]="scheduledItem.start | roundDuration | shortTimeHtml"
             ></span>
             <mat-icon>alarm</mat-icon>
           </div>
         } @else {
           <div
             class="time time-time"
-            [innerHTML]="scheduledItem.start | roundDuration | shortTime2"
+            [innerHTML]="scheduledItem.start | roundDuration | shortTimeHtml"
           ></div>
         }
 

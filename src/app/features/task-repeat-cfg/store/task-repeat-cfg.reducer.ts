@@ -9,9 +9,6 @@ import {
 import { TaskRepeatCfg, TaskRepeatCfgState } from '../task-repeat-cfg.model';
 import { createReducer, on } from '@ngrx/store';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
-import { migrateTaskRepeatCfgState } from '../migrate-task-repeat-cfg-state.util';
-import { MODEL_VERSION_KEY } from '../../../app.constants';
-import { MODEL_VERSION } from '../../../core/model-version';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { adapter } from './task-repeat-cfg.selectors';
 
@@ -22,16 +19,13 @@ export const { selectIds, selectEntities, selectAll, selectTotal } =
 
 export const initialTaskRepeatCfgState: TaskRepeatCfgState = adapter.getInitialState({
   // additional entity state properties
-  [MODEL_VERSION_KEY]: MODEL_VERSION.TASK_REPEAT,
 });
 
 export const taskRepeatCfgReducer = createReducer<TaskRepeatCfgState>(
   initialTaskRepeatCfgState,
 
   on(loadAllData, (oldState, { appDataComplete }) =>
-    appDataComplete.taskRepeatCfg
-      ? migrateTaskRepeatCfgState({ ...appDataComplete.taskRepeatCfg })
-      : oldState,
+    appDataComplete.taskRepeatCfg ? appDataComplete.taskRepeatCfg : oldState,
   ),
 
   // delete all project tasks from tags on project delete

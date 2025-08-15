@@ -83,10 +83,8 @@ export class DropboxApi {
    */
   async download<T>({
     path,
-    localRev,
   }: {
     path: string;
-    localRev?: string | null;
   }): Promise<{ meta: DropboxFileMetadata; data: T }> {
     try {
       const response = await this._request({
@@ -96,8 +94,6 @@ export class DropboxApi {
           'Dropbox-API-Arg': JSON.stringify({ path }),
           'Content-Type': 'application/octet-stream',
           // Don't send If-None-Match - always download full content
-          // localRev parameter kept for API consistency but not used
-          // ...(localRev ? { 'If-None-Match': localRev } : {}),
         },
       });
 
@@ -144,7 +140,8 @@ export class DropboxApi {
     if (!isForceOverwrite) {
       args.mode = revToMatch
         ? ({ '.tag': 'update', update: revToMatch } as any)
-        : { '.tag': 'update', update: '01630c96b4d421c00000001ce2a2770' };
+        : // TODO why is update hardcoded????
+          { '.tag': 'update', update: '01630c96b4d421c00000001ce2a2770' };
     }
 
     try {
@@ -249,7 +246,7 @@ export class DropboxApi {
       const data = (await response.json()) as TokenResponse;
       PFLog.normal('Dropbox: Refresh access token Response', data);
 
-      await this._parent.privateCfg.save({
+      await this._parent.privateCfg.updatePartial({
         accessToken: data.access_token,
         refreshToken: data.refresh_token || privateCfg?.refreshToken,
       });

@@ -19,6 +19,9 @@ import {
   unPauseFocusSession,
 } from '../../focus-mode/store/focus-mode.actions';
 import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
+import { ipcAddTaskFromAppUri$ } from '../../../core/ipc-events';
+import { TaskService } from '../task.service';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 
 // TODO send message to electron when current task changes here
 
@@ -29,6 +32,7 @@ export class TaskElectronEffects {
   private _configService = inject(GlobalConfigService);
   private _pomodoroService = inject(PomodoroService);
   private _focusModeService = inject(FocusModeService);
+  private _taskService = inject(TaskService);
 
   // -----------------------------------------------------------------------------------
   // NOTE: IS_ELECTRON checks not necessary, since we check before importing this module
@@ -69,7 +73,7 @@ export class TaskElectronEffects {
     });
   }
 
-  taskChangeElectron$: any = createEffect(
+  taskChangeElectron$ = createEffect(
     () =>
       this._actions$.pipe(
         ofType(
@@ -121,8 +125,8 @@ export class TaskElectronEffects {
         tap(({ id }) => {
           if (!id) {
             window.ea.setProgressBar({
-              progress: 0,
-              progressBarMode: 'pause',
+              progress: -1,
+              progressBarMode: 'none',
             });
           }
         }),
@@ -130,7 +134,23 @@ export class TaskElectronEffects {
     { dispatch: false },
   );
 
-  setTaskBarProgress$: any = createEffect(
+  clearTaskBarOnTaskDone$ = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(TaskSharedActions.updateTask),
+        tap(({ task }) => {
+          if (task.changes.isDone) {
+            window.ea.setProgressBar({
+              progress: -1,
+              progressBarMode: 'none',
+            });
+          }
+        }),
+      ),
+    { dispatch: false },
+  );
+
+  setTaskBarProgress$ = createEffect(
     () =>
       this._actions$.pipe(
         ofType(TimeTrackingActions.addTimeSpent),
@@ -149,6 +169,16 @@ export class TaskElectronEffects {
             progress,
             progressBarMode: 'normal',
           });
+        }),
+      ),
+    { dispatch: false },
+  );
+
+  handleAddTaskFromProtocol$ = createEffect(
+    () =>
+      ipcAddTaskFromAppUri$.pipe(
+        tap((data) => {
+          this._taskService.add(data.title);
         }),
       ),
     { dispatch: false },

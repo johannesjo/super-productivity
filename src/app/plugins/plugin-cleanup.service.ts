@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { cleanupAllPluginIframeUrls } from './util/plugin-iframe.util';
 
 /**
  * Simplified cleanup service following KISS principles.
@@ -33,5 +34,8 @@ export class PluginCleanupService {
   cleanupAll(): void {
     // Just clear all references - let Angular manage iframe DOM lifecycle
     this._pluginIframes.clear();
+
+    // Clean up all blob URLs to prevent memory leaks
+    cleanupAllPluginIframeUrls();
   }
 }

@@ -20,7 +20,7 @@ import { StringToMsPipe } from './string-to-ms.pipe';
 import { MsToStringPipe } from './ms-to-string.pipe';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from 'src/app/t.const';
-import { Log } from '../../core/log';
+import { processDurationInput } from './duration-input.util';
 
 @Directive({
   selector: 'input[inputDuration]',
@@ -88,11 +88,11 @@ export class InputDurationDirective implements ControlValueAccessor, Validator, 
     this._formatDisplayValue();
   }
 
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (value: number | null) => void): void {
     this._onChange = fn;
   }
 
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this._onTouched = fn;
   }
 
@@ -135,36 +135,22 @@ export class InputDurationDirective implements ControlValueAccessor, Validator, 
   }
 
   private _processInput(strVal: string): void {
-    try {
-      const digitWithTimeUnitRegex = /(^\d+h(?: \d+m)?$)|(^\d+m$)/i;
-      // If input is without unit like 1h, 2m, 3h 30m, etc, return
-      if (!digitWithTimeUnitRegex.test(strVal.trim())) {
-        return;
-      }
-      // Convert input string to milliseconds
-      const ms = strVal ? this._strToMs(strVal) : 0;
+    const result = processDurationInput(
+      strVal,
+      this.isAllowSeconds(),
+      this._previousMsValue,
+    );
 
-      // Special handling for zero values with units (e.g., "0m", "0h")
-      const isZeroWithUnit = /^0+[smhd]$/i.test(strVal.trim());
-
-      // don't interrupt typing for input without unit e.g. "32", "2h 32"
-      // but allow zero values with units to pass through
-      if (!isZeroWithUnit && strVal !== this._msToStr(ms)) {
-        return;
-      }
-
-      // Update internal state and notify form control
-      this._msValue = ms;
-      if (!this._previousMsValue || this._previousMsValue !== this._msValue) {
-        this._onChange(ms);
-      }
-      this._previousMsValue = this._msValue;
-    } catch (err) {
-      // If parsing fails, set to null
-      Log.err('Error parsing duration:', err);
-      this._msValue = null;
-      this._onChange(null);
+    if (!result.shouldUpdate) {
+      return;
     }
+
+    // Update internal state and notify form control
+    this._msValue = result.milliseconds;
+    if (!this._previousMsValue || this._previousMsValue !== this._msValue) {
+      this._onChange(result.milliseconds);
+    }
+    this._previousMsValue = this._msValue;
   }
 
   private _strToMs(str: string): number {

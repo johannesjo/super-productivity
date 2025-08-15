@@ -1,922 +1,674 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { WebdavApi } from './webdav-api';
-import { WebdavPrivateCfg } from './webdav';
-import {
-  AuthFailSPError,
-  NoEtagAPIError,
-  RemoteFileNotFoundAPIError,
-} from '../../../errors/errors';
-import { CapacitorHttp } from '@capacitor/core';
+import { WebdavPrivateCfg } from './webdav.model';
+import { WebDavHttpAdapter } from './webdav-http-adapter';
+import { WebdavXmlParser } from './webdav-xml-parser';
+import { HttpNotOkAPIError } from '../../../errors/errors';
 
 describe('WebdavApi', () => {
   let api: WebdavApi;
-  let mockGetCfgOrError: jasmine.Spy;
-  let mockFetch: jasmine.Spy;
-  let mockCapacitorHttp: jasmine.SpyObj<typeof CapacitorHttp>;
-
+  let mockGetCfg: jasmine.Spy;
+  let mockHttpAdapter: jasmine.SpyObj<WebDavHttpAdapter>;
+  let mockXmlParser: jasmine.SpyObj<WebdavXmlParser>;
   const mockCfg: WebdavPrivateCfg = {
-    baseUrl: 'https://webdav.example.com',
+    baseUrl: 'http://example.com/webdav',
     userName: 'testuser',
     password: 'testpass',
     syncFolderPath: '/sync',
-  };
-
-  const createMockResponse = (
-    status: number,
-    headers: Record<string, string> = {},
-    body: string = '',
-  ): Response => {
-    // 204 No Content and 304 Not Modified responses can't have a body
-    const responseBody = [204, 304].includes(status) ? null : body;
-    const response = new Response(responseBody, {
-      status,
-      statusText: status === 200 ? 'OK' : 'Error',
-      headers: new Headers(headers),
-    });
-    return response;
+    encryptKey: '',
   };
 
   beforeEach(() => {
-    mockGetCfgOrError = jasmine
+    mockGetCfg = jasmine
       .createSpy('getCfgOrError')
       .and.returnValue(Promise.resolve(mockCfg));
-    api = new WebdavApi(mockGetCfgOrError);
+    api = new WebdavApi(mockGetCfg);
 
-    mockFetch = jasmine.createSpy('fetch');
-    (globalThis as any).fetch = mockFetch;
-
-    mockCapacitorHttp = jasmine.createSpyObj('CapacitorHttp', ['request']);
-    (CapacitorHttp as any).request = mockCapacitorHttp.request;
+    // Access private properties for mocking
+    mockHttpAdapter = jasmine.createSpyObj('WebDavHttpAdapter', ['request']);
+    mockXmlParser = jasmine.createSpyObj('WebdavXmlParser', [
+      'parseMultiplePropsFromXml',
+      'validateResponseContent',
+    ]);
+    (api as any).httpAdapter = mockHttpAdapter;
+    (api as any).xmlParser = mockXmlParser;
   });
 
-  afterEach(() => {
-    delete (globalThis as any).fetch;
-  });
+  describe('getFileMeta', () => {
+    it('should get file metadata successfully using PROPFIND', async () => {
+      const mockResponse = {
+        status: 207,
+        headers: {},
+        data: '<?xml version="1.0"?><multistatus/>',
+      };
+      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
 
-  describe('upload', () => {
-    it('should upload file successfully and return etag', async () => {
-      const mockResponse = createMockResponse(201, { etag: '"etag-123"' });
-      mockFetch.and.returnValue(Promise.resolve(mockResponse));
+      const mockFileMeta = {
+        filename: 'test.txt',
+        basename: 'test.txt',
+        lastmod: 'Wed, 15 Jan 2025 10:00:00 GMT',
+        size: 1234,
+        type: 'file',
+        etag: 'abc123',
+        data: {},
+      };
+      mockXmlParser.parseMultiplePropsFromXml.and.returnValue([mockFileMeta]);
 
-      const result = await api.upload({
-        data: 'test data',
-        path: 'test.txt',
-        isOverwrite: false,
-        expectedEtag: null,
+      const result = await api.getFileMeta('/test.txt', null);
+
+      expect(mockHttpAdapter.request).toHaveBeenCalledWith({
+        url: 'http://example.com/webdav/test.txt',
+        method: 'PROPFIND',
+        body: WebdavXmlParser.PROPFIND_XML,
+        headers: jasmine.objectContaining({
+          'Content-Type': 'application/xml; charset=utf-8',
+          Depth: '0',
+        }),
       });
 
-      expect(result).toBe('etag-123');
-      expect(mockFetch).toHaveBeenCalledWith(
-        'https://webdav.example.com/test.txt',
+      expect(mockXmlParser.parseMultiplePropsFromXml).toHaveBeenCalledWith(
+        '<?xml version="1.0"?><multistatus/>',
+        '/test.txt',
+      );
+
+      expect(result).toEqual(mockFileMeta);
+    });
+
+    it('should throw RemoteFileNotFoundAPIError when PROPFIND returns non-207 status', async () => {
+      const mockResponse = {
+        status: 404,
+        headers: {},
+        data: '',
+      };
+      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
+
+      await expectAsync(api.getFileMeta('/test.txt', null)).toBeRejectedWith(
         jasmine.objectContaining({
-          method: 'PUT',
-          body: 'test data',
-          headers: jasmine.any(Headers),
+          name: ' RemoteFileNotFoundAPIError',
         }),
       );
-
-      const call = mockFetch.calls.mostRecent();
-      const headers = call.args[1].headers;
-      expect(headers.get('Content-Type')).toBe('application/octet-stream');
-      expect(headers.get('If-None-Match')).toBe('*');
-      expect(headers.get('Authorization')).toBe('Basic dGVzdHVzZXI6dGVzdHBhc3M=');
     });
 
-    it('should handle conditional upload with expectedEtag', async () => {
-      const mockResponse = createMockResponse(200, { etag: '"new-etag"' });
-      mockFetch.and.returnValue(Promise.resolve(mockResponse));
+    it('should throw RemoteFileNotFoundAPIError when no files parsed from response', async () => {
+      const mockResponse = {
+        status: 207,
+        headers: {},
+        data: '<?xml version="1.0"?><multistatus/>',
+      };
+      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
+      mockXmlParser.parseMultiplePropsFromXml.and.returnValue([]);
 
-      await api.upload({
-        data: 'test data',
-        path: 'test.txt',
-        isOverwrite: false,
-        expectedEtag: 'old-etag',
-      });
-
-      const call = mockFetch.calls.mostRecent();
-      const headers = call.args[1].headers;
-      expect(headers.get('If-Match')).toBe('old-etag');
-      expect(headers.get('If-None-Match')).toBeNull();
-    });
-
-    it('should handle force overwrite', async () => {
-      const mockResponse = createMockResponse(200, { etag: '"new-etag"' });
-      mockFetch.and.returnValue(Promise.resolve(mockResponse));
-
-      await api.upload({
-        data: 'test data',
-        path: 'test.txt',
-        isOverwrite: true,
-        expectedEtag: 'old-etag',
-      });
-
-      const call = mockFetch.calls.mostRecent();
-      const headers = call.args[1].headers;
-      expect(headers.get('If-Match')).toBe('old-etag');
-    });
-
-    it('should get etag via PROPFIND if not in response headers', async () => {
-      const uploadResponse = createMockResponse(201); // No etag header
-      const propfindResponse = createMockResponse(
-        207,
-        { 'content-type': 'application/xml' },
-        `<?xml version="1.0"?>
-        <d:multistatus xmlns:d="DAV:">
-          <d:response>
-            <d:href>/test.txt</d:href>
-            <d:propstat>
-              <d:status>HTTP/1.1 200 OK</d:status>
-              <d:prop>
-                <d:getetag>"fallback-etag"</d:getetag>
-              </d:prop>
-            </d:propstat>
-          </d:response>
-        </d:multistatus>`,
-      );
-
-      mockFetch.and.returnValues(
-        Promise.resolve(uploadResponse),
-        Promise.resolve(propfindResponse),
-      );
-
-      const result = await api.upload({
-        data: 'test data',
-        path: 'test.txt',
-      });
-
-      expect(result).toBe('fallback-etag');
-      expect(mockFetch).toHaveBeenCalledTimes(2);
-    });
-
-    it('should get etag via HEAD request when PROPFIND also fails', async () => {
-      const uploadResponse = createMockResponse(201); // No etag header
-      const propfindError = new Error('PROPFIND failed');
-      const headResponse = createMockResponse(200, { etag: '"head-fallback-etag"' });
-
-      mockFetch.and.returnValues(
-        Promise.resolve(uploadResponse),
-        Promise.reject(propfindError),
-        Promise.resolve(headResponse),
-      );
-
-      const result = await api.upload({
-        data: 'test data',
-        path: 'test.txt',
-      });
-
-      expect(result).toBe('head-fallback-etag');
-      expect(mockFetch).toHaveBeenCalledTimes(3);
-
-      // Verify the third call is a HEAD request
-      const headCall = mockFetch.calls.argsFor(2);
-      expect(headCall[1].method).toBe('HEAD');
-    });
-
-    it('should throw NoEtagAPIError when all etag retrieval methods fail', async () => {
-      const uploadResponse = createMockResponse(201); // No etag header
-      const propfindError = new Error('PROPFIND failed');
-      const headError = new Error('HEAD failed');
-      const getError = new Error('GET failed');
-
-      mockFetch.and.returnValues(
-        Promise.resolve(uploadResponse),
-        Promise.reject(propfindError),
-        Promise.reject(headError),
-        Promise.reject(getError),
-      );
-
-      await expectAsync(
-        api.upload({
-          data: 'test data',
-          path: 'test.txt',
+      await expectAsync(api.getFileMeta('/test.txt', null)).toBeRejectedWith(
+        jasmine.objectContaining({
+          name: ' RemoteFileNotFoundAPIError',
         }),
-      ).toBeRejectedWith(jasmine.any(NoEtagAPIError));
-
-      expect(mockFetch).toHaveBeenCalledTimes(4);
+      );
     });
 
-    it('should use fallback for etag after 404 retry', async () => {
-      const notFoundError = new RemoteFileNotFoundAPIError('test.txt');
-      const retryUploadResponse = createMockResponse(201); // No etag header
-      const propfindError = new Error('PROPFIND failed');
-      const headResponse = createMockResponse(200, { etag: '"head-etag-after-404"' });
+    it('should handle paths with special characters', async () => {
+      const mockResponse = {
+        status: 207,
+        headers: {},
+        data: '<?xml version="1.0"?><multistatus/>',
+      };
+      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
+      mockXmlParser.parseMultiplePropsFromXml.and.returnValue([
+        {
+          filename: 'file with spaces.txt',
+          basename: 'file with spaces.txt',
+          lastmod: 'Wed, 15 Jan 2025 10:00:00 GMT',
+          size: 100,
+          type: 'file',
+          etag: 'def456',
+          data: {},
+        },
+      ]);
 
-      mockFetch.and.returnValues(
-        Promise.reject(notFoundError), // Initial upload fails with 404
-        Promise.resolve(createMockResponse(201)), // MKCOL to create directory succeeds
-        Promise.resolve(retryUploadResponse), // Retry upload succeeds but no etag
-        Promise.reject(propfindError), // PROPFIND fails
-        Promise.resolve(headResponse), // HEAD request succeeds
+      await api.getFileMeta('/folder/file with spaces.txt', null);
+
+      expect(mockHttpAdapter.request).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          url: 'http://example.com/webdav/folder/file with spaces.txt',
+        }),
       );
-
-      const result = await api.upload({
-        data: 'test data',
-        path: 'test/file.txt',
-      });
-
-      expect(result).toBe('head-etag-after-404');
-      expect(mockFetch).toHaveBeenCalledTimes(5);
-    });
-
-    it('should use fallback for etag after 409 retry', async () => {
-      const conflictError = { status: 409 };
-      const retryUploadResponse = createMockResponse(201); // No etag header
-      const propfindError = new Error('PROPFIND failed');
-      const headResponse = createMockResponse(200, { etag: '"head-etag-after-409"' });
-
-      mockFetch.and.returnValues(
-        Promise.reject(conflictError), // Initial upload fails with 409
-        Promise.resolve(createMockResponse(201)), // MKCOL to create directory succeeds
-        Promise.resolve(retryUploadResponse), // Retry upload succeeds but no etag
-        Promise.reject(propfindError), // PROPFIND fails
-        Promise.resolve(headResponse), // HEAD request succeeds
-      );
-
-      const result = await api.upload({
-        data: 'test data',
-        path: 'test/file.txt',
-      });
-
-      expect(result).toBe('head-etag-after-409');
-      expect(mockFetch).toHaveBeenCalledTimes(5);
     });
   });
 
   describe('download', () => {
     it('should download file successfully', async () => {
-      const mockResponse = createMockResponse(
-        200,
-        { etag: '"etag-123"' },
+      const mockResponse = {
+        status: 200,
+        headers: {
+          'last-modified': 'Wed, 15 Jan 2025 10:00:00 GMT',
+        },
+        data: 'file content',
+      };
+      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
+      mockXmlParser.validateResponseContent.and.stub();
+
+      const result = await api.download({
+        path: '/test.txt',
+      });
+
+      expect(mockHttpAdapter.request).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          url: 'http://example.com/webdav/test.txt',
+          method: 'GET',
+        }),
+      );
+
+      expect(mockXmlParser.validateResponseContent).toHaveBeenCalledWith(
+        'file content',
+        '/test.txt',
+        'download',
         'file content',
       );
-      mockFetch.and.returnValue(Promise.resolve(mockResponse));
 
-      const result = await api.download({ path: 'test.txt' });
-
-      expect(result).toEqual({
-        rev: 'etag-123',
-        dataStr: 'file content',
-      });
-      expect(mockFetch).toHaveBeenCalledWith(
-        'https://webdav.example.com/test.txt',
+      expect(result).toEqual(
         jasmine.objectContaining({
-          method: 'GET',
-          headers: jasmine.any(Headers),
+          rev: 'Wed, 15 Jan 2025 10:00:00 GMT',
+          dataStr: 'file content',
+          lastModified: 'Wed, 15 Jan 2025 10:00:00 GMT',
+        }),
+      );
+      expect(result.legacyRev).toBeUndefined();
+    });
+
+    it('should return legacyRev when ETag is present', async () => {
+      const mockResponse = {
+        status: 200,
+        headers: {
+          'last-modified': 'Wed, 15 Jan 2025 10:00:00 GMT',
+          etag: '"abc123"',
+        },
+        data: 'file content',
+      };
+      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
+      mockXmlParser.validateResponseContent.and.stub();
+
+      const result = await api.download({
+        path: '/test.txt',
+      });
+
+      expect(result).toEqual(
+        jasmine.objectContaining({
+          rev: 'Wed, 15 Jan 2025 10:00:00 GMT',
+          legacyRev: 'abc123', // Cleaned ETag
+          dataStr: 'file content',
+          lastModified: 'Wed, 15 Jan 2025 10:00:00 GMT',
         }),
       );
     });
 
-    it('should handle conditional download with localRev', async () => {
-      const mockResponse = createMockResponse(200, { etag: '"new-etag"' }, 'new content');
-      mockFetch.and.returnValue(Promise.resolve(mockResponse));
-
-      await api.download({ path: 'test.txt', localRev: 'old-etag' });
-
-      const call = mockFetch.calls.mostRecent();
-      const headers = call.args[1].headers;
-      expect(headers.get('If-None-Match')).toBe('old-etag');
-    });
-
-    it('should handle 206 Partial Content with range', async () => {
-      const mockResponse = createMockResponse(
-        206,
-        { etag: '"etag-123"' },
-        'partial content',
-      );
-      mockFetch.and.returnValue(Promise.resolve(mockResponse));
+    it('should use last-modified as rev when no etag', async () => {
+      const mockResponse = {
+        status: 200,
+        headers: {
+          'last-modified': 'Wed, 15 Jan 2025 10:00:00 GMT',
+        },
+        data: 'content',
+      };
+      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
+      mockXmlParser.validateResponseContent.and.stub();
 
       const result = await api.download({
-        path: 'test.txt',
-        rangeStart: 0,
-        rangeEnd: 1023,
+        path: '/test.txt',
       });
 
-      expect(result.dataStr).toBe('partial content');
-      const call = mockFetch.calls.mostRecent();
-      const headers = call.args[1].headers;
-      expect(headers.get('Range')).toBe('bytes=0-1023');
+      expect(result.rev).toBe('Wed, 15 Jan 2025 10:00:00 GMT');
     });
 
-    it('should detect HTML error response', async () => {
-      const mockResponse = createMockResponse(
-        200,
-        {},
-        '<!DOCTYPE html><html><body>404 Not Found</body></html>',
-      );
-      mockFetch.and.returnValue(Promise.resolve(mockResponse));
+    // Test removed: If-None-Match header functionality has been removed
+    // Test removed: If-Modified-Since header functionality has been removed
+    // Test removed: If-Modified-Since header functionality has been removed
+    // Test removed: 304 Not Modified handling has been removed
+    // Test removed: 304 Not Modified handling has been removed
+    // Test removed: localRev parameter has been removed from download method
+    // Test removed: localRev parameter has been removed from download method
+  });
 
-      await expectAsync(api.download({ path: 'test.txt' })).toBeRejectedWith(
-        jasmine.any(RemoteFileNotFoundAPIError),
+  describe('upload', () => {
+    it('should upload file successfully', async () => {
+      const mockResponse = {
+        status: 201,
+        headers: {
+          'last-modified': 'Wed, 15 Jan 2025 11:00:00 GMT',
+        },
+        data: '',
+      };
+      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
+
+      const result = await api.upload({
+        path: '/test.txt',
+        data: 'new content',
+        expectedRev: null,
+      });
+
+      expect(mockHttpAdapter.request).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          url: 'http://example.com/webdav/test.txt',
+          method: 'PUT',
+          body: 'new content',
+          headers: jasmine.objectContaining({
+            'Content-Type': 'application/octet-stream',
+          }),
+        }),
+      );
+
+      expect(result).toEqual(
+        jasmine.objectContaining({
+          rev: 'Wed, 15 Jan 2025 11:00:00 GMT',
+          lastModified: 'Wed, 15 Jan 2025 11:00:00 GMT',
+        }),
+      );
+      expect(result.legacyRev).toBeUndefined();
+    });
+
+    it('should return legacyRev when ETag is present in upload response', async () => {
+      const mockResponse = {
+        status: 201,
+        headers: {
+          'last-modified': 'Wed, 15 Jan 2025 11:00:00 GMT',
+          etag: '"newrev123"',
+        },
+        data: '',
+      };
+      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
+
+      const result = await api.upload({
+        path: '/test.txt',
+        data: 'new content',
+        expectedRev: null,
+      });
+
+      expect(result).toEqual(
+        jasmine.objectContaining({
+          rev: 'Wed, 15 Jan 2025 11:00:00 GMT',
+          legacyRev: 'newrev123', // Cleaned ETag
+          lastModified: 'Wed, 15 Jan 2025 11:00:00 GMT',
+        }),
       );
     });
 
-    it('should handle missing etag with PROPFIND fallback', async () => {
-      const downloadResponse = createMockResponse(200, {}, 'content');
-      const propfindResponse = createMockResponse(
-        207,
-        { 'content-type': 'application/xml' },
-        `<?xml version="1.0"?>
-        <d:multistatus xmlns:d="DAV:">
-          <d:response>
-            <d:href>/test.txt</d:href>
-            <d:propstat>
-              <d:status>HTTP/1.1 200 OK</d:status>
-              <d:prop>
-                <d:getetag>"propfind-etag"</d:getetag>
-              </d:prop>
-            </d:propstat>
-          </d:response>
-        </d:multistatus>`,
+    it('should handle conditional upload with date string', async () => {
+      const mockResponse = {
+        status: 200,
+        headers: {
+          'last-modified': 'Wed, 15 Jan 2025 11:00:00 GMT',
+        },
+        data: '',
+      };
+      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
+
+      await api.upload({
+        path: '/test.txt',
+        data: 'new content',
+        expectedRev: 'Wed, 15 Jan 2025 10:00:00 GMT',
+      });
+
+      expect(mockHttpAdapter.request).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          headers: jasmine.objectContaining({
+            'If-Unmodified-Since': jasmine.any(String),
+          }),
+        }),
       );
-
-      mockFetch.and.returnValues(
-        Promise.resolve(downloadResponse),
-        Promise.resolve(propfindResponse),
-      );
-
-      const result = await api.download({ path: 'test.txt' });
-
-      expect(result.rev).toBe('propfind-etag');
-      expect(result.dataStr).toBe('content');
     });
 
-    it('should generate content-based hash when no etag available', async () => {
-      const downloadResponse = createMockResponse(200, {}, 'test content');
-      // Use a non-404 error to avoid RemoteFileNotFoundAPIError
-      const propfindError = new Error('PROPFIND failed');
+    it('should handle conditional upload with ISO date string', async () => {
+      const mockResponse = {
+        status: 200,
+        headers: {
+          'last-modified': 'Wed, 15 Jan 2025 11:00:00 GMT',
+        },
+        data: '',
+      };
+      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
 
-      mockFetch.and.returnValues(
-        Promise.resolve(downloadResponse),
-        Promise.reject(propfindError),
+      const isoDate = '2022-01-15T12:00:00.000Z'; // ISO date string
+
+      await api.upload({
+        path: '/test.txt',
+        data: 'new content',
+        expectedRev: isoDate,
+      });
+
+      expect(mockHttpAdapter.request).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          headers: jasmine.objectContaining({
+            'If-Unmodified-Since': jasmine.any(String),
+          }),
+        }),
+      );
+    });
+
+    it('should handle 412 Precondition Failed', async () => {
+      const errorResponse = new Response(null, { status: 412 });
+      const error = new HttpNotOkAPIError(errorResponse);
+      mockHttpAdapter.request.and.returnValue(Promise.reject(error));
+
+      await expectAsync(
+        api.upload({
+          path: '/test.txt',
+          data: 'new content',
+          expectedRev: 'oldrev',
+        }),
+      ).toBeRejectedWith(
+        jasmine.objectContaining({
+          name: 'RemoteFileChangedUnexpectedly',
+        }),
+      );
+    });
+
+    it('should handle 409 Conflict by creating parent directory', async () => {
+      const errorResponse = new Response(null, { status: 409 });
+      const error = new HttpNotOkAPIError(errorResponse);
+
+      // First call fails with 409
+      // Second call to create directory succeeds
+      // Third call to upload succeeds
+      const mockResponses = [
+        Promise.reject(error),
+        Promise.resolve({ status: 201, headers: {}, data: '' }),
+        Promise.resolve({
+          status: 201,
+          headers: { 'last-modified': 'Wed, 15 Jan 2025 11:00:00 GMT' },
+          data: '',
+        }),
+      ];
+      let callCount = 0;
+      mockHttpAdapter.request.and.callFake(() => mockResponses[callCount++]);
+
+      const result = await api.upload({
+        path: '/folder/test.txt',
+        data: 'new content',
+        expectedRev: null,
+      });
+
+      expect(mockHttpAdapter.request).toHaveBeenCalledTimes(3);
+      // Check MKCOL call
+      expect(mockHttpAdapter.request.calls.argsFor(1)[0]).toEqual(
+        jasmine.objectContaining({
+          url: 'http://example.com/webdav/folder',
+          method: 'MKCOL',
+        }),
+      );
+      expect(result.rev).toBe('Wed, 15 Jan 2025 11:00:00 GMT');
+    });
+
+    it('should fetch metadata when no rev in response headers', async () => {
+      const mockUploadResponse = {
+        status: 201,
+        headers: {}, // No etag or last-modified
+        data: '',
+      };
+      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockUploadResponse));
+
+      // Mock getFileMeta to be called after upload
+      spyOn(api, 'getFileMeta').and.returnValue(
+        Promise.resolve({
+          filename: 'test.txt',
+          basename: 'test.txt',
+          lastmod: 'Wed, 15 Jan 2025 12:00:00 GMT',
+          size: 100,
+          type: 'file',
+          etag: 'Wed, 15 Jan 2025 12:00:00 GMT', // Using lastmod as etag
+          data: {},
+        }),
       );
 
-      // Mock crypto API with a predictable hash
-      const hashBuffer = new ArrayBuffer(32);
-      const hashArray = new Uint8Array(hashBuffer);
-      // Fill with predictable values
-      for (let i = 0; i < 32; i++) {
-        hashArray[i] = i;
-      }
+      const result = await api.upload({
+        path: '/test.txt',
+        data: 'new content',
+        expectedRev: null,
+      });
 
-      const mockDigest = jasmine
-        .createSpy('digest')
-        .and.returnValue(Promise.resolve(hashBuffer));
+      expect(api.getFileMeta).toHaveBeenCalledWith('/test.txt', null, true);
+      expect(result).toEqual(
+        jasmine.objectContaining({
+          rev: 'Wed, 15 Jan 2025 12:00:00 GMT',
+          lastModified: 'Wed, 15 Jan 2025 12:00:00 GMT',
+        }),
+      );
+      expect(result.legacyRev).toBeUndefined();
+    });
 
-      // Use spyOnProperty to mock the crypto getter
-      spyOnProperty(globalThis, 'crypto', 'get').and.returnValue({
-        subtle: { digest: mockDigest },
-      } as any);
+    it('should return legacyRev from HEAD request when PUT returns no headers', async () => {
+      // First request (PUT) returns no headers
+      const putResponse = {
+        status: 201,
+        headers: {},
+        data: '',
+      };
 
-      const result = await api.download({ path: 'test.txt' });
+      // HEAD request returns both Last-Modified and ETag
+      const headResponse = {
+        status: 200,
+        headers: {
+          'last-modified': 'Wed, 15 Jan 2025 13:00:00 GMT',
+          etag: '"head-etag-123"',
+        },
+        data: '',
+      };
 
-      expect(result.dataStr).toBe('test content');
-      expect(result.rev).toBe('0001020304050607'); // First 16 chars of hex (8 bytes)
-      expect(mockDigest).toHaveBeenCalledWith('SHA-256', jasmine.any(Uint8Array));
+      mockHttpAdapter.request.and.callFake((params) => {
+        if (params.method === 'PUT') {
+          return Promise.resolve(putResponse);
+        } else if (params.method === 'HEAD') {
+          return Promise.resolve(headResponse);
+        } else {
+          return Promise.reject(new Error('Unexpected method'));
+        }
+      });
+
+      const result = await api.upload({
+        path: '/test.txt',
+        data: 'new content',
+        expectedRev: null,
+      });
+
+      expect(result).toEqual({
+        rev: 'Wed, 15 Jan 2025 13:00:00 GMT',
+        legacyRev: 'head-etag-123',
+        lastModified: 'Wed, 15 Jan 2025 13:00:00 GMT',
+      });
+    });
+
+    it('should extract legacyRev from PROPFIND meta when HEAD fails', async () => {
+      // PUT returns no headers
+      const putResponse = {
+        status: 201,
+        headers: {},
+        data: '',
+      };
+
+      mockHttpAdapter.request.and.callFake((params) => {
+        if (params.method === 'PUT') {
+          return Promise.resolve(putResponse);
+        } else if (params.method === 'HEAD') {
+          return Promise.reject(new Error('HEAD failed'));
+        } else {
+          return Promise.reject(new Error('Unexpected method'));
+        }
+      });
+
+      // Mock getFileMeta to return data with etag
+      spyOn(api, 'getFileMeta').and.returnValue(
+        Promise.resolve({
+          filename: 'test.txt',
+          basename: 'test.txt',
+          lastmod: 'Wed, 15 Jan 2025 14:00:00 GMT',
+          size: 100,
+          type: 'file',
+          etag: 'Wed, 15 Jan 2025 14:00:00 GMT',
+          data: {
+            etag: '"propfind-etag-456"', // Original ETag in data
+          },
+        }),
+      );
+
+      const result = await api.upload({
+        path: '/test.txt',
+        data: 'new content',
+        expectedRev: null,
+      });
+
+      expect(result).toEqual({
+        rev: 'Wed, 15 Jan 2025 14:00:00 GMT',
+        legacyRev: 'propfind-etag-456',
+        lastModified: 'Wed, 15 Jan 2025 14:00:00 GMT',
+      });
+    });
+
+    it('should handle upload with ETag in initial response', async () => {
+      const mockResponse = {
+        status: 201,
+        headers: {
+          'last-modified': 'Wed, 15 Jan 2025 15:00:00 GMT',
+          ETag: '"W/\\"weak-etag-789\\""', // Weak ETag with nested quotes
+        },
+        data: '',
+      };
+      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
+
+      const result = await api.upload({
+        path: '/test.txt',
+        data: 'new content',
+        expectedRev: null,
+      });
+
+      expect(result).toEqual({
+        rev: 'Wed, 15 Jan 2025 15:00:00 GMT',
+        legacyRev: 'W\\weak-etag-789\\', // Cleaned (removes / and " but not \)
+        lastModified: 'Wed, 15 Jan 2025 15:00:00 GMT',
+      });
     });
   });
 
   describe('remove', () => {
     it('should remove file successfully', async () => {
-      const propfindResponse = createMockResponse(
-        207,
-        { 'content-type': 'application/xml' },
-        `<?xml version="1.0"?>
-        <d:multistatus xmlns:d="DAV:">
-          <d:response>
-            <d:href>/test.txt</d:href>
-            <d:propstat>
-              <d:status>HTTP/1.1 200 OK</d:status>
-              <d:prop>
-                <d:resourcetype/>
-                <d:getetag>"file-etag"</d:getetag>
-              </d:prop>
-            </d:propstat>
-          </d:response>
-        </d:multistatus>`,
-      );
-      const deleteResponse = createMockResponse(204);
+      const mockResponse = {
+        status: 204,
+        headers: {},
+        data: '',
+      };
+      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
 
-      mockFetch.and.returnValues(
-        Promise.resolve(propfindResponse),
-        Promise.resolve(deleteResponse),
-      );
+      await api.remove('/test.txt');
 
-      await api.remove('test.txt');
-
-      expect(mockFetch).toHaveBeenCalledTimes(2);
-      expect(mockFetch.calls.argsFor(1)[0]).toContain('test.txt');
-      expect(mockFetch.calls.argsFor(1)[1].method).toBe('DELETE');
-    });
-
-    it('should handle conditional delete with expectedEtag', async () => {
-      const propfindResponse = createMockResponse(
-        207,
-        { 'content-type': 'application/xml' },
-        `<?xml version="1.0"?>
-        <d:multistatus xmlns:d="DAV:">
-          <d:response>
-            <d:href>/test.txt</d:href>
-            <d:propstat>
-              <d:status>HTTP/1.1 200 OK</d:status>
-              <d:prop>
-                <d:resourcetype/>
-                <d:getetag>"file-etag"</d:getetag>
-              </d:prop>
-            </d:propstat>
-          </d:response>
-        </d:multistatus>`,
-      );
-      const deleteResponse = createMockResponse(204);
-
-      mockFetch.and.returnValues(
-        Promise.resolve(propfindResponse),
-        Promise.resolve(deleteResponse),
-      );
-
-      await api.remove('test.txt', 'expected-etag');
-
-      const deleteCall = mockFetch.calls.argsFor(1);
-      expect(deleteCall[1].headers.get('If-Match')).toBe('expected-etag');
-    });
-
-    it('should check resource type before deletion', async () => {
-      const propfindResponse = createMockResponse(
-        207,
-        { 'content-type': 'application/xml' },
-        `<?xml version="1.0"?>
-        <d:multistatus xmlns:d="DAV:">
-          <d:response>
-            <d:href>/folder</d:href>
-            <d:propstat>
-              <d:status>HTTP/1.1 200 OK</d:status>
-              <d:prop>
-                <d:resourcetype><d:collection/></d:resourcetype>
-              </d:prop>
-            </d:propstat>
-          </d:response>
-        </d:multistatus>`,
-      );
-      const deleteResponse = createMockResponse(204);
-
-      mockFetch.and.returnValues(
-        Promise.resolve(propfindResponse),
-        Promise.resolve(deleteResponse),
-      );
-
-      await api.remove('folder');
-
-      expect(mockFetch).toHaveBeenCalledTimes(2);
-      const deleteCall = mockFetch.calls.mostRecent();
-      const headers = deleteCall.args[1].headers;
-      expect(headers.get('Depth')).toBe('infinity');
-    });
-
-    it('should handle multi-status response', async () => {
-      const propfindResponse = createMockResponse(
-        207,
-        { 'content-type': 'application/xml' },
-        `<?xml version="1.0"?>
-        <d:multistatus xmlns:d="DAV:">
-          <d:response>
-            <d:href>/folder</d:href>
-            <d:propstat>
-              <d:status>HTTP/1.1 200 OK</d:status>
-              <d:prop>
-                <d:resourcetype><d:collection/></d:resourcetype>
-              </d:prop>
-            </d:propstat>
-          </d:response>
-        </d:multistatus>`,
-      );
-      const multiStatusResponse = createMockResponse(
-        207,
-        { 'content-type': 'application/xml' },
-        `<?xml version="1.0"?>
-        <d:multistatus xmlns:d="DAV:">
-          <d:response>
-            <d:href>/folder/file1.txt</d:href>
-            <d:status>HTTP/1.1 423 Locked</d:status>
-          </d:response>
-        </d:multistatus>`,
-      );
-
-      mockFetch.and.returnValues(
-        Promise.resolve(propfindResponse),
-        Promise.resolve(multiStatusResponse),
-      );
-
-      await expectAsync(api.remove('folder')).toBeRejectedWithError(
-        'Partial deletion failure for: folder',
-      );
-    });
-  });
-
-  describe('getFileMeta', () => {
-    it('should get file metadata via PROPFIND', async () => {
-      const propfindResponse = createMockResponse(
-        207,
-        { 'content-type': 'application/xml' },
-        `<?xml version="1.0"?>
-        <d:multistatus xmlns:d="DAV:">
-          <d:response>
-            <d:href>/test.txt</d:href>
-            <d:propstat>
-              <d:status>HTTP/1.1 200 OK</d:status>
-              <d:prop>
-                <d:displayname>test.txt</d:displayname>
-                <d:getcontentlength>1234</d:getcontentlength>
-                <d:getlastmodified>Mon, 01 Jan 2024 00:00:00 GMT</d:getlastmodified>
-                <d:getetag>"etag-123"</d:getetag>
-                <d:resourcetype/>
-                <d:getcontenttype>text/plain</d:getcontenttype>
-              </d:prop>
-            </d:propstat>
-          </d:response>
-        </d:multistatus>`,
-      );
-
-      mockFetch.and.returnValue(Promise.resolve(propfindResponse));
-
-      const result = await api.getFileMeta('test.txt', null);
-
-      expect(result).toEqual({
-        filename: 'test.txt',
-        basename: 'test.txt',
-        lastmod: 'Mon, 01 Jan 2024 00:00:00 GMT',
-        size: 1234,
-        type: 'file',
-        etag: 'etag-123',
-        data: jasmine.objectContaining({
-          'content-type': 'text/plain',
-          'content-length': '1234',
-          etag: '"etag-123"',
-        }),
-      });
-    });
-
-    it('should fallback to HEAD when PROPFIND fails with PROPFIND error message', async () => {
-      const propfindError = new Error('PROPFIND not supported');
-      const headResponse = createMockResponse(200, {
-        etag: '"head-etag"',
-        'content-length': '5678',
-        'last-modified': 'Tue, 02 Jan 2024 00:00:00 GMT',
-        'content-type': 'application/json',
-      });
-
-      mockFetch.and.returnValues(
-        Promise.reject(propfindError),
-        Promise.resolve(headResponse),
-      );
-
-      const result = await api.getFileMeta('test.json', null);
-
-      expect(result.etag).toBe('head-etag');
-      expect(result.size).toBe(5678);
-      expect(result.type).toBe('file');
-    });
-
-    it('should detect HTML error response', async () => {
-      const htmlResponse = createMockResponse(
-        200,
-        { 'content-type': 'text/html' },
-        '<!DOCTYPE html><html><body>404 Not Found</body></html>',
-      );
-
-      mockFetch.and.returnValue(Promise.resolve(htmlResponse));
-
-      await expectAsync(api.getFileMeta('test.txt', null)).toBeRejectedWith(
-        jasmine.any(RemoteFileNotFoundAPIError),
-      );
-    });
-
-    it('should use GET fallback when useGetFallback is true and HEAD fails', async () => {
-      const propfindError = new Error('PROPFIND not supported');
-      const headError = new Error('HEAD failed');
-      const getResponse = createMockResponse(
-        200,
-        { etag: '"get-meta-etag"' },
-        'file content',
-      );
-
-      mockFetch.and.returnValues(
-        Promise.reject(propfindError),
-        Promise.reject(headError),
-        Promise.resolve(getResponse),
-      );
-
-      const result = await api.getFileMeta('test.txt', null, true);
-
-      expect(result).toEqual({
-        filename: 'test.txt',
-        basename: 'test.txt',
-        lastmod: jasmine.any(String),
-        size: 0,
-        type: 'file',
-        etag: 'get-meta-etag',
-        data: {
-          etag: 'get-meta-etag',
-          href: 'test.txt',
-        },
-      });
-      expect(mockFetch).toHaveBeenCalledTimes(3);
-
-      // Verify the third call is a GET request
-      const getCall = mockFetch.calls.argsFor(2);
-      expect(getCall[1].method).toBe('GET');
-    });
-
-    it('should not use GET fallback when useGetFallback is false', async () => {
-      const propfindError = new Error('PROPFIND not supported');
-      const headError = new Error('HEAD failed');
-
-      mockFetch.and.returnValues(
-        Promise.reject(propfindError),
-        Promise.reject(headError),
-      );
-
-      await expectAsync(api.getFileMeta('test.txt', null, false)).toBeRejectedWith(
-        headError,
-      );
-      expect(mockFetch).toHaveBeenCalledTimes(2);
-    });
-
-    it('should throw RemoteFileNotFoundAPIError when GET fallback returns 404', async () => {
-      const propfindError = new Error('PROPFIND not supported');
-      const headError = new Error('HEAD failed');
-      const getError = new RemoteFileNotFoundAPIError('test.txt');
-
-      mockFetch.and.returnValues(
-        Promise.reject(propfindError),
-        Promise.reject(headError),
-        Promise.reject(getError),
-      );
-
-      await expectAsync(api.getFileMeta('test.txt', null, true)).toBeRejectedWith(
-        jasmine.any(RemoteFileNotFoundAPIError),
-      );
-      expect(mockFetch).toHaveBeenCalledTimes(3);
-    });
-
-    it('should propagate other errors from GET fallback', async () => {
-      const propfindError = new Error('PROPFIND not supported');
-      const headError = new Error('HEAD failed');
-      const getError = new Error('Network error');
-
-      mockFetch.and.returnValues(
-        Promise.reject(propfindError),
-        Promise.reject(headError),
-        Promise.reject(getError),
-      );
-
-      await expectAsync(api.getFileMeta('test.txt', null, true)).toBeRejectedWith(
-        getError,
-      );
-      expect(mockFetch).toHaveBeenCalledTimes(3);
-    });
-  });
-
-  describe('createFolder', () => {
-    it('should create folder via MKCOL', async () => {
-      const mockResponse = createMockResponse(201);
-      mockFetch.and.returnValue(Promise.resolve(mockResponse));
-
-      await api.createFolder({ folderPath: 'newfolder' });
-
-      expect(mockFetch).toHaveBeenCalledWith(
-        'https://webdav.example.com/newfolder',
+      expect(mockHttpAdapter.request).toHaveBeenCalledWith(
         jasmine.objectContaining({
-          method: 'MKCOL',
+          url: 'http://example.com/webdav/test.txt',
+          method: 'DELETE',
         }),
       );
     });
-  });
 
-  describe('fileExists', () => {
-    it('should return true when file exists', async () => {
-      const propfindResponse = createMockResponse(
-        207,
-        { 'content-type': 'application/xml' },
-        `<?xml version="1.0"?>
-        <d:multistatus xmlns:d="DAV:">
-          <d:response>
-            <d:href>/test.txt</d:href>
-            <d:propstat>
-              <d:status>HTTP/1.1 200 OK</d:status>
-              <d:prop>
-                <d:getetag>"etag-123"</d:getetag>
-              </d:prop>
-            </d:propstat>
-          </d:response>
-        </d:multistatus>`,
+    it('should handle conditional delete with date string', async () => {
+      const mockResponse = {
+        status: 204,
+        headers: {},
+        data: '',
+      };
+      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
+
+      await api.remove('/test.txt', 'Wed, 15 Jan 2025 10:00:00 GMT');
+
+      expect(mockHttpAdapter.request).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          url: 'http://example.com/webdav/test.txt',
+          method: 'DELETE',
+          headers: jasmine.objectContaining({
+            'If-Unmodified-Since': jasmine.any(String),
+          }),
+        }),
       );
-
-      mockFetch.and.returnValue(Promise.resolve(propfindResponse));
-
-      const result = await api.fileExists('test.txt');
-
-      expect(result).toBe(true);
-    });
-
-    it('should propagate non-404 errors', async () => {
-      const serverError = createMockResponse(500);
-      mockFetch.and.returnValue(Promise.resolve(serverError));
-
-      await expectAsync(api.fileExists('test.txt')).toBeRejected();
-    });
-  });
-
-  describe('listFolder', () => {
-    it('should return empty array when PROPFIND error includes PROPFIND message', async () => {
-      const propfindError = new Error('PROPFIND not supported');
-      mockFetch.and.returnValue(Promise.reject(propfindError));
-
-      const result = await api.listFolder('folder');
-
-      expect(result).toEqual([]);
-      expect(mockFetch).toHaveBeenCalled();
     });
   });
 
   describe('_cleanRev', () => {
-    it('should clean etag values', () => {
-      expect((api as any)._cleanRev('"etag-123"')).toBe('etag-123');
-      expect((api as any)._cleanRev('etag-123')).toBe('etag-123');
-      expect((api as any)._cleanRev('&quot;etag-123&quot;')).toBe('etag-123');
-      expect((api as any)._cleanRev('"etag/with/slashes"')).toBe('etagwithslashes');
-      expect((api as any)._cleanRev('  etag-123  ')).toBe('etag-123');
+    it('should clean revision strings', () => {
+      expect((api as any)._cleanRev('"abc123"')).toBe('abc123');
+      expect((api as any)._cleanRev('abc/123')).toBe('abc123');
+      expect((api as any)._cleanRev('"abc/123"')).toBe('abc123');
+      expect((api as any)._cleanRev('&quot;abc123&quot;')).toBe('abc123');
       expect((api as any)._cleanRev('')).toBe('');
     });
-  });
 
-  describe('_getUrl', () => {
-    it('should construct proper URLs', () => {
-      expect((api as any)._getUrl('test.txt', mockCfg)).toBe(
-        'https://webdav.example.com/test.txt',
+    it('should handle various ETag formats', () => {
+      // Standard ETag with quotes
+      expect((api as any)._cleanRev('"12345"')).toBe('12345');
+
+      // Weak ETag
+      expect((api as any)._cleanRev('W/"weak-etag"')).toBe('Wweak-etag');
+
+      // ETag with escaped quotes
+      expect((api as any)._cleanRev('"escaped\\\\"quotes\\\\""')).toBe(
+        'escaped\\\\quotes\\\\',
       );
 
-      expect((api as any)._getUrl('/test.txt', mockCfg)).toBe(
-        'https://webdav.example.com/test.txt',
+      // ETag with HTML entities
+      expect((api as any)._cleanRev('&quot;html-entity&quot;')).toBe('html-entity');
+
+      // Complex ETag with multiple special characters
+      expect((api as any)._cleanRev('"complex/etag/with/slashes"')).toBe(
+        'complexetagwithslashes',
       );
 
-      const cfgWithoutSlash = { ...mockCfg, baseUrl: 'https://webdav.example.com' };
-      expect((api as any)._getUrl('test.txt', cfgWithoutSlash)).toBe(
-        'https://webdav.example.com/test.txt',
+      // Empty or null cases
+      expect((api as any)._cleanRev(null)).toBe('');
+      expect((api as any)._cleanRev(undefined)).toBe('');
+      expect((api as any)._cleanRev('   ')).toBe('');
+
+      // ETag with surrounding whitespace
+      expect((api as any)._cleanRev('  "whitespace"  ')).toBe('whitespace');
+    });
+  });
+
+  describe('_buildFullPath', () => {
+    it('should build correct full paths', () => {
+      expect((api as any)._buildFullPath('http://example.com/', '/file.txt')).toBe(
+        'http://example.com/file.txt',
+      );
+      expect((api as any)._buildFullPath('http://example.com', 'file.txt')).toBe(
+        'http://example.com/file.txt',
+      );
+      expect((api as any)._buildFullPath('http://example.com/', 'file.txt')).toBe(
+        'http://example.com/file.txt',
       );
     });
   });
 
-  describe('_getAuthHeader', () => {
-    it('should generate basic auth header', () => {
-      const authHeader = (api as any)._getAuthHeader(mockCfg);
-      expect(authHeader).toBe('Basic dGVzdHVzZXI6dGVzdHBhc3M=');
-
-      const decoded = atob('dGVzdHVzZXI6dGVzdHBhc3M=');
-      expect(decoded).toBe('testuser:testpass');
-    });
-  });
-
-  describe('getRevFromMetaHelper', () => {
-    it('should extract etag from various data structures', () => {
-      expect(api.getRevFromMetaHelper({ data: { etag: '"etag-123"' } })).toBe('etag-123');
-      expect(api.getRevFromMetaHelper({ etag: '"etag-456"' })).toBe('etag-456');
-      expect(api.getRevFromMetaHelper({ data: { ETag: '"etag-789"' } })).toBe('etag-789');
-      expect(api.getRevFromMetaHelper({ data: { 'oc-etag': '"oc-etag-123"' } })).toBe(
-        'oc-etag-123',
-      );
-    });
-
-    it('should throw NoEtagAPIError when etag is not found', () => {
-      expect(() => api.getRevFromMetaHelper({ data: {} })).toThrowError(NoEtagAPIError);
-      expect(() => api.getRevFromMetaHelper({})).toThrowError(NoEtagAPIError);
-    });
-  });
-
-  describe('_checkCommonErrors', () => {
-    it('should throw AuthFailSPError for 401/403 errors', () => {
-      const errors = [
-        { status: 401, message: 'Unauthorized' },
-        { status: 403, message: 'Forbidden' },
-      ];
-
-      for (const error of errors) {
-        expect(() => (api as any)._checkCommonErrors(error, 'test.txt')).toThrowError(
-          AuthFailSPError,
-        );
-      }
-    });
-
-    it('should not throw for 207 Multi-Status', () => {
-      expect(() =>
-        (api as any)._checkCommonErrors({ status: 207 }, 'test.txt'),
-      ).not.toThrow();
-    });
-  });
-
-  describe('CapacitorHttp integration', () => {
-    // Since we can't easily mock the module constant, we'll test the CapacitorHttp branch
-    // by commenting out the Android check temporarily for testing or using a different approach.
-    // For now, we'll just test that CapacitorHttp would be called properly with the right parameters
-
-    it('should support PROPFIND method via CapacitorHttp when properly configured', async () => {
-      const propfindXml = `<?xml version="1.0"?>
-        <d:multistatus xmlns:d="DAV:">
-          <d:response>
-            <d:href>/test.txt</d:href>
-            <d:propstat>
-              <d:status>HTTP/1.1 200 OK</d:status>
-              <d:prop>
-                <d:displayname>test.txt</d:displayname>
-                <d:getcontentlength>1234</d:getcontentlength>
-                <d:getlastmodified>Mon, 01 Jan 2024 00:00:00 GMT</d:getlastmodified>
-                <d:getetag>"capacitor-etag"</d:getetag>
-                <d:resourcetype/>
-                <d:getcontenttype>text/plain</d:getcontenttype>
-              </d:prop>
-            </d:propstat>
-          </d:response>
-        </d:multistatus>`;
-
-      const mockCapacitorResponse = {
+  describe('error handling', () => {
+    it('should call getCfgOrError for each operation', async () => {
+      const mockResponse = {
         status: 207,
-        url: 'https://webdav.example.com/test.txt',
-        data: propfindXml,
-        headers: { 'content-type': 'application/xml' },
-      };
-
-      mockCapacitorHttp.request.and.returnValue(Promise.resolve(mockCapacitorResponse));
-
-      // Verify CapacitorHttp is available and properly mocked
-      expect(mockCapacitorHttp.request).toBeDefined();
-      expect(typeof mockCapacitorHttp.request).toBe('function');
-
-      // Test that the mock returns expected response structure
-      const testResponse = await mockCapacitorHttp.request({
-        url: 'https://test.com',
-        method: 'PROPFIND',
         headers: {},
-        data: 'test',
-      });
+        data: '<?xml version="1.0"?><multistatus/>',
+      };
+      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
+      mockXmlParser.parseMultiplePropsFromXml.and.returnValue([
+        {
+          filename: 'test.txt',
+          basename: 'test.txt',
+          lastmod: '',
+          size: 0,
+          type: 'file',
+          etag: 'Wed, 15 Jan 2025 10:00:00 GMT', // Using lastmod as etag
+          data: {},
+        },
+      ]);
 
-      expect(testResponse).toEqual(mockCapacitorResponse);
+      await api.getFileMeta('/test.txt', null);
+
+      expect(mockGetCfg).toHaveBeenCalled();
     });
 
-    it('should handle Response construction correctly for different status codes', () => {
-      // Test the Response construction logic that was added for null body statuses
+    it('should propagate errors from getCfgOrError', async () => {
+      const error = new Error('Config error');
+      mockGetCfg.and.returnValue(Promise.reject(error));
 
-      // Test 204 No Content
-      expect(() => {
-        new Response(null, { status: 204, statusText: '204' });
-      }).not.toThrow();
-
-      // Test 304 Not Modified
-      expect(() => {
-        new Response(null, { status: 304, statusText: '304' });
-      }).not.toThrow();
-
-      // Test normal status with body
-      expect(() => {
-        new Response('content', { status: 200, statusText: '200' });
-      }).not.toThrow();
-
-      // Test that providing body to null-body status would throw
-      expect(() => {
-        new Response('content', { status: 204, statusText: '204' });
-      }).toThrow();
-    });
-
-    it('should have proper CapacitorHttp mock configuration', () => {
-      // Verify the mock is properly set up
-      expect(CapacitorHttp).toBeDefined();
-      expect(mockCapacitorHttp).toBeDefined();
-      expect(mockCapacitorHttp.request).toBeDefined();
-
-      // Verify the mock can be configured
-      const testResponse = {
-        status: 200,
-        url: 'test',
-        data: 'test data',
-        headers: { 'content-type': 'text/plain' },
-      };
-
-      mockCapacitorHttp.request.and.returnValue(Promise.resolve(testResponse));
-
-      expect(mockCapacitorHttp.request).toHaveBeenCalledTimes(0);
-
-      // Call and verify
-      mockCapacitorHttp.request({
-        url: 'test',
-        method: 'GET',
-        headers: {},
-        data: undefined,
-      });
-
-      expect(mockCapacitorHttp.request).toHaveBeenCalledTimes(1);
-      expect(mockCapacitorHttp.request).toHaveBeenCalledWith({
-        url: 'test',
-        method: 'GET',
-        headers: {},
-        data: undefined,
-      });
+      await expectAsync(api.getFileMeta('/test.txt', null)).toBeRejectedWith(error);
     });
   });
 });

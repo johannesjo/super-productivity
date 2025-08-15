@@ -31,12 +31,12 @@ export class DataInitService {
 
   // NOTE: it's important to remember that this doesn't mean that no changes are occurring any more
   // because the data load is triggered, but not necessarily already reflected inside the store
-  async reInit(isOmitTokens: boolean = false): Promise<void> {
+  async reInit(): Promise<void> {
     await this._pfapiService.pf.wasDataMigratedInitiallyPromise;
     const appDataComplete = await this._pfapiService.pf.getAllSyncModelData(true);
     const validationResult = this._pfapiService.pf.validate(appDataComplete);
     if (validationResult.success) {
-      this._store$.dispatch(loadAllData({ appDataComplete, isOmitTokens }));
+      this._store$.dispatch(loadAllData({ appDataComplete }));
     } else {
       // DATA REPAIR CASE
       // ----------------
@@ -48,7 +48,6 @@ export class DataInitService {
         this._store$.dispatch(
           loadAllData({
             appDataComplete: fixedData,
-            isOmitTokens,
           }),
         );
         const localCrossModelVersion =

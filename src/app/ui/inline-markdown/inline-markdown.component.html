@@ -1,11 +1,9 @@
-@let isTurnOffMarkdownParsing = isTurnOffMarkdownParsing$ | async;
-
 <div
   #wrapperEl
-  [class.isHideOverflow]="isHideOverflow"
+  [class.isHideOverflow]="isHideOverflow()"
   class="markdown-wrapper"
 >
-  @if (isShowEdit || isTurnOffMarkdownParsing) {
+  @if (isShowEdit() || isTurnOffMarkdownParsing()) {
     <textarea
       #textareaEl
       (blur)="untoggleShowEdit(); setBlur($event)"
@@ -14,19 +12,19 @@
       (keydown)="keypressHandler($event)"
       (keypress)="keypressHandler($event)"
       [@fadeIn]
-      [ngModel]="modelCopy"
+      [ngModel]="modelCopy()"
       class="mat-body-2 markdown-unparsed"
       rows="1"
     ></textarea>
   }
 
   <!--  (focus)="clickOrFocusPreview($event, true)"-->
-  @if (!isTurnOffMarkdownParsing) {
+  @if (!isTurnOffMarkdownParsing()) {
     <div
       #previewEl
       (click)="clickPreview($event)"
       [data]="model"
-      [hidden]="isShowEdit"
+      [hidden]="isShowEdit()"
       class="mat-body-2 markdown-parsed markdown"
       markdown
       tabindex="0"
@@ -38,7 +36,7 @@
   <div class="controls">
     <ng-content> </ng-content>
 
-    @if (isShowChecklistToggle() && !isTurnOffMarkdownParsing) {
+    @if (isShowChecklistToggle() && !isTurnOffMarkdownParsing()) {
       <!--  -->
       <button
         [matTooltip]="'Add checklist item'"

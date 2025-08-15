@@ -3,7 +3,7 @@ import { getTimestamp } from './get-timestamp';
 describe('getTimestamp', () => {
   it('should convert valid date string to timestamp', () => {
     const result = getTimestamp('2024-01-15T10:30:00');
-    expect(result).toBe(new Date('2024-01-15T10:30:00').getTime());
+    expect(result).toBe(new Date(2024, 0, 15, 10, 30, 0).getTime());
   });
 
   it('should handle ISO 8601 date strings', () => {

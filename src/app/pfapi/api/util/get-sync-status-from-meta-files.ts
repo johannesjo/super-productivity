@@ -33,7 +33,6 @@ export const getSyncStatusFromMetaFiles = (
   // Check for first-time sync with minimal local data
   // Only auto-import remote if local has very few changes (indicating fresh installation)
   const MINIMAL_UPDATE_THRESHOLD = 1;
-  const MINIMAL_FACTOR = 4;
 
   // Handle the case where remote is empty (lastUpdate = 0) - should upload local data
   if (remote.lastUpdate === 0 && local.lastUpdate > 0) {
@@ -56,10 +55,7 @@ export const getSyncStatusFromMetaFiles = (
     const remoteTotalUpdates = getTotalVectorClockUpdates(remote.vectorClock);
 
     // Only auto-import if local has minimal updates AND remote has significantly more
-    if (
-      localTotalUpdates <= MINIMAL_UPDATE_THRESHOLD &&
-      remoteTotalUpdates > localTotalUpdates * MINIMAL_FACTOR
-    ) {
+    if (localTotalUpdates <= MINIMAL_UPDATE_THRESHOLD) {
       PFLog.normal('First-time sync detected with minimal local data', {
         localTotalUpdates,
         remoteTotalUpdates,

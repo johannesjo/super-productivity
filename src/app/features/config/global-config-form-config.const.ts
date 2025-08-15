@@ -15,7 +15,6 @@ import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { SCHEDULE_FORM_CFG } from './form-cfgs/schedule-form.const';
 import { DOMINA_MODE_FORM } from './form-cfgs/domina-mode-form.const';
 import { FOCUS_MODE_FORM_CFG } from './form-cfgs/focus-mode-form.const';
-import { IS_FIREFOX } from '../../util/is-firefox';
 import { REMINDER_FORM_CFG } from './form-cfgs/reminder-form.const';
 import { SHORT_SYNTAX_FORM_CFG } from './form-cfgs/short-syntax-form.const';
 
@@ -49,7 +48,5 @@ export const GLOBAL_PRODUCTIVITY_FORM_CONFIG: ConfigFormConfig = [
   POMODORO_FORM_CFG,
   EVALUATION_SETTINGS_FORM_CFG,
   SIMPLE_COUNTER_FORM,
-  ...(!window.ea?.isSnap() && !IS_FIREFOX && !!window.speechSynthesis
-    ? [DOMINA_MODE_FORM]
-    : []),
+  ...(!window.ea?.isSnap() && !!window.speechSynthesis ? [DOMINA_MODE_FORM] : []),
 ].filter(filterGlobalConfigForm);

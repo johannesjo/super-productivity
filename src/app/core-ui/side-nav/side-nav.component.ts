@@ -1,11 +1,14 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
+  effect,
   ElementRef,
   HostBinding,
   HostListener,
   inject,
   OnDestroy,
+  signal,
   viewChild,
   viewChildren,
 } from '@angular/core';
@@ -15,10 +18,10 @@ import { DialogCreateProjectComponent } from '../../features/project/dialogs/cre
 import { Project } from '../../features/project/project.model';
 import { MatDialog } from '@angular/material/dialog';
 import { DRAG_DELAY_FOR_TOUCH_LONGER } from '../../app.constants';
-import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { standardListAnimation } from '../../ui/animations/standard-list.ani';
-import { first, map, switchMap } from 'rxjs/operators';
+import { first } from 'rxjs/operators';
 import { TagService } from '../../features/tag/tag.service';
 import { Tag } from '../../features/tag/tag.model';
 import { WorkContextType } from '../../features/work-context/work-context.model';
@@ -36,14 +39,14 @@ import { LS } from '../../core/persistence/storage-keys.const';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { TourId } from '../../features/shepherd/shepherd-steps.const';
 import { ShepherdService } from '../../features/shepherd/shepherd.service';
-import { getGithubErrorUrl } from 'src/app/core/error-handler/global-error-handler.util';
+import { getGithubErrorUrl } from '../../core/error-handler/global-error-handler.util';
 import { IS_MOUSE_PRIMARY, IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { moveItemBeforeItem } from '../../util/move-item-before-item';
 import { Store } from '@ngrx/store';
 import {
-  selectAllProjects,
+  selectAllProjectsExceptInbox,
   selectUnarchivedHiddenProjectIds,
   selectUnarchivedVisibleProjects,
 } from '../../features/project/store/project.selectors';
@@ -57,6 +60,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { AsyncPipe } from '@angular/common';
 import { toggleHideFromMenu } from '../../features/project/store/project.actions';
 import { PluginMenuComponent } from '../../plugins/ui/plugin-menu.component';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'side-nav',
@@ -94,48 +98,52 @@ export class SideNavComponent implements OnDestroy {
   private readonly _globalConfigService = inject(GlobalConfigService);
   private readonly _store = inject(Store);
 
-  readonly navEntries = viewChildren<MatMenuItem>('menuEntry');
+  navEntries = viewChildren<MatMenuItem>('menuEntry');
   IS_MOUSE_PRIMARY = IS_MOUSE_PRIMARY;
   IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
   DRAG_DELAY_FOR_TOUCH_LONGER = DRAG_DELAY_FOR_TOUCH_LONGER;
 
   keyboardFocusTimeout?: number;
-  readonly projectExpandBtn = viewChild('projectExpandBtn', { read: ElementRef });
-  isProjectsExpanded: boolean = this.fetchProjectListState();
-  isProjectsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
-    this.isProjectsExpanded,
-  );
+  projectExpandBtn = viewChild('projectExpandBtn', { read: ElementRef });
+  isProjectsExpanded = signal(this.fetchProjectListState());
 
-  allProjects$: Observable<Project[]> = this._store.select(selectAllProjects);
-  nonHiddenProjects$: Observable<Project[]> = this.isProjectsExpanded$.pipe(
-    switchMap((isExpanded) =>
-      isExpanded
-        ? this._store.select(selectUnarchivedVisibleProjects)
-        : combineLatest([
-            this._store.select(selectUnarchivedVisibleProjects),
-            this.workContextService.activeWorkContextId$,
-          ]).pipe(map(([projects, id]) => projects.filter((p) => p.id === id))),
-    ),
+  allNonInboxProjects = toSignal(this._store.select(selectAllProjectsExceptInbox), {
+    initialValue: [],
+  });
+  private _allVisibleProjects = toSignal(
+    this._store.select(selectUnarchivedVisibleProjects),
+    { initialValue: [] },
   );
+  private _activeWorkContextId = toSignal(this.workContextService.activeWorkContextId$, {
+    initialValue: null,
+  });
 
-  readonly tagExpandBtn = viewChild('tagExpandBtn', { read: ElementRef });
-  isTagsExpanded: boolean = this.fetchTagListState();
-  isTagsExpanded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
-    this.isTagsExpanded,
-  );
+  nonHiddenProjects = computed(() => {
+    const isExpanded = this.isProjectsExpanded();
+    const projects = this._allVisibleProjects();
+    if (isExpanded) {
+      return projects;
+    }
+    const activeId = this._activeWorkContextId();
+    return projects.filter((p) => p.id === activeId);
+  });
 
-  tagListToDisplay$: Observable<Tag[]> = this.tagService.tagsNoMyDayAndNoList$;
+  tagExpandBtn = viewChild('tagExpandBtn', { read: ElementRef });
+  isTagsExpanded = signal(this.fetchTagListState());
 
-  tagList$: Observable<Tag[]> = this.isTagsExpanded$.pipe(
-    switchMap((isExpanded) =>
-      isExpanded
-        ? this.tagListToDisplay$
-        : combineLatest([
-            this.tagListToDisplay$,
-            this.workContextService.activeWorkContextId$,
-          ]).pipe(map(([tags, id]) => tags.filter((t) => t.id === id))),
-    ),
-  );
+  private _tagListToDisplay = toSignal(this.tagService.tagsNoMyDayAndNoList$, {
+    initialValue: [],
+  });
+
+  tagList = computed(() => {
+    const isExpanded = this.isTagsExpanded();
+    const tags = this._tagListToDisplay();
+    if (isExpanded) {
+      return tags;
+    }
+    const activeId = this._activeWorkContextId();
+    return tags.filter((t) => t.id === activeId);
+  });
   T: typeof T = T;
   activeWorkContextId?: string | null;
   WorkContextType: typeof WorkContextType = WorkContextType;
@@ -145,7 +153,7 @@ export class SideNavComponent implements OnDestroy {
   private _cachedIssueUrl?: string;
 
   @HostBinding('class') get cssClass(): string {
-    return this._globalConfigService.cfg?.misc.isUseMinimalNav ? 'minimal-nav' : '';
+    return this._globalConfigService.cfg()?.misc.isUseMinimalNav ? 'minimal-nav' : '';
   }
 
   constructor() {
@@ -155,23 +163,23 @@ export class SideNavComponent implements OnDestroy {
       ),
     );
 
-    this._subs.add(
-      this._layoutService.isShowSideNav$.subscribe((isShow) => {
-        const navEntries = this.navEntries();
-        if (navEntries && isShow) {
-          this.keyManager = new FocusKeyManager<MatMenuItem>(
-            navEntries,
-          ).withVerticalOrientation(true);
-          window.clearTimeout(this.keyboardFocusTimeout);
-          this.keyboardFocusTimeout = window.setTimeout(() => {
-            this.keyManager?.setFirstItemActive();
-          }, 100);
-          // this.keyManager.change.subscribe((v) => Log.log('this.keyManager.change', v));
-        } else if (!isShow) {
-          this._taskService.focusFirstTaskIfVisible();
-        }
-      }),
-    );
+    // Effect to handle side nav visibility changes
+    effect(() => {
+      const isShow = this._layoutService.isShowSideNav();
+      const navEntries = this.navEntries();
+      if (navEntries && isShow) {
+        this.keyManager = new FocusKeyManager<MatMenuItem>(
+          navEntries,
+        ).withVerticalOrientation(true);
+        window.clearTimeout(this.keyboardFocusTimeout);
+        this.keyboardFocusTimeout = window.setTimeout(() => {
+          this.keyManager?.setFirstItemActive();
+        }, 100);
+        // this.keyManager.change.subscribe((v) => Log.log('this.keyManager.change', v));
+      } else if (!isShow) {
+        this._taskService.focusFirstTaskIfVisible();
+      }
+    });
   }
 
   @HostListener('keydown', ['$event'])
@@ -194,8 +202,8 @@ export class SideNavComponent implements OnDestroy {
     return localStorage.getItem(LS.IS_PROJECT_LIST_EXPANDED) === 'true';
   }
 
-  storeProjectListState(isExpanded: boolean): void {
-    this.isProjectsExpanded = isExpanded;
+  private _storeProjectListState(isExpanded: boolean): void {
+    this.isProjectsExpanded.set(isExpanded);
     localStorage.setItem(LS.IS_PROJECT_LIST_EXPANDED, isExpanded.toString());
   }
 
@@ -204,23 +212,20 @@ export class SideNavComponent implements OnDestroy {
   }
 
   storeTagListState(isExpanded: boolean): void {
-    this.isTagsExpanded = isExpanded;
+    this.isTagsExpanded.set(isExpanded);
     localStorage.setItem(LS.IS_TAG_LIST_EXPANDED, isExpanded.toString());
   }
 
   toggleExpandProjects(): void {
-    const newState: boolean = !this.isProjectsExpanded;
-    this.storeProjectListState(newState);
-    this.isProjectsExpanded$.next(newState);
+    const newState: boolean = !this.isProjectsExpanded();
+    this._storeProjectListState(newState);
   }
 
   toggleExpandProjectsLeftRight(ev: KeyboardEvent): void {
-    if (ev.key === 'ArrowLeft' && this.isProjectsExpanded) {
-      this.storeProjectListState(false);
-      this.isProjectsExpanded$.next(this.isProjectsExpanded);
-    } else if (ev.key === 'ArrowRight' && !this.isProjectsExpanded) {
-      this.storeProjectListState(true);
-      this.isProjectsExpanded$.next(this.isProjectsExpanded);
+    if (ev.key === 'ArrowLeft' && this.isProjectsExpanded()) {
+      this._storeProjectListState(false);
+    } else if (ev.key === 'ArrowRight' && !this.isProjectsExpanded()) {
+      this._storeProjectListState(true);
     }
   }
 
@@ -240,18 +245,15 @@ export class SideNavComponent implements OnDestroy {
   }
 
   toggleExpandTags(): void {
-    const newState: boolean = !this.isTagsExpanded;
+    const newState: boolean = !this.isTagsExpanded();
     this.storeTagListState(newState);
-    this.isTagsExpanded$.next(newState);
   }
 
   toggleExpandTagsLeftRight(ev: KeyboardEvent): void {
-    if (ev.key === 'ArrowLeft' && this.isTagsExpanded) {
+    if (ev.key === 'ArrowLeft' && this.isTagsExpanded()) {
       this.storeTagListState(false);
-      this.isTagsExpanded$.next(this.isTagsExpanded);
-    } else if (ev.key === 'ArrowRight' && !this.isTagsExpanded) {
+    } else if (ev.key === 'ArrowRight' && !this.isTagsExpanded()) {
       this.storeTagListState(true);
-      this.isTagsExpanded$.next(this.isTagsExpanded);
     }
   }
 

@@ -37,9 +37,19 @@
                       [task]="taskRepeatCfg"
                     ></tag-list>
                   </div>
+
                   <div
                     (click)="editTaskRepeatCfg(taskRepeatCfg)"
                     class="repeat-text-and-icon"
+                    [matTooltip]="
+                      T.SCHEDULE.NEXT +
+                      ' ' +
+                      (getNextOccurrence(taskRepeatCfg) | shortDate2) +
+                      ', ' +
+                      T.SCHEDULE.LAST +
+                      ' ' +
+                      (taskRepeatCfg.lastTaskCreationDay | shortDate2)
+                    "
                     mat-ripple
                   >
                     <div class="repeat-text">{{ getRepeatInfoText(taskRepeatCfg) }}</div>
@@ -77,12 +87,12 @@
             >
               <div class="date-and-time-left">
                 <div class="date hide-xs">
-                  {{ task.dueWithTime | date: 'EE, d MMM, ' }}
-                  {{ task.dueWithTime | date: 'shortTime' }}
+                  {{ task.dueWithTime | localeDate: 'EE, d MMM, ' }}
+                  {{ task.dueWithTime | shortTime }}
                 </div>
                 <div class="date show-xs-only">
-                  {{ task.dueWithTime | date: 'd MMM, ' }},
-                  {{ task.dueWithTime | date: 'shortTime' }}
+                  {{ task.dueWithTime | localeDate: 'd MMM, ' }},
+                  {{ task.dueWithTime | shortTime }}
                 </div>
                 <div class="time-left">({{ task.dueWithTime | humanizeTimestamp }})</div>
               </div>
@@ -120,7 +130,7 @@
               mat-ripple
             >
               <div class="date-and-time-left">
-                <div class="date">{{ task.dueDay | date: 'EE, d MMM' }}</div>
+                <div class="date">{{ task.dueDay | localeDate: 'EE, d MMM' }}</div>
               </div>
               <mat-icon>today</mat-icon>
             </div>

@@ -1,7 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { IDBPDatabase } from 'idb/build';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { filter, shareReplay, take } from 'rxjs/operators';
 import { DBSchema, openDB } from 'idb';
 import { DBAdapter } from './db-adapter.model';
 import { Log } from '../log';
@@ -21,17 +19,15 @@ interface MyDb extends DBSchema {
 })
 export class IndexedDBAdapterService implements DBAdapter {
   private _db?: IDBPDatabase<MyDb>;
-  private _isReady$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  private _afterReady$: Observable<boolean> = this._isReady$.pipe(
-    filter((isReady) => isReady),
-    shareReplay(1),
-  );
+  private _isReady = signal<boolean>(false);
+  private _readyPromise?: Promise<void>;
 
   constructor() {}
 
   public async init(): Promise<IDBPDatabase<MyDb>> {
-    try {
-      this._db = await openDB<MyDb>(DB_NAME, VERSION, {
+    // Create a promise that will resolve when the DB is ready
+    this._readyPromise = new Promise<void>((resolve, reject) => {
+      openDB<MyDb>(DB_NAME, VERSION, {
         // upgrade(db: IDBPDatabase<MyDb>, oldVersion: number, newVersion: number | null, transaction: IDBPTransaction<MyDb>) {
         // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
         upgrade(db: IDBPDatabase<MyDb>, oldVersion: number, newVersion: number | null) {
@@ -50,14 +46,20 @@ export class IndexedDBAdapterService implements DBAdapter {
         terminated(): void {
           alert('IDB TERMINATED');
         },
-      });
-    } catch (e) {
-      this._isReady$.next(false);
-      throw new Error(e as any);
-    }
+      })
+        .then((db) => {
+          this._db = db;
+          this._isReady.set(true);
+          resolve();
+        })
+        .catch((e) => {
+          this._isReady.set(false);
+          reject(new Error(e as any));
+        });
+    });
 
-    this._isReady$.next(true);
-    return this._db;
+    await this._readyPromise;
+    return this._db as IDBPDatabase<MyDb>;
   }
 
   async teardown(): Promise<void> {
@@ -113,9 +115,13 @@ export class IndexedDBAdapterService implements DBAdapter {
     return await (this._db as IDBPDatabase<MyDb>).clear(DB_MAIN_NAME);
   }
 
-  private async _afterReady(): Promise<boolean> {
+  private async _afterReady(): Promise<void> {
+    if (!this._readyPromise) {
+      throw new Error('Database not initialized. Call init() first.');
+    }
+
     try {
-      return await this._afterReady$.pipe(take(1)).toPromise();
+      await this._readyPromise;
     } catch (e) {
       Log.err('DB After Ready Error: Last Params');
       throw new Error(e as string);

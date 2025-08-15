@@ -5,7 +5,7 @@ import { UI_LONG_PRESS_DURATION } from '../ui.const';
 export class LongPressDirective implements OnDestroy {
   readonly longPress = output<MouseEvent | TouchEvent>();
 
-  private longPressTimeout: any;
+  private longPressTimeout: number | undefined;
 
   @HostListener('touchstart', ['$event'])
   @HostListener('mousedown', ['$event'])

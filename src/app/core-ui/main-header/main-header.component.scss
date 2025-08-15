@@ -1,7 +1,14 @@
 @import '../../../common';
 
-// Using CSS variables and direct values
-// Note: These local variables are replaced with direct values or CSS variables
+// TODO split up into more manageable bits
+
+@mixin btn-transition {
+  transition: var(--transition-standard);
+  opacity: 0;
+  position: relative;
+  z-index: 2;
+  margin: var(--s) 0 0 0;
+}
 
 :host {
   display: block;
@@ -18,16 +25,15 @@
   .wrapper {
     -webkit-app-region: drag;
   }
-
   &:active {
     cursor: grabbing;
   }
 
   .current-work-context-title,
-  ::ng-deep button,
-  ::ng-deep a,
   button,
-  a {
+  a,
+  ::ng-deep button,
+  ::ng-deep a {
     -webkit-app-region: no-drag;
   }
 }
@@ -39,9 +45,7 @@
   flex-wrap: nowrap;
   align-items: center;
   padding: 4px 8px;
-  //flex-wrap: wrap;
   min-height: var(--bar-height-large);
-
   @include mq(xs) {
     min-height: var(--bar-height);
     padding: 4px 16px;
@@ -49,23 +53,19 @@
 }
 
 .current-work-context-title {
-  //font-weight: bold;
   font-size: 18px;
   overflow: hidden;
   text-overflow: ellipsis;
-  //flex-grow: 1;
   white-space: nowrap;
   max-width: 100%;
   cursor: pointer;
   border-radius: var(--card-border-radius);
   padding: var(--s) var(--s2) var(--s) var(--s);
-
   @include mq(xs) {
     padding-right: var(--s);
   }
-
   &:focus {
-    outline: none;
+    outline: 0;
   }
 }
 
@@ -76,11 +76,10 @@
     transition: var(--transition-standard);
     opacity: 0;
     margin-right: var(--s2);
-    margin-left: calc(-1 * var(--s));
+    margin-left: calc(var(--s) * -1);
     position: relative;
     z-index: 1;
   }
-
   &:hover,
   .current-work-context-title:hover + & {
     opacity: 1;
@@ -93,25 +92,24 @@ button {
 }
 
 button.isActive2 {
-  background-color: var(--c-accent);
-  transition: background-color var(--transition-standard);
+  background: var(--c-accent);
+  transition: background var(--transition-standard);
 }
 
 .action-nav {
-  margin-right: 0px;
+  margin-right: 0;
   margin-left: auto;
   display: flex;
   align-items: center;
 
   :host-context([dir='rtl']) & {
-    margin-left: 0px;
+    margin-left: 0;
     margin-right: auto;
   }
 
   simple-counter-button,
   button {
     margin-left: var(--s-quarter);
-
     @include mq(xs) {
       margin-left: var(--s);
     }
@@ -119,25 +117,18 @@ button.isActive2 {
 }
 
 @keyframes pulse {
-  0% {
-    transform: scale(0.7);
-  }
-  25% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1);
-  }
+  0%,
   100% {
     transform: scale(0.7);
+  }
+  25%,
+  50% {
+    transform: scale(1);
   }
 }
 
 .play-btn-wrapper {
   position: relative;
-  //margin-left: var(--s-half);
-  //margin-right: var(--s-half);
-
   @include mq(xs) {
     margin-left: var(--s);
   }
@@ -146,13 +137,11 @@ button.isActive2 {
     width: 48px;
     height: 48px;
     position: absolute;
-    top: 0;
+    inset: 0;
+    top: auto;
     left: -4px;
-    right: 0;
-    bottom: 0;
     border-radius: 50%;
     margin: auto;
-    transform: scale(1, 1);
     animation: pulse 2s infinite;
     background: var(--c-accent);
     opacity: 0.6;
@@ -161,9 +150,7 @@ button.isActive2 {
   .play-btn {
     position: relative;
     margin-left: 0;
-    // needs to be above the rest
     z-index: 2;
-
     .circle-svg {
       transform: rotate(-90deg);
       position: absolute;
@@ -172,7 +159,6 @@ button.isActive2 {
       right: -8px;
       pointer-events: none;
     }
-
     .mat-icon {
       position: relative;
       z-index: 2;
@@ -180,11 +166,9 @@ button.isActive2 {
   }
 
   .pomodoro-label {
-    margin-left: 0;
     position: absolute;
     line-height: 1;
     padding: 2px 4px 1px;
-    width: auto;
     left: 50%;
     transform: translateX(-50%);
     box-shadow: var(--whiteframe-shadow-2dp);
@@ -193,7 +177,6 @@ button.isActive2 {
     z-index: 4;
     pointer-events: none;
     bottom: calc(var(--s) * -0.25);
-
     background: var(--bg-lighter);
     color: var(--text-color-most-intense);
   }
@@ -207,21 +190,15 @@ button.isActive2 {
     left: 50%;
     transform: translateX(-50%);
     pointer-events: none;
-
-    // add a little bit of extra hover area
     &:after {
       content: '';
       position: absolute;
-      top: calc(var(--s) * -1.25);
-      left: calc(var(--s) * -1.25);
-      right: calc(var(--s) * -1.25);
-      bottom: calc(var(--s) * -1.25);
+      inset: calc(var(--s) * -1.25);
     }
   }
 
   &:hover .pomodoro-controls {
     pointer-events: all;
-
     .pomodoro-btn {
       transform: translateY(0);
       opacity: 1;
@@ -229,64 +206,18 @@ button.isActive2 {
   }
 
   .pomodoro-btn {
-    transition: var(--transition-standard);
+    @include btn-transition;
     transform: translateY(-100%);
-    opacity: 0;
-    position: relative;
-    z-index: 2;
-    margin-top: var(--s);
-    margin-left: 0;
-
     &:nth-child(2) {
       transform: translateY(-200%);
     }
   }
 }
 
-.current-task-title {
-  position: absolute;
-  right: 100%;
-  width: auto;
-  border: 2px solid var(--c-accent);
-  border-radius: 12px;
-  min-width: 50px;
-  white-space: nowrap;
-  padding: var(--s-half) var(--s2);
-  padding-right: calc(var(--s) * 2.5);
-  margin-right: calc(-1 * var(--s) * 2);
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-  transition: var(--transition-standard);
-  display: flex;
-
-  @include mq(xs, max) {
-    display: none;
-  }
-
-  background: var(--bg-lighter);
-
-  .title {
-    max-width: 250px;
-    text-overflow: ellipsis;
-    overflow: hidden;
-  }
-
-  .project {
-    padding-right: 0;
-  }
-
-  :host:hover & {
-    opacity: 0;
-  }
-}
-
-// Mobile dropdown wrapper - shared by simple counter and side panel
 .mobile-dropdown-wrapper {
   position: relative;
 }
 
-// Mobile dropdown - shared style
 .mobile-dropdown {
   position: absolute;
   display: flex;
@@ -302,9 +233,8 @@ button.isActive2 {
     pointer-events: all;
   }
 
-  simple-counter-button,
-  button {
-    transition: var(--transition-standard);
+  simple-counter-button {
+    @include btn-transition;
     transform: translateY(-100%);
     opacity: 0;
     position: relative;
@@ -319,72 +249,50 @@ button.isActive2 {
     }
   }
 
-  &.isVisible simple-counter-button,
-  &.isVisible button {
+  &.isVisible simple-counter-button {
     transform: translateY(0);
     opacity: 1;
   }
 }
 
-// Desktop inline buttons - common style
-
-// Panel buttons
 .panel-btn {
   position: relative;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
   overflow: visible !important;
-
   &.isActive {
-    background-color: transparent;
-
+    background: transparent;
     .mat-icon {
-      transition: all 0.2s ease;
+      transition: all 0.2s;
       transform: rotate(45deg);
     }
-
     &::after {
       border-radius: 4px;
-      box-shadow: 0px -2px 3px 0px var(--separator-alpha);
+      box-shadow: 0 -2px 3px var(--separator-alpha);
       background: var(--sidebar-bg);
       content: '';
       width: 100%;
       position: absolute;
-      left: 1px;
       top: 0;
+      right: auto;
       bottom: -5px;
+      left: 1px;
       z-index: -1;
     }
-
     &.isCustomized::after {
       background: var(--c-accent);
     }
   }
-
   &:hover:not(.isActive):not(:disabled) {
-    background-color: var(--hover-color, rgba(0, 0, 0, 0.04));
+    background: var(--hover-color, rgba(0, 0, 0, 0.04));
   }
-
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     background: transparent !important;
+    &::after {
+      background: transparent !important;
+    }
   }
-
-  &:disabled::after {
-    background: transparent !important;
-  }
-}
-
-.sync-state-ico {
-  // important because it might be overwritten by material styles sometimes
-  position: absolute !important;
-  font-size: 10px;
-  height: 10px;
-  line-height: 10px;
-  left: 50%;
-  top: 50%;
-  font-weight: bold;
-  transform: translate(-50%, -50%);
 }
 
 .spin {
@@ -392,7 +300,7 @@ button.isActive2 {
 }
 
 @keyframes spin {
-  100% {
+  to {
     transform: rotate(-360deg);
   }
 }
@@ -419,7 +327,6 @@ button.isActive2 {
   padding: 0 var(--s);
   font-size: 12px;
   font-weight: 500;
-  //text-transform: uppercase;
   border: none;
   border-radius: 0;
   transition: var(--transition-standard);
@@ -464,15 +371,22 @@ button.isActive2 {
       border-right-color: rgba(255, 255, 255, 0.1);
     }
   }
+}
 
-  &:last-child {
-    border-top-right-radius: var(--card-border-radius);
-    border-bottom-right-radius: var(--card-border-radius);
-  }
+.current-task-title {
+  position: absolute;
+  right: 100%;
+  width: auto;
+  border: 2px solid var(--c-accent);
+  border-radius: 12px;
+}
 
-  &:focus {
-    outline: none;
-  }
+.sync-state-ico {
+  // important because it might be overwritten by material styles sometimes
+  position: absolute !important;
+  font-size: 10px;
+  height: 10px;
+  line-height: 10px;
 }
 
 :host:hover ::ng-deep {

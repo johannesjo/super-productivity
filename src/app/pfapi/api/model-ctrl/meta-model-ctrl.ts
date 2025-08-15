@@ -84,6 +84,17 @@ export class MetaModelCtrl {
     // Get client ID for vector clock
     const clientId = await this.loadClientId();
 
+    // Log to debug vector clock updates
+    PFLog.normal(
+      `${MetaModelCtrl.L}.${this.updateRevForModel.name}() vector clock update`,
+      {
+        modelId,
+        clientId,
+        currentVectorClock: metaModel.vectorClock,
+        clientIdInMemory: this._clientIdInMemory,
+      },
+    );
+
     // Create action string (max 100 chars)
     const actionStr = `${modelId} => ${new Date(timestamp).toISOString()}`;
     const lastUpdateAction =
@@ -251,7 +262,17 @@ export class MetaModelCtrl {
       throw new ClientIdNotFoundError();
     }
 
+    // Validate clientId format to catch corruption
+    if (clientId.length < 10) {
+      PFLog.critical(`${MetaModelCtrl.L}.loadClientId() Invalid clientId loaded:`, {
+        clientId,
+        length: clientId.length,
+      });
+      throw new Error(`Invalid clientId loaded: ${clientId}`);
+    }
+
     this._clientIdInMemory = clientId;
+    PFLog.normal(`${MetaModelCtrl.L}.loadClientId() loaded:`, { clientId });
     return clientId;
   }
 
@@ -315,6 +336,21 @@ export class MetaModelCtrl {
 
   private _generateClientId(): string {
     PFLog.normal(`${MetaModelCtrl.L}.${this._generateClientId.name}()`);
-    return getEnvironmentId() + '_' + Date.now();
+
+    const now = new Date();
+    const prefix = getEnvironmentId(); // e.g., "BCL"
+    const monthDay = `${now.getMonth() + 1}_${now.getDate()}`;
+
+    const millisSinceEpoch = now.getTime();
+    const base36Ts = millisSinceEpoch.toString(36); // precise + compact
+
+    return `${prefix}${base36Ts}${monthDay}`;
   }
+
+  // decoder for real timestamp
+  // function decodeBase36ClientId(id: string): Date {
+  //   const base36Ts = id.slice(-10); // or regex if format varies
+  //   const millis = parseInt(base36Ts, 36);
+  //   return new Date(millis);
+  // }
 }

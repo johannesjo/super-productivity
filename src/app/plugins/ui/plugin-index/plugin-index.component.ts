@@ -20,6 +20,7 @@ import {
   PluginIframeConfig,
   createPluginIframeUrl,
   handlePluginMessage,
+  cleanupPluginIframeUrl,
 } from '../../util/plugin-iframe.util';
 import { CommonModule } from '@angular/common';
 import { MatButton } from '@angular/material/button';
@@ -92,6 +93,7 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
 
   private _messageListener?: EventListener;
   private _routeSubscription?: Subscription;
+  private _currentIframeUrl: string | null = null;
 
   async ngOnInit(): Promise<void> {
     // If directPluginId is provided, load that plugin directly
@@ -231,10 +233,14 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
       indexHtml: indexContent,
       baseCfg,
       pluginBridge: this._pluginBridge,
+      boundMethods: this._pluginBridge.createBoundMethods(pluginId, plugin.manifest),
     };
 
-    // Create iframe URL
+    // Create iframe URL using blob URL
     const iframeUrl = createPluginIframeUrl(config);
+
+    // Store the URL for cleanup
+    this._currentIframeUrl = iframeUrl;
 
     // Store message handler for cleanup
     this._messageListener = async (event: Event) => {
@@ -248,7 +254,9 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
     const safeUrl = this._sanitizer.bypassSecurityTrustResourceUrl(iframeUrl);
     PluginLog.log(
       `Setting iframe src for plugin ${pluginId}:`,
-      iframeUrl.substring(0, 100) + '...',
+      iframeUrl.startsWith('blob:')
+        ? `blob:${iframeUrl.split(':')[1].substring(0, 20)}...`
+        : iframeUrl.substring(0, 100) + '...',
     );
     this.iframeSrc.set(safeUrl);
     this.isLoading.set(false);
@@ -264,6 +272,13 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
       window.removeEventListener('message', this._messageListener);
       this._messageListener = undefined;
       PluginLog.log(`Removed message listener for plugin: ${currentPluginId}`);
+    }
+
+    // Cleanup blob URL if it exists
+    if (this._currentIframeUrl) {
+      cleanupPluginIframeUrl(this._currentIframeUrl);
+      console.log(`Cleaned up blob URL for plugin: ${currentPluginId}`);
+      this._currentIframeUrl = null;
     }
 
     // Clear iframe reference from cleanup service (but don't remove from DOM)

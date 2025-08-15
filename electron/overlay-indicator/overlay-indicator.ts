@@ -20,14 +20,16 @@ export const initOverlayIndicator = (enabled: boolean, shortcut?: string): void 
     createOverlayWindow();
     initListeners();
 
-    // Show overlay and request current task state
+    // Request current task state
     const mainWindow = BrowserWindow.getAllWindows().find((win) => win !== overlayWindow);
     if (mainWindow) {
-      // Request current task state
       mainWindow.webContents.send(IPC.REQUEST_CURRENT_TASK_FOR_OVERLAY);
+
+      // Only show overlay if main window is not visible
+      if (!mainWindow.isVisible()) {
+        showOverlayWindow();
+      }
     }
-    // Always show overlay when initialized
-    showOverlayWindow();
   }
 };
 
@@ -38,13 +40,12 @@ export const updateOverlayEnabled = (isEnabled: boolean): void => {
     createOverlayWindow();
     initListeners();
 
-    // Show overlay and request current task state immediately when enabling
+    // Request current task state
     const mainWindow = BrowserWindow.getAllWindows().find((win) => win !== overlayWindow);
     if (mainWindow) {
       mainWindow.webContents.send(IPC.REQUEST_CURRENT_TASK_FOR_OVERLAY);
     }
-    // Always show overlay when enabled
-    showOverlayWindow();
+    // Don't show overlay immediately when enabling - wait for window to be minimized
   } else if (!isEnabled && overlayWindow) {
     destroyOverlayWindow();
   }
@@ -141,9 +142,6 @@ const createOverlayWindow = (): void => {
   });
 
   overlayWindow.on('ready-to-show', () => {
-    // Show the overlay window
-    overlayWindow.show();
-
     // Ensure window stays on all workspaces
     overlayWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
 
@@ -152,6 +150,7 @@ const createOverlayWindow = (): void => {
     if (mainWindow) {
       mainWindow.webContents.send(IPC.REQUEST_CURRENT_TASK_FOR_OVERLAY);
     }
+    // Don't show overlay here - it should only show when main window is minimized
   });
 
   // Prevent context menu on right-click to avoid crashes

@@ -6,7 +6,7 @@ import { TaskService } from '../../features/tasks/task.service';
 import { ProjectService } from '../../features/project/project.service';
 import { Router } from '@angular/router';
 import { Task } from '../../features/tasks/task.model';
-import { getWorklogStr } from '../../util/get-work-log-str';
+import { getDbDateStr } from '../../util/get-db-date-str';
 import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
 import { Log } from '../../core/log';
@@ -85,10 +85,10 @@ export class NavigateToTaskService {
       const parentTask = tasks.find((innerTask) => innerTask.id === task.parentId);
       if (parentTask && parentTask.timeSpentOnDay) {
         dateStr = Object.keys(parentTask.timeSpentOnDay)[0];
-        return dateStr ?? getWorklogStr(parentTask.created);
+        return dateStr ?? getDbDateStr(parentTask.created);
       }
     }
 
-    return getWorklogStr(task.created);
+    return getDbDateStr(task.created);
   }
 }

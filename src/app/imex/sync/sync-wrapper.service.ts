@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
-import { Observable, of, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { catchError, first, map, switchMap, take, timeout } from 'rxjs/operators';
+import { catchError, filter, first, map, switchMap, take, timeout } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -14,6 +14,7 @@ import {
   DecryptNoPasswordError,
   LockPresentError,
   NoRemoteModelFile,
+  PotentialCorsError,
   RevMismatchForModelError,
   SyncInvalidTimeValuesError,
   SyncProviderId,
@@ -31,8 +32,9 @@ import { DialogSyncInitialCfgComponent } from './dialog-sync-initial-cfg/dialog-
 import { DialogIncompleteSyncComponent } from './dialog-incomplete-sync/dialog-incomplete-sync.component';
 import { DialogHandleDecryptErrorComponent } from './dialog-handle-decrypt-error/dialog-handle-decrypt-error.component';
 import { DialogIncoherentTimestampsErrorComponent } from './dialog-incoherent-timestamps-error/dialog-incoherent-timestamps-error.component';
-import { devError } from '../../util/dev-error';
 import { SyncLog } from '../../core/log';
+import { promiseTimeout } from '../../util/promise-timeout';
+import { devError } from '../../util/dev-error';
 
 @Injectable({
   providedIn: 'root',
@@ -45,9 +47,6 @@ export class SyncWrapperService {
   private _matDialog = inject(MatDialog);
   private _dataInitService = inject(DataInitService);
   private _reminderService = inject(ReminderService);
-
-  // NEW: Subject to track when data reload is complete after sync
-  private _dataReloadComplete$ = new Subject<void>();
 
   syncState$ = this._pfapiService.syncState$;
 
@@ -63,33 +62,35 @@ export class SyncWrapperService {
 
   isEnabledAndReady$: Observable<boolean> =
     this._pfapiService.isSyncProviderEnabledAndReady$.pipe();
-  isSyncInProgress$: Observable<boolean> = this._pfapiService.isSyncInProgress$.pipe();
 
-  _afterCurrentSyncDoneIfAny$: Observable<unknown> = this.isSyncInProgress$.pipe(
-    switchMap((isSyncing) =>
-      isSyncing
-        ? this._dataReloadComplete$.pipe(
-            // this step shouldn't take too long normally, so we use a timeout in case we have a race condition
-            timeout(30000),
-            catchError((e) => {
-              devError(e);
+  // NOTE we don't use this._pfapiService.isSyncInProgress$ since it does not include handling and re-init view model
+  private _isSyncInProgress$ = new BehaviorSubject(false);
+  isSyncInProgress$ = this._isSyncInProgress$.asObservable();
+
+  afterCurrentSyncDoneOrSyncDisabled$: Observable<unknown> = this.isEnabledAndReady$.pipe(
+    switchMap((isEnabled) =>
+      isEnabled
+        ? this._isSyncInProgress$.pipe(
+            filter((isInProgress) => !isInProgress),
+            timeout(40000),
+            catchError((error) => {
+              devError('Sync wait timeout exceeded');
               return of(undefined);
             }),
           )
         : of(undefined),
     ),
-  );
-
-  afterCurrentSyncDoneOrSyncDisabled$: Observable<unknown> = this.isEnabledAndReady$.pipe(
-    switchMap((isEnabled) =>
-      isEnabled ? this._afterCurrentSyncDoneIfAny$ : of(undefined),
-    ),
     first(),
   );
 
-  // TODO move someplace else
-
   async sync(): Promise<SyncStatus | 'HANDLED_ERROR'> {
+    this._isSyncInProgress$.next(true);
+    return this._sync().finally(() => {
+      this._isSyncInProgress$.next(false);
+    });
+  }
+
+  private async _sync(): Promise<SyncStatus | 'HANDLED_ERROR'> {
     const providerId = await this.syncProviderId$.pipe(take(1)).toPromise();
     if (!providerId) {
       throw new Error('No Sync Provider for sync()');
@@ -161,10 +162,18 @@ export class SyncWrapperService {
 
           return r.status;
       }
-    } catch (error: any) {
+    } catch (error) {
       SyncLog.err(error);
 
-      if (error instanceof AuthFailSPError) {
+      if (error instanceof PotentialCorsError) {
+        this._snackService.open({
+          msg: T.F.SYNC.S.ERROR_CORS,
+          type: 'ERROR',
+          // a bit longer since it is a long message
+          config: { duration: 12000 },
+        });
+        return 'HANDLED_ERROR';
+      } else if (error instanceof AuthFailSPError) {
         this._snackService.open({
           msg: T.F.SYNC.S.INCOMPLETE_CFG,
           type: 'ERROR',
@@ -193,7 +202,9 @@ export class SyncWrapperService {
         error instanceof NoRemoteModelFile
       ) {
         SyncLog.log(error, Object.keys(error));
-        const modelId = error.additionalLog;
+        const modelId =
+          (error.additionalLog && error.additionalLog[0]) || error.additionalLog;
+
         this._matDialog
           .open(DialogIncompleteSyncComponent, {
             data: { modelId },
@@ -225,7 +236,9 @@ export class SyncWrapperService {
       } else if (error instanceof CanNotMigrateMajorDownError) {
         alert(this._translateService.instant(T.F.SYNC.A.REMOTE_MODEL_VERSION_NEWER));
         return 'HANDLED_ERROR';
-      } else if (error?.message === 'Sync already in progress') {
+      } else if (
+        (error as { message?: string })?.message === 'Sync already in progress'
+      ) {
         // Silently ignore concurrent sync attempts
         SyncLog.log('Sync already in progress, skipping concurrent sync attempt');
         return 'HANDLED_ERROR';
@@ -273,6 +286,11 @@ export class SyncWrapperService {
     }
 
     if (!provider.getAuthHelper) {
+      return { wasConfigured: false };
+    }
+
+    if (await provider.isReady()) {
+      SyncLog.warn('Provider already configured');
       return { wasConfigured: false };
     }
 
@@ -341,13 +359,13 @@ export class SyncWrapperService {
 
     try {
       await Promise.all([
-        this._dataInitService.reInit(true),
+        this._dataInitService.reInit(),
         this._reminderService.reloadFromDatabase(),
       ]);
-
+      // wait an extra frame to potentially avoid follow up problems
+      await promiseTimeout(100);
       SyncLog.log('Data re-initialization complete');
       // Signal that data reload is complete
-      this._dataReloadComplete$.next();
     } catch (error) {
       SyncLog.err('Error during data re-initialization:', error);
       throw error;

@@ -1,15 +1,196 @@
 @if (!(workContextService.isContextChangingWithDelay$ | async)) {
-  <right-panel @projectChange>
+  <div
+    #containerEl
+    class="wrapper"
+    cdkDropListGroup
+    @projectChange
+  >
     <div
-      #containerEl
-      class="wrapper"
-      cdkDropListGroup
+      #splitTopEl
+      class="today"
+      cdkScrollable
     >
-      <div
-        #splitTopEl
-        class="today"
-        cdkScrollable
-      >
+      <header class="work-view-header">
+        @if (!isPlanningMode() && (estimateRemainingToday() || workingToday())) {
+          <div
+            @fade
+            class="status-bar"
+          >
+            <div
+              class="item"
+              matTooltip="{{ T.WW.TODAY_REMAINING | translate }} ~{{
+                todayRemainingInProject() | msToString
+              }}"
+              [matTooltipDisabled]="
+                !(workContextService.isActiveWorkContextProject$ | async)
+              "
+              matTooltipPosition="above"
+            >
+              <span class="label">{{ T.WW.ESTIMATE_REMAINING | translate }}</span>
+              <span class="no-wrap">
+                ~<strong class="time-val">{{
+                  estimateRemainingToday() | msToString
+                }}</strong>
+                <mat-icon
+                  style="margin-left: 2px"
+                  svgIcon="estimate_remaining"
+                ></mat-icon>
+              </span>
+            </div>
+            <div class="item">
+              <span class="label">{{ T.WW.WORKING_TODAY | translate }}</span>
+              <span class="no-wrap">
+                <strong class="time-val">{{ workingToday() | msToString }}</strong>
+                @if (
+                  workContextService.workingTodayArchived$ | async;
+                  as workingTodayArchived
+                ) {
+                  <span [matTooltip]="T.WW.WORKING_TODAY_ARCHIVED | translate"
+                    >(+{{ workingTodayArchived | msToString }})</span
+                  >
+                }
+                <mat-icon svgIcon="working_today"></mat-icon>
+              </span>
+            </div>
+            @if (isShowTimeWorkedWithoutBreak) {
+              <div class="item hide-xs">
+                <span class="label">{{ T.WW.WITHOUT_BREAK | translate }} </span>
+                <span class="no-wrap">
+                  <strong class="time-val">{{
+                    takeABreakService.timeWorkingWithoutABreak$ | async | msToString
+                  }}</strong
+                  ><mat-icon>timer</mat-icon>
+                </span>
+                <div
+                  [matTooltip]="T.WW.RESET_BREAK_TIMER | translate"
+                  class="take-a-break-reset-btn"
+                >
+                  <button
+                    (click)="resetBreakTimer()"
+                    color="lighter"
+                    mat-mini-fab
+                  >
+                    <mat-icon>timer_off</mat-icon>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+        @if (isPlanningMode()) {
+          <div class="planning-mode-header">
+            @if (!undoneTasks()?.length) {
+              <h3 class="planning-mode-header mat-h3">
+                {{ T.WW.ADD_SOME_TASKS | translate }}
+              </h3>
+            }
+            @if (undoneTasks()?.length) {
+              <div class="status-bar">
+                <div class="item">
+                  <span class="label">{{ T.WW.TIME_ESTIMATED | translate }}</span>
+                  <span class="no-wrap">
+                    <strong class="time-val"
+                      >~{{
+                        workContextService.estimateRemainingToday$ | async | msToString
+                      }}</strong
+                    >
+                    <mat-icon>timer</mat-icon>
+                  </span>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </header>
+
+      <div class="task-list-wrapper">
+        @if (!isPlanningMode() && !(workContextService.isHasTasksToWorkOn$ | async)) {
+          <div
+            @expandFade
+            class="add-more-or-finish"
+          >
+            <div class="no-tasks-illu-wrapper">
+              <div class="inline-block-container">
+                <img
+                  class="show-light-only"
+                  src="assets/illu/horizon.svg"
+                  alt="illu"
+                />
+                <img
+                  class="show-dark-only"
+                  src="assets/illu/horizon-dark.svg"
+                  alt="illu"
+                />
+              </div>
+              <h2 class="no-tasks-label">
+                @if (hasDoneTasks() || (workContextService.doneTodayArchived$ | async)) {
+                  {{ T.WW.NO_PLANNED_TASK_ALL_DONE | translate }}
+                } @else {
+                  {{ T.WW.NO_PLANNED_TASKS | translate }}
+                }
+              </h2>
+            </div>
+
+            @if (!overdueTasks().length) {
+              <div class="btn-wrapper">
+                <button
+                  (click)="planMore()"
+                  color=""
+                  mat-stroked-button
+                  tabindex="1"
+                >
+                  <mat-icon>playlist_add</mat-icon>
+                  {{ T.WW.ADD_MORE | translate }}
+                </button>
+              </div>
+            }
+          </div>
+        }
+        @if (isPlanningMode()) {
+          <div
+            @expandFade
+            class="planning-mode-content"
+          >
+            <add-task-bar
+              (done)="startWork()"
+              [tabindex]="1"
+              [isDoubleEnterMode]="true"
+            ></add-task-bar>
+
+            <add-scheduled-today-or-tomorrow-btn></add-scheduled-today-or-tomorrow-btn>
+
+            <button
+              (click)="startWork()"
+              class="ready-to-work-btn"
+              color="primary"
+              mat-flat-button
+              tabindex="1"
+            >
+              <mat-icon>check</mat-icon>
+              {{ T.WW.READY_TO_WORK | translate }}
+            </button>
+          </div>
+        }
+        @if (customizedUndoneTasks(); as customized) {
+          @if (customized.grouped) {
+            @for (group of customized.grouped | keyvalue; track group.key) {
+              <h3>{{ group.key }}</h3>
+              <task-list
+                [tasks]="group.value"
+                listId="PARENT"
+                listModelId="UNDONE"
+              ></task-list>
+            }
+          } @else {
+            <task-list
+              class="tour-undoneList"
+              [tasks]="customized.list"
+              listId="PARENT"
+              listModelId="UNDONE"
+            ></task-list>
+          }
+        }
+
         @if (isShowOverduePanel()) {
           <section
             class="overdue-tasks"
@@ -18,30 +199,11 @@
             <!-- OVERDUE Outline -->
             <collapsible
               [title]="(T.G.OVERDUE | translate) + ' (' + overdueTasks().length + ')'"
-              [isExpanded]="true"
+              [isExpanded]="!isOverdueHidden()"
+              (isExpandedChange)="isOverdueHidden.set(!$event)"
               [isIconBefore]="true"
             >
-              <div
-                class="task-list-wrapper"
-                style="padding-bottom: 16px"
-              >
-                <task-list
-                  [tasks]="overdueTasks()"
-                  [isSortingDisabled]="true"
-                  listId="PARENT"
-                  listModelId="OVERDUE"
-                ></task-list>
-              </div>
-
-              <div
-                class=""
-                style="
-                  display: flex;
-                  gap: 16px;
-                  justify-content: center;
-                  align-items: center;
-                "
-              >
+              <div class="overdue-btn-wrapper">
                 <button
                   mat-stroked-button
                   color="primary"
@@ -60,319 +222,127 @@
                 <!--                  {{ T.F.PLANNER.D.ADD_PLANNED.RE_PLAN_ALL | translate }}-->
                 <!--                </button>-->
               </div>
-            </collapsible>
 
-            <h2
-              class="mat-h2 completed-tasks-heading"
-              style="margin: 8px; margin-top: 24px; margin-bottom: 8px"
-            >
-              <span
-                >{{ T.G.TODAY_TAG_TITLE | translate }}
-                @if (estimateRemainingToday()) {
-                  (~<strong>{{ estimateRemainingToday() | msToString }}</strong
-                  >)
-                }
-              </span>
-            </h2>
+              <div>
+                <task-list
+                  [tasks]="overdueTasks()"
+                  [isSortingDisabled]="true"
+                  listId="PARENT"
+                  listModelId="OVERDUE"
+                ></task-list>
+              </div>
+            </collapsible>
           </section>
         }
 
-        @if (!isShowOverduePanel()) {
-          <header class="work-view-header">
-            @if (!isPlanningMode() && (estimateRemainingToday() || workingToday())) {
-              <div
-                @fade
-                class="status-bar"
-              >
-                <div
-                  class="item"
-                  matTooltip="{{ T.WW.TODAY_REMAINING | translate }} ~{{
-                    todayRemainingInProject() | msToString
-                  }}"
-                  [matTooltipDisabled]="
-                    !(workContextService.isActiveWorkContextProject$ | async)
-                  "
-                  matTooltipPosition="above"
-                >
-                  <span class="label">{{ T.WW.ESTIMATE_REMAINING | translate }}</span>
-                  <span class="no-wrap">
-                    ~<strong class="time-val">{{
-                      estimateRemainingToday() | msToString
-                    }}</strong>
-                    <mat-icon
-                      style="margin-left: 2px"
-                      svgIcon="estimate_remaining"
-                    ></mat-icon>
-                  </span>
-                </div>
-                <div class="item">
-                  <span class="label">{{ T.WW.WORKING_TODAY | translate }}</span>
-                  <span class="no-wrap">
-                    <strong class="time-val">{{ workingToday() | msToString }}</strong>
-                    @if (
-                      workContextService.workingTodayArchived$ | async;
-                      as workingTodayArchived
-                    ) {
-                      <span [matTooltip]="T.WW.WORKING_TODAY_ARCHIVED | translate"
-                        >(+{{ workingTodayArchived | msToString }})</span
-                      >
-                    }
-                    <mat-icon svgIcon="working_today"></mat-icon>
-                  </span>
-                </div>
-                @if (isShowTimeWorkedWithoutBreak) {
-                  <div class="item hide-xs">
-                    <span class="label">{{ T.WW.WITHOUT_BREAK | translate }} </span>
-                    <span class="no-wrap">
-                      <strong class="time-val">{{
-                        takeABreakService.timeWorkingWithoutABreak$ | async | msToString
-                      }}</strong
-                      ><mat-icon>timer</mat-icon>
-                    </span>
-                    <div
-                      [matTooltip]="T.WW.RESET_BREAK_TIMER | translate"
-                      class="take-a-break-reset-btn"
-                    >
-                      <button
-                        (click)="resetBreakTimer()"
-                        color="lighter"
-                        mat-mini-fab
-                      >
-                        <mat-icon>timer_off</mat-icon>
-                      </button>
-                    </div>
-                  </div>
-                }
-              </div>
-            }
-            @if (isPlanningMode()) {
-              <div class="planning-mode-header">
-                @if (!undoneTasks()?.length) {
-                  <h3 class="planning-mode-header mat-h3">
-                    {{ T.WW.ADD_SOME_TASKS | translate }}
-                  </h3>
-                }
-                @if (undoneTasks()?.length) {
-                  <div class="status-bar">
-                    <div class="item">
-                      <span class="label">{{ T.WW.TIME_ESTIMATED | translate }}</span>
-                      <span class="no-wrap">
-                        <strong class="time-val"
-                          >~{{
-                            workContextService.estimateRemainingToday$
-                              | async
-                              | msToString
-                          }}</strong
-                        >
-                        <mat-icon>timer</mat-icon>
-                      </span>
-                    </div>
-                  </div>
-                }
-              </div>
-            }
-          </header>
-          <!--          @if (improvementService.hasLastTrackedImprovements$ | async) {-->
-          <!--            <improvement-banner [@expandFade]></improvement-banner>-->
-          <!--          }-->
+        @if (laterTodayTasks().length > 0 && isOnTodayList()) {
+          <div
+            @expand
+            class="collapsible-section"
+          >
+            <collapsible
+              [title]="
+                (T.WW.LATER_TODAY | translate) +
+                ' (' +
+                (laterTodayTasks()?.length || 0) +
+                ')'
+              "
+              [isExpanded]="!isLaterTodayHidden()"
+              (isExpandedChange)="isLaterTodayHidden.set(!$event)"
+              [isIconBefore]="true"
+            >
+              <task-list
+                [tasks]="laterTodayTasks()"
+                [isSortingDisabled]="true"
+                listId="PARENT"
+                listModelId="LATER_TODAY"
+              ></task-list>
+            </collapsible>
+          </div>
         }
 
-        <div class="task-list-wrapper">
-          @if (!isPlanningMode() && !(workContextService.isHasTasksToWorkOn$ | async)) {
-            <div
-              @expandFade
-              class="add-more-or-finish"
+        @if (!isPlanningMode() || hasDoneTasks()) {
+          @let nrOfDoneArchived =
+            doneTasks()?.length === 0
+              ? (workContextService.doneTodayArchived$ | async)
+              : 0;
+          <div
+            @expand
+            class="collapsible-section"
+          >
+            <collapsible
+              [title]="
+                (T.WW.DONE_TASKS | translate) +
+                ' (' +
+                (doneTasks()?.length || 0) +
+                (nrOfDoneArchived ? ' + ' + nrOfDoneArchived : '') +
+                ')'
+              "
+              [isExpanded]="!isDoneHidden()"
+              (isExpandedChange)="isDoneHidden.set(!$event)"
+              [isIconBefore]="true"
             >
-              <div class="no-tasks-illu-wrapper">
-                <div class="inline-block-container">
-                  <img
-                    class="show-light-only"
-                    src="assets/illu/horizon.svg"
-                    alt="illu"
-                  />
-                  <img
-                    class="show-dark-only"
-                    src="assets/illu/horizon-dark.svg"
-                    alt="illu"
-                  />
-                </div>
-                <h2 class="no-tasks-label">
-                  @if (
-                    hasDoneTasks() || (workContextService.doneTodayArchived$ | async)
-                  ) {
-                    {{ T.WW.NO_PLANNED_TASK_ALL_DONE | translate }}
-                  } @else {
-                    {{ T.WW.NO_PLANNED_TASKS | translate }}
-                  }
-                </h2>
-              </div>
-
-              @if (!overdueTasks().length) {
-                <div class="btn-wrapper">
+              <task-list
+                class="tour-doneList"
+                [noTasksMsg]="
+                  (nrOfDoneArchived ? T.WW.DONE_TASKS_IN_ARCHIVE : T.WW.NO_DONE_TASKS)
+                    | translate
+                "
+                [tasks]="doneTasks()"
+                listId="PARENT"
+                listModelId="DONE"
+              ></task-list>
+              <div class="finish-day-button-wrapper">
+                @if (!isOnTodayList() && hasDoneTasks()) {
                   <button
-                    (click)="planMore()"
-                    color=""
+                    class="e2e-move-done-to-archive"
                     mat-stroked-button
+                    (click)="moveDoneToArchive()"
                     tabindex="1"
                   >
-                    <mat-icon>playlist_add</mat-icon>
-                    {{ T.WW.ADD_MORE | translate }}
+                    <mat-icon>done_all</mat-icon>
+                    {{ T.WW.MOVE_DONE_TO_ARCHIVE | translate }}
                   </button>
-                </div>
-              }
-            </div>
-          }
-          @if (isPlanningMode()) {
-            <div
-              @expandFade
-              class="planning-mode-content"
-            >
-              <add-task-bar
-                (done)="startWork()"
-                [tabindex]="1"
-                [isDoubleEnterMode]="true"
-              ></add-task-bar>
-
-              <add-scheduled-today-or-tomorrow-btn></add-scheduled-today-or-tomorrow-btn>
-
-              <button
-                (click)="startWork()"
-                class="ready-to-work-btn"
-                color="primary"
-                mat-flat-button
-                tabindex="1"
-              >
-                <mat-icon>check</mat-icon>
-                {{ T.WW.READY_TO_WORK | translate }}
-              </button>
-            </div>
-          }
-          @if (customizedUndoneTasks(); as customized) {
-            @if (customized.grouped) {
-              @for (group of customized.grouped | keyvalue; track group.key) {
-                <h3>{{ group.key }}</h3>
-                <task-list
-                  [tasks]="group.value"
-                  listId="PARENT"
-                  listModelId="UNDONE"
-                ></task-list>
-              }
-            } @else {
-              <task-list
-                class="tour-undoneList"
-                [tasks]="customized.list"
-                listId="PARENT"
-                listModelId="UNDONE"
-              ></task-list>
+                }
+              </div>
+            </collapsible>
+            @if (isOnTodayList()) {
+              <finish-day-btn [hasDoneTasks]="hasDoneTasks()"></finish-day-btn>
             }
-          }
-
-          @if (laterTodayTasks().length > 0 && isOnTodayList()) {
-            <div
-              @expand
-              style="margin-top: 16px"
-            >
-              <collapsible
-                [title]="
-                  (T.WW.LATER_TODAY | translate) +
-                  ' (' +
-                  (laterTodayTasks()?.length || 0) +
-                  ')'
-                "
-                [isExpanded]="!isLaterTodayHidden()"
-                (isExpandedChange)="isLaterTodayHidden.set(!$event)"
-                [isIconBefore]="true"
-              >
-                <task-list
-                  [tasks]="laterTodayTasks()"
-                  [isSortingDisabled]="true"
-                  listId="PARENT"
-                  listModelId="LATER_TODAY"
-                ></task-list>
-              </collapsible>
-            </div>
-          }
-
-          @if (!isPlanningMode() || hasDoneTasks()) {
-            @let nrOfDoneArchived =
-              doneTasks()?.length === 0
-                ? (workContextService.doneTodayArchived$ | async)
-                : 0;
-            <div @expand>
-              <collapsible
-                style="margin-top: 16px"
-                [title]="
-                  (T.WW.DONE_TASKS | translate) +
-                  ' (' +
-                  (doneTasks()?.length || 0) +
-                  (nrOfDoneArchived ? ' + ' + nrOfDoneArchived : '') +
-                  ')'
-                "
-                [isExpanded]="!isDoneHidden()"
-                (isExpandedChange)="isDoneHidden.set(!$event)"
-                [isIconBefore]="true"
-              >
-                <task-list
-                  class="tour-doneList"
-                  [noTasksMsg]="
-                    (nrOfDoneArchived ? T.WW.DONE_TASKS_IN_ARCHIVE : T.WW.NO_DONE_TASKS)
-                      | translate
-                  "
-                  [tasks]="doneTasks()"
-                  listId="PARENT"
-                  listModelId="DONE"
-                ></task-list>
-                <div class="finish-day-button-wrapper">
-                  @if (!isOnTodayList() && hasDoneTasks()) {
-                    <button
-                      class="e2e-move-done-to-archive"
-                      mat-stroked-button
-                      (click)="moveDoneToArchive()"
-                      tabindex="1"
-                    >
-                      <mat-icon>done_all</mat-icon>
-                      {{ T.WW.MOVE_DONE_TO_ARCHIVE | translate }}
-                    </button>
-                  }
-                </div>
-              </collapsible>
-              @if (isOnTodayList()) {
-                <finish-day-btn [hasDoneTasks]="hasDoneTasks()"></finish-day-btn>
-              }
-            </div>
-          }
-        </div>
+          </div>
+        }
       </div>
-      @if (isShowBacklog()) {
-        <div
-          #splitBottomEl
-          [style.user-focus]="splitInputPos === 100 ? 'none' : ''"
-          class="backlog"
-        >
-          <split
-            (posChanged)="splitInputPos = $event"
-            [containerEl]="containerEl"
-            [counter]="backlogTasks()?.length"
-            [isAnimateBtn]="isTriggerBacklogIconAni$ | async"
-            [splitBottomEl]="splitBottomEl"
-            [splitPos]="splitInputPos"
-            [splitTopEl]="splitTopEl"
-          ></split>
-          @if (splitInputPos !== 100) {
-            <div
-              class="inner-wrapper"
-              style="user-select: none"
-            >
-              <backlog
-                (closeBacklog)="splitInputPos = 100"
-                [backlogTasks]="backlogTasks()"
-              ></backlog>
-            </div>
-          }
-        </div>
-      }
     </div>
-  </right-panel>
+
+    @if (isShowBacklog()) {
+      <div
+        #splitBottomEl
+        [style.user-focus]="splitInputPos === 100 ? 'none' : ''"
+        class="backlog"
+      >
+        <split
+          (posChanged)="splitInputPos = $event"
+          [containerEl]="containerEl"
+          [counter]="backlogTasks()?.length"
+          [isAnimateBtn]="isTriggerBacklogIconAni$ | async"
+          [splitBottomEl]="splitBottomEl"
+          [splitPos]="splitInputPos"
+          [splitTopEl]="splitTopEl"
+        ></split>
+        @if (splitInputPos !== 100) {
+          <div
+            class="inner-wrapper"
+            style="user-select: none"
+          >
+            <backlog
+              (closeBacklog)="splitInputPos = 100"
+              [backlogTasks]="backlogTasks()"
+            ></backlog>
+          </div>
+        }
+      </div>
+    }
+  </div>
 }
 
 <button

@@ -17,6 +17,9 @@
       "MSG": "Do you want to install Super Productivity as a PWA?"
     },
     "B_OFFLINE": "You are disconnected from the internet. Syncing and requesting issue provider data will not work.",
+    "CONTEXT_MENU": {
+      "CHANGE_BACKGROUND": "Change Background"
+    },
     "UPDATE_MAIN_MODEL": "Super Productivity has gotten a major update! Some migrations for your data are required. Please note that this renders your data incompatible with older versions of the app.",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "No model update chosen. Please note that you either have to downgrade to the last version, if you do not want to perform the model upgrade.",
     "UPDATE_WEB_APP": "New version available. Load New Version?"
@@ -37,6 +40,13 @@
     "PLACEHOLDER": "Please select a date",
     "PRESS_ENTER_AGAIN": "Press enter again to save",
     "TOMORROW": "Tomorrow"
+  },
+  "DIALOG_UNSPLASH_PICKER": {
+    "TITLE": "Select Background Image from Unsplash",
+    "SEARCH_LABEL": "Search images",
+    "SEARCH_PLACEHOLDER": "e.g., nature, mountains, abstract",
+    "NO_RESULTS": "No images found. Try a different search term.",
+    "BY": "by"
   },
   "F": {
     "ATTACHMENT": {
@@ -920,6 +930,7 @@
         "POSSIBLE_LEGACY_DATA": "Super Productivity has improved syncing by now using two separate files rather than a single one, allowing for much less data transfer. It is recommended to update all instances of Super Productivity and to first sync data from the app instance where the data is newest. If this is the data from your local device then please ignore this warning and just proceed to upload it by confirming the next dialog.",
         "REMOTE_MODEL_VERSION_NEWER": "The remote model version is newer than the local one. Please update your local app to the newest version!"
       },
+      "BTN_SYNC_NOW": "Sync Now",
       "C": {
         "EMPTY_SYNC": "You're trying to sync an empty data object. If you are trying to setup syncing from a new app instance, just press OK to load the data from the server. Otherwise, please check your data.",
         "FORCE_UPLOAD": "Forcing an upload of your data could lead to data loss. Continue?",
@@ -1020,6 +1031,7 @@
         "TITLE": "Sync",
         "WEB_DAV": {
           "CORS_INFO": "<strong>Making it work in the browser:</strong> To make this work in the browser you need to whitelist Super Productivity for CORS requests for your Nextcloud instance. This can have negative security implications! Please <a href='https://github.com/nextcloud/server/issues/3131'>refer to this thread for more information</a>. One approach to make this work on mobile is whitelisting \"https://app.super-productivity.com\" via the nextcloud app <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>. Use at your own risk!</p>",
+          "INFO": "WebDAV implementations differ wildly unfortunately. Super Productivity is known to work well with Nextcloud, but it might not work with your provider.",
           "L_BASE_URL": "Base Url",
           "L_PASSWORD": "Password",
           "L_SYNC_FOLDER_PATH": "Sync Folder Path",
@@ -1031,6 +1043,7 @@
         "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "No local changes – Already in sync",
         "BTN_CONFIGURE": "Configure",
         "BTN_FORCE_OVERWRITE": "Force Overwrite",
+        "ERROR_CORS": "WebDAV Sync Error: Network request failed.\n\nThis might be a CORS issue. Please ensure:\n• Your WebDAV server allows Cross-Origin requests\n• The server URL is correct and accessible\n• You have a working internet connection",
         "ERROR_DATA_IS_CURRENTLY_WRITTEN": "Remote Data is currently being written",
         "ERROR_FALLBACK_TO_BACKUP": "Something went wrong while importing the data. Falling back to local backup.",
         "ERROR_INVALID_DATA": "Error while syncing. Invalid data",
@@ -1510,7 +1523,7 @@
     "DELETE": "Delete",
     "DISMISS": "Dismiss",
     "DO_IT": "Do it!",
-    "DURATION_DESCRIPTION": "e.g. \"5h 23m\" which results in 5 hours in 23 minutes",
+    "DURATION_DESCRIPTION": "e.g. \"5h 23m\" which results in 5 hours and 23 minutes",
     "EDIT": "Edit",
     "ENABLED": "Enabled",
     "EXAMPLE_VAL": "e.g. 32m",
@@ -1647,18 +1660,32 @@
       "IT": "Italiano",
       "JA": "日本語",
       "KO": "한국어",
-      "LABEL": "Please select a language",
+      "LABEL": "Application language",
       "NB": "Norsk Bokmål",
       "NL": "Nederlands",
       "PL": "Polish",
       "PT": "Português",
       "RU": "Russian",
       "SK": "Slovak",
-      "TITLE": "Language",
+      "TITLE": "Language & Region",
       "TR": "Türkçe",
       "UK": "Українська",
       "ZH": "中文(简体)",
-      "ZH_TW": "中文(繁體)"
+      "ZH_TW": "中文(繁體)",
+      "TIME_LOCALE": "Time format locale",
+      "TIME_LOCALE_DESCRIPTION": "Choose a locale for time formatting. Different locales use different conventions (12h vs 24h format)",
+      "TIME_LOCALE_AUTO": "System default",
+      "TIME_LOCALE_EN_US": "English (US) - 12-hour AM/PM",
+      "TIME_LOCALE_EN_GB": "English (UK) - 24-hour",
+      "TIME_LOCALE_DE_DE": "German - 24-hour",
+      "TIME_LOCALE_FR_FR": "French - 24-hour",
+      "TIME_LOCALE_ES_ES": "Spanish - 24-hour",
+      "TIME_LOCALE_IT_IT": "Italian - 24-hour",
+      "TIME_LOCALE_PT_BR": "Portuguese (Brazil) - 24-hour",
+      "TIME_LOCALE_RU_RU": "Russian - 24-hour",
+      "TIME_LOCALE_ZH_CN": "Chinese (Simplified) - 24-hour",
+      "TIME_LOCALE_JA_JP": "Japanese - 24-hour",
+      "TIME_LOCALE_KO_KR": "Korean - 12-hour AM/PM"
     },
     "MISC": {
       "DEFAULT_PROJECT": "Default project to use for tasks if none is specified",
@@ -1950,6 +1977,8 @@
     "RISK_SYSTEM_ACCESS": "Desktop plugins with Node.js permissions can execute system commands",
     "RISK_PERFORMANCE": "Poorly written plugins may cause performance issues or crashes",
     "RECOMMENDATION": "Only install plugins from trusted sources and review their code if possible. Always backup your data before installing new plugins.",
+    "CONFIGURATION": "Configuration",
+    "CONFIGURE": "Configure",
     "INSTALL_WARNING": "Before installing a plugin, ensure you trust its source and understand the permissions it requests.",
     "SYSTEM_ACCESS_REQUEST_TITLE": "System Access Request",
     "SYSTEM_ACCESS_REQUEST_DESC": "This plugin is requesting permission to execute Node.js code on your system. This will allow it to:",
@@ -1978,6 +2007,7 @@
     "PROJECT_NOT_FOUND": "Project '{{contextId}}' not found",
     "TASKS_NOT_IN_PROJECT": "One or more tasks are not in project '{{contextId}}'",
     "PARENT_TASK_NOT_FOUND": "Parent task not found in context '{{contextId}}'",
+    "TASK_NOT_FOUND": "Task with ID '{{taskId}}' not found",
     "TASKS_NOT_SUBTASKS": "One or more tasks are not subtasks of '{{contextId}}'",
     "NO_PLUGIN_CONTEXT_PERSISTENCE": "Plugin does not have permission to persist data",
     "UNABLE_TO_PERSIST_DATA": "Unable to persist data to plugin storage",
@@ -2018,6 +2048,8 @@
     "ERROR_LOADING_PLUGIN": "Error loading plugin",
     "GO_BACK": "Go Back",
     "FAILED_TO_LOAD": "Failed to load plugin",
+    "FAILED_TO_LOAD_CONFIG": "Failed to load plugin configuration",
+    "FAILED_TO_SAVE_CONFIG": "Failed to save plugin configuration",
     "PLUGIN_ID_NOT_PROVIDED": "Plugin ID not provided",
     "PLUGIN_SYSTEM_FAILED_INIT": "Plugin system failed to initialize",
     "PLUGIN_NOT_FOUND": "Plugin not found",
@@ -2025,6 +2057,8 @@
     "INDEX_HTML_NOT_LOADED": "Plugin index.html not loaded"
   },
   "SCHEDULE": {
+    "LAST": "Last:",
+    "NEXT": "Next",
     "NO_REPEATABLE_TASKS": "There are currently no repeated tasks. You can schedule a task by choosing \"Repeat Task\" in the task side panel. To open it click on the most right icon that appears when hovering a task (or just tap on the task on mobile).",
     "NO_SCHEDULED": "There are currently no scheduled tasks. You can schedule a task by choosing \"Schedule Task\" in the task context menu. To open it right click (long press on mobile) on a task.",
     "NO_SCHEDULED_TITLE": "Scheduled Tasks for Day",

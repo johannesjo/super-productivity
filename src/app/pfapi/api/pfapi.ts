@@ -309,7 +309,8 @@ export class Pfapi<const MD extends ModelCfgs> {
 
       // Create a fresh vector clock with just this client
       const freshVectorClock: VectorClock = {
-        [newClientId]: 1,
+        // NOTE we set local change count to 2 to avoid MINIMAL_UPDATE_THRESHOLD in getSyncStatusFromMetaFiles()
+        [newClientId]: 2,
       };
 
       await this.metaModel.save({

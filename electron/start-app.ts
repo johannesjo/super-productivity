@@ -23,6 +23,10 @@ import { quitApp, showOrFocus } from './various-shared';
 import { createWindow } from './main-window';
 import { IdleTimeHandler } from './idle-time-handler';
 import { destroyOverlayWindow } from './overlay-indicator/overlay-indicator';
+import {
+  initializeProtocolHandling,
+  processPendingProtocolUrls,
+} from './protocol-handler';
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
@@ -52,6 +56,16 @@ let mainWin: BrowserWindow;
 let idleTimeHandler: IdleTimeHandler;
 
 export const startApp = (): void => {
+  // Initialize protocol handling
+  initializeProtocolHandling(IS_DEV, app, () => mainWin);
+
+  // Handle single instance lock
+  const gotTheLock = app.requestSingleInstanceLock();
+  if (!gotTheLock) {
+    app.quit();
+    return;
+  }
+
   // LOAD IPC STUFF
   initIpcInterfaces();
 
@@ -201,7 +215,14 @@ export const startApp = (): void => {
 
       // don't update if the user is about to close
       if (!appIN.isQuiting && idleTime > CONFIG.MIN_IDLE_TIME) {
+        log(
+          `Sending idle time to frontend: ${idleTime}ms (threshold: ${CONFIG.MIN_IDLE_TIME}ms)`,
+        );
         mainWin.webContents.send(IPC.IDLE_TIME, idleTime);
+      } else {
+        log(
+          `NOT sending idle time: ${idleTime}ms (threshold: ${CONFIG.MIN_IDLE_TIME}ms, isQuiting: ${appIN.isQuiting})`,
+        );
       }
     };
 
@@ -220,26 +241,32 @@ export const startApp = (): void => {
     lazySetInterval(checkIdle, CONFIG.IDLE_PING_INTERVAL);
 
     powerMonitor.on('suspend', () => {
+      log('powerMonitor: System suspend detected');
       appIN.isLocked = true;
       suspendStart = Date.now();
       mainWin.webContents.send(IPC.SUSPEND);
     });
 
     powerMonitor.on('lock-screen', () => {
+      log('powerMonitor: Screen lock detected');
       appIN.isLocked = true;
       suspendStart = Date.now();
       mainWin.webContents.send(IPC.SUSPEND);
     });
 
     powerMonitor.on('resume', () => {
+      const idleTime = Date.now() - suspendStart;
+      log(`powerMonitor: System resume detected. Idle time: ${idleTime}ms`);
       appIN.isLocked = false;
-      sendIdleMsgIfOverMin(Date.now() - suspendStart);
+      sendIdleMsgIfOverMin(idleTime);
       mainWin.webContents.send(IPC.RESUME);
     });
 
     powerMonitor.on('unlock-screen', () => {
+      const idleTime = Date.now() - suspendStart;
+      log(`powerMonitor: Screen unlock detected. Idle time: ${idleTime}ms`);
       appIN.isLocked = false;
-      sendIdleMsgIfOverMin(Date.now() - suspendStart);
+      sendIdleMsgIfOverMin(idleTime);
       mainWin.webContents.send(IPC.RESUME);
     });
 
@@ -328,6 +355,11 @@ export const startApp = (): void => {
       quitApp,
       customUrl,
     });
+
+    // Process any pending protocol URLs after window is created
+    setTimeout(() => {
+      processPendingProtocolUrls(mainWin);
+    }, 1000);
   }
 
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions

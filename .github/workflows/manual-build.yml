@@ -10,6 +10,9 @@ on:
 jobs:
   windows-bin:
     runs-on: windows-latest
+    env:
+      UNSPLASH_KEY: ${{ secrets.UNSPLASH_KEY }}
+      UNSPLASH_CLIENT_ID: ${{ secrets.UNSPLASH_CLIENT_ID }}
 
     steps:
       - uses: actions/setup-node@v3
@@ -62,6 +65,9 @@ jobs:
 
   mac-bin:
     runs-on: macos-latest
+    env:
+      UNSPLASH_KEY: ${{ secrets.UNSPLASH_KEY }}
+      UNSPLASH_CLIENT_ID: ${{ secrets.UNSPLASH_CLIENT_ID }}
 
     steps:
       - uses: actions/setup-node@v3
@@ -111,6 +117,8 @@ jobs:
         run: |
           mkdir -p ~/private_keys/
           echo '${{ secrets.mac_api_key }}' > ~/private_keys/AuthKey_${{ secrets.mac_api_key_id }}.p8
+
+      - run: npm run env # Generate env.generated.ts
 
       - name: Lint
         run: npm run lint:ci

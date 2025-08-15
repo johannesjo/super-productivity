@@ -1,5 +1,7 @@
 @import '../../../../common';
 
+// TODO split up into more manageable bits
+
 :host {
   --split-extra-border-radius: 20px;
   --margin-bottom: 6px;
@@ -8,65 +10,42 @@
   --offset-short-event: 15px;
 
   border-radius: 6px;
-  margin-right: var(--margin-right);
-  // size of sticky header
+  margin: 0 var(--margin-right) var(--margin-bottom) 0;
   scroll-margin-top: 120px;
   scroll-padding-top: 120px;
   line-height: 1;
   min-height: 20px;
   display: flex;
   align-items: flex-start;
-  margin-bottom: var(--margin-bottom);
   border: 1px solid var(--separator-color);
-  //box-shadow: var(--whiteframe-shadow-1dp);
+  border-left: 3px solid var(--project-color, var(--separator-color));
   background: var(--card-bg);
   color: var(--text-color);
   position: relative;
   z-index: 2;
-  border-left: 3px solid var(--project-color, var(--separator-color));
   user-select: none;
   // has to be for after elements
   overflow: visible !important;
   min-width: 0;
 
-  // &:hover {
-  //   z-index: 3;
-  //   overflow: visible;
-  // }
-
   &.very-short-event {
-    // slightly move up to  reduce chance of overlap with next
-    //margin-top: -2px;
     align-items: center;
-
-    //.title {
-    //  column-width: unset;
-    //  line-clamp: 1;
-    //  max-width: 200px;
-    //}
   }
 
   &.split-start {
-    border-radius: var(--split-extra-border-radius);
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
+    border-radius: var(--split-extra-border-radius) var(--split-extra-border-radius) 0 0;
     border-bottom-style: dashed;
   }
 
   &.split-continued {
-    border-radius: var(--split-extra-border-radius);
-    border-top-left-radius: 0;
-    border-bottom-right-radius: 0;
-    border-bottom-style: dashed;
-    border-top-style: dashed;
+    border-radius: 0 var(--split-extra-border-radius) 0 0;
+    border-style: dashed solid dashed solid;
     min-height: 8px;
   }
 
   &.split-continued-last {
-    border-radius: var(--split-extra-border-radius);
+    border-radius: 0 0 var(--split-extra-border-radius) var(--split-extra-border-radius);
     border-top-style: dashed;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
     min-height: 8px;
   }
 
@@ -82,48 +61,40 @@
       line-height: 0.4;
     }
   }
-}
 
-:host.LunchBreak {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: transparent;
-  margin-top: 2px;
-  border: none !important;
-  box-shadow: none !important;
-  z-index: 1;
+  &.LunchBreak {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+    margin-top: 2px;
+    border: none !important;
+    box-shadow: none !important;
+    z-index: 1;
 
-  .title {
-    flex-grow: 0;
-    column-width: auto;
-    flex-shrink: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    .title {
+      flex: 0 1 auto;
+      column-width: auto;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ico-wrapper {
+      margin-top: 0;
+    }
   }
 
-  .ico-wrapper {
-    margin-top: 0;
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: calc(-1 * (var(--margin-bottom) + 1px));
+    left: 0;
+    right: calc(-1 * (var(--margin-right) + 4px));
+    z-index: 3;
+    display: block;
   }
-}
 
-:host::before {
-  // NOTE: there are some styles in the parent component since host:active + :host  is not working
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: calc(-1 * (var(--margin-bottom) + 1px));
-  left: 0;
-  right: calc(-1 * (var(--margin-right) + 4px));
-  z-index: 3;
-  //background: rgba(255, 0, 0, 0.1);
-  display: block;
-}
-
-/* stylelint-disable no-duplicate-selectors */
-
-// non draggable
-:host {
   &.CalendarEvent,
   &.RepeatProjection,
   &.RepeatProjectionSplit,
@@ -132,53 +103,17 @@
   &.ScheduledRepeatProjection {
     border-style: dashed;
     border-left-style: solid;
-
-    //border-color: var(--separator-color);
     background: var(--bg-lighter);
 
     > * {
       opacity: 0.7;
     }
   }
-}
 
-:host.CalendarEvent {
-  border-left-width: 1px;
-
-  border-left-color: var(--extra-border-color);
-}
-
-:host-context(.is-not-dragging) :host.CalendarEvent:hover {
-  border-color: var(--c-accent);
-  color: var(--c-accent);
-}
-
-:host-context(.is-not-dragging) {
-  &.ScheduledTask,
-  &.CalendarEvent,
-  &.RepeatProjection,
-  &.RepeatProjectionSplit,
-  &.ScheduledRepeatProjection {
-    cursor: pointer;
-
-    &:hover {
-      opacity: 1;
-      //outline: 1px solid var(--c-accent);
-      border-color: var(--c-accent);
-
-      .ico {
-        color: var(--c-accent);
-      }
-
-      > * {
-        opacity: 1;
-      }
-    }
+  &.CalendarEvent {
+    border-left: 1px solid var(--extra-border-color);
   }
-}
 
-//  scheduable tasks
-:host {
   &.ScheduledRepeatProjection .ico {
     color: var(--c-primary);
   }
@@ -197,33 +132,53 @@
     }
 
     .ico-wrapper {
-      margin-left: 6px;
-      margin-top: 4px;
-      margin-right: 4px;
+      margin: 4px 4px 0 6px;
       opacity: 1;
 
       @include mq(xs, max) {
-        margin-left: 1px;
-        margin-top: 1px;
+        margin: 1px 0 0 1px;
       }
     }
 
     .time-badge {
       color: var(--text-color);
       border-color: var(--c-primary);
-      //color: var(--c-primary);
     }
   }
 }
 
-/* stylelint-enable no-duplicate-selectors */
+:host-context(.is-not-dragging) {
+  :host.ScheduledTask,
+  :host.CalendarEvent,
+  :host.RepeatProjection,
+  :host.RepeatProjectionSplit,
+  :host.ScheduledRepeatProjection {
+    cursor: pointer;
+
+    &:hover {
+      opacity: 1;
+      border-color: var(--c-accent);
+
+      &.CalendarEvent {
+        color: var(--c-accent);
+      }
+
+      .ico {
+        color: var(--c-accent);
+      }
+
+      > * {
+        opacity: 1;
+      }
+    }
+  }
+}
 
 .time-badge {
   opacity: 1 !important;
   position: absolute;
   left: 50%;
   top: 50%;
-  bottom: 0;
   transform: translate(-50%, 0);
   font-size: 10px;
   z-index: 1;
@@ -233,18 +188,15 @@
   padding: 1px;
   border: 1px solid var(--extra-border-color);
   border-radius: var(--card-border-radius);
+  color: var(--text-color);
+  background: var(--bg-lighter);
 
   @include mq(xs, max) {
     font-size: 9px;
     height: 11px;
   }
 
-  color: var(--text-color);
-  border-color: var(--extra-border-color);
-  background: var(--bg-lighter);
-
   :host.very-short-event & {
-    //bottom: 4px
     margin-top: -4px;
   }
 
@@ -260,8 +212,7 @@
 
 .ico-wrapper {
   position: relative;
-  margin-left: 6px;
-  margin-top: 8px;
+  margin: 8px 0 0 6px;
 
   @include mq(xs, max) {
     margin-top: 4px;
@@ -277,18 +228,18 @@
 
   mat-icon {
     display: block;
+
+    & + mat-icon {
+      display: none;
+    }
   }
 
-  mat-icon + mat-icon {
-    display: none;
-  }
-
-  :host:hover & {
-    mat-icon:first-of-type:not(:last-of-type) {
+  :host:hover & mat-icon {
+    &:first-of-type:not(:last-of-type) {
       display: none;
     }
 
-    mat-icon:nth-child(2) {
+    &:nth-child(2) {
       display: block;
     }
   }
@@ -323,9 +274,7 @@
   border-top-width: 3px;
   border-radius: 2px;
   position: relative;
-
   color: var(--text-color-muted);
-  border-color: var(--text-color-muted);
 
   @include mq(xs, max) {
     border-radius: 1px;
@@ -342,16 +291,13 @@
   font-size: 14px;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex-grow: 1;
-  flex-shrink: 1;
+  flex: 1 1 auto;
   padding: 6px;
   font-weight: 400;
   line-height: 1.4;
   max-height: 100%;
   text-align: left;
-  // somehow this fixes the cut off lines problem
   column-width: 250px;
-  //font-weight: bold;
 
   @include mq(xs, max) {
     column-width: 120px;
@@ -362,26 +308,20 @@
 
   @include mq(xxs, max) {
     font-size: 10px;
-    line-height: 1.3;
-    padding: 4px;
   }
 
   :host.very-short-event & {
-    padding-top: 1px;
-    padding-bottom: 2px;
+    padding: 1px 6px 2px;
   }
 
   :host.SplitTaskContinued &,
   :host.RepeatProjectionSplitContinued &,
   :host.SplitTaskContinuedLast &,
-  :host.RepeatProjectionSplitContinuedLast {
-    //white-space: nowrap;
-    //max-width: 100%;
+  :host.RepeatProjectionSplitContinuedLast & {
     line-clamp: 1;
   }
 }
 
-// planner tasks
 :host-context(.is-dragging) {
   :host.TaskPlannedForDay,
   :host.SplitTaskPlannedForDay,
@@ -391,7 +331,7 @@
   }
 }
 
-:host-context(.isDarkTheme .is-dragging) {
+:host-context(.isDarkTheme.is-dragging) {
   :host.TaskPlannedForDay,
   :host.SplitTaskPlannedForDay,
   :host.Task,
@@ -405,7 +345,6 @@
   z-index: 3;
 
   &:after {
-    // NOTE: there are some styles in the parent component since host:active + :host  is not working
     content: '';
     position: absolute;
     transform: translateY(calc(-1 * var(--offset)));
@@ -414,18 +353,15 @@
     left: 0;
     right: calc(-1 * (var(--margin-right) + 4px));
     z-index: 3;
-    //border: 1px solid red;
-    //background: rgba(255, 0, 0, 0.2);
   }
-}
 
-:host.very-short-event.drag-over {
-  transform: translateY(var(--offset-short-event));
-  z-index: 3;
+  &.very-short-event {
+    transform: translateY(var(--offset-short-event));
 
-  &:after {
-    transform: translateY(calc(-1 * var(--offset-short-event)));
-    height: calc(var(--offset-short-event) + var(--margin-bottom));
+    &:after {
+      transform: translateY(calc(-1 * var(--offset-short-event)));
+      height: calc(var(--offset-short-event) + var(--margin-bottom));
+    }
   }
 }
 

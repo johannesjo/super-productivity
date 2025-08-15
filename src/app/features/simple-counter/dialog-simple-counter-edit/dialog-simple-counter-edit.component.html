@@ -34,15 +34,16 @@
     @if (chartData()) {
       <section class="chart-section">
         <div class="chart-wrapper">
-          <canvas
-            baseChart
+          <lazy-chart
             [type]="'line'"
-            [data]="chartData()"
+            [datasets]="chartData().datasets"
+            [labels]="chartData().labels"
             [options]="chartOptions"
             [legend]="false"
+            height="200px"
             (chartClick)="onChartClick($event)"
           >
-          </canvas>
+          </lazy-chart>
         </div>
       </section>
     }

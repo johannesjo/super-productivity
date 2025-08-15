@@ -2,7 +2,8 @@ import { IssueProviderKey } from '../issue/issue.model';
 import { Reminder } from '../reminder/reminder.model';
 import { EntityState } from '@ngrx/entity';
 import { TaskAttachment } from './task-attachment/task-attachment.model';
-import { MODEL_VERSION_KEY } from '../../app.constants';
+// Import the unified Task type from plugin-api
+import { Task as PluginTask } from '@super-productivity/plugin-api';
 
 export enum HideSubTasksMode {
   // Show is undefined
@@ -47,8 +48,6 @@ export interface TimeSpentOnDayCopy {
 
 export interface TaskArchive extends EntityState<ArchiveTask> {
   ids: string[];
-  // additional entities state properties
-  [MODEL_VERSION_KEY]?: number;
 }
 
 export type TimeSpentOnDay = Readonly<TimeSpentOnDayCopy>;
@@ -68,9 +67,6 @@ export interface IssueFieldsForTask {
   issueTimeTracked?: IssueTaskTimeTracked;
   issuePoints?: number;
 }
-
-// Import the unified Task type from plugin-api
-import { Task as PluginTask } from '@super-productivity/plugin-api';
 
 // Extend the plugin Task type with app-specific fields
 // Omit issue fields from PluginTask to avoid conflict with IssueFieldsForTask
@@ -97,6 +93,7 @@ export interface TaskCopy
   attachments: TaskAttachment[];
 
   // Ensure type compatibility for internal fields
+  modified?: number;
   doneOn?: number;
   parentId?: string;
   reminderId?: string;
@@ -147,6 +144,12 @@ export interface TaskWithSubTasks extends Task {
   readonly subTasks: Task[];
 }
 
+// make title required and add optional property for possible related (parent) task
+export type IssueTask = Partial<Task> & {
+  title: string;
+  related_to?: string;
+};
+
 export const DEFAULT_TASK: Omit<TaskCopy, 'projectId'> = {
   id: '',
   subTaskIds: [],
@@ -171,8 +174,6 @@ export interface TaskState extends EntityState<Task> {
   taskDetailTargetPanel?: TaskDetailTargetPanel | null;
   lastCurrentTaskId: string | null;
   isDataLoaded: boolean;
-
-  [MODEL_VERSION_KEY]?: number;
 }
 
 export interface WorklogTask extends Task {

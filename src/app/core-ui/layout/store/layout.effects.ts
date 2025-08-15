@@ -30,7 +30,7 @@ export class LayoutEffects {
 
   hideNotesNavigatingToDailySummary$ = createEffect(() =>
     this.router.events.pipe(
-      filter((event: any) => event instanceof NavigationEnd),
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
       filter((event) => !!event.url.match(/(daily-summary)$/)),
       mapTo(hideNonTaskSidePanelContent()),
     ),

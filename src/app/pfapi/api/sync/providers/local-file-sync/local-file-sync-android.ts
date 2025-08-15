@@ -22,7 +22,7 @@ export class LocalFileSyncAndroid extends LocalFileSyncBase {
       const hasPermission = await SafService.checkPermission(privateCfg.safFolderUri);
       if (!hasPermission) {
         // SAF was enabled but permission was revoked
-        await this.privateCfg.save({ ...privateCfg, safFolderUri: undefined });
+        await this.privateCfg.updatePartial({ safFolderUri: undefined });
         return false;
       }
       return true;
@@ -33,9 +33,7 @@ export class LocalFileSyncAndroid extends LocalFileSyncBase {
   async setupSaf(): Promise<string | undefined> {
     try {
       const uri = await SafService.selectFolder();
-      const privateCfg = await this.privateCfg.load();
-      await this.privateCfg.save({
-        ...privateCfg,
+      await this.privateCfg.upsertPartial({
         safFolderUri: uri,
       });
       return uri;
@@ -46,7 +44,7 @@ export class LocalFileSyncAndroid extends LocalFileSyncBase {
   }
 
   async setPrivateCfg(privateCfg: LocalFileSyncPrivateCfg): Promise<void> {
-    await this.privateCfg.save(privateCfg);
+    await this.privateCfg.setComplete(privateCfg);
   }
 
   async getFilePath(targetPath: string): Promise<string> {

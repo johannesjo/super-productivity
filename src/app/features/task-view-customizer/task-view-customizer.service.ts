@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { Observable, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { TaskWithSubTasks } from '../tasks/task.model';
@@ -9,9 +9,12 @@ import { Project } from '../project/project.model';
 import { Tag } from '../tag/tag.model';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { computed } from '@angular/core';
+import { getDbDateStr } from '../../util/get-db-date-str';
 
 @Injectable({ providedIn: 'root' })
 export class TaskViewCustomizerService {
+  private store = inject(Store);
+
   public selectedSort = signal<string>('default');
   public selectedGroup = signal<string>('default');
   public selectedFilter = signal<string>('default');
@@ -25,7 +28,7 @@ export class TaskViewCustomizerService {
       !!this.filterInputValue(),
   );
 
-  constructor(private store: Store) {
+  constructor() {
     this._initProjects();
     this._initTags();
   }
@@ -96,56 +99,51 @@ export class TaskViewCustomizerService {
         return tasks.filter((task) => {
           if (!task.dueDay) return false;
 
-          const due = new Date(task.dueDay);
-          const now = new Date();
+          const todayStr = getDbDateStr();
+          const tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          const tomorrowStr = getDbDateStr(tomorrow);
 
           switch (filterVal) {
             case 'today':
-              return due.toDateString() === now.toDateString();
+              return task.dueDay === todayStr;
 
-            case 'tomorrow': {
-              const tomorrow = new Date();
-              tomorrow.setDate(now.getDate() + 1);
-              return due.toDateString() === tomorrow.toDateString();
-            }
+            case 'tomorrow':
+              return task.dueDay === tomorrowStr;
 
             case 'thisWeek': {
-              const todayStart = new Date(
-                now.getFullYear(),
-                now.getMonth(),
-                now.getDate(),
-                0,
-                0,
-                0,
-                0,
-              );
+              const now = new Date();
               const endOfWeek = new Date(now);
               endOfWeek.setDate(now.getDate() + (7 - now.getDay()));
-              endOfWeek.setHours(23, 59, 59, 999);
-              return due >= todayStart && due <= endOfWeek;
+              const endOfWeekStr = getDbDateStr(endOfWeek);
+              // Note: String comparison works correctly here because dueDay is in YYYY-MM-DD format
+              // which is lexicographically sortable. This avoids timezone conversion issues.
+              return task.dueDay >= todayStr && task.dueDay <= endOfWeekStr;
             }
 
             case 'nextWeek': {
+              const now = new Date();
               const startNextWeek = new Date(now);
               startNextWeek.setDate(now.getDate() + (7 - now.getDay()) + 1);
+              const startNextWeekStr = getDbDateStr(startNextWeek);
               const endNextWeek = new Date(startNextWeek);
               endNextWeek.setDate(startNextWeek.getDate() + 6);
-              return due >= startNextWeek && due <= endNextWeek;
+              const endNextWeekStr = getDbDateStr(endNextWeek);
+              return task.dueDay >= startNextWeekStr && task.dueDay <= endNextWeekStr;
             }
 
-            case 'thisMonth':
-              return (
-                due.getFullYear() === now.getFullYear() &&
-                due.getMonth() === now.getMonth()
-              );
+            case 'thisMonth': {
+              const now = new Date();
+              const yearMonth = getDbDateStr(now).substring(0, 7); // YYYY-MM
+              return task.dueDay.startsWith(yearMonth);
+            }
 
             case 'nextMonth': {
+              const now = new Date();
               const nextMonth = new Date(now);
               nextMonth.setMonth(now.getMonth() + 1);
-              return (
-                due.getFullYear() === nextMonth.getFullYear() &&
-                due.getMonth() === nextMonth.getMonth()
-              );
+              const yearMonth = getDbDateStr(nextMonth).substring(0, 7); // YYYY-MM
+              return task.dueDay.startsWith(yearMonth);
             }
 
             default:
@@ -177,16 +175,28 @@ export class TaskViewCustomizerService {
         return [...tasks].sort((a, b) => a.created - b.created);
       case 'scheduledDate':
         return [...tasks].sort((a, b) => {
-          // prettier-ignore
-          const aDate = a.dueWithTime ? new Date(a.dueWithTime) : (a.dueDay ? new Date(a.dueDay) : null);
-          // prettier-ignore
-          const bDate = b.dueWithTime ? new Date(b.dueWithTime) : (b.dueDay ? new Date(b.dueDay) : null);
+          // For dueWithTime, use timestamp comparison
+          if (a.dueWithTime && b.dueWithTime) {
+            return a.dueWithTime - b.dueWithTime;
+          }
 
-          if (!aDate && !bDate) return 0;
-          if (!aDate) return 1;
-          if (!bDate) return -1;
+          // Note: String comparison works correctly here because dueDay is in YYYY-MM-DD format
+          // which is lexicographically sortable. This avoids timezone conversion issues.
+          if (a.dueDay && b.dueDay) {
+            // If both have dueDay, compare strings directly
+            return a.dueDay.localeCompare(b.dueDay);
+          }
 
-          return aDate.getTime() - bDate.getTime();
+          // Mixed cases: prioritize dueWithTime over dueDay
+          if (a.dueWithTime && b.dueDay) return -1;
+          if (a.dueDay && b.dueWithTime) return 1;
+
+          // Handle null cases
+          if (!a.dueWithTime && !a.dueDay && !b.dueWithTime && !b.dueDay) return 0;
+          if (!a.dueWithTime && !a.dueDay) return 1;
+          if (!b.dueWithTime && !b.dueDay) return -1;
+
+          return 0;
         });
       case 'estimatedTime':
         return [...tasks].sort((a, b) => (a.timeEstimate || 0) - (b.timeEstimate || 0));

@@ -12,7 +12,7 @@ import { IssueTaskTimeTracked, Task, TimeSpentOnDay } from '../../../../tasks/ta
 import { BehaviorSubject, Observable } from 'rxjs';
 import { GitlabApiService } from '../gitlab-api/gitlab-api.service';
 import { first, map, tap } from 'rxjs/operators';
-import { throttle } from 'helpful-decorators';
+import { throttle } from '../../../../../util/decorators';
 import { SnackService } from '../../../../../core/snack/snack.service';
 import { Store } from '@ngrx/store';
 import { IssueProviderService } from '../../../issue-provider.service';

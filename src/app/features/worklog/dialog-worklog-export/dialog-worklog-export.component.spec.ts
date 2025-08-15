@@ -31,15 +31,15 @@ describe('DialogWorklogExportComponent moment replacement', () => {
       // For en-US this would be M/D/YYYY
       const testCases = [
         {
-          date: new Date('2023-10-15'),
+          date: new Date(2023, 9, 15),
           expectedPattern: /^\d{1,2}\/\d{1,2}\/\d{4}$/,
         },
         {
-          date: new Date('2024-01-01'),
+          date: new Date(2024, 0, 1),
           expectedPattern: /^\d{1,2}\/\d{1,2}\/\d{4}$/,
         },
         {
-          date: new Date('2024-12-31'),
+          date: new Date(2024, 11, 31),
           expectedPattern: /^\d{1,2}\/\d{1,2}\/\d{4}$/,
         },
       ];
@@ -52,9 +52,9 @@ describe('DialogWorklogExportComponent moment replacement', () => {
     });
 
     it('should handle same day comparison', () => {
-      const date1 = new Date('2023-10-15');
-      const date2 = new Date('2023-10-15');
-      const date3 = new Date('2023-10-16');
+      const date1 = new Date(2023, 9, 15);
+      const date2 = new Date(2023, 9, 15);
+      const date3 = new Date(2023, 9, 16);
 
       const str1 = date1.toLocaleDateString();
       const str2 = date2.toLocaleDateString();

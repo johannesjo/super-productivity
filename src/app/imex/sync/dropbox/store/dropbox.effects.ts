@@ -22,7 +22,7 @@ export class DropboxEffects {
             sectionKey === 'sync' && (sectionCfg as SyncConfig).isEnabled === false,
         ),
         withLatestFrom(this._pfapiService.currentProviderPrivateCfg$),
-        tap(([, provider]) => {
+        tap(async ([, provider]) => {
           if (
             provider?.providerId === SyncProviderId.Dropbox &&
             (provider.privateCfg as DropboxPrivateCfg)?.accessToken
@@ -31,10 +31,15 @@ export class DropboxEffects {
               return;
             }
             alert('Delete tokens');
-            this._pfapiService.pf.setPrivateCfgForSyncProvider(SyncProviderId.Dropbox, {
-              accessToken: '',
-              refreshToken: '',
-            });
+            const existingConfig = provider.privateCfg as DropboxPrivateCfg;
+            await this._pfapiService.pf.setPrivateCfgForSyncProvider(
+              SyncProviderId.Dropbox,
+              {
+                ...existingConfig,
+                accessToken: '',
+                refreshToken: '',
+              },
+            );
           }
         }),
       ),

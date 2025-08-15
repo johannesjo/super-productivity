@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-export const msToMinuteClockString = (value: any): string => {
+export const msToMinuteClockString = (value: number | null | undefined): string => {
   const totalMs = Number(value) || 0;
   const totalSeconds = Math.floor(Math.abs(totalMs) / 1000);
   const totalMinutes = Math.floor(totalSeconds / 60);
@@ -15,5 +15,6 @@ export const msToMinuteClockString = (value: any): string => {
 
 @Pipe({ name: 'msToMinuteClockString' })
 export class MsToMinuteClockStringPipe implements PipeTransform {
-  transform: (value: any, ...args: any[]) => any = msToMinuteClockString;
+  transform: (value: number | null | undefined, ...args: unknown[]) => string =
+    msToMinuteClockString;
 }

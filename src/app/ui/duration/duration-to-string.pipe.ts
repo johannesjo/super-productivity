@@ -1,12 +1,29 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
+type DurationInput =
+  | number
+  | string
+  | { asMilliseconds(): number }
+  | { _milliseconds: number }
+  | {
+      _data: {
+        milliseconds?: number;
+        seconds?: number;
+        minutes?: number;
+        hours?: number;
+        days?: number;
+      };
+    }
+  | null
+  | undefined;
+
 @Pipe({ name: 'durationToString' })
 export class DurationToStringPipe implements PipeTransform {
-  transform: (value: any, ...args: any[]) => any = durationToString;
+  transform: (value: DurationInput, ...args: unknown[]) => string = durationToString;
 }
 
 /* eslint-disable no-mixed-operators */
-export const durationToString = (value: any, args?: any): any => {
+export const durationToString = (value: DurationInput, args?: unknown): string => {
   if (!value) {
     return '';
   }
@@ -18,16 +35,31 @@ export const durationToString = (value: any, args?: any): any => {
     milliseconds = value;
   }
   // Handle SimpleDuration object with asMilliseconds method
-  else if (value.asMilliseconds && typeof value.asMilliseconds === 'function') {
+  else if (
+    typeof value === 'object' &&
+    value !== null &&
+    'asMilliseconds' in value &&
+    typeof value.asMilliseconds === 'function'
+  ) {
     milliseconds = value.asMilliseconds();
   }
   // Handle object with _milliseconds property (moment-like)
-  else if (value._milliseconds) {
-    milliseconds = value._milliseconds;
+  else if (typeof value === 'object' && value !== null && '_milliseconds' in value) {
+    milliseconds = (value as { _milliseconds: number })._milliseconds;
   }
   // Handle object with _data property (moment duration internal structure)
-  else if (value._data) {
-    const dd = value._data;
+  else if (typeof value === 'object' && value !== null && '_data' in value) {
+    const dd = (
+      value as {
+        _data: {
+          milliseconds?: number;
+          seconds?: number;
+          minutes?: number;
+          hours?: number;
+          days?: number;
+        };
+      }
+    )._data;
     milliseconds =
       (dd.milliseconds || 0) +
       (dd.seconds || 0) * 1000 +

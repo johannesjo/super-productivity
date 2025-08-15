@@ -1,244 +1,242 @@
 @let cfg = cfg$ | async;
 
-<right-panel [isAlwaysOver]="true">
-  <div class="page-wrapper">
-    @if (isForToday) {
-      <div style="text-align: center">
-        <a
-          class="back-btn"
-          color="primary"
-          mat-button
-          routerLink="/active/tasks"
-        >
-          <mat-icon>chevron_left</mat-icon>
-          {{ T.PDS.BACK | translate }}
-          <!--<mat-icon>playlist_play</mat-icon>-->
-        </a>
-      </div>
-    }
-
-    <h1 class="done-headline mat-headline-5">
-      @if (isForToday) {
-        <span [innerHTML]="T.PDS.CELEBRATE | translate"></span>
-      }
-      @if (!isForToday) {
-        <span>{{ T.PDS.SUMMARY_FOR | translate: { dayStr: dayStr } }}</span>
-      }
-    </h1>
-    <div class="daily-summary-summary">
-      <div class="summary-point">
-        <mat-icon>schedule</mat-icon>
-        <div class="summary-text">
-          {{ T.PDS.START_END | translate }}
-          <div class="summary-val">
-            <inline-input
-              (changed)="updateWorkStart($event)"
-              [type]="'time'"
-              [value]="started$ | async | momentFormat: 'HH:mm'"
-            >
-            </inline-input>
-            –
-            <inline-input
-              (changed)="updateWorkEnd($event)"
-              [type]="'time'"
-              [value]="end$ | async | momentFormat: 'HH:mm'"
-            >
-            </inline-input>
-          </div>
-        </div>
-      </div>
-      <div class="summary-point">
-        <mat-icon>check</mat-icon>
-        <div class="summary-text">
-          {{ T.PDS.TASKS_COMPLETED | translate }}
-          <div class="summary-val">
-            <span [innerHtml]="nrOfDoneTasks$ | async"></span> /
-            <span [innerHtml]="totalNrOfTasks$ | async"></span>
-          </div>
-        </div>
-      </div>
-      <div
-        [title]="T.PDS.TIME_SPENT_ESTIMATE_TITLE | translate"
-        class="summary-point"
+<div class="page-wrapper">
+  @if (isForToday) {
+    <div style="text-align: center">
+      <a
+        class="back-btn"
+        color="primary"
+        mat-button
+        routerLink="/active/tasks"
       >
-        <mat-icon>timer</mat-icon>
-        <div class="summary-text">
-          {{ T.PDS.TIME_SPENT_AND_ESTIMATE_LABEL | translate }}
-          <div class="summary-val">
-            {{ timeWorked$ | async | msToClockString }} /
-            {{ estimatedOnTasksWorkedOn$ | async | msToClockString }}
-          </div>
-        </div>
-      </div>
-
-      @if (isBreakTrackingSupport$ | async) {
-        <div class="summary-point">
-          <mat-icon>free_breakfast</mat-icon>
-          <div class="summary-text">
-            {{ T.PDS.BREAK_LABEL | translate }}
-            <div class="summary-val">
-              {{ breakNr$ | async }} / {{ breakTime$ | async | msToClockString }}
-            </div>
-          </div>
-        </div>
-      }
-    </div>
-
-    @if (simpleCounterSummaryItems()?.length) {
-      <div class="simple-counter-summary">
-        @for (simpleCounter of simpleCounterSummaryItems(); track simpleCounter.id) {
-          <simple-counter-summary-item
-            [dayStr]="dayStr"
-            [simpleCounter]="simpleCounter"
-          ></simple-counter-summary-item>
-        }
-      </div>
-    }
-
-    <div class="day-end-note">
-      @if (typeof dailySummaryNoteTxt() === 'string') {
-        <inline-markdown
-          [@expand]
-          [isShowControls]="true"
-          [isShowChecklistToggle]="true"
-          (changed)="updateDailySummaryTxt($event)"
-          [model]="dailySummaryNoteTxt()"
-        >
-          <button
-            [matTooltip]="'Remove daily summary note'"
-            (click)="updateDailySummaryTxt(undefined)"
-            mat-icon-button
-          >
-            <mat-icon>visibility_off</mat-icon>
-          </button>
-        </inline-markdown>
-      } @else {
-        <button
-          mat-icon-button
-          style="opacity: 0.4"
-          (click)="updateDailySummaryTxt('', true)"
-          matTooltip="Click to add a custom text block to describe your day end routine."
-        >
-          <mat-icon>note_alt</mat-icon>
-        </button>
-      }
-      <!--      <inline-markdown-->
-      <!--        (blur)="isFocusNotes=false"-->
-      <!--        (blurred)="isFocusNotes=false"-->
-      <!--        (changed)="changeTaskNotes($event); isFocusNotes=false"-->
-      <!--        (keyboardUnToggle)="focusItem(noteWrapperElRef)"-->
-      <!--        [isFocus]="isFocusNotes"-->
-      <!--        [isShowControls]="true"-->
-      <!--        [isShowChecklistToggle]="true"-->
-      <!--        [isDefaultText]="!task.notes"-->
-      <!--        [model]="task.notes|| defaultTaskNotes"-->
-      <!--      ></inline-markdown>-->
-    </div>
-
-    <mat-tab-group
-      (selectedIndexChange)="onTabIndexChange($event)"
-      [selectedIndex]="selectedTabIndex"
-      class="tabs"
-      dynamicHeight
-    >
-      <mat-tab [label]="'1. ' + (T.PDS.REVIEW_TASKS | translate)">
-        <section class="tab-inner">
-          @if (tasksWorkedOnOrDoneOrRepeatableFlat$ | async; as tasks) {
-            @if (tasks?.length) {
-              <task-summary-tables
-                [dayStr]="dayStr"
-                [flatTasks]="tasks"
-                [isForToday]="isForToday"
-                [isShowYesterday]="isForToday && isIncludeYesterday"
-              ></task-summary-tables>
-            } @else {
-              <p>{{ T.PDS.NO_TASKS | translate }}</p>
-            }
-            @if (tasks?.length) {
-              <tasks-by-tag
-                [dayStr]="dayStr"
-                [flatTasks]="tasks"
-                [isForToday]="isForToday"
-                [isShowYesterday]="isForToday && isIncludeYesterday"
-              ></tasks-by-tag>
-            }
-            <section style="margin-top: 48px">
-              <h3 style="font-weight: bold; margin-bottom: 4px">
-                {{ T.PDS.WEEK | translate }}
-              </h3>
-              @if (isForToday) {
-                <worklog-week></worklog-week>
-              }
-            </section>
-          } @else {
-            <mat-spinner style="margin: auto"></mat-spinner>
-          }
-        </section>
-      </mat-tab>
-
-      @if (!(configService.evaluation$ | async)?.isHideEvaluationSheet) {
-        <mat-tab [label]="'2. ' + (T.PDS.EVALUATE_DAY | translate)">
-          <section
-            class="tab-inner"
-            style="max-width: 600px"
-          >
-            <evaluation-sheet
-              (save)="onEvaluationSave()"
-              [day]="dayStr$ | async"
-            ></evaluation-sheet>
-          </section>
-        </mat-tab>
-      }
-      @if (isForToday) {
-        <mat-tab
-          [label]="
-            ((configService.evaluation$ | async)?.isHideEvaluationSheet ? '2. ' : '3. ') +
-            (T.PDS.PLAN_TOMORROW | translate)
-          "
-        >
-          <section class="tab-inner">
-            <plan-tasks-tomorrow></plan-tasks-tomorrow>
-          </section>
-        </mat-tab>
-      }
-    </mat-tab-group>
-
-    <section class="daily-summary-actions">
-      <div class="bottom-buttons">
-        @if (isForToday) {
-          <button
-            (click)="finishDay()"
-            [matTooltip]="T.PDS.SAVE_AND_GO_HOME_TOOLTIP | translate"
-            color="primary"
-            mat-flat-button
-          >
-            <mat-icon>wb_sunny</mat-icon>
-            {{ T.PDS.SAVE_AND_GO_HOME | translate }}
-          </button>
-        }
-        @if (!isForToday) {
-          <button
-            (click)="finishDay()"
-            color="primary"
-            mat-flat-button
-          >
-            <mat-icon>wb_sunny</mat-icon>
-            {{ T.PDS.CLEAR_ALL_CONTINUE | translate }}
-          </button>
-        }
-      </div>
-    </section>
-  </div>
-
-  @if (showSuccessAnimation) {
-    <div class="success-animation-wrapper">
-      <mat-icon>wb_sunny</mat-icon>
-      <div class="unicorn-wrapper">
-        <img
-          class="unicorn"
-          src="assets/unicorn.png"
-        />
-      </div>
+        <mat-icon>chevron_left</mat-icon>
+        {{ T.PDS.BACK | translate }}
+        <!--<mat-icon>playlist_play</mat-icon>-->
+      </a>
     </div>
   }
-</right-panel>
+
+  <h1 class="done-headline mat-headline-5">
+    @if (isForToday) {
+      <span [innerHTML]="T.PDS.CELEBRATE | translate"></span>
+    }
+    @if (!isForToday) {
+      <span>{{ T.PDS.SUMMARY_FOR | translate: { dayStr: dayStr } }}</span>
+    }
+  </h1>
+  <div class="daily-summary-summary">
+    <div class="summary-point">
+      <mat-icon>schedule</mat-icon>
+      <div class="summary-text">
+        {{ T.PDS.START_END | translate }}
+        <div class="summary-val">
+          <inline-input
+            (changed)="updateWorkStart($event)"
+            [type]="'time'"
+            [value]="started$ | async | momentFormat: 'HH:mm'"
+          >
+          </inline-input>
+          –
+          <inline-input
+            (changed)="updateWorkEnd($event)"
+            [type]="'time'"
+            [value]="end$ | async | momentFormat: 'HH:mm'"
+          >
+          </inline-input>
+        </div>
+      </div>
+    </div>
+    <div class="summary-point">
+      <mat-icon>check</mat-icon>
+      <div class="summary-text">
+        {{ T.PDS.TASKS_COMPLETED | translate }}
+        <div class="summary-val">
+          <span [innerHtml]="nrOfDoneTasks$ | async"></span> /
+          <span [innerHtml]="totalNrOfTasks$ | async"></span>
+        </div>
+      </div>
+    </div>
+    <div
+      [title]="T.PDS.TIME_SPENT_ESTIMATE_TITLE | translate"
+      class="summary-point"
+    >
+      <mat-icon>timer</mat-icon>
+      <div class="summary-text">
+        {{ T.PDS.TIME_SPENT_AND_ESTIMATE_LABEL | translate }}
+        <div class="summary-val">
+          {{ timeWorked$ | async | msToClockString }} /
+          {{ estimatedOnTasksWorkedOn$ | async | msToClockString }}
+        </div>
+      </div>
+    </div>
+
+    @if (isBreakTrackingSupport$ | async) {
+      <div class="summary-point">
+        <mat-icon>free_breakfast</mat-icon>
+        <div class="summary-text">
+          {{ T.PDS.BREAK_LABEL | translate }}
+          <div class="summary-val">
+            {{ breakNr$ | async }} / {{ breakTime$ | async | msToClockString }}
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  @if (simpleCounterSummaryItems()?.length) {
+    <div class="simple-counter-summary">
+      @for (simpleCounter of simpleCounterSummaryItems(); track simpleCounter.id) {
+        <simple-counter-summary-item
+          [dayStr]="dayStr"
+          [simpleCounter]="simpleCounter"
+        ></simple-counter-summary-item>
+      }
+    </div>
+  }
+
+  <div class="day-end-note">
+    @if (typeof dailySummaryNoteTxt() === 'string') {
+      <inline-markdown
+        [@expand]
+        [isShowControls]="true"
+        [isShowChecklistToggle]="true"
+        (changed)="updateDailySummaryTxt($event)"
+        [model]="dailySummaryNoteTxt()"
+      >
+        <button
+          [matTooltip]="'Remove daily summary note'"
+          (click)="updateDailySummaryTxt(undefined)"
+          mat-icon-button
+        >
+          <mat-icon>visibility_off</mat-icon>
+        </button>
+      </inline-markdown>
+    } @else {
+      <button
+        mat-icon-button
+        style="opacity: 0.4"
+        (click)="updateDailySummaryTxt('', true)"
+        matTooltip="Click to add a custom text block to describe your day end routine."
+      >
+        <mat-icon>note_alt</mat-icon>
+      </button>
+    }
+    <!--      <inline-markdown-->
+    <!--        (blur)="isFocusNotes=false"-->
+    <!--        (blurred)="isFocusNotes=false"-->
+    <!--        (changed)="changeTaskNotes($event); isFocusNotes=false"-->
+    <!--        (keyboardUnToggle)="focusItem(noteWrapperElRef)"-->
+    <!--        [isFocus]="isFocusNotes"-->
+    <!--        [isShowControls]="true"-->
+    <!--        [isShowChecklistToggle]="true"-->
+    <!--        [isDefaultText]="!task.notes"-->
+    <!--        [model]="task.notes|| defaultTaskNotes"-->
+    <!--      ></inline-markdown>-->
+  </div>
+
+  <mat-tab-group
+    (selectedIndexChange)="onTabIndexChange($event)"
+    [selectedIndex]="selectedTabIndex"
+    class="tabs"
+    dynamicHeight
+  >
+    <mat-tab [label]="'1. ' + (T.PDS.REVIEW_TASKS | translate)">
+      <section class="tab-inner">
+        @if (tasksWorkedOnOrDoneOrRepeatableFlat$ | async; as tasks) {
+          @if (tasks?.length) {
+            <task-summary-tables
+              [dayStr]="dayStr"
+              [flatTasks]="tasks"
+              [isForToday]="isForToday"
+              [isShowYesterday]="isForToday && isIncludeYesterday"
+            ></task-summary-tables>
+          } @else {
+            <p>{{ T.PDS.NO_TASKS | translate }}</p>
+          }
+          @if (tasks?.length) {
+            <tasks-by-tag
+              [dayStr]="dayStr"
+              [flatTasks]="tasks"
+              [isForToday]="isForToday"
+              [isShowYesterday]="isForToday && isIncludeYesterday"
+            ></tasks-by-tag>
+          }
+          <section style="margin-top: 48px">
+            <h3 style="font-weight: bold; margin-bottom: 4px">
+              {{ T.PDS.WEEK | translate }}
+            </h3>
+            @if (isForToday) {
+              <worklog-week></worklog-week>
+            }
+          </section>
+        } @else {
+          <mat-spinner style="margin: auto"></mat-spinner>
+        }
+      </section>
+    </mat-tab>
+
+    @if (!(configService.evaluation$ | async)?.isHideEvaluationSheet) {
+      <mat-tab [label]="'2. ' + (T.PDS.EVALUATE_DAY | translate)">
+        <section
+          class="tab-inner"
+          style="max-width: 600px"
+        >
+          <evaluation-sheet
+            (save)="onEvaluationSave()"
+            [day]="dayStr$ | async"
+          ></evaluation-sheet>
+        </section>
+      </mat-tab>
+    }
+    @if (isForToday) {
+      <mat-tab
+        [label]="
+          ((configService.evaluation$ | async)?.isHideEvaluationSheet ? '2. ' : '3. ') +
+          (T.PDS.PLAN_TOMORROW | translate)
+        "
+      >
+        <section class="tab-inner">
+          <plan-tasks-tomorrow></plan-tasks-tomorrow>
+        </section>
+      </mat-tab>
+    }
+  </mat-tab-group>
+
+  <section class="daily-summary-actions">
+    <div class="bottom-buttons">
+      @if (isForToday) {
+        <button
+          (click)="finishDay()"
+          [matTooltip]="T.PDS.SAVE_AND_GO_HOME_TOOLTIP | translate"
+          color="primary"
+          mat-flat-button
+        >
+          <mat-icon>wb_sunny</mat-icon>
+          {{ T.PDS.SAVE_AND_GO_HOME | translate }}
+        </button>
+      }
+      @if (!isForToday) {
+        <button
+          (click)="finishDay()"
+          color="primary"
+          mat-flat-button
+        >
+          <mat-icon>wb_sunny</mat-icon>
+          {{ T.PDS.CLEAR_ALL_CONTINUE | translate }}
+        </button>
+      }
+    </div>
+  </section>
+</div>
+
+@if (showSuccessAnimation) {
+  <div class="success-animation-wrapper">
+    <mat-icon>wb_sunny</mat-icon>
+    <div class="unicorn-wrapper">
+      <img
+        class="unicorn"
+        src="assets/unicorn.png"
+      />
+    </div>
+  </div>
+}

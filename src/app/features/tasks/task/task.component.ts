@@ -38,6 +38,7 @@ import {
   tap,
 } from 'rxjs/operators';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
+import { PanDirective, PanEvent } from '../../../ui/swipe-gesture/pan.directive';
 import { TaskAttachmentService } from '../task-attachment/task-attachment.service';
 import { DialogEditTaskAttachmentComponent } from '../task-attachment/dialog-edit-attachment/dialog-edit-task-attachment.component';
 import { swirlAnimation } from '../../../ui/animations/swirl-in-out.ani';
@@ -52,11 +53,12 @@ import {
   MatMenuTrigger,
 } from '@angular/material/menu';
 import { WorkContextService } from '../../work-context/work-context.service';
-import { throttle } from 'helpful-decorators';
+import { throttle } from '../../../util/decorators';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { Update } from '@ngrx/entity';
 import { isToday } from '../../../util/is-today.util';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { KeyboardConfig } from '../../config/keyboard-config.model';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
@@ -125,6 +127,7 @@ import { TaskLog } from '../../../core/log';
     TagListComponent,
     ShortPlannedAtPipe,
     TagToggleMenuListComponent,
+    PanDirective,
   ],
 })
 export class TaskComponent implements OnDestroy, AfterViewInit {
@@ -147,7 +150,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   // computed
   currentId = toSignal(this._taskService.currentTaskId$);
   isCurrent = computed(() => this.currentId() === this.task().id);
-  selectedId = toSignal(this._taskService.selectedTaskId$);
+  selectedId = this._taskService.selectedTaskId;
   isSelected = computed(() => this.selectedId() === this.task().id);
   todayStr = toSignal(this._globalTrackingIntervalService.todayDateStr$);
 
@@ -163,7 +166,10 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     return (
       !t.isDone &&
       ((t.dueWithTime && t.dueWithTime < Date.now()) ||
-        (t.dueDay && !isToday(new Date(t.dueDay)) && new Date(t.dueDay) < new Date()))
+        // Note: String comparison works correctly here because dueDay is in YYYY-MM-DD format
+        // which is lexicographically sortable. This avoids timezone conversion issues that occur
+        // when creating Date objects from date strings.
+        (t.dueDay && t.dueDay !== getDbDateStr() && t.dueDay < getDbDateStr()))
     );
   });
   isScheduledToday = computed(() => {
@@ -279,7 +285,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   @HostListener('drop', ['$event']) onDrop(ev: DragEvent): void {
     ev.preventDefault();
     this.focusSelf();
-    this._attachmentService.createFromDrop(ev, this.task().id);
+    this._attachmentService.createFromDrop(ev, this.task().id, true);
     ev.stopPropagation();
     this.isDragOver = false;
   }
@@ -601,11 +607,10 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
       throw new Error('No el');
     }
     taskTitleEditEl.textarea().nativeElement.focus();
-    //  (this.taskTitleEditEl as any).textarea.nativeElement.focus();
   }
 
   openContextMenu(event: TouchEvent | MouseEvent): void {
-    (this.taskTitleEditEl() as any).textarea.nativeElement?.blur();
+    this.taskTitleEditEl()?.textarea().nativeElement?.blur();
     this.taskContextMenu()?.open(event);
   }
 
@@ -613,7 +618,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     this._taskService.updateTags(this.task(), tagIds);
   }
 
-  onPanStart(ev: any): void {
+  onPanStart(ev: PanEvent): void {
     if (!IS_TOUCH_PRIMARY) {
       return;
     }
@@ -627,16 +632,12 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     if (
       (targetEl.className.indexOf && targetEl.className.indexOf('drag-handle') > -1) ||
       Math.abs(ev.deltaY) > Math.abs(ev.deltaX) ||
-      document.activeElement === (taskTitleEditEl as any).textarea.nativeElement ||
+      document.activeElement === taskTitleEditEl.textarea().nativeElement ||
       ev.isFinal
     ) {
       return;
     }
-    if (ev.deltaX > 0) {
-      this.isLockPanRight = true;
-    } else if (ev.deltaX < 0) {
-      this.isLockPanLeft = true;
-    }
+    this.isPreventPointerEventsWhilePanning = true;
   }
 
   onPanEnd(): void {
@@ -681,11 +682,11 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     }
   }
 
-  onPanLeft(ev: any): void {
+  onPanLeft(ev: PanEvent): void {
     this._handlePan(ev);
   }
 
-  onPanRight(ev: any): void {
+  onPanRight(ev: PanEvent): void {
     this._handlePan(ev);
   }
 
@@ -830,44 +831,56 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     return nextEl;
   }
 
-  private _handlePan(ev: any): void {
-    if (
-      !IS_TOUCH_PRIMARY ||
-      (!this.isLockPanLeft && !this.isLockPanRight) ||
-      ev.eventType === 8
-    ) {
+  private _handlePan(ev: PanEvent): void {
+    if (!IS_TOUCH_PRIMARY || ev.eventType === 8) {
       return;
     }
     const innerWrapperElRef = this.innerWrapperElRef();
-    if (!innerWrapperElRef) {
+    const blockLeftElRef = this.blockLeftElRef();
+    const blockRightElRef = this.blockRightElRef();
+    if (!innerWrapperElRef || !blockLeftElRef || !blockRightElRef) {
       throw new Error('No el');
     }
 
-    const targetRef = this.isLockPanRight
-      ? this.blockLeftElRef()
-      : this.blockRightElRef();
+    // Dynamically determine direction based on current pan position
+    const isPanningRight = ev.deltaX > 0;
+    const isPanningLeft = ev.deltaX < 0;
+
+    // Update lock state dynamically
+    this.isLockPanRight = isPanningRight;
+    this.isLockPanLeft = isPanningLeft;
+
+    // Select the appropriate block element based on current direction
+    const targetRef = isPanningRight ? blockLeftElRef : blockRightElRef;
 
     const MAGIC_FACTOR = 2;
     this.isPreventPointerEventsWhilePanning = true;
-    //  (this.task()TitleEditEl as any).textarea.nativeElement.blur();
-    if (targetRef) {
-      let scale = (ev.deltaX / this._elementRef.nativeElement.offsetWidth) * MAGIC_FACTOR;
-      scale = this.isLockPanLeft ? scale * -1 : scale;
+
+    // Reset both blocks first
+    this._renderer.setStyle(blockLeftElRef.nativeElement, 'width', '0');
+    this._renderer.setStyle(blockRightElRef.nativeElement, 'width', '0');
+    this._renderer.removeClass(blockLeftElRef.nativeElement, 'isActive');
+    this._renderer.removeClass(blockRightElRef.nativeElement, 'isActive');
+
+    if (targetRef && ev.deltaX !== 0) {
+      let scale =
+        (Math.abs(ev.deltaX) / this._elementRef.nativeElement.offsetWidth) * MAGIC_FACTOR;
       scale = Math.min(1, Math.max(0, scale));
+
       if (scale > 0.5) {
         this.isActionTriggered = true;
         this._renderer.addClass(targetRef.nativeElement, 'isActive');
       } else {
         this.isActionTriggered = false;
-        this._renderer.removeClass(targetRef.nativeElement, 'isActive');
       }
-      const moveBy = this.isLockPanLeft ? ev.deltaX * -1 : ev.deltaX;
+
+      const moveBy = Math.abs(ev.deltaX);
       this._renderer.setStyle(targetRef.nativeElement, 'width', `${moveBy}px`);
       this._renderer.setStyle(targetRef.nativeElement, 'transition', `none`);
       this._renderer.setStyle(
         innerWrapperElRef.nativeElement,
         'transform',
-        `translateX(${ev.deltaX}px`,
+        `translateX(${ev.deltaX}px)`,
       );
     }
   }
@@ -899,9 +912,9 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   get kb(): KeyboardConfig {
     if (IS_TOUCH_PRIMARY) {
-      return {} as any;
+      return {} as KeyboardConfig;
     }
-    return (this._configService.cfg?.keyboard as KeyboardConfig) || {};
+    return (this._configService.cfg()?.keyboard as KeyboardConfig) || {};
   }
 
   private _handleKeyboardShortcuts(ev: KeyboardEvent): void {
@@ -910,7 +923,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     }
 
     const t = this.task();
-    const cfg = this._configService.cfg;
+    const cfg = this._configService.cfg();
     if (!cfg) {
       throw new Error();
     }
@@ -989,7 +1002,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
     // collapse sub tasks
     if (ev.key === 'ArrowLeft' || checkKeyCombo(ev, keys.collapseSubTasks)) {
-      const hasSubTasks = t.subTasks && (t.subTasks as any).length > 0;
+      const hasSubTasks = t.subTasks && t.subTasks.length > 0;
       if (this.isSelected()) {
         this.hideDetailPanel();
       } else if (hasSubTasks && t._hideSubTasksMode !== HideSubTasksMode.HideAll) {
@@ -1004,7 +1017,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
     // expand sub tasks
     if (ev.key === 'ArrowRight' || checkKeyCombo(ev, keys.expandSubTasks)) {
-      const hasSubTasks = t.subTasks && (t.subTasks as any).length > 0;
+      const hasSubTasks = t.subTasks && t.subTasks.length > 0;
       if (hasSubTasks && t._hideSubTasksMode !== undefined) {
         this._taskService.toggleSubTaskMode(t.id, false, false);
       } else if (!this.isSelected()) {

@@ -7,14 +7,8 @@ import {
   MissingCredentialsSPError,
   NoRevAPIError,
 } from '../../../errors/errors';
-import { SyncProviderPrivateCfgBase } from '../../../pfapi.model';
-
-export interface WebdavPrivateCfg extends SyncProviderPrivateCfgBase {
-  baseUrl: string;
-  userName: string;
-  password: string;
-  syncFolderPath: string;
-}
+import { WebdavPrivateCfg } from './webdav.model';
+import { SyncLog } from '../../../../../core/log';
 
 export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDAV> {
   private static readonly L = 'Webdav';
@@ -41,7 +35,7 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
   }
 
   async setPrivateCfg(privateCfg: WebdavPrivateCfg): Promise<void> {
-    await this.privateCfg.save(privateCfg);
+    await this.privateCfg.setComplete(privateCfg);
   }
 
   async getFileRev(
@@ -49,8 +43,8 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
     localRev: string | null,
   ): Promise<{ rev: string }> {
     const { filePath } = await this._getConfigAndPath(targetPath);
-    const meta = await this._api.getFileMeta(filePath, localRev);
-    return { rev: meta.etag };
+    const meta = await this._api.getFileMeta(filePath, localRev, true);
+    return { rev: meta.lastmod };
   }
 
   async uploadFile(
@@ -59,67 +53,45 @@ export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDA
     localRev: string,
     isForceOverwrite: boolean = false,
   ): Promise<{ rev: string }> {
+    SyncLog.debug(Webdav.L, 'uploadFile', { targetPath, localRev, isForceOverwrite });
     const { filePath } = await this._getConfigAndPath(targetPath);
 
-    const etag = await this._api.upload({
+    const result = await this._api.upload({
       path: filePath,
       data: dataStr,
-      isOverwrite: isForceOverwrite,
-      expectedEtag: isForceOverwrite ? null : localRev,
+      isForceOverwrite: isForceOverwrite,
+      expectedRev: isForceOverwrite ? null : localRev,
     });
 
-    if (!etag) {
+    if (!result.rev) {
       throw new NoRevAPIError();
     }
 
-    return { rev: etag };
+    return { rev: result.rev };
   }
 
   async downloadFile(
     targetPath: string,
-    localRev: string,
-  ): Promise<{ rev: string; dataStr: string }> {
+  ): Promise<{ rev: string; legacyRev?: string; dataStr: string }> {
+    SyncLog.debug(Webdav.L, 'downloadFile', { targetPath });
     const { filePath } = await this._getConfigAndPath(targetPath);
 
-    // For metadata file, don't send localRev if it might not exist remotely
-    const effectiveLocalRev = targetPath === '__meta_' && localRev ? null : localRev;
+    const result = await this._api.download({
+      path: filePath,
+    });
 
-    try {
-      const { rev, dataStr } = await this._api.download({
-        path: filePath,
-        localRev: effectiveLocalRev,
-      });
-
-      if (!dataStr && dataStr !== '') {
-        throw new InvalidDataSPError(targetPath);
-      }
-      if (typeof rev !== 'string') {
-        throw new NoRevAPIError();
-      }
-
-      return { rev, dataStr };
-    } catch (e: any) {
-      // Handle 304 Not Modified by retrying without localRev
-      if (e?.status === 304) {
-        const { rev, dataStr } = await this._api.download({
-          path: filePath,
-          localRev: null,
-        });
-
-        if (!dataStr && dataStr !== '') {
-          throw new InvalidDataSPError(targetPath);
-        }
-        if (typeof rev !== 'string') {
-          throw new NoRevAPIError();
-        }
-
-        return { rev, dataStr };
-      }
-      throw e;
+    if (!result.dataStr && result.dataStr !== '') {
+      throw new InvalidDataSPError(targetPath);
     }
+    if (typeof result.rev !== 'string') {
+      throw new NoRevAPIError();
+    }
+
+    return { rev: result.rev, legacyRev: result.legacyRev, dataStr: result.dataStr };
   }
 
   async removeFile(targetPath: string): Promise<void> {
+    SyncLog.debug(Webdav.L, 'removeFile', { targetPath });
     const { filePath } = await this._getConfigAndPath(targetPath);
     await this._api.remove(filePath);
   }

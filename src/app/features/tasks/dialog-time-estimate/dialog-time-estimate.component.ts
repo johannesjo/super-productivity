@@ -20,7 +20,7 @@ import { TaskService } from '../task.service';
 import { getTodayStr } from '../util/get-today-str';
 import { createTaskCopy } from '../util/create-task-copy';
 import { DialogAddTimeEstimateForOtherDayComponent } from '../dialog-add-time-estimate-for-other-day/dialog-add-time-estimate-for-other-day.component';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import { T } from '../../../t.const';
 import { FormsModule } from '@angular/forms';
 import { HelpSectionComponent } from '../../../ui/help-section/help-section.component';
@@ -107,7 +107,7 @@ export class DialogTimeEstimateComponent implements AfterViewInit {
         if (result && result.timeSpent > 0 && result.date) {
           this.timeSpentOnDayCopy = {
             ...this.timeSpentOnDayCopy,
-            [getWorklogStr(result.date)]: result.timeSpent,
+            [getDbDateStr(result.date)]: result.timeSpent,
           };
           this.taskCopy.timeSpentOnDay = this.timeSpentOnDayCopy;
           this._cd.detectChanges();

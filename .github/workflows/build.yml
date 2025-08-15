@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+      UNSPLASH_KEY: ${{ secrets.UNSPLASH_KEY }}
+      UNSPLASH_CLIENT_ID: ${{ secrets.UNSPLASH_CLIENT_ID }}
 
     steps:
       - uses: actions/setup-node@v3
@@ -41,6 +43,13 @@ jobs:
         #  if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm i
 
+      - name: Install Playwright Browsers
+        run: |
+          npx playwright install --with-deps chromium
+          npx playwright install-deps chromium
+
+      - run: npm run env # Generate env.generated.ts
+
       - name: Lint
         run: npm run lint:ci
 
@@ -49,17 +58,13 @@ jobs:
 
       - name: Test E2E
         run: npm run e2e
-      - name: Upload performance metrics as an artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: nightwatch-performance-metrics
-          path: perf-metrics*.json
+
       - name: 'Upload E2E results on failure'
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4
         with:
           name: e2eResults
-          path: e2e-test-results/**/*.*
+          path: .tmp/e2e-test-results/**/*.*
           retention-days: 14
 
       - name: Build Frontend & Electron
@@ -74,21 +79,6 @@ jobs:
           build_script_name: empty
           github_token: ${{ secrets.github_token }}
           release: ${{ startsWith(github.ref, 'refs/tags/v') }}
-          release_notes: |
-            ## What's Changed
-
-            This release includes various improvements, bug fixes, and new features.
-
-            ### Installation
-            - **Windows**: Download the `.exe` installer
-            - **macOS**: Download the `.dmg` file
-            - **Linux**: Download the `.AppImage` file or install via Snap Store
-            - **Android**: Download the `.apk` file or get it from Google Play Store
-
-            For detailed changelog, see the commit history since the last release.
-
-            ### Support
-            If you encounter any issues, please report them on our [GitHub Issues](https://github.com/johannesjo/super-productivity/issues) page.
 
       # rename to possibly fix release issue
       - run: find ./.tmp/app-builds -type f -name '*.snap' -exec sh -c 'x="{}"; mv "$x" ".tmp/app-builds/sp.snap"' \;
@@ -108,6 +98,9 @@ jobs:
   mac-bin:
     runs-on: macos-latest
     if: startsWith(github.ref, 'refs/tags/v')
+    env:
+      UNSPLASH_KEY: ${{ secrets.UNSPLASH_KEY }}
+      UNSPLASH_CLIENT_ID: ${{ secrets.UNSPLASH_CLIENT_ID }}
 
     steps:
       - uses: actions/setup-node@v3
@@ -158,6 +151,8 @@ jobs:
           mkdir -p ~/private_keys/
           echo '${{ secrets.mac_api_key }}' > ~/private_keys/AuthKey_${{ secrets.mac_api_key_id }}.p8
 
+      - run: npm run env # Generate env.generated.ts
+
       - name: Lint
         run: npm run lint:ci
 
@@ -184,21 +179,6 @@ jobs:
           mac_certs: ${{ secrets.mac_certs }}
           mac_certs_password: ${{ secrets.mac_certs_password }}
           release: ${{ startsWith(github.ref, 'refs/tags/v') }}
-          release_notes: |
-            ## What's Changed
-
-            This release includes various improvements, bug fixes, and new features.
-
-            ### Installation
-            - **Windows**: Download the `.exe` installer
-            - **macOS**: Download the `.dmg` file
-            - **Linux**: Download the `.AppImage` file or install via Snap Store
-            - **Android**: Download the `.apk` file or get it from Google Play Store
-
-            For detailed changelog, see the commit history since the last release.
-
-            ### Support
-            If you encounter any issues, please report them on our [GitHub Issues](https://github.com/johannesjo/super-productivity/issues) page.
           # macOS notarization API key
         env:
           API_KEY_ID: ${{ secrets.mac_api_key_id }}
@@ -210,6 +190,9 @@ jobs:
   windows-bin:
     runs-on: windows-latest
     if: startsWith(github.ref, 'refs/tags/v')
+    env:
+      UNSPLASH_KEY: ${{ secrets.UNSPLASH_KEY }}
+      UNSPLASH_CLIENT_ID: ${{ secrets.UNSPLASH_CLIENT_ID }}
 
     steps:
       - uses: actions/setup-node@v3
@@ -250,6 +233,8 @@ jobs:
         #  if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm i
 
+      - run: npm run env # Generate env.generated.ts
+
       - name: Lint
         run: npm run lint:ci
 
@@ -265,18 +250,3 @@ jobs:
           build_script_name: empty
           github_token: ${{ secrets.github_token }}
           release: ${{ startsWith(github.ref, 'refs/tags/v') }}
-          release_notes: |
-            ## What's Changed
-
-            This release includes various improvements, bug fixes, and new features.
-
-            ### Installation
-            - **Windows**: Download the `.exe` installer
-            - **macOS**: Download the `.dmg` file
-            - **Linux**: Download the `.AppImage` file or install via Snap Store
-            - **Android**: Download the `.apk` file or get it from Google Play Store
-
-            For detailed changelog, see the commit history since the last release.
-
-            ### Support
-            If you encounter any issues, please report them on our [GitHub Issues](https://github.com/johannesjo/super-productivity/issues) page.

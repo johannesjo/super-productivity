@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
@@ -13,7 +13,6 @@ import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const'
 import { ScheduleConfig } from '../../config/global-config.model';
 import { T } from '../../../t.const';
 import { GlobalConfigService } from '../../config/global-config.service';
-import { Subscription } from 'rxjs';
 import { LS } from '../../../core/persistence/storage-keys.const';
 
 import { TranslateModule } from '@ngx-translate/core';
@@ -38,36 +37,46 @@ import { MatButton } from '@angular/material/button';
     MatButton,
   ],
 })
-export class DialogTimelineSetupComponent implements OnDestroy {
+export class DialogTimelineSetupComponent {
   private _matDialogRef =
     inject<MatDialogRef<DialogTimelineSetupComponent>>(MatDialogRef);
   data = inject<{
     isInfoShownInitially: boolean;
   }>(MAT_DIALOG_DATA);
-  private _globalConfigService = inject(GlobalConfigService);
+  readonly globalConfigService = inject(GlobalConfigService);
 
   T: typeof T = T;
-  timelineCfg: ScheduleConfig;
-  formGroup: UntypedFormGroup = new UntypedFormGroup({});
-  formConfig: FormlyFieldConfig[] = SCHEDULE_FORM_CFG.items as FormlyFieldConfig[];
-  private _subs = new Subscription();
 
-  constructor() {
-    this.timelineCfg = DEFAULT_GLOBAL_CONFIG.schedule;
-    this._subs.add(
-      this._globalConfigService.timelineCfg$.subscribe((v) => (this.timelineCfg = v)),
+  // Local copy for form editing
+  private _localTimelineCfg: ScheduleConfig;
+
+  get timelineCfg(): ScheduleConfig {
+    // Return local copy if it exists, otherwise use the signal value or default
+    return (
+      this._localTimelineCfg ??
+      this.globalConfigService.timelineCfg() ??
+      DEFAULT_GLOBAL_CONFIG.schedule
     );
   }
 
-  ngOnDestroy(): void {
-    this._subs.unsubscribe();
+  set timelineCfg(value: ScheduleConfig) {
+    this._localTimelineCfg = value;
+  }
+
+  formGroup: UntypedFormGroup = new UntypedFormGroup({});
+  formConfig: FormlyFieldConfig[] = SCHEDULE_FORM_CFG.items as FormlyFieldConfig[];
+
+  constructor() {
+    // Initialize local copy with current config value
+    this._localTimelineCfg =
+      this.globalConfigService.timelineCfg() ?? DEFAULT_GLOBAL_CONFIG.schedule;
   }
 
   saveAndClose(): void {
     localStorage.setItem(LS.WAS_SCHEDULE_INITIAL_DIALOG_SHOWN, 'true');
     this._matDialogRef.close();
-    if (this.timelineCfg) {
-      this._globalConfigService.updateSection('schedule', this.timelineCfg);
+    if (this._localTimelineCfg) {
+      this.globalConfigService.updateSection('schedule', this._localTimelineCfg);
     }
   }
 

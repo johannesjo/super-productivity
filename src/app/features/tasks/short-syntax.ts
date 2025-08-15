@@ -1,6 +1,6 @@
 import { casual } from 'chrono-node';
 import { Task, TaskCopy } from './task.model';
-import { getWorklogStr } from '../../util/get-work-log-str';
+import { getDbDateStr } from '../../util/get-db-date-str';
 import { stringToMs } from '../../ui/duration/string-to-ms.pipe';
 import { Tag } from '../tag/tag.model';
 import { Project } from '../project/project.model';
@@ -371,7 +371,7 @@ const parseTimeSpentChanges = (task: Partial<TaskCopy>): Partial<Task> => {
         ? {
             timeSpentOnDay: {
               ...(task.timeSpentOnDay || {}),
-              [getWorklogStr()]: stringToMs(timeSpent),
+              [getDbDateStr()]: stringToMs(timeSpent),
             },
           }
         : {}),

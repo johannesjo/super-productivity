@@ -3,7 +3,7 @@ import { IS_ELECTRON } from '../app.constants';
 import { devError } from './dev-error';
 import { Log } from '../core/log';
 
-const handlerMap: { [key: string]: Observable<any> } = {};
+const handlerMap: { [key: string]: Observable<unknown[]> } = {};
 
 export const ipcEvent$ = (evName: string): Observable<unknown[]> => {
   if (!IS_ELECTRON) {
@@ -18,7 +18,7 @@ export const ipcEvent$ = (evName: string): Observable<unknown[]> => {
   }
   handlerMap[evName] = subject;
 
-  const handler: (...args: any[]) => void = (...args): void => {
+  const handler: (...args: unknown[]) => void = (...args): void => {
     Log.log('ipcEvent$ trigger', evName);
     subject.next([...args]);
   };

@@ -29,13 +29,10 @@ import { PluginLog } from '../../core/log';
     @for (button of sidePanelButtons(); track button.pluginId) {
       <button
         mat-icon-button
-        [matTooltip]="
-          button.label + (isWorkView() ? '' : ' (only available in work views)')
-        "
+        [matTooltip]="button.label"
         (click)="onButtonClick(button)"
         class="plugin-side-panel-btn"
         [class.active]="activePluginId() === button.pluginId && isShowPanel()"
-        [disabled]="!isWorkView()"
       >
         <plugin-icon
           [pluginId]="button.pluginId"
@@ -61,7 +58,8 @@ import { PluginLog } from '../../core/log';
       }
 
       .plugin-side-panel-btn plugin-icon {
-        transition: all 0.2s ease;
+        transition: transform 0.2s ease;
+        display: block;
       }
 
       .plugin-side-panel-btn.active plugin-icon {
@@ -86,18 +84,8 @@ import { PluginLog } from '../../core/log';
         z-index: -1;
       }
 
-      .plugin-side-panel-btn:hover:not(.active):not(:disabled) {
+      .plugin-side-panel-btn:hover:not(.active) {
         background-color: var(--hover-color, rgba(0, 0, 0, 0.04));
-      }
-
-      .plugin-side-panel-btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-        background: transparent !important;
-      }
-
-      .plugin-side-panel-btn:disabled::after {
-        background: transparent !important;
       }
     `,
   ],
@@ -111,7 +99,7 @@ export class PluginSidePanelBtnsComponent {
   private _store = inject(Store);
   private _isXs$ = this._breakpointObserver.observe('(max-width: 600px)');
 
-  sidePanelButtons = toSignal(this._pluginBridge.sidePanelButtons$, { initialValue: [] });
+  sidePanelButtons = this._pluginBridge.sidePanelButtons;
 
   activePluginId = toSignal(this._store.select(selectActivePluginId));
   isShowPanel = toSignal(this._store.select(selectIsShowPluginPanel));
@@ -134,12 +122,6 @@ export class PluginSidePanelBtnsComponent {
 
   onButtonClick(button: PluginSidePanelBtnCfg): void {
     PluginLog.log('Side panel button clicked:', button.pluginId, button.label);
-
-    // Prevent action if not in work view
-    if (!this.isWorkView()) {
-      PluginLog.log('Not in work view, ignoring click');
-      return;
-    }
 
     PluginLog.log('Dispatching togglePluginPanel action for:', button.pluginId);
     // Dispatch action to toggle the plugin panel

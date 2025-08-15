@@ -4,11 +4,17 @@ import { SimpleDuration } from '../../util/round-duration';
 
 @Pipe({ name: 'durationFromString' })
 export class DurationFromStringPipe implements PipeTransform {
-  transform: (value: any, ...args: any[]) => any = durationFromString;
+  transform: (
+    value: string | null | undefined,
+    ...args: unknown[]
+  ) => SimpleDuration | null = durationFromString;
 }
 
-export const durationFromString = (strValue: any, args?: any): SimpleDuration | null => {
-  const milliseconds = stringToMs(strValue);
+export const durationFromString = (
+  strValue: string | null | undefined,
+  args?: unknown,
+): SimpleDuration | null => {
+  const milliseconds = stringToMs(strValue || '');
   if (milliseconds > 0) {
     return {
       asMilliseconds: () => milliseconds,

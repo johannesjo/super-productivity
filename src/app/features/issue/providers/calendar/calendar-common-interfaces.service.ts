@@ -82,7 +82,7 @@ export class CalendarCommonInterfacesService implements IssueServiceInterface {
 
   async getFreshDataForIssueTask(task: Task): Promise<{
     taskChanges: Partial<Task>;
-    issue: any;
+    issue: IssueData;
     issueTitle: string;
   } | null> {
     return null;
@@ -92,7 +92,7 @@ export class CalendarCommonInterfacesService implements IssueServiceInterface {
     {
       task: Readonly<Task>;
       taskChanges: Partial<Readonly<Task>>;
-      issue: any;
+      issue: IssueData;
     }[]
   > {
     return [];

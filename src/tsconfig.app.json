@@ -7,6 +7,7 @@
     "allowSyntheticDefaultImports": true
   },
   "files": ["main.ts", "polyfills.ts"],
+  "include": ["**/*.d.ts"],
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,
     "strictInjectionParameters": true

@@ -63,7 +63,7 @@ import {
   PluginUserDataState,
 } from '../plugins/plugin-persistence.model';
 
-export const CROSS_MODEL_VERSION = 4.1 as const;
+export const CROSS_MODEL_VERSION = 4.2 as const;
 
 export type PfapiAllModelCfg = {
   project: ModelCfg<ProjectState>;

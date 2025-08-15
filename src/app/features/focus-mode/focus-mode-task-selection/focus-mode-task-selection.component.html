@@ -6,7 +6,7 @@
 
   <select-task
     (taskChange)="onTaskChange($event)"
-    [initialTask]="initialTask$ | async"
+    [initialTask]="initialTask()"
     [isIncludeDoneTasks]="false"
   >
   </select-task>

@@ -113,9 +113,7 @@ export class SyncService<const MD extends ModelCfgs> {
         }
       }
 
-      const { remoteMeta, remoteMetaRev } = await this._metaFileSyncService.download(
-        localMeta0.metaRev,
-      );
+      const { remoteMeta, remoteMetaRev } = await this._metaFileSyncService.download();
 
       // we load again, to get the latest local changes for our checks and the data to upload
       const localMeta = await this._metaModelCtrl.load();

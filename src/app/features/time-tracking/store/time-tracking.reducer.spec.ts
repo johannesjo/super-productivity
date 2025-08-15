@@ -20,7 +20,7 @@ describe('TimeTracking Reducer', () => {
         tag: { '2': { '2023-01-02': { s: 5, e: 6, b: 7, bt: 8 } } },
       },
     } as Partial<AppDataCompleteNew> as AppDataCompleteNew;
-    const action = loadAllData({ appDataComplete, isOmitTokens: true });
+    const action = loadAllData({ appDataComplete });
     const result = timeTrackingReducer(initialTimeTrackingState, action);
     expect(result).toEqual(appDataComplete.timeTracking);
   });

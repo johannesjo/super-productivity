@@ -98,7 +98,7 @@ export class TakeABreakService {
   private _tick$: Observable<number> = merge(
     this._timeTrackingService.tick$.pipe(
       map((tick) => tick.duration),
-      filter(() => !!this._taskService.currentTaskId),
+      filter(() => !!this._taskService.currentTaskId()),
     ),
     this._actions$.pipe(ofType(idleDialogResult)).pipe(
       switchMap(({ trackItems, idleTime, isResetBreakTimer }) => {

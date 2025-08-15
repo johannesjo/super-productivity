@@ -6,6 +6,5 @@ export const loadAllData = createAction(
   '[SP_ALL] Load(import) all data',
   props<{
     appDataComplete: AppDataCompleteLegacy | AppDataCompleteNew;
-    isOmitTokens: boolean;
   }>(),
 );

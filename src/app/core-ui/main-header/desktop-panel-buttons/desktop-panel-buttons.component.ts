@@ -15,7 +15,7 @@ import { KeyboardConfig } from '../../../features/config/keyboard-config.model';
   template: `
     <button
       class="panel-btn"
-      [disabled]="!isRouteWithSidePanel()"
+      [disabled]="!isWorkViewPage()"
       [class.isActive]="isShowTaskViewCustomizerPanel()"
       [class.isCustomized]="taskViewCustomizerService.isCustomized()"
       (click)="layoutService.toggleTaskViewCustomizerPanel()"
@@ -39,7 +39,7 @@ import { KeyboardConfig } from '../../../features/config/keyboard-config.model';
         kb()?.toggleIssuePanel ? '[' + kb()?.toggleIssuePanel + ']' : ''
       }}"
     >
-      <mat-icon>playlist_add</mat-icon>
+      <mat-icon>dashboard_customize</mat-icon>
     </button>
 
     <button
@@ -66,11 +66,15 @@ import { KeyboardConfig } from '../../../features/config/keyboard-config.model';
         transition: all 0.2s ease;
         overflow: visible !important;
 
+        .mat-icon {
+          transition: transform 0.2s ease;
+          display: block;
+        }
+
         &.isActive {
           background-color: transparent;
 
           .mat-icon {
-            transition: all 0.2s ease;
             transform: rotate(45deg);
           }
 
@@ -117,6 +121,7 @@ export class DesktopPanelButtonsComponent {
 
   readonly kb = input<KeyboardConfig | null>();
   readonly isRouteWithSidePanel = input.required<boolean>();
+  readonly isWorkViewPage = input.required<boolean>();
   readonly isShowTaskViewCustomizerPanel = input.required<boolean>();
   readonly isShowIssuePanel = input.required<boolean>();
   readonly isShowNotes = input.required<boolean>();

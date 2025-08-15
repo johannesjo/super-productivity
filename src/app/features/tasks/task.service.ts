@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid';
 import { first, map, take, withLatestFrom } from 'rxjs/operators';
-import { inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
   ArchiveTask,
@@ -38,7 +38,6 @@ import {
   selectAllTasks,
   selectCurrentTask,
   selectCurrentTaskId,
-  selectCurrentTaskOrParentWithData,
   selectCurrentTaskParentOrCurrent,
   selectIsTaskDataLoaded,
   selectMainTasksWithoutTag,
@@ -78,22 +77,25 @@ import {
   moveProjectTaskUpInBacklogList,
 } from '../project/store/project.actions';
 import { Update } from '@ngrx/entity';
+import { RootState } from '../../root-store/root-state';
 import { DateService } from '../../core/date/date.service';
 import { TimeTrackingActions } from '../time-tracking/store/time-tracking.actions';
 import { ArchiveService } from '../time-tracking/archive.service';
 import { TaskArchiveService } from '../time-tracking/task-archive.service';
 import { TODAY_TAG } from '../tag/tag.const';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
-import { getWorklogStr } from '../../util/get-work-log-str';
+import { getDbDateStr } from '../../util/get-db-date-str';
 import { INBOX_PROJECT } from '../project/project.const';
 import { GlobalConfigService } from '../config/global-config.service';
 import { TaskLog } from '../../core/log';
+import { devError } from '../../util/dev-error';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TaskService {
-  private readonly _store = inject<Store<any>>(Store);
+  private readonly _store = inject<Store<RootState>>(Store);
   private readonly _workContextService = inject(WorkContextService);
   private readonly _imexMetaService = inject(ImexViewService);
   private readonly _timeTrackingService = inject(GlobalTrackingIntervalService);
@@ -103,12 +105,11 @@ export class TaskService {
   private readonly _taskArchiveService = inject(TaskArchiveService);
   private readonly _globalConfigService = inject(GlobalConfigService);
 
-  // Currently used in idle service TODO remove
-  currentTaskId: string | null = null;
   currentTaskId$: Observable<string | null> = this._store.pipe(
     select(selectCurrentTaskId),
     // NOTE: we can't use share here, as we need the last emitted value
   );
+  currentTaskId = toSignal(this.currentTaskId$, { initialValue: null });
 
   currentTask$: Observable<Task | null> = this._store.pipe(
     select(selectCurrentTask),
@@ -120,9 +121,12 @@ export class TaskService {
     // NOTE: we can't use share here, as we need the last emitted value
   );
 
-  selectedTaskId$: Observable<string | null> = this._store.pipe(
-    select(selectSelectedTaskId),
-    // NOTE: we can't use share here, as we need the last emitted value
+  selectedTaskId = toSignal(
+    this._store.pipe(
+      select(selectSelectedTaskId),
+      // NOTE: we can't use share here, as we need the last emitted value
+    ),
+    { initialValue: null },
   );
 
   selectedTask$: Observable<TaskWithSubTasks | null> = this._store.pipe(
@@ -130,21 +134,15 @@ export class TaskService {
     // NOTE: we can't use share here, as we need the last emitted value
   );
 
-  firstStartableTask$: Observable<Task | undefined> =
-    this._workContextService.startableTasksForActiveContext$.pipe(
-      map((tasks) => tasks[0]),
-    );
+  firstStartableTask = computed(
+    () => this._workContextService.startableTasksForActiveContext()[0],
+  );
 
   taskDetailPanelTargetPanel$: Observable<TaskDetailTargetPanel | null | undefined> =
     this._store.pipe(
       select(selectTaskDetailTargetPanel),
       // NOTE: we can't use share here, as we need the last emitted value
     );
-
-  currentTaskOrCurrentParent$: Observable<TaskWithSubTasks | null> = this._store.pipe(
-    select(selectCurrentTaskOrParentWithData),
-    // NOTE: we can't use share here, as we need the last emitted value
-  );
 
   isTaskDataLoaded$: Observable<boolean> = this._store.pipe(
     select(selectIsTaskDataLoaded),
@@ -183,8 +181,6 @@ export class TaskService {
       },
       true,
     );
-
-    this.currentTaskId$.subscribe((val) => (this.currentTaskId = val));
 
     // time tracking
     this._timeTrackingService.tick$
@@ -257,7 +253,7 @@ export class TaskService {
     this._workContextService.startableTasksForActiveContext$
       .pipe(take(1))
       .subscribe((tasks) => {
-        if (tasks[0] && !this.currentTaskId) {
+        if (tasks[0] && !this.currentTaskId()) {
           this.setCurrentId(tasks[0].id);
         }
       });
@@ -592,16 +588,20 @@ export class TaskService {
     }
   }
 
-  addSubTaskTo(parentId: string): void {
+  addSubTaskTo(parentId: string, additional: Partial<Task> = {}): string {
+    const task = this.createNewTaskWithDefaults({
+      title: additional.title || '',
+      additional: { dueDay: additional.dueDay || undefined, ...additional },
+    });
+
     this._store.dispatch(
       addSubTask({
-        task: this.createNewTaskWithDefaults({
-          title: '',
-          additional: { dueDay: undefined },
-        }),
+        task,
         parentId,
       }),
     );
+
+    return task.id;
   }
 
   addTimeSpent(
@@ -652,30 +652,68 @@ export class TaskService {
     }
   }
 
-  moveToArchive(tasks: TaskWithSubTasks | TaskWithSubTasks[]): void {
+  async moveToArchive(tasks: TaskWithSubTasks | TaskWithSubTasks[]): Promise<void> {
+    // Add comprehensive validation and logging
+    if (!tasks) {
+      console.error('[TaskService] moveToArchive called with null/undefined tasks');
+      return;
+    }
+
     if (!Array.isArray(tasks)) {
+      console.warn('[TaskService] moveToArchive converting single task to array', tasks);
       tasks = [tasks];
     }
+
+    // Double-check it's an array after conversion
+    if (!Array.isArray(tasks)) {
+      console.error('[TaskService] Failed to convert tasks to array:', tasks);
+      throw new Error('moveToArchive: tasks could not be converted to array');
+    }
+
+    TaskLog.log('[TaskService] moveToArchive called with:', {
+      count: tasks.length,
+      taskIds: tasks.map((t) => t?.id || 'undefined'),
+      tasksType: typeof tasks,
+      isArray: Array.isArray(tasks),
+    });
+
     // NOTE: we only update real parents since otherwise we move sub-tasks without their parent into the archive
-    const subTasks = tasks.filter((t) => t.parentId);
+    const subTasks = tasks.filter((t) => t?.parentId);
+    const parentTasks = tasks.filter((t) => t && !t.parentId);
+
+    TaskLog.log('[TaskService] Filtered tasks:', {
+      parentTasks: parentTasks.map((t) => t.id),
+      subTasks: subTasks.map((t) => t.id),
+    });
+
     if (subTasks.length) {
       if (this._workContextService.activeWorkContextType !== WorkContextType.TAG) {
-        throw new Error('Trying to move sub tasks into archive for project');
+        // this should be handled by moving parentTasks to archive
+        devError('Trying to move sub tasks into archive for project');
+      } else {
+        // when on a tag such as today, we simply remove the tag instead of attempting to move to archive
+        const tagToRemove = this._workContextService.activeWorkContextId;
+        TaskLog.log('[TaskService] Removing tag from subtasks:', tagToRemove);
+        subTasks.forEach((st) => {
+          this.updateTags(
+            st,
+            st.tagIds.filter((tid) => tid !== tagToRemove),
+          );
+        });
       }
-
-      // when on a tag such as today, we simply remove the tag instead of attempting to move to archive
-      const tagToRemove = this._workContextService.activeWorkContextId;
-      subTasks.forEach((st) => {
-        this.updateTags(
-          st,
-          st.tagIds.filter((tid) => tid !== tagToRemove),
-        );
-      });
     }
-    this._store.dispatch(
-      TaskSharedActions.moveToArchive({ tasks: tasks.filter((t) => !t.parentId) }),
-    );
-    this._archiveService.moveTasksToArchiveAndFlushArchiveIfDue(tasks);
+
+    if (parentTasks.length) {
+      TaskLog.log('[TaskService] Dispatching moveToArchive action for parent tasks');
+      // Only move parent tasks to archive, never subtasks
+      this._store.dispatch(TaskSharedActions.moveToArchive({ tasks: parentTasks }));
+      // Only archive parent tasks to prevent orphaned subtasks
+      TaskLog.log('[TaskService] Calling archive service to persist tasks');
+      await this._archiveService.moveTasksToArchiveAndFlushArchiveIfDue(parentTasks);
+      TaskLog.log('[TaskService] Archive operation completed successfully');
+    } else {
+      TaskLog.log('[TaskService] No parent tasks to archive');
+    }
   }
 
   moveToProject(task: TaskWithSubTasks, projectId: string): void {
@@ -1035,7 +1073,7 @@ export class TaskService {
         ? { projectId: workContextId }
         : {
             projectId:
-              this._globalConfigService.cfg?.misc.defaultProjectId || INBOX_PROJECT.id,
+              this._globalConfigService.cfg()?.misc.defaultProjectId || INBOX_PROJECT.id,
           }),
 
       tagIds:
@@ -1046,7 +1084,7 @@ export class TaskService {
           : [],
 
       ...(workContextId === TODAY_TAG.id && !additional.parentId
-        ? { dueDay: getWorklogStr() }
+        ? { dueDay: getDbDateStr() }
         : {}),
 
       ...additional,

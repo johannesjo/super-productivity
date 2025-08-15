@@ -80,7 +80,7 @@ describe('formatDayStr', () => {
   // This test helps debug timezone issues
   describe('timezone diagnostic', () => {
     it('should log timezone information for debugging', () => {
-      const date = new Date('2024-01-15');
+      const date = new Date(2024, 0, 15);
       const diagnostics = {
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         timezoneOffset: date.getTimezoneOffset(),

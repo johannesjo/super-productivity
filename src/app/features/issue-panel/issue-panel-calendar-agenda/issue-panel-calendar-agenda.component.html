@@ -23,9 +23,7 @@
               [issueProviderId]="issueProvider().id"
               [itemData]="item"
               [customTitleStr]="
-                (item.issueData?.start | date: 'shortTime') +
-                ' – ' +
-                item.issueData?.title
+                (item.issueData?.start | shortTime) + ' – ' + item.issueData?.title
               "
               (addIssue)="addIssue($event)"
             ></issue-preview-item>

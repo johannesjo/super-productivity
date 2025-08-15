@@ -1,10 +1,12 @@
 import { Dictionary } from '@ngrx/entity';
 
-export const arrayToDictionary = <T>(arr: T[]): Dictionary<T> => {
+export const arrayToDictionary = <T extends { id: string | number }>(
+  arr: T[],
+): Dictionary<T> => {
   return arr.reduce(
-    (acc: any, sc): Dictionary<unknown> => ({
+    (acc: Dictionary<T>, sc): Dictionary<T> => ({
       ...acc,
-      [(sc as any).id]: sc,
+      [sc.id]: sc,
     }),
     {},
   );

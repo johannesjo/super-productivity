@@ -57,9 +57,8 @@ export class PluginService implements OnDestroy {
   private _pluginIconsSignal = signal<Map<string, string>>(new Map());
 
   // Lazy loading state management
-  private _pluginStates = new Map<string, PluginState>();
-  private _pluginStates$ = new BehaviorSubject<Map<string, PluginState>>(new Map());
-  public readonly pluginStates$ = this._pluginStates$.asObservable();
+  private _pluginStates = signal<Map<string, PluginState>>(new Map());
+  public readonly pluginStates = this._pluginStates.asReadonly();
 
   // Track active side panel plugin
   private _activeSidePanelPlugin$ = new BehaviorSubject<PluginInstance | null>(null);
@@ -92,7 +91,7 @@ export class PluginService implements OnDestroy {
   private async _discoverBuiltInPlugins(): Promise<void> {
     const pluginPaths = [
       'assets/bundled-plugins/yesterday-tasks-plugin',
-      // 'assets/sync-md-plugin', // Disabled - not ready for prime time
+      'assets/bundled-plugins/sync-md',
       'assets/bundled-plugins/api-test-plugin',
       'assets/bundled-plugins/procrastination-buster',
     ];
@@ -117,7 +116,7 @@ export class PluginService implements OnDestroy {
             isEnabled,
           };
 
-          this._pluginStates.set(manifest.id, state);
+          this._setPluginState(manifest.id, state);
           this._pluginPaths.set(manifest.id, path);
 
           // Load icon if available
@@ -129,6 +128,7 @@ export class PluginService implements OnDestroy {
             if (icon) {
               state.icon = icon;
               this._pluginIcons.set(manifest.id, icon);
+              this._updatePluginIcons();
             }
           } catch (e) {
             // Icon is optional - silently ignore 404s and other errors
@@ -141,14 +141,12 @@ export class PluginService implements OnDestroy {
         PluginLog.err(`Failed to discover plugin at ${path}:`, error);
       }
     }
-
-    this._updatePluginStates();
   }
 
   private async _loadBuiltInPlugins(): Promise<void> {
     const pluginPaths = [
       'assets/bundled-plugins/yesterday-tasks-plugin',
-      // 'assets/sync-md-plugin', // Disabled - not ready for prime time
+      'assets/bundled-plugins/sync-md',
       'assets/bundled-plugins/api-test-plugin',
       'assets/bundled-plugins/procrastination-buster',
     ];
@@ -180,18 +178,17 @@ export class PluginService implements OnDestroy {
             icon: cachedPlugin.icon,
           };
 
-          this._pluginStates.set(cachedPlugin.id, state);
+          this._setPluginState(cachedPlugin.id, state);
           this._pluginPaths.set(cachedPlugin.id, state.path);
 
           if (cachedPlugin.icon) {
             this._pluginIcons.set(cachedPlugin.id, cachedPlugin.icon);
+            this._updatePluginIcons();
           }
         } catch (error) {
           PluginLog.err(`Failed to discover cached plugin ${cachedPlugin.id}:`, error);
         }
       }
-
-      this._updatePluginStates();
     } catch (error) {
       PluginLog.err('Failed to discover cached plugins:', error);
     }
@@ -199,7 +196,7 @@ export class PluginService implements OnDestroy {
 
   private async _loadEnabledPlugins(): Promise<void> {
     // Load all enabled plugins on startup
-    const pluginsToLoad = Array.from(this._pluginStates.values()).filter(
+    const pluginsToLoad = Array.from(this._pluginStates().values()).filter(
       (state) => state.isEnabled,
     );
 
@@ -217,19 +214,50 @@ export class PluginService implements OnDestroy {
     }
   }
 
-  private _updatePluginStates(): void {
-    this._pluginStates$.next(new Map(this._pluginStates));
+  private _updatePluginIcons(): void {
     this._pluginIconsSignal.set(new Map(this._pluginIcons));
+  }
+
+  private _setPluginState(pluginId: string, state: PluginState): void {
+    this._pluginStates.update((states) => {
+      const newStates = new Map(states);
+      newStates.set(pluginId, state);
+      return newStates;
+    });
+  }
+
+  private _deletePluginState(pluginId: string): void {
+    this._pluginStates.update((states) => {
+      const newStates = new Map(states);
+      newStates.delete(pluginId);
+      return newStates;
+    });
+  }
+
+  private _getPluginState(pluginId: string): PluginState | undefined {
+    return this._pluginStates().get(pluginId);
   }
 
   /**
    * Activate a plugin (load it if not already loaded)
+   * @param isManualActivation - true when user manually enables plugin, false on startup
    */
-  async activatePlugin(pluginId: string): Promise<PluginInstance | null> {
-    const state = this._pluginStates.get(pluginId);
+  async activatePlugin(
+    pluginId: string,
+    isManualActivation: boolean = false,
+  ): Promise<PluginInstance | null> {
+    const state = this._getPluginState(pluginId);
     if (!state) {
       PluginLog.err(`Plugin ${pluginId} not found`);
       return null;
+    }
+
+    // If manually activated, ensure the state reflects that it's enabled
+    if (isManualActivation && !state.isEnabled) {
+      this._setPluginState(pluginId, {
+        ...state,
+        isEnabled: true,
+      });
     }
 
     // If already loaded, return the instance
@@ -242,7 +270,7 @@ export class PluginService implements OnDestroy {
       // Wait for status to change
       await new Promise<void>((resolve) => {
         const checkStatus = setInterval(() => {
-          const currentState = this._pluginStates.get(pluginId);
+          const currentState = this._getPluginState(pluginId);
           if (currentState && currentState.status !== 'loading') {
             clearInterval(checkStatus);
             resolve();
@@ -250,21 +278,52 @@ export class PluginService implements OnDestroy {
         }, 100);
       });
 
-      const updatedState = this._pluginStates.get(pluginId);
+      const updatedState = this._getPluginState(pluginId);
       return updatedState?.instance || null;
     }
 
+    // Get the updated state if it was just enabled
+    const currentState = isManualActivation
+      ? this._getPluginState(pluginId) || state
+      : state;
+
+    // Only check for permission if plugin is actually enabled
+    if (currentState.isEnabled) {
+      // Only check permission on startup - manual activation already checked in UI
+      if (!isManualActivation) {
+        const hasConsent = await this._checkNodeExecutionPermissionForStartup(
+          currentState.manifest,
+        );
+        if (!hasConsent) {
+          console.log(
+            'Plugin requires Node.js execution permission but no stored consent found:',
+            state.manifest.id,
+          );
+          // Don't disable the plugin on startup - user may have enabled it but not granted permission yet
+          return null;
+        }
+      }
+    } else {
+      // Plugin is not enabled, don't activate it
+      console.log(`Plugin ${pluginId} is not enabled, skipping activation`);
+      return null;
+    }
+
     // Load the plugin
-    state.status = 'loading';
-    this._updatePluginStates();
+    this._setPluginState(pluginId, {
+      ...currentState,
+      status: 'loading',
+    });
 
     try {
       PluginLog.log(`Activating plugin: ${pluginId}`);
-      const instance = await this._loadPluginLazy(state);
+      const instance = await this._loadPluginLazy(currentState);
 
-      state.status = 'loaded';
-      state.instance = instance;
-      this._updatePluginStates();
+      this._setPluginState(pluginId, {
+        ...currentState,
+        status: 'loaded',
+        instance: instance,
+      });
 
       // Add to loaded plugins list for compatibility
       if (!this._loadedPlugins.find((p) => p.manifest.id === pluginId)) {
@@ -274,9 +333,11 @@ export class PluginService implements OnDestroy {
       return instance;
     } catch (error) {
       PluginLog.err(`Failed to activate plugin ${pluginId}:`, error);
-      state.status = 'error';
-      state.error = error instanceof Error ? error.message : String(error);
-      this._updatePluginStates();
+      this._setPluginState(pluginId, {
+        ...currentState,
+        status: 'error',
+        error: error instanceof Error ? error.message : String(error),
+      });
       return null;
     }
   }
@@ -408,15 +469,8 @@ export class PluginService implements OnDestroy {
           return placeholderInstance;
         }
 
-        // Only check for consent if plugin is enabled
-        if (isPluginEnabled) {
-          const hasConsent = await this._getNodeExecutionConsent(manifest);
-          if (!hasConsent) {
-            throw new Error(
-              this._translateService.instant(T.PLUGINS.USER_DECLINED_NODE_PERMISSION),
-            );
-          }
-        }
+        // Skip consent check during startup - will be checked when plugin is activated
+        // This prevents showing multiple dialogs at once during app startup
       }
 
       // Analyze plugin code (informational only - KISS approach)
@@ -487,7 +541,7 @@ export class PluginService implements OnDestroy {
       platform = 'android';
     }
 
-    const darkModeValue = this._globalThemeService.darkMode$.getValue();
+    const darkModeValue = this._globalThemeService.darkMode();
     const isDark = darkModeValue === 'dark';
 
     return {
@@ -502,7 +556,7 @@ export class PluginService implements OnDestroy {
     // In lazy loading mode, return all discovered plugins
     const allPlugins: PluginInstance[] = [];
 
-    for (const state of this._pluginStates.values()) {
+    for (const state of this._pluginStates().values()) {
       if (state.instance) {
         // Plugin is loaded, use the instance
         allPlugins.push(state.instance);
@@ -521,7 +575,7 @@ export class PluginService implements OnDestroy {
   }
 
   getAllPluginStates(): Map<string, PluginState> {
-    return new Map(this._pluginStates);
+    return new Map(this._pluginStates());
   }
 
   async getAllPluginsLegacy(): Promise<PluginInstance[]> {
@@ -617,7 +671,7 @@ export class PluginService implements OnDestroy {
     }
 
     // Check if plugin exists in states
-    const state = this._pluginStates.get(pluginId);
+    const state = this._getPluginState(pluginId);
     if (!state) {
       PluginLog.err(`Plugin ${pluginId} not found`);
       this._activeSidePanelPlugin$.next(null);
@@ -895,8 +949,7 @@ export class PluginService implements OnDestroy {
           error: placeholderInstance.error,
           icon: iconContent || undefined,
         };
-        this._pluginStates.set(manifest.id, state);
-        this._updatePluginStates();
+        this._setPluginState(manifest.id, state);
 
         PluginLog.log(
           `Uploaded plugin ${manifest.id} requires desktop version, creating placeholder`,
@@ -933,8 +986,7 @@ export class PluginService implements OnDestroy {
           isEnabled: false,
           icon: iconContent || undefined,
         };
-        this._pluginStates.set(manifest.id, state);
-        this._updatePluginStates();
+        this._setPluginState(manifest.id, state);
 
         PluginLog.log(`Uploaded plugin ${manifest.id} is disabled, skipping load`);
         return placeholderInstance;
@@ -972,8 +1024,7 @@ export class PluginService implements OnDestroy {
           instance: pluginInstance,
           icon: iconContent || undefined,
         };
-        this._pluginStates.set(manifest.id, state);
-        this._updatePluginStates();
+        this._setPluginState(manifest.id, state);
 
         PluginLog.log(`Uploaded plugin ${manifest.id} loaded successfully`);
       } else {
@@ -992,8 +1043,7 @@ export class PluginService implements OnDestroy {
           error: pluginInstance.error,
           icon: iconContent || undefined,
         };
-        this._pluginStates.set(manifest.id, state);
-        this._updatePluginStates();
+        this._setPluginState(manifest.id, state);
       }
 
       return pluginInstance;
@@ -1069,15 +1119,14 @@ export class PluginService implements OnDestroy {
     this._pluginIconsSignal.set(new Map(this._pluginIcons));
 
     // Remove from plugin states
-    this._pluginStates.delete(pluginId);
-    this._updatePluginStates();
+    this._deletePluginState(pluginId);
 
     PluginLog.log(`Uploaded plugin ${pluginId} removed completely`);
   }
 
   unloadPlugin(pluginId: string): boolean {
     // In lazy loading mode, update plugin state
-    const state = this._pluginStates.get(pluginId);
+    const state = this._getPluginState(pluginId);
     if (!state) {
       return false;
     }
@@ -1089,10 +1138,14 @@ export class PluginService implements OnDestroy {
       this.setActiveSidePanelPlugin(null);
     }
 
-    // Update state to not-loaded
-    state.status = 'not-loaded';
-    state.instance = undefined;
-    this._updatePluginStates();
+    // Update state to not-loaded and disabled
+    const updatedState: PluginState = {
+      ...state,
+      status: 'not-loaded',
+      instance: undefined,
+      isEnabled: false,
+    };
+    this._setPluginState(pluginId, updatedState);
 
     // Remove from loaded plugins list
     const index = this._loadedPlugins.findIndex((p) => p.manifest.id === pluginId);
@@ -1109,7 +1162,7 @@ export class PluginService implements OnDestroy {
 
   async reloadPlugin(pluginId: string): Promise<boolean> {
     // In lazy loading mode, unload and re-activate
-    const state = this._pluginStates.get(pluginId);
+    const state = this._getPluginState(pluginId);
     if (!state) {
       PluginLog.err(`Cannot reload plugin ${pluginId}: not found`);
       return false;
@@ -1230,21 +1283,46 @@ export class PluginService implements OnDestroy {
   }
 
   /**
+   * Check node execution permission on startup (uses stored consent)
+   */
+  private async _checkNodeExecutionPermissionForStartup(
+    manifest: PluginManifest,
+  ): Promise<boolean> {
+    // Check if plugin has nodeExecution permission
+    if (!manifest.permissions?.includes('nodeExecution')) {
+      return true; // No node execution permission needed
+    }
+
+    // Only check consent in Electron environment
+    if (!IS_ELECTRON) {
+      console.warn(
+        `Plugin ${manifest.id} requires nodeExecution permission which is not available in web environment`,
+      );
+      return false;
+    }
+
+    // On startup, use stored consent if available
+    const storedConsent =
+      await this._pluginMetaPersistenceService.getNodeExecutionConsent(manifest.id);
+
+    // Only allow if consent was explicitly granted and stored
+    return storedConsent === true;
+  }
+
+  /**
    * Get consent for Node.js execution permissions (KISS approach)
    */
   private async _getNodeExecutionConsent(manifest: PluginManifest): Promise<boolean> {
-    // Check if consent was already given and stored
-    const storedConsent =
+    // Check if we should pre-check the "remember" checkbox based on previous consent
+    const previousConsent =
       await this._pluginMetaPersistenceService.getNodeExecutionConsent(manifest.id);
-    if (storedConsent === true) {
-      return true;
-    }
 
-    // Single, simple consent dialog
+    // Always show dialog for nodeExecution permission
     const result = await this._dialog
       .open(PluginNodeConsentDialogComponent, {
         data: {
           manifest,
+          rememberChoice: previousConsent === true, // Pre-check if previously consented
         } as PluginNodeConsentDialogData,
         disableClose: false,
         width: '500px',
@@ -1260,9 +1338,19 @@ export class PluginService implements OnDestroy {
         setTimeout(() => {
           this._pluginMetaPersistenceService.setNodeExecutionConsent(manifest.id, true);
         }, 5000);
+      } else {
+        // User unchecked remember - remove stored consent
+        setTimeout(() => {
+          this._pluginMetaPersistenceService.setNodeExecutionConsent(manifest.id, false);
+        }, 5000);
       }
       return true;
     }
+
+    // User denied permission - remove any stored consent
+    setTimeout(() => {
+      this._pluginMetaPersistenceService.setNodeExecutionConsent(manifest.id, false);
+    }, 5000);
 
     return false;
   }

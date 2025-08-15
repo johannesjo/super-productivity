@@ -46,7 +46,7 @@ import { KeyboardConfig } from '../../../config/keyboard-config.model';
 import { DialogScheduleTaskComponent } from '../../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { DialogTimeEstimateComponent } from '../../dialog-time-estimate/dialog-time-estimate.component';
 import { DialogEditTaskAttachmentComponent } from '../../task-attachment/dialog-edit-attachment/dialog-edit-task-attachment.component';
-import { throttle } from 'helpful-decorators';
+import { throttle } from '../../../../util/decorators';
 import { DialogConfirmComponent } from '../../../../ui/dialog-confirm/dialog-confirm.component';
 import { Update } from '@ngrx/entity';
 import { IS_TOUCH_PRIMARY } from 'src/app/util/is-mouse-primary';
@@ -56,7 +56,7 @@ import { Store } from '@ngrx/store';
 import { selectTaskByIdWithSubTaskData } from '../../store/task.selectors';
 import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
-import { getWorklogStr } from '../../../../util/get-work-log-str';
+import { getDbDateStr } from '../../../../util/get-db-date-str';
 import { PlannerActions } from '../../../planner/store/planner.actions';
 import { addSubTask } from '../../../tasks/store/task.actions';
 import { combineDateAndTime } from '../../../../util/combine-date-and-time';
@@ -72,6 +72,7 @@ import { selectTodayTagTaskIds } from '../../../tag/store/tag.reducer';
 import { isToday } from '../../../../util/is-today.util';
 import { MenuTouchFixDirective } from '../menu-touch-fix.directive';
 import { TaskLog } from '../../../../core/log';
+import { isTouchEventInstance } from '../../../../util/is-touch-event.util';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -170,7 +171,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   //  Accessor inputs cannot be migrated as they are too complex.
   @Input('task') set taskSet(v: TaskWithSubTasks | Task) {
     this.task = v;
-    this.isCurrent = this._taskService.currentTaskId === v.id;
+    this.isCurrent = this._taskService.currentTaskId() === v.id;
     this._task$.next(v);
   }
 
@@ -189,7 +190,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     ev.stopPropagation();
     ev.stopImmediatePropagation();
 
-    if (ev instanceof MouseEvent || ev instanceof TouchEvent) {
+    if (ev instanceof MouseEvent || isTouchEventInstance(ev)) {
       this.contextMenuPosition.x =
         ('touches' in ev ? ev.touches[0].clientX : ev.clientX) + 10 + 'px';
       this.contextMenuPosition.y =
@@ -214,7 +215,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     if (IS_TOUCH_PRIMARY || !this.isAdvancedControls()) {
       return {} as any;
     }
-    return (this._globalConfigService.cfg?.keyboard as KeyboardConfig) || {};
+    return (this._globalConfigService.cfg()?.keyboard as KeyboardConfig) || {};
   }
 
   quickAccessKeydown(ev: KeyboardEvent): void {
@@ -520,7 +521,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     if (this.task.projectId && !this.task.parentId) {
       this._projectService.moveTaskToBacklog(this.task.id, this.task.projectId);
       if (
-        this.task.dueDay === getWorklogStr() ||
+        this.task.dueDay === getDbDateStr() ||
         (this.task.dueWithTime && isToday(this.task.dueWithTime))
       ) {
         this.unschedule();
@@ -587,13 +588,13 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     }
 
     const newDayDate = new Date(selectedDate);
-    const newDay = getWorklogStr(newDayDate);
+    const newDay = getDbDateStr(newDayDate);
 
     if (isRemoveFromToday) {
       this.unschedule();
     } else if (this.task.dueDay === newDay) {
       const formattedDate =
-        newDay == getWorklogStr()
+        newDay == getDbDateStr()
           ? this._translateService.instant(T.G.TODAY_TAG_TITLE)
           : (this._datePipe.transform(newDay, 'shortDate') as string);
       this._snackService.open({
@@ -613,7 +614,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
         false,
       );
     } else {
-      if (newDay === getWorklogStr()) {
+      if (newDay === getDbDateStr()) {
         this.addToMyDay();
       } else {
         this._store.dispatch(

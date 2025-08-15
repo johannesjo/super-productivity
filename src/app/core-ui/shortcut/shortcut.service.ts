@@ -11,8 +11,6 @@ import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const'
 import { UiHelperService } from '../../features/ui-helper/ui-helper.service';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { WorkContextType } from '../../features/work-context/work-context.model';
-import { SnackService } from '../../core/snack/snack.service';
-import { TranslateService } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { showFocusOverlay } from '../../features/focus-mode/store/focus-mode.actions';
 import { SyncWrapperService } from '../../imex/sync/sync-wrapper.service';
@@ -30,10 +28,8 @@ export class ShortcutService {
   private _matDialog = inject(MatDialog);
   private _taskService = inject(TaskService);
   private _workContextService = inject(WorkContextService);
-  private _snackService = inject(SnackService);
   private _activatedRoute = inject(ActivatedRoute);
   private _uiHelperService = inject(UiHelperService);
-  private _translateService = inject(TranslateService);
   private _syncWrapperService = inject(SyncWrapperService);
   private _store = inject(Store);
   private _pluginBridgeService = inject(PluginBridgeService);
@@ -61,7 +57,7 @@ export class ShortcutService {
       window.ea.on(IPC.TASK_TOGGLE_START, () => {
         this._taskService.toggleStartTask();
       });
-      window.ea.on(IPC.ADD_TASK, () => {
+      window.ea.on(IPC.SHOW_ADD_TASK_BAR, () => {
         this._layoutService.showAddTaskBar();
       });
       window.ea.on(IPC.ADD_NOTE, () => {
@@ -77,7 +73,7 @@ export class ShortcutService {
   }
 
   async handleKeyDown(ev: KeyboardEvent): Promise<void> {
-    const cfg = this._configService.cfg;
+    const cfg = this._configService.cfg();
     if (!cfg) {
       throw new Error();
     }
@@ -87,10 +83,9 @@ export class ShortcutService {
 
     // don't run when inside input or text area and if no special keys are used
     if (
-      ((el && el.tagName === 'INPUT') ||
-        el.tagName === 'TEXTAREA' ||
+      ((el && el.tagName.toUpperCase() === 'INPUT') ||
+        el.tagName.toUpperCase() === 'TEXTAREA' ||
         el.getAttribute('contenteditable')) &&
-      !ev.ctrlKey &&
       !ev.metaKey
     ) {
       return;
@@ -188,7 +183,7 @@ export class ShortcutService {
     }
 
     // Check plugin shortcuts (exec last)
-    const pluginShortcuts = this._pluginBridgeService.shortcuts$.getValue();
+    const pluginShortcuts = this._pluginBridgeService.shortcuts();
     for (const shortcut of pluginShortcuts) {
       const shortcutKey = `plugin_${shortcut.pluginId}:${shortcut.id}`;
       const shortcutKeyCombo = (keys as any)[shortcutKey];

@@ -1,5 +1,4 @@
 import { app } from 'electron';
-import { quitApp } from './various-shared';
 import { startApp } from './start-app';
 
 const IS_MAC = process.platform === 'darwin';
@@ -10,7 +9,8 @@ if (!IS_MAC) {
   const isLockObtained = app.requestSingleInstanceLock();
   if (!isLockObtained) {
     console.log('EXITING due to failed single instance lock');
-    quitApp();
+    // Force immediate exit without waiting for graceful shutdown
+    process.exit(0);
   } else {
     console.log('Start app...');
     startApp();

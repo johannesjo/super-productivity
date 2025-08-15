@@ -10,16 +10,17 @@ import {
   first,
   mapTo,
   switchMap,
-  withLatestFrom,
+  map,
+  take,
 } from 'rxjs/operators';
 import { Reminder } from './reminder.model';
 import { UiHelperService } from '../ui-helper/ui-helper.service';
 import { NotifyService } from '../../core/notify/notify.service';
 import { DialogViewTaskRemindersComponent } from '../tasks/dialog-view-task-reminders/dialog-view-task-reminders.component';
-import { throttle } from 'helpful-decorators';
+import { throttle } from '../../util/decorators';
 import { SyncTriggerService } from '../../imex/sync/sync-trigger.service';
 import { LayoutService } from '../../core-ui/layout/layout.service';
-import { from, merge, of, timer } from 'rxjs';
+import { from, merge, of, timer, interval } from 'rxjs';
 import { TaskService } from '../tasks/task.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { T } from 'src/app/t.const';
@@ -57,19 +58,22 @@ export class ReminderModule {
                 !!reminder &&
                 reminder.length > 0,
             ),
-            withLatestFrom(this._layoutService.isShowAddTaskBar$),
             // don't show reminders while add task bar is open
-            switchMap(([reminders, isShowAddTaskBar]: [Reminder[], boolean]) =>
-              isShowAddTaskBar
+            switchMap((reminders: Reminder[]) => {
+              const isShowAddTaskBar = this._layoutService.isShowAddTaskBar();
+              return isShowAddTaskBar
                 ? merge([
-                    this._layoutService.isShowAddTaskBar$.pipe(
+                    // Wait for add task bar to close
+                    interval(100).pipe(
+                      map(() => this._layoutService.isShowAddTaskBar()),
                       filter((isShowAddTaskBarLive) => !isShowAddTaskBarLive),
+                      take(1),
                     ),
                     // in case someone just forgot to close it
                     timer(10000),
                   ]).pipe(first(), mapTo(reminders), delay(1000))
-                : of(reminders),
-            ),
+                : of(reminders);
+            }),
           ),
         ),
       )
@@ -82,7 +86,7 @@ export class ReminderModule {
 
         const oldest = reminders[0];
         if (oldest.type === 'TASK') {
-          if (this._taskService.currentTaskId === oldest.relatedId) {
+          if (this._taskService.currentTaskId() === oldest.relatedId) {
             this._snackService.open({
               type: 'CUSTOM',
               msg: T.F.REMINDER.S_ACTIVE_TASK_DUE,

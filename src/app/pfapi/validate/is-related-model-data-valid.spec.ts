@@ -1,5 +1,4 @@
 import { isRelatedModelDataValid } from './is-related-model-data-valid';
-import { MODEL_VERSION_KEY } from '../../app.constants';
 import { DEFAULT_TASK, Task } from '../../features/tasks/task.model';
 import { fakeEntityStateFromArray } from '../../util/fake-entity-state-from-array';
 import { Project } from '../../features/project/project.model';
@@ -39,13 +38,12 @@ describe('isRelatedModelDataValid', () => {
     it('should return true for minimal valid data structure', () => {
       const minimalData = {
         ...mockAppData,
-        task: { ids: [], entities: {}, [MODEL_VERSION_KEY]: 5 },
+        task: { ids: [], entities: {} },
         project: {
           ids: [INBOX_PROJECT.id],
           entities: { [INBOX_PROJECT.id]: INBOX_PROJECT },
-          [MODEL_VERSION_KEY]: 5,
         },
-        tag: { ids: [], entities: {}, [MODEL_VERSION_KEY]: 5 },
+        tag: { ids: [], entities: {} },
       };
 
       const result = isRelatedModelDataValid(minimalData as any);
@@ -69,7 +67,6 @@ describe('isRelatedModelDataValid', () => {
                 backlogTaskIds: [],
               },
             ] as Partial<Project>[]),
-            [MODEL_VERSION_KEY]: 5,
           },
         };
 
@@ -91,7 +88,6 @@ describe('isRelatedModelDataValid', () => {
                 backlogTaskIds: ['missing-backlog-task'],
               },
             ] as Partial<Project>[]),
-            [MODEL_VERSION_KEY]: 5,
           },
         };
 
@@ -113,7 +109,6 @@ describe('isRelatedModelDataValid', () => {
                 backlogTaskIds: [],
               },
             ] as Partial<Project>[]),
-            [MODEL_VERSION_KEY]: 5,
           },
         };
 
@@ -137,7 +132,6 @@ describe('isRelatedModelDataValid', () => {
                 noteIds: ['missing-note-id'],
               },
             ] as Partial<Project>[]),
-            [MODEL_VERSION_KEY]: 5,
           },
         };
 
@@ -201,7 +195,6 @@ describe('isRelatedModelDataValid', () => {
               taskIds: ['missing-task-for-tag'],
             },
           ] as Partial<Tag>[]),
-          [MODEL_VERSION_KEY]: 5,
         },
       };
 
@@ -344,7 +337,6 @@ describe('isRelatedModelDataValid', () => {
             taskIds: ['task-with-reminder'],
           },
         ]),
-        [MODEL_VERSION_KEY]: 5,
       };
 
       const invalidData = {
@@ -432,6 +424,65 @@ describe('isRelatedModelDataValid', () => {
     //     'Inconsistent Task State: Lonely Sub Task in Today orphaned-today-subtask',
     //   );
     // });
+
+    it('should not throw error when parent task is in archiveOld and subtask is in archiveYoung', () => {
+      const taskData = fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'parent-task',
+          subTaskIds: [],
+          projectId: INBOX_PROJECT.id,
+        },
+      ]);
+
+      const archiveYoungTaskData = fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'sub-task-in-young',
+          parentId: 'parent-task-in-old', // parent is in archiveOld
+          projectId: INBOX_PROJECT.id,
+        },
+      ]);
+
+      const archiveOldTaskData = fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 'parent-task-in-old',
+          subTaskIds: ['sub-task-in-young'], // subtask is in archiveYoung
+          projectId: INBOX_PROJECT.id,
+        },
+      ]);
+
+      const projectData = {
+        ...mockAppData.project,
+        ...fakeEntityStateFromArray<Project>([
+          {
+            ...DEFAULT_PROJECT,
+            id: INBOX_PROJECT.id,
+            taskIds: ['parent-task'],
+          },
+        ]),
+      };
+
+      const validData = {
+        ...mockAppData,
+        task: taskData,
+        project: projectData,
+        archiveYoung: {
+          lastTimeTrackingFlush: 0,
+          timeTracking: mockAppData.archiveYoung.timeTracking,
+          task: archiveYoungTaskData,
+        },
+        archiveOld: {
+          lastTimeTrackingFlush: 0,
+          timeTracking: mockAppData.archiveOld.timeTracking,
+          task: archiveOldTaskData,
+        },
+      };
+
+      // Should not throw error since parent-child relationship spans archives correctly
+      expect(() => isRelatedModelDataValid(validData as any)).not.toThrow();
+    });
 
     it('should throw error for missing sub-task data in today list', () => {
       const taskData = fakeEntityStateFromArray<Task>([
@@ -568,14 +619,13 @@ describe('isRelatedModelDataValid', () => {
     it('should handle empty entity states without errors', () => {
       const emptyData = {
         ...mockAppData,
-        task: { ids: [], entities: {}, [MODEL_VERSION_KEY]: 5 },
+        task: { ids: [], entities: {} },
         project: {
           ids: [INBOX_PROJECT.id],
           entities: { [INBOX_PROJECT.id]: INBOX_PROJECT },
-          [MODEL_VERSION_KEY]: 5,
         },
-        tag: { ids: [], entities: {}, [MODEL_VERSION_KEY]: 5 },
-        note: { ids: [], entities: {}, todayOrder: [], [MODEL_VERSION_KEY]: 5 },
+        tag: { ids: [], entities: {} },
+        note: { ids: [], entities: {}, todayOrder: [] },
       };
 
       expect(() => isRelatedModelDataValid(emptyData as any)).not.toThrow();
@@ -617,7 +667,6 @@ describe('isRelatedModelDataValid', () => {
             taskIds: largeTasks.map((t) => t.id),
           },
         ]),
-        [MODEL_VERSION_KEY]: 5,
       };
 
       const largeData = {
@@ -672,7 +721,6 @@ describe('isRelatedModelDataValid', () => {
             taskIds: ['parent-1'],
           },
         ]),
-        [MODEL_VERSION_KEY]: 5,
       };
 
       const complexData = {

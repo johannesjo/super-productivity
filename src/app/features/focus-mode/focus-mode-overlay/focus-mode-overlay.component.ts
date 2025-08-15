@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, OnDestroy } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
-import { Observable, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
@@ -31,7 +31,7 @@ import { FocusModeDurationSelectionComponent } from '../focus-mode-duration-sele
 import { FocusModePreparationComponent } from '../focus-mode-preparation/focus-mode-preparation.component';
 import { FocusModeMainComponent } from '../focus-mode-main/focus-mode-main.component';
 import { FocusModeTaskDoneComponent } from '../focus-mode-task-done/focus-mode-task-done.component';
-import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { BannerService } from '../../../core/banner/banner.service';
 import { BannerId } from '../../../core/banner/banner.model';
@@ -55,7 +55,6 @@ import { FocusModeService } from '../focus-mode.service';
     FocusModeMainComponent,
     FocusModeTaskDoneComponent,
     MatButton,
-    AsyncPipe,
     TranslatePipe,
     MatButtonToggleGroup,
     MatButtonToggle,
@@ -83,7 +82,9 @@ export class FocusModeOverlayComponent implements OnDestroy {
     initialValue: undefined,
   });
 
-  isPomodoroEnabled$: Observable<boolean> = this._store.select(selectIsPomodoroEnabled);
+  isPomodoroEnabled = toSignal(this._store.select(selectIsPomodoroEnabled), {
+    initialValue: false,
+  });
 
   T: typeof T = T;
 

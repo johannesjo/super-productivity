@@ -24,12 +24,12 @@ import { LS, SS } from '../../../core/persistence/storage-keys.const';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { Store } from '@ngrx/store';
 import { PlannerActions } from '../../planner/store/planner.actions';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import { MentionConfig } from 'angular-mentions/lib/mention-config';
 import { AddTaskBarService } from './add-task-bar.service';
 import { map } from 'rxjs/operators';
 import { selectEnabledIssueProviders } from '../../issue/store/issue-provider.selectors';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
   MatAutocomplete,
   MatAutocompleteOrigin,
@@ -138,12 +138,17 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
 
   mentionConfig$: Observable<MentionConfig> = this._addTaskBarService.getMentionConfig$();
 
-  isAddToBacklogAvailable$: Observable<boolean> =
-    this._workContextService.activeWorkContext$.pipe(map((ctx) => !!ctx.isEnableBacklog));
+  isAddToBacklogAvailable = toSignal(
+    this._workContextService.activeWorkContext$.pipe(map((ctx) => !!ctx.isEnableBacklog)),
+    { initialValue: false },
+  );
 
-  isSearchIssueProvidersAvailable$: Observable<boolean> = this._store
-    .select(selectEnabledIssueProviders)
-    .pipe(map((issueProviders) => issueProviders.length > 0));
+  isSearchIssueProvidersAvailable = toSignal(
+    this._store
+      .select(selectEnabledIssueProviders)
+      .pipe(map((issueProviders) => issueProviders.length > 0)),
+    { initialValue: false },
+  );
 
   private _isAddInProgress?: boolean;
   private _lastAddedTaskId?: string;
@@ -343,7 +348,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnDestroy {
 
   private _planTaskForDay(taskId: string, day: string): void {
     this._taskService.getByIdOnce$(taskId).subscribe((task) => {
-      if (getWorklogStr() !== day) {
+      if (getDbDateStr() !== day) {
         this._store.dispatch(
           PlannerActions.planTaskForDay({
             task: task,

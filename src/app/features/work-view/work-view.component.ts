@@ -32,13 +32,11 @@ import { delay, filter, map, switchMap } from 'rxjs/operators';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { PlanningModeService } from '../planning-mode/planning-mode.service';
 import { T } from '../../t.const';
-import { ImprovementService } from '../metric/improvement/improvement.service';
 import { workViewProjectChangeAnimation } from '../../ui/animations/work-view-project-change.ani';
 import { WorkContextService } from '../work-context/work-context.service';
 import { ProjectService } from '../project/project.service';
 import { TaskViewCustomizerService } from '../task-view-customizer/task-view-customizer.service';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { RightPanelComponent } from '../right-panel/right-panel.component';
 import { CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -77,7 +75,6 @@ import { FinishDayBtnComponent } from './finish-day-btn/finish-day-btn.component
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    RightPanelComponent,
     CdkDropListGroup,
     CdkScrollable,
     MatTooltip,
@@ -102,7 +99,6 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   taskService = inject(TaskService);
   takeABreakService = inject(TakeABreakService);
   planningModeService = inject(PlanningModeService);
-  improvementService = inject(ImprovementService);
   layoutService = inject(LayoutService);
   customizerService = inject(TaskViewCustomizerService);
   workContextService = inject(WorkContextService);
@@ -119,13 +115,13 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   laterTodayTasks = toSignal(this._store.select(selectLaterTodayTasksWithSubTasks), {
     initialValue: [],
   });
-  undoneTasks = input<TaskWithSubTasks[]>([]);
+  undoneTasks = input.required<TaskWithSubTasks[]>();
   customizedUndoneTasks = toSignal(
     this.customizerService.customizeUndoneTasks(this.workContextService.undoneTasks$),
     { initialValue: { list: [] } },
   );
-  doneTasks = input<TaskWithSubTasks[]>([]);
-  backlogTasks = input<TaskWithSubTasks[]>([]);
+  doneTasks = input.required<TaskWithSubTasks[]>();
+  backlogTasks = input.required<TaskWithSubTasks[]>();
   isShowBacklog = input<boolean>(false);
 
   hasDoneTasks = computed(() => this.doneTasks().length > 0);
@@ -134,10 +130,11 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   todayRemainingInProject = toSignal(this.workContextService.todayRemainingInProject$);
   estimateRemainingToday = toSignal(this.workContextService.estimateRemainingToday$);
   workingToday = toSignal(this.workContextService.workingToday$);
-  selectedTaskId = toSignal(this.taskService.selectedTaskId$);
+  selectedTaskId = this.taskService.selectedTaskId;
   isOnTodayList = toSignal(this.workContextService.isToday$);
   isDoneHidden = signal(!!localStorage.getItem(LS.DONE_TASKS_HIDDEN));
   isLaterTodayHidden = signal(!!localStorage.getItem(LS.LATER_TODAY_TASKS_HIDDEN));
+  isOverdueHidden = signal(!!localStorage.getItem(LS.OVERDUE_TASKS_HIDDEN));
 
   isShowOverduePanel = computed(
     () => this.isOnTodayList() && this.overdueTasks().length > 0,
@@ -221,6 +218,15 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
         localStorage.removeItem(LS.LATER_TODAY_TASKS_HIDDEN);
       }
     });
+
+    effect(() => {
+      const isExpanded = this.isOverdueHidden();
+      if (isExpanded) {
+        localStorage.setItem(LS.OVERDUE_TASKS_HIDDEN, 'true');
+      } else {
+        localStorage.removeItem(LS.OVERDUE_TASKS_HIDDEN);
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -245,9 +251,9 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     this._subs.add(
       this.upperContainerScroll$.subscribe(({ target }) => {
         if ((target as HTMLElement).scrollTop !== 0) {
-          this.layoutService.isScrolled$.next(true);
+          this.layoutService.isScrolled.set(true);
         } else {
-          this.layoutService.isScrolled$.next(false);
+          this.layoutService.isScrolled.set(false);
         }
       }),
     );
@@ -257,7 +263,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     if (this._switchListAnimationTimeout) {
       window.clearTimeout(this._switchListAnimationTimeout);
     }
-    this.layoutService.isScrolled$.next(false);
+    this.layoutService.isScrolled.set(false);
   }
 
   planMore(): void {
@@ -272,9 +278,29 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     this.takeABreakService.resetTimer();
   }
 
-  moveDoneToArchive(): void {
+  async moveDoneToArchive(): Promise<void> {
     const doneTasks = this.doneTasks();
-    this.taskService.moveToArchive(doneTasks);
+
+    // Add detailed logging for debugging
+    console.log('[WorkView] moveDoneToArchive called with:', {
+      doneTasks,
+      type: typeof doneTasks,
+      isArray: Array.isArray(doneTasks),
+      length: doneTasks?.length,
+      projectId: this.workContextService.activeWorkContextId,
+      contextType: this.workContextService.activeWorkContextType,
+    });
+
+    if (!doneTasks || !Array.isArray(doneTasks)) {
+      console.error('[WorkView] doneTasks is not an array:', doneTasks);
+      return;
+    }
+
+    if (doneTasks.length === 0) {
+      return;
+    }
+
+    await this.taskService.moveToArchive(doneTasks);
     this._snackService.open({
       msg: T.F.TASK.S.MOVED_TO_ARCHIVE,
       type: 'SUCCESS',

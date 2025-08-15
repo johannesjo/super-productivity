@@ -434,6 +434,14 @@ export const SHEPHERD_STEPS = (
         on: 'bottom',
       },
       text: 'Open the menu (<span class="material-icons">menu</span>)',
+      beforeShowPromise: () => {
+        // If nav is always visible, skip this step
+        if (layoutService.isNavAlwaysVisible()) {
+          setTimeout(() => shepherdService.next(), 0);
+          return Promise.resolve();
+        }
+        return Promise.resolve();
+      },
       when: nextOnObs(
         layoutService.isShowSideNav$.pipe(filter((v) => !!v)),
         shepherdService,
@@ -445,7 +453,7 @@ export const SHEPHERD_STEPS = (
       id: TourId.IssueProviders,
       beforeShowPromise: () => router.navigate(['tag/TODAY/tasks']),
       title: 'Issue Integrations & Calendars',
-      text: 'You can import tasks from a variety of third party tools. To do so click on this icon <span class="material-icons">playlist_add</span> in the top right corner.',
+      text: 'You can import tasks from a variety of third party tools. To do so click on this icon <span class="material-icons">dashboard_customize</span> in the top right corner.',
       attachTo: {
         element: '.tour-issuePanelTrigger',
         on: 'bottom',
@@ -480,7 +488,14 @@ export const SHEPHERD_STEPS = (
         element: '.tour-burgerTrigger',
         on: 'bottom',
       },
-      beforeShowPromise: () => router.navigate(['']),
+      beforeShowPromise: () => {
+        return router.navigate(['']).then(() => {
+          // If nav is always visible, skip this step
+          if (layoutService.isNavAlwaysVisible()) {
+            setTimeout(() => shepherdService.next(), 0);
+          }
+        });
+      },
       text: 'Open the menu (<span class="material-icons">menu</span>)',
       when: nextOnObs(
         layoutService.isShowSideNav$.pipe(filter((v) => !!v)),
@@ -578,7 +593,7 @@ export const SHEPHERD_STEPS = (
                 classes: PRIMARY_CLASSES,
                 action: () => {
                   shepherdService.show(TourId.KeyboardNav);
-                  localStorage.setItem(LS.IS_SHOW_TOUR, 'true');
+                  localStorage.setItem(LS.IS_SKIP_TOUR, 'true');
                 },
               } as any,
             ]
@@ -588,7 +603,7 @@ export const SHEPHERD_STEPS = (
           classes: PRIMARY_CLASSES,
           action: () => {
             shepherdService.complete();
-            localStorage.setItem(LS.IS_SHOW_TOUR, 'true');
+            localStorage.setItem(LS.IS_SKIP_TOUR, 'true');
           },
         } as any,
       ],
@@ -601,7 +616,7 @@ export const SHEPHERD_STEPS = (
       text: 'Do you want to show the tour again the next time you start the app? You can always show the tour again via the help button in the left menu.',
       when: {
         show: () => {
-          if (localStorage.getItem(LS.IS_SHOW_TOUR)) {
+          if (localStorage.getItem(LS.IS_SKIP_TOUR)) {
             shepherdService.complete();
           }
         },
@@ -611,7 +626,7 @@ export const SHEPHERD_STEPS = (
           text: 'Never again',
           classes: SECONDARY_CLASSES,
           action: () => {
-            localStorage.setItem(LS.IS_SHOW_TOUR, 'true');
+            localStorage.setItem(LS.IS_SKIP_TOUR, 'true');
             shepherdService.complete();
           },
         } as any,
@@ -619,7 +634,7 @@ export const SHEPHERD_STEPS = (
           text: 'Again next time',
           classes: PRIMARY_CLASSES,
           action: () => {
-            localStorage.removeItem(LS.IS_SHOW_TOUR);
+            localStorage.removeItem(LS.IS_SKIP_TOUR);
             shepherdService.complete();
           },
         } as any,

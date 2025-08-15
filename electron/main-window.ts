@@ -118,7 +118,8 @@ export const createWindow = ({
     removeKeyInAnyCase(requestHeaders, 'accept');
 
     // NOTE this is needed for GitHub api requests to work :(
-    if (!details.url.includes('github.com')) {
+    // office365 needs a User-Agent as well (#4677)
+    if (!details.url.includes('github.com') && !details.url.includes('office365.com')) {
       removeKeyInAnyCase(requestHeaders, 'User-Agent');
     }
     callback({ requestHeaders });
@@ -187,7 +188,7 @@ export const createWindow = ({
 };
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function initWinEventListeners(app: any): void {
+function initWinEventListeners(app: Electron.App): void {
   const openUrlInBrowser = (url: string): void => {
     // needed for mac; especially for jira urls we might have a host like this www.host.de//
     const urlObj = new URL(url);

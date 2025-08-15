@@ -1,34 +1,37 @@
-import { Injectable } from '@angular/core';
+import { Injectable, computed, effect, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Banner, BANNER_SORT_PRIO_MAP, BannerId } from './banner.model';
-import { EMPTY, Observable, ReplaySubject } from 'rxjs';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class BannerService {
-  private _banners: Banner[] = [];
-  private _banners$: ReplaySubject<Banner[]> = new ReplaySubject(1);
-  activeBanner$: Observable<Banner | null> = this._banners$.pipe(
-    map((banners) => {
-      const sorted = banners.sort((a, b) => {
-        return BANNER_SORT_PRIO_MAP[b.id] - BANNER_SORT_PRIO_MAP[a.id];
-      });
-      return (sorted.length && sorted[0]) || null;
-    }),
-  );
+  private _banners = signal<Banner[]>([]);
+
+  activeBanner = computed(() => {
+    const banners = this._banners();
+    const sorted = [...banners].sort((a, b) => {
+      return BANNER_SORT_PRIO_MAP[b.id] - BANNER_SORT_PRIO_MAP[a.id];
+    });
+    return (sorted.length && sorted[0]) || null;
+  });
+
+  // Backward compatibility - expose as Observable for components not yet converted
+  activeBanner$ = toObservable(this.activeBanner);
 
   constructor() {
-    this.activeBanner$
-      .pipe(
-        switchMap(
-          (activeBanner) =>
-            activeBanner?.hideWhen$?.pipe(
-              tap(() => {
-                this.dismiss(activeBanner.id);
-              }),
-            ) || EMPTY,
-        ),
-      )
-      .subscribe();
+    // Set up auto-dismiss effect
+    effect(() => {
+      const activeBanner = this.activeBanner();
+      if (activeBanner?.hideWhen$) {
+        activeBanner.hideWhen$
+          .pipe(
+            tap(() => {
+              this.dismiss(activeBanner.id);
+            }),
+          )
+          .subscribe();
+      }
+    });
 
     // FOR DEBUGGING
     // this.open({
@@ -113,30 +116,36 @@ export class BannerService {
   }
 
   open(banner: Banner): void {
-    const bannerToUpdate = this._banners.find((bannerIN) => bannerIN.id === banner.id);
-    if (bannerToUpdate) {
-      Object.assign(bannerToUpdate, banner);
-    } else {
-      this._banners.push(banner);
-    }
-    this._banners$.next(this._banners);
+    this._banners.update((banners) => {
+      const bannerToUpdate = banners.find((bannerIN) => bannerIN.id === banner.id);
+      if (bannerToUpdate) {
+        Object.assign(bannerToUpdate, banner);
+        return [...banners];
+      } else {
+        return [...banners, banner];
+      }
+    });
   }
 
   dismiss(bannerId: BannerId): void {
-    const bannerIndex = this._banners.findIndex((bannerIN) => bannerIN.id === bannerId);
     // Log.log('BannerService -> dismissing Banner', bannerId);
-    if (bannerIndex > -1) {
-      // NOTE splice mutates
-      this._banners.splice(bannerIndex, 1);
-      this._banners$.next(this._banners);
-    }
+    this._banners.update((banners) => {
+      const bannerIndex = banners.findIndex((bannerIN) => bannerIN.id === bannerId);
+      if (bannerIndex > -1) {
+        return banners.filter((_, index) => index !== bannerIndex);
+      }
+      return banners;
+    });
   }
 
   // usually not required, but when we want to be sure
   dismissAll(bannerId: BannerId): void {
-    if (this._banners.find((bannerIN) => bannerIN.id === bannerId)) {
-      this._banners = this._banners.filter((banner) => banner.id !== bannerId);
-      this._banners$.next(this._banners);
-    }
+    this._banners.update((banners) => {
+      const hasBanner = banners.find((bannerIN) => bannerIN.id === bannerId);
+      if (hasBanner) {
+        return banners.filter((banner) => banner.id !== bannerId);
+      }
+      return banners;
+    });
   }
 }

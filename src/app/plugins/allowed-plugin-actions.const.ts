@@ -104,7 +104,7 @@ export const ALLOWED_PLUGIN_ACTIONS = [
 export type AllowedPluginAction = (typeof ALLOWED_PLUGIN_ACTIONS)[number];
 
 // Helper to check if an action is allowed
-export const isAllowedPluginAction = (action: any): boolean => {
+export const isAllowedPluginAction = (action: { type?: string }): boolean => {
   return ALLOWED_PLUGIN_ACTIONS.some(
     (allowedAction) => action.type === allowedAction.type,
   );

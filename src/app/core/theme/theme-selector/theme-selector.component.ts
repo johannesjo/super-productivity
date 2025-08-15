@@ -36,7 +36,7 @@ import { TranslatePipe } from '@ngx-translate/core';
         <mat-button-toggle-group
           name="darkMode"
           [attr.aria-label]="T.GCF.MISC.DARK_MODE_ARIA_LABEL | translate"
-          [value]="globalThemeService.darkMode$ | async"
+          [value]="globalThemeService.darkMode()"
           (change)="updateDarkMode($event)"
         >
           <mat-button-toggle value="system">
@@ -131,7 +131,7 @@ export class ThemeSelectorComponent {
 
   updateDarkMode(ev: MatButtonToggleChange): void {
     if (ev.value) {
-      this.globalThemeService.darkMode$.next(ev.value);
+      this.globalThemeService.darkMode.set(ev.value);
     }
   }
 
@@ -143,7 +143,7 @@ export class ThemeSelectorComponent {
       .getAvailableThemes()
       .find((t) => t.id === themeId);
     if (theme?.requiredMode) {
-      this.globalThemeService.darkMode$.next(theme.requiredMode);
+      this.globalThemeService.darkMode.set(theme.requiredMode);
     }
   }
 }

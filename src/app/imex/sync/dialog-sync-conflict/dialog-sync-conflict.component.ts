@@ -15,6 +15,7 @@ import { MatIcon } from '@angular/material/icon';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { DatePipe } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
+import { ShortTimePipe } from '../../../ui/pipes/short-time.pipe';
 import {
   compareVectorClocks,
   VectorClockComparison,
@@ -36,6 +37,7 @@ import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confir
     MatIcon,
     TranslatePipe,
     DatePipe,
+    ShortTimePipe,
     MatTooltip,
     CollapsibleComponent,
   ],

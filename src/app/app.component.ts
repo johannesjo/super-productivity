@@ -1,12 +1,18 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
+  computed,
   effect,
+  ElementRef,
   HostBinding,
   HostListener,
   inject,
   OnDestroy,
+  ViewChild,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ChromeExtensionInterfaceService } from './core/chrome-extension-interface/chrome-extension-interface.service';
 import { ShortcutService } from './core-ui/shortcut/shortcut.service';
 import { GlobalConfigService } from './features/config/global-config.service';
@@ -30,10 +36,11 @@ import { ImexViewService } from './imex/imex-meta/imex-view.service';
 import { IS_ANDROID_WEB_VIEW } from './util/is-android-web-view';
 import { isOnline$ } from './util/is-online';
 import { SyncTriggerService } from './imex/sync/sync-trigger.service';
+import { SyncWrapperService } from './imex/sync/sync-wrapper.service';
 import { environment } from '../environments/environment';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { TrackingReminderService } from './features/tracking-reminder/tracking-reminder.service';
-import { map } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 import { IS_MOBILE } from './util/is-mobile';
 import { warpAnimation, warpInAnimation } from './ui/animations/warp.ani';
 import { GlobalConfigState } from './features/config/global-config.model';
@@ -51,6 +58,7 @@ import { GlobalProgressBarComponent } from './core-ui/global-progress-bar/global
 import { FocusModeOverlayComponent } from './features/focus-mode/focus-mode-overlay/focus-mode-overlay.component';
 import { ShepherdComponent } from './features/shepherd/shepherd.component';
 import { AsyncPipe } from '@angular/common';
+import { RightPanelComponent } from './features/right-panel/right-panel.component';
 import { selectIsFocusOverlayShown } from './features/focus-mode/store/focus-mode.selectors';
 import { Store } from '@ngrx/store';
 import { PfapiService } from './pfapi/pfapi.service';
@@ -61,16 +69,27 @@ import { SyncStatus } from './pfapi/api';
 import { LocalBackupService } from './imex/local-backup/local-backup.service';
 import { DEFAULT_META_MODEL } from './pfapi/api/model-ctrl/meta-model-ctrl';
 import { AppDataCompleteNew } from './pfapi/pfapi-config';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogPleaseRateComponent } from './features/dialog-please-rate/dialog-please-rate.component';
-import { getWorklogStr } from './util/get-work-log-str';
+import { getDbDateStr } from './util/get-db-date-str';
 import { PluginService } from './plugins/plugin.service';
 import { MarkdownPasteService } from './features/tasks/markdown-paste.service';
 import { TaskService } from './features/tasks/task.service';
 import { IpcRendererEvent } from 'electron';
 import { SyncSafetyBackupService } from './imex/sync/sync-safety-backup.service';
 import { Log } from './core/log';
+import { MatMenuItem } from '@angular/material/menu';
+import { MatIcon } from '@angular/material/icon';
+import { DialogUnsplashPickerComponent } from './ui/dialog-unsplash-picker/dialog-unsplash-picker.component';
+import { ProjectService } from './features/project/project.service';
+import { TagService } from './features/tag/tag.service';
+import { ContextMenuComponent } from './ui/context-menu/context-menu.component';
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
 
 const w = window as any;
 const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
@@ -96,14 +115,19 @@ const productivityTip: string[] = w.productivityTips && w.productivityTips[w.ran
     MatSidenavContent,
     MainHeaderComponent,
     BannerComponent,
+    RightPanelComponent,
     RouterOutlet,
     GlobalProgressBarComponent,
     FocusModeOverlayComponent,
     ShepherdComponent,
     AsyncPipe,
+    MatMenuItem,
+    MatIcon,
+    TranslatePipe,
+    ContextMenuComponent,
   ],
 })
-export class AppComponent implements OnDestroy {
+export class AppComponent implements OnDestroy, AfterViewInit {
   private _translateService = inject(TranslateService);
 
   private _globalConfigService = inject(GlobalConfigService);
@@ -124,6 +148,10 @@ export class AppComponent implements OnDestroy {
   private _markdownPasteService = inject(MarkdownPasteService);
   private _taskService = inject(TaskService);
   private _pluginService = inject(PluginService);
+  private _syncWrapperService = inject(SyncWrapperService);
+  private _projectService = inject(ProjectService);
+  private _tagService = inject(TagService);
+  private _cdr = inject(ChangeDetectorRef);
 
   // needs to be imported for initialization
   private _syncSafetyBackupService = inject(SyncSafetyBackupService);
@@ -134,11 +162,21 @@ export class AppComponent implements OnDestroy {
   readonly layoutService = inject(LayoutService);
   readonly globalThemeService = inject(GlobalThemeService);
   readonly _store = inject(Store);
+  readonly T = T;
 
   productivityTipTitle: string = productivityTip && productivityTip[0];
   productivityTipText: string = productivityTip && productivityTip[1];
 
-  @HostBinding('@.disabled') isDisableAnimations = false;
+  @ViewChild('routeWrapper', { read: ElementRef }) routeWrapper?: ElementRef<HTMLElement>;
+
+  @HostBinding('@.disabled') get isDisableAnimations(): boolean {
+    return this._isDisableAnimations();
+  }
+
+  private _isDisableAnimations = computed(() => {
+    const misc = this._globalConfigService.misc();
+    return misc?.isDisableAnimations ?? false;
+  });
 
   isRTL: boolean = false;
 
@@ -152,9 +190,9 @@ export class AppComponent implements OnDestroy {
     ),
   );
 
-  isShowFocusOverlay$: Observable<boolean> = this._store.select(
-    selectIsFocusOverlayShown,
-  );
+  isShowFocusOverlay = toSignal(this._store.select(selectIsFocusOverlayShown), {
+    initialValue: false,
+  });
 
   private _subs: Subscription = new Subscription();
   private _intervalTimer?: NodeJS.Timeout;
@@ -165,7 +203,9 @@ export class AppComponent implements OnDestroy {
 
     this._checkMigrationAndInitBackups();
 
-    this._subs = this._languageService.isLangRTL.subscribe((val) => {
+    // Use effect to react to language RTL changes
+    effect(() => {
+      const val = this._languageService.isLangRTL();
       this.isRTL = val;
       document.dir = this.isRTL ? 'rtl' : 'ltr';
     });
@@ -175,11 +215,6 @@ export class AppComponent implements OnDestroy {
         if (!!params.focusItem) {
           this._focusElement(params.focusItem);
         }
-      }),
-    );
-    this._subs.add(
-      this._globalConfigService.misc$.subscribe((misc) => {
-        this.isDisableAnimations = misc.isDisableAnimations;
       }),
     );
 
@@ -196,7 +231,7 @@ export class AppComponent implements OnDestroy {
       // init offline banner in lack of a better place for it
       this._initOfflineBanner();
 
-      if (this._globalConfigService.cfg?.misc.isShowTipLonger) {
+      if (this._globalConfigService.misc()?.isShowTipLonger) {
         this._snackService.open({
           ico: 'lightbulb',
           config: {
@@ -212,7 +247,7 @@ export class AppComponent implements OnDestroy {
 
       const appStarts = +(localStorage.getItem(LS.APP_START_COUNT) || 0);
       const lastStartDay = localStorage.getItem(LS.APP_START_COUNT_LAST_START_DAY);
-      const todayStr = getWorklogStr();
+      const todayStr = getDbDateStr();
       if (appStarts === 32 || appStarts === 96) {
         this._matDialog.open(DialogPleaseRateComponent);
         localStorage.setItem(LS.APP_START_COUNT, (appStarts + 1).toString());
@@ -224,8 +259,12 @@ export class AppComponent implements OnDestroy {
 
       // Initialize plugin system
       try {
+        // Wait for sync to complete before initializing plugins to avoid DB lock conflicts
+        await this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$
+          .pipe(take(1))
+          .toPromise();
         await this._pluginService.initializePlugins();
-        Log.log('Plugin system initialized');
+        Log.log('Plugin system initialized after sync completed');
       } catch (error) {
         Log.err('Failed to initialize plugin system:', error);
       }
@@ -238,8 +277,8 @@ export class AppComponent implements OnDestroy {
       effect(() => {
         window.ea.on(IPC.ERROR, (ev: IpcRendererEvent, ...args: unknown[]) => {
           const data = args[0] as {
-            error: any;
-            stack: any;
+            error: unknown;
+            stack: unknown;
             errorStr: string | unknown;
           };
           const errMsg =
@@ -257,13 +296,13 @@ export class AppComponent implements OnDestroy {
 
       window.ea.on(IPC.TRANSFER_SETTINGS_REQUESTED, () => {
         window.ea.sendAppSettingsToElectron(
-          this._globalConfigService.cfg as GlobalConfigState,
+          this._globalConfigService.cfg() as GlobalConfigState,
         );
       });
     } else {
       // WEB VERSION
       window.addEventListener('beforeunload', (e) => {
-        const gCfg = this._globalConfigService.cfg;
+        const gCfg = this._globalConfigService.cfg();
         if (!gCfg) {
           throw new Error();
         }
@@ -359,7 +398,7 @@ export class AppComponent implements OnDestroy {
   }
 
   @HostListener('window:beforeinstallprompt', ['$event']) onBeforeInstallPrompt(
-    e: any,
+    e: BeforeInstallPromptEvent,
   ): void {
     if (IS_ELECTRON || localStorage.getItem(LS.WEB_APP_INSTALL)) {
       return;
@@ -393,6 +432,61 @@ export class AppComponent implements OnDestroy {
 
   getPage(outlet: RouterOutlet): string {
     return outlet.activatedRouteData.page || 'one';
+  }
+
+  changeBackgroundFromUnsplash(): void {
+    const isDarkMode = this.globalThemeService.isDarkTheme();
+    const contextKey = isDarkMode ? 'backgroundImageDark' : 'backgroundImageLight';
+
+    const dialogRef = this._matDialog.open(DialogUnsplashPickerComponent, {
+      width: '900px',
+      maxWidth: '95vw',
+      data: {
+        context: contextKey,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        // Get current work context
+        this.workContextService.activeWorkContext$
+          .pipe(take(1))
+          .subscribe((activeContext) => {
+            if (!activeContext) {
+              this._snackService.open({
+                type: 'ERROR',
+                msg: 'No active work context',
+              });
+              return;
+            }
+
+            // Extract the URL from the result object
+            const backgroundUrl = result.url || result;
+
+            // Update the theme based on context type
+            if (activeContext.type === 'PROJECT') {
+              this._projectService.update(activeContext.id, {
+                theme: {
+                  ...activeContext.theme,
+                  [contextKey]: backgroundUrl,
+                },
+              });
+            } else if (activeContext.type === 'TAG') {
+              this._tagService.updateTag(activeContext.id, {
+                theme: {
+                  ...activeContext.theme,
+                  [contextKey]: backgroundUrl,
+                },
+              });
+            }
+          });
+      }
+    });
+  }
+
+  ngAfterViewInit(): void {
+    // Trigger change detection to ensure the context menu component gets the element reference
+    this._cdr.detectChanges();
   }
 
   ngOnDestroy(): void {
@@ -534,7 +628,7 @@ export class AppComponent implements OnDestroy {
     if (navigator.storage) {
       // try to avoid data-loss
       Promise.all([navigator.storage.persisted()])
-        .then(([persisted]): any => {
+        .then(([persisted]) => {
           if (!persisted) {
             return navigator.storage.persist().then((granted) => {
               if (granted) {
@@ -543,12 +637,13 @@ export class AppComponent implements OnDestroy {
               // NOTE: we never execute for android web view, because it is always true
               else if (!IS_ANDROID_WEB_VIEW) {
                 const msg = T.GLOBAL_SNACK.PERSISTENCE_DISALLOWED;
-                Log.err('Persistence not allowed');
+                Log.warn('Persistence not allowed');
                 this._snackService.open({ msg });
               }
             });
           } else {
             Log.log('Persistence already allowed');
+            return;
           }
         })
         .catch((e) => {
@@ -603,8 +698,10 @@ export class AppComponent implements OnDestroy {
       el?.focus();
 
       if (el && IS_MOBILE) {
-        el.classList.add('mobile-highlight');
-        el.addEventListener('blur', () => el.classList.remove('mobile-highlight'));
+        el.classList.add('mobile-highlight-searched-item');
+        el.addEventListener('blur', () =>
+          el.classList.remove('mobile-highlight-searched-item'),
+        );
       }
 
       if ((el || counter === 4) && this._intervalTimer) {

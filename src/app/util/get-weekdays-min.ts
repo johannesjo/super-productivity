@@ -3,7 +3,7 @@
  * @param locale - The locale to use (e.g., 'en-US', 'de-DE')
  * @returns Array of minimal weekday names starting from Sunday
  */
-export const getWeekdaysMin = (locale: string): string[] => {
+export const getWeekdaysMin = (locale?: string): string[] => {
   const weekdays: string[] = [];
   const baseDate = new Date(2023, 0, 1); // January 1, 2023 is a Sunday
 

@@ -6,6 +6,7 @@ import {
   FocusModeConfig,
   GlobalConfigState,
   IdleConfig,
+  LanguageConfig,
   MiscConfig,
   PomodoroConfig,
   ReminderConfig,
@@ -17,14 +18,15 @@ import {
 } from '../global-config.model';
 import { DEFAULT_GLOBAL_CONFIG } from '../default-global-config.const';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
-import { migrateGlobalConfigState } from '../migrate-global-config.util';
-import { MODEL_VERSION_KEY } from '../../../app.constants';
-import { MODEL_VERSION } from '../../../core/model-version';
 import { getHoursFromClockString } from '../../../util/get-hours-from-clock-string';
 
 export const CONFIG_FEATURE_NAME = 'globalConfig';
 export const selectConfigFeatureState =
   createFeatureSelector<GlobalConfigState>(CONFIG_FEATURE_NAME);
+export const selectLanguageConfig = createSelector(
+  selectConfigFeatureState,
+  (cfg): LanguageConfig => cfg.lang,
+);
 export const selectMiscConfig = createSelector(
   selectConfigFeatureState,
   (cfg): MiscConfig => cfg.misc,
@@ -82,16 +84,13 @@ export const selectReminderConfig = createSelector(
 
 export const initialGlobalConfigState: GlobalConfigState = {
   ...DEFAULT_GLOBAL_CONFIG,
-  [MODEL_VERSION_KEY]: MODEL_VERSION.GLOBAL_CONFIG,
 };
 
 export const globalConfigReducer = createReducer<GlobalConfigState>(
   initialGlobalConfigState,
 
   on(loadAllData, (oldState, { appDataComplete }) =>
-    appDataComplete.globalConfig
-      ? migrateGlobalConfigState({ ...appDataComplete.globalConfig })
-      : oldState,
+    appDataComplete.globalConfig ? appDataComplete.globalConfig : oldState,
   ),
 
   on(updateGlobalConfigSection, (state, { sectionKey, sectionCfg }) => ({

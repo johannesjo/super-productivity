@@ -14,7 +14,7 @@ import { selectUndoneTodayTaskIds } from '../../../features/work-context/store/w
 import { PlannerActions } from '../../../features/planner/store/planner.actions';
 import { first } from 'rxjs/operators';
 import { selectTasksWithSubTasksByIds } from '../../../features/tasks/store/task.selectors';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
@@ -42,7 +42,7 @@ export class PlanTasksTomorrowComponent {
   T: typeof T = T;
 
   async planAllTodayTomorrow(): Promise<void> {
-    const todayStr = getWorklogStr();
+    const todayStr = getDbDateStr();
     const tomorrow = await this.plannerService.tomorrow$.pipe(first()).toPromise();
     const ids = await this.leftOverTodayIds$.pipe(first()).toPromise();
     const tasks = await this._store

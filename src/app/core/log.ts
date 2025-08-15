@@ -9,15 +9,15 @@ export enum LogLevel {
 }
 
 interface LogEntry {
-  timestamp: number;
-  level: string;
-  context: string;
-  message: string;
+  time: string;
+  lvl: string;
+  ctx: string;
+  msg: string;
   args: unknown[];
 }
 
 // Map old numeric levels to new enum for backwards compatibility
-const LOG_LEVEL = environment.production ? LogLevel.DEBUG : LogLevel.NORMAL;
+const LOG_LEVEL = environment.production ? LogLevel.DEBUG : LogLevel.DEBUG;
 
 const MAX_DATA_LENGTH = 400;
 
@@ -50,6 +50,7 @@ export class Log {
   /** Pre-bound console functions that preserve line numbers */
   private static readonly c = console.log.bind(console); // critical
   private static readonly e = (console.error || console.log).bind(console);
+  private static readonly w = (console.warn || console.log).bind(console);
   private static readonly l = console.log.bind(console); // log (formerly normal)
   private static readonly i = (console.info || console.log).bind(console); // info
   private static readonly v = console.log.bind(console); // verbose
@@ -73,10 +74,10 @@ export class Log {
   /** Record log entry to history */
   private static recordLog(level: string, context: string, args: unknown[]): void {
     const entry: LogEntry = {
-      timestamp: Date.now(),
-      level,
-      context,
-      message: args.length > 0 ? String(args[0]) : '',
+      time: new Date().toISOString(),
+      lvl: level,
+      ctx: context,
+      msg: args.length > 0 ? String(args[0]) : '',
       args: args.slice(1),
     };
 
@@ -98,6 +99,13 @@ export class Log {
     if (this.level >= LogLevel.ERROR) {
       this.recordLog('ERROR', this.context, args);
       this.e(this.getPrefix(), ...args);
+    }
+  }
+
+  static warn(...args: unknown[]): void {
+    if (this.level >= LogLevel.ERROR) {
+      this.recordLog('WARN', this.context, args);
+      this.w(this.getPrefix(), ...args);
     }
   }
 
@@ -129,10 +137,17 @@ export class Log {
     }
   }
 
+  // special helper to make a specially visible log
+  static x(...args: unknown[]): void {
+    if (this.level >= LogLevel.NORMAL) {
+      this.recordLog('LOG', this.context, args);
+      this.l('XXXXXXX: ', ...args);
+    }
+  }
+
   // Backwards compatibility aliases
   static error = Log.err;
   static normal = Log.log;
-  static warn = Log.err;
 
   /** Get the current log history */
   static getLogHistory(): LogEntry[] {
@@ -148,10 +163,10 @@ export class Log {
   static exportLogHistory(): string {
     // Safe JSON serialization to avoid circular structure errors
     const safeHistory = this.logHistory.map((entry) => ({
-      timestamp: entry.timestamp,
-      level: entry.level,
-      context: entry.context,
-      message: entry.message,
+      timestamp: entry.time,
+      level: entry.lvl,
+      context: entry.ctx,
+      message: entry.msg,
       args: entry.args.map((arg) => {
         try {
           // Try to serialize each arg safely
@@ -174,11 +189,11 @@ export class Log {
   static exportLogHistoryAsText(): string {
     return this.logHistory
       .map((entry) => {
-        const date = new Date(entry.timestamp).toISOString();
-        const context = entry.context ? `[${entry.context}] ` : '';
+        const date = new Date(entry.time).toISOString();
+        const context = entry.ctx ? `[${entry.ctx}] ` : '';
         const argsStr =
           entry.args.length > 0 ? ` ${entry.args.map(String).join(' ')}` : '';
-        return `${date} [${entry.level}] ${context}${entry.message}${argsStr}`;
+        return `${date} [${entry.lvl}] ${context}${entry.msg}${argsStr}`;
       })
       .join('\n');
   }

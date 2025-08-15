@@ -7,6 +7,7 @@ import { InputDurationFormlyComponent } from './duration/input-duration-formly/i
 import { ValidationModule } from './validation/validation.module';
 import { TranslateService } from '@ngx-translate/core';
 import { FormlyMaterialModule } from '@ngx-formly/material';
+import { FormlyJsonschema } from '@ngx-formly/core/json-schema';
 import { registerTranslateExtension } from './formly-translate-extension/formly-translate-extension';
 import { FormlyTranslatedTemplateComponent } from './formly-translated-template/formly-translated-template.component';
 import { FormlyMatToggleModule } from '@ngx-formly/material/toggle';
@@ -20,6 +21,7 @@ import { RepeatSectionTypeComponent } from '../features/config/repeat-section-ty
 import { FormlyMatSliderModule } from '@ngx-formly/material/slider';
 import { FormlyTagSelectionComponent } from './formly-tag-selection/formly-tag-selection.component';
 import { FormlyBtnComponent } from './formly-button/formly-btn.component';
+import { FormlyImageInputComponent } from './formly-image-input/formly-image-input.component';
 
 @NgModule({
   imports: [
@@ -80,6 +82,12 @@ import { FormlyBtnComponent } from './formly-button/formly-btn.component';
           name: 'repeat',
           component: RepeatSectionTypeComponent,
         },
+        {
+          name: 'image-input',
+          component: FormlyImageInputComponent,
+          extends: 'input',
+          wrappers: ['form-field'],
+        },
       ],
       extras: {
         immutable: true,
@@ -115,6 +123,7 @@ import { FormlyBtnComponent } from './formly-button/formly-btn.component';
       useFactory: registerTranslateExtension,
       deps: [TranslateService],
     },
+    FormlyJsonschema,
   ],
 })
 export class FormlyConfigModule {}

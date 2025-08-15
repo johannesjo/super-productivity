@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, interval, Observable, of, timer } from 'rxjs';
 import {
   WorkContext,
@@ -64,7 +65,7 @@ import { TimeTrackingActions } from '../time-tracking/store/time-tracking.action
 import { TaskArchiveService } from '../time-tracking/task-archive.service';
 import { INBOX_PROJECT } from '../project/project.const';
 import { selectProjectById } from '../project/store/project.selectors';
-import { getWorklogStr } from '../../util/get-work-log-str';
+import { getDbDateStr } from '../../util/get-db-date-str';
 import { Log } from '../../core/log';
 
 @Injectable({
@@ -301,14 +302,15 @@ export class WorkContextService {
     this.backlogTasks$,
   ]).pipe(map(([today, backlog]) => [...today, ...backlog]));
 
-  startableTasksForActiveContext$: Observable<Task[]> = this._afterDataLoadedOnce$.pipe(
-    switchMap(() => this._store$),
+  startableTasksForActiveContext$: Observable<Task[]> = this._store$.pipe(
     select(selectStartableTasksForActiveContext),
     shareReplay(1),
   );
+  startableTasksForActiveContext = toSignal(this.startableTasksForActiveContext$, {
+    initialValue: [],
+  });
 
-  trackableTasksForActiveContext$: Observable<Task[]> = this._afterDataLoadedOnce$.pipe(
-    switchMap(() => this._store$),
+  trackableTasksForActiveContext$: Observable<Task[]> = this._store$.pipe(
     select(selectTrackableTasksForActiveContext),
   );
 
@@ -467,7 +469,7 @@ export class WorkContextService {
     const tasksDoneToday: ArchiveTask[] = ids
       .map((id) => entities[id])
       .filter(
-        (t) => !!t && !t.parentId && t.doneOn && getWorklogStr(t.doneOn) === day,
+        (t) => !!t && !t.parentId && t.doneOn && getDbDateStr(t.doneOn) === day,
       ) as ArchiveTask[];
 
     let tasksToConsider: ArchiveTask[] = [];
@@ -622,7 +624,7 @@ export class WorkContextService {
 
   private _updateAdvancedCfgForCurrentContext(
     sectionKey: WorkContextAdvancedCfgKey,
-    data: any,
+    data: unknown,
   ): void {
     if (this.activeWorkContextType === WorkContextType.PROJECT) {
       this._store$.dispatch(

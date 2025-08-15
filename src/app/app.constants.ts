@@ -4,11 +4,9 @@ export const IS_ELECTRON = navigator.userAgent.toLowerCase().indexOf(' electron/
 // effectively IS_BROWSER
 export const IS_WEB_EXTENSION_REQUIRED_FOR_JIRA = !IS_ELECTRON && !IS_ANDROID_WEB_VIEW;
 
-// TODO merge and remove one of these
 export const TRACKING_INTERVAL = 1000;
 export const TIME_TRACKING_TO_DB_INTERVAL = 15000;
 
-export const MODEL_VERSION_KEY = '__modelVersion';
 export const DRAG_DELAY_FOR_TOUCH = 75;
 export const DRAG_DELAY_FOR_TOUCH_LONGER = 150;
 

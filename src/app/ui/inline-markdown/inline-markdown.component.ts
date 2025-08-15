@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   ElementRef,
   HostBinding,
   inject,
@@ -10,13 +11,12 @@ import {
   OnDestroy,
   OnInit,
   output,
+  signal,
   viewChild,
 } from '@angular/core';
 import { fadeInAnimation } from '../animations/fade.ani';
 import { MarkdownComponent } from 'ngx-markdown';
 import { IS_ELECTRON } from '../../app.constants';
-import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogFullscreenMarkdownComponent } from '../dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
@@ -25,7 +25,6 @@ import { FormsModule } from '@angular/forms';
 import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
-import { AsyncPipe } from '@angular/common';
 
 const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
 
@@ -35,14 +34,7 @@ const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
   styleUrls: ['./inline-markdown.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeInAnimation],
-  imports: [
-    FormsModule,
-    MarkdownComponent,
-    MatIconButton,
-    MatTooltip,
-    MatIcon,
-    AsyncPipe,
-  ],
+  imports: [FormsModule, MarkdownComponent, MatIconButton, MatTooltip, MatIcon],
 })
 export class InlineMarkdownComponent implements OnInit, OnDestroy {
   private _cd = inject(ChangeDetectorRef);
@@ -62,15 +54,15 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   readonly textareaEl = viewChild<ElementRef>('textareaEl');
   readonly previewEl = viewChild<MarkdownComponent>('previewEl');
 
-  isHideOverflow: boolean = false;
-  isChecklistMode: boolean = false;
-  isShowEdit: boolean = false;
-  modelCopy: string | undefined;
+  isHideOverflow = signal(false);
+  isChecklistMode = signal(false);
+  isShowEdit = signal(false);
+  modelCopy = signal<string | undefined>(undefined);
 
-  isTurnOffMarkdownParsing$: Observable<boolean> = this._globalConfigService.misc$.pipe(
-    map((cfg) => cfg.isTurnOffMarkdown),
-    startWith(false),
-  );
+  isTurnOffMarkdownParsing = computed(() => {
+    const misc = this._globalConfigService.misc();
+    return misc?.isTurnOffMarkdown ?? false;
+  });
   private _hideOverFlowTimeout: number | undefined;
 
   constructor() {
@@ -78,7 +70,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   }
 
   @HostBinding('class.isFocused') get isFocused(): boolean {
-    return this.isShowEdit;
+    return this.isShowEdit();
   }
 
   private _model: string | undefined;
@@ -91,25 +83,26 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set model(v: string | undefined) {
     this._model = v;
-    this.modelCopy = v;
+    this.modelCopy.set(v);
 
-    if (!this.isShowEdit) {
+    if (!this.isShowEdit()) {
       window.setTimeout(() => {
         this.resizeParsedToFit();
       });
     }
 
-    this.isChecklistMode =
-      this.isChecklistMode &&
-      this.isShowChecklistToggle() &&
-      !!v &&
-      isMarkdownChecklist(v);
+    this.isChecklistMode.set(
+      this.isChecklistMode() &&
+        this.isShowChecklistToggle() &&
+        !!v &&
+        isMarkdownChecklist(v),
+    );
   }
 
   // TODO: Skipped for migration because:
   //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set isFocus(val: boolean) {
-    if (!this.isShowEdit && val) {
+    if (!this.isShowEdit() && val) {
       this._toggleShowEdit();
     }
   }
@@ -132,7 +125,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   }
 
   checklistToggle(): void {
-    this.isChecklistMode = !this.isChecklistMode;
+    this.isChecklistMode.set(!this.isChecklistMode());
   }
 
   keypressHandler(ev: KeyboardEvent): void {
@@ -163,17 +156,17 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   untoggleShowEdit(): void {
     if (!this.isLock()) {
       this.resizeParsedToFit();
-      this.isShowEdit = false;
+      this.isShowEdit.set(false);
     }
     const textareaEl = this.textareaEl();
     if (!textareaEl) {
       throw new Error('Textarea not visible');
     }
-    this.modelCopy = textareaEl.nativeElement.value;
+    this.modelCopy.set(textareaEl.nativeElement.value);
 
-    if (this.modelCopy !== this.model) {
-      this.model = this.modelCopy;
-      this.changed.emit(this.modelCopy as string);
+    if (this.modelCopy() !== this.model) {
+      this.model = this.modelCopy();
+      this.changed.emit(this.modelCopy() as string);
     }
   }
 
@@ -199,13 +192,13 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
         height: '100vh',
         restoreFocus: true,
         data: {
-          content: this.modelCopy,
+          content: this.modelCopy(),
         },
       })
       .afterClosed()
       .subscribe((res) => {
         if (typeof res === 'string') {
-          this.modelCopy = res;
+          this.modelCopy.set(res);
           this.changed.emit(res);
         }
       });
@@ -245,40 +238,44 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   toggleChecklistMode(ev: Event): void {
     ev.preventDefault();
     ev.stopPropagation();
-    this.isChecklistMode = true;
+    this.isChecklistMode.set(true);
     this._toggleShowEdit();
 
     if (this.isDefaultText()) {
-      this.modelCopy = '- [ ] ';
+      this.modelCopy.set('- [ ] ');
     } else {
-      this.modelCopy += '\n- [ ] ';
+      this.modelCopy.set(this.modelCopy() + '\n- [ ] ');
       // cleanup string on add
-      this.modelCopy = this.modelCopy?.replace(/\n\n- \[/g, '\n- [').replace(/^\n/g, '');
+      this.modelCopy.set(
+        this.modelCopy()
+          ?.replace(/\n\n- \[/g, '\n- [')
+          .replace(/^\n/g, ''),
+      );
     }
   }
 
   private _toggleShowEdit(): void {
-    this.isShowEdit = true;
-    this.modelCopy = this.model || '';
+    this.isShowEdit.set(true);
+    this.modelCopy.set(this.model || '');
     setTimeout(() => {
       const textareaEl = this.textareaEl();
       if (!textareaEl) {
         throw new Error('Textarea not visible');
       }
-      textareaEl.nativeElement.value = this.modelCopy;
+      textareaEl.nativeElement.value = this.modelCopy();
       textareaEl.nativeElement.focus();
       this.resizeTextareaToFit();
     });
   }
 
   private _hideOverflow(): void {
-    this.isHideOverflow = true;
+    this.isHideOverflow.set(true);
     if (this._hideOverFlowTimeout) {
       window.clearTimeout(this._hideOverFlowTimeout);
     }
 
     this._hideOverFlowTimeout = window.setTimeout(() => {
-      this.isHideOverflow = false;
+      this.isHideOverflow.set(false);
       this._cd.detectChanges();
     }, HIDE_OVERFLOW_TIMEOUT_DURATION);
   }
@@ -320,12 +317,12 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
         allLines[itemIndex] = item.includes('[ ]')
           ? item.replace('[ ]', '[x]').replace('[]', '[x]')
           : item.replace('[x]', '[ ]');
-        this.modelCopy = allLines.join('\n');
+        this.modelCopy.set(allLines.join('\n'));
 
         // Update the markdown string
-        if (this.modelCopy !== this.model) {
-          this.model = this.modelCopy;
-          this.changed.emit(this.modelCopy);
+        if (this.modelCopy() !== this.model) {
+          this.model = this.modelCopy();
+          this.changed.emit(this.modelCopy() as string);
         }
       }
     }

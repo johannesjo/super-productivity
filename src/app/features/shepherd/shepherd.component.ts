@@ -18,14 +18,21 @@ export class ShepherdComponent implements AfterViewInit {
   private _projectService = inject(ProjectService);
 
   ngAfterViewInit(): void {
-    if (!localStorage.getItem(LS.IS_SHOW_TOUR) && navigator.userAgent !== 'NIGHTWATCH') {
+    if (
+      !localStorage.getItem(LS.IS_SKIP_TOUR) &&
+      navigator.userAgent !== 'NIGHTWATCH' &&
+      !navigator.userAgent.includes('PLAYWRIGHT')
+    ) {
       this._dataInitStateService.isAllDataLoadedInitially$
-        .pipe(concatMap(() => this._projectService.list$.pipe(first())))
+        .pipe(
+          concatMap(() => this._projectService.list$),
+          first(),
+        )
         .subscribe((projectList) => {
           if (projectList.length <= 2) {
             this.shepherdMyService.init();
           } else {
-            localStorage.setItem(LS.IS_SHOW_TOUR, 'true');
+            localStorage.setItem(LS.IS_SKIP_TOUR, 'true');
           }
         });
     }

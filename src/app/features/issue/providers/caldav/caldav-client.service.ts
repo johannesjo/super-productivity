@@ -8,7 +8,7 @@ import Calendar from 'cdav-library/models/calendar';
 import ICAL from 'ical.js';
 
 import { from, Observable, throwError } from 'rxjs';
-import { CaldavIssue } from './caldav-issue.model';
+import { CaldavIssue, CaldavIssueStatus } from './caldav-issue.model';
 import { CALDAV_TYPE, ISSUE_PROVIDER_HUMANIZED } from '../../issue.const';
 import { SearchResultItem } from '../../issue.model';
 import { SnackService } from '../../../../core/snack/snack.service';
@@ -21,6 +21,13 @@ import { IssueLog } from '../../../../core/log';
 interface ClientCache {
   client: DavClient;
   calendars: Map<string, Calendar>;
+}
+
+interface CalDavTaskData {
+  data: string;
+  url: string;
+  etag: string;
+  update?: () => Promise<void>;
 }
 
 @Injectable({
@@ -53,7 +60,10 @@ export class CaldavClientService {
     return url.substring(url.lastIndexOf('/') + 1);
   }
 
-  private static async _getAllTodos(calendar: any, filterOpen: boolean): Promise<any> {
+  private static async _getAllTodos(
+    calendar: Calendar,
+    filterOpen: boolean,
+  ): Promise<CalDavTaskData[]> {
     const query = {
       name: [NS.IETF_CALDAV, 'comp-filter'],
       attributes: [['name', 'VCALENDAR']],
@@ -83,7 +93,10 @@ export class CaldavClientService {
     return await calendar.calendarQuery([query]);
   }
 
-  private static async _findTaskByUid(calendar: any, taskUid: string): Promise<any> {
+  private static async _findTaskByUid(
+    calendar: Calendar,
+    taskUid: string,
+  ): Promise<CalDavTaskData[]> {
     const query = {
       name: [NS.IETF_CALDAV, 'comp-filter'],
       attributes: [['name', 'VCALENDAR']],
@@ -109,7 +122,7 @@ export class CaldavClientService {
     return await calendar.calendarQuery([query]);
   }
 
-  private static _mapTask(task: any): CaldavIssue {
+  private static _mapTask(task: CalDavTaskData): CaldavIssue {
     const jCal = ICAL.parse(task.data);
     const comp = new ICAL.Component(jCal);
     const todo = comp.getFirstSubcomponent('vtodo');
@@ -119,25 +132,25 @@ export class CaldavClientService {
       throw new Error('No todo found for task');
     }
 
-    let categories: string[] = [];
-    for (const cats of todo.getAllProperties('categories')) {
-      if (cats) {
-        categories = categories.concat(cats.getValues());
-      }
-    }
-
-    const completed = todo.getFirstPropertyValue('completed');
+    const categoriesProperty = todo.getAllProperties('categories')[0];
+    const categories: string[] = categoriesProperty?.getValues() || [];
 
     return {
       id: todo.getFirstPropertyValue('uid') as string,
-      completed: !!completed,
+      completed: !!todo.getFirstPropertyValue('completed'),
       item_url: task.url,
       summary: (todo.getFirstPropertyValue('summary') as string) || '',
-      due: (todo.getFirstPropertyValue('due') as string) || '',
-      start: (todo.getFirstPropertyValue('dtstart') as string) || '',
+      start: (todo.getFirstPropertyValue('dtstart') as ICAL.Time)?.toJSDate().getTime(),
+      due: (todo.getFirstPropertyValue('due') as ICAL.Time)?.toJSDate().getTime(),
+      note: (todo.getFirstPropertyValue('description') as string) || undefined,
+      status: (todo.getFirstPropertyValue('status') as CaldavIssueStatus) || undefined,
+      priority: +(todo.getFirstPropertyValue('priority') as string) || undefined,
+      percent_complete:
+        +(todo.getFirstPropertyValue('percent-complete') as string) || undefined,
+      location: todo.getFirstPropertyValue('location') as string,
       labels: categories,
-      note: (todo.getFirstPropertyValue('description') as string) || '',
       etag_hash: this._hashEtag(task.etag),
+      related_to: (todo.getFirstPropertyValue('related-to') as string) || undefined,
     };
   }
 
@@ -148,7 +161,7 @@ export class CaldavClientService {
     if (etag.length === 0) {
       return hash;
     }
-    for (i = 0; i < this.length; i++) {
+    for (i = 0; i < etag.length; i++) {
       chr = etag.charCodeAt(i);
       hash = (hash << 5) - hash + chr; //eslint-disable-line no-bitwise
       // Convert to 32bit integer
@@ -174,7 +187,7 @@ export class CaldavClientService {
 
       await client
         .connect({ enableCalDAV: true })
-        .catch((err: any) => this._handleNetErr(err));
+        .catch((err) => this._handleNetErr(err));
 
       const cache = {
         client,
@@ -186,7 +199,7 @@ export class CaldavClientService {
     }
   }
 
-  async _getCalendar(cfg: CaldavCfg): Promise<any> {
+  async _getCalendar(cfg: CaldavCfg): Promise<Calendar> {
     const clientCache = await this._get_client(cfg);
     const resource = cfg.resourceName as string;
 
@@ -196,7 +209,7 @@ export class CaldavClientService {
 
     const calendars = await clientCache.client.calendarHomes[0]
       .findAllCalendars()
-      .catch((err: any) => this._handleNetErr(err));
+      .catch((err) => this._handleNetErr(err));
 
     const calendar = calendars.find(
       (item: Calendar) =>
@@ -267,7 +280,7 @@ export class CaldavClientService {
     issueId: string,
     completed: boolean,
     summary: string,
-  ): Observable<any> {
+  ): Observable<void> {
     return from(
       this._updateTask(caldavCfg, issueId, { completed: completed, summary: summary }),
     ).pipe(
@@ -275,7 +288,7 @@ export class CaldavClientService {
     );
   }
 
-  private _getXhrProvider(cfg: CaldavCfg): any {
+  private _getXhrProvider(cfg: CaldavCfg): () => XMLHttpRequest {
     // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
     function xhrProvider(): XMLHttpRequest {
       const xhr = new XMLHttpRequest();
@@ -301,7 +314,7 @@ export class CaldavClientService {
     return xhrProvider;
   }
 
-  private _handleNetErr(err: any): void {
+  private _handleNetErr(err: unknown): never {
     this._snackService.open({
       type: 'ERROR',
       msg: T.F.ISSUE.S.ERR_NETWORK,
@@ -331,11 +344,11 @@ export class CaldavClientService {
     filterCategory: boolean,
   ): Promise<CaldavIssue[]> {
     const cal = await this._getCalendar(cfg);
-    const tasks = await CaldavClientService._getAllTodos(cal, filterOpen).catch(
-      (err: any) => this._handleNetErr(err),
+    const tasks = await CaldavClientService._getAllTodos(cal, filterOpen).catch((err) =>
+      this._handleNetErr(err),
     );
     return tasks
-      .map((t: any) => CaldavClientService._mapTask(t))
+      .map((t) => CaldavClientService._mapTask(t))
       .filter(
         (t: CaldavIssue) =>
           !filterCategory || !cfg.categoryFilter || t.labels.includes(cfg.categoryFilter),
@@ -344,7 +357,7 @@ export class CaldavClientService {
 
   private async _getTask(cfg: CaldavCfg, uid: string): Promise<CaldavIssue> {
     const cal = await this._getCalendar(cfg);
-    const task = await CaldavClientService._findTaskByUid(cal, uid).catch((err: any) =>
+    const task = await CaldavClientService._findTaskByUid(cal, uid).catch((err) =>
       this._handleNetErr(err),
     );
 
@@ -363,7 +376,7 @@ export class CaldavClientService {
     cfg: CaldavCfg,
     uid: string,
     updates: { completed: boolean; summary: string },
-  ): Promise<any> {
+  ): Promise<void> {
     const cal = await this._getCalendar(cfg);
 
     if (cal.readOnly) {
@@ -377,7 +390,7 @@ export class CaldavClientService {
       throw new Error('CALENDAR READ ONLY: ' + cfg.resourceName);
     }
 
-    const tasks = await CaldavClientService._findTaskByUid(cal, uid).catch((err: any) =>
+    const tasks = await CaldavClientService._findTaskByUid(cal, uid).catch((err) =>
       this._handleNetErr(err),
     );
 
@@ -436,6 +449,8 @@ export class CaldavClientService {
     todo.updatePropertyWithValue('sequence', sequenceInt);
 
     task.data = ICAL.stringify(jCal);
-    await task.update().catch((err: any) => this._handleNetErr(err));
+    if (task.update) {
+      await task.update().catch((err) => this._handleNetErr(err));
+    }
   }
 }

@@ -47,7 +47,7 @@
       @if (taskSuggestionsCtrl?.value?.length) {
         <div class="separator-box">
           <button
-            class="switch-add-to-btn"
+            class="switch-add-to-btn e2e-add-task-submit"
             (mousedown)="addTask()"
             type="submit"
             mat-icon-button
@@ -76,7 +76,7 @@
         }
       </button>
 
-      @if (isSearchIssueProvidersAvailable$ | async) {
+      @if (isSearchIssueProvidersAvailable()) {
         <button
           (click)="isSearchIssueProviders.set(!isSearchIssueProviders())"
           [matTooltip]="'Toggle searching issue providers'"
@@ -92,7 +92,7 @@
           }
         </button>
       }
-      @if (isAddToBacklogAvailable$ | async) {
+      @if (isAddToBacklogAvailable()) {
         <button
           (click)="isAddToBacklog.set(!isAddToBacklog())"
           [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOGGLE_ADD_TO_BACKLOG_TODAY | translate"

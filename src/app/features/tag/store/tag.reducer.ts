@@ -19,9 +19,6 @@ import {
 } from '../../../util/array-move';
 import { unique } from '../../../util/unique';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
-import { migrateTagState } from '../migrate-tag-state.util';
-import { MODEL_VERSION_KEY } from '../../../app.constants';
-import { MODEL_VERSION } from '../../../core/model-version';
 import {
   addTag,
   deleteTag,
@@ -32,7 +29,7 @@ import {
   upsertTag,
 } from './tag.actions';
 import { PlannerActions } from '../../planner/store/planner.actions';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import { Log } from '../../../core/log';
 
 export const TAG_FEATURE_NAME = 'tag';
@@ -106,7 +103,6 @@ const _addMyDayTagIfNecessary = (state: TagState): TagState => {
 export const initialTagState: TagState = _addMyDayTagIfNecessary(
   tagAdapter.getInitialState({
     // additional entity state properties
-    [MODEL_VERSION_KEY]: MODEL_VERSION.TAG,
   }),
 );
 
@@ -116,50 +112,13 @@ export const tagReducer = createReducer<TagState>(
   // META ACTIONS
   // ------------
   on(loadAllData, (oldState, { appDataComplete }) =>
-    _addMyDayTagIfNecessary(
-      appDataComplete.tag ? migrateTagState({ ...appDataComplete.tag }) : oldState,
-    ),
+    _addMyDayTagIfNecessary(appDataComplete.tag ? { ...appDataComplete.tag } : oldState),
   ),
 
-  on(
-    PlannerActions.transferTask,
-    (state, { task, today, targetIndex, newDay, prevDay, targetTaskId }) => {
-      const todayTag = state.entities[TODAY_TAG.id] as Tag;
-
-      if (prevDay === today && newDay !== today) {
-        return tagAdapter.updateOne(
-          {
-            id: TODAY_TAG.id,
-            changes: {
-              taskIds: todayTag.taskIds.filter((id) => id !== task.id),
-            },
-          },
-          state,
-        );
-      }
-      if (prevDay !== today && newDay === today) {
-        const taskIds = [...todayTag.taskIds];
-        const targetIndexToUse = targetTaskId
-          ? todayTag.taskIds.findIndex((id) => id === targetTaskId)
-          : targetIndex;
-        taskIds.splice(targetIndexToUse, 0, task.id);
-        return tagAdapter.updateOne(
-          {
-            id: TODAY_TAG.id,
-            changes: {
-              taskIds: unique(taskIds),
-            },
-          },
-          state,
-        );
-      }
-
-      return state;
-    },
-  ),
+  // NOTE: transferTask is now handled in planner-shared.reducer.ts
 
   on(PlannerActions.planTaskForDay, (state, { task, day, isAddToTop }) => {
-    const todayStr = getWorklogStr();
+    const todayStr = getDbDateStr();
     const todayTag = state.entities[TODAY_TAG.id] as Tag;
 
     if (day === todayStr && !todayTag.taskIds.includes(task.id)) {

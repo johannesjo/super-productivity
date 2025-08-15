@@ -54,14 +54,10 @@ export interface SyncProviderServiceInterface<PID extends SyncProviderId> {
   /**
    * Downloads file data from the sync provider
    * @param targetPath Path to the file
-   * @param localRev Current local revision; can be used to check if download is necessary
    * @returns The file data and revision information
    * @throws Error if the download fails
    */
-  downloadFile(
-    targetPath: string,
-    localRev: string | null,
-  ): Promise<FileDownloadResponse>;
+  downloadFile(targetPath: string): Promise<FileDownloadResponse>;
 
   /**
    * Uploads file data to the sync provider
@@ -111,6 +107,7 @@ export interface SyncProviderServiceInterface<PID extends SyncProviderId> {
 export interface FileRevResponse {
   /** The current revision identifier for the file */
   rev: string;
+  legacyRev?: string;
 }
 
 /**

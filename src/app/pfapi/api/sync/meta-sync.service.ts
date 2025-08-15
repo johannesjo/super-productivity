@@ -46,23 +46,19 @@ export class MetaSyncService {
 
   /**
    * Download metadata from remote storage
-   * @param localRev Optional local revision for conditional download
    * @returns Promise with the remote metadata and its revision
    * @throws NoRemoteMetaFile if the remote file doesn't exist
    * @throws LockPresentError if a lock is present from another client
    * @throws LockFromLocalClientPresentError if a lock is present from this client
    */
-  async download(
-    localRev: string | null = null,
-  ): Promise<{ remoteMeta: RemoteMeta; remoteMetaRev: string }> {
+  async download(): Promise<{ remoteMeta: RemoteMeta; remoteMetaRev: string }> {
     // return {} as any as MetaFileContent;
-    PFLog.normal(`${MetaSyncService.L}.${this.download.name}()`, { localRev });
+    PFLog.normal(`${MetaSyncService.L}.${this.download.name}()`);
     const syncProvider = this._currentSyncProvider$.getOrError();
 
     try {
       const r = await syncProvider.downloadFile(
         MetaModelCtrl.META_MODEL_REMOTE_FILE_NAME,
-        localRev,
       );
 
       // Check if file is locked

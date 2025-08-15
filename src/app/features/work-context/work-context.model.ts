@@ -68,12 +68,8 @@ export interface WorkContextCommon {
   id: string;
   title: string;
 
-  // TODO remove legacy
-  // breakTime?: BreakTime;
-  // breakNr?: BreakNr;
-  // workStart?: WorkStartEnd;
-  // workEnd?: WorkStartEnd;
   // to make it simpler for validation
+  // TODO remove legacy
   breakTime?: any;
   breakNr?: any;
   workStart?: any;

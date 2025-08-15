@@ -44,7 +44,7 @@ export class SyncEffects {
   private _execBeforeCloseService = inject(ExecBeforeCloseService);
   private readonly _initialPwaUpdateCheckService = inject(InitialPwaUpdateCheckService);
 
-  syncBeforeQuit$: any = createEffect(
+  syncBeforeQuit$ = createEffect(
     () =>
       !IS_ELECTRON
         ? EMPTY
@@ -97,7 +97,7 @@ export class SyncEffects {
       shareReplay(),
     );
 
-  triggerSync$: any = createEffect(
+  triggerSync$ = createEffect(
     () =>
       this._dataInitStateService.isAllDataLoadedInitially$.pipe(
         switchMap(() =>

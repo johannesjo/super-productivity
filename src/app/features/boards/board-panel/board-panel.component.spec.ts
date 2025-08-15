@@ -6,8 +6,11 @@ import { Store } from '@ngrx/store';
 import { TaskService } from '../../tasks/task.service';
 import { MatDialog } from '@angular/material/dialog';
 import { of, ReplaySubject } from 'rxjs';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { TranslateFakeLoader } from '@ngx-translate/core';
+import {
+  TranslateLoader,
+  TranslateModule,
+  TranslateNoOpLoader,
+} from '@ngx-translate/core';
 import { provideMockStore } from '@ngrx/store/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { PlannerTaskComponent } from '../../planner/planner-task/planner-task.component';
@@ -16,6 +19,7 @@ import { selectUnarchivedVisibleProjects } from '../../project/store/project.sel
 import { selectAllTasksWithoutHiddenProjects } from '../../tasks/store/task.selectors';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { ProjectService } from '../../project/project.service';
+import { signal } from '@angular/core';
 
 describe('BoardPanelComponent - Backlog Feature', () => {
   let component: BoardPanelComponent;
@@ -95,14 +99,14 @@ describe('BoardPanelComponent - Backlog Feature', () => {
       imports: [
         BoardPanelComponent,
         TranslateModule.forRoot({
-          loader: { provide: TranslateLoader, useClass: TranslateFakeLoader },
+          loader: { provide: TranslateLoader, useClass: TranslateNoOpLoader },
         }),
       ],
       providers: [
         provideMockStore({}),
         provideMockActions(() => actions$),
         { provide: Store, useValue: storeMock },
-        { provide: TaskService, useValue: {} },
+        { provide: TaskService, useValue: { currentTaskId: signal(null) } },
         { provide: MatDialog, useValue: {} },
         { provide: WorkContextService, useValue: workContextServiceMock },
         { provide: ProjectService, useValue: projectServiceMock },

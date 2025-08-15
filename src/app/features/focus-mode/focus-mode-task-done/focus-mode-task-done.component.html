@@ -8,11 +8,11 @@
 <div class="msg">
   <div class="worked-for-label">{{ T.F.FOCUS_MODE.WORKED_FOR | translate }}</div>
   <div class="worked-for-value">
-    {{ lastSessionTotalDuration$ | async | msToString: true }}
+    {{ lastSessionTotalDuration() | msToString: true }}
   </div>
 
   <div class="task-title-label">{{ T.F.FOCUS_MODE.ON | translate }}</div>
-  <div class="task-title">{{ taskTitle$ | async }}</div>
+  <div class="task-title">{{ taskTitle() }}</div>
 </div>
 
 <div class="btn-wrapper">
@@ -24,7 +24,7 @@
     {{ T.F.FOCUS_MODE.BACK_TO_PLANNING | translate }}
   </button>
 
-  @if (!(currentTask$ | async)) {
+  @if (!currentTask()) {
     <button
       mat-raised-button
       color="primary"
@@ -33,7 +33,7 @@
       {{ T.F.FOCUS_MODE.START_NEXT_FOCUS_SESSION | translate }}
     </button>
   }
-  @if (currentTask$ | async) {
+  @if (currentTask()) {
     <button
       mat-raised-button
       color="primary"

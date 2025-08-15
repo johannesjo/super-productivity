@@ -1,7 +1,7 @@
 describe('DialogJiraAddWorklogComponent _convertTimestamp', () => {
   describe('native implementation', () => {
     it('should convert timestamp to ISO string without seconds', () => {
-      const timestamp = new Date('2024-01-15T10:30:45.000Z').getTime();
+      const timestamp = new Date(2024, 0, 15, 10, 30, 45, 0).getTime();
       const date = new Date(timestamp);
 
       // Set seconds and milliseconds to 0

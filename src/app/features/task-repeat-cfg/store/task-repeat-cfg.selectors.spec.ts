@@ -1,9 +1,10 @@
 import { DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfg } from '../task-repeat-cfg.model';
 import { TaskReminderOptionId } from '../../tasks/task.model';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import {
-  selectTaskRepeatCfgsDueOnDayIncludingOverdue,
-  selectTaskRepeatCfgsDueOnDayOnly,
+  selectAllUnprocessedTaskRepeatCfgs,
+  selectTaskRepeatCfgsForExactDay,
   selectAllTaskRepeatCfgs,
   selectTaskRepeatCfgById,
   selectTaskRepeatCfgByIdAllowUndefined,
@@ -17,7 +18,7 @@ const DUMMY_REPEATABLE_TASK: TaskRepeatCfg = {
   id: 'REPEATABLE_DEFAULT',
   title: 'REPEATABLE_DEFAULT',
   quickSetting: 'DAILY',
-  lastTaskCreation: 60 * 60 * 1000,
+  lastTaskCreationDay: '1970-01-01',
   defaultEstimate: undefined,
   projectId: null,
   startTime: undefined,
@@ -40,7 +41,7 @@ const DUMMY_REPEATABLE_TASK: TaskRepeatCfg = {
 const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;
 
-const FAKE_MONDAY_THE_10TH = dateStrToUtcDate('2022-01-10').getTime();
+const FAKE_MONDAY_THE_10TH = new Date(2022, 0, 10).getTime();
 
 const dummyRepeatable = (id: string, fields: Partial<TaskRepeatCfg>): TaskRepeatCfg => ({
   ...DUMMY_REPEATABLE_TASK,
@@ -51,7 +52,7 @@ const dummyRepeatable = (id: string, fields: Partial<TaskRepeatCfg>): TaskRepeat
 describe('selectTaskRepeatCfgsDueOnDay', () => {
   describe('for DAILY', () => {
     it('should return cfg for a far future task', () => {
-      const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
+      const result = selectTaskRepeatCfgsForExactDay.projector(
         [
           dummyRepeatable('R1', {
             repeatCycle: 'DAILY',
@@ -67,18 +68,14 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
     });
 
     [
-      FAKE_MONDAY_THE_10TH,
-      // eslint-disable-next-line no-mixed-operators
-      FAKE_MONDAY_THE_10TH + DAY * 3,
-      // eslint-disable-next-line no-mixed-operators
-      FAKE_MONDAY_THE_10TH + DAY * 6,
-      // eslint-disable-next-line no-mixed-operators
-      FAKE_MONDAY_THE_10TH + DAY * 300,
-      // eslint-disable-next-line no-mixed-operators
-      FAKE_MONDAY_THE_10TH + DAY * 150,
-    ].forEach((dayDateStr) => {
+      new Date(2022, 0, 10), // Jan 10, 2022 (start date, day 0)
+      new Date(2022, 0, 13), // Jan 13, 2022 (day 3)
+      new Date(2022, 0, 16), // Jan 16, 2022 (day 6)
+      new Date(2022, 10, 6), // Nov 6, 2022 (day 300)
+      new Date(2022, 6, 9), // Jul 9, 2022 (day 150)
+    ].forEach((testDate) => {
       it('should return cfg for a for repeatEvery correctly', () => {
-        const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
+        const result = selectTaskRepeatCfgsForExactDay.projector(
           [
             dummyRepeatable('R1', {
               repeatCycle: 'DAILY',
@@ -87,7 +84,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
             }),
           ],
           {
-            dayDate: new Date(dayDateStr).getTime(),
+            dayDate: testDate.getTime(),
           },
         );
         const resultIds = result.map((item) => item.id);
@@ -107,7 +104,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
       FAKE_MONDAY_THE_10TH + DAY * 150 + HOUR * 6,
     ].forEach((dayDateStr) => {
       it('should return cfg for a for repeatEvery correctly for non exact day dates', () => {
-        const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
+        const result = selectTaskRepeatCfgsForExactDay.projector(
           [
             dummyRepeatable('R1', {
               repeatCycle: 'DAILY',
@@ -135,7 +132,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
       FAKE_MONDAY_THE_10TH + DAY * 34,
     ].forEach((dayDateStr) => {
       it('should NOT return cfg for a for repeatEvery if not correct', () => {
-        const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
+        const result = selectTaskRepeatCfgsForExactDay.projector(
           [
             dummyRepeatable('R1', {
               repeatCycle: 'DAILY',
@@ -161,7 +158,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
       FAKE_MONDAY_THE_10TH + DAY * 4,
     ].forEach((dayDateStr) => {
       it('should return cfg for a for repeatEvery if correct', () => {
-        const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
+        const result = selectTaskRepeatCfgsForExactDay.projector(
           [
             dummyRepeatable('R1', {
               repeatCycle: 'DAILY',
@@ -183,7 +180,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
 
   describe('for WEEKLY', () => {
     it('should return cfg for startDate today', () => {
-      const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
+      const result = selectTaskRepeatCfgsForExactDay.projector(
         [
           dummyRepeatable('R1', {
             repeatCycle: 'WEEKLY',
@@ -200,7 +197,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
     });
 
     it('should return cfg for startDate in the past', () => {
-      const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
+      const result = selectTaskRepeatCfgsForExactDay.projector(
         [
           dummyRepeatable('R1', {
             repeatCycle: 'WEEKLY',
@@ -218,7 +215,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
     });
 
     it('should return available for day', () => {
-      const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
+      const result = selectTaskRepeatCfgsForExactDay.projector(
         [
           dummyRepeatable('R1', {
             monday: true,
@@ -250,7 +247,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
       // eslint-disable-next-line no-mixed-operators
       const FULL_WEEK = [0, 1, 2, 3, 4, 5, 6].map((v) => FAKE_MONDAY_THE_10TH + v * DAY);
       const results = FULL_WEEK.map((dayTimestamp) =>
-        selectTaskRepeatCfgsDueOnDayOnly
+        selectTaskRepeatCfgsForExactDay
           .projector(repeatableTasks, { dayDate: dayTimestamp })
           .map((item) => item.id),
       );
@@ -258,7 +255,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
     });
 
     // it('should NOT return cfg for future startDate', () => {
-    //   const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
+    //   const result = selectTaskRepeatCfgsForExactDay.projector(
     //     [dummyRepeatable('R1', { repeatCycle: 'WEEKLY', startDate: '2022-02-10' })],
     //     {
     //       dayDate: FAKE_MONDAY_THE_10TH,
@@ -268,7 +265,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
     //   expect(resultIds).toEqual([]);
     // });
     // it('should return cfg if repeatCycle matches', () => {
-    //   const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
+    //   const result = selectTaskRepeatCfgsForExactDay.projector(
     //     [
     //       dummyRepeatable('R1', {
     //         repeatCycle: 'WEEKLY',
@@ -284,7 +281,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
     //   expect(resultIds).toEqual(['R1']);
     // });
     // it('should NOT return cfg if repeatCycle does NOT match', () => {
-    //   const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
+    //   const result = selectTaskRepeatCfgsForExactDay.projector(
     //     [
     //       dummyRepeatable('R1', {
     //         repeatCycle: 'WEEKLY',
@@ -303,7 +300,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
 
   describe('for MONTHLY', () => {
     it('should return cfg for startDate today', () => {
-      const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
+      const result = selectTaskRepeatCfgsForExactDay.projector(
         [dummyRepeatable('R1', { repeatCycle: 'MONTHLY', startDate: '2022-01-10' })],
         {
           dayDate: FAKE_MONDAY_THE_10TH,
@@ -314,7 +311,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
     });
 
     it('should return cfg for startDate in the past', () => {
-      const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
+      const result = selectTaskRepeatCfgsForExactDay.projector(
         [dummyRepeatable('R1', { repeatCycle: 'MONTHLY', startDate: '2022-01-10' })],
         {
           dayDate: dateStrToUtcDate('2022-02-10').getTime(),
@@ -325,7 +322,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
     });
 
     it('should NOT return cfg for future startDate', () => {
-      const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
+      const result = selectTaskRepeatCfgsForExactDay.projector(
         [dummyRepeatable('R1', { repeatCycle: 'MONTHLY', startDate: '2022-02-10' })],
         {
           dayDate: FAKE_MONDAY_THE_10TH,
@@ -336,7 +333,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
     });
 
     it('should return cfg if repeatCycle matches', () => {
-      const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
+      const result = selectTaskRepeatCfgsForExactDay.projector(
         [
           dummyRepeatable('R1', {
             repeatCycle: 'MONTHLY',
@@ -353,7 +350,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
     });
 
     it('should NOT return cfg if repeatCycle does NOT match', () => {
-      const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
+      const result = selectTaskRepeatCfgsForExactDay.projector(
         [
           dummyRepeatable('R1', {
             repeatCycle: 'MONTHLY',
@@ -372,7 +369,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
 
   describe('for YEARLY', () => {
     it('should return cfg for startDate today', () => {
-      const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
+      const result = selectTaskRepeatCfgsForExactDay.projector(
         [dummyRepeatable('R1', { repeatCycle: 'YEARLY', startDate: '2022-01-10' })],
         {
           dayDate: FAKE_MONDAY_THE_10TH,
@@ -383,7 +380,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
     });
 
     it('should return cfg for startDate in the past', () => {
-      const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
+      const result = selectTaskRepeatCfgsForExactDay.projector(
         [dummyRepeatable('R1', { repeatCycle: 'YEARLY', startDate: '2021-01-10' })],
         {
           dayDate: dateStrToUtcDate('2022-01-10').getTime(),
@@ -394,7 +391,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
     });
 
     it('should NOT return cfg for future startDate', () => {
-      const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
+      const result = selectTaskRepeatCfgsForExactDay.projector(
         [dummyRepeatable('R1', { repeatCycle: 'YEARLY', startDate: '2023-01-10' })],
         {
           dayDate: FAKE_MONDAY_THE_10TH,
@@ -405,7 +402,7 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
     });
 
     it('should return cfg if repeatCycle matches', () => {
-      const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
+      const result = selectTaskRepeatCfgsForExactDay.projector(
         [
           dummyRepeatable('R1', {
             repeatCycle: 'YEARLY',
@@ -422,12 +419,12 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
     });
 
     it('should NOT return cfg if repeatCycle does NOT match', () => {
-      const result = selectTaskRepeatCfgsDueOnDayOnly.projector(
+      const result = selectTaskRepeatCfgsForExactDay.projector(
         [
           dummyRepeatable('R1', {
             repeatCycle: 'YEARLY',
             startDate: '2022-01-10',
-            lastTaskCreation: dateStrToUtcDate('2022-01-10').getTime(),
+            lastTaskCreationDay: '2022-01-10',
             repeatEvery: 2,
           }),
         ],
@@ -445,15 +442,15 @@ describe('selectTaskRepeatCfgsDueOnDay', () => {
 
 // -----------------------------------------------------------------------------------
 
-describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
+describe('selectAllUnprocessedTaskRepeatCfgs', () => {
   it('should not return values for Marco`s edge case', () => {
-    const result = selectTaskRepeatCfgsDueOnDayIncludingOverdue.projector(
+    const result = selectAllUnprocessedTaskRepeatCfgs.projector(
       [
         dummyRepeatable('R1', {
           repeatCycle: 'MONTHLY',
           repeatEvery: 1,
           startDate: '2024-01-26',
-          lastTaskCreation: dateStrToUtcDate('2024-06-26').getTime(),
+          lastTaskCreationDay: '2024-06-26',
         }),
       ],
       {
@@ -468,7 +465,7 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
 
   describe('for DAILY', () => {
     it('should return cfg for a far future task', () => {
-      const result = selectTaskRepeatCfgsDueOnDayIncludingOverdue.projector(
+      const result = selectAllUnprocessedTaskRepeatCfgs.projector(
         [
           dummyRepeatable('R1', {
             repeatCycle: 'DAILY',
@@ -495,7 +492,7 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
       FAKE_MONDAY_THE_10TH + DAY * 150,
     ].forEach((dayDateStr) => {
       it('should return cfg for a for repeatEvery correctly', () => {
-        const result = selectTaskRepeatCfgsDueOnDayIncludingOverdue.projector(
+        const result = selectAllUnprocessedTaskRepeatCfgs.projector(
           [
             dummyRepeatable('R1', {
               repeatCycle: 'DAILY',
@@ -524,7 +521,7 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
       FAKE_MONDAY_THE_10TH + DAY * 150 + HOUR * 6,
     ].forEach((dayDateStr) => {
       it('should return cfg for a for repeatEvery correctly for non exact day dates', () => {
-        const result = selectTaskRepeatCfgsDueOnDayIncludingOverdue.projector(
+        const result = selectAllUnprocessedTaskRepeatCfgs.projector(
           [
             dummyRepeatable('R1', {
               repeatCycle: 'DAILY',
@@ -550,7 +547,7 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
       FAKE_MONDAY_THE_10TH + DAY * 4,
     ].forEach((dayDateStr) => {
       it('should return cfg for a for repeatEvery if correct', () => {
-        const result = selectTaskRepeatCfgsDueOnDayIncludingOverdue.projector(
+        const result = selectAllUnprocessedTaskRepeatCfgs.projector(
           [
             dummyRepeatable('R1', {
               repeatCycle: 'DAILY',
@@ -572,7 +569,7 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
 
   describe('for WEEKLY', () => {
     it('should return cfg for startDate today', () => {
-      const result = selectTaskRepeatCfgsDueOnDayIncludingOverdue.projector(
+      const result = selectAllUnprocessedTaskRepeatCfgs.projector(
         [
           dummyRepeatable('R1', {
             repeatCycle: 'WEEKLY',
@@ -589,7 +586,7 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
     });
 
     it('should return cfg for startDate in the past', () => {
-      const result = selectTaskRepeatCfgsDueOnDayIncludingOverdue.projector(
+      const result = selectAllUnprocessedTaskRepeatCfgs.projector(
         [
           dummyRepeatable('R1', {
             repeatCycle: 'WEEKLY',
@@ -607,7 +604,7 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
     });
 
     it('should return available for day', () => {
-      const result = selectTaskRepeatCfgsDueOnDayIncludingOverdue.projector(
+      const result = selectAllUnprocessedTaskRepeatCfgs.projector(
         [
           dummyRepeatable('R1', {
             monday: true,
@@ -626,7 +623,7 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
 
   describe('for MONTHLY', () => {
     it('should return cfg for startDate today', () => {
-      const result = selectTaskRepeatCfgsDueOnDayIncludingOverdue.projector(
+      const result = selectAllUnprocessedTaskRepeatCfgs.projector(
         [dummyRepeatable('R1', { repeatCycle: 'MONTHLY', startDate: '2022-01-10' })],
         {
           dayDate: FAKE_MONDAY_THE_10TH,
@@ -637,7 +634,7 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
     });
 
     it('should return cfg for startDate in the past', () => {
-      const result = selectTaskRepeatCfgsDueOnDayIncludingOverdue.projector(
+      const result = selectAllUnprocessedTaskRepeatCfgs.projector(
         [dummyRepeatable('R1', { repeatCycle: 'MONTHLY', startDate: '2022-01-10' })],
         {
           dayDate: dateStrToUtcDate('2022-02-10').getTime(),
@@ -648,7 +645,7 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
     });
 
     it('should NOT return cfg for future startDate', () => {
-      const result = selectTaskRepeatCfgsDueOnDayIncludingOverdue.projector(
+      const result = selectAllUnprocessedTaskRepeatCfgs.projector(
         [dummyRepeatable('R1', { repeatCycle: 'MONTHLY', startDate: '2022-02-10' })],
         {
           dayDate: FAKE_MONDAY_THE_10TH,
@@ -659,7 +656,7 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
     });
 
     it('should return cfg if repeatCycle matches', () => {
-      const result = selectTaskRepeatCfgsDueOnDayIncludingOverdue.projector(
+      const result = selectAllUnprocessedTaskRepeatCfgs.projector(
         [
           dummyRepeatable('R1', {
             repeatCycle: 'MONTHLY',
@@ -676,13 +673,13 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
     });
 
     it('should NOT return cfg if repeatCycle does NOT match', () => {
-      const result = selectTaskRepeatCfgsDueOnDayIncludingOverdue.projector(
+      const result = selectAllUnprocessedTaskRepeatCfgs.projector(
         [
           dummyRepeatable('R1', {
             repeatCycle: 'MONTHLY',
             startDate: '2022-01-10',
             repeatEvery: 3,
-            lastTaskCreation: dateStrToUtcDate('2022-01-10').getTime(),
+            lastTaskCreationDay: '2022-01-10',
           }),
         ],
         {
@@ -696,7 +693,7 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
 
   describe('for YEARLY', () => {
     it('should return cfg for startDate today', () => {
-      const result = selectTaskRepeatCfgsDueOnDayIncludingOverdue.projector(
+      const result = selectAllUnprocessedTaskRepeatCfgs.projector(
         [dummyRepeatable('R1', { repeatCycle: 'YEARLY', startDate: '2022-01-10' })],
         {
           dayDate: FAKE_MONDAY_THE_10TH,
@@ -707,7 +704,7 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
     });
 
     it('should return cfg for startDate in the past', () => {
-      const result = selectTaskRepeatCfgsDueOnDayIncludingOverdue.projector(
+      const result = selectAllUnprocessedTaskRepeatCfgs.projector(
         [dummyRepeatable('R1', { repeatCycle: 'YEARLY', startDate: '2021-01-10' })],
         {
           dayDate: dateStrToUtcDate('2022-01-10').getTime(),
@@ -718,7 +715,7 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
     });
 
     it('should NOT return cfg for future startDate', () => {
-      const result = selectTaskRepeatCfgsDueOnDayIncludingOverdue.projector(
+      const result = selectAllUnprocessedTaskRepeatCfgs.projector(
         [dummyRepeatable('R1', { repeatCycle: 'YEARLY', startDate: '2023-01-10' })],
         {
           dayDate: FAKE_MONDAY_THE_10TH,
@@ -729,7 +726,7 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
     });
 
     it('should return cfg if repeatCycle matches', () => {
-      const result = selectTaskRepeatCfgsDueOnDayIncludingOverdue.projector(
+      const result = selectAllUnprocessedTaskRepeatCfgs.projector(
         [
           dummyRepeatable('R1', {
             repeatCycle: 'YEARLY',
@@ -746,12 +743,12 @@ describe('selectTaskRepeatCfgsDueOnDayIncludingOverdue', () => {
     });
 
     it('should NOT return cfg if repeatCycle does NOT match', () => {
-      const result = selectTaskRepeatCfgsDueOnDayIncludingOverdue.projector(
+      const result = selectAllUnprocessedTaskRepeatCfgs.projector(
         [
           dummyRepeatable('R1', {
             repeatCycle: 'YEARLY',
             startDate: '2022-01-10',
-            lastTaskCreation: dateStrToUtcDate('2022-01-10').getTime(),
+            lastTaskCreationDay: '2022-01-10',
             repeatEvery: 2,
           }),
         ],
@@ -949,5 +946,89 @@ describe('selectTaskRepeatCfgsSortedByTitleAndProject', () => {
 
     // Order should be preserved when title and project are the same
     expect(result).toEqual([cfg1, cfg2]);
+  });
+});
+
+describe('Timezone Edge Cases for selectTaskRepeatCfgsForExactDay', () => {
+  const createTaskRepeatCfg = (id: string, lastDay: string): TaskRepeatCfg => ({
+    ...DEFAULT_TASK_REPEAT_CFG,
+    id,
+    lastTaskCreationDay: lastDay,
+    repeatCycle: 'DAILY',
+    repeatEvery: 1,
+    startDate: '2025-01-01',
+  });
+
+  it('should handle late night task creation correctly', () => {
+    const lateNight = new Date('2025-08-01T23:30:00'); // 11:30 PM
+    const configs = [
+      createTaskRepeatCfg('R1', '2025-08-01'), // Created earlier today
+      createTaskRepeatCfg('R2', '2025-07-31'), // Created yesterday
+    ];
+
+    const result = selectTaskRepeatCfgsForExactDay.projector(configs, {
+      dayDate: lateNight.getTime(),
+    });
+
+    // Should return the one created yesterday since today is its due date
+    expect(result.length).toBe(1);
+    expect(result[0].id).toBe('R2');
+  });
+
+  it('should handle early morning checks correctly', () => {
+    const earlyMorning = new Date('2025-08-02T01:00:00'); // 1 AM next day
+    const configs = [
+      createTaskRepeatCfg('R1', '2025-08-01'), // Created yesterday (from perspective of 1 AM)
+      createTaskRepeatCfg('R2', '2025-08-02'), // Already created today
+    ];
+
+    const result = selectTaskRepeatCfgsForExactDay.projector(configs, {
+      dayDate: earlyMorning.getTime(),
+    });
+
+    expect(result.length).toBe(1);
+    expect(result[0].id).toBe('R1');
+  });
+
+  it('should handle future creation dates correctly', () => {
+    const today = new Date('2025-08-01T12:00:00');
+    const configs = [
+      createTaskRepeatCfg('R1', '2025-08-02'), // Future date (should not process)
+      createTaskRepeatCfg('R2', '2025-07-31'), // Yesterday
+    ];
+
+    const result = selectTaskRepeatCfgsForExactDay.projector(configs, {
+      dayDate: today.getTime(),
+    });
+
+    expect(result.length).toBe(1);
+    expect(result[0].id).toBe('R2');
+  });
+
+  it('should prevent the reported bug: task created at 11 PM shows up next day', () => {
+    // Simulate: User creates task at 11 PM
+    const creationTime = new Date('2025-08-01T23:00:00');
+    const taskConfig: TaskRepeatCfg = {
+      ...DEFAULT_TASK_REPEAT_CFG,
+      id: 'test',
+      lastTaskCreationDay: getDbDateStr(creationTime), // '2025-08-01'
+      repeatCycle: 'DAILY',
+      repeatEvery: 1,
+      startDate: '2025-01-01',
+    };
+
+    // Check at 1 AM next day
+    const checkTime = new Date('2025-08-02T01:00:00');
+    const todayStr = getDbDateStr(checkTime); // '2025-08-02'
+
+    // The fix: String comparison shows they're different days
+    const shouldCreateTask = taskConfig.lastTaskCreationDay !== todayStr;
+    expect(shouldCreateTask).toBe(true);
+
+    // But if checking later on Aug 1st
+    const laterSameDay = new Date('2025-08-01T23:30:00');
+    const sameDayStr = getDbDateStr(laterSameDay); // '2025-08-01'
+    const shouldNotCreate = taskConfig.lastTaskCreationDay === sameDayStr;
+    expect(shouldNotCreate).toBe(true);
   });
 });

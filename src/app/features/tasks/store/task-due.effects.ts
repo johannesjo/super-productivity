@@ -13,30 +13,31 @@ import { GlobalTrackingIntervalService } from '../../../core/global-tracking-int
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { Store } from '@ngrx/store';
 import { selectOverdueTasksOnToday, selectTasksDueForDay } from './task.selectors';
-import { DataInitStateService } from '../../../core/data-init/data-init-state.service';
 import { SyncWrapperService } from '../../../imex/sync/sync-wrapper.service';
 import { selectTodayTaskIds } from '../../work-context/store/work-context.selectors';
 import { AddTasksForTomorrowService } from '../../add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
-import { getWorklogStr } from '../../../util/get-work-log-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import { environment } from '../../../../environments/environment';
 import { TaskLog } from '../../../core/log';
+import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
 
 @Injectable()
 export class TaskDueEffects {
   private _store$ = inject(Store);
   private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
-  private _dataInitStateService = inject(DataInitStateService);
   private _syncWrapperService = inject(SyncWrapperService);
   private _addTasksForTomorrowService = inject(AddTasksForTomorrowService);
+  private _syncTriggerService = inject(SyncTriggerService);
 
   // NOTE: this gets a lot of interference from tagEffect.preventParentAndSubTaskInTodayList$:
   createRepeatableTasksAndAddDueToday$ = createEffect(
     () => {
-      return this._dataInitStateService.isAllDataLoadedInitially$.pipe(
+      return this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(
         first(),
         switchMap(() =>
           // This inner observable will keep running even after outer completes
           this._globalTrackingIntervalService.todayDateStr$.pipe(
+            first(),
             switchMap(() => this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$),
             // Add debounce to ensure sync has fully completed and status is updated
             debounceTime(1000),
@@ -58,7 +59,7 @@ export class TaskDueEffects {
 
   // NOTE: this gets a lot of interference from tagEffect.preventParentAndSubTaskInTodayList$:
   removeOverdueFormToday$ = createEffect(() => {
-    return this._dataInitStateService.isAllDataLoadedInitially$.pipe(
+    return this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(
       first(),
       switchMap(() =>
         // This inner observable will keep running even after outer completes
@@ -92,7 +93,7 @@ export class TaskDueEffects {
 
   // Defensive effect to ensure tasks due today are in TODAY tag
   ensureTasksDueTodayInTodayTag$ = createEffect(() => {
-    return this._dataInitStateService.isAllDataLoadedInitially$.pipe(
+    return this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(
       first(),
       switchMap(() =>
         this._globalTrackingIntervalService.todayDateStr$.pipe(
@@ -100,7 +101,7 @@ export class TaskDueEffects {
           debounceTime(2000), // Wait a bit longer to ensure all other effects have run
           switchMap(() => this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$),
           switchMap(() => {
-            const todayStr = getWorklogStr();
+            const todayStr = getDbDateStr();
             return this._store$.select(selectTasksDueForDay, { day: todayStr }).pipe(
               first(),
               withLatestFrom(this._store$.select(selectTodayTaskIds)),
