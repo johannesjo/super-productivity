@@ -341,8 +341,15 @@ const parseScheduledDate = (task: Partial<TaskCopy>, now: Date): DueChanges => {
     if (simpleMatch && simpleMatch[0] && typeof +simpleMatch[0] === 'number') {
       const nr = +simpleMatch[0];
       if (nr <= 24) {
-        const due = new Date(now);
-        due.setHours(nr, 0, 0, 0);
+        const due = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+          nr,
+          0,
+          0,
+          0,
+        );
 
         // If the scheduled time has already passed today, schedule for tomorrow
         if (due.getTime() <= now.getTime()) {
