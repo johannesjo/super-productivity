@@ -1,4 +1,5 @@
 <work-view
+  [backlogTasks]="(workContextService.backlogTasks$ | async) || []"
   [doneTasks]="(workContextService.doneTasks$ | async) || []"
   [isShowBacklog]="false"
   [undoneTasks]="(workContextService.undoneTasks$ | async) || []"
