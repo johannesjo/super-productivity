@@ -72,6 +72,7 @@ import { selectTodayTagTaskIds } from '../../../tag/store/tag.reducer';
 import { isToday } from '../../../../util/is-today.util';
 import { MenuTouchFixDirective } from '../menu-touch-fix.directive';
 import { TaskLog } from '../../../../core/log';
+import { isTouchEventInstance } from '../../../../util/is-touch-event.util';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -189,7 +190,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     ev.stopPropagation();
     ev.stopImmediatePropagation();
 
-    if (ev instanceof MouseEvent || ev instanceof TouchEvent) {
+    if (ev instanceof MouseEvent || isTouchEventInstance(ev)) {
       this.contextMenuPosition.x =
         ('touches' in ev ? ev.touches[0].clientX : ev.clientX) + 10 + 'px';
       this.contextMenuPosition.y =
