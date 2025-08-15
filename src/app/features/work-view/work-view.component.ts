@@ -32,7 +32,6 @@ import { delay, filter, map, switchMap } from 'rxjs/operators';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { PlanningModeService } from '../planning-mode/planning-mode.service';
 import { T } from '../../t.const';
-import { ImprovementService } from '../metric/improvement/improvement.service';
 import { workViewProjectChangeAnimation } from '../../ui/animations/work-view-project-change.ani';
 import { WorkContextService } from '../work-context/work-context.service';
 import { ProjectService } from '../project/project.service';
@@ -100,7 +99,6 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   taskService = inject(TaskService);
   takeABreakService = inject(TakeABreakService);
   planningModeService = inject(PlanningModeService);
-  improvementService = inject(ImprovementService);
   layoutService = inject(LayoutService);
   customizerService = inject(TaskViewCustomizerService);
   workContextService = inject(WorkContextService);
@@ -117,13 +115,13 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
   laterTodayTasks = toSignal(this._store.select(selectLaterTodayTasksWithSubTasks), {
     initialValue: [],
   });
-  undoneTasks = input<TaskWithSubTasks[]>([]);
+  undoneTasks = input.required<TaskWithSubTasks[]>();
   customizedUndoneTasks = toSignal(
     this.customizerService.customizeUndoneTasks(this.workContextService.undoneTasks$),
     { initialValue: { list: [] } },
   );
-  doneTasks = input<TaskWithSubTasks[]>([]);
-  backlogTasks = input<TaskWithSubTasks[]>([]);
+  doneTasks = input.required<TaskWithSubTasks[]>();
+  backlogTasks = input.required<TaskWithSubTasks[]>();
   isShowBacklog = input<boolean>(false);
 
   hasDoneTasks = computed(() => this.doneTasks().length > 0);
@@ -282,6 +280,26 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
 
   async moveDoneToArchive(): Promise<void> {
     const doneTasks = this.doneTasks();
+
+    // Add detailed logging for debugging
+    console.log('[WorkView] moveDoneToArchive called with:', {
+      doneTasks,
+      type: typeof doneTasks,
+      isArray: Array.isArray(doneTasks),
+      length: doneTasks?.length,
+      projectId: this.workContextService.activeWorkContextId,
+      contextType: this.workContextService.activeWorkContextType,
+    });
+
+    if (!doneTasks || !Array.isArray(doneTasks)) {
+      console.error('[WorkView] doneTasks is not an array:', doneTasks);
+      return;
+    }
+
+    if (doneTasks.length === 0) {
+      return;
+    }
+
     await this.taskService.moveToArchive(doneTasks);
     this._snackService.open({
       msg: T.F.TASK.S.MOVED_TO_ARCHIVE,
