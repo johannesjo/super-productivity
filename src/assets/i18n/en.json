@@ -1407,7 +1407,8 @@
       },
       "B_TTR": {
         "ADD_TO_TASK": "Add to Task",
-        "MSG": "You have not been tracking time for {{time}}"
+        "MSG": "You have not been tracking time for {{time}}",
+        "MSG_WITHOUT_TIME": "You have not been tracking time"
       },
       "D_IDLE": {
         "ADD_ENTRY": "Add entry for tracking",
