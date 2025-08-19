@@ -107,7 +107,7 @@ export class GithubApiService {
       ? searchText
       : `${searchText} repo:${cfg.repo || ''}`;
 
-    // Create HttpParams with custom encoder to ensure parentheses are encoded
+    // Use HttpParams to properly handle encoding, but we need custom encoding for parentheses
     const params = new HttpParams({ encoder: new CustomHttpParamEncoder() }).set(
       'q',
       fullQuery,
@@ -225,7 +225,7 @@ query Issues {
     const httpParams =
       params.params instanceof HttpParams
         ? params.params
-        : new HttpParams({ fromObject: p.params });
+        : new HttpParams({ fromObject: p.params || {} });
 
     const allArgs = [
       ...bodyArg,

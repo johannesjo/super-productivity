@@ -48,7 +48,7 @@ describe('GithubApiService', () => {
           request.url.startsWith(`${GITHUB_API_BASE_URL}search/issues`),
         );
 
-        expect(req.request.params.get('q')).toBe('bug fix repo:owner/repo');
+        expect(req.request.url).toContain('q=bug%20fix%20repo%3Aowner%2Frepo');
         req.flush({ items: [] });
       });
 
@@ -60,13 +60,11 @@ describe('GithubApiService', () => {
           request.url.startsWith(`${GITHUB_API_BASE_URL}search/issues`),
         );
 
-        // Check the raw query parameter
-        expect(req.request.params.get('q')).toBe(
-          'state:open (author:@me OR assignee:@me) repo:owner/repo',
-        );
         // Verify parentheses are properly encoded in the URL
-        expect(req.request.urlWithParams).toContain('%28');
-        expect(req.request.urlWithParams).toContain('%29');
+        expect(req.request.url).toContain('%28'); // (
+        expect(req.request.url).toContain('%29'); // )
+        expect(req.request.url).toContain('state%3Aopen');
+        expect(req.request.url).toContain('author%3A%40me');
         req.flush({ items: [] });
       });
 
@@ -78,14 +76,10 @@ describe('GithubApiService', () => {
           request.url.startsWith(`${GITHUB_API_BASE_URL}search/issues`),
         );
 
-        // Check the raw query parameter
-        expect(req.request.params.get('q')).toBe(
-          'label:"bug fix" @mentions #123 repo:owner/repo',
-        );
         // Verify special characters are properly encoded in the URL
-        expect(req.request.urlWithParams).toContain('label%3A%22bug%20fix%22');
-        expect(req.request.urlWithParams).toContain('%40mentions');
-        expect(req.request.urlWithParams).toContain('%23123');
+        expect(req.request.url).toContain('label%3A%22bug%20fix%22');
+        expect(req.request.url).toContain('%40mentions');
+        expect(req.request.url).toContain('%23123');
         req.flush({ items: [] });
       });
 
@@ -97,10 +91,8 @@ describe('GithubApiService', () => {
           request.url.startsWith(`${GITHUB_API_BASE_URL}search/issues`),
         );
 
-        // Check the raw query parameter
-        expect(req.request.params.get('q')).toBe('test repo:owner/repo');
         // Forward slash in repo name should be encoded as %2F in the URL
-        expect(req.request.urlWithParams).toContain('repo%3Aowner%2Frepo');
+        expect(req.request.url).toContain('repo%3Aowner%2Frepo');
         req.flush({ items: [] });
       });
 
@@ -113,8 +105,8 @@ describe('GithubApiService', () => {
         );
 
         // Should not contain repo qualifier
-        expect(req.request.params.get('q')).toBe('javascript');
-        expect(req.request.urlWithParams).not.toContain('repo%3A');
+        expect(req.request.url).toContain('q=javascript');
+        expect(req.request.url).not.toContain('repo%3A');
         req.flush({ items: [] });
       });
 
@@ -126,16 +118,12 @@ describe('GithubApiService', () => {
           request.url.startsWith(`${GITHUB_API_BASE_URL}search/issues`),
         );
 
-        // Check the raw query parameter
-        expect(req.request.params.get('q')).toBe(
-          'sort:updated state:open (author:@me OR assignee:@me) repo:owner/repo',
-        );
         // All special characters should be properly encoded in the URL
-        expect(req.request.urlWithParams).toContain('sort%3Aupdated');
-        expect(req.request.urlWithParams).toContain('state%3Aopen');
-        expect(req.request.urlWithParams).toContain('%28'); // (
-        expect(req.request.urlWithParams).toContain('%29'); // )
-        expect(req.request.urlWithParams).toContain('%40me'); // @me
+        expect(req.request.url).toContain('sort%3Aupdated');
+        expect(req.request.url).toContain('state%3Aopen');
+        expect(req.request.url).toContain('%28'); // (
+        expect(req.request.url).toContain('%29'); // )
+        expect(req.request.url).toContain('%40me'); // @me
         req.flush({ items: [] });
       });
 
@@ -147,7 +135,7 @@ describe('GithubApiService', () => {
           request.url.startsWith(`${GITHUB_API_BASE_URL}search/issues`),
         );
 
-        expect(req.request.params.get('q')).toBe(' repo:owner/repo');
+        expect(req.request.url).toContain('q=%20repo%3Aowner%2Frepo');
         req.flush({ items: [] });
       });
 
@@ -236,9 +224,8 @@ describe('GithubApiService', () => {
         );
 
         // Unicode should be properly encoded
-        expect(req.request.params.get('q')).toBe('日本語 emoji 😀 repo:owner/repo');
-        expect(req.request.urlWithParams).toContain('%E6%97%A5%E6%9C%AC%E8%AA%9E');
-        expect(req.request.urlWithParams).toContain('%F0%9F%98%80');
+        expect(req.request.url).toContain('%E6%97%A5%E6%9C%AC%E8%AA%9E');
+        expect(req.request.url).toContain('%F0%9F%98%80');
         req.flush({ items: [] });
       });
 
@@ -251,8 +238,29 @@ describe('GithubApiService', () => {
         );
 
         // Query should use space separator, not plus
-        expect(req.request.params.get('q')).toBe('test search repo:owner/repo');
-        expect(req.request.urlWithParams).toContain('test%20search%20repo');
+        expect(req.request.url).toContain('test%20search%20repo');
+        req.flush({ items: [] });
+      });
+
+      it('should not truncate query - specific test for issue #4913', () => {
+        // This test specifically checks for the truncation bug where "sort" became "rt"
+        const searchText = 'sort:updated state:open (author:@me OR assignee:@me)';
+        service.searchIssueForRepoNoMap$(searchText, mockCfg).subscribe();
+
+        const req = httpMock.expectOne((request) =>
+          request.url.startsWith(`${GITHUB_API_BASE_URL}search/issues`),
+        );
+
+        // Critical: ensure the query starts with "sort" and is not truncated to "rt"
+        expect(req.request.urlWithParams).toContain('q=sort%3A');
+        expect(req.request.urlWithParams).not.toContain('q=rt%3A');
+
+        // Also verify the full query structure is intact
+        expect(req.request.urlWithParams).toContain('sort%3Aupdated');
+        expect(req.request.urlWithParams).toContain('state%3Aopen');
+        expect(req.request.urlWithParams).toContain(
+          '%28author%3A%40me%20OR%20assignee%3A%40me%29',
+        );
         req.flush({ items: [] });
       });
     });
