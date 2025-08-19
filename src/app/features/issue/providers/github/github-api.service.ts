@@ -7,6 +7,7 @@ import {
   HttpHeaders,
   HttpParams,
   HttpRequest,
+  HttpParameterCodec,
 } from '@angular/common/http';
 import { GITHUB_API_BASE_URL } from './github.const';
 import { Observable, ObservableInput, of, throwError } from 'rxjs';
@@ -26,6 +27,26 @@ import { GITHUB_TYPE, ISSUE_PROVIDER_HUMANIZED } from '../../issue.const';
 import { IssueLog } from '../../../../core/log';
 
 const BASE = GITHUB_API_BASE_URL;
+
+// Custom encoder to ensure parentheses are encoded for GitHub API
+class CustomHttpParamEncoder implements HttpParameterCodec {
+  encodeKey(key: string): string {
+    return encodeURIComponent(key);
+  }
+
+  encodeValue(value: string): string {
+    // Encode all special characters including parentheses
+    return encodeURIComponent(value).replace(/\(/g, '%28').replace(/\)/g, '%29');
+  }
+
+  decodeKey(key: string): string {
+    return decodeURIComponent(key);
+  }
+
+  decodeValue(value: string): string {
+    return decodeURIComponent(value);
+  }
+}
 
 @Injectable({
   providedIn: 'root',
@@ -81,19 +102,21 @@ export class GithubApiService {
     cfg: GithubCfg,
     isSearchAllGithub: boolean = false,
   ): Observable<GithubIssueReduced[]> {
-    // Encode search text and repo query separately to preserve the + separator
-    const encodedSearchText = encodeURIComponent(searchText)
-      .replace(/\(/g, '%28')
-      .replace(/\)/g, '%29');
+    // Build the full query string
+    const fullQuery = isSearchAllGithub
+      ? searchText
+      : `${searchText} repo:${cfg.repo || ''}`;
 
-    const encodedRepoQuery = isSearchAllGithub
-      ? ''
-      : `+repo:${encodeURIComponent(cfg.repo || '')}`;
-    const fullQuery = encodedSearchText + encodedRepoQuery;
+    // Create HttpParams with custom encoder to ensure parentheses are encoded
+    const params = new HttpParams({ encoder: new CustomHttpParamEncoder() }).set(
+      'q',
+      fullQuery,
+    );
 
     return this._sendRequest$(
       {
-        url: `${BASE}search/issues?q=${fullQuery}`,
+        url: `${BASE}search/issues`,
+        params: params,
       },
       cfg,
     ).pipe(
@@ -198,11 +221,17 @@ query Issues {
 
     const bodyArg = params.data ? [params.data] : [];
 
+    // Handle params - if it's already an HttpParams object, use it directly
+    const httpParams =
+      params.params instanceof HttpParams
+        ? params.params
+        : new HttpParams({ fromObject: p.params });
+
     const allArgs = [
       ...bodyArg,
       {
         headers: new HttpHeaders(p.headers),
-        params: new HttpParams({ fromObject: p.params }),
+        params: httpParams,
         reportProgress: false,
         observe: 'response',
         responseType: params.responseType,
