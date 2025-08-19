@@ -208,7 +208,7 @@ export const incrementVectorClock = (
 
   // Handle overflow - reset to 1 if approaching max safe integer
   if (currentValue >= Number.MAX_SAFE_INTEGER - 1000) {
-    PFLog.error('Vector clock component overflow protection triggered', {
+    PFLog.warn('Vector clock component overflow protection triggered', {
       clientId,
       currentValue,
     });
@@ -220,7 +220,7 @@ export const incrementVectorClock = (
   // Warn if vector clock is getting large
   const size = Object.keys(newClock).length;
   if (size > 30) {
-    PFLog.error('Warning: Vector clock growing large', {
+    PFLog.warn('Warning: Vector clock growing large', {
       size,
       clientId,
       threshold: 30,
