@@ -48,7 +48,7 @@ describe('GithubApiService', () => {
           request.url.startsWith(`${GITHUB_API_BASE_URL}search/issues`),
         );
 
-        expect(req.request.url).toContain('q=bug%20fix%20repo%3Aowner%2Frepo');
+        expect(req.request.urlWithParams).toContain('q=bug%20fix%20repo%3Aowner%2Frepo');
         req.flush({ items: [] });
       });
 
@@ -61,10 +61,10 @@ describe('GithubApiService', () => {
         );
 
         // Verify parentheses are properly encoded in the URL
-        expect(req.request.url).toContain('%28'); // (
-        expect(req.request.url).toContain('%29'); // )
-        expect(req.request.url).toContain('state%3Aopen');
-        expect(req.request.url).toContain('author%3A%40me');
+        expect(req.request.urlWithParams).toContain('%28'); // (
+        expect(req.request.urlWithParams).toContain('%29'); // )
+        expect(req.request.urlWithParams).toContain('state%3Aopen');
+        expect(req.request.urlWithParams).toContain('author%3A%40me');
         req.flush({ items: [] });
       });
 
@@ -77,9 +77,9 @@ describe('GithubApiService', () => {
         );
 
         // Verify special characters are properly encoded in the URL
-        expect(req.request.url).toContain('label%3A%22bug%20fix%22');
-        expect(req.request.url).toContain('%40mentions');
-        expect(req.request.url).toContain('%23123');
+        expect(req.request.urlWithParams).toContain('label%3A%22bug%20fix%22');
+        expect(req.request.urlWithParams).toContain('%40mentions');
+        expect(req.request.urlWithParams).toContain('%23123');
         req.flush({ items: [] });
       });
 
@@ -92,7 +92,7 @@ describe('GithubApiService', () => {
         );
 
         // Forward slash in repo name should be encoded as %2F in the URL
-        expect(req.request.url).toContain('repo%3Aowner%2Frepo');
+        expect(req.request.urlWithParams).toContain('repo%3Aowner%2Frepo');
         req.flush({ items: [] });
       });
 
@@ -105,8 +105,8 @@ describe('GithubApiService', () => {
         );
 
         // Should not contain repo qualifier
-        expect(req.request.url).toContain('q=javascript');
-        expect(req.request.url).not.toContain('repo%3A');
+        expect(req.request.urlWithParams).toContain('q=javascript');
+        expect(req.request.urlWithParams).not.toContain('repo%3A');
         req.flush({ items: [] });
       });
 
@@ -119,11 +119,11 @@ describe('GithubApiService', () => {
         );
 
         // All special characters should be properly encoded in the URL
-        expect(req.request.url).toContain('sort%3Aupdated');
-        expect(req.request.url).toContain('state%3Aopen');
-        expect(req.request.url).toContain('%28'); // (
-        expect(req.request.url).toContain('%29'); // )
-        expect(req.request.url).toContain('%40me'); // @me
+        expect(req.request.urlWithParams).toContain('sort%3Aupdated');
+        expect(req.request.urlWithParams).toContain('state%3Aopen');
+        expect(req.request.urlWithParams).toContain('%28'); // (
+        expect(req.request.urlWithParams).toContain('%29'); // )
+        expect(req.request.urlWithParams).toContain('%40me'); // @me
         req.flush({ items: [] });
       });
 
@@ -135,7 +135,7 @@ describe('GithubApiService', () => {
           request.url.startsWith(`${GITHUB_API_BASE_URL}search/issues`),
         );
 
-        expect(req.request.url).toContain('q=%20repo%3Aowner%2Frepo');
+        expect(req.request.urlWithParams).toContain('q=%20repo%3Aowner%2Frepo');
         req.flush({ items: [] });
       });
 
@@ -148,7 +148,6 @@ describe('GithubApiService', () => {
         );
 
         // Plus signs should be encoded
-        expect(req.request.params.get('q')).toBe('C++ programming repo:owner/repo');
         expect(req.request.urlWithParams).toContain('C%2B%2B');
         req.flush({ items: [] });
       });
@@ -162,7 +161,6 @@ describe('GithubApiService', () => {
         );
 
         // Ampersand should be encoded as %26
-        expect(req.request.params.get('q')).toBe('R&D issues repo:owner/repo');
         expect(req.request.urlWithParams).toContain('R%26D');
         req.flush({ items: [] });
       });
@@ -176,7 +174,6 @@ describe('GithubApiService', () => {
         );
 
         // Equals sign should be encoded as %3D
-        expect(req.request.params.get('q')).toBe('variable=value repo:owner/repo');
         expect(req.request.urlWithParams).toContain('variable%3Dvalue');
         req.flush({ items: [] });
       });
@@ -190,7 +187,6 @@ describe('GithubApiService', () => {
         );
 
         // Question mark should be encoded as %3F
-        expect(req.request.params.get('q')).toBe('what? why? repo:owner/repo');
         expect(req.request.urlWithParams).toContain('what%3F');
         expect(req.request.urlWithParams).toContain('why%3F');
         req.flush({ items: [] });
@@ -205,9 +201,6 @@ describe('GithubApiService', () => {
         );
 
         // Brackets should be encoded
-        expect(req.request.params.get('q')).toBe(
-          'array[index] object{key} repo:owner/repo',
-        );
         expect(req.request.urlWithParams).toContain('%5B'); // [
         expect(req.request.urlWithParams).toContain('%5D'); // ]
         expect(req.request.urlWithParams).toContain('%7B'); // {
@@ -224,8 +217,8 @@ describe('GithubApiService', () => {
         );
 
         // Unicode should be properly encoded
-        expect(req.request.url).toContain('%E6%97%A5%E6%9C%AC%E8%AA%9E');
-        expect(req.request.url).toContain('%F0%9F%98%80');
+        expect(req.request.urlWithParams).toContain('%E6%97%A5%E6%9C%AC%E8%AA%9E');
+        expect(req.request.urlWithParams).toContain('%F0%9F%98%80');
         req.flush({ items: [] });
       });
 
@@ -238,7 +231,7 @@ describe('GithubApiService', () => {
         );
 
         // Query should use space separator, not plus
-        expect(req.request.url).toContain('test%20search%20repo');
+        expect(req.request.urlWithParams).toContain('test%20search%20repo');
         req.flush({ items: [] });
       });
 

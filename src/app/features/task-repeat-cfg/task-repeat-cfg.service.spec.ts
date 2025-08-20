@@ -532,12 +532,28 @@ describe('TaskRepeatCfgService', () => {
 
   describe('Backward Compatibility', () => {
     it('should update both lastTaskCreation and lastTaskCreationDay when creating task', async () => {
-      const targetDayDate = new Date('2025-08-15T10:00:00').getTime();
+      // Use today's date for the target to ensure it's valid
+      const today = new Date();
+      today.setHours(10, 0, 0, 0);
+      const targetDayDate = today.getTime();
+
+      // Create a task repeat config with a start date in the past
+      const testTaskRepeatCfg = {
+        ...mockTaskRepeatCfg,
+        // eslint-disable-next-line no-mixed-operators
+        startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0], // 7 days ago
+        // eslint-disable-next-line no-mixed-operators
+        lastTaskCreationDay: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0], // 2 days ago
+      };
 
       taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
       taskService.createNewTaskWithDefaults.and.returnValue(mockTask);
 
-      await service.createRepeatableTask(mockTaskRepeatCfg, targetDayDate);
+      await service.createRepeatableTask(testTaskRepeatCfg, targetDayDate);
 
       // Verify both fields are set
       const updateAction = dispatchSpy.calls.argsFor(1)[0];
