@@ -98,23 +98,28 @@
       opacity: 0.8;
       margin-left: 4px;
     }
+  }
+}
 
-    .clear-icon {
-      margin-left: auto;
-      margin-right: 0;
-      font-size: 18px;
+.clear-btn {
+  opacity: 0.5;
+  border-radius: 4px !important;
+  margin-left: -8px;
+  min-width: 32px;
+  padding: 0;
+  text-align: center;
+  display: flex;
+  justify-content: center;
 
-      min-width: 32px;
-      min-height: 32px;
-      line-height: 32px;
-      text-align: center;
-      cursor: pointer;
-      opacity: 0.7;
-      order: 999; // Ensure it's always at the end
+  @include mq(xs) {
+    margin-left: -8px;
+  }
 
-      &:hover {
-        opacity: 1;
-      }
-    }
+  mat-icon {
+    margin: 0;
+  }
+
+  &:hover {
+    opacity: 1;
   }
 }
