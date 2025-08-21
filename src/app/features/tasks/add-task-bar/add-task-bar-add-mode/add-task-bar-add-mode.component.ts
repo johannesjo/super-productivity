@@ -150,26 +150,19 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   selectedTime = computed(() => this._taskInputState.currentState().time);
   selectedEstimate = computed(() => this._taskInputState.currentState().estimate);
 
-  // Auto-detected state - values are auto-detected when not in UI mode and have values
-  isProjectAutoDetected = computed(() => {
-    const state = this._taskInputState.currentState();
-    return !state.isUsingUI && !!state.project;
-  });
-
-  isTagsAutoDetected = computed(() => {
-    const state = this._taskInputState.currentState();
-    return !state.isUsingUI && state.tags.length > 0;
-  });
-
-  isDateAutoDetected = computed(() => {
-    const state = this._taskInputState.currentState();
-    return !state.isUsingUI && !!state.date;
-  });
-
-  isEstimateAutoDetected = computed(() => {
-    const state = this._taskInputState.currentState();
-    return !state.isUsingUI && !!state.estimate;
-  });
+  // Auto-detected state using service's computed property
+  isProjectAutoDetected = computed(
+    () => this._taskInputState.isAutoDetected() && !!this.selectedProject(),
+  );
+  isTagsAutoDetected = computed(
+    () => this._taskInputState.isAutoDetected() && this.selectedTags().length > 0,
+  );
+  isDateAutoDetected = computed(
+    () => this._taskInputState.isAutoDetected() && !!this.selectedDate(),
+  );
+  isEstimateAutoDetected = computed(
+    () => this._taskInputState.isAutoDetected() && !!this.selectedEstimate(),
+  );
 
   projects$ = this._projectService.list$.pipe(
     map((projects) => projects.filter((p) => !p.isArchived && !p.isHiddenFromMenu)),
@@ -217,7 +210,12 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   }
 
   ngOnInit(): void {
-    // Set inbox project as default selection in the state service
+    this.setupDefaultProject();
+    this.setupTextParsing();
+    this.setupTextSync();
+  }
+
+  private setupDefaultProject(): void {
     this._projectService.list$
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe((projects) => {
@@ -226,13 +224,14 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
           this._taskInputState.updateProject(inboxProject);
         }
       });
+  }
 
-    // Set up short syntax parsing with debounce using the new service
+  private setupTextParsing(): void {
     combineLatest([
       this.titleControl.valueChanges.pipe(
         debounceTime(300),
         distinctUntilChanged(),
-        filter((val) => typeof val === 'string'),
+        filter((val) => typeof val === 'string' && val.length > 0),
       ),
       this._globalConfigService.shortSyntax$,
       this._tagService.tagsNoMyDayAndNoList$,
@@ -240,20 +239,16 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
     ])
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe(([title, config, allTags, allProjects]) => {
-        if (!title) {
-          return;
-        }
-
-        // Update state service with new text
         this._taskInputState.updateFromText(
-          title,
+          title || '',
           config,
           allProjects.filter((p) => !p.isArchived && !p.isHiddenFromMenu),
           allTags,
         );
       });
+  }
 
-    // Sync text input with state service
+  private setupTextSync(): void {
     effect(() => {
       const currentText = this._taskInputState.currentState().rawText;
       if (currentText !== this.titleControl.value) {
@@ -301,11 +296,7 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   }
 
   clearProject(): void {
-    // Set back to inbox project instead of null
-    this._projectService.list$.pipe(first()).subscribe((projects) => {
-      const inboxProject = projects.find((p) => p.id === 'INBOX_PROJECT');
-      this._taskInputState.updateProject(inboxProject || null);
-    });
+    this.setInboxProject();
   }
 
   clearDate(): void {
@@ -314,6 +305,13 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
 
   clearEstimate(): void {
     this._taskInputState.updateEstimate(null);
+  }
+
+  private setInboxProject(): void {
+    this._projectService.list$.pipe(first()).subscribe((projects) => {
+      const inboxProject = projects.find((p) => p.id === 'INBOX_PROJECT');
+      this._taskInputState.updateProject(inboxProject || null);
+    });
   }
 
   async addTask(): Promise<void> {
@@ -363,16 +361,8 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
 
   private resetForm(): void {
     this.titleControl.setValue('');
-
-    // Reset state service and set inbox project as default
     this._taskInputState.reset();
-    this._projectService.list$.pipe(first()).subscribe((projects) => {
-      const inboxProject = projects.find((p) => p.id === 'INBOX_PROJECT');
-      if (inboxProject) {
-        this._taskInputState.updateProject(inboxProject);
-      }
-    });
-
+    this.setInboxProject();
     this._focusInput();
   }
 
