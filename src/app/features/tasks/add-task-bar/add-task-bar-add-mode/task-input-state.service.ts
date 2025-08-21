@@ -145,7 +145,7 @@ export class TaskInputStateService {
     this.state.update((current) => ({
       ...current,
       ...changes,
-      rawText: current.cleanText, // Clean text when using UI
+      // Keep the rawText unchanged so short syntax remains visible
       isUsingUI: true,
     }));
   }
