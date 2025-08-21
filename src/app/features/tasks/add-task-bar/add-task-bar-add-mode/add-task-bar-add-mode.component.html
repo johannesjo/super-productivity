@@ -10,7 +10,7 @@
       [tabindex]="tabindex()"
       [mention]="tagMentions | async"
       [mentionConfig]="tagMentionConfig | async"
-      placeholder="Add a task... (use + for project, # for tags, @ for dates, t for time estimates)"
+      placeholder="Add a task... (+project #tag @16:00)"
       matInput
       spellcheck="false"
       (keydown.enter)="$event.preventDefault(); addTask()"
@@ -119,14 +119,19 @@
     >
       <mat-icon>{{ selectedTime() ? 'schedule' : 'event' }}</mat-icon>
       <span>{{ dateDisplay() || 'Due' }}</span>
-      @if (selectedDate()) {
-        <mat-icon
-          class="clear-icon"
-          (click)="clearDate(); $event.stopPropagation()"
-          >close
-        </mat-icon>
-      }
     </button>
+
+    @if (selectedDate()) {
+      <button
+        mat-button
+        class="clear-btn"
+        (click)="clearDate(); $event.stopPropagation()"
+        [matTooltip]="'Clear date'"
+        matTooltipPosition="above"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    }
 
     <button
       mat-button
@@ -136,14 +141,19 @@
     >
       <mat-icon>timer</mat-icon>
       <span>{{ estimateDisplay() || 'Estimate' }}</span>
-      @if (selectedEstimate()) {
-        <mat-icon
-          class="clear-icon"
-          (click)="clearEstimate(); $event.stopPropagation()"
-          >close
-        </mat-icon>
-      }
     </button>
+
+    @if (selectedEstimate()) {
+      <button
+        mat-button
+        class="clear-btn"
+        (click)="clearEstimate(); $event.stopPropagation()"
+        [matTooltip]="'Clear estimate'"
+        matTooltipPosition="above"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    }
   </div>
 </div>
 
