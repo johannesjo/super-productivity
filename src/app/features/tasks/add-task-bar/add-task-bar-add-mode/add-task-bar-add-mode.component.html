@@ -3,7 +3,7 @@
   [class.isElevated]="isElevated()"
 >
   <div class="input-section">
-    <textarea
+    <input
       #inputEl
       class="task-input"
       [formControl]="titleControl"
@@ -13,9 +13,8 @@
       placeholder="Add a task... (use + for project, # for tags, @ for dates, t for time estimates)"
       matInput
       spellcheck="false"
-      rows="1"
       (keydown.enter)="$event.preventDefault(); addTask()"
-    ></textarea>
+    />
 
     <div class="button-controls">
       @if (titleControl.value?.trim()) {
