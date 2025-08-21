@@ -42,9 +42,9 @@
         "
         matTooltipPosition="above"
       >
-        <mat-icon>{{
-          localIsAddToBottom() ? 'vertical_align_bottom' : 'vertical_align_top'
-        }}</mat-icon>
+        <mat-icon
+          >{{ localIsAddToBottom() ? 'vertical_align_bottom' : 'vertical_align_top' }}
+        </mat-icon>
       </button>
 
       <button
@@ -75,10 +75,13 @@
       class="action-btn project-btn"
       [matMenuTriggerFor]="projectMenu"
       [class.has-value]="selectedProject()"
+      [class.auto-detected]="isProjectAutoDetected()"
       (click)="$event.stopPropagation()"
     >
-      <mat-icon>folder</mat-icon>
-      <span>{{ selectedProject()?.title || 'Project' }}</span>
+      <mat-icon [style.color]="selectedProject()!.theme.primary">{{
+        selectedProject()!.icon || 'folder'
+      }}</mat-icon>
+      <span>{{ selectedProject()?.title }}</span>
     </button>
 
     <button
@@ -111,8 +114,8 @@
         <mat-icon
           class="clear-icon"
           (click)="clearDate(); $event.stopPropagation()"
-          >close</mat-icon
-        >
+          >close
+        </mat-icon>
       }
     </button>
 
@@ -128,8 +131,8 @@
         <mat-icon
           class="clear-icon"
           (click)="clearEstimate(); $event.stopPropagation()"
-          >close</mat-icon
-        >
+          >close
+        </mat-icon>
       }
     </button>
   </div>
@@ -141,7 +144,9 @@
       mat-menu-item
       (click)="onProjectSelect(project)"
     >
-      <mat-icon [style.color]="project.theme.primary">folder</mat-icon>
+      <mat-icon [style.color]="project.theme.primary">{{
+        project.icon || 'folder'
+      }}</mat-icon>
       {{ project.title }}
     </button>
   }

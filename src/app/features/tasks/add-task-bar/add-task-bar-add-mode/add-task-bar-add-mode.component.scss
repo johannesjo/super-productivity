@@ -71,15 +71,24 @@
   padding-top: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: var(--s);
   border-top: 1px dashed var(--extra-border-color);
   margin-top: var(--s);
+
+  @include mq(xs) {
+    gap: var(--s);
+  }
 
   .action-btn {
     cursor: pointer;
     opacity: 0.5;
 
     &.has-value {
+      background-color: var(--bg-lightest);
+      opacity: 1;
+    }
+
+    // Project button is always active since we always have a project selected
+    &.project-btn {
       background-color: var(--bg-lightest);
       opacity: 1;
     }

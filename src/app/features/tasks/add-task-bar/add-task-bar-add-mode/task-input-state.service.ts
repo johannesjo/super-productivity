@@ -51,6 +51,7 @@ export class TaskInputStateService {
 
     const cleanText = parseResult?.taskChanges?.title?.trim() || text.trim();
     const isInUIMode = this.state().isUsingUI;
+    const inboxProject = allProjects.find((p) => p.id === 'INBOX_PROJECT');
 
     this.state.update((current) => ({
       ...current,
@@ -58,12 +59,15 @@ export class TaskInputStateService {
       cleanText,
       isUsingUI: false,
 
-      // Only update values if not in UI mode or if values are found
+      // Always ensure a project is selected - default to inbox if none found
       project: parseResult?.projectId
-        ? allProjects.find((p) => p.id === parseResult.projectId) || current.project
+        ? allProjects.find((p) => p.id === parseResult.projectId) ||
+          current.project ||
+          inboxProject ||
+          null
         : isInUIMode
           ? current.project
-          : null,
+          : current.project || inboxProject || null,
 
       tags: parseResult?.taskChanges?.tagIds?.length
         ? (parseResult.taskChanges.tagIds
@@ -91,7 +95,6 @@ export class TaskInputStateService {
       estimate:
         parseResult?.taskChanges?.timeEstimate || (isInUIMode ? current.estimate : null),
     }));
-    console.log(this.state());
   }
 
   private extractTimeFromDate(
@@ -147,9 +150,9 @@ export class TaskInputStateService {
     }));
   }
 
-  reset(): void {
+  reset(inboxProject?: Project | null): void {
     this.state.set({
-      project: null,
+      project: inboxProject || null,
       tags: [],
       date: null,
       time: null,

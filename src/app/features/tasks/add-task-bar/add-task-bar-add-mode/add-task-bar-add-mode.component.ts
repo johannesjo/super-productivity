@@ -219,6 +219,7 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe((projects) => {
         const inboxProject = projects.find((p) => p.id === 'INBOX_PROJECT');
+        // Always ensure inbox project is selected if no other project is set
         if (inboxProject && !this.selectedProject()) {
           this._taskInputState.updateProject(inboxProject);
         }
@@ -285,9 +286,7 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
     }
   }
 
-  clearProject(): void {
-    this.setInboxProject();
-  }
+  // Remove clearProject since we always want a project selected
 
   clearDate(): void {
     this._taskInputState.updateDate(null);
@@ -351,8 +350,13 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
 
   private resetForm(): void {
     this.titleControl.setValue('');
-    this._taskInputState.reset();
-    this.setInboxProject();
+
+    // Get inbox project and reset with it as default
+    this._projectService.list$.pipe(first()).subscribe((projects) => {
+      const inboxProject = projects.find((p) => p.id === 'INBOX_PROJECT');
+      this._taskInputState.reset(inboxProject);
+    });
+
     this._focusInput();
   }
 
