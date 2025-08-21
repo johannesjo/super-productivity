@@ -1,18 +1,13 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
-  OnDestroy,
-  signal,
   computed,
   inject,
+  OnDestroy,
+  OnInit,
+  signal,
 } from '@angular/core';
-import {
-  MatDialogRef,
-  MatDialogContent,
-  MatDialogTitle,
-  MAT_DIALOG_DATA,
-} from '@angular/material/dialog';
+import { MatDialogContent, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
@@ -20,19 +15,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
-import { UnsplashService, UnsplashPhoto } from '../../core/unsplash/unsplash.service';
+import { UnsplashPhoto, UnsplashService } from '../../core/unsplash/unsplash.service';
 import { GlobalThemeService } from '../../core/theme/global-theme.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { T } from '../../t.const';
-
-export interface DialogUnsplashPickerData {
-  context?:
-    | 'backgroundImageDark'
-    | 'backgroundImageLight'
-    | 'taskBackground'
-    | 'projectIcon'
-    | string;
-}
 
 @Component({
   selector: 'dialog-unsplash-picker',
@@ -55,6 +41,7 @@ export interface DialogUnsplashPickerData {
 export class DialogUnsplashPickerComponent implements OnInit, OnDestroy {
   private _dialogRef = inject<MatDialogRef<DialogUnsplashPickerComponent>>(MatDialogRef);
   private _unsplashService = inject(UnsplashService);
+  private _globalThemeService = inject(GlobalThemeService);
 
   readonly T = T;
   searchQuery = signal('');
@@ -68,26 +55,12 @@ export class DialogUnsplashPickerComponent implements OnInit, OnDestroy {
 
   private _searchSubject = new Subject<string>();
   private _destroy$ = new Subject<void>();
-  private _globalThemeService = inject(GlobalThemeService);
-  public data: DialogUnsplashPickerData =
-    inject(MAT_DIALOG_DATA, { optional: true }) || {};
 
-  private getDefaultSearchQuery(isDark: boolean): string {
-    const context = this.data.context;
+  private getDefaultSearchQuery(): string {
+    const isDarkMode = this._globalThemeService.isDarkTheme();
 
     // Simplified, more focused default searches
-    switch (context) {
-      case 'backgroundImageDark':
-        return 'dark abstract gradient';
-      case 'backgroundImageLight':
-        return 'minimal landscape';
-      case 'taskBackground':
-        return 'texture pattern';
-      case 'projectIcon':
-        return 'minimal abstract';
-      default:
-        return isDark ? 'dark abstract' : 'minimal nature';
-    }
+    return isDarkMode ? 'night' : 'landscape';
   }
 
   ngOnInit(): void {
@@ -100,8 +73,7 @@ export class DialogUnsplashPickerComponent implements OnInit, OnDestroy {
           this.isLoading.set(true);
           // If empty query, use context-aware default
           if (!query.trim()) {
-            const isDark = this._globalThemeService.isDarkTheme();
-            const defaultQuery = this.getDefaultSearchQuery(isDark);
+            const defaultQuery = this.getDefaultSearchQuery();
             return this._unsplashService.searchPhotos(defaultQuery);
           }
           return this._unsplashService.searchPhotos(query);
@@ -119,9 +91,7 @@ export class DialogUnsplashPickerComponent implements OnInit, OnDestroy {
         },
       });
 
-    // Initial load with context-aware defaults
-    const isDark = this._globalThemeService.isDarkTheme();
-    this.onSearchChange(this.getDefaultSearchQuery(isDark));
+    this.onSearchChange(this.getDefaultSearchQuery());
   }
 
   ngOnDestroy(): void {

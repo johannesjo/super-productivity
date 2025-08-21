@@ -85,6 +85,7 @@ import { DialogUnsplashPickerComponent } from './ui/dialog-unsplash-picker/dialo
 import { ProjectService } from './features/project/project.service';
 import { TagService } from './features/tag/tag.service';
 import { ContextMenuComponent } from './ui/context-menu/context-menu.component';
+import { WorkContextThemeCfg } from './features/work-context/work-context.model';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -435,15 +436,9 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   }
 
   changeBackgroundFromUnsplash(): void {
-    const isDarkMode = this.globalThemeService.isDarkTheme();
-    const contextKey = isDarkMode ? 'backgroundImageDark' : 'backgroundImageLight';
-
     const dialogRef = this._matDialog.open(DialogUnsplashPickerComponent, {
       width: '900px',
       maxWidth: '95vw',
-      data: {
-        context: contextKey,
-      },
     });
 
     dialogRef.afterClosed().subscribe((result) => {
@@ -462,6 +457,10 @@ export class AppComponent implements OnDestroy, AfterViewInit {
 
             // Extract the URL from the result object
             const backgroundUrl = result.url || result;
+            const isDarkMode = this._globalThemeService.isDarkTheme();
+            const contextKey: keyof WorkContextThemeCfg = isDarkMode
+              ? 'backgroundImageDark'
+              : 'backgroundImageLight';
 
             // Update the theme based on context type
             if (activeContext.type === 'PROJECT') {
