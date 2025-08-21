@@ -67,12 +67,10 @@
 }
 
 .action-buttons {
-  padding: var(--s);
   padding-top: 0;
   display: flex;
   flex-wrap: wrap;
   border-top: 1px dashed var(--extra-border-color);
-  margin-top: var(--s);
 
   @include mq(xs) {
     gap: var(--s);

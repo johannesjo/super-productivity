@@ -41,6 +41,8 @@ import { Store } from '@ngrx/store';
 import { PlannerActions } from '../../../planner/store/planner.actions';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TaskInputStateService } from './task-input-state.service';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogScheduleTaskComponent } from '../../../planner/dialog-schedule-task/dialog-schedule-task.component';
 
 @Component({
   selector: 'add-task-bar-add-mode',
@@ -73,6 +75,7 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   private _store = inject(Store);
   private _addTaskBarService = inject(AddTaskBarService);
   private _taskInputState = inject(TaskInputStateService);
+  private _matDialog = inject(MatDialog);
 
   tabindex = input<number>(0);
   isElevated = input<boolean>(false);
@@ -273,6 +276,21 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
 
   onDateSelect(date: Date | null): void {
     this._taskInputState.updateDate(date);
+  }
+
+  openScheduleDialog(): void {
+    const dialogRef = this._matDialog.open(DialogScheduleTaskComponent, {
+      data: {
+        isSelectDueOnly: true,
+      },
+      restoreFocus: true,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result && typeof result === 'object' && result.date) {
+        this._taskInputState.updateDate(result.date, result.time);
+      }
+    });
   }
 
   onTimeSelect(time: string | null): void {

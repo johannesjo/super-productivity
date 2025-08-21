@@ -105,7 +105,7 @@
     <button
       mat-button
       class="action-btn date-btn"
-      [matMenuTriggerFor]="dateMenu"
+      (click)="openScheduleDialog()"
       [class.has-value]="selectedDate()"
     >
       <mat-icon>event</mat-icon>
@@ -205,14 +205,6 @@
 </mat-menu>
 
 <mat-menu #estimateMenu="matMenu">
-  <div class="estimate-input-container">
-    <input
-      matInput
-      placeholder="e.g., 30m, 2h"
-      (input)="onEstimateInputChange($event)"
-      (click)="stopPropagation($event)"
-    />
-  </div>
   @for (option of ESTIMATE_OPTIONS; track option.value) {
     <button
       mat-menu-item
