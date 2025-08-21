@@ -35,7 +35,7 @@ import { TaskCopy } from '../../task.model';
 import { shortSyntax } from '../../short-syntax';
 import { map } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
-import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter, first } from 'rxjs/operators';
 import { Project } from '../../../project/project.model';
 import { Tag } from '../../../tag/tag.model';
 import { getLocalDateStr } from '../../../../util/get-local-date-str';
@@ -200,6 +200,16 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   }
 
   ngOnInit(): void {
+    // Set inbox project as default selection
+    this._projectService.list$
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe((projects) => {
+        const inboxProject = projects.find((p) => p.id === 'INBOX_PROJECT');
+        if (inboxProject && !this.selectedProject()) {
+          this.selectedProject.set(inboxProject);
+        }
+      });
+
     // Set up short syntax parsing with debounce
     combineLatest([
       this.titleControl.valueChanges.pipe(
@@ -343,7 +353,15 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   }
 
   clearProject(): void {
-    this.selectedProject.set(null);
+    // Set back to inbox project instead of null
+    this._projectService.list$.pipe(first()).subscribe((projects) => {
+      const inboxProject = projects.find((p) => p.id === 'INBOX_PROJECT');
+      if (inboxProject) {
+        this.selectedProject.set(inboxProject);
+      } else {
+        this.selectedProject.set(null);
+      }
+    });
     this.isProjectAutoDetected.set(false);
   }
 
@@ -404,7 +422,15 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
 
   private resetForm(): void {
     this.titleControl.setValue('');
-    this.selectedProject.set(null);
+    // Reset to inbox project instead of null
+    this._projectService.list$.pipe(first()).subscribe((projects) => {
+      const inboxProject = projects.find((p) => p.id === 'INBOX_PROJECT');
+      if (inboxProject) {
+        this.selectedProject.set(inboxProject);
+      } else {
+        this.selectedProject.set(null);
+      }
+    });
     this.selectedTags.set([]);
     this.selectedDate.set(null);
     this.selectedTime.set(null);
@@ -482,7 +508,15 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
     this.parsedTitle.set('');
     // Only clear if they were auto-detected
     if (this.isProjectAutoDetected()) {
-      this.selectedProject.set(null);
+      // Reset to inbox project instead of null
+      this._projectService.list$.pipe(first()).subscribe((projects) => {
+        const inboxProject = projects.find((p) => p.id === 'INBOX_PROJECT');
+        if (inboxProject) {
+          this.selectedProject.set(inboxProject);
+        } else {
+          this.selectedProject.set(null);
+        }
+      });
       this.isProjectAutoDetected.set(false);
     }
     if (this.isTagsAutoDetected()) {

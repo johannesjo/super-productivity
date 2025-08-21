@@ -67,16 +67,35 @@
 }
 
 .action-buttons {
-  padding: 0 var(--s2);
-  padding-bottom: var(--s);
+  padding: var(--s);
+  padding-top: 0;
   display: flex;
   flex-wrap: wrap;
   gap: var(--s);
   border-top: 1px dashed var(--extra-border-color);
+  margin-top: var(--s);
 
   .action-btn {
+    cursor: pointer;
+
+    &.has-value {
+      background-color: var(--bg-lightest);
+    }
+
     &.auto-detected {
       border-style: dashed;
+    }
+
+    .clear-icon {
+      margin-left: 4px;
+      font-size: 18px;
+      vertical-align: middle;
+      cursor: pointer;
+      opacity: 0.7;
+
+      &:hover {
+        opacity: 1;
+      }
     }
   }
 }
