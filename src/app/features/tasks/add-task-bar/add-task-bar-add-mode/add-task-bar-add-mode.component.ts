@@ -32,7 +32,6 @@ import { GlobalConfigService } from '../../../config/global-config.service';
 import { AddTaskBarService } from '../add-task-bar.service';
 import { T } from '../../../../t.const';
 import { TaskCopy } from '../../task.model';
-import { shortSyntax } from '../../short-syntax';
 import { map } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, first } from 'rxjs/operators';
@@ -45,6 +44,7 @@ import { IS_ANDROID_WEB_VIEW } from '../../../../util/is-android-web-view';
 import { Store } from '@ngrx/store';
 import { PlannerActions } from '../../../planner/store/planner.actions';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { TaskInputStateService } from './task-input-state.service';
 
 @Component({
   selector: 'add-task-bar-add-mode',
@@ -69,6 +69,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     TranslatePipe,
     MentionModule,
   ],
+  providers: [TaskInputStateService],
 })
 export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   private _taskService = inject(TaskService);
@@ -78,6 +79,7 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   private _globalConfigService = inject(GlobalConfigService);
   private _store = inject(Store);
   private _addTaskBarService = inject(AddTaskBarService);
+  private _taskInputState = inject(TaskInputStateService);
 
   tabindex = input<number>(0);
   isElevated = input<boolean>(false);
@@ -141,11 +143,33 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   inputEl = viewChild<ElementRef>('inputEl');
   titleControl = new FormControl<string>('');
 
-  selectedProject = signal<Project | null>(null);
-  selectedTags = signal<Tag[]>([]);
-  selectedDate = signal<Date | null>(null);
-  selectedTime = signal<string | null>(null);
-  selectedEstimate = signal<number | null>(null);
+  // Use computed values from the state service
+  selectedProject = computed(() => this._taskInputState.currentState().project);
+  selectedTags = computed(() => this._taskInputState.currentState().tags);
+  selectedDate = computed(() => this._taskInputState.currentState().date);
+  selectedTime = computed(() => this._taskInputState.currentState().time);
+  selectedEstimate = computed(() => this._taskInputState.currentState().estimate);
+
+  // Auto-detected state - values are auto-detected when not in UI mode and have values
+  isProjectAutoDetected = computed(() => {
+    const state = this._taskInputState.currentState();
+    return !state.isUsingUI && !!state.project;
+  });
+
+  isTagsAutoDetected = computed(() => {
+    const state = this._taskInputState.currentState();
+    return !state.isUsingUI && state.tags.length > 0;
+  });
+
+  isDateAutoDetected = computed(() => {
+    const state = this._taskInputState.currentState();
+    return !state.isUsingUI && !!state.date;
+  });
+
+  isEstimateAutoDetected = computed(() => {
+    const state = this._taskInputState.currentState();
+    return !state.isUsingUI && !!state.estimate;
+  });
 
   projects$ = this._projectService.list$.pipe(
     map((projects) => projects.filter((p) => !p.isArchived && !p.isHiddenFromMenu)),
@@ -181,13 +205,6 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
 
   private _destroyRef = inject(DestroyRef);
 
-  parsedTitle = signal<string>('');
-  // Track if values were auto-detected from input vs manually selected
-  isProjectAutoDetected = signal<boolean>(false);
-  isTagsAutoDetected = signal<boolean>(false);
-  isDateAutoDetected = signal<boolean>(false);
-  isEstimateAutoDetected = signal<boolean>(false);
-
   constructor() {
     // Initialize local state from inputs and keep them in sync
     effect(
@@ -200,17 +217,17 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   }
 
   ngOnInit(): void {
-    // Set inbox project as default selection
+    // Set inbox project as default selection in the state service
     this._projectService.list$
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe((projects) => {
         const inboxProject = projects.find((p) => p.id === 'INBOX_PROJECT');
         if (inboxProject && !this.selectedProject()) {
-          this.selectedProject.set(inboxProject);
+          this._taskInputState.updateProject(inboxProject);
         }
       });
 
-    // Set up short syntax parsing with debounce
+    // Set up short syntax parsing with debounce using the new service
     combineLatest([
       this.titleControl.valueChanges.pipe(
         debounceTime(300),
@@ -224,83 +241,25 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe(([title, config, allTags, allProjects]) => {
         if (!title) {
-          this.clearAutoDetected();
           return;
         }
 
-        const result = shortSyntax(
-          { title, tagIds: [], projectId: undefined },
+        // Update state service with new text
+        this._taskInputState.updateFromText(
+          title,
           config,
-          allTags,
           allProjects.filter((p) => !p.isArchived && !p.isHiddenFromMenu),
+          allTags,
         );
-
-        if (!result) {
-          this.clearAutoDetected();
-          return;
-        }
-
-        // Update parsed title
-        if (result.taskChanges.title) {
-          this.parsedTitle.set(result.taskChanges.title);
-        } else {
-          this.parsedTitle.set(title);
-        }
-
-        // Auto-select detected project
-        if (result.projectId && !this.selectedProject()) {
-          const project = allProjects.find((p) => p.id === result.projectId);
-          if (project) {
-            this.selectedProject.set(project);
-            this.isProjectAutoDetected.set(true);
-          }
-        } else if (!result.projectId && this.isProjectAutoDetected()) {
-          this.selectedProject.set(null);
-          this.isProjectAutoDetected.set(false);
-        }
-
-        // Auto-select detected tags
-        if (result.taskChanges.tagIds && result.taskChanges.tagIds.length > 0) {
-          const tags = result.taskChanges.tagIds
-            .map((id) => allTags.find((t) => t.id === id))
-            .filter(Boolean) as Tag[];
-          if (tags.length > 0 && this.selectedTags().length === 0) {
-            this.selectedTags.set(tags);
-            this.isTagsAutoDetected.set(true);
-          }
-        } else if (
-          (!result.taskChanges.tagIds || result.taskChanges.tagIds.length === 0) &&
-          this.isTagsAutoDetected()
-        ) {
-          this.selectedTags.set([]);
-          this.isTagsAutoDetected.set(false);
-        }
-
-        // Auto-select detected date and time
-        if (result.taskChanges.dueWithTime && !this.selectedDate()) {
-          const date = new Date(result.taskChanges.dueWithTime);
-          this.selectedDate.set(date);
-          this.isDateAutoDetected.set(true);
-          if (result.taskChanges.hasPlannedTime !== false) {
-            const hours = date.getHours().toString().padStart(2, '0');
-            const minutes = date.getMinutes().toString().padStart(2, '0');
-            this.selectedTime.set(`${hours}:${minutes}`);
-          }
-        } else if (!result.taskChanges.dueWithTime && this.isDateAutoDetected()) {
-          this.selectedDate.set(null);
-          this.selectedTime.set(null);
-          this.isDateAutoDetected.set(false);
-        }
-
-        // Auto-select detected estimate
-        if (result.taskChanges.timeEstimate && !this.selectedEstimate()) {
-          this.selectedEstimate.set(result.taskChanges.timeEstimate);
-          this.isEstimateAutoDetected.set(true);
-        } else if (!result.taskChanges.timeEstimate && this.isEstimateAutoDetected()) {
-          this.selectedEstimate.set(null);
-          this.isEstimateAutoDetected.set(false);
-        }
       });
+
+    // Sync text input with state service
+    effect(() => {
+      const currentText = this._taskInputState.currentState().rawText;
+      if (currentText !== this.titleControl.value) {
+        this.titleControl.setValue(currentText, { emitEvent: false });
+      }
+    });
   }
 
   ngAfterViewInit(): void {
@@ -319,36 +278,25 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   }
 
   onProjectSelect(project: Project): void {
-    this.selectedProject.set(project);
-    this.isProjectAutoDetected.set(false);
+    this._taskInputState.updateProject(project);
   }
 
   onTagToggle(tag: Tag): void {
-    const currentTags = this.selectedTags();
-    const existingIndex = currentTags.findIndex((t) => t.id === tag.id);
-
-    if (existingIndex >= 0) {
-      this.selectedTags.set(currentTags.filter((t) => t.id !== tag.id));
-    } else {
-      this.selectedTags.set([...currentTags, tag]);
-    }
-    this.isTagsAutoDetected.set(false);
+    this._taskInputState.toggleTag(tag);
   }
 
   onDateSelect(date: Date | null): void {
-    this.selectedDate.set(date);
-    this.isDateAutoDetected.set(false);
+    this._taskInputState.updateDate(date);
   }
 
   onTimeSelect(time: string | null): void {
-    this.selectedTime.set(time);
+    this._taskInputState.updateTime(time);
   }
 
   onEstimateInput(value: string): void {
     const ms = stringToMs(value);
     if (ms !== null) {
-      this.selectedEstimate.set(ms);
-      this.isEstimateAutoDetected.set(false);
+      this._taskInputState.updateEstimate(ms);
     }
   }
 
@@ -356,28 +304,21 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
     // Set back to inbox project instead of null
     this._projectService.list$.pipe(first()).subscribe((projects) => {
       const inboxProject = projects.find((p) => p.id === 'INBOX_PROJECT');
-      if (inboxProject) {
-        this.selectedProject.set(inboxProject);
-      } else {
-        this.selectedProject.set(null);
-      }
+      this._taskInputState.updateProject(inboxProject || null);
     });
-    this.isProjectAutoDetected.set(false);
   }
 
   clearDate(): void {
-    this.selectedDate.set(null);
-    this.selectedTime.set(null);
-    this.isDateAutoDetected.set(false);
+    this._taskInputState.updateDate(null);
   }
 
   clearEstimate(): void {
-    this.selectedEstimate.set(null);
-    this.isEstimateAutoDetected.set(false);
+    this._taskInputState.updateEstimate(null);
   }
 
   async addTask(): Promise<void> {
-    const title = this.parsedTitle() || this.titleControl.value?.trim();
+    const currentState = this._taskInputState.currentState();
+    const title = currentState.cleanText || this.titleControl.value?.trim();
     if (!title) return;
 
     const taskData: Partial<TaskCopy> = {
@@ -422,20 +363,16 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
 
   private resetForm(): void {
     this.titleControl.setValue('');
-    // Reset to inbox project instead of null
+
+    // Reset state service and set inbox project as default
+    this._taskInputState.reset();
     this._projectService.list$.pipe(first()).subscribe((projects) => {
       const inboxProject = projects.find((p) => p.id === 'INBOX_PROJECT');
       if (inboxProject) {
-        this.selectedProject.set(inboxProject);
-      } else {
-        this.selectedProject.set(null);
+        this._taskInputState.updateProject(inboxProject);
       }
     });
-    this.selectedTags.set([]);
-    this.selectedDate.set(null);
-    this.selectedTime.set(null);
-    this.selectedEstimate.set(null);
-    this.clearAutoDetected();
+
     this._focusInput();
   }
 
@@ -502,36 +439,6 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
 
   stopPropagation(event: Event): void {
     event.stopPropagation();
-  }
-
-  private clearAutoDetected(): void {
-    this.parsedTitle.set('');
-    // Only clear if they were auto-detected
-    if (this.isProjectAutoDetected()) {
-      // Reset to inbox project instead of null
-      this._projectService.list$.pipe(first()).subscribe((projects) => {
-        const inboxProject = projects.find((p) => p.id === 'INBOX_PROJECT');
-        if (inboxProject) {
-          this.selectedProject.set(inboxProject);
-        } else {
-          this.selectedProject.set(null);
-        }
-      });
-      this.isProjectAutoDetected.set(false);
-    }
-    if (this.isTagsAutoDetected()) {
-      this.selectedTags.set([]);
-      this.isTagsAutoDetected.set(false);
-    }
-    if (this.isDateAutoDetected()) {
-      this.selectedDate.set(null);
-      this.selectedTime.set(null);
-      this.isDateAutoDetected.set(false);
-    }
-    if (this.isEstimateAutoDetected()) {
-      this.selectedEstimate.set(null);
-      this.isEstimateAutoDetected.set(false);
-    }
   }
 
   toggleIsAddToBottom(): void {
