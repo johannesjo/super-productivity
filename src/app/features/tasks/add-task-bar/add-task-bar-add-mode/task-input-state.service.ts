@@ -7,6 +7,7 @@ import { ShortSyntaxConfig } from '../../../config/global-config.model';
 export interface TaskInputState {
   project: Project | null;
   tags: Tag[];
+  newTagTitles: string[];
   date: Date | null;
   time: string | null;
   estimate: number | null;
@@ -20,6 +21,7 @@ export class TaskInputStateService {
   private state = signal<TaskInputState>({
     project: null,
     tags: [],
+    newTagTitles: [],
     date: null,
     time: null,
     estimate: null,
@@ -35,6 +37,7 @@ export class TaskInputStateService {
     const s = this.state();
     return !!(s.project || s.tags.length || s.date || s.estimate);
   });
+  readonly hasNewTags = computed(() => this.state().newTagTitles.length > 0);
 
   updateFromText(
     text: string,
@@ -74,6 +77,8 @@ export class TaskInputStateService {
             .map((id) => allTags.find((t) => t.id === id))
             .filter(Boolean) as Tag[])
         : current.tags, // Always keep current tags if not parsed from text
+
+      newTagTitles: parseResult?.newTagTitles || [],
 
       date: parseResult?.taskChanges?.dueWithTime
         ? new Date(parseResult.taskChanges.dueWithTime)
@@ -152,6 +157,7 @@ export class TaskInputStateService {
     this.state.set({
       project: inboxProject || current.project || null,
       tags: current.tags, // Keep tags
+      newTagTitles: [], // Clear new tag titles on reset
       date: current.date, // Keep date preference for batch task creation
       time: current.time, // Keep time preference
       estimate: current.estimate, // Keep estimate preference

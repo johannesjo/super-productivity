@@ -43,6 +43,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TaskInputStateService } from './task-input-state.service';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogScheduleTaskComponent } from '../../../planner/dialog-schedule-task/dialog-schedule-task.component';
+import { DialogConfirmComponent } from '../../../../ui/dialog-confirm/dialog-confirm.component';
 
 @Component({
   selector: 'add-task-bar-add-mode',
@@ -142,6 +143,8 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   // Use computed values from the state service
   selectedProject = computed(() => this._taskInputState.currentState().project);
   selectedTags = computed(() => this._taskInputState.currentState().tags);
+  newTagTitles = computed(() => this._taskInputState.currentState().newTagTitles);
+  hasNewTags = computed(() => this._taskInputState.hasNewTags());
   selectedDate = computed(() => this._taskInputState.currentState().date);
   selectedTime = computed(() => this._taskInputState.currentState().time);
   selectedEstimate = computed(() => this._taskInputState.currentState().estimate);
@@ -337,10 +340,23 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
     const title = currentState.cleanText || this.titleControl.value?.trim();
     if (!title) return;
 
+    let finalTagIds = this.selectedTags().map((t) => t.id);
+
+    // Handle new tags if any exist
+    if (this.hasNewTags()) {
+      const shouldCreateNewTags = await this._confirmNewTags();
+      if (shouldCreateNewTags) {
+        // Create new tags and add their IDs
+        const newTagIds = await this._createNewTags(this.newTagTitles());
+        finalTagIds = [...finalTagIds, ...newTagIds];
+      }
+      // If user declined, proceed without the new tags (finalTagIds remains as existing tags only)
+    }
+
     const taskData: Partial<TaskCopy> = {
       ...this.additionalFields(),
       projectId: this.selectedProject()?.id,
-      tagIds: this.selectedTags().map((t) => t.id),
+      tagIds: finalTagIds,
       timeEstimate: this.selectedEstimate() || undefined,
     };
 
@@ -476,5 +492,35 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
 
   toggleIsAddToBacklog(): void {
     this.localIsAddToBacklog.update((v) => !v);
+  }
+
+  private async _confirmNewTags(): Promise<boolean> {
+    const newTags = this.newTagTitles();
+    const tagList = newTags.map((tag) => `<li><strong>#${tag}</strong></li>`).join('');
+
+    const dialogRef = this._matDialog.open(DialogConfirmComponent, {
+      data: {
+        title: 'Create New Tags',
+        titleIcon: 'new_releases',
+        message: `The following tags don't exist yet. Do you want to create them?<ul>${tagList}</ul>`,
+        okTxt: 'Create Tags',
+        cancelTxt: 'Skip Tags',
+      },
+      disableClose: false,
+      autoFocus: true,
+    });
+
+    return dialogRef.afterClosed().toPromise();
+  }
+
+  private async _createNewTags(tagTitles: string[]): Promise<string[]> {
+    const newTagIds: string[] = [];
+
+    for (const title of tagTitles) {
+      const newTagId = this._tagService.addTag({ title });
+      newTagIds.push(newTagId);
+    }
+
+    return newTagIds;
   }
 }
