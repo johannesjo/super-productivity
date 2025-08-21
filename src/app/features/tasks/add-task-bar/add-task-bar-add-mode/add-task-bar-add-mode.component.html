@@ -76,6 +76,7 @@
       [matMenuTriggerFor]="projectMenu"
       [class.has-value]="selectedProject()"
       [class.auto-detected]="isProjectAutoDetected()"
+      (click)="$event.stopPropagation()"
     >
       <mat-icon>folder</mat-icon>
       <span>{{ selectedProject()?.title || 'Project' }}</span>
@@ -153,26 +154,6 @@
         >
       }
     </button>
-  </div>
-
-  <div class="selected-values">
-    @if (selectedProject()) {
-      <mat-chip-set>
-        <mat-chip [style.background-color]="selectedProject()!.theme.primary">
-          {{ selectedProject()!.title }}
-        </mat-chip>
-      </mat-chip-set>
-    }
-
-    @if (selectedTags().length > 0) {
-      <mat-chip-set>
-        @for (tag of selectedTags(); track tag.id) {
-          <mat-chip [style.background-color]="tag.color || tag.theme?.primary">
-            {{ tag.title }}
-          </mat-chip>
-        }
-      </mat-chip-set>
-    }
   </div>
 </div>
 
