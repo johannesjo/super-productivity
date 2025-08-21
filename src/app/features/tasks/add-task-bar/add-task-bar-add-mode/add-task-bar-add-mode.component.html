@@ -89,16 +89,20 @@
       mat-button
       class="action-btn tags-btn"
       [matMenuTriggerFor]="tagsMenu"
-      [class.has-value]="selectedTags().length > 0"
+      [class.has-value]="selectedTags().length > 0 || hasNewTags()"
+      [class.has-new-tags]="hasNewTags()"
     >
       <mat-icon>label</mat-icon>
       <span>
-        @if (selectedTags().length === 0) {
+        @if (selectedTags().length === 0 && newTagTitles().length === 0) {
           Tags
-        } @else if (selectedTags().length === 1) {
+        } @else if (selectedTags().length === 1 && newTagTitles().length === 0) {
           {{ selectedTags()[0].title }}
         } @else {
-          {{ selectedTags().length }} tags
+          {{ selectedTags().length + newTagTitles().length }} tags
+          @if (hasNewTags()) {
+            <small class="new-tags-indicator">({{ newTagTitles().length }} new)</small>
+          }
         }
       </span>
     </button>
