@@ -82,9 +82,7 @@ export class TaskInputStateService {
 
       date: parseResult?.taskChanges?.dueWithTime
         ? new Date(parseResult.taskChanges.dueWithTime)
-        : isInUIMode
-          ? current.date
-          : null,
+        : current.date, // Always keep current date if not parsed from text
 
       time: parseResult?.taskChanges?.dueWithTime
         ? this.extractTimeFromDate(
