@@ -81,8 +81,9 @@ const DEFAULT_TIME = '09:00';
 })
 export class DialogScheduleTaskComponent implements AfterViewInit {
   data = inject<{
-    task: Task;
+    task?: Task;
     targetDay?: string;
+    isSelectDueOnly?: boolean;
   }>(MAT_DIALOG_DATA);
   private _matDialogRef = inject<MatDialogRef<DialogScheduleTaskComponent>>(MatDialogRef);
   private _cd = inject(ChangeDetectorRef);
@@ -99,7 +100,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   readonly calendar = viewChild.required(MatCalendar);
 
   remindAvailableOptions: TaskReminderOption[] = TASK_REMINDER_OPTIONS;
-  task: TaskCopy = this.data.task;
+  task: TaskCopy | undefined = this.data.task;
 
   selectedDate: Date | string | null = null;
   selectedTime: string | null = null;
@@ -115,40 +116,46 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   private _timeCheckVal: string | null = null;
 
   async ngAfterViewInit(): Promise<void> {
-    if (this.data.task.reminderId) {
-      const reminder = this._reminderService.getById(this.data.task.reminderId);
-      if (reminder && this.data.task.dueWithTime) {
-        this.selectedReminderCfgId = millisecondsDiffToRemindOption(
-          this.data.task.dueWithTime,
-          reminder.remindAt,
+    // Handle case when task is provided
+    if (this.data.task) {
+      if (this.data.task.reminderId) {
+        const reminder = this._reminderService.getById(this.data.task.reminderId);
+        if (reminder && this.data.task.dueWithTime) {
+          this.selectedReminderCfgId = millisecondsDiffToRemindOption(
+            this.data.task.dueWithTime,
+            reminder.remindAt,
+          );
+        } else {
+          Log.err('No reminder found for task', this.data.task);
+        }
+        // for tasks without anything scheduled
+      } else if (!this.data.task.dueWithTime) {
+        this.selectedReminderCfgId = TaskReminderOptionId.AtStart;
+      } else {
+        this.selectedReminderCfgId = TaskReminderOptionId.DoNotRemind;
+      }
+
+      if (this.data.task.dueWithTime) {
+        const tzOffset = new Date().getTimezoneOffset() * 60 * 1000;
+        this.selectedDate = new Date(this.data.task.dueWithTime + tzOffset);
+        this.selectedTime = new Date(this.data.task.dueWithTime).toLocaleTimeString(
+          'en-GB',
+          {
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          },
         );
       } else {
-        Log.err('No reminder found for task', this.data.task);
+        this.plannedDayForTask = this.data.task.dueDay || null;
+
+        this.selectedDate = this.plannedDayForTask
+          ? dateStrToUtcDate(this.plannedDayForTask)
+          : null;
       }
-      // for tasks without anything scheduled
-    } else if (!this.data.task.dueWithTime) {
-      this.selectedReminderCfgId = TaskReminderOptionId.AtStart;
     } else {
+      // When no task is provided (select-only mode), set default reminder config
       this.selectedReminderCfgId = TaskReminderOptionId.DoNotRemind;
-    }
-
-    if (this.data.task.dueWithTime) {
-      const tzOffset = new Date().getTimezoneOffset() * 60 * 1000;
-      this.selectedDate = new Date(this.data.task.dueWithTime + tzOffset);
-      this.selectedTime = new Date(this.data.task.dueWithTime).toLocaleTimeString(
-        'en-GB',
-        {
-          hour: '2-digit',
-          minute: '2-digit',
-          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        },
-      );
-    } else {
-      this.plannedDayForTask = this.data.task.dueDay || null;
-
-      this.selectedDate = this.plannedDayForTask
-        ? dateStrToUtcDate(this.plannedDayForTask)
-        : null;
     }
 
     if (this.data.targetDay) {
@@ -222,8 +229,8 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     }
   }
 
-  close(isSuccess: boolean = false): void {
-    this._matDialogRef.close(isSuccess);
+  close(result: boolean | { date: Date | null; time: string | null } = false): void {
+    this._matDialogRef.close(result);
   }
 
   dateSelected(newDate: Date): void {
@@ -236,6 +243,12 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   }
 
   remove(): void {
+    // Only handle remove if task is provided
+    if (!this.data.task) {
+      this.close(false);
+      return;
+    }
+
     // TODO simplify
     if (this.data.task.reminderId) {
       this._store.dispatch(
@@ -308,6 +321,15 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       return;
     }
 
+    // If in select-due-only mode, return the selected values instead of dispatching actions
+    if (this.data.isSelectDueOnly) {
+      this.close({
+        date: this.selectedDate as Date,
+        time: this.selectedTime,
+      });
+      return;
+    }
+
     const newDayDate = new Date(this.selectedDate);
     const newDay = getDbDateStr(newDayDate);
 
@@ -315,7 +337,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
 
     if (this.selectedTime) {
       this._scheduleWithTime();
-    } else if (this.data.task.dueDay === newDay) {
+    } else if (this.data.task && this.data.task.dueDay === newDay) {
       const formattedDate =
         newDay == getDbDateStr()
           ? this._translateService.instant(T.G.TODAY_TAG_TITLE)
@@ -335,6 +357,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
 
   private _handleReminderRemoval(): void {
     if (
+      this.data.task &&
       this.selectedReminderCfgId === TaskReminderOptionId.DoNotRemind &&
       typeof this.data.task.reminderId === 'string'
     ) {
@@ -350,6 +373,11 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   }
 
   private _scheduleWithTime(): void {
+    // Only schedule if task is provided
+    if (!this.data.task) {
+      return;
+    }
+
     const task = this.data.task;
     const newDate = new Date(
       getDateTimeFromClockString(this.selectedTime as string, this.selectedDate as Date),
@@ -369,6 +397,11 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   }
 
   private async _planForDay(newDay: string): Promise<void> {
+    // Only plan if task is provided
+    if (!this.data.task) {
+      return;
+    }
+
     this._store.dispatch(
       PlannerActions.planTaskForDay({
         task: this.data.task,
