@@ -176,6 +176,7 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
 
   dateDisplay = computed(() => {
     const date = this.selectedDate();
+    const time = this.selectedTime();
     if (!date) return null;
 
     const today = new Date();
@@ -183,7 +184,7 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
     tomorrow.setDate(tomorrow.getDate() + 1);
 
     if (this.isSameDate(date, today)) {
-      return 'Today';
+      return time ? time : 'Today';
     } else if (this.isSameDate(date, tomorrow)) {
       return 'Tomorrow';
     } else {
