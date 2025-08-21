@@ -46,15 +46,17 @@
         </mat-icon>
       </button>
 
-      <button
-        mat-icon-button
-        class="switch-add-to-btn"
-        (click)="toggleIsAddToBacklog()"
-        [matTooltip]="localIsAddToBacklog() ? 'Add to today' : 'Add to backlog'"
-        matTooltipPosition="above"
-      >
-        <mat-icon>{{ localIsAddToBacklog() ? 'inbox' : 'today' }}</mat-icon>
-      </button>
+      @if (selectedProject()?.isEnableBacklog) {
+        <button
+          mat-icon-button
+          class="switch-add-to-btn"
+          (click)="toggleIsAddToBacklog()"
+          [matTooltip]="localIsAddToBacklog() ? 'Add to today' : 'Add to backlog'"
+          matTooltipPosition="above"
+        >
+          <mat-icon>{{ localIsAddToBacklog() ? 'inbox' : 'today' }}</mat-icon>
+        </button>
+      }
 
       <button
         mat-icon-button
