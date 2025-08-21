@@ -141,6 +141,7 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   inputEl = viewChild<ElementRef>('inputEl');
   projectMenuTrigger = viewChild('projectMenuTrigger', { read: MatMenuTrigger });
   tagsMenuTrigger = viewChild('tagsMenuTrigger', { read: MatMenuTrigger });
+  estimateMenuTrigger = viewChild('estimateMenuTrigger', { read: MatMenuTrigger });
   titleControl = new FormControl<string>('');
 
   // Use computed values from the state service
@@ -347,6 +348,8 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
       if (result && typeof result === 'object' && result.date) {
         this._taskInputState.updateDate(result.date, result.time);
       }
+      // Always refocus input after dialog closes
+      this._focusInput();
     });
   }
 
@@ -552,6 +555,17 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
     }
   }
 
+  onEstimateMenuClick(event: Event): void {
+    event.stopPropagation();
+    const estimateTrigger = this.estimateMenuTrigger();
+    if (estimateTrigger) {
+      // Set up refocus when menu closes
+      estimateTrigger.menuClosed.pipe(first()).subscribe(() => {
+        this._focusInput();
+      });
+    }
+  }
+
   onInputKeydown(event: KeyboardEvent): void {
     if (event.key === '+') {
       event.preventDefault();
@@ -568,15 +582,14 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
 
   private async _confirmNewTags(): Promise<boolean> {
     const newTags = this.newTagTitles();
-    const tagList = newTags.map((tag) => `<li><strong>#${tag}</strong></li>`).join('');
+    const tagList = newTags.map((tag) => `<li><strong>${tag}</strong></li>`).join('');
 
     const dialogRef = this._matDialog.open(DialogConfirmComponent, {
       data: {
         title: 'Create New Tags',
-        titleIcon: 'new_releases',
         message: `The following tags don't exist yet. Do you want to create them?<ul>${tagList}</ul>`,
         okTxt: 'Create Tags',
-        cancelTxt: 'Skip Tags',
+        cancelTxt: 'Skip',
       },
       disableClose: false,
       autoFocus: true,
