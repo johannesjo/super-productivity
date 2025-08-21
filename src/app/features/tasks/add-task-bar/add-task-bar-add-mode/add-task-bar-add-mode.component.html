@@ -109,7 +109,7 @@
       (click)="openScheduleDialog()"
       [class.has-value]="selectedDate()"
     >
-      <mat-icon>event</mat-icon>
+      <mat-icon>{{ selectedTime() ? 'schedule' : 'event' }}</mat-icon>
       <span>{{ dateDisplay() || 'Due' }}</span>
       @if (selectedDate()) {
         <mat-icon
