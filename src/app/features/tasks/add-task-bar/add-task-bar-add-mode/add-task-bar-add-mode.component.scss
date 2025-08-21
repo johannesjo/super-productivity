@@ -21,6 +21,7 @@
     flex: 1;
     display: block;
     width: 100%;
+    height: 42px;
     font-size: 16px;
     box-sizing: border-box;
     border-style: solid;
@@ -31,8 +32,6 @@
     line-height: 42px;
     background: transparent;
     color: inherit;
-    resize: none;
-    overflow: hidden;
     font-family: inherit;
   }
 
