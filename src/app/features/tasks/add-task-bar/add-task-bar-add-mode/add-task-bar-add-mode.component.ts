@@ -23,6 +23,7 @@ import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { AsyncPipe } from '@angular/common';
 import { TaskService } from '../../task.service';
 import { WorkContextService } from '../../../work-context/work-context.service';
+import { WorkContextType } from '../../../work-context/work-context.model';
 import { ProjectService } from '../../../project/project.service';
 import { TagService } from '../../../tag/tag.service';
 import { GlobalConfigService } from '../../../config/global-config.service';
@@ -236,6 +237,7 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
 
   ngOnInit(): void {
     this.setupDefaultProject();
+    this.setupDefaultDate();
     this.setupTextParsing();
   }
 
@@ -252,7 +254,7 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
           let defaultProject: Project | undefined;
 
           // First try to use the current work context project
-          if (workContext?.type === 'PROJECT') {
+          if (workContext?.type === WorkContextType.PROJECT) {
             defaultProject = projects.find((p) => p.id === workContext.id);
           }
 
@@ -263,6 +265,22 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
 
           if (defaultProject) {
             this._taskInputState.updateProject(defaultProject);
+          }
+        }
+      });
+  }
+
+  private setupDefaultDate(): void {
+    // Set the default date to "Today" when on the Today list
+    this._workContextService.activeWorkContext$
+      .pipe(first(), takeUntilDestroyed(this._destroyRef))
+      .subscribe((workContext) => {
+        // Only set default if no date is currently selected
+        if (!this.selectedDate()) {
+          // Check if we're on the Today tag context
+          if (workContext?.type === WorkContextType.TAG && workContext?.id === 'TODAY') {
+            const today = new Date();
+            this._taskInputState.updateDate(today);
           }
         }
       });
@@ -424,7 +442,7 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
         let defaultProject: Project | undefined;
 
         // First try to use the current work context project
-        if (workContext?.type === 'PROJECT') {
+        if (workContext?.type === WorkContextType.PROJECT) {
           defaultProject = projects.find((p) => p.id === workContext.id);
         }
 
