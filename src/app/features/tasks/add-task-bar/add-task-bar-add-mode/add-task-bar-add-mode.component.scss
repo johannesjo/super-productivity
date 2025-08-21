@@ -77,13 +77,11 @@
 
   .action-btn {
     cursor: pointer;
+    opacity: 0.5;
 
     &.has-value {
       background-color: var(--bg-lightest);
-    }
-
-    &.auto-detected {
-      border-style: dashed;
+      opacity: 1;
     }
 
     .clear-icon {

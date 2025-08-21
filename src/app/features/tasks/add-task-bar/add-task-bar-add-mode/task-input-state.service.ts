@@ -91,6 +91,7 @@ export class TaskInputStateService {
       estimate:
         parseResult?.taskChanges?.timeEstimate || (isInUIMode ? current.estimate : null),
     }));
+    console.log(this.state());
   }
 
   private extractTimeFromDate(
