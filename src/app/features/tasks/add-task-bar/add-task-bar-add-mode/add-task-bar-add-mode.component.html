@@ -79,6 +79,7 @@
       [matMenuTriggerFor]="projectMenu"
       [class.has-value]="selectedProject()"
       [class.auto-detected]="isProjectAutoDetected()"
+      [class.menu-open]="isProjectMenuOpen()"
       (click)="onProjectMenuClick($event)"
     >
       <mat-icon [style.color]="selectedProject()!.theme.primary"
@@ -94,6 +95,7 @@
       [matMenuTriggerFor]="tagsMenu"
       [class.has-value]="selectedTags().length > 0 || hasNewTags()"
       [class.has-new-tags]="hasNewTags()"
+      [class.menu-open]="isTagsMenuOpen()"
       (click)="onTagsMenuClick($event)"
     >
       @if (selectedTags().length === 0 && newTagTitles().length === 0) {
@@ -147,6 +149,7 @@
       class="action-btn estimate-btn"
       [matMenuTriggerFor]="estimateMenu"
       [class.has-value]="selectedEstimate()"
+      [class.menu-open]="isEstimateMenuOpen()"
       (click)="onEstimateMenuClick($event)"
     >
       <mat-icon>timer</mat-icon>

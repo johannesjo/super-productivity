@@ -91,6 +91,11 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   localIsAddToBottom = signal<boolean>(false);
   localIsAddToBacklog = signal<boolean>(false);
 
+  // Track open menus for highlighting
+  isProjectMenuOpen = signal<boolean>(false);
+  isTagsMenuOpen = signal<boolean>(false);
+  isEstimateMenuOpen = signal<boolean>(false);
+
   afterTaskAdd = output<{ taskId: string; isAddToBottom: boolean }>();
   blurred = output<void>();
   switchToSearchMode = output<void>();
@@ -537,8 +542,10 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
     event.stopPropagation();
     const projectTrigger = this.projectMenuTrigger();
     if (projectTrigger) {
+      this.isProjectMenuOpen.set(true);
       // Set up refocus when menu closes
       projectTrigger.menuClosed.pipe(first()).subscribe(() => {
+        this.isProjectMenuOpen.set(false);
         this._focusInput();
       });
     }
@@ -548,8 +555,10 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
     event.stopPropagation();
     const tagsTrigger = this.tagsMenuTrigger();
     if (tagsTrigger) {
+      this.isTagsMenuOpen.set(true);
       // Set up refocus when menu closes
       tagsTrigger.menuClosed.pipe(first()).subscribe(() => {
+        this.isTagsMenuOpen.set(false);
         this._focusInput();
       });
     }
@@ -559,8 +568,10 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
     event.stopPropagation();
     const estimateTrigger = this.estimateMenuTrigger();
     if (estimateTrigger) {
+      this.isEstimateMenuOpen.set(true);
       // Set up refocus when menu closes
       estimateTrigger.menuClosed.pipe(first()).subscribe(() => {
+        this.isEstimateMenuOpen.set(false);
         this._focusInput();
       });
     }
@@ -571,9 +582,11 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
       event.preventDefault();
       const projectTrigger = this.projectMenuTrigger();
       if (projectTrigger) {
+        this.isProjectMenuOpen.set(true);
         projectTrigger.openMenu();
         // Refocus input when menu closes
         projectTrigger.menuClosed.pipe(first()).subscribe(() => {
+          this.isProjectMenuOpen.set(false);
           this._focusInput();
         });
       }

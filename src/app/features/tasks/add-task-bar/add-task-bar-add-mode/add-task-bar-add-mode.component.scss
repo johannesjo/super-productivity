@@ -92,6 +92,20 @@
       opacity: 1;
     }
 
+    // Highlight when menu is open
+    &.menu-open {
+      background-color: rgba(0, 0, 0, 0.05);
+      opacity: 1;
+
+      @include darkTheme() {
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+
+      mat-icon {
+        color: inherit;
+      }
+    }
+
     .new-tags-indicator {
       font-size: 0.8em;
       font-weight: normal;
