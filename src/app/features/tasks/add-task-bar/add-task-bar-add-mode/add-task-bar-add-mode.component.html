@@ -134,10 +134,12 @@
     }
 
     <button
+      #estimateMenuTrigger
       mat-button
       class="action-btn estimate-btn"
       [matMenuTriggerFor]="estimateMenu"
       [class.has-value]="selectedEstimate()"
+      (click)="onEstimateMenuClick($event)"
     >
       <mat-icon>timer</mat-icon>
       <span>{{ estimateDisplay() || 'Estimate' }}</span>
