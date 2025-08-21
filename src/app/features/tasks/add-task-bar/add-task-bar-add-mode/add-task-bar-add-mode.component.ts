@@ -207,12 +207,19 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
       },
       { allowSignalWrites: true },
     );
+
+    // Set up text sync with state service (must be in constructor for injection context)
+    effect(() => {
+      const currentText = this._taskInputState.currentState().rawText;
+      if (currentText !== this.titleControl.value) {
+        this.titleControl.setValue(currentText, { emitEvent: false });
+      }
+    });
   }
 
   ngOnInit(): void {
     this.setupDefaultProject();
     this.setupTextParsing();
-    this.setupTextSync();
   }
 
   private setupDefaultProject(): void {
@@ -246,15 +253,6 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
           allTags,
         );
       });
-  }
-
-  private setupTextSync(): void {
-    effect(() => {
-      const currentText = this._taskInputState.currentState().rawText;
-      if (currentText !== this.titleControl.value) {
-        this.titleControl.setValue(currentText, { emitEvent: false });
-      }
-    });
   }
 
   ngAfterViewInit(): void {
