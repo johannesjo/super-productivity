@@ -138,6 +138,8 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   ];
 
   inputEl = viewChild<ElementRef>('inputEl');
+  projectMenuTrigger = viewChild('projectMenuTrigger', { read: MatMenuTrigger });
+  tagsMenuTrigger = viewChild('tagsMenuTrigger', { read: MatMenuTrigger });
   titleControl = new FormControl<string>('');
 
   // Use computed values from the state service
@@ -171,6 +173,22 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
 
   activeWorkContext$ = this._workContextService.activeWorkContext$;
   mentionConfig$ = this._addTaskBarService.getMentionConfig$();
+
+  // Tag-only mentions configuration
+  tagMentions = this._tagService.tagsNoMyDayAndNoList$;
+  tagMentionConfig = combineLatest([
+    this._globalConfigService.shortSyntax$,
+    this._tagService.tagsNoMyDayAndNoList$,
+  ]).pipe(
+    map(([cfg, tagSuggestions]) => {
+      if (cfg.isEnableTag) {
+        return {
+          mentions: [{ items: tagSuggestions, labelKey: 'title', triggerChar: '#' }],
+        };
+      }
+      return { mentions: [] };
+    }),
+  );
 
   estimateDisplay = computed(() => {
     const estimate = this.selectedEstimate();
@@ -492,6 +510,42 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
 
   toggleIsAddToBacklog(): void {
     this.localIsAddToBacklog.update((v) => !v);
+  }
+
+  onProjectMenuClick(event: Event): void {
+    event.stopPropagation();
+    const projectTrigger = this.projectMenuTrigger();
+    if (projectTrigger) {
+      // Set up refocus when menu closes
+      projectTrigger.menuClosed.pipe(first()).subscribe(() => {
+        this._focusInput();
+      });
+    }
+  }
+
+  onTagsMenuClick(event: Event): void {
+    event.stopPropagation();
+    const tagsTrigger = this.tagsMenuTrigger();
+    if (tagsTrigger) {
+      // Set up refocus when menu closes
+      tagsTrigger.menuClosed.pipe(first()).subscribe(() => {
+        this._focusInput();
+      });
+    }
+  }
+
+  onInputKeydown(event: KeyboardEvent): void {
+    if (event.key === '+') {
+      event.preventDefault();
+      const projectTrigger = this.projectMenuTrigger();
+      if (projectTrigger) {
+        projectTrigger.openMenu();
+        // Refocus input when menu closes
+        projectTrigger.menuClosed.pipe(first()).subscribe(() => {
+          this._focusInput();
+        });
+      }
+    }
   }
 
   private async _confirmNewTags(): Promise<boolean> {

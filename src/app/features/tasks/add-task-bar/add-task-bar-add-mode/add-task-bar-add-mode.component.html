@@ -8,12 +8,13 @@
       class="task-input"
       [formControl]="titleControl"
       [tabindex]="tabindex()"
-      [mention]="(mentionConfig$ | async)?.mentions"
-      [mentionConfig]="mentionConfig$ | async"
+      [mention]="tagMentions | async"
+      [mentionConfig]="tagMentionConfig | async"
       placeholder="Add a task... (use + for project, # for tags, @ for dates, t for time estimates)"
       matInput
       spellcheck="false"
       (keydown.enter)="$event.preventDefault(); addTask()"
+      (keydown)="onInputKeydown($event)"
     />
 
     <div class="button-controls">
@@ -72,12 +73,13 @@
 
   <div class="action-buttons">
     <button
+      #projectMenuTrigger
       mat-button
       class="action-btn project-btn"
       [matMenuTriggerFor]="projectMenu"
       [class.has-value]="selectedProject()"
       [class.auto-detected]="isProjectAutoDetected()"
-      (click)="$event.stopPropagation()"
+      (click)="onProjectMenuClick($event)"
     >
       <mat-icon [style.color]="selectedProject()!.theme.primary">{{
         selectedProject()!.icon || 'folder'
@@ -86,11 +88,13 @@
     </button>
 
     <button
+      #tagsMenuTrigger
       mat-button
       class="action-btn tags-btn"
       [matMenuTriggerFor]="tagsMenu"
       [class.has-value]="selectedTags().length > 0 || hasNewTags()"
       [class.has-new-tags]="hasNewTags()"
+      (click)="onTagsMenuClick($event)"
     >
       <mat-icon>label</mat-icon>
       <span>
