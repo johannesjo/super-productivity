@@ -142,6 +142,7 @@ export class WorkContextService {
     switchMap(() => this._store$.select(selectActiveWorkContext)),
     shareReplay(1),
   );
+
   activeWorkContextTTData$ = this.activeWorkContext$.pipe(
     switchMap((ac) => this._timeTrackingService.getWorkStartEndForWorkContext$(ac)),
     shareReplay(1),

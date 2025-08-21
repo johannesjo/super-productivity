@@ -36,6 +36,7 @@ import { devError } from '../../util/dev-error';
 import { selectTaskFeatureState } from '../tasks/store/task.selectors';
 import { getTaskById } from '../tasks/store/task.reducer.util';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Injectable({
   providedIn: 'root',
@@ -47,6 +48,7 @@ export class ProjectService {
   private readonly _timeTrackingService = inject(TimeTrackingService);
 
   list$: Observable<Project[]> = this._store$.pipe(select(selectUnarchivedProjects));
+  list = toSignal(this.list$);
 
   archived$: Observable<Project[]> = this._store$.pipe(select(selectArchivedProjects));
 
