@@ -112,7 +112,11 @@ export class TaskInputStateService {
   }
 
   updateTags(tags: Tag[]): void {
-    this.updateUI({ tags });
+    this.updateUI({
+      tags,
+      // Clear new tag titles when clearing tags
+      newTagTitles: tags.length === 0 ? [] : this.state().newTagTitles,
+    });
   }
 
   toggleTag(tag: Tag): void {
