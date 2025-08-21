@@ -75,18 +75,10 @@
       class="action-btn project-btn"
       [matMenuTriggerFor]="projectMenu"
       [class.has-value]="selectedProject()"
-      [class.auto-detected]="isProjectAutoDetected()"
       (click)="$event.stopPropagation()"
     >
       <mat-icon>folder</mat-icon>
       <span>{{ selectedProject()?.title || 'Project' }}</span>
-      @if (selectedProject()) {
-        <mat-icon
-          class="clear-icon"
-          (click)="clearProject(); $event.stopPropagation()"
-          >close</mat-icon
-        >
-      }
     </button>
 
     <button
@@ -94,7 +86,6 @@
       class="action-btn tags-btn"
       [matMenuTriggerFor]="tagsMenu"
       [class.has-value]="selectedTags().length > 0"
-      [class.auto-detected]="isTagsAutoDetected()"
     >
       <mat-icon>label</mat-icon>
       <span>
@@ -113,10 +104,9 @@
       class="action-btn date-btn"
       [matMenuTriggerFor]="dateMenu"
       [class.has-value]="selectedDate()"
-      [class.auto-detected]="isDateAutoDetected()"
     >
       <mat-icon>event</mat-icon>
-      <span>{{ dateDisplay() || 'Due date' }}</span>
+      <span>{{ dateDisplay() || 'Due' }}</span>
       @if (selectedDate()) {
         <mat-icon
           class="clear-icon"
@@ -128,21 +118,9 @@
 
     <button
       mat-button
-      class="action-btn time-btn"
-      [matMenuTriggerFor]="timeMenu"
-      [class.has-value]="selectedTime()"
-      [disabled]="!selectedDate()"
-    >
-      <mat-icon>schedule</mat-icon>
-      <span>{{ selectedTime() || 'Time' }}</span>
-    </button>
-
-    <button
-      mat-button
       class="action-btn estimate-btn"
       [matMenuTriggerFor]="estimateMenu"
       [class.has-value]="selectedEstimate()"
-      [class.auto-detected]="isEstimateAutoDetected()"
     >
       <mat-icon>timer</mat-icon>
       <span>{{ estimateDisplay() || 'Estimate' }}</span>

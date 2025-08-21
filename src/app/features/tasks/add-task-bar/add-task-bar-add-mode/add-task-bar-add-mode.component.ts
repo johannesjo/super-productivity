@@ -1,29 +1,26 @@
 import {
-  Component,
-  ChangeDetectionStrategy,
-  inject,
-  output,
-  input,
-  signal,
-  computed,
-  viewChild,
-  ElementRef,
   AfterViewInit,
-  OnInit,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
   DestroyRef,
   effect,
+  ElementRef,
+  inject,
+  input,
+  OnInit,
+  output,
+  signal,
+  viewChild,
 } from '@angular/core';
-import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MentionModule } from 'angular-mentions';
 import { MatInput } from '@angular/material/input';
-import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
-import { MatMenuItem } from '@angular/material/menu';
-import { MatChip, MatChipSet } from '@angular/material/chips';
-import { AsyncPipe, DatePipe } from '@angular/common';
-import { TranslatePipe } from '@ngx-translate/core';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { AsyncPipe } from '@angular/common';
 import { TaskService } from '../../task.service';
 import { WorkContextService } from '../../../work-context/work-context.service';
 import { ProjectService } from '../../../project/project.service';
@@ -32,9 +29,8 @@ import { GlobalConfigService } from '../../../config/global-config.service';
 import { AddTaskBarService } from '../add-task-bar.service';
 import { T } from '../../../../t.const';
 import { TaskCopy } from '../../task.model';
-import { map } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter, first, map } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
-import { debounceTime, distinctUntilChanged, filter, first } from 'rxjs/operators';
 import { Project } from '../../../project/project.model';
 import { Tag } from '../../../tag/tag.model';
 import { getLocalDateStr } from '../../../../util/get-local-date-str';
@@ -51,6 +47,7 @@ import { TaskInputStateService } from './task-input-state.service';
   templateUrl: './add-task-bar-add-mode.component.html',
   styleUrls: ['./add-task-bar-add-mode.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
   imports: [
     FormsModule,
     ReactiveFormsModule,
@@ -62,11 +59,7 @@ import { TaskInputStateService } from './task-input-state.service';
     MatMenu,
     MatMenuTrigger,
     MatMenuItem,
-    MatChip,
-    MatChipSet,
     AsyncPipe,
-    DatePipe,
-    TranslatePipe,
     MentionModule,
   ],
   providers: [TaskInputStateService],
@@ -171,7 +164,6 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   tags$ = this._tagService.tagsNoMyDayAndNoList$;
 
   activeWorkContext$ = this._workContextService.activeWorkContext$;
-  shortSyntaxConfig$ = this._globalConfigService.shortSyntax$;
   mentionConfig$ = this._addTaskBarService.getMentionConfig$();
 
   estimateDisplay = computed(() => {

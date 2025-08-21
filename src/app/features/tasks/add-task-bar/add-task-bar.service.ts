@@ -137,6 +137,7 @@ export class AddTaskBarService {
     );
   }
 
+  // TODO improve this
   getMentionConfig$(): Observable<MentionConfig> {
     return combineLatest([
       this._globalConfigService.shortSyntax$,
