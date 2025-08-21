@@ -375,6 +375,10 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
     this._taskInputState.updateDate(null);
   }
 
+  clearTags(): void {
+    this._taskInputState.updateTags([]);
+  }
+
   clearEstimate(): void {
     this._taskInputState.updateEstimate(null);
   }

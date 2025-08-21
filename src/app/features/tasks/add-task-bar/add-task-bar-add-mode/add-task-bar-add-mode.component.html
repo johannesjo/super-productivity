@@ -121,6 +121,18 @@
       }
     </button>
 
+    @if (selectedTags().length > 0 || hasNewTags()) {
+      <button
+        mat-button
+        class="clear-btn"
+        (click)="clearTags(); $event.stopPropagation()"
+        [matTooltip]="'Clear tags'"
+        matTooltipPosition="above"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    }
+
     <button
       mat-button
       class="action-btn date-btn"
