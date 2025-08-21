@@ -250,7 +250,7 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   private setupTextParsing(): void {
     combineLatest([
       this.titleControl.valueChanges.pipe(
-        debounceTime(300),
+        debounceTime(50),
         distinctUntilChanged(),
         filter((val) => typeof val === 'string' && val.length > 0),
       ),

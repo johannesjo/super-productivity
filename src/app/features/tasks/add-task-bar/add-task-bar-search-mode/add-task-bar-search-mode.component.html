@@ -16,9 +16,7 @@
         [formControl]="searchControl"
         [tabindex]="tabindex()"
         [matAutocomplete]="autoEl"
-        placeholder="{{
-          searchType() === 'tasks' ? 'Search existing tasks...' : 'Search issues...'
-        }}"
+        placeholder="Search tasks and issues..."
         matInput
       />
 
@@ -32,18 +30,6 @@
         >
           <mat-icon>add</mat-icon>
         </button>
-
-        <button
-          mat-icon-button
-          class="search-type-toggle"
-          (click)="toggleSearchType()"
-          [matTooltip]="
-            searchType() === 'tasks' ? 'Switch to issue search' : 'Switch to task search'
-          "
-          matTooltipPosition="above"
-        >
-          <mat-icon>{{ searchType() === 'tasks' ? 'task' : 'bug_report' }}</mat-icon>
-        </button>
       </div>
     </div>
   </div>
@@ -51,17 +37,11 @@
   <div class="search-info">
     @if (searchControl.value) {
       <span class="info-text">
-        Searching {{ searchType() === 'tasks' ? 'tasks' : 'issues' }} for "{{
-          searchControl.value
-        }}"
+        Searching tasks and issues for "{{ searchControl.value }}"
       </span>
     } @else {
       <span class="info-text muted">
-        {{
-          searchType() === 'tasks'
-            ? 'Search for existing tasks to add to your current context'
-            : 'Search for issues from connected providers'
-        }}
+        Search for existing tasks and issues from connected providers
       </span>
     }
   </div>
@@ -87,6 +67,10 @@
               class="option-icon"
               [svgIcon]="item.issueType | issueIcon"
             ></mat-icon>
+          } @else if (item.taskId && item.isArchivedTask) {
+            <mat-icon class="option-icon archived">archive</mat-icon>
+          } @else if (item.taskId) {
+            <mat-icon class="option-icon">task</mat-icon>
           } @else if (!item.ctx) {
             <mat-icon class="option-icon">library_books</mat-icon>
           }
@@ -112,9 +96,7 @@
 
     @if ((suggestions$ | async)?.length === 0 && searchControl.value && !isLoading()) {
       <mat-option disabled>
-        <span class="no-results"
-          >No {{ searchType() === 'tasks' ? 'tasks' : 'issues' }} found</span
-        >
+        <span class="no-results">No tasks or issues found</span>
       </mat-option>
     }
   </mat-autocomplete>

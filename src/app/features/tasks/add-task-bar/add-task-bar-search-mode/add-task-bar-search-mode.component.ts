@@ -29,7 +29,7 @@ import { SnackService } from '../../../../core/snack/snack.service';
 import { T } from '../../../../t.const';
 import { AddTaskSuggestion } from '../add-task-suggestions.model';
 import { AddTaskBarService } from '../add-task-bar.service';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
 import { debounceTime, switchMap, map, tap, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { IssueIconPipe } from '../../../issue/issue-icon/issue-icon.pipe';
@@ -83,7 +83,6 @@ export class AddTaskBarSearchModeComponent implements AfterViewInit {
   searchControl = new FormControl<string>('');
 
   isLoading = signal(false);
-  searchType = signal<'tasks' | 'issues'>('tasks');
 
   activatedSuggestion$ = new BehaviorSubject<AddTaskSuggestion | null>(null);
 
@@ -96,10 +95,32 @@ export class AddTaskBarSearchModeComponent implements AfterViewInit {
         return of([]);
       }
 
-      if (this.searchType() === 'issues') {
-        return this._issueService.searchAllEnabledIssueProviders$(searchTerm).pipe(
+      // Search both tasks and issues simultaneously
+      const taskSearch$ = this._taskService.allTasks$.pipe(
+        map((tasks) => {
+          const searchLower = searchTerm.toLowerCase();
+          return tasks
+            .filter((task) => task.title.toLowerCase().includes(searchLower))
+            .slice(0, 15) // Limit task results to leave room for issues
+            .map(
+              (task) =>
+                ({
+                  title: task.title,
+                  taskId: task.id,
+                  projectId: task.projectId,
+                  isArchivedTask: task.isDone,
+                }) as AddTaskSuggestion,
+            );
+        }),
+        catchError(() => of([] as AddTaskSuggestion[])),
+      );
+
+      const issueSearch$ = this._issueService
+        .searchAllEnabledIssueProviders$(searchTerm)
+        .pipe(
           map((issueSuggestions) =>
-            issueSuggestions.map(
+            issueSuggestions.slice(0, 15).map(
+              // Limit issue results
               (issueSuggestion) =>
                 ({
                   title: issueSuggestion.title,
@@ -110,38 +131,14 @@ export class AddTaskBarSearchModeComponent implements AfterViewInit {
                 }) as AddTaskSuggestion,
             ),
           ),
-          tap(() => this.isLoading.set(false)),
-          catchError(() => {
-            this.isLoading.set(false);
-            return of([]);
-          }),
+          catchError(() => of([] as AddTaskSuggestion[])),
         );
-      } else {
-        // Search existing tasks
-        return this._taskService.allTasks$.pipe(
-          map((tasks) => {
-            const searchLower = searchTerm.toLowerCase();
-            return tasks
-              .filter(
-                (task) => !task.isDone && task.title.toLowerCase().includes(searchLower),
-              )
-              .slice(0, 20) // Limit results
-              .map(
-                (task) =>
-                  ({
-                    title: task.title,
-                    taskId: task.id,
-                    projectId: task.projectId,
-                  }) as AddTaskSuggestion,
-              );
-          }),
-          tap(() => this.isLoading.set(false)),
-          catchError(() => {
-            this.isLoading.set(false);
-            return of([]);
-          }),
-        );
-      }
+
+      // Combine both searches
+      return combineLatest([taskSearch$, issueSearch$]).pipe(
+        map(([tasks, issues]) => [...tasks, ...issues]),
+        tap(() => this.isLoading.set(false)),
+      );
     }),
     map((suggestions) => {
       const taskIdsToExclude = this.taskIdsToExclude() || [];
@@ -224,12 +221,6 @@ export class AddTaskBarSearchModeComponent implements AfterViewInit {
       this.searchControl.setValue('');
       this.switchToAddMode.emit();
     }
-  }
-
-  toggleSearchType(): void {
-    this.searchType.set(this.searchType() === 'tasks' ? 'issues' : 'tasks');
-    this.searchControl.setValue('');
-    this._focusInput();
   }
 
   private _focusInput(): void {
