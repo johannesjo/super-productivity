@@ -218,13 +218,30 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   }
 
   private setupDefaultProject(): void {
-    this._projectService.list$
-      .pipe(takeUntilDestroyed(this._destroyRef))
-      .subscribe((projects) => {
-        const inboxProject = projects.find((p) => p.id === 'INBOX_PROJECT');
-        // Always ensure inbox project is selected if no other project is set
-        if (inboxProject && !this.selectedProject()) {
-          this._taskInputState.updateProject(inboxProject);
+    // Set the initial project based on current work context
+    combineLatest([
+      this._projectService.list$,
+      this._workContextService.activeWorkContext$,
+    ])
+      .pipe(first(), takeUntilDestroyed(this._destroyRef))
+      .subscribe(([projects, workContext]) => {
+        // Only set default if no project is currently selected
+        if (!this.selectedProject()) {
+          let defaultProject: Project | undefined;
+
+          // First try to use the current work context project
+          if (workContext?.type === 'PROJECT') {
+            defaultProject = projects.find((p) => p.id === workContext.id);
+          }
+
+          // Fall back to inbox if no context project found
+          if (!defaultProject) {
+            defaultProject = projects.find((p) => p.id === 'INBOX_PROJECT');
+          }
+
+          if (defaultProject) {
+            this._taskInputState.updateProject(defaultProject);
+          }
         }
       });
   }
@@ -314,13 +331,6 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
     this._taskInputState.updateEstimate(null);
   }
 
-  private setInboxProject(): void {
-    this._projectService.list$.pipe(first()).subscribe((projects) => {
-      const inboxProject = projects.find((p) => p.id === 'INBOX_PROJECT');
-      this._taskInputState.updateProject(inboxProject || null);
-    });
-  }
-
   async addTask(): Promise<void> {
     const currentState = this._taskInputState.currentState();
     const title = currentState.cleanText || this.titleControl.value?.trim();
@@ -369,11 +379,27 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   private resetForm(): void {
     this.titleControl.setValue('');
 
-    // Get inbox project and reset with it as default
-    this._projectService.list$.pipe(first()).subscribe((projects) => {
-      const inboxProject = projects.find((p) => p.id === 'INBOX_PROJECT');
-      this._taskInputState.reset(inboxProject);
-    });
+    // Reset with current work context project as default
+    combineLatest([
+      this._projectService.list$,
+      this._workContextService.activeWorkContext$,
+    ])
+      .pipe(first())
+      .subscribe(([projects, workContext]) => {
+        let defaultProject: Project | undefined;
+
+        // First try to use the current work context project
+        if (workContext?.type === 'PROJECT') {
+          defaultProject = projects.find((p) => p.id === workContext.id);
+        }
+
+        // Fall back to inbox if no context project found
+        if (!defaultProject) {
+          defaultProject = projects.find((p) => p.id === 'INBOX_PROJECT');
+        }
+
+        this._taskInputState.reset(defaultProject || null);
+      });
 
     this._focusInput();
   }
