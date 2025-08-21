@@ -72,7 +72,7 @@
   border-top: 1px dashed var(--extra-border-color);
 
   @include mq(xs) {
-    gap: var(--s);
+    gap: 2px;
   }
 
   .action-btn {
@@ -97,6 +97,67 @@
       font-weight: normal;
       opacity: 0.8;
       margin-left: 4px;
+    }
+
+    .tags-display {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      max-width: 240px;
+      overflow: hidden;
+      position: relative;
+
+      .tag-item {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        flex-shrink: 0;
+        min-width: 0;
+
+        &.new-tag {
+          .tag-title {
+            font-style: italic;
+            opacity: 0.8;
+          }
+
+          mat-icon {
+            color: var(--color-accent);
+          }
+        }
+
+        mat-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+          line-height: 16px;
+        }
+
+        .tag-title {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          min-width: 0;
+          font-size: 0.9em;
+        }
+
+        // Last visible tag gets truncated with ellipsis if needed
+        &:last-child .tag-title {
+          text-overflow: ellipsis;
+        }
+      }
+
+      //
+      //// Gradient fade effect for overflow indication
+      //&::after {
+      //  content: '';
+      //  position: absolute;
+      //  right: 0;
+      //  top: 0;
+      //  bottom: 0;
+      //  width: 12px;
+      //  background: linear-gradient(to right, transparent, var(--bg-lightest));
+      //  pointer-events: none;
+      //}
     }
   }
 }

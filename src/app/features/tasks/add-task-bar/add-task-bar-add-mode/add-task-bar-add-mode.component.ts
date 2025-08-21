@@ -400,7 +400,7 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
     };
 
     if (this.selectedDate()) {
-      const date = this.selectedDate()!;
+      const date = new Date(this.selectedDate()!);
       if (this.selectedTime()) {
         const [hours, minutes] = this.selectedTime()!.split(':').map(Number);
         date.setHours(hours, minutes, 0, 0);
