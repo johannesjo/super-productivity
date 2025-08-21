@@ -81,9 +81,9 @@
       [class.auto-detected]="isProjectAutoDetected()"
       (click)="onProjectMenuClick($event)"
     >
-      <mat-icon [style.color]="selectedProject()!.theme.primary">{{
-        selectedProject()!.icon || 'folder'
-      }}</mat-icon>
+      <mat-icon [style.color]="selectedProject()!.theme.primary"
+        >{{ selectedProject()!.icon || 'folder' }}
+      </mat-icon>
       <span>{{ selectedProject()?.title }}</span>
     </button>
 
@@ -96,19 +96,27 @@
       [class.has-new-tags]="hasNewTags()"
       (click)="onTagsMenuClick($event)"
     >
-      <mat-icon>label</mat-icon>
-      <span>
-        @if (selectedTags().length === 0 && newTagTitles().length === 0) {
-          Tags
-        } @else if (selectedTags().length === 1 && newTagTitles().length === 0) {
-          {{ selectedTags()[0].title }}
-        } @else {
-          {{ selectedTags().length + newTagTitles().length }} tags
-          @if (hasNewTags()) {
-            <small class="new-tags-indicator">({{ newTagTitles().length }} new)</small>
+      @if (selectedTags().length === 0 && newTagTitles().length === 0) {
+        <mat-icon>label</mat-icon>
+        Tags
+      } @else {
+        <div class="tags-display">
+          @for (tag of selectedTags(); track tag.id) {
+            <div class="tag-item">
+              <mat-icon [style.color]="tag.color || tag.theme?.primary">
+                {{ tag.icon || 'label' }}
+              </mat-icon>
+              <span class="tag-title">{{ tag.title }}</span>
+            </div>
           }
-        }
-      </span>
+          @for (newTag of newTagTitles(); track newTag) {
+            <div class="tag-item new-tag">
+              <mat-icon>new_releases</mat-icon>
+              <span class="tag-title">{{ newTag }}</span>
+            </div>
+          }
+        </div>
+      }
     </button>
 
     <button
@@ -165,9 +173,9 @@
       mat-menu-item
       (click)="onProjectSelect(project)"
     >
-      <mat-icon [style.color]="project.theme.primary">{{
-        project.icon || 'folder'
-      }}</mat-icon>
+      <mat-icon [style.color]="project.theme.primary"
+        >{{ project.icon || 'folder' }}
+      </mat-icon>
       {{ project.title }}
     </button>
   }
