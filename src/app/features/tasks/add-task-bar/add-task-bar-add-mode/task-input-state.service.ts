@@ -73,9 +73,7 @@ export class TaskInputStateService {
         ? (parseResult.taskChanges.tagIds
             .map((id) => allTags.find((t) => t.id === id))
             .filter(Boolean) as Tag[])
-        : isInUIMode
-          ? current.tags
-          : [],
+        : current.tags, // Always keep current tags if not parsed from text
 
       date: parseResult?.taskChanges?.dueWithTime
         ? new Date(parseResult.taskChanges.dueWithTime)
@@ -88,12 +86,9 @@ export class TaskInputStateService {
             parseResult.taskChanges.dueWithTime,
             parseResult.taskChanges.hasPlannedTime,
           )
-        : isInUIMode
-          ? current.time
-          : null,
+        : current.time, // Always keep current time if not parsed from text
 
-      estimate:
-        parseResult?.taskChanges?.timeEstimate || (isInUIMode ? current.estimate : null),
+      estimate: parseResult?.taskChanges?.timeEstimate || current.estimate, // Always keep current estimate if not parsed
     }));
   }
 
@@ -151,12 +146,15 @@ export class TaskInputStateService {
   }
 
   reset(inboxProject?: Project | null): void {
+    // Keep tags, time, date, and estimate for convenience
+    const current = this.state();
+
     this.state.set({
-      project: inboxProject || null,
-      tags: [],
-      date: null,
-      time: null,
-      estimate: null,
+      project: inboxProject || current.project || null,
+      tags: current.tags, // Keep tags
+      date: current.date, // Keep date preference for batch task creation
+      time: current.time, // Keep time preference
+      estimate: current.estimate, // Keep estimate preference
       rawText: '',
       cleanText: '',
       isUsingUI: false,
