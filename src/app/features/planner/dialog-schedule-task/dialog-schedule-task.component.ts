@@ -154,8 +154,8 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
           : null;
       }
     } else {
-      // When no task is provided (select-only mode), set default reminder config
-      this.selectedReminderCfgId = TaskReminderOptionId.DoNotRemind;
+      // When no task is provided (select-only mode), set default reminder to "When it starts"
+      this.selectedReminderCfgId = TaskReminderOptionId.AtStart;
     }
 
     if (this.data.targetDay) {
