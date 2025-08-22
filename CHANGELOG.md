@@ -1,3 +1,19 @@
+## [14.3.4](https://github.com/johannesjo/super-productivity/compare/v14.3.3...v14.3.4) (2025-08-22)
+
+### Bug Fixes
+
+- avoid re-fetching issue data when tracking time ([6f590e2](https://github.com/johannesjo/super-productivity/commit/6f590e208f1bf3f0da4dde693526df2d8152886d))
+- copy to clipboard ([0a704fa](https://github.com/johannesjo/super-productivity/commit/0a704fa74d1e61f331e93996c0dbead4bccd63ce)), closes [#4966](https://github.com/johannesjo/super-productivity/issues/4966)
+- don't capitalize search results [#4967](https://github.com/johannesjo/super-productivity/issues/4967) ([713e784](https://github.com/johannesjo/super-productivity/commit/713e784753723c3bba24acc3a7980f7058d1761a))
+- don't log credentials ([854ced4](https://github.com/johannesjo/super-productivity/commit/854ced4b511e6f03a258cbff6c616f7e908afce5))
+- don't log credentials ([d1a75ec](https://github.com/johannesjo/super-productivity/commit/d1a75ec627cd3c4342ecccdd6f59705f910c8602))
+- github url formatting ([497cde5](https://github.com/johannesjo/super-productivity/commit/497cde51fbeb7bb4470a9eae63938cb89d48a7ed)), closes [#4913](https://github.com/johannesjo/super-productivity/issues/4913)
+- improve requests [#4967](https://github.com/johannesjo/super-productivity/issues/4967) ([b514321](https://github.com/johannesjo/super-productivity/commit/b514321f14749d160f61f0e1262feeb92e902b3f))
+- jira failed to poll [#4976](https://github.com/johannesjo/super-productivity/issues/4976) ([c24a97c](https://github.com/johannesjo/super-productivity/commit/c24a97cdc35411f92a6cfa2467535d160700eda8))
+- make schedule short syntax more reliable ([cc0b80e](https://github.com/johannesjo/super-productivity/commit/cc0b80ee0319c9a896c42047d92b3463a6e498dc))
+- make tracking reminder counter work again ([1418c84](https://github.com/johannesjo/super-productivity/commit/1418c841f4ece9f4a0ff45414f74cf5c48705137))
+- pwa message overlaps popout nav ([eef46f1](https://github.com/johannesjo/super-productivity/commit/eef46f160f5e37aecb9d2690aa4c1c2b7534ccae)), closes [#4968](https://github.com/johannesjo/super-productivity/issues/4968)
+
 ## [14.3.3](https://github.com/johannesjo/super-productivity/compare/v14.3.2...v14.3.3) (2025-08-15)
 
 ### Bug Fixes
