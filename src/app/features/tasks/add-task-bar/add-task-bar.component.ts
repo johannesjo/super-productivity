@@ -279,19 +279,23 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       tap(() => this.isSearchLoading.set(true)),
       debounceTime(300),
       switchMap((searchTerm) => {
-        // Always clear loading state if not in search mode or no search term
-        if (!this.isSearchMode() || !searchTerm || typeof searchTerm !== 'string') {
+        // Always clear loading state if no search term
+        if (
+          !searchTerm ||
+          typeof searchTerm !== 'string' ||
+          searchTerm.trim().length < 2
+        ) {
           this.isSearchLoading.set(false);
           return of([]);
         }
 
-        // Search both tasks and issues simultaneously
+        // Search tasks from all projects and archives
         const taskSearch$ = this._taskService.allTasks$.pipe(
           map((tasks) => {
             const searchLower = searchTerm.toLowerCase();
             return tasks
               .filter((task) => task.title.toLowerCase().includes(searchLower))
-              .slice(0, 15) // Limit task results to leave room for issues
+              .slice(0, this.isSearchMode() ? 15 : 10) // More results in search mode
               .map(
                 (task) =>
                   ({
@@ -305,24 +309,24 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
           catchError(() => of([] as AddTaskSuggestion[])),
         );
 
-        const issueSearch$ = this._issueService
-          .searchAllEnabledIssueProviders$(searchTerm)
-          .pipe(
-            map((issueSuggestions) =>
-              issueSuggestions.slice(0, 15).map(
-                // Limit issue results
-                (issueSuggestion) =>
-                  ({
-                    title: issueSuggestion.title,
-                    titleHighlighted: issueSuggestion.titleHighlighted,
-                    issueData: issueSuggestion.issueData,
-                    issueType: issueSuggestion.issueType,
-                    issueProviderId: issueSuggestion.issueProviderId,
-                  }) as AddTaskSuggestion,
+        // Only search issues when in search mode
+        const issueSearch$ = this.isSearchMode()
+          ? this._issueService.searchAllEnabledIssueProviders$(searchTerm).pipe(
+              map((issueSuggestions) =>
+                issueSuggestions.slice(0, 15).map(
+                  (issueSuggestion) =>
+                    ({
+                      title: issueSuggestion.title,
+                      titleHighlighted: issueSuggestion.titleHighlighted,
+                      issueData: issueSuggestion.issueData,
+                      issueType: issueSuggestion.issueType,
+                      issueProviderId: issueSuggestion.issueProviderId,
+                    }) as AddTaskSuggestion,
+                ),
               ),
-            ),
-            catchError(() => of([] as AddTaskSuggestion[])),
-          );
+              catchError(() => of([] as AddTaskSuggestion[])),
+            )
+          : of([] as AddTaskSuggestion[]);
 
         // Combine both searches
         return combineLatest([taskSearch$, issueSearch$]).pipe(
@@ -809,8 +813,12 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
   toggleSearchMode(): void {
     this.isSearchMode.update((mode) => !mode);
-    // Trigger value change to refresh suggestions
-    this.titleControl.updateValueAndValidity();
+    // Trigger suggestions refresh by emitting current value
+    const currentValue = this.titleControl.value;
+    if (currentValue && currentValue.trim().length >= 2) {
+      this.titleControl.setValue(currentValue + ' ');
+      this.titleControl.setValue(currentValue);
+    }
     // Focus input to refresh autocomplete with new search mode
     setTimeout(() => this._focusInput(), 0);
   }
@@ -1022,6 +1030,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       }
     }
 
-    this._taskInputState.update((state) => newState);
+    this._taskInputState.update(() => newState);
   }
 }
