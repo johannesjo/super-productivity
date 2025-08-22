@@ -19,7 +19,7 @@
       "
       matInput
       spellcheck="false"
-      (keydown.enter)="$event.preventDefault(); addTask()"
+      (keydown.enter)="handleEnterKey($event)"
       (keydown)="onInputKeydown($event)"
       (blur)="onBlur()"
     />
