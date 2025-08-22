@@ -287,6 +287,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
     // Initialize search suggestions observable
     this.suggestions$ = this.titleControl.valueChanges.pipe(
+      filter(() => this.isSearchMode()),
       tap(() => this.isSearchLoading.set(true)),
       debounceTime(300),
       switchMap((searchTerm) => {
@@ -300,13 +301,13 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
           return of([]);
         }
 
-        // Search tasks from all projects and archives
+        // Only search tasks when in search mode
         const taskSearch$ = this._taskService.allTasks$.pipe(
           map((tasks) => {
             const searchLower = searchTerm.toLowerCase();
             return tasks
               .filter((task) => task.title.toLowerCase().includes(searchLower))
-              .slice(0, this.isSearchMode() ? 15 : 10) // More results in search mode
+              .slice(0, 15) // More results in search mode
               .map(
                 (task) =>
                   ({
@@ -321,23 +322,23 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
         );
 
         // Only search issues when in search mode
-        const issueSearch$ = this.isSearchMode()
-          ? this._issueService.searchAllEnabledIssueProviders$(searchTerm).pipe(
-              map((issueSuggestions) =>
-                issueSuggestions.slice(0, 15).map(
-                  (issueSuggestion) =>
-                    ({
-                      title: issueSuggestion.title,
-                      titleHighlighted: issueSuggestion.titleHighlighted,
-                      issueData: issueSuggestion.issueData,
-                      issueType: issueSuggestion.issueType,
-                      issueProviderId: issueSuggestion.issueProviderId,
-                    }) as AddTaskSuggestion,
-                ),
+        const issueSearch$ = this._issueService
+          .searchAllEnabledIssueProviders$(searchTerm)
+          .pipe(
+            map((issueSuggestions) =>
+              issueSuggestions.slice(0, 15).map(
+                (issueSuggestion) =>
+                  ({
+                    title: issueSuggestion.title,
+                    titleHighlighted: issueSuggestion.titleHighlighted,
+                    issueData: issueSuggestion.issueData,
+                    issueType: issueSuggestion.issueType,
+                    issueProviderId: issueSuggestion.issueProviderId,
+                  }) as AddTaskSuggestion,
               ),
-              catchError(() => of([] as AddTaskSuggestion[])),
-            )
-          : of([] as AddTaskSuggestion[]);
+            ),
+            catchError(() => of([] as AddTaskSuggestion[])),
+          );
 
         // Combine both searches
         return combineLatest([taskSearch$, issueSearch$]).pipe(
