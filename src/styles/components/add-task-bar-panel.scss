@@ -1,0 +1,41 @@
+// Task autocomplete styles
+.add-task-bar-panel {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-top: 40px;
+
+  .suggestion-option {
+    min-height: 48px;
+    padding: 8px 16px;
+
+    .option-content {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+
+      .option-icon {
+        flex-shrink: 0;
+        color: var(--text-color-dimmed);
+
+        &.archived {
+          color: var(--color-accent);
+        }
+      }
+
+      .option-title {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .issue-id {
+        flex-shrink: 0;
+        font-size: 0.9em;
+        color: var(--text-color-dimmed);
+        opacity: 0.7;
+      }
+    }
+  }
+}
