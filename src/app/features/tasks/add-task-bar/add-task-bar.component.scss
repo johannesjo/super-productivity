@@ -125,7 +125,8 @@
 
 .add-issue-info-text {
   height: 38px;
-  padding: 8px;
+  padding: 0 8px;
+  line-height: 38px;
   font-weight: bold;
   border-top: 1px dashed var(--extra-border-color);
 }
@@ -251,5 +252,70 @@
   }
 }
 
-// NOTE: this is styled outside
-//.add-task-bar-panel {}
+//// Autocomplete panel styles
+::ng-deep .add-task-bar-panel {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-top: 40px;
+
+  .mat-mdc-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .project-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      margin-left: 8px;
+      opacity: 0.7;
+      margin-right: 0;
+    }
+
+    .project-title {
+      opacity: 0.7;
+      font-size: 0.9em;
+      margin-left: 4px;
+    }
+
+    mat-icon:first-child {
+      margin-right: 0;
+      flex-shrink: 0;
+    }
+  }
+
+  .suggestion-option {
+    min-height: 48px;
+    padding: 8px 16px;
+
+    .option-content {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+
+      .option-icon {
+        flex-shrink: 0;
+        color: var(--text-color-dimmed);
+
+        &.archived {
+          color: var(--color-accent);
+        }
+      }
+
+      .option-title {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .issue-id {
+        flex-shrink: 0;
+        font-size: 0.9em;
+        color: var(--text-color-dimmed);
+        opacity: 0.7;
+      }
+    }
+  }
+}
