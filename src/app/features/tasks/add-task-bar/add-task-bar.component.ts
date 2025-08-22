@@ -12,7 +12,6 @@ import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { TaskCopy } from '../task.model';
 import { AddTaskBarAddModeComponent } from './add-task-bar-add-mode/add-task-bar-add-mode.component';
 import { AddTaskBarSearchModeComponent } from './add-task-bar-search-mode/add-task-bar-search-mode.component';
-import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'add-task-bar',
@@ -20,7 +19,7 @@ import { AsyncPipe } from '@angular/common';
   styleUrls: ['./add-task-bar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [blendInOutAnimation, fadeAnimation],
-  imports: [AddTaskBarAddModeComponent, AddTaskBarSearchModeComponent, AsyncPipe],
+  imports: [AddTaskBarAddModeComponent, AddTaskBarSearchModeComponent],
 })
 export class AddTaskBarComponent {
   tabindex = input<number>(0);

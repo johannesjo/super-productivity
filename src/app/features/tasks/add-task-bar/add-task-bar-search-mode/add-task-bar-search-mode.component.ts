@@ -21,7 +21,6 @@ import {
 } from '@angular/material/autocomplete';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { AsyncPipe } from '@angular/common';
-import { TranslatePipe } from '@ngx-translate/core';
 import { TaskService } from '../../task.service';
 import { WorkContextService } from '../../../work-context/work-context.service';
 import { IssueService } from '../../../issue/issue.service';
@@ -55,7 +54,6 @@ import { WorkContextType } from '../../../work-context/work-context.model';
     MatOption,
     MatProgressSpinner,
     AsyncPipe,
-    TranslatePipe,
     IssueIconPipe,
     TagComponent,
   ],

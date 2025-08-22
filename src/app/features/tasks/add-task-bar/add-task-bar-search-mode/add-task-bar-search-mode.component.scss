@@ -1,28 +1,21 @@
 @import '../../../../../common';
 
 .search-mode-container {
-  background: var(--bg-lighter);
+  width: 100%;
+  position: relative;
   border-radius: var(--card-border-radius);
-  padding: var(--s2);
+  background-color: var(--bg-lighter);
+  color: var(--text-color-most-intense);
 
   &.isElevated {
-    background: var(--bg-lightest);
+    background-color: var(--bg-lightest);
   }
 }
 
 .search-header {
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: var(--s);
-  margin-bottom: var(--s2);
-
-  .back-btn {
-    opacity: 0.7;
-
-    &:hover {
-      opacity: 1;
-    }
-  }
+  color: var(--text-color-most-intense);
 
   .search-input-wrapper {
     flex: 1;
@@ -32,7 +25,7 @@
 
     .spinner {
       position: absolute;
-      left: var(--s2);
+      right: 60px;
       top: 50%;
       transform: translateY(-50%);
       z-index: 2;
@@ -40,19 +33,20 @@
 
     .search-input {
       flex: 1;
+      display: block;
+      width: 100%;
+      height: 42px;
       font-size: 16px;
-      padding: var(--s2);
-      padding-left: var(--s4);
-      border: 1px solid var(--extra-border-color);
-      border-radius: 24px;
-      background: var(--bg);
-      color: var(--text-color-most-intense);
-
-      &:focus {
-        outline: none;
-        border-color: var(--primary);
-        background: var(--bg-lighter);
-      }
+      box-sizing: border-box;
+      border-style: solid;
+      border-width: 0;
+      outline: 0;
+      padding-right: 4px;
+      padding-left: var(--s2);
+      line-height: 42px;
+      background: transparent;
+      color: inherit;
+      font-family: inherit;
     }
 
     .button-controls {
@@ -68,20 +62,6 @@
       &:hover {
         opacity: 1;
       }
-    }
-  }
-}
-
-.search-info {
-  padding: 0 var(--s2);
-  margin-bottom: var(--s);
-
-  .info-text {
-    font-size: 13px;
-    color: var(--text-color);
-
-    &.muted {
-      color: var(--text-color-muted);
     }
   }
 }
@@ -130,19 +110,4 @@
 .no-results {
   color: var(--text-color-muted);
   font-style: italic;
-}
-
-@include mq(xs, max) {
-  .search-header {
-    flex-direction: column;
-    align-items: stretch;
-
-    .back-btn {
-      align-self: flex-start;
-    }
-
-    .search-input-wrapper {
-      width: 100%;
-    }
-  }
 }
