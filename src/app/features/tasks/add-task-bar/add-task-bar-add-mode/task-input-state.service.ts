@@ -15,6 +15,13 @@ export interface TaskInputState {
   rawText: string;
   cleanText: string;
   isUsingUI: boolean;
+  // Track which fields were set via UI vs short syntax
+  fieldSources: {
+    project: 'ui' | 'syntax' | null;
+    tags: 'ui' | 'syntax' | null;
+    date: 'ui' | 'syntax' | null;
+    estimate: 'ui' | 'syntax' | null;
+  };
 }
 
 @Injectable()
@@ -29,6 +36,12 @@ export class TaskInputStateService {
     rawText: '',
     cleanText: '',
     isUsingUI: false,
+    fieldSources: {
+      project: null,
+      tags: null,
+      date: null,
+      estimate: null,
+    },
   });
 
   // Public readonly state and computed values
@@ -54,48 +67,75 @@ export class TaskInputStateService {
     );
 
     const cleanText = parseResult?.taskChanges?.title?.trim() || text.trim();
-    const isInUIMode = this.state().isUsingUI;
     const inboxProject = allProjects.find((p) => p.id === 'INBOX_PROJECT');
+    const current = this.state();
 
-    this.state.update((current) => ({
-      ...current,
+    // Extract parsed values safely
+    const parsedProject = parseResult?.projectId
+      ? allProjects.find((p) => p.id === parseResult.projectId)
+      : null;
+    const parsedTags = parseResult?.taskChanges?.tagIds
+      ? (parseResult.taskChanges.tagIds
+          .map((id) => allTags.find((t) => t.id === id))
+          .filter(Boolean) as Tag[])
+      : [];
+    const parsedDate = parseResult?.taskChanges?.dueWithTime
+      ? new Date(parseResult.taskChanges.dueWithTime)
+      : null;
+    const parsedTime = parseResult?.taskChanges?.dueWithTime
+      ? this.extractTimeFromDate(
+          parseResult.taskChanges.dueWithTime,
+          parseResult.taskChanges.hasPlannedTime,
+        )
+      : null;
+    const parsedEstimate = parseResult?.taskChanges?.timeEstimate ?? null;
+
+    this.state.update(() => ({
       rawText: text,
       cleanText,
       isUsingUI: false,
 
-      // Always ensure a project is selected - default to inbox if none found
-      project: parseResult?.projectId
-        ? allProjects.find((p) => p.id === parseResult.projectId) ||
-          current.project ||
-          inboxProject ||
-          null
-        : isInUIMode
-          ? current.project
-          : current.project || inboxProject || null,
+      project:
+        this.getValueOrKeepUI(
+          parsedProject,
+          current.project,
+          current.fieldSources.project,
+        ) ||
+        inboxProject ||
+        null,
 
       tags: unique(
-        parseResult?.taskChanges?.tagIds?.length
-          ? (parseResult.taskChanges.tagIds
-              .map((id) => allTags.find((t) => t.id === id))
-              .filter(Boolean) as Tag[])
-          : current.tags,
-      ), // Always keep current tags if not parsed from text
+        this.getValueOrKeepUI(parsedTags, current.tags, current.fieldSources.tags) || [],
+      ),
 
       newTagTitles: unique(parseResult?.newTagTitles || []),
 
-      date: parseResult?.taskChanges?.dueWithTime
-        ? new Date(parseResult.taskChanges.dueWithTime)
-        : current.date, // Always keep current date if not parsed from text
+      date: this.getValueOrKeepUI(parsedDate, current.date, current.fieldSources.date),
 
-      time: parseResult?.taskChanges?.dueWithTime
-        ? this.extractTimeFromDate(
-            parseResult.taskChanges.dueWithTime,
-            parseResult.taskChanges.hasPlannedTime,
-          )
-        : current.time, // Always keep current time if not parsed from text
+      time: this.getValueOrKeepUI(parsedTime, current.time, current.fieldSources.date),
 
-      estimate: parseResult?.taskChanges?.timeEstimate || current.estimate, // Always keep current estimate if not parsed
+      estimate: this.getValueOrKeepUI(
+        parsedEstimate,
+        current.estimate,
+        current.fieldSources.estimate,
+      ),
+
+      fieldSources: {
+        project: parsedProject ? 'syntax' : current.fieldSources.project,
+        tags: parsedTags.length > 0 ? 'syntax' : current.fieldSources.tags,
+        date: parsedDate ? 'syntax' : current.fieldSources.date,
+        estimate: parsedEstimate !== null ? 'syntax' : current.fieldSources.estimate,
+      },
     }));
+  }
+
+  private getValueOrKeepUI<T>(
+    syntaxValue: T | null,
+    currentValue: T | null,
+    fieldSource: 'ui' | 'syntax' | null,
+  ): T | null {
+    if (syntaxValue !== null) return syntaxValue;
+    return fieldSource === 'ui' ? currentValue : null;
   }
 
   private extractTimeFromDate(
@@ -111,15 +151,29 @@ export class TaskInputStateService {
   }
 
   updateProject(project: Project | null): void {
-    this.updateUI({ project });
+    this.state.update((current) => ({
+      ...current,
+      project,
+      isUsingUI: true,
+      fieldSources: {
+        ...current.fieldSources,
+        project: 'ui',
+      },
+    }));
   }
 
   updateTags(tags: Tag[]): void {
-    this.updateUI({
+    this.state.update((current) => ({
+      ...current,
       tags,
       // Clear new tag titles when clearing tags
-      newTagTitles: tags.length === 0 ? [] : this.state().newTagTitles,
-    });
+      newTagTitles: tags.length === 0 ? [] : current.newTagTitles,
+      isUsingUI: true,
+      fieldSources: {
+        ...current.fieldSources,
+        tags: 'ui',
+      },
+    }));
   }
 
   toggleTag(tag: Tag): void {
@@ -132,26 +186,74 @@ export class TaskInputStateService {
   }
 
   updateDate(date: Date | null, time?: string | null): void {
-    this.updateUI({
+    this.state.update((current) => ({
+      ...current,
       date,
       ...(time !== undefined && { time }),
-    });
+      isUsingUI: true,
+      fieldSources: {
+        ...current.fieldSources,
+        date: 'ui',
+      },
+    }));
   }
 
   updateTime(time: string | null): void {
-    this.updateUI({ time });
+    this.state.update((current) => ({
+      ...current,
+      time,
+      isUsingUI: true,
+      fieldSources: {
+        ...current.fieldSources,
+        date: 'ui', // Time is part of date
+      },
+    }));
   }
 
   updateEstimate(estimate: number | null): void {
-    this.updateUI({ estimate });
-  }
-
-  private updateUI(changes: Partial<TaskInputState>): void {
     this.state.update((current) => ({
       ...current,
-      ...changes,
-      // Keep the rawText unchanged so short syntax remains visible
+      estimate,
       isUsingUI: true,
+      fieldSources: {
+        ...current.fieldSources,
+        estimate: 'ui',
+      },
+    }));
+  }
+
+  clearDate(): void {
+    this.state.update((current) => ({
+      ...current,
+      date: null,
+      time: null,
+      fieldSources: {
+        ...current.fieldSources,
+        date: null,
+      },
+    }));
+  }
+
+  clearTags(): void {
+    this.state.update((current) => ({
+      ...current,
+      tags: [],
+      newTagTitles: [],
+      fieldSources: {
+        ...current.fieldSources,
+        tags: null,
+      },
+    }));
+  }
+
+  clearEstimate(): void {
+    this.state.update((current) => ({
+      ...current,
+      estimate: null,
+      fieldSources: {
+        ...current.fieldSources,
+        estimate: null,
+      },
     }));
   }
 
@@ -169,6 +271,12 @@ export class TaskInputStateService {
       rawText: '',
       cleanText: '',
       isUsingUI: false,
+      fieldSources: {
+        project: current.fieldSources.project,
+        tags: current.fieldSources.tags,
+        date: current.fieldSources.date,
+        estimate: current.fieldSources.estimate,
+      },
     });
   }
 }
