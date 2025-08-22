@@ -196,25 +196,13 @@ export class TaskInputStateService {
   }
 
   clearTags(): void {
-    this.state.update((current) => {
-      let cleanedText = current.rawText;
-
-      // Only remove syntax from text for syntax tags
-      for (const syntaxTag of current.syntaxTags) {
-        cleanedText = cleanedText.replace(
-          new RegExp(`\\s*#${syntaxTag.title}\\b`, 'g'),
-          '',
-        );
-      }
-
-      return {
-        ...current,
-        tags: [],
-        syntaxTags: [],
-        newTagTitles: [],
-        rawText: cleanedText.trim(),
-      };
-    });
+    this.state.update((current) => ({
+      ...current,
+      tags: [],
+      syntaxTags: [],
+      newTagTitles: [],
+      rawText: this.removeSyntaxFromText(current.rawText, 'tags'),
+    }));
   }
 
   clearEstimate(): void {
