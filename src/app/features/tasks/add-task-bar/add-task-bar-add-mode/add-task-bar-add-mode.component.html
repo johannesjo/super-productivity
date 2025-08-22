@@ -15,6 +15,7 @@
       spellcheck="false"
       (keydown.enter)="$event.preventDefault(); addTask()"
       (keydown)="onInputKeydown($event)"
+      (blur)="onBlur()"
     />
 
     <div class="button-controls">
