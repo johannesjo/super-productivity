@@ -6,6 +6,7 @@ import {
   DestroyRef,
   effect,
   ElementRef,
+  HostListener,
   inject,
   input,
   OnDestroy,
@@ -13,9 +14,8 @@ import {
   output,
   signal,
   viewChild,
-  HostListener,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MentionModule } from 'angular-mentions';
 import { MatInput } from '@angular/material/input';
@@ -36,7 +36,16 @@ import { TagService } from '../../tag/tag.service';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { AddTaskBarService } from './add-task-bar.service';
 import { T } from '../../../t.const';
-import { debounceTime, distinctUntilChanged, filter, first, map } from 'rxjs/operators';
+import {
+  catchError,
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  first,
+  map,
+  switchMap,
+  tap,
+} from 'rxjs/operators';
 import { Project } from '../../project/project.model';
 import { Tag } from '../../tag/tag.model';
 import { getLocalDateStr } from '../../../util/get-local-date-str';
@@ -45,9 +54,7 @@ import { stringToMs } from '../../../ui/duration/string-to-ms.pipe';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { Store } from '@ngrx/store';
 import { PlannerActions } from '../../planner/store/planner.actions';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { of } from 'rxjs';
-import { switchMap, tap, catchError } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
@@ -59,7 +66,6 @@ import {
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { IssueService } from '../../issue/issue.service';
 import { AddTaskSuggestion } from './add-task-suggestions.model';
-import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { TagComponent } from '../../tag/tag/tag.component';
 import { truncate } from '../../../util/truncate';
@@ -112,7 +118,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   tabindex = input<number>(0);
   isElevated = input<boolean>(false);
   isDisableAutoFocus = input<boolean>(false);
-  planForDay = input<string | undefined>(undefined);
   additionalFields = input<Partial<TaskCopy>>();
   taskIdsToExclude = input<string[]>();
   isHideTagTitles = input<boolean>(false);
@@ -577,7 +582,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
         taskData.dueWithTime = date.getTime();
         taskData.hasPlannedTime = true;
       } else {
-        taskData.dueWithTime = date.getTime();
+        taskData.dueDay = getLocalDateStr(state.date);
         taskData.hasPlannedTime = false;
       }
     }
@@ -593,11 +598,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       taskId,
       isAddToBottom: this.isAddToBottom(),
     });
-
-    const planForDay = this.planForDay();
-    if (planForDay && taskId) {
-      this._planTaskForDay(taskId, planForDay);
-    }
 
     this.resetForm();
   }
