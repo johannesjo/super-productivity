@@ -149,62 +149,35 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   estimateMenuTrigger = viewChild('estimateMenuTrigger', { read: MatMenuTrigger });
   titleControl = new FormControl<string>('');
 
-  // Use computed values from the state service
-  selectedProject = computed(() => this._taskInputState.currentState().project);
-  selectedTags = computed(() => this._taskInputState.currentState().tags);
-  newTagTitles = computed(() => this._taskInputState.currentState().newTagTitles);
-  hasNewTags = computed(() => this._taskInputState.hasNewTags());
-  selectedDate = computed(() => this._taskInputState.currentState().date);
-  selectedTime = computed(() => this._taskInputState.currentState().time);
-  selectedEstimate = computed(() => this._taskInputState.currentState().estimate);
-
-  // Auto-detected state using service's computed property
-  isProjectAutoDetected = computed(
-    () => this._taskInputState.isAutoDetected() && !!this.selectedProject(),
-  );
-  isTagsAutoDetected = computed(
-    () => this._taskInputState.isAutoDetected() && this.selectedTags().length > 0,
-  );
-  isDateAutoDetected = computed(
-    () => this._taskInputState.isAutoDetected() && !!this.selectedDate(),
-  );
-  isEstimateAutoDetected = computed(
-    () => this._taskInputState.isAutoDetected() && !!this.selectedEstimate(),
-  );
+  // Direct access to state service
+  state = this._taskInputState.currentState;
+  hasNewTags = this._taskInputState.hasNewTags;
+  isAutoDetected = this._taskInputState.isAutoDetected;
 
   projects$ = this._projectService.list$.pipe(
     map((projects) => projects.filter((p) => !p.isArchived && !p.isHiddenFromMenu)),
   );
-
   tags$ = this._tagService.tagsNoMyDayAndNoList$;
-
-  activeWorkContext$ = this._workContextService.activeWorkContext$;
-  mentionConfig$ = this._addTaskBarService.getMentionConfig$();
-
-  // Tag-only mentions configuration
-  tagMentions = this._tagService.tagsNoMyDayAndNoList$;
+  tagMentions = this.tags$;
   tagMentionConfig = combineLatest([
     this._globalConfigService.shortSyntax$,
-    this._tagService.tagsNoMyDayAndNoList$,
+    this.tags$,
   ]).pipe(
-    map(([cfg, tagSuggestions]) => {
-      if (cfg.isEnableTag) {
-        return {
-          mentions: [{ items: tagSuggestions, labelKey: 'title', triggerChar: '#' }],
-        };
-      }
-      return { mentions: [] };
-    }),
+    map(([cfg, tagSuggestions]) => ({
+      mentions: cfg.isEnableTag
+        ? [{ items: tagSuggestions, labelKey: 'title', triggerChar: '#' }]
+        : [],
+    })),
   );
 
   estimateDisplay = computed(() => {
-    const estimate = this.selectedEstimate();
+    const estimate = this.state().estimate;
     return estimate ? msToString(estimate) : null;
   });
 
   dateDisplay = computed(() => {
-    const date = this.selectedDate();
-    const time = this.selectedTime();
+    const date = this.state().date;
+    const time = this.state().time;
     if (!date) return null;
 
     const today = new Date();
@@ -234,7 +207,7 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
 
     // Set up bidirectional text sync with state service
     effect(() => {
-      const currentText = this._taskInputState.currentState().rawText;
+      const currentText = this.state().rawText;
       if (currentText !== this.titleControl.value) {
         this.titleControl.setValue(currentText, { emitEvent: false });
       }
@@ -248,26 +221,14 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   }
 
   private setupDefaultProject(): void {
-    // Set the initial project based on current work context
-    combineLatest([
-      this._projectService.list$,
-      this._workContextService.activeWorkContext$,
-    ])
+    combineLatest([this.projects$, this._workContextService.activeWorkContext$])
       .pipe(first(), takeUntilDestroyed(this._destroyRef))
       .subscribe(([projects, workContext]) => {
-        // Only set default if no project is currently selected
-        if (!this.selectedProject()) {
-          let defaultProject: Project | undefined;
-
-          // First try to use the current work context project
-          if (workContext?.type === WorkContextType.PROJECT) {
-            defaultProject = projects.find((p) => p.id === workContext.id);
-          }
-
-          // Fall back to inbox if no context project found
-          if (!defaultProject) {
-            defaultProject = projects.find((p) => p.id === 'INBOX_PROJECT');
-          }
+        if (!this.state().project) {
+          const defaultProject =
+            (workContext?.type === WorkContextType.PROJECT
+              ? projects.find((p) => p.id === workContext.id)
+              : null) || projects.find((p) => p.id === 'INBOX_PROJECT');
 
           if (defaultProject) {
             this._taskInputState.updateProject(defaultProject);
@@ -277,17 +238,15 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   }
 
   private setupDefaultDate(): void {
-    // Set the default date to "Today" when on the Today list
     this._workContextService.activeWorkContext$
       .pipe(first(), takeUntilDestroyed(this._destroyRef))
       .subscribe((workContext) => {
-        // Only set default if no date is currently selected
-        if (!this.selectedDate()) {
-          // Check if we're on the Today tag context
-          if (workContext?.type === WorkContextType.TAG && workContext?.id === 'TODAY') {
-            const today = new Date();
-            this._taskInputState.updateDate(today);
-          }
+        if (
+          !this.state().date &&
+          workContext?.type === WorkContextType.TAG &&
+          workContext?.id === 'TODAY'
+        ) {
+          this._taskInputState.updateDate(new Date());
         }
       });
   }
@@ -300,17 +259,12 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
         filter((val) => typeof val === 'string' && val.length > 0),
       ),
       this._globalConfigService.shortSyntax$,
-      this._tagService.tagsNoMyDayAndNoList$,
-      this._projectService.list$,
+      this.tags$,
+      this.projects$,
     ])
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe(([title, config, allTags, allProjects]) => {
-        this._taskInputState.updateFromText(
-          title || '',
-          config,
-          allProjects.filter((p) => !p.isArchived && !p.isHiddenFromMenu),
-          allTags,
-        );
+        this._taskInputState.updateFromText(title || '', config, allProjects, allTags);
       });
   }
 
@@ -348,13 +302,14 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
     };
 
     // If we have a selected date, pass it as targetDay
-    if (this.selectedDate()) {
-      initialData.targetDay = getLocalDateStr(this.selectedDate()!);
+    const state = this.state();
+    if (state.date) {
+      initialData.targetDay = getLocalDateStr(state.date);
 
       // If we also have a selected time, create a task object with dueWithTime
-      if (this.selectedTime()) {
-        const dateWithTime = new Date(this.selectedDate()!);
-        const [hours, minutes] = this.selectedTime()!.split(':').map(Number);
+      if (state.time) {
+        const dateWithTime = new Date(state.date);
+        const [hours, minutes] = state.time.split(':').map(Number);
         dateWithTime.setHours(hours, minutes, 0, 0);
 
         initialData.task = {
@@ -408,14 +363,15 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
     const title = currentState.cleanText || this.titleControl.value?.trim();
     if (!title) return;
 
-    let finalTagIds = this.selectedTags().map((t) => t.id);
+    const state = this.state();
+    let finalTagIds = state.tags.map((t) => t.id);
 
     // Handle new tags if any exist
     if (this.hasNewTags()) {
       const shouldCreateNewTags = await this._confirmNewTags();
       if (shouldCreateNewTags) {
         // Create new tags and add their IDs
-        const newTagIds = await this._createNewTags(this.newTagTitles());
+        const newTagIds = await this._createNewTags(state.newTagTitles);
         finalTagIds = [...finalTagIds, ...newTagIds];
       }
       // If user declined, proceed without the new tags (finalTagIds remains as existing tags only)
@@ -423,15 +379,15 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
 
     const taskData: Partial<TaskCopy> = {
       ...this.additionalFields(),
-      projectId: this.selectedProject()?.id,
+      projectId: state.project?.id,
       tagIds: finalTagIds,
-      timeEstimate: this.selectedEstimate() || undefined,
+      timeEstimate: state.estimate || undefined,
     };
 
-    if (this.selectedDate()) {
-      const date = new Date(this.selectedDate()!);
-      if (this.selectedTime()) {
-        const [hours, minutes] = this.selectedTime()!.split(':').map(Number);
+    if (state.date) {
+      const date = new Date(state.date);
+      if (state.time) {
+        const [hours, minutes] = state.time.split(':').map(Number);
         date.setHours(hours, minutes, 0, 0);
         taskData.dueWithTime = date.getTime();
         taskData.hasPlannedTime = true;
@@ -528,7 +484,7 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
 
   // Helper methods for template
   hasSelectedTag(tagId: string): boolean {
-    return this.selectedTags().some((t) => t.id === tagId);
+    return this.state().tags.some((t) => t.id === tagId);
   }
 
   private getTodayDate(): Date {
@@ -618,7 +574,7 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   }
 
   private async _confirmNewTags(): Promise<boolean> {
-    const newTags = this.newTagTitles();
+    const newTags = this.state().newTagTitles;
     const tagList = newTags.map((tag) => `<li><strong>${tag}</strong></li>`).join('');
 
     const dialogRef = this._matDialog.open(DialogConfirmComponent, {
