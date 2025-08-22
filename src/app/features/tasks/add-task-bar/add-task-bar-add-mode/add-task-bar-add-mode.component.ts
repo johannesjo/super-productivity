@@ -342,10 +342,30 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   }
 
   openScheduleDialog(): void {
+    // Prepare initial data for the dialog
+    const initialData: any = {
+      isSelectDueOnly: true,
+    };
+
+    // If we have a selected date, pass it as targetDay
+    if (this.selectedDate()) {
+      initialData.targetDay = getLocalDateStr(this.selectedDate()!);
+
+      // If we also have a selected time, create a task object with dueWithTime
+      if (this.selectedTime()) {
+        const dateWithTime = new Date(this.selectedDate()!);
+        const [hours, minutes] = this.selectedTime()!.split(':').map(Number);
+        dateWithTime.setHours(hours, minutes, 0, 0);
+
+        initialData.task = {
+          dueWithTime: dateWithTime.getTime(),
+          hasPlannedTime: true,
+        };
+      }
+    }
+
     const dialogRef = this._matDialog.open(DialogScheduleTaskComponent, {
-      data: {
-        isSelectDueOnly: true,
-      },
+      data: initialData,
       restoreFocus: true,
     });
 
