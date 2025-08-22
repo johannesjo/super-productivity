@@ -418,7 +418,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
     if (!this.isDisableAutoFocus()) {
       // Select all text if there's existing content (from previous session)
-      const hasExistingText = !!this.titleControl.value?.trim();
+      const hasExistingText = !!this.titleControl.value;
       this._focusInput(hasExistingText);
     }
 
