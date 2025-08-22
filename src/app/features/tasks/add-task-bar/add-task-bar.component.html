@@ -4,12 +4,6 @@
   @blendInOut
 >
   <div class="input-section">
-    @if (isSearchLoading()) {
-      <div class="spinner">
-        <mat-spinner diameter="20"></mat-spinner>
-      </div>
-    }
-
     <input
       #inputEl
       class="task-input"
@@ -98,40 +92,36 @@
       item of suggestions$ | async;
       track item.taskId || (item.issueData && item.issueData.id)
     ) {
-      <mat-option
-        [value]="item"
-        class="suggestion-option"
-      >
-        <div class="option-content">
-          @if (item.issueType) {
-            <mat-icon
-              class="option-icon"
-              [svgIcon]="item.issueType | issueIcon"
-            ></mat-icon>
-          } @else if (item.taskId && item.isArchivedTask) {
-            <mat-icon class="option-icon archived">archive</mat-icon>
-          } @else if (item.taskId) {
-            <mat-icon class="option-icon">task</mat-icon>
-          } @else if (!item.ctx) {
-            <mat-icon class="option-icon">library_books</mat-icon>
+      <mat-option [value]="item">
+        @if (item.issueType) {
+          <mat-icon [svgIcon]="item.issueType | issueIcon"></mat-icon>
+        } @else if (item.taskId && item.isArchivedTask) {
+          <mat-icon>archive</mat-icon>
+        } @else if (item.taskId) {
+          <mat-icon>task</mat-icon>
+        } @else if (!item.ctx) {
+          <mat-icon>library_books</mat-icon>
+        }
+        @if (item.ctx) {
+          <tag
+            [tag]="item.ctx"
+            [isHideTitle]="isHideTagTitles()"
+          ></tag>
+        }
+        <span [innerHTML]="item?.titleHighlighted || item?.title"></span>
+        @if (item.taskId && item.projectId) {
+          @for (project of projects$ | async; track project.id) {
+            @if (project.id === item.projectId) {
+              <mat-icon
+                class="project-icon"
+                [style.color]="project.theme.primary"
+              >
+                {{ project.icon || 'folder' }}
+              </mat-icon>
+              <span class="project-title">{{ project.title }}</span>
+            }
           }
-
-          @if (item.ctx) {
-            <tag
-              [tag]="item.ctx"
-              [isHideTitle]="false"
-            ></tag>
-          }
-
-          <span
-            class="option-title"
-            [innerHTML]="item?.titleHighlighted || item?.title"
-          ></span>
-
-          @if (item.issueData?.id) {
-            <span class="issue-id">#{{ item.issueData?.id }}</span>
-          }
-        </div>
+        }
       </mat-option>
     }
   </mat-autocomplete>
@@ -253,6 +243,12 @@
           <mat-icon>close</mat-icon>
         </button>
       }
+    </div>
+  }
+
+  @if (isSearchLoading()) {
+    <div class="spinner">
+      <mat-spinner diameter="20"></mat-spinner>
     </div>
   }
 </div>
