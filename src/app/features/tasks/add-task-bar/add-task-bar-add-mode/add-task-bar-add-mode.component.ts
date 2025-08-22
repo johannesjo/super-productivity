@@ -232,7 +232,7 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
       { allowSignalWrites: true },
     );
 
-    // Set up text sync with state service (must be in constructor for injection context)
+    // Set up bidirectional text sync with state service
     effect(() => {
       const currentText = this._taskInputState.currentState().rawText;
       if (currentText !== this.titleControl.value) {
