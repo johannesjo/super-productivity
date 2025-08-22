@@ -70,13 +70,53 @@ export class TaskAttachmentListComponent {
   }
 
   async copy(attachment?: TaskAttachment): Promise<void> {
-    if (!attachment) return;
-    // Force-cast PermissionDescriptor as 'clipboard-write' is not defined in type
-    const permission = { name: 'clipboard-write' } as unknown as PermissionDescriptor;
-    const result = await navigator.permissions.query(permission);
-    if ((result.state == 'granted' || result.state == 'prompt') && attachment.path) {
-      await navigator.clipboard.writeText(attachment.path);
-      this._snackService.open(T.GLOBAL_SNACK.COPY_TO_CLIPPBOARD);
+    if (!attachment || !attachment.path) return;
+
+    try {
+      // Try modern clipboard API first (works in most browsers with user gesture)
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(attachment.path);
+        this._snackService.open(T.GLOBAL_SNACK.COPY_TO_CLIPPBOARD);
+      } else {
+        // Fallback for older browsers or when clipboard API is not available
+        this._copyWithFallback(attachment.path);
+      }
+    } catch (error) {
+      console.warn('Clipboard write failed, trying fallback method:', error);
+      // Try fallback method if modern API fails
+      this._copyWithFallback(attachment.path);
+    }
+  }
+
+  private _copyWithFallback(text: string): void {
+    // Create a temporary textarea element
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    textarea.style.pointerEvents = 'none';
+
+    document.body.appendChild(textarea);
+    textarea.select();
+
+    try {
+      const successful = document.execCommand('copy');
+      if (successful) {
+        this._snackService.open(T.GLOBAL_SNACK.COPY_TO_CLIPPBOARD);
+      } else {
+        this._snackService.open({
+          msg: 'Failed to copy to clipboard. Please copy manually.',
+          type: 'ERROR',
+        });
+      }
+    } catch (error) {
+      console.error('Fallback copy failed:', error);
+      this._snackService.open({
+        msg: 'Failed to copy to clipboard. Please copy manually.',
+        type: 'ERROR',
+      });
+    } finally {
+      document.body.removeChild(textarea);
     }
   }
 
