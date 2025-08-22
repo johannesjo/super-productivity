@@ -1,8 +1,9 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 import { Project } from '../../../project/project.model';
 import { Tag } from '../../../tag/tag.model';
 import { shortSyntax } from '../../short-syntax';
 import { ShortSyntaxConfig } from '../../../config/global-config.model';
+import { unique } from '../../../../util/unique';
 
 export interface TaskInputState {
   project: Project | null;
@@ -72,13 +73,15 @@ export class TaskInputStateService {
           ? current.project
           : current.project || inboxProject || null,
 
-      tags: parseResult?.taskChanges?.tagIds?.length
-        ? (parseResult.taskChanges.tagIds
-            .map((id) => allTags.find((t) => t.id === id))
-            .filter(Boolean) as Tag[])
-        : current.tags, // Always keep current tags if not parsed from text
+      tags: unique(
+        parseResult?.taskChanges?.tagIds?.length
+          ? (parseResult.taskChanges.tagIds
+              .map((id) => allTags.find((t) => t.id === id))
+              .filter(Boolean) as Tag[])
+          : current.tags,
+      ), // Always keep current tags if not parsed from text
 
-      newTagTitles: parseResult?.newTagTitles || [],
+      newTagTitles: unique(parseResult?.newTagTitles || []),
 
       date: parseResult?.taskChanges?.dueWithTime
         ? new Date(parseResult.taskChanges.dueWithTime)
