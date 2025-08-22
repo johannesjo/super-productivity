@@ -3,6 +3,7 @@ import { Database } from '../db/database';
 import { PFLog } from '../../../core/log';
 import { PFEventEmitter } from '../util/events';
 import { PrivateCfgByProviderId } from '../pfapi.model';
+import { environment } from '../../../../environments/environment';
 
 /**
  * Store for managing sync provider private configuration
@@ -31,7 +32,8 @@ export class SyncProviderPrivateCfgStore<PID extends SyncProviderId> {
   async load(): Promise<PrivateCfgByProviderId<PID> | null> {
     PFLog.verbose(
       `${SyncProviderPrivateCfgStore.L}.${this.load.name}`,
-      this._privateCfgInMemory,
+      // NEVER EVER LOG THIS FOR PRODUCTION!!!!!
+      !environment.production && this._privateCfgInMemory,
     );
 
     // Return cached config if available
