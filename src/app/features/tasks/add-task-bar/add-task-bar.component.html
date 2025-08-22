@@ -134,19 +134,6 @@
         </div>
       </mat-option>
     }
-
-    @if (
-      (suggestions$ | async)?.length === 0 &&
-      titleControl.value &&
-      titleControl.value.length >= 2 &&
-      !isSearchLoading()
-    ) {
-      <mat-option disabled>
-        <span class="no-results">
-          {{ isSearchMode() ? 'No tasks or issues found' : 'No tasks found' }}
-        </span>
-      </mat-option>
-    }
   </mat-autocomplete>
 
   <div class="action-buttons">

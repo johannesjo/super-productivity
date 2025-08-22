@@ -246,7 +246,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
   private _destroyRef = inject(DestroyRef);
   private _focusTimeout?: number;
-  private _hasRestoredText = false;
 
   constructor() {
     // Set up bidirectional text sync with state service
@@ -803,8 +802,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
           this.updateFromText(savedText, config, allProjects, allTags);
         });
     }
-    // Mark that restoration is complete
-    this._hasRestoredText = true;
   }
 
   private clearSavedText(): void {
