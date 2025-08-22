@@ -8,20 +8,14 @@ import { unique } from '../../../../util/unique';
 export interface TaskInputState {
   project: Project | null;
   tags: Tag[];
-  newTagTitles: string[];
   date: Date | null;
   time: string | null;
   estimate: number | null;
+  newTagTitles: string[];
   rawText: string;
   cleanText: string;
-  isUsingUI: boolean;
-  // Track which fields were set via UI vs short syntax
-  fieldSources: {
-    project: 'ui' | 'syntax' | null;
-    tags: 'ui' | 'syntax' | null;
-    date: 'ui' | 'syntax' | null;
-    estimate: 'ui' | 'syntax' | null;
-  };
+  // Track only tags that came from syntax (so we can remove them when UI changes)
+  syntaxTags: Tag[];
 }
 
 @Injectable()
@@ -29,24 +23,22 @@ export class TaskInputStateService {
   private state = signal<TaskInputState>({
     project: null,
     tags: [],
-    newTagTitles: [],
     date: null,
     time: null,
     estimate: null,
+    newTagTitles: [],
     rawText: '',
     cleanText: '',
-    isUsingUI: false,
-    fieldSources: {
-      project: null,
-      tags: null,
-      date: null,
-      estimate: null,
-    },
+    syntaxTags: [],
   });
 
   // Public readonly state and computed values
   readonly currentState = this.state.asReadonly();
-  readonly isAutoDetected = computed(() => !this.state().isUsingUI);
+  readonly isAutoDetected = computed(() => {
+    const s = this.state();
+    // Auto-detected if all current tags are syntax tags
+    return s.syntaxTags.length > 0 && s.tags.every((tag) => s.syntaxTags.includes(tag));
+  });
   readonly hasValues = computed(() => {
     const s = this.state();
     return !!(s.project || s.tags.length || s.date || s.estimate);
@@ -68,74 +60,43 @@ export class TaskInputStateService {
 
     const cleanText = parseResult?.taskChanges?.title?.trim() || text.trim();
     const inboxProject = allProjects.find((p) => p.id === 'INBOX_PROJECT');
-    const current = this.state();
 
-    // Extract parsed values safely
-    const parsedProject = parseResult?.projectId
-      ? allProjects.find((p) => p.id === parseResult.projectId)
+    // Extract syntax values
+    const syntaxProject = parseResult?.projectId
+      ? allProjects.find((p) => p.id === parseResult.projectId) || null
       : null;
-    const parsedTags = parseResult?.taskChanges?.tagIds
+    const syntaxTags = parseResult?.taskChanges?.tagIds
       ? (parseResult.taskChanges.tagIds
           .map((id) => allTags.find((t) => t.id === id))
           .filter(Boolean) as Tag[])
       : [];
-    const parsedDate = parseResult?.taskChanges?.dueWithTime
+    const syntaxDate = parseResult?.taskChanges?.dueWithTime
       ? new Date(parseResult.taskChanges.dueWithTime)
       : null;
-    const parsedTime = parseResult?.taskChanges?.dueWithTime
+    const syntaxTime = parseResult?.taskChanges?.dueWithTime
       ? this.extractTimeFromDate(
           parseResult.taskChanges.dueWithTime,
           parseResult.taskChanges.hasPlannedTime,
         )
       : null;
-    const parsedEstimate = parseResult?.taskChanges?.timeEstimate ?? null;
+    const syntaxEstimate = parseResult?.taskChanges?.timeEstimate ?? null;
 
-    this.state.update(() => ({
+    this.state.update((current) => ({
+      ...current,
       rawText: text,
       cleanText,
-      isUsingUI: false,
-
-      project:
-        this.getValueOrKeepUI(
-          parsedProject,
-          current.project,
-          current.fieldSources.project,
-        ) ||
-        inboxProject ||
-        null,
-
-      tags: unique(
-        this.getValueOrKeepUI(parsedTags, current.tags, current.fieldSources.tags) || [],
-      ),
-
+      // Always update with parsed values (last assigned wins)
+      project: syntaxProject || current.project || inboxProject || null,
+      tags: unique([
+        ...current.tags.filter((t) => !current.syntaxTags.includes(t)),
+        ...syntaxTags,
+      ]),
+      date: syntaxDate || current.date,
+      time: syntaxTime || current.time,
+      estimate: syntaxEstimate || current.estimate,
+      syntaxTags, // Track which tags came from syntax
       newTagTitles: unique(parseResult?.newTagTitles || []),
-
-      date: this.getValueOrKeepUI(parsedDate, current.date, current.fieldSources.date),
-
-      time: this.getValueOrKeepUI(parsedTime, current.time, current.fieldSources.date),
-
-      estimate: this.getValueOrKeepUI(
-        parsedEstimate,
-        current.estimate,
-        current.fieldSources.estimate,
-      ),
-
-      fieldSources: {
-        project: parsedProject ? 'syntax' : current.fieldSources.project,
-        tags: parsedTags.length > 0 ? 'syntax' : current.fieldSources.tags,
-        date: parsedDate ? 'syntax' : current.fieldSources.date,
-        estimate: parsedEstimate !== null ? 'syntax' : current.fieldSources.estimate,
-      },
     }));
-  }
-
-  private getValueOrKeepUI<T>(
-    syntaxValue: T | null,
-    currentValue: T | null,
-    fieldSource: 'ui' | 'syntax' | null,
-  ): T | null {
-    if (syntaxValue !== null) return syntaxValue;
-    return fieldSource === 'ui' ? currentValue : null;
   }
 
   private extractTimeFromDate(
@@ -154,34 +115,49 @@ export class TaskInputStateService {
     this.state.update((current) => ({
       ...current,
       project,
-      isUsingUI: true,
-      fieldSources: {
-        ...current.fieldSources,
-        project: 'ui',
-      },
+      rawText: this.removeSyntaxFromText(current.rawText, 'project'),
     }));
   }
 
   updateTags(tags: Tag[]): void {
-    this.state.update((current) => ({
-      ...current,
-      tags,
-      // Clear new tag titles when clearing tags
-      newTagTitles: tags.length === 0 ? [] : current.newTagTitles,
-      isUsingUI: true,
-      fieldSources: {
-        ...current.fieldSources,
-        tags: 'ui',
-      },
-    }));
+    this.state.update((current) => {
+      // Find which tags were removed
+      const removedTags = current.tags.filter((t) => !tags.includes(t));
+
+      // Only remove syntax for tags that were actually removed AND were syntax tags
+      const removedSyntaxTags = removedTags.filter((t) => current.syntaxTags.includes(t));
+
+      // Keep syntax tags that weren't removed
+      const remainingSyntaxTags = current.syntaxTags.filter(
+        (t) => !removedTags.includes(t),
+      );
+
+      let cleanedText = current.rawText;
+
+      // Only remove syntax from text for the specific tags that were removed
+      for (const removedTag of removedSyntaxTags) {
+        cleanedText = cleanedText.replace(
+          new RegExp(`\\s*#${removedTag.title}\\b`, 'g'),
+          '',
+        );
+      }
+
+      return {
+        ...current,
+        tags,
+        syntaxTags: remainingSyntaxTags,
+        newTagTitles: tags.length === 0 ? [] : current.newTagTitles,
+        rawText: cleanedText.trim(),
+      };
+    });
   }
 
   toggleTag(tag: Tag): void {
-    const currentTags = this.state().tags;
-    const hasTag = currentTags.some((t) => t.id === tag.id);
+    const current = this.state();
+    const hasTag = current.tags.some((t) => t.id === tag.id);
     const newTags = hasTag
-      ? currentTags.filter((t) => t.id !== tag.id)
-      : [...currentTags, tag];
+      ? current.tags.filter((t) => t.id !== tag.id)
+      : [...current.tags, tag];
     this.updateTags(newTags);
   }
 
@@ -189,12 +165,8 @@ export class TaskInputStateService {
     this.state.update((current) => ({
       ...current,
       date,
-      ...(time !== undefined && { time }),
-      isUsingUI: true,
-      fieldSources: {
-        ...current.fieldSources,
-        date: 'ui',
-      },
+      time: time !== undefined ? time : current.time,
+      rawText: this.removeSyntaxFromText(current.rawText, 'date'),
     }));
   }
 
@@ -202,11 +174,7 @@ export class TaskInputStateService {
     this.state.update((current) => ({
       ...current,
       time,
-      isUsingUI: true,
-      fieldSources: {
-        ...current.fieldSources,
-        date: 'ui', // Time is part of date
-      },
+      rawText: this.removeSyntaxFromText(current.rawText, 'date'),
     }));
   }
 
@@ -214,11 +182,7 @@ export class TaskInputStateService {
     this.state.update((current) => ({
       ...current,
       estimate,
-      isUsingUI: true,
-      fieldSources: {
-        ...current.fieldSources,
-        estimate: 'ui',
-      },
+      rawText: this.removeSyntaxFromText(current.rawText, 'estimate'),
     }));
   }
 
@@ -227,56 +191,82 @@ export class TaskInputStateService {
       ...current,
       date: null,
       time: null,
-      fieldSources: {
-        ...current.fieldSources,
-        date: null,
-      },
+      rawText: this.removeSyntaxFromText(current.rawText, 'date'),
     }));
   }
 
   clearTags(): void {
-    this.state.update((current) => ({
-      ...current,
-      tags: [],
-      newTagTitles: [],
-      fieldSources: {
-        ...current.fieldSources,
-        tags: null,
-      },
-    }));
+    this.state.update((current) => {
+      let cleanedText = current.rawText;
+
+      // Only remove syntax from text for syntax tags
+      for (const syntaxTag of current.syntaxTags) {
+        cleanedText = cleanedText.replace(
+          new RegExp(`\\s*#${syntaxTag.title}\\b`, 'g'),
+          '',
+        );
+      }
+
+      return {
+        ...current,
+        tags: [],
+        syntaxTags: [],
+        newTagTitles: [],
+        rawText: cleanedText.trim(),
+      };
+    });
   }
 
   clearEstimate(): void {
     this.state.update((current) => ({
       ...current,
       estimate: null,
-      fieldSources: {
-        ...current.fieldSources,
-        estimate: null,
-      },
+      rawText: this.removeSyntaxFromText(current.rawText, 'estimate'),
     }));
   }
 
+  private removeSyntaxFromText(
+    text: string,
+    type: 'project' | 'tags' | 'date' | 'estimate',
+  ): string {
+    let cleanedText = text;
+
+    switch (type) {
+      case 'project':
+        // Remove project syntax like "+project"
+        cleanedText = cleanedText.replace(/\s*\+\S+/g, '');
+        break;
+      case 'tags':
+        // Remove tag syntax like "#tag"
+        cleanedText = cleanedText.replace(/\s*#\S+/g, '');
+        break;
+      case 'date':
+        // Remove date/time syntax like "@Tomorrow", "@16:00"
+        cleanedText = cleanedText.replace(/\s*@\S+/g, '');
+        break;
+      case 'estimate':
+        // Remove estimate syntax like "2h", "30m"
+        cleanedText = cleanedText.replace(/\s*\d+[hm]\b/g, '');
+        break;
+    }
+
+    return cleanedText.trim();
+  }
+
   reset(inboxProject?: Project | null): void {
-    // Keep tags, time, date, and estimate for convenience
+    // Keep current values for convenience
     const current = this.state();
 
     this.state.set({
       project: inboxProject || current.project || null,
-      tags: current.tags, // Keep tags
+      tags: current.tags, // Keep current tags
+      date: current.date, // Keep current date
+      time: current.time, // Keep current time
+      estimate: current.estimate, // Keep current estimate
+      syntaxTags: [], // Clear syntax tracking on reset
       newTagTitles: [], // Clear new tag titles on reset
-      date: current.date, // Keep date preference for batch task creation
-      time: current.time, // Keep time preference
-      estimate: current.estimate, // Keep estimate preference
       rawText: '',
       cleanText: '',
-      isUsingUI: false,
-      fieldSources: {
-        project: current.fieldSources.project,
-        tags: current.fieldSources.tags,
-        date: current.fieldSources.date,
-        estimate: current.fieldSources.estimate,
-      },
     });
   }
 }
