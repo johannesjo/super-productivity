@@ -266,9 +266,9 @@
 
 //// Autocomplete panel styles
 ::ng-deep .add-task-bar-panel {
-  max-height: 400px;
-  overflow-y: auto;
-  margin-top: 40px;
+  position: absolute;
+  padding: 0 !important;
+  top: 40px;
 
   .mat-mdc-option {
     display: flex;
