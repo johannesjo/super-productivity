@@ -185,8 +185,10 @@
         (click)="onTagsMenuClick($event)"
       >
         @if (state().tags.length === 0 && state().newTagTitles.length === 0) {
-          <mat-icon>label</mat-icon>
-          Tags
+          <ng-container>
+            <mat-icon>label</mat-icon>
+            Tags
+          </ng-container>
         } @else {
           <div class="tags-display">
             @for (tag of state().tags; track tag.id) {
