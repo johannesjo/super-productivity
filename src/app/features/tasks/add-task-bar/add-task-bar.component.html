@@ -136,115 +136,125 @@
     }
   </mat-autocomplete>
 
-  <div class="action-buttons">
-    <button
-      #projectMenuTrigger
-      mat-button
-      class="action-btn project-btn"
-      [matMenuTriggerFor]="projectMenu"
-      [class.has-value]="state().project"
-      [class.auto-detected]="isAutoDetected() && !!state().project"
-      [class.menu-open]="isProjectMenuOpen()"
-      (click)="onProjectMenuClick($event)"
-    >
-      <mat-icon [style.color]="state().project!.theme.primary"
-        >{{ state().project!.icon || 'folder' }}
-      </mat-icon>
-      <span>{{ state().project?.title }}</span>
-    </button>
+  @if (activatedIssueTask() && activatedIssueTask()!.issueType === undefined) {
+    <div class="add-issue-info-text">
+      <mat-icon>playlist_add</mat-icon>
+      {{
+        T.F.TASK.ADD_TASK_BAR.ADD_EXISTING_TASK
+          | translate: { taskTitle: activatedIssueTask()!.title }
+      }}
+    </div>
+  } @else {
+    <div class="action-buttons">
+      <button
+        #projectMenuTrigger
+        mat-button
+        class="action-btn project-btn"
+        [matMenuTriggerFor]="projectMenu"
+        [class.has-value]="state().project"
+        [class.auto-detected]="isAutoDetected() && !!state().project"
+        [class.menu-open]="isProjectMenuOpen()"
+        (click)="onProjectMenuClick($event)"
+      >
+        <mat-icon [style.color]="state().project!.theme.primary"
+          >{{ state().project!.icon || 'folder' }}
+        </mat-icon>
+        <span>{{ state().project?.title }}</span>
+      </button>
 
-    <button
-      mat-button
-      class="action-btn date-btn"
-      (click)="openScheduleDialog()"
-      [class.has-value]="state().date"
-    >
-      <mat-icon>{{ state().time ? 'schedule' : 'event' }}</mat-icon>
-      <span>{{ dateDisplay() || 'Due' }}</span>
-    </button>
-
-    @if (state().date) {
       <button
         mat-button
-        class="clear-btn"
-        (click)="clearDate(); $event.stopPropagation()"
-        [matTooltip]="'Clear date'"
-        matTooltipPosition="above"
+        class="action-btn date-btn"
+        (click)="openScheduleDialog()"
+        [class.has-value]="state().date"
       >
-        <mat-icon>close</mat-icon>
+        <mat-icon>{{ state().time ? 'schedule' : 'event' }}</mat-icon>
+        <span>{{ dateDisplay() || 'Due' }}</span>
       </button>
-    }
 
-    <button
-      #tagsMenuTrigger
-      mat-button
-      class="action-btn tags-btn"
-      [matMenuTriggerFor]="tagsMenu"
-      [class.has-value]="state().tags.length > 0 || hasNewTags()"
-      [class.has-new-tags]="hasNewTags()"
-      [class.menu-open]="isTagsMenuOpen()"
-      (click)="onTagsMenuClick($event)"
-    >
-      @if (state().tags.length === 0 && state().newTagTitles.length === 0) {
-        <mat-icon>label</mat-icon>
-        Tags
-      } @else {
-        <div class="tags-display">
-          @for (tag of state().tags; track tag.id) {
-            <div class="tag-item">
-              <mat-icon [style.color]="tag.color || tag.theme?.primary">
-                {{ tag.icon || 'label' }}
-              </mat-icon>
-              <span class="tag-title">{{ tag.title }}</span>
-            </div>
-          }
-          @for (newTag of state().newTagTitles; track newTag) {
-            <div class="tag-item new-tag">
-              <mat-icon>new_releases</mat-icon>
-              <span class="tag-title">{{ newTag }}</span>
-            </div>
-          }
-        </div>
+      @if (state().date) {
+        <button
+          mat-button
+          class="clear-btn"
+          (click)="clearDate(); $event.stopPropagation()"
+          [matTooltip]="'Clear date'"
+          matTooltipPosition="above"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
       }
-    </button>
 
-    @if (state().tags.length > 0 || hasNewTags()) {
       <button
+        #tagsMenuTrigger
         mat-button
-        class="clear-btn"
-        (click)="clearTags(); $event.stopPropagation()"
-        [matTooltip]="'Clear tags'"
-        matTooltipPosition="above"
+        class="action-btn tags-btn"
+        [matMenuTriggerFor]="tagsMenu"
+        [class.has-value]="state().tags.length > 0 || hasNewTags()"
+        [class.has-new-tags]="hasNewTags()"
+        [class.menu-open]="isTagsMenuOpen()"
+        (click)="onTagsMenuClick($event)"
       >
-        <mat-icon>close</mat-icon>
+        @if (state().tags.length === 0 && state().newTagTitles.length === 0) {
+          <mat-icon>label</mat-icon>
+          Tags
+        } @else {
+          <div class="tags-display">
+            @for (tag of state().tags; track tag.id) {
+              <div class="tag-item">
+                <mat-icon [style.color]="tag.color || tag.theme?.primary">
+                  {{ tag.icon || 'label' }}
+                </mat-icon>
+                <span class="tag-title">{{ tag.title }}</span>
+              </div>
+            }
+            @for (newTag of state().newTagTitles; track newTag) {
+              <div class="tag-item new-tag">
+                <mat-icon>new_releases</mat-icon>
+                <span class="tag-title">{{ newTag }}</span>
+              </div>
+            }
+          </div>
+        }
       </button>
-    }
 
-    <button
-      #estimateMenuTrigger
-      mat-button
-      class="action-btn estimate-btn"
-      [matMenuTriggerFor]="estimateMenu"
-      [class.has-value]="state().estimate"
-      [class.menu-open]="isEstimateMenuOpen()"
-      (click)="onEstimateMenuClick($event)"
-    >
-      <mat-icon>timer</mat-icon>
-      <span>{{ estimateDisplay() || 'Estimate' }}</span>
-    </button>
+      @if (state().tags.length > 0 || hasNewTags()) {
+        <button
+          mat-button
+          class="clear-btn"
+          (click)="clearTags(); $event.stopPropagation()"
+          [matTooltip]="'Clear tags'"
+          matTooltipPosition="above"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      }
 
-    @if (state().estimate) {
       <button
+        #estimateMenuTrigger
         mat-button
-        class="clear-btn"
-        (click)="clearEstimate(); $event.stopPropagation()"
-        [matTooltip]="'Clear estimate'"
-        matTooltipPosition="above"
+        class="action-btn estimate-btn"
+        [matMenuTriggerFor]="estimateMenu"
+        [class.has-value]="state().estimate"
+        [class.menu-open]="isEstimateMenuOpen()"
+        (click)="onEstimateMenuClick($event)"
       >
-        <mat-icon>close</mat-icon>
+        <mat-icon>timer</mat-icon>
+        <span>{{ estimateDisplay() || 'Estimate' }}</span>
       </button>
-    }
-  </div>
+
+      @if (state().estimate) {
+        <button
+          mat-button
+          class="clear-btn"
+          (click)="clearEstimate(); $event.stopPropagation()"
+          [matTooltip]="'Clear estimate'"
+          matTooltipPosition="above"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </div>
+  }
 </div>
 
 <!-------------- Menus ------------------->
