@@ -33,96 +33,188 @@
   bottom: var(--s);
 }
 
-.add-task-bar-container {
-  position: relative;
+.add-mode-container {
   width: 100%;
-}
+  position: relative;
+  border-radius: var(--card-border-radius);
+  background-color: var(--bg-lighter);
+  color: var(--text-color-most-intense);
 
-.mode-indicator {
-  position: absolute;
-  top: var(--s);
-  right: var(--s);
-  display: flex;
-  gap: 4px;
-  z-index: 10;
-
-  .mode-toggle {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: 1px solid var(--extra-border-color);
-    background: var(--bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    &:hover {
-      background: var(--bg-lighter);
-      border-color: var(--primary);
-    }
-
-    &.active {
-      background: var(--primary);
-      color: white;
-      border-color: var(--primary);
-    }
-
-    .mode-icon {
-      font-size: 16px;
-    }
+  &.isElevated {
+    background-color: var(--bg-lightest);
   }
 }
 
-.quick-toggles {
-  position: absolute;
-  bottom: var(--s);
-  right: var(--s);
+.input-section {
+  position: relative;
   display: flex;
-  gap: 4px;
-  z-index: 10;
+  color: var(--text-color-most-intense);
 
-  .quick-toggle {
-    width: 28px;
-    height: 28px;
-    border-radius: 4px;
-    border: 1px solid var(--extra-border-color);
-    background: var(--bg);
+  .task-input {
+    flex: 1;
+    display: block;
+    width: 100%;
+    height: 42px;
+    font-size: 16px;
+    box-sizing: border-box;
+    border-style: solid;
+    border-width: 0;
+    outline: 0;
+    padding-right: 4px;
+    padding-left: var(--s2);
+    line-height: 42px;
+    background: transparent;
+    color: inherit;
+    font-family: inherit;
+  }
+
+  .button-controls {
+    margin-left: auto;
+    z-index: 2;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    opacity: 0.6;
+  }
+
+  .separator-box {
+    border-right: 1px dashed var(--extra-border-color);
+    border-left: 1px dashed var(--extra-border-color);
+    border-color: var(--extra-border-color);
+  }
+
+  .switch-add-to-btn,
+  .switch-add-to-bot-btn {
+    opacity: 0.4;
 
     &:hover {
       opacity: 1;
-      background: var(--bg-lighter);
     }
+  }
 
-    &.active {
+  .search-toggle-btn {
+    opacity: 0.4;
+
+    &:hover {
       opacity: 1;
-      background: var(--primary-light);
-      border-color: var(--primary);
-    }
-
-    .toggle-icon {
-      font-size: 14px;
     }
   }
 }
 
-@include mq(xs, max) {
-  .mode-indicator {
-    position: static;
-    justify-content: center;
-    margin-bottom: var(--s);
+.action-buttons {
+  padding-top: 0;
+  display: flex;
+  flex-wrap: wrap;
+  border-top: 1px dashed var(--extra-border-color);
+
+  @include mq(xs) {
+    gap: 2px;
   }
 
-  .quick-toggles {
-    position: static;
-    justify-content: center;
-    margin-top: var(--s);
+  .action-btn {
+    cursor: pointer;
+    opacity: 0.5;
+    display: flex;
+    align-items: center;
+
+    &.has-value {
+      background-color: var(--bg-lightest);
+      opacity: 1;
+    }
+
+    // Project button is always active since we always have a project selected
+    &.project-btn {
+      background-color: var(--bg-lightest);
+      opacity: 1;
+    }
+
+    // Highlight when menu is open
+    &.menu-open {
+      background-color: rgba(0, 0, 0, 0.05);
+      opacity: 1;
+
+      @include darkTheme() {
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+
+      mat-icon {
+        color: inherit;
+      }
+    }
+
+    .new-tags-indicator {
+      font-size: 0.8em;
+      font-weight: normal;
+      opacity: 0.8;
+      margin-left: 4px;
+    }
+
+    .tags-display {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      max-width: 240px;
+      overflow: hidden;
+      position: relative;
+
+      .tag-item {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        flex-shrink: 0;
+        min-width: 0;
+
+        &.new-tag {
+          .tag-title {
+            font-style: italic;
+            opacity: 0.8;
+          }
+
+          mat-icon {
+            color: var(--color-accent);
+          }
+        }
+
+        mat-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+          line-height: 16px;
+        }
+
+        .tag-title {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          min-width: 0;
+          font-size: 0.9em;
+        }
+
+        // Last visible tag gets truncated with ellipsis if needed
+        &:last-child .tag-title {
+          text-overflow: ellipsis;
+        }
+      }
+    }
+  }
+}
+
+.clear-btn {
+  opacity: 0.5;
+  border-radius: 4px !important;
+  margin-left: -8px;
+  min-width: 32px;
+  padding: 0;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+
+  @include mq(xs) {
+    margin-left: -8px;
+  }
+
+  mat-icon {
+    margin: 0;
+  }
+
+  &:hover {
+    opacity: 1;
   }
 }
