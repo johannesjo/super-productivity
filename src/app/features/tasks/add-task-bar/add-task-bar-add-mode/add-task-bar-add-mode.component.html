@@ -10,7 +10,7 @@
       [tabindex]="tabindex()"
       [mention]="tagMentions | async"
       [mentionConfig]="tagMentionConfig | async"
-      placeholder="Add a task... (+project #tag @16:00)"
+      placeholder="Add a task... +project #tag @16:00"
       matInput
       spellcheck="false"
       (keydown.enter)="$event.preventDefault(); addTask()"
@@ -89,6 +89,28 @@
     </button>
 
     <button
+      mat-button
+      class="action-btn date-btn"
+      (click)="openScheduleDialog()"
+      [class.has-value]="selectedDate()"
+    >
+      <mat-icon>{{ selectedTime() ? 'schedule' : 'event' }}</mat-icon>
+      <span>{{ dateDisplay() || 'Due' }}</span>
+    </button>
+
+    @if (selectedDate()) {
+      <button
+        mat-button
+        class="clear-btn"
+        (click)="clearDate(); $event.stopPropagation()"
+        [matTooltip]="'Clear date'"
+        matTooltipPosition="above"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    }
+
+    <button
       #tagsMenuTrigger
       mat-button
       class="action-btn tags-btn"
@@ -134,28 +156,6 @@
     }
 
     <button
-      mat-button
-      class="action-btn date-btn"
-      (click)="openScheduleDialog()"
-      [class.has-value]="selectedDate()"
-    >
-      <mat-icon>{{ selectedTime() ? 'schedule' : 'event' }}</mat-icon>
-      <span>{{ dateDisplay() || 'Due' }}</span>
-    </button>
-
-    @if (selectedDate()) {
-      <button
-        mat-button
-        class="clear-btn"
-        (click)="clearDate(); $event.stopPropagation()"
-        [matTooltip]="'Clear date'"
-        matTooltipPosition="above"
-      >
-        <mat-icon>close</mat-icon>
-      </button>
-    }
-
-    <button
       #estimateMenuTrigger
       mat-button
       class="action-btn estimate-btn"
@@ -182,6 +182,7 @@
   </div>
 </div>
 
+<!-------------- Menus --------------------->
 <mat-menu #projectMenu="matMenu">
   @for (project of projects$ | async; track project.id) {
     <button
