@@ -4,6 +4,12 @@
   @blendInOut
 >
   <div class="input-section">
+    @if (isSearchLoading()) {
+      <div class="spinner">
+        <mat-spinner diameter="20"></mat-spinner>
+      </div>
+    }
+
     <input
       #inputEl
       class="task-input"
@@ -11,7 +17,12 @@
       [tabindex]="tabindex()"
       [mention]="tagMentions | async"
       [mentionConfig]="tagMentionConfig | async"
-      placeholder="Add a task... +project #tag @16:00"
+      [matAutocomplete]="taskAutoEl"
+      [placeholder]="
+        isSearchMode()
+          ? 'Add task or search tasks and issues...'
+          : 'Add a task... +project #tag @16:00'
+      "
       matInput
       spellcheck="false"
       (keydown.enter)="$event.preventDefault(); addTask()"
@@ -58,8 +69,85 @@
           <mat-icon>{{ isAddToBacklog() ? 'inbox' : 'today' }}</mat-icon>
         </button>
       }
+
+      <button
+        mat-icon-button
+        class="search-toggle-btn"
+        [class.active]="isSearchMode()"
+        (click)="toggleSearchMode()"
+        [matTooltip]="
+          isSearchMode()
+            ? 'Disable issue search (Ctrl+2)'
+            : 'Enable issue search (Ctrl+2)'
+        "
+        matTooltipPosition="above"
+      >
+        <mat-icon>search</mat-icon>
+      </button>
     </div>
   </div>
+
+  <mat-autocomplete
+    #taskAutoEl="matAutocomplete"
+    class="task-autocomplete"
+    (optionActivated)="onTaskSuggestionActivated($event?.option?.value)"
+    (optionSelected)="onTaskSuggestionSelected($event.option.value)"
+    [autoActiveFirstOption]="true"
+  >
+    @for (
+      item of suggestions$ | async;
+      track item.taskId || (item.issueData && item.issueData.id)
+    ) {
+      <mat-option
+        [value]="item"
+        class="suggestion-option"
+      >
+        <div class="option-content">
+          @if (item.issueType) {
+            <mat-icon
+              class="option-icon"
+              [svgIcon]="item.issueType | issueIcon"
+            ></mat-icon>
+          } @else if (item.taskId && item.isArchivedTask) {
+            <mat-icon class="option-icon archived">archive</mat-icon>
+          } @else if (item.taskId) {
+            <mat-icon class="option-icon">task</mat-icon>
+          } @else if (!item.ctx) {
+            <mat-icon class="option-icon">library_books</mat-icon>
+          }
+
+          @if (item.ctx) {
+            <tag
+              [tag]="item.ctx"
+              [isHideTitle]="false"
+            ></tag>
+          }
+
+          <span
+            class="option-title"
+            [innerHTML]="item?.titleHighlighted || item?.title"
+          ></span>
+
+          @if (item.issueData?.id) {
+            <span class="issue-id">#{{ item.issueData?.id }}</span>
+          }
+        </div>
+      </mat-option>
+    }
+
+    @if (
+      (suggestions$ | async)?.length === 0 &&
+      titleControl.value &&
+      titleControl.value.length >= 2 &&
+      !isSearchLoading()
+    ) {
+      <mat-option disabled>
+        <span class="no-results">
+          {{ isSearchMode() ? 'No tasks or issues found' : 'No tasks found' }}
+        </span>
+      </mat-option>
+    }
+  </mat-autocomplete>
 
   <div class="action-buttons">
     <button

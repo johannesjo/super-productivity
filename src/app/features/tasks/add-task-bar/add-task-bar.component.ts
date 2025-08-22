@@ -36,7 +36,6 @@ import { GlobalConfigService } from '../../config/global-config.service';
 import { AddTaskBarService } from './add-task-bar.service';
 import { T } from '../../../t.const';
 import { debounceTime, distinctUntilChanged, filter, first, map } from 'rxjs/operators';
-import { combineLatest } from 'rxjs';
 import { Project } from '../../project/project.model';
 import { Tag } from '../../tag/tag.model';
 import { getLocalDateStr } from '../../../util/get-local-date-str';
@@ -46,9 +45,25 @@ import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { Store } from '@ngrx/store';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { of } from 'rxjs';
+import { switchMap, tap, catchError } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
+import {
+  MatAutocomplete,
+  MatAutocompleteTrigger,
+  MatOption,
+} from '@angular/material/autocomplete';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { IssueService } from '../../issue/issue.service';
+import { AddTaskSuggestion } from './add-task-suggestions.model';
+import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
+import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
+import { TagComponent } from '../../tag/tag/tag.component';
+import { truncate } from '../../../util/truncate';
+import { SnackService } from '../../../core/snack/snack.service';
+import { shortSyntax } from '../short-syntax';
 
 @Component({
   selector: 'add-task-bar',
@@ -70,6 +85,12 @@ import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confir
     MatMenuItem,
     AsyncPipe,
     MentionModule,
+    MatAutocomplete,
+    MatAutocompleteTrigger,
+    MatOption,
+    MatProgressSpinner,
+    IssueIconPipe,
+    TagComponent,
   ],
   providers: [],
 })
@@ -82,6 +103,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   private _store = inject(Store);
   private _addTaskBarService = inject(AddTaskBarService);
   private _matDialog = inject(MatDialog);
+  private _issueService = inject(IssueService);
+  private _snackService = inject(SnackService);
 
   tabindex = input<number>(0);
   isElevated = input<boolean>(false);
@@ -89,6 +112,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   planForDay = input<string | undefined>(undefined);
   additionalFields = input<Partial<TaskCopy>>();
   taskIdsToExclude = input<string[]>();
+  isHideTagTitles = input<boolean>(false);
+  isSkipAddingCurrentTag = input<boolean>(false);
+  tagsToRemove = input<string[]>([]);
+  isDoubleEnterMode = input<boolean>(false);
 
   afterTaskAdd = output<{ taskId: string; isAddToBottom: boolean }>();
   blurred = output<void>();
@@ -99,10 +126,19 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   );
   isAddToBacklog = signal(false);
 
+  // Search mode state
+  isSearchMode = signal(false);
+  searchControl = new FormControl<string>('');
+  isSearchLoading = signal(false);
+  activatedSuggestion$ = new BehaviorSubject<AddTaskSuggestion | null>(null);
+
   // Track open menus for highlighting
   isProjectMenuOpen = signal<boolean>(false);
   isTagsMenuOpen = signal<boolean>(false);
   isEstimateMenuOpen = signal<boolean>(false);
+
+  // Search suggestions - initialized in constructor
+  suggestions$!: Observable<AddTaskSuggestion[]>;
 
   T = T;
 
@@ -237,6 +273,73 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
         this._focusTimeout = undefined;
       }
     });
+
+    // Initialize search suggestions observable
+    this.suggestions$ = this.titleControl.valueChanges.pipe(
+      tap(() => this.isSearchLoading.set(true)),
+      debounceTime(300),
+      switchMap((searchTerm) => {
+        // Always clear loading state if not in search mode or no search term
+        if (!this.isSearchMode() || !searchTerm || typeof searchTerm !== 'string') {
+          this.isSearchLoading.set(false);
+          return of([]);
+        }
+
+        // Search both tasks and issues simultaneously
+        const taskSearch$ = this._taskService.allTasks$.pipe(
+          map((tasks) => {
+            const searchLower = searchTerm.toLowerCase();
+            return tasks
+              .filter((task) => task.title.toLowerCase().includes(searchLower))
+              .slice(0, 15) // Limit task results to leave room for issues
+              .map(
+                (task) =>
+                  ({
+                    title: task.title,
+                    taskId: task.id,
+                    projectId: task.projectId,
+                    isArchivedTask: task.isDone,
+                  }) as AddTaskSuggestion,
+              );
+          }),
+          catchError(() => of([] as AddTaskSuggestion[])),
+        );
+
+        const issueSearch$ = this._issueService
+          .searchAllEnabledIssueProviders$(searchTerm)
+          .pipe(
+            map((issueSuggestions) =>
+              issueSuggestions.slice(0, 15).map(
+                // Limit issue results
+                (issueSuggestion) =>
+                  ({
+                    title: issueSuggestion.title,
+                    titleHighlighted: issueSuggestion.titleHighlighted,
+                    issueData: issueSuggestion.issueData,
+                    issueType: issueSuggestion.issueType,
+                    issueProviderId: issueSuggestion.issueProviderId,
+                  }) as AddTaskSuggestion,
+              ),
+            ),
+            catchError(() => of([] as AddTaskSuggestion[])),
+          );
+
+        // Combine both searches
+        return combineLatest([taskSearch$, issueSearch$]).pipe(
+          map(([tasks, issues]) => [...tasks, ...issues]),
+          tap(() => this.isSearchLoading.set(false)),
+        );
+      }),
+      map((suggestions) => {
+        const taskIdsToExclude = this.taskIdsToExclude() || [];
+        return suggestions.filter((s) => {
+          if (s.taskId) {
+            return !taskIdsToExclude.includes(s.taskId);
+          }
+          return true;
+        });
+      }),
+    );
   }
 
   ngOnInit(): void {
@@ -306,9 +409,19 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     const inputElement = (this.inputEl() as ElementRef).nativeElement;
     inputElement.addEventListener('keydown', (ev: KeyboardEvent) => {
       if (ev.key === 'Escape') {
-        this.blurred.emit();
+        if (this.isSearchMode()) {
+          if (this.searchControl.value) {
+            this.searchControl.setValue('');
+          } else {
+            this.toggleSearchMode();
+          }
+        } else {
+          this.blurred.emit();
+        }
       } else if (ev.key === 'Enter' && ev.ctrlKey) {
-        this.addTask();
+        if (!this.isSearchMode()) {
+          this.addTask();
+        }
       }
     });
   }
@@ -694,6 +807,69 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     sessionStorage.removeItem(SS.TODO_TMP);
   }
 
+  toggleSearchMode(): void {
+    this.isSearchMode.update((mode) => !mode);
+    // Trigger value change to refresh suggestions
+    this.titleControl.updateValueAndValidity();
+    // Focus input to refresh autocomplete with new search mode
+    setTimeout(() => this._focusInput(), 0);
+  }
+
+  onTaskSuggestionActivated(suggestion: AddTaskSuggestion | null): void {
+    this.activatedSuggestion$.next(suggestion);
+  }
+
+  async onTaskSuggestionSelected(suggestion: AddTaskSuggestion): Promise<void> {
+    if (!suggestion) return;
+
+    let taskId: string | undefined;
+
+    if (suggestion.taskId && suggestion.isFromOtherContextAndTagOnlySearch) {
+      if (this._workContextService.activeWorkContextType === WorkContextType.TAG) {
+        const task = await this._taskService.getByIdOnce$(suggestion.taskId).toPromise();
+        this._taskService.moveToCurrentWorkContext(task);
+      }
+      this._snackService.open({
+        ico: 'playlist_add',
+        msg: T.F.TASK.S.FOUND_MOVE_FROM_OTHER_LIST,
+        translateParams: {
+          title: truncate(suggestion.title),
+          contextTitle: suggestion.ctx?.title
+            ? truncate(suggestion.ctx.title)
+            : '~the void~',
+        },
+      });
+      taskId = suggestion.taskId;
+    } else if (suggestion.taskId) {
+      if (suggestion.projectId) {
+        this._taskService.getByIdOnce$(suggestion.taskId).subscribe((task) => {
+          this._taskService.moveToCurrentWorkContext(task);
+        });
+        this._snackService.open({
+          ico: 'arrow_upward',
+          msg: T.F.TASK.S.FOUND_MOVE_FROM_BACKLOG,
+          translateParams: { title: suggestion.title },
+        });
+        taskId = suggestion.taskId;
+      }
+    } else if (suggestion.issueType && suggestion.issueData) {
+      taskId = await this._addTaskBarService.addTaskFromExistingTaskOrIssue(
+        suggestion,
+        this.isAddToBacklog(),
+        true,
+      );
+    }
+
+    if (taskId) {
+      this.afterTaskAdd.emit({
+        taskId,
+        isAddToBottom: false,
+      });
+      this.titleControl.setValue('');
+      // Don't automatically turn off search mode, let user decide
+    }
+  }
+
   @HostListener('document:keydown', ['$event'])
   handleKeyboardShortcuts(event: KeyboardEvent): void {
     // Ctrl+1 to toggle add to top/bottom
@@ -701,11 +877,18 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       event.preventDefault();
       this.toggleIsAddToBottom();
     }
+    // Ctrl+2 to toggle search mode
+    else if (event.ctrlKey && event.key === '2') {
+      event.preventDefault();
+      this.toggleSearchMode();
+    }
   }
 
   // Internal state management methods
   private updateProject(project: Project | null): void {
     this._taskInputState.update((state) => ({ ...state, project }));
+    // Clear auto-detected flag when manually changing project
+    this.isAutoDetected.set(false);
   }
 
   private updateDate(date: Date | null, time?: string | null): void {
@@ -750,6 +933,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       rawText: '',
       cleanText: '',
     });
+    // Reset auto-detected flag
+    this.isAutoDetected.set(false);
   }
 
   private updateFromText(
@@ -758,12 +943,85 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     allProjects: Project[],
     allTags: Tag[],
   ): void {
-    // Simple text parsing - for now just update the raw and clean text
-    // In a full implementation, this would parse project references, tags, etc.
-    this._taskInputState.update((state) => ({
-      ...state,
+    // Start with basic state
+    const newState = {
       rawText: text,
-      cleanText: text, // For now, just use the raw text
-    }));
+      cleanText: text,
+      project: this.state().project,
+      tags: this.state().tags,
+      newTagTitles: [] as string[],
+      date: this.state().date,
+      time: this.state().time,
+      estimate: this.state().estimate,
+    };
+
+    // Only parse if we have text and config
+    if (text && config) {
+      try {
+        const parseResult = shortSyntax(
+          { title: text, tagIds: newState.tags.map((t) => t.id) },
+          config,
+          allTags,
+          allProjects,
+        );
+
+        if (parseResult) {
+          // Update clean text
+          if (parseResult.taskChanges.title) {
+            newState.cleanText = parseResult.taskChanges.title;
+          }
+
+          // Update project if found
+          if (parseResult.projectId) {
+            const foundProject = allProjects.find((p) => p.id === parseResult.projectId);
+            if (foundProject) {
+              newState.project = foundProject;
+              this.isAutoDetected.set(true);
+            }
+          }
+
+          // Update tags if found
+          if (parseResult.taskChanges.tagIds) {
+            const foundTags = allTags.filter((tag) =>
+              parseResult.taskChanges.tagIds?.includes(tag.id),
+            );
+            newState.tags = [
+              ...newState.tags,
+              ...foundTags.filter(
+                (tag) => !newState.tags.some((existing) => existing.id === tag.id),
+              ),
+            ];
+          }
+
+          // Update new tag titles
+          if (parseResult.newTagTitles.length > 0) {
+            newState.newTagTitles = parseResult.newTagTitles;
+          }
+
+          // Update time estimate
+          if (parseResult.taskChanges.timeEstimate) {
+            newState.estimate = parseResult.taskChanges.timeEstimate;
+          }
+
+          // Update due date
+          if (parseResult.taskChanges.dueWithTime) {
+            const dueDate = new Date(parseResult.taskChanges.dueWithTime);
+            newState.date = dueDate;
+
+            // Extract time if it has planned time
+            if (parseResult.taskChanges.hasPlannedTime !== false) {
+              const hours = dueDate.getHours().toString().padStart(2, '0');
+              const minutes = dueDate.getMinutes().toString().padStart(2, '0');
+              newState.time = `${hours}:${minutes}`;
+            }
+          }
+        }
+      } catch (error) {
+        console.warn('Short syntax parsing failed:', error);
+        // Fall back to basic text update
+      }
+    }
+
+    this._taskInputState.update((state) => newState);
   }
 }

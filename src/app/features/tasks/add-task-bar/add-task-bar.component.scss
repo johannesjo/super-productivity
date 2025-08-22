@@ -43,6 +43,13 @@
   &.isElevated {
     background-color: var(--bg-lightest);
   }
+
+  // Hide action buttons in search mode
+  &:has(.search-input) {
+    .action-buttons {
+      display: none;
+    }
+  }
 }
 
 .input-section {
@@ -95,6 +102,24 @@
     &:hover {
       opacity: 1;
     }
+
+    &.active {
+      opacity: 1;
+      background-color: var(--primary-light);
+      color: var(--primary);
+    }
+  }
+
+  .spinner {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 3;
+  }
+
+  .search-input {
+    padding-right: 40px; // Make room for spinner
   }
 }
 
@@ -216,5 +241,51 @@
 
   &:hover {
     opacity: 1;
+  }
+}
+
+// Task autocomplete styles
+.task-autocomplete {
+  max-height: 400px;
+  overflow-y: auto;
+
+  .suggestion-option {
+    min-height: 48px;
+    padding: 8px 16px;
+
+    .option-content {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+
+      .option-icon {
+        flex-shrink: 0;
+        color: var(--text-color-dimmed);
+
+        &.archived {
+          color: var(--color-accent);
+        }
+      }
+
+      .option-title {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .issue-id {
+        flex-shrink: 0;
+        font-size: 0.9em;
+        color: var(--text-color-dimmed);
+        opacity: 0.7;
+      }
+    }
+  }
+
+  .no-results {
+    color: var(--text-color-dimmed);
+    font-style: italic;
   }
 }
