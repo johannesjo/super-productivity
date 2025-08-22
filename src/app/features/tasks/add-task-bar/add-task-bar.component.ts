@@ -134,6 +134,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   searchControl = new FormControl<string>('');
   isSearchLoading = signal(false);
   activatedSuggestion$ = new BehaviorSubject<AddTaskSuggestion | null>(null);
+  private _processingAutocompleteSelection = false;
 
   // Track open menus for highlighting
   isProjectMenuOpen = signal<boolean>(false);
@@ -190,6 +191,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   ];
 
   inputEl = viewChild<ElementRef>('inputEl');
+  taskAutoEl = viewChild('taskAutoEl', { read: MatAutocomplete });
   projectMenuTrigger = viewChild('projectMenuTrigger', { read: MatMenuTrigger });
   tagsMenuTrigger = viewChild('tagsMenuTrigger', { read: MatMenuTrigger });
   estimateMenuTrigger = viewChild('estimateMenuTrigger', { read: MatMenuTrigger });
@@ -525,6 +527,23 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   async addTask(): Promise<void> {
+    // Don't create a new task if we're processing an autocomplete selection
+    if (this._processingAutocompleteSelection) {
+      return;
+    }
+
+    // Also check if autocomplete is currently open with options
+    const autocomplete = this.taskAutoEl();
+    if (
+      autocomplete &&
+      autocomplete.isOpen &&
+      autocomplete.options &&
+      autocomplete.options.length > 0
+    ) {
+      // Don't create a new task when autocomplete has options
+      return;
+    }
+
     const currentState = this.state();
     const title = currentState.cleanText || this.titleControl.value?.trim();
     if (!title) return;
@@ -826,12 +845,29 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     setTimeout(() => this._focusInput(), 0);
   }
 
+  handleEnterKey(event: KeyboardEvent): void {
+    event.preventDefault();
+
+    // Delay addTask to allow optionSelected to fire first if autocomplete is selecting
+    setTimeout(() => {
+      this.addTask();
+    }, 50);
+  }
+
   onTaskSuggestionActivated(suggestion: AddTaskSuggestion | null): void {
     this.activatedSuggestion$.next(suggestion);
   }
 
   async onTaskSuggestionSelected(suggestion: AddTaskSuggestion): Promise<void> {
     if (!suggestion) return;
+
+    // Set flag to indicate we're processing an autocomplete selection
+    this._processingAutocompleteSelection = true;
+
+    // Clear the flag after a short delay
+    setTimeout(() => {
+      this._processingAutocompleteSelection = false;
+    }, 100);
 
     let taskId: string | undefined;
 
@@ -877,6 +913,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
         isAddToBottom: false,
       });
       this.titleControl.setValue('');
+      // Clear the activated suggestion
+      this.activatedSuggestion$.next(null);
       // Don't automatically turn off search mode, let user decide
     }
   }
