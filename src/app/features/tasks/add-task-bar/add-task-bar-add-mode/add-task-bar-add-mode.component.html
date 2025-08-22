@@ -47,7 +47,7 @@
         </mat-icon>
       </button>
 
-      @if (selectedProject()?.isEnableBacklog) {
+      @if (state().project?.isEnableBacklog) {
         <button
           mat-icon-button
           class="switch-add-to-btn"
@@ -77,28 +77,28 @@
       mat-button
       class="action-btn project-btn"
       [matMenuTriggerFor]="projectMenu"
-      [class.has-value]="selectedProject()"
-      [class.auto-detected]="isProjectAutoDetected()"
+      [class.has-value]="state().project"
+      [class.auto-detected]="isAutoDetected() && !!state().project"
       [class.menu-open]="isProjectMenuOpen()"
       (click)="onProjectMenuClick($event)"
     >
-      <mat-icon [style.color]="selectedProject()!.theme.primary"
-        >{{ selectedProject()!.icon || 'folder' }}
+      <mat-icon [style.color]="state().project!.theme.primary"
+        >{{ state().project!.icon || 'folder' }}
       </mat-icon>
-      <span>{{ selectedProject()?.title }}</span>
+      <span>{{ state().project?.title }}</span>
     </button>
 
     <button
       mat-button
       class="action-btn date-btn"
       (click)="openScheduleDialog()"
-      [class.has-value]="selectedDate()"
+      [class.has-value]="state().date"
     >
-      <mat-icon>{{ selectedTime() ? 'schedule' : 'event' }}</mat-icon>
+      <mat-icon>{{ state().time ? 'schedule' : 'event' }}</mat-icon>
       <span>{{ dateDisplay() || 'Due' }}</span>
     </button>
 
-    @if (selectedDate()) {
+    @if (state().date) {
       <button
         mat-button
         class="clear-btn"
@@ -115,17 +115,17 @@
       mat-button
       class="action-btn tags-btn"
       [matMenuTriggerFor]="tagsMenu"
-      [class.has-value]="selectedTags().length > 0 || hasNewTags()"
+      [class.has-value]="state().tags.length > 0 || hasNewTags()"
       [class.has-new-tags]="hasNewTags()"
       [class.menu-open]="isTagsMenuOpen()"
       (click)="onTagsMenuClick($event)"
     >
-      @if (selectedTags().length === 0 && newTagTitles().length === 0) {
+      @if (state().tags.length === 0 && state().newTagTitles.length === 0) {
         <mat-icon>label</mat-icon>
         Tags
       } @else {
         <div class="tags-display">
-          @for (tag of selectedTags(); track tag.id) {
+          @for (tag of state().tags; track tag.id) {
             <div class="tag-item">
               <mat-icon [style.color]="tag.color || tag.theme?.primary">
                 {{ tag.icon || 'label' }}
@@ -133,7 +133,7 @@
               <span class="tag-title">{{ tag.title }}</span>
             </div>
           }
-          @for (newTag of newTagTitles(); track newTag) {
+          @for (newTag of state().newTagTitles; track newTag) {
             <div class="tag-item new-tag">
               <mat-icon>new_releases</mat-icon>
               <span class="tag-title">{{ newTag }}</span>
@@ -143,7 +143,7 @@
       }
     </button>
 
-    @if (selectedTags().length > 0 || hasNewTags()) {
+    @if (state().tags.length > 0 || hasNewTags()) {
       <button
         mat-button
         class="clear-btn"
@@ -160,7 +160,7 @@
       mat-button
       class="action-btn estimate-btn"
       [matMenuTriggerFor]="estimateMenu"
-      [class.has-value]="selectedEstimate()"
+      [class.has-value]="state().estimate"
       [class.menu-open]="isEstimateMenuOpen()"
       (click)="onEstimateMenuClick($event)"
     >
@@ -168,7 +168,7 @@
       <span>{{ estimateDisplay() || 'Estimate' }}</span>
     </button>
 
-    @if (selectedEstimate()) {
+    @if (state().estimate) {
       <button
         mat-button
         class="clear-btn"
