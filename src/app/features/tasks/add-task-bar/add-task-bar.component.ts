@@ -15,6 +15,7 @@ import {
   viewChild,
   HostListener,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MentionModule } from 'angular-mentions';
 import { MatInput } from '@angular/material/input';
@@ -64,6 +65,7 @@ import { TagComponent } from '../../tag/tag/tag.component';
 import { truncate } from '../../../util/truncate';
 import { SnackService } from '../../../core/snack/snack.service';
 import { shortSyntax } from '../short-syntax';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'add-task-bar',
@@ -91,6 +93,7 @@ import { shortSyntax } from '../short-syntax';
     MatProgressSpinner,
     IssueIconPipe,
     TagComponent,
+    TranslatePipe,
   ],
   providers: [],
 })
@@ -136,6 +139,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   isProjectMenuOpen = signal<boolean>(false);
   isTagsMenuOpen = signal<boolean>(false);
   isEstimateMenuOpen = signal<boolean>(false);
+
+  // Convert activated suggestion observable to signal for template
+  activatedIssueTask = toSignal(this.activatedSuggestion$, { initialValue: null });
 
   // Search suggestions - initialized in constructor
   suggestions$!: Observable<AddTaskSuggestion[]>;

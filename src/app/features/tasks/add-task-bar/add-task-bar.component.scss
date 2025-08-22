@@ -123,6 +123,13 @@
   }
 }
 
+.add-issue-info-text {
+  height: 38px;
+  padding: 8px;
+  font-weight: bold;
+  border-top: 1px dashed var(--extra-border-color);
+}
+
 .action-buttons {
   padding-top: 0;
   display: flex;
