@@ -34,18 +34,6 @@
     </div>
   </div>
 
-  <div class="search-info">
-    @if (searchControl.value) {
-      <span class="info-text">
-        Searching tasks and issues for "{{ searchControl.value }}"
-      </span>
-    } @else {
-      <span class="info-text muted">
-        Search for existing tasks and issues from connected providers
-      </span>
-    }
-  </div>
-
   <mat-autocomplete
     #autoEl="matAutocomplete"
     class="search-autocomplete"
@@ -88,7 +76,7 @@
           ></span>
 
           @if (item.issueData?.id) {
-            <span class="issue-id">#{{ item.issueData.id }}</span>
+            <span class="issue-id">#{{ item.issueData?.id }}</span>
           }
         </div>
       </mat-option>
