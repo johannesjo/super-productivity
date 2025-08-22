@@ -392,15 +392,15 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   // Remove clearProject since we always want a project selected
 
   clearDate(): void {
-    this._taskInputState.updateDate(null);
+    this._taskInputState.clearDate();
   }
 
   clearTags(): void {
-    this._taskInputState.updateTags([]);
+    this._taskInputState.clearTags();
   }
 
   clearEstimate(): void {
-    this._taskInputState.updateEstimate(null);
+    this._taskInputState.clearEstimate();
   }
 
   async addTask(): Promise<void> {
