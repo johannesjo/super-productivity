@@ -53,7 +53,6 @@ import { msToString } from '../../../ui/duration/ms-to-string.pipe';
 import { stringToMs } from '../../../ui/duration/string-to-ms.pipe';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { Store } from '@ngrx/store';
-import { PlannerActions } from '../../planner/store/planner.actions';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
@@ -630,20 +629,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       });
 
     this._focusInput();
-  }
-
-  private _planTaskForDay(taskId: string, day: string): void {
-    this._taskService.getByIdOnce$(taskId).subscribe((task) => {
-      if (getLocalDateStr() !== day) {
-        this._store.dispatch(
-          PlannerActions.planTaskForDay({
-            task,
-            day,
-            isAddToTop: !this.isAddToBottom(),
-          }),
-        );
-      }
-    });
   }
 
   private _focusInput(selectAll: boolean = false): void {
