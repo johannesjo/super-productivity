@@ -135,7 +135,7 @@
       }}
     </div>
   } @else {
-    <div class="action-buttons">
+    <div class="bottom-section">
       <button
         #projectMenuTrigger
         mat-button
@@ -245,13 +245,13 @@
       }
     </div>
   }
-
-  @if (isSearchLoading()) {
-    <div class="spinner">
-      <mat-spinner diameter="20"></mat-spinner>
-    </div>
-  }
 </div>
+
+@if (isSearchLoading()) {
+  <div class="spinner">
+    <mat-spinner diameter="24"></mat-spinner>
+  </div>
+}
 
 <!-------------- Menus ------------------->
 <mat-menu #projectMenu="matMenu">

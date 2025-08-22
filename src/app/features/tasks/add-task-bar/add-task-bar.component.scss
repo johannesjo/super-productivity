@@ -43,13 +43,6 @@
   &.isElevated {
     background-color: var(--bg-lightest);
   }
-
-  // Hide action buttons in search mode
-  &:has(.search-input) {
-    .action-buttons {
-      display: none;
-    }
-  }
 }
 
 .input-section {
@@ -110,14 +103,6 @@
     }
   }
 
-  .spinner {
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 3;
-  }
-
   .search-input {
     padding-right: 40px; // Make room for spinner
   }
@@ -131,7 +116,8 @@
   border-top: 1px dashed var(--extra-border-color);
 }
 
-.action-buttons {
+.bottom-section {
+  position: relative;
   padding-top: 0;
   display: flex;
   flex-wrap: wrap;
@@ -226,6 +212,28 @@
         }
       }
     }
+  }
+}
+
+.spinner {
+  animation: 200ms fadeIn;
+  position: absolute;
+  right: 50%;
+  top: 100%;
+  transform: translateX(-50%);
+  z-index: 333333;
+  border-radius: 50%;
+  background: var(--card-bg);
+  padding: 6px;
+  margin-top: 4px;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
   }
 }
 
