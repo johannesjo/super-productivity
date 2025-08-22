@@ -8,6 +8,7 @@ import {
   ElementRef,
   inject,
   input,
+  OnDestroy,
   OnInit,
   output,
   signal,
@@ -45,6 +46,7 @@ import { TaskInputStateService } from './task-input-state.service';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogScheduleTaskComponent } from '../../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { DialogConfirmComponent } from '../../../../ui/dialog-confirm/dialog-confirm.component';
+import { SS } from '../../../../core/persistence/storage-keys.const';
 
 @Component({
   selector: 'add-task-bar-add-mode',
@@ -68,7 +70,7 @@ import { DialogConfirmComponent } from '../../../../ui/dialog-confirm/dialog-con
   ],
   providers: [TaskInputStateService],
 })
-export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
+export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit, OnDestroy {
   private _taskService = inject(TaskService);
   private _workContextService = inject(WorkContextService);
   private _projectService = inject(ProjectService);
@@ -194,6 +196,8 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   });
 
   private _destroyRef = inject(DestroyRef);
+  private _focusTimeout?: number;
+  private _hasRestoredText = false;
 
   constructor() {
     // Initialize local state from inputs and keep them in sync
@@ -210,6 +214,23 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
       const currentText = this.state().rawText;
       if (currentText !== this.titleControl.value) {
         this.titleControl.setValue(currentText, { emitEvent: false });
+      }
+    });
+
+    // Save text on every keystroke
+    this.titleControl.valueChanges
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe((value) => {
+        if (value !== null) {
+          this.saveCurrentText(value);
+        }
+      });
+
+    // Clean up focus timeout on destroy
+    this._destroyRef.onDestroy(() => {
+      if (this._focusTimeout !== undefined) {
+        clearTimeout(this._focusTimeout);
+        this._focusTimeout = undefined;
       }
     });
   }
@@ -269,8 +290,13 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   }
 
   ngAfterViewInit(): void {
+    // Restore text first, before any focus operations
+    this.restorePreviousText();
+
     if (!this.isDisableAutoFocus()) {
-      this._focusInput();
+      // Select all text if there's existing content (from previous session)
+      const hasExistingText = !!this.titleControl.value?.trim();
+      this._focusInput(hasExistingText);
     }
 
     const inputElement = (this.inputEl() as ElementRef).nativeElement;
@@ -281,6 +307,22 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
         this.addTask();
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    if (this._focusTimeout !== undefined) {
+      clearTimeout(this._focusTimeout);
+      this._focusTimeout = undefined;
+    }
+  }
+
+  onBlur(): void {
+    const text = this.titleControl.value;
+    if (text && text.trim()) {
+      sessionStorage.setItem(SS.TODO_TMP, text);
+    } else {
+      sessionStorage.removeItem(SS.TODO_TMP);
+    }
   }
 
   onProjectSelect(project: Project): void {
@@ -418,6 +460,8 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
   }
 
   private resetForm(): void {
+    // Clear saved text when task is successfully added
+    this.clearSavedText();
     this.titleControl.setValue('');
 
     // Reset with current work context project as default
@@ -459,17 +503,32 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
     });
   }
 
-  private _focusInput(): void {
+  private _focusInput(selectAll: boolean = false): void {
+    // Clear any existing timeout
+    if (this._focusTimeout !== undefined) {
+      clearTimeout(this._focusTimeout);
+      this._focusTimeout = undefined;
+    }
+
     if (IS_ANDROID_WEB_VIEW) {
       document.body.focus();
       (this.inputEl() as ElementRef).nativeElement.focus();
-      setTimeout(() => {
+      this._focusTimeout = window.setTimeout(() => {
         document.body.focus();
         (this.inputEl() as ElementRef).nativeElement.focus();
+        if (selectAll) {
+          (this.inputEl() as ElementRef).nativeElement.select();
+        }
+        this._focusTimeout = undefined;
       }, 1000);
     } else {
-      setTimeout(() => {
-        (this.inputEl() as ElementRef).nativeElement.focus();
+      this._focusTimeout = window.setTimeout(() => {
+        const inputElement = (this.inputEl() as ElementRef).nativeElement;
+        inputElement.focus();
+        if (selectAll) {
+          inputElement.select();
+        }
+        this._focusTimeout = undefined;
       });
     }
   }
@@ -600,5 +659,35 @@ export class AddTaskBarAddModeComponent implements AfterViewInit, OnInit {
     }
 
     return newTagIds;
+  }
+
+  private saveCurrentText(text: string): void {
+    if (text.trim()) {
+      sessionStorage.setItem(SS.TODO_TMP, text);
+    } else {
+      sessionStorage.removeItem(SS.TODO_TMP);
+    }
+  }
+
+  private restorePreviousText(): void {
+    const savedText = sessionStorage.getItem(SS.TODO_TMP);
+    if (savedText && savedText.trim()) {
+      // Set the form control value
+      this.titleControl.setValue(savedText, { emitEvent: true });
+
+      // Update the state service to keep them in sync
+      // We need to wait for the required observables to be ready
+      combineLatest([this._globalConfigService.shortSyntax$, this.tags$, this.projects$])
+        .pipe(first())
+        .subscribe(([config, allTags, allProjects]) => {
+          this._taskInputState.updateFromText(savedText, config, allProjects, allTags);
+        });
+    }
+    // Mark that restoration is complete
+    this._hasRestoredText = true;
+  }
+
+  private clearSavedText(): void {
+    sessionStorage.removeItem(SS.TODO_TMP);
   }
 }
