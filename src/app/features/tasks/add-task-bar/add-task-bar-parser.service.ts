@@ -167,4 +167,44 @@ export class AddTaskBarParserService {
   resetPreviousResult(): void {
     this._previousParseResult = null;
   }
+
+  removeShortSyntaxFromInput(
+    currentInput: string,
+    type: 'tags' | 'date' | 'estimate',
+    specificTag?: string,
+  ): string {
+    if (!currentInput) return currentInput;
+
+    let cleanedInput = currentInput;
+
+    switch (type) {
+      case 'tags':
+        if (specificTag) {
+          // Remove specific tag (e.g., #tagname)
+          const tagRegex = new RegExp(`\\s*#${specificTag}\\b`, 'gi');
+          cleanedInput = cleanedInput.replace(tagRegex, '');
+        } else {
+          // Remove all tags (e.g., #tag1 #tag2)
+          cleanedInput = cleanedInput.replace(/\s*#\w+/g, '');
+        }
+        break;
+
+      case 'date':
+        // Remove date and time syntax (e.g., @today @16:30 @2024-01-15)
+        cleanedInput = cleanedInput.replace(/\s*@\S+/g, '');
+        break;
+
+      case 'estimate':
+        // Remove estimate syntax (e.g., t30m, 1h, 30m/1h, t1.5h)
+        // This matches the SHORT_SYNTAX_TIME_REG_EX from short-syntax.ts
+        cleanedInput = cleanedInput.replace(
+          /(?:\s|^)t?((\d+(?:\.\d+)?[mhd])(?:\s*\/\s*(\d+(?:\.\d+)?[mhd]))?)/gi,
+          ' ',
+        );
+        break;
+    }
+
+    // Clean up extra whitespace
+    return cleanedInput.replace(/\s+/g, ' ').trim();
+  }
 }

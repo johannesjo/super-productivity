@@ -37,7 +37,7 @@ export class AddTaskBarStateService {
     this._taskInputState.update((state) => ({ ...state, estimate }));
   }
 
-  toggleTag(tag: Tag): void {
+  toggleTag(tag: Tag, cleanedInputTxt?: string): void {
     this._taskInputState.update((state) => {
       const existingIndex = state.tags.findIndex((t) => t.id === tag.id);
       if (existingIndex >= 0) {
@@ -54,6 +54,9 @@ export class AddTaskBarStateService {
         };
       }
     });
+    if (cleanedInputTxt !== undefined) {
+      this.inputTxt.set(cleanedInputTxt);
+    }
   }
 
   updateTags(tags: Tag[]): void {
@@ -72,16 +75,25 @@ export class AddTaskBarStateService {
     this.inputTxt.set(inputTxt);
   }
 
-  clearTags(): void {
+  clearTags(cleanedInputTxt?: string): void {
     this._taskInputState.update((state) => ({ ...state, tags: [], newTagTitles: [] }));
+    if (cleanedInputTxt !== undefined) {
+      this.inputTxt.set(cleanedInputTxt);
+    }
   }
 
-  clearDate(): void {
+  clearDate(cleanedInputTxt?: string): void {
     this._taskInputState.update((state) => ({ ...state, date: null, time: null }));
+    if (cleanedInputTxt !== undefined) {
+      this.inputTxt.set(cleanedInputTxt);
+    }
   }
 
-  clearEstimate(): void {
+  clearEstimate(cleanedInputTxt?: string): void {
     this._taskInputState.update((state) => ({ ...state, estimate: null }));
+    if (cleanedInputTxt !== undefined) {
+      this.inputTxt.set(cleanedInputTxt);
+    }
   }
 
   resetState(): void {
