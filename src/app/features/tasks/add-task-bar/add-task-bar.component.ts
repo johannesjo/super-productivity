@@ -403,7 +403,12 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
     Log.x(taskData);
 
-    const taskId = this._taskService.add(title, this.isAddToBacklog(), taskData);
+    const taskId = this._taskService.add(
+      title,
+      this.isAddToBacklog(),
+      taskData,
+      this.isAddToBottom(),
+    );
 
     this.afterTaskAdd.emit({ taskId, isAddToBottom: this.isAddToBottom() });
     this._resetAfterAdd();
