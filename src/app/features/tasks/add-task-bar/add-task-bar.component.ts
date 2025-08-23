@@ -613,6 +613,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   private _resetForm(): void {
     this.clearSavedText();
     this.stateService.resetState();
+    this._parserService.resetPreviousResult();
     this._setProjectInitially();
   }
 
