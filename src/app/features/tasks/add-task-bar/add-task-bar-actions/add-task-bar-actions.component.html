@@ -1,0 +1,189 @@
+<div class="action-bar">
+  <button
+    #projectMenuTrigger
+    mat-button
+    class="action-btn project-btn"
+    [matMenuTriggerFor]="projectMenu"
+    [class.has-value]="state().project"
+    [class.auto-detected]="isAutoDetected() && !!state().project"
+    [class.menu-open]="isProjectMenuOpen()"
+    (click)="onProjectMenuClick($event)"
+  >
+    <mat-icon [style.color]="state().project!.theme.primary">
+      {{ state().project!.icon || 'folder' }}
+    </mat-icon>
+    <span>{{ state().project?.title }}</span>
+  </button>
+
+  <button
+    mat-button
+    class="action-btn date-btn"
+    (click)="openScheduleDialog()"
+    [class.has-value]="state().date"
+  >
+    <mat-icon>{{ state().time ? 'schedule' : 'event' }}</mat-icon>
+    <span>{{ dateDisplay() || 'Due' }}</span>
+  </button>
+
+  @if (state().date) {
+    <button
+      mat-button
+      class="clear-btn"
+      (click)="stateService().clearDate(); $event.stopPropagation()"
+      [matTooltip]="'Clear date'"
+      matTooltipPosition="above"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  }
+
+  <button
+    #tagsMenuTrigger
+    mat-button
+    class="action-btn tags-btn"
+    [matMenuTriggerFor]="tagsMenu"
+    [class.has-value]="state().tags.length > 0 || hasNewTags()"
+    [class.has-new-tags]="hasNewTags()"
+    [class.menu-open]="isTagsMenuOpen()"
+    (click)="onTagsMenuClick($event)"
+  >
+    @if (state().tags.length === 0 && state().newTagTitles.length === 0) {
+      <ng-container>
+        <mat-icon>label</mat-icon>
+        Tags
+      </ng-container>
+    } @else {
+      <div class="tags-display">
+        @for (tag of state().tags; track tag.id) {
+          <div class="tag-item">
+            <mat-icon [style.color]="tag.color || tag.theme?.primary">
+              {{ tag.icon || 'label' }}
+            </mat-icon>
+            <span class="tag-title">{{ tag.title }}</span>
+          </div>
+        }
+        @for (newTag of state().newTagTitles; track newTag) {
+          <div class="tag-item new-tag">
+            <mat-icon>new_releases</mat-icon>
+            <span class="tag-title">{{ newTag }}</span>
+          </div>
+        }
+      </div>
+    }
+  </button>
+
+  @if (state().tags.length > 0 || hasNewTags()) {
+    <button
+      mat-button
+      class="clear-btn"
+      (click)="stateService().clearTags(); $event.stopPropagation()"
+      [matTooltip]="'Clear tags'"
+      matTooltipPosition="above"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  }
+
+  <button
+    #estimateMenuTrigger
+    mat-button
+    class="action-btn estimate-btn"
+    [matMenuTriggerFor]="estimateMenu"
+    [class.has-value]="state().estimate"
+    [class.menu-open]="isEstimateMenuOpen()"
+    (click)="onEstimateMenuClick($event)"
+  >
+    <mat-icon>timer</mat-icon>
+    <span>{{ estimateDisplay() || 'Estimate' }}</span>
+  </button>
+
+  @if (state().estimate) {
+    <button
+      mat-button
+      class="clear-btn"
+      (click)="stateService().clearEstimate(); $event.stopPropagation()"
+      [matTooltip]="'Clear estimate'"
+      matTooltipPosition="above"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  }
+</div>
+
+<!-------------- Menus ------------------->
+<mat-menu #projectMenu="matMenu">
+  @for (project of projects$ | async; track project.id) {
+    <button
+      mat-menu-item
+      (click)="stateService().updateProject(project)"
+    >
+      <mat-icon [style.color]="project.theme.primary">
+        {{ project.icon || 'folder' }}
+      </mat-icon>
+      {{ project.title }}
+    </button>
+  }
+</mat-menu>
+
+<mat-menu #tagsMenu="matMenu">
+  @for (tag of tags$ | async; track tag.id) {
+    <button
+      mat-menu-item
+      (click)="stateService().toggleTag(tag)"
+      [class.selected]="hasSelectedTag(tag.id)"
+    >
+      <mat-icon [style.color]="tag.color || tag.theme?.primary">
+        {{ hasSelectedTag(tag.id) ? 'check_box' : 'check_box_outline_blank' }}
+      </mat-icon>
+      {{ tag.title }}
+    </button>
+  }
+</mat-menu>
+
+<mat-menu #dateMenu="matMenu">
+  @for (option of DATE_OPTIONS; track option.label) {
+    <button
+      mat-menu-item
+      (click)="stateService().updateDate(option.getDate())"
+    >
+      <mat-icon>{{ option.icon }}</mat-icon>
+      {{ option.label }}
+    </button>
+  }
+  <button
+    mat-menu-item
+    (click)="stateService().updateDate(null)"
+  >
+    <mat-icon>clear</mat-icon>
+    No Date
+  </button>
+</mat-menu>
+
+<mat-menu #timeMenu="matMenu">
+  @for (time of TIME_OPTIONS; track time) {
+    <button
+      mat-menu-item
+      (click)="stateService().updateTime(time)"
+    >
+      {{ time }}
+    </button>
+  }
+  <button
+    mat-menu-item
+    (click)="stateService().updateTime(null)"
+  >
+    <mat-icon>clear</mat-icon>
+    No Time
+  </button>
+</mat-menu>
+
+<mat-menu #estimateMenu="matMenu">
+  @for (option of ESTIMATE_OPTIONS; track option.value) {
+    <button
+      mat-menu-item
+      (click)="onEstimateInput(option.value)"
+    >
+      {{ option.label }}
+    </button>
+  }
+</mat-menu>
