@@ -13,7 +13,6 @@ import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
-import { AsyncPipe } from '@angular/common';
 import { first, map } from 'rxjs/operators';
 import { ProjectService } from '../../../project/project.service';
 import { TagService } from '../../../tag/tag.service';
@@ -33,15 +32,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   styleUrls: ['./add-task-bar-actions.component.scss', '../add-task-bar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [
-    MatButton,
-    MatIcon,
-    MatTooltip,
-    MatMenu,
-    MatMenuTrigger,
-    MatMenuItem,
-    AsyncPipe,
-  ],
+  imports: [MatButton, MatIcon, MatTooltip, MatMenu, MatMenuTrigger, MatMenuItem],
 })
 export class AddTaskBarActionsComponent {
   private readonly _projectService = inject(ProjectService);
