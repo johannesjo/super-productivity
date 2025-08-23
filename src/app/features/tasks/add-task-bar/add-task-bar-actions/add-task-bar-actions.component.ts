@@ -98,7 +98,6 @@ export class AddTaskBarActionsComponent {
 
   openScheduleDialog(): void {
     const dialogRef = this._matDialog.open(DialogScheduleTaskComponent, {
-      width: '400px',
       data: {
         date: this.state().date,
         time: this.state().time,
@@ -108,6 +107,9 @@ export class AddTaskBarActionsComponent {
     dialogRef.afterClosed().subscribe((result) => {
       if (result && typeof result === 'object' && result.date) {
         this.stateService.updateDate(result.date, result.time);
+      } else {
+        // update anyway for refocus
+        this.stateService.updateDate(this.state().date, this.state().time);
       }
     });
   }
