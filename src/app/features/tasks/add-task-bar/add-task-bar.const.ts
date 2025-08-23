@@ -63,16 +63,11 @@ export const ESTIMATE_OPTIONS = [
   { label: '5m', value: '5m' },
   { label: '10m', value: '10m' },
   { label: '15m', value: '15m' },
-  { label: '20m', value: '20m' },
   { label: '30m', value: '30m' },
-  { label: '45m', value: '45m' },
   { label: '1h', value: '1h' },
-  { label: '1.5h', value: '1h 30m' },
   { label: '2h', value: '2h' },
   { label: '3h', value: '3h' },
   { label: '4h', value: '4h' },
-  { label: '5h', value: '5h' },
-  { label: '6h', value: '6h' },
   { label: '8h', value: '8h' },
 ];
 
