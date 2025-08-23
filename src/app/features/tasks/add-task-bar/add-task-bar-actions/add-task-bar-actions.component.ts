@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   inject,
+  LOCALE_ID,
   output,
   signal,
   viewChild,
@@ -46,6 +47,7 @@ export class AddTaskBarActionsComponent {
   private readonly _matDialog = inject(MatDialog);
   stateService = inject(AddTaskBarStateService);
   private readonly _parserService = inject(AddTaskBarParserService);
+  private readonly _locale = inject(LOCALE_ID);
 
   // Menu state
   isProjectMenuOpen = signal<boolean>(false);
@@ -87,10 +89,13 @@ export class AddTaskBarActionsComponent {
     }
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    if (this.isSameDate(date, tomorrow)) {
+    if (!state.time && this.isSameDate(date, tomorrow)) {
       return state.time || 'Tomorrow';
     }
-    const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const dateStr = date.toLocaleDateString(this._locale, {
+      month: 'short',
+      day: 'numeric',
+    });
     return state.time ? `${dateStr} ${state.time}` : dateStr;
   });
 
@@ -104,6 +109,7 @@ export class AddTaskBarActionsComponent {
     const dialogRef = this._matDialog.open(DialogScheduleTaskComponent, {
       data: {
         targetDay: state.date ? getDbDateStr(state.date) : undefined,
+        targetTime: state.time || undefined,
         isSelectDueOnly: true,
       },
     });
