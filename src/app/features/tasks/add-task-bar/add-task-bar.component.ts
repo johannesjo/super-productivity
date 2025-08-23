@@ -224,7 +224,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     this._workContextService.activeWorkContext$
       .pipe(first(), takeUntilDestroyed(this._destroyRef))
       .subscribe((workContext) => {
-        if (
+        if (this.planForDay()) {
+          this.stateService.updateDate(new Date(this.planForDay()!));
+        } else if (
           !this.stateService.state().date &&
           workContext?.type === WorkContextType.TAG &&
           workContext?.id === 'TODAY'
