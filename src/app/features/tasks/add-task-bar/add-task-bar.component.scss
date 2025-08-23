@@ -41,6 +41,10 @@
 
   box-shadow: var(--whiteframe-shadow-3dp);
   border-radius: var(--card-border-radius);
+
+  &.isElevated {
+    box-shadow: var(--whiteframe-shadow-12dp);
+  }
 }
 
 .input-section {
