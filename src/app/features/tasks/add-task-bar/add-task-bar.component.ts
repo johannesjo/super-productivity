@@ -5,6 +5,7 @@ import {
   computed,
   DestroyRef,
   ElementRef,
+  HostListener,
   inject,
   input,
   OnDestroy,
@@ -110,7 +111,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
   // Outputs
   afterTaskAdd = output<{ taskId: string; isAddToBottom: boolean }>();
-  blurred = output<void>();
+  closed = output<void>();
   done = output<void>();
 
   // Local UI state
@@ -438,7 +439,19 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     if (text && text.trim()) {
       this._saveCurrentText(text);
     }
-    this.blurred.emit();
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    const component = target.closest('add-task-bar');
+    const autocompleteOption = target.closest('mat-option');
+    const matMenu = target.closest('mat-menu');
+
+    // If click is outside the component and not on autocomplete or menu options, close it
+    if (!component && !autocompleteOption && !matMenu) {
+      this.done.emit();
+    }
   }
 
   toggleIsAddToBottom(): void {
@@ -482,10 +495,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
         actionsComp.openProjectMenu();
       }
     }
-  }
-
-  stopPropagation(event: Event): void {
-    event.stopPropagation();
   }
 
   // Private helper methods

@@ -13,7 +13,7 @@
   <add-task-bar
     [isElevated]="true"
     [isHideTagTitles]="true"
-    (blurred)="isShowAddTask = false"
+    (closed)="isShowAddTask = false"
     (done)="isShowAddTask = false"
     (afterTaskAdd)="afterTaskAdd.emit($event)"
     [planForDay]="planForDay()"
