@@ -58,6 +58,7 @@ import { AddTaskBarActionsComponent } from './add-task-bar-actions/add-task-bar-
 import { Mentions } from 'angular-mentions/lib/mention-config';
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { unique } from '../../../util/unique';
+import { Log } from '../../../core/log';
 
 @Component({
   selector: 'add-task-bar',
@@ -378,15 +379,17 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     if (state.date) {
       const date = new Date(state.date);
       if (state.time) {
+        // TODO we need to add unit tests to confirm this works
         const [hours, minutes] = state.time.split(':').map(Number);
         date.setHours(hours, minutes, 0, 0);
         taskData.dueWithTime = date.getTime();
         taskData.hasPlannedTime = true;
       } else {
-        date.setHours(0, 0, 0, 0);
-        taskData.dueWithTime = date.getTime();
+        taskData.dueDay = getDbDateStr(date);
       }
     }
+
+    Log.x(taskData);
 
     const taskId = this._taskService.add(title, this.isAddToBacklog(), taskData);
 
