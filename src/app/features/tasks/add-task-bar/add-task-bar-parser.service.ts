@@ -14,6 +14,9 @@ export class AddTaskBarParserService {
     config: ShortSyntaxConfig | null,
     allProjects: Project[],
     allTags: Tag[],
+    defaultProject: Project,
+    defaultDate?: string,
+    defaultTime?: string,
   ): void {
     if (text && config) {
       // Get current tags from state to pass as tagIds
@@ -24,16 +27,20 @@ export class AddTaskBarParserService {
         allProjects,
       );
 
+      // defaultProject is already passed as a Project object, no need to find it
       if (!parseResult) {
         // No parse result means no short syntax found - clear everything
         this._stateService.updateCleanText(text);
         if (this._stateService.isAutoDetected()) {
-          this._stateService.updateProject(null);
+          this._stateService.updateProject(defaultProject);
         }
         this._stateService.updateTags([]);
         this._stateService.updateNewTagTitles([]);
         this._stateService.updateEstimate(null);
-        this._stateService.updateDate(null, null);
+        this._stateService.updateDate(
+          defaultDate ? new Date(defaultDate) : null,
+          defaultTime,
+        );
         return;
       }
 
@@ -50,7 +57,11 @@ export class AddTaskBarParserService {
         }
       } else if (this._stateService.isAutoDetected()) {
         // Clear auto-detected project if no project found in text
-        this._stateService.updateProject(null);
+        if (defaultProject) {
+          this._stateService.updateProject(defaultProject);
+        } else {
+          this._stateService.updateProject(null);
+        }
       }
 
       // Update tags - always set to what was parsed (could be empty)
@@ -68,11 +79,8 @@ export class AddTaskBarParserService {
       this._stateService.updateNewTagTitles(parseResult.newTagTitles || []);
 
       // Update time estimate
-      if (parseResult.taskChanges.timeEstimate) {
-        this._stateService.updateEstimate(parseResult.taskChanges.timeEstimate);
-      } else {
-        // No time estimate found, clear it
-        this._stateService.updateEstimate(null);
+      if ('timeEstimate' in parseResult.taskChanges) {
+        this._stateService.updateEstimate(parseResult.taskChanges.timeEstimate || null);
       }
 
       // Update due date and time
@@ -95,8 +103,12 @@ export class AddTaskBarParserService {
           this._stateService.updateDate(dueDate, null);
         }
       } else {
-        // No due date found, clear it
-        this._stateService.updateDate(null, null);
+        // No due date found in syntax, use default if provided
+        if (defaultDate) {
+          const date = new Date(defaultDate);
+          this._stateService.updateDate(date, defaultTime || null);
+        }
+        // Otherwise keep current date (don't clear if set via UI)
       }
     }
   }
