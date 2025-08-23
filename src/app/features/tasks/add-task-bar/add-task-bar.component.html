@@ -15,7 +15,9 @@
       (closed)="onMentionClosed()"
       [matAutocomplete]="taskAutoCompleteEl"
       [placeholder]="
-        isSearchMode() ? 'Add existing task or issues...' : 'A task title #tag @16:00'
+        isSearchMode()
+          ? (T.F.TASK.ADD_TASK_BAR.PLACEHOLDER_SEARCH | translate)
+          : (T.F.TASK.ADD_TASK_BAR.PLACEHOLDER_CREATE | translate)
       "
       matInput
       spellcheck="false"
@@ -31,7 +33,7 @@
             class="switch-add-to-btn e2e-add-task-submit"
             (click)="addTask()"
             type="submit"
-            [matTooltip]="'Add task'"
+            [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOOLTIP_ADD_TASK | translate"
             matTooltipPosition="above"
           >
             <mat-icon>add</mat-icon>
@@ -43,7 +45,11 @@
         mat-icon-button
         class="switch-add-to-bot-btn"
         (click)="toggleIsAddToBottom()"
-        [matTooltip]="isAddToBottom() ? 'Add to top (Ctrl+1)' : 'Add to bottom (Ctrl+1)'"
+        [matTooltip]="
+          isAddToBottom()
+            ? (T.F.TASK.ADD_TASK_BAR.TOOLTIP_ADD_TO_TOP | translate)
+            : (T.F.TASK.ADD_TASK_BAR.TOOLTIP_ADD_TO_BOTTOM | translate)
+        "
         matTooltipPosition="above"
       >
         <mat-icon
@@ -56,7 +62,11 @@
           mat-icon-button
           class="switch-add-to-btn"
           (click)="toggleIsAddToBacklog()"
-          [matTooltip]="isAddToBacklog() ? 'Add to today' : 'Add to backlog'"
+          [matTooltip]="
+            isAddToBacklog()
+              ? (T.F.TASK.ADD_TASK_BAR.TOOLTIP_ADD_TO_TODAY | translate)
+              : (T.F.TASK.ADD_TASK_BAR.TOOLTIP_ADD_TO_BACKLOG | translate)
+          "
           matTooltipPosition="above"
         >
           <mat-icon>{{ isAddToBacklog() ? 'inbox' : 'today' }}</mat-icon>
@@ -70,8 +80,8 @@
         (click)="toggleSearchMode()"
         [matTooltip]="
           isSearchMode()
-            ? 'Disable issue search (Ctrl+2)'
-            : 'Enable issue search (Ctrl+2)'
+            ? (T.F.TASK.ADD_TASK_BAR.TOOLTIP_DISABLE_SEARCH | translate)
+            : (T.F.TASK.ADD_TASK_BAR.TOOLTIP_ENABLE_SEARCH | translate)
         "
         matTooltipPosition="above"
       >
@@ -92,7 +102,7 @@
     } @else {
       <div class="add-issue-info-text">
         <mat-icon>playlist_add</mat-icon>
-        Search and add issues and tasks from archive and other projects
+        {{ T.F.TASK.ADD_TASK_BAR.SEARCH_INFO_TEXT | translate }}
       </div>
     }
   } @else {

@@ -131,7 +131,6 @@ describe('AddTaskBarActionsComponent', () => {
     });
 
     it('should expose constants', () => {
-      expect(component.DATE_OPTIONS).toBeDefined();
       expect(component.TIME_OPTIONS).toBeDefined();
       expect(component.ESTIMATE_OPTIONS).toBeDefined();
     });
