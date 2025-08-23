@@ -39,7 +39,7 @@
     }
   }
 
-  @if (!isHideTagBtn()) {
+  @if (!isHideTagBtn() && allTags().length) {
     <button
       #tagsMenuTrigger
       mat-button
@@ -116,7 +116,7 @@
 
 <!-------------- Menus ------------------->
 <mat-menu #projectMenu="matMenu">
-  @for (project of projects$ | async; track project.id) {
+  @for (project of allProjects(); track project.id) {
     <button
       mat-menu-item
       (click)="stateService.updateProject(project)"
@@ -130,7 +130,7 @@
 </mat-menu>
 
 <mat-menu #tagsMenu="matMenu">
-  @for (tag of tags$ | async; track tag.id) {
+  @for (tag of allTags(); track tag.id) {
     <button
       mat-menu-item
       (click)="toggleTagWithSyntax(tag)"
