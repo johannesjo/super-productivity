@@ -3,11 +3,15 @@ import { AddTaskBarStateService } from './add-task-bar-state.service';
 import { Project } from '../../project/project.model';
 import { Tag } from '../../tag/tag.model';
 import { INITIAL_ADD_TASK_BAR_STATE } from './add-task-bar.const';
+import { SS } from '../../../core/persistence/storage-keys.const';
 
 describe('AddTaskBarStateService', () => {
   let service: AddTaskBarStateService;
 
   beforeEach(() => {
+    // Clear sessionStorage before each test to ensure clean state
+    sessionStorage.removeItem(SS.ADD_TASK_BAR_TXT);
+
     TestBed.configureTestingModule({
       providers: [AddTaskBarStateService],
     });
