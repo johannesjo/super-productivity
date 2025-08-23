@@ -364,6 +364,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     this.setupDefaultProject();
     this.setupDefaultDate();
     this.setupTextParsing();
+    this.setupAutoActivation();
   }
 
   private setupDefaultProject(): void {
@@ -411,6 +412,19 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe(([title, config, allTags, allProjects]) => {
         this.updateFromText(title || '', config, allProjects, allTags);
+      });
+  }
+
+  private setupAutoActivation(): void {
+    // Auto-activate first suggestion when autoActiveFirstOption is true
+    this.suggestions$
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe((suggestions) => {
+        if (suggestions && suggestions.length > 0) {
+          this.onTaskSuggestionActivated(suggestions[0]);
+        } else {
+          this.onTaskSuggestionActivated(null);
+        }
       });
   }
 
@@ -896,17 +910,27 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       });
       taskId = suggestion.taskId;
     } else if (suggestion.taskId) {
-      if (suggestion.projectId) {
-        this._taskService.getByIdOnce$(suggestion.taskId).subscribe((task) => {
-          this._taskService.moveToCurrentWorkContext(task);
+      // Handle both regular tasks and archived tasks
+      this._taskService.getByIdOnce$(suggestion.taskId).subscribe((task) => {
+        this._taskService.moveToCurrentWorkContext(task);
+      });
+
+      // Show appropriate message based on task type
+      if (suggestion.isArchivedTask) {
+        this._snackService.open({
+          ico: 'unarchive',
+          msg: T.F.TASK.S.FOUND_RESTORE_FROM_ARCHIVE,
+          translateParams: { title: suggestion.title },
         });
+      } else if (suggestion.projectId) {
         this._snackService.open({
           ico: 'arrow_upward',
           msg: T.F.TASK.S.FOUND_MOVE_FROM_BACKLOG,
           translateParams: { title: suggestion.title },
         });
-        taskId = suggestion.taskId;
       }
+
+      taskId = suggestion.taskId;
     } else if (suggestion.issueType && suggestion.issueData) {
       taskId = await this._addTaskBarService.addTaskFromExistingTaskOrIssue(
         suggestion,

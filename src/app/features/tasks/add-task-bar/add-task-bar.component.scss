@@ -33,20 +33,14 @@
   bottom: var(--s);
 }
 
-.add-mode-container {
+.add-task-container {
   width: 100%;
   position: relative;
-  border-radius: var(--card-border-radius);
   background-color: var(--bg-lighter);
   color: var(--text-color-most-intense);
 
-  &.isElevated {
-    background-color: var(--bg-lightest);
-    box-shadow:
-      0 3px 5px -1px rgba(0, 0, 0, 0.2),
-      0 6px 10px 0 rgba(0, 0, 0, 0.14),
-      0 1px 18px 0 rgba(0, 0, 0, 0.12);
-  }
+  box-shadow: var(--whiteframe-shadow-3dp);
+  border-radius: var(--card-border-radius);
 }
 
 .input-section {
