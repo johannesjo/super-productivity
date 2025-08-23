@@ -8,7 +8,7 @@
   <!--TODO move inside page container somehow -->
   @if (layoutService.isShowAddTaskBar()) {
     <add-task-bar
-      (blurred)="layoutService.hideAddTaskBar()"
+      (closed)="layoutService.hideAddTaskBar()"
       [isElevated]="true"
       class="global"
     ></add-task-bar>
