@@ -4,6 +4,7 @@ import {
   Component,
   computed,
   DestroyRef,
+  effect,
   ElementRef,
   HostListener,
   inject,
@@ -185,6 +186,23 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
           this._saveCurrentText(value);
         }
       });
+
+    // Monitor state changes and refocus input when user selects values
+    // This catches all state changes regardless of input method (mouse, keyboard, etc.)
+    let isFirstRun = true;
+    effect(() => {
+      // Track state changes
+      this.stateService.state();
+
+      // Skip first run to avoid refocusing on initial state
+      if (isFirstRun) {
+        isFirstRun = false;
+        return;
+      }
+
+      // Refocus input when state changes (user selected something)
+      setTimeout(() => this._focusInput(), 0);
+    });
   }
 
   ngOnInit(): void {
