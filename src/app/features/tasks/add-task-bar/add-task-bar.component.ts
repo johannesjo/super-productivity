@@ -16,7 +16,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { MentionModule } from 'angular-mentions';
 import { MatInput } from '@angular/material/input';
 import { MatIconButton } from '@angular/material/button';
@@ -35,9 +35,9 @@ import { TagService } from '../../tag/tag.service';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { AddTaskBarIssueSearchService } from './add-task-bar-issue-search.service';
 import { T } from '../../../t.const';
-import { debounceTime, distinctUntilChanged, filter, first, map } from 'rxjs/operators';
+import { distinctUntilChanged, first, map } from 'rxjs/operators';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
-import { BehaviorSubject, combineLatest, fromEvent, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import {
@@ -66,7 +66,6 @@ import { Mentions } from 'angular-mentions/lib/mention-config';
   standalone: true,
   imports: [
     FormsModule,
-    ReactiveFormsModule,
     MatInput,
     MatIconButton,
     MatIcon,
@@ -121,7 +120,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   );
   isAddToBacklog = signal(false);
   isSearchMode = signal(false);
-  searchControl = new FormControl<string>('');
   isSearchLoading = signal(false);
   activatedSuggestion$ = new BehaviorSubject<AddTaskSuggestion | null>(null);
   isMentionMenuOpen = signal(false);
@@ -173,7 +171,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   );
 
   // Create observable from signal in injection context
-  private readonly isSearchIssueProviders$ = toObservable(this.isSearchMode);
+  private readonly _isSearchIssueProviders$ = toObservable(this.isSearchMode);
 
   // Tag mention functionality - will be initialized in ngOnInit
   tagMentions!: Observable<any>;
@@ -207,18 +205,16 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   taskAutoCompleteEl = viewChild<MatAutocomplete>('taskAutoCompleteEl');
   actionsComponent = viewChild(AddTaskBarActionsComponent);
 
-  titleControl = new FormControl<string>('');
-
   private _focusTimeout?: number;
   private _autocompleteTimeout?: number;
   private _processingAutocompleteSelection = false;
 
   constructor() {
-    // Save text on every keystroke
-    this.titleControl.valueChanges
-      .pipe(takeUntilDestroyed(this._destroyRef))
+    // Watch inputTxt signal changes for text parsing and saving
+    this.stateService.inputTxt$
+      .pipe(takeUntilDestroyed(this._destroyRef), distinctUntilChanged())
       .subscribe((value) => {
-        if (value !== null) {
+        if (value) {
           this._saveCurrentText(value);
         }
       });
@@ -255,27 +251,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     if (!this.isDisableAutoFocus()) {
       this._focusInput(true);
     }
-
-    // Setup escape key handling
-    fromEvent<KeyboardEvent>(document, 'keydown')
-      .pipe(
-        filter((ev) => ev.key === 'Escape'),
-        takeUntilDestroyed(this._destroyRef),
-      )
-      .subscribe((ev) => {
-        if (this.isSearchMode()) {
-          if (this.searchControl.value) {
-            this.searchControl.setValue('');
-          } else {
-            this.toggleSearchMode();
-          }
-          ev.preventDefault();
-        } else {
-          if (!this.isSearchMode()) {
-            this.done.emit();
-          }
-        }
-      });
   }
 
   ngOnDestroy(): void {
@@ -312,11 +287,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
   private _setupTextParsing(): void {
     combineLatest([
-      this.titleControl.valueChanges.pipe(
-        debounceTime(50),
-        distinctUntilChanged(),
-        filter((val) => typeof val === 'string' && val.length > 0),
-      ),
+      this.stateService.inputTxt$.pipe(distinctUntilChanged()),
       this._globalConfigService.shortSyntax$,
       this.tags$,
       this.projects$,
@@ -327,7 +298,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       .subscribe(
         ([title, config, allTags, allProjects, defaultProject, defaultDateInfo]) => {
           const { defaultDate, defaultTime } = defaultDateInfo;
-
           this._parserService.parseAndUpdateText(
             title || '',
             config,
@@ -343,8 +313,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
   private _setupSuggestions(): void {
     this.suggestions$ = this._addTaskBarService.getFilteredIssueSuggestions$(
-      this.titleControl,
-      this.isSearchIssueProviders$,
+      this.stateService.inputTxt$,
+      this._isSearchIssueProviders$,
       this.isSearchLoading,
     );
 
@@ -361,7 +331,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   private _setupTagMentions(): void {
-    this.tagMentions = this._addTaskBarService.getShortSyntaxTags$(this.titleControl);
+    this.tagMentions = this._addTaskBarService.getShortSyntaxTags$(
+      this.stateService.inputTxt$,
+    );
   }
 
   // Public methods
@@ -381,7 +353,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     }
 
     const currentState = this.stateService.state();
-    const title = currentState.cleanText || this.titleControl.value?.trim();
+    const title = currentState.cleanText || this.stateService.inputTxt().trim();
     if (!title) return;
 
     const state = this.stateService.state();
@@ -498,14 +470,20 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     }
 
     window.setTimeout(() => {
-      this.titleControl.setValue('');
+      this.stateService.updateInputTxt('');
       this.activatedSuggestion$.next(null);
     });
   }
 
   // UI event handlers
+  onInputChange(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const value = target.value;
+    this.stateService.updateInputTxt(value);
+  }
+
   onBlur(): void {
-    const text = this.titleControl.value;
+    const text = this.stateService.inputTxt();
     if (text && text.trim()) {
       this._saveCurrentText(text);
     }
@@ -535,13 +513,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
   toggleSearchMode(): void {
     this.isSearchMode.update((mode) => !mode);
-    const currentValue = this.titleControl.value;
-    if (currentValue && currentValue.trim().length >= 2) {
-      this.titleControl.setValue(currentValue);
-    }
     this._focusInput();
   }
   onMentionClosed(): void {
+    // note timeout for this to be set after keydown handler
     window.setTimeout(() => this.isMentionMenuOpen.set(false));
   }
 
@@ -604,7 +579,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   private _restorePreviousText(): void {
     const savedText = sessionStorage.getItem(SS.ADD_TASK_BAR_TXT);
     if (savedText && savedText.trim()) {
-      this.titleControl.setValue(savedText, { emitEvent: true });
+      this.stateService.updateInputTxt(savedText);
       sessionStorage.removeItem(SS.ADD_TASK_BAR_TXT);
 
       combineLatest([
@@ -636,7 +611,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   private _resetForm(): void {
-    this.titleControl.setValue('');
     this.clearSavedText();
     this.stateService.resetState();
     this._setProjectInitially();

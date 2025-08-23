@@ -7,7 +7,7 @@
     <input
       #inputEl
       class="task-input"
-      [formControl]="titleControl"
+      [(ngModel)]="stateService.inputTxt"
       [tabindex]="tabindex()"
       [mention]="tagMentions | async"
       [mentionConfig]="mentionCfg$ | async"
@@ -21,10 +21,11 @@
       spellcheck="false"
       (keydown)="onInputKeydown($event)"
       (blur)="onBlur()"
+      (input)="onInputChange($event)"
     />
 
     <div class="right-button-controls">
-      @if (titleControl.value?.trim()) {
+      @if (stateService.inputTxt()) {
         <div class="separator-box">
           <button
             mat-icon-button
