@@ -1,6 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { AddTaskBarParserService } from './add-task-bar-parser.service';
 import { AddTaskBarStateService } from './add-task-bar-state.service';
+import { ShortSyntaxConfig } from '../../config/global-config.model';
+import { Project } from '../../project/project.model';
+import { Tag } from '../../tag/tag.model';
 
 describe('AddTaskBarParserService', () => {
   let service: AddTaskBarParserService;
@@ -40,6 +43,45 @@ describe('AddTaskBarParserService', () => {
   });
 
   describe('parseAndUpdateText', () => {
+    let mockConfig: ShortSyntaxConfig;
+    let mockProjects: Project[];
+    let mockTags: Tag[];
+    let mockDefaultProject: Project;
+
+    beforeEach(() => {
+      mockConfig = {
+        isEnableProject: true,
+        isEnableDue: true,
+        isEnableTag: true,
+      } as ShortSyntaxConfig;
+
+      mockDefaultProject = {
+        id: 'default-project',
+        title: 'Default Project',
+        icon: 'folder',
+      } as Project;
+
+      mockProjects = [
+        mockDefaultProject,
+        { id: 'proj-1', title: 'Project One' } as Project,
+        { id: 'proj-2', title: 'Project Two' } as Project,
+      ];
+
+      mockTags = [
+        { id: 'tag-1', title: 'urgent' } as Tag,
+        { id: 'tag-2', title: 'important' } as Tag,
+      ];
+
+      // Reset all spy calls before each test
+      mockStateService.updateCleanText.calls.reset();
+      mockStateService.updateDate.calls.reset();
+      mockStateService.updateEstimate.calls.reset();
+      mockStateService.updateTags.calls.reset();
+      mockStateService.updateNewTagTitles.calls.reset();
+      mockStateService.setAutoDetectedProject.calls.reset();
+      mockStateService.updateProject.calls.reset();
+    });
+
     it('should handle empty text', () => {
       service.parseAndUpdateText('', null, [], [], null as any);
       expect(mockStateService.updateCleanText).not.toHaveBeenCalled();
@@ -48,6 +90,187 @@ describe('AddTaskBarParserService', () => {
     it('should handle null config', () => {
       service.parseAndUpdateText('test task', null, [], [], null as any);
       expect(mockStateService.updateCleanText).not.toHaveBeenCalled();
+    });
+
+    describe('Date Parsing', () => {
+      it('should handle default date when no date syntax present', () => {
+        const defaultDate = '2024-01-15';
+        const defaultTime = '09:00';
+
+        service.parseAndUpdateText(
+          'Simple task',
+          mockConfig,
+          mockProjects,
+          mockTags,
+          mockDefaultProject,
+          defaultDate,
+          defaultTime,
+        );
+
+        expect(mockStateService.updateDate).toHaveBeenCalled();
+        const [date, time] = mockStateService.updateDate.calls.mostRecent().args;
+        expect(date).toBeInstanceOf(Date);
+        expect(date?.toISOString().split('T')[0]).toBe(defaultDate);
+        expect(time).toBe(defaultTime);
+      });
+
+      it('should handle no date or default date', () => {
+        service.parseAndUpdateText(
+          'Simple task',
+          mockConfig,
+          mockProjects,
+          mockTags,
+          mockDefaultProject,
+        );
+
+        expect(mockStateService.updateDate).toHaveBeenCalled();
+        const [date, time] = mockStateService.updateDate.calls.mostRecent().args;
+        expect(date).toBeNull();
+        expect(time).toBeNull();
+      });
+
+      it('should test date parsing integration with shortSyntax', () => {
+        // Since shortSyntax is complex and depends on external implementation,
+        // we'll test the parser's handling of the parsed results
+        service.parseAndUpdateText(
+          'Task with date syntax that may or may not be parsed',
+          mockConfig,
+          mockProjects,
+          mockTags,
+          mockDefaultProject,
+        );
+
+        expect(mockStateService.updateDate).toHaveBeenCalled();
+        expect(mockStateService.updateCleanText).toHaveBeenCalled();
+      });
+
+      it('should handle default date and time when no syntax is found', () => {
+        const defaultDate = '2024-01-15';
+        const defaultTime = '09:00';
+
+        service.parseAndUpdateText(
+          'Plain text task',
+          mockConfig,
+          mockProjects,
+          mockTags,
+          mockDefaultProject,
+          defaultDate,
+          defaultTime,
+        );
+
+        expect(mockStateService.updateDate).toHaveBeenCalled();
+        const [date, time] = mockStateService.updateDate.calls.mostRecent().args;
+        expect(date).toBeInstanceOf(Date);
+        expect(time).toBe(defaultTime);
+      });
+    });
+
+    describe('Parsing Integration', () => {
+      it('should call updateEstimate when parsing text', () => {
+        service.parseAndUpdateText(
+          'Task with potential time estimate',
+          mockConfig,
+          mockProjects,
+          mockTags,
+          mockDefaultProject,
+        );
+
+        expect(mockStateService.updateEstimate).toHaveBeenCalled();
+      });
+
+      it('should handle null time estimates', () => {
+        service.parseAndUpdateText(
+          'Simple task',
+          mockConfig,
+          mockProjects,
+          mockTags,
+          mockDefaultProject,
+        );
+
+        expect(mockStateService.updateEstimate).toHaveBeenCalledWith(null);
+      });
+    });
+
+    describe('Basic Parsing Tests', () => {
+      it('should update tags when parsing text', () => {
+        service.parseAndUpdateText(
+          'Task with tags',
+          mockConfig,
+          mockProjects,
+          mockTags,
+          mockDefaultProject,
+        );
+
+        expect(mockStateService.updateTags).toHaveBeenCalled();
+        expect(mockStateService.updateNewTagTitles).toHaveBeenCalled();
+      });
+
+      it('should handle auto-detected projects', () => {
+        mockStateService.isAutoDetected.and.returnValue(false);
+
+        service.parseAndUpdateText(
+          'Simple task',
+          mockConfig,
+          mockProjects,
+          mockTags,
+          mockDefaultProject,
+        );
+
+        // Should call update methods
+        expect(mockStateService.updateCleanText).toHaveBeenCalled();
+        expect(mockStateService.updateDate).toHaveBeenCalled();
+      });
+
+      it('should handle text with clean text update', () => {
+        service.parseAndUpdateText(
+          'Task text',
+          mockConfig,
+          mockProjects,
+          mockTags,
+          mockDefaultProject,
+        );
+
+        expect(mockStateService.updateCleanText).toHaveBeenCalledWith('Task text');
+      });
+
+      it('should handle edge cases gracefully', () => {
+        const longText = 'Task ' + 'a'.repeat(1000);
+
+        expect(() => {
+          service.parseAndUpdateText(
+            longText,
+            mockConfig,
+            mockProjects,
+            mockTags,
+            mockDefaultProject,
+          );
+        }).not.toThrow();
+      });
+
+      it('should handle empty arrays for projects and tags', () => {
+        service.parseAndUpdateText(
+          'Task with no matching items',
+          mockConfig,
+          [],
+          [],
+          mockDefaultProject,
+        );
+
+        expect(mockStateService.updateTags).toHaveBeenCalled();
+        expect(mockStateService.updateNewTagTitles).toHaveBeenCalled();
+      });
+
+      it('should handle special characters in task text', () => {
+        service.parseAndUpdateText(
+          'Task with special chars !@#$%^&*()',
+          mockConfig,
+          mockProjects,
+          mockTags,
+          mockDefaultProject,
+        );
+
+        expect(mockStateService.updateCleanText).toHaveBeenCalled();
+      });
     });
   });
 
