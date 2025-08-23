@@ -136,6 +136,42 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   suggestions$!: Observable<AddTaskSuggestion[]>;
   activatedIssueTask = toSignal(this.activatedSuggestion$, { initialValue: null });
 
+  defaultProject$ = combineLatest([
+    this.projects$,
+    this._workContextService.activeWorkContext$,
+  ]).pipe(
+    map(([projects, workContext]) => {
+      const defaultProject =
+        (workContext?.type === WorkContextType.PROJECT
+          ? projects.find((p) => p.id === workContext.id)
+          : null) || projects.find((p) => p.id === 'INBOX_PROJECT');
+      return defaultProject;
+    }),
+  );
+
+  defaultDateAndTime$ = this._workContextService.activeWorkContext$.pipe(
+    map((workContext) => {
+      if (this.planForDay()) {
+        return {
+          date: this.planForDay()!,
+          defaultTime: undefined as string | undefined,
+        };
+      } else if (
+        workContext?.type === WorkContextType.TAG &&
+        workContext?.id === 'TODAY'
+      ) {
+        return {
+          defaultDate: new Date().toISOString(),
+          defaultTime: undefined as string | undefined,
+        };
+      }
+      return {
+        defaultDate: undefined as string | undefined,
+        defaultTime: undefined as string | undefined,
+      };
+    }),
+  );
+
   // Create observable from signal in injection context
   private readonly isSearchIssueProviders$ = toObservable(this.isSearchMode);
 
@@ -249,13 +285,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
   // Setup methods
   private _setProjectInitially(): void {
-    combineLatest([this.projects$, this._workContextService.activeWorkContext$])
+    this.defaultProject$
       .pipe(first(), takeUntilDestroyed(this._destroyRef))
-      .subscribe(([projects, workContext]) => {
-        const defaultProject =
-          (workContext?.type === WorkContextType.PROJECT
-            ? projects.find((p) => p.id === workContext.id)
-            : null) || projects.find((p) => p.id === 'INBOX_PROJECT');
+      .subscribe((defaultProject) => {
         if (defaultProject) {
           this.stateService.updateProject(defaultProject);
         }
@@ -288,11 +320,25 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       this._globalConfigService.shortSyntax$,
       this.tags$,
       this.projects$,
+      this.defaultProject$,
+      this.defaultDateAndTime$,
     ])
       .pipe(takeUntilDestroyed(this._destroyRef))
-      .subscribe(([title, config, allTags, allProjects]) => {
-        this._parserService.parseAndUpdateText(title || '', config, allProjects, allTags);
-      });
+      .subscribe(
+        ([title, config, allTags, allProjects, defaultProject, defaultDateInfo]) => {
+          const { defaultDate, defaultTime } = defaultDateInfo;
+
+          this._parserService.parseAndUpdateText(
+            title || '',
+            config,
+            allProjects,
+            allTags,
+            defaultProject!,
+            defaultDate,
+            defaultTime,
+          );
+        },
+      );
   }
 
   private _setupSuggestions(): void {
@@ -561,10 +607,26 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       this.titleControl.setValue(savedText, { emitEvent: true });
       sessionStorage.removeItem(SS.ADD_TASK_BAR_TXT);
 
-      combineLatest([this._globalConfigService.shortSyntax$, this.tags$, this.projects$])
+      combineLatest([
+        this._globalConfigService.shortSyntax$,
+        this.tags$,
+        this.projects$,
+        this.defaultProject$,
+        this.defaultDateAndTime$,
+      ])
         .pipe(first())
-        .subscribe(([config, allTags, allProjects]) => {
-          this._parserService.parseAndUpdateText(savedText, config, allProjects, allTags);
+        .subscribe(([config, allTags, allProjects, defaultProject, defaultDateInfo]) => {
+          const { defaultDate, defaultTime } = defaultDateInfo;
+
+          this._parserService.parseAndUpdateText(
+            savedText,
+            config,
+            allProjects,
+            allTags,
+            defaultProject!,
+            defaultDate,
+            defaultTime,
+          );
         });
     }
   }
