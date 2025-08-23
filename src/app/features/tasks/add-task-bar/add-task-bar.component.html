@@ -12,7 +12,7 @@
       [mention]="tagMentions | async"
       [mentionConfig]="mentionCfg$ | async"
       (opened)="isMentionMenuOpen.set(true)"
-      (closed)="isMentionMenuOpen.set(false)"
+      (closed)="onMentionClosed()"
       [matAutocomplete]="taskAutoCompleteEl"
       [placeholder]="
         isSearchMode()

@@ -487,7 +487,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     if (currentValue && currentValue.trim().length >= 2) {
       this.titleControl.setValue(currentValue);
     }
-    setTimeout(() => this._focusInput(), 0);
+    window.setTimeout(() => this._focusInput(), 0);
+  }
+  onMentionClosed(): void {
+    window.setTimeout(() => this.isMentionMenuOpen.set(false));
   }
 
   onInputKeydown(event: KeyboardEvent): void {
@@ -496,7 +499,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       if (this.isMentionMenuOpen()) {
         return;
       }
-      alert(this.isMentionMenuOpen());
       event.preventDefault();
       this.addTask();
     } else if (event.ctrlKey && event.key === '1') {
@@ -594,4 +596,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       }, 50);
     }
   }
+
+  protected readonly setTimeout = setTimeout;
 }
