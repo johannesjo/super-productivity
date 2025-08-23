@@ -1,8 +1,9 @@
-import { Injectable, signal, WritableSignal } from '@angular/core';
+import { effect, Injectable, signal, WritableSignal } from '@angular/core';
 import { Project } from '../../project/project.model';
 import { Tag } from '../../tag/tag.model';
 import { AddTaskBarState, INITIAL_ADD_TASK_BAR_STATE } from './add-task-bar.const';
 import { toObservable } from '@angular/core/rxjs-interop';
+import { SS } from '../../../core/persistence/storage-keys.const';
 
 @Injectable()
 export class AddTaskBarStateService {
@@ -10,10 +11,16 @@ export class AddTaskBarStateService {
     ...INITIAL_ADD_TASK_BAR_STATE,
   });
 
-  readonly inputTxt = signal('');
+  readonly inputTxt = signal(sessionStorage.getItem(SS.ADD_TASK_BAR_TXT) || '');
   readonly inputTxt$ = toObservable(this.inputTxt);
   readonly state = this._taskInputState.asReadonly();
   readonly isAutoDetected = signal(false);
+
+  constructor() {
+    effect(() => {
+      sessionStorage.setItem(SS.ADD_TASK_BAR_TXT, this.inputTxt());
+    });
+  }
 
   updateProject(project: Project | null): void {
     this._taskInputState.update((state) => ({ ...state, project }));
