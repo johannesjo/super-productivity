@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { TranslateModule, TranslateService, TranslateStore } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { AddTaskBarActionsComponent } from './add-task-bar-actions.component';
 import { AddTaskBarStateService } from '../add-task-bar-state.service';
@@ -104,7 +105,11 @@ describe('AddTaskBarActionsComponent', () => {
     mockMatDialog.open.and.returnValue(mockDialogRef);
 
     await TestBed.configureTestingModule({
-      imports: [AddTaskBarActionsComponent, BrowserAnimationsModule],
+      imports: [
+        AddTaskBarActionsComponent,
+        BrowserAnimationsModule,
+        TranslateModule.forRoot(),
+      ],
       providers: [
         { provide: AddTaskBarStateService, useValue: mockStateService },
         { provide: AddTaskBarParserService, useValue: mockParserService },
@@ -112,8 +117,24 @@ describe('AddTaskBarActionsComponent', () => {
         { provide: TagService, useValue: mockTagService },
         { provide: MatDialog, useValue: mockMatDialog },
         { provide: LOCALE_ID, useValue: 'en-US' },
+        TranslateService,
+        TranslateStore,
       ],
     }).compileComponents();
+
+    // Set up translations
+    const translateService = TestBed.inject(TranslateService);
+    translateService.setTranslation('en', {
+      F: {
+        TASK: {
+          ADD_TASK_BAR: {
+            TODAY: 'Today',
+            TOMORROW: 'Tomorrow',
+          },
+        },
+      },
+    });
+    translateService.use('en');
 
     fixture = TestBed.createComponent(AddTaskBarActionsComponent);
     component = fixture.componentInstance;
@@ -276,7 +297,11 @@ describe('AddTaskBarActionsComponent', () => {
       // Test with a German locale
       TestBed.resetTestingModule();
       TestBed.configureTestingModule({
-        imports: [AddTaskBarActionsComponent, BrowserAnimationsModule],
+        imports: [
+          AddTaskBarActionsComponent,
+          BrowserAnimationsModule,
+          TranslateModule.forRoot(),
+        ],
         providers: [
           { provide: AddTaskBarStateService, useValue: mockStateService },
           { provide: AddTaskBarParserService, useValue: mockParserService },
@@ -284,8 +309,24 @@ describe('AddTaskBarActionsComponent', () => {
           { provide: TagService, useValue: mockTagService },
           { provide: MatDialog, useValue: mockMatDialog },
           { provide: LOCALE_ID, useValue: 'de-DE' },
+          TranslateService,
+          TranslateStore,
         ],
       });
+
+      // Set up translations for German locale test
+      const deTranslateService = TestBed.inject(TranslateService);
+      deTranslateService.setTranslation('de', {
+        F: {
+          TASK: {
+            ADD_TASK_BAR: {
+              TODAY: 'Heute',
+              TOMORROW: 'Morgen',
+            },
+          },
+        },
+      });
+      deTranslateService.use('de');
 
       const deFixture = TestBed.createComponent(AddTaskBarActionsComponent);
       const deComponent = deFixture.componentInstance;
