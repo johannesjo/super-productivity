@@ -57,6 +57,9 @@ export class AddTaskBarParserService {
 
     if (!parseResult) {
       // No parse result means no short syntax found
+      // Preserve current user-selected values instead of falling back to defaults
+      const currentState = this._stateService.state();
+
       currentResult = {
         cleanText: text,
         projectId: this._stateService.isAutoDetected()
@@ -65,8 +68,9 @@ export class AddTaskBarParserService {
         tagIds: [],
         newTagTitles: [],
         timeEstimate: null,
-        dueDate: defaultDate ? new Date(defaultDate) : null,
-        dueTime: defaultTime || null,
+        // Preserve current date/time if user has selected them, otherwise use defaults
+        dueDate: currentState.date || (defaultDate ? new Date(defaultDate) : null),
+        dueTime: currentState.time || defaultTime || null,
       };
     } else {
       // Extract parsed values
