@@ -500,7 +500,14 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   onInputKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Enter') {
+    if (event.key === 'Escape') {
+      // Don't submit if mention popup is open - let it handle the selection
+      if (this.isMentionMenuOpen()) {
+        return;
+      }
+      event.preventDefault();
+      this.closed.emit();
+    } else if (event.key === 'Enter') {
       // Don't submit if mention popup is open - let it handle the selection
       if (this.isMentionMenuOpen()) {
         return;
