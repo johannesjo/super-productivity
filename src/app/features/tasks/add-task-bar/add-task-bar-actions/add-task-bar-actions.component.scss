@@ -37,13 +37,50 @@
   .action-btn {
     cursor: pointer;
     opacity: 0.5;
-    display: flex;
+    display: flex !important;
     align-items: center;
-    text-overflow: ellipsis;
     overflow: hidden;
+    font-size: 13px;
+    max-width: 150px; // Set a max width for buttons
+    min-width: 70px !important;
+
+    // Override mat-button padding to be more compact
+    &.mat-mdc-button {
+      padding: 0 8px;
+
+      .mat-mdc-button-touch-target {
+        display: none; // Remove touch target that can affect layout
+      }
+    }
 
     @include mq(xs, max) {
       font-size: 11px;
+    }
+
+    // Material button label wrapper
+    .mdc-button__label {
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      min-width: 0;
+    }
+
+    // Apply ellipsis to the text inside the button
+
+    ::ng-deep > span,
+    > span,
+    .mdc-button__label > span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0; // Allow span to shrink
+      display: inline-block; // Needed for ellipsis to work
+      max-width: 100%; // Ensure it doesn't exceed parent
+    }
+
+    mat-icon {
+      flex-shrink: 0; // Prevent icon from shrinking
+      margin-right: 4px;
     }
 
     &.has-value {
