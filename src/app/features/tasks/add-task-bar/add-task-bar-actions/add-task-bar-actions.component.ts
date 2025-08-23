@@ -18,6 +18,7 @@ import { TagService } from '../../../tag/tag.service';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogScheduleTaskComponent } from '../../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { AddTaskBarStateService } from '../add-task-bar-state.service';
+import { AddTaskBarParserService } from '../add-task-bar-parser.service';
 import { DATE_OPTIONS, ESTIMATE_OPTIONS, TIME_OPTIONS } from '../add-task-bar.const';
 import { stringToMs } from '../../../../ui/duration/string-to-ms.pipe';
 import { msToString } from '../../../../ui/duration/ms-to-string.pipe';
@@ -43,6 +44,7 @@ export class AddTaskBarActionsComponent {
   private readonly _tagService = inject(TagService);
   private readonly _matDialog = inject(MatDialog);
   stateService = inject(AddTaskBarStateService);
+  private readonly _parserService = inject(AddTaskBarParserService);
 
   // Menu state
   isProjectMenuOpen = signal<boolean>(false);
@@ -165,6 +167,51 @@ export class AddTaskBarActionsComponent {
       projectTrigger.menuClosed.pipe(first()).subscribe(() => {
         this.isProjectMenuOpen.set(false);
       });
+    }
+  }
+
+  clearDateWithSyntax(): void {
+    const currentInput = this.stateService.inputTxt();
+    const cleanedInput = this._parserService.removeShortSyntaxFromInput(
+      currentInput,
+      'date',
+    );
+    this.stateService.clearDate(cleanedInput);
+  }
+
+  clearTagsWithSyntax(): void {
+    const currentInput = this.stateService.inputTxt();
+    const cleanedInput = this._parserService.removeShortSyntaxFromInput(
+      currentInput,
+      'tags',
+    );
+    this.stateService.clearTags(cleanedInput);
+  }
+
+  clearEstimateWithSyntax(): void {
+    const currentInput = this.stateService.inputTxt();
+    const cleanedInput = this._parserService.removeShortSyntaxFromInput(
+      currentInput,
+      'estimate',
+    );
+    this.stateService.clearEstimate(cleanedInput);
+  }
+
+  toggleTagWithSyntax(tag: any): void {
+    const currentInput = this.stateService.inputTxt();
+    const isRemoving = this.hasSelectedTag(tag.id);
+
+    if (isRemoving) {
+      // If removing the tag, clean it from the input
+      const cleanedInput = this._parserService.removeShortSyntaxFromInput(
+        currentInput,
+        'tags',
+        tag.title,
+      );
+      this.stateService.toggleTag(tag, cleanedInput);
+    } else {
+      // If adding the tag, don't modify the input (let the parser handle it)
+      this.stateService.toggleTag(tag);
     }
   }
 

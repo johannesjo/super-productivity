@@ -29,7 +29,7 @@
     <button
       mat-button
       class="clear-btn"
-      (click)="stateService.clearDate(); $event.stopPropagation()"
+      (click)="clearDateWithSyntax(); $event.stopPropagation()"
       [matTooltip]="'Clear date'"
       matTooltipPosition="above"
     >
@@ -76,7 +76,7 @@
     <button
       mat-button
       class="clear-btn"
-      (click)="stateService.clearTags(); $event.stopPropagation()"
+      (click)="clearTagsWithSyntax(); $event.stopPropagation()"
       [matTooltip]="'Clear tags'"
       matTooltipPosition="above"
     >
@@ -101,7 +101,7 @@
     <button
       mat-button
       class="clear-btn"
-      (click)="stateService.clearEstimate(); $event.stopPropagation()"
+      (click)="clearEstimateWithSyntax(); $event.stopPropagation()"
       [matTooltip]="'Clear estimate'"
       matTooltipPosition="above"
     >
@@ -129,7 +129,7 @@
   @for (tag of tags$ | async; track tag.id) {
     <button
       mat-menu-item
-      (click)="stateService.toggleTag(tag)"
+      (click)="toggleTagWithSyntax(tag)"
       [class.selected]="hasSelectedTag(tag.id)"
     >
       <mat-icon [style.color]="tag.color || tag.theme?.primary">
