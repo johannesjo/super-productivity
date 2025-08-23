@@ -32,6 +32,7 @@ import {
   updateProject,
   updateTags,
 } from './task-shared-helpers';
+import { plannerFeatureKey } from '../../../features/planner/store/planner.reducer';
 
 // =============================================================================
 // HELPER FUNCTIONS
@@ -167,7 +168,28 @@ const handleAddTask = (
     }),
   );
 
-  return updateTags(updatedState, tagUpdates);
+  updatedState = updateTags(updatedState, tagUpdates);
+
+  // Update planner days if task has a future dueDay
+  if (task.dueDay && task.dueDay !== getDbDateStr()) {
+    const plannerState = updatedState[plannerFeatureKey as keyof RootState] as any;
+    const daysCopy = { ...plannerState.days };
+    const existingTaskIds = daysCopy[task.dueDay] || [];
+
+    daysCopy[task.dueDay] = unique(
+      isAddToBottom ? [...existingTaskIds, task.id] : [task.id, ...existingTaskIds],
+    );
+
+    updatedState = {
+      ...updatedState,
+      [plannerFeatureKey]: {
+        ...plannerState,
+        days: daysCopy,
+      },
+    };
+  }
+
+  return updatedState;
 };
 
 const handleConvertToMainTask = (
