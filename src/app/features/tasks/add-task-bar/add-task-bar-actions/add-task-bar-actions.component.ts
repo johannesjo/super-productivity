@@ -3,7 +3,6 @@ import {
   Component,
   computed,
   inject,
-  input,
   output,
   signal,
   viewChild,
@@ -43,9 +42,7 @@ export class AddTaskBarActionsComponent {
   private readonly _projectService = inject(ProjectService);
   private readonly _tagService = inject(TagService);
   private readonly _matDialog = inject(MatDialog);
-
-  // Input for the shared state service
-  stateService = input.required<AddTaskBarStateService>();
+  stateService = inject(AddTaskBarStateService);
 
   // Menu state
   isProjectMenuOpen = signal<boolean>(false);
@@ -53,9 +50,9 @@ export class AddTaskBarActionsComponent {
   isEstimateMenuOpen = signal<boolean>(false);
 
   // State from service
-  state = computed(() => this.stateService().state());
+  state = computed(() => this.stateService.state());
   hasNewTags = computed(() => this.state().newTagTitles.length > 0);
-  isAutoDetected = computed(() => this.stateService().isAutoDetected());
+  isAutoDetected = computed(() => this.stateService.isAutoDetected());
 
   // Observables
   projects$ = this._projectService.list$.pipe(
@@ -110,7 +107,7 @@ export class AddTaskBarActionsComponent {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result && typeof result === 'object' && result.date) {
-        this.stateService().updateDate(result.date, result.time);
+        this.stateService.updateDate(result.date, result.time);
       }
     });
   }
@@ -122,7 +119,7 @@ export class AddTaskBarActionsComponent {
   onEstimateInput(value: string): void {
     const ms = stringToMs(value);
     if (ms !== null) {
-      this.stateService().updateEstimate(ms);
+      this.stateService.updateEstimate(ms);
       this.estimateChanged.emit(value);
     }
   }

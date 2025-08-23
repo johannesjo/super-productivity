@@ -25,7 +25,7 @@
       (blur)="onBlur()"
     />
 
-    <div class="button-controls">
+    <div class="right-button-controls">
       @if (titleControl.value?.trim()) {
         <div class="separator-box">
           <button
@@ -98,10 +98,7 @@
       </div>
     }
   } @else {
-    <add-task-bar-actions
-      [stateService]="stateService"
-      (click)="stopPropagation($event)"
-    ></add-task-bar-actions>
+    <add-task-bar-actions (click)="stopPropagation($event)"></add-task-bar-actions>
   }
 </div>
 
