@@ -18,10 +18,9 @@ import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-i
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MentionModule } from 'angular-mentions';
 import { MatInput } from '@angular/material/input';
-import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { AsyncPipe } from '@angular/common';
 import { LS } from '../../../core/persistence/storage-keys.const';
 import { blendInOutAnimation } from 'src/app/ui/animations/blend-in-out.ani';
@@ -37,14 +36,11 @@ import { AddTaskBarIssueSearchService } from './add-task-bar-issue-search.servic
 import { T } from '../../../t.const';
 import { debounceTime, distinctUntilChanged, filter, first, map } from 'rxjs/operators';
 import { Project } from '../../project/project.model';
-import { msToString } from '../../../ui/duration/ms-to-string.pipe';
-import { stringToMs } from '../../../ui/duration/string-to-ms.pipe';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { Store } from '@ngrx/store';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { BehaviorSubject, combineLatest, fromEvent, Observable } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
-import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import {
   MatAutocomplete,
@@ -60,7 +56,7 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AddTaskBarStateService } from './add-task-bar-state.service';
 import { AddTaskBarParserService } from './add-task-bar-parser.service';
-import { DATE_OPTIONS, ESTIMATE_OPTIONS, TIME_OPTIONS } from './add-task-bar.const';
+import { AddTaskBarActionsComponent } from './add-task-bar-actions/add-task-bar-actions.component';
 
 @Component({
   selector: 'add-task-bar',
@@ -74,12 +70,8 @@ import { DATE_OPTIONS, ESTIMATE_OPTIONS, TIME_OPTIONS } from './add-task-bar.con
     ReactiveFormsModule,
     MatInput,
     MatIconButton,
-    MatButton,
     MatIcon,
     MatTooltip,
-    MatMenu,
-    MatMenuTrigger,
-    MatMenuItem,
     AsyncPipe,
     MentionModule,
     MatAutocomplete,
@@ -89,6 +81,7 @@ import { DATE_OPTIONS, ESTIMATE_OPTIONS, TIME_OPTIONS } from './add-task-bar.con
     IssueIconPipe,
     TagComponent,
     TranslatePipe,
+    AddTaskBarActionsComponent,
   ],
   providers: [AddTaskBarStateService, AddTaskBarParserService],
 })
@@ -106,6 +99,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   private readonly _destroyRef = inject(DestroyRef);
   readonly stateService = inject(AddTaskBarStateService);
 
+  T = T;
+
   // Inputs
   tabindex = input<number>(0);
   isElevated = input<boolean>(false);
@@ -115,7 +110,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   isHideTagTitles = input<boolean>(false);
   isSkipAddingCurrentTag = input<boolean>(false);
   tagsToRemove = input<string[]>([]);
-  isDoubleEnterMode = input<boolean>(false);
   planForDay = input<string>();
 
   // Outputs
@@ -133,15 +127,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   isSearchLoading = signal(false);
   activatedSuggestion$ = new BehaviorSubject<AddTaskSuggestion | null>(null);
 
-  // Menu state
-  isProjectMenuOpen = signal<boolean>(false);
-  isTagsMenuOpen = signal<boolean>(false);
-  isEstimateMenuOpen = signal<boolean>(false);
-
-  // State from service
-  state = this.stateService.state;
-  hasNewTags = computed(() => this.state().newTagTitles.length > 0);
-  isAutoDetected = this.stateService.isAutoDetected;
+  hasNewTags = computed(() => this.stateService.state().newTagTitles.length > 0);
 
   // Observables
   projects$ = this._projectService.list$.pipe(
@@ -159,45 +145,16 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   tagMentionConfig = this._addTaskBarService.getMentionConfig$();
 
   // Constants
-  readonly DATE_OPTIONS = DATE_OPTIONS;
-  readonly TIME_OPTIONS = TIME_OPTIONS;
-  readonly ESTIMATE_OPTIONS = ESTIMATE_OPTIONS;
-  T = T;
 
   // View children
   inputEl = viewChild<ElementRef>('inputEl');
-  taskAutoEl = viewChild('taskAutoEl', { read: MatAutocomplete });
-  projectMenuTrigger = viewChild('projectMenuTrigger', { read: MatMenuTrigger });
-  tagsMenuTrigger = viewChild('tagsMenuTrigger', { read: MatMenuTrigger });
-  estimateMenuTrigger = viewChild('estimateMenuTrigger', { read: MatMenuTrigger });
+  taskAutoCompleteEl = viewChild<MatAutocomplete>('taskAutoCompleteEl');
+  actionsComponent = viewChild(AddTaskBarActionsComponent);
 
   titleControl = new FormControl<string>('');
 
   private _focusTimeout?: number;
   private _processingAutocompleteSelection = false;
-
-  // Computed values
-  dateDisplay = computed(() => {
-    const state = this.state();
-    if (!state.date) return null;
-    const today = new Date();
-    const date = state.date;
-    if (this.isSameDate(date, today)) {
-      return state.time || 'Today';
-    }
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    if (this.isSameDate(date, tomorrow)) {
-      return state.time || 'Tomorrow';
-    }
-    const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    return state.time ? `${dateStr} ${state.time}` : dateStr;
-  });
-
-  estimateDisplay = computed(() => {
-    const estimate = this.state().estimate;
-    return estimate ? msToString(estimate) : null;
-  });
 
   constructor() {
     // Save text on every keystroke
@@ -205,29 +162,21 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe((value) => {
         if (value !== null) {
-          this.saveCurrentText(value);
+          this._saveCurrentText(value);
         }
       });
-
-    // Clean up focus timeout on destroy
-    this._destroyRef.onDestroy(() => {
-      if (this._focusTimeout !== undefined) {
-        clearTimeout(this._focusTimeout);
-        this._focusTimeout = undefined;
-      }
-    });
   }
 
   ngOnInit(): void {
-    this.setupDefaultProject();
-    this.setupDefaultDate();
-    this.setupTextParsing();
-    this.setupSuggestions();
-    this.setupTagMentions();
+    this._setupDefaultProject();
+    this._setupDefaultDate();
+    this._setupTextParsing();
+    this._setupSuggestions();
+    this._setupTagMentions();
   }
 
   ngAfterViewInit(): void {
-    this.restorePreviousText();
+    this._restorePreviousText();
 
     if (!this.isDisableAutoFocus()) {
       this._focusInput(true);
@@ -262,11 +211,11 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   // Setup methods
-  private setupDefaultProject(): void {
+  private _setupDefaultProject(): void {
     combineLatest([this.projects$, this._workContextService.activeWorkContext$])
       .pipe(first(), takeUntilDestroyed(this._destroyRef))
       .subscribe(([projects, workContext]) => {
-        if (!this.state().project) {
+        if (!this.stateService.state().project) {
           const defaultProject =
             (workContext?.type === WorkContextType.PROJECT
               ? projects.find((p) => p.id === workContext.id)
@@ -278,12 +227,12 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       });
   }
 
-  private setupDefaultDate(): void {
+  private _setupDefaultDate(): void {
     this._workContextService.activeWorkContext$
       .pipe(first(), takeUntilDestroyed(this._destroyRef))
       .subscribe((workContext) => {
         if (
-          !this.state().date &&
+          !this.stateService.state().date &&
           workContext?.type === WorkContextType.TAG &&
           workContext?.id === 'TODAY'
         ) {
@@ -292,7 +241,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       });
   }
 
-  private setupTextParsing(): void {
+  private _setupTextParsing(): void {
     combineLatest([
       this.titleControl.valueChanges.pipe(
         debounceTime(50),
@@ -309,7 +258,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       });
   }
 
-  private setupSuggestions(): void {
+  private _setupSuggestions(): void {
     this.suggestions$ = this._addTaskBarService.getFilteredIssueSuggestions$(
       this.titleControl,
       this.isSearchIssueProviders$,
@@ -328,7 +277,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       });
   }
 
-  private setupTagMentions(): void {
+  private _setupTagMentions(): void {
     this.tagMentions = this._addTaskBarService.getShortSyntaxTags$(this.titleControl);
   }
 
@@ -338,7 +287,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       return;
     }
 
-    const autocomplete = this.taskAutoEl();
+    const autocomplete = this.taskAutoCompleteEl();
     if (
       autocomplete &&
       autocomplete.isOpen &&
@@ -348,11 +297,11 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       return;
     }
 
-    const currentState = this.state();
+    const currentState = this.stateService.state();
     const title = currentState.cleanText || this.titleControl.value?.trim();
     if (!title) return;
 
-    const state = this.state();
+    const state = this.stateService.state();
     let finalTagIds = state.tags.map((t) => t.id);
 
     if (this.hasNewTags()) {
@@ -391,7 +340,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     }
 
     this.afterTaskAdd.emit({ taskId, isAddToBottom: this.isAddToBottom() });
-    this.resetForm();
+    this._resetForm();
   }
 
   handleEnterKey(event: KeyboardEvent): void {
@@ -476,16 +425,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   onBlur(): void {
     const text = this.titleControl.value;
     if (text && text.trim()) {
-      this.saveCurrentText(text);
+      this._saveCurrentText(text);
     }
     this.blurred.emit();
-  }
-
-  onEstimateInput(value: string): void {
-    const ms = stringToMs(value);
-    if (ms !== null) {
-      this.stateService.updateEstimate(ms);
-    }
   }
 
   toggleIsAddToBottom(): void {
@@ -506,27 +448,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     setTimeout(() => this._focusInput(), 0);
   }
 
-  openScheduleDialog(): void {
-    const dialogRef = this._matDialog.open(DialogScheduleTaskComponent, {
-      width: '400px',
-      data: {
-        date: this.state().date,
-        time: this.state().time,
-      },
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result && typeof result === 'object' && result.date) {
-        this.stateService.updateDate(result.date, result.time);
-      }
-    });
-  }
-
-  hasSelectedTag(tagId: string): boolean {
-    return this.state().tags.some((t) => t.id === tagId);
-  }
-
   // Keyboard shortcuts
+  // TODO check if this is properly removed
   @HostListener('document:keydown', ['$event'])
   handleKeyboardShortcuts(event: KeyboardEvent): void {
     if (event.ctrlKey && event.key === '1') {
@@ -540,41 +463,11 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
   onInputKeydown(event: KeyboardEvent): void {
     if (event.key === '+') {
-      const projectTrigger = this.projectMenuTrigger();
-      if (projectTrigger) {
+      const actionsComp = this.actionsComponent();
+      if (actionsComp) {
         event.preventDefault();
-        projectTrigger.openMenu();
+        actionsComp.openProjectMenu();
       }
-    }
-  }
-
-  onProjectMenuClick(event: Event): void {
-    this.isProjectMenuOpen.set(true);
-    const projectTrigger = this.projectMenuTrigger();
-    if (projectTrigger) {
-      projectTrigger.menuClosed.pipe(first()).subscribe(() => {
-        this.isProjectMenuOpen.set(false);
-      });
-    }
-  }
-
-  onTagsMenuClick(event: Event): void {
-    this.isTagsMenuOpen.set(true);
-    const tagsTrigger = this.tagsMenuTrigger();
-    if (tagsTrigger) {
-      tagsTrigger.menuClosed.pipe(first()).subscribe(() => {
-        this.isTagsMenuOpen.set(false);
-      });
-    }
-  }
-
-  onEstimateMenuClick(event: Event): void {
-    this.isEstimateMenuOpen.set(true);
-    const estimateTrigger = this.estimateMenuTrigger();
-    if (estimateTrigger) {
-      estimateTrigger.menuClosed.pipe(first()).subscribe(() => {
-        this.isEstimateMenuOpen.set(false);
-      });
     }
   }
 
@@ -586,7 +479,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   private async _confirmNewTags(): Promise<boolean> {
     const dialogRef = this._matDialog.open(DialogConfirmComponent, {
       data: {
-        message: `Create new tags: ${this.state().newTagTitles.join(', ')}?`,
+        message: `Create new tags: ${this.stateService.state().newTagTitles.join(', ')}?`,
       },
     });
     return await dialogRef.afterClosed().toPromise();
@@ -601,13 +494,13 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     return newTagIds;
   }
 
-  private saveCurrentText(text: string): void {
+  private _saveCurrentText(text: string): void {
     if (text.trim()) {
       sessionStorage.setItem('SUP_PREVIOUS_TASK_TEXT', text);
     }
   }
 
-  private restorePreviousText(): void {
+  private _restorePreviousText(): void {
     const savedText = sessionStorage.getItem('SUP_PREVIOUS_TASK_TEXT');
     if (savedText && savedText.trim()) {
       this.titleControl.setValue(savedText, { emitEvent: true });
@@ -625,7 +518,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     sessionStorage.removeItem('SUP_PREVIOUS_TASK_TEXT');
   }
 
-  private resetForm(): void {
+  private _resetForm(): void {
     this.titleControl.setValue('');
     this.clearSavedText();
 
@@ -683,13 +576,5 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
         }
       }, 50);
     }
-  }
-
-  private isSameDate(date1: Date, date2: Date): boolean {
-    return (
-      date1.getFullYear() === date2.getFullYear() &&
-      date1.getMonth() === date2.getMonth() &&
-      date1.getDate() === date2.getDate()
-    );
   }
 }

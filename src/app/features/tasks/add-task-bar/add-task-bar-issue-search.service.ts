@@ -160,13 +160,13 @@ export class AddTaskBarIssueSearchService {
         if (cfg.isEnableTag) {
           mentions.push({ items: tagSuggestions, labelKey: 'title', triggerChar: '#' });
         }
-        if (cfg.isEnableProject) {
-          mentions.push({
-            items: projectSuggestions,
-            labelKey: 'title',
-            triggerChar: '+',
-          });
-        }
+        // if (cfg.isEnableProject) {
+        //   mentions.push({
+        //     items: projectSuggestions,
+        //     labelKey: 'title',
+        //     triggerChar: '+',
+        //   });
+        // }
         return { mentions };
       }),
     );
