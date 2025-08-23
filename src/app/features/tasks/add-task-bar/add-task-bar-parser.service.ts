@@ -75,10 +75,4 @@ export class AddTaskBarParserService {
       }
     }
   }
-
-  clearParsedData(): void {
-    this._stateService.updateCleanText(null);
-    this._stateService.updateNewTagTitles([]);
-    // Note: We don't clear other fields as they might be manually set
-  }
 }
