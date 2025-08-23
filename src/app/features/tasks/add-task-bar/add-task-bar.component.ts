@@ -36,17 +36,16 @@ import { GlobalConfigService } from '../../config/global-config.service';
 import { AddTaskBarIssueSearchService } from './add-task-bar-issue-search.service';
 import { T } from '../../../t.const';
 import {
+  catchError,
   debounceTime,
   distinctUntilChanged,
   filter,
   first,
   map,
-  tap,
   switchMap,
-  catchError,
+  tap,
 } from 'rxjs/operators';
 import { Project } from '../../project/project.model';
-import { Tag } from '../../tag/tag.model';
 import { msToString } from '../../../ui/duration/ms-to-string.pipe';
 import { stringToMs } from '../../../ui/duration/string-to-ms.pipe';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
@@ -114,9 +113,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   private readonly _matDialog = inject(MatDialog);
   private readonly _snackService = inject(SnackService);
   private readonly _issueService = inject(IssueService);
-  private readonly _stateService = inject(AddTaskBarStateService);
   private readonly _parserService = inject(AddTaskBarParserService);
   private readonly _destroyRef = inject(DestroyRef);
+  readonly stateService = inject(AddTaskBarStateService);
 
   // Inputs
   tabindex = input<number>(0);
@@ -151,9 +150,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   isEstimateMenuOpen = signal<boolean>(false);
 
   // State from service
-  state = this._stateService.state;
+  state = this.stateService.state;
   hasNewTags = computed(() => this.state().newTagTitles.length > 0);
-  isAutoDetected = this._stateService.isAutoDetected;
+  isAutoDetected = this.stateService.isAutoDetected;
 
   // Observables
   projects$ = this._projectService.list$.pipe(
@@ -281,7 +280,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
               ? projects.find((p) => p.id === workContext.id)
               : null) || projects.find((p) => p.id === 'INBOX_PROJECT');
           if (defaultProject) {
-            this._stateService.updateProject(defaultProject);
+            this.stateService.updateProject(defaultProject);
           }
         }
       });
@@ -296,7 +295,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
           workContext?.type === WorkContextType.TAG &&
           workContext?.id === 'TODAY'
         ) {
-          this._stateService.updateDate(new Date());
+          this.stateService.updateDate(new Date());
         }
       });
   }
@@ -552,40 +551,11 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     this.blurred.emit();
   }
 
-  onProjectSelect(project: Project): void {
-    // TODO use stateService directly
-    this._stateService.updateProject(project);
-  }
-
-  onTagToggle(tag: Tag): void {
-    this._stateService.toggleTag(tag);
-  }
-
-  onDateSelect(date: Date | null): void {
-    this._stateService.updateDate(date);
-  }
-
-  onTimeSelect(time: string | null): void {
-    this._stateService.updateTime(time);
-  }
-
   onEstimateInput(value: string): void {
     const ms = stringToMs(value);
     if (ms !== null) {
-      this._stateService.updateEstimate(ms);
+      this.stateService.updateEstimate(ms);
     }
-  }
-
-  clearDate(): void {
-    this._stateService.clearDate();
-  }
-
-  clearTags(): void {
-    this._stateService.clearTags();
-  }
-
-  clearEstimate(): void {
-    this._stateService.clearEstimate();
   }
 
   toggleIsAddToBottom(): void {
@@ -617,7 +587,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result && typeof result === 'object' && result.date) {
-        this._stateService.updateDate(result.date, result.time);
+        this.stateService.updateDate(result.date, result.time);
       }
     });
   }
@@ -742,7 +712,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
           defaultProject = projects.find((p) => p.id === 'INBOX_PROJECT') || null;
         }
 
-        this._stateService.resetState(defaultProject);
+        this.stateService.resetState(defaultProject);
       });
   }
 
