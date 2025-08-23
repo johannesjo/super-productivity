@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   inject,
+  input,
   LOCALE_ID,
   output,
   signal,
@@ -48,6 +49,9 @@ export class AddTaskBarActionsComponent {
   stateService = inject(AddTaskBarStateService);
   private readonly _parserService = inject(AddTaskBarParserService);
   private readonly _locale = inject(LOCALE_ID);
+
+  isHideDueBtn = input<boolean>(false);
+  isHideTagBtn = input<boolean>(false);
 
   // Menu state
   isProjectMenuOpen = signal<boolean>(false);

@@ -97,7 +97,10 @@
       </div>
     }
   } @else {
-    <add-task-bar-actions></add-task-bar-actions>
+    <add-task-bar-actions
+      [isHideTagBtn]="!!planForDay()"
+      [isHideDueBtn]="!!planForDay()"
+    ></add-task-bar-actions>
   }
 </div>
 

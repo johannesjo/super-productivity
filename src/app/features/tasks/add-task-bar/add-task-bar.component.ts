@@ -56,6 +56,7 @@ import { AddTaskBarStateService } from './add-task-bar-state.service';
 import { AddTaskBarParserService } from './add-task-bar-parser.service';
 import { AddTaskBarActionsComponent } from './add-task-bar-actions/add-task-bar-actions.component';
 import { Mentions } from 'angular-mentions/lib/mention-config';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 
 @Component({
   selector: 'add-task-bar',
@@ -152,20 +153,20 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       if (this.planForDay()) {
         return {
           date: this.planForDay()!,
-          defaultTime: undefined as string | undefined,
+          time: undefined as string | undefined,
         };
       } else if (
         workContext?.type === WorkContextType.TAG &&
         workContext?.id === 'TODAY'
       ) {
         return {
-          defaultDate: new Date().toISOString(),
-          defaultTime: undefined as string | undefined,
+          date: getDbDateStr(),
+          time: undefined as string | undefined,
         };
       }
       return {
-        defaultDate: undefined as string | undefined,
-        defaultTime: undefined as string | undefined,
+        date: undefined as string | undefined,
+        time: undefined as string | undefined,
       };
     }),
   );
@@ -297,15 +298,15 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe(
         ([title, config, allTags, allProjects, defaultProject, defaultDateInfo]) => {
-          const { defaultDate, defaultTime } = defaultDateInfo;
+          const { date, time } = defaultDateInfo;
           this._parserService.parseAndUpdateText(
             title || '',
             config,
             allProjects,
             allTags,
             defaultProject!,
-            defaultDate,
-            defaultTime,
+            date,
+            time,
           );
         },
       );
@@ -591,7 +592,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       ])
         .pipe(first())
         .subscribe(([config, allTags, allProjects, defaultProject, defaultDateInfo]) => {
-          const { defaultDate, defaultTime } = defaultDateInfo;
+          const { date, time } = defaultDateInfo;
 
           this._parserService.parseAndUpdateText(
             savedText,
@@ -599,8 +600,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
             allProjects,
             allTags,
             defaultProject!,
-            defaultDate,
-            defaultTime,
+            date,
+            time,
           );
         });
     }
