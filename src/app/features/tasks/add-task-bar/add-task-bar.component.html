@@ -15,9 +15,7 @@
       (closed)="onMentionClosed()"
       [matAutocomplete]="taskAutoCompleteEl"
       [placeholder]="
-        isSearchMode()
-          ? 'Add existing task or issues...'
-          : 'Add a task... +project #tag @16:00'
+        isSearchMode() ? 'Add existing task or issues...' : 'A task title #tag @16:00'
       "
       matInput
       spellcheck="false"
