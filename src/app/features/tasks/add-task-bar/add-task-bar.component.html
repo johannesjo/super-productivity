@@ -120,7 +120,7 @@
       } @else if (item.taskId && item.isArchivedTask) {
         <mat-icon>archive</mat-icon>
       } @else if (item.taskId) {
-        <mat-icon>task</mat-icon>
+        <!--        <mat-icon>task</mat-icon>-->
       } @else if (!item.ctx) {
         <mat-icon>library_books</mat-icon>
       }
@@ -131,19 +131,6 @@
         ></tag>
       }
       <span [innerHTML]="item?.titleHighlighted || item?.title"></span>
-      @if (item.taskId && item.projectId) {
-        @for (project of projects$ | async; track project.id) {
-          @if (project.id === item.projectId) {
-            <mat-icon
-              class="project-icon"
-              [style.color]="project.theme.primary"
-            >
-              {{ project.icon || 'folder' }}
-            </mat-icon>
-            <span class="project-title">{{ project.title }}</span>
-          }
-        }
-      }
     </mat-option>
   }
 </mat-autocomplete>
