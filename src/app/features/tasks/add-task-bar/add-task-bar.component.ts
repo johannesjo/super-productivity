@@ -14,7 +14,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MentionModule } from 'angular-mentions';
 import { MatInput } from '@angular/material/input';
@@ -35,23 +35,14 @@ import { TagService } from '../../tag/tag.service';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { AddTaskBarIssueSearchService } from './add-task-bar-issue-search.service';
 import { T } from '../../../t.const';
-import {
-  catchError,
-  debounceTime,
-  distinctUntilChanged,
-  filter,
-  first,
-  map,
-  switchMap,
-  tap,
-} from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter, first, map } from 'rxjs/operators';
 import { Project } from '../../project/project.model';
 import { msToString } from '../../../ui/duration/ms-to-string.pipe';
 import { stringToMs } from '../../../ui/duration/string-to-ms.pipe';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { Store } from '@ngrx/store';
 import { PlannerActions } from '../../planner/store/planner.actions';
-import { BehaviorSubject, combineLatest, fromEvent, Observable, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, fromEvent, Observable } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
@@ -63,7 +54,6 @@ import {
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { AddTaskSuggestion } from './add-task-suggestions.model';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
-import { IssueService } from '../../issue/issue.service';
 import { TagComponent } from '../../tag/tag/tag.component';
 import { truncate } from '../../../util/truncate';
 import { SnackService } from '../../../core/snack/snack.service';
@@ -112,7 +102,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   private readonly _addTaskBarService = inject(AddTaskBarIssueSearchService);
   private readonly _matDialog = inject(MatDialog);
   private readonly _snackService = inject(SnackService);
-  private readonly _issueService = inject(IssueService);
   private readonly _parserService = inject(AddTaskBarParserService);
   private readonly _destroyRef = inject(DestroyRef);
   readonly stateService = inject(AddTaskBarStateService);
@@ -161,6 +150,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   tags$ = this._tagService.tags$;
   suggestions$!: Observable<AddTaskSuggestion[]>;
   activatedIssueTask = toSignal(this.activatedSuggestion$, { initialValue: null });
+
+  // Create observable from signal in injection context
+  private readonly isSearchIssueProviders$ = toObservable(this.isSearchMode);
 
   // Tag mention functionality - will be initialized in ngOnInit
   tagMentions!: Observable<any>;
@@ -318,72 +310,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   private setupSuggestions(): void {
-    this.suggestions$ = this.titleControl.valueChanges.pipe(
-      filter(() => this.isSearchMode()),
-      tap(() => this.isSearchLoading.set(true)),
-      debounceTime(300),
-      switchMap((searchTerm) => {
-        if (
-          !searchTerm ||
-          typeof searchTerm !== 'string' ||
-          searchTerm.trim().length < 2
-        ) {
-          this.isSearchLoading.set(false);
-          return of([]);
-        }
-
-        // Search tasks
-        const taskSearch$ = this._taskService.allTasks$.pipe(
-          map((tasks) => {
-            const searchLower = searchTerm.toLowerCase();
-            return tasks
-              .filter((task) => task.title.toLowerCase().includes(searchLower))
-              .slice(0, 15)
-              .map(
-                (task) =>
-                  ({
-                    title: task.title,
-                    taskId: task.id,
-                    projectId: task.projectId,
-                    isArchivedTask: task.isDone,
-                  }) as AddTaskSuggestion,
-              );
-          }),
-          catchError(() => of([] as AddTaskSuggestion[])),
-        );
-
-        // Search issues
-        const issueSearch$ = this._issueService
-          .searchAllEnabledIssueProviders$(searchTerm)
-          .pipe(
-            map((issueSuggestions) =>
-              issueSuggestions.slice(0, 15).map(
-                (issueSuggestion) =>
-                  ({
-                    title: issueSuggestion.title,
-                    titleHighlighted: issueSuggestion.titleHighlighted,
-                    issueData: issueSuggestion.issueData,
-                    issueType: issueSuggestion.issueType,
-                    issueProviderId: issueSuggestion.issueProviderId,
-                  }) as AddTaskSuggestion,
-              ),
-            ),
-            catchError(() => of([] as AddTaskSuggestion[])),
-          );
-
-        return combineLatest([taskSearch$, issueSearch$]).pipe(
-          map(([tasks, issues]) => [...tasks, ...issues]),
-          map((suggestions) => {
-            this.isSearchLoading.set(false);
-            return suggestions;
-          }),
-          catchError((error) => {
-            console.error('Error fetching suggestions:', error);
-            this.isSearchLoading.set(false);
-            return of([]);
-          }),
-        );
-      }),
+    this.suggestions$ = this._addTaskBarService.getFilteredIssueSuggestions$(
+      this.titleControl,
+      this.isSearchIssueProviders$,
+      this.isSearchLoading,
     );
 
     // Auto-activate first suggestion when autoActiveFirstOption is true
