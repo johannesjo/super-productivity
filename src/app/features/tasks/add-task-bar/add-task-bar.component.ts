@@ -349,6 +349,12 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       }
     }
 
+    // Filter out tags to remove if specified
+    const tagsToRemoveList = this.tagsToRemove();
+    if (tagsToRemoveList && tagsToRemoveList.length > 0) {
+      finalTagIds = finalTagIds.filter((tagId) => !tagsToRemoveList.includes(tagId));
+    }
+
     const taskData: Partial<TaskCopy> = {
       ...this.additionalFields(),
       projectId: state.project?.id,
