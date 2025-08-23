@@ -201,7 +201,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       }
 
       // Refocus input when state changes (user selected something)
-      setTimeout(() => this._focusInput(), 0);
+      this._focusInput();
     });
   }
 
@@ -451,7 +451,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       });
     }
 
-    setTimeout(() => {
+    window.setTimeout(() => {
       this.titleControl.setValue('');
       this.activatedSuggestion$.next(null);
     });
@@ -493,7 +493,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     if (currentValue && currentValue.trim().length >= 2) {
       this.titleControl.setValue(currentValue);
     }
-    window.setTimeout(() => this._focusInput(), 0);
+    this._focusInput();
   }
   onMentionClosed(): void {
     window.setTimeout(() => this.isMentionMenuOpen.set(false));
@@ -583,7 +583,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   private _focusInput(selectAll: boolean = false): void {
     // Cancel any existing timeout
     if (this._focusTimeout !== undefined) {
-      clearTimeout(this._focusTimeout);
+      window.clearTimeout(this._focusTimeout);
     }
 
     // Set new timeout
@@ -609,6 +609,4 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       }, 50);
     }
   }
-
-  protected readonly setTimeout = setTimeout;
 }
