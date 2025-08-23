@@ -17,7 +17,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { MentionModule } from 'angular-mentions';
+import { MentionConfig, MentionModule } from 'angular-mentions';
 import { MatInput } from '@angular/material/input';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -59,6 +59,7 @@ import { Mentions } from 'angular-mentions/lib/mention-config';
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { unique } from '../../../util/unique';
 import { Log } from '../../../core/log';
+import { CHRONO_SUGGESTIONS } from './add-task-bar.const';
 
 @Component({
   selector: 'add-task-bar',
@@ -191,6 +192,13 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
           triggerChar: '#',
         });
       }
+      if (cfg.isEnableDue) {
+        mentions.push({
+          items: CHRONO_SUGGESTIONS,
+          labelKey: 'title',
+          triggerChar: '@',
+        });
+      }
       // if (cfg.isEnableProject) {
       //   mentions.push({
       //     items: projectSuggestions,
@@ -198,7 +206,11 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       //     triggerChar: '+',
       //   });
       // }
-      return { mentions };
+      const mentionCfg: MentionConfig = {
+        mentions,
+        triggerChar: undefined,
+      };
+      return mentionCfg;
     }),
   );
 
