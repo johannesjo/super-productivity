@@ -106,7 +106,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   additionalFields = input<Partial<TaskCopy>>();
   taskIdsToExclude = input<string[]>();
   isHideTagTitles = input<boolean>(false);
-  isSkipAddingCurrentTag = input<boolean>(false);
   tagsToRemove = input<string[]>([]);
   planForDay = input<string>();
 

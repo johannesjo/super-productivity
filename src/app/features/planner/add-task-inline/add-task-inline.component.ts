@@ -22,7 +22,6 @@ export class AddTaskInlineComponent {
   readonly additionalFields = input<Partial<TaskCopy>>();
   readonly tagsToRemove = input<string[]>();
   readonly taskIdsToExclude = input<string[]>();
-  readonly isSkipAddingCurrentTag = input<boolean>(false);
   readonly afterTaskAdd = output<{ taskId: string; isAddToBottom: boolean }>();
 
   isShowAddTask = false;
