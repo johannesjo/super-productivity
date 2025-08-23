@@ -35,7 +35,6 @@ import { AddTaskBarIssueSearchService } from './add-task-bar-issue-search.servic
 import { T } from '../../../t.const';
 import { debounceTime, distinctUntilChanged, filter, first, map } from 'rxjs/operators';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
-import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, fromEvent, Observable } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
@@ -54,6 +53,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { AddTaskBarStateService } from './add-task-bar-state.service';
 import { AddTaskBarParserService } from './add-task-bar-parser.service';
 import { AddTaskBarActionsComponent } from './add-task-bar-actions/add-task-bar-actions.component';
+import { Mentions } from 'angular-mentions/lib/mention-config';
 
 @Component({
   selector: 'add-task-bar',
@@ -88,7 +88,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   private readonly _projectService = inject(ProjectService);
   private readonly _tagService = inject(TagService);
   private readonly _globalConfigService = inject(GlobalConfigService);
-  private readonly _store = inject(Store);
   private readonly _addTaskBarService = inject(AddTaskBarIssueSearchService);
   private readonly _matDialog = inject(MatDialog);
   private readonly _snackService = inject(SnackService);
@@ -123,6 +122,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   searchControl = new FormControl<string>('');
   isSearchLoading = signal(false);
   activatedSuggestion$ = new BehaviorSubject<AddTaskSuggestion | null>(null);
+  isMentionMenuOpen = signal(false);
 
   hasNewTags = computed(() => this.stateService.state().newTagTitles.length > 0);
 
@@ -139,7 +139,30 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
   // Tag mention functionality - will be initialized in ngOnInit
   tagMentions!: Observable<any>;
-  tagMentionConfig = this._addTaskBarService.getMentionConfig$();
+  mentionCfg$ = combineLatest([
+    this._globalConfigService.shortSyntax$,
+    this._tagService.tagsNoMyDayAndNoList$,
+    this._projectService.list$.pipe(map((ps) => ps.filter((p) => !p.isHiddenFromMenu))),
+  ]).pipe(
+    map(([cfg, tagSuggestions, projectSuggestions]) => {
+      const mentions: Mentions[] = [];
+      if (cfg.isEnableTag) {
+        mentions.push({
+          items: tagSuggestions,
+          labelKey: 'title',
+          triggerChar: '#',
+        });
+      }
+      // if (cfg.isEnableProject) {
+      //   mentions.push({
+      //     items: projectSuggestions,
+      //     labelKey: 'title',
+      //     triggerChar: '+',
+      //   });
+      // }
+      return { mentions };
+    }),
+  );
 
   // View children
   inputEl = viewChild<ElementRef>('inputEl');
@@ -149,6 +172,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   titleControl = new FormControl<string>('');
 
   private _focusTimeout?: number;
+  private _autocompleteTimeout?: number;
   private _processingAutocompleteSelection = false;
 
   constructor() {
@@ -201,6 +225,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     window.clearTimeout(this._focusTimeout);
+    window.clearTimeout(this._autocompleteTimeout);
   }
 
   // Setup methods
@@ -339,8 +364,12 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     if (!suggestion) return;
 
     this._processingAutocompleteSelection = true;
-    // TODO safe and clear timeout
-    setTimeout(() => {
+
+    if (this._autocompleteTimeout) {
+      window.clearTimeout(this._autocompleteTimeout);
+    }
+
+    this._autocompleteTimeout = window.setTimeout(() => {
       this._processingAutocompleteSelection = false;
     }, 100);
 
@@ -431,8 +460,12 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   onInputKeydown(event: KeyboardEvent): void {
-    // TODO this does not respect the mention popup being open
     if (event.key === 'Enter') {
+      // Don't submit if mention popup is open - let it handle the selection
+      if (this.isMentionMenuOpen()) {
+        return;
+      }
+      alert(this.isMentionMenuOpen());
       event.preventDefault();
       this.addTask();
     } else if (event.ctrlKey && event.key === '1') {
@@ -445,7 +478,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       const actionsComp = this.actionsComponent();
       if (actionsComp) {
         event.preventDefault();
-        // TODO fix this is closing the add task bar
+        event.stopPropagation();
         actionsComp.openProjectMenu();
       }
     }

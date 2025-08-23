@@ -75,3 +75,13 @@ export const ESTIMATE_OPTIONS = [
   { label: '6h', value: '6h' },
   { label: '8h', value: '8h' },
 ];
+
+export const INITIAL_ADD_TASK_BAR_STATE: AddTaskBarState = {
+  project: null,
+  tags: [],
+  date: null,
+  time: null,
+  estimate: null,
+  newTagTitles: [],
+  cleanText: null,
+};
