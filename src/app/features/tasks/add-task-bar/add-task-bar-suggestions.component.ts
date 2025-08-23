@@ -1,29 +1,26 @@
 import {
-  Component,
   ChangeDetectionStrategy,
-  Input,
-  Output,
-  EventEmitter,
-  OnInit,
-  inject,
-  signal,
+  Component,
   DestroyRef,
+  EventEmitter,
+  inject,
+  Input,
+  OnInit,
+  Output,
+  signal,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { FormControl } from '@angular/forms';
 import { MatAutocomplete, MatOption } from '@angular/material/autocomplete';
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { AsyncPipe } from '@angular/common';
-import { BehaviorSubject, Observable, of, combineLatest } from 'rxjs';
-import { debounceTime, switchMap, map, catchError, tap, filter } from 'rxjs/operators';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { AddTaskSuggestion } from './add-task-suggestions.model';
-import { TaskService } from '../task.service';
-import { IssueService } from '../../issue/issue.service';
-import { WorkContextService } from '../../work-context/work-context.service';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { TagComponent } from '../../tag/tag/tag.component';
 import { ProjectService } from '../../project/project.service';
+import { AddTaskBarIssueSearchService } from './add-task-bar-issue-search.service';
 
 @Component({
   selector: 'add-task-bar-suggestions',
@@ -113,9 +110,7 @@ import { ProjectService } from '../../project/project.service';
   ],
 })
 export class AddTaskBarSuggestionsComponent implements OnInit {
-  private readonly _taskService = inject(TaskService);
-  private readonly _issueService = inject(IssueService);
-  private readonly _workContextService = inject(WorkContextService);
+  private readonly _addTaskBarService = inject(AddTaskBarIssueSearchService);
   private readonly _projectService = inject(ProjectService);
   private readonly _destroyRef = inject(DestroyRef);
 
@@ -138,77 +133,12 @@ export class AddTaskBarSuggestionsComponent implements OnInit {
   }
 
   private _setupSuggestions(): void {
-    this.suggestions$ = this.titleControl.valueChanges.pipe(
-      filter(() => this.isSearchMode),
-      tap(() => this.isSearchLoading.set(true)),
-      debounceTime(300),
-      switchMap((searchTerm) => {
-        // Always clear loading state if no search term
-        if (
-          !searchTerm ||
-          typeof searchTerm !== 'string' ||
-          searchTerm.trim().length < 2
-        ) {
-          this.isSearchLoading.set(false);
-          return of([]);
-        }
+    const isSearchMode$ = toObservable(signal(this.isSearchMode));
 
-        // Search tasks
-        const taskSearch$ = this._taskService.allTasks$.pipe(
-          map((tasks) => {
-            const searchLower = searchTerm.toLowerCase();
-            return tasks
-              .filter((task) => task.title.toLowerCase().includes(searchLower))
-              .slice(0, 15)
-              .map(
-                (task) =>
-                  ({
-                    title: task.title,
-                    taskId: task.id,
-                    projectId: task.projectId,
-                    isArchivedTask: task.isDone,
-                  }) as AddTaskSuggestion,
-              );
-          }),
-          catchError(() => of([] as AddTaskSuggestion[])),
-        );
-
-        // Search issues
-        const issueSearch$ = this._issueService
-          .searchAllEnabledIssueProviders$(searchTerm)
-          .pipe(
-            map((issueSuggestions) =>
-              issueSuggestions.slice(0, 15).map(
-                (issueSuggestion) =>
-                  ({
-                    title: issueSuggestion.title,
-                    titleHighlighted: issueSuggestion.titleHighlighted,
-                    issueData: issueSuggestion.issueData,
-                    issueType: issueSuggestion.issueProviderId,
-                    issueProviderId: issueSuggestion.issueProviderId,
-                  }) as AddTaskSuggestion,
-              ),
-            ),
-            catchError(() => of([] as AddTaskSuggestion[])),
-          );
-
-        // Combine results
-        return combineLatest([taskSearch$, issueSearch$]).pipe(
-          map(([tasks, issues]) => [...tasks, ...issues]),
-          tap(() => this.isSearchLoading.set(false)),
-        );
-      }),
-      map((suggestions) => {
-        // Deduplicate by taskId
-        const seen = new Set<string>();
-        return suggestions.filter((s) => {
-          if (s.taskId) {
-            if (seen.has(s.taskId)) return false;
-            seen.add(s.taskId);
-          }
-          return true;
-        });
-      }),
+    this.suggestions$ = this._addTaskBarService.getFilteredIssueSuggestions$(
+      this.titleControl,
+      isSearchMode$,
+      this.isSearchLoading,
     );
   }
 

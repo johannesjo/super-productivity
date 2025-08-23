@@ -61,12 +61,25 @@ export class AddTaskBarIssueSearchService {
       withLatestFrom(this._workContextService.activeWorkContextTypeAndId$),
       switchMap(([searchTerm, { activeType, activeId }]) =>
         isSearchIssueProviders$.pipe(
-          switchMap((isIssueSearch) => {
-            if (isIssueSearch) {
-              if (!searchTerm?.length) {
-                return of([]);
-              }
-              return this._issueService.searchAllEnabledIssueProviders$(searchTerm).pipe(
+          switchMap((isSearchMode) => {
+            if (!isSearchMode) {
+              // When search mode is OFF, don't search anything
+              return of([]);
+            }
+
+            if (!searchTerm?.length) {
+              return of([]);
+            }
+
+            // When search mode is ON, search both archived tasks and issues
+            const archivedTasksSearch$ =
+              activeType === WorkContextType.PROJECT
+                ? this._searchForProject$(searchTerm, activeId)
+                : this._searchForTag$(searchTerm, activeId);
+
+            const issueSearch$ = this._issueService
+              .searchAllEnabledIssueProviders$(searchTerm)
+              .pipe(
                 map((issueSuggestions) =>
                   issueSuggestions.map(
                     (issueSuggestion) =>
@@ -79,15 +92,12 @@ export class AddTaskBarIssueSearchService {
                       }) as AddTaskSuggestion,
                   ),
                 ),
-                catchError(() => {
-                  return of([]);
-                }),
+                catchError(() => of([])),
               );
-            }
 
-            return activeType === WorkContextType.PROJECT
-              ? this._searchForProject$(searchTerm, activeId)
-              : this._searchForTag$(searchTerm, activeId);
+            return combineLatest([archivedTasksSearch$, issueSearch$]).pipe(
+              map(([tasks, issues]) => [...tasks, ...issues]),
+            );
           }),
         ),
       ),
