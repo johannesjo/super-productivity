@@ -57,6 +57,7 @@ import { AddTaskBarParserService } from './add-task-bar-parser.service';
 import { AddTaskBarActionsComponent } from './add-task-bar-actions/add-task-bar-actions.component';
 import { Mentions } from 'angular-mentions/lib/mention-config';
 import { getDbDateStr } from '../../../util/get-db-date-str';
+import { unique } from '../../../util/unique';
 
 @Component({
   selector: 'add-task-bar',
@@ -364,10 +365,13 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       finalTagIds = finalTagIds.filter((tagId) => !tagsToRemoveList.includes(tagId));
     }
 
+    const additionalFields = this.additionalFields();
     const taskData: Partial<TaskCopy> = {
-      ...this.additionalFields(),
+      ...additionalFields,
       projectId: state.project?.id,
-      tagIds: finalTagIds,
+      tagIds: additionalFields?.tagIds
+        ? unique([...finalTagIds, ...additionalFields.tagIds])
+        : finalTagIds,
       timeEstimate: state.estimate || undefined,
     };
 

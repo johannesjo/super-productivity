@@ -11,7 +11,8 @@ import { TagService } from '../../../tag/tag.service';
 import { DialogScheduleTaskComponent } from '../../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { Project } from '../../../project/project.model';
 import { Tag } from '../../../tag/tag.model';
-import { signal } from '@angular/core';
+import { signal, LOCALE_ID } from '@angular/core';
+import { getDbDateStr } from '../../../../util/get-db-date-str';
 
 describe('AddTaskBarActionsComponent', () => {
   let component: AddTaskBarActionsComponent;
@@ -93,6 +94,7 @@ describe('AddTaskBarActionsComponent', () => {
 
     mockTagService = jasmine.createSpyObj('TagService', [], {
       tags$: of([mockTag]),
+      tagsNoMyDayAndNoList$: of([mockTag]),
     });
 
     mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['afterClosed']);
@@ -109,6 +111,7 @@ describe('AddTaskBarActionsComponent', () => {
         { provide: ProjectService, useValue: mockProjectService },
         { provide: TagService, useValue: mockTagService },
         { provide: MatDialog, useValue: mockMatDialog },
+        { provide: LOCALE_ID, useValue: 'en-US' },
       ],
     }).compileComponents();
 
@@ -122,20 +125,30 @@ describe('AddTaskBarActionsComponent', () => {
       expect(component).toBeTruthy();
     });
 
-    it('should initialize with correct observables', () => {
-      component.allProjects.subscribe((projects) => {
-        expect(projects).toEqual([mockProject]);
-      });
-
-      component.allTags.subscribe((tags) => {
-        expect(tags).toEqual([mockTag]);
-      });
+    it('should initialize with correct signals', () => {
+      expect(component.allProjects()).toEqual([mockProject]);
+      expect(component.allTags()).toEqual([mockTag]);
     });
 
     it('should expose constants', () => {
       expect(component.DATE_OPTIONS).toBeDefined();
       expect(component.TIME_OPTIONS).toBeDefined();
       expect(component.ESTIMATE_OPTIONS).toBeDefined();
+    });
+
+    it('should handle input properties', () => {
+      // Test default values
+      expect(component.isHideDueBtn()).toBe(false);
+      expect(component.isHideTagBtn()).toBe(false);
+
+      // Create new fixture with input values
+      fixture = TestBed.createComponent(AddTaskBarActionsComponent);
+      fixture.componentRef.setInput('isHideDueBtn', true);
+      fixture.componentRef.setInput('isHideTagBtn', true);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.isHideDueBtn()).toBe(true);
+      expect(fixture.componentInstance.isHideTagBtn()).toBe(true);
     });
   });
 
@@ -175,7 +188,8 @@ describe('AddTaskBarActionsComponent', () => {
       (mockStateService as any)._mockStateSignal.set(stateWithTime);
 
       fixture.detectChanges();
-      expect(component.dateDisplay()).toBe(time);
+      // When today has a time, it shows the time instead of "Today"
+      expect(component.dateDisplay()).toBe('14:30');
     });
 
     it('should compute dateDisplay for tomorrow', () => {
@@ -258,6 +272,56 @@ describe('AddTaskBarActionsComponent', () => {
 
       expect(component.isAutoDetected()).toBe(true);
     });
+
+    it('should format dates according to locale', () => {
+      // Test with a German locale
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [AddTaskBarActionsComponent, BrowserAnimationsModule],
+        providers: [
+          { provide: AddTaskBarStateService, useValue: mockStateService },
+          { provide: AddTaskBarParserService, useValue: mockParserService },
+          { provide: ProjectService, useValue: mockProjectService },
+          { provide: TagService, useValue: mockTagService },
+          { provide: MatDialog, useValue: mockMatDialog },
+          { provide: LOCALE_ID, useValue: 'de-DE' },
+        ],
+      });
+
+      const deFixture = TestBed.createComponent(AddTaskBarActionsComponent);
+      const deComponent = deFixture.componentInstance;
+
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 7);
+      const stateWithDate = {
+        ...mockState,
+        date: futureDate,
+        time: null,
+      };
+      (mockStateService as any)._mockStateSignal.set(stateWithDate);
+      deFixture.detectChanges();
+
+      const result = deComponent.dateDisplay();
+      // German locale should format differently than en-US
+      expect(result).toBeTruthy();
+      expect(result).toContain(futureDate.getDate().toString());
+    });
+
+    it('should handle tomorrow with time correctly', () => {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const stateWithTomorrowAndTime = {
+        ...mockState,
+        date: tomorrow,
+        time: '15:30',
+      };
+      (mockStateService as any)._mockStateSignal.set(stateWithTomorrowAndTime);
+
+      fixture.detectChanges();
+      // With time, it should show the formatted date with time, not just "Tomorrow"
+      const result = component.dateDisplay();
+      expect(result).toContain('15:30');
+    });
   });
 
   describe('Schedule Dialog', () => {
@@ -276,7 +340,8 @@ describe('AddTaskBarActionsComponent', () => {
       expect(mockMatDialog.open).toHaveBeenCalledWith(DialogScheduleTaskComponent, {
         data: {
           isSelectDueOnly: true,
-          targetDay: testDate.toISOString().split('T')[0],
+          targetDay: getDbDateStr(testDate),
+          targetTime: '10:30',
         },
       });
     });
@@ -288,6 +353,7 @@ describe('AddTaskBarActionsComponent', () => {
         data: {
           isSelectDueOnly: true,
           targetDay: undefined,
+          targetTime: undefined,
         },
       });
     });
@@ -329,6 +395,49 @@ describe('AddTaskBarActionsComponent', () => {
         currentState.date,
         currentState.time,
       );
+    });
+
+    it('should pass time to dialog even when no date is selected', () => {
+      const stateWithTimeOnly = {
+        ...mockState,
+        date: null,
+        time: '09:00',
+      };
+      (mockStateService as any)._mockStateSignal.set(stateWithTimeOnly);
+      fixture.detectChanges();
+
+      component.openScheduleDialog();
+
+      expect(mockMatDialog.open).toHaveBeenCalledWith(DialogScheduleTaskComponent, {
+        data: {
+          isSelectDueOnly: true,
+          targetDay: undefined,
+          targetTime: '09:00',
+        },
+      });
+    });
+
+    it('should always set isSelectDueOnly to true', () => {
+      // Test with various states to ensure isSelectDueOnly is always true
+      const states = [
+        { ...mockState },
+        { ...mockState, date: new Date() },
+        { ...mockState, time: '10:00' },
+        { ...mockState, date: new Date(), time: '10:00' },
+      ];
+
+      states.forEach((state) => {
+        (mockStateService as any)._mockStateSignal.set(state);
+        fixture.detectChanges();
+        component.openScheduleDialog();
+      });
+
+      // All calls should have isSelectDueOnly: true
+      expect(mockMatDialog.open).toHaveBeenCalledTimes(states.length);
+      mockMatDialog.open.calls.all().forEach((call) => {
+        const dialogConfig = call.args[1] as any;
+        expect(dialogConfig?.data?.isSelectDueOnly).toBe(true);
+      });
     });
   });
 
@@ -593,26 +702,30 @@ describe('AddTaskBarActionsComponent', () => {
   });
 
   describe('Integration', () => {
-    it('should filter archived projects from projects$', (done) => {
+    it('should filter archived projects from allProjects signal', () => {
       const archivedProject = { ...mockProject, id: '2', isArchived: true };
       mockProjectService.list$ = of([mockProject, archivedProject]);
 
-      component.allProjects.subscribe((projects) => {
-        expect(projects).toEqual([mockProject]);
-        expect(projects).not.toContain(archivedProject);
-        done();
-      });
+      // Recreate component to pick up new observable
+      fixture = TestBed.createComponent(AddTaskBarActionsComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      expect(component.allProjects()).toEqual([mockProject]);
+      expect(component.allProjects()).not.toContain(archivedProject);
     });
 
-    it('should filter hidden projects from projects$', (done) => {
+    it('should filter hidden projects from allProjects signal', () => {
       const hiddenProject = { ...mockProject, id: '2', isHiddenFromMenu: true };
       mockProjectService.list$ = of([mockProject, hiddenProject]);
 
-      component.allProjects.subscribe((projects) => {
-        expect(projects).toEqual([mockProject]);
-        expect(projects).not.toContain(hiddenProject);
-        done();
-      });
+      // Recreate component to pick up new observable
+      fixture = TestBed.createComponent(AddTaskBarActionsComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      expect(component.allProjects()).toEqual([mockProject]);
+      expect(component.allProjects()).not.toContain(hiddenProject);
     });
   });
 });
