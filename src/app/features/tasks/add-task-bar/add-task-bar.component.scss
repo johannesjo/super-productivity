@@ -116,11 +116,17 @@
   height: 38px;
   padding: 0 8px;
   line-height: 38px;
-  font-weight: bold;
   border-top: 1px dashed var(--extra-border-color);
+  color: var(--text-color-muted);
+
+  &.bold {
+    opacity: 1;
+    color: var(--text-color-most-intense);
+    font-weight: bold;
+  }
 }
 
-.bottom-section {
+.action-bar {
   position: relative;
   padding-top: 0;
   display: flex;
