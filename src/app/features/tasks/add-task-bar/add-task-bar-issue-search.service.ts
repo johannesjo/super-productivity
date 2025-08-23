@@ -32,10 +32,11 @@ import { assertTruthy } from '../../../util/assert-truthy';
 import { DEFAULT_PROJECT_COLOR } from '../../work-context/work-context.const';
 import { TaskLog } from '../../../core/log';
 
+// TODO rename to AddTaskBarSearchService<
 @Injectable({
   providedIn: 'root',
 })
-export class AddTaskBarService {
+export class AddTaskBarIssueSearchService {
   private _taskService = inject(TaskService);
   private _workContextService = inject(WorkContextService);
   private _tagService = inject(TagService);
