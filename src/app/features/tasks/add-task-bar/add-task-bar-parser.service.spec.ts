@@ -19,9 +19,22 @@ describe('AddTaskBarParserService', () => {
       'updateEstimate',
       'updateDate',
       'isAutoDetected',
+      'state',
     ]);
 
     mockStateServiceSpy.isAutoDetected.and.returnValue(false);
+
+    // Default state return value
+    const defaultMockState = {
+      project: null,
+      tags: [],
+      newTagTitles: [],
+      date: null,
+      time: null,
+      estimate: null,
+      cleanText: null,
+    };
+    mockStateServiceSpy.state.and.returnValue(defaultMockState);
 
     TestBed.configureTestingModule({
       providers: [
@@ -93,9 +106,21 @@ describe('AddTaskBarParserService', () => {
     });
 
     describe('Date Parsing', () => {
-      it('should handle default date when no date syntax present', () => {
+      it('should handle default date when no date syntax present and no current state', () => {
         const defaultDate = '2024-01-15';
         const defaultTime = '09:00';
+
+        // Mock state to return no current date/time
+        const mockState = {
+          project: mockDefaultProject,
+          tags: [],
+          newTagTitles: [],
+          date: null,
+          time: null,
+          estimate: null,
+          cleanText: null,
+        };
+        mockStateService.state.and.returnValue(mockState);
 
         service.parseAndUpdateText(
           'Simple task',
@@ -111,6 +136,68 @@ describe('AddTaskBarParserService', () => {
         const [date, time] = mockStateService.updateDate.calls.mostRecent().args;
         expect(date).toBeInstanceOf(Date);
         expect(date?.toISOString().split('T')[0]).toBe(defaultDate);
+        expect(time).toBe(defaultTime);
+      });
+
+      it('should preserve current date/time when no syntax present', () => {
+        const currentDate = new Date('2024-02-20');
+        const currentTime = '14:30';
+
+        // Mock state to return current user-selected values
+        const mockState = {
+          project: mockDefaultProject,
+          tags: [],
+          newTagTitles: [],
+          date: currentDate,
+          time: currentTime,
+          estimate: null,
+          cleanText: null,
+        };
+        mockStateService.state.and.returnValue(mockState);
+
+        service.parseAndUpdateText(
+          'Task without date syntax',
+          mockConfig,
+          mockProjects,
+          mockTags,
+          mockDefaultProject,
+        );
+
+        expect(mockStateService.updateDate).toHaveBeenCalled();
+        const [date, time] = mockStateService.updateDate.calls.mostRecent().args;
+        expect(date).toBe(currentDate);
+        expect(time).toBe(currentTime);
+      });
+
+      it('should preserve current date but use default time when no current time', () => {
+        const currentDate = new Date('2024-02-20');
+        const defaultTime = '09:00';
+
+        // Mock state with date but no time
+        const mockState = {
+          project: mockDefaultProject,
+          tags: [],
+          newTagTitles: [],
+          date: currentDate,
+          time: null,
+          estimate: null,
+          cleanText: null,
+        };
+        mockStateService.state.and.returnValue(mockState);
+
+        service.parseAndUpdateText(
+          'Task text',
+          mockConfig,
+          mockProjects,
+          mockTags,
+          mockDefaultProject,
+          undefined, // no default date
+          defaultTime,
+        );
+
+        expect(mockStateService.updateDate).toHaveBeenCalled();
+        const [date, time] = mockStateService.updateDate.calls.mostRecent().args;
+        expect(date).toBe(currentDate);
         expect(time).toBe(defaultTime);
       });
 
