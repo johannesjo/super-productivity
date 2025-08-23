@@ -5,9 +5,30 @@ import { AddTaskBarStateService } from './add-task-bar-state.service';
 import { shortSyntax } from '../short-syntax';
 import { ShortSyntaxConfig } from '../../config/global-config.model';
 
+interface PreviousParseResult {
+  cleanText: string | null;
+  projectId: string | null;
+  tagIds: string[];
+  newTagTitles: string[];
+  timeEstimate: number | null;
+  dueDate: Date | null;
+  dueTime: string | null;
+}
+
 @Injectable()
 export class AddTaskBarParserService {
   private readonly _stateService = inject(AddTaskBarStateService);
+  private _previousParseResult: PreviousParseResult | null = null;
+
+  private _arraysEqual<T>(a: T[], b: T[]): boolean {
+    return a.length === b.length && a.every((val, i) => val === b[i]);
+  }
+
+  private _datesEqual(a: Date | null, b: Date | null): boolean {
+    if (a === null && b === null) return true;
+    if (a === null || b === null) return false;
+    return a.getTime() === b.getTime();
+  }
 
   parseAndUpdateText(
     text: string,
@@ -18,98 +39,132 @@ export class AddTaskBarParserService {
     defaultDate?: string,
     defaultTime?: string,
   ): void {
-    if (text && config) {
-      // Get current tags from state to pass as tagIds
-      const parseResult = shortSyntax(
-        { title: text, tagIds: [] },
-        config,
-        allTags,
-        allProjects,
-      );
+    if (!text || !config) {
+      this._previousParseResult = null;
+      return;
+    }
 
-      // defaultProject is already passed as a Project object, no need to find it
-      if (!parseResult) {
-        // No parse result means no short syntax found - clear everything
-        this._stateService.updateCleanText(text);
-        if (this._stateService.isAutoDetected()) {
-          this._stateService.updateProject(defaultProject);
-        }
-        this._stateService.updateTags([]);
-        this._stateService.updateNewTagTitles([]);
-        this._stateService.updateEstimate(null);
-        this._stateService.updateDate(
-          defaultDate ? new Date(defaultDate) : null,
-          defaultTime,
-        );
-        return;
-      }
+    // Get current tags from state to pass as tagIds
+    const parseResult = shortSyntax(
+      { title: text, tagIds: [] },
+      config,
+      allTags,
+      allProjects,
+    );
 
-      // Update clean text
-      if (parseResult.taskChanges.title) {
-        this._stateService.updateCleanText(parseResult.taskChanges.title);
-      }
+    // Create current parse result data structure
+    let currentResult: PreviousParseResult;
 
-      // Update project if found
-      if (parseResult.projectId) {
-        const foundProject = allProjects.find((p) => p.id === parseResult.projectId);
-        if (foundProject) {
-          this._stateService.setAutoDetectedProject(foundProject);
-        }
-      } else if (this._stateService.isAutoDetected()) {
-        // Clear auto-detected project if no project found in text
-        if (defaultProject) {
-          this._stateService.updateProject(defaultProject);
-        } else {
-          this._stateService.updateProject(null);
-        }
-      }
+    if (!parseResult) {
+      // No parse result means no short syntax found
+      currentResult = {
+        cleanText: text,
+        projectId: this._stateService.isAutoDetected()
+          ? defaultProject?.id || null
+          : null,
+        tagIds: [],
+        newTagTitles: [],
+        timeEstimate: null,
+        dueDate: defaultDate ? new Date(defaultDate) : null,
+        dueTime: defaultTime || null,
+      };
+    } else {
+      // Extract parsed values
+      const tagIds = parseResult.taskChanges.tagIds || [];
+      const newTagTitles = parseResult.newTagTitles || [];
 
-      // Update tags - always set to what was parsed (could be empty)
-      if (parseResult.taskChanges.tagIds) {
-        const foundTags = allTags.filter((tag) =>
-          parseResult.taskChanges.tagIds?.includes(tag.id),
-        );
-        this._stateService.updateTags(foundTags);
-      } else {
-        // No tags found in text, clear them
-        this._stateService.updateTags([]);
-      }
+      let dueDate: Date | null = null;
+      let dueTime: string | null = null;
 
-      // Update new tag titles - always set to what was parsed
-      this._stateService.updateNewTagTitles(parseResult.newTagTitles || []);
-
-      // Update time estimate
-      if ('timeEstimate' in parseResult.taskChanges) {
-        this._stateService.updateEstimate(parseResult.taskChanges.timeEstimate || null);
-      }
-
-      // Update due date and time
       if (parseResult.taskChanges.dueWithTime) {
-        const dueDate = new Date(parseResult.taskChanges.dueWithTime);
+        dueDate = new Date(parseResult.taskChanges.dueWithTime);
 
-        // Check if time was specified
         if (parseResult.taskChanges.hasPlannedTime !== false) {
           const hours = dueDate.getHours().toString().padStart(2, '0');
           const minutes = dueDate.getMinutes().toString().padStart(2, '0');
           const timeStr = `${hours}:${minutes}`;
 
-          // Only set time if it's not 00:00 (which indicates no time was specified)
           if (timeStr !== '00:00') {
-            this._stateService.updateDate(dueDate, timeStr);
-          } else {
-            this._stateService.updateDate(dueDate, null);
+            dueTime = timeStr;
           }
-        } else {
-          this._stateService.updateDate(dueDate, null);
         }
-      } else {
-        // No due date found in syntax, use default if provided
-        if (defaultDate) {
-          const date = new Date(defaultDate);
-          this._stateService.updateDate(date, defaultTime || null);
+      } else if (defaultDate) {
+        dueDate = new Date(defaultDate);
+        dueTime = defaultTime || null;
+      }
+
+      currentResult = {
+        cleanText: parseResult.taskChanges.title || text,
+        projectId: parseResult.projectId || null,
+        tagIds: tagIds,
+        newTagTitles: newTagTitles,
+        timeEstimate: parseResult.taskChanges.timeEstimate || null,
+        dueDate: dueDate,
+        dueTime: dueTime,
+      };
+    }
+
+    // Compare with previous result and only update changed values
+    if (
+      !this._previousParseResult ||
+      this._previousParseResult.cleanText !== currentResult.cleanText
+    ) {
+      this._stateService.updateCleanText(currentResult.cleanText);
+    }
+
+    if (
+      !this._previousParseResult ||
+      this._previousParseResult.projectId !== currentResult.projectId
+    ) {
+      if (currentResult.projectId) {
+        const foundProject = allProjects.find((p) => p.id === currentResult.projectId);
+        if (foundProject) {
+          this._stateService.setAutoDetectedProject(foundProject);
         }
-        // Otherwise keep current date (don't clear if set via UI)
+      } else if (this._stateService.isAutoDetected()) {
+        this._stateService.updateProject(defaultProject || null);
       }
     }
+
+    if (
+      !this._previousParseResult ||
+      !this._arraysEqual(this._previousParseResult.tagIds, currentResult.tagIds)
+    ) {
+      const foundTags = allTags.filter((tag) => currentResult.tagIds.includes(tag.id));
+      this._stateService.updateTags(foundTags);
+    }
+
+    if (
+      !this._previousParseResult ||
+      !this._arraysEqual(
+        this._previousParseResult.newTagTitles,
+        currentResult.newTagTitles,
+      )
+    ) {
+      this._stateService.updateNewTagTitles(currentResult.newTagTitles);
+    }
+
+    if (
+      !this._previousParseResult ||
+      this._previousParseResult.timeEstimate !== currentResult.timeEstimate
+    ) {
+      this._stateService.updateEstimate(currentResult.timeEstimate);
+    }
+
+    const dateChanged =
+      !this._previousParseResult ||
+      !this._datesEqual(this._previousParseResult.dueDate, currentResult.dueDate) ||
+      this._previousParseResult.dueTime !== currentResult.dueTime;
+
+    if (dateChanged) {
+      this._stateService.updateDate(currentResult.dueDate, currentResult.dueTime);
+    }
+
+    // Store current result as previous for next comparison
+    this._previousParseResult = currentResult;
+  }
+
+  resetPreviousResult(): void {
+    this._previousParseResult = null;
   }
 }
