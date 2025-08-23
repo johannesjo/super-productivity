@@ -22,6 +22,7 @@ import { AddTaskBarParserService } from '../add-task-bar-parser.service';
 import { DATE_OPTIONS, ESTIMATE_OPTIONS, TIME_OPTIONS } from '../add-task-bar.const';
 import { stringToMs } from '../../../../ui/duration/string-to-ms.pipe';
 import { msToString } from '../../../../ui/duration/ms-to-string.pipe';
+import { getDbDateStr } from '../../../../util/get-db-date-str';
 
 @Component({
   selector: 'add-task-bar-actions',
@@ -99,10 +100,11 @@ export class AddTaskBarActionsComponent {
   });
 
   openScheduleDialog(): void {
+    const state = this.state();
     const dialogRef = this._matDialog.open(DialogScheduleTaskComponent, {
       data: {
-        date: this.state().date,
-        time: this.state().time,
+        targetDay: state.date ? getDbDateStr(state.date) : undefined,
+        isSelectDueOnly: true,
       },
     });
 
@@ -122,7 +124,7 @@ export class AddTaskBarActionsComponent {
 
   onEstimateInput(value: string): void {
     const ms = stringToMs(value);
-    if (ms !== null) {
+    if (ms > 0) {
       this.stateService.updateEstimate(ms);
       this.estimateChanged.emit(value);
     }
