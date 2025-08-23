@@ -23,9 +23,9 @@
 
 <!--[cdkDropListData]="panelCfg()"-->
 <add-task-inline
+  style="margin-bottom: 8px"
   [additionalFields]="additionalTaskFields()"
   [tagsToRemove]="panelCfg().excludedTagIds"
-  [isSkipAddingCurrentTag]="true"
   [taskIdsToExclude]="panelCfg().taskIds"
   (afterTaskAdd)="afterTaskAdd($event)"
 ></add-task-inline>
