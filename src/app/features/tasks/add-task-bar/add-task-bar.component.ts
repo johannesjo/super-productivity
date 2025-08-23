@@ -5,7 +5,6 @@ import {
   computed,
   DestroyRef,
   ElementRef,
-  HostListener,
   inject,
   input,
   OnDestroy,
@@ -144,8 +143,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   tagMentions!: Observable<any>;
   tagMentionConfig = this._addTaskBarService.getMentionConfig$();
 
-  // Constants
-
   // View children
   inputEl = viewChild<ElementRef>('inputEl');
   taskAutoCompleteEl = viewChild<MatAutocomplete>('taskAutoCompleteEl');
@@ -205,9 +202,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this._focusTimeout !== undefined) {
-      clearTimeout(this._focusTimeout);
-    }
+    window.clearTimeout(this._focusTimeout);
   }
 
   // Setup methods
@@ -215,14 +210,12 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     combineLatest([this.projects$, this._workContextService.activeWorkContext$])
       .pipe(first(), takeUntilDestroyed(this._destroyRef))
       .subscribe(([projects, workContext]) => {
-        if (!this.stateService.state().project) {
-          const defaultProject =
-            (workContext?.type === WorkContextType.PROJECT
-              ? projects.find((p) => p.id === workContext.id)
-              : null) || projects.find((p) => p.id === 'INBOX_PROJECT');
-          if (defaultProject) {
-            this.stateService.updateProject(defaultProject);
-          }
+        const defaultProject =
+          (workContext?.type === WorkContextType.PROJECT
+            ? projects.find((p) => p.id === workContext.id)
+            : null) || projects.find((p) => p.id === 'INBOX_PROJECT');
+        if (defaultProject) {
+          this.stateService.updateProject(defaultProject);
         }
       });
   }
@@ -448,21 +441,14 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     setTimeout(() => this._focusInput(), 0);
   }
 
-  // Keyboard shortcuts
-  // TODO check if this is properly removed
-  @HostListener('document:keydown', ['$event'])
-  handleKeyboardShortcuts(event: KeyboardEvent): void {
+  onInputKeydown(event: KeyboardEvent): void {
     if (event.ctrlKey && event.key === '1') {
       event.preventDefault();
       this.toggleIsAddToBottom();
     } else if (event.ctrlKey && event.key === '2') {
       event.preventDefault();
       this.toggleSearchMode();
-    }
-  }
-
-  onInputKeydown(event: KeyboardEvent): void {
-    if (event.key === '+') {
+    } else if (event.key === '+') {
       const actionsComp = this.actionsComponent();
       if (actionsComp) {
         event.preventDefault();
