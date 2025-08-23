@@ -163,6 +163,10 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       this.selectedDate = dateStrToUtcDate(this.data.targetDay);
     }
 
+    if (this.data.targetTime) {
+      this.selectedTime = this.data.targetTime;
+    }
+
     this.calendar().activeDate = new Date(this.selectedDate || new Date());
     this._cd.detectChanges();
 
