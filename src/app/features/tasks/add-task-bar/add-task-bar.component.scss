@@ -3,6 +3,7 @@
 :host {
   display: block;
   text-align: start;
+  min-width: 300px;
 
   &.global {
     position: fixed;
@@ -128,105 +129,6 @@
   }
 }
 
-.action-bar {
-  position: relative;
-  padding-top: 0;
-  display: flex;
-  flex-wrap: wrap;
-  border-top: 1px dashed var(--extra-border-color);
-
-  @include mq(xs) {
-    gap: 2px;
-  }
-
-  .action-btn {
-    cursor: pointer;
-    opacity: 0.5;
-    display: flex;
-    align-items: center;
-
-    &.has-value {
-      background-color: var(--bg-lightest);
-      opacity: 1;
-    }
-
-    // Project button is always active since we always have a project selected
-    &.project-btn {
-      background-color: var(--bg-lightest);
-      opacity: 1;
-    }
-
-    // Highlight when menu is open
-    &.menu-open {
-      background-color: rgba(0, 0, 0, 0.05);
-      opacity: 1;
-
-      @include darkTheme() {
-        background-color: rgba(255, 255, 255, 0.05);
-      }
-
-      mat-icon {
-        color: inherit;
-      }
-    }
-
-    .new-tags-indicator {
-      font-size: 0.8em;
-      font-weight: normal;
-      opacity: 0.8;
-      margin-left: 4px;
-    }
-
-    .tags-display {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      max-width: 240px;
-      overflow: hidden;
-      position: relative;
-
-      .tag-item {
-        display: flex;
-        align-items: center;
-        gap: 2px;
-        flex-shrink: 0;
-        min-width: 0;
-
-        &.new-tag {
-          .tag-title {
-            font-style: italic;
-            opacity: 0.8;
-          }
-
-          mat-icon {
-            color: var(--color-accent);
-          }
-        }
-
-        mat-icon {
-          font-size: 16px;
-          width: 16px;
-          height: 16px;
-          line-height: 16px;
-        }
-
-        .tag-title {
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          min-width: 0;
-          font-size: 0.9em;
-        }
-
-        // Last visible tag gets truncated with ellipsis if needed
-        &:last-child .tag-title {
-          text-overflow: ellipsis;
-        }
-      }
-    }
-  }
-}
-
 .spinner {
   animation: 200ms fadeIn;
   position: absolute;
@@ -249,34 +151,12 @@
   }
 }
 
-.clear-btn {
-  opacity: 0.5;
-  border-radius: 4px !important;
-  margin-left: -8px;
-  min-width: 32px;
-  padding: 0;
-  text-align: center;
-  display: flex;
-  justify-content: center;
-
-  @include mq(xs) {
-    margin-left: -8px;
-  }
-
-  mat-icon {
-    margin: 0;
-  }
-
-  &:hover {
-    opacity: 1;
-  }
-}
-
 //// Autocomplete panel styles
 ::ng-deep .add-task-bar-panel {
   position: absolute;
   padding: 0 !important;
   top: 40px;
+  min-width: 300px;
 
   .mat-mdc-option {
     display: flex;
