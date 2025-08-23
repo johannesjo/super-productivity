@@ -34,7 +34,7 @@ export interface LayoutState {
 }
 
 export const INITIAL_LAYOUT_STATE: LayoutState = {
-  isShowAddTaskBar: true,
+  isShowAddTaskBar: false,
   isShowSideNav: false,
   isShowNotes: false,
   isShowIssuePanel: false,
