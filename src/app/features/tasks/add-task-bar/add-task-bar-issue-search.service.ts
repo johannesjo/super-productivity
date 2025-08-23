@@ -19,7 +19,6 @@ import { ProjectService } from '../../project/project.service';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { ShortSyntaxTag, shortSyntaxToTags } from './short-syntax-to-tags';
 import { Project } from '../../project/project.model';
-import { UntypedFormControl } from '@angular/forms';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { Task } from '../task.model';
 import { AddTaskSuggestion } from './add-task-suggestions.model';
@@ -44,11 +43,11 @@ export class AddTaskBarIssueSearchService {
   private _issueService = inject(IssueService);
 
   getFilteredIssueSuggestions$(
-    taskSuggestionsCtrl: UntypedFormControl,
+    inputText$: Observable<string>,
     isSearchIssueProviders$: Observable<boolean>,
     isLoading: WritableSignal<boolean>,
   ): Observable<AddTaskSuggestion[]> {
-    return taskSuggestionsCtrl.valueChanges.pipe(
+    return inputText$.pipe(
       tap(() => {
         isLoading.set(false);
       }),
@@ -122,10 +121,8 @@ export class AddTaskBarIssueSearchService {
     );
   }
 
-  getShortSyntaxTags$(
-    taskSuggestionsCtrl: UntypedFormControl,
-  ): Observable<ShortSyntaxTag[]> {
-    return taskSuggestionsCtrl.valueChanges.pipe(
+  getShortSyntaxTags$(inputText$: Observable<string>): Observable<ShortSyntaxTag[]> {
+    return inputText$.pipe(
       filter((val) => typeof val === 'string'),
       withLatestFrom(
         this._tagService.tagsNoMyDayAndNoList$,

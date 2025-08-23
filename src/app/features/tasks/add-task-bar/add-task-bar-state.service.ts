@@ -2,6 +2,7 @@ import { Injectable, signal, WritableSignal } from '@angular/core';
 import { Project } from '../../project/project.model';
 import { Tag } from '../../tag/tag.model';
 import { AddTaskBarState, INITIAL_ADD_TASK_BAR_STATE } from './add-task-bar.const';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 @Injectable()
 export class AddTaskBarStateService {
@@ -9,6 +10,8 @@ export class AddTaskBarStateService {
     ...INITIAL_ADD_TASK_BAR_STATE,
   });
 
+  readonly inputTxt = signal('');
+  readonly inputTxt$ = toObservable(this.inputTxt);
   readonly state = this._taskInputState.asReadonly();
   readonly isAutoDetected = signal(false);
 
@@ -65,6 +68,10 @@ export class AddTaskBarStateService {
     this._taskInputState.update((state) => ({ ...state, cleanText }));
   }
 
+  updateInputTxt(inputTxt: string): void {
+    this.inputTxt.set(inputTxt);
+  }
+
   clearTags(): void {
     this._taskInputState.update((state) => ({ ...state, tags: [], newTagTitles: [] }));
   }
@@ -81,6 +88,7 @@ export class AddTaskBarStateService {
     this._taskInputState.set({
       ...INITIAL_ADD_TASK_BAR_STATE,
     });
+    this.inputTxt.set('');
     this.isAutoDetected.set(false);
   }
 
