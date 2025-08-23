@@ -88,10 +88,9 @@ export class AddTaskBarStateService {
     this._taskInputState.update((state) => ({ ...state, estimate: null }));
   }
 
-  resetState(defaultProject: Project | null): void {
+  resetState(): void {
     this._taskInputState.set({
       ...this._initialState,
-      project: defaultProject,
     });
     this.isAutoDetected.set(false);
   }

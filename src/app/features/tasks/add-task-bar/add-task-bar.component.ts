@@ -21,7 +21,7 @@ import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { AsyncPipe } from '@angular/common';
-import { LS } from '../../../core/persistence/storage-keys.const';
+import { LS, SS } from '../../../core/persistence/storage-keys.const';
 import { blendInOutAnimation } from 'src/app/ui/animations/blend-in-out.ani';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { TaskCopy } from '../task.model';
@@ -34,10 +34,8 @@ import { GlobalConfigService } from '../../config/global-config.service';
 import { AddTaskBarIssueSearchService } from './add-task-bar-issue-search.service';
 import { T } from '../../../t.const';
 import { debounceTime, distinctUntilChanged, filter, first, map } from 'rxjs/operators';
-import { Project } from '../../project/project.model';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { Store } from '@ngrx/store';
-import { PlannerActions } from '../../planner/store/planner.actions';
 import { BehaviorSubject, combineLatest, fromEvent, Observable } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
@@ -165,7 +163,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this._setupDefaultProject();
+    this._setProjectInitially();
     this._setupDefaultDate();
     this._setupTextParsing();
     this._setupSuggestions();
@@ -206,7 +204,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   // Setup methods
-  private _setupDefaultProject(): void {
+  private _setProjectInitially(): void {
     combineLatest([this.projects$, this._workContextService.activeWorkContext$])
       .pipe(first(), takeUntilDestroyed(this._destroyRef))
       .subscribe(([projects, workContext]) => {
@@ -329,20 +327,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
     const taskId = this._taskService.add(title, this.isAddToBacklog(), taskData);
 
-    const planForDayValue = this.planForDay();
-    if (planForDayValue) {
-      this._planTaskForDay(taskId, planForDayValue);
-    }
-
     this.afterTaskAdd.emit({ taskId, isAddToBottom: this.isAddToBottom() });
     this._resetForm();
-  }
-
-  handleEnterKey(event: KeyboardEvent): void {
-    event.preventDefault();
-    setTimeout(async () => {
-      await this.addTask();
-    }, 50);
   }
 
   onTaskSuggestionActivated(suggestion: AddTaskSuggestion | null): void {
@@ -353,6 +339,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     if (!suggestion) return;
 
     this._processingAutocompleteSelection = true;
+    // TODO safe and clear timeout
     setTimeout(() => {
       this._processingAutocompleteSelection = false;
     }, 100);
@@ -444,7 +431,11 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   onInputKeydown(event: KeyboardEvent): void {
-    if (event.ctrlKey && event.key === '1') {
+    // TODO this does not respect the mention popup being open
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      this.addTask();
+    } else if (event.ctrlKey && event.key === '1') {
       event.preventDefault();
       this.toggleIsAddToBottom();
     } else if (event.ctrlKey && event.key === '2') {
@@ -454,6 +445,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       const actionsComp = this.actionsComponent();
       if (actionsComp) {
         event.preventDefault();
+        // TODO fix this is closing the add task bar
         actionsComp.openProjectMenu();
       }
     }
@@ -483,16 +475,16 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   private _saveCurrentText(text: string): void {
-    if (text.trim()) {
-      sessionStorage.setItem('SUP_PREVIOUS_TASK_TEXT', text);
+    if (typeof text === 'string') {
+      sessionStorage.setItem(SS.ADD_TASK_BAR_TXT, text);
     }
   }
 
   private _restorePreviousText(): void {
-    const savedText = sessionStorage.getItem('SUP_PREVIOUS_TASK_TEXT');
+    const savedText = sessionStorage.getItem(SS.ADD_TASK_BAR_TXT);
     if (savedText && savedText.trim()) {
       this.titleControl.setValue(savedText, { emitEvent: true });
-      sessionStorage.removeItem('SUP_PREVIOUS_TASK_TEXT');
+      sessionStorage.removeItem(SS.ADD_TASK_BAR_TXT);
 
       combineLatest([this._globalConfigService.shortSyntax$, this.tags$, this.projects$])
         .pipe(first())
@@ -503,37 +495,14 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   private clearSavedText(): void {
-    sessionStorage.removeItem('SUP_PREVIOUS_TASK_TEXT');
+    sessionStorage.removeItem(SS.ADD_TASK_BAR_TXT);
   }
 
   private _resetForm(): void {
     this.titleControl.setValue('');
     this.clearSavedText();
-
-    combineLatest([this.projects$, this._workContextService.activeWorkContext$])
-      .pipe(first())
-      .subscribe(([projects, workContext]) => {
-        let defaultProject: Project | null = null;
-
-        if (workContext?.type === WorkContextType.PROJECT) {
-          defaultProject = projects.find((p) => p.id === workContext.id) || null;
-        }
-
-        if (!defaultProject) {
-          defaultProject = projects.find((p) => p.id === 'INBOX_PROJECT') || null;
-        }
-
-        this.stateService.resetState(defaultProject);
-      });
-  }
-
-  private _planTaskForDay(taskId: string, day: string): void {
-    this._store.dispatch(
-      PlannerActions.planTaskForDay({
-        task: { id: taskId } as TaskCopy,
-        day,
-      }),
-    );
+    this.stateService.resetState();
+    this._setProjectInitially();
   }
 
   private _focusInput(selectAll: boolean = false): void {
