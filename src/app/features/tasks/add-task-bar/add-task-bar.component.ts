@@ -23,7 +23,7 @@ import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { AsyncPipe } from '@angular/common';
-import { LS, SS } from '../../../core/persistence/storage-keys.const';
+import { LS } from '../../../core/persistence/storage-keys.const';
 import { blendInOutAnimation } from 'src/app/ui/animations/blend-in-out.ani';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { TaskCopy } from '../task.model';
@@ -212,13 +212,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
   constructor() {
     // Watch inputTxt signal changes for text parsing and saving
-    this.stateService.inputTxt$
-      .pipe(takeUntilDestroyed(this._destroyRef), distinctUntilChanged())
-      .subscribe((value) => {
-        if (value) {
-          this._saveCurrentText(value);
-        }
-      });
 
     // Monitor state changes and refocus input when user selects values
     // This catches all state changes regardless of input method (mouse, keyboard, etc.)
@@ -247,8 +240,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this._restorePreviousText();
-
     if (!this.isDisableAutoFocus()) {
       this._focusInput(true);
     }
@@ -483,13 +474,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     this.stateService.updateInputTxt(value);
   }
 
-  onBlur(): void {
-    const text = this.stateService.inputTxt();
-    if (text && text.trim()) {
-      this._saveCurrentText(text);
-    }
-  }
-
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
@@ -571,48 +555,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     return newTagIds;
   }
 
-  private _saveCurrentText(text: string): void {
-    if (typeof text === 'string') {
-      sessionStorage.setItem(SS.ADD_TASK_BAR_TXT, text);
-    }
-  }
-
-  private _restorePreviousText(): void {
-    const savedText = sessionStorage.getItem(SS.ADD_TASK_BAR_TXT);
-    if (savedText && savedText.trim()) {
-      this.stateService.updateInputTxt(savedText);
-      sessionStorage.removeItem(SS.ADD_TASK_BAR_TXT);
-
-      combineLatest([
-        this._globalConfigService.shortSyntax$,
-        this.tags$,
-        this.projects$,
-        this.defaultProject$,
-        this.defaultDateAndTime$,
-      ])
-        .pipe(first())
-        .subscribe(([config, allTags, allProjects, defaultProject, defaultDateInfo]) => {
-          const { date, time } = defaultDateInfo;
-
-          this._parserService.parseAndUpdateText(
-            savedText,
-            config,
-            allProjects,
-            allTags,
-            defaultProject!,
-            date,
-            time,
-          );
-        });
-    }
-  }
-
-  private clearSavedText(): void {
-    sessionStorage.removeItem(SS.ADD_TASK_BAR_TXT);
-  }
-
   private _resetAfterAdd(): void {
-    this.clearSavedText();
     this.stateService.resetAfterAdd();
     // Reset parser state but don't reset project/date/estimate
     this._parserService.resetPreviousResult();
