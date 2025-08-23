@@ -23,7 +23,7 @@
       [class.has-value]="state().date"
     >
       <mat-icon>{{ state().time ? 'schedule' : 'event' }}</mat-icon>
-      <span>{{ dateDisplay() || 'Due' }}</span>
+      <span>{{ dateDisplay() || (T.F.TASK.ADD_TASK_BAR.DUE_BUTTON | translate) }}</span>
     </button>
 
     @if (state().date) {
@@ -31,7 +31,7 @@
         mat-button
         class="clear-btn"
         (click)="clearDateWithSyntax(); $event.stopPropagation()"
-        [matTooltip]="'Clear date'"
+        [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOOLTIP_CLEAR_DATE | translate"
         matTooltipPosition="above"
       >
         <mat-icon>close</mat-icon>
@@ -53,7 +53,7 @@
       @if (state().tags.length === 0 && state().newTagTitles.length === 0) {
         <ng-container>
           <mat-icon>label</mat-icon>
-          Tags
+          {{ T.F.TASK.ADD_TASK_BAR.TAGS_BUTTON | translate }}
         </ng-container>
       } @else {
         <div class="tags-display">
@@ -80,7 +80,7 @@
         mat-button
         class="clear-btn"
         (click)="clearTagsWithSyntax(); $event.stopPropagation()"
-        [matTooltip]="'Clear tags'"
+        [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOOLTIP_CLEAR_TAGS | translate"
         matTooltipPosition="above"
       >
         <mat-icon>close</mat-icon>
@@ -98,7 +98,9 @@
     (click)="onEstimateMenuClick($event)"
   >
     <mat-icon>timer</mat-icon>
-    <span>{{ estimateDisplay() || 'Estimate' }}</span>
+    <span>{{
+      estimateDisplay() || (T.F.TASK.ADD_TASK_BAR.ESTIMATE_BUTTON | translate)
+    }}</span>
   </button>
 
   @if (state().estimate) {
@@ -106,7 +108,7 @@
       mat-button
       class="clear-btn"
       (click)="clearEstimateWithSyntax(); $event.stopPropagation()"
-      [matTooltip]="'Clear estimate'"
+      [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOOLTIP_CLEAR_ESTIMATE | translate"
       matTooltipPosition="above"
     >
       <mat-icon>close</mat-icon>
@@ -144,25 +146,6 @@
   }
 </mat-menu>
 
-<mat-menu #dateMenu="matMenu">
-  @for (option of DATE_OPTIONS; track option.label) {
-    <button
-      mat-menu-item
-      (click)="stateService.updateDate(option.getDate())"
-    >
-      <mat-icon>{{ option.icon }}</mat-icon>
-      {{ option.label }}
-    </button>
-  }
-  <button
-    mat-menu-item
-    (click)="stateService.updateDate(null)"
-  >
-    <mat-icon>clear</mat-icon>
-    No Date
-  </button>
-</mat-menu>
-
 <mat-menu #timeMenu="matMenu">
   @for (time of TIME_OPTIONS; track time) {
     <button
@@ -177,7 +160,7 @@
     (click)="stateService.updateTime(null)"
   >
     <mat-icon>clear</mat-icon>
-    No Time
+    {{ T.F.TASK.ADD_TASK_BAR.NO_TIME | translate }}
   </button>
 </mat-menu>
 

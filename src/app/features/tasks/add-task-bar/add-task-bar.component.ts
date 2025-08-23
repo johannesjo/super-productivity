@@ -51,7 +51,6 @@ import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { TagComponent } from '../../tag/tag/tag.component';
 import { truncate } from '../../../util/truncate';
 import { SnackService } from '../../../core/snack/snack.service';
-import { TranslatePipe } from '@ngx-translate/core';
 import { AddTaskBarStateService } from './add-task-bar-state.service';
 import { AddTaskBarParserService } from './add-task-bar-parser.service';
 import { AddTaskBarActionsComponent } from './add-task-bar-actions/add-task-bar-actions.component';
@@ -60,6 +59,7 @@ import { getDbDateStr } from '../../../util/get-db-date-str';
 import { unique } from '../../../util/unique';
 import { Log } from '../../../core/log';
 import { CHRONO_SUGGESTIONS } from './add-task-bar.const';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'add-task-bar',
@@ -82,8 +82,8 @@ import { CHRONO_SUGGESTIONS } from './add-task-bar.const';
     MatProgressSpinner,
     IssueIconPipe,
     TagComponent,
-    TranslatePipe,
     AddTaskBarActionsComponent,
+    TranslateModule,
   ],
   providers: [AddTaskBarStateService, AddTaskBarParserService],
 })
@@ -98,6 +98,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   private readonly _snackService = inject(SnackService);
   private readonly _parserService = inject(AddTaskBarParserService);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _translateService = inject(TranslateService);
   readonly stateService = inject(AddTaskBarStateService);
 
   T = T;
@@ -563,7 +564,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   private async _confirmNewTags(): Promise<boolean> {
     const dialogRef = this._matDialog.open(DialogConfirmComponent, {
       data: {
-        message: `Create new tags: ${this.stateService.state().newTagTitles.join(', ')}?`,
+        message: `${this._translateService.instant(T.F.TASK.ADD_TASK_BAR.CREATE_NEW_TAGS)}: ${this.stateService.state().newTagTitles.join(', ')}?`,
       },
     });
     return await dialogRef.afterClosed().toPromise();

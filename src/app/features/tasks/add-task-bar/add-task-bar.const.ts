@@ -11,38 +11,6 @@ export interface AddTaskBarState {
   cleanText: string | null;
 }
 
-export const DATE_OPTIONS = [
-  {
-    label: 'Today',
-    icon: 'today',
-    getDate: () => {
-      const date = new Date();
-      date.setHours(0, 0, 0, 0);
-      return date;
-    },
-  },
-  {
-    label: 'Tomorrow',
-    icon: 'event',
-    getDate: () => {
-      const date = new Date();
-      date.setDate(date.getDate() + 1);
-      date.setHours(0, 0, 0, 0);
-      return date;
-    },
-  },
-  {
-    label: 'Next Week',
-    icon: 'next_week',
-    getDate: () => {
-      const date = new Date();
-      date.setDate(date.getDate() + 7);
-      date.setHours(0, 0, 0, 0);
-      return date;
-    },
-  },
-];
-
 export const TIME_OPTIONS = [
   '08:00',
   '09:00',

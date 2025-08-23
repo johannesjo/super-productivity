@@ -20,11 +20,13 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogScheduleTaskComponent } from '../../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { AddTaskBarStateService } from '../add-task-bar-state.service';
 import { AddTaskBarParserService } from '../add-task-bar-parser.service';
-import { DATE_OPTIONS, ESTIMATE_OPTIONS, TIME_OPTIONS } from '../add-task-bar.const';
+import { ESTIMATE_OPTIONS, TIME_OPTIONS } from '../add-task-bar.const';
 import { stringToMs } from '../../../../ui/duration/string-to-ms.pipe';
 import { msToString } from '../../../../ui/duration/ms-to-string.pipe';
 import { getDbDateStr } from '../../../../util/get-db-date-str';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { T } from '../../../../t.const';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'add-task-bar-actions',
@@ -32,7 +34,15 @@ import { toSignal } from '@angular/core/rxjs-interop';
   styleUrls: ['./add-task-bar-actions.component.scss', '../add-task-bar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [MatButton, MatIcon, MatTooltip, MatMenu, MatMenuTrigger, MatMenuItem],
+  imports: [
+    MatButton,
+    MatIcon,
+    MatTooltip,
+    MatMenu,
+    MatMenuTrigger,
+    MatMenuItem,
+    TranslateModule,
+  ],
 })
 export class AddTaskBarActionsComponent {
   private readonly _projectService = inject(ProjectService);
@@ -41,6 +51,9 @@ export class AddTaskBarActionsComponent {
   stateService = inject(AddTaskBarStateService);
   private readonly _parserService = inject(AddTaskBarParserService);
   private readonly _locale = inject(LOCALE_ID);
+  private readonly _translateService = inject(TranslateService);
+
+  T = T;
 
   isHideDueBtn = input<boolean>(false);
   isHideTagBtn = input<boolean>(false);
@@ -69,7 +82,6 @@ export class AddTaskBarActionsComponent {
   );
 
   // Constants
-  readonly DATE_OPTIONS = DATE_OPTIONS;
   readonly TIME_OPTIONS = TIME_OPTIONS;
   readonly ESTIMATE_OPTIONS = ESTIMATE_OPTIONS;
 
@@ -88,12 +100,12 @@ export class AddTaskBarActionsComponent {
     const today = new Date();
     const date = state.date;
     if (this.isSameDate(date, today)) {
-      return state.time || 'Today';
+      return state.time || this._translateService.instant(T.F.TASK.ADD_TASK_BAR.TODAY);
     }
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
     if (!state.time && this.isSameDate(date, tomorrow)) {
-      return state.time || 'Tomorrow';
+      return state.time || this._translateService.instant(T.F.TASK.ADD_TASK_BAR.TOMORROW);
     }
     const dateStr = date.toLocaleDateString(this._locale, {
       month: 'short',
