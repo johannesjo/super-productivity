@@ -152,6 +152,11 @@
 }
 
 //// Autocomplete panel styles
+::ng-deep .isTouchPrimary .add-task-bar-panel {
+  top: auto;
+  bottom: 4px;
+}
+
 ::ng-deep .add-task-bar-panel {
   position: absolute;
   padding: 0 !important;
