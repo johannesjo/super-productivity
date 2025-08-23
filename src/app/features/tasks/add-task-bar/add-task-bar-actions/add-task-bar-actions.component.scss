@@ -1,2 +1,130 @@
-// This component shares styles with the main add-task-bar component
-// All styles are defined in add-task-bar.component.scss
+@import '../../../../../common';
+
+.clear-btn {
+  opacity: 0.5;
+  border-radius: 4px !important;
+  margin-left: -8px;
+  min-width: 32px;
+  padding: 0;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+
+  @include mq(xs) {
+    margin-left: -8px;
+  }
+
+  mat-icon {
+    margin: 0;
+  }
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.action-bar {
+  position: relative;
+  padding-top: 0;
+  display: flex;
+  flex-wrap: nowrap;
+  border-top: 1px dashed var(--extra-border-color);
+
+  @include mq(xs) {
+    gap: 2px;
+  }
+
+  .action-btn {
+    cursor: pointer;
+    opacity: 0.5;
+    display: flex;
+    align-items: center;
+    max-width: 25%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+
+    @include mq(xs, max) {
+      font-size: 11px;
+    }
+
+    &.has-value {
+      background-color: var(--bg-lightest);
+      opacity: 1;
+    }
+
+    // Project button is always active since we always have a project selected
+    &.project-btn {
+      background-color: var(--bg-lightest);
+      opacity: 1;
+    }
+
+    // Highlight when menu is open
+    &.menu-open {
+      background-color: rgba(0, 0, 0, 0.05);
+      opacity: 1;
+
+      @include darkTheme() {
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+
+      mat-icon {
+        color: inherit;
+      }
+    }
+
+    .new-tags-indicator {
+      font-size: 0.8em;
+      font-weight: normal;
+      opacity: 0.8;
+      margin-left: 4px;
+    }
+
+    .tags-display {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      max-width: 240px;
+      overflow: hidden;
+      position: relative;
+
+      .tag-item {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        flex-shrink: 0;
+        min-width: 0;
+
+        &.new-tag {
+          .tag-title {
+            font-style: italic;
+            opacity: 0.8;
+          }
+
+          mat-icon {
+            color: var(--color-accent);
+          }
+        }
+
+        mat-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+          line-height: 16px;
+        }
+
+        .tag-title {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          min-width: 0;
+          font-size: 0.9em;
+        }
+
+        // Last visible tag gets truncated with ellipsis if needed
+        &:last-child .tag-title {
+          text-overflow: ellipsis;
+        }
+      }
+    }
+  }
+}
