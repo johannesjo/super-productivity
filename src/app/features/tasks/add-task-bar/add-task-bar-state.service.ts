@@ -1,23 +1,12 @@
 import { Injectable, signal, WritableSignal } from '@angular/core';
 import { Project } from '../../project/project.model';
 import { Tag } from '../../tag/tag.model';
-import { AddTaskBarState } from './add-task-bar.const';
+import { AddTaskBarState, INITIAL_ADD_TASK_BAR_STATE } from './add-task-bar.const';
 
 @Injectable()
 export class AddTaskBarStateService {
-  // TODO to const
-  private readonly _initialState: AddTaskBarState = {
-    project: null,
-    tags: [],
-    date: null,
-    time: null,
-    estimate: null,
-    newTagTitles: [],
-    cleanText: null,
-  };
-
   private readonly _taskInputState: WritableSignal<AddTaskBarState> = signal({
-    ...this._initialState,
+    ...INITIAL_ADD_TASK_BAR_STATE,
   });
 
   readonly state = this._taskInputState.asReadonly();
@@ -90,7 +79,7 @@ export class AddTaskBarStateService {
 
   resetState(): void {
     this._taskInputState.set({
-      ...this._initialState,
+      ...INITIAL_ADD_TASK_BAR_STATE,
     });
     this.isAutoDetected.set(false);
   }
@@ -98,9 +87,5 @@ export class AddTaskBarStateService {
   setAutoDetectedProject(project: Project): void {
     this.updateProject(project);
     this.isAutoDetected.set(true);
-  }
-
-  getValue(): AddTaskBarState {
-    return this._taskInputState();
   }
 }

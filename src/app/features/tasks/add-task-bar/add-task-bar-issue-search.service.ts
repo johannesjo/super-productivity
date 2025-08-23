@@ -19,7 +19,6 @@ import { ProjectService } from '../../project/project.service';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { ShortSyntaxTag, shortSyntaxToTags } from './short-syntax-to-tags';
 import { Project } from '../../project/project.model';
-import { MentionConfig, Mentions } from 'angular-mentions/lib/mention-config';
 import { UntypedFormControl } from '@angular/forms';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { Task } from '../task.model';
@@ -32,7 +31,6 @@ import { assertTruthy } from '../../../util/assert-truthy';
 import { DEFAULT_PROJECT_COLOR } from '../../work-context/work-context.const';
 import { TaskLog } from '../../../core/log';
 
-// TODO rename to AddTaskBarSearchService<
 @Injectable({
   providedIn: 'root',
 })
@@ -145,30 +143,6 @@ export class AddTaskBarIssueSearchService {
         }),
       ),
       startWith([]),
-    );
-  }
-
-  // TODO improve this
-  getMentionConfig$(): Observable<MentionConfig> {
-    return combineLatest([
-      this._globalConfigService.shortSyntax$,
-      this._tagService.tagsNoMyDayAndNoList$,
-      this._projectService.list$.pipe(map((ps) => ps.filter((p) => !p.isHiddenFromMenu))),
-    ]).pipe(
-      map(([cfg, tagSuggestions, projectSuggestions]) => {
-        const mentions: Mentions[] = [];
-        if (cfg.isEnableTag) {
-          mentions.push({ items: tagSuggestions, labelKey: 'title', triggerChar: '#' });
-        }
-        // if (cfg.isEnableProject) {
-        //   mentions.push({
-        //     items: projectSuggestions,
-        //     labelKey: 'title',
-        //     triggerChar: '+',
-        //   });
-        // }
-        return { mentions };
-      }),
     );
   }
 

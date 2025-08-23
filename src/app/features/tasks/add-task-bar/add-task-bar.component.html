@@ -10,7 +10,9 @@
       [formControl]="titleControl"
       [tabindex]="tabindex()"
       [mention]="tagMentions | async"
-      [mentionConfig]="tagMentionConfig | async"
+      [mentionConfig]="mentionCfg$ | async"
+      (opened)="isMentionMenuOpen.set(true)"
+      (closed)="isMentionMenuOpen.set(false)"
       [matAutocomplete]="taskAutoCompleteEl"
       [placeholder]="
         isSearchMode()
