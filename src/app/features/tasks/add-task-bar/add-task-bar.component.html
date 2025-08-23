@@ -126,16 +126,23 @@
     }
   </mat-autocomplete>
 
-  @if (activatedIssueTask() && activatedIssueTask()!.issueType === undefined) {
-    <div class="add-issue-info-text">
-      <mat-icon>playlist_add</mat-icon>
-      {{
-        T.F.TASK.ADD_TASK_BAR.ADD_EXISTING_TASK
-          | translate: { taskTitle: activatedIssueTask()!.title }
-      }}
-    </div>
+  @if (isSearchMode()) {
+    @if (activatedIssueTask() && activatedIssueTask()!.issueType === undefined) {
+      <div class="add-issue-info-text bold">
+        <mat-icon>playlist_add</mat-icon>
+        {{
+          T.F.TASK.ADD_TASK_BAR.ADD_EXISTING_TASK
+            | translate: { taskTitle: activatedIssueTask()!.title }
+        }}
+      </div>
+    } @else {
+      <div class="add-issue-info-text">
+        <mat-icon>playlist_add</mat-icon>
+        Search and add issues and tasks from archive and other projects
+      </div>
+    }
   } @else {
-    <div class="bottom-section">
+    <div class="action-bar">
       <button
         #projectMenuTrigger
         mat-button
