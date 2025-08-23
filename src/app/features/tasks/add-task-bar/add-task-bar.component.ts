@@ -944,11 +944,14 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
         taskId,
         isAddToBottom: false,
       });
-      this.titleControl.setValue('');
-      // Clear the activated suggestion
-      this.activatedSuggestion$.next(null);
-      // Don't automatically turn off search mode, let user decide
     }
+
+    // TODO check why this timeout is needed
+    // after
+    setTimeout(() => {
+      this.titleControl.setValue('');
+      this.activatedSuggestion$.next(null);
+    });
   }
 
   @HostListener('document:keydown', ['$event'])
