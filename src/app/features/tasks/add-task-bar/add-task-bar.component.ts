@@ -338,8 +338,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
   handleEnterKey(event: KeyboardEvent): void {
     event.preventDefault();
-    setTimeout(() => {
-      this.addTask();
+    setTimeout(async () => {
+      await this.addTask();
     }, 50);
   }
 
