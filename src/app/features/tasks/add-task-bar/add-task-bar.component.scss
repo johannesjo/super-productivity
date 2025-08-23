@@ -68,6 +68,10 @@
     background: transparent;
     color: inherit;
     font-family: inherit;
+
+    &::placeholder {
+      opacity: 0.6;
+    }
   }
 
   .right-button-controls {
