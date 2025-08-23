@@ -25,6 +25,7 @@ import { DATE_OPTIONS, ESTIMATE_OPTIONS, TIME_OPTIONS } from '../add-task-bar.co
 import { stringToMs } from '../../../../ui/duration/string-to-ms.pipe';
 import { msToString } from '../../../../ui/duration/ms-to-string.pipe';
 import { getDbDateStr } from '../../../../util/get-db-date-str';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'add-task-bar-actions',
@@ -64,10 +65,17 @@ export class AddTaskBarActionsComponent {
   isAutoDetected = computed(() => this.stateService.isAutoDetected());
 
   // Observables
-  projects$ = this._projectService.list$.pipe(
-    map((projects) => projects.filter((p) => !p.isArchived && !p.isHiddenFromMenu)),
+  allProjects = toSignal(
+    this._projectService.list$.pipe(
+      map((projects) => projects.filter((p) => !p.isArchived && !p.isHiddenFromMenu)),
+    ),
+    { initialValue: [] },
   );
-  tags$ = this._tagService.tags$;
+  allTags = toSignal(
+    this._tagService.tagsNoMyDayAndNoList$,
+
+    { initialValue: [] },
+  );
 
   // Constants
   readonly DATE_OPTIONS = DATE_OPTIONS;

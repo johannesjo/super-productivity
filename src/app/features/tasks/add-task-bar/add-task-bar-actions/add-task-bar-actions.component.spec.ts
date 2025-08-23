@@ -123,11 +123,11 @@ describe('AddTaskBarActionsComponent', () => {
     });
 
     it('should initialize with correct observables', () => {
-      component.projects$.subscribe((projects) => {
+      component.allProjects.subscribe((projects) => {
         expect(projects).toEqual([mockProject]);
       });
 
-      component.tags$.subscribe((tags) => {
+      component.allTags.subscribe((tags) => {
         expect(tags).toEqual([mockTag]);
       });
     });
@@ -597,7 +597,7 @@ describe('AddTaskBarActionsComponent', () => {
       const archivedProject = { ...mockProject, id: '2', isArchived: true };
       mockProjectService.list$ = of([mockProject, archivedProject]);
 
-      component.projects$.subscribe((projects) => {
+      component.allProjects.subscribe((projects) => {
         expect(projects).toEqual([mockProject]);
         expect(projects).not.toContain(archivedProject);
         done();
@@ -608,7 +608,7 @@ describe('AddTaskBarActionsComponent', () => {
       const hiddenProject = { ...mockProject, id: '2', isHiddenFromMenu: true };
       mockProjectService.list$ = of([mockProject, hiddenProject]);
 
-      component.projects$.subscribe((projects) => {
+      component.allProjects.subscribe((projects) => {
         expect(projects).toEqual([mockProject]);
         expect(projects).not.toContain(hiddenProject);
         done();
