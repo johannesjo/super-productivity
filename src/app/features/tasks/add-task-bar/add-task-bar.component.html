@@ -173,7 +173,7 @@
         <button
           mat-button
           class="clear-btn"
-          (click)="clearDate(); $event.stopPropagation()"
+          (click)="stateService.clearDate(); $event.stopPropagation()"
           [matTooltip]="'Clear date'"
           matTooltipPosition="above"
         >
@@ -220,7 +220,7 @@
         <button
           mat-button
           class="clear-btn"
-          (click)="clearTags(); $event.stopPropagation()"
+          (click)="stateService.clearTags(); $event.stopPropagation()"
           [matTooltip]="'Clear tags'"
           matTooltipPosition="above"
         >
@@ -245,7 +245,7 @@
         <button
           mat-button
           class="clear-btn"
-          (click)="clearEstimate(); $event.stopPropagation()"
+          (click)="stateService.clearEstimate(); $event.stopPropagation()"
           [matTooltip]="'Clear estimate'"
           matTooltipPosition="above"
         >
@@ -267,7 +267,7 @@
   @for (project of projects$ | async; track project.id) {
     <button
       mat-menu-item
-      (click)="onProjectSelect(project)"
+      (click)="stateService.updateProject(project)"
     >
       <mat-icon [style.color]="project.theme.primary"
         >{{ project.icon || 'folder' }}
@@ -281,7 +281,7 @@
   @for (tag of tags$ | async; track tag.id) {
     <button
       mat-menu-item
-      (click)="onTagToggle(tag)"
+      (click)="stateService.toggleTag(tag)"
       [class.selected]="hasSelectedTag(tag.id)"
     >
       <mat-icon [style.color]="tag.color || tag.theme?.primary">
@@ -296,7 +296,7 @@
   @for (option of DATE_OPTIONS; track option.label) {
     <button
       mat-menu-item
-      (click)="onDateSelect(option.getDate())"
+      (click)="stateService.updateDate(option.getDate())"
     >
       <mat-icon>{{ option.icon }}</mat-icon>
       {{ option.label }}
@@ -304,7 +304,7 @@
   }
   <button
     mat-menu-item
-    (click)="onDateSelect(null)"
+    (click)="stateService.updateDate(null)"
   >
     <mat-icon>clear</mat-icon>
     No Date
@@ -315,14 +315,14 @@
   @for (time of TIME_OPTIONS; track time) {
     <button
       mat-menu-item
-      (click)="onTimeSelect(time)"
+      (click)="stateService.updateTime(time)"
     >
       {{ time }}
     </button>
   }
   <button
     mat-menu-item
-    (click)="onTimeSelect(null)"
+    (click)="stateService.updateTime(null)"
   >
     <mat-icon>clear</mat-icon>
     No Time
