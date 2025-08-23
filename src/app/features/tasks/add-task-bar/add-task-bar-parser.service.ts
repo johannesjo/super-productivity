@@ -16,7 +16,16 @@ export class AddTaskBarParserService {
     allTags: Tag[],
   ): void {
     if (text && config) {
-      const parseResult = shortSyntax({ title: text }, config, allTags, allProjects);
+      // Get current tags from state to pass as tagIds
+      const currentTags = this._stateService.state().tags;
+      const currentTagIds = currentTags.map((t) => t.id);
+
+      const parseResult = shortSyntax(
+        { title: text, tagIds: currentTagIds },
+        config,
+        allTags,
+        allProjects,
+      );
 
       if (parseResult) {
         // Update clean text
