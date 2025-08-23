@@ -140,6 +140,70 @@ describe('taskSharedCrudMetaReducer', () => {
       );
     });
 
+    it('should add task to planner days when due in future', () => {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowStr = getDbDateStr(tomorrow);
+
+      const action = createAddTaskAction({ dueDay: tomorrowStr });
+
+      metaReducer(baseState, action);
+      expectStateUpdate(
+        {
+          ...expectTaskEntityExists('task1'),
+          ...expectTagUpdate('tag1', { taskIds: ['task1'] }),
+          planner: jasmine.objectContaining({
+            days: jasmine.objectContaining({
+              [tomorrowStr]: ['task1'],
+            }),
+          }),
+        },
+        action,
+        mockReducer,
+        baseState,
+      );
+    });
+
+    it('should not add task to planner days when due today (should go to TODAY tag instead)', () => {
+      const today = getDbDateStr();
+      const action = createAddTaskAction({ dueDay: today });
+
+      metaReducer(baseState, action);
+      expectStateUpdate(
+        {
+          ...expectTaskEntityExists('task1'),
+          ...expectTagUpdates({
+            tag1: { taskIds: ['task1'] },
+            TODAY: { taskIds: ['task1'] },
+          }),
+          planner: jasmine.objectContaining({
+            days: {}, // Should remain empty
+          }),
+        },
+        action,
+        mockReducer,
+        baseState,
+      );
+    });
+
+    it('should not add task to planner days when no dueDay is specified', () => {
+      const action = createAddTaskAction({ dueDay: undefined });
+
+      metaReducer(baseState, action);
+      expectStateUpdate(
+        {
+          ...expectTaskEntityExists('task1'),
+          ...expectTagUpdate('tag1', { taskIds: ['task1'] }),
+          planner: jasmine.objectContaining({
+            days: {}, // Should remain empty
+          }),
+        },
+        action,
+        mockReducer,
+        baseState,
+      );
+    });
+
     it('should add task to bottom when isAddToBottom is true', () => {
       const testState = createStateWithExistingTasks(
         ['existing-task'],
