@@ -96,12 +96,16 @@ export class AddTaskBarStateService {
     }
   }
 
-  resetState(): void {
-    this._taskInputState.set({
-      ...INITIAL_ADD_TASK_BAR_STATE,
-    });
+  resetAfterAdd(): void {
+    // Only clear input text and tags, preserve project, date, and estimate
+    this._taskInputState.update((state) => ({
+      ...state,
+      tags: [],
+      newTagTitles: [],
+      cleanText: null,
+    }));
     this.inputTxt.set('');
-    this.isAutoDetected.set(false);
+    // Keep isAutoDetected as is to preserve project selection
   }
 
   setAutoDetectedProject(project: Project): void {

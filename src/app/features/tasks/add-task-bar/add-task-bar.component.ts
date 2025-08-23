@@ -396,7 +396,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     const taskId = this._taskService.add(title, this.isAddToBacklog(), taskData);
 
     this.afterTaskAdd.emit({ taskId, isAddToBottom: this.isAddToBottom() });
-    this._resetForm();
+    this._resetAfterAdd();
   }
 
   onTaskSuggestionActivated(suggestion: AddTaskSuggestion | null): void {
@@ -610,11 +610,11 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     sessionStorage.removeItem(SS.ADD_TASK_BAR_TXT);
   }
 
-  private _resetForm(): void {
+  private _resetAfterAdd(): void {
     this.clearSavedText();
-    this.stateService.resetState();
+    this.stateService.resetAfterAdd();
+    // Reset parser state but don't reset project/date/estimate
     this._parserService.resetPreviousResult();
-    this._setProjectInitially();
   }
 
   private _focusInput(selectAll: boolean = false): void {
