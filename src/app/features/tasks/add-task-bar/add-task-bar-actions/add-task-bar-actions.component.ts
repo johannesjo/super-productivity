@@ -45,19 +45,22 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
   ],
 })
 export class AddTaskBarActionsComponent {
-  private readonly _projectService = inject(ProjectService);
-  private readonly _tagService = inject(TagService);
-  private readonly _matDialog = inject(MatDialog);
+  private _projectService = inject(ProjectService);
+  private _tagService = inject(TagService);
+  private _matDialog = inject(MatDialog);
+  private _parserService = inject(AddTaskBarParserService);
+  private _locale = inject(LOCALE_ID);
+  private _translateService = inject(TranslateService);
   stateService = inject(AddTaskBarStateService);
-  private readonly _parserService = inject(AddTaskBarParserService);
-  private readonly _locale = inject(LOCALE_ID);
-  private readonly _translateService = inject(TranslateService);
 
   T = T;
 
+  // Inputs
   isHideDueBtn = input<boolean>(false);
   isHideTagBtn = input<boolean>(false);
 
+  // Outputs
+  estimateChanged = output<string>();
   refocus = output<void>();
 
   // Menu state
@@ -90,9 +93,6 @@ export class AddTaskBarActionsComponent {
   projectMenuTrigger = viewChild('projectMenuTrigger', { read: MatMenuTrigger });
   tagsMenuTrigger = viewChild('tagsMenuTrigger', { read: MatMenuTrigger });
   estimateMenuTrigger = viewChild('estimateMenuTrigger', { read: MatMenuTrigger });
-
-  // Outputs
-  estimateChanged = output<string>();
 
   // Computed values
   dateDisplay = computed(() => {
@@ -203,6 +203,7 @@ export class AddTaskBarActionsComponent {
       'date',
     );
     this.stateService.clearDate(cleanedInput);
+    this.refocus.emit();
   }
 
   clearTagsWithSyntax(): void {
@@ -212,6 +213,7 @@ export class AddTaskBarActionsComponent {
       'tags',
     );
     this.stateService.clearTags(cleanedInput);
+    this.refocus.emit();
   }
 
   clearEstimateWithSyntax(): void {
@@ -221,6 +223,7 @@ export class AddTaskBarActionsComponent {
       'estimate',
     );
     this.stateService.clearEstimate(cleanedInput);
+    this.refocus.emit();
   }
 
   toggleTagWithSyntax(tag: any): void {
@@ -239,6 +242,7 @@ export class AddTaskBarActionsComponent {
       // If adding the tag, don't modify the input (let the parser handle it)
       this.stateService.toggleTag(tag);
     }
+    this.refocus.emit();
   }
 
   private isSameDate(date1: Date, date2: Date): boolean {
