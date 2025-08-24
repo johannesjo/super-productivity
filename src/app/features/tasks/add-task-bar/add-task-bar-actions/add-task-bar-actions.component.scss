@@ -43,6 +43,8 @@
     font-size: 13px;
     max-width: 150px; // Set a max width for buttons
     min-width: 70px !important;
+    // prevent dark theme being lighter than background
+    background: transparent !important;
 
     // Override mat-button padding to be more compact
     &.mat-mdc-button {
@@ -54,7 +56,7 @@
     }
 
     @include mq(xs, max) {
-      font-size: 11px;
+      font-size: 12px;
     }
 
     // Material button label wrapper
