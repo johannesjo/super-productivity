@@ -1,4 +1,5 @@
 import { nanoid } from 'nanoid';
+import typia from 'typia';
 import { first, map, take, withLatestFrom } from 'rxjs/operators';
 import { computed, inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -1092,6 +1093,9 @@ export class TaskService {
 
       ...additional,
     };
+
+    // Validate that we have a valid task before returning
+    typia.assert<Task>(d1);
 
     if (d1.projectId === undefined) {
       return { ...d1, projectId: INBOX_PROJECT.id };

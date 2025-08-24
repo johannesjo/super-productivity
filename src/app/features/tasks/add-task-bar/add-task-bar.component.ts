@@ -371,7 +371,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       tagIds: additionalFields?.tagIds
         ? unique([...finalTagIds, ...additionalFields.tagIds])
         : finalTagIds,
-      timeEstimate: state.estimate || undefined,
+      // needs to be 0
+      timeEstimate: state.estimate || 0,
     };
 
     if (state.date) {
