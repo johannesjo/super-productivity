@@ -58,6 +58,8 @@ export class AddTaskBarActionsComponent {
   isHideDueBtn = input<boolean>(false);
   isHideTagBtn = input<boolean>(false);
 
+  refocus = output<void>();
+
   // Menu state
   isProjectMenuOpen = signal<boolean>(false);
   isTagsMenuOpen = signal<boolean>(false);
@@ -132,10 +134,8 @@ export class AddTaskBarActionsComponent {
     dialogRef.afterClosed().subscribe((result) => {
       if (result && typeof result === 'object' && result.date) {
         this.stateService.updateDate(result.date, result.time);
-      } else {
-        // update anyway for refocus
-        this.stateService.updateDate(this.state().date, this.state().time);
       }
+      this.refocus.emit();
     });
   }
 
@@ -157,6 +157,7 @@ export class AddTaskBarActionsComponent {
     if (projectTrigger) {
       projectTrigger.menuClosed.pipe(first()).subscribe(() => {
         this.isProjectMenuOpen.set(false);
+        this.refocus.emit();
       });
     }
   }
@@ -167,6 +168,7 @@ export class AddTaskBarActionsComponent {
     if (tagsTrigger) {
       tagsTrigger.menuClosed.pipe(first()).subscribe(() => {
         this.isTagsMenuOpen.set(false);
+        this.refocus.emit();
       });
     }
   }
@@ -177,6 +179,7 @@ export class AddTaskBarActionsComponent {
     if (estimateTrigger) {
       estimateTrigger.menuClosed.pipe(first()).subscribe(() => {
         this.isEstimateMenuOpen.set(false);
+        this.refocus.emit();
       });
     }
   }
@@ -189,6 +192,7 @@ export class AddTaskBarActionsComponent {
       projectTrigger.openMenu();
       projectTrigger.menuClosed.pipe(first()).subscribe(() => {
         this.isProjectMenuOpen.set(false);
+        this.refocus.emit();
       });
     }
   }

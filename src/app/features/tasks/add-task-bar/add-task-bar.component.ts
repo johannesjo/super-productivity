@@ -244,7 +244,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       }
 
       // Refocus input when state changes (user selected something)
-      this._focusInput();
+      this.focusInput();
     });
     //
     // effect(() => {
@@ -262,7 +262,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
   ngAfterViewInit(): void {
     if (!this.isDisableAutoFocus()) {
-      this._focusInput(true);
+      this.focusInput(true);
     }
   }
 
@@ -514,17 +514,17 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   toggleIsAddToBottom(): void {
     this.isAddToBottom.update((v) => !v);
     localStorage.setItem(LS.IS_ADD_TO_BOTTOM, JSON.stringify(this.isAddToBottom()));
-    this._focusInput();
+    this.focusInput();
   }
 
   toggleIsAddToBacklog(): void {
     this.isAddToBacklog.update((v) => !v);
-    this._focusInput();
+    this.focusInput();
   }
 
   toggleSearchMode(): void {
     this.isSearchMode.update((mode) => !mode);
-    this._focusInput();
+    this.focusInput();
   }
   onMentionClosed(): void {
     // note timeout for this to be set after keydown handler
@@ -587,7 +587,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     this._parserService.resetPreviousResult();
   }
 
-  private _focusInput(selectAll: boolean = false): void {
+  focusInput(selectAll: boolean = false): void {
     // Cancel any existing timeout
     if (this._focusTimeout !== undefined) {
       window.clearTimeout(this._focusTimeout);
