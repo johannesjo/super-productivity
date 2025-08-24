@@ -36,19 +36,31 @@ export abstract class BasePage {
     // Store the initial count BEFORE submitting
     const initialCount = await this.page.locator('task').count();
 
+    // Wait for the submit button to become visible (it appears only when input has text)
     const submitBtn = this.page.locator('.e2e-add-task-submit');
-    await submitBtn.waitFor({ state: 'visible' });
+    await submitBtn.waitFor({ state: 'visible', timeout: 5000 });
     await submitBtn.click();
 
-    // Wait for task count to increase
-    await this.page.waitForFunction(
-      (expectedCount) => document.querySelectorAll('task').length > expectedCount,
-      initialCount,
-      { timeout: 10000 },
-    );
+    // Check if a dialog appeared (e.g., create tag dialog)
+    const dialogExists = await this.page
+      .locator('mat-dialog-container')
+      .isVisible()
+      .catch(() => false);
 
-    // Small delay to ensure task is fully rendered
-    await this.page.waitForTimeout(100);
+    if (!dialogExists) {
+      // Wait for task count to increase only if no dialog appeared
+      await this.page.waitForFunction(
+        (expectedCount) => document.querySelectorAll('task').length > expectedCount,
+        initialCount,
+        { timeout: 10000 },
+      );
+    } else {
+      // If dialog appeared, give a small delay for it to fully render
+      await this.page.waitForTimeout(500);
+    }
+
+    // Give extra time for task to be fully persisted
+    await this.page.waitForTimeout(1000);
 
     if (!skipClose) {
       // Only click backdrop once if it's visible

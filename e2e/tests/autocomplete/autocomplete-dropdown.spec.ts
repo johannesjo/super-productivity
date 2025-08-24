@@ -1,6 +1,6 @@
 import { expect, test } from '../../fixtures/test.fixture';
 
-const CONFIRM_CREATE_TAG_BTN = `dialog-confirm button[e2e="confirmBtn"]`;
+const CONFIRM_CREATE_TAG_BTN = `button[e2e="confirmBtn"]`;
 const BASIC_TAG_TITLE = 'task tag-list tag:last-of-type .tag-title';
 
 test.describe('Autocomplete Dropdown', () => {
