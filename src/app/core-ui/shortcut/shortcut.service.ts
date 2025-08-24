@@ -183,7 +183,7 @@ export class ShortcutService {
     }
 
     // Check plugin shortcuts (exec last)
-    const pluginShortcuts = this._pluginBridgeService.shortcuts$.getValue();
+    const pluginShortcuts = this._pluginBridgeService.shortcuts();
     for (const shortcut of pluginShortcuts) {
       const shortcutKey = `plugin_${shortcut.pluginId}:${shortcut.id}`;
       const shortcutKeyCombo = (keys as any)[shortcutKey];

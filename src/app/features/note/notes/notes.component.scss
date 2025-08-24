@@ -26,7 +26,7 @@ header {
     // window height - total header margin - header height
     100vh - var(--s3) - 36px
   );
-  overflow-y: scroll;
+  overflow-y: auto;
 
   @include mq(xs) {
     max-height: calc(

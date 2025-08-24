@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  effect,
   inject,
   OnDestroy,
   OnInit,
@@ -137,6 +138,13 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
         this._cd.detectChanges();
       });
     }
+
+    // Use effect to react to plugin shortcuts changes for live updates
+    effect(() => {
+      const shortcuts = this._pluginBridgeService.shortcuts();
+      Log.log('Plugin shortcuts changed:', { shortcuts });
+      this._updateKeyboardFormWithPluginShortcuts(shortcuts);
+    });
   }
 
   ngOnInit(): void {
@@ -144,14 +152,6 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
       this.configService.cfg$.subscribe((cfg) => {
         this.globalCfg = cfg;
         // this._cd.detectChanges();
-      }),
-    );
-
-    // Subscribe to plugin shortcuts changes for live updates
-    this._subs.add(
-      this._pluginBridgeService.shortcuts$.subscribe((shortcuts) => {
-        Log.log('Plugin shortcuts changed:', { shortcuts });
-        this._updateKeyboardFormWithPluginShortcuts(shortcuts);
       }),
     );
   }

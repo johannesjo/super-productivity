@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -39,12 +39,12 @@ export interface UnsplashSearchResponse {
   providedIn: 'root',
 })
 export class UnsplashService {
+  private _http = inject(HttpClient);
+
   private readonly API_URL = 'https://api.unsplash.com';
-  // Register your app at https://unsplash.com/developers for a free Access Key (50 req/hour)
+  // Register your app at https://unsplash.com/developers?utm_source=super-productivity&utm_medium=referral&utm_campaign=api-credit for a free Access Key (50 req/hour)
   // The Access Key is used with "Client-ID" prefix in the Authorization header
   private readonly ACCESS_KEY = getEnvOptional('UNSPLASH_KEY');
-
-  constructor(private _http: HttpClient) {}
 
   isAvailable(): boolean {
     return !!this.ACCESS_KEY;
@@ -57,7 +57,7 @@ export class UnsplashService {
 
     if (!this.ACCESS_KEY) {
       console.warn(
-        'No Unsplash Access Key configured. Register at https://unsplash.com/developers',
+        'No Unsplash Access Key configured. Register at https://unsplash.com/developers?utm_source=super-productivity&utm_medium=referral&utm_campaign=api-credit',
       );
       return of({ results: [], total: 0, total_pages: 0 });
     }
@@ -102,6 +102,17 @@ export class UnsplashService {
    */
   getBackgroundImageUrl(photo: UnsplashPhoto, width = 2560, quality = 85): string {
     return `${photo.urls.raw}&w=${width}&q=${quality}&auto=format`;
+  }
+
+  /**
+   * Add UTM parameters to Unsplash attribution links as required
+   * @param url - The original Unsplash URL
+   */
+  addUtmParams(url: string): string {
+    if (!url) return url;
+
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}utm_source=super-productivity&utm_medium=referral&utm_campaign=api-credit`;
   }
 
   /**

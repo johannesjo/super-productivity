@@ -4,13 +4,14 @@ import { IssueData } from '../../issue.model';
 import { OpenProjectAttachmentsComponent } from './open-project-attachments/open-project-attachments.component';
 import { JiraLinkComponent } from './jira-link/jira-link.component';
 import { TaskCopy } from '../../../tasks/task.model';
+import { CaldavTimeComponent } from './caldav-time/caldav-time.component';
 
 @Component({
   selector: 'issue-content-custom',
   templateUrl: './issue-content-custom.component.html',
   styleUrls: ['./issue-content-custom.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [OpenProjectAttachmentsComponent, JiraLinkComponent],
+  imports: [OpenProjectAttachmentsComponent, JiraLinkComponent, CaldavTimeComponent],
 })
 export class IssueContentCustomComponent {
   readonly field = input.required<IssueFieldConfig>();

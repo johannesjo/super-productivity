@@ -125,7 +125,7 @@ export class MobileSidePanelMenuComponent {
   // Convert observables to signals
   readonly isRouteWithSidePanel = toSignal(
     this._router.events.pipe(
-      filter((event: any) => event instanceof NavigationEnd),
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
       map((event) => true), // Always true since right-panel is now global
       startWith(true), // Always true since right-panel is now global
     ),
@@ -134,7 +134,7 @@ export class MobileSidePanelMenuComponent {
 
   readonly isWorkViewPage = toSignal(
     this._router.events.pipe(
-      filter((event: any) => event instanceof NavigationEnd),
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
       map((event) => !!event.urlAfterRedirects.match(/tasks$/)),
       startWith(!!this._router.url.match(/tasks$/)),
     ),
@@ -144,9 +144,7 @@ export class MobileSidePanelMenuComponent {
   readonly kb: KeyboardConfig = this._globalConfigService.cfg()?.keyboard || {};
 
   // Plugin-related signals
-  readonly sidePanelButtons = toSignal(this._pluginBridge.sidePanelButtons$, {
-    initialValue: [],
-  });
+  readonly sidePanelButtons = this._pluginBridge.sidePanelButtons;
   readonly activePluginId = toSignal(this._store.select(selectActivePluginId));
   readonly isShowPluginPanel = toSignal(this._store.select(selectIsShowPluginPanel));
 
@@ -185,7 +183,12 @@ export class MobileSidePanelMenuComponent {
     this.isShowMobileMenu.update((v) => !v);
   }
 
-  onPluginButtonClick(button: any): void {
+  onPluginButtonClick(button: {
+    pluginId: string;
+    onClick?: () => void;
+    label?: string;
+    icon?: string;
+  }): void {
     this._store.dispatch(togglePluginPanel(button.pluginId));
 
     if (button.onClick) {

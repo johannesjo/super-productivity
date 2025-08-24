@@ -1,10 +1,9 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { DB } from './storage-keys.const';
 import { DatabaseService } from './database.service';
 import { LocalSyncMetaForProvider, LocalSyncMetaModel } from '../../imex/sync/sync.model';
 import { LegacySyncProvider } from 'src/app/imex/sync/legacy-sync-provider.model';
 import { environment } from 'src/environments/environment';
-import { BehaviorSubject } from 'rxjs';
 import { Log } from '../log';
 
 const DEFAULT_LOCAL_SYNC_META: LocalSyncMetaModel = {
@@ -25,12 +24,12 @@ const DEFAULT_LOCAL_SYNC_META: LocalSyncMetaModel = {
   providedIn: 'root',
 })
 export class PersistenceLocalService {
-  lastSnyModelChange$ = new BehaviorSubject(0);
+  lastSyncModelChange = signal(0);
   private _databaseService = inject(DatabaseService);
 
   constructor() {
     // update val initially
-    this.loadLastSyncModelChange().then((val) => this.lastSnyModelChange$.next(val));
+    this.loadLastSyncModelChange().then((val) => this.lastSyncModelChange.set(val));
   }
 
   async save(data: LocalSyncMetaModel): Promise<unknown> {
@@ -85,7 +84,7 @@ export class PersistenceLocalService {
   async updateLastSyncModelChange(lastSyncModelChange: number): Promise<unknown> {
     Log.log(lastSyncModelChange);
     console.trace();
-    this.lastSnyModelChange$.next(lastSyncModelChange);
+    this.lastSyncModelChange.set(lastSyncModelChange);
     return await this._databaseService.save(
       DB.LOCAL_LAST_SYNC_MODEL_CHANGE,
       lastSyncModelChange,

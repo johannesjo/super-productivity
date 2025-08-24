@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, EMPTY, from, Observable } from 'rxjs';
 import { SimpleMetrics } from './metric.model';
 import { delay, map, switchMap, take } from 'rxjs/operators';
@@ -18,7 +19,7 @@ export class ProjectMetricsService {
   private _worklogService = inject(WorklogService);
   private _workContextService = inject(WorkContextService);
 
-  simpleMetrics$: Observable<SimpleMetrics> =
+  private _simpleMetricsObs$: Observable<SimpleMetrics> =
     this._workContextService.activeWorkContextTypeAndId$.pipe(
       // wait for current projectId to settle in :(
       delay(100),
@@ -38,4 +39,6 @@ export class ProjectMetricsService {
           : EMPTY;
       }),
     );
+
+  simpleMetrics = toSignal(this._simpleMetricsObs$);
 }

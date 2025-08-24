@@ -121,21 +121,21 @@ export class MainHeaderComponent implements OnDestroy {
   currentTaskContext = toSignal(this._currentTaskContext$);
 
   private _isRouteWithSidePanel$ = this._router.events.pipe(
-    filter((event: any) => event instanceof NavigationEnd),
+    filter((event): event is NavigationEnd => event instanceof NavigationEnd),
     map((event) => true), // Always true since right-panel is now global
     startWith(true), // Always true since right-panel is now global
   );
   isRouteWithSidePanel = toSignal(this._isRouteWithSidePanel$, { initialValue: true });
 
   private _isScheduleSection$ = this._router.events.pipe(
-    filter((event: any) => event instanceof NavigationEnd),
+    filter((event): event is NavigationEnd => event instanceof NavigationEnd),
     map((event) => !!event.urlAfterRedirects.match(/(schedule)$/)),
     startWith(!!this._router.url.match(/(schedule)$/)),
   );
   isScheduleSection = toSignal(this._isScheduleSection$, { initialValue: false });
 
   private _isWorkViewPage$ = this._router.events.pipe(
-    filter((event: any) => event instanceof NavigationEnd),
+    filter((event): event is NavigationEnd => event instanceof NavigationEnd),
     map((event) => !!event.urlAfterRedirects.match(/tasks$/)),
     startWith(!!this._router.url.match(/tasks$/)),
   );

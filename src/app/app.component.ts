@@ -12,6 +12,7 @@ import {
   OnDestroy,
   ViewChild,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ChromeExtensionInterfaceService } from './core/chrome-extension-interface/chrome-extension-interface.service';
 import { ShortcutService } from './core-ui/shortcut/shortcut.service';
 import { GlobalConfigService } from './features/config/global-config.service';
@@ -84,6 +85,7 @@ import { DialogUnsplashPickerComponent } from './ui/dialog-unsplash-picker/dialo
 import { ProjectService } from './features/project/project.service';
 import { TagService } from './features/tag/tag.service';
 import { ContextMenuComponent } from './ui/context-menu/context-menu.component';
+import { WorkContextThemeCfg } from './features/work-context/work-context.model';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -189,9 +191,9 @@ export class AppComponent implements OnDestroy, AfterViewInit {
     ),
   );
 
-  isShowFocusOverlay$: Observable<boolean> = this._store.select(
-    selectIsFocusOverlayShown,
-  );
+  isShowFocusOverlay = toSignal(this._store.select(selectIsFocusOverlayShown), {
+    initialValue: false,
+  });
 
   private _subs: Subscription = new Subscription();
   private _intervalTimer?: NodeJS.Timeout;
@@ -202,7 +204,9 @@ export class AppComponent implements OnDestroy, AfterViewInit {
 
     this._checkMigrationAndInitBackups();
 
-    this._subs = this._languageService.isLangRTL.subscribe((val) => {
+    // Use effect to react to language RTL changes
+    effect(() => {
+      const val = this._languageService.isLangRTL();
       this.isRTL = val;
       document.dir = this.isRTL ? 'rtl' : 'ltr';
     });
@@ -432,53 +436,50 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   }
 
   changeBackgroundFromUnsplash(): void {
-    this.globalThemeService.isDarkTheme$.pipe(take(1)).subscribe((isDarkMode) => {
-      const contextKey = isDarkMode ? 'backgroundImageDark' : 'backgroundImageLight';
+    const dialogRef = this._matDialog.open(DialogUnsplashPickerComponent, {
+      width: '900px',
+      maxWidth: '95vw',
+    });
 
-      const dialogRef = this._matDialog.open(DialogUnsplashPickerComponent, {
-        width: '900px',
-        maxWidth: '95vw',
-        data: {
-          context: contextKey,
-        },
-      });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        // Get current work context
+        this.workContextService.activeWorkContext$
+          .pipe(take(1))
+          .subscribe((activeContext) => {
+            if (!activeContext) {
+              this._snackService.open({
+                type: 'ERROR',
+                msg: 'No active work context',
+              });
+              return;
+            }
 
-      dialogRef.afterClosed().subscribe((result) => {
-        if (result) {
-          // Get current work context
-          this.workContextService.activeWorkContext$
-            .pipe(take(1))
-            .subscribe((activeContext) => {
-              if (!activeContext) {
-                this._snackService.open({
-                  type: 'ERROR',
-                  msg: 'No active work context',
-                });
-                return;
-              }
+            // Extract the URL from the result object
+            const backgroundUrl = result.url || result;
+            const isDarkMode = this._globalThemeService.isDarkTheme();
+            const contextKey: keyof WorkContextThemeCfg = isDarkMode
+              ? 'backgroundImageDark'
+              : 'backgroundImageLight';
 
-              // Extract the URL from the result object
-              const backgroundUrl = result.url || result;
-
-              // Update the theme based on context type
-              if (activeContext.type === 'PROJECT') {
-                this._projectService.update(activeContext.id, {
-                  theme: {
-                    ...activeContext.theme,
-                    [contextKey]: backgroundUrl,
-                  },
-                });
-              } else if (activeContext.type === 'TAG') {
-                this._tagService.updateTag(activeContext.id, {
-                  theme: {
-                    ...activeContext.theme,
-                    [contextKey]: backgroundUrl,
-                  },
-                });
-              }
-            });
-        }
-      });
+            // Update the theme based on context type
+            if (activeContext.type === 'PROJECT') {
+              this._projectService.update(activeContext.id, {
+                theme: {
+                  ...activeContext.theme,
+                  [contextKey]: backgroundUrl,
+                },
+              });
+            } else if (activeContext.type === 'TAG') {
+              this._tagService.updateTag(activeContext.id, {
+                theme: {
+                  ...activeContext.theme,
+                  [contextKey]: backgroundUrl,
+                },
+              });
+            }
+          });
+      }
     });
   }
 

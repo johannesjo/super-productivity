@@ -350,6 +350,8 @@ git clone https://github.com/johannesjo/super-productivity.git
 cd super-productivity
 npm i -g @angular/cli
 npm i
+# prepare the env file once
+npm run env
 ```
 
 **Run the dev server**

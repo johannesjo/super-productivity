@@ -1,4 +1,4 @@
-import { Injectable, inject, effect } from '@angular/core';
+import { Injectable, inject, effect, signal } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { DateAdapter } from '@angular/material/core';
 import {
@@ -7,7 +7,6 @@ import {
   LanguageCodeMomentMap,
   RTL_LANGUAGES,
 } from '../../app.constants';
-import { BehaviorSubject, Observable } from 'rxjs';
 import { GlobalConfigService } from 'src/app/features/config/global-config.service';
 import { DEFAULT_GLOBAL_CONFIG } from 'src/app/features/config/default-global-config.const';
 import { Log } from '../log';
@@ -19,8 +18,8 @@ export class LanguageService {
   private _globalConfigService = inject(GlobalConfigService);
 
   // I think a better approach is to add a field in every [lang].json file to specify the direction of the language
-  private isRTL: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  isLangRTL: Observable<boolean> = this.isRTL.asObservable();
+  private readonly _isRTL = signal<boolean>(false);
+  readonly isLangRTL = this._isRTL.asReadonly();
 
   // Temporary solution for knowing the rtl languages
   private readonly rtlLanguages: LanguageCode[] = RTL_LANGUAGES;
@@ -72,13 +71,13 @@ export class LanguageService {
   private _setFn(lng: LanguageCode): void {
     const momLng = LanguageCodeMomentMap[lng];
 
-    this.isRTL.next(this._isRTL(lng));
+    this._isRTL.set(this._checkIsRTL(lng));
     this._translateService.use(lng);
 
     this._dateAdapter.setLocale(momLng);
   }
 
-  private _isRTL(lng: LanguageCode): boolean {
+  private _checkIsRTL(lng: LanguageCode): boolean {
     return this.rtlLanguages.indexOf(lng) !== -1;
   }
 }

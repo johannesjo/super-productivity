@@ -1,3 +1,78 @@
+## [14.3.4](https://github.com/johannesjo/super-productivity/compare/v14.3.3...v14.3.4) (2025-08-22)
+
+### Bug Fixes
+
+- avoid re-fetching issue data when tracking time ([6f590e2](https://github.com/johannesjo/super-productivity/commit/6f590e208f1bf3f0da4dde693526df2d8152886d))
+- copy to clipboard ([0a704fa](https://github.com/johannesjo/super-productivity/commit/0a704fa74d1e61f331e93996c0dbead4bccd63ce)), closes [#4966](https://github.com/johannesjo/super-productivity/issues/4966)
+- don't capitalize search results [#4967](https://github.com/johannesjo/super-productivity/issues/4967) ([713e784](https://github.com/johannesjo/super-productivity/commit/713e784753723c3bba24acc3a7980f7058d1761a))
+- don't log credentials ([854ced4](https://github.com/johannesjo/super-productivity/commit/854ced4b511e6f03a258cbff6c616f7e908afce5))
+- don't log credentials ([d1a75ec](https://github.com/johannesjo/super-productivity/commit/d1a75ec627cd3c4342ecccdd6f59705f910c8602))
+- github url formatting ([497cde5](https://github.com/johannesjo/super-productivity/commit/497cde51fbeb7bb4470a9eae63938cb89d48a7ed)), closes [#4913](https://github.com/johannesjo/super-productivity/issues/4913)
+- improve requests [#4967](https://github.com/johannesjo/super-productivity/issues/4967) ([b514321](https://github.com/johannesjo/super-productivity/commit/b514321f14749d160f61f0e1262feeb92e902b3f))
+- jira failed to poll [#4976](https://github.com/johannesjo/super-productivity/issues/4976) ([c24a97c](https://github.com/johannesjo/super-productivity/commit/c24a97cdc35411f92a6cfa2467535d160700eda8))
+- make schedule short syntax more reliable ([cc0b80e](https://github.com/johannesjo/super-productivity/commit/cc0b80ee0319c9a896c42047d92b3463a6e498dc))
+- make tracking reminder counter work again ([1418c84](https://github.com/johannesjo/super-productivity/commit/1418c841f4ece9f4a0ff45414f74cf5c48705137))
+- pwa message overlaps popout nav ([eef46f1](https://github.com/johannesjo/super-productivity/commit/eef46f160f5e37aecb9d2690aa4c1c2b7534ccae)), closes [#4968](https://github.com/johannesjo/super-productivity/issues/4968)
+
+## [14.3.3](https://github.com/johannesjo/super-productivity/compare/v14.3.2...v14.3.3) (2025-08-15)
+
+### Bug Fixes
+
+- add fix for safari ([294cedb](https://github.com/johannesjo/super-productivity/commit/294cedb91f9f3aaccc1071fef3e0dd87f867f42a)), closes [#4959](https://github.com/johannesjo/super-productivity/issues/4959)
+- allow vertical scroll for new pan handler ([ea4a0af](https://github.com/johannesjo/super-productivity/commit/ea4a0afcece1efe50cb0fda377ee4f12f493478a))
+- **animations:** disable canvas-confetti when "Disable All Animations" is enabled ([6dc7cfb](https://github.com/johannesjo/super-productivity/commit/6dc7cfb93276f05b4dd5f26be4c16cafff02dd1a))
+- **archive:** ensure archive operation completes before app shutdown ([265ca3a](https://github.com/johannesjo/super-productivity/commit/265ca3addc31e450cbfba19523be0b142237455f)), closes [#4884](https://github.com/johannesjo/super-productivity/issues/4884)
+- build error ([d371e8f](https://github.com/johannesjo/super-productivity/commit/d371e8f6157fc294810f3b839207b2fc10fc798f))
+- **calDav:** etag hashing ([d79a0c0](https://github.com/johannesjo/super-productivity/commit/d79a0c02583962709a8a166bbfddaf56ceea1522))
+- center badge text [#4924](https://github.com/johannesjo/super-productivity/issues/4924) ([71c8322](https://github.com/johannesjo/super-productivity/commit/71c83228cf6f50b75819f349061a9b4f1db8b849))
+- **create-task-placeholder:** adjust padding and visibility for small widths ([41c2c0d](https://github.com/johannesjo/super-productivity/commit/41c2c0dc53a639b51ffa673b2fe4d70dae518896))
+- dialog confirm error ([e8f1498](https://github.com/johannesjo/super-productivity/commit/e8f1498f108daaf4af63f884784cf991c71aa337))
+- **docker:** simplify env handling for Docker builds ([75afe06](https://github.com/johannesjo/super-productivity/commit/75afe06b6944a2843188c03053055c2402d51445))
+- error when navigating to settings ([7957660](https://github.com/johannesjo/super-productivity/commit/79576607a77558041d4f81931cbbbed78d32381f))
+- github api requests not working anymore ([76b439a](https://github.com/johannesjo/super-productivity/commit/76b439adfd21412c520262768fc3fb92b045fc45))
+- migrate constructor injection to inject() function for Angular 20 ([aa9e32f](https://github.com/johannesjo/super-productivity/commit/aa9e32f5fe1d3b45f8969e6f04abb5a915ef31a4))
+- new pan directive not working as expected ([d67c45a](https://github.com/johannesjo/super-productivity/commit/d67c45a6cf46d5b6ac19bc770b815539ee3e1c6a))
+- remove progressbar on task complete in electron ([e78b340](https://github.com/johannesjo/super-productivity/commit/e78b340fb11332cc724800b7e9247c269b5e48a8))
+- resolve TranslateFakeLoader and test assertion issues ([119516e](https://github.com/johannesjo/super-productivity/commit/119516ee4e6b21ca5e54a0e5d1894ace5576dfd8))
+- resolve TypeScript error in electron debug.ts ([fbc45de](https://github.com/johannesjo/super-productivity/commit/fbc45de335a5e9f18ce32fa50518c16733351f9b))
+- **schedule:** fixed task placeholder closing issue when selecting task suggestion via mouse click ([ddad626](https://github.com/johannesjo/super-productivity/commit/ddad626fcaa54c1018bac726c5fe5bb10757c1c9))
+- typing issues ([2078e9e](https://github.com/johannesjo/super-productivity/commit/2078e9e770092c81e363b0916720f5001dfc4ec2))
+- typing issues 2 ([c9791e8](https://github.com/johannesjo/super-productivity/commit/c9791e8c29377c99c90ada8965985dda6efbbf4c))
+- unknown validity error [#4897](https://github.com/johannesjo/super-productivity/issues/4897) ([ca35d8f](https://github.com/johannesjo/super-productivity/commit/ca35d8f29f396361143ded80c3382531fd77eb17))
+- update test.ts to use provideZonelessChangeDetection ([f035018](https://github.com/johannesjo/super-productivity/commit/f0350186e5ef62a39ea6395894bcb5bac1237353))
+
+### Features
+
+- add .nvmrc file with Node.js v22.18.0 ([e005ceb](https://github.com/johannesjo/super-productivity/commit/e005ceb8b85827afa5d2cc3944453644b0a6a99a))
+- add everforest theme ([279bc6c](https://github.com/johannesjo/super-productivity/commit/279bc6ca29a43dd4c4097b7a71a6954ebdfcdd56))
+- **charts:** implement lazy loading for Chart.js to reduce initial bundle size ([5dfbbd8](https://github.com/johannesjo/super-productivity/commit/5dfbbd80be0455082f36fa30460cfd9c848406af))
+- complete Angular 20 upgrade and fixes ([b78d0ca](https://github.com/johannesjo/super-productivity/commit/b78d0cad841a6ba39745d8695aab5c8e423b9d7c))
+- **create-task-placeholder:** integrate SnackService for error notifications and improve timeout handling ([9df60c8](https://github.com/johannesjo/super-productivity/commit/9df60c80dc98c48b1d8c853a737f1b2efacade75))
+- implement progressBarMode none for electron ([0a64079](https://github.com/johannesjo/super-productivity/commit/0a64079de7923f1012f53eb631b9605087cb24f8))
+- implement task selection component to enhance create task placeholder in schedule view ([8e2949f](https://github.com/johannesjo/super-productivity/commit/8e2949f7888fbe38392ddb412972e2877cb4b330))
+- import more data form CalDAV and display all supported fields in details ([cdff96d](https://github.com/johannesjo/super-productivity/commit/cdff96dcf82ac0cd5d0d55eef28bc5b7ef3b2084))
+- improve context menu and limit to certain containers only ([9af9910](https://github.com/johannesjo/super-productivity/commit/9af991080ce3ae29e3f82e0a7bdd5f1c4b954bd2))
+- improve styling ([37e9b28](https://github.com/johannesjo/super-productivity/commit/37e9b28bf8c989eec8ba979e2b938f4efdf99284))
+- make mobile side nav a little smaller ([ba6017d](https://github.com/johannesjo/super-productivity/commit/ba6017df1284568fce4916b8004c5daf4108e9e1))
+- make unsplash utm stuff work ([1bc9123](https://github.com/johannesjo/super-productivity/commit/1bc912375a5ab4a6ffc79d78184969af618e6ac8))
+- migrate to Angular 20 and update all dependencies ([364dd8a](https://github.com/johannesjo/super-productivity/commit/364dd8af95c45305de5f1b43e45fe14f94079c43))
+- prepare for Angular 20 upgrade ([543c175](https://github.com/johannesjo/super-productivity/commit/543c175a503f2cdc6fd56a6d415005a91a7556fe))
+- replace hammerjs with custom swipe and pan directives ([973e17a](https://github.com/johannesjo/super-productivity/commit/973e17afc2c1eefb6dbe3a042bf88e341b6135bf))
+- replace helpful-decorators and thus lodash with custom implementation to save a lot of space ([4b05f21](https://github.com/johannesjo/super-productivity/commit/4b05f2128565b8e6f26bca83ed3ebb9df84af31b))
+- **task:** improve swipe to action ([1c29176](https://github.com/johannesjo/super-productivity/commit/1c29176f22e39c6891229c36a06e71978f372a1c))
+- **unsplash:** disable UI feature when API key not available ([c0fd0c4](https://github.com/johannesjo/super-productivity/commit/c0fd0c4751ce12870eb8a8b6f60f5162988a2e5d))
+- update Angular to v20.1.6 ([4987007](https://github.com/johannesjo/super-productivity/commit/4987007009a03e79bebc9e29276b848b055f08a2))
+- update NgRx to v20 ([b91edd6](https://github.com/johannesjo/super-productivity/commit/b91edd6adaaf403f7385cb98850c97f7d64f47ec))
+
+### Performance Improvements
+
+- enable critical CSS inlining for faster initial paint ([6bed63b](https://github.com/johannesjo/super-productivity/commit/6bed63b52d013155c784e12e45bcde709c20d96d))
+
+### BREAKING CHANGES
+
+- Requires Node.js v20.19+ or v22.12+
+- CreateTaskPlaceholderComponent now uses SelectTaskMinimalComponent
+
 ## [14.3.2](https://github.com/johannesjo/super-productivity/compare/v14.3.1...v14.3.2) (2025-08-08)
 
 ## [14.3.1](https://github.com/johannesjo/super-productivity/compare/v14.3.0...v14.3.1) (2025-08-08)

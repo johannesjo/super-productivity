@@ -1,14 +1,13 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ChartConfiguration, ChartType } from 'chart.js';
 import { MetricService } from './metric.service';
-import { Observable } from 'rxjs';
-import { LineChartData } from './metric.model';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { T } from '../../t.const';
 import { ProjectMetricsService } from './project-metrics.service';
 import { WorkContextService } from '../work-context/work-context.service';
 import { LazyChartComponent } from './lazy-chart/lazy-chart.component';
-import { AsyncPipe, DecimalPipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { MsToStringPipe } from '../../ui/duration/ms-to-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -18,7 +17,7 @@ import { TranslatePipe } from '@ngx-translate/core';
   styleUrls: ['./metric.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeAnimation],
-  imports: [LazyChartComponent, AsyncPipe, DecimalPipe, MsToStringPipe, TranslatePipe],
+  imports: [LazyChartComponent, DecimalPipe, MsToStringPipe, TranslatePipe],
 })
 export class MetricComponent {
   workContextService = inject(WorkContextService);
@@ -27,14 +26,15 @@ export class MetricComponent {
 
   T: typeof T = T;
 
-  productivityHappiness$: Observable<LineChartData> =
-    this.metricService.getProductivityHappinessChartData$();
+  productivityHappiness = toSignal(
+    this.metricService.getProductivityHappinessChartData$(),
+  );
 
-  simpleClickCounterData$: Observable<LineChartData> =
-    this.metricService.getSimpleClickCounterMetrics$();
+  simpleClickCounterData = toSignal(this.metricService.getSimpleClickCounterMetrics$());
 
-  simpleCounterStopWatchData$: Observable<LineChartData> =
-    this.metricService.getSimpleCounterStopwatchMetrics$();
+  simpleCounterStopWatchData = toSignal(
+    this.metricService.getSimpleCounterStopwatchMetrics$(),
+  );
 
   pieChartOptions: ChartConfiguration<'pie', number[], string>['options'] = {
     scales: {

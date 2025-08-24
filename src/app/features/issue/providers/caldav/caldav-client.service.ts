@@ -8,7 +8,7 @@ import Calendar from 'cdav-library/models/calendar';
 import ICAL from 'ical.js';
 
 import { from, Observable, throwError } from 'rxjs';
-import { CaldavIssue } from './caldav-issue.model';
+import { CaldavIssue, CaldavIssueStatus } from './caldav-issue.model';
 import { CALDAV_TYPE, ISSUE_PROVIDER_HUMANIZED } from '../../issue.const';
 import { SearchResultItem } from '../../issue.model';
 import { SnackService } from '../../../../core/snack/snack.service';
@@ -132,25 +132,25 @@ export class CaldavClientService {
       throw new Error('No todo found for task');
     }
 
-    let categories: string[] = [];
-    for (const cats of todo.getAllProperties('categories')) {
-      if (cats) {
-        categories = categories.concat(cats.getValues());
-      }
-    }
-
-    const completed = todo.getFirstPropertyValue('completed');
+    const categoriesProperty = todo.getAllProperties('categories')[0];
+    const categories: string[] = categoriesProperty?.getValues() || [];
 
     return {
       id: todo.getFirstPropertyValue('uid') as string,
-      completed: !!completed,
+      completed: !!todo.getFirstPropertyValue('completed'),
       item_url: task.url,
       summary: (todo.getFirstPropertyValue('summary') as string) || '',
-      due: (todo.getFirstPropertyValue('due') as string) || '',
-      start: (todo.getFirstPropertyValue('dtstart') as string) || '',
+      start: (todo.getFirstPropertyValue('dtstart') as ICAL.Time)?.toJSDate().getTime(),
+      due: (todo.getFirstPropertyValue('due') as ICAL.Time)?.toJSDate().getTime(),
+      note: (todo.getFirstPropertyValue('description') as string) || undefined,
+      status: (todo.getFirstPropertyValue('status') as CaldavIssueStatus) || undefined,
+      priority: +(todo.getFirstPropertyValue('priority') as string) || undefined,
+      percent_complete:
+        +(todo.getFirstPropertyValue('percent-complete') as string) || undefined,
+      location: todo.getFirstPropertyValue('location') as string,
       labels: categories,
-      note: (todo.getFirstPropertyValue('description') as string) || '',
       etag_hash: this._hashEtag(task.etag),
+      related_to: (todo.getFirstPropertyValue('related-to') as string) || undefined,
     };
   }
 
@@ -161,7 +161,7 @@ export class CaldavClientService {
     if (etag.length === 0) {
       return hash;
     }
-    for (i = 0; i < this.length; i++) {
+    for (i = 0; i < etag.length; i++) {
       chr = etag.charCodeAt(i);
       hash = (hash << 5) - hash + chr; //eslint-disable-line no-bitwise
       // Convert to 32bit integer

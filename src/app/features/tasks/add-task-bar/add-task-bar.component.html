@@ -76,7 +76,7 @@
         }
       </button>
 
-      @if (isSearchIssueProvidersAvailable$ | async) {
+      @if (isSearchIssueProvidersAvailable()) {
         <button
           (click)="isSearchIssueProviders.set(!isSearchIssueProviders())"
           [matTooltip]="'Toggle searching issue providers'"
@@ -92,7 +92,7 @@
           }
         </button>
       }
-      @if (isAddToBacklogAvailable$ | async) {
+      @if (isAddToBacklogAvailable()) {
         <button
           (click)="isAddToBacklog.set(!isAddToBacklog())"
           [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOGGLE_ADD_TO_BACKLOG_TODAY | translate"

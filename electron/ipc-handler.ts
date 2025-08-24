@@ -1,6 +1,14 @@
 // FRONTEND EVENTS
 // ---------------
-import { app, dialog, globalShortcut, ipcMain, IpcMainEvent, shell } from 'electron';
+import {
+  app,
+  dialog,
+  globalShortcut,
+  ipcMain,
+  IpcMainEvent,
+  ProgressBarOptions,
+  shell,
+} from 'electron';
 import { IPC } from './shared-with-frontend/ipc-events.const';
 import { lockscreen } from './lockscreen';
 import { errorHandlerWithFrontendInform } from './error-handler-with-frontend-inform';
@@ -83,10 +91,16 @@ export const initIpcInterfaces = (): void => {
     }
   });
 
-  ipcMain.on(IPC.SET_PROGRESS_BAR, (ev, { progress, mode }) => {
+  ipcMain.on(IPC.SET_PROGRESS_BAR, (ev, { progress, progressBarMode }) => {
     const mainWin = getWin();
     if (mainWin) {
-      mainWin.setProgressBar(Math.min(Math.max(progress, 0), 1), { mode });
+      if (progressBarMode === 'none') {
+        mainWin.setProgressBar(-1);
+      } else {
+        mainWin.setProgressBar(Math.min(Math.max(progress, 0), 1), {
+          mode: progressBarMode as ProgressBarOptions['mode'],
+        });
+      }
     }
   });
 

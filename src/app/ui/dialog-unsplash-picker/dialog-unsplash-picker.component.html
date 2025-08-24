@@ -40,7 +40,7 @@
         {{ T.DIALOG_UNSPLASH_PICKER.BY | translate }}
         <a
           *ngIf="photo.user.links?.html"
-          [href]="photo.user.links?.html || '#'"
+          [href]="getPhotographerUrl(photo)"
           target="_blank"
           (click)="$event.stopPropagation()"
           style="color: inherit"

@@ -5,7 +5,7 @@ import {
   BrowserDynamicTestingModule,
   platformBrowserDynamicTesting,
 } from '@angular/platform-browser-dynamic/testing';
-import { provideExperimentalZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
 // Type definitions for window.ea are in ./app/core/window-ea.d.ts
 
 beforeAll(() => {
@@ -34,15 +34,15 @@ TestBed.configureTestingModule = function (
   // Add zoneless change detection provider if not already present
   const hasZonelessProvider = moduleDef.providers.some(
     (p: unknown) =>
-      p === provideExperimentalZonelessChangeDetection ||
+      p === provideZonelessChangeDetection ||
       (p &&
         typeof p === 'object' &&
         'provide' in p &&
-        p.provide === provideExperimentalZonelessChangeDetection),
+        p.provide === provideZonelessChangeDetection),
   );
 
   if (!hasZonelessProvider) {
-    moduleDef.providers.push(provideExperimentalZonelessChangeDetection());
+    moduleDef.providers.push(provideZonelessChangeDetection());
   }
 
   return originalConfigureTestingModule.call(this, moduleDef);

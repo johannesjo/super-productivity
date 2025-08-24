@@ -69,6 +69,22 @@ export const autoFixTypiaErrors = (
         // Fix for issue #4593: simpleCounter countOnDay null value
         setValueByPath(data, keys, 0);
         PFLog.err(`Fixed: ${path} from null to 0 for simpleCounter`);
+      } else if (
+        keys[0] === 'taskRepeatCfg' &&
+        keys[1] === 'entities' &&
+        keys.length >= 4 &&
+        keys[3] === 'order' &&
+        error.expected.includes('number') &&
+        value === null
+      ) {
+        // Fix for issue #4897: taskRepeatCfg order null value
+        // Set order based on position in ids array or default to 0
+        const entityId = keys[2] as string;
+        const ids = (data.taskRepeatCfg?.ids as string[]) || [];
+        const orderIndex = ids.indexOf(entityId);
+        const orderValue = orderIndex >= 0 ? orderIndex : 0;
+        setValueByPath(data, keys, orderValue);
+        PFLog.err(`Fixed: ${path} from null to ${orderValue} for taskRepeatCfg order`);
       }
     }
   });

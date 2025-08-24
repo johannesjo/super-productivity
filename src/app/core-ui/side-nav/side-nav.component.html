@@ -54,7 +54,7 @@
   }
 </section>
 
-@if (nonHiddenProjects$ | async; as projectList) {
+@if (nonHiddenProjects(); as projectList) {
   <section class="projects tour-projects">
     <div class="g-multi-btn-wrapper e2e-projects-btn">
       <button
@@ -62,7 +62,7 @@
         #projectExpandBtn
         (click)="toggleExpandProjects()"
         (keydown)="toggleExpandProjectsLeftRight($event)"
-        [class.isExpanded]="isProjectsExpanded"
+        [class.isExpanded]="isProjectsExpanded()"
         class="expand-btn"
         mat-menu-item
       >
@@ -134,19 +134,19 @@
         ></side-nav-item>
       }
     </div>
-    @if (!projectList.length && isProjectsExpanded) {
+    @if (!projectList.length && isProjectsExpanded()) {
       <div class="no-tags-info">{{ T.MH.NO_PROJECT_INFO | translate }}</div>
     }
   </section>
 }
-@if (tagList$ | async; as tagList) {
+@if (tagList(); as tagList) {
   <section class="tags">
     <button
       #menuEntry
       #tagExpandBtn
       (click)="toggleExpandTags()"
       (keydown)="toggleExpandTagsLeftRight($event)"
-      [class.isExpanded]="isTagsExpanded"
+      [class.isExpanded]="isTagsExpanded()"
       class="expand-btn"
       mat-menu-item
     >
@@ -172,7 +172,7 @@
         ></side-nav-item>
       }
     </div>
-    @if (!tagList.length && isTagsExpanded) {
+    @if (!tagList.length && isTagsExpanded()) {
       <div class="no-tags-info">{{ T.MH.NO_TAG_INFO | translate }}</div>
     }
     <!--  <button (click)="addTag()"-->

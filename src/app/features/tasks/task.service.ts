@@ -588,16 +588,20 @@ export class TaskService {
     }
   }
 
-  addSubTaskTo(parentId: string): void {
+  addSubTaskTo(parentId: string, additional: Partial<Task> = {}): string {
+    const task = this.createNewTaskWithDefaults({
+      title: additional.title || '',
+      additional: { dueDay: additional.dueDay || undefined, ...additional },
+    });
+
     this._store.dispatch(
       addSubTask({
-        task: this.createNewTaskWithDefaults({
-          title: '',
-          additional: { dueDay: undefined },
-        }),
+        task,
         parentId,
       }),
     );
+
+    return task.id;
   }
 
   addTimeSpent(
@@ -649,18 +653,33 @@ export class TaskService {
   }
 
   async moveToArchive(tasks: TaskWithSubTasks | TaskWithSubTasks[]): Promise<void> {
+    // Add comprehensive validation and logging
+    if (!tasks) {
+      console.error('[TaskService] moveToArchive called with null/undefined tasks');
+      return;
+    }
+
     if (!Array.isArray(tasks)) {
+      console.warn('[TaskService] moveToArchive converting single task to array', tasks);
       tasks = [tasks];
+    }
+
+    // Double-check it's an array after conversion
+    if (!Array.isArray(tasks)) {
+      console.error('[TaskService] Failed to convert tasks to array:', tasks);
+      throw new Error('moveToArchive: tasks could not be converted to array');
     }
 
     TaskLog.log('[TaskService] moveToArchive called with:', {
       count: tasks.length,
-      taskIds: tasks.map((t) => t.id),
+      taskIds: tasks.map((t) => t?.id || 'undefined'),
+      tasksType: typeof tasks,
+      isArray: Array.isArray(tasks),
     });
 
     // NOTE: we only update real parents since otherwise we move sub-tasks without their parent into the archive
-    const subTasks = tasks.filter((t) => t.parentId);
-    const parentTasks = tasks.filter((t) => !t.parentId);
+    const subTasks = tasks.filter((t) => t?.parentId);
+    const parentTasks = tasks.filter((t) => t && !t.parentId);
 
     TaskLog.log('[TaskService] Filtered tasks:', {
       parentTasks: parentTasks.map((t) => t.id),

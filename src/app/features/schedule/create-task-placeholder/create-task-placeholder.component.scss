@@ -4,19 +4,22 @@
   border: 2px dashed var(--c-accent);
   border-radius: 8px;
   position: relative;
-  grid-row: 149 / span 2;
-  grid-column: 4 / span 2;
-  //box-shadow: var(--whiteframe-shadow-3dp);
   pointer-events: none;
   z-index: 33;
   opacity: 0.2;
-  // NOTE: to be consistent with scheduled event
   margin-bottom: 6px;
+  display: block;
+  container-type: inline-size;
 
   color: var(--text-color);
   background: var(--bg-lightest);
 
-  &.isEditMode {
+  &:hover:not(.edit-mode) {
+    opacity: 0.6;
+    cursor: pointer;
+  }
+
+  &.edit-mode {
     pointer-events: auto;
     opacity: 1;
     box-shadow: var(--whiteframe-shadow-4dp);
@@ -65,18 +68,98 @@
     }
   }
 
-  textarea {
-    padding: 8px;
-    resize: none;
-    border: 0;
-    outline: none;
+  .task-input-container {
     position: absolute;
-    background: transparent;
     inset: 0;
-    color: inherit;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow: hidden;
 
     @include mq(xs, max) {
+      padding: 4px;
+      gap: 4px;
+    }
+
+    // Remove padding when width is very small (< 150px)
+    @container (max-width: 135px) {
+      padding: 2px;
+      gap: 2px;
+    }
+
+    select-task-minimal {
+      flex: 1;
+      min-height: 0;
+    }
+
+    .task-type-indicator {
+      display: flex;
+      align-items: center;
+      gap: 4px;
       font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 12px;
+      font-weight: 500;
+
+      @include mq(xs, max) {
+        font-size: 9px;
+        padding: 1px 4px;
+      }
+
+      &.create {
+        background-color: rgba(var(--c-accent-rgb), 0.15);
+        color: var(--c-accent);
+      }
+
+      &.select {
+        background-color: rgba(var(--c-primary-rgb), 0.15);
+        color: var(--c-primary);
+      }
+
+      mat-icon {
+        font-size: 12px;
+        width: 12px;
+        height: 12px;
+
+        @include mq(xs, max) {
+          font-size: 10px;
+          width: 10px;
+          height: 10px;
+        }
+      }
+
+      span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 120px;
+
+        @include mq(xs, max) {
+          max-width: 80px;
+        }
+      }
+    }
+
+    .mode-hint {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      text-align: center;
+      line-height: 1;
+      opacity: 0.8;
+      margin-top: auto;
+      margin-bottom: -5px;
+      border-top: 1px dashed var(--extra-border-color);
+      padding-top: 3px;
+
+      @include mq(xs, max) {
+        font-size: 11px;
+      }
+
+      // Hide hint text when width is very small (< 150px)
+      @container (max-width: 135px) {
+        display: none;
+      }
     }
   }
 }
@@ -89,4 +172,24 @@
   text-align: center;
   font-weight: bold;
   font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+
+  @include mq(xs, max) {
+    font-size: 12px;
+  }
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+
+    @include mq(xs, max) {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+    }
+  }
 }

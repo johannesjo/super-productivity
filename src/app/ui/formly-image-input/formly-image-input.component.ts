@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FieldType } from '@ngx-formly/material';
 import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
 import { MatInput } from '@angular/material/input';
@@ -7,10 +7,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import {
-  DialogUnsplashPickerComponent,
-  DialogUnsplashPickerData,
-} from '../dialog-unsplash-picker/dialog-unsplash-picker.component';
+import { DialogUnsplashPickerComponent } from '../dialog-unsplash-picker/dialog-unsplash-picker.component';
 import { UnsplashService } from '../../core/unsplash/unsplash.service';
 
 @Component({
@@ -30,12 +27,8 @@ import { UnsplashService } from '../../core/unsplash/unsplash.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FormlyImageInputComponent extends FieldType<FormlyFieldConfig> {
-  constructor(
-    private _dialog: MatDialog,
-    private _unsplashService: UnsplashService,
-  ) {
-    super();
-  }
+  private _dialog = inject(MatDialog);
+  private _unsplashService = inject(UnsplashService);
 
   get isUnsplashAvailable(): boolean {
     return this._unsplashService.isAvailable();
@@ -46,14 +39,10 @@ export class FormlyImageInputComponent extends FieldType<FormlyFieldConfig> {
       console.warn('Unsplash service is not available - no API key configured');
       return;
     }
-    const dialogData: DialogUnsplashPickerData = {
-      context: this.field.key as string, // This will be 'backgroundImageDark' or 'backgroundImageLight'
-    };
 
     const dialogRef = this._dialog.open(DialogUnsplashPickerComponent, {
       width: '900px',
       maxWidth: '95vw',
-      data: dialogData,
     });
 
     dialogRef.afterClosed().subscribe((result: string | { url: string } | null) => {

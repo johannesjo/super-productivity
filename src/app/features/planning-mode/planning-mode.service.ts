@@ -1,5 +1,6 @@
-import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, merge, Observable, of, Subject } from 'rxjs';
+import { inject, Injectable, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { merge, Observable, of, Subject } from 'rxjs';
 import {
   distinctUntilChanged,
   filter,
@@ -21,8 +22,7 @@ export class PlanningModeService {
   private _taskService = inject(TaskService);
   private _store = inject(Store);
 
-  private _iPlanningModeEndedUser$: BehaviorSubject<boolean> =
-    new BehaviorSubject<boolean>(false);
+  private _isPlanningModeEndedByUser = signal<boolean>(false);
   private _manualTriggerCheck$ = new Subject<unknown>();
   private _isCurrentTask$: Observable<unknown> = this._taskService.currentTaskId$.pipe(
     distinctUntilChanged(),
@@ -38,7 +38,7 @@ export class PlanningModeService {
   isPlanningMode$: Observable<boolean> = this._triggerCheck$.pipe(
     withLatestFrom(
       this._workContextService.isHasTasksToWorkOn$,
-      this._iPlanningModeEndedUser$,
+      toObservable(this._isPlanningModeEndedByUser),
       this._store.select(selectOverdueTasksWithSubTasks),
     ),
 
@@ -56,12 +56,12 @@ export class PlanningModeService {
   }
 
   leavePlanningMode(): void {
-    this._iPlanningModeEndedUser$.next(true);
+    this._isPlanningModeEndedByUser.set(true);
     this.reCheckPlanningMode();
   }
 
   enterPlanningMode(): void {
-    this._iPlanningModeEndedUser$.next(false);
+    this._isPlanningModeEndedByUser.set(false);
     this.reCheckPlanningMode();
   }
 

@@ -129,13 +129,11 @@ export class TrackingReminderService {
       return;
     }
 
-    const durationStr = msToString(duration);
     this._bannerService.open({
       id: BannerId.StartTrackingReminder,
       ico: 'timer',
-      msg: this._translateService.instant(T.F.TIME_TRACKING.B_TTR.MSG, {
-        time: durationStr,
-      }),
+      msg: T.F.TIME_TRACKING.B_TTR.MSG_WITHOUT_TIME,
+      timer$: this.remindCounter$,
       action: {
         label: T.F.TIME_TRACKING.B_TTR.ADD_TO_TASK,
         fn: () => this._openDialog(),
@@ -156,6 +154,7 @@ export class TrackingReminderService {
         // Show desktop notification if enabled
         if (cfg.timeTracking.isTrackingReminderNotify) {
           // Instead of showing directly, queue it through the throttled subject
+          const durationStr = msToString(duration);
           this._throttledNotificationTrigger$.next(durationStr);
         }
       });

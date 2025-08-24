@@ -145,10 +145,10 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   // Parent task data
   parentTaskData = toSignal(
     this._task$.pipe(
-      switchMap((task) =>
-        task.parentId
-          ? this.taskService.getByIdWithSubTaskData$(task.parentId)
-          : of(null),
+      map((task) => task.parentId),
+      distinctUntilChanged(),
+      switchMap((parentId) =>
+        parentId ? this.taskService.getByIdWithSubTaskData$(parentId) : of(null),
       ),
     ),
     { initialValue: null },
@@ -156,9 +156,11 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
 
   // Repeat config label
   private _repeatCfg$ = this._task$.pipe(
-    switchMap((task) =>
-      task.repeatCfgId
-        ? this._taskRepeatCfgService.getTaskRepeatCfgByIdAllowUndefined$(task.repeatCfgId)
+    map((task) => task.repeatCfgId),
+    distinctUntilChanged(),
+    switchMap((repeatCfgId) =>
+      repeatCfgId
+        ? this._taskRepeatCfgService.getTaskRepeatCfgByIdAllowUndefined$(repeatCfgId)
         : of(null),
     ),
   );
@@ -181,9 +183,14 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   // Issue data reactive loading (replacing async effect)
   private _issueData$ = this._task$.pipe(
     takeUntilDestroyed(this._destroyRef),
-    switchMap((task) => {
-      const { issueId, issueType, issueProviderId } = task;
-
+    // Only react to changes in issue-related properties
+    map((task) => ({
+      issueId: task.issueId,
+      issueType: task.issueType,
+      issueProviderId: task.issueProviderId,
+    })),
+    distinctUntilChanged((prev, curr) => prev.issueId === curr.issueId),
+    switchMap(({ issueId, issueType, issueProviderId }) => {
       if (!issueId || !issueType || !issueProviderId) {
         return of(null);
       }
@@ -306,10 +313,17 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   private _jiraImageHeaders = IS_ELECTRON
     ? this._task$
         .pipe(
-          map((task) =>
-            task.issueType === JIRA_TYPE && task.issueProviderId
-              ? task.issueProviderId
-              : null,
+          map((task) => ({
+            issueType: task.issueType,
+            issueProviderId: task.issueProviderId,
+          })),
+          distinctUntilChanged(
+            (prev, curr) =>
+              prev.issueType === curr.issueType &&
+              prev.issueProviderId === curr.issueProviderId,
+          ),
+          map(({ issueType, issueProviderId }) =>
+            issueType === JIRA_TYPE && issueProviderId ? issueProviderId : null,
           ),
           distinctUntilChanged(),
           switchMap((issueProviderId) =>

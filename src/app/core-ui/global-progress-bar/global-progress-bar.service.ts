@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, EMPTY, Observable, of, timer } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { EMPTY, Observable, of, timer } from 'rxjs';
 import {
   delay,
   distinctUntilChanged,
@@ -16,7 +17,12 @@ const DELAY = 100;
 
 @Injectable({ providedIn: 'root' })
 export class GlobalProgressBarService {
-  nrOfRequests$: BehaviorSubject<number> = new BehaviorSubject(0);
+  // Use signals internally
+  private _nrOfRequests = signal(0);
+  private _label = signal<string | null>(null);
+
+  // Expose as observables for backward compatibility
+  nrOfRequests$ = toObservable(this._nrOfRequests);
   isShowGlobalProgressBar$: Observable<boolean> = this.nrOfRequests$.pipe(
     map((nr) => nr > 0),
     distinctUntilChanged(),
@@ -41,10 +47,7 @@ export class GlobalProgressBarService {
     }),
   );
 
-  private _label$: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(
-    null,
-  );
-  label$: Observable<string | null> = this._label$.pipe(
+  label$: Observable<string | null> = toObservable(this._label).pipe(
     distinctUntilChanged(),
     switchMap((label: string | null) =>
       !!label ? of(label) : of(null).pipe(delay(DELAY)),
@@ -58,14 +61,14 @@ export class GlobalProgressBarService {
   }
 
   countUp(url: string): void {
-    this.nrOfRequests$.next(this.nrOfRequests$.getValue() + 1);
-    this._label$.next(this._urlToLabel(url));
+    this._nrOfRequests.update((nr) => nr + 1);
+    this._label.set(this._urlToLabel(url));
   }
 
   countDown(): void {
-    this.nrOfRequests$.next(Math.max(this.nrOfRequests$.getValue() - 1, 0));
-    if (this.nrOfRequests$.getValue() - 1 <= 0) {
-      this._label$.next(null);
+    this._nrOfRequests.update((nr) => Math.max(nr - 1, 0));
+    if (this._nrOfRequests() <= 0) {
+      this._label.set(null);
     }
   }
 

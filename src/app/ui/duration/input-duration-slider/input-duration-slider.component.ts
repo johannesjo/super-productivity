@@ -33,7 +33,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
 
   // Convert to signals
   readonly minutesBefore = signal(0);
-  readonly dots = signal<any[]>([]);
+  readonly dots = signal<number[]>([]);
   readonly uid = 'duration-input-slider' + nanoid();
   readonly el: HTMLElement;
 
@@ -47,9 +47,9 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   // Internal model signal
   readonly _model = signal(0);
 
-  startHandler?: (ev: any) => void;
+  startHandler?: (ev: MouseEvent | TouchEvent) => void;
   endHandler?: () => void;
-  moveHandler?: (ev: any) => void;
+  moveHandler?: (ev: MouseEvent | TouchEvent) => void;
 
   readonly circleEl = viewChild<ElementRef>('circleEl');
 
@@ -74,7 +74,10 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
       }
 
       // don't execute when clicked on label or input
-      if (ev.target.tagName === 'LABEL' || ev.target.tagName === 'INPUT') {
+      if (
+        (ev.target as HTMLElement)?.tagName === 'LABEL' ||
+        (ev.target as HTMLElement)?.tagName === 'INPUT'
+      ) {
         this.endHandler();
         return;
       }
@@ -91,7 +94,8 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
     this.moveHandler = (ev) => {
       if (
         ev.type === 'click' &&
-        (ev.target.tagName === 'LABEL' || ev.target.tagName === 'INPUT')
+        ((ev.target as HTMLElement)?.tagName === 'LABEL' ||
+          (ev.target as HTMLElement)?.tagName === 'INPUT')
       ) {
         return;
       }
@@ -108,16 +112,18 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
       const centerX = circleEl.nativeElement.offsetWidth / 2;
       const centerY = circleEl.nativeElement.offsetHeight / 2;
 
-      let offsetX;
+      let offsetX: number;
+      let offsetY: number;
 
-      let offsetY;
       if (ev.type === 'touchmove') {
-        const rect = ev.target.getBoundingClientRect();
-        offsetX = ev.targetTouches[0].pageX - rect.left;
-        offsetY = ev.targetTouches[0].pageY - rect.top;
+        const touchEv = ev as TouchEvent;
+        const rect = (ev.target as Element).getBoundingClientRect();
+        offsetX = touchEv.targetTouches[0].pageX - rect.left;
+        offsetY = touchEv.targetTouches[0].pageY - rect.top;
       } else {
-        offsetX = ev.offsetX;
-        offsetY = ev.offsetY;
+        const mouseEv = ev as MouseEvent;
+        offsetX = mouseEv.offsetX;
+        offsetY = mouseEv.offsetY;
       }
 
       const x = offsetX - centerX;

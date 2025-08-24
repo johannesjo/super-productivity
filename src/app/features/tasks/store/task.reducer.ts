@@ -58,9 +58,6 @@ export const TASK_FEATURE_NAME = 'tasks';
 // REDUCER
 // -------
 export const initialTaskState: TaskState = taskAdapter.getInitialState({
-  // overwrite entity model to avoid problems with typing
-  ids: [],
-
   // TODO maybe at least move those properties to an ui property
   currentTaskId: null,
   selectedTaskId: null,

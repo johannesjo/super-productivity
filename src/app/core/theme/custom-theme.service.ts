@@ -35,6 +35,12 @@ export const AVAILABLE_CUSTOM_THEMES: CustomTheme[] = [
     requiredMode: 'dark',
   },
   {
+    id: 'everforest',
+    name: 'Everforest',
+    url: 'assets/themes/everforest.css',
+    requiredMode: 'system',
+  },
+  {
     id: 'rainbow',
     name: 'Rainbow',
     url: 'assets/themes/rainbow.css',

@@ -22,7 +22,6 @@ import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions'
 export const adapter: EntityAdapter<Note> = createEntityAdapter<Note>();
 
 export const initialNoteState: NoteState = adapter.getInitialState({
-  ids: [],
   todayOrder: [],
 });
 

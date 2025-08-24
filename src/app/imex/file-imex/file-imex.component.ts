@@ -89,9 +89,9 @@ export class FileImexComponent implements OnInit {
   }
 
   // NOTE: after promise done the file is NOT yet read
-  async handleFileInput(ev: any): Promise<void> {
-    const files = ev.target.files;
-    const file = files.item(0);
+  async handleFileInput(ev: Event): Promise<void> {
+    const files = (ev.target as HTMLInputElement).files;
+    const file = files?.item(0);
 
     if (!file) {
       // No file selected or selection cancelled

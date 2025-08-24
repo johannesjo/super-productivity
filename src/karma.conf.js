@@ -14,12 +14,24 @@ module.exports = function (config) {
       require('karma-chrome-launcher'),
       require('@angular-devkit/build-angular/plugins/karma'),
       require('./test-helpers/karma-running-spec-on-disconnect'),
+      require('karma-spec-reporter'),
     ],
     client: {
       clearContext: false, // leave Jasmine Spec Runner output visible in browser
       captureConsole: false,
     },
-    reporters: ['progress', 'running-spec'],
+    reporters: process.env.CI ? ['spec', 'running-spec'] : ['spec', 'running-spec'],
+    specReporter: {
+      maxLogLines: 5, // limit number of lines logged per test
+      suppressSummary: false, // show summary
+      suppressErrorSummary: false, // show error summary
+      suppressFailed: false, // show failed tests
+      suppressPassed: true, // hide passed tests
+      suppressSkipped: true, // hide skipped tests
+      showBrowser: false, // don't show browser name
+      showSpecTiming: false, // don't show spec timing
+      failFast: false, // continue after first failure
+    },
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,

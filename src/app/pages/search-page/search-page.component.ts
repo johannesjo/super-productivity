@@ -92,8 +92,8 @@ export class SearchPageComponent implements OnInit {
 
       return {
         id: task.id,
-        title: task.title.toLowerCase(),
-        taskNotes: task.notes?.toLowerCase() || '',
+        title: task.title,
+        taskNotes: task.notes || '',
         projectId: task.projectId || null,
         parentId: task.parentId || null,
         tagId,
@@ -150,8 +150,8 @@ export class SearchPageComponent implements OnInit {
 
     const result = searchableItems.filter(
       (task) =>
-        task.title.includes(searchTerm.toLowerCase()) ||
-        task.taskNotes.includes(searchTerm.toLowerCase()),
+        task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        task.taskNotes.toLowerCase().includes(searchTerm.toLowerCase()),
     );
 
     return result.slice(0, MAX_RESULTS);

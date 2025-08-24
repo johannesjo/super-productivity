@@ -249,11 +249,11 @@ body:not(.isDarkTheme) a[href]:hover {
 
 /* Material overrides for light theme */
 body:not(.isDarkTheme) {
-  --mdc-theme-surface: var(--card-bg);
-  --mdc-theme-on-surface: var(--text-color);
-  --mdc-theme-background: var(--bg);
-  --mdc-theme-primary: var(--nord0);
-  --mdc-fab-small-container-color: var(--c-accent);
+  --mat-theme-surface: var(--card-bg);
+  --mat-theme-on-surface: var(--text-color);
+  --mat-theme-background: var(--bg);
+  --mat-theme-primary: var(--nord0);
+  --mat-fab-small-container-color: var(--c-accent);
   --mat-sys-primary-container: var(--c-accent);
 }
 

@@ -5,11 +5,9 @@
   @if (!isForDayMode()) {
     <mat-icon>alarm</mat-icon>
     <span [innerHTML]="due() | shortTimeHtml"></span>
-    <!---->
   } @else {
     <mat-icon>today</mat-icon>
     <span>{{ date() | date: 'shortDate' }} </span>
-    <!---->
   }
 </div>
 
@@ -18,10 +16,27 @@
     <mat-icon>add</mat-icon>
     click to create task
   </div>
-}
+} @else {
+  <div class="task-input-container">
+    <!-- Select task minimal component -->
+    <select-task-minimal
+      #selectTaskMinimal
+      (taskSelected)="onTaskSelected($event)"
+      (textChanged)="onTextChanged($event)"
+      (blurred)="onSimpleTaskInputBlur()"
+      (keyPressed)="onSelectTaskKeyDown($event)"
+      (autocompleteOpened)="onAutocompleteOpened()"
+      (autocompleteClosed)="onAutocompleteClosed()"
+      [placeholder]="isForDayMode() ? 'Plan task for day...' : 'Schedule task...'"
+      [isIncludeDoneTasks]="false"
+      [isLimitToProject]="false"
+    ></select-task-minimal>
 
-<textarea
-  (blur)="onBlur()"
-  (keydown)="onKeyDown($event)"
-  #textAreaElement
-></textarea>
+    <!-- Mode toggle hint -->
+    <div class="mode-hint">
+      <small
+        >Ctrl+1 to toggle {{ isForDayMode() ? 'time scheduling' : 'day planning' }}</small
+      >
+    </div>
+  </div>
+}

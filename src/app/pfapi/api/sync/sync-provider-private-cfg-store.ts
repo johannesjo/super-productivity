@@ -31,7 +31,8 @@ export class SyncProviderPrivateCfgStore<PID extends SyncProviderId> {
   async load(): Promise<PrivateCfgByProviderId<PID> | null> {
     PFLog.verbose(
       `${SyncProviderPrivateCfgStore.L}.${this.load.name}`,
-      this._privateCfgInMemory,
+      // NEVER EVER LOG THIS FOR PRODUCTION!!!!!
+      typeof this._privateCfgInMemory,
     );
 
     // Return cached config if available
@@ -83,12 +84,31 @@ export class SyncProviderPrivateCfgStore<PID extends SyncProviderId> {
   }
 
   /**
+   * Upserts the provider's private configuration with partial data
+   * If no existing configuration exists, creates a new one with the provided updates
+   * @param updates Partial configuration updates to apply
+   * @returns Promise resolving after save completes
+   * @throws Error if save fails
+   */
+  async upsertPartial(updates: Partial<PrivateCfgByProviderId<PID>>): Promise<unknown> {
+    const existing = await this.load();
+    const privateCfg = existing
+      ? { ...existing, ...updates }
+      : (updates as PrivateCfgByProviderId<PID>);
+    return this._save(privateCfg);
+  }
+
+  /**
    * Internal method to save configuration
    * @private
    */
   private async _save(privateCfg: PrivateCfgByProviderId<PID>): Promise<unknown> {
     const key = this._providerId;
-    PFLog.normal(`${SyncProviderPrivateCfgStore.L}._save()`, key, privateCfg);
+    PFLog.normal(
+      `${SyncProviderPrivateCfgStore.L}._save()`,
+      key,
+      typeof this._privateCfgInMemory,
+    );
 
     this._privateCfgInMemory = privateCfg;
 

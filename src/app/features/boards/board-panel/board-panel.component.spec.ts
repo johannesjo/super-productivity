@@ -6,8 +6,11 @@ import { Store } from '@ngrx/store';
 import { TaskService } from '../../tasks/task.service';
 import { MatDialog } from '@angular/material/dialog';
 import { of, ReplaySubject } from 'rxjs';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { TranslateFakeLoader } from '@ngx-translate/core';
+import {
+  TranslateLoader,
+  TranslateModule,
+  TranslateNoOpLoader,
+} from '@ngx-translate/core';
 import { provideMockStore } from '@ngrx/store/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { PlannerTaskComponent } from '../../planner/planner-task/planner-task.component';
@@ -96,7 +99,7 @@ describe('BoardPanelComponent - Backlog Feature', () => {
       imports: [
         BoardPanelComponent,
         TranslateModule.forRoot({
-          loader: { provide: TranslateLoader, useClass: TranslateFakeLoader },
+          loader: { provide: TranslateLoader, useClass: TranslateNoOpLoader },
         }),
       ],
       providers: [
