@@ -287,7 +287,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       .pipe(first(), takeUntilDestroyed(this._destroyRef))
       .subscribe(({ date, time }) => {
         if (date) {
-          this.stateService.updateDate(date ? new Date(date) : null, time);
+          this.stateService.updateDate(date, time);
         }
       });
   }

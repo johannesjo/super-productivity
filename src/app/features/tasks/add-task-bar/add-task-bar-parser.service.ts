@@ -4,6 +4,7 @@ import { Tag } from '../../tag/tag.model';
 import { AddTaskBarStateService } from './add-task-bar-state.service';
 import { shortSyntax } from '../short-syntax';
 import { ShortSyntaxConfig } from '../../config/global-config.model';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 
 interface PreviousParseResult {
   cleanText: string | null;
@@ -11,7 +12,7 @@ interface PreviousParseResult {
   tagIds: string[];
   newTagTitles: string[];
   timeEstimate: number | null;
-  dueDate: Date | null;
+  dueDate: string | null;
   dueTime: string | null;
 }
 
@@ -24,10 +25,10 @@ export class AddTaskBarParserService {
     return a.length === b.length && a.every((val, i) => val === b[i]);
   }
 
-  private _datesEqual(a: Date | null, b: Date | null): boolean {
+  private _datesEqual(a: string | null, b: string | null): boolean {
     if (a === null && b === null) return true;
     if (a === null || b === null) return false;
-    return a.getTime() === b.getTime();
+    return a === b;
   }
 
   parseAndUpdateText(
@@ -69,7 +70,7 @@ export class AddTaskBarParserService {
         newTagTitles: [],
         timeEstimate: null,
         // Preserve current date/time if user has selected them, otherwise use defaults
-        dueDate: currentState.date || (defaultDate ? new Date(defaultDate) : null),
+        dueDate: currentState.date || (defaultDate ? defaultDate : null),
         dueTime: currentState.time || defaultTime || null,
       };
     } else {
@@ -77,15 +78,16 @@ export class AddTaskBarParserService {
       const tagIds = parseResult.taskChanges.tagIds || [];
       const newTagTitles = parseResult.newTagTitles || [];
 
-      let dueDate: Date | null = null;
+      let dueDate: string | null = null;
       let dueTime: string | null = null;
 
       if (parseResult.taskChanges.dueWithTime) {
-        dueDate = new Date(parseResult.taskChanges.dueWithTime);
+        const dueDateObj = new Date(parseResult.taskChanges.dueWithTime);
+        dueDate = getDbDateStr(dueDateObj);
 
         if (parseResult.taskChanges.hasPlannedTime !== false) {
-          const hours = dueDate.getHours().toString().padStart(2, '0');
-          const minutes = dueDate.getMinutes().toString().padStart(2, '0');
+          const hours = dueDateObj.getHours().toString().padStart(2, '0');
+          const minutes = dueDateObj.getMinutes().toString().padStart(2, '0');
           const timeStr = `${hours}:${minutes}`;
 
           if (timeStr !== '00:00') {
@@ -93,7 +95,7 @@ export class AddTaskBarParserService {
           }
         }
       } else if (defaultDate) {
-        dueDate = new Date(defaultDate);
+        dueDate = defaultDate;
         dueTime = defaultTime || null;
       }
 

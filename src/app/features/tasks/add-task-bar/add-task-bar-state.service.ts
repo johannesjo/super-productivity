@@ -28,7 +28,7 @@ export class AddTaskBarStateService {
     this.isAutoDetected.set(false);
   }
 
-  updateDate(date: Date | null, time?: string | null): void {
+  updateDate(date: string | null, time?: string | null): void {
     this._taskInputState.update((state) => ({
       ...state,
       date,

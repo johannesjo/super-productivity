@@ -98,7 +98,7 @@ export class AddTaskBarActionsComponent {
     const state = this.state();
     if (!state.date) return null;
     const today = new Date();
-    const date = state.date;
+    const date = new Date(state.date);
     if (this.isSameDate(date, today)) {
       return state.time || this._translateService.instant(T.F.TASK.ADD_TASK_BAR.TODAY);
     }
