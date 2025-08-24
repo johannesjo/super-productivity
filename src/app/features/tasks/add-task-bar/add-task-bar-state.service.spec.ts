@@ -4,6 +4,7 @@ import { Project } from '../../project/project.model';
 import { Tag } from '../../tag/tag.model';
 import { INITIAL_ADD_TASK_BAR_STATE } from './add-task-bar.const';
 import { SS } from '../../../core/persistence/storage-keys.const';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 
 describe('AddTaskBarStateService', () => {
   let service: AddTaskBarStateService;
@@ -69,18 +70,18 @@ describe('AddTaskBarStateService', () => {
     it('should update date in state', () => {
       const testDate = new Date('2024-01-15');
 
-      service.updateDate(testDate);
+      service.updateDate(getDbDateStr(testDate));
 
-      expect(service.state().date).toEqual(testDate);
+      expect(service.state().date).toEqual(getDbDateStr(testDate));
     });
 
     it('should update date and time when both provided', () => {
       const testDate = new Date('2024-01-15');
       const testTime = '10:30';
 
-      service.updateDate(testDate, testTime);
+      service.updateDate(getDbDateStr(testDate), testTime);
 
-      expect(service.state().date).toEqual(testDate);
+      expect(service.state().date).toEqual(getDbDateStr(testDate));
       expect(service.state().time).toBe(testTime);
     });
 
@@ -88,9 +89,9 @@ describe('AddTaskBarStateService', () => {
       const testDate = new Date('2024-01-15');
       service.updateTime('09:00');
 
-      service.updateDate(testDate);
+      service.updateDate(getDbDateStr(testDate));
 
-      expect(service.state().date).toEqual(testDate);
+      expect(service.state().date).toEqual(getDbDateStr(testDate));
       expect(service.state().time).toBe('09:00');
     });
 
@@ -98,15 +99,15 @@ describe('AddTaskBarStateService', () => {
       service.updateTime('09:00');
       const testDate = new Date('2024-01-15');
 
-      service.updateDate(testDate, null);
+      service.updateDate(getDbDateStr(testDate), null);
 
-      expect(service.state().date).toEqual(testDate);
+      expect(service.state().date).toEqual(getDbDateStr(testDate));
       expect(service.state().time).toBe(null);
     });
 
     it('should clear date when null passed', () => {
       const testDate = new Date('2024-01-15');
-      service.updateDate(testDate);
+      service.updateDate(getDbDateStr(testDate));
 
       service.updateDate(null);
 
@@ -296,7 +297,7 @@ describe('AddTaskBarStateService', () => {
 
   describe('clearDate', () => {
     it('should clear date and time', () => {
-      service.updateDate(new Date(), '10:30');
+      service.updateDate(getDbDateStr(new Date()), '10:30');
 
       service.clearDate();
 
@@ -340,7 +341,7 @@ describe('AddTaskBarStateService', () => {
 
       // Set up initial state
       service.updateProject(mockProject);
-      service.updateDate(testDate, '10:30');
+      service.updateDate(getDbDateStr(testDate), '10:30');
       service.updateEstimate(testEstimate);
       service.updateTags(mockTags);
       service.updateNewTagTitles(['new-tag']);
@@ -357,7 +358,7 @@ describe('AddTaskBarStateService', () => {
 
       // These should be preserved
       expect(service.state().project).toEqual(mockProject);
-      expect(service.state().date).toEqual(testDate);
+      expect(service.state().date).toEqual(getDbDateStr(testDate));
       expect(service.state().time).toBe('10:30');
       expect(service.state().estimate).toBe(testEstimate);
     });
