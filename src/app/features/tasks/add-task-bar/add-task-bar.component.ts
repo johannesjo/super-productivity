@@ -107,6 +107,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   tabindex = input<number>(0);
   isElevated = input<boolean>(false);
   isDisableAutoFocus = input<boolean>(false);
+  isNoDefaults = input<boolean>(false);
   additionalFields = input<Partial<TaskCopy>>();
   taskIdsToExclude = input<string[]>();
   isHideTagTitles = input<boolean>(false);
@@ -153,19 +154,21 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
   defaultDateAndTime$ = this._workContextService.activeWorkContext$.pipe(
     map((workContext) => {
-      if (this.planForDay()) {
-        return {
-          date: this.planForDay()!,
-          time: undefined as string | undefined,
-        };
-      } else if (
-        workContext?.type === WorkContextType.TAG &&
-        workContext?.id === 'TODAY'
-      ) {
-        return {
-          date: getDbDateStr(),
-          time: undefined as string | undefined,
-        };
+      if (!this.isNoDefaults()) {
+        if (this.planForDay()) {
+          return {
+            date: this.planForDay()!,
+            time: undefined as string | undefined,
+          };
+        } else if (
+          workContext?.type === WorkContextType.TAG &&
+          workContext?.id === 'TODAY'
+        ) {
+          return {
+            date: getDbDateStr(),
+            time: undefined as string | undefined,
+          };
+        }
       }
       return {
         date: undefined as string | undefined,
@@ -243,6 +246,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       // Refocus input when state changes (user selected something)
       this._focusInput();
     });
+    //
+    // effect(() => {
+    //   console.log(this.stateService.state());
+    // });
   }
 
   ngOnInit(): void {
@@ -276,17 +283,11 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   private _setupDefaultDate(): void {
-    this._workContextService.activeWorkContext$
+    this.defaultDateAndTime$
       .pipe(first(), takeUntilDestroyed(this._destroyRef))
-      .subscribe((workContext) => {
-        if (this.planForDay()) {
-          this.stateService.updateDate(new Date(this.planForDay()!));
-        } else if (
-          !this.stateService.state().date &&
-          workContext?.type === WorkContextType.TAG &&
-          workContext?.id === 'TODAY'
-        ) {
-          this.stateService.updateDate(new Date());
+      .subscribe(({ date, time }) => {
+        if (date) {
+          this.stateService.updateDate(date ? new Date(date) : null, time);
         }
       });
   }

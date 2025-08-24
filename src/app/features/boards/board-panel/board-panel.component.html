@@ -27,6 +27,7 @@
   [additionalFields]="additionalTaskFields()"
   [tagsToRemove]="panelCfg().excludedTagIds"
   [taskIdsToExclude]="panelCfg().taskIds"
+  [isNoDefaults]="true"
   (afterTaskAdd)="afterTaskAdd($event)"
 ></add-task-inline>
 
