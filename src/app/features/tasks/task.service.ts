@@ -593,6 +593,7 @@ export class TaskService {
       title: additional.title || '',
       additional: { dueDay: additional.dueDay || undefined, ...additional },
     });
+    console.log(task);
 
     this._store.dispatch(
       addSubTask({
@@ -1083,7 +1084,9 @@ export class TaskService {
           ? [workContextId]
           : [],
 
-      ...(workContextId === TODAY_TAG.id && !additional.parentId
+      ...(workContextId === TODAY_TAG.id &&
+      !additional.parentId &&
+      !additional.dueWithTime
         ? { dueDay: getDbDateStr() }
         : {}),
 
