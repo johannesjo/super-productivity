@@ -1,0 +1,365 @@
+import { TestBed } from '@angular/core/testing';
+import { AddTaskBarComponent } from './add-task-bar.component';
+import { TaskService } from '../task.service';
+import { WorkContextService } from '../../work-context/work-context.service';
+import { ProjectService } from '../../project/project.service';
+import { TagService } from '../../tag/tag.service';
+import { GlobalConfigService } from '../../config/global-config.service';
+import { AddTaskBarIssueSearchService } from './add-task-bar-issue-search.service';
+import { MatDialog } from '@angular/material/dialog';
+import { SnackService } from '../../../core/snack/snack.service';
+import { TranslateService } from '@ngx-translate/core';
+import { of } from 'rxjs';
+import { getDbDateStr } from '../../../util/get-db-date-str';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+
+describe('AddTaskBarComponent - Timezone Handling', () => {
+  let component: AddTaskBarComponent;
+  let mockTaskService: jasmine.SpyObj<TaskService>;
+  let mockWorkContextService: jasmine.SpyObj<WorkContextService>;
+  let mockProjectService: jasmine.SpyObj<ProjectService>;
+  let mockTagService: jasmine.SpyObj<TagService>;
+  let mockGlobalConfigService: jasmine.SpyObj<GlobalConfigService>;
+  let mockAddTaskBarIssueSearchService: jasmine.SpyObj<AddTaskBarIssueSearchService>;
+  let mockMatDialog: jasmine.SpyObj<MatDialog>;
+  let mockSnackService: jasmine.SpyObj<SnackService>;
+  let mockTranslateService: jasmine.SpyObj<TranslateService>;
+
+  beforeEach(() => {
+    const taskServiceSpy = jasmine.createSpyObj('TaskService', ['add', 'getByIdOnce$']);
+    const workContextServiceSpy = jasmine.createSpyObj('WorkContextService', [], {
+      activeWorkContext$: of(null),
+    });
+    const projectServiceSpy = jasmine.createSpyObj('ProjectService', [], {
+      list$: of([]),
+    });
+    const tagServiceSpy = jasmine.createSpyObj('TagService', [], {
+      tags$: of([]),
+      tagsNoMyDayAndNoList$: of([]),
+    });
+    const globalConfigServiceSpy = jasmine.createSpyObj('GlobalConfigService', [], {
+      shortSyntax$: of({ isEnableTag: true, isEnableDue: true, isEnableProject: true }),
+    });
+    const addTaskBarIssueSearchServiceSpy = jasmine.createSpyObj(
+      'AddTaskBarIssueSearchService',
+      ['getFilteredIssueSuggestions$', 'getShortSyntaxTags$'],
+    );
+    const matDialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
+    const snackServiceSpy = jasmine.createSpyObj('SnackService', ['open']);
+    const translateServiceSpy = jasmine.createSpyObj('TranslateService', ['instant', 'get']);
+    translateServiceSpy.instant.and.returnValue('test translation');
+    translateServiceSpy.get.and.returnValue(of('test translation'));
+
+    TestBed.configureTestingModule({
+      imports: [AddTaskBarComponent],
+      providers: [
+        provideNoopAnimations(),
+        { provide: TaskService, useValue: taskServiceSpy },
+        { provide: WorkContextService, useValue: workContextServiceSpy },
+        { provide: ProjectService, useValue: projectServiceSpy },
+        { provide: TagService, useValue: tagServiceSpy },
+        { provide: GlobalConfigService, useValue: globalConfigServiceSpy },
+        { provide: AddTaskBarIssueSearchService, useValue: addTaskBarIssueSearchServiceSpy },
+        { provide: MatDialog, useValue: matDialogSpy },
+        { provide: SnackService, useValue: snackServiceSpy },
+        { provide: TranslateService, useValue: translateServiceSpy },
+      ],
+    });
+
+    mockTaskService = TestBed.inject(TaskService) as jasmine.SpyObj<TaskService>;
+    mockWorkContextService = TestBed.inject(
+      WorkContextService,
+    ) as jasmine.SpyObj<WorkContextService>;
+    mockProjectService = TestBed.inject(ProjectService) as jasmine.SpyObj<ProjectService>;
+    mockTagService = TestBed.inject(TagService) as jasmine.SpyObj<TagService>;
+    mockGlobalConfigService = TestBed.inject(
+      GlobalConfigService,
+    ) as jasmine.SpyObj<GlobalConfigService>;
+    mockAddTaskBarIssueSearchService = TestBed.inject(
+      AddTaskBarIssueSearchService,
+    ) as jasmine.SpyObj<AddTaskBarIssueSearchService>;
+    mockMatDialog = TestBed.inject(MatDialog) as jasmine.SpyObj<MatDialog>;
+    mockSnackService = TestBed.inject(SnackService) as jasmine.SpyObj<SnackService>;
+    mockTranslateService = TestBed.inject(
+      TranslateService,
+    ) as jasmine.SpyObj<TranslateService>;
+
+    // Setup default return values for issue search service
+    mockAddTaskBarIssueSearchService.getFilteredIssueSuggestions$.and.returnValue(of([]));
+    mockAddTaskBarIssueSearchService.getShortSyntaxTags$.and.returnValue(of([]));
+
+    const fixture = TestBed.createComponent(AddTaskBarComponent);
+    component = fixture.componentInstance;
+  });
+
+  describe('Date Parsing from State', () => {
+    it('should create date in local timezone when parsing YYYY-MM-DD format', async () => {
+      // Set up state with a date string
+      const testDateStr = '2025-01-15';
+      component.stateService.updateDate(testDateStr, null);
+      component.stateService.updateInputTxt('Test task');
+
+      // Mock task service to capture the data passed
+      let capturedTaskData: any;
+      mockTaskService.add.and.callFake((title, isBacklog, data) => {
+        capturedTaskData = data;
+        return 'test-id';
+      });
+
+      // Call addTask
+      await component.addTask();
+
+      // Verify the date was created correctly in local timezone
+      expect(mockTaskService.add).toHaveBeenCalled();
+      expect(capturedTaskData.dueDay).toBe(testDateStr);
+
+      // The date should be created as Jan 15, 2025 at midnight local time
+      // not UTC midnight which could be a different day locally
+    });
+
+    it('should handle date with time correctly', async () => {
+      const testDateStr = '2025-01-15';
+      const testTimeStr = '14:30';
+      component.stateService.updateDate(testDateStr, testTimeStr);
+      component.stateService.updateInputTxt('Test task with time');
+
+      let capturedTaskData: any;
+      mockTaskService.add.and.callFake((title, isBacklog, data) => {
+        capturedTaskData = data;
+        return 'test-id';
+      });
+
+      await component.addTask();
+
+      expect(mockTaskService.add).toHaveBeenCalled();
+      expect(capturedTaskData.dueWithTime).toBeDefined();
+      expect(capturedTaskData.hasPlannedTime).toBe(true);
+
+      // Verify the timestamp represents Jan 15, 2025 at 14:30 local time
+      const resultDate = new Date(capturedTaskData.dueWithTime);
+      expect(resultDate.getFullYear()).toBe(2025);
+      expect(resultDate.getMonth()).toBe(0); // January
+      expect(resultDate.getDate()).toBe(15);
+      expect(resultDate.getHours()).toBe(14);
+      expect(resultDate.getMinutes()).toBe(30);
+    });
+
+    it('should handle dates near month boundaries correctly', async () => {
+      // Test last day of month
+      const testDateStr = '2025-01-31';
+      component.stateService.updateDate(testDateStr, null);
+      component.stateService.updateInputTxt('End of month task');
+
+      let capturedTaskData: any;
+      mockTaskService.add.and.callFake((title, isBacklog, data) => {
+        capturedTaskData = data;
+        return 'test-id';
+      });
+
+      await component.addTask();
+
+      expect(capturedTaskData.dueDay).toBe(testDateStr);
+    });
+
+    it('should handle leap year dates correctly', async () => {
+      // 2024 is a leap year
+      const testDateStr = '2024-02-29';
+      component.stateService.updateDate(testDateStr, null);
+      component.stateService.updateInputTxt('Leap year task');
+
+      let capturedTaskData: any;
+      mockTaskService.add.and.callFake((title, isBacklog, data) => {
+        capturedTaskData = data;
+        return 'test-id';
+      });
+
+      await component.addTask();
+
+      expect(capturedTaskData.dueDay).toBe(testDateStr);
+    });
+
+    it('should handle year boundaries correctly', async () => {
+      // Test New Year's Eve
+      const testDateStr = '2024-12-31';
+      const testTimeStr = '23:59';
+      component.stateService.updateDate(testDateStr, testTimeStr);
+      component.stateService.updateInputTxt('New Years Eve task');
+
+      let capturedTaskData: any;
+      mockTaskService.add.and.callFake((title, isBacklog, data) => {
+        capturedTaskData = data;
+        return 'test-id';
+      });
+
+      await component.addTask();
+
+      const resultDate = new Date(capturedTaskData.dueWithTime);
+      expect(resultDate.getFullYear()).toBe(2024);
+      expect(resultDate.getMonth()).toBe(11); // December
+      expect(resultDate.getDate()).toBe(31);
+      expect(resultDate.getHours()).toBe(23);
+      expect(resultDate.getMinutes()).toBe(59);
+    });
+  });
+
+  describe('DST Transition Handling', () => {
+    it('should handle spring forward DST transition', async () => {
+      // In many timezones, DST transitions happen in March
+      // For example, in US Eastern time, March 10, 2024 at 2:00 AM -> 3:00 AM
+      const testDateStr = '2024-03-10';
+      const testTimeStr = '02:30'; // This time may not exist due to DST
+      component.stateService.updateDate(testDateStr, testTimeStr);
+      component.stateService.updateInputTxt('DST spring forward task');
+
+      let capturedTaskData: any;
+      mockTaskService.add.and.callFake((title, isBacklog, data) => {
+        capturedTaskData = data;
+        return 'test-id';
+      });
+
+      await component.addTask();
+
+      // The timestamp should be created, even if the time doesn't technically exist
+      expect(capturedTaskData.dueWithTime).toBeDefined();
+      const resultDate = new Date(capturedTaskData.dueWithTime);
+      expect(resultDate.getFullYear()).toBe(2024);
+      expect(resultDate.getMonth()).toBe(2); // March
+      expect(resultDate.getDate()).toBe(10);
+    });
+
+    it('should handle fall back DST transition', async () => {
+      // In many timezones, DST ends in November
+      // For example, in US Eastern time, November 3, 2024 at 2:00 AM -> 1:00 AM
+      const testDateStr = '2024-11-03';
+      const testTimeStr = '01:30'; // This time occurs twice due to DST
+      component.stateService.updateDate(testDateStr, testTimeStr);
+      component.stateService.updateInputTxt('DST fall back task');
+
+      let capturedTaskData: any;
+      mockTaskService.add.and.callFake((title, isBacklog, data) => {
+        capturedTaskData = data;
+        return 'test-id';
+      });
+
+      await component.addTask();
+
+      expect(capturedTaskData.dueWithTime).toBeDefined();
+      const resultDate = new Date(capturedTaskData.dueWithTime);
+      expect(resultDate.getFullYear()).toBe(2024);
+      expect(resultDate.getMonth()).toBe(10); // November
+      expect(resultDate.getDate()).toBe(3);
+      expect(resultDate.getHours()).toBe(1);
+      expect(resultDate.getMinutes()).toBe(30);
+    });
+  });
+
+  describe('Edge Cases', () => {
+    it('should handle invalid date components gracefully', async () => {
+      // Test with a malformed date that might come from corrupted data
+      const testDateStr = '2025-13-32'; // Invalid month and day
+      component.stateService.updateDate(testDateStr, null);
+      component.stateService.updateInputTxt('Invalid date task');
+
+      let capturedTaskData: any;
+      mockTaskService.add.and.callFake((title, isBacklog, data) => {
+        capturedTaskData = data;
+        return 'test-id';
+      });
+
+      await component.addTask();
+
+      // JavaScript Date constructor will roll over invalid dates
+      // 13th month becomes January of next year, 32nd day rolls to next month
+      expect(capturedTaskData.dueDay).toBeDefined();
+    });
+
+    it('should handle midnight time correctly', async () => {
+      const testDateStr = '2025-01-15';
+      const testTimeStr = '00:00';
+      component.stateService.updateDate(testDateStr, testTimeStr);
+      component.stateService.updateInputTxt('Midnight task');
+
+      let capturedTaskData: any;
+      mockTaskService.add.and.callFake((title, isBacklog, data) => {
+        capturedTaskData = data;
+        return 'test-id';
+      });
+
+      await component.addTask();
+
+      const resultDate = new Date(capturedTaskData.dueWithTime);
+      expect(resultDate.getHours()).toBe(0);
+      expect(resultDate.getMinutes()).toBe(0);
+      expect(resultDate.getDate()).toBe(15);
+    });
+
+    it('should handle 24-hour time format correctly', async () => {
+      const testDateStr = '2025-01-15';
+      const testTimeStr = '23:45';
+      component.stateService.updateDate(testDateStr, testTimeStr);
+      component.stateService.updateInputTxt('Late night task');
+
+      let capturedTaskData: any;
+      mockTaskService.add.and.callFake((title, isBacklog, data) => {
+        capturedTaskData = data;
+        return 'test-id';
+      });
+
+      await component.addTask();
+
+      const resultDate = new Date(capturedTaskData.dueWithTime);
+      expect(resultDate.getHours()).toBe(23);
+      expect(resultDate.getMinutes()).toBe(45);
+    });
+  });
+
+  describe('Consistency with getDbDateStr', () => {
+    it('should produce consistent results when round-tripping dates', async () => {
+      const testDateStr = '2025-01-15';
+      component.stateService.updateDate(testDateStr, null);
+      component.stateService.updateInputTxt('Consistency test');
+
+      let capturedTaskData: any;
+      mockTaskService.add.and.callFake((title, isBacklog, data) => {
+        capturedTaskData = data;
+        return 'test-id';
+      });
+
+      await component.addTask();
+
+      // The stored dueDay should match the input
+      expect(capturedTaskData.dueDay).toBe(testDateStr);
+
+      // If we were to create a date from this string and convert back,
+      // it should remain the same
+      const [year, month, day] = testDateStr.split('-').map(Number);
+      const recreatedDate = new Date(year, month - 1, day);
+      const roundTrippedDateStr = getDbDateStr(recreatedDate);
+      expect(roundTrippedDateStr).toBe(testDateStr);
+    });
+
+    it('should maintain date consistency across timezone boundaries', async () => {
+      // Test a date that would be different if interpreted as UTC
+      const testDateStr = '2025-01-01'; // New Year's Day
+      component.stateService.updateDate(testDateStr, null);
+      component.stateService.updateInputTxt('New Year task');
+
+      let capturedTaskData: any;
+      mockTaskService.add.and.callFake((title, isBacklog, data) => {
+        capturedTaskData = data;
+        return 'test-id';
+      });
+
+      await component.addTask();
+
+      expect(capturedTaskData.dueDay).toBe(testDateStr);
+
+      // Verify that the date represents January 1st in local timezone
+      const [year, month, day] = testDateStr.split('-').map(Number);
+      const localDate = new Date(year, month - 1, day);
+      expect(localDate.getFullYear()).toBe(2025);
+      expect(localDate.getMonth()).toBe(0);
+      expect(localDate.getDate()).toBe(1);
+    });
+  });
+});

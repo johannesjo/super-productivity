@@ -510,6 +510,188 @@ describe('AddTaskBarParserService', () => {
     });
   });
 
+  describe('Timezone-specific Date Handling', () => {
+    let mockConfig: ShortSyntaxConfig;
+    let mockProjects: Project[];
+    let mockTags: Tag[];
+    let mockDefaultProject: Project;
+
+    beforeEach(() => {
+      mockConfig = {
+        isEnableProject: true,
+        isEnableDue: true,
+        isEnableTag: true,
+      } as ShortSyntaxConfig;
+
+      mockDefaultProject = {
+        id: 'default-project',
+        title: 'Default Project',
+        icon: 'folder',
+      } as Project;
+
+      mockProjects = [
+        mockDefaultProject,
+        { id: 'proj-1', title: 'Project One' } as Project,
+        { id: 'proj-2', title: 'Project Two' } as Project,
+      ];
+
+      mockTags = [
+        { id: 'tag-1', title: 'urgent' } as Tag,
+        { id: 'tag-2', title: 'important' } as Tag,
+      ];
+    });
+
+    it('should handle date strings consistently across timezones', () => {
+      const dateStr = '2025-01-15';
+      const timeStr = '14:30';
+
+      // Mock state to return the date and time
+      const mockState = {
+        project: mockDefaultProject,
+        tags: [],
+        newTagTitles: [],
+        date: dateStr,
+        time: timeStr,
+        estimate: null,
+        cleanText: null,
+      };
+      mockStateService.state.and.returnValue(mockState);
+
+      service.parseAndUpdateText(
+        'Task with date',
+        mockConfig,
+        mockProjects,
+        mockTags,
+        mockDefaultProject,
+        dateStr,
+        timeStr,
+      );
+
+      // Should preserve the date string as-is
+      expect(mockStateService.updateDate).toHaveBeenCalledWith(dateStr, timeStr);
+    });
+
+    it('should handle dates near DST transitions', () => {
+      // Test spring forward (March DST transition in many timezones)
+      const springDateStr = '2024-03-10';
+      const springTimeStr = '02:30';
+
+      const mockState = {
+        project: mockDefaultProject,
+        tags: [],
+        newTagTitles: [],
+        date: null,
+        time: null,
+        estimate: null,
+        cleanText: null,
+      };
+      mockStateService.state.and.returnValue(mockState);
+
+      service.parseAndUpdateText(
+        'DST test task',
+        mockConfig,
+        mockProjects,
+        mockTags,
+        mockDefaultProject,
+        springDateStr,
+        springTimeStr,
+      );
+
+      expect(mockStateService.updateDate).toHaveBeenCalledWith(
+        springDateStr,
+        springTimeStr,
+      );
+    });
+
+    it('should handle dates at year boundaries', () => {
+      // Test New Year's Eve
+      const newYearDateStr = '2024-12-31';
+      const newYearTimeStr = '23:59';
+
+      const mockState = {
+        project: mockDefaultProject,
+        tags: [],
+        newTagTitles: [],
+        date: null,
+        time: null,
+        estimate: null,
+        cleanText: null,
+      };
+      mockStateService.state.and.returnValue(mockState);
+
+      service.parseAndUpdateText(
+        'New Year task',
+        mockConfig,
+        mockProjects,
+        mockTags,
+        mockDefaultProject,
+        newYearDateStr,
+        newYearTimeStr,
+      );
+
+      expect(mockStateService.updateDate).toHaveBeenCalledWith(
+        newYearDateStr,
+        newYearTimeStr,
+      );
+    });
+
+    it('should maintain date consistency when parsing date-only strings', () => {
+      const dateStr = '2025-01-01';
+
+      const mockState = {
+        project: mockDefaultProject,
+        tags: [],
+        newTagTitles: [],
+        date: null,
+        time: null,
+        estimate: null,
+        cleanText: null,
+      };
+      mockStateService.state.and.returnValue(mockState);
+
+      service.parseAndUpdateText(
+        'Task',
+        mockConfig,
+        mockProjects,
+        mockTags,
+        mockDefaultProject,
+        dateStr,
+        undefined,
+      );
+
+      // Date should be passed through without modification
+      expect(mockStateService.updateDate).toHaveBeenCalledWith(dateStr, null);
+    });
+
+    it('should handle midnight time correctly', () => {
+      const dateStr = '2025-01-15';
+      const midnightTime = '00:00';
+
+      const mockState = {
+        project: mockDefaultProject,
+        tags: [],
+        newTagTitles: [],
+        date: null,
+        time: null,
+        estimate: null,
+        cleanText: null,
+      };
+      mockStateService.state.and.returnValue(mockState);
+
+      service.parseAndUpdateText(
+        'Midnight task',
+        mockConfig,
+        mockProjects,
+        mockTags,
+        mockDefaultProject,
+        dateStr,
+        midnightTime,
+      );
+
+      expect(mockStateService.updateDate).toHaveBeenCalledWith(dateStr, midnightTime);
+    });
+  });
+
   describe('private helper methods', () => {
     // Access private methods for testing
     let serviceAny: any;

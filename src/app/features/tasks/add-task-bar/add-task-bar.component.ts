@@ -375,7 +375,11 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     };
 
     if (state.date) {
-      const date = new Date(state.date);
+      // Parse date components to create date in local timezone
+      // This avoids timezone issues when parsing date strings like "2024-01-15"
+      const [year, month, day] = state.date.split('-').map(Number);
+      const date = new Date(year, month - 1, day);
+
       if (state.time) {
         // TODO we need to add unit tests to confirm this works
         const [hours, minutes] = state.time.split(':').map(Number);
@@ -383,7 +387,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
         taskData.dueWithTime = date.getTime();
         taskData.hasPlannedTime = true;
       } else {
-        taskData.dueDay = getDbDateStr(date);
+        taskData.dueDay = state.date;
       }
     }
 

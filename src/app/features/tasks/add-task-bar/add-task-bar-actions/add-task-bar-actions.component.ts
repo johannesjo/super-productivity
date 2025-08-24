@@ -23,10 +23,11 @@ import { AddTaskBarParserService } from '../add-task-bar-parser.service';
 import { ESTIMATE_OPTIONS } from '../add-task-bar.const';
 import { stringToMs } from '../../../../ui/duration/string-to-ms.pipe';
 import { msToString } from '../../../../ui/duration/ms-to-string.pipe';
-import { getDbDateStr } from '../../../../util/get-db-date-str';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { T } from '../../../../t.const';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { dateStrToUtcDate } from '../../../../util/date-str-to-utc-date';
+import { getDbDateStr } from '../../../../util/get-db-date-str';
 
 @Component({
   selector: 'add-task-bar-actions',
@@ -99,7 +100,7 @@ export class AddTaskBarActionsComponent {
     const state = this.state();
     if (!state.date) return null;
     const today = new Date();
-    const date = new Date(state.date);
+    const date = dateStrToUtcDate(state.date);
     if (this.isSameDate(date, today)) {
       return state.time || this._translateService.instant(T.F.TASK.ADD_TASK_BAR.TODAY);
     }
@@ -124,7 +125,7 @@ export class AddTaskBarActionsComponent {
     const state = this.state();
     const dialogRef = this._matDialog.open(DialogScheduleTaskComponent, {
       data: {
-        targetDay: state.date ? getDbDateStr(state.date) : undefined,
+        targetDay: state.date || undefined,
         targetTime: state.time || undefined,
         isSelectDueOnly: true,
       },
@@ -132,7 +133,7 @@ export class AddTaskBarActionsComponent {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result && typeof result === 'object' && result.date) {
-        this.stateService.updateDate(result.date, result.time);
+        this.stateService.updateDate(getDbDateStr(result.date), result.time);
       }
       this.refocus.emit();
     });
