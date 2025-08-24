@@ -53,7 +53,7 @@
   display: flex;
   color: var(--text-color-most-intense);
 
-  .task-input {
+  .main-input {
     flex: 1;
     display: block;
     width: 100%;
@@ -63,8 +63,9 @@
     border-style: solid;
     border-width: 0;
     outline: 0;
-    padding-right: 4px;
     padding-left: var(--s2);
+    // enough space for three buttons
+    padding-right: 126px;
     line-height: 42px;
     background: transparent;
     color: inherit;
@@ -79,6 +80,9 @@
     margin-left: auto;
     z-index: 2;
     display: flex;
+    position: absolute;
+    top: 0;
+    right: 0;
   }
 
   .separator-box {
