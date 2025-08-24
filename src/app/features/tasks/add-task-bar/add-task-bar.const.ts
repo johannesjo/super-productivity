@@ -4,7 +4,7 @@ import { Tag } from '../../tag/tag.model';
 export interface AddTaskBarState {
   project: Project | null;
   tags: Tag[];
-  date: Date | null;
+  date: string | null;
   time: string | null;
   estimate: number | null;
   newTagTitles: string[];
