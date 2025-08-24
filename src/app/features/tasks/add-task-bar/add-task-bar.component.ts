@@ -514,10 +514,12 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   toggleIsAddToBottom(): void {
     this.isAddToBottom.update((v) => !v);
     localStorage.setItem(LS.IS_ADD_TO_BOTTOM, JSON.stringify(this.isAddToBottom()));
+    this._focusInput();
   }
 
   toggleIsAddToBacklog(): void {
     this.isAddToBacklog.update((v) => !v);
+    this._focusInput();
   }
 
   toggleSearchMode(): void {
@@ -591,16 +593,18 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       window.clearTimeout(this._focusTimeout);
     }
 
+    document.body.focus();
+    window.setTimeout(() => this.inputEl()?.nativeElement.focus());
+
     // Set new timeout
     if (IS_ANDROID_WEB_VIEW) {
       this._focusTimeout = window.setTimeout(() => {
-        const inputElement = this.inputEl()?.nativeElement;
-        if (inputElement) {
-          inputElement.focus();
-          if (selectAll) {
-            inputElement.select();
-          }
+        document.body.focus();
+        this.inputEl()?.nativeElement.focus();
+        if (selectAll) {
+          this.inputEl()?.nativeElement.select();
         }
+        this._focusTimeout = undefined;
       }, 1000);
     } else {
       this._focusTimeout = window.setTimeout(() => {
