@@ -236,30 +236,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   private _autocompleteTimeout?: number;
   private _processingAutocompleteSelection = false;
 
-  constructor() {
-    // Watch inputTxt signal changes for text parsing and saving
-    // Monitor state changes and refocus input when user selects values
-    // This catches all state changes regardless of input method (mouse, keyboard, etc.)
-    // let isFirstRun = true;
-    // effect(() => {
-    //   // Track state changes
-    //   this.stateService.state();
-    //
-    //   // Skip first run to avoid refocusing on initial state
-    //   if (isFirstRun) {
-    //     isFirstRun = false;
-    //     return;
-    //   }
-    //
-    //   // Refocus input when state changes (user selected something)
-    //   this.focusInput();
-    // });
-    //
-    // effect(() => {
-    //   console.log(this.stateService.state());
-    // });
-  }
-
   ngOnInit(): void {
     this._setProjectInitially();
     this._setupDefaultDate();
@@ -613,7 +589,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
           this.inputEl()?.nativeElement.select();
         }
         this._focusTimeout = undefined;
-      }, 1000);
+      }, 200);
     } else {
       this._focusTimeout = window.setTimeout(() => {
         const inputElement = this.inputEl()?.nativeElement;
