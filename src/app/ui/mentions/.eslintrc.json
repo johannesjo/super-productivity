@@ -1,0 +1,14 @@
+{
+  "extends": ["../../../../.eslintrc.json"],
+  "rules": {
+    "@typescript-eslint/no-unused-vars": "warn",
+    "@typescript-eslint/naming-convention": "off",
+    "@angular-eslint/prefer-standalone": "off",
+    "@angular-eslint/prefer-inject": "off",
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/no-shadow": "off",
+    "prefer-const": "warn",
+    "no-var": "warn",
+    "prefer-arrow/prefer-arrow-functions": "off"
+  }
+}

@@ -198,7 +198,6 @@
     "@typescript-eslint/types": "^8.17.0",
     "@typescript-eslint/utils": "^8.35.1",
     "angular-material-css-vars": "^9.1.1",
-    "angular-mentions": "^1.5.0",
     "canvas-confetti": "^1.9.3",
     "chai": "^5.1.2",
     "chart.js": "^4.4.7",
@@ -256,9 +255,6 @@
     "typia": "^9.1.0"
   },
   "overrides": {
-    "angular-mentions": {
-      "@angular/common": "$@angular/common"
-    },
     "ngx-markdown": {
       "marked": "12.0.2"
     }
