@@ -787,4 +787,167 @@ describe('AddTaskBarActionsComponent', () => {
       expect(component.allProjects()).not.toContain(hiddenProject);
     });
   });
+
+  describe('Cross-Timezone Date Display', () => {
+    it('should correctly identify today across timezones', () => {
+      // Get today's date string in local timezone
+      const today = getDbDateStr(new Date());
+
+      const stateWithToday = {
+        ...mockState,
+        date: today,
+        time: null,
+      };
+      (mockStateService as any)._mockStateSignal.set(stateWithToday);
+      fixture.detectChanges();
+
+      const result = component.dateDisplay();
+      expect(result).toBe('Today');
+    });
+
+    it('should handle date display near midnight in different timezones', () => {
+      // Create a date that would be "tomorrow" if interpreted as UTC
+      // but is still "today" in local timezone
+      const now = new Date();
+
+      // Create a date at 23:45 local time
+      const lateTonight = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        23,
+        45,
+      );
+      const lateTonightStr = getDbDateStr(lateTonight);
+
+      const stateWithLateTime = {
+        ...mockState,
+        date: lateTonightStr,
+        time: '23:45',
+      };
+      (mockStateService as any)._mockStateSignal.set(stateWithLateTime);
+      fixture.detectChanges();
+
+      // Should still be today if the date string represents today
+      const result = component.dateDisplay();
+      if (lateTonightStr === getDbDateStr(new Date())) {
+        expect(result).toBe('23:45'); // Shows time when it's today with time
+      } else {
+        expect(result).toContain('23:45'); // Shows date with time
+      }
+    });
+
+    it('should correctly identify tomorrow across DST transitions', () => {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowStr = getDbDateStr(tomorrow);
+
+      const stateWithTomorrow = {
+        ...mockState,
+        date: tomorrowStr,
+        time: null,
+      };
+      (mockStateService as any)._mockStateSignal.set(stateWithTomorrow);
+      fixture.detectChanges();
+
+      const result = component.dateDisplay();
+      expect(result).toBe('Tomorrow');
+    });
+
+    it('should handle dates near year boundaries correctly', () => {
+      // Test New Year's Eve
+      const newYearEve = '2025-12-31';
+      const stateWithNewYearEve = {
+        ...mockState,
+        date: newYearEve,
+        time: '23:30',
+      };
+      (mockStateService as any)._mockStateSignal.set(stateWithNewYearEve);
+      fixture.detectChanges();
+
+      const result = component.dateDisplay();
+      expect(result).toContain('Dec'); // Should show month
+      expect(result).toContain('31'); // Should show day
+      expect(result).toContain('23:30'); // Should show time
+    });
+
+    it('should format dates consistently regardless of timezone', () => {
+      // Test a specific date that could be interpreted differently in different timezones
+      const testDate = '2025-06-15'; // Mid-year date
+      const testTime = '12:00';
+
+      const stateWithSpecificDate = {
+        ...mockState,
+        date: testDate,
+        time: testTime,
+      };
+      (mockStateService as any)._mockStateSignal.set(stateWithSpecificDate);
+      fixture.detectChanges();
+
+      const result = component.dateDisplay();
+      expect(result).toContain('Jun'); // Month should be June
+      expect(result).toContain('15'); // Day should be 15
+      expect(result).toContain('12:00'); // Time should be preserved
+    });
+  });
+
+  describe('Schedule Dialog Timezone Handling', () => {
+    it('should handle dialog results with dates from different timezones', () => {
+      // Simulate a dialog result with a Date object that might come from a date picker
+      const selectedDate = new Date(2025, 2, 15, 10, 30, 0); // March 15, 2025 at 10:30 AM
+      const mockResult = {
+        date: selectedDate,
+        time: '15:00', // User changed time to 3 PM
+      };
+      mockDialogRef.afterClosed.and.returnValue(of(mockResult));
+
+      component.openScheduleDialog();
+
+      // Should convert the Date to string format for consistency
+      expect(mockStateService.updateDate).toHaveBeenCalledWith(
+        '2025-03-15', // Date converted to string format
+        '15:00', // Time preserved
+      );
+    });
+
+    it('should preserve date consistency when opening dialog with existing date', () => {
+      // Set a date in the state
+      const existingDate = '2025-07-20';
+      const existingTime = '09:15';
+
+      const stateWithDate = {
+        ...mockState,
+        date: existingDate,
+        time: existingTime,
+      };
+      (mockStateService as any)._mockStateSignal.set(stateWithDate);
+      fixture.detectChanges();
+
+      component.openScheduleDialog();
+
+      // Dialog should be opened with the string date, not converted to Date object
+      expect(mockMatDialog.open).toHaveBeenCalledWith(
+        jasmine.any(Function), // DialogScheduleTaskComponent
+        {
+          data: {
+            isSelectDueOnly: true,
+            targetDay: existingDate, // Should remain as string
+            targetTime: existingTime,
+          },
+        },
+      );
+    });
+
+    it('should handle midnight times correctly in dialog', () => {
+      const midnightResult = {
+        date: new Date(2025, 0, 1, 0, 0, 0), // Jan 1, 2025 at midnight
+        time: '00:00',
+      };
+      mockDialogRef.afterClosed.and.returnValue(of(midnightResult));
+
+      component.openScheduleDialog();
+
+      expect(mockStateService.updateDate).toHaveBeenCalledWith('2025-01-01', '00:00');
+    });
+  });
 });
