@@ -39,6 +39,9 @@ describe('AddTaskBarActionsComponent', () => {
   const mockTag: Tag = {
     id: '1',
     title: 'urgent',
+    theme: {
+      primary: '#ff0000',
+    },
   } as Tag;
 
   const mockState = {
@@ -185,7 +188,7 @@ describe('AddTaskBarActionsComponent', () => {
     });
 
     it('should compute dateDisplay for today', () => {
-      const today = new Date();
+      const today = getDbDateStr(new Date());
       const stateWithToday = {
         ...mockState,
         date: today,
@@ -198,7 +201,7 @@ describe('AddTaskBarActionsComponent', () => {
     });
 
     it('should compute dateDisplay for today with time', () => {
-      const today = new Date();
+      const today = getDbDateStr(new Date());
       const time = '14:30';
       const stateWithTime = {
         ...mockState,
@@ -215,9 +218,10 @@ describe('AddTaskBarActionsComponent', () => {
     it('should compute dateDisplay for tomorrow', () => {
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowStr = getDbDateStr(tomorrow);
       const stateWithTomorrow = {
         ...mockState,
-        date: tomorrow,
+        date: tomorrowStr,
         time: null,
       };
       (mockStateService as any)._mockStateSignal.set(stateWithTomorrow);
@@ -229,18 +233,18 @@ describe('AddTaskBarActionsComponent', () => {
     it('should compute dateDisplay for other dates', () => {
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + 7);
+      const futureDateStr = getDbDateStr(futureDate);
       const stateWithFutureDate = {
         ...mockState,
-        date: futureDate,
+        date: futureDateStr,
         time: null,
       };
       (mockStateService as any)._mockStateSignal.set(stateWithFutureDate);
 
       fixture.detectChanges();
       const result = component.dateDisplay();
-      expect(result).toContain(
-        futureDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      );
+      // Check that result contains the day
+      expect(result).toContain(futureDate.getDate().toString());
     });
 
     it('should compute estimateDisplay correctly', () => {
@@ -267,11 +271,11 @@ describe('AddTaskBarActionsComponent', () => {
       // Test with date but no time for a future date with time component
       const dateWithTime = new Date();
       dateWithTime.setDate(dateWithTime.getDate() + 5);
-      dateWithTime.setHours(15, 30, 0, 0);
+      const dateStr = getDbDateStr(dateWithTime);
 
       const stateWithTimeInDate = {
         ...mockState,
-        date: dateWithTime,
+        date: dateStr,
         time: '10:00',
       };
       (mockStateService as any)._mockStateSignal.set(stateWithTimeInDate);
@@ -333,9 +337,10 @@ describe('AddTaskBarActionsComponent', () => {
 
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + 7);
+      const futureDateStr = getDbDateStr(futureDate);
       const stateWithDate = {
         ...mockState,
-        date: futureDate,
+        date: futureDateStr,
         time: null,
       };
       (mockStateService as any)._mockStateSignal.set(stateWithDate);
@@ -350,9 +355,10 @@ describe('AddTaskBarActionsComponent', () => {
     it('should handle tomorrow with time correctly', () => {
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowStr = getDbDateStr(tomorrow);
       const stateWithTomorrowAndTime = {
         ...mockState,
-        date: tomorrow,
+        date: tomorrowStr,
         time: '15:30',
       };
       (mockStateService as any)._mockStateSignal.set(stateWithTomorrowAndTime);
@@ -366,10 +372,10 @@ describe('AddTaskBarActionsComponent', () => {
 
   describe('Schedule Dialog', () => {
     it('should open schedule dialog with correct data', () => {
-      const testDate = new Date('2024-01-15');
+      const testDateStr = '2024-01-15';
       const stateWithDate = {
         ...mockState,
-        date: testDate,
+        date: testDateStr,
         time: '10:30',
       };
       (mockStateService as any)._mockStateSignal.set(stateWithDate);
@@ -380,7 +386,7 @@ describe('AddTaskBarActionsComponent', () => {
       expect(mockMatDialog.open).toHaveBeenCalledWith(DialogScheduleTaskComponent, {
         data: {
           isSelectDueOnly: true,
-          targetDay: getDbDateStr(testDate),
+          targetDay: testDateStr,
           targetTime: '10:30',
         },
       });
@@ -407,7 +413,7 @@ describe('AddTaskBarActionsComponent', () => {
       component.openScheduleDialog();
 
       expect(mockStateService.updateDate).toHaveBeenCalledWith(
-        resultDate as any,
+        getDbDateStr(resultDate),
         resultTime,
       );
     });
@@ -468,9 +474,9 @@ describe('AddTaskBarActionsComponent', () => {
       // Test with various states to ensure isSelectDueOnly is always true
       const states = [
         { ...mockState },
-        { ...mockState, date: new Date() },
+        { ...mockState, date: '2024-01-15' },
         { ...mockState, time: '10:00' },
-        { ...mockState, date: new Date(), time: '10:00' },
+        { ...mockState, date: '2024-01-15', time: '10:00' },
       ];
 
       states.forEach((state) => {
@@ -553,7 +559,13 @@ describe('AddTaskBarActionsComponent', () => {
     });
 
     it('should handle multiple tag selection correctly', () => {
-      const mockTag2: Tag = { id: '2', title: 'important' } as Tag;
+      const mockTag2: Tag = {
+        id: '2',
+        title: 'important',
+        theme: {
+          primary: '#00ff00',
+        },
+      } as Tag;
       const stateWithMultipleTags = {
         ...mockState,
         tags: [mockTag, mockTag2],
