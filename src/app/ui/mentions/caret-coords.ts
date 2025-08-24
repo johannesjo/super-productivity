@@ -7,7 +7,7 @@
 // Note that some browsers, such as Firefox, do not concatenate properties
 // into their shorthand (e.g. padding-top, padding-bottom etc. -> padding),
 // so we have to list every single property explicitly.
-var properties = [
+const properties = [
   'direction', // RTL support
   'boxSizing',
   'width', // on Chrome and IE, exclude the scrollbar, so the mirror div wraps exactly as the textarea does
@@ -48,32 +48,36 @@ var properties = [
   'MozTabSize',
 ];
 
-var isBrowser = typeof window !== 'undefined';
-var isFirefox = isBrowser && window['mozInnerScreenX'] != null;
+const isBrowser = typeof window !== 'undefined';
+const isFirefox = isBrowser && window['mozInnerScreenX'] != null;
 
-export function getCaretCoordinates(element, position, options) {
+export const getCaretCoordinates = (
+  element: any,
+  position: number,
+  options: any,
+): any => {
   if (!isBrowser) {
     throw new Error(
       'textarea-caret-position#getCaretCoordinates should only be called in a browser',
     );
   }
 
-  var debug = (options && options.debug) || false;
+  const debug = (options && options.debug) || false;
   if (debug) {
-    var el = document.querySelector('#input-textarea-caret-position-mirror-div');
+    const el = document.querySelector('#input-textarea-caret-position-mirror-div');
     if (el && el.parentNode) el.parentNode.removeChild(el);
   }
 
   // The mirror div will replicate the textarea's style
-  var div = document.createElement('div');
+  const div = document.createElement('div');
   div.id = 'input-textarea-caret-position-mirror-div';
   document.body.appendChild(div);
 
-  var style = div.style;
-  var computed = window.getComputedStyle
+  const style = div.style;
+  const computed = window.getComputedStyle
     ? window.getComputedStyle(element)
     : element.currentStyle; // currentStyle for IE < 9
-  var isInput = element.nodeName === 'INPUT';
+  const isInput = element.nodeName === 'INPUT';
 
   // Default textarea styles
   style.whiteSpace = 'pre-wrap';
@@ -84,17 +88,17 @@ export function getCaretCoordinates(element, position, options) {
   if (!debug) style.visibility = 'hidden'; // not 'display: none' because we want rendering
 
   // Transfer the element's properties to the div
-  properties.forEach(function (prop) {
+  properties.forEach((prop) => {
     if (isInput && prop === 'lineHeight') {
       // Special case for <input>s because text is rendered centered and line height may be != height
       if (computed.boxSizing === 'border-box') {
-        var height = parseInt(computed.height);
-        var outerHeight =
+        const height = parseInt(computed.height);
+        const outerHeight =
           parseInt(computed.paddingTop) +
           parseInt(computed.paddingBottom) +
           parseInt(computed.borderTopWidth) +
           parseInt(computed.borderBottomWidth);
-        var targetHeight = outerHeight + parseInt(computed.lineHeight);
+        const targetHeight = outerHeight + parseInt(computed.lineHeight);
         if (height > targetHeight) {
           style.lineHeight = height - outerHeight + 'px';
         } else if (height === targetHeight) {
@@ -124,7 +128,7 @@ export function getCaretCoordinates(element, position, options) {
     div.textContent = div.textContent.replace(/\s/g, '\u00a0');
   }
 
-  var span = document.createElement('span');
+  const span = document.createElement('span');
   // Wrapping must be replicated *exactly*, including when a long word gets
   // onto the next line, with whitespace at the end of the line before (#7).
   // The  *only* reliable way to do that is to copy the *entire* rest of the
@@ -133,7 +137,7 @@ export function getCaretCoordinates(element, position, options) {
   span.textContent = element.value.substring(position) || '.'; // || because a completely empty faux span doesn't render at all
   div.appendChild(span);
 
-  var coordinates = {
+  const coordinates = {
     top: span.offsetTop + parseInt(computed['borderTopWidth']),
     left: span.offsetLeft + parseInt(computed['borderLeftWidth']),
     height: parseInt(computed['lineHeight']),
@@ -146,7 +150,7 @@ export function getCaretCoordinates(element, position, options) {
   }
 
   return coordinates;
-}
+};
 
 // if (typeof module != 'undefined' && typeof module.exports != 'undefined') {
 //   module.exports = getCaretCoordinates;

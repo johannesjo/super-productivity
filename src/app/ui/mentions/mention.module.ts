@@ -4,8 +4,7 @@ import { MentionDirective } from './mention.directive';
 import { MentionListComponent } from './mention-list.component';
 
 @NgModule({
-  declarations: [MentionDirective, MentionListComponent],
-  imports: [CommonModule],
-  exports: [MentionDirective],
+  imports: [CommonModule, MentionDirective, MentionListComponent],
+  exports: [MentionDirective, MentionListComponent],
 })
 export class MentionModule {}

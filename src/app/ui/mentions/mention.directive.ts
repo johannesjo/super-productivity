@@ -4,6 +4,7 @@ import {
   ElementRef,
   TemplateRef,
   ViewContainerRef,
+  inject,
 } from '@angular/core';
 import { EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import {
@@ -35,12 +36,15 @@ const KEY_BUFFERED = 229;
 @Directive({
   selector: '[mention], [mentionConfig]',
   host: {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '(keydown)': 'keyHandler($event)',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '(input)': 'inputHandler($event)',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '(blur)': 'blurHandler($event)',
     autocomplete: 'off',
   },
-  standalone: false,
+  standalone: true,
 })
 export class MentionDirective implements OnChanges {
   // stores the items passed to the mentions directive and used to populate the root items in mentionConfig
@@ -101,20 +105,18 @@ export class MentionDirective implements OnChanges {
   private iframe: any; // optional
   private lastKeyCode: number = 0;
 
-  constructor(
-    private _element: ElementRef,
-    private _componentResolver: ComponentFactoryResolver,
-    private _viewContainerRef: ViewContainerRef,
-  ) {}
+  private readonly _element = inject(ElementRef);
+  private readonly _componentResolver = inject(ComponentFactoryResolver);
+  private readonly _viewContainerRef = inject(ViewContainerRef);
 
-  ngOnChanges(changes: SimpleChanges) {
+  ngOnChanges(changes: SimpleChanges): void {
     // console.log('config change', changes);
     if (changes['mention'] || changes['mentionConfig']) {
       this.updateConfig();
     }
   }
 
-  public updateConfig() {
+  public updateConfig(): void {
     const config = this.mentionConfig;
     this.triggerChars = {};
     // use items from directive if they have been set
@@ -124,15 +126,15 @@ export class MentionDirective implements OnChanges {
     this.addConfig(config);
     // nested configs
     if (config.mentions) {
-      config.mentions.forEach((config) => this.addConfig(config));
+      config.mentions.forEach((nestedConfig) => this.addConfig(nestedConfig));
     }
   }
 
   // add configuration for a trigger char
-  private addConfig(config: MentionConfig) {
+  private addConfig(cfg: MentionConfig): void {
     // defaults
     const defaults = Object.assign({}, this.DEFAULT_CONFIG);
-    config = Object.assign(defaults, config);
+    const config = Object.assign(defaults, cfg);
     // items
     let items = config.items;
     if (items && items.length > 0) {
@@ -164,11 +166,11 @@ export class MentionDirective implements OnChanges {
     }
   }
 
-  setIframe(iframe: HTMLIFrameElement) {
+  setIframe(iframe: HTMLIFrameElement): void {
     this.iframe = iframe;
   }
 
-  stopEvent(event: any) {
+  stopEvent(event: any): void {
     //if (event instanceof KeyboardEvent) { // does not work for iframe
     if (!event.wasClick) {
       event.preventDefault();
@@ -177,7 +179,7 @@ export class MentionDirective implements OnChanges {
     }
   }
 
-  blurHandler(event: any) {
+  blurHandler(event: any): void {
     this.stopEvent(event);
     this.stopSearch();
   }
@@ -185,7 +187,7 @@ export class MentionDirective implements OnChanges {
   inputHandler(
     event: any,
     nativeElement: HTMLInputElement = this._element.nativeElement,
-  ) {
+  ): void {
     if (this.lastKeyCode === KEY_BUFFERED && event.data) {
       const keyCode = event.data.charCodeAt(0);
       this.keyHandler({ keyCode, inputEvent: true }, nativeElement);
@@ -343,7 +345,7 @@ export class MentionDirective implements OnChanges {
   public startSearch(
     triggerChar?: string,
     nativeElement: HTMLInputElement = this._element.nativeElement,
-  ) {
+  ): void {
     triggerChar =
       triggerChar ||
       this.mentionConfig.triggerChar ||
@@ -354,7 +356,7 @@ export class MentionDirective implements OnChanges {
     this.keyHandler({ key: triggerChar, inputEvent: true }, nativeElement);
   }
 
-  stopSearch() {
+  stopSearch(): void {
     if (this.searchList && !this.searchList.hidden) {
       this.searchList.hidden = true;
       this.closed.emit();
@@ -363,7 +365,7 @@ export class MentionDirective implements OnChanges {
     this.searching = false;
   }
 
-  updateSearchList() {
+  updateSearchList(): void {
     let matches: any[] = [];
     if (this.activeConfig && this.activeConfig.items) {
       let objects = this.activeConfig.items;
@@ -393,7 +395,7 @@ export class MentionDirective implements OnChanges {
     }
   }
 
-  showSearchList(nativeElement: HTMLInputElement) {
+  showSearchList(nativeElement: HTMLInputElement): void {
     this.opened.emit();
 
     if (this.searchList == null) {

@@ -7,7 +7,9 @@ import {
   Input,
   TemplateRef,
   AfterContentChecked,
+  inject,
 } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 import { isInputOrTextAreaElement, getContentEditableCaretCoords } from './mention-utils';
 import { getCaretCoordinates } from './caret-coords';
@@ -21,6 +23,7 @@ import { getCaretCoordinates } from './caret-coords';
 @Component({
   selector: 'mention-list',
   styleUrls: ['./mention-list.component.scss'],
+  imports: [CommonModule],
   template: `
     <ng-template
       #defaultItemTemplate
@@ -53,7 +56,7 @@ import { getCaretCoordinates } from './caret-coords';
       </li>
     </ul>
   `,
-  standalone: false,
+  standalone: true,
 })
 export class MentionListComponent implements AfterContentChecked {
   @Input() labelKey: string = 'label';
@@ -69,9 +72,9 @@ export class MentionListComponent implements AfterContentChecked {
   styleOff: boolean = false;
   private coords: { top: number; left: number } = { top: 0, left: 0 };
   private offset: number = 0;
-  constructor(private element: ElementRef) {}
+  private readonly element = inject(ElementRef);
 
-  ngAfterContentChecked() {
+  ngAfterContentChecked(): void {
     if (!this.itemTemplate) {
       this.itemTemplate = this.defaultItemTemplate;
     }
@@ -81,12 +84,12 @@ export class MentionListComponent implements AfterContentChecked {
   position(
     nativeParentElement: HTMLInputElement,
     iframe: HTMLIFrameElement | null = null,
-  ) {
+  ): void {
     if (isInputOrTextAreaElement(nativeParentElement)) {
       // parent elements need to have postition:relative for this to work correctly?
       this.coords = getCaretCoordinates(
         nativeParentElement,
-        nativeParentElement.selectionStart,
+        nativeParentElement.selectionStart || 0,
         null,
       );
       this.coords.top =
@@ -129,11 +132,11 @@ export class MentionListComponent implements AfterContentChecked {
     this.positionElement();
   }
 
-  get activeItem() {
+  get activeItem(): any {
     return this.items[this.activeIndex];
   }
 
-  activateNextItem() {
+  activateNextItem(): void {
     // adjust scrollable-menu offset if the next item is out of view
     const listEl: HTMLElement = this.list.nativeElement;
     const activeEl = listEl.getElementsByClassName('active').item(0);
@@ -150,7 +153,7 @@ export class MentionListComponent implements AfterContentChecked {
     this.activeIndex = Math.max(Math.min(this.activeIndex + 1, this.items.length - 1), 0);
   }
 
-  activatePreviousItem() {
+  activatePreviousItem(): void {
     // adjust the scrollable-menu offset if the previous item is out of view
     const listEl: HTMLElement = this.list.nativeElement;
     const activeEl = listEl.getElementsByClassName('active').item(0);
@@ -168,17 +171,17 @@ export class MentionListComponent implements AfterContentChecked {
   }
 
   // reset for a new mention search
-  reset() {
+  reset(): void {
     this.list.nativeElement.scrollTop = 0;
     this.checkBounds();
   }
 
   // final positioning is done after the list is shown (and the height and width are known)
   // ensure it's in the page bounds
-  private checkBounds() {
-    let left = this.coords.left,
-      top = this.coords.top,
-      dropUp = this.dropUp;
+  private checkBounds(): void {
+    let left = this.coords.left;
+    const top = this.coords.top;
+    let dropUp = this.dropUp;
     const bounds: ClientRect = this.list.nativeElement.getBoundingClientRect();
     // if off right of page, align right
     if (bounds.left + bounds.width > window.innerWidth) {
@@ -200,7 +203,7 @@ export class MentionListComponent implements AfterContentChecked {
     left: number = this.coords.left,
     top: number = this.coords.top,
     dropUp: boolean = this.dropUp,
-  ) {
+  ): void {
     const el: HTMLElement = this.element.nativeElement;
     top += dropUp ? 0 : this.offset; // top of list is next line
     el.className = dropUp ? 'dropup' : '';
@@ -209,7 +212,10 @@ export class MentionListComponent implements AfterContentChecked {
     el.style.top = top + 'px';
   }
 
-  private getBlockCursorDimensions(nativeParentElement: HTMLInputElement) {
+  private getBlockCursorDimensions(nativeParentElement: HTMLInputElement): {
+    height: number;
+    width: number;
+  } {
     const parentStyles = window.getComputedStyle(nativeParentElement);
     return {
       height: parseFloat(parentStyles.lineHeight),

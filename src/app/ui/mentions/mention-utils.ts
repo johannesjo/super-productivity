@@ -1,27 +1,27 @@
 // DOM element manipulation functions...
 //
 
-function setValue(el: HTMLInputElement, value: any) {
+const setValue = (el: HTMLInputElement, value: any): void => {
   //console.log("setValue", el.nodeName, "["+value+"]");
   if (isInputOrTextAreaElement(el)) {
     el.value = value;
   } else {
     el.textContent = value;
   }
-}
+};
 
-export function getValue(el: HTMLInputElement) {
+export const getValue = (el: HTMLInputElement): string | null => {
   return isInputOrTextAreaElement(el) ? el.value : el.textContent;
-}
+};
 
-export function insertValue(
+export const insertValue = (
   el: HTMLInputElement,
   start: number,
   end: number,
   text: string,
   iframe: HTMLIFrameElement | null,
   noRecursion: boolean = false,
-) {
+): void => {
   //console.log("insertValue", el.nodeName, start, end, "["+text+"]", el);
   if (isTextElement(el)) {
     const val = getValue(el);
@@ -32,9 +32,9 @@ export function insertValue(
   } else if (!noRecursion) {
     const selObj = getWindowSelection(iframe);
     if (selObj && selObj.rangeCount > 0) {
-      var selRange = selObj.getRangeAt(0);
-      var position = selRange.startOffset;
-      var anchorNode = selObj.anchorNode;
+      const selRange = selObj.getRangeAt(0);
+      const position = selRange.startOffset;
+      const anchorNode = selObj.anchorNode;
       // if (text.endsWith(' ')) {
       //   text = text.substring(0, text.length-1) + '\xA0';
       // }
@@ -50,97 +50,98 @@ export function insertValue(
       }
     }
   }
-}
+};
 
-export function isInputOrTextAreaElement(el: HTMLElement): boolean {
+export const isInputOrTextAreaElement = (el: HTMLElement): boolean => {
   return el != null && (el.nodeName == 'INPUT' || el.nodeName == 'TEXTAREA');
-}
+};
 
-export function isTextElement(el: HTMLElement): boolean {
+export const isTextElement = (el: HTMLElement): boolean => {
   return (
     el != null &&
     (el.nodeName == 'INPUT' || el.nodeName == 'TEXTAREA' || el.nodeName == '#text')
   );
-}
+};
 
-export function setCaretPosition(
+export const setCaretPosition = (
   el: HTMLInputElement,
   pos: number,
   iframe: HTMLIFrameElement | null = null,
-) {
+): void => {
   //console.log("setCaretPosition", pos, el, iframe==null);
   if (isInputOrTextAreaElement(el) && el.selectionStart) {
     el.focus();
     el.setSelectionRange(pos, pos);
   } else {
-    let range = getDocument(iframe).createRange();
+    const range = getDocument(iframe).createRange();
     range.setStart(el, pos);
     range.collapse(true);
-    let sel = getWindowSelection(iframe);
+    const sel = getWindowSelection(iframe);
     if (sel) {
       sel.removeAllRanges();
       sel.addRange(range);
     }
   }
-}
+};
 
-export function getCaretPosition(
+export const getCaretPosition = (
   el: HTMLInputElement,
   iframe: HTMLIFrameElement | null = null,
-): number {
+): number => {
   //console.log("getCaretPosition", el);
   if (isInputOrTextAreaElement(el)) {
     const val = el.value;
     return val.slice(0, el.selectionStart || 0).length;
   } else {
-    var selObj = getWindowSelection(iframe); //window.getSelection();
+    const selObj = getWindowSelection(iframe); //window.getSelection();
     if (selObj && selObj.rangeCount > 0) {
-      var selRange = selObj.getRangeAt(0);
-      var preCaretRange = selRange.cloneRange();
+      const selRange = selObj.getRangeAt(0);
+      const preCaretRange = selRange.cloneRange();
       preCaretRange.selectNodeContents(el);
       preCaretRange.setEnd(selRange.endContainer, selRange.endOffset);
-      var position = preCaretRange.toString().length;
+      const position = preCaretRange.toString().length;
       return position;
     }
     return 0;
   }
-}
+};
 
 // Based on ment.io functions...
 //
 
-function getDocument(iframe: HTMLIFrameElement | null) {
+const getDocument = (iframe: HTMLIFrameElement | null): Document => {
   if (!iframe) {
     return document;
   } else {
     return iframe.contentWindow?.document || document;
   }
-}
+};
 
-function getWindowSelection(iframe: HTMLIFrameElement | null): Selection | null {
+const getWindowSelection = (iframe: HTMLIFrameElement | null): Selection | null => {
   if (!iframe) {
     return window.getSelection();
   } else {
     return iframe.contentWindow?.getSelection() || null;
   }
-}
+};
 
-export function getContentEditableCaretCoords(ctx: {
+export const getContentEditableCaretCoords = (ctx: {
   iframe: HTMLIFrameElement | null;
   parent?: Element | null;
-}) {
-  let markerTextChar = '\ufeff';
-  let markerId = 'sel_' + new Date().getTime() + '_' + Math.random().toString().substr(2);
-  let doc = getDocument(ctx ? ctx.iframe : null);
-  let sel = getWindowSelection(ctx ? ctx.iframe : null);
+}): { left: number; top: number } => {
+  const markerTextChar = '\ufeff';
+  const markerId =
+    'sel_' + new Date().getTime() + '_' + Math.random().toString().substr(2);
+  const doc = getDocument(ctx ? ctx.iframe : null);
+  const sel = getWindowSelection(ctx ? ctx.iframe : null);
   if (!sel || sel.rangeCount === 0) {
     return { left: 0, top: 0 };
   }
 
-  let prevRange = sel.getRangeAt(0);
+  const prevRange = sel.getRangeAt(0);
 
   // create new range and set postion using prevRange
-  let range = doc.createRange();
+  const range = doc.createRange();
   if (sel.anchorNode) {
     range.setStart(sel.anchorNode, prevRange.startOffset);
     range.setEnd(sel.anchorNode, prevRange.startOffset);
@@ -148,14 +149,14 @@ export function getContentEditableCaretCoords(ctx: {
 
     // Create the marker element containing a single invisible character
     // using DOM methods and insert it at the position in the range
-    let markerEl = doc.createElement('span');
+    const markerEl = doc.createElement('span');
     markerEl.id = markerId;
     markerEl.appendChild(doc.createTextNode(markerTextChar));
     range.insertNode(markerEl);
     sel.removeAllRanges();
     sel.addRange(prevRange);
 
-    let coordinates = {
+    const coordinates = {
       left: 0,
       top: markerEl.offsetHeight,
     };
@@ -168,13 +169,13 @@ export function getContentEditableCaretCoords(ctx: {
     return coordinates;
   }
   return { left: 0, top: 0 };
-}
+};
 
-function localToRelativeCoordinates(
+const localToRelativeCoordinates = (
   ctx: { iframe: HTMLIFrameElement | null; parent?: Element | null },
   element: Element,
   coordinates: { top: number; left: number },
-) {
+): void => {
   let obj = <HTMLElement>element;
   let iframe = ctx ? ctx.iframe : null;
   while (obj) {
@@ -207,4 +208,4 @@ function localToRelativeCoordinates(
       iframe = null;
     }
   }
-}
+};
