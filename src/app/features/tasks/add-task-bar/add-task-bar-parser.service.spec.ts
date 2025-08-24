@@ -134,13 +134,13 @@ describe('AddTaskBarParserService', () => {
 
         expect(mockStateService.updateDate).toHaveBeenCalled();
         const [date, time] = mockStateService.updateDate.calls.mostRecent().args;
-        expect(date).toBeInstanceOf(Date);
-        expect(date?.toISOString().split('T')[0]).toBe(defaultDate);
+        expect(typeof date).toBe('string');
+        expect(date).toBe(defaultDate);
         expect(time).toBe(defaultTime);
       });
 
       it('should preserve current date/time when no syntax present', () => {
-        const currentDate = new Date('2024-02-20');
+        const currentDate = '2024-02-20';
         const currentTime = '14:30';
 
         // Mock state to return current user-selected values
@@ -170,7 +170,7 @@ describe('AddTaskBarParserService', () => {
       });
 
       it('should preserve current date but use default time when no current time', () => {
-        const currentDate = new Date('2024-02-20');
+        const currentDate = '2024-02-20';
         const defaultTime = '09:00';
 
         // Mock state with date but no time
@@ -247,7 +247,7 @@ describe('AddTaskBarParserService', () => {
 
         expect(mockStateService.updateDate).toHaveBeenCalled();
         const [date, time] = mockStateService.updateDate.calls.mostRecent().args;
-        expect(date).toBeInstanceOf(Date);
+        expect(typeof date).toBe('string');
         expect(time).toBe(defaultTime);
       });
     });
@@ -541,32 +541,31 @@ describe('AddTaskBarParserService', () => {
     });
 
     describe('_datesEqual', () => {
-      it('should return true for equal dates', () => {
-        const date1 = new Date('2024-01-15T10:30:00Z');
-        const date2 = new Date('2024-01-15T10:30:00Z');
-        expect(serviceAny._datesEqual(date1, date2)).toBe(true);
+      it('should return true for equal date strings', () => {
+        const dateStr1 = '2024-01-15';
+        const dateStr2 = '2024-01-15';
+        expect(serviceAny._datesEqual(dateStr1, dateStr2)).toBe(true);
         expect(serviceAny._datesEqual(null, null)).toBe(true);
       });
 
-      it('should return false for different dates', () => {
-        const date1 = new Date('2024-01-15T10:30:00Z');
-        const date2 = new Date('2024-01-16T10:30:00Z');
-        expect(serviceAny._datesEqual(date1, date2)).toBe(false);
-        expect(serviceAny._datesEqual(date1, null)).toBe(false);
-        expect(serviceAny._datesEqual(null, date1)).toBe(false);
+      it('should return false for different date strings', () => {
+        const dateStr1 = '2024-01-15';
+        const dateStr2 = '2024-01-16';
+        expect(serviceAny._datesEqual(dateStr1, dateStr2)).toBe(false);
+        expect(serviceAny._datesEqual(dateStr1, null)).toBe(false);
+        expect(serviceAny._datesEqual(null, dateStr1)).toBe(false);
       });
 
-      it('should handle same timestamp different date objects', () => {
-        const timestamp = new Date('2024-01-15T10:30:00Z').getTime();
-        const date1 = new Date(timestamp);
-        const date2 = new Date(timestamp);
-        expect(serviceAny._datesEqual(date1, date2)).toBe(true);
+      it('should handle same date strings', () => {
+        const dateStr1 = '2024-01-15';
+        const dateStr2 = '2024-01-15';
+        expect(serviceAny._datesEqual(dateStr1, dateStr2)).toBe(true);
       });
 
-      it('should handle millisecond differences', () => {
-        const date1 = new Date('2024-01-15T10:30:00.000Z');
-        const date2 = new Date('2024-01-15T10:30:00.001Z');
-        expect(serviceAny._datesEqual(date1, date2)).toBe(false);
+      it('should handle different date strings', () => {
+        const dateStr1 = '2024-01-15';
+        const dateStr2 = '2024-01-16';
+        expect(serviceAny._datesEqual(dateStr1, dateStr2)).toBe(false);
       });
     });
   });

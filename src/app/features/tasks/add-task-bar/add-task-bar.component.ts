@@ -4,7 +4,6 @@ import {
   Component,
   computed,
   DestroyRef,
-  effect,
   ElementRef,
   HostListener,
   inject,

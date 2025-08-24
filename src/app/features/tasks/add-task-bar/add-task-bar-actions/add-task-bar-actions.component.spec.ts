@@ -138,6 +138,7 @@ describe('AddTaskBarActionsComponent', () => {
 
     fixture = TestBed.createComponent(AddTaskBarActionsComponent);
     component = fixture.componentInstance;
+    spyOn(component.refocus, 'emit');
     fixture.detectChanges();
   });
 
@@ -406,35 +407,42 @@ describe('AddTaskBarActionsComponent', () => {
 
       component.openScheduleDialog();
 
-      expect(mockStateService.updateDate).toHaveBeenCalledWith(resultDate, resultTime);
+      expect(mockStateService.updateDate).toHaveBeenCalledWith(
+        resultDate as any,
+        resultTime,
+      );
     });
 
     it('should handle dialog cancellation', () => {
       mockDialogRef.afterClosed.and.returnValue(of(false));
-      const currentState = { ...mockState, date: new Date(), time: '10:00' };
+      const currentState = {
+        ...mockState,
+        date: getDbDateStr(new Date()),
+        time: '10:00',
+      };
       (mockStateService as any)._mockStateSignal.set(currentState);
       fixture.detectChanges();
 
       component.openScheduleDialog();
 
-      expect(mockStateService.updateDate).toHaveBeenCalledWith(
-        currentState.date,
-        currentState.time,
-      );
+      expect(mockStateService.updateDate).not.toHaveBeenCalled();
+      expect(component.refocus.emit).toHaveBeenCalled();
     });
 
     it('should handle dialog result without proper data', () => {
       mockDialogRef.afterClosed.and.returnValue(of('invalid'));
-      const currentState = { ...mockState, date: new Date(), time: '10:00' };
+      const currentState = {
+        ...mockState,
+        date: getDbDateStr(new Date()),
+        time: '10:00',
+      };
       (mockStateService as any)._mockStateSignal.set(currentState);
       fixture.detectChanges();
 
       component.openScheduleDialog();
 
-      expect(mockStateService.updateDate).toHaveBeenCalledWith(
-        currentState.date,
-        currentState.time,
-      );
+      expect(mockStateService.updateDate).not.toHaveBeenCalled();
+      expect(component.refocus.emit).toHaveBeenCalled();
     });
 
     it('should pass time to dialog even when no date is selected', () => {
