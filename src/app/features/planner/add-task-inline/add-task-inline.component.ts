@@ -20,8 +20,9 @@ export class AddTaskInlineComponent {
 
   readonly planForDay = input<string>();
   readonly additionalFields = input<Partial<TaskCopy>>();
-  readonly tagsToRemove = input<string[]>();
+  readonly tagsToRemove = input<string[]>([]);
   readonly taskIdsToExclude = input<string[]>();
+  readonly isNoDefaults = input<boolean>(false);
   readonly afterTaskAdd = output<{ taskId: string; isAddToBottom: boolean }>();
 
   isShowAddTask = false;
