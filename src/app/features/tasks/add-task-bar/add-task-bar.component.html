@@ -9,7 +9,7 @@
       class="main-input nr-of-btns-{{ nrOfRightBtns() }}"
       [(ngModel)]="stateService.inputTxt"
       [tabindex]="tabindex()"
-      [mention]="tagMentions | async"
+      [mention]="tagMentions$ | async"
       [mentionConfig]="mentionCfg$ | async"
       (opened)="isMentionMenuOpen.set(true)"
       (closed)="onMentionClosed()"

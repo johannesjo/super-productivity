@@ -59,6 +59,7 @@ import { unique } from '../../../util/unique';
 import { Log } from '../../../core/log';
 import { CHRONO_SUGGESTIONS } from './add-task-bar.const';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { ShortSyntaxTag } from './short-syntax-to-tags';
 
 @Component({
   selector: 'add-task-bar',
@@ -190,7 +191,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   private readonly _isSearchIssueProviders$ = toObservable(this.isSearchMode);
 
   // Tag mention functionality - will be initialized in ngOnInit
-  tagMentions!: Observable<any>;
+  tagMentions$: Observable<ShortSyntaxTag[]> =
+    this._addTaskBarIssueSearchService.getShortSyntaxTags$(this.stateService.inputTxt$);
+
   mentionCfg$ = combineLatest([
     this._globalConfigService.shortSyntax$,
     this._tagService.tagsNoMyDayAndNoList$,
@@ -241,7 +244,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     this._setupDefaultDate();
     this._setupTextParsing();
     this._setupSuggestions();
-    this._setupTagMentions();
   }
 
   ngAfterViewInit(): void {
@@ -319,12 +321,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
           this.onTaskSuggestionActivated(null);
         }
       });
-  }
-
-  private _setupTagMentions(): void {
-    this.tagMentions = this._addTaskBarIssueSearchService.getShortSyntaxTags$(
-      this.stateService.inputTxt$,
-    );
   }
 
   // Public methods
