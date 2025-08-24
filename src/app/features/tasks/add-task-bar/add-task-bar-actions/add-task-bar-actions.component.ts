@@ -20,7 +20,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogScheduleTaskComponent } from '../../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { AddTaskBarStateService } from '../add-task-bar-state.service';
 import { AddTaskBarParserService } from '../add-task-bar-parser.service';
-import { ESTIMATE_OPTIONS, TIME_OPTIONS } from '../add-task-bar.const';
+import { ESTIMATE_OPTIONS } from '../add-task-bar.const';
 import { stringToMs } from '../../../../ui/duration/string-to-ms.pipe';
 import { msToString } from '../../../../ui/duration/ms-to-string.pipe';
 import { getDbDateStr } from '../../../../util/get-db-date-str';
@@ -84,7 +84,6 @@ export class AddTaskBarActionsComponent {
   );
 
   // Constants
-  readonly TIME_OPTIONS = TIME_OPTIONS;
   readonly ESTIMATE_OPTIONS = ESTIMATE_OPTIONS;
 
   // View children

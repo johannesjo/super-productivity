@@ -138,30 +138,19 @@
       (click)="toggleTagWithSyntax(tag)"
       [class.selected]="hasSelectedTag(tag.id)"
     >
-      <mat-icon [style.color]="tag.color || tag.theme?.primary">
-        {{ hasSelectedTag(tag.id) ? 'check_box' : 'check_box_outline_blank' }}
+      @if (hasSelectedTag(tag.id)) {
+        <mat-icon class="check-ico">check_box</mat-icon>
+      } @else {
+        <mat-icon class="check-ico">check_box_outline_blank</mat-icon>
+      }
+      <mat-icon
+        [style.color]="tag.color || tag.theme.primary"
+        class="tag-ico"
+        >{{ tag.icon || 'label' }}
       </mat-icon>
       {{ tag.title }}
     </button>
   }
-</mat-menu>
-
-<mat-menu #timeMenu="matMenu">
-  @for (time of TIME_OPTIONS; track time) {
-    <button
-      mat-menu-item
-      (click)="stateService.updateTime(time)"
-    >
-      {{ time }}
-    </button>
-  }
-  <button
-    mat-menu-item
-    (click)="stateService.updateTime(null)"
-  >
-    <mat-icon>clear</mat-icon>
-    {{ T.F.TASK.ADD_TASK_BAR.NO_TIME | translate }}
-  </button>
 </mat-menu>
 
 <mat-menu #estimateMenu="matMenu">
