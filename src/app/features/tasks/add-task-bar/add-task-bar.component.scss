@@ -15,6 +15,8 @@
 
     @include mq(xs, max) {
       transform: translateX(0) !important;
+      left: 4px;
+      right: 4px;
     }
 
     @include mq(xs) {
