@@ -25,7 +25,7 @@ import { AsyncPipe } from '@angular/common';
 import { LS } from '../../../core/persistence/storage-keys.const';
 import { blendInOutAnimation } from 'src/app/ui/animations/blend-in-out.ani';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
-import { TaskCopy } from '../task.model';
+import { TaskCopy, TaskReminderOptionId } from '../task.model';
 import { TaskService } from '../task.service';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { WorkContextType } from '../../work-context/work-context.model';
@@ -34,7 +34,7 @@ import { TagService } from '../../tag/tag.service';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { AddTaskBarIssueSearchService } from './add-task-bar-issue-search.service';
 import { T } from '../../../t.const';
-import { distinctUntilChanged, first, map } from 'rxjs/operators';
+import { distinctUntilChanged, first, map, timeout } from 'rxjs/operators';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
@@ -399,6 +399,20 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       taskData,
       this.isAddToBottom(),
     );
+
+    if (taskData.dueWithTime) {
+      this._taskService
+        .getByIdOnce$(taskId)
+        .pipe(timeout(1000))
+        .subscribe((task) => {
+          this._taskService.scheduleTask(
+            task,
+            taskData.dueWithTime!,
+            TaskReminderOptionId.AtStart,
+            this.isAddToBacklog(),
+          );
+        });
+    }
 
     this.afterTaskAdd.emit({ taskId, isAddToBottom: this.isAddToBottom() });
     this._resetAfterAdd();
