@@ -67,11 +67,20 @@
     outline: 0;
     padding-left: var(--s2);
     // enough space for three buttons
-    padding-right: 126px;
     line-height: 42px;
     background: transparent;
     color: inherit;
     font-family: inherit;
+
+    padding-right: 84px;
+
+    &.nr-of-btns-3 {
+      padding-right: 126px;
+    }
+
+    &.nr-of-btns-4 {
+      padding-right: 166px;
+    }
 
     &::placeholder {
       opacity: 0.6;

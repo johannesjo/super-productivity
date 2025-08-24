@@ -130,6 +130,16 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   isMentionMenuOpen = signal(false);
 
   hasNewTags = computed(() => this.stateService.state().newTagTitles.length > 0);
+  nrOfRightBtns = computed(() => {
+    let count = 2;
+    if (this.stateService.inputTxt().length > 0) {
+      count++;
+    }
+    if (this.stateService.state().project?.isEnableBacklog) {
+      count++;
+    }
+    return count;
+  });
 
   // Observables
   projects$ = this._projectService.list$.pipe(

@@ -6,7 +6,7 @@
   <div class="input-section">
     <input
       #inputEl
-      class="main-input"
+      class="main-input nr-of-btns-{{ nrOfRightBtns() }}"
       [(ngModel)]="stateService.inputTxt"
       [tabindex]="tabindex()"
       [mention]="tagMentions | async"
