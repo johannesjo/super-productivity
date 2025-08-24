@@ -93,7 +93,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   private readonly _projectService = inject(ProjectService);
   private readonly _tagService = inject(TagService);
   private readonly _globalConfigService = inject(GlobalConfigService);
-  private readonly _addTaskBarService = inject(AddTaskBarIssueSearchService);
+  private readonly _addTaskBarIssueSearchService = inject(AddTaskBarIssueSearchService);
   private readonly _matDialog = inject(MatDialog);
   private readonly _snackService = inject(SnackService);
   private readonly _parserService = inject(AddTaskBarParserService);
@@ -318,7 +318,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   private _setupSuggestions(): void {
-    this.suggestions$ = this._addTaskBarService.getFilteredIssueSuggestions$(
+    this.suggestions$ = this._addTaskBarIssueSearchService.getFilteredIssueSuggestions$(
       this.stateService.inputTxt$,
       this._isSearchIssueProviders$,
       this.isSearchLoading,
@@ -337,7 +337,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   private _setupTagMentions(): void {
-    this.tagMentions = this._addTaskBarService.getShortSyntaxTags$(
+    this.tagMentions = this._addTaskBarIssueSearchService.getShortSyntaxTags$(
       this.stateService.inputTxt$,
     );
   }
@@ -471,7 +471,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
       taskId = suggestion.taskId;
     } else if (suggestion.issueType && suggestion.issueData) {
-      taskId = await this._addTaskBarService.addTaskFromExistingTaskOrIssue(
+      taskId = await this._addTaskBarIssueSearchService.addTaskFromExistingTaskOrIssue(
         suggestion,
         this.isAddToBacklog(),
         true,
