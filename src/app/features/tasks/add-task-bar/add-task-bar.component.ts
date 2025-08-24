@@ -239,23 +239,22 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
   constructor() {
     // Watch inputTxt signal changes for text parsing and saving
-
     // Monitor state changes and refocus input when user selects values
     // This catches all state changes regardless of input method (mouse, keyboard, etc.)
-    let isFirstRun = true;
-    effect(() => {
-      // Track state changes
-      this.stateService.state();
-
-      // Skip first run to avoid refocusing on initial state
-      if (isFirstRun) {
-        isFirstRun = false;
-        return;
-      }
-
-      // Refocus input when state changes (user selected something)
-      this.focusInput();
-    });
+    // let isFirstRun = true;
+    // effect(() => {
+    //   // Track state changes
+    //   this.stateService.state();
+    //
+    //   // Skip first run to avoid refocusing on initial state
+    //   if (isFirstRun) {
+    //     isFirstRun = false;
+    //     return;
+    //   }
+    //
+    //   // Refocus input when state changes (user selected something)
+    //   this.focusInput();
+    // });
     //
     // effect(() => {
     //   console.log(this.stateService.state());
