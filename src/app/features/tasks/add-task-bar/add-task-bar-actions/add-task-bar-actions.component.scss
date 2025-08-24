@@ -44,7 +44,6 @@
     align-items: center;
     overflow: hidden;
     font-size: 13px;
-    max-width: 150px; // Set a max width for buttons
     min-width: 70px !important;
     flex-shrink: 0;
     // prevent dark theme being lighter than background
@@ -125,7 +124,6 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      max-width: 240px;
       overflow: hidden;
       position: relative;
 
