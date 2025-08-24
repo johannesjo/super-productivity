@@ -502,11 +502,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
     const component = target.closest('add-task-bar');
-    const autocompleteOption = target.closest('mat-option');
-    const matMenu = target.closest('mat-menu');
+    const overlayContainer = target.closest('.cdk-overlay-container');
 
     // If click is outside the component and not on autocomplete or menu options, close it
-    if (!component && !autocompleteOption && !matMenu) {
+    if (!component && !overlayContainer) {
       this.done.emit();
     }
   }
