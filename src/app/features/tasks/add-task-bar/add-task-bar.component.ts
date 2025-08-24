@@ -578,6 +578,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     }
 
     document.body.focus();
+    this.inputEl()?.nativeElement.focus();
     window.setTimeout(() => this.inputEl()?.nativeElement.focus());
 
     // Set new timeout
