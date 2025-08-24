@@ -11,8 +11,7 @@
       [tabindex]="tabindex()"
       [mention]="tagMentions$ | async"
       [mentionConfig]="mentionCfg$ | async"
-      (opened)="isMentionMenuOpen.set(true)"
-      (closed)="onMentionClosed()"
+      (listShownChange)="updateListShown($event)"
       [matAutocomplete]="taskAutoCompleteEl"
       [placeholder]="
         isSearchMode()

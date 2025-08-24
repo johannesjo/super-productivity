@@ -2,11 +2,16 @@ import {
   ComponentFactoryResolver,
   Directive,
   ElementRef,
+  EventEmitter,
+  inject,
+  Input,
+  OnChanges,
+  output,
+  Output,
+  SimpleChanges,
   TemplateRef,
   ViewContainerRef,
-  inject,
 } from '@angular/core';
-import { EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import {
   getCaretPosition,
   getValue,
@@ -94,6 +99,7 @@ export class MentionDirective implements OnChanges {
   // event emitted whenever the mention list is opened or closed
   @Output() opened = new EventEmitter();
   @Output() closed = new EventEmitter();
+  listShownChange = output<boolean>();
 
   private triggerChars: { [key: string]: MentionConfig } = {};
 
@@ -360,6 +366,7 @@ export class MentionDirective implements OnChanges {
     if (this.searchList && !this.searchList.hidden) {
       this.searchList.hidden = true;
       this.closed.emit();
+      this.listShownChange.emit(false);
     }
     this.activeConfig = undefined;
     this.searching = false;
@@ -392,11 +399,13 @@ export class MentionDirective implements OnChanges {
     if (this.searchList) {
       this.searchList.items = matches as any;
       this.searchList.hidden = matches.length == 0;
+      this.listShownChange.emit(matches.length > 0);
     }
   }
 
   showSearchList(nativeElement: HTMLInputElement): void {
     this.opened.emit();
+    this.listShownChange.emit(true);
 
     if (this.searchList == null) {
       const componentFactory =

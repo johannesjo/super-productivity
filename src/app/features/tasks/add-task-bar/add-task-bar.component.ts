@@ -127,7 +127,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   isSearchMode = signal(false);
   isSearchLoading = signal(false);
   activatedSuggestion$ = new BehaviorSubject<AddTaskSuggestion | null>(null);
-  isMentionMenuOpen = signal(false);
+  isMentionListShown = signal(false);
 
   hasNewTags = computed(() => this.stateService.state().newTagTitles.length > 0);
   nrOfRightBtns = computed(() => {
@@ -525,22 +525,18 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     this.isSearchMode.update((mode) => !mode);
     this.focusInput();
   }
-  onMentionClosed(): void {
-    // note timeout for this to be set after keydown handler
-    window.setTimeout(() => this.isMentionMenuOpen.set(false));
-  }
 
   onInputKeydown(event: KeyboardEvent): void {
     if (event.key === 'Escape') {
       // Don't submit if mention popup is open - let it handle the selection
-      if (this.isMentionMenuOpen()) {
+      if (this.isMentionListShown()) {
         return;
       }
       event.preventDefault();
       this.closed.emit();
     } else if (event.key === 'Enter') {
       // Don't submit if mention popup is open - let it handle the selection
-      if (this.isMentionMenuOpen()) {
+      if (this.isMentionListShown()) {
         return;
       }
       event.preventDefault();
@@ -617,5 +613,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
         }
       }, 50);
     }
+  }
+
+  updateListShown(isShown: boolean): void {
+    window.setTimeout(() => this.isMentionListShown.set(isShown));
   }
 }
