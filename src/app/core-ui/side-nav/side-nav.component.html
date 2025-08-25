@@ -8,6 +8,16 @@
       [activeWorkContextId]="activeWorkContextId"
     ></side-nav-item>
   }
+  @let inboxContext = workContextService.inboxWorkContext$ | async;
+  @if (inboxContext) {
+    <side-nav-item
+      #menuEntry
+      [type]="WorkContextType.PROJECT"
+      [defaultIcon]="inboxContext.icon"
+      [workContext]="inboxContext"
+      [activeWorkContextId]="activeWorkContextId"
+    ></side-nav-item>
+  }
 
   <button
     #menuEntry
@@ -41,17 +51,6 @@
     <mat-icon>grid_view</mat-icon>
     <span class="text">{{ T.MH.BOARDS | translate }}</span>
   </button>
-
-  @let inboxContext = workContextService.inboxWorkContext$ | async;
-  @if (inboxContext) {
-    <side-nav-item
-      #menuEntry
-      [type]="WorkContextType.PROJECT"
-      [defaultIcon]="inboxContext.icon"
-      [workContext]="inboxContext"
-      [activeWorkContextId]="activeWorkContextId"
-    ></side-nav-item>
-  }
 </section>
 
 @if (nonHiddenProjects(); as projectList) {
