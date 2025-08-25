@@ -685,25 +685,19 @@ describe('AddTaskBarActionsComponent', () => {
     });
 
     it('should handle project menu click', () => {
-      const event = new Event('click');
-
-      component.onProjectMenuClick(event);
+      component.onProjectMenuClick();
 
       expect(component.isProjectMenuOpen()).toBe(true);
     });
 
     it('should handle tags menu click', () => {
-      const event = new Event('click');
-
-      component.onTagsMenuClick(event);
+      component.onTagsMenuClick();
 
       expect(component.isTagsMenuOpen()).toBe(true);
     });
 
     it('should handle estimate menu click', () => {
-      const event = new Event('click');
-
-      component.onEstimateMenuClick(event);
+      component.onEstimateMenuClick();
 
       expect(component.isEstimateMenuOpen()).toBe(true);
     });
