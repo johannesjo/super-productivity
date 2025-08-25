@@ -151,49 +151,77 @@ export class AddTaskBarActionsComponent {
     }
   }
 
-  onProjectMenuClick(event: Event): void {
-    this.isProjectMenuOpen.set(true);
-    const projectTrigger = this.projectMenuTrigger();
-    if (projectTrigger) {
-      projectTrigger.menuClosed.pipe(first()).subscribe(() => {
-        this.isProjectMenuOpen.set(false);
-        this.refocus.emit();
-      });
-    }
+  onProjectMenuClick(): void {
+    this._handleMenuClick('project');
   }
 
-  onTagsMenuClick(event: Event): void {
-    this.isTagsMenuOpen.set(true);
-    const tagsTrigger = this.tagsMenuTrigger();
-    if (tagsTrigger) {
-      tagsTrigger.menuClosed.pipe(first()).subscribe(() => {
-        this.isTagsMenuOpen.set(false);
-        this.refocus.emit();
-      });
-    }
+  onTagsMenuClick(): void {
+    this._handleMenuClick('tags');
   }
 
-  onEstimateMenuClick(event: Event): void {
-    this.isEstimateMenuOpen.set(true);
-    const estimateTrigger = this.estimateMenuTrigger();
-    if (estimateTrigger) {
-      estimateTrigger.menuClosed.pipe(first()).subscribe(() => {
-        this.isEstimateMenuOpen.set(false);
-        this.refocus.emit();
-      });
-    }
+  onEstimateMenuClick(): void {
+    this._handleMenuClick('estimate');
   }
 
-  // Public method to open project menu programmatically
+  // Public methods to open menus programmatically
   openProjectMenu(): void {
-    const projectTrigger = this.projectMenuTrigger();
-    if (projectTrigger) {
-      this.isProjectMenuOpen.set(true);
-      projectTrigger.openMenu();
-      projectTrigger.menuClosed.pipe(first()).subscribe(() => {
-        this.isProjectMenuOpen.set(false);
+    this._openMenuProgrammatically('project');
+  }
+
+  openTagsMenu(): void {
+    this._openMenuProgrammatically('tags');
+  }
+
+  openEstimateMenu(): void {
+    this._openMenuProgrammatically('estimate');
+  }
+
+  // Private helper methods for DRY menu handling
+  private _handleMenuClick(menuType: 'project' | 'tags' | 'estimate'): void {
+    const { menuSignal, trigger } = this._getMenuRefs(menuType);
+    menuSignal.set(true);
+
+    if (trigger) {
+      trigger.menuClosed.pipe(first()).subscribe(() => {
+        menuSignal.set(false);
         this.refocus.emit();
       });
+    }
+  }
+
+  private _openMenuProgrammatically(menuType: 'project' | 'tags' | 'estimate'): void {
+    const { menuSignal, trigger } = this._getMenuRefs(menuType);
+
+    if (trigger) {
+      menuSignal.set(true);
+      trigger.openMenu();
+      trigger.menuClosed.pipe(first()).subscribe(() => {
+        menuSignal.set(false);
+        this.refocus.emit();
+      });
+    }
+  }
+
+  private _getMenuRefs(menuType: 'project' | 'tags' | 'estimate'): {
+    menuSignal: ReturnType<typeof signal<boolean>>;
+    trigger: MatMenuTrigger | undefined;
+  } {
+    switch (menuType) {
+      case 'project':
+        return {
+          menuSignal: this.isProjectMenuOpen,
+          trigger: this.projectMenuTrigger(),
+        };
+      case 'tags':
+        return {
+          menuSignal: this.isTagsMenuOpen,
+          trigger: this.tagsMenuTrigger(),
+        };
+      case 'estimate':
+        return {
+          menuSignal: this.isEstimateMenuOpen,
+          trigger: this.estimateMenuTrigger(),
+        };
     }
   }
 

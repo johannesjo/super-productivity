@@ -26,6 +26,7 @@ export interface TagComponentTag {
   styleUrls: ['./tag.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MatIcon],
+  standalone: true,
 })
 export class TagComponent {
   tag = input.required<TagComponentTag>();

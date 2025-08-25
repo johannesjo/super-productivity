@@ -7,7 +7,7 @@
     [class.has-value]="state().project"
     [class.auto-detected]="isAutoDetected() && !!state().project"
     [class.menu-open]="isProjectMenuOpen()"
-    (click)="onProjectMenuClick($event)"
+    (click)="onProjectMenuClick()"
   >
     <mat-icon [style.color]="state().project!.theme.primary">
       {{ state().project!.icon || 'folder' }}
@@ -48,7 +48,7 @@
       [class.has-value]="state().tags.length > 0 || hasNewTags()"
       [class.has-new-tags]="hasNewTags()"
       [class.menu-open]="isTagsMenuOpen()"
-      (click)="onTagsMenuClick($event)"
+      (click)="onTagsMenuClick()"
     >
       @if (state().tags.length === 0 && state().newTagTitles.length === 0) {
         <ng-container>
@@ -95,7 +95,7 @@
     [matMenuTriggerFor]="estimateMenu"
     [class.has-value]="state().estimate"
     [class.menu-open]="isEstimateMenuOpen()"
-    (click)="onEstimateMenuClick($event)"
+    (click)="onEstimateMenuClick()"
   >
     <mat-icon>timer</mat-icon>
     <span>{{

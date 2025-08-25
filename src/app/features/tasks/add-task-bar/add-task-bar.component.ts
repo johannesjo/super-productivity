@@ -215,13 +215,13 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
           triggerChar: '@',
         });
       }
-      // if (cfg.isEnableProject) {
-      //   mentions.push({
-      //     items: projectSuggestions,
-      //     labelKey: 'title',
-      //     triggerChar: '+',
-      //   });
-      // }
+      if (cfg.isEnableProject) {
+        mentions.push({
+          items: projectSuggestions,
+          labelKey: 'title',
+          triggerChar: '+',
+        });
+      }
       const mentionCfg: MentionConfig = {
         mentions,
         triggerChar: undefined,
@@ -527,33 +527,61 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   onInputKeydown(event: KeyboardEvent): void {
+    // Early return if mention popup is handling the key
+    if (this._shouldMentionHandleKey(event)) {
+      return;
+    }
+
+    // Handle Escape key
     if (event.key === 'Escape') {
-      // Don't submit if mention popup is open - let it handle the selection
-      if (this.isMentionListShown()) {
-        return;
-      }
       event.preventDefault();
       this.closed.emit();
-    } else if (event.key === 'Enter') {
-      // Don't submit if mention popup is open - let it handle the selection
-      if (this.isMentionListShown()) {
-        return;
-      }
+      return;
+    }
+
+    // Handle Enter key
+    if (event.key === 'Enter') {
       event.preventDefault();
-      this.addTask();
-    } else if (event.ctrlKey && event.key === '1') {
+      void this.addTask();
+      return;
+    }
+
+    // Handle Ctrl+Number shortcuts
+    if (event.ctrlKey) {
+      this._handleCtrlShortcut(event);
+    }
+  }
+
+  private _shouldMentionHandleKey(event: KeyboardEvent): boolean {
+    const mentionHandledKeys = ['Escape', 'Enter'];
+    return mentionHandledKeys.includes(event.key) && this.isMentionListShown();
+  }
+
+  private _handleCtrlShortcut(event: KeyboardEvent): void {
+    const shortcutMap: Record<string, () => void> = {
+      ['1']: () => this.toggleIsAddToBottom(),
+      ['2']: () => this.toggleSearchMode(),
+      ['3']: () => this._callActionMethod('openProjectMenu'),
+      ['4']: () => this._callActionMethod('openScheduleDialog'),
+      ['5']: () => this._callActionMethod('openTagsMenu'),
+      ['6']: () => this._callActionMethod('openEstimateMenu'),
+    };
+
+    const action = shortcutMap[event.key];
+    if (action) {
       event.preventDefault();
-      this.toggleIsAddToBottom();
-    } else if (event.ctrlKey && event.key === '2') {
-      event.preventDefault();
-      this.toggleSearchMode();
-    } else if (event.key === '+') {
-      const actionsComp = this.actionsComponent();
-      if (actionsComp) {
-        event.preventDefault();
+      // Add stopPropagation for action menu shortcuts (3-6)
+      if (['3', '4', '5', '6'].includes(event.key)) {
         event.stopPropagation();
-        actionsComp.openProjectMenu();
       }
+      action();
+    }
+  }
+
+  private _callActionMethod(methodName: keyof AddTaskBarActionsComponent): void {
+    const actionsComp = this.actionsComponent();
+    if (actionsComp) {
+      (actionsComp[methodName] as () => void)();
     }
   }
 
