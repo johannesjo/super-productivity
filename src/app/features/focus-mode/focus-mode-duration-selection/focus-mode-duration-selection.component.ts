@@ -4,6 +4,7 @@ import {
   Component,
   inject,
   OnDestroy,
+  signal,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
@@ -48,7 +49,7 @@ export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDes
   T: typeof T = T;
   sessionDuration$ = this._store.select(selectFocusSessionDuration);
   task$ = this._store.select(selectCurrentTask);
-  updatedFocusModeDuration?: number;
+  focusModeDuration = signal(0);
   focusTimeout = 0;
   cfg$: Observable<FocusModeConfig> = this._store.select(selectFocusModeConfig);
   cfg?: FocusModeConfig;
@@ -59,6 +60,9 @@ export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDes
 
   constructor() {
     this.cfg$.pipe(takeUntil(this._onDestroy$)).subscribe((v) => (this.cfg = v));
+    this.sessionDuration$
+      .pipe(takeUntil(this._onDestroy$))
+      .subscribe((v) => this.focusModeDuration.set(v));
   }
 
   ngAfterViewInit(): void {
@@ -75,15 +79,11 @@ export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDes
     this._onDestroy$.complete();
   }
 
-  onFocusModeDurationChanged(duration: number): void {
-    this.updatedFocusModeDuration = duration;
-  }
-
   onSubmit($event?: SubmitEvent): void {
     $event?.preventDefault();
-    if (this.updatedFocusModeDuration) {
+    if (this.focusModeDuration) {
       this._store.dispatch(
-        setFocusSessionDuration({ focusSessionDuration: this.updatedFocusModeDuration }),
+        setFocusSessionDuration({ focusSessionDuration: this.focusModeDuration() }),
       );
     }
     if (this.cfg?.isSkipPreparation) {

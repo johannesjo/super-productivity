@@ -26,8 +26,8 @@
   }
   @if (selectedMode() !== FocusModeMode.Flowtime) {
     <input-duration-slider
-      [model]="sessionDuration$ | async"
-      (modelChange)="onFocusModeDurationChanged($event)"
+      [model]="focusModeDuration()"
+      (modelChange)="focusModeDuration.set($event)"
     ></input-duration-slider>
   }
   <button
