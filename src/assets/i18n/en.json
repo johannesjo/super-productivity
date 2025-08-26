@@ -1798,7 +1798,7 @@
       "IS_FULL_SCREEN_BLOCKER": "Display message in fullscreen window (desktop only)",
       "IS_LOCK_SCREEN": "Lock screen when a break is due (desktop only)",
       "MESSAGE": "Take a break message",
-      "MIN_WORKING_TIME": "Trigger take a break notification after X working without one",
+      "MIN_WORKING_TIME": "Trigger take a break notification after X working without taking a break",
       "MOTIVATIONAL_IMGS": "Motivational images (use web urls)",
       "NOTIFICATION_TITLE": "Take a break!",
       "SNOOZE_TIME": "Snooze time when prompted to take a break",
