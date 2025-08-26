@@ -7,10 +7,6 @@
   align-items: center;
   padding: 8px;
   text-align: center;
-
-  h1 {
-    text-align: center;
-  }
 }
 
 form {
@@ -18,6 +14,11 @@ form {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: var(--s2);
 }
 
 .for-task {
@@ -28,8 +29,21 @@ form {
     font-size: 14px;
     margin-bottom: 8px;
   }
+
+  .task-title {
+    word-break: break-word;
+  }
+}
+
+.task-actions {
+  text-align: center;
+  margin-bottom: 8px;
 }
 
 input-duration-slider {
   margin-bottom: var(--s2);
+}
+
+.submit-button {
+  margin-top: 16px;
 }
