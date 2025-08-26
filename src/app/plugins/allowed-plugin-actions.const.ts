@@ -22,7 +22,6 @@ import {
   hidePluginPanel,
   hideSideNav,
   showAddTaskBar,
-  toggleAddTaskBar,
   toggleIssuePanel,
   toggleShowNotes,
   toggleSideNav,
@@ -37,7 +36,6 @@ export const ALLOWED_PLUGIN_ACTIONS = [
   // Layout
   showAddTaskBar,
   hideAddTaskBar,
-  toggleAddTaskBar,
   hideSideNav,
   toggleSideNav,
   toggleShowNotes,

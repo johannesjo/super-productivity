@@ -9,6 +9,7 @@
   @if (layoutService.isShowAddTaskBar()) {
     <add-task-bar
       (closed)="layoutService.hideAddTaskBar()"
+      (done)="layoutService.hideAddTaskBar()"
       [isElevated]="true"
       class="global"
     ></add-task-bar>

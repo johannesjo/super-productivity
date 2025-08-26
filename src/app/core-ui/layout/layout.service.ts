@@ -6,7 +6,6 @@ import {
   hideSideNav,
   hideTaskViewCustomizerPanel,
   showAddTaskBar,
-  toggleAddTaskBar,
   toggleIssuePanel,
   toggleShowNotes,
   toggleSideNav,
@@ -42,6 +41,7 @@ export class LayoutService {
   private _router = inject(Router);
   private _workContextService = inject(WorkContextService);
   private _breakPointObserver = inject(BreakpointObserver);
+  private _previouslyFocusedElement: HTMLElement | null = null;
 
   // Observable versions (needed for shepherd)
   readonly isShowAddTaskBar$: Observable<boolean> = this._store$.pipe(
@@ -163,15 +163,28 @@ export class LayoutService {
   }
 
   showAddTaskBar(): void {
+    // Store currently focused element if it's a task
+    const activeElement = document.activeElement as HTMLElement;
+    if (activeElement && activeElement.id && activeElement.id.startsWith('t-')) {
+      this._previouslyFocusedElement = activeElement;
+    }
     this._store$.dispatch(showAddTaskBar());
   }
 
   hideAddTaskBar(): void {
     this._store$.dispatch(hideAddTaskBar());
-  }
-
-  toggleAddTaskBar(): void {
-    this._store$.dispatch(toggleAddTaskBar());
+    // Restore focus to previously focused task after a small delay
+    if (this._previouslyFocusedElement) {
+      window.setTimeout(() => {
+        if (
+          this._previouslyFocusedElement &&
+          document.body.contains(this._previouslyFocusedElement)
+        ) {
+          this._previouslyFocusedElement.focus();
+          this._previouslyFocusedElement = null;
+        }
+      });
+    }
   }
 
   toggleSideNav(): void {

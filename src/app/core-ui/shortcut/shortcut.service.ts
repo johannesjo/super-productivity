@@ -136,7 +136,7 @@ export class ShortcutService {
       this._layoutService.toggleSideNav();
       ev.preventDefault();
     } else if (checkKeyCombo(ev, keys.addNewTask)) {
-      this._layoutService.toggleAddTaskBar();
+      this._layoutService.showAddTaskBar();
       ev.preventDefault();
     } else if (checkKeyCombo(ev, keys.addNewNote)) {
       if (this._matDialog.openDialogs.length === 0) {
