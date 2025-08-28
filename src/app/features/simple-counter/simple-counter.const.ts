@@ -1,14 +1,4 @@
 import { SimpleCounter, SimpleCounterType } from './simple-counter.model';
-import { loadAllData } from '../../root-store/meta/load-all-data.action';
-import {
-  finishPomodoroSession,
-  pausePomodoro,
-  pausePomodoroBreak,
-  startPomodoro,
-  startPomodoroBreak,
-  stopPomodoro,
-} from '../pomodoro/store/pomodoro.actions';
-import { setCurrentTask, unsetCurrentTask } from '../tasks/store/task.actions';
 
 export const EMPTY_SIMPLE_COUNTER: SimpleCounter = {
   id: '',
@@ -57,16 +47,4 @@ export const DEFAULT_SIMPLE_COUNTERS: SimpleCounter[] = [
     isTrackStreaks: true,
     streakMinValue: 8,
   },
-];
-
-export const SIMPLE_COUNTER_TRIGGER_ACTIONS: string[] = [
-  loadAllData.type,
-  setCurrentTask.type,
-  unsetCurrentTask.type,
-  startPomodoro.type,
-  pausePomodoro.type,
-  pausePomodoroBreak.type,
-  startPomodoroBreak.type,
-  stopPomodoro.type,
-  finishPomodoroSession.type,
 ];
