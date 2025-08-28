@@ -276,5 +276,8 @@
       "repo": "super-productivity",
       "owner": "johannesjo"
     }
-  ]
+  ],
+  "volta": {
+    "node": "22.18.0"
+  }
 }
