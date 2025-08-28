@@ -114,7 +114,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
   // Inputs
   tabindex = input<number>(0);
-  isElevated = input<boolean>(false);
+  isGlobalBarVariant = input<boolean>(false);
   isDisableAutoFocus = input<boolean>(false);
   isNoDefaults = input<boolean>(false);
   additionalFields = input<Partial<TaskCopy>>();

@@ -7,8 +7,6 @@ import {
 } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 
-import { INBOX_PROJECT } from '../../project/project.const';
-
 export interface TagComponentTag {
   title: string;
   icon?: string;
@@ -31,7 +29,6 @@ export interface TagComponentTag {
 export class TagComponent {
   tag = input.required<TagComponentTag>();
   isHideTitle = input(false);
-  isInboxTag = computed(() => (this.tag() as any).id === INBOX_PROJECT.id);
 
   // @HostBinding('style.background')
   color: Signal<string | undefined> = computed(() => {
