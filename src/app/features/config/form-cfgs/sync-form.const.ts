@@ -84,6 +84,13 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         field?.parent?.model.syncProvider !== LegacySyncProvider.WebDAV,
       key: 'webDav',
       fieldGroup: [
+        {
+          type: 'tpl',
+          templateOptions: {
+            tag: 'p',
+            text: T.F.SYNC.FORM.WEB_DAV.INFO,
+          },
+        },
         ...(!IS_ELECTRON && !IS_ANDROID_WEB_VIEW
           ? [
               {
@@ -95,13 +102,6 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
               },
             ]
           : []),
-        {
-          type: 'tpl',
-          templateOptions: {
-            tag: 'p',
-            text: T.F.SYNC.FORM.WEB_DAV.INFO,
-          },
-        },
         {
           key: 'baseUrl',
           type: 'input',
