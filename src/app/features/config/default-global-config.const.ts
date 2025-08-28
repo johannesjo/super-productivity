@@ -1,6 +1,6 @@
-import { GlobalConfigState } from './global-config.model';
-import { getDefaultVoice } from '../domina-mode/getAvailableVoices';
 import { TRACKING_INTERVAL } from '../../app.constants';
+import { getDefaultVoice } from '../domina-mode/getAvailableVoices';
+import { GlobalConfigState } from './global-config.model';
 
 const minute = 60 * 1000;
 const defaultVoice = getDefaultVoice();
@@ -80,6 +80,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     cyclesBeforeLongerBreak: 4,
     isStopTrackingOnBreak: true,
     isStopTrackingOnLongBreak: true,
+    isDisableAutoStartAfterBreak: false,
     isManualContinue: false,
     isManualContinueBreak: false,
     isPlaySound: true,
