@@ -34,7 +34,15 @@ import { TagService } from '../../tag/tag.service';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { AddTaskBarIssueSearchService } from './add-task-bar-issue-search.service';
 import { T } from '../../../t.const';
-import { distinctUntilChanged, first, map, timeout } from 'rxjs/operators';
+import {
+  distinctUntilChanged,
+  filter,
+  first,
+  map,
+  startWith,
+  timeout,
+  withLatestFrom,
+} from 'rxjs/operators';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
@@ -59,7 +67,8 @@ import { unique } from '../../../util/unique';
 import { Log } from '../../../core/log';
 import { CHRONO_SUGGESTIONS } from './add-task-bar.const';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { ShortSyntaxTag } from './short-syntax-to-tags';
+import { ShortSyntaxTag, shortSyntaxToTags } from './short-syntax-to-tags';
+import { DEFAULT_PROJECT_COLOR } from '../../work-context/work-context.const';
 
 @Component({
   selector: 'add-task-bar',
@@ -191,8 +200,25 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   private readonly _isSearchIssueProviders$ = toObservable(this.isSearchMode);
 
   // Tag mention functionality - will be initialized in ngOnInit
-  tagMentions$: Observable<ShortSyntaxTag[]> =
-    this._addTaskBarIssueSearchService.getShortSyntaxTags$(this.stateService.inputTxt$);
+  tagMentions$: Observable<ShortSyntaxTag[]> = this.stateService.inputTxt$.pipe(
+    filter((val) => typeof val === 'string'),
+    withLatestFrom(
+      this._tagService.tagsNoMyDayAndNoList$,
+      this._projectService.list$,
+      this._workContextService.activeWorkContext$,
+      this._globalConfigService.shortSyntax$,
+    ),
+    map(([val, tags, projects, activeWorkContext, shortSyntaxConfig]) =>
+      shortSyntaxToTags({
+        val,
+        tags,
+        projects,
+        defaultColor: activeWorkContext.theme.primary || DEFAULT_PROJECT_COLOR,
+        shortSyntaxConfig,
+      }),
+    ),
+    startWith([]),
+  );
 
   mentionCfg$ = combineLatest([
     this._globalConfigService.shortSyntax$,

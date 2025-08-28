@@ -3,10 +3,8 @@ import { combineLatest, forkJoin, from, Observable, of } from 'rxjs';
 import {
   catchError,
   debounceTime,
-  filter,
   first,
   map,
-  startWith,
   switchMap,
   take,
   tap,
@@ -17,7 +15,6 @@ import { WorkContextService } from '../../work-context/work-context.service';
 import { TagService } from '../../tag/tag.service';
 import { ProjectService } from '../../project/project.service';
 import { GlobalConfigService } from '../../config/global-config.service';
-import { ShortSyntaxTag, shortSyntaxToTags } from './short-syntax-to-tags';
 import { Project } from '../../project/project.model';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { Task } from '../task.model';
@@ -27,7 +24,6 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { T } from '../../../t.const';
 import { IssueService } from '../../issue/issue.service';
 import { assertTruthy } from '../../../util/assert-truthy';
-import { DEFAULT_PROJECT_COLOR } from '../../work-context/work-context.const';
 import { TaskLog } from '../../../core/log';
 
 @Injectable({
@@ -118,28 +114,6 @@ export class AddTaskBarIssueSearchService {
             : [...unique, item];
         }, []),
       ),
-    );
-  }
-
-  getShortSyntaxTags$(inputText$: Observable<string>): Observable<ShortSyntaxTag[]> {
-    return inputText$.pipe(
-      filter((val) => typeof val === 'string'),
-      withLatestFrom(
-        this._tagService.tagsNoMyDayAndNoList$,
-        this._projectService.list$,
-        this._workContextService.activeWorkContext$,
-        this._globalConfigService.shortSyntax$,
-      ),
-      map(([val, tags, projects, activeWorkContext, shortSyntaxConfig]) =>
-        shortSyntaxToTags({
-          val,
-          tags,
-          projects,
-          defaultColor: activeWorkContext.theme.primary || DEFAULT_PROJECT_COLOR,
-          shortSyntaxConfig,
-        }),
-      ),
-      startWith([]),
     );
   }
 
