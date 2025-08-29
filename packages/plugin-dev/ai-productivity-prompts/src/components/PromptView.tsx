@@ -1,4 +1,4 @@
-import { Component, createSignal, Show, For } from 'solid-js';
+import { Component, createSignal, Show, For, onMount } from 'solid-js';
 import { PromptCategory } from '../types';
 import { renderPrompt } from '../utils';
 
@@ -171,8 +171,10 @@ const PromptView: Component<PromptViewProps> = (props) => {
   };
 
   // Initialize on mount
-  loadTaskCounts();
-  regeneratePrompt();
+  onMount(async () => {
+    await loadTaskCounts();
+    await regeneratePrompt();
+  });
 
   const copyToClipboard = async () => {
     try {
@@ -226,8 +228,8 @@ const PromptView: Component<PromptViewProps> = (props) => {
             class="task-dropdown"
             value={taskSelection()}
             onChange={async (e) => {
-              setTaskSelection(e.target.value);
-              await loadTaskCounts();
+              const newSelection = e.target.value;
+              setTaskSelection(newSelection);
               await regeneratePrompt();
             }}
           >
