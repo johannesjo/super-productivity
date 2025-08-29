@@ -12,65 +12,90 @@ interface PromptViewProps {
 }
 
 const PromptView: Component<PromptViewProps> = (props) => {
-  const [taskSelection, setTaskSelection] = createSignal<'none' | 'today' | 'all'>(
-    'none',
-  );
-  const [taskCounts, setTaskCounts] = createSignal<{ today: number; all: number }>({
-    today: 0,
-    all: 0,
-  });
-  const [taskPreviews, setTaskPreviews] = createSignal<{
-    today: string[];
-    all: string[];
-  }>({ today: [], all: [] });
+  const [taskSelection, setTaskSelection] = createSignal<string>('none');
+  const [taskCounts, setTaskCounts] = createSignal<Record<string, number>>({});
+  const [taskPreviews, setTaskPreviews] = createSignal<Record<string, string[]>>({});
+  const [projects, setProjects] = createSignal<Array<{ id: string; title: string }>>([]);
   const [isLoadingTasks, setIsLoadingTasks] = createSignal<boolean>(false);
   const [generatedPrompt, setGeneratedPrompt] = createSignal<string>('');
 
   const loadTaskCounts = async () => {
     setIsLoadingTasks(true);
     const pluginAPI = (window as any).PluginAPI;
-    let todayCount = 0;
-    let allCount = 0;
+    const counts: Record<string, number> = {};
+    const previews: Record<string, string[]> = {};
 
     if (pluginAPI) {
       try {
-        const currentTasks = await pluginAPI.getCurrentContextTasks?.();
-        if (currentTasks) {
-          allCount = currentTasks.length;
+        // Get all tasks, current context tasks, and projects
+        const [allTasks, contextTasks, allProjects] = await Promise.all([
+          pluginAPI.getTasks?.(),
+          pluginAPI.getCurrentContextTasks?.(),
+          pluginAPI.getAllProjects?.(),
+        ]);
 
+        if (allTasks) {
+          const undoneTasks = allTasks.filter((task: any) => !task.isDone);
+          counts.all = undoneTasks.length;
+          previews.all = undoneTasks.map((task: any) => task.title);
+
+          // Today's tasks: undone tasks with time spent today or created today
           const today = new Date();
-          const startOfDay = new Date(
-            today.getFullYear(),
-            today.getMonth(),
-            today.getDate(),
-          ).getTime();
-          const endOfDay = startOfDay + 24 * 60 * 60 * 1000;
+          const todayStr =
+            today.getFullYear() +
+            '-' +
+            String(today.getMonth() + 1).padStart(2, '0') +
+            '-' +
+            String(today.getDate()).padStart(2, '0');
 
-          const todayTasks = currentTasks.filter((task: any) => {
-            return (
-              !task.isDone &&
-              (task.created >= startOfDay ||
-                (task.timeSpentOnDay &&
-                  Object.keys(task.timeSpentOnDay).some((date) => {
-                    const dateTime = new Date(date).getTime();
-                    return dateTime >= startOfDay && dateTime < endOfDay;
-                  })))
+          const todayTasks = undoneTasks.filter((task: any) => {
+            // Check if task has time spent today
+            if (task.timeSpentOnDay && task.timeSpentOnDay[todayStr] > 0) {
+              return true;
+            }
+
+            // Check if task was created today
+            const createdToday = new Date(task.created);
+            return createdToday.toDateString() === today.toDateString();
+          });
+
+          counts.today = todayTasks.length;
+          previews.today = todayTasks.map((task: any) => task.title);
+
+          // Group tasks by project
+          if (allProjects) {
+            const projectList = allProjects.filter((project: any) => !project.isArchived);
+            setProjects(
+              projectList.map((project: any) => ({
+                id: project.id,
+                title: project.title,
+              })),
             );
-          });
 
-          todayCount = todayTasks.length;
+            projectList.forEach((project: any) => {
+              const projectTasks = undoneTasks.filter(
+                (task: any) => task.projectId === project.id,
+              );
+              counts[`project-${project.id}`] = projectTasks.length;
+              previews[`project-${project.id}`] = projectTasks.map(
+                (task: any) => task.title,
+              );
+            });
+          }
+        }
 
-          setTaskPreviews({
-            today: todayTasks.map((task: any) => task.title),
-            all: currentTasks.map((task: any) => task.title),
-          });
+        if (contextTasks) {
+          const undoneContextTasks = contextTasks.filter((task: any) => !task.isDone);
+          counts.context = undoneContextTasks.length;
+          previews.context = undoneContextTasks.map((task: any) => task.title);
         }
       } catch (error) {
         console.log('Could not fetch task counts:', error);
       }
     }
 
-    setTaskCounts({ today: todayCount, all: allCount });
+    setTaskCounts(counts);
+    setTaskPreviews(previews);
     setIsLoadingTasks(false);
   };
 
@@ -83,37 +108,56 @@ const PromptView: Component<PromptViewProps> = (props) => {
 
     if (taskSelection() !== 'none' && pluginAPI) {
       try {
-        const currentTasks = await pluginAPI.getCurrentContextTasks?.();
-        if (currentTasks && currentTasks.length > 0) {
-          let tasksToInclude = currentTasks;
+        let tasksToInclude: any[] = [];
+        const selection = taskSelection();
 
-          if (taskSelection() === 'today') {
+        if (selection === 'today') {
+          // Get all tasks and filter for today
+          const allTasks = await pluginAPI.getTasks?.();
+          if (allTasks) {
             const today = new Date();
-            const startOfDay = new Date(
-              today.getFullYear(),
-              today.getMonth(),
-              today.getDate(),
-            ).getTime();
+            const todayStr =
+              today.getFullYear() +
+              '-' +
+              String(today.getMonth() + 1).padStart(2, '0') +
+              '-' +
+              String(today.getDate()).padStart(2, '0');
 
-            tasksToInclude = currentTasks.filter((task: any) => {
+            tasksToInclude = allTasks.filter((task: any) => {
+              if (task.isDone) return false;
+
+              // Tasks with time spent today or created today
               return (
-                !task.isDone &&
-                (task.created >= startOfDay ||
-                  (task.timeSpentOnDay &&
-                    Object.keys(task.timeSpentOnDay).some((date) => {
-                      const dateTime = new Date(date).getTime();
-                      return (
-                        dateTime >= startOfDay &&
-                        dateTime < startOfDay + 24 * 60 * 60 * 1000
-                      );
-                    })))
+                (task.timeSpentOnDay && task.timeSpentOnDay[todayStr] > 0) ||
+                new Date(task.created).toDateString() === today.toDateString()
               );
             });
           }
-
-          if (tasksToInclude.length > 0) {
-            tasksMd = tasksToInclude.map((task: any) => `- [ ] ${task.title}`).join('\n');
+        } else if (selection === 'context') {
+          // Get current context tasks
+          const contextTasks = await pluginAPI.getCurrentContextTasks?.();
+          if (contextTasks) {
+            tasksToInclude = contextTasks.filter((task: any) => !task.isDone);
           }
+        } else if (selection === 'all') {
+          // Get all tasks
+          const allTasks = await pluginAPI.getTasks?.();
+          if (allTasks) {
+            tasksToInclude = allTasks.filter((task: any) => !task.isDone);
+          }
+        } else if (selection.startsWith('project-')) {
+          // Get tasks for specific project
+          const projectId = selection.replace('project-', '');
+          const allTasks = await pluginAPI.getTasks?.();
+          if (allTasks) {
+            tasksToInclude = allTasks.filter(
+              (task: any) => !task.isDone && task.projectId === projectId,
+            );
+          }
+        }
+
+        if (tasksToInclude.length > 0) {
+          tasksMd = tasksToInclude.map((task: any) => `- [ ] ${task.title}`).join('\n');
         }
       } catch (error) {
         console.log('Could not fetch tasks:', error);
@@ -156,6 +200,18 @@ const PromptView: Component<PromptViewProps> = (props) => {
     return url;
   };
 
+  const getSelectionDisplayName = () => {
+    const selection = taskSelection();
+    if (selection === 'today') return "Today's tasks";
+    if (selection === 'context') return 'Context tasks';
+    if (selection === 'all') return 'All tasks';
+    if (selection.startsWith('project-')) {
+      const project = projects().find((p) => `project-${p.id}` === selection);
+      return project?.title || 'Project';
+    }
+    return '';
+  };
+
   return (
     <div class="page-fade">
       <div class="selected-prompt-header">
@@ -170,14 +226,26 @@ const PromptView: Component<PromptViewProps> = (props) => {
             class="task-dropdown"
             value={taskSelection()}
             onChange={async (e) => {
-              setTaskSelection(e.target.value as 'none' | 'today' | 'all');
+              setTaskSelection(e.target.value);
               await loadTaskCounts();
               await regeneratePrompt();
             }}
           >
             <option value="none">No tasks</option>
-            <option value="today">Today's tasks only ({taskCounts().today} tasks)</option>
-            <option value="all">All current tasks ({taskCounts().all} tasks)</option>
+            <option value="today">Today's tasks ({taskCounts().today || 0} tasks)</option>
+            <option value="context">
+              Current project/context ({taskCounts().context || 0} tasks)
+            </option>
+            <optgroup label="Individual Projects">
+              <For each={projects()}>
+                {(project) => (
+                  <option value={`project-${project.id}`}>
+                    {project.title} ({taskCounts()[`project-${project.id}`] || 0} tasks)
+                  </option>
+                )}
+              </For>
+            </optgroup>
+            <option value="all">All tasks ({taskCounts().all || 0} tasks)</option>
           </select>
         </label>
         <div class="task-preview">
@@ -187,50 +255,42 @@ const PromptView: Component<PromptViewProps> = (props) => {
             </div>
           </Show>
           <Show when={!isLoadingTasks()}>
-            <Show when={taskSelection() === 'today'}>
-              <div class="task-preview-content">
-                <Show when={taskPreviews().today.length === 0}>
-                  <span class="task-count-info text-muted">No tasks for today</span>
-                </Show>
-                <Show when={taskPreviews().today.length > 0}>
-                  <div class="task-count-header">
-                    Today's tasks ({taskCounts().today}):
-                  </div>
-                  <div class="task-preview-list">
-                    <For each={taskPreviews().today.slice(0, 3)}>
-                      {(taskTitle) => <div class="task-preview-item">• {taskTitle}</div>}
-                    </For>
-                    <Show when={taskPreviews().today.length > 3}>
-                      <div class="task-preview-more">
-                        ...and {taskPreviews().today.length - 3} more
-                      </div>
-                    </Show>
-                  </div>
-                </Show>
-              </div>
-            </Show>
-            <Show when={taskSelection() === 'all'}>
-              <div class="task-preview-content">
-                <Show when={taskPreviews().all.length === 0}>
-                  <span class="task-count-info text-muted">No tasks available</span>
-                </Show>
-                <Show when={taskPreviews().all.length > 0}>
-                  <div class="task-count-header">All tasks ({taskCounts().all}):</div>
-                  <div class="task-preview-list">
-                    <For each={taskPreviews().all.slice(0, 3)}>
-                      {(taskTitle) => <div class="task-preview-item">• {taskTitle}</div>}
-                    </For>
-                    <Show when={taskPreviews().all.length > 3}>
-                      <div class="task-preview-more">
-                        ...and {taskPreviews().all.length - 3} more
-                      </div>
-                    </Show>
-                  </div>
-                </Show>
-              </div>
-            </Show>
             <Show when={taskSelection() === 'none'}>
               <span class="task-count-info text-muted">No tasks will be included</span>
+            </Show>
+            <Show when={taskSelection() !== 'none'}>
+              <div class="task-preview-content">
+                <Show
+                  when={
+                    !taskPreviews()[taskSelection()] ||
+                    taskPreviews()[taskSelection()].length === 0
+                  }
+                >
+                  <span class="task-count-info text-muted">
+                    No tasks available for this selection
+                  </span>
+                </Show>
+                <Show
+                  when={
+                    taskPreviews()[taskSelection()] &&
+                    taskPreviews()[taskSelection()].length > 0
+                  }
+                >
+                  <div class="task-count-header">
+                    {getSelectionDisplayName()} ({taskCounts()[taskSelection()] || 0}):
+                  </div>
+                  <div class="task-preview-list">
+                    <For each={taskPreviews()[taskSelection()].slice(0, 3)}>
+                      {(taskTitle) => <div class="task-preview-item">• {taskTitle}</div>}
+                    </For>
+                    <Show when={taskPreviews()[taskSelection()].length > 3}>
+                      <div class="task-preview-more">
+                        ...and {taskPreviews()[taskSelection()].length - 3} more
+                      </div>
+                    </Show>
+                  </div>
+                </Show>
+              </div>
             </Show>
           </Show>
         </div>
