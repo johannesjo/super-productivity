@@ -34,3 +34,17 @@ export const focusSessionDone = createAction(
 
 export const showFocusOverlay = createAction('[FocusMode] Show Focus Overlay');
 export const hideFocusOverlay = createAction('[FocusMode] Hide Focus Overlay');
+
+// Break-related actions
+export const startBreak = createAction(
+  '[FocusMode] Start Break',
+  props<{ isLongBreak: boolean; breakDuration: number }>(),
+);
+export const setBreakTimeElapsed = createAction(
+  '[FocusMode] Set Break Time Elapsed',
+  props<{ breakTimeElapsed: number }>(),
+);
+export const skipBreak = createAction('[FocusMode] Skip Break');
+export const completeBreak = createAction('[FocusMode] Complete Break');
+export const incrementCycle = createAction('[FocusMode] Increment Cycle');
+export const resetCycles = createAction('[FocusMode] Reset Cycles');

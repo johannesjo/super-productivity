@@ -11,6 +11,7 @@ import {
   IdleConfig,
   LanguageConfig,
   MiscConfig,
+  PomodoroConfig,
   ScheduleConfig,
   ShortSyntaxConfig,
   SoundConfig,
@@ -23,6 +24,7 @@ import {
   selectIdleConfig,
   selectLanguageConfig,
   selectMiscConfig,
+  selectPomodoroConfig,
   selectShortSyntaxConfig,
   selectSoundConfig,
   selectSyncConfig,
@@ -83,6 +85,11 @@ export class GlobalConfigService {
     shareReplay(1),
   );
 
+  pomodoroConfig$: Observable<PomodoroConfig> = this._store.pipe(
+    select(selectPomodoroConfig),
+    shareReplay(1),
+  );
+
   timelineCfg$: Observable<ScheduleConfig> = this._store.pipe(
     select(selectTimelineConfig),
   );
@@ -116,6 +123,12 @@ export class GlobalConfigService {
   readonly takeABreak: Signal<TakeABreakConfig | undefined> = toSignal(this.takeABreak$, {
     initialValue: undefined,
   });
+  readonly pomodoroConfig: Signal<PomodoroConfig | undefined> = toSignal(
+    this.pomodoroConfig$,
+    {
+      initialValue: undefined,
+    },
+  );
   readonly timelineCfg: Signal<ScheduleConfig | undefined> = toSignal(this.timelineCfg$, {
     initialValue: undefined,
   });

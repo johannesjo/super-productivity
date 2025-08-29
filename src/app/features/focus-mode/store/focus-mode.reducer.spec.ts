@@ -11,6 +11,12 @@ import {
   showFocusOverlay,
   startFocusSession,
   unPauseFocusSession,
+  startBreak,
+  setBreakTimeElapsed,
+  skipBreak,
+  completeBreak,
+  incrementCycle,
+  resetCycles,
 } from './focus-mode.actions';
 import { FocusModeMode, FocusModePage } from '../focus-mode.const';
 
@@ -27,6 +33,12 @@ describe('FocusMode Reducer', () => {
       expect(state.focusSessionTimeElapsed).toBe(0);
       expect(state.lastSessionTotalDuration).toBe(0);
       expect(state.focusSessionActivePage).toBe(FocusModePage.TaskSelection);
+      // Break-related initial state
+      expect(state.isBreak).toBe(false);
+      expect(state.breakTimeElapsed).toBe(0);
+      expect(state.breakDuration).toBe(5 * 60 * 1000);
+      expect(state.isBreakLong).toBe(false);
+      expect(state.currentCycle).toBe(1);
     });
   });
 
@@ -227,6 +239,115 @@ describe('FocusMode Reducer', () => {
       expect(state.isFocusSessionRunning).toBe(false);
       expect(state.focusSessionTimeElapsed).toBe(0);
       expect(state.focusSessionDuration).toBe(25 * 60 * 1000);
+    });
+  });
+
+  describe('startBreak', () => {
+    it('should start short break', () => {
+      const action = startBreak({ isLongBreak: false, breakDuration: 5 * 60 * 1000 });
+      const state = focusModeReducer(initialState, action);
+
+      expect(state.isBreak).toBe(true);
+      expect(state.breakTimeElapsed).toBe(0);
+      expect(state.breakDuration).toBe(5 * 60 * 1000);
+      expect(state.isBreakLong).toBe(false);
+      expect(state.focusSessionActivePage).toBe(FocusModePage.Break);
+    });
+
+    it('should start long break', () => {
+      const action = startBreak({ isLongBreak: true, breakDuration: 15 * 60 * 1000 });
+      const state = focusModeReducer(initialState, action);
+
+      expect(state.isBreak).toBe(true);
+      expect(state.breakTimeElapsed).toBe(0);
+      expect(state.breakDuration).toBe(15 * 60 * 1000);
+      expect(state.isBreakLong).toBe(true);
+      expect(state.focusSessionActivePage).toBe(FocusModePage.Break);
+    });
+  });
+
+  describe('setBreakTimeElapsed', () => {
+    it('should update break time elapsed', () => {
+      const breakState: State = {
+        ...initialState,
+        isBreak: true,
+      };
+      const timeElapsed = 2 * 60 * 1000;
+      const action = setBreakTimeElapsed({ breakTimeElapsed: timeElapsed });
+      const state = focusModeReducer(breakState, action);
+
+      expect(state.breakTimeElapsed).toBe(timeElapsed);
+    });
+  });
+
+  describe('skipBreak', () => {
+    it('should end break and reset values', () => {
+      const breakState: State = {
+        ...initialState,
+        isBreak: true,
+        breakTimeElapsed: 2 * 60 * 1000,
+        focusSessionActivePage: FocusModePage.Break,
+        focusSessionTimeElapsed: 25 * 60 * 1000,
+      };
+      const action = skipBreak();
+      const state = focusModeReducer(breakState, action);
+
+      expect(state.isBreak).toBe(false);
+      expect(state.breakTimeElapsed).toBe(0);
+      expect(state.focusSessionActivePage).toBe(FocusModePage.Main);
+      expect(state.focusSessionTimeElapsed).toBe(0);
+    });
+  });
+
+  describe('completeBreak', () => {
+    it('should end break and reset values', () => {
+      const breakState: State = {
+        ...initialState,
+        isBreak: true,
+        breakTimeElapsed: 5 * 60 * 1000,
+        focusSessionActivePage: FocusModePage.Break,
+        focusSessionTimeElapsed: 25 * 60 * 1000,
+      };
+      const action = completeBreak();
+      const state = focusModeReducer(breakState, action);
+
+      expect(state.isBreak).toBe(false);
+      expect(state.breakTimeElapsed).toBe(0);
+      expect(state.focusSessionActivePage).toBe(FocusModePage.Main);
+      expect(state.focusSessionTimeElapsed).toBe(0);
+    });
+  });
+
+  describe('incrementCycle', () => {
+    it('should increment cycle count', () => {
+      const action = incrementCycle();
+      const state = focusModeReducer(initialState, action);
+
+      expect(state.currentCycle).toBe(2);
+    });
+
+    it('should increment from existing cycle count', () => {
+      const stateWithCycles: State = {
+        ...initialState,
+        currentCycle: 3,
+      };
+      const action = incrementCycle();
+      const state = focusModeReducer(stateWithCycles, action);
+
+      expect(state.currentCycle).toBe(4);
+    });
+  });
+
+  describe('resetCycles', () => {
+    it('should reset cycle count to 1', () => {
+      const stateWithCycles: State = {
+        ...initialState,
+        currentCycle: 5,
+      };
+      const action = resetCycles();
+      const state = focusModeReducer(stateWithCycles, action);
+
+      expect(state.currentCycle).toBe(1);
     });
   });
 });

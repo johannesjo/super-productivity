@@ -31,6 +31,7 @@ import { FocusModeDurationSelectionComponent } from '../focus-mode-duration-sele
 import { FocusModePreparationComponent } from '../focus-mode-preparation/focus-mode-preparation.component';
 import { FocusModeMainComponent } from '../focus-mode-main/focus-mode-main.component';
 import { FocusModeTaskDoneComponent } from '../focus-mode-task-done/focus-mode-task-done.component';
+import { FocusModeBreakComponent } from '../focus-mode-break/focus-mode-break.component';
 import { NgTemplateOutlet } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { BannerService } from '../../../core/banner/banner.service';
@@ -54,6 +55,7 @@ import { FocusModeService } from '../focus-mode.service';
     FocusModePreparationComponent,
     FocusModeMainComponent,
     FocusModeTaskDoneComponent,
+    FocusModeBreakComponent,
     MatButton,
     TranslatePipe,
     MatButtonToggleGroup,

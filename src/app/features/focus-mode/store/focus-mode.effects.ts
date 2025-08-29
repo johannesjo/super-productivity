@@ -6,8 +6,15 @@ import {
   pauseFocusSession,
   setFocusModeMode,
   setFocusSessionActivePage,
+  setFocusSessionDuration,
   setFocusSessionTimeElapsed,
   showFocusOverlay,
+  startBreak,
+  setBreakTimeElapsed,
+  completeBreak,
+  skipBreak,
+  incrementCycle,
+  startFocusSession,
 } from './focus-mode.actions';
 import { GlobalConfigService } from '../../config/global-config.service';
 import {
@@ -28,6 +35,8 @@ import {
   selectFocusModeMode,
   selectFocusSessionDuration,
   selectIsFocusSessionRunning,
+  selectFocusModeIsBreak,
+  selectFocusModeCurrentCycle,
 } from './focus-mode.selectors';
 import { Store } from '@ngrx/store';
 import { unsetCurrentTask } from '../../tasks/store/task.actions';
@@ -176,5 +185,64 @@ export class FocusModeEffects {
         }),
       ),
     { dispatch: false },
+  );
+
+  // Pomodoro break handling
+  startBreakAfterPomodoro$ = createEffect(() =>
+    this._actions$.pipe(
+      ofType(focusSessionDone),
+      withLatestFrom(
+        this._store.select(selectFocusModeMode),
+        this._store.select(selectFocusModeCurrentCycle),
+        this._globalConfigService.pomodoroConfig$,
+      ),
+      filter(([_, mode]) => mode === FocusModeMode.Pomodoro),
+      switchMap(([_, __, currentCycle, config]) => {
+        const isLongBreak = currentCycle % config.cyclesBeforeLongerBreak === 0;
+        const breakDuration =
+          (isLongBreak ? config.longerBreakDuration : config.breakDuration) || 300000;
+
+        if (config.isPlaySound) {
+          playSound(SESSION_DONE_SOUND, 100);
+        }
+
+        return of(startBreak({ isLongBreak, breakDuration }), incrementCycle());
+      }),
+    ),
+  );
+
+  updateBreakTimer$ = createEffect(() =>
+    this._focusModeService.currentBreakTime$.pipe(
+      withLatestFrom(
+        this._store.select(selectFocusModeIsBreak),
+        this._focusModeService.breakTimeToGo$,
+      ),
+      filter(([_, isBreak]) => isBreak),
+      map(([elapsed, __, remaining]) =>
+        remaining > 0
+          ? setBreakTimeElapsed({ breakTimeElapsed: elapsed })
+          : completeBreak(),
+      ),
+    ),
+  );
+
+  continueAfterBreak$ = createEffect(() =>
+    this._actions$.pipe(
+      ofType(completeBreak, skipBreak),
+      withLatestFrom(this._globalConfigService.pomodoroConfig$),
+      switchMap(([action, config]) => {
+        // Only play sound for natural completion, not skip
+        if (action.type === completeBreak.type && config.isPlaySoundAfterBreak) {
+          playSound(SESSION_DONE_SOUND, 100);
+        }
+
+        // Set the correct Pomodoro duration before starting the next session
+        const duration = config.duration || 25 * 60 * 1000;
+        return of(
+          setFocusSessionDuration({ focusSessionDuration: duration }),
+          startFocusSession(),
+        );
+      }),
+    ),
   );
 }

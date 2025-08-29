@@ -3,6 +3,8 @@ import { combineLatest, EMPTY, interval, merge, Observable, of } from 'rxjs';
 import {
   selectFocusSessionDuration,
   selectIsFocusSessionRunning,
+  selectFocusModeIsBreak,
+  selectFocusModeBreakDuration,
 } from './store/focus-mode.selectors';
 import {
   filter,
@@ -19,6 +21,9 @@ import {
   cancelFocusSession,
   focusSessionDone,
   unPauseFocusSession,
+  startBreak,
+  skipBreak,
+  completeBreak,
 } from './store/focus-mode.actions';
 import { Store } from '@ngrx/store';
 
@@ -82,4 +87,39 @@ export class FocusModeService {
         ((plannedSessionDuration - timeToGo) * 100) / plannedSessionDuration,
     ),
   );
+
+  // Break timer for pomodoro mode
+  private _isBreak$ = this._store.select(selectFocusModeIsBreak);
+  private _breakDuration$ = this._store.select(selectFocusModeBreakDuration);
+
+  private _breakTimer$: Observable<number> = interval(TICK_DURATION).pipe(
+    switchMap(() => of(Date.now())),
+    pairwise(),
+    map(([a, b]) => b - a),
+  );
+
+  private _breakTick$: Observable<number> = this._isBreak$.pipe(
+    switchMap((isBreak) => (isBreak ? this._breakTimer$ : EMPTY)),
+    map((tick) => tick * -1),
+  );
+
+  currentBreakTime$: Observable<number> = merge(
+    this._breakTick$,
+    this._actions$.pipe(ofType(startBreak, skipBreak, completeBreak), mapTo(0)),
+  ).pipe(
+    scan((acc, value) => {
+      const accValMinZero = acc < 0 ? 0 : acc;
+      return value < 0 ? accValMinZero - value : value;
+    }),
+    shareReplay(1),
+  );
+
+  breakTimeToGo$: Observable<number> = combineLatest([
+    this.currentBreakTime$.pipe(startWith(0)),
+    this._breakDuration$,
+  ]).pipe(map(([currentBreakTime, breakDuration]) => breakDuration - currentBreakTime));
+
+  skipBreak(): void {
+    this._store.dispatch(skipBreak());
+  }
 }

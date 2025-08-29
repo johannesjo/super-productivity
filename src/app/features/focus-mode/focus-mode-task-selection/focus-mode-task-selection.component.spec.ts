@@ -2,6 +2,7 @@ import { FocusModeTaskSelectionComponent } from './focus-mode-task-selection.com
 import {
   setFocusSessionActivePage,
   startFocusSession,
+  setFocusSessionDuration,
 } from '../store/focus-mode.actions';
 import { FocusModeMode, FocusModePage } from '../focus-mode.const';
 import { Task } from '../../tasks/task.model';
@@ -42,6 +43,11 @@ describe('FocusModeTaskSelectionComponent - onSubmit method', () => {
     // Mock signals with default values
     (component as any).mode = signal(FocusModeMode.Flowtime);
     (component as any).cfg = signal({ isSkipPreparation: false });
+    (component as any).pomodoroConfig = signal({
+      duration: 25 * 60 * 1000,
+      isPlaySound: false,
+      isPlaySoundAfterBreak: false,
+    });
   });
 
   describe('onSubmit', () => {
@@ -107,10 +113,11 @@ describe('FocusModeTaskSelectionComponent - onSubmit method', () => {
         expect(mockStore.dispatch).toHaveBeenCalledTimes(1);
       });
 
-      it('should create task and go to duration selection in Pomodoro mode', () => {
+      it('should create task and go to preparation in Pomodoro mode', () => {
         // Setup: Pomodoro mode
         (component as any).mode = signal(FocusModeMode.Pomodoro);
         (component as any).cfg = signal({ isSkipPreparation: false });
+        (component as any).pomodoroConfig = signal({ duration: 25 * 60 * 1000 });
 
         component.selectedTask = 'New Task Title';
         component.onSubmit(mockEvent);
@@ -118,10 +125,13 @@ describe('FocusModeTaskSelectionComponent - onSubmit method', () => {
         expect(mockTaskService.add).toHaveBeenCalledWith('New Task Title');
         expect(mockTaskService.setCurrentId).toHaveBeenCalledWith('new-task-id');
         expect(mockStore.dispatch).toHaveBeenCalledWith(
-          setFocusSessionActivePage({ focusActivePage: FocusModePage.DurationSelection }),
+          setFocusSessionDuration({ focusSessionDuration: 25 * 60 * 1000 }),
+        );
+        expect(mockStore.dispatch).toHaveBeenCalledWith(
+          setFocusSessionActivePage({ focusActivePage: FocusModePage.Preparation }),
         );
         expect(mockStore.dispatch).not.toHaveBeenCalledWith(startFocusSession());
-        expect(mockStore.dispatch).toHaveBeenCalledTimes(1);
+        expect(mockStore.dispatch).toHaveBeenCalledTimes(2);
       });
 
       it('should handle undefined config gracefully in Flowtime mode', () => {
@@ -178,10 +188,11 @@ describe('FocusModeTaskSelectionComponent - onSubmit method', () => {
         expect(mockStore.dispatch).toHaveBeenCalledTimes(1);
       });
 
-      it('should set current task and go to duration selection in Pomodoro mode', () => {
+      it('should set current task and go to preparation in Pomodoro mode', () => {
         // Setup: Pomodoro mode
         (component as any).mode = signal(FocusModeMode.Pomodoro);
         (component as any).cfg = signal({ isSkipPreparation: false });
+        (component as any).pomodoroConfig = signal({ duration: 25 * 60 * 1000 });
 
         component.selectedTask = mockTask;
         component.onSubmit(mockEvent);
@@ -189,10 +200,13 @@ describe('FocusModeTaskSelectionComponent - onSubmit method', () => {
         expect(mockTaskService.add).not.toHaveBeenCalled();
         expect(mockTaskService.setCurrentId).toHaveBeenCalledWith('task-1');
         expect(mockStore.dispatch).toHaveBeenCalledWith(
-          setFocusSessionActivePage({ focusActivePage: FocusModePage.DurationSelection }),
+          setFocusSessionDuration({ focusSessionDuration: 25 * 60 * 1000 }),
+        );
+        expect(mockStore.dispatch).toHaveBeenCalledWith(
+          setFocusSessionActivePage({ focusActivePage: FocusModePage.Preparation }),
         );
         expect(mockStore.dispatch).not.toHaveBeenCalledWith(startFocusSession());
-        expect(mockStore.dispatch).toHaveBeenCalledTimes(1);
+        expect(mockStore.dispatch).toHaveBeenCalledTimes(2);
       });
 
       it('should set current task and go to duration selection in Countdown mode', () => {
@@ -242,8 +256,24 @@ describe('FocusModeTaskSelectionComponent - onSubmit method', () => {
         );
       });
 
-      it('should determine focusActivePage correctly for non-Flowtime modes', () => {
+      it('should determine focusActivePage correctly for Pomodoro mode with skip preparation', () => {
         (component as any).mode = signal(FocusModeMode.Pomodoro);
+        (component as any).cfg = signal({ isSkipPreparation: true });
+        (component as any).pomodoroConfig = signal({ duration: 25 * 60 * 1000 });
+        component.selectedTask = 'Test Task';
+
+        component.onSubmit(mockEvent);
+
+        expect(mockStore.dispatch).toHaveBeenCalledWith(
+          setFocusSessionDuration({ focusSessionDuration: 25 * 60 * 1000 }),
+        );
+        expect(mockStore.dispatch).toHaveBeenCalledWith(
+          setFocusSessionActivePage({ focusActivePage: FocusModePage.Main }),
+        );
+      });
+
+      it('should determine focusActivePage correctly for Countdown mode', () => {
+        (component as any).mode = signal(FocusModeMode.Countdown);
         (component as any).cfg = signal({ isSkipPreparation: true }); // Should be ignored
         component.selectedTask = 'Test Task';
 

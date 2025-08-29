@@ -34,3 +34,29 @@ export const selectFocusSessionActivePage = createSelector(
   selectFocusModeState,
   (state) => state.focusSessionActivePage,
 );
+
+// Break-related selectors
+export const selectFocusModeIsBreak = createSelector(
+  selectFocusModeState,
+  (state) => state.isBreak,
+);
+
+export const selectFocusModeBreakTimeElapsed = createSelector(
+  selectFocusModeState,
+  (state) => state.breakTimeElapsed,
+);
+
+export const selectFocusModeBreakDuration = createSelector(
+  selectFocusModeState,
+  (state) => state.breakDuration,
+);
+
+export const selectFocusModeIsBreakLong = createSelector(
+  selectFocusModeState,
+  (state) => state.isBreakLong,
+);
+
+export const selectFocusModeCurrentCycle = createSelector(
+  selectFocusModeState,
+  (state) => state.currentCycle,
+);

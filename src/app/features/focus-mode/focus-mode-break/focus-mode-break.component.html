@@ -1,0 +1,26 @@
+<div class="focus-mode-break">
+  <h1>{{ breakTypeLabel() }} - Cycle {{ currentCycle() }}</h1>
+
+  <div class="timer-container">
+    <mat-progress-spinner
+      mode="determinate"
+      [value]="progressPercentage"
+      diameter="160"
+      strokeWidth="6"
+    >
+    </mat-progress-spinner>
+    <div class="timer-text">
+      {{ remainingTime() | msToClockString: true }}
+    </div>
+  </div>
+
+  <p class="break-message">Take a moment to relax</p>
+
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="skipBreak()"
+  >
+    Skip Break
+  </button>
+</div>

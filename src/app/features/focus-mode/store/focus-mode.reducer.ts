@@ -11,6 +11,12 @@ import {
   showFocusOverlay,
   startFocusSession,
   unPauseFocusSession,
+  startBreak,
+  setBreakTimeElapsed,
+  skipBreak,
+  completeBreak,
+  incrementCycle,
+  resetCycles,
 } from './focus-mode.actions';
 import { FocusModeMode, FocusModePage } from '../focus-mode.const';
 import { LS } from '../../../core/persistence/storage-keys.const';
@@ -28,6 +34,12 @@ export interface State {
   lastSessionTotalDuration: number;
   focusSessionActivePage: FocusModePage;
   mode: FocusModeMode;
+  // Pomodoro break-related properties
+  isBreak: boolean;
+  breakTimeElapsed: number;
+  breakDuration: number;
+  isBreakLong: boolean;
+  currentCycle: number;
 }
 
 const focusModeModeFromLS = localStorage.getItem(LS.FOCUS_MODE_MODE);
@@ -42,6 +54,12 @@ export const initialState: State = {
   mode: Object.values(FocusModeMode).includes(focusModeModeFromLS as any)
     ? (focusModeModeFromLS as any)
     : FocusModeMode.Flowtime,
+  // Pomodoro break-related initial values
+  isBreak: false,
+  breakTimeElapsed: 0,
+  breakDuration: 5 * 60 * 1000, // 5 minutes default
+  isBreakLong: false,
+  currentCycle: 1,
 };
 
 export const focusModeReducer = createReducer<State>(
@@ -124,5 +142,38 @@ export const focusModeReducer = createReducer<State>(
     isFocusSessionRunning: false,
     focusSessionTimeElapsed: 0,
     focusSessionDuration: DEFAULT_FOCUS_SESSION_DURATION,
+  })),
+
+  // Break-related reducers
+  on(startBreak, (state, { isLongBreak, breakDuration }) => ({
+    ...state,
+    isBreak: true,
+    breakTimeElapsed: 0,
+    breakDuration,
+    isBreakLong: isLongBreak,
+    focusSessionActivePage: FocusModePage.Break,
+  })),
+
+  on(setBreakTimeElapsed, (state, { breakTimeElapsed }) => ({
+    ...state,
+    breakTimeElapsed,
+  })),
+
+  on(skipBreak, completeBreak, (state) => ({
+    ...state,
+    isBreak: false,
+    breakTimeElapsed: 0,
+    focusSessionActivePage: FocusModePage.Main,
+    focusSessionTimeElapsed: 0, // Reset for new pomodoro session
+  })),
+
+  on(incrementCycle, (state) => ({
+    ...state,
+    currentCycle: state.currentCycle + 1,
+  })),
+
+  on(resetCycles, (state) => ({
+    ...state,
+    currentCycle: 1,
   })),
 );

@@ -21,6 +21,8 @@ import { SelectTaskComponent } from '../../tasks/select-task/select-task.compone
 import { selectFocusModeMode } from '../store/focus-mode.selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { selectFocusModeConfig } from '../../config/store/global-config.reducer';
+import { GlobalConfigService } from '../../config/global-config.service';
+import { setFocusSessionDuration } from '../store/focus-mode.actions';
 
 @Component({
   selector: 'focus-mode-task-selection',
@@ -32,9 +34,11 @@ import { selectFocusModeConfig } from '../../config/store/global-config.reducer'
 export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy {
   readonly taskService = inject(TaskService);
   private readonly _store = inject(Store);
+  private readonly _globalConfigService = inject(GlobalConfigService);
 
   mode = toSignal(this._store.select(selectFocusModeMode));
   cfg = toSignal(this._store.select(selectFocusModeConfig));
+  pomodoroConfig = toSignal(this._globalConfigService.pomodoroConfig$);
 
   selectedTask: string | Task | undefined;
   initialTask = this.taskService.firstStartableTask;
@@ -59,26 +63,38 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
 
   onSubmit($event: SubmitEvent): void {
     $event.preventDefault();
-    if (this.selectedTask) {
-      const focusActivePage =
-        this.mode() === FocusModeMode.Flowtime
-          ? this.cfg()?.isSkipPreparation
-            ? FocusModePage.Main
-            : FocusModePage.Preparation
-          : FocusModePage.DurationSelection;
+    if (!this.selectedTask) return;
 
-      if (typeof this.selectedTask === 'string') {
-        const taskId = this.taskService.add(this.selectedTask);
-        this.taskService.setCurrentId(taskId);
-        this._store.dispatch(setFocusSessionActivePage({ focusActivePage }));
-      } else {
-        this.taskService.setCurrentId(this.selectedTask.id);
-        this._store.dispatch(setFocusSessionActivePage({ focusActivePage }));
-      }
+    const mode = this.mode();
+    const skipPreparation = this.cfg()?.isSkipPreparation;
 
-      if (focusActivePage === FocusModePage.Main) {
-        this._store.dispatch(startFocusSession());
-      }
+    // Set task
+    if (typeof this.selectedTask === 'string') {
+      const taskId = this.taskService.add(this.selectedTask);
+      this.taskService.setCurrentId(taskId);
+    } else {
+      this.taskService.setCurrentId(this.selectedTask.id);
+    }
+
+    // Determine next page based on mode
+    let nextPage: FocusModePage;
+
+    if (mode === FocusModeMode.Pomodoro) {
+      // Set duration from config and skip duration selection
+      const duration = this.pomodoroConfig()?.duration || 25 * 60 * 1000;
+      this._store.dispatch(setFocusSessionDuration({ focusSessionDuration: duration }));
+      nextPage = skipPreparation ? FocusModePage.Main : FocusModePage.Preparation;
+    } else if (mode === FocusModeMode.Flowtime) {
+      nextPage = skipPreparation ? FocusModePage.Main : FocusModePage.Preparation;
+    } else {
+      // Countdown mode uses always duration selection
+      nextPage = FocusModePage.DurationSelection;
+    }
+
+    this._store.dispatch(setFocusSessionActivePage({ focusActivePage: nextPage }));
+
+    if (nextPage === FocusModePage.Main) {
+      this._store.dispatch(startFocusSession());
     }
   }
 }

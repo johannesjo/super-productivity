@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
-import { ReplaySubject } from 'rxjs';
+import { of, ReplaySubject } from 'rxjs';
 import { FocusModeEffects } from './focus-mode.effects';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import {
@@ -16,7 +16,6 @@ import { unsetCurrentTask } from '../../tasks/store/task.actions';
 import { openIdleDialog } from '../../idle/store/idle.actions';
 import { FocusModeMode } from '../focus-mode.const';
 import { Action } from '@ngrx/store';
-import { of } from 'rxjs';
 
 describe('FocusModeEffects', () => {
   let effects: FocusModeEffects;
@@ -27,6 +26,14 @@ describe('FocusModeEffects', () => {
 
     const globalConfigServiceSpy = jasmine.createSpyObj('GlobalConfigService', [], {
       sound$: of({ volume: 0 }),
+      pomodoroConfig$: of({
+        duration: 25 * 60 * 1000,
+        breakDuration: 5 * 60 * 1000,
+        longerBreakDuration: 15 * 60 * 1000,
+        cyclesBeforeLongerBreak: 4,
+        isPlaySound: false,
+        isPlaySoundAfterBreak: false,
+      }),
     });
 
     const taskServiceSpy = jasmine.createSpyObj('TaskService', [], {
@@ -41,6 +48,9 @@ describe('FocusModeEffects', () => {
       currentSessionTime$: of(0),
       timeToGo$: of(25 * 60 * 1000),
       sessionProgress$: of(0),
+      currentBreakTime$: of(0),
+      breakTimeToGo$: of(5 * 60 * 1000),
+      breakProgress$: of(0),
     });
 
     TestBed.configureTestingModule({
@@ -115,6 +125,15 @@ describe('FocusModeEffects', () => {
         expect(localStorage.setItem).toHaveBeenCalledWith('FOCUS_MODE_MODE', newMode);
         done();
       });
+    });
+  });
+
+  describe('Break-related effects', () => {
+    it('should be properly configured', () => {
+      // Test that the break-related effects are available
+      expect(effects.startBreakAfterPomodoro$).toBeDefined();
+      expect(effects.updateBreakTimer$).toBeDefined();
+      expect(effects.continueAfterBreak$).toBeDefined();
     });
   });
 });

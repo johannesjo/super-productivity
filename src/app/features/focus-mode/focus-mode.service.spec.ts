@@ -8,10 +8,15 @@ import {
   cancelFocusSession,
   focusSessionDone,
   unPauseFocusSession,
+  startBreak,
+  skipBreak,
+  completeBreak,
 } from './store/focus-mode.actions';
 import {
   selectFocusSessionDuration,
   selectIsFocusSessionRunning,
+  selectFocusModeIsBreak,
+  selectFocusModeBreakDuration,
 } from './store/focus-mode.selectors';
 
 describe('FocusModeService', () => {
@@ -41,6 +46,14 @@ describe('FocusModeService', () => {
             {
               selector: selectFocusSessionDuration,
               value: 25 * 60 * 1000,
+            },
+            {
+              selector: selectFocusModeIsBreak,
+              value: false,
+            },
+            {
+              selector: selectFocusModeBreakDuration,
+              value: 5 * 60 * 1000,
             },
           ],
         }),
@@ -122,6 +135,61 @@ describe('FocusModeService', () => {
       service.sessionProgress$.subscribe((progress) => {
         expect(progress).toBe(0);
         done();
+      });
+    });
+  });
+
+  describe('Break-related observables', () => {
+    describe('currentBreakTime$', () => {
+      it('should reset to 0 when startBreak is dispatched', (done) => {
+        actions$.next(startBreak({ isLongBreak: false, breakDuration: 5 * 60 * 1000 }));
+
+        service.currentBreakTime$.subscribe((time) => {
+          expect(time).toBe(0);
+          done();
+        });
+      });
+
+      it('should reset to 0 when skipBreak is dispatched', (done) => {
+        actions$.next(skipBreak());
+
+        service.currentBreakTime$.subscribe((time) => {
+          expect(time).toBe(0);
+          done();
+        });
+      });
+
+      it('should reset to 0 when completeBreak is dispatched', (done) => {
+        actions$.next(completeBreak());
+
+        service.currentBreakTime$.subscribe((time) => {
+          expect(time).toBe(0);
+          done();
+        });
+      });
+    });
+
+    describe('breakTimeToGo$', () => {
+      it('should calculate remaining break time', (done) => {
+        const mockBreakDuration = 5 * 60 * 1000;
+
+        store.overrideSelector(selectFocusModeBreakDuration, mockBreakDuration);
+        store.refreshState();
+
+        service.breakTimeToGo$.subscribe((timeToGo) => {
+          expect(timeToGo).toBe(mockBreakDuration);
+          done();
+        });
+      });
+    });
+
+    describe('skipBreak method', () => {
+      it('should dispatch skipBreak action', () => {
+        spyOn(store, 'dispatch');
+
+        service.skipBreak();
+
+        expect(store.dispatch).toHaveBeenCalledWith(skipBreak());
       });
     });
   });
