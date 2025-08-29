@@ -51,7 +51,7 @@ jobs:
       - run: npm run env # Generate env.generated.ts
 
       - name: Lint
-        run: npm run lint:ci
+        run: npm run lint
 
       - name: Test Unit
         run: npm run test

@@ -49,7 +49,7 @@ jobs:
 #        run: npm i
 #
 #      - name: Lint
-#        run: npm run lint:ci
+#        run: npm run lint
 #
 #      - name: Test Unit
 #        run: npm run test
