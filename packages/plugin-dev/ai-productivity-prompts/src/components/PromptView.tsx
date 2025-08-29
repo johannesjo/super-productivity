@@ -217,7 +217,6 @@ const PromptView: Component<PromptViewProps> = (props) => {
     <div class="page-fade">
       <div class="selected-prompt-header">
         <h2 class="text-primary">{props.selectedPrompt.prompt.title}</h2>
-        <p class="text-muted">From: {props.selectedPrompt.category.title}</p>
       </div>
 
       <div class="prompt-options">

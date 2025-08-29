@@ -1,15 +1,22 @@
 import { Component, createSignal, Show } from 'solid-js';
-import { PromptCategory } from './types';
+import { PromptCategory, CustomPrompt } from './types';
 import HomeView from './components/HomeView';
 import CategoryView from './components/CategoryView';
 import PromptView from './components/PromptView';
+import CustomPromptManager from './components/CustomPromptManager';
+import CustomPromptEditor from './components/CustomPromptEditor';
 import './App.css';
 
-type ViewState = 'home' | 'category' | 'prompt';
+type ViewState = 'home' | 'category' | 'prompt' | 'custom' | 'custom-editor';
 
 interface SelectedPrompt {
   category: PromptCategory;
   prompt: { title: string; template: string };
+}
+
+interface CustomPromptSelection {
+  prompt: CustomPrompt;
+  index: number;
 }
 
 const App: Component = () => {
@@ -18,6 +25,12 @@ const App: Component = () => {
     null,
   );
   const [selectedPrompt, setSelectedPrompt] = createSignal<SelectedPrompt | null>(null);
+  const [selectedCustomPrompt, setSelectedCustomPrompt] =
+    createSignal<CustomPromptSelection | null>(null);
+  const [editingPrompt, setEditingPrompt] = createSignal<{
+    prompt: CustomPrompt | null;
+    index?: number;
+  } | null>(null);
   const [generatedPrompt, setGeneratedPrompt] = createSignal<string>('');
 
   const handleSelectCategory = (category: PromptCategory) => {
@@ -35,17 +48,56 @@ const App: Component = () => {
 
   const handleBack = () => {
     if (currentView() === 'prompt') {
-      setCurrentView('category');
-      setSelectedPrompt(null);
+      if (selectedCustomPrompt()) {
+        setCurrentView('custom');
+        setSelectedPrompt(null);
+        setSelectedCustomPrompt(null);
+      } else {
+        setCurrentView('category');
+        setSelectedPrompt(null);
+      }
       setGeneratedPrompt('');
     } else if (currentView() === 'category') {
       setCurrentView('home');
       setSelectedCategory(null);
+    } else if (currentView() === 'custom') {
+      setCurrentView('home');
+    } else if (currentView() === 'custom-editor') {
+      setCurrentView('custom');
+      setEditingPrompt(null);
     }
   };
 
   const handlePromptUpdate = (prompt: string) => {
     setGeneratedPrompt(prompt);
+  };
+
+  const handleCustomPromptsClick = () => {
+    setCurrentView('custom');
+  };
+
+  const handleCustomPromptSelect = (prompt: CustomPrompt, index: number) => {
+    setSelectedCustomPrompt({ prompt, index });
+    setSelectedPrompt({
+      category: { title: 'Custom Prompts', prompts: [] },
+      prompt: { title: prompt.title, template: prompt.template },
+    });
+    setCurrentView('prompt');
+  };
+
+  const handleCustomPromptEdit = (prompt: CustomPrompt | null, index?: number) => {
+    setEditingPrompt({ prompt, index });
+    setCurrentView('custom-editor');
+  };
+
+  const handleCustomPromptSave = () => {
+    setCurrentView('custom');
+    setEditingPrompt(null);
+  };
+
+  const handleCustomPromptCancel = () => {
+    setCurrentView('custom');
+    setEditingPrompt(null);
   };
 
   return (
@@ -63,7 +115,10 @@ const App: Component = () => {
 
       <main class="main">
         <Show when={currentView() === 'home'}>
-          <HomeView onSelectCategory={handleSelectCategory} />
+          <HomeView
+            onSelectCategory={handleSelectCategory}
+            onCustomPromptsClick={handleCustomPromptsClick}
+          />
         </Show>
 
         <Show when={currentView() === 'category' && selectedCategory()}>
@@ -77,6 +132,22 @@ const App: Component = () => {
           <PromptView
             selectedPrompt={selectedPrompt()!}
             onUpdatePrompt={handlePromptUpdate}
+          />
+        </Show>
+
+        <Show when={currentView() === 'custom'}>
+          <CustomPromptManager
+            onSelectPrompt={handleCustomPromptSelect}
+            onEditPrompt={handleCustomPromptEdit}
+          />
+        </Show>
+
+        <Show when={currentView() === 'custom-editor'}>
+          <CustomPromptEditor
+            prompt={editingPrompt()?.prompt || null}
+            index={editingPrompt()?.index}
+            onSave={handleCustomPromptSave}
+            onCancel={handleCustomPromptCancel}
           />
         </Show>
       </main>

@@ -4,6 +4,7 @@ import { PROMPT_CATEGORIES } from '../prompts';
 
 interface HomeViewProps {
   onSelectCategory: (category: PromptCategory) => void;
+  onCustomPromptsClick: () => void;
 }
 
 const HomeView: Component<HomeViewProps> = (props) => {
@@ -26,6 +27,14 @@ const HomeView: Component<HomeViewProps> = (props) => {
             </button>
           )}
         </For>
+
+        <button
+          class="category-card card card-clickable custom-prompts-card"
+          onClick={props.onCustomPromptsClick}
+        >
+          <h3 class="text-primary">My Custom Prompts</h3>
+          <p class="text-muted">Create & manage your own prompts</p>
+        </button>
       </div>
     </>
   );

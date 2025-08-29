@@ -7,11 +7,51 @@
   box-sizing: border-box;
 }
 
+/* Theme support with Super Productivity variables */
+:root {
+  /* Light theme defaults */
+  --plugin-text-primary: var(--text-color, #333);
+  --plugin-text-muted: var(--text-color-muted, #666);
+  --plugin-bg-card: var(--card-bg, #fff);
+  --plugin-bg-input: var(--input-bg, #fff);
+  --plugin-border: var(--extra-border-color, #ddd);
+  --plugin-border-focus: var(--c-primary, #007bff);
+  --plugin-primary: var(--c-primary, #007bff);
+  --plugin-accent: var(--c-accent, #ff6b35);
+  --plugin-shadow: rgba(0, 0, 0, 0.1);
+  --plugin-shadow-hover: rgba(0, 0, 0, 0.15);
+}
+
+/* Dark theme support - using body class detection */
+body.isEnabledDarkTheme {
+  --plugin-text-primary: #e0e0e0;
+  --plugin-text-muted: #aaa;
+  --plugin-bg-card: #2d2d2d;
+  --plugin-bg-input: #3d3d3d;
+  --plugin-border: #555;
+  --plugin-border-focus: #4a9eff;
+  --plugin-shadow: rgba(0, 0, 0, 0.4);
+  --plugin-shadow-hover: rgba(0, 0, 0, 0.6);
+}
+
+/* Fallback dark theme via prefers-color-scheme */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --plugin-text-primary: var(--text-color, #e0e0e0);
+    --plugin-text-muted: var(--text-color-muted, #aaa);
+    --plugin-bg-card: var(--card-bg, #2d2d2d);
+    --plugin-bg-input: var(--input-bg, #3d3d3d);
+    --plugin-border: var(--extra-border-color, #555);
+    --plugin-shadow: rgba(0, 0, 0, 0.4);
+    --plugin-shadow-hover: rgba(0, 0, 0, 0.6);
+  }
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: transparent;
-  color: var(--text-color);
+  color: var(--plugin-text-primary);
 }
 
 .app {
@@ -23,29 +63,29 @@ body {
 
 /* Common card styles */
 .card {
-  background: var(--card-bg);
+  background: var(--plugin-bg-card);
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px var(--plugin-shadow);
   padding: 1rem;
   text-align: left;
-  border: 2px solid var(--extra-border-color);
+  border: 2px solid var(--plugin-border);
 }
 
 .card-clickable:hover {
   transition: transform 0.2s;
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  border-color: var(--c-primary);
+  box-shadow: 0 4px 8px var(--plugin-shadow-hover);
+  border-color: var(--plugin-primary);
   cursor: pointer;
 }
 
 /* Common text styles */
 .text-muted {
-  color: var(--text-color-muted);
+  color: var(--plugin-text-muted);
 }
 
 .text-primary {
-  color: var(--c-primary);
+  color: var(--plugin-primary);
 }
 
 .header {
@@ -111,6 +151,21 @@ body {
   font-size: 0.9rem;
 }
 
+/* Custom prompts card styling */
+.custom-prompts-card {
+  border-left: 4px solid var(--plugin-accent);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--plugin-accent) 10%, transparent),
+    color-mix(in srgb, var(--plugin-accent) 5%, transparent)
+  );
+}
+
+.custom-prompts-card:hover {
+  border-color: var(--plugin-accent);
+  transform: translateY(-3px);
+}
+
 /* Category View */
 .category-container {
   max-width: 800px;
@@ -118,9 +173,9 @@ body {
 }
 
 .selected-category {
-  padding: 1.5rem 0;
+  padding: 1rem 0;
   text-align: center;
-  border-bottom: 1px solid var(--extra-border-color);
+  border-bottom: 1px solid var(--plugin-border);
   margin-bottom: 2rem;
 }
 
@@ -143,15 +198,15 @@ body {
 
 .prompt-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  border-color: var(--c-primary);
+  box-shadow: 0 4px 8px var(--plugin-shadow-hover);
+  border-color: var(--plugin-primary);
 }
 
 .prompt-title {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--text-color);
+  color: var(--plugin-text-primary);
 }
 
 /* Prompt View */
@@ -161,10 +216,8 @@ body {
 }
 
 .selected-prompt-header {
-  padding: 1.5rem 0;
+  padding: 1rem 0;
   text-align: center;
-  border-bottom: 1px solid var(--extra-border-color);
-  margin-bottom: 2rem;
 }
 
 .selected-prompt-header h2 {
@@ -182,9 +235,12 @@ body {
 .prompt-options {
   margin-bottom: 1.5rem;
   padding: 1rem;
-  background: rgba(0, 0, 0, 0.05);
+  background: color-mix(in srgb, var(--plugin-text-primary) 5%, transparent);
   border-radius: 4px;
-  border: 1px solid var(--extra-border-color);
+  border: 1px solid var(--plugin-border);
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .dropdown-label {
@@ -192,23 +248,31 @@ body {
   align-items: center;
   gap: 0.75rem;
   font-size: 0.9rem;
-  color: var(--text-color);
+  color: var(--plugin-text-primary);
+  flex-wrap: wrap;
+  width: 100%;
 }
 
 .task-dropdown {
+  width: 100%;
+  max-width: 100%;
   padding: 0.5rem;
-  border: 1px solid var(--extra-border-color);
+  border: 1px solid var(--plugin-border);
   border-radius: 4px;
-  background: var(--card-bg);
-  color: var(--text-color);
+  background: var(--plugin-bg-card);
+  color: var(--plugin-text-primary);
   font-size: 0.9rem;
   font-family: inherit;
   cursor: pointer;
+  box-sizing: border-box;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .task-dropdown:focus {
   outline: none;
-  border-color: var(--c-primary);
+  border-color: var(--plugin-border-focus);
 }
 
 .task-preview {
@@ -217,17 +281,17 @@ body {
 
 .task-count-info {
   font-size: 0.85rem;
-  color: var(--c-primary);
+  color: var(--plugin-primary);
   font-weight: 500;
 }
 
 .task-count-info.tooltip {
   cursor: help;
-  border-bottom: 1px dotted var(--c-primary);
+  border-bottom: 1px dotted var(--plugin-primary);
 }
 
 .task-count-info.tooltip:hover {
-  color: var(--c-accent, var(--c-primary));
+  color: var(--plugin-accent);
 }
 
 .task-preview-content {
@@ -236,7 +300,7 @@ body {
 
 .task-count-header {
   font-size: 0.85rem;
-  color: var(--c-primary);
+  color: var(--plugin-primary);
   font-weight: 600;
   margin-bottom: 0.5rem;
 }
@@ -247,7 +311,7 @@ body {
 
 .task-preview-item {
   font-size: 0.8rem;
-  color: var(--text-color);
+  color: var(--plugin-text-primary);
   margin-bottom: 0.25rem;
   line-height: 1.3;
   word-break: break-word;
@@ -255,27 +319,27 @@ body {
 
 .task-preview-more {
   font-size: 0.75rem;
-  color: var(--text-color-muted);
+  color: var(--plugin-text-muted);
   font-style: italic;
   margin-top: 0.25rem;
 }
 
 .generated-prompt h3 {
   margin: 0 0 1rem 0;
-  color: var(--c-primary);
+  color: var(--plugin-primary);
 }
 
 .prompt-text {
   width: 100%;
   min-height: 300px;
   padding: 1rem;
-  border: 1px solid var(--extra-border-color);
+  border: 1px solid var(--plugin-border);
   border-radius: 4px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace;
   font-size: 0.9rem;
   line-height: 1.5;
-  background: var(--card-bg);
-  color: var(--text-color);
+  background: var(--plugin-bg-input);
+  color: var(--plugin-text-primary);
   resize: vertical;
 }
 
@@ -304,7 +368,7 @@ body {
 
 .action-button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 8px var(--plugin-shadow-hover);
 }
 
 .action-button:disabled {
@@ -315,8 +379,8 @@ body {
 
 /* Copy button */
 .copy-button {
-  background: var(--c-primary);
-  color: var(--c-contrast);
+  background: var(--plugin-primary);
+  color: white;
 }
 
 /* ChatGPT button */
@@ -327,6 +391,183 @@ body {
 
 .chatgpt-button:hover {
   background: #0d8c6b;
+}
+
+/* Custom prompt specific styles */
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  background: var(--plugin-bg-card);
+  border-radius: 8px;
+  border: 2px dashed var(--plugin-border);
+}
+
+.loading-container {
+  text-align: center;
+  padding: 2rem;
+}
+
+.custom-prompts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.custom-prompts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.custom-prompt-card {
+  border-left: 4px solid var(--plugin-primary);
+}
+
+.custom-prompt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.prompt-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.prompt-preview {
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.prompt-card-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Action buttons */
+.action-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.action-button.primary {
+  background: var(--plugin-primary);
+  color: white;
+}
+
+.action-button.primary:hover {
+  filter: brightness(1.1);
+}
+
+.action-button.secondary {
+  background: color-mix(in srgb, var(--plugin-text-primary) 10%, transparent);
+  color: var(--plugin-text-primary);
+  border: 1px solid var(--plugin-border);
+}
+
+.action-button.secondary:hover {
+  background: color-mix(in srgb, var(--plugin-text-primary) 15%, transparent);
+}
+
+/* Editor styles */
+.editor-header {
+  margin-bottom: 1.5rem;
+}
+
+.editor-container {
+  max-width: 800px;
+}
+
+.editor-instructions {
+  background: var(--plugin-bg-card);
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid var(--plugin-primary);
+}
+
+.editor-instructions p {
+  margin: 0 0 0.5rem 0;
+  color: var(--plugin-text-primary);
+}
+
+.editor-instructions p:last-child {
+  margin-bottom: 0;
+}
+
+.editor-field {
+  margin-bottom: 1.5rem;
+}
+
+.field-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--plugin-text-primary);
+}
+
+.prompt-title-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--plugin-border);
+  border-radius: 6px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  background: var(--plugin-bg-input);
+  color: var(--plugin-text-primary);
+}
+
+.prompt-title-input:focus {
+  outline: none;
+  border-color: var(--plugin-border-focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--plugin-border-focus) 20%, transparent);
+}
+
+.prompt-title-input::placeholder {
+  color: var(--plugin-text-muted);
+  font-weight: normal;
+}
+
+.prompt-textarea {
+  width: 100%;
+  min-height: 300px;
+  padding: 1rem;
+  border: 2px solid var(--plugin-border);
+  border-radius: 6px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  background: var(--plugin-bg-input);
+  color: var(--plugin-text-primary);
+  resize: vertical;
+}
+
+.prompt-textarea:focus {
+  outline: none;
+  border-color: var(--plugin-border-focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--plugin-border-focus) 20%, transparent);
+}
+
+.prompt-textarea::placeholder {
+  color: var(--plugin-text-muted);
+}
+
+.editor-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  padding-top: 1rem;
+  border-top: 1px solid var(--plugin-border);
 }
 
 /* Simple page transition */
