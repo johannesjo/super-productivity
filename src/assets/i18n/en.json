@@ -157,6 +157,10 @@
         "TXT_PAST": "<strong>{{title}}</strong> started at <strong>{{start}}</strong>!",
         "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> started at <strong>{{start}}</strong>!<br> (and {{nrOfOtherBanners}} other events are due)"
       },
+      "EVENT_STRINGS": {
+        "EVENT_STR": "event",
+        "EVENTS_STR": "events"
+      },
       "S": {
         "CAL_PROVIDER_ERROR": "Calendar Provider Error: {{errTxt}}"
       }

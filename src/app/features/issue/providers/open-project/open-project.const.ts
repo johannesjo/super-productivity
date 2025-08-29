@@ -1,4 +1,3 @@
-// TODO use as a checklist
 import { OpenProjectCfg } from './open-project.model';
 import { JiraWorklogExportDefaultTime } from '../jira/jira.model';
 export { OPEN_PROJECT_ISSUE_CONTENT_CONFIG } from './open-project-issue-content.const';

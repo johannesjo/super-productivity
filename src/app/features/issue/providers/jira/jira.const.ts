@@ -1,4 +1,3 @@
-// TODO use as a checklist
 import { JiraCfg, JiraWorklogExportDefaultTime } from './jira.model';
 import { GITHUB_INITIAL_POLL_DELAY } from '../github/github.const';
 import { JIRA_ISSUE_CONTENT_CONFIG } from './jira-issue-content.const';

@@ -20,7 +20,6 @@ import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 //   props: {
 //     tag: 'h3',
 //     class: 'sub-section-heading-first',
-//     // TODO add translation
 //     // text: T.F.JIRA.FORM_SECTION.CREDENTIALS,
 //     text: 'Credentials',
 //   },
