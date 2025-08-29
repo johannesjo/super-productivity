@@ -1,5 +1,6 @@
 import { Component, For } from 'solid-js';
-import { PROMPT_CATEGORIES, PromptCategory } from '../types';
+import { PromptCategory } from '../types';
+import { PROMPT_CATEGORIES } from '../prompts';
 
 interface HomeViewProps {
   onSelectCategory: (category: PromptCategory) => void;

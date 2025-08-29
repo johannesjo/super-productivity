@@ -1,5 +1,6 @@
 import { Component, createSignal, Show, For } from 'solid-js';
-import { PromptCategory, renderPrompt } from '../types';
+import { PromptCategory } from '../types';
+import { renderPrompt } from '../utils';
 
 interface SelectedPrompt {
   category: PromptCategory;
