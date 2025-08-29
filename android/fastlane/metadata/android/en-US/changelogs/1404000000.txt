@@ -1,0 +1,140 @@
+
+### Bug Fixes
+
+* add missing TranslateService provider to AddTaskBarActions component tests
+* **add-task-bar:** correct property name for task service observable
+* **add-task-bar:** fix infinite spinner in search mode
+* **add-task-bar:** move effect() to constructor for proper injection context
+* **addTaskBar:** closing when it shouldn't
+* **addTaskBar:** focus behavior
+* **addTaskBar:** isAddToBottom not being utilized
+* **addTaskBar:** issue with @ char block enter submit
+* **addTaskBar:** refocus on clear
+* dueDay not being taken into account when adding a task
+* duration selection for focus mode
+* initial value
+* search results have incorrect capitalization
+* task dueDay being set when dueWithTime is set
+* validation errors #4897
+### Features
+
+* **add-task-bar:** add keyboard shortcuts for mode switching and toggle controls
+* **add-task-bar:** implement bidirectional sync with TaskInputStateService
+* **add-task-bar:** implement clickable sections with integrated controls
+* **add-task-bar:** set inbox as default project and improve UI
+* **addTaskBar:** add back in planForDay stuff
+* **addTaskBar:** add clear button to tags as well
+* **addTaskBar:** add extra elevation for overlay mode
+* **addTaskBar:** add info text when adding existing task
+* **addTaskBar:** add offset to add task panel
+* **addTaskBar:** add support for creating new tags
+* **addTaskBar:** add tag icons to tag menu
+* **addTaskBar:** adjust reset after add
+* **addTaskBar:** adjust shortcuts and add new ones
+* **addTaskBar:** better style autocomplete items
+* **addTaskBar:** change default
+* **addTaskBar:** change due icon based on input
+* **addTaskBar:** cleanup
+* **addTaskBar:** cleanup not needed
+* **addTaskBar:** clear search when item was added
+* **addTaskBar:** clear shortsyntax on clear tags
+* **addTaskBar:** default values...
+* **addTaskBar:** don't add today tag when adding from boards
+* **addTaskBar:** dynamically react to number of buttons
+* **addTaskBar:** extract translations
+* **addTaskBar:** fine tuning for buttons
+* **addTaskBar:** first draft
+* **addTaskBar:** fix problems when parsed date got lost
+* **addTaskBar:** get rid of "No tasks" text
+* **addTaskBar:** get rid of unneeded persistence
+* **addTaskBar:** highlight currently active bar item
+* **addTaskBar:** improve
+* **addTaskBar:** improve 3
+* **addTaskBar:** improve blur handling
+* **addTaskBar:** improve focus behavior
+* **addTaskBar:** improve focus behavior
+* **addTaskBar:** improve for boards
+* **addTaskBar:** improve lots of stuff
+* **addTaskBar:** improve lots of stuff 2
+* **addTaskBar:** improve mobile styling
+* **addTaskBar:** improve mobile styling 2
+* **addTaskBar:** improve on clear buttons
+* **addTaskBar:** improve on planner
+* **addTaskBar:** improve on timeouts
+* **addTaskBar:** improve refocus behavior
+* **addTaskBar:** improve search items
+* **addTaskBar:** improve search mode
+* **addTaskBar:** improve search mode
+* **addTaskBar:** improve spinner
+* **addTaskBar:** improve styling
+* **addTaskBar:** improve styling
+* **addTaskBar:** improve styling
+* **addTaskBar:** improve styling of search mode
+* **addTaskBar:** improve tag preview
+* **addTaskBar:** integrate all into main component
+* **addTaskBar:** integrate all into main component 2
+* **addTaskBar:** keep tags unique
+* **addTaskBar:** make action bar scrollable
+* **addTaskBar:** make autocomplete list full width
+* **addTaskBar:** make bar a little wider for mobile
+* **addTaskBar:** make combining short syntax and buttons better
+* **addTaskBar:** make combining short syntax and buttons better 2
+* **addTaskBar:** make component more dry
+* **addTaskBar:** make day scheduling work
+* **addTaskBar:** make default date as it should
+* **addTaskBar:** make enter selection for mention work
+* **addTaskBar:** make escape close work again
+* **addTaskBar:** make it work across timezones
+* **addTaskBar:** make it work for boards
+* **addTaskBar:** make menus appear over bar
+* **addTaskBar:** make more stuff work
+* **addTaskBar:** make more stuff work2
+* **addTaskBar:** make no tag case work
+* **addTaskBar:** make refocus work
+* **addTaskBar:** make saving to session storage work properly
+* **addTaskBar:** make schedule dialog with time work
+* **addTaskBar:** make schedule dialog work
+* **addTaskBar:** make scheduling work as it should
+* **addTaskBar:** make scheduling work properly
+* **addTaskBar:** make search modes work like before
+* **addTaskBar:** make short syntax parsing work again
+* **addTaskBar:** make single line
+* **addTaskBar:** make tag parsing work
+* **addTaskBar:** make task selection work
+* **addTaskBar:** make vertical alignment work better
+* **addTaskBar:** only search when activated mode
+* **addTaskBar:** pass currently selected date to schedule dialog
+* **addTaskBar:** polish
+* **addTaskBar:** prevent enter submit getting blocked by mention stuff
+* **addTaskBar:** prevent model error
+* **addTaskBar:** properly position clear button
+* **addTaskBar:** re-implement tag removal input
+* **addTaskBar:** re-introduce saving tmp value
+* **addTaskBar:** reduce estimate options
+* **addTaskBar:** refactor into multiple step 1
+* **addTaskBar:** refactor into multiple step 2
+* **addTaskBar:** refactor into multiple step 3
+* **addTaskBar:** refactor into multiple step 4
+* **addTaskBar:** refactor into multiple step 5
+* **addTaskBar:** refocus main input
+* **addTaskBar:** refocus task after showing add task bar
+* **addTaskBar:** remove short syntax on clear
+* **addTaskBar:** retain tags and estimate
+* **addTaskBar:** schedule for today when on today list
+* **addTaskBar:** search old tasks and issus at the same time
+* **addTaskBar:** show add to backlog button only if there is a backlog
+* **addTaskBar:** simplify
+* **addTaskBar:** smoothen focus behavior
+* **addTaskBar:** use current project
+* **addTaskBar:** use diff parsing for parser
+* **addTaskBar:** use project menu instead of angular mention
+* **addTaskBar:** use schedule dialog for due
+* **addTaskBar:** use signal rather than signal for input text
+* **addTaskBar:** various fixes
+* get mentions into the project
+* get mentions into the project 2
+* **issue:** various improvements
+* make webdav warning more prominent
+* move inbox up
+* **packages:** add Volta support
+* updated italian translations
