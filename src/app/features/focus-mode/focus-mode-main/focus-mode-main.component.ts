@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   effect,
   HostBinding,
   HostListener,
@@ -12,15 +13,11 @@ import { TaskCopy } from '../../tasks/task.model';
 import { from, Observable, of, Subject } from 'rxjs';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { TaskService } from '../../tasks/task.service';
-import { first, map, switchMap, take, takeUntil, throttleTime } from 'rxjs/operators';
+import { first, switchMap, take, takeUntil } from 'rxjs/operators';
 import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachment.service';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { IssueService } from '../../issue/issue.service';
 import { Store } from '@ngrx/store';
-import {
-  selectFocusModeMode,
-  selectFocusSessionTimeElapsed,
-} from '../store/focus-mode.selectors';
 import { focusSessionDone } from '../store/focus-mode.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
@@ -78,9 +75,9 @@ export class FocusModeMainComponent implements OnDestroy {
 
   focusModeService = inject(FocusModeService);
 
-  timeElapsed$ = this._store.select(selectFocusSessionTimeElapsed);
-  mode$ = this._store.select(selectFocusModeMode);
-  isCountTimeDown$ = this.mode$.pipe(map((mode) => mode !== FocusModeMode.Flowtime));
+  timeElapsed = this.focusModeService.focusSessionTimeElapsed;
+  mode = this.focusModeService.focusModeMode;
+  isCountTimeDown = computed(() => this.mode() !== FocusModeMode.Flowtime);
 
   @HostBinding('class.isShowNotes') isShowNotes: boolean = false;
 
@@ -103,13 +100,11 @@ export class FocusModeMainComponent implements OnDestroy {
     take(1),
   );
 
-  autoRationProgress$: Observable<number> = this.timeElapsed$.pipe(
-    map((timeElapsed) => {
-      const percentOfFullMinute = (timeElapsed % 60000) / 60000;
-      return percentOfFullMinute * 100;
-    }),
-    throttleTime(900),
-  );
+  autoRationProgress = computed(() => {
+    const timeElapsed = this.timeElapsed();
+    const percentOfFullMinute = (timeElapsed % 60000) / 60000;
+    return percentOfFullMinute * 100;
+  });
 
   private _onDestroy$ = new Subject<void>();
   private _dragEnterTarget?: HTMLElement;

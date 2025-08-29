@@ -1,4 +1,4 @@
-@let isCountTimeDown = isCountTimeDown$ | async;
+@let isCountDown = isCountTimeDown();
 <!-- -->
 @if (taskService.currentTask$ | async; as task) {
   <task-title
@@ -7,7 +7,7 @@
     class="task-title"
   ></task-title>
   <div class="progress-wrapper">
-    @if (isCountTimeDown) {
+    @if (isCountDown) {
       <progress-circle
         [progress]="focusModeService.sessionProgress$ | async"
       ></progress-circle>
@@ -19,10 +19,10 @@
         class="focus-time"
         title="Focus time"
       >
-        @if (isCountTimeDown) {
+        @if (isCountDown) {
           {{ focusModeService.timeToGo$ | async | msToMinuteClockString }}
         } @else {
-          {{ timeElapsed$ | async | msToMinuteClockString }}
+          {{ timeElapsed() | msToMinuteClockString }}
         }
       </div>
     </div>

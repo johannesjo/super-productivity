@@ -11,6 +11,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { ConfettiService } from '../../../core/confetti/confetti.service';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
+import { FocusModeService } from '../focus-mode.service';
 import {
   selectCurrentTask,
   selectLastCurrentTask,
@@ -21,10 +22,6 @@ import {
   hideFocusOverlay,
   setFocusSessionActivePage,
 } from '../store/focus-mode.actions';
-import {
-  selectFocusModeMode,
-  selectLastSessionTotalDurationOrTimeElapsedFallback,
-} from '../store/focus-mode.selectors';
 
 @Component({
   selector: 'focus-mode-task-done',
@@ -36,8 +33,9 @@ import {
 export class FocusModeTaskDoneComponent implements AfterViewInit {
   private _store = inject(Store);
   private readonly _confettiService = inject(ConfettiService);
+  private readonly _focusModeService = inject(FocusModeService);
 
-  mode = toSignal(this._store.select(selectFocusModeMode));
+  mode = this._focusModeService.focusModeMode;
   currentTask = toSignal(this._store.select(selectCurrentTask));
   taskTitle = toSignal(
     this._store.select(selectLastCurrentTask).pipe(
@@ -49,9 +47,8 @@ export class FocusModeTaskDoneComponent implements AfterViewInit {
       take(1),
     ),
   );
-  lastSessionTotalDuration = toSignal(
-    this._store.select(selectLastSessionTotalDurationOrTimeElapsedFallback),
-  );
+  lastSessionTotalDuration =
+    this._focusModeService.lastSessionTotalDurationOrTimeElapsedFallback;
   T: typeof T = T;
 
   async ngAfterViewInit(): Promise<void> {

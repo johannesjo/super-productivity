@@ -6,12 +6,7 @@ import { GlobalConfigService } from '../../config/global-config.service';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import { FocusModeMode, FocusModePage } from '../focus-mode.const';
 import { Store } from '@ngrx/store';
-import {
-  selectFocusModeMode,
-  selectFocusSessionActivePage,
-  selectFocusSessionTimeElapsed,
-  selectIsFocusSessionRunning,
-} from '../store/focus-mode.selectors';
+import { selectFocusSessionTimeElapsed } from '../store/focus-mode.selectors';
 import {
   cancelFocusSession,
   hideFocusOverlay,
@@ -74,15 +69,9 @@ export class FocusModeOverlayComponent implements OnDestroy {
   FocusModePage: typeof FocusModePage = FocusModePage;
   FocusModeMode: typeof FocusModeMode = FocusModeMode;
 
-  selectedMode = toSignal(this._store.select(selectFocusModeMode), {
-    initialValue: undefined,
-  });
-  activePage = toSignal(this._store.select(selectFocusSessionActivePage), {
-    initialValue: undefined,
-  });
-  isFocusSessionRunning = toSignal(this._store.select(selectIsFocusSessionRunning), {
-    initialValue: undefined,
-  });
+  selectedMode = this.focusModeService.focusModeMode;
+  activePage = this.focusModeService.focusSessionActivePage;
+  isFocusSessionRunning = this.focusModeService.isFocusSessionRunning;
 
   isPomodoroEnabled = toSignal(this._store.select(selectIsPomodoroEnabled), {
     initialValue: false,

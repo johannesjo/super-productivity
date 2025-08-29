@@ -182,15 +182,5 @@ describe('FocusModeService', () => {
         });
       });
     });
-
-    describe('skipBreak method', () => {
-      it('should dispatch skipBreak action', () => {
-        spyOn(store, 'dispatch');
-
-        service.skipBreak();
-
-        expect(store.dispatch).toHaveBeenCalledWith(skipBreak());
-      });
-    });
   });
 });

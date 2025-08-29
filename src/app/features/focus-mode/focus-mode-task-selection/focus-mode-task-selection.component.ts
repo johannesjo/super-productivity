@@ -18,10 +18,9 @@ import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { TranslatePipe } from '@ngx-translate/core';
 import { SelectTaskComponent } from '../../tasks/select-task/select-task.component';
-import { selectFocusModeMode } from '../store/focus-mode.selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { selectFocusModeConfig } from '../../config/store/global-config.reducer';
 import { GlobalConfigService } from '../../config/global-config.service';
+import { FocusModeService } from '../focus-mode.service';
 import { setFocusSessionDuration } from '../store/focus-mode.actions';
 
 @Component({
@@ -35,9 +34,10 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
   readonly taskService = inject(TaskService);
   private readonly _store = inject(Store);
   private readonly _globalConfigService = inject(GlobalConfigService);
+  private readonly _focusModeService = inject(FocusModeService);
 
-  mode = toSignal(this._store.select(selectFocusModeMode));
-  cfg = toSignal(this._store.select(selectFocusModeConfig));
+  mode = this._focusModeService.focusModeMode;
+  cfg = this._focusModeService.focusModeConfig;
   pomodoroConfig = toSignal(this._globalConfigService.pomodoroConfig$);
 
   selectedTask: string | Task | undefined;
