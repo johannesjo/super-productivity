@@ -37,7 +37,7 @@ import {
 } from './store/focus-mode.actions';
 import { Store } from '@ngrx/store';
 
-const TICK_DURATION = 500;
+const TICK_DURATION = 200;
 
 @Injectable({
   providedIn: 'root',
