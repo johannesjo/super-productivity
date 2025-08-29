@@ -51,6 +51,7 @@ export class BoardsComponent implements AfterViewInit, OnDestroy {
   readonly contextMenuTrigger = viewChild.required<MatMenuTrigger>('menuTrigger');
   readonly contextMenuTriggers = viewChildren<MatMenuTrigger>('menuTrigger');
   store = inject(Store);
+  elementRef = inject(ElementRef);
   selectedTabIndex = signal(localStorage.getItem(LS.SELECTED_BOARD) || 0);
 
   boards = toSignal(this.store.select(selectAllBoards));
@@ -58,7 +59,7 @@ export class BoardsComponent implements AfterViewInit, OnDestroy {
 
   DEFAULT_BOARD_CFG = DEFAULT_BOARD_CFG;
 
-  constructor(private elementRef: ElementRef) {
+  constructor() {
     effect(() => {
       localStorage.setItem(LS.SELECTED_BOARD, this.selectedTabIndex().toString());
     });
