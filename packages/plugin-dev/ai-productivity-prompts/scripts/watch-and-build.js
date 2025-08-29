@@ -27,7 +27,7 @@ const rebuildPackage = () => {
   buildTimeout = setTimeout(async () => {
     console.log('\n📦 Building plugin package...');
 
-    const buildProcess = spawn('npm', ['run', 'package'], {
+    const buildProcess = spawn('npm', ['run', 'build'], {
       cwd: projectRoot,
       stdio: 'inherit',
       shell: true,

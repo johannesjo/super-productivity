@@ -78,6 +78,15 @@ const App: Component = () => {
     }
   };
 
+  const getChatGPTUrl = () => {
+    const prompt = generatedPrompt().replace(/\./g, ' ').replace(/-/g, ' ');
+    const encodedPrompt = encodeURI(prompt);
+    const url = `https://chat.openai.com/?q=${encodedPrompt}`;
+    console.log('Generated ChatGPT URL:', url);
+    console.log('Prompt length:', prompt.length);
+    return url;
+  };
+
   return (
     <div class="app">
       <Show when={currentView() !== 'home'}>
@@ -156,11 +165,19 @@ const App: Component = () => {
               />
               <div class="prompt-actions">
                 <button
-                  class="copy-button"
+                  class="action-button copy-button"
                   onClick={copyToClipboard}
                 >
                   📋 Copy to clipboard
                 </button>
+                <a
+                  class="action-button chatgpt-button"
+                  href={getChatGPTUrl()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  🤖 Open in ChatGPT
+                </a>
               </div>
             </div>
           </div>
