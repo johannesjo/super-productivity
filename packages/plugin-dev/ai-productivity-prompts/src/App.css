@@ -187,19 +187,77 @@ body {
   border: 1px solid var(--extra-border-color);
 }
 
-.checkbox-label {
+.dropdown-label {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
   font-size: 0.9rem;
-  cursor: pointer;
   color: var(--text-color);
 }
 
-.checkbox-label input[type='checkbox'] {
-  width: 16px;
-  height: 16px;
+.task-dropdown {
+  padding: 0.5rem;
+  border: 1px solid var(--extra-border-color);
+  border-radius: 4px;
+  background: var(--card-bg);
+  color: var(--text-color);
+  font-size: 0.9rem;
+  font-family: inherit;
   cursor: pointer;
+}
+
+.task-dropdown:focus {
+  outline: none;
+  border-color: var(--c-primary);
+}
+
+.task-preview {
+  margin-top: 0.75rem;
+}
+
+.task-count-info {
+  font-size: 0.85rem;
+  color: var(--c-primary);
+  font-weight: 500;
+}
+
+.task-count-info.tooltip {
+  cursor: help;
+  border-bottom: 1px dotted var(--c-primary);
+}
+
+.task-count-info.tooltip:hover {
+  color: var(--c-accent, var(--c-primary));
+}
+
+.task-preview-content {
+  width: 100%;
+}
+
+.task-count-header {
+  font-size: 0.85rem;
+  color: var(--c-primary);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.task-preview-list {
+  margin-left: 0.5rem;
+}
+
+.task-preview-item {
+  font-size: 0.8rem;
+  color: var(--text-color);
+  margin-bottom: 0.25rem;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.task-preview-more {
+  font-size: 0.75rem;
+  color: var(--text-color-muted);
+  font-style: italic;
+  margin-top: 0.25rem;
 }
 
 .generated-prompt h3 {
