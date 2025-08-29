@@ -1,0 +1,241 @@
+/*
+ * AI Productivity Prompts Plugin Styles
+ * Simplified structure following KISS principles
+ */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: transparent;
+  color: var(--text-color);
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+}
+
+/* Common card styles */
+.card {
+  background: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  text-align: left;
+  border: 2px solid var(--extra-border-color);
+}
+
+.card-clickable:hover {
+  transition: transform 0.2s;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  border-color: var(--c-primary);
+  cursor: pointer;
+}
+
+/* Common text styles */
+.text-muted {
+  color: var(--text-color-muted);
+}
+
+.text-primary {
+  color: var(--c-primary);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--c-primary);
+}
+
+.back-button {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 1px solid var(--c-primary);
+  color: var(--c-primary);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.back-button:hover {
+  background: var(--c-primary);
+  color: white;
+}
+
+.main {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.intro {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.intro h2 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Category Grid */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.category-card h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.category-card p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Category View */
+.category-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.selected-category {
+  padding: 1.5rem 0;
+  text-align: center;
+  border-bottom: 1px solid var(--extra-border-color);
+  margin-bottom: 2rem;
+}
+
+.selected-category h2 {
+  margin: 0;
+}
+
+/* Prompt List */
+.prompt-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.prompt-item {
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.prompt-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  border-color: var(--c-primary);
+}
+
+.prompt-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Prompt View */
+.prompt-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.selected-prompt-header {
+  padding: 1.5rem 0;
+  text-align: center;
+  border-bottom: 1px solid var(--extra-border-color);
+  margin-bottom: 2rem;
+}
+
+.selected-prompt-header h2 {
+  margin: 0 0 0.5rem 0;
+}
+
+.selected-prompt-header p {
+  margin: 0;
+}
+
+.generated-prompt {
+  padding: 1.5rem;
+}
+
+.generated-prompt h3 {
+  margin: 0 0 1rem 0;
+  color: var(--c-primary);
+}
+
+.prompt-text {
+  width: 100%;
+  min-height: 300px;
+  padding: 1rem;
+  border: 1px solid var(--extra-border-color);
+  border-radius: 4px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  background: var(--card-bg);
+  color: var(--text-color);
+  resize: vertical;
+}
+
+.prompt-actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.copy-button {
+  padding: 0.75rem 1.5rem;
+  background: var(--c-primary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.copy-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.copy-button:disabled {
+  opacity: 0.7;
+  transform: none;
+  cursor: not-allowed;
+}
+
+/* Simple page transition */
+.page-fade {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

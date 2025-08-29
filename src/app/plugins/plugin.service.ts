@@ -94,6 +94,7 @@ export class PluginService implements OnDestroy {
       'assets/bundled-plugins/sync-md',
       'assets/bundled-plugins/api-test-plugin',
       'assets/bundled-plugins/procrastination-buster',
+      'assets/bundled-plugins/ai-productivity-prompts',
     ];
 
     // Only load manifests for discovery
