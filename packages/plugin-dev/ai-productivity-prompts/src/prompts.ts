@@ -5,43 +5,58 @@ export const PROMPT_CATEGORIES: PromptCategory[] = [
     title: 'What to do now?',
     prompts: [
       {
-        title: 'Pick my Top 3 right now',
-        template: `You are an executive function coach. Help me identify exactly what to focus on right now. Consider:
+        title: 'Next Best Action',
+        template: `I need to decide what to work on right now. Analyze my tasks and recommend the SINGLE best thing to do next.
 
-- What's the most impactful thing I can do in the next 2 hours?
-- What's blocking other important work?
-- What matches my current energy level and context?
-- What will give me momentum for the rest of the day?
+Consider:
+1. Current time of day and my likely energy level
+2. Dependencies - what's blocking other work?
+3. Deadlines - what's truly urgent?
+4. Impact - what moves the needle most?
+5. Context - what can I realistically complete now?
 
-Give me 3 specific options ranked by impact and feasibility for my current situation.`,
+Give me:
+- ONE specific task to focus on
+- Why this task (2-3 bullet points)
+- First concrete action to start (under 2 minutes)
+- Expected time to complete`,
       },
       {
-        title: '90-Minute Deep Work Sprint',
-        template: `Design a focused 90-minute sprint for maximum impact:
+        title: '90-Minute Power Block',
+        template: `Help me structure the next 90 minutes for maximum productivity.
 
-**Sprint Setup:**
-- One clear objective (what success looks like)
-- 3-5 specific steps (actionable items)
-- Definition of done (how I'll know it's complete)
+Review my tasks and create:
 
-**Execution Framework:**
-- 5-minute setup ritual (clear space, set intention)
-- 75 minutes focused work (no interruptions)
-- 10-minute wrap-up (capture insights, next actions)
+**The ONE Thing** (15 words max)
+What single outcome would make this block a success?
 
-Focus on work that moves the needle forward.`,
+**Action Steps** (3-5 specific tasks)
+- [Exact action verb + specific deliverable]
+- Include time estimates for each
+
+**Success Metrics**
+How will I know I've succeeded? Be specific.
+
+**Potential Blockers**
+What might stop me? How do I prevent/handle it?
+
+Format as a checklist I can follow without thinking.`,
       },
       {
-        title: 'Quick Win Selection',
-        template: `Help me identify quick wins I can accomplish in the next 30-60 minutes:
+        title: 'Quick Win Hunter',
+        template: `Find me 1-2 tasks I can complete in the next 30 minutes that will give me momentum.
 
-Look for tasks that are:
-- High visibility or impact relative to effort
-- Remove blockers for other work
-- Give me energy and momentum
-- Can be completed with my current tools/context
+Criteria:
+- Can be FULLY completed (not just started)
+- Requires no external input or waiting
+- Has visible/tangible output
+- Moves a project forward OR removes a mental burden
 
-Rank by effort vs impact and suggest the best 1-2 to tackle now.`,
+For each task, tell me:
+1. The specific task
+2. Time estimate (be realistic)
+3. What I'll have when done
+4. Why this creates momentum`,
       },
     ],
   },
@@ -49,62 +64,77 @@ Rank by effort vs impact and suggest the best 1-2 to tackle now.`,
     title: 'Plan my day',
     prompts: [
       {
-        title: 'Daily Game Plan',
-        template: `Create a strategic plan for today that sets me up for success:
+        title: 'Daily Blueprint',
+        template: `Create my daily plan. Be specific and realistic.
 
-**Morning Priority:**
-- What's the ONE thing that would make today a win?
-- When will I tackle this (time block)?
+**Non-Negotiables** (max 3)
+What MUST happen today no matter what?
+1. [Task] - [Time needed] - [When]
+2. 
+3. 
 
-**Energy Management:**
-- High-energy tasks (for when I'm sharp)
-- Medium-energy tasks (for mid-day)
-- Low-energy tasks (for when I'm tired)
+**Energy Matching**
+Morning (high energy): [Which complex/creative task?]
+Afternoon (medium): [Which routine work?]
+Late day (low): [Which admin/cleanup task?]
 
-**Realistic Schedule:**
-- Include buffer time between tasks
-- Plan for interruptions and unexpected items
-- End with a small win to build momentum for tomorrow`,
+**Time Blocks**
+[Start-End]: [Specific task/outcome]
+Include 15-min buffers between major tasks
+
+**End-of-Day Win**
+One small task to complete last that will feel satisfying
+
+**Contingency**
+If I only have 2 hours today, which ONE task gets done?`,
       },
       {
-        title: 'Time-Blocked Schedule',
-        template: `Help me create a time-blocked schedule for maximum productivity:
+        title: 'Reality-Based Schedule',
+        template: `Build a schedule that actually works with my real life.
 
-**Time Blocking Principles:**
-- Batch similar tasks together
-- Protect deep work with longer blocks
-- Include transition time between different types of work
-- Schedule breaks and buffer time
+First, identify:
+- Fixed commitments (meetings, appointments)
+- Realistic work windows between them
+- My actual (not ideal) energy patterns today
 
-**Schedule Framework:**
-- 9-11 AM: Deep work block
-- 11-12 PM: Communications & quick tasks  
-- 1-3 PM: Meetings or collaborative work
-- 3-5 PM: Implementation & follow-ups
+Now create:
 
-Adapt this framework to fit my specific tasks and energy patterns.`,
+**Protected Time** (1-2 blocks max)
+[Time]: [Most important work] - phone off, door closed
+
+**Batch Windows**
+[Time]: Communications (email, messages, calls)
+[Time]: Quick tasks under 15 min each
+[Time]: Admin/planning/review
+
+**Flex Buffer**
+30-60 minutes unscheduled for the unexpected
+
+Give me exact times and specific tasks, not categories.`,
       },
       {
-        title: 'Energy-Based Planning',
-        template: `Plan my day around my natural energy rhythms:
+        title: 'Minimum Viable Day',
+        template: `I'm overwhelmed. Help me plan the absolute minimum for a successful day.
 
-**High Energy (typically morning):**
-- Complex problem-solving
-- Creative work
-- Important decisions
-- Challenging tasks
+**The ONE Thing**
+If only one task gets done today, which creates the most relief or progress?
+Task: [Specific task]
+Time needed: [Realistic estimate]
+When: [Specific time block]
 
-**Medium Energy (mid-day):**
-- Routine work
-- Planning and organizing
-- Less demanding meetings
+**Two Supporting Tasks**
+What two smaller tasks would most support the main one?
+1. [15-30 min task]
+2. [15-30 min task]
 
-**Low Energy (afternoon/evening):**
-- Administrative tasks
-- Email and communications
-- Review and cleanup work
+**Maintenance Minimum**
+What's the bare minimum to keep things from falling apart?
+- [5-10 min critical check-in]
+- [5-10 min critical response]
 
-Match my tasks to my energy levels for optimal productivity.`,
+Total time commitment: [Should be under 4 focused hours]
+
+Everything else can wait.`,
       },
     ],
   },
@@ -112,48 +142,57 @@ Match my tasks to my energy levels for optimal productivity.`,
     title: 'Plan my week',
     prompts: [
       {
-        title: 'Weekly Strategic Plan',
-        template: `Create a strategic weekly plan focused on outcomes:
+        title: 'Weekly Big Rocks',
+        template: `Define my week's priorities using the Big Rocks principle.
 
-**Week's Big Picture:**
-- 1-3 key outcomes (what success looks like)
-- Major milestones or deadlines
-- Available time and energy capacity
+**Three Big Rocks** (major outcomes)
+What three things, if completed, would make this a successful week?
+1. [Specific, measurable outcome] - Due: [Day]
+2. [Specific, measurable outcome] - Due: [Day]
+3. [Specific, measurable outcome] - Due: [Day]
 
-**Daily Themes:**
-- Monday: Planning & Setup
-- Tuesday: Deep Work & Creation  
-- Wednesday: Communication & Collaboration
-- Thursday: Implementation & Building
-- Friday: Review & Wrap-up
+**Rock Schedule**
+Monday: [Which rock gets focus? How many hours?]
+Tuesday: [Which rock gets focus? How many hours?]
+Wednesday: [Which rock gets focus? How many hours?]
+Thursday: [Which rock gets focus? How many hours?]
+Friday: [Wrap-up, review, or overflow?]
 
-**Risk Management:**
-- What could derail progress?
-- Where do I need buffers?
-- What's my minimum viable week if things go sideways?`,
+**Pebbles** (important but smaller)
+5-7 tasks that support the big rocks or maintain momentum
+- [Task]: [Which day, how long?]
+
+**Sand** (nice if time)
+Tasks to do ONLY after rocks and pebbles are handled
+
+What gets cut if I lose a day this week?`,
       },
       {
-        title: 'Weekly Sprint Planning',
-        template: `Plan my week like a sprint with clear objectives and deliverables:
+        title: 'Realistic Week Planner',
+        template: `Plan a week that accounts for how weeks actually go.
 
-**Sprint Goal:**
-- What's the primary outcome for this week?
-- How will I measure success?
+**Reality Check**
+- Actual available hours: [Subtract meetings, commute, breaks]
+- Energy reality: [When am I actually productive?]
+- Interruption buffer: [How much time gets eaten by unexpected?]
 
-**Sprint Backlog:**
-- Must-do items (non-negotiable)
-- Should-do items (important but flexible timing)
-- Could-do items (nice to have if time permits)
+**Must-Win Battles**
+Maximum 3 things that MUST be done this week:
+1. [Task] - [Hours needed] - [Spread across which days?]
+2. 
+3. 
 
-**Daily Structure:**
-- Morning standup ritual (daily priorities)
-- Focused work blocks
-- Evening review (progress and adjustments)
+**Daily Minimums**
+What's the ONE thing for each day that defines success?
+Mon: [30-90 min task]
+Tue: [30-90 min task]
+Wed: [30-90 min task]
+Thu: [30-90 min task]
+Fri: [30-90 min task]
 
-**Sprint Review:**
-- Friday afternoon: What got done?
-- What's carrying over to next week?
-- What did I learn about my process?`,
+**Overflow Plan**
+Where does unfinished work go?
+What can be dropped without consequence?`,
       },
     ],
   },
@@ -161,57 +200,83 @@ Match my tasks to my energy levels for optimal productivity.`,
     title: "Help, I'm procrastinating",
     prompts: [
       {
-        title: 'Procrastination Diagnosis',
-        template: `Let's figure out why I'm procrastinating and fix it:
+        title: 'Procrastination Buster',
+        template: `I'm stuck. Get me unstuck with ONE specific action.
 
-**Quick Diagnosis:**
-What's really going on here?
-- **Fear** (of failure, judgment, or success)
-- **Ambiguity** (unclear what to do next)
-- **Overwhelm** (task feels too big)
-- **Boredom** (task feels tedious or meaningless)
-- **Perfectionism** (standards are impossibly high)
-- **Wrong time** (energy/context doesn't match task)
+Looking at my tasks, identify:
 
-**Targeted Solutions:**
-For each blocker you identify, I'll give you:
-1. A tiny next step (under 5 minutes)
-2. A "good enough" approach 
-3. A mental reframe to shift perspective`,
+**The Real Blocker** (pick the most likely)
+□ Fear: "What if I fail/succeed/get judged?"
+□ Confusion: "I don't know where to start"
+□ Overwhelm: "This is too big"
+□ Perfectionism: "It won't be good enough"
+□ Boredom: "This feels pointless"
+
+**The Antidote**
+Based on the blocker, give me:
+1. The absolute smallest next step (under 2 minutes)
+2. Exact words/action to take (not concepts)
+3. What to do immediately after that step
+
+**Permission Slip**
+Write me a 1-sentence permission to do this imperfectly.
+
+**Momentum Builder**
+If this works, what's the next 10-minute task?`,
       },
       {
-        title: '2-Minute Rule',
-        template: `Break through procrastination with the 2-minute rule:
+        title: '2-Minute Momentum',
+        template: `Pick ONE task I'm avoiding. Break it down to start NOW.
 
-**The Approach:**
-1. **Find the tiniest possible step** (literally 2 minutes or less)
-2. **Remove ALL barriers** to starting that step right now
-3. **Set up your environment** to make it ridiculously easy
-4. **Commit only to the tiny step** (not the whole project)
+**The Task:** [Identify the specific task I'm avoiding most]
 
-**Examples of 2-minute starts:**
-- Open the document and write one sentence
-- Gather the materials I need
-- Write down 3 bullet points
-- Send a quick message to get started
+**2-Minute Start** 
+Not "work on X" but the EXACT first action:
+- Open [specific file/app/website]
+- Write [specific first sentence/line]
+- Send [specific message to specific person]
+- Move [specific thing to specific place]
 
-Starting creates momentum. Momentum defeats procrastination.`,
+**Remove Friction**
+What do I need to close/hide/prepare right now?
+- Close: [Specific tabs/apps]
+- Prepare: [Specific materials/files]
+- Set timer for: [Exactly 2 minutes]
+
+**The Deal**
+"Do ONLY this 2-minute task. Permission to stop after. No commitment beyond that."
+
+**If Momentum Happens**
+Next 2-minute task ready: [Specific action]`,
       },
       {
-        title: 'Procrastination Reset',
-        template: `When I'm stuck in a procrastination loop, help me reset:
+        title: 'Pattern Interrupt',
+        template: `I'm in a procrastination spiral. Break the pattern.
 
-**The Reset Process:**
-1. **Acknowledge without judgment** - "I'm procrastinating, and that's human"
-2. **Get curious, not critical** - What's this resistance telling me?
-3. **Change something physical** - Different location, posture, or time
-4. **Lower the bar** - What would "good enough" look like?
-5. **Find the path of least resistance** - What feels easiest right now?
+**Physical Reset** (pick one, do now)
+□ Stand up and stretch for 30 seconds
+□ Get a glass of water
+□ Walk to a different room
+□ Do 5 push-ups or jumping jacks
 
-**Quick Wins to Build Momentum:**
-- One tiny action that moves me forward
-- Clear something small off my list
-- Do a completely different task for 15 minutes, then return`,
+**Mental Reset**
+Answer: "What would this look like if it were easy?"
+[Your response]
+
+**The Ridiculous Version**
+What's the laughably small version of this task?
+Example: Instead of "write report" → "write the title"
+Your task: [Make it absurdly small]
+
+**Time Boxing**
+"I'll work on this for exactly 10 minutes, then I'm free."
+Start time: [Now]
+End time: [Now + 10 min]
+Task: [The ridiculous version]
+
+**Reward Ready**
+What will you do immediately after those 10 minutes?
+[Specific reward/break activity]`,
       },
     ],
   },
@@ -219,66 +284,96 @@ Starting creates momentum. Momentum defeats procrastination.`,
     title: 'Better Habits',
     prompts: [
       {
-        title: 'Habit Stack Builder',
-        template: `Help me build a new habit using the habit stacking technique:
+        title: 'Micro Habit Designer',
+        template: `Design a habit so small it's impossible to fail.
 
-**Current Habit + New Habit:**
-"After I [current habit], I will [new habit]."
+**The Habit I Want:** [End goal habit]
 
-**Making it Stick:**
-1. **Anchor to an existing strong habit** - What do I already do consistently?
-2. **Start ridiculously small** - What's the tiniest version of this habit?
-3. **Make it obvious** - How can I set up visual cues?
-4. **Make it attractive** - How can I make this enjoyable?
-5. **Remove friction** - What barriers can I eliminate?
+**The 2-Minute Version:** [Scale it down to 2 minutes max]
 
-**Track & Celebrate:**
-- Simple tracking method (checkbox, app, etc.)
-- Small reward for consistency
-- Plan for missed days (how to get back on track)`,
+**The Stack Formula:**
+"After I [existing habit], I will [new 2-min habit]"
+
+**Make It Obvious**
+□ Visual cue: [What will I see?]
+□ Phone reminder at: [Specific time]
+□ Physical prep: [What to set out tonight?]
+
+**The First Week Plan**
+Days 1-3: [Even tinier version - 30 seconds]
+Days 4-7: [The 2-minute version]
+Week 2: [Slightly expanded - 3-5 minutes]
+
+**Track It Simply**
+□ Check off on: [Calendar/app/paper - pick ONE]
+□ Celebration: [5-second celebration after doing it]
+
+**If I Miss a Day**
+"Never miss twice. Do 30-second version to maintain chain."`,
       },
       {
-        title: 'Morning Routine Optimizer',
-        template: `Design a morning routine that sets me up for success:
+        title: 'Keystone Habit Finder',
+        template: `Identify the ONE habit that will trigger positive chain reactions.
 
-**Core Elements:**
-1. **Wake-up ritual** (consistent time, first actions)
-2. **Physical activation** (movement, stretching, exercise)
-3. **Mental clarity** (meditation, journaling, planning)
-4. **Fuel** (hydration, nutrition)
-5. **Intention setting** (priorities, mindset)
+**Potential Keystone Habits**
+Analyze which ONE of these would impact the most areas:
+□ Morning movement (affects: energy, mood, discipline)
+□ Evening planning (affects: next day, sleep, anxiety)
+□ Meal prep (affects: health, time, decisions)
+□ Daily reading (affects: learning, wind-down, screen time)
+□ Time blocking (affects: productivity, boundaries, focus)
 
-**Design Principles:**
-- Start with 15-30 minutes total (build from there)
-- Include only essentials that truly impact your day
-- Make it flexible enough to work on different days
-- Focus on how you want to FEEL, not just what you do
+**Your Keystone Selection**
+The ONE to focus on: [Choose from above or identify your own]
 
-**Troubleshooting:**
-- What if I'm not a morning person?
-- How to maintain consistency when traveling?
-- Backup plan for rushed mornings`,
+**Ripple Effects**
+If I do this consistently, what else improves?
+1. [Secondary benefit]
+2. [Secondary benefit]
+3. [Secondary benefit]
+
+**30-Day Experiment**
+Start date: [Specific date]
+Minimum daily dose: [5-15 minutes max]
+Success metric: [What changes am I tracking?]
+
+Focus ONLY on this one habit for 30 days.`,
       },
       {
-        title: 'Habit Change Strategy',
-        template: `Create a strategic approach to changing an existing habit:
+        title: 'Bad Habit Replacer',
+        template: `Replace a bad habit with a better one using the same trigger.
 
-**Understanding the Current Habit:**
-1. **Cue** - What triggers this behavior?
-2. **Routine** - What's the actual behavior?
-3. **Reward** - What need does it satisfy?
+**The Habit to Change:** [Specific bad habit]
 
-**Designing the Replacement:**
-4. **Keep the cue** - Same trigger
-5. **Replace the routine** - New behavior that serves the same need
-6. **Preserve the reward** - Same or better payoff
+**The Trigger Audit**
+When does this happen?
+- Time: [When in the day?]
+- Location: [Where am I?]
+- Emotion: [What am I feeling?]
+- Preceding action: [What happens right before?]
 
-**Implementation Plan:**
-- Start date and 30-day experiment mindset
-- Environmental changes to support new habit
-- Accountability system (person, app, tracker)
-- Plan for obstacles and setbacks
-- Weekly review and adjustment process`,
+**The Need It Meets**
+What am I really seeking?
+□ Stress relief
+□ Stimulation/excitement
+□ Connection
+□ Escape/numbing
+□ Energy boost
+□ Reward/pleasure
+
+**The Replacement**
+New behavior that meets the SAME need:
+[Specific alternative action]
+
+**Implementation**
+When [trigger] happens,
+Instead of [bad habit],
+I will [replacement behavior],
+Because it gives me [same reward].
+
+**Friction Design**
+Make bad habit harder: [Specific action]
+Make good habit easier: [Specific action]`,
       },
     ],
   },
@@ -286,87 +381,122 @@ Starting creates momentum. Momentum defeats procrastination.`,
     title: 'Various',
     prompts: [
       {
-        title: 'Decision Making Framework',
-        template: `Help me make a clear, confident decision using a structured approach:
+        title: 'Quick Decision Maker',
+        template: `I need to make a decision. Help me choose in the next 5 minutes.
 
-**Decision Clarity:**
-1. **What exactly am I deciding?** (be specific)
-2. **What are my realistic options?** (usually 2-4 good choices)
-3. **What matters most?** (key criteria for evaluation)
+**The Decision:** [State it in one sentence]
 
-**Evaluation Process:**
-4. **Pros and cons** for each option
-5. **Long-term vs. short-term impact**
-6. **Reversibility** - Can I change course later?
-7. **Opportunity cost** - What am I giving up?
+**Real Options** (2-4 max)
+A: [Option]
+B: [Option]
+C: [Option if applicable]
 
-**Decision Filters:**
-- What would I advise a friend in this situation?
-- What aligns with my values and long-term goals?
-- What would I regret NOT trying?`,
+**10-10-10 Test**
+How will I feel about each option:
+- In 10 minutes?
+- In 10 months?
+- In 10 years?
+
+**Gut Check**
+If I had to decide in 10 seconds: [Which option?]
+What's my hesitation about that choice?
+
+**The Decider**
+Which option:
+- Aligns with my values? [A/B/C]
+- I'd recommend to a friend? [A/B/C]
+- I'll regret NOT trying? [A/B/C]
+- Is reversible if wrong? [A/B/C]
+
+**Decision:** [Choose now]
+**First action:** [What do I do in next hour?]`,
       },
       {
-        title: 'Problem Solving Assistant',
-        template: `Break down this problem using systematic problem-solving:
+        title: 'Problem Solver Express',
+        template: `Solve my problem in 5 steps or less.
 
-**Problem Definition:**
-1. **What's the real problem?** (not just symptoms)
-2. **Why does this matter?** (impact and consequences)
-3. **What's the desired outcome?** (specific success criteria)
+**Problem in one sentence:** [What's wrong?]
 
-**Root Cause Analysis:**
-4. **What's causing this problem?** (dig deeper than surface issues)
-5. **What's within my control?** (vs. what isn't)
-6. **What assumptions am I making?** (challenge these)
+**Why this matters:** [Impact if unsolved]
 
-**Solution Generation:**
-7. **Brainstorm options** (quantity over quality first)
-8. **Evaluate feasibility** (time, resources, skills needed)
-9. **Pick the best approach** (highest impact, lowest risk)
-10. **Define next steps** (concrete actions to move forward)`,
+**Root Cause** (pick most likely)
+□ Resource issue (time/money/tools)
+□ Knowledge gap (don't know how)
+□ System failure (process broken)
+□ People issue (communication/alignment)
+□ External blocker (waiting on others)
+
+**Three Solutions** (brainstorm fast)
+1. Quick fix: [Band-aid solution for now]
+2. Proper fix: [Real solution, more effort]
+3. Workaround: [Different approach entirely]
+
+**The Choice**
+Going with: [Pick one]
+Because: [One reason]
+First step: [Specific action today]
+Success looks like: [Measurable outcome]`,
       },
       {
-        title: 'Creative Block Breaker',
-        template: `Help me break through creative blocks and generate fresh ideas:
+        title: 'Stuck → Unstuck',
+        template: `I'm stuck on something. Get me moving in any direction.
 
-**Creative Warm-up:**
-1. **Change perspective** - How would a child/expert/alien approach this?
-2. **Combine unrelated things** - What if I merged [X] with [Y]?
-3. **Reverse assumptions** - What if the opposite were true?
-4. **Use constraints** - What if I had only [time/budget/materials]?
+**Where I'm Stuck:** [Describe in 1-2 sentences]
 
-**Idea Generation Techniques:**
-5. **Rapid brainstorming** - 20 ideas in 10 minutes (no editing)
-6. **Building on "bad" ideas** - What could make this work?
-7. **Random word association** - How does [random word] relate?
-8. **Question everything** - Why does this have to be this way?
+**Pattern Breaker** (do one now)
+□ Explain it to a rubber duck
+□ Draw it instead of writing
+□ Work backwards from the end
+□ Do the opposite for 5 minutes
+□ Ask "What would [expert] do?"
+□ List 10 bad solutions quickly
 
-**Next Steps:**
-- Pick 2-3 promising directions to explore
-- Create quick prototypes or tests
-- Get feedback early and often`,
+**New Angle**
+What if:
+- This were easy? [What would I do?]
+- I had unlimited resources? [What would I do?]
+- I had only 1 hour? [What would I do?]
+- Someone else had to do it? [What would I tell them?]
+
+**Minimum Viable Progress**
+Smallest step that's still progress: [Define it]
+Time needed: [5-15 minutes max]
+Do it when: [Specific time today]
+
+**If Still Stuck**
+Who can help: [Specific person]
+What to ask: [Specific question]`,
       },
       {
-        title: 'Learning Strategy',
-        template: `Design an effective learning approach for new skills or knowledge:
+        title: 'Weekly Review Template',
+        template: `Quick weekly review. Keep it under 15 minutes.
 
-**Learning Goals:**
-1. **What exactly do I want to learn?** (specific, measurable)
-2. **Why is this important?** (motivation and application)
-3. **How will I know I've learned it?** (success criteria)
+**Last Week's Wins** (3 max)
+1. [What went well?]
+2. [What went well?]
+3. [What went well?]
 
-**Learning Strategy:**
-4. **Break it down** - What are the core components?
-5. **Find the 20%** - What fundamentals give 80% of the value?
-6. **Active practice** - How can I apply this immediately?
-7. **Spaced repetition** - How will I review and reinforce?
+**Lessons Learned** (2 max)
+1. [What didn't work?] → [What to try instead]
+2. [What surprised me?] → [How to adapt]
 
-**Learning Plan:**
-- Daily/weekly time commitment (realistic)
-- Resources needed (books, courses, tools)
-- Practice opportunities (projects, exercises)
-- Progress tracking method
-- Accountability system`,
+**Progress Check**
+Main goal progress: [X%]
+On track? [Yes/No]
+If no, what ONE thing needs to change?
+
+**Next Week's Focus**
+THE priority: [One main outcome]
+Supporting tasks: [2-3 that enable the priority]
+What I'm saying NO to: [Specifically]
+
+**System Tweaks**
+One small process improvement: [What and how]
+
+**Energy Management**
+When was I most productive? [Day/time]
+When was I least productive? [Day/time]
+Schedule adjustment: [What to change]`,
       },
     ],
   },
