@@ -16,6 +16,7 @@ const App: Component = () => {
   );
   const [selectedPrompt, setSelectedPrompt] = createSignal<SelectedPrompt | null>(null);
   const [generatedPrompt, setGeneratedPrompt] = createSignal<string>('');
+  const [includeAllTasks, setIncludeAllTasks] = createSignal<boolean>(false);
 
   const handleSelectCategory = (category: PromptCategory) => {
     setSelectedCategory(category);
@@ -26,13 +27,23 @@ const App: Component = () => {
     const category = selectedCategory();
     if (!category) return;
 
-    // Get current tasks from Super Productivity
+    setSelectedPrompt({ category, prompt });
+    setCurrentView('prompt');
+
+    // Generate initial prompt without tasks
+    await regeneratePrompt();
+  };
+
+  const regeneratePrompt = async () => {
+    const prompt = selectedPrompt()?.prompt;
+    if (!prompt) return;
+
+    // Get tasks from Super Productivity if checkbox is checked
     const pluginAPI = (window as any).PluginAPI;
     let tasksMd = '';
 
-    if (pluginAPI) {
+    if (includeAllTasks() && pluginAPI) {
       try {
-        // Try to get current tasks as markdown
         const tasks = await pluginAPI.getCurrentTasks?.();
         if (tasks && tasks.length > 0) {
           tasksMd = tasks.map((task: any) => `- [ ] ${task.title}`).join('\n');
@@ -44,8 +55,6 @@ const App: Component = () => {
 
     const rendered = renderPrompt(prompt.template, tasksMd);
     setGeneratedPrompt(rendered);
-    setSelectedPrompt({ category, prompt });
-    setCurrentView('prompt');
   };
 
   const handleBack = () => {
@@ -149,36 +158,47 @@ const App: Component = () => {
 
         {/* Prompt View */}
         <Show when={currentView() === 'prompt' && selectedPrompt()}>
-          <div class="prompt-container page-fade">
+          <div class="page-fade">
             <div class="selected-prompt-header">
               <h2 class="text-primary">{selectedPrompt()!.prompt.title}</h2>
               <p class="text-muted">From: {selectedPrompt()!.category.title}</p>
             </div>
 
-            <div class="generated-prompt card">
-              <h3>Generated Prompt:</h3>
-              <textarea
-                class="prompt-text"
-                value={generatedPrompt()}
-                readonly
-                rows="15"
-              />
-              <div class="prompt-actions">
-                <button
-                  class="action-button copy-button"
-                  onClick={copyToClipboard}
-                >
-                  📋 Copy to clipboard
-                </button>
-                <a
-                  class="action-button chatgpt-button"
-                  href={getChatGPTUrl()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  🤖 Open in ChatGPT
-                </a>
-              </div>
+            <div class="prompt-options">
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={includeAllTasks()}
+                  onChange={(e) => {
+                    setIncludeAllTasks(e.target.checked);
+                    regeneratePrompt();
+                  }}
+                />
+                Include all current tasks in prompt
+              </label>
+            </div>
+
+            <textarea
+              class="prompt-text"
+              value={generatedPrompt()}
+              readonly
+              rows="15"
+            />
+            <div class="prompt-actions">
+              <button
+                class="action-button copy-button"
+                onClick={copyToClipboard}
+              >
+                📋 Copy to clipboard
+              </button>
+              <a
+                class="action-button chatgpt-button"
+                href={getChatGPTUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                🤖 Open in ChatGPT
+              </a>
             </div>
           </div>
         </Show>
