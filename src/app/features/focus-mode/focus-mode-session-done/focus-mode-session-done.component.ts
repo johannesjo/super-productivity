@@ -25,13 +25,13 @@ import {
 import { MatIcon } from '@angular/material/icon';
 
 @Component({
-  selector: 'focus-mode-task-done',
-  templateUrl: './focus-mode-task-done.component.html',
-  styleUrls: ['./focus-mode-task-done.component.scss'],
+  selector: 'focus-mode-session-done',
+  templateUrl: './focus-mode-session-done.component.html',
+  styleUrls: ['./focus-mode-session-done.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MatButton, MsToStringPipe, TranslatePipe, MatIcon],
 })
-export class FocusModeTaskDoneComponent implements AfterViewInit {
+export class FocusModeSessionDoneComponent implements AfterViewInit {
   private _store = inject(Store);
   private readonly _confettiService = inject(ConfettiService);
   private readonly _focusModeService = inject(FocusModeService);
