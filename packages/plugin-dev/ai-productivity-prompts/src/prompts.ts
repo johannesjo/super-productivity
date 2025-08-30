@@ -40,7 +40,7 @@ How will I know I've succeeded? Be specific.
 **Potential Blockers**
 What might stop me? How do I prevent/handle it?
 
-Format as a checklist I can follow without thinking.`,
+Format as a flat markdown checklist I can follow without thinking.`,
       },
       {
         title: 'Quick Win Hunter',
@@ -56,7 +56,9 @@ For each task, tell me:
 1. The specific task
 2. Time estimate (be realistic)
 3. What I'll have when done
-4. Why this creates momentum`,
+4. Why this creates momentum
+
+Give as a markdown checklist.`,
       },
     ],
   },
@@ -86,7 +88,9 @@ Include 15-min buffers between major tasks
 One small task to complete last that will feel satisfying
 
 **Contingency**
-If I only have 2 hours today, which ONE task gets done?`,
+If I only have 2 hours today, which ONE task gets done?
+
+Output as a flat markdown checklist (- [ ] Task name) that I can paste into my task manager.`,
       },
       {
         title: 'Reality-Based Schedule',
@@ -110,7 +114,8 @@ Now create:
 **Flex Buffer**
 30-60 minutes unscheduled for the unexpected
 
-Give me exact times and specific tasks, not categories.`,
+Give me exact times and specific tasks, not categories.
+Output as a flat markdown checklist (- [ ] Task name) I can paste into my task manager.`,
       },
       {
         title: 'Minimum Viable Day',
@@ -134,7 +139,8 @@ What's the bare minimum to keep things from falling apart?
 
 Total time commitment: [Should be under 4 focused hours]
 
-Everything else can wait.`,
+Everything else can wait.
+Output as a simple markdown checklist.`,
       },
     ],
   },
@@ -165,7 +171,9 @@ Friday: [Wrap-up, review, or overflow?]
 **Sand** (nice if time)
 Tasks to do ONLY after rocks and pebbles are handled
 
-What gets cut if I lose a day this week?`,
+What gets cut if I lose a day this week?
+
+Provide as a flat markdown checklist for my task manager.`,
       },
       {
         title: 'Realistic Week Planner',
@@ -192,7 +200,9 @@ Fri: [30-90 min task]
 
 **Overflow Plan**
 Where does unfinished work go?
-What can be dropped without consequence?`,
+What can be dropped without consequence?
+
+Give me a flat markdown checklist for the week.`,
       },
     ],
   },
@@ -222,7 +232,9 @@ Based on the blocker, give me:
 Write me a 1-sentence permission to do this imperfectly.
 
 **Momentum Builder**
-If this works, what's the next 10-minute task?`,
+If this works, what's the next 10-minute task?
+
+Output as a simple markdown checklist.`,
       },
       {
         title: '2-Minute Momentum',
@@ -247,7 +259,9 @@ What do I need to close/hide/prepare right now?
 "Do ONLY this 2-minute task. Permission to stop after. No commitment beyond that."
 
 **If Momentum Happens**
-Next 2-minute task ready: [Specific action]`,
+Next 2-minute task ready: [Specific action]
+
+Give me ultra-specific 2-minute actions as a markdown checklist.`,
       },
       {
         title: 'Pattern Interrupt',
