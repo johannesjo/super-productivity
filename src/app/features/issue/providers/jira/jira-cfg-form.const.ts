@@ -114,13 +114,13 @@ export const JIRA_CONFIG_FORM_SECTION: ConfigFormSection<IssueProviderJira> = {
       type: 'collapsible',
       props: { label: T.G.ADVANCED_CFG },
       fieldGroup: [
-        // {
-        //   key: 'isAllowSelfSignedCertificate',
-        //   type: 'checkbox',
-        //   templateOptions: {
-        //     label: T.F.JIRA.FORM_CRED.ALLOW_SELF_SIGNED,
-        //   },
-        // },
+        {
+          key: 'isAllowSelfSignedCertificate',
+          type: 'checkbox',
+          templateOptions: {
+            label: T.F.JIRA.FORM_CRED.ALLOW_SELF_SIGNED,
+          },
+        },
         {
           key: 'usePAT',
           type: 'checkbox',
