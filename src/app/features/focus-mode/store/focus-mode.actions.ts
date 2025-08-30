@@ -23,6 +23,8 @@ export const startFocusSession = createAction(
   props<{ duration?: number }>(),
 );
 
+export const goToMainScreen = createAction('[FocusMode] Go To Main Screen');
+
 export const pauseFocusSession = createAction('[FocusMode] Pause Session');
 export const unPauseFocusSession = createAction(
   '[FocusMode] Resume Session',

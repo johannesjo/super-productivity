@@ -10,6 +10,7 @@ import { TaskService } from '../../tasks/task.service';
 import { Store } from '@ngrx/store';
 import {
   focusSessionDone,
+  goToMainScreen,
   selectFocusDuration,
   setFocusSessionDuration,
   startFocusPreparation,
@@ -106,6 +107,11 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
       this.taskService.setCurrentId(taskId);
     } else {
       this.taskService.setCurrentId(this.selectedTask.id);
+    }
+
+    if (this.isFocusSessionRunning()) {
+      this._store.dispatch(goToMainScreen());
+      return;
     }
 
     // Get next phase from strategy

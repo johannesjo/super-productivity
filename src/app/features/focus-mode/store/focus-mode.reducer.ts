@@ -1,11 +1,11 @@
 import { createReducer, on } from '@ngrx/store';
 import * as a from './focus-mode.actions';
 import {
-  FocusModeState,
-  TimerState,
-  hasTimer,
-  FocusModePhaseType,
   FocusModeMode,
+  FocusModePhaseType,
+  FocusModeState,
+  hasTimer,
+  TimerState,
 } from '../focus-mode.model';
 import { LS } from '../../../core/persistence/storage-keys.const';
 
@@ -86,6 +86,11 @@ export const focusModeReducer = createReducer(
   on(a.startFocusPreparation, (state) => ({
     ...state,
     phase: { type: FocusModePhaseType.Preparation as const },
+  })),
+
+  on(a.goToMainScreen, (state) => ({
+    ...state,
+    phase: { type: FocusModePhaseType.Session as const, timer: state.sessionTimer! },
   })),
 
   on(a.startFocusSession, (state, { duration }) => {
