@@ -24,6 +24,21 @@ export class PomodoroStrategy implements FocusModeStrategy {
     return { duration, isLong };
   }
 
+  getNextPhaseAfterTaskSelection(skipPreparation: boolean): {
+    phase: 'duration-selection' | 'preparation' | 'session';
+    duration?: number;
+  } {
+    // TODO revert
+    // const config = this.globalConfigService.pomodoroConfig();
+    // const duration = config?.duration || 25 * 60 * 1000;
+    const duration = 4000;
+
+    return {
+      phase: skipPreparation ? 'session' : 'preparation',
+      duration,
+    };
+  }
+
   readonly shouldStartBreakAfterSession = true; // Always have breaks in Pomodoro
   readonly shouldAutoStartNextSession = true; // Auto-continue after break
 }
@@ -36,6 +51,16 @@ export class FlowtimeStrategy implements FocusModeStrategy {
 
   getBreakDuration(): null {
     return null; // No automatic breaks in Flowtime
+  }
+
+  getNextPhaseAfterTaskSelection(skipPreparation: boolean): {
+    phase: 'duration-selection' | 'preparation' | 'session';
+    duration?: number;
+  } {
+    return {
+      phase: skipPreparation ? 'session' : 'preparation',
+      duration: 0, // Flowtime doesn't have a fixed duration
+    };
   }
 }
 
@@ -56,6 +81,16 @@ export class CountdownStrategy implements FocusModeStrategy {
 
   getBreakDuration(): null {
     return null; // No automatic breaks in Countdown mode
+  }
+
+  getNextPhaseAfterTaskSelection(skipPreparation: boolean): {
+    phase: 'duration-selection' | 'preparation' | 'session';
+    duration?: number;
+  } {
+    // Countdown mode always uses duration selection
+    return {
+      phase: 'duration-selection',
+    };
   }
 }
 

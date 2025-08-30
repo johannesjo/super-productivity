@@ -23,6 +23,7 @@ import { MatButton } from '@angular/material/button';
 import { TranslatePipe } from '@ngx-translate/core';
 import { SelectTaskComponent } from '../../tasks/select-task/select-task.component';
 import { FocusModeService } from '../focus-mode.service';
+import { FocusModeStrategyFactory } from '../focus-mode-strategies';
 import { MatIcon } from '@angular/material/icon';
 import { MsToMinuteClockStringPipe } from '../../../ui/duration/ms-to-minute-clock-string.pipe';
 import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-circle.component';
@@ -50,6 +51,7 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
   readonly taskService = inject(TaskService);
   private readonly _store = inject(Store);
   private readonly _focusModeService = inject(FocusModeService);
+  private readonly _strategyFactory = inject(FocusModeStrategyFactory);
 
   mode = this._focusModeService.mode;
   cfg = this._focusModeService.cfg;
@@ -99,6 +101,8 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
     const mode = this.mode();
     const skipPreparation = this.cfg()?.isSkipPreparation;
 
+    if (!mode) return;
+
     // Set task
     if (typeof this.selectedTask === 'string') {
       const taskId = this.taskService.add(this.selectedTask);
@@ -107,28 +111,30 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
       this.taskService.setCurrentId(this.selectedTask.id);
     }
 
-    // Trigger next phase based on mode
-    if (mode === FocusModeMode.Pomodoro) {
-      // Set duration from config and skip duration selection
-      // TODO revert
-      // const duration = this.pomodoroCfg()?.duration || 25 * 60 * 1000;
-      const duration = 4000;
-      this._store.dispatch(setFocusSessionDuration({ focusSessionDuration: duration }));
+    // Get next phase from strategy
+    const strategy = this._strategyFactory.getStrategy(mode);
+    const nextPhase = strategy.getNextPhaseAfterTaskSelection(!!skipPreparation);
 
-      if (skipPreparation) {
-        this._store.dispatch(startFocusSession({ duration }));
-      } else {
+    // Set duration if provided by strategy
+    if (nextPhase.duration !== undefined) {
+      this._store.dispatch(
+        setFocusSessionDuration({ focusSessionDuration: nextPhase.duration }),
+      );
+    }
+
+    // Dispatch appropriate action based on strategy's decision
+    switch (nextPhase.phase) {
+      case 'duration-selection':
+        this._store.dispatch(selectFocusDuration());
+        break;
+      case 'preparation':
         this._store.dispatch(startFocusPreparation());
-      }
-    } else if (mode === FocusModeMode.Flowtime) {
-      if (skipPreparation) {
-        this._store.dispatch(startFocusSession({}));
-      } else {
-        this._store.dispatch(startFocusPreparation());
-      }
-    } else {
-      // Countdown mode always uses duration selection
-      this._store.dispatch(selectFocusDuration());
+        break;
+      case 'session':
+        this._store.dispatch(
+          startFocusSession(nextPhase.duration ? { duration: nextPhase.duration } : {}),
+        );
+        break;
     }
   }
 }

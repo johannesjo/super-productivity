@@ -34,6 +34,10 @@ export interface FocusModeStrategy {
   readonly shouldStartBreakAfterSession: boolean;
   readonly shouldAutoStartNextSession: boolean;
   getBreakDuration(cycle: number): { duration: number; isLong: boolean } | null;
+  getNextPhaseAfterTaskSelection(skipPreparation: boolean): {
+    phase: 'duration-selection' | 'preparation' | 'session';
+    duration?: number;
+  };
 }
 
 // Helper type guards
