@@ -23,6 +23,7 @@ export const initialState: FocusModeState = {
     ? (focusModeModeFromLS as FocusModeMode)
     : FocusModeMode.Countdown,
   isOverlayShown: false,
+  isSessionRunning: false,
   currentCycle: 1,
   lastSessionDuration: 0,
 };
@@ -74,6 +75,7 @@ export const focusModeReducer = createReducer(
   on(a.selectFocusTask, (state) => ({
     ...state,
     phase: { type: FocusModePhaseType.TaskSelection as const },
+    // Keep isSessionRunning unchanged - if we're in an active session, it continues
   })),
 
   on(a.selectFocusDuration, (state) => ({
@@ -88,6 +90,7 @@ export const focusModeReducer = createReducer(
 
   on(a.startFocusSession, (state, { duration }) => ({
     ...state,
+    isSessionRunning: true,
     phase: {
       type: FocusModePhaseType.Session as const,
       timer: createTimer(duration || DEFAULT_SESSION_DURATION),
@@ -131,6 +134,7 @@ export const focusModeReducer = createReducer(
 
     return {
       ...state,
+      isSessionRunning: false,
       phase: { type: FocusModePhaseType.SessionDone as const, totalDuration: duration },
       lastSessionDuration: duration,
     };
@@ -138,6 +142,7 @@ export const focusModeReducer = createReducer(
 
   on(a.cancelFocusSession, (state) => ({
     ...state,
+    isSessionRunning: false,
     phase: { type: FocusModePhaseType.TaskSelection as const },
     isOverlayShown: false,
   })),
@@ -150,6 +155,7 @@ export const focusModeReducer = createReducer(
 
     return {
       ...state,
+      isSessionRunning: false,
       phase: {
         type: FocusModePhaseType.Break as const,
         timer: createTimer(duration),
@@ -174,6 +180,7 @@ export const focusModeReducer = createReducer(
       if (state.phase.type === FocusModePhaseType.Session) {
         return {
           ...state,
+          isSessionRunning: false,
           phase: {
             type: FocusModePhaseType.SessionDone as const,
             totalDuration: updatedTimer.elapsed,

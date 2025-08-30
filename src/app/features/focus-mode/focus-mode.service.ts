@@ -31,9 +31,6 @@ export class FocusModeService {
 
   // Session signals
   isSessionRunning = toSignal(this._store.select(selectors.selectIsSessionRunning));
-  isSessionContextActive = toSignal(
-    this._store.select(selectors.selectIsSessionContextActive),
-  );
   isSessionPaused = toSignal(this._store.select(selectors.selectIsSessionPaused));
 
   // Break signals

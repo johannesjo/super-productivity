@@ -27,27 +27,8 @@ export const selectLastSessionDuration = createSelector(
 
 // Session selectors
 export const selectIsSessionRunning = createSelector(
-  selectPhase,
-  (phase) => phase.type === FocusModePhaseType.Session,
-);
-
-// Select if there's an active session context (session running OR task selection during active session)
-export const selectIsSessionContextActive = createSelector(
-  selectPhase,
-  selectLastSessionDuration,
-  (phase, lastSessionDuration) => {
-    // Session is actively running
-    if (phase.type === FocusModePhaseType.Session) {
-      return true;
-    }
-
-    // Task selection during an active session (session was paused/completed but user is selecting next task)
-    if (phase.type === FocusModePhaseType.TaskSelection && lastSessionDuration > 0) {
-      return true;
-    }
-
-    return false;
-  },
+  selectFocusModeState,
+  (state) => state.isSessionRunning,
 );
 
 export const selectIsSessionPaused = createSelector(

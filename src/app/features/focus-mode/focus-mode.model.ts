@@ -49,6 +49,7 @@ export interface FocusModeState {
   phase: FocusModePhase;
   mode: FocusModeMode;
   isOverlayShown: boolean;
+  isSessionRunning: boolean; // Tracks if a focus session is actively running
   currentCycle: number; // For Pomodoro
   lastSessionDuration: number;
 }
