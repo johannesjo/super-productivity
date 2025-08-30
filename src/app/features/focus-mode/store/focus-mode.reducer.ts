@@ -50,13 +50,13 @@ export const focusModeReducer = createReducer(
   initialState,
 
   // Mode changes
-  on(a.setMode, (state, { mode }) => ({
+  on(a.setFocusModeMode, (state, { mode }) => ({
     ...state,
     mode,
   })),
 
   // Overlay control
-  on(a.showOverlay, (state) => ({
+  on(a.showFocusOverlay, (state) => ({
     ...state,
     isOverlayShown: true,
     phase:
@@ -65,28 +65,28 @@ export const focusModeReducer = createReducer(
         : state.phase,
   })),
 
-  on(a.hideOverlay, (state) => ({
+  on(a.hideFocusOverlay, (state) => ({
     ...state,
     isOverlayShown: false,
   })),
 
   // Phase transitions
-  on(a.selectTask, (state) => ({
+  on(a.selectFocusTask, (state) => ({
     ...state,
     phase: { type: FocusModePhaseType.TaskSelection as const },
   })),
 
-  on(a.selectDuration, (state) => ({
+  on(a.selectFocusDuration, (state) => ({
     ...state,
     phase: { type: FocusModePhaseType.DurationSelection as const },
   })),
 
-  on(a.startPreparation, (state) => ({
+  on(a.startFocusPreparation, (state) => ({
     ...state,
     phase: { type: FocusModePhaseType.Preparation as const },
   })),
 
-  on(a.startSession, (state, { duration }) => ({
+  on(a.startFocusSession, (state, { duration }) => ({
     ...state,
     phase: {
       type: FocusModePhaseType.Session as const,
@@ -94,7 +94,7 @@ export const focusModeReducer = createReducer(
     },
   })),
 
-  on(a.pauseSession, (state) => {
+  on(a.pauseFocusSession, (state) => {
     if (state.phase.type !== FocusModePhaseType.Session) return state;
 
     return {
@@ -110,7 +110,7 @@ export const focusModeReducer = createReducer(
     };
   }),
 
-  on(a.resumeSession, (state, { idleTime = 0 }) => {
+  on(a.unPauseFocusSession, (state, { idleTime = 0 }) => {
     if (state.phase.type !== FocusModePhaseType.Session) return state;
 
     return {
@@ -126,7 +126,7 @@ export const focusModeReducer = createReducer(
     };
   }),
 
-  on(a.completeSession, (state) => {
+  on(a.focusSessionDone, (state) => {
     const duration = hasTimer(state.phase) ? state.phase.timer.elapsed : 0;
 
     return {
@@ -136,7 +136,7 @@ export const focusModeReducer = createReducer(
     };
   }),
 
-  on(a.cancelSession, (state) => ({
+  on(a.cancelFocusSession, (state) => ({
     ...state,
     phase: { type: FocusModePhaseType.TaskSelection as const },
     isOverlayShown: false,
@@ -198,7 +198,7 @@ export const focusModeReducer = createReducer(
   }),
 
   // Cycle management
-  on(a.nextCycle, (state) => ({
+  on(a.incrementCycle, (state) => ({
     ...state,
     currentCycle: state.currentCycle + 1,
   })),

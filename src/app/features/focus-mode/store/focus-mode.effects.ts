@@ -41,7 +41,7 @@ export class FocusModeEffects {
           ? this.taskService.currentTaskId$.pipe(
               distinctUntilChanged(),
               filter((id) => !!id),
-              map(() => actions.showOverlay()),
+              map(() => actions.showFocusOverlay()),
             )
           : EMPTY,
       ),
@@ -51,7 +51,7 @@ export class FocusModeEffects {
   // Handle session completion
   sessionComplete$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(actions.completeSession),
+      ofType(actions.focusSessionDone),
       withLatestFrom(
         this.store.select(selectors.selectMode),
         this.store.select(selectors.selectCurrentCycle),
@@ -72,7 +72,7 @@ export class FocusModeEffects {
 
           // For Pomodoro, increment cycle
           if (mode === FocusModeMode.Pomodoro) {
-            actionsToDispatch.push(actions.nextCycle());
+            actionsToDispatch.push(actions.incrementCycle());
           }
         }
 
@@ -131,7 +131,7 @@ export class FocusModeEffects {
   // Handle session cancellation
   cancelSession$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(actions.cancelSession),
+      ofType(actions.cancelFocusSession),
       map(() => unsetCurrentTask()),
     ),
   );
@@ -153,7 +153,7 @@ export class FocusModeEffects {
   pauseOnIdle$ = createEffect(() =>
     this.actions$.pipe(
       ofType(openIdleDialog),
-      map(() => actions.pauseSession()),
+      map(() => actions.pauseFocusSession()),
     ),
   );
 
@@ -161,7 +161,7 @@ export class FocusModeEffects {
   persistMode$ = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(actions.setMode),
+        ofType(actions.setFocusModeMode),
         tap(({ mode }) => {
           localStorage.setItem(LS.FOCUS_MODE_MODE, mode);
         }),
@@ -190,7 +190,7 @@ export class FocusModeEffects {
     ? createEffect(
         () =>
           this.actions$.pipe(
-            ofType(actions.completeSession),
+            ofType(actions.focusSessionDone),
             tap(() => {
               window.ea.showOrFocus();
               window.ea.flashFrame();

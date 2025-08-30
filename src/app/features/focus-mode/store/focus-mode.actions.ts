@@ -39,20 +39,6 @@ export const completeBreak = createAction('[FocusMode] Complete Break');
 export const incrementCycle = createAction('[FocusMode] Next Cycle');
 export const resetCycles = createAction('[FocusMode] Reset Cycles');
 
-// Compatibility aliases for old action names (short versions)
-export const setMode = setFocusModeMode;
-export const showOverlay = showFocusOverlay;
-export const hideOverlay = hideFocusOverlay;
-export const selectTask = selectFocusTask;
-export const selectDuration = selectFocusDuration;
-export const startPreparation = startFocusPreparation;
-export const startSession = startFocusSession;
-export const pauseSession = pauseFocusSession;
-export const resumeSession = unPauseFocusSession;
-export const completeSession = focusSessionDone;
-export const cancelSession = cancelFocusSession;
-export const nextCycle = incrementCycle;
-
 // Additional compatibility actions
 export const setFocusSessionDuration = createAction(
   '[FocusMode] Set Focus Session Duration',
