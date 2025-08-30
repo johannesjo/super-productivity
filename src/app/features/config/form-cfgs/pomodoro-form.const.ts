@@ -1,6 +1,6 @@
+import { T } from '../../../t.const';
 /* eslint-disable max-len */
 import { ConfigFormSection, PomodoroConfig } from '../global-config.model';
-import { T } from '../../../t.const';
 
 export const POMODORO_FORM_CFG: ConfigFormSection<PomodoroConfig> = {
   title: T.GCF.POMODORO.TITLE,
@@ -20,6 +20,14 @@ export const POMODORO_FORM_CFG: ConfigFormSection<PomodoroConfig> = {
       hideExpression: (model: any) => !model.isEnabled,
       templateOptions: {
         label: T.GCF.POMODORO.IS_STOP_TRACKING_ON_BREAK,
+      },
+    },
+    {
+      key: 'isDisableAutoStartAfterBreak',
+      type: 'checkbox',
+      hideExpression: (model: any) => !model.isEnabled,
+      templateOptions: {
+        label: T.GCF.POMODORO.IS_DISABLE_AUTO_START_AFTER_BREAK,
       },
     },
     {

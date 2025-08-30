@@ -1,10 +1,7 @@
-import { Injectable, inject } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
-import {
-  setCurrentTask,
-  toggleStart,
-  unsetCurrentTask,
-} from '../../tasks/store/task.actions';
+import { inject, Injectable } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+
+import { EMPTY, Observable, of } from 'rxjs';
 import {
   concatMap,
   filter,
@@ -14,6 +11,22 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs/operators';
+
+import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { Action, select, Store } from '@ngrx/store';
+
+import { IS_ELECTRON } from '../../../app.constants';
+import { NotifyService } from '../../../core/notify/notify.service';
+import { SnackService } from '../../../core/snack/snack.service';
+import { T } from '../../../t.const';
+import {
+  setCurrentTask,
+  toggleStart,
+  unsetCurrentTask,
+} from '../../tasks/store/task.actions';
+import { selectCurrentTaskId } from '../../tasks/store/task.selectors';
+import { TaskService } from '../../tasks/task.service';
+import { DialogPomodoroBreakComponent } from '../dialog-pomodoro-break/dialog-pomodoro-break.component';
 import { PomodoroService } from '../pomodoro.service';
 import {
   finishPomodoroSession,
@@ -24,16 +37,6 @@ import {
   startPomodoroBreak,
   stopPomodoro,
 } from './pomodoro.actions';
-import { MatDialog } from '@angular/material/dialog';
-import { DialogPomodoroBreakComponent } from '../dialog-pomodoro-break/dialog-pomodoro-break.component';
-import { Action, select, Store } from '@ngrx/store';
-import { selectCurrentTaskId } from '../../tasks/store/task.selectors';
-import { EMPTY, Observable, of } from 'rxjs';
-import { NotifyService } from '../../../core/notify/notify.service';
-import { IS_ELECTRON } from '../../../app.constants';
-import { T } from '../../../t.const';
-import { SnackService } from '../../../core/snack/snack.service';
-import { TaskService } from '../../tasks/task.service';
 
 @Injectable()
 export class PomodoroEffects {
@@ -100,8 +103,15 @@ export class PomodoroEffects {
           ? EMPTY
           : this._actions$.pipe(
               ofType(finishPomodoroSession, skipPomodoroBreak),
-              withLatestFrom(this._pomodoroService.isBreak$, this.currentTaskId$),
-              filter(([action, isBreak, currentTaskId]) => !isBreak && !currentTaskId),
+              withLatestFrom(
+                this._pomodoroService.isBreak$,
+                this.currentTaskId$,
+                this._pomodoroService.cfg$,
+              ),
+              filter(
+                ([action, isBreak, currentTaskId, cfg]) =>
+                  !isBreak && !currentTaskId && !cfg.isDisableAutoStartAfterBreak,
+              ),
               mapTo(toggleStart()),
             ),
       ),
@@ -114,6 +124,23 @@ export class PomodoroEffects {
         !isEnabledI
           ? EMPTY
           : this._actions$.pipe(ofType(stopPomodoro), mapTo(unsetCurrentTask())),
+      ),
+    ),
+  );
+
+  pauseTimeTrackingAfterBreakIsOptionEnabled$: Observable<unknown> = createEffect(() =>
+    this._pomodoroService.isEnabled$.pipe(
+      switchMap((isEnabledI) =>
+        !isEnabledI
+          ? EMPTY
+          : this._actions$.pipe(
+              ofType(finishPomodoroSession, skipPomodoroBreak),
+              withLatestFrom(this._pomodoroService.cfg$, this._pomodoroService.isBreak$),
+              filter(
+                ([action, cfg, isBreak]) => cfg.isDisableAutoStartAfterBreak && !isBreak,
+              ),
+              mapTo(unsetCurrentTask()),
+            ),
       ),
     ),
   );

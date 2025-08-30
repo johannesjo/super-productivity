@@ -1,7 +1,8 @@
 import { FormlyFieldConfig } from '@ngx-formly/core';
-import { ProjectCfgFormKey } from '../project/project.model';
+
 import { LanguageCode } from '../../app.constants';
 import { LegacySyncProvider } from '../../imex/sync/legacy-sync-provider.model';
+import { ProjectCfgFormKey } from '../project/project.model';
 import { KeyboardConfig } from './keyboard-config.model';
 
 export type MiscConfig = Readonly<{
@@ -73,6 +74,7 @@ export type PomodoroConfig = Readonly<{
   isEnabled: boolean;
   isStopTrackingOnBreak: boolean;
   isStopTrackingOnLongBreak: boolean;
+  isDisableAutoStartAfterBreak: boolean;
   isManualContinue: boolean;
   isManualContinueBreak: boolean;
   isPlaySound: boolean;
