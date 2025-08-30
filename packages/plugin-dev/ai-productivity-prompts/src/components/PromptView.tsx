@@ -13,12 +13,33 @@ interface PromptViewProps {
 }
 
 const PromptView: Component<PromptViewProps> = (props) => {
-  const [taskSelection, setTaskSelection] = createSignal<string>('none');
+  const TASK_SELECTION_KEY = 'ai-productivity-task-selection';
+
+  // Load saved selection from localStorage or default to 'none'
+  const getSavedSelection = () => {
+    try {
+      return localStorage.getItem(TASK_SELECTION_KEY) || 'none';
+    } catch {
+      return 'none';
+    }
+  };
+
+  const [taskSelection, setTaskSelection] = createSignal<string>(getSavedSelection());
   const [taskCounts, setTaskCounts] = createSignal<Record<string, number>>({});
   const [taskPreviews, setTaskPreviews] = createSignal<Record<string, string[]>>({});
   const [projects, setProjects] = createSignal<Array<{ id: string; title: string }>>([]);
   const [isLoadingTasks, setIsLoadingTasks] = createSignal<boolean>(false);
   const [generatedPrompt, setGeneratedPrompt] = createSignal<string>('');
+
+  // Save selection whenever it changes
+  const updateTaskSelection = (newSelection: string) => {
+    setTaskSelection(newSelection);
+    try {
+      localStorage.setItem(TASK_SELECTION_KEY, newSelection);
+    } catch (error) {
+      console.error('Failed to save task selection:', error);
+    }
+  };
 
   const loadTaskCounts = async () => {
     setIsLoadingTasks(true);
@@ -173,6 +194,18 @@ const PromptView: Component<PromptViewProps> = (props) => {
   // Initialize on mount
   onMount(async () => {
     await loadTaskCounts();
+
+    // Validate saved selection - check if it's still valid
+    const currentSelection = taskSelection();
+    if (currentSelection.startsWith('project-')) {
+      const projectId = currentSelection.replace('project-', '');
+      const projectExists = projects().some((p) => p.id === projectId);
+      if (!projectExists) {
+        // Project no longer exists, reset to 'none'
+        updateTaskSelection('none');
+      }
+    }
+
     await regeneratePrompt();
   });
 
@@ -229,7 +262,7 @@ const PromptView: Component<PromptViewProps> = (props) => {
             value={taskSelection()}
             onChange={async (e) => {
               const newSelection = e.target.value;
-              setTaskSelection(newSelection);
+              updateTaskSelection(newSelection);
               await regeneratePrompt();
             }}
           >
