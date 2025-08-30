@@ -35,7 +35,7 @@ export class FocusModeTaskDoneComponent implements AfterViewInit {
   private readonly _confettiService = inject(ConfettiService);
   private readonly _focusModeService = inject(FocusModeService);
 
-  mode = this._focusModeService.focusModeMode;
+  mode = this._focusModeService.mode;
   currentTask = toSignal(this._store.select(selectCurrentTask));
   taskTitle = toSignal(
     this._store.select(selectLastCurrentTask).pipe(

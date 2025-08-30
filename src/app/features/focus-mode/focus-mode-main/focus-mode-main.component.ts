@@ -75,8 +75,8 @@ export class FocusModeMainComponent implements OnDestroy {
 
   focusModeService = inject(FocusModeService);
 
-  timeElapsed = this.focusModeService.focusSessionTimeElapsed;
-  mode = this.focusModeService.focusModeMode;
+  timeElapsed = this.focusModeService.timeElapsed;
+  mode = this.focusModeService.mode;
   isCountTimeDown = computed(() => this.mode() !== FocusModeMode.Flowtime);
 
   @HostBinding('class.isShowNotes') isShowNotes: boolean = false;

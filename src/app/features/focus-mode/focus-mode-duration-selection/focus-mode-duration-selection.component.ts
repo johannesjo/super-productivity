@@ -45,8 +45,9 @@ export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDes
   task$ = this._store.select(selectCurrentTask);
   updatedFocusModeDuration?: number;
   focusTimeout = 0;
-  cfg = this._focusModeService.focusModeConfig;
-  selectedMode = this._focusModeService.focusModeMode;
+  cfg = this._focusModeService.cfg;
+  selectedMode = this._focusModeService.mode;
+
   private _onDestroy$ = new Subject<void>();
 
   ngAfterViewInit(): void {

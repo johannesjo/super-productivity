@@ -39,8 +39,8 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
   private readonly _globalConfigService = inject(GlobalConfigService);
   private readonly _focusModeService = inject(FocusModeService);
 
-  mode = this._focusModeService.focusModeMode;
-  cfg = this._focusModeService.focusModeConfig;
+  mode = this._focusModeService.mode;
+  cfg = this._focusModeService.cfg;
   pomodoroConfig = toSignal(this._globalConfigService.pomodoroConfig$);
   currentCycle = toSignal(this._store.select(selectFocusModeCurrentCycle));
 

@@ -104,22 +104,22 @@ export class FocusModeService {
   isFocusSessionRunning = toSignal(this._store.select(selectIsFocusSessionRunning), {
     initialValue: false,
   });
-  focusModeMode = toSignal(this._store.select(selectFocusModeMode));
-  focusSessionDuration = toSignal(this._store.select(selectFocusSessionDuration), {
+  mode = toSignal(this._store.select(selectFocusModeMode));
+  sessionDuration = toSignal(this._store.select(selectFocusSessionDuration), {
     initialValue: 25 * 60 * 1000,
   });
   isFocusOverlayShown = toSignal(this._store.select(selectIsFocusOverlayShown), {
     initialValue: false,
   });
-  focusSessionTimeElapsed = toSignal(this._store.select(selectFocusSessionTimeElapsed), {
+  timeElapsed = toSignal(this._store.select(selectFocusSessionTimeElapsed), {
     initialValue: 0,
   });
   lastSessionTotalDurationOrTimeElapsedFallback = toSignal(
     this._store.select(selectLastSessionTotalDurationOrTimeElapsedFallback),
     { initialValue: 0 },
   );
-  focusSessionActivePage = toSignal(this._store.select(selectFocusSessionActivePage));
-  focusModeConfig = toSignal(this._store.select(selectFocusModeConfig));
+  activePage = toSignal(this._store.select(selectFocusSessionActivePage));
+  cfg = toSignal(this._store.select(selectFocusModeConfig));
 
   // Computed session signals
   currentSessionTime = toSignal(this.currentSessionTime$, { initialValue: 0 });
@@ -160,22 +160,19 @@ export class FocusModeService {
   );
 
   // Break state signals
-  focusModeIsBreak = toSignal(this._store.select(selectFocusModeIsBreak), {
+  isBreak = toSignal(this._store.select(selectFocusModeIsBreak), {
     initialValue: false,
   });
-  focusModeBreakTimeElapsed = toSignal(
-    this._store.select(selectFocusModeBreakTimeElapsed),
-    {
-      initialValue: 0,
-    },
-  );
-  focusModeBreakDuration = toSignal(this._store.select(selectFocusModeBreakDuration), {
+  breakTimeElapsed = toSignal(this._store.select(selectFocusModeBreakTimeElapsed), {
+    initialValue: 0,
+  });
+  breakDuration = toSignal(this._store.select(selectFocusModeBreakDuration), {
     initialValue: 5 * 60 * 1000,
   });
-  focusModeIsBreakLong = toSignal(this._store.select(selectFocusModeIsBreakLong), {
+  isBreakLong = toSignal(this._store.select(selectFocusModeIsBreakLong), {
     initialValue: false,
   });
-  focusModeCurrentCycle = toSignal(this._store.select(selectFocusModeCurrentCycle), {
+  currentCycle = toSignal(this._store.select(selectFocusModeCurrentCycle), {
     initialValue: 1,
   });
 
@@ -184,7 +181,7 @@ export class FocusModeService {
   breakTimeToGo = toSignal(this.breakTimeToGo$, { initialValue: 0 });
   breakProgress = computed(() => {
     const currentBreakTime = this.currentBreakTime();
-    const breakDuration = this.focusModeBreakDuration();
+    const breakDuration = this.breakDuration();
     return breakDuration > 0 ? (currentBreakTime * 100) / breakDuration : 0;
   });
 }
