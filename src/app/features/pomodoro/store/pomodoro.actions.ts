@@ -29,5 +29,5 @@ export const stopPomodoro = createAction(PomodoroActionTypes.StopPomodoro);
 export const finishPomodoroSession = createAction(
   PomodoroActionTypes.FinishPomodoroSession,
 );
-// currently only used to notify simple counters
+
 export const skipPomodoroBreak = createAction(PomodoroActionTypes.SkipPomodoroBreak);

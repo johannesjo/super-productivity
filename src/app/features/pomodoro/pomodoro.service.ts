@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
+
 import { combineLatest, interval, merge, Observable, of } from 'rxjs';
-import { GlobalConfigService } from '../config/global-config.service';
 import {
   distinctUntilChanged,
   filter,
@@ -11,8 +11,14 @@ import {
   switchMap,
   withLatestFrom,
 } from 'rxjs/operators';
-import { PomodoroConfig, SoundConfig } from '../config/global-config.model';
+
+import { Actions, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
+
+import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
+import { PomodoroConfig, SoundConfig } from '../config/global-config.model';
+import { GlobalConfigService } from '../config/global-config.service';
+import { TaskService } from '../tasks/task.service';
 import {
   finishPomodoroSession,
   pausePomodoro,
@@ -28,8 +34,6 @@ import {
   selectIsManualPause,
   selectIsManualPauseBreak,
 } from './store/pomodoro.reducer';
-import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
-import { Actions, ofType } from '@ngrx/effects';
 
 const TICK_DURATION = 500;
 const DEFAULT_SOUND = 'assets/snd/positive.ogg';
@@ -42,6 +46,7 @@ export class PomodoroService {
   private _configService = inject(GlobalConfigService);
   private _store$ = inject<Store<any>>(Store);
   private _actions$ = inject(Actions);
+  private readonly _taskService = inject(TaskService);
 
   onStop$: Observable<any> = this._actions$.pipe(ofType(stopPomodoro));
 
@@ -155,6 +160,10 @@ export class PomodoroService {
           this.pauseBreak(true);
         } else if (cfg.isManualContinue && isBreak) {
           this.pause(true);
+
+          if (cfg.isDisableAutoStartAfterBreak) {
+            this._taskService.pauseCurrent();
+          }
         } else {
           this.finishPomodoroSession();
         }
