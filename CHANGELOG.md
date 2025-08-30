@@ -1,3 +1,28 @@
+## [14.4.1](https://github.com/johannesjo/super-productivity/compare/v14.4.0...v14.4.1) (2025-08-30)
+
+### Bug Fixes
+
+- assertion error ([68c9c3b](https://github.com/johannesjo/super-productivity/commit/68c9c3b9985193f2c62402715cf6d7306663bb77)), closes [#5011](https://github.com/johannesjo/super-productivity/issues/5011)
+- be more lenient about pomodoro model to avoid validation errors ([fe1dce5](https://github.com/johannesjo/super-productivity/commit/fe1dce54083d14042a96c9202fc11d9e7e8d2230))
+
+### Features
+
+- **aiPlugin:** allow to save and load custom prompts ([205cb30](https://github.com/johannesjo/super-productivity/commit/205cb30922b49531d328b85933a9429c2273ab00))
+- **aiPlugin:** allow to select project tasks ([6e7f6a4](https://github.com/johannesjo/super-productivity/commit/6e7f6a4fe6038af3848c8623149db41a5313ef62))
+- **aiPlugin:** first draft ([2717160](https://github.com/johannesjo/super-productivity/commit/27171607fa6bddfe48bb7980ba55cd6efd8f204b))
+- **aiPlugin:** improve layout ([c181ab3](https://github.com/johannesjo/super-productivity/commit/c181ab32060858271dc29e0bc478106bbb399b5b))
+- **aiPlugin:** improve prompts ([44661ee](https://github.com/johannesjo/super-productivity/commit/44661eea85053bc3a8749079731a712185c5474e))
+- **aiPlugin:** instruct prompts to give back markdown ([132a72d](https://github.com/johannesjo/super-productivity/commit/132a72d5dad9121668c97cb1e6d6346271709fd7))
+- **aiPlugin:** make build work and various improvements ([08c5cf0](https://github.com/johannesjo/super-productivity/commit/08c5cf03e5a42a4f6d7a8af9b6b5a760b326b885))
+- **aiPlugin:** make task select work better ([274aa9b](https://github.com/johannesjo/super-productivity/commit/274aa9bd2cc39bca947bcdb7f6282b2b1ffdd215))
+- **aiPlugin:** persist last include tasks selection ([960db8d](https://github.com/johannesjo/super-productivity/commit/960db8d2ce2490fd0a0ecdfdc0568645be651415))
+- **aiPlugin:** re-structure ([5f9453c](https://github.com/johannesjo/super-productivity/commit/5f9453cb6cddf14c8a5f82d14be001530f996fd7))
+- **aiPlugin:** re-structure and improve ([b434d53](https://github.com/johannesjo/super-productivity/commit/b434d53a406fc59b7c6a99056b3685bd6172bb69))
+- **aiPlugin:** select and preview tasks ([01f185b](https://github.com/johannesjo/super-productivity/commit/01f185b7c46af6dab346d51cd737e00737f09ac0))
+- **pomodoro:** disable time tracking autostart after break if option enabled ([1b478a5](https://github.com/johannesjo/super-productivity/commit/1b478a5430b88c50e43e41b211dc3cfb8fe1d7cb))
+- **pomodoro:** stop tracking time if isManualContinue and isDisableAutoStartAfterBreak both enabled ([12a1e2c](https://github.com/johannesjo/super-productivity/commit/12a1e2c1610c3625e3aa081032371cae47cbcdee))
+- **settings:** add isDisableAutoStartAfterBreak option in Pomodoro settings ([b1c7ce0](https://github.com/johannesjo/super-productivity/commit/b1c7ce02fcd7aab07c676454988b4aba16baff9a))
+
 # [14.4.0](https://github.com/johannesjo/super-productivity/compare/v14.3.4...v14.4.0) (2025-08-29)
 
 ### Bug Fixes

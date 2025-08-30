@@ -1,0 +1,22 @@
+
+### Bug Fixes
+
+* assertion error (68c9c3b), closes #5011
+* be more lenient about pomodoro model to avoid validation errors
+### Features
+
+* **aiPlugin:** allow to save and load custom prompts
+* **aiPlugin:** allow to select project tasks
+* **aiPlugin:** first draft
+* **aiPlugin:** improve layout
+* **aiPlugin:** improve prompts
+* **aiPlugin:** instruct prompts to give back markdown
+* **aiPlugin:** make build work and various improvements
+* **aiPlugin:** make task select work better
+* **aiPlugin:** persist last include tasks selection
+* **aiPlugin:** re-structure
+* **aiPlugin:** re-structure and improve
+* **aiPlugin:** select and preview tasks
+* **pomodoro:** disable time tracking autostart after break if option enabled
+* **pomodoro:** stop tracking time if isManualContinue and isDisableAutoStartAfterBreak both enabled
+* **settings:** add isDisableAutoStartAfterBreak option in Pomodoro settings
