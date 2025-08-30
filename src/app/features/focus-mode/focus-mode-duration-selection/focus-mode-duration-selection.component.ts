@@ -22,6 +22,7 @@ import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { T } from '../../../t.const';
 import { FocusModeService } from '../focus-mode.service';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
   selector: 'focus-mode-duration-selection',
@@ -34,6 +35,7 @@ import { FocusModeService } from '../focus-mode.service';
     InputDurationSliderComponent,
     AsyncPipe,
     TranslatePipe,
+    MatIcon,
   ],
 })
 export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDestroy {

@@ -22,13 +22,14 @@ import {
   hideFocusOverlay,
   setFocusSessionActivePage,
 } from '../store/focus-mode.actions';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
   selector: 'focus-mode-task-done',
   templateUrl: './focus-mode-task-done.component.html',
   styleUrls: ['./focus-mode-task-done.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatButton, MsToStringPipe, TranslatePipe],
+  imports: [MatButton, MsToStringPipe, TranslatePipe, MatIcon],
 })
 export class FocusModeTaskDoneComponent implements AfterViewInit {
   private _store = inject(Store);

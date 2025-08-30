@@ -36,7 +36,6 @@ import {
   selectFocusModeCurrentCycle,
   selectFocusModeIsBreak,
   selectFocusModeMode,
-  selectFocusSessionDuration,
   selectIsFocusSessionRunning,
 } from './focus-mode.selectors';
 import { Store } from '@ngrx/store';
@@ -64,8 +63,6 @@ export class FocusModeEffects {
   private _taskService = inject(TaskService);
 
   private _isRunning$ = this._store.select(selectIsFocusSessionRunning);
-  // TODO also rename store value maybe
-  private _plannedSessionDuration$ = this._store.select(selectFocusSessionDuration);
 
   autoStartFocusMode$ = createEffect(() => {
     return this._store.select(selectFocusModeConfig).pipe(
