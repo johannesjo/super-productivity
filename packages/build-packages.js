@@ -52,6 +52,12 @@ const plugins = [
     distFiles: ['manifest.json', 'plugin.js', 'index.html', 'icon.svg'],
     sourcePath: 'dist',
   },
+  {
+    name: 'ai-productivity-prompts',
+    path: 'packages/plugin-dev/ai-productivity-prompts',
+    buildCommand: 'npm run build',
+    skipCopy: true, // inline-assets.js handles the copying with inlined assets
+  },
   // Explicitly excluding:
   // - boilerplate-solid-js
 ];
