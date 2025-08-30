@@ -14,28 +14,32 @@
   <br />
 
   @if (isFocusSessionRunning()) {
-    <button
-      type="button"
-      color="primary"
-      mat-raised-button
-    >
-      {{ T.F.FOCUS_MODE.NEXT | translate }}
-    </button>
+    <div style="display: flex; gap: 16px">
+      <button
+        type="button"
+        mat-stroked-button
+        (click)="completeSession()"
+      >
+        <mat-icon>done_all</mat-icon>
+        Complete Session
+      </button>
 
-    <button
-      type="button"
-      color="primary"
-      mat-raised-button
-      (click)="completeSession()"
-    >
-      Complete Session
-    </button>
+      <button
+        type="submit"
+        color="primary"
+        mat-raised-button
+      >
+        <mat-icon>arrow_forward</mat-icon>
+        Continue Session
+      </button>
+    </div>
   } @else {
     <button
       type="submit"
       color="primary"
       mat-raised-button
     >
+      <mat-icon>arrow_forward</mat-icon>
       {{ T.F.FOCUS_MODE.NEXT | translate }}
     </button>
   }
