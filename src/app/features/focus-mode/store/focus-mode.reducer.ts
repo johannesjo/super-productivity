@@ -145,7 +145,10 @@ export const focusModeReducer = createReducer(
   }),
 
   on(a.focusSessionDone, (state) => {
-    const duration = hasTimer(state.phase) ? state.phase.timer.elapsed : 0;
+    // Prioritize sessionTimer since it's the authoritative source for session duration
+    const duration =
+      state.sessionTimer?.elapsed ??
+      (hasTimer(state.phase) ? state.phase.timer.elapsed : 0);
 
     return {
       ...state,
