@@ -128,10 +128,23 @@ export class FocusModeOverlayComponent implements OnDestroy {
     if (this.isFocusSessionRunning()) {
       const isCountTimeUp = this.selectedMode() === FocusModeMode.Flowtime;
 
+      // Get current mode to determine translation key and parameters
+      const mode = this.selectedMode();
+      const cycle = this.focusModeService.currentCycle();
+
+      const translationKey =
+        mode === FocusModeMode.Pomodoro
+          ? T.F.FOCUS_MODE.B.POMODORO_SESSION_RUNNING
+          : T.F.FOCUS_MODE.B.SESSION_RUNNING;
+
+      const translateParams =
+        mode === FocusModeMode.Pomodoro ? { cycleNr: cycle || 1 } : undefined;
+
       this.bannerService.open({
         id: BannerId.FocusMode,
         ico: 'center_focus_strong',
-        msg: T.F.FOCUS_MODE.B.SESSION_RUNNING,
+        msg: translationKey,
+        translateParams,
         timer$: isCountTimeUp
           ? this._store.select(selectTimeElapsed)
           : this.focusModeService.timeToGo$,

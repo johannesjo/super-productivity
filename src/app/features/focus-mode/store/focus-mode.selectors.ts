@@ -1,6 +1,6 @@
-import { createSelector, createFeatureSelector } from '@ngrx/store';
+import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { FOCUS_MODE_FEATURE_KEY } from './focus-mode.reducer';
-import { FocusModeState, hasTimer, FocusModePhaseType } from '../focus-mode.model';
+import { FocusModePhaseType, FocusModeState, hasTimer } from '../focus-mode.model'; // Base selectors
 
 // Base selectors
 export const selectFocusModeState =
@@ -24,9 +24,6 @@ export const selectLastSessionDuration = createSelector(
   selectFocusModeState,
   (state) => state.lastSessionDuration,
 );
-
-// Phase type
-export const selectPhaseType = createSelector(selectPhase, (phase) => phase.type);
 
 // Session selectors
 export const selectIsSessionRunning = createSelector(

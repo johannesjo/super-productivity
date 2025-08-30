@@ -206,6 +206,7 @@
     "FOCUS_MODE": {
       "B": {
         "SESSION_RUNNING": "Focus Session is running",
+        "POMODORO_SESSION_RUNNING": "Pomodoro Session #{{cycleNr}} is running",
         "TO_FOCUS_OVERLAY": "To Focus Overlay"
       },
       "BACK_TO_PLANNING": "Back to Planning",
