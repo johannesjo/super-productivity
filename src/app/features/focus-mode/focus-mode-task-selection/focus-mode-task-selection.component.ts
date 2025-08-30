@@ -57,7 +57,7 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
   cfg = this._focusModeService.cfg;
   pomodoroCfg = this._focusModeService.pomodoroCfg;
   currentCycle = this._focusModeService.currentCycle;
-  isFocusSessionRunning = this._focusModeService.isSessionRunning;
+  isFocusSessionRunning = this._focusModeService.isSessionContextActive;
 
   // Timer-related properties
   timeElapsed = this._focusModeService.timeElapsed;

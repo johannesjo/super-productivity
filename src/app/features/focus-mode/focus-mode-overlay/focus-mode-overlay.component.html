@@ -37,7 +37,7 @@
       @switch (activePage()) {
         <!-- -->
         @case (FocusModePage.TaskSelection) {
-          @if (!focusModeService.isFocusSessionRunning()) {
+          @if (!isSessionRunning()) {
             <ng-container *ngTemplateOutlet="selectModeTpl"></ng-container>
           }
           <focus-mode-task-selection
@@ -46,7 +46,7 @@
           ></focus-mode-task-selection>
         }
         @case (FocusModePage.DurationSelection) {
-          @if (!focusModeService.isFocusSessionRunning()) {
+          @if (!isSessionRunning()) {
             <ng-container *ngTemplateOutlet="selectModeTpl"></ng-container>
           }
           <focus-mode-duration-selection

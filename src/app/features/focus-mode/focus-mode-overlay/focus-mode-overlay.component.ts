@@ -73,7 +73,7 @@ export class FocusModeOverlayComponent implements OnDestroy {
 
   selectedMode = this.focusModeService.mode;
   activePage = this.focusModeService.activePage;
-  isSessionRunning = this.focusModeService.isSessionRunning;
+  isSessionRunning = this.focusModeService.isSessionContextActive;
 
   isPomodoroEnabled = toSignal(this._store.select(selectIsPomodoroEnabled), {
     initialValue: false,
