@@ -1,185 +1,167 @@
-import { inject, Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import {
-  cancelFocusSession,
-  completeBreak,
-  focusSessionDone,
-  focusTaskDone,
-  incrementCycle,
-  pauseFocusSession,
-  setBreakTimeElapsed,
-  setFocusModeMode,
-  setFocusSessionActivePage,
-  setFocusSessionDuration,
-  setFocusSessionTimeElapsed,
-  showFocusOverlay,
-  skipBreak,
-  startBreak,
-  startFocusSession,
-} from './focus-mode.actions';
-import { GlobalConfigService } from '../../config/global-config.service';
-import {
-  delay,
-  distinctUntilChanged,
-  filter,
-  first,
-  map,
-  mapTo,
-  switchMap,
-  switchMapTo,
-  tap,
-  withLatestFrom,
-} from 'rxjs/operators';
-import { EMPTY, Observable, of } from 'rxjs';
-import { TaskService } from '../../tasks/task.service';
-import {
-  selectFocusModeCurrentCycle,
-  selectFocusModeIsBreak,
-  selectFocusModeMode,
-  selectIsFocusSessionRunning,
-} from './focus-mode.selectors';
 import { Store } from '@ngrx/store';
-import { unsetCurrentTask } from '../../tasks/store/task.actions';
+import { of, EMPTY } from 'rxjs';
+import {
+  map,
+  switchMap,
+  withLatestFrom,
+  filter,
+  tap,
+  distinctUntilChanged,
+} from 'rxjs/operators';
+import * as actions from './focus-mode.actions';
+import * as selectors from './focus-mode.selectors';
+import { FocusModeStrategyFactory } from '../focus-mode-strategies';
+import { GlobalConfigService } from '../../config/global-config.service';
+import { TaskService } from '../../tasks/task.service';
 import { playSound } from '../../../util/play-sound';
 import { IS_ELECTRON } from '../../../app.constants';
-import { IdleService } from '../../idle/idle.service';
-import { FocusModeMode, FocusModePage } from '../focus-mode.const';
-import { selectFocusModeConfig } from '../../config/store/global-config.reducer';
-import { LS } from '../../../core/persistence/storage-keys.const';
+import { unsetCurrentTask } from '../../tasks/store/task.actions';
 import { openIdleDialog } from '../../idle/store/idle.actions';
-import { FocusModeService } from '../focus-mode.service';
+import { FocusModeMode } from '../focus-mode.const';
+import { LS } from '../../../core/persistence/storage-keys.const';
+import { selectFocusModeConfig } from '../../config/store/global-config.reducer';
 
 const SESSION_DONE_SOUND = 'positive.ogg';
 
-// const DEFAULT_TICK_SOUND = 'tick.mp3';
-
 @Injectable()
 export class FocusModeEffects {
-  private _focusModeService = inject(FocusModeService);
-  private _store = inject(Store);
-  private _actions$ = inject(Actions);
-  private _idleService = inject(IdleService);
-  private _globalConfigService = inject(GlobalConfigService);
-  private _taskService = inject(TaskService);
+  private actions$ = inject(Actions);
+  private store = inject(Store);
+  private strategyFactory = inject(FocusModeStrategyFactory);
+  private globalConfigService = inject(GlobalConfigService);
+  private taskService = inject(TaskService);
 
-  private _isRunning$ = this._store.select(selectIsFocusSessionRunning);
-
-  autoStartFocusMode$ = createEffect(() => {
-    return this._store.select(selectFocusModeConfig).pipe(
+  // Auto-show overlay when task is selected (if always use focus mode is enabled)
+  autoShowOverlay$ = createEffect(() =>
+    this.store.select(selectFocusModeConfig).pipe(
       switchMap((cfg) =>
-        cfg.isAlwaysUseFocusMode
-          ? this._taskService.currentTaskId$.pipe(
+        cfg?.isAlwaysUseFocusMode
+          ? this.taskService.currentTaskId$.pipe(
               distinctUntilChanged(),
-              switchMap((currentTaskId) =>
-                currentTaskId ? of(showFocusOverlay()) : EMPTY,
-              ),
+              filter((id) => !!id),
+              map(() => actions.showOverlay()),
             )
           : EMPTY,
-      ),
-    );
-  });
-
-  setElapsedTime$ = createEffect(() => {
-    return this._focusModeService.currentSessionTime$.pipe(
-      withLatestFrom(
-        this._store.select(selectFocusModeMode),
-        this._focusModeService.timeToGo$,
-      ),
-      map(([currentSessionTime, mode, timeToGo]) => {
-        if (mode === FocusModeMode.Flowtime) {
-          return setFocusSessionTimeElapsed({
-            focusSessionTimeElapsed: currentSessionTime,
-          });
-        }
-        return timeToGo >= 0
-          ? // ? setFocusSessionTimeToGo({ currentSessionTime })
-            setFocusSessionTimeElapsed({
-              focusSessionTimeElapsed: currentSessionTime,
-            })
-          : focusSessionDone();
-      }),
-    );
-  });
-
-  stopTrackingOnOnCancel$ = createEffect(() => {
-    return this._actions$.pipe(ofType(cancelFocusSession), mapTo(unsetCurrentTask()));
-  });
-
-  pauseOnIdle$ = createEffect(() => {
-    return this._actions$.pipe(ofType(openIdleDialog), mapTo(pauseFocusSession()));
-  });
-
-  playSessionDoneSoundIfEnabled$: Observable<unknown> = createEffect(
-    () =>
-      this._globalConfigService.sound$.pipe(
-        switchMap((sndCfg) =>
-          sndCfg.volume > 0
-            ? this._actions$.pipe(
-                ofType(focusSessionDone, focusTaskDone),
-                tap(() => playSound(SESSION_DONE_SOUND, 100)),
-              )
-            : EMPTY,
-        ),
-      ),
-    { dispatch: false },
-  );
-
-  // TODO check if needed
-  handleIdleCurrentTaskDeSelection$: Observable<unknown> = createEffect(() =>
-    this._isRunning$.pipe(
-      switchMap((isRunning) => (isRunning ? this._idleService.isIdle$ : EMPTY)),
-      switchMap((isIdle) =>
-        !isIdle ? this._idleService.isIdle$.pipe(distinctUntilChanged()) : EMPTY,
-      ),
-      // give time to let task be started again
-      delay(500),
-      switchMapTo(this._taskService.currentTaskId$.pipe(first())),
-      filter((currentTaskId) => !currentTaskId),
-      map(() =>
-        setFocusSessionActivePage({ focusActivePage: FocusModePage.TaskSelection }),
       ),
     ),
   );
 
-  setTaskBarIconProgress$ =
-    IS_ELECTRON &&
-    createEffect(
-      () =>
-        this._focusModeService.sessionProgress$.pipe(
-          withLatestFrom(this._isRunning$),
-          tap(([progress, isRunning]: [number, boolean]) => {
-            const progressBarMode: 'normal' | 'pause' = isRunning ? 'normal' : 'pause';
-            window.ea.setProgressBar({
-              progress: progress / 100,
-              progressBarMode,
-            });
-          }),
-        ),
-      { dispatch: false },
-    );
+  // Handle session completion
+  sessionComplete$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(actions.completeSession),
+      withLatestFrom(
+        this.store.select(selectors.selectMode),
+        this.store.select(selectors.selectCurrentCycle),
+        this.globalConfigService.sound$,
+      ),
+      switchMap(([_, mode, cycle, soundCfg]) => {
+        const strategy = this.strategyFactory.getStrategy(mode);
+        const actionsToDispatch: any[] = [];
 
-  focusWindowOnSessionOrTaskDone$ =
-    IS_ELECTRON &&
-    createEffect(
-      () =>
-        this._actions$.pipe(
-          ofType(focusSessionDone, focusTaskDone),
-          tap(() => {
-            window.ea.showOrFocus();
-            window.ea.flashFrame();
-            window.ea.setProgressBar({
-              progress: 100,
-              progressBarMode: 'normal',
-            });
-          }),
-        ),
-      { dispatch: false },
-    );
+        // Play sound if enabled
+        if (soundCfg.volume > 0) {
+          playSound(SESSION_DONE_SOUND, soundCfg.volume);
+        }
 
-  modeToLS$ = createEffect(
+        // Check if we should start a break
+        if (strategy.shouldStartBreakAfterSession) {
+          actionsToDispatch.push(actions.startBreak());
+
+          // For Pomodoro, increment cycle
+          if (mode === FocusModeMode.Pomodoro) {
+            actionsToDispatch.push(actions.nextCycle());
+          }
+        }
+
+        return actionsToDispatch.length > 0 ? of(...actionsToDispatch) : EMPTY;
+      }),
+    ),
+  );
+
+  // Handle break completion
+  breakComplete$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(actions.completeBreak),
+      withLatestFrom(
+        this.store.select(selectors.selectMode),
+        this.globalConfigService.pomodoroConfig$,
+        this.globalConfigService.sound$,
+      ),
+      switchMap(([_, mode, pomodoroCfg, soundCfg]) => {
+        const strategy = this.strategyFactory.getStrategy(mode);
+
+        // Play sound if enabled
+        if (pomodoroCfg.isPlaySoundAfterBreak && soundCfg.volume > 0) {
+          playSound(SESSION_DONE_SOUND, soundCfg.volume);
+        }
+
+        // Auto-start next session if configured
+        if (strategy.shouldAutoStartNextSession) {
+          const duration = strategy.initialSessionDuration;
+          return of(actions.startFocusSession({ duration }));
+        }
+
+        return EMPTY;
+      }),
+    ),
+  );
+
+  // Handle skip break
+  skipBreak$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(actions.skipBreak),
+      withLatestFrom(this.store.select(selectors.selectMode)),
+      switchMap(([_, mode]) => {
+        const strategy = this.strategyFactory.getStrategy(mode);
+
+        // Auto-start next session if configured
+        if (strategy.shouldAutoStartNextSession) {
+          const duration = strategy.initialSessionDuration;
+          return of(actions.startFocusSession({ duration }));
+        }
+
+        return EMPTY;
+      }),
+    ),
+  );
+
+  // Handle session cancellation
+  cancelSession$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(actions.cancelSession),
+      map(() => unsetCurrentTask()),
+    ),
+  );
+
+  // Handle compatibility startFocusSession action
+  startFocusSessionCompat$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType('[FocusMode] Start Focus Session'),
+      withLatestFrom(this.store.select(selectors.selectMode)),
+      switchMap(([_, mode]) => {
+        const strategy = this.strategyFactory.getStrategy(mode);
+        const duration = strategy.initialSessionDuration;
+        return of(actions.startFocusSession({ duration }));
+      }),
+    ),
+  );
+
+  // Pause on idle
+  pauseOnIdle$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(openIdleDialog),
+      map(() => actions.pauseSession()),
+    ),
+  );
+
+  // Persist mode to localStorage
+  persistMode$ = createEffect(
     () =>
-      this._actions$.pipe(
-        ofType(setFocusModeMode),
+      this.actions$.pipe(
+        ofType(actions.setMode),
         tap(({ mode }) => {
           localStorage.setItem(LS.FOCUS_MODE_MODE, mode);
         }),
@@ -187,62 +169,38 @@ export class FocusModeEffects {
     { dispatch: false },
   );
 
-  // Pomodoro break handling
-  startBreakAfterPomodoro$ = createEffect(() =>
-    this._actions$.pipe(
-      ofType(focusSessionDone),
-      withLatestFrom(
-        this._store.select(selectFocusModeMode),
-        this._store.select(selectFocusModeCurrentCycle),
-        this._globalConfigService.pomodoroConfig$,
-      ),
-      filter(([_, mode]) => mode === FocusModeMode.Pomodoro),
-      switchMap(([_, __, currentCycle, config]) => {
-        const isLongBreak = currentCycle % config.cyclesBeforeLongerBreak === 0;
-        const breakDuration =
-          (isLongBreak ? config.longerBreakDuration : config.breakDuration) || 300000;
+  // Electron-specific effects
+  setTaskBarProgress$ = IS_ELECTRON
+    ? createEffect(
+        () =>
+          this.store.select(selectors.selectProgress).pipe(
+            withLatestFrom(this.store.select(selectors.selectIsRunning)),
+            tap(([progress, isRunning]) => {
+              window.ea.setProgressBar({
+                progress: progress / 100,
+                progressBarMode: isRunning ? 'normal' : 'pause',
+              });
+            }),
+          ),
+        { dispatch: false },
+      )
+    : null;
 
-        if (config.isPlaySound) {
-          playSound(SESSION_DONE_SOUND, 100);
-        }
-
-        return of(startBreak({ isLongBreak, breakDuration }), incrementCycle());
-      }),
-    ),
-  );
-
-  updateBreakTimer$ = createEffect(() =>
-    this._focusModeService.currentBreakTime$.pipe(
-      withLatestFrom(
-        this._store.select(selectFocusModeIsBreak),
-        this._focusModeService.breakTimeToGo$,
-      ),
-      filter(([_, isBreak]) => isBreak),
-      map(([elapsed, __, remaining]) =>
-        remaining > 0
-          ? setBreakTimeElapsed({ breakTimeElapsed: elapsed })
-          : completeBreak(),
-      ),
-    ),
-  );
-
-  continueAfterBreak$ = createEffect(() =>
-    this._actions$.pipe(
-      ofType(completeBreak, skipBreak),
-      withLatestFrom(this._globalConfigService.pomodoroConfig$),
-      switchMap(([action, config]) => {
-        // Only play sound for natural completion, not skip
-        if (action.type === completeBreak.type && config.isPlaySoundAfterBreak) {
-          playSound(SESSION_DONE_SOUND, 100);
-        }
-
-        // Set the correct Pomodoro duration before starting the next session
-        const duration = config.duration || 25 * 60 * 1000;
-        return of(
-          setFocusSessionDuration({ focusSessionDuration: duration }),
-          startFocusSession(),
-        );
-      }),
-    ),
-  );
+  focusWindowOnComplete$ = IS_ELECTRON
+    ? createEffect(
+        () =>
+          this.actions$.pipe(
+            ofType(actions.completeSession),
+            tap(() => {
+              window.ea.showOrFocus();
+              window.ea.flashFrame();
+              window.ea.setProgressBar({
+                progress: 1,
+                progressBarMode: 'normal',
+              });
+            }),
+          ),
+        { dispatch: false },
+      )
+    : null;
 }

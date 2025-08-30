@@ -8,11 +8,12 @@ import {
 import { Store } from '@ngrx/store';
 import { selectFocusSessionDuration } from '../store/focus-mode.selectors';
 import {
-  setFocusSessionActivePage,
   setFocusSessionDuration,
+  startFocusPreparation,
   startFocusSession,
+  selectFocusTask,
 } from '../store/focus-mode.actions';
-import { FocusModeMode, FocusModePage } from '../focus-mode.const';
+import { FocusModeMode } from '../focus-mode.const';
 import { selectCurrentTask } from '../../tasks/store/task.selectors';
 import { Subject } from 'rxjs';
 import { FormsModule } from '@angular/forms';
@@ -78,21 +79,16 @@ export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDes
       );
     }
     if (this.cfg()?.isSkipPreparation) {
-      this._store.dispatch(startFocusSession());
       this._store.dispatch(
-        setFocusSessionActivePage({ focusActivePage: FocusModePage.Main }),
+        startFocusSession({ duration: this.updatedFocusModeDuration }),
       );
     } else {
-      this._store.dispatch(
-        setFocusSessionActivePage({ focusActivePage: FocusModePage.Preparation }),
-      );
+      this._store.dispatch(startFocusPreparation());
     }
   }
 
   selectDifferentTask(): void {
-    this._store.dispatch(
-      setFocusSessionActivePage({ focusActivePage: FocusModePage.TaskSelection }),
-    );
+    this._store.dispatch(selectFocusTask());
   }
 
   protected readonly FocusModeMode = FocusModeMode;

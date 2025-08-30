@@ -1,9 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, OnDestroy } from '@angular/core';
-import {
-  setFocusSessionActivePage,
-  startFocusSession,
-} from '../store/focus-mode.actions';
-import { FocusModePage } from '../focus-mode.const';
+import { startFocusSession } from '../store/focus-mode.actions';
 import { Store } from '@ngrx/store';
 import { interval, Observable, Subject } from 'rxjs';
 import { delay, map, startWith, takeUntil, takeWhile } from 'rxjs/operators';
@@ -44,10 +40,7 @@ export class FocusModePreparationComponent implements OnDestroy {
   }
 
   startSession(): void {
-    this._store.dispatch(startFocusSession());
-    this._store.dispatch(
-      setFocusSessionActivePage({ focusActivePage: FocusModePage.Main }),
-    );
+    this._store.dispatch(startFocusSession({}));
   }
 
   ngOnDestroy(): void {

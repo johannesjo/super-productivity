@@ -1,177 +1,203 @@
 import { createReducer, on } from '@ngrx/store';
-import {
-  cancelFocusSession,
-  completeBreak,
-  focusSessionDone,
-  hideFocusOverlay,
-  incrementCycle,
-  pauseFocusSession,
-  resetCycles,
-  setBreakTimeElapsed,
-  setFocusModeMode,
-  setFocusSessionActivePage,
-  setFocusSessionDuration,
-  setFocusSessionTimeElapsed,
-  showFocusOverlay,
-  skipBreak,
-  startBreak,
-  startFocusSession,
-  unPauseFocusSession,
-} from './focus-mode.actions';
-import { FocusModeMode, FocusModePage } from '../focus-mode.const';
+import * as actions from './focus-mode.actions';
+import { FocusModeState, TimerState, hasTimer } from '../focus-mode.model';
+import { FocusModeMode } from '../focus-mode.const';
 import { LS } from '../../../core/persistence/storage-keys.const';
 
-const DEFAULT_FOCUS_SESSION_DURATION = 25 * 60 * 1000;
-// const USE_REMAINING_SESSION_TIME_THRESHOLD = 60 * 1000;
+const DEFAULT_SESSION_DURATION = 25 * 60 * 1000;
+const DEFAULT_BREAK_DURATION = 5 * 60 * 1000;
+const DEFAULT_LONG_BREAK_DURATION = 15 * 60 * 1000;
 
 export const FOCUS_MODE_FEATURE_KEY = 'focusMode';
 
-export interface State {
-  isFocusOverlayShown: boolean;
-  isFocusSessionRunning: boolean;
-  focusSessionDuration: number;
-  focusSessionTimeElapsed: number;
-  lastSessionTotalDuration: number;
-  focusSessionActivePage: FocusModePage;
-  mode: FocusModeMode;
-  // Pomodoro break-related properties
-  isBreak: boolean;
-  breakTimeElapsed: number;
-  breakDuration: number;
-  isBreakLong: boolean;
-  currentCycle: number;
-}
-
 const focusModeModeFromLS = localStorage.getItem(LS.FOCUS_MODE_MODE);
 
-export const initialState: State = {
-  isFocusOverlayShown: false,
-  isFocusSessionRunning: false,
-  focusSessionDuration: DEFAULT_FOCUS_SESSION_DURATION,
-  focusSessionTimeElapsed: 0,
-  lastSessionTotalDuration: 0,
-  focusSessionActivePage: FocusModePage.TaskSelection,
+export const initialState: FocusModeState = {
+  phase: { type: 'idle' },
   mode: Object.values(FocusModeMode).includes(focusModeModeFromLS as any)
-    ? (focusModeModeFromLS as any)
-    : FocusModeMode.Flowtime,
-  // Pomodoro break-related initial values
-  isBreak: false,
-  breakTimeElapsed: 0,
-  breakDuration: 5 * 60 * 1000, // 5 minutes default
-  isBreakLong: false,
+    ? (focusModeModeFromLS as FocusModeMode)
+    : FocusModeMode.Countdown,
+  isOverlayShown: false,
   currentCycle: 1,
+  lastSessionDuration: 0,
 };
 
-export const focusModeReducer = createReducer<State>(
+const createTimer = (duration: number): TimerState => {
+  return {
+    startedAt: Date.now(),
+    elapsed: 0,
+    duration,
+    isPaused: false,
+  };
+};
+
+const updateTimer = (timer: TimerState): TimerState => {
+  if (timer.isPaused || !timer.startedAt) {
+    return timer;
+  }
+
+  const now = Date.now();
+  const elapsed = now - timer.startedAt;
+  return { ...timer, elapsed };
+};
+
+export const focusModeReducer = createReducer(
   initialState,
 
-  on(setFocusSessionActivePage, (state, { focusActivePage: focusSessionActivePage }) => ({
-    ...state,
-    focusSessionActivePage,
-  })),
-  on(setFocusModeMode, (state, { mode }) => ({
+  // Mode changes
+  on(actions.setMode, (state, { mode }) => ({
     ...state,
     mode,
   })),
-  on(setFocusSessionDuration, (state, { focusSessionDuration }) => ({
+
+  // Overlay control
+  on(actions.showOverlay, (state) => ({
     ...state,
-    focusSessionDuration,
+    isOverlayShown: true,
+    phase:
+      state.phase.type === 'idle' ? { type: 'task-selection' as const } : state.phase,
   })),
 
-  on(setFocusSessionTimeElapsed, (state, { focusSessionTimeElapsed }) => ({
+  on(actions.hideOverlay, (state) => ({
     ...state,
-    focusSessionTimeElapsed,
+    isOverlayShown: false,
   })),
 
-  on(startFocusSession, (state) => ({
+  // Phase transitions
+  on(actions.selectTask, (state) => ({
     ...state,
-    isFocusSessionRunning: true,
-    focusSessionActivePage: FocusModePage.Main,
-    lastSessionTotalDuration: 0,
-    // NOTE: not resetting since, we might want to continue
-    // focusSessionTimeElapsed: 0,
-    focusSessionDuration:
-      state.focusSessionDuration > 0
-        ? state.focusSessionDuration
-        : DEFAULT_FOCUS_SESSION_DURATION,
+    phase: { type: 'task-selection' as const },
   })),
 
-  on(focusSessionDone, (state) => {
+  on(actions.selectDuration, (state) => ({
+    ...state,
+    phase: { type: 'duration-selection' as const },
+  })),
+
+  on(actions.startPreparation, (state) => ({
+    ...state,
+    phase: { type: 'preparation' as const },
+  })),
+
+  on(actions.startSession, (state, { duration }) => ({
+    ...state,
+    phase: {
+      type: 'session' as const,
+      timer: createTimer(duration || DEFAULT_SESSION_DURATION),
+    },
+  })),
+
+  on(actions.pauseSession, (state) => {
+    if (state.phase.type !== 'session') return state;
+
     return {
       ...state,
-      isFocusSessionRunning: false,
-      isFocusOverlayShown: true,
-      focusSessionActivePage: FocusModePage.SessionDone,
-
-      // NOTE: we always reset on session done
-      focusSessionDuration: DEFAULT_FOCUS_SESSION_DURATION,
-      lastSessionTotalDuration: state.focusSessionTimeElapsed,
-      focusSessionTimeElapsed: 0,
+      phase: {
+        ...state.phase,
+        timer: {
+          ...state.phase.timer,
+          isPaused: true,
+          elapsed: state.phase.timer.elapsed,
+        },
+      },
     };
   }),
 
-  on(pauseFocusSession, (state) => ({
+  on(actions.resumeSession, (state, { idleTime = 0 }) => {
+    if (state.phase.type !== 'session') return state;
+
+    return {
+      ...state,
+      phase: {
+        ...state.phase,
+        timer: {
+          ...state.phase.timer,
+          isPaused: false,
+          startedAt: Date.now() - state.phase.timer.elapsed + idleTime,
+        },
+      },
+    };
+  }),
+
+  on(actions.completeSession, (state) => {
+    const duration = hasTimer(state.phase) ? state.phase.timer.elapsed : 0;
+
+    return {
+      ...state,
+      phase: { type: 'session-done' as const, totalDuration: duration },
+      lastSessionDuration: duration,
+    };
+  }),
+
+  on(actions.cancelSession, (state) => ({
     ...state,
-    isFocusSessionRunning: false,
+    phase: { type: 'task-selection' as const },
+    isOverlayShown: false,
   })),
 
-  on(unPauseFocusSession, (state, { idleTimeToAdd = 0 }) => ({
+  // Break handling
+  on(actions.startBreak, (state) => {
+    // Break duration logic should be handled by effects using strategies
+    const isLongBreak = state.currentCycle % 4 === 0;
+    const duration = isLongBreak ? DEFAULT_LONG_BREAK_DURATION : DEFAULT_BREAK_DURATION;
+
+    return {
+      ...state,
+      phase: {
+        type: 'break' as const,
+        timer: createTimer(duration),
+        isLong: isLongBreak,
+      },
+    };
+  }),
+
+  on(actions.skipBreak, actions.completeBreak, (state) => ({
     ...state,
-    isFocusSessionRunning: true,
-    // NOTE: this is adjusted in the effect via session time
-    // focusSessionDuration: state.focusSessionDuration,
+    phase: { type: 'task-selection' as const },
   })),
 
-  on(showFocusOverlay, (state) => ({
-    ...state,
-    isFocusOverlayShown: true,
-  })),
-  on(hideFocusOverlay, (state) => ({
-    ...state,
-    isFocusOverlayShown: false,
-    focusSessionActivePage:
-      state.focusSessionActivePage === FocusModePage.SessionDone
-        ? FocusModePage.TaskSelection
-        : state.focusSessionActivePage,
-  })),
-  on(cancelFocusSession, (state) => ({
-    ...state,
-    isFocusOverlayShown: false,
-    isFocusSessionRunning: false,
-    focusSessionTimeElapsed: 0,
-    focusSessionDuration: DEFAULT_FOCUS_SESSION_DURATION,
-  })),
+  // Timer updates
+  on(actions.tick, (state) => {
+    if (!hasTimer(state.phase)) return state;
 
-  // Break-related reducers
-  on(startBreak, (state, { isLongBreak, breakDuration }) => ({
-    ...state,
-    isBreak: true,
-    breakTimeElapsed: 0,
-    breakDuration,
-    isBreakLong: isLongBreak,
-    focusSessionActivePage: FocusModePage.Break,
-  })),
+    const updatedTimer = updateTimer(state.phase.timer);
 
-  on(setBreakTimeElapsed, (state, { breakTimeElapsed }) => ({
-    ...state,
-    breakTimeElapsed,
-  })),
+    // Check if timer completed
+    if (updatedTimer.duration > 0 && updatedTimer.elapsed >= updatedTimer.duration) {
+      if (state.phase.type === 'session') {
+        return {
+          ...state,
+          phase: { type: 'session-done' as const, totalDuration: updatedTimer.elapsed },
+          lastSessionDuration: updatedTimer.elapsed,
+        };
+      } else if (state.phase.type === 'break') {
+        return {
+          ...state,
+          phase: { type: 'break-done' as const },
+        };
+      }
+    }
 
-  on(skipBreak, completeBreak, (state) => ({
-    ...state,
-    isBreak: false,
-    breakTimeElapsed: 0,
-    focusSessionActivePage: FocusModePage.Main,
-    focusSessionTimeElapsed: 0, // Reset for new pomodoro session
-  })),
+    return {
+      ...state,
+      phase: {
+        ...state.phase,
+        timer: updatedTimer,
+      } as any,
+    };
+  }),
 
-  on(incrementCycle, (state) => ({
+  // Cycle management
+  on(actions.nextCycle, (state) => ({
     ...state,
     currentCycle: state.currentCycle + 1,
   })),
 
-  on(resetCycles, (state) => ({
+  on(actions.resetCycles, (state) => ({
     ...state,
     currentCycle: 1,
   })),
 );
+
+// For backward compatibility, export the old State interface name
+export type State = FocusModeState;

@@ -16,11 +16,11 @@ import {
   selectCurrentTask,
   selectLastCurrentTask,
 } from '../../tasks/store/task.selectors';
-import { FocusModePage } from '../focus-mode.const';
 import {
   cancelFocusSession,
   hideFocusOverlay,
-  setFocusSessionActivePage,
+  selectFocusTask,
+  selectFocusDuration,
 } from '../store/focus-mode.actions';
 import { MatIcon } from '@angular/material/icon';
 
@@ -75,14 +75,10 @@ export class FocusModeTaskDoneComponent implements AfterViewInit {
   }
 
   startNextFocusSession(): void {
-    this._store.dispatch(
-      setFocusSessionActivePage({ focusActivePage: FocusModePage.TaskSelection }),
-    );
+    this._store.dispatch(selectFocusTask());
   }
 
   continueWithFocusSession(): void {
-    this._store.dispatch(
-      setFocusSessionActivePage({ focusActivePage: FocusModePage.DurationSelection }),
-    );
+    this._store.dispatch(selectFocusDuration());
   }
 }

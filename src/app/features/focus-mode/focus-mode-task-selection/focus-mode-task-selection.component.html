@@ -4,6 +4,31 @@
 >
   <h1>{{ T.F.FOCUS_MODE.SELECT_TASK | translate }}</h1>
 
+  @if (isFocusSessionRunning()) {
+    @let isCountDown = isCountTimeDown();
+    <div class="timer-display">
+      <div class="progress-wrapper">
+        @if (isCountDown) {
+          <progress-circle [progress]="sessionProgress$ | async"></progress-circle>
+        } @else {
+          <breathing-dot></breathing-dot>
+        }
+        <div class="progress-label-wrapper">
+          <div
+            class="focus-time"
+            title="Current session time"
+          >
+            @if (isCountDown) {
+              {{ timeToGo$ | async | msToMinuteClockString }}
+            } @else {
+              {{ timeElapsed() | msToMinuteClockString }}
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
   <select-task
     (taskChange)="onTaskChange($event)"
     [initialTask]="initialTask()"

@@ -11,8 +11,10 @@ import {
   cancelFocusSession,
   hideFocusOverlay,
   setFocusModeMode,
-  setFocusSessionActivePage,
   showFocusOverlay,
+  selectFocusTask,
+  selectFocusDuration,
+  startFocusSession,
 } from '../store/focus-mode.actions';
 import { fadeInAnimation } from '../../../ui/animations/fade.ani';
 import { warpAnimation, warpInAnimation } from '../../../ui/animations/warp.ani';
@@ -103,21 +105,11 @@ export class FocusModeOverlayComponent implements OnDestroy {
           return;
         }
         if (!task) {
-          this._store.dispatch(
-            setFocusSessionActivePage({ focusActivePage: FocusModePage.TaskSelection }),
-          );
+          this._store.dispatch(selectFocusTask());
         } else if (this.isFocusSessionRunning()) {
-          this._store.dispatch(
-            setFocusSessionActivePage({
-              focusActivePage: FocusModePage.Main,
-            }),
-          );
+          this._store.dispatch(startFocusSession({}));
         } else {
-          this._store.dispatch(
-            setFocusSessionActivePage({
-              focusActivePage: FocusModePage.DurationSelection,
-            }),
-          );
+          this._store.dispatch(selectFocusDuration());
         }
       });
   }

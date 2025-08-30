@@ -1,190 +1,107 @@
-import { computed, inject, Injectable } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { EMPTY, interval, merge, of } from 'rxjs';
-import {
-  selectFocusModeBreakDuration,
-  selectFocusModeBreakTimeElapsed,
-  selectFocusModeCurrentCycle,
-  selectFocusModeIsBreak,
-  selectFocusModeIsBreakLong,
-  selectFocusModeMode,
-  selectFocusSessionActivePage,
-  selectFocusSessionDuration,
-  selectFocusSessionTimeElapsed,
-  selectIsFocusOverlayShown,
-  selectIsFocusSessionRunning,
-  selectLastSessionTotalDurationOrTimeElapsedFallback,
-} from './store/focus-mode.selectors';
-import { selectFocusModeConfig } from '../config/store/global-config.reducer';
-import {
-  map,
-  mapTo,
-  pairwise,
-  scan,
-  shareReplay,
-  startWith,
-  switchMap,
-} from 'rxjs/operators';
-import { Actions, ofType } from '@ngrx/effects';
-import {
-  cancelFocusSession,
-  completeBreak,
-  focusSessionDone,
-  skipBreak,
-  startBreak,
-  unPauseFocusSession,
-} from './store/focus-mode.actions';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { filter, map, tap } from 'rxjs/operators';
+import * as actions from './store/focus-mode.actions';
+import * as selectors from './store/focus-mode.selectors';
 import { GlobalConfigService } from '../config/global-config.service';
-
-const TICK_DURATION = 200;
+import { selectFocusModeConfig } from '../config/store/global-config.reducer';
+import { FocusModePage } from './focus-mode.const';
+import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class FocusModeService {
   private _store = inject(Store);
-  private _actions$ = inject(Actions);
   private _globalConfigService = inject(GlobalConfigService);
+  private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
 
-  private _isRunning$ = this._store.select(selectIsFocusSessionRunning);
-  private _plannedSessionDuration$ = this._store.select(selectFocusSessionDuration);
+  // State signals
+  phase = toSignal(this._store.select(selectors.selectPhase));
+  mode = toSignal(this._store.select(selectors.selectMode));
+  isOverlayShown = toSignal(this._store.select(selectors.selectIsOverlayShown));
+  currentCycle = toSignal(this._store.select(selectors.selectCurrentCycle));
 
-  private _timer$ = interval(TICK_DURATION).pipe(
-    switchMap(() => of(Date.now())),
-    pairwise(),
-    map(([a, b]) => b - a),
-  );
+  // Timer signals
+  isRunning = toSignal(this._store.select(selectors.selectIsRunning));
+  timeElapsed = toSignal(this._store.select(selectors.selectTimeElapsed));
+  timeRemaining = toSignal(this._store.select(selectors.selectTimeRemaining));
+  progress = toSignal(this._store.select(selectors.selectProgress));
 
-  private _tick$ = this._isRunning$.pipe(
-    switchMap((isRunning) => (isRunning ? this._timer$ : EMPTY)),
-    map((tick) => tick * -1),
-  );
+  // Session signals
+  isSessionRunning = toSignal(this._store.select(selectors.selectIsSessionRunning));
+  isSessionPaused = toSignal(this._store.select(selectors.selectIsSessionPaused));
+  isFocusSessionRunning = this.isSessionRunning; // Alias for compatibility
 
-  currentSessionTime$ = merge(
-    this._tick$,
-    this._actions$.pipe(ofType(cancelFocusSession), mapTo(0)),
-    this._actions$.pipe(
-      ofType(focusSessionDone),
-      // NOTE we always reset
-      // filter(({ isResetPlannedSessionDuration }) => !!isResetPlannedSessionDuration),
-      mapTo(0),
-    ),
-    this._actions$.pipe(
-      ofType(unPauseFocusSession),
-      map(({ idleTimeToAdd = 0 }) => idleTimeToAdd * -1),
-    ),
-  ).pipe(
-    scan((acc, value) => {
-      const accValMinZero = acc < 0 ? 0 : acc;
-      return value < 0 ? accValMinZero - value : value;
-    }),
-    shareReplay(1),
-  );
+  // Break signals
+  isBreakActive = toSignal(this._store.select(selectors.selectIsBreakActive));
+  isLongBreak = toSignal(this._store.select(selectors.selectIsLongBreak));
+  isBreakLong = toSignal(this._store.select(selectors.selectIsLongBreak)); // Alias for compatibility
 
-  timeToGo$ = this.currentSessionTime$.pipe(
-    startWith(0),
-    switchMap((currentSessionTime) =>
-      this._plannedSessionDuration$.pipe(
-        map((plannedDuration) => plannedDuration - currentSessionTime),
-      ),
-    ),
-  );
-
-  sessionProgress$ = this.currentSessionTime$.pipe(
-    startWith(0),
-    switchMap((currentSessionTime) =>
-      this._plannedSessionDuration$.pipe(
-        map((plannedDuration) =>
-          plannedDuration > 0 ? (currentSessionTime * 100) / plannedDuration : 0,
-        ),
-      ),
-    ),
-  );
-
-  // Core state signals
-  isFocusSessionRunning = toSignal(this._store.select(selectIsFocusSessionRunning), {
-    initialValue: false,
-  });
-  mode = toSignal(this._store.select(selectFocusModeMode));
-  sessionDuration = toSignal(this._store.select(selectFocusSessionDuration), {
-    initialValue: 25 * 60 * 1000,
-  });
-  isFocusOverlayShown = toSignal(this._store.select(selectIsFocusOverlayShown), {
-    initialValue: false,
-  });
-  timeElapsed = toSignal(this._store.select(selectFocusSessionTimeElapsed), {
+  // Break-specific timer signals (for compatibility)
+  breakTimeElapsed = toSignal(this._store.select(selectors.selectTimeElapsed), {
     initialValue: 0,
   });
-  lastSessionTotalDurationOrTimeElapsedFallback = toSignal(
-    this._store.select(selectLastSessionTotalDurationOrTimeElapsedFallback),
-    { initialValue: 0 },
-  );
-  activePage = toSignal(this._store.select(selectFocusSessionActivePage));
-  cfg = toSignal(this._store.select(selectFocusModeConfig));
-  pomodoroCfg = this._globalConfigService.pomodoroConfig;
-
-  // Computed session signals
-  currentSessionTime = toSignal(this.currentSessionTime$, { initialValue: 0 });
-  timeToGo = toSignal(this.timeToGo$, { initialValue: 0 });
-  sessionProgress = toSignal(this.sessionProgress$, { initialValue: 0 });
-
-  // Break timer for pomodoro mode
-  private _isBreak$ = this._store.select(selectFocusModeIsBreak);
-  private _breakDuration$ = this._store.select(selectFocusModeBreakDuration);
-
-  private _breakTimer$ = interval(TICK_DURATION).pipe(
-    switchMap(() => of(Date.now())),
-    pairwise(),
-    map(([a, b]) => b - a),
-  );
-
-  private _breakTick$ = this._isBreak$.pipe(
-    switchMap((isBreak) => (isBreak ? this._breakTimer$ : EMPTY)),
-    map((tick) => tick * -1),
-  );
-
-  currentBreakTime$ = merge(
-    this._breakTick$,
-    this._actions$.pipe(ofType(startBreak, skipBreak, completeBreak), mapTo(0)),
-  ).pipe(
-    scan((acc, value) => {
-      const accValMinZero = acc < 0 ? 0 : acc;
-      return value < 0 ? accValMinZero - value : value;
-    }),
-    shareReplay(1),
-  );
-
-  breakTimeToGo$ = this.currentBreakTime$.pipe(
-    startWith(0),
-    switchMap((currentBreakTime) =>
-      this._breakDuration$.pipe(map((breakDuration) => breakDuration - currentBreakTime)),
-    ),
-  );
-
-  // Break state signals
-  isBreak = toSignal(this._store.select(selectFocusModeIsBreak), {
-    initialValue: false,
-  });
-  breakTimeElapsed = toSignal(this._store.select(selectFocusModeBreakTimeElapsed), {
-    initialValue: 0,
-  });
-  breakDuration = toSignal(this._store.select(selectFocusModeBreakDuration), {
+  breakDuration = toSignal(this._store.select(selectors.selectTimeDuration), {
     initialValue: 5 * 60 * 1000,
   });
-  isBreakLong = toSignal(this._store.select(selectFocusModeIsBreakLong), {
-    initialValue: false,
-  });
-  currentCycle = toSignal(this._store.select(selectFocusModeCurrentCycle), {
-    initialValue: 1,
+  breakProgress = toSignal(this._store.select(selectors.selectProgress), {
+    initialValue: 0,
   });
 
-  // Computed break signals
-  currentBreakTime = toSignal(this.currentBreakTime$, { initialValue: 0 });
-  breakTimeToGo = toSignal(this.breakTimeToGo$, { initialValue: 0 });
-  breakProgress = computed(() => {
-    const currentBreakTime = this.currentBreakTime();
-    const breakDuration = this.breakDuration();
-    return breakDuration > 0 ? (currentBreakTime * 100) / breakDuration : 0;
-  });
+  // Config signals
+  pomodoroConfig = this._globalConfigService.pomodoroConfig;
+  focusModeConfig = toSignal(this._store.select(selectFocusModeConfig));
+  cfg = this.focusModeConfig; // Alias for compatibility
+  pomodoroCfg = this.pomodoroConfig; // Alias for compatibility
+
+  // Additional compatibility signals
+  lastSessionTotalDurationOrTimeElapsedFallback = toSignal(
+    this._store.select(selectors.selectLastSessionDuration),
+    { initialValue: 0 },
+  );
+
+  activePage = toSignal(
+    this._store.select(selectors.selectFocusModeState).pipe(
+      map((state) => {
+        if (state.isOverlayShown) {
+          switch (state.phase.type) {
+            case 'task-selection':
+              return FocusModePage.TaskSelection;
+            case 'duration-selection':
+              return FocusModePage.DurationSelection;
+            case 'preparation':
+              return FocusModePage.Preparation;
+            case 'session':
+              return FocusModePage.Main;
+            case 'session-done':
+              return FocusModePage.SessionDone;
+            case 'break':
+              return FocusModePage.Break;
+            default:
+              return FocusModePage.TaskSelection;
+          }
+        }
+        return FocusModePage.TaskSelection;
+      }),
+    ),
+    { initialValue: FocusModePage.TaskSelection },
+  );
+
+  // Observable versions for compatibility
+  sessionProgress$ = this._store.select(selectors.selectProgress);
+  currentSessionTime$ = this._store.select(selectors.selectTimeElapsed);
+  timeToGo$ = this._store.select(selectors.selectTimeRemaining);
+
+  // Single timer that updates the store
+  private timer$ = this._globalTrackingIntervalService.tick$.pipe(
+    filter(() => this.isRunning() === true),
+    tap(() => this._store.dispatch(actions.tick())),
+  );
+
+  constructor() {
+    // Start the timer subscription
+    this.timer$.subscribe();
+  }
 }

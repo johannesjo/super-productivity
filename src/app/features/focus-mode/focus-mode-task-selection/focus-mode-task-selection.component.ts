@@ -2,6 +2,7 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   OnDestroy,
 } from '@angular/core';
@@ -10,11 +11,12 @@ import { TaskService } from '../../tasks/task.service';
 import { Store } from '@ngrx/store';
 import {
   focusSessionDone,
-  setFocusSessionActivePage,
+  selectFocusDuration,
   setFocusSessionDuration,
+  startFocusPreparation,
   startFocusSession,
 } from '../store/focus-mode.actions';
-import { FocusModeMode, FocusModePage } from '../focus-mode.const';
+import { FocusModeMode } from '../focus-mode.const';
 import { T } from 'src/app/t.const';
 import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
@@ -22,13 +24,27 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { SelectTaskComponent } from '../../tasks/select-task/select-task.component';
 import { FocusModeService } from '../focus-mode.service';
 import { MatIcon } from '@angular/material/icon';
+import { MsToMinuteClockStringPipe } from '../../../ui/duration/ms-to-minute-clock-string.pipe';
+import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-circle.component';
+import { BreathingDotComponent } from '../../../ui/breathing-dot/breathing-dot.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'focus-mode-task-selection',
   templateUrl: './focus-mode-task-selection.component.html',
   styleUrls: ['./focus-mode-task-selection.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, MatButton, TranslatePipe, SelectTaskComponent, MatIcon],
+  imports: [
+    FormsModule,
+    MatButton,
+    TranslatePipe,
+    SelectTaskComponent,
+    MatIcon,
+    MsToMinuteClockStringPipe,
+    ProgressCircleComponent,
+    BreathingDotComponent,
+    AsyncPipe,
+  ],
 })
 export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy {
   readonly taskService = inject(TaskService);
@@ -41,10 +57,20 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
   currentCycle = this._focusModeService.currentCycle;
   isFocusSessionRunning = this._focusModeService.isFocusSessionRunning;
 
+  // Timer-related properties
+  timeElapsed = this._focusModeService.timeElapsed;
+  sessionProgress$ = this._focusModeService.sessionProgress$;
+  timeToGo$ = this._focusModeService.timeToGo$;
+
   selectedTask: string | Task | undefined;
   initialTask = this.taskService.firstStartableTask;
   focusTimeout = 0;
   T: typeof T = T;
+
+  isCountTimeDown = computed(() => {
+    const mode = this.mode();
+    return mode === FocusModeMode.Countdown || mode === FocusModeMode.Pomodoro;
+  });
 
   ngAfterViewInit(): void {
     this.focusTimeout = window.setTimeout(() => {
@@ -81,27 +107,28 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
       this.taskService.setCurrentId(this.selectedTask.id);
     }
 
-    // Determine next page based on mode
-    let nextPage: FocusModePage;
-
+    // Trigger next phase based on mode
     if (mode === FocusModeMode.Pomodoro) {
       // Set duration from config and skip duration selection
       // TODO revert
       // const duration = this.pomodoroCfg()?.duration || 25 * 60 * 1000;
       const duration = 4000;
       this._store.dispatch(setFocusSessionDuration({ focusSessionDuration: duration }));
-      nextPage = skipPreparation ? FocusModePage.Main : FocusModePage.Preparation;
+
+      if (skipPreparation) {
+        this._store.dispatch(startFocusSession({ duration }));
+      } else {
+        this._store.dispatch(startFocusPreparation());
+      }
     } else if (mode === FocusModeMode.Flowtime) {
-      nextPage = skipPreparation ? FocusModePage.Main : FocusModePage.Preparation;
+      if (skipPreparation) {
+        this._store.dispatch(startFocusSession({}));
+      } else {
+        this._store.dispatch(startFocusPreparation());
+      }
     } else {
-      // Countdown mode uses always duration selection
-      nextPage = FocusModePage.DurationSelection;
-    }
-
-    this._store.dispatch(setFocusSessionActivePage({ focusActivePage: nextPage }));
-
-    if (nextPage === FocusModePage.Main) {
-      this._store.dispatch(startFocusSession());
+      // Countdown mode always uses duration selection
+      this._store.dispatch(selectFocusDuration());
     }
   }
 }

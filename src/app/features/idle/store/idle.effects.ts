@@ -294,7 +294,7 @@ export class IdleEffects {
               this._store.dispatch(showFocusOverlay());
             }
           } else if (wasFocusSessionRunning) {
-            this._store.dispatch(unPauseFocusSession({ idleTimeToAdd: idleTime }));
+            this._store.dispatch(unPauseFocusSession({ idleTime: idleTime }));
             this._store.dispatch(showFocusOverlay());
           }
 
