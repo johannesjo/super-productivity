@@ -5,12 +5,11 @@
   <h1>{{ T.F.FOCUS_MODE.SELECT_TASK | translate }}</h1>
 
   @if (isFocusSessionRunning()) {
-    <div style="position: absolute; border: 4px solid red">XXXXXX</div>
     @let isCountDown = isCountTimeDown();
     <div class="timer-display">
       <div class="progress-wrapper">
         @if (isCountDown) {
-          <progress-circle [progress]="sessionProgress$ | async"></progress-circle>
+          <progress-circle [progress]="focusModeService.progress()"></progress-circle>
         } @else {
           <breathing-dot></breathing-dot>
         }
@@ -20,7 +19,7 @@
             title="Current session time"
           >
             @if (isCountDown) {
-              {{ timeToGo$ | async | msToMinuteClockString }}
+              {{ focusModeService.timeRemaining() | msToMinuteClockString }}
             } @else {
               {{ timeElapsed() | msToMinuteClockString }}
             }

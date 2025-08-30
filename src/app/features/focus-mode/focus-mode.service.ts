@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, tap } from 'rxjs/operators';
@@ -7,7 +7,7 @@ import * as selectors from './store/focus-mode.selectors';
 import { GlobalConfigService } from '../config/global-config.service';
 import { selectFocusModeConfig } from '../config/store/global-config.reducer';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
-import { FocusModePage, FocusModePhaseType } from './focus-mode.model';
+import { FocusModePage, FocusModePhaseType, FocusModeMode } from './focus-mode.model';
 
 @Injectable({
   providedIn: 'root',
@@ -64,6 +64,14 @@ export class FocusModeService {
     { initialValue: 0 },
   );
 
+  // UI helper signals
+  isCountTimeDown = computed(() => this.mode() !== FocusModeMode.Flowtime);
+
+  // Observable versions for compatibility
+  sessionProgress$ = this._store.select(selectors.selectProgress);
+  currentSessionTime$ = this._store.select(selectors.selectTimeElapsed);
+  timeToGo$ = this._store.select(selectors.selectTimeRemaining);
+
   activePage = toSignal(
     this._store.select(selectors.selectFocusModeState).pipe(
       map((state) => {
@@ -90,11 +98,6 @@ export class FocusModeService {
     ),
     { initialValue: FocusModePage.TaskSelection },
   );
-
-  // Observable versions for compatibility
-  sessionProgress$ = this._store.select(selectors.selectProgress);
-  currentSessionTime$ = this._store.select(selectors.selectTimeElapsed);
-  timeToGo$ = this._store.select(selectors.selectTimeRemaining);
 
   // Single timer that updates the store
   private timer$ = this._globalTrackingIntervalService.tick$.pipe(

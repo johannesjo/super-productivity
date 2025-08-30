@@ -2,7 +2,6 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
-  computed,
   inject,
   OnDestroy,
 } from '@angular/core';
@@ -23,12 +22,11 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { SelectTaskComponent } from '../../tasks/select-task/select-task.component';
 import { FocusModeService } from '../focus-mode.service';
 import { FocusModeStrategyFactory } from '../focus-mode-strategies';
-import { FocusModeMode, FocusModePhaseType } from '../focus-mode.model';
+import { FocusModePhaseType } from '../focus-mode.model';
 import { MatIcon } from '@angular/material/icon';
 import { MsToMinuteClockStringPipe } from '../../../ui/duration/ms-to-minute-clock-string.pipe';
 import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-circle.component';
 import { BreathingDotComponent } from '../../../ui/breathing-dot/breathing-dot.component';
-import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'focus-mode-task-selection',
@@ -44,7 +42,6 @@ import { AsyncPipe } from '@angular/common';
     MsToMinuteClockStringPipe,
     ProgressCircleComponent,
     BreathingDotComponent,
-    AsyncPipe,
   ],
 })
 export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy {
@@ -52,6 +49,9 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
   private readonly _store = inject(Store);
   private readonly _focusModeService = inject(FocusModeService);
   private readonly _strategyFactory = inject(FocusModeStrategyFactory);
+
+  // Expose service for template
+  focusModeService = this._focusModeService;
 
   mode = this._focusModeService.mode;
   cfg = this._focusModeService.cfg;
@@ -69,10 +69,7 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
   focusTimeout = 0;
   T: typeof T = T;
 
-  isCountTimeDown = computed(() => {
-    const mode = this.mode();
-    return mode === FocusModeMode.Countdown || mode === FocusModeMode.Pomodoro;
-  });
+  isCountTimeDown = this._focusModeService.isCountTimeDown;
 
   ngAfterViewInit(): void {
     this.focusTimeout = window.setTimeout(() => {

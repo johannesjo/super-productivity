@@ -30,10 +30,8 @@ export class PomodoroStrategy implements FocusModeStrategy {
       | FocusModePhaseType.Session;
     duration?: number;
   } {
-    // TODO revert
-    // const config = this.globalConfigService.pomodoroConfig();
-    // const duration = config?.duration || 25 * 60 * 1000;
-    const duration = 4000;
+    const config = this.globalConfigService.pomodoroConfig();
+    const duration = config?.duration || 25 * 60 * 1000;
 
     return {
       phase: skipPreparation

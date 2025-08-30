@@ -1,7 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  computed,
   effect,
   HostBinding,
   HostListener,
@@ -39,7 +38,6 @@ import { TaskAttachmentListComponent } from '../../tasks/task-attachment/task-at
 import { slideInOutFromBottomAni } from '../../../ui/animations/slide-in-out-from-bottom.ani';
 import { FocusModeService } from '../focus-mode.service';
 import { BreathingDotComponent } from '../../../ui/breathing-dot/breathing-dot.component';
-import { FocusModeMode } from '../focus-mode.model';
 
 @Component({
   selector: 'focus-mode-main',
@@ -76,8 +74,7 @@ export class FocusModeMainComponent implements OnDestroy {
   focusModeService = inject(FocusModeService);
 
   timeElapsed = this.focusModeService.timeElapsed;
-  mode = this.focusModeService.mode;
-  isCountTimeDown = computed(() => this.mode() !== FocusModeMode.Flowtime);
+  isCountTimeDown = this.focusModeService.isCountTimeDown;
 
   @HostBinding('class.isShowNotes') isShowNotes: boolean = false;
 
