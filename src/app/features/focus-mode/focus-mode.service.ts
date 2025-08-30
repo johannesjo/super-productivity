@@ -36,6 +36,7 @@ import {
   unPauseFocusSession,
 } from './store/focus-mode.actions';
 import { Store } from '@ngrx/store';
+import { GlobalConfigService } from '../config/global-config.service';
 
 const TICK_DURATION = 200;
 
@@ -45,6 +46,7 @@ const TICK_DURATION = 200;
 export class FocusModeService {
   private _store = inject(Store);
   private _actions$ = inject(Actions);
+  private _globalConfigService = inject(GlobalConfigService);
 
   private _isRunning$ = this._store.select(selectIsFocusSessionRunning);
   private _plannedSessionDuration$ = this._store.select(selectFocusSessionDuration);
@@ -120,6 +122,7 @@ export class FocusModeService {
   );
   activePage = toSignal(this._store.select(selectFocusSessionActivePage));
   cfg = toSignal(this._store.select(selectFocusModeConfig));
+  pomodoroCfg = this._globalConfigService.pomodoroConfig;
 
   // Computed session signals
   currentSessionTime = toSignal(this.currentSessionTime$, { initialValue: 0 });

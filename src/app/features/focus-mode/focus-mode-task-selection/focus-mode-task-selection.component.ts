@@ -10,21 +10,16 @@ import { TaskService } from '../../tasks/task.service';
 import { Store } from '@ngrx/store';
 import {
   setFocusSessionActivePage,
+  setFocusSessionDuration,
   startFocusSession,
-  startBreak,
-  incrementCycle,
 } from '../store/focus-mode.actions';
 import { FocusModeMode, FocusModePage } from '../focus-mode.const';
 import { T } from 'src/app/t.const';
 import { FormsModule } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButton } from '@angular/material/button';
 import { TranslatePipe } from '@ngx-translate/core';
 import { SelectTaskComponent } from '../../tasks/select-task/select-task.component';
-import { GlobalConfigService } from '../../config/global-config.service';
 import { FocusModeService } from '../focus-mode.service';
-import { setFocusSessionDuration } from '../store/focus-mode.actions';
-import { selectFocusModeCurrentCycle } from '../store/focus-mode.selectors';
 
 @Component({
   selector: 'focus-mode-task-selection',
@@ -36,13 +31,12 @@ import { selectFocusModeCurrentCycle } from '../store/focus-mode.selectors';
 export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy {
   readonly taskService = inject(TaskService);
   private readonly _store = inject(Store);
-  private readonly _globalConfigService = inject(GlobalConfigService);
   private readonly _focusModeService = inject(FocusModeService);
 
   mode = this._focusModeService.mode;
   cfg = this._focusModeService.cfg;
-  pomodoroConfig = toSignal(this._globalConfigService.pomodoroConfig$);
-  currentCycle = toSignal(this._store.select(selectFocusModeCurrentCycle));
+  pomodoroCfg = this._focusModeService.pomodoroCfg;
+  currentCycle = this._focusModeService.currentCycle;
 
   selectedTask: string | Task | undefined;
   initialTask = this.taskService.firstStartableTask;
@@ -85,7 +79,7 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
 
     if (mode === FocusModeMode.Pomodoro) {
       // Set duration from config and skip duration selection
-      const duration = this.pomodoroConfig()?.duration || 25 * 60 * 1000;
+      const duration = this.pomodoroCfg()?.duration || 25 * 60 * 1000;
       this._store.dispatch(setFocusSessionDuration({ focusSessionDuration: duration }));
       nextPage = skipPreparation ? FocusModePage.Main : FocusModePage.Preparation;
     } else if (mode === FocusModeMode.Flowtime) {
@@ -100,20 +94,5 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
     if (nextPage === FocusModePage.Main) {
       this._store.dispatch(startFocusSession());
     }
-  }
-
-  startBreak(): void {
-    const pomodoroConfig = this.pomodoroConfig();
-    const currentCycle = this.currentCycle();
-
-    if (!pomodoroConfig || !currentCycle) return;
-
-    const isLongBreak = currentCycle % pomodoroConfig.cyclesBeforeLongerBreak === 0;
-    const breakDuration =
-      (isLongBreak ? pomodoroConfig.longerBreakDuration : pomodoroConfig.breakDuration) ||
-      300000;
-
-    this._store.dispatch(startBreak({ isLongBreak, breakDuration }));
-    this._store.dispatch(incrementCycle());
   }
 }
