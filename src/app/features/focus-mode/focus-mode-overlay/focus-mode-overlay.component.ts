@@ -73,7 +73,7 @@ export class FocusModeOverlayComponent implements OnDestroy {
 
   selectedMode = this.focusModeService.mode;
   activePage = this.focusModeService.activePage;
-  isFocusSessionRunning = this.focusModeService.isFocusSessionRunning;
+  isSessionRunning = this.focusModeService.isSessionRunning;
 
   isPomodoroEnabled = toSignal(this._store.select(selectIsPomodoroEnabled), {
     initialValue: false,
@@ -106,7 +106,7 @@ export class FocusModeOverlayComponent implements OnDestroy {
         }
         if (!task) {
           this._store.dispatch(selectFocusTask());
-        } else if (this.isFocusSessionRunning()) {
+        } else if (this.isSessionRunning()) {
           this._store.dispatch(startFocusSession({}));
         } else {
           this._store.dispatch(selectFocusDuration());
@@ -125,7 +125,7 @@ export class FocusModeOverlayComponent implements OnDestroy {
   }
 
   closeOverlay(): void {
-    if (this.isFocusSessionRunning()) {
+    if (this.isSessionRunning()) {
       const isCountTimeUp = this.selectedMode() === FocusModeMode.Flowtime;
 
       // Get current mode to determine translation key and parameters
