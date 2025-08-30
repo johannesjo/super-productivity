@@ -32,6 +32,8 @@ export const focusSessionDone = createAction(
   props<{ isResetPlannedSessionDuration?: boolean }>(),
 );
 
+export const focusTaskDone = createAction('[FocusMode] Focus task done');
+
 export const showFocusOverlay = createAction('[FocusMode] Show Focus Overlay');
 export const hideFocusOverlay = createAction('[FocusMode] Hide Focus Overlay');
 

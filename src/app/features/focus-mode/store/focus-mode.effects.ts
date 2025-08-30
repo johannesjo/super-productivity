@@ -3,6 +3,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   cancelFocusSession,
   focusSessionDone,
+  focusTaskDone,
   pauseFocusSession,
   setFocusModeMode,
   setFocusSessionActivePage,
@@ -102,9 +103,11 @@ export class FocusModeEffects {
       }),
     );
   });
+
   stopTrackingOnOnCancel$ = createEffect(() => {
     return this._actions$.pipe(ofType(cancelFocusSession), mapTo(unsetCurrentTask()));
   });
+
   pauseOnIdle$ = createEffect(() => {
     return this._actions$.pipe(ofType(openIdleDialog), mapTo(pauseFocusSession()));
   });
@@ -115,13 +118,25 @@ export class FocusModeEffects {
         switchMap((sndCfg) =>
           sndCfg.volume > 0
             ? this._actions$.pipe(
-                ofType(focusSessionDone),
+                ofType(focusSessionDone, focusTaskDone),
                 tap(() => playSound(SESSION_DONE_SOUND, 100)),
               )
             : EMPTY,
         ),
       ),
     { dispatch: false },
+  );
+
+  // Handle task completion for pomodoro mode - show task selection instead of auto-starting break
+  handleTaskDoneForPomodoro$ = createEffect(() =>
+    this._actions$.pipe(
+      ofType(focusTaskDone),
+      withLatestFrom(this._store.select(selectFocusModeMode)),
+      filter(([_, mode]) => mode === FocusModeMode.Pomodoro),
+      map(() =>
+        setFocusSessionActivePage({ focusActivePage: FocusModePage.TaskSelection }),
+      ),
+    ),
   );
 
   // TODO check if needed
@@ -141,7 +156,7 @@ export class FocusModeEffects {
     ),
   );
 
-  setTaskBarIconProgress$: any =
+  setTaskBarIconProgress$ =
     IS_ELECTRON &&
     createEffect(
       () =>
@@ -158,12 +173,12 @@ export class FocusModeEffects {
       { dispatch: false },
     );
 
-  focusWindowOnSessionDone$: any =
+  focusWindowOnSessionOrTaskDone$ =
     IS_ELECTRON &&
     createEffect(
       () =>
         this._actions$.pipe(
-          ofType(focusSessionDone),
+          ofType(focusSessionDone, focusTaskDone),
           tap(() => {
             window.ea.showOrFocus();
             window.ea.flashFrame();

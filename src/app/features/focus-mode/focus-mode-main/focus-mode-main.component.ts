@@ -18,7 +18,7 @@ import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachme
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { IssueService } from '../../issue/issue.service';
 import { Store } from '@ngrx/store';
-import { focusSessionDone } from '../store/focus-mode.actions';
+import { focusTaskDone } from '../store/focus-mode.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
@@ -173,7 +173,7 @@ export class FocusModeMainComponent implements OnDestroy {
   }
 
   finishCurrentTask(): void {
-    this._store.dispatch(focusSessionDone({}));
+    this._store.dispatch(focusTaskDone());
     this._store.dispatch(
       TaskSharedActions.updateTask({
         task: {
