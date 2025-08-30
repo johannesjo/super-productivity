@@ -75,9 +75,3 @@ export const selectIsRunning = createSelector(
   selectPhase,
   (phase) => hasTimer(phase) && !phase.timer.isPaused,
 );
-
-// Backward compatibility selectors
-export const selectIsFocusSessionRunning = selectIsSessionRunning;
-export const selectIsFocusOverlayShown = selectIsOverlayShown;
-export const selectFocusSessionTimeElapsed = selectTimeElapsed;
-export const selectFocusSessionDuration = selectTimeDuration;

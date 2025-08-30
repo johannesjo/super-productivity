@@ -59,7 +59,7 @@ import { FocusModeOverlayComponent } from './features/focus-mode/focus-mode-over
 import { ShepherdComponent } from './features/shepherd/shepherd.component';
 import { AsyncPipe } from '@angular/common';
 import { RightPanelComponent } from './features/right-panel/right-panel.component';
-import { selectIsFocusOverlayShown } from './features/focus-mode/store/focus-mode.selectors';
+import { selectIsOverlayShown } from './features/focus-mode/store/focus-mode.selectors';
 import { Store } from '@ngrx/store';
 import { PfapiService } from './pfapi/pfapi.service';
 import { PersistenceLegacyService } from './core/persistence/persistence-legacy.service';
@@ -191,7 +191,7 @@ export class AppComponent implements OnDestroy, AfterViewInit {
     ),
   );
 
-  isShowFocusOverlay = toSignal(this._store.select(selectIsFocusOverlayShown), {
+  isShowFocusOverlay = toSignal(this._store.select(selectIsOverlayShown), {
     initialValue: false,
   });
 

@@ -5,7 +5,7 @@ import { first, takeUntil } from 'rxjs/operators';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import { Store } from '@ngrx/store';
-import { selectFocusSessionTimeElapsed } from '../store/focus-mode.selectors';
+import { selectTimeElapsed } from '../store/focus-mode.selectors';
 import {
   cancelFocusSession,
   hideFocusOverlay,
@@ -133,7 +133,7 @@ export class FocusModeOverlayComponent implements OnDestroy {
         ico: 'center_focus_strong',
         msg: T.F.FOCUS_MODE.B.SESSION_RUNNING,
         timer$: isCountTimeUp
-          ? this._store.select(selectFocusSessionTimeElapsed)
+          ? this._store.select(selectTimeElapsed)
           : this.focusModeService.timeToGo$,
         progress$: isCountTimeUp ? undefined : this.focusModeService.sessionProgress$,
         action2: {

@@ -45,7 +45,7 @@ import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confir
 import { T } from '../../../t.const';
 import { DateService } from '../../../core/date/date.service';
 import { ipcIdleTime$ } from '../../../core/ipc-events';
-import { selectIsFocusSessionRunning } from '../../focus-mode/store/focus-mode.selectors';
+import { selectIsSessionRunning } from '../../focus-mode/store/focus-mode.selectors';
 import {
   focusSessionDone,
   showFocusOverlay,
@@ -73,7 +73,7 @@ export class IdleEffects {
   // NOTE: needs to live forever since we can't unsubscribe from ipcEvent$
   // TODO check if this works as expected
   private _electronIdleTime$: Observable<number> = IS_ELECTRON ? ipcIdleTime$ : EMPTY;
-  private _isFocusSessionRunning$ = this._store.select(selectIsFocusSessionRunning);
+  private _isFocusSessionRunning$ = this._store.select(selectIsSessionRunning);
 
   private _triggerIdleApis$ = IS_ELECTRON
     ? this._electronIdleTime$

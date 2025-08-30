@@ -6,7 +6,7 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { selectFocusSessionDuration } from '../store/focus-mode.selectors';
+import { selectTimeDuration } from '../store/focus-mode.selectors';
 import {
   setFocusSessionDuration,
   startFocusPreparation,
@@ -44,7 +44,7 @@ export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDes
   private readonly _focusModeService = inject(FocusModeService);
 
   T: typeof T = T;
-  sessionDuration$ = this._store.select(selectFocusSessionDuration);
+  sessionDuration$ = this._store.select(selectTimeDuration);
   task$ = this._store.select(selectCurrentTask);
   updatedFocusModeDuration?: number;
   focusTimeout = 0;
