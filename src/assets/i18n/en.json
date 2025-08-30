@@ -1759,7 +1759,7 @@
       "IS_PLAY_TICK": "Play tick sound every second",
       "IS_STOP_TRACKING_ON_BREAK": "Stop time tracking for task on break",
       "LONGER_BREAK_DURATION": "Duration of longer breaks",
-      "TITLE": "Pomodoro Timer"
+      "TITLE": "Pomodoro Timer (legacy)"
     },
     "REMINDER": {
       "COUNTDOWN_DURATION": "Show banner X before the actual reminder",
