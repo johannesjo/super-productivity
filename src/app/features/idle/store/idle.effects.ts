@@ -233,11 +233,7 @@ export class IdleEffects {
 
           if (trackItems.length === 0 && simpleCounterToggleBtnsWhenNoTrackItems) {
             if (wasFocusSessionRunning) {
-              this._store.dispatch(
-                focusSessionDone({
-                  isResetPlannedSessionDuration: true,
-                }),
-              );
+              this._store.dispatch(focusSessionDone());
               this._store.dispatch(showFocusOverlay());
             }
 
@@ -294,11 +290,7 @@ export class IdleEffects {
               );
             });
             if (wasFocusSessionRunning) {
-              this._store.dispatch(
-                focusSessionDone({
-                  isResetPlannedSessionDuration: true,
-                }),
-              );
+              this._store.dispatch(focusSessionDone());
               this._store.dispatch(showFocusOverlay());
             }
           } else if (wasFocusSessionRunning) {

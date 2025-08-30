@@ -4,12 +4,13 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FocusModeService } from '../focus-mode.service';
 import { MsToClockStringPipe } from '../../../ui/duration/ms-to-clock-string.pipe';
 import { Store } from '@ngrx/store';
-import { skipBreak } from '../store/focus-mode.actions';
+import { completeBreak, skipBreak } from '../store/focus-mode.actions';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
   selector: 'focus-mode-break',
   standalone: true,
-  imports: [MatButtonModule, MatProgressSpinnerModule, MsToClockStringPipe],
+  imports: [MatButtonModule, MatProgressSpinnerModule, MsToClockStringPipe, MatIcon],
   templateUrl: './focus-mode-break.component.html',
   styleUrl: './focus-mode-break.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -21,7 +22,9 @@ export class FocusModeBreakComponent {
   readonly remainingTime = computed(() =>
     Math.max(
       0,
-      this.focusModeService.breakDuration() - this.focusModeService.breakTimeElapsed(),
+      // TODO restore
+      2000 - this.focusModeService.breakTimeElapsed(),
+      // this.focusModeService.breakDuration() - this.focusModeService.breakTimeElapsed(),
     ),
   );
 
@@ -38,5 +41,9 @@ export class FocusModeBreakComponent {
 
   skipBreak(): void {
     this._store.dispatch(skipBreak());
+  }
+
+  completeBreak(): void {
+    this._store.dispatch(completeBreak());
   }
 }

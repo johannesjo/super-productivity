@@ -16,11 +16,22 @@
 
   <p class="break-message">Take a moment to relax</p>
 
-  <button
-    mat-raised-button
-    color="primary"
-    (click)="skipBreak()"
-  >
-    Skip Break
-  </button>
+  @if (remainingTime() > 0) {
+    <button
+      mat-stroked-button
+      (click)="skipBreak()"
+    >
+      <mat-icon>skip_next</mat-icon>
+      Skip Break
+    </button>
+  } @else {
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="completeBreak()"
+    >
+      <mat-icon>play_arrow</mat-icon>
+      Continue to next Session
+    </button>
+  }
 </div>

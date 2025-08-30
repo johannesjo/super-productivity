@@ -9,6 +9,7 @@ import { Task } from '../../tasks/task.model';
 import { TaskService } from '../../tasks/task.service';
 import { Store } from '@ngrx/store';
 import {
+  focusSessionDone,
   setFocusSessionActivePage,
   setFocusSessionDuration,
   startFocusSession,
@@ -37,6 +38,7 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
   cfg = this._focusModeService.cfg;
   pomodoroCfg = this._focusModeService.pomodoroCfg;
   currentCycle = this._focusModeService.currentCycle;
+  isFocusSessionRunning = this._focusModeService.isFocusSessionRunning;
 
   selectedTask: string | Task | undefined;
   initialTask = this.taskService.firstStartableTask;
@@ -59,6 +61,10 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
     this.selectedTask = taskOrNewTask;
   }
 
+  completeSession(): void {
+    this._store.dispatch(focusSessionDone());
+  }
+
   onSubmit($event: SubmitEvent): void {
     $event.preventDefault();
     if (!this.selectedTask) return;
@@ -79,7 +85,9 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
 
     if (mode === FocusModeMode.Pomodoro) {
       // Set duration from config and skip duration selection
-      const duration = this.pomodoroCfg()?.duration || 25 * 60 * 1000;
+      // TODO revert
+      // const duration = this.pomodoroCfg()?.duration || 25 * 60 * 1000;
+      const duration = 4000;
       this._store.dispatch(setFocusSessionDuration({ focusSessionDuration: duration }));
       nextPage = skipPreparation ? FocusModePage.Main : FocusModePage.Preparation;
     } else if (mode === FocusModeMode.Flowtime) {

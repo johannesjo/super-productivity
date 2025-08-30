@@ -2,19 +2,19 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import {
   cancelFocusSession,
+  completeBreak,
   focusSessionDone,
   focusTaskDone,
+  incrementCycle,
   pauseFocusSession,
+  setBreakTimeElapsed,
   setFocusModeMode,
   setFocusSessionActivePage,
   setFocusSessionDuration,
   setFocusSessionTimeElapsed,
   showFocusOverlay,
-  startBreak,
-  setBreakTimeElapsed,
-  completeBreak,
   skipBreak,
-  incrementCycle,
+  startBreak,
   startFocusSession,
 } from './focus-mode.actions';
 import { GlobalConfigService } from '../../config/global-config.service';
@@ -33,11 +33,11 @@ import {
 import { EMPTY, Observable, of } from 'rxjs';
 import { TaskService } from '../../tasks/task.service';
 import {
+  selectFocusModeCurrentCycle,
+  selectFocusModeIsBreak,
   selectFocusModeMode,
   selectFocusSessionDuration,
   selectIsFocusSessionRunning,
-  selectFocusModeIsBreak,
-  selectFocusModeCurrentCycle,
 } from './focus-mode.selectors';
 import { Store } from '@ngrx/store';
 import { unsetCurrentTask } from '../../tasks/store/task.actions';
@@ -99,7 +99,7 @@ export class FocusModeEffects {
             setFocusSessionTimeElapsed({
               focusSessionTimeElapsed: currentSessionTime,
             })
-          : focusSessionDone({ isResetPlannedSessionDuration: true });
+          : focusSessionDone();
       }),
     );
   });
@@ -125,18 +125,6 @@ export class FocusModeEffects {
         ),
       ),
     { dispatch: false },
-  );
-
-  // Handle task completion for pomodoro mode - show task selection instead of auto-starting break
-  handleTaskDoneForPomodoro$ = createEffect(() =>
-    this._actions$.pipe(
-      ofType(focusTaskDone),
-      withLatestFrom(this._store.select(selectFocusModeMode)),
-      filter(([_, mode]) => mode === FocusModeMode.Pomodoro),
-      map(() =>
-        setFocusSessionActivePage({ focusActivePage: FocusModePage.TaskSelection }),
-      ),
-    ),
   );
 
   // TODO check if needed

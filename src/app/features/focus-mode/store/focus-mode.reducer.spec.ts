@@ -1,22 +1,22 @@
 import { focusModeReducer, initialState, State } from './focus-mode.reducer';
 import {
   cancelFocusSession,
+  completeBreak,
   focusSessionDone,
   hideFocusOverlay,
+  incrementCycle,
   pauseFocusSession,
+  resetCycles,
+  setBreakTimeElapsed,
   setFocusModeMode,
   setFocusSessionActivePage,
   setFocusSessionDuration,
   setFocusSessionTimeElapsed,
   showFocusOverlay,
+  skipBreak,
+  startBreak,
   startFocusSession,
   unPauseFocusSession,
-  startBreak,
-  setBreakTimeElapsed,
-  skipBreak,
-  completeBreak,
-  incrementCycle,
-  resetCycles,
 } from './focus-mode.actions';
 import { FocusModeMode, FocusModePage } from '../focus-mode.const';
 
@@ -113,14 +113,14 @@ describe('FocusMode Reducer', () => {
   });
 
   describe('focusSessionDone', () => {
-    it('should reset session when isResetPlannedSessionDuration is true', () => {
+    it('should reset session ', () => {
       const stateWithSession: State = {
         ...initialState,
         isFocusSessionRunning: true,
         focusSessionTimeElapsed: 25 * 60 * 1000,
         focusSessionDuration: 25 * 60 * 1000,
       };
-      const action = focusSessionDone({ isResetPlannedSessionDuration: true });
+      const action = focusSessionDone();
       const state = focusModeReducer(stateWithSession, action);
 
       expect(state.isFocusSessionRunning).toBe(false);
@@ -129,23 +129,6 @@ describe('FocusMode Reducer', () => {
       expect(state.focusSessionDuration).toBe(25 * 60 * 1000);
       expect(state.lastSessionTotalDuration).toBe(25 * 60 * 1000);
       expect(state.focusSessionTimeElapsed).toBe(0);
-    });
-
-    it('should not reset session when isResetPlannedSessionDuration is false', () => {
-      const stateWithSession: State = {
-        ...initialState,
-        isFocusSessionRunning: true,
-        focusSessionTimeElapsed: 15 * 60 * 1000,
-        focusSessionDuration: 25 * 60 * 1000,
-      };
-      const action = focusSessionDone({ isResetPlannedSessionDuration: false });
-      const state = focusModeReducer(stateWithSession, action);
-
-      expect(state.isFocusSessionRunning).toBe(false);
-      expect(state.isFocusOverlayShown).toBe(true);
-      expect(state.focusSessionActivePage).toBe(FocusModePage.SessionDone);
-      expect(state.focusSessionTimeElapsed).toBe(15 * 60 * 1000);
-      expect(state.focusSessionDuration).toBe(25 * 60 * 1000);
     });
   });
 

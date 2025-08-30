@@ -17,7 +17,6 @@ import {
 } from './store/focus-mode.selectors';
 import { selectFocusModeConfig } from '../config/store/global-config.reducer';
 import {
-  filter,
   map,
   mapTo,
   pairwise,
@@ -67,7 +66,8 @@ export class FocusModeService {
     this._actions$.pipe(ofType(cancelFocusSession), mapTo(0)),
     this._actions$.pipe(
       ofType(focusSessionDone),
-      filter(({ isResetPlannedSessionDuration }) => !!isResetPlannedSessionDuration),
+      // NOTE we always reset
+      // filter(({ isResetPlannedSessionDuration }) => !!isResetPlannedSessionDuration),
       mapTo(0),
     ),
     this._actions$.pipe(

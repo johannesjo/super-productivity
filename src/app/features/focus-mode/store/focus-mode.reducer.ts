@@ -1,22 +1,22 @@
 import { createReducer, on } from '@ngrx/store';
 import {
   cancelFocusSession,
+  completeBreak,
   focusSessionDone,
   hideFocusOverlay,
+  incrementCycle,
   pauseFocusSession,
+  resetCycles,
+  setBreakTimeElapsed,
   setFocusModeMode,
   setFocusSessionActivePage,
   setFocusSessionDuration,
   setFocusSessionTimeElapsed,
   showFocusOverlay,
+  skipBreak,
+  startBreak,
   startFocusSession,
   unPauseFocusSession,
-  startBreak,
-  setBreakTimeElapsed,
-  skipBreak,
-  completeBreak,
-  incrementCycle,
-  resetCycles,
 } from './focus-mode.actions';
 import { FocusModeMode, FocusModePage } from '../focus-mode.const';
 import { LS } from '../../../core/persistence/storage-keys.const';
@@ -96,19 +96,17 @@ export const focusModeReducer = createReducer<State>(
         : DEFAULT_FOCUS_SESSION_DURATION,
   })),
 
-  on(focusSessionDone, (state, { isResetPlannedSessionDuration }) => {
+  on(focusSessionDone, (state) => {
     return {
       ...state,
       isFocusSessionRunning: false,
       isFocusOverlayShown: true,
-      ...(isResetPlannedSessionDuration
-        ? {
-            focusSessionDuration: DEFAULT_FOCUS_SESSION_DURATION,
-            lastSessionTotalDuration: state.focusSessionTimeElapsed,
-            focusSessionTimeElapsed: 0,
-          }
-        : {}),
       focusSessionActivePage: FocusModePage.SessionDone,
+
+      // NOTE: we always reset on session done
+      focusSessionDuration: DEFAULT_FOCUS_SESSION_DURATION,
+      lastSessionTotalDuration: state.focusSessionTimeElapsed,
+      focusSessionTimeElapsed: 0,
     };
   }),
 

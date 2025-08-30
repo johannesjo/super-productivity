@@ -84,7 +84,7 @@ describe('FocusModeService', () => {
     });
 
     it('should reset to 0 when focusSessionDone with reset flag is dispatched', (done) => {
-      actions$.next(focusSessionDone({ isResetPlannedSessionDuration: true }));
+      actions$.next(focusSessionDone());
 
       service.currentSessionTime$.subscribe((time) => {
         expect(time).toBe(0);

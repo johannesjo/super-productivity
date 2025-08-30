@@ -18,11 +18,11 @@ import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachme
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { IssueService } from '../../issue/issue.service';
 import { Store } from '@ngrx/store';
-import { focusTaskDone } from '../store/focus-mode.actions';
+import { focusTaskDone, setFocusSessionActivePage } from '../store/focus-mode.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
-import { FocusModeMode } from '../focus-mode.const';
+import { FocusModeMode, FocusModePage } from '../focus-mode.const';
 import { ICAL_TYPE } from '../../issue/issue.const';
 import { TaskTitleComponent } from '../../../ui/task-title/task-title.component';
 import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-circle.component';
@@ -100,12 +100,6 @@ export class FocusModeMainComponent implements OnDestroy {
     take(1),
   );
 
-  autoRationProgress = computed(() => {
-    const timeElapsed = this.timeElapsed();
-    const percentOfFullMinute = (timeElapsed % 60000) / 60000;
-    return percentOfFullMinute * 100;
-  });
-
   private _onDestroy$ = new Subject<void>();
   private _dragEnterTarget?: HTMLElement;
 
@@ -174,6 +168,10 @@ export class FocusModeMainComponent implements OnDestroy {
 
   finishCurrentTask(): void {
     this._store.dispatch(focusTaskDone());
+    // always go to task selection afterward
+    this._store.dispatch(
+      setFocusSessionActivePage({ focusActivePage: FocusModePage.TaskSelection }),
+    );
     this._store.dispatch(
       TaskSharedActions.updateTask({
         task: {

@@ -27,10 +27,7 @@ export const unPauseFocusSession = createAction(
   props<{ idleTimeToAdd?: number }>(),
 );
 
-export const focusSessionDone = createAction(
-  '[FocusMode] Focus session done',
-  props<{ isResetPlannedSessionDuration?: boolean }>(),
-);
+export const focusSessionDone = createAction('[FocusMode] Focus session done');
 
 export const focusTaskDone = createAction('[FocusMode] Focus task done');
 

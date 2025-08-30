@@ -12,11 +12,31 @@
   </select-task>
   <br />
   <br />
-  <button
-    type="submit"
-    color="primary"
-    mat-raised-button
-  >
-    {{ T.F.FOCUS_MODE.NEXT | translate }}
-  </button>
+
+  @if (isFocusSessionRunning()) {
+    <button
+      type="button"
+      color="primary"
+      mat-raised-button
+    >
+      {{ T.F.FOCUS_MODE.NEXT | translate }}
+    </button>
+
+    <button
+      type="button"
+      color="primary"
+      mat-raised-button
+      (click)="completeSession()"
+    >
+      Complete Session
+    </button>
+  } @else {
+    <button
+      type="submit"
+      color="primary"
+      mat-raised-button
+    >
+      {{ T.F.FOCUS_MODE.NEXT | translate }}
+    </button>
+  }
 </form>
