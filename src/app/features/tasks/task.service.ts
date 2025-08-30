@@ -1094,6 +1094,13 @@ export class TaskService {
       ...additional,
     };
 
+    if (!d1.projectId) {
+      d1.projectId =
+        workContextType === WorkContextType.PROJECT
+          ? workContextId
+          : this._globalConfigService.cfg()?.misc.defaultProjectId || INBOX_PROJECT.id;
+    }
+
     // Validate that we have a valid task before returning
     typia.assert<Task>(d1);
 
