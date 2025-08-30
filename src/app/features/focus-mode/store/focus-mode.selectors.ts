@@ -48,13 +48,23 @@ export const selectIsLongBreak = createSelector(
 );
 
 // Timer selectors
-export const selectTimeElapsed = createSelector(selectPhase, (phase) =>
-  hasTimer(phase) ? phase.timer.elapsed : 0,
-);
+export const selectTimeElapsed = createSelector(selectFocusModeState, (state) => {
+  // Use sessionTimer if we're in an active session
+  if (state.isSessionRunning && state.sessionTimer) {
+    return state.sessionTimer.elapsed;
+  }
+  // Otherwise use phase timer if available
+  return hasTimer(state.phase) ? state.phase.timer.elapsed : 0;
+});
 
-export const selectTimeDuration = createSelector(selectPhase, (phase) =>
-  hasTimer(phase) ? phase.timer.duration : 0,
-);
+export const selectTimeDuration = createSelector(selectFocusModeState, (state) => {
+  // Use sessionTimer if we're in an active session
+  if (state.isSessionRunning && state.sessionTimer) {
+    return state.sessionTimer.duration;
+  }
+  // Otherwise use phase timer if available
+  return hasTimer(state.phase) ? state.phase.timer.duration : 0;
+});
 
 export const selectTimeRemaining = createSelector(
   selectTimeElapsed,
@@ -68,7 +78,11 @@ export const selectProgress = createSelector(
   (elapsed, duration) => (duration > 0 ? (elapsed / duration) * 100 : 0),
 );
 
-export const selectIsRunning = createSelector(
-  selectPhase,
-  (phase) => hasTimer(phase) && !phase.timer.isPaused,
-);
+export const selectIsRunning = createSelector(selectFocusModeState, (state) => {
+  // Check sessionTimer if in active session
+  if (state.isSessionRunning && state.sessionTimer) {
+    return !state.sessionTimer.isPaused;
+  }
+  // Otherwise check phase timer
+  return hasTimer(state.phase) && !state.phase.timer.isPaused;
+});

@@ -88,27 +88,34 @@ export const focusModeReducer = createReducer(
     phase: { type: FocusModePhaseType.Preparation as const },
   })),
 
-  on(a.startFocusSession, (state, { duration }) => ({
-    ...state,
-    isSessionRunning: true,
-    phase: {
-      type: FocusModePhaseType.Session as const,
-      timer: createTimer(duration || DEFAULT_SESSION_DURATION),
-    },
-  })),
+  on(a.startFocusSession, (state, { duration }) => {
+    const timer = createTimer(duration || DEFAULT_SESSION_DURATION);
+    return {
+      ...state,
+      isSessionRunning: true,
+      sessionTimer: timer,
+      phase: {
+        type: FocusModePhaseType.Session as const,
+        timer,
+      },
+    };
+  }),
 
   on(a.pauseFocusSession, (state) => {
     if (state.phase.type !== FocusModePhaseType.Session) return state;
 
+    const pausedTimer = {
+      ...state.phase.timer,
+      isPaused: true,
+      elapsed: state.phase.timer.elapsed,
+    };
+
     return {
       ...state,
+      sessionTimer: pausedTimer,
       phase: {
         ...state.phase,
-        timer: {
-          ...state.phase.timer,
-          isPaused: true,
-          elapsed: state.phase.timer.elapsed,
-        },
+        timer: pausedTimer,
       },
     };
   }),
@@ -116,15 +123,18 @@ export const focusModeReducer = createReducer(
   on(a.unPauseFocusSession, (state, { idleTime = 0 }) => {
     if (state.phase.type !== FocusModePhaseType.Session) return state;
 
+    const unpausedTimer = {
+      ...state.phase.timer,
+      isPaused: false,
+      startedAt: Date.now() - state.phase.timer.elapsed + idleTime,
+    };
+
     return {
       ...state,
+      sessionTimer: unpausedTimer,
       phase: {
         ...state.phase,
-        timer: {
-          ...state.phase.timer,
-          isPaused: false,
-          startedAt: Date.now() - state.phase.timer.elapsed + idleTime,
-        },
+        timer: unpausedTimer,
       },
     };
   }),
@@ -135,6 +145,7 @@ export const focusModeReducer = createReducer(
     return {
       ...state,
       isSessionRunning: false,
+      sessionTimer: undefined,
       phase: { type: FocusModePhaseType.SessionDone as const, totalDuration: duration },
       lastSessionDuration: duration,
     };
@@ -143,6 +154,7 @@ export const focusModeReducer = createReducer(
   on(a.cancelFocusSession, (state) => ({
     ...state,
     isSessionRunning: false,
+    sessionTimer: undefined,
     phase: { type: FocusModePhaseType.TaskSelection as const },
     isOverlayShown: false,
   })),
@@ -156,6 +168,7 @@ export const focusModeReducer = createReducer(
     return {
       ...state,
       isSessionRunning: false,
+      sessionTimer: undefined,
       phase: {
         type: FocusModePhaseType.Break as const,
         timer: createTimer(duration),
@@ -171,37 +184,77 @@ export const focusModeReducer = createReducer(
 
   // Timer updates
   on(a.tick, (state) => {
-    if (!hasTimer(state.phase)) return state;
+    // Update sessionTimer if we have an active session
+    if (state.isSessionRunning && state.sessionTimer) {
+      const updatedSessionTimer = updateTimer(state.sessionTimer);
 
-    const updatedTimer = updateTimer(state.phase.timer);
+      // If phase has a timer, update both
+      if (hasTimer(state.phase)) {
+        const updatedPhaseTimer = updateTimer(state.phase.timer);
 
-    // Check if timer completed
-    if (updatedTimer.duration > 0 && updatedTimer.elapsed >= updatedTimer.duration) {
-      if (state.phase.type === FocusModePhaseType.Session) {
+        // Check if timer completed
+        if (
+          updatedPhaseTimer.duration > 0 &&
+          updatedPhaseTimer.elapsed >= updatedPhaseTimer.duration
+        ) {
+          if (state.phase.type === FocusModePhaseType.Session) {
+            return {
+              ...state,
+              isSessionRunning: false,
+              sessionTimer: undefined,
+              phase: {
+                type: FocusModePhaseType.SessionDone as const,
+                totalDuration: updatedPhaseTimer.elapsed,
+              },
+              lastSessionDuration: updatedPhaseTimer.elapsed,
+            };
+          }
+        }
+
         return {
           ...state,
-          isSessionRunning: false,
+          sessionTimer: updatedSessionTimer,
           phase: {
-            type: FocusModePhaseType.SessionDone as const,
-            totalDuration: updatedTimer.elapsed,
-          },
-          lastSessionDuration: updatedTimer.elapsed,
+            ...state.phase,
+            timer: updatedPhaseTimer,
+          } as any,
         };
-      } else if (state.phase.type === FocusModePhaseType.Break) {
+      } else {
+        // Phase doesn't have timer (e.g., TaskSelection during active session)
+        // Just update sessionTimer
+        return {
+          ...state,
+          sessionTimer: updatedSessionTimer,
+        };
+      }
+    }
+
+    // Not in session, handle break timer
+    if (hasTimer(state.phase)) {
+      const updatedTimer = updateTimer(state.phase.timer);
+
+      // Check if break timer completed
+      if (
+        state.phase.type === FocusModePhaseType.Break &&
+        updatedTimer.duration > 0 &&
+        updatedTimer.elapsed >= updatedTimer.duration
+      ) {
         return {
           ...state,
           phase: { type: FocusModePhaseType.BreakDone as const },
         };
       }
+
+      return {
+        ...state,
+        phase: {
+          ...state.phase,
+          timer: updatedTimer,
+        } as any,
+      };
     }
 
-    return {
-      ...state,
-      phase: {
-        ...state.phase,
-        timer: updatedTimer,
-      } as any,
-    };
+    return state;
   }),
 
   // Cycle management
