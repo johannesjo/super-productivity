@@ -19,9 +19,9 @@ import { playSound } from '../../../util/play-sound';
 import { IS_ELECTRON } from '../../../app.constants';
 import { unsetCurrentTask } from '../../tasks/store/task.actions';
 import { openIdleDialog } from '../../idle/store/idle.actions';
-import { FocusModeMode } from '../focus-mode.const';
 import { LS } from '../../../core/persistence/storage-keys.const';
 import { selectFocusModeConfig } from '../../config/store/global-config.reducer';
+import { FocusModeMode } from '../focus-mode.model';
 
 const SESSION_DONE_SOUND = 'positive.ogg';
 

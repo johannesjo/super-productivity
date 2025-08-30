@@ -16,7 +16,6 @@ import {
   startFocusPreparation,
   startFocusSession,
 } from '../store/focus-mode.actions';
-import { FocusModeMode } from '../focus-mode.const';
 import { T } from 'src/app/t.const';
 import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
@@ -24,7 +23,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { SelectTaskComponent } from '../../tasks/select-task/select-task.component';
 import { FocusModeService } from '../focus-mode.service';
 import { FocusModeStrategyFactory } from '../focus-mode-strategies';
-import { FocusModePhaseType } from '../focus-mode.model';
+import { FocusModeMode, FocusModePhaseType } from '../focus-mode.model';
 import { MatIcon } from '@angular/material/icon';
 import { MsToMinuteClockStringPipe } from '../../../ui/duration/ms-to-minute-clock-string.pipe';
 import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-circle.component';

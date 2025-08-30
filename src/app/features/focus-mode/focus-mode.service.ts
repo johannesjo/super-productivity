@@ -6,9 +6,8 @@ import * as actions from './store/focus-mode.actions';
 import * as selectors from './store/focus-mode.selectors';
 import { GlobalConfigService } from '../config/global-config.service';
 import { selectFocusModeConfig } from '../config/store/global-config.reducer';
-import { FocusModePage } from './focus-mode.const';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
-import { FocusModePhaseType } from './focus-mode.model';
+import { FocusModePage, FocusModePhaseType } from './focus-mode.model';
 
 @Injectable({
   providedIn: 'root',

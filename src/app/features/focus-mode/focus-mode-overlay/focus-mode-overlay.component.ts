@@ -4,7 +4,6 @@ import { Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
-import { FocusModeMode, FocusModePage } from '../focus-mode.const';
 import { Store } from '@ngrx/store';
 import { selectFocusSessionTimeElapsed } from '../store/focus-mode.selectors';
 import {
@@ -36,6 +35,7 @@ import { BannerId } from '../../../core/banner/banner.model';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { FocusModeService } from '../focus-mode.service';
+import { FocusModeMode, FocusModePage } from '../focus-mode.model';
 
 @Component({
   selector: 'focus-mode-overlay',

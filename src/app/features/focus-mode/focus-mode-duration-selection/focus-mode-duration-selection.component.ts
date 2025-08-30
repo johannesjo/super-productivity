@@ -13,7 +13,6 @@ import {
   startFocusSession,
   selectFocusTask,
 } from '../store/focus-mode.actions';
-import { FocusModeMode } from '../focus-mode.const';
 import { selectCurrentTask } from '../../tasks/store/task.selectors';
 import { Subject } from 'rxjs';
 import { FormsModule } from '@angular/forms';
@@ -24,6 +23,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { T } from '../../../t.const';
 import { FocusModeService } from '../focus-mode.service';
 import { MatIcon } from '@angular/material/icon';
+import { FocusModeMode } from '../focus-mode.model';
 
 @Component({
   selector: 'focus-mode-duration-selection',

@@ -1,6 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { FocusModeMode } from './focus-mode.const';
-import { FocusModeStrategy, FocusModePhaseType } from './focus-mode.model';
+import { FocusModeStrategy, FocusModePhaseType, FocusModeMode } from './focus-mode.model';
 import { GlobalConfigService } from '../config/global-config.service';
 
 @Injectable({ providedIn: 'root' })

@@ -1,5 +1,3 @@
-import { FocusModeMode } from './focus-mode.const';
-
 // Unified timer state
 export interface TimerState {
   startedAt: number | null;
@@ -30,6 +28,21 @@ export type FocusModePhase =
   | { type: FocusModePhaseType.SessionDone; totalDuration: number }
   | { type: FocusModePhaseType.Break; timer: TimerState; isLong: boolean }
   | { type: FocusModePhaseType.BreakDone };
+
+export enum FocusModePage {
+  Main = 'Main',
+  SessionDone = 'SessionDone',
+  TaskSelection = 'TaskSelection',
+  DurationSelection = 'DurationSelection',
+  Preparation = 'Preparation',
+  Break = 'Break',
+}
+
+export enum FocusModeMode {
+  'Flowtime' = 'Flowtime',
+  'Pomodoro' = 'Pomodoro',
+  'Countdown' = 'Countdown',
+}
 
 // Simplified state structure
 export interface FocusModeState {

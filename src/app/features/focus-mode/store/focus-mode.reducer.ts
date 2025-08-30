@@ -5,8 +5,8 @@ import {
   TimerState,
   hasTimer,
   FocusModePhaseType,
+  FocusModeMode,
 } from '../focus-mode.model';
-import { FocusModeMode } from '../focus-mode.const';
 import { LS } from '../../../core/persistence/storage-keys.const';
 
 const DEFAULT_SESSION_DURATION = 25 * 60 * 1000;

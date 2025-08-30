@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { FocusModeMode, FocusModePage } from '../focus-mode.const';
+import { FocusModeMode, FocusModePage } from '../focus-mode.model';
 
 // Core actions
 export const tick = createAction('[FocusMode] Timer Tick');
