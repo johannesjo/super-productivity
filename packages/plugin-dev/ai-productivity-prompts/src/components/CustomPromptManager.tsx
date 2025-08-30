@@ -1,6 +1,11 @@
 import { Component, createSignal, For, onMount } from 'solid-js';
 import { CustomPrompt } from '../types';
 import { CustomPromptStore } from '../customPromptStore';
+import { truncateText } from '../utils';
+import { Button } from './shared/Button';
+import { LoadingSpinner } from './shared/LoadingSpinner';
+import { EmptyState } from './shared/EmptyState';
+import { Card } from './shared/Card';
 
 interface CustomPromptManagerProps {
   onSelectPrompt: (prompt: CustomPrompt, index: number) => void;
@@ -10,7 +15,6 @@ interface CustomPromptManagerProps {
 const CustomPromptManager: Component<CustomPromptManagerProps> = (props) => {
   const [prompts, setPrompts] = createSignal<CustomPrompt[]>([]);
   const [isLoading, setIsLoading] = createSignal<boolean>(false);
-
   const store = CustomPromptStore.getInstance();
 
   const loadPrompts = async () => {
@@ -34,95 +38,90 @@ const CustomPromptManager: Component<CustomPromptManagerProps> = (props) => {
 
     try {
       await store.deletePrompt(index);
-      await loadPrompts(); // Reload prompts
+      await loadPrompts();
     } catch (error) {
       console.error('Error deleting prompt:', error);
       alert('Error deleting prompt. Please try again.');
     }
   };
 
-  const getPromptPreview = (prompt: CustomPrompt) => {
-    if (!prompt || !prompt.template) {
-      return 'No preview available';
-    }
-    const lines = prompt.template.split('\n');
-    const firstLine = lines[0]?.trim() || '';
-    return firstLine.length > 80 ? firstLine.substring(0, 80) + '...' : firstLine;
-  };
+  const CreatePromptButton = () => (
+    <Button onClick={() => props.onEditPrompt(null)}>➕ Add Custom Prompt</Button>
+  );
 
-  onMount(() => {
-    loadPrompts();
-  });
+  onMount(loadPrompts);
 
   return (
     <div class="page-fade">
       <div class="custom-prompts-header">
         <h2 class="text-primary">My Custom Prompts</h2>
-        <button
-          class="action-button primary"
-          onClick={() => props.onEditPrompt(null)}
-        >
-          ➕ Add Custom Prompt
-        </button>
+        <CreatePromptButton />
       </div>
 
       {isLoading() ? (
-        <div class="loading-container">
-          <p class="text-muted">Loading custom prompts...</p>
-        </div>
+        <LoadingSpinner message="Loading custom prompts..." />
       ) : prompts().length === 0 ? (
-        <div class="empty-state">
-          <p class="text-muted">No custom prompts yet.</p>
-          <p class="text-muted">Create your first custom prompt to get started!</p>
-          <button
-            class="action-button primary"
-            onClick={() => props.onEditPrompt(null)}
-          >
-            Create First Prompt
-          </button>
-        </div>
+        <EmptyState
+          title="No custom prompts yet."
+          message="Create your first custom prompt to get started!"
+          action={<CreatePromptButton />}
+        />
       ) : (
         <div class="custom-prompts-list">
           <For each={prompts()}>
             {(prompt, index) => (
-              <div class="custom-prompt-card card">
-                <div class="custom-prompt-header">
-                  <h3 class="prompt-title">{prompt.title}</h3>
-                  <div class="prompt-actions">
-                    <button
-                      class="action-button secondary"
-                      onClick={() => props.onEditPrompt(prompt, index())}
-                      title="Edit prompt"
-                    >
-                      ✏️
-                    </button>
-                    <button
-                      class="action-button secondary"
-                      onClick={() => handleDeletePrompt(index())}
-                      title="Delete prompt"
-                    >
-                      🗑️
-                    </button>
-                  </div>
-                </div>
-
-                <div class="prompt-preview">
-                  <p class="text-muted">{getPromptPreview(prompt)}</p>
-                </div>
-
-                <div class="prompt-card-actions">
-                  <button
-                    class="action-button primary"
-                    onClick={() => props.onSelectPrompt(prompt, index())}
-                  >
-                    Use This Prompt
-                  </button>
-                </div>
-              </div>
+              <PromptCard
+                prompt={prompt}
+                index={index()}
+                onSelect={() => props.onSelectPrompt(prompt, index())}
+                onEdit={() => props.onEditPrompt(prompt, index())}
+                onDelete={() => handleDeletePrompt(index())}
+              />
             )}
           </For>
         </div>
       )}
+    </div>
+  );
+};
+
+// Extracted PromptCard component
+const PromptCard: Component<{
+  prompt: CustomPrompt;
+  index: number;
+  onSelect: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}> = (props) => {
+  return (
+    <div class="custom-prompt-card card">
+      <div class="custom-prompt-header">
+        <h3 class="prompt-title">{props.prompt.title}</h3>
+        <div class="prompt-actions">
+          <Button
+            variant="secondary"
+            onClick={props.onEdit}
+            title="Edit prompt"
+          >
+            ✏️
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={props.onDelete}
+            title="Delete prompt"
+          >
+            🗑️
+          </Button>
+        </div>
+      </div>
+
+      <div class="prompt-preview">
+        <p class="text-muted">{truncateText(props.prompt.template)}</p>
+      </div>
+
+      <div class="prompt-card-actions">
+        <Button onClick={props.onSelect}>Use This Prompt</Button>
+      </div>
     </div>
   );
 };

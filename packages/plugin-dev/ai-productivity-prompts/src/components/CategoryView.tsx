@@ -1,5 +1,6 @@
 import { Component, For } from 'solid-js';
 import { PromptCategory } from '../types';
+import { Card } from './shared/Card';
 
 interface CategoryViewProps {
   category: PromptCategory;
@@ -18,12 +19,12 @@ const CategoryView: Component<CategoryViewProps> = (props) => {
       <div class="prompt-list">
         <For each={props.category.prompts}>
           {(prompt) => (
-            <button
-              class="prompt-item card card-clickable"
+            <Card
               onClick={() => props.onSelectPrompt(prompt)}
+              class="prompt-item"
             >
               <h4 class="prompt-title">{prompt.title}</h4>
-            </button>
+            </Card>
           )}
         </For>
       </div>

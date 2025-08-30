@@ -1,6 +1,16 @@
 import { Component, createSignal, Show, For, onMount } from 'solid-js';
 import { PromptCategory } from '../types';
-import { renderPrompt } from '../utils';
+import {
+  renderPrompt,
+  formatTasksAsMarkdown,
+  copyToClipboard,
+  createChatGPTUrl,
+  isValidProjectSelection,
+} from '../utils';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useTaskData } from '../hooks/useApi';
+import { Button } from './shared/Button';
+import { LoadingSpinner } from './shared/LoadingSpinner';
 
 interface SelectedPrompt {
   category: PromptCategory;
@@ -12,177 +22,43 @@ interface PromptViewProps {
   onUpdatePrompt: (prompt: string) => void;
 }
 
+const TASK_SELECTION_KEY = 'ai-productivity-task-selection';
+
 const PromptView: Component<PromptViewProps> = (props) => {
-  const TASK_SELECTION_KEY = 'ai-productivity-task-selection';
-
-  // Load saved selection from localStorage or default to 'none'
-  const getSavedSelection = () => {
-    try {
-      return localStorage.getItem(TASK_SELECTION_KEY) || 'none';
-    } catch {
-      return 'none';
-    }
-  };
-
-  const [taskSelection, setTaskSelection] = createSignal<string>(getSavedSelection());
+  const [taskSelection, setTaskSelection] = useLocalStorage(TASK_SELECTION_KEY, 'none');
   const [taskCounts, setTaskCounts] = createSignal<Record<string, number>>({});
   const [taskPreviews, setTaskPreviews] = createSignal<Record<string, string[]>>({});
   const [projects, setProjects] = createSignal<Array<{ id: string; title: string }>>([]);
-  const [isLoadingTasks, setIsLoadingTasks] = createSignal<boolean>(false);
   const [generatedPrompt, setGeneratedPrompt] = createSignal<string>('');
+  const [copyButtonText, setCopyButtonText] = createSignal('📋 Copy to clipboard');
 
-  // Save selection whenever it changes
-  const updateTaskSelection = (newSelection: string) => {
-    setTaskSelection(newSelection);
-    try {
-      localStorage.setItem(TASK_SELECTION_KEY, newSelection);
-    } catch (error) {
-      console.error('Failed to save task selection:', error);
-    }
-  };
+  const { isLoading, loadTaskCounts, getTasksForSelection } = useTaskData();
 
-  const loadTaskCounts = async () => {
-    setIsLoadingTasks(true);
-    const pluginAPI = (window as any).PluginAPI;
-    const counts: Record<string, number> = {};
-    const previews: Record<string, string[]> = {};
-
-    if (pluginAPI) {
-      try {
-        // Get all tasks, current context tasks, and projects
-        const [allTasks, contextTasks, allProjects] = await Promise.all([
-          pluginAPI.getTasks?.(),
-          pluginAPI.getCurrentContextTasks?.(),
-          pluginAPI.getAllProjects?.(),
-        ]);
-
-        if (allTasks) {
-          const undoneTasks = allTasks.filter((task: any) => !task.isDone);
-          counts.all = undoneTasks.length;
-          previews.all = undoneTasks.map((task: any) => task.title);
-
-          // Today's tasks: undone tasks with time spent today or created today
-          const today = new Date();
-          const todayStr =
-            today.getFullYear() +
-            '-' +
-            String(today.getMonth() + 1).padStart(2, '0') +
-            '-' +
-            String(today.getDate()).padStart(2, '0');
-
-          const todayTasks = undoneTasks.filter((task: any) => {
-            // Check if task has time spent today
-            if (task.timeSpentOnDay && task.timeSpentOnDay[todayStr] > 0) {
-              return true;
-            }
-
-            // Check if task was created today
-            const createdToday = new Date(task.created);
-            return createdToday.toDateString() === today.toDateString();
-          });
-
-          counts.today = todayTasks.length;
-          previews.today = todayTasks.map((task: any) => task.title);
-
-          // Group tasks by project
-          if (allProjects) {
-            const projectList = allProjects.filter((project: any) => !project.isArchived);
-            setProjects(
-              projectList.map((project: any) => ({
-                id: project.id,
-                title: project.title,
-              })),
-            );
-
-            projectList.forEach((project: any) => {
-              const projectTasks = undoneTasks.filter(
-                (task: any) => task.projectId === project.id,
-              );
-              counts[`project-${project.id}`] = projectTasks.length;
-              previews[`project-${project.id}`] = projectTasks.map(
-                (task: any) => task.title,
-              );
-            });
-          }
-        }
-
-        if (contextTasks) {
-          const undoneContextTasks = contextTasks.filter((task: any) => !task.isDone);
-          counts.context = undoneContextTasks.length;
-          previews.context = undoneContextTasks.map((task: any) => task.title);
-        }
-      } catch (error) {
-        console.log('Could not fetch task counts:', error);
-      }
-    }
-
+  const loadAllTaskData = async () => {
+    const { counts, previews, projects: loadedProjects } = await loadTaskCounts();
     setTaskCounts(counts);
     setTaskPreviews(previews);
-    setIsLoadingTasks(false);
+    setProjects(loadedProjects);
+  };
+
+  const validateAndUpdateSelection = () => {
+    const currentSelection = taskSelection();
+    if (!isValidProjectSelection(currentSelection, projects())) {
+      setTaskSelection('none');
+    }
   };
 
   const regeneratePrompt = async () => {
     const prompt = props.selectedPrompt?.prompt;
     if (!prompt) return;
 
-    const pluginAPI = (window as any).PluginAPI;
     let tasksMd = '';
+    const selection = taskSelection();
 
-    if (taskSelection() !== 'none' && pluginAPI) {
-      try {
-        let tasksToInclude: any[] = [];
-        const selection = taskSelection();
-
-        if (selection === 'today') {
-          // Get all tasks and filter for today
-          const allTasks = await pluginAPI.getTasks?.();
-          if (allTasks) {
-            const today = new Date();
-            const todayStr =
-              today.getFullYear() +
-              '-' +
-              String(today.getMonth() + 1).padStart(2, '0') +
-              '-' +
-              String(today.getDate()).padStart(2, '0');
-
-            tasksToInclude = allTasks.filter((task: any) => {
-              if (task.isDone) return false;
-
-              // Tasks with time spent today or created today
-              return (
-                (task.timeSpentOnDay && task.timeSpentOnDay[todayStr] > 0) ||
-                new Date(task.created).toDateString() === today.toDateString()
-              );
-            });
-          }
-        } else if (selection === 'context') {
-          // Get current context tasks
-          const contextTasks = await pluginAPI.getCurrentContextTasks?.();
-          if (contextTasks) {
-            tasksToInclude = contextTasks.filter((task: any) => !task.isDone);
-          }
-        } else if (selection === 'all') {
-          // Get all tasks
-          const allTasks = await pluginAPI.getTasks?.();
-          if (allTasks) {
-            tasksToInclude = allTasks.filter((task: any) => !task.isDone);
-          }
-        } else if (selection.startsWith('project-')) {
-          // Get tasks for specific project
-          const projectId = selection.replace('project-', '');
-          const allTasks = await pluginAPI.getTasks?.();
-          if (allTasks) {
-            tasksToInclude = allTasks.filter(
-              (task: any) => !task.isDone && task.projectId === projectId,
-            );
-          }
-        }
-
-        if (tasksToInclude.length > 0) {
-          tasksMd = tasksToInclude.map((task: any) => `- [ ] ${task.title}`).join('\n');
-        }
-      } catch (error) {
-        console.log('Could not fetch tasks:', error);
+    if (selection !== 'none') {
+      const tasks = await getTasksForSelection(selection);
+      if (tasks.length > 0) {
+        tasksMd = formatTasksAsMarkdown(tasks);
       }
     }
 
@@ -191,49 +67,18 @@ const PromptView: Component<PromptViewProps> = (props) => {
     props.onUpdatePrompt(rendered);
   };
 
-  // Initialize on mount
-  onMount(async () => {
-    await loadTaskCounts();
-
-    // Validate saved selection - check if it's still valid
-    const currentSelection = taskSelection();
-    if (currentSelection.startsWith('project-')) {
-      const projectId = currentSelection.replace('project-', '');
-      const projectExists = projects().some((p) => p.id === projectId);
-      if (!projectExists) {
-        // Project no longer exists, reset to 'none'
-        updateTaskSelection('none');
-      }
-    }
-
+  const handleTaskSelectionChange = async (newSelection: string) => {
+    setTaskSelection(newSelection);
     await regeneratePrompt();
-  });
-
-  const copyToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(generatedPrompt());
-      const button = document.querySelector('.copy-button') as HTMLButtonElement;
-      if (button) {
-        const originalText = button.textContent;
-        button.textContent = 'Copied!';
-        button.disabled = true;
-        setTimeout(() => {
-          button.textContent = originalText;
-          button.disabled = false;
-        }, 1500);
-      }
-    } catch (error) {
-      console.error('Failed to copy:', error);
-    }
   };
 
-  const getChatGPTUrl = () => {
-    const prompt = generatedPrompt().replace(/\./g, ' ').replace(/-/g, ' ');
-    const encodedPrompt = encodeURI(prompt);
-    const url = `https://chat.openai.com/?q=${encodedPrompt}`;
-    console.log('Generated ChatGPT URL:', url);
-    console.log('Prompt length:', prompt.length);
-    return url;
+  const handleCopyToClipboard = async () => {
+    const success = await copyToClipboard(generatedPrompt());
+
+    if (success) {
+      setCopyButtonText('Copied!');
+      setTimeout(() => setCopyButtonText('📋 Copy to clipboard'), 1500);
+    }
   };
 
   const getSelectionDisplayName = () => {
@@ -248,6 +93,12 @@ const PromptView: Component<PromptViewProps> = (props) => {
     return '';
   };
 
+  onMount(async () => {
+    await loadAllTaskData();
+    validateAndUpdateSelection();
+    await regeneratePrompt();
+  });
+
   return (
     <div class="page-fade">
       <div class="selected-prompt-header">
@@ -260,11 +111,7 @@ const PromptView: Component<PromptViewProps> = (props) => {
           <select
             class="task-dropdown"
             value={taskSelection()}
-            onChange={async (e) => {
-              const newSelection = e.target.value;
-              updateTaskSelection(newSelection);
-              await regeneratePrompt();
-            }}
+            onChange={(e) => handleTaskSelectionChange(e.target.value)}
           >
             <option value="none">No tasks</option>
             <option value="today">Today's tasks ({taskCounts().today || 0} tasks)</option>
@@ -283,49 +130,24 @@ const PromptView: Component<PromptViewProps> = (props) => {
             <option value="all">All tasks ({taskCounts().all || 0} tasks)</option>
           </select>
         </label>
+
         <div class="task-preview">
-          <Show when={isLoadingTasks()}>
-            <div class="task-loading">
-              <span class="task-count-info text-muted">Loading tasks...</span>
-            </div>
+          <Show when={isLoading()}>
+            <LoadingSpinner message="Loading tasks..." />
           </Show>
-          <Show when={!isLoadingTasks()}>
+
+          <Show when={!isLoading()}>
             <Show when={taskSelection() === 'none'}>
               <span class="task-count-info text-muted">No tasks will be included</span>
             </Show>
+
             <Show when={taskSelection() !== 'none'}>
-              <div class="task-preview-content">
-                <Show
-                  when={
-                    !taskPreviews()[taskSelection()] ||
-                    taskPreviews()[taskSelection()].length === 0
-                  }
-                >
-                  <span class="task-count-info text-muted">
-                    No tasks available for this selection
-                  </span>
-                </Show>
-                <Show
-                  when={
-                    taskPreviews()[taskSelection()] &&
-                    taskPreviews()[taskSelection()].length > 0
-                  }
-                >
-                  <div class="task-count-header">
-                    {getSelectionDisplayName()} ({taskCounts()[taskSelection()] || 0}):
-                  </div>
-                  <div class="task-preview-list">
-                    <For each={taskPreviews()[taskSelection()].slice(0, 3)}>
-                      {(taskTitle) => <div class="task-preview-item">• {taskTitle}</div>}
-                    </For>
-                    <Show when={taskPreviews()[taskSelection()].length > 3}>
-                      <div class="task-preview-more">
-                        ...and {taskPreviews()[taskSelection()].length - 3} more
-                      </div>
-                    </Show>
-                  </div>
-                </Show>
-              </div>
+              <TaskPreview
+                selection={taskSelection()}
+                previews={taskPreviews()}
+                counts={taskCounts()}
+                displayName={getSelectionDisplayName()}
+              />
             </Show>
           </Show>
         </div>
@@ -337,22 +159,53 @@ const PromptView: Component<PromptViewProps> = (props) => {
         readonly
         rows="15"
       />
+
       <div class="prompt-actions">
-        <button
-          class="action-button copy-button"
-          onClick={copyToClipboard}
-        >
-          📋 Copy to clipboard
-        </button>
+        <Button onClick={handleCopyToClipboard}>{copyButtonText()}</Button>
         <a
           class="action-button chatgpt-button"
-          href={getChatGPTUrl()}
+          href={createChatGPTUrl(generatedPrompt())}
           target="_blank"
           rel="noopener noreferrer"
         >
           🤖 Open in ChatGPT
         </a>
       </div>
+    </div>
+  );
+};
+
+// Extracted TaskPreview component
+const TaskPreview: Component<{
+  selection: string;
+  previews: Record<string, string[]>;
+  counts: Record<string, number>;
+  displayName: string;
+}> = (props) => {
+  const tasks = () => props.previews[props.selection] || [];
+  const hasNoTasks = () => tasks().length === 0;
+
+  return (
+    <div class="task-preview-content">
+      <Show when={hasNoTasks()}>
+        <span class="task-count-info text-muted">
+          No tasks available for this selection
+        </span>
+      </Show>
+
+      <Show when={!hasNoTasks()}>
+        <div class="task-count-header">
+          {props.displayName} ({props.counts[props.selection] || 0}):
+        </div>
+        <div class="task-preview-list">
+          <For each={tasks().slice(0, 3)}>
+            {(taskTitle) => <div class="task-preview-item">• {taskTitle}</div>}
+          </For>
+          <Show when={tasks().length > 3}>
+            <div class="task-preview-more">...and {tasks().length - 3} more</div>
+          </Show>
+        </div>
+      </Show>
     </div>
   );
 };
