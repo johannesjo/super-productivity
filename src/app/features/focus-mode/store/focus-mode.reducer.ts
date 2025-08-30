@@ -1,6 +1,11 @@
 import { createReducer, on } from '@ngrx/store';
-import * as actions from './focus-mode.actions';
-import { FocusModeState, TimerState, hasTimer } from '../focus-mode.model';
+import * as a from './focus-mode.actions';
+import {
+  FocusModeState,
+  TimerState,
+  hasTimer,
+  FocusModePhaseType,
+} from '../focus-mode.model';
 import { FocusModeMode } from '../focus-mode.const';
 import { LS } from '../../../core/persistence/storage-keys.const';
 
@@ -13,7 +18,7 @@ export const FOCUS_MODE_FEATURE_KEY = 'focusMode';
 const focusModeModeFromLS = localStorage.getItem(LS.FOCUS_MODE_MODE);
 
 export const initialState: FocusModeState = {
-  phase: { type: 'idle' },
+  phase: { type: FocusModePhaseType.Idle },
   mode: Object.values(FocusModeMode).includes(focusModeModeFromLS as any)
     ? (focusModeModeFromLS as FocusModeMode)
     : FocusModeMode.Countdown,
@@ -45,50 +50,52 @@ export const focusModeReducer = createReducer(
   initialState,
 
   // Mode changes
-  on(actions.setMode, (state, { mode }) => ({
+  on(a.setMode, (state, { mode }) => ({
     ...state,
     mode,
   })),
 
   // Overlay control
-  on(actions.showOverlay, (state) => ({
+  on(a.showOverlay, (state) => ({
     ...state,
     isOverlayShown: true,
     phase:
-      state.phase.type === 'idle' ? { type: 'task-selection' as const } : state.phase,
+      state.phase.type === FocusModePhaseType.Idle
+        ? { type: FocusModePhaseType.TaskSelection as const }
+        : state.phase,
   })),
 
-  on(actions.hideOverlay, (state) => ({
+  on(a.hideOverlay, (state) => ({
     ...state,
     isOverlayShown: false,
   })),
 
   // Phase transitions
-  on(actions.selectTask, (state) => ({
+  on(a.selectTask, (state) => ({
     ...state,
-    phase: { type: 'task-selection' as const },
+    phase: { type: FocusModePhaseType.TaskSelection as const },
   })),
 
-  on(actions.selectDuration, (state) => ({
+  on(a.selectDuration, (state) => ({
     ...state,
-    phase: { type: 'duration-selection' as const },
+    phase: { type: FocusModePhaseType.DurationSelection as const },
   })),
 
-  on(actions.startPreparation, (state) => ({
+  on(a.startPreparation, (state) => ({
     ...state,
-    phase: { type: 'preparation' as const },
+    phase: { type: FocusModePhaseType.Preparation as const },
   })),
 
-  on(actions.startSession, (state, { duration }) => ({
+  on(a.startSession, (state, { duration }) => ({
     ...state,
     phase: {
-      type: 'session' as const,
+      type: FocusModePhaseType.Session as const,
       timer: createTimer(duration || DEFAULT_SESSION_DURATION),
     },
   })),
 
-  on(actions.pauseSession, (state) => {
-    if (state.phase.type !== 'session') return state;
+  on(a.pauseSession, (state) => {
+    if (state.phase.type !== FocusModePhaseType.Session) return state;
 
     return {
       ...state,
@@ -103,8 +110,8 @@ export const focusModeReducer = createReducer(
     };
   }),
 
-  on(actions.resumeSession, (state, { idleTime = 0 }) => {
-    if (state.phase.type !== 'session') return state;
+  on(a.resumeSession, (state, { idleTime = 0 }) => {
+    if (state.phase.type !== FocusModePhaseType.Session) return state;
 
     return {
       ...state,
@@ -119,24 +126,24 @@ export const focusModeReducer = createReducer(
     };
   }),
 
-  on(actions.completeSession, (state) => {
+  on(a.completeSession, (state) => {
     const duration = hasTimer(state.phase) ? state.phase.timer.elapsed : 0;
 
     return {
       ...state,
-      phase: { type: 'session-done' as const, totalDuration: duration },
+      phase: { type: FocusModePhaseType.SessionDone as const, totalDuration: duration },
       lastSessionDuration: duration,
     };
   }),
 
-  on(actions.cancelSession, (state) => ({
+  on(a.cancelSession, (state) => ({
     ...state,
-    phase: { type: 'task-selection' as const },
+    phase: { type: FocusModePhaseType.TaskSelection as const },
     isOverlayShown: false,
   })),
 
   // Break handling
-  on(actions.startBreak, (state) => {
+  on(a.startBreak, (state) => {
     // Break duration logic should be handled by effects using strategies
     const isLongBreak = state.currentCycle % 4 === 0;
     const duration = isLongBreak ? DEFAULT_LONG_BREAK_DURATION : DEFAULT_BREAK_DURATION;
@@ -144,36 +151,39 @@ export const focusModeReducer = createReducer(
     return {
       ...state,
       phase: {
-        type: 'break' as const,
+        type: FocusModePhaseType.Break as const,
         timer: createTimer(duration),
         isLong: isLongBreak,
       },
     };
   }),
 
-  on(actions.skipBreak, actions.completeBreak, (state) => ({
+  on(a.skipBreak, a.completeBreak, (state) => ({
     ...state,
-    phase: { type: 'task-selection' as const },
+    phase: { type: FocusModePhaseType.TaskSelection as const },
   })),
 
   // Timer updates
-  on(actions.tick, (state) => {
+  on(a.tick, (state) => {
     if (!hasTimer(state.phase)) return state;
 
     const updatedTimer = updateTimer(state.phase.timer);
 
     // Check if timer completed
     if (updatedTimer.duration > 0 && updatedTimer.elapsed >= updatedTimer.duration) {
-      if (state.phase.type === 'session') {
+      if (state.phase.type === FocusModePhaseType.Session) {
         return {
           ...state,
-          phase: { type: 'session-done' as const, totalDuration: updatedTimer.elapsed },
+          phase: {
+            type: FocusModePhaseType.SessionDone as const,
+            totalDuration: updatedTimer.elapsed,
+          },
           lastSessionDuration: updatedTimer.elapsed,
         };
-      } else if (state.phase.type === 'break') {
+      } else if (state.phase.type === FocusModePhaseType.Break) {
         return {
           ...state,
-          phase: { type: 'break-done' as const },
+          phase: { type: FocusModePhaseType.BreakDone as const },
         };
       }
     }
@@ -188,12 +198,12 @@ export const focusModeReducer = createReducer(
   }),
 
   // Cycle management
-  on(actions.nextCycle, (state) => ({
+  on(a.nextCycle, (state) => ({
     ...state,
     currentCycle: state.currentCycle + 1,
   })),
 
-  on(actions.resetCycles, (state) => ({
+  on(a.resetCycles, (state) => ({
     ...state,
     currentCycle: 1,
   })),

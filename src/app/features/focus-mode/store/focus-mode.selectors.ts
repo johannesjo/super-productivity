@@ -1,7 +1,6 @@
 import { createSelector, createFeatureSelector } from '@ngrx/store';
 import { FOCUS_MODE_FEATURE_KEY } from './focus-mode.reducer';
-import { FocusModeState, hasTimer } from '../focus-mode.model';
-import { FocusModePage } from '../focus-mode.const';
+import { FocusModeState, hasTimer, FocusModePhaseType } from '../focus-mode.model';
 
 // Base selectors
 export const selectFocusModeState =
@@ -32,23 +31,23 @@ export const selectPhaseType = createSelector(selectPhase, (phase) => phase.type
 // Session selectors
 export const selectIsSessionRunning = createSelector(
   selectPhase,
-  (phase) => phase.type === 'session',
+  (phase) => phase.type === FocusModePhaseType.Session,
 );
 
 export const selectIsSessionPaused = createSelector(
   selectPhase,
-  (phase) => phase.type === 'session' && phase.timer.isPaused,
+  (phase) => phase.type === FocusModePhaseType.Session && phase.timer.isPaused,
 );
 
 // Break selectors
 export const selectIsBreakActive = createSelector(
   selectPhase,
-  (phase) => phase.type === 'break',
+  (phase) => phase.type === FocusModePhaseType.Break,
 );
 
 export const selectIsLongBreak = createSelector(
   selectPhase,
-  (phase) => phase.type === 'break' && phase.isLong,
+  (phase) => phase.type === FocusModePhaseType.Break && phase.isLong,
 );
 
 // Timer selectors
@@ -82,38 +81,3 @@ export const selectIsFocusSessionRunning = selectIsSessionRunning;
 export const selectIsFocusOverlayShown = selectIsOverlayShown;
 export const selectFocusSessionTimeElapsed = selectTimeElapsed;
 export const selectFocusSessionDuration = selectTimeDuration;
-export const selectFocusModeIsBreak = selectIsBreakActive;
-export const selectFocusModeBreakTimeElapsed = selectTimeElapsed;
-export const selectFocusModeBreakDuration = selectTimeDuration;
-export const selectFocusModeCurrentCycle = selectCurrentCycle;
-export const selectFocusModeMode = selectMode;
-export const selectFocusModeIsBreakLong = selectIsLongBreak;
-export const selectLastSessionTotalDurationOrTimeElapsedFallback =
-  selectLastSessionDuration;
-
-// Map phase to old active page concept
-export const selectFocusSessionActivePage = createSelector(
-  selectPhaseType,
-  selectIsBreakActive,
-  (phaseType, isBreak): FocusModePage => {
-    if (isBreak) return FocusModePage.Break;
-
-    switch (phaseType) {
-      case 'idle':
-      case 'task-selection':
-        return FocusModePage.TaskSelection;
-      case 'duration-selection':
-        return FocusModePage.DurationSelection;
-      case 'preparation':
-        return FocusModePage.Preparation;
-      case 'session':
-        return FocusModePage.Main;
-      case 'session-done':
-        return FocusModePage.SessionDone;
-      case 'break-done':
-        return FocusModePage.TaskSelection;
-      default:
-        return FocusModePage.TaskSelection;
-    }
-  },
-);

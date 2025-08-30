@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { FocusModeMode } from './focus-mode.const';
-import { FocusModeStrategy } from './focus-mode.model';
+import { FocusModeStrategy, FocusModePhaseType } from './focus-mode.model';
 import { GlobalConfigService } from '../config/global-config.service';
 
 @Injectable({ providedIn: 'root' })
@@ -25,7 +25,10 @@ export class PomodoroStrategy implements FocusModeStrategy {
   }
 
   getNextPhaseAfterTaskSelection(skipPreparation: boolean): {
-    phase: 'duration-selection' | 'preparation' | 'session';
+    phase:
+      | FocusModePhaseType.DurationSelection
+      | FocusModePhaseType.Preparation
+      | FocusModePhaseType.Session;
     duration?: number;
   } {
     // TODO revert
@@ -34,7 +37,9 @@ export class PomodoroStrategy implements FocusModeStrategy {
     const duration = 4000;
 
     return {
-      phase: skipPreparation ? 'session' : 'preparation',
+      phase: skipPreparation
+        ? FocusModePhaseType.Session
+        : FocusModePhaseType.Preparation,
       duration,
     };
   }
@@ -54,11 +59,16 @@ export class FlowtimeStrategy implements FocusModeStrategy {
   }
 
   getNextPhaseAfterTaskSelection(skipPreparation: boolean): {
-    phase: 'duration-selection' | 'preparation' | 'session';
+    phase:
+      | FocusModePhaseType.DurationSelection
+      | FocusModePhaseType.Preparation
+      | FocusModePhaseType.Session;
     duration?: number;
   } {
     return {
-      phase: skipPreparation ? 'session' : 'preparation',
+      phase: skipPreparation
+        ? FocusModePhaseType.Session
+        : FocusModePhaseType.Preparation,
       duration: 0, // Flowtime doesn't have a fixed duration
     };
   }
@@ -84,12 +94,15 @@ export class CountdownStrategy implements FocusModeStrategy {
   }
 
   getNextPhaseAfterTaskSelection(skipPreparation: boolean): {
-    phase: 'duration-selection' | 'preparation' | 'session';
+    phase:
+      | FocusModePhaseType.DurationSelection
+      | FocusModePhaseType.Preparation
+      | FocusModePhaseType.Session;
     duration?: number;
   } {
     // Countdown mode always uses duration selection
     return {
-      phase: 'duration-selection',
+      phase: FocusModePhaseType.DurationSelection,
     };
   }
 }

@@ -8,6 +8,7 @@ import { GlobalConfigService } from '../config/global-config.service';
 import { selectFocusModeConfig } from '../config/store/global-config.reducer';
 import { FocusModePage } from './focus-mode.const';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
+import { FocusModePhaseType } from './focus-mode.model';
 
 @Injectable({
   providedIn: 'root',
@@ -67,17 +68,17 @@ export class FocusModeService {
       map((state) => {
         if (state.isOverlayShown) {
           switch (state.phase.type) {
-            case 'task-selection':
+            case FocusModePhaseType.TaskSelection:
               return FocusModePage.TaskSelection;
-            case 'duration-selection':
+            case FocusModePhaseType.DurationSelection:
               return FocusModePage.DurationSelection;
-            case 'preparation':
+            case FocusModePhaseType.Preparation:
               return FocusModePage.Preparation;
-            case 'session':
+            case FocusModePhaseType.Session:
               return FocusModePage.Main;
-            case 'session-done':
+            case FocusModePhaseType.SessionDone:
               return FocusModePage.SessionDone;
-            case 'break':
+            case FocusModePhaseType.Break:
               return FocusModePage.Break;
             default:
               return FocusModePage.TaskSelection;

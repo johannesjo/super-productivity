@@ -24,6 +24,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { SelectTaskComponent } from '../../tasks/select-task/select-task.component';
 import { FocusModeService } from '../focus-mode.service';
 import { FocusModeStrategyFactory } from '../focus-mode-strategies';
+import { FocusModePhaseType } from '../focus-mode.model';
 import { MatIcon } from '@angular/material/icon';
 import { MsToMinuteClockStringPipe } from '../../../ui/duration/ms-to-minute-clock-string.pipe';
 import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-circle.component';
@@ -124,13 +125,13 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
 
     // Dispatch appropriate action based on strategy's decision
     switch (nextPhase.phase) {
-      case 'duration-selection':
+      case FocusModePhaseType.DurationSelection:
         this._store.dispatch(selectFocusDuration());
         break;
-      case 'preparation':
+      case FocusModePhaseType.Preparation:
         this._store.dispatch(startFocusPreparation());
         break;
-      case 'session':
+      case FocusModePhaseType.Session:
         this._store.dispatch(
           startFocusSession(nextPhase.duration ? { duration: nextPhase.duration } : {}),
         );

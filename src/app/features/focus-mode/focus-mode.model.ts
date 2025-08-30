@@ -8,16 +8,28 @@ export interface TimerState {
   isPaused: boolean;
 }
 
+// Phase types enum
+export enum FocusModePhaseType {
+  Idle = 'idle',
+  TaskSelection = 'task-selection',
+  DurationSelection = 'duration-selection',
+  Preparation = 'preparation',
+  Session = 'session',
+  SessionDone = 'session-done',
+  Break = 'break',
+  BreakDone = 'break-done',
+}
+
 // State machine states
 export type FocusModePhase =
-  | { type: 'idle' }
-  | { type: 'task-selection' }
-  | { type: 'duration-selection' }
-  | { type: 'preparation' }
-  | { type: 'session'; timer: TimerState }
-  | { type: 'session-done'; totalDuration: number }
-  | { type: 'break'; timer: TimerState; isLong: boolean }
-  | { type: 'break-done' };
+  | { type: FocusModePhaseType.Idle }
+  | { type: FocusModePhaseType.TaskSelection }
+  | { type: FocusModePhaseType.DurationSelection }
+  | { type: FocusModePhaseType.Preparation }
+  | { type: FocusModePhaseType.Session; timer: TimerState }
+  | { type: FocusModePhaseType.SessionDone; totalDuration: number }
+  | { type: FocusModePhaseType.Break; timer: TimerState; isLong: boolean }
+  | { type: FocusModePhaseType.BreakDone };
 
 // Simplified state structure
 export interface FocusModeState {
@@ -35,7 +47,10 @@ export interface FocusModeStrategy {
   readonly shouldAutoStartNextSession: boolean;
   getBreakDuration(cycle: number): { duration: number; isLong: boolean } | null;
   getNextPhaseAfterTaskSelection(skipPreparation: boolean): {
-    phase: 'duration-selection' | 'preparation' | 'session';
+    phase:
+      | FocusModePhaseType.DurationSelection
+      | FocusModePhaseType.Preparation
+      | FocusModePhaseType.Session;
     duration?: number;
   };
 }
@@ -43,14 +58,14 @@ export interface FocusModeStrategy {
 // Helper type guards
 export const isSessionPhase = (
   phase: FocusModePhase,
-): phase is Extract<FocusModePhase, { type: 'session' }> => {
-  return phase.type === 'session';
+): phase is Extract<FocusModePhase, { type: FocusModePhaseType.Session }> => {
+  return phase.type === FocusModePhaseType.Session;
 };
 
 export const isBreakPhase = (
   phase: FocusModePhase,
-): phase is Extract<FocusModePhase, { type: 'break' }> => {
-  return phase.type === 'break';
+): phase is Extract<FocusModePhase, { type: FocusModePhaseType.Break }> => {
+  return phase.type === FocusModePhaseType.Break;
 };
 
 export const hasTimer = (
