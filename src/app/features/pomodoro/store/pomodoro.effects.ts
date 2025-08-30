@@ -137,7 +137,8 @@ export class PomodoroEffects {
               ofType(finishPomodoroSession, skipPomodoroBreak),
               withLatestFrom(this._pomodoroService.cfg$, this._pomodoroService.isBreak$),
               filter(
-                ([action, cfg, isBreak]) => cfg.isDisableAutoStartAfterBreak && !isBreak,
+                ([action, cfg, isBreak]) =>
+                  !!cfg.isDisableAutoStartAfterBreak && !isBreak,
               ),
               mapTo(unsetCurrentTask()),
             ),
@@ -153,7 +154,7 @@ export class PomodoroEffects {
           : this._actions$.pipe(
               ofType(finishPomodoroSession),
               withLatestFrom(this._pomodoroService.cfg$, this._pomodoroService.isBreak$),
-              filter(([action, cfg, isBreak]) => cfg.isStopTrackingOnBreak && isBreak),
+              filter(([action, cfg, isBreak]) => !!cfg.isStopTrackingOnBreak && isBreak),
               mapTo(unsetCurrentTask()),
             ),
       ),

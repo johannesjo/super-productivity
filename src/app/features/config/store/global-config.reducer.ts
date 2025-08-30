@@ -75,7 +75,7 @@ export const selectPomodoroConfig = createSelector(
 );
 export const selectIsPomodoroEnabled = createSelector(
   selectConfigFeatureState,
-  (cfg): boolean => cfg.pomodoro.isEnabled,
+  (cfg): boolean => !!cfg.pomodoro.isEnabled,
 );
 export const selectReminderConfig = createSelector(
   selectConfigFeatureState,

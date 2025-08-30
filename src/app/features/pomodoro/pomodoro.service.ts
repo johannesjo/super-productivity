@@ -57,7 +57,7 @@ export class PomodoroService {
     map((cfg) => cfg && cfg.sound),
   );
   isEnabled$: Observable<boolean> = this.cfg$.pipe(
-    map((cfg) => cfg && cfg.isEnabled),
+    map((cfg) => cfg && !!cfg.isEnabled),
     shareReplay(1),
   );
 
@@ -172,7 +172,7 @@ export class PomodoroService {
     this.currentSessionTime$
       .pipe(
         withLatestFrom(this.cfg$),
-        filter(([val, cfg]) => cfg.isEnabled && cfg.isPlayTick),
+        filter(([val, cfg]) => !!cfg.isEnabled && !!cfg.isPlayTick),
         map(([val]) => val),
         distinctUntilChanged(),
         filter((v, index) => index % (1000 / TICK_DURATION) === 0),

@@ -71,16 +71,16 @@ export type TakeABreakConfig = Readonly<{
 }>;
 
 export type PomodoroConfig = Readonly<{
-  isEnabled: boolean;
-  isStopTrackingOnBreak: boolean;
-  isStopTrackingOnLongBreak: boolean;
-  isDisableAutoStartAfterBreak: boolean;
-  isManualContinue: boolean;
-  isManualContinueBreak: boolean;
-  isPlaySound: boolean;
-  isPlaySoundAfterBreak: boolean;
-  // isGoToWorkView: boolean;
-  isPlayTick: boolean;
+  isEnabled?: boolean;
+  isStopTrackingOnBreak?: boolean;
+  isStopTrackingOnLongBreak?: boolean;
+  isDisableAutoStartAfterBreak?: boolean;
+  isManualContinue?: boolean;
+  isManualContinueBreak?: boolean;
+  isPlaySound?: boolean;
+  isPlaySoundAfterBreak?: boolean;
+  // isGoToWorkView?: boolean;
+  isPlayTick?: boolean;
 
   // due to formly not being reliable here we need to be more lenient
   duration?: number | null;
