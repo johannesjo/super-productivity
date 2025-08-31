@@ -129,7 +129,7 @@ export const focusModeReducer = createReducer(
       timer: {
         ...state.timer,
         isRunning: true,
-        startedAt: Date.now() - state.timer.elapsed + idleTime,
+        startedAt: Date.now() - state.timer.elapsed - idleTime,
       },
     };
   }),
