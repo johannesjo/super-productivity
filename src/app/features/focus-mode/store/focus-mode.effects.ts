@@ -1,14 +1,14 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { of, EMPTY } from 'rxjs';
+import { EMPTY, of } from 'rxjs';
 import {
+  distinctUntilChanged,
+  filter,
   map,
   switchMap,
-  withLatestFrom,
-  filter,
   tap,
-  distinctUntilChanged,
+  withLatestFrom,
 } from 'rxjs/operators';
 import * as actions from './focus-mode.actions';
 import * as selectors from './focus-mode.selectors';
@@ -166,19 +166,6 @@ export class FocusModeEffects {
     ),
   );
 
-  // Handle compatibility startFocusSession action
-  startFocusSessionCompat$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType('[FocusMode] Start Focus Session'),
-      withLatestFrom(this.store.select(selectors.selectMode)),
-      switchMap(([_, mode]) => {
-        const strategy = this.strategyFactory.getStrategy(mode);
-        const duration = strategy.initialSessionDuration;
-        return of(actions.startFocusSession({ duration }));
-      }),
-    ),
-  );
-
   // Pause on idle
   pauseOnIdle$ = createEffect(() =>
     this.actions$.pipe(
@@ -200,37 +187,65 @@ export class FocusModeEffects {
   );
 
   // Electron-specific effects
-  setTaskBarProgress$ = IS_ELECTRON
-    ? createEffect(
-        () =>
-          this.store.select(selectors.selectProgress).pipe(
-            withLatestFrom(this.store.select(selectors.selectIsRunning)),
-            tap(([progress, isRunning]) => {
-              window.ea.setProgressBar({
-                progress: progress / 100,
-                progressBarMode: isRunning ? 'normal' : 'pause',
-              });
-            }),
-          ),
-        { dispatch: false },
-      )
-    : null;
+  setTaskBarProgress$ =
+    IS_ELECTRON &&
+    createEffect(
+      () =>
+        this.store.select(selectors.selectProgress).pipe(
+          withLatestFrom(this.store.select(selectors.selectIsRunning)),
+          tap(([progress, isRunning]) => {
+            window.ea.setProgressBar({
+              progress: progress / 100,
+              progressBarMode: isRunning ? 'normal' : 'pause',
+            });
+          }),
+        ),
+      { dispatch: false },
+    );
 
-  focusWindowOnComplete$ = IS_ELECTRON
-    ? createEffect(
-        () =>
-          this.actions$.pipe(
-            ofType(actions.focusSessionDone),
-            tap(() => {
-              window.ea.showOrFocus();
-              window.ea.flashFrame();
-              window.ea.setProgressBar({
-                progress: 1,
-                progressBarMode: 'normal',
-              });
-            }),
-          ),
-        { dispatch: false },
-      )
-    : null;
+  focusWindowOnComplete$ =
+    IS_ELECTRON &&
+    createEffect(
+      () =>
+        this.actions$.pipe(
+          ofType(actions.focusSessionDone),
+          tap(() => {
+            window.ea.showOrFocus();
+            window.ea.flashFrame();
+            window.ea.setProgressBar({
+              progress: 1,
+              progressBarMode: 'normal',
+            });
+          }),
+        ),
+      { dispatch: false },
+    );
+
+  focusWindowOnBreakStart$ =
+    IS_ELECTRON &&
+    createEffect(
+      () =>
+        this.actions$.pipe(
+          ofType(actions.startBreak),
+          tap(() => {
+            window.ea.showOrFocus();
+            window.ea.flashFrame();
+          }),
+        ),
+      { dispatch: false },
+    );
+
+  focusWindowOnBreakComplete$ =
+    IS_ELECTRON &&
+    createEffect(
+      () =>
+        this.actions$.pipe(
+          ofType(actions.completeBreak, actions.skipBreak),
+          tap(() => {
+            window.ea.showOrFocus();
+            window.ea.flashFrame();
+          }),
+        ),
+      { dispatch: false },
+    );
 }
