@@ -18,9 +18,6 @@ export enum FocusScreen {
   Break = 'Break',
 }
 
-// Legacy alias for backward compatibility
-export const FocusModePage = FocusScreen;
-
 export enum FocusModeMode {
   'Flowtime' = 'Flowtime',
   'Pomodoro' = 'Pomodoro',

@@ -73,13 +73,3 @@ export const selectIsRunning = createSelector(
   selectTimer,
   (timer) => timer.isRunning && timer.purpose !== null,
 );
-
-// Legacy selector for backward compatibility
-export const selectPhase = createSelector(
-  selectCurrentScreen,
-  selectTimer,
-  (screen, timer) => {
-    // Map new screen/timer to old phase structure for compatibility
-    return { type: screen, timer };
-  },
-);

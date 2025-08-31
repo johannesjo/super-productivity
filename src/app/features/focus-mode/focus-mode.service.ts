@@ -24,9 +24,6 @@ export class FocusModeService {
   isOverlayShown = toSignal(this._store.select(selectors.selectIsOverlayShown));
   currentCycle = toSignal(this._store.select(selectors.selectCurrentCycle));
 
-  // Legacy compatibility
-  phase = toSignal(this._store.select(selectors.selectPhase));
-
   // Timer signals
   isRunning = toSignal(this._store.select(selectors.selectIsRunning));
   timeElapsed = toSignal(this._store.select(selectors.selectTimeElapsed));

@@ -319,20 +319,4 @@ describe('FocusModeSelectors', () => {
       expect(result).toBe(false);
     });
   });
-
-  describe('selectPhase (legacy)', () => {
-    it('should return phase object with screen and timer', () => {
-      const timer = createMockTimer({ elapsed: 60000 });
-      const state = createMockState({
-        currentScreen: FocusScreen.Main,
-        timer,
-      });
-      const result = selectors.selectPhase(state);
-
-      expect(result).toEqual({
-        type: FocusScreen.Main,
-        timer,
-      });
-    });
-  });
 });

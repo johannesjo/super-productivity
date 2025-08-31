@@ -47,9 +47,6 @@ describe('FocusModeService', () => {
       if (selector === selectors.selectCurrentCycle) {
         return of(0);
       }
-      if (selector === selectors.selectPhase) {
-        return of('INACTIVE');
-      }
       if (selector === selectors.selectIsRunning) {
         return of(false);
       }
