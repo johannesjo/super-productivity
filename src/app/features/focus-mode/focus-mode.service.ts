@@ -8,7 +8,7 @@ import * as selectors from './store/focus-mode.selectors';
 import { GlobalConfigService } from '../config/global-config.service';
 import { selectFocusModeConfig } from '../config/store/global-config.reducer';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
-import { FocusScreen, FocusModeMode } from './focus-mode.model';
+import { FocusModeMode } from './focus-mode.model';
 
 @Injectable({
   providedIn: 'root',
@@ -47,17 +47,6 @@ export class FocusModeService {
 
   // Compatibility aliases (TODO: remove when components are updated)
   isBreakLong = this.isLongBreak;
-  breakTimeElapsed = toSignal(this._store.select(selectors.selectTimeElapsed), {
-    initialValue: 0,
-  });
-  breakDuration = toSignal(this._store.select(selectors.selectTimeDuration), {
-    initialValue: 5 * 60 * 1000,
-  });
-  breakProgress = toSignal(this._store.select(selectors.selectProgress), {
-    initialValue: 0,
-  });
-  cfg = this.focusModeConfig;
-  pomodoroCfg = this.pomodoroConfig;
 
   // Additional compatibility signals
   lastSessionTotalDurationOrTimeElapsedFallback = toSignal(
@@ -72,10 +61,6 @@ export class FocusModeService {
   sessionProgress$ = this._store.select(selectors.selectProgress);
   currentSessionTime$ = this._store.select(selectors.selectTimeElapsed);
   timeToGo$ = this._store.select(selectors.selectTimeRemaining);
-
-  activePage = toSignal(this._store.select(selectors.selectCurrentScreen), {
-    initialValue: FocusScreen.TaskSelection,
-  });
 
   // Single timer that updates the store
   constructor() {

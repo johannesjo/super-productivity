@@ -163,24 +163,20 @@ describe('FocusModeService', () => {
       expect(service.isBreakLong).toBe(service.isLongBreak);
     });
 
-    it('should provide breakTimeElapsed alias', () => {
-      expect(service.breakTimeElapsed()).toBe(0);
+    it('should provide timeElapsed signal', () => {
+      expect(service.timeElapsed()).toBe(0);
     });
 
-    it('should provide breakDuration alias', () => {
-      expect(service.breakDuration()).toBe(300000);
+    it('should provide progress signal', () => {
+      expect(service.progress()).toBe(0);
     });
 
-    it('should provide breakProgress alias', () => {
-      expect(service.breakProgress()).toBe(0);
+    it('should provide focusModeConfig signal', () => {
+      expect(service.focusModeConfig).toBeDefined();
     });
 
-    it('should provide cfg alias', () => {
-      expect(service.cfg).toBe(service.focusModeConfig);
-    });
-
-    it('should provide pomodoroCfg alias', () => {
-      expect(service.pomodoroCfg).toBe(service.pomodoroConfig);
+    it('should provide pomodoroConfig signal', () => {
+      expect(service.pomodoroConfig).toBeDefined();
     });
   });
 
@@ -220,9 +216,9 @@ describe('FocusModeService', () => {
     });
   });
 
-  describe('activePage signal', () => {
+  describe('currentScreen signal', () => {
     it('should initialize with TaskSelection default', () => {
-      expect(service.activePage()).toBe(FocusScreen.TaskSelection);
+      expect(service.currentScreen()).toBe(FocusScreen.TaskSelection);
     });
   });
 });
