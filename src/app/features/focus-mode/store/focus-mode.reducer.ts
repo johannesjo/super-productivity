@@ -180,14 +180,13 @@ export const focusModeReducer = createReducer(
 
     const updatedTimer = updateTimer(state.timer);
 
-    // Check if timer completed
+    // Check if timer completed - mark for completion but let effects handle the flow
     if (updatedTimer.duration > 0 && updatedTimer.elapsed >= updatedTimer.duration) {
       if (updatedTimer.purpose === 'work') {
-        // Work session completed
+        // Work session completed - stop timer and mark duration, but don't change screen yet
         return {
           ...state,
-          timer: createIdleTimer(),
-          currentScreen: FocusScreen.SessionDone,
+          timer: { ...updatedTimer, isRunning: false }, // Stop the timer but preserve state
           lastCompletedDuration: updatedTimer.elapsed,
         };
       } else if (updatedTimer.purpose === 'break') {

@@ -48,6 +48,24 @@ export class FocusModeEffects {
     ),
   );
 
+  // Detect when work session timer completes and dispatch focusSessionDone
+  detectSessionCompletion$ = createEffect(() =>
+    this.store.select(selectors.selectTimer).pipe(
+      filter(
+        (timer) =>
+          timer.purpose === 'work' &&
+          !timer.isRunning &&
+          timer.duration > 0 &&
+          timer.elapsed >= timer.duration,
+      ),
+      distinctUntilChanged(
+        (prev, curr) =>
+          prev.elapsed === curr.elapsed && prev.startedAt === curr.startedAt,
+      ),
+      map(() => actions.focusSessionDone()),
+    ),
+  );
+
   // Handle session completion
   sessionComplete$ = createEffect(() =>
     this.actions$.pipe(
