@@ -207,6 +207,8 @@
       "B": {
         "SESSION_RUNNING": "Focus Session is running",
         "POMODORO_SESSION_RUNNING": "Pomodoro Session #{{cycleNr}} is running",
+        "BREAK_RUNNING": "Break is running",
+        "POMODORO_BREAK_RUNNING": "Break #{{cycleNr}} is running",
         "TO_FOCUS_OVERLAY": "To Focus Overlay"
       },
       "BACK_TO_PLANNING": "Back to Planning",
