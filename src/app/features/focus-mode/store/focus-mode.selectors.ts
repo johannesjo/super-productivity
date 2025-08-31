@@ -1,12 +1,17 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { FOCUS_MODE_FEATURE_KEY } from './focus-mode.reducer';
-import { FocusModePhaseType, FocusModeState, hasTimer } from '../focus-mode.model'; // Base selectors
+import { FocusModeState } from '../focus-mode.model';
 
 // Base selectors
 export const selectFocusModeState =
   createFeatureSelector<FocusModeState>(FOCUS_MODE_FEATURE_KEY);
 
-export const selectPhase = createSelector(selectFocusModeState, (state) => state.phase);
+export const selectTimer = createSelector(selectFocusModeState, (state) => state.timer);
+
+export const selectCurrentScreen = createSelector(
+  selectFocusModeState,
+  (state) => state.currentScreen,
+);
 
 export const selectMode = createSelector(selectFocusModeState, (state) => state.mode);
 
@@ -22,49 +27,35 @@ export const selectCurrentCycle = createSelector(
 
 export const selectLastSessionDuration = createSelector(
   selectFocusModeState,
-  (state) => state.lastSessionDuration,
+  (state) => state.lastCompletedDuration,
 );
 
 // Session selectors
 export const selectIsSessionRunning = createSelector(
-  selectFocusModeState,
-  (state) => state.isSessionRunning,
+  selectTimer,
+  (timer) => timer.isRunning && timer.purpose === 'work',
 );
 
 export const selectIsSessionPaused = createSelector(
-  selectPhase,
-  (phase) => phase.type === FocusModePhaseType.Session && phase.timer.isPaused,
+  selectTimer,
+  (timer) => !timer.isRunning && timer.purpose === 'work',
 );
 
 // Break selectors
 export const selectIsBreakActive = createSelector(
-  selectPhase,
-  (phase) => phase.type === FocusModePhaseType.Break,
+  selectTimer,
+  (timer) => timer.purpose === 'break',
 );
 
 export const selectIsLongBreak = createSelector(
-  selectPhase,
-  (phase) => phase.type === FocusModePhaseType.Break && phase.isLong,
+  selectTimer,
+  (timer) => timer.purpose === 'break' && timer.isLongBreak === true,
 );
 
-// Timer selectors
-export const selectTimeElapsed = createSelector(selectFocusModeState, (state) => {
-  // Use sessionTimer if we're in an active session
-  if (state.isSessionRunning && state.sessionTimer) {
-    return state.sessionTimer.elapsed;
-  }
-  // Otherwise use phase timer if available
-  return hasTimer(state.phase) ? state.phase.timer.elapsed : 0;
-});
+// Timer selectors - much simpler!
+export const selectTimeElapsed = createSelector(selectTimer, (timer) => timer.elapsed);
 
-export const selectTimeDuration = createSelector(selectFocusModeState, (state) => {
-  // Use sessionTimer if we're in an active session
-  if (state.isSessionRunning && state.sessionTimer) {
-    return state.sessionTimer.duration;
-  }
-  // Otherwise use phase timer if available
-  return hasTimer(state.phase) ? state.phase.timer.duration : 0;
-});
+export const selectTimeDuration = createSelector(selectTimer, (timer) => timer.duration);
 
 export const selectTimeRemaining = createSelector(
   selectTimeElapsed,
@@ -78,11 +69,17 @@ export const selectProgress = createSelector(
   (elapsed, duration) => (duration > 0 ? (elapsed / duration) * 100 : 0),
 );
 
-export const selectIsRunning = createSelector(selectFocusModeState, (state) => {
-  // Check sessionTimer if in active session
-  if (state.isSessionRunning && state.sessionTimer) {
-    return !state.sessionTimer.isPaused;
-  }
-  // Otherwise check phase timer
-  return hasTimer(state.phase) && !state.phase.timer.isPaused;
-});
+export const selectIsRunning = createSelector(
+  selectTimer,
+  (timer) => timer.isRunning && timer.purpose !== null,
+);
+
+// Legacy selector for backward compatibility
+export const selectPhase = createSelector(
+  selectCurrentScreen,
+  selectTimer,
+  (screen, timer) => {
+    // Map new screen/timer to old phase structure for compatibility
+    return { type: screen, timer };
+  },
+);

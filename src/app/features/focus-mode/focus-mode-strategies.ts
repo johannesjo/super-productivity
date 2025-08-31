@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { FocusModeStrategy, FocusModePhaseType, FocusModeMode } from './focus-mode.model';
+import { FocusModeStrategy, FocusScreen, FocusModeMode } from './focus-mode.model';
 import { GlobalConfigService } from '../config/global-config.service';
 
 @Injectable({ providedIn: 'root' })
@@ -14,7 +14,9 @@ export class PomodoroStrategy implements FocusModeStrategy {
   getBreakDuration(cycle: number): { duration: number; isLong: boolean } {
     const config = this.globalConfigService.pomodoroConfig();
     const cyclesBeforeLong = config?.cyclesBeforeLongerBreak || 4;
-    const isLong = cycle % cyclesBeforeLong === 0;
+    // The next cycle will be cycle + 1, check if that should be a long break
+    const nextCycle = cycle + 1;
+    const isLong = nextCycle % cyclesBeforeLong === 0;
 
     const duration = isLong
       ? config?.longerBreakDuration || 15 * 60 * 1000
@@ -23,20 +25,15 @@ export class PomodoroStrategy implements FocusModeStrategy {
     return { duration, isLong };
   }
 
-  getNextPhaseAfterTaskSelection(skipPreparation: boolean): {
-    phase:
-      | FocusModePhaseType.DurationSelection
-      | FocusModePhaseType.Preparation
-      | FocusModePhaseType.Session;
+  getNextScreenAfterTaskSelection(skipPreparation: boolean): {
+    screen: FocusScreen;
     duration?: number;
   } {
     const config = this.globalConfigService.pomodoroConfig();
     const duration = config?.duration || 25 * 60 * 1000;
 
     return {
-      phase: skipPreparation
-        ? FocusModePhaseType.Session
-        : FocusModePhaseType.Preparation,
+      screen: skipPreparation ? FocusScreen.Main : FocusScreen.Preparation,
       duration,
     };
   }
@@ -55,17 +52,12 @@ export class FlowtimeStrategy implements FocusModeStrategy {
     return null; // No automatic breaks in Flowtime
   }
 
-  getNextPhaseAfterTaskSelection(skipPreparation: boolean): {
-    phase:
-      | FocusModePhaseType.DurationSelection
-      | FocusModePhaseType.Preparation
-      | FocusModePhaseType.Session;
+  getNextScreenAfterTaskSelection(skipPreparation: boolean): {
+    screen: FocusScreen;
     duration?: number;
   } {
     return {
-      phase: skipPreparation
-        ? FocusModePhaseType.Session
-        : FocusModePhaseType.Preparation,
+      screen: skipPreparation ? FocusScreen.Main : FocusScreen.Preparation,
       duration: 0, // Flowtime doesn't have a fixed duration
     };
   }
@@ -90,16 +82,13 @@ export class CountdownStrategy implements FocusModeStrategy {
     return null; // No automatic breaks in Countdown mode
   }
 
-  getNextPhaseAfterTaskSelection(skipPreparation: boolean): {
-    phase:
-      | FocusModePhaseType.DurationSelection
-      | FocusModePhaseType.Preparation
-      | FocusModePhaseType.Session;
+  getNextScreenAfterTaskSelection(skipPreparation: boolean): {
+    screen: FocusScreen;
     duration?: number;
   } {
     // Countdown mode always uses duration selection
     return {
-      phase: FocusModePhaseType.DurationSelection,
+      screen: FocusScreen.DurationSelection,
     };
   }
 }

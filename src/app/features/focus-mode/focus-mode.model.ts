@@ -1,34 +1,24 @@
-// Unified timer state
+// Timer state - single source of truth
 export interface TimerState {
+  isRunning: boolean;
   startedAt: number | null;
   elapsed: number;
   duration: number;
-  isPaused: boolean;
+  purpose: 'work' | 'break' | null;
+  isLongBreak?: boolean;
 }
 
-// Phase types enum
-export enum FocusModePhaseType {
-  Idle = 'idle',
-  TaskSelection = 'task-selection',
-  DurationSelection = 'duration-selection',
-  Preparation = 'preparation',
-  Session = 'session',
-  SessionDone = 'session-done',
-  Break = 'break',
-  BreakDone = 'break-done',
+// UI screens enum
+export enum FocusScreen {
+  TaskSelection = 'TaskSelection',
+  DurationSelection = 'DurationSelection',
+  Preparation = 'Preparation',
+  Main = 'Main',
+  SessionDone = 'SessionDone',
+  Break = 'Break',
 }
 
-// State machine states
-export type FocusModePhase =
-  | { type: FocusModePhaseType.Idle }
-  | { type: FocusModePhaseType.TaskSelection }
-  | { type: FocusModePhaseType.DurationSelection }
-  | { type: FocusModePhaseType.Preparation }
-  | { type: FocusModePhaseType.Session; timer: TimerState }
-  | { type: FocusModePhaseType.SessionDone; totalDuration: number }
-  | { type: FocusModePhaseType.Break; timer: TimerState; isLong: boolean }
-  | { type: FocusModePhaseType.BreakDone };
-
+// Legacy support - map old page names to new screens
 export enum FocusModePage {
   Main = 'Main',
   SessionDone = 'SessionDone',
@@ -46,13 +36,18 @@ export enum FocusModeMode {
 
 // Simplified state structure
 export interface FocusModeState {
-  phase: FocusModePhase;
-  mode: FocusModeMode;
+  // The timer - single source of truth
+  timer: TimerState;
+
+  // The UI - what screen to show
+  currentScreen: FocusScreen;
   isOverlayShown: boolean;
-  isSessionRunning: boolean; // Tracks if a focus session is actively running
-  sessionTimer?: TimerState; // Persists session timer across phase transitions
-  currentCycle: number; // For Pomodoro
-  lastSessionDuration: number;
+
+  // Session metadata
+  mode: FocusModeMode;
+  currentCycle: number;
+  lastCompletedDuration: number;
+  // TODO maybe add today total
 }
 
 // Mode strategy interface
@@ -61,30 +56,21 @@ export interface FocusModeStrategy {
   readonly shouldStartBreakAfterSession: boolean;
   readonly shouldAutoStartNextSession: boolean;
   getBreakDuration(cycle: number): { duration: number; isLong: boolean } | null;
-  getNextPhaseAfterTaskSelection(skipPreparation: boolean): {
-    phase:
-      | FocusModePhaseType.DurationSelection
-      | FocusModePhaseType.Preparation
-      | FocusModePhaseType.Session;
+  getNextScreenAfterTaskSelection(skipPreparation: boolean): {
+    screen: FocusScreen;
     duration?: number;
   };
 }
 
-// Helper type guards
-export const isSessionPhase = (
-  phase: FocusModePhase,
-): phase is Extract<FocusModePhase, { type: FocusModePhaseType.Session }> => {
-  return phase.type === FocusModePhaseType.Session;
+// Helper functions for timer
+export const isTimerRunning = (timer: TimerState): boolean => {
+  return timer.isRunning && timer.purpose !== null;
 };
 
-export const isBreakPhase = (
-  phase: FocusModePhase,
-): phase is Extract<FocusModePhase, { type: FocusModePhaseType.Break }> => {
-  return phase.type === FocusModePhaseType.Break;
+export const isWorkSession = (timer: TimerState): boolean => {
+  return timer.purpose === 'work';
 };
 
-export const hasTimer = (
-  phase: FocusModePhase,
-): phase is Extract<FocusModePhase, { timer: TimerState }> => {
-  return 'timer' in phase;
+export const isBreakSession = (timer: TimerState): boolean => {
+  return timer.purpose === 'break';
 };

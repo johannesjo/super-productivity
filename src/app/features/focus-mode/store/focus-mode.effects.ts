@@ -68,7 +68,19 @@ export class FocusModeEffects {
 
         // Check if we should start a break
         if (strategy.shouldStartBreakAfterSession) {
-          actionsToDispatch.push(actions.startBreak());
+          // Get break duration from strategy
+          const breakInfo = strategy.getBreakDuration(cycle);
+          if (breakInfo) {
+            actionsToDispatch.push(
+              actions.startBreak({
+                duration: breakInfo.duration,
+                isLongBreak: breakInfo.isLong,
+              }),
+            );
+          } else {
+            // Fallback if no break info (shouldn't happen for Pomodoro)
+            actionsToDispatch.push(actions.startBreak({}));
+          }
 
           // For Pomodoro, increment cycle
           if (mode === FocusModeMode.Pomodoro) {

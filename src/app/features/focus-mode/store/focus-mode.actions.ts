@@ -34,7 +34,10 @@ export const unPauseFocusSession = createAction(
 export const focusSessionDone = createAction('[FocusMode] Complete Session');
 export const cancelFocusSession = createAction('[FocusMode] Cancel Session');
 
-export const startBreak = createAction('[FocusMode] Start Break');
+export const startBreak = createAction(
+  '[FocusMode] Start Break',
+  props<{ duration?: number; isLongBreak?: boolean }>(),
+);
 export const skipBreak = createAction('[FocusMode] Skip Break');
 export const completeBreak = createAction('[FocusMode] Complete Break');
 

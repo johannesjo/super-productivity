@@ -2,43 +2,57 @@ import { createReducer, on } from '@ngrx/store';
 import * as a from './focus-mode.actions';
 import {
   FocusModeMode,
-  FocusModePhaseType,
   FocusModeState,
-  hasTimer,
+  FocusScreen,
   TimerState,
 } from '../focus-mode.model';
 import { LS } from '../../../core/persistence/storage-keys.const';
 
 const DEFAULT_SESSION_DURATION = 25 * 60 * 1000;
 const DEFAULT_BREAK_DURATION = 5 * 60 * 1000;
-const DEFAULT_LONG_BREAK_DURATION = 15 * 60 * 1000;
 
 export const FOCUS_MODE_FEATURE_KEY = 'focusMode';
 
 const focusModeModeFromLS = localStorage.getItem(LS.FOCUS_MODE_MODE);
 
+const createIdleTimer = (): TimerState => ({
+  isRunning: false,
+  startedAt: null,
+  elapsed: 0,
+  duration: 0,
+  purpose: null,
+});
+
 export const initialState: FocusModeState = {
-  phase: { type: FocusModePhaseType.Idle },
+  timer: createIdleTimer(),
+  currentScreen: FocusScreen.TaskSelection,
+  isOverlayShown: false,
   mode: Object.values(FocusModeMode).includes(focusModeModeFromLS as any)
     ? (focusModeModeFromLS as FocusModeMode)
     : FocusModeMode.Countdown,
-  isOverlayShown: false,
-  isSessionRunning: false,
   currentCycle: 1,
-  lastSessionDuration: 0,
+  lastCompletedDuration: 0,
 };
 
-const createTimer = (duration: number): TimerState => {
-  return {
-    startedAt: Date.now(),
-    elapsed: 0,
-    duration,
-    isPaused: false,
-  };
-};
+const createWorkTimer = (duration: number): TimerState => ({
+  isRunning: true,
+  startedAt: Date.now(),
+  elapsed: 0,
+  duration,
+  purpose: 'work',
+});
+
+const createBreakTimer = (duration: number, isLong = false): TimerState => ({
+  isRunning: true,
+  startedAt: Date.now(),
+  elapsed: 0,
+  duration,
+  purpose: 'break',
+  isLongBreak: isLong,
+});
 
 const updateTimer = (timer: TimerState): TimerState => {
-  if (timer.isPaused || !timer.startedAt) {
+  if (!timer.isRunning || !timer.startedAt) {
     return timer;
   }
 
@@ -60,10 +74,6 @@ export const focusModeReducer = createReducer(
   on(a.showFocusOverlay, (state) => ({
     ...state,
     isOverlayShown: true,
-    phase:
-      state.phase.type === FocusModePhaseType.Idle
-        ? { type: FocusModePhaseType.TaskSelection as const }
-        : state.phase,
   })),
 
   on(a.hideFocusOverlay, (state) => ({
@@ -71,199 +81,142 @@ export const focusModeReducer = createReducer(
     isOverlayShown: false,
   })),
 
-  // Phase transitions
+  // Screen navigation
   on(a.selectFocusTask, (state) => ({
     ...state,
-    phase: { type: FocusModePhaseType.TaskSelection as const },
-    // Keep isSessionRunning unchanged - if we're in an active session, it continues
+    currentScreen: FocusScreen.TaskSelection,
   })),
 
   on(a.selectFocusDuration, (state) => ({
     ...state,
-    phase: { type: FocusModePhaseType.DurationSelection as const },
+    currentScreen: FocusScreen.DurationSelection,
   })),
 
   on(a.startFocusPreparation, (state) => ({
     ...state,
-    phase: { type: FocusModePhaseType.Preparation as const },
+    currentScreen: FocusScreen.Preparation,
   })),
 
   on(a.goToMainScreen, (state) => ({
     ...state,
-    phase: { type: FocusModePhaseType.Session as const, timer: state.sessionTimer! },
+    currentScreen: FocusScreen.Main,
   })),
 
   on(a.startFocusSession, (state, { duration }) => {
-    const timer = createTimer(duration || DEFAULT_SESSION_DURATION);
+    const timer = createWorkTimer(duration || DEFAULT_SESSION_DURATION);
     return {
       ...state,
-      isSessionRunning: true,
-      sessionTimer: timer,
-      phase: {
-        type: FocusModePhaseType.Session as const,
-        timer,
-      },
+      timer,
+      currentScreen: FocusScreen.Main,
     };
   }),
 
   on(a.pauseFocusSession, (state) => {
-    if (state.phase.type !== FocusModePhaseType.Session) return state;
-
-    const pausedTimer = {
-      ...state.phase.timer,
-      isPaused: true,
-      elapsed: state.phase.timer.elapsed,
-    };
+    if (state.timer.purpose !== 'work') return state;
 
     return {
       ...state,
-      sessionTimer: pausedTimer,
-      phase: {
-        ...state.phase,
-        timer: pausedTimer,
+      timer: {
+        ...state.timer,
+        isRunning: false,
       },
     };
   }),
 
   on(a.unPauseFocusSession, (state, { idleTime = 0 }) => {
-    if (state.phase.type !== FocusModePhaseType.Session) return state;
-
-    const unpausedTimer = {
-      ...state.phase.timer,
-      isPaused: false,
-      startedAt: Date.now() - state.phase.timer.elapsed + idleTime,
-    };
+    if (state.timer.purpose !== 'work') return state;
 
     return {
       ...state,
-      sessionTimer: unpausedTimer,
-      phase: {
-        ...state.phase,
-        timer: unpausedTimer,
+      timer: {
+        ...state.timer,
+        isRunning: true,
+        startedAt: Date.now() - state.timer.elapsed + idleTime,
       },
     };
   }),
 
   on(a.focusSessionDone, (state) => {
-    // Prioritize sessionTimer since it's the authoritative source for session duration
-    const duration =
-      state.sessionTimer?.elapsed ??
-      (hasTimer(state.phase) ? state.phase.timer.elapsed : 0);
+    const duration = state.timer.elapsed;
 
     return {
       ...state,
-      isSessionRunning: false,
-      sessionTimer: undefined,
-      phase: { type: FocusModePhaseType.SessionDone as const, totalDuration: duration },
-      lastSessionDuration: duration,
+      timer: createIdleTimer(),
+      currentScreen: FocusScreen.SessionDone,
+      lastCompletedDuration: duration,
     };
   }),
 
   on(a.cancelFocusSession, (state) => ({
     ...state,
-    isSessionRunning: false,
-    sessionTimer: undefined,
-    phase: { type: FocusModePhaseType.TaskSelection as const },
+    timer: createIdleTimer(),
+    currentScreen: FocusScreen.TaskSelection,
     isOverlayShown: false,
   })),
 
   // Break handling
-  on(a.startBreak, (state) => {
-    // Break duration logic should be handled by effects using strategies
-    const isLongBreak = state.currentCycle % 4 === 0;
-    const duration = isLongBreak ? DEFAULT_LONG_BREAK_DURATION : DEFAULT_BREAK_DURATION;
+  on(a.startBreak, (state, { duration, isLongBreak }) => {
+    const timer = createBreakTimer(
+      duration || DEFAULT_BREAK_DURATION,
+      isLongBreak || false,
+    );
 
     return {
       ...state,
-      isSessionRunning: false,
-      sessionTimer: undefined,
-      phase: {
-        type: FocusModePhaseType.Break as const,
-        timer: createTimer(duration),
-        isLong: isLongBreak,
-      },
+      timer,
+      currentScreen: FocusScreen.Break,
     };
   }),
 
   on(a.skipBreak, a.completeBreak, (state) => ({
     ...state,
-    phase: { type: FocusModePhaseType.TaskSelection as const },
+    timer: createIdleTimer(),
+    currentScreen: FocusScreen.TaskSelection,
   })),
 
-  // Timer updates
+  // Timer updates - much simpler!
   on(a.tick, (state) => {
-    // Update sessionTimer if we have an active session
-    if (state.isSessionRunning && state.sessionTimer) {
-      const updatedSessionTimer = updateTimer(state.sessionTimer);
+    if (!state.timer.isRunning || !state.timer.purpose) {
+      return state;
+    }
 
-      // If phase has a timer, update both
-      if (hasTimer(state.phase)) {
-        const updatedPhaseTimer = updateTimer(state.phase.timer);
+    const updatedTimer = updateTimer(state.timer);
 
-        // Check if timer completed
-        if (
-          updatedPhaseTimer.duration > 0 &&
-          updatedPhaseTimer.elapsed >= updatedPhaseTimer.duration
-        ) {
-          if (state.phase.type === FocusModePhaseType.Session) {
-            return {
-              ...state,
-              isSessionRunning: false,
-              sessionTimer: undefined,
-              phase: {
-                type: FocusModePhaseType.SessionDone as const,
-                totalDuration: updatedPhaseTimer.elapsed,
-              },
-              lastSessionDuration: updatedPhaseTimer.elapsed,
-            };
-          }
-        }
-
+    // Check if timer completed
+    if (updatedTimer.duration > 0 && updatedTimer.elapsed >= updatedTimer.duration) {
+      if (updatedTimer.purpose === 'work') {
+        // Work session completed
         return {
           ...state,
-          sessionTimer: updatedSessionTimer,
-          phase: {
-            ...state.phase,
-            timer: updatedPhaseTimer,
-          } as any,
+          timer: createIdleTimer(),
+          currentScreen: FocusScreen.SessionDone,
+          lastCompletedDuration: updatedTimer.elapsed,
         };
-      } else {
-        // Phase doesn't have timer (e.g., TaskSelection during active session)
-        // Just update sessionTimer
+      } else if (updatedTimer.purpose === 'break') {
+        // Break completed
         return {
           ...state,
-          sessionTimer: updatedSessionTimer,
+          timer: createIdleTimer(),
+          currentScreen: FocusScreen.TaskSelection,
         };
       }
     }
 
-    // Not in session, handle break timer
-    if (hasTimer(state.phase)) {
-      const updatedTimer = updateTimer(state.phase.timer);
-
-      // Check if break timer completed
-      if (
-        state.phase.type === FocusModePhaseType.Break &&
-        updatedTimer.duration > 0 &&
-        updatedTimer.elapsed >= updatedTimer.duration
-      ) {
-        return {
-          ...state,
-          phase: { type: FocusModePhaseType.BreakDone as const },
-        };
-      }
-
-      return {
-        ...state,
-        phase: {
-          ...state.phase,
-          timer: updatedTimer,
-        } as any,
-      };
-    }
-
-    return state;
+    // Just update the timer
+    return {
+      ...state,
+      timer: updatedTimer,
+    };
   }),
+
+  // Duration setting
+  on(a.setFocusSessionDuration, (state, { focusSessionDuration }) => ({
+    ...state,
+    timer: {
+      ...state.timer,
+      duration: focusSessionDuration,
+    },
+  })),
 
   // Cycle management
   on(a.incrementCycle, (state) => ({

@@ -23,7 +23,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { SelectTaskComponent } from '../../tasks/select-task/select-task.component';
 import { FocusModeService } from '../focus-mode.service';
 import { FocusModeStrategyFactory } from '../focus-mode-strategies';
-import { FocusModePhaseType } from '../focus-mode.model';
+import { FocusScreen } from '../focus-mode.model';
 import { MatIcon } from '@angular/material/icon';
 import { MsToMinuteClockStringPipe } from '../../../ui/duration/ms-to-minute-clock-string.pipe';
 import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-circle.component';
@@ -114,28 +114,28 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
       return;
     }
 
-    // Get next phase from strategy
+    // Get next screen from strategy
     const strategy = this._strategyFactory.getStrategy(mode);
-    const nextPhase = strategy.getNextPhaseAfterTaskSelection(!!skipPreparation);
+    const nextStep = strategy.getNextScreenAfterTaskSelection(!!skipPreparation);
 
     // Set duration if provided by strategy
-    if (nextPhase.duration !== undefined) {
+    if (nextStep.duration !== undefined) {
       this._store.dispatch(
-        setFocusSessionDuration({ focusSessionDuration: nextPhase.duration }),
+        setFocusSessionDuration({ focusSessionDuration: nextStep.duration }),
       );
     }
 
     // Dispatch appropriate action based on strategy's decision
-    switch (nextPhase.phase) {
-      case FocusModePhaseType.DurationSelection:
+    switch (nextStep.screen) {
+      case FocusScreen.DurationSelection:
         this._store.dispatch(selectFocusDuration());
         break;
-      case FocusModePhaseType.Preparation:
+      case FocusScreen.Preparation:
         this._store.dispatch(startFocusPreparation());
         break;
-      case FocusModePhaseType.Session:
+      case FocusScreen.Main:
         this._store.dispatch(
-          startFocusSession(nextPhase.duration ? { duration: nextPhase.duration } : {}),
+          startFocusSession(nextStep.duration ? { duration: nextStep.duration } : {}),
         );
         break;
     }

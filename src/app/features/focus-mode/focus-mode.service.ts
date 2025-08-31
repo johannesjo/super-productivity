@@ -7,7 +7,7 @@ import * as selectors from './store/focus-mode.selectors';
 import { GlobalConfigService } from '../config/global-config.service';
 import { selectFocusModeConfig } from '../config/store/global-config.reducer';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
-import { FocusModePage, FocusModePhaseType, FocusModeMode } from './focus-mode.model';
+import { FocusModePage, FocusScreen, FocusModeMode } from './focus-mode.model';
 
 @Injectable({
   providedIn: 'root',
@@ -18,10 +18,13 @@ export class FocusModeService {
   private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
 
   // State signals
-  phase = toSignal(this._store.select(selectors.selectPhase));
+  currentScreen = toSignal(this._store.select(selectors.selectCurrentScreen));
   mode = toSignal(this._store.select(selectors.selectMode));
   isOverlayShown = toSignal(this._store.select(selectors.selectIsOverlayShown));
   currentCycle = toSignal(this._store.select(selectors.selectCurrentCycle));
+
+  // Legacy compatibility
+  phase = toSignal(this._store.select(selectors.selectPhase));
 
   // Timer signals
   isRunning = toSignal(this._store.select(selectors.selectIsRunning));
@@ -70,27 +73,25 @@ export class FocusModeService {
   timeToGo$ = this._store.select(selectors.selectTimeRemaining);
 
   activePage = toSignal(
-    this._store.select(selectors.selectFocusModeState).pipe(
-      map((state) => {
-        if (state.isOverlayShown) {
-          switch (state.phase.type) {
-            case FocusModePhaseType.TaskSelection:
-              return FocusModePage.TaskSelection;
-            case FocusModePhaseType.DurationSelection:
-              return FocusModePage.DurationSelection;
-            case FocusModePhaseType.Preparation:
-              return FocusModePage.Preparation;
-            case FocusModePhaseType.Session:
-              return FocusModePage.Main;
-            case FocusModePhaseType.SessionDone:
-              return FocusModePage.SessionDone;
-            case FocusModePhaseType.Break:
-              return FocusModePage.Break;
-            default:
-              return FocusModePage.TaskSelection;
-          }
+    this._store.select(selectors.selectCurrentScreen).pipe(
+      map((screen) => {
+        // Map FocusScreen to FocusModePage for backward compatibility
+        switch (screen) {
+          case FocusScreen.TaskSelection:
+            return FocusModePage.TaskSelection;
+          case FocusScreen.DurationSelection:
+            return FocusModePage.DurationSelection;
+          case FocusScreen.Preparation:
+            return FocusModePage.Preparation;
+          case FocusScreen.Main:
+            return FocusModePage.Main;
+          case FocusScreen.SessionDone:
+            return FocusModePage.SessionDone;
+          case FocusScreen.Break:
+            return FocusModePage.Break;
+          default:
+            return FocusModePage.TaskSelection;
         }
-        return FocusModePage.TaskSelection;
       }),
     ),
     { initialValue: FocusModePage.TaskSelection },
