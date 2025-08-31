@@ -13,7 +13,6 @@ import {
   showFocusOverlay,
   selectFocusTask,
   selectFocusDuration,
-  startFocusSession,
 } from '../store/focus-mode.actions';
 import { fadeInAnimation } from '../../../ui/animations/fade.ani';
 import { warpAnimation, warpInAnimation } from '../../../ui/animations/warp.ani';
@@ -104,10 +103,12 @@ export class FocusModeOverlayComponent implements OnDestroy {
         if (this.activePage() === FocusModePage.SessionDone) {
           return;
         }
+        // If a session is already running, don't do anything - just show the current state
+        if (this.isSessionRunning()) {
+          return;
+        }
         if (!task) {
           this._store.dispatch(selectFocusTask());
-        } else if (this.isSessionRunning()) {
-          this._store.dispatch(startFocusSession({}));
         } else {
           this._store.dispatch(selectFocusDuration());
         }
