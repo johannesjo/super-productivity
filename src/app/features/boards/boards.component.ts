@@ -1,20 +1,16 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
-  ElementRef,
   effect,
+  ElementRef,
   inject,
-  OnDestroy,
   signal,
-  viewChild,
-  viewChildren,
 } from '@angular/core';
 import { MatTab, MatTabContent, MatTabGroup, MatTabLabel } from '@angular/material/tabs';
 import { Store } from '@ngrx/store';
 import { T } from '../../t.const';
 import { MatIcon } from '@angular/material/icon';
-import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
+import { MatMenuModule } from '@angular/material/menu';
 import { nanoid } from 'nanoid';
 import { BoardComponent } from './board/board.component';
 import { CdkScrollable } from '@angular/cdk/overlay';
@@ -26,6 +22,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { BoardEditComponent } from './board-edit/board-edit.component';
 import { DEFAULT_BOARD_CFG } from './boards.const';
 import { BoardsActions } from './store/boards.actions';
+import { ContextMenuComponent } from '../../ui/context-menu/context-menu.component';
 
 @Component({
   selector: 'boards',
@@ -42,14 +39,13 @@ import { BoardsActions } from './store/boards.actions';
     CdkDropListGroup,
     TranslatePipe,
     BoardEditComponent,
+    ContextMenuComponent,
   ],
   templateUrl: './boards.component.html',
   styleUrl: './boards.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BoardsComponent implements AfterViewInit, OnDestroy {
-  readonly contextMenuTrigger = viewChild.required<MatMenuTrigger>('menuTrigger');
-  readonly contextMenuTriggers = viewChildren<MatMenuTrigger>('menuTrigger');
+export class BoardsComponent {
   store = inject(Store);
   elementRef = inject(ElementRef);
   selectedTabIndex = signal(localStorage.getItem(LS.SELECTED_BOARD) || 0);
@@ -62,23 +58,6 @@ export class BoardsComponent implements AfterViewInit, OnDestroy {
   constructor() {
     effect(() => {
       localStorage.setItem(LS.SELECTED_BOARD, this.selectedTabIndex().toString());
-    });
-  }
-  ngAfterViewInit(): void {
-    const boardTabEls = this.elementRef.nativeElement.querySelectorAll(
-      'mat-tab-header [id*="mat-tab-group"]',
-    );
-    boardTabEls.forEach((element: HTMLElement) => {
-      element.addEventListener('click', this.tabClick.bind(this));
-    });
-  }
-
-  ngOnDestroy(): void {
-    const boardTabEls = this.elementRef.nativeElement.querySelectorAll(
-      'mat-tab-header [id*="mat-tab-group"]',
-    );
-    boardTabEls.forEach((element: HTMLElement) => {
-      element.removeEventListener('click', this.tabClick.bind(this));
     });
   }
 
@@ -97,16 +76,8 @@ export class BoardsComponent implements AfterViewInit, OnDestroy {
     setTimeout(() => this.selectedTabIndex.set(index));
   }
 
-  tabClick(event: MouseEvent): void {
-    const activeTabIdx = this.selectedTabIndex();
-    // Get the element where the click event is attached, not the actual element
-    // that receives the click
-    const el = event.currentTarget as HTMLElement;
-    const clickedTabIdx = el.id.substring(el.id.length - 1);
-    if (parseInt(clickedTabIdx) == activeTabIdx) {
-      // Open context menu
-      this.contextMenuTriggers()[activeTabIdx].openMenu();
-    }
+  get componentElement(): HTMLElement {
+    return this.elementRef.nativeElement;
   }
 
   duplicateBoard(): void {
