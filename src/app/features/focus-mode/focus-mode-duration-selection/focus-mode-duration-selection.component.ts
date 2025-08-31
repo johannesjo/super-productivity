@@ -24,6 +24,7 @@ import { T } from '../../../t.const';
 import { FocusModeService } from '../focus-mode.service';
 import { MatIcon } from '@angular/material/icon';
 import { FocusModeMode } from '../focus-mode.model';
+import { LS } from '../../../core/persistence/storage-keys.const';
 
 @Component({
   selector: 'focus-mode-duration-selection',
@@ -46,7 +47,7 @@ export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDes
   T: typeof T = T;
   sessionDuration$ = this._store.select(selectTimeDuration);
   task$ = this._store.select(selectCurrentTask);
-  updatedFocusModeDuration?: number;
+  updatedFocusModeDuration: number = 25 * 60 * 1000; // Default to 25 minutes
   focusTimeout = 0;
   cfg = this._focusModeService.cfg;
   selectedMode = this._focusModeService.mode;
@@ -54,6 +55,12 @@ export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDes
   private _onDestroy$ = new Subject<void>();
 
   ngAfterViewInit(): void {
+    // Initialize duration from localStorage or use default
+    const lastDuration = localStorage.getItem(LS.LAST_COUNTDOWN_DURATION);
+    if (lastDuration) {
+      this.updatedFocusModeDuration = parseInt(lastDuration, 10);
+    }
+
     this.focusTimeout = window.setTimeout(() => {
       const el = document.querySelector('input');
       (el as HTMLElement)?.focus();
@@ -74,6 +81,12 @@ export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDes
   onSubmit($event?: SubmitEvent): void {
     $event?.preventDefault();
     if (this.updatedFocusModeDuration) {
+      // Save the duration to localStorage for next time
+      localStorage.setItem(
+        LS.LAST_COUNTDOWN_DURATION,
+        this.updatedFocusModeDuration.toString(),
+      );
+
       this._store.dispatch(
         setFocusSessionDuration({ focusSessionDuration: this.updatedFocusModeDuration }),
       );

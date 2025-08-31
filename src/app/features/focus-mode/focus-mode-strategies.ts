@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { FocusModeStrategy, FocusScreen, FocusModeMode } from './focus-mode.model';
 import { GlobalConfigService } from '../config/global-config.service';
+import { LS } from '../../core/persistence/storage-keys.const';
 
 @Injectable({ providedIn: 'root' })
 export class PomodoroStrategy implements FocusModeStrategy {
@@ -69,7 +70,7 @@ export class CountdownStrategy implements FocusModeStrategy {
 
   get initialSessionDuration(): number {
     const lastDuration = parseInt(
-      localStorage.getItem('LAST_COUNTDOWN_DURATION') || '0',
+      localStorage.getItem(LS.LAST_COUNTDOWN_DURATION) || '0',
       10,
     );
     return lastDuration || 25 * 60 * 1000;
