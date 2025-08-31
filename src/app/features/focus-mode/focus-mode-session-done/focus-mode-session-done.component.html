@@ -3,7 +3,13 @@
   <div class="pyro-after"></div>
 </div>
 
-<h1>{{ T.F.FOCUS_MODE.SESSION_COMPLETED | translate }}</h1>
+<h1>
+  @if (mode() === FocusModeMode.Pomodoro) {
+    {{ T.F.FOCUS_MODE.POMODORO_SESSION_COMPLETED | translate }}
+  } @else {
+    {{ T.F.FOCUS_MODE.SESSION_COMPLETED | translate }}
+  }
+</h1>
 
 <div class="msg">
   <div class="worked-for-label">{{ T.F.FOCUS_MODE.WORKED_FOR | translate }}</div>

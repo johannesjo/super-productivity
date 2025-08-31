@@ -12,6 +12,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { ConfettiService } from '../../../core/confetti/confetti.service';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { FocusModeService } from '../focus-mode.service';
+import { FocusModeMode } from '../focus-mode.model';
 import {
   selectCurrentTask,
   selectLastCurrentTask,
@@ -37,6 +38,7 @@ export class FocusModeSessionDoneComponent implements AfterViewInit {
   private readonly _focusModeService = inject(FocusModeService);
 
   mode = this._focusModeService.mode;
+  FocusModeMode = FocusModeMode;
   currentTask = toSignal(this._store.select(selectCurrentTask));
   taskTitle = toSignal(
     this._store.select(selectLastCurrentTask).pipe(

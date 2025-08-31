@@ -231,6 +231,7 @@
       "SELECT_ANOTHER_TASK": "Select another Task",
       "SELECT_TASK": "Select Task to focus on",
       "SESSION_COMPLETED": "Focus Session Completed!",
+      "POMODORO_SESSION_COMPLETED": "Pomodoro Session Completed!",
       "SET_FOCUS_SESSION_DURATION": "Set Focus Session Duration",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Show/hide task notes and attachments",
       "START_FOCUS_SESSION": "Start Focus Session",
