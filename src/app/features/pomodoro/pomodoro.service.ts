@@ -158,6 +158,10 @@ export class PomodoroService {
       .subscribe(([val, cfg, isBreak]) => {
         if (cfg.isManualContinueBreak && !isBreak) {
           this.pauseBreak(true);
+
+          if (cfg.isDisableAutoStartAfterBreak) {
+            this._taskService.pauseCurrent();
+          }
         } else if (cfg.isManualContinue && isBreak) {
           this.pause(true);
 
