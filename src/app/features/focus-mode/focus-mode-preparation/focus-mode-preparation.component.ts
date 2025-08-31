@@ -7,6 +7,7 @@ import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { T } from 'src/app/t.const';
 import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
+import { selectTimeDuration } from '../store/focus-mode.selectors';
 import { FocusModeService } from '../focus-mode.service';
 
 const COUNTDOWN_DURATION = 5;
@@ -42,7 +43,7 @@ export class FocusModePreparationComponent implements OnDestroy {
   }
 
   startSession(): void {
-    const duration = this._focusModeService.breakDuration();
+    const duration = this._store.selectSignal(selectTimeDuration)();
     this._store.dispatch(startFocusSession({ duration }));
   }
 

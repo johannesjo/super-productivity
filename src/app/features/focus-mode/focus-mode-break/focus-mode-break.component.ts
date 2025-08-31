@@ -20,15 +20,11 @@ export class FocusModeBreakComponent {
   private readonly _store = inject(Store);
 
   readonly remainingTime = computed(() => {
-    const elapsed = this.focusModeService.breakTimeElapsed() || 0;
-    const duration = this.focusModeService.breakDuration() || 0;
-    return Math.max(0, duration - elapsed);
+    return this.focusModeService.timeRemaining() || 0;
   });
 
   readonly progressPercentage = computed(() => {
-    const duration = this.focusModeService.breakDuration() || 0;
-    const elapsed = this.focusModeService.breakTimeElapsed() || 0;
-    return duration === 0 ? 0 : Math.min(100, (elapsed / duration) * 100);
+    return this.focusModeService.progress() || 0;
   });
 
   readonly breakTypeLabel = computed(() =>

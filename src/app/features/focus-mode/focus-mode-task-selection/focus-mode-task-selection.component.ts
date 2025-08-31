@@ -55,8 +55,8 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
   focusModeService = this._focusModeService;
 
   mode = this._focusModeService.mode;
-  cfg = this._focusModeService.cfg;
-  pomodoroCfg = this._focusModeService.pomodoroCfg;
+  focusModeConfig = this._focusModeService.focusModeConfig;
+  pomodoroConfig = this._focusModeService.pomodoroConfig;
   currentCycle = this._focusModeService.currentCycle;
   isFocusSessionRunning = this._focusModeService.isSessionRunning;
 
@@ -97,7 +97,7 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
     if (!this.selectedTask) return;
 
     const mode = this.mode();
-    const skipPreparation = this.cfg()?.isSkipPreparation;
+    const skipPreparation = this.focusModeConfig()?.isSkipPreparation;
 
     if (!mode) return;
 

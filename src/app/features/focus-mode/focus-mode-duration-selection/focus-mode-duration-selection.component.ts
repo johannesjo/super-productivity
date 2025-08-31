@@ -49,7 +49,7 @@ export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDes
   task$ = this._store.select(selectCurrentTask);
   updatedFocusModeDuration: number = FOCUS_MODE_DEFAULTS.SESSION_DURATION;
   focusTimeout = 0;
-  cfg = this._focusModeService.cfg;
+  cfg = this._focusModeService.focusModeConfig;
   selectedMode = this._focusModeService.mode;
 
   private _onDestroy$ = new Subject<void>();
