@@ -14,7 +14,7 @@
     </div>
   </div>
 
-  <p class="break-message">Take a moment to relax</p>
+  <p class="break-message">{{ T.F.FOCUS_MODE.BREAK_RELAX_MSG | translate }}</p>
 
   @if (remainingTime() > 0) {
     <button
@@ -22,7 +22,7 @@
       (click)="skipBreak()"
     >
       <mat-icon>skip_next</mat-icon>
-      Skip Break
+      {{ T.F.FOCUS_MODE.SKIP_BREAK | translate }}
     </button>
   } @else {
     <button
@@ -31,7 +31,7 @@
       (click)="completeBreak()"
     >
       <mat-icon>arrow_forward</mat-icon>
-      Continue to next Session
+      {{ T.F.FOCUS_MODE.CONTINUE_TO_NEXT_SESSION | translate }}
     </button>
   }
 </div>

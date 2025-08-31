@@ -238,7 +238,16 @@
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Show/hide task notes and attachments",
       "START_FOCUS_SESSION": "Start Focus Session",
       "START_NEXT_FOCUS_SESSION": "Start next Focus Session",
-      "WORKED_FOR": "You worked for"
+      "WORKED_FOR": "You worked for",
+      "BREAK_RELAX_MSG": "Take a moment to relax",
+      "SKIP_BREAK": "Skip Break",
+      "CONTINUE_TO_NEXT_SESSION": "Continue to next Session",
+      "FOCUS_TIME_TOOLTIP": "Focus time",
+      "CURRENT_SESSION_TIME_TOOLTIP": "Current session time",
+      "COMPLETE_SESSION": "Complete Session",
+      "CONTINUE_SESSION": "Continue Session",
+      "LONG_BREAK": "Long Break",
+      "SHORT_BREAK": "Short Break"
     },
     "GITEA": {
       "DIALOG_INITIAL": {

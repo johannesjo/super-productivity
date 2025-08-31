@@ -15,7 +15,7 @@
     <div class="progress-label-wrapper">
       <div
         class="focus-time"
-        title="Focus time"
+        [title]="T.F.FOCUS_MODE.FOCUS_TIME_TOOLTIP | translate"
       >
         @if (isCountDown) {
           {{ focusModeService.timeRemaining() | msToMinuteClockString }}

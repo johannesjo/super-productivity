@@ -6,11 +6,19 @@ import { MsToClockStringPipe } from '../../../ui/duration/ms-to-clock-string.pip
 import { Store } from '@ngrx/store';
 import { completeBreak, skipBreak } from '../store/focus-mode.actions';
 import { MatIcon } from '@angular/material/icon';
+import { T } from '../../../t.const';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'focus-mode-break',
   standalone: true,
-  imports: [MatButtonModule, MatProgressSpinnerModule, MsToClockStringPipe, MatIcon],
+  imports: [
+    MatButtonModule,
+    MatProgressSpinnerModule,
+    MsToClockStringPipe,
+    MatIcon,
+    TranslatePipe,
+  ],
   templateUrl: './focus-mode-break.component.html',
   styleUrl: './focus-mode-break.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -18,6 +26,7 @@ import { MatIcon } from '@angular/material/icon';
 export class FocusModeBreakComponent {
   readonly focusModeService = inject(FocusModeService);
   private readonly _store = inject(Store);
+  T: typeof T = T;
 
   readonly remainingTime = computed(() => {
     return this.focusModeService.timeRemaining() || 0;
@@ -28,7 +37,9 @@ export class FocusModeBreakComponent {
   });
 
   readonly breakTypeLabel = computed(() =>
-    this.focusModeService.isBreakLong() ? 'Long Break' : 'Short Break',
+    this.focusModeService.isBreakLong()
+      ? T.F.FOCUS_MODE.LONG_BREAK
+      : T.F.FOCUS_MODE.SHORT_BREAK,
   );
 
   skipBreak(): void {

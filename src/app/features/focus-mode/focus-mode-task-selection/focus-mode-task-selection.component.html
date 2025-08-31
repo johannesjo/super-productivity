@@ -16,7 +16,7 @@
         <div class="progress-label-wrapper">
           <div
             class="focus-time"
-            title="Current session time"
+            [title]="T.F.FOCUS_MODE.CURRENT_SESSION_TIME_TOOLTIP | translate"
           >
             @if (isCountDown) {
               {{ focusModeService.timeRemaining() | msToMinuteClockString }}
@@ -46,7 +46,7 @@
         (click)="completeSession()"
       >
         <mat-icon>done_all</mat-icon>
-        Complete Session
+        {{ T.F.FOCUS_MODE.COMPLETE_SESSION | translate }}
       </button>
 
       <button
@@ -55,7 +55,7 @@
         mat-raised-button
       >
         <mat-icon>arrow_forward</mat-icon>
-        Continue Session
+        {{ T.F.FOCUS_MODE.CONTINUE_SESSION | translate }}
       </button>
     </div>
   } @else {
