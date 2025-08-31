@@ -1,4 +1,5 @@
 import { computed, inject, Injectable } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, tap } from 'rxjs/operators';
@@ -77,13 +78,14 @@ export class FocusModeService {
   });
 
   // Single timer that updates the store
-  private timer$ = this._globalTrackingIntervalService.tick$.pipe(
-    filter(() => this.isRunning() === true),
-    tap(() => this._store.dispatch(actions.tick())),
-  );
-
   constructor() {
-    // Start the timer subscription
-    this.timer$.subscribe();
+    // Start the timer subscription with proper cleanup
+    this._globalTrackingIntervalService.tick$
+      .pipe(
+        filter(() => this.isRunning() === true),
+        tap(() => this._store.dispatch(actions.tick())),
+        takeUntilDestroyed(),
+      )
+      .subscribe();
   }
 }
