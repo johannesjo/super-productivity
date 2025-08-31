@@ -190,11 +190,10 @@ export const focusModeReducer = createReducer(
           lastCompletedDuration: updatedTimer.elapsed,
         };
       } else if (updatedTimer.purpose === 'break') {
-        // Break completed
+        // Break completed - stop timer but stay on break screen for user confirmation
         return {
           ...state,
-          timer: createIdleTimer(),
-          currentScreen: FocusScreen.TaskSelection,
+          timer: { ...updatedTimer, isRunning: false },
         };
       }
     }
