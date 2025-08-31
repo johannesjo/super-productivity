@@ -95,7 +95,7 @@ export const focusModeReducer = createReducer(
     currentScreen: FocusScreen.Preparation,
   })),
 
-  on(a.goToMainScreen, (state) => ({
+  on(a.navigateToMainScreen, (state) => ({
     ...state,
     currentScreen: FocusScreen.Main,
   })),
@@ -134,7 +134,7 @@ export const focusModeReducer = createReducer(
     };
   }),
 
-  on(a.focusSessionDone, (state) => {
+  on(a.completeFocusSession, (state) => {
     const duration = state.timer.elapsed;
 
     return {

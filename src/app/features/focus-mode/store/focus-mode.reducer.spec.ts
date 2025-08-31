@@ -99,7 +99,7 @@ describe('FocusModeReducer', () => {
     });
 
     it('should navigate to main screen', () => {
-      const action = a.goToMainScreen();
+      const action = a.navigateToMainScreen();
       const result = focusModeReducer(initialState, action);
 
       expect(result.currentScreen).toBe(FocusScreen.Main);
@@ -193,7 +193,7 @@ describe('FocusModeReducer', () => {
         },
       };
 
-      const action = a.focusSessionDone();
+      const action = a.completeFocusSession();
       const result = focusModeReducer(runningState, action);
 
       expect(result.currentScreen).toBe(FocusScreen.SessionDone);

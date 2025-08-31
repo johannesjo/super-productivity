@@ -9,8 +9,8 @@ import { Task } from '../../tasks/task.model';
 import { TaskService } from '../../tasks/task.service';
 import { Store } from '@ngrx/store';
 import {
-  focusSessionDone,
-  goToMainScreen,
+  completeFocusSession,
+  navigateToMainScreen,
   selectFocusDuration,
   setFocusSessionDuration,
   startFocusPreparation,
@@ -89,7 +89,7 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
   }
 
   completeSession(): void {
-    this._store.dispatch(focusSessionDone());
+    this._store.dispatch(completeFocusSession());
   }
 
   onSubmit($event: SubmitEvent): void {
@@ -110,7 +110,7 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
     }
 
     if (this.isFocusSessionRunning()) {
-      this._store.dispatch(goToMainScreen());
+      this._store.dispatch(navigateToMainScreen());
       return;
     }
 

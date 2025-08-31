@@ -49,7 +49,7 @@ export const ALLOWED_PLUGIN_ACTIONS = [
   // startFocusSession,
   // cancelFocusSession,
   // pauseFocusSession,
-  // focusSessionDone,
+  // completeFocusSession,
 
   // Task Management
   // addTask,

@@ -48,7 +48,7 @@ export class FocusModeEffects {
     ),
   );
 
-  // Detect when work session timer completes and dispatch focusSessionDone
+  // Detect when work session timer completes and dispatch completeFocusSession
   detectSessionCompletion$ = createEffect(() =>
     this.store.select(selectors.selectTimer).pipe(
       filter(
@@ -62,14 +62,14 @@ export class FocusModeEffects {
         (prev, curr) =>
           prev.elapsed === curr.elapsed && prev.startedAt === curr.startedAt,
       ),
-      map(() => actions.focusSessionDone()),
+      map(() => actions.completeFocusSession()),
     ),
   );
 
   // Handle session completion
   sessionComplete$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(actions.focusSessionDone),
+      ofType(actions.completeFocusSession),
       withLatestFrom(
         this.store.select(selectors.selectMode),
         this.store.select(selectors.selectCurrentCycle),
@@ -208,7 +208,7 @@ export class FocusModeEffects {
     createEffect(
       () =>
         this.actions$.pipe(
-          ofType(actions.focusSessionDone),
+          ofType(actions.completeFocusSession),
           tap(() => {
             window.ea.showOrFocus();
             window.ea.flashFrame();

@@ -361,7 +361,7 @@ describe('FocusModeMainComponent', () => {
     it('should dispatch all required actions', () => {
       component.finishCurrentTask();
 
-      expect(mockStore.dispatch).toHaveBeenCalledWith(actions.focusTaskDone());
+      expect(mockStore.dispatch).toHaveBeenCalledWith(actions.completeTask());
       expect(mockStore.dispatch).toHaveBeenCalledWith(actions.selectFocusTask());
       expect(mockStore.dispatch).toHaveBeenCalledWith(
         TaskSharedActions.updateTask({

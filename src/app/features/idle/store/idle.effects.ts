@@ -47,7 +47,7 @@ import { DateService } from '../../../core/date/date.service';
 import { ipcIdleTime$ } from '../../../core/ipc-events';
 import { selectIsSessionRunning } from '../../focus-mode/store/focus-mode.selectors';
 import {
-  focusSessionDone,
+  completeFocusSession,
   showFocusOverlay,
   unPauseFocusSession,
 } from '../../focus-mode/store/focus-mode.actions';
@@ -233,7 +233,7 @@ export class IdleEffects {
 
           if (trackItems.length === 0 && simpleCounterToggleBtnsWhenNoTrackItems) {
             if (wasFocusSessionRunning) {
-              this._store.dispatch(focusSessionDone());
+              this._store.dispatch(completeFocusSession());
               this._store.dispatch(showFocusOverlay());
             }
 
@@ -290,7 +290,7 @@ export class IdleEffects {
               );
             });
             if (wasFocusSessionRunning) {
-              this._store.dispatch(focusSessionDone());
+              this._store.dispatch(completeFocusSession());
               this._store.dispatch(showFocusOverlay());
             }
           } else if (wasFocusSessionRunning) {

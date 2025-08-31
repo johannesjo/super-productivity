@@ -11,7 +11,7 @@ import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.act
 import { FocusModeService } from '../../focus-mode/focus-mode.service';
 import {
   cancelFocusSession,
-  focusSessionDone,
+  completeFocusSession,
   hideFocusOverlay,
   pauseFocusSession,
   showFocusOverlay,
@@ -86,7 +86,7 @@ export class TaskElectronEffects {
           cancelFocusSession,
           pauseFocusSession,
           unPauseFocusSession,
-          focusSessionDone,
+          completeFocusSession,
         ),
 
         withLatestFrom(
