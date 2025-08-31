@@ -71,7 +71,7 @@ export class FocusModeOverlayComponent implements OnDestroy {
   FocusModeMode: typeof FocusModeMode = FocusModeMode;
 
   selectedMode = this.focusModeService.mode;
-  activePage = this.focusModeService.activePage;
+  activePage = this.focusModeService.currentScreen;
   isSessionRunning = this.focusModeService.isSessionRunning;
 
   isPomodoroEnabled = toSignal(this._store.select(selectIsPomodoroEnabled), {
@@ -126,30 +126,51 @@ export class FocusModeOverlayComponent implements OnDestroy {
   }
 
   closeOverlay(): void {
-    if (this.isSessionRunning()) {
-      const isCountTimeUp = this.selectedMode() === FocusModeMode.Flowtime;
+    const isOnBreak = this.focusModeService.isBreakActive();
 
-      // Get current mode to determine translation key and parameters
+    if (this.isSessionRunning() || isOnBreak) {
       const mode = this.selectedMode();
       const cycle = this.focusModeService.currentCycle();
 
-      const translationKey =
-        mode === FocusModeMode.Pomodoro
-          ? T.F.FOCUS_MODE.B.POMODORO_SESSION_RUNNING
-          : T.F.FOCUS_MODE.B.SESSION_RUNNING;
+      // Determine banner message based on session type
+      let translationKey: string;
+      let icon: string;
+      let timer$;
+      let progress$;
+
+      if (isOnBreak) {
+        // Break is active
+        translationKey =
+          mode === FocusModeMode.Pomodoro
+            ? T.F.FOCUS_MODE.B.POMODORO_BREAK_RUNNING
+            : T.F.FOCUS_MODE.B.BREAK_RUNNING;
+        icon = 'free_breakfast';
+        timer$ = this.focusModeService.timeToGo$;
+        progress$ = this.focusModeService.sessionProgress$;
+      } else {
+        // Work session is active
+        const isCountTimeUp = mode === FocusModeMode.Flowtime;
+        translationKey =
+          mode === FocusModeMode.Pomodoro
+            ? T.F.FOCUS_MODE.B.POMODORO_SESSION_RUNNING
+            : T.F.FOCUS_MODE.B.SESSION_RUNNING;
+        icon = 'center_focus_strong';
+        timer$ = isCountTimeUp
+          ? this._store.select(selectTimeElapsed)
+          : this.focusModeService.timeToGo$;
+        progress$ = isCountTimeUp ? undefined : this.focusModeService.sessionProgress$;
+      }
 
       const translateParams =
         mode === FocusModeMode.Pomodoro ? { cycleNr: cycle || 1 } : undefined;
 
       this.bannerService.open({
         id: BannerId.FocusMode,
-        ico: 'center_focus_strong',
+        ico: icon,
         msg: translationKey,
         translateParams,
-        timer$: isCountTimeUp
-          ? this._store.select(selectTimeElapsed)
-          : this.focusModeService.timeToGo$,
-        progress$: isCountTimeUp ? undefined : this.focusModeService.sessionProgress$,
+        timer$,
+        progress$,
         action2: {
           label: T.F.FOCUS_MODE.B.TO_FOCUS_OVERLAY,
           fn: () => {
