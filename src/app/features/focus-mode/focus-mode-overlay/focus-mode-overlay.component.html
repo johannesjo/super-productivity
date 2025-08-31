@@ -36,7 +36,7 @@
       <!-- -->
       @switch (activePage()) {
         <!-- -->
-        @case (FocusModePage.TaskSelection) {
+        @case (FocusScreen.TaskSelection) {
           @if (!isSessionRunning()) {
             <ng-container *ngTemplateOutlet="selectModeTpl"></ng-container>
           }
@@ -45,7 +45,7 @@
             @warpIn
           ></focus-mode-task-selection>
         }
-        @case (FocusModePage.DurationSelection) {
+        @case (FocusScreen.DurationSelection) {
           @if (!isSessionRunning()) {
             <ng-container *ngTemplateOutlet="selectModeTpl"></ng-container>
           }
@@ -54,16 +54,16 @@
             @warpIn
           ></focus-mode-duration-selection>
         }
-        @case (FocusModePage.Preparation) {
+        @case (FocusScreen.Preparation) {
           <focus-mode-preparation @warpIn></focus-mode-preparation>
         }
-        @case (FocusModePage.Main) {
+        @case (FocusScreen.Main) {
           <focus-mode-main @warpIn></focus-mode-main>
         }
-        @case (FocusModePage.SessionDone) {
+        @case (FocusScreen.SessionDone) {
           <focus-mode-session-done @warpIn></focus-mode-session-done>
         }
-        @case (FocusModePage.Break) {
+        @case (FocusScreen.Break) {
           <focus-mode-break @warpIn></focus-mode-break>
         }
       }

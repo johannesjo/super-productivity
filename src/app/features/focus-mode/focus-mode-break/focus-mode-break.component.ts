@@ -19,20 +19,16 @@ export class FocusModeBreakComponent {
   readonly focusModeService = inject(FocusModeService);
   private readonly _store = inject(Store);
 
-  readonly remainingTime = computed(() =>
-    Math.max(
-      0,
-      // TODO restore
-      2000 - this.focusModeService.breakTimeElapsed(),
-      // this.focusModeService.breakDuration() - this.focusModeService.breakTimeElapsed(),
-    ),
-  );
+  readonly remainingTime = computed(() => {
+    const elapsed = this.focusModeService.breakTimeElapsed() || 0;
+    const duration = this.focusModeService.breakDuration() || 0;
+    return Math.max(0, duration - elapsed);
+  });
 
   readonly progressPercentage = computed(() => {
-    const duration = this.focusModeService.breakDuration();
-    return duration === 0
-      ? 0
-      : Math.min(100, (this.focusModeService.breakTimeElapsed() / duration) * 100);
+    const duration = this.focusModeService.breakDuration() || 0;
+    const elapsed = this.focusModeService.breakTimeElapsed() || 0;
+    return duration === 0 ? 0 : Math.min(100, (elapsed / duration) * 100);
   });
 
   readonly breakTypeLabel = computed(() =>

@@ -5,11 +5,9 @@ import {
   FocusModeState,
   FocusScreen,
   TimerState,
+  FOCUS_MODE_DEFAULTS,
 } from '../focus-mode.model';
 import { LS } from '../../../core/persistence/storage-keys.const';
-
-const DEFAULT_SESSION_DURATION = 25 * 60 * 1000;
-const DEFAULT_BREAK_DURATION = 5 * 60 * 1000;
 
 export const FOCUS_MODE_FEATURE_KEY = 'focusMode';
 
@@ -103,7 +101,7 @@ export const focusModeReducer = createReducer(
   })),
 
   on(a.startFocusSession, (state, { duration }) => {
-    const timer = createWorkTimer(duration || DEFAULT_SESSION_DURATION);
+    const timer = createWorkTimer(duration || FOCUS_MODE_DEFAULTS.SESSION_DURATION);
     return {
       ...state,
       timer,
@@ -157,7 +155,7 @@ export const focusModeReducer = createReducer(
   // Break handling
   on(a.startBreak, (state, { duration, isLongBreak }) => {
     const timer = createBreakTimer(
-      duration || DEFAULT_BREAK_DURATION,
+      duration || FOCUS_MODE_DEFAULTS.SHORT_BREAK_DURATION,
       isLongBreak || false,
     );
 

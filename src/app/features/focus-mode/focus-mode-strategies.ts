@@ -1,5 +1,10 @@
 import { Injectable, inject } from '@angular/core';
-import { FocusModeStrategy, FocusScreen, FocusModeMode } from './focus-mode.model';
+import {
+  FocusModeStrategy,
+  FocusScreen,
+  FocusModeMode,
+  FOCUS_MODE_DEFAULTS,
+} from './focus-mode.model';
 import { GlobalConfigService } from '../config/global-config.service';
 import { LS } from '../../core/persistence/storage-keys.const';
 
@@ -9,19 +14,20 @@ export class PomodoroStrategy implements FocusModeStrategy {
 
   get initialSessionDuration(): number {
     const config = this.globalConfigService.pomodoroConfig();
-    return config?.duration || 25 * 60 * 1000;
+    return config?.duration || FOCUS_MODE_DEFAULTS.SESSION_DURATION;
   }
 
   getBreakDuration(cycle: number): { duration: number; isLong: boolean } {
     const config = this.globalConfigService.pomodoroConfig();
-    const cyclesBeforeLong = config?.cyclesBeforeLongerBreak || 4;
+    const cyclesBeforeLong =
+      config?.cyclesBeforeLongerBreak || FOCUS_MODE_DEFAULTS.CYCLES_BEFORE_LONG_BREAK;
     // The next cycle will be cycle + 1, check if that should be a long break
     const nextCycle = cycle + 1;
     const isLong = nextCycle % cyclesBeforeLong === 0;
 
     const duration = isLong
-      ? config?.longerBreakDuration || 15 * 60 * 1000
-      : config?.breakDuration || 5 * 60 * 1000;
+      ? config?.longerBreakDuration || FOCUS_MODE_DEFAULTS.LONG_BREAK_DURATION
+      : config?.breakDuration || FOCUS_MODE_DEFAULTS.SHORT_BREAK_DURATION;
 
     return { duration, isLong };
   }
@@ -30,8 +36,7 @@ export class PomodoroStrategy implements FocusModeStrategy {
     screen: FocusScreen;
     duration?: number;
   } {
-    const config = this.globalConfigService.pomodoroConfig();
-    const duration = config?.duration || 25 * 60 * 1000;
+    const duration = this.initialSessionDuration; // Reuse the getter
 
     return {
       screen: skipPreparation ? FocusScreen.Main : FocusScreen.Preparation,
@@ -66,14 +71,12 @@ export class FlowtimeStrategy implements FocusModeStrategy {
 
 @Injectable({ providedIn: 'root' })
 export class CountdownStrategy implements FocusModeStrategy {
-  private globalConfigService = inject(GlobalConfigService);
-
   get initialSessionDuration(): number {
     const lastDuration = parseInt(
       localStorage.getItem(LS.LAST_COUNTDOWN_DURATION) || '0',
       10,
     );
-    return lastDuration || 25 * 60 * 1000;
+    return lastDuration || FOCUS_MODE_DEFAULTS.SESSION_DURATION;
   }
 
   readonly shouldStartBreakAfterSession = false;

@@ -34,7 +34,7 @@ import { BannerId } from '../../../core/banner/banner.model';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { FocusModeService } from '../focus-mode.service';
-import { FocusModeMode, FocusModePage } from '../focus-mode.model';
+import { FocusModeMode, FocusScreen } from '../focus-mode.model';
 
 @Component({
   selector: 'focus-mode-overlay',
@@ -67,7 +67,7 @@ export class FocusModeOverlayComponent implements OnDestroy {
   private readonly _globalConfigService = inject(GlobalConfigService);
   private readonly _store = inject(Store);
 
-  FocusModePage: typeof FocusModePage = FocusModePage;
+  FocusScreen: typeof FocusScreen = FocusScreen;
   FocusModeMode: typeof FocusModeMode = FocusModeMode;
 
   selectedMode = this.focusModeService.mode;
@@ -84,8 +84,8 @@ export class FocusModeOverlayComponent implements OnDestroy {
   private _closeOnEscapeKeyListener = (ev: KeyboardEvent): void => {
     if (ev.key === 'Escape') {
       if (
-        this.activePage() === FocusModePage.TaskSelection ||
-        this.activePage() === FocusModePage.DurationSelection
+        this.activePage() === FocusScreen.TaskSelection ||
+        this.activePage() === FocusScreen.DurationSelection
       ) {
         this.cancelFocusSession();
       }
@@ -100,7 +100,7 @@ export class FocusModeOverlayComponent implements OnDestroy {
     this.taskService.currentTask$
       .pipe(first(), takeUntil(this._onDestroy$))
       .subscribe((task) => {
-        if (this.activePage() === FocusModePage.SessionDone) {
+        if (this.activePage() === FocusScreen.SessionDone) {
           return;
         }
         // If a session is already running, don't do anything - just show the current state

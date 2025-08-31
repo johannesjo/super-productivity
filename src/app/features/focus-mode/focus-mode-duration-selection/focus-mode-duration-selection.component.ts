@@ -23,7 +23,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { T } from '../../../t.const';
 import { FocusModeService } from '../focus-mode.service';
 import { MatIcon } from '@angular/material/icon';
-import { FocusModeMode } from '../focus-mode.model';
+import { FocusModeMode, FOCUS_MODE_DEFAULTS } from '../focus-mode.model';
 import { LS } from '../../../core/persistence/storage-keys.const';
 
 @Component({
@@ -47,7 +47,7 @@ export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDes
   T: typeof T = T;
   sessionDuration$ = this._store.select(selectTimeDuration);
   task$ = this._store.select(selectCurrentTask);
-  updatedFocusModeDuration: number = 25 * 60 * 1000; // Default to 25 minutes
+  updatedFocusModeDuration: number = FOCUS_MODE_DEFAULTS.SESSION_DURATION;
   focusTimeout = 0;
   cfg = this._focusModeService.cfg;
   selectedMode = this._focusModeService.mode;

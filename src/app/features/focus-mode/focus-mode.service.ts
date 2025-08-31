@@ -1,13 +1,13 @@
 import { computed, inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { filter, map, tap } from 'rxjs/operators';
+import { filter, tap } from 'rxjs/operators';
 import * as actions from './store/focus-mode.actions';
 import * as selectors from './store/focus-mode.selectors';
 import { GlobalConfigService } from '../config/global-config.service';
 import { selectFocusModeConfig } from '../config/store/global-config.reducer';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
-import { FocusModePage, FocusScreen, FocusModeMode } from './focus-mode.model';
+import { FocusScreen, FocusModeMode } from './focus-mode.model';
 
 @Injectable({
   providedIn: 'root',
@@ -39,9 +39,13 @@ export class FocusModeService {
   // Break signals
   isBreakActive = toSignal(this._store.select(selectors.selectIsBreakActive));
   isLongBreak = toSignal(this._store.select(selectors.selectIsLongBreak));
-  isBreakLong = toSignal(this._store.select(selectors.selectIsLongBreak)); // Alias for compatibility
 
-  // Break-specific timer signals (for compatibility)
+  // Config signals
+  pomodoroConfig = this._globalConfigService.pomodoroConfig;
+  focusModeConfig = toSignal(this._store.select(selectFocusModeConfig));
+
+  // Compatibility aliases (TODO: remove when components are updated)
+  isBreakLong = this.isLongBreak;
   breakTimeElapsed = toSignal(this._store.select(selectors.selectTimeElapsed), {
     initialValue: 0,
   });
@@ -51,12 +55,8 @@ export class FocusModeService {
   breakProgress = toSignal(this._store.select(selectors.selectProgress), {
     initialValue: 0,
   });
-
-  // Config signals
-  pomodoroConfig = this._globalConfigService.pomodoroConfig;
-  focusModeConfig = toSignal(this._store.select(selectFocusModeConfig));
-  cfg = this.focusModeConfig; // Alias for compatibility
-  pomodoroCfg = this.pomodoroConfig; // Alias for compatibility
+  cfg = this.focusModeConfig;
+  pomodoroCfg = this.pomodoroConfig;
 
   // Additional compatibility signals
   lastSessionTotalDurationOrTimeElapsedFallback = toSignal(
@@ -72,30 +72,9 @@ export class FocusModeService {
   currentSessionTime$ = this._store.select(selectors.selectTimeElapsed);
   timeToGo$ = this._store.select(selectors.selectTimeRemaining);
 
-  activePage = toSignal(
-    this._store.select(selectors.selectCurrentScreen).pipe(
-      map((screen) => {
-        // Map FocusScreen to FocusModePage for backward compatibility
-        switch (screen) {
-          case FocusScreen.TaskSelection:
-            return FocusModePage.TaskSelection;
-          case FocusScreen.DurationSelection:
-            return FocusModePage.DurationSelection;
-          case FocusScreen.Preparation:
-            return FocusModePage.Preparation;
-          case FocusScreen.Main:
-            return FocusModePage.Main;
-          case FocusScreen.SessionDone:
-            return FocusModePage.SessionDone;
-          case FocusScreen.Break:
-            return FocusModePage.Break;
-          default:
-            return FocusModePage.TaskSelection;
-        }
-      }),
-    ),
-    { initialValue: FocusModePage.TaskSelection },
-  );
+  activePage = toSignal(this._store.select(selectors.selectCurrentScreen), {
+    initialValue: FocusScreen.TaskSelection,
+  });
 
   // Single timer that updates the store
   private timer$ = this._globalTrackingIntervalService.tick$.pipe(

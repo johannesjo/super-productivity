@@ -18,15 +18,8 @@ export enum FocusScreen {
   Break = 'Break',
 }
 
-// Legacy support - map old page names to new screens
-export enum FocusModePage {
-  Main = 'Main',
-  SessionDone = 'SessionDone',
-  TaskSelection = 'TaskSelection',
-  DurationSelection = 'DurationSelection',
-  Preparation = 'Preparation',
-  Break = 'Break',
-}
+// Legacy alias for backward compatibility
+export const FocusModePage = FocusScreen;
 
 export enum FocusModeMode {
   'Flowtime' = 'Flowtime',
@@ -62,7 +55,7 @@ export interface FocusModeStrategy {
   };
 }
 
-// Helper functions for timer
+// Helper functions and type guards for timer
 export const isTimerRunning = (timer: TimerState): boolean => {
   return timer.isRunning && timer.purpose !== null;
 };
@@ -74,3 +67,11 @@ export const isWorkSession = (timer: TimerState): boolean => {
 export const isBreakSession = (timer: TimerState): boolean => {
   return timer.purpose === 'break';
 };
+
+// Constants for better maintainability
+export const FOCUS_MODE_DEFAULTS = {
+  SESSION_DURATION: 25 * 60 * 1000, // 25 minutes
+  SHORT_BREAK_DURATION: 5 * 60 * 1000, // 5 minutes
+  LONG_BREAK_DURATION: 15 * 60 * 1000, // 15 minutes
+  CYCLES_BEFORE_LONG_BREAK: 4,
+} as const;
