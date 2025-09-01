@@ -146,7 +146,7 @@
     "@angular-eslint/schematics": "^20.1.1",
     "@angular-eslint/template-parser": "^20.1.1",
     "@angular/animations": "^20.1.6",
-    "@angular/cdk": "^20.1.5",
+    "@angular/cdk": "^20.2.1",
     "@angular/cli": "^20.1.5",
     "@angular/common": "^20.1.6",
     "@angular/compiler": "^20.1.6",
