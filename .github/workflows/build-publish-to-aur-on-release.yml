@@ -18,10 +18,11 @@ jobs:
       - run: sed "s/PACKAGE_VERSION/${package_version}/g" build/linux/PKGBUILD_template > build/linux/PKGBUILD
 
       - name: Publish AUR package
-        uses: KSXGitHub/github-actions-deploy-aur@v3.0.1
+        uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
         with:
           pkgname: superproductivity-bin
           pkgbuild: build/linux/PKGBUILD
+          updpkgsums: true
           commit_username: ${{ secrets.AUR_USERNAME }}
           commit_email: ${{ secrets.AUR_EMAIL }}
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
