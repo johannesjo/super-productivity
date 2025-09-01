@@ -247,7 +247,9 @@
       "COMPLETE_SESSION": "Complete Session",
       "CONTINUE_SESSION": "Continue Session",
       "LONG_BREAK": "Long Break",
-      "SHORT_BREAK": "Short Break"
+      "SHORT_BREAK": "Short Break",
+      "LONG_BREAK_TITLE": "Long Break - Cycle {{cycle}}",
+      "SHORT_BREAK_TITLE": "Short Break - Cycle {{cycle}}"
     },
     "GITEA": {
       "DIALOG_INITIAL": {
