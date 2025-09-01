@@ -74,6 +74,7 @@ import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { isMarkdownChecklist } from '../../markdown-checklist/is-markdown-checklist';
+import { Log } from '../../../core/log';
 
 @Component({
   selector: 'task-detail-panel',
@@ -402,6 +403,7 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
           }
         }
       });
+    Log.verbose('Task Detail Panel', this.task());
   }
 
   ngOnDestroy(): void {
