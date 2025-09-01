@@ -12,7 +12,7 @@ jobs:
     if: '!github.event.release.prerelease'
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
 
       - run: PACKAGE_VERSION=$(cat ./package.json | grep version | head -1 | awk -F '"' '{print $4}') && echo "package_version=$PACKAGE_VERSION" >> $GITHUB_ENV
       - run: sed "s/PACKAGE_VERSION/${package_version}/g" build/linux/PKGBUILD_template > build/linux/PKGBUILD
