@@ -22,29 +22,48 @@ export const formatMonthDay = (date: Date, locale: string): string => {
       return '';
     }
 
-    const datePipe = new DatePipe(locale);
+    // Use the browser's native Intl.DateTimeFormat for proper locale support
+    // This is more reliable than Angular's DatePipe for getting locale-specific formatting
+    try {
+      const formatter = new Intl.DateTimeFormat(locale, {
+        month: 'numeric',
+        day: 'numeric',
+      });
 
-    // Use Angular's DatePipe for consistent formatting with the rest of the app
-    // 'shortDate' format will automatically adapt to the locale (M/d/yy for en-US, dd/MM/yy for en-GB, etc.)
-    const shortDate = datePipe.transform(date, 'shortDate') || '';
+      const formatted = formatter.format(date);
 
-    // Remove year from various locale formats:
-    // en-US: "12/25/23" -> "12/25"
-    // en-GB: "25/12/2023" -> "25/12"
-    // de-DE: "25.12.23" -> "25.12"
-    // fr-FR: "25/12/2023" -> "25/12"
-    // ja-JP: "2023/12/25" -> "12/25" (special case - remove year from start)
-    // ko-KR: "23. 12. 25." -> "12. 25."
+      // Remove zero-padding for consistency across all locales
+      // This ensures "05/01" becomes "5/1", "05.01" becomes "5.1", etc.
+      return formatted.replace(/\b0+(\d)/g, '$1');
+    } catch (intlError) {
+      // If Intl.DateTimeFormat fails, fall back to DatePipe approach
+      Log.warn(
+        `Intl.DateTimeFormat failed for locale ${locale}, falling back to DatePipe`,
+      );
 
-    // Handle year at the end (most common): separator + 2-4 digits
-    let result = shortDate.replace(/[/.\-\s]+\d{2,4}\.?$/, '');
+      const datePipe = new DatePipe(locale);
+      const shortDate = datePipe.transform(date, 'shortDate') || '';
 
-    // Handle year at the beginning (like Japanese): 4 digits + separator
-    result = result.replace(/^\d{4}[/.\-\s]+/, '');
+      if (!shortDate) {
+        throw new Error('DatePipe.transform returned null or empty string');
+      }
 
-    return result;
+      // Remove year from various locale formats
+      let result = shortDate;
+
+      // Handle year at the end: separator followed by 2-4 digits
+      result = result.replace(/[/.\-\s]\d{2,4}\.?$/, '');
+
+      // Handle year at the beginning: 4 digits followed by separator
+      result = result.replace(/^\d{4}[/.\-\s]/, '');
+
+      // Clean up any remaining separators at start/end
+      result = result.replace(/^[/.\-\s]+|[/.\-\s]+$/g, '');
+
+      return result;
+    }
   } catch (error) {
-    // Fallback to basic formatting if locale data is missing
+    // Final fallback to basic formatting
     Log.err(`formatMonthDay failed for locale ${locale}:`, error);
     const month = date.getMonth() + 1;
     const day = date.getDate();
