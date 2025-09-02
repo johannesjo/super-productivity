@@ -15,7 +15,14 @@ jobs:
       - uses: actions/checkout@v3
 
       - run: PACKAGE_VERSION=$(cat ./package.json | grep version | head -1 | awk -F '"' '{print $4}') && echo "package_version=$PACKAGE_VERSION" >> $GITHUB_ENV
-      - run: sed "s/PACKAGE_VERSION/${package_version}/g" build/linux/PKGBUILD_template > build/linux/PKGBUILD
+
+      - name: Download and calculate checksum
+        run: |
+          wget -q "https://github.com/johannesjo/super-productivity/releases/download/v${package_version}/superProductivity-amd64.deb" -O /tmp/superProductivity-amd64.deb
+          SHA256_CHECKSUM=$(sha256sum /tmp/superProductivity-amd64.deb | awk '{print $1}')
+          echo "sha256_checksum=$SHA256_CHECKSUM" >> $GITHUB_ENV
+
+      - run: sed -e "s/PACKAGE_VERSION/${package_version}/g" -e "s/SHA256_CHECKSUM/${sha256_checksum}/g" build/linux/PKGBUILD_template > build/linux/PKGBUILD
 
       - name: Publish AUR package
         uses: KSXGitHub/github-actions-deploy-aur@v3.0.1
