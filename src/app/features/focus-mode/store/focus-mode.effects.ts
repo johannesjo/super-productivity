@@ -66,6 +66,28 @@ export class FocusModeEffects {
     ),
   );
 
+  // Detect when break timer completes and show notification (no auto-complete)
+  detectBreakTimeUp$ = createEffect(
+    () =>
+      this.store.select(selectors.selectTimer).pipe(
+        filter(
+          (timer) =>
+            timer.purpose === 'break' &&
+            !timer.isRunning &&
+            timer.duration > 0 &&
+            timer.elapsed >= timer.duration,
+        ),
+        distinctUntilChanged(
+          (prev, curr) =>
+            prev.elapsed === curr.elapsed && prev.startedAt === curr.startedAt,
+        ),
+        tap(() => {
+          this._notifyUser();
+        }),
+      ),
+    { dispatch: false },
+  );
+
   // Handle session completion
   sessionComplete$ = createEffect(() =>
     this.actions$.pipe(
@@ -73,16 +95,13 @@ export class FocusModeEffects {
       withLatestFrom(
         this.store.select(selectors.selectMode),
         this.store.select(selectors.selectCurrentCycle),
-        this.globalConfigService.sound$,
       ),
-      switchMap(([_, mode, cycle, soundCfg]) => {
+      switchMap(([_, mode, cycle]) => {
         const strategy = this.strategyFactory.getStrategy(mode);
         const actionsToDispatch: any[] = [];
 
-        // Play sound if enabled
-        if (soundCfg.volume > 0) {
-          playSound(SESSION_DONE_SOUND, soundCfg.volume);
-        }
+        // Show notification (sound + window focus)
+        this._notifyUser();
 
         // Check if we should start a break
         if (strategy.shouldStartBreakAfterSession) {
@@ -115,18 +134,12 @@ export class FocusModeEffects {
   breakComplete$ = createEffect(() =>
     this.actions$.pipe(
       ofType(actions.completeBreak),
-      withLatestFrom(
-        this.store.select(selectors.selectMode),
-        this.globalConfigService.pomodoroConfig$,
-        this.globalConfigService.sound$,
-      ),
-      switchMap(([_, mode, pomodoroCfg, soundCfg]) => {
+      withLatestFrom(this.store.select(selectors.selectMode)),
+      switchMap(([_, mode]) => {
         const strategy = this.strategyFactory.getStrategy(mode);
 
-        // Play sound if enabled
-        if (pomodoroCfg.isPlaySoundAfterBreak && soundCfg.volume > 0) {
-          playSound(SESSION_DONE_SOUND, soundCfg.volume);
-        }
+        // Show notification (sound + window focus)
+        this._notifyUser();
 
         // Auto-start next session if configured
         if (strategy.shouldAutoStartNextSession) {
@@ -203,24 +216,6 @@ export class FocusModeEffects {
       { dispatch: false },
     );
 
-  focusWindowOnComplete$ =
-    IS_ELECTRON &&
-    createEffect(
-      () =>
-        this.actions$.pipe(
-          ofType(actions.completeFocusSession),
-          tap(() => {
-            window.ea.showOrFocus();
-            window.ea.flashFrame();
-            window.ea.setProgressBar({
-              progress: 1,
-              progressBarMode: 'normal',
-            });
-          }),
-        ),
-      { dispatch: false },
-    );
-
   focusWindowOnBreakStart$ =
     IS_ELECTRON &&
     createEffect(
@@ -228,24 +223,28 @@ export class FocusModeEffects {
         this.actions$.pipe(
           ofType(actions.startBreak),
           tap(() => {
-            window.ea.showOrFocus();
-            window.ea.flashFrame();
+            this._notifyUser(true);
           }),
         ),
       { dispatch: false },
     );
 
-  focusWindowOnBreakComplete$ =
-    IS_ELECTRON &&
-    createEffect(
-      () =>
-        this.actions$.pipe(
-          ofType(actions.completeBreak, actions.skipBreak),
-          tap(() => {
-            window.ea.showOrFocus();
-            window.ea.flashFrame();
-          }),
-        ),
-      { dispatch: false },
-    );
+  private _notifyUser(isHideBar = false): void {
+    const soundVolume = this.globalConfigService.sound()?.volume || 0;
+
+    // Play sound if enabled
+    if (soundVolume > 0) {
+      playSound(SESSION_DONE_SOUND, soundVolume);
+    }
+
+    // Focus window if in Electron
+    if (IS_ELECTRON) {
+      window.ea.showOrFocus();
+      window.ea.flashFrame();
+      window.ea.setProgressBar({
+        progress: 1,
+        progressBarMode: isHideBar ? 'none' : 'normal',
+      });
+    }
+  }
 }
