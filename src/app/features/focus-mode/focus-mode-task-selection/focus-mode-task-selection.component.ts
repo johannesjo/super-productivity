@@ -89,7 +89,7 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
   }
 
   completeSession(): void {
-    this._store.dispatch(completeFocusSession());
+    this._store.dispatch(completeFocusSession({ isManual: true }));
   }
 
   onSubmit($event: SubmitEvent): void {

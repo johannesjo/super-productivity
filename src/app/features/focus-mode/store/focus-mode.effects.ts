@@ -69,7 +69,7 @@ export class FocusModeEffects {
         (prev, curr) =>
           prev.elapsed === curr.elapsed && prev.startedAt === curr.startedAt,
       ),
-      map(() => actions.completeFocusSession()),
+      map(() => actions.completeFocusSession({ isManual: false })),
     ),
   );
 
@@ -103,15 +103,21 @@ export class FocusModeEffects {
         this.store.select(selectors.selectMode),
         this.store.select(selectors.selectCurrentCycle),
       ),
-      switchMap(([_, mode, cycle]) => {
+      switchMap(([action, mode, cycle]) => {
         const strategy = this.strategyFactory.getStrategy(mode);
         const actionsToDispatch: any[] = [];
 
         // Show notification (sound + window focus)
         this._notifyUser();
 
-        // Check if we should start a break
-        if (strategy.shouldStartBreakAfterSession) {
+        // For Pomodoro mode, always increment cycle after session completion
+        if (mode === FocusModeMode.Pomodoro) {
+          actionsToDispatch.push(actions.incrementCycle());
+        }
+
+        // Check if we should start a break - only for automatic completions
+        // Manual completions should stay on SessionDone screen
+        if (!action.isManual && strategy.shouldStartBreakAfterSession) {
           // Get break duration from strategy
           const breakInfo = strategy.getBreakDuration(cycle);
           if (breakInfo) {
@@ -124,11 +130,6 @@ export class FocusModeEffects {
           } else {
             // Fallback if no break info (shouldn't happen for Pomodoro)
             actionsToDispatch.push(actions.startBreak({}));
-          }
-
-          // For Pomodoro, increment cycle
-          if (mode === FocusModeMode.Pomodoro) {
-            actionsToDispatch.push(actions.incrementCycle());
           }
         }
 

@@ -193,7 +193,7 @@ describe('FocusModeReducer', () => {
         },
       };
 
-      const action = a.completeFocusSession();
+      const action = a.completeFocusSession({ isManual: false });
       const result = focusModeReducer(runningState, action);
 
       expect(result.currentScreen).toBe(FocusScreen.SessionDone);

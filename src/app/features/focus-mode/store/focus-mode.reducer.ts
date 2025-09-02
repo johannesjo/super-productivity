@@ -134,7 +134,7 @@ export const focusModeReducer = createReducer(
     };
   }),
 
-  on(a.completeFocusSession, (state) => {
+  on(a.completeFocusSession, (state, { isManual }) => {
     const duration = state.timer.elapsed;
 
     return {

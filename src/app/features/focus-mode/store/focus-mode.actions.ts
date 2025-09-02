@@ -31,7 +31,10 @@ export const unPauseFocusSession = createAction(
   props<{ idleTime?: number }>(),
 );
 
-export const completeFocusSession = createAction('[FocusMode] Complete Session');
+export const completeFocusSession = createAction(
+  '[FocusMode] Complete Session',
+  props<{ isManual?: boolean }>(),
+);
 export const cancelFocusSession = createAction('[FocusMode] Cancel Session');
 
 export const startBreak = createAction(
