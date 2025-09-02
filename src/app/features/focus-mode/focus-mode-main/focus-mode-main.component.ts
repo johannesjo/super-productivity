@@ -115,15 +115,10 @@ export class FocusModeMainComponent implements OnDestroy {
     });
     this.taskService.currentTask$.pipe(takeUntil(this._onDestroy$)).subscribe((task) => {
       this.task = task;
+      if (!task) {
+        this._store.dispatch(selectFocusTask());
+      }
     });
-
-    this.taskService.currentTask$
-      .pipe(first(), takeUntil(this._onDestroy$))
-      .subscribe((task) => {
-        if (!task) {
-          this.taskService.startFirstStartable();
-        }
-      });
   }
 
   @HostListener('dragenter', ['$event']) onDragEnter(ev: DragEvent): void {

@@ -52,13 +52,9 @@ describe('FocusModeMainComponent', () => {
     });
 
     currentTaskSubject = new BehaviorSubject<TaskCopy | null>(mockTask);
-    const taskServiceSpy = jasmine.createSpyObj(
-      'TaskService',
-      ['update', 'startFirstStartable'],
-      {
-        currentTask$: currentTaskSubject.asObservable(),
-      },
-    );
+    const taskServiceSpy = jasmine.createSpyObj('TaskService', ['update'], {
+      currentTask$: currentTaskSubject.asObservable(),
+    });
 
     const taskAttachmentServiceSpy = jasmine.createSpyObj('TaskAttachmentService', [
       'createFromDrop',
@@ -122,62 +118,6 @@ describe('FocusModeMainComponent', () => {
 
     it('should set default task notes from config', () => {
       expect(component.defaultTaskNotes).toBe('Default task notes template');
-    });
-
-    it('should start first startable task if no current task', () => {
-      // Create a new test setup with null task
-      const nullTaskSubject = new BehaviorSubject<TaskCopy | null>(null);
-      const taskServiceWithNull = jasmine.createSpyObj(
-        'TaskService',
-        ['update', 'startFirstStartable'],
-        {
-          currentTask$: nullTaskSubject.asObservable(),
-        },
-      );
-
-      // Use the existing mocked services
-      const globalConfigSpy = jasmine.createSpyObj('GlobalConfigService', [], {
-        misc: jasmine.createSpy().and.returnValue({
-          taskNotesTpl: 'Default task notes template',
-        }),
-      });
-
-      const focusModeSpy = jasmine.createSpyObj('FocusModeService', [], {
-        timeElapsed: jasmine.createSpy().and.returnValue(60000),
-        isCountTimeDown: jasmine.createSpy().and.returnValue(true),
-        progress: jasmine.createSpy().and.returnValue(0),
-        timeRemaining: jasmine.createSpy().and.returnValue(1500000),
-        isSessionRunning: jasmine.createSpy().and.returnValue(false),
-        isBreakActive: jasmine.createSpy().and.returnValue(false),
-        currentCycle: jasmine.createSpy().and.returnValue(1),
-        mode: jasmine.createSpy().and.returnValue('Pomodoro'),
-      });
-
-      TestBed.resetTestingModule();
-      TestBed.configureTestingModule({
-        imports: [
-          FocusModeMainComponent,
-          NoopAnimationsModule,
-          TranslateModule.forRoot(),
-        ],
-        providers: [
-          { provide: Store, useValue: mockStore },
-          { provide: GlobalConfigService, useValue: globalConfigSpy },
-          { provide: TaskService, useValue: taskServiceWithNull },
-          { provide: TaskAttachmentService, useValue: mockTaskAttachmentService },
-          { provide: IssueService, useValue: mockIssueService },
-          {
-            provide: SimpleCounterService,
-            useValue: jasmine.createSpyObj('SimpleCounterService', ['']),
-          },
-          { provide: FocusModeService, useValue: focusModeSpy },
-        ],
-      });
-
-      const nullFixture = TestBed.createComponent(FocusModeMainComponent);
-      nullFixture.detectChanges();
-
-      expect(taskServiceWithNull.startFirstStartable).toHaveBeenCalled();
     });
 
     it('should initialize focus mode service properties', () => {
