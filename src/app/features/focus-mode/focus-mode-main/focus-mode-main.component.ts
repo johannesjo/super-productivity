@@ -17,7 +17,12 @@ import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachme
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { IssueService } from '../../issue/issue.service';
 import { Store } from '@ngrx/store';
-import { completeTask, selectFocusTask } from '../store/focus-mode.actions';
+import {
+  completeTask,
+  selectFocusTask,
+  setFocusSessionDuration,
+} from '../store/focus-mode.actions';
+import { selectTimeDuration } from '../store/focus-mode.selectors';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
@@ -191,6 +196,19 @@ export class FocusModeMainComponent implements OnDestroy {
       }
       this.taskService.update(this.task.id, { title: newTitle });
     }
+  }
+
+  extendSession(): void {
+    this._store
+      .select(selectTimeDuration)
+      .pipe(first())
+      .subscribe((currentDuration) => {
+        const fiveMinutesInMs = 5 * 60 * 1000; // 5 minutes in milliseconds
+        const extendedDuration = currentDuration + fiveMinutesInMs;
+        this._store.dispatch(
+          setFocusSessionDuration({ focusSessionDuration: extendedDuration }),
+        );
+      });
   }
 
   protected readonly ICAL_TYPE = ICAL_TYPE;

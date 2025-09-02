@@ -61,6 +61,15 @@
         <mat-icon [svgIcon]="task.issueType | issueIcon"></mat-icon>
       </a>
     }
+    @if (isCountDown) {
+      <button
+        mat-icon-button
+        [matTooltip]="'Add 5 minutes'"
+        (click)="extendSession()"
+      >
+        <mat-icon>add_circle</mat-icon>
+      </button>
+    }
     <button
       (click)="isShowNotes = !isShowNotes"
       [matTooltip]="T.F.FOCUS_MODE.SHOW_HIDE_NOTES_AND_ATTACHMENTS | translate"
