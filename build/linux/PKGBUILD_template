@@ -13,8 +13,8 @@ depends=('gtk3' 'nss')
 provides=("${_pkgname}")
 conflicts=("${_pkgname}"
 		   "${_pkgname}-git")
-md5sums=('SKIP')
 source=("superproductivity-${pkgver}-amd64.deb::https://github.com/johannesjo/super-productivity/releases/download/v${pkgver}/superProductivity-amd64.deb")
+sha256sums=('SKIP')
 
 package() {
 	tar -xvf data.tar.xz -C "${pkgdir}"
