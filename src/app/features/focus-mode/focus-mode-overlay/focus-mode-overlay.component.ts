@@ -9,10 +9,10 @@ import { selectTimeElapsed } from '../store/focus-mode.selectors';
 import {
   cancelFocusSession,
   hideFocusOverlay,
+  selectFocusDuration,
+  selectFocusTask,
   setFocusModeMode,
   showFocusOverlay,
-  selectFocusTask,
-  selectFocusDuration,
 } from '../store/focus-mode.actions';
 import { fadeInAnimation } from '../../../ui/animations/fade.ani';
 import { warpAnimation, warpInAnimation } from '../../../ui/animations/warp.ani';
@@ -97,22 +97,25 @@ export class FocusModeOverlayComponent implements OnDestroy {
 
     document.addEventListener('keydown', this._closeOnEscapeKeyListener);
 
-    this.taskService.currentTask$
-      .pipe(first(), takeUntil(this._onDestroy$))
-      .subscribe((task) => {
-        if (this.activePage() === FocusScreen.SessionDone) {
-          return;
-        }
-        // If a session is already running, don't do anything - just show the current state
-        if (this.isSessionRunning()) {
-          return;
-        }
-        if (!task) {
-          this._store.dispatch(selectFocusTask());
-        } else {
-          this._store.dispatch(selectFocusDuration());
-        }
-      });
+    if (
+      this.activePage() === FocusScreen.SessionDone ||
+      this.isSessionRunning() ||
+      this.focusModeService.isBreakActive()
+    ) {
+      return;
+    } else {
+      this.taskService.currentTask$
+        .pipe(first(), takeUntil(this._onDestroy$))
+        .subscribe((task) => {
+          // If a session is already running or break is active, don't do anything - just show the current state
+
+          if (!task) {
+            this._store.dispatch(selectFocusTask());
+          } else {
+            this._store.dispatch(selectFocusDuration());
+          }
+        });
+    }
   }
 
   ngOnDestroy(): void {
