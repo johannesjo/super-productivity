@@ -146,10 +146,25 @@ export class JiraApiService {
         // NOTE: we pass the cfg as well to avoid race conditions
       },
       cfg,
+      suppressErrorSnack: true,
     }).pipe(
       // switchMap((res) =>
       //   res.length > 0 ? of(res) : this.issuePicker$(searchTerm, cfg),
       // ),
+      catchError((err) => {
+        const code = err?.error?.statusCode ?? err?.status ?? err?.error?.status;
+        if (code === 401 || code === 403) return throwError(() => err);
+        // Fallback for Server/DC: /search?jql=...
+        return this._sendRequest$({
+          jiraReqCfg: {
+            pathname: 'search',
+            followAllRedirects: true,
+            query: { jql: searchTermJQL },
+            transform: mapToSearchResultsForJQL,
+          },
+          cfg,
+        });
+      }),
       tap((v) => IssueLog.log('AAAAA', v)),
     );
   }
@@ -223,7 +238,23 @@ export class JiraApiService {
         },
       },
       cfg,
-    });
+      suppressErrorSnack: true,
+    }).pipe(
+      catchError((err) => {
+        const code = err?.error?.statusCode ?? err?.status ?? err?.error?.status;
+        if (code === 401 || code === 403) return throwError(() => err);
+        // Fallback for Server/DC: POST /search with jql in body
+        return this._sendRequest$({
+          jiraReqCfg: {
+            transform: mapIssuesResponse as (res: any, cfg?: JiraCfg) => any,
+            pathname: 'search',
+            method: 'POST',
+            body: { ...options, jql: searchQuery },
+          },
+          cfg,
+        });
+      }),
+    );
   }
 
   getIssueById$(issueId: string, cfg: JiraCfg): Observable<JiraIssue> {
@@ -364,10 +395,12 @@ export class JiraApiService {
     jiraReqCfg,
     cfg,
     isForce = false,
+    suppressErrorSnack = false,
   }: {
     jiraReqCfg: JiraRequestCfg;
     cfg: JiraCfg;
     isForce?: boolean;
+    suppressErrorSnack?: boolean;
   }): Observable<any> {
     return this._isInterfacesReadyIfNeeded$.pipe(
       take(1),
@@ -432,6 +465,7 @@ export class JiraApiService {
           requestInit,
           jiraReqCfg.transform,
           cfg,
+          suppressErrorSnack,
         );
         // NOTE: offline is sexier & easier than cache, but in case we change our mind...
         // const args = [requestId, url, requestInit, jiraReqCfg.transform];
@@ -446,6 +480,7 @@ export class JiraApiService {
     requestInit: RequestInit,
     transform: any,
     jiraCfg: JiraCfg,
+    suppressErrorSnack: boolean,
   ): Observable<any> {
     // TODO refactor to observable for request canceling etc
     let promiseResolve;
@@ -495,7 +530,9 @@ export class JiraApiService {
           IssueLog.log(err);
           IssueLog.log(getErrorTxt(err));
           const errTxt = `Jira: ${getErrorTxt(err)}`;
-          this._snackService.open({ type: 'ERROR', msg: errTxt });
+          if (!suppressErrorSnack) {
+            this._snackService.open({ type: 'ERROR', msg: errTxt });
+          }
           return throwError({ [HANDLED_ERROR_PROP_STR]: errTxt });
         }),
       );
@@ -509,7 +546,9 @@ export class JiraApiService {
         IssueLog.log(err);
         IssueLog.log(getErrorTxt(err));
         const errTxt = `Jira: ${getErrorTxt(err)}`;
-        this._snackService.open({ type: 'ERROR', msg: errTxt });
+        if (!suppressErrorSnack) {
+          this._snackService.open({ type: 'ERROR', msg: errTxt });
+        }
         return throwError({ [HANDLED_ERROR_PROP_STR]: errTxt });
       }),
       first(),
