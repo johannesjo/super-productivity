@@ -254,7 +254,7 @@ export class ScheduleEventComponent implements OnInit {
         .subscribe((p) => {
           this._elRef.nativeElement.style.setProperty(
             '--project-color',
-            p ? p.theme.primary : '',
+            p ? p.theme?.primary : '',
           );
         });
     }

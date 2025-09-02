@@ -213,7 +213,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
         val,
         tags,
         projects,
-        defaultColor: activeWorkContext.theme.primary || DEFAULT_PROJECT_COLOR,
+        defaultColor: activeWorkContext?.theme?.primary || DEFAULT_PROJECT_COLOR,
         shortSyntaxConfig,
       }),
     ),

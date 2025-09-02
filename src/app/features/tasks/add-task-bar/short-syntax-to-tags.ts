@@ -55,7 +55,7 @@ export const shortSyntaxToTags = ({
     }
     shortSyntaxTags.push({
       title: project.title,
-      color: project.theme.primary || DEFAULT_PROJECT_COLOR,
+      color: project.theme?.primary || DEFAULT_PROJECT_COLOR,
       projectId: r.projectId,
       icon: 'list',
     });
@@ -137,7 +137,7 @@ export const shortSyntaxToTags = ({
       }
       shortSyntaxTags.push({
         title: tag.title,
-        color: tag.color || tag.theme.primary || DEFAULT_TAG_COLOR,
+        color: tag.color || tag.theme?.primary || DEFAULT_TAG_COLOR,
         icon: tag.icon || 'style',
       });
     });
