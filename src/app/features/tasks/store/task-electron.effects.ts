@@ -178,6 +178,11 @@ export class TaskElectronEffects {
     () =>
       ipcAddTaskFromAppUri$.pipe(
         tap((data) => {
+          // Double-check data validity as defensive programming
+          if (!data || !data.title || typeof data.title !== 'string') {
+            console.error('handleAddTaskFromProtocol$ received invalid data:', data);
+            return;
+          }
           this._taskService.add(data.title);
         }),
       ),

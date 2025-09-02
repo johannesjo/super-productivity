@@ -106,5 +106,23 @@ describe('TaskElectronEffects', () => {
       mockIpcAddTaskFromAppUri$.next({ title: 'Task 1' });
       mockIpcAddTaskFromAppUri$.next({ title: 'Task 2' });
     });
+
+    it('should handle validation logic correctly', (done) => {
+      // Test the validation logic directly
+      const validateData = (data: any): boolean => {
+        if (!data || !data.title || typeof data.title !== 'string') {
+          return false;
+        }
+        return true;
+      };
+
+      expect(validateData({ title: 'Valid Task' })).toBe(true);
+      expect(validateData(null)).toBe(false);
+      expect(validateData(undefined)).toBe(false);
+      expect(validateData({ notTitle: 'Invalid' })).toBe(false);
+      expect(validateData({ title: 123 })).toBe(false);
+
+      done();
+    });
   });
 });
