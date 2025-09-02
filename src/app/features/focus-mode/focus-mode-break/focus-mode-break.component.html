@@ -32,13 +32,23 @@
       {{ T.F.FOCUS_MODE.SKIP_BREAK | translate }}
     </button>
   } @else {
-    <button
-      mat-raised-button
-      color="primary"
-      (click)="completeBreak()"
-    >
-      <mat-icon>arrow_forward</mat-icon>
-      {{ T.F.FOCUS_MODE.CONTINUE_TO_NEXT_SESSION | translate }}
-    </button>
+    <div class="button-row">
+      <button
+        mat-stroked-button
+        (click)="completeBreak()"
+      >
+        <mat-icon>done_all</mat-icon>
+        {{ T.G.COMPLETE | translate }}
+      </button>
+
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="completeBreak()"
+      >
+        <mat-icon>arrow_forward</mat-icon>
+        {{ T.F.FOCUS_MODE.CONTINUE_TO_NEXT_SESSION | translate }}
+      </button>
+    </div>
   }
 </div>
