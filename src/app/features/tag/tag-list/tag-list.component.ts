@@ -65,7 +65,7 @@ export class TagListComponent {
     if (project && project.id) {
       const projectTag: Tag = {
         ...project,
-        color: project.theme.primary || DEFAULT_PROJECT_COLOR,
+        color: project.theme?.primary || DEFAULT_PROJECT_COLOR,
         created: 0,
         icon: project.icon || 'folder_special',
       };

@@ -94,10 +94,10 @@ export class NoteComponent implements OnChanges {
                         (project) =>
                           project && {
                             ...project,
-                            color: project.theme.primary || DEFAULT_PROJECT_COLOR,
+                            color: project.theme?.primary || DEFAULT_PROJECT_COLOR,
                             icon: 'list',
                             theme: {
-                              primary: project.theme.primary || DEFAULT_PROJECT_COLOR,
+                              primary: project.theme?.primary || DEFAULT_PROJECT_COLOR,
                             },
                           },
                       ),

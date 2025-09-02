@@ -31,7 +31,7 @@ export const selectArchivedProjects = createSelector(selectAllProjects, (project
   projects.filter((p) => p.isArchived),
 );
 export const selectAllProjectColors = createSelector(selectAllProjects, (projects) =>
-  projects.reduce((prev, cur) => ({ ...prev, [cur.id]: cur.theme.primary }), {}),
+  projects.reduce((prev, cur) => ({ ...prev, [cur.id]: cur.theme?.primary }), {}),
 );
 export const selectAllProjectColorsAndTitles = createSelector(
   selectAllProjects,
@@ -39,7 +39,7 @@ export const selectAllProjectColorsAndTitles = createSelector(
     projects.reduce(
       (prev, cur) => ({
         ...prev,
-        [cur.id]: { color: cur.theme.primary, title: cur.title },
+        [cur.id]: { color: cur.theme?.primary, title: cur.title },
       }),
       {},
     ),
