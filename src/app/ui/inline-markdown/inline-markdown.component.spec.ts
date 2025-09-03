@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { MarkdownModule } from 'ngx-markdown';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { InlineMarkdownComponent } from './inline-markdown.component';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 
@@ -17,7 +18,7 @@ describe('InlineMarkdownComponent', () => {
     mockMatDialog = jasmine.createSpyObj('MatDialog', ['open']);
 
     await TestBed.configureTestingModule({
-      imports: [InlineMarkdownComponent, MarkdownModule.forRoot()],
+      imports: [InlineMarkdownComponent, MarkdownModule.forRoot(), NoopAnimationsModule],
       providers: [
         { provide: GlobalConfigService, useValue: mockGlobalConfigService },
         { provide: MatDialog, useValue: mockMatDialog },

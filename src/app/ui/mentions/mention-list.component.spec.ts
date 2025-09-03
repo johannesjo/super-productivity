@@ -156,7 +156,7 @@ describe('MentionListComponent', () => {
       const result = component.activeItem;
 
       expect(result).toBeNull();
-      expect(consoleSpy).not.toHaveBeenCalled();
+      expect(logWarnSpy).not.toHaveBeenCalled();
     });
 
     it('should return undefined item at valid index', () => {
@@ -167,7 +167,7 @@ describe('MentionListComponent', () => {
       const result = component.activeItem;
 
       expect(result).toBeUndefined();
-      expect(consoleSpy).not.toHaveBeenCalled();
+      expect(logWarnSpy).not.toHaveBeenCalled();
     });
   });
 
