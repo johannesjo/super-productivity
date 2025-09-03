@@ -468,12 +468,18 @@ export class IssueService {
       issueId: issueDataReduced.id.toString(),
       issueWasUpdated: false,
       issueLastUpdated: Date.now(),
+      // Default plan for today unless a precise time is provided by provider
       dueDay: getDbDateStr(),
       ...additionalFromProviderIssueService,
       // NOTE: if we were to add tags, this could be overwritten here
       ...(await getProjectOrTagId()),
       ...additional,
     };
+
+    // If a precise start time is provided by the provider, avoid setting dueDay as well
+    if ((taskData as Partial<TaskCopy>).dueWithTime) {
+      (taskData as Partial<TaskCopy>).dueDay = undefined;
+    }
 
     let taskId: string | undefined;
 
@@ -524,7 +530,12 @@ export class IssueService {
     );
 
     if (parentTask) {
-      return this._taskService.addSubTaskTo(parentTask.task.id, { title, ...taskData });
+      const subTaskData = { title, ...taskData } as Partial<TaskCopy>;
+      // Ensure invariants for sub-tasks as well
+      if (subTaskData.dueWithTime) {
+        subTaskData.dueDay = undefined;
+      }
+      return this._taskService.addSubTaskTo(parentTask.task.id, subTaskData);
     }
 
     return undefined;

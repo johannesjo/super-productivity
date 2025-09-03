@@ -217,7 +217,11 @@ const handleConvertToMainTask = (
         parentId: undefined,
         tagIds: [...parentTask.tagIds],
         modified: Date.now(),
-        ...(isPlanForToday ? { dueDay: getDbDateStr() } : {}),
+        ...(isPlanForToday && !task.dueWithTime
+          ? {
+              dueDay: getDbDateStr(),
+            }
+          : {}),
       },
     },
     taskStateAfterParentCleanup,
