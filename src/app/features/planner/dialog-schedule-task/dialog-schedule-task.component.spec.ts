@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { provideMockStore } from '@ngrx/store/testing';
+import { Store } from '@ngrx/store';
 import { TranslateModule, TranslateService, TranslateStore } from '@ngx-translate/core';
 import { SnackService } from '../../../core/snack/snack.service';
 import { DatePipe } from '@angular/common';
@@ -19,6 +20,8 @@ import { RootState } from '../../../root-store/root-state';
 import { CONFIG_FEATURE_NAME } from '../../config/store/global-config.reducer';
 import { TaskCopy, TaskReminderOptionId } from '../../tasks/task.model';
 import { ReminderService } from '../../reminder/reminder.service';
+import { PlannerActions } from '../store/planner.actions';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 
 describe('DialogScheduleTaskComponent', () => {
   let component: DialogScheduleTaskComponent;
@@ -29,6 +32,7 @@ describe('DialogScheduleTaskComponent', () => {
   let plannerServiceSpy: jasmine.SpyObj<PlannerService>;
   let workContextServiceSpy: jasmine.SpyObj<WorkContextService>;
   let reminderServiceSpy: jasmine.SpyObj<ReminderService>;
+  let store: Store;
 
   const mockDialogData = {
     taskId: 'task123',
@@ -89,6 +93,7 @@ describe('DialogScheduleTaskComponent', () => {
 
     fixture = TestBed.createComponent(DialogScheduleTaskComponent);
     component = fixture.componentInstance;
+    store = TestBed.inject(Store);
     const t = {
       id: 'task123',
       title: 'Test Task',
@@ -244,6 +249,43 @@ describe('DialogScheduleTaskComponent', () => {
         await component.submit();
       } catch {}
       expect(snackServiceSpy.open).not.toHaveBeenCalled();
+    });
+
+    it('should plan for today (clear time) when removing time from a task scheduled for today', async () => {
+      const today = new Date();
+      const mockTask = {
+        id: 'taskWithTimeToday',
+        title: 'Task With Time',
+        tagIds: [] as string[],
+        projectId: 'DEFAULT',
+        timeSpentOnDay: {},
+        attachments: [],
+        timeEstimate: 0,
+        timeSpent: 0,
+        isDone: false,
+        created: 1640995200000,
+        subTaskIds: [],
+        dueWithTime: today.getTime(),
+        dueDay: getDbDateStr(today),
+      } as unknown as TaskCopy;
+
+      const dispatchSpy = spyOn(store, 'dispatch');
+
+      component.task = mockTask;
+      component.data = { task: mockTask } as any;
+      component.selectedDate = new Date(today);
+      component.selectedTime = null;
+
+      await component.submit();
+
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        PlannerActions.planTaskForDay({
+          task: mockTask,
+          day: getDbDateStr(today),
+          isShowSnack: true,
+        }),
+      );
+      expect(dialogRefSpy.close).toHaveBeenCalledWith(true);
     });
   });
 });

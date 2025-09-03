@@ -342,7 +342,12 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
 
     if (this.selectedTime) {
       this._scheduleWithTime();
-    } else if (this.data.task && this.data.task.dueDay === newDay) {
+    } else if (
+      this.data.task &&
+      this.data.task.dueDay === newDay &&
+      // Only show info if there is no time set already
+      !this.data.task.dueWithTime
+    ) {
       const formattedDate =
         newDay == getDbDateStr()
           ? this._translateService.instant(T.G.TODAY_TAG_TITLE)
