@@ -122,6 +122,16 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     if (this._hideOverFlowTimeout) {
       window.clearTimeout(this._hideOverFlowTimeout);
     }
+
+    if (this.isShowEdit()) {
+      const textareaEl = this.textareaEl();
+      if (textareaEl) {
+        const currentValue = textareaEl.nativeElement.value;
+        if (currentValue !== this.model) {
+          this.changed.emit(currentValue);
+        }
+      }
+    }
   }
 
   checklistToggle(): void {
