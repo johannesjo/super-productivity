@@ -13,6 +13,7 @@ import { CommonModule } from '@angular/common';
 
 import { isInputOrTextAreaElement, getContentEditableCaretCoords } from './mention-utils';
 import { getCaretCoordinates } from './caret-coords';
+import { Log } from '../../core/log';
 
 /**
  * Angular Mentions.
@@ -133,6 +134,18 @@ export class MentionListComponent implements AfterContentChecked {
   }
 
   get activeItem(): any {
+    // Add bounds checking to prevent accessing undefined array elements
+    if (!this.items || !Array.isArray(this.items) || this.items.length === 0) {
+      return null;
+    }
+
+    if (this.activeIndex < 0 || this.activeIndex >= this.items.length) {
+      Log.warn(
+        `MentionListComponent: activeIndex ${this.activeIndex} is out of bounds for items array of length ${this.items.length}`,
+      );
+      return null;
+    }
+
     return this.items[this.activeIndex];
   }
 

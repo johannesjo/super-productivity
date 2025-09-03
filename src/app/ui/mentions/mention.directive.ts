@@ -22,6 +22,7 @@ import {
 
 import { MentionConfig } from './mention-config';
 import { MentionListComponent } from './mention-list.component';
+import { Log } from '../../core/log';
 
 const KEY_BACKSPACE = 8;
 const KEY_TAB = 9;
@@ -73,18 +74,48 @@ export class MentionDirective implements OnChanges {
     allowSpace: false,
     returnTrigger: false,
     mentionSelect: (item: any, triggerChar?: string) => {
-      return (
-        (this.activeConfig?.triggerChar || '') +
-        item[this.activeConfig?.labelKey || 'label']
-      );
+      // Add defensive null/undefined checks to prevent TypeError
+      if (!item) {
+        Log.warn('MentionDirective: mentionSelect called with undefined/null item');
+        return this.activeConfig?.triggerChar || '';
+      }
+
+      const labelKey = this.activeConfig?.labelKey || 'label';
+      const itemValue = item[labelKey];
+
+      if (itemValue === undefined || itemValue === null) {
+        Log.warn(`MentionDirective: item missing required property '${labelKey}'`, item);
+        return this.activeConfig?.triggerChar || '';
+      }
+
+      return (this.activeConfig?.triggerChar || '') + itemValue;
     },
     mentionFilter: (searchString: string, items: any[]) => {
+      if (!items || !Array.isArray(items)) {
+        Log.warn('MentionDirective: mentionFilter called with invalid items array');
+        return [];
+      }
+
       const searchStringLowerCase = searchString.toLowerCase();
-      return items.filter((e) =>
-        e[this.activeConfig?.labelKey || 'label']
-          .toLowerCase()
-          .startsWith(searchStringLowerCase),
-      );
+      const labelKey = this.activeConfig?.labelKey || 'label';
+
+      return items.filter((e) => {
+        // Add defensive checks to prevent errors during filtering
+        if (!e || typeof e !== 'object') {
+          return false;
+        }
+
+        const itemValue = e[labelKey];
+        if (
+          itemValue === undefined ||
+          itemValue === null ||
+          typeof itemValue !== 'string'
+        ) {
+          return false;
+        }
+
+        return itemValue.toLowerCase().startsWith(searchStringLowerCase);
+      });
     },
   };
 

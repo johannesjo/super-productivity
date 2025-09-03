@@ -64,11 +64,11 @@ import { AddTaskBarActionsComponent } from './add-task-bar-actions/add-task-bar-
 import { Mentions } from '../../../ui/mentions/mention-config';
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { unique } from '../../../util/unique';
-import { Log } from '../../../core/log';
 import { CHRONO_SUGGESTIONS } from './add-task-bar.const';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ShortSyntaxTag, shortSyntaxToTags } from './short-syntax-to-tags';
 import { DEFAULT_PROJECT_COLOR } from '../../work-context/work-context.const';
+import { Log } from '../../../core/log';
 
 @Component({
   selector: 'add-task-bar',
@@ -234,7 +234,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       const mentions: Mentions[] = [];
       if (cfg.isEnableTag) {
         mentions.push({
-          items: tagSuggestions,
+          items: tagSuggestions || [],
           labelKey: 'title',
           triggerChar: '#',
         });
@@ -248,7 +248,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       }
       if (cfg.isEnableProject) {
         mentions.push({
-          items: projectSuggestions,
+          items: projectSuggestions || [],
           labelKey: 'title',
           triggerChar: '+',
         });
