@@ -179,10 +179,19 @@ export class FocusModeMainComponent implements OnDestroy {
 
   finishCurrentTask(): void {
     this._store.dispatch(focusSessionDone({}));
+
+    // Ensure we have a valid task id before dispatching updates
+    const id = this.task && this.task.id;
+    if (!id) {
+      // No current task; nothing to finish
+      return;
+    }
+
+    // Mark task as done first to ensure effects receive a valid id
     this._store.dispatch(
       TaskSharedActions.updateTask({
         task: {
-          id: this.task?.id as string,
+          id,
           changes: {
             isDone: true,
             doneOn: Date.now(),

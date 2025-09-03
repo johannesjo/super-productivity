@@ -69,7 +69,8 @@ export const setCaretPosition = (
   iframe: HTMLIFrameElement | null = null,
 ): void => {
   //console.log("setCaretPosition", pos, el, iframe==null);
-  if (isInputOrTextAreaElement(el) && el.selectionStart) {
+  // selectionStart can be 0; check for number explicitly
+  if (isInputOrTextAreaElement(el) && typeof el.selectionStart === 'number') {
     el.focus();
     el.setSelectionRange(pos, pos);
   } else {
