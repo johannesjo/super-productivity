@@ -138,8 +138,7 @@ export class AddTaskBarParserService {
       !this._previousParseResult ||
       !this._arraysEqual(this._previousParseResult.tagIds, currentResult.tagIds)
     ) {
-      const foundTags = allTags.filter((tag) => currentResult.tagIds.includes(tag.id));
-      this._stateService.updateTags(foundTags);
+      this._stateService.updateTagIds(currentResult.tagIds);
     }
 
     if (

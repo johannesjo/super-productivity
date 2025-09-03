@@ -1,9 +1,8 @@
-import { Tag } from '../../tag/tag.model';
 import { INBOX_PROJECT } from '../../project/project.const';
 
 export interface AddTaskBarState {
   projectId: string;
-  tags: Tag[];
+  tagIds: string[];
   date: string | null;
   time: string | null;
   estimate: number | null;
@@ -24,7 +23,7 @@ export const ESTIMATE_OPTIONS = [
 
 export const INITIAL_ADD_TASK_BAR_STATE: AddTaskBarState = {
   projectId: INBOX_PROJECT.id,
-  tags: [],
+  tagIds: [],
   date: null,
   time: null,
   estimate: null,

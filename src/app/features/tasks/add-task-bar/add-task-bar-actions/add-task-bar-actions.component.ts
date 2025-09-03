@@ -89,6 +89,9 @@ export class AddTaskBarActionsComponent {
 
     { initialValue: [] },
   );
+  selectedTags = computed(() =>
+    this.allTags().filter((t) => this.state().tagIds.includes(t.id)),
+  );
 
   // Constants
   readonly ESTIMATE_OPTIONS = ESTIMATE_OPTIONS;
@@ -143,7 +146,7 @@ export class AddTaskBarActionsComponent {
   }
 
   hasSelectedTag(tagId: string): boolean {
-    return this.state().tags.some((t) => t.id === tagId);
+    return this.state().tagIds.includes(tagId);
   }
 
   onEstimateInput(value: string): void {

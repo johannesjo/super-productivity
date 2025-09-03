@@ -44,25 +44,26 @@
       #tagsMenuTrigger
       mat-button
       class="action-btn"
-      [class.tags-mode]="state().tags.length > 0 || state().newTagTitles.length > 0"
+      [class.tags-mode]="state().tagIds.length > 0 || state().newTagTitles.length > 0"
       [matMenuTriggerFor]="tagsMenu"
-      [class.has-value]="state().tags.length > 0 || hasNewTags()"
+      [class.has-value]="state().tagIds.length > 0 || hasNewTags()"
       [class.has-new-tags]="hasNewTags()"
       [class.menu-open]="isTagsMenuOpen()"
       (click)="onTagsMenuClick()"
     >
       <!-- NOTE: we do it this way, since mat-button puts it inside the label otherwise leading to vertical alignment issues -->
-      <mat-icon [class.hide]="state().tags.length > 0 || state().newTagTitles.length > 0"
+      <mat-icon
+        [class.hide]="state().tagIds.length > 0 || state().newTagTitles.length > 0"
         >label</mat-icon
       >
 
-      @if (state().tags.length === 0 && state().newTagTitles.length === 0) {
+      @if (state().tagIds.length === 0 && state().newTagTitles.length === 0) {
         <ng-container>
           <span>{{ T.F.TASK.ADD_TASK_BAR.TAGS_BUTTON | translate }}</span>
         </ng-container>
       } @else {
         <div class="tags-display">
-          @for (tag of state().tags; track tag.id) {
+          @for (tag of selectedTags(); track tag.id) {
             <div class="tag-item">
               <mat-icon [style.color]="tag.color || tag.theme?.primary">
                 {{ tag.icon || 'label' }}
@@ -80,7 +81,7 @@
       }
     </button>
 
-    @if (state().tags.length > 0 || hasNewTags()) {
+    @if (state().tagIds.length > 0 || hasNewTags()) {
       <button
         mat-button
         class="clear-btn"

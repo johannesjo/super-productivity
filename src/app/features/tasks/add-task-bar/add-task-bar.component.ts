@@ -375,7 +375,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     if (!title) return;
 
     const state = this.stateService.state();
-    let finalTagIds = state.tags.map((t) => t.id);
+    let finalTagIds = [...state.tagIds];
 
     if (this.hasNewTags()) {
       const shouldCreateNewTags = await this._confirmNewTags();

@@ -14,7 +14,7 @@ describe('AddTaskBarParserService', () => {
       'updateCleanText',
       'setAutoDetectedProjectId',
       'updateProjectId',
-      'updateTags',
+      'updateTagIds',
       'updateNewTagTitles',
       'updateEstimate',
       'updateDate',
@@ -27,7 +27,7 @@ describe('AddTaskBarParserService', () => {
     // Default state return value
     const defaultMockState = {
       projectId: null,
-      tags: [],
+      tagIds: [],
       newTagTitles: [],
       date: null,
       time: null,
@@ -89,7 +89,7 @@ describe('AddTaskBarParserService', () => {
       mockStateService.updateCleanText.calls.reset();
       mockStateService.updateDate.calls.reset();
       mockStateService.updateEstimate.calls.reset();
-      mockStateService.updateTags.calls.reset();
+      mockStateService.updateTagIds.calls.reset();
       mockStateService.updateNewTagTitles.calls.reset();
       mockStateService.setAutoDetectedProjectId.calls.reset();
       mockStateService.updateProjectId.calls.reset();
@@ -113,7 +113,7 @@ describe('AddTaskBarParserService', () => {
         // Mock state to return no current date/time
         const mockState = {
           projectId: mockDefaultProject.id,
-          tags: [],
+          tagIds: [],
           newTagTitles: [],
           date: null,
           time: null,
@@ -146,7 +146,7 @@ describe('AddTaskBarParserService', () => {
         // Mock state to return current user-selected values
         const mockState = {
           projectId: mockDefaultProject.id,
-          tags: [],
+          tagIds: [],
           newTagTitles: [],
           date: currentDate,
           time: currentTime,
@@ -176,7 +176,7 @@ describe('AddTaskBarParserService', () => {
         // Mock state with date but no time
         const mockState = {
           projectId: mockDefaultProject.id,
-          tags: [],
+          tagIds: [],
           newTagTitles: [],
           date: currentDate,
           time: null,
@@ -288,7 +288,7 @@ describe('AddTaskBarParserService', () => {
           mockDefaultProject,
         );
 
-        expect(mockStateService.updateTags).toHaveBeenCalled();
+        expect(mockStateService.updateTagIds).toHaveBeenCalled();
         expect(mockStateService.updateNewTagTitles).toHaveBeenCalled();
       });
 
@@ -343,7 +343,7 @@ describe('AddTaskBarParserService', () => {
           mockDefaultProject,
         );
 
-        expect(mockStateService.updateTags).toHaveBeenCalled();
+        expect(mockStateService.updateTagIds).toHaveBeenCalled();
         expect(mockStateService.updateNewTagTitles).toHaveBeenCalled();
       });
 
@@ -547,8 +547,8 @@ describe('AddTaskBarParserService', () => {
 
       // Mock state to return the date and time
       const mockState = {
-        project: mockDefaultProject,
-        tags: [],
+        projectId: mockDefaultProject.id,
+        tagIds: [],
         newTagTitles: [],
         date: dateStr,
         time: timeStr,
@@ -577,8 +577,8 @@ describe('AddTaskBarParserService', () => {
       const springTimeStr = '02:30';
 
       const mockState = {
-        project: mockDefaultProject,
-        tags: [],
+        projectId: mockDefaultProject.id,
+        tagIds: [],
         newTagTitles: [],
         date: null,
         time: null,
@@ -609,8 +609,8 @@ describe('AddTaskBarParserService', () => {
       const newYearTimeStr = '23:59';
 
       const mockState = {
-        project: mockDefaultProject,
-        tags: [],
+        projectId: mockDefaultProject.id,
+        tagIds: [],
         newTagTitles: [],
         date: null,
         time: null,
@@ -639,8 +639,8 @@ describe('AddTaskBarParserService', () => {
       const dateStr = '2025-01-01';
 
       const mockState = {
-        project: mockDefaultProject,
-        tags: [],
+        projectId: mockDefaultProject.id,
+        tagIds: [],
         newTagTitles: [],
         date: null,
         time: null,
@@ -668,8 +668,8 @@ describe('AddTaskBarParserService', () => {
       const midnightTime = '00:00';
 
       const mockState = {
-        project: mockDefaultProject,
-        tags: [],
+        projectId: mockDefaultProject.id,
+        tagIds: [],
         newTagTitles: [],
         date: null,
         time: null,

@@ -46,7 +46,7 @@ describe('AddTaskBarActionsComponent', () => {
 
   const mockState = {
     projectId: mockProject.id, // Use mock project id by default
-    tags: [],
+    tagIds: [],
     newTagTitles: [],
     date: null,
     time: null,
@@ -498,7 +498,7 @@ describe('AddTaskBarActionsComponent', () => {
     it('should check if tag is selected', () => {
       const stateWithTags = {
         ...mockState,
-        tags: [mockTag],
+        tagIds: [mockTag.id],
       };
       (mockStateService as any)._mockStateSignal.set(stateWithTags);
       fixture.detectChanges();
@@ -513,7 +513,7 @@ describe('AddTaskBarActionsComponent', () => {
     it('should toggle tag with syntax removal when removing', () => {
       const stateWithTags = {
         ...mockState,
-        tags: [mockTag],
+        tagIds: [mockTag.id],
       };
       (mockStateService as any)._mockStateSignal.set(stateWithTags);
       (mockStateService as any)._mockInputTxtSignal.set('Task #urgent');
@@ -533,7 +533,7 @@ describe('AddTaskBarActionsComponent', () => {
     it('should toggle tag without syntax modification when adding', () => {
       const stateWithoutTag = {
         ...mockState,
-        tags: [], // Tag not present
+        tagIds: [], // Tag not present
       };
       (mockStateService as any)._mockStateSignal.set(stateWithoutTag);
       fixture.detectChanges();
@@ -568,7 +568,7 @@ describe('AddTaskBarActionsComponent', () => {
       } as Tag;
       const stateWithMultipleTags = {
         ...mockState,
-        tags: [mockTag, mockTag2],
+        tagIds: [mockTag.id, mockTag2.id],
       };
       (mockStateService as any)._mockStateSignal.set(stateWithMultipleTags);
       fixture.detectChanges();

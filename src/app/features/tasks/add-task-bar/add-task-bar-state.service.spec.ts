@@ -149,18 +149,18 @@ describe('AddTaskBarStateService', () => {
     it('should add tag when not present', () => {
       service.toggleTag(mockTag1);
 
-      expect(service.state().tags).toContain(mockTag1);
-      expect(service.state().tags).toHaveSize(1);
+      expect(service.state().tagIds).toContain(mockTag1.id);
+      expect(service.state().tagIds).toHaveSize(1);
     });
 
     it('should remove tag when already present', () => {
-      service.updateTags([mockTag1, mockTag2]);
+      service.updateTagIds([mockTag1.id, mockTag2.id]);
 
       service.toggleTag(mockTag1);
 
-      expect(service.state().tags).not.toContain(mockTag1);
-      expect(service.state().tags).toContain(mockTag2);
-      expect(service.state().tags).toHaveSize(1);
+      expect(service.state().tagIds).not.toContain(mockTag1.id);
+      expect(service.state().tagIds).toContain(mockTag2.id);
+      expect(service.state().tagIds).toHaveSize(1);
     });
 
     it('should update input text when cleanedInputTxt provided', () => {
@@ -183,17 +183,17 @@ describe('AddTaskBarStateService', () => {
       service.toggleTag(mockTag1);
       service.toggleTag(mockTag2);
 
-      expect(service.state().tags[0]).toEqual(mockTag1);
-      expect(service.state().tags[1]).toEqual(mockTag2);
+      expect(service.state().tagIds[0]).toEqual(mockTag1.id);
+      expect(service.state().tagIds[1]).toEqual(mockTag2.id);
     });
 
     it('should preserve other tags when removing one', () => {
       const mockTag3: Tag = { id: '3', title: 'work' } as Tag;
-      service.updateTags([mockTag1, mockTag2, mockTag3]);
+      service.updateTagIds([mockTag1.id, mockTag2.id, mockTag3.id]);
 
       service.toggleTag(mockTag2);
 
-      expect(service.state().tags).toEqual([mockTag1, mockTag3]);
+      expect(service.state().tagIds).toEqual([mockTag1.id, mockTag3.id]);
     });
   });
 
@@ -204,18 +204,18 @@ describe('AddTaskBarStateService', () => {
         { id: '2', title: 'important' } as Tag,
       ];
 
-      service.updateTags(mockTags);
+      service.updateTagIds(mockTags.map((t) => t.id));
 
-      expect(service.state().tags).toEqual(mockTags);
+      expect(service.state().tagIds).toEqual(mockTags.map((t) => t.id));
     });
 
     it('should clear tags when empty array passed', () => {
       const mockTags: Tag[] = [{ id: '1', title: 'urgent' } as Tag];
-      service.updateTags(mockTags);
+      service.updateTagIds(mockTags.map((t) => t.id));
 
-      service.updateTags([]);
+      service.updateTagIds([]);
 
-      expect(service.state().tags).toEqual([]);
+      expect(service.state().tagIds).toEqual([]);
     });
   });
 
@@ -268,12 +268,12 @@ describe('AddTaskBarStateService', () => {
   describe('clearTags', () => {
     it('should clear tags and new tag titles', () => {
       const mockTags: Tag[] = [{ id: '1', title: 'urgent' } as Tag];
-      service.updateTags(mockTags);
+      service.updateTagIds(mockTags.map((t) => t.id));
       service.updateNewTagTitles(['new-tag']);
 
       service.clearTags();
 
-      expect(service.state().tags).toEqual([]);
+      expect(service.state().tagIds).toEqual([]);
       expect(service.state().newTagTitles).toEqual([]);
     });
 
@@ -334,7 +334,7 @@ describe('AddTaskBarStateService', () => {
       service.updateProjectId(mockProject.id);
       service.updateDate(getDbDateStr(testDate), '10:30');
       service.updateEstimate(testEstimate);
-      service.updateTags(mockTags);
+      service.updateTagIds(mockTags.map((t) => t.id));
       service.updateNewTagTitles(['new-tag']);
       service.updateCleanText('Clean text');
       service.updateInputTxt('Input text');
@@ -342,7 +342,7 @@ describe('AddTaskBarStateService', () => {
       service.resetAfterAdd();
 
       // These should be cleared
-      expect(service.state().tags).toEqual([]);
+      expect(service.state().tagIds).toEqual([]);
       expect(service.state().newTagTitles).toEqual([]);
       expect(service.state().cleanText).toBe(null);
       expect(service.inputTxt()).toBe('');
