@@ -58,16 +58,19 @@ export class FocusModeEffects {
   // Detect when work session timer completes and dispatch completeFocusSession
   detectSessionCompletion$ = createEffect(() =>
     this.store.select(selectors.selectTimer).pipe(
+      withLatestFrom(this.store.select(selectors.selectMode)),
       filter(
-        (timer) =>
+        ([timer, mode]) =>
           timer.purpose === 'work' &&
           !timer.isRunning &&
           timer.duration > 0 &&
-          timer.elapsed >= timer.duration,
+          timer.elapsed >= timer.duration &&
+          mode !== FocusModeMode.Flowtime, // Flowtime sessions should never auto-complete
       ),
       distinctUntilChanged(
-        (prev, curr) =>
-          prev.elapsed === curr.elapsed && prev.startedAt === curr.startedAt,
+        ([prevTimer], [currTimer]) =>
+          prevTimer.elapsed === currTimer.elapsed &&
+          prevTimer.startedAt === currTimer.startedAt,
       ),
       map(() => actions.completeFocusSession({ isManual: false })),
     ),

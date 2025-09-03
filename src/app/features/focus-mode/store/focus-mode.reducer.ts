@@ -205,14 +205,20 @@ export const focusModeReducer = createReducer(
     };
   }),
 
-  // Duration setting
-  on(a.setFocusSessionDuration, (state, { focusSessionDuration }) => ({
-    ...state,
-    timer: {
-      ...state.timer,
-      duration: focusSessionDuration,
-    },
-  })),
+  // Duration setting - don't set duration for Flowtime sessions
+  on(a.setFocusSessionDuration, (state, { focusSessionDuration }) => {
+    // Prevent setting duration for Flowtime mode to ensure it runs forever
+    if (state.mode === FocusModeMode.Flowtime) {
+      return state;
+    }
+    return {
+      ...state,
+      timer: {
+        ...state.timer,
+        duration: focusSessionDuration,
+      },
+    };
+  }),
 
   // Cycle management
   on(a.incrementCycle, (state) => ({
