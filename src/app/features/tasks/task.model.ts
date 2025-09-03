@@ -62,7 +62,8 @@ export interface IssueFieldsForTask {
   issueProviderId?: string;
   issueType?: IssueProviderKey;
   issueWasUpdated?: boolean;
-  issueLastUpdated?: number;
+  // TODO remove null again
+  issueLastUpdated?: number | null;
   issueAttachmentNr?: number;
   issueTimeTracked?: IssueTaskTimeTracked;
   issuePoints?: number;
