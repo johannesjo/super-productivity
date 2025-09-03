@@ -1,7 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
-import { of, take } from 'rxjs';
-import { FocusModeMode } from '../../focus-mode.model';
+import { provideMockActions } from '@ngrx/effects/testing';
+import { of, Subject } from 'rxjs';
+import { take } from 'rxjs/operators';
+import { Action } from '@ngrx/store';
+import { FocusModeMode } from '../focus-mode.model';
 import * as selectors from './focus-mode.selectors';
 import * as actions from './focus-mode.actions';
 import { focusModeReducer, initialState } from './focus-mode.reducer';
@@ -59,11 +62,15 @@ describe('FocusMode Flowtime behavior', () => {
   describe('Effects: detectSessionCompletion$', () => {
     let store: MockStore;
     let effects: FocusModeEffects;
+    let actions$: Subject<Action>;
 
     beforeEach(() => {
+      actions$ = new Subject<Action>();
+
       TestBed.configureTestingModule({
         providers: [
           provideMockStore({}),
+          provideMockActions(() => actions$),
           FocusModeEffects,
           { provide: BannerService, useValue: { open: () => {}, dismiss: () => {} } },
           { provide: GlobalConfigService, useValue: { sound: () => ({ volume: 0 }) } },
@@ -85,6 +92,13 @@ describe('FocusMode Flowtime behavior', () => {
       effects = TestBed.inject(FocusModeEffects);
     });
 
+    afterEach(() => {
+      // Reset any overridden selectors to avoid cross-test contamination
+      if (store && 'resetSelectors' in store) {
+        (store as any).resetSelectors();
+      }
+    });
+
     it('should NOT emit completeFocusSession for Flowtime even if elapsed >= duration', (done) => {
       const timer = {
         purpose: 'work' as const,
@@ -98,13 +112,16 @@ describe('FocusMode Flowtime behavior', () => {
       store.overrideSelector(selectors.selectMode, FocusModeMode.Flowtime);
       store.refreshState();
 
-      effects.detectSessionCompletion$.pipe(take(1)).subscribe({
+      const sub = effects.detectSessionCompletion$.pipe(take(1)).subscribe({
         next: () => fail('Should not emit'),
         error: (e) => fail(String(e)),
         complete: () => done(),
       });
-      // Complete immediately if no emission
-      setTimeout(() => done(), 50);
+      // Complete if no emission happens within a short window
+      setTimeout(() => {
+        sub.unsubscribe();
+        done();
+      }, 50);
     });
 
     it('should emit completeFocusSession for Pomodoro when elapsed >= duration', (done) => {
@@ -120,7 +137,7 @@ describe('FocusMode Flowtime behavior', () => {
       store.overrideSelector(selectors.selectMode, FocusModeMode.Pomodoro);
       store.refreshState();
 
-      effects.detectSessionCompletion$.pipe(take(1)).subscribe((action) => {
+      effects.detectSessionCompletion$.pipe(take(1)).subscribe((action: any) => {
         expect(action.type).toBe(actions.completeFocusSession.type);
         done();
       });
