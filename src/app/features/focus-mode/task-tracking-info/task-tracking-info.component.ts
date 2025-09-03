@@ -26,6 +26,9 @@ import { TaskService } from '../../tasks/task.service';
         class="task-tracking-info"
         (click)="onTaskClick()"
         [matTooltip]="'Pause tracking'"
+        role="button"
+        tabindex="0"
+        aria-label="Pause tracking for current task"
         @expand
       >
         @if (showTitle()) {
@@ -40,7 +43,7 @@ import { TaskService } from '../../tasks/task.service';
       </div>
     }
   `,
-  styleUrl: './task-tracking-info.component.scss',
+  styleUrls: ['./task-tracking-info.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation],
 })
