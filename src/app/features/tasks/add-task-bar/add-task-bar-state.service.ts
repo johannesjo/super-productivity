@@ -22,7 +22,7 @@ export class AddTaskBarStateService {
     });
   }
 
-  updateProject(project: Project | null): void {
+  updateProject(project: Project): void {
     this._taskInputState.update((state) => ({ ...state, project }));
     // Clear auto-detected flag when manually changing project
     this.isAutoDetected.set(false);
