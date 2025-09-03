@@ -5,13 +5,13 @@ import { select, Store } from '@ngrx/store';
 import { filter, startWith, take, tap, withLatestFrom } from 'rxjs/operators';
 import { selectCurrentTask } from './task.selectors';
 import { GlobalConfigService } from '../../config/global-config.service';
-import { selectIsFocusOverlayShown } from '../../focus-mode/store/focus-mode.selectors';
+import { selectIsOverlayShown } from '../../focus-mode/store/focus-mode.selectors';
 import { PomodoroService } from '../../pomodoro/pomodoro.service';
 import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
 import { FocusModeService } from '../../focus-mode/focus-mode.service';
 import {
   cancelFocusSession,
-  focusSessionDone,
+  completeFocusSession,
   hideFocusOverlay,
   pauseFocusSession,
   showFocusOverlay,
@@ -47,7 +47,7 @@ export class TaskElectronEffects {
           withLatestFrom(
             this._pomodoroService.isEnabled$,
             this._pomodoroService.currentSessionTime$,
-            this._store$.pipe(select(selectIsFocusOverlayShown)),
+            this._store$.pipe(select(selectIsOverlayShown)),
             this._focusModeService.currentSessionTime$,
           ),
           // Only take the first value and complete
@@ -86,14 +86,14 @@ export class TaskElectronEffects {
           cancelFocusSession,
           pauseFocusSession,
           unPauseFocusSession,
-          focusSessionDone,
+          completeFocusSession,
         ),
 
         withLatestFrom(
           this._store$.pipe(select(selectCurrentTask)),
           this._pomodoroService.isEnabled$,
           this._pomodoroService.currentSessionTime$,
-          this._store$.pipe(select(selectIsFocusOverlayShown)),
+          this._store$.pipe(select(selectIsOverlayShown)),
           this._focusModeService.currentSessionTime$.pipe(startWith(0)),
         ),
         tap(
@@ -156,7 +156,7 @@ export class TaskElectronEffects {
         ofType(TimeTrackingActions.addTimeSpent),
         withLatestFrom(
           this._configService.cfg$,
-          this._store$.select(selectIsFocusOverlayShown),
+          this._store$.select(selectIsOverlayShown),
         ),
         // we display pomodoro progress for pomodoro
         filter(

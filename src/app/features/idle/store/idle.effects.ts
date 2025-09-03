@@ -45,9 +45,9 @@ import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confir
 import { T } from '../../../t.const';
 import { DateService } from '../../../core/date/date.service';
 import { ipcIdleTime$ } from '../../../core/ipc-events';
-import { selectIsFocusSessionRunning } from '../../focus-mode/store/focus-mode.selectors';
+import { selectIsSessionRunning } from '../../focus-mode/store/focus-mode.selectors';
 import {
-  focusSessionDone,
+  completeFocusSession,
   showFocusOverlay,
   unPauseFocusSession,
 } from '../../focus-mode/store/focus-mode.actions';
@@ -73,7 +73,7 @@ export class IdleEffects {
   // NOTE: needs to live forever since we can't unsubscribe from ipcEvent$
   // TODO check if this works as expected
   private _electronIdleTime$: Observable<number> = IS_ELECTRON ? ipcIdleTime$ : EMPTY;
-  private _isFocusSessionRunning$ = this._store.select(selectIsFocusSessionRunning);
+  private _isFocusSessionRunning$ = this._store.select(selectIsSessionRunning);
 
   private _triggerIdleApis$ = IS_ELECTRON
     ? this._electronIdleTime$
@@ -233,11 +233,7 @@ export class IdleEffects {
 
           if (trackItems.length === 0 && simpleCounterToggleBtnsWhenNoTrackItems) {
             if (wasFocusSessionRunning) {
-              this._store.dispatch(
-                focusSessionDone({
-                  isResetPlannedSessionDuration: true,
-                }),
-              );
+              this._store.dispatch(completeFocusSession({ isManual: false }));
               this._store.dispatch(showFocusOverlay());
             }
 
@@ -294,15 +290,11 @@ export class IdleEffects {
               );
             });
             if (wasFocusSessionRunning) {
-              this._store.dispatch(
-                focusSessionDone({
-                  isResetPlannedSessionDuration: true,
-                }),
-              );
+              this._store.dispatch(completeFocusSession({ isManual: false }));
               this._store.dispatch(showFocusOverlay());
             }
           } else if (wasFocusSessionRunning) {
-            this._store.dispatch(unPauseFocusSession({ idleTimeToAdd: idleTime }));
+            this._store.dispatch(unPauseFocusSession({ idleTime: idleTime }));
             this._store.dispatch(showFocusOverlay());
           }
 

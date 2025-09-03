@@ -12,20 +12,20 @@ import { TaskCopy } from '../../tasks/task.model';
 import { from, Observable, of, Subject } from 'rxjs';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { TaskService } from '../../tasks/task.service';
-import { first, map, switchMap, take, takeUntil, throttleTime } from 'rxjs/operators';
+import { first, switchMap, take, takeUntil } from 'rxjs/operators';
 import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachment.service';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { IssueService } from '../../issue/issue.service';
 import { Store } from '@ngrx/store';
 import {
-  selectFocusModeMode,
-  selectFocusSessionTimeElapsed,
-} from '../store/focus-mode.selectors';
-import { focusSessionDone } from '../store/focus-mode.actions';
+  completeTask,
+  selectFocusTask,
+  setFocusSessionDuration,
+} from '../store/focus-mode.actions';
+import { selectTimeDuration } from '../store/focus-mode.selectors';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
-import { FocusModeMode } from '../focus-mode.const';
 import { ICAL_TYPE } from '../../issue/issue.const';
 import { TaskTitleComponent } from '../../../ui/task-title/task-title.component';
 import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-circle.component';
@@ -78,9 +78,8 @@ export class FocusModeMainComponent implements OnDestroy {
 
   focusModeService = inject(FocusModeService);
 
-  timeElapsed$ = this._store.select(selectFocusSessionTimeElapsed);
-  mode$ = this._store.select(selectFocusModeMode);
-  isCountTimeDown$ = this.mode$.pipe(map((mode) => mode !== FocusModeMode.Flowtime));
+  timeElapsed = this.focusModeService.timeElapsed;
+  isCountTimeDown = this.focusModeService.isCountTimeDown;
 
   @HostBinding('class.isShowNotes') isShowNotes: boolean = false;
 
@@ -103,14 +102,6 @@ export class FocusModeMainComponent implements OnDestroy {
     take(1),
   );
 
-  autoRationProgress$: Observable<number> = this.timeElapsed$.pipe(
-    map((timeElapsed) => {
-      const percentOfFullMinute = (timeElapsed % 60000) / 60000;
-      return percentOfFullMinute * 100;
-    }),
-    throttleTime(900),
-  );
-
   private _onDestroy$ = new Subject<void>();
   private _dragEnterTarget?: HTMLElement;
 
@@ -124,15 +115,10 @@ export class FocusModeMainComponent implements OnDestroy {
     });
     this.taskService.currentTask$.pipe(takeUntil(this._onDestroy$)).subscribe((task) => {
       this.task = task;
+      if (!task) {
+        this._store.dispatch(selectFocusTask());
+      }
     });
-
-    this.taskService.currentTask$
-      .pipe(first(), takeUntil(this._onDestroy$))
-      .subscribe((task) => {
-        if (!task) {
-          this.taskService.startFirstStartable();
-        }
-      });
   }
 
   @HostListener('dragenter', ['$event']) onDragEnter(ev: DragEvent): void {
@@ -178,27 +164,24 @@ export class FocusModeMainComponent implements OnDestroy {
   }
 
   finishCurrentTask(): void {
-    this._store.dispatch(focusSessionDone({}));
+    this._store.dispatch(completeTask());
+    // always go to task selection afterward
+    this._store.dispatch(selectFocusTask());
 
-    // Ensure we have a valid task id before dispatching updates
     const id = this.task && this.task.id;
-    if (!id) {
-      // No current task; nothing to finish
-      return;
-    }
-
-    // Mark task as done first to ensure effects receive a valid id
-    this._store.dispatch(
-      TaskSharedActions.updateTask({
-        task: {
-          id,
-          changes: {
-            isDone: true,
-            doneOn: Date.now(),
+    if (id) {
+      this._store.dispatch(
+        TaskSharedActions.updateTask({
+          task: {
+            id,
+            changes: {
+              isDone: true,
+              doneOn: Date.now(),
+            },
           },
-        },
-      }),
-    );
+        }),
+      );
+    }
   }
 
   trackById(i: number, item: SimpleCounter): string {
@@ -212,6 +195,19 @@ export class FocusModeMainComponent implements OnDestroy {
       }
       this.taskService.update(this.task.id, { title: newTitle });
     }
+  }
+
+  extendSession(): void {
+    this._store
+      .select(selectTimeDuration)
+      .pipe(first())
+      .subscribe((currentDuration) => {
+        const fiveMinutesInMs = 5 * 60 * 1000; // 5 minutes in milliseconds
+        const extendedDuration = currentDuration + fiveMinutesInMs;
+        this._store.dispatch(
+          setFocusSessionDuration({ focusSessionDuration: extendedDuration }),
+        );
+      });
   }
 
   protected readonly ICAL_TYPE = ICAL_TYPE;

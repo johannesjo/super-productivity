@@ -9,37 +9,68 @@ import { Task } from '../../tasks/task.model';
 import { TaskService } from '../../tasks/task.service';
 import { Store } from '@ngrx/store';
 import {
-  setFocusSessionActivePage,
+  completeFocusSession,
+  navigateToMainScreen,
+  selectFocusDuration,
+  setFocusSessionDuration,
+  startFocusPreparation,
   startFocusSession,
 } from '../store/focus-mode.actions';
-import { FocusModeMode, FocusModePage } from '../focus-mode.const';
 import { T } from 'src/app/t.const';
 import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { TranslatePipe } from '@ngx-translate/core';
 import { SelectTaskComponent } from '../../tasks/select-task/select-task.component';
-import { selectFocusModeMode } from '../store/focus-mode.selectors';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { selectFocusModeConfig } from '../../config/store/global-config.reducer';
+import { FocusModeService } from '../focus-mode.service';
+import { FocusModeStrategyFactory } from '../focus-mode-strategies';
+import { FocusScreen } from '../focus-mode.model';
+import { MatIcon } from '@angular/material/icon';
+import { MsToMinuteClockStringPipe } from '../../../ui/duration/ms-to-minute-clock-string.pipe';
+import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-circle.component';
+import { BreathingDotComponent } from '../../../ui/breathing-dot/breathing-dot.component';
 
 @Component({
   selector: 'focus-mode-task-selection',
   templateUrl: './focus-mode-task-selection.component.html',
   styleUrls: ['./focus-mode-task-selection.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, MatButton, TranslatePipe, SelectTaskComponent],
+  imports: [
+    FormsModule,
+    MatButton,
+    TranslatePipe,
+    SelectTaskComponent,
+    MatIcon,
+    MsToMinuteClockStringPipe,
+    ProgressCircleComponent,
+    BreathingDotComponent,
+  ],
 })
 export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy {
   readonly taskService = inject(TaskService);
   private readonly _store = inject(Store);
+  private readonly _focusModeService = inject(FocusModeService);
+  private readonly _strategyFactory = inject(FocusModeStrategyFactory);
 
-  mode = toSignal(this._store.select(selectFocusModeMode));
-  cfg = toSignal(this._store.select(selectFocusModeConfig));
+  // Expose service for template
+  focusModeService = this._focusModeService;
+
+  mode = this._focusModeService.mode;
+  focusModeConfig = this._focusModeService.focusModeConfig;
+  pomodoroConfig = this._focusModeService.pomodoroConfig;
+  currentCycle = this._focusModeService.currentCycle;
+  isFocusSessionRunning = this._focusModeService.isSessionRunning;
+
+  // Timer-related properties
+  timeElapsed = this._focusModeService.timeElapsed;
+  sessionProgress$ = this._focusModeService.sessionProgress$;
+  timeToGo$ = this._focusModeService.timeToGo$;
 
   selectedTask: string | Task | undefined;
   initialTask = this.taskService.firstStartableTask;
   focusTimeout = 0;
   T: typeof T = T;
+
+  isCountTimeDown = this._focusModeService.isCountTimeDown;
 
   ngAfterViewInit(): void {
     this.focusTimeout = window.setTimeout(() => {
@@ -57,28 +88,56 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
     this.selectedTask = taskOrNewTask;
   }
 
+  completeSession(): void {
+    this._store.dispatch(completeFocusSession({ isManual: true }));
+  }
+
   onSubmit($event: SubmitEvent): void {
     $event.preventDefault();
-    if (this.selectedTask) {
-      const focusActivePage =
-        this.mode() === FocusModeMode.Flowtime
-          ? this.cfg()?.isSkipPreparation
-            ? FocusModePage.Main
-            : FocusModePage.Preparation
-          : FocusModePage.DurationSelection;
+    if (!this.selectedTask) return;
 
-      if (typeof this.selectedTask === 'string') {
-        const taskId = this.taskService.add(this.selectedTask);
-        this.taskService.setCurrentId(taskId);
-        this._store.dispatch(setFocusSessionActivePage({ focusActivePage }));
-      } else {
-        this.taskService.setCurrentId(this.selectedTask.id);
-        this._store.dispatch(setFocusSessionActivePage({ focusActivePage }));
-      }
+    const mode = this.mode();
+    const skipPreparation = this.focusModeConfig()?.isSkipPreparation;
 
-      if (focusActivePage === FocusModePage.Main) {
-        this._store.dispatch(startFocusSession());
-      }
+    if (!mode) return;
+
+    // Set task
+    if (typeof this.selectedTask === 'string') {
+      const taskId = this.taskService.add(this.selectedTask);
+      this.taskService.setCurrentId(taskId);
+    } else {
+      this.taskService.setCurrentId(this.selectedTask.id);
+    }
+
+    if (this.isFocusSessionRunning()) {
+      this._store.dispatch(navigateToMainScreen());
+      return;
+    }
+
+    // Get next screen from strategy
+    const strategy = this._strategyFactory.getStrategy(mode);
+    const nextStep = strategy.getNextScreenAfterTaskSelection(!!skipPreparation);
+
+    // Set duration if provided by strategy
+    if (nextStep.duration !== undefined) {
+      this._store.dispatch(
+        setFocusSessionDuration({ focusSessionDuration: nextStep.duration }),
+      );
+    }
+
+    // Dispatch appropriate action based on strategy's decision
+    switch (nextStep.screen) {
+      case FocusScreen.DurationSelection:
+        this._store.dispatch(selectFocusDuration());
+        break;
+      case FocusScreen.Preparation:
+        this._store.dispatch(startFocusPreparation());
+        break;
+      case FocusScreen.Main:
+        this._store.dispatch(
+          startFocusSession(nextStep.duration ? { duration: nextStep.duration } : {}),
+        );
+        break;
     }
   }
 }

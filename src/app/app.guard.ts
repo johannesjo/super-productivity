@@ -12,7 +12,7 @@ import { WorkContextType } from './features/work-context/work-context.model';
 import { TagService } from './features/tag/tag.service';
 import { ProjectService } from './features/project/project.service';
 import { Store } from '@ngrx/store';
-import { selectIsFocusOverlayShown } from './features/focus-mode/store/focus-mode.selectors';
+import { selectIsOverlayShown } from './features/focus-mode/store/focus-mode.selectors';
 import { DataInitStateService } from './core/data-init/data-init-state.service';
 
 @Injectable({ providedIn: 'root' })
@@ -65,7 +65,7 @@ export class FocusOverlayOpenGuard {
     next: ActivatedRouteSnapshot,
     state: RouterStateSnapshot,
   ): Observable<boolean> {
-    return this._store.select(selectIsFocusOverlayShown).pipe(map((isShown) => !isShown));
+    return this._store.select(selectIsOverlayShown).pipe(map((isShown) => !isShown));
   }
 }
 

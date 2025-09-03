@@ -150,11 +150,29 @@ breathing-dot {
   button {
     width: 56px !important;
     height: 56px !important;
+    position: relative;
 
     mat-icon {
       font-size: 32px !important; //make it bigger, the default being 24px.
       width: 32px !important;
       height: 32px !important;
+    }
+
+    .extend-label {
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+      background: var(--c-accent);
+      color: var(--c-on-accent);
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: bold;
+      line-height: 1;
     }
   }
 }

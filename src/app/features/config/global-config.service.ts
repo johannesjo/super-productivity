@@ -3,6 +3,7 @@ import { select, Store } from '@ngrx/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { updateGlobalConfigSection } from './store/global-config.actions';
 import { Observable } from 'rxjs';
+import { DEFAULT_GLOBAL_CONFIG } from './default-global-config.const';
 import {
   EvaluationConfig,
   GlobalConfigSectionKey,
@@ -11,6 +12,7 @@ import {
   IdleConfig,
   LanguageConfig,
   MiscConfig,
+  PomodoroConfig,
   ScheduleConfig,
   ShortSyntaxConfig,
   SoundConfig,
@@ -23,6 +25,7 @@ import {
   selectIdleConfig,
   selectLanguageConfig,
   selectMiscConfig,
+  selectPomodoroConfig,
   selectShortSyntaxConfig,
   selectSoundConfig,
   selectSyncConfig,
@@ -83,6 +86,11 @@ export class GlobalConfigService {
     shareReplay(1),
   );
 
+  pomodoroConfig$: Observable<PomodoroConfig> = this._store.pipe(
+    select(selectPomodoroConfig),
+    shareReplay(1),
+  );
+
   timelineCfg$: Observable<ScheduleConfig> = this._store.pipe(
     select(selectTimelineConfig),
   );
@@ -116,6 +124,12 @@ export class GlobalConfigService {
   readonly takeABreak: Signal<TakeABreakConfig | undefined> = toSignal(this.takeABreak$, {
     initialValue: undefined,
   });
+  readonly pomodoroConfig: Signal<PomodoroConfig | undefined> = toSignal(
+    this.pomodoroConfig$,
+    {
+      initialValue: DEFAULT_GLOBAL_CONFIG.pomodoro,
+    },
+  );
   readonly timelineCfg: Signal<ScheduleConfig | undefined> = toSignal(this.timelineCfg$, {
     initialValue: undefined,
   });

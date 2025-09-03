@@ -1,4 +1,4 @@
-@let isCountTimeDown = isCountTimeDown$ | async;
+@let isCountDown = isCountTimeDown();
 <!-- -->
 @if (taskService.currentTask$ | async; as task) {
   <task-title
@@ -7,22 +7,20 @@
     class="task-title"
   ></task-title>
   <div class="progress-wrapper">
-    @if (isCountTimeDown) {
-      <progress-circle
-        [progress]="focusModeService.sessionProgress$ | async"
-      ></progress-circle>
+    @if (isCountDown) {
+      <progress-circle [progress]="focusModeService.progress()"></progress-circle>
     } @else {
       <breathing-dot></breathing-dot>
     }
     <div class="progress-label-wrapper">
       <div
         class="focus-time"
-        title="Focus time"
+        [title]="T.F.FOCUS_MODE.FOCUS_TIME_TOOLTIP | translate"
       >
-        @if (isCountTimeDown) {
-          {{ focusModeService.timeToGo$ | async | msToMinuteClockString }}
+        @if (isCountDown) {
+          {{ focusModeService.timeRemaining() | msToMinuteClockString }}
         } @else {
-          {{ timeElapsed$ | async | msToMinuteClockString }}
+          {{ timeElapsed() | msToMinuteClockString }}
         }
       </div>
     </div>
@@ -62,6 +60,15 @@
         }
         <mat-icon [svgIcon]="task.issueType | issueIcon"></mat-icon>
       </a>
+    }
+    @if (isCountDown) {
+      <button
+        mat-icon-button
+        [matTooltip]="'Add 5 minutes'"
+        (click)="extendSession()"
+      >
+        <mat-icon>add_circle</mat-icon>
+      </button>
     }
     <button
       (click)="isShowNotes = !isShowNotes"

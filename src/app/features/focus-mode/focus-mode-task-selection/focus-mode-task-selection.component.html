@@ -4,6 +4,31 @@
 >
   <h1>{{ T.F.FOCUS_MODE.SELECT_TASK | translate }}</h1>
 
+  @if (isFocusSessionRunning()) {
+    @let isCountDown = isCountTimeDown();
+    <div class="timer-display">
+      <div class="progress-wrapper">
+        @if (isCountDown) {
+          <progress-circle [progress]="focusModeService.progress()"></progress-circle>
+        } @else {
+          <breathing-dot></breathing-dot>
+        }
+        <div class="progress-label-wrapper">
+          <div
+            class="focus-time"
+            [title]="T.F.FOCUS_MODE.CURRENT_SESSION_TIME_TOOLTIP | translate"
+          >
+            @if (isCountDown) {
+              {{ focusModeService.timeRemaining() | msToMinuteClockString }}
+            } @else {
+              {{ timeElapsed() | msToMinuteClockString }}
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
   <select-task
     (taskChange)="onTaskChange($event)"
     [initialTask]="initialTask()"
@@ -12,11 +37,35 @@
   </select-task>
   <br />
   <br />
-  <button
-    type="submit"
-    color="primary"
-    mat-raised-button
-  >
-    {{ T.F.FOCUS_MODE.NEXT | translate }}
-  </button>
+
+  @if (isFocusSessionRunning()) {
+    <div style="display: flex; gap: 16px">
+      <button
+        type="button"
+        mat-stroked-button
+        (click)="completeSession()"
+      >
+        <mat-icon>done_all</mat-icon>
+        {{ T.F.FOCUS_MODE.COMPLETE_SESSION | translate }}
+      </button>
+
+      <button
+        type="submit"
+        color="primary"
+        mat-raised-button
+      >
+        <mat-icon>arrow_forward</mat-icon>
+        {{ T.F.FOCUS_MODE.CONTINUE_SESSION | translate }}
+      </button>
+    </div>
+  } @else {
+    <button
+      type="submit"
+      color="primary"
+      mat-raised-button
+    >
+      <mat-icon>arrow_forward</mat-icon>
+      {{ T.F.FOCUS_MODE.NEXT | translate }}
+    </button>
+  }
 </form>

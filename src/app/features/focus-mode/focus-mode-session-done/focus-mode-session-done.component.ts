@@ -11,33 +11,35 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { ConfettiService } from '../../../core/confetti/confetti.service';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
+import { FocusModeService } from '../focus-mode.service';
+import { FocusModeMode } from '../focus-mode.model';
 import {
   selectCurrentTask,
   selectLastCurrentTask,
 } from '../../tasks/store/task.selectors';
-import { FocusModePage } from '../focus-mode.const';
 import {
   cancelFocusSession,
   hideFocusOverlay,
-  setFocusSessionActivePage,
+  selectFocusTask,
+  selectFocusDuration,
 } from '../store/focus-mode.actions';
-import {
-  selectFocusModeMode,
-  selectLastSessionTotalDurationOrTimeElapsedFallback,
-} from '../store/focus-mode.selectors';
+import { MatIcon } from '@angular/material/icon';
+import { TaskTrackingInfoComponent } from '../task-tracking-info/task-tracking-info.component';
 
 @Component({
-  selector: 'focus-mode-task-done',
-  templateUrl: './focus-mode-task-done.component.html',
-  styleUrls: ['./focus-mode-task-done.component.scss'],
+  selector: 'focus-mode-session-done',
+  templateUrl: './focus-mode-session-done.component.html',
+  styleUrls: ['./focus-mode-session-done.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatButton, MsToStringPipe, TranslatePipe],
+  imports: [MatButton, MsToStringPipe, TranslatePipe, MatIcon, TaskTrackingInfoComponent],
 })
-export class FocusModeTaskDoneComponent implements AfterViewInit {
+export class FocusModeSessionDoneComponent implements AfterViewInit {
   private _store = inject(Store);
   private readonly _confettiService = inject(ConfettiService);
+  private readonly _focusModeService = inject(FocusModeService);
 
-  mode = toSignal(this._store.select(selectFocusModeMode));
+  mode = this._focusModeService.mode;
+  FocusModeMode = FocusModeMode;
   currentTask = toSignal(this._store.select(selectCurrentTask));
   taskTitle = toSignal(
     this._store.select(selectLastCurrentTask).pipe(
@@ -49,9 +51,8 @@ export class FocusModeTaskDoneComponent implements AfterViewInit {
       take(1),
     ),
   );
-  lastSessionTotalDuration = toSignal(
-    this._store.select(selectLastSessionTotalDurationOrTimeElapsedFallback),
-  );
+  lastSessionTotalDuration =
+    this._focusModeService.lastSessionTotalDurationOrTimeElapsedFallback;
   T: typeof T = T;
 
   async ngAfterViewInit(): Promise<void> {
@@ -77,14 +78,10 @@ export class FocusModeTaskDoneComponent implements AfterViewInit {
   }
 
   startNextFocusSession(): void {
-    this._store.dispatch(
-      setFocusSessionActivePage({ focusActivePage: FocusModePage.TaskSelection }),
-    );
+    this._store.dispatch(selectFocusTask());
   }
 
   continueWithFocusSession(): void {
-    this._store.dispatch(
-      setFocusSessionActivePage({ focusActivePage: FocusModePage.DurationSelection }),
-    );
+    this._store.dispatch(selectFocusDuration());
   }
 }

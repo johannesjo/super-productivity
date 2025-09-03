@@ -23,3 +23,36 @@ form {
 select-task {
   width: 100%;
 }
+
+.timer-display {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: var(--s);
+}
+
+.progress-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+progress-circle,
+breathing-dot {
+  width: 120px;
+  height: 120px;
+}
+
+.progress-label-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  .focus-time {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+  }
+}

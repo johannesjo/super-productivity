@@ -1,9 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, OnDestroy } from '@angular/core';
-import {
-  setFocusSessionActivePage,
-  startFocusSession,
-} from '../store/focus-mode.actions';
-import { FocusModePage } from '../focus-mode.const';
+import { startFocusSession } from '../store/focus-mode.actions';
 import { Store } from '@ngrx/store';
 import { interval, Observable, Subject } from 'rxjs';
 import { delay, map, startWith, takeUntil, takeWhile } from 'rxjs/operators';
@@ -11,6 +7,8 @@ import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { T } from 'src/app/t.const';
 import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
+import { selectTimeDuration } from '../store/focus-mode.selectors';
+import { FocusModeService } from '../focus-mode.service';
 
 const COUNTDOWN_DURATION = 5;
 
@@ -24,6 +22,7 @@ const COUNTDOWN_DURATION = 5;
 })
 export class FocusModePreparationComponent implements OnDestroy {
   private readonly _store = inject(Store);
+  private readonly _focusModeService = inject(FocusModeService);
 
   T: typeof T = T;
 
@@ -44,10 +43,8 @@ export class FocusModePreparationComponent implements OnDestroy {
   }
 
   startSession(): void {
-    this._store.dispatch(startFocusSession());
-    this._store.dispatch(
-      setFocusSessionActivePage({ focusActivePage: FocusModePage.Main }),
-    );
+    const duration = this._store.selectSignal(selectTimeDuration)();
+    this._store.dispatch(startFocusSession({ duration }));
   }
 
   ngOnDestroy(): void {

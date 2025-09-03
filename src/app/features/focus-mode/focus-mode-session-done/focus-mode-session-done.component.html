@@ -3,7 +3,13 @@
   <div class="pyro-after"></div>
 </div>
 
-<h1>{{ T.F.FOCUS_MODE.SESSION_COMPLETED | translate }}</h1>
+<h1>
+  @if (mode() === FocusModeMode.Pomodoro) {
+    {{ T.F.FOCUS_MODE.POMODORO_SESSION_COMPLETED | translate }}
+  } @else {
+    {{ T.F.FOCUS_MODE.SESSION_COMPLETED | translate }}
+  }
+</h1>
 
 <div class="msg">
   <div class="worked-for-label">{{ T.F.FOCUS_MODE.WORKED_FOR | translate }}</div>
@@ -13,6 +19,11 @@
 
   <div class="task-title-label">{{ T.F.FOCUS_MODE.ON | translate }}</div>
   <div class="task-title">{{ taskTitle() }}</div>
+
+  <task-tracking-info
+    class="inline"
+    [showTitle]="false"
+  ></task-tracking-info>
 </div>
 
 <div class="btn-wrapper">
@@ -21,25 +32,16 @@
     color="primary"
     (click)="cancelAndCloseFocusOverlay()"
   >
+    <mat-icon>arrow_back</mat-icon>
     {{ T.F.FOCUS_MODE.BACK_TO_PLANNING | translate }}
   </button>
 
-  @if (!currentTask()) {
-    <button
-      mat-raised-button
-      color="primary"
-      (click)="startNextFocusSession()"
-    >
-      {{ T.F.FOCUS_MODE.START_NEXT_FOCUS_SESSION | translate }}
-    </button>
-  }
-  @if (currentTask()) {
-    <button
-      mat-raised-button
-      color="primary"
-      (click)="continueWithFocusSession()"
-    >
-      {{ T.F.FOCUS_MODE.CONTINUE_FOCUS_SESSION | translate }}
-    </button>
-  }
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="currentTask() ? continueWithFocusSession() : startNextFocusSession()"
+  >
+    <mat-icon>arrow_forward</mat-icon>
+    {{ T.F.FOCUS_MODE.START_NEXT_FOCUS_SESSION | translate }}
+  </button>
 </div>

@@ -2,102 +2,107 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
-  ElementRef,
   inject,
-  ViewChild,
+  OnDestroy,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { selectTimeDuration } from '../store/focus-mode.selectors';
 import {
-  selectFocusModeMode,
-  selectFocusSessionDuration,
-} from '../store/focus-mode.selectors';
-import {
-  setFocusSessionActivePage,
   setFocusSessionDuration,
+  startFocusPreparation,
   startFocusSession,
+  selectFocusTask,
 } from '../store/focus-mode.actions';
-import { FocusModeMode, FocusModePage } from '../focus-mode.const';
 import { selectCurrentTask } from '../../tasks/store/task.selectors';
-import { selectFocusModeConfig } from '../../config/store/global-config.reducer';
+import { Subject } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { InputDurationSliderComponent } from '../../../ui/duration/input-duration-slider/input-duration-slider.component';
+import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { T } from '../../../t.const';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { FocusModeService } from '../focus-mode.service';
+import { MatIcon } from '@angular/material/icon';
+import { FocusModeMode, FOCUS_MODE_DEFAULTS } from '../focus-mode.model';
+import { LS } from '../../../core/persistence/storage-keys.const';
 
 @Component({
   selector: 'focus-mode-duration-selection',
   templateUrl: './focus-mode-duration-selection.component.html',
   styleUrls: ['./focus-mode-duration-selection.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, MatButton, InputDurationSliderComponent, TranslatePipe],
+  imports: [
+    FormsModule,
+    MatButton,
+    InputDurationSliderComponent,
+    AsyncPipe,
+    TranslatePipe,
+    MatIcon,
+  ],
 })
-export class FocusModeDurationSelectionComponent implements AfterViewInit {
+export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDestroy {
   private readonly _store = inject(Store);
-  private readonly _destroyRef = inject(DestroyRef);
+  private readonly _focusModeService = inject(FocusModeService);
 
-  readonly T = T;
-  readonly FocusModeMode = FocusModeMode;
+  T: typeof T = T;
+  sessionDuration$ = this._store.select(selectTimeDuration);
+  task$ = this._store.select(selectCurrentTask);
+  updatedFocusModeDuration: number = FOCUS_MODE_DEFAULTS.SESSION_DURATION;
+  focusTimeout = 0;
+  cfg = this._focusModeService.focusModeConfig;
+  selectedMode = this._focusModeService.mode;
 
-  readonly currentTask = toSignal(this._store.select(selectCurrentTask));
-  readonly selectedMode = toSignal(this._store.select(selectFocusModeMode));
-  readonly cfg = toSignal(this._store.select(selectFocusModeConfig));
-  readonly focusModeDuration = toSignal(this._store.select(selectFocusSessionDuration), {
-    initialValue: 0,
-  });
-
-  @ViewChild('durationInput', { read: ElementRef })
-  private durationInputRef?: ElementRef<HTMLInputElement>;
-
-  private focusTimeout = 0;
-
-  constructor() {
-    this._destroyRef.onDestroy(() => {
-      if (this.focusTimeout) {
-        window.clearTimeout(this.focusTimeout);
-      }
-    });
-  }
+  private _onDestroy$ = new Subject<void>();
 
   ngAfterViewInit(): void {
+    // Initialize duration from localStorage or use default
+    const lastDuration = localStorage.getItem(LS.LAST_COUNTDOWN_DURATION);
+    if (lastDuration) {
+      this.updatedFocusModeDuration = parseInt(lastDuration, 10);
+    }
+
     this.focusTimeout = window.setTimeout(() => {
-      if (this.durationInputRef?.nativeElement) {
-        this.durationInputRef.nativeElement.focus();
-        this.durationInputRef.nativeElement.select();
-      }
+      const el = document.querySelector('input');
+      (el as HTMLElement)?.focus();
+      (el as any)?.select();
     }, 200);
   }
 
-  onSubmit(event?: SubmitEvent): void {
-    event?.preventDefault();
+  ngOnDestroy(): void {
+    window.clearTimeout(this.focusTimeout);
+    this._onDestroy$.next();
+    this._onDestroy$.complete();
+  }
 
-    const duration = this.focusModeDuration();
-    if (duration) {
-      this._store.dispatch(setFocusSessionDuration({ focusSessionDuration: duration }));
-    }
+  onFocusModeDurationChanged(duration: number): void {
+    this.updatedFocusModeDuration = duration;
+  }
 
-    const config = this.cfg();
-    if (config?.isSkipPreparation) {
-      this._store.dispatch(startFocusSession());
+  onSubmit($event?: SubmitEvent): void {
+    $event?.preventDefault();
+    if (this.updatedFocusModeDuration) {
+      // Save the duration to localStorage for next time
+      localStorage.setItem(
+        LS.LAST_COUNTDOWN_DURATION,
+        this.updatedFocusModeDuration.toString(),
+      );
+
       this._store.dispatch(
-        setFocusSessionActivePage({ focusActivePage: FocusModePage.Main }),
+        setFocusSessionDuration({ focusSessionDuration: this.updatedFocusModeDuration }),
+      );
+    }
+    if (this.cfg()?.isSkipPreparation) {
+      this._store.dispatch(
+        startFocusSession({ duration: this.updatedFocusModeDuration }),
       );
     } else {
-      this._store.dispatch(
-        setFocusSessionActivePage({ focusActivePage: FocusModePage.Preparation }),
-      );
+      this._store.dispatch(startFocusPreparation());
     }
   }
 
   selectDifferentTask(): void {
-    this._store.dispatch(
-      setFocusSessionActivePage({ focusActivePage: FocusModePage.TaskSelection }),
-    );
+    this._store.dispatch(selectFocusTask());
   }
 
-  updateDuration(value: number): void {
-    this._store.dispatch(setFocusSessionDuration({ focusSessionDuration: value }));
-  }
+  protected readonly FocusModeMode = FocusModeMode;
 }

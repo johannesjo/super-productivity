@@ -1,0 +1,34 @@
+.focus-mode-break {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  gap: 2rem;
+}
+
+.timer-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .timer-text {
+    position: absolute;
+    font-size: 1.8rem;
+    font-weight: 500;
+  }
+}
+
+.break-message {
+  font-size: 1.1rem;
+  opacity: 0.8;
+  margin: 0;
+}
+
+.button-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}

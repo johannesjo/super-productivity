@@ -1,128 +1,230 @@
 import { createReducer, on } from '@ngrx/store';
+import * as a from './focus-mode.actions';
 import {
-  cancelFocusSession,
-  focusSessionDone,
-  hideFocusOverlay,
-  pauseFocusSession,
-  setFocusModeMode,
-  setFocusSessionActivePage,
-  setFocusSessionDuration,
-  setFocusSessionTimeElapsed,
-  showFocusOverlay,
-  startFocusSession,
-  unPauseFocusSession,
-} from './focus-mode.actions';
-import { FocusModeMode, FocusModePage } from '../focus-mode.const';
+  FocusModeMode,
+  FocusModeState,
+  FocusScreen,
+  TimerState,
+  FOCUS_MODE_DEFAULTS,
+} from '../focus-mode.model';
 import { LS } from '../../../core/persistence/storage-keys.const';
-
-const DEFAULT_FOCUS_SESSION_DURATION = 25 * 60 * 1000;
-// const USE_REMAINING_SESSION_TIME_THRESHOLD = 60 * 1000;
 
 export const FOCUS_MODE_FEATURE_KEY = 'focusMode';
 
-export interface State {
-  isFocusOverlayShown: boolean;
-  isFocusSessionRunning: boolean;
-  focusSessionDuration: number;
-  focusSessionTimeElapsed: number;
-  lastSessionTotalDuration: number;
-  focusSessionActivePage: FocusModePage;
-  mode: FocusModeMode;
-}
-
 const focusModeModeFromLS = localStorage.getItem(LS.FOCUS_MODE_MODE);
 
-export const initialState: State = {
-  isFocusOverlayShown: false,
-  isFocusSessionRunning: false,
-  focusSessionDuration: DEFAULT_FOCUS_SESSION_DURATION,
-  focusSessionTimeElapsed: 0,
-  lastSessionTotalDuration: 0,
-  focusSessionActivePage: FocusModePage.TaskSelection,
+const createIdleTimer = (): TimerState => ({
+  isRunning: false,
+  startedAt: null,
+  elapsed: 0,
+  duration: 0,
+  purpose: null,
+});
+
+export const initialState: FocusModeState = {
+  timer: createIdleTimer(),
+  currentScreen: FocusScreen.TaskSelection,
+  isOverlayShown: false,
   mode: Object.values(FocusModeMode).includes(focusModeModeFromLS as any)
-    ? (focusModeModeFromLS as any)
-    : FocusModeMode.Flowtime,
+    ? (focusModeModeFromLS as FocusModeMode)
+    : FocusModeMode.Countdown,
+  currentCycle: 1,
+  lastCompletedDuration: 0,
 };
 
-export const focusModeReducer = createReducer<State>(
+const createWorkTimer = (duration: number): TimerState => ({
+  isRunning: true,
+  startedAt: Date.now(),
+  elapsed: 0,
+  duration,
+  purpose: 'work',
+});
+
+const createBreakTimer = (duration: number, isLong = false): TimerState => ({
+  isRunning: true,
+  startedAt: Date.now(),
+  elapsed: 0,
+  duration,
+  purpose: 'break',
+  isLongBreak: isLong,
+});
+
+const updateTimer = (timer: TimerState): TimerState => {
+  if (!timer.isRunning || !timer.startedAt) {
+    return timer;
+  }
+
+  const now = Date.now();
+  const elapsed = now - timer.startedAt;
+  return { ...timer, elapsed };
+};
+
+export const focusModeReducer = createReducer(
   initialState,
 
-  on(setFocusSessionActivePage, (state, { focusActivePage: focusSessionActivePage }) => ({
-    ...state,
-    focusSessionActivePage,
-  })),
-  on(setFocusModeMode, (state, { mode }) => ({
+  // Mode changes
+  on(a.setFocusModeMode, (state, { mode }) => ({
     ...state,
     mode,
   })),
-  on(setFocusSessionDuration, (state, { focusSessionDuration }) => ({
+
+  // Overlay control
+  on(a.showFocusOverlay, (state) => ({
     ...state,
-    focusSessionDuration,
+    isOverlayShown: true,
   })),
 
-  on(setFocusSessionTimeElapsed, (state, { focusSessionTimeElapsed }) => ({
+  on(a.hideFocusOverlay, (state) => ({
     ...state,
-    focusSessionTimeElapsed,
+    isOverlayShown: false,
   })),
 
-  on(startFocusSession, (state) => ({
+  // Screen navigation
+  on(a.selectFocusTask, (state) => ({
     ...state,
-    isFocusSessionRunning: true,
-    focusSessionActivePage: FocusModePage.Main,
-    lastSessionTotalDuration: 0,
-    // NOTE: not resetting since, we might want to continue
-    // focusSessionTimeElapsed: 0,
-    focusSessionDuration:
-      state.focusSessionDuration > 0
-        ? state.focusSessionDuration
-        : DEFAULT_FOCUS_SESSION_DURATION,
+    currentScreen: FocusScreen.TaskSelection,
   })),
 
-  on(focusSessionDone, (state, { isResetPlannedSessionDuration }) => {
+  on(a.selectFocusDuration, (state) => ({
+    ...state,
+    currentScreen: FocusScreen.DurationSelection,
+  })),
+
+  on(a.startFocusPreparation, (state) => ({
+    ...state,
+    currentScreen: FocusScreen.Preparation,
+  })),
+
+  on(a.navigateToMainScreen, (state) => ({
+    ...state,
+    currentScreen: FocusScreen.Main,
+  })),
+
+  on(a.startFocusSession, (state, { duration }) => {
+    const timer = createWorkTimer(duration || FOCUS_MODE_DEFAULTS.SESSION_DURATION);
     return {
       ...state,
-      isFocusSessionRunning: false,
-      isFocusOverlayShown: true,
-      ...(isResetPlannedSessionDuration
-        ? {
-            focusSessionDuration: DEFAULT_FOCUS_SESSION_DURATION,
-            lastSessionTotalDuration: state.focusSessionTimeElapsed,
-            focusSessionTimeElapsed: 0,
-          }
-        : {}),
-      focusSessionActivePage: FocusModePage.SessionDone,
+      timer,
+      currentScreen: FocusScreen.Main,
     };
   }),
 
-  on(pauseFocusSession, (state) => ({
+  on(a.pauseFocusSession, (state) => {
+    if (state.timer.purpose !== 'work') return state;
+
+    return {
+      ...state,
+      timer: {
+        ...state.timer,
+        isRunning: false,
+      },
+    };
+  }),
+
+  on(a.unPauseFocusSession, (state, { idleTime = 0 }) => {
+    if (state.timer.purpose !== 'work') return state;
+
+    return {
+      ...state,
+      timer: {
+        ...state.timer,
+        isRunning: true,
+        startedAt: Date.now() - state.timer.elapsed - idleTime,
+      },
+    };
+  }),
+
+  on(a.completeFocusSession, (state, { isManual }) => {
+    const duration = state.timer.elapsed;
+
+    return {
+      ...state,
+      timer: createIdleTimer(),
+      currentScreen: FocusScreen.SessionDone,
+      lastCompletedDuration: duration,
+    };
+  }),
+
+  on(a.cancelFocusSession, (state) => ({
     ...state,
-    isFocusSessionRunning: false,
+    timer: createIdleTimer(),
+    currentScreen: FocusScreen.TaskSelection,
+    isOverlayShown: false,
   })),
 
-  on(unPauseFocusSession, (state, { idleTimeToAdd = 0 }) => ({
+  // Break handling
+  on(a.startBreak, (state, { duration, isLongBreak }) => {
+    const timer = createBreakTimer(
+      duration || FOCUS_MODE_DEFAULTS.SHORT_BREAK_DURATION,
+      isLongBreak || false,
+    );
+
+    return {
+      ...state,
+      timer,
+      currentScreen: FocusScreen.Break,
+    };
+  }),
+
+  on(a.skipBreak, a.completeBreak, (state) => ({
     ...state,
-    isFocusSessionRunning: true,
-    // NOTE: this is adjusted in the effect via session time
-    // focusSessionDuration: state.focusSessionDuration,
+    timer: createIdleTimer(),
+    currentScreen: FocusScreen.TaskSelection,
   })),
 
-  on(showFocusOverlay, (state) => ({
+  // Timer updates - much simpler!
+  on(a.tick, (state) => {
+    if (!state.timer.isRunning || !state.timer.purpose) {
+      return state;
+    }
+
+    const updatedTimer = updateTimer(state.timer);
+
+    // Check if timer completed - mark for completion but let effects handle the flow
+    if (updatedTimer.duration > 0 && updatedTimer.elapsed >= updatedTimer.duration) {
+      if (updatedTimer.purpose === 'work') {
+        // Work session completed - stop timer and mark duration, but don't change screen yet
+        return {
+          ...state,
+          timer: { ...updatedTimer, isRunning: false }, // Stop the timer but preserve state
+          lastCompletedDuration: updatedTimer.elapsed,
+        };
+      } else if (updatedTimer.purpose === 'break') {
+        // Break completed - stop timer but stay on break screen for user confirmation
+        return {
+          ...state,
+          timer: { ...updatedTimer, isRunning: false },
+        };
+      }
+    }
+
+    // Just update the timer
+    return {
+      ...state,
+      timer: updatedTimer,
+    };
+  }),
+
+  // Duration setting
+  on(a.setFocusSessionDuration, (state, { focusSessionDuration }) => ({
     ...state,
-    isFocusOverlayShown: true,
+    timer: {
+      ...state.timer,
+      duration: focusSessionDuration,
+    },
   })),
-  on(hideFocusOverlay, (state) => ({
+
+  // Cycle management
+  on(a.incrementCycle, (state) => ({
     ...state,
-    isFocusOverlayShown: false,
-    focusSessionActivePage:
-      state.focusSessionActivePage === FocusModePage.SessionDone
-        ? FocusModePage.TaskSelection
-        : state.focusSessionActivePage,
+    currentCycle: state.currentCycle + 1,
   })),
-  on(cancelFocusSession, (state) => ({
+
+  on(a.resetCycles, (state) => ({
     ...state,
-    isFocusOverlayShown: false,
-    isFocusSessionRunning: false,
-    focusSessionTimeElapsed: 0,
-    focusSessionDuration: DEFAULT_FOCUS_SESSION_DURATION,
+    currentCycle: 1,
   })),
 );
+
+// For backward compatibility, export the old State interface name
+export type State = FocusModeState;

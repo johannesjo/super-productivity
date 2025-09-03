@@ -206,11 +206,13 @@
     "FOCUS_MODE": {
       "B": {
         "SESSION_RUNNING": "Focus Session is running",
+        "POMODORO_SESSION_RUNNING": "Pomodoro Session #{{cycleNr}} is running",
+        "BREAK_RUNNING": "Break is running",
+        "POMODORO_BREAK_RUNNING": "Break #{{cycleNr}} is running",
         "TO_FOCUS_OVERLAY": "To Focus Overlay"
       },
       "BACK_TO_PLANNING": "Back to Planning",
       "CONGRATS": "Congrats for completing this session!",
-      "CONTINUE_FOCUS_SESSION": "Continue Focus Session",
       "COUNTDOWN": "Countdown",
       "FINISH_TASK_AND_SELECT_NEXT": "Finish task and select next",
       "FLOWTIME": "Flowtime",
@@ -221,6 +223,7 @@
       "NEXT": "Next",
       "ON": "on",
       "OPEN_ISSUE_IN_BROWSER": "Open issue in Browser",
+      "POMODORO": "Pomodoro",
       "POMODORO_BACK": "Back",
       "POMODORO_DISABLE": "Disable Pomodoro",
       "POMODORO_INFO": "Focus sessions cannot be used together with the pomodoro timer enabled.",
@@ -230,11 +233,23 @@
       "SELECT_ANOTHER_TASK": "Select another Task",
       "SELECT_TASK": "Select Task to focus on",
       "SESSION_COMPLETED": "Focus Session Completed!",
+      "POMODORO_SESSION_COMPLETED": "Pomodoro Session Completed!",
       "SET_FOCUS_SESSION_DURATION": "Set Focus Session Duration",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Show/hide task notes and attachments",
       "START_FOCUS_SESSION": "Start Focus Session",
       "START_NEXT_FOCUS_SESSION": "Start next Focus Session",
-      "WORKED_FOR": "You worked for"
+      "WORKED_FOR": "You worked for",
+      "BREAK_RELAX_MSG": "Take a moment to relax",
+      "SKIP_BREAK": "Skip Break",
+      "CONTINUE_TO_NEXT_SESSION": "Continue to next Session",
+      "FOCUS_TIME_TOOLTIP": "Focus time",
+      "CURRENT_SESSION_TIME_TOOLTIP": "Current session time",
+      "COMPLETE_SESSION": "Complete Session",
+      "CONTINUE_SESSION": "Continue Session",
+      "LONG_BREAK": "Long Break",
+      "SHORT_BREAK": "Short Break",
+      "LONG_BREAK_TITLE": "Long Break - Cycle {{cycle}}",
+      "SHORT_BREAK_TITLE": "Short Break - Cycle {{cycle}}"
     },
     "GITEA": {
       "DIALOG_INITIAL": {
@@ -715,7 +730,7 @@
     },
     "POMODORO": {
       "BACK_TO_WORK": "Back to work!",
-      "BREAK_IS_DONE": "Your break is done!",
+      "BREAK_IS_DONE": "Focus break is over!",
       "ENJOY_YOURSELF": "Enjoy yourself, get yourself moving, come back in:",
       "FINISH_SESSION_X": "You successfully finished session <strong>{{nr}}</strong>!",
       "NOTIFICATION": {
@@ -1545,6 +1560,7 @@
     "ADVANCED_CFG": "Advanced Config",
     "CANCEL": "Cancel",
     "CLOSE": "Close",
+    "COMPLETE": "Complete",
     "CONFIRM": "Confirm",
     "DELETE": "Delete",
     "DISMISS": "Dismiss",
@@ -1758,7 +1774,7 @@
       "IS_PLAY_TICK": "Play tick sound every second",
       "IS_STOP_TRACKING_ON_BREAK": "Stop time tracking for task on break",
       "LONGER_BREAK_DURATION": "Duration of longer breaks",
-      "TITLE": "Pomodoro Timer"
+      "TITLE": "Pomodoro Timer (legacy)"
     },
     "REMINDER": {
       "COUNTDOWN_DURATION": "Show banner X before the actual reminder",

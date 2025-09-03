@@ -91,7 +91,7 @@ PluginAPI.registerMenuEntry({
   icon: 'center_focus_strong',
   onClick: () => {
     PluginAPI.execAction({
-      type: '[FocusMode] Start Focus Session',
+      type: '[FocusMode] Start Session',
     });
 
     PluginAPI.showSnack({
