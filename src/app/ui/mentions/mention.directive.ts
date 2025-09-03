@@ -281,11 +281,19 @@ export class MentionDirective implements OnChanges {
         } else if (this.searchList && !this.searchList.hidden) {
           if (event.keyCode === KEY_TAB || event.keyCode === KEY_ENTER) {
             this.stopEvent(event);
+
+            // Check if we have a valid active item before proceeding
+            if (!this.searchList.activeItem) {
+              console.warn('MentionDirective: No active item available for selection');
+              this.stopSearch();
+              return false;
+            }
+
             // emit the selected list item
-            this.itemSelected.emit(this.searchList!.activeItem);
+            this.itemSelected.emit(this.searchList.activeItem);
             // optional function to format the selected item before inserting the text
             const text = this.activeConfig!.mentionSelect!(
-              this.searchList!.activeItem,
+              this.searchList.activeItem,
               this.activeConfig!.triggerChar,
             );
             // value is inserted without a trailing space for consistency
