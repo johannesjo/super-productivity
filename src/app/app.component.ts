@@ -466,14 +466,14 @@ export class AppComponent implements OnDestroy, AfterViewInit {
             if (activeContext.type === 'PROJECT') {
               this._projectService.update(activeContext.id, {
                 theme: {
-                  ...activeContext.theme,
+                  ...(activeContext.theme || {}),
                   [contextKey]: backgroundUrl,
                 },
               });
             } else if (activeContext.type === 'TAG') {
               this._tagService.updateTag(activeContext.id, {
                 theme: {
-                  ...activeContext.theme,
+                  ...(activeContext.theme || {}),
                   [contextKey]: backgroundUrl,
                 },
               });

@@ -9,7 +9,7 @@
     [class.menu-open]="isProjectMenuOpen()"
     (click)="onProjectMenuClick()"
   >
-    <mat-icon [style.color]="state().project!.theme.primary">
+    <mat-icon [style.color]="state().project?.theme?.primary">
       {{ state().project!.icon || 'folder' }}
     </mat-icon>
     <span>{{ state().project?.title }}</span>
