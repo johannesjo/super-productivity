@@ -23,7 +23,7 @@ import {
   REDMINE_TYPE,
 } from './issue.const';
 import { TaskService } from '../tasks/task.service';
-import { Task, TaskCopy } from '../tasks/task.model';
+import { IssueTask, Task, TaskCopy } from '../tasks/task.model';
 import { IssueServiceInterface } from './issue-service-interface';
 import { JiraCommonInterfacesService } from './providers/jira/jira-common-interfaces.service';
 import { GithubCommonInterfacesService } from './providers/github/github-common-interfaces.service';
@@ -48,6 +48,7 @@ import { selectEnabledIssueProviders } from './store/issue-provider.selectors';
 import { getErrorTxt } from '../../util/get-error-text';
 import { getDbDateStr } from '../../util/get-db-date-str';
 import { TODAY_TAG } from '../tag/tag.const';
+import typia from 'typia';
 
 @Injectable({
   providedIn: 'root',
@@ -231,9 +232,7 @@ export class IssueService {
     });
 
     if (issuesToAdd.length === 1) {
-      const issueTitle = this.ISSUE_SERVICE_MAP[providerKey].getAddTaskData(
-        issuesToAdd[0],
-      ).title;
+      const issueTitle = this._getAddTaskData(providerKey, issuesToAdd[0]).title;
       this._snackService.open({
         svgIco: ISSUE_PROVIDER_ICON_MAP[providerKey],
         // ico: 'cloud_download',
@@ -411,10 +410,6 @@ export class IssueService {
       throw new Error('No issueData');
     }
 
-    if (!this.ISSUE_SERVICE_MAP[issueProviderKey].getAddTaskData) {
-      throw new Error('Issue method not available');
-    }
-
     if (
       await this._checkAndHandleIssueAlreadyAdded(
         issueProviderKey,
@@ -429,7 +424,7 @@ export class IssueService {
       title = null,
       related_to,
       ...additionalFromProviderIssueService
-    } = this.ISSUE_SERVICE_MAP[issueProviderKey].getAddTaskData(issueDataReduced);
+    } = this._getAddTaskData(issueProviderKey, issueDataReduced);
     IssueLog.log({ title, related_to, additionalFromProviderIssueService });
 
     const getProjectOrTagId = async (): Promise<Partial<TaskCopy>> => {
@@ -592,6 +587,18 @@ export class IssueService {
     }
 
     return false;
+  }
+
+  private _getAddTaskData(
+    issueProviderKey: IssueProviderKey,
+    issueReduced: IssueDataReduced,
+  ): IssueTask {
+    if (!this.ISSUE_SERVICE_MAP[issueProviderKey].getAddTaskData) {
+      throw new Error('Issue method not available');
+    }
+    const r = this.ISSUE_SERVICE_MAP[issueProviderKey].getAddTaskData(issueReduced);
+    typia.assert<IssueTask>(r);
+    return r;
   }
 
   // TODO if we need to refresh data on after add, this is how we would do it
