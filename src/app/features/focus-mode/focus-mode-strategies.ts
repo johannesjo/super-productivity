@@ -14,20 +14,20 @@ export class PomodoroStrategy implements FocusModeStrategy {
 
   get initialSessionDuration(): number {
     const config = this.globalConfigService.pomodoroConfig();
-    return config?.duration || FOCUS_MODE_DEFAULTS.SESSION_DURATION;
+    return config?.duration ?? FOCUS_MODE_DEFAULTS.SESSION_DURATION;
   }
 
   getBreakDuration(cycle: number): { duration: number; isLong: boolean } {
     const config = this.globalConfigService.pomodoroConfig();
     const cyclesBeforeLong =
-      config?.cyclesBeforeLongerBreak || FOCUS_MODE_DEFAULTS.CYCLES_BEFORE_LONG_BREAK;
+      config?.cyclesBeforeLongerBreak ?? FOCUS_MODE_DEFAULTS.CYCLES_BEFORE_LONG_BREAK;
     // The next cycle will be cycle + 1, check if that should be a long break
     const nextCycle = cycle + 1;
     const isLong = nextCycle % cyclesBeforeLong === 0;
 
     const duration = isLong
-      ? config?.longerBreakDuration || FOCUS_MODE_DEFAULTS.LONG_BREAK_DURATION
-      : config?.breakDuration || FOCUS_MODE_DEFAULTS.SHORT_BREAK_DURATION;
+      ? (config?.longerBreakDuration ?? FOCUS_MODE_DEFAULTS.LONG_BREAK_DURATION)
+      : (config?.breakDuration ?? FOCUS_MODE_DEFAULTS.SHORT_BREAK_DURATION);
 
     return { duration, isLong };
   }

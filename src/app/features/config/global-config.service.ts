@@ -3,6 +3,7 @@ import { select, Store } from '@ngrx/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { updateGlobalConfigSection } from './store/global-config.actions';
 import { Observable } from 'rxjs';
+import { DEFAULT_GLOBAL_CONFIG } from './default-global-config.const';
 import {
   EvaluationConfig,
   GlobalConfigSectionKey,
@@ -126,7 +127,7 @@ export class GlobalConfigService {
   readonly pomodoroConfig: Signal<PomodoroConfig | undefined> = toSignal(
     this.pomodoroConfig$,
     {
-      initialValue: undefined,
+      initialValue: DEFAULT_GLOBAL_CONFIG.pomodoro,
     },
   );
   readonly timelineCfg: Signal<ScheduleConfig | undefined> = toSignal(this.timelineCfg$, {

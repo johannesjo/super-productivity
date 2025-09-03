@@ -730,7 +730,7 @@
     },
     "POMODORO": {
       "BACK_TO_WORK": "Back to work!",
-      "BREAK_IS_DONE": "Your break is done!",
+      "BREAK_IS_DONE": "Focus break is over!",
       "ENJOY_YOURSELF": "Enjoy yourself, get yourself moving, come back in:",
       "FINISH_SESSION_X": "You successfully finished session <strong>{{nr}}</strong>!",
       "NOTIFICATION": {
