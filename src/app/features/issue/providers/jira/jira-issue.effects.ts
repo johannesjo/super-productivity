@@ -48,7 +48,7 @@ export class JiraIssueEffects {
 
   // -----
 
-  addWorkLog$: any = createEffect(
+  addWorkLog$ = createEffect(
     () =>
       this._actions$.pipe(
         ofType(TaskSharedActions.updateTask),
@@ -241,8 +241,9 @@ export class JiraIssueEffects {
       this._actions$.pipe(
         ofType(TaskSharedActions.updateTask),
         filter(({ task }): boolean => !!task.changes.isDone),
-        // NOTE: as this is only a partial object we need to get the full one
-        concatMap(({ task }) => this._taskService.getByIdOnce$(task.id.toString())),
+        // Guard against missing id and load full entity
+        filter(({ task }) => task.id != null && task.id !== (undefined as any)),
+        concatMap(({ task }) => this._taskService.getByIdOnce$(String(task.id))),
         filter((task: Task) => task && task.issueType === JIRA_TYPE),
         concatMap((task: Task) => {
           if (!task.issueProviderId) {
