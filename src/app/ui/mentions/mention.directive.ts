@@ -17,6 +17,7 @@ import {
   getValue,
   insertValue,
   setCaretPosition,
+  isInputOrTextAreaElement,
 } from './mention-utils';
 
 import { MentionConfig } from './mention-config';
@@ -233,9 +234,15 @@ export class MentionDirective implements OnChanges {
       }
     }
     if (event.keyCode == KEY_ENTER && event.wasClick && pos < this.startPos) {
-      // put caret back in position prior to contenteditable menu click
-      pos = this.startNode.length;
-      setCaretPosition(this.startNode, pos, this.iframe);
+      // Restore caret near where it should be when a list item was clicked.
+      // Compute end position based on typed search length instead of relying on DOM nodes.
+      const typedLen = 1 + (this.searchString ? this.searchString.length : 0); // trigger + search
+      pos = this.startPos + typedLen;
+      setCaretPosition(
+        isInputOrTextAreaElement(nativeElement) ? nativeElement : (this.startNode as any),
+        pos,
+        this.iframe,
+      );
     }
     //console.log("keyHandler", this.startPos, pos, val, charPressed, event);
 
@@ -256,7 +263,8 @@ export class MentionDirective implements OnChanges {
       }
     } else if (this.startPos >= 0 && this.searching) {
       if (pos <= this.startPos && this.searchList) {
-        this.searchList.hidden = true;
+        // Caret moved before the trigger char; terminate search cleanly
+        this.stopSearch();
       }
       // ignore shift when pressed alone, but not when used with another key
       else if (
