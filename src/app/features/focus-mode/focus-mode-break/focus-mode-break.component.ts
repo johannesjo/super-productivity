@@ -8,6 +8,7 @@ import { completeBreak, skipBreak } from '../store/focus-mode.actions';
 import { MatIcon } from '@angular/material/icon';
 import { T } from '../../../t.const';
 import { TranslatePipe } from '@ngx-translate/core';
+import { TaskTrackingInfoComponent } from '../task-tracking-info/task-tracking-info.component';
 
 @Component({
   selector: 'focus-mode-break',
@@ -18,6 +19,7 @@ import { TranslatePipe } from '@ngx-translate/core';
     MsToClockStringPipe,
     MatIcon,
     TranslatePipe,
+    TaskTrackingInfoComponent,
   ],
   templateUrl: './focus-mode-break.component.html',
   styleUrl: './focus-mode-break.component.scss',

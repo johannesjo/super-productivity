@@ -24,13 +24,14 @@ import {
   selectFocusDuration,
 } from '../store/focus-mode.actions';
 import { MatIcon } from '@angular/material/icon';
+import { TaskTrackingInfoComponent } from '../task-tracking-info/task-tracking-info.component';
 
 @Component({
   selector: 'focus-mode-session-done',
   templateUrl: './focus-mode-session-done.component.html',
   styleUrls: ['./focus-mode-session-done.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatButton, MsToStringPipe, TranslatePipe, MatIcon],
+  imports: [MatButton, MsToStringPipe, TranslatePipe, MatIcon, TaskTrackingInfoComponent],
 })
 export class FocusModeSessionDoneComponent implements AfterViewInit {
   private _store = inject(Store);

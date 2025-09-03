@@ -11,7 +11,7 @@
   <div class="timer-container">
     <mat-progress-spinner
       mode="determinate"
-      [value]="progressPercentage"
+      [value]="progressPercentage()"
       diameter="160"
       strokeWidth="6"
     >
@@ -20,6 +20,8 @@
       {{ remainingTime() | msToClockString: true }}
     </div>
   </div>
+
+  <task-tracking-info></task-tracking-info>
 
   <p class="break-message">{{ T.F.FOCUS_MODE.BREAK_RELAX_MSG | translate }}</p>
 
