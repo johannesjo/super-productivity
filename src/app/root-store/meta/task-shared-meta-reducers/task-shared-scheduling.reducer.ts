@@ -147,6 +147,8 @@ const handlePlanTasksForToday = (
     id: taskId,
     changes: {
       dueDay: today,
+      // Ensure we never keep both a day and a time
+      dueWithTime: undefined,
     },
   }));
 
