@@ -45,7 +45,7 @@ describe('AddTaskBarActionsComponent', () => {
   } as Tag;
 
   const mockState = {
-    project: mockProject, // Use mock project by default to avoid template issues
+    projectId: mockProject.id, // Use mock project id by default
     tags: [],
     newTagTitles: [],
     date: null,
@@ -289,7 +289,7 @@ describe('AddTaskBarActionsComponent', () => {
       (mockStateService as any)._mockAutoDetectedSignal.set(true);
       const stateWithProject = {
         ...mockState,
-        project: mockProject,
+        projectId: mockProject.id,
       };
       (mockStateService as any)._mockStateSignal.set(stateWithProject);
       fixture.detectChanges();

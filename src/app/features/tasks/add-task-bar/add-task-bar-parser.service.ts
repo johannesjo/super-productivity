@@ -125,10 +125,12 @@ export class AddTaskBarParserService {
       if (currentResult.projectId) {
         const foundProject = allProjects.find((p) => p.id === currentResult.projectId);
         if (foundProject) {
-          this._stateService.setAutoDetectedProject(foundProject);
+          this._stateService.setAutoDetectedProjectId(foundProject.id);
         }
       } else if (this._stateService.isAutoDetected()) {
-        this._stateService.updateProject(defaultProject || null);
+        if (defaultProject?.id) {
+          this._stateService.updateProjectId(defaultProject.id);
+        }
       }
     }
 

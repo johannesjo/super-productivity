@@ -38,29 +38,20 @@ describe('AddTaskBarStateService', () => {
     });
   });
 
-  describe('updateProject', () => {
+  describe('updateProjectId', () => {
     it('should update project in state', () => {
       const mockProject: Project = { id: '1', title: 'Test Project' } as Project;
 
-      service.updateProject(mockProject);
+      service.updateProjectId(mockProject.id);
 
-      expect(service.state().project).toEqual(mockProject);
-    });
-
-    it('should clear project when null passed', () => {
-      const mockProject: Project = { id: '1', title: 'Test Project' } as Project;
-      service.updateProject(mockProject);
-
-      service.updateProject(null);
-
-      expect(service.state().project).toBe(null);
+      expect(service.state().projectId).toEqual(mockProject.id);
     });
 
     it('should clear auto-detected flag when manually changing project', () => {
       service.isAutoDetected.set(true);
       const mockProject: Project = { id: '1', title: 'Test Project' } as Project;
 
-      service.updateProject(mockProject);
+      service.updateProjectId(mockProject.id);
 
       expect(service.isAutoDetected()).toBe(false);
     });
@@ -340,7 +331,7 @@ describe('AddTaskBarStateService', () => {
       const mockTags: Tag[] = [{ id: '1', title: 'urgent' } as Tag];
 
       // Set up initial state
-      service.updateProject(mockProject);
+      service.updateProjectId(mockProject.id);
       service.updateDate(getDbDateStr(testDate), '10:30');
       service.updateEstimate(testEstimate);
       service.updateTags(mockTags);
@@ -357,20 +348,20 @@ describe('AddTaskBarStateService', () => {
       expect(service.inputTxt()).toBe('');
 
       // These should be preserved
-      expect(service.state().project).toEqual(mockProject);
+      expect(service.state().projectId).toEqual(mockProject.id);
       expect(service.state().date).toEqual(getDbDateStr(testDate));
       expect(service.state().time).toBe('10:30');
       expect(service.state().estimate).toBe(testEstimate);
     });
   });
 
-  describe('setAutoDetectedProject', () => {
-    it('should update project and set auto-detected flag', () => {
+  describe('setAutoDetectedProjectId', () => {
+    it('should update projectId and set auto-detected flag', () => {
       const mockProject: Project = { id: '1', title: 'Auto Project' } as Project;
 
-      service.setAutoDetectedProject(mockProject);
+      service.setAutoDetectedProjectId(mockProject.id);
 
-      expect(service.state().project).toEqual(mockProject);
+      expect(service.state().projectId).toEqual(mockProject.id);
       expect(service.isAutoDetected()).toBe(true);
     });
   });
@@ -391,10 +382,10 @@ describe('AddTaskBarStateService', () => {
     it('should update signal values reactively', () => {
       const mockProject: Project = { id: '1', title: 'Reactive Project' } as Project;
 
-      service.updateProject(mockProject);
+      service.updateProjectId(mockProject.id);
 
       // The signal should immediately reflect the change
-      expect(service.state().project).toEqual(mockProject);
+      expect(service.state().projectId).toEqual(mockProject.id);
     });
   });
 });

@@ -12,8 +12,8 @@ describe('AddTaskBarParserService', () => {
   beforeEach(() => {
     const mockStateServiceSpy = jasmine.createSpyObj('AddTaskBarStateService', [
       'updateCleanText',
-      'setAutoDetectedProject',
-      'updateProject',
+      'setAutoDetectedProjectId',
+      'updateProjectId',
       'updateTags',
       'updateNewTagTitles',
       'updateEstimate',
@@ -26,7 +26,7 @@ describe('AddTaskBarParserService', () => {
 
     // Default state return value
     const defaultMockState = {
-      project: null,
+      projectId: null,
       tags: [],
       newTagTitles: [],
       date: null,
@@ -91,8 +91,8 @@ describe('AddTaskBarParserService', () => {
       mockStateService.updateEstimate.calls.reset();
       mockStateService.updateTags.calls.reset();
       mockStateService.updateNewTagTitles.calls.reset();
-      mockStateService.setAutoDetectedProject.calls.reset();
-      mockStateService.updateProject.calls.reset();
+      mockStateService.setAutoDetectedProjectId.calls.reset();
+      mockStateService.updateProjectId.calls.reset();
     });
 
     it('should handle empty text', () => {
@@ -112,7 +112,7 @@ describe('AddTaskBarParserService', () => {
 
         // Mock state to return no current date/time
         const mockState = {
-          project: mockDefaultProject,
+          projectId: mockDefaultProject.id,
           tags: [],
           newTagTitles: [],
           date: null,
@@ -145,7 +145,7 @@ describe('AddTaskBarParserService', () => {
 
         // Mock state to return current user-selected values
         const mockState = {
-          project: mockDefaultProject,
+          projectId: mockDefaultProject.id,
           tags: [],
           newTagTitles: [],
           date: currentDate,
@@ -175,7 +175,7 @@ describe('AddTaskBarParserService', () => {
 
         // Mock state with date but no time
         const mockState = {
-          project: mockDefaultProject,
+          projectId: mockDefaultProject.id,
           tags: [],
           newTagTitles: [],
           date: currentDate,

@@ -138,18 +138,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   activatedSuggestion$ = new BehaviorSubject<AddTaskSuggestion | null>(null);
   isMentionListShown = signal(false);
 
-  hasNewTags = computed(() => this.stateService.state().newTagTitles.length > 0);
-  nrOfRightBtns = computed(() => {
-    let count = 2;
-    if (this.stateService.inputTxt().length > 0) {
-      count++;
-    }
-    if (this.stateService.state().project?.isEnableBacklog) {
-      count++;
-    }
-    return count;
-  });
-
   // Observables
   projects$ = this._projectService.list$.pipe(
     map((projects) => projects.filter((p) => !p.isArchived && !p.isHiddenFromMenu)),
@@ -157,6 +145,23 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   tags$ = this._tagService.tags$;
   suggestions$!: Observable<AddTaskSuggestion[]>;
   activatedIssueTask = toSignal(this.activatedSuggestion$, { initialValue: null });
+
+  // Computed values depending on projects$
+  hasNewTags = computed(() => this.stateService.state().newTagTitles.length > 0);
+  projectsSignal = toSignal(this.projects$, { initialValue: [] });
+  currentProject = computed(() =>
+    this.projectsSignal().find((p) => p.id === this.stateService.state().projectId),
+  );
+  nrOfRightBtns = computed(() => {
+    let count = 2;
+    if (this.stateService.inputTxt().length > 0) {
+      count++;
+    }
+    if (this.currentProject()?.isEnableBacklog) {
+      count++;
+    }
+    return count;
+  });
 
   defaultProject$ = combineLatest([
     this.projects$,
@@ -289,7 +294,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       .pipe(first(), takeUntilDestroyed(this._destroyRef))
       .subscribe((defaultProject) => {
         if (defaultProject) {
-          this.stateService.updateProject(defaultProject);
+          this.stateService.updateProjectId(defaultProject.id);
         }
       });
   }
@@ -389,7 +394,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     const additionalFields = this.additionalFields();
     const taskData: Partial<TaskCopy> = {
       ...additionalFields,
-      projectId: state.project?.id,
+      projectId: state.projectId,
       tagIds: additionalFields?.tagIds
         ? unique([...finalTagIds, ...additionalFields.tagIds])
         : finalTagIds,

@@ -81,6 +81,9 @@ export class AddTaskBarActionsComponent {
     ),
     { initialValue: [] },
   );
+  selectedProject = computed(() =>
+    this.allProjects().find((p) => p.id === this.state().projectId),
+  );
   allTags = toSignal(
     this._tagService.tagsNoMyDayAndNoList$,
 

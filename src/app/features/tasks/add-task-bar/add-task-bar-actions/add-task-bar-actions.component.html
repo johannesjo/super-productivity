@@ -4,15 +4,15 @@
     mat-button
     class="action-btn"
     [matMenuTriggerFor]="projectMenu"
-    [class.has-value]="state().project"
-    [class.auto-detected]="isAutoDetected() && !!state().project"
+    [class.has-value]="selectedProject()"
+    [class.auto-detected]="isAutoDetected() && !!selectedProject()"
     [class.menu-open]="isProjectMenuOpen()"
     (click)="onProjectMenuClick()"
   >
-    <mat-icon [style.color]="state().project?.theme?.primary">
-      {{ state().project!.icon || 'folder' }}
+    <mat-icon [style.color]="selectedProject()?.theme?.primary">
+      {{ selectedProject()?.icon || 'folder' }}
     </mat-icon>
-    <span>{{ state().project?.title }}</span>
+    <span>{{ selectedProject()?.title }}</span>
   </button>
 
   @if (!isHideDueBtn()) {
@@ -126,7 +126,7 @@
   @for (project of allProjects(); track project.id) {
     <button
       mat-menu-item
-      (click)="stateService.updateProject(project)"
+      (click)="stateService.updateProjectId(project.id)"
     >
       <mat-icon [style.color]="project.theme.primary">
         {{ project.icon || 'folder' }}

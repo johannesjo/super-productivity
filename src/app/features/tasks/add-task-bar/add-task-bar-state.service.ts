@@ -1,5 +1,4 @@
 import { effect, Injectable, signal, WritableSignal } from '@angular/core';
-import { Project } from '../../project/project.model';
 import { Tag } from '../../tag/tag.model';
 import { AddTaskBarState, INITIAL_ADD_TASK_BAR_STATE } from './add-task-bar.const';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -22,8 +21,8 @@ export class AddTaskBarStateService {
     });
   }
 
-  updateProject(project: Project): void {
-    this._taskInputState.update((state) => ({ ...state, project }));
+  updateProjectId(projectId: string): void {
+    this._taskInputState.update((state) => ({ ...state, projectId }));
     // Clear auto-detected flag when manually changing project
     this.isAutoDetected.set(false);
   }
@@ -115,8 +114,8 @@ export class AddTaskBarStateService {
     // Keep isAutoDetected as is to preserve project selection
   }
 
-  setAutoDetectedProject(project: Project): void {
-    this.updateProject(project);
+  setAutoDetectedProjectId(projectId: string): void {
+    this.updateProjectId(projectId);
     this.isAutoDetected.set(true);
   }
 }
