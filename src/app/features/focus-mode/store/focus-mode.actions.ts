@@ -26,10 +26,7 @@ export const startFocusSession = createAction(
 export const navigateToMainScreen = createAction('[FocusMode] Navigate To Main Screen');
 
 export const pauseFocusSession = createAction('[FocusMode] Pause Session');
-export const unPauseFocusSession = createAction(
-  '[FocusMode] Resume Session',
-  props<{ idleTime?: number }>(),
-);
+export const unPauseFocusSession = createAction('[FocusMode] Resume Session');
 
 export const completeFocusSession = createAction(
   '[FocusMode] Complete Session',
