@@ -171,6 +171,28 @@ export class TaskViewCustomizerService {
     switch (sort) {
       case 'name':
         return [...tasks].sort((a, b) => a.title.localeCompare(b.title));
+      case 'tag': {
+        const getPrimaryTagTitle = (t: TaskWithSubTasks): string | null => {
+          if (!t.tagIds || t.tagIds.length === 0) return null;
+          const titles = t.tagIds
+            .map((id) => this._allTags.find((tag) => tag.id === id)?.title)
+            .filter((v): v is string => !!v);
+          if (!titles.length) return null;
+          titles.sort((a, b) => a.localeCompare(b));
+          return titles[0];
+        };
+        return [...tasks].sort((a, b) => {
+          const aTitle = getPrimaryTagTitle(a);
+          const bTitle = getPrimaryTagTitle(b);
+          if (aTitle && bTitle) {
+            const cmp = aTitle.localeCompare(bTitle);
+            return cmp !== 0 ? cmp : a.title.localeCompare(b.title);
+          }
+          if (aTitle && !bTitle) return -1; // tasks with tags first
+          if (!aTitle && bTitle) return 1;
+          return a.title.localeCompare(b.title);
+        });
+      }
       case 'creationDate':
         return [...tasks].sort((a, b) => a.created - b.created);
       case 'scheduledDate':

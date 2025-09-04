@@ -44,6 +44,8 @@ export class TaskViewCustomizerPanelComponent implements OnInit {
     { value: 'creationDate', label: T.F.TASK_VIEW.CUSTOMIZER.SORT_CREATION_DATE },
     { value: 'estimatedTime', label: T.F.TASK_VIEW.CUSTOMIZER.ESTIMATED_TIME },
     { value: 'timeSpent', label: T.F.TASK_VIEW.CUSTOMIZER.TIME_SPENT },
+    // Reuse GROUP_TAG label for sorting by tag
+    { value: 'tag', label: T.F.TASK_VIEW.CUSTOMIZER.GROUP_TAG },
   ];
 
   groupOptions = [
