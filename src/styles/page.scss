@@ -12,10 +12,8 @@ app-root,
   height: 100%;
   height: -webkit-fill-available;
   box-sizing: border-box;
-  //font-family: 'Montserrat', 'Roboto', sans-serif;
-  //font-family: 'Open Sans', sans-serif;
-  //font-family: 'Roboto', sans-serif;
-  font-family: 'Roboto', 'Comic Sans MS', sans-serif;
+  font-optical-sizing: auto;
+  font-family: 'Open Sans', sans-serif;
 }
 
 html {

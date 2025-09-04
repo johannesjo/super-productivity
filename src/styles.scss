@@ -3,10 +3,10 @@
 
 @use 'sass:math';
 
-@import '../node_modules/@fontsource/roboto/400.css';
-@import '../node_modules/@fontsource/roboto/400-italic.css';
-@import '../node_modules/@fontsource/roboto/700.css';
-@import '../node_modules/@fontsource/roboto/300.css';
+@import '../node_modules/@fontsource/open-sans/400.css';
+@import '../node_modules/@fontsource/open-sans/400-italic.css';
+@import '../node_modules/@fontsource/open-sans/700.css';
+@import '../node_modules/@fontsource/open-sans/300.css';
 
 @include meta.load-css('styles/_css-variables');
 @include meta.load-css('styles/themes');

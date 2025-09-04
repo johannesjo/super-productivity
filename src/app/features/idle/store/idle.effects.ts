@@ -72,12 +72,10 @@ export class IdleEffects {
   private _isDialogOpen: boolean = false;
 
   // NOTE: needs to live forever since we can't unsubscribe from ipcEvent$
-  // TODO check if this works as expected
-  private _electronIdleTime$: Observable<number> = IS_ELECTRON ? ipcIdleTime$ : EMPTY;
   private _isFocusSessionRunning$ = this._store.select(selectIsSessionRunning);
 
   private _triggerIdleApis$ = IS_ELECTRON
-    ? this._electronIdleTime$
+    ? ipcIdleTime$
     : this._chromeExtensionInterfaceService.onReady$.pipe(
         first(),
         switchMap(() => {

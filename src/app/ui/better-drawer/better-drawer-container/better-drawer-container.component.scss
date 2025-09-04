@@ -31,7 +31,7 @@ $z-this-backdrop: calc(var(--z-task-side-bar-over) - 1);
   min-width: 200px;
   // NOTE: prevents overlapping with nav when open
   max-width: 700px;
-  background: var(--selected-task-bg-color);
+  background: var(--right-panel-bg);
   //border: 1px solid;
   //border-right: 0;
   //border-bottom: 0;
@@ -46,6 +46,8 @@ $z-this-backdrop: calc(var(--z-task-side-bar-over) - 1);
   @include mq(xs, max) {
     max-width: 100%;
   }
+
+  //border-color: var(--extra-border-color);
 
   :host.isOver & {
     position: fixed;

@@ -49,7 +49,7 @@ body.isEnabledDarkTheme {
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Open Sans', sans-serif;
   background: transparent;
   color: var(--plugin-text-primary);
 }
@@ -520,7 +520,7 @@ body {
   padding: 0.75rem 1rem;
   border: 2px solid var(--plugin-border);
   border-radius: 6px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Open Sans', sans-serif;
   font-size: 1rem;
   font-weight: 500;
   background: var(--plugin-bg-input);

@@ -80,6 +80,7 @@
   // Dark Theme Elevation Colors
   // -----------------------------
   --dark0: rgb(0, 0, 0);
+  --dark0-5: rgb(26, 26, 26);
   --dark1: rgb(30, 30, 30);
   --dark2: rgb(34, 34, 34);
   --dark3: rgb(36, 36, 36);
@@ -329,7 +330,10 @@ body {
   --bg-lightest: #fff;
   --bg-super-light: #fff;
   --card-bg: #ffffff;
+
+  // Navigation & Panel backgrounds
   --sidebar-bg: var(--bg);
+  --right-panel-bg: var(--bg);
 
   // Text colors
   --text-color: rgb(44, 44, 44);
@@ -353,6 +357,7 @@ body {
   --standard-note-bg: #ffffff;
   --standard-note-fg: var(--text-color);
   --standard-note-bg-hovered: var(--standard-note-bg);
+  --notes-container-bg: inherit;
 
   // Task colors
   --task-c-bg: #fff;
@@ -412,6 +417,7 @@ body {
     var(--palette-foreground-secondary-text-alpha, 1)
   );
   --task-detail-bg: var(--card-bg);
+  --task-detail-bg-hover: #eeeeee;
   --task-detail-shadow: var(--whiteframe-shadow-1dp);
 
   // Grid colors
@@ -431,17 +437,21 @@ body {
 // -----------------------------
 body.isDarkTheme {
   // Background colors
-  --bg: var(--dark0);
+  //--bg: var(--dark0);
+  --bg: #131314;
   --bg-darker: var(--dark0);
   --bg-slightly-lighter: var(--dark4);
   --bg-lighter: var(--dark12);
   --bg-lightest: var(--dark24);
   --bg-super-light: #616161;
   --card-bg: var(--dark2);
-  --sidebar-bg: var(--dark8);
+
+  // Navigation & Panel backgrounds
+  --sidebar-bg: var(--dark1);
+  --right-panel-bg: var(--sidebar-bg);
 
   // Text colors
-  --text-color: rgb(235, 235, 235);
+  --text-color: rgb(230, 230, 230);
   --text-color-less-intense: rgba(235, 235, 235, 0.9);
   --text-color-muted: rgba(235, 235, 235, 0.6);
   --text-color-more-intense: rgb(245, 245, 245);
@@ -459,16 +469,18 @@ body.isDarkTheme {
   --c-backdrop: var(--c-dark-60);
 
   // Note colors
-  --standard-note-bg: var(--dark16);
+  --standard-note-bg: var(--dark4);
   --standard-note-fg: #eeeeee;
   --standard-note-bg-hovered: var(--dark24);
+  --notes-container-bg: inherit;
 
   // Task colors
-  --task-c-bg: var(--dark3);
+  //--task-c-bg: #212123ff;
+  --task-c-bg: var(--dark1);
   --task-c-selected-bg: var(--dark6);
-  --sub-task-c-bg: var(--dark4-5);
-  --sub-task-c-bg-done: var(--dark2);
-  --task-c-bg-done: var(--dark1);
+  --sub-task-c-bg: var(--dark2);
+  --sub-task-c-bg-done: var(--dark1);
+  --task-c-bg-done: var(--dark0-5);
   --task-c-current-bg: var(--dark12);
   --task-c-drag-drop-bg: var(--dark12);
   --sub-task-c-bg-in-selected: var(--dark10);
@@ -517,5 +529,6 @@ body.isDarkTheme {
 
   // Task detail item
   --task-detail-value-color: rgba(255, 255, 255, 0.7);
-  --task-detail-bg: var(--dark10);
+  --task-detail-bg: var(--dark6);
+  --task-detail-bg-hover: var(--dark10);
 }

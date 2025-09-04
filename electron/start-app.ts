@@ -204,6 +204,14 @@ export const startApp = (): void => {
     idleTimeHandler = new IdleTimeHandler();
 
     let suspendStart: number;
+    // Prevent overlapping async idle checks.
+    // lazySetInterval schedules the next tick regardless of whether the previous
+    // check finished. Our idle detection on Wayland may spawn external commands
+    // (gdbus/dbus-send/xprintidle/loginctl) which can take close to or longer than
+    // the poll interval. Without this guard, multiple checks can run concurrently,
+    // causing timeouts and subsequent 0ms readings, which looks like “only one
+    // idle event was ever sent”. This ensures at most one check runs at a time.
+    let isCheckingIdle = false;
     const sendIdleMsgIfOverMin = (idleTime: number): void => {
       // sometimes when starting a second instance we get here although we don't want to
       if (!mainWin) {
@@ -216,28 +224,46 @@ export const startApp = (): void => {
       // don't update if the user is about to close
       if (!appIN.isQuiting && idleTime > CONFIG.MIN_IDLE_TIME) {
         log(
-          `Sending idle time to frontend: ${idleTime}ms (threshold: ${CONFIG.MIN_IDLE_TIME}ms)`,
+          `✅ Sending idle time to frontend: ${idleTime}ms (threshold: ${CONFIG.MIN_IDLE_TIME}ms, method: ${idleTimeHandler.currentMethod})`,
         );
         mainWin.webContents.send(IPC.IDLE_TIME, idleTime);
       } else {
         log(
-          `NOT sending idle time: ${idleTime}ms (threshold: ${CONFIG.MIN_IDLE_TIME}ms, isQuiting: ${appIN.isQuiting})`,
+          // eslint-disable-next-line max-len
+          `❌ NOT sending idle time: ${idleTime}ms (threshold: ${CONFIG.MIN_IDLE_TIME}ms, isQuiting: ${appIN.isQuiting}, method: ${idleTimeHandler.currentMethod})`,
         );
       }
     };
 
     const checkIdle = async (): Promise<void> => {
+      // Skip if a previous check is still in flight
+      if (isCheckingIdle) {
+        return;
+      }
+      isCheckingIdle = true;
       try {
+        const startTime = Date.now();
         const idleTime = await idleTimeHandler.getIdleTimeWithFallbacks();
+        const checkDuration = Date.now() - startTime;
+
+        log(
+          `🔍 Idle check completed in ${checkDuration}ms: ${idleTime}ms (method: ${idleTimeHandler.currentMethod})`,
+        );
         sendIdleMsgIfOverMin(idleTime);
       } catch (error) {
-        log('Error getting idle time:', error);
-        // Fallback to standard method if our handler fails
-        sendIdleMsgIfOverMin(powerMonitor.getSystemIdleTime() * 1000);
+        log('💥 Error getting idle time, falling back to powerMonitor:', error);
+        const fallbackIdleTime = powerMonitor.getSystemIdleTime() * 1000;
+        log(`🔄 Fallback powerMonitor idle time: ${fallbackIdleTime}ms`);
+        sendIdleMsgIfOverMin(fallbackIdleTime);
+      } finally {
+        isCheckingIdle = false;
       }
     };
 
     // init time tracking interval
+    log(
+      `🚀 Starting idle time tracking (interval: ${CONFIG.IDLE_PING_INTERVAL}ms, threshold: ${CONFIG.MIN_IDLE_TIME}ms)`,
+    );
     lazySetInterval(checkIdle, CONFIG.IDLE_PING_INTERVAL);
 
     powerMonitor.on('suspend', () => {
