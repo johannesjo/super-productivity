@@ -1,6 +1,6 @@
 @use 'sass:math';
 
-@import '../../../../common';
+@use '_globals' as *;
 
 .wrapper {
   position: relative;

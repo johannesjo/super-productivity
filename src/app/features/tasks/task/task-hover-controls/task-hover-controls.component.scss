@@ -1,5 +1,5 @@
-@import '../../../../../common';
-@import '../task.component.mixins';
+@use '_globals' as *;
+@use '../task.component.mixins' as *;
 
 :host {
   transform-origin: right center;

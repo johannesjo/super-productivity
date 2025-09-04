@@ -1,4 +1,4 @@
-@import '../../tasks/task/task.component.mixins';
+@use '_globals' as *;
 
 :host {
   //@include grabCursor();

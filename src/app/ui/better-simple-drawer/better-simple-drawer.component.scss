@@ -1,3 +1,5 @@
+@use '_globals' as *;
+
 $z-this-content: calc(var(--z-side-panel-task-and-notes) + 1);
 $z-this-backdrop: calc(var(--z-task-side-bar-over) - 1);
 $z-this-side: calc(#{$z-this-content} + 2);

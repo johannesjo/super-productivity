@@ -1,4 +1,4 @@
-@import '../../../../common';
-@import './task.component.mixins';
-@import './task-base';
-@import './task-controls';
+@use '_globals' as *;
+@use './task.component.mixins' as *;
+@use './task-base';
+@use './task-controls';

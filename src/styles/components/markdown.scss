@@ -1,6 +1,8 @@
+@use '../mixins/_scroll';
+
 .markdown-preview,
 .markdown {
-  @include scrollY;
+  @include scroll.scrollY;
   word-wrap: break-word;
   word-break: break-word;
   overflow-wrap: break-word;

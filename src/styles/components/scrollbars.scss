@@ -1,6 +1,6 @@
-@import '../mixins/media-queries';
+@use '../mixins/_media-queries';
 
-@mixin _scrollBarStyles() {
+@mixin scrollBarStyles() {
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
   scrollbar-width: 4px;
 
@@ -27,14 +27,14 @@
   }
 }
 
-@include mq(xs) {
+@include media-queries.mq(xs) {
   .isNoMac {
-    @include _scrollBarStyles;
+    @include scrollBarStyles;
   }
 }
 
-@include mq(xs, max) {
+@include media-queries.mq(xs, max) {
   .isNoTouchOnly {
-    @include _scrollBarStyles;
+    @include scrollBarStyles;
   }
 }

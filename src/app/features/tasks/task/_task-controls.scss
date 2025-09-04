@@ -1,3 +1,6 @@
+@use '_globals' as *;
+@use 'task.component.mixins' as *;
+
 // CONTROLS
 // --------
 .all-controls-wrapper {

@@ -1,6 +1,6 @@
-// Import only to access the material design color variables
-@import '../../../../common';
+@use '_globals' as *;
 
+// Import only to access the material design color variables
 @mixin isDone($direct-parent-only-sel: false) {
   @if $direct-parent-only-sel {
     .inner-wrapper.isDone > #{$direct-parent-only-sel} > & {

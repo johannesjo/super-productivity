@@ -1,5 +1,6 @@
 @use 'angular-material-css-vars' as mat-css-vars;
-@import '../_common';
+@use '../_common';
+@use './mixins/media-queries';
 
 html,
 body,
@@ -110,7 +111,7 @@ body {
 .page-wrapper {
   padding: var(--s) var(--s) calc(var(--s) * 9);
 
-  @include mq(xs) {
+  @include media-queries.mq(xs) {
     padding: var(--s) var(--s2) calc(var(--s) * 9);
   }
 }
@@ -126,20 +127,20 @@ body {
   max-width: calc(var(--component-max-width) - 40px);
   margin: auto;
 
-  @include mq(xxs) {
+  @include media-queries.mq(xxs) {
     padding: 0 var(--s) var(--s7);
   }
 
-  @include mq(xs) {
+  @include media-queries.mq(xs) {
     padding: 0 calc(var(--s) * 1.5) var(--s7);
   }
 
-  @include mq(sm) {
+  @include media-queries.mq(sm) {
     padding: 0 var(--s3) var(--s7);
     max-width: var(--component-max-width);
   }
 
-  @include mq(lg) {
+  @include media-queries.mq(lg) {
     padding: 0 var(--s3) var(--s7);
     max-width: calc(var(--component-max-width) + 100px);
   }

@@ -1,4 +1,4 @@
-@import 'media-queries';
+@use './media-queries';
 
 @mixin scroll() {
   -webkit-overflow-scrolling: touch;

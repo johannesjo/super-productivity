@@ -1,10 +1,12 @@
+@use '../mixins/_media-queries';
+
 .fab-wrapper {
   position: fixed;
   right: 32px;
   bottom: 32px;
   z-index: 333;
 
-  @include mq(xs, max) {
+  @include media-queries.mq(xs, max) {
     right: 50%;
     transform: translateX(50%);
     bottom: 16px;

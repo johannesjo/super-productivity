@@ -1,3 +1,6 @@
+@use '_globals' as *;
+@use 'task.component.mixins' as *;
+
 // TASK BOX STYLES
 // ---------------
 // NOTE: needs to come first to be overwritten by :host.isCurrent

@@ -1,4 +1,4 @@
-@import '../../../_common';
+@use '_globals' as *;
 
 :host {
   display: inline-block;

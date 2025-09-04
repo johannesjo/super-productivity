@@ -1,4 +1,4 @@
-@import 'mixins/media-queries';
+@use './mixins/_media-queries';
 
 .center-wrapper {
   display: flex;
@@ -22,19 +22,19 @@
 }
 
 .hide-xs {
-  @include mq(xs, max) {
+  @include media-queries.mq(xs, max) {
     display: none !important;
   }
 }
 
 .hide-xxs {
-  @include mq(xxs, max) {
+  @include media-queries.mq(xxs, max) {
     display: none !important;
   }
 }
 
 .hide-xxxs {
-  @include mq(xxxs, max) {
+  @include media-queries.mq(xxxs, max) {
     display: none !important;
   }
 }
@@ -64,19 +64,19 @@
 }
 
 .show-xs-only {
-  @include mq(xs) {
+  @include media-queries.mq(xs) {
     display: none !important;
   }
 }
 
 .hide-gt-sm {
-  @include mq(sm, max) {
+  @include media-queries.mq(sm, max) {
     display: none !important;
   }
 }
 
 .show-gt-sm-only {
-  @include mq(sm) {
+  @include media-queries.mq(sm) {
     display: none !important;
   }
 }

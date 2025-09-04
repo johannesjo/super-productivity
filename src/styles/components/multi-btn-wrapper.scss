@@ -1,3 +1,5 @@
+@use '../mixins/_is-touch-device';
+
 .g-multi-btn-wrapper {
   display: flex;
   position: relative;
@@ -36,7 +38,7 @@
       height: 40px;
     }
 
-    @include mousePrimaryDevice(true) {
+    @include is-touch-device.mousePrimaryDevice(true) {
       opacity: 0;
       display: none;
     }
@@ -45,7 +47,7 @@
   &:focus,
   &:hover {
     button:nth-of-type(n + 2) {
-      @include mousePrimaryDevice(true) {
+      @include is-touch-device.mousePrimaryDevice(true) {
         opacity: 0.8;
         display: inline-flex;
       }

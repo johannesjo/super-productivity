@@ -1,4 +1,5 @@
-@import '../../common';
+@use '../../_common';
+@use '../mixins/_media-queries';
 
 // to share between planner-task and planner-calendar-event
 .planner-time-remaining-shared {
@@ -11,18 +12,18 @@
   line-height: 1;
   margin-left: auto;
   font-size: var(--planner-font-size-mobile);
+  color: var(--text-color-muted);
 
-  @include mq(xs) {
+  @include media-queries.mq(xs) {
     font-size: var(--planner-font-size);
   }
-  color: var(--text-color-muted);
 
   mat-icon {
     vertical-align: middle;
     margin-top: -2px;
     height: 14px !important;
 
-    @include mq(xs) {
+    @include media-queries.mq(xs) {
       height: 16px !important;
       font-size: var(--planner-font-size);
     }

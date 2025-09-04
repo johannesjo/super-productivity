@@ -1,16 +1,18 @@
+@use 'sass:meta';
+@use 'styles/font/material-icons';
+
 @use 'sass:math';
 
 @import '../node_modules/@fontsource/roboto/400.css';
 @import '../node_modules/@fontsource/roboto/400-italic.css';
 @import '../node_modules/@fontsource/roboto/700.css';
 @import '../node_modules/@fontsource/roboto/300.css';
-@import './styles/font/material-icons';
 
-@import './styles/_css-variables';
-@import './styles/themes';
-@import './styles/page';
-@import './styles/util';
-@import './styles/components/components';
+@include meta.load-css('styles/_css-variables');
+@include meta.load-css('styles/themes');
+@include meta.load-css('styles/page');
+@include meta.load-css('styles/util');
+@include meta.load-css('styles/components/components');
 
 * {
   //box-shadow: none !important;

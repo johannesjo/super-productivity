@@ -1,3 +1,5 @@
+@use '_globals' as *;
+
 // Shared task styling mixins and utilities
 @mixin task-box-base() {
   position: absolute;

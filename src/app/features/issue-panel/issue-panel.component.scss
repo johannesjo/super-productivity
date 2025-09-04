@@ -1,4 +1,4 @@
-@import '../../../common';
+@use '_globals' as *;
 
 :host {
   // NOTE 0 because we want the inner scrollbars at the very right

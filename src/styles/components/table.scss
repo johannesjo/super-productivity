@@ -1,3 +1,5 @@
+@use '../mixins/_media-queries';
+
 table {
   th,
   td {
@@ -6,7 +8,7 @@ table {
     overflow-y: visible !important;
   }
 
-  @include mq(xs) {
+  @include media-queries.mq(xs) {
     th,
     td {
       padding: 0 var(--s);

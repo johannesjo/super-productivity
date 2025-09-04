@@ -1,3 +1,5 @@
+@use '../mixins/_media-queries';
+
 :root {
   //--mat-fab-small-container-elevation-shadow: var(--whiteframe-shadow-4dp);
   --mat-dialog-container-small-max-width: 94vw;
@@ -34,7 +36,7 @@
 }
 
 .cdk-overlay-pane.mat-mdc-dialog-panel {
-  @include mq(xs, max) {
+  @include media-queries.mq(xs, max) {
     max-width: 96vw !important;
   }
 }
@@ -52,7 +54,7 @@ body .mat-mdc-dialog-surface {
 }
 
 .mat-mdc-dialog-panel {
-  @include mq(xs) {
+  @include media-queries.mq(xs) {
     //--mat-dialog-container-min-width: 350px;
   }
 }
@@ -77,7 +79,7 @@ body .mat-mdc-dialog-surface {
   width: 100% !important;
   max-width: none !important;
 
-  @include mq(xs) {
+  @include media-queries.mq(xs) {
     margin: var(--s2);
     max-height: 95vh !important;
   }

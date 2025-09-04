@@ -1,5 +1,6 @@
-@import '../../../../common';
-@import '../../../../styles/components/scrollbars';
+@use '_globals' as *;
+
+@use '../../../../styles/components/scrollbars';
 
 .plugin-index-container {
   height: 100%;
@@ -82,7 +83,7 @@
   height: 100%;
   border: none;
   background: transparent;
-  @include _scrollBarStyles;
+  @include scrollbars.scrollBarStyles;
 
   &.hidden {
     visibility: hidden;

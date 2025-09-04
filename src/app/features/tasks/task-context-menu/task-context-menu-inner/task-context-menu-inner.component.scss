@@ -1,5 +1,5 @@
-@import '../../../../../common.scss';
-@import '../task-context-menu-touch-fix.scss';
+@use '_globals' as *;
+@use '../task-context-menu-touch-fix.scss';
 
 .key-i {
   opacity: 0.4;

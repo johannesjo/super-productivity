@@ -41,15 +41,7 @@
             "webWorkerTsConfig": "src/tsconfig.worker.json",
             "browser": "src/main.ts",
             "stylePreprocessorOptions": {
-              "includePaths": ["."],
-              "sass": {
-                "silenceDeprecations": [
-                  "mixed-decls",
-                  "color-functions",
-                  "global-builtin",
-                  "import"
-                ]
-              }
+              "includePaths": [".", "src", "src/styles"]
             }
           },
           "configurations": {

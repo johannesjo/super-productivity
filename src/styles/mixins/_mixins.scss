@@ -1,14 +1,17 @@
-@import 'theming';
-@import 'positioning';
-@import 'text';
-@import 'grab-cursor';
-@import 'note-style';
-@import 'hardware';
-@import 'pseudo';
-@import 'scroll';
-@import 'main-container';
-@import 'inline-edit-elevation';
-@import 'is-touch-device';
-@import 'responsive-ratio';
-@import 'material-icon';
-@import 'media-queries';
+// Forward all mixins so they can be used without namespace in components
+@forward '_theming';
+@forward '_positioning';
+@forward '_text';
+@forward '_grab-cursor';
+@forward '_note-style';
+@forward '_hardware';
+@forward '_pseudo';
+@forward '_scroll';
+@forward '_main-container';
+@forward '_inline-edit-elevation';
+@forward '_is-touch-device';
+@forward '_responsive-ratio';
+@forward '_material-icon';
+@forward '_media-queries';
+
+// Internal @use statements removed to avoid potential circular dependency issues

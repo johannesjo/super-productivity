@@ -1,4 +1,4 @@
-@import '../../common';
+@use '_globals' as *;
 
 .formly-row {
   @include mq(xs) {

@@ -1,3 +1,5 @@
+@use '../mixins/_theming';
+
 //@import "shepherd.js/dist/css/shepherd.css";
 
 .shepherd-modal-overlay-container {
@@ -45,7 +47,7 @@
   line-height: 2em;
   position: relative;
 
-  @include darkTheme(true) {
+  @include theming.darkTheme(true) {
     background: var(--dark8) !important;
   }
 

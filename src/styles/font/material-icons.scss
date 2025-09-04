@@ -1,4 +1,4 @@
-@import '../mixins/material-icon';
+@use '../mixins/material-icon';
 
 // Download from:
 // https://github.com/google/material-design-icons/tree/master/font
@@ -14,5 +14,5 @@
 }
 
 .material-icons {
-  @include materialIconBase();
+  @include material-icon.materialIconBase();
 }

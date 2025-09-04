@@ -1,0 +1,8 @@
+// Global mixins and functions that are available in all component styles
+// This file forwards all mixins without namespace so they can be used directly
+
+// Forward functions
+@forward 'functions/_ddivide';
+
+// Forward all mixins
+@forward 'mixins/_mixins';

@@ -1,5 +1,5 @@
 @use 'angular-material-css-vars' as mat-css-vars;
-@import '../../../../common';
+@use '_globals' as *;
 
 .month-grid-container {
   display: grid;
