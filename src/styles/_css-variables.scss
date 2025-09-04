@@ -531,4 +531,7 @@ body.isDarkTheme {
   --task-detail-value-color: rgba(255, 255, 255, 0.7);
   --task-detail-bg: var(--dark6);
   --task-detail-bg-hover: var(--dark10);
+
+  // Material Design sidenav backdrop override
+  --mat-sidenav-scrim-color: var(--c-dark-80);
 }
