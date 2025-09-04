@@ -20,15 +20,17 @@ import {
   isInputOrTextAreaElement,
 } from './mention-utils';
 
-import { MentionConfig, MentionItem } from './mention-config';
+import { MentionConfig } from './mention-config';
 import { MentionListComponent } from './mention-list.component';
 import { Log } from '../../core/log';
+import {
+  MentionItem,
+  MentionEvent,
+  MentionNode,
+  TextInputElement,
+} from './mention-types';
 
 // Custom types for mention events
-interface CustomEvent extends Event {
-  wasClick?: boolean;
-}
-
 interface CustomKeyboardEvent extends KeyboardEvent {
   inputEvent?: boolean;
   wasClick?: boolean;
@@ -165,7 +167,7 @@ export class MentionDirective implements OnChanges {
 
   private searchString: string | null = null;
   private startPos: number = -1;
-  private startNode: Node | null = null;
+  private startNode: MentionNode = null;
   private searchList?: MentionListComponent;
   private searching: boolean = false;
   private iframe: HTMLIFrameElement | null = null; // optional
@@ -207,7 +209,7 @@ export class MentionDirective implements OnChanges {
       // convert strings to objects
       if (typeof items[0] == 'string') {
         items = (items as string[]).map((label) => {
-          const object: Record<string, unknown> = {};
+          const object: MentionItem = {};
           object[config.labelKey || 'label'] = label;
           return object;
         });
@@ -238,23 +240,34 @@ export class MentionDirective implements OnChanges {
     this.iframe = iframe;
   }
 
-  stopEvent(event: CustomEvent): void {
+  stopEvent(event: MentionEvent | null): void {
+    // Handle null or undefined events gracefully
+    if (!event) {
+      return;
+    }
     //if (event instanceof KeyboardEvent) { // does not work for iframe
     if (!event.wasClick) {
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
+      // Add defensive checks to ensure methods exist before calling them
+      if (typeof event.preventDefault === 'function') {
+        event.preventDefault();
+      }
+      if (typeof event.stopPropagation === 'function') {
+        event.stopPropagation();
+      }
+      if (typeof event.stopImmediatePropagation === 'function') {
+        event.stopImmediatePropagation();
+      }
     }
   }
 
-  blurHandler(event: FocusEvent): void {
+  blurHandler(event: MentionEvent): void {
     this.stopEvent(event);
     this.stopSearch();
   }
 
   inputHandler(
-    event: InputEvent,
-    nativeElement: HTMLInputElement = this._element.nativeElement,
+    event: MentionEvent,
+    nativeElement: TextInputElement = this._element.nativeElement,
   ): void {
     if (this.lastKeyCode === KEY_BUFFERED && event.data) {
       const keyCode = event.data.charCodeAt(0);
@@ -267,10 +280,10 @@ export class MentionDirective implements OnChanges {
 
   // @param nativeElement is the alternative text element in an iframe scenario
   keyHandler(
-    event: CustomKeyboardEvent,
-    nativeElement: HTMLInputElement = this._element.nativeElement,
+    event: MentionEvent,
+    nativeElement: TextInputElement = this._element.nativeElement,
   ): boolean | undefined {
-    this.lastKeyCode = event.keyCode;
+    this.lastKeyCode = event.keyCode || 0;
 
     if (event.isComposing || event.keyCode === KEY_BUFFERED) {
       return undefined;
@@ -284,7 +297,7 @@ export class MentionDirective implements OnChanges {
     }
     let charPressed = event.key;
     if (!charPressed) {
-      const charCode = event.which || event.keyCode;
+      const charCode = event.which || event.keyCode || 0;
       if (!event.shiftKey && charCode >= 65 && charCode <= 90) {
         charPressed = String.fromCharCode(charCode + 32);
       }
@@ -294,7 +307,7 @@ export class MentionDirective implements OnChanges {
       else {
         // TODO (dmacfarlane) fix this for non-alpha keys
         // http://stackoverflow.com/questions/2220196/how-to-decode-character-pressed-from-jquerys-keydowns-event-handler?lq=1
-        charPressed = String.fromCharCode(event.which || event.keyCode);
+        charPressed = String.fromCharCode((event.which || event.keyCode) ?? 0);
       }
     }
     if (event.keyCode == KEY_ENTER && event.wasClick && pos < this.startPos) {
@@ -305,7 +318,7 @@ export class MentionDirective implements OnChanges {
       setCaretPosition(
         isInputOrTextAreaElement(nativeElement)
           ? nativeElement
-          : (this.startNode as HTMLInputElement),
+          : (this.startNode as HTMLInputElement | HTMLTextAreaElement),
         pos,
         this.iframe,
       );
@@ -316,9 +329,10 @@ export class MentionDirective implements OnChanges {
     if (config) {
       this.activeConfig = config;
       this.startPos = event.inputEvent ? pos - 1 : pos;
-      this.startNode =
-        (this.iframe ? this.iframe.contentWindow?.getSelection() : window.getSelection())
-          ?.anchorNode || null;
+      const selection = this.iframe
+        ? this.iframe.contentWindow?.getSelection()
+        : window.getSelection();
+      this.startNode = selection?.anchorNode || null;
       this.searching = true;
       this.searchString = null;
       this.showSearchList(nativeElement);
@@ -435,7 +449,7 @@ export class MentionDirective implements OnChanges {
   // exposed for external calls to open the mention list, e.g. by clicking a button
   public startSearch(
     triggerChar?: string,
-    nativeElement: HTMLInputElement = this._element.nativeElement,
+    nativeElement: TextInputElement = this._element.nativeElement,
   ): void {
     triggerChar =
       triggerChar ||
@@ -491,7 +505,7 @@ export class MentionDirective implements OnChanges {
     }
   }
 
-  showSearchList(nativeElement: HTMLInputElement): void {
+  showSearchList(nativeElement: TextInputElement): void {
     this.opened.emit();
     this.listShownChange.emit(true);
 
@@ -515,7 +529,7 @@ export class MentionDirective implements OnChanges {
     this.searchList.dropUp = this.activeConfig!.dropUp || false;
     this.searchList.styleOff = this.mentionConfig.disableStyle || false;
     this.searchList.activeIndex = 0;
-    this.searchList.position(nativeElement, this.iframe);
+    this.searchList.position(nativeElement as HTMLInputElement, this.iframe);
     if (this.searchList) {
       window.requestAnimationFrame(() => this.searchList!.reset());
     }

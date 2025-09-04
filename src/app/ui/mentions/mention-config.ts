@@ -1,8 +1,8 @@
 // configuration structure, backwards compatible with earlier versions
 
-export interface MentionItem {
-  [key: string]: unknown;
-}
+import { MentionItem } from './mention-types';
+
+export { MentionItem } from './mention-types';
 
 export interface MentionConfig<T = MentionItem> extends Mentions<T> {
   // nested config
@@ -13,7 +13,7 @@ export interface MentionConfig<T = MentionItem> extends Mentions<T> {
 }
 
 export interface Mentions<T = MentionItem> {
-  // an array of strings or objects to suggest
+  // an array of strings or objects to suggest - can be any array for flexibility
   items?: T[] | string[];
 
   // the character that will trigger the menu behavior

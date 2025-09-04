@@ -19,9 +19,9 @@ import { error, log } from 'electron-log/main';
 import { GlobalConfigState } from '../src/app/features/config/global-config.model';
 import { IS_MAC } from './common.const';
 import {
-  showOverlayWindow,
-  hideOverlayWindow,
   destroyOverlayWindow,
+  hideOverlayWindow,
+  showOverlayWindow,
 } from './overlay-indicator/overlay-indicator';
 
 let mainWin: BrowserWindow;
@@ -119,7 +119,9 @@ export const createWindow = ({
 
     // NOTE this is needed for GitHub api requests to work :(
     // office365 needs a User-Agent as well (#4677)
-    if (new URL(details.url).hostname in ['github.com', 'office365.com', 'outlook.live.com']) {
+    if (
+      new URL(details.url).hostname in ['github.com', 'office365.com', 'outlook.live.com']
+    ) {
       removeKeyInAnyCase(requestHeaders, 'User-Agent');
     }
     callback({ requestHeaders });

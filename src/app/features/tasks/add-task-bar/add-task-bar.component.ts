@@ -16,7 +16,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { MentionConfig, MentionModule } from '../../../ui/mentions';
+import { MentionConfig, MentionModule, MentionItem } from '../../../ui/mentions';
 import { MatInput } from '@angular/material/input';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -243,7 +243,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       const mentions: Mentions[] = [];
       if (cfg.isEnableTag) {
         mentions.push({
-          items: tagSuggestions || [],
+          items: (tagSuggestions as unknown as MentionItem[]) || [],
           labelKey: 'title',
           triggerChar: '#',
         });
@@ -257,7 +257,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       }
       if (cfg.isEnableProject) {
         mentions.push({
-          items: projectSuggestions || [],
+          items: (projectSuggestions as unknown as MentionItem[]) || [],
           labelKey: 'title',
           triggerChar: '+',
         });
