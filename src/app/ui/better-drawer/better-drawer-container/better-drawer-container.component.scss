@@ -46,7 +46,7 @@ $z-this-backdrop: calc(var(--z-task-side-bar-over) - 1);
     max-width: 100%;
   }
 
-  background: var(--selected-task-bg-color);
+  background: var(--right-panel-bg);
   //border-color: var(--extra-border-color);
 
   :host.isOver & {

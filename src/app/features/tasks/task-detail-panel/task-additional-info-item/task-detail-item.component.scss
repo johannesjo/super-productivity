@@ -55,11 +55,9 @@
   }
 
   @include darkTheme() {
-    background: var(--dark10);
-    box-shadow: var(--whiteframe-shadow-1dp);
+    box-shadow: var(--task-detail-shadow);
   }
   @include lightTheme {
-    background: #fff;
     border-color: var(--extra-border-color);
   }
 }
@@ -78,7 +76,7 @@
   .input-item.standard-size {
     &:hover,
     &:focus {
-      background: #eee;
+      background: var(--task-detail-bg-hover);
     }
   }
 }
@@ -88,7 +86,7 @@
   .input-item.standard-size {
     &:hover,
     &:focus {
-      background: var(--bg-lightest);
+      background: var(--task-detail-bg-hover);
     }
   }
 }
