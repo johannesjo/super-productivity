@@ -204,6 +204,14 @@ export const startApp = (): void => {
     idleTimeHandler = new IdleTimeHandler();
 
     let suspendStart: number;
+    // Prevent overlapping async idle checks.
+    // lazySetInterval schedules the next tick regardless of whether the previous
+    // check finished. Our idle detection on Wayland may spawn external commands
+    // (gdbus/dbus-send/xprintidle/loginctl) which can take close to or longer than
+    // the poll interval. Without this guard, multiple checks can run concurrently,
+    // causing timeouts and subsequent 0ms readings, which looks like “only one
+    // idle event was ever sent”. This ensures at most one check runs at a time.
+    let isCheckingIdle = false;
     const sendIdleMsgIfOverMin = (idleTime: number): void => {
       // sometimes when starting a second instance we get here although we don't want to
       if (!mainWin) {
@@ -228,6 +236,11 @@ export const startApp = (): void => {
     };
 
     const checkIdle = async (): Promise<void> => {
+      // Skip if a previous check is still in flight
+      if (isCheckingIdle) {
+        return;
+      }
+      isCheckingIdle = true;
       try {
         const startTime = Date.now();
         const idleTime = await idleTimeHandler.getIdleTimeWithFallbacks();
@@ -242,6 +255,8 @@ export const startApp = (): void => {
         const fallbackIdleTime = powerMonitor.getSystemIdleTime() * 1000;
         log(`🔄 Fallback powerMonitor idle time: ${fallbackIdleTime}ms`);
         sendIdleMsgIfOverMin(fallbackIdleTime);
+      } finally {
+        isCheckingIdle = false;
       }
     };
 
