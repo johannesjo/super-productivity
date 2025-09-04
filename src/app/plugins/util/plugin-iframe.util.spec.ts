@@ -77,7 +77,7 @@
 //             '--link-color': '#2196f3',
 //             '--border-radius': '4px',
 //             '--transition': '0.3s ease',
-//             '--font-family': 'Roboto, sans-serif',
+//             '--font-family': 'Open Sans, sans-serif',
 //             '--error-color': '#f44336',
 //           };
 //           // eslint-enable @typescript-eslint/naming-convention
@@ -97,7 +97,7 @@
 //       expect(css).toContain('background: transparent');
 //       expect(css).toContain('--primary-bg: #e3f2fd');
 //       expect(css).toContain('--link-color: #2196f3');
-//       expect(css).toContain('font-family: Roboto, sans-serif');
+//       expect(css).toContain('font-family: Open Sans, sans-serif');
 //     });
 //
 //     it('should create CSS with theme variables for dark theme', () => {
@@ -150,7 +150,7 @@
 //       expect(css).toContain('margin: 0');
 //       expect(css).toContain('padding: 8px');
 //       expect(css).toContain('background: transparent');
-//       expect(css).toContain('font-family: Roboto, sans-serif');
+//       expect(css).toContain('font-family: Open Sans, sans-serif');
 //       expect(css).toContain('color: var(--text-color)');
 //     });
 //   });
