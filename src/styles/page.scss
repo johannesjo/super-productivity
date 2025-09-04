@@ -76,6 +76,12 @@ body {
         mat-css-vars.mat-css-color(50, 1) 140px,
         var(--bg) 100%
       );
+      //background: linear-gradient(
+      //  180deg,
+      //  mat-css-vars.mat-css-color(100, 1) 0%,
+      //  mat-css-vars.mat-css-color(50, 0.1) 140px,
+      //  transparent
+      //);
     }
   }
 
@@ -91,9 +97,9 @@ body {
       filter: saturate(0.8);
       background: linear-gradient(
         180deg,
-        mat-css-vars.mat-css-color(800, 0.35) 0%,
-        mat-css-vars.mat-css-color(900, 0.1) 140px,
-        mat-css-vars.mat-css-color(900, 0.02) 100%
+        mat-css-vars.mat-css-color(800, 0.2) 0%,
+        mat-css-vars.mat-css-color(900, 0.025) 140px,
+        transparent 100%
       );
     }
   }
