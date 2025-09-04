@@ -216,28 +216,39 @@ export const startApp = (): void => {
       // don't update if the user is about to close
       if (!appIN.isQuiting && idleTime > CONFIG.MIN_IDLE_TIME) {
         log(
-          `Sending idle time to frontend: ${idleTime}ms (threshold: ${CONFIG.MIN_IDLE_TIME}ms)`,
+          `✅ Sending idle time to frontend: ${idleTime}ms (threshold: ${CONFIG.MIN_IDLE_TIME}ms, method: ${idleTimeHandler.currentMethod})`,
         );
         mainWin.webContents.send(IPC.IDLE_TIME, idleTime);
       } else {
         log(
-          `NOT sending idle time: ${idleTime}ms (threshold: ${CONFIG.MIN_IDLE_TIME}ms, isQuiting: ${appIN.isQuiting})`,
+          // eslint-disable-next-line max-len
+          `❌ NOT sending idle time: ${idleTime}ms (threshold: ${CONFIG.MIN_IDLE_TIME}ms, isQuiting: ${appIN.isQuiting}, method: ${idleTimeHandler.currentMethod})`,
         );
       }
     };
 
     const checkIdle = async (): Promise<void> => {
       try {
+        const startTime = Date.now();
         const idleTime = await idleTimeHandler.getIdleTimeWithFallbacks();
+        const checkDuration = Date.now() - startTime;
+
+        log(
+          `🔍 Idle check completed in ${checkDuration}ms: ${idleTime}ms (method: ${idleTimeHandler.currentMethod})`,
+        );
         sendIdleMsgIfOverMin(idleTime);
       } catch (error) {
-        log('Error getting idle time:', error);
-        // Fallback to standard method if our handler fails
-        sendIdleMsgIfOverMin(powerMonitor.getSystemIdleTime() * 1000);
+        log('💥 Error getting idle time, falling back to powerMonitor:', error);
+        const fallbackIdleTime = powerMonitor.getSystemIdleTime() * 1000;
+        log(`🔄 Fallback powerMonitor idle time: ${fallbackIdleTime}ms`);
+        sendIdleMsgIfOverMin(fallbackIdleTime);
       }
     };
 
     // init time tracking interval
+    log(
+      `🚀 Starting idle time tracking (interval: ${CONFIG.IDLE_PING_INTERVAL}ms, threshold: ${CONFIG.MIN_IDLE_TIME}ms)`,
+    );
     lazySetInterval(checkIdle, CONFIG.IDLE_PING_INTERVAL);
 
     powerMonitor.on('suspend', () => {
