@@ -51,6 +51,7 @@ import {
   showFocusOverlay,
   unPauseFocusSession,
 } from '../../focus-mode/store/focus-mode.actions';
+import { Log } from '../../../core/log';
 
 const DEFAULT_MIN_IDLE_TIME = 60000;
 const IDLE_POLL_INTERVAL = 1000;
@@ -104,6 +105,12 @@ export class IdleEffects {
             ? of(resetIdle())
             : this._triggerIdleApis$.pipe(
                 switchMap((idleTimeInMs) => {
+                  Log.verbose('triggerIdleWhenEnabled$', {
+                    idleTimeInMs,
+                    isEnableIdleTimeTracking,
+                    isOnlyOpenIdleWhenCurrentTask,
+                    minIdleTime,
+                  });
                   if (
                     isOnlyOpenIdleWhenCurrentTask &&
                     !this._taskService.currentTaskId()
