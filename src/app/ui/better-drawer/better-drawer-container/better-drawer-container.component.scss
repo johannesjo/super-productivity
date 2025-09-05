@@ -1,4 +1,4 @@
-@use '_globals' as *;
+@use '../../../../styles/_globals.scss' as *;
 
 $z-this-content: calc(var(--z-side-panel-task-and-notes) + 1);
 $z-this-backdrop: calc(var(--z-task-side-bar-over) - 1);

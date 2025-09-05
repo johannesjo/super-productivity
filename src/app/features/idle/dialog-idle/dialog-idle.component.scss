@@ -1,4 +1,4 @@
-@use '_globals' as *;
+@use '../../../../styles/_globals.scss' as *;
 
 .dialog-content {
   @include mq(xs) {

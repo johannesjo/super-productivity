@@ -1,6 +1,6 @@
 @use 'sass:math';
 
-@use '_globals' as *;
+@use '../../../../styles/_globals.scss' as *;
 
 .wrapper {
   position: relative;

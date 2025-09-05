@@ -1,4 +1,4 @@
-@use '_globals' as *;
+@use '../_globals.scss' as *;
 
 .formly-row {
   @include mq(xs) {
