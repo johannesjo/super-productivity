@@ -103,6 +103,13 @@ mat-sidenav {
   width: fit-content;
   z-index: var(--z-side-nav);
 }
+
+// Remove right border/shadow of the side nav
+
+:host-context(.isDarkTheme) ::ng-deep .mat-drawer.mat-drawer-side {
+  border-right: 0 !important;
+}
+
 @media (min-width: 800px) {
   button.mat-mdc-menu-item {
     width: 600px;
