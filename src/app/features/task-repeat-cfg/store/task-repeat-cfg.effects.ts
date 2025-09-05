@@ -73,15 +73,44 @@ export class TaskRepeatCfgEffects {
       this._actions$.pipe(
         ofType(addTaskRepeatCfgToTask),
         switchMap(({ taskRepeatCfg, taskId }) => {
-          return this._taskService.getByIdOnce$(taskId).pipe(
+          return this._taskService.getByIdWithSubTaskData$(taskId).pipe(
             first(),
-            map((task) => ({
-              task,
-              taskRepeatCfg,
-            })),
+            map((taskWithSubTasks) => {
+              // Extract subtasks safely, ensuring we handle the type properly
+              const subTasks = Array.isArray(taskWithSubTasks.subTasks)
+                ? taskWithSubTasks.subTasks
+                : [];
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              const { subTasks: _ignored, ...taskWithoutSubs } = taskWithSubTasks;
+
+              if (subTasks.length === 0) {
+                return {
+                  task: taskWithoutSubs,
+                  taskRepeatCfg,
+                  subTaskTemplates: [],
+                };
+              }
+
+              const subTaskTemplates = subTasks.map((subTask) => {
+                return {
+                  title: subTask.title,
+                  notes: subTask.notes,
+                  timeEstimate: subTask.timeEstimate,
+                };
+              });
+
+              return {
+                task: taskWithoutSubs,
+                taskRepeatCfg,
+                subTaskTemplates,
+              };
+            }),
           );
         }),
-        tap(({ task, taskRepeatCfg }) => {
+        tap(({ task, taskRepeatCfg, subTaskTemplates }) => {
+          this._taskRepeatCfgService.updateTaskRepeatCfg(taskRepeatCfg.id, {
+            subTaskTemplates,
+          });
           this._updateRegularTaskInstance(task, taskRepeatCfg, taskRepeatCfg);
         }),
       ),

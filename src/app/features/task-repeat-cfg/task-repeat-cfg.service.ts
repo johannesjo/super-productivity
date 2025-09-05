@@ -22,6 +22,7 @@ import { first, take } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
 import { Task } from '../tasks/task.model';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
+import { addSubTask } from '../tasks/store/task.actions';
 import { WorkContextService } from '../work-context/work-context.service';
 import { WorkContextType } from '../work-context/work-context.model';
 import { isValidSplitTime } from '../../util/is-valid-split-time';
@@ -159,6 +160,7 @@ export class TaskRepeatCfgService {
       | ReturnType<typeof TaskSharedActions.addTask>
       | ReturnType<typeof updateTaskRepeatCfg>
       | ReturnType<typeof TaskSharedActions.scheduleTaskWithTime>
+      | ReturnType<typeof addSubTask>
     )[]
   > {
     // NOTE: there might be multiple configs in case something went wrong
@@ -199,6 +201,7 @@ export class TaskRepeatCfgService {
       | ReturnType<typeof TaskSharedActions.addTask>
       | ReturnType<typeof updateTaskRepeatCfg>
       | ReturnType<typeof TaskSharedActions.scheduleTaskWithTime>
+      | ReturnType<typeof addSubTask>
     )[] = [
       TaskSharedActions.addTask({
         task: {
@@ -240,6 +243,32 @@ export class TaskRepeatCfgService {
           isSkipAutoRemoveFromToday: true,
         }),
       );
+    }
+
+    if (
+      taskRepeatCfg.shouldInheritSubtasks &&
+      taskRepeatCfg.subTaskTemplates &&
+      taskRepeatCfg.subTaskTemplates.length > 0
+    ) {
+      for (const subTask of taskRepeatCfg.subTaskTemplates) {
+        const newSubTask = this._taskService.createNewTaskWithDefaults({
+          title: subTask.title,
+          additional: {
+            notes: subTask.notes || '',
+            timeEstimate: subTask.timeEstimate || 0,
+            parentId: task.id,
+            projectId: taskRepeatCfg.projectId || undefined,
+            isDone: false, // Always start fresh
+          },
+        });
+
+        createNewActions.push(
+          addSubTask({
+            task: newSubTask,
+            parentId: task.id,
+          }),
+        );
+      }
     }
 
     return createNewActions;

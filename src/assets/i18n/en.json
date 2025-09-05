@@ -1398,7 +1398,9 @@
         "THURSDAY": "Thursday",
         "TITLE": "Title for task",
         "TUESDAY": "Tuesday",
-        "WEDNESDAY": "Wednesday"
+        "WEDNESDAY": "Wednesday",
+        "INHERIT_SUBTASKS": "Inherit subtasks",
+        "INHERIT_SUBTASKS_DESCRIPTION": "When enabled, subtasks from the most recent task instance will be recreated with the repeating task"
       }
     },
     "TASK_VIEW": {

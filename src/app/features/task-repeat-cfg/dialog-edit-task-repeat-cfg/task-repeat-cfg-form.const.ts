@@ -220,4 +220,13 @@ export const TASK_REPEAT_CFG_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
       rows: 4,
     },
   },
+  {
+    key: 'shouldInheritSubtasks',
+    type: 'checkbox',
+    defaultValue: false,
+    templateOptions: {
+      label: T.F.TASK_REPEAT.F.INHERIT_SUBTASKS,
+      description: T.F.TASK_REPEAT.F.INHERIT_SUBTASKS_DESCRIPTION,
+    },
+  },
 ];
