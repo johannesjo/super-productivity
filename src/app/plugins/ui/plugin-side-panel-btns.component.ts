@@ -72,7 +72,7 @@ import { PluginLog } from '../../core/log';
         border-bottom-left-radius: 4px;
         border-bottom-right-radius: 4px;
         box-shadow: 0px -2px 3px 0px var(--separator-alpha);
-        background: var(--sidebar-bg);
+        background: var(--right-panel-bg);
         content: '';
         width: 100%;
         position: absolute;

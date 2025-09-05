@@ -81,7 +81,7 @@ import { KeyboardConfig } from '../../../features/config/keyboard-config.model';
           &::after {
             border-radius: 4px;
             box-shadow: 0px -2px 3px 0px var(--separator-alpha);
-            background: var(--sidebar-bg);
+            background: var(--right-panel-bg);
             content: '';
             width: 100%;
             position: absolute;
