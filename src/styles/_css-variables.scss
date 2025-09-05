@@ -476,11 +476,12 @@ body.isDarkTheme {
 
   // Task colors
   //--task-c-bg: #212123ff;
-  --task-c-bg: var(--dark1);
+  --task-c-bg: var(--dark2);
+  --sub-task-c-bg: var(--dark4);
+  --sub-task-c-bg-done: var(--dark3);
+  --task-c-bg-done: var(--dark1);
+
   --task-c-selected-bg: var(--dark6);
-  --sub-task-c-bg: var(--dark2);
-  --sub-task-c-bg-done: var(--dark1);
-  --task-c-bg-done: var(--dark0-5);
   --task-c-current-bg: var(--dark12);
   --task-c-drag-drop-bg: var(--dark12);
   --sub-task-c-bg-in-selected: var(--dark10);
