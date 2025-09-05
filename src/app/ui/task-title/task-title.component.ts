@@ -52,6 +52,7 @@ export class TaskTitleComponent {
   readonly valueEdited = output<{
     newVal: string;
     wasChanged: boolean;
+    blurEvent?: FocusEvent;
   }>();
 
   constructor() {}
@@ -69,10 +70,10 @@ export class TaskTitleComponent {
     }
   }
 
-  blurred(): void {
+  blurred(event?: FocusEvent): void {
     this.isFocused = false;
     // this.isEditMode = false;
-    this._submit();
+    this._submit(event);
   }
 
   handleKeyDown(ev: KeyboardEvent): void {
@@ -130,11 +131,12 @@ export class TaskTitleComponent {
     this.textarea().nativeElement.blur();
   }
 
-  private _submit(): void {
+  private _submit(blurEvent?: FocusEvent): void {
     const cleanVal = this._cleanValue(this.tmpValue);
     this.valueEdited.emit({
       newVal: cleanVal,
       wasChanged: cleanVal !== this.lastExternalValue,
+      blurEvent,
     });
   }
 

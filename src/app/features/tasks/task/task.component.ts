@@ -382,14 +382,28 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   updateTaskTitleIfChanged({
     newVal,
     wasChanged,
+    blurEvent,
   }: {
     newVal: string;
     wasChanged: boolean;
+    blurEvent?: FocusEvent;
   }): void {
     if (wasChanged) {
       this._taskService.update(this.task().id, { title: newVal });
     }
-    this.focusSelf();
+
+    // Only focus self if no input/textarea is receiving focus next
+    // This prevents stealing focus from any user input that was just clicked for editing
+    const nextFocusTarget = blurEvent?.relatedTarget as HTMLElement | null;
+    const isNextTargetInput =
+      nextFocusTarget &&
+      (nextFocusTarget.tagName.toLowerCase() === 'input' ||
+        nextFocusTarget.tagName.toLowerCase() === 'textarea' ||
+        nextFocusTarget.closest('task') !== null);
+
+    if (!isNextTargetInput) {
+      this.focusSelf();
+    }
   }
 
   estimateTime(): void {
