@@ -448,7 +448,7 @@ body.isDarkTheme {
 
   // Navigation & Panel backgrounds
   --sidebar-bg: var(--dark1);
-  --right-panel-bg: var(--sidebar-bg);
+  --right-panel-bg: var(--dark5);
 
   // Text colors
   --text-color: rgb(230, 230, 230);
@@ -469,7 +469,7 @@ body.isDarkTheme {
   --c-backdrop: var(--c-dark-60);
 
   // Note colors
-  --standard-note-bg: var(--dark4);
+  --standard-note-bg: var(--dark10);
   --standard-note-fg: #eeeeee;
   --standard-note-bg-hovered: var(--dark24);
   --notes-container-bg: inherit;
@@ -481,7 +481,7 @@ body.isDarkTheme {
   --sub-task-c-bg-done: var(--dark3);
   --task-c-bg-done: var(--dark1);
 
-  --task-c-selected-bg: var(--dark6);
+  --task-c-selected-bg: var(--right-panel-bg);
   --task-c-current-bg: var(--dark12);
   --task-c-drag-drop-bg: var(--dark12);
   --sub-task-c-bg-in-selected: var(--dark10);
@@ -530,8 +530,8 @@ body.isDarkTheme {
 
   // Task detail item
   --task-detail-value-color: rgba(255, 255, 255, 0.7);
-  --task-detail-bg: var(--dark6);
-  --task-detail-bg-hover: var(--dark10);
+  --task-detail-bg: var(--dark8);
+  --task-detail-bg-hover: var(--dark12);
 
   // Material Design sidenav backdrop override
   --mat-sidenav-scrim-color: var(--c-dark-80);
