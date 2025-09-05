@@ -48,24 +48,22 @@ body {
     opacity: 0;
   }
 
-  &.isEnabledBackgroundGradient {
-    &:before {
-      display: block;
-      opacity: 1;
-    }
-  }
-
   &.isLightTheme {
     color: var(--text-color);
     background: var(--bg);
 
-    &.isDisableBackgroundTint {
-      background: var(--bg);
-    }
-
     &:before {
+      display: block;
+      opacity: 1;
       filter: saturate(0.8);
       background: mat-css-vars.mat-css-color(50, 1);
+    }
+    &.isDisableBackgroundTint {
+      background: var(--bg);
+      &:before {
+        display: none;
+        opacity: 0;
+      }
     }
   }
 
@@ -73,13 +71,18 @@ body {
     color: var(--text-color);
     background: var(--bg);
 
-    &.isDisableBackgroundTint {
-      background: var(--bg);
-    }
-
     &:before {
+      display: block;
+      opacity: 1;
       filter: brightness(0.1);
       background: mat-css-vars.mat-css-color(900, 1);
+    }
+    &.isDisableBackgroundTint {
+      background: var(--bg);
+      &:before {
+        display: none;
+        opacity: 0;
+      }
     }
   }
 
