@@ -22,7 +22,7 @@ export const TODAY_TAG: Tag = {
     primary: DEFAULT_TODAY_TAG_COLOR,
     // backgroundImageDark: 'assets/bg/NIGHT_manuel-will.jpg',
     backgroundImageDark: '',
-    isDisableBackgroundGradient: false,
+    isDisableBackgroundGradient: true,
   },
 };
 
