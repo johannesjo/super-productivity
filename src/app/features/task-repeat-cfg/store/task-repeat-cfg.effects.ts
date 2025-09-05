@@ -20,7 +20,7 @@ import { Task, TaskCopy } from '../../tasks/task.model';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { TaskService } from '../../tasks/task.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
-import { TaskRepeatCfg, TaskRepeatCfgCopy } from '../task-repeat-cfg.model';
+import { TaskRepeatCfgCopy } from '../task-repeat-cfg.model';
 import { forkJoin, of } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
@@ -75,9 +75,15 @@ export class TaskRepeatCfgEffects {
         switchMap(({ taskRepeatCfg, taskId }) => {
           return this._taskService.getByIdWithSubTaskData$(taskId).pipe(
             first(),
-            map((task) => {
-              const { subTasks, ...taskWithoutSubs } = task;
-              if (!subTasks || subTasks.length === 0) {
+            map((taskWithSubTasks) => {
+              // Extract subtasks safely, ensuring we handle the type properly
+              const subTasks = Array.isArray(taskWithSubTasks.subTasks)
+                ? taskWithSubTasks.subTasks
+                : [];
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              const { subTasks: _ignored, ...taskWithoutSubs } = taskWithSubTasks;
+
+              if (subTasks.length === 0) {
                 return {
                   task: taskWithoutSubs,
                   taskRepeatCfg,
