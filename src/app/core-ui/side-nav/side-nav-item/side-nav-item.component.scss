@@ -1,8 +1,31 @@
 @use '_globals' as *;
 
 :host {
-  button .badge {
-    display: none;
+  display: flex !important;
+  align-items: stretch;
+  position: relative;
+  width: 100%;
+
+  button:first-of-type {
+    white-space: nowrap;
+    overflow: hidden;
+    flex: 1;
+    min-width: 0;
+
+    .text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .badge {
+      display: none;
+    }
+  }
+
+  .additional-btn {
+    flex-shrink: 0;
+    width: 40px !important;
+    min-width: 40px !important;
   }
 
   &.hasTasks {

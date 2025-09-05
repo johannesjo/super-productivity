@@ -25,18 +25,20 @@
   @if (isShowFocusOverlay()) {
     <focus-mode-overlay @warp></focus-mode-overlay>
   } @else {
-    <mat-sidenav-container [dir]="isRTL ? 'rtl' : 'ltr'">
-      <mat-sidenav
-        (closedStart)="layoutService.hideSideNav()"
-        [mode]="layoutService.isNavOver() ? 'over' : 'side'"
-        [opened]="layoutService.isShowSideNav()"
-        [disableClose]="layoutService.isNavAlwaysVisible()"
-        position="start"
+    <div
+      class="app-container"
+      [dir]="isRTL ? 'rtl' : 'ltr'"
+    >
+      <magic-side-nav
+        [config]="getMagicSideNavConfig()"
+        [expandedGroupIds]="getExpandedGroupIds()"
+        [activeWorkContextId]="getActiveWorkContextId()"
+        (itemClick)="sideNavConfigService.onNavItemClick($event)"
+        (expandedChange)="onSideNavExpandedChange($event)"
       >
-        <side-nav></side-nav>
-        @if (workContextService.isActiveWorkContextProject$ | async) {}
-      </mat-sidenav>
-      <mat-sidenav-content>
+      </magic-side-nav>
+
+      <main class="main-content">
         <header
           [class.isNotScrolled]="!layoutService.isScrolled()"
           class="header-wrapper"
@@ -56,8 +58,8 @@
           </div>
         </right-panel>
         <global-progress-bar></global-progress-bar>
-      </mat-sidenav-content>
-    </mat-sidenav-container>
+      </main>
+    </div>
   }
   <!-- -->
 }

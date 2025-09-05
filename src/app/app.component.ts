@@ -45,13 +45,10 @@ import { IS_MOBILE } from './util/is-mobile';
 import { warpAnimation, warpInAnimation } from './ui/animations/warp.ani';
 import { GlobalConfigState } from './features/config/global-config.model';
 import { AddTaskBarComponent } from './features/tasks/add-task-bar/add-task-bar.component';
-import {
-  MatSidenav,
-  MatSidenavContainer,
-  MatSidenavContent,
-} from '@angular/material/sidenav';
 import { Dir } from '@angular/cdk/bidi';
-import { SideNavComponent } from './core-ui/side-nav/side-nav.component';
+import { MagicSideNavComponent } from './core-ui/magic-side-nav/magic-side-nav';
+import { SideNavConfigService } from './core-ui/side-nav/side-nav-config.service';
+import { NavConfig } from './core-ui/magic-side-nav/magic-side-nav';
 import { MainHeaderComponent } from './core-ui/main-header/main-header.component';
 import { BannerComponent } from './core/banner/banner/banner.component';
 import { GlobalProgressBarComponent } from './core-ui/global-progress-bar/global-progress-bar.component';
@@ -109,11 +106,8 @@ const productivityTip: string[] = w.productivityTips && w.productivityTips[w.ran
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     AddTaskBarComponent,
-    MatSidenavContainer,
     Dir,
-    MatSidenav,
-    SideNavComponent,
-    MatSidenavContent,
+    MagicSideNavComponent,
     MainHeaderComponent,
     BannerComponent,
     RightPanelComponent,
@@ -158,6 +152,7 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   private _syncSafetyBackupService = inject(SyncSafetyBackupService);
 
   readonly syncTriggerService = inject(SyncTriggerService);
+  readonly sideNavConfigService = inject(SideNavConfigService);
   readonly imexMetaService = inject(ImexViewService);
   readonly workContextService = inject(WorkContextService);
   readonly layoutService = inject(LayoutService);
@@ -194,6 +189,11 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   isShowFocusOverlay = toSignal(this._store.select(selectIsOverlayShown), {
     initialValue: false,
   });
+
+  private readonly _activeWorkContextId = toSignal(
+    this.workContextService.activeWorkContextId$,
+    { initialValue: null },
+  );
 
   private _subs: Subscription = new Subscription();
   private _intervalTimer?: NodeJS.Timeout;
@@ -433,6 +433,31 @@ export class AppComponent implements OnDestroy, AfterViewInit {
 
   getPage(outlet: RouterOutlet): string {
     return outlet.activatedRouteData.page || 'one';
+  }
+
+  getMagicSideNavConfig(): NavConfig {
+    const baseConfig = this.sideNavConfigService.navConfig();
+    return {
+      ...baseConfig,
+      expandedByDefault: this.layoutService.isShowSideNav(),
+      // Integrate with layout service for mobile detection
+      mobileBreakpoint: 0, // Disable mobile mode, use existing app mobile handling
+    };
+  }
+
+  onSideNavExpandedChange(isExpanded: boolean): void {
+    const currentlyExpanded = this.layoutService.isShowSideNav();
+    if (isExpanded !== currentlyExpanded) {
+      this.layoutService.toggleSideNav();
+    }
+  }
+
+  getExpandedGroupIds(): Set<string> {
+    return this.sideNavConfigService.expandedGroupIds();
+  }
+
+  getActiveWorkContextId(): string | null {
+    return this._activeWorkContextId();
   }
 
   changeBackgroundFromUnsplash(): void {

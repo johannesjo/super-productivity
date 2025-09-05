@@ -59,7 +59,7 @@
       <button
         #menuEntry
         #projectExpandBtn
-        (click)="toggleExpandProjects()"
+        (click)="toggleExpandProjects(); $event.stopPropagation()"
         (keydown)="toggleExpandProjectsLeftRight($event)"
         [class.isExpanded]="isProjectsExpanded()"
         class="expand-btn"
@@ -115,7 +115,7 @@
       }
     </ng-template>
     <div
-      [@standardList]="projectList?.length"
+      [@standardList]="projectList.length"
       cdkDropList
       (cdkDropListDropped)="dropOnProjectList(projectList, $event)"
     >
@@ -143,17 +143,17 @@
     <button
       #menuEntry
       #tagExpandBtn
-      (click)="toggleExpandTags()"
+      (click)="toggleExpandTags(); $event.stopPropagation()"
       (keydown)="toggleExpandTagsLeftRight($event)"
       [class.isExpanded]="isTagsExpanded()"
       class="expand-btn"
       mat-menu-item
     >
-      <span class="title">{{ T.MH.TAGS | translate }}</span>
       <mat-icon>expand_more</mat-icon>
+      <span class="title">{{ T.MH.TAGS | translate }}</span>
     </button>
     <div
-      [@standardList]="tagList?.length"
+      [@standardList]="tagList.length"
       cdkDropList
       (cdkDropListDropped)="dropOnTagList(tagList, $event)"
     >
@@ -211,7 +211,7 @@
   </button>
   <button
     #menuEntry
-    [mat-menu-trigger-for]="helpMenu"
+    [matMenuTriggerFor]="helpMenu"
     class="route-link"
     mat-menu-item
   >

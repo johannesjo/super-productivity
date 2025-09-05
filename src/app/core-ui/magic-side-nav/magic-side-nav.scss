@@ -1,0 +1,665 @@
+// Use app's CSS variables for width and spacing
+$sidebar-width-expanded: var(--side-nav-width, 260px);
+$sidebar-width-collapsed: 72px;
+$mobile-breakpoint: 768px;
+$transition-speed: var(--transition-standard, 0.3s);
+$overlay-bg: var(--c-dark-50, rgba(0, 0, 0, 0.5));
+
+:host {
+  // Use app's CSS variables for consistent theming
+  --sidebar-bg: var(--palette-background-card);
+  --sidebar-border: var(--divider-color);
+  --sidebar-text: rgba(
+    var(--palette-foreground-text),
+    var(--palette-foreground-text-alpha)
+  );
+  --sidebar-text-secondary: rgba(
+    var(--palette-foreground-secondary-text),
+    var(--palette-foreground-secondary-text-alpha)
+  );
+  --sidebar-hover: var(--palette-background-hover);
+  --sidebar-active: var(--c-primary-10, rgba(var(--palette-primary-500-rgb), 0.04));
+  --sidebar-active-text: var(--palette-primary-800);
+
+  // Dark theme overrides
+  body.isDarkTheme & {
+    --sidebar-active-text: var(--c-primary);
+  }
+}
+
+// Mobile menu toggle button
+.mobile-menu-toggle {
+  display: none;
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 1001;
+  background: var(--sidebar-bg);
+  border: 1px solid var(--sidebar-border);
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  transition: all $transition-speed ease;
+
+  &.visible {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &:hover {
+    background: var(--sidebar-hover);
+  }
+
+  svg {
+    color: var(--sidebar-text);
+  }
+}
+
+// Mobile overlay
+.nav-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: $overlay-bg;
+  z-index: 998;
+  opacity: 0;
+  transition: opacity $transition-speed ease;
+
+  &.visible {
+    display: block;
+    opacity: 1;
+  }
+}
+
+// Main sidebar
+.nav-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: $sidebar-width-expanded;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
+  transition: all $transition-speed cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 999;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  &.resizing {
+    transition: none !important;
+  }
+
+  // Threshold zone visual feedback
+  &.collapse-zone {
+    border-left: 3px solid #ef4444;
+    box-shadow: inset 3px 0 0 rgba(239, 68, 68, 0.1);
+
+    .resize-handle {
+      background-color: #ef4444 !important;
+    }
+  }
+
+  &.expand-zone {
+    border-left: 3px solid #10b981;
+    box-shadow: inset 3px 0 0 rgba(16, 185, 129, 0.1);
+
+    .resize-handle {
+      background-color: #10b981 !important;
+    }
+  }
+
+  // Scrollbar styling
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--sidebar-border);
+    border-radius: 3px;
+
+    &:hover {
+      background: var(--sidebar-text-secondary);
+    }
+  }
+
+  // Collapsed state (desktop)
+  &.collapsed {
+    width: $sidebar-width-collapsed !important;
+
+    .nav-label,
+    .nav-badge,
+    .nav-chevron,
+    .nav-children {
+      display: none;
+    }
+
+    .nav-link {
+      justify-content: center;
+      padding: 12px;
+
+      &[title] {
+        // Ensure tooltip shows on hover for collapsed items
+      }
+    }
+
+    .nav-icon {
+      margin: 0;
+    }
+
+    // Multi-button wrapper in collapsed mode
+    .g-multi-btn-wrapper {
+      justify-content: center;
+
+      .expand-btn {
+        justify-content: center;
+        padding: 12px;
+        position: relative;
+
+        .nav-icon {
+          margin: 0;
+        }
+
+        // Show a small indicator when section is expanded in collapsed mode
+        &.isExpanded::after {
+          content: '';
+          position: absolute;
+          bottom: 2px;
+          right: 2px;
+          width: 4px;
+          height: 4px;
+          background-color: var(--sidebar-active-text);
+          border-radius: 50%;
+        }
+      }
+
+      // Hide additional buttons in collapsed mode
+      .additional-btn {
+        display: none;
+      }
+    }
+
+    // Fix side-nav-item wrapping issues in collapsed mode
+    ::ng-deep side-nav-item {
+      .additional-btn {
+        display: none !important;
+      }
+    }
+
+    .sidebar-toggle {
+      right: auto;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    // Show resize handle in collapsed mode but style differently
+    .resize-handle.collapsed-handle {
+      display: block;
+      width: 8px;
+      right: -4px;
+
+      &:hover {
+        background-color: var(--sidebar-active-text);
+      }
+
+      .resize-handle-line {
+        width: 3px;
+        height: 60px;
+        opacity: 0.7;
+      }
+    }
+  }
+
+  // Mobile specific
+  &.mobile {
+    transform: translateX(-100%);
+    width: $sidebar-width-expanded;
+
+    &.mobile-visible {
+      transform: translateX(0);
+    }
+  }
+
+  // Position right
+  &.position-right {
+    left: auto;
+    right: 0;
+    border-right: none;
+    border-left: 1px solid var(--sidebar-border);
+
+    &.mobile {
+      transform: translateX(100%);
+
+      &.mobile-visible {
+        transform: translateX(0);
+      }
+    }
+
+    .sidebar-toggle {
+      left: 16px;
+      right: auto;
+    }
+
+    &.collapse-zone {
+      border-left: none;
+      border-right: 3px solid #ef4444;
+      box-shadow: inset -3px 0 0 rgba(239, 68, 68, 0.1);
+    }
+
+    &.expand-zone {
+      border-left: none;
+      border-right: 3px solid #10b981;
+      box-shadow: inset -3px 0 0 rgba(16, 185, 129, 0.1);
+    }
+  }
+
+  // Note: Theme colors are handled by CSS variables above
+}
+
+// Sidebar toggle button (desktop)
+.sidebar-toggle {
+  display: none;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: 1px solid var(--sidebar-border);
+  border-radius: 6px;
+  padding: 6px;
+  cursor: pointer;
+  transition: all $transition-speed ease;
+  color: var(--sidebar-text-secondary);
+
+  &.visible {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &:hover {
+    background: var(--sidebar-hover);
+    color: var(--sidebar-text);
+  }
+}
+
+// Navigation list
+.nav-list {
+  list-style: none;
+  padding: 60px var(--s) var(--s2);
+  margin: 0;
+}
+
+.nav-item {
+  margin-bottom: 2px;
+
+  &.has-children {
+    margin-bottom: 4px;
+  }
+}
+
+// Separator styling
+.nav-separator {
+  height: 1px;
+  background: var(--divider-color);
+  margin: var(--s2) var(--s2);
+  border: none;
+  opacity: 0.7;
+}
+
+// Navigation links
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s2) var(--s2);
+  color: var(--sidebar-text);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  position: relative;
+
+  &:hover {
+    background: var(--sidebar-hover);
+  }
+
+  &.active {
+    background: var(--sidebar-active);
+    color: var(--sidebar-active-text);
+
+    .nav-icon {
+      color: var(--sidebar-active-text);
+    }
+  }
+
+  &.expanded .nav-chevron {
+    transform: rotate(180deg);
+  }
+}
+
+// Navigation icon
+.nav-icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sidebar-text-secondary);
+  font-size: 18px;
+  line-height: 1;
+}
+
+// Navigation label
+.nav-label {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Navigation badge
+.nav-badge {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: var(--sidebar-active);
+  color: var(--sidebar-active-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+// Fix side-nav-item wrapping issues globally
+::ng-deep side-nav-item {
+  display: flex !important;
+  align-items: stretch;
+  width: 100%;
+
+  button:first-of-type {
+    white-space: nowrap;
+    overflow: hidden;
+    flex: 1;
+    min-width: 0;
+
+    .text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .additional-btn {
+    flex-shrink: 0;
+    width: 40px !important;
+    min-width: 40px !important;
+  }
+}
+
+// Navigation chevron
+.nav-chevron {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+  color: var(--sidebar-text-secondary);
+}
+
+// Children navigation
+.nav-children {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+
+  &.visible {
+    max-height: 500px;
+  }
+}
+
+.nav-child-item {
+  margin-left: var(--s3);
+}
+
+.nav-child-link {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s) var(--s2);
+  color: var(--sidebar-text-secondary);
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-size: 14px;
+
+  &:hover {
+    background: var(--sidebar-hover);
+    color: var(--sidebar-text);
+  }
+
+  &.active {
+    background: var(--sidebar-active);
+    color: var(--sidebar-active-text);
+
+    .nav-icon {
+      color: var(--sidebar-active-text);
+    }
+  }
+
+  .nav-icon {
+    width: 20px;
+    height: 20px;
+    font-size: 16px;
+  }
+}
+
+// Resize handle
+.resize-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  cursor: col-resize;
+  z-index: 1002;
+  transition: background-color 0.2s ease;
+
+  &.position-left {
+    right: -2px;
+  }
+
+  &.position-right {
+    left: -2px;
+  }
+
+  &:hover {
+    background-color: var(--sidebar-active-text);
+
+    .resize-handle-line {
+      opacity: 1;
+    }
+  }
+
+  &:active {
+    background-color: var(--sidebar-active-text);
+  }
+}
+
+.resize-handle-line {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px;
+  height: 40px;
+  background: var(--sidebar-text-secondary);
+  border-radius: 1px;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+// Multi-button wrapper styling for expandable sections with additional buttons
+.g-multi-btn-wrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+
+  .expand-btn {
+    flex: 1;
+    text-align: left;
+
+    &.isExpanded .nav-icon {
+      transform: rotate(180deg);
+    }
+  }
+
+  .additional-btn {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    padding: 4px;
+    margin-left: var(--s);
+    color: var(--sidebar-text-secondary);
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: var(--sidebar-hover);
+      color: var(--sidebar-text);
+    }
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .title {
+    font-weight: 500;
+  }
+}
+
+// Integration styles for side-nav-item components
+.work-context-item {
+  // Remove default nav-child-item padding to let side-nav-item handle its own spacing
+  padding: 0;
+  margin: 0;
+
+  side-nav-item {
+    // Ensure side-nav-item fits well within the navigation structure
+    display: block;
+    width: 100%;
+
+    // Override side-nav-item styles to match magic-side-nav theming
+    .g-multi-btn-wrapper {
+      background-color: transparent;
+
+      .color-bar {
+        // Make color bar thinner to fit better in child context
+        width: 2px;
+      }
+
+      button {
+        color: var(--sidebar-text);
+        padding: var(--s) var(--s2);
+        font-size: 14px;
+
+        &:hover {
+          background-color: var(--sidebar-hover);
+        }
+
+        &.isActiveRoute {
+          background-color: var(--sidebar-active);
+          color: var(--sidebar-active-text);
+        }
+      }
+
+      .additional-btn {
+        color: var(--sidebar-text-secondary);
+
+        &:hover {
+          background-color: var(--sidebar-hover);
+          color: var(--sidebar-text);
+        }
+      }
+    }
+  }
+}
+
+// Media queries
+@media (max-width: $mobile-breakpoint) {
+  .nav-sidebar {
+    &.collapsed {
+      width: $sidebar-width-expanded;
+
+      .nav-label,
+      .nav-badge,
+      .nav-chevron,
+      .nav-children.visible {
+        display: initial;
+      }
+
+      .nav-link {
+        justify-content: flex-start;
+        padding: 10px 12px;
+      }
+    }
+  }
+}
+
+// Top-level work context items (Today/Inbox)
+.work-context-item-main {
+  display: block;
+  width: 100%;
+
+  side-nav-item {
+    display: block;
+    width: 100%;
+
+    .g-multi-btn-wrapper {
+      background-color: transparent;
+
+      button {
+        color: var(--sidebar-text);
+
+        &:hover {
+          background-color: var(--sidebar-hover);
+        }
+
+        &.isActiveRoute {
+          background-color: var(--sidebar-active);
+          color: var(--sidebar-active-text);
+        }
+      }
+
+      .additional-btn {
+        color: var(--sidebar-text-secondary);
+
+        &:hover {
+          background-color: var(--sidebar-hover);
+          color: var(--sidebar-text);
+        }
+      }
+    }
+  }
+}
