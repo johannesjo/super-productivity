@@ -19,7 +19,7 @@ export const DEFAULT_TODAY_TAG_COLOR = '#6495ED';
 
 export const WORK_CONTEXT_DEFAULT_THEME: WorkContextThemeCfg = {
   isAutoContrast: true,
-  isDisableBackgroundGradient: false,
+  isDisableBackgroundTint: false,
   primary: DEFAULT_TAG_COLOR,
   huePrimary: '500',
   accent: '#ff4081',
@@ -134,14 +134,14 @@ export const WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<WorkContex
         },
       },
       {
-        key: 'isDisableBackgroundGradient',
+        key: 'isDisableBackgroundTint',
         type: 'checkbox',
         expressions: {
           hide: (fCfg: FormlyFieldConfig) =>
             fCfg.model.backgroundImageDark || fCfg.model.backgroundImageLight,
         },
         templateOptions: {
-          label: T.F.PROJECT.FORM_THEME.L_IS_DISABLE_BACKGROUND_GRADIENT,
+          label: T.F.PROJECT.FORM_THEME.L_IS_DISABLE_BACKGROUND_TINT,
         },
       },
       {

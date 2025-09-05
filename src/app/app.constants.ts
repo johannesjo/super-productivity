@@ -110,7 +110,7 @@ export enum BodyClass {
   isMousePrimary = 'isMousePrimary',
   isLightTheme = 'isLightTheme',
   isDarkTheme = 'isDarkTheme',
-  isDisableBackgroundGradient = 'isDisableBackgroundGradient',
+  isDisableBackgroundTint = 'isDisableBackgroundTint',
   isEnabledBackgroundGradient = 'isEnabledBackgroundGradient',
   isDisableAnimations = 'isDisableAnimations',
   isDataImportInProgress = 'isDataImportInProgress',

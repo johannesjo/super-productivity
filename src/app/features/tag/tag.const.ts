@@ -22,7 +22,7 @@ export const TODAY_TAG: Tag = {
     primary: DEFAULT_TODAY_TAG_COLOR,
     // backgroundImageDark: 'assets/bg/NIGHT_manuel-will.jpg',
     backgroundImageDark: '',
-    isDisableBackgroundGradient: true,
+    isDisableBackgroundTint: true,
   },
 };
 
@@ -51,7 +51,7 @@ export const URGENT_TAG: Tag = {
     ...WORK_CONTEXT_DEFAULT_THEME,
     primary: '#c618e1',
     backgroundImageDark: '',
-    isDisableBackgroundGradient: false,
+    isDisableBackgroundTint: false,
   },
 };
 
@@ -66,7 +66,7 @@ export const IMPORTANT_TAG: Tag = {
     ...WORK_CONTEXT_DEFAULT_THEME,
     primary: '#e11826',
     backgroundImageDark: '',
-    isDisableBackgroundGradient: false,
+    isDisableBackgroundTint: false,
   },
 };
 
@@ -79,6 +79,6 @@ export const IN_PROGRESS_TAG: Tag = {
   theme: {
     ...WORK_CONTEXT_DEFAULT_THEME,
     backgroundImageDark: '',
-    isDisableBackgroundGradient: false,
+    isDisableBackgroundTint: false,
   },
 };

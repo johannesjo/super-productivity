@@ -29,6 +29,6 @@ export const INBOX_PROJECT: Project = {
     ...WORK_CONTEXT_DEFAULT_THEME,
     primary: 'rgb(144, 187, 165)',
     backgroundImageDark: '',
-    isDisableBackgroundGradient: false,
+    isDisableBackgroundTint: false,
   },
 };

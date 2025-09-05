@@ -87,7 +87,7 @@ describe('PluginBridgeService', () => {
     workEnd: {},
     theme: {
       isAutoContrast: false,
-      isDisableBackgroundGradient: false,
+      isDisableBackgroundTint: false,
       primary: '',
       huePrimary: '500',
       accent: '',

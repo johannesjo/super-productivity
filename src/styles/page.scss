@@ -59,29 +59,13 @@ body {
     color: var(--text-color);
     background: var(--bg);
 
-    &.isDisableBackgroundGradient {
+    &.isDisableBackgroundTint {
       background: var(--bg);
-      //&:before {
-      //  display: block;
-      //  opacity: .3;
-      //  background: mat-css-vars.mat-css-color(50, 1);
-      //}
     }
 
     &:before {
       filter: saturate(0.8);
-      background: linear-gradient(
-        180deg,
-        mat-css-vars.mat-css-color(100, 1) 0%,
-        mat-css-vars.mat-css-color(50, 1) 140px,
-        var(--bg) 100%
-      );
-      //background: linear-gradient(
-      //  180deg,
-      //  mat-css-vars.mat-css-color(100, 1) 0%,
-      //  mat-css-vars.mat-css-color(50, 0.1) 140px,
-      //  transparent
-      //);
+      background: mat-css-vars.mat-css-color(50, 1);
     }
   }
 
@@ -89,18 +73,13 @@ body {
     color: var(--text-color);
     background: var(--bg);
 
-    &.isDisableBackgroundGradient {
+    &.isDisableBackgroundTint {
       background: var(--bg);
     }
 
     &:before {
-      filter: saturate(0.8);
-      background: linear-gradient(
-        180deg,
-        mat-css-vars.mat-css-color(800, 0.2) 0%,
-        mat-css-vars.mat-css-color(900, 0.025) 140px,
-        transparent 100%
-      );
+      filter: brightness(0.1);
+      background: mat-css-vars.mat-css-color(900, 1);
     }
   }
 

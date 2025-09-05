@@ -795,7 +795,7 @@
         "L_HUE_PRIMARY": "Drempelwaarde voor donkere tekst op primaire kleurenachtergrond",
         "L_HUE_WARN": "De drempel voor donkere tekst waarschuwt kleurenachtergrond",
         "L_IS_AUTO_CONTRAST": "Automatisch ingestelde tekstkleuren voor de beste leesbaarheid",
-        "L_IS_DISABLE_BACKGROUND_GRADIENT": "Schakel gekleurde achtergrondgradiënt uit",
+        "L_IS_DISABLE_BACKGROUND_TINT": "Schakel gekleurde achtergrondgradiënt uit",
         "L_IS_REDUCED_THEME": "Gebruik gereduceerde gebruikersinterface (geen vakjes rond taken)",
         "L_THEME_COLOR": "Thema kleur",
         "L_TITLE": "Titel",

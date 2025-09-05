@@ -795,7 +795,7 @@
         "L_HUE_PRIMARY": "Threshold for dark text on primary color background",
         "L_HUE_WARN": "Prahová hodnota pre tmavý text na pozadí primárnej farby",
         "L_IS_AUTO_CONTRAST": "Automatické nastavenie farieb textu pre najlepšiu čitateľnosť",
-        "L_IS_DISABLE_BACKGROUND_GRADIENT": "Zakázať prechod farebného pozadia",
+        "L_IS_DISABLE_BACKGROUND_TINT": "Zakázať prechod farebného pozadia",
         "L_IS_REDUCED_THEME": "Použiť zmenšené používateľské rozhranie (bez rámčekov okolo úloh)",
         "L_THEME_COLOR": "Farba motívu",
         "L_TITLE": "Názov",

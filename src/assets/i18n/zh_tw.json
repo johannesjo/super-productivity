@@ -512,7 +512,7 @@
         "L_HUE_PRIMARY": "原色背景上的深色文字閾值",
         "L_HUE_WARN": "警告顏色背景上的黑深色文字的閾值",
         "L_IS_AUTO_CONTRAST": "自動設置文本顏色以獲得最佳可讀性",
-        "L_IS_DISABLE_BACKGROUND_GRADIENT": "停用彩色背景漸變",
+        "L_IS_DISABLE_BACKGROUND_TINT": "停用彩色背景漸變",
         "L_IS_REDUCED_THEME": "使用縮減的UI（任務周圍沒有框）",
         "L_THEME_COLOR": "主題色",
         "L_TITLE": "標題",

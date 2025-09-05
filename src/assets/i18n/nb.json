@@ -795,7 +795,7 @@
         "L_HUE_PRIMARY": "Terskel for mørk tekst på primærfargebakgrunn",
         "L_HUE_WARN": "Terskel for mørk tekst på advarselfargebakgrunn",
         "L_IS_AUTO_CONTRAST": "Sett inn tekstfarger automatisk for best lesbarhet",
-        "L_IS_DISABLE_BACKGROUND_GRADIENT": "Deaktiver farget bakgrunnsforløpning",
+        "L_IS_DISABLE_BACKGROUND_TINT": "Deaktiver farget bakgrunnsforløpning",
         "L_IS_REDUCED_THEME": "Bruk redusert brukergrensesnitt (ingen ruter rundt oppgaver)",
         "L_THEME_COLOR": "Temafarge",
         "L_TITLE": "Tittel",

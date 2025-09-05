@@ -795,7 +795,7 @@
         "L_HUE_PRIMARY": "プライマリーカラーの背景上の暗いテキストのしきい値",
         "L_HUE_WARN": "警告色の背景上の暗いテキストのしきい値",
         "L_IS_AUTO_CONTRAST": "読みやすくするためにテキストの色を自動設定する",
-        "L_IS_DISABLE_BACKGROUND_GRADIENT": "背景のグラデーションを無効にする",
+        "L_IS_DISABLE_BACKGROUND_TINT": "背景のグラデーションを無効にする",
         "L_IS_REDUCED_THEME": "縮小されたUIを使用する（タスクを囲むボックスはありません）",
         "L_THEME_COLOR": "テーマカラー",
         "L_TITLE": "タイトル",

@@ -795,7 +795,7 @@
         "L_HUE_PRIMARY": "Ambang batas untuk teks gelap pada latar belakang warna primer",
         "L_HUE_WARN": "Ambang batas untuk teks gelap pada latar belakang warna peringatan",
         "L_IS_AUTO_CONTRAST": "Atur warna teks secara otomatis untuk keterbacaan terbaik",
-        "L_IS_DISABLE_BACKGROUND_GRADIENT": "Nonaktifkan gradien latar belakang berwarna",
+        "L_IS_DISABLE_BACKGROUND_TINT": "Nonaktifkan gradien latar belakang berwarna",
         "L_IS_REDUCED_THEME": "Gunakan UI yang diperkecil (tidak ada kotak di sekitar tugas)",
         "L_THEME_COLOR": "Tema Warna",
         "L_TITLE": "Judul",

@@ -106,7 +106,7 @@ export class GlobalThemeService {
 
   private _setColorTheme(theme: WorkContextThemeCfg): void {
     this._materialCssVarsService.setAutoContrastEnabled(!!theme.isAutoContrast);
-    this._setBackgroundGradient(!!theme.isDisableBackgroundGradient);
+    this._setBackgroundGradient(!!theme.isDisableBackgroundTint);
 
     // NOTE: setting undefined values does not seem to be a problem so we use !
     if (!theme.isAutoContrast) {
@@ -120,13 +120,13 @@ export class GlobalThemeService {
     this._materialCssVarsService.setWarnColor(theme.warn!);
   }
 
-  private _setBackgroundGradient(isDisableBackgroundGradient: boolean): void {
-    if (isDisableBackgroundGradient) {
-      this.document.body.classList.add(BodyClass.isDisableBackgroundGradient);
+  private _setBackgroundGradient(isDisableBackgroundTint: boolean): void {
+    if (isDisableBackgroundTint) {
+      this.document.body.classList.add(BodyClass.isDisableBackgroundTint);
       this.document.body.classList.remove(BodyClass.isEnabledBackgroundGradient);
     } else {
       this.document.body.classList.add(BodyClass.isEnabledBackgroundGradient);
-      this.document.body.classList.remove(BodyClass.isDisableBackgroundGradient);
+      this.document.body.classList.remove(BodyClass.isDisableBackgroundTint);
     }
   }
 

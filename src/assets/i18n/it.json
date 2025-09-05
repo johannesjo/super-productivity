@@ -805,7 +805,7 @@
         "L_HUE_PRIMARY": "Soglia per il testo scuro su sfondo del colore primario",
         "L_HUE_WARN": "Soglia per il testo scuro su sfondo del colore di warning",
         "L_IS_AUTO_CONTRAST": "Imposta automaticamente il colore del testo per ottimizzare la leggibilità",
-        "L_IS_DISABLE_BACKGROUND_GRADIENT": "Disabilita il gradiente colorato di sfondo",
+        "L_IS_DISABLE_BACKGROUND_TINT": "Disabilita il gradiente colorato di sfondo",
         "L_IS_REDUCED_THEME": "Usa UI ridotta (nessuna cornice intorno alle attività)",
         "L_THEME_COLOR": "Colore del tema",
         "L_TITLE": "Titolo",

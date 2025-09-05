@@ -629,7 +629,7 @@
         "L_HUE_PRIMARY": "Práh pro tmavý text na pozadí primární barvy",
         "L_HUE_WARN": "Práh pro tmavý text na pozadí varovné barvy",
         "L_IS_AUTO_CONTRAST": "Automaticky nastavit barvy textu pro nejlepší čitelnost",
-        "L_IS_DISABLE_BACKGROUND_GRADIENT": "Vypnout barevný pozadí",
+        "L_IS_DISABLE_BACKGROUND_TINT": "Vypnout barevný pozadí",
         "L_IS_REDUCED_THEME": "Použít zjednodušené uživatelské rozhraní (bez rámečků kolem úkolů)",
         "L_THEME_COLOR": "Barva tématu",
         "L_TITLE": "Název",

@@ -795,7 +795,7 @@
         "L_HUE_PRIMARY": "Prag za tamni tekst na primarnoj boji pozadine",
         "L_HUE_WARN": "Prag za tamni tekst na boji upozorenja pozadine",
         "L_IS_AUTO_CONTRAST": "Automatski postavi boju teksta za najbolju čitljivost",
-        "L_IS_DISABLE_BACKGROUND_GRADIENT": "Deaktiviraj prijelaz boja pozadine",
+        "L_IS_DISABLE_BACKGROUND_TINT": "Deaktiviraj prijelaz boja pozadine",
         "L_IS_REDUCED_THEME": "Koristi reducirano korisničko sučelje (bez okvira okolo zadataka)",
         "L_THEME_COLOR": "Boja teme",
         "L_TITLE": "Naslov",

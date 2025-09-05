@@ -795,7 +795,7 @@
         "L_HUE_PRIMARY": "Limite para texto escuro em fundo de cor primária",
         "L_HUE_WARN": "Limite para texto escuro em aviso de cor de fundo",
         "L_IS_AUTO_CONTRAST": "Definir cores de texto automaticamente para melhor legibilidade",
-        "L_IS_DISABLE_BACKGROUND_GRADIENT": "Desativar gradiente de fundo colorido",
+        "L_IS_DISABLE_BACKGROUND_TINT": "Desativar gradiente de fundo colorido",
         "L_IS_REDUCED_THEME": "Usar UI reduzida (sem caixas nas tarefas)",
         "L_THEME_COLOR": "Cor do tema",
         "L_TITLE": "Título",

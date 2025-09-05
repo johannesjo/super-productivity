@@ -44,7 +44,7 @@ export type WorkContextAdvancedCfg = Readonly<{
 // TODO handle more strictly
 export type WorkContextThemeCfg = Readonly<{
   isAutoContrast?: boolean;
-  isDisableBackgroundGradient?: boolean;
+  isDisableBackgroundTint?: boolean;
   primary?: string;
   huePrimary?: HueValue;
   accent?: string;
