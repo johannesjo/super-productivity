@@ -21,6 +21,7 @@ import { NavigationEnd, NavigationStart, Router } from '@angular/router';
 import { filter, map, switchMap, startWith } from 'rxjs/operators';
 import { of, timer } from 'rxjs';
 import { SwipeDirective } from '../../swipe-gesture/swipe.directive';
+import { CssString, StyleObject, StyleObjectToString } from '../../../util/styles';
 
 const SMALL_CONTAINER_WIDTH = 620;
 const VERY_SMALL_CONTAINER_WIDTH = 450;
@@ -145,19 +146,17 @@ export class BetterDrawerContainerComponent implements OnDestroy {
     this.wasClosed.emit();
   }
 
-  private _getWidthRelatedStyles(): string {
-    const widthStyle = ` width: ${this.sideWidth()}%;`;
-    const margin = this.isRTL() ? 'margin-left' : 'margin-right';
+  private _getWidthRelatedStyles(): CssString {
     const isOpen = this.isOpen();
     const isOver = this.isOver();
 
-    return isOver
-      ? isOpen
-        ? 'transform: translateX(0);'
-        : 'transform: translateX(100%);'
-      : isOpen
-        ? `${margin}: 0; ${widthStyle}`
-        : `${margin}: ${-1 * this.sideWidth()}%; ${widthStyle}`;
+    const styles: StyleObject = { width: isOpen ? `${this.sideWidth()}%` : '0' };
+
+    if (isOver) {
+      styles.transform = `${isOpen ? 'translateX(0)' : 'translateX(100%)'}`;
+    }
+
+    return StyleObjectToString(styles);
   }
 
   private _setupResizeObserver(element: HTMLElement): void {
