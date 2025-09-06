@@ -15,7 +15,13 @@
   mat-menu-item
 >
   <span class="badge">{{ nrOfOpenTasks() }}</span>
-  <mat-icon class="drag-handle">{{ workContext().icon || defaultIcon() }}</mat-icon>
+  @if (isEmojiIcon()) {
+    <span class="drag-handle nav-icon-emoji">{{
+      workContext().icon || defaultIcon()
+    }}</span>
+  } @else {
+    <mat-icon class="drag-handle">{{ workContext().icon || defaultIcon() }}</mat-icon>
+  }
   <span class="text">{{ workContext().title }}</span>
 </button>
 
