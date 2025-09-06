@@ -174,11 +174,6 @@ export class MagicSideNavComponent implements OnInit {
     }
 
     this.checkScreenSize();
-
-    console.log(
-      '🔧 MagicSideNavComponent ngOnInit - expandedGroupIds:',
-      this.expandedGroupIds,
-    );
   }
 
   @HostListener('window:resize')
@@ -241,49 +236,22 @@ export class MagicSideNavComponent implements OnInit {
 
   isGroupExpanded(item: NavItem): boolean {
     // Use external expansion state if available, otherwise fall back to local state
-    console.log(
-      `🔍 isGroupExpanded(${item.id}) - expandedGroupIds:`,
-      this.expandedGroupIds,
-      'size:',
-      this.expandedGroupIds?.size,
-    );
     if (this.expandedGroupIds && this.expandedGroupIds.size > 0) {
-      const result = this.expandedGroupIds.has(item.id);
-      console.log(
-        `🔍 isGroupExpanded(${item.id}):`,
-        result,
-        'from external expandedGroupIds:',
-        Array.from(this.expandedGroupIds),
-      );
-      return result;
+      return this.expandedGroupIds.has(item.id);
     }
-    const result = this.expandedGroups().has(item.id);
-    console.log(
-      `🔍 isGroupExpanded(${item.id}):`,
-      result,
-      'from local expandedGroups:',
-      Array.from(this.expandedGroups()),
-    );
-    return result;
+    return this.expandedGroups().has(item.id);
   }
 
   onItemClick(item: NavItem): void {
-    console.log(
-      '🖱️ onItemClick called for:',
-      item.id,
-      'has children:',
-      !!item.children?.length,
-      'has action:',
-      !!item.action,
-    );
-    if (item.children && item.children.length > 0) {
-      // For items with children, call the action (which should be the expand/collapse handler)
+    // Special handling for expandable sections (projects/tags) - they should always be toggleable
+    const isExpandableSection = item.id === 'projects' || item.id === 'tags';
+
+    if ((item.children && item.children.length > 0) || isExpandableSection) {
+      // For items with children OR expandable sections, call the action
       if (item.action) {
-        console.log('🖱️ Calling item.action() for:', item.id);
         item.action();
       } else {
         // Only use local state if no external action is provided
-        console.log('🖱️ No action found, using local toggleGroup for:', item.id);
         this.toggleGroup(item);
       }
     } else {

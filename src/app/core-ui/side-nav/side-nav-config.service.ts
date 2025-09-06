@@ -185,21 +185,11 @@ export class SideNavConfigService {
     const expanded = new Set<string>();
     if (this._isProjectsExpanded()) expanded.add('projects');
     if (this._isTagsExpanded()) expanded.add('tags');
-    console.log('🔄 Expanded group IDs computed:', Array.from(expanded), {
-      projects: this._isProjectsExpanded(),
-      tags: this._isTagsExpanded(),
-    });
     return expanded;
   });
 
   // Simple action handler
   onNavItemClick(item: NavItem): void {
-    console.log(
-      '🔧 Service onNavItemClick called for:',
-      item.id,
-      'has children:',
-      !!item.children?.length,
-    );
     if (item.href) {
       window.open(item.href, '_blank');
     } else if (item.action) {
@@ -293,21 +283,15 @@ export class SideNavConfigService {
 
   // Simple toggle functions
   private _toggleProjectsExpanded(): void {
-    const oldState = this._isProjectsExpanded();
-    const newState = !oldState;
-    console.log('🔧 Toggling projects expanded:', oldState, '->', newState);
+    const newState = !this._isProjectsExpanded();
     this._isProjectsExpanded.set(newState);
     localStorage.setItem(LS.IS_PROJECT_LIST_EXPANDED, newState.toString());
-    console.log('🔧 After toggle - projects expanded:', this._isProjectsExpanded());
   }
 
   private _toggleTagsExpanded(): void {
-    const oldState = this._isTagsExpanded();
-    const newState = !oldState;
-    console.log('🔧 Toggling tags expanded:', oldState, '->', newState);
+    const newState = !this._isTagsExpanded();
     this._isTagsExpanded.set(newState);
     localStorage.setItem(LS.IS_TAG_LIST_EXPANDED, newState.toString());
-    console.log('🔧 After toggle - tags expanded:', this._isTagsExpanded());
   }
 
   // Simple action handlers
