@@ -20,7 +20,7 @@ import { Task, TaskCopy } from '../../tasks/task.model';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { TaskService } from '../../tasks/task.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
-import { TaskRepeatCfgCopy } from '../task-repeat-cfg.model';
+import { TaskRepeatCfg, TaskRepeatCfgCopy } from '../task-repeat-cfg.model';
 import { forkJoin, of } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
@@ -73,15 +73,38 @@ export class TaskRepeatCfgEffects {
       this._actions$.pipe(
         ofType(addTaskRepeatCfgToTask),
         switchMap(({ taskRepeatCfg, taskId }) => {
-          return this._taskService.getByIdOnce$(taskId).pipe(
+          return this._taskService.getByIdWithSubTaskData$(taskId).pipe(
             first(),
-            map((task) => ({
-              task,
-              taskRepeatCfg,
-            })),
+            map((task) => {
+              const { subTasks, ...taskWithoutSubs } = task;
+              if (!subTasks || subTasks.length === 0) {
+                return {
+                  task: taskWithoutSubs,
+                  taskRepeatCfg,
+                  subTaskTemplates: [],
+                };
+              }
+
+              const subTaskTemplates = subTasks.map((subTask) => {
+                return {
+                  title: subTask.title,
+                  notes: subTask.notes,
+                  timeEstimate: subTask.timeEstimate,
+                };
+              });
+
+              return {
+                task: taskWithoutSubs,
+                taskRepeatCfg,
+                subTaskTemplates,
+              };
+            }),
           );
         }),
-        tap(({ task, taskRepeatCfg }) => {
+        tap(({ task, taskRepeatCfg, subTaskTemplates }) => {
+          this._taskRepeatCfgService.updateTaskRepeatCfg(taskRepeatCfg.id, {
+            subTaskTemplates,
+          });
           this._updateRegularTaskInstance(task, taskRepeatCfg, taskRepeatCfg);
         }),
       ),
