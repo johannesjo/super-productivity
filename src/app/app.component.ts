@@ -86,6 +86,7 @@ import { ProjectService } from './features/project/project.service';
 import { TagService } from './features/tag/tag.service';
 import { ContextMenuComponent } from './ui/context-menu/context-menu.component';
 import { WorkContextThemeCfg } from './features/work-context/work-context.model';
+import { IsInputElement } from './util/dom-element';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -334,29 +335,17 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   }
 
   @HostListener('document:paste', ['$event']) onPaste(ev: ClipboardEvent): void {
-    // Only handle paste if not in an input/textarea
+    // Skip handling inside input elements
     const target = ev.target as HTMLElement;
-    if (
-      target.tagName === 'INPUT' ||
-      target.tagName === 'TEXTAREA' ||
-      target.isContentEditable
-    ) {
-      return;
-    }
+    if (IsInputElement(target)) return;
 
     const clipboardData = ev.clipboardData;
-    if (!clipboardData) {
-      return;
-    }
+    if (!clipboardData) return;
 
     const pastedText = clipboardData.getData('text/plain');
-    if (!pastedText) {
-      return;
-    }
+    if (!pastedText) return;
 
-    if (!this._markdownPasteService.isMarkdownTaskList(pastedText)) {
-      return;
-    }
+    if (!this._markdownPasteService.isMarkdownTaskList(pastedText)) return;
 
     // Prevent default paste behavior
     ev.preventDefault();

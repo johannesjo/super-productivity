@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { IS_ELECTRON } from '../../app.constants';
 import { checkKeyCombo } from '../../util/check-key-combo';
+import { IsInputElement } from '../../util/dom-element';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LayoutService } from '../layout/layout.service';
@@ -81,15 +82,8 @@ export class ShortcutService {
     const keys = cfg.keyboard;
     const el = ev.target as HTMLElement;
 
-    // don't run when inside input or text area and if no special keys are used
-    if (
-      ((el && el.tagName.toUpperCase() === 'INPUT') ||
-        el.tagName.toUpperCase() === 'TEXTAREA' ||
-        el.getAttribute('contenteditable')) &&
-      !ev.metaKey
-    ) {
-      return;
-    }
+    // Skip handling if no special keys are used and inside input elements
+    if (!ev.metaKey && IsInputElement(el)) return;
 
     if (
       checkKeyCombo(ev, keys.toggleBacklog) &&
