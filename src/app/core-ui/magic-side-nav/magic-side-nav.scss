@@ -93,6 +93,23 @@ $overlay-bg: var(--c-dark-50, rgba(0, 0, 0, 0.5));
     transition: none !important;
   }
 
+  // Milkglass effect when background image is present
+  // This will be applied when a CSS class is added to indicate background image presence
+  :host-context(.hasBgImage) {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    -webkit-backdrop-filter: blur(20px) saturate(180%); // Safari support
+  }
+
+  // Dark theme milkglass adjustments
+  :host-context(.isDarkTheme.hasBgImage) {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    -webkit-backdrop-filter: blur(20px) saturate(180%); // Safari support
+  }
+
   // Threshold zone visual feedback
   &.collapse-zone {
     border-left: 3px solid #ef4444;

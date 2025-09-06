@@ -19,7 +19,7 @@ import { GlobalConfigService } from './features/config/global-config.service';
 import { LayoutService } from './core-ui/layout/layout.service';
 import { IPC } from '../../electron/shared-with-frontend/ipc-events.const';
 import { SnackService } from './core/snack/snack.service';
-import { IS_ELECTRON, LanguageCode } from './app.constants';
+import { BodyClass, IS_ELECTRON, LanguageCode } from './app.constants';
 import { expandAnimation } from './ui/animations/expand.ani';
 import { warpRouteAnimation } from './ui/animations/warp-route';
 import { combineLatest, Observable, Subscription } from 'rxjs';
@@ -209,6 +209,17 @@ export class AppComponent implements OnDestroy, AfterViewInit {
       const val = this._languageService.isLangRTL();
       this.isRTL = val;
       document.dir = this.isRTL ? 'rtl' : 'ltr';
+    });
+
+    // Add/remove hasBgImage class to body when background image changes
+    effect(() => {
+      const bgImage = this.globalThemeService.backgroundImg();
+      const bodyEl = document.body;
+      if (bgImage) {
+        bodyEl.classList.add(BodyClass.hasBgImage);
+      } else {
+        bodyEl.classList.remove(BodyClass.hasBgImage);
+      }
     });
 
     this._subs.add(

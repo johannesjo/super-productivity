@@ -160,7 +160,7 @@
                         class="additional-btn"
                         mat-icon-button
                         [matTooltip]="btn.tooltip | translate"
-                        (click)="btn.action?.()"
+                        (click)="btn.action?.(); $event.stopPropagation()"
                         #additionalBtn
                       >
                         <mat-icon>{{ btn.icon }}</mat-icon>
@@ -173,7 +173,6 @@
                 @if (item.contextMenuItems && item.contextMenuItems.length > 0) {
                   <context-menu
                     [contextMenu]="contextMenuTemplate"
-                    [leftClickTriggerEl]="additionalBtn"
                     [rightClickTriggerEl]="expandBtn"
                   ></context-menu>
                   <ng-template #contextMenuTemplate>
@@ -288,8 +287,28 @@
                           <span class="nav-badge">{{ child.badge }}</span>
                         }
                       </a>
-                    }
-                    @if (!child.route) {
+                    } @else if (child.href) {
+                      <a
+                        [href]="child.href"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="nav-child-link"
+                        (click)="onItemClick(child)"
+                      >
+                        @if (child.svgIcon) {
+                          <mat-icon
+                            class="nav-icon"
+                            [svgIcon]="child.svgIcon"
+                          ></mat-icon>
+                        } @else {
+                          <mat-icon class="nav-icon">{{ child.icon }}</mat-icon>
+                        }
+                        <span class="nav-label">{{ child.label | translate }}</span>
+                        @if (child.badge) {
+                          <span class="nav-badge">{{ child.badge }}</span>
+                        }
+                      </a>
+                    } @else {
                       <button
                         class="nav-child-link"
                         (click)="onItemClick(child)"
