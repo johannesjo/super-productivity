@@ -1,9 +1,17 @@
 @if (tag().icon) {
-  <mat-icon
-    [style.color]="color()"
-    class="tag-ico"
-    >{{ tag().icon }}
-  </mat-icon>
+  @if (isEmojiIcon()) {
+    <span
+      [style.color]="color()"
+      class="tag-ico tag-ico-emoji"
+      >{{ tag().icon }}
+    </span>
+  } @else {
+    <mat-icon
+      [style.color]="color()"
+      class="tag-ico"
+      >{{ tag().icon }}
+    </mat-icon>
+  }
 } @else {
   <div
     class="circle"

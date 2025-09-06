@@ -9,6 +9,7 @@ import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autoc
 import { MatOption } from '@angular/material/core';
 import { IS_ELECTRON } from '../../../app.constants';
 import { MatTooltip } from '@angular/material/tooltip';
+import { extractFirstEmoji, isSingleEmoji } from '../../../util/extract-first-emoji';
 
 @Component({
   selector: 'icon-input',
@@ -49,27 +50,53 @@ export class IconInputComponent extends FieldType<FormlyFieldConfig> {
     arr.length = Math.min(150, arr.length);
     this.filteredIcons.set(arr);
 
-    const isEmoji = /\p{Emoji}/u.test(val);
-    console.log(1, { isEmoji });
+    const hasEmoji = /\p{Emoji}/u.test(val);
 
-    if (isEmoji) {
-      this.formControl.setValue(val);
+    if (hasEmoji) {
+      const firstEmoji = extractFirstEmoji(val);
+
+      if (firstEmoji && isSingleEmoji(firstEmoji)) {
+        this.formControl.setValue(firstEmoji);
+        this.isEmoji.set(true);
+      } else if (firstEmoji) {
+        this.formControl.setValue(firstEmoji);
+        this.isEmoji.set(true);
+      } else {
+        this.formControl.setValue('');
+        this.isEmoji.set(false);
+      }
     } else if (!val) {
       this.formControl.setValue('');
+      this.isEmoji.set(false);
+    } else {
+      this.isEmoji.set(false);
     }
-    this.isEmoji.set(isEmoji && !this.filteredIcons().includes(val));
   }
 
   onIconSelect(icon: string): void {
     this.formControl.setValue(icon);
     const isEmoji = /\p{Emoji}/u.test(icon);
-    console.log(2, { isEmoji });
-    this.isEmoji.set(false);
+    this.isEmoji.set(isEmoji && !this.filteredIcons().includes(icon));
   }
 
   openEmojiPicker(): void {
     if (IS_ELECTRON) {
       window.ea.showEmojiPanel();
+    }
+  }
+
+  onPaste(event: ClipboardEvent): void {
+    event.preventDefault();
+
+    const pastedText = event.clipboardData?.getData('text') || '';
+
+    if (pastedText) {
+      const firstEmoji = extractFirstEmoji(pastedText);
+
+      if (firstEmoji) {
+        this.formControl.setValue(firstEmoji);
+        this.isEmoji.set(true);
+      }
     }
   }
 
