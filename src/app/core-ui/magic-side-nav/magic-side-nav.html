@@ -82,21 +82,31 @@
           <hr class="nav-separator" />
         }
         @case ('group') {
-          <nav-list
-            [item]="item"
-            [showText]="isExpanded() || (isMobile() && showMobileMenu())"
-            [isExpanded]="isGroupExpanded(item)"
-            [activeWorkContextId]="activeWorkContextId"
-            (itemClick)="onItemClick($event)"
-          ></nav-list>
+          <li
+            class="nav-item has-children"
+            role="listitem"
+          >
+            <sp-nav-section
+              [item]="item"
+              [showLabels]="isExpanded() || (isMobile() && showMobileMenu())"
+              [isExpanded]="isGroupExpanded(item)"
+              [activeWorkContextId]="activeWorkContextId"
+              (itemClick)="onItemClick($event)"
+            ></sp-nav-section>
+          </li>
         }
         @default {
-          <nav-item
-            [item]="item"
-            [showText]="isExpanded() || (isMobile() && showMobileMenu())"
-            [activeWorkContextId]="activeWorkContextId"
-            (itemClick)="onItemClick($event)"
-          ></nav-item>
+          <li
+            class="nav-item"
+            role="listitem"
+          >
+            <sp-nav-item
+              [item]="item"
+              [showLabels]="isExpanded() || (isMobile() && showMobileMenu())"
+              [activeWorkContextId]="activeWorkContextId"
+              (itemClick)="onItemClick($event)"
+            ></sp-nav-item>
+          </li>
         }
       }
     }

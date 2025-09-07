@@ -53,7 +53,7 @@ export class NavRowComponent {
   @Input() svgIcon?: string;
   @Input() label?: string;
   @Input() badge?: string | number;
-  @Input() showText = true;
+  @Input() showLabels = true;
   @Input() showChevron = false;
   @Input() labelClass?: string;
 }

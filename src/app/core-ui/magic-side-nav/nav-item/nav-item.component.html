@@ -7,7 +7,7 @@
       [activeWorkContextId]="activeWorkContextId() || ''"
       [variant]="'nav'"
       [compact]="isChild()"
-      [showMoreButton]="showText()"
+      [showMoreButton]="showLabels()"
     ></side-nav-item>
   }
 
@@ -24,7 +24,7 @@
         [svgIcon]="item().svgIcon"
         [label]="item().label"
         [badge]="item().badge"
-        [showText]="showText()"
+        [showLabels]="showLabels()"
       ></nav-row>
     </a>
   }
@@ -43,7 +43,7 @@
         [svgIcon]="item().svgIcon"
         [label]="item().label"
         [badge]="item().badge"
-        [showText]="showText()"
+        [showLabels]="showLabels()"
       ></nav-row>
     </a>
   }
@@ -59,7 +59,7 @@
         [svgIcon]="item().svgIcon"
         [label]="item().label"
         [badge]="item().badge"
-        [showText]="showText()"
+        [showLabels]="showLabels()"
       ></nav-row>
     </button>
   }
@@ -78,8 +78,8 @@
         [svgIcon]="item().svgIcon"
         [label]="item().label"
         [badge]="item().badge"
-        [showText]="showText()"
-        [showChevron]="hasChildren() && showText()"
+        [showLabels]="showLabels()"
+        [showChevron]="hasChildren() && showLabels()"
       ></nav-row>
     </button>
   }

@@ -7,7 +7,7 @@
   <mat-icon class="nav-icon">{{ icon }}</mat-icon>
 }
 
-@if (showText && label) {
+@if (showLabels && label) {
   <span
     class="nav-label"
     [class]="labelClass"
@@ -15,7 +15,7 @@
   >
 }
 
-@if (showText && badge) {
+@if (showLabels && badge) {
   <span class="nav-badge">{{ badge }}</span>
 }
 

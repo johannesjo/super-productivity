@@ -10,7 +10,7 @@ import { SideNavItemComponent } from '../side-nav-item/side-nav-item.component';
 import { NavRowComponent } from '../nav-row/nav-row.component';
 
 @Component({
-  selector: 'nav-item',
+  selector: 'sp-nav-item',
   standalone: true,
   imports: [
     CommonModule,
@@ -66,9 +66,9 @@ import { NavRowComponent } from '../nav-row/nav-row.component';
     `,
   ],
 })
-export class NavItemComponent {
+export class SpNavItemComponent {
   item = input.required<NavItem>();
-  showText = input<boolean>(true);
+  showLabels = input<boolean>(true);
   isExpanded = input<boolean>(false);
   activeWorkContextId = input<string | null>(null);
   isChild = input<boolean>(false);
@@ -80,7 +80,7 @@ export class NavItemComponent {
     const i = this.item();
     return i.type === 'group' && !!i.children?.length;
   });
-  shouldShowTooltip = computed(() => !this.showText() && !!this.item().label);
+  shouldShowTooltip = computed(() => !this.showLabels() && !!this.item().label);
 
   onItemClick(): void {
     this.itemClick.emit(this.item());
