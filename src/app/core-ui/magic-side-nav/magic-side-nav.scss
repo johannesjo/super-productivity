@@ -111,21 +111,21 @@ $overlay-bg: var(--c-dark-50, rgba(0, 0, 0, 0.5));
   }
 
   // Threshold zone visual feedback
-  &.collapse-zone {
-    border-left: 3px solid #ef4444;
-    box-shadow: inset 3px 0 0 rgba(239, 68, 68, 0.1);
-
-    .resize-handle {
-      background-color: #ef4444 !important;
-    }
-  }
+  //&.collapse-zone {
+  //  border-left: 3px solid #ef4444;
+  //  box-shadow: inset 3px 0 0 rgba(239, 68, 68, 0.1);
+  //
+  //  .resize-handle {
+  //    background-color: #ef4444 !important;
+  //  }
+  //}
 
   &.expand-zone {
-    border-left: 3px solid #10b981;
+    border-left: 3px solid var(--c-primary);
     box-shadow: inset 3px 0 0 rgba(16, 185, 129, 0.1);
 
     .resize-handle {
-      background-color: #10b981 !important;
+      background-color: var(--c-primary) !important;
     }
   }
 
@@ -152,7 +152,6 @@ $overlay-bg: var(--c-dark-50, rgba(0, 0, 0, 0.5));
     width: $sidebar-width-collapsed !important;
 
     .nav-label,
-    .nav-badge,
     .nav-chevron,
     .nav-children {
       display: none;
@@ -388,17 +387,6 @@ $overlay-bg: var(--c-dark-50, rgba(0, 0, 0, 0.5));
   text-overflow: ellipsis;
 }
 
-// Navigation badge
-.nav-badge {
-  flex-shrink: 0;
-  padding: 2px 8px;
-  border-radius: 12px;
-  background: var(--sidebar-active);
-  color: var(--sidebar-active-text);
-  font-size: 12px;
-  font-weight: 600;
-}
-
 // Fix side-nav-item wrapping issues globally
 ::ng-deep nav-item-inner {
   display: flex !important;
@@ -583,7 +571,6 @@ $overlay-bg: var(--c-dark-50, rgba(0, 0, 0, 0.5));
       width: $sidebar-width-expanded;
 
       .nav-label,
-      .nav-badge,
       .nav-chevron,
       .nav-children.visible {
         display: initial;

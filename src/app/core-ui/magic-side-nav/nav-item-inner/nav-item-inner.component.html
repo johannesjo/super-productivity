@@ -10,8 +10,10 @@
     routerLinkActive="isActiveRoute"
     mat-menu-item
   >
-    <span class="badge">{{ nrOfOpenTasks() }}</span>
-    <mat-icon class="drag-handle">{{ workContext()!.icon || defaultIcon() }}</mat-icon>
+    <div class="ico-wrapper">
+      <mat-icon class="drag-handle">{{ workContext()!.icon || defaultIcon() }} </mat-icon>
+      <span class="badge">{{ nrOfOpenTasks() }}</span>
+    </div>
     <span class="text">{{ workContext()!.title }}</span>
   </button>
 
@@ -50,10 +52,6 @@
 
   @if (showLabels() && label()) {
     <span class="nav-label">{{ label() | translate }}</span>
-  }
-
-  @if (showLabels() && badge() !== undefined && badge() !== null && badge() !== '') {
-    <span class="nav-badge">{{ badge() }}</span>
   }
 
   @if (showChevron()) {

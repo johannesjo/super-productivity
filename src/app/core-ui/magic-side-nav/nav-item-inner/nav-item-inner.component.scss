@@ -20,6 +20,10 @@
     .badge {
       display: none;
     }
+
+    .ico-wrapper {
+      position: relative;
+    }
   }
 
   .additional-btn {
@@ -34,15 +38,12 @@
       z-index: 10;
       position: absolute;
       line-height: 1;
-      right: 100%;
+      left: 40px;
       text-align: center;
       bottom: 6px;
       font-size: 10px;
-      min-width: 18px;
-      padding: 0 4px 0;
-      border: 1px solid var(--extra-border-color);
-      border-radius: 12px;
-      margin-right: -49px;
+      padding: 0;
+      border-radius: 4px;
 
       // avoid affecting drag handle
       pointer-events: none;

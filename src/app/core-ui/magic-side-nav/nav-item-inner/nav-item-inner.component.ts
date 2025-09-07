@@ -66,7 +66,6 @@ export class NavItemInnerComponent {
   label = input<string | undefined>(undefined);
   icon = input<string | undefined>(undefined);
   svgIcon = input<string | undefined>(undefined);
-  badge = input<string | number | undefined>(undefined);
   showLabels = input<boolean>(true);
   showChevron = input<boolean>(false);
 

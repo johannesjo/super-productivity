@@ -41,7 +41,6 @@ export interface NavBaseItem {
   label?: string;
   icon?: string;
   svgIcon?: string;
-  badge?: string | number;
 }
 
 export interface NavSeparatorItem extends NavBaseItem {

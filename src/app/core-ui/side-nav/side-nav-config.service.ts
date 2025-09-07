@@ -261,9 +261,6 @@ export class SideNavConfigService {
         workContext: mainContext,
         workContextType: WorkContextType.TAG,
         defaultIcon: 'today',
-        badge: mainContext.taskIds?.length
-          ? mainContext.taskIds.length.toString()
-          : undefined,
       });
     }
 
@@ -277,9 +274,6 @@ export class SideNavConfigService {
         workContext: inboxContext,
         workContextType: WorkContextType.PROJECT,
         defaultIcon: 'inbox',
-        badge: inboxContext.taskIds?.length
-          ? inboxContext.taskIds.length.toString()
-          : undefined,
       });
     }
 
@@ -305,7 +299,6 @@ export class SideNavConfigService {
       workContext: project,
       workContextType: WorkContextType.PROJECT,
       defaultIcon: 'folder_special',
-      badge: project.taskIds?.length ? project.taskIds.length.toString() : undefined,
     }));
   }
 
@@ -328,7 +321,6 @@ export class SideNavConfigService {
       workContext: tag,
       workContextType: WorkContextType.TAG,
       defaultIcon: 'label',
-      badge: tag.taskIds?.length ? tag.taskIds.length.toString() : undefined,
     }));
   }
 
