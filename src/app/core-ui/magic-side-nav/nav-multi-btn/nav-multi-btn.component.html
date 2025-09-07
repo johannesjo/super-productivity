@@ -1,0 +1,62 @@
+<div class="g-multi-btn-wrapper">
+  <button
+    class="nav-link expand-btn"
+    [class.expanded]="isGroupExpanded"
+    [class.isExpanded]="isGroupExpanded"
+    [attr.title]="!showText ? item.label : null"
+    (click)="onExpandClick()"
+    [attr.aria-expanded]="isGroupExpanded"
+    [attr.aria-controls]="'group-' + item.id"
+    #expandBtn
+  >
+    <nav-row
+      [icon]="item.icon"
+      [svgIcon]="item.svgIcon"
+      [label]="item.label"
+      [badge]="item.badge"
+      [showText]="showText"
+      [showChevron]="item.children && item.children.length > 0 && showText"
+      labelClass="title"
+    ></nav-row>
+  </button>
+
+  <!-- Additional buttons (only show when sidebar is expanded) -->
+  @if (showText) {
+    @for (btn of item.additionalButtons; track btn.id) {
+      @if (!btn.hidden) {
+        <button
+          class="additional-btn"
+          mat-icon-button
+          [matTooltip]="btn.tooltip | translate"
+          (click)="onAdditionalButtonClick(btn, $event)"
+          #additionalBtn
+        >
+          <mat-icon>{{ btn.icon }}</mat-icon>
+        </button>
+      }
+    }
+  }
+
+  <!-- Context menu for additional buttons -->
+  @if (item.contextMenuItems && item.contextMenuItems.length > 0) {
+    <context-menu
+      [contextMenu]="contextMenuTemplate"
+      [rightClickTriggerEl]="expandBtn"
+    ></context-menu>
+    <ng-template #contextMenuTemplate>
+      @for (contextItem of item.contextMenuItems; track contextItem.id) {
+        <button
+          mat-menu-item
+          (click)="contextItem.action?.()"
+        >
+          @if (contextItem.svgIcon) {
+            <mat-icon [svgIcon]="contextItem.svgIcon"></mat-icon>
+          } @else {
+            <mat-icon>{{ contextItem.icon }}</mat-icon>
+          }
+          {{ contextItem.label | translate }}
+        </button>
+      }
+    </ng-template>
+  }
+</div>

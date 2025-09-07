@@ -26,6 +26,8 @@ import {
 } from '../../features/work-context/work-context.model';
 import { SideNavItemComponent } from '../side-nav/side-nav-item/side-nav-item.component';
 import { ContextMenuComponent } from '../../ui/context-menu/context-menu.component';
+import { NavEntryComponent } from './nav-entry/nav-entry.component';
+import { NavMultiBtnComponent } from './nav-multi-btn/nav-multi-btn.component';
 
 export interface NavItem {
   id: string;
@@ -87,6 +89,8 @@ export interface NavConfig {
     TranslatePipe,
     SideNavItemComponent,
     ContextMenuComponent,
+    NavEntryComponent,
+    NavMultiBtnComponent,
   ],
   templateUrl: './magic-side-nav.html',
   styleUrl: './magic-side-nav.scss',
@@ -118,6 +122,8 @@ export class MagicSideNavComponent implements OnInit {
   isMobile = signal(false);
   showMobileMenu = signal(false);
   expandedGroups = signal(new Set<string>());
+  // Visual feedback state for resizing thresholds
+  resizeState = signal<'normal' | 'collapse' | 'expand'>('normal');
 
   // Resize functionality
   currentWidth = signal(260);
@@ -136,12 +142,12 @@ export class MagicSideNavComponent implements OnInit {
     return this.currentWidth();
   });
 
-  constructor() {
-    // Effect to update sidebar width whenever signals change
-    effect(() => {
-      this.updateSidebarWidth();
-    });
+  // Keep stable references for event listeners to ensure proper cleanup
+  private readonly onDrag: (event: MouseEvent) => void = (event: MouseEvent) =>
+    this.handleDrag(event);
+  private readonly onDragEnd: () => void = () => this.handleDragEnd();
 
+  constructor() {
     // Effect to emit width changes
     effect(() => {
       this.widthChange.emit(this.sidebarWidth());
@@ -274,8 +280,8 @@ export class MagicSideNavComponent implements OnInit {
     this.startX.set(event.clientX);
     this.startWidth.set(this.isExpanded() ? this.currentWidth() : 72);
 
-    document.addEventListener('mousemove', this.handleDrag.bind(this));
-    document.addEventListener('mouseup', this.handleDragEnd.bind(this));
+    document.addEventListener('mousemove', this.onDrag);
+    document.addEventListener('mouseup', this.onDragEnd);
     document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';
 
@@ -305,15 +311,15 @@ export class MagicSideNavComponent implements OnInit {
         this.startX.set(event.clientX);
 
         // Visual feedback
-        this.updateSidebarVisualFeedback('normal');
+        this.resizeState.set('normal');
         return;
       }
 
       // Show visual feedback when approaching collapse threshold
       if (potentialWidth < this.collapseThreshold() + 20) {
-        this.updateSidebarVisualFeedback('collapse');
+        this.resizeState.set('collapse');
       } else {
-        this.updateSidebarVisualFeedback('normal');
+        this.resizeState.set('normal');
       }
 
       // Normal resize when expanded
@@ -340,15 +346,15 @@ export class MagicSideNavComponent implements OnInit {
         this.startX.set(event.clientX);
 
         // Visual feedback
-        this.updateSidebarVisualFeedback('normal');
+        this.resizeState.set('normal');
         return;
       }
 
       // Show visual feedback when approaching threshold
       if (draggedWidth > this.expandThreshold() - 20) {
-        this.updateSidebarVisualFeedback('expand');
+        this.resizeState.set('expand');
       } else {
-        this.updateSidebarVisualFeedback('normal');
+        this.resizeState.set('normal');
       }
     }
   }
@@ -357,13 +363,13 @@ export class MagicSideNavComponent implements OnInit {
     if (!this.isResizing()) return;
 
     this.isResizing.set(false);
-    document.removeEventListener('mousemove', this.handleDrag.bind(this));
-    document.removeEventListener('mouseup', this.handleDragEnd.bind(this));
+    document.removeEventListener('mousemove', this.onDrag);
+    document.removeEventListener('mouseup', this.onDragEnd);
     document.body.style.cursor = '';
     document.body.style.userSelect = '';
 
     // Reset visual feedback
-    this.updateSidebarVisualFeedback('normal');
+    this.resizeState.set('normal');
 
     // Save width to localStorage (only save if expanded)
     if (this.isExpanded()) {
@@ -371,29 +377,5 @@ export class MagicSideNavComponent implements OnInit {
     }
   }
 
-  private updateSidebarWidth(): void {
-    const sidebar = document.querySelector('.nav-sidebar') as HTMLElement;
-    if (sidebar && !this.isMobile()) {
-      if (this.isExpanded()) {
-        sidebar.style.setProperty('width', `${this.currentWidth()}px`, 'important');
-      } else {
-        sidebar.style.setProperty('width', '72px', 'important');
-      }
-    }
-  }
-
-  private updateSidebarVisualFeedback(state: 'normal' | 'collapse' | 'expand'): void {
-    const sidebar = document.querySelector('.nav-sidebar') as HTMLElement;
-    if (!sidebar) return;
-
-    // Remove all feedback classes
-    sidebar.classList.remove('collapse-zone', 'expand-zone');
-
-    // Add appropriate class based on state
-    if (state === 'collapse') {
-      sidebar.classList.add('collapse-zone');
-    } else if (state === 'expand') {
-      sidebar.classList.add('expand-zone');
-    }
-  }
+  // Inline width binding via template replaces imperative DOM style updates
 }
