@@ -50,7 +50,7 @@ import {
   selectUnarchivedHiddenProjectIds,
   selectUnarchivedVisibleProjects,
 } from '../../features/project/store/project.selectors';
-import { SideNavItemComponent } from '../magic-side-nav/side-nav-item/side-nav-item.component';
+import { NavItemInnerComponent } from '../magic-side-nav/nav-item-inner/nav-item-inner.component';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
@@ -69,7 +69,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [standardListAnimation, expandFadeAnimation],
   imports: [
-    SideNavItemComponent,
+    NavItemInnerComponent,
     MatMenuItem,
     RouterLink,
     RouterLinkActive,

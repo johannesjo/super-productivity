@@ -1,22 +1,22 @@
 <section class="main">
   @if (workContextService.mainWorkContext$ | async; as mainContext) {
-    <side-nav-item
+    <nav-item-inner
       #menuEntry
       [type]="WorkContextType.TAG"
       [defaultIcon]="mainContext.icon"
       [workContext]="mainContext"
       [activeWorkContextId]="activeWorkContextId"
-    ></side-nav-item>
+    ></nav-item-inner>
   }
   @let inboxContext = workContextService.inboxWorkContext$ | async;
   @if (inboxContext) {
-    <side-nav-item
+    <nav-item-inner
       #menuEntry
       [type]="WorkContextType.PROJECT"
       [defaultIcon]="inboxContext.icon"
       [workContext]="inboxContext"
       [activeWorkContextId]="activeWorkContextId"
-    ></side-nav-item>
+    ></nav-item-inner>
   }
 
   <button
@@ -120,7 +120,7 @@
       (cdkDropListDropped)="dropOnProjectList(projectList, $event)"
     >
       @for (project of projectList; track project.id) {
-        <side-nav-item
+        <nav-item-inner
           #menuEntry
           cdkDrag
           [cdkDragData]="project"
@@ -130,7 +130,7 @@
           [type]="WorkContextType.PROJECT"
           [defaultIcon]="'folder_special'"
           [activeWorkContextId]="activeWorkContextId"
-        ></side-nav-item>
+        ></nav-item-inner>
       }
     </div>
     @if (!projectList.length && isProjectsExpanded()) {
@@ -158,7 +158,7 @@
       (cdkDropListDropped)="dropOnTagList(tagList, $event)"
     >
       @for (tag of tagList; track tag.id) {
-        <side-nav-item
+        <nav-item-inner
           #menuEntry
           cdkDrag
           [cdkDragData]="tag"
@@ -168,7 +168,7 @@
           [type]="WorkContextType.TAG"
           [defaultIcon]="'label'"
           [activeWorkContextId]="activeWorkContextId"
-        ></side-nav-item>
+        ></nav-item-inner>
       }
     </div>
     @if (!tagList.length && isTagsExpanded()) {

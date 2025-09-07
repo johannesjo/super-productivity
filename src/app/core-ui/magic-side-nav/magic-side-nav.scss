@@ -204,7 +204,7 @@ $overlay-bg: var(--c-dark-50, rgba(0, 0, 0, 0.5));
     }
 
     // Fix side-nav-item wrapping issues in collapsed mode
-    ::ng-deep side-nav-item {
+    ::ng-deep nav-item-inner {
       .additional-btn {
         display: none !important;
       }
@@ -400,7 +400,7 @@ $overlay-bg: var(--c-dark-50, rgba(0, 0, 0, 0.5));
 }
 
 // Fix side-nav-item wrapping issues globally
-::ng-deep side-nav-item {
+::ng-deep nav-item-inner {
   display: flex !important;
   align-items: stretch;
   width: 100%;

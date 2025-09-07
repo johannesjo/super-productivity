@@ -1,0 +1,72 @@
+@if (mode() === 'work' && workContext()) {
+  <div
+    class="planner-drag-place-holder-shared"
+    *cdkDragPlaceholder
+  ></div>
+
+  <button
+    #routeBtn
+    [routerLink]="[type() === 'TAG' ? 'tag' : 'project', workContext()!.id, 'tasks']"
+    routerLinkActive="isActiveRoute"
+    mat-menu-item
+  >
+    <span class="badge">{{ nrOfOpenTasks() }}</span>
+    <mat-icon class="drag-handle">{{ workContext()!.icon || defaultIcon() }}</mat-icon>
+    <span class="text">{{ workContext()!.title }}</span>
+  </button>
+
+  @if (showMoreButton()) {
+    <button
+      #settingsBtn
+      class="additional-btn"
+      mat-icon-button
+    >
+      <mat-icon>more_vert</mat-icon>
+    </button>
+  }
+
+  <context-menu
+    [contextMenu]="contextMenu"
+    [rightClickTriggerEl]="routeBtn"
+    [leftClickTriggerEl]="settingsBtn"
+  ></context-menu>
+
+  <ng-template #contextMenu>
+    <work-context-menu
+      [contextId]="workContext()!.id"
+      [contextType]="type()!"
+    ></work-context-menu>
+  </ng-template>
+} @else {
+  <!-- Presentational row (used inside anchors/buttons) -->
+  @if (svgIcon()) {
+    <mat-icon
+      class="nav-icon"
+      [svgIcon]="svgIcon()"
+    ></mat-icon>
+  } @else if (icon()) {
+    <mat-icon class="nav-icon">{{ icon() }}</mat-icon>
+  }
+
+  @if (showLabels() && label()) {
+    <span class="nav-label">{{ label() | translate }}</span>
+  }
+
+  @if (showLabels() && badge() !== undefined && badge() !== null && badge() !== '') {
+    <span class="nav-badge">{{ badge() }}</span>
+  }
+
+  @if (showChevron()) {
+    <svg
+      class="nav-chevron"
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+    >
+      <path d="M4 6l4 4 4-4" />
+    </svg>
+  }
+}

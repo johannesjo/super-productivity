@@ -2,15 +2,14 @@ import { Component, computed, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { NavItem } from '../magic-side-nav';
-import { SideNavItemComponent } from '../side-nav-item/side-nav-item.component';
-import { NavRowComponent } from '../nav-row/nav-row.component';
+import { NavItemInnerComponent } from '../nav-item-inner/nav-item-inner.component';
 
 @Component({
   selector: 'nav-item',
   standalone: true,
-  imports: [CommonModule, RouterModule, SideNavItemComponent, NavRowComponent],
+  imports: [CommonModule, RouterModule, NavItemInnerComponent],
   templateUrl: './nav-item.component.html',
-  styleUrl: './nav-item.component.scss',
+  styleUrl: './nav-item.component.css',
 })
 export class SpNavItemComponent {
   item = input.required<NavItem>();

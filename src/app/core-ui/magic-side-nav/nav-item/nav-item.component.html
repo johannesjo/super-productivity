@@ -1,6 +1,6 @@
 @switch (item().type) {
   @case ('workContext') {
-    <side-nav-item
+    <nav-item-inner
       [workContext]="item().workContext"
       [type]="item().workContextType"
       [defaultIcon]="item().defaultIcon"
@@ -8,7 +8,7 @@
       [variant]="'nav'"
       [compact]="isChild()"
       [showMoreButton]="showLabels()"
-    ></side-nav-item>
+    ></nav-item-inner>
   }
 
   @case ('route') {
@@ -19,13 +19,14 @@
       [attr.title]="shouldShowTooltip() ? item().label : null"
       (click)="onItemClick()"
     >
-      <nav-row
+      <nav-item-inner
+        [mode]="'row'"
         [icon]="item().icon"
         [svgIcon]="item().svgIcon"
         [label]="item().label"
         [badge]="item().badge"
         [showLabels]="showLabels()"
-      ></nav-row>
+      ></nav-item-inner>
     </a>
   }
 
@@ -38,13 +39,14 @@
       [attr.title]="shouldShowTooltip() ? item().label : null"
       (click)="onItemClick()"
     >
-      <nav-row
+      <nav-item-inner
+        [mode]="'row'"
         [icon]="item().icon"
         [svgIcon]="item().svgIcon"
         [label]="item().label"
         [badge]="item().badge"
         [showLabels]="showLabels()"
-      ></nav-row>
+      ></nav-item-inner>
     </a>
   }
 
@@ -54,13 +56,14 @@
       [attr.title]="shouldShowTooltip() ? item().label : null"
       (click)="onItemClick()"
     >
-      <nav-row
+      <nav-item-inner
+        [mode]="'row'"
         [icon]="item().icon"
         [svgIcon]="item().svgIcon"
         [label]="item().label"
         [badge]="item().badge"
         [showLabels]="showLabels()"
-      ></nav-row>
+      ></nav-item-inner>
     </button>
   }
 
@@ -73,14 +76,15 @@
       [attr.aria-controls]="'group-' + item().id"
       (click)="onItemClick()"
     >
-      <nav-row
+      <nav-item-inner
+        [mode]="'row'"
         [icon]="item().icon"
         [svgIcon]="item().svgIcon"
         [label]="item().label"
         [badge]="item().badge"
         [showLabels]="showLabels()"
         [showChevron]="hasChildren() && showLabels()"
-      ></nav-row>
+      ></nav-item-inner>
     </button>
   }
 }

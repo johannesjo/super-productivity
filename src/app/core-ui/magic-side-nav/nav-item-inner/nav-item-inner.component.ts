@@ -24,9 +24,10 @@ import { MatMenuItem } from '@angular/material/menu';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { selectAllDoneIds } from '../../../features/tasks/store/task.selectors';
 import { Store } from '@ngrx/store';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
-  selector: 'side-nav-item',
+  selector: 'nav-item-inner',
   imports: [
     RouterLink,
     RouterModule,
@@ -36,48 +37,65 @@ import { Store } from '@ngrx/store';
     MatIconButton,
     MatIcon,
     MatMenuItem,
+    TranslatePipe,
   ],
-  templateUrl: './side-nav-item.component.html',
-  styleUrl: './side-nav-item.component.scss',
+  templateUrl: './nav-item-inner.component.html',
+  styleUrl: './nav-item-inner.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'g-multi-btn-wrapper' },
   standalone: true,
 })
-export class SideNavItemComponent {
+export class NavItemInnerComponent {
   private readonly _store = inject(Store);
 
-  workContext = input.required<WorkContextCommon>();
-  type = input.required<WorkContextType>();
-  defaultIcon = input.required<string>();
-  activeWorkContextId = input.required<string>();
+  // Mode selection
+  mode = input<'work' | 'row'>('work');
+
+  // Work context inputs
+  workContext = input<WorkContextCommon | null>(null);
+  type = input<WorkContextType | null>(null);
+  defaultIcon = input<string>('folder_special');
+  activeWorkContextId = input<string>('');
+
   // Variant styling to integrate into magic-side-nav without deep selectors
   variant = input<'default' | 'nav'>('default');
   compact = input<boolean>(false);
   showMoreButton = input<boolean>(true);
 
+  // Presentational row inputs
+  label = input<string | undefined>(undefined);
+  icon = input<string | undefined>(undefined);
+  svgIcon = input<string | undefined>(undefined);
+  badge = input<string | number | undefined>(undefined);
+  showLabels = input<boolean>(true);
+  showChevron = input<boolean>(false);
+
   allUndoneTaskIds = toSignal(this._store.select(selectAllDoneIds), { initialValue: [] });
   nrOfOpenTasks = computed<number>(() => {
-    // const allUndoneTasks
+    const wc = this.workContext();
+    if (!wc) return 0;
     const allUndoneTaskIds = this.allUndoneTaskIds();
-    return this.workContext().taskIds.filter((tid) => !allUndoneTaskIds.includes(tid))
-      .length;
+    return wc.taskIds.filter((tid) => !allUndoneTaskIds.includes(tid)).length;
   });
 
-  readonly routeBtn = viewChild.required('routeBtn', { read: ElementRef });
+  readonly routeBtn = viewChild('routeBtn', { read: ElementRef });
 
   @HostBinding('class.hasTasks')
   get workContextHasTasks(): boolean {
-    return this.workContext().taskIds.length > 0;
+    const wc = this.workContext();
+    return !!wc && wc.taskIds.length > 0;
   }
 
   @HostBinding('class.isActiveContext')
   get isActiveContext(): boolean {
-    return this.workContext().id === this.activeWorkContextId();
+    const wc = this.workContext();
+    return !!wc && wc.id === this.activeWorkContextId();
   }
 
   @HostBinding('class.isHidden')
   get isHidden(): boolean {
-    return !!(this.workContext() as Project)?.isHiddenFromMenu;
+    const wc = this.workContext();
+    return !!(wc as Project | null)?.isHiddenFromMenu;
   }
 
   @HostBinding('class.variant-nav')
@@ -91,6 +109,9 @@ export class SideNavItemComponent {
   }
 
   focus(): void {
-    this.routeBtn().nativeElement.focus();
+    const btn = this.routeBtn();
+    if (btn) {
+      btn.nativeElement.focus();
+    }
   }
 }

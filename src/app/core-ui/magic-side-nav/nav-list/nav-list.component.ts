@@ -5,7 +5,7 @@ import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
 import { NavGroupItem, NavItem } from '../magic-side-nav';
-import { NavRowComponent } from '../nav-row/nav-row.component';
+import { NavItemInnerComponent } from '../nav-item-inner/nav-item-inner.component';
 import { SpNavItemComponent } from '../nav-item/nav-item.component';
 
 @Component({
@@ -17,11 +17,11 @@ import { SpNavItemComponent } from '../nav-item/nav-item.component';
     MatIconButton,
     MatTooltip,
     TranslatePipe,
-    NavRowComponent,
+    NavItemInnerComponent,
     SpNavItemComponent,
   ],
   templateUrl: './nav-list.component.html',
-  styleUrl: './nav-list.component.scss',
+  styleUrl: './nav-list.component.css',
 })
 export class SpNavSectionComponent {
   item = input.required<NavGroupItem>();

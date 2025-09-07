@@ -8,7 +8,8 @@
     [attr.aria-expanded]="isExpanded()"
     [attr.aria-controls]="'group-' + item().id"
   >
-    <nav-row
+    <nav-item-inner
+      [mode]="row"
       [icon]="item().icon"
       [svgIcon]="item().svgIcon"
       [label]="item().label"
@@ -16,7 +17,7 @@
       [showLabels]="showLabels()"
       [showChevron]="item().children && item().children.length > 0 && showLabels()"
       labelClass="title"
-    ></nav-row>
+    ></nav-item-inner>
   </button>
 
   @if (showLabels()) {
