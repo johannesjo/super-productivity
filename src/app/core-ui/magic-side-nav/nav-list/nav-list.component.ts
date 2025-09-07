@@ -92,7 +92,7 @@ import { SpNavItemComponent } from '../nav-item/nav-item.component';
         max-height: 500px;
       }
       .nav-child-item {
-        margin-left: var(--s3);
+        /*margin-left: var(--s3);*/
       }
     `,
   ],

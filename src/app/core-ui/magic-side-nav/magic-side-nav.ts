@@ -291,9 +291,12 @@ export class MagicSideNavComponent implements OnInit {
 
   isGroupExpanded(item: NavItem): boolean {
     if (item.type !== 'group') return false;
-    // Use external expansion state if available, otherwise fall back to local state
+    // Prefer external expansion state for known groups, but fall back to local for others (e.g., Help)
     if (this.expandedGroupIds && this.expandedGroupIds.size > 0) {
-      return this.expandedGroupIds.has(item.id);
+      if (this.expandedGroupIds.has(item.id)) {
+        return true;
+      }
+      // If not controlled externally, use local state
     }
     return this.expandedGroups().has(item.id);
   }
