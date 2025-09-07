@@ -60,18 +60,37 @@ export class SideNavConfigService {
       ...this._buildWorkContextItems(),
 
       // Separator
-      { id: 'sep-1', label: '', icon: '' },
+      { type: 'separator', id: 'sep-1' },
 
       // Main Routes
-      { id: 'schedule', label: T.MH.SCHEDULE, icon: 'early_on', route: '/schedule' },
-      { id: 'planner', label: T.MH.PLANNER, icon: 'edit_calendar', route: '/planner' },
-      { id: 'boards', label: T.MH.BOARDS, icon: 'grid_view', route: '/boards' },
+      {
+        type: 'route',
+        id: 'schedule',
+        label: T.MH.SCHEDULE,
+        icon: 'early_on',
+        route: '/schedule',
+      },
+      {
+        type: 'route',
+        id: 'planner',
+        label: T.MH.PLANNER,
+        icon: 'edit_calendar',
+        route: '/planner',
+      },
+      {
+        type: 'route',
+        id: 'boards',
+        label: T.MH.BOARDS,
+        icon: 'grid_view',
+        route: '/boards',
+      },
 
       // Separator
-      { id: 'sep-2', label: '', icon: '' },
+      { type: 'separator', id: 'sep-2' },
 
       // Projects Section
       {
+        type: 'group',
         id: 'projects',
         label: T.MH.PROJECTS,
         icon: 'expand_more',
@@ -89,6 +108,7 @@ export class SideNavConfigService {
 
       // Tags Section
       {
+        type: 'group',
         id: 'tags',
         label: T.MH.TAGS,
         icon: 'expand_more',
@@ -97,11 +117,18 @@ export class SideNavConfigService {
       },
 
       // Separator
-      { id: 'sep-3', label: '', icon: '' },
+      { type: 'separator', id: 'sep-3' },
 
       // App Section
-      { id: 'search', label: T.MH.SEARCH, icon: 'search', route: '/search' },
       {
+        type: 'route',
+        id: 'search',
+        label: T.MH.SEARCH,
+        icon: 'search',
+        route: '/search',
+      },
+      {
+        type: 'route',
         id: 'scheduled-list',
         label: T.MH.ALL_PLANNED_LIST,
         icon: 'list',
@@ -110,53 +137,62 @@ export class SideNavConfigService {
 
       // Help Menu
       {
+        type: 'group',
         id: 'help',
         label: T.MH.HELP,
         icon: 'help_center',
         children: [
           {
+            type: 'href',
             id: 'help-online',
             label: T.MH.HM.GET_HELP_ONLINE,
             icon: 'help_center',
             href: 'https://github.com/johannesjo/super-productivity/blob/master/README.md#question-how-to-use-it',
           },
           {
+            type: 'action',
             id: 'help-report',
             label: T.MH.HM.REPORT_A_PROBLEM,
             icon: 'bug_report',
             action: () => this._openBugReport(),
           },
           {
+            type: 'href',
             id: 'help-contribute',
             label: T.MH.HM.CONTRIBUTE,
             icon: 'volunteer_activism',
             href: 'https://github.com/johannesjo/super-productivity/blob/master/CONTRIBUTING.md',
           },
           {
+            type: 'href',
             id: 'help-reddit',
             label: T.MH.HM.REDDIT_COMMUNITY,
             icon: 'forum',
             href: 'https://www.reddit.com/r/superProductivity/',
           },
           {
+            type: 'action',
             id: 'tour-welcome',
             label: T.MH.HM.START_WELCOME,
             icon: 'directions',
             action: () => this._startTour(TourId.Welcome),
           },
           {
+            type: 'action',
             id: 'tour-keyboard',
             label: T.MH.HM.KEYBOARD,
             icon: 'directions',
             action: () => this._startTour(TourId.KeyboardNav),
           },
           {
+            type: 'action',
             id: 'tour-sync',
             label: T.MH.HM.SYNC,
             icon: 'directions',
             action: () => this._startTour(TourId.Sync),
           },
           {
+            type: 'action',
             id: 'tour-calendars',
             label: T.MH.HM.CALENDARS,
             icon: 'directions',
@@ -165,7 +201,13 @@ export class SideNavConfigService {
         ],
       },
 
-      { id: 'settings', label: T.MH.SETTINGS, icon: 'settings', route: '/config' },
+      {
+        type: 'route',
+        id: 'settings',
+        label: T.MH.SETTINGS,
+        icon: 'settings',
+        route: '/config',
+      },
     ],
     expandedByDefault: true,
     showLabels: true,
@@ -190,12 +232,17 @@ export class SideNavConfigService {
 
   // Simple action handler
   onNavItemClick(item: NavItem): void {
-    if (item.href) {
-      window.open(item.href, '_blank');
-    } else if (item.action) {
-      item.action();
+    switch (item.type) {
+      case 'href':
+        window.open(item.href, '_blank');
+        break;
+      case 'action':
+        item.action?.();
+        break;
+      default:
+        // Routes and groups handled elsewhere
+        break;
     }
-    // Routes are handled automatically by router
   }
 
   // Private helpers
@@ -206,6 +253,7 @@ export class SideNavConfigService {
 
     if (mainContext) {
       items.push({
+        type: 'workContext',
         id: `main-${mainContext.id}`,
         label: mainContext.title,
         icon: mainContext.icon || 'today',
@@ -221,6 +269,7 @@ export class SideNavConfigService {
 
     if (inboxContext) {
       items.push({
+        type: 'workContext',
         id: `inbox-${inboxContext.id}`,
         label: inboxContext.title,
         icon: inboxContext.icon || 'inbox',
@@ -248,6 +297,7 @@ export class SideNavConfigService {
     }
 
     return filteredProjects.map((project) => ({
+      type: 'workContext',
       id: `project-${project.id}`,
       label: project.title,
       icon: project.icon || 'folder_special',
@@ -270,6 +320,7 @@ export class SideNavConfigService {
     }
 
     return filteredTags.map((tag) => ({
+      type: 'workContext',
       id: `tag-${tag.id}`,
       label: tag.title,
       icon: tag.icon || 'label',

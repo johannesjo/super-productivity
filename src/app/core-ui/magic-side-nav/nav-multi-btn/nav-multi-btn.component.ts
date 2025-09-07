@@ -14,6 +14,7 @@ import { NavItem, NavAdditionalButton } from '../magic-side-nav';
 import { ContextMenuComponent } from '../../../ui/context-menu/context-menu.component';
 import { MatMenuItem } from '@angular/material/menu';
 import { NavRowComponent } from '../nav-row/nav-row.component';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'nav-multi-btn',
@@ -26,6 +27,7 @@ import { NavRowComponent } from '../nav-row/nav-row.component';
     ContextMenuComponent,
     MatMenuItem,
     NavRowComponent,
+    TranslatePipe,
   ],
   templateUrl: './nav-multi-btn.component.html',
   styleUrl: './nav-multi-btn.component.scss',

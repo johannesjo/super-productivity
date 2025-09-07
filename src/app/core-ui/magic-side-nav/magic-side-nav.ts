@@ -29,24 +29,73 @@ import { ContextMenuComponent } from '../../ui/context-menu/context-menu.compone
 import { NavEntryComponent } from './nav-entry/nav-entry.component';
 import { NavMultiBtnComponent } from './nav-multi-btn/nav-multi-btn.component';
 
-export interface NavItem {
+export type NavItem =
+  | NavSeparatorItem
+  | NavWorkContextItem
+  | NavRouteItem
+  | NavHrefItem
+  | NavActionItem
+  | NavGroupItem;
+
+export interface NavBaseItem {
+  id: string;
+  label?: string;
+  icon?: string;
+  svgIcon?: string;
+  badge?: string | number;
+}
+
+export interface NavSeparatorItem extends NavBaseItem {
+  type: 'separator';
+}
+
+export interface NavWorkContextItem extends NavBaseItem {
+  type: 'workContext';
+  label: string;
+  icon: string;
+  route: string;
+  workContext: WorkContextCommon;
+  workContextType: WorkContextType;
+  defaultIcon: string;
+}
+
+export interface NavRouteItem extends NavBaseItem {
+  type: 'route';
+  label: string;
+  icon: string;
+  route: string;
+}
+
+export interface NavHrefItem extends NavBaseItem {
+  type: 'href';
+  label: string;
+  icon: string;
+  href: string;
+}
+
+export interface NavActionItem extends NavBaseItem {
+  type: 'action';
+  label: string;
+  icon: string;
+  action: () => void;
+}
+
+export interface NavContextItem {
   id: string;
   label: string;
   icon: string;
-  svgIcon?: string; // For SVG icons like schedule
-  route?: string; // Internal Angular route
-  href?: string; // External link
+  svgIcon?: string;
   action?: () => void;
-  children?: NavItem[];
-  badge?: string | number;
-  // For work context items (projects/tags)
-  workContext?: WorkContextCommon;
-  workContextType?: WorkContextType;
-  defaultIcon?: string;
-  // Additional buttons for navigation sections
+}
+
+export interface NavGroupItem extends NavBaseItem {
+  type: 'group';
+  label: string;
+  icon: string;
+  children: NavItem[];
   additionalButtons?: NavAdditionalButton[];
-  // Context menu items
-  contextMenuItems?: NavItem[];
+  contextMenuItems?: NavContextItem[];
+  action?: () => void; // optional external toggle logic
 }
 
 export interface NavAdditionalButton {
@@ -55,7 +104,7 @@ export interface NavAdditionalButton {
   tooltip?: string;
   action?: () => void;
   hidden?: boolean;
-  contextMenu?: NavItem[];
+  contextMenu?: NavContextItem[];
 }
 
 export interface NavConfig {
@@ -227,7 +276,7 @@ export class MagicSideNavComponent implements OnInit {
   }
 
   toggleGroup(item: NavItem): void {
-    if (item.children && item.children.length > 0) {
+    if (item.type === 'group' && item.children && item.children.length > 0) {
       this.expandedGroups.update((groups) => {
         const newGroups = new Set(groups);
         if (newGroups.has(item.id)) {
@@ -241,6 +290,7 @@ export class MagicSideNavComponent implements OnInit {
   }
 
   isGroupExpanded(item: NavItem): boolean {
+    if (item.type !== 'group') return false;
     // Use external expansion state if available, otherwise fall back to local state
     if (this.expandedGroupIds && this.expandedGroupIds.size > 0) {
       return this.expandedGroupIds.has(item.id);
@@ -249,26 +299,25 @@ export class MagicSideNavComponent implements OnInit {
   }
 
   onItemClick(item: NavItem): void {
-    // Special handling for expandable sections (projects/tags) - they should always be toggleable
-    const isExpandableSection = item.id === 'projects' || item.id === 'tags';
-
-    if ((item.children && item.children.length > 0) || isExpandableSection) {
-      // For items with children OR expandable sections, call the action
+    if (item.type === 'group') {
+      // Allow external toggle handler if provided
       if (item.action) {
         item.action();
       } else {
-        // Only use local state if no external action is provided
         this.toggleGroup(item);
       }
-    } else {
-      if (item.action) {
-        item.action();
-      }
-      this.itemClick.emit(item);
+      return;
+    }
 
-      if (this.isMobile()) {
-        this.showMobileMenu.set(false);
-      }
+    if (item.type === 'action') {
+      item.action?.();
+    }
+
+    // Emit to parent for external handling (e.g., href open)
+    this.itemClick.emit(item);
+
+    if (this.isMobile()) {
+      this.showMobileMenu.set(false);
     }
   }
 
