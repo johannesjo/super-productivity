@@ -53,6 +53,7 @@ export class SideNavItemComponent {
   // Variant styling to integrate into magic-side-nav without deep selectors
   variant = input<'default' | 'nav'>('default');
   compact = input<boolean>(false);
+  showMoreButton = input<boolean>(true);
 
   allUndoneTaskIds = toSignal(this._store.select(selectAllDoneIds), { initialValue: [] });
   nrOfOpenTasks = computed<number>(() => {

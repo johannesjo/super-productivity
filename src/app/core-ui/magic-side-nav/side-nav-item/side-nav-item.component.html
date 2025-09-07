@@ -21,13 +21,15 @@
 
 <!--[matMenuTriggerFor]="contextMenuEl"-->
 
-<button
-  #settingsBtn
-  class="additional-btn"
-  mat-icon-button
->
-  <mat-icon>more_vert</mat-icon>
-</button>
+@if (showMoreButton()) {
+  <button
+    #settingsBtn
+    class="additional-btn"
+    mat-icon-button
+  >
+    <mat-icon>more_vert</mat-icon>
+  </button>
+}
 
 <context-menu
   [contextMenu]="contextMenu"

@@ -79,19 +79,24 @@
     @for (item of config.items; track item.id) {
       @switch (item.type) {
         @case ('separator') {
-          <li
-            class="nav-separator"
-            role="separator"
-          ></li>
+          <hr class="nav-separator" />
         }
-        @default {
-          <nav-entry
+        @case ('group') {
+          <nav-list
             [item]="item"
             [showText]="isExpanded() || (isMobile() && showMobileMenu())"
-            [isGroupExpanded]="isGroupExpanded(item)"
+            [isExpanded]="isGroupExpanded(item)"
             [activeWorkContextId]="activeWorkContextId"
             (itemClick)="onItemClick($event)"
-          ></nav-entry>
+          ></nav-list>
+        }
+        @default {
+          <nav-item
+            [item]="item"
+            [showText]="isExpanded() || (isMobile() && showMobileMenu())"
+            [activeWorkContextId]="activeWorkContextId"
+            (itemClick)="onItemClick($event)"
+          ></nav-item>
         }
       }
     }

@@ -1,0 +1,61 @@
+<div class="g-multi-btn-wrapper">
+  <button
+    class="nav-link expand-btn"
+    [class.expanded]="isExpanded()"
+    [class.isExpanded]="isExpanded()"
+    [attr.title]="!showText() ? item().label : null"
+    (click)="onHeaderClick()"
+    [attr.aria-expanded]="isExpanded()"
+    [attr.aria-controls]="'group-' + item().id"
+  >
+    <nav-row
+      [icon]="item().icon"
+      [svgIcon]="item().svgIcon"
+      [label]="item().label"
+      [badge]="item().badge"
+      [showText]="showText()"
+      [showChevron]="item().children && item().children.length > 0 && showText()"
+      labelClass="title"
+    ></nav-row>
+  </button>
+
+  @if (showText()) {
+    @for (btn of item().additionalButtons; track btn.id) {
+      @if (!btn.hidden) {
+        <button
+          class="additional-btn"
+          mat-icon-button
+          [matTooltip]="btn.tooltip | translate"
+          (click)="btn.action?.()"
+        >
+          <mat-icon>{{ btn.icon }}</mat-icon>
+        </button>
+      }
+    }
+  }
+</div>
+
+@if (item().children && item().children.length > 0) {
+  <ul
+    class="nav-children"
+    [class.expanded]="isExpanded()"
+    [class.visible]="isExpanded()"
+    [attr.id]="'group-' + item().id"
+    role="list"
+  >
+    @for (child of item().children; track child.id) {
+      <li
+        class="nav-child-item"
+        role="listitem"
+      >
+        <nav-item
+          [item]="child"
+          [showText]="true"
+          [isChild]="true"
+          [activeWorkContextId]="activeWorkContextId()"
+          (itemClick)="itemClick.emit(child)"
+        ></nav-item>
+      </li>
+    }
+  </ul>
+}

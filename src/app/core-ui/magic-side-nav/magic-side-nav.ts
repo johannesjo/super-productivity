@@ -26,8 +26,8 @@ import {
 } from '../../features/work-context/work-context.model';
 import { SideNavItemComponent } from './side-nav-item/side-nav-item.component';
 import { ContextMenuComponent } from '../../ui/context-menu/context-menu.component';
-import { NavEntryComponent } from './nav-entry/nav-entry.component';
-import { NavMultiBtnComponent } from './nav-multi-btn/nav-multi-btn.component';
+import { NavItemComponent } from './nav-item/nav-item.component';
+import { NavListComponent } from './nav-list/nav-list.component';
 
 export type NavItem =
   | NavSeparatorItem
@@ -138,8 +138,8 @@ export interface NavConfig {
     TranslatePipe,
     SideNavItemComponent,
     ContextMenuComponent,
-    NavEntryComponent,
-    NavMultiBtnComponent,
+    NavItemComponent,
+    NavListComponent,
   ],
   templateUrl: './magic-side-nav.html',
   styleUrl: './magic-side-nav.scss',
