@@ -1,21 +1,13 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
 import { NavItem } from '../magic-side-nav';
-import { SideNavItemComponent } from '../../side-nav/side-nav-item/side-nav-item.component';
 import { NavMultiBtnComponent } from '../nav-multi-btn/nav-multi-btn.component';
-import { NavRowComponent } from '../nav-row/nav-row.component';
+import { NavItemComponent } from '../nav-item/nav-item.component';
 
 @Component({
   selector: 'nav-entry',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    SideNavItemComponent,
-    NavMultiBtnComponent,
-    NavRowComponent,
-  ],
+  imports: [CommonModule, NavMultiBtnComponent, NavItemComponent],
   templateUrl: './nav-entry.component.html',
   styleUrl: './nav-entry.component.scss',
 })

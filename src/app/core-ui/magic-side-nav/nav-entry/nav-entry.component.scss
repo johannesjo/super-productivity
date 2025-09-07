@@ -8,6 +8,12 @@
   }
 }
 
+// Ensure nested nav-item and nav-row components inherit styles
+::ng-deep nav-item,
+::ng-deep nav-row {
+  display: contents; // Make these components transparent to layout
+}
+
 // Navigation links
 .nav-link {
   display: flex;

@@ -5,94 +5,25 @@
   "
   role="listitem"
 >
-  @switch (item.type) {
-    @case ('workContext') {
-      <side-nav-item
-        [workContext]="item.workContext"
-        [type]="item.workContextType"
-        [defaultIcon]="item.defaultIcon"
-        [activeWorkContextId]="activeWorkContextId || ''"
-        class="work-context-item-main"
-      ></side-nav-item>
-    }
-    @case ('route') {
-      <a
-        [routerLink]="item.route"
-        routerLinkActive="active"
-        class="nav-link"
-        [attr.title]="!showText ? item.label : null"
-        (click)="onItemClick()"
-      >
-        <nav-row
-          [icon]="item.icon"
-          [svgIcon]="item.svgIcon"
-          [label]="item.label"
-          [badge]="item.badge"
-          [showText]="showText"
-        ></nav-row>
-      </a>
-    }
-    @case ('href') {
-      <a
-        [href]="item.href"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="nav-link"
-        [attr.title]="!showText ? item.label : null"
-        (click)="onItemClick()"
-      >
-        <nav-row
-          [icon]="item.icon"
-          [svgIcon]="item.svgIcon"
-          [label]="item.label"
-          [badge]="item.badge"
-          [showText]="showText"
-        ></nav-row>
-      </a>
-    }
-    @case ('action') {
-      <button
-        class="nav-link"
-        [attr.title]="!showText ? item.label : null"
-        (click)="onItemClick()"
-      >
-        <nav-row
-          [icon]="item.icon"
-          [svgIcon]="item.svgIcon"
-          [label]="item.label"
-          [badge]="item.badge"
-          [showText]="showText"
-        ></nav-row>
-      </button>
-    }
-    @case ('group') {
-      @if (item.additionalButtons && item.additionalButtons.length > 0) {
-        <nav-multi-btn
-          [item]="item"
-          [showText]="showText"
-          [isGroupExpanded]="isGroupExpanded"
-          (itemClick)="onItemClick()"
-        ></nav-multi-btn>
-      } @else {
-        <button
-          class="nav-link"
-          [class.expanded]="isGroupExpanded"
-          [attr.title]="!showText ? item.label : null"
-          (click)="onItemClick()"
-          [attr.aria-expanded]="isGroupExpanded"
-          [attr.aria-controls]="'group-' + item.id"
-        >
-          <nav-row
-            [icon]="item.icon"
-            [svgIcon]="item.svgIcon"
-            [label]="item.label"
-            [badge]="item.badge"
-            [showText]="showText"
-            [showChevron]="item.children && item.children.length > 0 && showText"
-          ></nav-row>
-        </button>
-      }
-    }
+  @if (
+    item.type === 'group' && item.additionalButtons && item.additionalButtons.length > 0
+  ) {
+    <!-- Multi-button wrapper for groups with additional buttons -->
+    <nav-multi-btn
+      [item]="item"
+      [showText]="showText"
+      [isGroupExpanded]="isGroupExpanded"
+      (itemClick)="onItemClick()"
+    ></nav-multi-btn>
+  } @else {
+    <!-- Standard nav item -->
+    <nav-item
+      [item]="item"
+      [showText]="showText"
+      [isExpanded]="isGroupExpanded"
+      [activeWorkContextId]="activeWorkContextId"
+      (itemClick)="onItemClick()"
+    ></nav-item>
   }
 
   <!-- Children Items -->
@@ -109,68 +40,13 @@
           class="nav-child-item"
           role="listitem"
         >
-          @switch (child.type) {
-            @case ('workContext') {
-              <div class="work-context-item">
-                <side-nav-item
-                  [workContext]="child.workContext"
-                  [type]="child.workContextType"
-                  [defaultIcon]="child.defaultIcon"
-                  [activeWorkContextId]="activeWorkContextId || ''"
-                ></side-nav-item>
-              </div>
-            }
-            @case ('route') {
-              <a
-                [routerLink]="child.route"
-                routerLinkActive="active"
-                class="nav-child-link"
-                [attr.title]="!showText ? child.label : null"
-                (click)="onChildClick(child)"
-              >
-                <nav-row
-                  [icon]="child.icon"
-                  [svgIcon]="child.svgIcon"
-                  [label]="child.label"
-                  [badge]="child.badge"
-                  [showText]="true"
-                ></nav-row>
-              </a>
-            }
-            @case ('href') {
-              <a
-                [href]="child.href"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="nav-child-link"
-                [attr.title]="!showText ? child.label : null"
-                (click)="onChildClick(child)"
-              >
-                <nav-row
-                  [icon]="child.icon"
-                  [svgIcon]="child.svgIcon"
-                  [label]="child.label"
-                  [badge]="child.badge"
-                  [showText]="true"
-                ></nav-row>
-              </a>
-            }
-            @case ('action') {
-              <button
-                class="nav-child-link"
-                [attr.title]="!showText ? child.label : null"
-                (click)="onChildClick(child)"
-              >
-                <nav-row
-                  [icon]="child.icon"
-                  [svgIcon]="child.svgIcon"
-                  [label]="child.label"
-                  [badge]="child.badge"
-                  [showText]="true"
-                ></nav-row>
-              </button>
-            }
-          }
+          <nav-item
+            [item]="child"
+            [showText]="true"
+            [isChild]="true"
+            [activeWorkContextId]="activeWorkContextId"
+            (itemClick)="onChildClick(child)"
+          ></nav-item>
         </li>
       }
     </ul>
