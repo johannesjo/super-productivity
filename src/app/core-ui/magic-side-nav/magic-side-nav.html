@@ -86,13 +86,13 @@
             class="nav-item has-children"
             role="listitem"
           >
-            <sp-nav-section
+            <nav-list
               [item]="item"
               [showLabels]="isExpanded() || (isMobile() && showMobileMenu())"
               [isExpanded]="isGroupExpanded(item)"
               [activeWorkContextId]="activeWorkContextId"
               (itemClick)="onItemClick($event)"
-            ></sp-nav-section>
+            ></nav-list>
           </li>
         }
         @default {
@@ -100,12 +100,12 @@
             class="nav-item"
             role="listitem"
           >
-            <sp-nav-item
+            <nav-item
               [item]="item"
               [showLabels]="isExpanded() || (isMobile() && showMobileMenu())"
               [activeWorkContextId]="activeWorkContextId"
               (itemClick)="onItemClick($event)"
-            ></sp-nav-item>
+            ></nav-item>
           </li>
         }
       }

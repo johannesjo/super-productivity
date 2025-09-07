@@ -48,13 +48,13 @@
         class="nav-child-item"
         role="listitem"
       >
-        <sp-nav-item
+        <nav-item
           [item]="child"
           [showLabels]="true"
           [isChild]="true"
           [activeWorkContextId]="activeWorkContextId()"
           (itemClick)="itemClick.emit(child)"
-        ></sp-nav-item>
+        ></nav-item>
       </li>
     }
   </ul>

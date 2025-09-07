@@ -24,7 +24,6 @@ import {
   WorkContextCommon,
   WorkContextType,
 } from '../../features/work-context/work-context.model';
-import { SideNavItemComponent } from './side-nav-item/side-nav-item.component';
 import { ContextMenuComponent } from '../../ui/context-menu/context-menu.component';
 import { SpNavItemComponent } from './nav-item/nav-item.component';
 import { SpNavSectionComponent } from './nav-list/nav-list.component';
@@ -136,7 +135,6 @@ export interface NavConfig {
     MatMenuItem,
     MatMenuTrigger,
     TranslatePipe,
-    SideNavItemComponent,
     ContextMenuComponent,
     SpNavItemComponent,
     SpNavSectionComponent,

@@ -1,70 +1,16 @@
 import { Component, computed, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { MatIcon } from '@angular/material/icon';
-import { MatIconButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
-import { TranslatePipe } from '@ngx-translate/core';
 import { NavItem } from '../magic-side-nav';
 import { SideNavItemComponent } from '../side-nav-item/side-nav-item.component';
 import { NavRowComponent } from '../nav-row/nav-row.component';
 
 @Component({
-  selector: 'sp-nav-item',
+  selector: 'nav-item',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    MatIcon,
-    MatIconButton,
-    MatTooltip,
-    TranslatePipe,
-    SideNavItemComponent,
-    NavRowComponent,
-  ],
+  imports: [CommonModule, RouterModule, SideNavItemComponent, NavRowComponent],
   templateUrl: './nav-item.component.html',
-  styles: [
-    `
-      :host {
-        display: contents;
-      }
-      .nav-link,
-      .nav-child-link {
-        display: flex;
-        align-items: center;
-        gap: var(--s2);
-        padding: var(--s2) var(--s2);
-        color: var(--sidebar-text);
-        text-decoration: none;
-        border-radius: 8px;
-        transition: all 0.2s ease;
-        cursor: pointer;
-        background: transparent;
-        border: none;
-        width: 100%;
-        text-align: left;
-        position: relative;
-      }
-      .nav-link:hover,
-      .nav-child-link:hover {
-        background: var(--sidebar-hover);
-      }
-      .nav-link.active,
-      .nav-child-link.active {
-        background: var(--sidebar-active);
-        color: var(--sidebar-active-text);
-      }
-      .nav-child-link {
-        padding: var(--s) var(--s2);
-        color: var(--sidebar-text-secondary);
-        border-radius: 6px;
-        font-size: 14px;
-      }
-      .nav-child-link:hover {
-        color: var(--sidebar-text);
-      }
-    `,
-  ],
+  styleUrl: './nav-item.component.scss',
 })
 export class SpNavItemComponent {
   item = input.required<NavItem>();

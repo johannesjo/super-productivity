@@ -55,36 +55,6 @@
   &.isHidden {
     display: none !important;
   }
-
-  // color bar left styles
-  .color-bar,
-  &.isActiveRoute:before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: var(--s-half);
-    background-color: var(--c-primary);
-  }
-
-  .color-bar {
-    opacity: 0;
-  }
-
-  &.isActiveContext,
-  &:focus,
-  &:hover {
-    .color-bar {
-      opacity: 1;
-    }
-  }
-}
-
-:host-context(.cdk-drop-list-dragging) {
-  .color-bar {
-    opacity: 0 !important;
-  }
 }
 
 :host.isActiveContext button {
@@ -136,13 +106,6 @@ body.isDarkTheme :host.isActiveContext button.isActiveRoute {
       background-color: var(--sidebar-hover);
       color: var(--sidebar-text);
     }
-  }
-}
-
-// Compact variant for nested list (thinner color bar)
-:host.compact {
-  .color-bar {
-    width: 2px;
   }
 }
 

@@ -3,11 +3,6 @@
   *cdkDragPlaceholder
 ></div>
 
-<div
-  [style.background]="workContext().theme.primary"
-  class="color-bar"
-></div>
-
 <button
   #routeBtn
   [routerLink]="[type() === 'TAG' ? 'tag' : 'project', workContext().id, 'tasks']"
