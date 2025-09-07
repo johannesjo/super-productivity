@@ -1,4 +1,4 @@
-@use '_globals' as *;
+@use 'styles/globals' as *;
 
 :host {
   display: flex !important;
@@ -105,6 +105,44 @@ body.isDarkTheme :host.isActiveContext button.isActiveRoute {
 
   mat-icon {
     color: var(--c-primary);
+  }
+}
+
+// Styling when used inside magic-side-nav
+:host.variant-nav {
+  .g-multi-btn-wrapper {
+    background-color: transparent;
+  }
+
+  button[mat-menu-item] {
+    color: var(--sidebar-text);
+    padding: var(--s) var(--s2);
+    font-size: 14px;
+
+    &:hover {
+      background-color: var(--sidebar-hover);
+    }
+
+    &.isActiveRoute {
+      background-color: var(--sidebar-active);
+      color: var(--sidebar-active-text);
+    }
+  }
+
+  .additional-btn {
+    color: var(--sidebar-text-secondary);
+
+    &:hover {
+      background-color: var(--sidebar-hover);
+      color: var(--sidebar-text);
+    }
+  }
+}
+
+// Compact variant for nested list (thinner color bar)
+:host.compact {
+  .color-bar {
+    width: 2px;
   }
 }
 

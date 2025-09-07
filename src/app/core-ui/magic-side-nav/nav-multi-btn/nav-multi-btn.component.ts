@@ -1,16 +1,9 @@
-import {
-  Component,
-  Input,
-  Output,
-  EventEmitter,
-  ViewChild,
-  ElementRef,
-} from '@angular/core';
+import { Component, ViewChild, ElementRef, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
-import { NavItem, NavAdditionalButton } from '../magic-side-nav';
+import { NavItem, NavAdditionalButton, NavGroupItem } from '../magic-side-nav';
 import { ContextMenuComponent } from '../../../ui/context-menu/context-menu.component';
 import { MatMenuItem } from '@angular/material/menu';
 import { NavRowComponent } from '../nav-row/nav-row.component';
@@ -33,17 +26,17 @@ import { TranslatePipe } from '@ngx-translate/core';
   styleUrl: './nav-multi-btn.component.scss',
 })
 export class NavMultiBtnComponent {
-  @Input({ required: true }) item!: NavItem;
+  item = input.required<NavGroupItem>();
   // Whether labels and badges should be visible (driven by parent nav state)
-  @Input() showText = true;
-  @Input() isGroupExpanded: boolean = false;
+  showText = input<boolean>(true);
+  isGroupExpanded = input<boolean>(false);
 
-  @Output() itemClick = new EventEmitter<NavItem>();
+  itemClick = output<NavItem>();
 
   @ViewChild('expandBtn', { read: ElementRef }) expandBtn?: ElementRef;
 
   onExpandClick(): void {
-    this.itemClick.emit(this.item);
+    this.itemClick.emit(this.item());
   }
 
   onAdditionalButtonClick(btn: NavAdditionalButton, event: Event): void {

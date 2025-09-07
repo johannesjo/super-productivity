@@ -1,83 +1,84 @@
-@switch (item.type) {
+@switch (item().type) {
   @case ('workContext') {
     <side-nav-item
-      [workContext]="item.workContext"
-      [type]="item.workContextType"
-      [defaultIcon]="item.defaultIcon"
-      [activeWorkContextId]="activeWorkContextId || ''"
-      [class]="isChild ? 'work-context-item' : 'work-context-item-main'"
+      [workContext]="item().workContext"
+      [type]="item().workContextType"
+      [defaultIcon]="item().defaultIcon"
+      [activeWorkContextId]="activeWorkContextId() || ''"
+      [variant]="'nav'"
+      [compact]="isChild()"
     ></side-nav-item>
   }
 
   @case ('route') {
     <a
-      [routerLink]="item.route"
+      [routerLink]="item().route"
       routerLinkActive="active"
-      [class]="linkClass"
-      [attr.title]="shouldShowTooltip() ? item.label : null"
+      [class]="linkClass()"
+      [attr.title]="shouldShowTooltip() ? item().label : null"
       (click)="onItemClick()"
     >
       <nav-row
-        [icon]="item.icon"
-        [svgIcon]="item.svgIcon"
-        [label]="item.label"
-        [badge]="item.badge"
-        [showText]="showText"
+        [icon]="item().icon"
+        [svgIcon]="item().svgIcon"
+        [label]="item().label"
+        [badge]="item().badge"
+        [showText]="showText()"
       ></nav-row>
     </a>
   }
 
   @case ('href') {
     <a
-      [href]="item.href"
+      [href]="item().href"
       target="_blank"
       rel="noopener noreferrer"
-      [class]="linkClass"
-      [attr.title]="shouldShowTooltip() ? item.label : null"
+      [class]="linkClass()"
+      [attr.title]="shouldShowTooltip() ? item().label : null"
       (click)="onItemClick()"
     >
       <nav-row
-        [icon]="item.icon"
-        [svgIcon]="item.svgIcon"
-        [label]="item.label"
-        [badge]="item.badge"
-        [showText]="showText"
+        [icon]="item().icon"
+        [svgIcon]="item().svgIcon"
+        [label]="item().label"
+        [badge]="item().badge"
+        [showText]="showText()"
       ></nav-row>
     </a>
   }
 
   @case ('action') {
     <button
-      [class]="linkClass"
-      [attr.title]="shouldShowTooltip() ? item.label : null"
+      [class]="linkClass()"
+      [attr.title]="shouldShowTooltip() ? item().label : null"
       (click)="onItemClick()"
     >
       <nav-row
-        [icon]="item.icon"
-        [svgIcon]="item.svgIcon"
-        [label]="item.label"
-        [badge]="item.badge"
-        [showText]="showText"
+        [icon]="item().icon"
+        [svgIcon]="item().svgIcon"
+        [label]="item().label"
+        [badge]="item().badge"
+        [showText]="showText()"
       ></nav-row>
     </button>
   }
 
   @case ('group') {
     <button
-      [class]="linkClass"
-      [class.expanded]="isExpanded"
-      [attr.title]="shouldShowTooltip() ? item.label : null"
-      [attr.aria-expanded]="isExpanded"
-      [attr.aria-controls]="'group-' + item.id"
+      [class]="linkClass()"
+      [class.expanded]="isExpanded()"
+      [attr.title]="shouldShowTooltip() ? item().label : null"
+      [attr.aria-expanded]="isExpanded()"
+      [attr.aria-controls]="'group-' + item().id"
       (click)="onItemClick()"
     >
       <nav-row
-        [icon]="item.icon"
-        [svgIcon]="item.svgIcon"
-        [label]="item.label"
-        [badge]="item.badge"
-        [showText]="showText"
-        [showChevron]="item.children && item.children.length > 0 && showText"
+        [icon]="item().icon"
+        [svgIcon]="item().svgIcon"
+        [label]="item().label"
+        [badge]="item().badge"
+        [showText]="showText()"
+        [showChevron]="hasChildren() && showText()"
       ></nav-row>
     </button>
   }

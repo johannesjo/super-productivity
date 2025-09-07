@@ -24,7 +24,7 @@ import {
   WorkContextCommon,
   WorkContextType,
 } from '../../features/work-context/work-context.model';
-import { SideNavItemComponent } from '../side-nav/side-nav-item/side-nav-item.component';
+import { SideNavItemComponent } from './side-nav-item/side-nav-item.component';
 import { ContextMenuComponent } from '../../ui/context-menu/context-menu.component';
 import { NavEntryComponent } from './nav-entry/nav-entry.component';
 import { NavMultiBtnComponent } from './nav-multi-btn/nav-multi-btn.component';

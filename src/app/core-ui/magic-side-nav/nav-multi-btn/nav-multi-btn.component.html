@@ -1,27 +1,27 @@
 <div class="g-multi-btn-wrapper">
   <button
     class="nav-link expand-btn"
-    [class.expanded]="isGroupExpanded"
-    [class.isExpanded]="isGroupExpanded"
-    [attr.title]="!showText ? item.label : null"
+    [class.expanded]="isGroupExpanded()"
+    [class.isExpanded]="isGroupExpanded()"
+    [attr.title]="!showText() ? item().label : null"
     (click)="onExpandClick()"
-    [attr.aria-expanded]="isGroupExpanded"
-    [attr.aria-controls]="'group-' + item.id"
+    [attr.aria-expanded]="isGroupExpanded()"
+    [attr.aria-controls]="'group-' + item().id"
     #expandBtn
   >
     <nav-row
-      [icon]="item.icon"
-      [svgIcon]="item.svgIcon"
-      [label]="item.label"
-      [badge]="item.badge"
-      [showText]="showText"
+      [icon]="item().icon"
+      [svgIcon]="item().svgIcon"
+      [label]="item().label"
+      [badge]="item().badge"
+      [showText]="showText()"
       labelClass="title"
     ></nav-row>
   </button>
 
   <!-- Additional buttons (only show when sidebar is expanded) -->
-  @if (showText) {
-    @for (btn of item.additionalButtons; track btn.id) {
+  @if (showText()) {
+    @for (btn of item().additionalButtons; track btn.id) {
       @if (!btn.hidden) {
         <button
           class="additional-btn"

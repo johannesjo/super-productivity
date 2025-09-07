@@ -50,6 +50,9 @@ export class SideNavItemComponent {
   type = input.required<WorkContextType>();
   defaultIcon = input.required<string>();
   activeWorkContextId = input.required<string>();
+  // Variant styling to integrate into magic-side-nav without deep selectors
+  variant = input<'default' | 'nav'>('default');
+  compact = input<boolean>(false);
 
   allUndoneTaskIds = toSignal(this._store.select(selectAllDoneIds), { initialValue: [] });
   nrOfOpenTasks = computed<number>(() => {
@@ -74,6 +77,16 @@ export class SideNavItemComponent {
   @HostBinding('class.isHidden')
   get isHidden(): boolean {
     return !!(this.workContext() as Project)?.isHiddenFromMenu;
+  }
+
+  @HostBinding('class.variant-nav')
+  get isVariantNav(): boolean {
+    return this.variant() === 'nav';
+  }
+
+  @HostBinding('class.compact')
+  get isCompact(): boolean {
+    return this.compact();
   }
 
   focus(): void {

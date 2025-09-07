@@ -200,86 +200,9 @@
   }
 }
 
-// Work context items styling
-.work-context-item {
-  // Remove default nav-child-item padding to let side-nav-item handle its own spacing
-  padding: 0;
-  margin: 0;
-
-  ::ng-deep side-nav-item {
-    // Ensure side-nav-item fits well within the navigation structure
-    display: block;
-    width: 100%;
-
-    // Override side-nav-item styles to match magic-side-nav theming
-    .g-multi-btn-wrapper {
-      background-color: transparent;
-
-      .color-bar {
-        // Make color bar thinner to fit better in child context
-        width: 2px;
-      }
-
-      button {
-        color: var(--sidebar-text);
-        padding: var(--s) var(--s2);
-        font-size: 14px;
-
-        &:hover {
-          background-color: var(--sidebar-hover);
-        }
-
-        &.isActiveRoute {
-          background-color: var(--sidebar-active);
-          color: var(--sidebar-active-text);
-        }
-      }
-
-      .additional-btn {
-        color: var(--sidebar-text-secondary);
-
-        &:hover {
-          background-color: var(--sidebar-hover);
-          color: var(--sidebar-text);
-        }
-      }
-    }
-  }
+// Keep nav-entry transparent for layout
+:host {
+  display: contents;
 }
 
-// Top-level work context items (Today/Inbox)
-.work-context-item-main {
-  display: block;
-  width: 100%;
-
-  ::ng-deep side-nav-item {
-    display: block;
-    width: 100%;
-
-    .g-multi-btn-wrapper {
-      background-color: transparent;
-
-      button {
-        color: var(--sidebar-text);
-
-        &:hover {
-          background-color: var(--sidebar-hover);
-        }
-
-        &.isActiveRoute {
-          background-color: var(--sidebar-active);
-          color: var(--sidebar-active-text);
-        }
-      }
-
-      .additional-btn {
-        color: var(--sidebar-text-secondary);
-
-        &:hover {
-          background-color: var(--sidebar-hover);
-          color: var(--sidebar-text);
-        }
-      }
-    }
-  }
-}
+// SideNavItemComponent handles nav variant styling; nothing needed here

@@ -1,41 +1,48 @@
 <li
   class="nav-item"
-  [class.has-children]="
-    item.type === 'group' && item.children && item.children.length > 0
-  "
+  [class.has-children]="hasChildren()"
   role="listitem"
 >
-  @if (
-    item.type === 'group' && item.additionalButtons && item.additionalButtons.length > 0
-  ) {
-    <!-- Multi-button wrapper for groups with additional buttons -->
-    <nav-multi-btn
-      [item]="item"
-      [showText]="showText"
-      [isGroupExpanded]="isGroupExpanded"
-      (itemClick)="onItemClick()"
-    ></nav-multi-btn>
+  @if (groupItem(); as gi) {
+    @if (gi.additionalButtons && gi.additionalButtons.length > 0) {
+      <!-- Multi-button wrapper for groups with additional buttons -->
+      <nav-multi-btn
+        [item]="gi"
+        [showText]="showText()"
+        [isGroupExpanded]="isGroupExpanded()"
+        (itemClick)="onItemClick()"
+      ></nav-multi-btn>
+    } @else {
+      <!-- Group without additional buttons -->
+      <nav-item
+        [item]="gi"
+        [showText]="showText()"
+        [isExpanded]="isGroupExpanded()"
+        [activeWorkContextId]="activeWorkContextId()"
+        (itemClick)="onItemClick()"
+      ></nav-item>
+    }
   } @else {
-    <!-- Standard nav item -->
+    <!-- Non-group standard nav item -->
     <nav-item
-      [item]="item"
-      [showText]="showText"
-      [isExpanded]="isGroupExpanded"
-      [activeWorkContextId]="activeWorkContextId"
+      [item]="item()"
+      [showText]="showText()"
+      [isExpanded]="false"
+      [activeWorkContextId]="activeWorkContextId()"
       (itemClick)="onItemClick()"
     ></nav-item>
   }
 
   <!-- Children Items -->
-  @if (item.type === 'group' && item.children && item.children.length > 0) {
+  @if (groupItem(); as gi) {
     <ul
       class="nav-children"
-      [class.expanded]="isGroupExpanded"
-      [class.visible]="isGroupExpanded"
-      [attr.id]="'group-' + item.id"
+      [class.expanded]="isGroupExpanded()"
+      [class.visible]="isGroupExpanded()"
+      [attr.id]="'group-' + gi.id"
       role="list"
     >
-      @for (child of item.children; track child.id) {
+      @for (child of gi.children; track child.id) {
         <li
           class="nav-child-item"
           role="listitem"
@@ -44,7 +51,7 @@
             [item]="child"
             [showText]="true"
             [isChild]="true"
-            [activeWorkContextId]="activeWorkContextId"
+            [activeWorkContextId]="activeWorkContextId()"
             (itemClick)="onChildClick(child)"
           ></nav-item>
         </li>

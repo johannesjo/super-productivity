@@ -50,7 +50,7 @@ import {
   selectUnarchivedHiddenProjectIds,
   selectUnarchivedVisibleProjects,
 } from '../../features/project/store/project.selectors';
-import { SideNavItemComponent } from './side-nav-item/side-nav-item.component';
+import { SideNavItemComponent } from '../magic-side-nav/side-nav-item/side-nav-item.component';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
