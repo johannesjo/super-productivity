@@ -5,6 +5,11 @@
     display: none;
   }
 
+  // Ensure Material icons in side nav have consistent 8px margin
+  button mat-icon {
+    margin-right: 8px !important;
+  }
+
   &.hasTasks {
     button .badge {
       display: block;
@@ -98,4 +103,17 @@ body.isDarkTheme :host.isActiveContext button.isActiveRoute {
     right: calc(-1 * var(--s));
     bottom: calc(-1 * var(--s));
   }
+}
+
+.nav-icon-emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  line-height: 1;
+  text-align: center;
+  vertical-align: middle;
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
 }

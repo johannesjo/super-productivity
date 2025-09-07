@@ -24,6 +24,7 @@ import { MatMenuItem } from '@angular/material/menu';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { selectAllDoneIds } from '../../../features/tasks/store/task.selectors';
 import { Store } from '@ngrx/store';
+import { isEmoji } from '../../../util/is-emoji';
 
 @Component({
   selector: 'side-nav-item',
@@ -75,6 +76,11 @@ export class SideNavItemComponent {
   get isHidden(): boolean {
     return !!(this.workContext() as Project)?.isHiddenFromMenu;
   }
+
+  isEmojiIcon = computed<boolean>(() => {
+    const icon = this.workContext().icon || this.defaultIcon();
+    return isEmoji(icon);
+  });
 
   focus(): void {
     this.routeBtn().nativeElement.focus();
