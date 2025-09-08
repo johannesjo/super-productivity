@@ -6,6 +6,15 @@
   display: flex;
   align-items: center;
   position: relative;
+
+  .expand-btn {
+    flex: 1;
+    text-align: left;
+
+    &.isExpanded .nav-icon {
+      transform: rotate(180deg);
+    }
+  }
 }
 
 .nav-link {
@@ -56,6 +65,12 @@
     background-color: var(--sidebar-hover);
     color: var(--sidebar-text);
   }
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
 }
 
 .nav-children {
@@ -68,5 +83,41 @@
 
   &.visible {
     max-height: 500px;
+  }
+}
+
+// Collapsed state behaviors inherited from parent sidebar
+:host-context(.nav-sidebar.collapsed) {
+  .g-multi-btn-wrapper {
+    justify-content: center;
+
+    .expand-btn {
+      justify-content: center;
+      padding: 12px;
+      position: relative;
+
+      .nav-icon {
+        margin: 0;
+      }
+
+      &.isExpanded::after {
+        content: '';
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        width: 4px;
+        height: 4px;
+        background-color: var(--sidebar-active-text);
+        border-radius: 50%;
+      }
+    }
+
+    .additional-btn {
+      display: none;
+    }
+  }
+
+  .nav-children {
+    display: none;
   }
 }

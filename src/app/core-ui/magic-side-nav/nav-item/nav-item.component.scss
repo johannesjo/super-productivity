@@ -123,3 +123,115 @@
     bottom: calc(-1 * var(--s));
   }
 }
+
+// Unified navigation row styles moved from parent
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s2) var(--s2);
+  color: var(--sidebar-text);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  position: relative;
+
+  &:hover {
+    background: var(--sidebar-hover);
+  }
+
+  &.active {
+    background: var(--sidebar-active);
+    color: var(--sidebar-active-text);
+
+    .nav-icon {
+      color: var(--sidebar-active-text);
+    }
+  }
+
+  &.expanded .nav-chevron {
+    transform: rotate(180deg);
+  }
+}
+
+.nav-child-link {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s) var(--s2);
+  color: var(--sidebar-text-secondary);
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-size: 14px;
+
+  &:hover {
+    background: var(--sidebar-hover);
+    color: var(--sidebar-text);
+  }
+
+  &.active {
+    background: var(--sidebar-active);
+    color: var(--sidebar-active-text);
+
+    .nav-icon {
+      color: var(--sidebar-active-text);
+    }
+  }
+
+  .nav-icon {
+    width: 20px;
+    height: 20px;
+    font-size: 16px;
+  }
+}
+
+// Navigation icon and chevron
+.nav-icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sidebar-text-secondary);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.nav-chevron {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+  color: var(--sidebar-text-secondary);
+}
+
+// Collapsed state adjustments from parent sidebar
+:host-context(.nav-sidebar.collapsed) {
+  .nav-link {
+    justify-content: center;
+    padding: 12px;
+  }
+
+  .nav-icon {
+    margin: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  :host-context(.nav-sidebar.collapsed) {
+    .nav-link {
+      justify-content: flex-start;
+      padding: 10px 12px;
+    }
+  }
+}
