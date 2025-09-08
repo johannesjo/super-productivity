@@ -33,6 +33,8 @@
         [config]="getMagicSideNavConfig()"
         [expandedGroupIds]="getExpandedGroupIds()"
         [activeWorkContextId]="getActiveWorkContextId()"
+        [mobileVisible]="layoutService.isShowSideNav()"
+        (mobileVisibleChange)="onMobileNavVisibleChange($event)"
         (itemClick)="sideNavConfigService.onNavItemClick($event)"
         (expandedChange)="onSideNavExpandedChange($event)"
       >

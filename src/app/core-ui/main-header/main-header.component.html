@@ -1,12 +1,13 @@
 <div class="wrapper">
   @if (!isNavAlwaysVisible()) {
-    <!--    <button-->
-    <!--      (click)="layoutService.toggleSideNav()"-->
-    <!--      class="burger-trigger tour-burgerTrigger"-->
-    <!--      mat-icon-button-->
-    <!--    >-->
-    <!--      <mat-icon>menu</mat-icon>-->
-    <!--    </button>-->
+    <button
+      (click)="layoutService.toggleSideNav()"
+      class="burger-trigger tour-burgerTrigger"
+      mat-icon-button
+      matTooltip="Open navigation"
+    >
+      <mat-icon>menu</mat-icon>
+    </button>
   }
 
   <work-context-title

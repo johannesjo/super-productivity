@@ -451,8 +451,8 @@ export class AppComponent implements OnDestroy, AfterViewInit {
     return {
       ...baseConfig,
       expandedByDefault: this.layoutService.isShowSideNav(),
-      // Integrate with layout service for mobile detection
-      mobileBreakpoint: 0, // Disable mobile mode, use existing app mobile handling
+      // Enable magic-side-nav mobile overlay for small screens
+      mobileBreakpoint: 768,
     };
   }
 
@@ -460,6 +460,13 @@ export class AppComponent implements OnDestroy, AfterViewInit {
     const currentlyExpanded = this.layoutService.isShowSideNav();
     if (isExpanded !== currentlyExpanded) {
       this.layoutService.toggleSideNav();
+    }
+  }
+
+  // Keep layout service in sync when mobile overlay closes via backdrop/item click
+  onMobileNavVisibleChange(isVisible: boolean): void {
+    if (!isVisible && this.layoutService.isShowSideNav()) {
+      this.layoutService.hideSideNav();
     }
   }
 

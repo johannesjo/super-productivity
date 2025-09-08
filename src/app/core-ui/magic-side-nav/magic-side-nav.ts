@@ -7,6 +7,7 @@ import {
   computed,
   effect,
   output,
+  input,
   OnInit,
   OnDestroy,
 } from '@angular/core';
@@ -167,6 +168,9 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
   itemClick = output<NavItem>();
   expandedChange = output<boolean>();
   widthChange = output<number>();
+  // Externally controlled mobile overlay visibility
+  mobileVisible = input<boolean | null>(null);
+  mobileVisibleChange = output<boolean>();
 
   isExpanded = signal(true);
   isMobile = signal(false);
@@ -198,6 +202,10 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
   // Animate the host width so layout adjusts smoothly
   @HostBinding('style.width.px')
   get hostWidth(): number {
+    // On mobile, don't reserve layout space; use fixed overlay instead
+    if (this.isMobile()) {
+      return 0;
+    }
     return this.sidebarWidth();
   }
 
@@ -220,6 +228,21 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     // Effect to emit width changes
     effect(() => {
       this.widthChange.emit(this.sidebarWidth());
+    });
+
+    // Sync external mobile visibility input → internal state
+    effect(() => {
+      const desired = this.mobileVisible();
+      if (desired !== null && this.isMobile()) {
+        this.showMobileMenu.set(!!desired);
+      }
+    });
+
+    // Emit mobile visible changes to parent while in mobile mode
+    effect(() => {
+      if (this.isMobile()) {
+        this.mobileVisibleChange.emit(this.showMobileMenu());
+      }
     });
   }
 
@@ -270,7 +293,7 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
       const nav = document.querySelector('.nav-sidebar');
       const toggle = document.querySelector('.mobile-menu-toggle');
 
-      if (nav && !nav.contains(target) && toggle && !toggle.contains(target)) {
+      if (nav && !nav.contains(target) && (!toggle || !toggle.contains(target as Node))) {
         this.showMobileMenu.set(false);
       }
     }

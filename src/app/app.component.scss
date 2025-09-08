@@ -23,23 +23,28 @@
 }
 
 // Override magic-side-nav styles for flex layout integration
-magic-side-nav {
-  ::ng-deep .nav-sidebar {
-    position: relative !important;
-    top: auto !important;
-    left: auto !important;
-    bottom: auto !important;
-    height: 100vh !important;
-    min-height: -webkit-fill-available !important;
-    z-index: auto !important;
-  }
+// Use desktop layout overrides only on larger screens
+@media (min-width: 768px) {
+  magic-side-nav {
+    ::ng-deep .nav-sidebar {
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      bottom: auto !important;
+      height: 100vh !important;
+      min-height: -webkit-fill-available !important;
+      z-index: auto !important;
+    }
 
-  ::ng-deep .mobile-menu-toggle {
-    display: none !important; // Use app header toggle instead
-  }
+    // Header provides a toggle on small screens; keep native toggle hidden on desktop
+    ::ng-deep .mobile-menu-toggle {
+      display: none !important;
+    }
 
-  ::ng-deep .nav-overlay {
-    display: none !important; // Not needed in flex layout
+    // Overlay not needed on desktop
+    ::ng-deep .nav-overlay {
+      display: none !important;
+    }
   }
 }
 

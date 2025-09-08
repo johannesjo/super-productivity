@@ -81,7 +81,7 @@ $overlay-bg: var(--c-dark-50, rgba(0, 0, 0, 0.5));
   right: 0;
   bottom: 0;
   background: $overlay-bg;
-  z-index: 998;
+  z-index: 1001;
   opacity: 0;
   transition: opacity $transition-duration $transition-timing;
 
@@ -102,7 +102,7 @@ $overlay-bg: var(--c-dark-50, rgba(0, 0, 0, 0.5));
   border-right: 1px solid var(--sidebar-border);
   // Default: don't animate width
   transition: none;
-  z-index: 999;
+  z-index: 1002;
   overflow-y: auto;
   overflow-x: hidden;
 
