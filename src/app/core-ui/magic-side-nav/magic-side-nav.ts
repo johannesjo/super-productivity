@@ -49,6 +49,8 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
   showMobileMenu = signal(false);
   // Track expanded groups as array for better signal change detection
   expandedGroups = signal<string[]>([]);
+  // Merge service-controlled and local expanded ids for reactive checks
+
   // Animate only for collapsed/expanded toggle
   animateWidth = signal(false);
   private _animateTimeoutId: number | null = null;
@@ -166,18 +168,19 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
   }
 
   toggleGroup(item: NavItem): void {
-    if (item.type === 'group' && item.children && item.children.length > 0) {
-      const groups = this.expandedGroups();
-      if (groups.includes(item.id)) {
-        this.expandedGroups.set(groups.filter((g) => g !== item.id));
-      } else {
-        this.expandedGroups.set([...groups, item.id]);
-      }
+    if (item.type !== 'group' || !item.children) {
+      return;
     }
+    const groups = this.expandedGroups();
+    if (groups.includes(item.id)) {
+      this.expandedGroups.set(groups.filter((g) => g !== item.id));
+    } else {
+      this.expandedGroups.set([...groups, item.id]);
+    }
+    console.log(item, this.expandedGroups());
   }
 
   isGroupExpanded(item: NavItem): boolean {
-    if (item.type !== 'group') return false;
     return this.expandedGroups().includes(item.id);
   }
 

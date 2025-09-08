@@ -222,14 +222,6 @@ export class MagicNavConfigService {
     expandThreshold: 180,
   }));
 
-  // Expanded groups
-  readonly expandedGroupIds = computed<Set<string>>(() => {
-    const expanded = new Set<string>();
-    if (this._isProjectsExpanded()) expanded.add('projects');
-    if (this._isTagsExpanded()) expanded.add('tags');
-    return expanded;
-  });
-
   // Simple action handler
   onNavItemClick(item: NavItem): void {
     switch (item.type) {
