@@ -2,10 +2,17 @@
 $sidebar-width-expanded: var(--side-nav-width, 260px);
 $sidebar-width-collapsed: 72px;
 $mobile-breakpoint: 768px;
-$transition-speed: var(--transition-standard, 0.3s);
+// Use duration/timing variables directly; --transition-standard is a shorthand
+$transition-duration: var(--transition-duration-m, 0.3s);
+$transition-timing: var(--ani-standard-timing, cubic-bezier(0.4, 0, 0.2, 1));
 $overlay-bg: var(--c-dark-50, rgba(0, 0, 0, 0.5));
 
 :host {
+  // Ensure the component itself participates in layout and animates width
+  display: block;
+  flex: 0 0 auto;
+  transition: none;
+  will-change: width;
   // Use app's CSS variables for consistent theming
   --sidebar-bg: var(--palette-background-card);
   --sidebar-border: var(--divider-color);
@@ -27,6 +34,16 @@ $overlay-bg: var(--c-dark-50, rgba(0, 0, 0, 0.5));
   }
 }
 
+// Enable host width transition only when toggling collapsed/expanded
+:host(.animate) {
+  transition: width $transition-duration $transition-timing;
+}
+
+// Disable host transition during resize drags
+:host(.resizing) {
+  transition: none !important;
+}
+
 // Mobile menu toggle button
 .mobile-menu-toggle {
   display: none;
@@ -39,7 +56,7 @@ $overlay-bg: var(--c-dark-50, rgba(0, 0, 0, 0.5));
   border-radius: 8px;
   padding: 8px;
   cursor: pointer;
-  transition: all $transition-speed ease;
+  transition: var(--transition-standard);
 
   &.visible {
     display: flex;
@@ -67,7 +84,7 @@ $overlay-bg: var(--c-dark-50, rgba(0, 0, 0, 0.5));
   background: $overlay-bg;
   z-index: 998;
   opacity: 0;
-  transition: opacity $transition-speed ease;
+  transition: opacity $transition-duration $transition-timing;
 
   &.visible {
     display: block;
@@ -84,12 +101,23 @@ $overlay-bg: var(--c-dark-50, rgba(0, 0, 0, 0.5));
   width: $sidebar-width-expanded;
   background: var(--sidebar-bg);
   border-right: 1px solid var(--sidebar-border);
-  transition: all $transition-speed cubic-bezier(0.4, 0, 0.2, 1);
+  // Default: don't animate width
+  transition: none;
   z-index: 999;
   overflow-y: auto;
   overflow-x: hidden;
 
+  &.animate {
+    transition: width $transition-duration $transition-timing;
+  }
+
   &.resizing {
+    transition: none !important;
+  }
+
+  // When resizing, also suppress label/text transitions inside entries
+  &.resizing .nav-label,
+  &.resizing .text {
     transition: none !important;
   }
 
@@ -149,10 +177,8 @@ $overlay-bg: var(--c-dark-50, rgba(0, 0, 0, 0.5));
 
   // Collapsed state (desktop)
   &.collapsed {
-    width: $sidebar-width-collapsed !important;
+    // width controlled via inline style for smooth transitions
 
-    .nav-label,
-    .nav-chevron,
     .nav-children {
       display: none;
     }
@@ -290,7 +316,7 @@ $overlay-bg: var(--c-dark-50, rgba(0, 0, 0, 0.5));
   border-radius: 6px;
   padding: 6px;
   cursor: pointer;
-  transition: all $transition-speed ease;
+  transition: var(--transition-standard);
   color: var(--sidebar-text-secondary);
 
   &.visible {

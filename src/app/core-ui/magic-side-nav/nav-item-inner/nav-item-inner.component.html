@@ -14,7 +14,13 @@
       <mat-icon class="drag-handle">{{ workContext()!.icon || defaultIcon() }} </mat-icon>
       <span class="badge">{{ nrOfOpenTasks() }}</span>
     </div>
-    <span class="text">{{ workContext()!.title }}</span>
+    <span
+      class="text"
+      [class.label-hidden]="!showLabels()"
+      [attr.aria-hidden]="!showLabels() ? 'true' : 'false'"
+    >
+      {{ workContext()!.title }}
+    </span>
   </button>
 
   @if (showMoreButton()) {
@@ -50,8 +56,14 @@
     <mat-icon class="nav-icon">{{ icon() }}</mat-icon>
   }
 
-  @if (showLabels() && label()) {
-    <span class="nav-label">{{ label() | translate }}</span>
+  @if (label()) {
+    <span
+      class="nav-label"
+      [class.label-hidden]="!showLabels()"
+      [attr.aria-hidden]="!showLabels() ? 'true' : 'false'"
+    >
+      {{ label() | translate }}
+    </span>
   }
 
   @if (showChevron()) {

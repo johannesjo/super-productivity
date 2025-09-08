@@ -2,11 +2,13 @@ import {
   Component,
   Input,
   HostListener,
+  HostBinding,
   signal,
   computed,
   effect,
   output,
   OnInit,
+  OnDestroy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -141,7 +143,7 @@ export interface NavConfig {
   templateUrl: './magic-side-nav.html',
   styleUrl: './magic-side-nav.scss',
 })
-export class MagicSideNavComponent implements OnInit {
+export class MagicSideNavComponent implements OnInit, OnDestroy {
   @Input() config: NavConfig = {
     items: [],
     expandedByDefault: true,
@@ -170,6 +172,9 @@ export class MagicSideNavComponent implements OnInit {
   expandedGroups = signal(new Set<string>());
   // Visual feedback state for resizing thresholds
   resizeState = signal<'normal' | 'collapse' | 'expand'>('normal');
+  // Animate only for collapsed/expanded toggle
+  animateWidth = signal(false);
+  private _animateTimeoutId: number | null = null;
 
   // Resize functionality
   currentWidth = signal(260);
@@ -188,6 +193,22 @@ export class MagicSideNavComponent implements OnInit {
     return this.currentWidth();
   });
 
+  // Animate the host width so layout adjusts smoothly
+  @HostBinding('style.width.px')
+  get hostWidth(): number {
+    return this.sidebarWidth();
+  }
+
+  @HostBinding('class.animate')
+  get hostAnimate(): boolean {
+    return this.animateWidth();
+  }
+
+  @HostBinding('class.resizing')
+  get hostResizing(): boolean {
+    return this.isResizing();
+  }
+
   // Keep stable references for event listeners to ensure proper cleanup
   private readonly onDrag: (event: MouseEvent) => void = (event: MouseEvent) =>
     this.handleDrag(event);
@@ -198,6 +219,13 @@ export class MagicSideNavComponent implements OnInit {
     effect(() => {
       this.widthChange.emit(this.sidebarWidth());
     });
+  }
+
+  ngOnDestroy(): void {
+    if (this._animateTimeoutId != null) {
+      window.clearTimeout(this._animateTimeoutId);
+      this._animateTimeoutId = null;
+    }
   }
 
   ngOnInit(): void {
@@ -264,6 +292,7 @@ export class MagicSideNavComponent implements OnInit {
     if (this.isMobile()) {
       this.showMobileMenu.update((show) => !show);
     } else {
+      this._enableWidthAnimation();
       const newExpanded = !this.isExpanded();
       this.isExpanded.set(newExpanded);
       // Save expansion state to localStorage
@@ -424,6 +453,19 @@ export class MagicSideNavComponent implements OnInit {
     if (this.isExpanded()) {
       localStorage.setItem('nav-sidebar-width', this.currentWidth().toString());
     }
+  }
+
+  private _enableWidthAnimation(): void {
+    if (this._animateTimeoutId != null) {
+      window.clearTimeout(this._animateTimeoutId);
+      this._animateTimeoutId = null;
+    }
+    this.animateWidth.set(true);
+    // Slightly longer than --transition-duration-m (225ms) to ensure cleanup
+    this._animateTimeoutId = window.setTimeout(() => {
+      this.animateWidth.set(false);
+      this._animateTimeoutId = null;
+    }, 300);
   }
 
   // Inline width binding via template replaces imperative DOM style updates

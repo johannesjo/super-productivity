@@ -41,6 +41,7 @@
   [class.collapsed]="!isExpanded() && !isMobile()"
   [class.mobile]="isMobile()"
   [class.mobile-visible]="isMobile() && showMobileMenu()"
+  [class.animate]="animateWidth()"
   [class.theme-dark]="config.theme === 'dark'"
   [class.position-right]="config.position === 'right'"
   [class.resizing]="isResizing()"
