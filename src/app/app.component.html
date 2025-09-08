@@ -30,13 +30,9 @@
       [dir]="isRTL ? 'rtl' : 'ltr'"
     >
       <magic-side-nav
-        [config]="getMagicSideNavConfig()"
-        [expandedGroupIds]="getExpandedGroupIds()"
         [activeWorkContextId]="getActiveWorkContextId()"
-        [mobileVisible]="layoutService.isShowSideNav()"
+        [mobileVisible]="layoutService.isShowMobileSideNav()"
         (mobileVisibleChange)="onMobileNavVisibleChange($event)"
-        (itemClick)="sideNavConfigService.onNavItemClick($event)"
-        (expandedChange)="onSideNavExpandedChange($event)"
       >
       </magic-side-nav>
 

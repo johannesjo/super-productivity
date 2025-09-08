@@ -47,7 +47,7 @@ import { GlobalConfigState } from './features/config/global-config.model';
 import { AddTaskBarComponent } from './features/tasks/add-task-bar/add-task-bar.component';
 import { Dir } from '@angular/cdk/bidi';
 import { MagicSideNavComponent } from './core-ui/magic-side-nav/magic-side-nav';
-import { SideNavConfigService } from './core-ui/side-nav/side-nav-config.service';
+import { MagicNavConfigService } from './core-ui/magic-side-nav/magic-nav-config.service';
 import { MainHeaderComponent } from './core-ui/main-header/main-header.component';
 import { BannerComponent } from './core/banner/banner/banner.component';
 import { GlobalProgressBarComponent } from './core-ui/global-progress-bar/global-progress-bar.component';
@@ -82,7 +82,6 @@ import { ProjectService } from './features/project/project.service';
 import { TagService } from './features/tag/tag.service';
 import { ContextMenuComponent } from './ui/context-menu/context-menu.component';
 import { WorkContextThemeCfg } from './features/work-context/work-context.model';
-import { NavConfig } from './core-ui/magic-side-nav/magic-side-nav.model';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -152,7 +151,7 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   private _syncSafetyBackupService = inject(SyncSafetyBackupService);
 
   readonly syncTriggerService = inject(SyncTriggerService);
-  readonly sideNavConfigService = inject(SideNavConfigService);
+  readonly sideNavConfigService = inject(MagicNavConfigService);
   readonly imexMetaService = inject(ImexViewService);
   readonly workContextService = inject(WorkContextService);
   readonly layoutService = inject(LayoutService);
@@ -446,32 +445,11 @@ export class AppComponent implements OnDestroy, AfterViewInit {
     return outlet.activatedRouteData.page || 'one';
   }
 
-  getMagicSideNavConfig(): NavConfig {
-    const baseConfig = this.sideNavConfigService.navConfig();
-    return {
-      ...baseConfig,
-      expandedByDefault: this.layoutService.isShowSideNav(),
-      // Enable magic-side-nav mobile overlay for small screens
-      mobileBreakpoint: 768,
-    };
-  }
-
-  onSideNavExpandedChange(isExpanded: boolean): void {
-    const currentlyExpanded = this.layoutService.isShowSideNav();
-    if (isExpanded !== currentlyExpanded) {
-      this.layoutService.toggleSideNav();
-    }
-  }
-
   // Keep layout service in sync when mobile overlay closes via backdrop/item click
   onMobileNavVisibleChange(isVisible: boolean): void {
-    if (!isVisible && this.layoutService.isShowSideNav()) {
+    if (!isVisible) {
       this.layoutService.hideSideNav();
     }
-  }
-
-  getExpandedGroupIds(): Set<string> {
-    return this.sideNavConfigService.expandedGroupIds();
   }
 
   getActiveWorkContextId(): string | null {

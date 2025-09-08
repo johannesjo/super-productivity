@@ -443,7 +443,7 @@ export const SHEPHERD_STEPS = (
         return Promise.resolve();
       },
       when: nextOnObs(
-        layoutService.isShowSideNav$.pipe(filter((v) => !!v)),
+        layoutService.isShowMobileSideNav$.pipe(filter((v) => !!v)),
         shepherdService,
       ),
     },
@@ -498,7 +498,7 @@ export const SHEPHERD_STEPS = (
       },
       text: 'Open the menu (<span class="material-icons">menu</span>)',
       when: nextOnObs(
-        layoutService.isShowSideNav$.pipe(filter((v) => !!v)),
+        layoutService.isShowMobileSideNav$.pipe(filter((v) => !!v)),
         shepherdService,
       ),
     },

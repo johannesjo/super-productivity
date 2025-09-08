@@ -1,4 +1,4 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
@@ -13,12 +13,12 @@ import { LS } from '../../core/persistence/storage-keys.const';
 import { DialogCreateProjectComponent } from '../../features/project/dialogs/create-project/dialog-create-project.component';
 import { getGithubErrorUrl } from '../../core/error-handler/global-error-handler.util';
 import { selectUnarchivedVisibleProjects } from '../../features/project/store/project.selectors';
-import { NavConfig, NavItem } from '../magic-side-nav/magic-side-nav.model';
+import { NavConfig, NavItem } from './magic-side-nav.model';
 
 @Injectable({
   providedIn: 'root',
 })
-export class SideNavConfigService {
+export class MagicNavConfigService {
   private readonly _workContextService = inject(WorkContextService);
   private readonly _tagService = inject(TagService);
   private readonly _shepherdService = inject(ShepherdService);
@@ -298,7 +298,7 @@ export class SideNavConfigService {
       route: `/project/${project.id}/tasks`,
       workContext: project,
       workContextType: WorkContextType.PROJECT,
-      defaultIcon: 'folder_special',
+      defaultIcon: project.icon || 'folder_special',
     }));
   }
 
@@ -320,7 +320,7 @@ export class SideNavConfigService {
       route: `/tag/${tag.id}/tasks`,
       workContext: tag,
       workContextType: WorkContextType.TAG,
-      defaultIcon: 'label',
+      defaultIcon: tag.icon || 'label',
     }));
   }
 

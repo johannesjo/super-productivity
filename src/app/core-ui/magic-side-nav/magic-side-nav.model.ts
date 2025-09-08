@@ -81,15 +81,15 @@ export interface NavAdditionalButton {
 }
 export interface NavConfig {
   items: NavItem[];
-  expandedByDefault?: boolean;
-  showLabels?: boolean;
-  mobileBreakpoint?: number;
-  position?: 'left' | 'right';
-  theme?: 'light' | 'dark';
-  resizable?: boolean;
-  minWidth?: number;
-  maxWidth?: number;
-  defaultWidth?: number;
-  collapseThreshold?: number;
-  expandThreshold?: number;
+  expandedByDefault: boolean;
+  showLabels: boolean;
+  mobileBreakpoint: number;
+  position: 'left' | 'right';
+  theme: 'light' | 'dark';
+  resizable: boolean;
+  minWidth: number;
+  maxWidth: number;
+  defaultWidth: number;
+  collapseThreshold: number;
+  expandThreshold: number;
 }

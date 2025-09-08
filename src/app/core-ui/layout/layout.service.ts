@@ -47,7 +47,7 @@ export class LayoutService {
   readonly isShowAddTaskBar$: Observable<boolean> = this._store$.pipe(
     select(selectIsShowAddTaskBar),
   );
-  readonly isShowSideNav$: Observable<boolean> = this._store$.pipe(
+  readonly isShowMobileSideNav$: Observable<boolean> = this._store$.pipe(
     select(selectIsShowSideNav),
   );
   readonly isShowIssuePanel$: Observable<boolean> = this._store$.pipe(
@@ -129,13 +129,8 @@ export class LayoutService {
     return !this.isRightPanelNextNavOver();
   });
 
-  private readonly _isShowSideNav = toSignal(this.isShowSideNav$, {
+  private readonly isShowMobileSideNav = toSignal(this.isShowMobileSideNav$, {
     initialValue: false,
-  });
-
-  readonly isShowSideNav = computed(() => {
-    const isShow = this._isShowSideNav();
-    return isShow || this.isNavAlwaysVisible();
   });
 
   readonly isShowNotes = toSignal(this._store$.pipe(select(selectIsShowNotes)), {
@@ -156,7 +151,7 @@ export class LayoutService {
       this._router.events.pipe(filter((ev) => ev instanceof NavigationStart)),
       this._workContextService.onWorkContextChange$,
     ).subscribe(() => {
-      if (this.isNavOver() && this._isShowSideNav()) {
+      if (this.isNavOver() && this.isShowMobileSideNav()) {
         this.hideSideNav();
       }
     });
