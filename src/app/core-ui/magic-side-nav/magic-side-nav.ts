@@ -1,153 +1,40 @@
 import {
   Component,
-  Input,
-  HostListener,
-  HostBinding,
-  signal,
   computed,
   effect,
-  output,
+  HostListener,
   input,
-  OnInit,
   OnDestroy,
+  OnInit,
+  output,
+  signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { MatIcon } from '@angular/material/icon';
-import { MatIconButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
-import {
-  MatMenu,
-  MatMenuContent,
-  MatMenuItem,
-  MatMenuTrigger,
-} from '@angular/material/menu';
-import { TranslatePipe } from '@ngx-translate/core';
-import {
-  WorkContextCommon,
-  WorkContextType,
-} from '../../features/work-context/work-context.model';
-import { ContextMenuComponent } from '../../ui/context-menu/context-menu.component';
 import { SpNavItemComponent } from './nav-item/nav-item.component';
 import { SpNavSectionComponent } from './nav-list/nav-list.component';
-
-export type NavItem =
-  | NavSeparatorItem
-  | NavWorkContextItem
-  | NavRouteItem
-  | NavHrefItem
-  | NavActionItem
-  | NavGroupItem;
-
-export interface NavBaseItem {
-  id: string;
-  label?: string;
-  icon?: string;
-  svgIcon?: string;
-}
-
-export interface NavSeparatorItem extends NavBaseItem {
-  type: 'separator';
-}
-
-export interface NavWorkContextItem extends NavBaseItem {
-  type: 'workContext';
-  label: string;
-  icon: string;
-  route: string;
-  workContext: WorkContextCommon;
-  workContextType: WorkContextType;
-  defaultIcon: string;
-}
-
-export interface NavRouteItem extends NavBaseItem {
-  type: 'route';
-  label: string;
-  icon: string;
-  route: string;
-}
-
-export interface NavHrefItem extends NavBaseItem {
-  type: 'href';
-  label: string;
-  icon: string;
-  href: string;
-}
-
-export interface NavActionItem extends NavBaseItem {
-  type: 'action';
-  label: string;
-  icon: string;
-  action: () => void;
-}
-
-export interface NavContextItem {
-  id: string;
-  label: string;
-  icon: string;
-  svgIcon?: string;
-  action?: () => void;
-}
-
-export interface NavGroupItem extends NavBaseItem {
-  type: 'group';
-  label: string;
-  icon: string;
-  children: NavItem[];
-  additionalButtons?: NavAdditionalButton[];
-  contextMenuItems?: NavContextItem[];
-  action?: () => void; // optional external toggle logic
-}
-
-export interface NavAdditionalButton {
-  id: string;
-  icon: string;
-  tooltip?: string;
-  action?: () => void;
-  hidden?: boolean;
-  contextMenu?: NavContextItem[];
-}
-
-export interface NavConfig {
-  items: NavItem[];
-  expandedByDefault?: boolean;
-  showLabels?: boolean;
-  mobileBreakpoint?: number;
-  position?: 'left' | 'right';
-  theme?: 'light' | 'dark';
-  resizable?: boolean;
-  minWidth?: number;
-  maxWidth?: number;
-  defaultWidth?: number;
-  collapseThreshold?: number;
-  expandThreshold?: number;
-}
+import { NavConfig, NavItem } from './magic-side-nav.model';
 
 const COLLAPSED_WIDTH = 64;
+
+const HOST_WIDTH = '[style.width.px]';
+const HOST_ANIMATE = '[class.animate]';
+const HOST_RESIZING = '[class.resizing]';
 
 @Component({
   selector: 'magic-side-nav',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    MatIcon,
-    MatIconButton,
-    MatTooltip,
-    MatMenu,
-    MatMenuContent,
-    MatMenuItem,
-    MatMenuTrigger,
-    TranslatePipe,
-    ContextMenuComponent,
-    SpNavItemComponent,
-    SpNavSectionComponent,
-  ],
+  imports: [CommonModule, RouterModule, SpNavItemComponent, SpNavSectionComponent],
   templateUrl: './magic-side-nav.html',
   styleUrl: './magic-side-nav.scss',
+  host: {
+    [HOST_WIDTH]: 'hostWidth()',
+    [HOST_ANIMATE]: 'hostAnimate()',
+    [HOST_RESIZING]: 'hostResizing()',
+  },
 })
 export class MagicSideNavComponent implements OnInit, OnDestroy {
-  @Input() config: NavConfig = {
+  config = input<NavConfig>({
     items: [],
     expandedByDefault: true,
     showLabels: true,
@@ -160,10 +47,10 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     defaultWidth: 260,
     collapseThreshold: 150,
     expandThreshold: 180,
-  };
+  });
 
-  @Input() expandedGroupIds: Set<string> = new Set();
-  @Input() activeWorkContextId: string | null = null;
+  expandedGroupIds = input<Set<string>>(new Set());
+  activeWorkContextId = input<string | null>(null);
 
   itemClick = output<NavItem>();
   expandedChange = output<boolean>();
@@ -200,8 +87,7 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
   });
 
   // Animate the host width so layout adjusts smoothly
-  @HostBinding('style.width.px')
-  get hostWidth(): number {
+  hostWidth(): number {
     // On mobile, don't reserve layout space; use fixed overlay instead
     if (this.isMobile()) {
       return 0;
@@ -209,20 +95,18 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     return this.sidebarWidth();
   }
 
-  @HostBinding('class.animate')
-  get hostAnimate(): boolean {
+  hostAnimate(): boolean {
     return this.animateWidth();
   }
 
-  @HostBinding('class.resizing')
-  get hostResizing(): boolean {
+  hostResizing(): boolean {
     return this.isResizing();
   }
 
   // Keep stable references for event listeners to ensure proper cleanup
-  private readonly onDrag: (event: MouseEvent) => void = (event: MouseEvent) =>
-    this.handleDrag(event);
-  private readonly onDragEnd: () => void = () => this.handleDragEnd();
+  private readonly _onDrag: (event: MouseEvent) => void = (event: MouseEvent) =>
+    this._handleDrag(event);
+  private readonly _onDragEnd: () => void = () => this._handleDragEnd();
 
   constructor() {
     // Effect to emit width changes
@@ -259,14 +143,14 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     const initialExpanded =
       savedExpanded !== null
         ? savedExpanded === 'true'
-        : (this.config.expandedByDefault ?? true);
+        : (this.config().expandedByDefault ?? true);
 
     this.isExpanded.set(initialExpanded);
-    this.currentWidth.set(this.config.defaultWidth ?? 260);
-    this.minWidth.set(this.config.minWidth ?? 200);
-    this.maxWidth.set(this.config.maxWidth ?? 400);
-    this.collapseThreshold.set(this.config.collapseThreshold ?? 150);
-    this.expandThreshold.set(this.config.expandThreshold ?? 180);
+    this.currentWidth.set(this.config().defaultWidth ?? 260);
+    this.minWidth.set(this.config().minWidth ?? 200);
+    this.maxWidth.set(this.config().maxWidth ?? 400);
+    this.collapseThreshold.set(this.config().collapseThreshold ?? 150);
+    this.expandThreshold.set(this.config().expandThreshold ?? 180);
 
     // Load saved width from localStorage
     const savedWidth = localStorage.getItem('nav-sidebar-width');
@@ -278,12 +162,12 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
       this.currentWidth.set(width);
     }
 
-    this.checkScreenSize();
+    this._checkScreenSize();
   }
 
   @HostListener('window:resize')
   onWindowResize(): void {
-    this.checkScreenSize();
+    this._checkScreenSize();
   }
 
   @HostListener('document:click', ['$event'])
@@ -299,16 +183,16 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     }
   }
 
-  private checkScreenSize(): void {
+  private _checkScreenSize(): void {
     const wasMobile = this.isMobile();
-    const currentMobile = window.innerWidth < (this.config.mobileBreakpoint || 768);
+    const currentMobile = window.innerWidth < (this.config().mobileBreakpoint || 768);
     this.isMobile.set(currentMobile);
 
     if (wasMobile !== currentMobile) {
       if (currentMobile) {
         this.showMobileMenu.set(false);
       } else {
-        this.isExpanded.set(this.config.expandedByDefault ?? true);
+        this.isExpanded.set(this.config().expandedByDefault ?? true);
       }
     }
   }
@@ -343,8 +227,8 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
   isGroupExpanded(item: NavItem): boolean {
     if (item.type !== 'group') return false;
     // Prefer external expansion state for known groups, but fall back to local for others (e.g., Help)
-    if (this.expandedGroupIds && this.expandedGroupIds.size > 0) {
-      if (this.expandedGroupIds.has(item.id)) {
+    if (this.expandedGroupIds && this.expandedGroupIds().size > 0) {
+      if (this.expandedGroupIds().has(item.id)) {
         return true;
       }
       // If not controlled externally, use local state
@@ -357,9 +241,9 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
       // Allow external toggle handler if provided
       if (item.action) {
         item.action();
-      } else {
-        this.toggleGroup(item);
       }
+      // Always reflect the toggle locally so UI responds immediately
+      this.toggleGroup(item);
       return;
     }
 
@@ -377,25 +261,25 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
 
   // Resize functionality
   onResizeStart(event: MouseEvent): void {
-    if (!this.config.resizable || this.isMobile()) return;
+    if (!this.config().resizable || this.isMobile()) return;
 
     this.isResizing.set(true);
     this.startX.set(event.clientX);
     this.startWidth.set(this.isExpanded() ? this.currentWidth() : COLLAPSED_WIDTH);
 
-    document.addEventListener('mousemove', this.onDrag);
-    document.addEventListener('mouseup', this.onDragEnd);
+    document.addEventListener('mousemove', this._onDrag);
+    document.addEventListener('mouseup', this._onDragEnd);
     document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';
 
     event.preventDefault();
   }
 
-  private handleDrag(event: MouseEvent): void {
+  private _handleDrag(event: MouseEvent): void {
     if (!this.isResizing()) return;
 
     const deltaX =
-      this.config.position === 'right'
+      this.config().position === 'right'
         ? this.startX() - event.clientX
         : event.clientX - this.startX();
 
@@ -462,12 +346,12 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     }
   }
 
-  private handleDragEnd(): void {
+  private _handleDragEnd(): void {
     if (!this.isResizing()) return;
 
     this.isResizing.set(false);
-    document.removeEventListener('mousemove', this.onDrag);
-    document.removeEventListener('mouseup', this.onDragEnd);
+    document.removeEventListener('mousemove', this._onDrag);
+    document.removeEventListener('mouseup', this._onDragEnd);
     document.body.style.cursor = '';
     document.body.style.userSelect = '';
 

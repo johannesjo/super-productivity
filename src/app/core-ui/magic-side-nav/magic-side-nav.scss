@@ -4,7 +4,7 @@ $mobile-breakpoint: 768px;
 // Use duration/timing variables directly; --transition-standard is a shorthand
 $transition-duration: var(--transition-duration-m, 0.3s);
 $transition-timing: var(--ani-standard-timing, cubic-bezier(0.4, 0, 0.2, 1));
-$overlay-bg: var(--c-dark-50, rgba(0, 0, 0, 0.5));
+$overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
 
 :host {
   // Ensure the component itself participates in layout and animates width
@@ -12,6 +12,8 @@ $overlay-bg: var(--c-dark-50, rgba(0, 0, 0, 0.5));
   flex: 0 0 auto;
   transition: none;
   will-change: width;
+  position: relative;
+  z-index: var(--z-side-nav);
   // Use app's CSS variables for consistent theming
   --sidebar-bg: var(--palette-background-card);
   --sidebar-border: var(--divider-color);
@@ -72,6 +74,14 @@ $overlay-bg: var(--c-dark-50, rgba(0, 0, 0, 0.5));
   }
 }
 
+// Dark theme milkglass adjustments
+:host-context(.isDarkTheme.hasBgImage) :host {
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(20px) saturate(180%); // Safari support
+}
+
 // Mobile overlay
 .nav-overlay {
   display: none;
@@ -81,7 +91,7 @@ $overlay-bg: var(--c-dark-50, rgba(0, 0, 0, 0.5));
   right: 0;
   bottom: 0;
   background: $overlay-bg;
-  z-index: 1001;
+  z-index: var(--z-backdrop, 1001);
   opacity: 0;
   transition: opacity $transition-duration $transition-timing;
 
@@ -106,6 +116,8 @@ $overlay-bg: var(--c-dark-50, rgba(0, 0, 0, 0.5));
   overflow-y: auto;
   overflow-x: hidden;
 
+  // Slight elevation and clear background for overlay/mobile mode is defined in the mobile block below
+
   &.animate {
     transition: width $transition-duration $transition-timing;
   }
@@ -126,14 +138,6 @@ $overlay-bg: var(--c-dark-50, rgba(0, 0, 0, 0.5));
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(20px) saturate(180%);
     border-right: 1px solid rgba(255, 255, 255, 0.1);
-    -webkit-backdrop-filter: blur(20px) saturate(180%); // Safari support
-  }
-
-  // Dark theme milkglass adjustments
-  :host-context(.isDarkTheme.hasBgImage) {
-    background: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(20px) saturate(180%);
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
     -webkit-backdrop-filter: blur(20px) saturate(180%); // Safari support
   }
 
@@ -260,6 +264,9 @@ $overlay-bg: var(--c-dark-50, rgba(0, 0, 0, 0.5));
 
   // Mobile specific
   &.mobile {
+    transition: transform $transition-duration $transition-timing;
+    will-change: transform;
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.3);
     transform: translateX(-100%);
     width: $sidebar-width-expanded;
 

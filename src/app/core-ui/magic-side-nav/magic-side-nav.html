@@ -42,8 +42,8 @@
   [class.mobile]="isMobile()"
   [class.mobile-visible]="isMobile() && showMobileMenu()"
   [class.animate]="animateWidth()"
-  [class.theme-dark]="config.theme === 'dark'"
-  [class.position-right]="config.position === 'right'"
+  [class.theme-dark]="config().theme === 'dark'"
+  [class.position-right]="config().position === 'right'"
   [class.resizing]="isResizing()"
   [class.collapse-zone]="resizeState() === 'collapse'"
   [class.expand-zone]="resizeState() === 'expand'"
@@ -77,7 +77,7 @@
     class="nav-list"
     role="list"
   >
-    @for (item of config.items; track item.id) {
+    @for (item of config().items; track item.id) {
       @switch (item.type) {
         @case ('separator') {
           <hr class="nav-separator" />
@@ -91,7 +91,7 @@
               [item]="item"
               [showLabels]="isExpanded() || (isMobile() && showMobileMenu())"
               [isExpanded]="isGroupExpanded(item)"
-              [activeWorkContextId]="activeWorkContextId"
+              [activeWorkContextId]="activeWorkContextId()"
               (itemClick)="onItemClick($event)"
             ></nav-list>
           </li>
@@ -104,7 +104,7 @@
             <nav-item
               [item]="item"
               [showLabels]="isExpanded() || (isMobile() && showMobileMenu())"
-              [activeWorkContextId]="activeWorkContextId"
+              [activeWorkContextId]="activeWorkContextId()"
               (itemClick)="onItemClick($event)"
             ></nav-item>
           </li>
@@ -114,11 +114,11 @@
   </ul>
 
   <!-- Resize Handle -->
-  @if (config.resizable && !isMobile()) {
+  @if (config().resizable && !isMobile()) {
     <div
       class="resize-handle"
-      [class.position-left]="config.position !== 'right'"
-      [class.position-right]="config.position === 'right'"
+      [class.position-left]="config().position !== 'right'"
+      [class.position-right]="config().position === 'right'"
       [class.collapsed-handle]="!isExpanded()"
       (mousedown)="onResizeStart($event)"
       [attr.aria-label]="'Resize sidebar'"

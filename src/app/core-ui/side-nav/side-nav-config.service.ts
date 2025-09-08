@@ -3,7 +3,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
 
-import { NavConfig, NavItem } from '../magic-side-nav/magic-side-nav';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { TagService } from '../../features/tag/tag.service';
@@ -14,6 +13,7 @@ import { LS } from '../../core/persistence/storage-keys.const';
 import { DialogCreateProjectComponent } from '../../features/project/dialogs/create-project/dialog-create-project.component';
 import { getGithubErrorUrl } from '../../core/error-handler/global-error-handler.util';
 import { selectUnarchivedVisibleProjects } from '../../features/project/store/project.selectors';
+import { NavConfig, NavItem } from '../magic-side-nav/magic-side-nav.model';
 
 @Injectable({
   providedIn: 'root',

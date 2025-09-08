@@ -9,13 +9,12 @@
     [attr.aria-controls]="'group-' + item().id"
   >
     <nav-item-inner
-      [mode]="row"
+      [mode]="'row'"
       [icon]="item().icon"
       [svgIcon]="item().svgIcon"
       [label]="item().label"
       [showLabels]="showLabels()"
       [showChevron]="item().children && item().children.length > 0 && showLabels()"
-      labelClass="title"
     ></nav-item-inner>
   </button>
 

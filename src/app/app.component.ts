@@ -48,7 +48,6 @@ import { AddTaskBarComponent } from './features/tasks/add-task-bar/add-task-bar.
 import { Dir } from '@angular/cdk/bidi';
 import { MagicSideNavComponent } from './core-ui/magic-side-nav/magic-side-nav';
 import { SideNavConfigService } from './core-ui/side-nav/side-nav-config.service';
-import { NavConfig } from './core-ui/magic-side-nav/magic-side-nav';
 import { MainHeaderComponent } from './core-ui/main-header/main-header.component';
 import { BannerComponent } from './core/banner/banner/banner.component';
 import { GlobalProgressBarComponent } from './core-ui/global-progress-bar/global-progress-bar.component';
@@ -83,6 +82,7 @@ import { ProjectService } from './features/project/project.service';
 import { TagService } from './features/tag/tag.service';
 import { ContextMenuComponent } from './ui/context-menu/context-menu.component';
 import { WorkContextThemeCfg } from './features/work-context/work-context.model';
+import { NavConfig } from './core-ui/magic-side-nav/magic-side-nav.model';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;

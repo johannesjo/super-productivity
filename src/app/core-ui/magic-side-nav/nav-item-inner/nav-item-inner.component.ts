@@ -3,7 +3,6 @@ import {
   Component,
   computed,
   ElementRef,
-  HostBinding,
   inject,
   input,
   viewChild,
@@ -26,6 +25,12 @@ import { selectAllDoneIds } from '../../../features/tasks/store/task.selectors';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
 
+const HOST_HAS_TASKS = '[class.hasTasks]';
+const HOST_IS_ACTIVE = '[class.isActiveContext]';
+const HOST_IS_HIDDEN = '[class.isHidden]';
+const HOST_VARIANT_NAV = '[class.variant-nav]';
+const HOST_IS_COMPACT = '[class.compact]';
+
 @Component({
   selector: 'nav-item-inner',
   imports: [
@@ -42,7 +47,14 @@ import { TranslatePipe } from '@ngx-translate/core';
   templateUrl: './nav-item-inner.component.html',
   styleUrl: './nav-item-inner.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'g-multi-btn-wrapper' },
+  host: {
+    class: 'g-multi-btn-wrapper',
+    [HOST_HAS_TASKS]: 'workContextHasTasks',
+    [HOST_IS_ACTIVE]: 'isActiveContext',
+    [HOST_IS_HIDDEN]: 'isHidden',
+    [HOST_VARIANT_NAV]: 'isVariantNav',
+    [HOST_IS_COMPACT]: 'isCompact',
+  },
   standalone: true,
 })
 export class NavItemInnerComponent {
@@ -77,38 +89,33 @@ export class NavItemInnerComponent {
     return wc.taskIds.filter((tid) => !allUndoneTaskIds.includes(tid)).length;
   });
 
-  readonly routeBtn = viewChild('routeBtn', { read: ElementRef });
+  private readonly _routeBtn = viewChild('routeBtn', { read: ElementRef });
 
-  @HostBinding('class.hasTasks')
   get workContextHasTasks(): boolean {
     const wc = this.workContext();
     return !!wc && wc.taskIds.length > 0;
   }
 
-  @HostBinding('class.isActiveContext')
   get isActiveContext(): boolean {
     const wc = this.workContext();
     return !!wc && wc.id === this.activeWorkContextId();
   }
 
-  @HostBinding('class.isHidden')
   get isHidden(): boolean {
     const wc = this.workContext();
     return !!(wc as Project | null)?.isHiddenFromMenu;
   }
 
-  @HostBinding('class.variant-nav')
   get isVariantNav(): boolean {
     return this.variant() === 'nav';
   }
 
-  @HostBinding('class.compact')
   get isCompact(): boolean {
     return this.compact();
   }
 
   focus(): void {
-    const btn = this.routeBtn();
+    const btn = this._routeBtn();
     if (btn) {
       btn.nativeElement.focus();
     }
