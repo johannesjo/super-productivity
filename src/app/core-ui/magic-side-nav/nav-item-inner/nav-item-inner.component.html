@@ -10,10 +10,7 @@
     routerLinkActive="isActiveRoute"
     mat-menu-item
   >
-    <div class="ico-wrapper">
-      <mat-icon class="drag-handle">{{ workContext()!.icon || defaultIcon() }}</mat-icon>
-      <span class="badge">{{ nrOfOpenTasks() }}</span>
-    </div>
+    <mat-icon class="drag-handle">{{ workContext()!.icon || defaultIcon() }}</mat-icon>
     <span
       class="text"
       [class.label-hidden]="!showLabels()"
@@ -21,6 +18,7 @@
     >
       {{ workContext()!.title }}
     </span>
+    <span class="badge">{{ nrOfOpenTasks() }}</span>
   </button>
 
   <button

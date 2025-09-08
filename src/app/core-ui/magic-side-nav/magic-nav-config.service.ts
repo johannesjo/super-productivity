@@ -60,7 +60,6 @@ export class MagicNavConfigService {
       ...this._buildWorkContextItems(),
 
       // Separator
-      { type: 'separator', id: 'sep-1' },
 
       // Main Routes
       {
@@ -68,6 +67,8 @@ export class MagicNavConfigService {
         id: 'schedule',
         label: T.MH.SCHEDULE,
         icon: 'early_on',
+        svgIcon: 'early_on',
+
         route: '/schedule',
       },
       {

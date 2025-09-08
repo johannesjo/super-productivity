@@ -20,6 +20,7 @@ export class SpNavItemComponent {
 
   itemClick = output<NavItem>();
 
+  // TODO check if needed
   linkClass = computed(() => (this.isChild() ? 'nav-child-link' : 'nav-link'));
   hasChildren = computed(() => {
     const i = this.item();

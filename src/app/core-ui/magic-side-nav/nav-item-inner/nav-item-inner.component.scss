@@ -6,6 +6,10 @@
   position: relative;
   width: 100%;
 
+  * {
+    border: 1px solid red;
+  }
+
   button:first-of-type {
     white-space: nowrap;
     overflow: hidden;
