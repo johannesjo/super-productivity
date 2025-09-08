@@ -13,8 +13,8 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { SpNavItemComponent } from './nav-item/nav-item.component';
-import { SpNavSectionComponent } from './nav-list/nav-list.component';
+import { NavItemComponent } from './nav-item/nav-item.component';
+import { NavSectionComponent } from './nav-list/nav-list.component';
 import { NavItem } from './magic-side-nav.model';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { MagicNavConfigService } from './magic-nav-config.service';
@@ -24,7 +24,7 @@ const COLLAPSED_WIDTH = 64;
 @Component({
   selector: 'magic-side-nav',
   standalone: true,
-  imports: [CommonModule, RouterModule, SpNavItemComponent, SpNavSectionComponent],
+  imports: [CommonModule, RouterModule, NavItemComponent, NavSectionComponent],
   templateUrl: './magic-side-nav.html',
   styleUrl: './magic-side-nav.scss',
   host: {

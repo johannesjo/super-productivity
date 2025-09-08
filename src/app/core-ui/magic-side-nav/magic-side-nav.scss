@@ -232,7 +232,7 @@ $overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
     }
 
     // Fix side-nav-item wrapping issues in collapsed mode
-    ::ng-deep nav-item-inner {
+    ::ng-deep nav-item {
       .additional-btn {
         display: none !important;
       }
@@ -422,7 +422,7 @@ $overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
 }
 
 // Fix side-nav-item wrapping issues globally
-::ng-deep nav-item-inner {
+::ng-deep nav-item {
   display: flex !important;
   align-items: stretch;
   width: 100%;
@@ -433,7 +433,7 @@ $overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
     flex: 1;
     min-width: 0;
 
-    .text {
+    .nav-label {
       overflow: hidden;
       text-overflow: ellipsis;
     }

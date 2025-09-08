@@ -99,12 +99,58 @@
             class="nav-item"
             role="listitem"
           >
-            <nav-item
-              [item]="item"
-              [showLabels]="isExpanded() || (isMobile() && showMobileMenu())"
-              [activeWorkContextId]="activeWorkContextId()"
-              (itemClick)="onItemClick($event)"
-            ></nav-item>
+            @switch (item.type) {
+              @case ('workContext') {
+                <nav-item
+                  [workContext]="item.workContext"
+                  [type]="item.workContextType"
+                  [defaultIcon]="item.defaultIcon"
+                  [activeWorkContextId]="activeWorkContextId() || ''"
+                  [variant]="'nav'"
+                  [compact]="false"
+                  [showLabels]="isExpanded() || (isMobile() && showMobileMenu())"
+                  [showMoreButton]="isExpanded() || (isMobile() && showMobileMenu())"
+                ></nav-item>
+              }
+
+              @case ('route') {
+                <nav-item
+                  [container]="'route'"
+                  [navRoute]="item.route"
+                  [icon]="item.icon"
+                  [svgIcon]="item.svgIcon"
+                  [label]="item.label"
+                  [showLabels]="isExpanded() || (isMobile() && showMobileMenu())"
+                  [compact]="false"
+                  (clicked)="onItemClick(item)"
+                ></nav-item>
+              }
+
+              @case ('href') {
+                <nav-item
+                  [container]="'href'"
+                  [navHref]="item.href"
+                  [icon]="item.icon"
+                  [svgIcon]="item.svgIcon"
+                  [label]="item.label"
+                  [showLabels]="isExpanded() || (isMobile() && showMobileMenu())"
+                  [compact]="false"
+                  (clicked)="onItemClick(item)"
+                ></nav-item>
+              }
+
+              @case ('action') {
+                <nav-item
+                  [container]="'action'"
+                  [icon]="item.icon"
+                  [svgIcon]="item.svgIcon"
+                  [label]="item.label"
+                  [showLabels]="isExpanded() || (isMobile() && showMobileMenu())"
+                  [compact]="false"
+                  (clicked)="onItemClick(item)"
+                ></nav-item>
+              }
+            }
           </li>
         }
       }

@@ -4,8 +4,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
-import { NavItemInnerComponent } from '../nav-item-inner/nav-item-inner.component';
-import { SpNavItemComponent } from '../nav-item/nav-item.component';
+import { NavItemComponent } from '../nav-item/nav-item.component';
 import { NavGroupItem, NavItem } from '../magic-side-nav.model';
 
 @Component({
@@ -17,13 +16,12 @@ import { NavGroupItem, NavItem } from '../magic-side-nav.model';
     MatIconButton,
     MatTooltip,
     TranslatePipe,
-    NavItemInnerComponent,
-    SpNavItemComponent,
+    NavItemComponent,
   ],
   templateUrl: './nav-list.component.html',
   styleUrl: './nav-list.component.scss',
 })
-export class SpNavSectionComponent {
+export class NavSectionComponent {
   item = input.required<NavGroupItem>();
   showLabels = input<boolean>(true);
   isExpanded = input<boolean>(false);

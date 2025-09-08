@@ -1,22 +1,16 @@
 <div class="g-multi-btn-wrapper">
-  <button
-    class="nav-link expand-btn"
-    [class.expanded]="isExpanded()"
-    [class.isExpanded]="isExpanded()"
-    [attr.title]="!showLabels() ? item().label : null"
-    (click)="onHeaderClick()"
-    [attr.aria-expanded]="isExpanded()"
-    [attr.aria-controls]="'group-' + item().id"
-  >
-    <nav-item-inner
-      [mode]="'row'"
-      [icon]="item().icon"
-      [svgIcon]="item().svgIcon"
-      [label]="item().label"
-      [showLabels]="showLabels()"
-      [showChevron]="item().children && item().children.length > 0 && showLabels()"
-    ></nav-item-inner>
-  </button>
+  <nav-item
+    [container]="'group'"
+    [expanded]="isExpanded()"
+    [ariaExpanded]="isExpanded()"
+    [ariaControls]="'group-' + item().id"
+    [icon]="item().icon"
+    [svgIcon]="item().svgIcon"
+    [label]="item().label"
+    [showLabels]="showLabels()"
+    [showChevron]="item().children && item().children.length > 0 && showLabels()"
+    (clicked)="onHeaderClick()"
+  ></nav-item>
 
   @if (showLabels()) {
     @for (btn of item().additionalButtons; track btn.id) {
@@ -47,13 +41,55 @@
         class="nav-child-item"
         role="listitem"
       >
-        <nav-item
-          [item]="child"
-          [showLabels]="true"
-          [isChild]="true"
-          [activeWorkContextId]="activeWorkContextId()"
-          (itemClick)="itemClick.emit(child)"
-        ></nav-item>
+        @switch (child.type) {
+          @case ('workContext') {
+            <nav-item
+              [workContext]="child.workContext"
+              [type]="child.workContextType"
+              [defaultIcon]="child.defaultIcon"
+              [activeWorkContextId]="activeWorkContextId() || ''"
+              [variant]="'nav'"
+              [compact]="true"
+              [showLabels]="true"
+              [showMoreButton]="true"
+            ></nav-item>
+          }
+          @case ('route') {
+            <nav-item
+              [container]="'route'"
+              [navRoute]="child.route"
+              [icon]="child.icon"
+              [svgIcon]="child.svgIcon"
+              [label]="child.label"
+              [showLabels]="true"
+              [compact]="true"
+              (clicked)="itemClick.emit(child)"
+            ></nav-item>
+          }
+          @case ('href') {
+            <nav-item
+              [container]="'href'"
+              [navHref]="child.href"
+              [icon]="child.icon"
+              [svgIcon]="child.svgIcon"
+              [label]="child.label"
+              [showLabels]="true"
+              [compact]="true"
+              (clicked)="itemClick.emit(child)"
+            ></nav-item>
+          }
+          @case ('action') {
+            <nav-item
+              [container]="'action'"
+              [icon]="child.icon"
+              [svgIcon]="child.svgIcon"
+              [label]="child.label"
+              [showLabels]="true"
+              [compact]="true"
+              (clicked)="itemClick.emit(child)"
+            ></nav-item>
+          }
+        }
       </li>
     }
   </ul>
