@@ -70,7 +70,3 @@
 .nav-children.visible {
   max-height: 500px;
 }
-
-.nav-child-item {
-  margin-left: var(--s3);
-}

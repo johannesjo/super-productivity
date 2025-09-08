@@ -122,6 +122,8 @@ export interface NavConfig {
   expandThreshold?: number;
 }
 
+const COLLAPSED_WIDTH = 64;
+
 @Component({
   selector: 'magic-side-nav',
   standalone: true,
@@ -189,7 +191,7 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
   // Computed values
   sidebarWidth = computed(() => {
     if (this.isMobile()) return 260;
-    if (!this.isExpanded()) return 72;
+    if (!this.isExpanded()) return COLLAPSED_WIDTH;
     return this.currentWidth();
   });
 
@@ -356,7 +358,7 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
 
     this.isResizing.set(true);
     this.startX.set(event.clientX);
-    this.startWidth.set(this.isExpanded() ? this.currentWidth() : 72);
+    this.startWidth.set(this.isExpanded() ? this.currentWidth() : COLLAPSED_WIDTH);
 
     document.addEventListener('mousemove', this.onDrag);
     document.addEventListener('mouseup', this.onDragEnd);
@@ -385,7 +387,7 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
         this.expandedChange.emit(this.isExpanded());
 
         // Reset starting point for continued dragging from collapsed state
-        this.startWidth.set(72);
+        this.startWidth.set(COLLAPSED_WIDTH);
         this.startX.set(event.clientX);
 
         // Visual feedback
@@ -409,7 +411,7 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
       this.currentWidth.set(newWidth);
     } else {
       // Currently collapsed - check for expand threshold
-      const collapsedWidth = 72;
+      const collapsedWidth = COLLAPSED_WIDTH;
       const draggedWidth = collapsedWidth + deltaX;
 
       if (draggedWidth > this.expandThreshold()) {

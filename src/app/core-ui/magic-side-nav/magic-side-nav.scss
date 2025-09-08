@@ -1,6 +1,5 @@
 // Use app's CSS variables for width and spacing
 $sidebar-width-expanded: var(--side-nav-width, 260px);
-$sidebar-width-collapsed: 72px;
 $mobile-breakpoint: 768px;
 // Use duration/timing variables directly; --transition-standard is a shorthand
 $transition-duration: var(--transition-duration-m, 0.3s);
@@ -334,7 +333,9 @@ $overlay-bg: var(--c-dark-50, rgba(0, 0, 0, 0.5));
 // Navigation list
 .nav-list {
   list-style: none;
-  padding: 60px var(--s) var(--s2);
+  //padding: 60px var(--s) var(--s2);
+  padding: 0;
+  padding-top: 60px;
   margin: 0;
 }
 

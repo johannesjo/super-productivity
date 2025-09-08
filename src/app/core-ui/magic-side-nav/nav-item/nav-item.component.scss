@@ -28,14 +28,3 @@
     color: var(--sidebar-active-text);
   }
 }
-
-.nav-child-link {
-  padding: var(--s) var(--s2);
-  color: var(--sidebar-text-secondary);
-  border-radius: 6px;
-  font-size: 14px;
-
-  &:hover {
-    color: var(--sidebar-text);
-  }
-}
