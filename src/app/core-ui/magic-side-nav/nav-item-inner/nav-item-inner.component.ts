@@ -25,12 +25,6 @@ import { selectAllDoneIds } from '../../../features/tasks/store/task.selectors';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
 
-const HOST_HAS_TASKS = '[class.hasTasks]';
-const HOST_IS_ACTIVE = '[class.isActiveContext]';
-const HOST_IS_HIDDEN = '[class.isHidden]';
-const HOST_VARIANT_NAV = '[class.variant-nav]';
-const HOST_IS_COMPACT = '[class.compact]';
-
 @Component({
   selector: 'nav-item-inner',
   imports: [
@@ -49,11 +43,16 @@ const HOST_IS_COMPACT = '[class.compact]';
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'g-multi-btn-wrapper',
-    [HOST_HAS_TASKS]: 'workContextHasTasks',
-    [HOST_IS_ACTIVE]: 'isActiveContext',
-    [HOST_IS_HIDDEN]: 'isHidden',
-    [HOST_VARIANT_NAV]: 'isVariantNav',
-    [HOST_IS_COMPACT]: 'isCompact',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    '[class.hasTasks]': 'workContextHasTasks()',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    '[class.isActiveContext]': 'isActiveContext()',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    '[class.isHidden]': 'isHidden()',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    '[class.variant-nav]': 'isVariantNav()',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    '[class.compact]': 'isCompact()',
   },
   standalone: true,
 })
@@ -91,28 +90,24 @@ export class NavItemInnerComponent {
 
   private readonly _routeBtn = viewChild('routeBtn', { read: ElementRef });
 
-  get workContextHasTasks(): boolean {
+  workContextHasTasks = computed<boolean>(() => {
     const wc = this.workContext();
     return !!wc && wc.taskIds.length > 0;
-  }
+  });
 
-  get isActiveContext(): boolean {
+  isActiveContext = computed<boolean>(() => {
     const wc = this.workContext();
     return !!wc && wc.id === this.activeWorkContextId();
-  }
+  });
 
-  get isHidden(): boolean {
+  isHidden = computed<boolean>(() => {
     const wc = this.workContext();
     return !!(wc as Project | null)?.isHiddenFromMenu;
-  }
+  });
 
-  get isVariantNav(): boolean {
-    return this.variant() === 'nav';
-  }
+  isVariantNav = computed<boolean>(() => this.variant() === 'nav');
 
-  get isCompact(): boolean {
-    return this.compact();
-  }
+  isCompact = computed<boolean>(() => this.compact());
 
   focus(): void {
     const btn = this._routeBtn();

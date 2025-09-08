@@ -11,7 +11,7 @@
     mat-menu-item
   >
     <div class="ico-wrapper">
-      <mat-icon class="drag-handle">{{ workContext()!.icon || defaultIcon() }} </mat-icon>
+      <mat-icon class="drag-handle">{{ workContext()!.icon || defaultIcon() }}</mat-icon>
       <span class="badge">{{ nrOfOpenTasks() }}</span>
     </div>
     <span
@@ -23,15 +23,14 @@
     </span>
   </button>
 
-  @if (showMoreButton()) {
-    <button
-      #settingsBtn
-      class="additional-btn"
-      mat-icon-button
-    >
-      <mat-icon>more_vert</mat-icon>
-    </button>
-  }
+  <button
+    [style.visibility]="showMoreButton() ? 'visible' : 'hidden'"
+    #settingsBtn
+    class="additional-btn"
+    mat-icon-button
+  >
+    <mat-icon>more_vert</mat-icon>
+  </button>
 
   <context-menu
     [contextMenu]="contextMenu"
