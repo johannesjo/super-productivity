@@ -141,24 +141,7 @@ $overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
     -webkit-backdrop-filter: blur(20px) saturate(180%); // Safari support
   }
 
-  // Threshold zone visual feedback
-  //&.collapse-zone {
-  //  border-left: 3px solid #ef4444;
-  //  box-shadow: inset 3px 0 0 rgba(239, 68, 68, 0.1);
-  //
-  //  .resize-handle {
-  //    background-color: #ef4444 !important;
-  //  }
-  //}
-
-  &.expand-zone {
-    border-left: 3px solid var(--c-primary);
-    box-shadow: inset 3px 0 0 rgba(16, 185, 129, 0.1);
-
-    .resize-handle {
-      background-color: var(--c-primary) !important;
-    }
-  }
+  // removed unused expand/collapse zone visuals
 
   // Scrollbar styling
   &::-webkit-scrollbar {
@@ -239,17 +222,7 @@ $overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
       right: auto;
     }
 
-    &.collapse-zone {
-      border-left: none;
-      border-right: 3px solid #ef4444;
-      box-shadow: inset -3px 0 0 rgba(239, 68, 68, 0.1);
-    }
-
-    &.expand-zone {
-      border-left: none;
-      border-right: 3px solid #10b981;
-      box-shadow: inset -3px 0 0 rgba(16, 185, 129, 0.1);
-    }
+    // removed unused collapse/expand zone visuals for right-position
   }
 
   // Note: Theme colors are handled by CSS variables above

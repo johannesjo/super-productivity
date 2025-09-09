@@ -153,10 +153,6 @@
       color: var(--sidebar-active-text);
     }
   }
-
-  &.expanded .nav-chevron {
-    transform: rotate(180deg);
-  }
 }
 
 .nav-child-link {
@@ -209,11 +205,7 @@
   line-height: 1;
 }
 
-.nav-chevron {
-  flex-shrink: 0;
-  transition: transform 0.2s ease;
-  color: var(--sidebar-text-secondary);
-}
+// Removed legacy chevron styles; we rotate expand_more icon instead
 
 // Rotate the expand_more icon for group headers instead of showing a separate chevron
 .nav-link .expand-icon {
