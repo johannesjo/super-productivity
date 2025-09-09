@@ -13,9 +13,10 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { NavItemComponent } from './nav-item/nav-item.component';
 import { NavSectionComponent } from './nav-list/nav-list.component';
-import { NavItem } from './magic-side-nav.model';
+import { NavItem, NavGroupItem, NavWorkContextItem } from './magic-side-nav.model';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { MagicNavConfigService } from './magic-nav-config.service';
 import { readBoolLS, readNumberLSBounded } from '../../util/ls-util';
@@ -230,6 +231,22 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
 
     if (this.isMobile()) {
       this.showMobileMenu.set(false);
+    }
+  }
+
+  onDragDrop(
+    groupItem: NavGroupItem,
+    dropData: {
+      items: NavWorkContextItem[];
+      event: CdkDragDrop<string, string, NavWorkContextItem>;
+    },
+  ): void {
+    const { items, event } = dropData;
+
+    if (groupItem.id === 'projects') {
+      this._sideNavConfigService.handleProjectDrop(items, event);
+    } else if (groupItem.id === 'tags') {
+      this._sideNavConfigService.handleTagDrop(items, event);
     }
   }
 

@@ -2,18 +2,25 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { first } from 'rxjs/operators';
 
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { TagService } from '../../features/tag/tag.service';
+import { ProjectService } from '../../features/project/project.service';
 import { ShepherdService } from '../../features/shepherd/shepherd.service';
 import { TourId } from '../../features/shepherd/shepherd-steps.const';
 import { T } from '../../t.const';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { DialogCreateProjectComponent } from '../../features/project/dialogs/create-project/dialog-create-project.component';
 import { getGithubErrorUrl } from '../../core/error-handler/global-error-handler.util';
-import { selectUnarchivedVisibleProjects } from '../../features/project/store/project.selectors';
-import { NavConfig, NavItem } from './magic-side-nav.model';
+import {
+  selectUnarchivedVisibleProjects,
+  selectUnarchivedHiddenProjectIds,
+} from '../../features/project/store/project.selectors';
+import { NavConfig, NavItem, NavWorkContextItem } from './magic-side-nav.model';
+import { TODAY_TAG } from '../../features/tag/tag.const';
 
 @Injectable({
   providedIn: 'root',
@@ -21,6 +28,7 @@ import { NavConfig, NavItem } from './magic-side-nav.model';
 export class MagicNavConfigService {
   private readonly _workContextService = inject(WorkContextService);
   private readonly _tagService = inject(TagService);
+  private readonly _projectService = inject(ProjectService);
   private readonly _shepherdService = inject(ShepherdService);
   private readonly _matDialog = inject(MatDialog);
   private readonly _store = inject(Store);
@@ -341,6 +349,49 @@ export class MagicNavConfigService {
 
   private _startTour(tourId: TourId): void {
     void this._shepherdService.show(tourId);
+  }
+
+  // Drag and drop handlers
+  async handleProjectDrop(
+    items: NavWorkContextItem[],
+    event: CdkDragDrop<string, string, NavWorkContextItem>,
+  ): Promise<void> {
+    if (event.previousIndex === event.currentIndex) return;
+
+    // Create a copy of the array and move the item
+    const reorderedItems = [...items];
+    moveItemInArray(reorderedItems, event.previousIndex, event.currentIndex);
+
+    // Get the new order of IDs
+    const visibleIds = reorderedItems.map((item) => item.workContext!.id);
+
+    // Get hidden project IDs to append at the end
+    const hiddenIds = await this._store
+      .select(selectUnarchivedHiddenProjectIds)
+      .pipe(first())
+      .toPromise();
+
+    // Combine visible and hidden IDs
+    const newIds = [...visibleIds, ...(hiddenIds || [])];
+    this._projectService.updateOrder(newIds);
+  }
+
+  handleTagDrop(
+    items: NavWorkContextItem[],
+    event: CdkDragDrop<string, string, NavWorkContextItem>,
+  ): void {
+    if (event.previousIndex === event.currentIndex) return;
+
+    // Create a copy of the array and move the item
+    const reorderedItems = [...items];
+    moveItemInArray(reorderedItems, event.previousIndex, event.currentIndex);
+
+    // Get the new order of IDs
+    const visibleIds = reorderedItems.map((item) => item.workContext!.id);
+
+    // Special today list should always be first, so prepend it
+    const newIds = [TODAY_TAG.id, ...visibleIds.filter((id) => id !== TODAY_TAG.id)];
+    this._tagService.updateOrder(newIds);
   }
 
   // Helper

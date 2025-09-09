@@ -4,8 +4,11 @@ import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
+import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { NavItemComponent } from '../nav-item/nav-item.component';
-import { NavGroupItem, NavItem } from '../magic-side-nav.model';
+import { NavGroupItem, NavItem, NavWorkContextItem } from '../magic-side-nav.model';
+import { DRAG_DELAY_FOR_TOUCH_LONGER } from '../../../app.constants';
+import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 
 @Component({
   selector: 'nav-list',
@@ -16,6 +19,8 @@ import { NavGroupItem, NavItem } from '../magic-side-nav.model';
     MatIconButton,
     MatTooltip,
     TranslatePipe,
+    CdkDropList,
+    CdkDrag,
     NavItemComponent,
   ],
   templateUrl: './nav-list.component.html',
@@ -29,8 +34,36 @@ export class NavSectionComponent {
   activeWorkContextId = input<string | null>(null);
 
   itemClick = output<NavItem>();
+  dragDrop = output<{
+    items: NavWorkContextItem[];
+    event: CdkDragDrop<string, string, NavWorkContextItem>;
+  }>();
+
+  readonly IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
+  readonly DRAG_DELAY_FOR_TOUCH_LONGER = DRAG_DELAY_FOR_TOUCH_LONGER;
 
   onHeaderClick(): void {
     this.itemClick.emit(this.item());
+  }
+
+  onDrop(event: CdkDragDrop<string, string, NavWorkContextItem>): void {
+    // Early exit if no actual movement
+    if (
+      event.previousContainer !== event.container ||
+      event.currentIndex === event.previousIndex
+    ) {
+      return;
+    }
+
+    // Filter work context items once
+    const workContextItems =
+      this.item().children?.filter(
+        (child): child is NavWorkContextItem => child.type === 'workContext',
+      ) || [];
+
+    // Only emit if there are actually work context items to reorder
+    if (workContextItems.length > 0) {
+      this.dragDrop.emit({ items: workContextItems, event });
+    }
   }
 }

@@ -34,62 +34,75 @@
     [class.visible]="isExpanded()"
     [attr.id]="'group-' + item().id"
     role="list"
+    cdkDropList
+    [cdkDropListSortingDisabled]="false"
+    [cdkDropListAutoScrollDisabled]="true"
+    (cdkDropListDropped)="onDrop($event)"
   >
     @for (child of item().children; track child.id) {
-      <li
-        class="nav-child-item"
-        role="listitem"
-      >
-        @switch (child.type) {
-          @case ('workContext') {
-            <nav-item
-              [workContext]="child.workContext"
-              [type]="child.workContextType"
-              [defaultIcon]="child.defaultIcon"
-              [activeWorkContextId]="activeWorkContextId() || ''"
-              [variant]="'nav'"
-              [compact]="true"
-              [showLabels]="true"
-              [showMoreButton]="true"
-            ></nav-item>
+      @if (child.type === 'workContext') {
+        <li
+          class="nav-child-item draggable"
+          role="listitem"
+          cdkDrag
+          [cdkDragData]="child"
+          [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? DRAG_DELAY_FOR_TOUCH_LONGER : 0"
+        >
+          <nav-item
+            [workContext]="child.workContext"
+            [type]="child.workContextType"
+            [defaultIcon]="child.defaultIcon"
+            [activeWorkContextId]="activeWorkContextId() || ''"
+            [variant]="'nav'"
+            [compact]="true"
+            [showLabels]="true"
+            [showMoreButton]="true"
+          ></nav-item>
+        </li>
+      } @else {
+        <li
+          class="nav-child-item"
+          role="listitem"
+        >
+          @switch (child.type) {
+            @case ('route') {
+              <nav-item
+                [container]="'route'"
+                [navRoute]="child.route"
+                [icon]="child.icon"
+                [svgIcon]="child.svgIcon"
+                [label]="child.label"
+                [showLabels]="true"
+                [compact]="true"
+                (clicked)="itemClick.emit(child)"
+              ></nav-item>
+            }
+            @case ('href') {
+              <nav-item
+                [container]="'href'"
+                [navHref]="child.href"
+                [icon]="child.icon"
+                [svgIcon]="child.svgIcon"
+                [label]="child.label"
+                [showLabels]="true"
+                [compact]="true"
+                (clicked)="itemClick.emit(child)"
+              ></nav-item>
+            }
+            @case ('action') {
+              <nav-item
+                [container]="'action'"
+                [icon]="child.icon"
+                [svgIcon]="child.svgIcon"
+                [label]="child.label"
+                [showLabels]="true"
+                [compact]="true"
+                (clicked)="itemClick.emit(child)"
+              ></nav-item>
+            }
           }
-          @case ('route') {
-            <nav-item
-              [container]="'route'"
-              [navRoute]="child.route"
-              [icon]="child.icon"
-              [svgIcon]="child.svgIcon"
-              [label]="child.label"
-              [showLabels]="true"
-              [compact]="true"
-              (clicked)="itemClick.emit(child)"
-            ></nav-item>
-          }
-          @case ('href') {
-            <nav-item
-              [container]="'href'"
-              [navHref]="child.href"
-              [icon]="child.icon"
-              [svgIcon]="child.svgIcon"
-              [label]="child.label"
-              [showLabels]="true"
-              [compact]="true"
-              (clicked)="itemClick.emit(child)"
-            ></nav-item>
-          }
-          @case ('action') {
-            <nav-item
-              [container]="'action'"
-              [icon]="child.icon"
-              [svgIcon]="child.svgIcon"
-              [label]="child.label"
-              [showLabels]="true"
-              [compact]="true"
-              (clicked)="itemClick.emit(child)"
-            ></nav-item>
-          }
-        }
-      </li>
+        </li>
+      }
     }
   </ul>
 }

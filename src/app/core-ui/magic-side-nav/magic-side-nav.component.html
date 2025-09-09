@@ -91,6 +91,7 @@
               [isExpanded]="isGroupExpanded(item)"
               [activeWorkContextId]="activeWorkContextId()"
               (itemClick)="onItemClick($event)"
+              (dragDrop)="onDragDrop(item, $event)"
             ></nav-list>
           </li>
         }

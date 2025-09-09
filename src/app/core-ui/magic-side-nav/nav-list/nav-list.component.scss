@@ -47,6 +47,50 @@
   }
 }
 
+.nav-child-item {
+  &.draggable {
+    cursor: grab;
+    // Remove default transitions for better performance
+
+    &:active {
+      cursor: grabbing;
+    }
+
+    &.cdk-drag-animating {
+      transition: transform 200ms cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+  }
+
+  &.cdk-drag-preview {
+    box-sizing: border-box;
+    border-radius: 4px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    transform: rotate(2deg);
+    opacity: 0.9;
+    // Use GPU acceleration
+    will-change: transform;
+  }
+
+  &.cdk-drag-placeholder {
+    opacity: 0.4;
+    background: var(--sidebar-hover);
+    border-radius: 4px;
+    // Minimize repaint
+    transform: translateZ(0);
+  }
+}
+
+// Only apply transitions during drag to avoid performance issues
+.cdk-drop-list-dragging .nav-child-item:not(.cdk-drag-placeholder) {
+  transition: transform 200ms cubic-bezier(0.25, 0.8, 0.25, 1);
+  will-change: transform;
+}
+
+// Disable transitions when not dragging
+.nav-children:not(.cdk-drop-list-dragging) .nav-child-item {
+  transition: none;
+}
+
 // Collapsed state behaviors inherited from parent sidebar
 :host-context(.nav-sidebar.collapsed) {
   .g-multi-btn-wrapper {
