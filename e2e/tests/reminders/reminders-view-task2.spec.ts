@@ -5,7 +5,7 @@ const DIALOG_TASKS_WRAPPER = `${DIALOG} .tasks`;
 const DIALOG_TASK = `${DIALOG} .task`;
 const DIALOG_TASK1 = `${DIALOG_TASK}:first-of-type`;
 const DIALOG_TASK2 = `${DIALOG_TASK}:nth-of-type(2)`;
-const SCHEDULE_MAX_WAIT_TIME = 180000;
+const SCHEDULE_MAX_WAIT_TIME = 60000; // Reduced from 180s to 60s
 
 // Helper selectors for task scheduling
 const TASK = 'task';
@@ -59,7 +59,7 @@ test.describe.serial('Reminders View Task 2', () => {
     workViewPage,
     testPrefix,
   }) => {
-    test.setTimeout(SCHEDULE_MAX_WAIT_TIME + 60000); // Add extra buffer
+    test.setTimeout(SCHEDULE_MAX_WAIT_TIME + 30000); // Add extra buffer
 
     await workViewPage.waitForTaskList();
 

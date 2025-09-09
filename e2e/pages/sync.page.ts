@@ -66,7 +66,7 @@ export class SyncPage extends BasePage {
 
   async waitForSyncComplete(): Promise<void> {
     // Wait for sync spinner to disappear
-    await this.syncSpinner.waitFor({ state: 'hidden', timeout: 30000 });
+    await this.syncSpinner.waitFor({ state: 'hidden', timeout: 20000 }); // Reduced from 30s to 20s
     // Verify check icon appears
     await this.syncCheckIcon.waitFor({ state: 'visible' });
   }

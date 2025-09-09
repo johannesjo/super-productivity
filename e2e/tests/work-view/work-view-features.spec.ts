@@ -23,11 +23,11 @@ test.describe('Work View Features', () => {
     await page.waitForTimeout(2000);
 
     // Verify undone task list is visible
-    await expect(page.locator(UNDONE_TASK_LIST)).toBeVisible({ timeout: 10000 });
+    await expect(page.locator(UNDONE_TASK_LIST)).toBeVisible({ timeout: 8000 }); // Reduced from 10s to 8s
 
     // Create tasks
     await workViewPage.addTask('Task 1');
-    await page.waitForSelector(TASK, { state: 'visible', timeout: 5000 });
+    await page.waitForSelector(TASK, { state: 'visible', timeout: 4000 }); // Reduced from 5s to 4s
     await page.waitForTimeout(500);
 
     await workViewPage.addTask('Task 2');

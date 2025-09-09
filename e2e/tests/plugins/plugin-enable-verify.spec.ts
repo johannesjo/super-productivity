@@ -9,13 +9,12 @@ import {
   waitForPluginManagementInit,
 } from '../../helpers/plugin-test.helpers';
 
-const { SIDENAV } = cssSelectors;
-const SETTINGS_BTN = `${SIDENAV} .tour-settingsMenuBtn`;
+const { SETTINGS_BTN } = cssSelectors;
 
 test.describe.serial('Plugin Enable Verify', () => {
   test('enable API Test Plugin and verify menu entry', async ({ page, workViewPage }) => {
     const timeoutMultiplier = getCITimeoutMultiplier();
-    test.setTimeout(60000 * timeoutMultiplier);
+    test.setTimeout(30000 * timeoutMultiplier); // Reduced from 60s to 30s base
 
     // First, ensure plugin assets are available
     const assetsAvailable = await waitForPluginAssets(page);
@@ -69,7 +68,7 @@ test.describe.serial('Plugin Enable Verify', () => {
     const pluginEnabled = await enablePluginWithVerification(
       page,
       'API Test Plugin',
-      15000 * timeoutMultiplier,
+      10000 * timeoutMultiplier, // Reduced from 15s to 10s
     );
 
     expect(pluginEnabled).toBe(true);
@@ -78,24 +77,27 @@ test.describe.serial('Plugin Enable Verify', () => {
     const pluginInMenu = await waitForPluginInMenu(
       page,
       'API Test Plugin',
-      20000 * timeoutMultiplier,
+      15000 * timeoutMultiplier, // Reduced from 20s to 15s
     );
 
     expect(pluginInMenu).toBe(true);
 
-    // Additional verification - check menu structure
+    // Additional verification - check menu structure in magic-side-nav
     const menuResult = await page.evaluate(() => {
-      const pluginMenu = document.querySelector('side-nav plugin-menu');
-      const buttons = pluginMenu ? Array.from(pluginMenu.querySelectorAll('button')) : [];
+      // Look for plugin items in magic-side-nav structure
+      const sideNav = document.querySelector('magic-side-nav');
+      const navButtons = sideNav
+        ? Array.from(sideNav.querySelectorAll('nav-item button'))
+        : [];
 
       return {
-        hasPluginMenu: !!pluginMenu,
-        buttonCount: buttons.length,
-        buttonTexts: buttons.map((btn) => btn.textContent?.trim() || ''),
+        hasSideNav: !!sideNav,
+        buttonCount: navButtons.length,
+        buttonTexts: navButtons.map((btn) => btn.textContent?.trim() || ''),
       };
     });
 
-    expect(menuResult.hasPluginMenu).toBe(true);
+    expect(menuResult.hasSideNav).toBe(true);
     expect(menuResult.buttonCount).toBeGreaterThan(0);
     // Check if any button text contains "API Test Plugin" (handle whitespace)
     const hasApiTestPlugin = menuResult.buttonTexts.some((text: string) =>

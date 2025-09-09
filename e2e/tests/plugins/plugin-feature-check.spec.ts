@@ -75,7 +75,7 @@ test.describe.serial('Plugin Feature Check', () => {
       // Check various plugin-related elements
       uiResults.hasPluginManagementTag = !!document.querySelector('plugin-management');
       uiResults.hasPluginSection = !!document.querySelector('.plugin-section');
-      uiResults.hasPluginMenu = !!document.querySelector('plugin-menu');
+      uiResults.hasMagicSideNav = !!document.querySelector('magic-side-nav');
       uiResults.hasPluginHeaderBtns = !!document.querySelector('plugin-header-btns');
 
       // Check if plugin text appears anywhere

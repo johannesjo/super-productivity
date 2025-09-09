@@ -33,12 +33,12 @@ test.describe('Daily Summary', () => {
     // Wait for task element in summary table
     await page.waitForSelector(SUMMARY_TABLE_TASK_EL, {
       state: 'visible',
-      timeout: 15000,
+      timeout: 10000, // Reduced from 15s to 10s
     });
 
     // Assert task appears in summary (look for partial match of the task name)
     const taskElement = page.locator(SUMMARY_TABLE_TASK_EL);
     // Just check for a key part of the task name that would be present regardless of prefix
-    await expect(taskElement).toContainText('hohoho', { timeout: 5000 });
+    await expect(taskElement).toContainText('hohoho', { timeout: 3000 }); // Reduced from 5s to 3s
   });
 });

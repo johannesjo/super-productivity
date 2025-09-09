@@ -17,14 +17,14 @@ test.describe('Autocomplete Dropdown', () => {
     // Wait for and click the confirm create tag button with increased timeout
     await page.waitForSelector(CONFIRM_CREATE_TAG_BTN, {
       state: 'visible',
-      timeout: 15000,
+      timeout: 10000, // Reduced from 15s to 10s
     });
     await page.locator(CONFIRM_CREATE_TAG_BTN).click();
 
     // Wait for dialog to close
     await page.waitForSelector(CONFIRM_CREATE_TAG_BTN, {
       state: 'hidden',
-      timeout: 10000,
+      timeout: 8000, // Reduced from 10s to 8s
     });
 
     // Close the add task input if still open
@@ -34,7 +34,7 @@ test.describe('Autocomplete Dropdown', () => {
     }
 
     // Wait for tag to be created with increased timeout
-    await page.waitForSelector(BASIC_TAG_TITLE, { state: 'visible', timeout: 15000 });
+    await page.waitForSelector(BASIC_TAG_TITLE, { state: 'visible', timeout: 10000 }); // Reduced from 15s to 10s
 
     // Assert tag is present and has correct text
     const tagTitle = page.locator(BASIC_TAG_TITLE);

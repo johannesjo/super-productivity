@@ -62,14 +62,14 @@ test.describe('Basic Navigation', () => {
     // Wait for work view to be ready
     await workViewPage.waitForTaskList();
 
-    // Click settings button
-    await page.click('side-nav .tour-settingsMenuBtn');
+    // Based on screenshot, look for Settings text in the nav - simpler approach
+    await page.click('text=Settings');
     await page.waitForLoadState('networkidle');
     await expect(page).toHaveURL(/\/#\/config/);
     await expect(page.locator('.page-settings')).toBeVisible();
 
-    // Click on work context to go back
-    await page.click('.current-work-context-title');
+    // Navigate back to work view by clicking the Today tag
+    await page.click('text=Today');
     await page.waitForLoadState('networkidle');
     await expect(page).toHaveURL(/\/#\/tag\/TODAY/);
     await expect(page.locator('task-list').first()).toBeVisible();

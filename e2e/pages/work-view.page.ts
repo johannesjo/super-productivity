@@ -21,7 +21,7 @@ export class WorkViewPage extends BasePage {
   async waitForTaskList(): Promise<void> {
     await this.page.waitForSelector('task-list', {
       state: 'visible',
-      timeout: 8000,
+      timeout: 6000, // Reduced from 8s to 6s
     });
     // Ensure route wrapper is fully loaded
     await this.routerWrapper.waitFor({ state: 'visible' });

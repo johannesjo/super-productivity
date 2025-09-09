@@ -2,8 +2,7 @@ import { expect, test } from '../../fixtures/test.fixture';
 import { cssSelectors } from '../../constants/selectors';
 import * as path from 'path';
 
-const { SIDENAV } = cssSelectors;
-const SETTINGS_BTN = `${SIDENAV} .tour-settingsMenuBtn`;
+const { SETTINGS_BTN } = cssSelectors;
 const FILE_INPUT = 'input[type="file"][accept=".zip"]';
 const TEST_PLUGIN_ID = 'test-upload-plugin';
 

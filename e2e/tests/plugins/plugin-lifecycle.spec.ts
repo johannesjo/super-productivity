@@ -6,17 +6,15 @@ import {
   getCITimeoutMultiplier,
 } from '../../helpers/plugin-test.helpers';
 
-const { SIDENAV } = cssSelectors;
+const { SIDENAV, SETTINGS_BTN } = cssSelectors;
 
 // Plugin-related selectors
-const SETTINGS_BTN = `${SIDENAV} .tour-settingsMenuBtn`;
-const PLUGIN_MENU = `${SIDENAV} plugin-menu`;
-const PLUGIN_MENU_ITEM = `${PLUGIN_MENU} button`;
+const API_TEST_PLUGIN_NAV_ITEM = `${SIDENAV} nav-item button:has-text("API Test Plugin")`;
 
 test.describe('Plugin Lifecycle', () => {
   test.beforeEach(async ({ page, workViewPage }) => {
     const timeoutMultiplier = getCITimeoutMultiplier();
-    test.setTimeout(60000 * timeoutMultiplier);
+    test.setTimeout(30000 * timeoutMultiplier); // Reduced from 60s to 30s base
 
     // First, ensure plugin assets are available
     const assetsAvailable = await waitForPluginAssets(page);
@@ -116,21 +114,21 @@ test.describe('Plugin Lifecycle', () => {
 
   test('verify plugin is initially loaded', async ({ page }) => {
     test.setTimeout(20000); // Increase timeout
-    // Wait for plugin menu to be ready
-    await page.locator(PLUGIN_MENU).waitFor({ state: 'visible' });
+    // Wait for magic-side-nav to be ready
+    await page.locator(SIDENAV).waitFor({ state: 'visible' });
     await page.waitForTimeout(50); // Small delay for plugins to initialize
 
-    // Plugin doesn't show snack bar on load, check plugin menu instead
-    await expect(page.locator(PLUGIN_MENU_ITEM)).toBeVisible({ timeout: 10000 });
-    await expect(page.locator(PLUGIN_MENU_ITEM)).toContainText('API Test Plugin');
+    // Plugin doesn't show snack bar on load, check plugin nav item instead
+    await expect(page.locator(API_TEST_PLUGIN_NAV_ITEM)).toBeVisible({ timeout: 10000 });
+    await expect(page.locator(API_TEST_PLUGIN_NAV_ITEM)).toContainText('API Test Plugin');
   });
 
   test('test plugin navigation', async ({ page }) => {
     test.setTimeout(20000); // Increase timeout
 
-    // Click on the plugin menu item to navigate to plugin
-    await expect(page.locator(PLUGIN_MENU_ITEM)).toBeVisible();
-    await page.click(PLUGIN_MENU_ITEM);
+    // Click on the plugin nav item to navigate to plugin
+    await expect(page.locator(API_TEST_PLUGIN_NAV_ITEM)).toBeVisible();
+    await page.click(API_TEST_PLUGIN_NAV_ITEM);
     // Wait for navigation to plugin page
     await page.waitForTimeout(500); // Give time for navigation
     await page.waitForTimeout(50); // Small delay for UI settling
@@ -266,20 +264,22 @@ test.describe('Plugin Lifecycle', () => {
     await page.locator('.route-wrapper').waitFor({ state: 'visible' });
     await page.waitForTimeout(500); // Small delay for UI settling
 
-    // Check if the plugin menu exists and verify the API Test Plugin is not in it
-    const pluginMenuExists = (await page.locator(PLUGIN_MENU).count()) > 0;
+    // Check if the magic-side-nav exists and verify the API Test Plugin is not in it
+    const sideNavExists = (await page.locator(SIDENAV).count()) > 0;
 
-    if (pluginMenuExists) {
-      // Check all plugin menu items to ensure API Test Plugin is not present
+    if (sideNavExists) {
+      // Check all plugin nav items to ensure API Test Plugin is not present
       const hasApiTestPlugin = await page.evaluate(() => {
-        const menuItems = Array.from(document.querySelectorAll('plugin-menu button'));
+        const menuItems = Array.from(
+          document.querySelectorAll('magic-side-nav nav-item button'),
+        );
         return menuItems.some((item) => item.textContent?.includes('API Test Plugin'));
       });
 
       expect(hasApiTestPlugin).toBe(false);
     } else {
-      // Plugin menu doesn't exist at all, which is also valid when no plugins are enabled
-      expect(pluginMenuExists).toBe(false);
+      // Magic-side-nav doesn't exist at all, which is unexpected
+      expect(sideNavExists).toBe(true);
     }
   });
 });

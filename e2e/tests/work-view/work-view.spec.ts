@@ -122,7 +122,7 @@ test.describe('Work View', () => {
 
     // Verify both tasks are visible
     const tasks = page.locator('task');
-    await expect(tasks).toHaveCount(2, { timeout: 10000 });
+    await expect(tasks).toHaveCount(2, { timeout: 8000 }); // Reduced from 10s to 8s
 
     // Get all task textareas and their values
     const taskTextareas = await tasks.locator('textarea').all();
