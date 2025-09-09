@@ -94,6 +94,13 @@
             ></nav-list>
           </li>
         }
+        @case ('menu') {
+          <nav-mat-menu
+            [item]="item"
+            [showLabels]="showText()"
+            (itemClick)="onItemClick($event)"
+          ></nav-mat-menu>
+        }
         @default {
           <li
             class="nav-item"

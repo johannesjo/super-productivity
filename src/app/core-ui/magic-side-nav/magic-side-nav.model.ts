@@ -9,7 +9,8 @@ export type NavItem =
   | NavRouteItem
   | NavHrefItem
   | NavActionItem
-  | NavGroupItem;
+  | NavGroupItem
+  | NavMenuItem;
 
 export interface NavBaseItem {
   id: string;
@@ -69,6 +70,13 @@ export interface NavGroupItem extends NavBaseItem {
   additionalButtons?: NavAdditionalButton[];
   contextMenuItems?: NavContextItem[];
   action?: () => void; // optional external toggle logic
+}
+
+export interface NavMenuItem extends NavBaseItem {
+  type: 'menu';
+  label: string;
+  icon: string;
+  children: NavItem[];
 }
 
 export interface NavAdditionalButton {

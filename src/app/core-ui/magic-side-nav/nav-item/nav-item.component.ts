@@ -20,7 +20,7 @@ import { ContextMenuComponent } from '../../../ui/context-menu/context-menu.comp
 import { CdkDragPlaceholder } from '@angular/cdk/drag-drop';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { MatMenuItem } from '@angular/material/menu';
+import { MatMenuItem, MatMenuModule } from '@angular/material/menu';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { selectAllDoneIds } from '../../../features/tasks/store/task.selectors';
 import { Store } from '@ngrx/store';
@@ -37,6 +37,7 @@ import { TranslatePipe } from '@ngx-translate/core';
     MatIconButton,
     MatIcon,
     MatMenuItem,
+    MatMenuModule,
     TranslatePipe,
   ],
   templateUrl: './nav-item.component.html',
@@ -88,6 +89,8 @@ export class NavItemComponent {
   svgIcon = input<string | undefined>(undefined);
   showLabels = input<boolean>(true);
   showChevron = input<boolean>(false);
+  // Optional: menu trigger for dropdown
+  menuTriggerFor = input<any | null>(null);
 
   // Events
   // Common row class for compact/default variants

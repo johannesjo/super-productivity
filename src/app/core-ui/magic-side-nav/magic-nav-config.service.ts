@@ -136,9 +136,9 @@ export class MagicNavConfigService {
         route: '/scheduled-list',
       },
 
-      // Help Menu
+      // Help Menu (rendered as mat-menu)
       {
-        type: 'group',
+        type: 'menu',
         id: 'help',
         label: T.MH.HELP,
         icon: 'help_center',

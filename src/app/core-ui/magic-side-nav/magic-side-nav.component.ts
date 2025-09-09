@@ -19,13 +19,26 @@ import { NavItem } from './magic-side-nav.model';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { MagicNavConfigService } from './magic-nav-config.service';
 import { readBoolLS, readNumberLSBounded } from '../../util/ls-util';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatIcon } from '@angular/material/icon';
+import { TranslatePipe } from '@ngx-translate/core';
+import { NavMatMenuComponent } from './nav-mat-menu/nav-mat-menu.component';
 
 const COLLAPSED_WIDTH = 64;
 
 @Component({
   selector: 'magic-side-nav',
   standalone: true,
-  imports: [CommonModule, RouterModule, NavItemComponent, NavSectionComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    NavItemComponent,
+    NavSectionComponent,
+    MatMenuModule,
+    MatIcon,
+    TranslatePipe,
+    NavMatMenuComponent,
+  ],
   templateUrl: './magic-side-nav.component.html',
   styleUrl: './magic-side-nav.component.scss',
   host: {
