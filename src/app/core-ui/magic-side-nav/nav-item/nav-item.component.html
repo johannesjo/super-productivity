@@ -24,8 +24,9 @@
     >
       {{ workContext()!.title }}
     </span>
-    <span class="badge">{{ nrOfOpenTasks() }}</span>
   </button>
+
+  <div class="task-count">{{ nrOfOpenTasks() }}</div>
 
   <button
     [style.visibility]="showMoreButton() ? 'visible' : 'hidden'"

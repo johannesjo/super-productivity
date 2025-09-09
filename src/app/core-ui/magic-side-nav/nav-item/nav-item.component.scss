@@ -25,10 +25,6 @@
         margin var(--transition-duration-m, 0.25s) var(--ani-standard-timing);
     }
 
-    .badge {
-      display: none;
-    }
-
     .ico-wrapper {
       position: relative;
     }
@@ -40,30 +36,6 @@
     min-width: 40px !important;
   }
 
-  &:hover .badge {
-    display: none !important;
-  }
-
-  &.hasTasks {
-    button .badge {
-      display: block;
-      z-index: 10;
-      position: absolute;
-      line-height: 1;
-      text-align: center;
-      font-size: 10px;
-      padding: 0;
-      left: auto;
-      bottom: auto;
-      right: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-
-      // avoid affecting drag handle
-      pointer-events: none;
-    }
-  }
-
   &.isHidden {
     display: none !important;
   }
@@ -71,6 +43,23 @@
 
 :host.isActiveContext button {
   font-weight: normal;
+}
+
+:host:hover .task-count {
+  display: none !important;
+}
+
+.task-count {
+  margin-left: auto;
+  line-height: 1;
+  text-align: center;
+  font-size: 10px;
+  padding: 8px;
+  padding-right: 16px;
+  display: flex;
+  align-items: center;
+  // avoid affecting drag handle
+  pointer-events: none;
 }
 
 // Active state visuals are handled by .nav-link.active styles
@@ -263,14 +252,8 @@
     display: none !important;
   }
 
-  &.hasTasks {
-    button .badge {
-      left: 50%;
-      bottom: 6px;
-      right: auto;
-      top: auto;
-      transform: translateX(-50%);
-    }
+  .task-count {
+    display: none;
   }
 
   // (no duplicate .nav-link styles here; use global ones)
