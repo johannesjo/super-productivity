@@ -5,6 +5,7 @@
   align-items: stretch;
   position: relative;
   width: 100%;
+  color: var(--text-color);
 
   button:first-of-type {
     white-space: nowrap;
@@ -18,6 +19,7 @@
     }
 
     .nav-label {
+      color: var(--text-color);
       overflow: hidden;
       text-overflow: ellipsis;
       // smooth collapse/expand for title
