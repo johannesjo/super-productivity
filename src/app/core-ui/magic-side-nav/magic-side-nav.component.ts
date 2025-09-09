@@ -16,13 +16,11 @@ import { RouterModule } from '@angular/router';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { NavItemComponent } from './nav-item/nav-item.component';
 import { NavSectionComponent } from './nav-list/nav-list.component';
-import { NavItem, NavGroupItem, NavWorkContextItem } from './magic-side-nav.model';
+import { NavGroupItem, NavItem, NavWorkContextItem } from './magic-side-nav.model';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { MagicNavConfigService } from './magic-nav-config.service';
 import { readBoolLS, readNumberLSBounded } from '../../util/ls-util';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatIcon } from '@angular/material/icon';
-import { TranslatePipe } from '@ngx-translate/core';
 import { NavMatMenuComponent } from './nav-mat-menu/nav-mat-menu.component';
 import { TaskService } from '../../features/tasks/task.service';
 
@@ -37,8 +35,6 @@ const COLLAPSED_WIDTH = 64;
     NavItemComponent,
     NavSectionComponent,
     MatMenuModule,
-    MatIcon,
-    TranslatePipe,
     NavMatMenuComponent,
   ],
   templateUrl: './magic-side-nav.component.html',
@@ -58,12 +54,11 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
   activeWorkContextId = input<string | null>(null);
 
   // Externally controlled mobile overlay visibility
-  mobileVisible = input<boolean | null>(null);
   mobileVisibleChange = output<boolean>();
 
   isFullMode = signal(true);
   isMobile = signal(false);
-  showMobileMenu = signal(false);
+  showMobileMenuOverlay = signal(false);
   // Track expanded groups as array for better signal change detection
   expandedGroups = signal<string[]>([]);
   // Merge service-controlled and local expanded ids for reactive checks
@@ -90,9 +85,7 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
   readonly hostWidthSignal = computed(() => (this.isMobile() ? 0 : this.sidebarWidth()));
 
   // Commonly used derived state for template readability
-  readonly showText = computed(
-    () => this.isFullMode() || (this.isMobile() && this.showMobileMenu()),
-  );
+  readonly showText = computed(() => this.isFullMode() || this.isMobile());
 
   // Keep stable references for event listeners to ensure proper cleanup
   private readonly _onDrag: (event: MouseEvent) => void = (event: MouseEvent) =>
@@ -100,18 +93,10 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
   private readonly _onDragEnd: () => void = () => this._handleDragEnd();
 
   constructor() {
-    // Sync external mobile visibility input → internal state
-    effect(() => {
-      const desired = this.mobileVisible();
-      if (desired !== null && this.isMobile()) {
-        this.showMobileMenu.set(desired);
-      }
-    });
-
     // Emit mobile visible changes to parent while in mobile mode
     effect(() => {
       if (this.isMobile()) {
-        this.mobileVisibleChange.emit(this.showMobileMenu());
+        this.mobileVisibleChange.emit(this.showMobileMenuOverlay());
       }
     });
   }
@@ -152,19 +137,6 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     this._checkScreenSize();
   }
 
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent): void {
-    if (this.isMobile() && this.showMobileMenu()) {
-      const target = event.target as HTMLElement;
-      const nav = document.querySelector('.nav-sidebar');
-      const toggle = document.querySelector('.mobile-menu-toggle');
-
-      if (nav && !nav.contains(target) && (!toggle || !toggle.contains(target as Node))) {
-        this.showMobileMenu.set(false);
-      }
-    }
-  }
-
   onNavKeyDown(event: KeyboardEvent): void {
     if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
       this._handleArrowNavigation(event);
@@ -180,24 +152,25 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
 
     if (wasMobile !== currentMobile) {
       if (currentMobile) {
-        this.showMobileMenu.set(false);
+        this.showMobileMenuOverlay.set(false);
       } else {
         this.isFullMode.set(this.config().fullModeByDefault);
       }
     }
   }
 
-  toggleSidebar(): void {
-    if (this.isMobile()) {
-      this.showMobileMenu.update((show) => !show);
-    } else {
-      this._enableWidthAnimation();
-      const newFullMode = !this.isFullMode();
-      this.isFullMode.set(newFullMode);
-      // Save fullMode/compactMode state to localStorage
-      localStorage.setItem(LS.NAV_SIDEBAR_EXPANDED, newFullMode.toString());
-      // handled internally
-    }
+  toggleMobileNav(): void {
+    this.showMobileMenuOverlay.update((show) => !show);
+    console.log(this.showMobileMenuOverlay());
+  }
+
+  toggleSideNavMode(): void {
+    this._enableWidthAnimation();
+    const newFullMode = !this.isFullMode();
+    this.isFullMode.set(newFullMode);
+    // Save fullMode/compactMode state to localStorage
+    localStorage.setItem(LS.NAV_SIDEBAR_EXPANDED, newFullMode.toString());
+    // handled internally
   }
 
   toggleGroup(item: NavItem): void {
@@ -249,7 +222,7 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     this._sideNavConfigService.onNavItemClick(item);
 
     if (this.isMobile()) {
-      this.showMobileMenu.set(false);
+      this.showMobileMenuOverlay.set(false);
     }
   }
 

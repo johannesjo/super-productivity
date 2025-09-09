@@ -29,12 +29,7 @@
       class="app-container"
       [dir]="isRTL ? 'rtl' : 'ltr'"
     >
-      <magic-side-nav
-        [activeWorkContextId]="getActiveWorkContextId()"
-        [mobileVisible]="layoutService.isShowMobileSideNav()"
-        (mobileVisibleChange)="onMobileNavVisibleChange($event)"
-      >
-      </magic-side-nav>
+      <magic-side-nav [activeWorkContextId]="getActiveWorkContextId()"> </magic-side-nav>
 
       <main class="main-content">
         <header

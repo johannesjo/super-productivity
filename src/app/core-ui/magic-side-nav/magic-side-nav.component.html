@@ -1,11 +1,9 @@
-<!-- Mobile Menu Toggle (only visible on mobile) -->
-@if (isMobile()) {
+<!-- Mobile Menu Open Button (only visible on mobile when closed) -->
+@if (isMobile() && !showMobileMenuOverlay()) {
   <button
-    class="mobile-menu-toggle"
-    [class.visible]="isMobile()"
-    (click)="toggleSidebar()"
-    [attr.aria-label]="showMobileMenu() ? 'Close menu' : 'Open menu'"
-    [attr.aria-expanded]="showMobileMenu()"
+    class="mobile-menu-open"
+    (click)="toggleMobileNav()"
+    [attr.aria-label]="'Open menu'"
   >
     <svg
       width="24"
@@ -15,30 +13,25 @@
       stroke="currentColor"
       stroke-width="2"
     >
-      @if (!showMobileMenu()) {
-        <path d="M3 12h18M3 6h18M3 18h18" />
-      }
-      @if (showMobileMenu()) {
-        <path d="M6 6l12 12M6 18L18 6" />
-      }
+      <path d="M3 12h18M3 6h18M3 18h18" />
     </svg>
   </button>
 }
 
 <!-- Overlay for mobile (backdrop) -->
-@if (isMobile() && showMobileMenu()) {
+@if (isMobile() && showMobileMenuOverlay()) {
   <div
     class="nav-backdrop-mobile"
-    (click)="toggleSidebar()"
+    (click)="toggleMobileNav()"
   ></div>
 }
 <!-- Main Navigation Sidebar -->
 <nav
   class="nav-sidebar"
-  [class.fullMode]="isFullMode() || (isMobile() && showMobileMenu())"
+  [class.fullMode]="isFullMode() || isMobile()"
   [class.compactMode]="!isFullMode() && !isMobile()"
   [class.mobile]="isMobile()"
-  [class.mobile-visible]="isMobile() && showMobileMenu()"
+  [class.mobile-visible]="isMobile() && showMobileMenuOverlay()"
   [class.animate]="animateWidth()"
   [class.theme-dark]="config().theme === 'dark'"
   [class.position-right]="config().position === 'right'"
@@ -52,7 +45,7 @@
     <button
       class="sidebar-toggle"
       [class.visible]="!isMobile()"
-      (click)="toggleSidebar()"
+      (click)="toggleSideNavMode()"
       [attr.aria-label]="isFullMode() ? 'Switch to compact mode' : 'Switch to full mode'"
       [attr.aria-expanded]="isFullMode()"
     >

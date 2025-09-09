@@ -24,13 +24,14 @@
   transition: none !important;
 }
 
-// Mobile menu toggle button
-.mobile-menu-toggle {
-  display: none;
+// Mobile menu open button (only shows when menu is closed)
+.mobile-menu-open {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: fixed;
   top: 8px;
   left: 8px;
-  z-index: 221001;
   background: var(--sidenav-bg);
   border: 1px solid var(--sidebar-border);
   border-radius: 8px;
@@ -38,12 +39,6 @@
   cursor: pointer;
   transition: var(--transition-standard);
   color: var(--text-color-less-intense);
-
-  &.visible {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
 
   &:hover {
     background: var(--sidebar-hover);
@@ -244,6 +239,11 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+
+  // Remove top padding on mobile (600px breakpoint)
+  @media (max-width: 600px) {
+    padding-top: 0;
+  }
 }
 
 .nav-item {
