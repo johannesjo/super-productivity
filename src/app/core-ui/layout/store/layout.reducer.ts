@@ -2,13 +2,13 @@ import {
   hideAddTaskBar,
   hideNonTaskSidePanelContent,
   hidePluginPanel,
-  hideSideNav,
+  hideMobileSideNav,
   showAddTaskBar,
   showPluginPanel,
   toggleIssuePanel,
   togglePluginPanel,
   toggleShowNotes,
-  toggleSideNav,
+  toggleMobileSideNav,
   toggleTaskViewCustomizerPanel,
 } from './layout.actions';
 import {
@@ -25,7 +25,7 @@ export interface LayoutState {
   isShowAddTaskBar: boolean;
   isShowNotes: boolean;
   isShowIssuePanel: boolean;
-  isShowSideNav: boolean;
+  isShowMobileSideNav: boolean;
   isShowCelebrate: boolean;
   isShowTaskViewCustomizerPanel: boolean;
   isShowPluginPanel: boolean;
@@ -34,7 +34,7 @@ export interface LayoutState {
 
 export const INITIAL_LAYOUT_STATE: LayoutState = {
   isShowAddTaskBar: false,
-  isShowSideNav: false,
+  isShowMobileSideNav: false,
   isShowNotes: false,
   isShowIssuePanel: false,
   isShowCelebrate: false,
@@ -53,7 +53,7 @@ export const selectIsShowAddTaskBar = createSelector(
 
 export const selectIsShowSideNav = createSelector(
   selectLayoutFeatureState,
-  (state) => state.isShowSideNav,
+  (state) => state.isShowMobileSideNav,
 );
 
 export const selectIsShowNotes = createSelector(
@@ -101,9 +101,12 @@ const _reducer = createReducer<LayoutState>(
 
   on(hideAddTaskBar, (state) => ({ ...state, isShowAddTaskBar: false })),
 
-  on(hideSideNav, (state) => ({ ...state, isShowSideNav: false })),
+  on(hideMobileSideNav, (state) => ({ ...state, isShowMobileSideNav: false })),
 
-  on(toggleSideNav, (state) => ({ ...state, isShowSideNav: !state.isShowSideNav })),
+  on(toggleMobileSideNav, (state) => ({
+    ...state,
+    isShowSideNavisShowMobileSideNav: !state.isShowMobileSideNav,
+  })),
 
   on(toggleShowNotes, (state) => ({
     ...state,

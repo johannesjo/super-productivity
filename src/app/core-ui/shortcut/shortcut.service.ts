@@ -132,8 +132,7 @@ export class ShortcutService {
     } else if (checkKeyCombo(ev, keys.showSearchBar)) {
       this._router.navigate(['/search']);
       ev.preventDefault();
-    } else if (checkKeyCombo(ev, keys.toggleSideNav)) {
-      this._layoutService.toggleSideNav();
+    } else if (checkKeyCombo(ev, keys.focusSideNav)) {
       ev.preventDefault();
     } else if (checkKeyCombo(ev, keys.addNewTask)) {
       this._layoutService.showAddTaskBar();

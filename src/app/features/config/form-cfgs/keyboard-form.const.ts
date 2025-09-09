@@ -77,7 +77,7 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       },
     },
     {
-      key: 'toggleSideNav',
+      key: 'focusSideNav',
       type: 'keyboard',
       templateOptions: {
         label: T.GCF.KEYBOARD.TOGGLE_SIDE_NAV,

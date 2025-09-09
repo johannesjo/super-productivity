@@ -3,12 +3,12 @@ import {
   hideAddTaskBar,
   hideIssuePanel,
   hideNonTaskSidePanelContent,
-  hideSideNav,
+  hideMobileSideNav,
   hideTaskViewCustomizerPanel,
   showAddTaskBar,
   toggleIssuePanel,
   toggleShowNotes,
-  toggleSideNav,
+  toggleMobileSideNav,
   toggleTaskViewCustomizerPanel,
 } from './store/layout.actions';
 import { merge, Observable } from 'rxjs';
@@ -183,11 +183,11 @@ export class LayoutService {
   }
 
   toggleSideNav(): void {
-    this._store$.dispatch(toggleSideNav());
+    this._store$.dispatch(toggleMobileSideNav());
   }
 
   hideSideNav(): void {
-    this._store$.dispatch(hideSideNav());
+    this._store$.dispatch(hideMobileSideNav());
   }
 
   toggleNotes(): void {

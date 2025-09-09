@@ -1681,7 +1681,7 @@
       "TOGGLE_BOOKMARKS": "Show/Hide Bookmark Bar",
       "TOGGLE_ISSUE_PANEL": "Show/Hide Issue Panel",
       "TOGGLE_PLAY": "Start/Stop Task",
-      "TOGGLE_SIDE_NAV": "Show & Focus/Hide Sidenav",
+      "TOGGLE_SIDE_NAV": "Focus Sidenav",
       "TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL": "Toggle Filter/Group/Sort Panel",
       "TRIGGER_SYNC": "Trigger sync (if configured)",
       "ZOOM_DEFAULT": "Zoom default (Desktop only)",
