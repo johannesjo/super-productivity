@@ -27,11 +27,11 @@
   }
 </div>
 
-@if (item().children && item().children.length > 0) {
+@if (item().children && item().children.length > 0 && isExpanded()) {
   <ul
+    [@expandFade]
+    [@standardList]="item().children.length"
     class="nav-children"
-    [class.expanded]="isExpanded()"
-    [class.visible]="isExpanded()"
     [attr.id]="'group-' + item().id"
     role="list"
     cdkDropList

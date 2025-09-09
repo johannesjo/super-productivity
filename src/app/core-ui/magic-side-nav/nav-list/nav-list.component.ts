@@ -9,6 +9,8 @@ import { NavItemComponent } from '../nav-item/nav-item.component';
 import { NavGroupItem, NavItem, NavWorkContextItem } from '../magic-side-nav.model';
 import { DRAG_DELAY_FOR_TOUCH_LONGER } from '../../../app.constants';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
+import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
+import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
 
 @Component({
   selector: 'nav-list',
@@ -26,6 +28,7 @@ import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
   templateUrl: './nav-list.component.html',
   styleUrl: './nav-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [standardListAnimation, expandFadeAnimation],
 })
 export class NavSectionComponent {
   item = input.required<NavGroupItem>();
