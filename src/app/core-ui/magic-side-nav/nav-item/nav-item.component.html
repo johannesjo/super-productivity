@@ -10,7 +10,6 @@
     routerLinkActive="active"
     class="nav-link"
     [class.has-tasks]="nrOfOpenTasks() > 0"
-    [attr.title]="!showLabels() ? workContext()!.title : null"
     mat-menu-item
   >
     <mat-icon class="nav-icon drag-handle">{{
@@ -57,7 +56,6 @@
       mat-menu-item
       class="nav-link"
       [class.expanded]="expanded()"
-      [attr.title]="!showLabels() ? (label() | translate) : null"
       (click)="clicked.emit()"
     >
       @if (svgIcon()) {
@@ -94,7 +92,6 @@
       rel="noopener noreferrer"
       class="nav-link"
       [class.expanded]="expanded()"
-      [attr.title]="!showLabels() ? (label() | translate) : null"
       (click)="clicked.emit()"
     >
       @if (svgIcon()) {
@@ -128,7 +125,6 @@
       class="nav-link"
       mat-menu-item
       [class.expanded]="container() === 'group' && expanded()"
-      [attr.title]="!showLabels() ? (label() | translate) : null"
       [attr.aria-expanded]="container() === 'group' ? expanded() : null"
       [attr.aria-controls]="container() === 'group' ? ariaControls() : null"
       [matMenuTriggerFor]="menuTriggerFor()"
