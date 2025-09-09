@@ -142,23 +142,6 @@
       left: 50%;
       transform: translateX(-50%);
     }
-
-    // Show resize handle in compactMode but style differently
-    .resize-handle.compactMode-handle {
-      display: block;
-      width: 8px;
-      right: -4px;
-
-      &:hover {
-        background-color: var(--sidenav-active-text);
-      }
-
-      .resize-handle-line {
-        width: 3px;
-        height: 60px;
-        opacity: 0.7;
-      }
-    }
   }
 
   // Mobile specific
@@ -263,14 +246,14 @@
   opacity: 0.7;
 }
 
-// Resize handle
+// Resize handle (now positioned relative to host component)
 .resize-handle {
   position: absolute;
   top: 0;
   bottom: 0;
   width: 4px;
   cursor: col-resize;
-  z-index: 1002;
+  z-index: 1003; // Above the nav-sidebar
   transition: background-color 0.2s ease;
 
   &.position-left {
@@ -281,30 +264,26 @@
     left: -2px;
   }
 
+  // CompactMode specific styling
+  &.compactMode-handle {
+    width: 8px;
+
+    &.position-left {
+      right: -4px;
+    }
+
+    &.position-right {
+      left: -4px;
+    }
+  }
+
   &:hover {
     background-color: var(--sidenav-active-text);
-
-    .resize-handle-line {
-      opacity: 1;
-    }
   }
 
   &:active {
     background-color: var(--sidenav-active-text);
   }
-}
-
-.resize-handle-line {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 2px;
-  height: 40px;
-  background: var(--sidebar-text-secondary);
-  border-radius: 1px;
-  opacity: 0.5;
-  transition: opacity 0.2s ease;
 }
 
 // Multi-button wrapper styling moved to nav-list component
