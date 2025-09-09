@@ -40,18 +40,25 @@
     min-width: 40px !important;
   }
 
+  &:hover .badge {
+    display: none !important;
+  }
+
   &.hasTasks {
     button .badge {
       display: block;
       z-index: 10;
       position: absolute;
       line-height: 1;
-      left: 40px;
       text-align: center;
-      bottom: 6px;
       font-size: 10px;
       padding: 0;
       border-radius: 4px;
+      left: auto;
+      bottom: auto;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
 
       // avoid affecting drag handle
       pointer-events: none;
@@ -211,6 +218,7 @@
 .nav-link .expand-icon {
   transition: transform 0.2s ease;
 }
+
 .nav-link.expanded .expand-icon {
   transform: rotate(180deg);
 }
@@ -229,6 +237,22 @@
   // Hide the overflow menu button entirely when collapsed
   .additional-btn {
     display: none !important;
+  }
+
+  // Hide Material's menu item text wrapper (keeps icon centered, avoids jump)
+  a:first-of-type ::ng-deep .mat-mdc-menu-item-text,
+  button:first-of-type ::ng-deep .mat-mdc-menu-item-text {
+    display: none !important;
+  }
+
+  &.hasTasks {
+    button .badge {
+      left: 50%;
+      bottom: 6px;
+      right: auto;
+      top: auto;
+      transform: translateX(-50%);
+    }
   }
 }
 
