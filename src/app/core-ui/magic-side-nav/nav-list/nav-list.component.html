@@ -55,7 +55,10 @@
     @for (child of item().children; track child.id) {
       @if (child.type === 'workContext') {
         <li
-          class="nav-child-item draggable"
+          class="nav-child-item"
+          [class.draggable]="
+            child.defaultIcon !== 'today' && child.defaultIcon !== 'inbox'
+          "
           role="listitem"
           cdkDrag
           [cdkDragData]="child"
