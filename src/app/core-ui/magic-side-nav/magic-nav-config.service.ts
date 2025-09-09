@@ -23,6 +23,7 @@ import {
 import { toggleHideFromMenu } from '../../features/project/store/project.actions';
 import { NavConfig, NavItem, NavWorkContextItem } from './magic-side-nav.model';
 import { TODAY_TAG } from '../../features/tag/tag.const';
+import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
 
 @Injectable({
   providedIn: 'root',
@@ -34,6 +35,7 @@ export class MagicNavConfigService {
   private readonly _shepherdService = inject(ShepherdService);
   private readonly _matDialog = inject(MatDialog);
   private readonly _store = inject(Store);
+  private readonly _pluginBridge = inject(PluginBridgeService);
 
   // Simple state signals
   private readonly _isProjectsExpanded = signal(
@@ -66,6 +68,7 @@ export class MagicNavConfigService {
     this._workContextService.activeWorkContextId$,
     { initialValue: null },
   );
+  private readonly _pluginMenuEntries = this._pluginBridge.menuEntries;
 
   // Main navigation configuration
   readonly navConfig = computed<NavConfig>(() => ({
@@ -99,6 +102,9 @@ export class MagicNavConfigService {
         icon: 'grid_view',
         route: '/boards',
       },
+
+      // Plugin entries
+      ...this._buildPluginItems(),
 
       // Separator
       { type: 'separator', id: 'sep-2' },
@@ -228,6 +234,7 @@ export class MagicNavConfigService {
         label: T.MH.SETTINGS,
         icon: 'settings',
         route: '/config',
+        tourClass: 'tour-settingsMenuBtn',
       },
     ],
     fullModeByDefault: true,
@@ -334,6 +341,19 @@ export class MagicNavConfigService {
       workContext: tag,
       workContextType: WorkContextType.TAG,
       defaultIcon: tag.icon || 'label',
+    }));
+  }
+
+  private _buildPluginItems(): NavItem[] {
+    const pluginEntries = this._pluginMenuEntries();
+
+    return pluginEntries.map((entry) => ({
+      type: 'plugin',
+      id: `plugin-${entry.pluginId}-${entry.label}`,
+      label: entry.label,
+      icon: entry.icon || 'extension',
+      pluginId: entry.pluginId,
+      action: entry.onClick,
     }));
   }
 

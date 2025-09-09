@@ -87,6 +87,9 @@ export class NavItemComponent {
   // Optional: menu trigger for dropdown
   menuTriggerFor = input<any | null>(null);
 
+  // Tour class for Shepherd.js guide
+  tourClass = input<string | null>(null);
+
   // Events
   clicked = output<void>();
 

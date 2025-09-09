@@ -10,13 +10,15 @@ export type NavItem =
   | NavHrefItem
   | NavActionItem
   | NavGroupItem
-  | NavMenuItem;
+  | NavMenuItem
+  | NavPluginItem;
 
 export interface NavBaseItem {
   id: string;
   label?: string;
   icon?: string;
   svgIcon?: string;
+  tourClass?: string;
 }
 
 export interface NavSeparatorItem extends NavBaseItem {
@@ -78,6 +80,14 @@ export interface NavMenuItem extends NavBaseItem {
   label: string;
   icon: string;
   children: NavItem[];
+}
+
+export interface NavPluginItem extends NavBaseItem {
+  type: 'plugin';
+  label: string;
+  icon: string;
+  pluginId: string;
+  action: () => void;
 }
 
 export interface NavAdditionalButton {

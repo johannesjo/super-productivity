@@ -59,6 +59,7 @@
       mat-menu-item
       class="nav-link"
       [class.expanded]="expanded()"
+      [class]="tourClass()"
       (click)="clicked.emit()"
     >
       @if (svgIcon()) {
@@ -131,6 +132,7 @@
       [attr.aria-expanded]="container() === 'group' ? expanded() : null"
       [attr.aria-controls]="container() === 'group' ? ariaControls() : null"
       [matMenuTriggerFor]="menuTriggerFor()"
+      [class]="tourClass()"
       (click)="clicked.emit()"
     >
       @if (svgIcon()) {

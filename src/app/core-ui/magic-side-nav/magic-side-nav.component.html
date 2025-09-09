@@ -123,6 +123,7 @@
                   [svgIcon]="item.svgIcon"
                   [label]="item.label"
                   [showLabels]="showText()"
+                  [tourClass]="item.tourClass"
                   (clicked)="onItemClick(item)"
                 ></nav-item>
               }
@@ -134,6 +135,7 @@
                   [svgIcon]="item.svgIcon"
                   [label]="item.label"
                   [showLabels]="showText()"
+                  [tourClass]="item.tourClass"
                   (clicked)="onItemClick(item)"
                 ></nav-item>
               }
@@ -144,6 +146,18 @@
                   [svgIcon]="item.svgIcon"
                   [label]="item.label"
                   [showLabels]="showText()"
+                  [tourClass]="item.tourClass"
+                  (clicked)="onItemClick(item)"
+                ></nav-item>
+              }
+              @case ('plugin') {
+                <nav-item
+                  [container]="'action'"
+                  [icon]="item.icon"
+                  [svgIcon]="item.svgIcon"
+                  [label]="item.label"
+                  [showLabels]="showText()"
+                  [tourClass]="item.tourClass"
                   (clicked)="onItemClick(item)"
                 ></nav-item>
               }

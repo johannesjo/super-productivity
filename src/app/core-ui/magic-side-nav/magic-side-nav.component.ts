@@ -216,6 +216,10 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
       item.action?.();
     }
 
+    if (item.type === 'plugin') {
+      item.action?.();
+    }
+
     // Handle via service for actions/hrefs
     this._sideNavConfigService.onNavItemClick(item);
 
