@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
 import { TranslatePipe } from '@ngx-translate/core';
 import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { NavItemComponent } from '../nav-item/nav-item.component';
@@ -11,6 +12,7 @@ import { DRAG_DELAY_FOR_TOUCH_LONGER } from '../../../app.constants';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
+import { MagicNavConfigService } from '../magic-nav-config.service';
 
 @Component({
   selector: 'nav-list',
@@ -20,6 +22,7 @@ import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
     MatIcon,
     MatIconButton,
     MatTooltip,
+    MatMenuModule,
     TranslatePipe,
     CdkDropList,
     CdkDrag,
@@ -31,6 +34,8 @@ import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
   animations: [standardListAnimation, expandFadeAnimation],
 })
 export class NavSectionComponent {
+  private readonly _navConfigService = inject(MagicNavConfigService);
+
   item = input.required<NavGroupItem>();
   showLabels = input<boolean>(true);
   isExpanded = input<boolean>(false);
@@ -45,8 +50,15 @@ export class NavSectionComponent {
   readonly IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
   readonly DRAG_DELAY_FOR_TOUCH_LONGER = DRAG_DELAY_FOR_TOUCH_LONGER;
 
+  // Access to service methods and data for visibility menu
+  readonly allProjectsExceptInbox = this._navConfigService.allProjectsExceptInbox;
+
   onHeaderClick(): void {
     this.itemClick.emit(this.item());
+  }
+
+  toggleProjectVisibility(projectId: string): void {
+    this._navConfigService.toggleProjectVisibility(projectId);
   }
 
   onDrop(event: CdkDragDrop<string, string, NavWorkContextItem>): void {

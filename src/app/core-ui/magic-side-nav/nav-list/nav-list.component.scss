@@ -6,21 +6,59 @@
   display: flex;
   align-items: center;
   position: relative;
+
+  // Hide additional buttons by default on desktop
+  .additional-btns {
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+  }
+
+  // Show additional buttons on hover (desktop)
+  &:hover .additional-btns {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+// Always show buttons on mobile/touch devices
+@media (hover: none) {
+  .g-multi-btn-wrapper .additional-btns {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.additional-btns {
+  display: flex;
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
 }
 
 .additional-btn {
   flex-shrink: 0;
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
-  padding: 4px;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  padding: 4px !important;
   margin-left: var(--s);
   color: var(--sidebar-text-secondary);
   background: transparent;
   border: none;
-  border-radius: 4px;
+  border-radius: 0 !important; // Override Material Design rounded corners
   cursor: pointer;
-  transition: all 0.2s ease;
+
+  // Override Material Design button styles
+  &.mat-mdc-icon-button {
+    --mdc-icon-button-state-layer-size: 32px;
+    --mdc-icon-button-icon-size: 18px;
+    border-radius: 0 !important;
+    width: 32px !important;
+    height: 32px !important;
+    padding: 4px !important;
+  }
 
   &:hover {
     background-color: var(--sidebar-hover);

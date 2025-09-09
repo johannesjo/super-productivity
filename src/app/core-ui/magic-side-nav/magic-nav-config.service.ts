@@ -18,7 +18,9 @@ import { getGithubErrorUrl } from '../../core/error-handler/global-error-handler
 import {
   selectUnarchivedVisibleProjects,
   selectUnarchivedHiddenProjectIds,
+  selectAllProjectsExceptInbox,
 } from '../../features/project/store/project.selectors';
+import { toggleHideFromMenu } from '../../features/project/store/project.actions';
 import { NavConfig, NavItem, NavWorkContextItem } from './magic-side-nav.model';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 
@@ -51,6 +53,10 @@ export class MagicNavConfigService {
   });
   private readonly _visibleProjects = toSignal(
     this._store.select(selectUnarchivedVisibleProjects),
+    { initialValue: [] },
+  );
+  private readonly _allProjectsExceptInbox = toSignal(
+    this._store.select(selectAllProjectsExceptInbox),
     { initialValue: [] },
   );
   private readonly _tags = toSignal(this._tagService.tagsNoMyDayAndNoList$, {
@@ -106,6 +112,12 @@ export class MagicNavConfigService {
         children: this._buildProjectItems(),
         action: () => this._toggleProjectsExpanded(),
         additionalButtons: [
+          {
+            id: 'project-visibility',
+            icon: 'visibility',
+            tooltip: 'Show/Hide Projects',
+            action: () => this._openProjectVisibilityMenu(),
+          },
           {
             id: 'add-project',
             icon: 'add',
@@ -224,7 +236,7 @@ export class MagicNavConfigService {
     position: 'left',
     theme: 'light',
     resizable: true,
-    minWidth: 200,
+    minWidth: 190,
     maxWidth: 400,
     defaultWidth: 260,
     collapseThreshold: 150,
@@ -329,6 +341,9 @@ export class MagicNavConfigService {
   readonly isProjectsExpanded = computed(() => this._isProjectsExpanded());
   readonly isTagsExpanded = computed(() => this._isTagsExpanded());
 
+  // Public access to projects for visibility menu
+  readonly allProjectsExceptInbox = computed(() => this._allProjectsExceptInbox());
+
   // Simple toggle functions
   private _toggleProjectsExpanded(): void {
     const newState = !this._isProjectsExpanded();
@@ -353,6 +368,15 @@ export class MagicNavConfigService {
 
   private _startTour(tourId: TourId): void {
     void this._shepherdService.show(tourId);
+  }
+
+  private _openProjectVisibilityMenu(): void {
+    // This will trigger the nav-mat-menu component to show the visibility options
+    // The actual menu items are built by the component based on all projects
+  }
+
+  toggleProjectVisibility(projectId: string): void {
+    this._store.dispatch(toggleHideFromMenu({ id: projectId }));
   }
 
   // Drag and drop handlers
