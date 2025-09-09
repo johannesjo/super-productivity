@@ -185,6 +185,29 @@
 }
 
 // Collapsed state adjustments from parent sidebar
+
+:host-context(.isLightTheme .nav-sidebar.compactMode) {
+  .nav-link {
+    &.active {
+      color: var(--sidebar-active-text);
+      background: var(--sidebar-active);
+      border-radius: 48px;
+      border-bottom: 1px solid var(--separator-color);
+      //border: 1px solid var(--separator-color);
+      border-top: 1px solid var(--separator-color);
+
+      &::after {
+        position: absolute;
+        inset: 4px;
+      }
+
+      .nav-icon {
+        color: var(--sidebar-active-text);
+      }
+    }
+  }
+}
+
 :host-context(.nav-sidebar.compactMode) {
   .nav-link {
     justify-content: center;
@@ -197,10 +220,7 @@
 
     &.active {
       color: var(--sidebar-active-text);
-      border-radius: 48px;
       background: var(--sidebar-active);
-      border-top: 1px solid var(--separator-color);
-      border-bottom: 1px solid var(--separator-color);
 
       &::after {
         position: absolute;
