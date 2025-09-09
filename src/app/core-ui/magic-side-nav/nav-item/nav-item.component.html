@@ -13,9 +13,11 @@
     mat-menu-item
     (click)="clicked.emit()"
   >
-    <mat-icon class="nav-icon drag-handle">{{
-      workContext()!.icon || defaultIcon()
-    }}</mat-icon>
+    <mat-icon
+      class="nav-icon"
+      [class.drag-handle]="defaultIcon() !== 'today' && defaultIcon() !== 'inbox'"
+      >{{ workContext()!.icon || defaultIcon() }}</mat-icon
+    >
     <span
       class="nav-label"
       [class.label-hidden]="!showLabels()"

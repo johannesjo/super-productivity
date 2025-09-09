@@ -465,5 +465,13 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     return allFocusable;
   }
 
+  // Public method to focus the first nav entry (for keyboard shortcuts)
+  focusFirstNavEntry(): void {
+    const focusableElements = this._getFocusableNavElements();
+    if (focusableElements.length > 0) {
+      focusableElements[0].focus();
+    }
+  }
+
   // Inline width binding via template replaces imperative DOM style updates
 }

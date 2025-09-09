@@ -335,6 +335,12 @@ body {
   --sidenav-bg: transparent;
   --sidenav-bg-mobile: var(--bg);
   --sidenav-active: rgba(255, 255, 255, 1.25);
+  --sidenav-active-text: var(--palette-primary-800);
+  --sidebar-border: var(--divider-color);
+  --sidebar-hover: var(--palette-background-hover);
+  --sidebar-text: var(--text-color);
+  --sidebar-text-secondary: var(--text-color-muted);
+  --overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
   --right-panel-bg: #fff;
 
   // Text colors
@@ -452,6 +458,12 @@ body.isDarkTheme {
   --sidenav-bg: transparent;
   --sidenav-bg-mobile: var(--bg);
   --sidenav-active: rgba(255, 255, 255, 0.075);
+  --sidenav-active-text: var(--c-primary);
+  --sidebar-border: var(--divider-color);
+  --sidebar-hover: var(--palette-background-hover);
+  --sidebar-text: var(--text-color);
+  --sidebar-text-secondary: var(--text-color-muted);
+  --overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.8));
   --right-panel-bg: var(--dark5);
 
   // Text colors

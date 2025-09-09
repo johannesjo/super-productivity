@@ -3,10 +3,6 @@
   --mobile-breakpoint: 768px;
   --sidebar-transition-duration: var(--transition-duration-m, 0.3s);
   --sidebar-transition-timing: var(--ani-standard-timing, cubic-bezier(0.4, 0, 0.2, 1));
-  --overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
-  --sidebar-border: var(--divider-color);
-  --sidebar-hover: var(--palette-background-hover);
-  --sidenav-active-text: var(--palette-primary-800);
   --mat-menu-item-spacing: 4px;
 
   // Ensure the component itself participates in layout and animates width
@@ -16,12 +12,6 @@
   will-change: width;
   position: relative;
   z-index: var(--z-side-nav);
-  // Use app's CSS variables for consistent theming
-
-  // Dark theme overrides
-  body.isDarkTheme & {
-    --sidenav-active-text: var(--c-primary);
-  }
 }
 
 // Enable host width transition only when toggling compactMode/fullMode
