@@ -369,7 +369,7 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     }
 
     // Get the sidenav toggle button first (if visible)
-    const toggleButton = nav.querySelector('.sidenav-toggle') as HTMLElement;
+    const toggleButton = nav.querySelector('.mode-toggle') as HTMLElement;
     const focusableElements: HTMLElement[] = [];
 
     if (toggleButton) {

@@ -43,7 +43,7 @@
   <!-- Desktop Toggle Button (inside sidenav) -->
   @if (!isMobile()) {
     <button
-      class="sidenav-toggle"
+      class="mode-toggle"
       [class.visible]="!isMobile()"
       (click)="toggleSideNavMode()"
       [attr.aria-label]="isFullMode() ? 'Switch to compact mode' : 'Switch to full mode'"

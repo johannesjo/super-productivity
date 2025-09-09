@@ -75,11 +75,13 @@
 .nav-children {
   list-style: none;
   padding: 0;
-  margin: 4px 0 0 0;
+  margin: 4px 0 8px 0;
   // Angular animations handle expand/collapse - no CSS transitions needed
 }
 
 .nav-child-item {
+  //padding-left: 16px;
+
   &.draggable {
     cursor: grab;
     // Remove default transitions for better performance

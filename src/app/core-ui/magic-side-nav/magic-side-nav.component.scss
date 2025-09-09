@@ -4,6 +4,7 @@
   --sidenav-transition-duration: var(--transition-duration-m, 0.3s);
   --sidenav-transition-timing: var(--ani-standard-timing, cubic-bezier(0.4, 0, 0.2, 1));
   --mat-menu-item-spacing: 4px;
+  --sidenav-border-color: var(--separator-color);
 
   // Ensure the component itself participates in layout and animates width
   display: block;
@@ -33,7 +34,7 @@
   top: 8px;
   left: 8px;
   background: var(--sidenav-bg);
-  border: 1px solid var(--sidenav-border);
+  border: 1px solid var(--sidenav-border-color);
   border-radius: 8px;
   padding: 8px;
   cursor: pointer;
@@ -81,7 +82,7 @@
   bottom: 0;
   width: var(--sidenav-width-expanded);
   background: var(--sidenav-bg);
-  border-right: 1px solid var(--sidenav-border);
+  border-right: 1px solid var(--sidenav-border-color);
   // Default: don't animate width
   transition: none;
   z-index: 1002;
@@ -123,7 +124,7 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background: var(--sidenav-border);
+    background: var(--sidenav-border-color);
     border-radius: 3px;
 
     &:hover {
@@ -135,7 +136,7 @@
   &.compactMode {
     // width controlled via inline style for smooth transitions
 
-    .sidenav-toggle {
+    .mode-toggle {
       right: auto;
       left: 50%;
       transform: translateX(-50%);
@@ -162,7 +163,7 @@
     left: auto;
     right: 0;
     border-right: none;
-    border-left: 1px solid var(--sidenav-border);
+    border-left: 1px solid var(--sidenav-border-color);
 
     &.mobile {
       transform: translateX(100%);
@@ -172,7 +173,7 @@
       }
     }
 
-    .sidenav-toggle {
+    .mode-toggle {
       left: 16px;
       right: auto;
     }
@@ -182,13 +183,13 @@
 }
 
 // Sidebar toggle button (desktop)
-.sidenav-toggle {
+.mode-toggle {
   display: none;
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 8px;
+  right: 8px;
   background: transparent;
-  border: 1px solid var(--sidenav-border);
+  border: 1px solid var(--sidenav-border-color);
   border-radius: 6px;
   padding: 6px;
   cursor: pointer;
@@ -212,7 +213,7 @@
   list-style: none;
   //padding: 60px var(--s) var(--s2);
   padding: 0;
-  padding-top: 60px;
+  padding-top: 54px;
   margin: 0;
   height: 100%;
   display: flex;
@@ -235,10 +236,10 @@
 // Separator styling
 .nav-separator {
   height: 1px;
-  background: var(--divider-color);
+  background: var(--sidenav-border-color);
   margin: var(--s2) var(--s2);
   border: none;
-  opacity: 0.7;
+  opacity: 1;
 }
 
 // Resize handle (now positioned relative to host component)
@@ -257,19 +258,6 @@
 
   &.position-right {
     left: -2px;
-  }
-
-  // CompactMode specific styling
-  &.compactMode-handle {
-    width: 8px;
-
-    &.position-left {
-      right: -4px;
-    }
-
-    &.position-right {
-      left: -4px;
-    }
   }
 
   &:hover {
