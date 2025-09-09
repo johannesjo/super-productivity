@@ -225,6 +225,11 @@
   .nav-icon {
     margin: 0;
   }
+
+  // Hide the overflow menu button entirely when collapsed
+  .additional-btn {
+    display: none !important;
+  }
 }
 
 @media (max-width: 768px) {
