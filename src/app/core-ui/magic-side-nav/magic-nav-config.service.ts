@@ -325,6 +325,15 @@ export class MagicNavConfigService {
     }));
   }
 
+  // Public methods to get expansion state (for component to check)
+  isProjectsExpanded(): boolean {
+    return this._isProjectsExpanded();
+  }
+
+  isTagsExpanded(): boolean {
+    return this._isTagsExpanded();
+  }
+
   // Simple toggle functions
   private _toggleProjectsExpanded(): void {
     const newState = !this._isProjectsExpanded();

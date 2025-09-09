@@ -101,7 +101,11 @@
     }
   }
 
+  // Don't completely hide nav-children in collapsed mode
+  // The service already handles filtering to show only active items
+  // This allows groups to still expand and show active context
   .nav-children {
-    display: none;
+    // Keep children visible when group is expanded, even in collapsed sidebar
+    // The filtering logic in the service will handle what items to show
   }
 }

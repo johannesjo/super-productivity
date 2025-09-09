@@ -137,14 +137,9 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     );
     this.currentWidth.set(bounded ?? this.config().defaultWidth);
 
-    // Initialize expanded groups from stored flags (projects/tags)
+    // Initialize expanded groups for non-service-managed groups
+    // Projects and tags expansion is managed by the service
     const nextExpanded: string[] = [];
-    if (readBoolLS(LS.IS_PROJECT_LIST_EXPANDED, true)) {
-      nextExpanded.push('projects');
-    }
-    if (readBoolLS(LS.IS_TAG_LIST_EXPANDED, true)) {
-      nextExpanded.push('tags');
-    }
     this.expandedGroups.set(nextExpanded);
 
     this._checkScreenSize();
@@ -208,16 +203,30 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
   }
 
   isGroupExpanded(item: NavItem): boolean {
+    // Use the service as the source of truth for expansion state
+    if (item.id === 'projects') {
+      return this._sideNavConfigService.isProjectsExpanded();
+    } else if (item.id === 'tags') {
+      return this._sideNavConfigService.isTagsExpanded();
+    }
+    // For other groups, fall back to local state
     return this.expandedGroups().includes(item.id);
   }
 
   onItemClick(item: NavItem): void {
     if (item.type === 'group') {
-      // Allow external toggle handler if provided
+      // For projects and tags, let the service handle the toggle to avoid double-toggle
+      if (item.id === 'projects' || item.id === 'tags') {
+        if (item.action) {
+          item.action(); // This will update the service state
+        }
+        return;
+      }
+
+      // For other groups, handle locally
       if (item.action) {
         item.action();
       }
-      // Always reflect the toggle locally so UI responds immediately
       this.toggleGroup(item);
       return;
     }
