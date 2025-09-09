@@ -12,9 +12,9 @@
     [attr.title]="!showLabels() ? workContext()!.title : null"
     mat-menu-item
   >
-    <mat-icon class="nav-icon drag-handle">{{
-      workContext()!.icon || defaultIcon()
-    }}</mat-icon>
+    <mat-icon class="nav-icon drag-handle"
+      >{{ workContext()!.icon || defaultIcon() }}
+    </mat-icon>
     <span
       class="nav-label"
       [class.label-hidden]="!showLabels()"
@@ -61,10 +61,16 @@
       @if (svgIcon()) {
         <mat-icon
           class="nav-icon"
+          [class.expand-icon]="container() === 'group' && svgIcon() === 'expand_more'"
           [svgIcon]="svgIcon()"
         ></mat-icon>
       } @else if (icon()) {
-        <mat-icon class="nav-icon">{{ icon() }}</mat-icon>
+        <mat-icon
+          class="nav-icon"
+          [class.expand-icon]="container() === 'group' && icon() === 'expand_more'"
+        >
+          {{ icon() }}
+        </mat-icon>
       }
       @if (label()) {
         <span
@@ -74,19 +80,6 @@
         >
           {{ label() | translate }}
         </span>
-      }
-      @if (showChevron()) {
-        <svg
-          class="nav-chevron"
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <path d="M4 6l4 4 4-4" />
-        </svg>
       }
     </a>
   } @else if (container() === 'href') {
@@ -103,10 +96,16 @@
       @if (svgIcon()) {
         <mat-icon
           class="nav-icon"
+          [class.expand-icon]="container() === 'group' && svgIcon() === 'expand_more'"
           [svgIcon]="svgIcon()"
         ></mat-icon>
       } @else if (icon()) {
-        <mat-icon class="nav-icon">{{ icon() }}</mat-icon>
+        <mat-icon
+          class="nav-icon"
+          [class.expand-icon]="container() === 'group' && icon() === 'expand_more'"
+        >
+          {{ icon() }}
+        </mat-icon>
       }
       @if (label()) {
         <span
@@ -116,19 +115,6 @@
         >
           {{ label() | translate }}
         </span>
-      }
-      @if (showChevron()) {
-        <svg
-          class="nav-chevron"
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <path d="M4 6l4 4 4-4" />
-        </svg>
       }
     </a>
   } @else if (container() === 'action' || container() === 'group') {
@@ -145,10 +131,16 @@
       @if (svgIcon()) {
         <mat-icon
           class="nav-icon"
+          [class.expand-icon]="container() === 'group' && svgIcon() === 'expand_more'"
           [svgIcon]="svgIcon()"
         ></mat-icon>
       } @else if (icon()) {
-        <mat-icon class="nav-icon">{{ icon() }}</mat-icon>
+        <mat-icon
+          class="nav-icon"
+          [class.expand-icon]="container() === 'group' && icon() === 'expand_more'"
+        >
+          {{ icon() }}
+        </mat-icon>
       }
       @if (label()) {
         <span
@@ -159,29 +151,22 @@
           {{ label() | translate }}
         </span>
       }
-      @if (showChevron()) {
-        <svg
-          class="nav-chevron"
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <path d="M4 6l4 4 4-4" />
-        </svg>
-      }
     </button>
   } @else {
     <!-- Fallback: raw row (kept for compatibility) -->
     @if (svgIcon()) {
       <mat-icon
         class="nav-icon"
+        [class.expand-icon]="container() === 'group' && svgIcon() === 'expand_more'"
         [svgIcon]="svgIcon()"
       ></mat-icon>
     } @else if (icon()) {
-      <mat-icon class="nav-icon">{{ icon() }}</mat-icon>
+      <mat-icon
+        class="nav-icon"
+        [class.expand-icon]="container() === 'group' && icon() === 'expand_more'"
+      >
+        {{ icon() }}
+      </mat-icon>
     }
 
     @if (label()) {
@@ -192,20 +177,6 @@
       >
         {{ label() | translate }}
       </span>
-    }
-
-    @if (showChevron()) {
-      <svg
-        class="nav-chevron"
-        width="16"
-        height="16"
-        viewBox="0 0 16 16"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-      >
-        <path d="M4 6l4 4 4-4" />
-      </svg>
     }
   }
 }

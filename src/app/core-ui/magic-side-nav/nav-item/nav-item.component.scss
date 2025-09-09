@@ -215,6 +215,14 @@
   color: var(--sidebar-text-secondary);
 }
 
+// Rotate the expand_more icon for group headers instead of showing a separate chevron
+.nav-link .expand-icon {
+  transition: transform 0.2s ease;
+}
+.nav-link.expanded .expand-icon {
+  transform: rotate(180deg);
+}
+
 // Collapsed state adjustments from parent sidebar
 :host-context(.nav-sidebar.collapsed) {
   .nav-link {

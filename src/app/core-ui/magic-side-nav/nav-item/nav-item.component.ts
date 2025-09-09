@@ -87,7 +87,6 @@ export class NavItemComponent {
   icon = input<string | undefined>(undefined);
   svgIcon = input<string | undefined>(undefined);
   showLabels = input<boolean>(true);
-  showChevron = input<boolean>(false);
   // Optional: menu trigger for dropdown
   menuTriggerFor = input<any | null>(null);
 
