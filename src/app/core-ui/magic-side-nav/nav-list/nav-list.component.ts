@@ -57,6 +57,10 @@ export class NavSectionComponent {
     this.itemClick.emit(this.item());
   }
 
+  onChildClick(child: NavItem): void {
+    this.itemClick.emit(child);
+  }
+
   toggleProjectVisibility(projectId: string): void {
     this._navConfigService.toggleProjectVisibility(projectId);
   }

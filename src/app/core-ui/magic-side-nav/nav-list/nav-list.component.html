@@ -69,6 +69,7 @@
             [variant]="'nav'"
             [showLabels]="true"
             [showMoreButton]="true"
+            (clicked)="onChildClick(child)"
           ></nav-item>
         </li>
       } @else {
@@ -85,7 +86,7 @@
                 [svgIcon]="child.svgIcon"
                 [label]="child.label"
                 [showLabels]="true"
-                (clicked)="itemClick.emit(child)"
+                (clicked)="onChildClick(child)"
               ></nav-item>
             }
             @case ('href') {
@@ -96,7 +97,7 @@
                 [svgIcon]="child.svgIcon"
                 [label]="child.label"
                 [showLabels]="true"
-                (clicked)="itemClick.emit(child)"
+                (clicked)="onChildClick(child)"
               ></nav-item>
             }
             @case ('action') {
@@ -106,7 +107,7 @@
                 [svgIcon]="child.svgIcon"
                 [label]="child.label"
                 [showLabels]="true"
-                (clicked)="itemClick.emit(child)"
+                (clicked)="onChildClick(child)"
               ></nav-item>
             }
           }

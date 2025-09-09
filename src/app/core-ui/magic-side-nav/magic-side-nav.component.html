@@ -121,6 +121,7 @@
                   [variant]="'nav'"
                   [showLabels]="showText()"
                   [showMoreButton]="showText()"
+                  (clicked)="onItemClick(item)"
                 ></nav-item>
               }
               @case ('route') {

@@ -184,12 +184,12 @@
     transition: transform var(--sidebar-transition-duration)
       var(--sidebar-transition-timing);
     will-change: transform;
-    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.3);
     transform: translateX(-100%);
     width: var(--sidebar-width-expanded);
     background: var(--sidenav-bg-mobile);
 
     &.mobile-visible {
+      box-shadow: 4px 0 16px rgba(0, 0, 0, 0.3);
       transform: translateX(0);
     }
   }

@@ -11,6 +11,7 @@
     class="nav-link"
     [class.has-tasks]="nrOfOpenTasks() > 0"
     mat-menu-item
+    (click)="clicked.emit()"
   >
     <mat-icon class="nav-icon drag-handle">{{
       workContext()!.icon || defaultIcon()
