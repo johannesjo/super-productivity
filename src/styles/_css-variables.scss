@@ -332,8 +332,9 @@ body {
   --card-bg: #ffffff;
 
   // Navigation & Panel backgrounds
-  --sidebar-bg: var(--bg);
-  --sidebar-active: rgba(255, 255, 255, 1.25);
+  --sidenav-bg: transparent;
+  --sidenav-bg-mobile: var(--bg);
+  --sidenav-active: rgba(255, 255, 255, 1.25);
   --right-panel-bg: #fff;
 
   // Text colors
@@ -448,8 +449,9 @@ body.isDarkTheme {
   --card-bg: var(--dark2);
 
   // Navigation & Panel backgrounds
-  --sidebar-bg: var(--dark1);
-  --sidebar-active: rgba(255, 255, 255, 0.075);
+  --sidenav-bg: transparent;
+  --sidenav-bg-mobile: var(--bg);
+  --sidenav-active: rgba(255, 255, 255, 0.075);
   --right-panel-bg: var(--dark5);
 
   // Text colors

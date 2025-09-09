@@ -145,11 +145,11 @@
   }
 
   &.active {
-    background: var(--sidebar-active);
-    color: var(--sidebar-active-text);
+    background: var(--sidenav-active);
+    color: var(--sidenav-active-text);
 
     .nav-icon {
-      color: var(--sidebar-active-text);
+      color: var(--sidenav-active-text);
     }
   }
 
@@ -189,8 +189,8 @@
 :host-context(.isLightTheme .nav-sidebar.compactMode) {
   .nav-link {
     &.active {
-      color: var(--sidebar-active-text);
-      background: var(--sidebar-active);
+      color: var(--sidenav-active-text);
+      background: var(--sidenav-active);
       border-radius: 48px;
       border-bottom: 1px solid var(--separator-color);
       //border: 1px solid var(--separator-color);
@@ -202,7 +202,7 @@
       }
 
       .nav-icon {
-        color: var(--sidebar-active-text);
+        color: var(--sidenav-active-text);
       }
     }
   }
@@ -219,8 +219,8 @@
     }
 
     &.active {
-      color: var(--sidebar-active-text);
-      background: var(--sidebar-active);
+      color: var(--sidenav-active-text);
+      background: var(--sidenav-active);
 
       &::after {
         position: absolute;
@@ -228,7 +228,7 @@
       }
 
       .nav-icon {
-        color: var(--sidebar-active-text);
+        color: var(--sidenav-active-text);
       }
     }
   }
@@ -255,7 +255,7 @@
   // (no duplicate .nav-link styles here; use global ones)
 }
 
-@media (max-width: 768px) {
+@include mq(xs, max) {
   :host-context(.nav-sidebar.compactMode) {
     .nav-link {
       justify-content: flex-start;

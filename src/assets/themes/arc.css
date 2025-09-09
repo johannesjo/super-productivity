@@ -40,7 +40,7 @@ body.isDarkTheme {
 
   /* Component backgrounds */
   --card-bg: var(--arc-bg-medium);
-  --sidebar-bg: var(--arc-sidebar);
+  --sidenav-bg: var(--arc-sidebar);
   --selected-task-bg-color: var(--arc-bg-medium);
   --banner-bg: var(--arc-bg-medium);
 

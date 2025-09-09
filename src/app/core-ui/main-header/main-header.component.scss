@@ -52,23 +52,6 @@
   }
 }
 
-.current-work-context-title {
-  font-size: 18px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 100%;
-  cursor: pointer;
-  border-radius: var(--card-border-radius);
-  padding: var(--s) var(--s2) var(--s) var(--s);
-  @include mq(xs) {
-    padding-right: var(--s);
-  }
-  &:focus {
-    outline: 0;
-  }
-}
-
 .project-settings-btn {
   display: none;
   @include mq(xs) {
@@ -268,7 +251,7 @@ button.isActive2 {
     &::after {
       border-radius: 4px;
       box-shadow: 0 -2px 3px var(--separator-alpha);
-      background: var(--sidebar-bg);
+      background: var(--sidenav-bg);
       content: '';
       width: 100%;
       position: absolute;

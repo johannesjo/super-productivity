@@ -41,7 +41,7 @@ body.isDarkTheme {
 
   /* Glass component backgrounds - darker */
   --card-bg: rgba(255, 255, 255, 0.05);
-  --sidebar-bg: rgba(255, 255, 255, 0.02);
+  --sidenav-bg: rgba(255, 255, 255, 0.02);
   --selected-task-bg-color: rgba(255, 255, 255, 0.08);
   --banner-bg: rgba(255, 255, 255, 0.06);
 

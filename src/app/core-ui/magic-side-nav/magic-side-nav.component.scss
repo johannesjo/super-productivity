@@ -15,16 +15,15 @@ $overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
   position: relative;
   z-index: var(--z-side-nav);
   // Use app's CSS variables for consistent theming
-  --sidebar-bg: var(--palette-background-card);
   --sidebar-border: var(--divider-color);
 
   --sidebar-hover: var(--palette-background-hover);
-  --sidebar-active-text: var(--palette-primary-800);
+  --sidenav-active-text: var(--palette-primary-800);
   --mat-menu-item-spacing: 4px;
 
   // Dark theme overrides
   body.isDarkTheme & {
-    --sidebar-active-text: var(--c-primary);
+    --sidenav-active-text: var(--c-primary);
   }
 }
 
@@ -42,15 +41,16 @@ $overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
 .mobile-menu-toggle {
   display: none;
   position: fixed;
-  top: 16px;
-  left: 16px;
-  z-index: 1001;
-  background: var(--sidebar-bg);
+  top: 8px;
+  left: 8px;
+  z-index: 221001;
+  background: var(--sidenav-bg);
   border: 1px solid var(--sidebar-border);
   border-radius: 8px;
   padding: 8px;
   cursor: pointer;
   transition: var(--transition-standard);
+  color: var(--text-color-less-intense);
 
   &.visible {
     display: flex;
@@ -101,7 +101,7 @@ $overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
   left: 0;
   bottom: 0;
   width: $sidebar-width-expanded;
-  background: var(--sidebar-bg);
+  background: var(--sidenav-bg);
   border-right: 1px solid var(--sidebar-border);
   // Default: don't animate width
   transition: none;
@@ -171,7 +171,7 @@ $overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
       right: -4px;
 
       &:hover {
-        background-color: var(--sidebar-active-text);
+        background-color: var(--sidenav-active-text);
       }
 
       .resize-handle-line {
@@ -189,6 +189,7 @@ $overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
     box-shadow: 4px 0 16px rgba(0, 0, 0, 0.3);
     transform: translateX(-100%);
     width: $sidebar-width-expanded;
+    background: var(--sidenav-bg-mobile);
 
     &.mobile-visible {
       transform: translateX(0);
@@ -296,7 +297,7 @@ $overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
   }
 
   &:hover {
-    background-color: var(--sidebar-active-text);
+    background-color: var(--sidenav-active-text);
 
     .resize-handle-line {
       opacity: 1;
@@ -304,7 +305,7 @@ $overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
   }
 
   &:active {
-    background-color: var(--sidebar-active-text);
+    background-color: var(--sidenav-active-text);
   }
 }
 

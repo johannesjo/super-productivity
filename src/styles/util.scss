@@ -124,3 +124,9 @@ body.isDarkTheme .show-light-only {
 .block {
   display: block;
 }
+
+.milk-glass {
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%); // Safari support
+}

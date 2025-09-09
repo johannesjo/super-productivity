@@ -82,7 +82,7 @@ body.isDarkTheme {
 
   /* Component backgrounds */
   --card-bg: #2d2d2d;
-  --sidebar-bg: #0f0f0f;
+  --sidenav-bg: #0f0f0f;
 }
 
 body.isDarkTheme mat-sidenav-content {

@@ -138,7 +138,7 @@ mat-sidenav-container {
 mat-sidenav ::ng-deep .mat-drawer-inner-container {
   @include scrollYImportant();
 
-  background: var(--sidebar-bg);
+  background: var(--sidenav-bg);
 }
 
 mat-sidenav {

@@ -59,7 +59,7 @@ body:not(.isDarkTheme) {
 
   /* Component backgrounds */
   --card-bg: #ffffff;
-  --sidebar-bg: var(--nord5);
+  --sidenav-bg: var(--nord5);
   --selected-task-bg-color: #f2f4f8;
   --banner-bg: #f2f4f8;
 
