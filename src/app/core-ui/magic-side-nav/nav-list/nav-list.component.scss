@@ -44,7 +44,7 @@
   min-width: 32px !important;
   padding: 4px !important;
   margin-left: var(--s);
-  color: var(--sidebar-text-secondary);
+  color: var(--sidenav-text-secondary);
   background: transparent;
   border: none;
   border-radius: 0 !important; // Override Material Design rounded corners
@@ -61,8 +61,8 @@
   }
 
   &:hover {
-    background-color: var(--sidebar-hover);
-    color: var(--sidebar-text);
+    background-color: var(--sidenav-hover);
+    color: var(--sidenav-text);
   }
 
   mat-icon {
@@ -105,7 +105,7 @@
 
   &.cdk-drag-placeholder {
     opacity: 0.4;
-    background: var(--sidebar-hover);
+    background: var(--sidenav-hover);
     border-radius: 4px;
     // Minimize repaint
     transform: translateZ(0);
@@ -118,8 +118,8 @@
   will-change: transform;
 }
 
-// CompactMode state behaviors inherited from parent sidebar
-:host-context(.nav-sidebar.compactMode) {
+// CompactMode state behaviors inherited from parent sidenav
+:host-context(.nav-sidenav.compactMode) {
   .g-multi-btn-wrapper {
     justify-content: center;
 

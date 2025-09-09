@@ -115,8 +115,6 @@ export class NavItemComponent {
     return !!(wc as Project | null)?.isHiddenFromMenu;
   });
 
-  // removed redundant computed flags: use inputs directly in host bindings
-
   focus(): void {
     const btn = this._routeBtn();
     if (btn) {

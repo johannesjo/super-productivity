@@ -1,8 +1,8 @@
 :host {
-  --sidebar-width-expanded: var(--side-nav-width, 260px);
+  --sidenav-width-expanded: var(--side-nav-width, 260px);
   --mobile-breakpoint: 768px;
-  --sidebar-transition-duration: var(--transition-duration-m, 0.3s);
-  --sidebar-transition-timing: var(--ani-standard-timing, cubic-bezier(0.4, 0, 0.2, 1));
+  --sidenav-transition-duration: var(--transition-duration-m, 0.3s);
+  --sidenav-transition-timing: var(--ani-standard-timing, cubic-bezier(0.4, 0, 0.2, 1));
   --mat-menu-item-spacing: 4px;
 
   // Ensure the component itself participates in layout and animates width
@@ -16,7 +16,7 @@
 
 // Enable host width transition only when toggling compactMode/fullMode
 :host(.animate) {
-  transition: width var(--sidebar-transition-duration) var(--sidebar-transition-timing);
+  transition: width var(--sidenav-transition-duration) var(--sidenav-transition-timing);
 }
 
 // Disable host transition during resize drags
@@ -33,7 +33,7 @@
   top: 8px;
   left: 8px;
   background: var(--sidenav-bg);
-  border: 1px solid var(--sidebar-border);
+  border: 1px solid var(--sidenav-border);
   border-radius: 8px;
   padding: 8px;
   cursor: pointer;
@@ -41,11 +41,11 @@
   color: var(--text-color);
 
   &:hover {
-    background: var(--sidebar-hover);
+    background: var(--sidenav-hover);
   }
 
   svg {
-    color: var(--sidebar-text);
+    color: var(--sidenav-text);
   }
 }
 
@@ -68,20 +68,20 @@
   height: 100vh;
   background: var(--overlay-bg);
   z-index: var(--z-backdrop, 1001);
-  transition: opacity var(--sidebar-transition-duration) var(--sidebar-transition-timing);
+  transition: opacity var(--sidenav-transition-duration) var(--sidenav-transition-timing);
   display: block;
   opacity: 1;
 }
 
-// Main sidebar
-.nav-sidebar {
+// Main sidenav
+.nav-sidenav {
   position: fixed;
   top: 0;
   left: 0;
   bottom: 0;
-  width: var(--sidebar-width-expanded);
+  width: var(--sidenav-width-expanded);
   background: var(--sidenav-bg);
-  border-right: 1px solid var(--sidebar-border);
+  border-right: 1px solid var(--sidenav-border);
   // Default: don't animate width
   transition: none;
   z-index: 1002;
@@ -91,7 +91,7 @@
   // Slight elevation and clear background for overlay/mobile mode is defined in the mobile block below
 
   &.animate {
-    transition: width var(--sidebar-transition-duration) var(--sidebar-transition-timing);
+    transition: width var(--sidenav-transition-duration) var(--sidenav-transition-timing);
   }
 
   &.resizing {
@@ -113,8 +113,6 @@
     -webkit-backdrop-filter: blur(20px) saturate(180%); // Safari support
   }
 
-  // removed unused expand/collapse zone visuals
-
   // Scrollbar styling
   &::-webkit-scrollbar {
     width: 6px;
@@ -125,11 +123,11 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background: var(--sidebar-border);
+    background: var(--sidenav-border);
     border-radius: 3px;
 
     &:hover {
-      background: var(--sidebar-text-secondary);
+      background: var(--sidenav-text-secondary);
     }
   }
 
@@ -137,7 +135,7 @@
   &.compactMode {
     // width controlled via inline style for smooth transitions
 
-    .sidebar-toggle {
+    .sidenav-toggle {
       right: auto;
       left: 50%;
       transform: translateX(-50%);
@@ -146,11 +144,11 @@
 
   // Mobile specific
   &.mobile {
-    transition: transform var(--sidebar-transition-duration)
-      var(--sidebar-transition-timing);
+    transition: transform var(--sidenav-transition-duration)
+      var(--sidenav-transition-timing);
     will-change: transform;
     transform: translateX(-100%);
-    width: var(--sidebar-width-expanded);
+    width: var(--sidenav-width-expanded);
     background: var(--sidenav-bg-mobile);
 
     &.mobile-visible {
@@ -164,7 +162,7 @@
     left: auto;
     right: 0;
     border-right: none;
-    border-left: 1px solid var(--sidebar-border);
+    border-left: 1px solid var(--sidenav-border);
 
     &.mobile {
       transform: translateX(100%);
@@ -174,30 +172,28 @@
       }
     }
 
-    .sidebar-toggle {
+    .sidenav-toggle {
       left: 16px;
       right: auto;
     }
-
-    // removed unused collapse/expand zone visuals for right-position
   }
 
   // Note: Theme colors are handled by CSS variables above
 }
 
 // Sidebar toggle button (desktop)
-.sidebar-toggle {
+.sidenav-toggle {
   display: none;
   position: absolute;
   top: 16px;
   right: 16px;
   background: transparent;
-  border: 1px solid var(--sidebar-border);
+  border: 1px solid var(--sidenav-border);
   border-radius: 6px;
   padding: 6px;
   cursor: pointer;
   transition: var(--transition-standard);
-  color: var(--sidebar-text-secondary);
+  color: var(--sidenav-text-secondary);
 
   &.visible {
     display: flex;
@@ -206,8 +202,8 @@
   }
 
   &:hover {
-    background: var(--sidebar-hover);
-    color: var(--sidebar-text);
+    background: var(--sidenav-hover);
+    color: var(--sidenav-text);
   }
 }
 
@@ -223,7 +219,6 @@
   flex-direction: column;
   justify-content: flex-start;
 
-  // Remove top padding on mobile (600px breakpoint)
   @media (max-width: 600px) {
     padding-top: 0;
   }
@@ -253,7 +248,7 @@
   bottom: 0;
   width: 4px;
   cursor: col-resize;
-  z-index: 1003; // Above the nav-sidebar
+  z-index: 1003; // Above the nav-sidenav
   transition: background-color 0.2s ease;
 
   &.position-left {
@@ -285,7 +280,3 @@
     background-color: var(--sidenav-active-text);
   }
 }
-
-// Multi-button wrapper styling moved to nav-list component
-
-// Media-query rules affecting link rows moved to nav-item component

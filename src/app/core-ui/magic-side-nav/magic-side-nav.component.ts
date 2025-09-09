@@ -75,14 +75,14 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
   startWidth = signal(0);
 
   // Computed values
-  sidebarWidth = computed(() => {
+  sidenavWidth = computed(() => {
     if (this.isMobile()) return 260;
     if (!this.isFullMode()) return COLLAPSED_WIDTH;
     return this.currentWidth();
   });
 
   // Host width as computed signal: don't reserve space on mobile overlay
-  readonly hostWidthSignal = computed(() => (this.isMobile() ? 0 : this.sidebarWidth()));
+  readonly hostWidthSignal = computed(() => (this.isMobile() ? 0 : this.sidenavWidth()));
 
   // Commonly used derived state for template readability
   readonly showText = computed(() => this.isFullMode() || this.isMobile());
@@ -161,7 +161,6 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
 
   toggleMobileNav(): void {
     this.showMobileMenuOverlay.update((show) => !show);
-    console.log(this.showMobileMenuOverlay());
   }
 
   toggleSideNavMode(): void {
@@ -170,7 +169,6 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     this.isFullMode.set(newFullMode);
     // Save fullMode/compactMode state to localStorage
     localStorage.setItem(LS.NAV_SIDEBAR_EXPANDED, newFullMode.toString());
-    // handled internally
   }
 
   toggleGroup(item: NavItem): void {
@@ -267,32 +265,24 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
         : event.clientX - this.startX();
 
     const potentialWidth = this.startWidth() + deltaX;
-    const cfg = this.config();
-    const collapseTh = cfg.collapseThreshold;
-    const expandTh = cfg.expandThreshold;
-    const minW = cfg.minWidth;
-    const maxW = cfg.maxWidth;
+    const { collapseThreshold, expandThreshold, minWidth, maxWidth } = this.config();
 
     // Handle seamless mode transitions
     if (this.isFullMode()) {
       // Currently fullMode - check for compactMode threshold
-      if (potentialWidth < collapseTh) {
+      if (potentialWidth < collapseThreshold) {
         // Auto-switch to compactMode without releasing mouse
         this.isFullMode.set(false);
-        // handled internally
 
         // Reset starting point for continued dragging from compactMode state
         this.startWidth.set(COLLAPSED_WIDTH);
         this.startX.set(event.clientX);
 
-        // No visual feedback
         return;
       }
 
-      // No visual feedback when approaching collapse threshold
-
       // Normal resize when fullMode
-      const newWidth = Math.max(minW, Math.min(maxW, potentialWidth));
+      const newWidth = Math.max(minWidth, Math.min(maxWidth, potentialWidth));
 
       this.currentWidth.set(newWidth);
     } else {
@@ -300,23 +290,18 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
       const compactModeWidth = COLLAPSED_WIDTH;
       const draggedWidth = compactModeWidth + deltaX;
 
-      if (draggedWidth > expandTh) {
+      if (draggedWidth > expandThreshold) {
         // Auto-switch to fullMode without releasing mouse
         this.isFullMode.set(true);
-        const newWidth = expandTh + 20; // Start slightly beyond threshold
+        const newWidth = expandThreshold + 20; // Start slightly beyond threshold
         this.currentWidth.set(newWidth);
-        // handled internally
 
         // Reset starting point for continued dragging from fullMode state
         this.startWidth.set(this.currentWidth());
         this.startX.set(event.clientX);
 
-        // No visual feedback
         return;
       }
-
-      // Show visual feedback when approaching threshold
-      // No visual feedback when approaching expand threshold
     }
   }
 
@@ -328,8 +313,6 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     document.removeEventListener('mouseup', this._onDragEnd);
     document.body.style.cursor = '';
     document.body.style.userSelect = '';
-
-    // No visual feedback to reset
 
     // Save width to localStorage (only save if fullMode)
     if (this.isFullMode()) {
@@ -380,13 +363,13 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
   }
 
   private _getFocusableNavElements(): HTMLElement[] {
-    const nav = document.querySelector('.nav-sidebar');
+    const nav = document.querySelector('.nav-sidenav');
     if (!nav) {
       return [];
     }
 
-    // Get the sidebar toggle button first (if visible)
-    const toggleButton = nav.querySelector('.sidebar-toggle') as HTMLElement;
+    // Get the sidenav toggle button first (if visible)
+    const toggleButton = nav.querySelector('.sidenav-toggle') as HTMLElement;
     const focusableElements: HTMLElement[] = [];
 
     if (toggleButton) {
@@ -445,7 +428,7 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
   private _handleEscapeKey(event: KeyboardEvent): void {
     // Unfocus any currently focused navigation element
     const activeElement = document.activeElement as HTMLElement;
-    const navSidebar = document.querySelector('.nav-sidebar');
+    const navSidebar = document.querySelector('.nav-sidenav');
 
     // Check if the currently focused element is within the navigation
     if (navSidebar && navSidebar.contains(activeElement)) {
@@ -471,6 +454,4 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
       focusableElements[0].focus();
     }
   }
-
-  // Inline width binding via template replaces imperative DOM style updates
 }
