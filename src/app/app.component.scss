@@ -35,16 +35,6 @@
       min-height: -webkit-fill-available !important;
       z-index: auto !important;
     }
-
-    // Header provides a toggle on small screens; keep native toggle hidden on desktop
-    ::ng-deep .mobile-menu-toggle {
-      display: none !important;
-    }
-
-    // Overlay not needed on desktop
-    ::ng-deep .nav-overlay {
-      display: none !important;
-    }
   }
 }
 

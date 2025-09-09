@@ -28,12 +28,10 @@
 <!-- Overlay for mobile (backdrop) -->
 @if (isMobile() && showMobileMenu()) {
   <div
-    class="nav-overlay"
-    [class.visible]="isMobile() && showMobileMenu()"
+    class="nav-backdrop-mobile"
     (click)="toggleSidebar()"
   ></div>
 }
-
 <!-- Main Navigation Sidebar -->
 <nav
   class="nav-sidebar"
