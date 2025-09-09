@@ -12,6 +12,11 @@
     flex: 1;
     min-width: 0;
 
+    // to make space for the task-count
+    &.has-tasks {
+      padding-right: 40px;
+    }
+
     .nav-label {
       overflow: hidden;
       text-overflow: ellipsis;
@@ -50,12 +55,13 @@
 }
 
 .task-count {
-  margin-left: auto;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
   line-height: 1;
   text-align: center;
   font-size: 10px;
-  padding: 8px;
-  padding-right: 16px;
+  right: 16px;
   display: flex;
   align-items: center;
   // avoid affecting drag handle
