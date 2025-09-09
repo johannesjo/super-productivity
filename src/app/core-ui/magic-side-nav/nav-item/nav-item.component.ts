@@ -52,9 +52,9 @@ import { TranslatePipe } from '@ngx-translate/core';
     // eslint-disable-next-line @typescript-eslint/naming-convention
     '[class.isHidden]': 'isHidden()',
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    '[class.variant-nav]': 'isVariantNav()',
+    '[class.variant-nav]': "variant() === 'nav'",
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    '[class.compact]': 'isCompact()',
+    '[class.compact]': 'compact()',
   },
   standalone: true,
 })
@@ -69,7 +69,6 @@ export class NavItemComponent {
   navRoute = input<string | any[] | undefined>(undefined);
   navHref = input<string | undefined>(undefined);
   expanded = input<boolean>(false);
-  ariaExpanded = input<boolean | null>(null);
   ariaControls = input<string | null>(null);
 
   // Work context inputs
@@ -122,9 +121,7 @@ export class NavItemComponent {
     return !!(wc as Project | null)?.isHiddenFromMenu;
   });
 
-  isVariantNav = computed<boolean>(() => this.variant() === 'nav');
-
-  isCompact = computed<boolean>(() => this.compact());
+  // removed redundant computed flags: use inputs directly in host bindings
 
   focus(): void {
     const btn = this._routeBtn();

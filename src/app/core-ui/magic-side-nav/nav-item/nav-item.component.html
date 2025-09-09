@@ -133,11 +133,11 @@
     </a>
   } @else if (container() === 'action' || container() === 'group') {
     <button
-      [class]="compact() ? 'nav-child-link' : 'nav-link'"
+      [class]="rowClass()"
       mat-menu-item
       [class.expanded]="container() === 'group' && expanded()"
       [attr.title]="!showLabels() ? (label() | translate) : null"
-      [attr.aria-expanded]="container() === 'group' ? ariaExpanded() : null"
+      [attr.aria-expanded]="container() === 'group' ? expanded() : null"
       [attr.aria-controls]="container() === 'group' ? ariaControls() : null"
       [matMenuTriggerFor]="menuTriggerFor()"
       (click)="clicked.emit()"
