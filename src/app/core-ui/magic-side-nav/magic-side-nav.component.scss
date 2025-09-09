@@ -213,7 +213,7 @@
   list-style: none;
   //padding: 60px var(--s) var(--s2);
   padding: 0;
-  padding-top: 54px;
+  padding-top: 48px;
   margin: 0;
   height: 100%;
   display: flex;
@@ -240,6 +240,7 @@
   margin: var(--s2) var(--s2);
   border: none;
   opacity: 1;
+  flex-shrink: 0;
 }
 
 // Resize handle (now positioned relative to host component)
