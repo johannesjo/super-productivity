@@ -3,28 +3,24 @@ import {
   hideAddTaskBar,
   hideIssuePanel,
   hideNonTaskSidePanelContent,
-  hideMobileSideNav,
   hideTaskViewCustomizerPanel,
   showAddTaskBar,
   toggleIssuePanel,
   toggleShowNotes,
-  toggleMobileSideNav,
   toggleTaskViewCustomizerPanel,
 } from './store/layout.actions';
-import { merge, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { select, Store } from '@ngrx/store';
 import {
   LayoutState,
   selectIsShowAddTaskBar,
   selectIsShowIssuePanel,
   selectIsShowNotes,
-  selectIsShowSideNav,
   selectIsShowTaskViewCustomizerPanel,
 } from './store/layout.reducer';
 import { filter, map, startWith } from 'rxjs/operators';
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { NavigationEnd, NavigationStart, Router } from '@angular/router';
-import { WorkContextService } from '../../features/work-context/work-context.service';
+import { NavigationEnd, Router } from '@angular/router';
 import { selectMiscConfig } from '../../features/config/store/global-config.reducer';
 import { toSignal } from '@angular/core/rxjs-interop';
 
@@ -39,16 +35,12 @@ const VERY_BIG_SCREEN = NAV_ALWAYS_VISIBLE;
 export class LayoutService {
   private _store$ = inject<Store<LayoutState>>(Store);
   private _router = inject(Router);
-  private _workContextService = inject(WorkContextService);
   private _breakPointObserver = inject(BreakpointObserver);
   private _previouslyFocusedElement: HTMLElement | null = null;
 
   // Observable versions (needed for shepherd)
   readonly isShowAddTaskBar$: Observable<boolean> = this._store$.pipe(
     select(selectIsShowAddTaskBar),
-  );
-  readonly isShowMobileSideNav$: Observable<boolean> = this._store$.pipe(
-    select(selectIsShowSideNav),
   );
   readonly isShowIssuePanel$: Observable<boolean> = this._store$.pipe(
     select(selectIsShowIssuePanel),
@@ -129,10 +121,6 @@ export class LayoutService {
     return !this.isRightPanelNextNavOver();
   });
 
-  private readonly isShowMobileSideNav = toSignal(this.isShowMobileSideNav$, {
-    initialValue: false,
-  });
-
   readonly isShowNotes = toSignal(this._store$.pipe(select(selectIsShowNotes)), {
     initialValue: false,
   });
@@ -143,19 +131,6 @@ export class LayoutService {
   );
 
   readonly isShowIssuePanel = toSignal(this.isShowIssuePanel$, { initialValue: false });
-
-  // Subscribe to navigation events to hide sidenav
-  constructor() {
-    // Only hide sidenav on actual navigation, not on initial load
-    merge(
-      this._router.events.pipe(filter((ev) => ev instanceof NavigationStart)),
-      this._workContextService.onWorkContextChange$,
-    ).subscribe(() => {
-      if (this.isNavOver() && this.isShowMobileSideNav()) {
-        this.hideSideNav();
-      }
-    });
-  }
 
   showAddTaskBar(): void {
     // Store currently focused element if it's a task
@@ -180,14 +155,6 @@ export class LayoutService {
         }
       });
     }
-  }
-
-  toggleSideNav(): void {
-    this._store$.dispatch(toggleMobileSideNav());
-  }
-
-  hideSideNav(): void {
-    this._store$.dispatch(hideMobileSideNav());
   }
 
   toggleNotes(): void {

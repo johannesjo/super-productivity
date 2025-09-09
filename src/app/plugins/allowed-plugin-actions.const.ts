@@ -20,11 +20,9 @@ import {
   hideAddTaskBar,
   hideNonTaskSidePanelContent,
   hidePluginPanel,
-  hideMobileSideNav,
   showAddTaskBar,
   toggleIssuePanel,
   toggleShowNotes,
-  toggleMobileSideNav,
 } from '../core-ui/layout/store/layout.actions';
 
 /**
@@ -36,8 +34,6 @@ export const ALLOWED_PLUGIN_ACTIONS = [
   // Layout
   showAddTaskBar,
   hideAddTaskBar,
-  hideMobileSideNav,
-  toggleMobileSideNav,
   toggleShowNotes,
   hideNonTaskSidePanelContent,
   toggleIssuePanel,
