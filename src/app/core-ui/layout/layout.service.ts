@@ -21,12 +21,10 @@ import {
 import { filter, map, startWith } from 'rxjs/operators';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { NavigationEnd, Router } from '@angular/router';
-import { selectMiscConfig } from '../../features/config/store/global-config.reducer';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-const NAV_ALWAYS_VISIBLE = 1200;
-const NAV_OVER_RIGHT_PANEL_NEXT = 800;
-const BOTH_OVER = 720;
+const NAV_ALWAYS_VISIBLE = 600;
+const RIGHT_PANEL_OVER = 720;
 const VERY_BIG_SCREEN = NAV_ALWAYS_VISIBLE;
 
 @Injectable({
@@ -50,23 +48,16 @@ export class LayoutService {
   readonly isScrolled = signal<boolean>(false);
   readonly isShowAddTaskBar = toSignal(this.isShowAddTaskBar$, { initialValue: false });
 
-  readonly isNavAlwaysVisible = toSignal(
+  readonly isMobileNav = toSignal(
     this._breakPointObserver
       .observe([`(min-width: ${NAV_ALWAYS_VISIBLE}px)`])
       .pipe(map((result) => result.matches)),
     { initialValue: false },
   );
 
-  readonly isRightPanelNextNavOver = toSignal(
-    this._breakPointObserver
-      .observe([`(min-width: ${NAV_OVER_RIGHT_PANEL_NEXT}px)`])
-      .pipe(map((result) => result.matches)),
-    { initialValue: false },
-  );
-
   readonly isRightPanelOver = toSignal(
     this._breakPointObserver
-      .observe([`(min-width: ${BOTH_OVER}px)`])
+      .observe([`(min-width: ${RIGHT_PANEL_OVER}px)`])
       .pipe(map((result) => !result.matches)),
     { initialValue: false },
   );
@@ -106,20 +97,6 @@ export class LayoutService {
   private _isWorkViewUrl(url: string): boolean {
     return url.includes('/active/') || url.includes('/tag/') || url.includes('/project/');
   }
-
-  // Convert misc config to signal
-  private readonly _miscConfig = toSignal(this._store$.select(selectMiscConfig), {
-    initialValue: undefined,
-  });
-
-  // Computed signal for nav over state
-  readonly isNavOver = computed(() => {
-    const miscCfg = this._miscConfig();
-    if (miscCfg?.isUseMinimalNav) {
-      return false;
-    }
-    return !this.isRightPanelNextNavOver();
-  });
 
   readonly isShowNotes = toSignal(this._store$.pipe(select(selectIsShowNotes)), {
     initialValue: false,
