@@ -46,7 +46,7 @@ import { warpAnimation, warpInAnimation } from './ui/animations/warp.ani';
 import { GlobalConfigState } from './features/config/global-config.model';
 import { AddTaskBarComponent } from './features/tasks/add-task-bar/add-task-bar.component';
 import { Dir } from '@angular/cdk/bidi';
-import { MagicSideNavComponent } from './core-ui/magic-side-nav/magic-side-nav';
+import { MagicSideNavComponent } from './core-ui/magic-side-nav/magic-side-nav.component';
 import { MagicNavConfigService } from './core-ui/magic-side-nav/magic-nav-config.service';
 import { MainHeaderComponent } from './core-ui/main-header/main-header.component';
 import { BannerComponent } from './core/banner/banner/banner.component';

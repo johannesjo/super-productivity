@@ -87,7 +87,7 @@
           >
             <nav-list
               [item]="item"
-              [showLabels]="isExpanded() || (isMobile() && showMobileMenu())"
+              [showLabels]="showText()"
               [isExpanded]="isGroupExpanded(item)"
               [activeWorkContextId]="activeWorkContextId()"
               (itemClick)="onItemClick($event)"
@@ -108,8 +108,8 @@
                   [activeWorkContextId]="activeWorkContextId() || ''"
                   [variant]="'nav'"
                   [compact]="false"
-                  [showLabels]="isExpanded() || (isMobile() && showMobileMenu())"
-                  [showMoreButton]="isExpanded() || (isMobile() && showMobileMenu())"
+                  [showLabels]="showText()"
+                  [showMoreButton]="showText()"
                 ></nav-item>
               }
 
@@ -120,7 +120,7 @@
                   [icon]="item.icon"
                   [svgIcon]="item.svgIcon"
                   [label]="item.label"
-                  [showLabels]="isExpanded() || (isMobile() && showMobileMenu())"
+                  [showLabels]="showText()"
                   [compact]="false"
                   (clicked)="onItemClick(item)"
                 ></nav-item>
@@ -133,7 +133,7 @@
                   [icon]="item.icon"
                   [svgIcon]="item.svgIcon"
                   [label]="item.label"
-                  [showLabels]="isExpanded() || (isMobile() && showMobileMenu())"
+                  [showLabels]="showText()"
                   [compact]="false"
                   (clicked)="onItemClick(item)"
                 ></nav-item>
@@ -145,7 +145,7 @@
                   [icon]="item.icon"
                   [svgIcon]="item.svgIcon"
                   [label]="item.label"
-                  [showLabels]="isExpanded() || (isMobile() && showMobileMenu())"
+                  [showLabels]="showText()"
                   [compact]="false"
                   (clicked)="onItemClick(item)"
                 ></nav-item>

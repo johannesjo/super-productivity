@@ -90,6 +90,8 @@ export class NavItemComponent {
   showChevron = input<boolean>(false);
 
   // Events
+  // Common row class for compact/default variants
+  readonly rowClass = computed(() => (this.compact() ? 'nav-child-link' : 'nav-link'));
   clicked = output<void>();
 
   allUndoneTaskIds = toSignal(this._store.select(selectAllDoneIds), { initialValue: [] });

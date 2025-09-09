@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
@@ -20,6 +20,7 @@ import { NavGroupItem, NavItem } from '../magic-side-nav.model';
   ],
   templateUrl: './nav-list.component.html',
   styleUrl: './nav-list.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NavSectionComponent {
   item = input.required<NavGroupItem>();

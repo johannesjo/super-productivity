@@ -18,6 +18,7 @@ import { NavSectionComponent } from './nav-list/nav-list.component';
 import { NavItem } from './magic-side-nav.model';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { MagicNavConfigService } from './magic-nav-config.service';
+import { readBoolLS, readNumberLSBounded } from '../../util/ls-util';
 
 const COLLAPSED_WIDTH = 64;
 
@@ -25,8 +26,8 @@ const COLLAPSED_WIDTH = 64;
   selector: 'magic-side-nav',
   standalone: true,
   imports: [CommonModule, RouterModule, NavItemComponent, NavSectionComponent],
-  templateUrl: './magic-side-nav.html',
-  styleUrl: './magic-side-nav.scss',
+  templateUrl: './magic-side-nav.component.html',
+  styleUrl: './magic-side-nav.component.scss',
   host: {
     '[style.width.px]': 'hostWidthSignal()',
     '[class.animate]': 'animateWidth()',
@@ -72,6 +73,11 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
   // Host width as computed signal: don't reserve space on mobile overlay
   readonly hostWidthSignal = computed(() => (this.isMobile() ? 0 : this.sidebarWidth()));
 
+  // Commonly used derived state for template readability
+  readonly showText = computed(
+    () => this.isExpanded() || (this.isMobile() && this.showMobileMenu()),
+  );
+
   // Keep stable references for event listeners to ensure proper cleanup
   private readonly _onDrag: (event: MouseEvent) => void = (event: MouseEvent) =>
     this._handleDrag(event);
@@ -103,21 +109,29 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Load saved expansion state or default to config value
-    const savedExpanded = localStorage.getItem(LS.NAV_SIDEBAR_EXPANDED);
-    const initialExpanded =
-      savedExpanded !== null ? savedExpanded === 'true' : this.config().expandedByDefault;
-
+    const initialExpanded = readBoolLS(
+      LS.NAV_SIDEBAR_EXPANDED,
+      this.config().expandedByDefault,
+    );
     this.isExpanded.set(initialExpanded);
-    this.currentWidth.set(this.config().defaultWidth);
 
-    // Load saved width from localStorage
-    const savedWidth = localStorage.getItem(LS.NAV_SIDEBAR_WIDTH);
-    if (savedWidth) {
-      const minW = this.config().minWidth;
-      const maxW = this.config().maxWidth;
-      const width = Math.max(minW, Math.min(maxW, parseInt(savedWidth)));
-      this.currentWidth.set(width);
+    // Load saved width from localStorage or default
+    const bounded = readNumberLSBounded(
+      LS.NAV_SIDEBAR_WIDTH,
+      this.config().minWidth,
+      this.config().maxWidth,
+    );
+    this.currentWidth.set(bounded ?? this.config().defaultWidth);
+
+    // Initialize expanded groups from stored flags (projects/tags)
+    const nextExpanded: string[] = [];
+    if (readBoolLS(LS.IS_PROJECT_LIST_EXPANDED, true)) {
+      nextExpanded.push('projects');
     }
+    if (readBoolLS(LS.IS_TAG_LIST_EXPANDED, true)) {
+      nextExpanded.push('tags');
+    }
+    this.expandedGroups.set(nextExpanded);
 
     this._checkScreenSize();
   }
@@ -177,7 +191,6 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     } else {
       this.expandedGroups.set([...groups, item.id]);
     }
-    console.log(item, this.expandedGroups());
   }
 
   isGroupExpanded(item: NavItem): boolean {
