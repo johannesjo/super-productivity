@@ -53,8 +53,6 @@ import { TranslatePipe } from '@ngx-translate/core';
     '[class.isHidden]': 'isHidden()',
     // eslint-disable-next-line @typescript-eslint/naming-convention
     '[class.variant-nav]': "variant() === 'nav'",
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    '[class.compact]': 'compact()',
   },
   standalone: true,
 })
@@ -79,7 +77,6 @@ export class NavItemComponent {
 
   // Variant styling to integrate into magic-side-nav without deep selectors
   variant = input<'default' | 'nav'>('default');
-  compact = input<boolean>(false);
   showMoreButton = input<boolean>(true);
 
   // Presentational row inputs
@@ -91,8 +88,6 @@ export class NavItemComponent {
   menuTriggerFor = input<any | null>(null);
 
   // Events
-  // Common row class for compact/default variants
-  readonly rowClass = computed(() => (this.compact() ? 'nav-child-link' : 'nav-link'));
   clicked = output<void>();
 
   allUndoneTaskIds = toSignal(this._store.select(selectAllDoneIds), { initialValue: [] });

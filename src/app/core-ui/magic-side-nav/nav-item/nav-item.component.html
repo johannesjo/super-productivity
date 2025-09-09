@@ -8,15 +8,13 @@
     #routeBtn
     [routerLink]="[type() === 'TAG' ? 'tag' : 'project', workContext()!.id, 'tasks']"
     routerLinkActive="active"
-    [class]="rowClass()"
+    class="nav-link"
     [attr.title]="!showLabels() ? workContext()!.title : null"
     mat-menu-item
   >
-    <mat-icon
-      class="nav-icon"
-      [class.drag-handle]="compact()"
-      >{{ workContext()!.icon || defaultIcon() }}</mat-icon
-    >
+    <mat-icon class="nav-icon drag-handle">{{
+      workContext()!.icon || defaultIcon()
+    }}</mat-icon>
     <span
       class="nav-label"
       [class.label-hidden]="!showLabels()"
@@ -56,7 +54,7 @@
       [routerLink]="navRoute()"
       routerLinkActive="active"
       mat-menu-item
-      [class]="rowClass()"
+      class="nav-link"
       [class.expanded]="expanded()"
       [attr.title]="!showLabels() ? (label() | translate) : null"
       (click)="clicked.emit()"
@@ -93,7 +91,7 @@
       target="_blank"
       mat-menu-item
       rel="noopener noreferrer"
-      [class]="rowClass()"
+      class="nav-link"
       [class.expanded]="expanded()"
       [attr.title]="!showLabels() ? (label() | translate) : null"
       (click)="clicked.emit()"
@@ -126,7 +124,7 @@
     </a>
   } @else if (container() === 'action' || container() === 'group') {
     <button
-      [class]="rowClass()"
+      class="nav-link"
       mat-menu-item
       [class.expanded]="container() === 'group' && expanded()"
       [attr.title]="!showLabels() ? (label() | translate) : null"
