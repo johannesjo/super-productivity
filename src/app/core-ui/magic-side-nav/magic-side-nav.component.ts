@@ -377,19 +377,12 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     // Get all focusable elements in the nav
     const focusableElements = this._getFocusableNavElements();
 
-    console.log('Arrow key pressed:', event.key);
-    console.log('Found focusable elements:', focusableElements.length);
-
     if (focusableElements.length === 0) {
-      console.log('No focusable elements found');
       return;
     }
 
     const activeElement = document.activeElement as HTMLElement;
     const currentIndex = focusableElements.indexOf(activeElement);
-
-    console.log('Current focused element:', activeElement);
-    console.log('Current index:', currentIndex);
 
     event.preventDefault();
     event.stopPropagation();
@@ -406,16 +399,12 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
       return;
     }
 
-    console.log('Next index:', nextIndex);
-    console.log('Focusing element:', focusableElements[nextIndex]);
-
     focusableElements[nextIndex]?.focus();
   }
 
   private _getFocusableNavElements(): HTMLElement[] {
     const nav = document.querySelector('.nav-sidebar');
     if (!nav) {
-      console.log('Nav sidebar not found');
       return [];
     }
 
@@ -428,7 +417,6 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
       if (styles.display !== 'none' && styles.visibility !== 'hidden') {
         toggleButton.setAttribute('tabindex', '0');
         focusableElements.push(toggleButton);
-        console.log('Added sidebar toggle to navigation');
       }
     }
 
@@ -437,12 +425,9 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     const selector = '.nav-link, [mat-menu-item]';
     const allElements = Array.from(nav.querySelectorAll(selector)) as HTMLElement[];
 
-    console.log('Found nav elements:', allElements);
-
     // Filter to only get elements within the nav-list
     const navList = nav.querySelector('.nav-list');
     if (!navList) {
-      console.log('Nav list not found');
       return focusableElements; // Return just the toggle if no nav list
     }
 
@@ -467,8 +452,6 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
       return isInNavList && isInteractive && isVisible && !isSettingsBtn;
     });
 
-    console.log('Filtered nav list elements:', navListElements);
-
     // Set tabindex on nav list elements to make them focusable
     navListElements.forEach((el) => {
       if (!el.hasAttribute('tabindex') || el.getAttribute('tabindex') === '-1') {
@@ -478,7 +461,6 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
 
     // Combine toggle button (if present) with nav list elements
     const allFocusable = [...focusableElements, ...navListElements];
-    console.log('Total focusable elements:', allFocusable.length);
 
     return allFocusable;
   }
