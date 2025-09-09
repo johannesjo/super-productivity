@@ -163,6 +163,12 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     }
   }
 
+  onNavKeyDown(event: KeyboardEvent): void {
+    if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+      this._handleArrowNavigation(event);
+    }
+  }
+
   private _checkScreenSize(): void {
     const wasMobile = this.isMobile();
     const currentMobile = window.innerWidth < (this.config().mobileBreakpoint || 768);
@@ -365,6 +371,116 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
       this.animateWidth.set(false);
       this._animateTimeoutId = null;
     }, 300);
+  }
+
+  private _handleArrowNavigation(event: KeyboardEvent): void {
+    // Get all focusable elements in the nav
+    const focusableElements = this._getFocusableNavElements();
+
+    console.log('Arrow key pressed:', event.key);
+    console.log('Found focusable elements:', focusableElements.length);
+
+    if (focusableElements.length === 0) {
+      console.log('No focusable elements found');
+      return;
+    }
+
+    const activeElement = document.activeElement as HTMLElement;
+    const currentIndex = focusableElements.indexOf(activeElement);
+
+    console.log('Current focused element:', activeElement);
+    console.log('Current index:', currentIndex);
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    let nextIndex: number;
+    if (currentIndex === -1) {
+      // No nav element focused, focus first element
+      nextIndex = 0;
+    } else if (event.key === 'ArrowDown') {
+      nextIndex = (currentIndex + 1) % focusableElements.length;
+    } else if (event.key === 'ArrowUp') {
+      nextIndex = currentIndex === 0 ? focusableElements.length - 1 : currentIndex - 1;
+    } else {
+      return;
+    }
+
+    console.log('Next index:', nextIndex);
+    console.log('Focusing element:', focusableElements[nextIndex]);
+
+    focusableElements[nextIndex]?.focus();
+  }
+
+  private _getFocusableNavElements(): HTMLElement[] {
+    const nav = document.querySelector('.nav-sidebar');
+    if (!nav) {
+      console.log('Nav sidebar not found');
+      return [];
+    }
+
+    // Get the sidebar toggle button first (if visible)
+    const toggleButton = nav.querySelector('.sidebar-toggle') as HTMLElement;
+    const focusableElements: HTMLElement[] = [];
+
+    if (toggleButton) {
+      const styles = window.getComputedStyle(toggleButton);
+      if (styles.display !== 'none' && styles.visibility !== 'hidden') {
+        toggleButton.setAttribute('tabindex', '0');
+        focusableElements.push(toggleButton);
+        console.log('Added sidebar toggle to navigation');
+      }
+    }
+
+    // Get all nav-link elements (these are the actual clickable items)
+    // Also get any mat-menu-item elements which are used for nav items
+    const selector = '.nav-link, [mat-menu-item]';
+    const allElements = Array.from(nav.querySelectorAll(selector)) as HTMLElement[];
+
+    console.log('Found nav elements:', allElements);
+
+    // Filter to only get elements within the nav-list
+    const navList = nav.querySelector('.nav-list');
+    if (!navList) {
+      console.log('Nav list not found');
+      return focusableElements; // Return just the toggle if no nav list
+    }
+
+    const navListElements = allElements.filter((el) => {
+      // Make sure the element is inside nav-list
+      const isInNavList = navList.contains(el);
+
+      // Check if it's actually interactive (button or link)
+      const tagName = el.tagName.toLowerCase();
+      const isInteractive = tagName === 'button' || tagName === 'a';
+
+      // Check visibility
+      const styles = window.getComputedStyle(el);
+      const isVisible =
+        styles.display !== 'none' &&
+        styles.visibility !== 'hidden' &&
+        styles.opacity !== '0';
+
+      // Exclude settings buttons and other non-navigation buttons
+      const isSettingsBtn = el.classList.contains('additional-btn');
+
+      return isInNavList && isInteractive && isVisible && !isSettingsBtn;
+    });
+
+    console.log('Filtered nav list elements:', navListElements);
+
+    // Set tabindex on nav list elements to make them focusable
+    navListElements.forEach((el) => {
+      if (!el.hasAttribute('tabindex') || el.getAttribute('tabindex') === '-1') {
+        el.setAttribute('tabindex', '0');
+      }
+    });
+
+    // Combine toggle button (if present) with nav list elements
+    const allFocusable = [...focusableElements, ...navListElements];
+    console.log('Total focusable elements:', allFocusable.length);
+
+    return allFocusable;
   }
 
   // Inline width binding via template replaces imperative DOM style updates

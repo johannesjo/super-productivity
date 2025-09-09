@@ -47,6 +47,7 @@
   [class.resizing]="isResizing()"
   [style.width.px]="sidebarWidth()"
   role="navigation"
+  (keydown)="onNavKeyDown($event)"
 >
   <!-- Desktop Toggle Button (inside sidebar) -->
   @if (!isMobile()) {
@@ -119,7 +120,6 @@
                   [showMoreButton]="showText()"
                 ></nav-item>
               }
-
               @case ('route') {
                 <nav-item
                   [container]="'route'"
@@ -131,7 +131,6 @@
                   (clicked)="onItemClick(item)"
                 ></nav-item>
               }
-
               @case ('href') {
                 <nav-item
                   [container]="'href'"
@@ -143,7 +142,6 @@
                   (clicked)="onItemClick(item)"
                 ></nav-item>
               }
-
               @case ('action') {
                 <nav-item
                   [container]="'action'"
