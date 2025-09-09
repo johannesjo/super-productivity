@@ -53,7 +53,6 @@
       text-align: center;
       font-size: 10px;
       padding: 0;
-      border-radius: 4px;
       left: auto;
       bottom: auto;
       right: 16px;
@@ -62,9 +61,6 @@
 
       // avoid affecting drag handle
       pointer-events: none;
-
-      border-color: var(--extra-border-color);
-      background: var(--bg-lighter);
     }
   }
 
@@ -252,6 +248,30 @@
       right: auto;
       top: auto;
       transform: translateX(-50%);
+    }
+  }
+
+  // Unified navigation row styles moved from parent
+  .nav-link {
+    &:hover {
+      background: var(--sidebar-hover);
+    }
+
+    &.active {
+      color: var(--sidebar-active-text);
+      border-radius: 48px;
+      background: var(--sidebar-active);
+      border-top: 1px solid var(--separator-color);
+      border-bottom: 1px solid var(--separator-color);
+
+      &::after {
+        position: absolute;
+        inset: 4px;
+      }
+
+      .nav-icon {
+        color: var(--sidebar-active-text);
+      }
     }
   }
 }

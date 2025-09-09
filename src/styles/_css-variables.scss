@@ -333,6 +333,7 @@ body {
 
   // Navigation & Panel backgrounds
   --sidebar-bg: var(--bg);
+  --sidebar-active: rgba(255, 255, 255, 0.5);
   --right-panel-bg: #fff;
 
   // Text colors
@@ -448,6 +449,7 @@ body.isDarkTheme {
 
   // Navigation & Panel backgrounds
   --sidebar-bg: var(--dark1);
+  --sidebar-active: rgba(255, 255, 255, 0.075);
   --right-panel-bg: var(--dark5);
 
   // Text colors

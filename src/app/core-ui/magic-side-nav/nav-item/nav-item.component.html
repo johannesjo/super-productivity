@@ -62,6 +62,8 @@
         <mat-icon
           class="nav-icon"
           [class.expand-icon]="container() === 'group' && svgIcon() === 'expand_more'"
+          [class.icon--svg]="true"
+          [class.icon--early-on]="svgIcon() === 'early_on'"
           [svgIcon]="svgIcon()"
         ></mat-icon>
       } @else if (icon()) {
@@ -97,6 +99,8 @@
         <mat-icon
           class="nav-icon"
           [class.expand-icon]="container() === 'group' && svgIcon() === 'expand_more'"
+          [class.icon--svg]="true"
+          [class.icon--early-on]="svgIcon() === 'early_on'"
           [svgIcon]="svgIcon()"
         ></mat-icon>
       } @else if (icon()) {
@@ -132,6 +136,8 @@
         <mat-icon
           class="nav-icon"
           [class.expand-icon]="container() === 'group' && svgIcon() === 'expand_more'"
+          [class.icon--svg]="true"
+          [class.icon--early-on]="svgIcon() === 'early_on'"
           [svgIcon]="svgIcon()"
         ></mat-icon>
       } @else if (icon()) {

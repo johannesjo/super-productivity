@@ -17,17 +17,10 @@ $overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
   // Use app's CSS variables for consistent theming
   --sidebar-bg: var(--palette-background-card);
   --sidebar-border: var(--divider-color);
-  --sidebar-text: rgba(
-    var(--palette-foreground-text),
-    var(--palette-foreground-text-alpha)
-  );
-  --sidebar-text-secondary: rgba(
-    var(--palette-foreground-secondary-text),
-    var(--palette-foreground-secondary-text-alpha)
-  );
+
   --sidebar-hover: var(--palette-background-hover);
-  --sidebar-active: var(--c-primary-10, rgba(var(--palette-primary-500-rgb), 0.04));
   --sidebar-active-text: var(--palette-primary-800);
+  --mat-menu-item-spacing: 4px;
 
   // Dark theme overrides
   body.isDarkTheme & {
