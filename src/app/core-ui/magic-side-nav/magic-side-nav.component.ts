@@ -24,6 +24,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
 import { TranslatePipe } from '@ngx-translate/core';
 import { NavMatMenuComponent } from './nav-mat-menu/nav-mat-menu.component';
+import { TaskService } from '../../features/tasks/task.service';
 
 const COLLAPSED_WIDTH = 64;
 
@@ -50,6 +51,7 @@ const COLLAPSED_WIDTH = 64;
 })
 export class MagicSideNavComponent implements OnInit, OnDestroy {
   private readonly _sideNavConfigService = inject(MagicNavConfigService);
+  private readonly _taskService = inject(TaskService);
   // Use service's computed signal directly
   readonly config = this._sideNavConfigService.navConfig;
 
@@ -166,6 +168,8 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
   onNavKeyDown(event: KeyboardEvent): void {
     if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
       this._handleArrowNavigation(event);
+    } else if (event.key === 'Escape') {
+      this._handleEscapeKey(event);
     }
   }
 
@@ -463,6 +467,28 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     const allFocusable = [...focusableElements, ...navListElements];
 
     return allFocusable;
+  }
+
+  private _handleEscapeKey(event: KeyboardEvent): void {
+    // Unfocus any currently focused navigation element
+    const activeElement = document.activeElement as HTMLElement;
+    const navSidebar = document.querySelector('.nav-sidebar');
+
+    // Check if the currently focused element is within the navigation
+    if (navSidebar && navSidebar.contains(activeElement)) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      // Unfocus the navigation element
+      if (activeElement && typeof activeElement.blur === 'function') {
+        activeElement.blur();
+      }
+
+      // Focus the first task if available
+      setTimeout(() => {
+        this._taskService.focusFirstTaskIfVisible();
+      }, 10);
+    }
   }
 
   // Public method to focus the first nav entry (for keyboard shortcuts)
