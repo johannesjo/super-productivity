@@ -72,8 +72,10 @@ import { map } from 'rxjs/operators';
         cursor: pointer;
         border-radius: var(--card-border-radius);
         padding: var(--s) var(--s2) var(--s) var(--s);
+        padding-left: 54px;
 
         @media (min-width: 600px) {
+          padding-left: 0;
           padding-right: var(--s);
         }
 

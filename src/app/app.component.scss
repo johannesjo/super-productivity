@@ -6,6 +6,38 @@
   height: 100%;
 }
 
+.app-container {
+  display: flex;
+  height: 100vh;
+  min-height: 100vh;
+  // mobile viewport bug fix
+  min-height: -webkit-fill-available;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; // Prevent flex item from growing beyond container
+  overflow: hidden;
+}
+
+// Override magic-side-nav styles for flex layout integration
+// Use desktop layout overrides only on larger screens
+@media (min-width: 768px) {
+  magic-side-nav {
+    ::ng-deep .nav-sidebar {
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      bottom: auto !important;
+      height: 100vh !important;
+      min-height: -webkit-fill-available !important;
+      z-index: auto !important;
+    }
+  }
+}
+
 .header-wrapper {
   position: relative;
   z-index: var(--z-main-header-wrapper);
@@ -96,7 +128,7 @@ mat-sidenav-container {
 mat-sidenav ::ng-deep .mat-drawer-inner-container {
   @include scrollYImportant();
 
-  background: var(--sidebar-bg);
+  background: var(--sidenav-bg);
 }
 
 mat-sidenav {

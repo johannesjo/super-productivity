@@ -1,3 +1,3 @@
 export const cssSelectors = {
-  SIDENAV: 'side-nav',
+  SIDENAV: 'magic-side-nav',
 };

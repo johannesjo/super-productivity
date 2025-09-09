@@ -1,0 +1,291 @@
+:host {
+  --sidebar-width-expanded: var(--side-nav-width, 260px);
+  --mobile-breakpoint: 768px;
+  --sidebar-transition-duration: var(--transition-duration-m, 0.3s);
+  --sidebar-transition-timing: var(--ani-standard-timing, cubic-bezier(0.4, 0, 0.2, 1));
+  --mat-menu-item-spacing: 4px;
+
+  // Ensure the component itself participates in layout and animates width
+  display: block;
+  flex: 0 0 auto;
+  transition: none;
+  will-change: width;
+  position: relative;
+  z-index: var(--z-side-nav);
+}
+
+// Enable host width transition only when toggling compactMode/fullMode
+:host(.animate) {
+  transition: width var(--sidebar-transition-duration) var(--sidebar-transition-timing);
+}
+
+// Disable host transition during resize drags
+:host(.resizing) {
+  transition: none !important;
+}
+
+// Mobile menu open button (only shows when menu is closed)
+.mobile-menu-open {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  background: var(--sidenav-bg);
+  border: 1px solid var(--sidebar-border);
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  transition: var(--transition-standard);
+  color: var(--text-color);
+
+  &:hover {
+    background: var(--sidebar-hover);
+  }
+
+  svg {
+    color: var(--sidebar-text);
+  }
+}
+
+// Dark theme milkglass adjustments
+:host-context(.isDarkTheme.hasBgImage) :host {
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(20px) saturate(180%); // Safari support
+}
+
+// Mobile overlay
+.nav-backdrop-mobile {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--overlay-bg);
+  z-index: var(--z-backdrop, 1001);
+  transition: opacity var(--sidebar-transition-duration) var(--sidebar-transition-timing);
+  display: block;
+  opacity: 1;
+}
+
+// Main sidebar
+.nav-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--sidebar-width-expanded);
+  background: var(--sidenav-bg);
+  border-right: 1px solid var(--sidebar-border);
+  // Default: don't animate width
+  transition: none;
+  z-index: 1002;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  // Slight elevation and clear background for overlay/mobile mode is defined in the mobile block below
+
+  &.animate {
+    transition: width var(--sidebar-transition-duration) var(--sidebar-transition-timing);
+  }
+
+  &.resizing {
+    transition: none !important;
+  }
+
+  // When resizing, also suppress label/text transitions inside entries
+  &.resizing .nav-label,
+  &.resizing .text {
+    transition: none !important;
+  }
+
+  // Milkglass effect when background image is present
+  // This will be applied when a CSS class is added to indicate background image presence
+  :host-context(.hasBgImage) {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    -webkit-backdrop-filter: blur(20px) saturate(180%); // Safari support
+  }
+
+  // removed unused expand/collapse zone visuals
+
+  // Scrollbar styling
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--sidebar-border);
+    border-radius: 3px;
+
+    &:hover {
+      background: var(--sidebar-text-secondary);
+    }
+  }
+
+  // CompactMode state (desktop)
+  &.compactMode {
+    // width controlled via inline style for smooth transitions
+
+    .sidebar-toggle {
+      right: auto;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+
+  // Mobile specific
+  &.mobile {
+    transition: transform var(--sidebar-transition-duration)
+      var(--sidebar-transition-timing);
+    will-change: transform;
+    transform: translateX(-100%);
+    width: var(--sidebar-width-expanded);
+    background: var(--sidenav-bg-mobile);
+
+    &.mobile-visible {
+      box-shadow: 4px 0 16px rgba(0, 0, 0, 0.3);
+      transform: translateX(0);
+    }
+  }
+
+  // Position right
+  &.position-right {
+    left: auto;
+    right: 0;
+    border-right: none;
+    border-left: 1px solid var(--sidebar-border);
+
+    &.mobile {
+      transform: translateX(100%);
+
+      &.mobile-visible {
+        transform: translateX(0);
+      }
+    }
+
+    .sidebar-toggle {
+      left: 16px;
+      right: auto;
+    }
+
+    // removed unused collapse/expand zone visuals for right-position
+  }
+
+  // Note: Theme colors are handled by CSS variables above
+}
+
+// Sidebar toggle button (desktop)
+.sidebar-toggle {
+  display: none;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: 1px solid var(--sidebar-border);
+  border-radius: 6px;
+  padding: 6px;
+  cursor: pointer;
+  transition: var(--transition-standard);
+  color: var(--sidebar-text-secondary);
+
+  &.visible {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &:hover {
+    background: var(--sidebar-hover);
+    color: var(--sidebar-text);
+  }
+}
+
+// Navigation list
+.nav-list {
+  list-style: none;
+  //padding: 60px var(--s) var(--s2);
+  padding: 0;
+  padding-top: 60px;
+  margin: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+
+  // Remove top padding on mobile (600px breakpoint)
+  @media (max-width: 600px) {
+    padding-top: 0;
+  }
+}
+
+.nav-item {
+  margin-bottom: 2px;
+
+  &.has-children {
+    margin-bottom: 4px;
+  }
+}
+
+// Separator styling
+.nav-separator {
+  height: 1px;
+  background: var(--divider-color);
+  margin: var(--s2) var(--s2);
+  border: none;
+  opacity: 0.7;
+}
+
+// Resize handle (now positioned relative to host component)
+.resize-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  cursor: col-resize;
+  z-index: 1003; // Above the nav-sidebar
+  transition: background-color 0.2s ease;
+
+  &.position-left {
+    right: -2px;
+  }
+
+  &.position-right {
+    left: -2px;
+  }
+
+  // CompactMode specific styling
+  &.compactMode-handle {
+    width: 8px;
+
+    &.position-left {
+      right: -4px;
+    }
+
+    &.position-right {
+      left: -4px;
+    }
+  }
+
+  &:hover {
+    background-color: var(--sidenav-active-text);
+  }
+
+  &:active {
+    background-color: var(--sidenav-active-text);
+  }
+}
+
+// Multi-button wrapper styling moved to nav-list component
+
+// Media-query rules affecting link rows moved to nav-item component

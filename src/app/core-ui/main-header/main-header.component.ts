@@ -146,7 +146,6 @@ export class MainHeaderComponent implements OnDestroy {
     this.workContextService.activeWorkContextTypeAndId$,
   );
   activeWorkContextTitle = toSignal(this.workContextService.activeWorkContextTitle$);
-  isNavAlwaysVisible = computed(() => this.layoutService.isNavAlwaysVisible());
   currentTask = toSignal(this.taskService.currentTask$);
   currentTaskId = this.taskService.currentTaskId;
   pomodoroIsEnabled = toSignal(this.pomodoroService.isEnabled$);

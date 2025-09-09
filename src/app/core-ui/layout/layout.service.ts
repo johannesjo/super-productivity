@@ -3,34 +3,28 @@ import {
   hideAddTaskBar,
   hideIssuePanel,
   hideNonTaskSidePanelContent,
-  hideSideNav,
   hideTaskViewCustomizerPanel,
   showAddTaskBar,
   toggleIssuePanel,
   toggleShowNotes,
-  toggleSideNav,
   toggleTaskViewCustomizerPanel,
 } from './store/layout.actions';
-import { merge, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { select, Store } from '@ngrx/store';
 import {
   LayoutState,
   selectIsShowAddTaskBar,
   selectIsShowIssuePanel,
   selectIsShowNotes,
-  selectIsShowSideNav,
   selectIsShowTaskViewCustomizerPanel,
 } from './store/layout.reducer';
 import { filter, map, startWith } from 'rxjs/operators';
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { NavigationEnd, NavigationStart, Router } from '@angular/router';
-import { WorkContextService } from '../../features/work-context/work-context.service';
-import { selectMiscConfig } from '../../features/config/store/global-config.reducer';
+import { NavigationEnd, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-const NAV_ALWAYS_VISIBLE = 1200;
-const NAV_OVER_RIGHT_PANEL_NEXT = 800;
-const BOTH_OVER = 720;
+const NAV_ALWAYS_VISIBLE = 600;
+const RIGHT_PANEL_OVER = 720;
 const VERY_BIG_SCREEN = NAV_ALWAYS_VISIBLE;
 
 @Injectable({
@@ -39,16 +33,12 @@ const VERY_BIG_SCREEN = NAV_ALWAYS_VISIBLE;
 export class LayoutService {
   private _store$ = inject<Store<LayoutState>>(Store);
   private _router = inject(Router);
-  private _workContextService = inject(WorkContextService);
   private _breakPointObserver = inject(BreakpointObserver);
   private _previouslyFocusedElement: HTMLElement | null = null;
 
   // Observable versions (needed for shepherd)
   readonly isShowAddTaskBar$: Observable<boolean> = this._store$.pipe(
     select(selectIsShowAddTaskBar),
-  );
-  readonly isShowSideNav$: Observable<boolean> = this._store$.pipe(
-    select(selectIsShowSideNav),
   );
   readonly isShowIssuePanel$: Observable<boolean> = this._store$.pipe(
     select(selectIsShowIssuePanel),
@@ -58,23 +48,16 @@ export class LayoutService {
   readonly isScrolled = signal<boolean>(false);
   readonly isShowAddTaskBar = toSignal(this.isShowAddTaskBar$, { initialValue: false });
 
-  readonly isNavAlwaysVisible = toSignal(
+  readonly isMobileNav = toSignal(
     this._breakPointObserver
       .observe([`(min-width: ${NAV_ALWAYS_VISIBLE}px)`])
       .pipe(map((result) => result.matches)),
     { initialValue: false },
   );
 
-  readonly isRightPanelNextNavOver = toSignal(
-    this._breakPointObserver
-      .observe([`(min-width: ${NAV_OVER_RIGHT_PANEL_NEXT}px)`])
-      .pipe(map((result) => result.matches)),
-    { initialValue: false },
-  );
-
   readonly isRightPanelOver = toSignal(
     this._breakPointObserver
-      .observe([`(min-width: ${BOTH_OVER}px)`])
+      .observe([`(min-width: ${RIGHT_PANEL_OVER}px)`])
       .pipe(map((result) => !result.matches)),
     { initialValue: false },
   );
@@ -115,29 +98,6 @@ export class LayoutService {
     return url.includes('/active/') || url.includes('/tag/') || url.includes('/project/');
   }
 
-  // Convert misc config to signal
-  private readonly _miscConfig = toSignal(this._store$.select(selectMiscConfig), {
-    initialValue: undefined,
-  });
-
-  // Computed signal for nav over state
-  readonly isNavOver = computed(() => {
-    const miscCfg = this._miscConfig();
-    if (miscCfg?.isUseMinimalNav) {
-      return false;
-    }
-    return !this.isRightPanelNextNavOver();
-  });
-
-  private readonly _isShowSideNav = toSignal(this.isShowSideNav$, {
-    initialValue: false,
-  });
-
-  readonly isShowSideNav = computed(() => {
-    const isShow = this._isShowSideNav();
-    return isShow || this.isNavAlwaysVisible();
-  });
-
   readonly isShowNotes = toSignal(this._store$.pipe(select(selectIsShowNotes)), {
     initialValue: false,
   });
@@ -148,19 +108,6 @@ export class LayoutService {
   );
 
   readonly isShowIssuePanel = toSignal(this.isShowIssuePanel$, { initialValue: false });
-
-  // Subscribe to navigation events to hide sidenav
-  constructor() {
-    // Only hide sidenav on actual navigation, not on initial load
-    merge(
-      this._router.events.pipe(filter((ev) => ev instanceof NavigationStart)),
-      this._workContextService.onWorkContextChange$,
-    ).subscribe(() => {
-      if (this.isNavOver() && this._isShowSideNav()) {
-        this.hideSideNav();
-      }
-    });
-  }
 
   showAddTaskBar(): void {
     // Store currently focused element if it's a task
@@ -185,14 +132,6 @@ export class LayoutService {
         }
       });
     }
-  }
-
-  toggleSideNav(): void {
-    this._store$.dispatch(toggleSideNav());
-  }
-
-  hideSideNav(): void {
-    this._store$.dispatch(hideSideNav());
   }
 
   toggleNotes(): void {

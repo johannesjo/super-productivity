@@ -19,7 +19,7 @@ import { GlobalConfigService } from './features/config/global-config.service';
 import { LayoutService } from './core-ui/layout/layout.service';
 import { IPC } from '../../electron/shared-with-frontend/ipc-events.const';
 import { SnackService } from './core/snack/snack.service';
-import { IS_ELECTRON, LanguageCode } from './app.constants';
+import { BodyClass, IS_ELECTRON, LanguageCode } from './app.constants';
 import { expandAnimation } from './ui/animations/expand.ani';
 import { warpRouteAnimation } from './ui/animations/warp-route';
 import { combineLatest, Observable, Subscription } from 'rxjs';
@@ -45,13 +45,8 @@ import { IS_MOBILE } from './util/is-mobile';
 import { warpAnimation, warpInAnimation } from './ui/animations/warp.ani';
 import { GlobalConfigState } from './features/config/global-config.model';
 import { AddTaskBarComponent } from './features/tasks/add-task-bar/add-task-bar.component';
-import {
-  MatSidenav,
-  MatSidenavContainer,
-  MatSidenavContent,
-} from '@angular/material/sidenav';
 import { Dir } from '@angular/cdk/bidi';
-import { SideNavComponent } from './core-ui/side-nav/side-nav.component';
+import { MagicSideNavComponent } from './core-ui/magic-side-nav/magic-side-nav.component';
 import { MainHeaderComponent } from './core-ui/main-header/main-header.component';
 import { BannerComponent } from './core/banner/banner/banner.component';
 import { GlobalProgressBarComponent } from './core-ui/global-progress-bar/global-progress-bar.component';
@@ -109,11 +104,8 @@ const productivityTip: string[] = w.productivityTips && w.productivityTips[w.ran
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     AddTaskBarComponent,
-    MatSidenavContainer,
     Dir,
-    MatSidenav,
-    SideNavComponent,
-    MatSidenavContent,
+    MagicSideNavComponent,
     MainHeaderComponent,
     BannerComponent,
     RightPanelComponent,
@@ -195,6 +187,11 @@ export class AppComponent implements OnDestroy, AfterViewInit {
     initialValue: false,
   });
 
+  private readonly _activeWorkContextId = toSignal(
+    this.workContextService.activeWorkContextId$,
+    { initialValue: null },
+  );
+
   private _subs: Subscription = new Subscription();
   private _intervalTimer?: NodeJS.Timeout;
 
@@ -209,6 +206,17 @@ export class AppComponent implements OnDestroy, AfterViewInit {
       const val = this._languageService.isLangRTL();
       this.isRTL = val;
       document.dir = this.isRTL ? 'rtl' : 'ltr';
+    });
+
+    // Add/remove hasBgImage class to body when background image changes
+    effect(() => {
+      const bgImage = this.globalThemeService.backgroundImg();
+      const bodyEl = document.body;
+      if (bgImage) {
+        bodyEl.classList.add(BodyClass.hasBgImage);
+      } else {
+        bodyEl.classList.remove(BodyClass.hasBgImage);
+      }
     });
 
     this._subs.add(
@@ -433,6 +441,10 @@ export class AppComponent implements OnDestroy, AfterViewInit {
 
   getPage(outlet: RouterOutlet): string {
     return outlet.activatedRouteData.page || 'one';
+  }
+
+  getActiveWorkContextId(): string | null {
+    return this._activeWorkContextId();
   }
 
   changeBackgroundFromUnsplash(): void {

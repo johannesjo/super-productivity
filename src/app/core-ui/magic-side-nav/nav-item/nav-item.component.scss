@@ -1,0 +1,281 @@
+@use 'styles/globals' as *;
+
+:host {
+  display: flex !important;
+  align-items: stretch;
+  position: relative;
+  width: 100%;
+  color: var(--text-color);
+
+  button:first-of-type {
+    white-space: nowrap;
+    overflow: hidden;
+    flex: 1;
+    min-width: 0;
+
+    // to make space for the task-count
+    &.has-tasks {
+      padding-right: 40px;
+    }
+
+    .nav-label {
+      color: var(--text-color);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      // smooth collapse/expand for title
+      display: inline-block;
+      white-space: nowrap;
+      max-width: 100%;
+      transition:
+        opacity var(--transition-duration-m, 0.25s) var(--ani-standard-timing),
+        max-width var(--transition-duration-m, 0.25s) var(--ani-standard-timing),
+        margin var(--transition-duration-m, 0.25s) var(--ani-standard-timing);
+    }
+
+    .ico-wrapper {
+      position: relative;
+    }
+  }
+
+  .additional-btn {
+    flex-shrink: 0;
+    width: 40px !important;
+    min-width: 40px !important;
+  }
+
+  &.isHidden {
+    display: none !important;
+  }
+}
+
+:host.isActiveContext button {
+  font-weight: normal;
+}
+
+:host:hover .task-count {
+  display: none !important;
+}
+
+@media (hover: none) {
+  .additional-btn {
+    opacity: 1;
+    visibility: visible;
+  }
+  .task-count {
+    display: none !important;
+  }
+}
+
+.task-count {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  line-height: 1;
+  text-align: center;
+  font-size: 10px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  // avoid affecting drag handle
+  pointer-events: none;
+
+  @include mq(xs, max) {
+    display: none;
+  }
+}
+
+// Active state visuals are handled by .nav-link.active styles
+
+// Styling when used inside magic-side-nav: rely on global .nav-link/.nav-child-link
+// Only keep adjustments for the additional button here
+:host.variant-nav {
+  .g-multi-btn-wrapper {
+    background-color: transparent;
+  }
+
+  .additional-btn {
+    color: var(--sidebar-text-secondary);
+
+    &:hover {
+      background-color: var(--sidebar-hover);
+      color: var(--sidebar-text);
+    }
+  }
+}
+
+// Smooth label show/hide for presentational rows
+.nav-label {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 100%;
+  transition:
+    opacity var(--transition-duration-m, 0.25s) var(--ani-standard-timing),
+    max-width var(--transition-duration-m, 0.25s) var(--ani-standard-timing),
+    margin var(--transition-duration-m, 0.25s) var(--ani-standard-timing);
+}
+
+.nav-label.label-hidden,
+.text.label-hidden {
+  opacity: 0;
+  max-width: 0;
+  margin-left: 0 !important;
+  pointer-events: none;
+}
+
+.drag-handle {
+  /* Firefox 1.5-26 */
+  position: relative;
+  @include grabCursor();
+
+  &:after {
+    content: '';
+    position: absolute;
+    top: calc(-1 * var(--s));
+    left: calc(-1 * var(--s));
+    right: calc(-1 * var(--s));
+    bottom: calc(-1 * var(--s));
+  }
+}
+
+// Standard navigation row styles (simplified to be the only style)
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s) var(--s2);
+  color: var(--sidebar-text-secondary);
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-size: 14px;
+
+  &:hover {
+    background: var(--sidebar-hover);
+    color: var(--sidebar-text);
+  }
+
+  &.active {
+    background: var(--sidenav-active);
+    color: var(--sidenav-active-text);
+
+    .nav-icon {
+      color: var(--sidenav-active-text);
+    }
+  }
+
+  .nav-icon {
+    width: 20px;
+    height: 20px;
+    font-size: 16px;
+  }
+}
+
+// Navigation icon and chevron
+.nav-icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sidebar-text-secondary);
+  font-size: 18px;
+  line-height: 1;
+}
+
+// Removed legacy chevron styles; we rotate expand_more icon instead
+
+// Rotate the expand_more icon for group headers instead of showing a separate chevron
+.expand-icon {
+  transition: transform 0.2s ease;
+}
+
+.expanded .expand-icon {
+  transform: rotate(180deg);
+}
+
+// Collapsed state adjustments from parent sidebar
+
+:host-context(.isLightTheme .nav-sidebar.compactMode) {
+  .nav-link {
+    &.active {
+      color: var(--sidenav-active-text);
+      background: var(--sidenav-active);
+      border-radius: 48px;
+      border-bottom: 1px solid var(--separator-color);
+      //border: 1px solid var(--separator-color);
+      border-top: 1px solid var(--separator-color);
+
+      &::after {
+        position: absolute;
+        inset: 4px;
+      }
+
+      .nav-icon {
+        color: var(--sidenav-active-text);
+      }
+    }
+  }
+}
+
+:host-context(.nav-sidebar.compactMode) {
+  .nav-link {
+    justify-content: center;
+    padding: 12px;
+
+    // Keep dedicated compactMode hover/active feel
+    &:hover {
+      background: var(--sidebar-hover);
+    }
+
+    &.active {
+      color: var(--sidenav-active-text);
+      background: var(--sidenav-active);
+
+      &::after {
+        position: absolute;
+        inset: 4px;
+      }
+
+      .nav-icon {
+        color: var(--sidenav-active-text);
+      }
+    }
+  }
+
+  .nav-icon {
+    margin: 0;
+  }
+
+  // Hide the overflow menu button entirely when compactMode
+  .additional-btn {
+    display: none !important;
+  }
+
+  // Hide Material's menu item text wrapper (keeps icon centered, avoids jump)
+  a:first-of-type ::ng-deep .mat-mdc-menu-item-text,
+  button:first-of-type ::ng-deep .mat-mdc-menu-item-text {
+    display: none !important;
+  }
+
+  .task-count {
+    display: none;
+  }
+
+  // (no duplicate .nav-link styles here; use global ones)
+}
+
+@include mq(xs, max) {
+  :host-context(.nav-sidebar.compactMode) {
+    .nav-link {
+      justify-content: flex-start;
+      padding: 10px 12px;
+    }
+  }
+}

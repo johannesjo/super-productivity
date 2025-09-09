@@ -436,16 +436,26 @@ export const SHEPHERD_STEPS = (
       text: 'Open the menu (<span class="material-icons">menu</span>)',
       beforeShowPromise: () => {
         // If nav is always visible, skip this step
-        if (layoutService.isNavAlwaysVisible()) {
+        if (layoutService.isMobileNav()) {
           setTimeout(() => shepherdService.next(), 0);
           return Promise.resolve();
         }
         return Promise.resolve();
       },
-      when: nextOnObs(
-        layoutService.isShowSideNav$.pipe(filter((v) => !!v)),
-        shepherdService,
-      ),
+      when: {
+        show: () => {
+          // If nav is always visible, skip immediately
+          if (layoutService.isMobileNav()) {
+            setTimeout(() => shepherdService.next(), 0);
+          } else {
+            // For mobile, wait for the burger button to be clicked
+            // We'll use a simple timeout or manual next for now
+            // since the mobile nav opening doesn't have an observable
+            // TODO better implementation
+            setTimeout(() => shepherdService.next(), 8000);
+          }
+        },
+      },
     },
 
     // ------------------------------
@@ -491,16 +501,24 @@ export const SHEPHERD_STEPS = (
       beforeShowPromise: () => {
         return router.navigate(['']).then(() => {
           // If nav is always visible, skip this step
-          if (layoutService.isNavAlwaysVisible()) {
+          if (layoutService.isMobileNav()) {
             setTimeout(() => shepherdService.next(), 0);
           }
         });
       },
       text: 'Open the menu (<span class="material-icons">menu</span>)',
-      when: nextOnObs(
-        layoutService.isShowSideNav$.pipe(filter((v) => !!v)),
-        shepherdService,
-      ),
+      when: {
+        show: () => {
+          // If nav is always visible, skip immediately
+          if (layoutService.isMobileNav()) {
+            setTimeout(() => shepherdService.next(), 0);
+          } else {
+            // For mobile, wait for the burger button to be clicked
+            // TODO better implementation
+            setTimeout(() => shepherdService.next(), 8000);
+          }
+        },
+      },
     },
     {
       title: 'Configure Sync',

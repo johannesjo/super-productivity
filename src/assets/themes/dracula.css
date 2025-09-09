@@ -47,7 +47,7 @@ body.isDarkTheme {
 
   /* Component backgrounds */
   --card-bg: #2c2e3a;
-  --sidebar-bg: #21222c;
+  --sidenav-bg: #21222c;
   --selected-task-bg-color: #343746;
   --banner-bg: #343746;
 

@@ -1,0 +1,34 @@
+<li
+  class="nav-item"
+  role="listitem"
+>
+  <div class="g-multi-btn-wrapper">
+    <nav-item
+      [container]="'group'"
+      [icon]="item().icon"
+      [svgIcon]="item().svgIcon"
+      [label]="item().label"
+      [showLabels]="showLabels()"
+      [menuTriggerFor]="menuRef"
+    ></nav-item>
+  </div>
+
+  <mat-menu #menuRef="matMenu">
+    @for (child of item().children; track child.id) {
+      <button
+        mat-menu-item
+        (click)="onChildClick(child)"
+      >
+        @if (child['svgIcon']) {
+          <mat-icon
+            class="nav-icon"
+            [svgIcon]="child['svgIcon']"
+          ></mat-icon>
+        } @else {
+          <mat-icon class="nav-icon">{{ child.icon }}</mat-icon>
+        }
+        <span>{{ child.label | translate }}</span>
+      </button>
+    }
+  </mat-menu>
+</li>

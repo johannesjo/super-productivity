@@ -114,6 +114,7 @@ export enum BodyClass {
   isEnabledBackgroundGradient = 'isEnabledBackgroundGradient',
   isDisableAnimations = 'isDisableAnimations',
   isDataImportInProgress = 'isDataImportInProgress',
+  hasBgImage = 'hasBgImage',
 
   isAndroidKeyboardShown = 'isAndroidKeyboardShown',
   isAndroidKeyboardHidden = 'isAndroidKeyboardHidden',
