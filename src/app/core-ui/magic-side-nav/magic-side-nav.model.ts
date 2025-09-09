@@ -21,6 +21,7 @@ export interface NavBaseItem {
 
 export interface NavSeparatorItem extends NavBaseItem {
   type: 'separator';
+  mtAuto?: true;
 }
 
 export interface NavWorkContextItem extends NavBaseItem {

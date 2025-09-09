@@ -79,7 +79,10 @@
     @for (item of config().items; track item.id) {
       @switch (item.type) {
         @case ('separator') {
-          <hr class="nav-separator" />
+          <hr
+            class="nav-separator"
+            [style.margin-top]="item.mtAuto && 'auto'"
+          />
         }
         @case ('group') {
           <li

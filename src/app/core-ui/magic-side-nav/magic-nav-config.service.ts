@@ -16,9 +16,9 @@ import { LS } from '../../core/persistence/storage-keys.const';
 import { DialogCreateProjectComponent } from '../../features/project/dialogs/create-project/dialog-create-project.component';
 import { getGithubErrorUrl } from '../../core/error-handler/global-error-handler.util';
 import {
-  selectUnarchivedVisibleProjects,
-  selectUnarchivedHiddenProjectIds,
   selectAllProjectsExceptInbox,
+  selectUnarchivedHiddenProjectIds,
+  selectUnarchivedVisibleProjects,
 } from '../../features/project/store/project.selectors';
 import { toggleHideFromMenu } from '../../features/project/store/project.actions';
 import { NavConfig, NavItem, NavWorkContextItem } from './magic-side-nav.model';
@@ -138,7 +138,7 @@ export class MagicNavConfigService {
       },
 
       // Separator
-      { type: 'separator', id: 'sep-3' },
+      { type: 'separator', id: 'sep-3', mtAuto: true },
 
       // App Section
       {

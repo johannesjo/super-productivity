@@ -254,6 +254,10 @@ $overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
   padding: 0;
   padding-top: 60px;
   margin: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 .nav-item {
