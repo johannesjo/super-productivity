@@ -382,9 +382,9 @@ body {
   --task-selected-shadow: var(--whiteframe-shadow-3dp);
 
   // Scrollbar colors
-  --scrollbar-thumb: #888;
-  --scrollbar-thumb-hover: #555;
-  --scrollbar-track: #f1f1f1;
+  --scrollbar-thumb: rgba(136, 136, 136, 0.5);
+  --scrollbar-thumb-hover: rgba(85, 85, 85, 0.7);
+  --scrollbar-track: rgba(241, 241, 241, 0.3);
 
   // Chip colors
   --chip-outline-color: rgba(125, 125, 125, 0.4);
@@ -469,7 +469,7 @@ body.isDarkTheme {
   // Text colors
   --text-color: rgb(230, 230, 230);
   --text-color-less-intense: rgba(235, 235, 235, 0.9);
-  --text-color-muted: rgba(235, 235, 235, 0.6);
+  --text-color-muted: rgba(235, 235, 235, 0.75);
   --text-color-more-intense: rgb(245, 245, 245);
   --text-color-most-intense: rgb(255, 255, 255);
 
@@ -507,9 +507,9 @@ body.isDarkTheme {
   --task-selected-shadow: var(--whiteframe-shadow-4dp);
 
   // Scrollbar colors
-  --scrollbar-thumb: #333;
-  --scrollbar-thumb-hover: #444;
-  --scrollbar-track: #222;
+  --scrollbar-thumb: rgba(51, 51, 51, 0.6);
+  --scrollbar-thumb-hover: rgba(68, 68, 68, 0.8);
+  --scrollbar-track: rgba(34, 34, 34, 0.4);
 
   // Grid colors
   --grid-color: var(--c-light-10);
