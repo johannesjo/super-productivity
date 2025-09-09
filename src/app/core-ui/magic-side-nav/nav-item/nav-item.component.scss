@@ -224,6 +224,28 @@
   .nav-link {
     justify-content: center;
     padding: 12px;
+
+    // Keep dedicated collapsed hover/active feel
+    &:hover {
+      background: var(--sidebar-hover);
+    }
+
+    &.active {
+      color: var(--sidebar-active-text);
+      border-radius: 48px;
+      background: var(--sidebar-active);
+      border-top: 1px solid var(--separator-color);
+      border-bottom: 1px solid var(--separator-color);
+
+      &::after {
+        position: absolute;
+        inset: 4px;
+      }
+
+      .nav-icon {
+        color: var(--sidebar-active-text);
+      }
+    }
   }
 
   .nav-icon {
@@ -251,29 +273,7 @@
     }
   }
 
-  // Unified navigation row styles moved from parent
-  .nav-link {
-    &:hover {
-      background: var(--sidebar-hover);
-    }
-
-    &.active {
-      color: var(--sidebar-active-text);
-      border-radius: 48px;
-      background: var(--sidebar-active);
-      border-top: 1px solid var(--separator-color);
-      border-bottom: 1px solid var(--separator-color);
-
-      &::after {
-        position: absolute;
-        inset: 4px;
-      }
-
-      .nav-icon {
-        color: var(--sidebar-active-text);
-      }
-    }
-  }
+  // (no duplicate .nav-link styles here; use global ones)
 }
 
 @media (max-width: 768px) {
