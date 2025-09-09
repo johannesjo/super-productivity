@@ -54,6 +54,16 @@
   display: none !important;
 }
 
+@media (hover: none) {
+  .additional-btn {
+    opacity: 1;
+    visibility: visible;
+  }
+  .task-count {
+    display: none !important;
+  }
+}
+
 .task-count {
   position: absolute;
   top: 50%;
@@ -66,6 +76,10 @@
   align-items: center;
   // avoid affecting drag handle
   pointer-events: none;
+
+  @include mq(xs, max) {
+    display: none;
+  }
 }
 
 // Active state visuals are handled by .nav-link.active styles

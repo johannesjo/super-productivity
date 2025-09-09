@@ -23,7 +23,7 @@
 
 // Always show buttons on mobile/touch devices
 @media (hover: none) {
-  .g-multi-btn-wrapper .additional-btns {
+  .additional-btns {
     opacity: 1;
     visibility: visible;
   }

@@ -1,12 +1,14 @@
-// Use app's CSS variables for width and spacing
-$sidebar-width-expanded: var(--side-nav-width, 260px);
-$mobile-breakpoint: 768px;
-// Use duration/timing variables directly; --transition-standard is a shorthand
-$transition-duration: var(--transition-duration-m, 0.3s);
-$transition-timing: var(--ani-standard-timing, cubic-bezier(0.4, 0, 0.2, 1));
-$overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
-
 :host {
+  --sidebar-width-expanded: var(--side-nav-width, 260px);
+  --mobile-breakpoint: 768px;
+  --sidebar-transition-duration: var(--transition-duration-m, 0.3s);
+  --sidebar-transition-timing: var(--ani-standard-timing, cubic-bezier(0.4, 0, 0.2, 1));
+  --overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
+  --sidebar-border: var(--divider-color);
+  --sidebar-hover: var(--palette-background-hover);
+  --sidenav-active-text: var(--palette-primary-800);
+  --mat-menu-item-spacing: 4px;
+
   // Ensure the component itself participates in layout and animates width
   display: block;
   flex: 0 0 auto;
@@ -15,11 +17,6 @@ $overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
   position: relative;
   z-index: var(--z-side-nav);
   // Use app's CSS variables for consistent theming
-  --sidebar-border: var(--divider-color);
-
-  --sidebar-hover: var(--palette-background-hover);
-  --sidenav-active-text: var(--palette-primary-800);
-  --mat-menu-item-spacing: 4px;
 
   // Dark theme overrides
   body.isDarkTheme & {
@@ -29,7 +26,7 @@ $overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
 
 // Enable host width transition only when toggling compactMode/fullMode
 :host(.animate) {
-  transition: width $transition-duration $transition-timing;
+  transition: width var(--sidebar-transition-duration) var(--sidebar-transition-timing);
 }
 
 // Disable host transition during resize drags
@@ -83,10 +80,10 @@ $overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
   left: 0;
   right: 0;
   bottom: 0;
-  background: $overlay-bg;
+  background: var(--overlay-bg);
   z-index: var(--z-backdrop, 1001);
   opacity: 0;
-  transition: opacity $transition-duration $transition-timing;
+  transition: opacity var(--sidebar-transition-duration) var(--sidebar-transition-timing);
 
   &.visible {
     display: block;
@@ -100,7 +97,7 @@ $overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
   top: 0;
   left: 0;
   bottom: 0;
-  width: $sidebar-width-expanded;
+  width: var(--sidebar-width-expanded);
   background: var(--sidenav-bg);
   border-right: 1px solid var(--sidebar-border);
   // Default: don't animate width
@@ -112,7 +109,7 @@ $overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
   // Slight elevation and clear background for overlay/mobile mode is defined in the mobile block below
 
   &.animate {
-    transition: width $transition-duration $transition-timing;
+    transition: width var(--sidebar-transition-duration) var(--sidebar-transition-timing);
   }
 
   &.resizing {
@@ -184,11 +181,12 @@ $overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
 
   // Mobile specific
   &.mobile {
-    transition: transform $transition-duration $transition-timing;
+    transition: transform var(--sidebar-transition-duration)
+      var(--sidebar-transition-timing);
     will-change: transform;
     box-shadow: 4px 0 16px rgba(0, 0, 0, 0.3);
     transform: translateX(-100%);
-    width: $sidebar-width-expanded;
+    width: var(--sidebar-width-expanded);
     background: var(--sidenav-bg-mobile);
 
     &.mobile-visible {
