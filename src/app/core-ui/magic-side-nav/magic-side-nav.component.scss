@@ -28,7 +28,7 @@ $overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
   }
 }
 
-// Enable host width transition only when toggling collapsed/expanded
+// Enable host width transition only when toggling compactMode/fullMode
 :host(.animate) {
   transition: width $transition-duration $transition-timing;
 }
@@ -154,8 +154,8 @@ $overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
     }
   }
 
-  // Collapsed state (desktop)
-  &.collapsed {
+  // CompactMode state (desktop)
+  &.compactMode {
     // width controlled via inline style for smooth transitions
 
     .sidebar-toggle {
@@ -164,8 +164,8 @@ $overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
       transform: translateX(-50%);
     }
 
-    // Show resize handle in collapsed mode but style differently
-    .resize-handle.collapsed-handle {
+    // Show resize handle in compactMode but style differently
+    .resize-handle.compactMode-handle {
       display: block;
       width: 8px;
       right: -4px;

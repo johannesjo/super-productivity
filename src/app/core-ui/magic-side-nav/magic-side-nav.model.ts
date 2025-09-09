@@ -89,7 +89,7 @@ export interface NavAdditionalButton {
 }
 export interface NavConfig {
   items: NavItem[];
-  expandedByDefault: boolean;
+  fullModeByDefault: boolean;
   showLabels: boolean;
   mobileBreakpoint: number;
   position: 'left' | 'right';

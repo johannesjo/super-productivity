@@ -218,7 +218,7 @@ export class MagicNavConfigService {
         route: '/config',
       },
     ],
-    expandedByDefault: true,
+    fullModeByDefault: true,
     showLabels: true,
     mobileBreakpoint: 768,
     position: 'left',
@@ -287,7 +287,7 @@ export class MagicNavConfigService {
 
     let filteredProjects = projects;
     if (!this._isProjectsExpanded() && activeId) {
-      // Show only active project when collapsed
+      // Show only active project when group is collapsed
       filteredProjects = projects.filter((project) => project.id === activeId);
     }
 
@@ -309,7 +309,7 @@ export class MagicNavConfigService {
 
     let filteredTags = tags;
     if (!this._isTagsExpanded() && activeId) {
-      // Show only active tag when collapsed
+      // Show only active tag when group is collapsed
       filteredTags = tags.filter((tag) => tag.id === activeId);
     }
 

@@ -37,8 +37,8 @@
 <!-- Main Navigation Sidebar -->
 <nav
   class="nav-sidebar"
-  [class.expanded]="isExpanded() || (isMobile() && showMobileMenu())"
-  [class.collapsed]="!isExpanded() && !isMobile()"
+  [class.fullMode]="isFullMode() || (isMobile() && showMobileMenu())"
+  [class.compactMode]="!isFullMode() && !isMobile()"
   [class.mobile]="isMobile()"
   [class.mobile-visible]="isMobile() && showMobileMenu()"
   [class.animate]="animateWidth()"
@@ -54,8 +54,8 @@
       class="sidebar-toggle"
       [class.visible]="!isMobile()"
       (click)="toggleSidebar()"
-      [attr.aria-label]="isExpanded() ? 'Collapse sidebar' : 'Expand sidebar'"
-      [attr.aria-expanded]="isExpanded()"
+      [attr.aria-label]="isFullMode() ? 'Switch to compact mode' : 'Switch to full mode'"
+      [attr.aria-expanded]="isFullMode()"
     >
       <svg
         width="20"
@@ -65,7 +65,7 @@
         stroke="currentColor"
         stroke-width="2"
       >
-        <path [attr.d]="isExpanded() ? 'M13 4l-6 6 6 6' : 'M7 4l6 6-6 6'" />
+        <path [attr.d]="isFullMode() ? 'M13 4l-6 6 6 6' : 'M7 4l6 6-6 6'" />
       </svg>
     </button>
   }
@@ -171,7 +171,7 @@
       class="resize-handle"
       [class.position-left]="config().position !== 'right'"
       [class.position-right]="config().position === 'right'"
-      [class.collapsed-handle]="!isExpanded()"
+      [class.compactMode-handle]="!isFullMode()"
       (mousedown)="onResizeStart($event)"
       [attr.aria-label]="'Resize sidebar'"
       role="separator"

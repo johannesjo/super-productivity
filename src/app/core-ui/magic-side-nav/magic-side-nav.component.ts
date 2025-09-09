@@ -59,14 +59,14 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
   mobileVisible = input<boolean | null>(null);
   mobileVisibleChange = output<boolean>();
 
-  isExpanded = signal(true);
+  isFullMode = signal(true);
   isMobile = signal(false);
   showMobileMenu = signal(false);
   // Track expanded groups as array for better signal change detection
   expandedGroups = signal<string[]>([]);
   // Merge service-controlled and local expanded ids for reactive checks
 
-  // Animate only for collapsed/expanded toggle
+  // Animate only for compactMode/fullMode toggle
   animateWidth = signal(false);
   private _animateTimeoutId: number | null = null;
 
@@ -80,7 +80,7 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
   // Computed values
   sidebarWidth = computed(() => {
     if (this.isMobile()) return 260;
-    if (!this.isExpanded()) return COLLAPSED_WIDTH;
+    if (!this.isFullMode()) return COLLAPSED_WIDTH;
     return this.currentWidth();
   });
 
@@ -89,7 +89,7 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
 
   // Commonly used derived state for template readability
   readonly showText = computed(
-    () => this.isExpanded() || (this.isMobile() && this.showMobileMenu()),
+    () => this.isFullMode() || (this.isMobile() && this.showMobileMenu()),
   );
 
   // Keep stable references for event listeners to ensure proper cleanup
@@ -122,12 +122,12 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Load saved expansion state or default to config value
-    const initialExpanded = readBoolLS(
+    // Load saved fullMode/compactMode state or default to config value
+    const initialFullMode = readBoolLS(
       LS.NAV_SIDEBAR_EXPANDED,
-      this.config().expandedByDefault,
+      this.config().fullModeByDefault,
     );
-    this.isExpanded.set(initialExpanded);
+    this.isFullMode.set(initialFullMode);
 
     // Load saved width from localStorage or default
     const bounded = readNumberLSBounded(
@@ -172,7 +172,7 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
       if (currentMobile) {
         this.showMobileMenu.set(false);
       } else {
-        this.isExpanded.set(this.config().expandedByDefault);
+        this.isFullMode.set(this.config().fullModeByDefault);
       }
     }
   }
@@ -182,10 +182,10 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
       this.showMobileMenu.update((show) => !show);
     } else {
       this._enableWidthAnimation();
-      const newExpanded = !this.isExpanded();
-      this.isExpanded.set(newExpanded);
-      // Save expansion state to localStorage
-      localStorage.setItem(LS.NAV_SIDEBAR_EXPANDED, newExpanded.toString());
+      const newFullMode = !this.isFullMode();
+      this.isFullMode.set(newFullMode);
+      // Save fullMode/compactMode state to localStorage
+      localStorage.setItem(LS.NAV_SIDEBAR_EXPANDED, newFullMode.toString());
       // handled internally
     }
   }
@@ -265,7 +265,7 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
 
     this.isResizing.set(true);
     this.startX.set(event.clientX);
-    this.startWidth.set(this.isExpanded() ? this.currentWidth() : COLLAPSED_WIDTH);
+    this.startWidth.set(this.isFullMode() ? this.currentWidth() : COLLAPSED_WIDTH);
 
     document.addEventListener('mousemove', this._onDrag);
     document.addEventListener('mouseup', this._onDragEnd);
@@ -291,14 +291,14 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     const maxW = cfg.maxWidth;
 
     // Handle seamless mode transitions
-    if (this.isExpanded()) {
-      // Currently expanded - check for collapse threshold
+    if (this.isFullMode()) {
+      // Currently fullMode - check for compactMode threshold
       if (potentialWidth < collapseTh) {
-        // Auto-collapse without releasing mouse
-        this.isExpanded.set(false);
+        // Auto-switch to compactMode without releasing mouse
+        this.isFullMode.set(false);
         // handled internally
 
-        // Reset starting point for continued dragging from collapsed state
+        // Reset starting point for continued dragging from compactMode state
         this.startWidth.set(COLLAPSED_WIDTH);
         this.startX.set(event.clientX);
 
@@ -308,23 +308,23 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
 
       // No visual feedback when approaching collapse threshold
 
-      // Normal resize when expanded
+      // Normal resize when fullMode
       const newWidth = Math.max(minW, Math.min(maxW, potentialWidth));
 
       this.currentWidth.set(newWidth);
     } else {
-      // Currently collapsed - check for expand threshold
-      const collapsedWidth = COLLAPSED_WIDTH;
-      const draggedWidth = collapsedWidth + deltaX;
+      // Currently compactMode - check for fullMode threshold
+      const compactModeWidth = COLLAPSED_WIDTH;
+      const draggedWidth = compactModeWidth + deltaX;
 
       if (draggedWidth > expandTh) {
-        // Auto-expand without releasing mouse
-        this.isExpanded.set(true);
+        // Auto-switch to fullMode without releasing mouse
+        this.isFullMode.set(true);
         const newWidth = expandTh + 20; // Start slightly beyond threshold
         this.currentWidth.set(newWidth);
         // handled internally
 
-        // Reset starting point for continued dragging from expanded state
+        // Reset starting point for continued dragging from fullMode state
         this.startWidth.set(this.currentWidth());
         this.startX.set(event.clientX);
 
@@ -348,8 +348,8 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
 
     // No visual feedback to reset
 
-    // Save width to localStorage (only save if expanded)
-    if (this.isExpanded()) {
+    // Save width to localStorage (only save if fullMode)
+    if (this.isFullMode()) {
       localStorage.setItem(LS.NAV_SIDEBAR_WIDTH, this.currentWidth().toString());
     }
   }

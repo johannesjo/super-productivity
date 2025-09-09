@@ -209,12 +209,12 @@
 }
 
 // Collapsed state adjustments from parent sidebar
-:host-context(.nav-sidebar.collapsed) {
+:host-context(.nav-sidebar.compactMode) {
   .nav-link {
     justify-content: center;
     padding: 12px;
 
-    // Keep dedicated collapsed hover/active feel
+    // Keep dedicated compactMode hover/active feel
     &:hover {
       background: var(--sidebar-hover);
     }
@@ -241,7 +241,7 @@
     margin: 0;
   }
 
-  // Hide the overflow menu button entirely when collapsed
+  // Hide the overflow menu button entirely when compactMode
   .additional-btn {
     display: none !important;
   }
@@ -260,7 +260,7 @@
 }
 
 @media (max-width: 768px) {
-  :host-context(.nav-sidebar.collapsed) {
+  :host-context(.nav-sidebar.compactMode) {
     .nav-link {
       justify-content: flex-start;
       padding: 10px 12px;
