@@ -1,15 +1,20 @@
-import { PluginInterface, Task, Project } from '@super-productivity/plugin-api';
+import {
+  PluginAPI,
+  PluginHooks,
+  TaskCompletePayload,
+  TaskUpdatePayload,
+} from '@super-productivity/plugin-api';
 
-declare const plugin: PluginInterface;
+declare const plugin: PluginAPI;
 
 // Plugin initialization
-plugin.log('Solid.js Boilerplate Plugin loaded');
+plugin.log.info('Boilerplate plugin initialized');
 
 // Example: Register a header button
 plugin.registerHeaderButton({
   icon: 'rocket',
-  tooltip: 'Open Boilerplate Plugin',
-  action: () => {
+  label: 'Open Boilerplate Plugin',
+  onClick: () => {
     plugin.showIndexHtmlAsView();
   },
 });
@@ -18,7 +23,7 @@ plugin.registerHeaderButton({
 plugin.registerMenuEntry({
   label: 'Boilerplate Plugin',
   icon: 'rocket',
-  action: () => {
+  onClick: () => {
     plugin.showIndexHtmlAsView();
   },
 });
@@ -33,33 +38,36 @@ plugin.registerShortcut({
 });
 
 // Example: Hook into task completion
-plugin.on('taskComplete', async (task: Task) => {
-  plugin.log('Task completed:', task.title);
+plugin.registerHook(PluginHooks.TASK_COMPLETE, (taskData: TaskCompletePayload) => {
+  plugin.log.info('Task completed:', taskData.task.title);
 
   // Example: Show notification
   plugin.showSnack({
-    msg: `Great job! You completed: ${task.title}`,
+    msg: `Great job! You completed: ${taskData.task.title}`,
     type: 'SUCCESS',
   });
 });
 
 // Example: Hook into task updates
-plugin.on('taskUpdate', async (task: Task) => {
-  plugin.log('Task updated:', task.title);
+plugin.registerHook(PluginHooks.TASK_UPDATE, (taskData: TaskUpdatePayload) => {
+  plugin.log.info('Task updated:', taskData.task.title);
 });
 
 // Example: Hook into context changes
 plugin.on('contextChange', async (context: { projectId?: string; tagId?: string }) => {
-  plugin.log('Context changed:', context);
-
-  if (context.projectId) {
-    const projects = await plugin.getAllProjects();
-    const currentProject = projects.find((p) => p.id === context.projectId);
-    if (currentProject) {
-      plugin.log('Switched to project:', currentProject.title);
+plugin.registerHook(
+  PluginHooks.ANY_TASK_UPDATE,
+  async (payload: AnyTaskUpdatePayload) => {
+    const changes = payload.changes;
+    if (changes && 'projectId' in changes && changes.projectId) {
+      const projects = await plugin.getAllProjects();
+      const currentProject = projects.find((p) => p.id === changes.projectId);
+      if (currentProject) {
+        plugin.log.info('Switched to project:', currentProject.title);
+      }
     }
-  }
-});
+  },
+);
 
 // Example: Custom command handler
 plugin.onMessage('getStats', async () => {
