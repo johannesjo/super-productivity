@@ -55,16 +55,19 @@ plugin.registerHook(PluginHooks.TASK_UPDATE, (taskData: TaskUpdatePayload) => {
 
 // Example: Hook into context changes
 plugin.on('contextChange', async (context: { projectId?: string; tagId?: string }) => {
-  plugin.log('Context changed:', context);
-
-  if (context.projectId) {
-    const projects = await plugin.getAllProjects();
-    const currentProject = projects.find((p) => p.id === context.projectId);
-    if (currentProject) {
-      plugin.log('Switched to project:', currentProject.title);
+plugin.registerHook(
+  PluginHooks.ANY_TASK_UPDATE,
+  async (payload: AnyTaskUpdatePayload) => {
+    const changes = payload.changes;
+    if (changes && 'projectId' in changes && changes.projectId) {
+      const projects = await plugin.getAllProjects();
+      const currentProject = projects.find((p) => p.id === changes.projectId);
+      if (currentProject) {
+        plugin.log.info('Switched to project:', currentProject.title);
+      }
     }
-  }
-});
+  },
+);
 
 // Example: Custom command handler
 plugin.onMessage('getStats', async () => {
