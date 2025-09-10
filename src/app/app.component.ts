@@ -223,6 +223,11 @@ export class AppComponent implements OnDestroy, AfterViewInit {
       }
     });
 
+    if (this.isShowMobileButtonNav) {
+      const bodyEl = document.body;
+      bodyEl.classList.add(BodyClass.hasMobileBottomNav);
+    }
+
     this._subs.add(
       this._activatedRoute.queryParams.subscribe((params) => {
         if (!!params.focusItem) {

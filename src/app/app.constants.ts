@@ -115,6 +115,7 @@ export enum BodyClass {
   isDisableAnimations = 'isDisableAnimations',
   isDataImportInProgress = 'isDataImportInProgress',
   hasBgImage = 'hasBgImage',
+  hasMobileBottomNav = 'hasMobileBottomNav',
 
   isAndroidKeyboardShown = 'isAndroidKeyboardShown',
   isAndroidKeyboardHidden = 'isAndroidKeyboardHidden',
