@@ -10,10 +10,10 @@ const TO_TODAY_SUF = ' .actions button:last-of-type';
 const SCHEDULE_MAX_WAIT_TIME = 60000; // Reduced from 180s to 60s
 
 // Helper selectors for task scheduling
-const TASK = 'task';
-const SCHEDULE_TASK_ITEM = 'task-detail-item:nth-child(2)';
-const SCHEDULE_DIALOG = 'mat-dialog-container';
-const DIALOG_SUBMIT = `${SCHEDULE_DIALOG} mat-dialog-actions button:last-of-type`;
+const SCHEDULE_TASK_ITEM =
+  'task-detail-item:has(mat-icon:text("alarm")), task-detail-item:has(mat-icon:text("today")), task-detail-item:has(mat-icon:text("schedule"))';
+const DIALOG_CONTAINER = 'mat-dialog-container';
+const DIALOG_SUBMIT = `${DIALOG_CONTAINER} mat-dialog-actions button:last-of-type`;
 const TIME_INP = 'input[type="time"]';
 const RIGHT_PANEL = '.right-panel';
 const DEFAULT_DELTA = 5000; // 5 seconds instead of 1.2 minutes
@@ -25,35 +25,93 @@ test.describe.serial('Reminders View Task 4', () => {
     title: string,
     scheduleTime: number = Date.now() + DEFAULT_DELTA,
   ): Promise<void> => {
-    // Add task
+    // Add task (title should already include test prefix)
     await workViewPage.addTask(title);
 
+    // Wait for task to be fully rendered before proceeding
+    await page.waitForTimeout(500);
+
     // Open task panel by hovering and clicking the detail button
-    const taskSel = page.locator(TASK).first();
-    await taskSel.waitFor({ state: 'visible' });
+    // Find the specific task by title to ensure we're working with the right one
+    const specificTaskSelector =
+      `task:has-text("${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}")`.substring(
+        0,
+        200,
+      ); // Limit selector length
+    const taskSel = page.locator(specificTaskSelector).first();
+    await taskSel.waitFor({ state: 'visible', timeout: 10000 });
+
+    // Ensure task is fully loaded by checking for task content
+    await page.waitForTimeout(300);
+
     await taskSel.hover();
-    const detailPanelBtn = page.locator('.show-additional-info-btn').first();
-    await detailPanelBtn.waitFor({ state: 'visible' });
+    const detailPanelBtn = taskSel.locator('.show-additional-info-btn').first();
+    await detailPanelBtn.waitFor({ state: 'visible', timeout: 5000 });
     await detailPanelBtn.click();
-    await page.waitForSelector(RIGHT_PANEL, { state: 'visible' });
+    await page.waitForSelector(RIGHT_PANEL, { state: 'visible', timeout: 10000 });
 
-    // Click schedule item
-    await page.click(SCHEDULE_TASK_ITEM);
-    await page.waitForSelector(SCHEDULE_DIALOG, { state: 'visible' });
+    // Wait for and click schedule task item with better error handling
+    const scheduleItem = page.locator(SCHEDULE_TASK_ITEM);
+    await scheduleItem.waitFor({ state: 'visible', timeout: 10000 });
 
-    // Set time
+    // Ensure the schedule item is clickable
+    await scheduleItem.waitFor({ state: 'attached' });
+    await page.waitForTimeout(200);
+    await scheduleItem.click();
+
+    // Wait for dialog with improved timeout
+    const dialogContainer = page.locator(DIALOG_CONTAINER);
+    await dialogContainer.waitFor({ state: 'visible', timeout: 10000 });
+    await page.waitForTimeout(200); // Allow dialog animation to complete
+
+    // Set time - use more robust selector and approach
     const d = new Date(scheduleTime);
     const timeValue = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
 
-    const timeInput = page.locator(TIME_INP);
-    await timeInput.click();
-    await timeInput.clear();
-    await timeInput.fill(timeValue);
-    await page.keyboard.press('Tab');
+    const timeInput = page
+      .locator('mat-form-field input[type="time"]')
+      .or(page.locator(TIME_INP));
+    await timeInput.waitFor({ state: 'visible', timeout: 10000 });
 
-    // Submit
+    // Multiple approaches to ensure the time input is ready
+    await timeInput.click();
+    await page.waitForTimeout(100);
+
+    // Clear existing value if any
+    await timeInput.fill('');
+    await page.waitForTimeout(100);
+
+    // Set the time value
+    await timeInput.fill(timeValue);
+    await page.waitForTimeout(100);
+
+    // Verify the value was set
+    const inputValue = await timeInput.inputValue();
+    if (inputValue !== timeValue) {
+      // Fallback: use evaluate to set value directly
+      await page.evaluate(
+        ({ value }) => {
+          const timeInputEl = document.querySelector(
+            'mat-form-field input[type="time"]',
+          ) as HTMLInputElement;
+          if (timeInputEl) {
+            timeInputEl.value = value;
+            timeInputEl.dispatchEvent(new Event('input', { bubbles: true }));
+            timeInputEl.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        },
+        { value: timeValue },
+      );
+    }
+
+    // Ensure focus moves away to commit the value
+    await page.keyboard.press('Tab');
+    await page.waitForTimeout(100);
+
+    // Submit dialog
+    await page.waitForSelector(DIALOG_SUBMIT, { state: 'visible' });
     await page.click(DIALOG_SUBMIT);
-    await page.waitForSelector(SCHEDULE_DIALOG, { state: 'hidden' });
+    await page.waitForSelector(DIALOG_CONTAINER, { state: 'hidden' });
   };
 
   test('should manually empty list via add to today', async ({
@@ -72,8 +130,13 @@ test.describe.serial('Reminders View Task 4', () => {
     const task2Name = `${testPrefix}-1 D task xyz`;
     const task3Name = `${testPrefix}-2 D task xyz`;
 
+    // Add tasks with proper spacing to avoid interference
     await addTaskWithReminder(page, workViewPage, task1Name, start);
+    await page.waitForTimeout(1000); // Ensure first task is fully processed
+
     await addTaskWithReminder(page, workViewPage, task2Name, start);
+    await page.waitForTimeout(1000); // Ensure second task is fully processed
+
     await addTaskWithReminder(page, workViewPage, task3Name, Date.now() + 5000);
 
     // Wait for reminder dialog

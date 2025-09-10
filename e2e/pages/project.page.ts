@@ -181,11 +181,10 @@ export class ProjectPage extends BasePage {
       ? `${this.testPrefix}-Test Project`
       : 'Test Project';
 
-    // After creating a project, we need to ensure Projects group is visible and expanded
-    // Wait a moment for the nav to update from empty state to normal state
-    await this.page.waitForTimeout(1000);
+    // After creating a project, ensure Projects group is visible and expanded
+    await this.page.waitForTimeout(2000); // Increased wait for DOM updates
 
-    // Now find the Projects group button (should exist since we have a project)
+    // Find the Projects group button (should exist since we have a project)
     const projectsGroupAfterCreation = this.page
       .locator('nav-list')
       .filter({ hasText: 'Projects' })
@@ -193,28 +192,91 @@ export class ProjectPage extends BasePage {
       .first();
     await projectsGroupAfterCreation.waitFor({ state: 'visible', timeout: 5000 });
 
-    // Check if projects group is expanded, if not click to expand
-    const isExpanded = await projectsGroupAfterCreation.getAttribute('aria-expanded');
+    // Check if projects group is expanded, use similar logic to project.spec.ts
+    let isExpanded = await projectsGroupAfterCreation.getAttribute('aria-expanded');
     if (isExpanded !== 'true') {
-      await projectsGroupAfterCreation.click();
-      await this.page.waitForTimeout(500); // Wait for expansion animation
+      // Multiple approaches to expand the Projects section
+      // First: Try clicking the expand icon within the Projects button
+      const expandIcon = projectsGroupAfterCreation
+        .locator('mat-icon, .expand-icon, [class*="expand"]')
+        .first();
+      if (await expandIcon.isVisible({ timeout: 1000 }).catch(() => false)) {
+        await expandIcon.click();
+        await this.page.waitForTimeout(1500);
+        isExpanded = await projectsGroupAfterCreation.getAttribute('aria-expanded');
+      }
+
+      // If still not expanded, try clicking the main button
+      if (isExpanded !== 'true') {
+        await projectsGroupAfterCreation.click();
+        await this.page.waitForTimeout(1500);
+        isExpanded = await projectsGroupAfterCreation.getAttribute('aria-expanded');
+      }
+
+      // If still not expanded, try double-clicking as last resort
+      if (isExpanded !== 'true') {
+        await projectsGroupAfterCreation.dblclick();
+        await this.page.waitForTimeout(1500);
+      }
     }
 
-    // Wait for the project to appear in the navigation - try multiple approaches
+    // Wait for the project to appear in the navigation - use improved approach from project.spec.ts
+    await this.page.waitForTimeout(1000); // Allow time for project to appear
+
     let newProject;
-    try {
-      // First try the specific structure
-      newProject = this.page
-        .locator('nav-list .nav-children')
-        .locator('nav-item')
-        .filter({ hasText: projectName })
-        .locator('button');
-      await newProject.waitFor({ state: 'visible', timeout: 3000 });
-    } catch {
-      // Fallback: look for any button with the project name anywhere in the nav
-      newProject = this.page.locator('button').filter({ hasText: projectName });
-      await newProject.waitFor({ state: 'visible', timeout: 3000 });
+    let projectFound = false;
+
+    // Check if .nav-children container exists after expansion
+    const navChildren = this.page.locator('.nav-children');
+    const navChildrenExists = await navChildren.count();
+
+    if (navChildrenExists > 0) {
+      await navChildren.waitFor({ state: 'visible', timeout: 5000 });
+
+      try {
+        // Primary approach: nav-child-item structure with nav-item button
+        newProject = this.page
+          .locator('.nav-children .nav-child-item nav-item button')
+          .filter({ hasText: projectName });
+        await newProject.waitFor({ state: 'visible', timeout: 3000 });
+        projectFound = true;
+      } catch {
+        try {
+          // Second approach: any nav-child-item with the project name
+          newProject = this.page
+            .locator('.nav-child-item')
+            .filter({ hasText: projectName })
+            .locator('button');
+          await newProject.waitFor({ state: 'visible', timeout: 3000 });
+          projectFound = true;
+        } catch {
+          // Continue to fallback approaches
+        }
+      }
     }
+
+    // Fallback approaches if structured approach didn't work
+    if (!projectFound) {
+      try {
+        // Fallback: find any button with project name in the nav area
+        newProject = this.page
+          .locator('magic-side-nav button')
+          .filter({ hasText: projectName });
+        await newProject.waitFor({ state: 'visible', timeout: 3000 });
+        projectFound = true;
+      } catch {
+        // Ultimate fallback: search entire page for project button
+        newProject = this.page.locator('button').filter({ hasText: projectName });
+        await newProject.waitFor({ state: 'visible', timeout: 3000 });
+        projectFound = true;
+      }
+    }
+
+    // Verify the project is found and click it
+    if (!projectFound) {
+      throw new Error(`Project "${projectName}" not found in navigation after creation`);
+    }
+
     await newProject.click();
 
     // Wait for navigation to complete

@@ -8,7 +8,8 @@ const SCHEDULE_MAX_WAIT_TIME = 60000; // Reduced from 180s to 60s
 
 // Helper selectors from addTaskWithReminder
 const TASK = 'task';
-const SCHEDULE_TASK_ITEM = 'task-detail-item:nth-child(2)';
+const SCHEDULE_TASK_ITEM =
+  'task-detail-item:has(mat-icon:text("alarm")), task-detail-item:has(mat-icon:text("today")), task-detail-item:has(mat-icon:text("schedule"))';
 const DIALOG_CONTAINER = 'mat-dialog-container';
 const DIALOG_SUBMIT = `${DIALOG_CONTAINER} mat-dialog-actions button:last-of-type`;
 const TIME_INP = 'input[type="time"]';
@@ -45,53 +46,56 @@ test.describe('Reminders View Task', () => {
     await detailPanelBtn.waitFor({ state: 'visible' });
     await detailPanelBtn.click();
 
-    // Wait for and click schedule task item
-    await page.waitForSelector(SCHEDULE_TASK_ITEM, { state: 'visible' });
-    await page.click(SCHEDULE_TASK_ITEM);
+    // Wait for and click schedule task item with better error handling
+    const scheduleItem = page.locator(SCHEDULE_TASK_ITEM);
+    await scheduleItem.waitFor({ state: 'visible', timeout: 5000 });
+    await scheduleItem.click();
 
-    // Wait for dialog
-    await page.waitForSelector(DIALOG_CONTAINER, { state: 'visible' });
-    await page.locator(DIALOG_CONTAINER).waitFor({ state: 'visible' });
-    await page.waitForTimeout(50); // Small delay for dialog animation
+    // Wait for dialog with improved timeout
+    const dialogContainer = page.locator(DIALOG_CONTAINER);
+    await dialogContainer.waitFor({ state: 'visible', timeout: 10000 });
+    await page.waitForTimeout(200); // Allow dialog animation to complete
 
-    // Set time
-    await page.waitForSelector(TIME_INP, { state: 'visible' });
-    await page.locator(TIME_INP).waitFor({ state: 'visible' });
-    await page.waitForTimeout(50); // Small delay for UI settling
+    // Set time - use more robust selector and approach
+    const timeInput = page
+      .locator('mat-form-field input[type="time"]')
+      .or(page.locator(TIME_INP));
+    await timeInput.waitFor({ state: 'visible', timeout: 10000 });
 
-    // Focus and set time value
-    await page.click(TIME_INP);
-    await page.locator(TIME_INP).focus();
-    await page.waitForTimeout(50); // Small delay for focus
+    // Multiple approaches to ensure the time input is ready
+    await timeInput.click();
+    await page.waitForTimeout(100);
 
-    // Clear and set value
-    await page.fill(TIME_INP, '');
-    await page.waitForTimeout(50); // Small delay for clear
+    // Clear existing value if any
+    await timeInput.fill('');
+    await page.waitForTimeout(100);
 
     // Set the time value
-    await page.evaluate(
-      ({ selector, value }) => {
-        const el = document.querySelector(selector) as HTMLInputElement;
-        if (el) {
-          el.value = value;
-          el.dispatchEvent(new Event('input', { bubbles: true }));
-          el.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-      },
-      { selector: TIME_INP, value: timeValue },
-    );
+    await timeInput.fill(timeValue);
+    await page.waitForTimeout(100);
 
-    // Wait for value to be updated in the input
-    await page.locator(TIME_INP).waitFor({ state: 'visible' });
-    await page.waitForTimeout(50); // Small delay for value update
+    // Verify the value was set
+    const inputValue = await timeInput.inputValue();
+    if (inputValue !== timeValue) {
+      // Fallback: use evaluate to set value directly
+      await page.evaluate(
+        ({ value }) => {
+          const timeInputEl = document.querySelector(
+            'mat-form-field input[type="time"]',
+          ) as HTMLInputElement;
+          if (timeInputEl) {
+            timeInputEl.value = value;
+            timeInputEl.dispatchEvent(new Event('input', { bubbles: true }));
+            timeInputEl.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        },
+        { value: timeValue },
+      );
+    }
 
-    // Also set value normally
-    await page.fill(TIME_INP, timeValue);
-    await page.waitForTimeout(50); // Small delay for value setting
-
-    // Tab to commit value
+    // Ensure focus moves away to commit the value
     await page.keyboard.press('Tab');
-    await page.waitForTimeout(50); // Small delay for tab action
+    await page.waitForTimeout(100);
 
     // Submit dialog
     await page.waitForSelector(DIALOG_SUBMIT, { state: 'visible' });
