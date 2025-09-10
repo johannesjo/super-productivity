@@ -278,11 +278,7 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   // Template helper computed signals
   showSubTasksPanel = computed(() => {
     const task = this.task();
-    return (
-      task &&
-      !task.parentId &&
-      (this.layoutService.isRightPanelOver() || this.isDialogMode())
-    );
+    return task && !task.parentId;
   });
 
   showTimeEstimate = computed(() => !this.task().subTasks?.length);
