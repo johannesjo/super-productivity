@@ -44,14 +44,14 @@ plugin.registerHook(PluginHooks.TASK_COMPLETE, (taskData: TaskCompletePayload) =
 
   // Example: Show notification
   plugin.showSnack({
-    msg: `Great job! You completed: ${task.title}`,
+    msg: `Great job! You completed: ${taskData.task.title}`,
     type: 'SUCCESS',
   });
 });
 
 // Example: Hook into task updates
-plugin.on('taskUpdate', async (task: Task) => {
-  plugin.log('Task updated:', task.title);
+plugin.registerHook(PluginHooks.TASK_UPDATE, (taskData: TaskUpdatePayload) => {
+  plugin.log.info('Task updated:', taskData.task.title);
 });
 
 // Example: Hook into context changes
