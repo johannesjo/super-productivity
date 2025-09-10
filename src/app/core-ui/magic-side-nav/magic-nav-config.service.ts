@@ -364,6 +364,10 @@ export class MagicNavConfigService {
   // Public access to projects for visibility menu
   readonly allProjectsExceptInbox = computed(() => this._allProjectsExceptInbox());
 
+  // Check if there are any projects or tags (for empty state)
+  readonly hasAnyProjects = computed(() => this._visibleProjects().length > 0);
+  readonly hasAnyTags = computed(() => this._tags().length > 0);
+
   // Simple toggle functions
   private _toggleProjectsExpanded(): void {
     const newState = !this._isProjectsExpanded();
@@ -382,6 +386,13 @@ export class MagicNavConfigService {
     this._matDialog.open(DialogCreateProjectComponent, { restoreFocus: true });
   }
 
+  private _createNewTag(): void {
+    const title = prompt('Enter tag name:');
+    if (title && title.trim()) {
+      this._tagService.addTag({ title: title.trim() });
+    }
+  }
+
   private _openBugReport(): void {
     window.open(getGithubErrorUrl('', undefined, true), '_blank');
   }
@@ -397,6 +408,15 @@ export class MagicNavConfigService {
 
   toggleProjectVisibility(projectId: string): void {
     this._store.dispatch(toggleHideFromMenu({ id: projectId }));
+  }
+
+  // Public methods for empty states
+  createNewProject(): void {
+    this._openCreateProject();
+  }
+
+  createNewTag(): void {
+    this._createNewTag();
   }
 
   // Drag and drop handlers

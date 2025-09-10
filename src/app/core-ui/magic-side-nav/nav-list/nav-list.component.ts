@@ -13,6 +13,7 @@ import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 import { expandFadeAnimation } from '../../../ui/animations/expand.ani';
 import { MagicNavConfigService } from '../magic-nav-config.service';
+import { T } from '../../../t.const';
 
 @Component({
   selector: 'nav-list',
@@ -49,9 +50,12 @@ export class NavSectionComponent {
 
   readonly IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
   readonly DRAG_DELAY_FOR_TOUCH_LONGER = DRAG_DELAY_FOR_TOUCH_LONGER;
+  readonly T = T;
 
   // Access to service methods and data for visibility menu
   readonly allProjectsExceptInbox = this._navConfigService.allProjectsExceptInbox;
+  readonly hasAnyProjects = this._navConfigService.hasAnyProjects;
+  readonly hasAnyTags = this._navConfigService.hasAnyTags;
 
   onHeaderClick(): void {
     this.itemClick.emit(this.item());
@@ -63,6 +67,24 @@ export class NavSectionComponent {
 
   toggleProjectVisibility(projectId: string): void {
     this._navConfigService.toggleProjectVisibility(projectId);
+  }
+
+  createNewProject(): void {
+    this._navConfigService.createNewProject();
+  }
+
+  createNewTag(): void {
+    this._navConfigService.createNewTag();
+  }
+
+  shouldShowEmptyState(): boolean {
+    const itemId = this.item().id;
+    if (itemId === 'projects') {
+      return !this.hasAnyProjects();
+    } else if (itemId === 'tags') {
+      return !this.hasAnyTags();
+    }
+    return false;
   }
 
   onDrop(event: CdkDragDrop<string, string, NavWorkContextItem>): void {
