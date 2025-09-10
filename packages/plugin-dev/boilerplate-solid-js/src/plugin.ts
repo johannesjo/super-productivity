@@ -14,8 +14,8 @@ plugin.log.info('Boilerplate plugin initialized');
 // Example: Register a header button
 plugin.registerHeaderButton({
   icon: 'rocket',
-  tooltip: 'Open Boilerplate Plugin',
-  action: () => {
+  label: 'Open Boilerplate Plugin',
+  onClick: () => {
     plugin.showIndexHtmlAsView();
   },
 });
