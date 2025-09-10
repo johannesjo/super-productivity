@@ -166,12 +166,21 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   defaultProject$ = combineLatest([
     this.projects$,
     this._workContextService.activeWorkContext$,
+    this._globalConfigService.misc$,
   ]).pipe(
-    map(([projects, workContext]) => {
+    map(([projects, workContext, miscConfig]) => {
+      // Priority order:
+      // 1. If current work context is a project → use that project
+      // 2. If misc.defaultProjectId is configured → use that project
+      // 3. Otherwise → fall back to INBOX_PROJECT
       const defaultProject =
         (workContext?.type === WorkContextType.PROJECT
           ? projects.find((p) => p.id === workContext.id)
-          : null) || projects.find((p) => p.id === 'INBOX_PROJECT');
+          : null) ||
+        (miscConfig.defaultProjectId
+          ? projects.find((p) => p.id === miscConfig.defaultProjectId)
+          : null) ||
+        projects.find((p) => p.id === 'INBOX_PROJECT');
       return defaultProject;
     }),
   );
