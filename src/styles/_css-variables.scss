@@ -61,6 +61,7 @@
   // NOTE needs to be below the z-index of cdk-overlay which is 1000
   --z-add-task-bar: 999;
   --z-search-bar: 999;
+  --z-mobile-bottom-nav: 50;
   --z-tour: 99;
 
   // ===============================
@@ -342,6 +343,7 @@ body {
   --sidebar-text-secondary: var(--text-color-muted);
   --overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
   --right-panel-bg: #fff;
+  --bottom-nav-height: 44px;
 
   // Text colors
   --text-color: rgb(44, 44, 44);
@@ -465,6 +467,7 @@ body.isDarkTheme {
   --sidebar-text-secondary: var(--text-color-muted);
   --overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.8));
   --right-panel-bg: var(--dark5);
+  --bottom-nav-bg: var(--sidenav-bg-mobile);
 
   // Text colors
   --text-color: rgb(230, 230, 230);

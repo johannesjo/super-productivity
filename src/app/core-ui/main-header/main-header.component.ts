@@ -40,7 +40,6 @@ import { PluginSidePanelBtnsComponent } from '../../plugins/ui/plugin-side-panel
 import { WorkContextTitleComponent } from './work-context-title/work-context-title.component';
 import { PlayButtonComponent } from './play-button/play-button.component';
 import { DesktopPanelButtonsComponent } from './desktop-panel-buttons/desktop-panel-buttons.component';
-import { MobileSidePanelMenuComponent } from './mobile-side-panel-menu/mobile-side-panel-menu.component';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
 
@@ -59,7 +58,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
     LongPressDirective,
     PluginHeaderBtnsComponent,
     PluginSidePanelBtnsComponent,
-    MobileSidePanelMenuComponent,
     WorkContextTitleComponent,
     PlayButtonComponent,
     DesktopPanelButtonsComponent,
@@ -84,14 +82,17 @@ export class MainHeaderComponent implements OnDestroy {
   T: typeof T = T;
   isShowSimpleCounterBtnsMobile = signal(false);
 
-  // Convert breakpoint observer to signals
-  private _isXs$ = this.breakpointObserver.observe('(max-width: 599px)');
+  // TODO these should live in the layout service
+  // Convert breakpoint observer to signals - using 768px to match mobile-bottom-nav
+  private _isXs$ = this.breakpointObserver.observe('(max-width: 768px)');
   private _isXxxs$ = this.breakpointObserver.observe('(max-width: 398px)');
 
+  // TODO these should live in the layout service
   isXs = toSignal(this._isXs$.pipe(map((result) => result.matches)), {
     initialValue: false,
   });
 
+  // TODO these should live in the layout service
   isXxxs = toSignal(this._isXxxs$.pipe(map((result) => result.matches)), {
     initialValue: false,
   });

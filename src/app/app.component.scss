@@ -22,9 +22,31 @@
   overflow: hidden;
 }
 
+// Mobile bottom nav spacing
+.has-mobile-bottom-nav {
+  @include mq(xs, max) {
+    .main-content {
+      padding-bottom: var(--bottom-nav-height);
+    }
+  }
+}
+
+// Move snack bar above mobile bottom nav
+:host ::ng-deep {
+  @include mq(xs, max) {
+    body.hasMobileBottomNav .cdk-overlay-container .mat-mdc-snack-bar-container {
+      bottom: calc(var(--bottom-nav-height) + 16px) !important;
+    }
+  }
+}
+
 // Override magic-side-nav styles for flex layout integration
 // Use desktop layout overrides only on larger screens
-@media (min-width: 768px) {
+@include mq(xs) {
+  mobile-bottom-nav {
+    display: none !important;
+  }
+
   magic-side-nav {
     ::ng-deep .nav-sidebar {
       position: relative !important;

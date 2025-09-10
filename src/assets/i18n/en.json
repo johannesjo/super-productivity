@@ -24,6 +24,11 @@
     "UPDATE_MAIN_MODEL_NO_UPDATE": "No model update chosen. Please note that you either have to downgrade to the last version, if you do not want to perform the model upgrade.",
     "UPDATE_WEB_APP": "New version available. Load New Version?"
   },
+  "BN": {
+    "SHOW_ISSUE_PANEL": "Show Issue Panel",
+    "SHOW_NOTES": "Show Project Notes",
+    "SHOW_TASK_VIEW_CUSTOMIZER_PANEL": "Show Filter/Group/Sort Panel"
+  },
   "BL": {
     "NO_TASKS": "There are currently no tasks in your backlog"
   },

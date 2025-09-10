@@ -81,6 +81,8 @@ import { ProjectService } from './features/project/project.service';
 import { TagService } from './features/tag/tag.service';
 import { ContextMenuComponent } from './ui/context-menu/context-menu.component';
 import { WorkContextThemeCfg } from './features/work-context/work-context.model';
+import { MobileBottomNavComponent } from './core-ui/mobile-bottom-nav/mobile-bottom-nav.component';
+import { IS_TOUCH_PRIMARY } from './util/is-mouse-primary';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -118,6 +120,7 @@ const productivityTip: string[] = w.productivityTips && w.productivityTips[w.ran
     MatIcon,
     TranslatePipe,
     ContextMenuComponent,
+    MobileBottomNavComponent,
   ],
 })
 export class AppComponent implements OnDestroy, AfterViewInit {
@@ -156,6 +159,7 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   readonly globalThemeService = inject(GlobalThemeService);
   readonly _store = inject(Store);
   readonly T = T;
+  readonly isShowMobileButtonNav = IS_MOBILE && IS_TOUCH_PRIMARY;
 
   productivityTipTitle: string = productivityTip && productivityTip[0];
   productivityTipText: string = productivityTip && productivityTip[1];
@@ -216,6 +220,16 @@ export class AppComponent implements OnDestroy, AfterViewInit {
         bodyEl.classList.add(BodyClass.hasBgImage);
       } else {
         bodyEl.classList.remove(BodyClass.hasBgImage);
+      }
+    });
+
+    // Add/remove has-mobile-bottom-nav class to body for snack bar positioning
+    effect(() => {
+      const bodyEl = document.body;
+      if (this.isShowMobileButtonNav) {
+        bodyEl.classList.add(BodyClass.hasMobileBottomNav);
+      } else {
+        bodyEl.classList.remove(BodyClass.hasMobileBottomNav);
       }
     });
 
