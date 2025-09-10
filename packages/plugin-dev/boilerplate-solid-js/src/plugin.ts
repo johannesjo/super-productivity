@@ -1,9 +1,8 @@
 import {
   PluginAPI,
   PluginHooks,
-  Task,
   TaskCompletePayload,
-  Project,
+  TaskUpdatePayload,
 } from '@super-productivity/plugin-api';
 
 declare const plugin: PluginAPI;
