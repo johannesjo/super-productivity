@@ -44,25 +44,39 @@ test.describe('Project', () => {
   });
 
   test('create second project', async ({ page, testPrefix }) => {
-    // First click on Projects menu item to expand it
-    const projectsButton = page.locator('nav-item button:has-text("Projects")');
-    await projectsButton.waitFor({ state: 'visible', timeout: 5000 });
+    // Handle empty state vs existing projects scenario
+    const addProjectBtn = page
+      .locator('nav-item')
+      .filter({ hasText: 'Create Project' })
+      .locator('button');
+    const projectsGroupBtn = page
+      .locator('nav-list')
+      .filter({ hasText: 'Projects' })
+      .locator('nav-item button')
+      .first();
 
-    // Check if projects section is already expanded
-    const isExpanded = await projectsButton.getAttribute('aria-expanded');
-    if (isExpanded !== 'true') {
-      await projectsButton.click();
-      await page.waitForTimeout(500); // Wait for expansion animation
+    // Check if we're in empty state (no projects yet) or if projects group exists
+    try {
+      await addProjectBtn.waitFor({ state: 'visible', timeout: 1000 });
+      // Empty state: project will be created via the empty state button
+    } catch {
+      // Normal state: expand projects group first
+      await projectsGroupBtn.waitFor({ state: 'visible', timeout: 5000 });
+      const isExpanded = await projectsGroupBtn.getAttribute('aria-expanded');
+      if (isExpanded !== 'true') {
+        await projectsGroupBtn.click();
+        await page.waitForTimeout(500); // Wait for expansion animation
+      }
     }
 
     // Create a new project
     await projectPage.createProject('Cool Test Project');
 
-    // After creating, ensure Projects section is still expanded
-    await projectsButton.waitFor({ state: 'visible', timeout: 3000 });
-    const isStillExpanded = await projectsButton.getAttribute('aria-expanded');
+    // After creating, ensure Projects section exists and is expanded
+    await projectsGroupBtn.waitFor({ state: 'visible', timeout: 3000 });
+    const isStillExpanded = await projectsGroupBtn.getAttribute('aria-expanded');
     if (isStillExpanded !== 'true') {
-      await projectsButton.click();
+      await projectsGroupBtn.click();
       await page.waitForTimeout(500); // Wait for expansion animation
     }
 
