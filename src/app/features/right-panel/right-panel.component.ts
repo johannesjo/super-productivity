@@ -34,6 +34,7 @@ import { hidePluginPanel } from '../../core-ui/layout/store/layout.actions';
 import { Log } from '../../core/log';
 import { NavigationEnd, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
 
 @Component({
   selector: 'right-panel',
@@ -338,6 +339,9 @@ export class RightPanelComponent implements OnDestroy {
   }
 
   onClose(): void {
-    this.taskService.focusLastFocusedTask();
+    // Only restore focus on non-touch devices to prevent scroll position loss
+    if (!IS_TOUCH_PRIMARY) {
+      this.taskService.focusLastFocusedTask();
+    }
   }
 }
