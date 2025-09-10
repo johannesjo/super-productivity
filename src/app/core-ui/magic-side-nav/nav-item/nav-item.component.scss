@@ -142,6 +142,11 @@
   width: 100%;
   text-align: left;
   font-size: 14px;
+  //justify-content: center;
+  //
+  //::ng-deep .mat-mdc-menu-item-text {
+  //  margin-right: auto;
+  //}
 
   &:hover {
     background: var(--sidenav-hover);
@@ -246,14 +251,5 @@
 
   .task-count {
     display: none;
-  }
-}
-
-@include mq(xs, max) {
-  :host-context(.nav-sidenav.compactMode) {
-    .nav-link {
-      justify-content: flex-start;
-      padding: 10px 12px;
-    }
   }
 }

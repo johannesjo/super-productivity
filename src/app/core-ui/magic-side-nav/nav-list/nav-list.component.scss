@@ -17,15 +17,14 @@
   // Show additional buttons on hover (desktop)
   &:hover .additional-btns {
     opacity: 1;
-    visibility: visible;
   }
 }
 
 // Always show buttons on mobile/touch devices
 @media (hover: none) {
   .additional-btns {
-    opacity: 1;
-    visibility: visible;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
 }
 
@@ -125,8 +124,22 @@
   .g-multi-btn-wrapper {
     justify-content: center;
 
+    // Hide additional buttons in compact mode, except on mobile
+    .additional-btns {
+      opacity: 0;
+
+      @media (hover: none) {
+        opacity: 1 !important;
+        position: static;
+        margin-top: 4px;
+      }
+    }
+
     .additional-btn {
-      display: none;
+      @media (hover: none) {
+        position: static;
+        margin: 0 2px;
+      }
     }
   }
 
