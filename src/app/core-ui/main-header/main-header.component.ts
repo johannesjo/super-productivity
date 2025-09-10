@@ -84,8 +84,8 @@ export class MainHeaderComponent implements OnDestroy {
   isShowSimpleCounterBtnsMobile = signal(false);
 
   // TODO these should live in the layout service
-  // Convert breakpoint observer to signals - using 768px to match mobile-bottom-nav
-  private _isXs$ = this.breakpointObserver.observe('(max-width: 768px)');
+  // Convert breakpoint observer to signals - using 600px to match mobile-bottom-nav
+  private _isXs$ = this.breakpointObserver.observe('(max-width: 600px)');
   private _isXxxs$ = this.breakpointObserver.observe('(max-width: 398px)');
 
   // TODO these should live in the layout service
