@@ -17,6 +17,7 @@
   // Show additional buttons on hover (desktop)
   &:hover .additional-btns {
     opacity: 1;
+    visibility: visible !important;
   }
 }
 
