@@ -259,19 +259,6 @@ finish-day-btn,
   }
 }
 
-.add-task-btn {
-  z-index: 45;
-  position: fixed;
-  right: 50%;
-  bottom: var(--s2);
-  transform: translateX(50%);
-
-  &.isRight {
-    transform: none;
-    right: var(--s2);
-  }
-}
-
 .no-tasks-illu-wrapper {
   position: relative;
   margin-bottom: 32px;

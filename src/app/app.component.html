@@ -27,9 +27,14 @@
   } @else {
     <div
       class="app-container"
+      [class.has-mobile-bottom-nav]="isShowMobileButtonNav"
       [dir]="isRTL ? 'rtl' : 'ltr'"
     >
-      <magic-side-nav [activeWorkContextId]="getActiveWorkContextId()"> </magic-side-nav>
+      <magic-side-nav
+        #magicSideNav
+        [activeWorkContextId]="getActiveWorkContextId()"
+      >
+      </magic-side-nav>
 
       <main class="main-content">
         <header
@@ -52,6 +57,13 @@
         </right-panel>
         <global-progress-bar></global-progress-bar>
       </main>
+
+      <!-- Mobile Bottom Navigation -->
+      @if (isShowMobileButtonNav) {
+        <mobile-bottom-nav
+          (toggleMobileNavEvent)="magicSideNav.toggleMobileNav()"
+        ></mobile-bottom-nav>
+      }
     </div>
   }
   <!-- -->
