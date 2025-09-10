@@ -3,10 +3,8 @@
     mat-button
     class="nav-button"
     (click)="toggleMobileNav()"
-    [matTooltip]="'Navigation' | translate"
   >
     <mat-icon>menu</mat-icon>
-    <span class="nav-label">{{ 'Menu' | translate }}</span>
   </button>
 
   <button
@@ -16,7 +14,6 @@
     [routerLink]="todayRoute"
   >
     <mat-icon>wb_sunny</mat-icon>
-    <span class="nav-label">{{ T.G.TODAY | translate }}</span>
   </button>
 
   <button
@@ -35,17 +32,14 @@
     routerLink="/planner"
   >
     <mat-icon>edit_calendar</mat-icon>
-    <span class="nav-label">{{ T.F.PLANNER.PLANNER | translate }}</span>
   </button>
 
   <button
     mat-button
     class="nav-button"
     [matMenuTriggerFor]="panelsMenu"
-    [matTooltip]="T.MH.SIDE_PANEL_MENU | translate"
   >
     <mat-icon>view_sidebar</mat-icon>
-    <span class="nav-label">{{ 'Panels' | translate }}</span>
   </button>
 </nav>
 

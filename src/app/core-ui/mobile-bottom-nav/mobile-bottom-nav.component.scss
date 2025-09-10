@@ -35,36 +35,17 @@
     min-width: 64px;
     border-radius: 16px;
     transition: all 0.2s ease;
-    color: var(--mat-on-surface-variant);
 
     &:hover {
       background-color: var(--mat-surface-container-high);
-      color: var(--mat-on-surface);
-    }
-
-    &.active {
-      background-color: var(--mat-secondary-container);
-      color: var(--mat-on-secondary-container);
-
-      .nav-label {
-        font-weight: 500;
-      }
     }
 
     mat-icon {
       font-size: 24px;
       width: 24px;
       height: 24px;
-      margin-bottom: 2px;
-    }
-
-    .nav-label {
-      font-size: 10px;
-      line-height: 12px;
-      text-transform: none;
-      font-weight: 400;
-      letter-spacing: 0.5px;
-      display: none;
+      padding: 0;
+      margin: 0;
     }
   }
 
