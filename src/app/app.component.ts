@@ -223,10 +223,15 @@ export class AppComponent implements OnDestroy, AfterViewInit {
       }
     });
 
-    if (this.isShowMobileButtonNav) {
+    // Add/remove has-mobile-bottom-nav class to body for snack bar positioning
+    effect(() => {
       const bodyEl = document.body;
-      bodyEl.classList.add(BodyClass.hasMobileBottomNav);
-    }
+      if (this.isShowMobileButtonNav) {
+        bodyEl.classList.add(BodyClass.hasMobileBottomNav);
+      } else {
+        bodyEl.classList.remove(BodyClass.hasMobileBottomNav);
+      }
+    });
 
     this._subs.add(
       this._activatedRoute.queryParams.subscribe((params) => {

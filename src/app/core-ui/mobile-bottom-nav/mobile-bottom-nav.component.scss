@@ -1,31 +1,28 @@
 @use '../../../styles/_globals.scss' as *;
 
+:host {
+  display: contents;
+}
+
 .mobile-bottom-nav {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 64px;
-  background: var(--mat-surface-container);
-  border-top: 1px solid var(--sidenav-border-color);
-  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.1); // Subtle shadow to enhance border visibility
-  display: none;
+  height: var(--bottom-nav-height);
+  background: var(--bottom-nav-bg);
+  border-top: 1px solid var(--separator-color);
+  box-shadow: var(--whiteframe-shadow-6dp);
   align-items: center;
   justify-content: space-between;
   padding: 0 8px;
   z-index: var(--z-mobile-bottom-nav);
+  display: flex;
+
   // Glass effect only when background image is present
   :host-context(.hasBgImage) & {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-  }
-
-  &.visible {
-    display: flex;
-
-    @media (min-width: 769px) {
-      display: none;
-    }
   }
 
   .nav-button {
@@ -34,7 +31,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 56px;
+    height: var(--bottom-nav-height);
     min-width: 64px;
     border-radius: 16px;
     transition: all 0.2s ease;
@@ -67,12 +64,16 @@
       text-transform: none;
       font-weight: 400;
       letter-spacing: 0.5px;
+      display: none;
     }
   }
 
   .add-task-button {
     width: 56px;
     height: 56px;
+    margin-left: 8px;
+    margin-right: 8px;
+    margin-bottom: 24px;
     box-shadow: var(--mat-fab-container-elevation-shadow);
     transition: all 0.2s ease;
 
@@ -92,76 +93,6 @@
       width: 28px;
       height: 28px;
     }
-  }
-}
-
-// Panel menu styling - global since mat-menu is rendered in overlay
-::ng-deep .mobile-bottom-nav-panels-menu {
-  .mat-mdc-menu-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-height: 48px;
-
-    &.active {
-      background-color: var(--mat-secondary-container);
-      color: var(--mat-on-secondary-container);
-
-      .mat-icon,
-      plugin-icon {
-        color: var(--mat-on-secondary-container);
-      }
-    }
-
-    &:disabled {
-      opacity: 0.5;
-    }
-
-    .mat-icon {
-      margin-right: 0;
-      width: 24px;
-      height: 24px;
-      font-size: 24px;
-    }
-
-    plugin-icon {
-      width: 24px;
-      height: 24px;
-    }
-
-    span {
-      flex: 1;
-    }
-  }
-}
-
-// Animations
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideInFromLeft {
-  from {
-    transform: translateX(-100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideInFromBottom {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
   }
 }
 

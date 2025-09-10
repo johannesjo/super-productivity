@@ -1,27 +1,22 @@
-<nav
-  class="mobile-bottom-nav"
-  [class.visible]="isMobile()"
->
+<nav class="mobile-bottom-nav">
   <button
     mat-button
     class="nav-button"
-    [class.active]="currentRoute().includes('/tag/' + todayTagId + '/tasks')"
-    [routerLink]="todayRoute"
-    [matTooltip]="T.G.TODAY | translate"
+    (click)="toggleMobileNav()"
+    [matTooltip]="'Navigation' | translate"
   >
-    <mat-icon>wb_sunny</mat-icon>
-    <span class="nav-label">{{ T.G.TODAY | translate }}</span>
+    <mat-icon>menu</mat-icon>
+    <span class="nav-label">{{ 'Menu' | translate }}</span>
   </button>
 
   <button
     mat-button
     class="nav-button"
-    [class.active]="currentRoute() === '/planner'"
-    routerLink="/planner"
-    [matTooltip]="T.F.PLANNER.PLANNER | translate"
+    [class.active]="currentRoute().includes('/tag/' + todayTagId + '/tasks')"
+    [routerLink]="todayRoute"
   >
-    <mat-icon>edit_calendar</mat-icon>
-    <span class="nav-label">{{ T.F.PLANNER.PLANNER | translate }}</span>
+    <mat-icon>wb_sunny</mat-icon>
+    <span class="nav-label">{{ T.G.TODAY | translate }}</span>
   </button>
 
   <button
@@ -29,9 +24,18 @@
     class="add-task-button"
     color="primary"
     (click)="showAddTaskBar()"
-    [matTooltip]="T.F.TASK.ADD | translate"
   >
     <mat-icon>add</mat-icon>
+  </button>
+
+  <button
+    mat-button
+    class="nav-button"
+    [class.active]="currentRoute() === '/planner'"
+    routerLink="/planner"
+  >
+    <mat-icon>edit_calendar</mat-icon>
+    <span class="nav-label">{{ T.F.PLANNER.PLANNER | translate }}</span>
   </button>
 
   <button
@@ -42,16 +46,6 @@
   >
     <mat-icon>view_sidebar</mat-icon>
     <span class="nav-label">{{ 'Panels' | translate }}</span>
-  </button>
-
-  <button
-    mat-button
-    class="nav-button"
-    (click)="toggleMobileNav()"
-    [matTooltip]="'Navigation' | translate"
-  >
-    <mat-icon>menu</mat-icon>
-    <span class="nav-label">{{ 'Menu' | translate }}</span>
   </button>
 </nav>
 

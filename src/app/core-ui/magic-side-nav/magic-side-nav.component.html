@@ -1,22 +1,22 @@
 <!-- Mobile Menu Open Button (only visible on mobile when closed) -->
-@if (isMobile() && !showMobileMenuOverlay()) {
-  <button
-    class="mobile-menu-open"
-    (click)="toggleMobileNav()"
-    [attr.aria-label]="'Open menu'"
-  >
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-    >
-      <path d="M3 12h18M3 6h18M3 18h18" />
-    </svg>
-  </button>
-}
+<!--@if (isMobile() && !showMobileMenuOverlay()) {-->
+<!--  <button-->
+<!--    class="mobile-menu-open"-->
+<!--    (click)="toggleMobileNav()"-->
+<!--    [attr.aria-label]="'Open menu'"-->
+<!--  >-->
+<!--    <svg-->
+<!--      width="24"-->
+<!--      height="24"-->
+<!--      viewBox="0 0 24 24"-->
+<!--      fill="none"-->
+<!--      stroke="currentColor"-->
+<!--      stroke-width="2"-->
+<!--    >-->
+<!--      <path d="M3 12h18M3 6h18M3 18h18" />-->
+<!--    </svg>-->
+<!--  </button>-->
+<!--}-->
 
 <!-- Overlay for mobile (backdrop) -->
 @if (isMobile() && showMobileMenuOverlay()) {

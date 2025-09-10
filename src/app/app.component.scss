@@ -26,7 +26,7 @@
 .has-mobile-bottom-nav {
   @include mq(xs, max) {
     .main-content {
-      padding-bottom: 64px;
+      padding-bottom: var(--bottom-nav-height);
     }
   }
 }
@@ -35,7 +35,7 @@
 :host ::ng-deep {
   @include mq(xs, max) {
     body.hasMobileBottomNav .cdk-overlay-container .mat-mdc-snack-bar-container {
-      bottom: 80px !important; // 64px nav height + 16px spacing
+      bottom: calc(var(--bottom-nav-height) + 16px) !important;
     }
   }
 }
