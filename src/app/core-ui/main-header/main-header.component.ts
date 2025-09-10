@@ -23,7 +23,7 @@ import { SnackService } from '../../core/snack/snack.service';
 import { NavigationEnd, Router } from '@angular/router';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { KeyboardConfig } from 'src/app/features/config/keyboard-config.model';
-import { MatIconButton } from '@angular/material/button';
+import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -37,7 +37,7 @@ import { showFocusOverlay } from '../../features/focus-mode/store/focus-mode.act
 import { SyncStatus } from '../../pfapi/api';
 import { PluginHeaderBtnsComponent } from '../../plugins/ui/plugin-header-btns.component';
 import { PluginSidePanelBtnsComponent } from '../../plugins/ui/plugin-side-panel-btns.component';
-import { WorkContextTitleComponent } from './work-context-title/work-context-title.component';
+import { PageTitleComponent } from './page-title/page-title.component';
 import { PlayButtonComponent } from './play-button/play-button.component';
 import { DesktopPanelButtonsComponent } from './desktop-panel-buttons/desktop-panel-buttons.component';
 import { BreakpointObserver } from '@angular/cdk/layout';
@@ -51,6 +51,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   animations: [fadeAnimation, expandFadeHorizontalAnimation],
   imports: [
     MatIconButton,
+    MatButton,
     MatIcon,
     MatTooltip,
     TranslatePipe,
@@ -58,7 +59,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
     LongPressDirective,
     PluginHeaderBtnsComponent,
     PluginSidePanelBtnsComponent,
-    WorkContextTitleComponent,
+    PageTitleComponent,
     PlayButtonComponent,
     DesktopPanelButtonsComponent,
   ],
@@ -143,10 +144,7 @@ export class MainHeaderComponent implements OnDestroy {
   isWorkViewPage = toSignal(this._isWorkViewPage$, { initialValue: false });
 
   // Convert more observables to signals
-  activeWorkContextTypeAndId = toSignal(
-    this.workContextService.activeWorkContextTypeAndId$,
-  );
-  activeWorkContextTitle = toSignal(this.workContextService.activeWorkContextTitle$);
+
   currentTask = toSignal(this.taskService.currentTask$);
   currentTaskId = this.taskService.currentTaskId;
   pomodoroIsEnabled = toSignal(this.pomodoroService.isEnabled$);

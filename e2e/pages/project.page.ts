@@ -24,7 +24,7 @@ export class ProjectPage extends BasePage {
     this.projectNameInput = page.getByRole('textbox', { name: 'Project Name' });
     this.submitBtn = page.locator('dialog-create-project button[type=submit]:enabled');
     this.workCtxMenu = page.locator('work-context-menu');
-    this.workCtxTitle = page.locator('.current-work-context-title');
+    this.workCtxTitle = page.locator('.page-title');
     this.projectSettingsBtn = this.workCtxMenu
       .locator('button[aria-label="Project Settings"]')
       .or(this.workCtxMenu.locator('button').nth(3));
