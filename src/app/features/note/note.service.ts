@@ -22,6 +22,7 @@ import { DropPasteInput } from '../../core/drop-paste-input/drop-paste.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import { WorkContextType } from '../work-context/work-context.model';
 import { PfapiService } from '../../pfapi/pfapi.service';
+import { IsInputElement } from '../../util/dom-element';
 
 @Injectable({
   providedIn: 'root',
@@ -111,15 +112,11 @@ export class NoteService {
 
   private async _handleInput(drop: DropPasteInput, ev: Event): Promise<void> {
     // properly not intentional so we leave
-    if (!drop || !drop.path || drop.type === 'FILE') {
-      return;
-    }
+    if (!drop || !drop.path || drop.type === 'FILE') return;
 
-    // don't intervene with text inputs
+    // Skip handling inside input elements
     const target = ev.target as HTMLElement;
-    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
-      return;
-    }
+    if (IsInputElement(target)) return;
 
     const note: Partial<Note> = {
       content: drop.path,

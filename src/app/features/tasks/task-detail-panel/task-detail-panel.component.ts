@@ -75,6 +75,7 @@ import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-i
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { isMarkdownChecklist } from '../../markdown-checklist/is-markdown-checklist';
 import { Log } from '../../../core/log';
+import { IsInputElement } from '../../../util/dom-element';
 
 @Component({
   selector: 'task-detail-panel',
@@ -142,6 +143,21 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
 
   // Observable conversions
   private _task$ = toObservable(this.task);
+
+  @HostListener('keydown', ['$event'])
+  onKeydown(ev: KeyboardEvent): void {
+    // Skip handling inside input elements
+    const target = ev.target as HTMLElement;
+    if (IsInputElement(target)) return;
+
+    const cfg = this._globalConfigService.cfg();
+    if (!cfg) throw new Error('No config service available');
+
+    const keys = cfg.keyboard;
+    const matchesKeybinding = keys.taskToggleDetailPanelOpen === ev.key;
+
+    if (matchesKeybinding) this.collapseParent();
+  }
 
   // Parent task data
   parentTaskData = toSignal(
