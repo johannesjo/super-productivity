@@ -1,6 +1,6 @@
 import { PluginInterface, Task, Project } from '@super-productivity/plugin-api';
 
-declare const plugin: PluginInterface;
+declare const plugin: PluginAPI;
 
 // Plugin initialization
 plugin.log('Solid.js Boilerplate Plugin loaded');
