@@ -59,9 +59,6 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
   isFullMode = signal(true);
   isMobile = signal(false);
   showMobileMenuOverlay = signal(false);
-  // Track expanded groups as array for better signal change detection
-  expandedGroups = signal<string[]>([]);
-  // Merge service-controlled and local expanded ids for reactive checks
 
   // Animate only for compactMode/fullMode toggle
   animateWidth = signal(false);
@@ -124,11 +121,6 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     );
     this.currentWidth.set(bounded ?? this.config().defaultWidth);
 
-    // Initialize expanded groups for non-service-managed groups
-    // Projects and tags expansion is managed by the service
-    const nextExpanded: string[] = [];
-    this.expandedGroups.set(nextExpanded);
-
     this._checkScreenSize();
   }
 
@@ -171,44 +163,23 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     localStorage.setItem(LS.NAV_SIDEBAR_EXPANDED, newFullMode.toString());
   }
 
-  toggleGroup(item: NavItem): void {
-    if (item.type !== 'group' || !item.children) {
-      return;
-    }
-    const groups = this.expandedGroups();
-    if (groups.includes(item.id)) {
-      this.expandedGroups.set(groups.filter((g) => g !== item.id));
-    } else {
-      this.expandedGroups.set([...groups, item.id]);
-    }
-  }
-
   isGroupExpanded(item: NavItem): boolean {
-    // Use the service as the source of truth for expansion state
+    // Use the service as the source of truth for all expansion state
     if (item.id === 'projects') {
       return this._sideNavConfigService.isProjectsExpanded();
     } else if (item.id === 'tags') {
       return this._sideNavConfigService.isTagsExpanded();
     }
-    // For other groups, fall back to local state
-    return this.expandedGroups().includes(item.id);
+    // For other groups, default to expanded (or extend service to manage all groups)
+    return true;
   }
 
   onItemClick(item: NavItem): void {
     if (item.type === 'group') {
-      // For projects and tags, let the service handle the toggle to avoid double-toggle
-      if (item.id === 'projects' || item.id === 'tags') {
-        if (item.action) {
-          item.action(); // This will update the service state
-        }
-        return;
-      }
-
-      // For other groups, handle locally
+      // All groups now handled consistently through service
       if (item.action) {
         item.action();
       }
-      this.toggleGroup(item);
       return;
     }
 

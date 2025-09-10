@@ -391,8 +391,8 @@ export class MagicNavConfigService {
   }
 
   private _openProjectVisibilityMenu(): void {
-    // This will trigger the nav-mat-menu component to show the visibility options
-    // The actual menu items are built by the component based on all projects
+    // Project visibility is handled by the nav-list component's additional buttons
+    // This method is called but the actual menu is rendered in the template
   }
 
   toggleProjectVisibility(projectId: string): void {

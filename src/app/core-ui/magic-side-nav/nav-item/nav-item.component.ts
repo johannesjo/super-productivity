@@ -2,11 +2,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  ElementRef,
   inject,
   input,
   output,
-  viewChild,
 } from '@angular/core';
 import { RouterLink, RouterModule } from '@angular/router';
 
@@ -93,15 +91,21 @@ export class NavItemComponent {
   // Events
   clicked = output<void>();
 
-  allUndoneTaskIds = toSignal(this._store.select(selectAllDoneIds), { initialValue: [] });
-  nrOfOpenTasks = computed<number>(() => {
-    const wc = this.workContext();
-    if (!wc) return 0;
-    const allUndoneTaskIds = this.allUndoneTaskIds();
-    return wc.taskIds.filter((tid) => !allUndoneTaskIds.includes(tid)).length;
+  private readonly _allUndoneTaskIds = toSignal(this._store.select(selectAllDoneIds), {
+    initialValue: [],
   });
 
-  private readonly _routeBtn = viewChild('routeBtn', { read: ElementRef });
+  // Memoized computation for better performance
+  nrOfOpenTasks = computed<number>(() => {
+    const wc = this.workContext();
+    if (!wc || wc.taskIds.length === 0) return 0;
+
+    const allUndoneTaskIds = this._allUndoneTaskIds();
+    const undoneTaskCount = wc.taskIds.filter(
+      (tid) => !allUndoneTaskIds.includes(tid),
+    ).length;
+    return undoneTaskCount;
+  });
 
   workContextHasTasks = computed<boolean>(() => {
     const wc = this.workContext();
@@ -117,11 +121,4 @@ export class NavItemComponent {
     const wc = this.workContext();
     return !!(wc as Project | null)?.isHiddenFromMenu;
   });
-
-  focus(): void {
-    const btn = this._routeBtn();
-    if (btn) {
-      btn.nativeElement.focus();
-    }
-  }
 }
