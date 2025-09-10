@@ -12,7 +12,9 @@
   margin-bottom: 32px;
 
   @include mq(xs, max) {
-    width: auto;
+    width: 100%;
+    max-width: 100%;
+    min-width: 100%;
     padding: 0;
     margin-bottom: 16px;
   }
