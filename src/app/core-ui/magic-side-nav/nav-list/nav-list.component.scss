@@ -14,7 +14,8 @@
     transition: all 0.2s ease;
   }
 
-  // Show additional buttons on hover (desktop)
+  // Show additional buttons on focus/hover (desktop)
+  &:focus-within .additional-btns,
   &:hover .additional-btns {
     opacity: 1;
     visibility: visible !important;
@@ -60,6 +61,7 @@
     padding: 4px !important;
   }
 
+  &:focus,
   &:hover {
     background-color: var(--sidenav-hover);
     color: var(--sidenav-text);

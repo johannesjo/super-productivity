@@ -108,6 +108,7 @@ button[mat-menu-item].nav-link.active {
   .additional-btn {
     color: var(--sidenav-text-secondary);
 
+    &:focus,
     &:hover {
       background-color: var(--sidenav-hover);
       color: var(--sidenav-text);
@@ -160,6 +161,7 @@ button[mat-menu-item].nav-link.active {
   //  margin-right: auto;
   //}
 
+  &:focus,
   &:hover {
     background: var(--sidenav-hover);
     color: var(--sidenav-text);
@@ -236,6 +238,7 @@ button[mat-menu-item].nav-link.active {
     justify-content: center;
     padding: 12px;
 
+    &:focus,
     &:hover {
       background: var(--sidenav-hover);
     }

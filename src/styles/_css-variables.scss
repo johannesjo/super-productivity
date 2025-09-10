@@ -336,6 +336,7 @@ body {
   --sidenav-bg: transparent;
   --sidenav-bg-mobile: var(--bg);
   --sidenav-active: rgba(255, 255, 255, 1.25);
+  --sidenav-hover: rgba(205, 205, 205, 0.35);
   --sidenav-active-text: var(--palette-primary-800);
   --sidebar-border: var(--divider-color);
   --sidebar-hover: var(--palette-background-hover);
@@ -460,6 +461,7 @@ body.isDarkTheme {
   --sidenav-bg: transparent;
   --sidenav-bg-mobile: var(--bg);
   --sidenav-active: rgba(255, 255, 255, 0.075);
+  --sidenav-hover: rgba(255, 255, 255, 0.05);
   --sidenav-active-text: var(--c-primary);
   --sidebar-border: var(--divider-color);
   --sidebar-hover: var(--palette-background-hover);

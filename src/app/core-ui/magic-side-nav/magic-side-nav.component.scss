@@ -41,6 +41,7 @@
   transition: var(--transition-standard);
   color: var(--text-color);
 
+  &:focus,
   &:hover {
     background: var(--sidenav-hover);
   }
@@ -185,6 +186,7 @@
     justify-content: center;
   }
 
+  &:focus,
   &:hover {
     background: var(--sidenav-hover);
     color: var(--sidenav-text);
@@ -244,6 +246,7 @@
     left: -2px;
   }
 
+  &:focus,
   &:hover {
     background-color: var(--sidenav-active-text);
   }
