@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BehaviorSubject, of } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AddTaskBarComponent } from './add-task-bar.component';
 import { TaskService } from '../task.service';
 import { WorkContextService } from '../../work-context/work-context.service';
@@ -30,7 +30,6 @@ describe('AddTaskBarComponent', () => {
   let mockMatDialog: jasmine.SpyObj<MatDialog>;
   let mockSnackService: jasmine.SpyObj<SnackService>;
   let mockAddTaskBarIssueSearchService: jasmine.SpyObj<AddTaskBarIssueSearchService>;
-  let mockTranslateService: jasmine.SpyObj<TranslateService>;
 
   // Mock data
   const mockProjects: Project[] = [
@@ -39,24 +38,32 @@ describe('AddTaskBarComponent', () => {
       title: 'Inbox',
       isArchived: false,
       isHiddenFromMenu: false,
+      theme: { primary: '#3f51b5' },
+      icon: 'inbox',
     } as Project,
     {
       id: 'project-1',
       title: 'Project 1',
       isArchived: false,
       isHiddenFromMenu: false,
+      theme: { primary: '#4caf50' },
+      icon: 'folder',
     } as Project,
     {
       id: 'project-2',
       title: 'Project 2',
       isArchived: false,
       isHiddenFromMenu: false,
+      theme: { primary: '#ff9800' },
+      icon: 'folder',
     } as Project,
     {
       id: 'default-project',
       title: 'Default Project',
       isArchived: false,
       isHiddenFromMenu: false,
+      theme: { primary: '#9c27b0' },
+      icon: 'folder',
     } as Project,
   ];
 
@@ -101,8 +108,22 @@ describe('AddTaskBarComponent', () => {
       list$: of(mockProjects),
     });
     mockTagService = jasmine.createSpyObj('TagService', [], {
-      tags$: of([]),
-      tagsNoMyDayAndNoList$: of([]),
+      tags$: of([
+        {
+          id: 'tag-1',
+          title: 'Test Tag',
+          theme: { primary: '#2196f3' },
+          icon: 'label',
+        },
+      ]),
+      tagsNoMyDayAndNoList$: of([
+        {
+          id: 'tag-1',
+          title: 'Test Tag',
+          theme: { primary: '#2196f3' },
+          icon: 'label',
+        },
+      ]),
     });
     mockGlobalConfigService = jasmine.createSpyObj('GlobalConfigService', [], {
       misc$: new BehaviorSubject<MiscConfig>(mockMiscConfig),
@@ -115,14 +136,11 @@ describe('AddTaskBarComponent', () => {
       'AddTaskBarIssueSearchService',
       ['getFilteredIssueSuggestions$', 'addTaskFromExistingTaskOrIssue'],
     );
-    mockTranslateService = jasmine.createSpyObj('TranslateService', ['instant']);
-
     // Setup method returns
     mockAddTaskBarIssueSearchService.getFilteredIssueSuggestions$.and.returnValue(of([]));
-    mockTranslateService.instant.and.returnValue('Test message');
 
     await TestBed.configureTestingModule({
-      imports: [AddTaskBarComponent, NoopAnimationsModule],
+      imports: [AddTaskBarComponent, NoopAnimationsModule, TranslateModule.forRoot()],
       providers: [
         { provide: TaskService, useValue: mockTaskService },
         { provide: WorkContextService, useValue: mockWorkContextService },
@@ -136,9 +154,25 @@ describe('AddTaskBarComponent', () => {
           provide: AddTaskBarIssueSearchService,
           useValue: mockAddTaskBarIssueSearchService,
         },
-        { provide: TranslateService, useValue: mockTranslateService },
       ],
     }).compileComponents();
+
+    // Set up translations first
+    const translateService = TestBed.inject(TranslateService);
+    translateService.setTranslation('en', {
+      F: {
+        TASK: {
+          ADD_TASK_BAR: {
+            PLACEHOLDER_SEARCH: 'Search tasks...',
+            PLACEHOLDER_CREATE: 'Add task...',
+            TOOLTIP_ADD_TASK: 'Add task',
+            TOOLTIP_ADD_TO_TOP: 'Add to top',
+            TOOLTIP_ADD_TO_BOTTOM: 'Add to bottom',
+          },
+        },
+      },
+    });
+    translateService.use('en');
 
     fixture = TestBed.createComponent(AddTaskBarComponent);
     component = fixture.componentInstance;
@@ -340,15 +374,28 @@ describe('AddTaskBarComponent', () => {
 
       expect(defaultProject?.id).toBe('default-project');
     });
+  });
 
-    it('should handle empty projects list gracefully', async () => {
-      // Re-create the component with empty projects list
+  describe('defaultProject$ with empty projects', () => {
+    let componentEmptyProjects: AddTaskBarComponent;
+    let fixtureEmptyProjects: ComponentFixture<AddTaskBarComponent>;
+    let mockProjectServiceEmpty: jasmine.SpyObj<ProjectService>;
+
+    beforeEach(async () => {
+      // Reset TestBed to allow reconfiguration
+      TestBed.resetTestingModule();
+
+      // Create a separate mock for empty projects list
+      mockProjectServiceEmpty = jasmine.createSpyObj('ProjectService', [], {
+        list$: of([]),
+      });
+
       await TestBed.configureTestingModule({
-        imports: [AddTaskBarComponent, NoopAnimationsModule],
+        imports: [AddTaskBarComponent, NoopAnimationsModule, TranslateModule.forRoot()],
         providers: [
           { provide: TaskService, useValue: mockTaskService },
           { provide: WorkContextService, useValue: mockWorkContextService },
-          { provide: ProjectService, useValue: { ...mockProjectService, list$: of([]) } },
+          { provide: ProjectService, useValue: mockProjectServiceEmpty },
           { provide: TagService, useValue: mockTagService },
           { provide: GlobalConfigService, useValue: mockGlobalConfigService },
           { provide: Store, useValue: mockStore },
@@ -358,13 +405,31 @@ describe('AddTaskBarComponent', () => {
             provide: AddTaskBarIssueSearchService,
             useValue: mockAddTaskBarIssueSearchService,
           },
-          { provide: TranslateService, useValue: mockTranslateService },
         ],
       }).compileComponents();
 
-      fixture = TestBed.createComponent(AddTaskBarComponent);
-      component = fixture.componentInstance;
+      // Set up translations first
+      const translateService = TestBed.inject(TranslateService);
+      translateService.setTranslation('en', {
+        F: {
+          TASK: {
+            ADD_TASK_BAR: {
+              PLACEHOLDER_SEARCH: 'Search tasks...',
+              PLACEHOLDER_CREATE: 'Add task...',
+              TOOLTIP_ADD_TASK: 'Add task',
+              TOOLTIP_ADD_TO_TOP: 'Add to top',
+              TOOLTIP_ADD_TO_BOTTOM: 'Add to bottom',
+            },
+          },
+        },
+      });
+      translateService.use('en');
 
+      fixtureEmptyProjects = TestBed.createComponent(AddTaskBarComponent);
+      componentEmptyProjects = fixtureEmptyProjects.componentInstance;
+    });
+
+    it('should handle empty projects list gracefully', async () => {
       // Set tag context
       (
         mockWorkContextService.activeWorkContext$ as BehaviorSubject<WorkContext | null>
@@ -378,7 +443,9 @@ describe('AddTaskBarComponent', () => {
         configWithDefault,
       );
 
-      const defaultProject = await component.defaultProject$.pipe(first()).toPromise();
+      const defaultProject = await componentEmptyProjects.defaultProject$
+        .pipe(first())
+        .toPromise();
 
       expect(defaultProject).toBeUndefined();
     });
