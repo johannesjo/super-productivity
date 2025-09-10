@@ -18,7 +18,7 @@ plugin.registerHeaderButton({
 plugin.registerMenuEntry({
   label: 'Boilerplate Plugin',
   icon: 'rocket',
-  action: () => {
+  onClick: () => {
     plugin.showIndexHtmlAsView();
   },
 });
