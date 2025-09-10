@@ -1,4 +1,10 @@
-import { PluginInterface, Task, Project } from '@super-productivity/plugin-api';
+import {
+  PluginAPI,
+  PluginHooks,
+  Task,
+  TaskCompletePayload,
+  Project,
+} from '@super-productivity/plugin-api';
 
 declare const plugin: PluginAPI;
 
@@ -33,8 +39,8 @@ plugin.registerShortcut({
 });
 
 // Example: Hook into task completion
-plugin.on('taskComplete', async (task: Task) => {
-  plugin.log('Task completed:', task.title);
+plugin.registerHook(PluginHooks.TASK_COMPLETE, (taskData: TaskCompletePayload) => {
+  plugin.log.info('Task completed:', taskData.task.title);
 
   // Example: Show notification
   plugin.showSnack({
