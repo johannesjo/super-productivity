@@ -9,7 +9,7 @@ import {
 declare const plugin: PluginAPI;
 
 // Plugin initialization
-plugin.log('Solid.js Boilerplate Plugin loaded');
+plugin.log.info('Boilerplate plugin initialized');
 
 // Example: Register a header button
 plugin.registerHeaderButton({
