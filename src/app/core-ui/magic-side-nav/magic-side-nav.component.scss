@@ -114,27 +114,10 @@
     -webkit-backdrop-filter: blur(20px) saturate(180%); // Safari support
   }
 
-  // Scrollbar styling
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: var(--sidenav-border-color);
-    border-radius: 3px;
-
-    &:hover {
-      background: var(--sidenav-text-secondary);
-    }
-  }
-
   // CompactMode state (desktop)
   &.compactMode {
-    // width controlled via inline style for smooth transitions
+    scrollbar-width: none;
+    scrollbar-gutter: stable both-edges;
 
     .mode-toggle {
       right: auto;

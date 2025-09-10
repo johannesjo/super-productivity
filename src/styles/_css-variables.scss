@@ -384,9 +384,9 @@ body {
   --task-selected-shadow: var(--whiteframe-shadow-3dp);
 
   // Scrollbar colors
-  --scrollbar-thumb: rgba(136, 136, 136, 0.5);
+  --scrollbar-thumb: rgba(136, 136, 136, 0.4);
   --scrollbar-thumb-hover: rgba(85, 85, 85, 0.7);
-  --scrollbar-track: rgba(241, 241, 241, 0.3);
+  --scrollbar-track: rgba(241, 241, 241, 0);
 
   // Chip colors
   --chip-outline-color: rgba(125, 125, 125, 0.4);
@@ -510,9 +510,9 @@ body.isDarkTheme {
   --task-selected-shadow: var(--whiteframe-shadow-4dp);
 
   // Scrollbar colors
-  --scrollbar-thumb: rgba(51, 51, 51, 0.6);
-  --scrollbar-thumb-hover: rgba(68, 68, 68, 0.8);
-  --scrollbar-track: rgba(34, 34, 34, 0.4);
+  --scrollbar-thumb: rgba(150, 150, 150, 0.3);
+  --scrollbar-thumb-hover: rgba(150, 150, 150, 0.7);
+  --scrollbar-track: rgba(34, 34, 34, 0);
 
   // Grid colors
   --grid-color: var(--c-light-10);
