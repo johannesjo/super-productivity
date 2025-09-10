@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  OnDestroy,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { MatRipple } from '@angular/material/core';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -17,11 +11,6 @@ import { T } from '../../../t.const';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs/operators';
-import { Store } from '@ngrx/store';
-import { TODAY_TAG } from '../../../features/tag/tag.const';
-import { WorkContextType } from '../../../features/work-context/work-context.model';
-import { setActiveWorkContext } from '../../../features/work-context/store/work-context.actions';
-import { Subscription } from 'rxjs';
 import { WorkContextService } from '../../../features/work-context/work-context.service';
 
 @Component({
@@ -116,12 +105,10 @@ import { WorkContextService } from '../../../features/work-context/work-context.
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PageTitleComponent implements OnDestroy {
+export class PageTitleComponent {
   private _breakpointObserver = inject(BreakpointObserver);
   private _router = inject(Router);
-  private _store = inject(Store);
   private _workContextService = inject(WorkContextService);
-  private _subs = new Subscription();
 
   readonly T = T;
 
@@ -171,38 +158,4 @@ export class PageTitleComponent implements OnDestroy {
   isXxxs = toSignal(this._isXxxs$.pipe(map((result) => result.matches)), {
     initialValue: false,
   });
-
-  constructor() {
-    // Switch to TODAY context when navigating to schedule/planner/boards
-    this._subs.add(
-      this._router.events
-        .pipe(
-          filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-          map((event) => event.urlAfterRedirects),
-          startWith(this._router.url), // Handle initial page load
-          filter(
-            (url) =>
-              !!url.match(/(schedule)$/) ||
-              !!url.match(/(planner)$/) ||
-              !!url.match(/(boards)$/),
-          ),
-        )
-        .subscribe(() => {
-          // Check if we're not already in TODAY context
-          const currentContext = this.activeWorkContextTypeAndId();
-          if (!currentContext || currentContext.activeId !== TODAY_TAG.id) {
-            this._store.dispatch(
-              setActiveWorkContext({
-                activeId: TODAY_TAG.id,
-                activeType: WorkContextType.TAG,
-              }),
-            );
-          }
-        }),
-    );
-  }
-
-  ngOnDestroy(): void {
-    this._subs.unsubscribe();
-  }
 }
