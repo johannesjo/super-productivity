@@ -84,7 +84,19 @@
   }
 }
 
-// Active state visuals are handled by .nav-link.active styles
+// Active state visuals - ensure they override Angular Material styles
+button[mat-menu-item].nav-link.active {
+  color: var(--sidenav-active-text) !important;
+  background: var(--sidenav-active) !important;
+
+  .nav-label {
+    color: var(--sidenav-active-text) !important;
+  }
+
+  .nav-icon {
+    color: var(--sidenav-active-text) !important;
+  }
+}
 
 // Styling when used inside magic-side-nav: rely on global .nav-link/.nav-child-link
 // Only keep adjustments for the additional button here
@@ -160,6 +172,10 @@
     .nav-icon {
       color: var(--sidenav-active-text);
     }
+
+    .nav-label {
+      color: var(--sidenav-active-text);
+    }
   }
 
   .nav-icon {
@@ -193,8 +209,8 @@
 :host-context(.isLightTheme .nav-sidenav.compactMode) {
   .nav-link {
     &.active {
-      color: var(--sidenav-active-text);
-      background: var(--sidenav-active);
+      color: var(--sidenav-active-text) !important;
+      background: var(--sidenav-active) !important;
       border-radius: 48px;
       border-bottom: 1px solid var(--separator-color);
       border-top: 1px solid var(--separator-color);
@@ -205,7 +221,11 @@
       }
 
       .nav-icon {
-        color: var(--sidenav-active-text);
+        color: var(--sidenav-active-text) !important;
+      }
+
+      .nav-label {
+        color: var(--sidenav-active-text) !important;
       }
     }
   }
@@ -221,8 +241,8 @@
     }
 
     &.active {
-      color: var(--sidenav-active-text);
-      background: var(--sidenav-active);
+      color: var(--sidenav-active-text) !important;
+      background: var(--sidenav-active) !important;
 
       &::after {
         position: absolute;
@@ -230,7 +250,11 @@
       }
 
       .nav-icon {
-        color: var(--sidenav-active-text);
+        color: var(--sidenav-active-text) !important;
+      }
+
+      .nav-label {
+        color: var(--sidenav-active-text) !important;
       }
     }
   }
