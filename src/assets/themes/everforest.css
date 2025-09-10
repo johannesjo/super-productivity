@@ -63,7 +63,7 @@ body:not(.isDarkTheme) {
 
   /* Component backgrounds */
   --card-bg: #fffbf0;
-  --sidebar-bg: var(--everforest-bg1);
+  --sidenav-bg: var(--everforest-bg1);
   --selected-task-bg-color: var(--everforest-bg2);
   --banner-bg: var(--everforest-bg2);
 
@@ -272,7 +272,7 @@ body.isDarkTheme {
 
   /* Component backgrounds */
   --card-bg: var(--everforest-bg1);
-  --sidebar-bg: var(--everforest-bg-dim);
+  --sidenav-bg: var(--everforest-bg-dim);
   --selected-task-bg-color: var(--everforest-bg2);
   --banner-bg: var(--everforest-bg2);
 

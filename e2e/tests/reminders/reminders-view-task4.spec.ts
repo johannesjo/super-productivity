@@ -7,7 +7,7 @@ const DIALOG_TASK1 = `${DIALOG_TASK}:first-of-type`;
 const DIALOG_TASK2 = `${DIALOG_TASK}:nth-of-type(2)`;
 const DIALOG_TASK3 = `${DIALOG_TASK}:nth-of-type(3)`;
 const TO_TODAY_SUF = ' .actions button:last-of-type';
-const SCHEDULE_MAX_WAIT_TIME = 180000;
+const SCHEDULE_MAX_WAIT_TIME = 60000; // Reduced from 180s to 60s
 
 // Helper selectors for task scheduling
 const TASK = 'task';
@@ -61,7 +61,7 @@ test.describe.serial('Reminders View Task 4', () => {
     workViewPage,
     testPrefix,
   }) => {
-    test.setTimeout(SCHEDULE_MAX_WAIT_TIME + 120000);
+    test.setTimeout(SCHEDULE_MAX_WAIT_TIME + 60000); // Reduced extra time
 
     await workViewPage.waitForTaskList();
 
@@ -79,7 +79,7 @@ test.describe.serial('Reminders View Task 4', () => {
     // Wait for reminder dialog
     await page.waitForSelector(DIALOG, {
       state: 'visible',
-      timeout: SCHEDULE_MAX_WAIT_TIME + 120000,
+      timeout: SCHEDULE_MAX_WAIT_TIME + 60000, // Reduced timeout
     });
 
     // Wait for all tasks to be present

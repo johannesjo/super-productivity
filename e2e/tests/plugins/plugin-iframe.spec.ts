@@ -9,12 +9,11 @@ import {
   waitForPluginManagementInit,
 } from '../../helpers/plugin-test.helpers';
 
-const { SIDENAV } = cssSelectors;
+const { SIDENAV, SETTINGS_BTN } = cssSelectors;
 
 // Plugin-related selectors
-const PLUGIN_MENU_ITEM = `${SIDENAV} plugin-menu button`;
+const PLUGIN_NAV_ITEMS = `${SIDENAV} nav-item button`;
 const PLUGIN_IFRAME = 'plugin-index iframe';
-const SETTINGS_BTN = `${SIDENAV} .tour-settingsMenuBtn`;
 const PLUGIN_MANAGEMENT = 'plugin-management';
 const PLUGIN_SECTION = '.plugin-section';
 const SETTINGS_PAGE = '.page-settings';
@@ -24,7 +23,7 @@ test.describe.serial('Plugin Iframe', () => {
   test.beforeEach(async ({ page, workViewPage }) => {
     // Increase timeout for CI environment
     const timeoutMultiplier = getCITimeoutMultiplier();
-    test.setTimeout(60000 * timeoutMultiplier);
+    test.setTimeout(30000 * timeoutMultiplier); // Reduced from 60s to 30s base
 
     // First, ensure plugin assets are available
     const assetsAvailable = await waitForPluginAssets(page);
@@ -79,7 +78,7 @@ test.describe.serial('Plugin Iframe', () => {
     const pluginEnabled = await enablePluginWithVerification(
       page,
       'API Test Plugin',
-      15000 * timeoutMultiplier,
+      10000 * timeoutMultiplier, // Reduced from 15s to 10s
     );
 
     if (!pluginEnabled) {
@@ -90,7 +89,7 @@ test.describe.serial('Plugin Iframe', () => {
     const pluginInMenu = await waitForPluginInMenu(
       page,
       'API Test Plugin',
-      20000 * timeoutMultiplier,
+      15000 * timeoutMultiplier, // Reduced from 20s to 15s
     );
 
     if (!pluginInMenu) {
@@ -114,8 +113,10 @@ test.describe.serial('Plugin Iframe', () => {
   });
 
   test('open plugin iframe view', async ({ page }) => {
-    // Plugin menu item should already be visible from beforeEach
-    const pluginMenuItem = page.locator(PLUGIN_MENU_ITEM);
+    // Plugin nav item should already be visible from beforeEach
+    const pluginMenuItem = page
+      .locator(PLUGIN_NAV_ITEMS)
+      .filter({ hasText: 'API Test Plugin' });
 
     // Click plugin menu item
     await pluginMenuItem.click();

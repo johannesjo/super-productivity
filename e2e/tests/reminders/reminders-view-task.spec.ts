@@ -4,7 +4,7 @@ const DIALOG = 'dialog-view-task-reminder';
 const DIALOG_TASK = `${DIALOG} .task`;
 const DIALOG_TASK1 = `${DIALOG_TASK}:first-of-type`;
 
-const SCHEDULE_MAX_WAIT_TIME = 180000;
+const SCHEDULE_MAX_WAIT_TIME = 60000; // Reduced from 180s to 60s
 
 // Helper selectors from addTaskWithReminder
 const TASK = 'task';
@@ -25,7 +25,7 @@ test.describe('Reminders View Task', () => {
     workViewPage,
     testPrefix,
   }) => {
-    test.setTimeout(SCHEDULE_MAX_WAIT_TIME + 30000); // Add extra time for test setup
+    test.setTimeout(SCHEDULE_MAX_WAIT_TIME + 20000); // Add extra time for test setup
 
     // Wait for work view to be ready
     await workViewPage.waitForTaskList();

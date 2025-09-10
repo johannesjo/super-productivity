@@ -1,8 +1,8 @@
 import { test, expect } from '../../fixtures/test.fixture';
 
-const SIDENAV = 'side-nav';
+const SIDENAV = 'magic-side-nav';
 const ROUTER_WRAPPER = '.route-wrapper';
-const SETTINGS_BTN = `${SIDENAV} .tour-settingsMenuBtn`;
+const SETTINGS_BTN = `${SIDENAV} nav-item:has([icon="settings"]) button, ${SIDENAV} .tour-settingsMenuBtn`;
 
 test.describe.serial('Plugin Visibility', () => {
   test('navigate to settings page', async ({ page, workViewPage }) => {

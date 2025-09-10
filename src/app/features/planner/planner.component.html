@@ -43,24 +43,3 @@
 <!--    <add-task-panel-planner (closePanel)="isPanelOpen = false"></add-task-panel-planner>-->
 <!--  </ng-container>-->
 <!--</better-simple-drawer>-->
-
-@if (!isPanelOpen) {
-  <div class="fab-wrapper FAB-BTN">
-    <button
-      mat-fab
-      class="show-xs-only"
-      color="primary"
-      (click)="layoutService.showAddTaskBar()"
-    >
-      <mat-icon>add</mat-icon>
-    </button>
-    <!--    <button-->
-    <!--      mat-fab-->
-    <!--      color="primary"-->
-    <!--      matTooltip="{{ T.F.PLANNER.TASK_DRAWER | translate }}"-->
-    <!--      (click)="isPanelOpen = true"-->
-    <!--    >-->
-    <!--      <mat-icon>playlist_add</mat-icon>-->
-    <!--    </button>-->
-  </div>
-}

@@ -8,7 +8,7 @@
     tabindex="-1"
     placeholder="{{ T.F.TASK.ADDITIONAL_INFO.TITLE_PLACEHOLDER | translate }}"
     [ngModel]="tmpValue"
-    (blur)="blurred()"
+    (blur)="blurred($event)"
     (focus)="focused()"
     (ngModelChange)="updateTmpValue($event)"
     (mousedown)="$event.stopPropagation()"

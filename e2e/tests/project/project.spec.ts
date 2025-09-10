@@ -18,7 +18,7 @@ test.describe('Project', () => {
 
   test('move done tasks to archive without error', async ({ page }) => {
     // First navigate to Inbox project (not Today view) since archive button only shows in project views
-    const inboxMenuItem = page.locator('[role="menuitem"]:has-text("Inbox")');
+    const inboxMenuItem = page.locator('magic-side-nav button:has-text("Inbox")');
     await inboxMenuItem.click();
 
     // Add tasks using the page object method
@@ -45,22 +45,41 @@ test.describe('Project', () => {
 
   test('create second project', async ({ page, testPrefix }) => {
     // First click on Projects menu item to expand it
-    await projectPage.projectAccordion.click();
+    const projectsButton = page.locator('nav-item button:has-text("Projects")');
+    await projectsButton.waitFor({ state: 'visible', timeout: 5000 });
+
+    // Check if projects section is already expanded
+    const isExpanded = await projectsButton.getAttribute('aria-expanded');
+    if (isExpanded !== 'true') {
+      await projectsButton.click();
+      await page.waitForTimeout(500); // Wait for expansion animation
+    }
 
     // Create a new project
     await projectPage.createProject('Cool Test Project');
+
+    // After creating, ensure Projects section is still expanded
+    await projectsButton.waitFor({ state: 'visible', timeout: 3000 });
+    const isStillExpanded = await projectsButton.getAttribute('aria-expanded');
+    if (isStillExpanded !== 'true') {
+      await projectsButton.click();
+      await page.waitForTimeout(500); // Wait for expansion animation
+    }
 
     // Find the newly created project directly (with test prefix)
     const expectedProjectName = testPrefix
       ? `${testPrefix}-Cool Test Project`
       : 'Cool Test Project';
-    const newProject = page.locator(
-      `[role="menuitem"]:has-text("${expectedProjectName}")`,
-    );
-    await expect(newProject).toBeVisible();
+
+    // Look for the project in the nav children area
+    const newProject = page.locator(`nav-item button:has-text("${expectedProjectName}")`);
+    await expect(newProject).toBeVisible({ timeout: 5000 });
 
     // Click on the new project
     await newProject.click();
+
+    // Wait for navigation to complete
+    await page.waitForLoadState('networkidle');
 
     // Verify we're in the new project
     await expect(projectPage.workCtxTitle).toContainText(expectedProjectName);
@@ -68,11 +87,14 @@ test.describe('Project', () => {
 
   test('navigate to project settings', async ({ page }) => {
     // Navigate to Inbox project
-    const inboxMenuItem = page.locator('[role="menuitem"]:has-text("Inbox")');
+    const inboxMenuItem = page.locator('magic-side-nav button:has-text("Inbox")');
     await inboxMenuItem.click();
 
-    // Navigate directly to settings via the Settings menu item
-    const settingsMenuItem = page.locator('[role="menuitem"]:has-text("Settings")');
+    // Navigate directly to settings via the Settings nav item
+    const settingsMenuItem = page
+      .locator('magic-side-nav a[href="#/config"]')
+      .or(page.locator('magic-side-nav a.tour-settingsMenuBtn'))
+      .first();
     await settingsMenuItem.click();
 
     // Navigate to project settings tab/section if needed

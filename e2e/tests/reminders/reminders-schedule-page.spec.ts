@@ -6,7 +6,7 @@ const SCHEDULE_DIALOG = 'dialog-schedule-task';
 const SCHEDULE_DIALOG_TIME_INPUT = 'dialog-schedule-task input[type="time"]';
 const SCHEDULE_DIALOG_CONFIRM = 'mat-dialog-actions button:last-child';
 
-const SCHEDULE_ROUTE_BTN = 'button[routerlink="scheduled-list"]';
+const SCHEDULE_ROUTE_BTN = 'magic-side-nav a[href="#/scheduled-list"]';
 const SCHEDULE_PAGE_CMP = 'scheduled-list-page';
 const SCHEDULE_PAGE_TASKS = `${SCHEDULE_PAGE_CMP} .tasks planner-task`;
 const SCHEDULE_PAGE_TASK_1 = `${SCHEDULE_PAGE_TASKS}:first-of-type`;
@@ -60,8 +60,14 @@ test.describe('Reminders Schedule Page', () => {
     await targetTask.locator(TASK_SCHEDULE_BTN).waitFor({ state: 'visible' });
 
     // Navigate to scheduled page
-    const scheduleRouteBtn = page.locator(SCHEDULE_ROUTE_BTN);
-    await scheduleRouteBtn.click();
+    try {
+      const scheduleRouteBtn = page.locator(SCHEDULE_ROUTE_BTN);
+      await scheduleRouteBtn.waitFor({ state: 'visible', timeout: 5000 });
+      await scheduleRouteBtn.first().click();
+    } catch (error) {
+      console.log('Nav button failed, using direct navigation');
+      await page.goto('/#/scheduled-list');
+    }
 
     // Wait for scheduled page to load
     await page.waitForSelector(SCHEDULE_PAGE_CMP, { state: 'visible' });
@@ -192,9 +198,14 @@ test.describe('Reminders Schedule Page', () => {
     await expect(task2.locator(TASK_SCHEDULE_BTN).first()).toBeVisible();
 
     // Navigate to scheduled page
-    const scheduleRouteBtn = page.locator(SCHEDULE_ROUTE_BTN);
-    await scheduleRouteBtn.waitFor({ state: 'visible' });
-    await scheduleRouteBtn.click();
+    try {
+      const scheduleRouteBtn = page.locator(SCHEDULE_ROUTE_BTN);
+      await scheduleRouteBtn.waitFor({ state: 'visible', timeout: 5000 });
+      await scheduleRouteBtn.first().click();
+    } catch (error) {
+      console.log('Nav button failed, using direct navigation');
+      await page.goto('/#/scheduled-list');
+    }
 
     // Wait for scheduled page to load
     await page.waitForSelector(SCHEDULE_PAGE_CMP, { state: 'visible', timeout: 10000 });

@@ -61,6 +61,7 @@
   // NOTE needs to be below the z-index of cdk-overlay which is 1000
   --z-add-task-bar: 999;
   --z-search-bar: 999;
+  --z-mobile-bottom-nav: 50;
   --z-tour: 99;
 
   // ===============================
@@ -332,9 +333,17 @@ body {
   --card-bg: #ffffff;
 
   // Navigation & Panel backgrounds
-  --sidebar-bg: var(--bg);
-  //--sidebar-border-color: var(--extra-border-color);
+  --sidenav-bg: transparent;
+  --sidenav-bg-mobile: var(--bg);
+  --sidenav-active: rgba(255, 255, 255, 1.25);
+  --sidenav-active-text: var(--palette-primary-800);
+  --sidebar-border: var(--divider-color);
+  --sidebar-hover: var(--palette-background-hover);
+  --sidebar-text: var(--text-color);
+  --sidebar-text-secondary: var(--text-color-muted);
+  --overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
   --right-panel-bg: #fff;
+  --bottom-nav-height: 44px;
 
   // Text colors
   --text-color: rgb(44, 44, 44);
@@ -375,9 +384,9 @@ body {
   --task-selected-shadow: var(--whiteframe-shadow-3dp);
 
   // Scrollbar colors
-  --scrollbar-thumb: #888;
-  --scrollbar-thumb-hover: #555;
-  --scrollbar-track: #f1f1f1;
+  --scrollbar-thumb: rgba(136, 136, 136, 0.5);
+  --scrollbar-thumb-hover: rgba(85, 85, 85, 0.7);
+  --scrollbar-track: rgba(241, 241, 241, 0.3);
 
   // Chip colors
   --chip-outline-color: rgba(125, 125, 125, 0.4);
@@ -448,14 +457,22 @@ body.isDarkTheme {
   --card-bg: var(--dark2);
 
   // Navigation & Panel backgrounds
-  --sidebar-bg: var(--dark1);
-  --sidebar-border-color: var(--dark12);
+  --sidenav-bg: transparent;
+  --sidenav-bg-mobile: var(--bg);
+  --sidenav-active: rgba(255, 255, 255, 0.075);
+  --sidenav-active-text: var(--c-primary);
+  --sidebar-border: var(--divider-color);
+  --sidebar-hover: var(--palette-background-hover);
+  --sidebar-text: var(--text-color);
+  --sidebar-text-secondary: var(--text-color-muted);
+  --overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.8));
   --right-panel-bg: var(--dark5);
+  --bottom-nav-bg: var(--sidenav-bg-mobile);
 
   // Text colors
   --text-color: rgb(230, 230, 230);
   --text-color-less-intense: rgba(235, 235, 235, 0.9);
-  --text-color-muted: rgba(235, 235, 235, 0.6);
+  --text-color-muted: rgba(235, 235, 235, 0.75);
   --text-color-more-intense: rgb(245, 245, 245);
   --text-color-most-intense: rgb(255, 255, 255);
 
@@ -493,9 +510,9 @@ body.isDarkTheme {
   --task-selected-shadow: var(--whiteframe-shadow-4dp);
 
   // Scrollbar colors
-  --scrollbar-thumb: #333;
-  --scrollbar-thumb-hover: #444;
-  --scrollbar-track: #222;
+  --scrollbar-thumb: rgba(51, 51, 51, 0.6);
+  --scrollbar-thumb-hover: rgba(68, 68, 68, 0.8);
+  --scrollbar-track: rgba(34, 34, 34, 0.4);
 
   // Grid colors
   --grid-color: var(--c-light-10);

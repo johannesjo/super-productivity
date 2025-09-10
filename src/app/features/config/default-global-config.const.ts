@@ -98,7 +98,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     openProjectNotes: 'Shift+N',
     toggleTaskViewCustomizerPanel: 'c',
     toggleIssuePanel: 'p',
-    toggleSideNav: 'Shift+D',
+    focusSideNav: 'Shift+D',
     showHelp: '?',
     showSearchBar: 'Shift+F',
     toggleBacklog: 'b',

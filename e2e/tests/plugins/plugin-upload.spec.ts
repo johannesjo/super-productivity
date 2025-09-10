@@ -2,10 +2,9 @@ import { test, expect } from '../../fixtures/test.fixture';
 import * as path from 'path';
 import { cssSelectors } from '../../constants/selectors';
 
-const { SIDENAV } = cssSelectors;
+const { SETTINGS_BTN } = cssSelectors;
 
 // Plugin-related selectors
-const SETTINGS_BTN = `${SIDENAV} .tour-settingsMenuBtn`;
 const UPLOAD_PLUGIN_BTN = 'plugin-management button[mat-raised-button]'; // The "Choose Plugin File" button
 const FILE_INPUT = 'input[type="file"][accept=".zip"]';
 const PLUGIN_CARD = 'plugin-management mat-card.ng-star-inserted';

@@ -73,9 +73,13 @@ test.describe('Finish Day Quick History With Subtasks', () => {
     await page.waitForSelector('task-list', { state: 'visible' });
 
     // Step 5: Navigate to quick history via left-hand menu
-    await page.click('side-nav > section.main > side-nav-item.g-multi-btn-wrapper', {
-      button: 'right',
-    });
+    // Right-click on work view in magic-side-nav (first main nav item)
+    await page.click(
+      'magic-side-nav .nav-list > li.nav-item:first-child nav-item button',
+      {
+        button: 'right',
+      },
+    );
     await page.waitForSelector('work-context-menu > button:nth-child(1)', {
       state: 'visible',
     });

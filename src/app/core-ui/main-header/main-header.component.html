@@ -1,14 +1,4 @@
 <div class="wrapper">
-  @if (!isNavAlwaysVisible()) {
-    <button
-      (click)="layoutService.toggleSideNav()"
-      class="burger-trigger tour-burgerTrigger"
-      mat-icon-button
-    >
-      <mat-icon>menu</mat-icon>
-    </button>
-  }
-
   <work-context-title
     [title]="activeWorkContextTitle()"
     [activeWorkContextTypeAndId]="activeWorkContextTypeAndId()"
@@ -152,8 +142,6 @@
           </div>
         </div>
       }
-
-      <mobile-side-panel-menu></mobile-side-panel-menu>
     }
   </nav>
 </div>

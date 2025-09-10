@@ -1,0 +1,162 @@
+@if (!shouldShowEmptyState()) {
+  <!-- Show normal expandable group when there are items -->
+  <div class="g-multi-btn-wrapper">
+    <nav-item
+      [container]="'group'"
+      [expanded]="isExpanded()"
+      [ariaControls]="'group-' + item().id"
+      [icon]="item().icon"
+      [svgIcon]="item().svgIcon"
+      [label]="item().label"
+      [showLabels]="showLabels()"
+      (clicked)="onHeaderClick()"
+    ></nav-item>
+
+    @if (showLabels()) {
+      <div class="additional-btns">
+        @for (btn of item().additionalButtons; track btn.id) {
+          @if (!btn.hidden) {
+            @if (btn.id === 'project-visibility') {
+              <button
+                #visibilityBtn
+                class="additional-btn"
+                mat-icon-button
+                [matTooltip]="btn.tooltip | translate"
+                [matMenuTriggerFor]="visibilityMenu"
+              >
+                <mat-icon>{{ btn.icon }}</mat-icon>
+              </button>
+            } @else {
+              <button
+                class="additional-btn"
+                mat-icon-button
+                [matTooltip]="btn.tooltip | translate"
+                (click)="btn.action?.()"
+              >
+                <mat-icon>{{ btn.icon }}</mat-icon>
+              </button>
+            }
+          }
+        }
+      </div>
+    }
+  </div>
+
+  @if (isExpanded() && item().children && item().children.length > 0) {
+    <ul
+      [@expandFade]
+      [@standardList]="item().children.length"
+      class="nav-children"
+      [attr.id]="'group-' + item().id"
+      role="list"
+      cdkDropList
+      [cdkDropListSortingDisabled]="false"
+      [cdkDropListAutoScrollDisabled]="true"
+      (cdkDropListDropped)="onDrop($event)"
+    >
+      @for (child of item().children; track child.id) {
+        @if (child.type === 'workContext') {
+          <li
+            class="nav-child-item"
+            [class.draggable]="
+              child.defaultIcon !== 'today' && child.defaultIcon !== 'inbox'
+            "
+            role="listitem"
+            cdkDrag
+            [cdkDragData]="child"
+            [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? DRAG_DELAY_FOR_TOUCH_LONGER : 0"
+          >
+            <nav-item
+              [workContext]="child.workContext"
+              [type]="child.workContextType"
+              [defaultIcon]="child.defaultIcon"
+              [activeWorkContextId]="activeWorkContextId() || ''"
+              [variant]="'nav'"
+              [showLabels]="true"
+              [showMoreButton]="true"
+              (clicked)="onChildClick(child)"
+            ></nav-item>
+          </li>
+        } @else {
+          <li
+            class="nav-child-item"
+            role="listitem"
+          >
+            @switch (child.type) {
+              @case ('route') {
+                <nav-item
+                  [container]="'route'"
+                  [navRoute]="child.route"
+                  [icon]="child.icon"
+                  [svgIcon]="child.svgIcon"
+                  [label]="child.label"
+                  [showLabels]="true"
+                  (clicked)="onChildClick(child)"
+                ></nav-item>
+              }
+              @case ('href') {
+                <nav-item
+                  [container]="'href'"
+                  [navHref]="child.href"
+                  [icon]="child.icon"
+                  [svgIcon]="child.svgIcon"
+                  [label]="child.label"
+                  [showLabels]="true"
+                  (clicked)="onChildClick(child)"
+                ></nav-item>
+              }
+              @case ('action') {
+                <nav-item
+                  [container]="'action'"
+                  [icon]="child.icon"
+                  [svgIcon]="child.svgIcon"
+                  [label]="child.label"
+                  [showLabels]="true"
+                  (clicked)="onChildClick(child)"
+                ></nav-item>
+              }
+            }
+          </li>
+        }
+      }
+    </ul>
+  }
+} @else {
+  <!-- Empty state: Show only the add button when no items exist -->
+  @if (item().id === 'projects') {
+    <nav-item
+      [container]="'action'"
+      [icon]="'add'"
+      [label]="T.MH.CREATE_PROJECT"
+      [showLabels]="showLabels()"
+      (clicked)="createNewProject()"
+    ></nav-item>
+  } @else if (item().id === 'tags') {
+    <nav-item
+      [container]="'action'"
+      [icon]="'add'"
+      [label]="T.MH.CREATE_TAG"
+      [showLabels]="showLabels()"
+      (clicked)="createNewTag()"
+    ></nav-item>
+  }
+}
+
+<!-- Project Visibility Menu -->
+<!--@if (item().id === 'projects') {-->
+<mat-menu #visibilityMenu="matMenu">
+  @for (project of allProjectsExceptInbox(); track project.id) {
+    <button
+      mat-menu-item
+      (click)="toggleProjectVisibility(project.id)"
+    >
+      @if (!project.isHiddenFromMenu) {
+        <mat-icon>visibility</mat-icon>
+      } @else {
+        <mat-icon>visibility_off</mat-icon>
+      }
+      <span>{{ project.title }}</span>
+    </button>
+  }
+</mat-menu>
+<!--}-->

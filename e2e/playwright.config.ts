@@ -127,12 +127,12 @@ export default defineConfig({
   /* Folder for test artifacts such as screenshots, videos, traces, etc. */
   outputDir: path.join(__dirname, '..', '.tmp', 'e2e-test-results', 'test-results'),
 
-  /* Global timeout for each test - increased for parallel execution */
-  timeout: 60 * 1000,
+  /* Global timeout for each test - optimized for faster execution */
+  timeout: 40 * 1000, // Reduced from 60s to 40s
 
   /* Global timeout for each assertion */
   expect: {
-    timeout: 15 * 1000,
+    timeout: 10 * 1000, // Reduced from 15s to 10s
   },
 
   /* Maximum test failures before stopping */

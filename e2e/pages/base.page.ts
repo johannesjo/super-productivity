@@ -38,7 +38,7 @@ export abstract class BasePage {
 
     // Wait for the submit button to become visible (it appears only when input has text)
     const submitBtn = this.page.locator('.e2e-add-task-submit');
-    await submitBtn.waitFor({ state: 'visible', timeout: 5000 });
+    await submitBtn.waitFor({ state: 'visible', timeout: 3000 }); // Reduced from 5s to 3s
     await submitBtn.click();
 
     // Check if a dialog appeared (e.g., create tag dialog)
@@ -52,7 +52,7 @@ export abstract class BasePage {
       await this.page.waitForFunction(
         (expectedCount) => document.querySelectorAll('task').length > expectedCount,
         initialCount,
-        { timeout: 10000 },
+        { timeout: 6000 }, // Reduced from 10s to 6s
       );
     } else {
       // If dialog appeared, give a small delay for it to fully render

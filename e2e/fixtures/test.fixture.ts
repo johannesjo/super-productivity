@@ -31,21 +31,39 @@ export const test = base.extend<TestFixtures>({
   page: async ({ isolatedContext }, use) => {
     const page = await isolatedContext.newPage();
 
-    // Navigate to the app first
-    await page.goto('/');
+    try {
+      // Set up error handling
+      page.on('pageerror', (error) => {
+        console.error('Page error:', error.message);
+      });
 
-    // Wait for app to be ready
-    await page.waitForLoadState('networkidle');
-    await page.waitForSelector('body', { state: 'visible' });
+      page.on('console', (msg) => {
+        if (msg.type() === 'error') {
+          console.error('Console error:', msg.text());
+        }
+      });
 
-    // Wait for the app to react to the localStorage change
-    await page.waitForLoadState('domcontentloaded');
+      // Navigate to the app first
+      await page.goto('/');
 
-    // Double-check: Dismiss any tour dialog if it still appears
-    await use(page);
+      // Wait for app to be ready
+      await page.waitForLoadState('networkidle');
+      await page.waitForSelector('body', { state: 'visible' });
 
-    // Cleanup
-    await page.close();
+      // Wait for the app to react to the localStorage change
+      await page.waitForLoadState('domcontentloaded');
+
+      // Wait for the main navigation to be fully loaded
+      await page.waitForSelector('magic-side-nav', { state: 'visible', timeout: 10000 });
+
+      // Double-check: Dismiss any tour dialog if it still appears
+      await use(page);
+    } finally {
+      // Cleanup - make sure context is still available
+      if (!page.isClosed()) {
+        await page.close();
+      }
+    }
   },
 
   // Provide test prefix for data namespacing

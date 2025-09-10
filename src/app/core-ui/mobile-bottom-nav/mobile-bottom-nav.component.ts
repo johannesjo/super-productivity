@@ -1,0 +1,145 @@
+import { ChangeDetectionStrategy, Component, inject, output } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
+import { TranslateModule } from '@ngx-translate/core';
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { filter, map, startWith } from 'rxjs/operators';
+
+import { LayoutService } from '../layout/layout.service';
+import { TaskViewCustomizerService } from '../../features/task-view-customizer/task-view-customizer.service';
+import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
+import { PluginIconComponent } from '../../plugins/ui/plugin-icon/plugin-icon.component';
+import { GlobalConfigService } from '../../features/config/global-config.service';
+import { Store } from '@ngrx/store';
+import { togglePluginPanel } from '../layout/store/layout.actions';
+import {
+  selectActivePluginId,
+  selectIsShowPluginPanel,
+} from '../layout/store/layout.reducer';
+import { TODAY_TAG } from '../../features/tag/tag.const';
+import { T } from '../../t.const';
+
+@Component({
+  selector: 'mobile-bottom-nav',
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatIconModule,
+    MatButtonModule,
+    MatTooltipModule,
+    MatMenuModule,
+    TranslateModule,
+    PluginIconComponent,
+  ],
+  templateUrl: './mobile-bottom-nav.component.html',
+  styleUrls: ['./mobile-bottom-nav.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class MobileBottomNavComponent {
+  private readonly _router = inject(Router);
+  private readonly _breakpointObserver = inject(BreakpointObserver);
+  private readonly _layoutService = inject(LayoutService);
+  private readonly _taskViewCustomizerService = inject(TaskViewCustomizerService);
+  private readonly _pluginBridge = inject(PluginBridgeService);
+  private readonly _globalConfigService = inject(GlobalConfigService);
+  private readonly _store = inject(Store);
+
+  readonly T = T;
+  readonly TODAY_TAG = TODAY_TAG;
+  readonly todayTagId = TODAY_TAG.id;
+  readonly todayRoute = `/tag/${TODAY_TAG.id}/tasks`;
+
+  // Services for template access
+  readonly layoutService = this._layoutService;
+  readonly taskViewCustomizerService = this._taskViewCustomizerService;
+
+  // Output events
+  toggleMobileNavEvent = output<void>();
+
+  // Responsive breakpoint
+  private readonly _isMobile$ = this._breakpointObserver.observe('(max-width: 768px)');
+  readonly isMobile = toSignal(this._isMobile$.pipe(map((result) => result.matches)), {
+    initialValue: false,
+  });
+
+  // Current route tracking
+  readonly currentRoute = toSignal(
+    this._router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map((event) => event.urlAfterRedirects),
+      startWith(this._router.url),
+    ),
+    { initialValue: this._router.url },
+  );
+
+  // Plugin-related signals
+  readonly sidePanelButtons = this._pluginBridge.sidePanelButtons;
+  readonly activePluginId = toSignal(this._store.select(selectActivePluginId));
+  readonly isShowPluginPanel = toSignal(this._store.select(selectIsShowPluginPanel));
+
+  // Route-based computed properties
+  readonly isRouteWithSidePanel = toSignal(
+    this._router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map((event) => true), // Always true since right-panel is now global
+      startWith(true), // Always true since right-panel is now global
+    ),
+    { initialValue: true },
+  );
+
+  readonly isWorkViewPage = toSignal(
+    this._router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map((event) => !!event.urlAfterRedirects.match(/tasks$/)),
+      startWith(!!this._router.url.match(/tasks$/)),
+    ),
+    { initialValue: !!this._router.url.match(/tasks$/) },
+  );
+
+  // Panel state signals from layout service
+  readonly isShowNotes = this._layoutService.isShowNotes;
+  readonly isShowIssuePanel = this._layoutService.isShowIssuePanel;
+  readonly isShowTaskViewCustomizerPanel =
+    this._layoutService.isShowTaskViewCustomizerPanel;
+
+  // Navigation methods
+  showAddTaskBar(): void {
+    this._layoutService.showAddTaskBar();
+  }
+
+  toggleMobileNav(): void {
+    this.toggleMobileNavEvent.emit();
+  }
+
+  // Panel methods
+  onPluginButtonClick(button: {
+    pluginId: string;
+    onClick?: () => void;
+    label?: string;
+    icon?: string;
+  }): void {
+    this._store.dispatch(togglePluginPanel(button.pluginId));
+
+    if (button.onClick) {
+      button.onClick();
+    }
+  }
+
+  toggleTaskViewCustomizer(): void {
+    this._layoutService.toggleTaskViewCustomizerPanel();
+  }
+
+  toggleIssuePanel(): void {
+    this._layoutService.toggleAddTaskPanel();
+  }
+
+  toggleNotes(): void {
+    this._layoutService.toggleNotes();
+  }
+}

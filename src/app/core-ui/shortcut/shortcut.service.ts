@@ -126,8 +126,8 @@ export class ShortcutService {
     } else if (checkKeyCombo(ev, keys.showSearchBar)) {
       this._router.navigate(['/search']);
       ev.preventDefault();
-    } else if (checkKeyCombo(ev, keys.toggleSideNav)) {
-      this._layoutService.toggleSideNav();
+    } else if (checkKeyCombo(ev, keys.focusSideNav)) {
+      this._focusSideNav();
       ev.preventDefault();
     } else if (checkKeyCombo(ev, keys.addNewTask)) {
       this._layoutService.showAddTaskBar();
@@ -185,6 +185,39 @@ export class ShortcutService {
         ev.preventDefault();
         this._pluginBridgeService.executeShortcut(`${shortcut.pluginId}:${shortcut.id}`);
         return;
+      }
+    }
+  }
+
+  private _focusSideNav(): void {
+    console.log('FocusSideNav called');
+
+    // Very simple approach - just find the first nav-link and focus it
+    const firstNavLink = document.querySelector('.nav-sidebar .nav-link') as HTMLElement;
+    console.log('First nav link found:', !!firstNavLink, firstNavLink);
+
+    if (firstNavLink) {
+      // Make sure it's focusable
+      firstNavLink.setAttribute('tabindex', '0');
+
+      // Focus with a small delay to ensure DOM is ready
+      setTimeout(() => {
+        firstNavLink.focus();
+        console.log('Focused element. Active element is now:', document.activeElement);
+        console.log('Focus successful:', document.activeElement === firstNavLink);
+      }, 10);
+    } else {
+      // Fallback: try to focus the toggle button
+      const toggleBtn = document.querySelector(
+        '.nav-sidebar .sidebar-toggle',
+      ) as HTMLElement;
+      console.log('Toggle button found:', !!toggleBtn, toggleBtn);
+      if (toggleBtn) {
+        toggleBtn.setAttribute('tabindex', '0');
+        setTimeout(() => {
+          toggleBtn.focus();
+          console.log('Focused toggle. Active element is now:', document.activeElement);
+        }, 10);
       }
     }
   }

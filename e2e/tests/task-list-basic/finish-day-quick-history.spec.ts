@@ -57,7 +57,7 @@ test.describe.serial('Finish Day Quick History', () => {
 
     // Navigate to quick history via left-hand menu
     const contextBtn = page
-      .locator('side-nav > section.main > side-nav-item.g-multi-btn-wrapper')
+      .locator('magic-side-nav .nav-list > li.nav-item:first-child nav-item')
       .first();
     await contextBtn.waitFor({ state: 'visible' });
     await contextBtn.click({ button: 'right' });

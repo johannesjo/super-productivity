@@ -6,13 +6,12 @@ import {
   getCITimeoutMultiplier,
 } from '../../helpers/plugin-test.helpers';
 
-const { SIDENAV } = cssSelectors;
-const SETTINGS_BTN = `${SIDENAV} .tour-settingsMenuBtn`;
+const { SETTINGS_BTN } = cssSelectors;
 
 test.describe.serial('Plugin Structure Test', () => {
   test('check plugin card structure', async ({ page, workViewPage }) => {
     const timeoutMultiplier = getCITimeoutMultiplier();
-    test.setTimeout(60000 * timeoutMultiplier);
+    test.setTimeout(30000 * timeoutMultiplier); // Reduced from 60s to 30s base
 
     // First, ensure plugin assets are available
     const assetsAvailable = await waitForPluginAssets(page);

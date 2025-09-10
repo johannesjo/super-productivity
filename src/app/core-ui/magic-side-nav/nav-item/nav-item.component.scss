@@ -1,0 +1,279 @@
+@use 'styles/globals' as *;
+
+:host {
+  display: flex !important;
+  align-items: stretch;
+  position: relative;
+  width: 100%;
+  color: var(--text-color);
+
+  button:first-of-type {
+    white-space: nowrap;
+    overflow: hidden;
+    flex: 1;
+    min-width: 0;
+
+    // to make space for the task-count
+    &.has-tasks {
+      padding-right: 40px;
+    }
+
+    .nav-label {
+      color: var(--text-color);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      // smooth collapse/expand for title
+      display: inline-block;
+      white-space: nowrap;
+      max-width: 100%;
+      transition:
+        opacity var(--transition-duration-m, 0.25s) var(--ani-standard-timing),
+        max-width var(--transition-duration-m, 0.25s) var(--ani-standard-timing),
+        margin var(--transition-duration-m, 0.25s) var(--ani-standard-timing);
+    }
+
+    .ico-wrapper {
+      position: relative;
+    }
+  }
+
+  .additional-btn {
+    flex-shrink: 0;
+    width: 40px !important;
+    min-width: 40px !important;
+  }
+
+  &.isHidden {
+    display: none !important;
+  }
+}
+
+:host.isActiveContext button {
+  font-weight: normal;
+}
+
+:host:hover .task-count {
+  display: none !important;
+}
+
+@media (hover: none) {
+  .additional-btn {
+    opacity: 1;
+    visibility: visible;
+  }
+  .task-count {
+    display: none !important;
+  }
+}
+
+.task-count {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  line-height: 1;
+  text-align: center;
+  font-size: 10px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  // avoid affecting drag handle
+  pointer-events: none;
+
+  @include mq(xs, max) {
+    display: none;
+  }
+}
+
+// Active state visuals - ensure they override Angular Material styles
+button[mat-menu-item].nav-link.active {
+  color: var(--sidenav-active-text) !important;
+  background: var(--sidenav-active) !important;
+
+  .nav-label {
+    color: var(--sidenav-active-text) !important;
+  }
+
+  .nav-icon {
+    color: var(--sidenav-active-text) !important;
+  }
+}
+
+// Styling when used inside magic-side-nav: rely on global .nav-link/.nav-child-link
+// Only keep adjustments for the additional button here
+:host.variant-nav {
+  .g-multi-btn-wrapper {
+    background-color: transparent;
+  }
+
+  .additional-btn {
+    color: var(--sidenav-text-secondary);
+
+    &:hover {
+      background-color: var(--sidenav-hover);
+      color: var(--sidenav-text);
+    }
+  }
+}
+
+.nav-label.label-hidden,
+.text.label-hidden {
+  opacity: 0;
+  max-width: 0;
+  margin-left: 0 !important;
+  pointer-events: none;
+}
+
+.drag-handle {
+  /* Firefox 1.5-26 */
+  position: relative;
+  @include grabCursor();
+
+  &:after {
+    content: '';
+    position: absolute;
+    top: calc(-1 * var(--s));
+    left: calc(-1 * var(--s));
+    right: calc(-1 * var(--s));
+    bottom: calc(-1 * var(--s));
+  }
+}
+
+// Standard navigation row styles (simplified to be the only style)
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s) var(--s2);
+  color: var(--sidenav-text-secondary);
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-size: 14px;
+  //justify-content: center;
+  //
+  //::ng-deep .mat-mdc-menu-item-text {
+  //  margin-right: auto;
+  //}
+
+  &:hover {
+    background: var(--sidenav-hover);
+    color: var(--sidenav-text);
+  }
+
+  &.active {
+    background: var(--sidenav-active);
+    color: var(--sidenav-active-text);
+
+    .nav-icon {
+      color: var(--sidenav-active-text);
+    }
+
+    .nav-label {
+      color: var(--sidenav-active-text);
+    }
+  }
+
+  .nav-icon {
+    width: 24px;
+    height: 24px;
+    font-size: 18px;
+  }
+}
+
+// Navigation icon and chevron
+.nav-icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sidenav-text-secondary);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.expand-icon {
+  transition: transform 0.2s ease;
+}
+
+.expanded .expand-icon {
+  transform: rotate(180deg);
+}
+
+:host-context(.isLightTheme .nav-sidenav.compactMode) {
+  .nav-link {
+    &.active {
+      color: var(--sidenav-active-text) !important;
+      background: var(--sidenav-active) !important;
+      border-radius: 48px;
+      border-bottom: 1px solid var(--separator-color);
+      border-top: 1px solid var(--separator-color);
+
+      &::after {
+        position: absolute;
+        inset: 4px;
+      }
+
+      .nav-icon {
+        color: var(--sidenav-active-text) !important;
+      }
+
+      .nav-label {
+        color: var(--sidenav-active-text) !important;
+      }
+    }
+  }
+}
+
+:host-context(.nav-sidenav.compactMode) {
+  .nav-link {
+    justify-content: center;
+    padding: 12px;
+
+    &:hover {
+      background: var(--sidenav-hover);
+    }
+
+    &.active {
+      color: var(--sidenav-active-text) !important;
+      background: var(--sidenav-active) !important;
+
+      &::after {
+        position: absolute;
+        inset: 4px;
+      }
+
+      .nav-icon {
+        color: var(--sidenav-active-text) !important;
+      }
+
+      .nav-label {
+        color: var(--sidenav-active-text) !important;
+      }
+    }
+  }
+
+  .nav-icon {
+    margin: 0;
+  }
+
+  // Hide the overflow menu button entirely when compactMode
+  .additional-btn {
+    display: none !important;
+  }
+
+  a:first-of-type ::ng-deep .mat-mdc-menu-item-text,
+  button:first-of-type ::ng-deep .mat-mdc-menu-item-text {
+    display: none !important;
+  }
+
+  .task-count {
+    display: none;
+  }
+}

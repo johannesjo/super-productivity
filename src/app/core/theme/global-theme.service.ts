@@ -79,7 +79,7 @@ export class GlobalThemeService {
 
   init(): void {
     // This is here to make web page reloads on non-work-context pages at least usable
-    this._setBackgroundGradient(true);
+    this._setBackgroundTint(true);
     this._initIcons();
     this._initHandlersForInitialBodyClasses();
     this._initThemeWatchers();
@@ -106,7 +106,7 @@ export class GlobalThemeService {
 
   private _setColorTheme(theme: WorkContextThemeCfg): void {
     this._materialCssVarsService.setAutoContrastEnabled(!!theme.isAutoContrast);
-    this._setBackgroundGradient(!!theme.isDisableBackgroundTint);
+    this._setBackgroundTint(!!theme.isDisableBackgroundTint);
 
     // NOTE: setting undefined values does not seem to be a problem so we use !
     if (!theme.isAutoContrast) {
@@ -120,14 +120,12 @@ export class GlobalThemeService {
     this._materialCssVarsService.setWarnColor(theme.warn!);
   }
 
-  private _setBackgroundGradient(isDisableBackgroundTint: boolean): void {
-    if (isDisableBackgroundTint) {
-      this.document.body.classList.add(BodyClass.isDisableBackgroundTint);
-      this.document.body.classList.remove(BodyClass.isEnabledBackgroundGradient);
-    } else {
-      this.document.body.classList.add(BodyClass.isEnabledBackgroundGradient);
-      this.document.body.classList.remove(BodyClass.isDisableBackgroundTint);
-    }
+  private _setBackgroundTint(isDisableBackgroundTint: boolean): void {
+    // Simplify: toggle only the disable flag; CSS handles the rest
+    this.document.body.classList.toggle(
+      BodyClass.isDisableBackgroundTint,
+      !!isDisableBackgroundTint,
+    );
   }
 
   private _initIcons(): void {

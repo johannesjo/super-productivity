@@ -6,8 +6,7 @@ import {
   waitForPluginManagementInit,
 } from '../../helpers/plugin-test.helpers';
 
-const { SIDENAV } = cssSelectors;
-const SETTINGS_BTN = `${SIDENAV} .tour-settingsMenuBtn`;
+const { SETTINGS_BTN } = cssSelectors;
 
 test.describe('Enable Plugin Test', () => {
   test('navigate to plugin settings and enable API Test Plugin', async ({
@@ -15,7 +14,7 @@ test.describe('Enable Plugin Test', () => {
     workViewPage,
   }) => {
     const timeoutMultiplier = getCITimeoutMultiplier();
-    test.setTimeout(60000 * timeoutMultiplier);
+    test.setTimeout(30000 * timeoutMultiplier); // Reduced from 60s to 30s base
 
     // console.log('[Plugin Test] Starting enable plugin test...');
 
@@ -133,10 +132,10 @@ test.describe('Enable Plugin Test', () => {
 
     // Now check if plugin menu has buttons
     await page.evaluate(() => {
-      const pluginMenu = document.querySelector('side-nav plugin-menu');
-      const buttons = pluginMenu ? pluginMenu.querySelectorAll('button') : [];
+      const sideNav = document.querySelector('magic-side-nav');
+      const buttons = sideNav ? sideNav.querySelectorAll('nav-item button') : [];
       return {
-        pluginMenuExists: !!pluginMenu,
+        sideNavExists: !!sideNav,
         buttonCount: buttons.length,
         buttonTexts: Array.from(buttons).map((btn) => btn.textContent?.trim() || ''),
       };
