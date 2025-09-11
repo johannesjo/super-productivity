@@ -12,11 +12,15 @@
       <!--    </button>-->
     </header>
   }
-  @if (showSubTasksPanel()) {
+  @if (isShowSubTasksPanel()) {
     <task-detail-item
       (collapseParent)="collapseParent()"
       (keyPress)="onItemKeyPress($event)"
-      [expanded]="(task().subTasks?.length || 0) > 0 && !isDialogMode()"
+      [expanded]="
+        isSubTaskPanelExpandedInitially() &&
+        (task().subTasks?.length || 0) > 0 &&
+        !isDialogMode()
+      "
       [type]="'panel'"
     >
       <ng-container panel-header>
