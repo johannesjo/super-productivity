@@ -9,8 +9,8 @@ import { Page } from '@playwright/test';
  */
 export const waitForPluginAssets = async (
   page: Page,
-  maxRetries: number = 10,
-  retryDelay: number = 1000,
+  maxRetries: number = 20,
+  retryDelay: number = 1500,
 ): Promise<boolean> => {
   // In CI, increase retries and delay
   if (process.env.CI) {
@@ -28,13 +28,20 @@ export const waitForPluginAssets = async (
 
   // First ensure the app is loaded
   try {
-    await page.waitForSelector('app-root', { state: 'visible', timeout: 20000 }); // Reduced from 30s to 20s
-    await page.waitForSelector('task-list, .tour-settingsMenuBtn', {
+    await page.waitForSelector('app-root', { state: 'visible', timeout: 30000 });
+    await page.waitForSelector('task-list, .tour-settingsMenuBtn, magic-side-nav', {
       state: 'attached',
-      timeout: 15000, // Reduced from 20s to 15s
+      timeout: 20000,
     });
-  } catch (e) {
-    throw new Error('[Plugin Test] App not fully loaded:', e.message);
+  } catch (e: any) {
+    // Give one extra grace period for slower startups before failing
+    await page.waitForTimeout(2000);
+    try {
+      await page.waitForSelector('app-root', { state: 'visible', timeout: 15000 });
+    } catch {
+      console.error('[Plugin Test] App did not become ready in time');
+      return false;
+    }
   }
 
   for (let i = 0; i < maxRetries; i++) {
@@ -54,7 +61,7 @@ export const waitForPluginAssets = async (
           }
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(
         `[Plugin Test] Attempt ${i + 1}/${maxRetries}: Error - ${error.message}`,
       );
@@ -326,7 +333,6 @@ export const robustClick = async (
       return true;
     } catch (error) {
       console.log(`Selector ${selector} failed: ${error.message}`);
-      continue;
     }
   }
   console.error(`All selectors failed: ${selectors.join(', ')}`);

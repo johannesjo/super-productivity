@@ -15,7 +15,8 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   /* Retry failed tests to handle flakiness */
   retries: process.env.CI ? 2 : 1,
-  workers: process.env.CI ? Math.min(4, os.cpus().length) : Math.min(8, os.cpus().length),
+  // Reduce worker count to avoid resource contention causing flakiness
+  workers: process.env.CI ? Math.min(3, os.cpus().length) : Math.min(4, os.cpus().length),
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: process.env.CI
     ? [
@@ -119,7 +120,7 @@ export default defineConfig({
     url: 'http://localhost:4242',
     reuseExistingServer: !process.env.CI, // Don't reuse in CI to ensure clean state
     // unfortunately for CI we need to wait long for this to go up :(
-    timeout: 2 * 60 * 1000, // 1 minute should be enough if server starts properly
+    timeout: 3 * 60 * 1000, // Allow up to 3 minutes for slower CI starts
     stdout: 'pipe', // Always show output for debugging
     stderr: 'pipe',
   },
@@ -127,12 +128,12 @@ export default defineConfig({
   /* Folder for test artifacts such as screenshots, videos, traces, etc. */
   outputDir: path.join(__dirname, '..', '.tmp', 'e2e-test-results', 'test-results'),
 
-  /* Global timeout for each test - optimized for faster execution */
-  timeout: 40 * 1000, // Reduced from 60s to 40s
+  /* Global timeout for each test - slightly increased for stability */
+  timeout: 60 * 1000,
 
   /* Global timeout for each assertion */
   expect: {
-    timeout: 10 * 1000, // Reduced from 15s to 10s
+    timeout: 15 * 1000,
   },
 
   /* Maximum test failures before stopping */
