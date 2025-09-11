@@ -64,15 +64,17 @@
       }
     </button>
 
-    <button
-      mat-icon-button
-      matTooltip="{{ T.MH.ENTER_FOCUS_MODE | translate }} {{
-        kb.goToFocusMode ? '[' + kb.goToFocusMode + ']' : ''
-      }}"
-      (click)="enableFocusMode()"
-    >
-      <mat-icon>center_focus_strong</mat-icon>
-    </button>
+    @if (!isXxxs()) {
+      <button
+        mat-icon-button
+        matTooltip="{{ T.MH.ENTER_FOCUS_MODE | translate }} {{
+          kb.goToFocusMode ? '[' + kb.goToFocusMode + ']' : ''
+        }}"
+        (click)="enableFocusMode()"
+      >
+        <mat-icon>center_focus_strong</mat-icon>
+      </button>
+    }
 
     <plugin-header-btns></plugin-header-btns>
 
