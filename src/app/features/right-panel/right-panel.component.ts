@@ -348,7 +348,7 @@ export class RightPanelComponent implements OnDestroy {
             hasBackdrop: true,
             closeOnNavigation: true,
             panelClass: 'bottom-panel-sheet',
-            maxHeight: '90vh',
+            // Let CSS handle positioning and height
           });
 
           // Handle bottom sheet dismissal

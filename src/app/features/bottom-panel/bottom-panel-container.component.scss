@@ -10,15 +10,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
+  padding: 12px 8px;
   position: relative;
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  cursor: grab;
+  user-select: none;
+
+  &:active {
+    cursor: grabbing;
+  }
 
   .drag-handle {
-    width: 32px;
-    height: 4px;
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 2px;
+    width: 40px;
+    height: 5px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 3px;
+    transition: background-color 0.2s ease;
+  }
+
+  &:hover .drag-handle {
+    background-color: rgba(0, 0, 0, 0.4);
   }
 
   .close-btn {
