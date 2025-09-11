@@ -2,7 +2,7 @@
 @use '../../tasks/task/task.component.mixins' as *;
 
 :host {
-  border-radius: 6px;
+  border-radius: var(--task-border-radius);
   min-height: var(--planner-item-height);
   display: flex;
   align-items: stretch;
