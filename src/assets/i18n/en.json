@@ -1405,7 +1405,9 @@
         "TUESDAY": "Tuesday",
         "WEDNESDAY": "Wednesday",
         "INHERIT_SUBTASKS": "Inherit subtasks",
-        "INHERIT_SUBTASKS_DESCRIPTION": "When enabled, subtasks from the most recent task instance will be recreated with the repeating task"
+        "INHERIT_SUBTASKS_DESCRIPTION": "When enabled, subtasks from the most recent task instance will be recreated with the repeating task",
+        "DISABLE_AUTO_UPDATE_SUBTASKS": "Disable auto-updating subtasks",
+        "DISABLE_AUTO_UPDATE_SUBTASKS_DESCRIPTION": "Do not update inherited subtasks automatically when the newest instance changes"
       }
     },
     "TASK_VIEW": {

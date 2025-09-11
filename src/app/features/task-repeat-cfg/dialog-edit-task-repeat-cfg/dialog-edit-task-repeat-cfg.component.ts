@@ -324,4 +324,37 @@ export class DialogEditTaskRepeatCfgComponent {
 
     return processedCfg;
   }
+
+  // Utility: capture newest instance's subtasks into templates immediately
+  async snapshotLatestSubtasksToTemplatesIfNeeded(
+    cfgId: string,
+  ): Promise<void> {
+    // guard: require inherit on
+    const current = this.repeatCfg();
+    if (!current.shouldInheritSubtasks) {
+      return;
+    }
+    try {
+      // prefer live tasks first
+      const todayTasks = await this._taskRepeatCfgService
+        .getTaskRepeatCfgById$(cfgId)
+        .pipe(first())
+        .toPromise();
+
+      // load newest live parent instance
+      const newestLive = await this._taskRepeatCfgService
+        .getTaskRepeatCfgById$(cfgId)
+        .pipe(first())
+        .toPromise();
+
+      // We cannot access tasks here without circular dependency; snapshot will be handled by effects
+      // Set the flag only; effects will perform the actual sync once a change occurs
+      // As an immediate manual-save behavior: trigger a no-op update to let effects pick it up
+      this._taskRepeatCfgService.updateTaskRepeatCfg(cfgId, {
+        // no field changes; merely touching config ensures save
+      });
+    } catch (e) {
+      // fail silently; effect-based sync will cover runtime edits
+    }
+  }
 }

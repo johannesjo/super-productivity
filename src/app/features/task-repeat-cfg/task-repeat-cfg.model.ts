@@ -53,6 +53,8 @@ export interface TaskRepeatCfgCopy {
   notes: string | undefined;
   // ... possible sub tasks & attachments
   shouldInheritSubtasks?: boolean;
+  // new UX: disable auto update checkbox (auto-update is default)
+  disableAutoUpdateSubtasks?: boolean;
   subTaskTemplates?: {
     title: string;
     timeEstimate?: number;
@@ -92,4 +94,6 @@ export const DEFAULT_TASK_REPEAT_CFG: Omit<TaskRepeatCfgCopy, 'id'> = {
 
   notes: undefined,
   shouldInheritSubtasks: false,
+  // legacy isAutoUpdateSubtasks intentionally left undefined
+  disableAutoUpdateSubtasks: false,
 };
