@@ -2,7 +2,7 @@
   box-sizing: border-box;
   position: relative;
   border-radius: var(--card-border-radius);
-  box-shadow: var(--shadow-card-shadow);
+  box-shadow: var(--card-shadow);
   transition: var(--transition-fast);
   transition-property: transform, box-shadow;
   //border: 1px solid var(--grid-color);

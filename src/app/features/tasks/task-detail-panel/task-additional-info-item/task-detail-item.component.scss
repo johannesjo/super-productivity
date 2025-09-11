@@ -43,12 +43,12 @@
 // SHARED
 .input-item,
 .mat-expansion-panel {
-  box-shadow: none;
   border: 1px solid transparent;
   margin: 8px;
   border-radius: var(--card-border-radius);
   background: var(--task-detail-bg);
   font-size: 14px;
+  box-shadow: var(--task-detail-shadow);
 
   :host-context(.isNoTouchOnly):focus & {
     border-color: var(--palette-primary-400) !important;
@@ -58,7 +58,7 @@
     box-shadow: var(--task-detail-shadow);
   }
   @include lightTheme {
-    border-color: var(--extra-border-color);
+    //border-color: var(--extra-border-color);
   }
 }
 
@@ -93,9 +93,9 @@
 
 // PANEL
 :host::ng-deep {
-  .mat-expansion-panel:not([class*='mat-elevation-z']) {
-    box-shadow: none;
-  }
+  //.mat-expansion-panel:not([class*='mat-elevation-z']) {
+  //  box-shadow: none;
+  //}
 
   .mat-expansion-panel-body {
     padding: 0;

@@ -10,6 +10,7 @@
 
   color: var(--text-color);
   background: var(--task-c-bg);
+  box-shadow: var(--task-shadow);
 
   &.isDone {
     opacity: var(--task-is-done-dim-opacity);

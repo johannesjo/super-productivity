@@ -331,6 +331,11 @@ body {
   --bg-lightest: #fff;
   --bg-super-light: #fff;
   --card-bg: #ffffff;
+  --card-shadow: var(--whiteframe-shadow-1dp);
+  //--card-shadow:
+  //  0 3px 1px -2px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
+  //  0 2px 2px 0 rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
+  //  0 1px 5px 0 rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
 
   // Navigation & Panel backgrounds
   --sidenav-bg: transparent;
@@ -343,7 +348,8 @@ body {
   --sidebar-text: var(--text-color);
   --sidebar-text-secondary: var(--text-color-muted);
   --overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
-  --right-panel-bg: #fff;
+  --right-panel-bg: transparent;
+  --right-panel-bg-mobile: #fff;
   --bottom-nav-height: 44px;
   --bottom-nav-bg: var(--sidenav-bg-mobile);
 
@@ -382,6 +388,9 @@ body {
   --sub-task-c-bg-in-selected: var(--task-c-bg);
 
   // Task shadows
+  --task-shadow: var(--whiteframe-shadow-1dp);
+  --task-shadow-sub-task: none;
+
   --task-current-shadow: var(--whiteframe-shadow-3dp);
   --task-selected-shadow: var(--whiteframe-shadow-3dp);
 
@@ -402,6 +411,7 @@ body {
 
   // Banner
   --banner-bg: var(--card-bg);
+  --banner-shadow: var(--whiteframe-shadow-2dp);
 
   // Improvement banner
   --improvement-text: rgba(44, 44, 44, 1);
@@ -430,7 +440,7 @@ body {
   );
   --task-detail-bg: var(--card-bg);
   --task-detail-bg-hover: #eeeeee;
-  --task-detail-shadow: var(--whiteframe-shadow-1dp);
+  --task-detail-shadow: var(--card-shadow);
 
   // Grid colors
   --grid-color: #dadce0;
@@ -469,7 +479,7 @@ body.isDarkTheme {
   --sidebar-text: var(--text-color);
   --sidebar-text-secondary: var(--text-color-muted);
   --overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.8));
-  --right-panel-bg: var(--dark5);
+  --right-panel-bg: transparent;
   --bottom-nav-bg: var(--sidenav-bg-mobile);
 
   // Text colors
@@ -498,12 +508,12 @@ body.isDarkTheme {
 
   // Task colors
   //--task-c-bg: #212123ff;
-  --task-c-bg: var(--dark2);
-  --sub-task-c-bg: var(--dark4);
-  --sub-task-c-bg-done: var(--dark3);
+  --task-c-bg: var(--dark3);
+  --sub-task-c-bg: var(--dark4-5);
+  --sub-task-c-bg-done: var(--dark2);
   --task-c-bg-done: var(--dark1);
 
-  --task-c-selected-bg: var(--right-panel-bg);
+  --task-c-selected-bg: var(--dark6);
   --task-c-current-bg: var(--dark12);
   --task-c-drag-drop-bg: var(--dark12);
   --sub-task-c-bg-in-selected: var(--dark10);
