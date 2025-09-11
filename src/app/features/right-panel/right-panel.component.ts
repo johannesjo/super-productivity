@@ -332,6 +332,13 @@ export class RightPanelComponent implements OnDestroy {
     const isDisableTaskPanelAni = this.isDisableTaskPanelAni();
 
     untracked(() => {
+      // Close bottom sheet immediately when switching from xs to non-xs screens
+      if (!isXs && this._bottomSheetRef) {
+        this._bottomSheetRef.dismiss();
+        this._bottomSheetRef = null;
+        return;
+      }
+
       // Only handle bottom sheet on xs screens
       if (isXs) {
         if (isOpen && panelContent && !this._bottomSheetRef) {
@@ -361,10 +368,6 @@ export class RightPanelComponent implements OnDestroy {
           this._bottomSheetRef.dismiss();
           this._bottomSheetRef = null;
         }
-      } else if (this._bottomSheetRef) {
-        // Close bottom sheet when not on xs screens
-        this._bottomSheetRef.dismiss();
-        this._bottomSheetRef = null;
       }
     });
   });

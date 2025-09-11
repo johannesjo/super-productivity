@@ -10,9 +10,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 8px;
+  padding: 8px;
   position: relative;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
   cursor: grab;
   user-select: none;
 
@@ -21,29 +20,26 @@
   }
 
   .drag-handle {
-    width: 40px;
-    height: 5px;
-    background-color: rgba(0, 0, 0, 0.3);
+    width: 60px;
+    height: 6px;
+    background-color: rgba(255, 255, 255, 0.4);
     border-radius: 3px;
     transition: background-color 0.2s ease;
   }
 
   &:hover .drag-handle {
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(255, 255, 255, 0.6);
   }
 
   .close-btn {
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
+    display: none; // Hidden for now
   }
 }
 
 .bottom-panel-content {
   flex: 1;
   overflow-y: auto;
-  padding: 16px;
+  padding: 4px 8px;
 
   .ani-container {
     &.isDisableAni {

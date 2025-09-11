@@ -31,8 +31,8 @@ progress-bar {
   min-height: var(--bar-height);
   display: flex;
   align-items: center;
-  position: sticky;
-  top: 0;
+  //position: sticky;
+  //top: 0;
   padding: 0 var(--s);
   // NOTE make space for close button
   padding-right: 50px;

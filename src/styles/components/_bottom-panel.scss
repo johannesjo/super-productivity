@@ -2,13 +2,15 @@
 .bottom-panel-sheet {
   .mat-bottom-sheet-container {
     padding: 0;
-    height: 40vh; // Default to 2/5 of viewport height
+    height: 60vh; // Default to 3/5 of viewport height
     max-height: 98vh;
     min-height: 20vh;
     // Fix to bottom of viewport
     position: fixed !important;
     bottom: 0 !important;
+    left: 16px !important;
     left: 0 !important;
+    right: 16px !important;
     right: 0 !important;
     width: 100vw !important;
     // Enable smooth resizing - but disable during custom dragging
@@ -17,6 +19,9 @@
     resize: vertical;
     overflow: hidden;
     background: var(--dark1);
+    border-top-right-radius: 20px;
+    border-top-left-radius: 20px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
 
     // Disable transitions during custom drag
     &.dragging {
@@ -32,10 +37,11 @@
   }
 
   .bottom-panel-content {
-    // Remove padding since components have their own padding
-    padding: 0;
+    // Minimal padding for bottom sheet
+    padding: 0 4px;
     flex: 1;
     overflow: hidden;
+    position: relative;
 
     // Ensure components fill the available space
     > * {

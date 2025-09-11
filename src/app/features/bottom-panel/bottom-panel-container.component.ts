@@ -20,6 +20,7 @@ import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { taskDetailPanelTaskChangeAnimation } from '../tasks/task-detail-panel/task-detail-panel.ani';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { BottomPanelPositionService } from '../../core-ui/layout/bottom-panel-position.service';
 
 export interface BottomPanelData {
   panelContent:
@@ -54,6 +55,7 @@ export interface BottomPanelData {
 export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
   private _bottomSheetRef = inject(MatBottomSheetRef<BottomPanelContainerComponent>);
   private _elementRef = inject(ElementRef);
+  private _positionService = inject(BottomPanelPositionService);
   readonly data = inject<BottomPanelData>(MAT_BOTTOM_SHEET_DATA);
 
   readonly dragHandle = viewChild<ElementRef>('dragHandle');
@@ -171,6 +173,8 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
     const container = this._getSheetContainer();
     if (container) {
       container.classList.remove('dragging');
+      // Save the current height for this panel type
+      this._positionService.saveHeight(this.panelContent(), container.offsetHeight);
     }
   }
 
@@ -180,15 +184,17 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
     const container = this._getSheetContainer();
     if (container) {
       container.classList.remove('dragging');
+      // Save the current height for this panel type
+      this._positionService.saveHeight(this.panelContent(), container.offsetHeight);
     }
   }
 
   private _setInitialHeight(): void {
     const container = this._getSheetContainer();
     if (container) {
-      const initialHeight = window.innerHeight * 0.4; // 2/5 of viewport height
-      container.style.height = `${initialHeight}px`;
-      container.style.maxHeight = `${initialHeight}px`;
+      const savedHeight = this._positionService.getSavedHeight(this.panelContent());
+      container.style.height = `${savedHeight}px`;
+      container.style.maxHeight = `${savedHeight}px`;
     }
   }
 
