@@ -111,6 +111,14 @@ mat-option.isDone {
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  plugin-icon {
+    margin-right: 14px;
+  }
+
+  span {
+    margin-right: auto;
+  }
 }
 
 .mat-mdc-icon-button.mat-mdc-button-base {
