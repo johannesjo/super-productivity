@@ -15,13 +15,11 @@ import { TaskCopy } from '../../tasks/task.model';
 import { EMPTY, Observable } from 'rxjs';
 import { TaskService } from '../../tasks/task.service';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
-import { MatDialog } from '@angular/material/dialog';
 import { T } from '../../../t.const';
 import { Project } from '../../project/project.model';
 import { ProjectService } from '../../project/project.service';
 import { takeUntil } from 'rxjs/operators';
 import { BaseComponent } from '../../../core/base-component/base.component';
-import { DialogTaskDetailPanelComponent } from '../../tasks/dialog-task-detail-panel/dialog-task-detail-panel.component';
 import { TaskContextMenuComponent } from '../../tasks/task-context-menu/task-context-menu.component';
 import { MatIcon } from '@angular/material/icon';
 import { LongPressIOSDirective } from '../../../ui/longpress/longpress-ios.directive';
@@ -52,7 +50,6 @@ import { Log } from '../../../core/log';
 export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDestroy {
   private _taskService = inject(TaskService);
   private _cd = inject(ChangeDetectorRef);
-  private _matDialog = inject(MatDialog);
   private _projectService = inject(ProjectService);
 
   // TODO: Skipped for migration because:
@@ -89,9 +86,8 @@ export class PlannerTaskComponent extends BaseComponent implements OnInit, OnDes
   @HostListener('click', ['$event'])
   async clickHandler(): Promise<void> {
     if (this.task) {
-      this._matDialog.open(DialogTaskDetailPanelComponent, {
-        data: { taskId: this.task.id },
-      });
+      // Use bottom panel on mobile, dialog on desktop
+      this._taskService.setSelectedId(this.task.id);
     }
   }
 
