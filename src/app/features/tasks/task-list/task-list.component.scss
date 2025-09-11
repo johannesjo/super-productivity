@@ -53,10 +53,14 @@
 
 .cdk-drag-placeholder,
 .cdk-drag-preview {
-  border-radius: 6px;
+  border-radius: var(--task-border-radius);
   overflow: hidden;
 
   ::ng-deep .controls {
     display: none;
+  }
+  ::ng-deep .box {
+    display: none;
+    box-shadow: none !important;
   }
 }

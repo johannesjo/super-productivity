@@ -175,7 +175,7 @@ mat-icon.mat-icon[svgicon] {
 }
 
 .cdk-drag-preview {
-  box-shadow: var(--whiteframe-shadow-12dp);
+  box-shadow: var(--whiteframe-shadow-4dp) !important;
   cursor: grabbing !important;
   overflow: hidden;
 
