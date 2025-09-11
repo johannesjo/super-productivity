@@ -229,4 +229,16 @@ export const TASK_REPEAT_CFG_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
       description: T.F.TASK_REPEAT.F.INHERIT_SUBTASKS_DESCRIPTION,
     },
   },
+  // child option depending on inherit
+  {
+    key: 'disableAutoUpdateSubtasks',
+    type: 'checkbox',
+    defaultValue: false,
+    hideExpression: (model: any) => !model.shouldInheritSubtasks,
+    templateOptions: {
+      label: T.F.TASK_REPEAT.F.DISABLE_AUTO_UPDATE_SUBTASKS,
+      description: T.F.TASK_REPEAT.F.DISABLE_AUTO_UPDATE_SUBTASKS_DESCRIPTION,
+    },
+    className: 'sp-formly-child-option',
+  },
 ];
