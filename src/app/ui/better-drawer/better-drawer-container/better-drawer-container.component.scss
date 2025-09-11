@@ -94,17 +94,15 @@ $z-this-backdrop: calc(var(--z-task-side-bar-over) - 1);
   right: var(--s);
   box-shadow: var(--whiteframe-shadow-2dp);
   border-radius: 50%;
-  border: 1px solid;
   color: var(--text-color);
   background: var(--bg-lightest);
-  border-color: var(--extra-border-color);
+  border: 1px solid var(--extra-border-color);
 
   @include mq(xs) {
     top: 0;
     border-radius: 0;
     right: 100%;
     box-shadow: var(--whiteframe-shadow-1dp);
-    border: 1px solid;
   }
 
   &,

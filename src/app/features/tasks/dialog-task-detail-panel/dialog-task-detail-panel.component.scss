@@ -28,19 +28,5 @@
     task .hover-controls {
       display: none !important;
     }
-
-    .wrapper {
-      //padding: 16px;
-    }
-
-    task-detail-item {
-      margin-left: var(--s);
-      margin-right: var(--s);
-
-      @include mq(xxs) {
-        margin-left: calc(var(--s) * 1.5);
-        margin-right: calc(var(--s) * 1.5);
-      }
-    }
   }
 }
