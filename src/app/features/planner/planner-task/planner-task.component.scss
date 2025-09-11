@@ -55,9 +55,7 @@
   }
 }
 
-::ng-deep .tag-title {
-  font-size: var(--planner-font-size-smaller-mobile) !important;
-
+:host ::ng-deep .tag-title {
   @include mq(xs) {
     font-size: var(--planner-font-size-smaller) !important;
   }
@@ -90,7 +88,6 @@
   position: relative;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: var(--planner-font-size-mobile);
   flex-grow: 1;
   flex-shrink: 1;
 
