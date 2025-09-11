@@ -11,9 +11,14 @@
   margin-left: 0;
   // needs to be above the rest
   z-index: 2;
+  box-shadow: var(--whiteframe-shadow-1dp);
 
   &.isTimeUp {
     border: 2px solid var(--c-accent);
+  }
+
+  &.isOn {
+    box-shadow: var(--whiteframe-shadow-2dp);
   }
 
   .mat-icon {
@@ -52,7 +57,7 @@
   width: auto;
   left: 50%;
   transform: translateX(-50%);
-  box-shadow: var(--whiteframe-shadow-2dp);
+  box-shadow: var(--whiteframe-shadow-1dp);
   font-weight: bold;
   border-radius: 8px;
   z-index: 4;

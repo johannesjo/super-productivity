@@ -6,6 +6,7 @@
         (contextmenu)="edit($event)"
         (longPress)="edit()"
         [color]="sc.isOn ? 'accent' : ''"
+        [class.isOn]="sc.isOn"
         class="main-btn stopwatch"
         mat-mini-fab
       >
@@ -44,6 +45,7 @@
         (contextmenu)="edit($event)"
         (longPress)="edit()"
         [color]="sc.isOn && !isTimeUp() ? 'accent' : ''"
+        [class.isOn]="sc.isOn && !isTimeUp()"
         [class.isTimeUp]="isTimeUp()"
         class="main-btn repeated-countdown"
         mat-mini-fab

@@ -182,6 +182,7 @@ import { Subscription } from 'rxjs';
           position: relative;
           margin-left: 0;
           z-index: 2;
+          box-shadow: var(--whiteframe-shadow-2dp);
 
           .circle-svg {
             transform: rotate(-90deg);
