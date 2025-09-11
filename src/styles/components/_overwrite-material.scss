@@ -232,8 +232,12 @@ mat-tooltip-component {
 // Move snack bar above mobile bottom nav for all touch devices
 @include media-queries.mq(xs, max) {
   // Apply to all touch devices, not just when mobile bottom nav is shown
+  body.hasMobileBottomNav .mat-mdc-snack-bar-handset {
+    pointer-events: none;
+  }
   body.hasMobileBottomNav mat-snack-bar-container {
     margin-bottom: calc(var(--bottom-nav-height) + 24px) !important;
+    pointer-events: auto;
   }
 
   //snack-custom {
