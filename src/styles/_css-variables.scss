@@ -215,16 +215,7 @@ body {
   --bg-lightest: #fff;
   --bg-super-light: #fff;
   --card-bg: #ffffff;
-  --card-shadow:
-    rgba(14, 63, 126, 0.06) 0px 0px 0px 1px, rgba(42, 51, 70, 0.03) 0px 1px 1px -0.5px,
-    rgba(42, 51, 70, 0.04) 0px 2px 2px -1px, rgba(42, 51, 70, 0.04) 0px 3px 3px -1.5px,
-    rgba(42, 51, 70, 0.03) 0px 5px 5px -2.5px, rgba(42, 51, 70, 0.03) 0px 10px 10px -5px,
-    rgba(42, 51, 70, 0.03) 0px 24px 24px -8px;
-
-  //--card-shadow:
-  //  0 3px 1px -2px rgba(0, 0, 0, var(--shadow-key-umbra-opacity)),
-  //  0 2px 2px 0 rgba(0, 0, 0, var(--shadow-key-penumbra-opacity)),
-  //  0 1px 5px 0 rgba(0, 0, 0, var(--shadow-ambient-shadow-opacity));
+  --card-shadow: var(--whiteframe-shadow-2dp);
 
   // Navigation & Panel backgrounds
   --sidenav-bg: transparent;
@@ -282,8 +273,8 @@ body {
 
   --task-shadow-sub-task: none;
   //--task-shadow-sub-task: rgba(0, 0, 0, 0.16) 0px 1px 4px;
-  --task-current-shadow: var(--whiteframe-shadow-2dp);
-  --task-selected-shadow: var(--whiteframe-shadow-2dp);
+  --task-current-shadow: var(--whiteframe-shadow-4dp);
+  --task-selected-shadow: var(--whiteframe-shadow-3dp);
 
   // Task Border
   //--task-border: 1px solid var(--extra-border-color);
@@ -413,7 +404,7 @@ body.isDarkTheme {
   --sub-task-c-bg-in-selected: var(--dark10);
 
   // Task shadows
-  --task-current-shadow: var(--whiteframe-shadow-8dp);
+  --task-current-shadow: var(--whiteframe-shadow-4dp);
   --task-selected-shadow: var(--whiteframe-shadow-4dp);
   --task-shadow-sub-task: var(--task-shadow);
 
@@ -471,13 +462,7 @@ body.isDarkTheme {
   // ===============================
   // SHADOWS & ELEVATION
   // ===============================
-  --md-sys-level0: none;
-  --md-sys-level1: 0 1px 4px 0 rgba(0, 0, 0, 0.37);
-  --md-sys-level1-5: 0 2px 2px 0 rgba(0, 0, 0, 0.2), 0 4px 8px 0 rgba(0, 0, 0, 0.24);
-  --md-sys-level2: 0 2px 2px 0 rgba(0, 0, 0, 0.2), 0 6px 10px 0 rgba(0, 0, 0, 0.3);
-  --md-sys-level3: 0 11px 7px 0 rgba(0, 0, 0, 0.19), 0 13px 25px 0 rgba(0, 0, 0, 0.3);
-  --md-sys-level4: 0 14px 12px 0 rgba(0, 0, 0, 0.17), 0 20px 40px 0 rgba(0, 0, 0, 0.3);
-  --md-sys-level5: 0 17px 17px 0 rgba(0, 0, 0, 0.15), 0 27px 55px 0 rgba(0, 0, 0, 0.3);
+
   --whiteframe-shadow-1dp: var(--md-sys-level1);
   --whiteframe-shadow-2dp: var(--md-sys-level1-5);
   --whiteframe-shadow-3dp: var(--md-sys-level2);
@@ -486,4 +471,37 @@ body.isDarkTheme {
   --whiteframe-shadow-8dp: var(--md-sys-level3);
   --whiteframe-shadow-12dp: var(--md-sys-level4);
   --whiteframe-shadow-24dp: var(--md-sys-level5);
+
+  // material design m3 shadows
+  //--md-sys-level0: none;
+  //--md-sys-level1: 0 1px 4px 0 rgba(0, 0, 0, 0.37);
+  //--md-sys-level1-5: 0 2px 2px 0 rgba(0, 0, 0, 0.2), 0 4px 8px 0 rgba(0, 0, 0, 0.24);
+  //--md-sys-level2: 0 2px 2px 0 rgba(0, 0, 0, 0.2), 0 6px 10px 0 rgba(0, 0, 0, 0.3);
+  //--md-sys-level3: 0 11px 7px 0 rgba(0, 0, 0, 0.19), 0 13px 25px 0 rgba(0, 0, 0, 0.3);
+  //--md-sys-level4: 0 14px 12px 0 rgba(0, 0, 0, 0.17), 0 20px 40px 0 rgba(0, 0, 0, 0.3);
+  //--md-sys-level5: 0 17px 17px 0 rgba(0, 0, 0, 0.15), 0 27px 55px 0 rgba(0, 0, 0, 0.3);
+
+  // apple
+  //--md-sys-level1:   0 1px 2px rgba(0,0,0,0.12);
+  //--md-sys-level1-5: 0 2px 4px rgba(0,0,0,0.12);
+  //--md-sys-level2:   0 4px 8px rgba(0,0,0,0.14);
+  //--md-sys-level3:   0 8px 16px rgba(0,0,0,0.16);
+  //--md-sys-level4:   0 12px 24px rgba(0,0,0,0.18);
+  //--md-sys-level5:   0 20px 40px rgba(0,0,0,0.20);
+
+  /* Ant-like tokens */
+  --md-sys-level1: 0 2px 8px rgba(0, 0, 0, 0.12), 0 1px 3px -2px rgba(0, 0, 0, 0.16);
+  --md-sys-level1-5: 0 3px 10px rgba(0, 0, 0, 0.12), 0 3px 6px -3px rgba(0, 0, 0, 0.16);
+  --md-sys-level2: 0 4px 12px rgba(0, 0, 0, 0.14), 0 6px 16px -4px rgba(0, 0, 0, 0.12);
+  --md-sys-level3: 0 8px 24px rgba(0, 0, 0, 0.14), 0 12px 28px -6px rgba(0, 0, 0, 0.12);
+  --md-sys-level4: 0 12px 32px rgba(0, 0, 0, 0.16), 0 20px 40px -8px rgba(0, 0, 0, 0.12);
+  --md-sys-level5: 0 20px 48px rgba(0, 0, 0, 0.18), 0 32px 64px -10px rgba(0, 0, 0, 0.14);
+
+  /* Fluent-like tokens: soft ambient + directional key */
+  //--md-sys-level1:   0 1px 2px rgba(0,0,0,0.10), 0 2px 1px rgba(0,0,0,0.08);
+  //--md-sys-level1-5: 0 2px 4px rgba(0,0,0,0.10), 0 3px 2px rgba(0,0,0,0.10);
+  //--md-sys-level2:   0 4px 8px rgba(0,0,0,0.12), 0 6px 4px rgba(0,0,0,0.12);
+  //--md-sys-level3:   0 8px 16px rgba(0,0,0,0.14), 0 10px 6px rgba(0,0,0,0.12);
+  //--md-sys-level4:   0 12px 24px rgba(0,0,0,0.16), 0 16px 8px rgba(0,0,0,0.12);
+  //--md-sys-level5:   0 20px 40px rgba(0,0,0,0.18), 0 28px 12px rgba(0,0,0,0.14);
 }
