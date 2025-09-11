@@ -1,0 +1,57 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Edit Folder' : 'Create New Folder' }}</h2>
+
+<form
+  [formGroup]="form"
+  (ngSubmit)="save()"
+>
+  <mat-dialog-content>
+    <mat-form-field
+      appearance="outline"
+      class="full-width"
+    >
+      <mat-label>Folder Name</mat-label>
+      <input
+        matInput
+        formControlName="title"
+        placeholder="Enter folder name"
+        required
+      />
+      @if (form.get('title')?.errors?.['required']) {
+        <mat-error>Folder name is required</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field
+      appearance="outline"
+      class="full-width"
+    >
+      <mat-label>Parent Folder</mat-label>
+      <mat-select formControlName="parentId">
+        <mat-option [value]="null">No parent (root level)</mat-option>
+        @for (folder of availableFolders$ | async; track folder.id) {
+          @if (!isEdit || folder.id !== data?.folder?.id) {
+            <mat-option [value]="folder.id">{{ folder.title }}</mat-option>
+          }
+        }
+      </mat-select>
+    </mat-form-field>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button
+      type="button"
+      mat-button
+      (click)="cancel()"
+    >
+      Cancel
+    </button>
+    <button
+      type="submit"
+      mat-raised-button
+      color="primary"
+      [disabled]="form.invalid"
+    >
+      {{ isEdit ? 'Save' : 'Create' }}
+    </button>
+  </mat-dialog-actions>
+</form>

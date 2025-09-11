@@ -6,6 +6,7 @@ import {
   PfapiBaseCfg,
 } from './api';
 import { ProjectState } from '../features/project/project.model';
+import { ProjectFolderState } from '../features/project-folder/project-folder.model';
 import { GlobalConfigState } from '../features/config/global-config.model';
 import { Reminder } from '../features/reminder/reminder.model';
 import {
@@ -23,6 +24,7 @@ import { TagState } from '../features/tag/tag.model';
 import { SimpleCounterState } from '../features/simple-counter/simple-counter.model';
 import { TaskRepeatCfgState } from '../features/task-repeat-cfg/task-repeat-cfg.model';
 import { initialProjectState } from '../features/project/store/project.reducer';
+import { initialState as initialProjectFolderState } from '../features/project-folder/store/project-folder.reducer';
 import { DEFAULT_GLOBAL_CONFIG } from '../features/config/default-global-config.const';
 import { initialNoteState } from '../features/note/store/note.reducer';
 import { issueProviderInitialState } from '../features/issue/store/issue-provider.reducer';
@@ -67,6 +69,7 @@ export const CROSS_MODEL_VERSION = 4.2 as const;
 
 export type PfapiAllModelCfg = {
   project: ModelCfg<ProjectState>;
+  projectFolder: ModelCfg<ProjectFolderState>;
   globalConfig: ModelCfg<GlobalConfigState>;
   planner: ModelCfg<PlannerState>;
   boards: ModelCfg<BoardsState>;
@@ -112,6 +115,12 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     defaultData: initialProjectState,
     isMainFileModel: true,
     validate: appDataValidators.project,
+    repair: fixEntityStateConsistency,
+  },
+  projectFolder: {
+    defaultData: initialProjectFolderState,
+    isMainFileModel: true,
+    validate: appDataValidators.projectFolder,
     repair: fixEntityStateConsistency,
   },
   tag: {

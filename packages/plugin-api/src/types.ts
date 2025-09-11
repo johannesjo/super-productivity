@@ -225,6 +225,16 @@ export interface Task {
   _hideSubTasksMode?: number;
 }
 
+export interface ProjectFolder {
+  id: string;
+  title: string;
+  icon?: string | null;
+  parentId?: string | null;
+  isExpanded?: boolean;
+  created: number;
+  updated?: number;
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -241,6 +251,7 @@ export interface Project {
   noteIds: string[];
   isEnableBacklog?: boolean;
   isHiddenFromMenu?: boolean;
+  folderId?: string | null;
 
   // Advanced config (internal) - must be any to match WorkContextCommon
   advancedCfg: unknown;

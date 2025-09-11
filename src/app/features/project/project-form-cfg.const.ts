@@ -72,6 +72,14 @@ export const CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG: ConfigFormSection<Project>
       },
     },
     {
+      key: 'folderId',
+      type: 'project-folder-select',
+      templateOptions: {
+        label: 'Folder',
+        placeholder: 'Select folder (optional)',
+      },
+    },
+    {
       key: 'isEnableBacklog',
       type: 'checkbox',
       defaultValue: false,

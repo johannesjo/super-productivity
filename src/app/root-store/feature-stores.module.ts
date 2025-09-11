@@ -49,6 +49,11 @@ import {
 } from '../features/project/store/project.reducer';
 import { ProjectEffects } from '../features/project/store/project.effects';
 import {
+  projectFolderFeatureKey,
+  projectFolderReducer,
+} from '../features/project-folder/store/project-folder.reducer';
+import { ProjectFolderEffects } from '../features/project-folder/store/project-folder.effects';
+import {
   SIMPLE_COUNTER_FEATURE_NAME,
   simpleCounterReducer,
 } from '../features/simple-counter/store/simple-counter.reducer';
@@ -137,6 +142,9 @@ import { PluginHooksEffects } from '../plugins/plugin-hooks.effects';
 
     StoreModule.forFeature(PROJECT_FEATURE_NAME, projectReducer),
     EffectsModule.forFeature([ProjectEffects]),
+
+    StoreModule.forFeature(projectFolderFeatureKey, projectFolderReducer),
+    EffectsModule.forFeature([ProjectFolderEffects]),
 
     StoreModule.forFeature(SIMPLE_COUNTER_FEATURE_NAME, simpleCounterReducer),
     EffectsModule.forFeature([SimpleCounterEffects]),

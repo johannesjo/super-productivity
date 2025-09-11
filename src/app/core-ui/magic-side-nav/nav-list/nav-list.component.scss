@@ -122,6 +122,17 @@
   will-change: transform;
 }
 
+// Indentation for nested levels
+// Applies a small offset to each nested nav-list level
+:host-context(.nav-child-item) {
+  .g-multi-btn-wrapper {
+    padding-left: var(--s);
+  }
+  .nav-children {
+    margin-left: var(--s);
+  }
+}
+
 // CompactMode state behaviors inherited from parent sidenav
 :host-context(.nav-sidenav.compactMode) {
   .g-multi-btn-wrapper {
