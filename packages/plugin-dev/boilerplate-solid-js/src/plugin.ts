@@ -1,4 +1,5 @@
 import {
+  AnyTaskUpdatePayload,
   PluginAPI,
   PluginHooks,
   TaskCompletePayload,
@@ -30,9 +31,9 @@ plugin.registerMenuEntry({
 
 // Example: Register keyboard shortcut
 plugin.registerShortcut({
-  keys: 'ctrl+shift+b',
+  id: 'open-boilerplate-plugin',
   label: 'Open Boilerplate Plugin',
-  action: () => {
+  onExec: () => {
     plugin.showIndexHtmlAsView();
   },
 });
@@ -54,7 +55,6 @@ plugin.registerHook(PluginHooks.TASK_UPDATE, (taskData: TaskUpdatePayload) => {
 });
 
 // Example: Hook into context changes
-plugin.on('contextChange', async (context: { projectId?: string; tagId?: string }) => {
 plugin.registerHook(
   PluginHooks.ANY_TASK_UPDATE,
   async (payload: AnyTaskUpdatePayload) => {
@@ -70,56 +70,49 @@ plugin.registerHook(
 );
 
 // Example: Custom command handler
-plugin.onMessage('getStats', async () => {
-  const tasks = await plugin.getTasks();
-  const completedToday = tasks.filter(
-    (t) => t.isDone && new Date(t.doneOn!).toDateString() === new Date().toDateString(),
-  );
+if (plugin.onMessage) {
+  plugin.onMessage(async (message: any) => {
+    switch (message?.type) {
+      case 'getStats':
+        const tasks = await plugin.getTasks();
+        const completedToday = tasks.filter(
+          (t) =>
+            t.isDone && new Date(t.doneOn!).toDateString() === new Date().toDateString(),
+        );
 
-  return {
-    totalTasks: tasks.length,
-    completedToday: completedToday.length,
-    pendingTasks: tasks.filter((t) => !t.isDone).length,
-  };
-});
+        return {
+          totalTasks: tasks.length,
+          completedToday: completedToday.length,
+          pendingTasks: tasks.filter((t) => !t.isDone).length,
+        };
+      case 'createTask': {
+        const newTask = await plugin.addTask({
+          title: message.data.title,
+          projectId: message.data.projectId,
+        });
 
-// Example: Handle custom actions from iframe
-plugin.onMessage('createTask', async (data: { title: string; projectId?: string }) => {
-  const newTask = await plugin.addTask({
-    title: data.title,
-    projectId: data.projectId,
+        plugin.showSnack({
+          msg: `Task "${message.data.title}" created!`,
+          type: 'SUCCESS',
+        });
+
+        return newTask;
+      }
+      case 'getTasks':
+        return await plugin.getTasks();
+      case 'getAllProjects':
+        return await plugin.getAllProjects();
+      // Example: Persist plugin data
+      case 'saveSettings':
+        await plugin.persistDataSynced(JSON.stringify(message.data));
+        return { success: true };
+      // Example: Load plugin data
+      case 'loadSettings': {
+        const settings = await plugin.loadSyncedData();
+        return settings ? JSON.parse(settings) : {};
+      }
+      default:
+        return { error: 'Unknown message type' };
+    }
   });
-
-  plugin.showSnack({
-    msg: `Task "${newTask.title}" created!`,
-    type: 'SUCCESS',
-  });
-
-  return newTask;
-});
-
-// Forward API calls from iframe to plugin API
-plugin.onMessage('getTasks', async () => {
-  return await plugin.getTasks();
-});
-
-plugin.onMessage('getAllProjects', async () => {
-  return await plugin.getAllProjects();
-});
-
-// Example: Persist plugin data
-plugin.onMessage('saveSettings', async (settings: any) => {
-  await plugin.persistDataSynced('settings', settings);
-  return { success: true };
-});
-
-// Example: Load plugin data
-plugin.onMessage('loadSettings', async () => {
-  const settings = await plugin.loadSyncedData('settings');
-  return settings || {};
-});
-
-// Plugin cleanup (if needed)
-plugin.onDestroy(() => {
-  plugin.log('Boilerplate plugin is being destroyed');
-});
+}
