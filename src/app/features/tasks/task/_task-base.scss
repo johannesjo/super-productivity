@@ -63,7 +63,7 @@
   top: 2px;
   transition: var(--transition-standard);
   transition-property: transform, box-shadow;
-  border: 1px solid transparent;
+  border: var(--task-border, 1px solid transparent);
   border-radius: var(--task-border-radius);
   box-shadow: var(--task-shadow);
 
