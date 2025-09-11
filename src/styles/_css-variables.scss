@@ -415,6 +415,7 @@ body.isDarkTheme {
   // Task shadows
   --task-current-shadow: var(--whiteframe-shadow-8dp);
   --task-selected-shadow: var(--whiteframe-shadow-4dp);
+  --task-shadow-sub-task: var(--task-shadow);
 
   // Scrollbar colors
   --scrollbar-thumb: rgba(150, 150, 150, 0.3);
