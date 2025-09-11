@@ -71,32 +71,28 @@ import { KeyboardConfig } from '../../../features/config/keyboard-config.model';
           display: block;
         }
 
+        &.isActive,
+        &.isCustomized {
+          box-shadow: 0px -2px 3px 0px var(--separator-alpha);
+        }
+
         &.isActive {
           background-color: transparent;
+
+          &::after {
+            border-radius: 4px;
+          }
 
           .mat-icon {
             transform: rotate(45deg);
           }
-
-          &::after {
-            border-radius: 4px;
-            box-shadow: 0px -2px 3px 0px var(--separator-alpha);
-            background: var(--right-panel-bg);
-            content: '';
-            width: 100%;
-            position: absolute;
-            left: 1px;
-            top: 0;
-            bottom: -5px;
-            z-index: -1;
-          }
-
-          &.isCustomized::after {
-            background: var(--c-accent);
-          }
         }
 
-        &:hover:not(.isActive):not(:disabled) {
+        &.isCustomized {
+          background: var(--c-accent);
+        }
+
+        &:hover:not(.isActive):not(.isCustomized):not(:disabled) {
           background-color: var(--hover-color, rgba(0, 0, 0, 0.04));
         }
 
