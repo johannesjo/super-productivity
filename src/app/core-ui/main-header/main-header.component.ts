@@ -40,7 +40,6 @@ import { PluginSidePanelBtnsComponent } from '../../plugins/ui/plugin-side-panel
 import { PageTitleComponent } from './page-title/page-title.component';
 import { PlayButtonComponent } from './play-button/play-button.component';
 import { DesktopPanelButtonsComponent } from './desktop-panel-buttons/desktop-panel-buttons.component';
-import { BreakpointObserver } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -74,7 +73,6 @@ export class MainHeaderComponent implements OnDestroy {
   readonly simpleCounterService = inject(SimpleCounterService);
   readonly syncWrapperService = inject(SyncWrapperService);
   readonly globalConfigService = inject(GlobalConfigService);
-  readonly breakpointObserver = inject(BreakpointObserver);
   private readonly _snackService = inject(SnackService);
   private readonly _router = inject(Router);
   private readonly _store = inject(Store);
@@ -83,20 +81,8 @@ export class MainHeaderComponent implements OnDestroy {
   T: typeof T = T;
   isShowSimpleCounterBtnsMobile = signal(false);
 
-  // TODO these should live in the layout service
-  // Convert breakpoint observer to signals - using 600px to match mobile-bottom-nav
-  private _isXs$ = this.breakpointObserver.observe('(max-width: 600px)');
-  private _isXxxs$ = this.breakpointObserver.observe('(max-width: 398px)');
-
-  // TODO these should live in the layout service
-  isXs = toSignal(this._isXs$.pipe(map((result) => result.matches)), {
-    initialValue: false,
-  });
-
-  // TODO these should live in the layout service
-  isXxxs = toSignal(this._isXxxs$.pipe(map((result) => result.matches)), {
-    initialValue: false,
-  });
+  isXs = this.layoutService.isXs;
+  isXxxs = this.layoutService.isXxxs;
 
   showDesktopButtons = computed(() => !this.isXs());
 

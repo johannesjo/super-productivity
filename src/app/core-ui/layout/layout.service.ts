@@ -26,6 +26,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 const NAV_ALWAYS_VISIBLE = 600;
 const RIGHT_PANEL_OVER = 720;
 const VERY_BIG_SCREEN = NAV_ALWAYS_VISIBLE;
+const XS_BREAKPOINT = 600;
+const XXXS_BREAKPOINT = 398;
 
 @Injectable({
   providedIn: 'root',
@@ -59,6 +61,20 @@ export class LayoutService {
     this._breakPointObserver
       .observe([`(min-width: ${RIGHT_PANEL_OVER}px)`])
       .pipe(map((result) => !result.matches)),
+    { initialValue: false },
+  );
+
+  readonly isXs = toSignal(
+    this._breakPointObserver
+      .observe(`(max-width: ${XS_BREAKPOINT}px)`)
+      .pipe(map((result) => result.matches)),
+    { initialValue: false },
+  );
+
+  readonly isXxxs = toSignal(
+    this._breakPointObserver
+      .observe(`(max-width: ${XXXS_BREAKPOINT}px)`)
+      .pipe(map((result) => result.matches)),
     { initialValue: false },
   );
 
