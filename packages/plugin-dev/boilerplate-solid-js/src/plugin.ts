@@ -31,9 +31,9 @@ plugin.registerMenuEntry({
 
 // Example: Register keyboard shortcut
 plugin.registerShortcut({
-  keys: 'ctrl+shift+b',
+  id: 'open-boilerplate-plugin',
   label: 'Open Boilerplate Plugin',
-  action: () => {
+  onExec: () => {
     plugin.showIndexHtmlAsView();
   },
 });
