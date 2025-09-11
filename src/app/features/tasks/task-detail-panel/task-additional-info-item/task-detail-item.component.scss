@@ -136,21 +136,20 @@
     border-radius: var(--card-border-radius);
     overflow: visible !important;
     transition: var(--transition-standard);
-    background: var(--bg-lightest);
-    @include darkTheme() {
-      box-shadow: var(--whiteframe-shadow-1dp);
-    }
   }
 
   &.isFocused .markdown-wrapper {
     box-shadow: var(--whiteframe-shadow-3dp) !important;
-    border-color: transparent;
   }
 
   .markdown-unparsed,
   .markdown-parsed {
+    background: var(--bg-lightest);
     color: inherit;
-    background-color: inherit;
+
+    @include lightTheme() {
+      border: 1px solid var(--extra-border-color);
+    }
   }
 }
 
