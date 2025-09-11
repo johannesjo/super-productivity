@@ -94,6 +94,5 @@ export const DEFAULT_TASK_REPEAT_CFG: Omit<TaskRepeatCfgCopy, 'id'> = {
 
   notes: undefined,
   shouldInheritSubtasks: false,
-  // legacy isAutoUpdateSubtasks intentionally left undefined
   disableAutoUpdateSubtasks: false,
 };
