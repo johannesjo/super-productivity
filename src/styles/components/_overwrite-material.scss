@@ -227,3 +227,16 @@ task.cdk-drag-preview .box {
 mat-tooltip-component {
   pointer-events: none;
 }
+
+// SNACK
+// Move snack bar above mobile bottom nav for all touch devices
+@include media-queries.mq(xs, max) {
+  // Apply to all touch devices, not just when mobile bottom nav is shown
+  body.hasMobileBottomNav mat-snack-bar-container {
+    margin-bottom: calc(var(--bottom-nav-height) + 24px) !important;
+  }
+
+  //snack-custom {
+  //  margin-bottom: calc(var(--bottom-nav-height) + 16px) !important;
+  //}
+}

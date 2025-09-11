@@ -31,15 +31,6 @@
   }
 }
 
-// Move snack bar above mobile bottom nav
-:host ::ng-deep {
-  @include mq(xs, max) {
-    body.hasMobileBottomNav .cdk-overlay-container .mat-mdc-snack-bar-container {
-      bottom: calc(var(--bottom-nav-height) + 16px) !important;
-    }
-  }
-}
-
 // Override magic-side-nav styles for flex layout integration
 // Use desktop layout overrides only on larger screens
 @include mq(xs) {

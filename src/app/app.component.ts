@@ -19,7 +19,7 @@ import { GlobalConfigService } from './features/config/global-config.service';
 import { LayoutService } from './core-ui/layout/layout.service';
 import { IPC } from '../../electron/shared-with-frontend/ipc-events.const';
 import { SnackService } from './core/snack/snack.service';
-import { BodyClass, IS_ELECTRON, LanguageCode } from './app.constants';
+import { IS_ELECTRON, LanguageCode } from './app.constants';
 import { expandAnimation } from './ui/animations/expand.ani';
 import { warpRouteAnimation } from './ui/animations/warp-route';
 import { combineLatest, Observable, Subscription } from 'rxjs';
@@ -83,7 +83,6 @@ import { ContextMenuComponent } from './ui/context-menu/context-menu.component';
 import { WorkContextThemeCfg } from './features/work-context/work-context.model';
 import { IsInputElement } from './util/dom-element';
 import { MobileBottomNavComponent } from './core-ui/mobile-bottom-nav/mobile-bottom-nav.component';
-import { IS_TOUCH_PRIMARY } from './util/is-mouse-primary';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -160,7 +159,7 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   readonly globalThemeService = inject(GlobalThemeService);
   readonly _store = inject(Store);
   readonly T = T;
-  readonly isShowMobileButtonNav = IS_MOBILE && IS_TOUCH_PRIMARY;
+  readonly isShowMobileButtonNav = this.globalThemeService.isShowMobileButtonNav;
 
   productivityTipTitle: string = productivityTip && productivityTip[0];
   productivityTipText: string = productivityTip && productivityTip[1];
@@ -211,27 +210,6 @@ export class AppComponent implements OnDestroy, AfterViewInit {
       const val = this._languageService.isLangRTL();
       this.isRTL = val;
       document.dir = this.isRTL ? 'rtl' : 'ltr';
-    });
-
-    // Add/remove hasBgImage class to body when background image changes
-    effect(() => {
-      const bgImage = this.globalThemeService.backgroundImg();
-      const bodyEl = document.body;
-      if (bgImage) {
-        bodyEl.classList.add(BodyClass.hasBgImage);
-      } else {
-        bodyEl.classList.remove(BodyClass.hasBgImage);
-      }
-    });
-
-    // Add/remove has-mobile-bottom-nav class to body for snack bar positioning
-    effect(() => {
-      const bodyEl = document.body;
-      if (this.isShowMobileButtonNav) {
-        bodyEl.classList.add(BodyClass.hasMobileBottomNav);
-      } else {
-        bodyEl.classList.remove(BodyClass.hasMobileBottomNav);
-      }
     });
 
     this._subs.add(

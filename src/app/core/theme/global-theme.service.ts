@@ -24,6 +24,7 @@ import { HttpClient } from '@angular/common/http';
 import { LS } from '../persistence/storage-keys.const';
 import { CustomThemeService } from './custom-theme.service';
 import { Log } from '../log';
+import { IS_MOBILE } from '../../util/is-mobile';
 
 export type DarkModeCfg = 'dark' | 'light' | 'system';
 
@@ -40,6 +41,7 @@ export class GlobalThemeService {
   private _imexMetaService = inject(ImexViewService);
   private _http = inject(HttpClient);
   private _customThemeService = inject(CustomThemeService);
+  readonly isShowMobileButtonNav = IS_MOBILE && IS_TOUCH_PRIMARY;
 
   darkMode = signal<DarkModeCfg>(
     (localStorage.getItem(LS.DARK_MODE) as DarkModeCfg) || 'system',
@@ -240,6 +242,24 @@ export class GlobalThemeService {
         this.document.body.classList.add(BodyClass.isDisableAnimations);
       } else {
         this.document.body.classList.remove(BodyClass.isDisableAnimations);
+      }
+    });
+
+    // Add/remove hasBgImage class to body when background image changes
+    effect(() => {
+      if (this.backgroundImg()) {
+        this.document.body.classList.add(BodyClass.hasBgImage);
+      } else {
+        this.document.body.classList.remove(BodyClass.hasBgImage);
+      }
+    });
+
+    // Add/remove has-mobile-bottom-nav class to body for snack bar positioning
+    effect(() => {
+      if (this.isShowMobileButtonNav) {
+        this.document.body.classList.add(BodyClass.hasMobileBottomNav);
+      } else {
+        this.document.body.classList.remove(BodyClass.hasMobileBottomNav);
       }
     });
 
