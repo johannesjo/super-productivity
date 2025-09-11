@@ -43,6 +43,8 @@ export const createPluginCssInjection = (): string => {
         --text-color-less-intense: ${getVar('--text-color-less-intense')};
         --text-color-muted: ${getVar('--text-color-muted')};
         --card-bg: ${getVar('--card-bg')};
+        --card-shadow: ${getVar('--card-shadow')};
+        --card-border-radius: ${getVar('--card-border-radius')};
         --divider-color: ${getVar('--divider-color')};
         --extra-border-color: ${getVar('--extra-border-color')};
         --select-hover-bg: ${getVar('--select-hover-bg')};
@@ -57,6 +59,55 @@ export const createPluginCssInjection = (): string => {
         --scrollbar-thumb: ${getVar('--scrollbar-thumb')};
         --scrollbar-thumb-hover: ${getVar('--scrollbar-thumb-hover')};
         --scrollbar-track: ${getVar('--scrollbar-track')};
+        
+        /* Shadow system */
+        --whiteframe-shadow-1dp: ${getVar('--whiteframe-shadow-1dp')};
+        --whiteframe-shadow-2dp: ${getVar('--whiteframe-shadow-2dp')};
+        --whiteframe-shadow-3dp: ${getVar('--whiteframe-shadow-3dp')};
+        --whiteframe-shadow-4dp: ${getVar('--whiteframe-shadow-4dp')};
+        --whiteframe-shadow-6dp: ${getVar('--whiteframe-shadow-6dp')};
+        --whiteframe-shadow-8dp: ${getVar('--whiteframe-shadow-8dp')};
+        --whiteframe-shadow-12dp: ${getVar('--whiteframe-shadow-12dp')};
+        --whiteframe-shadow-24dp: ${getVar('--whiteframe-shadow-24dp')};
+        
+        /* Spacing system */
+        --s: ${getVar('--s')};
+        --s-quarter: ${getVar('--s-quarter')};
+        --s-half: ${getVar('--s-half')};
+        --s2: ${getVar('--s2')};
+        --s3: ${getVar('--s3')};
+        --s4: ${getVar('--s4')};
+        
+        /* Transition system */
+        --transition-duration-xs: ${getVar('--transition-duration-xs')};
+        --transition-duration-s: ${getVar('--transition-duration-s')};
+        --transition-duration-m: ${getVar('--transition-duration-m')};
+        --transition-duration-l: ${getVar('--transition-duration-l')};
+        --transition-standard: ${getVar('--transition-standard')};
+        --ani-standard-timing: ${getVar('--ani-standard-timing')};
+        
+        /* Task-related variables */
+        --task-first-line-min-height: ${getVar('--task-first-line-min-height')};
+        --task-icon-default-opacity: ${getVar('--task-icon-default-opacity')};
+        --task-inner-padding-top-bottom: ${getVar('--task-inner-padding-top-bottom')};
+        --task-is-done-dim-opacity: ${getVar('--task-is-done-dim-opacity')};
+        --task-border-radius: ${getVar('--task-border-radius')};
+        --task-c-bg: ${getVar('--task-c-bg')};
+        --task-c-selected-bg: ${getVar('--task-c-selected-bg')};
+        --sub-task-c-bg: ${getVar('--sub-task-c-bg')};
+        --sub-task-c-bg-done: ${getVar('--sub-task-c-bg-done')};
+        --task-c-bg-done: ${getVar('--task-c-bg-done')};
+        --task-c-current-bg: ${getVar('--task-c-current-bg')};
+        --task-c-drag-drop-bg: ${getVar('--task-c-drag-drop-bg')};
+        --sub-task-c-bg-in-selected: ${getVar('--sub-task-c-bg-in-selected')};
+        --task-shadow: ${getVar('--task-shadow')};
+        --task-shadow-sub-task: ${getVar('--task-shadow-sub-task')};
+        --task-current-shadow: ${getVar('--task-current-shadow')};
+        --task-selected-shadow: ${getVar('--task-selected-shadow')};
+        --task-detail-value-color: ${getVar('--task-detail-value-color')};
+        --task-detail-bg: ${getVar('--task-detail-bg')};
+        --task-detail-bg-hover: ${getVar('--task-detail-bg-hover')};
+        --task-detail-shadow: ${getVar('--task-detail-shadow')};
       }
 
       body {
