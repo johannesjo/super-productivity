@@ -44,8 +44,15 @@ export class WorkViewPage extends BasePage {
     const textarea = this.page.locator('textarea:focus, input[type="text"]:focus');
     await textarea.waitFor({ state: 'visible', timeout: 1000 });
 
+    // Ensure the field is properly focused and cleared before filling
+    await textarea.click();
+    await this.page.waitForTimeout(100);
+    await textarea.fill('');
+    await this.page.waitForTimeout(50);
+
     // Use fill() instead of type() for more reliable text input
     await textarea.fill(subTaskName);
+    await this.page.waitForTimeout(100);
     await this.page.keyboard.press('Enter');
   }
 }

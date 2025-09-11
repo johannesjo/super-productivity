@@ -29,7 +29,7 @@ test.describe.serial('Reminders View Task 4', () => {
     await workViewPage.addTask(title);
 
     // Wait for task to be fully rendered before proceeding
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(800);
 
     // Open task panel by hovering and clicking the detail button
     // Find the specific task by title to ensure we're working with the right one
@@ -41,8 +41,9 @@ test.describe.serial('Reminders View Task 4', () => {
     const taskSel = page.locator(specificTaskSelector).first();
     await taskSel.waitFor({ state: 'visible', timeout: 10000 });
 
-    // Ensure task is fully loaded by checking for task content
-    await page.waitForTimeout(300);
+    // Ensure task is fully loaded by checking for task content and that it's not moving
+    await page.waitForTimeout(500);
+    await taskSel.scrollIntoViewIfNeeded();
 
     await taskSel.hover();
     const detailPanelBtn = taskSel.locator('.show-additional-info-btn').first();
@@ -90,7 +91,7 @@ test.describe.serial('Reminders View Task 4', () => {
     if (inputValue !== timeValue) {
       // Fallback: use evaluate to set value directly
       await page.evaluate(
-        ({ value }) => {
+        ({ value }: { value: string }) => {
           const timeInputEl = document.querySelector(
             'mat-form-field input[type="time"]',
           ) as HTMLInputElement;
@@ -132,12 +133,13 @@ test.describe.serial('Reminders View Task 4', () => {
 
     // Add tasks with proper spacing to avoid interference
     await addTaskWithReminder(page, workViewPage, task1Name, start);
-    await page.waitForTimeout(1000); // Ensure first task is fully processed
+    await page.waitForTimeout(2000); // Ensure first task is fully processed
 
     await addTaskWithReminder(page, workViewPage, task2Name, start);
-    await page.waitForTimeout(1000); // Ensure second task is fully processed
+    await page.waitForTimeout(2000); // Ensure second task is fully processed
 
     await addTaskWithReminder(page, workViewPage, task3Name, Date.now() + 5000);
+    await page.waitForTimeout(1000); // Allow final task to settle
 
     // Wait for reminder dialog
     await page.waitForSelector(DIALOG, {
@@ -155,11 +157,19 @@ test.describe.serial('Reminders View Task 4', () => {
     await expect(page.locator(DIALOG_TASKS_WRAPPER)).toContainText(task2Name);
     await expect(page.locator(DIALOG_TASKS_WRAPPER)).toContainText(task3Name);
 
-    // Click "add to today" buttons
-    await page.click(DIALOG_TASK1 + TO_TODAY_SUF);
-    await page.click(DIALOG_TASK2 + TO_TODAY_SUF);
+    // Click "add to today" buttons with proper waits
+    const button1 = page.locator(DIALOG_TASK1 + TO_TODAY_SUF);
+    await button1.waitFor({ state: 'visible', timeout: 5000 });
+    await button1.click();
+    await page.waitForTimeout(500); // Allow first click to process
+
+    const button2 = page.locator(DIALOG_TASK2 + TO_TODAY_SUF);
+    await button2.waitFor({ state: 'visible', timeout: 5000 });
+    await button2.click();
+    await page.waitForTimeout(500); // Allow second click to process
 
     // Verify remaining task contains 'D task xyz'
+    await page.waitForTimeout(1000); // Allow dialog state to update
     await expect(page.locator(DIALOG_TASK1)).toContainText('D task xyz');
   });
 });
