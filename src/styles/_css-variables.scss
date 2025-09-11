@@ -365,6 +365,7 @@ body.isDarkTheme {
   --sidebar-text-secondary: var(--text-color-muted);
   --overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.8));
   --right-panel-bg: transparent;
+  --right-panel-bg-mobile: var(--bg);
   --bottom-nav-bg: var(--sidenav-bg-mobile);
 
   // Text colors
