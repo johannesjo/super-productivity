@@ -76,9 +76,8 @@
 .repeat-task-cfg {
   margin-bottom: var(--s);
   padding: var(--s-half) var(--s2);
-  box-shadow: none;
   border: none;
-
+  box-shadow: var(--task-shadow);
   background: var(--task-c-bg);
 }
 
