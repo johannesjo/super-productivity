@@ -89,9 +89,9 @@
     // because of the shadow, this looks better
     //bottom: 2px;
 
-    @include darkTheme {
-      box-shadow: var(--whiteframe-shadow-4dp);
-    }
+    //@include darkTheme {
+    //  box-shadow: var(--whiteframe-shadow-4dp);
+    //}
 
     @include mq(xs) {
       transform-origin: left;
@@ -198,7 +198,6 @@
 
     @include darkTheme {
       top: -1px;
-      box-shadow: var(--whiteframe-shadow-1dp);
       background: var(--sub-task-c-bg);
     }
   }

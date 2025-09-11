@@ -39,7 +39,6 @@ $z-this-backdrop: calc(var(--z-task-side-bar-over) - 1);
 
   @include mq(xs, max) {
     max-width: 100%;
-    background: var(--right-panel-bg-mobile);
   }
 
   //border-color: var(--extra-border-color);
@@ -51,6 +50,7 @@ $z-this-backdrop: calc(var(--z-task-side-bar-over) - 1);
     bottom: 0;
     z-index: var(--z-task-side-bar-over);
     right: 0;
+    background: var(--right-panel-bg-mobile);
 
     @include mq(xs, max) {
       width: 100% !important;

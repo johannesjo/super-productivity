@@ -1,14 +1,9 @@
 @use './theming';
 
-//$shadow-edit-on-click-light: 0 0 4px 0 var(--c-dark-80), var(--whiteframe-shadow-14dp);
-//$shadow-edit-on-click-dark: 0 0 4px 0 var(--bg)-lightest, var(--whiteframe-shadow-14dp);
-$shadow-edit-on-click-dark: var(--whiteframe-shadow-15dp);
-$shadow-edit-on-click-light: var(--whiteframe-shadow-7dp);
-
 @mixin inlineEditElevation {
   border-radius: var(--card-border-radius);
   background: var(--card-bg);
-  box-shadow: var(--whiteframe-shadow-7dp);
+  box-shadow: var(--whiteframe-shadow-4dp);
   color: var(--text-color-most-intense);
   border: 1px solid var(--c-accent);
   //border: 1px solid var(--extra-border-color);
