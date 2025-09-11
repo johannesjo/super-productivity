@@ -1,43 +1,38 @@
-@if (!layoutService.isXs()) {
-  <better-drawer-container
-    (wasClosed)="close()"
-    [isOpen]="isOpen()"
-    [isOver]="isOverlayMode()"
-    [sideWidth]="40"
-  >
-    <ng-container better-drawer-content>
-      <ng-content></ng-content>
-    </ng-container>
+<better-drawer-container
+  (wasClosed)="close()"
+  [isOpen]="isOpen() && !layoutService.isXs()"
+  [isOver]="isOverlayMode()"
+  [sideWidth]="40"
+>
+  <ng-container better-drawer-content>
+    <ng-content></ng-content>
+  </ng-container>
 
-    <ng-container better-drawer-side>
-      @if (isOpen()) {
-        <div class="right-panel">
-          @if (panelContent() === 'ISSUE_PANEL') {
-            <issue-panel [@slideInFromRight]></issue-panel>
-          } @else if (panelContent() === 'NOTES') {
-            <notes [@slideInFromRight]></notes>
-          } @else if (panelContent() === 'TASK_VIEW_CUSTOMIZER_PANEL') {
-            <task-view-customizer-panel [@slideInFromRight]></task-view-customizer-panel>
-          } @else if (panelContent() === 'PLUGIN') {
-            @for (key of pluginPanelKeys(); track key) {
-              <plugin-panel-container [@slideInFromRight]></plugin-panel-container>
-            }
-            <!-- Task content comes last so we can avoid an extra effect to unset selected task -->
-          } @else {
-            @if (selectedTaskWithDelayForNone(); as task) {
-              <task-detail-panel
-                [isOver]="isOverlayMode()"
-                [@taskDetailPanelTaskChange]="task.id"
-                [@.disabled]="isDisableTaskPanelAni()"
-                [task]="task"
-              ></task-detail-panel>
-            }
+  <ng-container better-drawer-side>
+    @if (isOpen()) {
+      <div class="right-panel">
+        @if (panelContent() === 'ISSUE_PANEL') {
+          <issue-panel [@slideInFromRight]></issue-panel>
+        } @else if (panelContent() === 'NOTES') {
+          <notes [@slideInFromRight]></notes>
+        } @else if (panelContent() === 'TASK_VIEW_CUSTOMIZER_PANEL') {
+          <task-view-customizer-panel [@slideInFromRight]></task-view-customizer-panel>
+        } @else if (panelContent() === 'PLUGIN') {
+          @for (key of pluginPanelKeys(); track key) {
+            <plugin-panel-container [@slideInFromRight]></plugin-panel-container>
           }
-        </div>
-      }
-    </ng-container>
-  </better-drawer-container>
-} @else {
-  <!-- On xs screens, content is shown in bottom sheet via the effect -->
-  <ng-content></ng-content>
-}
+          <!-- Task content comes last so we can avoid an extra effect to unset selected task -->
+        } @else {
+          @if (selectedTaskWithDelayForNone(); as task) {
+            <task-detail-panel
+              [isOver]="isOverlayMode()"
+              [@taskDetailPanelTaskChange]="task.id"
+              [@.disabled]="isDisableTaskPanelAni()"
+              [task]="task"
+            ></task-detail-panel>
+          }
+        }
+      </div>
+    }
+  </ng-container>
+</better-drawer-container>
