@@ -1,0 +1,24 @@
+// Bottom panel sheet styles
+.bottom-panel-sheet {
+  .mat-bottom-sheet-container {
+    padding: 0;
+    max-height: 90vh;
+    min-height: 200px;
+  }
+
+  .bottom-panel-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .bottom-panel-content {
+    // Remove padding since components have their own padding
+    padding: 0;
+
+    // Ensure components fill the available space
+    > * {
+      height: 100%;
+    }
+  }
+}

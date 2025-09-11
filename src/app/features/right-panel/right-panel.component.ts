@@ -35,6 +35,11 @@ import { Log } from '../../core/log';
 import { NavigationEnd, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
+import { MatBottomSheet, MatBottomSheetRef } from '@angular/material/bottom-sheet';
+import {
+  BottomPanelContainerComponent,
+  BottomPanelData,
+} from '../bottom-panel/bottom-panel-container.component';
 
 @Component({
   selector: 'right-panel',
@@ -61,6 +66,8 @@ export class RightPanelComponent implements OnDestroy {
   pluginService = inject(PluginService);
   store = inject(Store);
   private _router = inject(Router);
+  private _bottomSheet = inject(MatBottomSheet);
+  private _bottomSheetRef: MatBottomSheetRef<BottomPanelContainerComponent> | null = null;
 
   // NOTE: used for debugging
   readonly isAlwaysOver = input<boolean>(false);
@@ -315,6 +322,53 @@ export class RightPanelComponent implements OnDestroy {
     { allowSignalWrites: true },
   );
 
+  // Effect to handle bottom sheet opening/closing on xs screens
+  private _bottomSheetEffect = effect(() => {
+    const isXs = this.layoutService.isXs();
+    const isOpen = this.isOpen();
+    const panelContent = this.panelContent();
+    const selectedTask = this.selectedTaskWithDelayForNone();
+    const activePluginId = this._activePluginId();
+    const isDisableTaskPanelAni = this.isDisableTaskPanelAni();
+
+    untracked(() => {
+      // Only handle bottom sheet on xs screens
+      if (isXs) {
+        if (isOpen && panelContent && !this._bottomSheetRef) {
+          // Open bottom sheet
+          const data: BottomPanelData = {
+            panelContent,
+            selectedTask,
+            activePluginId,
+            isDisableTaskPanelAni,
+          };
+
+          this._bottomSheetRef = this._bottomSheet.open(BottomPanelContainerComponent, {
+            data,
+            hasBackdrop: true,
+            closeOnNavigation: true,
+            panelClass: 'bottom-panel-sheet',
+            maxHeight: '90vh',
+          });
+
+          // Handle bottom sheet dismissal
+          this._bottomSheetRef.afterDismissed().subscribe(() => {
+            this._bottomSheetRef = null;
+            this.close();
+          });
+        } else if (!isOpen && this._bottomSheetRef) {
+          // Close bottom sheet
+          this._bottomSheetRef.dismiss();
+          this._bottomSheetRef = null;
+        }
+      } else if (this._bottomSheetRef) {
+        // Close bottom sheet when not on xs screens
+        this._bottomSheetRef.dismiss();
+        this._bottomSheetRef = null;
+      }
+    });
+  });
+
   ngOnDestroy(): void {
     // Clean up timers to prevent memory leaks
     if (this._selectedTaskDelayTimer) {
@@ -322,6 +376,11 @@ export class RightPanelComponent implements OnDestroy {
     }
     if (this._animationTimer) {
       window.clearTimeout(this._animationTimer);
+    }
+    // Clean up bottom sheet if open
+    if (this._bottomSheetRef) {
+      this._bottomSheetRef.dismiss();
+      this._bottomSheetRef = null;
     }
   }
 
