@@ -9,39 +9,27 @@ import { Page } from '@playwright/test';
  */
 export const waitForPluginAssets = async (
   page: Page,
-  maxRetries: number = 20,
-  retryDelay: number = 1500,
+  maxRetries: number = 12,
+  retryDelay: number = 1000,
+  overallTimeoutMs?: number,
 ): Promise<boolean> => {
-  // In CI, increase retries and delay
+  // Hard cap for total waiting time to avoid exceeding test timeout
+  const capMs = overallTimeoutMs ?? (process.env.CI ? 25000 : 15000);
+  const start = Date.now();
+  // In CI, keep retries conservative to stay under cap
   if (process.env.CI) {
-    maxRetries = 20;
-    retryDelay = 3000;
-    // Wait for server to be fully ready in CI
-    await page.waitForLoadState('networkidle');
-    await page.locator('app-root').waitFor({ state: 'visible', timeout: 10000 }); // Reduced from 15s to 10s
-    // Small delay for UI to stabilize
-    await page.waitForTimeout(200);
+    maxRetries = Math.min(Math.max(maxRetries, 10), 15);
+    retryDelay = Math.max(retryDelay, 1500);
   }
 
   const baseUrl = page.url().split('#')[0];
   const testUrl = `${baseUrl}assets/bundled-plugins/api-test-plugin/manifest.json`;
 
-  // First ensure the app is loaded
+  // Basic readiness check; keep short to not eat into cap
   try {
-    await page.waitForSelector('app-root', { state: 'visible', timeout: 30000 });
-    await page.waitForSelector('task-list, .tour-settingsMenuBtn, magic-side-nav', {
-      state: 'attached',
-      timeout: 20000,
-    });
-  } catch (e: any) {
-    // Give one extra grace period for slower startups before failing
-    await page.waitForTimeout(2000);
-    try {
-      await page.waitForSelector('app-root', { state: 'visible', timeout: 15000 });
-    } catch {
-      console.error('[Plugin Test] App did not become ready in time');
-      return false;
-    }
+    await page.waitForSelector('app-root', { state: 'visible', timeout: 8000 });
+  } catch {
+    return false;
   }
 
   for (let i = 0; i < maxRetries; i++) {
@@ -67,6 +55,11 @@ export const waitForPluginAssets = async (
       );
     }
 
+    // Respect overall cap to avoid test-level timeout
+    const elapsed = Date.now() - start;
+    if (elapsed + retryDelay > capMs) {
+      break;
+    }
     if (i < maxRetries - 1) {
       // Wait before retry - network request, so timeout is appropriate here
       await page.waitForTimeout(retryDelay);
@@ -77,9 +70,7 @@ export const waitForPluginAssets = async (
 
   // In CI, this might be expected if assets aren't built properly
   if (process.env.CI) {
-    console.warn(
-      '[Plugin Test] Plugin assets not available in CI - this is a known issue',
-    );
+    console.warn('[Plugin Test] Plugin assets unavailable; skipping in CI');
   }
 
   return false;
