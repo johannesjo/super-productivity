@@ -116,8 +116,3 @@ if (plugin.onMessage) {
     }
   });
 }
-
-// Plugin cleanup (if needed)
-plugin.onDestroy(() => {
-  plugin.log('Boilerplate plugin is being destroyed');
-});
