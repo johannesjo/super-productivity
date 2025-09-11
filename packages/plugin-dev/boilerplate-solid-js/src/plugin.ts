@@ -1,4 +1,5 @@
 import {
+  AnyTaskUpdatePayload,
   PluginAPI,
   PluginHooks,
   TaskCompletePayload,
@@ -54,7 +55,6 @@ plugin.registerHook(PluginHooks.TASK_UPDATE, (taskData: TaskUpdatePayload) => {
 });
 
 // Example: Hook into context changes
-plugin.on('contextChange', async (context: { projectId?: string; tagId?: string }) => {
 plugin.registerHook(
   PluginHooks.ANY_TASK_UPDATE,
   async (payload: AnyTaskUpdatePayload) => {
