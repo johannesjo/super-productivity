@@ -43,7 +43,11 @@
 
   .ani-container {
     &.isDisableAni {
-      animation: none !important;
+      &,
+      * {
+        animation: none !important;
+        transition: none !important;
+      }
     }
   }
 }

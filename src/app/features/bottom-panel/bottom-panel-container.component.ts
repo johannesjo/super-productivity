@@ -9,7 +9,8 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { MatBottomSheetRef, MAT_BOTTOM_SHEET_DATA } from '@angular/material/bottom-sheet';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '@angular/material/bottom-sheet';
 import { TaskWithSubTasks } from '../tasks/task.model';
 import { TaskDetailPanelComponent } from '../tasks/task-detail-panel/task-detail-panel.component';
 import { NotesComponent } from '../note/notes/notes.component';
@@ -21,6 +22,7 @@ import { taskDetailPanelTaskChangeAnimation } from '../tasks/task-detail-panel/t
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { BottomPanelPositionService } from '../../core-ui/layout/bottom-panel-position.service';
+import { TaskService } from '../tasks/task.service';
 
 export interface BottomPanelData {
   panelContent:
@@ -56,14 +58,17 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
   private _bottomSheetRef = inject(MatBottomSheetRef<BottomPanelContainerComponent>);
   private _elementRef = inject(ElementRef);
   private _positionService = inject(BottomPanelPositionService);
+  private _taskService = inject(TaskService);
   readonly data = inject<BottomPanelData>(MAT_BOTTOM_SHEET_DATA);
 
   readonly dragHandle = viewChild<ElementRef>('dragHandle');
 
   readonly panelContent = computed(() => this.data.panelContent);
-  readonly selectedTask = computed(() => this.data.selectedTask || null);
+  readonly selectedTask = toSignal(this._taskService.selectedTask$, {
+    initialValue: null,
+  });
   readonly activePluginId = computed(() => this.data.activePluginId || null);
-  readonly isDisableTaskPanelAni = signal(this.data.isDisableTaskPanelAni ?? false);
+  readonly isDisableTaskPanelAni = signal(true); // Always start with animation disabled
 
   readonly pluginPanelKeys = computed<string[]>(() => {
     const activePluginId = this.activePluginId();
@@ -73,14 +78,24 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
   private _isDragging = false;
   private _startY = 0;
   private _startHeight = 0;
+  private _lastY = 0;
+  private _lastTime = 0;
+  private _velocity = 0;
+  private _disableAniTimeout?: number;
 
   ngAfterViewInit(): void {
     this._setupDragListeners();
     this._setInitialHeight();
+
+    // Re-enable animations after initial render is complete
+    this._disableAniTimeout = window.setTimeout(() => {
+      this.isDisableTaskPanelAni.set(false);
+    }, 300);
   }
 
   ngOnDestroy(): void {
     this._removeDragListeners();
+    window.clearTimeout(this._disableAniTimeout);
   }
 
   close(): void {
@@ -130,6 +145,9 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
   private _startDrag(clientY: number): void {
     this._isDragging = true;
     this._startY = clientY;
+    this._lastY = clientY;
+    this._lastTime = Date.now();
+    this._velocity = 0;
     const container = this._getSheetContainer();
     if (container) {
       this._startHeight = container.offsetHeight;
@@ -165,26 +183,58 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
 
     container.style.height = `${constrainedHeight}px`;
     container.style.maxHeight = `${constrainedHeight}px`;
+
+    // Calculate velocity for momentum detection
+    const currentTime = Date.now();
+    const timeDiff = currentTime - this._lastTime;
+    if (timeDiff > 0) {
+      this._velocity = (clientY - this._lastY) / timeDiff;
+    }
+    this._lastY = clientY;
+    this._lastTime = currentTime;
   }
 
   private _onDragEnd(): void {
-    this._isDragging = false;
-    document.body.style.userSelect = '';
-    const container = this._getSheetContainer();
-    if (container) {
-      container.classList.remove('dragging');
-      // Save the current height for this panel type
-      this._positionService.saveHeight(this.panelContent(), container.offsetHeight);
-    }
+    this._handleDragEnd();
   }
 
   private _onTouchEnd(): void {
+    this._handleDragEnd();
+  }
+
+  private _handleDragEnd(): void {
     this._isDragging = false;
     document.body.style.userSelect = '';
     const container = this._getSheetContainer();
     if (container) {
       container.classList.remove('dragging');
-      // Save the current height for this panel type
+
+      // Check for momentum and handle snap behavior
+      const velocityThreshold = 0.5; // pixels per millisecond
+      const viewportHeight = window.innerHeight;
+
+      if (Math.abs(this._velocity) > velocityThreshold) {
+        if (this._velocity > 0) {
+          // Swiping down with momentum - close the panel
+          this.close();
+          return;
+        } else {
+          // Swiping up with momentum - expand to 4/5 of screen height
+          const targetHeight = viewportHeight * 0.8;
+          container.style.height = `${targetHeight}px`;
+          container.style.maxHeight = `${targetHeight}px`;
+          container.style.transition = 'height 0.3s ease-out, max-height 0.3s ease-out';
+
+          // Remove transition after animation
+          setTimeout(() => {
+            container.style.transition = '';
+            this._positionService.saveHeight(this.panelContent(), targetHeight);
+          }, 300);
+          return;
+        }
+      }
+
+      // No momentum - just save the current height
       this._positionService.saveHeight(this.panelContent(), container.offsetHeight);
     }
   }

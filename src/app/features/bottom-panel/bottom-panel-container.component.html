@@ -22,7 +22,9 @@
         @if (selectedTask(); as selectedTaskLocal) {
           <div
             class="ani-container"
-            [@taskDetailPanelTaskChange]="selectedTaskLocal.id"
+            [@taskDetailPanelTaskChange]="
+              isDisableTaskPanelAni() ? 'disabled' : selectedTaskLocal.id
+            "
             [class.isDisableAni]="isDisableTaskPanelAni()"
           >
             <task-detail-panel [task]="selectedTaskLocal"></task-detail-panel>
