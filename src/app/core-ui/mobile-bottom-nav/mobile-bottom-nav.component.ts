@@ -1,12 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule, NavigationEnd } from '@angular/router';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
 import { TranslateModule } from '@ngx-translate/core';
-import { BreakpointObserver } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs/operators';
 
@@ -14,7 +13,6 @@ import { LayoutService } from '../layout/layout.service';
 import { TaskViewCustomizerService } from '../../features/task-view-customizer/task-view-customizer.service';
 import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
 import { PluginIconComponent } from '../../plugins/ui/plugin-icon/plugin-icon.component';
-import { GlobalConfigService } from '../../features/config/global-config.service';
 import { Store } from '@ngrx/store';
 import { togglePluginPanel } from '../layout/store/layout.actions';
 import {
@@ -43,11 +41,9 @@ import { T } from '../../t.const';
 })
 export class MobileBottomNavComponent {
   private readonly _router = inject(Router);
-  private readonly _breakpointObserver = inject(BreakpointObserver);
   private readonly _layoutService = inject(LayoutService);
   private readonly _taskViewCustomizerService = inject(TaskViewCustomizerService);
   private readonly _pluginBridge = inject(PluginBridgeService);
-  private readonly _globalConfigService = inject(GlobalConfigService);
   private readonly _store = inject(Store);
 
   readonly T = T;
@@ -61,12 +57,6 @@ export class MobileBottomNavComponent {
 
   // Output events
   toggleMobileNavEvent = output<void>();
-
-  // Responsive breakpoint
-  private readonly _isMobile$ = this._breakpointObserver.observe('(max-width: 768px)');
-  readonly isMobile = toSignal(this._isMobile$.pipe(map((result) => result.matches)), {
-    initialValue: false,
-  });
 
   // Current route tracking
   readonly currentRoute = toSignal(
