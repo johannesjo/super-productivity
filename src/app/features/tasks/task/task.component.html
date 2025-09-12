@@ -71,7 +71,10 @@
       </button>
     }
 
-    <div class="title-and-left-btns-wrapper">
+    <div
+      class="title-and-left-btns-wrapper"
+      (click)="titleBarClick($event)"
+    >
       <div
         (click)="focusSelf()"
         [class.handle-par]="!isInSubTaskList()"
@@ -112,13 +115,7 @@
         </div>
       </div>
 
-      <div
-        (click)="
-          IS_TOUCH_PRIMARY &&
-            (t.title.length ? toggleShowDetailPanel($event) : focusTitleForEdit())
-        "
-        class="title-and-tags-wrapper"
-      >
+      <div class="title-and-tags-wrapper">
         @if (!isInSubTaskList() && t.parentId) {
           <div class="parent-title">
             <div class="title">{{ parentTitle() }}</div>
@@ -256,11 +253,7 @@
         }
 
         <div>
-          @if (
-            t.notes ||
-            (t.issueId && t.issueType !== ICAL_TYPE) ||
-            (isSelected() && !layoutService.isRightPanelOver())
-          ) {
+          @if (t.notes || (t.issueId && t.issueType !== ICAL_TYPE)) {
             <button
               (click)="toggleShowDetailPanel()"
               title="{{ T.F.TASK.CMP.TOGGLE_DETAIL_PANEL | translate }}  {{
@@ -268,7 +261,6 @@
                   ? '[' + kb.taskToggleDetailPanelOpen + ']'
                   : ''
               }}"
-              [class.closeBtn]="!t.issueWasUpdated && isSelected()"
               class="ico-btn show-additional-info-btn"
               color=""
               mat-icon-button

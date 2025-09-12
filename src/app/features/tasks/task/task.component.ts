@@ -538,6 +538,19 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     );
   }
 
+  titleBarClick(event: MouseEvent): void {
+    console.log(event.target);
+    if (
+      (IS_TOUCH_PRIMARY && this.task().title.length) ||
+      (event.target as HTMLElement).tagName.toUpperCase() !== 'TEXTAREA'
+      // && (event.target as HTMLElement).tagName.toUpperCase() !== 'TASK-TITLE')
+    ) {
+      this.toggleShowDetailPanel(event);
+    } else {
+      this.focusTitleForEdit();
+    }
+  }
+
   focusPrevious(isFocusReverseIfNotPossible: boolean = false): void {
     if (IS_TOUCH_PRIMARY) {
       return;
