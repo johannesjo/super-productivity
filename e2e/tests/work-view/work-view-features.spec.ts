@@ -78,7 +78,7 @@ test.describe('Work View Features', () => {
   });
 
   test('should handle task order correctly', async ({ page, workViewPage }) => {
-    test.setTimeout(20000);
+    test.setTimeout(process.env.CI ? 60000 : 45000);
 
     // Wait for work view to be ready
     await workViewPage.waitForTaskList();

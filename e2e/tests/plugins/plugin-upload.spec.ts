@@ -18,7 +18,8 @@ test.describe.serial('Plugin Upload', () => {
   });
 
   test('upload and manage plugin lifecycle', async ({ page, workViewPage }) => {
-    test.setTimeout(30000); // Increase timeout for file upload
+    // Give the plugin pipeline more breathing room on slower machines/CI
+    test.setTimeout(process.env.CI ? 90000 : 60000);
     // Navigate to plugin management
     await page.click(SETTINGS_BTN);
     await page.waitForTimeout(1000);

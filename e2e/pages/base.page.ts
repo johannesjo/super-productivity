@@ -24,15 +24,29 @@ export abstract class BasePage {
 
     const inputEl = this.page.locator('add-task-bar.global input');
 
+    // If the global input is not present, open the Add Task Bar first
     if ((await inputEl.count()) === 0) {
       const addBtn = this.page.locator('.tour-addBtn');
       await addBtn.waitFor({ state: 'visible' });
       await addBtn.click();
-      await inputEl.waitFor({ state: 'visible' });
     }
 
-    await inputEl.clear();
-    await inputEl.fill(prefixedTaskName);
+    // Ensure input is visible before interacting (handles dev-server reloads)
+    await inputEl.first().waitFor({ state: 'visible', timeout: 15000 });
+
+    // Retry once if navigation/reload happens during typing
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        await inputEl.clear();
+        await inputEl.fill(prefixedTaskName);
+        break;
+      } catch (e) {
+        // Wait for possible navigation/re-render
+        await this.page.waitForLoadState('networkidle').catch(() => {});
+        await inputEl.first().waitFor({ state: 'visible', timeout: 10000 });
+        if (attempt === 1) throw e;
+      }
+    }
 
     // Store the initial count and get task text for verification
     const initialCount = await this.page.locator('task').count();

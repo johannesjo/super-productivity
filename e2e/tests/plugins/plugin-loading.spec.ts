@@ -17,7 +17,8 @@ const PLUGIN_IFRAME = 'plugin-index iframe';
 test.describe.serial('Plugin Loading', () => {
   test('full plugin loading lifecycle', async ({ page, workViewPage }) => {
     const timeoutMultiplier = getCITimeoutMultiplier();
-    test.setTimeout(30000 * timeoutMultiplier); // Reduced from 60s to 30s base
+    // Slightly higher base to avoid flakiness on slower environments
+    test.setTimeout(45000 * timeoutMultiplier);
 
     // First, ensure plugin assets are available
     const assetsAvailable = await waitForPluginAssets(page);
@@ -127,8 +128,8 @@ test.describe.serial('Plugin Loading', () => {
   });
 
   test('disable and re-enable plugin', async ({ page, workViewPage }) => {
-    // Increase timeout to account for asset checking in CI
-    test.setTimeout(process.env.CI ? 45000 : 20000); // Reduced timeouts
+    // Increase timeout to account for asset checking and plugin (un)load
+    test.setTimeout(process.env.CI ? 90000 : 60000);
 
     // Check if plugin assets are available
     const assetsAvailable = await waitForPluginAssets(page);

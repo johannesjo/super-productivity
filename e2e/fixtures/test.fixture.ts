@@ -46,15 +46,25 @@ export const test = base.extend<TestFixtures>({
       // Navigate to the app first
       await page.goto('/');
 
-      // Wait for app to be ready
-      await page.waitForLoadState('networkidle');
-      await page.waitForSelector('body', { state: 'visible' });
-
-      // Wait for the app to react to the localStorage change
+      // Wait for app shell and navigation to be ready and stable
       await page.waitForLoadState('domcontentloaded');
-
-      // Wait for the main navigation to be fully loaded
-      await page.waitForSelector('magic-side-nav', { state: 'visible', timeout: 10000 });
+      await page.waitForSelector('body', { state: 'visible' });
+      await page.waitForSelector('magic-side-nav', { state: 'visible', timeout: 15000 });
+      // Ensure we are on a work-view route and the DOM is settled
+      await page
+        .waitForURL(/#\/(tag|project)\/.+\/tasks/, { timeout: 15000 })
+        .catch(() => {});
+      await page.waitForLoadState('networkidle');
+      await page.locator('.route-wrapper').first().waitFor({ state: 'visible' });
+      // Only wait for the global add input if it's already present
+      const addTaskInput = page.locator('add-task-bar.global input');
+      try {
+        if ((await addTaskInput.count()) > 0) {
+          await addTaskInput.first().waitFor({ state: 'visible', timeout: 3000 });
+        }
+      } catch {
+        // Non-fatal: not all routes show the global add input immediately
+      }
 
       // Double-check: Dismiss any tour dialog if it still appears
       await use(page);

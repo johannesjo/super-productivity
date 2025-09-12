@@ -27,6 +27,16 @@ export class WorkViewPage extends BasePage {
     await this.routerWrapper.waitFor({ state: 'visible' });
     // Wait for network to settle
     await this.page.waitForLoadState('networkidle');
+    // If the global add-task bar is already open, wait for its input, otherwise don't block navigation
+    try {
+      if ((await this.addTaskGlobalInput.count()) > 0) {
+        await this.addTaskGlobalInput
+          .first()
+          .waitFor({ state: 'visible', timeout: 3000 });
+      }
+    } catch {
+      // Non-fatal: some routes/tests don't show the global add bar immediately
+    }
   }
 
   async addSubTask(task: Locator, subTaskName: string): Promise<void> {
