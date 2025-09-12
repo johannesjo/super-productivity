@@ -4,7 +4,6 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  max-height: 90vh;
   overflow: hidden;
 }
 
@@ -15,6 +14,7 @@
   position: relative;
   cursor: grab;
   user-select: none;
+  touch-action: none; // prevent native scrolling while dragging
 
   &:active {
     cursor: grabbing;

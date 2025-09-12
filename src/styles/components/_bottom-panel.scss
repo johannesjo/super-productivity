@@ -8,9 +8,7 @@
     // Fix to bottom of viewport
     position: fixed !important;
     bottom: 0 !important;
-    left: 16px !important;
     left: 0 !important;
-    right: 16px !important;
     right: 0 !important;
     width: 100vw !important;
     // Enable smooth resizing - but disable during custom dragging
@@ -26,6 +24,11 @@
     // Disable transitions during custom drag
     &.dragging {
       transition: none;
+      // Prevent any inner animation/transition jank while dragging
+      * {
+        transition: none !important;
+        animation: none !important;
+      }
     }
   }
 

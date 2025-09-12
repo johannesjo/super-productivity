@@ -327,9 +327,6 @@ export class RightPanelComponent implements OnDestroy {
     const isXs = this.layoutService.isXs();
     const isOpen = this.isOpen();
     const panelContent = this.panelContent();
-    const selectedTask = this.selectedTaskWithDelayForNone();
-    const activePluginId = this._activePluginId();
-    const isDisableTaskPanelAni = this.isDisableTaskPanelAni();
 
     untracked(() => {
       // Close bottom sheet immediately when switching from xs to non-xs screens
@@ -343,12 +340,7 @@ export class RightPanelComponent implements OnDestroy {
       if (isXs) {
         if (isOpen && panelContent && !this._bottomSheetRef) {
           // Open bottom sheet
-          const data: BottomPanelData = {
-            panelContent,
-            selectedTask,
-            activePluginId,
-            isDisableTaskPanelAni,
-          };
+          const data: BottomPanelData = { panelContent };
 
           this._bottomSheetRef = this._bottomSheet.open(BottomPanelContainerComponent, {
             data,

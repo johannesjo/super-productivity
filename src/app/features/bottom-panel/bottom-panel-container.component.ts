@@ -11,7 +11,6 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '@angular/material/bottom-sheet';
-import { TaskWithSubTasks } from '../tasks/task.model';
 import { TaskDetailPanelComponent } from '../tasks/task-detail-panel/task-detail-panel.component';
 import { NotesComponent } from '../note/notes/notes.component';
 import { IssuePanelComponent } from '../issue-panel/issue-panel.component';
@@ -31,9 +30,6 @@ export interface BottomPanelData {
     | 'ISSUE_PANEL'
     | 'TASK_VIEW_CUSTOMIZER_PANEL'
     | 'PLUGIN';
-  selectedTask?: TaskWithSubTasks | null;
-  activePluginId?: string | null;
-  isDisableTaskPanelAni?: boolean;
 }
 
 // Panel height constants
@@ -76,13 +72,7 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
   readonly selectedTask = toSignal(this._taskService.selectedTask$, {
     initialValue: null,
   });
-  readonly activePluginId = computed(() => this.data.activePluginId || null);
   readonly isDisableTaskPanelAni = signal(true); // Always start with animation disabled
-
-  readonly pluginPanelKeys = computed<string[]>(() => {
-    const activePluginId = this.activePluginId();
-    return activePluginId ? [`plugin-${activePluginId}`] : [];
-  });
 
   private _isDragging = false;
   private _startY = 0;
@@ -94,12 +84,9 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
   private _cachedContainer: HTMLElement | null = null;
 
   // Store bound functions to prevent memory leaks
-  private readonly _boundOnDragStart = this._onDragStart.bind(this);
-  private readonly _boundOnDragMove = this._onDragMove.bind(this);
-  private readonly _boundOnDragEnd = this._onDragEnd.bind(this);
-  private readonly _boundOnTouchStart = this._onTouchStart.bind(this);
-  private readonly _boundOnTouchMove = this._onTouchMove.bind(this);
-  private readonly _boundOnTouchEnd = this._onTouchEnd.bind(this);
+  private readonly _boundOnPointerDown = this._onPointerDown.bind(this);
+  private readonly _boundOnPointerMove = this._onPointerMove.bind(this);
+  private readonly _boundOnPointerUp = this._onPointerUp.bind(this);
 
   ngAfterViewInit(): void {
     this._setupDragListeners();
@@ -125,40 +112,30 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
     const panelHeader = this.panelHeader()?.nativeElement;
     if (!panelHeader) return;
 
-    // Mouse events
-    panelHeader.addEventListener('mousedown', this._boundOnDragStart);
-    document.addEventListener('mousemove', this._boundOnDragMove);
-    document.addEventListener('mouseup', this._boundOnDragEnd);
-
-    // Touch events
-    panelHeader.addEventListener('touchstart', this._boundOnTouchStart, {
+    // Unified pointer events (mouse, touch, pen)
+    panelHeader.addEventListener('pointerdown', this._boundOnPointerDown);
+    document.addEventListener('pointermove', this._boundOnPointerMove, {
       passive: false,
     });
-    document.addEventListener('touchmove', this._boundOnTouchMove, {
-      passive: false,
-    });
-    document.addEventListener('touchend', this._boundOnTouchEnd);
+    document.addEventListener('pointerup', this._boundOnPointerUp);
   }
 
   private _removeDragListeners(): void {
     const panelHeader = this.panelHeader()?.nativeElement;
     if (panelHeader) {
-      panelHeader.removeEventListener('mousedown', this._boundOnDragStart);
-      panelHeader.removeEventListener('touchstart', this._boundOnTouchStart);
+      panelHeader.removeEventListener('pointerdown', this._boundOnPointerDown);
     }
-    document.removeEventListener('mousemove', this._boundOnDragMove);
-    document.removeEventListener('mouseup', this._boundOnDragEnd);
-    document.removeEventListener('touchmove', this._boundOnTouchMove);
-    document.removeEventListener('touchend', this._boundOnTouchEnd);
+    document.removeEventListener('pointermove', this._boundOnPointerMove);
+    document.removeEventListener('pointerup', this._boundOnPointerUp);
   }
 
-  private _onDragStart(event: MouseEvent): void {
-    this._startDrag(event.clientY);
-  }
-
-  private _onTouchStart(event: TouchEvent): void {
+  private _onPointerDown(event: PointerEvent): void {
+    // Only react to primary button for mouse
+    if (event.pointerType === 'mouse' && event.button !== 0) {
+      return;
+    }
     event.preventDefault();
-    this._startDrag(event.touches[0].clientY);
+    this._startDrag(event.clientY);
   }
 
   private _startDrag(clientY: number): void {
@@ -175,16 +152,10 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
     document.body.style.userSelect = 'none';
   }
 
-  private _onDragMove(event: MouseEvent): void {
+  private _onPointerMove(event: PointerEvent): void {
     if (!this._isDragging) return;
     event.preventDefault();
     this._updateHeight(event.clientY);
-  }
-
-  private _onTouchMove(event: TouchEvent): void {
-    if (!this._isDragging) return;
-    event.preventDefault();
-    this._updateHeight(event.touches[0].clientY);
   }
 
   private _updateHeight(clientY: number): void {
@@ -213,11 +184,7 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
     this._lastTime = currentTime;
   }
 
-  private _onDragEnd(): void {
-    this._handleDragEnd();
-  }
-
-  private _onTouchEnd(): void {
+  private _onPointerUp(): void {
     this._handleDragEnd();
   }
 
