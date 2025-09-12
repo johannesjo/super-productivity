@@ -37,7 +37,7 @@ import {
   moveSubTaskToTop,
   moveSubTaskUp,
 } from '../../tasks/store/task.actions';
-import { EMPTY, forkJoin, from, of as rxOf } from 'rxjs';
+import { EMPTY, forkJoin, from, Observable, of as rxOf } from 'rxjs';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
@@ -47,7 +47,7 @@ export class TaskRepeatCfgEffects {
   private _matDialog = inject(MatDialog);
   private _taskArchiveService = inject(TaskArchiveService);
 
-  removeConfigIdFromTaskStateTasks$: any = createEffect(() =>
+  removeConfigIdFromTaskStateTasks$ = createEffect(() =>
     this._actions$.pipe(
       ofType(deleteTaskRepeatCfg),
       concatMap(({ id }) => this._taskService.getTasksByRepeatCfgId$(id).pipe(take(1))),
@@ -67,7 +67,7 @@ export class TaskRepeatCfgEffects {
     ),
   );
 
-  removeConfigIdFromTaskArchiveTasks$: any = createEffect(
+  removeConfigIdFromTaskArchiveTasks$ = createEffect(
     () =>
       this._actions$.pipe(
         ofType(deleteTaskRepeatCfg),
@@ -121,7 +121,10 @@ export class TaskRepeatCfgEffects {
     { dispatch: false },
   );
 
-  // Auto-sync subtask templates from newest live instance when auto-update flag is enabled
+  /**
+   * Auto-syncs subtask templates from the newest live instance when auto-update flag is enabled.
+   * Triggers on subtask operations like add, move, update, or delete.
+   */
   autoSyncSubtaskTemplatesFromNewest$ = createEffect(
     () =>
       this._actions$.pipe(
@@ -136,44 +139,12 @@ export class TaskRepeatCfgEffects {
           TaskSharedActions.deleteTask,
         ),
         // Ignore delete for parent tasks (no need to sync after parent removed)
-        filter((action) => {
-          const asAny = action as any;
-          if (action.type === TaskSharedActions.deleteTask.type) {
-            const task = asAny.task as Task | undefined;
-            return !!task && !!task.parentId;
-          }
-          return true;
-        }),
+        filter((action) => this._isRelevantSubtaskAction(action)),
         // Only consider updates relevant to subtasks or parent content updates
-        switchMap((action) => {
-          // Determine candidate parentId & taskId
-          // For move/add actions, parentId is explicit
-          const asAny = action as any;
-          const parentId: string | undefined = asAny.parentId || asAny.srcTaskId;
-          const updatedTaskId: string | undefined = asAny.task?.id || asAny.id;
-
-          if (!parentId && !updatedTaskId) {
-            return EMPTY;
-          }
-
-          // Resolve the parent: if parentId given use it, else try to get parent via updated task
-          const resolveParent$ = parentId
-            ? this._taskService.getByIdOnce$(parentId)
-            : updatedTaskId
-              ? this._taskService
-                  .getByIdOnce$(updatedTaskId as string)
-                  .pipe(
-                    switchMap((t) =>
-                      t && t.parentId
-                        ? this._taskService.getByIdOnce$(t.parentId)
-                        : rxOf(null),
-                    ),
-                  )
-              : rxOf(null);
-
-          return resolveParent$.pipe(
+        switchMap((action) =>
+          this._resolveParentTaskFromAction(action).pipe(
             first(),
-            switchMap((parent) => {
+            switchMap((parent: Task | null) => {
               if (!parent || !parent.repeatCfgId) {
                 return EMPTY;
               }
@@ -186,7 +157,7 @@ export class TaskRepeatCfgEffects {
                     return EMPTY;
                   }
                   // auto-update is default unless explicitly disabled
-                  const isAutoEnabled = (cfg as any).disableAutoUpdateSubtasks !== true;
+                  const isAutoEnabled = !cfg.disableAutoUpdateSubtasks;
                   if (!isAutoEnabled) {
                     return EMPTY;
                   }
@@ -204,7 +175,10 @@ export class TaskRepeatCfgEffects {
                         return EMPTY;
                       }
                       // Build templates from newest.subTaskIds order
-                      return rxOf({ cfg, newest } as {
+                      return rxOf({
+                        cfg,
+                        newest,
+                      } as {
                         cfg: TaskRepeatCfgCopy;
                         newest: Task;
                       });
@@ -236,13 +210,16 @@ export class TaskRepeatCfgEffects {
               );
             }),
             filter((v): v is ReturnType<typeof updateTaskRepeatCfg> => !!v),
-          );
-        }),
+          ),
+        ),
       ),
     { dispatch: true },
   );
 
-  // When enabling inherit subtasks in the dialog, immediately snapshot newest instance
+  /**
+   * When enabling inherit subtasks in the dialog, immediately snapshots the subtasks
+   * from the newest instance to set initial templates.
+   */
   enableAutoUpdateOrInheritSnapshot$ = createEffect(() =>
     this._actions$.pipe(
       ofType(updateTaskRepeatCfg),
@@ -328,7 +305,7 @@ export class TaskRepeatCfgEffects {
     ),
   );
 
-  checkToUpdateAllTaskInstances: any = createEffect(
+  checkToUpdateAllTaskInstances$ = createEffect(
     () =>
       this._actions$.pipe(
         ofType(updateTaskRepeatCfg),
@@ -477,16 +454,6 @@ export class TaskRepeatCfgEffects {
     }
   }
 
-  private _toSubTaskTemplates(
-    subs: Task[],
-  ): NonNullable<TaskRepeatCfgCopy['subTaskTemplates']> {
-    return subs.map((st) => ({
-      title: st.title,
-      notes: st.notes,
-      timeEstimate: st.timeEstimate,
-    }));
-  }
-
   private _templatesEqual(
     a: TaskRepeatCfgCopy['subTaskTemplates'] | undefined,
     b: NonNullable<TaskRepeatCfgCopy['subTaskTemplates']>,
@@ -507,5 +474,56 @@ export class TaskRepeatCfgEffects {
       }
     }
     return true;
+  }
+
+  /**
+   * Determines if an action is relevant for subtask template syncing
+   */
+  private _isRelevantSubtaskAction(action: any): boolean {
+    if (action.type === TaskSharedActions.deleteTask.type) {
+      const task = action.task as Task | undefined;
+      return !!task && !!task.parentId;
+    }
+    return true;
+  }
+
+  /**
+   * Resolves the parent task from an action that might affect subtasks
+   */
+  private _resolveParentTaskFromAction(action: any): Observable<Task | null> {
+    const parentId: string | undefined = action.parentId || action.srcTaskId;
+    const updatedTaskId: string | undefined = action.task?.id || action.id;
+
+    if (!parentId && !updatedTaskId) {
+      return EMPTY;
+    }
+
+    // Resolve the parent: if parentId given use it, else try to get parent via updated task
+    const resolveParent$ = parentId
+      ? this._taskService.getByIdOnce$(parentId)
+      : updatedTaskId
+        ? this._taskService
+            .getByIdOnce$(updatedTaskId as string)
+            .pipe(
+              switchMap((t) =>
+                t && t.parentId ? this._taskService.getByIdOnce$(t.parentId) : rxOf(null),
+              ),
+            )
+        : rxOf(null);
+
+    return resolveParent$;
+  }
+
+  /**
+   * Converts tasks to subtask templates with only essential fields
+   */
+  private _toSubTaskTemplates(
+    subs: Task[],
+  ): NonNullable<TaskRepeatCfgCopy['subTaskTemplates']> {
+    return subs.map((st) => ({
+      title: st.title,
+      notes: st.notes,
+      timeEstimate: st.timeEstimate,
+    }));
   }
 }
