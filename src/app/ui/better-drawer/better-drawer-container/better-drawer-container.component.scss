@@ -1,7 +1,6 @@
 @use '../../../../styles/_globals.scss' as *;
 
 $z-this-content: calc(var(--z-side-panel-task-and-notes) + 1);
-$z-this-backdrop: calc(var(--z-task-side-bar-over) - 1);
 
 :host {
   display: flex;
@@ -51,21 +50,6 @@ $z-this-backdrop: calc(var(--z-task-side-bar-over) - 1);
 
   //border-color: var(--extra-border-color);
 
-  :host.isOver & {
-    position: fixed;
-    width: 80vw !important;
-    max-width: none; // allow overlay to exceed side-mode cap
-    top: 0;
-    bottom: 0;
-    z-index: var(--z-task-side-bar-over);
-    right: 0;
-    background: var(--right-panel-bg-mobile);
-
-    @include mq(xs, max) {
-      width: 100% !important;
-    }
-  }
-
   :host.isOpen.isOpen.isOpen & {
     //box-shadow: var(--whiteframe-shadow-2dp);
     opacity: 1;
@@ -78,57 +62,4 @@ $z-this-backdrop: calc(var(--z-task-side-bar-over) - 1);
   height: 100%;
   position: relative;
   z-index: 2;
-}
-
-.backdrop {
-  // global styles in backdrop.scss
-  z-index: $z-this-backdrop;
-
-  @include mq(xs, max) {
-    display: none;
-  }
-}
-
-.close-btn {
-  display: none;
-  font-size: 32px;
-  height: 48px;
-  width: 48px;
-  text-align: center;
-  line-height: 46px;
-  position: absolute;
-  z-index: 23;
-  top: 5px;
-  cursor: pointer;
-  right: var(--s);
-  box-shadow: var(--whiteframe-shadow-2dp);
-  border-radius: 50%;
-  color: var(--text-color);
-  background: var(--bg-lightest);
-  border: 1px solid var(--extra-border-color);
-
-  @include mq(xs) {
-    top: 0;
-    border-radius: 0;
-    right: 100%;
-    box-shadow: var(--whiteframe-shadow-1dp);
-  }
-
-  &,
-  &:focus,
-  &:active {
-    outline: none;
-  }
-
-  @include mq(xs) {
-    background: var(--bg-slightly-lighter);
-  }
-
-  :host.isOver.isOpen & {
-    display: block;
-  }
-
-  @include mq(xs) {
-    //display: none;
-  }
 }

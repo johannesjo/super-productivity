@@ -110,22 +110,7 @@ export class RightPanelComponent implements OnInit, OnDestroy {
   readonly isAlwaysOver = input<boolean>(false);
 
   // Computed panel width for CSS binding
-  readonly panelWidth = computed(() => {
-    const isOverlay = this.isOverlayMode();
-    // In overlay mode, use fixed width; in side mode, use resizable width
-    return isOverlay ? RIGHT_PANEL_CONFIG.DEFAULT_WIDTH : this.currentWidth();
-  });
-
-  // Determines if the panel should be in overlay mode based on route and screen size
-  readonly isOverlayMode = computed(() => {
-    // Force overlay mode for debugging purposes
-    if (this.isAlwaysOver()) {
-      return true;
-    }
-
-    // Check if panel should be in overlay mode based on current route and screen size
-    return this.layoutService.shouldRightPanelOverlay();
-  });
+  readonly panelWidth = computed(() => this.currentWidth());
 
   // Convert observables to signals
   private readonly _selectedTask = toSignal(this.taskService.selectedTask$, {
@@ -457,12 +442,7 @@ export class RightPanelComponent implements OnInit, OnDestroy {
 
   // Resize functionality methods
   onResizeStart(event: MouseEvent): void {
-    if (
-      !RIGHT_PANEL_CONFIG.RESIZABLE ||
-      this.isOverlayMode() ||
-      this._isListenersAttached
-    )
-      return;
+    if (!RIGHT_PANEL_CONFIG.RESIZABLE || this._isListenersAttached) return;
 
     this.isResizing.set(true);
     this._startX.set(event.clientX);

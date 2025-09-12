@@ -1,9 +1,8 @@
 <better-drawer-container
   (wasClosed)="close()"
   [isOpen]="isOpen() && !layoutService.isXs()"
-  [isOver]="isOverlayMode()"
   [sideWidth]="40"
-  [sideWidthPx]="!isOverlayMode() ? panelWidth() : null"
+  [sideWidthPx]="panelWidth()"
   [class.resizing]="isResizing()"
   [@.disabled]="isResizing()"
 >
@@ -15,7 +14,7 @@
     @if (isOpen()) {
       <div class="right-panel">
         <!-- Resize Handle (only show in side mode when open) -->
-        @if (!isOverlayMode() && !layoutService.isXs()) {
+        @if (!layoutService.isXs()) {
           <div
             class="resize-handle"
             (mousedown)="onResizeStart($event)"
@@ -51,7 +50,6 @@
         } @else {
           @if (selectedTaskWithDelayForNone(); as task) {
             <task-detail-panel
-              [isOver]="isOverlayMode()"
               [@taskDetailPanelTaskChange]="task.id"
               [@.disabled]="isDisableTaskPanelAni()"
               [task]="task"

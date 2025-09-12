@@ -5,14 +5,6 @@
   <ng-content select="[better-drawer-content]"></ng-content>
 </div>
 
-@if (isOpen() && isOver()) {
-  <div
-    (click)="close()"
-    @fade
-    class="backdrop"
-  ></div>
-}
-
 <div
   swipeGesture
   (swiperight)="IS_TOUCH_PRIMARY && close()"
@@ -20,12 +12,6 @@
   class="side"
   (transitionend)="updateStyleAfterTransition()"
 >
-  <button
-    (click)="close()"
-    class="close-btn"
-  >
-    &times;
-  </button>
   <!-- Slot for non-scrolling side tools/overlays (e.g. edge handle) -->
   <ng-content select="[better-drawer-side-overlay]"></ng-content>
   <div class="side-inner">

@@ -35,8 +35,6 @@ const VERY_SMALL_CONTAINER_WIDTH = 450;
   host: {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     '[class.isOpen]': 'isOpen()',
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    '[class.isOver]': 'isOver()',
   },
   imports: [SwipeDirective],
   standalone: true,
@@ -51,7 +49,6 @@ export class BetterDrawerContainerComponent implements OnDestroy {
   // Optional pixel-based width for the side panel (overrides percentage when provided)
   readonly sideWidthPx = input<number | null>(null);
   readonly isOpen = input<boolean>(false);
-  readonly isOver = input<boolean>(false);
   readonly wasClosed = output<void>();
 
   readonly contentElRef = viewChild<ElementRef>('contentElRef');
@@ -131,7 +128,7 @@ export class BetterDrawerContainerComponent implements OnDestroy {
 
   updateStyleAfterTransition(): void {
     // Handle visibility after transition ends
-    if (!this.isOver() && !this.isOpen()) {
+    if (!this.isOpen()) {
       // We could update styles here if needed, but the drawer handles this via CSS
     }
   }
@@ -150,17 +147,12 @@ export class BetterDrawerContainerComponent implements OnDestroy {
 
   private _getWidthRelatedStyles(): CssString {
     const isOpen = this.isOpen();
-    const isOver = this.isOver();
 
     // Prefer pixel width when provided, otherwise fall back to percentage
     const px = this.sideWidthPx();
     const widthVal = px != null && px > 0 ? `${px}px` : `${this.sideWidth()}%`;
 
     const styles: StyleObject = { width: isOpen ? widthVal : '0' };
-
-    if (isOver) {
-      styles.transform = `${isOpen ? 'translateX(0)' : 'translateX(100%)'}`;
-    }
 
     return StyleObjectToString(styles);
   }
