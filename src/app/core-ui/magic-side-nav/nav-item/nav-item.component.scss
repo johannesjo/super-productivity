@@ -85,6 +85,7 @@
 }
 
 // Active state visuals - ensure they override Angular Material styles
+//button[mat-menu-item].nav-link[routerlinkactive="active"],
 button[mat-menu-item].nav-link.active {
   color: var(--sidenav-active-text) !important;
   background: var(--sidenav-active) !important;
@@ -170,6 +171,7 @@ button[mat-menu-item].nav-link.active {
   &.active {
     background: var(--sidenav-active);
     color: var(--sidenav-active-text);
+    box-shadow: var(--whiteframe-shadow-1dp);
 
     .nav-icon {
       color: var(--sidenav-active-text);
@@ -208,31 +210,6 @@ button[mat-menu-item].nav-link.active {
   transform: rotate(180deg);
 }
 
-:host-context(.isLightTheme .nav-sidenav.compactMode) {
-  .nav-link {
-    &.active {
-      color: var(--sidenav-active-text) !important;
-      background: var(--sidenav-active) !important;
-      border-radius: 48px;
-      border-bottom: 1px solid var(--separator-color);
-      border-top: 1px solid var(--separator-color);
-
-      &::after {
-        position: absolute;
-        inset: 4px;
-      }
-
-      .nav-icon {
-        color: var(--sidenav-active-text) !important;
-      }
-
-      .nav-label {
-        color: var(--sidenav-active-text) !important;
-      }
-    }
-  }
-}
-
 :host-context(.nav-sidenav.compactMode) {
   .nav-link {
     justify-content: center;
@@ -246,6 +223,7 @@ button[mat-menu-item].nav-link.active {
     &.active {
       color: var(--sidenav-active-text) !important;
       background: var(--sidenav-active) !important;
+      box-shadow: var(--whiteframe-shadow-1dp);
 
       &::after {
         position: absolute;

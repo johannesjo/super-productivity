@@ -49,9 +49,6 @@
 
   // Z-index layers
   --z-focus-mode-overlay: 101;
-  --z-side-panel-task-and-notes: 44;
-  --z-side-panel-planner: 46;
-  --z-task-side-bar-over: 100;
   --z-main-header-wrapper: 50;
   --z-side-nav: 60;
   --z-banner: 11;
@@ -62,6 +59,7 @@
   --z-add-task-bar: 999;
   --z-search-bar: 999;
   --z-mobile-bottom-nav: 50;
+  --z-right-panel: 44;
   --z-tour: 99;
 
   // ===============================
@@ -232,6 +230,9 @@ body {
   --right-panel-bg-mobile: #fff;
   --bottom-nav-height: 44px;
   --bottom-nav-bg: var(--sidenav-bg-mobile);
+  --bottom-panel-bg: #fff;
+  --bottom-panel-handle: rgba(0, 0, 0, 0.4);
+  --bottom-panel-handle-active: rgba(0, 0, 0, 0.6);
 
   // Text colors
   --text-color: rgb(44, 44, 44);
@@ -367,6 +368,9 @@ body.isDarkTheme {
   --right-panel-bg: transparent;
   --right-panel-bg-mobile: var(--bg);
   --bottom-nav-bg: var(--sidenav-bg-mobile);
+  --bottom-panel-bg: var(--dark1);
+  --bottom-panel-handle: rgba(255, 255, 255, 0.4);
+  --bottom-panel-handle-active: rgba(255, 255, 255, 0.6);
 
   // Text colors
   --text-color: rgb(230, 230, 230);

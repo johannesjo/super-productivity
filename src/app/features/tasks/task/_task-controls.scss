@@ -115,6 +115,10 @@
     min-width: 0;
   }
 
+  @include verySmallMainContainer {
+    display: none;
+  }
+
   &.isEditable {
     cursor: pointer;
 

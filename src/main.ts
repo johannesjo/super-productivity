@@ -25,6 +25,7 @@ import { FormlyConfigModule } from './app/ui/formly-config.module';
 import { markedOptionsFactory } from './app/ui/marked-options-factory';
 import { MaterialCssVarsModule } from 'angular-material-css-vars';
 import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
 import { ReminderModule } from './app/features/reminder/reminder.module';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import {
@@ -95,6 +96,7 @@ bootstrapApplication(AppComponent, {
       }),
       MaterialCssVarsModule.forRoot(),
       MatSidenavModule,
+      MatBottomSheetModule,
       ReminderModule,
       MaterialCssVarsModule.forRoot(),
       // External

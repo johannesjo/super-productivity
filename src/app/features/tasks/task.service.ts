@@ -222,17 +222,19 @@ export class TaskService {
       throw new Error('No task with parent task given');
     }
     const parentTask = await this.getByIdOnce$(task.parentId).toPromise();
-    const { activeId, activeType } =
-      await this._workContextService.activeWorkContextTypeAndId$
-        .pipe(first())
-        .toPromise();
+    const activeContext = await this._workContextService.activeWorkContext$
+      .pipe(first())
+      .toPromise();
 
-    const isParentOnSameList =
-      activeType === WorkContextType.PROJECT
-        ? parentTask.projectId === activeId
-        : parentTask.tagIds.includes(activeId);
+    if (!activeContext) {
+      throw new Error('No active work context');
+    }
 
-    if (!isParentOnSameList) {
+    // Check if parent task is actually visible in the current context
+    const isParentVisibleInCurrentContext = activeContext.taskIds.includes(task.parentId);
+
+    if (!isParentVisibleInCurrentContext) {
+      // Navigate to the context where the parent task belongs
       if (parentTask.projectId) {
         await this._router.navigate([`project/${parentTask.projectId}/tasks`]);
       } else if (parentTask.tagIds[0]) {

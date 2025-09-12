@@ -88,6 +88,7 @@ import { environment } from '../../../../environments/environment';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { TaskLog } from '../../../core/log';
+import { LayoutService } from '../../../core-ui/layout/layout.service';
 
 @Component({
   selector: 'task',
@@ -142,6 +143,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   private readonly _projectService = inject(ProjectService);
   private readonly _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
   readonly workContextService = inject(WorkContextService);
+  readonly layoutService = inject(LayoutService);
 
   task = input.required<TaskWithSubTasks>();
   isBacklog = input<boolean>(false);
@@ -534,6 +536,19 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
         reminderId: this.task().reminderId,
       }),
     );
+  }
+
+  titleBarClick(event: MouseEvent): void {
+    console.log(event.target);
+    if (
+      (IS_TOUCH_PRIMARY && this.task().title.length) ||
+      (event.target as HTMLElement).tagName.toUpperCase() !== 'TEXTAREA'
+      // && (event.target as HTMLElement).tagName.toUpperCase() !== 'TASK-TITLE')
+    ) {
+      this.toggleShowDetailPanel(event);
+    } else {
+      this.focusTitleForEdit();
+    }
   }
 
   focusPrevious(isFocusReverseIfNotPossible: boolean = false): void {

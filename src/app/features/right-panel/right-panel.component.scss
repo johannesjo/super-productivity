@@ -1,16 +1,155 @@
+@use '../../../styles/_globals.scss' as *;
+
 :host {
-  display: block;
+  display: flex;
+  flex-direction: row;
+  justify-content: stretch;
+  align-items: stretch;
+  height: calc(100% - var(--bar-height));
+
+  &.resizing {
+    // Disable transitions while resizing
+    * {
+      transition: none !important;
+    }
+
+    .side {
+      transition: none !important;
+    }
+  }
+}
+
+// Disable transitions during external resize drags
+:host(.resizing) {
+  .side {
+    transition: none !important;
+  }
+}
+
+.content {
+  flex-grow: 1;
+  max-width: 100%;
+  position: relative;
+  z-index: var(--z-right-panel);
+}
+
+.side {
+  // NOTE: we can't use margin-top: -1px; to prevent double border when header got a bottom one
+  // because then there would be none
+
+  position: relative;
+  transition: var(--transition-leave);
+  transition-property: opacity, width, right, transform;
+  // Cap panel to at most half of the container width in side mode
+  max-width: 50%;
+  background: var(--right-panel-bg);
+  background: transparent;
+  border-left: 1px solid var(--separator-color);
+  overflow: visible; // allow overlay controls to stick out on the left edge
+  opacity: 0; // Hidden by default
+  visibility: hidden; // Ensure panel is fully hidden when closed
+  pointer-events: none; // Disable interactions when closed
+
+  @include mq(sm, max) {
+    // NOTE: prevents overlapping with nav when open
+    max-width: 500px;
+  }
+
+  @include mq(xs, max) {
+    max-width: 100%;
+  }
+
+  //border-color: var(--extra-border-color);
+
+  :host.isOpen.isOpen.isOpen & {
+    //box-shadow: var(--whiteframe-shadow-2dp);
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: var(--transition-enter);
+  }
+}
+
+.side-inner {
+  @include scrollYImportant();
   height: 100%;
+  position: relative;
+  z-index: 2;
 }
 
 .right-panel {
   height: 100%;
   display: flex;
   flex-direction: column;
+  position: relative;
 
   plugin-panel-container {
     flex: 1;
     height: 100%;
     overflow: hidden;
   }
+}
+
+// Resize handle (matching magic-nav style)
+.resize-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -2px; // Position like magic-nav
+  width: 4px;
+  cursor: col-resize;
+  z-index: 1003;
+  transition: background-color 0.2s ease;
+  background: transparent;
+
+  &:focus,
+  &:hover {
+    background-color: var(--sidenav-active-text);
+  }
+
+  &:active {
+    background-color: var(--sidenav-active-text);
+  }
+}
+
+// Edge close handle
+.edge-close-handle {
+  position: absolute;
+  top: 50%;
+  left: -8px; // Position outside the panel
+  width: 20px;
+  height: 48px;
+  transform: translateY(-50%);
+  background: var(--bg-lightest);
+  //border: 1px solid var(--separator-color);
+  border-radius: 3px 8px 8px 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab; // Indicate it can be dragged
+  z-index: 1004;
+  box-shadow: var(--whiteframe-shadow-2dp);
+  transition: all 0.2s ease;
+  color: var(--text-color);
+  border: none;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    //border-color: var(--color-accent);
+    //color: var(--color-accent);
+  }
+
+  :host.resizing & {
+    cursor: grabbing; // Show grabbing cursor when actively resizing
+  }
+}
+
+// Keep the resize handle highlighted while dragging
+:host.resizing .resize-handle {
+  background-color: var(--sidenav-active-text) !important;
 }

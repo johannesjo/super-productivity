@@ -7,6 +7,9 @@ const ANI = [
 ];
 
 export const taskDetailPanelTaskChangeAnimation = trigger('taskDetailPanelTaskChange', [
+  transition('disabled => disabled', []),
+  transition('* => disabled', []),
+  transition('disabled => *', []),
   transition('* <=> *', ANI),
   transition(':enter', []),
 ]);

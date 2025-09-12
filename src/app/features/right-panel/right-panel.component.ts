@@ -2,191 +2,92 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  effect,
   inject,
   input,
   OnDestroy,
+  OnInit,
+  output,
   signal,
-  untracked,
 } from '@angular/core';
-import { TaskDetailTargetPanel, TaskWithSubTasks } from '../tasks/task.model';
-import { filter, map, startWith } from 'rxjs/operators';
+import { fadeAnimation } from '../../ui/animations/fade.ani';
+import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
+import { LanguageService } from '../../core/language/language.service';
+import { IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, NavigationStart, Router } from '@angular/router';
+import { filter, map, startWith, switchMap } from 'rxjs/operators';
+import { of, timer } from 'rxjs';
+import { SwipeDirective } from '../../ui/swipe-gesture/swipe.directive';
+import { CssString, StyleObject, StyleObjectToString } from '../../util/styles';
+import { LS } from '../../core/persistence/storage-keys.const';
+import { readNumberLSBounded } from '../../util/ls-util';
+import { MatIconModule } from '@angular/material/icon';
+import { MatRippleModule } from '@angular/material/core';
+import { RightPanelContentComponent } from './right-panel-content.component';
 import { TaskService } from '../tasks/task.service';
 import { LayoutService } from '../../core-ui/layout/layout.service';
-import { slideInFromTopAni } from '../../ui/animations/slide-in-from-top.ani';
-import { slideInFromRightAni } from '../../ui/animations/slide-in-from-right.ani';
-import { taskDetailPanelTaskChangeAnimation } from '../tasks/task-detail-panel/task-detail-panel.ani';
-import { BetterDrawerContainerComponent } from '../../ui/better-drawer/better-drawer-container/better-drawer-container.component';
-import { IssuePanelComponent } from '../issue-panel/issue-panel.component';
-import { NotesComponent } from '../note/notes/notes.component';
-import { TaskDetailPanelComponent } from '../tasks/task-detail-panel/task-detail-panel.component';
-import { TaskViewCustomizerPanelComponent } from '../task-view-customizer/task-view-customizer-panel/task-view-customizer-panel.component';
-import { PluginService } from '../../plugins/plugin.service';
-import { PluginPanelContainerComponent } from '../../plugins/ui/plugin-panel-container/plugin-panel-container.component';
 import { Store } from '@ngrx/store';
+import { hidePluginPanel } from '../../core-ui/layout/store/layout.actions';
+import { TaskDetailTargetPanel } from '../tasks/task.model';
 import {
   INITIAL_LAYOUT_STATE,
-  selectActivePluginId,
-  selectIsShowPluginPanel,
   selectLayoutFeatureState,
 } from '../../core-ui/layout/store/layout.reducer';
-import { hidePluginPanel } from '../../core-ui/layout/store/layout.actions';
-import { Log } from '../../core/log';
-import { NavigationEnd, Router } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
+
+// Right panel resize constants
+const RIGHT_PANEL_CONFIG = {
+  DEFAULT_WIDTH: 320,
+  MIN_WIDTH: 280,
+  MAX_WIDTH: 800,
+  RESIZABLE: true,
+  CLOSE_THRESHOLD: 100,
+} as const;
 
 @Component({
   selector: 'right-panel',
   templateUrl: './right-panel.component.html',
   styleUrls: ['./right-panel.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    taskDetailPanelTaskChangeAnimation,
-    slideInFromTopAni,
-    slideInFromRightAni,
-  ],
-  imports: [
-    BetterDrawerContainerComponent,
-    IssuePanelComponent,
-    NotesComponent,
-    TaskDetailPanelComponent,
-    TaskViewCustomizerPanelComponent,
-    PluginPanelContainerComponent,
-  ],
+  animations: [fadeAnimation],
+  imports: [SwipeDirective, MatIconModule, MatRippleModule, RightPanelContentComponent],
+  host: {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    '[class.isOpen]': 'isOpen()',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    '[class.resizing]': 'isResizing()',
+  },
+  standalone: true,
 })
-export class RightPanelComponent implements OnDestroy {
-  taskService = inject(TaskService);
-  layoutService = inject(LayoutService);
-  pluginService = inject(PluginService);
-  store = inject(Store);
+export class RightPanelComponent implements OnInit, OnDestroy {
+  private _domSanitizer = inject(DomSanitizer);
+  private _languageService = inject(LanguageService);
   private _router = inject(Router);
+  private _taskService = inject(TaskService);
+  private _layoutService = inject(LayoutService);
+  private _store = inject(Store);
 
-  // NOTE: used for debugging
-  readonly isAlwaysOver = input<boolean>(false);
+  readonly sideWidth = input<number>(40);
+  readonly wasClosed = output<void>();
 
-  // Determines if the panel should be in overlay mode based on route and screen size
-  readonly isOverlayMode = computed(() => {
-    // Force overlay mode for debugging purposes
-    if (this.isAlwaysOver()) {
-      return true;
-    }
+  readonly isRTL = this._languageService.isLangRTL;
 
-    // Check if panel should be in overlay mode based on current route and screen size
-    return this.layoutService.shouldRightPanelOverlay();
-  });
-
-  // Convert observables to signals
-  private readonly _selectedTask = toSignal(this.taskService.selectedTask$, {
+  // Convert observables to signals to match right-panel-content logic
+  private readonly _selectedTask = toSignal(this._taskService.selectedTask$, {
     initialValue: null,
   });
 
   private readonly _taskDetailPanelTargetPanel = toSignal(
-    this.taskService.taskDetailPanelTargetPanel$,
+    this._taskService.taskDetailPanelTargetPanel$,
     { initialValue: null },
   );
 
   private readonly _layoutFeatureState = toSignal(
-    this.store.select(selectLayoutFeatureState),
+    this._store.select(selectLayoutFeatureState),
     {
       initialValue: INITIAL_LAYOUT_STATE,
     },
   );
 
-  private readonly _isShowPluginPanel = toSignal(
-    this.store.select(selectIsShowPluginPanel),
-    { initialValue: false },
-  );
-
-  private readonly _activePluginId = toSignal(this.store.select(selectActivePluginId), {
-    initialValue: null,
-  });
-
-  // to still display its data when panel is closing
-  private _selectedTaskDelayedSignal = signal<TaskWithSubTasks | null>(null);
-
-  // Effect to handle delayed task clearing
-  private _selectedTaskDelayTimer: any;
-  private _selectedTaskDelayEffect = effect(
-    () => {
-      const task = this._selectedTask();
-
-      // Clear any existing timer
-      if (this._selectedTaskDelayTimer) {
-        clearTimeout(this._selectedTaskDelayTimer);
-        this._selectedTaskDelayTimer = null;
-      }
-
-      if (task) {
-        this._selectedTaskDelayedSignal.set(task);
-      } else {
-        // Delay clearing the task to allow animations
-        this._selectedTaskDelayTimer = setTimeout(() => {
-          this._selectedTaskDelayedSignal.set(null);
-        }, 200);
-      }
-    },
-    { allowSignalWrites: true },
-  );
-
-  readonly selectedTaskWithDelayForNone = computed(() =>
-    this._selectedTaskDelayedSignal(),
-  );
-
-  // Computed signal for panel content
-  readonly panelContent = computed<
-    | 'NOTES'
-    | 'TASK'
-    | 'ADD_TASK_PANEL'
-    | 'ISSUE_PANEL'
-    | 'TASK_VIEW_CUSTOMIZER_PANEL'
-    | 'PLUGIN'
-    | undefined
-  >(() => {
-    const layoutState = this._layoutFeatureState();
-    const selectedTask = this._selectedTask();
-
-    if (!layoutState) {
-      return undefined;
-    }
-
-    const {
-      isShowNotes,
-      isShowIssuePanel,
-      isShowTaskViewCustomizerPanel,
-      isShowPluginPanel,
-    } = layoutState;
-
-    if (isShowNotes) {
-      return 'NOTES';
-    } else if (isShowIssuePanel) {
-      return 'ISSUE_PANEL';
-    } else if (isShowTaskViewCustomizerPanel) {
-      return 'TASK_VIEW_CUSTOMIZER_PANEL';
-    } else if (isShowPluginPanel) {
-      return 'PLUGIN';
-    } else if (selectedTask) {
-      // Task content comes last so we can avoid an extra effect to unset selected task
-      return 'TASK';
-    }
-    return undefined;
-  });
-
-  // Computed signal that includes plugin ID for component recreation
-  readonly pluginPanelKeys = computed<string[]>(() => {
-    const isShowPluginPanel = this._isShowPluginPanel();
-    const activePluginId = this._activePluginId();
-
-    const keys = isShowPluginPanel && activePluginId ? [`plugin-${activePluginId}`] : [];
-    Log.log('RightPanel: pluginPanelKeys computed:', {
-      isShowPluginPanel,
-      activePluginId,
-      keys,
-    });
-    return keys;
-  });
-
-  // Signal to track current route
   private readonly _currentRoute = toSignal(
     this._router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd),
@@ -196,12 +97,11 @@ export class RightPanelComponent implements OnDestroy {
     { initialValue: this._router.url },
   );
 
-  // Computed signal for panel open state
+  // Get isOpen from the same logic as right-panel-content
   readonly isOpen = computed<boolean>(() => {
     const selectedTask = this._selectedTask();
     const targetPanel = this._taskDetailPanelTargetPanel();
     const layoutState = this._layoutFeatureState();
-    const currentRoute = this._currentRoute();
 
     if (!layoutState) {
       return false;
@@ -214,134 +114,279 @@ export class RightPanelComponent implements OnDestroy {
       isShowPluginPanel,
     } = layoutState;
 
-    const isWorkView = this._isWorkViewUrl(currentRoute);
-
-    // For non-work-view routes, only allow panels that are explicitly opened
-    // This prevents panels from persisting when navigating from work-view to non-work-view
-    if (!isWorkView) {
-      // You might want to allow certain panels on non-work-view routes
-      // For now, let's allow all panels but they'll be in "over" mode
-    }
+    const hasContent = !!(
+      selectedTask ||
+      isShowNotes ||
+      isShowAddTaskPanel ||
+      isShowTaskViewCustomizerPanel ||
+      isShowPluginPanel
+    );
 
     return (
-      !!(
-        selectedTask ||
-        isShowNotes ||
-        isShowAddTaskPanel ||
-        isShowTaskViewCustomizerPanel ||
-        isShowPluginPanel
-      ) && targetPanel !== TaskDetailTargetPanel.DONT_OPEN_PANEL
-    );
+      hasContent &&
+      targetPanel !== TaskDetailTargetPanel.DONT_OPEN_PANEL &&
+      !this._layoutService.isXs()
+    ); // Don't show on mobile - handled by bottom sheet
   });
 
-  // NOTE: prevents the inner animation from happening file panel is expanding
-  readonly isDisableTaskPanelAni = signal(true);
+  // Resize functionality
+  readonly currentWidth = signal<number>(RIGHT_PANEL_CONFIG.DEFAULT_WIDTH);
+  readonly isResizing = signal(false);
+  private readonly _startX = signal(0);
+  private readonly _startWidth = signal(0);
 
-  // Track previous isOpen state to avoid infinite loops
-  private _previousIsOpen = signal<boolean | null>(null);
+  // Store bound functions to prevent memory leaks
+  private readonly _boundOnDrag = this._handleDrag.bind(this);
+  private readonly _boundOnDragEnd = this._handleDragEnd.bind(this);
 
-  // Effect to handle panel close
-  private _isOpenEffect = effect(
-    () => {
-      const isOpen = this.isOpen();
-      const previousIsOpen = this._previousIsOpen();
+  // Track listener state to prevent double attachment/removal
+  private _isListenersAttached = false;
 
-      // Only trigger onClose when transitioning from open to closed
-      if (previousIsOpen === true && isOpen === false) {
-        // Use setTimeout to avoid triggering state changes during effect execution
-        setTimeout(() => this.onClose(), 0);
-      }
+  // Performance optimization for drag events
+  private _lastDragTime = 0;
+  private readonly _dragThrottleMs = 16; // ~60fps
 
-      this._previousIsOpen.set(isOpen);
-    },
-    { allowSignalWrites: true },
+  // Close button drag detection
+  private _closeButtonDragStart = { x: 0, y: 0 };
+  private _isCloseButtonDragCandidate = false;
+  private readonly _dragThreshold = 5; // pixels of movement to start drag
+
+  // Computed panel width for CSS binding
+  readonly panelWidth = computed(() => this.currentWidth());
+
+  readonly sideStyle = computed<SafeStyle>(() => {
+    const styles =
+      this._getWidthRelatedStyles() +
+      (this._shouldSkipAnimation() ? ' transition: none;' : '');
+    return this._domSanitizer.bypassSecurityTrustStyle(styles);
+  });
+
+  // Skip animations during navigation using RxJS
+  private readonly _skipAnimationDuringNav = toSignal(
+    this._router.events.pipe(
+      filter(
+        (event) => event instanceof NavigationStart || event instanceof NavigationEnd,
+      ),
+      map((event) => event instanceof NavigationStart),
+      // When navigation starts, immediately return true
+      // When navigation ends, delay returning false by 100ms
+      switchMap((isNavigating) =>
+        isNavigating ? of(true) : timer(100).pipe(map(() => false)),
+      ),
+      startWith(false), // Start with animations enabled
+    ),
+    { initialValue: false },
   );
 
-  // Effect to handle animation state with delay
-  private _animationTimer: number | null = null;
-  private _animationEffect = effect(
-    () => {
-      const isOpen = this.isOpen();
+  // Computed signal that determines if animations should be skipped
+  private readonly _shouldSkipAnimation = computed(() => this._skipAnimationDuringNav());
 
-      // Clear any existing timer
-      if (this._animationTimer) {
-        clearTimeout(this._animationTimer);
-        this._animationTimer = null;
-      }
-
-      // Delay is needed for timing
-      this._animationTimer = window.setTimeout(() => {
-        this.isDisableTaskPanelAni.set(!isOpen);
-      }, 500);
-    },
-    { allowSignalWrites: true },
-  );
-
-  // Signal to track previous route for navigation handling
-  private _previousRoute = signal<{ url: string; isWorkView: boolean } | null>(null);
-
-  // Effect for navigation handling
-  private _navigationEffect = effect(
-    () => {
-      const currentRoute = this._currentRoute();
-      const isCurrentWorkView = this._isWorkViewUrl(currentRoute);
-
-      untracked(() => {
-        const prev = this._previousRoute();
-
-        if (prev) {
-          // Only close panel when navigating FROM work-view TO non-work-view
-          // Never close when navigating between work-views or to a work-view
-          const shouldClose = prev.isWorkView && !isCurrentWorkView;
-
-          // Debug logging
-          if (shouldClose) {
-            Log.log('RightPanel: Closing panel on navigation', {
-              from: prev.url,
-              to: currentRoute,
-              fromIsWorkView: prev.isWorkView,
-              toIsWorkView: isCurrentWorkView,
-            });
-            // Close all panels immediately when navigating away from work views
-            // to prevent the overlay mode from briefly showing
-            this.close();
-          }
-        }
-
-        // Update previous route
-        this._previousRoute.set({ url: currentRoute, isWorkView: isCurrentWorkView });
-      });
-    },
-    { allowSignalWrites: true },
-  );
-
-  ngOnDestroy(): void {
-    // Clean up timers to prevent memory leaks
-    if (this._selectedTaskDelayTimer) {
-      window.clearTimeout(this._selectedTaskDelayTimer);
-    }
-    if (this._animationTimer) {
-      window.clearTimeout(this._animationTimer);
+  updateStyleAfterTransition(): void {
+    // Handle visibility after transition ends
+    if (!this.isOpen()) {
+      // We could update styles here if needed, but the drawer handles this via CSS
     }
   }
 
-  private _isWorkViewUrl(url: string): boolean {
-    return url.includes('/active/') || url.includes('/tag/') || url.includes('/project/');
+  ngOnInit(): void {
+    this._initializeWidth();
+  }
+
+  ngOnDestroy(): void {
+    // Clean up resize state if active (emergency cleanup)
+    if (this.isResizing()) {
+      this._handleDragEnd();
+    }
   }
 
   close(): void {
-    this.taskService.setSelectedId(null);
-    this.layoutService.hideNotes();
-    this.layoutService.hideAddTaskPanel();
-    this.layoutService.hideTaskViewCustomizerPanel();
-    this.store.dispatch(hidePluginPanel());
-    this.onClose();
+    // FORCE blur because otherwise task notes won't save
+    if (IS_TOUCH_PRIMARY) {
+      document.querySelectorAll('input,textarea').forEach((element) => {
+        if (element === document.activeElement) {
+          return (element as HTMLElement).blur();
+        }
+      });
+    }
+
+    // Delegate to task service and layout service to close the panel
+    this._taskService.setSelectedId(null);
+    this._layoutService.hideNotes();
+    this._layoutService.hideAddTaskPanel();
+    this._layoutService.hideTaskViewCustomizerPanel();
+    this._store.dispatch(hidePluginPanel());
+
+    this.wasClosed.emit();
   }
 
-  onClose(): void {
-    // Only restore focus on non-touch devices to prevent scroll position loss
-    if (!IS_TOUCH_PRIMARY) {
-      this.taskService.focusLastFocusedTask();
+  onCloseButtonMouseDown(event: MouseEvent): void {
+    // Start tracking for potential drag operation
+    this._closeButtonDragStart = { x: event.clientX, y: event.clientY };
+    this._isCloseButtonDragCandidate = true;
+
+    // Add temporary listeners to detect drag initiation
+    const onMouseMove = (moveEvent: MouseEvent): void => {
+      if (!this._isCloseButtonDragCandidate) return;
+
+      const deltaX = Math.abs(moveEvent.clientX - this._closeButtonDragStart.x);
+      const deltaY = Math.abs(moveEvent.clientY - this._closeButtonDragStart.y);
+
+      if (deltaX > this._dragThreshold || deltaY > this._dragThreshold) {
+        // Movement detected, start resize operation
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        this._startResize(moveEvent);
+      }
+    };
+
+    const onMouseUp = (): void => {
+      // Clean up temporary listeners
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+
+    // Prevent default to avoid button focus issues during drag
+    event.preventDefault();
+  }
+
+  onCloseButtonClick(event: MouseEvent): void {
+    // Only close if this wasn't a drag operation
+    if (!this._isCloseButtonDragCandidate || this.isResizing()) {
+      return; // Was a drag, don't close
+    }
+
+    // Check if mouse moved significantly since mousedown
+    const deltaX = Math.abs(event.clientX - this._closeButtonDragStart.x);
+    const deltaY = Math.abs(event.clientY - this._closeButtonDragStart.y);
+
+    if (deltaX < this._dragThreshold && deltaY < this._dragThreshold) {
+      // Small movement, treat as click
+      this.close();
+    }
+
+    // Reset drag candidate state
+    this._isCloseButtonDragCandidate = false;
+  }
+
+  private _getWidthRelatedStyles(): CssString {
+    const isOpen = this.isOpen();
+
+    // Use the current panel width for resize functionality
+    const px = this.panelWidth();
+    const widthVal = px > 0 ? `${px}px` : `${this.sideWidth()}%`;
+
+    const styles: StyleObject = { width: isOpen ? widthVal : '0' };
+
+    return StyleObjectToString(styles);
+  }
+
+  // Resize functionality methods
+  onResizeStart(event: MouseEvent): void {
+    this._startResize(event);
+  }
+
+  private _startResize(event: MouseEvent): void {
+    if (!RIGHT_PANEL_CONFIG.RESIZABLE || this._isListenersAttached) return;
+
+    this.isResizing.set(true);
+    this._startX.set(event.clientX);
+    this._startWidth.set(this.currentWidth());
+
+    // Mark listeners as attached before adding them
+    this._isListenersAttached = true;
+    document.addEventListener('mousemove', this._boundOnDrag);
+    document.addEventListener('mouseup', this._boundOnDragEnd);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+
+    // Reset close button drag candidate since we're now resizing
+    this._isCloseButtonDragCandidate = false;
+
+    event.preventDefault();
+  }
+
+  private _handleDrag(event: MouseEvent): void {
+    if (!this.isResizing()) return;
+
+    // Throttle drag events for better performance
+    const now = Date.now();
+    if (now - this._lastDragTime < this._dragThrottleMs) return;
+    this._lastDragTime = now;
+
+    // Right panel resizes from left edge, so subtract delta
+    const deltaX = this._startX() - event.clientX;
+    const potentialWidth = this._startWidth() + deltaX;
+
+    // If dragged below close threshold, close the panel immediately
+    if (potentialWidth < RIGHT_PANEL_CONFIG.CLOSE_THRESHOLD) {
+      this.isResizing.set(false);
+      this._isListenersAttached = false;
+      document.removeEventListener('mousemove', this._boundOnDrag);
+      document.removeEventListener('mouseup', this._boundOnDragEnd);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      this.close();
+      return;
+    }
+
+    const newWidth = Math.max(
+      RIGHT_PANEL_CONFIG.MIN_WIDTH,
+      Math.min(RIGHT_PANEL_CONFIG.MAX_WIDTH, potentialWidth),
+    );
+
+    this.currentWidth.set(newWidth);
+  }
+
+  private _handleDragEnd(): void {
+    if (!this.isResizing() && !this._isListenersAttached) return;
+
+    this.isResizing.set(false);
+    this._isListenersAttached = false;
+
+    document.removeEventListener('mousemove', this._boundOnDrag);
+    document.removeEventListener('mouseup', this._boundOnDragEnd);
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+
+    // Save width to localStorage with error handling
+    this._saveWidthToStorage();
+  }
+
+  private _saveWidthToStorage(): void {
+    try {
+      localStorage.setItem(LS.RIGHT_PANEL_WIDTH, this.currentWidth().toString());
+    } catch (error) {
+      console.warn('Failed to save right panel width to localStorage:', error);
     }
   }
+
+  private _initializeWidth(): void {
+    try {
+      // Load saved width from localStorage or use default
+      const savedWidth = readNumberLSBounded(
+        LS.RIGHT_PANEL_WIDTH,
+        RIGHT_PANEL_CONFIG.MIN_WIDTH,
+        RIGHT_PANEL_CONFIG.MAX_WIDTH,
+      );
+
+      const width = savedWidth ?? RIGHT_PANEL_CONFIG.DEFAULT_WIDTH;
+
+      // Additional validation
+      if (!Number.isFinite(width) || width < RIGHT_PANEL_CONFIG.MIN_WIDTH) {
+        console.warn('Invalid right panel width detected, using default');
+        this.currentWidth.set(RIGHT_PANEL_CONFIG.DEFAULT_WIDTH);
+        return;
+      }
+
+      this.currentWidth.set(width);
+    } catch (error) {
+      console.warn('Failed to initialize right panel width:', error);
+      this.currentWidth.set(RIGHT_PANEL_CONFIG.DEFAULT_WIDTH);
+    }
+  }
+
+  protected readonly IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
 }

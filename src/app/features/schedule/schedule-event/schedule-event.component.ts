@@ -31,10 +31,10 @@ import { T } from '../../../t.const';
 import { TaskCopy } from '../../tasks/task.model';
 import { selectTaskByIdWithSubTaskData } from '../../tasks/store/task.selectors';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
+import { TaskService } from '../../tasks/task.service';
 import { DialogTimeEstimateComponent } from '../../tasks/dialog-time-estimate/dialog-time-estimate.component';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DialogTaskDetailPanelComponent } from '../../tasks/dialog-task-detail-panel/dialog-task-detail-panel.component';
 import { TaskContextMenuComponent } from '../../tasks/task-context-menu/task-context-menu.component';
 import { BehaviorSubject, of } from 'rxjs';
 import { IssueService } from '../../issue/issue.service';
@@ -54,6 +54,7 @@ export class ScheduleEventComponent implements OnInit {
   private _cd = inject(ChangeDetectorRef);
   private _issueService = inject(IssueService);
   private _dateTimeFormatService = inject(DateTimeFormatService);
+  private _taskService = inject(TaskService);
 
   T: typeof T = T;
   @HostBinding('title') hoverTitle: string = '';
@@ -203,9 +204,8 @@ export class ScheduleEventComponent implements OnInit {
   @HostListener('click')
   async clickHandler(): Promise<void> {
     if (this.task) {
-      this._matDialog.open(DialogTaskDetailPanelComponent, {
-        data: { taskId: this.task.id },
-      });
+      // Use bottom panel on mobile, sidebar on desktop
+      this._taskService.setSelectedId(this.task.id);
     } else if (
       this.se.type === SVEType.RepeatProjection ||
       this.se.type === SVEType.RepeatProjectionSplit ||

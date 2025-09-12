@@ -31,14 +31,13 @@ progress-bar {
   min-height: var(--bar-height);
   display: flex;
   align-items: center;
-  position: sticky;
-  top: 0;
+  //position: sticky;
+  //top: 0;
   padding: 0 var(--s);
   // NOTE make space for close button
   padding-right: 50px;
   z-index: 44;
   border-radius: var(--card-border-radius);
-  background: var(--task-detail-bg);
   margin: 8px;
   border-bottom: 2px solid var(--c-primary) !important;
 
@@ -55,7 +54,6 @@ progress-bar {
     padding-top: 4px;
     padding-bottom: 4px;
     margin-top: 0;
-
     color: var(--text-color);
   }
 }
@@ -64,12 +62,17 @@ progress-bar {
   font-weight: bold;
   transform-origin: top center;
   padding: var(--s);
-  font-size: 17px;
+  padding: 0;
   margin: 0;
   flex-grow: 1;
   margin-top: 4px;
   line-height: 1.4;
   min-height: 40px;
+  font-size: 14px;
+
+  @include mq(xs) {
+    font-size: 17px;
+  }
 
   &:focus {
     transform: scale(1);
