@@ -254,8 +254,8 @@ export class TaskRepeatCfgService {
         const newSubTask = this._taskService.createNewTaskWithDefaults({
           title: subTask.title,
           additional: {
-            notes: subTask.notes || '',
-            timeEstimate: subTask.timeEstimate || 0,
+            notes: subTask.notes ?? '',
+            timeEstimate: subTask.timeEstimate ?? 0,
             parentId: task.id,
             projectId: taskRepeatCfg.projectId || undefined,
             isDone: false, // Always start fresh
