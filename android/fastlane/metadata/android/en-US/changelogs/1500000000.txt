@@ -1,0 +1,139 @@
+
+### Bug Fixes
+
+* change drawer side panel width & remove unnecessary css rules
+* dark theme panel bg
+* default project not honored (cd90c8a), closes #4442
+* drag preview
+* handle shortcut to close task-detail-panel
+* indicate activated filters via button
+* indicate activated filters via button
+* not being able to jump from task title edit the next
+* plugin buttons in mobile bottom nav
+* prevent focus task after right panel on mobile
+* remove unnecessary condition to show subtasks in task-detail-panel component
+* **rightPanel:** not double scrollbar and panel height
+* side panel btn colors
+* **sideNav:** add project and project visibility buttons always visible for touch
+* **sideNav:** color not changing for all active items
+* **sideNav:** project add and visibility not shown on hover
+* snack position for mobile
+* task detail panel title font size
+### Features
+
+* add back in helper classes for main container size
+* add open sans as default font
+* add sort by tag feature #4005
+* add Turkish time locale support
+* adjust border radius
+* adjust dark theme colors once more
+* adjust dark theme right panel colors
+* adjust page title
+* adjust scrollbar styling
+* adjust styles and add shadows
+* adjust task colors
+* always show focus mode button
+* **bottomNav:** add snack bottom margin
+* **bottomNav:** adjust text
+* **bottomNav:** first draft
+* **bottomNav:** improve styling for bottom nav
+* **bottomNav:** improve styling for bottom nav 2
+* **bottomPanel:** add momentum snap and fix task ani
+* **bottomPanel:** adjust values
+* **bottomPanel:** connect planner and schedule
+* **bottomPanel:** first draft
+* **bottomPanel:** get rid of task close button when panel is active
+* **bottomPanel:** improve styling
+* **bottomPanel:** make content show again for desktop
+* **bottomPanel:** make drag up work
+* **bottomPanel:** make theme colors work
+* **bottomPanel:** remember position
+* **bottomPanel:** simplify event handling and increase draggable area
+* disable default background gradient
+* don't open sub-task entry immediately
+* further unify styling
+* hide focus mode for very small screens
+* hide right nav border for dark theme
+* **i18n:** add missing turkish translations
+* Implement repeatable sub-tasks
+* improve all shadows and use m3 shadows
+* improve dark theme colors once more
+* improve glass theme
+* improve global shadow styles
+* improve header buttons
+* improve logging for idle handling
+* improve on dark theme sub tasks
+* improve on idle
+* improve on task notes
+* improve side-nav border color
+* improve styling
+* improve styling for mobile planner task
+* improve styling of panel
+* improve task shadow styles
+* improve task styling
+* improve task title in task detail panel styling
+* keep controls below snack active
+* make dark theme backdrop dark
+* make dark theme gradient darker
+* make scrollbars a bit more subtle
+* **planner:** make tasks full width for single col view
+* **plugin:** add more css variables
+* replace background gradient with background tint
+* **rightPanel:** add drag to close
+* **rightPanel:** add handle
+* **rightPanel:** hide right panel when closed
+* **rightPanel:** improve on handle
+* **rightPanel:** improve on task title and display for all sizes
+* **rightPanel:** make close button work as drag handle too
+* **rightPanel:** make panel resizable
+* **rightPanel:** open panel also on desktop on task click
+* **rightPanel:** remove over state for side panel
+* **rightPanel:** unselect task on route change
+* **sideNav:** add "add tag" and "add project" buttons
+* **sideNav:** add background when there is background image
+* **sideNav:** add escape key to unfocus nav and focus first task
+* **sideNav:** add new left navigation and integrate
+* **sideNav:** always close mobile nav when item was clicked
+* **sideNav:** animate
+* **sideNav:** better solution for task-count
+* **sideNav:** bring back project visibility menu
+* **sideNav:** don't show more_vert button for collapsed
+* **sideNav:** fix colors and make focus shortcut working
+* **sideNav:** help as mat-menu
+* **sideNav:** improve collapsed style
+* **sideNav:** improve mobile
+* **sideNav:** improve mobile nav behavior and styling
+* **sideNav:** improve nav active styles
+* **sideNav:** improve nav active styles
+* **sideNav:** improve styling
+* **sideNav:** improve styling
+* **sideNav:** improve task count style
+* **sideNav:** make backdrop work
+* **sideNav:** make collapse and expand work
+* **sideNav:** make collapse expand children animation work again
+* **sideNav:** make drag and drop of  projects and tags work again
+* **sideNav:** make early on icon a little smaller
+* **sideNav:** make expand and collapse projects and tags work in compact nav mode
+* **sideNav:** make expand icon work
+* **sideNav:** make icons work again
+* **sideNav:** make keyboard nav work
+* **sideNav:** make mobile nav work
+* **sideNav:** make mobile nav work again
+* **sideNav:** make more_vert button work
+* **sideNav:** make overlay nav half way work
+* **sideNav:** make plugins work with new nav
+* **sideNav:** make shepherd kinda work and throw out more layout stuff
+* **sideNav:** make text color work better
+* **sideNav:** move certain nav parts to the bottom
+* **sideNav:** move drag handle right of scrollbars
+* **sidenav:** polish styling
+* **sideNav:** prepare focus sidenav
+* **sidenav:** prevent disappearing separators
+* **sideNav:** remove grab cursor from Today and Inbox entries
+* **sideNav:** remove side nav layout store stuff
+* **sideNav:** remove title
+* **sideNav:** style adjustments
+* **sideNav:** unify hover and focus styles
+* **sideNav:** unify styling
+* softer shadows
+* stay in current context when going to parent task
