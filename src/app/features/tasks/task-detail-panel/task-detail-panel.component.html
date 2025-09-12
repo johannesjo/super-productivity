@@ -1,17 +1,16 @@
 <div class="wrapper">
-  @if (isDialogMode() || isOver() || IS_TOUCH_PRIMARY) {
-    <header class="task-title-wrapper">
-      <task-title
-        [resetToLastExternalValueTrigger]="task()"
-        (valueEdited)="updateTaskTitleIfChanged($event.wasChanged, $event.newVal)"
-        [value]="task().title || ''"
-        class="task-title"
-      ></task-title>
-      <!--    <button mat-icon-button>-->
-      <!--      <mat-icon>more_vert</mat-icon>-->
-      <!--    </button>-->
-    </header>
-  }
+  <header class="task-title-wrapper">
+    <task-title
+      [resetToLastExternalValueTrigger]="task()"
+      (valueEdited)="updateTaskTitleIfChanged($event.wasChanged, $event.newVal)"
+      [value]="task().title || ''"
+      class="task-title"
+    ></task-title>
+    <!--    <button mat-icon-button>-->
+    <!--      <mat-icon>more_vert</mat-icon>-->
+    <!--    </button>-->
+  </header>
+
   @if (isShowSubTasksPanel()) {
     <task-detail-item
       (collapseParent)="collapseParent()"

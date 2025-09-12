@@ -54,7 +54,6 @@ progress-bar {
     padding-top: 4px;
     padding-bottom: 4px;
     margin-top: 0;
-
     color: var(--text-color);
   }
 }
@@ -63,12 +62,17 @@ progress-bar {
   font-weight: bold;
   transform-origin: top center;
   padding: var(--s);
-  font-size: 17px;
+  padding: 0;
   margin: 0;
   flex-grow: 1;
   margin-top: 4px;
   line-height: 1.4;
   min-height: 40px;
+  font-size: 14px;
+
+  @include mq(xs) {
+    font-size: 16px;
+  }
 
   &:focus {
     transform: scale(1);
