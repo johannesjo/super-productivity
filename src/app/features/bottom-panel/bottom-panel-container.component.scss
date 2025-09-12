@@ -44,8 +44,21 @@
 
 .bottom-panel-content {
   flex: 1;
+  // For mobile bottom sheet, let parent handle overflow
+  // For desktop right panel, use overflow-y auto
   overflow-y: auto;
   padding: 0 8px 4px;
+
+  // Mobile bottom sheet specific styles
+  :host-context(.bottom-panel-sheet) & {
+    overflow: hidden;
+    padding: 0 4px;
+
+    > * {
+      height: 100%;
+      overflow-y: auto;
+    }
+  }
 
   .ani-container {
     &.isDisableAni {

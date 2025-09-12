@@ -1,13 +1,11 @@
 @use '../../../styles/_globals.scss' as *;
 
-$z-this-content: calc(var(--z-right-panel) + 1);
-
 :host {
   display: flex;
   flex-direction: row;
   justify-content: stretch;
   align-items: stretch;
-  height: 100%;
+  height: calc(100% - var(--bar-height));
 
   &.resizing {
     // Disable transitions while resizing

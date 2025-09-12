@@ -20,20 +20,11 @@ header {
 
 .notes {
   padding: calc(var(--s) * 1.5);
+  // Add extra bottom padding to ensure last note is fully visible
+  padding-bottom: calc(var(--s) * 3);
 
-  // Specify a max-height and overflow-y to allow scrolling in cdkDropList.
-  max-height: calc(
-    // window height - total header margin - header height
-    100vh - var(--s3) - 36px
-  );
-  overflow-y: auto;
-
-  @include mq(xs) {
-    max-height: calc(
-      // window height - bar height - total header margin - header height
-      100vh - var(--bar-height) - var(--s) - 36px
-    );
-  }
+  // Remove max-height and overflow-y to prevent double scrollbars
+  // Let the parent bottom-panel-content handle scrolling instead
 }
 
 note {

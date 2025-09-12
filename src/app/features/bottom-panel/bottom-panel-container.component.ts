@@ -21,6 +21,7 @@ import { taskDetailPanelTaskChangeAnimation } from '../tasks/task-detail-panel/t
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { TaskService } from '../tasks/task.service';
+import { Log } from '../../core/log';
 
 export interface BottomPanelData {
   panelContent:
@@ -38,7 +39,7 @@ const PANEL_HEIGHTS = {
   MIN_HEIGHT: 0.2,
   MAX_HEIGHT_ABSOLUTE: 0.98,
   TASK_PANEL_HEIGHT: 0.5,
-  OTHER_PANEL_HEIGHT: 0.8,
+  OTHER_PANEL_HEIGHT: 0.9,
   VELOCITY_THRESHOLD: 0.5,
   INITIAL_ANIMATION_BLOCK_DURATION: 300, // ms
 } as const;
@@ -242,7 +243,7 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
           '.mat-bottom-sheet-container',
         );
       } catch (error) {
-        console.warn('Failed to find bottom sheet container:', error);
+        Log.warn('Failed to find bottom sheet container:', error);
         return null;
       }
     }
