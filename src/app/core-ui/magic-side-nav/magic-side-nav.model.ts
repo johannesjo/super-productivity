@@ -103,8 +103,6 @@ export interface NavConfig {
   fullModeByDefault: boolean;
   showLabels: boolean;
   mobileBreakpoint: number;
-  position: 'left' | 'right';
-  theme: 'light' | 'dark';
   resizable: boolean;
   minWidth: number;
   maxWidth: number;

@@ -235,9 +235,9 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     if (!this.isResizing()) return;
 
     const deltaX =
-      this.config().position === 'right'
-        ? this.startX() - event.clientX
-        : event.clientX - this.startX();
+      // this.config().position === 'right'
+      //   ? this.startX() - event.clientX
+      event.clientX - this.startX();
 
     const potentialWidth = this.startWidth() + deltaX;
     const { collapseThreshold, expandThreshold, minWidth, maxWidth } = this.config();
