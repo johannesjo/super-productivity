@@ -13,10 +13,9 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { NavItemComponent } from './nav-item/nav-item.component';
 import { NavSectionComponent } from './nav-list/nav-list.component';
-import { NavGroupItem, NavItem, NavWorkContextItem } from './magic-side-nav.model';
+import { NavItem } from './magic-side-nav.model';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { MagicNavConfigService } from './magic-nav-config.service';
 import { lsSetItem, readBoolLS, readNumberLSBounded } from '../../util/ls-util';
@@ -235,33 +234,28 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     }
   }
 
-  onDragDrop(
-    groupItem: NavGroupItem,
-    dropData: {
-      items: NavWorkContextItem[];
-      event: CdkDragDrop<any, any, NavWorkContextItem>;
-    },
-  ): void {
-    const { items, event } = dropData;
-
-    if (groupItem.id === 'projects') {
-      this._sideNavConfigService.handleProjectDrop(items, event);
-    } else if (groupItem.id === 'tags') {
-      this._sideNavConfigService.handleTagDrop(items, event);
-    }
+  onProjectMove(moveData: {
+    projectId: string;
+    targetFolderId: string | null;
+    targetIndex?: number;
+  }): void {
+    this._sideNavConfigService.handleProjectMove(
+      moveData.projectId,
+      moveData.targetFolderId,
+      moveData.targetIndex,
+    );
   }
 
-  onFolderDrop(
-    groupItem: NavGroupItem,
-    dropData: {
-      event: CdkDragDrop<any, any, any>;
-    },
-  ): void {
-    const { event } = dropData;
-
-    if (groupItem.id === 'projects') {
-      this._sideNavConfigService.handleFolderDrop(event);
-    }
+  onFolderMove(moveData: {
+    folderId: string;
+    targetParentFolderId: string | null;
+    targetIndex?: number;
+  }): void {
+    this._sideNavConfigService.handleFolderMove(
+      moveData.folderId,
+      moveData.targetParentFolderId,
+      moveData.targetIndex,
+    );
   }
 
   // Resize functionality

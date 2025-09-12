@@ -3,12 +3,13 @@
   <div
     class="g-multi-btn-wrapper"
     [class.folder-header-drop-zone]="isHeaderDropZone()"
-    [cdkDropList]="isHeaderDropZone()"
-    [cdkDropListData]="item()"
-    [cdkDropListSortingDisabled]="true"
-    [cdkDropListEnterPredicate]="canDropOnHeader"
-    [attr.id]="'header-' + item().id"
-    (cdkDropListDropped)="onHeaderDrop($event)"
+    [attr.data-drop-zone]="
+      isHeaderDropZone()
+        ? item().id?.startsWith('folder-')
+          ? item().id?.replace('folder-', '')
+          : 'projects'
+        : null
+    "
   >
     <nav-item
       [container]="'group'"
@@ -58,13 +59,6 @@
       class="nav-children"
       [attr.id]="'group-' + item().id"
       role="list"
-      cdkDropList
-      [cdkDropListData]="item()"
-      [cdkDropListSortingDisabled]="false"
-      [cdkDropListAutoScrollDisabled]="true"
-      [cdkDropListConnectedTo]="getConnectedDropLists()"
-      [attr.id]="'list-' + item().id"
-      (cdkDropListDropped)="onDrop($event)"
     >
       @for (child of item().children; track child.id) {
         @if (child.type === 'workContext') {
@@ -74,9 +68,7 @@
               child.defaultIcon !== 'today' && child.defaultIcon !== 'inbox'
             "
             role="listitem"
-            cdkDrag
-            [cdkDragData]="child"
-            [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? DRAG_DELAY_FOR_TOUCH_LONGER : 0"
+            [attr.data-project-id]="child.workContext?.id"
           >
             <nav-item
               [workContext]="child.workContext"
@@ -94,15 +86,9 @@
             class="nav-child-item folder-item"
             [class.draggable]="child.id?.startsWith('folder-')"
             role="listitem"
-            cdkDrag
-            [cdkDragData]="child"
-            [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? DRAG_DELAY_FOR_TOUCH_LONGER : 0"
-            [cdkDragDisabled]="!child.id?.startsWith('folder-')"
-            cdkDropList
-            [cdkDropListData]="child"
-            [cdkDropListConnectedTo]="getConnectedDropLists()"
-            [attr.id]="'folder-drop-' + child.id"
-            (cdkDropListDropped)="onFolderDrop($event)"
+            [attr.data-folder-id]="
+              child.id?.startsWith('folder-') ? child.id?.replace('folder-', '') : null
+            "
           >
             <nav-list
               [item]="child"
@@ -110,8 +96,8 @@
               [isExpanded]="child.icon === 'expand_more'"
               [activeWorkContextId]="activeWorkContextId()"
               (itemClick)="onChildClick($event)"
-              (dragDrop)="dragDrop.emit($event)"
-              (folderDrop)="folderDrop.emit($event)"
+              (projectMove)="projectMove.emit($event)"
+              (folderMove)="folderMove.emit($event)"
             ></nav-list>
           </li>
         } @else {

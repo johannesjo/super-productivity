@@ -652,6 +652,160 @@ export class MagicNavConfigService {
     }
   }
 
+  handleProjectMove(
+    projectId: string,
+    targetFolderId: string | null,
+    targetIndex?: number,
+  ): void {
+    console.log('🎯 handleProjectMove called:', {
+      projectId,
+      targetFolderId,
+      targetIndex,
+    });
+    // Get current state before making any changes
+    const allProjects = this._visibleProjects();
+    console.log('📊 All projects:', allProjects?.length || 0);
+    if (!allProjects || allProjects.length === 0) {
+      console.log('❌ No projects found, exiting');
+      return;
+    }
+
+    // Find the source project
+    const sourceProject = allProjects.find((p) => p.id === projectId);
+    console.log('🔍 Source project found:', !!sourceProject, sourceProject?.title);
+    if (!sourceProject) {
+      console.log('❌ Source project not found, exiting');
+      return;
+    }
+
+    // Build target list from current state (projects that would be in target folder)
+    const getProjectsInFolder = (folderId: string | null): string[] =>
+      allProjects
+        .filter((p) => (folderId ? p.folderId === folderId : !p.folderId))
+        .map((p) => p.id);
+
+    const targetIds = getProjectsInFolder(targetFolderId).filter(
+      (id) => id !== projectId,
+    );
+
+    // Calculate the correct index
+    const clampedIndex =
+      typeof targetIndex === 'number'
+        ? Math.max(0, Math.min(targetIndex, targetIds.length))
+        : targetIds.length; // append by default
+
+    // Create the new order for the target folder
+    const newTargetIds = [
+      ...targetIds.slice(0, clampedIndex),
+      projectId,
+      ...targetIds.slice(clampedIndex),
+    ];
+
+    // Now update the folder assignment
+    console.log('💾 Updating project folder assignment...');
+    this._projectService.update(projectId, { folderId: targetFolderId });
+    console.log('✅ Folder assignment updated, proceeding with reordering...');
+
+    // Build the final order by reconstructing the full list
+    const result: string[] = [];
+    let insertedTargetSegment = false;
+
+    // Go through all projects and rebuild the order
+    for (const p of allProjects) {
+      const projectFolderId = p.id === projectId ? targetFolderId : p.folderId;
+      const isInTargetFolder = targetFolderId
+        ? projectFolderId === targetFolderId
+        : !projectFolderId;
+
+      if (isInTargetFolder) {
+        // Insert the reordered target segment once
+        if (!insertedTargetSegment) {
+          result.push(...newTargetIds);
+          insertedTargetSegment = true;
+        }
+        // Skip individual items from target folder as they're already in newTargetIds
+        continue;
+      }
+
+      // Skip the moved project if it appears elsewhere
+      if (p.id === projectId) {
+        continue;
+      }
+
+      result.push(p.id);
+    }
+
+    // If target folder was empty, insert the target segment
+    if (!insertedTargetSegment) {
+      result.push(...newTargetIds);
+    }
+
+    console.log('📋 Final project order:', result);
+    this._projectService.updateOrder(result);
+  }
+
+  handleFolderMove(
+    folderId: string,
+    targetParentFolderId: string | null,
+    targetIndex?: number,
+  ): void {
+    // Validate the move to prevent circular dependencies and invalid nesting
+    if (!this._isValidFolderMove(folderId, targetParentFolderId)) {
+      console.warn(
+        'Invalid folder move - would create circular dependency or invalid nesting',
+      );
+      return;
+    }
+
+    // Update the parent assignment
+    this._projectFolderService.updateProjectFolder(folderId, {
+      parentId: targetParentFolderId,
+    });
+
+    // For now, we don't need to implement folder ordering since the UI doesn't require it
+    // Folders are ordered by their creation time and expanded state
+    // This could be extended in the future if folder ordering becomes necessary
+
+    console.log('Folder moved:', { folderId, targetParentFolderId, targetIndex });
+  }
+
+  private _isValidFolderMove(
+    folderId: string,
+    targetParentFolderId: string | null,
+  ): boolean {
+    // Can't move a folder into itself
+    if (folderId === targetParentFolderId) {
+      return false;
+    }
+
+    // If moving to root level, it's always valid
+    if (!targetParentFolderId) {
+      return true;
+    }
+
+    // Get all folders to check for circular dependencies
+    const allFolders = this._projectFolders();
+
+    // Find the target parent folder
+    const targetParent = allFolders.find((f) => f.id === targetParentFolderId);
+    if (!targetParent) {
+      return false; // Target parent doesn't exist
+    }
+
+    // Check if target parent already has a parent (would create nesting deeper than 1 level)
+    if (targetParent.parentId) {
+      return false; // Would create nesting deeper than 1 level
+    }
+
+    // Check if the folder being moved has children that would become too deeply nested
+    const folderHasChildren = allFolders.some((f) => f.parentId === folderId);
+    if (folderHasChildren && targetParentFolderId) {
+      return false; // Would create nesting deeper than 1 level (grandchildren)
+    }
+
+    return true;
+  }
+
   private _handleProjectFolderMove(
     projectItem: NavWorkContextItem,
     sourceContainer: any,

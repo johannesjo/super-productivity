@@ -89,8 +89,8 @@
               [isExpanded]="isGroupExpanded(item)"
               [activeWorkContextId]="activeWorkContextId()"
               (itemClick)="onItemClick($event)"
-              (dragDrop)="onDragDrop(item, $event)"
-              (folderDrop)="onFolderDrop(item, $event)"
+              (projectMove)="onProjectMove($event)"
+              (folderMove)="onFolderMove($event)"
             ></nav-list>
           </li>
         }
