@@ -1,3 +1,5 @@
+// NOTE the parent el styles live in _bottom-panel.scss
+
 .bottom-panel-container {
   display: flex;
   flex-direction: column;
@@ -27,13 +29,13 @@
   .drag-handle {
     width: 60px;
     height: 6px;
-    background-color: rgba(255, 255, 255, 0.4);
+    background-color: var(--bottom-panel-handle);
     border-radius: 3px;
     transition: background-color 0.2s ease;
-  }
 
-  &:hover .drag-handle {
-    background-color: rgba(255, 255, 255, 0.6);
+    :host-context(.dragging) & {
+      background-color: var(--bottom-panel-handle-active);
+    }
   }
 
   .close-btn {
