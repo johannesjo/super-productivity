@@ -33,8 +33,8 @@ $z-this-backdrop: calc(var(--z-task-side-bar-over) - 1);
   z-index: var(--z-side-panel-task-and-notes);
   transition: var(--transition-leave);
   transition-property: opacity, width, right, transform;
-  // NOTE: prevents overlapping with nav when open
-  max-width: 700px;
+  // Cap panel to at most half of the container width in side mode
+  max-width: 50%;
   background: var(--right-panel-bg);
   background: transparent;
   border-left: 1px solid var(--separator-color);
@@ -53,6 +53,7 @@ $z-this-backdrop: calc(var(--z-task-side-bar-over) - 1);
   :host.isOver & {
     position: fixed;
     width: 80vw !important;
+    max-width: none; // allow overlay to exceed side-mode cap
     top: 0;
     bottom: 0;
     z-index: var(--z-task-side-bar-over);

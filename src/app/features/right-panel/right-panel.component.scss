@@ -58,6 +58,45 @@
   }
 }
 
+// Edge close handle centered vertically, placed on the left edge
+.edge-close-handle {
+  position: absolute;
+  top: 50%;
+  left: -14px; // sit slightly outside to avoid overlapping content
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--separator-color);
+  background: var(--bg-lightest);
+  color: var(--sidenav-active-text);
+  opacity: 0.6;
+  transition: var(--transition-fast);
+  z-index: 1005; // above resize handle
+
+  &:hover,
+  &:focus {
+    background: var(--sidenav-hover);
+    opacity: 1;
+    outline: none;
+  }
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+  }
+}
+
+:host(.resizing) .edge-close-handle {
+  transition: none !important;
+}
+
 // Keep the indicator highlighted while dragging
 :host(.resizing) .resize-handle::after {
   background-color: var(--sidenav-active-text);

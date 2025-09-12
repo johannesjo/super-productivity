@@ -43,6 +43,8 @@ import {
 } from '../bottom-panel/bottom-panel-container.component';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { readNumberLSBounded } from '../../util/ls-util';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 
 // Right panel resize constants
 const RIGHT_PANEL_CONFIG = {
@@ -70,6 +72,8 @@ const RIGHT_PANEL_CONFIG = {
     TaskDetailPanelComponent,
     TaskViewCustomizerPanelComponent,
     PluginPanelContainerComponent,
+    MatIconModule,
+    MatButtonModule,
   ],
   host: {
     // eslint-disable-next-line @typescript-eslint/naming-convention

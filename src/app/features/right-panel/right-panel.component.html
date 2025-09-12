@@ -23,6 +23,18 @@
             role="separator"
           ></div>
         }
+        <!-- Edge close handle (middle of panel edge, side mode only) -->
+        @if (!isOverlayMode() && !layoutService.isXs()) {
+          <button
+            type="button"
+            class="edge-close-handle"
+            (click)="close()"
+            [attr.aria-label]="'Close right panel'"
+            mat-icon-button
+          >
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        }
         @if (panelContent() === 'ISSUE_PANEL') {
           <issue-panel [@slideInFromRight]></issue-panel>
         } @else if (panelContent() === 'NOTES') {
