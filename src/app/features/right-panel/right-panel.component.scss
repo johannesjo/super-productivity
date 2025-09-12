@@ -29,8 +29,8 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  left: -6px; // widen hit area to straddle boundary
-  width: 12px; // larger hit target for easier grabbing
+  left: 0; // keep fully inside panel to avoid being covered by content sibling
+  width: 10px; // comfortable hit target on the inside edge
   cursor: col-resize;
   z-index: 1003;
   transition: background-color 0.2s ease;
@@ -44,7 +44,7 @@
     top: 0;
     bottom: 0;
     width: 4px;
-    left: calc(50% - 2px);
+    left: 0; // draw indicator right at the panel edge
     background-color: transparent;
     transition: background-color 0.2s ease;
   }
@@ -62,25 +62,31 @@
 .edge-close-handle {
   position: absolute;
   top: 50%;
-  left: -14px; // sit slightly outside to avoid overlapping content
+  left: 2px; // align just inside the resize line to remain visible
   transform: translateY(-50%);
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 48px;
   padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  border: 1px solid var(--separator-color);
+  border-radius: 12px;
+  border-top-left-radius: 2px;
+  border-bottom-left-radius: 2px;
   background: var(--bg-lightest);
+  border: 1px solid var(--separator-color);
+  box-shadow: var(--whiteframe-shadow-1dp);
   color: var(--sidenav-active-text);
-  opacity: 0.6;
   transition: var(--transition-fast);
   z-index: 1005; // above resize handle
+  overflow: hidden; // clip ripple to rounded shape
+  cursor: pointer;
+  //border: 1px solid var(--separator-color);
+  //opacity: 0.6;
 
   &:hover,
   &:focus {
-    background: var(--sidenav-hover);
+    background: var(--bg-lightest);
     opacity: 1;
     outline: none;
   }

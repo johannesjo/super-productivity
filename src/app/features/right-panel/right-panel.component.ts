@@ -44,7 +44,7 @@ import {
 import { LS } from '../../core/persistence/storage-keys.const';
 import { readNumberLSBounded } from '../../util/ls-util';
 import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
+import { MatRippleModule } from '@angular/material/core';
 
 // Right panel resize constants
 const RIGHT_PANEL_CONFIG = {
@@ -73,7 +73,7 @@ const RIGHT_PANEL_CONFIG = {
     TaskViewCustomizerPanelComponent,
     PluginPanelContainerComponent,
     MatIconModule,
-    MatButtonModule,
+    MatRippleModule,
   ],
   host: {
     // eslint-disable-next-line @typescript-eslint/naming-convention

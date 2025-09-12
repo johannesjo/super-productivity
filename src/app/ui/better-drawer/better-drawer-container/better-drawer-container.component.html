@@ -26,6 +26,8 @@
   >
     &times;
   </button>
+  <!-- Slot for non-scrolling side tools/overlays (e.g. edge handle) -->
+  <ng-content select="[better-drawer-side-overlay]"></ng-content>
   <div class="side-inner">
     <ng-content select="[better-drawer-side]"></ng-content>
   </div>

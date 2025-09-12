@@ -38,6 +38,7 @@ $z-this-backdrop: calc(var(--z-task-side-bar-over) - 1);
   background: var(--right-panel-bg);
   background: transparent;
   border-left: 1px solid var(--separator-color);
+  overflow: visible; // allow overlay controls to stick out on the left edge
 
   @include mq(sm, max) {
     // NOTE: prevents overlapping with nav when open

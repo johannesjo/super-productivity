@@ -22,19 +22,21 @@
             [attr.aria-label]="'Resize right panel'"
             role="separator"
           ></div>
-        }
-        <!-- Edge close handle (middle of panel edge, side mode only) -->
-        @if (!isOverlayMode() && !layoutService.isXs()) {
-          <button
-            type="button"
+          <div
             class="edge-close-handle"
-            (click)="close()"
+            role="button"
+            tabindex="0"
             [attr.aria-label]="'Close right panel'"
-            mat-icon-button
+            (click)="close()"
+            (keydown.enter)="close()"
+            (keydown.space)="close()"
+            matRipple
+            [matRippleDisabled]="isResizing()"
           >
             <mat-icon>chevron_right</mat-icon>
-          </button>
+          </div>
         }
+
         @if (panelContent() === 'ISSUE_PANEL') {
           <issue-panel [@slideInFromRight]></issue-panel>
         } @else if (panelContent() === 'NOTES') {
