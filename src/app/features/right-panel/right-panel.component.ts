@@ -6,6 +6,7 @@ import {
   inject,
   input,
   OnDestroy,
+  OnInit,
   signal,
   untracked,
 } from '@angular/core';
@@ -40,6 +41,16 @@ import {
   BottomPanelContainerComponent,
   BottomPanelData,
 } from '../bottom-panel/bottom-panel-container.component';
+import { LS } from '../../core/persistence/storage-keys.const';
+import { readNumberLSBounded } from '../../util/ls-util';
+
+// Right panel resize constants
+const RIGHT_PANEL_CONFIG = {
+  DEFAULT_WIDTH: 320,
+  MIN_WIDTH: 280,
+  MAX_WIDTH: 800,
+  RESIZABLE: true,
+} as const;
 
 @Component({
   selector: 'right-panel',
@@ -59,8 +70,12 @@ import {
     TaskViewCustomizerPanelComponent,
     PluginPanelContainerComponent,
   ],
+  host: {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    '[class.resizing]': 'isResizing()',
+  },
 })
-export class RightPanelComponent implements OnDestroy {
+export class RightPanelComponent implements OnInit, OnDestroy {
   taskService = inject(TaskService);
   layoutService = inject(LayoutService);
   pluginService = inject(PluginService);
@@ -69,8 +84,25 @@ export class RightPanelComponent implements OnDestroy {
   private _bottomSheet = inject(MatBottomSheet);
   private _bottomSheetRef: MatBottomSheetRef<BottomPanelContainerComponent> | null = null;
 
+  // Resize functionality
+  readonly currentWidth = signal<number>(RIGHT_PANEL_CONFIG.DEFAULT_WIDTH);
+  readonly isResizing = signal(false);
+  private readonly _startX = signal(0);
+  private readonly _startWidth = signal(0);
+
+  // Store bound functions to prevent memory leaks
+  private readonly _boundOnDrag = this._handleDrag.bind(this);
+  private readonly _boundOnDragEnd = this._handleDragEnd.bind(this);
+
   // NOTE: used for debugging
   readonly isAlwaysOver = input<boolean>(false);
+
+  // Computed panel width for CSS binding
+  readonly panelWidth = computed(() => {
+    const isOverlay = this.isOverlayMode();
+    // In overlay mode, use fixed width; in side mode, use resizable width
+    return isOverlay ? RIGHT_PANEL_CONFIG.DEFAULT_WIDTH : this.currentWidth();
+  });
 
   // Determines if the panel should be in overlay mode based on route and screen size
   readonly isOverlayMode = computed(() => {
@@ -364,6 +396,10 @@ export class RightPanelComponent implements OnDestroy {
     });
   });
 
+  ngOnInit(): void {
+    this._initializeWidth();
+  }
+
   ngOnDestroy(): void {
     // Clean up timers to prevent memory leaks
     if (this._selectedTaskDelayTimer) {
@@ -397,5 +433,59 @@ export class RightPanelComponent implements OnDestroy {
     if (!IS_TOUCH_PRIMARY) {
       this.taskService.focusLastFocusedTask();
     }
+  }
+
+  // Resize functionality methods
+  onResizeStart(event: MouseEvent): void {
+    if (!RIGHT_PANEL_CONFIG.RESIZABLE || this.isOverlayMode()) return;
+
+    this.isResizing.set(true);
+    this._startX.set(event.clientX);
+    this._startWidth.set(this.currentWidth());
+
+    document.addEventListener('mousemove', this._boundOnDrag);
+    document.addEventListener('mouseup', this._boundOnDragEnd);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+
+    event.preventDefault();
+  }
+
+  private _handleDrag(event: MouseEvent): void {
+    if (!this.isResizing()) return;
+
+    // Right panel resizes from left edge, so subtract delta
+    const deltaX = this._startX() - event.clientX;
+    const potentialWidth = this._startWidth() + deltaX;
+
+    const newWidth = Math.max(
+      RIGHT_PANEL_CONFIG.MIN_WIDTH,
+      Math.min(RIGHT_PANEL_CONFIG.MAX_WIDTH, potentialWidth),
+    );
+
+    this.currentWidth.set(newWidth);
+  }
+
+  private _handleDragEnd(): void {
+    if (!this.isResizing()) return;
+
+    this.isResizing.set(false);
+    document.removeEventListener('mousemove', this._boundOnDrag);
+    document.removeEventListener('mouseup', this._boundOnDragEnd);
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+
+    // Save width to localStorage
+    localStorage.setItem(LS.RIGHT_PANEL_WIDTH, this.currentWidth().toString());
+  }
+
+  private _initializeWidth(): void {
+    // Load saved width from localStorage or use default
+    const savedWidth = readNumberLSBounded(
+      LS.RIGHT_PANEL_WIDTH,
+      RIGHT_PANEL_CONFIG.MIN_WIDTH,
+      RIGHT_PANEL_CONFIG.MAX_WIDTH,
+    );
+    this.currentWidth.set(savedWidth ?? RIGHT_PANEL_CONFIG.DEFAULT_WIDTH);
   }
 }

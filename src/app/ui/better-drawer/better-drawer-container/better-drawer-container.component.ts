@@ -48,6 +48,8 @@ export class BetterDrawerContainerComponent implements OnDestroy {
   private _router = inject(Router);
 
   readonly sideWidth = input<number>(0);
+  // Optional pixel-based width for the side panel (overrides percentage when provided)
+  readonly sideWidthPx = input<number | null>(null);
   readonly isOpen = input<boolean>(false);
   readonly isOver = input<boolean>(false);
   readonly wasClosed = output<void>();
@@ -150,7 +152,11 @@ export class BetterDrawerContainerComponent implements OnDestroy {
     const isOpen = this.isOpen();
     const isOver = this.isOver();
 
-    const styles: StyleObject = { width: isOpen ? `${this.sideWidth()}%` : '0' };
+    // Prefer pixel width when provided, otherwise fall back to percentage
+    const px = this.sideWidthPx();
+    const widthVal = px != null && px > 0 ? `${px}px` : `${this.sideWidth()}%`;
+
+    const styles: StyleObject = { width: isOpen ? widthVal : '0' };
 
     if (isOver) {
       styles.transform = `${isOpen ? 'translateX(0)' : 'translateX(100%)'}`;

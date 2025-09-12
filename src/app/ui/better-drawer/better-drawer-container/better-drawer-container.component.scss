@@ -11,6 +11,13 @@ $z-this-backdrop: calc(var(--z-task-side-bar-over) - 1);
   height: 100%;
 }
 
+// Disable transitions during external resize drags
+:host(.resizing) {
+  .side {
+    transition: none !important;
+  }
+}
+
 .content {
   flex-grow: 1;
   max-width: 100%;

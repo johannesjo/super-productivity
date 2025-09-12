@@ -3,6 +3,9 @@
   [isOpen]="isOpen() && !layoutService.isXs()"
   [isOver]="isOverlayMode()"
   [sideWidth]="40"
+  [sideWidthPx]="!isOverlayMode() ? panelWidth() : null"
+  [class.resizing]="isResizing()"
+  [@.disabled]="isResizing()"
 >
   <ng-container better-drawer-content>
     <ng-content></ng-content>
@@ -11,6 +14,15 @@
   <ng-container better-drawer-side>
     @if (isOpen()) {
       <div class="right-panel">
+        <!-- Resize Handle (only show in side mode when open) -->
+        @if (!isOverlayMode() && !layoutService.isXs()) {
+          <div
+            class="resize-handle"
+            (mousedown)="onResizeStart($event)"
+            [attr.aria-label]="'Resize right panel'"
+            role="separator"
+          ></div>
+        }
         @if (panelContent() === 'ISSUE_PANEL') {
           <issue-panel [@slideInFromRight]></issue-panel>
         } @else if (panelContent() === 'NOTES') {
