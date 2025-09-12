@@ -4,7 +4,7 @@ import { hideNonTaskSidePanelContent } from './layout.actions';
 import { filter, mapTo } from 'rxjs/operators';
 import { setSelectedTask } from '../../../features/tasks/store/task.actions';
 import { LayoutService } from '../layout.service';
-import { NavigationEnd, Router } from '@angular/router';
+import { NavigationStart, NavigationEnd, Router } from '@angular/router';
 
 // what should happen
 // task selected => open panel
@@ -33,6 +33,14 @@ export class LayoutEffects {
       filter((event): event is NavigationEnd => event instanceof NavigationEnd),
       filter((event) => !!event.url.match(/(daily-summary)$/)),
       mapTo(hideNonTaskSidePanelContent()),
+    ),
+  );
+
+  // Deselect task on navigation start - parent task button will re-select after navigation
+  unselectTaskOnNavigation$ = createEffect(() =>
+    this.router.events.pipe(
+      filter((event): event is NavigationStart => event instanceof NavigationStart),
+      mapTo(setSelectedTask({ id: null })),
     ),
   );
 }

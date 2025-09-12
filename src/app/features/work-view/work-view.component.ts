@@ -41,7 +41,7 @@ import { CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
-import { MatButton, MatFabButton, MatMiniFabButton } from '@angular/material/button';
+import { MatButton, MatMiniFabButton } from '@angular/material/button';
 import { AddTaskBarComponent } from '../tasks/add-task-bar/add-task-bar.component';
 import { AddScheduledTodayOrTomorrowBtnComponent } from '../add-tasks-for-tomorrow/add-scheduled-for-tomorrow/add-scheduled-today-or-tomorrow-btn.component';
 import { TaskListComponent } from '../tasks/task-list/task-list.component';
@@ -86,7 +86,6 @@ import { FinishDayBtnComponent } from './finish-day-btn/finish-day-btn.component
     TaskListComponent,
     SplitComponent,
     BacklogComponent,
-    MatFabButton,
     AsyncPipe,
     MsToStringPipe,
     TranslatePipe,
