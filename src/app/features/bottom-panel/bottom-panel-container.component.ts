@@ -36,7 +36,16 @@ export interface BottomPanelData {
   isDisableTaskPanelAni?: boolean;
 }
 
-const MAX_HEIGHT = 0.8;
+// Panel height constants
+const PANEL_HEIGHTS = {
+  MAX_HEIGHT: 0.8,
+  MIN_HEIGHT: 0.2,
+  MAX_HEIGHT_ABSOLUTE: 0.98,
+  TASK_PANEL_HEIGHT: 0.5,
+  OTHER_PANEL_HEIGHT: 0.8,
+  VELOCITY_THRESHOLD: 0.5,
+  INITIAL_ANIMATION_BLOCK_DURATION: 300, // ms
+} as const;
 
 @Component({
   selector: 'bottom-panel-container',
@@ -82,6 +91,15 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
   private _lastTime = 0;
   private _velocity = 0;
   private _disableAniTimeout?: number;
+  private _cachedContainer: HTMLElement | null = null;
+
+  // Store bound functions to prevent memory leaks
+  private readonly _boundOnDragStart = this._onDragStart.bind(this);
+  private readonly _boundOnDragMove = this._onDragMove.bind(this);
+  private readonly _boundOnDragEnd = this._onDragEnd.bind(this);
+  private readonly _boundOnTouchStart = this._onTouchStart.bind(this);
+  private readonly _boundOnTouchMove = this._onTouchMove.bind(this);
+  private readonly _boundOnTouchEnd = this._onTouchEnd.bind(this);
 
   ngAfterViewInit(): void {
     this._setupDragListeners();
@@ -90,12 +108,13 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
     // Re-enable animations after initial render is complete
     this._disableAniTimeout = window.setTimeout(() => {
       this.isDisableTaskPanelAni.set(false);
-    }, 300);
+    }, PANEL_HEIGHTS.INITIAL_ANIMATION_BLOCK_DURATION);
   }
 
   ngOnDestroy(): void {
     this._removeDragListeners();
     window.clearTimeout(this._disableAniTimeout);
+    this._cachedContainer = null; // Clear cached reference
   }
 
   close(): void {
@@ -107,30 +126,30 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
     if (!panelHeader) return;
 
     // Mouse events
-    panelHeader.addEventListener('mousedown', this._onDragStart.bind(this));
-    document.addEventListener('mousemove', this._onDragMove.bind(this));
-    document.addEventListener('mouseup', this._onDragEnd.bind(this));
+    panelHeader.addEventListener('mousedown', this._boundOnDragStart);
+    document.addEventListener('mousemove', this._boundOnDragMove);
+    document.addEventListener('mouseup', this._boundOnDragEnd);
 
     // Touch events
-    panelHeader.addEventListener('touchstart', this._onTouchStart.bind(this), {
+    panelHeader.addEventListener('touchstart', this._boundOnTouchStart, {
       passive: false,
     });
-    document.addEventListener('touchmove', this._onTouchMove.bind(this), {
+    document.addEventListener('touchmove', this._boundOnTouchMove, {
       passive: false,
     });
-    document.addEventListener('touchend', this._onTouchEnd.bind(this));
+    document.addEventListener('touchend', this._boundOnTouchEnd);
   }
 
   private _removeDragListeners(): void {
     const panelHeader = this.panelHeader()?.nativeElement;
     if (panelHeader) {
-      panelHeader.removeEventListener('mousedown', this._onDragStart.bind(this));
-      panelHeader.removeEventListener('touchstart', this._onTouchStart.bind(this));
+      panelHeader.removeEventListener('mousedown', this._boundOnDragStart);
+      panelHeader.removeEventListener('touchstart', this._boundOnTouchStart);
     }
-    document.removeEventListener('mousemove', this._onDragMove.bind(this));
-    document.removeEventListener('mouseup', this._onDragEnd.bind(this));
-    document.removeEventListener('touchmove', this._onTouchMove.bind(this));
-    document.removeEventListener('touchend', this._onTouchEnd.bind(this));
+    document.removeEventListener('mousemove', this._boundOnDragMove);
+    document.removeEventListener('mouseup', this._boundOnDragEnd);
+    document.removeEventListener('touchmove', this._boundOnTouchMove);
+    document.removeEventListener('touchend', this._boundOnTouchEnd);
   }
 
   private _onDragStart(event: MouseEvent): void {
@@ -176,9 +195,9 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
     const newHeight = this._startHeight + deltaY;
     const viewportHeight = window.innerHeight;
 
-    // Constrain height between 20vh and 98vh
-    const minHeight = viewportHeight * 0.2;
-    const maxHeight = viewportHeight * 0.98;
+    // Constrain height between min and max bounds
+    const minHeight = viewportHeight * PANEL_HEIGHTS.MIN_HEIGHT;
+    const maxHeight = viewportHeight * PANEL_HEIGHTS.MAX_HEIGHT_ABSOLUTE;
     const constrainedHeight = Math.min(Math.max(newHeight, minHeight), maxHeight);
 
     container.style.height = `${constrainedHeight}px`;
@@ -210,17 +229,16 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
       container.classList.remove('dragging');
 
       // Check for momentum and handle snap behavior
-      const velocityThreshold = 0.5; // pixels per millisecond
       const viewportHeight = window.innerHeight;
 
-      if (Math.abs(this._velocity) > velocityThreshold) {
+      if (Math.abs(this._velocity) > PANEL_HEIGHTS.VELOCITY_THRESHOLD) {
         if (this._velocity > 0) {
           // Swiping down with momentum - close the panel
           this.close();
           return;
         } else {
-          // Swiping up with momentum - expand to 4/5 of screen height
-          const targetHeight = viewportHeight * MAX_HEIGHT;
+          // Swiping up with momentum - expand to max height
+          const targetHeight = viewportHeight * PANEL_HEIGHTS.MAX_HEIGHT;
           container.style.height = `${targetHeight}px`;
           container.style.maxHeight = `${targetHeight}px`;
           container.style.transition = 'height 0.3s ease-out, max-height 0.3s ease-out';
@@ -228,7 +246,7 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
           // Remove transition after animation
           setTimeout(() => {
             container.style.transition = '';
-          }, 300);
+          }, PANEL_HEIGHTS.INITIAL_ANIMATION_BLOCK_DURATION);
           return;
         }
       }
@@ -240,7 +258,10 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
   private _setInitialHeight(): void {
     const container = this._getSheetContainer();
     if (container) {
-      const heightRatio = this.panelContent() === 'TASK' ? 0.5 : MAX_HEIGHT;
+      const heightRatio =
+        this.panelContent() === 'TASK'
+          ? PANEL_HEIGHTS.TASK_PANEL_HEIGHT
+          : PANEL_HEIGHTS.OTHER_PANEL_HEIGHT;
       const initialHeight = window.innerHeight * heightRatio;
       container.style.height = `${initialHeight}px`;
       container.style.maxHeight = `${initialHeight}px`;
@@ -248,6 +269,16 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
   }
 
   private _getSheetContainer(): HTMLElement | null {
-    return this._elementRef.nativeElement.closest('.mat-bottom-sheet-container');
+    if (!this._cachedContainer) {
+      try {
+        this._cachedContainer = this._elementRef.nativeElement.closest(
+          '.mat-bottom-sheet-container',
+        );
+      } catch (error) {
+        console.warn('Failed to find bottom sheet container:', error);
+        return null;
+      }
+    }
+    return this._cachedContainer;
   }
 }
