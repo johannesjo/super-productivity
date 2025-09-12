@@ -625,4 +625,292 @@ describe('TaskRepeatCfgService', () => {
       expect(actualDate.toISOString().split('T')[0]).toBe('2025-08-02');
     });
   });
+
+  describe('Subtask Templates', () => {
+    const mockRepeatCfgWithSubtasks: TaskRepeatCfg = {
+      ...mockTaskRepeatCfg,
+      shouldInheritSubtasks: true,
+      subTaskTemplates: [
+        { title: 'SubTask 1', notes: 'Notes 1', timeEstimate: 3600000 },
+        { title: 'SubTask 2', notes: 'Notes 2', timeEstimate: 7200000 },
+      ],
+    };
+
+    beforeEach(() => {
+      // Reset the mock before each test
+      taskService.createNewTaskWithDefaults.calls.reset();
+
+      // Mock createNewTaskWithDefaults for both main task and subtasks
+      taskService.createNewTaskWithDefaults.and.callFake((args) => ({
+        ...DEFAULT_TASK,
+        id:
+          args.title === 'Test Repeat Task'
+            ? 'parent-task-id'
+            : 'new-subtask-' + Math.random().toString(36).substr(2, 9),
+        title: args.title || 'Default Title',
+        notes: args.additional?.notes || '',
+        timeEstimate: args.additional?.timeEstimate || 0,
+        parentId: args.additional?.parentId,
+        projectId: args.additional?.projectId || 'test-project',
+        isDone: args.additional?.isDone || false,
+      }));
+    });
+
+    it('should create subtasks from templates when inherit is enabled', async () => {
+      const today = new Date();
+      const targetDayDate = today.getTime();
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
+
+      // Mock task creation to return different objects based on title
+      let callCount = 0;
+      taskService.createNewTaskWithDefaults.and.callFake((args) => {
+        callCount++;
+        if (callCount === 1) {
+          // Main task
+          return {
+            ...mockTask,
+            id: 'parent-task-id',
+            title: 'Test Repeat Task',
+          } as Task;
+        } else {
+          // Subtasks
+          const template = mockRepeatCfgWithSubtasks.subTaskTemplates![callCount - 2];
+          return {
+            ...DEFAULT_TASK,
+            id: `subtask-${callCount}`,
+            title: template.title,
+            notes: template.notes || '',
+            timeEstimate: template.timeEstimate || 0,
+            parentId: 'parent-task-id',
+            projectId: 'test-project',
+            isDone: false,
+          } as Task;
+        }
+      });
+
+      const actions = await service._getActionsForTaskRepeatCfg(
+        mockRepeatCfgWithSubtasks,
+        targetDayDate,
+      );
+
+      // Should have addTask action + updateTaskRepeatCfg + 2 addSubTask actions
+      expect(actions.length).toBe(4);
+
+      // Verify main task creation
+      expect(actions[0].type).toBe(TaskSharedActions.addTask.type);
+
+      // Verify subtask creations
+      expect(actions[2].type).toBe('[Task] Add SubTask');
+      expect(actions[3].type).toBe('[Task] Add SubTask');
+
+      // Verify subtask properties
+      const subTask1Action = actions[2] as any;
+      const subTask2Action = actions[3] as any;
+
+      expect(subTask1Action.task.title).toBe('SubTask 1');
+      expect(subTask1Action.task.notes).toBe('Notes 1');
+      expect(subTask1Action.task.timeEstimate).toBe(3600000);
+      expect(subTask1Action.parentId).toBe('parent-task-id');
+
+      expect(subTask2Action.task.title).toBe('SubTask 2');
+      expect(subTask2Action.task.notes).toBe('Notes 2');
+      expect(subTask2Action.task.timeEstimate).toBe(7200000);
+      expect(subTask2Action.parentId).toBe('parent-task-id');
+    });
+
+    it('should not create subtasks when inherit is disabled', async () => {
+      const cfgWithoutInherit: TaskRepeatCfg = {
+        ...mockTaskRepeatCfg,
+        shouldInheritSubtasks: false,
+        subTaskTemplates: [
+          { title: 'SubTask 1', notes: 'Notes 1', timeEstimate: 3600000 },
+        ],
+      };
+
+      const today = new Date();
+      const targetDayDate = today.getTime();
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
+      taskService.createNewTaskWithDefaults.and.returnValue(mockTask);
+
+      const actions = await service._getActionsForTaskRepeatCfg(
+        cfgWithoutInherit,
+        targetDayDate,
+      );
+
+      // Should have only addTask and updateTaskRepeatCfg actions
+      expect(actions.length).toBe(2);
+      expect(actions[0].type).toBe(TaskSharedActions.addTask.type);
+      expect(actions[1].type).toBe(updateTaskRepeatCfg.type);
+    });
+
+    it('should not create subtasks when templates are empty', async () => {
+      const cfgWithEmptyTemplates: TaskRepeatCfg = {
+        ...mockTaskRepeatCfg,
+        shouldInheritSubtasks: true,
+        subTaskTemplates: [],
+      };
+
+      const today = new Date();
+      const targetDayDate = today.getTime();
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
+      taskService.createNewTaskWithDefaults.and.returnValue(mockTask);
+
+      const actions = await service._getActionsForTaskRepeatCfg(
+        cfgWithEmptyTemplates,
+        targetDayDate,
+      );
+
+      // Should have only addTask and updateTaskRepeatCfg actions
+      expect(actions.length).toBe(2);
+      expect(actions[0].type).toBe(TaskSharedActions.addTask.type);
+      expect(actions[1].type).toBe(updateTaskRepeatCfg.type);
+    });
+
+    it('should handle subtasks with missing notes and timeEstimate', async () => {
+      const cfgWithMinimalTemplates: TaskRepeatCfg = {
+        ...mockTaskRepeatCfg,
+        shouldInheritSubtasks: true,
+        subTaskTemplates: [
+          { title: 'Minimal SubTask' }, // No notes or timeEstimate
+        ],
+      };
+
+      const today = new Date();
+      const targetDayDate = today.getTime();
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
+
+      let callCount = 0;
+      taskService.createNewTaskWithDefaults.and.callFake((args) => {
+        callCount++;
+        if (callCount === 1) {
+          // Main task
+          return {
+            ...mockTask,
+            id: 'parent-task-id',
+            title: 'Test Repeat Task',
+          } as Task;
+        } else {
+          // Subtask
+          return {
+            ...DEFAULT_TASK,
+            id: 'minimal-subtask',
+            title: 'Minimal SubTask',
+            notes: '',
+            timeEstimate: 0,
+            parentId: 'parent-task-id',
+            projectId: 'test-project',
+            isDone: false,
+          } as Task;
+        }
+      });
+
+      const actions = await service._getActionsForTaskRepeatCfg(
+        cfgWithMinimalTemplates,
+        targetDayDate,
+      );
+
+      expect(actions.length).toBe(3);
+
+      const subTaskAction = actions[2] as any;
+      expect(subTaskAction.task.title).toBe('Minimal SubTask');
+      expect(subTaskAction.task.notes).toBe(''); // Should default to empty string
+      expect(subTaskAction.task.timeEstimate).toBe(0); // Should default to 0
+      expect(subTaskAction.task.isDone).toBe(false); // Always start fresh
+    });
+
+    it('should assign correct projectId to subtasks', async () => {
+      const cfgWithProject: TaskRepeatCfg = {
+        ...mockRepeatCfgWithSubtasks,
+        projectId: 'specific-project-id',
+      };
+
+      const today = new Date();
+      const targetDayDate = today.getTime();
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
+
+      let callCount = 0;
+      taskService.createNewTaskWithDefaults.and.callFake((args) => {
+        callCount++;
+        if (callCount === 1) {
+          // Main task
+          return {
+            ...mockTask,
+            id: 'parent-task-id',
+            title: 'Test Repeat Task',
+          } as Task;
+        } else {
+          // Subtasks - should use project ID from template
+          const template = cfgWithProject.subTaskTemplates![callCount - 2];
+          return {
+            ...DEFAULT_TASK,
+            id: `subtask-${callCount}`,
+            title: template.title,
+            notes: template.notes || '',
+            timeEstimate: template.timeEstimate || 0,
+            parentId: 'parent-task-id',
+            projectId: 'specific-project-id',
+            isDone: false,
+          } as Task;
+        }
+      });
+
+      const actions = await service._getActionsForTaskRepeatCfg(
+        cfgWithProject,
+        targetDayDate,
+      );
+
+      const subTaskAction1 = actions[2] as any;
+      const subTaskAction2 = actions[3] as any;
+
+      expect(subTaskAction1.task.projectId).toBe('specific-project-id');
+      expect(subTaskAction2.task.projectId).toBe('specific-project-id');
+    });
+
+    it('should handle null/undefined projectId in subtasks', async () => {
+      const cfgWithoutProject: TaskRepeatCfg = {
+        ...mockRepeatCfgWithSubtasks,
+        projectId: null,
+      };
+
+      const today = new Date();
+      const targetDayDate = today.getTime();
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
+
+      let callCount = 0;
+      taskService.createNewTaskWithDefaults.and.callFake((args) => {
+        callCount++;
+        if (callCount === 1) {
+          // Main task
+          return {
+            ...mockTask,
+            id: 'parent-task-id',
+            title: 'Test Repeat Task',
+          } as Task;
+        } else {
+          // Subtasks - should have undefined projectId when null
+          const template = cfgWithoutProject.subTaskTemplates![callCount - 2];
+          const result = {
+            ...DEFAULT_TASK,
+            id: `subtask-${callCount}`,
+            title: template.title,
+            notes: template.notes || '',
+            timeEstimate: template.timeEstimate || 0,
+            parentId: 'parent-task-id',
+            isDone: false,
+          } as Task;
+          // Remove projectId property entirely when it should be undefined
+          delete (result as any).projectId;
+          return result;
+        }
+      });
+
+      const actions = await service._getActionsForTaskRepeatCfg(
+        cfgWithoutProject,
+        targetDayDate,
+      );
+
+      const subTaskAction1 = actions[2] as any;
+      expect(subTaskAction1.task.projectId).toBeUndefined();
+    });
+  });
 });
