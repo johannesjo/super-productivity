@@ -61,7 +61,7 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
   private _taskService = inject(TaskService);
   readonly data = inject<BottomPanelData>(MAT_BOTTOM_SHEET_DATA);
 
-  readonly dragHandle = viewChild<ElementRef>('dragHandle');
+  readonly panelHeader = viewChild<ElementRef>('panelHeader');
 
   readonly panelContent = computed(() => this.data.panelContent);
   readonly selectedTask = toSignal(this._taskService.selectedTask$, {
@@ -103,16 +103,16 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
   }
 
   private _setupDragListeners(): void {
-    const dragHandle = this.dragHandle()?.nativeElement;
-    if (!dragHandle) return;
+    const panelHeader = this.panelHeader()?.nativeElement;
+    if (!panelHeader) return;
 
     // Mouse events
-    dragHandle.addEventListener('mousedown', this._onDragStart.bind(this));
+    panelHeader.addEventListener('mousedown', this._onDragStart.bind(this));
     document.addEventListener('mousemove', this._onDragMove.bind(this));
     document.addEventListener('mouseup', this._onDragEnd.bind(this));
 
     // Touch events
-    dragHandle.addEventListener('touchstart', this._onTouchStart.bind(this), {
+    panelHeader.addEventListener('touchstart', this._onTouchStart.bind(this), {
       passive: false,
     });
     document.addEventListener('touchmove', this._onTouchMove.bind(this), {
@@ -122,10 +122,10 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
   }
 
   private _removeDragListeners(): void {
-    const dragHandle = this.dragHandle()?.nativeElement;
-    if (dragHandle) {
-      dragHandle.removeEventListener('mousedown', this._onDragStart.bind(this));
-      dragHandle.removeEventListener('touchstart', this._onTouchStart.bind(this));
+    const panelHeader = this.panelHeader()?.nativeElement;
+    if (panelHeader) {
+      panelHeader.removeEventListener('mousedown', this._onDragStart.bind(this));
+      panelHeader.removeEventListener('touchstart', this._onTouchStart.bind(this));
     }
     document.removeEventListener('mousemove', this._onDragMove.bind(this));
     document.removeEventListener('mouseup', this._onDragEnd.bind(this));

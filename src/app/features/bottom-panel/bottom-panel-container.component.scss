@@ -19,6 +19,11 @@
     cursor: grabbing;
   }
 
+  // Allow dragging anywhere on header by disabling pointer events on children
+  > * {
+    pointer-events: none;
+  }
+
   .drag-handle {
     width: 60px;
     height: 6px;
