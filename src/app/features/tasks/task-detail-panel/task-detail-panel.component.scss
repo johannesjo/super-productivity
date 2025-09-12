@@ -68,10 +68,10 @@ progress-bar {
   margin-top: 4px;
   line-height: 1.4;
   min-height: 40px;
-  font-size: 14px;
+  font-size: 17px;
 
   @include mq(xs) {
-    font-size: 17px;
+    font-size: 15px;
   }
 
   &:focus {
