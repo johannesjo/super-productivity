@@ -52,7 +52,7 @@
   // Improve dragging experience on mobile
   .bottom-panel-header {
     // Increase touch target
-    min-height: 44px;
+    min-height: 36px;
     // Better visual feedback
     &:active {
       background-color: rgba(0, 0, 0, 0.04);

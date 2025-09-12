@@ -12,7 +12,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
   position: relative;
   cursor: grab;
   user-select: none;
@@ -46,7 +45,7 @@
 .bottom-panel-content {
   flex: 1;
   overflow-y: auto;
-  padding: 4px 8px;
+  padding: 0 8px 4px;
 
   .ani-container {
     &.isDisableAni {
