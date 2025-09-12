@@ -1724,6 +1724,7 @@
       "TIME_LOCALE_AUTO": "System default",
       "TIME_LOCALE_EN_US": "English (US) - 12-hour AM/PM",
       "TIME_LOCALE_EN_GB": "English (UK) - 24-hour",
+      "TIME_LOCALE_TR_TR": "Turkish - 24-hour",
       "TIME_LOCALE_DE_DE": "German - 24-hour",
       "TIME_LOCALE_FR_FR": "French - 24-hour",
       "TIME_LOCALE_ES_ES": "Spanish - 24-hour",

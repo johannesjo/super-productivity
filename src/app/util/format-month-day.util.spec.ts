@@ -28,6 +28,18 @@ describe('formatMonthDay', () => {
     });
   });
 
+  describe('Turkish locale (tr-TR)', () => {
+    it('should format dates as DD/MM', () => {
+      const result = formatMonthDay(testDate, 'tr-TR');
+      expect(result).toBe('25/12'); // Turkish format: DD/MM or DD.MM
+    });
+
+    it('should handle single digit months and days', () => {
+      const result = formatMonthDay(singleDigitDate, 'tr-TR');
+      expect(result).toBe('5/1'); // Zero-padding removed for consistency
+    });
+  });
+
   describe('German locale (de-DE)', () => {
     it('should format dates as DD.MM.', () => {
       const result = formatMonthDay(testDate, 'de-DE');
@@ -188,7 +200,7 @@ describe('formatMonthDay', () => {
       // MM/DD format locales
       const mmddLocales = ['en-US', 'zh-CN', 'ja-JP'];
       // DD/MM format locales
-      const ddmmLocales = ['en-GB', 'fr-FR', 'es-ES', 'it-IT', 'pt-BR'];
+      const ddmmLocales = ['en-GB', 'fr-FR', 'es-ES', 'it-IT', 'pt-BR', 'tr-TR'];
 
       mmddLocales.forEach((locale) => {
         const result = formatMonthDay(testDate, locale);
@@ -211,6 +223,7 @@ describe('formatMonthDay', () => {
         'es-ES',
         'it-IT',
         'pt-BR',
+        'tr-TR',
         'ru-RU',
         'zh-CN',
         'ja-JP',
