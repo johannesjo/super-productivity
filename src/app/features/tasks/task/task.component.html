@@ -256,7 +256,11 @@
         }
 
         <div>
-          @if (t.notes || (t.issueId && t.issueType !== ICAL_TYPE) || isSelected()) {
+          @if (
+            t.notes ||
+            (t.issueId && t.issueType !== ICAL_TYPE) ||
+            (isSelected() && !layoutService.isRightPanelOver())
+          ) {
             <button
               (click)="toggleShowDetailPanel()"
               title="{{ T.F.TASK.CMP.TOGGLE_DETAIL_PANEL | translate }}  {{
