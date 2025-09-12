@@ -171,8 +171,6 @@
 @if (config().resizable && !isMobile()) {
   <div
     class="resize-handle"
-    [class.position-left]="config().position !== 'right'"
-    [class.position-right]="config().position === 'right'"
     [class.compactMode-handle]="!isFullMode()"
     (mousedown)="onResizeStart($event)"
     [attr.aria-label]="'Resize sidenav'"

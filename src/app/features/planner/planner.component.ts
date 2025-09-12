@@ -9,21 +9,14 @@ import { T } from '../../t.const';
 import { CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { PlannerPlanViewComponent } from './planner-plan-view/planner-plan-view.component';
 import { CdkScrollable } from '@angular/cdk/scrolling';
-import { MatFabButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
+// Removed unused Material imports to avoid warnings
 
 @Component({
   selector: 'planner',
   templateUrl: './planner.component.html',
   styleUrl: './planner.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    CdkDropListGroup,
-    PlannerPlanViewComponent,
-    CdkScrollable,
-    MatFabButton,
-    MatIcon,
-  ],
+  imports: [CdkDropListGroup, PlannerPlanViewComponent, CdkScrollable],
 })
 export class PlannerComponent {
   private _store = inject(Store);

@@ -22,7 +22,6 @@ import { mapToScheduleDays } from '../map-schedule-data/map-to-schedule-days';
 import { mapScheduleDaysToScheduleEvents } from '../map-schedule-data/map-schedule-days-to-schedule-events';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatIcon } from '@angular/material/icon';
-import { MatFabButton } from '@angular/material/button';
 import { selectTaskRepeatCfgsWithAndWithoutStartTime } from '../../task-repeat-cfg/store/task-repeat-cfg.selectors';
 import { ScheduleWeekComponent } from '../schedule-week/schedule-week.component';
 import { ScheduleMonthComponent } from '../schedule-month/schedule-month.component';
@@ -30,13 +29,7 @@ import { ScheduleService } from '../schedule.service';
 
 @Component({
   selector: 'schedule',
-  imports: [
-    LocaleDatePipe,
-    ScheduleWeekComponent,
-    ScheduleMonthComponent,
-    MatIcon,
-    MatFabButton,
-  ],
+  imports: [LocaleDatePipe, ScheduleWeekComponent, ScheduleMonthComponent, MatIcon],
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -240,8 +240,6 @@ export class MagicNavConfigService {
     fullModeByDefault: true,
     showLabels: true,
     mobileBreakpoint: 600,
-    position: 'left',
-    theme: 'light',
     resizable: true,
     minWidth: 190,
     maxWidth: 400,
