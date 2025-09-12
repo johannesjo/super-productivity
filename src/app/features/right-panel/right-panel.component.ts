@@ -50,6 +50,7 @@ const RIGHT_PANEL_CONFIG = {
   MIN_WIDTH: 280,
   MAX_WIDTH: 800,
   RESIZABLE: true,
+  CLOSE_THRESHOLD: 100,
 } as const;
 
 @Component({
@@ -484,6 +485,18 @@ export class RightPanelComponent implements OnInit, OnDestroy {
     // Right panel resizes from left edge, so subtract delta
     const deltaX = this._startX() - event.clientX;
     const potentialWidth = this._startWidth() + deltaX;
+
+    // If dragged below close threshold, close the panel immediately
+    if (potentialWidth < RIGHT_PANEL_CONFIG.CLOSE_THRESHOLD) {
+      this.isResizing.set(false);
+      this._isListenersAttached = false;
+      document.removeEventListener('mousemove', this._boundOnDrag);
+      document.removeEventListener('mouseup', this._boundOnDragEnd);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      this.close();
+      return;
+    }
 
     const newWidth = Math.max(
       RIGHT_PANEL_CONFIG.MIN_WIDTH,
