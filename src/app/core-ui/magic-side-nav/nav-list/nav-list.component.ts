@@ -45,7 +45,11 @@ export class NavSectionComponent {
   itemClick = output<NavItem>();
   dragDrop = output<{
     items: NavWorkContextItem[];
-    event: CdkDragDrop<string, string, NavWorkContextItem>;
+    event: CdkDragDrop<any, any, NavWorkContextItem>;
+  }>();
+
+  folderDrop = output<{
+    event: CdkDragDrop<any, any, any>;
   }>();
 
   readonly IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
@@ -87,12 +91,19 @@ export class NavSectionComponent {
     return false;
   }
 
-  onDrop(event: CdkDragDrop<string, string, NavWorkContextItem>): void {
-    // Early exit if no actual movement
-    if (
-      event.previousContainer !== event.container ||
-      event.currentIndex === event.previousIndex
-    ) {
+  isHeaderDropZone(): boolean {
+    return this.item().id?.startsWith('folder-') || this.item().id === 'projects';
+  }
+
+  onDrop(event: CdkDragDrop<any, any, any>): void {
+    // Handle cross-container drops (moving projects between folders)
+    if (event.previousContainer !== event.container) {
+      this.folderDrop.emit({ event });
+      return;
+    }
+
+    // Early exit if no actual movement within same container
+    if (event.currentIndex === event.previousIndex) {
       return;
     }
 
@@ -106,5 +117,56 @@ export class NavSectionComponent {
     if (workContextItems.length > 0) {
       this.dragDrop.emit({ items: workContextItems, event });
     }
+  }
+
+  onFolderDrop(event: CdkDragDrop<any, any, any>): void {
+    // Handle dropping projects into folders
+    this.folderDrop.emit({ event });
+  }
+
+  getConnectedDropLists(): string[] {
+    // Create a comprehensive list of all possible drop zones
+    const dropLists: string[] = [];
+
+    // Always include the main projects header and list
+    dropLists.push('header-projects', 'list-projects');
+
+    // Add all child folder drop zones - both their list and the folder drop zone itself
+    const childFolders =
+      this.item().children?.filter(
+        (child) => child.type === 'group' && child.id?.startsWith('folder-'),
+      ) || [];
+
+    for (const folder of childFolders) {
+      dropLists.push(
+        `header-${folder.id}`,
+        `list-${folder.id}`,
+        `folder-drop-${folder.id}`, // Add the folder drop zone itself
+      );
+    }
+
+    // If this is a folder, also add its own header and list
+    if (this.item().id?.startsWith('folder-')) {
+      dropLists.push(`header-${this.item().id}`, `list-${this.item().id}`);
+    }
+
+    // Remove duplicates and return
+    return [...new Set(dropLists)];
+  }
+
+  canDropOnHeader = (drag: any, drop: any): boolean => {
+    // Allow dropping projects on folder headers or the projects header
+    const draggedItem = drag.data;
+    const targetItem = drop.data;
+
+    return (
+      draggedItem?.type === 'workContext' &&
+      (targetItem?.id?.startsWith('folder-') || targetItem?.id === 'projects')
+    );
+  };
+
+  onHeaderDrop(event: CdkDragDrop<any, any, any>): void {
+    // Handle dropping projects onto folder headers
+    this.folderDrop.emit({ event });
   }
 }

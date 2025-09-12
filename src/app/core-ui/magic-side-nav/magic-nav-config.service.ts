@@ -3,7 +3,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { first } from 'rxjs/operators';
 
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { WorkContextService } from '../../features/work-context/work-context.service';
@@ -20,7 +19,6 @@ import { getGithubErrorUrl } from '../../core/error-handler/global-error-handler
 import { DialogPromptComponent } from '../../ui/dialog-prompt/dialog-prompt.component';
 import {
   selectAllProjectsExceptInbox,
-  selectUnarchivedHiddenProjectIds,
   selectUnarchivedVisibleProjects,
 } from '../../features/project/store/project.selectors';
 import { toggleHideFromMenu } from '../../features/project/store/project.actions';
@@ -261,6 +259,16 @@ export class MagicNavConfigService {
     expandThreshold: 180,
   }));
 
+  // Expose all drop zone ids (projects root + all folders) for DnD connectivity
+  readonly allFolderDropListIds = computed<string[]>(() => {
+    const folders = this._projectFolders();
+    const ids: string[] = ['header-projects', 'list-projects'];
+    for (const f of folders) {
+      ids.push(`header-folder-${f.id}`, `list-folder-${f.id}`);
+    }
+    return ids;
+  });
+
   // Simple action handler
   onNavItemClick(item: NavItem): void {
     switch (item.type) {
@@ -417,17 +425,15 @@ export class MagicNavConfigService {
 
     folderChildren.push(...projectItems);
 
-    // Only add the folder if it has children
-    if (folderChildren.length > 0) {
-      items.push({
-        type: 'group',
-        id: `folder-${folder.id}`,
-        label: folder.title,
-        icon: folder.isExpanded ? 'expand_more' : 'chevron_right',
-        children: folderChildren,
-        action: () => this._toggleFolderExpansion(folder.id),
-      });
-    }
+    // Always add the folder (even if empty) to serve as a drop target
+    items.push({
+      type: 'group',
+      id: `folder-${folder.id}`,
+      label: folder.title,
+      icon: folder.isExpanded ? 'expand_more' : 'chevron_right',
+      children: folderChildren,
+      action: () => this._toggleFolderExpansion(folder.id),
+    });
 
     return items;
   }
@@ -579,18 +585,34 @@ export class MagicNavConfigService {
     const reorderedItems = [...items];
     moveItemInArray(reorderedItems, event.previousIndex, event.currentIndex);
 
-    // Get the new order of IDs
-    const visibleIds = reorderedItems.map((item) => item.workContext!.id);
+    // Only proceed with reordering if we're dealing with root-level projects
+    // For folder-level reordering, we don't need to update the global project order
+    const isRootLevelReordering = items.every(
+      (item) => item.workContext && !(item.workContext as any).folderId,
+    );
 
-    // Get hidden project IDs to append at the end
-    const hiddenIds = await this._store
-      .select(selectUnarchivedHiddenProjectIds)
-      .pipe(first())
-      .toPromise();
+    if (!isRootLevelReordering) {
+      // Reordering within a folder doesn't affect the global project order
+      return;
+    }
 
-    // Combine visible and hidden IDs
-    const newIds = [...visibleIds, ...(hiddenIds || [])];
-    this._projectService.updateOrder(newIds);
+    // New order (root-level visible projects only) from the drag result
+    const reorderedRootVisibleIds = reorderedItems.map((item) => item.workContext!.id);
+
+    // Build the full visible-unarchived order across ALL projects (root + inside folders)
+    const visibleProjectsAll = this._visibleProjects();
+    if (!visibleProjectsAll || visibleProjectsAll.length === 0) {
+      return;
+    }
+
+    // Reconstruct the global visible order by replacing only the root-level segment
+    const rootQueue = [...reorderedRootVisibleIds];
+    const fullVisibleIds = visibleProjectsAll.map((p) =>
+      p.folderId ? p.id : rootQueue.shift()!,
+    );
+
+    // Submit only the full visible-unarchived ids. Reducer appends archived + hidden.
+    this._projectService.updateOrder(fullVisibleIds);
   }
 
   handleTagDrop(
@@ -609,5 +631,51 @@ export class MagicNavConfigService {
     // Special today list should always be first, so prepend it
     const newIds = [TODAY_TAG.id, ...visibleIds.filter((id) => id !== TODAY_TAG.id)];
     this._tagService.updateOrder(newIds);
+  }
+
+  handleFolderDrop(event: CdkDragDrop<any, any, any>): void {
+    const draggedItem = event.item.data;
+    const targetContainer = event.container.data;
+    const sourceContainer = event.previousContainer.data;
+
+    // Handle project being moved between containers
+    if (
+      draggedItem.type === 'workContext' &&
+      draggedItem.workContextType === WorkContextType.PROJECT
+    ) {
+      this._handleProjectFolderMove(draggedItem, sourceContainer, targetContainer);
+    }
+    // Handle folder reordering (if needed in the future)
+    else if (draggedItem.type === 'group' && draggedItem.id?.startsWith('folder-')) {
+      // For now, we don't support folder reordering, but this is where it would go
+      console.log('Folder reordering not yet supported');
+    }
+  }
+
+  private _handleProjectFolderMove(
+    projectItem: NavWorkContextItem,
+    sourceContainer: any,
+    targetContainer: any,
+  ): void {
+    const projectId = projectItem.workContext?.id;
+    if (!projectId) return;
+
+    let targetFolderId: string | null = null;
+
+    // Determine target folder ID
+    if (targetContainer?.id?.startsWith('folder-')) {
+      targetFolderId = targetContainer.id.replace('folder-', '');
+    } else if (targetContainer?.id === 'projects') {
+      targetFolderId = null; // Moving to root level
+    }
+
+    // Update the project's folder assignment
+    this._projectService.update(projectId, { folderId: targetFolderId });
+  }
+
+  // Helper
+  private _getStoredBooleanState(key: string): boolean {
+    const stored = localStorage.getItem(key);
+    return stored === null || stored === 'true';
   }
 }

@@ -239,7 +239,7 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     groupItem: NavGroupItem,
     dropData: {
       items: NavWorkContextItem[];
-      event: CdkDragDrop<string, string, NavWorkContextItem>;
+      event: CdkDragDrop<any, any, NavWorkContextItem>;
     },
   ): void {
     const { items, event } = dropData;
@@ -248,6 +248,19 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
       this._sideNavConfigService.handleProjectDrop(items, event);
     } else if (groupItem.id === 'tags') {
       this._sideNavConfigService.handleTagDrop(items, event);
+    }
+  }
+
+  onFolderDrop(
+    groupItem: NavGroupItem,
+    dropData: {
+      event: CdkDragDrop<any, any, any>;
+    },
+  ): void {
+    const { event } = dropData;
+
+    if (groupItem.id === 'projects') {
+      this._sideNavConfigService.handleFolderDrop(event);
     }
   }
 
