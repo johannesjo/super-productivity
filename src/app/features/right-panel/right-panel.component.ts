@@ -94,6 +94,13 @@ export class RightPanelComponent implements OnInit, OnDestroy {
   private readonly _boundOnDrag = this._handleDrag.bind(this);
   private readonly _boundOnDragEnd = this._handleDragEnd.bind(this);
 
+  // Track listener state to prevent double attachment/removal
+  private _isListenersAttached = false;
+
+  // Performance optimization for drag events
+  private _lastDragTime = 0;
+  private readonly _dragThrottleMs = 16; // ~60fps
+
   // NOTE: used for debugging
   readonly isAlwaysOver = input<boolean>(false);
 
@@ -145,7 +152,7 @@ export class RightPanelComponent implements OnInit, OnDestroy {
   private _selectedTaskDelayedSignal = signal<TaskWithSubTasks | null>(null);
 
   // Effect to handle delayed task clearing
-  private _selectedTaskDelayTimer: any;
+  private _selectedTaskDelayTimer: ReturnType<typeof setTimeout> | null = null;
   private _selectedTaskDelayEffect = effect(
     () => {
       const task = this._selectedTask();
@@ -297,7 +304,7 @@ export class RightPanelComponent implements OnInit, OnDestroy {
   );
 
   // Effect to handle animation state with delay
-  private _animationTimer: number | null = null;
+  private _animationTimer: ReturnType<typeof setTimeout> | null = null;
   private _animationEffect = effect(
     () => {
       const isOpen = this.isOpen();
@@ -309,7 +316,7 @@ export class RightPanelComponent implements OnInit, OnDestroy {
       }
 
       // Delay is needed for timing
-      this._animationTimer = window.setTimeout(() => {
+      this._animationTimer = setTimeout(() => {
         this.isDisableTaskPanelAni.set(!isOpen);
       }, 500);
     },
@@ -401,13 +408,21 @@ export class RightPanelComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    // Clean up resize state if active (emergency cleanup)
+    if (this.isResizing()) {
+      this._handleDragEnd();
+    }
+
     // Clean up timers to prevent memory leaks
     if (this._selectedTaskDelayTimer) {
-      window.clearTimeout(this._selectedTaskDelayTimer);
+      clearTimeout(this._selectedTaskDelayTimer);
+      this._selectedTaskDelayTimer = null;
     }
     if (this._animationTimer) {
-      window.clearTimeout(this._animationTimer);
+      clearTimeout(this._animationTimer);
+      this._animationTimer = null;
     }
+
     // Clean up bottom sheet if open
     if (this._bottomSheetRef) {
       this._bottomSheetRef.dismiss();
@@ -437,12 +452,19 @@ export class RightPanelComponent implements OnInit, OnDestroy {
 
   // Resize functionality methods
   onResizeStart(event: MouseEvent): void {
-    if (!RIGHT_PANEL_CONFIG.RESIZABLE || this.isOverlayMode()) return;
+    if (
+      !RIGHT_PANEL_CONFIG.RESIZABLE ||
+      this.isOverlayMode() ||
+      this._isListenersAttached
+    )
+      return;
 
     this.isResizing.set(true);
     this._startX.set(event.clientX);
     this._startWidth.set(this.currentWidth());
 
+    // Mark listeners as attached before adding them
+    this._isListenersAttached = true;
     document.addEventListener('mousemove', this._boundOnDrag);
     document.addEventListener('mouseup', this._boundOnDragEnd);
     document.body.style.cursor = 'col-resize';
@@ -453,6 +475,11 @@ export class RightPanelComponent implements OnInit, OnDestroy {
 
   private _handleDrag(event: MouseEvent): void {
     if (!this.isResizing()) return;
+
+    // Throttle drag events for better performance
+    const now = Date.now();
+    if (now - this._lastDragTime < this._dragThrottleMs) return;
+    this._lastDragTime = now;
 
     // Right panel resizes from left edge, so subtract delta
     const deltaX = this._startX() - event.clientX;
@@ -467,25 +494,50 @@ export class RightPanelComponent implements OnInit, OnDestroy {
   }
 
   private _handleDragEnd(): void {
-    if (!this.isResizing()) return;
+    if (!this.isResizing() && !this._isListenersAttached) return;
 
     this.isResizing.set(false);
+    this._isListenersAttached = false;
+
     document.removeEventListener('mousemove', this._boundOnDrag);
     document.removeEventListener('mouseup', this._boundOnDragEnd);
     document.body.style.cursor = '';
     document.body.style.userSelect = '';
 
-    // Save width to localStorage
-    localStorage.setItem(LS.RIGHT_PANEL_WIDTH, this.currentWidth().toString());
+    // Save width to localStorage with error handling
+    this._saveWidthToStorage();
+  }
+
+  private _saveWidthToStorage(): void {
+    try {
+      localStorage.setItem(LS.RIGHT_PANEL_WIDTH, this.currentWidth().toString());
+    } catch (error) {
+      console.warn('Failed to save right panel width to localStorage:', error);
+    }
   }
 
   private _initializeWidth(): void {
-    // Load saved width from localStorage or use default
-    const savedWidth = readNumberLSBounded(
-      LS.RIGHT_PANEL_WIDTH,
-      RIGHT_PANEL_CONFIG.MIN_WIDTH,
-      RIGHT_PANEL_CONFIG.MAX_WIDTH,
-    );
-    this.currentWidth.set(savedWidth ?? RIGHT_PANEL_CONFIG.DEFAULT_WIDTH);
+    try {
+      // Load saved width from localStorage or use default
+      const savedWidth = readNumberLSBounded(
+        LS.RIGHT_PANEL_WIDTH,
+        RIGHT_PANEL_CONFIG.MIN_WIDTH,
+        RIGHT_PANEL_CONFIG.MAX_WIDTH,
+      );
+
+      const width = savedWidth ?? RIGHT_PANEL_CONFIG.DEFAULT_WIDTH;
+
+      // Additional validation
+      if (!Number.isFinite(width) || width < RIGHT_PANEL_CONFIG.MIN_WIDTH) {
+        console.warn('Invalid right panel width detected, using default');
+        this.currentWidth.set(RIGHT_PANEL_CONFIG.DEFAULT_WIDTH);
+        return;
+      }
+
+      this.currentWidth.set(width);
+    } catch (error) {
+      console.warn('Failed to initialize right panel width:', error);
+      this.currentWidth.set(RIGHT_PANEL_CONFIG.DEFAULT_WIDTH);
+    }
   }
 }
