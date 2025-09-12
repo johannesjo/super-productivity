@@ -37,7 +37,7 @@ import {
   moveSubTaskToTop,
   moveSubTaskUp,
 } from '../../tasks/store/task.actions';
-import { EMPTY, forkJoin, of as rxOf } from 'rxjs';
+import { EMPTY, forkJoin, from, of as rxOf } from 'rxjs';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
@@ -78,7 +78,7 @@ export class TaskRepeatCfgEffects {
     { dispatch: false },
   );
 
-  updateTaskAfterMakingItRepeatable$: any = createEffect(
+  updateTaskAfterMakingItRepeatable$ = createEffect(
     () =>
       this._actions$.pipe(
         ofType(addTaskRepeatCfgToTask),
@@ -101,13 +101,7 @@ export class TaskRepeatCfgEffects {
                 };
               }
 
-              const subTaskTemplates = subTasks.map((subTask) => {
-                return {
-                  title: subTask.title,
-                  notes: subTask.notes,
-                  timeEstimate: subTask.timeEstimate,
-                };
-              });
+              const subTaskTemplates = this._toSubTaskTemplates(subTasks);
 
               return {
                 task: taskWithoutSubs,
@@ -128,7 +122,7 @@ export class TaskRepeatCfgEffects {
   );
 
   // Auto-sync subtask templates from newest live instance when auto-update flag is enabled
-  autoSyncSubtaskTemplatesFromNewest$: any = createEffect(
+  autoSyncSubtaskTemplatesFromNewest$ = createEffect(
     () =>
       this._actions$.pipe(
         ofType(
@@ -227,23 +221,8 @@ export class TaskRepeatCfgEffects {
               ),
             ),
             mergeMap(({ cfg, subs }) => {
-              const newTemplates = (subs || []).map((st) => ({
-                title: st.title,
-                notes: st.notes,
-                timeEstimate: st.timeEstimate,
-              }));
-
-              const oldTemplates = cfg.subTaskTemplates || [];
-              const isEqual =
-                oldTemplates.length === newTemplates.length &&
-                oldTemplates.every(
-                  (ot, i) =>
-                    ot.title === newTemplates[i].title &&
-                    (ot.notes || '') === (newTemplates[i].notes || '') &&
-                    (ot.timeEstimate || 0) === (newTemplates[i].timeEstimate || 0),
-                );
-
-              if (isEqual) {
+              const newTemplates = this._toSubTaskTemplates(subs || []);
+              if (this._templatesEqual(cfg.subTaskTemplates, newTemplates)) {
                 return EMPTY;
               }
               return rxOf(
@@ -264,7 +243,7 @@ export class TaskRepeatCfgEffects {
   );
 
   // When enabling inherit subtasks in the dialog, immediately snapshot newest instance
-  enableAutoUpdateOrInheritSnapshot$: any = createEffect(() =>
+  enableAutoUpdateOrInheritSnapshot$ = createEffect(() =>
     this._actions$.pipe(
       ofType(updateTaskRepeatCfg),
       // only react to enabling inherit subtasks; avoids loops
@@ -307,38 +286,28 @@ export class TaskRepeatCfgEffects {
                 }
 
                 // fallback to archive
-                return rxOf(null).pipe(
-                  switchMap(async () => {
-                    const arch =
-                      await this._taskService.getArchiveTasksForRepeatCfgId(repeatCfgId);
+                return from(
+                  this._taskService.getArchiveTasksForRepeatCfgId(repeatCfgId),
+                ).pipe(
+                  switchMap((arch) => {
                     if (!arch || arch.length === 0) {
-                      return { cfg, subs: [] as Task[] };
+                      return rxOf({ cfg, subs: [] as Task[] });
                     }
                     const newest = arch.reduce((a, b) => (a.created > b.created ? a : b));
-                    const archiveState = await this._taskArchiveService.load();
-                    const subs = newest.subTaskIds.map(
-                      (id) => archiveState.entities[id] as unknown as Task,
+                    return from(this._taskArchiveService.load()).pipe(
+                      map((archiveState) => {
+                        const subs = newest.subTaskIds
+                          .map((id) => archiveState.entities[id])
+                          .filter(Boolean) as unknown as Task[];
+                        return { cfg, subs };
+                      }),
                     );
-                    return { cfg, subs };
                   }),
                 );
               }),
               mergeMap(({ cfg: config, subs }) => {
-                const newTemplates = (subs || []).map((st) => ({
-                  title: st.title,
-                  notes: st.notes,
-                  timeEstimate: st.timeEstimate,
-                }));
-                const oldTemplates = config.subTaskTemplates || [];
-                const isEqual =
-                  oldTemplates.length === newTemplates.length &&
-                  oldTemplates.every(
-                    (ot, i) =>
-                      ot.title === newTemplates[i]?.title &&
-                      (ot.notes || '') === (newTemplates[i]?.notes || '') &&
-                      (ot.timeEstimate || 0) === (newTemplates[i]?.timeEstimate || 0),
-                  );
-                if (isEqual) {
+                const newTemplates = this._toSubTaskTemplates(subs || []);
+                if (this._templatesEqual(config.subTaskTemplates, newTemplates)) {
                   return EMPTY;
                 }
                 return rxOf(
@@ -506,5 +475,37 @@ export class TaskRepeatCfgEffects {
         timeEstimate: changes.defaultEstimate,
       });
     }
+  }
+
+  private _toSubTaskTemplates(
+    subs: Task[],
+  ): NonNullable<TaskRepeatCfgCopy['subTaskTemplates']> {
+    return subs.map((st) => ({
+      title: st.title,
+      notes: st.notes,
+      timeEstimate: st.timeEstimate,
+    }));
+  }
+
+  private _templatesEqual(
+    a: TaskRepeatCfgCopy['subTaskTemplates'] | undefined,
+    b: NonNullable<TaskRepeatCfgCopy['subTaskTemplates']>,
+  ): boolean {
+    const aArr = a || [];
+    if (aArr.length !== b.length) {
+      return false;
+    }
+    for (let i = 0; i < aArr.length; i++) {
+      const ai = aArr[i];
+      const bi = b[i];
+      if (
+        ai.title !== bi.title ||
+        (ai.notes || '') !== (bi.notes || '') ||
+        (ai.timeEstimate || 0) !== (bi.timeEstimate || 0)
+      ) {
+        return false;
+      }
+    }
+    return true;
   }
 }

@@ -324,5 +324,4 @@ export class DialogEditTaskRepeatCfgComponent {
 
     return processedCfg;
   }
-
 }
