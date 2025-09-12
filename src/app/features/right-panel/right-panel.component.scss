@@ -1,14 +1,77 @@
+@use '../../../styles/_globals.scss' as *;
+
+$z-this-content: calc(var(--z-right-panel) + 1);
+
 :host {
-  display: block;
+  display: flex;
+  flex-direction: row;
+  justify-content: stretch;
+  align-items: stretch;
   height: 100%;
-  position: relative;
 
   &.resizing {
     // Disable transitions while resizing
     * {
       transition: none !important;
     }
+
+    .side {
+      transition: none !important;
+    }
   }
+}
+
+// Disable transitions during external resize drags
+:host(.resizing) {
+  .side {
+    transition: none !important;
+  }
+}
+
+.content {
+  flex-grow: 1;
+  max-width: 100%;
+  position: relative;
+  z-index: var(--z-right-panel);
+}
+
+.side {
+  // NOTE: we can't use margin-top: -1px; to prevent double border when header got a bottom one
+  // because then there would be none
+
+  position: relative;
+  transition: var(--transition-leave);
+  transition-property: opacity, width, right, transform;
+  // Cap panel to at most half of the container width in side mode
+  max-width: 50%;
+  background: var(--right-panel-bg);
+  background: transparent;
+  border-left: 1px solid var(--separator-color);
+  overflow: visible; // allow overlay controls to stick out on the left edge
+
+  @include mq(sm, max) {
+    // NOTE: prevents overlapping with nav when open
+    max-width: 500px;
+  }
+
+  @include mq(xs, max) {
+    max-width: 100%;
+  }
+
+  //border-color: var(--extra-border-color);
+
+  :host.isOpen.isOpen.isOpen & {
+    //box-shadow: var(--whiteframe-shadow-2dp);
+    opacity: 1;
+    transition: var(--transition-enter);
+  }
+}
+
+.side-inner {
+  @include scrollYImportant();
+  height: 100%;
+  position: relative;
+  z-index: 2;
 }
 
 .right-panel {
@@ -24,86 +87,67 @@
   }
 }
 
-// Resize handle
+// Resize handle (matching magic-nav style)
 .resize-handle {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 0; // keep fully inside panel to avoid being covered by content sibling
-  width: 10px; // comfortable hit target on the inside edge
+  left: -2px; // Position like magic-nav
+  width: 4px;
   cursor: col-resize;
   z-index: 1003;
   transition: background-color 0.2s ease;
-  user-select: none;
-  background: transparent; // keep hit area invisible by default
+  background: transparent;
 
-  // Visual indicator line (thin) centered within the wider hit area
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    left: 0; // draw indicator right at the panel edge
-    background-color: transparent;
-    transition: background-color 0.2s ease;
-  }
-
-  &:hover::after {
+  &:focus,
+  &:hover {
     background-color: var(--sidenav-active-text);
   }
 
-  &:active::after {
+  &:active {
     background-color: var(--sidenav-active-text);
   }
 }
 
-// Edge close handle centered vertically, placed on the left edge
+// Edge close handle
 .edge-close-handle {
   position: absolute;
   top: 50%;
-  left: 2px; // align just inside the resize line to remain visible
-  transform: translateY(-50%);
-  width: 22px;
+  left: -8px; // Position outside the panel
+  width: 20px;
   height: 48px;
-  padding: 0;
+  transform: translateY(-50%);
+  background: var(--bg-lightest);
+  //border: 1px solid var(--separator-color);
+  border-radius: 2px 8px 8px 2px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
-  border-top-left-radius: 2px;
-  border-bottom-left-radius: 2px;
-  background: var(--bg-lightest);
-  border: 1px solid var(--separator-color);
-  box-shadow: var(--whiteframe-shadow-1dp);
-  color: var(--sidenav-active-text);
-  transition: var(--transition-fast);
-  z-index: 1005; // above resize handle
-  overflow: hidden; // clip ripple to rounded shape
   cursor: pointer;
-  //border: 1px solid var(--separator-color);
-  //opacity: 0.6;
-
-  &:hover,
-  &:focus {
-    background: var(--bg-lightest);
-    opacity: 1;
-    outline: none;
-  }
+  z-index: 1004;
+  box-shadow: var(--whiteframe-shadow-1dp);
+  transition: all 0.2s ease;
+  color: var(--text-color);
+  border: none;
 
   mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-    line-height: 18px;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    //border-color: var(--color-accent);
+    //color: var(--color-accent);
+  }
+
+  :host.resizing & {
+    opacity: 0.5;
+    pointer-events: none;
   }
 }
 
-:host(.resizing) .edge-close-handle {
-  transition: none !important;
-}
-
-// Keep the indicator highlighted while dragging
-:host(.resizing) .resize-handle::after {
-  background-color: var(--sidenav-active-text);
+// Keep the resize handle highlighted while dragging
+:host.resizing .resize-handle {
+  background-color: var(--sidenav-active-text) !important;
 }
