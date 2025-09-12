@@ -21,7 +21,6 @@ import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { taskDetailPanelTaskChangeAnimation } from '../tasks/task-detail-panel/task-detail-panel.ani';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { BottomPanelPositionService } from '../../core-ui/layout/bottom-panel-position.service';
 import { TaskService } from '../tasks/task.service';
 
 export interface BottomPanelData {
@@ -36,6 +35,8 @@ export interface BottomPanelData {
   activePluginId?: string | null;
   isDisableTaskPanelAni?: boolean;
 }
+
+const MAX_HEIGHT = 0.8;
 
 @Component({
   selector: 'bottom-panel-container',
@@ -57,7 +58,6 @@ export interface BottomPanelData {
 export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
   private _bottomSheetRef = inject(MatBottomSheetRef<BottomPanelContainerComponent>);
   private _elementRef = inject(ElementRef);
-  private _positionService = inject(BottomPanelPositionService);
   private _taskService = inject(TaskService);
   readonly data = inject<BottomPanelData>(MAT_BOTTOM_SHEET_DATA);
 
@@ -220,7 +220,7 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
           return;
         } else {
           // Swiping up with momentum - expand to 4/5 of screen height
-          const targetHeight = viewportHeight * 0.8;
+          const targetHeight = viewportHeight * MAX_HEIGHT;
           container.style.height = `${targetHeight}px`;
           container.style.maxHeight = `${targetHeight}px`;
           container.style.transition = 'height 0.3s ease-out, max-height 0.3s ease-out';
@@ -228,23 +228,22 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
           // Remove transition after animation
           setTimeout(() => {
             container.style.transition = '';
-            this._positionService.saveHeight(this.panelContent(), targetHeight);
           }, 300);
           return;
         }
       }
 
-      // No momentum - just save the current height
-      this._positionService.saveHeight(this.panelContent(), container.offsetHeight);
+      // No momentum - no action needed
     }
   }
 
   private _setInitialHeight(): void {
     const container = this._getSheetContainer();
     if (container) {
-      const savedHeight = this._positionService.getSavedHeight(this.panelContent());
-      container.style.height = `${savedHeight}px`;
-      container.style.maxHeight = `${savedHeight}px`;
+      const heightRatio = this.panelContent() === 'TASK' ? 0.5 : MAX_HEIGHT;
+      const initialHeight = window.innerHeight * heightRatio;
+      container.style.height = `${initialHeight}px`;
+      container.style.maxHeight = `${initialHeight}px`;
     }
   }
 
