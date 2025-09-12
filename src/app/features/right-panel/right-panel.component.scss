@@ -119,13 +119,13 @@ $z-this-content: calc(var(--z-right-panel) + 1);
   transform: translateY(-50%);
   background: var(--bg-lightest);
   //border: 1px solid var(--separator-color);
-  border-radius: 2px 8px 8px 2px;
+  border-radius: 3px 8px 8px 3px;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  cursor: grab; // Indicate it can be dragged
   z-index: 1004;
-  box-shadow: var(--whiteframe-shadow-1dp);
+  box-shadow: var(--whiteframe-shadow-2dp);
   transition: all 0.2s ease;
   color: var(--text-color);
   border: none;
@@ -142,8 +142,7 @@ $z-this-content: calc(var(--z-right-panel) + 1);
   }
 
   :host.resizing & {
-    opacity: 0.5;
-    pointer-events: none;
+    cursor: grabbing; // Show grabbing cursor when actively resizing
   }
 }
 

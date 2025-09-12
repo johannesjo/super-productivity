@@ -21,8 +21,9 @@
       class="edge-close-handle"
       role="button"
       tabindex="0"
-      [attr.aria-label]="'Close right panel'"
-      (click)="close()"
+      [attr.aria-label]="'Close right panel or drag to resize'"
+      (click)="onCloseButtonClick($event)"
+      (mousedown)="onCloseButtonMouseDown($event)"
       (keydown.enter)="close()"
       (keydown.space)="close()"
     >
