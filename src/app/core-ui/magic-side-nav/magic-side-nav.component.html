@@ -170,7 +170,7 @@
 <!-- Resize Handle (moved outside scrolling container) -->
 @if (config().resizable && !isMobile()) {
   <div
-    class="resize-handle"
+    class="resize-handle position-left"
     [class.compactMode-handle]="!isFullMode()"
     (mousedown)="onResizeStart($event)"
     [attr.aria-label]="'Resize sidenav'"
