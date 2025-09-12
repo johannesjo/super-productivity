@@ -119,6 +119,7 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
       passive: false,
     });
     document.addEventListener('pointerup', this._boundOnPointerUp);
+    document.addEventListener('pointercancel', this._boundOnPointerUp);
   }
 
   private _removeDragListeners(): void {
@@ -128,6 +129,7 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
     }
     document.removeEventListener('pointermove', this._boundOnPointerMove);
     document.removeEventListener('pointerup', this._boundOnPointerUp);
+    document.removeEventListener('pointercancel', this._boundOnPointerUp);
   }
 
   private _onPointerDown(event: PointerEvent): void {

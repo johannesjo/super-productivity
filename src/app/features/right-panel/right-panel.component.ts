@@ -15,7 +15,7 @@ import { LanguageService } from '../../core/language/language.service';
 import { IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, NavigationStart, Router } from '@angular/router';
-import { filter, map, switchMap, startWith } from 'rxjs/operators';
+import { filter, map, startWith, switchMap } from 'rxjs/operators';
 import { of, timer } from 'rxjs';
 import { SwipeDirective } from '../../ui/swipe-gesture/swipe.directive';
 import { CssString, StyleObject, StyleObjectToString } from '../../util/styles';
@@ -30,8 +30,8 @@ import { Store } from '@ngrx/store';
 import { hidePluginPanel } from '../../core-ui/layout/store/layout.actions';
 import { TaskDetailTargetPanel } from '../tasks/task.model';
 import {
-  selectLayoutFeatureState,
   INITIAL_LAYOUT_STATE,
+  selectLayoutFeatureState,
 } from '../../core-ui/layout/store/layout.reducer';
 
 // Right panel resize constants
@@ -102,7 +102,6 @@ export class RightPanelComponent implements OnInit, OnDestroy {
     const selectedTask = this._selectedTask();
     const targetPanel = this._taskDetailPanelTargetPanel();
     const layoutState = this._layoutFeatureState();
-    const currentRoute = this._currentRoute();
 
     if (!layoutState) {
       return false;
@@ -114,13 +113,6 @@ export class RightPanelComponent implements OnInit, OnDestroy {
       isShowTaskViewCustomizerPanel,
       isShowPluginPanel,
     } = layoutState;
-
-    const isWorkView = this._isWorkViewUrl(currentRoute);
-
-    // For non-work-view routes, still allow panels
-    if (!isWorkView) {
-      // Panels can still be shown on non-work views
-    }
 
     const hasContent = !!(
       selectedTask ||
@@ -277,10 +269,6 @@ export class RightPanelComponent implements OnInit, OnDestroy {
 
     // Reset drag candidate state
     this._isCloseButtonDragCandidate = false;
-  }
-
-  private _isWorkViewUrl(url: string): boolean {
-    return url.includes('/active/') || url.includes('/tag/') || url.includes('/project/');
   }
 
   private _getWidthRelatedStyles(): CssString {
