@@ -48,6 +48,9 @@ $z-this-content: calc(var(--z-right-panel) + 1);
   background: transparent;
   border-left: 1px solid var(--separator-color);
   overflow: visible; // allow overlay controls to stick out on the left edge
+  opacity: 0; // Hidden by default
+  visibility: hidden; // Ensure panel is fully hidden when closed
+  pointer-events: none; // Disable interactions when closed
 
   @include mq(sm, max) {
     // NOTE: prevents overlapping with nav when open
@@ -63,6 +66,8 @@ $z-this-content: calc(var(--z-right-panel) + 1);
   :host.isOpen.isOpen.isOpen & {
     //box-shadow: var(--whiteframe-shadow-2dp);
     opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
     transition: var(--transition-enter);
   }
 }
