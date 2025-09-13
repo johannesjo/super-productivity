@@ -29,7 +29,10 @@
       <mat-icon>chevron_right</mat-icon>
     </button>
 
-    <div class="side-inner">
+    <div
+      class="side-inner"
+      [style.min-width.px]="panelWidth()"
+    >
       <right-panel-content></right-panel-content>
     </div>
   </div>
