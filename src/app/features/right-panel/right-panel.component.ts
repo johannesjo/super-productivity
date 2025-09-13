@@ -1,11 +1,11 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   computed,
   inject,
   input,
   OnDestroy,
-  OnInit,
   output,
   signal,
 } from '@angular/core';
@@ -38,7 +38,7 @@ import {
 const RIGHT_PANEL_CONFIG = {
   DEFAULT_WIDTH: 320,
   MIN_WIDTH: 280,
-  MAX_WIDTH: 800,
+  MAX_WIDTH: '50%',
   RESIZABLE: true,
   CLOSE_THRESHOLD: 100,
 } as const;
@@ -48,6 +48,24 @@ const DRAG_CONFIG = {
   THROTTLE_MS: 16, // ~60fps for smooth dragging
   THRESHOLD_PX: 5, // pixels of movement to start drag
 } as const;
+
+// Helper function for max width calculation
+const getMaxWidthInPixels = (maxWidth: number | string): number => {
+  if (typeof maxWidth === 'string' && maxWidth.endsWith('%')) {
+    const percentage = parseFloat(maxWidth);
+    // Calculate based on main content container width (viewport minus side nav)
+    const mainContent = document.querySelector('.main-content') as HTMLElement;
+    const containerWidth = mainContent ? mainContent.clientWidth : window.innerWidth;
+    return (containerWidth * percentage) / 100;
+  }
+  return typeof maxWidth === 'number' ? maxWidth : parseFloat(maxWidth.toString());
+};
+
+// Helper function to validate and clamp width within bounds
+const clampWidth = (width: number, maxWidth: number | string): number => {
+  const maxWidthInPixels = getMaxWidthInPixels(maxWidth);
+  return Math.max(RIGHT_PANEL_CONFIG.MIN_WIDTH, Math.min(maxWidthInPixels, width));
+};
 
 @Component({
   selector: 'right-panel',
@@ -64,7 +82,7 @@ const DRAG_CONFIG = {
   },
   standalone: true,
 })
-export class RightPanelComponent implements OnInit, OnDestroy {
+export class RightPanelComponent implements AfterViewInit, OnDestroy {
   private _domSanitizer = inject(DomSanitizer);
   private _languageService = inject(LanguageService);
   private _router = inject(Router);
@@ -144,12 +162,14 @@ export class RightPanelComponent implements OnInit, OnDestroy {
   // Store bound functions to prevent memory leaks
   private readonly _boundOnDrag = this._handleDrag.bind(this);
   private readonly _boundOnDragEnd = this._handleDragEnd.bind(this);
+  private readonly _boundOnWindowResize = this._throttledWindowResize.bind(this);
 
   // Track listener state to prevent double attachment/removal
   private _isListenersAttached = false;
 
   // Performance optimization for drag events
   private _lastDragTime = 0;
+  private _lastResizeTime = 0;
 
   // Close button drag detection
   private _closeButtonDragStart = { x: 0, y: 0 };
@@ -192,14 +212,45 @@ export class RightPanelComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnInit(): void {
+  ngAfterViewInit(): void {
     this._initializeWidth();
+    // Add window resize listener for percentage-based max width
+    window.addEventListener('resize', this._boundOnWindowResize);
   }
 
   ngOnDestroy(): void {
     // Clean up resize state if active (emergency cleanup)
     if (this.isResizing()) {
       this._handleDragEnd();
+    }
+
+    // Remove window resize listener
+    window.removeEventListener('resize', this._boundOnWindowResize);
+  }
+
+  private _throttledWindowResize(): void {
+    // Throttle resize events for better performance
+    const now = Date.now();
+    if (now - this._lastResizeTime < DRAG_CONFIG.THROTTLE_MS * 4) return; // Less frequent than drag
+    this._lastResizeTime = now;
+
+    this._handleWindowResize();
+  }
+
+  private _handleWindowResize(): void {
+    // Only recalculate if using percentage-based max width
+    if (
+      typeof RIGHT_PANEL_CONFIG.MAX_WIDTH === 'string' &&
+      RIGHT_PANEL_CONFIG.MAX_WIDTH.endsWith('%')
+    ) {
+      const currentWidth = this.currentWidth();
+      const newMaxWidthInPixels = getMaxWidthInPixels(RIGHT_PANEL_CONFIG.MAX_WIDTH);
+
+      // If current width exceeds new max width, clamp it
+      if (currentWidth > newMaxWidthInPixels) {
+        this.currentWidth.set(newMaxWidthInPixels);
+        this._saveWidthToStorage();
+      }
     }
   }
 
@@ -336,11 +387,7 @@ export class RightPanelComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const newWidth = Math.max(
-      RIGHT_PANEL_CONFIG.MIN_WIDTH,
-      Math.min(RIGHT_PANEL_CONFIG.MAX_WIDTH, potentialWidth),
-    );
-
+    const newWidth = clampWidth(potentialWidth, RIGHT_PANEL_CONFIG.MAX_WIDTH);
     this.currentWidth.set(newWidth);
   }
 
@@ -369,11 +416,13 @@ export class RightPanelComponent implements OnInit, OnDestroy {
 
   private _initializeWidth(): void {
     try {
+      const maxWidthInPixels = getMaxWidthInPixels(RIGHT_PANEL_CONFIG.MAX_WIDTH);
+
       // Load saved width from localStorage or use default
       const savedWidth = readNumberLSBounded(
         LS.RIGHT_PANEL_WIDTH,
         RIGHT_PANEL_CONFIG.MIN_WIDTH,
-        RIGHT_PANEL_CONFIG.MAX_WIDTH,
+        maxWidthInPixels,
       );
 
       const width = savedWidth ?? RIGHT_PANEL_CONFIG.DEFAULT_WIDTH;
@@ -385,7 +434,9 @@ export class RightPanelComponent implements OnInit, OnDestroy {
         return;
       }
 
-      this.currentWidth.set(width);
+      // Ensure width doesn't exceed current max width (important for percentage-based max width)
+      const validatedWidth = clampWidth(width, RIGHT_PANEL_CONFIG.MAX_WIDTH);
+      this.currentWidth.set(validatedWidth);
     } catch (error) {
       console.warn('Failed to initialize right panel width:', error);
       this.currentWidth.set(RIGHT_PANEL_CONFIG.DEFAULT_WIDTH);
