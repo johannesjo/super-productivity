@@ -95,8 +95,21 @@ export class RightPanelContentComponent implements OnDestroy {
   // to still display its data when panel is closing
   private _selectedTaskDelayedSignal = signal<TaskWithSubTasks | null>(null);
 
+  // Delayed signals for panel type and plugin id to keep content visible during close animation
+  private _delayedPanelType = signal<
+    | 'NOTES'
+    | 'TASK'
+    | 'ADD_TASK_PANEL'
+    | 'ISSUE_PANEL'
+    | 'TASK_VIEW_CUSTOMIZER_PANEL'
+    | 'PLUGIN'
+    | null
+  >(null);
+  private _delayedActivePluginId = signal<string | null>(null);
+
   // Effect to handle delayed task clearing
   private _selectedTaskDelayTimer: ReturnType<typeof setTimeout> | null = null;
+  private _panelTypeDelayTimer: ReturnType<typeof setTimeout> | null = null;
   private _selectedTaskDelayEffect = effect(
     () => {
       const task = this._selectedTask();
@@ -123,7 +136,78 @@ export class RightPanelContentComponent implements OnDestroy {
     this._selectedTaskDelayedSignal(),
   );
 
-  // Computed signal for panel content
+  // Effect to handle delayed panel type clearing
+  private _panelTypeDelayEffect = effect(
+    () => {
+      // Compute immediate panel type including TASK
+      const layoutState = this._layoutFeatureState();
+      const selectedTask = this._selectedTask();
+
+      // Clear any existing timer
+      if (this._panelTypeDelayTimer) {
+        clearTimeout(this._panelTypeDelayTimer);
+        this._panelTypeDelayTimer = null;
+      }
+
+      if (!layoutState) {
+        this._delayedPanelType.set(null);
+        this._delayedActivePluginId.set(null);
+        return;
+      }
+
+      const {
+        isShowNotes,
+        isShowIssuePanel,
+        isShowTaskViewCustomizerPanel,
+        isShowPluginPanel,
+      } = layoutState;
+
+      let currentPanelType:
+        | 'NOTES'
+        | 'TASK'
+        | 'ISSUE_PANEL'
+        | 'TASK_VIEW_CUSTOMIZER_PANEL'
+        | 'PLUGIN'
+        | null = null;
+
+      if (isShowNotes) {
+        currentPanelType = 'NOTES';
+      } else if (isShowIssuePanel) {
+        currentPanelType = 'ISSUE_PANEL';
+      } else if (isShowTaskViewCustomizerPanel) {
+        currentPanelType = 'TASK_VIEW_CUSTOMIZER_PANEL';
+      } else if (isShowPluginPanel) {
+        currentPanelType = 'PLUGIN';
+      } else if (selectedTask) {
+        currentPanelType = 'TASK';
+      }
+
+      if (currentPanelType) {
+        // Immediately set the panel type when opening or while open
+        this._delayedPanelType.set(currentPanelType);
+        // Keep plugin id up to date while plugin panel is active
+        if (currentPanelType === 'PLUGIN') {
+          const pid = this._activePluginId();
+          if (pid) {
+            this._delayedActivePluginId.set(pid);
+          }
+        }
+      } else {
+        // Only set delay if we currently have a panel type to preserve
+        const currentDelayedType = this._delayedPanelType();
+        if (currentDelayedType) {
+          // Delay clearing the panel type (and plugin id) to allow close animation to play with content visible
+          this._panelTypeDelayTimer = setTimeout(() => {
+            this._delayedPanelType.set(null);
+            this._delayedActivePluginId.set(null);
+          }, 225); // Match CSS transition duration
+        }
+      }
+    },
+    { allowSignalWrites: true },
+  );
+
+  // Computed signal for panel content using delayed panel type exclusively
   readonly panelContent = computed<
     | 'NOTES'
     | 'TASK'
@@ -132,44 +216,16 @@ export class RightPanelContentComponent implements OnDestroy {
     | 'TASK_VIEW_CUSTOMIZER_PANEL'
     | 'PLUGIN'
     | undefined
-  >(() => {
-    const layoutState = this._layoutFeatureState();
-    const selectedTask = this._selectedTask();
-
-    if (!layoutState) {
-      return undefined;
-    }
-
-    const {
-      isShowNotes,
-      isShowIssuePanel,
-      isShowTaskViewCustomizerPanel,
-      isShowPluginPanel,
-    } = layoutState;
-
-    if (isShowNotes) {
-      return 'NOTES';
-    } else if (isShowIssuePanel) {
-      return 'ISSUE_PANEL';
-    } else if (isShowTaskViewCustomizerPanel) {
-      return 'TASK_VIEW_CUSTOMIZER_PANEL';
-    } else if (isShowPluginPanel) {
-      return 'PLUGIN';
-    } else if (selectedTask) {
-      // Task content comes last so we can avoid an extra effect to unset selected task
-      return 'TASK';
-    }
-    return undefined;
-  });
+  >(() => this._delayedPanelType() ?? undefined);
 
   // Computed signal that includes plugin ID for component recreation
   readonly pluginPanelKeys = computed<string[]>(() => {
-    const isShowPluginPanel = this._isShowPluginPanel();
-    const activePluginId = this._activePluginId();
-
-    const keys = isShowPluginPanel && activePluginId ? [`plugin-${activePluginId}`] : [];
-    Log.log('RightPanel: pluginPanelKeys computed:', {
-      isShowPluginPanel,
+    const delayedType = this._delayedPanelType();
+    const activePluginId = this._delayedActivePluginId() || this._activePluginId();
+    const keys =
+      delayedType === 'PLUGIN' && activePluginId ? [`plugin-${activePluginId}`] : [];
+    Log.log('RightPanel: pluginPanelKeys computed (delayed):', {
+      delayedType,
       activePluginId,
       keys,
     });
@@ -352,6 +408,10 @@ export class RightPanelContentComponent implements OnDestroy {
     if (this._selectedTaskDelayTimer) {
       clearTimeout(this._selectedTaskDelayTimer);
       this._selectedTaskDelayTimer = null;
+    }
+    if (this._panelTypeDelayTimer) {
+      clearTimeout(this._panelTypeDelayTimer);
+      this._panelTypeDelayTimer = null;
     }
     if (this._animationTimer) {
       clearTimeout(this._animationTimer);
