@@ -4,6 +4,16 @@
   --nr-of-days: 5;
   --nr-of-weeks: 6;
   background: transparent;
+  display: flex;
+  flex-direction: column;
+}
+
+// we need this to prevent problems with route ani and scroll behavior
+.scroll-wrapper {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  overflow-y: scroll;
 }
 
 header {

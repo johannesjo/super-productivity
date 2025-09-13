@@ -1,6 +1,14 @@
 /* eslint-disable */
-import { ChangeDetectionStrategy, Component, inject, computed } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  computed,
+  OnInit,
+  AfterViewInit,
+} from '@angular/core';
 import { fromEvent } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
 import { select, Store } from '@ngrx/store';
 import { selectTimelineTasks } from '../../work-context/store/work-context.selectors';
 import { selectPlannerDayMap } from '../../planner/store/planner.selectors';
@@ -39,7 +47,7 @@ import { ScheduleService } from '../schedule.service';
     '[style.--nr-of-days]': 'daysToShow().length',
   },
 })
-export class ScheduleComponent {
+export class ScheduleComponent implements AfterViewInit {
   taskService = inject(TaskService);
   layoutService = inject(LayoutService);
   scheduleService = inject(ScheduleService);
@@ -47,6 +55,7 @@ export class ScheduleComponent {
   private _calendarIntegrationService = inject(CalendarIntegrationService);
   private _store = inject(Store);
   private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
+  private _route = inject(ActivatedRoute);
 
   private _currentTimeViewMode = computed(() => this.layoutService.selectedTimeView());
   isMonthView = computed(() => this._currentTimeViewMode() === 'month');
@@ -199,5 +208,15 @@ export class ScheduleComponent {
         data: { isInfoShownInitially: true },
       });
     }
+  }
+
+  ngAfterViewInit(): void {
+    // Handle fragment scrolling manually as a fallback
+    setTimeout(() => {
+      const element = document.getElementById('work-start');
+      if (element) {
+        element.scrollIntoView({ behavior: 'instant', block: 'start' });
+      }
+    }); // Small delay to ensure DOM is fully rendered
   }
 }

@@ -59,18 +59,20 @@
   </div>
 </header>
 
-@if (isMonthView()) {
-  <schedule-month
-    [events]="events()"
-    [daysToShow]="daysToShow()"
-    [weeksToShow]="weeksToShow()"
-  ></schedule-month>
-} @else {
-  <schedule-week
-    [events]="events()"
-    [beyondBudget]="beyondBudget()"
-    [daysToShow]="daysToShow()"
-    [workStartEnd]="workStartEnd()"
-    [currentTimeRow]="currentTimeRow()"
-  ></schedule-week>
-}
+<div class="scroll-wrapper">
+  @if (isMonthView()) {
+    <schedule-month
+      [events]="events()"
+      [daysToShow]="daysToShow()"
+      [weeksToShow]="weeksToShow()"
+    ></schedule-month>
+  } @else {
+    <schedule-week
+      [events]="events()"
+      [beyondBudget]="beyondBudget()"
+      [daysToShow]="daysToShow()"
+      [workStartEnd]="workStartEnd()"
+      [currentTimeRow]="currentTimeRow()"
+    ></schedule-week>
+  }
+</div>
