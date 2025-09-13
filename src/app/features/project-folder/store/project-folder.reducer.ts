@@ -18,16 +18,14 @@ export const projectFolderReducer = createReducer(
   on(loadAllData, (state, { appDataComplete }) =>
     appDataComplete.projectFolder?.ids ? appDataComplete.projectFolder : state,
   ),
-  on(ProjectFolderActions.loadProjectFoldersSuccess, (state, { projectFolders }) =>
-    adapter.setAll(projectFolders, state),
-  ),
-  on(ProjectFolderActions.addProjectFolderSuccess, (state, { projectFolder }) =>
+
+  on(ProjectFolderActions.addProjectFolder, (state, { projectFolder }) =>
     adapter.addOne(projectFolder, state),
   ),
-  on(ProjectFolderActions.updateProjectFolderSuccess, (state, { update }) =>
+  on(ProjectFolderActions.updateProjectFolder, (state, update) =>
     adapter.updateOne(update, state),
   ),
-  on(ProjectFolderActions.deleteProjectFolderSuccess, (state, { id }) =>
+  on(ProjectFolderActions.deleteProjectFolder, (state, { id }) =>
     adapter.removeOne(id, state),
   ),
   on(ProjectFolderActions.toggleFolderExpansion, (state, { id }) => {

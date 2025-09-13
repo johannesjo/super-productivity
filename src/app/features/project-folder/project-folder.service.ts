@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { select, Store } from '@ngrx/store';
@@ -6,7 +6,6 @@ import { nanoid } from 'nanoid';
 import { ProjectFolder } from './project-folder.model';
 import * as ProjectFolderActions from './store/project-folder.actions';
 import * as ProjectFolderSelectors from './store/project-folder.selectors';
-import { PfapiService } from '../../pfapi/pfapi.service';
 import { ProjectService } from '../project/project.service';
 
 @Injectable({
@@ -14,7 +13,6 @@ import { ProjectService } from '../project/project.service';
 })
 export class ProjectFolderService {
   private readonly _store = inject(Store);
-  private readonly _pfapiService = inject(PfapiService);
   private readonly _projectService = inject(ProjectService);
 
   projectFolders$ = this._store.pipe(
@@ -27,14 +25,6 @@ export class ProjectFolderService {
   constructor() {
     // Project folders are loaded via loadAllData action during app initialization
     // No need to manually load them here
-  }
-
-  loadProjectFolders(): void {
-    this._store.dispatch(ProjectFolderActions.loadProjectFolders());
-  }
-
-  getAllProjectFolders(): Observable<ProjectFolder[]> {
-    return this.projectFolders$;
   }
 
   addProjectFolder(folderData: Omit<ProjectFolder, 'id' | 'created'>): void {

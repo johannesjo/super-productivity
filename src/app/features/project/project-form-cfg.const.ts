@@ -71,14 +71,14 @@ export const CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG: ConfigFormSection<Project>
         description: T.G.ICON_INP_DESCRIPTION,
       },
     },
-    {
-      key: 'folderId',
-      type: 'project-folder-select',
-      templateOptions: {
-        label: 'Folder',
-        placeholder: 'Select folder (optional)',
-      },
-    },
+    // {
+    //   key: 'folderId',
+    //   type: 'project-folder-select',
+    //   templateOptions: {
+    //     label: 'Folder',
+    //     placeholder: 'Select folder (optional)',
+    //   },
+    // },
     {
       key: 'isEnableBacklog',
       type: 'checkbox',
