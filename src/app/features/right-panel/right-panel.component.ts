@@ -160,8 +160,8 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
   private readonly _startWidth = signal(0);
 
   // Store bound functions to prevent memory leaks
-  private readonly _boundOnDrag = this._handleDrag.bind(this);
-  private readonly _boundOnDragEnd = this._handleDragEnd.bind(this);
+  private readonly _boundOnPointerMove = this._handlePointerMove.bind(this);
+  private readonly _boundOnPointerUp = this._handlePointerUp.bind(this);
   private readonly _boundOnWindowResize = this._throttledWindowResize.bind(this);
 
   // Track listener state to prevent double attachment/removal
@@ -274,58 +274,6 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
     this.wasClosed.emit();
   }
 
-  onCloseButtonMouseDown(event: MouseEvent): void {
-    // Start tracking for potential drag operation
-    this._closeButtonDragStart = { x: event.clientX, y: event.clientY };
-    this._isCloseButtonDragCandidate = true;
-
-    // Add temporary listeners to detect drag initiation
-    const onMouseMove = (moveEvent: MouseEvent): void => {
-      if (!this._isCloseButtonDragCandidate) return;
-
-      const deltaX = Math.abs(moveEvent.clientX - this._closeButtonDragStart.x);
-      const deltaY = Math.abs(moveEvent.clientY - this._closeButtonDragStart.y);
-
-      if (deltaX > DRAG_CONFIG.THRESHOLD_PX || deltaY > DRAG_CONFIG.THRESHOLD_PX) {
-        // Movement detected, start resize operation
-        document.removeEventListener('mousemove', onMouseMove);
-        document.removeEventListener('mouseup', onMouseUp);
-        this._startResize(moveEvent);
-      }
-    };
-
-    const onMouseUp = (): void => {
-      // Clean up temporary listeners
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-    };
-
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-
-    // Prevent default to avoid button focus issues during drag
-    event.preventDefault();
-  }
-
-  onCloseButtonClick(event: MouseEvent): void {
-    // Only close if this wasn't a drag operation
-    if (!this._isCloseButtonDragCandidate || this.isResizing()) {
-      return; // Was a drag, don't close
-    }
-
-    // Check if mouse moved significantly since mousedown
-    const deltaX = Math.abs(event.clientX - this._closeButtonDragStart.x);
-    const deltaY = Math.abs(event.clientY - this._closeButtonDragStart.y);
-
-    if (deltaX < DRAG_CONFIG.THRESHOLD_PX && deltaY < DRAG_CONFIG.THRESHOLD_PX) {
-      // Small movement, treat as click
-      this.close();
-    }
-
-    // Reset drag candidate state
-    this._isCloseButtonDragCandidate = false;
-  }
-
   private _getWidthRelatedStyles(): CssString {
     const isOpen = this.isOpen();
 
@@ -339,57 +287,31 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
   }
 
   // Resize functionality methods
-  onResizeStart(event: MouseEvent): void {
-    this._startResize(event);
-  }
-
-  private _startResize(event: MouseEvent): void {
+  onResizePointerDown(event: PointerEvent): void {
     if (!RIGHT_PANEL_CONFIG.RESIZABLE || this._isListenersAttached) return;
 
     this.isResizing.set(true);
+    this._activePointerId = event.pointerId;
     this._startX.set(event.clientX);
     this._startWidth.set(this.currentWidth());
 
-    // Mark listeners as attached before adding them
     this._isListenersAttached = true;
-    document.addEventListener('mousemove', this._boundOnDrag);
-    document.addEventListener('mouseup', this._boundOnDragEnd);
+    document.addEventListener('pointermove', this._boundOnPointerMove, {
+      passive: false,
+    });
+    document.addEventListener('pointerup', this._boundOnPointerUp, { passive: true });
     document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';
 
-    // Reset close button drag candidate since we're now resizing
-    this._isCloseButtonDragCandidate = false;
+    if (event.pointerType === 'touch') {
+      (document.body.style as any).touchAction = 'none';
+    }
 
+    this._isCloseButtonDragCandidate = false;
     event.preventDefault();
   }
 
-  private _handleDrag(event: MouseEvent): void {
-    if (!this.isResizing()) return;
-
-    // Throttle drag events for better performance
-    const now = Date.now();
-    if (now - this._lastDragTime < DRAG_CONFIG.THROTTLE_MS) return;
-    this._lastDragTime = now;
-
-    // Right panel resizes from left edge, so subtract delta
-    const deltaX = this._startX() - event.clientX;
-    const potentialWidth = this._startWidth() + deltaX;
-
-    // If dragged below close threshold, close the panel immediately
-    if (potentialWidth < RIGHT_PANEL_CONFIG.CLOSE_THRESHOLD) {
-      this.isResizing.set(false);
-      this._isListenersAttached = false;
-      document.removeEventListener('mousemove', this._boundOnDrag);
-      document.removeEventListener('mouseup', this._boundOnDragEnd);
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-      this.close();
-      return;
-    }
-
-    const newWidth = clampWidth(potentialWidth, RIGHT_PANEL_CONFIG.MAX_WIDTH);
-    this.currentWidth.set(newWidth);
-  }
+  // Mouse-specific resize logic removed; unified in pointer handlers
 
   private _handleDragEnd(): void {
     if (!this.isResizing() && !this._isListenersAttached) return;
@@ -397,13 +319,110 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
     this.isResizing.set(false);
     this._isListenersAttached = false;
 
-    document.removeEventListener('mousemove', this._boundOnDrag);
-    document.removeEventListener('mouseup', this._boundOnDragEnd);
+    document.removeEventListener('pointermove', this._boundOnPointerMove);
+    document.removeEventListener('pointerup', this._boundOnPointerUp);
     document.body.style.cursor = '';
     document.body.style.userSelect = '';
+    (document.body.style as any).touchAction = '';
 
     // Save width to localStorage with error handling
     this._saveWidthToStorage();
+  }
+
+  private _activePointerId: number | null = null;
+
+  private _handlePointerMove(event: PointerEvent): void {
+    if (!this.isResizing()) return;
+    if (this._activePointerId !== null && event.pointerId !== this._activePointerId)
+      return;
+
+    const now = Date.now();
+    if (now - this._lastDragTime < DRAG_CONFIG.THROTTLE_MS) {
+      event.preventDefault();
+      return;
+    }
+    this._lastDragTime = now;
+
+    const deltaX = this._startX() - event.clientX;
+    const potentialWidth = this._startWidth() + deltaX;
+
+    if (potentialWidth < RIGHT_PANEL_CONFIG.CLOSE_THRESHOLD) {
+      this.isResizing.set(false);
+      this._isListenersAttached = false;
+      document.removeEventListener('pointermove', this._boundOnPointerMove);
+      document.removeEventListener('pointerup', this._boundOnPointerUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      (document.body.style as any).touchAction = '';
+      this.close();
+      event.preventDefault();
+      return;
+    }
+
+    const newWidth = clampWidth(potentialWidth, RIGHT_PANEL_CONFIG.MAX_WIDTH);
+    this.currentWidth.set(newWidth);
+    event.preventDefault();
+  }
+
+  private _handlePointerUp(event: PointerEvent): void {
+    if (this._activePointerId !== null && event.pointerId !== this._activePointerId)
+      return;
+    if (!this.isResizing() && !this._isListenersAttached) return;
+
+    this.isResizing.set(false);
+    this._isListenersAttached = false;
+    this._activePointerId = null;
+
+    document.removeEventListener('pointermove', this._boundOnPointerMove);
+    document.removeEventListener('pointerup', this._boundOnPointerUp);
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    (document.body.style as any).touchAction = '';
+
+    this._saveWidthToStorage();
+  }
+
+  // Pointer support for edge close handle drag-to-resize
+  onCloseButtonPointerDown(event: PointerEvent): void {
+    this._closeButtonDragStart = { x: event.clientX, y: event.clientY };
+    this._isCloseButtonDragCandidate = true;
+
+    const onMove = (moveEvent: PointerEvent): void => {
+      if (!this._isCloseButtonDragCandidate) return;
+      const deltaX = Math.abs(moveEvent.clientX - this._closeButtonDragStart.x);
+      const deltaY = Math.abs(moveEvent.clientY - this._closeButtonDragStart.y);
+      if (deltaX > DRAG_CONFIG.THRESHOLD_PX || deltaY > DRAG_CONFIG.THRESHOLD_PX) {
+        document.removeEventListener('pointermove', onMove);
+        document.removeEventListener('pointerup', onUp);
+        // Start pointer-based resize session
+        this.onResizePointerDown(moveEvent);
+      }
+      moveEvent.preventDefault();
+    };
+
+    const onUp = (): void => {
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerup', onUp);
+      this._isCloseButtonDragCandidate = false;
+    };
+
+    document.addEventListener('pointermove', onMove, { passive: false });
+    document.addEventListener('pointerup', onUp, { passive: true });
+
+    event.preventDefault();
+  }
+
+  onCloseButtonPointerUp(event: PointerEvent): void {
+    if (this.isResizing()) {
+      this._isCloseButtonDragCandidate = false;
+      return;
+    }
+    const dx = Math.abs(event.clientX - this._closeButtonDragStart.x);
+    const dy = Math.abs(event.clientY - this._closeButtonDragStart.y);
+    if (dx < DRAG_CONFIG.THRESHOLD_PX && dy < DRAG_CONFIG.THRESHOLD_PX) {
+      this.close();
+    }
+    this._isCloseButtonDragCandidate = false;
   }
 
   private _saveWidthToStorage(): void {

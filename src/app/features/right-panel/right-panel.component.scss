@@ -92,6 +92,7 @@
 
 // Resize handle (matching magic-nav style)
 .resize-handle {
+  touch-action: none; // allow pointer events to control without scrolling
   position: absolute;
   top: 0;
   bottom: 0;
@@ -114,6 +115,7 @@
 
 // Edge close handle
 .edge-close-handle {
+  touch-action: none; // allow pointer events to control without scrolling
   position: absolute;
   top: 50%;
   left: -8px; // Position outside the panel

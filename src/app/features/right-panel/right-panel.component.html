@@ -13,7 +13,7 @@
     <!-- Resize Handle -->
     <div
       class="resize-handle"
-      (mousedown)="onResizeStart($event)"
+      (pointerdown)="onResizePointerDown($event)"
       [attr.aria-label]="'Resize right panel'"
       role="separator"
     ></div>
@@ -22,8 +22,8 @@
       role="button"
       tabindex="0"
       [attr.aria-label]="'Close right panel or drag to resize'"
-      (click)="onCloseButtonClick($event)"
-      (mousedown)="onCloseButtonMouseDown($event)"
+      (pointerdown)="onCloseButtonPointerDown($event)"
+      (pointerup)="onCloseButtonPointerUp($event)"
       (keydown.enter)="close()"
     >
       <mat-icon>chevron_right</mat-icon>
