@@ -11,7 +11,7 @@ describe('dnd.helpers', () => {
   });
 
   it('rejects invalid DragData', () => {
-    const parsed = asDragData({ foo: 'bar' } as any);
+    const parsed = asDragData({ foo: 'bar' });
     expect(parsed).toBeNull();
   });
 

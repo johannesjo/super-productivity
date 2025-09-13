@@ -7,94 +7,104 @@
   position: relative;
 }
 
-.tree__item {
+.item {
   position: relative;
+
+  &.is-dragging {
+    opacity: 0.4;
+  }
+
+  &.is-over-inside {
+    background: greenyellow;
+  }
 }
 
-.tree__row {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
+.row {
   min-height: 28px;
-  border-radius: 4px;
-  padding: 2px 6px;
   user-select: none;
   -webkit-user-select: none;
-}
-
-.tree__handle {
   cursor: grab;
-  padding: 0 4px;
-  user-select: none;
-  -webkit-user-select: none;
+
+  &.is-over {
+    background: greenyellow !important;
+  }
 }
 
-.tree__row.is-over {
-  outline: 2px dashed #2684ff;
+.item.just-dropped > .row {
+  background: gold;
 }
 
-.tree__row.is-dragging {
-  opacity: 0.5;
-}
-
-.tree__item--folder > .tree__row {
-  font-weight: 600;
-}
-
-.tree__expander {
+.expander {
   width: 16px;
   text-align: center;
   user-select: none;
 }
 
-.tree__drop {
+.drop {
   height: 8px;
+  pointer-events: none;
+  width: 100%;
+  background: rgba(255, 0, 0, 0.2);
+  position: absolute;
+
+  .is-dragging & {
+    pointer-events: all;
+    background: rgba(0, 255, 0, 0.2);
+  }
+
+  .item:not(.is-folder) & {
+    height: 50%;
+  }
 }
 
-.tree__drop--before,
-.tree__drop--after {
+.drop--before,
+.drop--after {
   border-top: 2px solid transparent;
 }
 
-.tree__drop.is-over {
-  border-top-color: #2684ff;
+.drop--before {
+  top: 0;
 }
 
-.tree__group {
+.drop--after {
+  bottom: 0;
+}
+
+.group {
   margin-left: 0;
 }
 
-.tree__root-drop {
+.root-drop {
   height: 10px;
   border-top: 2px dashed transparent;
-}
 
-.tree__root-drop.is-over {
-  border-top-color: #2684ff;
+  &.is-over {
+    border-top-color: purple;
+  }
 }
 
 /* indicator */
-.tree__indicator {
+.indicator {
   position: absolute;
   height: 0;
   pointer-events: none;
 }
 
-.tree__indicator-dot {
+.indicator-dot {
   position: absolute;
   top: -5px;
   left: -7px;
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #2684ff;
+  background: red;
   box-shadow: 0 0 0 2px white;
 }
 
-.tree__indicator-line {
+.indicator-line {
   display: block;
   height: 2px;
-  background: #2684ff;
+  background: red;
   width: 100%;
   position: absolute;
   top: -1px;

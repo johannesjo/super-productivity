@@ -18,7 +18,10 @@ export class DndDraggableDirective {
 
   private _bindEffect = effect(() => {
     // Rebind when id/context changes
-    this.cleanup?.();
+    if (this.cleanup) {
+      this.cleanup();
+      this.cleanup = null;
+    }
     const id = this.id();
     const ctx = this.dndContext();
     this.cleanup = draggable({

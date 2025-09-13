@@ -53,7 +53,7 @@ export class DndDropTargetDirective {
     this.cleanup = dropTargetForElements({
       element: this.el.nativeElement,
       canDrop: ({ source }) =>
-        asDragData(source.data as any)?.uniqueContextId === this.dndContext(),
+        asDragData(source.data)?.uniqueContextId === this.dndContext(),
       getData: () => makeDropData({ type: 'drop', id: cfg.id, where }),
       onDragStart: (p) => this.onActive(p, where),
       onDropTargetChange: (p) => this.onActive(p, where),
@@ -76,7 +76,8 @@ export class DndDropTargetDirective {
     { location, self }: ElementDropTargetEventBasePayload,
     where: DropData['where'],
   ) {
-    const [innerMost] = location.current.dropTargets;
+    const list = location.current.dropTargets;
+    const innerMost = list[list.length - 1];
     const isActive = innerMost?.element === self.element;
     this.activeChange.emit(isActive);
     this.indicator.emit({ active: isActive, element: this.el.nativeElement, where });
