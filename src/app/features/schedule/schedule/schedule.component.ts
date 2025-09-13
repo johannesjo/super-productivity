@@ -48,8 +48,8 @@ export class ScheduleComponent {
   private _store = inject(Store);
   private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
 
-  private _selectedTimeView = computed(() => this.layoutService.selectedTimeView());
-  isMonthView = computed(() => this._selectedTimeView() === 'month');
+  private _currentTimeViewMode = computed(() => this.layoutService.selectedTimeView());
+  isMonthView = computed(() => this._currentTimeViewMode() === 'month');
 
   private _todayDateStr = toSignal(this._globalTrackingIntervalService.todayDateStr$);
   private _windowSize = toSignal(
@@ -63,7 +63,7 @@ export class ScheduleComponent {
 
   private _daysToShowCount = computed(() => {
     const size = this._windowSize();
-    const selectedView = this._selectedTimeView();
+    const selectedView = this._currentTimeViewMode();
     const width = size.width;
     const height = size.height;
 
@@ -96,7 +96,7 @@ export class ScheduleComponent {
 
   daysToShow = computed(() => {
     const count = this._daysToShowCount();
-    const selectedView = this._selectedTimeView();
+    const selectedView = this._currentTimeViewMode();
     // Trigger re-computation when today changes
     this._todayDateStr();
 

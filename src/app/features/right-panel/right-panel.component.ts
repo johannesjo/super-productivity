@@ -43,6 +43,12 @@ const RIGHT_PANEL_CONFIG = {
   CLOSE_THRESHOLD: 100,
 } as const;
 
+// Performance and interaction constants
+const DRAG_CONFIG = {
+  THROTTLE_MS: 16, // ~60fps for smooth dragging
+  THRESHOLD_PX: 5, // pixels of movement to start drag
+} as const;
+
 @Component({
   selector: 'right-panel',
   templateUrl: './right-panel.component.html',
@@ -144,12 +150,10 @@ export class RightPanelComponent implements OnInit, OnDestroy {
 
   // Performance optimization for drag events
   private _lastDragTime = 0;
-  private readonly _dragThrottleMs = 16; // ~60fps
 
   // Close button drag detection
   private _closeButtonDragStart = { x: 0, y: 0 };
   private _isCloseButtonDragCandidate = false;
-  private readonly _dragThreshold = 5; // pixels of movement to start drag
 
   // Computed panel width for CSS binding
   readonly panelWidth = computed(() => this.currentWidth());
@@ -231,7 +235,7 @@ export class RightPanelComponent implements OnInit, OnDestroy {
       const deltaX = Math.abs(moveEvent.clientX - this._closeButtonDragStart.x);
       const deltaY = Math.abs(moveEvent.clientY - this._closeButtonDragStart.y);
 
-      if (deltaX > this._dragThreshold || deltaY > this._dragThreshold) {
+      if (deltaX > DRAG_CONFIG.THRESHOLD_PX || deltaY > DRAG_CONFIG.THRESHOLD_PX) {
         // Movement detected, start resize operation
         document.removeEventListener('mousemove', onMouseMove);
         document.removeEventListener('mouseup', onMouseUp);
@@ -262,7 +266,7 @@ export class RightPanelComponent implements OnInit, OnDestroy {
     const deltaX = Math.abs(event.clientX - this._closeButtonDragStart.x);
     const deltaY = Math.abs(event.clientY - this._closeButtonDragStart.y);
 
-    if (deltaX < this._dragThreshold && deltaY < this._dragThreshold) {
+    if (deltaX < DRAG_CONFIG.THRESHOLD_PX && deltaY < DRAG_CONFIG.THRESHOLD_PX) {
       // Small movement, treat as click
       this.close();
     }
@@ -313,7 +317,7 @@ export class RightPanelComponent implements OnInit, OnDestroy {
 
     // Throttle drag events for better performance
     const now = Date.now();
-    if (now - this._lastDragTime < this._dragThrottleMs) return;
+    if (now - this._lastDragTime < DRAG_CONFIG.THROTTLE_MS) return;
     this._lastDragTime = now;
 
     // Right panel resizes from left edge, so subtract delta

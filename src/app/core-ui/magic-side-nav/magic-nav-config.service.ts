@@ -39,10 +39,10 @@ export class MagicNavConfigService {
 
   // Simple state signals
   private readonly _isProjectsExpanded = signal(
-    this._getStoredState(LS.IS_PROJECT_LIST_EXPANDED),
+    this._getStoredBooleanState(LS.IS_PROJECT_LIST_EXPANDED),
   );
   private readonly _isTagsExpanded = signal(
-    this._getStoredState(LS.IS_TAG_LIST_EXPANDED),
+    this._getStoredBooleanState(LS.IS_TAG_LIST_EXPANDED),
   );
 
   // Data signals
@@ -461,7 +461,7 @@ export class MagicNavConfigService {
   }
 
   // Helper
-  private _getStoredState(key: string): boolean {
+  private _getStoredBooleanState(key: string): boolean {
     const stored = localStorage.getItem(key);
     return stored === null || stored === 'true';
   }
