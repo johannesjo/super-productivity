@@ -1,0 +1,102 @@
+:host {
+  display: block;
+}
+
+.tree {
+  display: block;
+  position: relative;
+}
+
+.tree__item {
+  position: relative;
+}
+
+.tree__row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  min-height: 28px;
+  border-radius: 4px;
+  padding: 2px 6px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.tree__handle {
+  cursor: grab;
+  padding: 0 4px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.tree__row.is-over {
+  outline: 2px dashed #2684ff;
+}
+
+.tree__row.is-dragging {
+  opacity: 0.5;
+}
+
+.tree__item--folder > .tree__row {
+  font-weight: 600;
+}
+
+.tree__expander {
+  width: 16px;
+  text-align: center;
+  user-select: none;
+}
+
+.tree__drop {
+  height: 8px;
+}
+
+.tree__drop--before,
+.tree__drop--after {
+  border-top: 2px solid transparent;
+}
+
+.tree__drop.is-over {
+  border-top-color: #2684ff;
+}
+
+.tree__group {
+  margin-left: 0;
+}
+
+.tree__root-drop {
+  height: 10px;
+  border-top: 2px dashed transparent;
+}
+
+.tree__root-drop.is-over {
+  border-top-color: #2684ff;
+}
+
+/* indicator */
+.tree__indicator {
+  position: absolute;
+  height: 0;
+  pointer-events: none;
+}
+
+.tree__indicator-dot {
+  position: absolute;
+  top: -5px;
+  left: -7px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #2684ff;
+  box-shadow: 0 0 0 2px white;
+}
+
+.tree__indicator-line {
+  display: block;
+  height: 2px;
+  background: #2684ff;
+  width: 100%;
+  position: absolute;
+  top: -1px;
+  left: 0;
+}

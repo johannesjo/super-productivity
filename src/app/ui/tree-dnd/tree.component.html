@@ -1,0 +1,112 @@
+<div
+  class="tree"
+  #root
+>
+  @for (node of nodes(); track node.id) {
+    <ng-container
+      *ngTemplateOutlet="nodeTpl; context: { $implicit: node, level: 0 }"
+    ></ng-container>
+  }
+  <!-- root drop area: drop as last item in root -->
+  <div
+    class="tree__root-drop"
+    [class.is-over]="rootOver()"
+    [dndDropTarget]="{ id: '', where: 'root' }"
+    [dndContext]="contextId"
+    (activeChange)="rootOver.set($event)"
+    (indicator)="onIndicator($event)"
+  ></div>
+
+  <!-- floating drop indicator -->
+  <div
+    class="tree__indicator"
+    [style.display]="indicatorVisible() ? 'block' : 'none'"
+    [style.top.px]="indicatorTop()"
+    [style.left.px]="indicatorLeft()"
+    [style.width.px]="indicatorWidth()"
+  >
+    <span class="tree__indicator-dot"></span>
+    <span class="tree__indicator-line"></span>
+  </div>
+</div>
+
+<ng-template
+  #nodeTpl
+  let-node
+  let-level="level"
+>
+  <div
+    class="tree__item"
+    [class.tree__item--folder]="isFolder(node)"
+    [style.paddingLeft.px]="level * indent()"
+  >
+    <!-- before drop zone -->
+    <div
+      class="tree__drop tree__drop--before"
+      [class.is-over]="isOver(node.id, 'before')"
+      [dndDropTarget]="{ id: node.id, where: 'before' }"
+      [dndContext]="contextId"
+      (activeChange)="setOver(node.id, 'before', $event)"
+      (indicator)="onIndicator($event)"
+    ></div>
+
+    <div
+      class="tree__row"
+      [attr.data-id]="node.id"
+      [class.is-dragging]="draggingId() === node.id"
+      [class.is-over]="isOver(node.id, 'inside')"
+      [dndDropTarget]="isFolder(node) ? { id: node.id, where: 'inside' } : null"
+      [dndContext]="contextId"
+      (activeChange)="setOver(node.id, 'inside', $event)"
+    >
+      <span
+        class="tree__handle"
+        [dndDraggable]="node.id"
+        [dndContext]="contextId"
+        title="Drag"
+        >≡</span
+      >
+      @if (isFolder(node)) {
+        <span
+          class="tree__expander"
+          (click)="$event.stopPropagation(); node.expanded = !node.expanded"
+        >
+          {{ node.expanded ? '▾' : '▸' }}
+        </span>
+      }
+      @if (folderTpl() && isFolder(node)) {
+        <ng-container
+          *ngTemplateOutlet="folderTpl(); context: { $implicit: node }"
+        ></ng-container>
+      } @else {
+        @if (itemTpl(); as tpl) {
+          <ng-container
+            *ngTemplateOutlet="tpl; context: { $implicit: node }"
+          ></ng-container>
+        } @else {
+          {{ node.label }}
+        }
+      }
+    </div>
+
+    <!-- after drop zone -->
+    <div
+      class="tree__drop tree__drop--after"
+      [class.is-over]="isOver(node.id, 'after')"
+      [dndDropTarget]="{ id: node.id, where: 'after' }"
+      [dndContext]="contextId"
+      (activeChange)="setOver(node.id, 'after', $event)"
+      (indicator)="onIndicator($event)"
+    ></div>
+  </div>
+
+  @if (node.expanded && node.children?.length) {
+    <div class="tree__group">
+      @for (child of node.children; track child.id) {
+        <ng-container
+          *ngTemplateOutlet="nodeTpl; context: { $implicit: child, level: level + 1 }"
+        ></ng-container>
+      }
+    </div>
+  }
+</ng-template>
