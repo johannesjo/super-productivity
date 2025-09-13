@@ -295,17 +295,7 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
     this._startX.set(event.clientX);
     this._startWidth.set(this.currentWidth());
 
-    this._isListenersAttached = true;
-    document.addEventListener('pointermove', this._boundOnPointerMove, {
-      passive: false,
-    });
-    document.addEventListener('pointerup', this._boundOnPointerUp, { passive: true });
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
-
-    if (event.pointerType === 'touch') {
-      (document.body.style as any).touchAction = 'none';
-    }
+    this._attachResizeListeners(event.pointerType === 'touch');
 
     this._isCloseButtonDragCandidate = false;
     event.preventDefault();
@@ -318,12 +308,7 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
 
     this.isResizing.set(false);
     this._isListenersAttached = false;
-
-    document.removeEventListener('pointermove', this._boundOnPointerMove);
-    document.removeEventListener('pointerup', this._boundOnPointerUp);
-    document.body.style.cursor = '';
-    document.body.style.userSelect = '';
-    (document.body.style as any).touchAction = '';
+    this._detachResizeListeners();
 
     // Save width to localStorage with error handling
     this._saveWidthToStorage();
@@ -349,11 +334,7 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
     if (potentialWidth < RIGHT_PANEL_CONFIG.CLOSE_THRESHOLD) {
       this.isResizing.set(false);
       this._isListenersAttached = false;
-      document.removeEventListener('pointermove', this._boundOnPointerMove);
-      document.removeEventListener('pointerup', this._boundOnPointerUp);
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-      (document.body.style as any).touchAction = '';
+      this._detachResizeListeners();
       this.close();
       event.preventDefault();
       return;
@@ -373,11 +354,7 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
     this._isListenersAttached = false;
     this._activePointerId = null;
 
-    document.removeEventListener('pointermove', this._boundOnPointerMove);
-    document.removeEventListener('pointerup', this._boundOnPointerUp);
-    document.body.style.cursor = '';
-    document.body.style.userSelect = '';
-    (document.body.style as any).touchAction = '';
+    this._detachResizeListeners();
 
     this._saveWidthToStorage();
   }
@@ -410,6 +387,28 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
     document.addEventListener('pointerup', onUp, { passive: true });
 
     event.preventDefault();
+  }
+
+  // Centralized listener/body style handling to keep logic tidy
+  private _attachResizeListeners(isTouch: boolean): void {
+    this._isListenersAttached = true;
+    document.addEventListener('pointermove', this._boundOnPointerMove, {
+      passive: false,
+    });
+    document.addEventListener('pointerup', this._boundOnPointerUp, { passive: true });
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    if (isTouch) {
+      (document.body.style as any).touchAction = 'none';
+    }
+  }
+
+  private _detachResizeListeners(): void {
+    document.removeEventListener('pointermove', this._boundOnPointerMove);
+    document.removeEventListener('pointerup', this._boundOnPointerUp);
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    (document.body.style as any).touchAction = '';
   }
 
   onCloseButtonPointerUp(event: PointerEvent): void {

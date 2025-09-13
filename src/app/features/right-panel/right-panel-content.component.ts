@@ -39,6 +39,18 @@ import {
   BottomPanelData,
 } from '../bottom-panel/bottom-panel-container.component';
 
+// Keep in sync with CSS var --transition-duration-m
+const CLOSE_ANIMATION_MS = 225;
+
+// Narrow the panel type to a reusable alias for clarity
+export type RightPanelContentPanelType =
+  | 'NOTES'
+  | 'TASK'
+  | 'ADD_TASK_PANEL'
+  | 'ISSUE_PANEL'
+  | 'TASK_VIEW_CUSTOMIZER_PANEL'
+  | 'PLUGIN';
+
 @Component({
   selector: 'right-panel-content',
   templateUrl: './right-panel-content.component.html',
@@ -96,15 +108,7 @@ export class RightPanelContentComponent implements OnDestroy {
   private _selectedTaskDelayedSignal = signal<TaskWithSubTasks | null>(null);
 
   // Delayed signals for panel type and plugin id to keep content visible during close animation
-  private _delayedPanelType = signal<
-    | 'NOTES'
-    | 'TASK'
-    | 'ADD_TASK_PANEL'
-    | 'ISSUE_PANEL'
-    | 'TASK_VIEW_CUSTOMIZER_PANEL'
-    | 'PLUGIN'
-    | null
-  >(null);
+  private _delayedPanelType = signal<RightPanelContentPanelType | null>(null);
   private _delayedActivePluginId = signal<string | null>(null);
 
   // Effect to handle delayed task clearing
@@ -162,13 +166,7 @@ export class RightPanelContentComponent implements OnDestroy {
         isShowPluginPanel,
       } = layoutState;
 
-      let currentPanelType:
-        | 'NOTES'
-        | 'TASK'
-        | 'ISSUE_PANEL'
-        | 'TASK_VIEW_CUSTOMIZER_PANEL'
-        | 'PLUGIN'
-        | null = null;
+      let currentPanelType: RightPanelContentPanelType | null = null;
 
       if (isShowNotes) {
         currentPanelType = 'NOTES';
@@ -200,7 +198,7 @@ export class RightPanelContentComponent implements OnDestroy {
           this._panelTypeDelayTimer = setTimeout(() => {
             this._delayedPanelType.set(null);
             this._delayedActivePluginId.set(null);
-          }, 225); // Match CSS transition duration
+          }, CLOSE_ANIMATION_MS);
         }
       }
     },
@@ -208,15 +206,9 @@ export class RightPanelContentComponent implements OnDestroy {
   );
 
   // Computed signal for panel content using delayed panel type exclusively
-  readonly panelContent = computed<
-    | 'NOTES'
-    | 'TASK'
-    | 'ADD_TASK_PANEL'
-    | 'ISSUE_PANEL'
-    | 'TASK_VIEW_CUSTOMIZER_PANEL'
-    | 'PLUGIN'
-    | undefined
-  >(() => this._delayedPanelType() ?? undefined);
+  readonly panelContent = computed<RightPanelContentPanelType | undefined>(
+    () => this._delayedPanelType() ?? undefined,
+  );
 
   // Computed signal that includes plugin ID for component recreation
   readonly pluginPanelKeys = computed<string[]>(() => {
