@@ -11,23 +11,25 @@
 >
   <div class="right-panel">
     <!-- Resize Handle -->
-    <div
-      class="resize-handle"
-      (pointerdown)="onResizePointerDown($event)"
-      [attr.aria-label]="'Resize right panel'"
-      role="separator"
-    ></div>
-    <button
-      class="edge-close-handle"
-      role="button"
-      tabindex="0"
-      [attr.aria-label]="'Close right panel or drag to resize'"
-      (pointerdown)="onCloseButtonPointerDown($event)"
-      (pointerup)="onCloseButtonPointerUp($event)"
-      (keydown.enter)="close()"
-    >
-      <mat-icon>chevron_right</mat-icon>
-    </button>
+    @if (isOpen()) {
+      <div
+        class="resize-handle"
+        (pointerdown)="onResizePointerDown($event)"
+        [attr.aria-label]="'Resize right panel'"
+        role="separator"
+      ></div>
+      <button
+        class="edge-close-handle"
+        role="button"
+        tabindex="0"
+        [attr.aria-label]="'Close right panel or drag to resize'"
+        (pointerdown)="onCloseButtonPointerDown($event)"
+        (pointerup)="onCloseButtonPointerUp($event)"
+        (keydown.enter)="close()"
+      >
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    }
 
     <div
       class="side-inner"
