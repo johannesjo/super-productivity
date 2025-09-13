@@ -18,7 +18,6 @@ export type MiscConfig = Readonly<{
   firstDayOfWeek: number;
   startOfNextDay: number;
   taskNotesTpl: string;
-  isUseMinimalNav?: boolean;
   isDisableAnimations: boolean;
   // optional because it was added later
   isShowTipLonger?: boolean;

@@ -23,7 +23,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     defaultProjectId: null,
     firstDayOfWeek: 1,
     startOfNextDay: 0,
-    isUseMinimalNav: false,
     isDisableAnimations: false,
     isShowTipLonger: false,
     taskNotesTpl: `**How can I best achieve it now?**

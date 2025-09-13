@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { filter, pairwise, tap, withLatestFrom } from 'rxjs/operators';
+import { filter, tap, withLatestFrom } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { IS_ELECTRON, LanguageCode } from '../../../app.constants';
 import { T } from '../../../t.const';
@@ -12,8 +12,6 @@ import { DEFAULT_GLOBAL_CONFIG } from '../default-global-config.const';
 import { KeyboardConfig } from '../keyboard-config.model';
 import { updateGlobalConfigSection } from './global-config.actions';
 import { MiscConfig } from '../global-config.model';
-import { selectMiscConfig } from './global-config.reducer';
-import { Log } from '../../../core/log';
 
 @Injectable()
 export class GlobalConfigEffects {
@@ -127,21 +125,6 @@ export class GlobalConfigEffects {
           const cfg = appDataComplete.globalConfig || DEFAULT_GLOBAL_CONFIG;
           const startOfNextDay = cfg && cfg.misc && cfg.misc.startOfNextDay;
           this._dateService.setStartOfNextDayDiff(startOfNextDay);
-        }),
-      ),
-    { dispatch: false },
-  );
-
-  toggleNavOnMinimalNavChange$: any = createEffect(
-    () =>
-      this._store.select(selectMiscConfig).pipe(
-        pairwise(),
-        filter(([a, b]) => a.isUseMinimalNav !== b.isUseMinimalNav),
-        tap(() => {
-          Log.log('AA');
-          // this._store.dispatch(hideSideNav());
-          // this._store.dispatch(toggleSideNav());
-          window.dispatchEvent(new Event('resize'));
         }),
       ),
     { dispatch: false },
