@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { TaskDetailTargetPanel, TaskWithSubTasks } from '../tasks/task.model';
 import { filter, map, startWith } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 import { TaskService } from '../tasks/task.service';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { slideInFromTopAni } from '../../ui/animations/slide-in-from-top.ani';
@@ -77,6 +78,7 @@ export class RightPanelContentComponent implements OnDestroy {
   private _router = inject(Router);
   private _bottomSheet = inject(MatBottomSheet);
   private _bottomSheetRef: MatBottomSheetRef<BottomPanelContainerComponent> | null = null;
+  private _bottomSheetSubscription: Subscription | null = null;
 
   // Convert observables to signals
   private readonly _selectedTask = toSignal(this.taskService.selectedTask$, {
@@ -143,64 +145,7 @@ export class RightPanelContentComponent implements OnDestroy {
   // Effect to handle delayed panel type clearing
   private _panelTypeDelayEffect = effect(
     () => {
-      // Compute immediate panel type including TASK
-      const layoutState = this._layoutFeatureState();
-      const selectedTask = this._selectedTask();
-
-      // Clear any existing timer
-      if (this._panelTypeDelayTimer) {
-        clearTimeout(this._panelTypeDelayTimer);
-        this._panelTypeDelayTimer = null;
-      }
-
-      if (!layoutState) {
-        this._delayedPanelType.set(null);
-        this._delayedActivePluginId.set(null);
-        return;
-      }
-
-      const {
-        isShowNotes,
-        isShowIssuePanel,
-        isShowTaskViewCustomizerPanel,
-        isShowPluginPanel,
-      } = layoutState;
-
-      let currentPanelType: RightPanelContentPanelType | null = null;
-
-      if (isShowNotes) {
-        currentPanelType = 'NOTES';
-      } else if (isShowIssuePanel) {
-        currentPanelType = 'ISSUE_PANEL';
-      } else if (isShowTaskViewCustomizerPanel) {
-        currentPanelType = 'TASK_VIEW_CUSTOMIZER_PANEL';
-      } else if (isShowPluginPanel) {
-        currentPanelType = 'PLUGIN';
-      } else if (selectedTask) {
-        currentPanelType = 'TASK';
-      }
-
-      if (currentPanelType) {
-        // Immediately set the panel type when opening or while open
-        this._delayedPanelType.set(currentPanelType);
-        // Keep plugin id up to date while plugin panel is active
-        if (currentPanelType === 'PLUGIN') {
-          const pid = this._activePluginId();
-          if (pid) {
-            this._delayedActivePluginId.set(pid);
-          }
-        }
-      } else {
-        // Only set delay if we currently have a panel type to preserve
-        const currentDelayedType = this._delayedPanelType();
-        if (currentDelayedType) {
-          // Delay clearing the panel type (and plugin id) to allow close animation to play with content visible
-          this._panelTypeDelayTimer = setTimeout(() => {
-            this._delayedPanelType.set(null);
-            this._delayedActivePluginId.set(null);
-          }, CLOSE_ANIMATION_MS);
-        }
-      }
+      this._updatePanelTypeWithDelay();
     },
     { allowSignalWrites: true },
   );
@@ -214,14 +159,7 @@ export class RightPanelContentComponent implements OnDestroy {
   readonly pluginPanelKeys = computed<string[]>(() => {
     const delayedType = this._delayedPanelType();
     const activePluginId = this._delayedActivePluginId() || this._activePluginId();
-    const keys =
-      delayedType === 'PLUGIN' && activePluginId ? [`plugin-${activePluginId}`] : [];
-    Log.log('RightPanel: pluginPanelKeys computed (delayed):', {
-      delayedType,
-      activePluginId,
-      keys,
-    });
-    return keys;
+    return delayedType === 'PLUGIN' && activePluginId ? [`plugin-${activePluginId}`] : [];
   });
 
   // Signal to track current route
@@ -382,10 +320,13 @@ export class RightPanelContentComponent implements OnDestroy {
           });
 
           // Handle bottom sheet dismissal
-          this._bottomSheetRef.afterDismissed().subscribe(() => {
-            this._bottomSheetRef = null;
-            this.close();
-          });
+          this._bottomSheetSubscription = this._bottomSheetRef
+            .afterDismissed()
+            .subscribe(() => {
+              this._bottomSheetRef = null;
+              this._bottomSheetSubscription = null;
+              this.close();
+            });
         } else if (!isOpen && this._bottomSheetRef) {
           // Close bottom sheet
           this._bottomSheetRef.dismiss();
@@ -415,6 +356,12 @@ export class RightPanelContentComponent implements OnDestroy {
       this._bottomSheetRef.dismiss();
       this._bottomSheetRef = null;
     }
+
+    // Clean up bottom sheet subscription
+    if (this._bottomSheetSubscription) {
+      this._bottomSheetSubscription.unsubscribe();
+      this._bottomSheetSubscription = null;
+    }
   }
 
   private _isWorkViewUrl(url: string): boolean {
@@ -434,6 +381,71 @@ export class RightPanelContentComponent implements OnDestroy {
     // Only restore focus on non-touch devices to prevent scroll position loss
     if (!IS_TOUCH_PRIMARY) {
       this.taskService.focusLastFocusedTask();
+    }
+  }
+
+  private _updatePanelTypeWithDelay(): void {
+    const currentPanelType = this._getCurrentPanelType();
+    this._clearPanelTypeTimer();
+
+    if (currentPanelType) {
+      this._setPanelTypeImmediately(currentPanelType);
+    } else {
+      this._scheduleDelayedPanelTypeClearing();
+    }
+  }
+
+  private _getCurrentPanelType(): RightPanelContentPanelType | null {
+    const layoutState = this._layoutFeatureState();
+    const selectedTask = this._selectedTask();
+
+    if (!layoutState) {
+      return null;
+    }
+
+    const {
+      isShowNotes,
+      isShowIssuePanel,
+      isShowTaskViewCustomizerPanel,
+      isShowPluginPanel,
+    } = layoutState;
+
+    if (isShowNotes) return 'NOTES';
+    if (isShowIssuePanel) return 'ISSUE_PANEL';
+    if (isShowTaskViewCustomizerPanel) return 'TASK_VIEW_CUSTOMIZER_PANEL';
+    if (isShowPluginPanel) return 'PLUGIN';
+    if (selectedTask) return 'TASK';
+
+    return null;
+  }
+
+  private _clearPanelTypeTimer(): void {
+    if (this._panelTypeDelayTimer) {
+      clearTimeout(this._panelTypeDelayTimer);
+      this._panelTypeDelayTimer = null;
+    }
+  }
+
+  private _setPanelTypeImmediately(panelType: RightPanelContentPanelType): void {
+    this._delayedPanelType.set(panelType);
+
+    // Keep plugin id up to date while plugin panel is active
+    if (panelType === 'PLUGIN') {
+      const pid = this._activePluginId();
+      if (pid) {
+        this._delayedActivePluginId.set(pid);
+      }
+    }
+  }
+
+  private _scheduleDelayedPanelTypeClearing(): void {
+    const currentDelayedType = this._delayedPanelType();
+    if (currentDelayedType) {
+      // Delay clearing the panel type (and plugin id) to allow close animation to play with content visible
+      this._panelTypeDelayTimer = setTimeout(() => {
+        this._delayedPanelType.set(null);
+        this._delayedActivePluginId.set(null);
+      }, CLOSE_ANIMATION_MS);
     }
   }
 }
