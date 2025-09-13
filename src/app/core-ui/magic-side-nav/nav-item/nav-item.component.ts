@@ -14,6 +14,7 @@ import {
 } from '../../../features/work-context/work-context.model';
 import { Project } from '../../../features/project/project.model';
 import { WorkContextMenuComponent } from '../../work-context-menu/work-context-menu.component';
+import { FolderContextMenuComponent } from '../../folder-context-menu/folder-context-menu.component';
 import { ContextMenuComponent } from '../../../ui/context-menu/context-menu.component';
 import { CdkDragPlaceholder } from '@angular/cdk/drag-drop';
 import { MatIconButton } from '@angular/material/button';
@@ -30,6 +31,7 @@ import { TranslatePipe } from '@ngx-translate/core';
     RouterLink,
     RouterModule,
     WorkContextMenuComponent,
+    FolderContextMenuComponent,
     ContextMenuComponent,
     CdkDragPlaceholder,
     MatIconButton,
@@ -58,7 +60,7 @@ export class NavItemComponent {
   private readonly _store = inject(Store);
 
   // Mode selection
-  mode = input<'work' | 'row'>('work');
+  mode = input<'work' | 'folder' | 'row'>('work');
 
   // Container selection for non-work modes
   container = input<'route' | 'href' | 'action' | 'group' | null>(null);
@@ -72,6 +74,9 @@ export class NavItemComponent {
   type = input<WorkContextType | null>(null);
   defaultIcon = input<string>('folder_special');
   activeWorkContextId = input<string>('');
+
+  // Folder inputs
+  folderId = input<string | null>(null);
 
   // Variant styling to integrate into magic-side-nav without deep selectors
   variant = input<'default' | 'nav'>('default');

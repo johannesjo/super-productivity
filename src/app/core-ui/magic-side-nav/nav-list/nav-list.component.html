@@ -12,7 +12,13 @@
     "
   >
     <nav-item
-      [container]="'group'"
+      [mode]="item().id?.startsWith('folder-') ? 'folder' : 'row'"
+      [container]="item().id?.startsWith('folder-') ? null : 'group'"
+      [folderId]="
+        item().id?.startsWith('folder-')
+          ? item().id?.replace('folder-', '') || null
+          : null
+      "
       [expanded]="isExpanded()"
       [ariaControls]="'group-' + item().id"
       [icon]="item().icon"
