@@ -496,14 +496,39 @@ export class NavSectionComponent implements AfterViewInit, OnDestroy {
           this._dropHandled = true;
           projectsHeader.classList.remove('drop-target-active');
           if (source.data.type === 'project') {
+            // Calculate target index to append at the end of root-level projects
+            const navChildren = element.querySelector(':scope > .nav-children');
+            let targetIndex = 0;
+
+            if (navChildren) {
+              // Count existing root-level projects to determine append index
+              const rootProjectElements = Array.from(navChildren.children).filter(
+                (child) => child.hasAttribute('data-project-id'),
+              );
+              targetIndex = rootProjectElements.length;
+            }
+
             this.projectMove.emit({
               projectId: source.data.projectId as string,
               targetFolderId: null,
+              targetIndex,
             });
           } else if (source.data.type === 'folder') {
+            // Calculate target index for root-level folders
+            const navChildren = element.querySelector(':scope > .nav-children');
+            let targetIndex = 0;
+
+            if (navChildren) {
+              const rootFolderElements = Array.from(navChildren.children).filter(
+                (child) => child.hasAttribute('data-folder-id'),
+              );
+              targetIndex = rootFolderElements.length;
+            }
+
             this.folderMove.emit({
               folderId: source.data.folderId as string,
               targetParentFolderId: null,
+              targetIndex,
             });
           }
         },
@@ -548,23 +573,49 @@ export class NavSectionComponent implements AfterViewInit, OnDestroy {
             this._dropHandled = true;
             folderHeader.classList.remove('drop-target-active');
             if (source.data.type === 'project') {
+              // Calculate the target index to append at the end of the folder
+              const folderContainer = htmlEl.querySelector('.nav-children');
+              let targetIndex = 0;
+
+              if (folderContainer) {
+                // Count existing projects in this folder to determine append index
+                const projectElements = Array.from(folderContainer.children).filter(
+                  (child) => child.hasAttribute('data-project-id'),
+                );
+                targetIndex = projectElements.length;
+              }
+
               console.log('📁 Folder drop:', {
                 projectId: source.data.projectId,
                 targetFolderId: folderId,
+                targetIndex,
                 sourceType: source.data.type,
               });
 
               this.projectMove.emit({
                 projectId: source.data.projectId as string,
                 targetFolderId: folderId,
+                targetIndex,
               });
             } else if (source.data.type === 'folder') {
               // Prevent nesting deeper than one level - check if this folder is a child
               const isChildFolder = this.item().id?.startsWith('folder-');
               if (!isChildFolder) {
+                // Calculate target index for folder
+                const parentContainer = htmlEl.closest('.nav-children');
+                let targetIndex = 0;
+
+                if (parentContainer) {
+                  const parentFolderElements = Array.from(
+                    parentContainer.children,
+                  ).filter((child) => child.hasAttribute('data-folder-id'));
+                  targetIndex = parentFolderElements.length;
+                }
+
                 this.folderMove.emit({
                   folderId: source.data.folderId as string,
                   targetParentFolderId: folderId,
+                  targetIndex,
                 });
               }
             }

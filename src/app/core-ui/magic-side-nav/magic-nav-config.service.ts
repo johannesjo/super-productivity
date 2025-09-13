@@ -678,7 +678,58 @@ export class MagicNavConfigService {
       return;
     }
 
-    // Build target list from current state (projects that would be in target folder)
+    // Check if we're reordering within the same folder
+    const isReorderingWithinSameFolder = sourceProject?.folderId === targetFolderId;
+
+    if (isReorderingWithinSameFolder && typeof targetIndex === 'number') {
+      // For same-folder reordering, we need to update the global order to reflect
+      // the new position within the folder while maintaining all other project positions
+      console.log('🔄 Reordering within same folder');
+
+      // Get all projects in the target folder (excluding the moved project)
+      const folderProjects = allProjects.filter(
+        (p) => p.folderId === targetFolderId && p.id !== projectId,
+      );
+
+      // Create the new order for this folder by inserting the moved project at targetIndex
+      const newFolderOrder = [...folderProjects];
+      const clampedIndex = Math.max(0, Math.min(targetIndex, newFolderOrder.length));
+      newFolderOrder.splice(clampedIndex, 0, sourceProject);
+
+      // Now rebuild the full global order by replacing the folder segment
+      const result: string[] = [];
+      let folderSegmentInserted = false;
+
+      for (const p of allProjects) {
+        if (p.folderId === targetFolderId) {
+          // Insert the reordered folder segment once
+          if (!folderSegmentInserted) {
+            result.push(...newFolderOrder.map((fp) => fp.id));
+            folderSegmentInserted = true;
+          }
+          // Skip individual folder items as they're already in newFolderOrder
+          continue;
+        }
+
+        // Skip the moved project if it appears elsewhere (it shouldn't, but safety)
+        if (p.id === projectId) {
+          continue;
+        }
+
+        result.push(p.id);
+      }
+
+      // If folder was empty before, add the folder segment
+      if (!folderSegmentInserted) {
+        result.push(projectId);
+      }
+
+      console.log('📋 Final project order (same folder reorder):', result);
+      this._projectService.updateOrder(result);
+      return;
+    }
+
+    // For cross-folder moves or moves to/from root level, use the existing logic
     const getProjectsInFolder = (folderId: string | null): string[] =>
       allProjects
         .filter((p) => (folderId ? p.folderId === folderId : !p.folderId))
