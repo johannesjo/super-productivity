@@ -295,6 +295,17 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
     this._startX.set(event.clientX);
     this._startWidth.set(this.currentWidth());
 
+    // Improve pointer capture for consistent drag behavior
+    const targetEl = event.target as Element | null;
+    if (targetEl) {
+      try {
+        targetEl.setPointerCapture(event.pointerId);
+        this._activePointerCaptureEl = targetEl;
+      } catch {
+        // ignore capture errors (e.g., non-capturable targets)
+      }
+    }
+
     this._attachResizeListeners(event.pointerType === 'touch');
 
     this._isCloseButtonDragCandidate = false;
@@ -315,6 +326,7 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
   }
 
   private _activePointerId: number | null = null;
+  private _activePointerCaptureEl: Element | null = null;
 
   private _handlePointerMove(event: PointerEvent): void {
     if (!this.isResizing()) return;
@@ -353,6 +365,14 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
     this.isResizing.set(false);
     this._isListenersAttached = false;
     this._activePointerId = null;
+    if (this._activePointerCaptureEl) {
+      try {
+        this._activePointerCaptureEl.releasePointerCapture(event.pointerId);
+      } catch {
+        // ignore release errors
+      }
+      this._activePointerCaptureEl = null;
+    }
 
     this._detachResizeListeners();
 
