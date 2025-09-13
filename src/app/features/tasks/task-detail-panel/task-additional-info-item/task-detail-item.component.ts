@@ -16,7 +16,7 @@ import {
   MatExpansionPanelHeader,
   MatExpansionPanelTitle,
 } from '@angular/material/expansion';
-import { IsInputElement } from '../../../../util/dom-element';
+import { isInputElement } from '../../../../util/dom-element';
 
 @Component({
   selector: 'task-detail-item',
@@ -56,7 +56,7 @@ export class TaskDetailItemComponent {
   @HostListener('keydown', ['$event']) onKeyDown(ev: KeyboardEvent): void {
     // Skip handling inside input elements
     const targetEl = ev.target as HTMLElement;
-    if (IsInputElement(targetEl)) return;
+    if (isInputElement(targetEl)) return;
 
     this.keyPress.emit(ev);
     if (ev.code === 'Escape') {

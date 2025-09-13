@@ -13,7 +13,7 @@ import {
 import { TaskState } from '../task.model';
 import { createFromDrop } from 'src/app/core/drop-paste-input/drop-paste-input';
 import { TaskLog } from '../../../core/log';
-import { IsInputElement } from '../../../util/dom-element';
+import { isInputElement } from '../../../util/dom-element';
 
 @Injectable({
   providedIn: 'root',
@@ -77,7 +77,7 @@ export class TaskAttachmentService {
 
     // don't intervene with text inputs
     const targetEl = ev.target as HTMLElement;
-    if (!isSkipTextareaCheck && IsInputElement(targetEl)) return;
+    if (!isSkipTextareaCheck && isInputElement(targetEl)) return;
 
     ev.preventDefault();
     ev.stopPropagation();

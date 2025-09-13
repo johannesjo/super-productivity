@@ -33,6 +33,7 @@ import {
   INITIAL_LAYOUT_STATE,
   selectLayoutFeatureState,
 } from '../../core-ui/layout/store/layout.reducer';
+import { isInputElement } from '../../util/dom-element';
 
 // Right panel resize constants
 const RIGHT_PANEL_CONFIG = {
@@ -257,11 +258,10 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
   close(): void {
     // FORCE blur because otherwise task notes won't save
     if (IS_TOUCH_PRIMARY) {
-      document.querySelectorAll('input,textarea').forEach((element) => {
-        if (element === document.activeElement) {
-          return (element as HTMLElement).blur();
-        }
-      });
+      const activeElement = document.activeElement as HTMLElement;
+      if (activeElement && isInputElement(activeElement)) {
+        activeElement.blur();
+      }
     }
 
     // Delegate to task service and layout service to close the panel
@@ -399,7 +399,7 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
     document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';
     if (isTouch) {
-      (document.body.style as any).touchAction = 'none';
+      document.body.style.setProperty('touch-action', 'none');
     }
   }
 
@@ -408,7 +408,7 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
     document.removeEventListener('pointerup', this._boundOnPointerUp);
     document.body.style.cursor = '';
     document.body.style.userSelect = '';
-    (document.body.style as any).touchAction = '';
+    document.body.style.setProperty('touch-action', '');
   }
 
   onCloseButtonPointerUp(event: PointerEvent): void {

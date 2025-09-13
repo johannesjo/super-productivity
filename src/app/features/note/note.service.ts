@@ -22,7 +22,7 @@ import { DropPasteInput } from '../../core/drop-paste-input/drop-paste.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import { WorkContextType } from '../work-context/work-context.model';
 import { PfapiService } from '../../pfapi/pfapi.service';
-import { IsInputElement } from '../../util/dom-element';
+import { isInputElement } from '../../util/dom-element';
 
 @Injectable({
   providedIn: 'root',
@@ -116,7 +116,7 @@ export class NoteService {
 
     // Skip handling inside input elements
     const target = ev.target as HTMLElement;
-    if (IsInputElement(target)) return;
+    if (isInputElement(target)) return;
 
     const note: Partial<Note> = {
       content: drop.path,

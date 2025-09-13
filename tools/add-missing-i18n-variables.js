@@ -71,7 +71,12 @@ for (const file of i18nFiles) {
     console.log(`✓ Updated ${file}`);
     updatedFiles++;
   } catch (error) {
-    console.error(`✗ Error processing ${file}:`, error.message);
+    console.error(`✗ Error processing ${file}:`);
+    console.error(`   Path: ${langPath}`);
+    console.error(`   Error: ${error.message}`);
+    if (error.stack) {
+      console.error(`   Stack: ${error.stack.split('\n')[1]?.trim()}`);
+    }
     errors++;
   }
 }

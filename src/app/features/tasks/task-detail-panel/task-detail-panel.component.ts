@@ -75,7 +75,7 @@ import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-i
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { isMarkdownChecklist } from '../../markdown-checklist/is-markdown-checklist';
 import { Log } from '../../../core/log';
-import { IsInputElement } from '../../../util/dom-element';
+import { isInputElement } from '../../../util/dom-element';
 
 @Component({
   selector: 'task-detail-panel',
@@ -148,7 +148,7 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   onKeydown(ev: KeyboardEvent): void {
     // Skip handling inside input elements
     const target = ev.target as HTMLElement;
-    if (IsInputElement(target)) return;
+    if (isInputElement(target)) return;
 
     const cfg = this._globalConfigService.cfg();
     if (!cfg) throw new Error('No config service available');
