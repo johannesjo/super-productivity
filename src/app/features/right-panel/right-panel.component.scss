@@ -16,6 +16,14 @@
     .side {
       transition: none !important;
     }
+
+    // Disable interactions while actively resizing
+    .side-inner {
+      pointer-events: none;
+    }
+    .right-panel iframe {
+      pointer-events: none;
+    }
   }
 }
 
