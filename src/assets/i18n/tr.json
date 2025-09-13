@@ -24,6 +24,11 @@
     "UPDATE_MAIN_MODEL_NO_UPDATE": "Hiçbir model güncellemesi seçilmedi. Model yükseltmesini gerçekleştirmek istemiyorsanız, son sürüme geçmek zorunda olduğunuzu lütfen unutmayın.",
     "UPDATE_WEB_APP": "Yeni sürüm mevcut. Yeni Sürüm Yüklensin Mi?"
   },
+  "BN": {
+    "SHOW_ISSUE_PANEL": "Sorun Panelini Göster",
+    "SHOW_NOTES": "Proje Notlarını Göster",
+    "SHOW_TASK_VIEW_CUSTOMIZER_PANEL": "Filtre/Grup/Sırala Panelini Göster"
+  },
   "BL": {
     "NO_TASKS": "Birikmiş işler günlüğünüzde şu anda görev yok"
   },
@@ -126,7 +131,7 @@
         "ASSIGNEE": "Atanan",
         "AT": "üzerinde",
         "ATTACHMENTS": "Ekler",
-        "CHANGED": "Değiştirildi",
+        "CHANGED": "değiştirildi",
         "COMMENTS": "Yorumlar",
         "COMPONENTS": "Bileşenler",
         "DESCRIPTION": "Açıklama",
@@ -1398,7 +1403,11 @@
         "THURSDAY": "Perşembe",
         "TITLE": "Görevin Başlığı",
         "TUESDAY": "Salı",
-        "WEDNESDAY": "Çarşamba"
+        "WEDNESDAY": "Çarşamba",
+        "INHERIT_SUBTASKS": "Alt görevleri devral",
+        "INHERIT_SUBTASKS_DESCRIPTION": "Etkinleştirildiğinde, en son görev örneğindeki alt görevler tekrarlayan görevle birlikte yeniden oluşturulur",
+        "DISABLE_AUTO_UPDATE_SUBTASKS": "Alt görevlerin otomatik güncellenmesini devre dışı bırak",
+        "DISABLE_AUTO_UPDATE_SUBTASKS_DESCRIPTION": "En yeni örnek değiştiğinde devralınan alt görevleri otomatik olarak güncelleme"
       }
     },
     "TASK_VIEW": {
