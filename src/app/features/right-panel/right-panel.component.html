@@ -1,17 +1,16 @@
 <div class="content">
   <ng-content></ng-content>
 </div>
-
-<div
-  swipeGesture
-  (swiperight)="IS_TOUCH_PRIMARY && close()"
-  [style]="sideStyle()"
-  class="side"
-  (transitionend)="updateStyleAfterTransition()"
->
-  <div class="right-panel">
-    <!-- Resize Handle -->
-    @if (isOpen()) {
+@if (isOpen()) {
+  <div
+    swipeGesture
+    (swiperight)="IS_TOUCH_PRIMARY && close()"
+    [style]="sideStyle()"
+    class="side"
+    @slideRightPanel
+  >
+    <div class="right-panel">
+      <!-- Resize Handle -->
       <div
         class="resize-handle"
         (pointerdown)="onResizePointerDown($event)"
@@ -29,13 +28,13 @@
       >
         <mat-icon>chevron_right</mat-icon>
       </button>
-    }
 
-    <div
-      class="side-inner"
-      [style.min-width.px]="panelWidth()"
-    >
-      <right-panel-content></right-panel-content>
+      <div
+        class="side-inner"
+        [style.min-width.px]="panelWidth()"
+      >
+        <right-panel-content></right-panel-content>
+      </div>
     </div>
   </div>
-</div>
+}

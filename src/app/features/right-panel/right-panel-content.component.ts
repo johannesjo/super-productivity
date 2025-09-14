@@ -10,7 +10,6 @@ import {
 } from '@angular/core';
 import { TaskDetailTargetPanel, TaskWithSubTasks } from '../tasks/task.model';
 import { filter, map, startWith } from 'rxjs/operators';
-import { Subscription } from 'rxjs';
 import { TaskService } from '../tasks/task.service';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { slideInFromTopAni } from '../../ui/animations/slide-in-from-top.ani';
@@ -34,11 +33,6 @@ import { Log } from '../../core/log';
 import { NavigationEnd, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
-import { MatBottomSheet, MatBottomSheetRef } from '@angular/material/bottom-sheet';
-import {
-  BottomPanelContainerComponent,
-  BottomPanelData,
-} from '../bottom-panel/bottom-panel-container.component';
 
 // Keep in sync with CSS var --transition-duration-m
 const CLOSE_ANIMATION_MS = 225;
@@ -76,9 +70,6 @@ export class RightPanelContentComponent implements OnDestroy {
   pluginService = inject(PluginService);
   store = inject(Store);
   private _router = inject(Router);
-  private _bottomSheet = inject(MatBottomSheet);
-  private _bottomSheetRef: MatBottomSheetRef<BottomPanelContainerComponent> | null = null;
-  private _bottomSheetSubscription: Subscription | null = null;
 
   // Convert observables to signals
   private readonly _selectedTask = toSignal(this.taskService.selectedTask$, {
@@ -291,51 +282,6 @@ export class RightPanelContentComponent implements OnDestroy {
     { allowSignalWrites: true },
   );
 
-  // Effect to handle bottom sheet opening/closing on xs screens
-  private _bottomSheetEffect = effect(() => {
-    const isXs = this.layoutService.isXs();
-    const isOpen = this.isOpen();
-    const panelContent = this.panelContent();
-
-    untracked(() => {
-      // Close bottom sheet immediately when switching from xs to non-xs screens
-      if (!isXs && this._bottomSheetRef) {
-        this._bottomSheetRef.dismiss();
-        this._bottomSheetRef = null;
-        return;
-      }
-
-      // Only handle bottom sheet on xs screens
-      if (isXs) {
-        if (isOpen && panelContent && !this._bottomSheetRef) {
-          // Open bottom sheet
-          const data: BottomPanelData = { panelContent };
-
-          this._bottomSheetRef = this._bottomSheet.open(BottomPanelContainerComponent, {
-            data,
-            hasBackdrop: true,
-            closeOnNavigation: true,
-            panelClass: 'bottom-panel-sheet',
-            // Let CSS handle positioning and height
-          });
-
-          // Handle bottom sheet dismissal
-          this._bottomSheetSubscription = this._bottomSheetRef
-            .afterDismissed()
-            .subscribe(() => {
-              this._bottomSheetRef = null;
-              this._bottomSheetSubscription = null;
-              this.close();
-            });
-        } else if (!isOpen && this._bottomSheetRef) {
-          // Close bottom sheet
-          this._bottomSheetRef.dismiss();
-          this._bottomSheetRef = null;
-        }
-      }
-    });
-  });
-
   ngOnDestroy(): void {
     // Clean up timers to prevent memory leaks
     if (this._selectedTaskDelayTimer) {
@@ -349,18 +295,6 @@ export class RightPanelContentComponent implements OnDestroy {
     if (this._animationTimer) {
       clearTimeout(this._animationTimer);
       this._animationTimer = null;
-    }
-
-    // Clean up bottom sheet if open
-    if (this._bottomSheetRef) {
-      this._bottomSheetRef.dismiss();
-      this._bottomSheetRef = null;
-    }
-
-    // Clean up bottom sheet subscription
-    if (this._bottomSheetSubscription) {
-      this._bottomSheetSubscription.unsubscribe();
-      this._bottomSheetSubscription = null;
     }
   }
 

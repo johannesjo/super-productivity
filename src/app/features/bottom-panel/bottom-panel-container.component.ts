@@ -22,6 +22,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { TaskService } from '../tasks/task.service';
 import { Log } from '../../core/log';
+import { BottomPanelStateService } from '../../core-ui/bottom-panel-state.service';
 
 export interface BottomPanelData {
   panelContent:
@@ -65,6 +66,7 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
   private _bottomSheetRef = inject(MatBottomSheetRef<BottomPanelContainerComponent>);
   private _elementRef = inject(ElementRef);
   private _taskService = inject(TaskService);
+  private _bottomPanelState = inject(BottomPanelStateService);
   readonly data = inject<BottomPanelData>(MAT_BOTTOM_SHEET_DATA);
 
   readonly panelHeader = viewChild<ElementRef>('panelHeader');
@@ -90,6 +92,8 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
   private readonly _boundOnPointerUp = this._onPointerUp.bind(this);
 
   ngAfterViewInit(): void {
+    // Mark bottom panel as open for mutual exclusion with right panel
+    this._bottomPanelState.isOpen.set(true);
     this._setupDragListeners();
     this._setInitialHeight();
 
@@ -103,6 +107,8 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
     this._removeDragListeners();
     window.clearTimeout(this._disableAniTimeout);
     this._cachedContainer = null; // Clear cached reference
+    // Mark bottom panel as closed
+    this._bottomPanelState.isOpen.set(false);
   }
 
   close(): void {

@@ -3,11 +3,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   input,
   OnDestroy,
   output,
   signal,
+  untracked,
 } from '@angular/core';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
@@ -16,7 +18,7 @@ import { IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, NavigationStart, Router } from '@angular/router';
 import { filter, map, startWith, switchMap } from 'rxjs/operators';
-import { of, timer } from 'rxjs';
+import { of, Subscription, timer } from 'rxjs';
 import { SwipeDirective } from '../../ui/swipe-gesture/swipe.directive';
 import { CssString, StyleObject, StyleObjectToString } from '../../util/styles';
 import { LS } from '../../core/persistence/storage-keys.const';
@@ -34,7 +36,13 @@ import {
   selectLayoutFeatureState,
 } from '../../core-ui/layout/store/layout.reducer';
 import { isInputElement } from '../../util/dom-element';
-
+import { BottomPanelStateService } from '../../core-ui/bottom-panel-state.service';
+import { slideRightPanelAni } from './slide-right-panel-out.ani';
+import {
+  BottomPanelContainerComponent,
+  BottomPanelData,
+} from '../bottom-panel/bottom-panel-container.component';
+import { MatBottomSheet, MatBottomSheetRef } from '@angular/material/bottom-sheet';
 // Right panel resize constants
 const RIGHT_PANEL_CONFIG = {
   DEFAULT_WIDTH: 320,
@@ -73,7 +81,7 @@ const clampWidth = (width: number, maxWidth: number | string): number => {
   templateUrl: './right-panel.component.html',
   styleUrls: ['./right-panel.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [fadeAnimation],
+  animations: [fadeAnimation, slideRightPanelAni],
   imports: [SwipeDirective, MatIconModule, MatRippleModule, RightPanelContentComponent],
   host: {
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -84,12 +92,13 @@ const clampWidth = (width: number, maxWidth: number | string): number => {
   standalone: true,
 })
 export class RightPanelComponent implements AfterViewInit, OnDestroy {
+  private _layoutService = inject(LayoutService);
   private _domSanitizer = inject(DomSanitizer);
   private _languageService = inject(LanguageService);
   private _router = inject(Router);
   private _taskService = inject(TaskService);
-  private _layoutService = inject(LayoutService);
   private _store = inject(Store);
+  private _bottomPanelState = inject(BottomPanelStateService);
 
   readonly sideWidth = input<number>(40);
   readonly wasClosed = output<void>();
@@ -124,6 +133,11 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
 
   // Get isOpen from the same logic as right-panel-content
   readonly isOpen = computed<boolean>(() => {
+    // If bottom sheet is open, keep right panel closed for mutual exclusion
+    if (this._bottomPanelState.isOpen()) {
+      return false;
+    }
+
     const selectedTask = this._selectedTask();
     const targetPanel = this._taskDetailPanelTargetPanel();
     const layoutState = this._layoutFeatureState();
@@ -134,7 +148,7 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
 
     const {
       isShowNotes,
-      isShowIssuePanel: isShowAddTaskPanel,
+      isShowIssuePanel,
       isShowTaskViewCustomizerPanel,
       isShowPluginPanel,
     } = layoutState;
@@ -142,7 +156,7 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
     const hasContent = !!(
       selectedTask ||
       isShowNotes ||
-      isShowAddTaskPanel ||
+      isShowIssuePanel ||
       isShowTaskViewCustomizerPanel ||
       isShowPluginPanel
     );
@@ -164,6 +178,9 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
   private readonly _boundOnPointerMove = this._handlePointerMove.bind(this);
   private readonly _boundOnPointerUp = this._handlePointerUp.bind(this);
   private readonly _boundOnWindowResize = this._throttledWindowResize.bind(this);
+  private _bottomSheet = inject(MatBottomSheet);
+  private _bottomSheetRef: MatBottomSheetRef<BottomPanelContainerComponent> | null = null;
+  private _bottomSheetSubscription: Subscription | null = null;
 
   // Track listener state to prevent double attachment/removal
   private _isListenersAttached = false;
@@ -206,12 +223,52 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
   // Computed signal that determines if animations should be skipped
   private readonly _shouldSkipAnimation = computed(() => this._skipAnimationDuringNav());
 
-  updateStyleAfterTransition(): void {
-    // Handle visibility after transition ends
-    if (!this.isOpen()) {
-      // We could update styles here if needed, but the drawer handles this via CSS
-    }
-  }
+  // Effect to handle bottom sheet opening/closing on xs screens
+  private _bottomSheetEffect = effect(() => {
+    const isXs = this._layoutService.isXs();
+    const isOpen = this.isOpen();
+    // const panelContent = this.panelContent();
+    // TODO make this work
+    const panelContent = undefined;
+
+    untracked(() => {
+      // Close bottom sheet immediately when switching from xs to non-xs screens
+      if (!isXs && this._bottomSheetRef) {
+        this._bottomSheetRef.dismiss();
+        this._bottomSheetRef = null;
+        return;
+      }
+
+      // Only handle bottom sheet on xs screens
+      if (isXs) {
+        if (isOpen && panelContent && !this._bottomSheetRef) {
+          // Open bottom sheet
+          const data: BottomPanelData = { panelContent };
+
+          this._bottomSheetRef = this._bottomSheet.open(BottomPanelContainerComponent, {
+            data,
+            hasBackdrop: true,
+            closeOnNavigation: true,
+            panelClass: 'bottom-panel-sheet',
+            // Let CSS handle positioning and height
+          });
+
+          // Handle bottom sheet dismissal
+          this._bottomSheetSubscription = this._bottomSheetRef
+            .afterDismissed()
+            .subscribe(() => {
+              this._bottomSheetRef = null;
+              this._bottomSheetSubscription = null;
+              this.close();
+            });
+        } else if (!isOpen && this._bottomSheetRef) {
+          // Close bottom sheet
+          this._bottomSheetRef.dismiss();
+          this._bottomSheetRef = null;
+        }
+      }
+    });
+  });
 
   ngAfterViewInit(): void {
     this._initializeWidth();
@@ -227,6 +284,18 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
 
     // Remove window resize listener
     window.removeEventListener('resize', this._boundOnWindowResize);
+
+    // Clean up bottom sheet if open
+    if (this._bottomSheetRef) {
+      this._bottomSheetRef.dismiss();
+      this._bottomSheetRef = null;
+    }
+
+    // Clean up bottom sheet subscription
+    if (this._bottomSheetSubscription) {
+      this._bottomSheetSubscription.unsubscribe();
+      this._bottomSheetSubscription = null;
+    }
   }
 
   private _throttledWindowResize(): void {
