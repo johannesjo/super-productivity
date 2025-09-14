@@ -41,33 +41,45 @@
 }
 
 .drop {
-  height: 8px;
+  height: 12px;
   pointer-events: none;
   width: 100%;
-  background: rgba(255, 0, 0, 0.2);
+  background: transparent;
   position: absolute;
+  z-index: 1;
 
   .is-dragging & {
     pointer-events: all;
-    background: rgba(0, 255, 0, 0.2);
+    background: rgba(0, 123, 255, 0.1);
+  }
+
+  &:hover {
+    background: rgba(0, 123, 255, 0.15);
   }
 
   .item:not(.is-folder) & {
-    height: 50%;
+    height: 16px;
   }
 }
 
 .drop--before,
 .drop--after {
   border-top: 2px solid transparent;
+
+  &.is-over {
+    border-top-color: #007bff;
+    background: rgba(0, 123, 255, 0.2);
+  }
 }
 
 .drop--before {
   top: 0;
+  margin-top: -6px;
 }
 
 .drop--after {
   bottom: 0;
+  margin-bottom: -6px;
 }
 
 .group {

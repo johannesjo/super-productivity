@@ -66,6 +66,7 @@ export class TreeDndComponent implements AfterViewInit {
   // Content templates (signal-based)
   readonly itemTpl = contentChild<TemplateRef<ItemTplContext>>('treeItem');
   readonly folderTpl = contentChild<TemplateRef<FolderTplContext>>('treeFolder');
+  readonly dragPreviewTpl = contentChild<TemplateRef<any>>('treeDragPreview');
 
   // Output: notify consumers of moves
   moved = output<MoveInstruction>();

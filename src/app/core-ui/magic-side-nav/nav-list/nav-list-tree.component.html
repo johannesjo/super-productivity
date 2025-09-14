@@ -1,0 +1,162 @@
+<div
+  class="g-multi-btn-wrapper"
+  [class.folder-header-drop-zone]="isHeaderDropZone()"
+  [attr.data-drop-zone]="
+    isHeaderDropZone()
+      ? item().id?.startsWith('folder-')
+        ? item().id?.replace('folder-', '')
+        : 'projects'
+      : null
+  "
+>
+  <nav-item
+    [mode]="item().id?.startsWith('folder-') ? 'folder' : 'row'"
+    [container]="item().id?.startsWith('folder-') ? null : 'group'"
+    [folderId]="
+      item().id?.startsWith('folder-') ? item().id?.replace('folder-', '') || null : null
+    "
+    [expanded]="isExpanded()"
+    [ariaControls]="'group-' + item().id"
+    [icon]="item().icon"
+    [svgIcon]="item().svgIcon"
+    [label]="item().label"
+    [showLabels]="showLabels()"
+    (clicked)="onHeaderClick()"
+  ></nav-item>
+
+  @if (showLabels()) {
+    <div class="additional-btns">
+      @for (btn of item().additionalButtons; track btn.id) {
+        @if (!btn.hidden) {
+          @if (btn.id === 'project-visibility') {
+            <button
+              #visibilityBtn
+              class="additional-btn"
+              mat-icon-button
+              [matTooltip]="btn.tooltip | translate"
+              [matMenuTriggerFor]="visibilityMenu"
+            >
+              <mat-icon>{{ btn.icon }}</mat-icon>
+            </button>
+          } @else {
+            <button
+              class="additional-btn"
+              mat-icon-button
+              [matTooltip]="btn.tooltip | translate"
+              (click)="btn.action?.()"
+            >
+              <mat-icon>{{ btn.icon }}</mat-icon>
+            </button>
+          }
+        }
+      }
+    </div>
+  }
+</div>
+
+@if (isExpanded() && itemHasChildren()) {
+  <div
+    class="nav-children"
+    [attr.id]="'group-' + item().id"
+    role="list"
+    draggable="false"
+  >
+    <tree-dnd
+      [data]="treeNodes()"
+      [indent]="20"
+      (moved)="onTreeNodeMoved($event)"
+      (updated)="onTreeUpdated($event)"
+    >
+      <ng-template
+        #treeItem
+        let-node
+      >
+        <div
+          class="nav-child-item"
+          [class.draggable]="isNodeDraggable(node)"
+          [attr.data-project-id]="getProjectId(node)"
+        >
+          <nav-item
+            [workContext]="getWorkContextFromNode(node)"
+            [type]="getTypeFromNode(node)"
+            [defaultIcon]="getDefaultIconFromNode(node)"
+            [activeWorkContextId]="activeWorkContextId() || ''"
+            [variant]="'nav'"
+            [showLabels]="true"
+            [showMoreButton]="true"
+            (clicked)="onChildClick(getNavItemFromNode(node))"
+          ></nav-item>
+        </div>
+      </ng-template>
+
+      <ng-template
+        #treeFolder
+        let-node
+      >
+        <div
+          class="nav-child-item folder-item"
+          [class.draggable]="true"
+          [attr.data-folder-id]="node.id?.replace('folder-', '')"
+        >
+          <nav-item
+            [mode]="'folder'"
+            [folderId]="node.id?.replace('folder-', '') || null"
+            [expanded]="node.expanded"
+            [icon]="'folder'"
+            [label]="node.label"
+            [variant]="'nav'"
+            [showLabels]="showLabels()"
+            (clicked)="onChildClick(getNavItemFromNode(node))"
+          ></nav-item>
+        </div>
+      </ng-template>
+
+      <!-- Custom drag preview template -->
+      <ng-template
+        #treeDragPreview
+        let-data
+      >
+        <div
+          class="custom-drag-preview"
+          [ngStyle]="{
+            background: 'var(--primary-color, #3f51b5)',
+            color: 'white',
+            'border-radius': '8px',
+            padding: '12px 16px',
+            'box-shadow': '0 4px 12px rgba(0,0,0,0.25)',
+            display: 'flex',
+            'align-items': 'center',
+            gap: '8px',
+            'font-weight': '500',
+            'max-width': '280px',
+            'white-space': 'nowrap',
+            overflow: 'hidden',
+            'text-overflow': 'ellipsis',
+          }"
+        >
+          <mat-icon [ngStyle]="{ 'font-size': '18px', width: '18px', height: '18px' }">
+            {{ data.isFolder ? 'folder' : 'assignment' }}
+          </mat-icon>
+          <span>{{ data.node.label }}</span>
+        </div>
+      </ng-template>
+    </tree-dnd>
+  </div>
+}
+
+<!-- Project Visibility Menu -->
+<mat-menu #visibilityMenu="matMenu">
+  @for (project of allProjectsExceptInbox(); track project.id) {
+    <button
+      mat-menu-item
+      (click)="toggleProjectVisibility(project.id)"
+    >
+      @if (!project.isHiddenFromMenu) {
+        <mat-icon>visibility</mat-icon>
+      } @else {
+        <mat-icon>visibility_off</mat-icon>
+      }
+      <span>{{ project.title }}</span>
+    </button>
+  }
+</mat-menu>

@@ -101,6 +101,10 @@ export class ProjectFolderService {
     this._store.dispatch(ProjectFolderActions.toggleFolderExpansion({ id }));
   }
 
+  updateOrder(ids: string[]): void {
+    this._store.dispatch(ProjectFolderActions.updateProjectFolderOrder({ ids }));
+  }
+
   getFoldersByParentId(parentId: string | null): Observable<ProjectFolder[]> {
     return this._store.pipe(
       select(ProjectFolderSelectors.selectFoldersByParentId, { parentId }),

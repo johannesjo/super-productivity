@@ -8,7 +8,7 @@ export const projectFolderFeatureKey = 'projectFolder';
 
 export const adapter: EntityAdapter<ProjectFolder> = createEntityAdapter<ProjectFolder>({
   selectId: (projectFolder) => projectFolder.id,
-  sortComparer: (a, b) => a.title.localeCompare(b.title),
+  // No sortComparer: preserve explicit order via `ids`
 });
 
 export const initialState: ProjectFolderState = adapter.getInitialState({});
@@ -39,5 +39,17 @@ export const projectFolderReducer = createReducer(
       },
       state,
     );
+  }),
+  on(ProjectFolderActions.updateProjectFolderOrder, (state, { ids }) => {
+    // Ensure we only set known ids and keep entities unchanged
+    const knownIdsSet = new Set(Object.keys(state.entities));
+    const filtered = ids.filter((id) => knownIdsSet.has(id));
+    const missing = (state.ids as string[]).filter((id) => !filtered.includes(id));
+    // Append any missing ids at the end to avoid accidental drops
+    const newIds = [...filtered, ...missing];
+    return {
+      ...state,
+      ids: newIds,
+    } as ProjectFolderState;
   }),
 );

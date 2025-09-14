@@ -808,16 +808,60 @@ export class MagicNavConfigService {
       return;
     }
 
-    // Update the parent assignment
+    const allFolders = this._projectFolders();
+    if (!allFolders) {
+      return;
+    }
+
+    // Compute new global folder id order while reordering only the relevant sibling segment
+    const currentIds = allFolders.map((f) => f.id);
+    const withoutMoved = currentIds.filter((id) => id !== folderId);
+
+    const siblingIds = allFolders
+      .filter(
+        (f) =>
+          f.id !== folderId && (f.parentId || null) === (targetParentFolderId || null),
+      )
+      .map((f) => f.id);
+
+    const clampedIndex = Math.max(
+      0,
+      Math.min(
+        typeof targetIndex === 'number' ? targetIndex : siblingIds.length,
+        siblingIds.length,
+      ),
+    );
+
+    // Determine insertion reference
+    const pivotId = siblingIds[clampedIndex] ?? null;
+
+    // Find insertion position in global list
+    let insertAt = -1;
+    if (pivotId) {
+      insertAt = withoutMoved.indexOf(pivotId);
+    } else if (siblingIds.length > 0) {
+      const lastSiblingId = siblingIds[siblingIds.length - 1];
+      const lastIdx = withoutMoved.indexOf(lastSiblingId);
+      insertAt = lastIdx + 1;
+    } else {
+      // No siblings → append at end
+      insertAt = withoutMoved.length;
+    }
+
+    const newIds = [
+      ...withoutMoved.slice(0, insertAt),
+      folderId,
+      ...withoutMoved.slice(insertAt),
+    ];
+
+    // First update the parent assignment
     this._projectFolderService.updateProjectFolder(folderId, {
       parentId: targetParentFolderId,
     });
+    // Then update the folder order to reflect new sibling placement
+    this._projectFolderService.updateOrder(newIds);
 
-    // For now, we don't need to implement folder ordering since the UI doesn't require it
-    // Folders are ordered by their creation time and expanded state
-    // This could be extended in the future if folder ordering becomes necessary
-
-    console.log('Folder moved:', { folderId, targetParentFolderId, targetIndex });
+    console.log('Folder moved:', { folderId, targetParentFolderId, targetIndex, newIds });
   }
 
   private _isValidFolderMove(

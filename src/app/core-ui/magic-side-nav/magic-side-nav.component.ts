@@ -14,7 +14,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { NavItemComponent } from './nav-item/nav-item.component';
-import { NavSectionComponent } from './nav-list/nav-list.component';
+import { NavListTreeComponent } from './nav-list/nav-list-tree.component';
 import { NavItem } from './magic-side-nav.model';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { MagicNavConfigService } from './magic-nav-config.service';
@@ -35,7 +35,7 @@ const MOBILE_NAV_WIDTH = 300;
     CommonModule,
     RouterModule,
     NavItemComponent,
-    NavSectionComponent,
+    NavListTreeComponent,
     MatMenuModule,
     NavMatMenuComponent,
   ],

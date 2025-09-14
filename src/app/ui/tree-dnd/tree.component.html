@@ -48,6 +48,7 @@
   >
     <div
       class="drop drop--before"
+      [class.is-over]="isOver(node.id, 'before')"
       [dndDropTarget]="{ id: node.id, where: 'before' }"
       [dndContext]="contextId"
       (activeChange)="setOver(node.id, 'before', $event)"
@@ -60,6 +61,8 @@
       [attr.data-id]="node.id"
       [dndDropTarget]="isFolder(node) ? { id: node.id, where: 'inside' } : null"
       [dndContext]="contextId"
+      [dragPreviewTemplate]="dragPreviewTpl()"
+      [dragPreviewData]="{ node: node, isFolder: isFolder(node) }"
       (activeChange)="setOver(node.id, 'inside', $event)"
       (indicator)="onIndicator($event)"
     >
@@ -98,6 +101,7 @@
 
     <div
       class="drop drop--after"
+      [class.is-over]="isOver(node.id, 'after')"
       [dndDropTarget]="{ id: node.id, where: 'after' }"
       [dndContext]="contextId"
       (activeChange)="setOver(node.id, 'after', $event)"
