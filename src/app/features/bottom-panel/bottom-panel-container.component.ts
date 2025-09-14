@@ -5,6 +5,7 @@ import {
   computed,
   ElementRef,
   inject,
+  NgZone,
   OnDestroy,
   signal,
   viewChild,
@@ -24,6 +25,7 @@ import { TaskService } from '../tasks/task.service';
 import { Log } from '../../core/log';
 import { PanelContentService, PanelContentType } from '../panels/panel-content.service';
 import { BottomPanelStateService } from '../../core-ui/bottom-panel-state.service';
+import { IS_TOUCH_ONLY } from '../../util/is-touch-only';
 
 export interface BottomPanelData {
   panelContent: PanelContentType;
@@ -39,6 +41,8 @@ const PANEL_HEIGHTS = {
   VELOCITY_THRESHOLD: 0.5,
   INITIAL_ANIMATION_BLOCK_DURATION: 300, // ms
 } as const;
+
+const KEYBOARD_DETECT_THRESHOLD = 100; // px - minimum height change to detect keyboard
 
 @Component({
   selector: 'bottom-panel-container',
@@ -63,6 +67,7 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
   private _taskService = inject(TaskService);
   private _bottomPanelState = inject(BottomPanelStateService);
   private _panelContentService = inject(PanelContentService);
+  private _ngZone = inject(NgZone);
   readonly data = inject<BottomPanelData | null>(MAT_BOTTOM_SHEET_DATA, {
     optional: true,
   });
@@ -87,15 +92,21 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
   private _disableAniTimeout?: number;
   private _cachedContainer: HTMLElement | null = null;
 
+  // Mobile keyboard handling
+  private _isKeyboardWatcherInitialized = false;
+  private _originalHeight: string = '';
+
   // Store bound functions to prevent memory leaks
   private readonly _boundOnPointerDown = this._onPointerDown.bind(this);
   private readonly _boundOnPointerMove = this._onPointerMove.bind(this);
   private readonly _boundOnPointerUp = this._onPointerUp.bind(this);
+  private readonly _boundOnViewportResize = this._onViewportResize.bind(this);
 
   ngAfterViewInit(): void {
     // Mark bottom panel as open for mutual exclusion with right panel
     this._bottomPanelState.isOpen.set(true);
     this._setupDragListeners();
+    this._setupKeyboardWatcher();
     this._setInitialHeight();
 
     // Re-enable animations after initial render is complete
@@ -106,6 +117,7 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this._removeDragListeners();
+    this._removeKeyboardWatcher();
     window.clearTimeout(this._disableAniTimeout);
     this._cachedContainer = null; // Clear cached reference
     // Mark bottom panel as closed
@@ -257,5 +269,84 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
       }
     }
     return this._cachedContainer;
+  }
+
+  private _setupKeyboardWatcher(): void {
+    if (
+      !IS_TOUCH_ONLY ||
+      this._isKeyboardWatcherInitialized ||
+      typeof window === 'undefined'
+    ) {
+      return;
+    }
+    this._isKeyboardWatcherInitialized = true;
+
+    // Use Visual Viewport API if available (modern browsers)
+    if ('visualViewport' in window && window.visualViewport) {
+      window.visualViewport.addEventListener('resize', this._boundOnViewportResize);
+    }
+  }
+
+  private _removeKeyboardWatcher(): void {
+    if (typeof window !== 'undefined' && window.visualViewport) {
+      window.visualViewport.removeEventListener('resize', this._boundOnViewportResize);
+    }
+    // Restore original height if it was stored
+    if (this._originalHeight) {
+      const container = this._getSheetContainer();
+      if (container) {
+        container.style.maxHeight = this._originalHeight;
+        container.style.removeProperty('height');
+      }
+    }
+  }
+
+  private _onViewportResize(): void {
+    this._ngZone.run(() => {
+      this._handleViewportResize();
+    });
+  }
+
+  private _handleViewportResize(): void {
+    if (typeof window === 'undefined') return;
+
+    const visualViewport = window.visualViewport;
+    if (!visualViewport) return;
+
+    const windowHeight = window.innerHeight;
+    const viewportHeight = visualViewport.height;
+    const keyboardHeight = windowHeight - viewportHeight;
+
+    // Check if keyboard is visible
+    const isKeyboardVisible = keyboardHeight > KEYBOARD_DETECT_THRESHOLD;
+
+    const container = this._getSheetContainer();
+    if (!container) return;
+
+    if (isKeyboardVisible) {
+      // Store original height if not already stored
+      if (!this._originalHeight) {
+        this._originalHeight = container.style.maxHeight || '';
+      }
+
+      // Calculate safe height - be more conservative
+      const safeHeight = Math.max(200, viewportHeight * 0.85); // At least 200px, max 85% of viewport
+
+      // Use !important to override CSS max-height
+      container.style.setProperty('max-height', `${safeHeight}px`, 'important');
+
+      // Force current height if it exceeds the new max
+      if (container.offsetHeight > safeHeight) {
+        container.style.setProperty('height', `${safeHeight}px`, 'important');
+      }
+    } else {
+      // Restore original height constraints when keyboard is hidden
+      // Remove our forced styles
+      container.style.removeProperty('max-height');
+      container.style.removeProperty('height');
+
+      // Clean up stored height
+      this._originalHeight = '';
+    }
   }
 }
