@@ -1,3 +1,35 @@
+## [15.0.1](https://github.com/johannesjo/super-productivity/compare/v15.0.0...v15.0.1) (2025-09-14)
+
+### Bug Fixes
+
+- **bottomPanel:** fix mobile keyboard open hides input problem ([c90602e](https://github.com/johannesjo/super-productivity/commit/c90602ee7afd0fa17a623a09cb3050e21db11bc7))
+- nav resizing not working anymore ([635b368](https://github.com/johannesjo/super-productivity/commit/635b368de1750386f101e58934d83ca92b61321a))
+- prompt() is not supported ([ff53beb](https://github.com/johannesjo/super-productivity/commit/ff53beb1a5cfb08dd6564a6262d69d9ee5ed3a38)), closes [#5104](https://github.com/johannesjo/super-productivity/issues/5104)
+- **rightPanel:** resize not working for plugin panels ([0071e93](https://github.com/johannesjo/super-productivity/commit/0071e937b34a89a747d0b81a2f0aa87312bf7daf))
+
+### Features
+
+- add missing Turkish translations ([0255424](https://github.com/johannesjo/super-productivity/commit/0255424bc0b938a05e8e569982453820b06dc721))
+- add script to update missing i18n keys from en.json ([81f0a6b](https://github.com/johannesjo/super-productivity/commit/81f0a6b22ec6ef5d13e9e08aff7b42cdb360ca1b))
+- make sidenav persistence work ([663d024](https://github.com/johannesjo/super-productivity/commit/663d02445056fc5436c40d3c10d0d881d410749c))
+- remove minimal nav setting ([942f693](https://github.com/johannesjo/super-productivity/commit/942f69386a8c050dc25fbd8a721e784ce6a43d31))
+- **rightPanel:** avoid problems with content and animation ([eabea37](https://github.com/johannesjo/super-productivity/commit/eabea37f9923662447e7c727064bb0504574a253))
+- **rightPanel:** hide handle when closed ([34bdd3a](https://github.com/johannesjo/super-productivity/commit/34bdd3a04991d60cf9ca5391e51c1a24fe507eb0))
+- **rightPanel:** improve ani behavior for task-view-customizer-panel ([f8b962a](https://github.com/johannesjo/super-productivity/commit/f8b962aabd026ba11c653a8312a629bd9e36c6ab))
+- **rightPanel:** improve on animation ([cf0f271](https://github.com/johannesjo/super-productivity/commit/cf0f271c243236665da98993b058f326796347d7))
+- **rightPanel:** make it work for touch devices ([db83f3f](https://github.com/johannesjo/super-productivity/commit/db83f3f9190613595caae37495f2579209c44b1c))
+- **rightPanel:** make max-width of 50% work ([12e41ab](https://github.com/johannesjo/super-productivity/commit/12e41ab7e03984567e44f6cc5ed8e534d6c270e5))
+- **rightPanel:** re-restructure bottom panel right panel stuff ([e1f930d](https://github.com/johannesjo/super-productivity/commit/e1f930dce92e3fbc321e99f159fa398af031b36f))
+- **rightPanel:** re-restructure bottom panel right panel stuff 2 ([6eff6ed](https://github.com/johannesjo/super-productivity/commit/6eff6ed8d8f5b985d8f72d4406a35ce9327eb23d))
+- **rightPanel:** use setPointerCapture to improve drag behavior ([141f51d](https://github.com/johannesjo/super-productivity/commit/141f51db6fad68d9f935222a2afd60bf262fc76a))
+- **schedule:** make initial scroll to work start work ([b72a9b1](https://github.com/johannesjo/super-productivity/commit/b72a9b169cc6dc4fa7de5b1e4cc1e893edc2d8bc))
+- **sideNav:** hide nav completely when not shown on mobile ([7e307a9](https://github.com/johannesjo/super-productivity/commit/7e307a93747a89a20b38c1325d2af5d16aa6a3b8))
+- **sideNav:** make mobile nav ani work ([0a5b71e](https://github.com/johannesjo/super-productivity/commit/0a5b71e067afd0e787c122ce9b36275001c8635d))
+- **sideNav:** only show count when there is one ([b87d031](https://github.com/johannesjo/super-productivity/commit/b87d03142936c225a87e0cb686f8d678e1968a78))
+- **sideNav:** prepare mobile animation ([06407b9](https://github.com/johannesjo/super-productivity/commit/06407b92799c716716d176fdda497bd2a9a253a7))
+- **task:** use [@container](https://github.com/container) query instead of body class for small list styles ([eab5327](https://github.com/johannesjo/super-productivity/commit/eab532759116ba5c99d43f8d65d112c12aa0848d))
+- **task:** use [@container](https://github.com/container) query instead of body class for small list styles 2 ([a58c6b1](https://github.com/johannesjo/super-productivity/commit/a58c6b187d5449e30cb54dfaa2f43dfe757805cf))
+
 # [15.0.0](https://github.com/johannesjo/super-productivity/compare/v14.5.0...v15.0.0) (2025-09-12)
 
 ### Bug Fixes
