@@ -19,7 +19,7 @@ import { GlobalConfigService } from './features/config/global-config.service';
 import { LayoutService } from './core-ui/layout/layout.service';
 import { IPC } from '../../electron/shared-with-frontend/ipc-events.const';
 import { SnackService } from './core/snack/snack.service';
-import { IS_ELECTRON, LanguageCode, MainContainerClass } from './app.constants';
+import { IS_ELECTRON, LanguageCode } from './app.constants';
 import { expandAnimation } from './ui/animations/expand.ani';
 import { warpRouteAnimation } from './ui/animations/warp-route';
 import { combineLatest, Observable, Subscription } from 'rxjs';
@@ -198,7 +198,6 @@ export class AppComponent implements OnDestroy, AfterViewInit {
 
   private _subs: Subscription = new Subscription();
   private _intervalTimer?: NodeJS.Timeout;
-  private _routeWrapperResizeObserver: ResizeObserver | null = null;
 
   constructor() {
     this._languageService.setDefault(LanguageCode.en);
@@ -480,53 +479,11 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   ngAfterViewInit(): void {
     // Trigger change detection to ensure the context menu component gets the element reference
     this._cdr.detectChanges();
-
-    // Observe the actual .route-wrapper width via selector for robustness
-    this._setupRouteWrapperObserver();
   }
 
   ngOnDestroy(): void {
     this._subs.unsubscribe();
     if (this._intervalTimer) clearInterval(this._intervalTimer);
-    if (this._routeWrapperResizeObserver) {
-      this._routeWrapperResizeObserver.disconnect();
-      this._routeWrapperResizeObserver = null;
-    }
-  }
-
-  private _setupRouteWrapperObserver(): void {
-    const target = document.querySelector('.route-wrapper') as HTMLElement | null;
-    if (!target) {
-      // Retry shortly in case content hasn't been rendered yet
-      window.setTimeout(() => this._setupRouteWrapperObserver(), 100);
-      return;
-    }
-    const setClassFromWidth = (width: number): void => {
-      if (width < 330) {
-        document.body.classList.add(MainContainerClass.isVerySmallMainContainer);
-        document.body.classList.remove(MainContainerClass.isSmallMainContainer);
-      } else if (width < 500) {
-        document.body.classList.add(MainContainerClass.isSmallMainContainer);
-        document.body.classList.remove(MainContainerClass.isVerySmallMainContainer);
-      } else {
-        document.body.classList.remove(MainContainerClass.isSmallMainContainer);
-        document.body.classList.remove(MainContainerClass.isVerySmallMainContainer);
-      }
-    };
-
-    if ('ResizeObserver' in window) {
-      this._routeWrapperResizeObserver = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          const widthVal = entry.contentRect.width;
-          setClassFromWidth(widthVal);
-        }
-      });
-      this._routeWrapperResizeObserver.observe(target);
-    }
-
-    // Initial evaluation
-    const currentWidth = target.getBoundingClientRect().width;
-    setClassFromWidth(currentWidth);
   }
 
   private async _checkMigrationAndInitBackups(): Promise<void> {

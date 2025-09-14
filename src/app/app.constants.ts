@@ -121,11 +121,6 @@ export enum BodyClass {
   isAndroidKeyboardHidden = 'isAndroidKeyboardHidden',
 }
 
-export enum MainContainerClass {
-  isSmallMainContainer = 'isSmallMainContainer',
-  isVerySmallMainContainer = 'isVerySmallMainContainer',
-}
-
 export enum HelperClasses {
   isHideForAdvancedFeatures = 'isHideForAdvancedFeatures',
   isHideForNoAdvancedFeatures = 'isHideForNoAdvancedFeatures',

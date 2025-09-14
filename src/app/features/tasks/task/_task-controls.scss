@@ -51,10 +51,10 @@
     margin-left: 5px;
   }
 
-  @include smallMainContainer {
-    white-space: normal;
-    margin-left: 5px;
-  }
+  //@include smallMainContainer {
+  //  white-space: normal;
+  //  margin-left: 5px;
+  //}
 
   //@include verySmallMainContainer {
   //  min-height: 40px;
@@ -179,7 +179,7 @@
   }
 
   //@include smallMainContainer {
-  //  @include timeWrapperMinimalStyles;
+  @include timeWrapperMinimalStyles;
   //}
 
   @include mq(xs, max) {
@@ -357,6 +357,15 @@ progress-bar {
   pointer-events: all;
 
   @include grabCursor();
+
+  @include verySmallMainContainer {
+    width: 8px;
+    min-width: 0;
+
+    > * {
+      display: none;
+    }
+  }
 
   > * {
     pointer-events: none;

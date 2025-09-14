@@ -176,11 +176,6 @@
   margin: var(--s) var(--s) var(--s) var(--s3);
   position: relative;
 
-  @include smallMainContainer {
-    margin: var(--s) var(--s) var(--s) var(--s3);
-    position: relative;
-  }
-
   @include mq(xs) {
     //margin: var(--s) var(--s2) var(--s) var(--s3);
     margin: var(--s) var(--s) var(--s) var(--s5);
