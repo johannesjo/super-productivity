@@ -24,6 +24,7 @@ import { toggleHideFromMenu } from '../../features/project/store/project.actions
 import { NavConfig, NavItem, NavWorkContextItem } from './magic-side-nav.model';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
+import { lsGetBoolean, lsSetItem } from '../../util/ls-util';
 
 @Injectable({
   providedIn: 'root',
@@ -39,11 +40,9 @@ export class MagicNavConfigService {
 
   // Simple state signals
   private readonly _isProjectsExpanded = signal(
-    this._getStoredBooleanState(LS.IS_PROJECT_LIST_EXPANDED),
+    lsGetBoolean(LS.IS_PROJECT_LIST_EXPANDED, true),
   );
-  private readonly _isTagsExpanded = signal(
-    this._getStoredBooleanState(LS.IS_TAG_LIST_EXPANDED),
-  );
+  private readonly _isTagsExpanded = signal(lsGetBoolean(LS.IS_TAG_LIST_EXPANDED, true));
 
   // Data signals
   private readonly _mainWorkContext = toSignal(
@@ -370,13 +369,13 @@ export class MagicNavConfigService {
   private _toggleProjectsExpanded(): void {
     const newState = !this._isProjectsExpanded();
     this._isProjectsExpanded.set(newState);
-    localStorage.setItem(LS.IS_PROJECT_LIST_EXPANDED, newState.toString());
+    lsSetItem(LS.IS_PROJECT_LIST_EXPANDED, newState);
   }
 
   private _toggleTagsExpanded(): void {
     const newState = !this._isTagsExpanded();
     this._isTagsExpanded.set(newState);
-    localStorage.setItem(LS.IS_TAG_LIST_EXPANDED, newState.toString());
+    lsSetItem(LS.IS_TAG_LIST_EXPANDED, newState);
   }
 
   // Simple action handlers
@@ -458,11 +457,5 @@ export class MagicNavConfigService {
     // Special today list should always be first, so prepend it
     const newIds = [TODAY_TAG.id, ...visibleIds.filter((id) => id !== TODAY_TAG.id)];
     this._tagService.updateOrder(newIds);
-  }
-
-  // Helper
-  private _getStoredBooleanState(key: string): boolean {
-    const stored = localStorage.getItem(key);
-    return stored === null || stored === 'true';
   }
 }
