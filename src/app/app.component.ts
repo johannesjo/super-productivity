@@ -89,8 +89,11 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-const w = window as any;
-const productivityTip: string[] = w.productivityTips && w.productivityTips[w.randomIndex];
+const w = window as Window & { productivityTips?: string[][]; randomIndex?: number };
+const productivityTip: string[] | undefined =
+  w.productivityTips && w.randomIndex !== undefined
+    ? w.productivityTips[w.randomIndex]
+    : undefined;
 
 @Component({
   selector: 'app-root',
@@ -161,8 +164,8 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   readonly T = T;
   readonly isShowMobileButtonNav = this.globalThemeService.isShowMobileButtonNav;
 
-  productivityTipTitle: string = productivityTip && productivityTip[0];
-  productivityTipText: string = productivityTip && productivityTip[1];
+  productivityTipTitle: string = productivityTip?.[0] || '';
+  productivityTipText: string = productivityTip?.[1] || '';
 
   @ViewChild('routeWrapper', { read: ElementRef }) routeWrapper?: ElementRef<HTMLElement>;
 
@@ -241,9 +244,9 @@ export class AppComponent implements OnDestroy, AfterViewInit {
           },
           msg:
             '<strong>' +
-            (window as any).productivityTips[(window as any).randomIndex][0] +
+            w.productivityTips![w.randomIndex!][0] +
             ':</strong> ' +
-            (window as any).productivityTips[(window as any).randomIndex][1],
+            w.productivityTips![w.randomIndex!][1],
         });
       }
 
@@ -513,7 +516,7 @@ export class AppComponent implements OnDestroy, AfterViewInit {
       }
       try {
         await this._pfapiService.importCompleteBackup(
-          legacyData as any as AppDataCompleteNew,
+          legacyData as unknown as AppDataCompleteNew,
           true,
           true,
         );
@@ -542,7 +545,10 @@ export class AppComponent implements OnDestroy, AfterViewInit {
           alert(
             this._translateService.instant(T.MIGRATE.E_MIGRATION_FAILED) +
               '\n\n' +
-              JSON.stringify((error as any).additionalLog[0].errors),
+              JSON.stringify(
+                (error as { additionalLog?: Array<{ errors: unknown }> })
+                  .additionalLog?.[0]?.errors,
+              ),
           );
         } catch (e) {
           alert(

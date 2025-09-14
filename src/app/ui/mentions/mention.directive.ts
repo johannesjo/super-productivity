@@ -369,7 +369,7 @@ export class MentionDirective implements OnChanges {
               this.itemSelected.emit(activeItem);
               // optional function to format the selected item before inserting the text
               const text = this.activeConfig!.mentionSelect!(
-                activeItem,
+                activeItem as MentionItem | string,
                 this.activeConfig!.triggerChar,
               );
               // value is inserted without a trailing space for consistency

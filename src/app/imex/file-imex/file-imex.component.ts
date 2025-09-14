@@ -155,7 +155,7 @@ export class FileImexComponent implements OnInit {
 
   private async _processAndImportData(dataString: string): Promise<void> {
     let data: AppDataCompleteNew | undefined;
-    let oldData: any; // Keep type any for oldData to match original logic for V1 check
+    let oldData: unknown; // For V1 legacy data format check
 
     try {
       data = oldData = JSON.parse(dataString);
@@ -171,7 +171,8 @@ export class FileImexComponent implements OnInit {
 
     // V1 data check (as in original handleFileInput)
     // TODO: consider if this check is still relevant or can be removed/updated
-    if (oldData.config && Array.isArray(oldData.tasks)) {
+    const v1Data = oldData as { config?: unknown; tasks?: unknown };
+    if (v1Data.config && Array.isArray(v1Data.tasks)) {
       alert('V1 Data. Migration not supported any more.');
       // Potentially also use snackService here or log an error.
       // For now, keeping alert as per original logic.

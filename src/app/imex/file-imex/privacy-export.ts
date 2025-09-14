@@ -1,5 +1,4 @@
 import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
-import { CompleteBackup } from '../../pfapi/api';
 
 let i: number = 0;
 
@@ -35,11 +34,13 @@ const maskString = (key: string, val: string, counter: number): string => {
   }
 };
 
-const recurse = (obj: any): void => {
+const recurse = (obj: unknown): void => {
+  if (typeof obj !== 'object' || obj === null) return;
+
   // eslint-disable-next-line guard-for-in
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      const val = obj[key];
+      const val = (obj as Record<string, unknown>)[key];
       if (Array.isArray(val)) {
         val.forEach((arrVal) => {
           if (typeof arrVal === 'object' && arrVal !== null) {
@@ -49,14 +50,14 @@ const recurse = (obj: any): void => {
       } else if (typeof val === 'object' && val !== null) {
         recurse(val);
       } else if (typeof val === 'string') {
-        obj[key] = maskString(key, val, i);
+        (obj as Record<string, unknown>)[key] = maskString(key, val, i);
       }
     }
     i++;
   }
 };
 
-export const privacyExport = (d: CompleteBackup<any>): string => {
+export const privacyExport = (d: unknown): string => {
   const cpy = dirtyDeepCopy(d);
   recurse(cpy);
   return JSON.stringify(cpy);
