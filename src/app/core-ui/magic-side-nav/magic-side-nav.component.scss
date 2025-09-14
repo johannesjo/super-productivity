@@ -70,7 +70,6 @@
   height: 100vh;
   background: var(--overlay-bg);
   z-index: var(--z-backdrop, 1001);
-  transition: opacity var(--sidenav-transition-duration) var(--sidenav-transition-timing);
   display: block;
   opacity: 1;
 }
