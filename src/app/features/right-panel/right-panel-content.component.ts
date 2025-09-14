@@ -33,18 +33,13 @@ import { Log } from '../../core/log';
 import { NavigationEnd, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
+import { PanelContentService, PanelContentType } from '../panels/panel-content.service';
 
 // Keep in sync with CSS var --transition-duration-m
 const CLOSE_ANIMATION_MS = 225;
 
 // Narrow the panel type to a reusable alias for clarity
-export type RightPanelContentPanelType =
-  | 'NOTES'
-  | 'TASK'
-  | 'ADD_TASK_PANEL'
-  | 'ISSUE_PANEL'
-  | 'TASK_VIEW_CUSTOMIZER_PANEL'
-  | 'PLUGIN';
+export type RightPanelContentPanelType = PanelContentType;
 
 @Component({
   selector: 'right-panel-content',
@@ -70,6 +65,7 @@ export class RightPanelContentComponent implements OnDestroy {
   pluginService = inject(PluginService);
   store = inject(Store);
   private _router = inject(Router);
+  private _panelContentService = inject(PanelContentService);
 
   // Convert observables to signals
   private readonly _selectedTask = toSignal(this.taskService.selectedTask$, {
@@ -319,7 +315,7 @@ export class RightPanelContentComponent implements OnDestroy {
   }
 
   private _updatePanelTypeWithDelay(): void {
-    const currentPanelType = this._getCurrentPanelType();
+    const currentPanelType = this._panelContentService.getCurrentPanelType();
     this._clearPanelTypeTimer();
 
     if (currentPanelType) {
@@ -329,29 +325,7 @@ export class RightPanelContentComponent implements OnDestroy {
     }
   }
 
-  private _getCurrentPanelType(): RightPanelContentPanelType | null {
-    const layoutState = this._layoutFeatureState();
-    const selectedTask = this._selectedTask();
-
-    if (!layoutState) {
-      return null;
-    }
-
-    const {
-      isShowNotes,
-      isShowIssuePanel,
-      isShowTaskViewCustomizerPanel,
-      isShowPluginPanel,
-    } = layoutState;
-
-    if (isShowNotes) return 'NOTES';
-    if (isShowIssuePanel) return 'ISSUE_PANEL';
-    if (isShowTaskViewCustomizerPanel) return 'TASK_VIEW_CUSTOMIZER_PANEL';
-    if (isShowPluginPanel) return 'PLUGIN';
-    if (selectedTask) return 'TASK';
-
-    return null;
-  }
+  // panel type resolution moved to PanelContentService
 
   private _clearPanelTypeTimer(): void {
     if (this._panelTypeDelayTimer) {

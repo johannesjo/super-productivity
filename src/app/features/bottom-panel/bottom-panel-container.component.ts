@@ -22,16 +22,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { TaskService } from '../tasks/task.service';
 import { Log } from '../../core/log';
+import { PanelContentService, PanelContentType } from '../panels/panel-content.service';
 import { BottomPanelStateService } from '../../core-ui/bottom-panel-state.service';
 
 export interface BottomPanelData {
-  panelContent:
-    | 'NOTES'
-    | 'TASK'
-    | 'ADD_TASK_PANEL'
-    | 'ISSUE_PANEL'
-    | 'TASK_VIEW_CUSTOMIZER_PANEL'
-    | 'PLUGIN';
+  panelContent: PanelContentType;
 }
 
 // Panel height constants
@@ -67,11 +62,17 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
   private _elementRef = inject(ElementRef);
   private _taskService = inject(TaskService);
   private _bottomPanelState = inject(BottomPanelStateService);
-  readonly data = inject<BottomPanelData>(MAT_BOTTOM_SHEET_DATA);
+  private _panelContentService = inject(PanelContentService);
+  readonly data = inject<BottomPanelData | null>(MAT_BOTTOM_SHEET_DATA, {
+    optional: true,
+  });
 
   readonly panelHeader = viewChild<ElementRef>('panelHeader');
 
-  readonly panelContent = computed(() => this.data.panelContent);
+  readonly panelContent = computed<PanelContentType | null>(() => {
+    const dataContent = this.data?.panelContent ?? null;
+    return dataContent ?? this._panelContentService.getCurrentPanelType();
+  });
   readonly selectedTask = toSignal(this._taskService.selectedTask$, {
     initialValue: null,
   });

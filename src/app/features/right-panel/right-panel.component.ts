@@ -38,10 +38,7 @@ import {
 import { isInputElement } from '../../util/dom-element';
 import { BottomPanelStateService } from '../../core-ui/bottom-panel-state.service';
 import { slideRightPanelAni } from './slide-right-panel-out.ani';
-import {
-  BottomPanelContainerComponent,
-  BottomPanelData,
-} from '../bottom-panel/bottom-panel-container.component';
+import { BottomPanelContainerComponent } from '../bottom-panel/bottom-panel-container.component';
 import { MatBottomSheet, MatBottomSheetRef } from '@angular/material/bottom-sheet';
 // Right panel resize constants
 const RIGHT_PANEL_CONFIG = {
@@ -131,13 +128,8 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
     { initialValue: this._router.url },
   );
 
-  // Get isOpen from the same logic as right-panel-content
-  readonly isOpen = computed<boolean>(() => {
-    // If bottom sheet is open, keep right panel closed for mutual exclusion
-    if (this._bottomPanelState.isOpen()) {
-      return false;
-    }
-
+  // Determine if there is content to show in any panel
+  private readonly _hasPanelContent = computed<boolean>(() => {
     const selectedTask = this._selectedTask();
     const targetPanel = this._taskDetailPanelTargetPanel();
     const layoutState = this._layoutFeatureState();
@@ -161,11 +153,14 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
       isShowPluginPanel
     );
 
-    return (
-      hasContent &&
-      targetPanel !== TaskDetailTargetPanel.DONT_OPEN_PANEL &&
-      !this._layoutService.isXs()
-    ); // Don't show on mobile - handled by bottom sheet
+    return hasContent && targetPanel !== TaskDetailTargetPanel.DONT_OPEN_PANEL;
+  });
+
+  // Get isOpen for the right side panel (desktop/non-xs only)
+  readonly isOpen = computed<boolean>(() => {
+    // If bottom sheet is open, keep right panel closed for mutual exclusion
+    if (this._bottomPanelState.isOpen()) return false;
+    return this._hasPanelContent() && !this._layoutService.isXs();
   });
 
   // Resize functionality
@@ -226,10 +221,7 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
   // Effect to handle bottom sheet opening/closing on xs screens
   private _bottomSheetEffect = effect(() => {
     const isXs = this._layoutService.isXs();
-    const isOpen = this.isOpen();
-    // const panelContent = this.panelContent();
-    // TODO make this work
-    const panelContent = undefined;
+    const hasContent = this._hasPanelContent();
 
     untracked(() => {
       // Close bottom sheet immediately when switching from xs to non-xs screens
@@ -241,12 +233,10 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
 
       // Only handle bottom sheet on xs screens
       if (isXs) {
-        if (isOpen && panelContent && !this._bottomSheetRef) {
+        if (hasContent && !this._bottomSheetRef) {
           // Open bottom sheet
-          const data: BottomPanelData = { panelContent };
 
           this._bottomSheetRef = this._bottomSheet.open(BottomPanelContainerComponent, {
-            data,
             hasBackdrop: true,
             closeOnNavigation: true,
             panelClass: 'bottom-panel-sheet',
@@ -261,7 +251,7 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
               this._bottomSheetSubscription = null;
               this.close();
             });
-        } else if (!isOpen && this._bottomSheetRef) {
+        } else if (!hasContent && this._bottomSheetRef) {
           // Close bottom sheet
           this._bottomSheetRef.dismiss();
           this._bottomSheetRef = null;
