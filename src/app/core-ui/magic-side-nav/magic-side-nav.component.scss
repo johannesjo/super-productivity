@@ -129,17 +129,11 @@
 
   // Mobile specific
   &.mobile {
-    transition: transform var(--sidenav-transition-duration)
-      var(--sidenav-transition-timing);
-    will-change: transform;
-    transform: translateX(-100%);
     width: var(--sidenav-width-expanded);
     background: var(--sidenav-bg-mobile);
-
-    &.mobile-visible {
-      box-shadow: 4px 0 16px rgba(0, 0, 0, 0.3);
-      transform: translateX(0);
-    }
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.3);
+    // Remove CSS transitions - let Angular animations handle it
+    transition: none !important;
   }
 
   // Position right
@@ -148,14 +142,6 @@
     right: 0;
     border-right: none;
     border-left: 1px solid var(--sidenav-border-color);
-
-    &.mobile {
-      transform: translateX(100%);
-
-      &.mobile-visible {
-        transform: translateX(0);
-      }
-    }
 
     .mode-toggle {
       left: 16px;

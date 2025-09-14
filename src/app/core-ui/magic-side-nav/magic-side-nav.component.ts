@@ -1,5 +1,16 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { Component, computed, effect, HostListener, inject, input, OnDestroy, OnInit, output, signal, } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  HostListener,
+  inject,
+  input,
+  OnDestroy,
+  OnInit,
+  output,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
@@ -13,6 +24,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { NavMatMenuComponent } from './nav-mat-menu/nav-mat-menu.component';
 import { TaskService } from '../../features/tasks/task.service';
 import { LayoutService } from '../layout/layout.service';
+import { magicSideNavAnimations } from './magic-side-nav.animations';
 
 const COLLAPSED_WIDTH = 64;
 const MOBILE_NAV_WIDTH = 300;
@@ -35,6 +47,7 @@ const MOBILE_NAV_WIDTH = 300;
     '[class.animate]': 'animateWidth()',
     '[class.resizing]': 'isResizing()',
   },
+  animations: magicSideNavAnimations,
 })
 export class MagicSideNavComponent implements OnInit, OnDestroy {
   private readonly _sideNavConfigService = inject(MagicNavConfigService);
