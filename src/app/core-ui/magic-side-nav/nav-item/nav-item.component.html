@@ -27,7 +27,9 @@
     </span>
   </button>
 
-  <div class="task-count">{{ nrOfOpenTasks() }}</div>
+  @if (nrOfOpenTasks() > 0) {
+    <div class="task-count">{{ nrOfOpenTasks() }}</div>
+  }
 
   <button
     [style.visibility]="showMoreButton() ? 'visible' : 'hidden'"
