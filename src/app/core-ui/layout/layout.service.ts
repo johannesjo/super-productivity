@@ -27,6 +27,9 @@ const NAV_ALWAYS_VISIBLE = 600;
 const RIGHT_PANEL_OVER = 720;
 const VERY_BIG_SCREEN = NAV_ALWAYS_VISIBLE;
 const XS_BREAKPOINT = 600;
+const XS_MEDIA_QUERY = `(max-width: ${XS_BREAKPOINT}px)`;
+const initialXsMatch =
+  typeof window !== 'undefined' ? window.matchMedia(XS_MEDIA_QUERY).matches : false;
 const XXXS_BREAKPOINT = 398;
 
 @Injectable({
@@ -66,9 +69,9 @@ export class LayoutService {
 
   readonly isXs = toSignal(
     this._breakPointObserver
-      .observe(`(max-width: ${XS_BREAKPOINT}px)`)
+      .observe(XS_MEDIA_QUERY)
       .pipe(map((result) => result.matches)),
-    { initialValue: false },
+    { initialValue: initialXsMatch },
   );
 
   readonly isXxxs = toSignal(
