@@ -12,6 +12,7 @@ import {
   signal,
   TemplateRef,
 } from '@angular/core';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 import { NgTemplateOutlet } from '@angular/common';
 import { monitorForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import {
@@ -33,8 +34,32 @@ import { asDragData, asDropData } from './dnd.helpers';
   standalone: true,
   imports: [NgTemplateOutlet, DndDraggableDirective, DndDropTargetDirective],
   templateUrl: './tree.component.html',
-  styleUrl: './tree.component.scss',
+  styleUrls: ['./tree.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [
+    trigger('expandCollapse', [
+      state(
+        'collapsed',
+        style({
+          height: '0',
+          opacity: 0,
+          overflow: 'hidden',
+        }),
+      ),
+      state(
+        'expanded',
+        style({
+          height: '*',
+          opacity: 1,
+          overflow: 'visible',
+        }),
+      ),
+      transition('collapsed <=> expanded', [
+        style({ overflow: 'hidden' }),
+        animate('300ms ease-in-out'),
+      ]),
+    ]),
+  ],
 })
 export class TreeDndComponent implements AfterViewInit {
   private host = inject(ElementRef<HTMLElement>);

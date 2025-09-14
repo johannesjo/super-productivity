@@ -6,6 +6,7 @@ import {
   inject,
   input,
   output,
+  Injector,
 } from '@angular/core';
 import {
   dropTargetForElements,
@@ -39,35 +40,37 @@ export class DndDropTargetDirective {
   private cleanup: (() => void) | null = null;
 
   // Rebind drop target whenever config/context changes
-  private _bindEffect = effect(() => {
-    // ensure cleanup of previous binding
-    this.cleanup?.();
-    this.cleanup = null;
+  private _bindEffect = effect(
+    () => {
+      // ensure cleanup of previous binding
+      this.cleanup?.();
+      this.cleanup = null;
 
-    const cfg = this.config();
-    if (!cfg) {
-      return; // disabled target
-    }
+      const cfg = this.config();
+      if (!cfg) {
+        return; // disabled target
+      }
 
-    const where = cfg.where;
-    this.cleanup = dropTargetForElements({
-      element: this.el.nativeElement,
-      canDrop: ({ source }) =>
-        asDragData(source.data)?.uniqueContextId === this.dndContext(),
-      getData: () => makeDropData({ type: 'drop', id: cfg.id, where }),
-      onDragStart: (p) => this.onActive(p, where),
-      onDropTargetChange: (p) => this.onActive(p, where),
-      onDragLeave: () => {
-        this.activeChange.emit(false);
-        this.indicator.emit({ active: false, element: this.el.nativeElement, where });
-      },
-      onDrop: () => {
-        this.activeChange.emit(false);
-        this.indicator.emit({ active: false, element: this.el.nativeElement, where });
-      },
-    });
-  });
-
+      const where = cfg.where;
+      this.cleanup = dropTargetForElements({
+        element: this.el.nativeElement,
+        canDrop: ({ source }) =>
+          asDragData(source.data)?.uniqueContextId === this.dndContext(),
+        getData: () => makeDropData({ type: 'drop', id: cfg.id, where }),
+        onDragStart: (p) => this.onActive(p, where),
+        onDropTargetChange: (p) => this.onActive(p, where),
+        onDragLeave: () => {
+          this.activeChange.emit(false);
+          this.indicator.emit({ active: false, element: this.el.nativeElement, where });
+        },
+        onDrop: () => {
+          this.activeChange.emit(false);
+          this.indicator.emit({ active: false, element: this.el.nativeElement, where });
+        },
+      });
+    },
+    { injector: inject(Injector) },
+  );
   constructor() {
     this.destroyRef.onDestroy(() => this.cleanup?.());
   }

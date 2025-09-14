@@ -1,5 +1,7 @@
 <div
   class="tree"
+  role="tree"
+  aria-label="Tree"
   [class.is-dragging]="draggingId()"
   #root
 >
@@ -48,7 +50,6 @@
   >
     <div
       class="drop drop--before"
-      [class.is-over]="isOver(node.id, 'before')"
       [dndDropTarget]="{ id: node.id, where: 'before' }"
       [dndContext]="contextId"
       (activeChange)="setOver(node.id, 'before', $event)"
@@ -61,7 +62,10 @@
       [attr.data-id]="node.id"
       [dndDropTarget]="isFolder(node) ? { id: node.id, where: 'inside' } : null"
       [dndContext]="contextId"
-      [dragPreviewTemplate]="dragPreviewTpl()"
+      [attr.role]="'treeitem'"
+      [attr.aria-level]="level + 1"
+      [attr.aria-expanded]="isFolder(node) ? node.expanded : null"
+      [dragPreviewTemplate]="dragPreviewTpl() ?? null"
       [dragPreviewData]="{ node: node, isFolder: isFolder(node) }"
       (activeChange)="setOver(node.id, 'inside', $event)"
       (indicator)="onIndicator($event)"
@@ -101,7 +105,6 @@
 
     <div
       class="drop drop--after"
-      [class.is-over]="isOver(node.id, 'after')"
       [dndDropTarget]="{ id: node.id, where: 'after' }"
       [dndContext]="contextId"
       (activeChange)="setOver(node.id, 'after', $event)"
@@ -109,8 +112,11 @@
     ></div>
   </div>
 
-  @if (node.expanded && node.children?.length) {
-    <div class="group">
+  @if (node.children?.length) {
+    <div
+      class="group"
+      [@expandCollapse]="node.expanded ? 'expanded' : 'collapsed'"
+    >
       @for (child of node.children; track child.id) {
         <ng-container
           *ngTemplateOutlet="nodeTpl; context: { $implicit: child, level: level + 1 }"

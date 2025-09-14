@@ -7,6 +7,7 @@ import {
   input,
   TemplateRef,
   ViewContainerRef,
+  Injector,
 } from '@angular/core';
 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
@@ -30,39 +31,36 @@ export class DndDraggableDirective {
 
   private cleanup: (() => void) | null = null;
 
-  private _bindEffect = effect(() => {
-    // Rebind when id/context changes
-    if (this.cleanup) {
-      this.cleanup();
-      this.cleanup = null;
-    }
-    const id = this.id();
-    const ctx = this.dndContext();
-    this.cleanup = draggable({
-      element: this.el.nativeElement,
-      getInitialData: () => makeDragData(ctx, id),
-      onGenerateDragPreview: ({ nativeSetDragImage }) => {
-        setCustomNativeDragPreview({
-          getOffset: pointerOutsideOfPreview({
-            x: '8px',
-            y: '8px',
-          }),
-          nativeSetDragImage,
-          render: ({ container }) => {
-            const template = this.dragPreviewTemplate();
-
-            if (template) {
-              // Use custom template
-              return this.renderCustomTemplate(template, container);
-            } else {
-              // Fall back to default preview
-              return this.renderDefaultPreview(container);
-            }
-          },
-        });
-      },
-    });
-  });
+  private _bindEffect = effect(
+    () => {
+      // Rebind when id/context changes
+      if (this.cleanup) {
+        this.cleanup();
+        this.cleanup = null;
+      }
+      const id = this.id();
+      const ctx = this.dndContext();
+      this.cleanup = draggable({
+        element: this.el.nativeElement,
+        getInitialData: () => makeDragData(ctx, id),
+        onGenerateDragPreview: ({ nativeSetDragImage }) => {
+          setCustomNativeDragPreview({
+            getOffset: pointerOutsideOfPreview({ x: '8px', y: '8px' }),
+            nativeSetDragImage,
+            render: ({ container }) => {
+              const template = this.dragPreviewTemplate();
+              if (template) {
+                return this.renderCustomTemplate(template, container);
+              } else {
+                return this.renderDefaultPreview(container);
+              }
+            },
+          });
+        },
+      });
+    },
+    { injector: inject(Injector) },
+  );
 
   constructor() {
     this.destroyRef.onDestroy(() => this.cleanup?.());

@@ -65,21 +65,14 @@
 .drop--before,
 .drop--after {
   border-top: 2px solid transparent;
-
-  &.is-over {
-    border-top-color: #007bff;
-    background: rgba(0, 123, 255, 0.2);
-  }
 }
 
 .drop--before {
   top: 0;
-  margin-top: -6px;
 }
 
 .drop--after {
   bottom: 0;
-  margin-bottom: -6px;
 }
 
 .group {
@@ -91,7 +84,12 @@
   border-top: 2px dashed transparent;
 
   &.is-over {
-    border-top-color: purple;
+    border-top-color: #007bff;
+    background: rgba(0, 123, 255, 0.1);
+  }
+
+  &:hover {
+    background: rgba(0, 123, 255, 0.05);
   }
 }
 
