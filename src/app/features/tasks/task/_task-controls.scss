@@ -361,10 +361,7 @@ progress-bar {
   @include verySmallMainContainer {
     width: 8px;
     min-width: 0;
-
-    > * {
-      display: none;
-    }
+    opacity: 0;
   }
 
   > * {
