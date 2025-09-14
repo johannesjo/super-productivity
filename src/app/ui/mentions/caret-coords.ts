@@ -51,11 +51,21 @@ const properties = [
 const isBrowser = typeof window !== 'undefined';
 const isFirefox = isBrowser && window['mozInnerScreenX'] != null;
 
+interface CaretCoordinatesOptions {
+  debug?: boolean;
+}
+
+interface CaretCoordinates {
+  top: number;
+  left: number;
+  height: number;
+}
+
 export const getCaretCoordinates = (
-  element: any,
+  element: HTMLTextAreaElement | HTMLInputElement,
   position: number,
-  options: any,
-): any => {
+  options?: CaretCoordinatesOptions,
+): CaretCoordinates => {
   if (!isBrowser) {
     throw new Error(
       'textarea-caret-position#getCaretCoordinates should only be called in a browser',
@@ -76,7 +86,7 @@ export const getCaretCoordinates = (
   const style = div.style;
   const computed = window.getComputedStyle
     ? window.getComputedStyle(element)
-    : element.currentStyle; // currentStyle for IE < 9
+    : (element as any).currentStyle; // currentStyle for IE < 9
   const isInput = element.nodeName === 'INPUT';
 
   // Default textarea styles

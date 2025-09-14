@@ -13,6 +13,7 @@ import { CommonModule } from '@angular/common';
 
 import { isInputOrTextAreaElement, getContentEditableCaretCoords } from './mention-utils';
 import { getCaretCoordinates } from './caret-coords';
+import { MentionItem } from './mention-config';
 import { Log } from '../../core/log';
 
 /**
@@ -61,12 +62,12 @@ import { Log } from '../../core/log';
 })
 export class MentionListComponent implements AfterContentChecked {
   @Input() labelKey: string = 'label';
-  @Input() itemTemplate?: TemplateRef<any>;
+  @Input() itemTemplate?: TemplateRef<{ $implicit: MentionItem; index: number }>;
   @Output() itemClick = new EventEmitter();
   @ViewChild('list', { static: true }) list!: ElementRef;
   @ViewChild('defaultItemTemplate', { static: true })
-  defaultItemTemplate!: TemplateRef<any>;
-  items = [];
+  defaultItemTemplate!: TemplateRef<{ $implicit: MentionItem; index: number }>;
+  items: MentionItem[] | string[] = [];
   activeIndex: number = 0;
   hidden: boolean = false;
   dropUp: boolean = false;
@@ -91,7 +92,7 @@ export class MentionListComponent implements AfterContentChecked {
       this.coords = getCaretCoordinates(
         nativeParentElement,
         nativeParentElement.selectionStart || 0,
-        null,
+        undefined,
       );
       this.coords.top =
         nativeParentElement.offsetTop + this.coords.top - nativeParentElement.scrollTop;
@@ -133,7 +134,7 @@ export class MentionListComponent implements AfterContentChecked {
     this.positionElement();
   }
 
-  get activeItem(): any {
+  get activeItem(): MentionItem | string | null {
     // Add bounds checking to prevent accessing undefined array elements
     if (!this.items || !Array.isArray(this.items) || this.items.length === 0) {
       return null;

@@ -1,7 +1,7 @@
 // DOM element manipulation functions...
 //
 
-const setValue = (el: HTMLInputElement, value: any): void => {
+const setValue = (el: HTMLInputElement, value: string): void => {
   //console.log("setValue", el.nodeName, "["+value+"]");
   if (isInputOrTextAreaElement(el)) {
     el.value = value;

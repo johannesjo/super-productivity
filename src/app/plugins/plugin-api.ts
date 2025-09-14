@@ -38,7 +38,7 @@ import {
  */
 export class PluginAPI implements PluginAPIInterface {
   readonly Hooks = PluginHooks;
-  private _hookHandlers = new Map<string, Map<Hooks, Array<PluginHookHandler<any>>>>();
+  private _hookHandlers = new Map<string, Map<Hooks, Array<PluginHookHandler<Hooks>>>>();
   private _headerButtons: Array<PluginHeaderBtnCfg> = [];
   private _menuEntries: Array<PluginMenuEntryCfg> = [];
   private _shortcuts: Array<PluginShortcutCfg> = [];
@@ -89,11 +89,11 @@ export class PluginAPI implements PluginAPIInterface {
       pluginHooks.set(hook, []);
     }
 
-    pluginHooks.get(hook)!.push(fn as PluginHookHandler<any>);
+    pluginHooks.get(hook)!.push(fn as PluginHookHandler<Hooks>);
     PluginLog.log(`Plugin ${this._pluginId} registered hook: ${hook}`);
 
     // Register hook with bridge
-    this._pluginBridge.registerHook(this._pluginId, hook, fn as PluginHookHandler<any>);
+    this._pluginBridge.registerHook(this._pluginId, hook, fn as PluginHookHandler<Hooks>);
   }
 
   registerHeaderButton(headerBtnCfg: PluginHeaderBtnCfg): void {

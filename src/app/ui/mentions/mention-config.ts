@@ -1,16 +1,20 @@
 // configuration structure, backwards compatible with earlier versions
 
-export interface MentionConfig extends Mentions {
+export interface MentionItem {
+  [key: string]: unknown;
+}
+
+export interface MentionConfig<T = MentionItem> extends Mentions<T> {
   // nested config
-  mentions?: Mentions[];
+  mentions?: Mentions<T>[];
 
   // option to disable encapsulated styles so global styles can be used instead
   disableStyle?: boolean;
 }
 
-export interface Mentions {
+export interface Mentions<T = MentionItem> {
   // an array of strings or objects to suggest
-  items?: any[];
+  items?: T[] | string[];
 
   // the character that will trigger the menu behavior
   triggerChar?: string;
@@ -38,8 +42,8 @@ export interface Mentions {
   returnTrigger?: boolean;
 
   // optional function to format the selected item before inserting the text
-  mentionSelect?: (item: any, triggerChar?: string) => string;
+  mentionSelect?: (item: T | string, triggerChar?: string) => string;
 
   // optional function to customize the search implementation
-  mentionFilter?: (searchString: string, items?: any) => any[];
+  mentionFilter?: (searchString: string, items?: T[] | string[]) => T[] | string[];
 }

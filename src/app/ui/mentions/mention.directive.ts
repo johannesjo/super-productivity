@@ -20,9 +20,19 @@ import {
   isInputOrTextAreaElement,
 } from './mention-utils';
 
-import { MentionConfig } from './mention-config';
+import { MentionConfig, MentionItem } from './mention-config';
 import { MentionListComponent } from './mention-list.component';
 import { Log } from '../../core/log';
+
+// Custom types for mention events
+interface CustomEvent extends Event {
+  wasClick?: boolean;
+}
+
+interface CustomKeyboardEvent extends KeyboardEvent {
+  inputEvent?: boolean;
+  wasClick?: boolean;
+}
 
 const KEY_BACKSPACE = 8;
 const KEY_TAB = 9;
@@ -55,9 +65,9 @@ const KEY_BUFFERED = 229;
 })
 export class MentionDirective implements OnChanges {
   // stores the items passed to the mentions directive and used to populate the root items in mentionConfig
-  private mentionItems: any[] = [];
+  private mentionItems: MentionItem[] | string[] = [];
 
-  @Input('mention') set mention(items: any[]) {
+  @Input('mention') set mention(items: MentionItem[] | string[]) {
     this.mentionItems = items;
   }
 
@@ -73,13 +83,19 @@ export class MentionDirective implements OnChanges {
     maxItems: -1,
     allowSpace: false,
     returnTrigger: false,
-    mentionSelect: (item: any, triggerChar?: string) => {
+    mentionSelect: (item: MentionItem | string, triggerChar?: string) => {
       // Add defensive null/undefined checks to prevent TypeError
       if (!item) {
         Log.warn('MentionDirective: mentionSelect called with undefined/null item');
         return this.activeConfig?.triggerChar || '';
       }
 
+      // Handle string items directly
+      if (typeof item === 'string') {
+        return (this.activeConfig?.triggerChar || '') + item;
+      }
+
+      // Handle MentionItem objects
       const labelKey = this.activeConfig?.labelKey || 'label';
       const itemValue = item[labelKey];
 
@@ -90,7 +106,7 @@ export class MentionDirective implements OnChanges {
 
       return (this.activeConfig?.triggerChar || '') + itemValue;
     },
-    mentionFilter: (searchString: string, items: any[]) => {
+    mentionFilter: (searchString: string, items?: MentionItem[] | string[]) => {
       if (!items || !Array.isArray(items)) {
         Log.warn('MentionDirective: mentionFilter called with invalid items array');
         return [];
@@ -99,34 +115,46 @@ export class MentionDirective implements OnChanges {
       const searchStringLowerCase = searchString.toLowerCase();
       const labelKey = this.activeConfig?.labelKey || 'label';
 
-      return items.filter((e) => {
+      const filteredItems = items.filter((e: MentionItem | string) => {
         // Add defensive checks to prevent errors during filtering
-        if (!e || typeof e !== 'object') {
+        if (!e) {
           return false;
         }
 
-        const itemValue = e[labelKey];
-        if (
-          itemValue === undefined ||
-          itemValue === null ||
-          typeof itemValue !== 'string'
-        ) {
-          return false;
+        // Handle string items directly
+        if (typeof e === 'string') {
+          return e.toLowerCase().startsWith(searchStringLowerCase);
         }
 
-        return itemValue.toLowerCase().startsWith(searchStringLowerCase);
+        // Handle MentionItem objects
+        if (typeof e === 'object') {
+          const itemValue = e[labelKey];
+          if (
+            itemValue === undefined ||
+            itemValue === null ||
+            typeof itemValue !== 'string'
+          ) {
+            return false;
+          }
+          return itemValue.toLowerCase().startsWith(searchStringLowerCase);
+        }
+
+        return false;
       });
+
+      // Return the same type as the input array
+      return filteredItems as typeof items;
     },
   };
 
   // template to use for rendering list items
-  @Input() mentionListTemplate?: TemplateRef<any>;
+  @Input() mentionListTemplate?: TemplateRef<{ $implicit: MentionItem; index: number }>;
 
   // event emitted whenever the search term changes
   @Output() searchTerm = new EventEmitter<string>();
 
   // event emitted when an item is selected
-  @Output() itemSelected = new EventEmitter<any>();
+  @Output() itemSelected = new EventEmitter<MentionItem | string>();
 
   // event emitted whenever the mention list is opened or closed
   @Output() opened = new EventEmitter();
@@ -137,10 +165,10 @@ export class MentionDirective implements OnChanges {
 
   private searchString: string | null = null;
   private startPos: number = -1;
-  private startNode: any;
+  private startNode: Node | null = null;
   private searchList?: MentionListComponent;
   private searching: boolean = false;
-  private iframe: any; // optional
+  private iframe: HTMLIFrameElement | null = null; // optional
   private lastKeyCode: number = 0;
 
   private readonly _element = inject(ElementRef);
@@ -178,17 +206,19 @@ export class MentionDirective implements OnChanges {
     if (items && items.length > 0) {
       // convert strings to objects
       if (typeof items[0] == 'string') {
-        items = items.map((label) => {
-          const object: any = {};
+        items = (items as string[]).map((label) => {
+          const object: Record<string, unknown> = {};
           object[config.labelKey || 'label'] = label;
           return object;
         });
       }
       if (config.labelKey) {
         // remove items without an labelKey (as it's required to filter the list)
-        items = items.filter((e) => e[config.labelKey!]);
+        items = (items as MentionItem[]).filter((e) => e[config.labelKey!]);
         if (!config.disableSort) {
-          items.sort((a, b) => a[config.labelKey!].localeCompare(b[config.labelKey!]));
+          (items as MentionItem[]).sort((a, b) =>
+            String(a[config.labelKey!]).localeCompare(String(b[config.labelKey!])),
+          );
         }
       }
     }
@@ -208,7 +238,7 @@ export class MentionDirective implements OnChanges {
     this.iframe = iframe;
   }
 
-  stopEvent(event: any): void {
+  stopEvent(event: CustomEvent): void {
     //if (event instanceof KeyboardEvent) { // does not work for iframe
     if (!event.wasClick) {
       event.preventDefault();
@@ -217,24 +247,27 @@ export class MentionDirective implements OnChanges {
     }
   }
 
-  blurHandler(event: any): void {
+  blurHandler(event: FocusEvent): void {
     this.stopEvent(event);
     this.stopSearch();
   }
 
   inputHandler(
-    event: any,
+    event: InputEvent,
     nativeElement: HTMLInputElement = this._element.nativeElement,
   ): void {
     if (this.lastKeyCode === KEY_BUFFERED && event.data) {
       const keyCode = event.data.charCodeAt(0);
-      this.keyHandler({ keyCode, inputEvent: true }, nativeElement);
+      this.keyHandler(
+        { keyCode, inputEvent: true } as CustomKeyboardEvent,
+        nativeElement,
+      );
     }
   }
 
   // @param nativeElement is the alternative text element in an iframe scenario
   keyHandler(
-    event: any,
+    event: CustomKeyboardEvent,
     nativeElement: HTMLInputElement = this._element.nativeElement,
   ): boolean | undefined {
     this.lastKeyCode = event.keyCode;
@@ -270,7 +303,9 @@ export class MentionDirective implements OnChanges {
       const typedLen = 1 + (this.searchString ? this.searchString.length : 0); // trigger + search
       pos = this.startPos + typedLen;
       setCaretPosition(
-        isInputOrTextAreaElement(nativeElement) ? nativeElement : (this.startNode as any),
+        isInputOrTextAreaElement(nativeElement)
+          ? nativeElement
+          : (this.startNode as HTMLInputElement),
         pos,
         this.iframe,
       );
@@ -281,9 +316,9 @@ export class MentionDirective implements OnChanges {
     if (config) {
       this.activeConfig = config;
       this.startPos = event.inputEvent ? pos - 1 : pos;
-      this.startNode = (
-        this.iframe ? this.iframe.contentWindow.getSelection() : window.getSelection()
-      ).anchorNode;
+      this.startNode =
+        (this.iframe ? this.iframe.contentWindow?.getSelection() : window.getSelection())
+          ?.anchorNode || null;
       this.searching = true;
       this.searchString = null;
       this.showSearchList(nativeElement);
@@ -329,31 +364,34 @@ export class MentionDirective implements OnChanges {
             }
 
             // emit the selected list item
-            this.itemSelected.emit(this.searchList.activeItem);
-            // optional function to format the selected item before inserting the text
-            const text = this.activeConfig!.mentionSelect!(
-              this.searchList.activeItem,
-              this.activeConfig!.triggerChar,
-            );
-            // value is inserted without a trailing space for consistency
-            // between element types (div and iframe do not preserve the space)
-            insertValue(nativeElement, this.startPos, pos, text, this.iframe);
-            // fire input event so angular bindings are updated
-            if ('createEvent' in document) {
-              const evt = document.createEvent('HTMLEvents');
-              if (this.iframe) {
-                // a 'change' event is required to trigger tinymce updates
-                evt.initEvent('change', true, false);
-              } else {
-                evt.initEvent('input', true, false);
+            const activeItem = this.searchList.activeItem;
+            if (activeItem) {
+              this.itemSelected.emit(activeItem);
+              // optional function to format the selected item before inserting the text
+              const text = this.activeConfig!.mentionSelect!(
+                activeItem,
+                this.activeConfig!.triggerChar,
+              );
+              // value is inserted without a trailing space for consistency
+              // between element types (div and iframe do not preserve the space)
+              insertValue(nativeElement, this.startPos, pos, text, this.iframe);
+              // fire input event so angular bindings are updated
+              if ('createEvent' in document) {
+                const evt = document.createEvent('HTMLEvents');
+                if (this.iframe) {
+                  // a 'change' event is required to trigger tinymce updates
+                  evt.initEvent('change', true, false);
+                } else {
+                  evt.initEvent('input', true, false);
+                }
+                // this seems backwards, but fire the event from this elements nativeElement (not the
+                // one provided that may be in an iframe, as it won't be propogate)
+                this._element.nativeElement.dispatchEvent(evt);
               }
-              // this seems backwards, but fire the event from this elements nativeElement (not the
-              // one provided that may be in an iframe, as it won't be propogate)
-              this._element.nativeElement.dispatchEvent(evt);
+              this.startPos = -1;
+              this.stopSearch();
+              return false;
             }
-            this.startPos = -1;
-            this.stopSearch();
-            return false;
           } else if (event.keyCode === KEY_ESCAPE) {
             this.stopEvent(event);
             this.stopSearch();
@@ -406,7 +444,10 @@ export class MentionDirective implements OnChanges {
       '@';
     const pos = getCaretPosition(nativeElement, this.iframe);
     insertValue(nativeElement, pos, pos, triggerChar, this.iframe);
-    this.keyHandler({ key: triggerChar, inputEvent: true }, nativeElement);
+    this.keyHandler(
+      { key: triggerChar, inputEvent: true } as CustomKeyboardEvent,
+      nativeElement,
+    );
   }
 
   stopSearch(): void {
@@ -420,7 +461,7 @@ export class MentionDirective implements OnChanges {
   }
 
   updateSearchList(): void {
-    let matches: any[] = [];
+    let matches: MentionItem[] | string[] = [];
     if (this.activeConfig && this.activeConfig.items) {
       let objects = this.activeConfig.items;
       // disabling the search relies on the async operation to do the filtering
@@ -444,7 +485,7 @@ export class MentionDirective implements OnChanges {
     }
     // update the search list
     if (this.searchList) {
-      this.searchList.items = matches as any;
+      this.searchList.items = matches;
       this.searchList.hidden = matches.length == 0;
       this.listShownChange.emit(matches.length > 0);
     }
@@ -462,7 +503,11 @@ export class MentionDirective implements OnChanges {
       this.searchList.itemTemplate = this.mentionListTemplate;
       componentRef.instance['itemClick'].subscribe(() => {
         nativeElement.focus();
-        const fakeKeydown = { key: 'Enter', keyCode: KEY_ENTER, wasClick: true };
+        const fakeKeydown = {
+          key: 'Enter',
+          keyCode: KEY_ENTER,
+          wasClick: true,
+        } as CustomKeyboardEvent;
         this.keyHandler(fakeKeydown, nativeElement);
       });
     }
