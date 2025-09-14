@@ -1,16 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import {
-  Component,
-  computed,
-  effect,
-  HostListener,
-  inject,
-  input,
-  OnDestroy,
-  OnInit,
-  output,
-  signal,
-} from '@angular/core';
+import { Component, computed, effect, HostListener, inject, input, OnDestroy, OnInit, output, signal, } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
