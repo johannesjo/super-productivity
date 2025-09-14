@@ -43,6 +43,9 @@ const PANEL_HEIGHTS = {
 } as const;
 
 const KEYBOARD_DETECT_THRESHOLD = 100; // px - minimum height change to detect keyboard
+const KEYBOARD_SAFE_HEIGHT_MIN = 200; // px - minimal safe panel height while keyboard visible
+const KEYBOARD_SAFE_HEIGHT_RATIO = 0.85; // fraction of visual viewport height
+const KEYBOARD_RESIZE_DEBOUNCE_MS = 100; // ms - debounce viewport resize events
 
 @Component({
   selector: 'bottom-panel-container',
@@ -95,6 +98,7 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
   // Mobile keyboard handling
   private _isKeyboardWatcherInitialized = false;
   private _originalHeight: string = '';
+  private _vvResizeTimer: number | null = null;
 
   // Store bound functions to prevent memory leaks
   private readonly _boundOnPointerDown = this._onPointerDown.bind(this);
@@ -302,9 +306,17 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
   }
 
   private _onViewportResize(): void {
-    this._ngZone.run(() => {
-      this._handleViewportResize();
-    });
+    // Debounce rapid viewport resize events while the keyboard animates
+    if (this._vvResizeTimer) {
+      window.clearTimeout(this._vvResizeTimer);
+      this._vvResizeTimer = null;
+    }
+    this._vvResizeTimer = window.setTimeout(() => {
+      this._vvResizeTimer = null;
+      this._ngZone.run(() => {
+        this._handleViewportResize();
+      });
+    }, KEYBOARD_RESIZE_DEBOUNCE_MS);
   }
 
   private _handleViewportResize(): void {
@@ -330,7 +342,10 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
       }
 
       // Calculate safe height - be more conservative
-      const safeHeight = Math.max(200, viewportHeight * 0.85); // At least 200px, max 85% of viewport
+      const safeHeight = Math.max(
+        KEYBOARD_SAFE_HEIGHT_MIN,
+        viewportHeight * KEYBOARD_SAFE_HEIGHT_RATIO,
+      );
 
       // Use !important to override CSS max-height
       container.style.setProperty('max-height', `${safeHeight}px`, 'important');
