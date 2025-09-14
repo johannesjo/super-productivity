@@ -52,6 +52,7 @@ export class PomodoroService {
 
   cfg$: Observable<PomodoroConfig> = this._configService.cfg$.pipe(
     map((cfg) => cfg && cfg.pomodoro),
+    distinctUntilChanged(),
   );
   soundConfig$: Observable<SoundConfig> = this._configService.cfg$.pipe(
     map((cfg) => cfg && cfg.sound),
