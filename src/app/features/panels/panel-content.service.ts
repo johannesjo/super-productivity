@@ -6,6 +6,7 @@ import {
 } from '../../core-ui/layout/store/layout.reducer';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TaskService } from '../tasks/task.service';
+import { TaskDetailTargetPanel } from '../tasks/task.model';
 
 export type PanelContentType =
   | 'NOTES'
@@ -23,6 +24,11 @@ export class PanelContentService {
   private readonly _selectedTask = toSignal(this._taskService.selectedTask$, {
     initialValue: null,
   });
+
+  private readonly _taskDetailPanelTargetPanel = toSignal(
+    this._taskService.taskDetailPanelTargetPanel$,
+    { initialValue: null },
+  );
 
   private readonly _layoutFeatureState = toSignal(
     this._store.select(selectLayoutFeatureState),
@@ -51,7 +57,39 @@ export class PanelContentService {
     return null;
   });
 
+  readonly hasContent = computed<boolean>(() => {
+    const layoutState = this._layoutFeatureState();
+    const selectedTask = this._selectedTask();
+    if (!layoutState) return false;
+    const {
+      isShowNotes,
+      isShowIssuePanel,
+      isShowTaskViewCustomizerPanel,
+      isShowPluginPanel,
+    } = layoutState;
+    return !!(
+      selectedTask ||
+      isShowNotes ||
+      isShowIssuePanel ||
+      isShowTaskViewCustomizerPanel ||
+      isShowPluginPanel
+    );
+  });
+
+  readonly canOpen = computed<boolean>(() => {
+    const target = this._taskDetailPanelTargetPanel();
+    return this.hasContent() && target !== TaskDetailTargetPanel.DONT_OPEN_PANEL;
+  });
+
   getCurrentPanelType(): PanelContentType | null {
     return this.panelType();
+  }
+
+  getHasContent(): boolean {
+    return this.hasContent();
+  }
+
+  getCanOpen(): boolean {
+    return this.canOpen();
   }
 }

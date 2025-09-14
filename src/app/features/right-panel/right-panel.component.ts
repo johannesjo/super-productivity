@@ -30,7 +30,6 @@ import { TaskService } from '../tasks/task.service';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { Store } from '@ngrx/store';
 import { hidePluginPanel } from '../../core-ui/layout/store/layout.actions';
-import { TaskDetailTargetPanel } from '../tasks/task.model';
 import {
   INITIAL_LAYOUT_STATE,
   selectLayoutFeatureState,
@@ -40,6 +39,7 @@ import { BottomPanelStateService } from '../../core-ui/bottom-panel-state.servic
 import { slideRightPanelAni } from './slide-right-panel-out.ani';
 import { BottomPanelContainerComponent } from '../bottom-panel/bottom-panel-container.component';
 import { MatBottomSheet, MatBottomSheetRef } from '@angular/material/bottom-sheet';
+import { PanelContentService } from '../panels/panel-content.service';
 // Right panel resize constants
 const RIGHT_PANEL_CONFIG = {
   DEFAULT_WIDTH: 320,
@@ -96,6 +96,7 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
   private _taskService = inject(TaskService);
   private _store = inject(Store);
   private _bottomPanelState = inject(BottomPanelStateService);
+  private _panelContentService = inject(PanelContentService);
 
   readonly sideWidth = input<number>(40);
   readonly wasClosed = output<void>();
@@ -129,32 +130,9 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
   );
 
   // Determine if there is content to show in any panel
-  private readonly _hasPanelContent = computed<boolean>(() => {
-    const selectedTask = this._selectedTask();
-    const targetPanel = this._taskDetailPanelTargetPanel();
-    const layoutState = this._layoutFeatureState();
-
-    if (!layoutState) {
-      return false;
-    }
-
-    const {
-      isShowNotes,
-      isShowIssuePanel,
-      isShowTaskViewCustomizerPanel,
-      isShowPluginPanel,
-    } = layoutState;
-
-    const hasContent = !!(
-      selectedTask ||
-      isShowNotes ||
-      isShowIssuePanel ||
-      isShowTaskViewCustomizerPanel ||
-      isShowPluginPanel
-    );
-
-    return hasContent && targetPanel !== TaskDetailTargetPanel.DONT_OPEN_PANEL;
-  });
+  private readonly _hasPanelContent = computed<boolean>(() =>
+    this._panelContentService.getCanOpen(),
+  );
 
   // Get isOpen for the right side panel (desktop/non-xs only)
   readonly isOpen = computed<boolean>(() => {
