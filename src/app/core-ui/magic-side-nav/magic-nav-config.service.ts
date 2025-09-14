@@ -15,6 +15,7 @@ import { T } from '../../t.const';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { DialogCreateProjectComponent } from '../../features/project/dialogs/create-project/dialog-create-project.component';
 import { getGithubErrorUrl } from '../../core/error-handler/global-error-handler.util';
+import { DialogPromptComponent } from '../../ui/dialog-prompt/dialog-prompt.component';
 import {
   selectAllProjectsExceptInbox,
   selectUnarchivedHiddenProjectIds,
@@ -384,10 +385,18 @@ export class MagicNavConfigService {
   }
 
   private _createNewTag(): void {
-    const title = prompt('Enter tag name:');
-    if (title && title.trim()) {
-      this._tagService.addTag({ title: title.trim() });
-    }
+    this._matDialog
+      .open(DialogPromptComponent, {
+        data: {
+          placeholder: T.F.TAG.TTL.ADD_NEW_TAG,
+        },
+      })
+      .afterClosed()
+      .subscribe((title) => {
+        if (title && title.trim()) {
+          this._tagService.addTag({ title: title.trim() });
+        }
+      });
   }
 
   private _openBugReport(): void {
