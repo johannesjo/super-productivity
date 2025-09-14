@@ -215,6 +215,7 @@ export class ScheduleEventComponent implements OnInit {
       this._matDialog.open(DialogEditTaskRepeatCfgComponent, {
         data: {
           repeatCfg,
+          targetDate: (this.se.id.includes('_') && this.se.id.split('_')[1]) || undefined,
         },
       });
     } else if (this.se.type === SVEType.CalendarEvent) {

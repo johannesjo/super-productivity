@@ -456,6 +456,7 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
       restoreFocus: true,
       data: {
         task: this.task(),
+        targetDate: this.task().dueDay || getDbDateStr(new Date(this.task().created)),
       },
     });
   }
