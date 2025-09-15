@@ -1,20 +1,58 @@
 import { inject, Injectable } from '@angular/core';
-import { TaskService } from './task.service';
 import { TaskFocusService } from './task-focus.service';
 import { GlobalConfigService } from '../config/global-config.service';
 import { checkKeyCombo } from '../../util/check-key-combo';
+import { Log } from '../../core/log';
+
+type TaskId = string;
+
+// TODO get real method names from component
+type TaskComponentMethod =
+  | 'focusTitleForEdit'
+  | 'toggleShowDetailPanel'
+  | 'estimateTime'
+  | 'scheduleTask'
+  | 'toggleDoneKeyboard'
+  | 'addSubTask'
+  | 'addAttachment'
+  | 'deleteTask'
+  | 'openProjectMenu'
+  | 'editTags'
+  | 'openContextMenu'
+  | 'moveToBacklog'
+  | 'moveToToday'
+  | 'focusPrevious'
+  | 'focusNext'
+  | 'collapseSubTasks'
+  | 'expandSubTasks'
+  | 'moveUp'
+  | 'moveDown'
+  | 'moveToTop'
+  | 'moveToBottom'
+  | 'focusSelf'
+  | 'showAdditionalInfos';
 
 @Injectable({
   providedIn: 'root',
 })
+/**
+ * Service for handling global task keyboard shortcuts.
+ * Delegates shortcut actions to the appropriate task component methods.
+ */
 export class TaskShortcutService {
-  private readonly _taskService = inject(TaskService);
   private readonly _taskFocusService = inject(TaskFocusService);
   private readonly _configService = inject(GlobalConfigService);
 
+  /**
+   * Handles task-specific keyboard shortcuts if a task is currently focused.
+   *
+   * @param ev - The keyboard event
+   * @returns True if the shortcut was handled, false otherwise
+   */
   handleTaskShortcuts(ev: KeyboardEvent): boolean {
     // Handle task-specific shortcuts if a task is focused
-    const focusedTaskId = this._taskFocusService.focusedTaskId();
+    const focusedTaskId: TaskId | null = this._taskFocusService.focusedTaskId();
+
     if (!focusedTaskId) return false;
 
     const cfg = this._configService.cfg();
@@ -134,17 +172,65 @@ export class TaskShortcutService {
     return false;
   }
 
-  private _handleTaskShortcut(taskId: string, method: string, ...args: any[]): void {
+  /**
+   * Finds and calls a method on the task component for the given task ID.
+   *
+   * @param taskId - The ID of the task
+   * @param method - The method name to call on the task component
+   * @param args - Arguments to pass to the method
+   */
+  private _handleTaskShortcut(
+    taskId: TaskId,
+    method: TaskComponentMethod,
+    ...args: unknown[]
+  ): void {
     // Find the task component by taskId and call the specified method
-    const taskElement = document.querySelector(`#t-${taskId}`) as any;
-    const taskComponent = this._getTaskComponent(taskElement);
+    const taskElement = document.querySelector(`#t-${taskId}`) as HTMLElement | null;
+    if (!taskElement) {
+      Log.warn(`Task element not found for ID: t-${taskId}`);
+      return;
+    }
 
-    if (taskComponent && typeof taskComponent[method] === 'function') {
-      taskComponent[method](...args);
+    const taskComponent = this._getTaskComponent(taskElement);
+    if (!taskComponent) {
+      Log.warn(`Task component not found for element:`, taskElement);
+      return;
+    }
+
+    if (typeof taskComponent[method] === 'function') {
+      (taskComponent[method] as (...args: unknown[]) => void)(...args);
+      // TODO hide context menu if open
+    } else {
+      Log.warn(`Method ${method} not found on task component`, taskComponent);
     }
   }
 
-  private _getTaskComponent(taskElement: any): any {
-    return taskElement && (window as any).ng.getComponent(taskElement);
+  /**
+   * Extracts the Angular component instance from a DOM element.
+   *
+   * @param taskElement - The DOM element containing the task component
+   * @returns The task component instance or null if not found
+   */
+  private _getTaskComponent(taskElement: HTMLElement | null): unknown | null {
+    if (!taskElement) return null;
+
+    // Try the modern approach first
+    if ((window as any).ng?.getComponent) {
+      const component = (window as any).ng.getComponent(taskElement);
+      if (component) return component;
+    }
+
+    // Fallback to the __ngContext__ approach
+    if ((taskElement as any).__ngContext__) {
+      const context = (taskElement as any).__ngContext__;
+      for (let i = 0; i < context.length; i++) {
+        const item = context[i];
+        if (item && typeof item.task === 'function') {
+          return item;
+        }
+      }
+    }
+
+    return null;
   }
 }

@@ -268,11 +268,11 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   // methods come last
 
   @HostListener('focus') onFocus(): void {
-    this._taskFocusService.setFocusedTask(this.task().id);
+    this._taskFocusService.focusedTaskId.set(this.task().id);
   }
 
   @HostListener('blur') onBlur(): void {
-    this._taskFocusService.setFocusedTask(null);
+    this._taskFocusService.focusedTaskId.set(null);
   }
 
   @HostListener('dragenter', ['$event']) onDragEnter(ev: DragEvent): void {
