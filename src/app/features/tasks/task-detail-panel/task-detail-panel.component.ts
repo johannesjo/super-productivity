@@ -483,7 +483,10 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   collapseParent(): void {
     if (!this.isDialogMode()) {
       this.taskService.setSelectedId(null);
-      this.taskService.focusTaskIfPossible(this.task().id);
+      // NOTE: we delay for a frame to avoid problems with the global task keyboard shortcut handler
+      window.setTimeout(() => {
+        this.taskService.focusTaskIfPossible(this.task().id);
+      });
     }
   }
 

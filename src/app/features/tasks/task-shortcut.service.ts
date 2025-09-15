@@ -3,42 +3,36 @@ import { TaskFocusService } from './task-focus.service';
 import { GlobalConfigService } from '../config/global-config.service';
 import { checkKeyCombo } from '../../util/check-key-combo';
 import { Log } from '../../core/log';
+import { TaskComponent } from './task/task.component';
+import { TaskContextMenuComponent } from './task-context-menu/task-context-menu.component';
+import { TaskContextMenuInnerComponent } from './task-context-menu/task-context-menu-inner/task-context-menu-inner.component';
 
 type TaskId = string;
 
-// TODO get real method names from component
-type TaskComponentMethod =
-  | 'focusTitleForEdit'
-  | 'toggleShowDetailPanel'
-  | 'estimateTime'
-  | 'scheduleTask'
-  | 'toggleDoneKeyboard'
-  | 'addSubTask'
-  | 'addAttachment'
-  | 'deleteTask'
-  | 'openProjectMenu'
-  | 'editTags'
-  | 'openContextMenu'
-  | 'moveToBacklog'
-  | 'moveToToday'
-  | 'focusPrevious'
-  | 'focusNext'
-  | 'collapseSubTasks'
-  | 'expandSubTasks'
-  | 'moveUp'
-  | 'moveDown'
-  | 'moveToTop'
-  | 'moveToBottom'
-  | 'focusSelf'
-  | 'showAdditionalInfos';
+/**
+ * Available methods on the task component for keyboard shortcut delegation.
+ * These correspond to actual methods implemented in the TaskComponent.
+ */
+type TaskComponentMethod = keyof TaskComponent;
 
+/**
+ * Service for handling global task keyboard shortcuts.
+ *
+ * This service provides comprehensive keyboard shortcut support for task management:
+ * - Delegates shortcut actions to appropriate task component methods
+ * - Manages context menu state to prevent conflicts with navigation shortcuts
+ * - Supports conditional shortcut execution based on UI state
+ * - Provides type-safe component interaction through well-defined interfaces
+ *
+ * Key features:
+ * - Arrow navigation (disabled when context menus are open)
+ * - Task editing shortcuts (title, tags, scheduling, etc.)
+ * - Project and context management shortcuts
+ * - Automatic context menu closing when executing shortcuts
+ */
 @Injectable({
   providedIn: 'root',
 })
-/**
- * Service for handling global task keyboard shortcuts.
- * Delegates shortcut actions to the appropriate task component methods.
- */
 export class TaskShortcutService {
   private readonly _taskFocusService = inject(TaskFocusService);
   private readonly _configService = inject(GlobalConfigService);
@@ -53,7 +47,18 @@ export class TaskShortcutService {
     // Handle task-specific shortcuts if a task is focused
     const focusedTaskId: TaskId | null = this._taskFocusService.focusedTaskId();
 
-    if (!focusedTaskId) return false;
+    // Log.log('TaskShortcutService.handleTaskShortcuts', {
+    //   focusedTaskId,
+    //   key: ev.key,
+    //   ctrlKey: ev.ctrlKey,
+    //   shiftKey: ev.shiftKey,
+    //   altKey: ev.altKey,
+    // });
+
+    if (!focusedTaskId) {
+      // Log.log('TaskShortcutService: No focused task ID');
+      return false;
+    }
 
     const cfg = this._configService.cfg();
     if (!cfg) return false;
@@ -61,8 +66,14 @@ export class TaskShortcutService {
     const keys = cfg.keyboard;
     const isShiftOrCtrlPressed = ev.shiftKey || ev.ctrlKey;
 
+    // Check if the focused task's context menu is open - if so, skip arrow navigation shortcuts
+    const isContextMenuOpen = this._isTaskContextMenuOpen(focusedTaskId);
+
     // Basic task actions that work through component delegation
-    if (checkKeyCombo(ev, keys.taskEditTitle) || ev.key === 'Enter') {
+    if (
+      !isContextMenuOpen &&
+      (checkKeyCombo(ev, keys.taskEditTitle) || ev.key === 'Enter')
+    ) {
       this._handleTaskShortcut(focusedTaskId, 'focusTitleForEdit');
       ev.preventDefault();
       return true;
@@ -103,8 +114,8 @@ export class TaskShortcutService {
       return true;
     }
 
-    // Move to project / Open project menu
-    if (checkKeyCombo(ev, keys.taskMoveToProject)) {
+    // Move to project / Open project menu for project selection (only for non-sub-tasks)
+    if (!isContextMenuOpen && checkKeyCombo(ev, keys.taskMoveToProject)) {
       this._handleTaskShortcut(focusedTaskId, 'openProjectMenu');
       ev.preventDefault();
       return true;
@@ -124,23 +135,26 @@ export class TaskShortcutService {
       return true;
     }
 
-    // Move to backlog/today (simplified)
+    // Move to backlog/today (only for project tasks, not sub-tasks)
     if (checkKeyCombo(ev, keys.moveToBacklog)) {
-      this._handleTaskShortcut(focusedTaskId, 'moveToBacklog');
+      this._handleTaskShortcut(focusedTaskId, 'moveToBacklogWithFocus');
       ev.preventDefault();
+      ev.stopPropagation();
       return true;
     }
 
     if (checkKeyCombo(ev, keys.moveToTodaysTasks)) {
-      this._handleTaskShortcut(focusedTaskId, 'moveToToday');
+      this._handleTaskShortcut(focusedTaskId, 'moveToTodayWithFocus');
       ev.preventDefault();
+      ev.stopPropagation();
       return true;
     }
 
-    // Navigation shortcuts
+    // Navigation shortcuts - only work if context menu is not open
     if (
-      (!isShiftOrCtrlPressed && ev.key === 'ArrowUp') ||
-      checkKeyCombo(ev, keys.selectPreviousTask)
+      !isContextMenuOpen &&
+      ((!isShiftOrCtrlPressed && ev.key === 'ArrowUp') ||
+        checkKeyCombo(ev, keys.selectPreviousTask))
     ) {
       ev.preventDefault();
       this._handleTaskShortcut(focusedTaskId, 'focusPrevious');
@@ -148,24 +162,67 @@ export class TaskShortcutService {
     }
 
     if (
-      (!isShiftOrCtrlPressed && ev.key === 'ArrowDown') ||
-      checkKeyCombo(ev, keys.selectNextTask)
+      !isContextMenuOpen &&
+      ((!isShiftOrCtrlPressed && ev.key === 'ArrowDown') ||
+        checkKeyCombo(ev, keys.selectNextTask))
     ) {
       ev.preventDefault();
       this._handleTaskShortcut(focusedTaskId, 'focusNext');
       return true;
     }
 
-    // Arrow navigation for expand/collapse
-    if (ev.key === 'ArrowLeft' || checkKeyCombo(ev, keys.collapseSubTasks)) {
-      this._handleTaskShortcut(focusedTaskId, 'focusPrevious');
+    // Arrow navigation for expand/collapse - only work if context menu is not open
+    if (
+      !isContextMenuOpen &&
+      (ev.key === 'ArrowLeft' || checkKeyCombo(ev, keys.collapseSubTasks))
+    ) {
+      this._handleTaskShortcut(focusedTaskId, 'handleArrowLeft');
       ev.preventDefault();
       return true;
     }
 
-    if (ev.key === 'ArrowRight' || checkKeyCombo(ev, keys.expandSubTasks)) {
-      this._handleTaskShortcut(focusedTaskId, 'focusNext');
+    if (
+      !isContextMenuOpen &&
+      (ev.key === 'ArrowRight' || checkKeyCombo(ev, keys.expandSubTasks))
+    ) {
+      this._handleTaskShortcut(focusedTaskId, 'handleArrowRight');
       ev.preventDefault();
+      return true;
+    }
+
+    // Toggle play/pause
+    if (checkKeyCombo(ev, keys.togglePlay)) {
+      this._handleTaskShortcut(focusedTaskId, 'togglePlayPause');
+      ev.preventDefault();
+      return true;
+    }
+
+    // Task movement shortcuts
+    if (checkKeyCombo(ev, keys.moveTaskUp)) {
+      this._handleTaskShortcut(focusedTaskId, 'moveTaskUp');
+      ev.preventDefault();
+      ev.stopPropagation();
+      return true;
+    }
+
+    if (checkKeyCombo(ev, keys.moveTaskDown)) {
+      this._handleTaskShortcut(focusedTaskId, 'moveTaskDown');
+      ev.preventDefault();
+      ev.stopPropagation();
+      return true;
+    }
+
+    if (checkKeyCombo(ev, keys.moveTaskToTop)) {
+      this._handleTaskShortcut(focusedTaskId, 'moveTaskToTop');
+      ev.preventDefault();
+      ev.stopPropagation();
+      return true;
+    }
+
+    if (checkKeyCombo(ev, keys.moveTaskToBottom)) {
+      this._handleTaskShortcut(focusedTaskId, 'moveTaskToBottom');
+      ev.preventDefault();
+      ev.stopPropagation();
       return true;
     }
 
@@ -173,9 +230,9 @@ export class TaskShortcutService {
   }
 
   /**
-   * Finds and calls a method on the task component for the given task ID.
+   * Calls a method on the currently focused task component.
    *
-   * @param taskId - The ID of the task
+   * @param taskId - The ID of the task (for validation)
    * @param method - The method name to call on the task component
    * @param args - Arguments to pass to the method
    */
@@ -184,53 +241,66 @@ export class TaskShortcutService {
     method: TaskComponentMethod,
     ...args: unknown[]
   ): void {
-    // Find the task component by taskId and call the specified method
-    const taskElement = document.querySelector(`#t-${taskId}`) as HTMLElement | null;
-    if (!taskElement) {
-      Log.warn(`Task element not found for ID: t-${taskId}`);
-      return;
-    }
-
-    const taskComponent = this._getTaskComponent(taskElement);
+    const taskComponent = this._taskFocusService.lastFocusedTaskComponent();
     if (!taskComponent) {
-      Log.warn(`Task component not found for element:`, taskElement);
+      Log.warn(`No focused task component available for ID: ${taskId}`);
       return;
     }
 
     if (typeof taskComponent[method] === 'function') {
+      // Close context menu if open before executing the shortcut
+      this._closeContextMenuIfOpen(taskComponent);
+
       (taskComponent[method] as (...args: unknown[]) => void)(...args);
-      // TODO hide context menu if open
     } else {
       Log.warn(`Method ${method} not found on task component`, taskComponent);
     }
   }
 
   /**
-   * Extracts the Angular component instance from a DOM element.
+   * Checks if the context menu is open for the currently focused task.
    *
-   * @param taskElement - The DOM element containing the task component
-   * @returns The task component instance or null if not found
+   * @param taskId - The task ID to check
+   * @returns True if the context menu is open, false otherwise
    */
-  private _getTaskComponent(taskElement: HTMLElement | null): unknown | null {
-    if (!taskElement) return null;
+  private _isTaskContextMenuOpen(taskId: TaskId): boolean {
+    try {
+      const taskComponent = this._taskFocusService.lastFocusedTaskComponent();
+      if (!taskComponent) return false;
 
-    // Try the modern approach first
-    if ((window as any).ng?.getComponent) {
-      const component = (window as any).ng.getComponent(taskElement);
-      if (component) return component;
+      const contextMenu: TaskContextMenuComponent | undefined =
+        taskComponent.taskContextMenu();
+      return contextMenu?.isShowInner ?? false;
+    } catch (error) {
+      return false;
     }
+  }
 
-    // Fallback to the __ngContext__ approach
-    if ((taskElement as any).__ngContext__) {
-      const context = (taskElement as any).__ngContext__;
-      for (let i = 0; i < context.length; i++) {
-        const item = context[i];
-        if (item && typeof item.task === 'function') {
-          return item;
+  /**
+   * Closes the context menu if it's currently open for the given task component.
+   *
+   * @param taskComponent - The task component instance
+   */
+  private _closeContextMenuIfOpen(taskComponent: TaskComponent): void {
+    try {
+      const contextMenu: TaskContextMenuComponent | undefined =
+        taskComponent.taskContextMenu();
+
+      // Close the context menu if it's open
+      if (contextMenu && contextMenu.isShowInner) {
+        // Set isShowInner to false to hide the context menu
+        contextMenu.isShowInner = false;
+
+        // Also trigger onClose on the inner component if available
+        const innerComponent: TaskContextMenuInnerComponent | undefined =
+          contextMenu.taskContextMenuInner?.();
+        if (innerComponent && typeof innerComponent.onClose === 'function') {
+          innerComponent.onClose();
         }
       }
+    } catch (error) {
+      // Silently ignore errors - context menu might not exist or be accessible
+      Log.warn('Failed to close context menu:', error);
     }
-
-    return null;
   }
 }

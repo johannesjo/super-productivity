@@ -208,8 +208,11 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   }
 
   focusRelatedTaskOrNext(): void {
-    // NOTE: not active for now
-    // this.focusTaskOrNextAfter.emit();
+    // Focus the task element after context menu closes
+    const taskElement = document.querySelector(`#t-${this.task.id}`) as HTMLElement;
+    if (taskElement) {
+      taskElement.focus();
+    }
   }
 
   onClose(): void {

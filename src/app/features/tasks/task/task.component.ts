@@ -269,6 +269,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   @HostListener('focus') onFocus(): void {
     this._taskFocusService.focusedTaskId.set(this.task().id);
+    this._taskFocusService.lastFocusedTaskComponent.set(this);
   }
 
   @HostListener('blur') onBlur(): void {
@@ -385,6 +386,95 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   pauseTask(): void {
     this._taskService.pauseCurrent();
+  }
+
+  togglePlayPause(): void {
+    if (this.isCurrent()) {
+      this.pauseTask();
+    } else {
+      this.startTask();
+    }
+  }
+
+  moveTaskUp(): void {
+    const t = this.task();
+    this._taskService.moveUp(t.id, t.parentId, this.isBacklog());
+    // timeout required to let changes take place
+    setTimeout(() => this.focusSelf());
+    setTimeout(() => this.focusSelf(), 10);
+  }
+
+  moveTaskDown(): void {
+    const t = this.task();
+    this._taskService.moveDown(t.id, t.parentId, this.isBacklog());
+    setTimeout(() => this.focusSelf());
+    setTimeout(() => this.focusSelf(), 10);
+  }
+
+  moveTaskToTop(): void {
+    const t = this.task();
+    this._taskService.moveToTop(t.id, t.parentId, this.isBacklog());
+    setTimeout(() => this.focusSelf());
+    setTimeout(() => this.focusSelf(), 10);
+  }
+
+  moveTaskToBottom(): void {
+    const t = this.task();
+    this._taskService.moveToBottom(t.id, t.parentId, this.isBacklog());
+    setTimeout(() => this.focusSelf());
+    setTimeout(() => this.focusSelf(), 10);
+  }
+
+  handleArrowLeft(): void {
+    const t = this.task();
+    const hasSubTasks = t.subTasks && t.subTasks.length > 0;
+
+    if (this.isSelected()) {
+      this.hideDetailPanel();
+    } else if (hasSubTasks && t._hideSubTasksMode !== HideSubTasksMode.HideAll) {
+      this._taskService.toggleSubTaskMode(t.id, true, false);
+    } else {
+      this.focusPrevious();
+    }
+  }
+
+  handleArrowRight(): void {
+    const t = this.task();
+    const hasSubTasks = t.subTasks && t.subTasks.length > 0;
+
+    if (hasSubTasks && t._hideSubTasksMode !== undefined) {
+      this._taskService.toggleSubTaskMode(t.id, false, false);
+    } else if (!this.isSelected()) {
+      this.showDetailPanel();
+    } else {
+      this.focusNext();
+    }
+  }
+
+  moveToBacklogWithFocus(): void {
+    const t = this.task();
+    if (t.projectId && !t.parentId) {
+      this.focusPrevious(true);
+      this.moveToBacklog();
+    }
+  }
+
+  moveToTodayWithFocus(): void {
+    const t = this.task();
+    if (t.projectId) {
+      this.focusNext(true, true);
+      this.moveToToday();
+    }
+  }
+
+  openProjectMenu(): void {
+    const t = this.task();
+    if (!t.parentId) {
+      const projectMenuTrigger = this.projectMenuTrigger();
+      if (projectMenuTrigger) {
+        projectMenuTrigger.openMenu();
+      }
+    }
   }
 
   updateTaskTitleIfChanged({
