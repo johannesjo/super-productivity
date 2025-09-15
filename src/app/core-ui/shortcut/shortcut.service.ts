@@ -18,6 +18,7 @@ import { SyncWrapperService } from '../../imex/sync/sync-wrapper.service';
 import { first, mapTo, switchMap } from 'rxjs/operators';
 import { fromEvent, merge, Observable, of } from 'rxjs';
 import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
+import { TaskShortcutService } from '../../features/tasks/task-shortcut.service';
 
 @Injectable({
   providedIn: 'root',
@@ -34,6 +35,7 @@ export class ShortcutService {
   private _syncWrapperService = inject(SyncWrapperService);
   private _store = inject(Store);
   private _pluginBridgeService = inject(PluginBridgeService);
+  private _taskShortcutService = inject(TaskShortcutService);
 
   isCtrlPressed$: Observable<boolean> = fromEvent(document, 'keydown').pipe(
     switchMap((ev: Event) => {
@@ -174,6 +176,11 @@ export class ShortcutService {
       } else if (checkKeyCombo(ev, keys.zoomDefault)) {
         this._uiHelperService.zoomTo(1);
       }
+    }
+
+    // Handle task-specific shortcuts
+    if (this._taskShortcutService.handleTaskShortcuts(ev)) {
+      return;
     }
 
     // Check plugin shortcuts (exec last)
