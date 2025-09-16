@@ -103,7 +103,7 @@
   left: -2px; // Position like magic-nav
   width: 4px;
   cursor: col-resize;
-  z-index: 1003;
+  z-index: var(--z-right-panel-resize-handle);
   transition: background-color 0.2s ease;
   background: transparent;
 
@@ -133,7 +133,7 @@
   align-items: center;
   justify-content: center;
   cursor: grab; // Indicate it can be dragged
-  z-index: 1004;
+  z-index: var(--z-right-panel-edge-handle);
   box-shadow: var(--whiteframe-shadow-2dp);
   transition: all 0.2s ease;
   color: var(--text-color);
