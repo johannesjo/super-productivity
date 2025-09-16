@@ -1,7 +1,9 @@
 // DOM element manipulation functions...
 //
 
-const setValue = (el: HTMLInputElement, value: string): void => {
+import { TextInputElement } from './mention-types';
+
+const setValue = (el: TextInputElement, value: string): void => {
   //console.log("setValue", el.nodeName, "["+value+"]");
   if (isInputOrTextAreaElement(el)) {
     el.value = value;
@@ -10,12 +12,12 @@ const setValue = (el: HTMLInputElement, value: string): void => {
   }
 };
 
-export const getValue = (el: HTMLInputElement): string | null => {
+export const getValue = (el: TextInputElement): string | null => {
   return isInputOrTextAreaElement(el) ? el.value : el.textContent;
 };
 
 export const insertValue = (
-  el: HTMLInputElement,
+  el: TextInputElement,
   start: number,
   end: number,
   text: string,
@@ -40,7 +42,7 @@ export const insertValue = (
       // }
       if (anchorNode) {
         insertValue(
-          <HTMLInputElement>anchorNode,
+          anchorNode as TextInputElement,
           position - (end - start),
           position,
           text,
@@ -64,7 +66,7 @@ export const isTextElement = (el: HTMLElement): boolean => {
 };
 
 export const setCaretPosition = (
-  el: HTMLInputElement,
+  el: TextInputElement,
   pos: number,
   iframe: HTMLIFrameElement | null = null,
 ): void => {
@@ -86,7 +88,7 @@ export const setCaretPosition = (
 };
 
 export const getCaretPosition = (
-  el: HTMLInputElement,
+  el: TextInputElement,
   iframe: HTMLIFrameElement | null = null,
 ): number => {
   //console.log("getCaretPosition", el);
