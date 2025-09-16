@@ -1,9 +1,9 @@
 import { moveNode, isAncestor, getPath } from './tree.utils';
 import type { TreeNode, MoveInstruction } from './tree.types';
 
-function root(...children: TreeNode[]): TreeNode[] {
+const root = (...children: TreeNode[]): TreeNode[] => {
   return children;
-}
+};
 
 describe('tree.utils', () => {
   it('moves before a sibling', () => {

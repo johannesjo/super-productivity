@@ -1,18 +1,14 @@
 import { MoveInstruction, TreeId, TreeNode } from './tree.types';
 
-export function cloneNodes(nodes: TreeNode[]): TreeNode[] {
-  return nodes.map((n) => ({
+export const cloneNodes = (nodes: TreeNode[]): TreeNode[] =>
+  nodes.map((n) => ({
     ...n,
     children: n.children ? cloneNodes(n.children) : undefined,
   }));
-}
 
-export function getPath(nodes: TreeNode[], targetId: TreeId): TreeId[] | null {
+export const getPath = (nodes: TreeNode[], targetId: TreeId): TreeId[] | null => {
   const path: TreeId[] = [];
-  const found = dfs(nodes, targetId, path);
-  return found ? path : null;
-
-  function dfs(list: TreeNode[], id: TreeId, acc: TreeId[]): boolean {
+  const dfs = (list: TreeNode[], id: TreeId, acc: TreeId[]): boolean => {
     for (const node of list) {
       acc.push(node.id);
       if (node.id === id) return true;
@@ -20,19 +16,24 @@ export function getPath(nodes: TreeNode[], targetId: TreeId): TreeId[] | null {
       acc.pop();
     }
     return false;
-  }
-}
+  };
+  const found = dfs(nodes, targetId, path);
+  return found ? path : null;
+};
 
-export function isAncestor(
+export const isAncestor = (
   nodes: TreeNode[],
   ancestorId: TreeId,
   possibleDescendantId: TreeId,
-): boolean {
+): boolean => {
   const path = getPath(nodes, possibleDescendantId);
   return !!path?.includes(ancestorId);
-}
+};
 
-export function findAndRemove(nodes: TreeNode[], id: TreeId): { node: TreeNode | null } {
+export const findAndRemove = (
+  nodes: TreeNode[],
+  id: TreeId,
+): { node: TreeNode | null } => {
   const stack: { parent: TreeNode | null; list: TreeNode[] }[] = [
     { parent: null, list: nodes },
   ];
@@ -48,9 +49,9 @@ export function findAndRemove(nodes: TreeNode[], id: TreeId): { node: TreeNode |
     }
   }
   return { node: null };
-}
+};
 
-export function getChildren(nodes: TreeNode[], id: '' | TreeId): TreeNode[] {
+export const getChildren = (nodes: TreeNode[], id: '' | TreeId): TreeNode[] => {
   if (id === '') return nodes;
   const stack = [...nodes];
   while (stack.length) {
@@ -59,9 +60,9 @@ export function getChildren(nodes: TreeNode[], id: '' | TreeId): TreeNode[] {
     if (n.children) stack.push(...n.children);
   }
   return nodes;
-}
+};
 
-export function moveNode(data: TreeNode[], instr: MoveInstruction): TreeNode[] {
+export const moveNode = (data: TreeNode[], instr: MoveInstruction): TreeNode[] => {
   if (instr.targetId && instr.itemId === instr.targetId) return data; // no-op
   if (instr.targetId && isAncestor(data, instr.itemId, instr.targetId)) return data; // prevent into own child
 
@@ -83,9 +84,9 @@ export function moveNode(data: TreeNode[], instr: MoveInstruction): TreeNode[] {
   const insertIndex = instr.where === 'before' ? index : index + 1;
   parentChildren.splice(insertIndex, 0, node);
   return nodes;
-}
+};
 
-function getChildrenOfParent(nodes: TreeNode[], id: TreeId): TreeNode[] {
+const getChildrenOfParent = (nodes: TreeNode[], id: TreeId): TreeNode[] => {
   // returns the array that contains the node with id
   const stack: { parent: TreeNode | null; list: TreeNode[] }[] = [
     { parent: null, list: nodes },
@@ -99,4 +100,4 @@ function getChildrenOfParent(nodes: TreeNode[], id: TreeId): TreeNode[] {
     }
   }
   return nodes;
-}
+};

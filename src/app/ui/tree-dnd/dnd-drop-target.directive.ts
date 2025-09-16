@@ -78,7 +78,7 @@ export class DndDropTargetDirective {
   private onActive(
     { location, self }: ElementDropTargetEventBasePayload,
     where: DropData['where'],
-  ) {
+  ): void {
     const list = location.current.dropTargets;
     const innerMost = list[list.length - 1];
     const isActive = innerMost?.element === self.element;

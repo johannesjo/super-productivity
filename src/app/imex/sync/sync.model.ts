@@ -14,7 +14,7 @@ import { NoteState } from '../../features/note/note.model';
 import { PlannerState } from '../../features/planner/store/planner.reducer';
 import { IssueProviderState } from '../../features/issue/issue.model';
 import { BoardsState } from '../../features/boards/store/boards.reducer';
-import { ProjectFolderState } from '../../features/project-folder/project-folder.model';
+import { ProjectFolderState } from '../../features/project-folder/store/project-folder.model';
 
 export interface AppBaseWithoutLastSyncModelChange {
   project: ProjectState;

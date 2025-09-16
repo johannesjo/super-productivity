@@ -10,7 +10,7 @@ import { TAG_FEATURE_NAME } from '../features/tag/store/tag.reducer';
 import { TagState } from '../features/tag/tag.model';
 import { WORK_CONTEXT_FEATURE_NAME } from '../features/work-context/store/work-context.selectors';
 import { ProjectState } from '../features/project/project.model';
-import { ProjectFolderState } from '../features/project-folder/project-folder.model';
+import { ProjectFolderState } from '../features/project-folder/store/project-folder.model';
 import { projectFolderFeatureKey } from '../features/project-folder/store/project-folder.reducer';
 import { NoteState } from '../features/note/note.model';
 import {

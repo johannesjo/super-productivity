@@ -4,7 +4,7 @@ import {
   TimeTrackingState,
 } from '../../features/time-tracking/time-tracking.model';
 import { ProjectState } from '../../features/project/project.model';
-import { ProjectFolderState } from '../../features/project-folder/project-folder.model';
+import { ProjectFolderState } from '../../features/project-folder/store/project-folder.model';
 import { TaskState } from '../../features/tasks/task.model';
 import { createValidate } from 'typia';
 import { TagState } from '../../features/tag/tag.model';

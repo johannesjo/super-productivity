@@ -267,7 +267,7 @@ export class TreeDndComponent implements AfterViewInit {
     this.indicatorVisible.set(false);
   }
 
-  private rebuildNodeCache(nodes: TreeNode[]) {
+  private rebuildNodeCache(nodes: TreeNode[]): void {
     const cache = new Map<string, TreeNode>();
     const stack = [...nodes];
     while (stack.length) {
@@ -329,7 +329,7 @@ export class TreeDndComponent implements AfterViewInit {
   }
 
   // Imperative update: replace tree data and rebuild cache
-  update(nodes: TreeNode[]) {
+  update(nodes: TreeNode[]): void {
     this.nodes.set(nodes ?? []);
     this.rebuildNodeCache(this.nodes());
     this.updated.emit(this.nodes());

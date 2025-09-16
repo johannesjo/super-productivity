@@ -6,7 +6,7 @@ import {
   PfapiBaseCfg,
 } from './api';
 import { ProjectState } from '../features/project/project.model';
-import { ProjectFolderState } from '../features/project-folder/project-folder.model';
+import { ProjectFolderState } from '../features/project-folder/store/project-folder.model';
 import { GlobalConfigState } from '../features/config/global-config.model';
 import { Reminder } from '../features/reminder/reminder.model';
 import {

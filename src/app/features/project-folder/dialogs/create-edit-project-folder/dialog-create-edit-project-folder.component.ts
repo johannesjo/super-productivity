@@ -7,7 +7,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
 
-import { ProjectFolder } from '../../project-folder.model';
+import { ProjectFolder } from '../../store/project-folder.model';
 import { ProjectFolderService } from '../../project-folder.service';
 
 export interface DialogCreateEditProjectFolderData {
@@ -33,7 +33,7 @@ export class DialogCreateEditProjectFolderComponent {
   private readonly _dialogRef = inject(
     MatDialogRef<DialogCreateEditProjectFolderComponent>,
   );
-  readonly data = inject<DialogCreateEditProjectFolderData>(MAT_DIALOG_DATA);
+  readonly data = inject<DialogCreateEditProjectFolderData | null>(MAT_DIALOG_DATA);
   private readonly _projectFolderService = inject(ProjectFolderService);
   private readonly _fb = inject(FormBuilder);
 
@@ -46,10 +46,11 @@ export class DialogCreateEditProjectFolderComponent {
   });
 
   constructor() {
-    if (this.isEdit && this.data.folder) {
+    if (this.isEdit && this.data?.folder) {
+      const folder = this.data.folder;
       this.form.patchValue({
-        title: this.data.folder.title,
-        parentId: this.data.folder.parentId,
+        title: folder.title,
+        parentId: folder.parentId,
       });
     }
   }
@@ -61,8 +62,9 @@ export class DialogCreateEditProjectFolderComponent {
 
     const formValue = this.form.value;
 
-    if (this.isEdit && this.data.folder) {
-      this._projectFolderService.updateProjectFolder(this.data.folder.id, {
+    if (this.isEdit && this.data?.folder) {
+      const folder = this.data.folder;
+      this._projectFolderService.updateProjectFolder(folder.id, {
         title: formValue.title,
         parentId: formValue.parentId,
       });
