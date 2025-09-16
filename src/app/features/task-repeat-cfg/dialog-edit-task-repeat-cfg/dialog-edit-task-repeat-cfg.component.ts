@@ -33,7 +33,9 @@ import { TagService } from '../../tag/tag.service';
 import { unique } from '../../../util/unique';
 import { exists } from '../../../util/exists';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { getDbDateStr } from '../../../util/get-db-date-str';
+import { getDbDateStr, isDBDateStr } from '../../../util/get-db-date-str';
+import { formatMonthDay } from '../../../util/format-month-day.util';
+import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 import { first } from 'rxjs/operators';
 import { getQuickSettingUpdates } from './get-quick-setting-updates';
 import { clockStringFromDate } from '../../../ui/duration/clock-string-from-date';
@@ -98,6 +100,21 @@ export class DialogEditTaskRepeatCfgComponent {
   formGroup2 = signal(new UntypedFormGroup({}));
   tagSuggestions = toSignal(this._tagService.tags$, { initialValue: [] });
   canRemoveInstance = signal<boolean>(false);
+  removeInstanceButtonText = computed(() => {
+    if (!this._data.targetDate) {
+      return this._translateService.instant(T.F.TASK_REPEAT.F.REMOVE_INSTANCE);
+    }
+
+    // Format date using same logic as ShortDate2Pipe
+    const date = isDBDateStr(this._data.targetDate)
+      ? dateStrToUtcDate(this._data.targetDate)
+      : new Date(this._data.targetDate);
+    const formattedDate = formatMonthDay(date, this._locale);
+
+    return this._translateService.instant(T.F.TASK_REPEAT.F.REMOVE_FOR_DATE, {
+      date: formattedDate,
+    });
+  });
 
   constructor() {
     // Initialize form config
@@ -276,10 +293,10 @@ export class DialogEditTaskRepeatCfgComponent {
       .open(DialogConfirmComponent, {
         restoreFocus: true,
         data: {
-          message: this._translateService.instant('F.TASK_REPEAT.D_DELETE_INSTANCE.MSG', {
+          message: this._translateService.instant(T.F.TASK_REPEAT.D_DELETE_INSTANCE.MSG, {
             date: new Date(targetDate).toLocaleDateString(this._locale),
           }),
-          okTxt: this._translateService.instant('F.TASK_REPEAT.D_DELETE_INSTANCE.OK'),
+          okTxt: this._translateService.instant(T.F.TASK_REPEAT.D_DELETE_INSTANCE.OK),
         },
       })
       .afterClosed()

@@ -1411,6 +1411,7 @@
         "INHERIT_SUBTASKS": "Inherit subtasks",
         "INHERIT_SUBTASKS_DESCRIPTION": "When enabled, subtasks from the most recent task instance will be recreated with the repeating task",
         "REMOVE_INSTANCE": "Remove today",
+        "REMOVE_FOR_DATE": "Remove for {{date}}",
         "DISABLE_AUTO_UPDATE_SUBTASKS": "Disable auto-updating subtasks",
         "DISABLE_AUTO_UPDATE_SUBTASKS_DESCRIPTION": "Do not update inherited subtasks automatically when the newest instance changes"
       }
