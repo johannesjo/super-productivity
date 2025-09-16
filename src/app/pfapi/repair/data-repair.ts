@@ -261,7 +261,8 @@ const _removeMissingTasksFromListsOrRestoreFromArchive = (
 
   tag.ids.forEach((tId: string | number) => {
     const tagItem = tag.entities[tId] as TagCopy;
-    tagItem.taskIds = tagItem.taskIds.filter((id) => taskIds.includes(id));
+    const filteredTaskIds = tagItem.taskIds.filter((id) => taskIds.includes(id));
+    tag.entities[tId] = { ...tagItem, taskIds: filteredTaskIds };
   });
 
   taskIdsToRestoreFromArchive.forEach((id) => {
