@@ -1,13 +1,14 @@
 import { ChangeDetectionStrategy, Component, inject, Input } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Router } from '@angular/router';
-import { first } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { ProjectFolderService } from '../../features/project-folder/project-folder.service';
 import { DialogCreateEditProjectFolderComponent } from '../../features/project-folder/dialogs/create-edit-project-folder/dialog-create-edit-project-folder.component';
 import { MatMenuItem } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
+import { ProjectService } from '../../features/project/project.service';
+import { ProjectFolder } from '../../features/project-folder/store/project-folder.model';
 
 @Component({
   selector: 'folder-context-menu',
@@ -20,15 +21,12 @@ import { MatIcon } from '@angular/material/icon';
 export class FolderContextMenuComponent {
   private readonly _matDialog = inject(MatDialog);
   private readonly _projectFolderService = inject(ProjectFolderService);
-  private readonly _router = inject(Router);
+  private readonly _projectService = inject(ProjectService);
 
   @Input() folderId!: string;
 
   async editFolder(): Promise<void> {
-    const folder = await this._projectFolderService
-      .getFolderById(this.folderId)
-      .pipe(first())
-      .toPromise();
+    const folder = await this._loadFolder(this.folderId);
 
     if (!folder) return;
 
@@ -41,25 +39,35 @@ export class FolderContextMenuComponent {
   }
 
   async deleteFolder(): Promise<void> {
-    const folder = await this._projectFolderService
-      .getFolderById(this.folderId)
-      .pipe(first())
-      .toPromise();
+    const folder = await this._loadFolder(this.folderId);
 
     if (!folder) return;
 
-    const isConfirmed = await this._matDialog
-      .open(DialogConfirmComponent, {
-        restoreFocus: true,
-        data: {
-          message: `Are you sure you want to delete the folder "${folder.title}"? All projects in this folder will be moved to the root level.`,
-        },
-      })
-      .afterClosed()
-      .toPromise();
+    const isConfirmed = await new Promise<boolean>((resolve) => {
+      this._matDialog
+        .open(DialogConfirmComponent, {
+          restoreFocus: true,
+          data: {
+            message: `Are you sure you want to delete the folder "${folder.title}"? All projects in this folder will be moved to the root level.`,
+          },
+        })
+        .afterClosed()
+        .pipe(take(1))
+        .subscribe((result) => resolve(!!result));
+    });
 
     if (isConfirmed) {
+      this._projectService.moveProjectsFromFolderToRoot(this.folderId);
       this._projectFolderService.deleteProjectFolder(this.folderId);
     }
+  }
+
+  private _loadFolder(folderId: string): Promise<ProjectFolder | undefined> {
+    return new Promise((resolve) => {
+      this._projectFolderService
+        .getFolderById(folderId)
+        .pipe(take(1))
+        .subscribe((folder) => resolve(folder));
+    });
   }
 }

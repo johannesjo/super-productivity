@@ -24,7 +24,9 @@ import { MagicNavConfigService } from '../magic-nav-config.service';
 import { T } from '../../../t.const';
 import { WorkContextType } from '../../../features/work-context/work-context.model';
 import { ProjectFolderService } from '../../../features/project-folder/project-folder.service';
-import { Log } from '../../../core/log';
+import { ProjectService } from '../../../features/project/project.service';
+import { TagService } from '../../../features/tag/tag.service';
+import { TODAY_TAG } from '../../../features/tag/tag.const';
 
 @Component({
   selector: 'nav-list-tree',
@@ -47,6 +49,8 @@ import { Log } from '../../../core/log';
 export class NavListTreeComponent {
   private readonly _navConfigService = inject(MagicNavConfigService);
   private readonly _projectFolderService = inject(ProjectFolderService);
+  private readonly _projectService = inject(ProjectService);
+  private readonly _tagService = inject(TagService);
 
   item = input.required<NavGroupItem>();
   showLabels = input<boolean>(true);
@@ -54,17 +58,6 @@ export class NavListTreeComponent {
   activeWorkContextId = input<string | null>(null);
 
   itemClick = output<NavItem>();
-  projectMove = output<{
-    projectId: string;
-    targetFolderId: string | null;
-    targetIndex?: number;
-  }>();
-
-  folderMove = output<{
-    folderId: string;
-    targetParentFolderId: string | null;
-    targetIndex?: number;
-  }>();
 
   readonly T = T;
 
@@ -76,6 +69,10 @@ export class NavListTreeComponent {
   // Project folder data for expansion state
   private readonly _projectFolders = toSignal(
     this._projectFolderService.projectFolders$,
+    { initialValue: [] },
+  );
+  private readonly _rootProjectIdsSig = toSignal(
+    this._projectFolderService.rootProjectIds$,
     { initialValue: [] },
   );
 
@@ -141,16 +138,16 @@ export class NavListTreeComponent {
   }
 
   onTreeUpdated(updatedNodes: TreeNode<NavGroupItem>[]): void {
-    Log.x(updatedNodes);
-
-    // Update our local tree nodes signal to reflect the new structure
     this.treeNodes.set(updatedNodes);
 
     // Check for folder expansion changes and sync them to the project folder service
     this._syncFolderExpansionStates(updatedNodes);
 
-    // Extract and persist project folder relationships from the tree structure
-    this._persistProjectFolderRelationships(updatedNodes);
+    if (this.item().id === 'projects') {
+      this._applyProjectTreeChanges(updatedNodes);
+    } else if (this.item().id === 'tags') {
+      this._applyTagOrder(updatedNodes);
+    }
   }
 
   private _syncFolderExpansionStates(nodes: TreeNode<NavGroupItem>[]): void {
@@ -176,32 +173,27 @@ export class NavListTreeComponent {
     nodes.forEach(syncNode);
   }
 
-  private _persistProjectFolderRelationships(nodes: TreeNode<NavGroupItem>[]): void {
-    const folderProjectMap = new Map<string, string[]>();
-    const rootProjectIds: string[] = [];
-
-    const processNode = (node: TreeNode<NavGroupItem>): void => {
-      if (node.isFolder) {
-        const projectIds =
-          node.children
-            ?.filter((child) => !child.isFolder)
-            .map((child) => child.id.replace('project-', '')) || [];
-
-        folderProjectMap.set(node.id, projectIds);
-        node.children?.filter((child) => child.isFolder).forEach(processNode);
-      } else {
-        rootProjectIds.push(node.id.replace('project-', ''));
-      }
-    };
-
-    nodes.forEach(processNode);
-
-    // Update folders with new project relationships
+  private _persistProjectFolderRelationships(
+    folderProjectMap: Map<string, string[]>,
+    rootProjectIds: string[],
+  ): void {
     const currentFolders = this._projectFolders();
-    const updatedFolders = currentFolders.map((folder) => ({
-      ...folder,
-      projectIds: folderProjectMap.get(folder.id) || folder.projectIds,
-    }));
+
+    let didChange = false;
+    const updatedFolders = currentFolders.map((folder) => {
+      const nextProjectIds = folderProjectMap.get(folder.id) ?? [];
+      if (!didChange && !this._areArraysEqual(folder.projectIds, nextProjectIds)) {
+        didChange = true;
+      }
+      return {
+        ...folder,
+        projectIds: nextProjectIds,
+      };
+    });
+
+    if (!didChange && this._areArraysEqual(this._rootProjectIdsSig(), rootProjectIds)) {
+      return;
+    }
 
     this._projectFolderService.updateProjectFolderRelationships(
       updatedFolders,
@@ -289,5 +281,134 @@ export class NavListTreeComponent {
   getProjectId(node: TreeNode<NavGroupItem>): string | undefined {
     const navItem = this.findNavItem(node.id);
     return (navItem as any)?.workContext?.id;
+  }
+
+  private _applyProjectTreeChanges(nodes: TreeNode<NavGroupItem>[]): void {
+    const { folderProjectMap, rootProjectIds, orderedProjectIds } =
+      this._collectProjectStructure(nodes);
+
+    this._persistProjectFolderRelationships(folderProjectMap, rootProjectIds);
+
+    const allProjects = this._navConfigService.allProjectsExceptInbox();
+    const visibleProjects = allProjects.filter(
+      (project) => !project.isArchived && !project.isHiddenFromMenu,
+    );
+    const projectLookup = new Map(
+      visibleProjects.map((project) => [project.id, project]),
+    );
+
+    // Update folder assignments when necessary
+    const desiredAssignment = new Map<string, string | null>();
+    folderProjectMap.forEach((projectIds, folderId) => {
+      projectIds.forEach((projectId) => desiredAssignment.set(projectId, folderId));
+    });
+    rootProjectIds.forEach((projectId) => desiredAssignment.set(projectId, null));
+
+    desiredAssignment.forEach((targetFolderId, projectId) => {
+      const project = projectLookup.get(projectId);
+      if (!project) {
+        return;
+      }
+      const currentFolder = project.folderId ?? null;
+      if (currentFolder !== targetFolderId) {
+        this._projectService.update(projectId, { folderId: targetFolderId });
+      }
+    });
+
+    // Update order for visible projects if changed and counts match
+    const dedupedOrder = orderedProjectIds.filter(
+      (projectId, index, arr) => arr.indexOf(projectId) === index,
+    );
+    if (dedupedOrder.length !== visibleProjects.length) {
+      return;
+    }
+    const currentOrder = visibleProjects.map((project) => project.id);
+    if (!this._areArraysEqual(dedupedOrder, currentOrder)) {
+      this._projectService.updateOrder(dedupedOrder);
+    }
+  }
+
+  private _applyTagOrder(nodes: TreeNode<NavGroupItem>[]): void {
+    const orderedTagIds: string[] = [];
+    const collect = (list: TreeNode<NavGroupItem>[]): void => {
+      list.forEach((node) => {
+        if (node.isFolder && node.children) {
+          collect(node.children);
+          return;
+        }
+        const tagId = this._extractTagId(node.id);
+        if (tagId) {
+          orderedTagIds.push(tagId);
+        }
+      });
+    };
+    collect(nodes);
+
+    if (!orderedTagIds.length) {
+      return;
+    }
+
+    const deduped = orderedTagIds.filter(
+      (tagId, index, arr) => arr.indexOf(tagId) === index,
+    );
+    const reordered = [TODAY_TAG.id, ...deduped.filter((id) => id !== TODAY_TAG.id)];
+
+    this._tagService.updateOrder(reordered);
+  }
+
+  private _collectProjectStructure(nodes: TreeNode<NavGroupItem>[]): {
+    folderProjectMap: Map<string, string[]>;
+    rootProjectIds: string[];
+    orderedProjectIds: string[];
+  } {
+    const folderProjectMap = new Map<string, string[]>();
+    const rootProjectIds: string[] = [];
+    const orderedProjectIds: string[] = [];
+
+    const visit = (node: TreeNode<NavGroupItem>, parentFolderId: string | null): void => {
+      if (node.isFolder) {
+        const childProjects: string[] = [];
+        node.children?.forEach((child) => {
+          if (child.isFolder) {
+            visit(child, node.id);
+          } else {
+            const projectId = this._extractProjectId(child.id);
+            if (projectId) {
+              childProjects.push(projectId);
+              orderedProjectIds.push(projectId);
+            }
+          }
+        });
+        folderProjectMap.set(node.id, childProjects);
+        return;
+      }
+
+      const projectId = this._extractProjectId(node.id);
+      if (projectId) {
+        orderedProjectIds.push(projectId);
+        if (!parentFolderId) {
+          rootProjectIds.push(projectId);
+        }
+      }
+    };
+
+    nodes.forEach((node) => visit(node, null));
+
+    return { folderProjectMap, rootProjectIds, orderedProjectIds };
+  }
+
+  private _extractProjectId(nodeId: string): string | null {
+    return nodeId.startsWith('project-') ? nodeId.replace('project-', '') : null;
+  }
+
+  private _extractTagId(nodeId: string): string | null {
+    return nodeId.startsWith('tag-') ? nodeId.replace('tag-', '') : null;
+  }
+
+  private _areArraysEqual(a: string[], b: string[]): boolean {
+    if (a.length !== b.length) {
+      return false;
+    }
+    return a.every((value, index) => value === b[index]);
   }
 }

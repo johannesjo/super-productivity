@@ -671,7 +671,6 @@ export class MagicNavConfigService {
     // Handle folder reordering (if needed in the future)
     else if (draggedItem.type === 'group' && (draggedItem as any).isFolder) {
       // For now, we don't support folder reordering, but this is where it would go
-      console.log('Folder reordering not yet supported');
     }
   }
 
@@ -680,24 +679,15 @@ export class MagicNavConfigService {
     targetFolderId: string | null,
     targetIndex?: number,
   ): void {
-    console.log('🎯 handleProjectMove called:', {
-      projectId,
-      targetFolderId,
-      targetIndex,
-    });
     // Get current state before making any changes
     const allProjects = this._visibleProjects();
-    console.log('📊 All projects:', allProjects?.length || 0);
     if (!allProjects || allProjects.length === 0) {
-      console.log('❌ No projects found, exiting');
       return;
     }
 
     // Find the source project
     const sourceProject = allProjects.find((p) => p.id === projectId);
-    console.log('🔍 Source project found:', !!sourceProject, sourceProject?.title);
     if (!sourceProject) {
-      console.log('❌ Source project not found, exiting');
       return;
     }
 
@@ -707,8 +697,6 @@ export class MagicNavConfigService {
     if (isReorderingWithinSameFolder && typeof targetIndex === 'number') {
       // For same-folder reordering, we need to update the global order to reflect
       // the new position within the folder while maintaining all other project positions
-      console.log('🔄 Reordering within same folder');
-
       // Get all projects in the target folder (excluding the moved project)
       const folderProjects = allProjects.filter(
         (p) => p.folderId === targetFolderId && p.id !== projectId,
@@ -747,7 +735,6 @@ export class MagicNavConfigService {
         result.push(projectId);
       }
 
-      console.log('📋 Final project order (same folder reorder):', result);
       this._projectService.updateOrder(result);
       return;
     }
@@ -776,9 +763,7 @@ export class MagicNavConfigService {
     ];
 
     // Now update the folder assignment
-    console.log('💾 Updating project folder assignment...');
     this._projectService.update(projectId, { folderId: targetFolderId });
-    console.log('✅ Folder assignment updated, proceeding with reordering...');
 
     // Build the final order by reconstructing the full list
     const result: string[] = [];
@@ -814,7 +799,6 @@ export class MagicNavConfigService {
       result.push(...newTargetIds);
     }
 
-    console.log('📋 Final project order:', result);
     this._projectService.updateOrder(result);
   }
 
@@ -883,8 +867,6 @@ export class MagicNavConfigService {
     });
     // Then update the folder order to reflect new sibling placement
     this._projectFolderService.updateOrder(newIds);
-
-    Log.log('Folder moved:', { folderId, targetParentFolderId, targetIndex, newIds });
   }
 
   private _isValidFolderMove(

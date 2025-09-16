@@ -234,30 +234,6 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     }
   }
 
-  onProjectMove(moveData: {
-    projectId: string;
-    targetFolderId: string | null;
-    targetIndex?: number;
-  }): void {
-    this._sideNavConfigService.handleProjectMove(
-      moveData.projectId,
-      moveData.targetFolderId,
-      moveData.targetIndex,
-    );
-  }
-
-  onFolderMove(moveData: {
-    folderId: string;
-    targetParentFolderId: string | null;
-    targetIndex?: number;
-  }): void {
-    this._sideNavConfigService.handleFolderMove(
-      moveData.folderId,
-      moveData.targetParentFolderId,
-      moveData.targetIndex,
-    );
-  }
-
   // Resize functionality
   onResizeStart(event: MouseEvent): void {
     if (!this.config().resizable || this.isMobile()) return;

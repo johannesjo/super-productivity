@@ -2,6 +2,9 @@ import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FieldType, FieldTypeConfig } from '@ngx-formly/core';
 import { CommonModule } from '@angular/common';
 import { ProjectFolderService } from '../../project-folder.service';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatOptionModule } from '@angular/material/core';
 
 @Component({
   selector: 'formly-field-project-folder-select',
@@ -21,7 +24,7 @@ import { ProjectFolderService } from '../../project-folder.service';
   `,
   styleUrls: ['./project-folder-select.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule],
+  imports: [CommonModule, MatFormFieldModule, MatSelectModule, MatOptionModule],
 })
 export class ProjectFolderSelectComponent extends FieldType<FieldTypeConfig> {
   readonly projectFolderService = inject(ProjectFolderService);
