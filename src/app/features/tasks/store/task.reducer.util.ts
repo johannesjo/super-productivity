@@ -239,6 +239,12 @@ export const removeTaskFromParentSideEffects = (
 ): TaskState => {
   const parentId: string = taskToRemove.parentId as string;
   const parentTask = state.entities[parentId] as Task;
+
+  if (!parentTask) {
+    TaskLog.err(`Parent task ${parentId} not found in removeTaskFromParentSideEffects`);
+    return state;
+  }
+
   const isWasLastSubTask = parentTask.subTaskIds.length === 1;
 
   let newState = taskAdapter.updateOne(
