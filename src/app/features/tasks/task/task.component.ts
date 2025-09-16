@@ -358,6 +358,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
       .open(DialogEditTaskRepeatCfgComponent, {
         data: {
           task: this.task(),
+          targetDate: this.task().dueDay || getDbDateStr(new Date(this.task().created)),
         },
       })
       .afterClosed()

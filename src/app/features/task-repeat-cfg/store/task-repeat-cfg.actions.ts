@@ -34,3 +34,8 @@ export const deleteTaskRepeatCfgs = createAction(
   '[TaskRepeatCfg] Delete multiple TaskRepeatCfgs',
   props<{ ids: string[] }>(),
 );
+
+export const deleteTaskRepeatCfgInstance = createAction(
+  '[TaskRepeatCfg] Delete Single Instance',
+  props<{ repeatCfgId: string; dateStr: string }>(),
+);

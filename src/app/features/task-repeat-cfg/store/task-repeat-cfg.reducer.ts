@@ -5,6 +5,7 @@ import {
   updateTaskRepeatCfg,
   updateTaskRepeatCfgs,
   upsertTaskRepeatCfg,
+  deleteTaskRepeatCfgInstance,
 } from './task-repeat-cfg.actions';
 import { TaskRepeatCfg, TaskRepeatCfgState } from '../task-repeat-cfg.model';
 import { createReducer, on } from '@ngrx/store';
@@ -77,4 +78,22 @@ export const taskRepeatCfgReducer = createReducer<TaskRepeatCfgState>(
     ),
   ),
   on(deleteTaskRepeatCfg, (state, { id }) => adapter.removeOne(id, state)),
+  on(deleteTaskRepeatCfgInstance, (state, { repeatCfgId, dateStr }) => {
+    const cfg = state.entities[repeatCfgId];
+    if (!cfg) return state;
+
+    const deletedDates = cfg.deletedInstanceDates || [];
+    if (!deletedDates.includes(dateStr)) {
+      return adapter.updateOne(
+        {
+          id: repeatCfgId,
+          changes: {
+            deletedInstanceDates: [...deletedDates, dateStr],
+          },
+        },
+        state,
+      );
+    }
+    return state;
+  }),
 );

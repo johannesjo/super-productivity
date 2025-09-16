@@ -15,6 +15,7 @@ import {
   MatDialogRef,
   MatDialogTitle,
 } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
 import {
   DEFAULT_TASK_REPEAT_CFG,
@@ -32,7 +33,9 @@ import { TagService } from '../../tag/tag.service';
 import { unique } from '../../../util/unique';
 import { exists } from '../../../util/exists';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { getDbDateStr } from '../../../util/get-db-date-str';
+import { getDbDateStr, isDBDateStr } from '../../../util/get-db-date-str';
+import { formatMonthDay } from '../../../util/format-month-day.util';
+import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 import { first } from 'rxjs/operators';
 import { getQuickSettingUpdates } from './get-quick-setting-updates';
 import { clockStringFromDate } from '../../../ui/duration/clock-string-from-date';
@@ -42,6 +45,7 @@ import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { Log } from '../../../core/log';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 
 // TASK_REPEAT_CFG_FORM_CFG
 @Component({
@@ -64,6 +68,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 export class DialogEditTaskRepeatCfgComponent {
   private _tagService = inject(TagService);
   private _taskRepeatCfgService = inject(TaskRepeatCfgService);
+  private _matDialog = inject(MatDialog);
   private _matDialogRef =
     inject<MatDialogRef<DialogEditTaskRepeatCfgComponent>>(MatDialogRef);
   private _translateService = inject(TranslateService);
@@ -71,6 +76,7 @@ export class DialogEditTaskRepeatCfgComponent {
   private _data = inject<{
     task?: Task;
     repeatCfg?: TaskRepeatCfg;
+    targetDate?: string;
   }>(MAT_DIALOG_DATA);
 
   T: typeof T = T;
@@ -93,6 +99,22 @@ export class DialogEditTaskRepeatCfgComponent {
   formGroup1 = signal(new UntypedFormGroup({}));
   formGroup2 = signal(new UntypedFormGroup({}));
   tagSuggestions = toSignal(this._tagService.tags$, { initialValue: [] });
+  canRemoveInstance = signal<boolean>(false);
+  removeInstanceButtonText = computed(() => {
+    if (!this._data.targetDate) {
+      return this._translateService.instant(T.F.TASK_REPEAT.F.REMOVE_INSTANCE);
+    }
+
+    // Format date using same logic as ShortDate2Pipe
+    const date = isDBDateStr(this._data.targetDate)
+      ? dateStrToUtcDate(this._data.targetDate)
+      : new Date(this._data.targetDate);
+    const formattedDate = formatMonthDay(date, this._locale);
+
+    return this._translateService.instant(T.F.TASK_REPEAT.F.REMOVE_FOR_DATE, {
+      date: formattedDate,
+    });
+  });
 
   constructor() {
     // Initialize form config
@@ -106,8 +128,10 @@ export class DialogEditTaskRepeatCfgComponent {
           .pipe(first())
           .subscribe((cfg) => {
             this._setRepeatCfgInitiallyForEditOnly(cfg);
+            this._checkCanRemoveInstance();
           });
       }
+      this._checkCanRemoveInstance();
     });
   }
 
@@ -257,6 +281,36 @@ export class DialogEditTaskRepeatCfgComponent {
     this.close();
   }
 
+  deleteInstance(): void {
+    if (!this._data.targetDate || !this.canRemoveInstance()) {
+      return;
+    }
+
+    const currentRepeatCfg = this.repeatCfg() as TaskRepeatCfg;
+    const targetDate = this._data.targetDate;
+
+    this._matDialog
+      .open(DialogConfirmComponent, {
+        restoreFocus: true,
+        data: {
+          message: this._translateService.instant(T.F.TASK_REPEAT.D_DELETE_INSTANCE.MSG, {
+            date: new Date(targetDate).toLocaleDateString(this._locale),
+          }),
+          okTxt: this._translateService.instant(T.F.TASK_REPEAT.D_DELETE_INSTANCE.OK),
+        },
+      })
+      .afterClosed()
+      .subscribe((isConfirm: boolean) => {
+        if (isConfirm) {
+          this._taskRepeatCfgService.deleteTaskRepeatCfgInstance(
+            exists(currentRepeatCfg.id),
+            targetDate,
+          );
+          this.close();
+        }
+      });
+  }
+
   close(): void {
     this._matDialogRef.close();
   }
@@ -323,5 +377,15 @@ export class DialogEditTaskRepeatCfgComponent {
     }
 
     return processedCfg;
+  }
+
+  private _checkCanRemoveInstance(): void {
+    if (!this._data.targetDate) {
+      this.canRemoveInstance.set(false);
+      return;
+    }
+    const todayStr = getDbDateStr(new Date());
+    const isTargetTodayOrPast = this._data.targetDate <= todayStr;
+    this.canRemoveInstance.set(!isTargetTodayOrPast);
   }
 }

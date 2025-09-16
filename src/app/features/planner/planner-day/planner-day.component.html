@@ -55,6 +55,7 @@
     ) {
       <planner-repeat-projection
         [repeatCfg]="repeatProjection.repeatCfg"
+        [dayDate]="day.dayDate"
       ></planner-repeat-projection>
     }
 
@@ -123,6 +124,7 @@
           @case (SCHEDULE_ITEM_TYPE.RepeatProjection) {
             <planner-repeat-projection
               [repeatCfg]="scheduledItem.repeatCfg"
+              [dayDate]="day.dayDate"
             ></planner-repeat-projection>
           }
         }

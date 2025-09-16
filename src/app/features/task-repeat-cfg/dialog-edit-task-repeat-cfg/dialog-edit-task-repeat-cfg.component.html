@@ -57,6 +57,17 @@
     </button>
 
     @if (isEdit()) {
+      @if (canRemoveInstance()) {
+        <button
+          (click)="deleteInstance()"
+          color="primary"
+          mat-stroked-button
+          type="button"
+        >
+          <mat-icon>event_busy</mat-icon>
+          {{ removeInstanceButtonText() }}
+        </button>
+      }
       <button
         (click)="remove()"
         color="primary"

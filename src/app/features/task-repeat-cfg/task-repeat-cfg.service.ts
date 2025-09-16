@@ -7,6 +7,7 @@ import {
   updateTaskRepeatCfg,
   updateTaskRepeatCfgs,
   upsertTaskRepeatCfg,
+  deleteTaskRepeatCfgInstance,
 } from './store/task-repeat-cfg.actions';
 import { Observable } from 'rxjs';
 import {
@@ -120,6 +121,10 @@ export class TaskRepeatCfgService {
     this._store$.dispatch(upsertTaskRepeatCfg({ taskRepeatCfg }));
   }
 
+  deleteTaskRepeatCfgInstance(repeatCfgId: string, dateStr: string): void {
+    this._store$.dispatch(deleteTaskRepeatCfgInstance({ repeatCfgId, dateStr }));
+  }
+
   async createRepeatableTask(
     taskRepeatCfg: TaskRepeatCfg,
     targetDayDate: number,
@@ -179,6 +184,11 @@ export class TaskRepeatCfgService {
         .length === 0;
 
     if (!isCreateNew) {
+      return [];
+    }
+    // Check if this date is in the deleted instances list
+    const targetDateStr = getDbDateStr(new Date(targetDayDate));
+    if (taskRepeatCfg.deletedInstanceDates?.includes(targetDateStr)) {
       return [];
     }
     const targetCreated = getNewestPossibleDueDate(
