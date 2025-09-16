@@ -3,5 +3,5 @@ import { ProjectFolder } from './project-folder.model';
 
 export const updateProjectFolders = createAction(
   '[ProjectFolder] Update Project Folders',
-  props<{ projectFolders: ProjectFolder[] }>(),
+  props<{ projectFolders: ProjectFolder[]; rootProjectIds: string[] }>(),
 );

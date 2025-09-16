@@ -63,6 +63,10 @@ export class MagicNavConfigService {
     this._projectFolderService.projectFolders$,
     { initialValue: [] },
   );
+  private readonly _rootProjectIds = toSignal(
+    this._projectFolderService.rootProjectIds$,
+    { initialValue: [] },
+  );
   private readonly _allProjectsExceptInbox = toSignal(
     this._store.select(selectAllProjectsExceptInbox),
     { initialValue: [] },
@@ -323,6 +327,7 @@ export class MagicNavConfigService {
   private _buildProjectItems(): NavItem[] {
     const projects = this._visibleProjects();
     const projectFolders = this._projectFolders();
+    const rootProjectIds = this._rootProjectIds();
     const activeId = this._activeWorkContextId();
 
     // Build hierarchy: folders with their projects, plus root-level projects
@@ -341,13 +346,22 @@ export class MagicNavConfigService {
       items.push(...folderItems);
     }
 
-    // Add root-level projects (projects not in any folder)
+    // Add root-level projects in the correct order
+    const rootIds = rootProjectIds as string[];
+    const orderedRootProjects = rootIds
+      .map((projectId) => projects.find((project) => project.id === projectId))
+      .filter((project) => project !== undefined);
+
+    // Also include any projects not in folders and not in rootProjectIds (fallback)
     const allFolderProjectIds = projectFolders.flatMap(
       (folder) => folder.projectIds || [],
     );
-    const rootProjects = projects.filter(
-      (project) => !allFolderProjectIds.includes(project.id),
+    const unorderedRootProjects = projects.filter(
+      (project) =>
+        !allFolderProjectIds.includes(project.id) && !rootIds.includes(project.id),
     );
+
+    const rootProjects = [...orderedRootProjects, ...unorderedRootProjects];
     let filteredRootProjects = rootProjects;
 
     if (!this._isProjectsExpanded() && activeId) {
@@ -378,10 +392,11 @@ export class MagicNavConfigService {
   ): NavItem[] {
     const items: NavItem[] = [];
 
-    // Get projects in this folder
-    const folderProjects = allProjects.filter((project) =>
-      folder.projectIds?.includes(project.id),
-    );
+    // Get projects in this folder in the correct order
+    const folderProjects =
+      folder.projectIds
+        ?.map((projectId) => allProjects.find((project) => project.id === projectId))
+        .filter((project) => project !== undefined) || [];
 
     // Get sub-folders in this folder
     const subFolders = allFolders.filter((f) => f.parentId === folder.id);

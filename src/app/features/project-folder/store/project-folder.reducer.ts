@@ -8,6 +8,7 @@ export const projectFolderFeatureKey = 'projectFolder';
 export const initialProjectFolderState: ProjectFolderState = {
   entities: {},
   ids: [],
+  rootProjectIds: [],
 };
 
 // Export as initialState for compatibility with existing code
@@ -22,8 +23,9 @@ export const projectFolderReducer = createReducer(
     (state, { appDataComplete }) => appDataComplete.projectFolder || initialState,
   ),
 
-  on(updateProjectFolders, (state, { projectFolders }) => ({
+  on(updateProjectFolders, (state, { projectFolders, rootProjectIds }) => ({
     entities: Object.fromEntries(projectFolders.map((f) => [f.id, f])),
     ids: projectFolders.map((f) => f.id),
+    rootProjectIds,
   })),
 );

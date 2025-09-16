@@ -9,4 +9,5 @@ export interface ProjectFolder {
 export interface ProjectFolderState {
   entities: { [id: string]: ProjectFolder };
   ids: string[];
+  rootProjectIds: string[];
 }

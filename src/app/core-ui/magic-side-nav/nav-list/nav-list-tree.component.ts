@@ -178,6 +178,7 @@ export class NavListTreeComponent {
 
   private _persistProjectFolderRelationships(nodes: TreeNode<NavGroupItem>[]): void {
     const folderUpdates: { id: string; projectIds: string[] }[] = [];
+    const rootProjectIds: string[] = [];
 
     const extractFolderData = (node: TreeNode<NavGroupItem>): void => {
       if (node.isFolder) {
@@ -190,15 +191,25 @@ export class NavListTreeComponent {
 
         // Process sub-folders recursively
         node.children?.filter((child) => child.isFolder).forEach(extractFolderData);
+      } else {
+        // This is a root-level project
+        rootProjectIds.push(node.id.replace('project-', ''));
       }
     };
 
     nodes.forEach(extractFolderData);
 
-    // Update each folder with its new project list
-    folderUpdates.forEach(({ id, projectIds }) => {
-      this._projectFolderService.updateProjectFolder(id, { projectIds });
+    // Update the project folder service with both folder relationships and root project order
+    const currentFolders = this._projectFolders();
+    const updatedFolders = currentFolders.map((folder) => {
+      const update = folderUpdates.find((u) => u.id === folder.id);
+      return update ? { ...folder, projectIds: update.projectIds } : folder;
     });
+
+    this._projectFolderService.updateProjectFolderRelationships(
+      updatedFolders,
+      rootProjectIds,
+    );
   }
 
   findNavItem(id: string): NavItem | null {
