@@ -149,8 +149,8 @@ export class NavListTreeComponent {
     // Check for folder expansion changes and sync them to the project folder service
     this._syncFolderExpansionStates(updatedNodes);
 
-    // Note: The actual persistence to backend happens via the move handlers above
-    // This method ensures the UI stays in sync with the tree component's internal state
+    // Extract and persist project folder relationships from the tree structure
+    this._persistProjectFolderRelationships(updatedNodes);
   }
 
   private _syncFolderExpansionStates(nodes: TreeNode<NavGroupItem>[]): void {
@@ -174,6 +174,52 @@ export class NavListTreeComponent {
     };
 
     nodes.forEach(syncNode);
+  }
+
+  private _persistProjectFolderRelationships(nodes: TreeNode<NavGroupItem>[]): void {
+    const extractFolderData = (node: TreeNode<NavGroupItem>): any => {
+      if (node.isFolder) {
+        // Get all project children (non-folder nodes)
+        const projectIds = node.children
+          ? node.children
+              .filter((child) => !child.isFolder)
+              .map((child) => child.id.replace('project-', '')) // Remove 'project-' prefix
+          : [];
+
+        return {
+          id: node.id,
+          projectIds,
+          // Also get any sub-folders recursively
+          subFolders: node.children
+            ? node.children
+                .filter((child) => child.isFolder)
+                .map((child) => extractFolderData(child))
+            : [],
+        };
+      }
+      return null;
+    };
+
+    // Extract folder data from all top-level folders
+    const folderUpdates: { id: string; projectIds: string[] }[] = [];
+
+    const processFolderData = (folderData: any): void => {
+      if (folderData) {
+        folderUpdates.push({ id: folderData.id, projectIds: folderData.projectIds });
+        // Process sub-folders recursively
+        folderData.subFolders.forEach(processFolderData);
+      }
+    };
+
+    nodes.forEach((node) => {
+      const folderData = extractFolderData(node);
+      processFolderData(folderData);
+    });
+
+    // Update each folder with its new project list
+    folderUpdates.forEach(({ id, projectIds }) => {
+      this._projectFolderService.updateProjectFolder(id, { projectIds });
+    });
   }
 
   findNavItem(id: string): NavItem | null {

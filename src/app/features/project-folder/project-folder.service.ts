@@ -1,11 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, combineLatest } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import { ProjectFolder, ProjectFolderState } from './store/project-folder.model';
 import { updateProjectFolders } from './store/project-folder.actions';
 import { projectFolderFeatureKey } from './store/project-folder.reducer';
-import { selectAllProjects } from '../project/store/project.selectors';
 
 @Injectable({
   providedIn: 'root',
@@ -13,24 +12,9 @@ import { selectAllProjects } from '../project/store/project.selectors';
 export class ProjectFolderService {
   private readonly _store = inject(Store);
 
-  private readonly _allProjects$ = this._store.select(selectAllProjects);
-
-  readonly projectFolders$: Observable<ProjectFolder[]> = combineLatest([
-    this._store.select(
-      (state: any) => state[projectFolderFeatureKey] as ProjectFolderState,
-    ),
-    this._allProjects$,
-  ]).pipe(
-    map(([folderState, projects]) => {
-      return folderState.ids.map((id) => {
-        const folder = folderState.entities[id];
-        const projectIds = projects
-          .filter((project) => (project as any).folderId === folder.id)
-          .map((project) => project.id);
-        return { ...folder, projectIds };
-      });
-    }),
-  );
+  readonly projectFolders$: Observable<ProjectFolder[]> = this._store
+    .select((state: any) => state[projectFolderFeatureKey] as ProjectFolderState)
+    .pipe(map((state) => state.ids.map((id) => state.entities[id])));
 
   readonly topLevelFolders$: Observable<ProjectFolder[]> = this.projectFolders$.pipe(
     map((folders) => folders.filter((folder) => !folder.parentId)),

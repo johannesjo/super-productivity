@@ -25,6 +25,7 @@ import { toggleHideFromMenu } from '../../features/project/store/project.actions
 import { NavConfig, NavItem, NavWorkContextItem } from './magic-side-nav.model';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
+import { Log } from '../../core/log';
 import { lsGetBoolean, lsSetItem } from '../../util/ls-util';
 
 @Injectable({
@@ -341,7 +342,12 @@ export class MagicNavConfigService {
     }
 
     // Add root-level projects (projects not in any folder)
-    const rootProjects = projects.filter((project) => !project.folderId);
+    const allFolderProjectIds = projectFolders.flatMap(
+      (folder) => folder.projectIds || [],
+    );
+    const rootProjects = projects.filter(
+      (project) => !allFolderProjectIds.includes(project.id),
+    );
     let filteredRootProjects = rootProjects;
 
     if (!this._isProjectsExpanded() && activeId) {
@@ -373,8 +379,8 @@ export class MagicNavConfigService {
     const items: NavItem[] = [];
 
     // Get projects in this folder
-    const folderProjects = allProjects.filter(
-      (project) => project.folderId === folder.id,
+    const folderProjects = allProjects.filter((project) =>
+      folder.projectIds?.includes(project.id),
     );
 
     // Get sub-folders in this folder
@@ -447,8 +453,8 @@ export class MagicNavConfigService {
     activeId: string | null,
   ): boolean {
     // Check if any project in this folder is active
-    const folderProjects = allProjects.filter(
-      (project) => project.folderId === folder.id,
+    const folderProjects = allProjects.filter((project) =>
+      folder.projectIds?.includes(project.id),
     );
     if (folderProjects.some((p) => p.id === activeId)) {
       return true;
@@ -863,7 +869,7 @@ export class MagicNavConfigService {
     // Then update the folder order to reflect new sibling placement
     this._projectFolderService.updateOrder(newIds);
 
-    console.log('Folder moved:', { folderId, targetParentFolderId, targetIndex, newIds });
+    Log.log('Folder moved:', { folderId, targetParentFolderId, targetIndex, newIds });
   }
 
   private _isValidFolderMove(
