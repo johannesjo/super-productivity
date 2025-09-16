@@ -1089,7 +1089,8 @@ export class TaskService {
 
       ...(workContextId === TODAY_TAG.id &&
       !additional.parentId &&
-      !additional.dueWithTime
+      !additional.dueWithTime &&
+      !('dueDay' in additional)
         ? { dueDay: getDbDateStr() }
         : {}),
 

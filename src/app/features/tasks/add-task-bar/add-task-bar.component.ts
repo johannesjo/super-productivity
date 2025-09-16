@@ -426,6 +426,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       } else {
         taskData.dueDay = state.date;
       }
+    } else {
+      // Explicitly set dueDay to undefined when no date is selected
+      // This prevents automatic assignment of today's date in TODAY context
+      taskData.dueDay = undefined;
     }
 
     Log.x(taskData);
