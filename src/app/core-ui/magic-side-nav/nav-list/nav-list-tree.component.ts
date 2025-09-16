@@ -177,34 +177,31 @@ export class NavListTreeComponent {
   }
 
   private _persistProjectFolderRelationships(nodes: TreeNode<NavGroupItem>[]): void {
-    const folderUpdates: { id: string; projectIds: string[] }[] = [];
+    const folderProjectMap = new Map<string, string[]>();
     const rootProjectIds: string[] = [];
 
-    const extractFolderData = (node: TreeNode<NavGroupItem>): void => {
+    const processNode = (node: TreeNode<NavGroupItem>): void => {
       if (node.isFolder) {
         const projectIds =
           node.children
             ?.filter((child) => !child.isFolder)
             .map((child) => child.id.replace('project-', '')) || [];
 
-        folderUpdates.push({ id: node.id, projectIds });
-
-        // Process sub-folders recursively
-        node.children?.filter((child) => child.isFolder).forEach(extractFolderData);
+        folderProjectMap.set(node.id, projectIds);
+        node.children?.filter((child) => child.isFolder).forEach(processNode);
       } else {
-        // This is a root-level project
         rootProjectIds.push(node.id.replace('project-', ''));
       }
     };
 
-    nodes.forEach(extractFolderData);
+    nodes.forEach(processNode);
 
-    // Update the project folder service with both folder relationships and root project order
+    // Update folders with new project relationships
     const currentFolders = this._projectFolders();
-    const updatedFolders = currentFolders.map((folder) => {
-      const update = folderUpdates.find((u) => u.id === folder.id);
-      return update ? { ...folder, projectIds: update.projectIds } : folder;
-    });
+    const updatedFolders = currentFolders.map((folder) => ({
+      ...folder,
+      projectIds: folderProjectMap.get(folder.id) || folder.projectIds,
+    }));
 
     this._projectFolderService.updateProjectFolderRelationships(
       updatedFolders,

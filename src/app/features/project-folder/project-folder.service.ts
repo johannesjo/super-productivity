@@ -1,10 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { map, take } from 'rxjs/operators';
+import { map, take, withLatestFrom } from 'rxjs/operators';
 import { ProjectFolder, ProjectFolderState } from './store/project-folder.model';
 import { updateProjectFolders } from './store/project-folder.actions';
 import { projectFolderFeatureKey } from './store/project-folder.reducer';
+import { nanoid } from 'nanoid';
 
 @Injectable({
   providedIn: 'root',
@@ -31,76 +32,64 @@ export class ProjectFolderService {
   }
 
   updateProjectFolder(id: string, changes: Partial<ProjectFolder>): void {
-    const currentFolders = this._getCurrentFolders();
-    const currentRootProjectIds = this._getCurrentRootProjectIds();
-    const updatedFolders = currentFolders.map((folder) =>
-      folder.id === id ? { ...folder, ...changes } : folder,
-    );
-    this._store.dispatch(
-      updateProjectFolders({
-        projectFolders: updatedFolders,
-        rootProjectIds: currentRootProjectIds,
-      }),
-    );
-  }
-
-  private _getCurrentFolders(): ProjectFolder[] {
-    let folders: ProjectFolder[] = [];
-    this.projectFolders$.pipe(take(1)).subscribe((f) => (folders = f));
-    return folders;
-  }
-
-  private _getCurrentRootProjectIds(): string[] {
-    let rootProjectIds: string[] = [];
-    this.rootProjectIds$.pipe(take(1)).subscribe((ids) => (rootProjectIds = ids));
-    return rootProjectIds;
+    this.projectFolders$
+      .pipe(take(1), withLatestFrom(this.rootProjectIds$))
+      .subscribe(([folders, rootProjectIds]) => {
+        const updatedFolders = folders.map((folder) =>
+          folder.id === id ? { ...folder, ...changes } : folder,
+        );
+        this._store.dispatch(
+          updateProjectFolders({ projectFolders: updatedFolders, rootProjectIds }),
+        );
+      });
   }
 
   addProjectFolder(folder: Omit<ProjectFolder, 'id' | 'projectIds'>): void {
-    const newFolder: ProjectFolder = {
-      ...folder,
-      id: `folder-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      projectIds: [],
-    };
-    const updatedFolders = [...this._getCurrentFolders(), newFolder];
-    const currentRootProjectIds = this._getCurrentRootProjectIds();
-    this._store.dispatch(
-      updateProjectFolders({
-        projectFolders: updatedFolders,
-        rootProjectIds: currentRootProjectIds,
-      }),
-    );
+    this.projectFolders$
+      .pipe(take(1), withLatestFrom(this.rootProjectIds$))
+      .subscribe(([folders, rootProjectIds]) => {
+        const newFolder: ProjectFolder = {
+          ...folder,
+          id: `folder-${nanoid()}`,
+          projectIds: [],
+        };
+        const updatedFolders = [...folders, newFolder];
+        this._store.dispatch(
+          updateProjectFolders({ projectFolders: updatedFolders, rootProjectIds }),
+        );
+      });
   }
 
   deleteProjectFolder(id: string): void {
-    const updatedFolders = this._getCurrentFolders().filter((folder) => folder.id !== id);
-    const currentRootProjectIds = this._getCurrentRootProjectIds();
-    this._store.dispatch(
-      updateProjectFolders({
-        projectFolders: updatedFolders,
-        rootProjectIds: currentRootProjectIds,
-      }),
-    );
+    this.projectFolders$
+      .pipe(take(1), withLatestFrom(this.rootProjectIds$))
+      .subscribe(([folders, rootProjectIds]) => {
+        const updatedFolders = folders.filter((folder) => folder.id !== id);
+        this._store.dispatch(
+          updateProjectFolders({ projectFolders: updatedFolders, rootProjectIds }),
+        );
+      });
   }
 
   updateOrder(newIds: string[]): void {
-    const folders = this._getCurrentFolders();
-    const folderMap = Object.fromEntries(folders.map((f) => [f.id, f]));
-    const reorderedFolders = newIds.map((id) => folderMap[id]).filter(Boolean);
-    const currentRootProjectIds = this._getCurrentRootProjectIds();
-    this._store.dispatch(
-      updateProjectFolders({
-        projectFolders: reorderedFolders,
-        rootProjectIds: currentRootProjectIds,
-      }),
-    );
+    this.projectFolders$
+      .pipe(take(1), withLatestFrom(this.rootProjectIds$))
+      .subscribe(([folders, rootProjectIds]) => {
+        const folderMap = Object.fromEntries(folders.map((f) => [f.id, f]));
+        const reorderedFolders = newIds.map((id) => folderMap[id]).filter(Boolean);
+        this._store.dispatch(
+          updateProjectFolders({ projectFolders: reorderedFolders, rootProjectIds }),
+        );
+      });
   }
 
   toggleFolderExpansion(id: string): void {
-    const folder = this._getCurrentFolders().find((f) => f.id === id);
-    if (folder) {
-      this.updateProjectFolder(id, { isExpanded: !folder.isExpanded });
-    }
+    this.projectFolders$.pipe(take(1)).subscribe((folders) => {
+      const folder = folders.find((f) => f.id === id);
+      if (folder) {
+        this.updateProjectFolder(id, { isExpanded: !folder.isExpanded });
+      }
+    });
   }
 
   loadProjectFolders(folders: ProjectFolder[], rootProjectIds: string[] = []): void {
