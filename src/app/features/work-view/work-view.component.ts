@@ -183,7 +183,12 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
       const doneArr = flattenTasks(this.doneTasks());
       if (doneArr.some((t) => t.id === currentSelectedId)) return;
 
-      if (this.laterTodayTasks().some((t) => t.id === currentSelectedId)) return;
+      if (
+        this.laterTodayTasks().some(
+          (t) => t.id === currentSelectedId || t.subTaskIds.includes(currentSelectedId),
+        )
+      )
+        return;
 
       if (
         this.workContextService.activeWorkContextId === TODAY_TAG.id &&
