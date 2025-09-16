@@ -4,6 +4,7 @@ import { By } from '@angular/platform-browser';
 import { MentionDirective } from './mention.directive';
 import { MentionConfig } from './mention-config';
 import { Log } from '../../core/log';
+import { MentionEvent } from './mention-types';
 
 @Component({
   template: `<input [mentionConfig]="mentionConfig" />`,
@@ -241,6 +242,105 @@ describe('MentionDirective', () => {
       const result = mentionFilter('', items);
 
       expect(result).toEqual(items);
+    });
+  });
+
+  describe('stopEvent', () => {
+    it('should handle standard event with all methods', () => {
+      const mockEvent: MentionEvent = {
+        wasClick: false,
+        preventDefault: jasmine.createSpy('preventDefault'),
+        stopPropagation: jasmine.createSpy('stopPropagation'),
+        stopImmediatePropagation: jasmine.createSpy('stopImmediatePropagation'),
+      };
+
+      directive.stopEvent(mockEvent);
+
+      expect(mockEvent.preventDefault).toHaveBeenCalled();
+      expect(mockEvent.stopPropagation).toHaveBeenCalled();
+      expect(mockEvent.stopImmediatePropagation).toHaveBeenCalled();
+    });
+
+    it('should handle event with missing preventDefault method', () => {
+      const mockEvent: MentionEvent = {
+        wasClick: false,
+        stopPropagation: jasmine.createSpy('stopPropagation'),
+        stopImmediatePropagation: jasmine.createSpy('stopImmediatePropagation'),
+      };
+
+      // Should not throw error
+      expect(() => directive.stopEvent(mockEvent)).not.toThrow();
+      expect(mockEvent.stopPropagation).toHaveBeenCalled();
+      expect(mockEvent.stopImmediatePropagation).toHaveBeenCalled();
+    });
+
+    it('should handle event with missing stopPropagation method', () => {
+      const mockEvent: MentionEvent = {
+        wasClick: false,
+        preventDefault: jasmine.createSpy('preventDefault'),
+        stopImmediatePropagation: jasmine.createSpy('stopImmediatePropagation'),
+      };
+
+      expect(() => directive.stopEvent(mockEvent)).not.toThrow();
+      expect(mockEvent.preventDefault).toHaveBeenCalled();
+      expect(mockEvent.stopImmediatePropagation).toHaveBeenCalled();
+    });
+
+    it('should handle event with missing stopImmediatePropagation method', () => {
+      const mockEvent: MentionEvent = {
+        wasClick: false,
+        preventDefault: jasmine.createSpy('preventDefault'),
+        stopPropagation: jasmine.createSpy('stopPropagation'),
+      };
+
+      expect(() => directive.stopEvent(mockEvent)).not.toThrow();
+      expect(mockEvent.preventDefault).toHaveBeenCalled();
+      expect(mockEvent.stopPropagation).toHaveBeenCalled();
+    });
+
+    it('should handle event with all methods missing', () => {
+      const mockEvent: MentionEvent = {
+        wasClick: false,
+      };
+
+      // Should not throw error
+      expect(() => directive.stopEvent(mockEvent)).not.toThrow();
+    });
+
+    it('should handle event with non-function preventDefault property', () => {
+      const mockEvent: MentionEvent = {
+        wasClick: false,
+        preventDefault: 'not-a-function' as any, // intentionally invalid for test
+        stopPropagation: jasmine.createSpy('stopPropagation'),
+        stopImmediatePropagation: jasmine.createSpy('stopImmediatePropagation'),
+      };
+
+      expect(() => directive.stopEvent(mockEvent)).not.toThrow();
+      expect(mockEvent.stopPropagation).toHaveBeenCalled();
+      expect(mockEvent.stopImmediatePropagation).toHaveBeenCalled();
+    });
+
+    it('should not stop event when wasClick is true', () => {
+      const mockEvent: MentionEvent = {
+        wasClick: true,
+        preventDefault: jasmine.createSpy('preventDefault'),
+        stopPropagation: jasmine.createSpy('stopPropagation'),
+        stopImmediatePropagation: jasmine.createSpy('stopImmediatePropagation'),
+      };
+
+      directive.stopEvent(mockEvent);
+
+      expect(mockEvent.preventDefault).not.toHaveBeenCalled();
+      expect(mockEvent.stopPropagation).not.toHaveBeenCalled();
+      expect(mockEvent.stopImmediatePropagation).not.toHaveBeenCalled();
+    });
+
+    it('should handle null event gracefully', () => {
+      expect(() => directive.stopEvent(null)).not.toThrow();
+    });
+
+    it('should handle undefined event gracefully', () => {
+      expect(() => directive.stopEvent(undefined as any)).not.toThrow();
     });
   });
 });

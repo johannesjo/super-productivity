@@ -175,7 +175,7 @@ describe('FocusModeReducer', () => {
         },
       };
 
-      const action = a.unPauseFocusSession({ idleTime: 5000 });
+      const action = a.unPauseFocusSession();
       const result = focusModeReducer(pausedState, action);
 
       expect(result.timer.isRunning).toBe(true);
