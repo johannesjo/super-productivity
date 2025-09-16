@@ -1,5 +1,5 @@
 import { createReducer, on } from '@ngrx/store';
-import { ProjectFolder, ProjectFolderState } from './project-folder.model';
+import { ProjectFolderState } from './project-folder.model';
 import { updateProjectFolders } from './project-folder.actions';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 
@@ -22,18 +22,8 @@ export const projectFolderReducer = createReducer(
     (state, { appDataComplete }) => appDataComplete.projectFolder || initialState,
   ),
 
-  on(updateProjectFolders, (state, { projectFolders }) => {
-    const entities: { [id: string]: ProjectFolder } = {};
-    const ids: string[] = [];
-
-    projectFolders.forEach((folder) => {
-      entities[folder.id] = folder;
-      ids.push(folder.id);
-    });
-
-    return {
-      entities,
-      ids,
-    };
-  }),
+  on(updateProjectFolders, (state, { projectFolders }) => ({
+    entities: Object.fromEntries(projectFolders.map((f) => [f.id, f])),
+    ids: projectFolders.map((f) => f.id),
+  })),
 );

@@ -177,44 +177,23 @@ export class NavListTreeComponent {
   }
 
   private _persistProjectFolderRelationships(nodes: TreeNode<NavGroupItem>[]): void {
-    const extractFolderData = (node: TreeNode<NavGroupItem>): any => {
-      if (node.isFolder) {
-        // Get all project children (non-folder nodes)
-        const projectIds = node.children
-          ? node.children
-              .filter((child) => !child.isFolder)
-              .map((child) => child.id.replace('project-', '')) // Remove 'project-' prefix
-          : [];
-
-        return {
-          id: node.id,
-          projectIds,
-          // Also get any sub-folders recursively
-          subFolders: node.children
-            ? node.children
-                .filter((child) => child.isFolder)
-                .map((child) => extractFolderData(child))
-            : [],
-        };
-      }
-      return null;
-    };
-
-    // Extract folder data from all top-level folders
     const folderUpdates: { id: string; projectIds: string[] }[] = [];
 
-    const processFolderData = (folderData: any): void => {
-      if (folderData) {
-        folderUpdates.push({ id: folderData.id, projectIds: folderData.projectIds });
+    const extractFolderData = (node: TreeNode<NavGroupItem>): void => {
+      if (node.isFolder) {
+        const projectIds =
+          node.children
+            ?.filter((child) => !child.isFolder)
+            .map((child) => child.id.replace('project-', '')) || [];
+
+        folderUpdates.push({ id: node.id, projectIds });
+
         // Process sub-folders recursively
-        folderData.subFolders.forEach(processFolderData);
+        node.children?.filter((child) => child.isFolder).forEach(extractFolderData);
       }
     };
 
-    nodes.forEach((node) => {
-      const folderData = extractFolderData(node);
-      processFolderData(folderData);
-    });
+    nodes.forEach(extractFolderData);
 
     // Update each folder with its new project list
     folderUpdates.forEach(({ id, projectIds }) => {
