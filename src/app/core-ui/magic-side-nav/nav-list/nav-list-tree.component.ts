@@ -9,6 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+// animations removed for simplicity
 import { CommonModule, NgStyle } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
@@ -16,13 +17,14 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TreeDndComponent } from '../../../ui/tree-dnd/tree.component';
-import { MoveInstruction, TreeNode } from '../../../ui/tree-dnd/tree.types';
+import { TreeNode } from '../../../ui/tree-dnd/tree.types';
 import { NavItemComponent } from '../nav-item/nav-item.component';
 import { NavGroupItem, NavItem, NavMenuItem } from '../magic-side-nav.model';
 import { MagicNavConfigService } from '../magic-nav-config.service';
 import { T } from '../../../t.const';
 import { WorkContextType } from '../../../features/work-context/work-context.model';
 import { ProjectFolderService } from '../../../features/project-folder/project-folder.service';
+import { Log } from '../../../core/log';
 
 @Component({
   selector: 'nav-list-tree',
@@ -83,7 +85,7 @@ export class NavListTreeComponent {
   }
 
   // Convert nav items to tree nodes - using writable signal for bidirectional updates
-  readonly treeNodes = signal<TreeNode[]>([]);
+  readonly treeNodes = signal<TreeNode<NavGroupItem>[]>([]);
 
   constructor() {
     // Initialize and sync treeNodes when item or project folders change
@@ -103,20 +105,21 @@ export class NavListTreeComponent {
     return this.hasChildren(item) ? item.children.length > 0 : false;
   });
 
-  private navItemToTreeNode(navItem: NavItem): TreeNode {
+  private navItemToTreeNode(navItem: NavItem): TreeNode<NavGroupItem> {
     // Handle folders
-    if (navItem.id?.startsWith('folder-')) {
+    if ((navItem as any).isFolder) {
       const children = this.hasChildren(navItem) ? navItem.children : [];
-      const folderId = navItem.id.replace('folder-', '');
+      const folderId = (navItem as any).folderId || navItem.id;
       const folderData = this._projectFolders().find((f) => f.id === folderId);
       const isExpanded = folderData?.isExpanded ?? true; // Default to expanded if not found
 
       return {
-        id: navItem.id,
+        id: folderId,
         label: navItem.label || '',
         isFolder: true,
         expanded: isExpanded,
         children: children.map((child) => this.navItemToTreeNode(child)),
+        data: navItem as NavGroupItem,
       };
     }
 
@@ -125,6 +128,7 @@ export class NavListTreeComponent {
       id: navItem.id || '',
       label: navItem.label || '',
       isFolder: false,
+      data: navItem as NavGroupItem,
     };
   }
 
@@ -136,32 +140,23 @@ export class NavListTreeComponent {
     this.itemClick.emit(child);
   }
 
-  onTreeNodeMoved(instruction: MoveInstruction): void {
-    const { itemId, targetId, where } = instruction;
+  onTreeUpdated(updatedNodes: TreeNode<NavGroupItem>[]): void {
+    Log.x(updatedNodes);
 
-    // Determine if this is a folder or project move
-    if (itemId.startsWith('folder-')) {
-      this.handleFolderMove(itemId, targetId, where);
-    } else {
-      this.handleProjectMove(itemId, targetId, where);
-    }
-  }
-
-  onTreeUpdated(updatedNodes: TreeNode[]): void {
     // Update our local tree nodes signal to reflect the new structure
     this.treeNodes.set(updatedNodes);
 
     // Check for folder expansion changes and sync them to the project folder service
-    this.syncFolderExpansionStates(updatedNodes);
+    this._syncFolderExpansionStates(updatedNodes);
 
     // Note: The actual persistence to backend happens via the move handlers above
     // This method ensures the UI stays in sync with the tree component's internal state
   }
 
-  private syncFolderExpansionStates(nodes: TreeNode[]): void {
-    const syncNode = (node: TreeNode): void => {
-      if (node.isFolder && node.id.startsWith('folder-')) {
-        const folderId = node.id.replace('folder-', '');
+  private _syncFolderExpansionStates(nodes: TreeNode<NavGroupItem>[]): void {
+    const syncNode = (node: TreeNode<NavGroupItem>): void => {
+      if (node.isFolder) {
+        const folderId = node.id;
         const currentFolderData = this._projectFolders().find((f) => f.id === folderId);
 
         // If the expansion state has changed, update it in the service
@@ -181,116 +176,7 @@ export class NavListTreeComponent {
     nodes.forEach(syncNode);
   }
 
-  private handleProjectMove(projectId: string, targetId: string, where: string): void {
-    // Normalize project id: our tree nodes use `project-<id>`
-    const normalizedProjectId = projectId.startsWith('project-')
-      ? projectId.replace('project-', '')
-      : projectId;
-    let targetFolderId: string | null = null;
-    let targetIndex: number | undefined;
-
-    if (targetId === '') {
-      // Dropped at root
-      targetFolderId = null;
-      targetIndex = this.calculateRootIndex(where);
-    } else if (targetId.startsWith('folder-')) {
-      // Dropped into a folder
-      targetFolderId = targetId.replace('folder-', '');
-      if (where === 'inside') {
-        targetIndex = this.calculateFolderChildIndex(targetId);
-      } else {
-        targetIndex = this.calculateSiblingIndex(targetId, where);
-      }
-    } else {
-      // Dropped relative to another project
-      targetFolderId = this.getParentFolderId(targetId);
-      targetIndex = this.calculateSiblingIndex(targetId, where);
-    }
-
-    this.projectMove.emit({
-      projectId: normalizedProjectId,
-      targetFolderId,
-      targetIndex,
-    });
-  }
-
-  private handleFolderMove(folderId: string, targetId: string, where: string): void {
-    let targetParentFolderId: string | null = null;
-    let targetIndex: number | undefined;
-
-    if (targetId === '' || !targetId.startsWith('folder-')) {
-      // Moving to root level
-      targetParentFolderId = null;
-      targetIndex = this.calculateRootFolderIndex(where);
-    } else {
-      // Moving relative to another folder (but not inside to prevent deep nesting)
-      if (where === 'inside') {
-        targetParentFolderId = targetId.replace('folder-', '');
-        targetIndex = 0;
-      } else {
-        targetParentFolderId = this.getFolderParentId(targetId);
-        targetIndex = this.calculateSiblingIndex(targetId, where);
-      }
-    }
-
-    this.folderMove.emit({
-      folderId: folderId.replace('folder-', ''),
-      targetParentFolderId,
-      targetIndex,
-    });
-  }
-
-  private calculateRootIndex(where: string): number {
-    // Simple implementation - append at end for root level
-    const item = this.item();
-    const children = this.hasChildren(item) ? item.children : [];
-    return children.filter((child) => !child.id?.startsWith('folder-')).length;
-  }
-
-  private calculateRootFolderIndex(where: string): number {
-    const item = this.item();
-    const children = this.hasChildren(item) ? item.children : [];
-    return children.filter((child) => child.id?.startsWith('folder-')).length;
-  }
-
-  private calculateFolderChildIndex(folderId: string): number {
-    const folder = this.findNavItem(folderId);
-    const children = folder && this.hasChildren(folder) ? folder.children : [];
-    return children.length || 0;
-  }
-
-  private calculateSiblingIndex(siblingId: string, where: string): number {
-    const item = this.item();
-    const siblings = this.hasChildren(item) ? item.children : [];
-    const siblingIndex = siblings.findIndex((child) => child.id === siblingId);
-    return where === 'after' ? siblingIndex + 1 : siblingIndex;
-  }
-
-  private getParentFolderId(itemId: string): string | null {
-    // Find the parent folder of an item
-    const findParent = (items: NavItem[]): string | null => {
-      for (const item of items) {
-        if (this.hasChildren(item)) {
-          const children = item.children;
-          if (children.some((child) => child.id === itemId)) {
-            return item.id?.startsWith('folder-') ? item.id.replace('folder-', '') : null;
-          }
-          const result = findParent(children);
-          if (result !== null) return result;
-        }
-      }
-      return null;
-    };
-    const item = this.item();
-    const children = this.hasChildren(item) ? item.children : [];
-    return findParent(children);
-  }
-
-  private getFolderParentId(folderId: string): string | null {
-    return this.getParentFolderId(folderId);
-  }
-
-  private findNavItem(id: string): NavItem | null {
+  findNavItem(id: string): NavItem | null {
     const search = (items: NavItem[]): NavItem | null => {
       for (const item of items) {
         if (item.id === id) return item;
@@ -308,27 +194,27 @@ export class NavListTreeComponent {
   }
 
   // Helper methods for template
-  getWorkContextFromNode(node: TreeNode): any {
+  getWorkContextFromNode(node: TreeNode<NavGroupItem>): any {
     const navItem = this.findNavItem(node.id);
     return (navItem as any)?.workContext;
   }
 
-  getTypeFromNode(node: TreeNode): WorkContextType | null {
+  getTypeFromNode(node: TreeNode<NavGroupItem>): WorkContextType | null {
     const navItem = this.findNavItem(node.id) as any;
     return (navItem?.workContextType as WorkContextType) ?? null;
   }
 
-  getDefaultIconFromNode(node: TreeNode): string {
+  getDefaultIconFromNode(node: TreeNode<NavGroupItem>): string {
     const navItem = this.findNavItem(node.id);
     return (navItem as any)?.defaultIcon || 'list';
   }
 
-  isNodeDraggable(node: TreeNode): boolean {
+  isNodeDraggable(node: TreeNode<NavGroupItem>): boolean {
     const icon = this.getDefaultIconFromNode(node);
     return icon !== 'today' && icon !== 'inbox';
   }
 
-  getNavItemFromNode(node: TreeNode): NavItem {
+  getNavItemFromNode(node: TreeNode<NavGroupItem>): NavItem {
     const found = this.findNavItem(node.id);
     if (found) return found;
     // Create a fallback NavActionItem for safety
@@ -364,10 +250,10 @@ export class NavListTreeComponent {
   }
 
   isHeaderDropZone(): boolean {
-    return this.item().id?.startsWith('folder-') || this.item().id === 'projects';
+    return (this.item() as any).isFolder === true || this.item().id === 'projects';
   }
 
-  getProjectId(node: TreeNode): string | undefined {
+  getProjectId(node: TreeNode<NavGroupItem>): string | undefined {
     const navItem = this.findNavItem(node.id);
     return (navItem as any)?.workContext?.id;
   }

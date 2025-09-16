@@ -428,11 +428,13 @@ export class MagicNavConfigService {
     // Always add the folder (even if empty) to serve as a drop target
     items.push({
       type: 'group',
-      id: `folder-${folder.id}`,
+      id: folder.id,
       label: folder.title,
       icon: folder.isExpanded ? 'expand_more' : 'chevron_right',
       children: folderChildren,
       action: () => this._toggleFolderExpansion(folder.id),
+      isFolder: true,
+      folderId: folder.id,
     });
 
     return items;
@@ -646,7 +648,7 @@ export class MagicNavConfigService {
       this._handleProjectFolderMove(draggedItem, sourceContainer, targetContainer);
     }
     // Handle folder reordering (if needed in the future)
-    else if (draggedItem.type === 'group' && draggedItem.id?.startsWith('folder-')) {
+    else if (draggedItem.type === 'group' && (draggedItem as any).isFolder) {
       // For now, we don't support folder reordering, but this is where it would go
       console.log('Folder reordering not yet supported');
     }
@@ -912,7 +914,13 @@ export class MagicNavConfigService {
     let targetFolderId: string | null = null;
 
     // Determine target folder ID
-    if (targetContainer?.id?.startsWith('folder-')) {
+    if (targetContainer?.isFolder && targetContainer?.folderId) {
+      targetFolderId = targetContainer.folderId;
+    } else if (
+      typeof targetContainer?.id === 'string' &&
+      targetContainer.id?.startsWith?.('folder-')
+    ) {
+      // Fallback for legacy id format, if still present
       targetFolderId = targetContainer.id.replace('folder-', '');
     } else if (targetContainer?.id === 'projects') {
       targetFolderId = null; // Moving to root level

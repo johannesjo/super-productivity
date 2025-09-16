@@ -2,19 +2,13 @@
   class="g-multi-btn-wrapper"
   [class.folder-header-drop-zone]="isHeaderDropZone()"
   [attr.data-drop-zone]="
-    isHeaderDropZone()
-      ? item().id?.startsWith('folder-')
-        ? item().id?.replace('folder-', '')
-        : 'projects'
-      : null
+    isHeaderDropZone() ? (item().isFolder ? item().folderId : 'projects') : null
   "
 >
   <nav-item
-    [mode]="item().id?.startsWith('folder-') ? 'folder' : 'row'"
-    [container]="item().id?.startsWith('folder-') ? null : 'group'"
-    [folderId]="
-      item().id?.startsWith('folder-') ? item().id?.replace('folder-', '') || null : null
-    "
+    [mode]="item().isFolder ? 'folder' : 'row'"
+    [container]="item().isFolder ? null : 'group'"
+    [folderId]="item().isFolder ? item().folderId || null : null"
     [expanded]="isExpanded()"
     [ariaControls]="'group-' + item().id"
     [icon]="item().icon"
@@ -64,7 +58,6 @@
     <tree-dnd
       [data]="treeNodes()"
       [indent]="20"
-      (moved)="onTreeNodeMoved($event)"
       (updated)="onTreeUpdated($event)"
     >
       <ng-template
@@ -96,11 +89,11 @@
         <div
           class="nav-child-item folder-item"
           [class.draggable]="true"
-          [attr.data-folder-id]="node.id?.replace('folder-', '')"
+          [attr.data-folder-id]="node.id"
         >
           <nav-item
             [mode]="'folder'"
-            [folderId]="node.id?.replace('folder-', '') || null"
+            [folderId]="node.id || null"
             [expanded]="node.expanded"
             [icon]="'folder'"
             [label]="node.label"

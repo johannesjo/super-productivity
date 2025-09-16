@@ -73,6 +73,10 @@ export interface NavGroupItem extends NavBaseItem {
   additionalButtons?: NavAdditionalButton[];
   contextMenuItems?: NavContextItem[];
   action?: () => void; // optional external toggle logic
+  // Indicates this group represents a project folder
+  isFolder?: boolean;
+  // Raw folder id if this is a folder group
+  folderId?: string;
 }
 
 export interface NavMenuItem extends NavBaseItem {

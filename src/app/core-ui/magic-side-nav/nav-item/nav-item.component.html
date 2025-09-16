@@ -62,17 +62,13 @@
     [attr.aria-controls]="ariaControls()"
     (click)="clicked.emit()"
   >
-    @if (svgIcon()) {
-      <mat-icon
-        class="nav-icon expand-icon drag-handle"
-        [class.icon--svg]="true"
-        [svgIcon]="svgIcon()"
-      ></mat-icon>
-    } @else if (icon()) {
-      <mat-icon class="nav-icon expand-icon drag-handle">
-        {{ icon() }}
-      </mat-icon>
-    }
+    <mat-icon
+      class="nav-icon expand-icon drag-handle folder-icon"
+      [class.expanded]="expanded()"
+      [class.collapsed]="!expanded()"
+    >
+      chevron_right
+    </mat-icon>
     @if (label()) {
       <span
         class="nav-label"
