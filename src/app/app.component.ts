@@ -322,15 +322,15 @@ export class AppComponent implements OnDestroy, AfterViewInit {
         this._initMultiInstanceWarning();
       }
     }
+
+    // prevent page reloads on missed drops
+    document.addEventListener('dragover', (ev) => {
+      ev.preventDefault();
+    });
   }
 
   @HostListener('document:keydown', ['$event']) onKeyDown(ev: KeyboardEvent): void {
     this._shortcutService.handleKeyDown(ev);
-  }
-
-  // prevent page reloads on missed drops
-  @HostListener('document:dragover', ['$event']) onDragOver(ev: DragEvent): void {
-    ev.preventDefault();
   }
 
   @HostListener('document:drop', ['$event']) onDrop(ev: DragEvent): void {
