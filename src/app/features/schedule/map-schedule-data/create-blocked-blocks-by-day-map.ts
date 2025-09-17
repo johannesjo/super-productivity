@@ -15,18 +15,58 @@ import { getDiffInDays } from '../../../util/get-diff-in-days';
 // TODO improve to even better algo for createSortedBlockerBlocks
 const NR_OF_DAYS = 10;
 
-export const createBlockedBlocksByDayMap = (
+// Back-compat overload: old call sites used `now` as 6th argument
+export function createBlockedBlocksByDayMap(
   scheduledTasks: TaskWithDueTime[],
   scheduledTaskRepeatCfgs: TaskRepeatCfg[],
   icalEventMap: ScheduleCalendarMapEntry[],
   workStartEndCfg?: ScheduleWorkStartEndCfg,
   weekendWorkStartEndCfg?: ScheduleWorkStartEndCfg,
+  now?: number,
+  nrOfDays?: number,
+): BlockedBlockByDayMap;
+export function createBlockedBlocksByDayMap(
+  scheduledTasks: TaskWithDueTime[],
+  scheduledTaskRepeatCfgs: TaskRepeatCfg[],
+  icalEventMap: ScheduleCalendarMapEntry[],
+  workStartEndEndCfg?: ScheduleWorkStartEndCfg,
+  weekendWorkStartEndCfg?: ScheduleWorkStartEndCfg,
   lunchBreakCfg?: ScheduleLunchBreakCfg,
   customBlocksWeekday?: ScheduleWorkStartEndCfg[],
   customBlocksWeekend?: ScheduleWorkStartEndCfg[],
   now?: number,
-  nrOfDays: number = NR_OF_DAYS,
-): BlockedBlockByDayMap => {
+  nrOfDays?: number,
+): BlockedBlockByDayMap;
+export function createBlockedBlocksByDayMap(
+  scheduledTasks: TaskWithDueTime[],
+  scheduledTaskRepeatCfgs: TaskRepeatCfg[],
+  icalEventMap: ScheduleCalendarMapEntry[],
+  workStartEndCfg?: ScheduleWorkStartEndCfg,
+  weekendWorkStartEndCfg?: ScheduleWorkStartEndCfg,
+  a6?: any,
+  a7?: any,
+  a8?: any,
+  a9?: any,
+  a10?: any,
+): BlockedBlockByDayMap {
+  // Normalize args for both signatures
+  let lunchBreakCfg: ScheduleLunchBreakCfg | undefined;
+  let customBlocksWeekday: ScheduleWorkStartEndCfg[] | undefined;
+  let customBlocksWeekend: ScheduleWorkStartEndCfg[] | undefined;
+  let now: number | undefined;
+  let nrOfDays: number = NR_OF_DAYS;
+
+  if (typeof a6 === 'number') {
+    // Old signature: a6=now, a7=nrOfDays
+    now = a6 as number;
+    nrOfDays = typeof a7 === 'number' ? (a7 as number) : NR_OF_DAYS;
+  } else {
+    lunchBreakCfg = a6 as ScheduleLunchBreakCfg | undefined;
+    customBlocksWeekday = a7 as ScheduleWorkStartEndCfg[] | undefined;
+    customBlocksWeekend = a8 as ScheduleWorkStartEndCfg[] | undefined;
+    now = a9 as number | undefined;
+    nrOfDays = typeof a10 === 'number' ? (a10 as number) : NR_OF_DAYS;
+  }
   const allBlockedBlocks = createSortedBlockerBlocks(
     scheduledTasks,
     scheduledTaskRepeatCfgs,
@@ -97,7 +137,7 @@ export const createBlockedBlocksByDayMap = (
   });
 
   return blockedBlocksByDay;
-};
+}
 const createEntriesForDay = (
   entries: BlockedBlockEntry[],
   dayEnd: number,
