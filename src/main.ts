@@ -61,7 +61,6 @@ import { CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { AppComponent } from './app/app.component';
 import { ShortTimeHtmlPipe } from './app/ui/pipes/short-time-html.pipe';
 import { ShortTimePipe } from './app/ui/pipes/short-time.pipe';
-import { BackgroundTask } from '@capawesome/capacitor-background-task';
 import { promiseTimeout } from './app/util/promise-timeout';
 import { PLUGIN_INITIALIZER_PROVIDER } from './app/plugins/plugin-initializer';
 import { initializeMatMenuTouchFix } from './app/features/tasks/task-context-menu/mat-menu-touch-monkey-patch';
@@ -239,6 +238,7 @@ if (IS_ANDROID_WEB_VIEW) {
     }
     // The app state has been changed to inactive.
     // Start the background task by calling `beforeExit`.
+    const { BackgroundTask } = await import('@capawesome/capacitor-background-task');
     const taskId = await BackgroundTask.beforeExit(async () => {
       // Run your code...
       // Finish the background task as soon as everything is done.

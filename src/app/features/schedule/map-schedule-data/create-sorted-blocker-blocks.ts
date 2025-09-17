@@ -18,7 +18,10 @@ export const createSortedBlockerBlocks = (
   scheduledTaskRepeatCfgs: TaskRepeatCfg[],
   icalEventMap: ScheduleCalendarMapEntry[],
   workStartEndCfg?: ScheduleWorkStartEndCfg,
+  weekendWorkStartEndCfg?: ScheduleWorkStartEndCfg,
   lunchBreakCfg?: ScheduleLunchBreakCfg,
+  customBlocksWeekday?: ScheduleWorkStartEndCfg[],
+  customBlocksWeekend?: ScheduleWorkStartEndCfg[],
   now: number = Date.now(),
   nrOfDays: number = PROJECTION_DAYS,
 ): BlockedBlock[] => {
@@ -33,8 +36,19 @@ export const createSortedBlockerBlocks = (
       nrOfDays,
       scheduledTaskRepeatCfgs,
     ),
-    ...createBlockerBlocksForWorkStartEnd(now, nrOfDays, workStartEndCfg),
+    ...createBlockerBlocksForWorkStartEnd(
+      now,
+      nrOfDays,
+      workStartEndCfg,
+      weekendWorkStartEndCfg,
+    ),
     ...createBlockerBlocksForLunchBreak(now, nrOfDays, lunchBreakCfg),
+    ...createBlockerBlocksForCustomBlocks(
+      now,
+      nrOfDays,
+      customBlocksWeekday,
+      customBlocksWeekend,
+    ),
   ];
 
   blockedBlocks = mergeBlocksRecursively(blockedBlocks);
@@ -104,10 +118,11 @@ const createBlockerBlocksForWorkStartEnd = (
   now: number,
   nrOfDays: number,
   workStartEndCfg?: ScheduleWorkStartEndCfg,
+  weekendWorkStartEndCfg?: ScheduleWorkStartEndCfg,
 ): BlockedBlock[] => {
   const blockedBlocks: BlockedBlock[] = [];
 
-  if (!workStartEndCfg) {
+  if (!workStartEndCfg && !weekendWorkStartEndCfg) {
     return blockedBlocks;
   }
   let i: number = 0;
@@ -118,24 +133,36 @@ const createBlockerBlocksForWorkStartEnd = (
     currentDate.setDate(nowDate.getDate() + i);
     currentDate.setHours(0, 0, 0, 0);
     const currentDayTimestamp = currentDate.getTime();
+    const isWeekend = currentDate.getDay() === 0 || currentDate.getDay() === 6;
 
     const nextDate = new Date(nowDate);
     nextDate.setDate(nowDate.getDate() + i + 1);
     nextDate.setHours(0, 0, 0, 0);
     const nextDayTimestamp = nextDate.getTime();
 
-    const start = getDateTimeFromClockString(
-      workStartEndCfg.endTime,
-      currentDayTimestamp,
+    const cfgToday =
+      isWeekend && weekendWorkStartEndCfg ? weekendWorkStartEndCfg : workStartEndCfg;
+    if (!cfgToday) {
+      i++;
+      continue;
+    }
+
+    const nextIsWeekend = nextDate.getDay() === 0 || nextDate.getDay() === 6;
+    const cfgNext =
+      nextIsWeekend && weekendWorkStartEndCfg ? weekendWorkStartEndCfg : workStartEndCfg;
+
+    const start = getDateTimeFromClockString(cfgToday.endTime, currentDayTimestamp);
+    const end = getDateTimeFromClockString(
+      (cfgNext || cfgToday).startTime,
+      nextDayTimestamp,
     );
-    const end = getDateTimeFromClockString(workStartEndCfg.startTime, nextDayTimestamp);
     blockedBlocks.push({
       start,
       end,
       entries: [
         {
           type: BlockedBlockType.WorkdayStartEnd,
-          data: workStartEndCfg,
+          data: cfgToday,
           start,
           end,
         },
@@ -186,6 +213,53 @@ const createBlockerBlocksForLunchBreak = (
     i++;
   }
 
+  return blockedBlocks;
+};
+
+const createBlockerBlocksForCustomBlocks = (
+  now: number,
+  nrOfDays: number,
+  customBlocksWeekday?: ScheduleWorkStartEndCfg[],
+  customBlocksWeekend?: ScheduleWorkStartEndCfg[],
+): BlockedBlock[] => {
+  const blockedBlocks: BlockedBlock[] = [];
+  const hasWeekday = !!customBlocksWeekday && customBlocksWeekday.length > 0;
+  const hasWeekend = !!customBlocksWeekend && customBlocksWeekend.length > 0;
+  if (!hasWeekday && !hasWeekend) {
+    return blockedBlocks;
+  }
+  for (let i = 0; i < nrOfDays; i++) {
+    const nowDate = new Date(now);
+    const targetDate = new Date(nowDate);
+    targetDate.setDate(nowDate.getDate() + i);
+    targetDate.setHours(0, 0, 0, 0);
+    const currentDayTimestamp = targetDate.getTime();
+    const isWeekend = targetDate.getDay() === 0 || targetDate.getDay() === 6;
+
+    const blocksForDay = isWeekend ? customBlocksWeekend : customBlocksWeekday;
+    (blocksForDay || []).forEach((cfg) => {
+      if (!cfg?.startTime || !cfg?.endTime) {
+        return;
+      }
+      const start = getDateTimeFromClockString(cfg.startTime, currentDayTimestamp);
+      const end = getDateTimeFromClockString(cfg.endTime, currentDayTimestamp);
+      if (isNaN(start) || isNaN(end) || end <= start) {
+        return;
+      }
+      blockedBlocks.push({
+        start,
+        end,
+        entries: [
+          {
+            type: BlockedBlockType.LunchBreak,
+            data: { startTime: cfg.startTime, endTime: cfg.endTime },
+            start,
+            end,
+          },
+        ],
+      });
+    });
+  }
   return blockedBlocks;
 };
 

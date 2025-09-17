@@ -1,0 +1,2183 @@
+[
+  {
+    "timestamp": "2025-09-17T13:14:50.427Z",
+    "level": "LOG",
+    "context": "",
+    "message": "[object Object]",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.483Z",
+    "level": "VERBOSE",
+    "context": "",
+    "message": "[a]@ngrx/store/init",
+    "args": [
+      {
+        "type": "@ngrx/store/init"
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.484Z",
+    "level": "VERBOSE",
+    "context": "",
+    "message": "[a]@ngrx/store/update-reducers",
+    "args": [
+      {
+        "type": "@ngrx/store/update-reducers",
+        "features": [
+          "appState",
+          "layout",
+          "globalConfig",
+          "focusMode",
+          "idle",
+          "improvement",
+          "issueProvider",
+          "metric",
+          "note",
+          "obstruction",
+          "pomodoro",
+          "projects",
+          "simpleCounter",
+          "tag",
+          "taskRepeatCfg",
+          "tasks",
+          "workContext",
+          "boards",
+          "timeTracking",
+          "planner"
+        ]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.484Z",
+    "level": "VERBOSE",
+    "context": "",
+    "message": "[a]@ngrx/effects/init",
+    "args": [
+      {
+        "type": "@ngrx/effects/init"
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.486Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "MetaModelCtrl.load()",
+    "args": ["undefined"]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.486Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "m",
+    "args": [
+      "short:{\"task\":{\"_inMemoryData\":{\"ids\":[\"l4njAiRlItLLOonmha-6k\",\"sR5Jymfmc2S3pMYM7a2qF\",\"X5QeBe-i2mKcacrcmVIim\",\"vjOhzgE1pfEL9knoI_5hY\",\"1wCx0bLFmlk88jkZ0DmgI\",\"6S0rZ4u2QkFWGq_NqHX3V\"],\"entities\":{\"X5QeBe-i2mKcacrcmVIim\":{\"id\":\"X5QeBe-i2mKcacrcmVIim\",\"subTaskIds\":[],\"timeSpentOnDay\":{\"2025-09-15\":15571756},\"timeSpent\":15571756,\"timeEstimate\":4500000,\"isDone\":false,\"title\":\"ai搜索昨天记下的前几个问题\",\"tagIds\":[],\"cr"
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.486Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "MetaModelCtrl.load()",
+    "args": ["undefined"]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.510Z",
+    "level": "LOG",
+    "context": "",
+    "message": "DAY_CHANGE 2025-09-17",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.515Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():reminders",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.530Z",
+    "level": "VERBOSE",
+    "context": "",
+    "message": "[a][Task] SetSelectedTask",
+    "args": [
+      {
+        "id": null,
+        "type": "[Task] SetSelectedTask"
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.540Z",
+    "level": "LOG",
+    "context": "",
+    "message": "Persistence already allowed",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.542Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MetaModelCtrl.loadClientId() loaded:",
+    "args": [
+      {
+        "clientId": "BCWmfhoa5x29_13"
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.543Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MetaModelCtrl.load() loaded from DB:",
+    "args": [
+      "short:{\"data\":{\"lastUpdate\":1758089782928,\"crossModelVersion\":4.2,\"vectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedVectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedUpdate\":1758089782928,\"lastSyncedAction\":\"Uploaded single file at 2025-09-17T06:17:01.248Z\",\"revMap\":{\"pluginUserData\":\"0163eae856e601d00000002f7db1001\",\"pluginMetadata\":\"0163eae8575a62400000002f7db1001\",\"globalConfig\":\"0163eb3c55e5142000000"
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.543Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MetaModelCtrl.load() loaded valid data:",
+    "args": [
+      "short:{\"lastUpdate\":1758089782928,\"lastSyncedUpdate\":1758089782928,\"metaRev\":\"0163ef92f3f771700000002f7db1001\",\"hasRevMap\":true,\"revMapKeys\":[\"pluginUserData\",\"pluginMetadata\",\"globalConfig\",\"issueProvider\",\"metric\",\"improvement\",\"obstruction\",\"archiveYoung\",\"archiveOld\"],\"vectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedVectorClock\":{\"BCWmfhoa5x29_13\":6082},\"hasVectorClock\":true,\"vectorClockKeys\":[\"BCW"
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.543Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MetaModelCtrl.load() loaded from DB:",
+    "args": [
+      "short:{\"data\":{\"lastUpdate\":1758089782928,\"crossModelVersion\":4.2,\"vectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedVectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedUpdate\":1758089782928,\"lastSyncedAction\":\"Uploaded single file at 2025-09-17T06:17:01.248Z\",\"revMap\":{\"pluginUserData\":\"0163eae856e601d00000002f7db1001\",\"pluginMetadata\":\"0163eae8575a62400000002f7db1001\",\"globalConfig\":\"0163eb3c55e5142000000"
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.543Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MetaModelCtrl.load() loaded valid data:",
+    "args": [
+      "short:{\"lastUpdate\":1758089782928,\"lastSyncedUpdate\":1758089782928,\"metaRev\":\"0163ef92f3f771700000002f7db1001\",\"hasRevMap\":true,\"revMapKeys\":[\"pluginUserData\",\"pluginMetadata\",\"globalConfig\",\"issueProvider\",\"metric\",\"improvement\",\"obstruction\",\"archiveYoung\",\"archiveOld\"],\"vectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedVectorClock\":{\"BCWmfhoa5x29_13\":6082},\"hasVectorClock\":true,\"vectorClockKeys\":[\"BCW"
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.543Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MigrationService.checkAndMigrateLocalDB()",
+    "args": [
+      "short:{\"meta\":{\"lastUpdate\":1758089782928,\"crossModelVersion\":4.2,\"vectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedVectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedUpdate\":1758089782928,\"lastSyncedAction\":\"Uploaded single file at 2025-09-17T06:17:01.248Z\",\"revMap\":{\"pluginUserData\":\"0163eae856e601d00000002f7db1001\",\"pluginMetadata\":\"0163eae8575a62400000002f7db1001\",\"globalConfig\":\"0163eb3c55e5142000000"
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.543Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "getAllSyncModelData()",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.543Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():task",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.543Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():timeTracking",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.543Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():project",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.543Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():tag",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.543Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():simpleCounter",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.543Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():note",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.543Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():taskRepeatCfg",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.543Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():reminders",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.543Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():planner",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.543Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():boards",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.543Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():pluginUserData",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.543Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():pluginMetadata",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.543Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():globalConfig",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.543Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():issueProvider",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.543Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():metric",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.543Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():improvement",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.543Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():obstruction",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.543Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():archiveYoung",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.543Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():archiveOld",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.544Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():reminders",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.544Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "TmpBackupService.load()",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.545Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MigrationService.migrate() no migration needed",
+    "args": [
+      {
+        "dataInCrossModelVersion": 4.2,
+        "codeModelVersion": 4.2
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.545Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "getAllSyncModelData()",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.545Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():task",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.545Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():timeTracking",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.545Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():project",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.545Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():tag",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.545Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():simpleCounter",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.545Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():note",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.545Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():taskRepeatCfg",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.546Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():reminders",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.546Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():planner",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.546Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():boards",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.546Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():pluginUserData",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.546Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():pluginMetadata",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.546Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():globalConfig",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.546Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():issueProvider",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.546Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():metric",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.546Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():improvement",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.546Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():obstruction",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.546Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():archiveYoung",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.546Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():archiveOld",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.546Z",
+    "level": "LOG",
+    "context": "",
+    "message": "loaded reminders from database",
+    "args": [
+      [
+        {
+          "id": "ns7aTMBhq9sLpEkBNHxWm",
+          "relatedId": "vjOhzgE1pfEL9knoI_5hY",
+          "title": "准备数学考试",
+          "remindAt": 1758097800000,
+          "type": "TASK"
+        }
+      ]
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.546Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "MetaModelCtrl.load()",
+    "args": [
+      "short:{\"lastUpdate\":1758089782928,\"crossModelVersion\":4.2,\"vectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedVectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedUpdate\":1758089782928,\"lastSyncedAction\":\"Uploaded single file at 2025-09-17T06:17:01.248Z\",\"revMap\":{\"pluginUserData\":\"0163eae856e601d00000002f7db1001\",\"pluginMetadata\":\"0163eae8575a62400000002f7db1001\",\"globalConfig\":\"0163eb3c55e514200000002f7db10"
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.547Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "validate()",
+    "args": [
+      "short:{\"data\":{\"task\":{\"ids\":[\"l4njAiRlItLLOonmha-6k\",\"sR5Jymfmc2S3pMYM7a2qF\",\"X5QeBe-i2mKcacrcmVIim\",\"vjOhzgE1pfEL9knoI_5hY\",\"1wCx0bLFmlk88jkZ0DmgI\"],\"entities\":{\"X5QeBe-i2mKcacrcmVIim\":{\"id\":\"X5QeBe-i2mKcacrcmVIim\",\"subTaskIds\":[],\"timeSpentOnDay\":{\"2025-09-15\":15571756},\"timeSpent\":15571756,\"timeEstimate\":4500000,\"isDone\":false,\"title\":\"ai搜索昨天记下的前几个问题\",\"tagIds\":[],\"created\":1757769611397,\"attachments"
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.548Z",
+    "level": "VERBOSE",
+    "context": "",
+    "message": "[a][SP_ALL] Load(import) all data",
+    "args": [
+      "short:{\"appDataComplete\":{\"task\":{\"ids\":[\"l4njAiRlItLLOonmha-6k\",\"sR5Jymfmc2S3pMYM7a2qF\",\"X5QeBe-i2mKcacrcmVIim\",\"vjOhzgE1pfEL9knoI_5hY\",\"1wCx0bLFmlk88jkZ0DmgI\"],\"entities\":{\"X5QeBe-i2mKcacrcmVIim\":{\"id\":\"X5QeBe-i2mKcacrcmVIim\",\"subTaskIds\":[],\"timeSpentOnDay\":{\"2025-09-15\":15571756},\"timeSpent\":15571756,\"timeEstimate\":4500000,\"isDone\":false,\"title\":\"ai搜索昨天记下的前几个问题\",\"tagIds\":[],\"created\":1757769611397,\""
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.550Z",
+    "level": "VERBOSE",
+    "context": "",
+    "message": "[a][SP_ALL] All Data was loaded",
+    "args": [
+      {
+        "type": "[SP_ALL] All Data was loaded"
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.552Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "setActiveSyncProvider()",
+    "args": ["Dropbox", "Dropbox"]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.553Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "SyncProviderPrivateCfgStore.load",
+    "args": ["undefined"]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.553Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "setEncryptAndCompressCfg()",
+    "args": [
+      {
+        "isEncrypt": false,
+        "isCompress": false
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.553Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "SyncProviderPrivateCfgStore.load",
+    "args": ["undefined"]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.553Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "SyncProviderPrivateCfgStore.load",
+    "args": ["undefined"]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.558Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "EV:providerReady",
+    "args": [
+      true,
+      {
+        "syncDone": [],
+        "syncStart": [null],
+        "syncError": [],
+        "syncStatusChange": [null],
+        "metaModelChange": [null],
+        "providerChange": [],
+        "providerReady": [null],
+        "providerPrivateCfgChange": [null],
+        "onBeforeUpdateLocal": [null]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.558Z",
+    "level": "LOG",
+    "context": "sync",
+    "message": "sync(effect).....",
+    "args": ["INITIAL_SYNC_TRIGGER"]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.559Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "Database.lock()",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.559Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "sync()",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.559Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "EV:syncStatusChange",
+    "args": [
+      "SYNCING",
+      {
+        "syncDone": [],
+        "syncStart": [null],
+        "syncError": [],
+        "syncStatusChange": [null],
+        "metaModelChange": [null],
+        "providerChange": [],
+        "providerReady": [null],
+        "providerPrivateCfgChange": [null],
+        "onBeforeUpdateLocal": [null]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.559Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "SyncProviderPrivateCfgStore.load",
+    "args": ["object"]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.559Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "MetaModelCtrl.load()",
+    "args": [
+      "short:{\"lastUpdate\":1758089782928,\"crossModelVersion\":4.2,\"vectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedVectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedUpdate\":1758089782928,\"lastSyncedAction\":\"Uploaded single file at 2025-09-17T06:17:01.248Z\",\"revMap\":{\"pluginUserData\":\"0163eae856e601d00000002f7db1001\",\"pluginMetadata\":\"0163eae8575a62400000002f7db1001\",\"globalConfig\":\"0163eb3c55e514200000002f7db10"
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.559Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "SyncService.sync(): Initial meta check",
+    "args": [
+      {
+        "lastUpdate": 1758089782928,
+        "lastSyncedUpdate": 1758089782928,
+        "metaRev": "0163ef92f3f771700000002f7db1001",
+        "isInSync": true
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.559Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MetaSyncService.getRev()",
+    "args": [
+      {
+        "localRev": "0163ef92f3f771700000002f7db1001"
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:50.559Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "SyncProviderPrivateCfgStore.load",
+    "args": ["object"]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.530Z",
+    "level": "LOG",
+    "context": "",
+    "message": "2 out of 44082 MiB used (0%)",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.553Z",
+    "level": "ERROR",
+    "context": "",
+    "message": "GLOBAL_ERROR_HANDLER",
+    "args": [{}]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.553Z",
+    "level": "LOG",
+    "context": "",
+    "message": "Last actions before error:",
+    "args": [
+      [
+        "1758114890530: [Task] SetSelectedTask",
+        "1758114890548: [SP_ALL] Load(import) all data",
+        "1758114890550: [SP_ALL] All Data was loaded"
+      ]
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.553Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "getAllSyncModelData()",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.553Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():task",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.553Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():timeTracking",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.553Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():project",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.553Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():tag",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.553Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():simpleCounter",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.553Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():note",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.553Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():taskRepeatCfg",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.553Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():reminders",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.553Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():planner",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.553Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():boards",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.553Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():pluginUserData",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.553Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():pluginMetadata",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.553Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():globalConfig",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.553Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():issueProvider",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.553Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():metric",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.553Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():improvement",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.553Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():obstruction",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.553Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():archiveYoung",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.553Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():archiveOld",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.555Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "MetaModelCtrl.load()",
+    "args": [
+      "short:{\"lastUpdate\":1758089782928,\"crossModelVersion\":4.2,\"vectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedVectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedUpdate\":1758089782928,\"lastSyncedAction\":\"Uploaded single file at 2025-09-17T06:17:01.248Z\",\"revMap\":{\"pluginUserData\":\"0163eae856e601d00000002f7db1001\",\"pluginMetadata\":\"0163eae8575a62400000002f7db1001\",\"globalConfig\":\"0163eb3c55e514200000002f7db10"
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.555Z",
+    "level": "LOG",
+    "context": "",
+    "message": "[object Object]",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.765Z",
+    "level": "LOG",
+    "context": "sync",
+    "message": "immediate sync trigger",
+    "args": ["I_BLUR_WHILE_NOT_TRACKING"]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.766Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "DropboxApi.updateAccessTokenFromRefreshTokenIfAvailable()",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.766Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "SyncProviderPrivateCfgStore.load",
+    "args": ["object"]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.903Z",
+    "level": "LOG",
+    "context": "",
+    "message": "[object HTMLCollection]",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:51.904Z",
+    "level": "LOG",
+    "context": "sync",
+    "message": "sync(effect).....",
+    "args": ["I_BLUR_WHILE_NOT_TRACKING"]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.425Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "Dropbox: Refresh access token Response",
+    "args": [
+      "short:{\"access_token\":\"sl.u.AF8I8aDW-6oCMd3hZzBZk3ON7khBGkRONB1ELskC_UwvX2nqzf3NgvjQQMPeTn9ZnXf8MaCEpDfmrQZipLwxESTN7jSPBvaRurkamkPeCYAOufB00SyYqYebQKVqzAkF32GkPnmC2ag2k8PLRw63_9xIcRv_xMmmgr4dCjM2qj_MWJG9OkFMdnwc8OZDB_jZ-3iTPXfP0H5SrqIaSisCJLT9fzz2y-cXW-Za3faLv9Yv3OhTWej13491mNoAban9Gt26EWB4PKKXzsCloxzUYN5UFLErKeBrWx5wOyKyA2RM2yD8Sc43XaluCjn0o4eHD1v6WLqLCmYdM70p1zgXQmA4Vq_YZfki4qyhm4oJH3hehKXSl-6UW9uIzg"
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.425Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "SyncProviderPrivateCfgStore.load",
+    "args": ["object"]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.425Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "SyncProviderPrivateCfgStore._save()",
+    "args": ["Dropbox", "object"]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.425Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "EV:providerPrivateCfgChange",
+    "args": [
+      "short:{\"providerId\":\"Dropbox\",\"privateCfg\":{\"encryptKey\":\"\",\"accessToken\":\"sl.u.AF8I8aDW-6oCMd3hZzBZk3ON7khBGkRONB1ELskC_UwvX2nqzf3NgvjQQMPeTn9ZnXf8MaCEpDfmrQZipLwxESTN7jSPBvaRurkamkPeCYAOufB00SyYqYebQKVqzAkF32GkPnmC2ag2k8PLRw63_9xIcRv_xMmmgr4dCjM2qj_MWJG9OkFMdnwc8OZDB_jZ-3iTPXfP0H5SrqIaSisCJLT9fzz2y-cXW-Za3faLv9Yv3OhTWej13491mNoAban9Gt26EWB4PKKXzsCloxzUYN5UFLErKeBrWx5wOyKyA2RM2yD8Sc43XaluCjn0o4eHD1v6WL",
+      {
+        "syncDone": [],
+        "syncStart": [null],
+        "syncError": [],
+        "syncStatusChange": [null],
+        "metaModelChange": [null],
+        "providerChange": [],
+        "providerReady": [null],
+        "providerPrivateCfgChange": [null],
+        "onBeforeUpdateLocal": [null]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.426Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "SyncProviderPrivateCfgStore.load",
+    "args": ["object"]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.558Z",
+    "level": "ERROR",
+    "context": "",
+    "message": "GLOBAL_ERROR_HANDLER",
+    "args": [{}]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.739Z",
+    "level": "LOG",
+    "context": "",
+    "message": "[object HTMLCollection]",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.887Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "SyncService.sync(): Early return - already in sync",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.887Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "sync() result:",
+    "args": [
+      {
+        "status": "InSync"
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.887Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "EV:syncDone",
+    "args": [
+      {
+        "status": "InSync"
+      },
+      {
+        "syncDone": [],
+        "syncStart": [null],
+        "syncError": [],
+        "syncStatusChange": [null],
+        "metaModelChange": [null],
+        "providerChange": [],
+        "providerReady": [null],
+        "providerPrivateCfgChange": [null],
+        "onBeforeUpdateLocal": [null]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.887Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "EV:syncStatusChange",
+    "args": [
+      "IN_SYNC",
+      {
+        "syncDone": [],
+        "syncStart": [null],
+        "syncError": [],
+        "syncStatusChange": [null],
+        "metaModelChange": [null],
+        "providerChange": [],
+        "providerReady": [null],
+        "providerPrivateCfgChange": [null],
+        "onBeforeUpdateLocal": [null]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.887Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "Database.unlock()",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.887Z",
+    "level": "LOG",
+    "context": "plugin",
+    "message": "Initializing plugin system...",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.888Z",
+    "level": "LOG",
+    "context": "task",
+    "message": "[TaskDueEffects] Triggering addAllDueToday after sync",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.889Z",
+    "level": "LOG",
+    "context": "task",
+    "message": "[AddTasksForTomorrow] Starting addAllDueToday",
+    "args": [
+      {
+        "todayStr": "2025-09-17"
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.891Z",
+    "level": "VERBOSE",
+    "context": "",
+    "message": "[a][Task Shared] addTask",
+    "args": [
+      "short:{\"task\":{\"id\":\"6S0rZ4u2QkFWGq_NqHX3V\",\"subTaskIds\":[],\"timeSpentOnDay\":{},\"timeSpent\":0,\"timeEstimate\":3600000,\"isDone\":false,\"title\":\"练托福\",\"tagIds\":[\"EM_IMPORTANT\"],\"created\":1758081600000,\"attachments\":[],\"projectId\":\"LdNjiIda5mEc6IPnLgSDs\",\"dueDay\":\"2025-09-17\",\"repeatCfgId\":\"62GY76asCdgRGgjv-DcLS\",\"notes\":\"\"},\"workContextType\":\"TAG\",\"workContextId\":\"TODAY\",\"isAddToBacklog\":false,\"isAddToBottom"
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.893Z",
+    "level": "LOG",
+    "context": "task",
+    "message": "shortSyntax",
+    "args": ["undefined"]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.893Z",
+    "level": "ERROR",
+    "context": "",
+    "message": "GLOBAL_ERROR_HANDLER",
+    "args": [{}]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.894Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "___ ModelCtrl.save():tag",
+    "args": [
+      {
+        "isUpdateRevAndLastUpdate": true
+      },
+      {
+        "dataKeys": ["ids", "entities"],
+        "dataType": "object"
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.894Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MetaModelCtrl.updateRevForModel()",
+    "args": [
+      "tag",
+      "short:{\"modelCfg\":{\"defaultData\":{\"ids\":[\"TODAY\"],\"entities\":{\"TODAY\":{\"color\":null,\"created\":1758114890380,\"advancedCfg\":{\"worklogExportSettings\":{\"cols\":[\"DATE\",\"START\",\"END\",\"TIME_CLOCK\",\"TITLES_INCLUDING_SUB\"],\"roundWorkTimeTo\":null,\"roundStartTimeTo\":null,\"roundEndTimeTo\":null,\"separateTasksBy\":\" | \",\"groupBy\":\"DATE\"}},\"theme\":{\"isAutoContrast\":false,\"isDisableBackgroundTint\":true,\"primary\":\"#6495E"
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.894Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "___ ModelCtrl.save():project",
+    "args": [
+      {
+        "isUpdateRevAndLastUpdate": true
+      },
+      {
+        "dataKeys": ["ids", "entities"],
+        "dataType": "object"
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.895Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MetaModelCtrl.updateRevForModel()",
+    "args": [
+      "project",
+      "short:{\"modelCfg\":{\"defaultData\":{\"ids\":[\"INBOX_PROJECT\"],\"entities\":{\"INBOX_PROJECT\":{\"isHiddenFromMenu\":false,\"isArchived\":false,\"isEnableBacklog\":false,\"backlogTaskIds\":[],\"noteIds\":[],\"advancedCfg\":{\"worklogExportSettings\":{\"cols\":[\"DATE\",\"START\",\"END\",\"TIME_CLOCK\",\"TITLES_INCLUDING_SUB\"],\"roundWorkTimeTo\":null,\"roundStartTimeTo\":null,\"roundEndTimeTo\":null,\"separateTasksBy\":\" | \",\"groupBy\":\"DATE\"}},"
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.895Z",
+    "level": "LOG",
+    "context": "",
+    "message": "__DB_S_task__",
+    "args": [true, "[Task Shared] addTask"]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.895Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "___ ModelCtrl.save():task",
+    "args": [
+      {
+        "isUpdateRevAndLastUpdate": true
+      },
+      {
+        "dataKeys": [
+          "ids",
+          "entities",
+          "currentTaskId",
+          "selectedTaskId",
+          "taskDetailTargetPanel",
+          "lastCurrentTaskId",
+          "isDataLoaded"
+        ],
+        "dataType": "object"
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.895Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MetaModelCtrl.updateRevForModel()",
+    "args": [
+      "task",
+      "short:{\"modelCfg\":{\"defaultData\":{\"ids\":[],\"entities\":{},\"currentTaskId\":null,\"selectedTaskId\":null,\"taskDetailTargetPanel\":\"Default\",\"lastCurrentTaskId\":null,\"isDataLoaded\":false},\"isMainFileModel\":true},\"inMemory\":{\"lastUpdate\":1758089782928,\"crossModelVersion\":4.2,\"vectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedVectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedUpdate\":1758089782928,\"lastSyncedAction"
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.896Z",
+    "level": "VERBOSE",
+    "context": "",
+    "message": "[a][TaskRepeatCfg] Update TaskRepeatCfg",
+    "args": [
+      {
+        "taskRepeatCfg": {
+          "id": "62GY76asCdgRGgjv-DcLS",
+          "changes": {
+            "lastTaskCreation": 1758081600000,
+            "lastTaskCreationDay": "2025-09-17"
+          }
+        },
+        "type": "[TaskRepeatCfg] Update TaskRepeatCfg"
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.896Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "___ ModelCtrl.save():taskRepeatCfg",
+    "args": [
+      {
+        "isUpdateRevAndLastUpdate": true
+      },
+      {
+        "dataKeys": ["ids", "entities"],
+        "dataType": "object"
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.896Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MetaModelCtrl.updateRevForModel()",
+    "args": [
+      "taskRepeatCfg",
+      "short:{\"modelCfg\":{\"defaultData\":{\"ids\":[],\"entities\":{}},\"isMainFileModel\":true},\"inMemory\":{\"lastUpdate\":1758089782928,\"crossModelVersion\":4.2,\"vectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedVectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedUpdate\":1758089782928,\"lastSyncedAction\":\"Uploaded single file at 2025-09-17T06:17:01.248Z\",\"revMap\":{\"pluginUserData\":\"0163eae856e601d00000002f7db1001\",\"pluginMe"
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.897Z",
+    "level": "LOG",
+    "context": "",
+    "message": "[object HTMLCollection]",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.897Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MetaModelCtrl.updateRevForModel() vector clock update",
+    "args": [
+      {
+        "modelId": "tag",
+        "clientId": "BCWmfhoa5x29_13",
+        "currentVectorClock": {
+          "BCWmfhoa5x29_13": 6082
+        },
+        "clientIdInMemory": "BCWmfhoa5x29_13"
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.897Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "incrementVectorClock",
+    "args": [
+      {
+        "clientId": "BCWmfhoa5x29_13",
+        "currentValue": 6082,
+        "allClients": ["BCWmfhoa5x29_13"]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.897Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MetaModelCtrl.save()",
+    "args": [
+      "short:{\"metaModel\":{\"lastUpdate\":1758114892894,\"crossModelVersion\":4.2,\"vectorClock\":{\"BCWmfhoa5x29_13\":6083},\"lastSyncedVectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedUpdate\":1758089782928,\"lastSyncedAction\":\"Uploaded single file at 2025-09-17T06:17:01.248Z\",\"revMap\":{\"pluginUserData\":\"0163eae856e601d00000002f7db1001\",\"pluginMetadata\":\"0163eae8575a62400000002f7db1001\",\"globalConfig\":\"0163eb3c55e51420"
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.897Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "EV:metaModelChange",
+    "args": [
+      "short:{\"lastUpdate\":1758114892894,\"crossModelVersion\":4.2,\"vectorClock\":{\"BCWmfhoa5x29_13\":6083},\"lastSyncedVectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedUpdate\":1758089782928,\"lastSyncedAction\":\"Uploaded single file at 2025-09-17T06:17:01.248Z\",\"revMap\":{\"pluginUserData\":\"0163eae856e601d00000002f7db1001\",\"pluginMetadata\":\"0163eae8575a62400000002f7db1001\",\"globalConfig\":\"0163eb3c55e514200000002f7db10",
+      {
+        "syncDone": [],
+        "syncStart": [null],
+        "syncError": [],
+        "syncStatusChange": [null],
+        "metaModelChange": [null],
+        "providerChange": [],
+        "providerReady": [null],
+        "providerPrivateCfgChange": [null],
+        "onBeforeUpdateLocal": [null]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.897Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "EV:syncStatusChange",
+    "args": [
+      "UNKNOWN_OR_CHANGED",
+      {
+        "syncDone": [],
+        "syncStart": [null],
+        "syncError": [],
+        "syncStatusChange": [null],
+        "metaModelChange": [null],
+        "providerChange": [],
+        "providerReady": [null],
+        "providerPrivateCfgChange": [null],
+        "onBeforeUpdateLocal": [null]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.897Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MetaModelCtrl.save() about to save to DB:",
+    "args": [
+      {
+        "id": "__meta_",
+        "lastSyncedUpdate": 1758089782928,
+        "lastUpdate": 1758114892894,
+        "willMatch": false
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.898Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MetaModelCtrl.updateRevForModel() vector clock update",
+    "args": [
+      {
+        "modelId": "project",
+        "clientId": "BCWmfhoa5x29_13",
+        "currentVectorClock": {
+          "BCWmfhoa5x29_13": 6082
+        },
+        "clientIdInMemory": "BCWmfhoa5x29_13"
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.898Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "incrementVectorClock",
+    "args": [
+      {
+        "clientId": "BCWmfhoa5x29_13",
+        "currentValue": 6082,
+        "allClients": ["BCWmfhoa5x29_13"]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.898Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MetaModelCtrl.save()",
+    "args": [
+      "short:{\"metaModel\":{\"lastUpdate\":1758114892895,\"crossModelVersion\":4.2,\"vectorClock\":{\"BCWmfhoa5x29_13\":6083},\"lastSyncedVectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedUpdate\":1758089782928,\"lastSyncedAction\":\"Uploaded single file at 2025-09-17T06:17:01.248Z\",\"revMap\":{\"pluginUserData\":\"0163eae856e601d00000002f7db1001\",\"pluginMetadata\":\"0163eae8575a62400000002f7db1001\",\"globalConfig\":\"0163eb3c55e51420"
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.898Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "EV:metaModelChange",
+    "args": [
+      "short:{\"lastUpdate\":1758114892895,\"crossModelVersion\":4.2,\"vectorClock\":{\"BCWmfhoa5x29_13\":6083},\"lastSyncedVectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedUpdate\":1758089782928,\"lastSyncedAction\":\"Uploaded single file at 2025-09-17T06:17:01.248Z\",\"revMap\":{\"pluginUserData\":\"0163eae856e601d00000002f7db1001\",\"pluginMetadata\":\"0163eae8575a62400000002f7db1001\",\"globalConfig\":\"0163eb3c55e514200000002f7db10",
+      {
+        "syncDone": [],
+        "syncStart": [null],
+        "syncError": [],
+        "syncStatusChange": [null],
+        "metaModelChange": [null],
+        "providerChange": [],
+        "providerReady": [null],
+        "providerPrivateCfgChange": [null],
+        "onBeforeUpdateLocal": [null]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.898Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "EV:syncStatusChange",
+    "args": [
+      "UNKNOWN_OR_CHANGED",
+      {
+        "syncDone": [],
+        "syncStart": [null],
+        "syncError": [],
+        "syncStatusChange": [null],
+        "metaModelChange": [null],
+        "providerChange": [],
+        "providerReady": [null],
+        "providerPrivateCfgChange": [null],
+        "onBeforeUpdateLocal": [null]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.898Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MetaModelCtrl.save() about to save to DB:",
+    "args": [
+      {
+        "id": "__meta_",
+        "lastSyncedUpdate": 1758089782928,
+        "lastUpdate": 1758114892895,
+        "willMatch": false
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.898Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MetaModelCtrl.updateRevForModel() vector clock update",
+    "args": [
+      {
+        "modelId": "task",
+        "clientId": "BCWmfhoa5x29_13",
+        "currentVectorClock": {
+          "BCWmfhoa5x29_13": 6082
+        },
+        "clientIdInMemory": "BCWmfhoa5x29_13"
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.898Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "incrementVectorClock",
+    "args": [
+      {
+        "clientId": "BCWmfhoa5x29_13",
+        "currentValue": 6082,
+        "allClients": ["BCWmfhoa5x29_13"]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.898Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MetaModelCtrl.save()",
+    "args": [
+      "short:{\"metaModel\":{\"lastUpdate\":1758114892895,\"crossModelVersion\":4.2,\"vectorClock\":{\"BCWmfhoa5x29_13\":6083},\"lastSyncedVectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedUpdate\":1758089782928,\"lastSyncedAction\":\"Uploaded single file at 2025-09-17T06:17:01.248Z\",\"revMap\":{\"pluginUserData\":\"0163eae856e601d00000002f7db1001\",\"pluginMetadata\":\"0163eae8575a62400000002f7db1001\",\"globalConfig\":\"0163eb3c55e51420"
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.898Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "EV:metaModelChange",
+    "args": [
+      "short:{\"lastUpdate\":1758114892895,\"crossModelVersion\":4.2,\"vectorClock\":{\"BCWmfhoa5x29_13\":6083},\"lastSyncedVectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedUpdate\":1758089782928,\"lastSyncedAction\":\"Uploaded single file at 2025-09-17T06:17:01.248Z\",\"revMap\":{\"pluginUserData\":\"0163eae856e601d00000002f7db1001\",\"pluginMetadata\":\"0163eae8575a62400000002f7db1001\",\"globalConfig\":\"0163eb3c55e514200000002f7db10",
+      {
+        "syncDone": [],
+        "syncStart": [null],
+        "syncError": [],
+        "syncStatusChange": [null],
+        "metaModelChange": [null],
+        "providerChange": [],
+        "providerReady": [null],
+        "providerPrivateCfgChange": [null],
+        "onBeforeUpdateLocal": [null]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.898Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "EV:syncStatusChange",
+    "args": [
+      "UNKNOWN_OR_CHANGED",
+      {
+        "syncDone": [],
+        "syncStart": [null],
+        "syncError": [],
+        "syncStatusChange": [null],
+        "metaModelChange": [null],
+        "providerChange": [],
+        "providerReady": [null],
+        "providerPrivateCfgChange": [null],
+        "onBeforeUpdateLocal": [null]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.898Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MetaModelCtrl.save() about to save to DB:",
+    "args": [
+      {
+        "id": "__meta_",
+        "lastSyncedUpdate": 1758089782928,
+        "lastUpdate": 1758114892895,
+        "willMatch": false
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.898Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MetaModelCtrl.updateRevForModel() vector clock update",
+    "args": [
+      {
+        "modelId": "taskRepeatCfg",
+        "clientId": "BCWmfhoa5x29_13",
+        "currentVectorClock": {
+          "BCWmfhoa5x29_13": 6082
+        },
+        "clientIdInMemory": "BCWmfhoa5x29_13"
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.898Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "incrementVectorClock",
+    "args": [
+      {
+        "clientId": "BCWmfhoa5x29_13",
+        "currentValue": 6082,
+        "allClients": ["BCWmfhoa5x29_13"]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.898Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MetaModelCtrl.save()",
+    "args": [
+      "short:{\"metaModel\":{\"lastUpdate\":1758114892896,\"crossModelVersion\":4.2,\"vectorClock\":{\"BCWmfhoa5x29_13\":6083},\"lastSyncedVectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedUpdate\":1758089782928,\"lastSyncedAction\":\"Uploaded single file at 2025-09-17T06:17:01.248Z\",\"revMap\":{\"pluginUserData\":\"0163eae856e601d00000002f7db1001\",\"pluginMetadata\":\"0163eae8575a62400000002f7db1001\",\"globalConfig\":\"0163eb3c55e51420"
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.898Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "EV:metaModelChange",
+    "args": [
+      "short:{\"lastUpdate\":1758114892896,\"crossModelVersion\":4.2,\"vectorClock\":{\"BCWmfhoa5x29_13\":6083},\"lastSyncedVectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedUpdate\":1758089782928,\"lastSyncedAction\":\"Uploaded single file at 2025-09-17T06:17:01.248Z\",\"revMap\":{\"pluginUserData\":\"0163eae856e601d00000002f7db1001\",\"pluginMetadata\":\"0163eae8575a62400000002f7db1001\",\"globalConfig\":\"0163eb3c55e514200000002f7db10",
+      {
+        "syncDone": [],
+        "syncStart": [null],
+        "syncError": [],
+        "syncStatusChange": [null],
+        "metaModelChange": [null],
+        "providerChange": [],
+        "providerReady": [null],
+        "providerPrivateCfgChange": [null],
+        "onBeforeUpdateLocal": [null]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.898Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "EV:syncStatusChange",
+    "args": [
+      "UNKNOWN_OR_CHANGED",
+      {
+        "syncDone": [],
+        "syncStart": [null],
+        "syncError": [],
+        "syncStatusChange": [null],
+        "metaModelChange": [null],
+        "providerChange": [],
+        "providerReady": [null],
+        "providerPrivateCfgChange": [null],
+        "onBeforeUpdateLocal": [null]
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:52.898Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MetaModelCtrl.save() about to save to DB:",
+    "args": [
+      {
+        "id": "__meta_",
+        "lastSyncedUpdate": 1758089782928,
+        "lastUpdate": 1758114892896,
+        "willMatch": false
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:53.011Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():archiveYoung",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:53.016Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():archiveYoung",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:53.030Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():pluginMetadata",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:53.046Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MetaModelCtrl.save() DB save completed successfully",
+    "args": [
+      "short:{\"lastUpdate\":1758114892894,\"crossModelVersion\":4.2,\"vectorClock\":{\"BCWmfhoa5x29_13\":6083},\"lastSyncedVectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedUpdate\":1758089782928,\"lastSyncedAction\":\"Uploaded single file at 2025-09-17T06:17:01.248Z\",\"revMap\":{\"pluginUserData\":\"0163eae856e601d00000002f7db1001\",\"pluginMetadata\":\"0163eae8575a62400000002f7db1001\",\"globalConfig\":\"0163eb3c55e514200000002f7db10"
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:53.051Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MetaModelCtrl.save() DB save completed successfully",
+    "args": [
+      "short:{\"lastUpdate\":1758114892895,\"crossModelVersion\":4.2,\"vectorClock\":{\"BCWmfhoa5x29_13\":6083},\"lastSyncedVectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedUpdate\":1758089782928,\"lastSyncedAction\":\"Uploaded single file at 2025-09-17T06:17:01.248Z\",\"revMap\":{\"pluginUserData\":\"0163eae856e601d00000002f7db1001\",\"pluginMetadata\":\"0163eae8575a62400000002f7db1001\",\"globalConfig\":\"0163eb3c55e514200000002f7db10"
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:53.052Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MetaModelCtrl.save() DB save completed successfully",
+    "args": [
+      "short:{\"lastUpdate\":1758114892895,\"crossModelVersion\":4.2,\"vectorClock\":{\"BCWmfhoa5x29_13\":6083},\"lastSyncedVectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedUpdate\":1758089782928,\"lastSyncedAction\":\"Uploaded single file at 2025-09-17T06:17:01.248Z\",\"revMap\":{\"pluginUserData\":\"0163eae856e601d00000002f7db1001\",\"pluginMetadata\":\"0163eae8575a62400000002f7db1001\",\"globalConfig\":\"0163eb3c55e514200000002f7db10"
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:53.052Z",
+    "level": "LOG",
+    "context": "pf",
+    "message": "MetaModelCtrl.save() DB save completed successfully",
+    "args": [
+      "short:{\"lastUpdate\":1758114892896,\"crossModelVersion\":4.2,\"vectorClock\":{\"BCWmfhoa5x29_13\":6083},\"lastSyncedVectorClock\":{\"BCWmfhoa5x29_13\":6082},\"lastSyncedUpdate\":1758089782928,\"lastSyncedAction\":\"Uploaded single file at 2025-09-17T06:17:01.248Z\",\"revMap\":{\"pluginUserData\":\"0163eae856e601d00000002f7db1001\",\"pluginMetadata\":\"0163eae8575a62400000002f7db1001\",\"globalConfig\":\"0163eb3c55e514200000002f7db10"
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:53.057Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():pluginMetadata",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:53.059Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():pluginMetadata",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:53.060Z",
+    "level": "DEBUG",
+    "context": "plugin",
+    "message": "Icon not found for plugin api-test-plugin: assets/bundled-plugins/api-test-plugin/icon.svg",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:53.063Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():pluginMetadata",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:53.065Z",
+    "level": "VERBOSE",
+    "context": "pf",
+    "message": "ModelCtrl.load():pluginMetadata",
+    "args": [
+      {
+        "inMemoryData": null
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:53.066Z",
+    "level": "LOG",
+    "context": "plugin",
+    "message": "[PluginCache] Loading all plugins from cache",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:53.067Z",
+    "level": "LOG",
+    "context": "plugin",
+    "message": "Loading 2 enabled plugins...",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:53.067Z",
+    "level": "LOG",
+    "context": "plugin",
+    "message": "Loading plugin: procrastination-buster (enabled: true, hooks: 1, sidePanel: true)",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:53.067Z",
+    "level": "LOG",
+    "context": "plugin",
+    "message": "Loading plugin: ai-productivity-prompts (enabled: true, hooks: 1, sidePanel: true)",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:53.067Z",
+    "level": "LOG",
+    "context": "plugin",
+    "message": "Activating plugin: procrastination-buster",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:53.076Z",
+    "level": "LOG",
+    "context": "plugin",
+    "message": "Plugin procrastination-buster registered side panel button",
+    "args": [
+      {
+        "label": "Procrastination Buster",
+        "icon": "icon.svg"
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:53.076Z",
+    "level": "LOG",
+    "context": "plugin",
+    "message": "PluginBridge: Side panel button registered",
+    "args": [
+      {
+        "pluginId": "procrastination-buster",
+        "sidePanelBtnCfg": {
+          "label": "Procrastination Buster",
+          "icon": "icon.svg"
+        }
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:53.076Z",
+    "level": "LOG",
+    "context": "plugin",
+    "message": "Activating plugin: ai-productivity-prompts",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:53.091Z",
+    "level": "LOG",
+    "context": "plugin",
+    "message": "Plugin ai-productivity-prompts registered side panel button",
+    "args": [
+      {
+        "label": "AI Productivity Prompts",
+        "icon": "icon.svg"
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:53.091Z",
+    "level": "LOG",
+    "context": "plugin",
+    "message": "PluginBridge: Side panel button registered",
+    "args": [
+      {
+        "pluginId": "ai-productivity-prompts",
+        "sidePanelBtnCfg": {
+          "label": "AI Productivity Prompts",
+          "icon": "icon.svg"
+        }
+      }
+    ]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:53.091Z",
+    "level": "LOG",
+    "context": "plugin",
+    "message": "Plugin system initialized successfully",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:53.091Z",
+    "level": "LOG",
+    "context": "",
+    "message": "Plugin system initialized after sync completed",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:53.552Z",
+    "level": "ERROR",
+    "context": "",
+    "message": "GLOBAL_ERROR_HANDLER",
+    "args": [{}]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:53.553Z",
+    "level": "LOG",
+    "context": "",
+    "message": "[object HTMLCollection]",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:54.558Z",
+    "level": "ERROR",
+    "context": "",
+    "message": "GLOBAL_ERROR_HANDLER",
+    "args": [{}]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:54.559Z",
+    "level": "LOG",
+    "context": "",
+    "message": "[object HTMLCollection]",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:55.552Z",
+    "level": "ERROR",
+    "context": "",
+    "message": "GLOBAL_ERROR_HANDLER",
+    "args": [{}]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:55.553Z",
+    "level": "LOG",
+    "context": "",
+    "message": "[object HTMLCollection]",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:56.551Z",
+    "level": "ERROR",
+    "context": "",
+    "message": "GLOBAL_ERROR_HANDLER",
+    "args": [{}]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:56.552Z",
+    "level": "LOG",
+    "context": "",
+    "message": "[object HTMLCollection]",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:57.557Z",
+    "level": "ERROR",
+    "context": "",
+    "message": "GLOBAL_ERROR_HANDLER",
+    "args": [{}]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:57.740Z",
+    "level": "LOG",
+    "context": "",
+    "message": "[object HTMLCollection]",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:58.555Z",
+    "level": "ERROR",
+    "context": "",
+    "message": "GLOBAL_ERROR_HANDLER",
+    "args": [{}]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:58.753Z",
+    "level": "LOG",
+    "context": "",
+    "message": "[object HTMLCollection]",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:14:59.549Z",
+    "level": "ERROR",
+    "context": "",
+    "message": "GLOBAL_ERROR_HANDLER",
+    "args": [{}]
+  },
+  {
+    "timestamp": "2025-09-17T13:14:59.550Z",
+    "level": "LOG",
+    "context": "",
+    "message": "[object HTMLCollection]",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:15:00.549Z",
+    "level": "ERROR",
+    "context": "",
+    "message": "GLOBAL_ERROR_HANDLER",
+    "args": [{}]
+  },
+  {
+    "timestamp": "2025-09-17T13:15:00.550Z",
+    "level": "LOG",
+    "context": "",
+    "message": "[object HTMLCollection]",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:15:00.555Z",
+    "level": "LOG",
+    "context": "",
+    "message": "ReminderService: Worker activated 1 reminder(s)",
+    "args": []
+  },
+  {
+    "timestamp": "2025-09-17T13:15:00.555Z",
+    "level": "LOG",
+    "context": "",
+    "message": "ReminderService: 1 valid reminder(s) to show",
+    "args": []
+  }
+]

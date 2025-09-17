@@ -166,9 +166,20 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isWorkStartEndEnabled: true,
     workStart: DEFAULT_DAY_START,
     workEnd: '17:00',
+    isWeekendHoursEnabled: false,
+    weekendWorkStart: '10:00',
+    weekendWorkEnd: '15:00',
     isLunchBreakEnabled: false,
     lunchBreakStart: '13:00',
     lunchBreakEnd: '14:00',
+    // Disabled by default
+    customBlockAStart: undefined,
+    customBlockAEnd: undefined,
+    customBlockBStart: undefined,
+    customBlockBEnd: undefined,
+    customBlocksWeekdayStr: '',
+    customBlocksWeekendStr: '',
+    isAutoSortByEstimateDesc: false,
   },
 
   sync: {

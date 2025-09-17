@@ -20,6 +20,7 @@ import { getTasksWithinAndBeyondBudget } from './get-tasks-within-and-beyond-bud
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 import { selectTaskRepeatCfgsForExactDay } from '../../task-repeat-cfg/store/task-repeat-cfg.selectors';
 import { Log } from '../../../core/log';
+import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 
 export const createScheduleDays = (
   nonScheduledTasks: TaskWithoutReminder[],
@@ -29,6 +30,7 @@ export const createScheduleDays = (
   blockerBlocksDayMap: BlockedBlockByDayMap,
   workStartEndCfg: ScheduleWorkStartEndCfg | undefined,
   now: number,
+  isAutoSortByEstimateDesc?: boolean,
 ): ScheduleDay[] => {
   let viewEntriesPushedToNextDay: SVEEntryForNextDay[];
   let flowTasksLeftAfterDay: TaskWithoutReminder[] = nonScheduledTasks.map((task) => {
@@ -40,6 +42,14 @@ export const createScheduleDays = (
     }
     return task;
   });
+  // Optional sorting by remaining estimate to approximate daily difficulty balancing
+  if (isAutoSortByEstimateDesc) {
+    flowTasksLeftAfterDay = flowTasksLeftAfterDay.sort((a, b) => {
+      const aLeft = Math.max((a.timeEstimate || 0) - (a.timeSpent || 0), 0);
+      const bLeft = Math.max((b.timeEstimate || 0) - (b.timeSpent || 0), 0);
+      return bLeft - aLeft;
+    });
+  }
   let beyondBudgetTasks: TaskWithoutReminder[];
 
   const v: ScheduleDay[] = dayDates.map((dayDate, i) => {
@@ -85,9 +95,48 @@ export const createScheduleDays = (
           : {}),
       };
     }) as TaskWithPlannedForDayIndication[];
-    const flowTasksForDay = [...flowTasksLeftAfterDay, ...plannedForDayTasks];
+    // merge with planned-for-day tasks
+    let flowTasksForDay = [...flowTasksLeftAfterDay, ...plannedForDayTasks];
+
+    // Scheme A: project priority + urgency + remaining time
+    flowTasksForDay = flowTasksForDay.sort((a, b) => {
+      // 1) project priority: school > coding/learning > others
+      const prio = (t: any): number => {
+        const pid: string = (t.projectId || '').toString();
+        const p = pid.toLowerCase();
+        if (p.includes('school')) return 0;
+        if (p.includes('coding') || p.includes('learn')) return 1;
+        return 2;
+      };
+      const pa = prio(a);
+      const pb = prio(b);
+      if (pa !== pb) return pa - pb;
+
+      // 2) urgency by due date/time
+      const getDueTs = (t: any): number | null => {
+        if (typeof t.dueWithTime === 'number') return t.dueWithTime;
+        if (typeof t.dueDay === 'string') return dateStrToUtcDate(t.dueDay).getTime();
+        return null;
+      };
+      const da = getDueTs(a as any);
+      const db = getDueTs(b as any);
+      if (da !== null && db === null) return -1;
+      if (da === null && db !== null) return 1;
+      if (da !== null && db !== null && da !== db) return da - db;
+
+      // 3) longer tasks first
+      const aLeft = getTimeLeftForTask(a);
+      const bLeft = getTimeLeftForTask(b);
+      return bLeft - aLeft;
+    });
+
+    const BUFFER_PER_TASK_MS = 5 * 60 * 1000;
     const { beyond, within, isSomeTimeLeftForLastOverBudget } =
-      getTasksWithinAndBeyondBudget(flowTasksForDay, nonScheduledBudgetForDay);
+      getTasksWithinAndBeyondBudget(
+        flowTasksForDay,
+        nonScheduledBudgetForDay,
+        BUFFER_PER_TASK_MS,
+      );
 
     const nonSplitBeyondTasks = (() => {
       if (isSomeTimeLeftForLastOverBudget) {
@@ -149,22 +198,6 @@ export const createScheduleDays = (
         }
       }
     });
-
-    // Log.log({
-    //   dayDate,
-    //   startTime: dateStrToUtcDate(startTime),
-    //   viewEntriesPushedToNextDay,
-    //   flowTasksLeftAfterDay,
-    //   blockerBlocksForDay,
-    //   nonScheduledBudgetForDay,
-    //   beyondBudgetTasks,
-    //   viewEntries,
-    //   viewEntriesToRenderForDay,
-    //   nonScheduledBudgetForDay2: nonScheduledBudgetForDay / 60 / 60 / 1000,
-    //   within,
-    //   beyond,
-    //   isSomeTimeLeftForLastOverBudget,
-    // });
 
     return {
       dayDate,

@@ -14,8 +14,9 @@ const absolutePath = path.resolve(file);
 try {
   // Run prettier
   console.log(`🎨 Formatting ${path.basename(file)}...`);
-  execSync(`npm run prettier:file ${absolutePath}`, {
-    stdio: 'pipe',
+  // NOTE: use "--" to forward args to npm scripts to avoid waiting for stdin
+  execSync(`npm run prettier:file -- ${absolutePath}`, {
+    stdio: 'inherit',
     encoding: 'utf8',
   });
 
@@ -25,13 +26,13 @@ try {
   if (file.endsWith('.scss')) {
     // Use stylelint for SCSS files
     execSync(`npx stylelint ${absolutePath}`, {
-      stdio: 'pipe',
+      stdio: 'inherit',
       encoding: 'utf8',
     });
   } else {
     // Use ng lint for TypeScript/JavaScript files
-    const lintOutput = execSync(`npm run lint:file ${absolutePath}`, {
-      stdio: 'pipe',
+    execSync(`npm run lint:file -- ${absolutePath}`, {
+      stdio: 'inherit',
       encoding: 'utf8',
     });
   }

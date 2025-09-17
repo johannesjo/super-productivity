@@ -20,7 +20,10 @@ export const createBlockedBlocksByDayMap = (
   scheduledTaskRepeatCfgs: TaskRepeatCfg[],
   icalEventMap: ScheduleCalendarMapEntry[],
   workStartEndCfg?: ScheduleWorkStartEndCfg,
+  weekendWorkStartEndCfg?: ScheduleWorkStartEndCfg,
   lunchBreakCfg?: ScheduleLunchBreakCfg,
+  customBlocksWeekday?: ScheduleWorkStartEndCfg[],
+  customBlocksWeekend?: ScheduleWorkStartEndCfg[],
   now?: number,
   nrOfDays: number = NR_OF_DAYS,
 ): BlockedBlockByDayMap => {
@@ -29,7 +32,10 @@ export const createBlockedBlocksByDayMap = (
     scheduledTaskRepeatCfgs,
     icalEventMap,
     workStartEndCfg,
+    weekendWorkStartEndCfg,
     lunchBreakCfg,
+    customBlocksWeekday,
+    customBlocksWeekend,
     now,
     nrOfDays,
   );

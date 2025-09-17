@@ -7,6 +7,7 @@ import { getTimeLeftForTask } from '../../../util/get-time-left-for-task';
 export const getTasksWithinAndBeyondBudget = (
   tasks: TaskWithoutReminder[],
   budget: number,
+  bufferPerTaskMs: number = 0,
 ): {
   beyond: (TaskWithPlannedForDayIndication | TaskWithoutReminder)[];
   within: (TaskWithPlannedForDayIndication | TaskWithoutReminder)[];
@@ -27,12 +28,13 @@ export const getTasksWithinAndBeyondBudget = (
     }
 
     const timeLeftForTask = getTimeLeftForTask(task);
-    if (timeLeftForTask > remainingBudget) {
+    const requiredWithBuffer = timeLeftForTask + bufferPerTaskMs;
+    if (requiredWithBuffer > remainingBudget) {
       isOverBudget = true;
       beyond.push(task);
     } else {
       within.push(task);
-      remainingBudget -= timeLeftForTask;
+      remainingBudget -= requiredWithBuffer;
     }
   }
 

@@ -61,6 +61,7 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
   beyondBudget = input<ScheduleEvent[][] | null>([]);
   daysToShow = input<string[]>([]);
   workStartEnd = input<{ workStartRow: number; workEndRow: number } | null>(null);
+  workStartEndPerDay = input<{ workStartRow: number; workEndRow: number }[] | null>(null);
   currentTimeRow = input<number>(0);
   isCtrlPressed = input<boolean>(false);
 

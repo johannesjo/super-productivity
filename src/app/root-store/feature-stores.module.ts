@@ -69,6 +69,7 @@ import { TaskUiEffects } from '../features/tasks/store/task-ui.effects';
 import { ShortSyntaxEffects } from '../features/tasks/store/short-syntax.effects';
 import { IS_ELECTRON } from '../app.constants';
 import { TaskElectronEffects } from '../features/tasks/store/task-electron.effects';
+import { TaskAutoScheduleEffects } from '../features/tasks/store/task-auto-schedule.effects';
 import { WORK_CONTEXT_FEATURE_NAME } from '../features/work-context/store/work-context.selectors';
 import { workContextReducer } from '../features/work-context/store/work-context.reducer';
 import { WorkContextEffects } from '../features/work-context/store/work-context.effects';
@@ -155,6 +156,7 @@ import { PluginHooksEffects } from '../plugins/plugin-hooks.effects';
       TaskUiEffects,
       ShortSyntaxEffects,
       TaskDueEffects,
+      TaskAutoScheduleEffects,
       ...(IS_ELECTRON ? [TaskElectronEffects] : []),
     ]),
 

@@ -10,6 +10,7 @@
   "include": ["**/*.d.ts"],
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,
-    "strictInjectionParameters": true
+    "strictInjectionParameters": true,
+    "ignoreLibraries": true
   }
 }

@@ -26,7 +26,11 @@ export const mapToScheduleDays = (
     startTime: '0:00',
     endTime: '23:59',
   },
+  weekendWorkStartEndCfg?: ScheduleWorkStartEndCfg,
   lunchBreakCfg?: ScheduleLunchBreakCfg,
+  customBlocksWeekday?: ScheduleWorkStartEndCfg[],
+  customBlocksWeekend?: ScheduleWorkStartEndCfg[],
+  isAutoSortByEstimateDesc?: boolean,
 ): ScheduleDay[] => {
   // NOTE to use for failing test cases
   // const params = {
@@ -78,7 +82,10 @@ export const mapToScheduleDays = (
     scheduledTaskRepeatCfgs,
     calenderWithItems,
     workStartEndCfg,
+    weekendWorkStartEndCfg,
     lunchBreakCfg,
+    customBlocksWeekday,
+    customBlocksWeekend,
     now,
   );
 
@@ -90,6 +97,7 @@ export const mapToScheduleDays = (
     blockerBlocksDayMap,
     workStartEndCfg,
     now,
+    isAutoSortByEstimateDesc,
   );
 
   return v;

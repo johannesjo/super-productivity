@@ -21,11 +21,10 @@ import { LS } from '../../../core/persistence/storage-keys.const';
 import { DialogTimelineSetupComponent } from '../dialog-timeline-setup/dialog-timeline-setup.component';
 import { LocaleDatePipe } from '../../../ui/pipes/locale-date.pipe';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
-import {
-  selectTimelineConfig,
-  selectTimelineWorkStartEndHours,
-} from '../../config/store/global-config.reducer';
+import { selectTimelineConfig } from '../../config/store/global-config.reducer';
 import { FH } from '../schedule.const';
+import { getHoursFromClockString } from '../../../util/get-hours-from-clock-string';
+import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 import { mapToScheduleDays } from '../map-schedule-data/map-to-schedule-days';
 import { mapScheduleDaysToScheduleEvents } from '../map-schedule-data/map-schedule-days-to-schedule-events';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -157,12 +156,59 @@ export class ScheduleComponent implements AfterViewInit {
             endTime: timelineCfg.workEnd,
           }
         : undefined,
+      timelineCfg?.isWeekendHoursEnabled &&
+        timelineCfg?.weekendWorkStart &&
+        timelineCfg?.weekendWorkEnd
+        ? {
+            startTime: timelineCfg.weekendWorkStart,
+            endTime: timelineCfg.weekendWorkEnd,
+          }
+        : undefined,
       timelineCfg?.isLunchBreakEnabled
         ? {
             startTime: timelineCfg.lunchBreakStart,
             endTime: timelineCfg.lunchBreakEnd,
           }
         : undefined,
+      [
+        ...(timelineCfg?.customBlockAStart && timelineCfg?.customBlockAEnd
+          ? [
+              {
+                startTime: timelineCfg.customBlockAStart,
+                endTime: timelineCfg.customBlockAEnd,
+              },
+            ]
+          : []),
+        ...(timelineCfg?.customBlockBStart && timelineCfg?.customBlockBEnd
+          ? [
+              {
+                startTime: timelineCfg.customBlockBStart,
+                endTime: timelineCfg.customBlockBEnd,
+              },
+            ]
+          : []),
+        // Parse multiple weekday custom blocks
+        ...((timelineCfg?.customBlocksWeekdayStr || '')
+          .split(';')
+          .map((s) => s.trim())
+          .filter((s) => s.includes('-'))
+          .map((s) => {
+            const [a, b] = s.split('-').map((v) => v.trim());
+            return a && b ? ({ startTime: a, endTime: b } as const) : null;
+          })
+          .filter((v) => !!v) as { startTime: string; endTime: string }[]),
+      ],
+      // Weekend custom blocks parsed separately and applied by day
+      (timelineCfg?.customBlocksWeekendStr || '')
+        .split(';')
+        .map((s) => s.trim())
+        .filter((s) => s.includes('-'))
+        .map((s) => {
+          const [a, b] = s.split('-').map((v) => v.trim());
+          return a && b ? ({ startTime: a, endTime: b } as const) : null;
+        })
+        .filter((v) => !!v) as { startTime: string; endTime: string }[],
+      timelineCfg?.isAutoSortByEstimateDesc,
     );
   });
 
@@ -171,19 +217,55 @@ export class ScheduleComponent implements AfterViewInit {
     return mapScheduleDaysToScheduleEvents(days, FH);
   });
 
-  private _workStartEndHours = toSignal(
-    this._store.pipe(select(selectTimelineWorkStartEndHours)),
-  );
-
   workStartEnd = computed(() => {
-    const v = this._workStartEndHours();
-    return (
-      v && {
-        // NOTE: +1 because grids start at 1
-        workStartRow: Math.round(FH * v.workStart) + 1,
-        workEndRow: Math.round(FH * v.workEnd) + 1,
-      }
-    );
+    // derive from config and today's weekday
+    const cfg = this._timelineConfig();
+    if (!cfg?.isWorkStartEndEnabled) {
+      return null;
+    }
+    const day = new Date();
+    const isWeekend = day.getDay() === 0 || day.getDay() === 6;
+    const startStr =
+      isWeekend && cfg.isWeekendHoursEnabled && cfg.weekendWorkStart
+        ? cfg.weekendWorkStart
+        : cfg.workStart;
+    const endStr =
+      isWeekend && cfg.isWeekendHoursEnabled && cfg.weekendWorkEnd
+        ? cfg.weekendWorkEnd
+        : cfg.workEnd;
+    const workStart = getHoursFromClockString(startStr);
+    const workEnd = getHoursFromClockString(endStr);
+    return {
+      workStartRow: Math.round(FH * workStart) + 1,
+      workEndRow: Math.round(FH * workEnd) + 1,
+    };
+  });
+
+  // Per-day work start/end rows for rendering dashed lines correctly per column
+  workStartEndPerDay = computed(() => {
+    const cfg = this._timelineConfig();
+    const days = this.daysToShow();
+    if (!cfg?.isWorkStartEndEnabled || !days?.length) {
+      return null;
+    }
+    return days.map((dayStr) => {
+      const d = dateStrToUtcDate(dayStr);
+      const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+      const startStr =
+        isWeekend && cfg.isWeekendHoursEnabled && cfg.weekendWorkStart
+          ? cfg.weekendWorkStart
+          : cfg.workStart;
+      const endStr =
+        isWeekend && cfg.isWeekendHoursEnabled && cfg.weekendWorkEnd
+          ? cfg.weekendWorkEnd
+          : cfg.workEnd;
+      const workStart = getHoursFromClockString(startStr);
+      const workEnd = getHoursFromClockString(endStr);
+      return {
+        workStartRow: Math.round(FH * workStart) + 1,
+        workEndRow: Math.round(FH * workEnd) + 1,
+      };
+    });
   });
 
   events = computed(() => this._eventsAndBeyondBudget().eventsFlat);

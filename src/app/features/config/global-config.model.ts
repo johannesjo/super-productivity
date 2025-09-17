@@ -143,9 +143,26 @@ export type ScheduleConfig = Readonly<{
   isWorkStartEndEnabled: boolean;
   workStart: string;
   workEnd: string;
+  // Optional separate weekend hours
+  isWeekendHoursEnabled?: boolean;
+  weekendWorkStart?: string;
+  weekendWorkEnd?: string;
   isLunchBreakEnabled: boolean;
   lunchBreakStart: string;
   lunchBreakEnd: string;
+  // Optional: two extra custom blocked time windows per day
+  // If provided, the app will treat these windows as not schedulable
+  // Times should be in HH:mm format. Empty/undefined means disabled.
+  customBlockAStart?: string;
+  customBlockAEnd?: string;
+  customBlockBStart?: string;
+  customBlockBEnd?: string;
+  // Optional: many custom blocks via semicolon-separated strings (UI-friendly)
+  // Format: "HH:mm-HH:mm; HH:mm-HH:mm"
+  customBlocksWeekdayStr?: string;
+  customBlocksWeekendStr?: string;
+  // Optional: automatically sort tasks by remaining estimate (desc) before scheduling
+  isAutoSortByEstimateDesc?: boolean;
 }>;
 
 export type ReminderConfig = Readonly<{
