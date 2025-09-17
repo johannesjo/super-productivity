@@ -56,6 +56,12 @@ export function createSortedBlockerBlocks(
   if (typeof a6 === 'number') {
     now = a6 as number;
     nrOfDays = typeof a7 === 'number' ? (a7 as number) : PROJECTION_DAYS;
+    // Back-compat: tests sometimes pass lunchBreakCfg as 5th param
+    // (workStartEndCfg provided, weekendWorkStartEndCfg actually holds lunch window)
+    if (weekendWorkStartEndCfg && !lunchBreakCfg) {
+      lunchBreakCfg = weekendWorkStartEndCfg as unknown as ScheduleLunchBreakCfg;
+      weekendWorkStartEndCfg = undefined;
+    }
   } else {
     lunchBreakCfg = a6 as ScheduleLunchBreakCfg | undefined;
     // Support signature: (..., lunchBreakCfg, now)
