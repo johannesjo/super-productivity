@@ -58,10 +58,25 @@ export function createSortedBlockerBlocks(
     nrOfDays = typeof a7 === 'number' ? (a7 as number) : PROJECTION_DAYS;
   } else {
     lunchBreakCfg = a6 as ScheduleLunchBreakCfg | undefined;
-    customBlocksWeekday = a7 as ScheduleWorkStartEndCfg[] | undefined;
-    customBlocksWeekend = a8 as ScheduleWorkStartEndCfg[] | undefined;
-    now = typeof a9 === 'number' ? (a9 as number) : Date.now();
-    nrOfDays = typeof a10 === 'number' ? (a10 as number) : PROJECTION_DAYS;
+    // Support signature: (..., lunchBreakCfg, now)
+    if (typeof a7 === 'number') {
+      now = a7 as number;
+      nrOfDays = typeof a8 === 'number' ? (a8 as number) : PROJECTION_DAYS;
+      customBlocksWeekday = undefined;
+      customBlocksWeekend = undefined;
+    } else {
+      customBlocksWeekday = a7 as ScheduleWorkStartEndCfg[] | undefined;
+      // Support signature: (..., lunchBreakCfg, customBlocksWeekday, now)
+      if (typeof a8 === 'number') {
+        now = a8 as number;
+        nrOfDays = typeof a9 === 'number' ? (a9 as number) : PROJECTION_DAYS;
+        customBlocksWeekend = undefined;
+      } else {
+        customBlocksWeekend = a8 as ScheduleWorkStartEndCfg[] | undefined;
+        now = typeof a9 === 'number' ? (a9 as number) : Date.now();
+        nrOfDays = typeof a10 === 'number' ? (a10 as number) : PROJECTION_DAYS;
+      }
+    }
   }
 
   if (typeof now !== 'number') {
