@@ -24,6 +24,7 @@ import { MagicNavConfigService } from '../magic-nav-config.service';
 import { T } from '../../../t.const';
 import { WorkContextType } from '../../../features/work-context/work-context.model';
 import { ProjectFolderService } from '../../../features/project-folder/project-folder.service';
+import { ProjectFolder } from '../../../features/project-folder/store/project-folder.model';
 import { ProjectService } from '../../../features/project/project.service';
 import { TagService } from '../../../features/tag/tag.service';
 import { TODAY_TAG } from '../../../features/tag/tag.const';
@@ -187,21 +188,41 @@ export class NavListTreeComponent {
 
   private _persistProjectFolderRelationships(
     folderProjectMap: Map<string, string[]>,
-    rootProjectIds: string[],
     rootLayout: string[],
+    folderParentMap: Map<string, string | null>,
+    orderedFolderIds: string[],
   ): void {
     const currentFolders = this._projectFolders();
+    const nextFolderById = new Map<string, ProjectFolder>();
 
     let didChange = false;
-    const updatedFolders = currentFolders.map((folder) => {
+
+    currentFolders.forEach((folder) => {
       const nextProjectIds = folderProjectMap.get(folder.id) ?? [];
-      if (!didChange && !this._areArraysEqual(folder.projectIds, nextProjectIds)) {
-        didChange = true;
+      const nextParentId = folderParentMap.has(folder.id)
+        ? (folderParentMap.get(folder.id) ?? null)
+        : folder.parentId;
+      if (!didChange) {
+        didChange =
+          !this._areArraysEqual(folder.projectIds, nextProjectIds) ||
+          folder.parentId !== nextParentId;
       }
-      return {
+      nextFolderById.set(folder.id, {
         ...folder,
         projectIds: nextProjectIds,
-      };
+        parentId: nextParentId,
+      });
+    });
+
+    const orderedFolders: ProjectFolder[] = orderedFolderIds
+      .map((id) => nextFolderById.get(id))
+      .filter((folder): folder is ProjectFolder => !!folder);
+
+    const included = new Set(orderedFolders.map((folder) => folder.id));
+    currentFolders.forEach((folder) => {
+      if (!included.has(folder.id)) {
+        orderedFolders.push(folder);
+      }
     });
 
     const layoutChanged = !this._areArraysEqual(this._rootProjectIdsSig(), rootLayout);
@@ -211,7 +232,7 @@ export class NavListTreeComponent {
     }
 
     this._projectFolderService.updateProjectFolderRelationships(
-      updatedFolders,
+      orderedFolders,
       rootLayout,
     );
   }
@@ -299,10 +320,20 @@ export class NavListTreeComponent {
   }
 
   private _applyProjectTreeChanges(nodes: TreeNode<NavGroupItem>[]): void {
-    const { folderProjectMap, rootProjectIds, orderedProjectIds, rootLayout } =
-      this._collectProjectStructure(nodes);
+    const {
+      folderProjectMap,
+      orderedProjectIds,
+      rootLayout,
+      folderParentMap,
+      orderedFolderIds,
+    } = this._collectProjectStructure(nodes);
 
-    this._persistProjectFolderRelationships(folderProjectMap, rootProjectIds, rootLayout);
+    this._persistProjectFolderRelationships(
+      folderProjectMap,
+      rootLayout,
+      folderParentMap,
+      orderedFolderIds,
+    );
 
     const allProjects = this._navConfigService.allProjectsExceptInbox();
     const visibleProjects = allProjects.filter(
@@ -317,7 +348,9 @@ export class NavListTreeComponent {
     folderProjectMap.forEach((projectIds, folderId) => {
       projectIds.forEach((projectId) => desiredAssignment.set(projectId, folderId));
     });
-    rootProjectIds.forEach((projectId) => desiredAssignment.set(projectId, null));
+    rootLayout
+      .filter((entry) => entry.startsWith('project:'))
+      .forEach((entry) => desiredAssignment.set(entry.replace('project:', ''), null));
 
     desiredAssignment.forEach((targetFolderId, projectId) => {
       const project = projectLookup.get(projectId);
@@ -373,14 +406,16 @@ export class NavListTreeComponent {
 
   private _collectProjectStructure(nodes: TreeNode<NavGroupItem>[]): {
     folderProjectMap: Map<string, string[]>;
-    rootProjectIds: string[];
     orderedProjectIds: string[];
     rootLayout: string[];
+    folderParentMap: Map<string, string | null>;
+    orderedFolderIds: string[];
   } {
     const folderProjectMap = new Map<string, string[]>();
-    const rootProjectIds: string[] = [];
     const orderedProjectIds: string[] = [];
     const rootLayout: string[] = [];
+    const folderParentMap = new Map<string, string | null>();
+    const orderedFolderIds: string[] = [];
 
     const visit = (
       node: TreeNode<NavGroupItem>,
@@ -388,6 +423,8 @@ export class NavListTreeComponent {
       level: number,
     ): void => {
       if (node.isFolder) {
+        folderParentMap.set(node.id, parentFolderId);
+        orderedFolderIds.push(node.id);
         if (level === 0) {
           rootLayout.push(`folder:${node.id}`);
         }
@@ -412,7 +449,6 @@ export class NavListTreeComponent {
       if (projectId) {
         orderedProjectIds.push(projectId);
         if (parentFolderId === null) {
-          rootProjectIds.push(projectId);
           rootLayout.push(`project:${projectId}`);
         }
       }
@@ -420,7 +456,13 @@ export class NavListTreeComponent {
 
     nodes.forEach((node) => visit(node, null, 0));
 
-    return { folderProjectMap, rootProjectIds, orderedProjectIds, rootLayout };
+    return {
+      folderProjectMap,
+      orderedProjectIds,
+      rootLayout,
+      folderParentMap,
+      orderedFolderIds,
+    };
   }
 
   private _extractProjectId(nodeId: string): string | null {

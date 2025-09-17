@@ -336,6 +336,9 @@ export class TreeDndComponent implements AfterViewInit {
   }
 
   private flashJustDropped(id: string): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
     this.justDroppedId.set(id);
     if (this._dropFlashTimer) clearTimeout(this._dropFlashTimer);
     this._dropFlashTimer = window.setTimeout(() => {

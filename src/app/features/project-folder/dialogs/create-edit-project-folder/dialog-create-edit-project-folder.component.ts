@@ -9,6 +9,8 @@ import { CommonModule } from '@angular/common';
 
 import { ProjectFolder } from '../../store/project-folder.model';
 import { ProjectFolderService } from '../../project-folder.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { T } from '../../../../t.const';
 
 export interface DialogCreateEditProjectFolderData {
   folder?: ProjectFolder;
@@ -27,6 +29,7 @@ export interface DialogCreateEditProjectFolderData {
     MatInputModule,
     MatSelectModule,
     MatButtonModule,
+    TranslateModule,
   ],
 })
 export class DialogCreateEditProjectFolderComponent {
@@ -44,6 +47,8 @@ export class DialogCreateEditProjectFolderComponent {
     title: ['', [Validators.required, Validators.minLength(1)]],
     parentId: [null],
   });
+
+  readonly T = T;
 
   constructor() {
     if (this.isEdit && this.data?.folder) {

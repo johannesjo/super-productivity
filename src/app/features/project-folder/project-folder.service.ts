@@ -65,8 +65,14 @@ export class ProjectFolderService {
       .pipe(take(1), withLatestFrom(this.rootProjectIds$))
       .subscribe(([folders, rootProjectIds]) => {
         const updatedFolders = folders.filter((folder) => folder.id !== id);
+        const updatedRootLayout = rootProjectIds.filter(
+          (entry) => entry !== `folder:${id}`,
+        );
         this._store.dispatch(
-          updateProjectFolders({ projectFolders: updatedFolders, rootProjectIds }),
+          updateProjectFolders({
+            projectFolders: updatedFolders,
+            rootProjectIds: updatedRootLayout,
+          }),
         );
       });
   }
@@ -75,8 +81,25 @@ export class ProjectFolderService {
     this.projectFolders$
       .pipe(take(1), withLatestFrom(this.rootProjectIds$))
       .subscribe(([folders, rootProjectIds]) => {
-        const folderMap = Object.fromEntries(folders.map((f) => [f.id, f]));
-        const reorderedFolders = newIds.map((id) => folderMap[id]).filter(Boolean);
+        const folderMap = new Map(folders.map((f) => [f.id, f] as const));
+        const seen = new Set<string>();
+        const reorderedFolders: ProjectFolder[] = [];
+
+        newIds.forEach((id) => {
+          const folder = folderMap.get(id);
+          if (folder && !seen.has(id)) {
+            reorderedFolders.push(folder);
+            seen.add(id);
+          }
+        });
+
+        folders.forEach((folder) => {
+          if (!seen.has(folder.id)) {
+            reorderedFolders.push(folder);
+            seen.add(folder.id);
+          }
+        });
+
         this._store.dispatch(
           updateProjectFolders({ projectFolders: reorderedFolders, rootProjectIds }),
         );

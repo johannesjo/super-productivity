@@ -25,7 +25,6 @@ import { toggleHideFromMenu } from '../../features/project/store/project.actions
 import { NavConfig, NavItem, NavWorkContextItem } from './magic-side-nav.model';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
-import { Log } from '../../core/log';
 import { lsGetBoolean, lsSetItem } from '../../util/ls-util';
 
 @Injectable({
@@ -131,13 +130,13 @@ export class MagicNavConfigService {
           {
             id: 'project-visibility',
             icon: 'visibility',
-            tooltip: 'Show/Hide Projects',
+            tooltip: T.F.PROJECT_FOLDER.TOOLTIP_VISIBILITY,
             action: () => this._openProjectVisibilityMenu(),
           },
           {
             id: 'add-project-folder',
             icon: 'create_new_folder',
-            tooltip: 'Create Project Folder',
+            tooltip: T.F.PROJECT_FOLDER.TOOLTIP_CREATE,
             action: () => this._openCreateProjectFolder(),
           },
           {

@@ -1,4 +1,11 @@
-<h2 mat-dialog-title>{{ isEdit ? 'Edit Folder' : 'Create New Folder' }}</h2>
+<h2 mat-dialog-title>
+  {{
+    (isEdit
+      ? T.F.PROJECT_FOLDER.DIALOG.EDIT_TITLE
+      : T.F.PROJECT_FOLDER.DIALOG.CREATE_TITLE
+    ) | translate
+  }}
+</h2>
 
 <form
   [formGroup]="form"
@@ -9,15 +16,17 @@
       appearance="outline"
       class="full-width"
     >
-      <mat-label>Folder Name</mat-label>
+      <mat-label>{{ T.F.PROJECT_FOLDER.DIALOG.NAME_LABEL | translate }}</mat-label>
       <input
         matInput
         formControlName="title"
-        placeholder="Enter folder name"
+        [placeholder]="T.F.PROJECT_FOLDER.DIALOG.NAME_PLACEHOLDER | translate"
         required
       />
       @if (form.get('title')?.errors?.['required']) {
-        <mat-error>Folder name is required</mat-error>
+        <mat-error>
+          {{ T.F.PROJECT_FOLDER.DIALOG.NAME_REQUIRED | translate }}
+        </mat-error>
       }
     </mat-form-field>
 
@@ -25,9 +34,11 @@
       appearance="outline"
       class="full-width"
     >
-      <mat-label>Parent Folder</mat-label>
+      <mat-label>{{ T.F.PROJECT_FOLDER.DIALOG.PARENT_LABEL | translate }}</mat-label>
       <mat-select formControlName="parentId">
-        <mat-option [value]="null">No parent (root level)</mat-option>
+        <mat-option [value]="null">
+          {{ T.F.PROJECT_FOLDER.DIALOG.NO_PARENT | translate }}
+        </mat-option>
         @for (folder of availableFolders$ | async; track folder.id) {
           @if (!isEdit || folder.id !== data?.folder?.id) {
             <mat-option [value]="folder.id">{{ folder.title }}</mat-option>
@@ -43,7 +54,7 @@
       mat-button
       (click)="cancel()"
     >
-      Cancel
+      {{ T.G.CANCEL | translate }}
     </button>
     <button
       type="submit"
@@ -51,7 +62,7 @@
       color="primary"
       [disabled]="form.invalid"
     >
-      {{ isEdit ? 'Save' : 'Create' }}
+      {{ (isEdit ? T.G.SAVE : T.G.ADD) | translate }}
     </button>
   </mat-dialog-actions>
 </form>
