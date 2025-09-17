@@ -327,16 +327,46 @@ export class MagicNavConfigService {
   private _buildProjectItems(): NavItem[] {
     const projects = this._visibleProjects();
     const projectFolders = this._projectFolders();
-    const rootProjectIds = this._rootProjectIds();
+    const rootLayout = this._rootProjectIds() ?? [];
     const activeId = this._activeWorkContextId();
 
-    // Build hierarchy: folders with their projects, plus root-level projects
     const items: NavItem[] = [];
+    const folderMap = new Map(projectFolders.map((folder) => [folder.id, folder]));
+    const processedFolders = new Set<string>();
+    const processedProjects = new Set<string>();
 
-    // Add top-level folders
-    const topLevelFolders = projectFolders.filter((folder) => !folder.parentId);
+    const appendProject = (projectId: string): void => {
+      if (processedProjects.has(projectId)) {
+        return;
+      }
+      const project = projects.find((p) => p.id === projectId);
+      if (!project || project.folderId) {
+        return;
+      }
+      if (!this._isProjectsExpanded() && activeId && project.id !== activeId) {
+        return;
+      }
+      items.push({
+        type: 'workContext',
+        id: `project-${project.id}`,
+        label: project.title,
+        icon: project.icon || 'folder_special',
+        route: `/project/${project.id}/tasks`,
+        workContext: project,
+        workContextType: WorkContextType.PROJECT,
+        defaultIcon: project.icon || 'folder_special',
+      });
+      processedProjects.add(projectId);
+    };
 
-    for (const folder of topLevelFolders) {
+    const appendFolder = (folderId: string): void => {
+      if (processedFolders.has(folderId)) {
+        return;
+      }
+      const folder = folderMap.get(folderId);
+      if (!folder || folder.parentId) {
+        return;
+      }
       const folderItems = this._buildProjectFolderItems(
         folder,
         projects,
@@ -344,43 +374,30 @@ export class MagicNavConfigService {
         activeId,
       );
       items.push(...folderItems);
+      processedFolders.add(folderId);
+    };
+
+    if (rootLayout.length) {
+      for (const entry of rootLayout) {
+        if (entry.startsWith('folder:')) {
+          appendFolder(entry.slice('folder:'.length));
+        } else if (entry.startsWith('project:')) {
+          appendProject(entry.slice('project:'.length));
+        } else {
+          appendProject(entry);
+        }
+      }
     }
 
-    // Add root-level projects in the correct order
-    const rootIds = rootProjectIds as string[];
-    const orderedRootProjects = rootIds
-      .map((projectId) => projects.find((project) => project.id === projectId))
-      .filter((project) => project !== undefined);
+    // Fallback for any folders or projects missing from layout (e.g., newly created)
+    projectFolders
+      .filter((folder) => !folder.parentId && !processedFolders.has(folder.id))
+      .forEach((folder) => appendFolder(folder.id));
 
-    // Also include any projects not in folders and not in rootProjectIds (fallback)
-    const allFolderProjectIds = projectFolders.flatMap(
-      (folder) => folder.projectIds || [],
-    );
-    const unorderedRootProjects = projects.filter(
-      (project) =>
-        !allFolderProjectIds.includes(project.id) && !rootIds.includes(project.id),
-    );
+    projects
+      .filter((project) => !project.folderId && !processedProjects.has(project.id))
+      .forEach((project) => appendProject(project.id));
 
-    const rootProjects = [...orderedRootProjects, ...unorderedRootProjects];
-    let filteredRootProjects = rootProjects;
-
-    if (!this._isProjectsExpanded() && activeId) {
-      // Show only active project when group is collapsed
-      filteredRootProjects = rootProjects.filter((project) => project.id === activeId);
-    }
-
-    const rootProjectItems = filteredRootProjects.map((project) => ({
-      type: 'workContext' as const,
-      id: `project-${project.id}`,
-      label: project.title,
-      icon: project.icon || 'folder_special',
-      route: `/project/${project.id}/tasks`,
-      workContext: project,
-      workContextType: WorkContextType.PROJECT,
-      defaultIcon: project.icon || 'folder_special',
-    }));
-
-    items.push(...rootProjectItems);
     return items;
   }
 
@@ -413,10 +430,11 @@ export class MagicNavConfigService {
       }
     }
 
-    // Add the folder as a group
+    // Collect items for this folder
     const folderChildren: NavItem[] = [];
+    const subFolderNavItems: NavItem[] = [];
 
-    // Add sub-folders recursively
+    // Prepare sub-folders recursively (appended after projects to keep order intuitive)
     for (const subFolder of subFolders) {
       const subFolderItems = this._buildProjectFolderItems(
         subFolder,
@@ -424,7 +442,7 @@ export class MagicNavConfigService {
         allFolders,
         activeId,
       );
-      folderChildren.push(...subFolderItems);
+      subFolderNavItems.push(...subFolderItems);
     }
 
     // Add projects in this folder
@@ -445,6 +463,7 @@ export class MagicNavConfigService {
     }));
 
     folderChildren.push(...projectItems);
+    folderChildren.push(...subFolderNavItems);
 
     // Always add the folder (even if empty) to serve as a drop target
     items.push({
