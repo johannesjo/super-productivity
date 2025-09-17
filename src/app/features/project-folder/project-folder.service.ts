@@ -2,10 +2,33 @@ import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map, take, withLatestFrom } from 'rxjs/operators';
-import { ProjectFolder, ProjectFolderState } from './store/project-folder.model';
+import {
+  ProjectFolder,
+  ProjectFolderRootItem,
+  ProjectFolderState,
+} from './store/project-folder.model';
 import { updateProjectFolders } from './store/project-folder.actions';
 import { projectFolderFeatureKey } from './store/project-folder.reducer';
 import { nanoid } from 'nanoid';
+
+const rootItemEquals = (a: ProjectFolderRootItem, b: ProjectFolderRootItem): boolean =>
+  a.type === b.type && a.id === b.id;
+
+const pushRootItemUnique = (
+  list: ProjectFolderRootItem[],
+  entry: ProjectFolderRootItem,
+): ProjectFolderRootItem[] =>
+  list.some((item) => rootItemEquals(item, entry)) ? list : [...list, entry];
+
+const dedupeRootItems = (items: ProjectFolderRootItem[]): ProjectFolderRootItem[] => {
+  const result: ProjectFolderRootItem[] = [];
+  items.forEach((entry) => {
+    if (!result.some((item) => rootItemEquals(item, entry))) {
+      result.push(entry);
+    }
+  });
+  return result;
+};
 
 @Injectable({
   providedIn: 'root',
@@ -17,9 +40,9 @@ export class ProjectFolderService {
     .select((state: any) => state[projectFolderFeatureKey] as ProjectFolderState)
     .pipe(map((state) => state.ids.map((id) => state.entities[id])));
 
-  readonly rootProjectIds$: Observable<string[]> = this._store
+  readonly rootItems$: Observable<ProjectFolderRootItem[]> = this._store
     .select((state: any) => state[projectFolderFeatureKey] as ProjectFolderState)
-    .pipe(map((state) => state.rootProjectIds));
+    .pipe(map((state) => state.rootItems));
 
   readonly topLevelFolders$: Observable<ProjectFolder[]> = this.projectFolders$.pipe(
     map((folders) => folders.filter((folder) => !folder.parentId)),
@@ -33,34 +56,63 @@ export class ProjectFolderService {
 
   updateProjectFolder(id: string, changes: Partial<ProjectFolder>): void {
     this.projectFolders$
-      .pipe(take(1), withLatestFrom(this.rootProjectIds$))
-      .subscribe(([folders, rootProjectIds]) => {
+      .pipe(take(1), withLatestFrom(this.rootItems$))
+      .subscribe(([folders, rootItems]) => {
         const updatedFolders = folders.map((folder) =>
           folder.id === id ? { ...folder, ...changes } : folder,
         );
+
+        const folderBefore = folders.find((folder) => folder.id === id);
+        let updatedRootItems = [...rootItems];
+        if (changes.parentId !== undefined) {
+          if (changes.parentId) {
+            // moved under a parent -> remove any root entry
+            updatedRootItems = updatedRootItems.filter(
+              (item) => !(item.type === 'folder' && item.id === id),
+            );
+          } else {
+            // moved to root -> add entry
+            updatedRootItems = pushRootItemUnique(updatedRootItems, {
+              type: 'folder',
+              id,
+            });
+          }
+        } else if (!folderBefore?.parentId) {
+          // keep existing entry if already root
+          updatedRootItems = pushRootItemUnique(updatedRootItems, {
+            type: 'folder',
+            id,
+          });
+        }
+
         this._store.dispatch(
-          updateProjectFolders({ projectFolders: updatedFolders, rootProjectIds }),
+          updateProjectFolders({
+            projectFolders: updatedFolders,
+            rootItems: dedupeRootItems(updatedRootItems),
+          }),
         );
       });
   }
 
   addProjectFolder(folder: Omit<ProjectFolder, 'id' | 'projectIds'>): void {
     this.projectFolders$
-      .pipe(take(1), withLatestFrom(this.rootProjectIds$))
-      .subscribe(([folders, rootProjectIds]) => {
+      .pipe(take(1), withLatestFrom(this.rootItems$))
+      .subscribe(([folders, rootItems]) => {
         const newFolder: ProjectFolder = {
           ...folder,
           id: `folder-${nanoid()}`,
           projectIds: [],
         };
+
         const updatedFolders = [...folders, newFolder];
-        const updatedRootLayout = rootProjectIds.includes(`folder:${newFolder.id}`)
-          ? rootProjectIds
-          : [...rootProjectIds, `folder:${newFolder.id}`];
+        const updatedRootItems = !newFolder.parentId
+          ? pushRootItemUnique(rootItems, { type: 'folder', id: newFolder.id })
+          : [...rootItems];
+
         this._store.dispatch(
           updateProjectFolders({
             projectFolders: updatedFolders,
-            rootProjectIds: updatedRootLayout,
+            rootItems: updatedRootItems,
           }),
         );
       });
@@ -68,8 +120,8 @@ export class ProjectFolderService {
 
   deleteProjectFolder(id: string): void {
     this.projectFolders$
-      .pipe(take(1), withLatestFrom(this.rootProjectIds$))
-      .subscribe(([folders, rootLayout]) => {
+      .pipe(take(1), withLatestFrom(this.rootItems$))
+      .subscribe(([folders, rootItems]) => {
         const folderToDelete = folders.find((folder) => folder.id === id);
         if (!folderToDelete) {
           return;
@@ -83,47 +135,37 @@ export class ProjectFolderService {
             folder.parentId === id ? { ...folder, parentId: null } : folder,
           );
 
-        const replacementEntries: string[] = [];
+        const replacementEntries: ProjectFolderRootItem[] = [];
         childFolders.forEach((folder) => {
-          replacementEntries.push(`folder:${folder.id}`);
+          replacementEntries.push({ type: 'folder', id: folder.id });
         });
         (folderToDelete.projectIds ?? []).forEach((projectId) => {
-          replacementEntries.push(`project:${projectId}`);
+          replacementEntries.push({ type: 'project', id: projectId });
         });
 
-        const newRootLayout: string[] = [];
+        let newRootItems: ProjectFolderRootItem[] = [];
         let replaced = false;
-        rootLayout.forEach((entry) => {
-          if (entry === `folder:${id}`) {
-            if (replacementEntries.length) {
-              replacementEntries.forEach((value) => {
-                if (!newRootLayout.includes(value)) {
-                  newRootLayout.push(value);
-                }
-              });
-            }
+        rootItems.forEach((entry) => {
+          if (entry.type === 'folder' && entry.id === id) {
+            replacementEntries.forEach((replacement) => {
+              newRootItems = pushRootItemUnique(newRootItems, replacement);
+            });
             replaced = true;
           } else {
-            newRootLayout.push(entry);
+            newRootItems = pushRootItemUnique(newRootItems, entry);
           }
         });
 
-        if (!replaced && replacementEntries.length) {
-          replacementEntries.forEach((value) => {
-            if (!newRootLayout.includes(value)) {
-              newRootLayout.push(value);
-            }
+        if (!replaced) {
+          replacementEntries.forEach((replacement) => {
+            newRootItems = pushRootItemUnique(newRootItems, replacement);
           });
         }
-
-        const dedupedRootLayout = newRootLayout.filter(
-          (value, index, arr) => arr.indexOf(value) === index,
-        );
 
         this._store.dispatch(
           updateProjectFolders({
             projectFolders: updatedFolders,
-            rootProjectIds: dedupedRootLayout,
+            rootItems: dedupeRootItems(newRootItems),
           }),
         );
       });
@@ -138,18 +180,27 @@ export class ProjectFolderService {
     });
   }
 
-  loadProjectFolders(folders: ProjectFolder[], rootProjectIds: string[] = []): void {
+  loadProjectFolders(
+    folders: ProjectFolder[],
+    rootItems: ProjectFolderRootItem[] = [],
+  ): void {
     this._store.dispatch(
-      updateProjectFolders({ projectFolders: folders, rootProjectIds }),
+      updateProjectFolders({
+        projectFolders: folders,
+        rootItems: dedupeRootItems(rootItems),
+      }),
     );
   }
 
   updateProjectFolderRelationships(
     folders: ProjectFolder[],
-    rootProjectIds: string[],
+    rootItems: ProjectFolderRootItem[],
   ): void {
     this._store.dispatch(
-      updateProjectFolders({ projectFolders: folders, rootProjectIds }),
+      updateProjectFolders({
+        projectFolders: folders,
+        rootItems: dedupeRootItems(rootItems),
+      }),
     );
   }
 }

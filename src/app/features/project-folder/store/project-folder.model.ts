@@ -6,8 +6,13 @@ export interface ProjectFolder {
   projectIds: string[];
 }
 
+export interface ProjectFolderRootItem {
+  id: string;
+  type: 'folder' | 'project';
+}
+
 export interface ProjectFolderState {
   entities: { [id: string]: ProjectFolder };
   ids: string[];
-  rootProjectIds: string[];
+  rootItems: ProjectFolderRootItem[];
 }

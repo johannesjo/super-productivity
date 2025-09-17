@@ -7,6 +7,7 @@ import { WorkContextType } from '../../features/work-context/work-context.model'
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { TagService } from '../../features/tag/tag.service';
 import { ProjectFolderService } from '../../features/project-folder/project-folder.service';
+import { ProjectFolder } from '../../features/project-folder/store/project-folder.model';
 import { ShepherdService } from '../../features/shepherd/shepherd.service';
 import { TourId } from '../../features/shepherd/shepherd-steps.const';
 import { T } from '../../t.const';
@@ -58,10 +59,9 @@ export class MagicNavConfigService {
     this._projectFolderService.projectFolders$,
     { initialValue: [] },
   );
-  private readonly _rootProjectIds = toSignal(
-    this._projectFolderService.rootProjectIds$,
-    { initialValue: [] },
-  );
+  private readonly _rootItems = toSignal(this._projectFolderService.rootItems$, {
+    initialValue: [],
+  });
   private readonly _allProjectsExceptInbox = toSignal(
     this._store.select(selectAllProjectsExceptInbox),
     { initialValue: [] },
@@ -322,7 +322,7 @@ export class MagicNavConfigService {
   private _buildProjectItems(): NavItem[] {
     const projects = this._visibleProjects();
     const projectFolders = this._projectFolders();
-    const rootLayout = this._rootProjectIds() ?? [];
+    const rootItems = this._rootItems() ?? [];
     const activeId = this._activeWorkContextId();
 
     const items: NavItem[] = [];
@@ -367,19 +367,18 @@ export class MagicNavConfigService {
         projects,
         projectFolders,
         activeId,
+        processedProjects,
       );
       items.push(...folderItems);
       processedFolders.add(folderId);
     };
 
-    if (rootLayout.length) {
-      for (const entry of rootLayout) {
-        if (entry.startsWith('folder:')) {
-          appendFolder(entry.slice('folder:'.length));
-        } else if (entry.startsWith('project:')) {
-          appendProject(entry.slice('project:'.length));
-        } else {
-          appendProject(entry);
+    if (rootItems.length) {
+      for (const entry of rootItems) {
+        if (entry.type === 'folder') {
+          appendFolder(entry.id);
+        } else if (entry.type === 'project') {
+          appendProject(entry.id);
         }
       }
     }
@@ -397,10 +396,11 @@ export class MagicNavConfigService {
   }
 
   private _buildProjectFolderItems(
-    folder: any,
+    folder: ProjectFolder,
     allProjects: any[],
-    allFolders: any[],
+    allFolders: ProjectFolder[],
     activeId: string | null,
+    processedProjects: Set<string>,
   ): NavItem[] {
     const items: NavItem[] = [];
 
@@ -436,6 +436,7 @@ export class MagicNavConfigService {
         allProjects,
         allFolders,
         activeId,
+        processedProjects,
       );
       subFolderNavItems.push(...subFolderItems);
     }
@@ -445,6 +446,12 @@ export class MagicNavConfigService {
     if (!this._isProjectsExpanded() && activeId) {
       filteredProjects = folderProjects.filter((p) => p.id === activeId);
     }
+
+    folderProjects.forEach((project) => {
+      if (project) {
+        processedProjects.add(project.id);
+      }
+    });
 
     const projectItems = filteredProjects.map((project) => ({
       type: 'workContext' as const,

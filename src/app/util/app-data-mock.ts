@@ -9,6 +9,7 @@ export const createAppDataCompleteMock = (): AppDataCompleteNew => ({
   },
   projectFolder: {
     ...createEmptyEntity(),
+    rootItems: [],
   },
   globalConfig: DEFAULT_GLOBAL_CONFIG,
 

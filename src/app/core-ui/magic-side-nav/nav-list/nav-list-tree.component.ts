@@ -24,7 +24,10 @@ import { MagicNavConfigService } from '../magic-nav-config.service';
 import { T } from '../../../t.const';
 import { WorkContextType } from '../../../features/work-context/work-context.model';
 import { ProjectFolderService } from '../../../features/project-folder/project-folder.service';
-import { ProjectFolder } from '../../../features/project-folder/store/project-folder.model';
+import {
+  ProjectFolder,
+  ProjectFolderRootItem,
+} from '../../../features/project-folder/store/project-folder.model';
 import { TagService } from '../../../features/tag/tag.service';
 import { TODAY_TAG } from '../../../features/tag/tag.const';
 
@@ -70,10 +73,9 @@ export class NavListTreeComponent {
     this._projectFolderService.projectFolders$,
     { initialValue: [] },
   );
-  private readonly _rootProjectIdsSig = toSignal(
-    this._projectFolderService.rootProjectIds$,
-    { initialValue: [] },
-  );
+  private readonly _rootItemsSig = toSignal(this._projectFolderService.rootItems$, {
+    initialValue: [],
+  });
 
   // Type guard for items with children
   private hasChildren(item: NavItem): item is NavGroupItem | NavMenuItem {
@@ -186,7 +188,7 @@ export class NavListTreeComponent {
 
   private _persistProjectFolderRelationships(
     folderProjectMap: Map<string, string[]>,
-    rootLayout: string[],
+    rootItems: ProjectFolderRootItem[],
     folderParentMap: Map<string, string | null>,
     orderedFolderIds: string[],
   ): void {
@@ -223,7 +225,7 @@ export class NavListTreeComponent {
       }
     });
 
-    const layoutChanged = !this._areArraysEqual(this._rootProjectIdsSig(), rootLayout);
+    const layoutChanged = !this._areRootItemsEqual(this._rootItemsSig(), rootItems);
 
     if (!didChange && !layoutChanged) {
       return;
@@ -231,7 +233,7 @@ export class NavListTreeComponent {
 
     this._projectFolderService.updateProjectFolderRelationships(
       orderedFolders,
-      rootLayout,
+      this._dedupeRootItems(rootItems),
     );
   }
 
@@ -318,12 +320,12 @@ export class NavListTreeComponent {
   }
 
   private _applyProjectTreeChanges(nodes: TreeNode<NavGroupItem>[]): void {
-    const { folderProjectMap, rootLayout, folderParentMap, orderedFolderIds } =
+    const { folderProjectMap, rootItems, folderParentMap, orderedFolderIds } =
       this._collectProjectStructure(nodes);
 
     this._persistProjectFolderRelationships(
       folderProjectMap,
-      rootLayout,
+      rootItems,
       folderParentMap,
       orderedFolderIds,
     );
@@ -359,12 +361,13 @@ export class NavListTreeComponent {
 
   private _collectProjectStructure(nodes: TreeNode<NavGroupItem>[]): {
     folderProjectMap: Map<string, string[]>;
-    rootLayout: string[];
+    rootItems: ProjectFolderRootItem[];
     folderParentMap: Map<string, string | null>;
     orderedFolderIds: string[];
   } {
     const folderProjectMap = new Map<string, string[]>();
-    const rootLayout: string[] = [];
+    const rootItems: ProjectFolderRootItem[] = [];
+    const rootItemKeys = new Set<string>();
     const folderParentMap = new Map<string, string | null>();
     const orderedFolderIds: string[] = [];
 
@@ -377,7 +380,11 @@ export class NavListTreeComponent {
         folderParentMap.set(node.id, parentFolderId);
         orderedFolderIds.push(node.id);
         if (level === 0) {
-          rootLayout.push(`folder:${node.id}`);
+          const key = `folder:${node.id}`;
+          if (!rootItemKeys.has(key)) {
+            rootItems.push({ type: 'folder', id: node.id });
+            rootItemKeys.add(key);
+          }
         }
 
         const childProjects: string[] = [];
@@ -386,7 +393,7 @@ export class NavListTreeComponent {
             visit(child, node.id, level + 1);
           } else {
             const projectId = this._extractProjectId(child.id);
-            if (projectId) {
+            if (projectId && !childProjects.includes(projectId)) {
               childProjects.push(projectId);
             }
           }
@@ -398,7 +405,11 @@ export class NavListTreeComponent {
       const projectId = this._extractProjectId(node.id);
       if (projectId) {
         if (parentFolderId === null) {
-          rootLayout.push(`project:${projectId}`);
+          const key = `project:${projectId}`;
+          if (!rootItemKeys.has(key)) {
+            rootItems.push({ type: 'project', id: projectId });
+            rootItemKeys.add(key);
+          }
         }
       }
     };
@@ -407,7 +418,7 @@ export class NavListTreeComponent {
 
     return {
       folderProjectMap,
-      rootLayout,
+      rootItems,
       folderParentMap,
       orderedFolderIds,
     };
@@ -426,5 +437,27 @@ export class NavListTreeComponent {
       return false;
     }
     return a.every((value, index) => value === b[index]);
+  }
+
+  private _areRootItemsEqual(
+    a: ProjectFolderRootItem[],
+    b: ProjectFolderRootItem[],
+  ): boolean {
+    if (a.length !== b.length) {
+      return false;
+    }
+    return a.every(
+      (value, index) => value.type === b[index].type && value.id === b[index].id,
+    );
+  }
+
+  private _dedupeRootItems(items: ProjectFolderRootItem[]): ProjectFolderRootItem[] {
+    const result: ProjectFolderRootItem[] = [];
+    items.forEach((entry) => {
+      if (!result.some((item) => item.type === entry.type && item.id === entry.id)) {
+        result.push(entry);
+      }
+    });
+    return result;
   }
 }

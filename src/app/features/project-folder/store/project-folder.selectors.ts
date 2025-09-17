@@ -13,9 +13,9 @@ export const selectAllProjectFolders = createSelector(selectProjectFolderState, 
   state.ids.map((id) => state.entities[id]),
 );
 
-export const selectRootProjectIds = createSelector(
+export const selectRootItems = createSelector(
   selectProjectFolderState,
-  (state) => state.rootProjectIds,
+  (state) => state.rootItems,
 );
 
 export const selectProjectFolderEntities = createSelector(
