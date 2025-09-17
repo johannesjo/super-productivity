@@ -98,37 +98,14 @@ export const createScheduleDays = (
     // merge with planned-for-day tasks
     let flowTasksForDay = [...flowTasksLeftAfterDay, ...plannedForDayTasks];
 
-    // Scheme A: project priority + urgency + remaining time
-    flowTasksForDay = flowTasksForDay.sort((a, b) => {
-      // 1) project priority: school > coding/learning > others
-      const prio = (t: any): number => {
-        const pid: string = (t.projectId || '').toString();
-        const p = pid.toLowerCase();
-        if (p.includes('school')) return 0;
-        if (p.includes('coding') || p.includes('learn')) return 1;
-        return 2;
-      };
-      const pa = prio(a);
-      const pb = prio(b);
-      if (pa !== pb) return pa - pb;
-
-      // 2) urgency by due date/time
-      const getDueTs = (t: any): number | null => {
-        if (typeof t.dueWithTime === 'number') return t.dueWithTime;
-        if (typeof t.dueDay === 'string') return dateStrToUtcDate(t.dueDay).getTime();
-        return null;
-      };
-      const da = getDueTs(a as any);
-      const db = getDueTs(b as any);
-      if (da !== null && db === null) return -1;
-      if (da === null && db !== null) return 1;
-      if (da !== null && db !== null && da !== db) return da - db;
-
-      // 3) longer tasks first
-      const aLeft = getTimeLeftForTask(a);
-      const bLeft = getTimeLeftForTask(b);
-      return bLeft - aLeft;
-    });
+    // 保持原有任务输入顺序；仅当配置启用时，按剩余时长降序近似平衡难度
+    if (isAutoSortByEstimateDesc) {
+      flowTasksForDay = flowTasksForDay.sort((a, b) => {
+        const aLeft = getTimeLeftForTask(a);
+        const bLeft = getTimeLeftForTask(b);
+        return bLeft - aLeft;
+      });
+    }
 
     const BUFFER_PER_TASK_MS = 5 * 60 * 1000;
     const { beyond, within, isSomeTimeLeftForLastOverBudget } =
