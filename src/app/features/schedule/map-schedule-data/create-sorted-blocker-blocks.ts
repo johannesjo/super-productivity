@@ -13,7 +13,17 @@ import {
 import { selectTaskRepeatCfgsForExactDay } from '../../task-repeat-cfg/store/task-repeat-cfg.selectors';
 const PROJECTION_DAYS: number = 30;
 
-export const createSortedBlockerBlocks = (
+/* eslint-disable prefer-arrow/prefer-arrow-functions */
+export function createSortedBlockerBlocks(
+  scheduledTasks: TaskWithDueTime[],
+  scheduledTaskRepeatCfgs: TaskRepeatCfg[],
+  icalEventMap: ScheduleCalendarMapEntry[],
+  workStartEndCfg?: ScheduleWorkStartEndCfg,
+  weekendWorkStartEndCfg?: ScheduleWorkStartEndCfg,
+  now?: number,
+  nrOfDays?: number,
+): BlockedBlock[];
+export function createSortedBlockerBlocks(
   scheduledTasks: TaskWithDueTime[],
   scheduledTaskRepeatCfgs: TaskRepeatCfg[],
   icalEventMap: ScheduleCalendarMapEntry[],
@@ -22,9 +32,38 @@ export const createSortedBlockerBlocks = (
   lunchBreakCfg?: ScheduleLunchBreakCfg,
   customBlocksWeekday?: ScheduleWorkStartEndCfg[],
   customBlocksWeekend?: ScheduleWorkStartEndCfg[],
-  now: number = Date.now(),
-  nrOfDays: number = PROJECTION_DAYS,
-): BlockedBlock[] => {
+  now?: number,
+  nrOfDays?: number,
+): BlockedBlock[];
+export function createSortedBlockerBlocks(
+  scheduledTasks: TaskWithDueTime[],
+  scheduledTaskRepeatCfgs: TaskRepeatCfg[],
+  icalEventMap: ScheduleCalendarMapEntry[],
+  workStartEndCfg?: ScheduleWorkStartEndCfg,
+  weekendWorkStartEndCfg?: ScheduleWorkStartEndCfg,
+  a6?: any,
+  a7?: any,
+  a8?: any,
+  a9?: any,
+  a10?: any,
+): BlockedBlock[] {
+  let lunchBreakCfg: ScheduleLunchBreakCfg | undefined;
+  let customBlocksWeekday: ScheduleWorkStartEndCfg[] | undefined;
+  let customBlocksWeekend: ScheduleWorkStartEndCfg[] | undefined;
+  let now: number = Date.now();
+  let nrOfDays: number = PROJECTION_DAYS;
+
+  if (typeof a6 === 'number') {
+    now = a6 as number;
+    nrOfDays = typeof a7 === 'number' ? (a7 as number) : PROJECTION_DAYS;
+  } else {
+    lunchBreakCfg = a6 as ScheduleLunchBreakCfg | undefined;
+    customBlocksWeekday = a7 as ScheduleWorkStartEndCfg[] | undefined;
+    customBlocksWeekend = a8 as ScheduleWorkStartEndCfg[] | undefined;
+    now = typeof a9 === 'number' ? (a9 as number) : Date.now();
+    nrOfDays = typeof a10 === 'number' ? (a10 as number) : PROJECTION_DAYS;
+  }
+
   if (typeof now !== 'number') {
     throw new Error('No valid now given');
   }
@@ -64,7 +103,8 @@ export const createSortedBlockerBlocks = (
   // Log.log(blockedBlocks);
 
   return blockedBlocks;
-};
+}
+/* eslint-enable prefer-arrow/prefer-arrow-functions */
 
 const createBlockerBlocksForScheduledRepeatProjections = (
   now: number,
