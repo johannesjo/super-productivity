@@ -7,7 +7,6 @@ import { ProjectFolderService } from '../../features/project-folder/project-fold
 import { DialogCreateEditProjectFolderComponent } from '../../features/project-folder/dialogs/create-edit-project-folder/dialog-create-edit-project-folder.component';
 import { MatMenuItem } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
-import { ProjectService } from '../../features/project/project.service';
 import { ProjectFolder } from '../../features/project-folder/store/project-folder.model';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { T } from '../../t.const';
@@ -23,7 +22,6 @@ import { T } from '../../t.const';
 export class FolderContextMenuComponent {
   private readonly _matDialog = inject(MatDialog);
   private readonly _projectFolderService = inject(ProjectFolderService);
-  private readonly _projectService = inject(ProjectService);
   private readonly _translateService = inject(TranslateService);
 
   @Input() folderId!: string;
@@ -66,7 +64,6 @@ export class FolderContextMenuComponent {
     });
 
     if (isConfirmed) {
-      this._projectService.moveProjectsFromFolderToRoot(this.folderId);
       this._projectFolderService.deleteProjectFolder(this.folderId);
     }
   }

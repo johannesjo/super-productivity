@@ -54,20 +54,9 @@ export class ProjectFolderService {
           projectIds: [],
         };
         const updatedFolders = [...folders, newFolder];
-        this._store.dispatch(
-          updateProjectFolders({ projectFolders: updatedFolders, rootProjectIds }),
-        );
-      });
-  }
-
-  deleteProjectFolder(id: string): void {
-    this.projectFolders$
-      .pipe(take(1), withLatestFrom(this.rootProjectIds$))
-      .subscribe(([folders, rootProjectIds]) => {
-        const updatedFolders = folders.filter((folder) => folder.id !== id);
-        const updatedRootLayout = rootProjectIds.filter(
-          (entry) => entry !== `folder:${id}`,
-        );
+        const updatedRootLayout = rootProjectIds.includes(`folder:${newFolder.id}`)
+          ? rootProjectIds
+          : [...rootProjectIds, `folder:${newFolder.id}`];
         this._store.dispatch(
           updateProjectFolders({
             projectFolders: updatedFolders,
@@ -77,31 +66,65 @@ export class ProjectFolderService {
       });
   }
 
-  updateOrder(newIds: string[]): void {
+  deleteProjectFolder(id: string): void {
     this.projectFolders$
       .pipe(take(1), withLatestFrom(this.rootProjectIds$))
-      .subscribe(([folders, rootProjectIds]) => {
-        const folderMap = new Map(folders.map((f) => [f.id, f] as const));
-        const seen = new Set<string>();
-        const reorderedFolders: ProjectFolder[] = [];
+      .subscribe(([folders, rootLayout]) => {
+        const folderToDelete = folders.find((folder) => folder.id === id);
+        if (!folderToDelete) {
+          return;
+        }
 
-        newIds.forEach((id) => {
-          const folder = folderMap.get(id);
-          if (folder && !seen.has(id)) {
-            reorderedFolders.push(folder);
-            seen.add(id);
+        const childFolders = folders.filter((folder) => folder.parentId === id);
+
+        const updatedFolders = folders
+          .filter((folder) => folder.id !== id)
+          .map((folder) =>
+            folder.parentId === id ? { ...folder, parentId: null } : folder,
+          );
+
+        const replacementEntries: string[] = [];
+        childFolders.forEach((folder) => {
+          replacementEntries.push(`folder:${folder.id}`);
+        });
+        (folderToDelete.projectIds ?? []).forEach((projectId) => {
+          replacementEntries.push(`project:${projectId}`);
+        });
+
+        const newRootLayout: string[] = [];
+        let replaced = false;
+        rootLayout.forEach((entry) => {
+          if (entry === `folder:${id}`) {
+            if (replacementEntries.length) {
+              replacementEntries.forEach((value) => {
+                if (!newRootLayout.includes(value)) {
+                  newRootLayout.push(value);
+                }
+              });
+            }
+            replaced = true;
+          } else {
+            newRootLayout.push(entry);
           }
         });
 
-        folders.forEach((folder) => {
-          if (!seen.has(folder.id)) {
-            reorderedFolders.push(folder);
-            seen.add(folder.id);
-          }
-        });
+        if (!replaced && replacementEntries.length) {
+          replacementEntries.forEach((value) => {
+            if (!newRootLayout.includes(value)) {
+              newRootLayout.push(value);
+            }
+          });
+        }
+
+        const dedupedRootLayout = newRootLayout.filter(
+          (value, index, arr) => arr.indexOf(value) === index,
+        );
 
         this._store.dispatch(
-          updateProjectFolders({ projectFolders: reorderedFolders, rootProjectIds }),
+          updateProjectFolders({
+            projectFolders: updatedFolders,
+            rootProjectIds: dedupedRootLayout,
+          }),
         );
       });
   }

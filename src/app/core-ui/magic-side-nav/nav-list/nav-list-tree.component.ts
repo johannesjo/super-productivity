@@ -25,7 +25,6 @@ import { T } from '../../../t.const';
 import { WorkContextType } from '../../../features/work-context/work-context.model';
 import { ProjectFolderService } from '../../../features/project-folder/project-folder.service';
 import { ProjectFolder } from '../../../features/project-folder/store/project-folder.model';
-import { ProjectService } from '../../../features/project/project.service';
 import { TagService } from '../../../features/tag/tag.service';
 import { TODAY_TAG } from '../../../features/tag/tag.const';
 
@@ -50,7 +49,6 @@ import { TODAY_TAG } from '../../../features/tag/tag.const';
 export class NavListTreeComponent {
   private readonly _navConfigService = inject(MagicNavConfigService);
   private readonly _projectFolderService = inject(ProjectFolderService);
-  private readonly _projectService = inject(ProjectService);
   private readonly _tagService = inject(TagService);
 
   item = input.required<NavGroupItem>();
@@ -320,13 +318,8 @@ export class NavListTreeComponent {
   }
 
   private _applyProjectTreeChanges(nodes: TreeNode<NavGroupItem>[]): void {
-    const {
-      folderProjectMap,
-      orderedProjectIds,
-      rootLayout,
-      folderParentMap,
-      orderedFolderIds,
-    } = this._collectProjectStructure(nodes);
+    const { folderProjectMap, rootLayout, folderParentMap, orderedFolderIds } =
+      this._collectProjectStructure(nodes);
 
     this._persistProjectFolderRelationships(
       folderProjectMap,
@@ -334,46 +327,6 @@ export class NavListTreeComponent {
       folderParentMap,
       orderedFolderIds,
     );
-
-    const allProjects = this._navConfigService.allProjectsExceptInbox();
-    const visibleProjects = allProjects.filter(
-      (project) => !project.isArchived && !project.isHiddenFromMenu,
-    );
-    const projectLookup = new Map(
-      visibleProjects.map((project) => [project.id, project]),
-    );
-
-    // Update folder assignments when necessary
-    const desiredAssignment = new Map<string, string | null>();
-    folderProjectMap.forEach((projectIds, folderId) => {
-      projectIds.forEach((projectId) => desiredAssignment.set(projectId, folderId));
-    });
-    rootLayout
-      .filter((entry) => entry.startsWith('project:'))
-      .forEach((entry) => desiredAssignment.set(entry.replace('project:', ''), null));
-
-    desiredAssignment.forEach((targetFolderId, projectId) => {
-      const project = projectLookup.get(projectId);
-      if (!project) {
-        return;
-      }
-      const currentFolder = project.folderId ?? null;
-      if (currentFolder !== targetFolderId) {
-        this._projectService.update(projectId, { folderId: targetFolderId });
-      }
-    });
-
-    // Update order for visible projects if changed and counts match
-    const dedupedOrder = orderedProjectIds.filter(
-      (projectId, index, arr) => arr.indexOf(projectId) === index,
-    );
-    if (dedupedOrder.length !== visibleProjects.length) {
-      return;
-    }
-    const currentOrder = visibleProjects.map((project) => project.id);
-    if (!this._areArraysEqual(dedupedOrder, currentOrder)) {
-      this._projectService.updateOrder(dedupedOrder);
-    }
   }
 
   private _applyTagOrder(nodes: TreeNode<NavGroupItem>[]): void {
@@ -406,13 +359,11 @@ export class NavListTreeComponent {
 
   private _collectProjectStructure(nodes: TreeNode<NavGroupItem>[]): {
     folderProjectMap: Map<string, string[]>;
-    orderedProjectIds: string[];
     rootLayout: string[];
     folderParentMap: Map<string, string | null>;
     orderedFolderIds: string[];
   } {
     const folderProjectMap = new Map<string, string[]>();
-    const orderedProjectIds: string[] = [];
     const rootLayout: string[] = [];
     const folderParentMap = new Map<string, string | null>();
     const orderedFolderIds: string[] = [];
@@ -437,7 +388,6 @@ export class NavListTreeComponent {
             const projectId = this._extractProjectId(child.id);
             if (projectId) {
               childProjects.push(projectId);
-              orderedProjectIds.push(projectId);
             }
           }
         });
@@ -447,7 +397,6 @@ export class NavListTreeComponent {
 
       const projectId = this._extractProjectId(node.id);
       if (projectId) {
-        orderedProjectIds.push(projectId);
         if (parentFolderId === null) {
           rootLayout.push(`project:${projectId}`);
         }
@@ -458,7 +407,6 @@ export class NavListTreeComponent {
 
     return {
       folderProjectMap,
-      orderedProjectIds,
       rootLayout,
       folderParentMap,
       orderedFolderIds,

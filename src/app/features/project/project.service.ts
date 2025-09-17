@@ -217,15 +217,4 @@ export class ProjectService {
   updateOrder(ids: string[]): void {
     this._store$.dispatch(updateProjectOrder({ ids }));
   }
-
-  moveProjectsFromFolderToRoot(folderId: string): void {
-    this.list$.pipe(take(1)).subscribe((projects) => {
-      const projectsInFolder = projects.filter(
-        (project) => project.folderId === folderId,
-      );
-      projectsInFolder.forEach((project) => {
-        this.update(project.id, { folderId: null });
-      });
-    });
-  }
 }
