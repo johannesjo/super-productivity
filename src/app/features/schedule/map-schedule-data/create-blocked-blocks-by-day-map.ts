@@ -16,6 +16,7 @@ import { getDiffInDays } from '../../../util/get-diff-in-days';
 const NR_OF_DAYS = 10;
 
 // Back-compat overload: old call sites used `now` as 6th argument
+/* eslint-disable prefer-arrow/prefer-arrow-functions */
 export function createBlockedBlocksByDayMap(
   scheduledTasks: TaskWithDueTime[],
   scheduledTaskRepeatCfgs: TaskRepeatCfg[],
@@ -138,6 +139,7 @@ export function createBlockedBlocksByDayMap(
 
   return blockedBlocksByDay;
 }
+/* eslint-enable prefer-arrow/prefer-arrow-functions */
 const createEntriesForDay = (
   entries: BlockedBlockEntry[],
   dayEnd: number,
