@@ -19,7 +19,12 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { TreeDndComponent } from '../../../ui/tree-dnd/tree.component';
 import { MoveInstruction, TreeNode } from '../../../ui/tree-dnd/tree.types';
 import { NavItemComponent } from '../nav-item/nav-item.component';
-import { NavGroupItem, NavItem, NavMenuItem } from '../magic-side-nav.model';
+import {
+  NavGroupItem,
+  NavItem,
+  NavMenuItem,
+  NavWorkContextItem,
+} from '../magic-side-nav.model';
 import { MagicNavConfigService } from '../magic-nav-config.service';
 import { T } from '../../../t.const';
 import { WorkContextType } from '../../../features/work-context/work-context.model';
@@ -30,6 +35,19 @@ import {
 } from '../../../features/project-folder/store/project-folder.model';
 import { TagService } from '../../../features/tag/tag.service';
 import { TODAY_TAG } from '../../../features/tag/tag.const';
+
+// Type guard functions using the existing NavItem union types
+const isNavGroupItem = (item: NavItem): item is NavGroupItem => {
+  return item.type === 'group';
+};
+
+const isNavWorkContextItem = (item: NavItem): item is NavWorkContextItem => {
+  return item.type === 'workContext';
+};
+
+const hasDefaultIcon = (item: NavItem): item is NavWorkContextItem => {
+  return item.type === 'workContext' && 'defaultIcon' in item;
+};
 
 @Component({
   selector: 'nav-list-tree',
@@ -107,9 +125,9 @@ export class NavListTreeComponent {
 
   private navItemToTreeNode(navItem: NavItem): TreeNode<NavGroupItem> {
     // Handle folders
-    if ((navItem as any).isFolder) {
+    if (isNavGroupItem(navItem) && navItem.isFolder) {
       const children = this.hasChildren(navItem) ? navItem.children : [];
-      const folderId = (navItem as any).folderId || navItem.id;
+      const folderId = navItem.folderId || navItem.id;
       const folderData = this._projectFolders().find((f) => f.id === folderId);
       const isExpanded = folderData?.isExpanded ?? true; // Default to expanded if not found
 
@@ -257,17 +275,17 @@ export class NavListTreeComponent {
   // Helper methods for template
   getWorkContextFromNode(node: TreeNode<NavGroupItem>): any {
     const navItem = this.findNavItem(node.id);
-    return (navItem as any)?.workContext;
+    return navItem && isNavWorkContextItem(navItem) ? navItem.workContext : undefined;
   }
 
   getTypeFromNode(node: TreeNode<NavGroupItem>): WorkContextType | null {
-    const navItem = this.findNavItem(node.id) as any;
-    return (navItem?.workContextType as WorkContextType) ?? null;
+    const navItem = this.findNavItem(node.id);
+    return navItem && isNavWorkContextItem(navItem) ? navItem.workContextType : null;
   }
 
   getDefaultIconFromNode(node: TreeNode<NavGroupItem>): string {
     const navItem = this.findNavItem(node.id);
-    return (navItem as any)?.defaultIcon || 'list';
+    return navItem && hasDefaultIcon(navItem) ? navItem.defaultIcon || 'list' : 'list';
   }
 
   isNodeDraggable(node: TreeNode<NavGroupItem>): boolean {
@@ -311,12 +329,13 @@ export class NavListTreeComponent {
   }
 
   isHeaderDropZone(): boolean {
-    return (this.item() as any).isFolder === true || this.item().id === 'projects';
+    const item = this.item();
+    return (isNavGroupItem(item) && item.isFolder) || item.id === 'projects';
   }
 
   getProjectId(node: TreeNode<NavGroupItem>): string | undefined {
     const navItem = this.findNavItem(node.id);
-    return (navItem as any)?.workContext?.id;
+    return navItem && isNavWorkContextItem(navItem) ? navItem.workContext.id : undefined;
   }
 
   private _applyProjectTreeChanges(nodes: TreeNode<NavGroupItem>[]): void {

@@ -21,6 +21,7 @@ import {
   selectUnarchivedVisibleProjects,
 } from '../../features/project/store/project.selectors';
 import { toggleHideFromMenu } from '../../features/project/store/project.actions';
+import { Project } from '../../features/project/project.model';
 import { NavConfig, NavItem } from './magic-side-nav.model';
 import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
 import { lsGetBoolean, lsSetItem } from '../../util/ls-util';
@@ -397,7 +398,7 @@ export class MagicNavConfigService {
 
   private _buildProjectFolderItems(
     folder: ProjectFolder,
-    allProjects: any[],
+    allProjects: Project[],
     allFolders: ProjectFolder[],
     activeId: string | null,
     processedProjects: Set<string>,
@@ -483,9 +484,9 @@ export class MagicNavConfigService {
   }
 
   private _folderContainsActiveProject(
-    folder: any,
-    allProjects: any[],
-    allFolders: any[],
+    folder: ProjectFolder,
+    allProjects: Project[],
+    allFolders: ProjectFolder[],
     activeId: string | null,
   ): boolean {
     // Check if any project in this folder is active

@@ -2,13 +2,12 @@ import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map, take, withLatestFrom } from 'rxjs/operators';
-import {
-  ProjectFolder,
-  ProjectFolderRootItem,
-  ProjectFolderState,
-} from './store/project-folder.model';
+import { ProjectFolder, ProjectFolderRootItem } from './store/project-folder.model';
 import { updateProjectFolders } from './store/project-folder.actions';
-import { projectFolderFeatureKey } from './store/project-folder.reducer';
+import {
+  selectAllProjectFolders,
+  selectRootItems,
+} from './store/project-folder.selectors';
 import { nanoid } from 'nanoid';
 
 const rootItemEquals = (a: ProjectFolderRootItem, b: ProjectFolderRootItem): boolean =>
@@ -36,13 +35,12 @@ const dedupeRootItems = (items: ProjectFolderRootItem[]): ProjectFolderRootItem[
 export class ProjectFolderService {
   private readonly _store = inject(Store);
 
-  readonly projectFolders$: Observable<ProjectFolder[]> = this._store
-    .select((state: any) => state[projectFolderFeatureKey] as ProjectFolderState)
-    .pipe(map((state) => state.ids.map((id) => state.entities[id])));
+  readonly projectFolders$: Observable<ProjectFolder[]> = this._store.select(
+    selectAllProjectFolders,
+  );
 
-  readonly rootItems$: Observable<ProjectFolderRootItem[]> = this._store
-    .select((state: any) => state[projectFolderFeatureKey] as ProjectFolderState)
-    .pipe(map((state) => state.rootItems));
+  readonly rootItems$: Observable<ProjectFolderRootItem[]> =
+    this._store.select(selectRootItems);
 
   readonly topLevelFolders$: Observable<ProjectFolder[]> = this.projectFolders$.pipe(
     map((folders) => folders.filter((folder) => !folder.parentId)),

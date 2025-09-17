@@ -10,7 +10,7 @@ export const selectProjectFolderState = createFeatureSelector<ProjectFolderState
 export const selectProjectFolderFeatureState = selectProjectFolderState;
 
 export const selectAllProjectFolders = createSelector(selectProjectFolderState, (state) =>
-  state.ids.map((id) => state.entities[id]),
+  state.ids.map((id) => state.entities[id]).filter(Boolean),
 );
 
 export const selectRootItems = createSelector(
