@@ -14,8 +14,6 @@ export interface ProjectFolderState {
   tree: ProjectFolderTree;
 }
 
-export type ProjectFolderTreeState = ProjectFolderState;
-
 export interface ProjectFolderSummary {
   id: string;
   title: string;

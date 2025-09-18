@@ -27,11 +27,15 @@ import {
 } from '../magic-side-nav.model';
 import { MagicNavConfigService } from '../magic-nav-config.service';
 import { T } from '../../../t.const';
-import { WorkContextType } from '../../../features/work-context/work-context.model';
+import {
+  WorkContextType,
+  WorkContextCommon,
+} from '../../../features/work-context/work-context.model';
 import { ProjectFolderService } from '../../../features/project-folder/project-folder.service';
 import { ProjectFolderTreeNode } from '../../../features/project-folder/store/project-folder.model';
 import { TagService } from '../../../features/tag/tag.service';
 import { TODAY_TAG } from '../../../features/tag/tag.const';
+import { TreeUtilsService } from '../../../util/tree-utils.service';
 
 // Type guard functions using the existing NavItem union types
 const isNavGroupItem = (item: NavItem): item is NavGroupItem => {
@@ -68,6 +72,7 @@ export class NavListTreeComponent {
   private readonly _navConfigService = inject(MagicNavConfigService);
   private readonly _projectFolderService = inject(ProjectFolderService);
   private readonly _tagService = inject(TagService);
+  private readonly _treeUtils = inject(TreeUtilsService);
 
   item = input.required<NavGroupItem>();
   showLabels = input<boolean>(true);
@@ -168,24 +173,7 @@ export class NavListTreeComponent {
   }
 
   private _findFolderNode(id: string): ProjectFolderTreeNode | undefined {
-    const traverse = (
-      nodes: ProjectFolderTreeNode[],
-    ): ProjectFolderTreeNode | undefined => {
-      for (const node of nodes) {
-        if (node.kind !== 'folder') {
-          continue;
-        }
-        if (node.id === id) {
-          return node;
-        }
-        const childMatch = traverse(node.children ?? []);
-        if (childMatch) {
-          return childMatch;
-        }
-      }
-      return undefined;
-    };
-    return traverse(this._projectFolderTree());
+    return this._treeUtils.findNode(this._projectFolderTree(), id);
   }
 
   findNavItem(id: string): NavItem | null {
@@ -206,7 +194,7 @@ export class NavListTreeComponent {
   }
 
   // Helper methods for template
-  getWorkContextFromNode(node: TreeNode<NavGroupItem>): any {
+  getWorkContextFromNode(node: TreeNode<NavGroupItem>): WorkContextCommon | undefined {
     const navItem = this.findNavItem(node.id);
     return navItem && isNavWorkContextItem(navItem) ? navItem.workContext : undefined;
   }
@@ -276,7 +264,7 @@ export class NavListTreeComponent {
     const currentTree = this._normalizeTreeForCompare(this._projectFolderTree());
     const normalizedNext = this._normalizeTreeForCompare(nextTree);
 
-    if (JSON.stringify(currentTree) === JSON.stringify(normalizedNext)) {
+    if (this._isProjectFolderTreeEqual(currentTree, normalizedNext)) {
       return;
     }
 
@@ -356,6 +344,29 @@ export class NavListTreeComponent {
           }
         : { id: node.id, kind: 'project' },
     );
+  }
+
+  private _isProjectFolderTreeEqual(
+    a: ProjectFolderTreeNode[],
+    b: ProjectFolderTreeNode[],
+  ): boolean {
+    if (a.length !== b.length) {
+      return false;
+    }
+    return a.every((nodeA, index) => {
+      const nodeB = b[index];
+      if (nodeA.id !== nodeB.id || nodeA.kind !== nodeB.kind) {
+        return false;
+      }
+      if (nodeA.kind === 'folder' && nodeB.kind === 'folder') {
+        return (
+          nodeA.title === nodeB.title &&
+          nodeA.isExpanded === nodeB.isExpanded &&
+          this._isProjectFolderTreeEqual(nodeA.children ?? [], nodeB.children ?? [])
+        );
+      }
+      return true;
+    });
   }
 
   private _extractProjectId(nodeId: string): string | null {

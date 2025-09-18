@@ -14,10 +14,12 @@ import {
   selectProjectFolderTree,
 } from './store/project-folder.selectors';
 import { updateProjectFolders } from './store/project-folder.actions';
+import { TreeUtilsService } from '../../util/tree-utils.service';
 
 @Injectable({ providedIn: 'root' })
 export class ProjectFolderService {
   private readonly _store = inject(Store);
+  private readonly _treeUtils = inject(TreeUtilsService);
 
   readonly projectFolders$: Observable<ProjectFolderSummary[]> = this._store.select(
     selectAllProjectFolders,
@@ -35,7 +37,7 @@ export class ProjectFolderService {
   getFolderNodeById(id: string): Observable<ProjectFolderTreeNode | undefined> {
     return this.tree$.pipe(
       take(1),
-      map((tree) => this._find(tree, id)),
+      map((tree) => this._treeUtils.findNode(tree, id)),
     );
   }
 
@@ -50,8 +52,8 @@ export class ProjectFolderService {
     this._store.dispatch(updateProjectFolders({ tree: sanitizeProjectFolderTree(tree) }));
   }
 
-  addFolder(title: string, parentId: string | null): void {
-    this._mutateTree((tree) => {
+  addFolder(title: string, parentId: string | null): Promise<void> {
+    return this._mutateTree((tree) => {
       const newNode: ProjectFolderTreeNode = {
         id: `folder-${nanoid()}`,
         kind: 'folder',
@@ -59,41 +61,54 @@ export class ProjectFolderService {
         isExpanded: true,
         children: [],
       };
-      return this._insertNode(tree, newNode, parentId, undefined);
+      return this._treeUtils.insertNode(tree, newNode, parentId, undefined);
     });
   }
 
   updateFolder(
     id: string,
     changes: Partial<{ title: string; isExpanded: boolean; parentId: string | null }>,
-  ): void {
+  ): Promise<void> {
     if (changes.parentId !== undefined) {
-      this._mutateTree((tree) => {
-        const removal = this._removeNode(tree, id);
-        if (!removal) {
-          return tree;
-        }
-        const { tree: withoutNode, removed } = removal;
-        if (removed.kind !== 'folder') {
-          return tree;
-        }
-        const updatedNode: ProjectFolderTreeNode = {
-          ...removed,
-          title: changes.title ?? removed.title,
-          isExpanded: changes.isExpanded ?? removed.isExpanded,
-        };
-        return this._insertNode(
-          withoutNode,
-          updatedNode,
-          changes.parentId ?? null,
-          undefined,
-        );
-      });
-      return;
+      return this._moveFolderToParent(id, changes);
+    } else {
+      return this._updateFolderProperties(id, changes);
     }
+  }
 
-    this._mutateTree((tree) =>
-      this._mapTree(tree, (node) =>
+  private _moveFolderToParent(
+    id: string,
+    changes: Partial<{ title: string; isExpanded: boolean; parentId: string | null }>,
+  ): Promise<void> {
+    return this._mutateTree((tree) => {
+      const removal = this._treeUtils.removeNode(tree, id);
+      if (!removal) {
+        return tree;
+      }
+      const { tree: withoutNode, removed } = removal;
+      if (removed.kind !== 'folder') {
+        return tree;
+      }
+      const updatedNode: ProjectFolderTreeNode = {
+        ...removed,
+        title: changes.title ?? removed.title,
+        isExpanded: changes.isExpanded ?? removed.isExpanded,
+      };
+      return this._treeUtils.insertNode(
+        withoutNode,
+        updatedNode,
+        changes.parentId ?? null,
+        undefined,
+      );
+    });
+  }
+
+  private _updateFolderProperties(
+    id: string,
+    changes: Partial<{ title: string; isExpanded: boolean }>,
+  ): Promise<void> {
+    return this._mutateTree((tree) =>
+      this._treeUtils.mapTree(tree, (node) =>
         node.id === id && node.kind === 'folder'
           ? {
               ...node,
@@ -105,9 +120,9 @@ export class ProjectFolderService {
     );
   }
 
-  toggleFolderExpansion(id: string): void {
-    this._mutateTree((tree) =>
-      this._mapTree(tree, (node) =>
+  toggleFolderExpansion(id: string): Promise<void> {
+    return this._mutateTree((tree) =>
+      this._treeUtils.mapTree(tree, (node) =>
         node.id === id && node.kind === 'folder'
           ? { ...node, isExpanded: !(node.isExpanded ?? true) }
           : node,
@@ -115,9 +130,9 @@ export class ProjectFolderService {
     );
   }
 
-  deleteFolder(id: string): void {
-    this._mutateTree((tree) => {
-      const removal = this._removeNode(tree, id);
+  deleteFolder(id: string): Promise<void> {
+    return this._mutateTree((tree) => {
+      const removal = this._treeUtils.removeNode(tree, id);
       if (!removal) {
         return tree;
       }
@@ -129,111 +144,14 @@ export class ProjectFolderService {
     });
   }
 
-  private _mutateTree(
+  private async _mutateTree(
     updater: (tree: ProjectFolderTreeNode[]) => ProjectFolderTreeNode[],
-  ): void {
-    this._store
+  ): Promise<void> {
+    const state = await this._store
       .select(selectProjectFolderState)
       .pipe(take(1))
-      .subscribe((state) => {
-        const nextTree = sanitizeProjectFolderTree(updater(state.tree));
-        this._store.dispatch(updateProjectFolders({ tree: nextTree }));
-      });
-  }
-
-  private _find(
-    tree: ProjectFolderTreeNode[],
-    id: string,
-  ): ProjectFolderTreeNode | undefined {
-    for (const node of tree) {
-      if (node.id === id) {
-        return node;
-      }
-      if (node.kind === 'folder') {
-        const found = this._find(node.children ?? [], id);
-        if (found) {
-          return found;
-        }
-      }
-    }
-    return undefined;
-  }
-
-  private _mapTree(
-    tree: ProjectFolderTreeNode[],
-    mapFn: (node: ProjectFolderTreeNode) => ProjectFolderTreeNode,
-  ): ProjectFolderTreeNode[] {
-    return tree.map((node) => {
-      const mapped = mapFn(node);
-      if (mapped.kind === 'folder') {
-        return {
-          ...mapped,
-          children: this._mapTree(mapped.children ?? [], mapFn),
-        };
-      }
-      return mapped;
-    });
-  }
-
-  private _insertNode(
-    tree: ProjectFolderTreeNode[],
-    node: ProjectFolderTreeNode,
-    parentId: string | null,
-    index: number | undefined,
-  ): ProjectFolderTreeNode[] {
-    if (!parentId) {
-      const copy = [...tree];
-      if (index === undefined || index < 0 || index > copy.length) {
-        copy.push(node);
-      } else {
-        copy.splice(index, 0, node);
-      }
-      return copy;
-    }
-
-    return tree.map((item) => {
-      if (item.id === parentId && item.kind === 'folder') {
-        const children = item.children ? [...item.children] : [];
-        const filtered = children.filter((child) => child.id !== node.id);
-        if (index === undefined || index < 0 || index > filtered.length) {
-          filtered.push(node);
-        } else {
-          filtered.splice(index, 0, node);
-        }
-        return {
-          ...item,
-          children: filtered,
-        };
-      }
-      if (item.kind === 'folder') {
-        return {
-          ...item,
-          children: this._insertNode(item.children ?? [], node, parentId, index),
-        };
-      }
-      return item;
-    });
-  }
-
-  private _removeNode(
-    tree: ProjectFolderTreeNode[],
-    id: string,
-  ): { tree: ProjectFolderTreeNode[]; removed: ProjectFolderTreeNode } | null {
-    const copy = [...tree];
-    for (let i = 0; i < copy.length; i++) {
-      const node = copy[i];
-      if (node.id === id) {
-        copy.splice(i, 1);
-        return { tree: copy, removed: node };
-      }
-      if (node.kind === 'folder') {
-        const result = this._removeNode(node.children ?? [], id);
-        if (result) {
-          copy[i] = { ...node, children: result.tree };
-          return { tree: copy, removed: result.removed };
-        }
-      }
-    }
-    return null;
+      .toPromise();
+    const nextTree = sanitizeProjectFolderTree(updater(state.tree));
+    this._store.dispatch(updateProjectFolders({ tree: nextTree }));
   }
 }

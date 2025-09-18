@@ -16,7 +16,10 @@ export const initialState: ProjectFolderState = {
 export const projectFolderReducer = createReducer(
   initialState,
   on(loadAllData, (state, { appDataComplete }) => {
-    const stored = (appDataComplete as any)?.projectFolder;
+    const stored =
+      appDataComplete && typeof appDataComplete === 'object'
+        ? (appDataComplete as Record<string, unknown>).projectFolder
+        : undefined;
     if (!stored) {
       return initialState;
     }

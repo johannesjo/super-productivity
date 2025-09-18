@@ -7,7 +7,7 @@ import {
 } from './api';
 import { ProjectState } from '../features/project/project.model';
 import {
-  ProjectFolderTreeState,
+  ProjectFolderState,
   sanitizeProjectFolderState,
 } from '../features/project-folder/store/project-folder.model';
 import { GlobalConfigState } from '../features/config/global-config.model';
@@ -72,7 +72,7 @@ export const CROSS_MODEL_VERSION = 4.2 as const;
 
 export type PfapiAllModelCfg = {
   project: ModelCfg<ProjectState>;
-  projectFolder: ModelCfg<ProjectFolderTreeState>;
+  projectFolder: ModelCfg<ProjectFolderState>;
   globalConfig: ModelCfg<GlobalConfigState>;
   planner: ModelCfg<PlannerState>;
   boards: ModelCfg<BoardsState>;
