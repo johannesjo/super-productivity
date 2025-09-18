@@ -21,6 +21,7 @@ import {
 } from '../layout/store/layout.reducer';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { T } from '../../t.const';
+import { WorkContextService } from '../../features/work-context/work-context.service';
 
 @Component({
   selector: 'mobile-bottom-nav',
@@ -45,6 +46,7 @@ export class MobileBottomNavComponent {
   private readonly _taskViewCustomizerService = inject(TaskViewCustomizerService);
   private readonly _pluginBridge = inject(PluginBridgeService);
   private readonly _store = inject(Store);
+  private readonly _workContextService = inject(WorkContextService);
 
   readonly T = T;
   readonly TODAY_TAG = TODAY_TAG;
@@ -72,6 +74,9 @@ export class MobileBottomNavComponent {
   readonly sidePanelButtons = this._pluginBridge.sidePanelButtons;
   readonly activePluginId = toSignal(this._store.select(selectActivePluginId));
   readonly isShowPluginPanel = toSignal(this._store.select(selectIsShowPluginPanel));
+  readonly hasProjectBacklog = toSignal(
+    this._workContextService.activeWorkContext$.pipe(map((ac) => ac.isEnableBacklog)),
+  );
 
   // Route-based computed properties
   readonly isRouteWithSidePanel = toSignal(

@@ -19,6 +19,7 @@
   <button
     mat-fab
     class="add-task-button"
+    [class.smaller]="hasProjectBacklog()"
     color="primary"
     (click)="showAddTaskBar()"
   >

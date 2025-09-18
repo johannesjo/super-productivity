@@ -69,6 +69,13 @@
       transform: scale(0.95);
     }
 
+    &.smaller {
+      height: 40px;
+      margin-left: 8px;
+      margin-right: 8px;
+      margin-bottom: 0px;
+    }
+
     mat-icon {
       font-size: 28px;
       width: 28px;
