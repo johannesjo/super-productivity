@@ -479,7 +479,7 @@ export const SHEPHERD_STEPS = (
       beforeShowPromise: () => {
         return router.navigate(['']).then(() => {
           // If nav is always visible, skip this step
-          if (layoutService.isShowMobileBottomNav) {
+          if (!layoutService.isShowMobileBottomNav) {
             setTimeout(() => shepherdService.next(), 0);
           }
         });
@@ -487,14 +487,8 @@ export const SHEPHERD_STEPS = (
       text: 'Open the menu (<span class="material-icons">menu</span>)',
       when: {
         show: () => {
-          // If nav is always visible, skip immediately
-          if (layoutService.isShowMobileBottomNav) {
-            setTimeout(() => shepherdService.next(), 0);
-          } else {
-            // For mobile, wait for the burger button to be clicked
-            // TODO better implementation
-            setTimeout(() => shepherdService.next(), 8000);
-          }
+          // TODO better implementation
+          setTimeout(() => shepherdService.next(), 8000);
         },
       },
     },
