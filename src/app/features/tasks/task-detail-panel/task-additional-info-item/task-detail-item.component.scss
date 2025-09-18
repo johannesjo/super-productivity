@@ -46,6 +46,11 @@
 .mat-expansion-panel,
 :host::ng-deep .mat-expansion-panel:not([class*='mat-elevation-z']) {
   box-shadow: var(--task-detail-shadow);
+
+  @include mq(xs, max) {
+    box-shadow: none;
+    border: 1px solid var(--extra-border-color) !important;
+  }
 }
 
 .input-item,
