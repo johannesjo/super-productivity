@@ -1,0 +1,13 @@
+
+### Bug Fixes
+
+* **jira:** fallback to /rest/api/*/search when /search/jql returns error (#5015)
+* make jira fallback less greedy and more specific
+* planning mode button needs to be pressed twice (61133dd), closes #5136
+
+
+### Features
+
+* improve mobile task detail component in bottom panel
+* improve styling for task title wrapper in bottom panel and side panel
+* make snackbar work more nicely on mobile

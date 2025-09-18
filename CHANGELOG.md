@@ -1,3 +1,17 @@
+## [15.0.3](https://github.com/johannesjo/super-productivity/compare/v15.0.2...v15.0.3) (2025-09-18)
+
+### Bug Fixes
+
+- **jira:** fallback to /rest/api/\*/search when /search/jql returns error ([#5015](https://github.com/johannesjo/super-productivity/issues/5015)) ([95a3cf7](https://github.com/johannesjo/super-productivity/commit/95a3cf73c8a21ec06b67fbe9613f269c6fe2f4ae))
+- make jira fallback less greedy and more specific ([bc21f08](https://github.com/johannesjo/super-productivity/commit/bc21f0874f09296adf486e6e97faee46578dbbef))
+- planning mode button needs to be pressed twice ([61133dd](https://github.com/johannesjo/super-productivity/commit/61133dd7208c2fe576f8e8a6b90a4415edcc0a9f)), closes [#5136](https://github.com/johannesjo/super-productivity/issues/5136)
+
+### Features
+
+- improve mobile task detail component in bottom panel ([5a555c1](https://github.com/johannesjo/super-productivity/commit/5a555c1fc25e0f12c257d6a9f20e2c5a1a7ef861))
+- improve styling for task title wrapper in bottom panel and side panel ([e95d44d](https://github.com/johannesjo/super-productivity/commit/e95d44d21298a9f293c38a54048cda54e15a13ae))
+- make snackbar work more nicely on mobile ([7d119c2](https://github.com/johannesjo/super-productivity/commit/7d119c2aa89e681f137ea4eb7ed00f66ab7c916f))
+
 ## [15.0.2](https://github.com/johannesjo/super-productivity/compare/v15.0.1...v15.0.2) (2025-09-18)
 
 ### Bug Fixes
