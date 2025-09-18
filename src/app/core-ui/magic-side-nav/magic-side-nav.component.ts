@@ -2,8 +2,8 @@
 import {
   Component,
   computed,
+  DestroyRef,
   effect,
-  HostListener,
   inject,
   input,
   OnDestroy,
@@ -50,6 +50,7 @@ const MOBILE_NAV_WIDTH = 300;
   animations: magicSideNavAnimations,
 })
 export class MagicSideNavComponent implements OnInit, OnDestroy {
+  private readonly _destroyRef = inject(DestroyRef);
   private readonly _sideNavConfigService = inject(MagicNavConfigService);
   private readonly _taskService = inject(TaskService);
   private readonly _layoutService = inject(LayoutService);
@@ -115,6 +116,11 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
         lsSetItem(LS.NAV_SIDEBAR_WIDTH, width.toString());
       }
     });
+    const resizeListener = (): void => this._checkScreenSize();
+    window.addEventListener('resize', resizeListener);
+    this._destroyRef.onDestroy(() => {
+      window.removeEventListener('resize', resizeListener);
+    });
   }
 
   ngOnDestroy(): void {
@@ -150,11 +156,6 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
       this.isFullMode.set(this.config().fullModeByDefault);
       this.currentWidth.set(this.config().defaultWidth);
     }
-  }
-
-  @HostListener('window:resize')
-  onWindowResize(): void {
-    this._checkScreenSize();
   }
 
   onNavKeyDown(event: KeyboardEvent): void {
