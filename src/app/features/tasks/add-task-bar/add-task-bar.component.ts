@@ -69,6 +69,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ShortSyntaxTag, shortSyntaxToTags } from './short-syntax-to-tags';
 import { DEFAULT_PROJECT_COLOR } from '../../work-context/work-context.const';
 import { Log } from '../../../core/log';
+import { TODAY_TAG } from '../../tag/tag.const';
 
 @Component({
   selector: 'add-task-bar',
@@ -281,6 +282,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
   ngOnInit(): void {
     this._setProjectInitially();
+    this._setTagInitially();
     this._setupDefaultDate();
     this._setupTextParsing();
     this._setupSuggestions();
@@ -304,6 +306,23 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       .subscribe((defaultProject) => {
         if (defaultProject) {
           this.stateService.updateProjectId(defaultProject.id);
+        }
+      });
+  }
+
+  private _setTagInitially(): void {
+    if (this.isNoDefaults()) {
+      return;
+    }
+
+    this._workContextService.activeWorkContext$
+      .pipe(first(), takeUntilDestroyed(this._destroyRef))
+      .subscribe((workContext) => {
+        if (
+          workContext?.type === WorkContextType.TAG &&
+          workContext.id !== TODAY_TAG.id
+        ) {
+          this.stateService.updateTagIds([workContext.id]);
         }
       });
   }
