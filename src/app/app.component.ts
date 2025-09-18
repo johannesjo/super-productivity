@@ -1,14 +1,15 @@
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   computed,
+  DestroyRef,
   effect,
   ElementRef,
   HostBinding,
   HostListener,
   inject,
+  NgZone,
   OnDestroy,
   ViewChild,
 } from '@angular/core';
@@ -52,7 +53,7 @@ import { BannerComponent } from './core/banner/banner/banner.component';
 import { GlobalProgressBarComponent } from './core-ui/global-progress-bar/global-progress-bar.component';
 import { FocusModeOverlayComponent } from './features/focus-mode/focus-mode-overlay/focus-mode-overlay.component';
 import { ShepherdComponent } from './features/shepherd/shepherd.component';
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, DOCUMENT } from '@angular/common';
 import { RightPanelComponent } from './features/right-panel/right-panel.component';
 import { selectIsOverlayShown } from './features/focus-mode/store/focus-mode.selectors';
 import { Store } from '@ngrx/store';
@@ -150,7 +151,9 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   private _syncWrapperService = inject(SyncWrapperService);
   private _projectService = inject(ProjectService);
   private _tagService = inject(TagService);
-  private _cdr = inject(ChangeDetectorRef);
+  private _destroyRef = inject(DestroyRef);
+  private _ngZone = inject(NgZone);
+  private _document = inject(DOCUMENT, { optional: true });
 
   // needs to be imported for initialization
   private _syncSafetyBackupService = inject(SyncSafetyBackupService);
@@ -322,19 +325,6 @@ export class AppComponent implements OnDestroy, AfterViewInit {
         this._initMultiInstanceWarning();
       }
     }
-
-    // prevent page reloads on missed drops
-    document.addEventListener('dragover', (ev) => {
-      ev.preventDefault();
-    });
-  }
-
-  @HostListener('document:keydown', ['$event']) onKeyDown(ev: KeyboardEvent): void {
-    this._shortcutService.handleKeyDown(ev);
-  }
-
-  @HostListener('document:drop', ['$event']) onDrop(ev: DragEvent): void {
-    ev.preventDefault();
   }
 
   @HostListener('document:paste', ['$event']) onPaste(ev: ClipboardEvent): void {
@@ -480,8 +470,37 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    // Trigger change detection to ensure the context menu component gets the element reference
-    this._cdr.detectChanges();
+    this._ngZone.runOutsideAngular(() => {
+      const doc = this._document!;
+      // Handle global document events outside Angular to avoid change detection churn.
+      // - dragover/drop: block the browser's default file-drop navigation.
+      // - keydown: route shortcuts and only re-enter Angular when they matter.
+      // Prevent the browser from treating file drops as navigation events
+      const onDragOver = (ev: DragEvent): void => {
+        ev.preventDefault();
+      };
+
+      // Ensure accidental file drops don’t replace the SPA with the dropped file
+      const onDrop = (ev: DragEvent): void => {
+        ev.preventDefault();
+      };
+
+      const onKeyDown = (ev: KeyboardEvent): void => {
+        this._ngZone.run(() => {
+          void this._shortcutService.handleKeyDown(ev);
+        });
+      };
+
+      doc.addEventListener('dragover', onDragOver, { passive: false });
+      doc.addEventListener('drop', onDrop, { passive: false });
+      doc.addEventListener('keydown', onKeyDown);
+
+      this._destroyRef.onDestroy(() => {
+        doc.removeEventListener('dragover', onDragOver);
+        doc.removeEventListener('drop', onDrop);
+        doc.removeEventListener('keydown', onKeyDown);
+      });
+    });
   }
 
   ngOnDestroy(): void {
