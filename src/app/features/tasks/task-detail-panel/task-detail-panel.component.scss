@@ -31,19 +31,10 @@ progress-bar {
   min-height: var(--bar-height);
   display: flex;
   align-items: center;
-  //position: sticky;
-  //top: 0;
-  padding: 0 var(--s);
-  // NOTE make space for close button
-  padding-right: 50px;
   z-index: 44;
   border-radius: var(--card-border-radius);
   margin: 8px;
   border-bottom: 2px solid var(--c-primary) !important;
-
-  @include mq(xs) {
-    padding: 0 var(--s);
-  }
 
   ::ng-deep textarea {
     border: 2px solid red;
@@ -62,7 +53,6 @@ progress-bar {
   font-weight: bold;
   transform-origin: top center;
   padding: var(--s);
-  padding: 0;
   margin: 0;
   flex-grow: 1;
   margin-top: 4px;
