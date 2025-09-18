@@ -67,7 +67,8 @@ export class SnackService {
 
     const cfg = {
       ...DEFAULT_SNACK_CFG,
-      duration: type === 'ERROR' ? 8000 : DEFAULT_SNACK_CFG.duration,
+      // duration: type === 'ERROR' ? 8000 : DEFAULT_SNACK_CFG.duration,
+      duration: 2222222222222,
       ...config,
       data: {
         ...params,
@@ -90,7 +91,6 @@ export class SnackService {
       default: {
         // Opening snackbar directly without NgZone
         this._ref = this._matSnackBar.openFromComponent(SnackCustomComponent, cfg);
-        this._adjustSnackPos();
         break;
       }
     }
@@ -113,34 +113,5 @@ export class SnackService {
           destroySubs();
         });
     }
-  }
-
-  private _adjustSnackPos(): void {
-    // only relevant on mobile
-    if (window.innerWidth >= 600) {
-      return;
-    }
-
-    const checkExecPosCheck = (): void => {
-      const el: HTMLElement | null = document.querySelector('.mat-mdc-snack-bar-handset');
-
-      if (!el) {
-        return;
-      }
-      if (document.querySelector('add-task-bar.global')) {
-        el.style.marginBottom = '78px';
-      } else if (document.querySelector('.FAB-BTN')) {
-        el.style.marginBottom = '78px';
-      }
-    };
-    setTimeout(() => {
-      checkExecPosCheck();
-    });
-    setTimeout(() => {
-      checkExecPosCheck();
-    }, 60);
-    setTimeout(() => {
-      checkExecPosCheck();
-    }, 180);
   }
 }

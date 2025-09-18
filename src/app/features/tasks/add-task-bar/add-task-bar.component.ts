@@ -16,7 +16,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { MentionConfig, MentionModule, MentionItem } from '../../../ui/mentions';
+import { MentionConfig, MentionItem, MentionModule } from '../../../ui/mentions';
 import { MatInput } from '@angular/material/input';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -70,6 +70,7 @@ import { ShortSyntaxTag, shortSyntaxToTags } from './short-syntax-to-tags';
 import { DEFAULT_PROJECT_COLOR } from '../../work-context/work-context.const';
 import { Log } from '../../../core/log';
 import { TODAY_TAG } from '../../tag/tag.const';
+import { BodyClass } from '../../../app.constants';
 
 @Component({
   selector: 'add-task-bar',
@@ -286,6 +287,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     this._setupDefaultDate();
     this._setupTextParsing();
     this._setupSuggestions();
+
+    document.body.classList.add(BodyClass.isAddTaskBarOpen);
   }
 
   ngAfterViewInit(): void {
@@ -297,6 +300,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   ngOnDestroy(): void {
     window.clearTimeout(this._focusTimeout);
     window.clearTimeout(this._autocompleteTimeout);
+    document.body.classList.remove(BodyClass.isAddTaskBarOpen);
   }
 
   // Setup methods
