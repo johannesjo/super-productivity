@@ -41,6 +41,10 @@ export class LayoutService {
   private _breakPointObserver = inject(BreakpointObserver);
   private _previouslyFocusedElement: HTMLElement | null = null;
 
+  // Signal to trigger sidebar focus
+  private _focusSideNavTrigger = signal(0);
+  readonly focusSideNavTrigger = this._focusSideNavTrigger.asReadonly();
+
   // Observable versions (needed for shepherd)
   readonly isShowAddTaskBar$: Observable<boolean> = this._store$.pipe(
     select(selectIsShowAddTaskBar),
@@ -175,5 +179,10 @@ export class LayoutService {
 
   hideTaskViewCustomizerPanel(): void {
     this._store$.dispatch(hideTaskViewCustomizerPanel());
+  }
+
+  focusSideNav(): void {
+    // Trigger the focus signal - components listening to this signal will handle the focus
+    this._focusSideNavTrigger.update((value) => value + 1);
   }
 }

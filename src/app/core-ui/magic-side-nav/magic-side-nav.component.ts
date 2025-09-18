@@ -116,6 +116,18 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
         lsSetItem(LS.NAV_SIDEBAR_WIDTH, width.toString());
       }
     });
+
+    // Listen for focus trigger from LayoutService
+    effect(() => {
+      const trigger = this._layoutService.focusSideNavTrigger();
+      if (trigger > 0) {
+        // Small delay to ensure DOM is ready
+        window.setTimeout(() => {
+          this.focusFirstNavEntry();
+        });
+      }
+    });
+
     const resizeListener = (): void => this._checkScreenSize();
     window.addEventListener('resize', resizeListener);
     this._destroyRef.onDestroy(() => {
@@ -444,6 +456,18 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
 
   // Public method to focus the first nav entry (for keyboard shortcuts)
   focusFirstNavEntry(): void {
+    if (this.isMobile() && !this.showMobileMenuOverlay()) {
+      this.showMobileMenuOverlay.set(true);
+      setTimeout(() => {
+        this._focusFirstNavElement();
+      });
+      return;
+    }
+
+    this._focusFirstNavElement();
+  }
+
+  private _focusFirstNavElement(): void {
     const focusableElements = this._getFocusableNavElements();
     if (focusableElements.length > 0) {
       focusableElements[0].focus();
