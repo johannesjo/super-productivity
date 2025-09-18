@@ -115,6 +115,17 @@ export class TaskAutoScheduleEffects {
       startFrom = Math.max(now, startToday.getTime());
     }
 
+    // 若当前时间处于 block 内，先将起点推至该 block 结束，避免把任务排到 block 里
+    const bumpOutOfBlocks = (blocks: BlockedBlock[], from: number): number => {
+      for (const b of blocks) {
+        if (from >= b.start && from < b.end) {
+          return b.end;
+        }
+      }
+      return from;
+    };
+    startFrom = bumpOutOfBlocks(blocksToday, startFrom);
+
     const actions: Array<ReturnType<typeof TaskSharedActions.scheduleTaskWithTime>> = [];
     const localBlocked: BlockedBlock[] = [];
     const getCombinedMap = (): any => ({
