@@ -1,3 +1,39 @@
+## [15.0.2](https://github.com/johannesjo/super-productivity/compare/v15.0.1...v15.0.2) (2025-09-18)
+
+### Bug Fixes
+
+- added missing ) ([e731d1a](https://github.com/johannesjo/super-productivity/commit/e731d1af4468cb81da28deb012088ed7958502a6))
+- ai prompts icon ([749752f](https://github.com/johannesjo/super-productivity/commit/749752fcea718c6f6f5590b5a54b34fe6ea2f06b))
+- avoid non critical error ([b426508](https://github.com/johannesjo/super-productivity/commit/b426508662de72bb49951b0910b6a3ff3f75264e))
+- being unable to open detail panel for later today sub task ([4a5c2fd](https://github.com/johannesjo/super-productivity/commit/4a5c2fdf8045c9be3bab3221f25f426c22329cd5))
+- fixed URL sanitization ([56af1fa](https://github.com/johannesjo/super-productivity/commit/56af1fa748b57e0540faa9307ca497e669c2d8ca))
+- **focusMode:** flow time timer only going to 25 minutes ([44e98c0](https://github.com/johannesjo/super-productivity/commit/44e98c05cbc8d8796419be6fed4468cee3dcf23a))
+- make mobile bottom nav work with backlog button ([70f14eb](https://github.com/johannesjo/super-productivity/commit/70f14eb7a6c0ad3600cce6ca175fc1af2c89c5b3)), closes [#5132](https://github.com/johannesjo/super-productivity/issues/5132)
+- **mentions:** resolve TypeScript compilation errors ([7417cd9](https://github.com/johannesjo/super-productivity/commit/7417cd9b6560abf3f7da82a6d8fdd325223a393e))
+- **mentions:** update function signatures to support TextInputElement ([0cf1bc4](https://github.com/johannesjo/super-productivity/commit/0cf1bc4a8d5d1491944cf01e4508439aae29185d))
+- readonly error ([74dacc7](https://github.com/johannesjo/super-productivity/commit/74dacc7dcea6165b5c93a6e56f90737ec7b1d1ee))
+- set current tag as default for add task bar ([493fb71](https://github.com/johannesjo/super-productivity/commit/493fb7138a2d525d8d3c6899eab07bb903211543)), closes [#5124](https://github.com/johannesjo/super-productivity/issues/5124)
+- toggle side nav keyboard shortcut not working ([6411782](https://github.com/johannesjo/super-productivity/commit/6411782b384d550b3773945c674a1bece823584f)), closes [#5115](https://github.com/johannesjo/super-productivity/issues/5115)
+- unable to remove due for today ([15768b2](https://github.com/johannesjo/super-productivity/commit/15768b22940a98ec5b4be72456e4823d084d0e58)), closes [#5092](https://github.com/johannesjo/super-productivity/issues/5092)
+- z-index stuff ([8596133](https://github.com/johannesjo/super-productivity/commit/8596133bb5eba53f2e4abacd4271794930f0a308))
+
+### Features
+
+- add ability to delete single instances of repeated tasks ([6b3675c](https://github.com/johannesjo/super-productivity/commit/6b3675cd611a826e0ca211c9ef11724c7dd9ff90)), closes [#4195](https://github.com/johannesjo/super-productivity/issues/4195)
+- **focusMode:** improve idle handling ([7f34817](https://github.com/johannesjo/super-productivity/commit/7f3481733c5cc8130d6a9e7d335cb2eedc1ab318))
+- improve performance for events ([7a008c9](https://github.com/johannesjo/super-productivity/commit/7a008c933bec24ccb1e07a72cbfb2ddecb56a658))
+- improve tour for desktop ([f60ea2a](https://github.com/johannesjo/super-productivity/commit/f60ea2abc73188ed153fed83d368ac07203e46b7))
+- improvements for new delete repeat instance feature ([3ab879e](https://github.com/johannesjo/super-productivity/commit/3ab879e93ef5148d35702f800926b9434867f5cc))
+- make shepherd tour work better for mobile ([a4a5cfb](https://github.com/johannesjo/super-productivity/commit/a4a5cfb197ffa520ff5fc0939309cf69f9fcc570))
+- simplify layout stuff ([148166b](https://github.com/johannesjo/super-productivity/commit/148166babc07fb34301e4731e9b8b8aaf2d1f719))
+- **task:** handle keyboard shortcuts globally for tasks ([08d9562](https://github.com/johannesjo/super-productivity/commit/08d95626c45ac00f3f287e3933c0c25569cb9052))
+- **task:** handle keyboard shortcuts globally for tasks 2 ([6696c8d](https://github.com/johannesjo/super-productivity/commit/6696c8dd690e9e2c6f5b77e84763195244df90a6))
+- **task:** make task shortcuts work from context menu ([888657e](https://github.com/johannesjo/super-productivity/commit/888657e386072a2761c72181a8854dbd4932762a))
+
+### Performance Improvements
+
+- prevent unnecessary change change detections with high-frequency listeners ([b7eb2f2](https://github.com/johannesjo/super-productivity/commit/b7eb2f24521b9b2cff9c2ce7de2ab4b450b538fa))
+
 ## [15.0.1](https://github.com/johannesjo/super-productivity/compare/v15.0.0...v15.0.1) (2025-09-14)
 
 ### Bug Fixes
