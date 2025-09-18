@@ -33,7 +33,6 @@ import {
   mapTo,
   shareReplay,
   take,
-  tap,
   timeoutWith,
 } from 'rxjs/operators';
 import { JiraIssue, JiraIssueReduced } from './jira-issue.model';
@@ -153,19 +152,20 @@ export class JiraApiService {
       // ),
       catchError((err) => {
         const code = err?.error?.statusCode ?? err?.status ?? err?.error?.status;
-        if (code === 401 || code === 403) return throwError(() => err);
-        // Fallback for Server/DC: /search?jql=...
-        return this._sendRequest$({
-          jiraReqCfg: {
-            pathname: 'search',
-            followAllRedirects: true,
-            query: { jql: searchTermJQL },
-            transform: mapToSearchResultsForJQL,
-          },
-          cfg,
-        });
+        if (code === 404) {
+          // Fallback for Server/DC: /search?jql=...
+          return this._sendRequest$({
+            jiraReqCfg: {
+              pathname: 'search',
+              followAllRedirects: true,
+              query: { jql: searchTermJQL },
+              transform: mapToSearchResultsForJQL,
+            },
+            cfg,
+          });
+        }
+        return throwError(() => err);
       }),
-      tap((v) => IssueLog.log('AAAAA', v)),
     );
   }
 
