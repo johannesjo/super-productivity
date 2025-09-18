@@ -90,7 +90,7 @@ export const appDataValidators: {
   archiveOld: <R>(d: R | ArchiveModel) => validateArchiveModel(d),
   project: <R>(d: R | ProjectState) => _wrapValidate(_validateProject(d), d, true),
   projectFolder: <R>(d: R | ProjectFolderTreeState) =>
-    _wrapValidate(_validateProjectFolder(d), d, true),
+    _wrapValidate(_validateProjectFolder(d), d, false),
   tag: <R>(d: R | TagState) => _wrapValidate(_validateTag(d), d, true),
   simpleCounter: <R>(d: R | SimpleCounterState) =>
     _wrapValidate(_validateSimpleCounter(d), d, true),

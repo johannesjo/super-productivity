@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 import {
   ProjectFolderTreeNode,
   ProjectFolderSummary,
+  sanitizeProjectFolderTree,
 } from './store/project-folder.model';
 import {
   selectAllProjectFolders,
@@ -46,7 +47,7 @@ export class ProjectFolderService {
   }
 
   saveTree(tree: ProjectFolderTreeNode[]): void {
-    this._store.dispatch(updateProjectFolders({ tree: this._sanitize(tree) }));
+    this._store.dispatch(updateProjectFolders({ tree: sanitizeProjectFolderTree(tree) }));
   }
 
   addFolder(title: string, parentId: string | null): void {
@@ -135,7 +136,7 @@ export class ProjectFolderService {
       .select(selectProjectFolderState)
       .pipe(take(1))
       .subscribe((state) => {
-        const nextTree = this._sanitize(updater(state.tree));
+        const nextTree = sanitizeProjectFolderTree(updater(state.tree));
         this._store.dispatch(updateProjectFolders({ tree: nextTree }));
       });
   }
@@ -234,21 +235,5 @@ export class ProjectFolderService {
       }
     }
     return null;
-  }
-
-  private _sanitize(tree: ProjectFolderTreeNode[]): ProjectFolderTreeNode[] {
-    const sanitizeNode = (node: ProjectFolderTreeNode): ProjectFolderTreeNode => {
-      if (node.kind === 'folder') {
-        return {
-          id: node.id,
-          kind: 'folder',
-          title: node.title ?? '',
-          isExpanded: node.isExpanded ?? true,
-          children: this._sanitize(node.children ?? []),
-        };
-      }
-      return { id: node.id, kind: 'project' };
-    };
-    return tree.map(sanitizeNode);
   }
 }

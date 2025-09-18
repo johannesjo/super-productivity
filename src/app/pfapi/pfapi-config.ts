@@ -6,7 +6,10 @@ import {
   PfapiBaseCfg,
 } from './api';
 import { ProjectState } from '../features/project/project.model';
-import { ProjectFolderTreeState } from '../features/project-folder/store/project-folder.model';
+import {
+  ProjectFolderTreeState,
+  sanitizeProjectFolderState,
+} from '../features/project-folder/store/project-folder.model';
 import { GlobalConfigState } from '../features/config/global-config.model';
 import { Reminder } from '../features/reminder/reminder.model';
 import {
@@ -121,7 +124,7 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     defaultData: initialProjectFolderState,
     isMainFileModel: true,
     validate: appDataValidators.projectFolder,
-    repair: fixEntityStateConsistency,
+    repair: sanitizeProjectFolderState,
   },
   tag: {
     defaultData: initialTagState,
