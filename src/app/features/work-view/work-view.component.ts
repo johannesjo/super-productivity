@@ -125,7 +125,7 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
 
   hasDoneTasks = computed(() => this.doneTasks().length > 0);
 
-  isPlanningMode = toSignal(this.planningModeService.isPlanningMode$);
+  isPlanningMode = this.planningModeService.isPlanningMode;
   todayRemainingInProject = toSignal(this.workContextService.todayRemainingInProject$);
   estimateRemainingToday = toSignal(this.workContextService.estimateRemainingToday$);
   workingToday = toSignal(this.workContextService.workingToday$);
