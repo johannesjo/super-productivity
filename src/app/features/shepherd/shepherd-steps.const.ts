@@ -160,6 +160,7 @@ export const SHEPHERD_STEPS = (
       ),
       beforeShowPromise: () => promiseTimeout(200),
     },
+
     {
       title: 'Time Tracking',
       text: '<p>Pressing the play button in the top right corner will start your first time tracking session.</p><p>Time tracking is useful as it allows you to get a better idea on how you spend your time. It will enable you to make better estimates and can improve how you work.</p>',
@@ -281,6 +282,10 @@ export const SHEPHERD_STEPS = (
         ]),
     {
       title: 'The Task Details',
+      attachTo: {
+        element: 'task-detail-panel',
+        on: IS_MOUSE_PRIMARY ? 'left' : 'top',
+      },
       text: `<p>This is the task detail panel. Here you can:</p><ul>
 <li>adjust estimates</li>
 <li>schedule your task</li>
@@ -295,7 +300,7 @@ export const SHEPHERD_STEPS = (
       title: 'Closing the Task Details',
       text: IS_MOUSE_PRIMARY
         ? 'You can close the panel by <em>clicking</em> on the <span class="material-icons">close</span>. Do this now!'
-        : 'You can close the panel by <em>tapping</em> on the <span class="material-icons">close</span>. Do this now!',
+        : 'You can close the panel by <em>tapping</em> on the darker backdrop in the top or dragging the panel handle to the very bottom. Do this now!',
       attachTo: {
         element: '.show-additional-info-btn',
         on: 'bottom',
@@ -424,61 +429,35 @@ export const SHEPHERD_STEPS = (
     {
       id: TourId.Projects,
       title: 'Projects',
-      text: 'If you have lots of tasks, you probably need more than a single task list. One way of creating different lists is by using projects.',
+      text: 'If you have lots of tasks, you probably need more than a single task list. One way of creating different lists is by using projects. You can find projects in the menu (<span class="material-icons">menu</span>).',
       buttons: [{ ...NEXT_BTN, text: 'Good to know!' }],
-    },
-    {
-      title: 'Projects',
-      attachTo: {
-        element: '.tour-burgerTrigger',
-        on: 'bottom',
-      },
-      text: 'Open the menu (<span class="material-icons">menu</span>)',
-      beforeShowPromise: () => {
-        // If nav is always visible, skip this step
-        if (layoutService.isMobileNav()) {
-          setTimeout(() => shepherdService.next(), 0);
-          return Promise.resolve();
-        }
-        return Promise.resolve();
-      },
-      when: {
-        show: () => {
-          // If nav is always visible, skip immediately
-          if (layoutService.isMobileNav()) {
-            setTimeout(() => shepherdService.next(), 0);
-          } else {
-            // For mobile, wait for the burger button to be clicked
-            // We'll use a simple timeout or manual next for now
-            // since the mobile nav opening doesn't have an observable
-            // TODO better implementation
-            setTimeout(() => shepherdService.next(), 8000);
-          }
-        },
-      },
     },
 
     // ------------------------------
-    {
-      id: TourId.IssueProviders,
-      beforeShowPromise: () => router.navigate(['tag/TODAY/tasks']),
-      title: 'Issue Integrations & Calendars',
-      text: 'You can import tasks from a variety of third party tools. To do so click on this icon <span class="material-icons">dashboard_customize</span> in the top right corner.',
-      attachTo: {
-        element: '.tour-issuePanelTrigger',
-        on: 'bottom',
-      },
-      when: nextOnObs(
-        layoutService.isShowIssuePanel$.pipe(filter((v) => !!v)),
-        shepherdService,
-      ),
-    },
-    {
-      id: TourId.IssueProviders,
-      title: 'Issue Integrations & Calendars',
-      text: 'To configure an issue provider or calendar, click on one of the buttons in the panel. But for now, lets continue.',
-      buttons: [{ ...NEXT_BTN, text: 'Alright!' }],
-    },
+    ...(IS_MOUSE_PRIMARY
+      ? [
+          {
+            id: TourId.IssueProviders,
+            beforeShowPromise: () => router.navigate(['tag/TODAY/tasks']),
+            title: 'Issue Integrations & Calendars',
+            text: 'You can import tasks from a variety of third party tools. To do so click on this icon <span class="material-icons">dashboard_customize</span> in the top right corner.',
+            attachTo: {
+              element: '.tour-issuePanelTrigger',
+              on: 'bottom' as any,
+            },
+            when: nextOnObs(
+              layoutService.isShowIssuePanel$.pipe(filter((v) => !!v)),
+              shepherdService,
+            ),
+          },
+          {
+            id: TourId.IssueProviders,
+            title: 'Issue Integrations & Calendars',
+            text: 'To configure an issue provider or calendar, click on one of the buttons in the panel. But for now, lets continue.',
+            buttons: [{ ...NEXT_BTN, text: 'Alright!' }],
+          },
+        ]
+      : []),
 
     // ------------------------------
     {

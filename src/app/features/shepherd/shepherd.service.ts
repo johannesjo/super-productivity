@@ -122,6 +122,10 @@ export class ShepherdService {
     if (!this._Shepherd) {
       throw new Error('Shepherd not loaded');
     }
+    // Prevent multiple initialization of the same tour
+    if (this.tour) {
+      return;
+    }
     const tourObject = new this._Shepherd.Tour({
       defaultStepOptions: {
         scrollTo: false,
