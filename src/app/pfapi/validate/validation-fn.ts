@@ -4,7 +4,7 @@ import {
   TimeTrackingState,
 } from '../../features/time-tracking/time-tracking.model';
 import { ProjectState } from '../../features/project/project.model';
-import { ProjectFolderState } from '../../features/project-folder/store/project-folder.model';
+import { ProjectFolderTreeState } from '../../features/project-folder/store/project-folder.model';
 import { TaskState } from '../../features/tasks/task.model';
 import { createValidate } from 'typia';
 import { TagState } from '../../features/tag/tag.model';
@@ -41,7 +41,7 @@ const _validateTask = createValidate<TaskState>();
 const _validateTaskRepeatCfg = createValidate<TaskRepeatCfgState>();
 const _validateArchive = createValidate<ArchiveModel>();
 const _validateProject = createValidate<ProjectState>();
-const _validateProjectFolder = createValidate<ProjectFolderState>();
+const _validateProjectFolder = createValidate<ProjectFolderTreeState>();
 const _validateTag = createValidate<TagState>();
 const _validateSimpleCounter = createValidate<SimpleCounterState>();
 const _validateNote = createValidate<NoteState>();
@@ -89,7 +89,7 @@ export const appDataValidators: {
   archiveYoung: <R>(d: R | ArchiveModel) => validateArchiveModel(d),
   archiveOld: <R>(d: R | ArchiveModel) => validateArchiveModel(d),
   project: <R>(d: R | ProjectState) => _wrapValidate(_validateProject(d), d, true),
-  projectFolder: <R>(d: R | ProjectFolderState) =>
+  projectFolder: <R>(d: R | ProjectFolderTreeState) =>
     _wrapValidate(_validateProjectFolder(d), d, true),
   tag: <R>(d: R | TagState) => _wrapValidate(_validateTag(d), d, true),
   simpleCounter: <R>(d: R | SimpleCounterState) =>

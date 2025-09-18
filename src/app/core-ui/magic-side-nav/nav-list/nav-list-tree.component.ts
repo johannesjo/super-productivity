@@ -29,10 +29,7 @@ import { MagicNavConfigService } from '../magic-nav-config.service';
 import { T } from '../../../t.const';
 import { WorkContextType } from '../../../features/work-context/work-context.model';
 import { ProjectFolderService } from '../../../features/project-folder/project-folder.service';
-import {
-  ProjectFolder,
-  ProjectFolderRootItem,
-} from '../../../features/project-folder/store/project-folder.model';
+import { ProjectFolderTreeNode } from '../../../features/project-folder/store/project-folder.model';
 import { TagService } from '../../../features/tag/tag.service';
 import { TODAY_TAG } from '../../../features/tag/tag.const';
 
@@ -85,13 +82,7 @@ export class NavListTreeComponent {
   readonly allProjectsExceptInbox = this._navConfigService.allProjectsExceptInbox;
   readonly hasAnyProjects = this._navConfigService.hasAnyProjects;
   readonly hasAnyTags = this._navConfigService.hasAnyTags;
-
-  // Project folder data for expansion state
-  private readonly _projectFolders = toSignal(
-    this._projectFolderService.projectFolders$,
-    { initialValue: [] },
-  );
-  private readonly _rootItemsSig = toSignal(this._projectFolderService.rootItems$, {
+  private readonly _projectFolderTree = toSignal(this._projectFolderService.tree$, {
     initialValue: [],
   });
 
@@ -107,9 +98,6 @@ export class NavListTreeComponent {
     // Initialize and sync treeNodes when item or project folders change
     effect(() => {
       const item = this.item();
-      // Also track _projectFolders to update when folder expansion states change
-      this._projectFolders();
-
       const children = this.hasChildren(item) ? item.children : [];
       const nodes = children.map((child) => this.navItemToTreeNode(child));
       this.treeNodes.set(nodes);
@@ -128,8 +116,9 @@ export class NavListTreeComponent {
     if (isNavGroupItem(navItem) && navItem.isFolder) {
       const children = this.hasChildren(navItem) ? navItem.children : [];
       const folderId = navItem.folderId || navItem.id;
-      const folderData = this._projectFolders().find((f) => f.id === folderId);
-      const isExpanded = folderData?.isExpanded ?? true; // Default to expanded if not found
+      const existing = this._findFolderNode(folderId);
+      const isExpanded =
+        existing?.kind === 'folder' ? (existing.isExpanded ?? true) : true;
 
       return {
         id: folderId,
@@ -161,9 +150,6 @@ export class NavListTreeComponent {
   onTreeUpdated(updatedNodes: TreeNode<NavGroupItem>[]): void {
     this.treeNodes.set(updatedNodes);
 
-    // Check for folder expansion changes and sync them to the project folder service
-    this._syncFolderExpansionStates(updatedNodes);
-
     if (!this._hasPendingDndUpdate) {
       return;
     }
@@ -181,78 +167,25 @@ export class NavListTreeComponent {
     this._hasPendingDndUpdate = true;
   }
 
-  private _syncFolderExpansionStates(nodes: TreeNode<NavGroupItem>[]): void {
-    const syncNode = (node: TreeNode<NavGroupItem>): void => {
-      if (node.isFolder) {
-        const folderId = node.id;
-        const currentFolderData = this._projectFolders().find((f) => f.id === folderId);
-
-        // If the expansion state has changed, update it in the service
-        if (currentFolderData && currentFolderData.isExpanded !== node.expanded) {
-          this._projectFolderService.updateProjectFolder(folderId, {
-            isExpanded: node.expanded,
-          });
+  private _findFolderNode(id: string): ProjectFolderTreeNode | undefined {
+    const traverse = (
+      nodes: ProjectFolderTreeNode[],
+    ): ProjectFolderTreeNode | undefined => {
+      for (const node of nodes) {
+        if (node.kind !== 'folder') {
+          continue;
+        }
+        if (node.id === id) {
+          return node;
+        }
+        const childMatch = traverse(node.children ?? []);
+        if (childMatch) {
+          return childMatch;
         }
       }
-
-      // Recursively check children
-      if (node.children) {
-        node.children.forEach(syncNode);
-      }
+      return undefined;
     };
-
-    nodes.forEach(syncNode);
-  }
-
-  private _persistProjectFolderRelationships(
-    folderProjectMap: Map<string, string[]>,
-    rootItems: ProjectFolderRootItem[],
-    folderParentMap: Map<string, string | null>,
-    orderedFolderIds: string[],
-  ): void {
-    const currentFolders = this._projectFolders();
-    const nextFolderById = new Map<string, ProjectFolder>();
-
-    let didChange = false;
-
-    currentFolders.forEach((folder) => {
-      const nextProjectIds = folderProjectMap.get(folder.id) ?? [];
-      const nextParentId = folderParentMap.has(folder.id)
-        ? (folderParentMap.get(folder.id) ?? null)
-        : folder.parentId;
-      if (!didChange) {
-        didChange =
-          !this._areArraysEqual(folder.projectIds, nextProjectIds) ||
-          folder.parentId !== nextParentId;
-      }
-      nextFolderById.set(folder.id, {
-        ...folder,
-        projectIds: nextProjectIds,
-        parentId: nextParentId,
-      });
-    });
-
-    const orderedFolders: ProjectFolder[] = orderedFolderIds
-      .map((id) => nextFolderById.get(id))
-      .filter((folder): folder is ProjectFolder => !!folder);
-
-    const included = new Set(orderedFolders.map((folder) => folder.id));
-    currentFolders.forEach((folder) => {
-      if (!included.has(folder.id)) {
-        orderedFolders.push(folder);
-      }
-    });
-
-    const layoutChanged = !this._areRootItemsEqual(this._rootItemsSig(), rootItems);
-
-    if (!didChange && !layoutChanged) {
-      return;
-    }
-
-    this._projectFolderService.updateProjectFolderRelationships(
-      orderedFolders,
-      this._dedupeRootItems(rootItems),
-    );
+    return traverse(this._projectFolderTree());
   }
 
   findNavItem(id: string): NavItem | null {
@@ -339,15 +272,15 @@ export class NavListTreeComponent {
   }
 
   private _applyProjectTreeChanges(nodes: TreeNode<NavGroupItem>[]): void {
-    const { folderProjectMap, rootItems, folderParentMap, orderedFolderIds } =
-      this._collectProjectStructure(nodes);
+    const nextTree = this._treeNodesToFolderState(nodes);
+    const currentTree = this._normalizeTreeForCompare(this._projectFolderTree());
+    const normalizedNext = this._normalizeTreeForCompare(nextTree);
 
-    this._persistProjectFolderRelationships(
-      folderProjectMap,
-      rootItems,
-      folderParentMap,
-      orderedFolderIds,
-    );
+    if (JSON.stringify(currentTree) === JSON.stringify(normalizedNext)) {
+      return;
+    }
+
+    this._projectFolderService.saveTree(nextTree);
   }
 
   private _applyTagOrder(nodes: TreeNode<NavGroupItem>[]): void {
@@ -378,69 +311,51 @@ export class NavListTreeComponent {
     this._tagService.updateOrder(reordered);
   }
 
-  private _collectProjectStructure(nodes: TreeNode<NavGroupItem>[]): {
-    folderProjectMap: Map<string, string[]>;
-    rootItems: ProjectFolderRootItem[];
-    folderParentMap: Map<string, string | null>;
-    orderedFolderIds: string[];
-  } {
-    const folderProjectMap = new Map<string, string[]>();
-    const rootItems: ProjectFolderRootItem[] = [];
-    const rootItemKeys = new Set<string>();
-    const folderParentMap = new Map<string, string | null>();
-    const orderedFolderIds: string[] = [];
+  private _treeNodesToFolderState(
+    nodes: TreeNode<NavGroupItem>[],
+  ): ProjectFolderTreeNode[] {
+    return nodes
+      .map((node) => this._nodeToFolderTreeNode(node))
+      .filter((node): node is ProjectFolderTreeNode => !!node);
+  }
 
-    const visit = (
-      node: TreeNode<NavGroupItem>,
-      parentFolderId: string | null,
-      level: number,
-    ): void => {
-      if (node.isFolder) {
-        folderParentMap.set(node.id, parentFolderId);
-        orderedFolderIds.push(node.id);
-        if (level === 0) {
-          const key = `folder:${node.id}`;
-          if (!rootItemKeys.has(key)) {
-            rootItems.push({ type: 'folder', id: node.id });
-            rootItemKeys.add(key);
+  private _nodeToFolderTreeNode(
+    node: TreeNode<NavGroupItem>,
+  ): ProjectFolderTreeNode | null {
+    if (node.isFolder) {
+      const existing = this._findFolderNode(node.id);
+      const children = this._treeNodesToFolderState(node.children ?? []);
+      return {
+        id: node.id,
+        kind: 'folder',
+        title: node.label ?? existing?.title ?? '',
+        isExpanded: node.expanded ?? existing?.isExpanded ?? true,
+        children,
+      };
+    }
+
+    const projectId = this._extractProjectId(node.id);
+    if (!projectId) {
+      return null;
+    }
+
+    return { id: projectId, kind: 'project' };
+  }
+
+  private _normalizeTreeForCompare(
+    nodes: ProjectFolderTreeNode[],
+  ): ProjectFolderTreeNode[] {
+    return nodes.map((node) =>
+      node.kind === 'folder'
+        ? {
+            id: node.id,
+            kind: 'folder',
+            title: node.title ?? '',
+            isExpanded: node.isExpanded ?? true,
+            children: this._normalizeTreeForCompare(node.children ?? []),
           }
-        }
-
-        const childProjects: string[] = [];
-        node.children?.forEach((child) => {
-          if (child.isFolder) {
-            visit(child, node.id, level + 1);
-          } else {
-            const projectId = this._extractProjectId(child.id);
-            if (projectId && !childProjects.includes(projectId)) {
-              childProjects.push(projectId);
-            }
-          }
-        });
-        folderProjectMap.set(node.id, childProjects);
-        return;
-      }
-
-      const projectId = this._extractProjectId(node.id);
-      if (projectId) {
-        if (parentFolderId === null) {
-          const key = `project:${projectId}`;
-          if (!rootItemKeys.has(key)) {
-            rootItems.push({ type: 'project', id: projectId });
-            rootItemKeys.add(key);
-          }
-        }
-      }
-    };
-
-    nodes.forEach((node) => visit(node, null, 0));
-
-    return {
-      folderProjectMap,
-      rootItems,
-      folderParentMap,
-      orderedFolderIds,
-    };
+        : { id: node.id, kind: 'project' },
+    );
   }
 
   private _extractProjectId(nodeId: string): string | null {
@@ -449,34 +364,5 @@ export class NavListTreeComponent {
 
   private _extractTagId(nodeId: string): string | null {
     return nodeId.startsWith('tag-') ? nodeId.replace('tag-', '') : null;
-  }
-
-  private _areArraysEqual(a: string[], b: string[]): boolean {
-    if (a.length !== b.length) {
-      return false;
-    }
-    return a.every((value, index) => value === b[index]);
-  }
-
-  private _areRootItemsEqual(
-    a: ProjectFolderRootItem[],
-    b: ProjectFolderRootItem[],
-  ): boolean {
-    if (a.length !== b.length) {
-      return false;
-    }
-    return a.every(
-      (value, index) => value.type === b[index].type && value.id === b[index].id,
-    );
-  }
-
-  private _dedupeRootItems(items: ProjectFolderRootItem[]): ProjectFolderRootItem[] {
-    const result: ProjectFolderRootItem[] = [];
-    items.forEach((entry) => {
-      if (!result.some((item) => item.type === entry.type && item.id === entry.id)) {
-        result.push(entry);
-      }
-    });
-    return result;
   }
 }

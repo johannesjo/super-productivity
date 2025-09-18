@@ -1,204 +1,254 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { nanoid } from 'nanoid';
+import { map, take } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { map, take, withLatestFrom } from 'rxjs/operators';
-import { ProjectFolder, ProjectFolderRootItem } from './store/project-folder.model';
-import { updateProjectFolders } from './store/project-folder.actions';
+import {
+  ProjectFolderTreeNode,
+  ProjectFolderSummary,
+} from './store/project-folder.model';
 import {
   selectAllProjectFolders,
-  selectRootItems,
+  selectProjectFolderState,
+  selectProjectFolderTree,
 } from './store/project-folder.selectors';
-import { nanoid } from 'nanoid';
+import { updateProjectFolders } from './store/project-folder.actions';
 
-const rootItemEquals = (a: ProjectFolderRootItem, b: ProjectFolderRootItem): boolean =>
-  a.type === b.type && a.id === b.id;
-
-const pushRootItemUnique = (
-  list: ProjectFolderRootItem[],
-  entry: ProjectFolderRootItem,
-): ProjectFolderRootItem[] =>
-  list.some((item) => rootItemEquals(item, entry)) ? list : [...list, entry];
-
-const dedupeRootItems = (items: ProjectFolderRootItem[]): ProjectFolderRootItem[] => {
-  const result: ProjectFolderRootItem[] = [];
-  items.forEach((entry) => {
-    if (!result.some((item) => rootItemEquals(item, entry))) {
-      result.push(entry);
-    }
-  });
-  return result;
-};
-
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class ProjectFolderService {
   private readonly _store = inject(Store);
 
-  readonly projectFolders$: Observable<ProjectFolder[]> = this._store.select(
+  readonly projectFolders$: Observable<ProjectFolderSummary[]> = this._store.select(
     selectAllProjectFolders,
   );
 
-  readonly rootItems$: Observable<ProjectFolderRootItem[]> =
-    this._store.select(selectRootItems);
+  readonly topLevelFolders$: Observable<ProjectFolderSummary[]> =
+    this.projectFolders$.pipe(
+      map((folders) => folders.filter((folder) => !folder.parentId)),
+    );
 
-  readonly topLevelFolders$: Observable<ProjectFolder[]> = this.projectFolders$.pipe(
-    map((folders) => folders.filter((folder) => !folder.parentId)),
+  readonly tree$: Observable<ProjectFolderTreeNode[]> = this._store.select(
+    selectProjectFolderTree,
   );
 
-  getFolderById(id: string): Observable<ProjectFolder | undefined> {
+  getFolderNodeById(id: string): Observable<ProjectFolderTreeNode | undefined> {
+    return this.tree$.pipe(
+      take(1),
+      map((tree) => this._find(tree, id)),
+    );
+  }
+
+  getFolderSummaryById(id: string): Observable<ProjectFolderSummary | undefined> {
     return this.projectFolders$.pipe(
+      take(1),
       map((folders) => folders.find((folder) => folder.id === id)),
     );
   }
 
-  updateProjectFolder(id: string, changes: Partial<ProjectFolder>): void {
-    this.projectFolders$
-      .pipe(take(1), withLatestFrom(this.rootItems$))
-      .subscribe(([folders, rootItems]) => {
-        const updatedFolders = folders.map((folder) =>
-          folder.id === id ? { ...folder, ...changes } : folder,
-        );
-
-        const folderBefore = folders.find((folder) => folder.id === id);
-        let updatedRootItems = [...rootItems];
-        if (changes.parentId !== undefined) {
-          if (changes.parentId) {
-            // moved under a parent -> remove any root entry
-            updatedRootItems = updatedRootItems.filter(
-              (item) => !(item.type === 'folder' && item.id === id),
-            );
-          } else {
-            // moved to root -> add entry
-            updatedRootItems = pushRootItemUnique(updatedRootItems, {
-              type: 'folder',
-              id,
-            });
-          }
-        } else if (!folderBefore?.parentId) {
-          // keep existing entry if already root
-          updatedRootItems = pushRootItemUnique(updatedRootItems, {
-            type: 'folder',
-            id,
-          });
-        }
-
-        this._store.dispatch(
-          updateProjectFolders({
-            projectFolders: updatedFolders,
-            rootItems: dedupeRootItems(updatedRootItems),
-          }),
-        );
-      });
+  saveTree(tree: ProjectFolderTreeNode[]): void {
+    this._store.dispatch(updateProjectFolders({ tree: this._sanitize(tree) }));
   }
 
-  addProjectFolder(folder: Omit<ProjectFolder, 'id' | 'projectIds'>): void {
-    this.projectFolders$
-      .pipe(take(1), withLatestFrom(this.rootItems$))
-      .subscribe(([folders, rootItems]) => {
-        const newFolder: ProjectFolder = {
-          ...folder,
-          id: `folder-${nanoid()}`,
-          projectIds: [],
-        };
-
-        const updatedFolders = [...folders, newFolder];
-        const updatedRootItems = !newFolder.parentId
-          ? pushRootItemUnique(rootItems, { type: 'folder', id: newFolder.id })
-          : [...rootItems];
-
-        this._store.dispatch(
-          updateProjectFolders({
-            projectFolders: updatedFolders,
-            rootItems: updatedRootItems,
-          }),
-        );
-      });
-  }
-
-  deleteProjectFolder(id: string): void {
-    this.projectFolders$
-      .pipe(take(1), withLatestFrom(this.rootItems$))
-      .subscribe(([folders, rootItems]) => {
-        const folderToDelete = folders.find((folder) => folder.id === id);
-        if (!folderToDelete) {
-          return;
-        }
-
-        const childFolders = folders.filter((folder) => folder.parentId === id);
-
-        const updatedFolders = folders
-          .filter((folder) => folder.id !== id)
-          .map((folder) =>
-            folder.parentId === id ? { ...folder, parentId: null } : folder,
-          );
-
-        const replacementEntries: ProjectFolderRootItem[] = [];
-        childFolders.forEach((folder) => {
-          replacementEntries.push({ type: 'folder', id: folder.id });
-        });
-        (folderToDelete.projectIds ?? []).forEach((projectId) => {
-          replacementEntries.push({ type: 'project', id: projectId });
-        });
-
-        let newRootItems: ProjectFolderRootItem[] = [];
-        let replaced = false;
-        rootItems.forEach((entry) => {
-          if (entry.type === 'folder' && entry.id === id) {
-            replacementEntries.forEach((replacement) => {
-              newRootItems = pushRootItemUnique(newRootItems, replacement);
-            });
-            replaced = true;
-          } else {
-            newRootItems = pushRootItemUnique(newRootItems, entry);
-          }
-        });
-
-        if (!replaced) {
-          replacementEntries.forEach((replacement) => {
-            newRootItems = pushRootItemUnique(newRootItems, replacement);
-          });
-        }
-
-        this._store.dispatch(
-          updateProjectFolders({
-            projectFolders: updatedFolders,
-            rootItems: dedupeRootItems(newRootItems),
-          }),
-        );
-      });
-  }
-
-  toggleFolderExpansion(id: string): void {
-    this.projectFolders$.pipe(take(1)).subscribe((folders) => {
-      const folder = folders.find((f) => f.id === id);
-      if (folder) {
-        this.updateProjectFolder(id, { isExpanded: !folder.isExpanded });
-      }
+  addFolder(title: string, parentId: string | null): void {
+    this._mutateTree((tree) => {
+      const newNode: ProjectFolderTreeNode = {
+        id: `folder-${nanoid()}`,
+        kind: 'folder',
+        title,
+        isExpanded: true,
+        children: [],
+      };
+      return this._insertNode(tree, newNode, parentId, undefined);
     });
   }
 
-  loadProjectFolders(
-    folders: ProjectFolder[],
-    rootItems: ProjectFolderRootItem[] = [],
+  updateFolder(
+    id: string,
+    changes: Partial<{ title: string; isExpanded: boolean; parentId: string | null }>,
   ): void {
-    this._store.dispatch(
-      updateProjectFolders({
-        projectFolders: folders,
-        rootItems: dedupeRootItems(rootItems),
-      }),
+    if (changes.parentId !== undefined) {
+      this._mutateTree((tree) => {
+        const removal = this._removeNode(tree, id);
+        if (!removal) {
+          return tree;
+        }
+        const { tree: withoutNode, removed } = removal;
+        if (removed.kind !== 'folder') {
+          return tree;
+        }
+        const updatedNode: ProjectFolderTreeNode = {
+          ...removed,
+          title: changes.title ?? removed.title,
+          isExpanded: changes.isExpanded ?? removed.isExpanded,
+        };
+        return this._insertNode(
+          withoutNode,
+          updatedNode,
+          changes.parentId ?? null,
+          undefined,
+        );
+      });
+      return;
+    }
+
+    this._mutateTree((tree) =>
+      this._mapTree(tree, (node) =>
+        node.id === id && node.kind === 'folder'
+          ? {
+              ...node,
+              title: changes.title ?? node.title,
+              isExpanded: changes.isExpanded ?? node.isExpanded,
+            }
+          : node,
+      ),
     );
   }
 
-  updateProjectFolderRelationships(
-    folders: ProjectFolder[],
-    rootItems: ProjectFolderRootItem[],
-  ): void {
-    this._store.dispatch(
-      updateProjectFolders({
-        projectFolders: folders,
-        rootItems: dedupeRootItems(rootItems),
-      }),
+  toggleFolderExpansion(id: string): void {
+    this._mutateTree((tree) =>
+      this._mapTree(tree, (node) =>
+        node.id === id && node.kind === 'folder'
+          ? { ...node, isExpanded: !(node.isExpanded ?? true) }
+          : node,
+      ),
     );
+  }
+
+  deleteFolder(id: string): void {
+    this._mutateTree((tree) => {
+      const removal = this._removeNode(tree, id);
+      if (!removal) {
+        return tree;
+      }
+      const { tree: withoutNode, removed } = removal;
+      if (removed.kind !== 'folder') {
+        return withoutNode;
+      }
+      return [...(removed.children ?? []), ...withoutNode];
+    });
+  }
+
+  private _mutateTree(
+    updater: (tree: ProjectFolderTreeNode[]) => ProjectFolderTreeNode[],
+  ): void {
+    this._store
+      .select(selectProjectFolderState)
+      .pipe(take(1))
+      .subscribe((state) => {
+        const nextTree = this._sanitize(updater(state.tree));
+        this._store.dispatch(updateProjectFolders({ tree: nextTree }));
+      });
+  }
+
+  private _find(
+    tree: ProjectFolderTreeNode[],
+    id: string,
+  ): ProjectFolderTreeNode | undefined {
+    for (const node of tree) {
+      if (node.id === id) {
+        return node;
+      }
+      if (node.kind === 'folder') {
+        const found = this._find(node.children ?? [], id);
+        if (found) {
+          return found;
+        }
+      }
+    }
+    return undefined;
+  }
+
+  private _mapTree(
+    tree: ProjectFolderTreeNode[],
+    mapFn: (node: ProjectFolderTreeNode) => ProjectFolderTreeNode,
+  ): ProjectFolderTreeNode[] {
+    return tree.map((node) => {
+      const mapped = mapFn(node);
+      if (mapped.kind === 'folder') {
+        return {
+          ...mapped,
+          children: this._mapTree(mapped.children ?? [], mapFn),
+        };
+      }
+      return mapped;
+    });
+  }
+
+  private _insertNode(
+    tree: ProjectFolderTreeNode[],
+    node: ProjectFolderTreeNode,
+    parentId: string | null,
+    index: number | undefined,
+  ): ProjectFolderTreeNode[] {
+    if (!parentId) {
+      const copy = [...tree];
+      if (index === undefined || index < 0 || index > copy.length) {
+        copy.push(node);
+      } else {
+        copy.splice(index, 0, node);
+      }
+      return copy;
+    }
+
+    return tree.map((item) => {
+      if (item.id === parentId && item.kind === 'folder') {
+        const children = item.children ? [...item.children] : [];
+        const filtered = children.filter((child) => child.id !== node.id);
+        if (index === undefined || index < 0 || index > filtered.length) {
+          filtered.push(node);
+        } else {
+          filtered.splice(index, 0, node);
+        }
+        return {
+          ...item,
+          children: filtered,
+        };
+      }
+      if (item.kind === 'folder') {
+        return {
+          ...item,
+          children: this._insertNode(item.children ?? [], node, parentId, index),
+        };
+      }
+      return item;
+    });
+  }
+
+  private _removeNode(
+    tree: ProjectFolderTreeNode[],
+    id: string,
+  ): { tree: ProjectFolderTreeNode[]; removed: ProjectFolderTreeNode } | null {
+    const copy = [...tree];
+    for (let i = 0; i < copy.length; i++) {
+      const node = copy[i];
+      if (node.id === id) {
+        copy.splice(i, 1);
+        return { tree: copy, removed: node };
+      }
+      if (node.kind === 'folder') {
+        const result = this._removeNode(node.children ?? [], id);
+        if (result) {
+          copy[i] = { ...node, children: result.tree };
+          return { tree: copy, removed: result.removed };
+        }
+      }
+    }
+    return null;
+  }
+
+  private _sanitize(tree: ProjectFolderTreeNode[]): ProjectFolderTreeNode[] {
+    const sanitizeNode = (node: ProjectFolderTreeNode): ProjectFolderTreeNode => {
+      if (node.kind === 'folder') {
+        return {
+          id: node.id,
+          kind: 'folder',
+          title: node.title ?? '',
+          isExpanded: node.isExpanded ?? true,
+          children: this._sanitize(node.children ?? []),
+        };
+      }
+      return { id: node.id, kind: 'project' };
+    };
+    return tree.map(sanitizeNode);
   }
 }

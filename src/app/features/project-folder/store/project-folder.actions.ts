@@ -1,7 +1,7 @@
 import { createAction, props } from '@ngrx/store';
-import { ProjectFolder, ProjectFolderRootItem } from './project-folder.model';
+import { ProjectFolderTree } from './project-folder.model';
 
 export const updateProjectFolders = createAction(
   '[ProjectFolder] Update Project Folders',
-  props<{ projectFolders: ProjectFolder[]; rootItems: ProjectFolderRootItem[] }>(),
+  props<{ tree: ProjectFolderTree }>(),
 );

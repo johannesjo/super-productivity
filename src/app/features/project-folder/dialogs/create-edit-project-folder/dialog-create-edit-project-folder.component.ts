@@ -7,13 +7,14 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
 
-import { ProjectFolder } from '../../store/project-folder.model';
+import { ProjectFolderSummary } from '../../store/project-folder.model';
 import { ProjectFolderService } from '../../project-folder.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { T } from '../../../../t.const';
+import { map } from 'rxjs/operators';
 
 export interface DialogCreateEditProjectFolderData {
-  folder?: ProjectFolder;
+  folder?: ProjectFolderSummary;
 }
 
 @Component({
@@ -41,7 +42,9 @@ export class DialogCreateEditProjectFolderComponent {
   private readonly _fb = inject(FormBuilder);
 
   readonly isEdit = !!this.data?.folder;
-  readonly availableFolders$ = this._projectFolderService.topLevelFolders$;
+  readonly availableFolders$ = this._projectFolderService.projectFolders$.pipe(
+    map((folders) => folders.filter((folder) => folder.id !== this.data?.folder?.id)),
+  );
 
   form: FormGroup = this._fb.group({
     title: ['', [Validators.required, Validators.minLength(1)]],
@@ -69,16 +72,12 @@ export class DialogCreateEditProjectFolderComponent {
 
     if (this.isEdit && this.data?.folder) {
       const folder = this.data.folder;
-      this._projectFolderService.updateProjectFolder(folder.id, {
+      this._projectFolderService.updateFolder(folder.id, {
         title: formValue.title,
-        parentId: formValue.parentId,
+        parentId: formValue.parentId ?? null,
       });
     } else {
-      this._projectFolderService.addProjectFolder({
-        title: formValue.title,
-        parentId: formValue.parentId,
-        isExpanded: true,
-      });
+      this._projectFolderService.addFolder(formValue.title, formValue.parentId ?? null);
     }
 
     this._dialogRef.close();

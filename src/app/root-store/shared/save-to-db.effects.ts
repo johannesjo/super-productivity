@@ -17,7 +17,7 @@ import { selectConfigFeatureState } from '../../features/config/store/global-con
 import { selectIssueProviderState } from '../../features/issue/store/issue-provider.selectors';
 import { selectNoteFeatureState } from '../../features/note/store/note.reducer';
 import { selectProjectFeatureState } from '../../features/project/store/project.selectors';
-import { selectProjectFolderFeatureState } from '../../features/project-folder/store/project-folder.selectors';
+import { selectProjectFolderState } from '../../features/project-folder/store/project-folder.selectors';
 import { selectTagFeatureState } from '../../features/tag/store/tag.reducer';
 import { selectPlannerState } from '../../features/planner/store/planner.selectors';
 import { selectSimpleCounterFeatureState } from '../../features/simple-counter/store/simple-counter.reducer';
@@ -61,10 +61,7 @@ export class SaveToDbEffects {
 
   tag$ = this.createSaveEffect(selectTagFeatureState, 'tag');
   project$ = this.createSaveEffect(selectProjectFeatureState, 'project');
-  projectFolder$ = this.createSaveEffect(
-    selectProjectFolderFeatureState,
-    'projectFolder',
-  );
+  projectFolder$ = this.createSaveEffect(selectProjectFolderState, 'projectFolder');
   globalCfg$ = this.createSaveEffect(selectConfigFeatureState, 'globalConfig');
   planner$ = this.createSaveEffect(selectPlannerState, 'planner');
   boards$ = this.createSaveEffect(selectBoardsState, 'boards');

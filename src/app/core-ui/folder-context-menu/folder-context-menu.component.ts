@@ -7,7 +7,7 @@ import { ProjectFolderService } from '../../features/project-folder/project-fold
 import { DialogCreateEditProjectFolderComponent } from '../../features/project-folder/dialogs/create-edit-project-folder/dialog-create-edit-project-folder.component';
 import { MatMenuItem } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
-import { ProjectFolder } from '../../features/project-folder/store/project-folder.model';
+import { ProjectFolderSummary } from '../../features/project-folder/store/project-folder.model';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { T } from '../../t.const';
 
@@ -64,14 +64,14 @@ export class FolderContextMenuComponent {
     });
 
     if (isConfirmed) {
-      this._projectFolderService.deleteProjectFolder(this.folderId);
+      this._projectFolderService.deleteFolder(this.folderId);
     }
   }
 
-  private _loadFolder(folderId: string): Promise<ProjectFolder | undefined> {
+  private _loadFolder(folderId: string): Promise<ProjectFolderSummary | undefined> {
     return new Promise((resolve) => {
       this._projectFolderService
-        .getFolderById(folderId)
+        .getFolderSummaryById(folderId)
         .pipe(take(1))
         .subscribe((folder) => resolve(folder));
     });

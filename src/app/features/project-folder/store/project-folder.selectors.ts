@@ -1,29 +1,46 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { ProjectFolderState } from './project-folder.model';
+import {
+  ProjectFolderState,
+  ProjectFolderTreeNode,
+  ProjectFolderSummary,
+} from './project-folder.model';
 import { projectFolderFeatureKey } from './project-folder.reducer';
 
 export const selectProjectFolderState = createFeatureSelector<ProjectFolderState>(
   projectFolderFeatureKey,
 );
 
-// Export with the name expected by existing code
 export const selectProjectFolderFeatureState = selectProjectFolderState;
 
-export const selectAllProjectFolders = createSelector(selectProjectFolderState, (state) =>
-  state.ids.map((id) => state.entities[id]).filter(Boolean),
+export const selectProjectFolderTree = createSelector(
+  selectProjectFolderState,
+  (state) => state.tree,
 );
 
-export const selectRootItems = createSelector(
-  selectProjectFolderState,
-  (state) => state.rootItems,
-);
+const collectFolders = (
+  nodes: ProjectFolderTreeNode[],
+  parentId: string | null,
+  acc: ProjectFolderSummary[],
+): void => {
+  nodes.forEach((node) => {
+    if (node.kind === 'folder') {
+      acc.push({
+        id: node.id,
+        title: node.title ?? '',
+        parentId,
+        isExpanded: node.isExpanded ?? true,
+      });
+      collectFolders(node.children ?? [], node.id, acc);
+    }
+  });
+};
 
-export const selectProjectFolderEntities = createSelector(
-  selectProjectFolderState,
-  (state) => state.entities,
-);
+export const selectAllProjectFolders = createSelector(selectProjectFolderTree, (tree) => {
+  const result: ProjectFolderSummary[] = [];
+  collectFolders(tree, null, result);
+  return result;
+});
 
-export const selectProjectFolderIds = createSelector(
-  selectProjectFolderState,
-  (state) => state.ids,
+export const selectTopLevelFolders = createSelector(selectProjectFolderTree, (tree) =>
+  tree.filter((node) => node.kind === 'folder'),
 );

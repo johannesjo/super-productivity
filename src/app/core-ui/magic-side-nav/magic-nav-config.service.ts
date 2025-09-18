@@ -7,7 +7,7 @@ import { WorkContextType } from '../../features/work-context/work-context.model'
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { TagService } from '../../features/tag/tag.service';
 import { ProjectFolderService } from '../../features/project-folder/project-folder.service';
-import { ProjectFolder } from '../../features/project-folder/store/project-folder.model';
+import { ProjectFolderTreeNode } from '../../features/project-folder/store/project-folder.model';
 import { ShepherdService } from '../../features/shepherd/shepherd.service';
 import { TourId } from '../../features/shepherd/shepherd-steps.const';
 import { T } from '../../t.const';
@@ -56,11 +56,7 @@ export class MagicNavConfigService {
     this._store.select(selectUnarchivedVisibleProjects),
     { initialValue: [] },
   );
-  private readonly _projectFolders = toSignal(
-    this._projectFolderService.projectFolders$,
-    { initialValue: [] },
-  );
-  private readonly _rootItems = toSignal(this._projectFolderService.rootItems$, {
+  private readonly _projectFolderTree = toSignal(this._projectFolderService.tree$, {
     initialValue: [],
   });
   private readonly _allProjectsExceptInbox = toSignal(
@@ -262,11 +258,17 @@ export class MagicNavConfigService {
 
   // Expose all drop zone ids (projects root + all folders) for DnD connectivity
   readonly allFolderDropListIds = computed<string[]>(() => {
-    const folders = this._projectFolders();
+    const tree = this._projectFolderTree();
     const ids: string[] = ['header-projects', 'list-projects'];
-    for (const f of folders) {
-      ids.push(`header-folder-${f.id}`, `list-folder-${f.id}`);
-    }
+    const collect = (nodes: ProjectFolderTreeNode[]): void => {
+      nodes.forEach((node) => {
+        if (node.kind === 'folder') {
+          ids.push(`header-folder-${node.id}`, `list-folder-${node.id}`);
+          collect(node.children ?? []);
+        }
+      });
+    };
+    collect(tree);
     return ids;
   });
 
@@ -322,28 +324,25 @@ export class MagicNavConfigService {
 
   private _buildProjectItems(): NavItem[] {
     const projects = this._visibleProjects();
-    const projectFolders = this._projectFolders();
-    const rootItems = this._rootItems() ?? [];
     const activeId = this._activeWorkContextId();
-
-    const items: NavItem[] = [];
-    const folderMap = new Map(projectFolders.map((folder) => [folder.id, folder]));
-    const processedFolders = new Set<string>();
+    const projectTree = this._projectFolderTree();
     const processedProjects = new Set<string>();
 
-    const appendProject = (projectId: string): void => {
-      if (processedProjects.has(projectId)) {
-        return;
-      }
-      const project = projects.find((p) => p.id === projectId);
-      if (!project) {
-        return;
-      }
-      if (!this._isProjectsExpanded() && activeId && project.id !== activeId) {
-        return;
-      }
-      items.push({
-        type: 'workContext',
+    const projectMap = new Map(projects.map((project) => [project.id, project]));
+    const showAll = this._isProjectsExpanded() || !activeId;
+
+    const treeItems = this._buildNavItemsFromTree(
+      projectTree,
+      projectMap,
+      processedProjects,
+      activeId,
+      showAll,
+    );
+
+    const fallbackItems = projects
+      .filter((project) => !processedProjects.has(project.id))
+      .map((project) => ({
+        type: 'workContext' as const,
         id: `project-${project.id}`,
         label: project.title,
         icon: project.icon || 'folder_special',
@@ -351,161 +350,72 @@ export class MagicNavConfigService {
         workContext: project,
         workContextType: WorkContextType.PROJECT,
         defaultIcon: project.icon || 'folder_special',
-      });
-      processedProjects.add(projectId);
-    };
+      }));
 
-    const appendFolder = (folderId: string): void => {
-      if (processedFolders.has(folderId)) {
-        return;
-      }
-      const folder = folderMap.get(folderId);
-      if (!folder || folder.parentId) {
-        return;
-      }
-      const folderItems = this._buildProjectFolderItems(
-        folder,
-        projects,
-        projectFolders,
-        activeId,
-        processedProjects,
-      );
-      items.push(...folderItems);
-      processedFolders.add(folderId);
-    };
-
-    if (rootItems.length) {
-      for (const entry of rootItems) {
-        if (entry.type === 'folder') {
-          appendFolder(entry.id);
-        } else if (entry.type === 'project') {
-          appendProject(entry.id);
-        }
-      }
-    }
-
-    // Fallback for any folders or projects missing from layout (e.g., newly created)
-    projectFolders
-      .filter((folder) => !folder.parentId && !processedFolders.has(folder.id))
-      .forEach((folder) => appendFolder(folder.id));
-
-    projects
-      .filter((project) => !processedProjects.has(project.id))
-      .forEach((project) => appendProject(project.id));
-
-    return items;
+    return [...treeItems, ...fallbackItems];
   }
 
-  private _buildProjectFolderItems(
-    folder: ProjectFolder,
-    allProjects: Project[],
-    allFolders: ProjectFolder[],
-    activeId: string | null,
+  private _buildNavItemsFromTree(
+    nodes: ProjectFolderTreeNode[],
+    projectMap: Map<string, Project>,
     processedProjects: Set<string>,
+    activeId: string | null,
+    showAll: boolean,
   ): NavItem[] {
     const items: NavItem[] = [];
 
-    // Get projects in this folder in the correct order
-    const folderProjects =
-      folder.projectIds
-        ?.map((projectId) => allProjects.find((project) => project.id === projectId))
-        .filter((project) => project !== undefined) || [];
-
-    // Get sub-folders in this folder
-    const subFolders = allFolders.filter((f) => f.parentId === folder.id);
-
-    // If collapsed and no active items in this folder, skip it
-    if (!this._isProjectsExpanded() && activeId) {
-      const hasActiveProject = folderProjects.some((p) => p.id === activeId);
-      const hasActiveSubFolder = subFolders.some((f) =>
-        this._folderContainsActiveProject(f, allProjects, allFolders, activeId),
-      );
-
-      if (!hasActiveProject && !hasActiveSubFolder) {
-        return [];
+    nodes.forEach((node) => {
+      if (node.kind === 'project') {
+        const projectId = node.id;
+        if (processedProjects.has(projectId)) {
+          return;
+        }
+        const project = projectMap.get(projectId);
+        if (!project) {
+          return;
+        }
+        if (!showAll && project.id !== activeId) {
+          return;
+        }
+        items.push({
+          type: 'workContext',
+          id: `project-${project.id}`,
+          label: project.title,
+          icon: project.icon || 'folder_special',
+          route: `/project/${project.id}/tasks`,
+          workContext: project,
+          workContextType: WorkContextType.PROJECT,
+          defaultIcon: project.icon || 'folder_special',
+        });
+        processedProjects.add(projectId);
+        return;
       }
-    }
 
-    // Collect items for this folder
-    const folderChildren: NavItem[] = [];
-    const subFolderNavItems: NavItem[] = [];
-
-    // Prepare sub-folders recursively (appended after projects to keep order intuitive)
-    for (const subFolder of subFolders) {
-      const subFolderItems = this._buildProjectFolderItems(
-        subFolder,
-        allProjects,
-        allFolders,
-        activeId,
+      const childItems = this._buildNavItemsFromTree(
+        node.children ?? [],
+        projectMap,
         processedProjects,
+        activeId,
+        showAll,
       );
-      subFolderNavItems.push(...subFolderItems);
-    }
 
-    // Add projects in this folder
-    let filteredProjects = folderProjects;
-    if (!this._isProjectsExpanded() && activeId) {
-      filteredProjects = folderProjects.filter((p) => p.id === activeId);
-    }
-
-    folderProjects.forEach((project) => {
-      if (project) {
-        processedProjects.add(project.id);
+      if (!showAll && childItems.length === 0) {
+        return;
       }
-    });
 
-    const projectItems = filteredProjects.map((project) => ({
-      type: 'workContext' as const,
-      id: `project-${project.id}`,
-      label: project.title,
-      icon: project.icon || 'folder_special',
-      route: `/project/${project.id}/tasks`,
-      workContext: project,
-      workContextType: WorkContextType.PROJECT,
-      defaultIcon: project.icon || 'folder_special',
-    }));
-
-    folderChildren.push(...projectItems);
-    folderChildren.push(...subFolderNavItems);
-
-    // Always add the folder (even if empty) to serve as a drop target
-    items.push({
-      type: 'group',
-      id: folder.id,
-      label: folder.title,
-      icon: folder.isExpanded ? 'expand_more' : 'chevron_right',
-      children: folderChildren,
-      action: () => this._toggleFolderExpansion(folder.id),
-      isFolder: true,
-      folderId: folder.id,
+      items.push({
+        type: 'group',
+        id: node.id,
+        label: node.title ?? '',
+        icon: node.isExpanded ? 'expand_more' : 'chevron_right',
+        children: childItems,
+        action: () => this._projectFolderService.toggleFolderExpansion(node.id),
+        isFolder: true,
+        folderId: node.id,
+      });
     });
 
     return items;
-  }
-
-  private _folderContainsActiveProject(
-    folder: ProjectFolder,
-    allProjects: Project[],
-    allFolders: ProjectFolder[],
-    activeId: string | null,
-  ): boolean {
-    // Check if any project in this folder is active
-    const folderProjects = allProjects.filter((project) =>
-      folder.projectIds?.includes(project.id),
-    );
-    if (folderProjects.some((p) => p.id === activeId)) {
-      return true;
-    }
-
-    // Check sub-folders recursively
-    const subFolders = allFolders.filter((f) => f.parentId === folder.id);
-    return subFolders.some((f) =>
-      this._folderContainsActiveProject(f, allProjects, allFolders, activeId),
-    );
-  }
-
-  private _toggleFolderExpansion(folderId: string): void {
-    this._projectFolderService.toggleFolderExpansion(folderId);
   }
 
   private _buildTagItems(): NavItem[] {
