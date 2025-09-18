@@ -127,7 +127,8 @@
     "plugins:build": "cd packages/plugin-dev && npm run build:all"
   },
   "resolutions": {
-    "sass": "1.32.6"
+    "sass": "1.32.6",
+    "@ctrl/tinycolor": "4.1.0"
   },
   "dependencies": {
     "electron-dl": "^3.5.2",
