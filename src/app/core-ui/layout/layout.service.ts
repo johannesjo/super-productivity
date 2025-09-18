@@ -1,4 +1,4 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import {
   hideAddTaskBar,
   hideIssuePanel,
@@ -18,28 +18,27 @@ import {
   selectIsShowNotes,
   selectIsShowTaskViewCustomizerPanel,
 } from './store/layout.reducer';
-import { filter, map, startWith } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { NavigationEnd, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { IS_MOBILE } from '../../util/is-mobile';
+import { IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
 
-const NAV_ALWAYS_VISIBLE = 600;
-const RIGHT_PANEL_OVER = 720;
-const VERY_BIG_SCREEN = NAV_ALWAYS_VISIBLE;
 const XS_BREAKPOINT = 600;
+const XXXS_BREAKPOINT = 398;
 const XS_MEDIA_QUERY = `(max-width: ${XS_BREAKPOINT}px)`;
 const initialXsMatch =
   typeof window !== 'undefined' ? window.matchMedia(XS_MEDIA_QUERY).matches : false;
-const XXXS_BREAKPOINT = 398;
 
 @Injectable({
   providedIn: 'root',
 })
 export class LayoutService {
   private _store$ = inject<Store<LayoutState>>(Store);
-  private _router = inject(Router);
   private _breakPointObserver = inject(BreakpointObserver);
   private _previouslyFocusedElement: HTMLElement | null = null;
+
+  readonly isShowMobileBottomNav = IS_MOBILE && IS_TOUCH_PRIMARY;
 
   // Signal to trigger sidebar focus
   private _focusSideNavTrigger = signal(0);
@@ -57,20 +56,6 @@ export class LayoutService {
   readonly isScrolled = signal<boolean>(false);
   readonly isShowAddTaskBar = toSignal(this.isShowAddTaskBar$, { initialValue: false });
 
-  readonly isMobileNav = toSignal(
-    this._breakPointObserver
-      .observe([`(min-width: ${NAV_ALWAYS_VISIBLE}px)`])
-      .pipe(map((result) => result.matches)),
-    { initialValue: false },
-  );
-
-  readonly isRightPanelOver = toSignal(
-    this._breakPointObserver
-      .observe([`(min-width: ${RIGHT_PANEL_OVER}px)`])
-      .pipe(map((result) => !result.matches)),
-    { initialValue: false },
-  );
-
   readonly isXs = toSignal(
     this._breakPointObserver
       .observe(XS_MEDIA_QUERY)
@@ -85,41 +70,9 @@ export class LayoutService {
     { initialValue: false },
   );
 
-  // Signals for custom right panel behavior
-  private readonly _isVeryBigScreen = toSignal(
-    this._breakPointObserver
-      .observe([`(min-width: ${VERY_BIG_SCREEN}px)`])
-      .pipe(map((result) => result.matches)),
-    { initialValue: false },
-  );
-
-  private readonly _isWorkViewRoute = toSignal(
-    this._router.events.pipe(
-      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-      map((event) => this._isWorkViewUrl(event.urlAfterRedirects)),
-      startWith(this._isWorkViewUrl(this._router.url)),
-    ),
-    { initialValue: this._isWorkViewUrl(this._router.url) },
-  );
-
-  // Computed signal to determine if right panel should be in overlay mode based on route and screen size
-  readonly shouldRightPanelOverlay = computed(() => {
-    const isWorkView = this._isWorkViewRoute();
-    const isVeryBigScreen = this._isVeryBigScreen();
-    const defaultIsOver = this.isRightPanelOver();
-
-    // For work-view routes, use default responsive behavior
-    if (isWorkView) {
-      return defaultIsOver;
-    }
-
-    // For non-work-view routes: always use overlay mode unless on very big screen
-    return !isVeryBigScreen;
-  });
-
-  private _isWorkViewUrl(url: string): boolean {
-    return url.includes('/active/') || url.includes('/tag/') || url.includes('/project/');
-  }
+  // private _isWorkViewUrl(url: string): boolean {
+  //   return url.includes('/active/') || url.includes('/tag/') || url.includes('/project/');
+  // }
 
   readonly isShowNotes = toSignal(this._store$.pipe(select(selectIsShowNotes)), {
     initialValue: false,

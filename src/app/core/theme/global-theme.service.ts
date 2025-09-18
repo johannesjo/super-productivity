@@ -24,13 +24,14 @@ import { HttpClient } from '@angular/common/http';
 import { LS } from '../persistence/storage-keys.const';
 import { CustomThemeService } from './custom-theme.service';
 import { Log } from '../log';
-import { IS_MOBILE } from '../../util/is-mobile';
+import { LayoutService } from '../../core-ui/layout/layout.service';
 
 export type DarkModeCfg = 'dark' | 'light' | 'system';
 
 @Injectable({ providedIn: 'root' })
 export class GlobalThemeService {
   private document = inject<Document>(DOCUMENT);
+  private _layoutService = inject(LayoutService);
   private _materialCssVarsService = inject(MaterialCssVarsService);
   private _workContextService = inject(WorkContextService);
   private _globalConfigService = inject(GlobalConfigService);
@@ -41,7 +42,6 @@ export class GlobalThemeService {
   private _imexMetaService = inject(ImexViewService);
   private _http = inject(HttpClient);
   private _customThemeService = inject(CustomThemeService);
-  readonly isShowMobileButtonNav = IS_MOBILE && IS_TOUCH_PRIMARY;
 
   darkMode = signal<DarkModeCfg>(
     (localStorage.getItem(LS.DARK_MODE) as DarkModeCfg) || 'system',
@@ -256,7 +256,7 @@ export class GlobalThemeService {
 
     // Add/remove has-mobile-bottom-nav class to body for snack bar positioning
     effect(() => {
-      if (this.isShowMobileButtonNav) {
+      if (this._layoutService.isShowMobileBottomNav) {
         this.document.body.classList.add(BodyClass.hasMobileBottomNav);
       } else {
         this.document.body.classList.remove(BodyClass.hasMobileBottomNav);

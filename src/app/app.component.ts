@@ -165,7 +165,7 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   readonly globalThemeService = inject(GlobalThemeService);
   readonly _store = inject(Store);
   readonly T = T;
-  readonly isShowMobileButtonNav = this.globalThemeService.isShowMobileButtonNav;
+  readonly isShowMobileButtonNav = this.layoutService.isShowMobileBottomNav;
 
   productivityTipTitle: string = productivityTip?.[0] || '';
   productivityTipText: string = productivityTip?.[1] || '';

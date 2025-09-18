@@ -299,10 +299,10 @@ export const SHEPHERD_STEPS = (
     {
       title: 'Closing the Task Details',
       text: IS_MOUSE_PRIMARY
-        ? 'You can close the panel by <em>clicking</em> on the <span class="material-icons">close</span>. Do this now!'
+        ? 'You can close the panel by <em>clicking</em> on the button with the <span class="material-icons">chevron_right</span> icon. Do this now!'
         : 'You can close the panel by <em>tapping</em> on the darker backdrop in the top or dragging the panel handle to the very bottom. Do this now!',
       attachTo: {
-        element: '.show-additional-info-btn',
+        element: '.tour-edge-close-handle',
         on: 'bottom',
       },
       when: nextOnObs(
@@ -451,7 +451,6 @@ export const SHEPHERD_STEPS = (
             ),
           },
           {
-            id: TourId.IssueProviders,
             title: 'Issue Integrations & Calendars',
             text: 'To configure an issue provider or calendar, click on one of the buttons in the panel. But for now, lets continue.',
             buttons: [{ ...NEXT_BTN, text: 'Alright!' }],
@@ -480,7 +479,7 @@ export const SHEPHERD_STEPS = (
       beforeShowPromise: () => {
         return router.navigate(['']).then(() => {
           // If nav is always visible, skip this step
-          if (layoutService.isMobileNav()) {
+          if (layoutService.isShowMobileBottomNav) {
             setTimeout(() => shepherdService.next(), 0);
           }
         });
@@ -489,7 +488,7 @@ export const SHEPHERD_STEPS = (
       when: {
         show: () => {
           // If nav is always visible, skip immediately
-          if (layoutService.isMobileNav()) {
+          if (layoutService.isShowMobileBottomNav) {
             setTimeout(() => shepherdService.next(), 0);
           } else {
             // For mobile, wait for the burger button to be clicked

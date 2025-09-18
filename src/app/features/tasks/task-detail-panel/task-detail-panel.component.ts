@@ -298,7 +298,7 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   });
 
   isSubTaskPanelExpandedInitially = computed(() => {
-    return this.layoutService.isRightPanelOver() || this.isDialogMode();
+    return this.isDialogMode();
   });
 
   showTimeEstimate = computed(() => !this.task().subTasks?.length);
