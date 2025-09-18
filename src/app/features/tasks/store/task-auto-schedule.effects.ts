@@ -81,6 +81,26 @@ export class TaskAutoScheduleEffects {
     }
 
     // 初始 blocked map：基于已排期任务等
+    // Parse custom blocks from schedule config (weekday/weekend)
+    const parseCustomBlocks = (
+      v?: string,
+    ): { startTime: string; endTime: string }[] | undefined => {
+      if (!v) return undefined;
+      const items = v
+        .split(';')
+        .map((s) => s.trim())
+        .filter((s) => s.includes('-'))
+        .map((s) => {
+          const [a, b] = s.split('-').map((x) => x.trim());
+          return a && b ? ({ startTime: a, endTime: b } as const) : null;
+        })
+        .filter((x) => !!x) as { startTime: string; endTime: string }[];
+      return items.length ? items : undefined;
+    };
+
+    const customWeekday = parseCustomBlocks(scheduleCfg?.customBlocksWeekdayStr);
+    const customWeekend = parseCustomBlocks(scheduleCfg?.customBlocksWeekendStr);
+
     const blockedMap = createBlockedBlocksByDayMap(
       (timelineTasks.planned || []) as TaskWithDueTime[],
       repeatCfgsWithStartTime || [],
@@ -97,8 +117,8 @@ export class TaskAutoScheduleEffects {
       scheduleCfg?.isLunchBreakEnabled
         ? { startTime: scheduleCfg.lunchBreakStart, endTime: scheduleCfg.lunchBreakEnd }
         : undefined,
-      undefined,
-      undefined,
+      customWeekday,
+      customWeekend,
       now,
       3,
     );
@@ -124,7 +144,12 @@ export class TaskAutoScheduleEffects {
       }
       return from;
     };
-    startFrom = bumpOutOfBlocks(blocksToday, startFrom);
+    // Repeatedly bump until outside all consecutive blocks
+    for (;;) {
+      const next = bumpOutOfBlocks(blocksToday, startFrom);
+      if (next === startFrom) break;
+      startFrom = next;
+    }
 
     const actions: Array<ReturnType<typeof TaskSharedActions.scheduleTaskWithTime>> = [];
     const localBlocked: BlockedBlock[] = [];
