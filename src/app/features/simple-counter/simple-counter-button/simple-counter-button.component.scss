@@ -22,7 +22,16 @@
   }
 
   .mat-icon {
-    position: relative;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    width: 24px;
+    height: 24px;
     z-index: 2;
 
     :host(.isSuccess) & {
