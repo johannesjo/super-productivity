@@ -1,12 +1,12 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  effect,
   inject,
   input,
   output,
   signal,
 } from '@angular/core';
-// animations removed for simplicity
 import { CommonModule, NgStyle } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
@@ -19,6 +19,14 @@ import { NavItemComponent } from '../nav-item/nav-item.component';
 import { NavItem, NavTreeItem } from '../magic-side-nav.model';
 import { MagicNavConfigService } from '../magic-nav-config.service';
 import { T } from '../../../t.const';
+import {
+  MenuTreeViewFolderNode,
+  MenuTreeViewNode,
+  MenuTreeViewProjectNode,
+  MenuTreeViewTagNode,
+} from '../../../features/menu-tree/store/menu-tree.model';
+import { MenuTreeService } from '../../../features/menu-tree/menu-tree.service';
+import { WorkContextType } from '../../../features/work-context/work-context.model';
 
 @Component({
   selector: 'nav-list-tree',
@@ -40,6 +48,7 @@ import { T } from '../../../t.const';
 })
 export class NavListTreeComponent {
   private readonly _navConfigService = inject(MagicNavConfigService);
+  private readonly _menuTreeService = inject(MenuTreeService);
 
   item = input.required<NavTreeItem>();
   showLabels = input<boolean>(true);
@@ -49,28 +58,172 @@ export class NavListTreeComponent {
   itemClick = output<NavItem>();
 
   readonly T = T;
+  readonly WorkContextType = WorkContextType;
 
   // Access to service methods and data for visibility menu
   readonly allProjectsExceptInbox = this._navConfigService.allProjectsExceptInbox;
 
-  // Convert nav items to tree nodes - using writable signal for bidirectional updates
-  readonly treeNodes = signal<TreeNode<NavItem>[]>([]);
+  readonly treeNodes = signal<TreeNode<MenuTreeViewNode>[]>([]);
+
+  constructor() {
+    effect(() => {
+      const nodes = this.item().tree;
+      this.treeNodes.set(nodes.map((node) => this._toTreeNode(node)));
+    });
+  }
 
   onHeaderClick(): void {
     this.itemClick.emit(this.item());
   }
 
-  onChildClick(child: any): void {
-    this.itemClick.emit(child);
+  onChildClick(node: TreeNode<MenuTreeViewNode>): void {
+    const data = node.data;
+    if (!data) return;
+
+    if (data.kind === 'folder') {
+      this._toggleFolder(node.id);
+      return;
+    }
+
+    if (data.kind === 'project') {
+      this.itemClick.emit(this._toProjectNavItem(data));
+      return;
+    }
+
+    if (data.kind === 'tag') {
+      this.itemClick.emit(this._toTagNavItem(data));
+    }
   }
 
-  onTreeUpdated(updatedNodes: TreeNode<NavItem>[]): void {
+  onTreeUpdated(updatedNodes: TreeNode<MenuTreeViewNode>[]): void {
     this.treeNodes.set(updatedNodes);
+    this._persistCurrentTree();
   }
 
-  onTreeMoved(_instruction?: MoveInstruction): void {}
+  onTreeMoved(_instruction?: MoveInstruction): void {
+    // Intentionally left blank – persistence happens in onTreeUpdated
+  }
 
   toggleProjectVisibility(projectId: string): void {
     this._navConfigService.toggleProjectVisibility(projectId);
+  }
+
+  private _toggleFolder(treeNodeId: string): void {
+    const updated = this._mapTreeNodes(this.treeNodes(), (node) => {
+      if (node.id === treeNodeId) {
+        const isExpanded = !(node.expanded ?? true);
+        return {
+          ...node,
+          expanded: isExpanded,
+          data: node.data?.kind === 'folder' ? { ...node.data, isExpanded } : node.data,
+        };
+      }
+      return node;
+    });
+    this.treeNodes.set(updated);
+    this._persistCurrentTree();
+  }
+
+  private _persistCurrentTree(): void {
+    const viewTree = this._treeNodesToViewNodes(this.treeNodes());
+    if (this.item().id === 'projects') {
+      this._menuTreeService.persistProjectViewTree(viewTree);
+    } else if (this.item().id === 'tags') {
+      this._menuTreeService.persistTagViewTree(viewTree);
+    }
+  }
+
+  private _toTreeNode(node: MenuTreeViewNode): TreeNode<MenuTreeViewNode> {
+    if (node.kind === 'folder') {
+      return {
+        id: `folder-${node.id}`,
+        label: node.name,
+        isFolder: true,
+        expanded: node.isExpanded,
+        data: node,
+        children: node.children.map((child) => this._toTreeNode(child)),
+      } satisfies TreeNode<MenuTreeViewNode>;
+    }
+    if (node.kind === 'project') {
+      return {
+        id: `project-${node.project.id}`,
+        label: node.project.title,
+        isFolder: false,
+        data: node,
+      } satisfies TreeNode<MenuTreeViewNode>;
+    }
+    return {
+      id: `tag-${node.tag.id}`,
+      label: node.tag.title,
+      isFolder: false,
+      data: node,
+    } satisfies TreeNode<MenuTreeViewNode>;
+  }
+
+  private _treeNodesToViewNodes(nodes: TreeNode<MenuTreeViewNode>[]): MenuTreeViewNode[] {
+    return nodes
+      .map((node) => {
+        const data = node.data;
+        if (!data) {
+          return null;
+        }
+        if (data.kind === 'folder') {
+          return {
+            kind: 'folder',
+            id: data.id,
+            name: data.name,
+            isExpanded: node.expanded ?? data.isExpanded,
+            children: this._treeNodesToViewNodes(node.children ?? []),
+          } satisfies MenuTreeViewFolderNode;
+        }
+        if (data.kind === 'project') {
+          return data satisfies MenuTreeViewProjectNode;
+        }
+        return data satisfies MenuTreeViewTagNode;
+      })
+      .filter((node): node is MenuTreeViewNode => node !== null);
+  }
+
+  private _mapTreeNodes(
+    nodes: TreeNode<MenuTreeViewNode>[],
+    updater: (node: TreeNode<MenuTreeViewNode>) => TreeNode<MenuTreeViewNode>,
+  ): TreeNode<MenuTreeViewNode>[] {
+    return nodes.map((node) => {
+      const base: TreeNode<MenuTreeViewNode> = {
+        ...node,
+        children: node.children ? this._mapTreeNodes(node.children, updater) : undefined,
+      };
+      return updater(base);
+    });
+  }
+
+  private _toProjectNavItem(node: MenuTreeViewProjectNode): NavItem {
+    const project = node.project;
+    const icon = project.icon || 'folder_special';
+    return {
+      type: 'workContext',
+      id: `project-${project.id}`,
+      label: project.title,
+      icon,
+      route: `/project/${project.id}/tasks`,
+      workContext: project,
+      workContextType: WorkContextType.PROJECT,
+      defaultIcon: icon,
+    } as NavItem;
+  }
+
+  private _toTagNavItem(node: MenuTreeViewTagNode): NavItem {
+    const tag = node.tag;
+    const icon = tag.icon || 'label';
+    return {
+      type: 'workContext',
+      id: `tag-${tag.id}`,
+      label: tag.title,
+      icon,
+      route: `/tag/${tag.id}/tasks`,
+      workContext: tag,
+      workContextType: WorkContextType.TAG,
+      defaultIcon: icon,
+    } as NavItem;
   }
 }

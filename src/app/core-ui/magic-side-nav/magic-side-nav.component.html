@@ -78,6 +78,20 @@
               [style.margin-top]="item.mtAuto && 'auto'"
             />
           }
+          @case ('tree') {
+            <li
+              class="nav-item has-children"
+              role="listitem"
+            >
+              <nav-list-tree
+                [item]="item"
+                [showLabels]="showText()"
+                [isExpanded]="isGroupExpanded(item)"
+                [activeWorkContextId]="activeWorkContextId()"
+                (itemClick)="onItemClick($event)"
+              ></nav-list-tree>
+            </li>
+          }
           @case ('group') {
             <li
               class="nav-item has-children"

@@ -2,7 +2,7 @@
   <nav-item
     [mode]="'folder'"
     [container]="null"
-    [folderId]="null"
+    [folderId]="item().id"
     [expanded]="isExpanded()"
     [ariaControls]="'group-' + item().id"
     [icon]="item().icon"
@@ -58,39 +58,56 @@
         #treeItem
         let-node
       >
-        <div class="nav-child-item">
-          <nav-item
-            [workContext]="node.data.workContextId"
-            [type]="node.data.workContextType"
-            [defaultIcon]="node.data.icon"
-            [activeWorkContextId]="activeWorkContextId() || ''"
-            [variant]="'nav'"
-            [showLabels]="true"
-            [showMoreButton]="true"
-            (clicked)="onChildClick(node)"
-          ></nav-item>
-        </div>
-      </ng-template>
-
-      <ng-template
-        #treeFolder
-        let-node
-      >
         <div
-          class="nav-child-item folder-item"
-          [class.draggable]="true"
-          [attr.data-folder-id]="node.id"
+          class="nav-child-item"
+          [class.folder-item]="node.data?.kind === 'folder'"
+          [class.draggable]="node.data?.kind !== 'tag'"
+          [attr.data-project-id]="
+            node.data?.kind === 'project' ? node.data.project.id : null
+          "
+          [attr.data-tag-id]="node.data?.kind === 'tag' ? node.data.tag.id : null"
         >
-          <nav-item
-            [mode]="'folder'"
-            [folderId]="node.id || null"
-            [expanded]="node.expanded"
-            [icon]="'folder'"
-            [label]="node.label"
-            [variant]="'nav'"
-            [showLabels]="showLabels()"
-            (clicked)="onChildClick(node)"
-          ></nav-item>
+          @switch (node.data?.kind) {
+            @case ('project') {
+              <nav-item
+                [workContext]="node.data.project"
+                [type]="WorkContextType.PROJECT"
+                [defaultIcon]="node.data.project.icon || 'folder_special'"
+                [activeWorkContextId]="activeWorkContextId() || ''"
+                [variant]="'nav'"
+                [showLabels]="showLabels()"
+                [showMoreButton]="true"
+                (clicked)="onChildClick(node)"
+              ></nav-item>
+            }
+            @case ('tag') {
+              <nav-item
+                [workContext]="node.data.tag"
+                [type]="WorkContextType.TAG"
+                [defaultIcon]="node.data.tag.icon || 'label'"
+                [activeWorkContextId]="activeWorkContextId() || ''"
+                [variant]="'nav'"
+                [showLabels]="showLabels()"
+                [showMoreButton]="true"
+                (clicked)="onChildClick(node)"
+              ></nav-item>
+            }
+            @default {
+              <nav-item
+                [mode]="'folder'"
+                [folderId]="node.data?.kind === 'folder' ? node.data.id : null"
+                [expanded]="
+                  node.expanded ??
+                  (node.data?.kind === 'folder' ? (node.data.isExpanded ?? true) : true)
+                "
+                [icon]="'folder'"
+                [label]="node.data?.kind === 'folder' ? node.data.name : ''"
+                [variant]="'nav'"
+                [showLabels]="showLabels()"
+                (clicked)="onChildClick(node)"
+              ></nav-item>
+            }
+          }
         </div>
       </ng-template>
 

@@ -1,4 +1,4 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { computed, effect, inject, Injectable, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
@@ -21,6 +21,8 @@ import { toggleHideFromMenu } from '../../features/project/store/project.actions
 import { NavConfig, NavItem } from './magic-side-nav.model';
 import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
 import { lsGetBoolean, lsSetItem } from '../../util/ls-util';
+import { MenuTreeService } from '../../features/menu-tree/menu-tree.service';
+import { MenuTreeViewNode } from '../../features/menu-tree/store/menu-tree.model';
 
 @Injectable({
   providedIn: 'root',
@@ -32,6 +34,7 @@ export class MagicNavConfigService {
   private readonly _matDialog = inject(MatDialog);
   private readonly _store = inject(Store);
   private readonly _pluginBridge = inject(PluginBridgeService);
+  private readonly _menuTreeService = inject(MenuTreeService);
 
   // Simple state signals
   private readonly _isProjectsExpanded = signal(
@@ -59,7 +62,29 @@ export class MagicNavConfigService {
   private readonly _tags = toSignal(this._tagService.tagsNoMyDayAndNoList$, {
     initialValue: [],
   });
+  private readonly _projectNavTree = computed<MenuTreeViewNode[]>(() =>
+    this._menuTreeService.buildProjectViewTree(this._visibleProjects()),
+  );
+  private readonly _tagNavTree = computed<MenuTreeViewNode[]>(() =>
+    this._menuTreeService.buildTagViewTree(this._tags()),
+  );
   private readonly _pluginMenuEntries = this._pluginBridge.menuEntries;
+
+  constructor() {
+    effect(() => {
+      const projects = this._visibleProjects();
+      if (projects.length && !this._menuTreeService.hasProjectTree()) {
+        this._menuTreeService.initializeProjectTree(projects);
+      }
+    });
+
+    effect(() => {
+      const tags = this._tags();
+      if (tags.length && !this._menuTreeService.hasTagTree()) {
+        this._menuTreeService.initializeTagTree(tags);
+      }
+    });
+  }
 
   // Main navigation configuration
   readonly navConfig = computed<NavConfig>(() => ({
@@ -106,8 +131,13 @@ export class MagicNavConfigService {
         id: 'projects',
         label: T.MH.PROJECTS,
         icon: 'expand_more',
-        // TODO
-        tree: [],
+        tree:
+          this._projectNavTree().length > 0
+            ? this._projectNavTree()
+            : this._visibleProjects().map((project) => ({
+                kind: 'project',
+                project,
+              })),
         action: () => this._toggleProjectsExpanded(),
         additionalButtons: [
           {
@@ -137,8 +167,13 @@ export class MagicNavConfigService {
         id: 'tags',
         label: T.MH.TAGS,
         icon: 'expand_more',
-        // TODO
-        tree: [],
+        tree:
+          this._tagNavTree().length > 0
+            ? this._tagNavTree()
+            : this._tags().map((tag) => ({
+                kind: 'tag',
+                tag,
+              })),
         action: () => this._toggleTagsExpanded(),
       },
 
