@@ -97,14 +97,18 @@ export class NavListTreeComponent {
   }
 
   // Convert nav items to tree nodes - using writable signal for bidirectional updates
-  readonly treeNodes = signal<TreeNode<NavGroupItem>[]>([]);
+  readonly treeNodes = signal<TreeNode<NavItem>[]>([]);
+  private readonly _navItemLookup = signal<Map<string, NavItem>>(new Map());
 
   constructor() {
     // Initialize and sync treeNodes when item or project folders change
     effect(() => {
       const item = this.item();
       const children = this.hasChildren(item) ? item.children : [];
-      const nodes = children.map((child) => this.navItemToTreeNode(child));
+      const lookup = new Map<string, NavItem>();
+      const nodes = children.map((child) => this.navItemToTreeNode(child, lookup));
+      // Store nav item references per node to avoid repeated tree scans during drag updates
+      this._navItemLookup.set(lookup);
       this.treeNodes.set(nodes);
     });
   }
@@ -116,7 +120,10 @@ export class NavListTreeComponent {
     return this.hasChildren(item) ? item.children.length > 0 : false;
   });
 
-  private navItemToTreeNode(navItem: NavItem): TreeNode<NavGroupItem> {
+  private navItemToTreeNode(
+    navItem: NavItem,
+    lookup: Map<string, NavItem>,
+  ): TreeNode<NavItem> {
     // Handle folders
     if (isNavGroupItem(navItem) && navItem.isFolder) {
       const children = this.hasChildren(navItem) ? navItem.children : [];
@@ -125,22 +132,27 @@ export class NavListTreeComponent {
       const isExpanded =
         existing?.kind === 'folder' ? (existing.isExpanded ?? true) : true;
 
+      lookup.set(folderId, navItem);
       return {
         id: folderId,
         label: navItem.label || '',
         isFolder: true,
         expanded: isExpanded,
-        children: children.map((child) => this.navItemToTreeNode(child)),
-        data: navItem as NavGroupItem,
+        children: children.map((child) => this.navItemToTreeNode(child, lookup)),
+        data: navItem,
       };
     }
 
     // Handle projects/tags
+    const nodeId = navItem.id || '';
+    if (nodeId) {
+      lookup.set(nodeId, navItem);
+    }
     return {
-      id: navItem.id || '',
+      id: nodeId,
       label: navItem.label || '',
       isFolder: false,
-      data: navItem as NavGroupItem,
+      data: navItem,
     };
   }
 
@@ -152,7 +164,7 @@ export class NavListTreeComponent {
     this.itemClick.emit(child);
   }
 
-  onTreeUpdated(updatedNodes: TreeNode<NavGroupItem>[]): void {
+  onTreeUpdated(updatedNodes: TreeNode<NavItem>[]): void {
     this.treeNodes.set(updatedNodes);
 
     if (!this._hasPendingDndUpdate) {
@@ -177,45 +189,32 @@ export class NavListTreeComponent {
   }
 
   findNavItem(id: string): NavItem | null {
-    const search = (items: NavItem[]): NavItem | null => {
-      for (const item of items) {
-        if (item.id === id) return item;
-        if (this.hasChildren(item)) {
-          const children = item.children;
-          const result = search(children);
-          if (result) return result;
-        }
-      }
-      return null;
-    };
-    const item = this.item();
-    const children = this.hasChildren(item) ? item.children : [];
-    return search(children);
+    return this._navItemLookup().get(id) ?? null;
   }
 
   // Helper methods for template
-  getWorkContextFromNode(node: TreeNode<NavGroupItem>): WorkContextCommon | undefined {
-    const navItem = this.findNavItem(node.id);
+  getWorkContextFromNode(node: TreeNode<NavItem>): WorkContextCommon | undefined {
+    const navItem = node.data ?? this.findNavItem(node.id);
     return navItem && isNavWorkContextItem(navItem) ? navItem.workContext : undefined;
   }
 
-  getTypeFromNode(node: TreeNode<NavGroupItem>): WorkContextType | null {
-    const navItem = this.findNavItem(node.id);
+  getTypeFromNode(node: TreeNode<NavItem>): WorkContextType | null {
+    const navItem = node.data ?? this.findNavItem(node.id);
     return navItem && isNavWorkContextItem(navItem) ? navItem.workContextType : null;
   }
 
-  getDefaultIconFromNode(node: TreeNode<NavGroupItem>): string {
-    const navItem = this.findNavItem(node.id);
+  getDefaultIconFromNode(node: TreeNode<NavItem>): string {
+    const navItem = node.data ?? this.findNavItem(node.id);
     return navItem && hasDefaultIcon(navItem) ? navItem.defaultIcon || 'list' : 'list';
   }
 
-  isNodeDraggable(node: TreeNode<NavGroupItem>): boolean {
+  isNodeDraggable(node: TreeNode<NavItem>): boolean {
     const icon = this.getDefaultIconFromNode(node);
     return icon !== 'today' && icon !== 'inbox';
   }
 
-  getNavItemFromNode(node: TreeNode<NavGroupItem>): NavItem {
-    const found = this.findNavItem(node.id);
+  getNavItemFromNode(node: TreeNode<NavItem>): NavItem {
+    const found = node.data ?? this.findNavItem(node.id);
     if (found) return found;
     // Create a fallback NavActionItem for safety
     return {
@@ -254,12 +253,12 @@ export class NavListTreeComponent {
     return (isNavGroupItem(item) && item.isFolder) || item.id === 'projects';
   }
 
-  getProjectId(node: TreeNode<NavGroupItem>): string | undefined {
-    const navItem = this.findNavItem(node.id);
+  getProjectId(node: TreeNode<NavItem>): string | undefined {
+    const navItem = node.data ?? this.findNavItem(node.id);
     return navItem && isNavWorkContextItem(navItem) ? navItem.workContext.id : undefined;
   }
 
-  private _applyProjectTreeChanges(nodes: TreeNode<NavGroupItem>[]): void {
+  private _applyProjectTreeChanges(nodes: TreeNode<NavItem>[]): void {
     const nextTree = this._treeNodesToFolderState(nodes);
     const currentTree = this._normalizeTreeForCompare(this._projectFolderTree());
     const normalizedNext = this._normalizeTreeForCompare(nextTree);
@@ -271,9 +270,9 @@ export class NavListTreeComponent {
     this._projectFolderService.saveTree(nextTree);
   }
 
-  private _applyTagOrder(nodes: TreeNode<NavGroupItem>[]): void {
+  private _applyTagOrder(nodes: TreeNode<NavItem>[]): void {
     const orderedTagIds: string[] = [];
-    const collect = (list: TreeNode<NavGroupItem>[]): void => {
+    const collect = (list: TreeNode<NavItem>[]): void => {
       list.forEach((node) => {
         if (node.isFolder && node.children) {
           collect(node.children);
@@ -299,17 +298,13 @@ export class NavListTreeComponent {
     this._tagService.updateOrder(reordered);
   }
 
-  private _treeNodesToFolderState(
-    nodes: TreeNode<NavGroupItem>[],
-  ): ProjectFolderTreeNode[] {
+  private _treeNodesToFolderState(nodes: TreeNode<NavItem>[]): ProjectFolderTreeNode[] {
     return nodes
       .map((node) => this._nodeToFolderTreeNode(node))
       .filter((node): node is ProjectFolderTreeNode => !!node);
   }
 
-  private _nodeToFolderTreeNode(
-    node: TreeNode<NavGroupItem>,
-  ): ProjectFolderTreeNode | null {
+  private _nodeToFolderTreeNode(node: TreeNode<NavItem>): ProjectFolderTreeNode | null {
     if (node.isFolder) {
       const existing = this._findFolderNode(node.id);
       const children = this._treeNodesToFolderState(node.children ?? []);

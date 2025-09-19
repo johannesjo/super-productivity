@@ -104,6 +104,10 @@ export class TreeDndComponent implements AfterViewInit {
   setOver(id: string, where: DropWhere, on: boolean): void {
     // Track hover state
     this.overMap.update((m) => {
+      const current = m[id]?.[where] ?? false;
+      if (current === on) {
+        return m; // Atlaskit fires multiple hover events per frame; skip no-op updates to avoid needless change detection.
+      }
       const entry = { ...(m[id] ?? {}) };
       entry[where] = on;
       return { ...m, [id]: entry };
@@ -126,14 +130,29 @@ export class TreeDndComponent implements AfterViewInit {
   indicatorTop = signal(0);
   indicatorLeft = signal(0);
   indicatorWidth = signal(0);
+  private treeRootEl: HTMLElement | null = null;
+  private lastIndicatorTarget: { element: HTMLElement; where: DropWhere } | null = null;
 
   onIndicator(evt: { active: boolean; element: HTMLElement; where: DropWhere }): void {
     if (!evt.active) {
       this.indicatorVisible.set(false);
+      this.lastIndicatorTarget = null;
       return;
     }
     // No special-casing: indicator follows active drop target
-    const container = this.host.nativeElement.querySelector('.tree') as HTMLElement;
+    this.treeRootEl ??= this.host.nativeElement.querySelector('.tree') as HTMLElement;
+    const container = this.treeRootEl;
+    if (!container) {
+      return;
+    }
+    const sameTarget =
+      this.lastIndicatorTarget?.element === evt.element &&
+      this.lastIndicatorTarget?.where === evt.where;
+    if (sameTarget && this.indicatorVisible()) {
+      // Skip recomputing layout for repeated pointer move events over the same drop zone
+      return;
+    }
+    this.lastIndicatorTarget = { element: evt.element, where: evt.where };
     const containerRect = container.getBoundingClientRect();
     const elRect = evt.element.getBoundingClientRect();
 
@@ -168,7 +187,9 @@ export class TreeDndComponent implements AfterViewInit {
     this.indicatorTop.set(Math.round(y));
     this.indicatorLeft.set(Math.max(0, Math.round(left)));
     this.indicatorWidth.set(Math.max(0, Math.round(width)));
-    this.indicatorVisible.set(true);
+    if (!this.indicatorVisible()) {
+      this.indicatorVisible.set(true);
+    }
   }
 
   onRootActive(active: boolean): void {
@@ -265,6 +286,7 @@ export class TreeDndComponent implements AfterViewInit {
     this.overMap.set({});
     this.rootOver.set(false);
     this.indicatorVisible.set(false);
+    this.lastIndicatorTarget = null;
   }
 
   private rebuildNodeCache(nodes: TreeNode[]): void {
