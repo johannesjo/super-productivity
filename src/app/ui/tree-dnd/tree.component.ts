@@ -131,12 +131,18 @@ export class TreeDndComponent implements AfterViewInit {
   indicatorLeft = signal(0);
   indicatorWidth = signal(0);
   private treeRootEl: HTMLElement | null = null;
+  private containerRect: DOMRect | null = null;
+  private elementLayoutCache: WeakMap<
+    HTMLElement,
+    { rect: DOMRect; paddingLeft: number }
+  > = new WeakMap();
   private lastIndicatorTarget: { element: HTMLElement; where: DropWhere } | null = null;
 
   onIndicator(evt: { active: boolean; element: HTMLElement; where: DropWhere }): void {
     if (!evt.active) {
       this.indicatorVisible.set(false);
       this.lastIndicatorTarget = null;
+      this.containerRect = null;
       return;
     }
     // No special-casing: indicator follows active drop target
@@ -153,8 +159,20 @@ export class TreeDndComponent implements AfterViewInit {
       return;
     }
     this.lastIndicatorTarget = { element: evt.element, where: evt.where };
-    const containerRect = container.getBoundingClientRect();
-    const elRect = evt.element.getBoundingClientRect();
+    this.containerRect ??= container.getBoundingClientRect();
+    const containerRect = this.containerRect;
+
+    let elementLayout = this.elementLayoutCache.get(evt.element);
+    if (!elementLayout) {
+      const rect = evt.element.getBoundingClientRect();
+      const itemEl = evt.element.closest('.item') as HTMLElement | null;
+      const paddingLeft = itemEl
+        ? parseFloat(getComputedStyle(itemEl).paddingLeft || '0') || 0
+        : 0;
+      elementLayout = { rect, paddingLeft };
+      this.elementLayoutCache.set(evt.element, elementLayout);
+    }
+    const elRect = elementLayout.rect;
 
     // Vertical position: before/after lines snap to top/bottom of the drop zone
     // For inside: draw at the bottom of the row to suggest insertion as first child
@@ -174,8 +192,7 @@ export class TreeDndComponent implements AfterViewInit {
     const itemEl = evt.element.closest('.item') as HTMLElement | null;
     if (itemEl) {
       const itemRect = itemEl.getBoundingClientRect();
-      const computed = getComputedStyle(itemEl);
-      const paddingLeft = parseFloat(computed.paddingLeft || '0') || 0;
+      const paddingLeft = this.elementLayoutCache.get(evt.element)?.paddingLeft ?? 0;
       const extraIndent = evt.where === 'inside' ? this.indent() : 0;
       left = itemRect.left - containerRect.left + paddingLeft + extraIndent;
       width = Math.max(0, containerRect.width - left);
@@ -210,6 +227,11 @@ export class TreeDndComponent implements AfterViewInit {
         onDragStart: ({ source }) => {
           const data = asDragData(source.data);
           if (data) this.draggingId.set(data.id);
+          this.treeRootEl ??= this.host.nativeElement.querySelector(
+            '.tree',
+          ) as HTMLElement;
+          this.containerRect = this.treeRootEl?.getBoundingClientRect() ?? null;
+          this.elementLayoutCache = new WeakMap();
         },
         onDrop: ({ location, source }) => {
           this.draggingId.set(null);
@@ -287,6 +309,8 @@ export class TreeDndComponent implements AfterViewInit {
     this.rootOver.set(false);
     this.indicatorVisible.set(false);
     this.lastIndicatorTarget = null;
+    this.containerRect = null;
+    this.elementLayoutCache = new WeakMap();
   }
 
   private rebuildNodeCache(nodes: TreeNode[]): void {
