@@ -53,13 +53,34 @@
       [indent]="20"
       (updated)="onTreeUpdated($event)"
     >
+      <!-- Template for folder nodes -->
+      <ng-template
+        #treeFolder
+        let-node
+        let-expanded="expanded"
+        let-toggle="toggle"
+      >
+        <div class="nav-child-item folder-item draggable">
+          <nav-item
+            [container]="'action'"
+            [expanded]="expanded"
+            [icon]="expanded ? 'folder_open' : 'folder'"
+            [label]="node.data?.kind === 'folder' ? node.data.name : node.label"
+            [variant]="'nav'"
+            [showLabels]="showLabels()"
+            [showMoreButton]="false"
+            (clicked)="onChildClick(node)"
+          ></nav-item>
+        </div>
+      </ng-template>
+
+      <!-- Template for item nodes (projects and tags) -->
       <ng-template
         #treeItem
         let-node
       >
         <div
           class="nav-child-item"
-          [class.folder-item]="node.data?.kind === 'folder'"
           [class.draggable]="node.data?.kind !== 'tag'"
           [attr.data-project-id]="
             node.data?.kind === 'project' ? node.data.project.id : null
@@ -88,21 +109,6 @@
                 [variant]="'nav'"
                 [showLabels]="showLabels()"
                 [showMoreButton]="true"
-                (clicked)="onChildClick(node)"
-              ></nav-item>
-            }
-            @default {
-              <nav-item
-                [mode]="'folder'"
-                [folderId]="node.data?.kind === 'folder' ? node.data.id : null"
-                [expanded]="
-                  node.expanded ??
-                  (node.data?.kind === 'folder' ? (node.data.isExpanded ?? true) : true)
-                "
-                [icon]="'folder'"
-                [label]="node.data?.kind === 'folder' ? node.data.name : ''"
-                [variant]="'nav'"
-                [showLabels]="showLabels()"
                 (clicked)="onChildClick(node)"
               ></nav-item>
             }

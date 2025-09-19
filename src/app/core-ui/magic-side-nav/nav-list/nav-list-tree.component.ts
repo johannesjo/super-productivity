@@ -43,7 +43,7 @@ import { WorkContextType } from '../../../features/work-context/work-context.mod
     NavItemComponent,
   ],
   templateUrl: './nav-list-tree.component.html',
-  styleUrls: ['./nav-list-tree.component.scss', './nav-list.component.scss'],
+  styleUrls: ['./nav-list-tree.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NavListTreeComponent {
