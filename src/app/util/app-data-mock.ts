@@ -7,9 +7,9 @@ export const createAppDataCompleteMock = (): AppDataCompleteNew => ({
   project: {
     ...createEmptyEntity(),
   },
-  projectFolder: {
-    ...createEmptyEntity(),
-    rootItems: [],
+  menuTree: {
+    tagTree: [],
+    projectTree: [],
   },
   globalConfig: DEFAULT_GLOBAL_CONFIG,
 

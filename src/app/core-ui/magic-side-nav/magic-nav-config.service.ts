@@ -71,6 +71,7 @@ export class MagicNavConfigService {
   private readonly _pluginMenuEntries = this._pluginBridge.menuEntries;
 
   constructor() {
+    // TODO these should probably live in the _menuTreeService
     effect(() => {
       const projects = this._visibleProjects();
       if (projects.length && !this._menuTreeService.hasProjectTree()) {
@@ -78,6 +79,7 @@ export class MagicNavConfigService {
       }
     });
 
+    // TODO these should probably live in the _menuTreeService
     effect(() => {
       const tags = this._tags();
       if (tags.length && !this._menuTreeService.hasTagTree()) {
@@ -375,10 +377,24 @@ export class MagicNavConfigService {
   }
 
   private _openCreateProjectFolder(): void {
-    // TODO properly implement folder creation via DialogPromptComponent
-    this._matDialog.open(DialogPromptComponent, {
-      restoreFocus: true,
-    });
+    this._matDialog
+      .open(DialogPromptComponent, {
+        restoreFocus: true,
+        data: {
+          placeholder: T.F.PROJECT_FOLDER.DIALOG.NAME_PLACEHOLDER,
+        },
+      })
+      .afterClosed()
+      .subscribe((title) => {
+        if (!title) {
+          return;
+        }
+        const trimmed = title.trim();
+        if (!trimmed) {
+          return;
+        }
+        this._menuTreeService.createProjectFolder(trimmed);
+      });
   }
 
   private _createNewTag(): void {

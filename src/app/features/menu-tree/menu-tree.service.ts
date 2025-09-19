@@ -111,6 +111,29 @@ export class MenuTreeService {
     this.setTagTree(stored);
   }
 
+  createProjectFolder(name: string, parentFolderId?: string | null): void {
+    const trimmed = name.trim();
+    if (!trimmed) {
+      return;
+    }
+
+    const newFolder: MenuTreeFolderNode = {
+      kind: 'folder',
+      id: this._createFolderId(),
+      name: trimmed,
+      isExpanded: true,
+      children: [],
+    };
+
+    const currentTree = this.projectTree();
+    const nextTree = this._insertFolderNode(
+      currentTree,
+      newFolder,
+      parentFolderId ?? null,
+    );
+    this.setProjectTree(nextTree);
+  }
+
   private _buildViewTree<T extends { id: string }>(options: {
     storedTree: MenuTreeTreeNode[];
     items: T[];
@@ -127,9 +150,6 @@ export class MenuTreeService {
         const children = node.children
           .map((child) => mapNode(child))
           .filter((child): child is MenuTreeViewNode => child !== null);
-        if (children.length === 0) {
-          return null;
-        }
         return {
           kind: 'folder',
           id: node.id,
@@ -184,9 +204,6 @@ export class MenuTreeService {
         const children = node.children
           .map((child) => mapNode(child))
           .filter((child): child is MenuTreeTreeNode => child !== null);
-        if (!children.length) {
-          return null;
-        }
         return {
           kind: 'folder',
           id: node.id,
@@ -234,5 +251,61 @@ export class MenuTreeService {
     };
     walk(nodes);
     return result;
+  }
+
+  private _insertFolderNode(
+    tree: MenuTreeTreeNode[],
+    folder: MenuTreeFolderNode,
+    parentId: string | null,
+  ): MenuTreeTreeNode[] {
+    const cloned = this._cloneTree(tree);
+    if (!parentId) {
+      return [...cloned, folder];
+    }
+
+    const target = this._findFolder(cloned, parentId);
+    if (!target) {
+      return [...cloned, folder];
+    }
+
+    target.children = [...target.children, folder];
+    target.isExpanded = true;
+    return cloned;
+  }
+
+  private _cloneTree(tree: MenuTreeTreeNode[]): MenuTreeTreeNode[] {
+    return tree.map((node) =>
+      node.kind === 'folder'
+        ? {
+            kind: 'folder',
+            id: node.id,
+            name: node.name,
+            isExpanded: node.isExpanded,
+            children: this._cloneTree(node.children),
+          }
+        : { ...node },
+    );
+  }
+
+  private _findFolder(tree: MenuTreeTreeNode[], id: string): MenuTreeFolderNode | null {
+    for (const node of tree) {
+      if (node.kind === 'folder') {
+        if (node.id === id) {
+          return node;
+        }
+        const childMatch = this._findFolder(node.children, id);
+        if (childMatch) {
+          return childMatch;
+        }
+      }
+    }
+    return null;
+  }
+
+  private _createFolderId(): string {
+    if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+      return crypto.randomUUID();
+    }
+    return `folder-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   }
 }
