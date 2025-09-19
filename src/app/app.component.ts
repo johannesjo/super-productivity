@@ -239,7 +239,8 @@ export class AppComponent implements OnDestroy, AfterViewInit {
       // init offline banner in lack of a better place for it
       this._initOfflineBanner();
 
-      if (this._globalConfigService.misc()?.isShowTipLonger) {
+      const miscCfg = this._globalConfigService.misc();
+      if (!miscCfg?.isDisableProductivityTips) {
         this._snackService.open({
           ico: 'lightbulb',
           config: {
@@ -250,6 +251,12 @@ export class AppComponent implements OnDestroy, AfterViewInit {
             w.productivityTips![w.randomIndex!][0] +
             ':</strong> ' +
             w.productivityTips![w.randomIndex!][1],
+          actionStr: T.G.DONT_SHOW_AGAIN,
+          actionFn: () => {
+            this._globalConfigService.updateSection('misc', {
+              isDisableProductivityTips: true,
+            });
+          },
         });
       }
 
