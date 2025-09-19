@@ -210,7 +210,7 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
   }
 
   onItemClick(item: NavItem): void {
-    if (item.type === 'group') {
+    if (item.type === 'tree') {
       // All groups now handled consistently through service
       if (item.action) {
         item.action();

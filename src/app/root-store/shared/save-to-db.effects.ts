@@ -17,7 +17,6 @@ import { selectConfigFeatureState } from '../../features/config/store/global-con
 import { selectIssueProviderState } from '../../features/issue/store/issue-provider.selectors';
 import { selectNoteFeatureState } from '../../features/note/store/note.reducer';
 import { selectProjectFeatureState } from '../../features/project/store/project.selectors';
-import { selectProjectFolderState } from '../../features/project-folder/store/project-folder.selectors';
 import { selectTagFeatureState } from '../../features/tag/store/tag.reducer';
 import { selectPlannerState } from '../../features/planner/store/planner.selectors';
 import { selectSimpleCounterFeatureState } from '../../features/simple-counter/store/simple-counter.reducer';
@@ -44,6 +43,7 @@ import { loadAllData } from '../meta/load-all-data.action';
 import { clearHiddenImprovements } from '../../features/metric/improvement/store/improvement.actions';
 import { selectTaskRepeatCfgFeatureState } from '../../features/task-repeat-cfg/store/task-repeat-cfg.selectors';
 import { Log } from '../../core/log';
+import { selectMenuTreeState } from '../../features/menu-tree/store/menu-tree.selectors';
 
 const ALWAYS_IGNORED_ACTIONS = [loadAllData.type];
 
@@ -61,7 +61,7 @@ export class SaveToDbEffects {
 
   tag$ = this.createSaveEffect(selectTagFeatureState, 'tag');
   project$ = this.createSaveEffect(selectProjectFeatureState, 'project');
-  projectFolder$ = this.createSaveEffect(selectProjectFolderState, 'projectFolder');
+  menuTree$ = this.createSaveEffect(selectMenuTreeState, 'menuTree');
   globalCfg$ = this.createSaveEffect(selectConfigFeatureState, 'globalConfig');
   planner$ = this.createSaveEffect(selectPlannerState, 'planner');
   boards$ = this.createSaveEffect(selectBoardsState, 'boards');

@@ -14,11 +14,11 @@ import { NoteState } from '../../features/note/note.model';
 import { PlannerState } from '../../features/planner/store/planner.reducer';
 import { IssueProviderState } from '../../features/issue/issue.model';
 import { BoardsState } from '../../features/boards/store/boards.reducer';
-import { ProjectFolderState } from '../../features/project-folder/store/project-folder.model';
+import { MenuTreeState } from '../../features/menu-tree/store/menu-tree.model';
 
 export interface AppBaseWithoutLastSyncModelChange {
   project: ProjectState;
-  projectFolder: ProjectFolderState;
+  menuTree: MenuTreeState;
   globalConfig: GlobalConfigState;
   reminders: Reminder[];
   planner: PlannerState;

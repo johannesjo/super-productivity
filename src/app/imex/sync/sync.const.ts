@@ -15,7 +15,7 @@ import { plannerInitialState } from '../../features/planner/store/planner.reduce
 import { GlobalConfigState } from '../../features/config/global-config.model';
 import { issueProviderInitialState } from '../../features/issue/store/issue-provider.reducer';
 import { initialBoardsState } from '../../features/boards/store/boards.reducer';
-import { initialState as projectFolderInitialState } from '../../features/project-folder/store/project-folder.reducer';
+import { menuTreeInitialState } from '../../features/menu-tree/store/menu-tree.reducer';
 
 export const SYNC_INITIAL_SYNC_TRIGGER = 'INITIAL_SYNC_TRIGGER';
 export const SYNC_DEFAULT_AUDIT_TIME = 10000;
@@ -27,7 +27,7 @@ export const SYNC_MIN_INTERVAL = 5000;
 
 export const DEFAULT_APP_BASE_DATA: AppBaseData = {
   project: initialProjectState,
-  projectFolder: projectFolderInitialState,
+  menuTree: menuTreeInitialState,
   archivedProjects: {},
   globalConfig: initialGlobalConfigState,
   reminders: [],

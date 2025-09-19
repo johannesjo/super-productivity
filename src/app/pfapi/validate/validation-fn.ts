@@ -4,7 +4,7 @@ import {
   TimeTrackingState,
 } from '../../features/time-tracking/time-tracking.model';
 import { ProjectState } from '../../features/project/project.model';
-import { ProjectFolderState } from '../../features/project-folder/store/project-folder.model';
+import { MenuTreeState } from '../../features/menu-tree/store/menu-tree.model';
 import { TaskState } from '../../features/tasks/task.model';
 import { createValidate } from 'typia';
 import { TagState } from '../../features/tag/tag.model';
@@ -23,9 +23,9 @@ import { AppDataCompleteNew } from '../pfapi-config';
 import { ValidationResult } from '../api/pfapi.model';
 import { PFLog } from '../../core/log';
 import {
-  PluginUserDataState,
   PluginMetaDataState,
-} from '../../plugins/plugin-persistence.model';
+  PluginUserDataState,
+} from '../../plugins/plugin-persistence.model'; // for more speed
 
 // for more speed
 // type DataToValidate = Omit<AppDataCompleteNew, 'archiveOld' | 'archiveYoung'>;
@@ -41,7 +41,7 @@ const _validateTask = createValidate<TaskState>();
 const _validateTaskRepeatCfg = createValidate<TaskRepeatCfgState>();
 const _validateArchive = createValidate<ArchiveModel>();
 const _validateProject = createValidate<ProjectState>();
-const _validateProjectFolder = createValidate<ProjectFolderState>();
+const _validateMenuTree = createValidate<MenuTreeState>();
 const _validateTag = createValidate<TagState>();
 const _validateSimpleCounter = createValidate<SimpleCounterState>();
 const _validateNote = createValidate<NoteState>();
@@ -89,8 +89,7 @@ export const appDataValidators: {
   archiveYoung: <R>(d: R | ArchiveModel) => validateArchiveModel(d),
   archiveOld: <R>(d: R | ArchiveModel) => validateArchiveModel(d),
   project: <R>(d: R | ProjectState) => _wrapValidate(_validateProject(d), d, true),
-  projectFolder: <R>(d: R | ProjectFolderState) =>
-    _wrapValidate(_validateProjectFolder(d), d, false),
+  menuTree: <R>(d: R | MenuTreeState) => _wrapValidate(_validateMenuTree(d), d, false),
   tag: <R>(d: R | TagState) => _wrapValidate(_validateTag(d), d, true),
   simpleCounter: <R>(d: R | SimpleCounterState) =>
     _wrapValidate(_validateSimpleCounter(d), d, true),

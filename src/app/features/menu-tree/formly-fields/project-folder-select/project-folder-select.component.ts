@@ -1,7 +1,7 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FieldType, FieldTypeConfig } from '@ngx-formly/core';
 import { CommonModule } from '@angular/common';
-import { ProjectFolderService } from '../../project-folder.service';
+import { MenuTreeService } from '../../project-folder.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
@@ -40,7 +40,7 @@ import { T } from '../../../../t.const';
     TranslateModule,
   ],
 })
-export class ProjectFolderSelectComponent extends FieldType<FieldTypeConfig> {
-  readonly projectFolderService = inject(ProjectFolderService);
+export class MenuTreeSelectComponent extends FieldType<FieldTypeConfig> {
+  readonly projectFolderService = inject(MenuTreeService);
   readonly T = T;
 }

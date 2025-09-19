@@ -1,14 +1,8 @@
-<div
-  class="g-multi-btn-wrapper"
-  [class.folder-header-drop-zone]="isHeaderDropZone()"
-  [attr.data-drop-zone]="
-    isHeaderDropZone() ? (item().isFolder ? item().folderId : 'projects') : null
-  "
->
+<div class="g-multi-btn-wrapper">
   <nav-item
-    [mode]="item().isFolder ? 'folder' : 'row'"
-    [container]="item().isFolder ? null : 'group'"
-    [folderId]="item().isFolder ? item().folderId || null : null"
+    [mode]="'folder'"
+    [container]="null"
+    [folderId]="null"
     [expanded]="isExpanded()"
     [ariaControls]="'group-' + item().id"
     [icon]="item().icon"
@@ -48,10 +42,9 @@
   }
 </div>
 
-@if (isExpanded() && itemHasChildren()) {
+@if (isExpanded()) {
   <div
     class="nav-children"
-    [attr.id]="'group-' + item().id"
     role="list"
     draggable="false"
   >
@@ -65,20 +58,16 @@
         #treeItem
         let-node
       >
-        <div
-          class="nav-child-item"
-          [class.draggable]="isNodeDraggable(node)"
-          [attr.data-project-id]="getProjectId(node)"
-        >
+        <div class="nav-child-item">
           <nav-item
-            [workContext]="getWorkContextFromNode(node)"
-            [type]="getTypeFromNode(node)"
-            [defaultIcon]="getDefaultIconFromNode(node)"
+            [workContext]="node.data.workContextId"
+            [type]="node.data.workContextType"
+            [defaultIcon]="node.data.icon"
             [activeWorkContextId]="activeWorkContextId() || ''"
             [variant]="'nav'"
             [showLabels]="true"
             [showMoreButton]="true"
-            (clicked)="onChildClick(getNavItemFromNode(node))"
+            (clicked)="onChildClick(node)"
           ></nav-item>
         </div>
       </ng-template>
@@ -100,7 +89,7 @@
             [label]="node.label"
             [variant]="'nav'"
             [showLabels]="showLabels()"
-            (clicked)="onChildClick(getNavItemFromNode(node))"
+            (clicked)="onChildClick(node)"
           ></nav-item>
         </div>
       </ng-template>

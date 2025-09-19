@@ -2,6 +2,7 @@ import {
   WorkContextCommon,
   WorkContextType,
 } from '../../features/work-context/work-context.model';
+import { MenuTreeTreeNode } from '../../features/menu-tree/store/menu-tree.model';
 
 export type NavItem =
   | NavSeparatorItem
@@ -9,7 +10,7 @@ export type NavItem =
   | NavRouteItem
   | NavHrefItem
   | NavActionItem
-  | NavGroupItem
+  | NavTreeItem
   | NavMenuItem
   | NavPluginItem;
 
@@ -65,18 +66,15 @@ export interface NavContextItem {
   action?: () => void;
 }
 
-export interface NavGroupItem extends NavBaseItem {
-  type: 'group';
+export interface NavTreeItem extends NavBaseItem {
+  type: 'tree';
   label: string;
   icon: string;
-  children: NavItem[];
   additionalButtons?: NavAdditionalButton[];
   contextMenuItems?: NavContextItem[];
   action?: () => void; // optional external toggle logic
   // Indicates this group represents a project folder
-  isFolder?: boolean;
-  // Raw folder id if this is a folder group
-  folderId?: string;
+  tree: MenuTreeTreeNode[];
 }
 
 export interface NavMenuItem extends NavBaseItem {

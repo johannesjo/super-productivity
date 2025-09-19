@@ -6,14 +6,11 @@ import { MatDialog } from '@angular/material/dialog';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { TagService } from '../../features/tag/tag.service';
-import { ProjectFolderService } from '../../features/project-folder/project-folder.service';
-import { ProjectFolderTreeNode } from '../../features/project-folder/store/project-folder.model';
 import { ShepherdService } from '../../features/shepherd/shepherd.service';
 import { TourId } from '../../features/shepherd/shepherd-steps.const';
 import { T } from '../../t.const';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { DialogCreateProjectComponent } from '../../features/project/dialogs/create-project/dialog-create-project.component';
-import { DialogCreateEditProjectFolderComponent } from '../../features/project-folder/dialogs/create-edit-project-folder/dialog-create-edit-project-folder.component';
 import { getGithubErrorUrl } from '../../core/error-handler/global-error-handler.util';
 import { DialogPromptComponent } from '../../ui/dialog-prompt/dialog-prompt.component';
 import {
@@ -21,7 +18,6 @@ import {
   selectUnarchivedVisibleProjects,
 } from '../../features/project/store/project.selectors';
 import { toggleHideFromMenu } from '../../features/project/store/project.actions';
-import { Project } from '../../features/project/project.model';
 import { NavConfig, NavItem } from './magic-side-nav.model';
 import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
 import { lsGetBoolean, lsSetItem } from '../../util/ls-util';
@@ -32,7 +28,6 @@ import { lsGetBoolean, lsSetItem } from '../../util/ls-util';
 export class MagicNavConfigService {
   private readonly _workContextService = inject(WorkContextService);
   private readonly _tagService = inject(TagService);
-  private readonly _projectFolderService = inject(ProjectFolderService);
   private readonly _shepherdService = inject(ShepherdService);
   private readonly _matDialog = inject(MatDialog);
   private readonly _store = inject(Store);
@@ -56,9 +51,7 @@ export class MagicNavConfigService {
     this._store.select(selectUnarchivedVisibleProjects),
     { initialValue: [] },
   );
-  private readonly _projectFolderTree = toSignal(this._projectFolderService.tree$, {
-    initialValue: [],
-  });
+
   private readonly _allProjectsExceptInbox = toSignal(
     this._store.select(selectAllProjectsExceptInbox),
     { initialValue: [] },
@@ -66,10 +59,6 @@ export class MagicNavConfigService {
   private readonly _tags = toSignal(this._tagService.tagsNoMyDayAndNoList$, {
     initialValue: [],
   });
-  private readonly _activeWorkContextId = toSignal(
-    this._workContextService.activeWorkContextId$,
-    { initialValue: null },
-  );
   private readonly _pluginMenuEntries = this._pluginBridge.menuEntries;
 
   // Main navigation configuration
@@ -113,11 +102,12 @@ export class MagicNavConfigService {
 
       // Projects Section
       {
-        type: 'group',
+        type: 'tree',
         id: 'projects',
         label: T.MH.PROJECTS,
         icon: 'expand_more',
-        children: this._buildProjectItems(),
+        // TODO
+        tree: [],
         action: () => this._toggleProjectsExpanded(),
         additionalButtons: [
           {
@@ -143,11 +133,12 @@ export class MagicNavConfigService {
 
       // Tags Section
       {
-        type: 'group',
+        type: 'tree',
         id: 'tags',
         label: T.MH.TAGS,
         icon: 'expand_more',
-        children: this._buildTagItems(),
+        // TODO
+        tree: [],
         action: () => this._toggleTagsExpanded(),
       },
 
@@ -256,22 +247,6 @@ export class MagicNavConfigService {
     expandThreshold: 180,
   }));
 
-  // Expose all drop zone ids (projects root + all folders) for DnD connectivity
-  readonly allFolderDropListIds = computed<string[]>(() => {
-    const tree = this._projectFolderTree();
-    const ids: string[] = ['header-projects', 'list-projects'];
-    const collect = (nodes: ProjectFolderTreeNode[]): void => {
-      nodes.forEach((node) => {
-        if (node.kind === 'folder') {
-          ids.push(`header-folder-${node.id}`, `list-folder-${node.id}`);
-          collect(node.children ?? []);
-        }
-      });
-    };
-    collect(tree);
-    return ids;
-  });
-
   // Simple action handler
   onNavItemClick(item: NavItem): void {
     switch (item.type) {
@@ -322,124 +297,6 @@ export class MagicNavConfigService {
     return items;
   }
 
-  private _buildProjectItems(): NavItem[] {
-    const projects = this._visibleProjects();
-    const activeId = this._activeWorkContextId();
-    const projectTree = this._projectFolderTree();
-    const processedProjects = new Set<string>();
-
-    const projectMap = new Map(projects.map((project) => [project.id, project]));
-    const showAll = this._isProjectsExpanded() || !activeId;
-
-    const treeItems = this._buildNavItemsFromTree(
-      projectTree,
-      projectMap,
-      processedProjects,
-      activeId,
-      showAll,
-    );
-
-    const fallbackItems = projects
-      .filter((project) => !processedProjects.has(project.id))
-      .map((project) => ({
-        type: 'workContext' as const,
-        id: `project-${project.id}`,
-        label: project.title,
-        icon: project.icon || 'folder_special',
-        route: `/project/${project.id}/tasks`,
-        workContext: project,
-        workContextType: WorkContextType.PROJECT,
-        defaultIcon: project.icon || 'folder_special',
-      }));
-
-    return [...treeItems, ...fallbackItems];
-  }
-
-  private _buildNavItemsFromTree(
-    nodes: ProjectFolderTreeNode[],
-    projectMap: Map<string, Project>,
-    processedProjects: Set<string>,
-    activeId: string | null,
-    showAll: boolean,
-  ): NavItem[] {
-    const items: NavItem[] = [];
-
-    nodes.forEach((node) => {
-      if (node.kind === 'project') {
-        const projectId = node.id;
-        if (processedProjects.has(projectId)) {
-          return;
-        }
-        const project = projectMap.get(projectId);
-        if (!project) {
-          return;
-        }
-        if (!showAll && project.id !== activeId) {
-          return;
-        }
-        items.push({
-          type: 'workContext',
-          id: `project-${project.id}`,
-          label: project.title,
-          icon: project.icon || 'folder_special',
-          route: `/project/${project.id}/tasks`,
-          workContext: project,
-          workContextType: WorkContextType.PROJECT,
-          defaultIcon: project.icon || 'folder_special',
-        });
-        processedProjects.add(projectId);
-        return;
-      }
-
-      const childItems = this._buildNavItemsFromTree(
-        node.children ?? [],
-        projectMap,
-        processedProjects,
-        activeId,
-        showAll,
-      );
-
-      if (!showAll && childItems.length === 0) {
-        return;
-      }
-
-      items.push({
-        type: 'group',
-        id: node.id,
-        label: node.title ?? '',
-        icon: node.isExpanded ? 'expand_more' : 'chevron_right',
-        children: childItems,
-        action: () => this._projectFolderService.toggleFolderExpansion(node.id),
-        isFolder: true,
-        folderId: node.id,
-      });
-    });
-
-    return items;
-  }
-
-  private _buildTagItems(): NavItem[] {
-    const tags = this._tags();
-    const activeId = this._activeWorkContextId();
-
-    let filteredTags = tags;
-    if (!this._isTagsExpanded() && activeId) {
-      // Show only active tag when group is collapsed
-      filteredTags = tags.filter((tag) => tag.id === activeId);
-    }
-
-    return filteredTags.map((tag) => ({
-      type: 'workContext',
-      id: `tag-${tag.id}`,
-      label: tag.title,
-      icon: tag.icon || 'label',
-      route: `/tag/${tag.id}/tasks`,
-      workContext: tag,
-      workContextType: WorkContextType.TAG,
-      defaultIcon: tag.icon || 'label',
-    }));
-  }
-
   private _buildPluginItems(): NavItem[] {
     const pluginEntries = this._pluginMenuEntries();
 
@@ -483,7 +340,8 @@ export class MagicNavConfigService {
   }
 
   private _openCreateProjectFolder(): void {
-    this._matDialog.open(DialogCreateEditProjectFolderComponent, {
+    // TODO properly implement folder creation via DialogPromptComponent
+    this._matDialog.open(DialogPromptComponent, {
       restoreFocus: true,
     });
   }

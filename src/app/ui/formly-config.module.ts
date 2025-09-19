@@ -22,7 +22,6 @@ import { FormlyMatSliderModule } from '@ngx-formly/material/slider';
 import { FormlyTagSelectionComponent } from './formly-tag-selection/formly-tag-selection.component';
 import { FormlyBtnComponent } from './formly-button/formly-btn.component';
 import { FormlyImageInputComponent } from './formly-image-input/formly-image-input.component';
-import { ProjectFolderSelectComponent } from '../features/project-folder/formly-fields/project-folder-select/project-folder-select.component';
 
 @NgModule({
   imports: [
@@ -89,12 +88,6 @@ import { ProjectFolderSelectComponent } from '../features/project-folder/formly-
           extends: 'input',
           wrappers: ['form-field'],
         },
-        {
-          name: 'project-folder-select',
-          component: ProjectFolderSelectComponent,
-          extends: 'input',
-          wrappers: [],
-        },
       ],
       extras: {
         immutable: true,
@@ -115,7 +108,6 @@ import { ProjectFolderSelectComponent } from '../features/project-folder/formly-
     // might be needed for formly to pick up on directives
     ValidationModule,
     FormlyLinkWidgetComponent,
-    ProjectFolderSelectComponent,
   ],
   exports: [
     FormlyMaterialModule,
