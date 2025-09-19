@@ -19,6 +19,7 @@ import { PlannerActions } from '../../planner/store/planner.actions';
 import { SCHEDULE_TASK_MIN_DURATION_IN_MS } from '../../schedule/schedule.const';
 import { BlockedBlock } from '../../schedule/schedule.model';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
+import { TaskService } from '../task.service';
 
 @Injectable()
 export class TaskAutoScheduleEffects {
@@ -26,6 +27,7 @@ export class TaskAutoScheduleEffects {
   private _store = inject<Store<RootState>>(Store);
   private _calendarIntegration = inject(CalendarIntegrationService);
   private _ticker = inject(GlobalTrackingIntervalService);
+  private _taskService = inject(TaskService);
 
   private static readonly GAP_MS = 5 * 60 * 1000; // 任务间隔 5 分钟
 
@@ -66,6 +68,7 @@ export class TaskAutoScheduleEffects {
     timelineTasks: { planned: TaskWithDueTime[]; unPlanned: Task[] },
     repeatCfgsWithStartTime: any[],
     icalEvents: any[],
+    currentTaskId?: string | null,
   ): Array<ReturnType<typeof TaskSharedActions.scheduleTaskWithTime>> {
     const todayDate = new Date(now);
     todayDate.setHours(0, 0, 0, 0);
@@ -73,7 +76,7 @@ export class TaskAutoScheduleEffects {
 
     // 仅针对“今天未排时间”的候选任务
     const candidates = [...(timelineTasks.unPlanned || [])]
-      .filter((t) => !t.isDone)
+      .filter((t) => !t.isDone && t.id !== currentTaskId)
       .sort(this._sortByPriority);
 
     if (candidates.length === 0) {
@@ -217,17 +220,21 @@ export class TaskAutoScheduleEffects {
         this._store.pipe(select(selectTimelineTasks)),
         this._store.pipe(select(selectTaskRepeatCfgsWithAndWithoutStartTime)),
         this._calendarIntegration.icalEvents$,
+        this._taskService.currentTaskId$,
       ),
-      map(([action, scheduleCfg, timelineTasks, repeatCfgsObj, icalEvents]) => {
-        const now = Date.now();
-        return this._scheduleSeqForToday(
-          now,
-          scheduleCfg,
-          timelineTasks,
-          (repeatCfgsObj && repeatCfgsObj.withStartTime) || [],
-          icalEvents,
-        );
-      }),
+      map(
+        ([action, scheduleCfg, timelineTasks, repeatCfgsObj, icalEvents, currentId]) => {
+          const now = Date.now();
+          return this._scheduleSeqForToday(
+            now,
+            scheduleCfg,
+            timelineTasks,
+            (repeatCfgsObj && repeatCfgsObj.withStartTime) || [],
+            icalEvents,
+            currentId || null,
+          );
+        },
+      ),
       // 扁平化 action 数组
       mergeMap((acts) => acts),
     ),
@@ -241,8 +248,9 @@ export class TaskAutoScheduleEffects {
         this._store.pipe(select(selectTimelineTasks)),
         this._store.pipe(select(selectTaskRepeatCfgsWithAndWithoutStartTime)),
         this._calendarIntegration.icalEvents$,
+        this._taskService.currentTaskId$,
       ),
-      map(([tick, scheduleCfg, timelineTasks, repeatCfgsObj, icalEvents]) => {
+      map(([tick, scheduleCfg, timelineTasks, repeatCfgsObj, icalEvents, currentId]) => {
         const now = Date.now();
         const overdue = (timelineTasks.planned || []).filter((t) => {
           const start = (t as any).dueWithTime as number;
@@ -260,6 +268,7 @@ export class TaskAutoScheduleEffects {
           timelineTasks,
           (repeatCfgsObj && repeatCfgsObj.withStartTime) || [],
           icalEvents,
+          currentId || null,
         );
       }),
       mergeMap((acts) => acts),
