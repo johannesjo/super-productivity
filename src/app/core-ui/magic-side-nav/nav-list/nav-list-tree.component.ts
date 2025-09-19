@@ -14,7 +14,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TreeDndComponent } from '../../../ui/tree-dnd/tree.component';
-import { MoveInstruction, TreeNode } from '../../../ui/tree-dnd/tree.types';
+import { TreeNode } from '../../../ui/tree-dnd/tree.types';
 import { NavItemComponent } from '../nav-item/nav-item.component';
 import { NavItem, NavTreeItem } from '../magic-side-nav.model';
 import { MagicNavConfigService } from '../magic-nav-config.service';
@@ -98,10 +98,6 @@ export class NavListTreeComponent {
   onTreeUpdated(updatedNodes: TreeNode<MenuTreeViewNode>[]): void {
     this.treeNodes.set(updatedNodes);
     this._persistCurrentTree();
-  }
-
-  onTreeMoved(_instruction?: MoveInstruction): void {
-    // Intentionally left blank – persistence happens in onTreeUpdated
   }
 
   toggleProjectVisibility(projectId: string): void {
