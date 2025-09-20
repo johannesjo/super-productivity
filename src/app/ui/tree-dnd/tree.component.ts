@@ -393,9 +393,6 @@ export class TreeDndComponent<TData = unknown> {
     const reset = (): void => {
       try {
         item.reset();
-        // Access CDK internal API to ensure complete reset
-        const dragRef = (item as { _dragRef?: { reset: () => void } })._dragRef;
-        dragRef?.reset();
       } catch (error) {
         // Ignore reset errors - they can happen if the item is already destroyed
         console.debug('Failed to reset drag item:', error);
@@ -447,6 +444,8 @@ export class TreeDndComponent<TData = unknown> {
   }
 
   private readonly _findNode = (id: TreeId): TreeNode<TData> | null => {
+    if (!id) return null;
+
     const stack = [...this.nodes()] as TreeNode<TData>[];
     while (stack.length) {
       const node = stack.pop()!;

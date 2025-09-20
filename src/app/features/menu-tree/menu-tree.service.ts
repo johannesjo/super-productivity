@@ -18,7 +18,12 @@ import {
   selectMenuTreeProjectTree,
   selectMenuTreeTagTree,
 } from './store/menu-tree.selectors';
-import { updateProjectTree, updateTagTree } from './store/menu-tree.actions';
+import {
+  updateProjectTree,
+  updateTagTree,
+  deleteFolder,
+  updateFolder,
+} from './store/menu-tree.actions';
 
 @Injectable({ providedIn: 'root' })
 export class MenuTreeService {
@@ -132,6 +137,40 @@ export class MenuTreeService {
       parentFolderId ?? null,
     );
     this.setProjectTree(nextTree);
+  }
+
+  deleteFolderFromProject(folderId: string): void {
+    this._store.dispatch(deleteFolder({ folderId, treeType: 'project' }));
+  }
+
+  deleteFolderFromTag(folderId: string): void {
+    this._store.dispatch(deleteFolder({ folderId, treeType: 'tag' }));
+  }
+
+  updateFolderInProject(folderId: string, name: string): void {
+    this._store.dispatch(updateFolder({ folderId, name, treeType: 'project' }));
+  }
+
+  updateFolderInTag(folderId: string, name: string): void {
+    this._store.dispatch(updateFolder({ folderId, name, treeType: 'tag' }));
+  }
+
+  findFolderInTree(
+    folderId: string,
+    tree: MenuTreeTreeNode[],
+  ): MenuTreeFolderNode | null {
+    for (const node of tree) {
+      if (node.id === folderId && node.kind === 'folder') {
+        return node;
+      }
+      if (node.kind === 'folder') {
+        const found = this.findFolderInTree(folderId, node.children);
+        if (found) {
+          return found;
+        }
+      }
+    }
+    return null;
   }
 
   private _buildViewTree<T extends { id: string }>(options: {
