@@ -1,14 +1,11 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { computed, effect, inject, Injectable, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { first } from 'rxjs/operators';
 
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { TagService } from '../../features/tag/tag.service';
-import { ProjectService } from '../../features/project/project.service';
 import { ShepherdService } from '../../features/shepherd/shepherd.service';
 import { TourId } from '../../features/shepherd/shepherd-steps.const';
 import { T } from '../../t.const';
@@ -18,14 +15,14 @@ import { getGithubErrorUrl } from '../../core/error-handler/global-error-handler
 import { DialogPromptComponent } from '../../ui/dialog-prompt/dialog-prompt.component';
 import {
   selectAllProjectsExceptInbox,
-  selectUnarchivedHiddenProjectIds,
   selectUnarchivedVisibleProjects,
 } from '../../features/project/store/project.selectors';
 import { toggleHideFromMenu } from '../../features/project/store/project.actions';
-import { NavConfig, NavItem, NavWorkContextItem } from './magic-side-nav.model';
-import { TODAY_TAG } from '../../features/tag/tag.const';
+import { NavConfig, NavItem } from './magic-side-nav.model';
 import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
 import { lsGetBoolean, lsSetItem } from '../../util/ls-util';
+import { MenuTreeService } from '../../features/menu-tree/menu-tree.service';
+import { MenuTreeViewNode } from '../../features/menu-tree/store/menu-tree.model';
 
 @Injectable({
   providedIn: 'root',
@@ -33,11 +30,11 @@ import { lsGetBoolean, lsSetItem } from '../../util/ls-util';
 export class MagicNavConfigService {
   private readonly _workContextService = inject(WorkContextService);
   private readonly _tagService = inject(TagService);
-  private readonly _projectService = inject(ProjectService);
   private readonly _shepherdService = inject(ShepherdService);
   private readonly _matDialog = inject(MatDialog);
   private readonly _store = inject(Store);
   private readonly _pluginBridge = inject(PluginBridgeService);
+  private readonly _menuTreeService = inject(MenuTreeService);
 
   // Simple state signals
   private readonly _isProjectsExpanded = signal(
@@ -57,6 +54,7 @@ export class MagicNavConfigService {
     this._store.select(selectUnarchivedVisibleProjects),
     { initialValue: [] },
   );
+
   private readonly _allProjectsExceptInbox = toSignal(
     this._store.select(selectAllProjectsExceptInbox),
     { initialValue: [] },
@@ -64,11 +62,31 @@ export class MagicNavConfigService {
   private readonly _tags = toSignal(this._tagService.tagsNoMyDayAndNoList$, {
     initialValue: [],
   });
-  private readonly _activeWorkContextId = toSignal(
-    this._workContextService.activeWorkContextId$,
-    { initialValue: null },
+  private readonly _projectNavTree = computed<MenuTreeViewNode[]>(() =>
+    this._menuTreeService.buildProjectViewTree(this._visibleProjects()),
+  );
+  private readonly _tagNavTree = computed<MenuTreeViewNode[]>(() =>
+    this._menuTreeService.buildTagViewTree(this._tags()),
   );
   private readonly _pluginMenuEntries = this._pluginBridge.menuEntries;
+
+  constructor() {
+    // TODO these should probably live in the _menuTreeService
+    effect(() => {
+      const projects = this._visibleProjects();
+      if (projects.length && !this._menuTreeService.hasProjectTree()) {
+        this._menuTreeService.initializeProjectTree(projects);
+      }
+    });
+
+    // TODO these should probably live in the _menuTreeService
+    effect(() => {
+      const tags = this._tags();
+      if (tags.length && !this._menuTreeService.hasTagTree()) {
+        this._menuTreeService.initializeTagTree(tags);
+      }
+    });
+  }
 
   // Main navigation configuration
   readonly navConfig = computed<NavConfig>(() => ({
@@ -111,18 +129,30 @@ export class MagicNavConfigService {
 
       // Projects Section
       {
-        type: 'group',
+        type: 'tree',
         id: 'projects',
         label: T.MH.PROJECTS,
         icon: 'expand_more',
-        children: this._buildProjectItems(),
+        tree:
+          this._projectNavTree().length > 0
+            ? this._projectNavTree()
+            : this._visibleProjects().map((project) => ({
+                kind: 'project',
+                project,
+              })),
         action: () => this._toggleProjectsExpanded(),
         additionalButtons: [
           {
             id: 'project-visibility',
             icon: 'visibility',
-            tooltip: 'Show/Hide Projects',
+            tooltip: T.F.PROJECT_FOLDER.TOOLTIP_VISIBILITY,
             action: () => this._openProjectVisibilityMenu(),
+          },
+          {
+            id: 'add-project-folder',
+            icon: 'create_new_folder',
+            tooltip: T.F.PROJECT_FOLDER.TOOLTIP_CREATE,
+            action: () => this._openCreateProjectFolder(),
           },
           {
             id: 'add-project',
@@ -135,11 +165,17 @@ export class MagicNavConfigService {
 
       // Tags Section
       {
-        type: 'group',
+        type: 'tree',
         id: 'tags',
         label: T.MH.TAGS,
         icon: 'expand_more',
-        children: this._buildTagItems(),
+        tree:
+          this._tagNavTree().length > 0
+            ? this._tagNavTree()
+            : this._tags().map((tag) => ({
+                kind: 'tag',
+                tag,
+              })),
         action: () => this._toggleTagsExpanded(),
       },
 
@@ -298,50 +334,6 @@ export class MagicNavConfigService {
     return items;
   }
 
-  private _buildProjectItems(): NavItem[] {
-    const projects = this._visibleProjects();
-    const activeId = this._activeWorkContextId();
-
-    let filteredProjects = projects;
-    if (!this._isProjectsExpanded() && activeId) {
-      // Show only active project when group is collapsed
-      filteredProjects = projects.filter((project) => project.id === activeId);
-    }
-
-    return filteredProjects.map((project) => ({
-      type: 'workContext',
-      id: `project-${project.id}`,
-      label: project.title,
-      icon: project.icon || 'folder_special',
-      route: `/project/${project.id}/tasks`,
-      workContext: project,
-      workContextType: WorkContextType.PROJECT,
-      defaultIcon: project.icon || 'folder_special',
-    }));
-  }
-
-  private _buildTagItems(): NavItem[] {
-    const tags = this._tags();
-    const activeId = this._activeWorkContextId();
-
-    let filteredTags = tags;
-    if (!this._isTagsExpanded() && activeId) {
-      // Show only active tag when group is collapsed
-      filteredTags = tags.filter((tag) => tag.id === activeId);
-    }
-
-    return filteredTags.map((tag) => ({
-      type: 'workContext',
-      id: `tag-${tag.id}`,
-      label: tag.title,
-      icon: tag.icon || 'label',
-      route: `/tag/${tag.id}/tasks`,
-      workContext: tag,
-      workContextType: WorkContextType.TAG,
-      defaultIcon: tag.icon || 'label',
-    }));
-  }
-
   private _buildPluginItems(): NavItem[] {
     const pluginEntries = this._pluginMenuEntries();
 
@@ -384,6 +376,27 @@ export class MagicNavConfigService {
     this._matDialog.open(DialogCreateProjectComponent, { restoreFocus: true });
   }
 
+  private _openCreateProjectFolder(): void {
+    this._matDialog
+      .open(DialogPromptComponent, {
+        restoreFocus: true,
+        data: {
+          placeholder: T.F.PROJECT_FOLDER.DIALOG.NAME_PLACEHOLDER,
+        },
+      })
+      .afterClosed()
+      .subscribe((title) => {
+        if (!title) {
+          return;
+        }
+        const trimmed = title.trim();
+        if (!trimmed) {
+          return;
+        }
+        this._menuTreeService.createProjectFolder(trimmed);
+      });
+  }
+
   private _createNewTag(): void {
     this._matDialog
       .open(DialogPromptComponent, {
@@ -423,48 +436,5 @@ export class MagicNavConfigService {
 
   createNewTag(): void {
     this._createNewTag();
-  }
-
-  // Drag and drop handlers
-  async handleProjectDrop(
-    items: NavWorkContextItem[],
-    event: CdkDragDrop<string, string, NavWorkContextItem>,
-  ): Promise<void> {
-    if (event.previousIndex === event.currentIndex) return;
-
-    // Create a copy of the array and move the item
-    const reorderedItems = [...items];
-    moveItemInArray(reorderedItems, event.previousIndex, event.currentIndex);
-
-    // Get the new order of IDs
-    const visibleIds = reorderedItems.map((item) => item.workContext!.id);
-
-    // Get hidden project IDs to append at the end
-    const hiddenIds = await this._store
-      .select(selectUnarchivedHiddenProjectIds)
-      .pipe(first())
-      .toPromise();
-
-    // Combine visible and hidden IDs
-    const newIds = [...visibleIds, ...(hiddenIds || [])];
-    this._projectService.updateOrder(newIds);
-  }
-
-  handleTagDrop(
-    items: NavWorkContextItem[],
-    event: CdkDragDrop<string, string, NavWorkContextItem>,
-  ): void {
-    if (event.previousIndex === event.currentIndex) return;
-
-    // Create a copy of the array and move the item
-    const reorderedItems = [...items];
-    moveItemInArray(reorderedItems, event.previousIndex, event.currentIndex);
-
-    // Get the new order of IDs
-    const visibleIds = reorderedItems.map((item) => item.workContext!.id);
-
-    // Special today list should always be first, so prepend it
-    const newIds = [TODAY_TAG.id, ...visibleIds.filter((id) => id !== TODAY_TAG.id)];
-    this._tagService.updateOrder(newIds);
   }
 }

@@ -43,6 +43,7 @@ import { loadAllData } from '../meta/load-all-data.action';
 import { clearHiddenImprovements } from '../../features/metric/improvement/store/improvement.actions';
 import { selectTaskRepeatCfgFeatureState } from '../../features/task-repeat-cfg/store/task-repeat-cfg.selectors';
 import { Log } from '../../core/log';
+import { selectMenuTreeState } from '../../features/menu-tree/store/menu-tree.selectors';
 
 const ALWAYS_IGNORED_ACTIONS = [loadAllData.type];
 
@@ -60,6 +61,7 @@ export class SaveToDbEffects {
 
   tag$ = this.createSaveEffect(selectTagFeatureState, 'tag');
   project$ = this.createSaveEffect(selectProjectFeatureState, 'project');
+  menuTree$ = this.createSaveEffect(selectMenuTreeState, 'menuTree');
   globalCfg$ = this.createSaveEffect(selectConfigFeatureState, 'globalConfig');
   planner$ = this.createSaveEffect(selectPlannerState, 'planner');
   boards$ = this.createSaveEffect(selectBoardsState, 'boards');

@@ -14,11 +14,11 @@
         class="project-icon-emoji"
         [style.color]="selectedProject()?.theme?.primary"
       >
-        {{ selectedProject()?.icon || 'folder' }}
+        {{ selectedProject()?.icon || 'list_alt' }}
       </span>
     } @else {
       <mat-icon [style.color]="selectedProject()?.theme?.primary">
-        {{ selectedProject()?.icon || 'folder' }}
+        {{ selectedProject()?.icon || 'list_alt' }}
       </mat-icon>
     }
     <span>{{ selectedProject()?.title }}</span>
@@ -143,11 +143,11 @@
           class="menu-icon-emoji"
           [style.color]="project.theme.primary"
         >
-          {{ project.icon || 'folder' }}
+          {{ project.icon || 'list_alt' }}
         </span>
       } @else {
         <mat-icon [style.color]="project.theme.primary">
-          {{ project.icon || 'folder' }}
+          {{ project.icon || 'list_alt' }}
         </mat-icon>
       }
       {{ project.title }}

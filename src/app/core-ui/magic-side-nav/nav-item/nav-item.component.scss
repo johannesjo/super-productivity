@@ -1,5 +1,18 @@
 @use 'styles/globals' as *;
 
+// Folder expand/collapse icon animation
+.folder-icon {
+  transition: transform 0.3s ease-in-out;
+
+  &.expanded {
+    transform: rotate(90deg);
+  }
+
+  &.collapsed {
+    transform: rotate(0deg);
+  }
+}
+
 :host {
   display: flex !important;
   align-items: stretch;

@@ -10,6 +10,7 @@ import { TAG_FEATURE_NAME } from '../features/tag/store/tag.reducer';
 import { TagState } from '../features/tag/tag.model';
 import { WORK_CONTEXT_FEATURE_NAME } from '../features/work-context/store/work-context.selectors';
 import { ProjectState } from '../features/project/project.model';
+import { menuTreeFeatureKey } from '../features/menu-tree/store/menu-tree.reducer';
 import { NoteState } from '../features/note/note.model';
 import {
   BOARDS_FEATURE_NAME,
@@ -18,11 +19,13 @@ import {
 import * as fromPlanner from '../features/planner/store/planner.reducer';
 import { PlannerState } from '../features/planner/store/planner.reducer';
 import { AppState, appStateFeatureKey } from './app-state/app-state.reducer';
+import { MenuTreeState } from '../features/menu-tree/store/menu-tree.model';
 
 export interface RootState {
   [TASK_FEATURE_NAME]: TaskState;
   [WORK_CONTEXT_FEATURE_NAME]: WorkContextState;
   [PROJECT_FEATURE_NAME]: ProjectState;
+  [menuTreeFeatureKey]: MenuTreeState;
   [TAG_FEATURE_NAME]: TagState;
   [NOTE_FEATURE_NAME]: NoteState;
   [LAYOUT_FEATURE_NAME]: LayoutState;

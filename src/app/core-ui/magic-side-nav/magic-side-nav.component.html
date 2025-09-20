@@ -78,19 +78,18 @@
               [style.margin-top]="item.mtAuto && 'auto'"
             />
           }
-          @case ('group') {
+          @case ('tree') {
             <li
               class="nav-item has-children"
               role="listitem"
             >
-              <nav-list
+              <nav-list-tree
                 [item]="item"
                 [showLabels]="showText()"
                 [isExpanded]="isGroupExpanded(item)"
                 [activeWorkContextId]="activeWorkContextId()"
                 (itemClick)="onItemClick($event)"
-                (dragDrop)="onDragDrop(item, $event)"
-              ></nav-list>
+              ></nav-list-tree>
             </li>
           }
           @case ('menu') {
@@ -114,7 +113,6 @@
                     [activeWorkContextId]="activeWorkContextId() || ''"
                     [variant]="'nav'"
                     [showLabels]="showText()"
-                    [showMoreButton]="showText()"
                     (clicked)="onItemClick(item)"
                   ></nav-item>
                 }

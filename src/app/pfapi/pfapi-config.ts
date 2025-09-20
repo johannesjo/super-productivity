@@ -6,6 +6,7 @@ import {
   PfapiBaseCfg,
 } from './api';
 import { ProjectState } from '../features/project/project.model';
+import { MenuTreeState } from '../features/menu-tree/store/menu-tree.model';
 import { GlobalConfigState } from '../features/config/global-config.model';
 import { Reminder } from '../features/reminder/reminder.model';
 import {
@@ -62,11 +63,13 @@ import {
   PluginMetaDataState,
   PluginUserDataState,
 } from '../plugins/plugin-persistence.model';
+import { menuTreeInitialState } from '../features/menu-tree/store/menu-tree.reducer';
 
 export const CROSS_MODEL_VERSION = 4.2 as const;
 
 export type PfapiAllModelCfg = {
   project: ModelCfg<ProjectState>;
+  menuTree: ModelCfg<MenuTreeState>;
   globalConfig: ModelCfg<GlobalConfigState>;
   planner: ModelCfg<PlannerState>;
   boards: ModelCfg<BoardsState>;
@@ -140,7 +143,6 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     validate: appDataValidators.taskRepeatCfg,
     repair: fixEntityStateConsistency,
   },
-
   reminders: {
     defaultData: [],
     isMainFileModel: true,
@@ -156,8 +158,14 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     isMainFileModel: true,
     validate: appDataValidators.boards,
   },
+  // we put it in main file model because it is likely as notes to get changed
+  menuTree: {
+    defaultData: menuTreeInitialState,
+    validate: appDataValidators.menuTree,
+  },
 
   //-------------------------------
+
   pluginUserData: {
     defaultData: initialPluginUserDataState,
     validate: appDataValidators.pluginUserData,
