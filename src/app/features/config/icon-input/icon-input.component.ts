@@ -9,7 +9,8 @@ import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autoc
 import { MatOption } from '@angular/material/core';
 import { IS_ELECTRON } from '../../../app.constants';
 import { MatTooltip } from '@angular/material/tooltip';
-import { extractFirstEmoji, isSingleEmoji } from '../../../util/extract-first-emoji';
+import { containsEmoji, extractFirstEmoji } from '../../../util/extract-first-emoji';
+import { isSingleEmoji } from '../../../util/extract-first-emoji';
 
 @Component({
   selector: 'icon-input',
@@ -50,7 +51,7 @@ export class IconInputComponent extends FieldType<FormlyFieldConfig> {
     arr.length = Math.min(150, arr.length);
     this.filteredIcons.set(arr);
 
-    const hasEmoji = /\p{Emoji}/u.test(val);
+    const hasEmoji = containsEmoji(val);
 
     if (hasEmoji) {
       const firstEmoji = extractFirstEmoji(val);
@@ -72,8 +73,8 @@ export class IconInputComponent extends FieldType<FormlyFieldConfig> {
 
   onIconSelect(icon: string): void {
     this.formControl.setValue(icon);
-    const isEmoji = /\p{Emoji}/u.test(icon);
-    this.isEmoji.set(isEmoji && !this.filteredIcons().includes(icon));
+    const emojiCheck = isSingleEmoji(icon);
+    this.isEmoji.set(emojiCheck && !this.filteredIcons().includes(icon));
   }
 
   openEmojiPicker(): void {

@@ -6,7 +6,7 @@ import {
   Signal,
 } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
-import { isEmoji } from '../../../util/is-emoji';
+import { isSingleEmoji } from '../../../util/extract-first-emoji';
 
 export interface TagComponentTag {
   title: string;
@@ -39,6 +39,6 @@ export class TagComponent {
 
   isEmojiIcon: Signal<boolean> = computed(() => {
     const currentTag = this.tag();
-    return currentTag.icon ? isEmoji(currentTag.icon) : false;
+    return currentTag.icon ? isSingleEmoji(currentTag.icon) : false;
   });
 }

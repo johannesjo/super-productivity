@@ -28,7 +28,7 @@ import { T } from '../../../../t.const';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { dateStrToUtcDate } from '../../../../util/date-str-to-utc-date';
 import { getDbDateStr } from '../../../../util/get-db-date-str';
-import { isEmoji } from '../../../../util/is-emoji';
+import { isSingleEmoji } from '../../../../util/extract-first-emoji';
 
 @Component({
   selector: 'add-task-bar-actions',
@@ -132,13 +132,13 @@ export class AddTaskBarActionsComponent {
   isProjectEmojiIcon = computed(() => {
     const project = this.selectedProject();
     const icon = project?.icon || 'folder';
-    return isEmoji(icon);
+    return isSingleEmoji(icon);
   });
 
   // Emoji detection for tag icons
   isTagEmojiIcon(tag: any): boolean {
     const icon = tag?.icon || 'label';
-    return isEmoji(icon);
+    return isSingleEmoji(icon);
   }
 
   openScheduleDialog(): void {
