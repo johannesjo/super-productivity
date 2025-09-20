@@ -199,20 +199,20 @@ export class MenuTreeService {
       }
 
       if (itemType === 'project' && node.kind === 'project') {
-        const project = itemMap.get(node.projectId);
+        const project = itemMap.get(node.id);
         if (!project) {
           return null;
         }
-        usedIds.add(node.projectId);
+        usedIds.add(node.id);
         return createViewNode(project) as MenuTreeViewProjectNode;
       }
 
       if (itemType === 'tag' && node.kind === 'tag') {
-        const tag = itemMap.get(node.tagId);
+        const tag = itemMap.get(node.id);
         if (!tag) {
           return null;
         }
-        usedIds.add(node.tagId);
+        usedIds.add(node.id);
         return createViewNode(tag) as MenuTreeViewTagNode;
       }
 
@@ -256,7 +256,6 @@ export class MenuTreeService {
         return {
           kind: 'project',
           id: node.project.id,
-          projectId: node.project.id,
         } satisfies MenuTreeProjectNode;
       }
 
@@ -264,7 +263,6 @@ export class MenuTreeService {
         return {
           kind: 'tag',
           id: node.tag.id,
-          tagId: node.tag.id,
         } satisfies MenuTreeTagNode;
       }
 

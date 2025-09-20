@@ -15,12 +15,10 @@ interface MenuTreeBaseNode {
 
 export interface MenuTreeProjectNode extends MenuTreeBaseNode {
   kind: 'project';
-  projectId: string;
 }
 
 export interface MenuTreeTagNode extends MenuTreeBaseNode {
   kind: 'tag';
-  tagId: string;
 }
 
 export interface MenuTreeFolderNode extends MenuTreeBaseNode {
