@@ -14,11 +14,11 @@
     }
 
     &.is-drag-invalid {
-      cursor: not-allowed;
-
-      * {
-        cursor: not-allowed !important;
-      }
+      //cursor: not-allowed;
+      //
+      //* {
+      //  cursor: not-allowed !important;
+      //}
     }
   }
 }
@@ -28,12 +28,20 @@
   padding-left: var(--tree-indent, 0);
 
   &.is-dragging {
-    opacity: 0.4;
     pointer-events: none;
+    z-index: var(--z-dragged-nav-item);
+
+    //&::ng-deep  nav-item {
+    //  opacity: 1;
+    //border-radius: var(--card-border-radius);
+    //border-radius: 10px;
+    //background: var(--bg-lightest) !important;
+    //box-shadow: var(--whiteframe-shadow-12dp);
+    //}
   }
 
   &.is-over-inside {
-    background: var(--c-primary); /* Purple for "inside" folder */
+    background: var(--c-primary);
   }
 }
 
@@ -52,29 +60,9 @@
 }
 
 .root-drop {
-  height: 20px;
-  border-top: 2px dashed transparent;
   position: relative;
   z-index: 5;
-
-  &.is-root-over {
-    border-top-color: var(--c-primary);
-    background: var(--c-primary); /* Red for root drop (end of list) */
-    z-index: 15;
-  }
-
-  &:hover {
-    background: var(--c-primary);
-  }
-}
-
-.drag-preview {
-  background: var(--tree-preview-bg, #ffffff);
-  border: 2px solid var(--tree-preview-border, #ddd);
-  border-radius: 4px;
-  padding: 6px 10px;
-  white-space: nowrap;
-  pointer-events: none;
+  height: 12px;
 }
 
 /* indicator */
