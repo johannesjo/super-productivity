@@ -13,11 +13,21 @@
     mat-menu-item
     (click)="clicked.emit()"
   >
-    <mat-icon
-      class="nav-icon"
-      [class.drag-handle]="defaultIcon() !== 'today' && defaultIcon() !== 'inbox'"
-      >{{ workContext()!.icon || defaultIcon() }}
-    </mat-icon>
+    @if (isWorkContextEmojiIcon()) {
+      <span
+        class="nav-icon nav-icon-emoji"
+        style="color: {{ workContext()?.theme.primary }}"
+        [class.drag-handle]="defaultIcon() !== 'today' && defaultIcon() !== 'inbox'"
+        >{{ workContext()!.icon || defaultIcon() }}
+      </span>
+    } @else {
+      <mat-icon
+        class="nav-icon"
+        style="color: {{ workContext()?.theme.primary }}"
+        [class.drag-handle]="defaultIcon() !== 'today' && defaultIcon() !== 'inbox'"
+        >{{ workContext()!.icon || defaultIcon() }}
+      </mat-icon>
+    }
     <span
       class="nav-label"
       [class.label-hidden]="!showLabels()"
@@ -112,12 +122,21 @@
           [svgIcon]="svgIcon()"
         ></mat-icon>
       } @else if (icon()) {
-        <mat-icon
-          class="nav-icon"
-          [class.expand-icon]="container() === 'group' && icon() === 'expand_more'"
-        >
-          {{ icon() }}
-        </mat-icon>
+        @if (isPresentationalEmojiIcon()) {
+          <span
+            class="nav-icon nav-icon-emoji"
+            [class.expand-icon]="container() === 'group' && icon() === 'expand_more'"
+          >
+            {{ icon() }}
+          </span>
+        } @else {
+          <mat-icon
+            class="nav-icon"
+            [class.expand-icon]="container() === 'group' && icon() === 'expand_more'"
+          >
+            {{ icon() }}
+          </mat-icon>
+        }
       }
       @if (label()) {
         <span
@@ -148,12 +167,21 @@
           [svgIcon]="svgIcon()"
         ></mat-icon>
       } @else if (icon()) {
-        <mat-icon
-          class="nav-icon"
-          [class.expand-icon]="container() === 'group' && icon() === 'expand_more'"
-        >
-          {{ icon() }}
-        </mat-icon>
+        @if (isPresentationalEmojiIcon()) {
+          <span
+            class="nav-icon nav-icon-emoji"
+            [class.expand-icon]="container() === 'group' && icon() === 'expand_more'"
+          >
+            {{ icon() }}
+          </span>
+        } @else {
+          <mat-icon
+            class="nav-icon"
+            [class.expand-icon]="container() === 'group' && icon() === 'expand_more'"
+          >
+            {{ icon() }}
+          </mat-icon>
+        }
       }
       @if (label()) {
         <span
@@ -185,12 +213,21 @@
           [svgIcon]="svgIcon()"
         ></mat-icon>
       } @else if (icon()) {
-        <mat-icon
-          class="nav-icon"
-          [class.expand-icon]="container() === 'group' && icon() === 'expand_more'"
-        >
-          {{ icon() }}
-        </mat-icon>
+        @if (isPresentationalEmojiIcon()) {
+          <span
+            class="nav-icon nav-icon-emoji"
+            [class.expand-icon]="container() === 'group' && icon() === 'expand_more'"
+          >
+            {{ icon() }}
+          </span>
+        } @else {
+          <mat-icon
+            class="nav-icon"
+            [class.expand-icon]="container() === 'group' && icon() === 'expand_more'"
+          >
+            {{ icon() }}
+          </mat-icon>
+        }
       }
       @if (label()) {
         <span

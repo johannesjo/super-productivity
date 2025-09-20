@@ -214,6 +214,24 @@ button[mat-menu-item].nav-link.active {
   color: var(--sidenav-text-secondary);
   font-size: 18px;
   line-height: 1;
+
+  // Emoji-specific styling
+  &.nav-icon-emoji {
+    font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+    font-size: 16px;
+    // Reset any Material Design icon styling
+    font-feature-settings: normal;
+    font-variation-settings: normal;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+    // Better emoji rendering
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
 }
 
 .expand-icon {

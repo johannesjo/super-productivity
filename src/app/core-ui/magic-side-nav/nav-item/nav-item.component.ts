@@ -25,6 +25,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { selectAllDoneIds } from '../../../features/tasks/store/task.selectors';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
+import { isSingleEmoji } from '../../../util/extract-first-emoji';
 
 @Component({
   selector: 'nav-item',
@@ -124,5 +125,19 @@ export class NavItemComponent {
   isHidden = computed<boolean>(() => {
     const wc = this.workContext();
     return !!(wc as Project | null)?.isHiddenFromMenu;
+  });
+
+  // Emoji detection for work context icons
+  isWorkContextEmojiIcon = computed<boolean>(() => {
+    const wc = this.workContext();
+    if (!wc) return false;
+    const icon = wc.icon || this.defaultIcon();
+    return isSingleEmoji(icon);
+  });
+
+  // Emoji detection for presentational icons
+  isPresentationalEmojiIcon = computed<boolean>(() => {
+    const iconValue = this.icon();
+    return iconValue ? isSingleEmoji(iconValue) : false;
   });
 }
