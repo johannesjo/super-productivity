@@ -58,15 +58,20 @@
         let-expanded="expanded"
         let-toggle="toggle"
       >
-        <div class="nav-child-item folder-item draggable">
+        <div
+          class="nav-child-item folder-item draggable"
+          (contextmenu)="onFolderContextMenu($event, node)"
+        >
           <nav-item
-            [mode]="'folder'"
-            [folderId]="node.data?.kind === 'folder' ? node.data.id : ''"
+            [container]="'action'"
             [expanded]="expanded"
+            [icon]="expanded ? 'folder_open' : 'folder'"
             [label]="node.data?.kind === 'folder' ? node.data.name : node.data.label"
             [variant]="'nav'"
             [showLabels]="showLabels()"
+            [showMoreButton]="true"
             (clicked)="onChildClick(node)"
+            (moreButtonClick)="onFolderMoreButton($event, node)"
           ></nav-item>
         </div>
       </ng-template>
@@ -89,7 +94,7 @@
               <nav-item
                 [workContext]="node.data.project"
                 [type]="WorkContextType.PROJECT"
-                [defaultIcon]="node.data.project.icon || 'folder_special'"
+                [defaultIcon]="node.data.project.icon || 'list_alt'"
                 [activeWorkContextId]="activeWorkContextId() || ''"
                 [variant]="'nav'"
                 [showLabels]="showLabels()"

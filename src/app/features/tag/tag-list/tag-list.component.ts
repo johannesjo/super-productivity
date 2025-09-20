@@ -67,7 +67,7 @@ export class TagListComponent {
         ...project,
         color: project.theme?.primary || DEFAULT_PROJECT_COLOR,
         created: 0,
-        icon: project.icon || 'folder_special',
+        icon: project.icon || 'list_alt',
       };
       // project tag first then sorted tags
       return [projectTag, ...tagsI];

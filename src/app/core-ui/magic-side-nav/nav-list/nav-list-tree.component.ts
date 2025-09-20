@@ -104,6 +104,29 @@ export class NavListTreeComponent {
     this._navConfigService.toggleProjectVisibility(projectId);
   }
 
+  onFolderMoreButton(event: MouseEvent, node: TreeNode<MenuTreeViewNode>): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this._openFolderContextMenu(event, node);
+  }
+
+  onFolderContextMenu(event: MouseEvent, node: TreeNode<MenuTreeViewNode>): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this._openFolderContextMenu(event, node);
+  }
+
+  private _openFolderContextMenu(
+    event: MouseEvent,
+    node: TreeNode<MenuTreeViewNode>,
+  ): void {
+    // TODO: Implement folder context menu
+    console.log(
+      'Folder context menu for:',
+      node.data?.kind === 'folder' ? node.data.name : 'unknown',
+    );
+  }
+
   private _toggleFolder(treeNodeId: string): void {
     const updated = this._mapTreeNodes(this.treeNodes(), (node) => {
       if (node.id === treeNodeId) {
@@ -192,7 +215,7 @@ export class NavListTreeComponent {
 
   private _toProjectNavItem(node: MenuTreeViewProjectNode): NavItem {
     const project = node.project;
-    const icon = project.icon || 'folder_special';
+    const icon = project.icon || 'list_alt';
     return {
       type: 'workContext',
       id: `project-${project.id}`,

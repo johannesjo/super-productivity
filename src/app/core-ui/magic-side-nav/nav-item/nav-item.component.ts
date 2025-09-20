@@ -72,7 +72,7 @@ export class NavItemComponent {
   // Work context inputs
   workContext = input<WorkContextCommon | null>(null);
   type = input<WorkContextType | null>(null);
-  defaultIcon = input<string>('folder_special');
+  defaultIcon = input<string>('list_alt');
   activeWorkContextId = input<string>('');
 
   // Folder inputs
