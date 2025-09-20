@@ -29,6 +29,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { dateStrToUtcDate } from '../../../../util/date-str-to-utc-date';
 import { getDbDateStr } from '../../../../util/get-db-date-str';
 import { isSingleEmoji } from '../../../../util/extract-first-emoji';
+import { DEFAULT_PROJECT_ICON } from '../../../project/project.const';
 
 @Component({
   selector: 'add-task-bar-actions',
@@ -301,4 +302,6 @@ export class AddTaskBarActionsComponent {
       date1.getDate() === date2.getDate()
     );
   }
+
+  protected readonly DEFAULT_PROJECT_ICON = DEFAULT_PROJECT_ICON;
 }

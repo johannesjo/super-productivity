@@ -32,6 +32,7 @@ import { isObject } from '../../util/is-object';
 import { MatIcon } from '@angular/material/icon';
 import { ConfigSectionComponent } from '../../features/config/config-section/config-section.component';
 import { TranslatePipe } from '@ngx-translate/core';
+import { DEFAULT_PROJECT_ICON } from '../../features/project/project.const';
 
 @Component({
   selector: 'project-settings',
@@ -145,4 +146,6 @@ export class ProjectSettingsPageComponent implements OnInit, OnDestroy {
     }
     return (this.issueIntegrationCfgs as any)[key];
   }
+
+  protected readonly DEFAULT_PROJECT_ICON = DEFAULT_PROJECT_ICON;
 }
