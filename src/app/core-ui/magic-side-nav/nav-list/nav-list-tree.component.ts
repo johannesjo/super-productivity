@@ -28,6 +28,7 @@ import {
 import { MenuTreeService } from '../../../features/menu-tree/menu-tree.service';
 import { WorkContextType } from '../../../features/work-context/work-context.model';
 import { DEFAULT_PROJECT_ICON } from '../../../features/project/project.const';
+import { expandCollapseAni } from '../../../ui/tree-dnd/tree.animations';
 
 @Component({
   selector: 'nav-list-tree',
@@ -46,6 +47,7 @@ import { DEFAULT_PROJECT_ICON } from '../../../features/project/project.const';
   templateUrl: './nav-list-tree.component.html',
   styleUrls: ['./nav-list-tree.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [expandCollapseAni],
 })
 export class NavListTreeComponent {
   private readonly _navConfigService = inject(MagicNavConfigService);

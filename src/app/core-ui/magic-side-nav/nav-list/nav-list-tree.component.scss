@@ -18,7 +18,7 @@
   }
 
   // Show additional buttons on focus/hover (desktop)
-  &:focus-within .additional-btns,
+  //&:focus-within .additional-btns,
   &:hover .additional-btns {
     display: flex;
   }

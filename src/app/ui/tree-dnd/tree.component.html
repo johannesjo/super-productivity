@@ -92,12 +92,12 @@
     }
   </div>
 
-  @if (folder) {
+  @if (folder && node.expanded) {
     @let childLevel = level + 1;
     <div
-      class="folder"
-      [@expandCollapse]="node.expanded ? 'expanded' : 'collapsed'"
+      class="folder-content"
       cdkDropList
+      [@expandCollapse]
       [cdkDropListData]="{ parentId: node.id, items: node.children ?? [] }"
       [cdkDropListEnterPredicate]="canEnterList"
       (cdkDropListDropped)="onDrop($event)"

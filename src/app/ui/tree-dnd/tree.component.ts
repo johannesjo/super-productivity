@@ -11,7 +11,6 @@ import {
   signal,
   TemplateRef,
 } from '@angular/core';
-import { animate, state, style, transition, trigger } from '@angular/animations';
 import { NgClass, NgStyle, NgTemplateOutlet } from '@angular/common';
 import {
   CdkDrag,
@@ -38,6 +37,7 @@ import { TreeDragService } from './tree-drag.service';
 import { TreeIndicatorService } from './tree-indicator.service';
 import { TREE_CONSTANTS } from './tree-constants';
 import { assertTreeId } from './tree-guards';
+import { expandCollapseAni } from './tree.animations';
 
 @Component({
   selector: 'tree-dnd',
@@ -47,30 +47,7 @@ import { assertTreeId } from './tree-guards';
   templateUrl: './tree.component.html',
   styleUrls: ['./tree.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    trigger('expandCollapse', [
-      state(
-        'collapsed',
-        style({
-          height: '0',
-          opacity: 0,
-          overflow: 'hidden',
-        }),
-      ),
-      state(
-        'expanded',
-        style({
-          height: '*',
-          opacity: 1,
-          overflow: 'visible',
-        }),
-      ),
-      transition('collapsed <=> expanded', [
-        style({ overflow: 'hidden' }),
-        animate(`${TREE_CONSTANTS.ANIMATION_DURATION}ms ease-in-out`),
-      ]),
-    ]),
-  ],
+  animations: [expandCollapseAni],
 })
 export class TreeDndComponent<TData = unknown> {
   // === INJECTED DEPENDENCIES ===
