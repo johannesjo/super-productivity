@@ -33,12 +33,12 @@
   }
 
   &.is-over-inside {
-    background: rgba(138, 43, 226, 0.2); /* Purple for "inside" folder */
+    background: var(--c-primary); /* Purple for "inside" folder */
   }
 }
 
 .item.was-just-dropped {
-  background: gold;
+  background: var(--c-primary);
 }
 
 .expander {
@@ -58,22 +58,21 @@
   z-index: 5;
 
   &.is-root-over {
-    border-top-color: #dc3545;
-    background: rgba(220, 53, 69, 0.15); /* Red for root drop (end of list) */
+    border-top-color: var(--c-primary);
+    background: var(--c-primary); /* Red for root drop (end of list) */
     z-index: 15;
   }
 
   &:hover {
-    background: rgba(0, 123, 255, 0.05);
+    background: var(--c-primary);
   }
 }
 
 .drag-preview {
   background: var(--tree-preview-bg, #ffffff);
-  border: 1px solid var(--tree-preview-border, #ddd);
+  border: 2px solid var(--tree-preview-border, #ddd);
   border-radius: 4px;
   padding: 6px 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   white-space: nowrap;
   pointer-events: none;
 }
@@ -93,14 +92,13 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: red;
-  box-shadow: 0 0 0 2px white;
+  background: var(--c-primary);
 }
 
 .indicator-line {
   display: block;
   height: 2px;
-  background: red;
+  background: var(--c-primary);
   width: 100%;
   position: absolute;
   top: -1px;
