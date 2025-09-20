@@ -11,7 +11,7 @@ import {
 } from 'electron';
 import { join } from 'path';
 import { initDebug } from './debug';
-import * as electronDl from 'electron-dl';
+import electronDl from 'electron-dl';
 import { IPC } from './shared-with-frontend/ipc-events.const';
 import { initBackupAdapter } from './backup';
 import { initLocalFileSyncAdapter } from './local-file-sync';
