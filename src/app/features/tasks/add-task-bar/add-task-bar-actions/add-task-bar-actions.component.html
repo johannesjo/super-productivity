@@ -9,9 +9,18 @@
     [class.menu-open]="isProjectMenuOpen()"
     (click)="onProjectMenuClick()"
   >
-    <mat-icon [style.color]="selectedProject()?.theme?.primary">
-      {{ selectedProject()?.icon || 'folder' }}
-    </mat-icon>
+    @if (isProjectEmojiIcon()) {
+      <span
+        class="project-icon-emoji"
+        [style.color]="selectedProject()?.theme?.primary"
+      >
+        {{ selectedProject()?.icon || 'folder' }}
+      </span>
+    } @else {
+      <mat-icon [style.color]="selectedProject()?.theme?.primary">
+        {{ selectedProject()?.icon || 'folder' }}
+      </mat-icon>
+    }
     <span>{{ selectedProject()?.title }}</span>
   </button>
 
@@ -129,9 +138,18 @@
       mat-menu-item
       (click)="stateService.updateProjectId(project.id)"
     >
-      <mat-icon [style.color]="project.theme.primary">
-        {{ project.icon || 'folder' }}
-      </mat-icon>
+      @if (isTagEmojiIcon(project)) {
+        <span
+          class="menu-icon-emoji"
+          [style.color]="project.theme.primary"
+        >
+          {{ project.icon || 'folder' }}
+        </span>
+      } @else {
+        <mat-icon [style.color]="project.theme.primary">
+          {{ project.icon || 'folder' }}
+        </mat-icon>
+      }
       {{ project.title }}
     </button>
   }
@@ -149,11 +167,19 @@
       } @else {
         <mat-icon class="check-ico">check_box_outline_blank</mat-icon>
       }
-      <mat-icon
-        [style.color]="tag.color || tag.theme.primary"
-        class="tag-ico"
-        >{{ tag.icon || 'label' }}
-      </mat-icon>
+      @if (isTagEmojiIcon(tag)) {
+        <span
+          [style.color]="tag.color || tag.theme.primary"
+          class="tag-ico tag-ico-emoji"
+          >{{ tag.icon || 'label' }}
+        </span>
+      } @else {
+        <mat-icon
+          [style.color]="tag.color || tag.theme.primary"
+          class="tag-ico"
+          >{{ tag.icon || 'label' }}
+        </mat-icon>
+      }
       {{ tag.title }}
     </button>
   }

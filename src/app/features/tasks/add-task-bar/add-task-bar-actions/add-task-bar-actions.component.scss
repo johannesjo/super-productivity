@@ -36,6 +36,39 @@
   }
 }
 
+.tag-ico-emoji {
+  display: inline-block;
+  font-size: 12px;
+  line-height: 1;
+  text-align: center;
+  vertical-align: middle;
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+}
+
+.project-icon-emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+  text-align: center;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+.menu-icon-emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+  text-align: center;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
 .action-bar {
   position: relative;
   padding-top: 0;

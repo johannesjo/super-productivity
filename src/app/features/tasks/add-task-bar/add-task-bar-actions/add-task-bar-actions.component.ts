@@ -28,6 +28,7 @@ import { T } from '../../../../t.const';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { dateStrToUtcDate } from '../../../../util/date-str-to-utc-date';
 import { getDbDateStr } from '../../../../util/get-db-date-str';
+import { isEmoji } from '../../../../util/is-emoji';
 
 @Component({
   selector: 'add-task-bar-actions',
@@ -126,6 +127,19 @@ export class AddTaskBarActionsComponent {
     const estimate = this.state().estimate;
     return estimate ? msToString(estimate) : null;
   });
+
+  // Emoji detection for project icons
+  isProjectEmojiIcon = computed(() => {
+    const project = this.selectedProject();
+    const icon = project?.icon || 'folder';
+    return isEmoji(icon);
+  });
+
+  // Emoji detection for tag icons
+  isTagEmojiIcon(tag: any): boolean {
+    const icon = tag?.icon || 'label';
+    return isEmoji(icon);
+  }
 
   openScheduleDialog(): void {
     const state = this.state();
