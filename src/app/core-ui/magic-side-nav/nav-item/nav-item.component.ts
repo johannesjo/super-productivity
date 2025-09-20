@@ -60,27 +60,25 @@ import { TranslatePipe } from '@ngx-translate/core';
 export class NavItemComponent {
   private readonly _store = inject(Store);
 
-  // Mode selection
   mode = input<'work' | 'folder' | 'row'>('work');
-
-  // Container selection for non-work modes
+  variant = input<'default' | 'nav'>('default');
   container = input<'route' | 'href' | 'action' | 'group' | null>(null);
+
   navRoute = input<string | any[] | undefined>(undefined);
   navHref = input<string | undefined>(undefined);
   expanded = input<boolean>(false);
-  ariaControls = input<string | null>(null);
 
+  ariaControls = input<string | null>(null);
   // Work context inputs
   workContext = input<WorkContextCommon | null>(null);
   type = input<WorkContextType | null>(null);
   defaultIcon = input<string>(DEFAULT_PROJECT_ICON);
+
   activeWorkContextId = input<string>('');
-
   // Folder inputs
-  folderId = input<string | null>(null);
 
+  folderId = input<string | null>(null);
   // Variant styling to integrate into magic-side-nav without deep selectors
-  variant = input<'default' | 'nav'>('default');
   showMoreButton = input<boolean>(true);
 
   // Presentational row inputs

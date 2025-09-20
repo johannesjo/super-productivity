@@ -16,8 +16,8 @@
     <mat-icon
       class="nav-icon"
       [class.drag-handle]="defaultIcon() !== 'today' && defaultIcon() !== 'inbox'"
-      >{{ workContext()!.icon || defaultIcon() }}</mat-icon
-    >
+      >{{ workContext()!.icon || defaultIcon() }}
+    </mat-icon>
     <span
       class="nav-label"
       [class.label-hidden]="!showLabels()"
@@ -32,7 +32,6 @@
   }
 
   <button
-    [style.visibility]="showMoreButton() ? 'visible' : 'hidden'"
     #settingsBtn
     class="additional-btn"
     mat-icon-button
@@ -57,17 +56,12 @@
     #folderBtn
     class="nav-link"
     mat-menu-item
-    [class.expanded]="expanded()"
     [attr.aria-expanded]="expanded()"
     [attr.aria-controls]="ariaControls()"
     (click)="clicked.emit()"
   >
-    <mat-icon
-      class="nav-icon expand-icon drag-handle folder-icon"
-      [class.expanded]="expanded()"
-      [class.collapsed]="!expanded()"
-    >
-      expand_more
+    <mat-icon class="nav-icon expand-icon drag-handle folder-icon">
+      {{ expanded() ? 'folder_open' : 'folder' }}
     </mat-icon>
     @if (label()) {
       <span
@@ -80,9 +74,18 @@
     }
   </button>
 
+  <button
+    #folderSettingsBtn
+    class="additional-btn"
+    mat-icon-button
+  >
+    <mat-icon>more_vert</mat-icon>
+  </button>
+
   <context-menu
     [contextMenu]="folderContextMenu"
     [rightClickTriggerEl]="folderBtn"
+    [leftClickTriggerEl]="folderSettingsBtn"
   ></context-menu>
 
   <ng-template #folderContextMenu>
@@ -197,33 +200,9 @@
         >
           {{ label() | translate }}
         </span>
+      } @else {
+        <h1>XXX</h1>
       }
     </button>
-  } @else {
-    <!-- Fallback: raw row (kept for compatibility) -->
-    @if (svgIcon()) {
-      <mat-icon
-        class="nav-icon"
-        [class.expand-icon]="container() === 'group' && svgIcon() === 'expand_more'"
-        [svgIcon]="svgIcon()"
-      ></mat-icon>
-    } @else if (icon()) {
-      <mat-icon
-        class="nav-icon"
-        [class.expand-icon]="container() === 'group' && icon() === 'expand_more'"
-      >
-        {{ icon() }}
-      </mat-icon>
-    }
-
-    @if (label()) {
-      <span
-        class="nav-label"
-        [class.label-hidden]="!showLabels()"
-        [attr.aria-hidden]="!showLabels() ? 'true' : 'false'"
-      >
-        {{ label() | translate }}
-      </span>
-    }
   }
 }

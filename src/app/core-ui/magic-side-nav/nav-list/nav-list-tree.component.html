@@ -64,15 +64,13 @@
           (contextmenu)="onFolderContextMenu($event, node)"
         >
           <nav-item
-            [container]="'action'"
+            [mode]="'folder'"
             [expanded]="expanded"
-            [icon]="expanded ? 'folder_open' : 'folder'"
             [label]="node.data?.kind === 'folder' ? node.data.name : node.data.label"
             [variant]="'nav'"
             [showLabels]="showLabels()"
-            [showMoreButton]="true"
             (clicked)="onChildClick(node)"
-            (moreButtonClick)="onFolderMoreButton($event, node)"
+            [folderId]="node.id"
           ></nav-item>
         </div>
       </ng-template>
@@ -99,7 +97,6 @@
                 [activeWorkContextId]="activeWorkContextId() || ''"
                 [variant]="'nav'"
                 [showLabels]="showLabels()"
-                [showMoreButton]="true"
                 (clicked)="onChildClick(node)"
               ></nav-item>
             }
@@ -111,7 +108,6 @@
                 [activeWorkContextId]="activeWorkContextId() || ''"
                 [variant]="'nav'"
                 [showLabels]="showLabels()"
-                [showMoreButton]="true"
                 (clicked)="onChildClick(node)"
               ></nav-item>
             }
