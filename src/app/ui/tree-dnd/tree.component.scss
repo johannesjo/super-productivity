@@ -5,32 +5,39 @@
 .tree {
   display: block;
   position: relative;
+
+  &.is-dragging {
+    cursor: grabbing;
+
+    * {
+      cursor: grabbing !important;
+    }
+
+    &.is-drag-invalid {
+      cursor: not-allowed;
+
+      * {
+        cursor: not-allowed !important;
+      }
+    }
+  }
 }
 
 .item {
   position: relative;
+  padding-left: var(--tree-indent, 0);
 
   &.is-dragging {
     opacity: 0.4;
+    pointer-events: none;
   }
 
   &.is-over-inside {
-    background: greenyellow;
+    background: rgba(138, 43, 226, 0.2); /* Purple for "inside" folder */
   }
 }
 
-.row {
-  min-height: 28px;
-  user-select: none;
-  -webkit-user-select: none;
-  cursor: grab;
-
-  &.is-over {
-    background: greenyellow !important;
-  }
-}
-
-.item.just-dropped > .row {
+.item.was-just-dropped {
   background: gold;
 }
 
@@ -40,52 +47,20 @@
   user-select: none;
 }
 
-.drop {
-  height: 12px;
-  pointer-events: none;
-  width: 100%;
-  background: transparent;
-  position: absolute;
-  z-index: 1;
-
-  .is-dragging & {
-    pointer-events: all;
-    background: rgba(0, 123, 255, 0.1);
-  }
-
-  &:hover {
-    background: rgba(0, 123, 255, 0.15);
-  }
-
-  .item:not(.is-folder) & {
-    height: 16px;
-  }
-}
-
-.drop--before,
-.drop--after {
-  border-top: 2px solid transparent;
-}
-
-.drop--before {
-  top: 0;
-}
-
-.drop--after {
-  bottom: 0;
-}
-
-.group {
+.folder {
   margin-left: 0;
 }
 
 .root-drop {
-  height: 10px;
+  height: 20px;
   border-top: 2px dashed transparent;
+  position: relative;
+  z-index: 5;
 
-  &.is-over {
-    border-top-color: #007bff;
-    background: rgba(0, 123, 255, 0.1);
+  &.is-root-over {
+    border-top-color: #dc3545;
+    background: rgba(220, 53, 69, 0.15); /* Red for root drop (end of list) */
+    z-index: 15;
   }
 
   &:hover {
@@ -93,11 +68,22 @@
   }
 }
 
+.drag-preview {
+  background: var(--tree-preview-bg, #ffffff);
+  border: 1px solid var(--tree-preview-border, #ddd);
+  border-radius: 4px;
+  padding: 6px 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 /* indicator */
 .indicator {
   position: absolute;
   height: 0;
   pointer-events: none;
+  display: none;
 }
 
 .indicator-dot {

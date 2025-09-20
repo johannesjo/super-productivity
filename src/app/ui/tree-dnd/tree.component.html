@@ -3,34 +3,37 @@
   role="tree"
   aria-label="Tree"
   [class.is-dragging]="draggingId()"
-  #root
+  [class.is-drag-invalid]="isDragInvalid()"
+  cdkDropListGroup
 >
-  @for (node of nodes(); track node.id) {
-    <ng-container
-      *ngTemplateOutlet="nodeTpl; context: { $implicit: node, level: 0 }"
-    ></ng-container>
-  }
-  <!-- root drop area: drop as last item in root -->
   <div
-    class="root-drop"
-    [class.is-over]="rootOver()"
-    [dndDropTarget]="{ id: '', where: 'root' }"
-    [dndContext]="contextId"
-    (activeChange)="onRootActive($event)"
-    (indicator)="onIndicator($event)"
-  ></div>
-
-  <!-- floating drop indicator -->
-  <div
-    class="indicator"
-    [style.display]="indicatorVisible() ? 'block' : 'none'"
-    [style.top.px]="indicatorTop()"
-    [style.left.px]="indicatorLeft()"
-    [style.width.px]="indicatorWidth()"
+    class="list list--root"
+    cdkDropList
+    [cdkDropListData]="{ parentId: 'root', items: nodes() }"
+    [cdkDropListEnterPredicate]="canEnterList"
+    (cdkDropListDropped)="onDrop($event)"
   >
-    <span class="indicator-dot"></span>
-    <span class="indicator-line"></span>
+    @for (node of nodes(); track node.id) {
+      <ng-container
+        *ngTemplateOutlet="nodeTpl; context: { $implicit: node, level: 0 }"
+      ></ng-container>
+    }
+    <div
+      class="root-drop"
+      data-drop-zone="root"
+      [class.is-root-over]="isRootOver()"
+    ></div>
   </div>
+
+  @if (draggingId()) {
+    <div
+      class="indicator"
+      [ngStyle]="indicatorStyle()"
+    >
+      <span class="indicator-dot"></span>
+      <span class="indicator-line"></span>
+    </div>
+  }
 </div>
 
 <ng-template
@@ -38,88 +41,70 @@
   let-node
   let-level="level"
 >
+  @let folder = node.children !== undefined;
+  @let overInside = isOver(node.id, 'inside');
+  @let overBefore = isOver(node.id, 'before');
+  @let overAfter = isOver(node.id, 'after');
+  @let indentPx = level * indent();
+
   <div
     class="item"
-    [class.is-folder]="isFolder(node)"
-    [class.is-dragging]="draggingId() === node.id"
-    [class.just-dropped]="justDroppedId() === node.id"
-    [class.is-over-inside]="isOver(node.id, 'inside')"
-    [class.is-over-before]="isOver(node.id, 'before')"
-    [class.is-over-after]="isOver(node.id, 'after')"
-    [style.paddingLeft.px]="level * indent()"
+    cdkDrag
+    [cdkDragData]="node.id"
+    [ngClass]="{
+      'is-folder': folder,
+      'is-dragging': draggingId() === node.id,
+      'was-just-dropped': justDroppedId() === node.id,
+      'is-over-inside': overInside,
+      'is-over-before': overBefore,
+      'is-over-after': overAfter,
+    }"
+    [attr.data-node-id]="node.id"
+    [style.--tree-indent.px]="indentPx"
+    (cdkDragStarted)="onDragStarted(node.id)"
+    (cdkDragEnded)="onDragEnded($event)"
+    (cdkDragMoved)="onDragMoved($event)"
+    data-drop-zone="inside"
+    [attr.role]="'treeitem'"
+    [attr.aria-level]="level + 1"
+    [attr.aria-expanded]="folder ? node.expanded : null"
   >
-    <div
-      class="drop drop--before"
-      [dndDropTarget]="{ id: node.id, where: 'before' }"
-      [dndContext]="contextId"
-      (activeChange)="setOver(node.id, 'before', $event)"
-      (indicator)="onIndicator($event)"
-    ></div>
-
-    <div
-      class="row"
-      [dndDraggable]="node.id"
-      [attr.data-id]="node.id"
-      [dndDropTarget]="isFolder(node) ? { id: node.id, where: 'inside' } : null"
-      [dndContext]="contextId"
-      [attr.role]="'treeitem'"
-      [attr.aria-level]="level + 1"
-      [attr.aria-expanded]="isFolder(node) ? node.expanded : null"
-      [dragPreviewTemplate]="dragPreviewTpl() ?? null"
-      [dragPreviewData]="{ node: node, isFolder: isFolder(node) }"
-      (activeChange)="setOver(node.id, 'inside', $event)"
-      (indicator)="onIndicator($event)"
-    >
-      @if (isFolder(node)) {
-        @if (folderTpl(); as tpl) {
-          <ng-container
-            *ngTemplateOutlet="
-              tpl;
-              context: {
-                $implicit: node,
-                expanded: node.expanded,
-                toggle: toggle.bind(this),
-                dragOver: isOver(node.id, 'inside'),
-              }
-            "
-          ></ng-container>
-        } @else {
-          <span
-            class="expander"
-            (click)="$event.stopPropagation(); toggle(node)"
-          >
-            {{ node.expanded ? '▾' : '▸' }}
-          </span>
-          <span class="label">{{ node.label }}</span>
-        }
-      } @else {
-        @if (itemTpl(); as tpl) {
-          <ng-container
-            *ngTemplateOutlet="tpl; context: { $implicit: node }"
-          ></ng-container>
-        } @else {
-          {{ node.label }}
-        }
+    @if (folder) {
+      @if (folderTpl(); as tpl) {
+        <ng-container
+          *ngTemplateOutlet="
+            tpl;
+            context: {
+              $implicit: node,
+              expanded: node.expanded,
+              toggle: toggle.bind(this),
+              dragOver: overInside,
+            }
+          "
+        ></ng-container>
       }
-    </div>
-
-    <div
-      class="drop drop--after"
-      [dndDropTarget]="{ id: node.id, where: 'after' }"
-      [dndContext]="contextId"
-      (activeChange)="setOver(node.id, 'after', $event)"
-      (indicator)="onIndicator($event)"
-    ></div>
+    } @else {
+      @if (itemTpl(); as tpl) {
+        <ng-container
+          *ngTemplateOutlet="tpl; context: { $implicit: node }"
+        ></ng-container>
+      }
+    }
   </div>
 
-  @if (node.children?.length) {
+  @if (folder) {
+    @let childLevel = level + 1;
     <div
-      class="group"
+      class="folder"
       [@expandCollapse]="node.expanded ? 'expanded' : 'collapsed'"
+      cdkDropList
+      [cdkDropListData]="{ parentId: node.id, items: node.children ?? [] }"
+      [cdkDropListEnterPredicate]="canEnterList"
+      (cdkDropListDropped)="onDrop($event)"
     >
-      @for (child of node.children; track child.id) {
+      @for (child of node.children ?? []; track child.id) {
         <ng-container
-          *ngTemplateOutlet="nodeTpl; context: { $implicit: child, level: level + 1 }"
+          *ngTemplateOutlet="nodeTpl; context: { $implicit: child, level: childLevel }"
         ></ng-container>
       }
     </div>

@@ -133,7 +133,6 @@ export class NavListTreeComponent {
     if (node.kind === 'folder') {
       return {
         id: `folder-${node.id}`,
-        label: node.name,
         isFolder: true,
         expanded: node.isExpanded,
         data: node,
@@ -143,14 +142,12 @@ export class NavListTreeComponent {
     if (node.kind === 'project') {
       return {
         id: `project-${node.project.id}`,
-        label: node.project.title,
         isFolder: false,
         data: node,
       } satisfies TreeNode<MenuTreeViewNode>;
     }
     return {
       id: `tag-${node.tag.id}`,
-      label: node.tag.title,
       isFolder: false,
       data: node,
     } satisfies TreeNode<MenuTreeViewNode>;

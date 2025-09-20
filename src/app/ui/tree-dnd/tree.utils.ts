@@ -1,14 +1,19 @@
 import { MoveInstruction, TreeId, TreeNode } from './tree.types';
 
-export const cloneNodes = (nodes: TreeNode[]): TreeNode[] =>
+export const cloneNodes = <TData = unknown>(
+  nodes: readonly TreeNode<TData>[],
+): TreeNode<TData>[] =>
   nodes.map((n) => ({
     ...n,
     children: n.children ? cloneNodes(n.children) : undefined,
   }));
 
-export const getPath = (nodes: TreeNode[], targetId: TreeId): TreeId[] | null => {
+export const getPath = <TData = unknown>(
+  nodes: readonly TreeNode<TData>[],
+  targetId: TreeId,
+): TreeId[] | null => {
   const path: TreeId[] = [];
-  const dfs = (list: TreeNode[], id: TreeId, acc: TreeId[]): boolean => {
+  const dfs = (list: readonly TreeNode<TData>[], id: TreeId, acc: TreeId[]): boolean => {
     for (const node of list) {
       acc.push(node.id);
       if (node.id === id) return true;
@@ -21,8 +26,8 @@ export const getPath = (nodes: TreeNode[], targetId: TreeId): TreeId[] | null =>
   return found ? path : null;
 };
 
-export const isAncestor = (
-  nodes: TreeNode[],
+export const isAncestor = <TData = unknown>(
+  nodes: readonly TreeNode<TData>[],
   ancestorId: TreeId,
   possibleDescendantId: TreeId,
 ): boolean => {
@@ -30,11 +35,11 @@ export const isAncestor = (
   return !!path?.includes(ancestorId);
 };
 
-export const findAndRemove = (
-  nodes: TreeNode[],
+export const findAndRemove = <TData = unknown>(
+  nodes: TreeNode<TData>[],
   id: TreeId,
-): { node: TreeNode | null } => {
-  const stack: { parent: TreeNode | null; list: TreeNode[] }[] = [
+): { node: TreeNode<TData> | null } => {
+  const stack: { parent: TreeNode<TData> | null; list: TreeNode<TData>[] }[] = [
     { parent: null, list: nodes },
   ];
   while (stack.length) {
@@ -51,7 +56,10 @@ export const findAndRemove = (
   return { node: null };
 };
 
-export const getChildren = (nodes: TreeNode[], id: '' | TreeId): TreeNode[] => {
+export const getChildren = <TData = unknown>(
+  nodes: TreeNode<TData>[],
+  id: '' | TreeId,
+): TreeNode<TData>[] => {
   if (id === '') return nodes;
   const stack = [...nodes];
   while (stack.length) {
@@ -62,13 +70,17 @@ export const getChildren = (nodes: TreeNode[], id: '' | TreeId): TreeNode[] => {
   return nodes;
 };
 
-export const moveNode = (data: TreeNode[], instr: MoveInstruction): TreeNode[] => {
-  if (instr.targetId && instr.itemId === instr.targetId) return data; // no-op
-  if (instr.targetId && isAncestor(data, instr.itemId, instr.targetId)) return data; // prevent into own child
+export const moveNode = <TData = unknown>(
+  data: readonly TreeNode<TData>[],
+  instr: MoveInstruction,
+): TreeNode<TData>[] => {
+  if (instr.targetId && instr.itemId === instr.targetId) return cloneNodes(data); // no-op
+  if (instr.targetId && isAncestor(data, instr.itemId, instr.targetId))
+    return cloneNodes(data); // prevent into own child
 
   const nodes = cloneNodes(data);
   const { node } = findAndRemove(nodes, instr.itemId);
-  if (!node) return data;
+  if (!node) return cloneNodes(data);
 
   if (instr.where === 'inside') {
     const children = getChildren(nodes, (instr.targetId as TreeId) ?? '');
@@ -80,15 +92,18 @@ export const moveNode = (data: TreeNode[], instr: MoveInstruction): TreeNode[] =
   // before/after among siblings of target
   const parentChildren = getChildrenOfParent(nodes, instr.targetId);
   const index = parentChildren.findIndex((n) => n.id === instr.targetId);
-  if (index === -1) return data;
+  if (index === -1) return cloneNodes(data);
   const insertIndex = instr.where === 'before' ? index : index + 1;
   parentChildren.splice(insertIndex, 0, node);
   return nodes;
 };
 
-const getChildrenOfParent = (nodes: TreeNode[], id: TreeId): TreeNode[] => {
+const getChildrenOfParent = <TData = unknown>(
+  nodes: TreeNode<TData>[],
+  id: TreeId,
+): TreeNode<TData>[] => {
   // returns the array that contains the node with id
-  const stack: { parent: TreeNode | null; list: TreeNode[] }[] = [
+  const stack: { parent: TreeNode<TData> | null; list: TreeNode<TData>[] }[] = [
     { parent: null, list: nodes },
   ];
   while (stack.length) {

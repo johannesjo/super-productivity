@@ -49,9 +49,9 @@
     draggable="false"
   >
     <tree-dnd
-      [data]="treeNodes()"
-      [indent]="20"
-      (updated)="onTreeUpdated($event)"
+      [nodes]="treeNodes()"
+      (nodesChange)="onTreeUpdated($event)"
+      [indent]="16"
     >
       <!-- Template for folder nodes -->
       <ng-template
@@ -65,7 +65,7 @@
             [container]="'action'"
             [expanded]="expanded"
             [icon]="expanded ? 'folder_open' : 'folder'"
-            [label]="node.data?.kind === 'folder' ? node.data.name : node.label"
+            [label]="node.data?.kind === 'folder' ? node.data.name : node.data.label"
             [variant]="'nav'"
             [showLabels]="showLabels()"
             [showMoreButton]="false"
@@ -142,7 +142,13 @@
           <mat-icon [ngStyle]="{ 'font-size': '18px', width: '18px', height: '18px' }">
             {{ data.isFolder ? 'folder' : 'assignment' }}
           </mat-icon>
-          <span>{{ data.node.label }}</span>
+          <span>{{
+            data.node.data?.kind === 'folder'
+              ? data.node.data.name
+              : data.node.data?.kind === 'project'
+                ? data.node.data.project.title
+                : data.node.data?.tag.title
+          }}</span>
         </div>
       </ng-template>
     </tree-dnd>

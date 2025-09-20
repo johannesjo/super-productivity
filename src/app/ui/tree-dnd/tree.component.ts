@@ -1,38 +1,49 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   contentChild,
   DestroyRef,
-  effect,
   ElementRef,
   inject,
   input,
+  model,
   output,
   signal,
   TemplateRef,
 } from '@angular/core';
-import { trigger, state, style, transition, animate } from '@angular/animations';
-import { NgTemplateOutlet } from '@angular/common';
-import { monitorForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+import { animate, state, style, transition, trigger } from '@angular/animations';
+import { NgClass, NgStyle, NgTemplateOutlet } from '@angular/common';
 import {
-  DragData,
-  DropData,
+  CdkDrag,
+  CdkDragDrop,
+  CdkDragEnd,
+  CdkDragMove,
+  CdkDropList,
+  DragDropModule,
+} from '@angular/cdk/drag-drop';
+import {
+  CanDropPredicate,
+  DropListContext,
   DropWhere,
   FolderTplContext,
+  HoverTarget,
   ItemTplContext,
   MoveInstruction,
+  PointerPosition,
+  TreeId,
   TreeNode,
 } from './tree.types';
 import { moveNode } from './tree.utils';
-import { DndDraggableDirective } from './dnd-draggable.directive';
-import { DndDropTargetDirective } from './dnd-drop-target.directive';
-import { asDragData, asDropData } from './dnd.helpers';
+import { TreeDragService } from './tree-drag.service';
+import { TreeIndicatorService } from './tree-indicator.service';
+import { TREE_CONSTANTS } from './tree-constants';
+import { assertTreeId } from './tree-guards';
 
 @Component({
   selector: 'tree-dnd',
   standalone: true,
-  imports: [NgTemplateOutlet, DndDraggableDirective, DndDropTargetDirective],
+  imports: [NgTemplateOutlet, NgStyle, NgClass, DragDropModule],
+  providers: [TreeIndicatorService, TreeDragService],
   templateUrl: './tree.component.html',
   styleUrls: ['./tree.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -56,57 +67,68 @@ import { asDragData, asDropData } from './dnd.helpers';
       ),
       transition('collapsed <=> expanded', [
         style({ overflow: 'hidden' }),
-        animate('300ms ease-in-out'),
+        animate(`${TREE_CONSTANTS.ANIMATION_DURATION}ms ease-in-out`),
       ]),
     ]),
   ],
 })
-export class TreeDndComponent implements AfterViewInit {
-  private host = inject(ElementRef<HTMLElement>);
-  private destroyRef = inject(DestroyRef);
+export class TreeDndComponent<TData = unknown> {
+  // === INJECTED DEPENDENCIES ===
+  private readonly _host = inject(ElementRef<HTMLElement>);
+  private readonly _destroyRef = inject(DestroyRef);
+  private readonly _dragService = inject(TreeDragService);
+  private readonly _indicatorService = inject(TreeIndicatorService);
 
-  // Unique context to keep interactions scoped to one tree
-  private ctx = Symbol('tree-dnd');
-  // expose to template
-  contextId = this.ctx;
+  // === PUBLIC INPUTS/OUTPUTS/MODELS ===
+  readonly nodes = model.required<readonly TreeNode<TData>[]>();
+  readonly indent = input(TREE_CONSTANTS.DEFAULT_INDENT);
+  readonly canDrop = input<CanDropPredicate<TData>>(() => true);
+  readonly moved = output<MoveInstruction>();
 
-  // Inputs (signal-based)
-  readonly data = input.required<TreeNode[]>();
-  readonly indent = input(16);
-  // Allow users to control drop permission (default: allow all valid moves)
-  readonly canDrop = input<
-    (ctx: { drag: TreeNode; drop: TreeNode | null; where: DropWhere }) => boolean
-  >(() => true);
+  // === PUBLIC CONTENT CHILDREN ===
+  readonly itemTpl = contentChild<TemplateRef<ItemTplContext<TData>>>('treeItem');
+  readonly folderTpl = contentChild<TemplateRef<FolderTplContext<TData>>>('treeFolder');
 
-  // Local state mirrored from input for internal reordering
-  readonly nodes = signal<TreeNode[]>([]);
-  private nodeCache = signal<Map<string, TreeNode>>(new Map());
+  // === PUBLIC SIGNALS ===
+  readonly draggingId = signal<TreeId | null>(null);
+  readonly justDroppedId = signal<TreeId | null>(null);
+  readonly isDragInvalid = signal<boolean>(false);
+  readonly isRootOver = signal<boolean>(false);
+  readonly indicatorStyle = this._indicatorService.indicatorStyle;
 
-  private _syncEffect = effect(() => {
-    const newNodes = this.data() ?? [];
-    this.nodes.set(newNodes);
-    this.rebuildNodeCache(newNodes);
-  });
+  // === PRIVATE STATE ===
+  /**
+   * Tracks which drop zones are currently being hovered over.
+   * Structure: { nodeId: { before: true, after: false, inside: false } }
+   * This allows multiple drop zones to be highlighted simultaneously if needed.
+   */
+  private readonly _overMap = signal<Record<TreeId, Partial<Record<DropWhere, boolean>>>>(
+    {},
+  );
+  private _hoverTarget: HoverTarget | null = null;
+  private _treeRootEl: HTMLElement | null = null;
+  private _rootDropEl: HTMLElement | null = null;
+  private _dropHandled = false;
+  private _dropFlashTimer?: number;
 
-  // Content templates (signal-based)
-  readonly itemTpl = contentChild<TemplateRef<ItemTplContext>>('treeItem');
-  readonly folderTpl = contentChild<TemplateRef<FolderTplContext>>('treeFolder');
-  readonly dragPreviewTpl = contentChild<TemplateRef<any>>('treeDragPreview');
+  constructor() {
+    this._destroyRef.onDestroy(() => {
+      if (this._dropFlashTimer) clearTimeout(this._dropFlashTimer);
+      this._indicatorService.clear();
+    });
+  }
 
-  // Output: notify consumers of moves
-  moved = output<MoveInstruction>();
-  // Output: emit latest tree after internal changes
-  updated = output<TreeNode[]>();
+  // === PUBLIC METHODS ===
+  readonly canEnterList = (
+    drag: CdkDrag<TreeId>,
+    drop: CdkDropList<DropListContext<TData>>,
+  ): boolean => this._canEnterListPredicate(drag, drop);
 
-  // drag highlight state (ids mapped to where states)
-  private overMap = signal<Record<string, Partial<Record<DropWhere, boolean>>>>({});
-
-  setOver(id: string, where: DropWhere, on: boolean): void {
-    // Track hover state
-    this.overMap.update((m) => {
+  setOver(id: TreeId, where: DropWhere, on: boolean): void {
+    this._overMap.update((m) => {
       const current = m[id]?.[where] ?? false;
       if (current === on) {
-        return m; // Atlaskit fires multiple hover events per frame; skip no-op updates to avoid needless change detection.
+        return m; // No change needed
       }
       const entry = { ...(m[id] ?? {}) };
       entry[where] = on;
@@ -114,281 +136,422 @@ export class TreeDndComponent implements AfterViewInit {
     });
   }
 
-  isOver(id: string, where: DropWhere): boolean {
-    return !!this.overMap()[id]?.[where];
+  isOver(id: TreeId, where: DropWhere): boolean {
+    return !!this._overMap()[id]?.[where];
   }
-  rootOver = signal<boolean>(false);
 
-  draggingId = signal<string | null>(null);
-  // recent drop flash state
-  justDroppedId = signal<string | null>(null);
-  private _dropFlashTimer?: number;
-  // trackBy not needed with @for track expressions
+  toggle(node: TreeNode<TData>): void {
+    if (!node.children?.length) return;
+    node.expanded = !node.expanded;
+    const updatedNodes = [...this.nodes()] as TreeNode<TData>[];
+    this.nodes.set(updatedNodes);
+  }
 
-  // Indicator state
-  indicatorVisible = signal(false);
-  indicatorTop = signal(0);
-  indicatorLeft = signal(0);
-  indicatorWidth = signal(0);
-  private treeRootEl: HTMLElement | null = null;
-  private containerRect: DOMRect | null = null;
-  private elementLayoutCache: WeakMap<
-    HTMLElement,
-    { rect: DOMRect; paddingLeft: number }
-  > = new WeakMap();
-  private lastIndicatorTarget: { element: HTMLElement; where: DropWhere } | null = null;
+  // === EVENT HANDLERS ===
+  onDrop(event: CdkDragDrop<DropListContext<TData>>): void {
+    const dragId = this._extractDragId(event.item.data);
+    this.draggingId.set(null);
+    this._dropHandled = true;
 
-  onIndicator(evt: { active: boolean; element: HTMLElement; where: DropWhere }): void {
-    if (!evt.active) {
-      this.indicatorVisible.set(false);
-      this.lastIndicatorTarget = null;
-      this.containerRect = null;
+    // if we have no dragId it means we dragged an invalid element, so we just reset
+    if (!dragId) {
+      this._scheduleItemReset(event.item);
+      this._clearHoverStates();
       return;
     }
-    // No special-casing: indicator follows active drop target
-    this.treeRootEl ??= this.host.nativeElement.querySelector('.tree') as HTMLElement;
-    const container = this.treeRootEl;
-    if (!container) {
+
+    const instruction = this._getDropInstruction(dragId, event);
+    const wasMoved = instruction ? this._applyInstruction(instruction) : false;
+
+    if (wasMoved) {
+      this._flashJustDropped(dragId);
+    }
+
+    // Always schedule reset to ensure proper cleanup
+    this._scheduleItemReset(event.item);
+    this._clearHoverStates();
+  }
+
+  onDragStarted(id: TreeId): void {
+    try {
+      assertTreeId(id, 'drag ID');
+      this.draggingId.set(id);
+      this.isDragInvalid.set(false);
+      this._hoverTarget = null;
+      this._dropHandled = false;
+      this.isRootOver.set(false);
+      this._treeRootEl = this._host.nativeElement.querySelector('.tree');
+      this._rootDropEl = this._host.nativeElement.querySelector('.root-drop');
+      this._indicatorService.clear();
+    } catch (error) {
+      console.error('Invalid drag start:', error);
+    }
+  }
+
+  onDragMoved(event: CdkDragMove<TreeId>): void {
+    const dragId = this._extractDragId(event.source.data);
+    if (!dragId) return;
+
+    const pointer = event.pointerPosition;
+    if (!pointer) return;
+
+    this._treeRootEl ??= this._host.nativeElement.querySelector('.tree');
+    this._rootDropEl ??= this._host.nativeElement.querySelector('.root-drop');
+
+    const target = this._findHoverTarget(pointer);
+    this._updateHover(dragId, target);
+
+    // Clear hover if dragged outside tree boundaries
+    if (!target && this._hoverTarget) {
+      this._setHoverTarget(null);
+    }
+  }
+
+  onDragEnded(event: CdkDragEnd<TreeId>): void {
+    const dragId = this._extractDragId(event.source.data);
+
+    if (!this._dropHandled && dragId) {
+      if (this._hoverTarget) {
+        const instruction = this._buildInstructionFromHover(dragId, this._hoverTarget);
+        if (instruction && this._applyInstruction(instruction)) {
+          this._flashJustDropped(dragId);
+        }
+      }
+      // Always reset when drag ends without a drop, regardless of hover target
+      this._scheduleItemReset(event.source);
+    }
+
+    this.draggingId.set(null);
+    this.isDragInvalid.set(false);
+    this._dropHandled = false;
+    this._clearHoverStates();
+  }
+
+  // === PRIVATE METHODS ===
+  private _canEnterListPredicate(
+    drag: CdkDrag<TreeId>,
+    drop: CdkDropList<DropListContext<TData>>,
+  ): boolean {
+    const data = drop.data;
+    const dragId = this._extractDragId(drag.data);
+    if (!dragId || !data) {
+      return false;
+    }
+    if (data.parentId && this._isNodeAncestor(dragId, data.parentId)) {
+      return false;
+    }
+    const dragNode = this._findNode(dragId);
+    if (!dragNode) {
+      return false;
+    }
+    if (!data.parentId) {
+      return this.canDrop()({ drag: dragNode, drop: null, where: 'root' });
+    }
+    const parentNode = this._findNode(data.parentId);
+    if (!parentNode || parentNode.children === undefined) {
+      return false;
+    }
+    return this.canDrop()({ drag: dragNode, drop: parentNode, where: 'inside' });
+  }
+
+  /**
+   * Determines what element the user is hovering over during drag operations.
+   * This is complex because we need to:
+   * 1. Respect tree boundaries (don't allow drops outside the tree)
+   * 2. Handle the special "root drop" zone at the bottom
+   * 3. Calculate drop zones (before/after/inside) based on pointer position
+   * 4. Return the correct element for indicator positioning
+   */
+  private _findHoverTarget(pointer: PointerPosition): HoverTarget | null {
+    // First check: Are we even within the tree boundaries?
+    if (this._treeRootEl) {
+      const treeRect = this._treeRootEl.getBoundingClientRect();
+      if (!this._dragService.isPointInRect(pointer, treeRect)) {
+        return null; // Outside tree boundaries - show invalid cursor
+      }
+    }
+
+    // Special case: Check if hovering over the root drop zone (bottom of tree)
+    if (this._rootDropEl) {
+      const rect = this._rootDropEl.getBoundingClientRect();
+      if (this._dragService.isPointInRect(pointer, rect)) {
+        return { id: '', where: 'root', element: this._rootDropEl };
+      }
+    }
+
+    // Find the actual DOM element under the mouse pointer
+    const element = document.elementFromPoint(pointer.x, pointer.y) as HTMLElement | null;
+    if (!element) return null;
+
+    // Navigate up the DOM to find the nearest tree item container
+    const itemEl = element.closest('.item') as HTMLElement | null;
+    if (!itemEl || !this._treeRootEl?.contains(itemEl)) {
+      return null; // Element not within this tree instance
+    }
+
+    // Extract the node ID from the data attribute
+    const nodeId = itemEl.getAttribute('data-node-id') as TreeId | null;
+    if (!nodeId) return null;
+
+    const itemRect = itemEl.getBoundingClientRect();
+
+    // Calculate drop zone: folders get larger "inside" zones for easier targeting
+    const targetNode = this._findNode(nodeId);
+    const isTargetFolder = targetNode ? targetNode.children !== undefined : false;
+    const where = this._dragService.calculateHoverZone(pointer, itemRect, isTargetFolder);
+
+    return { id: nodeId, where, element: itemEl };
+  }
+
+  private _updateHover(dragId: string, target: HoverTarget | null): void {
+    const isValid = target && this._isHoverAllowed(dragId, target);
+
+    // Show invalid cursor when hovering outside tree or over invalid targets
+    this.isDragInvalid.set(!isValid);
+
+    if (!isValid) {
+      this._setHoverTarget(null);
       return;
     }
-    const sameTarget =
-      this.lastIndicatorTarget?.element === evt.element &&
-      this.lastIndicatorTarget?.where === evt.where;
-    if (sameTarget && this.indicatorVisible()) {
-      // Skip recomputing layout for repeated pointer move events over the same drop zone
+    this._setHoverTarget(target);
+  }
+
+  private _isHoverAllowed(dragId: string, target: HoverTarget): boolean {
+    return this._buildInstructionFromHover(dragId, target) !== null;
+  }
+
+  /**
+   * Updates the current hover target and manages visual feedback.
+   * This handles the complex state transitions between different hover targets:
+   * - Clearing previous hover states (remove highlights)
+   * - Setting new hover states (add highlights)
+   * - Managing the drop indicator position
+   * - Handling special "root" hover state separately
+   */
+  private _setHoverTarget(next: HoverTarget | null): void {
+    const prev = this._hoverTarget;
+
+    // Optimization: if we're hovering over the same target, just update indicator
+    if (prev && next && prev.id === next.id && prev.where === next.where) {
+      this._hoverTarget = next;
+      this._showIndicator(next);
       return;
     }
-    this.lastIndicatorTarget = { element: evt.element, where: evt.where };
-    this.containerRect ??= container.getBoundingClientRect();
-    const containerRect = this.containerRect;
 
-    let elementLayout = this.elementLayoutCache.get(evt.element);
-    if (!elementLayout) {
-      const rect = evt.element.getBoundingClientRect();
-      const itemEl = evt.element.closest('.item') as HTMLElement | null;
-      const paddingLeft = itemEl
-        ? parseFloat(getComputedStyle(itemEl).paddingLeft || '0') || 0
-        : 0;
-      elementLayout = { rect, paddingLeft };
-      this.elementLayoutCache.set(evt.element, elementLayout);
-    }
-    const elRect = elementLayout.rect;
-
-    // Vertical position: before/after lines snap to top/bottom of the drop zone
-    // For inside: draw at the bottom of the row to suggest insertion as first child
-    const isAfter = evt.where === 'after';
-    const y =
-      elRect.top -
-      containerRect.top +
-      (isAfter || evt.where === 'inside' ? elRect.height : 0);
-
-    // Horizontal position: reflect the level the item will be dropped into
-    // - root: level 0 (no indent)
-    // - before/after: same level as the target item (its container padding-left)
-    // - inside: one level deeper than the target item
-    let left = 0;
-    let width = containerRect.width;
-
-    const itemEl = evt.element.closest('.item') as HTMLElement | null;
-    if (itemEl) {
-      const itemRect = itemEl.getBoundingClientRect();
-      const paddingLeft = this.elementLayoutCache.get(evt.element)?.paddingLeft ?? 0;
-      const extraIndent = evt.where === 'inside' ? this.indent() : 0;
-      left = itemRect.left - containerRect.left + paddingLeft + extraIndent;
-      width = Math.max(0, containerRect.width - left);
-    } else if (evt.where === 'root') {
-      left = 0;
-      width = containerRect.width;
+    // Clear previous hover visual feedback
+    if (prev) {
+      if (prev.where === 'root') {
+        this.isRootOver.set(false);
+      } else {
+        this.setOver(prev.id, prev.where, false);
+      }
     }
 
-    this.indicatorTop.set(Math.round(y));
-    this.indicatorLeft.set(Math.max(0, Math.round(left)));
-    this.indicatorWidth.set(Math.max(0, Math.round(width)));
-    if (!this.indicatorVisible()) {
-      this.indicatorVisible.set(true);
+    // Handle clearing hover state
+    if (!next) {
+      this._hoverTarget = null;
+      this._indicatorService.hide();
+      return;
     }
+
+    // Set new hover state and visual feedback
+    this._hoverTarget = next;
+    if (next.where === 'root') {
+      this.isRootOver.set(true);
+    } else {
+      this.setOver(next.id, next.where, true);
+    }
+    this._showIndicator(next);
   }
 
-  onRootActive(active: boolean): void {
-    this.rootOver.set(active);
-  }
+  /**
+   * Determines the final move instruction when a drop occurs.
+   * This is complex because we need to handle two different types of drop detection:
+   * 1. Hover-based drops (precise positioning for folders)
+   * 2. Drop-list-based drops (reliable for list ordering)
+   *
+   * We prioritize hover instructions for "inside" folder drops because they provide
+   * better UX - users can see exactly where they're dropping via the indicator.
+   */
+  private _getDropInstruction(
+    dragId: TreeId,
+    event: CdkDragDrop<DropListContext<TData>>,
+  ): MoveInstruction | null {
+    // Get hover-based instruction (more precise for folders)
+    let hoverInstruction: MoveInstruction | null = null;
+    if (this._hoverTarget) {
+      hoverInstruction = this._buildInstructionFromHover(dragId, this._hoverTarget);
+    }
 
-  isFolder(n: TreeNode): boolean {
-    return !!n.isFolder || n.children !== undefined;
-  }
-
-  ngAfterViewInit(): void {
-    const cleanup: Array<() => void> = [];
-
-    // Register monitor only (drop-targets + draggables are directives)
-    cleanup.push(
-      monitorForElements({
-        canMonitor: ({ source }) => asDragData(source.data)?.uniqueContextId === this.ctx,
-        onDragStart: ({ source }) => {
-          const data = asDragData(source.data);
-          if (data) this.draggingId.set(data.id);
-          this.treeRootEl ??= this.host.nativeElement.querySelector(
-            '.tree',
-          ) as HTMLElement;
-          this.containerRect = this.treeRootEl?.getBoundingClientRect() ?? null;
-          this.elementLayoutCache = new WeakMap();
-        },
-        onDrop: ({ location, source }) => {
-          this.draggingId.set(null);
-          const dropTargets = location.current.dropTargets;
-          if (!dropTargets.length) {
-            this.clearOverStates();
-            return;
-          }
-          const s = asDragData(source.data);
-          // Use innermost drop target (last in list for this adapter)
-          const target = asDropData(dropTargets[dropTargets.length - 1].data);
-          if (!s || !target) {
-            this.clearOverStates();
-            return;
-          }
-
-          // Validate drop operation
-          if (!this.isValidDrop(s, target)) {
-            this.clearOverStates();
-            return;
-          }
-          if (target.where === 'root') {
-            // Drop at the very end of the root list
-            const currentRoots = this.nodes();
-            const lastRoot = [...currentRoots].reverse().find((n) => n.id !== s.id);
-            const instr: MoveInstruction = lastRoot
-              ? { itemId: s.id, targetId: lastRoot.id, where: 'after' }
-              : { itemId: s.id, targetId: '', where: 'inside' }; // empty root: insert as only item
-            const updatedNodes = moveNode(this.nodes(), instr);
-            this.nodes.set(updatedNodes);
-            this.rebuildNodeCache(updatedNodes);
-            this.moved.emit(instr);
-            this.updated.emit(this.nodes());
-            this.flashJustDropped(s.id);
-            this.clearOverStates();
-            return;
-          }
-          if (target.where === 'inside') {
-            const targetNode = this.findNode(target.id);
-            if (!targetNode) {
-              console.warn(`Drop target node with id '${target.id}' not found`);
-              this.clearOverStates();
-              return;
-            }
-            if (!this.isFolder(targetNode)) {
-              this.clearOverStates();
-              return; // disallow dropping inside items
-            }
-          }
-          const instr: MoveInstruction = {
-            itemId: s.id,
-            targetId: target.id,
-            where: target.where,
-          } as MoveInstruction;
-          const updatedNodes = moveNode(this.nodes(), instr);
-          this.nodes.set(updatedNodes);
-          this.rebuildNodeCache(updatedNodes);
-          this.moved.emit(instr);
-          this.updated.emit(this.nodes());
-          this.flashJustDropped(s.id);
-          this.clearOverStates();
-        },
-      }),
+    // Get drop-list-based instruction (more reliable for ordering)
+    const dropInstruction = this._dragService.buildInstructionFromDropEvent<TData>(
+      dragId,
+      event,
+      this._findNode.bind(this),
+      this._getSiblings.bind(this),
+      (node: TreeNode<TData>) => node.children !== undefined,
+      this._isNodeAncestor.bind(this),
+      this.canDrop(),
     );
 
-    this.destroyRef.onDestroy(() => {
-      cleanup.forEach((fn) => fn());
-      if (this._dropFlashTimer) clearTimeout(this._dropFlashTimer);
-      this.justDroppedId.set(null);
-    });
+    // Prioritize hover instruction for "inside" folder drops
+    // This gives users better visual feedback and more precise control
+    if (hoverInstruction?.where === 'inside' && hoverInstruction.targetId) {
+      const targetNode = this._findNode(hoverInstruction.targetId);
+      if (targetNode && targetNode.children !== undefined) {
+        return hoverInstruction;
+      }
+    }
+
+    // Fall back to drop instruction for ordering, or hover instruction as last resort
+    return dropInstruction ?? hoverInstruction;
   }
 
-  private clearOverStates(): void {
-    this.overMap.set({});
-    this.rootOver.set(false);
-    this.indicatorVisible.set(false);
-    this.lastIndicatorTarget = null;
-    this.containerRect = null;
-    this.elementLayoutCache = new WeakMap();
+  /**
+   * Resets a dragged item to its original position with proper timing.
+   * We use requestAnimationFrame to ensure the reset happens after Angular's
+   * change detection cycle, preventing visual glitches.
+   */
+  private _scheduleItemReset(item: CdkDrag<TreeId>): void {
+    const reset = (): void => {
+      try {
+        item.reset();
+        // Access CDK internal API to ensure complete reset
+        const dragRef = (item as { _dragRef?: { reset: () => void } })._dragRef;
+        dragRef?.reset();
+      } catch (error) {
+        // Ignore reset errors - they can happen if the item is already destroyed
+        console.debug('Failed to reset drag item:', error);
+      }
+    };
+
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(reset);
+    } else {
+      reset();
+    }
   }
 
-  private rebuildNodeCache(nodes: TreeNode[]): void {
-    const cache = new Map<string, TreeNode>();
+  private _showIndicator(target: HoverTarget): void {
+    if (!this._treeRootEl) return;
+    this._indicatorService.show(
+      target.element,
+      target.where,
+      this._treeRootEl,
+      this.indent(),
+    );
+  }
+
+  private _clearHoverStates(): void {
+    this._hoverTarget = null;
+    this._overMap.set({});
+    this.isRootOver.set(false);
+    this._indicatorService.hide();
+    this._rootDropEl = null;
+  }
+
+  private _traverseNodes(
+    nodes: TreeNode<TData>[],
+    callback: (node: TreeNode<TData>) => void,
+  ): void {
     const stack = [...nodes];
     while (stack.length) {
       const node = stack.pop()!;
-      cache.set(node.id, node);
-      if (node.children) {
+      callback(node);
+      if (node.children?.length) {
         stack.push(...node.children);
       }
     }
-    this.nodeCache.set(cache);
   }
 
-  private findNode(id: string): TreeNode | null {
-    return this.nodeCache().get(id) ?? null;
+  private _getSiblings(parentId: TreeId): TreeNode<TData>[] {
+    if (!parentId) return this.nodes() as TreeNode<TData>[];
+    return this._findNode(parentId)?.children ?? [];
   }
 
-  private isValidDrop(dragData: DragData, dropData: DropData): boolean {
-    const dragNode = this.findNode(dragData.id);
-    if (!dragNode) return false;
-
-    if (dropData.where === 'root') {
-      return this.canDrop()({ drag: dragNode, drop: null, where: 'root' });
-    }
-
-    // Prevent dropping item onto itself
-    if (dragData.id === dropData.id) return false;
-
-    const targetNode = this.findNode(dropData.id);
-    if (!targetNode) return false;
-    if (this.isNodeAncestor(dragData.id, dropData.id)) return false;
-    if (dropData.where === 'inside' && !this.isFolder(targetNode)) return false;
-
-    return this.canDrop()({ drag: dragNode, drop: targetNode, where: dropData.where });
-  }
-
-  // removed disallowed hover evaluation
-
-  private isNodeAncestor(ancestorId: string, possibleDescendantId: string): boolean {
-    const ancestorNode = this.findNode(ancestorId);
-    if (!ancestorNode?.children) return false;
-
-    const stack = [...ancestorNode.children];
+  private readonly _findNode = (id: TreeId): TreeNode<TData> | null => {
+    const stack = [...this.nodes()] as TreeNode<TData>[];
     while (stack.length) {
       const node = stack.pop()!;
-      if (node.id === possibleDescendantId) return true;
-      if (node.children) stack.push(...node.children);
+      if (node.id === id) return node;
+      if (node.children?.length) {
+        stack.push(...node.children);
+      }
     }
-    return false;
+    return null;
+  };
+
+  private _buildInstructionFromHover(
+    dragId: TreeId,
+    hover: HoverTarget,
+  ): MoveInstruction | null {
+    return this._dragService.buildInstructionFromHover<TData>(
+      dragId,
+      hover,
+      this._findNode.bind(this),
+      () => this.nodes() as TreeNode<TData>[],
+      (node: TreeNode<TData>) => node.children !== undefined,
+      this._isNodeAncestor.bind(this),
+      this.canDrop(),
+    );
   }
 
-  toggle(node: TreeNode): void {
-    if (!node.children?.length) return;
-    node.expanded = !node.expanded;
-    // trigger change and update cache
-    const updatedNodes = [...this.nodes()];
+  private _applyInstruction(instr: MoveInstruction): boolean {
+    const updatedNodes = moveNode<TData>(this.nodes() as TreeNode<TData>[], instr);
     this.nodes.set(updatedNodes);
-    this.rebuildNodeCache(updatedNodes);
-    this.updated.emit(this.nodes());
+    this.moved.emit(instr);
+    return true;
   }
 
-  // Imperative update: replace tree data and rebuild cache
-  update(nodes: TreeNode[]): void {
-    this.nodes.set(nodes ?? []);
-    this.rebuildNodeCache(this.nodes());
-    this.updated.emit(this.nodes());
-  }
+  /**
+   * Checks if one node is an ancestor of another.
+   * This prevents users from dropping a folder into itself or its descendants,
+   * which would create invalid tree structures.
+   *
+   * Example: Can't drag "Folder A" into "Folder A/Subfolder B"
+   */
+  private readonly _isNodeAncestor = (
+    ancestorId: TreeId,
+    possibleDescendantId: TreeId,
+  ): boolean => {
+    const ancestorNode = this._findNode(ancestorId);
+    if (!ancestorNode?.children) return false;
 
-  private flashJustDropped(id: string): void {
-    if (typeof window === 'undefined') {
-      return;
+    let found = false;
+    this._traverseNodes(ancestorNode.children as TreeNode<TData>[], (node) => {
+      if (node.id === possibleDescendantId) {
+        found = true;
+      }
+    });
+    return found;
+  };
+
+  /**
+   * Extracts and validates drag data as a TreeId.
+   *
+   * CDK drag events type item.data as 'any', but we set [cdkDragData]="node.id"
+   * so we expect it to be a TreeId (string). This function provides runtime validation:
+   * 1. Checks if data is a non-empty string
+   * 2. Verifies the string is actually a valid node ID in our tree
+   *
+   * This prevents issues from malformed drag data or external drag sources.
+   */
+  private _extractDragId(data: unknown): TreeId | null {
+    if (typeof data === 'string' && data.length > 0) {
+      // Verify this is actually a node ID that exists in our tree
+      const node = this._findNode(data);
+      return node ? data : null;
     }
+    return null;
+  }
+
+  private _flashJustDropped(id: TreeId): void {
+    if (typeof window === 'undefined') return;
+
     this.justDroppedId.set(id);
     if (this._dropFlashTimer) clearTimeout(this._dropFlashTimer);
     this._dropFlashTimer = window.setTimeout(() => {
       if (this.justDroppedId() === id) this.justDroppedId.set(null);
-    }, 300);
+    }, TREE_CONSTANTS.DROP_FLASH_DURATION);
   }
 }
