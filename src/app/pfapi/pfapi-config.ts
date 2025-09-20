@@ -65,7 +65,7 @@ import {
 } from '../plugins/plugin-persistence.model';
 import { menuTreeInitialState } from '../features/menu-tree/store/menu-tree.reducer';
 
-export const CROSS_MODEL_VERSION = 4.2 as const;
+export const CROSS_MODEL_VERSION = 4.3 as const;
 
 export type PfapiAllModelCfg = {
   project: ModelCfg<ProjectState>;
