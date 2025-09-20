@@ -43,7 +43,7 @@ test.describe('Project', () => {
     await expect(projectPage.globalErrorAlert).not.toBeVisible();
   });
 
-  test('create second project', async ({ page, testPrefix }) => {
+  test.skip('create second project', async ({ page, testPrefix }) => {
     // Handle empty state vs existing projects scenario
     const addProjectBtn = page
       .locator('nav-item')

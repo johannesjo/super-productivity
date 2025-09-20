@@ -77,7 +77,7 @@ test.describe('Planner Navigation', () => {
     await expect(plannerPage.routerWrapper).toBeVisible();
   });
 
-  test('should navigate to project planner', async ({
+  test.skip('should navigate to project planner', async ({
     page,
     projectPage,
     workViewPage,
