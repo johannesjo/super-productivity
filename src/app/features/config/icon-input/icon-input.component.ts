@@ -55,10 +55,7 @@ export class IconInputComponent extends FieldType<FormlyFieldConfig> {
     if (hasEmoji) {
       const firstEmoji = extractFirstEmoji(val);
 
-      if (firstEmoji && isSingleEmoji(firstEmoji)) {
-        this.formControl.setValue(firstEmoji);
-        this.isEmoji.set(true);
-      } else if (firstEmoji) {
+      if (firstEmoji) {
         this.formControl.setValue(firstEmoji);
         this.isEmoji.set(true);
       } else {
@@ -93,7 +90,7 @@ export class IconInputComponent extends FieldType<FormlyFieldConfig> {
     if (pastedText) {
       const firstEmoji = extractFirstEmoji(pastedText);
 
-      if (firstEmoji) {
+      if (firstEmoji && isSingleEmoji(firstEmoji)) {
         this.formControl.setValue(firstEmoji);
         this.isEmoji.set(true);
       }

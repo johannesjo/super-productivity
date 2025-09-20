@@ -334,8 +334,8 @@ const appCloseHandler = (app: App): void => {
 
   mainWin.on('closed', () => {
     // Dereference the window object
-    mainWin = null as any;
-    mainWinModule.win = undefined;
+    mainWin = null;
+    mainWinModule.win = null;
   });
 
   mainWin.webContents.on('render-process-gone', (event, detailed) => {
