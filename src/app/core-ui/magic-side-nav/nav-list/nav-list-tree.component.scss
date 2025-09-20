@@ -10,19 +10,17 @@
   display: flex;
   align-items: center;
   position: relative;
+  overflow: hidden;
 
   // Hide additional buttons by default on desktop
   .additional-btns {
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.2s ease;
+    display: none;
   }
 
   // Show additional buttons on focus/hover (desktop)
   &:focus-within .additional-btns,
   &:hover .additional-btns {
-    opacity: 1;
-    visibility: visible !important;
+    display: flex;
   }
 
   // Folder header drop zone styling
@@ -51,10 +49,7 @@
 
 .additional-btns {
   display: flex;
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
+  margin-left: auto;
 }
 
 .additional-btn {

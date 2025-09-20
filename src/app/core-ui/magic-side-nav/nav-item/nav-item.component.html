@@ -67,7 +67,7 @@
       [class.expanded]="expanded()"
       [class.collapsed]="!expanded()"
     >
-      chevron_right
+      expand_more
     </mat-icon>
     @if (label()) {
       <span
@@ -80,19 +80,9 @@
     }
   </button>
 
-  <button
-    [style.visibility]="showMoreButton() ? 'visible' : 'hidden'"
-    #folderSettingsBtn
-    class="additional-btn"
-    mat-icon-button
-  >
-    <mat-icon>more_vert</mat-icon>
-  </button>
-
   <context-menu
     [contextMenu]="folderContextMenu"
     [rightClickTriggerEl]="folderBtn"
-    [leftClickTriggerEl]="folderSettingsBtn"
   ></context-menu>
 
   <ng-template #folderContextMenu>

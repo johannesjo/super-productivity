@@ -1,13 +1,11 @@
 <div class="g-multi-btn-wrapper">
   <nav-item
-    [mode]="'folder'"
-    [container]="null"
-    [folderId]="item().id"
+    [container]="'group'"
     [expanded]="isExpanded()"
     [ariaControls]="'group-' + item().id"
     [icon]="item().icon"
     [svgIcon]="item().svgIcon"
-    [label]="item().label"
+    [label]="item().label | translate"
     [showLabels]="showLabels()"
     (clicked)="onHeaderClick()"
   ></nav-item>
@@ -62,13 +60,12 @@
       >
         <div class="nav-child-item folder-item draggable">
           <nav-item
-            [container]="'action'"
+            [mode]="'folder'"
+            [folderId]="node.data?.kind === 'folder' ? node.data.id : ''"
             [expanded]="expanded"
-            [icon]="expanded ? 'folder_open' : 'folder'"
             [label]="node.data?.kind === 'folder' ? node.data.name : node.data.label"
             [variant]="'nav'"
             [showLabels]="showLabels()"
-            [showMoreButton]="false"
             (clicked)="onChildClick(node)"
           ></nav-item>
         </div>
