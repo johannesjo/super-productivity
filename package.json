@@ -158,7 +158,7 @@
     "@angular/material": "^20.1.5",
     "@angular/platform-browser": "^20.1.6",
     "@angular/platform-browser-dynamic": "^20.1.6",
-    "@angular/platform-server": "^20.1.6",
+    "@angular/platform-server": "^20.3.0",
     "@angular/router": "^20.1.6",
     "@angular/service-worker": "^20.1.6",
     "@atlaskit/pragmatic-drag-and-drop": "^1.7.7",
