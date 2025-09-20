@@ -13,21 +13,14 @@
     mat-menu-item
     (click)="clicked.emit()"
   >
-    @if (isWorkContextEmojiIcon()) {
-      <span
-        class="nav-icon nav-icon-emoji"
-        style="color: {{ workContext()?.theme.primary }}"
-        [class.drag-handle]="defaultIcon() !== 'today' && defaultIcon() !== 'inbox'"
-        >{{ workContext()!.icon || defaultIcon() }}
-      </span>
-    } @else {
-      <mat-icon
-        class="nav-icon"
-        style="color: {{ workContext()?.theme.primary }}"
-        [class.drag-handle]="defaultIcon() !== 'today' && defaultIcon() !== 'inbox'"
-        >{{ workContext()!.icon || defaultIcon() }}
-      </mat-icon>
-    }
+    <mat-icon
+      class="nav-icon"
+      style="color: {{ workContext()?.theme.primary }}"
+      [class.nav-icon-emoji]="isWorkContextEmojiIcon()"
+      [class.drag-handle]="defaultIcon() !== 'today' && defaultIcon() !== 'inbox'"
+      >{{ workContext()!.icon || defaultIcon() }}
+    </mat-icon>
+
     <span
       class="nav-label"
       [class.label-hidden]="!showLabels()"
