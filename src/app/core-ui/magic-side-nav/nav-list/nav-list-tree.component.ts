@@ -158,12 +158,16 @@ export class NavListTreeComponent {
 
   private _toTreeNode(node: MenuTreeViewNode): TreeNode<MenuTreeViewNode> {
     if (node.kind === 'folder') {
+      const children = node.children.map((child) => this._toTreeNode(child));
+      // Always expand empty folders
+      const shouldExpand = children.length === 0 ? true : node.isExpanded;
+
       return {
         id: `folder-${node.id}`,
         isFolder: true,
-        expanded: node.isExpanded,
+        expanded: shouldExpand,
         data: node,
-        children: node.children.map((child) => this._toTreeNode(child)),
+        children,
       } satisfies TreeNode<MenuTreeViewNode>;
     }
     if (node.kind === 'project') {
