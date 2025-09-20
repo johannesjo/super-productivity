@@ -13,6 +13,7 @@ import {
   WorkContextType,
 } from '../../../features/work-context/work-context.model';
 import { Project } from '../../../features/project/project.model';
+import { DEFAULT_PROJECT_ICON } from '../../../features/project/project.const';
 import { WorkContextMenuComponent } from '../../work-context-menu/work-context-menu.component';
 import { FolderContextMenuComponent } from '../../folder-context-menu/folder-context-menu.component';
 import { ContextMenuComponent } from '../../../ui/context-menu/context-menu.component';
@@ -72,7 +73,7 @@ export class NavItemComponent {
   // Work context inputs
   workContext = input<WorkContextCommon | null>(null);
   type = input<WorkContextType | null>(null);
-  defaultIcon = input<string>('list_alt');
+  defaultIcon = input<string>(DEFAULT_PROJECT_ICON);
   activeWorkContextId = input<string>('');
 
   // Folder inputs

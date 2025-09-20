@@ -117,11 +117,6 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     validate: appDataValidators.project,
     repair: fixEntityStateConsistency,
   },
-  menuTree: {
-    defaultData: menuTreeInitialState,
-    isMainFileModel: true,
-    validate: appDataValidators.menuTree,
-  },
   tag: {
     defaultData: initialTagState,
     isMainFileModel: true,
@@ -148,7 +143,6 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     validate: appDataValidators.taskRepeatCfg,
     repair: fixEntityStateConsistency,
   },
-
   reminders: {
     defaultData: [],
     isMainFileModel: true,
@@ -164,8 +158,14 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     isMainFileModel: true,
     validate: appDataValidators.boards,
   },
+  // we put it in main file model because it is likely as notes to get changed
+  menuTree: {
+    defaultData: menuTreeInitialState,
+    validate: appDataValidators.menuTree,
+  },
 
   //-------------------------------
+
   pluginUserData: {
     defaultData: initialPluginUserDataState,
     validate: appDataValidators.pluginUserData,

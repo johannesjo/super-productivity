@@ -27,6 +27,7 @@ import {
 } from '../../../features/menu-tree/store/menu-tree.model';
 import { MenuTreeService } from '../../../features/menu-tree/menu-tree.service';
 import { WorkContextType } from '../../../features/work-context/work-context.model';
+import { DEFAULT_PROJECT_ICON } from '../../../features/project/project.const';
 
 @Component({
   selector: 'nav-list-tree',
@@ -59,6 +60,7 @@ export class NavListTreeComponent {
 
   readonly T = T;
   readonly WorkContextType = WorkContextType;
+  readonly DEFAULT_PROJECT_ICON = DEFAULT_PROJECT_ICON;
 
   // Access to service methods and data for visibility menu
   readonly allProjectsExceptInbox = this._navConfigService.allProjectsExceptInbox;
@@ -215,7 +217,7 @@ export class NavListTreeComponent {
 
   private _toProjectNavItem(node: MenuTreeViewProjectNode): NavItem {
     const project = node.project;
-    const icon = project.icon || 'list_alt';
+    const icon = project.icon || DEFAULT_PROJECT_ICON;
     return {
       type: 'workContext',
       id: `project-${project.id}`,
