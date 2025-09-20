@@ -1,3 +1,53 @@
+# [15.1.0-rc.0](https://github.com/johannesjo/super-productivity/compare/v15.0.3...v15.1.0-rc.0) (2025-09-20)
+
+### Bug Fixes
+
+- electron error ([d5ec716](https://github.com/johannesjo/super-productivity/commit/d5ec716c8cb3e0c1478f130f5500cb36fa852be6))
+- improve emoji detection and remove unnecessary code ([c23788a](https://github.com/johannesjo/super-productivity/commit/c23788ab794cb565d835bade88f1bd860dc85ff5))
+- nav items ([3778cfa](https://github.com/johannesjo/super-productivity/commit/3778cfab2ff11231f6bc8786fb68620c047a05a8))
+- properly handle single emoji as project icon ([3696d62](https://github.com/johannesjo/super-productivity/commit/3696d62fbaaabe66b573ea0e61fdf173eb84d26f))
+- ready to work button not working when there are no tasks ([552d778](https://github.com/johannesjo/super-productivity/commit/552d778df860822ff83c3b2867cce6ae91e1a0d5))
+
+### Features
+
+- add cross model migration 4.3 for menuTree backwards compatibility ([5c6b7fd](https://github.com/johannesjo/super-productivity/commit/5c6b7fd6b93c7429880159f8003cea38e2deb680))
+- add emoji support to magic side nav items ([38d9d20](https://github.com/johannesjo/super-productivity/commit/38d9d205ca2ad46417986c6d7e5f6f00dde817b6))
+- add one time opt out for productivity snack ([c5740a7](https://github.com/johannesjo/super-productivity/commit/c5740a76ca336042927ab0167982535ec28b143c))
+- color icons ([134f355](https://github.com/johannesjo/super-productivity/commit/134f3559af0f0573a5b29861c93b055dfc6007fd))
+- improve emoji styling in nav ([b2c1f07](https://github.com/johannesjo/super-productivity/commit/b2c1f07f2ff62e27e6b3104fae2e40a685c0ec42))
+- **projectFolders:** add edit folder context menu ([7c5fffc](https://github.com/johannesjo/super-productivity/commit/7c5fffccc48a533c06ca59afef7f1d290a68f6fb))
+- **projectFolders:** add new ui component ([dbb3eb0](https://github.com/johannesjo/super-productivity/commit/dbb3eb02f795b89f46efd7ca515683dc7f0d968f))
+- **projectFolders:** always expand empty folders ([c2dc29b](https://github.com/johannesjo/super-productivity/commit/c2dc29b8857efd01b00506e2924671d54fae47ef))
+- **projectFolders:** better style folders ([0dcba57](https://github.com/johannesjo/super-productivity/commit/0dcba57221f534fb7ac2a475f58591caa9ed963a))
+- **projectFolders:** better tree component using angular cdk drag and drop ([268656d](https://github.com/johannesjo/super-productivity/commit/268656d9cffefbfb003b61c38b36865e5224bdfe))
+- **projectFolders:** change default project icon ([c2427c6](https://github.com/johannesjo/super-productivity/commit/c2427c694dd41efcbc117742b1a6ae737de23650))
+- **projectFolders:** extract default project icon ([cd71c4e](https://github.com/johannesjo/super-productivity/commit/cd71c4eebf07ddf63b8acb81e8c3002c2634e2a7))
+- **projectFolders:** first working draft ([e669037](https://github.com/johannesjo/super-productivity/commit/e669037c1754d546798ac270955a129c07569d41))
+- **projectFolders:** improve ([d795b4f](https://github.com/johannesjo/super-productivity/commit/d795b4fdb4778315ab7b4cfdfac9d4d698488774))
+- **projectFolders:** improve code quality and extract translations ([7dc91c1](https://github.com/johannesjo/super-productivity/commit/7dc91c1b6a8eb731e38731d10ef436ca09954345))
+- **projectFolders:** improve styling ([66f52e8](https://github.com/johannesjo/super-productivity/commit/66f52e8e138ffb61d00ca3f61ee1354eaa240c10))
+- **projectFolders:** improve styling ([cb66932](https://github.com/johannesjo/super-productivity/commit/cb669327055ce2e518825d953caef8888d34910c))
+- **projectFolders:** make all the buttons and context menus work better ([5ebd758](https://github.com/johannesjo/super-productivity/commit/5ebd7586896dcdebd68754c48c1676f2925e123e))
+- **projectFolders:** make animation work ([28f940b](https://github.com/johannesjo/super-productivity/commit/28f940b744df4091f1be40beb890a255362ac7bf))
+- **projectFolders:** make it basic drag and drop work via pragmatic drag and drop ([c11ae6e](https://github.com/johannesjo/super-productivity/commit/c11ae6e5e931e9029234cb75e4ac44ff0338c24a))
+- **projectFolders:** make it work ([2993525](https://github.com/johannesjo/super-productivity/commit/2993525bf507ba530d4cb00c184d3a962017cdec))
+- **projectFolders:** make it work half way well ([cab1833](https://github.com/johannesjo/super-productivity/commit/cab1833635abb4dc31269447cdd2216421680b47))
+- **projectFolders:** make model smaller ([327b1d3](https://github.com/johannesjo/super-productivity/commit/327b1d37d43ea329c7046e321da9eaadabab67c3))
+- **projectFolders:** make new tree model work ([cd41dbb](https://github.com/johannesjo/super-productivity/commit/cd41dbbe9a66379aebed12dca05d9663fddc59ce))
+- **projectFolders:** make persisting folder order work ([9332bd4](https://github.com/johannesjo/super-productivity/commit/9332bd4701f69a91bf1d7253fbd50420de499466))
+- **projectFolders:** make project folder name change or deletion work ([132a560](https://github.com/johannesjo/super-productivity/commit/132a560fc7037242ea8c483862a42146c78494a4))
+- **projectFolders:** make project folder persistence work ([fbe45fe](https://github.com/johannesjo/super-productivity/commit/fbe45fe2362503c78986245fa9502aaf2e4b6d3a))
+- **projectFolders:** make project sort inside folder work ([a10fc62](https://github.com/johannesjo/super-productivity/commit/a10fc626638ac3b758a12b585944d0342b84a605))
+- **projectFolders:** make ui updates work well ([e26ac08](https://github.com/johannesjo/super-productivity/commit/e26ac0857eb535beb33777a69ab9875f7cd3b807))
+- **projectFolders:** outline project folder db stuff ([ca963de](https://github.com/johannesjo/super-productivity/commit/ca963de576c32585040c3a2189772073215f285d))
+- **projectFolders:** properly connect folder buttons ([960414e](https://github.com/johannesjo/super-productivity/commit/960414e8008454dbebab80a336bfe9d0d50e66a1))
+- **projectFolders:** update ui component ([105909c](https://github.com/johannesjo/super-productivity/commit/105909cb6bbec36a91a4992ee28531b52689df3e))
+- **projectFolders:** update ui component ([cc501a9](https://github.com/johannesjo/super-productivity/commit/cc501a9c66f2a17a4fdc4248a06421097f89a26b))
+
+### Performance Improvements
+
+- comprehensive emoji utilities optimization and consolidation ([2ca5d7b](https://github.com/johannesjo/super-productivity/commit/2ca5d7b1d371893c0ecce243f50660967dfa1f2a))
+
 ## [15.0.3](https://github.com/johannesjo/super-productivity/compare/v15.0.2...v15.0.3) (2025-09-18)
 
 ### Bug Fixes
