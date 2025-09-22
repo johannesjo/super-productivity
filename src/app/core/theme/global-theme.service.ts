@@ -189,6 +189,13 @@ export class GlobalThemeService {
     return Promise.all(iconPromises);
   }
 
+  registerSvgIcon(iconName: string, url: string): void {
+    this._matIconRegistry.addSvgIcon(
+      iconName,
+      this._domSanitizer.bypassSecurityTrustResourceUrl(url),
+    );
+  }
+
   private _initThemeWatchers(): void {
     // init theme watchers
     this._workContextService.currentTheme$.subscribe((theme: WorkContextThemeCfg) =>

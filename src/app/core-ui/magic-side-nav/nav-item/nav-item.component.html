@@ -189,7 +189,7 @@
           [class.expand-icon]="container() === 'group' && svgIcon() === 'expand_more'"
           [class.icon--svg]="true"
           [class.icon--early-on]="svgIcon() === 'early_on'"
-          [svgIcon]="svgIcon()"
+          [svgIcon]="namedSvgIcon()"
         ></mat-icon>
       } @else if (icon()) {
         <mat-icon
