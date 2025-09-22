@@ -337,14 +337,20 @@ export class MagicNavConfigService {
   private _buildPluginItems(): NavItem[] {
     const pluginEntries = this._pluginMenuEntries();
 
-    return pluginEntries.map((entry) => ({
-      type: 'plugin',
-      id: `plugin-${entry.pluginId}-${entry.label}`,
-      label: entry.label,
-      icon: entry.icon || 'extension',
-      pluginId: entry.pluginId,
-      action: entry.onClick,
-    }));
+    return pluginEntries.map((entry) => {
+      const hasSvgIcon = /\.svg$/i.test(entry.icon || '');
+      return {
+        type: 'plugin',
+        id: `plugin-${entry.pluginId}-${entry.label}`,
+        label: entry.label,
+        icon: entry.icon || 'extension',
+        ...(hasSvgIcon && {
+          svgIcon: `assets/bundled-plugins/${entry.pluginId}/${entry.icon}`,
+        }),
+        pluginId: entry.pluginId,
+        action: entry.onClick,
+      };
+    });
   }
 
   // Public computed signals for expansion state (for component to check)
