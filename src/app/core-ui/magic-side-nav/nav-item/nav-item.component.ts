@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { RouterLink, RouterModule } from '@angular/router';
 
+import { GlobalThemeService } from '../../../core/theme/global-theme.service';
 import {
   WorkContextCommon,
   WorkContextType,
@@ -59,6 +60,7 @@ import { isSingleEmoji } from '../../../util/extract-first-emoji';
   standalone: true,
 })
 export class NavItemComponent {
+  private readonly _globalThemeService = inject(GlobalThemeService);
   private readonly _store = inject(Store);
 
   mode = input<'work' | 'folder' | 'row'>('work');
@@ -139,5 +141,26 @@ export class NavItemComponent {
   isPresentationalEmojiIcon = computed<boolean>(() => {
     const iconValue = this.icon();
     return iconValue ? isSingleEmoji(iconValue) : false;
+  });
+
+  namedSvgIcon = computed<string | undefined>(() => {
+    const svgUrl = this.svgIcon();
+    if (svgUrl && svgUrl.startsWith('assets/')) {
+      const match = svgUrl.match(/bundled-plugins\/([^\/]+)\/([^\/]+\.svg)$/);
+      let iconName: string;
+      if (match) {
+        // Prefix icon names with plugin ID to avoid collision.
+        // Not strictly required, but without this, two plugins
+        // could register the same icons and override each other.
+        const pluginId = match[1];
+        const fileName = match[2].replace('.svg', '');
+        iconName = `plugin-${pluginId}-${fileName}`;
+      } else {
+        iconName = svgUrl.replace(/\//g, '_').replace(/\.svg$/, '');
+      }
+      this._globalThemeService.registerSvgIcon(iconName, svgUrl);
+      return iconName;
+    }
+    return this.svgIcon();
   });
 }
