@@ -24,16 +24,17 @@
  * normalizeKeyCode("+"); // Returns "+"
  */
 export const prepareKeyCode = (code: string): string => {
-  const rules: { codeMapping: Record<string, string>; replaces: Record<string, string> } = {
-    codeMapping: {
-      Minus: '-',
-      Equal: '+',
-    },
-    replaces: {
-      Key: '',
-      Digit: '',
-    },
-  };
+  const rules: { codeMapping: Record<string, string>; replaces: Record<string, string> } =
+    {
+      codeMapping: {
+        Minus: '-',
+        Equal: '+',
+      },
+      replaces: {
+        Key: '',
+        Digit: '',
+      },
+    };
 
   // ! Replace prefixes (that's just the format of `e.code`)
   // - "Key" prefix
@@ -62,7 +63,10 @@ export const prepareKeyCode = (code: string): string => {
  * // Suppose Shift and A are pressed
  * checkKeyCombo(event, "Ctrl+A"); // Returns false
  */
-export const checkKeyCombo = (ev: KeyboardEvent, comboToTest: string | null | undefined): boolean => {
+export const checkKeyCombo = (
+  ev: KeyboardEvent,
+  comboToTest: string | null | undefined,
+): boolean => {
   // NOTE: comboToTest can sometimes be undefined
   if (!comboToTest) return false;
 
@@ -76,7 +80,11 @@ export const checkKeyCombo = (ev: KeyboardEvent, comboToTest: string | null | un
   };
 
   // Corner case: only "+" key (without any modifiers)
-  if (comboToTest === '+' && pressedKey === '+' && Object.values(modifiersStatus).every((x) => !x)) {
+  if (
+    comboToTest === '+' &&
+    pressedKey === '+' &&
+    Object.values(modifiersStatus).every((x) => !x)
+  ) {
     return true;
   }
 
@@ -89,12 +97,15 @@ export const checkKeyCombo = (ev: KeyboardEvent, comboToTest: string | null | un
   const standardKey = comboKeys.pop();
 
   // Check all required modifiers in combo
-  const isCorrectModifierPressed = comboKeys.every((comboKey) => modifiersStatus[comboKey]);
+  const isCorrectModifierPressed = comboKeys.every(
+    (comboKey) => modifiersStatus[comboKey],
+  );
 
   // Check ...
   const isCorrectKeyPressed =
     // Convert keys to lowercase for more comatibility
-    pressedKey.toLowerCase() === standardKey?.toLowerCase() || (isPlusKey && pressedKey === '+');
+    pressedKey.toLowerCase() === standardKey?.toLowerCase() ||
+    (isPlusKey && pressedKey === '+');
 
   return isCorrectModifierPressed && isCorrectKeyPressed;
 };

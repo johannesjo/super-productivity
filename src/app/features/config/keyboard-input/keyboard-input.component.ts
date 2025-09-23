@@ -33,7 +33,16 @@ export class KeyboardInputComponent extends FieldType<FormlyFieldConfig> {
     if (keyCode === 'Escape') {
       this.formControl.setValue(null);
       if (ev.target instanceof HTMLElement) ev.target.blur();
-    } else if (['ShiftLeft', 'ShiftRight', 'ControlLeft', 'ControlRight', 'AltLeft', 'AltRight'].includes(keyCode)) {
+    } else if (
+      [
+        'ShiftLeft',
+        'ShiftRight',
+        'ControlLeft',
+        'ControlRight',
+        'AltLeft',
+        'AltRight',
+      ].includes(keyCode)
+    ) {
       // Don't update if event is for ctrl alt or shift down itself
       return;
     } else {
