@@ -8,20 +8,20 @@
  *
  * @example
  * // letters
- * normalizeKeyCode("KeyA"); // Returns "A"
- * normalizeKeyCode("A"); // Returns "A"
+ * prepareKeyCode("KeyA"); // Returns "A"
+ * prepareKeyCode("A"); // Returns "A"
  *
  * // digits
- * normalizeKeyCode("Digit1"); // Returns "1"
- * normalizeKeyCode("1"); // Returns "1"
+ * prepareKeyCode("Digit1"); // Returns "1"
+ * prepareKeyCode("1"); // Returns "1"
  *
  * // minus
- * normalizeKeyCode("Minus"); // Returns "-"
- * normalizeKeyCode("-"); // Returns "-"
+ * prepareKeyCode("Minus"); // Returns "-"
+ * prepareKeyCode("-"); // Returns "-"
  *
  * // plus
- * normalizeKeyCode("Equal"); // Returns "+"
- * normalizeKeyCode("+"); // Returns "+"
+ * prepareKeyCode("Equal"); // Returns "+"
+ * prepareKeyCode("+"); // Returns "+"
  */
 export const prepareKeyCode = (code: string): string => {
   const rules: { codeMapping: Record<string, string>; replaces: Record<string, string> } =
