@@ -76,6 +76,7 @@ import { getDbDateStr } from '../../../util/get-db-date-str';
 import { isMarkdownChecklist } from '../../markdown-checklist/is-markdown-checklist';
 import { Log } from '../../../core/log';
 import { isInputElement } from '../../../util/dom-element';
+import { checkKeyCombo } from '../../../util/check-key-combo';
 
 @Component({
   selector: 'task-detail-panel',
@@ -154,9 +155,7 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
     if (!cfg) throw new Error('No config service available');
 
     const keys = cfg.keyboard;
-    const matchesKeybinding = keys.taskToggleDetailPanelOpen === ev.key;
-
-    if (matchesKeybinding) this.collapseParent();
+    if (checkKeyCombo(ev, keys.taskToggleDetailPanelOpen)) this.collapseParent();
   }
 
   // Parent task data
