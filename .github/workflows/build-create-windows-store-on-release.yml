@@ -19,7 +19,7 @@ jobs:
     if: '!github.event.release.prerelease'
 
     steps:
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v5
         with:
           node-version: 20
       # required because setting via env.TZ does not work on windows
