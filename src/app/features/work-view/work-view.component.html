@@ -173,12 +173,17 @@
         @if (customizedUndoneTasks(); as customized) {
           @if (customized.grouped) {
             @for (group of customized.grouped | keyvalue; track group.key) {
-              <h3>{{ group.key }}</h3>
-              <task-list
-                [tasks]="group.value"
-                listId="PARENT"
-                listModelId="UNDONE"
-              ></task-list>
+              <collapsible
+                [title]="group.key"
+                [isIconBefore]="true"
+                [isExpanded]="true"
+              >
+                <task-list
+                  [tasks]="group.value"
+                  listId="PARENT"
+                  listModelId="UNDONE"
+                ></task-list>
+              </collapsible>
             }
           } @else {
             <task-list
