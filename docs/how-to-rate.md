@@ -58,5 +58,9 @@
 # Other places to leave review
 
 https://www.producthunt.com/products/super-productivity
+
 https://play.google.com/store/apps/details?id=com.superproductivity.superproductivity
+
 https://www.pling.com/p/1352584/
+
+https://alternativeto.net/software/super-productivity/about/
