@@ -66,7 +66,13 @@ customDateParser.refiners.push({
   },
 });
 
-const SHORT_SYNTAX_PROJECT_REG_EX = new RegExp(`\\${CH_PRO}[^${ALL_SPECIAL}]+`, 'gi');
+// The following project name extraction pattern attempts to improve on the
+// previous version by not immediately terminating upon encountering a short
+// syntax delimiting character and looks ahead to consider usage context
+const SHORT_SYNTAX_PROJECT_REG_EX = new RegExp(
+  `\\${CH_PRO}((?:(?!\\s+(?:\\${CH_TAG}|\\${CH_DUE}|t?\\d+[mh]\\b)).)+)`,
+  'i',
+);
 const SHORT_SYNTAX_TAGS_REG_EX = new RegExp(`\\${CH_TAG}[^${ALL_SPECIAL}|\\s]+`, 'gi');
 
 // Literal notation: /\@[^\+|\#|\@]/gi
@@ -198,7 +204,10 @@ const parseProjectChanges = (
 
     if (existingProject) {
       return {
-        title: task.title?.replace(`${CH_PRO}${projectTitle}`, '').trim(),
+        title: task.title
+          ?.replace(`${CH_PRO}${projectTitle}`, '')
+          .trim()
+          .replace('  ', ' '),
         projectId: existingProject.id,
       };
     }
