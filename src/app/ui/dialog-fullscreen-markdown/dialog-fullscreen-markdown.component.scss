@@ -14,6 +14,11 @@
   }
 }
 
+// Add padding on macOS Electron to avoid traffic light buttons
+:host-context(.isMac.isElectron) {
+  padding-top: var(--mac-title-bar-padding);
+}
+
 .content {
   flex-grow: 1;
   position: relative;
