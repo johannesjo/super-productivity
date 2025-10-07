@@ -30,6 +30,8 @@ header {
   z-index: 10;
   color: var(--text-color);
   background: var(--bg-lighter);
+  // to account for scrollbar
+  padding-right: 11px;
 }
 
 .main-controls {
@@ -74,19 +76,17 @@ header {
 .days.month-view {
   display: block;
   grid-template-columns: none;
-  padding-bottom: 6px;
 
   .month-header {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 8px 16px;
+    padding: 6px 16px;
 
     .month-title {
       font-size: 20px;
       font-weight: 600;
-      margin-bottom: 6px;
 
       @include mq(xs, max) {
         font-size: 16px;
