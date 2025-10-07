@@ -1,3 +1,21 @@
+# [15.1.0](https://github.com/johannesjo/super-productivity/compare/v15.1.0-rc.0...v15.1.0) (2025-10-07)
+
+### Bug Fixes
+
+- **boards:** not correctly navigating to the newly created board [#5211](https://github.com/johannesjo/super-productivity/issues/5211) ([6dc1922](https://github.com/johannesjo/super-productivity/commit/6dc1922fb9ee3c941985049e443a4a9749d93c80))
+- day of week header missing [#5168](https://github.com/johannesjo/super-productivity/issues/5168) ([699e244](https://github.com/johannesjo/super-productivity/commit/699e24402638547255a7fa9438c410da60958618))
+- **focusMode:** issue link styling ([eeb8faf](https://github.com/johannesjo/super-productivity/commit/eeb8faf365e74d9d6afe9cc346038820220fe11f))
+- snacks showing forever ([239dec5](https://github.com/johannesjo/super-productivity/commit/239dec5b194fddf8d488bb8b75275d9f7731def2))
+
+### Features
+
+- **projectFolders:** add data validation and repair ([beb29db](https://github.com/johannesjo/super-productivity/commit/beb29db05f23061d621013fbe7fca3c2ffa3fa15))
+- **projectFolders:** make it also work for tags ([5c0c944](https://github.com/johannesjo/super-productivity/commit/5c0c944f17eddce908f767bf10631636bca8c76f))
+- **projectFolders:** prepare to make it work for tags too ([3e98ca9](https://github.com/johannesjo/super-productivity/commit/3e98ca93b336c4a86a796bf7e478eb974cf814a5))
+- **projectFolders:** reduce size ([aa17eac](https://github.com/johannesjo/super-productivity/commit/aa17eac846a5ba75f886db999ef0cf2a680b3e19))
+- **schedule:** improve styling ([fa1482f](https://github.com/johannesjo/super-productivity/commit/fa1482ffe408f0f29fcae19b6a6b90b863a7e105))
+- show done tasks section only if there are done tasks ([61d03a8](https://github.com/johannesjo/super-productivity/commit/61d03a8ebf0196483ea3dafd2dcb08d3230244d9))
+
 # [15.1.0-rc.0](https://github.com/johannesjo/super-productivity/compare/v15.0.3...v15.1.0-rc.0) (2025-09-20)
 
 ### Bug Fixes

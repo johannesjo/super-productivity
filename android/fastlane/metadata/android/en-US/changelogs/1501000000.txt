@@ -1,0 +1,15 @@
+
+### Bug Fixes
+
+* **boards:** not correctly navigating to the newly created board #5211
+* day of week header missing #5168
+* **focusMode:** issue link styling
+* snacks showing forever
+### Features
+
+* **projectFolders:** add data validation and repair
+* **projectFolders:** make it also work for tags
+* **projectFolders:** prepare to make it work for tags too
+* **projectFolders:** reduce size
+* **schedule:** improve styling
+* show done tasks section only if there are done tasks
