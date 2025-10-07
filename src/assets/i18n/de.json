@@ -831,6 +831,24 @@
       "TOOLTIP_CREATE": "Projektordner erstellen",
       "TOOLTIP_VISIBILITY": "Projekte anzeigen/ausblenden"
     },
+    "TAG_FOLDER": {
+      "DIALOG": {
+        "CREATE_TITLE": "Ordner erstellen",
+        "EDIT_TITLE": "Ordner bearbeiten",
+        "NAME_LABEL": "Ordnername",
+        "NAME_PLACEHOLDER": "Ordnernamen eingeben",
+        "NAME_REQUIRED": "Ordnername ist erforderlich",
+        "PARENT_LABEL": "Übergeordneter Ordner",
+        "NO_PARENT": "Kein übergeordneter Ordner (Root-Ebene)"
+      },
+      "SELECT": {
+        "LABEL": "Ordner",
+        "PLACEHOLDER": "Ordner wählen",
+        "NO_PARENT": "Kein Ordner (Root-Ebene)"
+      },
+      "CONFIRM_DELETE": "Möchtest du den Ordner \"{{title}}\" wirklich löschen? Alle Tags in diesem Ordner werden auf die oberste Ebene verschoben.",
+      "TOOLTIP_CREATE": "Tag-Ordner erstellen"
+    },
     "QUICK_HISTORY": {
       "NO_DATA": "Keine Daten für das laufende Jahr",
       "PAGE_TITLE": "Schnellverlauf",

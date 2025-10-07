@@ -33,14 +33,14 @@ export class FolderContextMenuComponent {
     const folder = this._loadFolder(this.folderId);
     if (!folder) return;
 
+    const folderNs = this.treeKind === 'project' ? T.F.PROJECT_FOLDER : T.F.TAG_FOLDER;
+
     const dialogRef = this._matDialog.open(DialogPromptComponent, {
       restoreFocus: true,
       data: {
-        txtLabel: this._translateService.instant(T.F.PROJECT_FOLDER.DIALOG.NAME_LABEL),
+        txtLabel: this._translateService.instant(folderNs.DIALOG.NAME_LABEL),
         txtValue: folder.name,
-        placeholder: this._translateService.instant(
-          T.F.PROJECT_FOLDER.DIALOG.NAME_PLACEHOLDER,
-        ),
+        placeholder: this._translateService.instant(folderNs.DIALOG.NAME_PLACEHOLDER),
       },
     });
 
@@ -69,7 +69,12 @@ export class FolderContextMenuComponent {
     const folder = this._loadFolder(this.folderId);
     if (!folder) return;
 
-    const message = this._translateService.instant(T.F.PROJECT_FOLDER.CONFIRM_DELETE, {
+    const confirmKey =
+      this.treeKind === 'project'
+        ? T.F.PROJECT_FOLDER.CONFIRM_DELETE
+        : T.F.TAG_FOLDER.CONFIRM_DELETE;
+
+    const message = this._translateService.instant(confirmKey, {
       title: folder.name,
     });
 

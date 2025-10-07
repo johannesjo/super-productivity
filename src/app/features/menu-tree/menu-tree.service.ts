@@ -117,26 +117,19 @@ export class MenuTreeService {
   }
 
   createProjectFolder(name: string, parentFolderId?: string | null): void {
-    const trimmed = name.trim();
-    if (!trimmed) {
-      return;
-    }
+    this._createFolder({
+      name,
+      parentFolderId: parentFolderId ?? null,
+      treeKind: 'project',
+    });
+  }
 
-    const newFolder: MenuTreeFolderNode = {
-      kind: 'folder',
-      id: this._createFolderId(),
-      name: trimmed,
-      isExpanded: true,
-      children: [],
-    };
-
-    const currentTree = this.projectTree();
-    const nextTree = this._insertFolderNode(
-      currentTree,
-      newFolder,
-      parentFolderId ?? null,
-    );
-    this.setProjectTree(nextTree);
+  createTagFolder(name: string, parentFolderId?: string | null): void {
+    this._createFolder({
+      name,
+      parentFolderId: parentFolderId ?? null,
+      treeKind: 'tag',
+    });
   }
 
   deleteFolderFromProject(folderId: string): void {
@@ -344,5 +337,38 @@ export class MenuTreeService {
       return crypto.randomUUID();
     }
     return `folder-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  }
+
+  private _createFolder(options: {
+    name: string;
+    parentFolderId: string | null;
+    treeKind: 'project' | 'tag';
+  }): void {
+    const trimmed = options.name.trim();
+    if (!trimmed) {
+      return;
+    }
+
+    const newFolder: MenuTreeFolderNode = {
+      kind: 'folder',
+      id: this._createFolderId(),
+      name: trimmed,
+      isExpanded: true,
+      children: [],
+    };
+
+    const currentTree =
+      options.treeKind === 'project' ? this.projectTree() : this.tagTree();
+    const nextTree = this._insertFolderNode(
+      currentTree,
+      newFolder,
+      options.parentFolderId,
+    );
+
+    if (options.treeKind === 'project') {
+      this.setProjectTree(nextTree);
+    } else {
+      this.setTagTree(nextTree);
+    }
   }
 }

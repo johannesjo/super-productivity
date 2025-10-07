@@ -179,6 +179,20 @@ export class MagicNavConfigService {
                 tag,
               })),
         action: () => this._toggleTagsExpanded(),
+        additionalButtons: [
+          {
+            id: 'add-tag-folder',
+            icon: 'create_new_folder',
+            tooltip: T.F.TAG_FOLDER.TOOLTIP_CREATE,
+            action: () => this._openCreateTagFolder(),
+          },
+          {
+            id: 'add-tag',
+            icon: 'add',
+            tooltip: T.MH.CREATE_TAG,
+            action: () => this._createNewTag(),
+          },
+        ],
       },
 
       // Separator
@@ -396,6 +410,27 @@ export class MagicNavConfigService {
           return;
         }
         this._menuTreeService.createProjectFolder(trimmed);
+      });
+  }
+
+  private _openCreateTagFolder(): void {
+    this._matDialog
+      .open(DialogPromptComponent, {
+        restoreFocus: true,
+        data: {
+          placeholder: T.F.TAG_FOLDER.DIALOG.NAME_PLACEHOLDER,
+        },
+      })
+      .afterClosed()
+      .subscribe((title) => {
+        if (!title) {
+          return;
+        }
+        const trimmed = title.trim();
+        if (!trimmed) {
+          return;
+        }
+        this._menuTreeService.createTagFolder(trimmed);
       });
   }
 

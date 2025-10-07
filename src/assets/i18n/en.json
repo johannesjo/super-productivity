@@ -865,6 +865,24 @@
       "TOOLTIP_CREATE": "Create project folder",
       "TOOLTIP_VISIBILITY": "Show/hide projects"
     },
+    "TAG_FOLDER": {
+      "DIALOG": {
+        "CREATE_TITLE": "Create folder",
+        "EDIT_TITLE": "Edit folder",
+        "NAME_LABEL": "Folder name",
+        "NAME_PLACEHOLDER": "Enter folder name",
+        "NAME_REQUIRED": "Folder name is required",
+        "PARENT_LABEL": "Parent folder",
+        "NO_PARENT": "No parent (root level)"
+      },
+      "SELECT": {
+        "LABEL": "Folder",
+        "PLACEHOLDER": "Select folder",
+        "NO_PARENT": "No folder (root level)"
+      },
+      "CONFIRM_DELETE": "Are you sure you want to delete the folder \"{{title}}\"? All tags in this folder will be moved to the root level.",
+      "TOOLTIP_CREATE": "Create tag folder"
+    },
     "QUICK_HISTORY": {
       "NO_DATA": "No data for current year",
       "PAGE_TITLE": "Quick History",
