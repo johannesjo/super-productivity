@@ -9,7 +9,10 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { T } from '../../t.const';
 import { DialogPromptComponent } from '../../ui/dialog-prompt/dialog-prompt.component';
 import { MenuTreeService } from '../../features/menu-tree/menu-tree.service';
-import { MenuTreeFolderNode } from '../../features/menu-tree/store/menu-tree.model';
+import {
+  MenuTreeFolderNode,
+  MenuTreeKind,
+} from '../../features/menu-tree/store/menu-tree.model';
 
 @Component({
   selector: 'folder-context-menu',
@@ -25,7 +28,7 @@ export class FolderContextMenuComponent {
   private readonly _menuTreeService = inject(MenuTreeService);
 
   @Input() folderId!: string;
-  @Input() treeKind: 'project' | 'tag' = 'project';
+  @Input() treeKind: MenuTreeKind = MenuTreeKind.PROJECT;
 
   readonly T = T;
 
@@ -33,7 +36,8 @@ export class FolderContextMenuComponent {
     const folder = this._loadFolder(this.folderId);
     if (!folder) return;
 
-    const folderNs = this.treeKind === 'project' ? T.F.PROJECT_FOLDER : T.F.TAG_FOLDER;
+    const folderNs =
+      this.treeKind === MenuTreeKind.PROJECT ? T.F.PROJECT_FOLDER : T.F.TAG_FOLDER;
 
     const dialogRef = this._matDialog.open(DialogPromptComponent, {
       restoreFocus: true,
@@ -57,7 +61,7 @@ export class FolderContextMenuComponent {
           ? this.folderId.substring(7)
           : this.folderId;
 
-        if (this.treeKind === 'project') {
+        if (this.treeKind === MenuTreeKind.PROJECT) {
           this._menuTreeService.updateFolderInProject(cleanId, trimmed);
         } else {
           this._menuTreeService.updateFolderInTag(cleanId, trimmed);
@@ -70,7 +74,7 @@ export class FolderContextMenuComponent {
     if (!folder) return;
 
     const confirmKey =
-      this.treeKind === 'project'
+      this.treeKind === MenuTreeKind.PROJECT
         ? T.F.PROJECT_FOLDER.CONFIRM_DELETE
         : T.F.TAG_FOLDER.CONFIRM_DELETE;
 
@@ -93,7 +97,7 @@ export class FolderContextMenuComponent {
             ? this.folderId.substring(7)
             : this.folderId;
 
-          if (this.treeKind === 'project') {
+          if (this.treeKind === MenuTreeKind.PROJECT) {
             this._menuTreeService.deleteFolderFromProject(cleanId);
           } else {
             this._menuTreeService.deleteFolderFromTag(cleanId);
@@ -110,8 +114,8 @@ export class FolderContextMenuComponent {
     const tagTree = this._menuTreeService.tagTree();
 
     // Search in the appropriate tree first, then fallback to the other
-    const primaryTree = this.treeKind === 'project' ? projectTree : tagTree;
-    const secondaryTree = this.treeKind === 'project' ? tagTree : projectTree;
+    const primaryTree = this.treeKind === MenuTreeKind.PROJECT ? projectTree : tagTree;
+    const secondaryTree = this.treeKind === MenuTreeKind.PROJECT ? tagTree : projectTree;
 
     return (
       this._menuTreeService.findFolderInTree(cleanId, primaryTree) ||

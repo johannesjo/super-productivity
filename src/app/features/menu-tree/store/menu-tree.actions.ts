@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { MenuTreeTreeNode } from './menu-tree.model';
+import { MenuTreeKind, MenuTreeTreeNode } from './menu-tree.model';
 
 export const updateProjectTree = createAction(
   '[MenuTree] Update Project Tree',
@@ -13,10 +13,10 @@ export const updateTagTree = createAction(
 
 export const deleteFolder = createAction(
   '[MenuTree] Delete Folder',
-  props<{ folderId: string; treeType: 'project' | 'tag' }>(),
+  props<{ folderId: string; treeType: MenuTreeKind }>(),
 );
 
 export const updateFolder = createAction(
   '[MenuTree] Update Folder',
-  props<{ folderId: string; name: string; treeType: 'project' | 'tag' }>(),
+  props<{ folderId: string; name: string; treeType: MenuTreeKind }>(),
 );

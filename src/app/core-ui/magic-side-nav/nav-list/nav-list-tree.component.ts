@@ -21,6 +21,7 @@ import { NavItem, NavTreeItem } from '../magic-side-nav.model';
 import { MagicNavConfigService } from '../magic-nav-config.service';
 import { T } from '../../../t.const';
 import {
+  MenuTreeKind,
   MenuTreeViewFolderNode,
   MenuTreeViewNode,
   MenuTreeViewProjectNode,
@@ -69,7 +70,7 @@ export class NavListTreeComponent {
   readonly allProjectsExceptInbox = this._navConfigService.allProjectsExceptInbox;
 
   readonly treeNodes = signal<TreeNode<MenuTreeViewNode>[]>([]);
-  readonly treeKind = computed<'project' | 'tag'>(() => this.item().treeKind);
+  readonly treeKind = computed<MenuTreeKind>(() => this.item().treeKind);
 
   constructor() {
     effect(() => {

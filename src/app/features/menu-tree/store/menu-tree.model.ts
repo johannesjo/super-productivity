@@ -1,7 +1,12 @@
 import { Project } from '../../project/project.model';
 import { Tag } from '../../tag/tag.model';
 
-export type MenuTreeNodeKind = 'folder' | 'project' | 'tag';
+export enum MenuTreeKind {
+  PROJECT = 'project',
+  TAG = 'tag',
+}
+
+export type MenuTreeNodeKind = 'folder' | MenuTreeKind.PROJECT | MenuTreeKind.TAG;
 
 export interface MenuTreeState {
   projectTree: MenuTreeTreeNode[];
@@ -14,11 +19,11 @@ interface MenuTreeBaseNode {
 }
 
 export interface MenuTreeProjectNode extends MenuTreeBaseNode {
-  kind: 'project';
+  kind: MenuTreeKind.PROJECT;
 }
 
 export interface MenuTreeTagNode extends MenuTreeBaseNode {
-  kind: 'tag';
+  kind: MenuTreeKind.TAG;
 }
 
 export interface MenuTreeFolderNode extends MenuTreeBaseNode {

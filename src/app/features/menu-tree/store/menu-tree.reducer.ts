@@ -1,5 +1,5 @@
 import { createReducer, on } from '@ngrx/store';
-import { MenuTreeState, MenuTreeTreeNode } from './menu-tree.model';
+import { MenuTreeKind, MenuTreeState, MenuTreeTreeNode } from './menu-tree.model';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import {
   updateProjectTree,
@@ -85,20 +85,22 @@ export const menuTreeReducer = createReducer(
   on(deleteFolder, (state, { folderId, treeType }) => ({
     ...state,
     projectTree:
-      treeType === 'project'
+      treeType === MenuTreeKind.PROJECT
         ? _deleteFolderFromTree(state.projectTree, folderId)
         : state.projectTree,
     tagTree:
-      treeType === 'tag' ? _deleteFolderFromTree(state.tagTree, folderId) : state.tagTree,
+      treeType === MenuTreeKind.TAG
+        ? _deleteFolderFromTree(state.tagTree, folderId)
+        : state.tagTree,
   })),
   on(updateFolder, (state, { folderId, name, treeType }) => ({
     ...state,
     projectTree:
-      treeType === 'project'
+      treeType === MenuTreeKind.PROJECT
         ? _updateFolderInTree(state.projectTree, folderId, name)
         : state.projectTree,
     tagTree:
-      treeType === 'tag'
+      treeType === MenuTreeKind.TAG
         ? _updateFolderInTree(state.tagTree, folderId, name)
         : state.tagTree,
   })),

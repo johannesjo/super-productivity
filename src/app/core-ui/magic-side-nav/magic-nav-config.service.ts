@@ -22,7 +22,10 @@ import { NavConfig, NavItem } from './magic-side-nav.model';
 import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
 import { lsGetBoolean, lsSetItem } from '../../util/ls-util';
 import { MenuTreeService } from '../../features/menu-tree/menu-tree.service';
-import { MenuTreeViewNode } from '../../features/menu-tree/store/menu-tree.model';
+import {
+  MenuTreeKind,
+  MenuTreeViewNode,
+} from '../../features/menu-tree/store/menu-tree.model';
 
 @Injectable({
   providedIn: 'root',
@@ -133,7 +136,7 @@ export class MagicNavConfigService {
         id: 'projects',
         label: T.MH.PROJECTS,
         icon: 'expand_more',
-        treeKind: 'project',
+        treeKind: MenuTreeKind.PROJECT,
         tree:
           this._projectNavTree().length > 0
             ? this._projectNavTree()
@@ -170,7 +173,7 @@ export class MagicNavConfigService {
         id: 'tags',
         label: T.MH.TAGS,
         icon: 'expand_more',
-        treeKind: 'tag',
+        treeKind: MenuTreeKind.TAG,
         tree:
           this._tagNavTree().length > 0
             ? this._tagNavTree()
