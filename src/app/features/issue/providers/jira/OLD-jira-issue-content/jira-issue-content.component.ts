@@ -1,6 +1,11 @@
 import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
 import { TaskWithSubTasks } from '../../../../tasks/task.model';
-import { JiraIssue, JiraRelatedIssue, JiraSubtask } from '../jira-issue.model';
+import {
+  JiraComment,
+  JiraIssue,
+  JiraRelatedIssue,
+  JiraSubtask,
+} from '../jira-issue.model';
 import { expandAnimation } from '../../../../../ui/animations/expand.ani';
 import { TaskAttachment } from '../../../../tasks/task-attachment/task-attachment.model';
 import { T } from '../../../../../t.const';
@@ -27,7 +32,6 @@ import { MatIcon } from '@angular/material/icon';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { JiraToMarkdownPipe } from '../../../../../ui/pipes/jira-to-markdown.pipe';
 import { MsToStringPipe } from '../../../../../ui/duration/ms-to-string.pipe';
-import { SortPipe } from '../../../../../ui/pipes/sort.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 import { SnackService } from '../../../../../core/snack/snack.service';
 import { IssueLog } from '../../../../../core/log';
@@ -53,7 +57,6 @@ interface JiraSubtaskWithUrl extends JiraSubtask {
     DatePipe,
     JiraToMarkdownPipe,
     MsToStringPipe,
-    SortPipe,
     TranslatePipe,
     MarkdownPipe,
   ],
@@ -173,5 +176,12 @@ export class JiraIssueContentComponent {
 
   trackByIndex(i: number, p: any): number {
     return i;
+  }
+
+  get sortedComments(): JiraComment[] {
+    if (!this.issue?.comments) {
+      return [];
+    }
+    return [...this.issue.comments].sort((a, b) => a.created.localeCompare(b.created));
   }
 }

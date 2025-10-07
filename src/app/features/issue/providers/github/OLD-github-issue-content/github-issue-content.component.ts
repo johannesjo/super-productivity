@@ -16,7 +16,6 @@ import { MatChipListbox, MatChipOption } from '@angular/material/chips';
 import { MarkdownComponent, MarkdownPipe } from 'ngx-markdown';
 import { MatIcon } from '@angular/material/icon';
 import { AsyncPipe, DatePipe } from '@angular/common';
-import { SortPipe } from '../../../../../ui/pipes/sort.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
@@ -34,7 +33,6 @@ import { TranslatePipe } from '@ngx-translate/core';
     MatAnchor,
     AsyncPipe,
     DatePipe,
-    SortPipe,
     TranslatePipe,
     MarkdownPipe,
   ],
@@ -56,6 +54,15 @@ export class GithubIssueContentComponent {
     // NOTE: when we ask for this we should have it
     return (this.issue?.comments &&
       this.issue.comments[this.issue.comments?.length - 1]) as GithubComment;
+  }
+
+  get sortedComments(): GithubComment[] {
+    if (!this.issue?.comments) {
+      return [];
+    }
+    return [...this.issue.comments].sort((a, b) =>
+      a.created_at.localeCompare(b.created_at),
+    );
   }
 
   isCollapsedIssueSummary(): boolean {
