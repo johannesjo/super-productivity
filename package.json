@@ -252,7 +252,7 @@
     "ts-node": "~10.9.2",
     "ts-patch": "^3.3.0",
     "tslib": "^2.7.0",
-    "typescript": "~5.8.3",
+    "typescript": "~5.9.3",
     "typia": "^9.1.0"
   },
   "overrides": {
