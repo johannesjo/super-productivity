@@ -19,18 +19,24 @@ export class ScheduleService {
     return daysToShow;
   }
 
-  getMonthDaysToShow(numberOfWeeks: number): string[] {
+  getMonthDaysToShow(numberOfWeeks: number, firstDayOfWeek: number = 0): string[] {
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
-    const firstSunday = new Date(firstDayOfMonth);
-    firstSunday.setDate(firstDayOfMonth.getDate() - firstDayOfMonth.getDay());
+    // Calculate the first day to show based on firstDayOfWeek setting
+    // firstDayOfWeek: 0=Sunday, 1=Monday, 2=Tuesday, etc.
+    const firstDayToShow = new Date(firstDayOfMonth);
+    const monthStartDay = firstDayOfMonth.getDay(); // 0=Sunday, 1=Monday, etc.
+
+    // Calculate how many days to go back from the first of the month
+    const daysToGoBack = (monthStartDay - firstDayOfWeek + 7) % 7;
+    firstDayToShow.setDate(firstDayOfMonth.getDate() - daysToGoBack);
 
     const totalDays = numberOfWeeks * 7;
     const daysToShow: string[] = [];
     for (let i = 0; i < totalDays; i++) {
-      const currentDate = new Date(firstSunday);
-      currentDate.setDate(firstSunday.getDate() + i);
+      const currentDate = new Date(firstDayToShow);
+      currentDate.setDate(firstDayToShow.getDate() + i);
       daysToShow.push(this._dateService.todayStr(currentDate.getTime()));
     }
 

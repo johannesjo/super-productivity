@@ -24,6 +24,7 @@ import { GlobalTrackingIntervalService } from '../../../core/global-tracking-int
 import {
   selectTimelineConfig,
   selectTimelineWorkStartEndHours,
+  selectMiscConfig,
 } from '../../config/store/global-config.reducer';
 import { FH } from '../schedule.const';
 import { mapToScheduleDays } from '../map-schedule-data/map-to-schedule-days';
@@ -106,22 +107,30 @@ export class ScheduleComponent implements AfterViewInit {
   daysToShow = computed(() => {
     const count = this._daysToShowCount();
     const selectedView = this._currentTimeViewMode();
+    const miscConfig = this._miscConfig();
     // Trigger re-computation when today changes
     this._todayDateStr();
 
     if (selectedView === 'month') {
-      return this.scheduleService.getMonthDaysToShow(count);
+      const firstDayOfWeek = miscConfig?.firstDayOfWeek ?? 1; // Default to Monday
+      return this.scheduleService.getMonthDaysToShow(count, firstDayOfWeek);
     }
     return this.scheduleService.getDaysToShow(count);
   });
 
   weeksToShow = computed(() => Math.ceil(this.daysToShow().length / 7));
 
+  firstDayOfWeek = computed(() => {
+    const miscConfig = this._miscConfig();
+    return miscConfig?.firstDayOfWeek ?? 1; // Default to Monday
+  });
+
   private _timelineTasks = toSignal(this._store.pipe(select(selectTimelineTasks)));
   private _taskRepeatCfgs = toSignal(
     this._store.pipe(select(selectTaskRepeatCfgsWithAndWithoutStartTime)),
   );
   private _timelineConfig = toSignal(this._store.pipe(select(selectTimelineConfig)));
+  private _miscConfig = toSignal(this._store.pipe(select(selectMiscConfig)));
   private _icalEvents = toSignal(this._calendarIntegrationService.icalEvents$, {
     initialValue: [],
   });
