@@ -11,9 +11,9 @@ describe('repairMenuTree', () => {
 
     const menuTree: MenuTreeState = {
       projectTree: [
-        { kind: MenuTreeKind.PROJECT, id: 'project1' },
-        { kind: MenuTreeKind.PROJECT, id: 'orphaned-project' },
-        { kind: MenuTreeKind.PROJECT, id: 'project2' },
+        { k: MenuTreeKind.PROJECT, id: 'project1' },
+        { k: MenuTreeKind.PROJECT, id: 'orphaned-project' },
+        { k: MenuTreeKind.PROJECT, id: 'project2' },
       ],
       tagTree: [],
     };
@@ -22,8 +22,8 @@ describe('repairMenuTree', () => {
 
     expect(result.projectTree.length).toBe(2);
     expect(result.projectTree).toEqual([
-      { kind: MenuTreeKind.PROJECT, id: 'project1' },
-      { kind: MenuTreeKind.PROJECT, id: 'project2' },
+      { k: MenuTreeKind.PROJECT, id: 'project1' },
+      { k: MenuTreeKind.PROJECT, id: 'project2' },
     ]);
   });
 
@@ -34,9 +34,9 @@ describe('repairMenuTree', () => {
     const menuTree: MenuTreeState = {
       projectTree: [],
       tagTree: [
-        { kind: MenuTreeKind.TAG, id: 'tag1' },
-        { kind: MenuTreeKind.TAG, id: 'orphaned-tag' },
-        { kind: MenuTreeKind.TAG, id: 'tag2' },
+        { k: MenuTreeKind.TAG, id: 'tag1' },
+        { k: MenuTreeKind.TAG, id: 'orphaned-tag' },
+        { k: MenuTreeKind.TAG, id: 'tag2' },
       ],
     };
 
@@ -44,8 +44,8 @@ describe('repairMenuTree', () => {
 
     expect(result.tagTree.length).toBe(2);
     expect(result.tagTree).toEqual([
-      { kind: MenuTreeKind.TAG, id: 'tag1' },
-      { kind: MenuTreeKind.TAG, id: 'tag2' },
+      { k: MenuTreeKind.TAG, id: 'tag1' },
+      { k: MenuTreeKind.TAG, id: 'tag2' },
     ]);
   });
 
@@ -56,13 +56,13 @@ describe('repairMenuTree', () => {
     const menuTree: MenuTreeState = {
       projectTree: [
         {
-          kind: MenuTreeKind.FOLDER,
+          k: MenuTreeKind.FOLDER,
           id: 'folder1',
           name: 'Folder 1',
           isExpanded: true,
           children: [
-            { kind: MenuTreeKind.PROJECT, id: 'project1' },
-            { kind: MenuTreeKind.PROJECT, id: 'orphaned-project' },
+            { k: MenuTreeKind.PROJECT, id: 'project1' },
+            { k: MenuTreeKind.PROJECT, id: 'orphaned-project' },
           ],
         },
       ],
@@ -72,12 +72,12 @@ describe('repairMenuTree', () => {
     const result = repairMenuTree(menuTree, validProjectIds, validTagIds);
 
     expect(result.projectTree.length).toBe(1);
-    expect(result.projectTree[0].kind).toBe(MenuTreeKind.FOLDER);
-    if (result.projectTree[0].kind === MenuTreeKind.FOLDER) {
+    expect(result.projectTree[0].k).toBe(MenuTreeKind.FOLDER);
+    if (result.projectTree[0].k === MenuTreeKind.FOLDER) {
       expect(result.projectTree[0].id).toBe('folder1');
       expect(result.projectTree[0].children.length).toBe(1);
       expect(result.projectTree[0].children[0]).toEqual({
-        kind: MenuTreeKind.PROJECT,
+        k: MenuTreeKind.PROJECT,
         id: 'project1',
       });
     }
@@ -90,20 +90,20 @@ describe('repairMenuTree', () => {
     const menuTree: MenuTreeState = {
       projectTree: [
         {
-          kind: MenuTreeKind.FOLDER,
+          k: MenuTreeKind.FOLDER,
           id: 'parent-folder',
           name: 'Parent',
           isExpanded: true,
           children: [
-            { kind: MenuTreeKind.PROJECT, id: 'project1' },
+            { k: MenuTreeKind.PROJECT, id: 'project1' },
             {
-              kind: MenuTreeKind.FOLDER,
+              k: MenuTreeKind.FOLDER,
               id: 'nested-folder',
               name: 'Nested',
               isExpanded: false,
               children: [
-                { kind: MenuTreeKind.PROJECT, id: 'project2' },
-                { kind: MenuTreeKind.PROJECT, id: 'orphaned-nested-project' },
+                { k: MenuTreeKind.PROJECT, id: 'project2' },
+                { k: MenuTreeKind.PROJECT, id: 'orphaned-nested-project' },
               ],
             },
           ],
@@ -115,13 +115,13 @@ describe('repairMenuTree', () => {
     const result = repairMenuTree(menuTree, validProjectIds, validTagIds);
 
     expect(result.projectTree.length).toBe(1);
-    if (result.projectTree[0].kind === MenuTreeKind.FOLDER) {
+    if (result.projectTree[0].k === MenuTreeKind.FOLDER) {
       expect(result.projectTree[0].children.length).toBe(2);
       const nestedFolder = result.projectTree[0].children[1];
-      if (nestedFolder.kind === MenuTreeKind.FOLDER) {
+      if (nestedFolder.k === MenuTreeKind.FOLDER) {
         expect(nestedFolder.children.length).toBe(1);
         expect(nestedFolder.children[0]).toEqual({
-          kind: MenuTreeKind.PROJECT,
+          k: MenuTreeKind.PROJECT,
           id: 'project2',
         });
       }
@@ -150,13 +150,13 @@ describe('repairMenuTree', () => {
     const menuTree: MenuTreeState = {
       projectTree: [
         {
-          kind: MenuTreeKind.FOLDER,
+          k: MenuTreeKind.FOLDER,
           id: 'folder1',
           name: 'Work Projects',
           isExpanded: true,
           children: [
-            { kind: MenuTreeKind.PROJECT, id: 'project1' },
-            { kind: MenuTreeKind.PROJECT, id: 'project2' },
+            { k: MenuTreeKind.PROJECT, id: 'project1' },
+            { k: MenuTreeKind.PROJECT, id: 'project2' },
           ],
         },
       ],
@@ -174,18 +174,18 @@ describe('repairMenuTree', () => {
 
     const menuTree: MenuTreeState = {
       projectTree: [
-        { kind: MenuTreeKind.PROJECT, id: 'project1' },
-        { kind: MenuTreeKind.TAG, id: 'tag1' } as any,
+        { k: MenuTreeKind.PROJECT, id: 'project1' },
+        { k: MenuTreeKind.TAG, id: 'tag1' } as any,
       ],
       tagTree: [
-        { kind: MenuTreeKind.TAG, id: 'tag1' },
-        { kind: MenuTreeKind.PROJECT, id: 'project1' } as any,
+        { k: MenuTreeKind.TAG, id: 'tag1' },
+        { k: MenuTreeKind.PROJECT, id: 'project1' } as any,
       ],
     };
 
     const result = repairMenuTree(menuTree, validProjectIds, validTagIds);
 
-    expect(result.projectTree).toEqual([{ kind: MenuTreeKind.PROJECT, id: 'project1' }]);
-    expect(result.tagTree).toEqual([{ kind: MenuTreeKind.TAG, id: 'tag1' }]);
+    expect(result.projectTree).toEqual([{ k: MenuTreeKind.PROJECT, id: 'project1' }]);
+    expect(result.tagTree).toEqual([{ k: MenuTreeKind.TAG, id: 'tag1' }]);
   });
 });

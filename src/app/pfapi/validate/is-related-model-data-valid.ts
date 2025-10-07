@@ -380,7 +380,7 @@ const validateMenuTree = (
         return false;
       }
 
-      if (node.kind === MenuTreeKind.FOLDER) {
+      if (node.k === MenuTreeKind.FOLDER) {
         // Validate folder structure
         if (!node.id || !node.name) {
           _validityError(`Invalid folder node in ${treeType} - missing id or name`, {
@@ -402,7 +402,7 @@ const validateMenuTree = (
         if (!validateTreeNodes(node.children, treeType)) {
           return false;
         }
-      } else if (treeType === 'projectTree' && node.kind === MenuTreeKind.PROJECT) {
+      } else if (treeType === 'projectTree' && node.k === MenuTreeKind.PROJECT) {
         // Validate project reference
         if (!node.id) {
           _validityError(`Project node in menuTree missing id`, { node, d });
@@ -416,7 +416,7 @@ const validateMenuTree = (
           );
           return false;
         }
-      } else if (treeType === 'tagTree' && node.kind === MenuTreeKind.TAG) {
+      } else if (treeType === 'tagTree' && node.k === MenuTreeKind.TAG) {
         // Validate tag reference
         if (!node.id) {
           _validityError(`Tag node in menuTree missing id`, { node, d });
@@ -431,7 +431,7 @@ const validateMenuTree = (
           return false;
         }
       } else {
-        _validityError(`Invalid node kind in ${treeType}: ${node.kind}`, { node, d });
+        _validityError(`Invalid node kind in ${treeType}: ${node.k}`, { node, d });
         return false;
       }
     }

@@ -30,20 +30,20 @@ export const repairMenuTree = (
     const filtered: MenuTreeTreeNode[] = [];
 
     for (const node of nodes) {
-      if (node.kind === MenuTreeKind.FOLDER) {
+      if (node.k === MenuTreeKind.FOLDER) {
         const filteredChildren = filterTreeNodes(node.children, treeType);
         filtered.push({
           ...node,
           children: filteredChildren,
         });
-      } else if (treeType === 'projectTree' && node.kind === MenuTreeKind.PROJECT) {
+      } else if (treeType === 'projectTree' && node.k === MenuTreeKind.PROJECT) {
         // Keep project only if it exists
         if (validProjectIds.has(node.id)) {
           filtered.push(node);
         } else {
           PFLog.log(`Removing orphaned project reference ${node.id} from ${treeType}`);
         }
-      } else if (treeType === 'tagTree' && node.kind === MenuTreeKind.TAG) {
+      } else if (treeType === 'tagTree' && node.k === MenuTreeKind.TAG) {
         // Keep tag only if it exists
         if (validTagIds.has(node.id)) {
           filtered.push(node);

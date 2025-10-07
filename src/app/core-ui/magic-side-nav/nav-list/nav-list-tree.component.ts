@@ -88,17 +88,17 @@ export class NavListTreeComponent {
     const data = node.data;
     if (!data) return;
 
-    if (data.kind === MenuTreeKind.FOLDER) {
+    if (data.k === MenuTreeKind.FOLDER) {
       this._toggleFolder(node.id);
       return;
     }
 
-    if (data.kind === MenuTreeKind.PROJECT) {
+    if (data.k === MenuTreeKind.PROJECT) {
       this.itemClick.emit(this._toProjectNavItem(data));
       return;
     }
 
-    if (data.kind === MenuTreeKind.TAG) {
+    if (data.k === MenuTreeKind.TAG) {
       this.itemClick.emit(this._toTagNavItem(data));
     }
   }
@@ -131,7 +131,7 @@ export class NavListTreeComponent {
     // TODO: Implement folder context menu
     console.log(
       'Folder context menu for:',
-      node.data?.kind === MenuTreeKind.FOLDER ? node.data.name : 'unknown',
+      node.data?.k === MenuTreeKind.FOLDER ? node.data.name : 'unknown',
     );
   }
 
@@ -143,7 +143,7 @@ export class NavListTreeComponent {
           ...node,
           expanded: isExpanded,
           data:
-            node.data?.kind === MenuTreeKind.FOLDER
+            node.data?.k === MenuTreeKind.FOLDER
               ? { ...node.data, isExpanded }
               : node.data,
         };
@@ -164,7 +164,7 @@ export class NavListTreeComponent {
   }
 
   private _toTreeNode(node: MenuTreeViewNode): TreeNode<MenuTreeViewNode> {
-    if (node.kind === MenuTreeKind.FOLDER) {
+    if (node.k === MenuTreeKind.FOLDER) {
       const children = node.children.map((child) => this._toTreeNode(child));
       // Always expand empty folders
       const shouldExpand = children.length === 0 ? true : node.isExpanded;
@@ -177,7 +177,7 @@ export class NavListTreeComponent {
         children,
       } satisfies TreeNode<MenuTreeViewNode>;
     }
-    if (node.kind === MenuTreeKind.PROJECT) {
+    if (node.k === MenuTreeKind.PROJECT) {
       return {
         id: `project-${node.project.id}`,
         isFolder: false,
@@ -198,16 +198,16 @@ export class NavListTreeComponent {
         if (!data) {
           return null;
         }
-        if (data.kind === MenuTreeKind.FOLDER) {
+        if (data.k === MenuTreeKind.FOLDER) {
           return {
-            kind: MenuTreeKind.FOLDER,
+            k: MenuTreeKind.FOLDER,
             id: data.id,
             name: data.name,
             isExpanded: node.expanded ?? data.isExpanded,
             children: this._treeNodesToViewNodes(node.children ?? []),
           } satisfies MenuTreeViewFolderNode;
         }
-        if (data.kind === MenuTreeKind.PROJECT) {
+        if (data.k === MenuTreeKind.PROJECT) {
           return data satisfies MenuTreeViewProjectNode;
         }
         return data satisfies MenuTreeViewTagNode;

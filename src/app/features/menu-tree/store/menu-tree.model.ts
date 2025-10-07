@@ -2,9 +2,9 @@ import { Project } from '../../project/project.model';
 import { Tag } from '../../tag/tag.model';
 
 export enum MenuTreeKind {
-  FOLDER = 'folder',
-  PROJECT = 'project',
-  TAG = 'tag',
+  FOLDER = 'f',
+  PROJECT = 'p',
+  TAG = 't',
 }
 
 export type MenuTreeNodeKind =
@@ -19,19 +19,19 @@ export interface MenuTreeState {
 
 interface MenuTreeBaseNode {
   id: string;
-  kind: MenuTreeNodeKind;
+  k: MenuTreeNodeKind;
 }
 
 export interface MenuTreeProjectNode extends MenuTreeBaseNode {
-  kind: MenuTreeKind.PROJECT;
+  k: MenuTreeKind.PROJECT;
 }
 
 export interface MenuTreeTagNode extends MenuTreeBaseNode {
-  kind: MenuTreeKind.TAG;
+  k: MenuTreeKind.TAG;
 }
 
 export interface MenuTreeFolderNode extends MenuTreeBaseNode {
-  kind: MenuTreeKind.FOLDER;
+  k: MenuTreeKind.FOLDER;
   children: MenuTreeTreeNode[];
   name: string;
   isExpanded?: boolean;
@@ -48,7 +48,7 @@ export type MenuTreeViewNode =
   | MenuTreeViewTagNode;
 
 export interface MenuTreeViewFolderNode {
-  kind: MenuTreeKind.FOLDER;
+  k: MenuTreeKind.FOLDER;
   id: string;
   name: string;
   isExpanded: boolean;
@@ -56,11 +56,11 @@ export interface MenuTreeViewFolderNode {
 }
 
 export interface MenuTreeViewProjectNode {
-  kind: MenuTreeKind.PROJECT;
+  k: MenuTreeKind.PROJECT;
   project: Project;
 }
 
 export interface MenuTreeViewTagNode {
-  kind: MenuTreeKind.TAG;
+  k: MenuTreeKind.TAG;
   tag: Tag;
 }

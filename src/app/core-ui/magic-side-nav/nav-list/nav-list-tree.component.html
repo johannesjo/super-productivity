@@ -67,7 +67,7 @@
             [mode]="'folder'"
             [expanded]="expanded"
             [label]="
-              node.data?.kind === MenuTreeKind.FOLDER ? node.data.name : node.data.label
+              node.data?.k === MenuTreeKind.FOLDER ? node.data.name : node.data.label
             "
             [variant]="'nav'"
             [showLabels]="showLabels()"
@@ -85,15 +85,13 @@
       >
         <div
           class="nav-child-item"
-          [class.draggable]="node.data?.kind !== MenuTreeKind.TAG"
+          [class.draggable]="node.data?.k !== MenuTreeKind.TAG"
           [attr.data-project-id]="
-            node.data?.kind === MenuTreeKind.PROJECT ? node.data.project.id : null
+            node.data?.k === MenuTreeKind.PROJECT ? node.data.project.id : null
           "
-          [attr.data-tag-id]="
-            node.data?.kind === MenuTreeKind.TAG ? node.data.tag.id : null
-          "
+          [attr.data-tag-id]="node.data?.k === MenuTreeKind.TAG ? node.data.tag.id : null"
         >
-          @switch (node.data?.kind) {
+          @switch (node.data?.k) {
             @case (MenuTreeKind.PROJECT) {
               <nav-item
                 [workContext]="node.data.project"
@@ -147,9 +145,9 @@
             {{ data.isFolder ? 'folder' : 'assignment' }}
           </mat-icon>
           <span>{{
-            data.node.data?.kind === MenuTreeKind.FOLDER
+            data.node.data?.k === MenuTreeKind.FOLDER
               ? data.node.data.name
-              : data.node.data?.kind === MenuTreeKind.PROJECT
+              : data.node.data?.k === MenuTreeKind.PROJECT
                 ? data.node.data.project.title
                 : data.node.data?.tag.title
           }}</span>

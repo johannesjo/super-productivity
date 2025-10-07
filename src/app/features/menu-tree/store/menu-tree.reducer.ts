@@ -25,7 +25,7 @@ const _deleteFolderFromTree = (
   return tree
     .filter((node) => node.id !== folderId)
     .map((node) => {
-      if (node.kind === MenuTreeKind.FOLDER) {
+      if (node.k === MenuTreeKind.FOLDER) {
         return {
           ...node,
           children: _deleteFolderFromTree(node.children, folderId),
@@ -41,13 +41,13 @@ const _updateFolderInTree = (
   name: string,
 ): MenuTreeTreeNode[] => {
   return tree.map((node) => {
-    if (node.id === folderId && node.kind === MenuTreeKind.FOLDER) {
+    if (node.id === folderId && node.k === MenuTreeKind.FOLDER) {
       return {
         ...node,
         name,
       };
     }
-    if (node.kind === MenuTreeKind.FOLDER) {
+    if (node.k === MenuTreeKind.FOLDER) {
       return {
         ...node,
         children: _updateFolderInTree(node.children, folderId, name),
