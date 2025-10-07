@@ -135,7 +135,7 @@
     "electron-localshortcut": "^3.2.1",
     "electron-log": "^5.4.1",
     "electron-window-state": "^5.0.3",
-    "fs-extra": "^11.3.0",
+    "fs-extra": "^11.3.2",
     "node-fetch": "^2.7.0"
   },
   "devDependencies": {
