@@ -141,7 +141,7 @@ export class MagicNavConfigService {
           this._projectNavTree().length > 0
             ? this._projectNavTree()
             : this._visibleProjects().map((project) => ({
-                kind: 'project',
+                kind: MenuTreeKind.PROJECT,
                 project,
               })),
         action: () => this._toggleProjectsExpanded(),
@@ -178,7 +178,7 @@ export class MagicNavConfigService {
           this._tagNavTree().length > 0
             ? this._tagNavTree()
             : this._tags().map((tag) => ({
-                kind: 'tag',
+                kind: MenuTreeKind.TAG,
                 tag,
               })),
         action: () => this._toggleTagsExpanded(),

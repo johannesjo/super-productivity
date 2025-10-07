@@ -16,6 +16,7 @@ import { INBOX_PROJECT } from '../../features/project/project.const';
 import { autoFixTypiaErrors } from './auto-fix-typia-errors';
 import { IValidation } from 'typia';
 import { PFLog } from '../../core/log';
+import { repairMenuTree } from './repair-menu-tree';
 
 // TODO improve later
 const ENTITY_STATE_KEYS: (keyof AppDataCompleteLegacy)[] = ALL_ENTITY_MODEL_KEYS;
@@ -73,6 +74,7 @@ export const dataRepair = (
   dataOut = _removeNonExistentProjectIdsFromTasks(dataOut);
   dataOut = _removeNonExistentTagsFromTasks(dataOut);
   dataOut = _addInboxProjectIdIfNecessary(dataOut);
+  dataOut = _repairMenuTree(dataOut);
   dataOut = autoFixTypiaErrors(dataOut, errors);
 
   // console.timeEnd('dataRepair');
@@ -802,6 +804,19 @@ const _cleanupOrphanedSubTasks = (data: AppDataCompleteNew): AppDataCompleteNew 
         }
       }
     });
+
+  return data;
+};
+
+const _repairMenuTree = (data: AppDataCompleteNew): AppDataCompleteNew => {
+  if (!data.menuTree) {
+    return data;
+  }
+
+  const validProjectIds = new Set<string>(data.project.ids as string[]);
+  const validTagIds = new Set<string>(data.tag.ids as string[]);
+
+  data.menuTree = repairMenuTree(data.menuTree, validProjectIds, validTagIds);
 
   return data;
 };
