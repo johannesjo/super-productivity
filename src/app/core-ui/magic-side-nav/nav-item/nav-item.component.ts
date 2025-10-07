@@ -79,6 +79,7 @@ export class NavItemComponent {
   // Folder inputs
 
   folderId = input<string | null>(null);
+  treeKind = input<'project' | 'tag'>('project');
   // Variant styling to integrate into magic-side-nav without deep selectors
   showMoreButton = input<boolean>(true);
 

@@ -25,7 +25,7 @@ export class FolderContextMenuComponent {
   private readonly _menuTreeService = inject(MenuTreeService);
 
   @Input() folderId!: string;
-  @Input() treeType: 'project' | 'tag' = 'project';
+  @Input() treeKind: 'project' | 'tag' = 'project';
 
   readonly T = T;
 
@@ -47,18 +47,20 @@ export class FolderContextMenuComponent {
     dialogRef
       .afterClosed()
       .pipe(take(1))
-      .subscribe((result: string) => {
-        if (result && result.trim() !== folder.name) {
-          // Extract folder ID (remove the "folder-" prefix if present)
-          const cleanId = this.folderId.startsWith('folder-')
-            ? this.folderId.substring(7)
-            : this.folderId;
+      .subscribe((result: string | null) => {
+        const trimmed = result?.trim();
+        if (!trimmed || trimmed === folder.name) {
+          return;
+        }
+        // Extract folder ID (remove the "folder-" prefix if present)
+        const cleanId = this.folderId.startsWith('folder-')
+          ? this.folderId.substring(7)
+          : this.folderId;
 
-          if (this.treeType === 'project') {
-            this._menuTreeService.updateFolderInProject(cleanId, result.trim());
-          } else {
-            this._menuTreeService.updateFolderInTag(cleanId, result.trim());
-          }
+        if (this.treeKind === 'project') {
+          this._menuTreeService.updateFolderInProject(cleanId, trimmed);
+        } else {
+          this._menuTreeService.updateFolderInTag(cleanId, trimmed);
         }
       });
   }
@@ -86,7 +88,7 @@ export class FolderContextMenuComponent {
             ? this.folderId.substring(7)
             : this.folderId;
 
-          if (this.treeType === 'project') {
+          if (this.treeKind === 'project') {
             this._menuTreeService.deleteFolderFromProject(cleanId);
           } else {
             this._menuTreeService.deleteFolderFromTag(cleanId);
@@ -103,8 +105,8 @@ export class FolderContextMenuComponent {
     const tagTree = this._menuTreeService.tagTree();
 
     // Search in the appropriate tree first, then fallback to the other
-    const primaryTree = this.treeType === 'project' ? projectTree : tagTree;
-    const secondaryTree = this.treeType === 'project' ? tagTree : projectTree;
+    const primaryTree = this.treeKind === 'project' ? projectTree : tagTree;
+    const secondaryTree = this.treeKind === 'project' ? tagTree : projectTree;
 
     return (
       this._menuTreeService.findFolderInTree(cleanId, primaryTree) ||

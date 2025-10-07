@@ -70,6 +70,7 @@ export interface NavTreeItem extends NavBaseItem {
   type: 'tree';
   label: string;
   icon: string;
+  treeKind: 'project' | 'tag';
   additionalButtons?: NavAdditionalButton[];
   contextMenuItems?: NavContextItem[];
   action?: () => void; // optional external toggle logic

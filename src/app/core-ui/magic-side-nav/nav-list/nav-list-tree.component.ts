@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   effect,
   inject,
   input,
@@ -68,6 +69,7 @@ export class NavListTreeComponent {
   readonly allProjectsExceptInbox = this._navConfigService.allProjectsExceptInbox;
 
   readonly treeNodes = signal<TreeNode<MenuTreeViewNode>[]>([]);
+  readonly treeKind = computed<'project' | 'tag'>(() => this.item().treeKind);
 
   constructor() {
     effect(() => {
