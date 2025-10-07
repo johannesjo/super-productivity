@@ -260,7 +260,7 @@
           </div>
         }
 
-        @if (!isPlanningMode() || hasDoneTasks()) {
+        @if (hasDoneTasks()) {
           @let nrOfDoneArchived =
             doneTasks()?.length === 0
               ? (workContextService.doneTodayArchived$ | async)
