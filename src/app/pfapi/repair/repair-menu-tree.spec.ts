@@ -56,7 +56,7 @@ describe('repairMenuTree', () => {
     const menuTree: MenuTreeState = {
       projectTree: [
         {
-          kind: 'folder',
+          kind: MenuTreeKind.FOLDER,
           id: 'folder1',
           name: 'Folder 1',
           isExpanded: true,
@@ -72,8 +72,8 @@ describe('repairMenuTree', () => {
     const result = repairMenuTree(menuTree, validProjectIds, validTagIds);
 
     expect(result.projectTree.length).toBe(1);
-    expect(result.projectTree[0].kind).toBe('folder');
-    if (result.projectTree[0].kind === 'folder') {
+    expect(result.projectTree[0].kind).toBe(MenuTreeKind.FOLDER);
+    if (result.projectTree[0].kind === MenuTreeKind.FOLDER) {
       expect(result.projectTree[0].id).toBe('folder1');
       expect(result.projectTree[0].children.length).toBe(1);
       expect(result.projectTree[0].children[0]).toEqual({
@@ -90,14 +90,14 @@ describe('repairMenuTree', () => {
     const menuTree: MenuTreeState = {
       projectTree: [
         {
-          kind: 'folder',
+          kind: MenuTreeKind.FOLDER,
           id: 'parent-folder',
           name: 'Parent',
           isExpanded: true,
           children: [
             { kind: MenuTreeKind.PROJECT, id: 'project1' },
             {
-              kind: 'folder',
+              kind: MenuTreeKind.FOLDER,
               id: 'nested-folder',
               name: 'Nested',
               isExpanded: false,
@@ -115,10 +115,10 @@ describe('repairMenuTree', () => {
     const result = repairMenuTree(menuTree, validProjectIds, validTagIds);
 
     expect(result.projectTree.length).toBe(1);
-    if (result.projectTree[0].kind === 'folder') {
+    if (result.projectTree[0].kind === MenuTreeKind.FOLDER) {
       expect(result.projectTree[0].children.length).toBe(2);
       const nestedFolder = result.projectTree[0].children[1];
-      if (nestedFolder.kind === 'folder') {
+      if (nestedFolder.kind === MenuTreeKind.FOLDER) {
         expect(nestedFolder.children.length).toBe(1);
         expect(nestedFolder.children[0]).toEqual({
           kind: MenuTreeKind.PROJECT,
@@ -150,7 +150,7 @@ describe('repairMenuTree', () => {
     const menuTree: MenuTreeState = {
       projectTree: [
         {
-          kind: 'folder',
+          kind: MenuTreeKind.FOLDER,
           id: 'folder1',
           name: 'Work Projects',
           isExpanded: true,

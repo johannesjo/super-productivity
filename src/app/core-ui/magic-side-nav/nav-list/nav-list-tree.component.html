@@ -66,7 +66,9 @@
           <nav-item
             [mode]="'folder'"
             [expanded]="expanded"
-            [label]="node.data?.kind === 'folder' ? node.data.name : node.data.label"
+            [label]="
+              node.data?.kind === MenuTreeKind.FOLDER ? node.data.name : node.data.label
+            "
             [variant]="'nav'"
             [showLabels]="showLabels()"
             (clicked)="onChildClick(node)"
@@ -83,14 +85,16 @@
       >
         <div
           class="nav-child-item"
-          [class.draggable]="node.data?.kind !== 'tag'"
+          [class.draggable]="node.data?.kind !== MenuTreeKind.TAG"
           [attr.data-project-id]="
-            node.data?.kind === 'project' ? node.data.project.id : null
+            node.data?.kind === MenuTreeKind.PROJECT ? node.data.project.id : null
           "
-          [attr.data-tag-id]="node.data?.kind === 'tag' ? node.data.tag.id : null"
+          [attr.data-tag-id]="
+            node.data?.kind === MenuTreeKind.TAG ? node.data.tag.id : null
+          "
         >
           @switch (node.data?.kind) {
-            @case ('project') {
+            @case (MenuTreeKind.PROJECT) {
               <nav-item
                 [workContext]="node.data.project"
                 [type]="WorkContextType.PROJECT"
@@ -101,7 +105,7 @@
                 (clicked)="onChildClick(node)"
               ></nav-item>
             }
-            @case ('tag') {
+            @case (MenuTreeKind.TAG) {
               <nav-item
                 [workContext]="node.data.tag"
                 [type]="WorkContextType.TAG"
@@ -143,9 +147,9 @@
             {{ data.isFolder ? 'folder' : 'assignment' }}
           </mat-icon>
           <span>{{
-            data.node.data?.kind === 'folder'
+            data.node.data?.kind === MenuTreeKind.FOLDER
               ? data.node.data.name
-              : data.node.data?.kind === 'project'
+              : data.node.data?.kind === MenuTreeKind.PROJECT
                 ? data.node.data.project.title
                 : data.node.data?.tag.title
           }}</span>

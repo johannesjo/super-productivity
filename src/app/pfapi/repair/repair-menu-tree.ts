@@ -30,7 +30,7 @@ export const repairMenuTree = (
     const filtered: MenuTreeTreeNode[] = [];
 
     for (const node of nodes) {
-      if (node.kind === 'folder') {
+      if (node.kind === MenuTreeKind.FOLDER) {
         const filteredChildren = filterTreeNodes(node.children, treeType);
         filtered.push({
           ...node,

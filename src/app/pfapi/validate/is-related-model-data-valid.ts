@@ -2,6 +2,7 @@ import { devError } from '../../util/dev-error';
 import { environment } from '../../../environments/environment';
 import { AppDataCompleteNew } from '../pfapi-config';
 import { PFLog } from '../../core/log';
+import { MenuTreeKind } from '../../features/menu-tree/store/menu-tree.model';
 
 let errorCount = 0;
 let lastValidityError: string;
@@ -379,7 +380,7 @@ const validateMenuTree = (
         return false;
       }
 
-      if (node.kind === 'folder') {
+      if (node.kind === MenuTreeKind.FOLDER) {
         // Validate folder structure
         if (!node.id || !node.name) {
           _validityError(`Invalid folder node in ${treeType} - missing id or name`, {
@@ -401,7 +402,7 @@ const validateMenuTree = (
         if (!validateTreeNodes(node.children, treeType)) {
           return false;
         }
-      } else if (treeType === 'projectTree' && node.kind === 'project') {
+      } else if (treeType === 'projectTree' && node.kind === MenuTreeKind.PROJECT) {
         // Validate project reference
         if (!node.id) {
           _validityError(`Project node in menuTree missing id`, { node, d });
@@ -415,7 +416,7 @@ const validateMenuTree = (
           );
           return false;
         }
-      } else if (treeType === 'tagTree' && node.kind === 'tag') {
+      } else if (treeType === 'tagTree' && node.kind === MenuTreeKind.TAG) {
         // Validate tag reference
         if (!node.id) {
           _validityError(`Tag node in menuTree missing id`, { node, d });
