@@ -34,6 +34,7 @@ import { fromPfapiEvent, pfapiEventAndInitialAfter } from './pfapi-helper';
 import { DataInitStateService } from '../core/data-init/data-init-state.service';
 import { GlobalProgressBarService } from '../core-ui/global-progress-bar/global-progress-bar.service';
 import { PFLog } from '../core/log';
+import { reloadApp } from '../util/reload-app';
 
 @Injectable({
   providedIn: 'root',
@@ -160,7 +161,7 @@ export class PfapiService {
 
       this._imexViewService.setDataImportInProgress(false);
       if (!isSkipReload) {
-        window.location.reload();
+        reloadApp();
       }
     } catch (e) {
       this._imexViewService.setDataImportInProgress(false);

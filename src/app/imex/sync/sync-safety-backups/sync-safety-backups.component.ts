@@ -17,6 +17,7 @@ import { T } from '../../../t.const';
 import { CommonModule } from '@angular/common';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { SyncLog } from '../../../core/log';
+import { reloadApp } from '../../../util/reload-app';
 
 @Component({
   selector: 'sync-safety-backups',
@@ -97,7 +98,7 @@ export class SyncSafetyBackupsComponent implements OnInit, OnDestroy {
         msg: T.F.SYNC.SAFETY_BACKUP.RESTORED_SUCCESS,
       });
       // Reload the page after restoration
-      setTimeout(() => window.location.reload(), 1000);
+      setTimeout(() => reloadApp(), 1000);
     } catch (error) {
       SyncLog.err('Failed to restore backup:', error);
       this._snackService.open({
