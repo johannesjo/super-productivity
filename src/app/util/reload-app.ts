@@ -7,7 +7,7 @@ import { IS_ELECTRON } from '../app.constants';
  * proper Electron IPC event when running in Electron, and falls back to
  * window.location.reload() in browser contexts.
  */
-export function reloadApp(): void {
+export const reloadApp = (): void => {
   if (IS_ELECTRON && window.ea && typeof window.ea.reloadMainWin === 'function') {
     // Use Electron's proper reload method via IPC
     window.ea.reloadMainWin();
@@ -15,4 +15,4 @@ export function reloadApp(): void {
     // Fallback for browser/PWA context
     window.location.reload();
   }
-}
+};
