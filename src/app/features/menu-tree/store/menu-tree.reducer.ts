@@ -7,6 +7,8 @@ import {
   deleteFolder,
   updateFolder,
 } from './menu-tree.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
+import { deleteTag, deleteTags } from '../../tag/store/tag.actions';
 
 export const menuTreeFeatureKey = 'menuTree';
 
@@ -57,6 +59,56 @@ const _updateFolderInTree = (
   });
 };
 
+const _deleteItemFromTree = (
+  tree: MenuTreeTreeNode[],
+  itemId: string,
+  itemKind: MenuTreeKind.PROJECT | MenuTreeKind.TAG,
+): MenuTreeTreeNode[] => {
+  const _walk = (nodes: MenuTreeTreeNode[]): readonly [MenuTreeTreeNode[], boolean] => {
+    let hasChanged = false;
+    const nextNodes: MenuTreeTreeNode[] = [];
+
+    for (const node of nodes) {
+      if (node.k === itemKind && node.id === itemId) {
+        hasChanged = true;
+        continue;
+      }
+
+      if (node.k === MenuTreeKind.FOLDER) {
+        const [children, childChanged] = _walk(node.children);
+        if (childChanged) {
+          hasChanged = true;
+          nextNodes.push({
+            ...node,
+            children,
+          });
+        } else {
+          nextNodes.push(node);
+        }
+        continue;
+      }
+
+      nextNodes.push(node);
+    }
+
+    if (!hasChanged) {
+      return [nodes, false] as const;
+    }
+    return [nextNodes, true] as const;
+  };
+
+  const [nextTree, hasChanged] = _walk(tree);
+  return hasChanged ? nextTree : tree;
+};
+
+const _deleteItemsFromTree = (
+  tree: MenuTreeTreeNode[],
+  itemIds: string[],
+  itemKind: MenuTreeKind.PROJECT | MenuTreeKind.TAG,
+): MenuTreeTreeNode[] => {
+  return itemIds.reduce((acc, id) => _deleteItemFromTree(acc, id, itemKind), tree);
+};
+
 export const menuTreeReducer = createReducer(
   menuTreeInitialState,
   on(loadAllData, (_state, { appDataComplete }) => {
@@ -103,5 +155,17 @@ export const menuTreeReducer = createReducer(
       treeType === MenuTreeKind.TAG
         ? _updateFolderInTree(state.tagTree, folderId, name)
         : state.tagTree,
+  })),
+  on(TaskSharedActions.deleteProject, (state, { project }) => ({
+    ...state,
+    projectTree: _deleteItemFromTree(state.projectTree, project.id, MenuTreeKind.PROJECT),
+  })),
+  on(deleteTag, (state, { id }) => ({
+    ...state,
+    tagTree: _deleteItemFromTree(state.tagTree, id, MenuTreeKind.TAG),
+  })),
+  on(deleteTags, (state, { ids }) => ({
+    ...state,
+    tagTree: _deleteItemsFromTree(state.tagTree, ids, MenuTreeKind.TAG),
   })),
 );
