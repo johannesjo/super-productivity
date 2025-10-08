@@ -1,3 +1,14 @@
+## [15.1.2-rc.0](https://github.com/johannesjo/super-productivity/compare/v15.1.1...v15.1.2-rc.0) (2025-10-08)
+
+### Bug Fixes
+
+- typing issues ([746745c](https://github.com/johannesjo/super-productivity/commit/746745cc705eaa87d2387d19dd2843e47200b6e8))
+
+### Features
+
+- **int:** translate month calendar headers ([2f5c398](https://github.com/johannesjo/super-productivity/commit/2f5c39853a005db095b77ff4a45495a292a2a2bc))
+- remove faulty wayland fallbacks [#5235](https://github.com/johannesjo/super-productivity/issues/5235) ([4c563b1](https://github.com/johannesjo/super-productivity/commit/4c563b117e28767e46f878f7a3f3c3c8a714f00a))
+
 ## [15.1.1](https://github.com/johannesjo/super-productivity/compare/v15.1.0...v15.1.1) (2025-10-08)
 
 ### Bug Fixes
