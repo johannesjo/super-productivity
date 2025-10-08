@@ -1,11 +1,10 @@
 @use '@angular/material' as mat;
 @use 'angular-material-css-vars' as mat-css-vars;
 
-//$custom-typography: mat.m2-define-typography-config(
-//  $font-family: null,
-//);
-//@include mat-css-vars.init-material-css-vars($typography-config: $custom-typography);
-@include mat-css-vars.init-material-css-vars();
+$custom-typography: mat.m2-define-typography-config(
+  $font-family: 'Open Sans, sans-serif',
+);
+@include mat-css-vars.init-material-css-vars($typography-config: $custom-typography);
 
 .bg-card {
   background: var(--card-bg);
