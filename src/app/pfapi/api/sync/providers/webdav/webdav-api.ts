@@ -91,14 +91,35 @@ export class WebdavApi {
       );
 
       // Get revision from Last-Modified
-      const lastModified =
+      let lastModified =
         response.headers['last-modified'] || response.headers['Last-Modified'];
 
       // Get ETag for legacy compatibility
-      const etag = response.headers['etag'] || response.headers['ETag'];
-      const legacyRev = etag ? this._cleanRev(etag) : undefined;
+      let etag = response.headers['etag'] || response.headers['ETag'];
+      let legacyRev = etag ? this._cleanRev(etag) : undefined;
 
-      const rev = lastModified || '';
+      let rev = lastModified || '';
+
+      // Fallback: If Last-Modified and ETag are both missing, use PROPFIND to retrive them as it is defined by webDAV protocol
+      // Some servers (like OpenList/Alist) may not return these headers on GET
+      if (!lastModified && !etag) {
+        PFLog.verbose(
+          `${WebdavApi.L}.download() missing Last-Modified/ETag, trying PROPFIND fallback for ${path}`,
+        );
+        try {
+          const meta = await this.getFileMeta(path, null, false);
+          if (!lastModified && meta.lastmod) {
+            lastModified = meta.lastmod;
+            rev = lastModified;
+          }
+          if (!etag && meta.etag) {
+            etag = meta.etag;
+            legacyRev = this._cleanRev(etag);
+          }
+        } catch (e) {
+          PFLog.warn(`${WebdavApi.L}.download() PROPFIND fallback failed for ${path}`, e);
+        }
+      }
 
       if (!rev) {
         PFLog.err(`${WebdavApi.L}.download() no Last-Modified found for ${path}`);
