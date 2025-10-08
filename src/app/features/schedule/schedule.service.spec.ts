@@ -4,14 +4,12 @@ import { DateService } from '../../core/date/date.service';
 
 describe('ScheduleService', () => {
   let service: ScheduleService;
-  let dateService: DateService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [ScheduleService, DateService],
     });
     service = TestBed.inject(ScheduleService);
-    dateService = TestBed.inject(DateService);
   });
 
   it('should be created', () => {

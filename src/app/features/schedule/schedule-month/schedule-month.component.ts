@@ -1,16 +1,16 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   Input,
-  computed,
+  LOCALE_ID,
   signal,
 } from '@angular/core';
 import { ScheduleEvent } from '../schedule.model';
 import { ScheduleEventComponent } from '../schedule-event/schedule-event.component';
-import { DatePipe } from '@angular/common';
+import { DatePipe, formatDate } from '@angular/common';
 import { T } from '../../../t.const';
-import { DateService } from '../../../core/date/date.service';
 import { ScheduleService } from '../schedule.service';
 
 @Component({
@@ -22,8 +22,8 @@ import { ScheduleService } from '../schedule.service';
   standalone: true,
 })
 export class ScheduleMonthComponent {
-  private _dateService = inject(DateService);
   private _scheduleService = inject(ScheduleService);
+  private _locale = inject(LOCALE_ID);
 
   @Input() events: ScheduleEvent[] | null = [];
   @Input() daysToShow: string[] = [];
@@ -37,11 +37,18 @@ export class ScheduleMonthComponent {
   // Generate weekday headers based on firstDayOfWeek setting
   weekdayHeaders = computed(() => {
     const firstDay = this._firstDayOfWeek();
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const headers: string[] = [];
 
+    // Create a date for each day of week (using a week starting on Sunday)
+    // January 2, 2000 was a Sunday
+    const sundayDate = new Date(2000, 0, 2);
+
     for (let i = 0; i < 7; i++) {
-      headers.push(dayNames[(firstDay + i) % 7]);
+      const dayIndex = (firstDay + i) % 7;
+      const date = new Date(sundayDate);
+      date.setDate(sundayDate.getDate() + dayIndex);
+      // 'EEE' format gives abbreviated day name (e.g., 'Mon', 'Tue')
+      headers.push(formatDate(date, 'EEE', this._locale));
     }
 
     return headers;
