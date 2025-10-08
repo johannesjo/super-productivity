@@ -25,7 +25,7 @@
     />
 
     <div class="right-button-controls">
-      @if (stateService.inputTxt()) {
+      @if (stateService.inputTxt() && !isSearchMode()) {
         <div class="separator-box">
           <button
             mat-icon-button
