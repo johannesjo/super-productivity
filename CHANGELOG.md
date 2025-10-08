@@ -1,3 +1,9 @@
+## [15.1.3-rc.0](https://github.com/johannesjo/super-productivity/compare/v15.1.2-rc.0...v15.1.3-rc.0) (2025-10-08)
+
+### Bug Fixes
+
+- **webdav:** add fallback for missing Last-Modified and ETag in download method ([58a2e3a](https://github.com/johannesjo/super-productivity/commit/58a2e3a73896bf14b96a63290a493b4b47b23ce0))
+
 ## [15.1.2-rc.0](https://github.com/johannesjo/super-productivity/compare/v15.1.1...v15.1.2-rc.0) (2025-10-08)
 
 ### Bug Fixes
