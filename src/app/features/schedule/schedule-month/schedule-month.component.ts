@@ -3,9 +3,8 @@ import {
   Component,
   computed,
   inject,
-  Input,
+  input,
   LOCALE_ID,
-  signal,
 } from '@angular/core';
 import { ScheduleEvent } from '../schedule.model';
 import { ScheduleEventComponent } from '../schedule-event/schedule-event.component';
@@ -25,18 +24,14 @@ export class ScheduleMonthComponent {
   private _scheduleService = inject(ScheduleService);
   private _locale = inject(LOCALE_ID);
 
-  @Input() events: ScheduleEvent[] | null = [];
-  @Input() daysToShow: string[] = [];
-  @Input() weeksToShow: number = 6;
-  @Input() set firstDayOfWeek(value: number) {
-    this._firstDayOfWeek.set(value);
-  }
-
-  private _firstDayOfWeek = signal<number>(1); // Default to Monday
+  readonly events = input<ScheduleEvent[] | null>([]);
+  readonly daysToShow = input<string[]>([]);
+  readonly weeksToShow = input<number>(6);
+  readonly firstDayOfWeek = input<number>(1);
 
   // Generate weekday headers based on firstDayOfWeek setting
-  weekdayHeaders = computed(() => {
-    const firstDay = this._firstDayOfWeek();
+  readonly weekdayHeaders = computed(() => {
+    const firstDay = this.firstDayOfWeek();
     const headers: string[] = [];
 
     // Create a date for each day of week (using a week starting on Sunday)
@@ -69,11 +64,11 @@ export class ScheduleMonthComponent {
   }
 
   hasEventsForDay(day: string): boolean {
-    return this._scheduleService.hasEventsForDay(day, this.events || []);
+    return this._scheduleService.hasEventsForDay(day, this.events() || []);
   }
 
   getEventsForDay(day: string): ScheduleEvent[] {
-    return this._scheduleService.getEventsForDay(day, this.events || []);
+    return this._scheduleService.getEventsForDay(day, this.events() || []);
   }
 
   getEventDayStr(ev: ScheduleEvent): string | null {

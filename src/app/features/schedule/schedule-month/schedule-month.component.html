@@ -3,10 +3,10 @@
     <div class="weekday-header">{{ header }}</div>
   }
 
-  @for (day of daysToShow; track $index) {
+  @for (day of daysToShow(); track $index) {
     @let weekIndex = getWeekIndex($index);
     @let dayIndex = getDayIndex($index);
-    @if (weekIndex < weeksToShow) {
+    @if (weekIndex < weeksToShow()) {
       <div
         class="month-day-cell {{ getDayClass(day) }}"
         [attr.data-day]="day"
