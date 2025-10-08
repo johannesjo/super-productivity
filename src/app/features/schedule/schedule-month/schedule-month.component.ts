@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, Input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  Input,
+  computed,
+  signal,
+} from '@angular/core';
 import { ScheduleEvent } from '../schedule.model';
 import { ScheduleEventComponent } from '../schedule-event/schedule-event.component';
 import { DatePipe } from '@angular/common';
@@ -21,6 +28,24 @@ export class ScheduleMonthComponent {
   @Input() events: ScheduleEvent[] | null = [];
   @Input() daysToShow: string[] = [];
   @Input() weeksToShow: number = 6;
+  @Input() set firstDayOfWeek(value: number) {
+    this._firstDayOfWeek.set(value);
+  }
+
+  private _firstDayOfWeek = signal<number>(1); // Default to Monday
+
+  // Generate weekday headers based on firstDayOfWeek setting
+  weekdayHeaders = computed(() => {
+    const firstDay = this._firstDayOfWeek();
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const headers: string[] = [];
+
+    for (let i = 0; i < 7; i++) {
+      headers.push(dayNames[(firstDay + i) % 7]);
+    }
+
+    return headers;
+  });
 
   T: typeof T = T;
 

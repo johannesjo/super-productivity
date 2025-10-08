@@ -1,11 +1,7 @@
 <div class="month-grid-container">
-  <div class="weekday-header">Sun</div>
-  <div class="weekday-header">Mon</div>
-  <div class="weekday-header">Tue</div>
-  <div class="weekday-header">Wed</div>
-  <div class="weekday-header">Thu</div>
-  <div class="weekday-header">Fri</div>
-  <div class="weekday-header">Sat</div>
+  @for (header of weekdayHeaders(); track $index) {
+    <div class="weekday-header">{{ header }}</div>
+  }
 
   @for (day of daysToShow; track $index) {
     @let weekIndex = getWeekIndex($index);
