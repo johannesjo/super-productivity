@@ -174,7 +174,7 @@ export class JiraIssueContentComponent {
     this._taskService.markIssueUpdatesAsRead(this.task.id);
   }
 
-  trackByIndex(i: number, p: any): number {
+  trackByIndex(i: number, p: JiraComment): number {
     return i;
   }
 

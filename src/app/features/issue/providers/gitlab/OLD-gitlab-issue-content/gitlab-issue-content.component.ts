@@ -52,7 +52,7 @@ export class GitlabIssueContentComponent {
     this._taskService.markIssueUpdatesAsRead(task.id);
   }
 
-  trackByIndex(i: number, p: any): number {
+  trackByIndex(i: number, p: GitlabComment): number {
     return i;
   }
 

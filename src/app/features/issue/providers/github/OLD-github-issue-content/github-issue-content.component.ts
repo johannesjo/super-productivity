@@ -56,7 +56,7 @@ export class GithubIssueContentComponent {
       this.issue.comments[this.issue.comments?.length - 1]) as GithubComment;
   }
 
-  get sortedComments(): GithubComment[] {
+  get sortedComments(): readonly GithubComment[] {
     if (!this.issue?.comments) {
       return [];
     }
@@ -90,7 +90,7 @@ export class GithubIssueContentComponent {
     this._taskService.markIssueUpdatesAsRead(task.id);
   }
 
-  trackByIndex(i: number, p: any): number {
+  trackByIndex(i: number, p: GithubComment): number {
     return i;
   }
 }
