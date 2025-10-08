@@ -1,0 +1,10 @@
+
+### Bug Fixes
+
+* full screen notes editor for mac (80aec12), closes #4190 #5230
+* mac overlapping with window controls (738375a), closes #5224
+* **task:** improve project name parsing from task input
+* typing issues
+### Features
+
+* **projectFolders:** add touch delay for drag and drop

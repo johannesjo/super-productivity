@@ -1,3 +1,16 @@
+## [15.1.1](https://github.com/johannesjo/super-productivity/compare/v15.1.0...v15.1.1) (2025-10-08)
+
+### Bug Fixes
+
+- full screen notes editor for mac ([80aec12](https://github.com/johannesjo/super-productivity/commit/80aec12c7008651bfb16e74b72f5596c0077c321)), closes [#4190](https://github.com/johannesjo/super-productivity/issues/4190) [#5230](https://github.com/johannesjo/super-productivity/issues/5230)
+- mac overlapping with window controls ([738375a](https://github.com/johannesjo/super-productivity/commit/738375ade0e92b4e4e2978a1d330b1b25ce38a85)), closes [#5224](https://github.com/johannesjo/super-productivity/issues/5224)
+- **task:** improve project name parsing from task input ([dc5960e](https://github.com/johannesjo/super-productivity/commit/dc5960eb986035a3181c62272db31670b82cc080))
+- typing issues ([07f32bf](https://github.com/johannesjo/super-productivity/commit/07f32bf51f97780d34f98e669df35a7a54197815))
+
+### Features
+
+- **projectFolders:** add touch delay for drag and drop ([25cecb9](https://github.com/johannesjo/super-productivity/commit/25cecb9629a4e79978340bff8e3e5f88a02ad58f))
+
 # [15.1.0](https://github.com/johannesjo/super-productivity/compare/v15.1.0-rc.0...v15.1.0) (2025-10-07)
 
 ### Bug Fixes
