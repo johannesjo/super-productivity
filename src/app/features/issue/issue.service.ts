@@ -141,6 +141,10 @@ export class IssueService {
   ): Observable<SearchResultItemWithProviderId[]> {
     return this._store.select(selectEnabledIssueProviders).pipe(
       switchMap((enabledProviders) => {
+        if (enabledProviders.length === 0) {
+          return of([]);
+        }
+
         const searchObservables = enabledProviders.map((provider) =>
           from(
             this.searchIssues(searchTerm, provider.id, provider.issueProviderKey),
