@@ -22,7 +22,10 @@ import { NavConfig, NavItem } from './magic-side-nav.model';
 import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
 import { lsGetBoolean, lsSetItem } from '../../util/ls-util';
 import { MenuTreeService } from '../../features/menu-tree/menu-tree.service';
-import { MenuTreeViewNode } from '../../features/menu-tree/store/menu-tree.model';
+import {
+  MenuTreeKind,
+  MenuTreeViewNode,
+} from '../../features/menu-tree/store/menu-tree.model';
 
 @Injectable({
   providedIn: 'root',
@@ -133,11 +136,12 @@ export class MagicNavConfigService {
         id: 'projects',
         label: T.MH.PROJECTS,
         icon: 'expand_more',
+        treeKind: MenuTreeKind.PROJECT,
         tree:
           this._projectNavTree().length > 0
             ? this._projectNavTree()
             : this._visibleProjects().map((project) => ({
-                kind: 'project',
+                k: MenuTreeKind.PROJECT,
                 project,
               })),
         action: () => this._toggleProjectsExpanded(),
@@ -169,14 +173,29 @@ export class MagicNavConfigService {
         id: 'tags',
         label: T.MH.TAGS,
         icon: 'expand_more',
+        treeKind: MenuTreeKind.TAG,
         tree:
           this._tagNavTree().length > 0
             ? this._tagNavTree()
             : this._tags().map((tag) => ({
-                kind: 'tag',
+                k: MenuTreeKind.TAG,
                 tag,
               })),
         action: () => this._toggleTagsExpanded(),
+        additionalButtons: [
+          {
+            id: 'add-tag-folder',
+            icon: 'create_new_folder',
+            tooltip: T.F.TAG_FOLDER.TOOLTIP_CREATE,
+            action: () => this._openCreateTagFolder(),
+          },
+          {
+            id: 'add-tag',
+            icon: 'add',
+            tooltip: T.MH.CREATE_TAG,
+            action: () => this._createNewTag(),
+          },
+        ],
       },
 
       // Separator
@@ -394,6 +413,27 @@ export class MagicNavConfigService {
           return;
         }
         this._menuTreeService.createProjectFolder(trimmed);
+      });
+  }
+
+  private _openCreateTagFolder(): void {
+    this._matDialog
+      .open(DialogPromptComponent, {
+        restoreFocus: true,
+        data: {
+          placeholder: T.F.TAG_FOLDER.DIALOG.NAME_PLACEHOLDER,
+        },
+      })
+      .afterClosed()
+      .subscribe((title) => {
+        if (!title) {
+          return;
+        }
+        const trimmed = title.trim();
+        if (!trimmed) {
+          return;
+        }
+        this._menuTreeService.createTagFolder(trimmed);
       });
   }
 

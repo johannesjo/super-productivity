@@ -1,3 +1,51 @@
+## [15.1.3-rc.0](https://github.com/johannesjo/super-productivity/compare/v15.1.2-rc.0...v15.1.3-rc.0) (2025-10-08)
+
+### Bug Fixes
+
+- **webdav:** add fallback for missing Last-Modified and ETag in download method ([58a2e3a](https://github.com/johannesjo/super-productivity/commit/58a2e3a73896bf14b96a63290a493b4b47b23ce0))
+
+## [15.1.2-rc.0](https://github.com/johannesjo/super-productivity/compare/v15.1.1...v15.1.2-rc.0) (2025-10-08)
+
+### Bug Fixes
+
+- typing issues ([746745c](https://github.com/johannesjo/super-productivity/commit/746745cc705eaa87d2387d19dd2843e47200b6e8))
+
+### Features
+
+- **int:** translate month calendar headers ([2f5c398](https://github.com/johannesjo/super-productivity/commit/2f5c39853a005db095b77ff4a45495a292a2a2bc))
+- remove faulty wayland fallbacks [#5235](https://github.com/johannesjo/super-productivity/issues/5235) ([4c563b1](https://github.com/johannesjo/super-productivity/commit/4c563b117e28767e46f878f7a3f3c3c8a714f00a))
+
+## [15.1.1](https://github.com/johannesjo/super-productivity/compare/v15.1.0...v15.1.1) (2025-10-08)
+
+### Bug Fixes
+
+- full screen notes editor for mac ([80aec12](https://github.com/johannesjo/super-productivity/commit/80aec12c7008651bfb16e74b72f5596c0077c321)), closes [#4190](https://github.com/johannesjo/super-productivity/issues/4190) [#5230](https://github.com/johannesjo/super-productivity/issues/5230)
+- mac overlapping with window controls ([738375a](https://github.com/johannesjo/super-productivity/commit/738375ade0e92b4e4e2978a1d330b1b25ce38a85)), closes [#5224](https://github.com/johannesjo/super-productivity/issues/5224)
+- **task:** improve project name parsing from task input ([dc5960e](https://github.com/johannesjo/super-productivity/commit/dc5960eb986035a3181c62272db31670b82cc080))
+- typing issues ([07f32bf](https://github.com/johannesjo/super-productivity/commit/07f32bf51f97780d34f98e669df35a7a54197815))
+
+### Features
+
+- **projectFolders:** add touch delay for drag and drop ([25cecb9](https://github.com/johannesjo/super-productivity/commit/25cecb9629a4e79978340bff8e3e5f88a02ad58f))
+
+# [15.1.0](https://github.com/johannesjo/super-productivity/compare/v15.1.0-rc.0...v15.1.0) (2025-10-07)
+
+### Bug Fixes
+
+- **boards:** not correctly navigating to the newly created board [#5211](https://github.com/johannesjo/super-productivity/issues/5211) ([6dc1922](https://github.com/johannesjo/super-productivity/commit/6dc1922fb9ee3c941985049e443a4a9749d93c80))
+- day of week header missing [#5168](https://github.com/johannesjo/super-productivity/issues/5168) ([699e244](https://github.com/johannesjo/super-productivity/commit/699e24402638547255a7fa9438c410da60958618))
+- **focusMode:** issue link styling ([eeb8faf](https://github.com/johannesjo/super-productivity/commit/eeb8faf365e74d9d6afe9cc346038820220fe11f))
+- snacks showing forever ([239dec5](https://github.com/johannesjo/super-productivity/commit/239dec5b194fddf8d488bb8b75275d9f7731def2))
+
+### Features
+
+- **projectFolders:** add data validation and repair ([beb29db](https://github.com/johannesjo/super-productivity/commit/beb29db05f23061d621013fbe7fca3c2ffa3fa15))
+- **projectFolders:** make it also work for tags ([5c0c944](https://github.com/johannesjo/super-productivity/commit/5c0c944f17eddce908f767bf10631636bca8c76f))
+- **projectFolders:** prepare to make it work for tags too ([3e98ca9](https://github.com/johannesjo/super-productivity/commit/3e98ca93b336c4a86a796bf7e478eb974cf814a5))
+- **projectFolders:** reduce size ([aa17eac](https://github.com/johannesjo/super-productivity/commit/aa17eac846a5ba75f886db999ef0cf2a680b3e19))
+- **schedule:** improve styling ([fa1482f](https://github.com/johannesjo/super-productivity/commit/fa1482ffe408f0f29fcae19b6a6b90b863a7e105))
+- show done tasks section only if there are done tasks ([61d03a8](https://github.com/johannesjo/super-productivity/commit/61d03a8ebf0196483ea3dafd2dcb08d3230244d9))
+
 # [15.1.0-rc.0](https://github.com/johannesjo/super-productivity/compare/v15.0.3...v15.1.0-rc.0) (2025-09-20)
 
 ### Bug Fixes

@@ -1,5 +1,5 @@
 import { createReducer, on } from '@ngrx/store';
-import { MenuTreeState, MenuTreeTreeNode } from './menu-tree.model';
+import { MenuTreeKind, MenuTreeState, MenuTreeTreeNode } from './menu-tree.model';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import {
   updateProjectTree,
@@ -25,7 +25,7 @@ const _deleteFolderFromTree = (
   return tree
     .filter((node) => node.id !== folderId)
     .map((node) => {
-      if (node.kind === 'folder') {
+      if (node.k === MenuTreeKind.FOLDER) {
         return {
           ...node,
           children: _deleteFolderFromTree(node.children, folderId),
@@ -41,13 +41,13 @@ const _updateFolderInTree = (
   name: string,
 ): MenuTreeTreeNode[] => {
   return tree.map((node) => {
-    if (node.id === folderId && node.kind === 'folder') {
+    if (node.id === folderId && node.k === MenuTreeKind.FOLDER) {
       return {
         ...node,
         name,
       };
     }
-    if (node.kind === 'folder') {
+    if (node.k === MenuTreeKind.FOLDER) {
       return {
         ...node,
         children: _updateFolderInTree(node.children, folderId, name),
@@ -85,20 +85,22 @@ export const menuTreeReducer = createReducer(
   on(deleteFolder, (state, { folderId, treeType }) => ({
     ...state,
     projectTree:
-      treeType === 'project'
+      treeType === MenuTreeKind.PROJECT
         ? _deleteFolderFromTree(state.projectTree, folderId)
         : state.projectTree,
     tagTree:
-      treeType === 'tag' ? _deleteFolderFromTree(state.tagTree, folderId) : state.tagTree,
+      treeType === MenuTreeKind.TAG
+        ? _deleteFolderFromTree(state.tagTree, folderId)
+        : state.tagTree,
   })),
   on(updateFolder, (state, { folderId, name, treeType }) => ({
     ...state,
     projectTree:
-      treeType === 'project'
+      treeType === MenuTreeKind.PROJECT
         ? _updateFolderInTree(state.projectTree, folderId, name)
         : state.projectTree,
     tagTree:
-      treeType === 'tag'
+      treeType === MenuTreeKind.TAG
         ? _updateFolderInTree(state.tagTree, folderId, name)
         : state.tagTree,
   })),

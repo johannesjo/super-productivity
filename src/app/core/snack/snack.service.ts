@@ -67,8 +67,7 @@ export class SnackService {
 
     const cfg = {
       ...DEFAULT_SNACK_CFG,
-      // duration: type === 'ERROR' ? 8000 : DEFAULT_SNACK_CFG.duration,
-      duration: 2222222222222,
+      duration: type === 'ERROR' ? 8000 : DEFAULT_SNACK_CFG.duration,
       ...config,
       data: {
         ...params,

@@ -2,6 +2,7 @@ import { devError } from '../../util/dev-error';
 import { environment } from '../../../environments/environment';
 import { AppDataCompleteNew } from '../pfapi-config';
 import { PFLog } from '../../core/log';
+import { MenuTreeKind } from '../../features/menu-tree/store/menu-tree.model';
 
 let errorCount = 0;
 let lastValidityError: string;
@@ -41,6 +42,11 @@ export const isRelatedModelDataValid = (d: AppDataCompleteNew): boolean => {
 
   // Validate reminders
   if (!validateReminders(d)) {
+    return false;
+  }
+
+  // Validate menuTree
+  if (!validateMenuTree(d, projectIds, tagIds)) {
     return false;
   }
 
@@ -351,6 +357,105 @@ const validateReminders = (d: AppDataCompleteNew): boolean => {
         task,
         d,
       });
+      return false;
+    }
+  }
+
+  return true;
+};
+
+const validateMenuTree = (
+  d: AppDataCompleteNew,
+  projectIds: Set<string>,
+  tagIds: Set<string>,
+): boolean => {
+  // Recursive function to validate tree nodes
+  const validateTreeNodes = (
+    nodes: any[],
+    treeType: 'projectTree' | 'tagTree',
+  ): boolean => {
+    for (const node of nodes) {
+      if (!node || typeof node !== 'object') {
+        _validityError(`Invalid menuTree node in ${treeType}`, { node, d });
+        return false;
+      }
+
+      if (node.k === MenuTreeKind.FOLDER) {
+        // Validate folder structure
+        if (!node.id || !node.name) {
+          _validityError(`Invalid folder node in ${treeType} - missing id or name`, {
+            node,
+            d,
+          });
+          return false;
+        }
+
+        if (!Array.isArray(node.children)) {
+          _validityError(`Invalid folder node in ${treeType} - children not array`, {
+            node,
+            d,
+          });
+          return false;
+        }
+
+        // Recursively validate children
+        if (!validateTreeNodes(node.children, treeType)) {
+          return false;
+        }
+      } else if (treeType === 'projectTree' && node.k === MenuTreeKind.PROJECT) {
+        // Validate project reference
+        if (!node.id) {
+          _validityError(`Project node in menuTree missing id`, { node, d });
+          return false;
+        }
+
+        if (!projectIds.has(node.id)) {
+          _validityError(
+            `Orphaned project reference in menuTree - project ${node.id} doesn't exist`,
+            { node, treeType, d },
+          );
+          return false;
+        }
+      } else if (treeType === 'tagTree' && node.k === MenuTreeKind.TAG) {
+        // Validate tag reference
+        if (!node.id) {
+          _validityError(`Tag node in menuTree missing id`, { node, d });
+          return false;
+        }
+
+        if (!tagIds.has(node.id)) {
+          _validityError(
+            `Orphaned tag reference in menuTree - tag ${node.id} doesn't exist`,
+            { node, treeType, d },
+          );
+          return false;
+        }
+      } else {
+        _validityError(`Invalid node kind in ${treeType}: ${node.k}`, { node, d });
+        return false;
+      }
+    }
+    return true;
+  };
+
+  // Validate projectTree
+  if (d.menuTree?.projectTree) {
+    if (!Array.isArray(d.menuTree.projectTree)) {
+      _validityError('menuTree.projectTree is not an array', { d });
+      return false;
+    }
+    if (!validateTreeNodes(d.menuTree.projectTree, 'projectTree')) {
+      return false;
+    }
+  }
+
+  // Validate tagTree
+  if (d.menuTree?.tagTree) {
+    if (!Array.isArray(d.menuTree.tagTree)) {
+      _validityError('menuTree.tagTree is not an array', { d });
+      return false;
+    }
+    if (!validateTreeNodes(d.menuTree.tagTree, 'tagTree')) {
       return false;
     }
   }

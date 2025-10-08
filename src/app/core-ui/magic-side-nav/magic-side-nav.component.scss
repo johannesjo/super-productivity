@@ -153,9 +153,10 @@
 
 // Sidebar toggle button (desktop)
 .mode-toggle {
+  --top: 8px;
   display: none;
   position: absolute;
-  top: 8px;
+  top: var(--top);
   right: 8px;
   background: transparent;
   border: 1px solid var(--sidenav-border-color);
@@ -164,6 +165,10 @@
   cursor: pointer;
   transition: var(--transition-standard);
   color: var(--sidenav-text-secondary);
+
+  :host-context(.isMac.isElectron) & {
+    top: calc(var(--top) + var(--mac-title-bar-padding, 0px));
+  }
 
   &.visible {
     display: flex;
@@ -180,10 +185,11 @@
 
 // Navigation list
 .nav-list {
+  --pt: 48px;
   list-style: none;
   //padding: 60px var(--s) var(--s2);
   padding: 0;
-  padding-top: 48px;
+  padding-top: var(--pt);
   margin: 0;
   height: 100%;
   display: flex;
@@ -192,6 +198,10 @@
 
   @media (max-width: 600px) {
     padding-top: 0;
+  }
+
+  :host-context(.isMac.isElectron) & {
+    padding-top: calc(var(--pt) + var(--mac-title-bar-padding, 0px));
   }
 }
 

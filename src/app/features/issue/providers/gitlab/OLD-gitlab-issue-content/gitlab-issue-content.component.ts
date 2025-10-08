@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input, input, inject } from '@angular/core';
 import { TaskWithSubTasks } from '../../../../tasks/task.model';
-import { GitlabIssue } from '../gitlab-issue.model';
+import { GitlabComment, GitlabIssue } from '../gitlab-issue.model';
 import { expandAnimation } from '../../../../../ui/animations/expand.ani';
 import { T } from '../../../../../t.const';
 import { TaskService } from '../../../../tasks/task.service';
@@ -9,7 +9,6 @@ import { MatChipListbox, MatChipOption } from '@angular/material/chips';
 import { MarkdownComponent, MarkdownPipe } from 'ngx-markdown';
 import { MatIcon } from '@angular/material/icon';
 import { AsyncPipe, DatePipe } from '@angular/common';
-import { SortPipe } from '../../../../../ui/pipes/sort.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
@@ -27,7 +26,6 @@ import { TranslatePipe } from '@ngx-translate/core';
     MatIcon,
     AsyncPipe,
     DatePipe,
-    SortPipe,
     TranslatePipe,
     MarkdownPipe,
   ],
@@ -54,7 +52,16 @@ export class GitlabIssueContentComponent {
     this._taskService.markIssueUpdatesAsRead(task.id);
   }
 
-  trackByIndex(i: number, p: any): number {
+  trackByIndex(i: number, p: GitlabComment): number {
     return i;
+  }
+
+  get sortedComments(): GitlabComment[] {
+    if (!this.issue?.comments) {
+      return [];
+    }
+    return [...this.issue.comments].sort((a, b) =>
+      a.created_at.localeCompare(b.created_at),
+    );
   }
 }

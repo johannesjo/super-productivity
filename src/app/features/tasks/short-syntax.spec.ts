@@ -1021,6 +1021,35 @@ describe('shortSyntax', () => {
     });
   });
 
+  describe('projects using special delimiters', () => {
+    const taskTemplates = [
+      'Task *',
+      'Task * 10m',
+      'Task * 1h / 2d',
+      'Task * @tomorrow',
+      'Task * @in 1 day',
+      'Task * #A',
+    ];
+
+    const projects = ['a+b', '10 contracts', 'c++', 'my@email.com', 'issue#123'].map(
+      (title) => ({ id: title, title }) as Project,
+    );
+
+    for (const taskTemplate of taskTemplates) {
+      for (const project of projects) {
+        const taskTitle = taskTemplate.replaceAll('*', `+${project.title}`);
+        it(`should parse project "${project.title}" from "${taskTitle}"`, () => {
+          const task = {
+            ...TASK,
+            title: taskTitle,
+          };
+          const result = shortSyntax(task, CONFIG, ALL_TAGS, projects);
+          expect(result?.projectId).toBe(project.id);
+        });
+      }
+    }
+  });
+
   // This group of tests address Chrono's parsing the format "<date> <month> <yy}>" as year
   // This will cause unintended parsing result when the date syntax is used together with the time estimate syntax
   // https://github.com/johannesjo/super-productivity/issues/4194

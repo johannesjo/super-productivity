@@ -120,10 +120,7 @@
           </div>
         }
         @if (!isCollapsedIssueComments()) {
-          @for (
-            comment of issue?.comments | sort: 'created_at';
-            track trackByIndex($index, comment)
-          ) {
+          @for (comment of sortedComments; track trackByIndex($index, comment)) {
             <div class="comment">
               <!--<img [src]="comment.author.avatarUrl"-->
               <!--class="author-avatar">-->
