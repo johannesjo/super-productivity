@@ -36,8 +36,10 @@ describe('ScheduleService', () => {
       const result = service.getMonthDaysToShow(numberOfWeeks, firstDayOfWeek);
 
       // January 2025 starts on Wednesday (day 3)
-      // With Monday as first day of week, the calendar should start from Dec 29, 2024 (Monday)
-      const firstDayDate = new Date(result[0]);
+      // With Monday as first day of week, the calendar should start from Dec 30, 2024 (Monday)
+      // Parse the date string in local timezone by using the Date constructor with year, month, day
+      const [year, month, day] = result[0].split('-').map(Number);
+      const firstDayDate = new Date(year, month - 1, day);
       expect(firstDayDate.getDay()).toBe(1); // Monday
 
       jasmine.clock().uninstall();
@@ -55,8 +57,10 @@ describe('ScheduleService', () => {
       const result = service.getMonthDaysToShow(numberOfWeeks, firstDayOfWeek);
 
       // January 2025 starts on Wednesday (day 3)
-      // With Sunday as first day of week, the calendar should start from Dec 28, 2024 (Sunday)
-      const firstDayDate = new Date(result[0]);
+      // With Sunday as first day of week, the calendar should start from Dec 29, 2024 (Sunday)
+      // Parse the date string in local timezone by using the Date constructor with year, month, day
+      const [year, month, day] = result[0].split('-').map(Number);
+      const firstDayDate = new Date(year, month - 1, day);
       expect(firstDayDate.getDay()).toBe(0); // Sunday
 
       jasmine.clock().uninstall();
@@ -74,8 +78,10 @@ describe('ScheduleService', () => {
       const result = service.getMonthDaysToShow(numberOfWeeks, firstDayOfWeek);
 
       // January 2025 starts on Wednesday (day 3)
-      // With Saturday as first day of week, the calendar should start from Dec 27, 2024 (Saturday)
-      const firstDayDate = new Date(result[0]);
+      // With Saturday as first day of week, the calendar should start from Dec 28, 2024 (Saturday)
+      // Parse the date string in local timezone by using the Date constructor with year, month, day
+      const [year, month, day] = result[0].split('-').map(Number);
+      const firstDayDate = new Date(year, month - 1, day);
       expect(firstDayDate.getDay()).toBe(6); // Saturday
 
       jasmine.clock().uninstall();
@@ -92,7 +98,9 @@ describe('ScheduleService', () => {
       const result = service.getMonthDaysToShow(numberOfWeeks);
 
       // Should default to Sunday as first day
-      const firstDayDate = new Date(result[0]);
+      // Parse the date string in local timezone by using the Date constructor with year, month, day
+      const [year, month, day] = result[0].split('-').map(Number);
+      const firstDayDate = new Date(year, month - 1, day);
       expect(firstDayDate.getDay()).toBe(0); // Sunday
 
       jasmine.clock().uninstall();
