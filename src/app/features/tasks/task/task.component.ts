@@ -188,8 +188,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
       this.task().dueDay &&
       (!this.isTodayListActive() ||
         this.isOverdue() ||
-        this.task().dueDay !== this.todayStr() ||
-        !environment.production)
+        this.task().dueDay !== this.todayStr())
     );
   });
 
