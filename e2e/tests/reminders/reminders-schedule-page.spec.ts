@@ -1,3 +1,4 @@
+import type { Locator, Page } from '@playwright/test';
 import { test, expect } from '../../fixtures/test.fixture';
 
 const TASK = 'task';
@@ -11,6 +12,66 @@ const SCHEDULE_PAGE_CMP = 'scheduled-list-page';
 const SCHEDULE_PAGE_TASKS = `${SCHEDULE_PAGE_CMP} .tasks planner-task`;
 const SCHEDULE_PAGE_TASK_1 = `${SCHEDULE_PAGE_TASKS}:first-of-type`;
 const SCHEDULE_PAGE_TASK_1_TITLE_EL = `${SCHEDULE_PAGE_TASK_1} .title`;
+const DETAIL_PANEL_BTN = '.show-additional-info-btn';
+const DETAIL_PANEL_SELECTOR = 'dialog-task-detail-panel, task-detail-panel';
+const DETAIL_PANEL_SCHEDULE_ITEM =
+  'task-detail-item:has(mat-icon:text("alarm")), ' +
+  'task-detail-item:has(mat-icon:text("today")), ' +
+  'task-detail-item:has(mat-icon:text("schedule"))';
+
+const fillScheduleDialogTime = async (
+  page: Page,
+  scheduleTime: number,
+): Promise<void> => {
+  const dialog = page.locator(SCHEDULE_DIALOG);
+  await dialog.waitFor({ state: 'visible', timeout: 10000 });
+
+  const timeInput = page.locator(SCHEDULE_DIALOG_TIME_INPUT);
+  await timeInput.waitFor({ state: 'visible', timeout: 10000 });
+
+  const date = new Date(scheduleTime);
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+
+  await timeInput.fill('');
+  await timeInput.fill(`${hours}:${minutes}`);
+
+  const confirmBtn = page.locator(SCHEDULE_DIALOG_CONFIRM);
+  await confirmBtn.waitFor({ state: 'visible', timeout: 5000 });
+  await confirmBtn.click();
+
+  await dialog.waitFor({ state: 'hidden', timeout: 10000 });
+};
+
+const closeDetailPanelIfOpen = async (page: Page): Promise<void> => {
+  const detailPanel = page.locator(DETAIL_PANEL_SELECTOR).first();
+  if (await detailPanel.isVisible()) {
+    await page.keyboard.press('Escape');
+    await detailPanel.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
+  }
+};
+
+const scheduleTaskViaDetailPanel = async (
+  page: Page,
+  task: Locator,
+  scheduleTime: number,
+): Promise<void> => {
+  await task.waitFor({ state: 'visible' });
+  await task.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(200);
+  await task.hover({ force: true });
+
+  const detailBtn = task.locator(DETAIL_PANEL_BTN).first();
+  await detailBtn.waitFor({ state: 'visible', timeout: 5000 });
+  await detailBtn.click();
+
+  const scheduleItem = page.locator(DETAIL_PANEL_SCHEDULE_ITEM).first();
+  await scheduleItem.waitFor({ state: 'visible', timeout: 5000 });
+  await scheduleItem.click();
+
+  await fillScheduleDialogTime(page, scheduleTime);
+  await closeDetailPanelIfOpen(page);
+};
 
 test.describe('Reminders Schedule Page', () => {
   test('should add a scheduled tasks', async ({ page, workViewPage, testPrefix }) => {
@@ -30,34 +91,13 @@ test.describe('Reminders Schedule Page', () => {
     // Hover to reveal schedule button
     await targetTask.hover();
 
-    // Wait for schedule button to become visible after hover
-    const scheduleBtn = targetTask.locator(TASK_SCHEDULE_BTN);
-    await scheduleBtn.waitFor({ state: 'visible' });
-    await scheduleBtn.click();
-
-    // Wait for schedule dialog to appear
-    const dialog = page.locator(SCHEDULE_DIALOG);
-    await dialog.waitFor({ state: 'visible' });
-
-    // Wait for time input to be ready
-    const timeInput = page.locator(SCHEDULE_DIALOG_TIME_INPUT);
-    await timeInput.waitFor({ state: 'visible' });
-
-    // Set time (convert timestamp to time string)
-    const date = new Date(scheduleTime);
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    await timeInput.fill(`${hours}:${minutes}`);
-
-    // Confirm scheduling
-    const confirmBtn = page.locator(SCHEDULE_DIALOG_CONFIRM);
-    await confirmBtn.click();
-
-    // Wait for dialog to close
-    await dialog.waitFor({ state: 'hidden' });
+    // Open detail panel to access schedule action
+    await scheduleTaskViaDetailPanel(page, targetTask, scheduleTime);
 
     // Wait for schedule indicator to appear on the task
-    await targetTask.locator(TASK_SCHEDULE_BTN).waitFor({ state: 'visible' });
+    await targetTask
+      .locator(TASK_SCHEDULE_BTN)
+      .waitFor({ state: 'visible', timeout: 10000 });
 
     // Navigate to scheduled page
     try {
@@ -97,64 +137,12 @@ test.describe('Reminders Schedule Page', () => {
       const task = page.locator(TASK).filter({ hasText: taskTitle }).first();
       await task.waitFor({ state: 'visible' });
 
-      // Ensure task is in viewport
-      await task.scrollIntoViewIfNeeded();
-      await page.waitForTimeout(500); // Small delay for scroll to complete
+      await scheduleTaskViaDetailPanel(page, task, scheduleTime);
 
-      // Hover to reveal schedule button with retry
-      let retries = 3;
-      while (retries > 0) {
-        await task.hover({ force: true });
-
-        // Check if schedule button is visible
-        const scheduleBtn = task.locator(TASK_SCHEDULE_BTN).first();
-        try {
-          await scheduleBtn.waitFor({ state: 'visible', timeout: 2000 });
-          await scheduleBtn.click();
-          break;
-        } catch (e) {
-          retries--;
-          if (retries === 0) throw e;
-          await page.waitForTimeout(500);
-        }
-      }
-
-      // Wait for dialog with increased timeout
-      const dialog = page.locator(SCHEDULE_DIALOG);
-      await dialog.waitFor({ state: 'visible', timeout: 5000 });
-
-      // Wait for dialog to be fully rendered
-      await page.waitForTimeout(500);
-
-      // Wait for and fill time input
-      const timeInput = page.locator(SCHEDULE_DIALOG_TIME_INPUT);
-      await timeInput.waitFor({ state: 'visible' });
-
-      // Clear existing value before filling
-      await timeInput.clear();
-
-      // Set time
-      const date = new Date(scheduleTime);
-      const hours = date.getHours().toString().padStart(2, '0');
-      const minutes = date.getMinutes().toString().padStart(2, '0');
-      await timeInput.fill(`${hours}:${minutes}`);
-
-      // Confirm
-      const confirmBtn = page.locator(SCHEDULE_DIALOG_CONFIRM);
-      await confirmBtn.waitFor({ state: 'visible' });
-      await confirmBtn.click();
-
-      // Wait for dialog to close
-      await dialog.waitFor({ state: 'hidden', timeout: 5000 });
-
-      // Wait a bit for UI to update
-      await page.waitForTimeout(1000);
-
-      // Wait for schedule indicator to appear on the task
       await task
         .locator(TASK_SCHEDULE_BTN)
         .first()
-        .waitFor({ state: 'visible', timeout: 5000 });
+        .waitFor({ state: 'visible', timeout: 10000 });
     };
 
     // Add and schedule first task
