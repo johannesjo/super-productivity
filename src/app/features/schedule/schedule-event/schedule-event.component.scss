@@ -103,11 +103,7 @@
   &.ScheduledRepeatProjection {
     border-style: dashed;
     border-left-style: solid;
-    background: var(--bg-lighter);
-
-    > * {
-      opacity: 0.7;
-    }
+    opacity: 0.7;
   }
 
   &.CalendarEvent {
