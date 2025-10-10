@@ -115,6 +115,21 @@
             ></lazy-chart>
           </section>
         }
+        @if (focusSessionData(); as focusSessions) {
+          @if (focusSessions.labels?.length) {
+            <section>
+              <h3>{{ T.F.METRIC.CMP.FOCUS_SESSION_TRENDS | translate }}</h3>
+              <lazy-chart
+                [type]="lineChartType"
+                [datasets]="focusSessions.datasets"
+                [labels]="focusSessions.labels"
+                [legend]="true"
+                [options]="lineChartOptions"
+                height="400px"
+              ></lazy-chart>
+            </section>
+          }
+        }
       </section>
     </section>
   }

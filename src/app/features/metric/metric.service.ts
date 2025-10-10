@@ -14,11 +14,12 @@ import {
   selectMetricById,
   selectMetricHasData,
   selectObstructionCountsPieChartData,
+  selectFocusSessionLineChartData,
   selectProductivityHappinessLineChartData,
   selectSimpleCounterClickCounterLineChartData,
   selectSimpleCounterStopWatchLineChartData,
 } from './store/metric.selectors';
-import { map, switchMap } from 'rxjs/operators';
+import { map, switchMap, take } from 'rxjs/operators';
 import { DEFAULT_METRIC_FOR_DAY } from './metric.const';
 import {
   selectCheckedImprovementIdsForDay,
@@ -59,7 +60,10 @@ export class MetricService {
     return this._store$.pipe(select(selectMetricById, { id: day })).pipe(
       switchMap((metric) => {
         return metric
-          ? of(metric)
+          ? of({
+              ...metric,
+              focusSessions: metric.focusSessions ?? [],
+            })
           : combineLatest([
               this._store$.pipe(select(selectCheckedImprovementIdsForDay, { day })),
               this._store$.pipe(select(selectRepeatedImprovementIds)),
@@ -70,6 +74,7 @@ export class MetricService {
                   ...DEFAULT_METRIC_FOR_DAY,
                   improvements: checkedImprovementIds || [],
                   improvementsTomorrow: repeatedImprovementIds || [],
+                  focusSessions: [],
                 };
               }),
             );
@@ -110,6 +115,40 @@ export class MetricService {
     this._store$.dispatch(upsertMetric({ metric }));
   }
 
+  logFocusSession(duration: number, day: string = this._dateService.todayStr()): void {
+    if (!duration || duration <= 0) {
+      return;
+    }
+
+    this._store$
+      .pipe(select(selectMetricById, { id: day }), take(1))
+      .subscribe((metric) => {
+        if (metric) {
+          const focusSessions = metric.focusSessions ?? [];
+          this._store$.dispatch(
+            updateMetric({
+              metric: {
+                id: day,
+                changes: {
+                  focusSessions: [...focusSessions, duration],
+                },
+              },
+            }),
+          );
+        } else {
+          this._store$.dispatch(
+            upsertMetric({
+              metric: {
+                id: day,
+                ...DEFAULT_METRIC_FOR_DAY,
+                focusSessions: [duration],
+              },
+            }),
+          );
+        }
+      });
+  }
+
   // STATISTICS
   getProductivityHappinessChartData$(howMany: number = 60): Observable<LineChartData> {
     return this._store$.select(selectProductivityHappinessLineChartData, { howMany });
@@ -121,5 +160,9 @@ export class MetricService {
 
   getSimpleCounterStopwatchMetrics$(howMany: number = 60): Observable<LineChartData> {
     return this._store$.select(selectSimpleCounterStopWatchLineChartData, { howMany });
+  }
+
+  getFocusSessionMetrics$(howMany: number = 60): Observable<LineChartData> {
+    return this._store$.select(selectFocusSessionLineChartData, { howMany });
   }
 }

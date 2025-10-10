@@ -81,6 +81,20 @@
         </div>
       </div>
     }
+
+    @let focusSessionCount = focusSessionCount$ | async;
+    @if (focusSessionCount) {
+      <div class="summary-point">
+        <mat-icon>center_focus_strong</mat-icon>
+        <div class="summary-text">
+          {{ T.PDS.FOCUS_SUMMARY | translate }}
+          <div class="summary-val">
+            {{ focusSessionCount }} /
+            {{ focusSessionDuration$ | async | msToClockString }}
+          </div>
+        </div>
+      </div>
+    }
   </div>
 
   @if (simpleCounterSummaryItems()?.length) {

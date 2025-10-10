@@ -300,3 +300,47 @@ export const selectSimpleCounterStopWatchLineChartData = createSelector(
     return chart;
   },
 );
+
+export const selectFocusSessionLineChartDataComplete = createSelector(
+  selectMetricFeatureState,
+  (state: MetricState): LineChartData => {
+    const ids = state.ids as string[];
+    const sorted = sortWorklogDates(ids);
+    const chart: LineChartData = {
+      labels: [],
+      datasets: [
+        { data: [], label: 'Focus sessions' },
+        { data: [], label: 'Focus minutes' },
+      ],
+    };
+
+    sorted.forEach((id) => {
+      const metric = state.entities[id];
+      if (!metric) {
+        return;
+      }
+      const focusSessions = metric.focusSessions ?? [];
+      const totalDuration = focusSessions.reduce((acc, val) => acc + val, 0);
+
+      chart.labels?.push(metric.id);
+      chart.datasets[0].data.push(focusSessions.length);
+      chart.datasets[1].data.push(Math.round(totalDuration / 60000));
+    });
+
+    return chart;
+  },
+);
+
+export const selectFocusSessionLineChartData = createSelector(
+  selectFocusSessionLineChartDataComplete,
+  (chart: LineChartData, props: { howMany: number }): LineChartData => {
+    const f = -1 * props.howMany;
+    return {
+      labels: chart.labels?.slice(f),
+      datasets: chart.datasets.map((dataset) => ({
+        data: dataset.data.slice(f),
+        label: dataset.label,
+      })),
+    };
+  },
+);
