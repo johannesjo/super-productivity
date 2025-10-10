@@ -20,7 +20,7 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { distinctUntilChanged, filter, map, scan, switchMap } from 'rxjs/operators';
 import { BannerService } from '../../../core/banner/banner.service';
 import { BannerId } from '../../../core/banner/banner.model';
-import { MatMiniFabButton } from '@angular/material/button';
+import { MatIconButton, MatMiniFabButton } from '@angular/material/button';
 import { LongPressDirective } from '../../../ui/longpress/longpress.directive';
 import { MatIcon } from '@angular/material/icon';
 import { AsyncPipe } from '@angular/common';
@@ -41,6 +41,7 @@ import { MsToMinuteClockStringPipe } from '../../../ui/duration/ms-to-minute-clo
     MatIcon,
     AsyncPipe,
     MsToMinuteClockStringPipe,
+    MatIconButton,
   ],
 })
 export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
