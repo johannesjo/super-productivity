@@ -6,6 +6,7 @@ import {
   deleteMetric,
   updateMetric,
   upsertMetric,
+  logFocusSession,
 } from './store/metric.actions';
 import { combineLatest, Observable, of } from 'rxjs';
 import { LineChartData, Metric, MetricState } from './metric.model';
@@ -19,13 +20,15 @@ import {
   selectSimpleCounterClickCounterLineChartData,
   selectSimpleCounterStopWatchLineChartData,
 } from './store/metric.selectors';
-import { map, switchMap, take } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import { DEFAULT_METRIC_FOR_DAY } from './metric.const';
 import {
   selectCheckedImprovementIdsForDay,
   selectRepeatedImprovementIds,
 } from './improvement/store/improvement.reducer';
 import { DateService } from 'src/app/core/date/date.service';
+
+const MIN_FOCUS_SESSION_DURATION = 1000;
 
 @Injectable({
   providedIn: 'root',
@@ -116,37 +119,16 @@ export class MetricService {
   }
 
   logFocusSession(duration: number, day: string = this._dateService.todayStr()): void {
-    if (!duration || duration <= 0) {
+    if (!duration || duration < MIN_FOCUS_SESSION_DURATION) {
       return;
     }
 
-    this._store$
-      .pipe(select(selectMetricById, { id: day }), take(1))
-      .subscribe((metric) => {
-        if (metric) {
-          const focusSessions = metric.focusSessions ?? [];
-          this._store$.dispatch(
-            updateMetric({
-              metric: {
-                id: day,
-                changes: {
-                  focusSessions: [...focusSessions, duration],
-                },
-              },
-            }),
-          );
-        } else {
-          this._store$.dispatch(
-            upsertMetric({
-              metric: {
-                id: day,
-                ...DEFAULT_METRIC_FOR_DAY,
-                focusSessions: [duration],
-              },
-            }),
-          );
-        }
-      });
+    this._store$.dispatch(
+      logFocusSession({
+        day,
+        duration,
+      }),
+    );
   }
 
   // STATISTICS
