@@ -1,17 +1,21 @@
-@if (countdown$ | async; as countdown) {
-  @if (countdown > 0) {
-    <section>
-      <div class="action-msg">{{ T.F.FOCUS_MODE.GET_READY | translate }}</div>
-      <ol>
-        <li>{{ T.F.FOCUS_MODE.PREP_STRETCH | translate }}</li>
-        <li>{{ T.F.FOCUS_MODE.PREP_SIT_UPRIGHT | translate }}</li>
-        <li>{{ T.F.FOCUS_MODE.PREP_GET_MENTALLY_READY | translate }}</li>
-      </ol>
-      <div class="countdown-timer">{{ countdown }}</div>
-    </section>
+@let remaining = countdown();
+<section class="preparation">
+  @if (remaining > 0) {
+    <div class="action-msg">{{ T.F.FOCUS_MODE.GET_READY | translate }}</div>
+    <ol>
+      <li>{{ T.F.FOCUS_MODE.PREP_STRETCH | translate }}</li>
+      <li>{{ T.F.FOCUS_MODE.PREP_SIT_UPRIGHT | translate }}</li>
+      <li>{{ T.F.FOCUS_MODE.PREP_GET_MENTALLY_READY | translate }}</li>
+    </ol>
+    <div class="countdown-timer">{{ remaining }}</div>
+  } @else {
+    <div
+      class="action-msg go-msg"
+      @fade
+    >
+      {{ T.F.FOCUS_MODE.GOGOGO | translate }}
+    </div>
   }
-} @else {
-  <section @fade>
-    <div class="action-msg">{{ T.F.FOCUS_MODE.GOGOGO | translate }}</div>
-  </section>
-}
+
+  <focus-mode-preparation-rocket [state]="rocketState()"></focus-mode-preparation-rocket>
+</section>

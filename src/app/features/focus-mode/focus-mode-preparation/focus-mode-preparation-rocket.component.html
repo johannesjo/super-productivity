@@ -1,0 +1,17 @@
+@let rocketState = state();
+<div
+  class="rocket-wrapper"
+  [class.jiggle-even]="rocketState === 'jiggle-even'"
+  [class.jiggle-odd]="rocketState === 'jiggle-odd'"
+  [class.launch]="rocketState === 'launch'"
+>
+  <div class="rocket">
+    <div class="nose"></div>
+    <div class="body">
+      <div class="window"></div>
+    </div>
+    <div class="fin fin-left"></div>
+    <div class="fin fin-right"></div>
+    <div class="flame"></div>
+  </div>
+</div>
