@@ -310,10 +310,11 @@
                 }
               </div>
             </collapsible>
-            @if (isOnTodayList()) {
-              <finish-day-btn [hasDoneTasks]="hasDoneTasks()"></finish-day-btn>
-            }
           </div>
+        }
+
+        @if (!isPlanningMode() && isOnTodayList()) {
+          <finish-day-btn [hasDoneTasks]="hasDoneTasks()"></finish-day-btn>
         }
       </div>
     </div>
