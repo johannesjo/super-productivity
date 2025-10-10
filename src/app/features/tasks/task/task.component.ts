@@ -636,14 +636,10 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   titleBarClick(event: MouseEvent): void {
     console.log(event.target);
-    if (
-      (IS_TOUCH_PRIMARY && this.task().title.length) ||
-      (event.target as HTMLElement).tagName.toUpperCase() !== 'TEXTAREA'
-      // && (event.target as HTMLElement).tagName.toUpperCase() !== 'TASK-TITLE')
-    ) {
+    if (IS_TOUCH_PRIMARY && this.task().title.length) {
       this.toggleShowDetailPanel(event);
-    } else {
-      this.focusTitleForEdit();
+    } else if ((event.target as HTMLElement).tagName.toUpperCase() !== 'TEXTAREA') {
+      this.focusSelf();
     }
   }
 
@@ -701,7 +697,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     if (IS_TOUCH_PRIMARY) {
       return;
     }
-    this.focusSelfElement();
+    this._focusSelfElement();
   }
 
   focusSelfOrNextIfNotPossible(): void {
@@ -721,7 +717,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     }, 200);
   }
 
-  focusSelfElement(): void {
+  private _focusSelfElement(): void {
     this._elementRef.nativeElement.focus();
   }
 
