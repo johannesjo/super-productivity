@@ -5,13 +5,31 @@
   [class.jiggle-odd]="rocketState === 'jiggle-odd'"
   [class.launch]="rocketState === 'launch'"
 >
-  <div class="rocket">
-    <div class="nose"></div>
-    <div class="body">
-      <div class="window"></div>
-    </div>
-    <div class="fin fin-left"></div>
-    <div class="fin fin-right"></div>
-    <div class="flame"></div>
-  </div>
+  <svg
+    class="rocket-svg"
+    viewBox="0 0 60 120"
+    role="presentation"
+  >
+    <path
+      class="rocket-body"
+      d="M30 0
+         C44 18 52 38 52 60
+         V100
+         H8
+         V60
+         C8 38 16 18 30 0Z"
+    />
+    <polygon
+      class="rocket-fin rocket-fin-left"
+      points="8,92 2,110 20,100"
+    />
+    <polygon
+      class="rocket-fin rocket-fin-right"
+      points="52,92 58,110 40,100"
+    />
+    <polygon
+      class="rocket-flame"
+      points="30,100 40,120 20,120"
+    />
+  </svg>
 </div>

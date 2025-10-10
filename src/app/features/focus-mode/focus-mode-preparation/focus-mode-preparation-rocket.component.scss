@@ -1,0 +1,75 @@
+.rocket-wrapper {
+  position: relative;
+  width: 80px;
+  height: 140px;
+  margin: var(--s2) auto 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  transform-origin: 50% 100%;
+  transition: transform 0.18s ease;
+
+  &.jiggle-even {
+    transform: rotate(-6deg);
+  }
+
+  &.jiggle-odd {
+    transform: rotate(6deg);
+  }
+
+  &.launch {
+    animation: rocket-launch 0.85s forwards ease-in;
+  }
+
+  .rocket-svg {
+    width: 100%;
+    height: 100%;
+    color: var(--c-primary);
+  }
+}
+
+.rocket-body,
+.rocket-fin {
+  fill: currentColor;
+}
+
+.rocket-flame {
+  fill: currentColor;
+  opacity: 0.45;
+  transform-origin: 30px 110px;
+  animation: flame-flicker 0.28s infinite alternate;
+  transition: opacity 0.2s ease;
+}
+
+.rocket-wrapper.launch .rocket-flame {
+  opacity: 0.9;
+  animation: flame-launch 0.18s infinite alternate;
+}
+
+@keyframes flame-flicker {
+  from {
+    transform: scaleY(1);
+  }
+  to {
+    transform: scaleY(0.65);
+  }
+}
+
+@keyframes flame-launch {
+  from {
+    transform: scaleY(1.15);
+  }
+  to {
+    transform: scaleY(1.4);
+  }
+}
+
+@keyframes rocket-launch {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-240px);
+    opacity: 0;
+  }
+}
