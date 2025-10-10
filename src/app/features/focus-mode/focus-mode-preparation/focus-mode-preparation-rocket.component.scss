@@ -1,3 +1,25 @@
+$rocket-pulse-values: 0, 1, 2, 3, 4, 5;
+
+@mixin rocket-bounce-frames($pulse) {
+  @at-root {
+    @keyframes rocket-bounce-#{$pulse} {
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+      45% {
+        transform: translateY(-8px);
+      }
+    }
+  }
+}
+
+@mixin rocket-bounce-animation($pulse) {
+  &.pulse-#{$pulse} {
+    animation: rocket-bounce-#{$pulse} 0.32s ease-in-out;
+  }
+}
+
 .rocket-wrapper {
   position: relative;
   width: 80px;
@@ -8,8 +30,9 @@
   justify-content: center;
   transform-origin: 50% 100%;
 
-  &[class*='pulse-'] {
-    animation: rocket-bounce 0.32s ease-in-out;
+  @each $pulse in $rocket-pulse-values {
+    @include rocket-bounce-animation($pulse);
+    @include rocket-bounce-frames($pulse);
   }
 
   &.launch {
@@ -41,16 +64,6 @@
   transform-origin: 30px 108px;
   animation: flame-flicker 0.28s infinite alternate;
   transition: opacity 0.2s ease;
-}
-
-@keyframes rocket-bounce {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  45% {
-    transform: translateY(-8px);
-  }
 }
 
 @keyframes flame-flicker {

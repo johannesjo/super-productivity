@@ -1,21 +1,32 @@
 @let remaining = countdown();
 <section class="preparation">
-  @if (remaining > 0) {
-    <div class="action-msg">{{ T.F.FOCUS_MODE.GET_READY | translate }}</div>
-    <ol>
-      <li>{{ T.F.FOCUS_MODE.PREP_STRETCH | translate }}</li>
-      <li>{{ T.F.FOCUS_MODE.PREP_SIT_UPRIGHT | translate }}</li>
-      <li>{{ T.F.FOCUS_MODE.PREP_GET_MENTALLY_READY | translate }}</li>
-    </ol>
-    <div class="countdown-timer">{{ remaining }}</div>
-  } @else {
+  <div class="message-stack">
     <div
-      class="action-msg go-msg"
-      @fade
+      class="prep-content"
+      [class.is-hidden]="remaining <= 0"
     >
-      {{ T.F.FOCUS_MODE.GOGOGO | translate }}
+      <div
+        class="action-msg"
+        style="margin-bottom: 16px"
+      >
+        {{ T.F.FOCUS_MODE.GET_READY | translate }}
+      </div>
+      <ol>
+        <li>{{ T.F.FOCUS_MODE.PREP_STRETCH | translate }}</li>
+        <li>{{ T.F.FOCUS_MODE.PREP_SIT_UPRIGHT | translate }}</li>
+        <li>{{ T.F.FOCUS_MODE.PREP_GET_MENTALLY_READY | translate }}</li>
+      </ol>
+      <div class="countdown-timer">{{ remaining }}</div>
     </div>
-  }
+    @if (remaining <= 0) {
+      <div
+        class="action-msg go-msg"
+        @fade
+      >
+        {{ T.F.FOCUS_MODE.GOGOGO | translate }}
+      </div>
+    }
+  </div>
 
   <focus-mode-preparation-rocket [state]="rocketState()"></focus-mode-preparation-rocket>
 </section>

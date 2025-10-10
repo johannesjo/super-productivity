@@ -4,6 +4,20 @@
   align-items: center;
   text-align: center;
   gap: var(--s2);
+  position: relative;
+  line-height: 1.2;
+}
+
+.message-stack {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.prep-content.is-hidden {
+  visibility: hidden;
 }
 
 .action-msg {
@@ -14,6 +28,11 @@
 .go-msg {
   font-size: 28px;
   letter-spacing: 1px;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
 }
 
 ol {
@@ -30,5 +49,5 @@ ol {
 .countdown-timer {
   font-size: 36px;
   font-weight: bold;
-  margin-top: var(--s2);
+  margin-top: var(--s3);
 }
