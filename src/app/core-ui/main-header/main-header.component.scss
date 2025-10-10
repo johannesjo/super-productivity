@@ -134,7 +134,8 @@ button.isActive2 {
   .play-btn {
     position: relative;
     margin-left: 0;
-    z-index: 2;
+    // make sure it is above the label of our focus button
+    z-index: 4;
     .circle-svg {
       transform: rotate(-90deg);
       position: absolute;
@@ -396,7 +397,6 @@ button.isActive2 {
     transform: translateX(-50%);
     font-weight: bold;
     border-radius: 8px;
-    z-index: 4;
     pointer-events: none;
     bottom: calc(var(--s) * -0.25);
     background: var(--bg-lighter);
