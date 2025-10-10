@@ -1,14 +1,16 @@
+import { NgClass } from '@angular/common';
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
-type RocketState = 'jiggle-even' | 'jiggle-odd' | 'launch';
+export type RocketState = `pulse-${number}` | 'launch';
 
 @Component({
   selector: 'focus-mode-preparation-rocket',
   standalone: true,
   templateUrl: './focus-mode-preparation-rocket.component.html',
   styleUrls: ['./focus-mode-preparation-rocket.component.scss'],
+  imports: [NgClass],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FocusModePreparationRocketComponent {
-  readonly state = input<RocketState>('jiggle-even');
+  readonly state = input<RocketState>('pulse-5');
 }

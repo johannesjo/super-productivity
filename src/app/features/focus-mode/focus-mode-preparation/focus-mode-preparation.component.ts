@@ -14,11 +14,12 @@ import { T } from 'src/app/t.const';
 import { TranslatePipe } from '@ngx-translate/core';
 import { selectTimeDuration } from '../store/focus-mode.selectors';
 import { FocusModeService } from '../focus-mode.service';
-import { FocusModePreparationRocketComponent } from './focus-mode-preparation-rocket.component';
+import {
+  FocusModePreparationRocketComponent,
+  type RocketState,
+} from './focus-mode-preparation-rocket.component';
 
-type RocketState = 'jiggle-even' | 'jiggle-odd' | 'launch';
-
-const COUNTDOWN_DURATION = 5222;
+const COUNTDOWN_DURATION = 5;
 
 @Component({
   selector: 'focus-mode-preparation',
@@ -36,7 +37,7 @@ export class FocusModePreparationComponent implements OnDestroy {
 
   private _onDestroy$ = new Subject<void>();
   readonly countdown = signal<number>(COUNTDOWN_DURATION);
-  readonly rocketState = signal<RocketState>('jiggle-even');
+  readonly rocketState = signal<RocketState>('pulse-5');
   private _hasLaunched = false;
 
   constructor() {
@@ -47,7 +48,7 @@ export class FocusModePreparationComponent implements OnDestroy {
         this.countdown.set(remaining);
 
         if (remaining > 0) {
-          this.rocketState.set(remaining % 2 === 0 ? 'jiggle-even' : 'jiggle-odd');
+          this.rocketState.set(`pulse-${remaining}` as RocketState);
         } else {
           this.rocketState.set('launch');
           if (!this._hasLaunched) {
