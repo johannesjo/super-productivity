@@ -344,3 +344,24 @@ export const selectFocusSessionLineChartData = createSelector(
     };
   },
 );
+
+export const selectFocusSessionsByDay = createSelector(
+  selectMetricFeatureState,
+  (state: MetricState): Record<string, { count: number; total: number }> => {
+    const result: Record<string, { count: number; total: number }> = {};
+    const ids = state.ids as string[];
+
+    ids.forEach((id) => {
+      const metric = state.entities[id];
+      if (metric?.focusSessions && metric.focusSessions.length) {
+        const total = metric.focusSessions.reduce((acc, val) => acc + val, 0);
+        result[id] = {
+          count: metric.focusSessions.length,
+          total,
+        };
+      }
+    });
+
+    return result;
+  },
+);

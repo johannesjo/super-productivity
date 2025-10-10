@@ -16,6 +16,7 @@ import {
   selectMetricHasData,
   selectObstructionCountsPieChartData,
   selectFocusSessionLineChartData,
+  selectFocusSessionsByDay,
   selectProductivityHappinessLineChartData,
   selectSimpleCounterClickCounterLineChartData,
   selectSimpleCounterStopWatchLineChartData,
@@ -49,6 +50,10 @@ export class MetricService {
     this._store$.pipe(select(selectObstructionCountsPieChartData)),
     { initialValue: null },
   );
+
+  focusSessionsByDay = toSignal(this._store$.pipe(select(selectFocusSessionsByDay)), {
+    initialValue: {} as Record<string, { count: number; total: number }>,
+  });
 
   // getMetricForDay$(id: string = getWorklogStr()): Observable<Metric> {
   //   if (!id) {
@@ -146,5 +151,9 @@ export class MetricService {
 
   getFocusSessionMetrics$(howMany: number = 60): Observable<LineChartData> {
     return this._store$.select(selectFocusSessionLineChartData, { howMany });
+  }
+
+  getFocusSummaryForDay(day: string): { count: number; total: number } | undefined {
+    return this.focusSessionsByDay()[day];
   }
 }

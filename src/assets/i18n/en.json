@@ -1581,7 +1581,8 @@
       "WEEK": {
         "EXPORT": "Export Week Data",
         "NO_DATA": "No tasks this week yet.",
-        "TITLE": "Title"
+        "TITLE": "Title",
+        "FOCUS_SUMMARY": "Focus sessions (nr / time)"
       }
     }
   },

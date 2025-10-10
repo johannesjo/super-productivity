@@ -1608,6 +1608,7 @@ const T = {
         EXPORT: 'F.WORKLOG.WEEK.EXPORT',
         NO_DATA: 'F.WORKLOG.WEEK.NO_DATA',
         TITLE: 'F.WORKLOG.WEEK.TITLE',
+        FOCUS_SUMMARY: 'F.WORKLOG.WEEK.FOCUS_SUMMARY',
       },
     },
   },

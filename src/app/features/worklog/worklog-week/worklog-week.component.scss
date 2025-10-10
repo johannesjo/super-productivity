@@ -161,6 +161,12 @@ $this-border-radius: 8px;
   //margin-top: var(--s);
 }
 
+.focus-summary-item .count {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-quarter);
+}
+
 .simple-counter-item {
   margin: 0 var(--s-half);
   display: inline-flex;
