@@ -1,3 +1,15 @@
+## [15.2.1](https://github.com/johannesjo/super-productivity/compare/v15.2.0...v15.2.1) (2025-10-11)
+
+### Bug Fixes
+
+- correct GitHub Actions workflow parameter names ([a810ce7](https://github.com/johannesjo/super-productivity/commit/a810ce79cbcde8b283f50de4af5c5572a63f499a))
+- electron snap issue [#5252](https://github.com/johannesjo/super-productivity/issues/5252) ([e465712](https://github.com/johannesjo/super-productivity/commit/e465712029c87af4719e474530afa5fbdf90df3c))
+
+### Features
+
+- adjust tour text ([2b611b8](https://github.com/johannesjo/super-productivity/commit/2b611b8b1fcd03818f14a63f396cba3dfe2d56c3))
+- don't show productivity snack tip when tour dialog is shown ([60c668e](https://github.com/johannesjo/super-productivity/commit/60c668e240e73caf158ed197bc4dec11039556d5))
+
 # [15.2.0](https://github.com/johannesjo/super-productivity/compare/v15.1.3-rc.0...v15.2.0) (2025-10-10)
 
 ### Bug Fixes
