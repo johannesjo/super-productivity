@@ -55,6 +55,18 @@ let mainWin: BrowserWindow;
 let idleTimeHandler: IdleTimeHandler;
 
 export const startApp = (): void => {
+  // Workaround for Electron 38+ snap package GPU issues (issue #5252)
+  // Electron 38.1+ has GPU/Mesa driver access issues in snap confinement
+  const isForceGpu = process.argv.some((val) => val.includes('--enable-gpu'));
+  const isSnap = process.platform === 'linux' && !!process.env.SNAP;
+  if (isSnap && !isForceGpu) {
+    log(
+      'Snap: Disabling hardware acceleration to avoid Mesa driver lookup crashes (issue #5252)',
+    );
+    log('Snap: Launch with --enable-gpu to attempt hardware rendering (may crash)');
+    app.disableHardwareAcceleration();
+  }
+
   // Initialize protocol handling
   initializeProtocolHandling(IS_DEV, app, () => mainWin);
 
