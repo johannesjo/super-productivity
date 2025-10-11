@@ -15,7 +15,7 @@ jobs:
       - uses: actions/first-interaction@v3
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          issue-message: |
+          issue_message: |
             Hello there ${{ github.actor }}! 👋
 
             Thank you and congratulations 🎉 for opening your very first issue in this project! 💖
@@ -24,7 +24,7 @@ jobs:
 
             For more open ended discussions and/or specific questions, please visit the [discussions page](https://github.com/johannesjo/super-productivity/discussions). 💖
 
-          pr-message: |
+          pr_message: |
             Hello there ${{ github.actor }}! 👋
 
             Thank you and congrats 🎉 for opening your first PR on this project! ✨ 💖
