@@ -439,15 +439,53 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
 
   // Public method to focus the first nav entry (for keyboard shortcuts)
   focusFirstNavEntry(): void {
-    if (this.isMobile() && !this.showMobileMenuOverlay()) {
-      this.showMobileMenuOverlay.set(true);
-      setTimeout(() => {
-        this._focusFirstNavElement();
-      });
+    // Check if any nav element is currently focused
+    const activeElement = document.activeElement as HTMLElement;
+    const navSidebar = document.querySelector('.nav-sidenav');
+    const isNavFocused = navSidebar && navSidebar.contains(activeElement);
+
+    // If on mobile
+    if (this.isMobile()) {
+      if (this.showMobileMenuOverlay()) {
+        // If mobile overlay is open and nav is focused, close it
+        if (isNavFocused) {
+          this.showMobileMenuOverlay.set(false);
+          // Blur the active element
+          if (activeElement && typeof activeElement.blur === 'function') {
+            activeElement.blur();
+          }
+          // Focus the first task if available
+          setTimeout(() => {
+            this._taskService.focusFirstTaskIfVisible();
+          }, 10);
+        } else {
+          // Mobile overlay is open but nav not focused, focus it
+          this._focusFirstNavElement();
+        }
+      } else {
+        // Mobile overlay is closed, open it and focus
+        this.showMobileMenuOverlay.set(true);
+        setTimeout(() => {
+          this._focusFirstNavElement();
+        });
+      }
       return;
     }
 
-    this._focusFirstNavElement();
+    // Desktop behavior: toggle focus
+    if (isNavFocused) {
+      // Nav is already focused, unfocus it
+      if (activeElement && typeof activeElement.blur === 'function') {
+        activeElement.blur();
+      }
+      // Focus the first task if available
+      setTimeout(() => {
+        this._taskService.focusFirstTaskIfVisible();
+      }, 10);
+    } else {
+      // Nav is not focused, focus it
+      this._focusFirstNavElement();
+    }
   }
 
   private _focusFirstNavElement(): void {
