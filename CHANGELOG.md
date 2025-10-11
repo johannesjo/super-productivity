@@ -1,3 +1,9 @@
+## [15.2.2](https://github.com/johannesjo/super-productivity/compare/v15.2.1...v15.2.2) (2025-10-11)
+
+### Bug Fixes
+
+- css warning ([bebc212](https://github.com/johannesjo/super-productivity/commit/bebc2125228f51f52969314f0ca32ae053ac4fe4))
+
 ## [15.2.1](https://github.com/johannesjo/super-productivity/compare/v15.2.0...v15.2.1) (2025-10-11)
 
 ### Bug Fixes
