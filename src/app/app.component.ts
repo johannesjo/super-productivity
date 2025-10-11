@@ -240,7 +240,7 @@ export class AppComponent implements OnDestroy, AfterViewInit {
       this._initOfflineBanner();
 
       const miscCfg = this._globalConfigService.misc();
-      if (!miscCfg?.isDisableProductivityTips) {
+      if (!miscCfg?.isDisableProductivityTips && !this._isTourLikelyToBeShown()) {
         this._snackService.open({
           ico: 'lightbulb',
           config: {
@@ -632,6 +632,18 @@ export class AppComponent implements OnDestroy, AfterViewInit {
         alert(t2);
       }
     });
+  }
+
+  private _isTourLikelyToBeShown(): boolean {
+    if (localStorage.getItem(LS.IS_SKIP_TOUR)) {
+      return false;
+    }
+    const ua = navigator.userAgent;
+    if (ua === 'NIGHTWATCH' || ua.includes('PLAYWRIGHT')) {
+      return false;
+    }
+    const projectList = this._projectService.list();
+    return !projectList || projectList.length <= 2;
   }
 
   private _initOfflineBanner(): void {
