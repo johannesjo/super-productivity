@@ -73,6 +73,14 @@ jobs:
       - name: Install Snapcraft
         uses: samuelmeuli/action-snapcraft@v3
 
+      - name: Pre-install required snaps
+        run: |
+          set -e
+          sudo snap install core18 --channel=latest/stable || true
+          sudo snap install core22 --channel=latest/stable || true
+          sudo snap install gnome-3-28-1804 --channel=latest/stable || true
+          sudo snap refresh
+
       - name: Build/Release Electron app
         env:
           GH_TOKEN: ${{ secrets.github_token }}
