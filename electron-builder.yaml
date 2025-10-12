@@ -76,7 +76,7 @@ snap:
     - libglu1-mesa
     - libosmesa6
     - libgl1-mesa-dri
-    - libtinfo5
+    - libtinfo6
     - libnspr4
     - libnss3
   plugs:
