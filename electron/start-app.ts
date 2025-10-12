@@ -65,6 +65,10 @@ export const startApp = (): void => {
     );
     log('Snap: Launch with --enable-gpu to attempt hardware rendering (may crash)');
     app.disableHardwareAcceleration();
+
+    // Additional command-line switches to ensure snap compatibility
+    app.commandLine.appendSwitch('disable-gpu');
+    app.commandLine.appendSwitch('disable-gpu-sandbox');
   }
 
   // Initialize protocol handling

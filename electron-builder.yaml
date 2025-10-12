@@ -61,6 +61,19 @@ snap:
   autoStart: true
   base: core22
   confinement: strict
+  # Force software rendering to avoid GPU/Mesa driver issues in snap confinement
+  # See: https://github.com/johannesjo/super-productivity/issues/5252
+  environment:
+    LIBGL_ALWAYS_SOFTWARE: '1'
+    MESA_LOADER_DRIVER_OVERRIDE: llvmpipe
+    LIBGL_DRIVERS_PATH: !!str '$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/dri:$SNAP/gnome-platform/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/dri'
+    __GLX_VENDOR_LIBRARY_NAME: mesa
+    DISABLE_WAYLAND: '1'
+  stagePackages:
+    - default
+    - libglu1-mesa
+    - libosmesa6
+    - libgl1-mesa-dri
   plugs:
     - default
     - password-manager-service
