@@ -76,8 +76,11 @@ jobs:
       - name: Ensure runner can access LXD
         run: |
           sudo snap install lxd --channel=5.0/stable || true
-          sudo usermod -aG lxd $USER
+          sudo lxd waitready || true
           sudo lxd init --auto || true
+          sudo usermod -aG lxd $USER
+          sudo sysctl -w net.ipv4.ip_forward=1
+          sudo sysctl -w net.ipv6.conf.all.forwarding=1
 
       - name: Build/Release Electron app
         env:
