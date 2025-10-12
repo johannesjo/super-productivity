@@ -77,6 +77,7 @@ jobs:
         run: |
           sudo snap install lxd --channel=5.0/stable || true
           sudo usermod -aG lxd $USER
+          sudo lxd init --auto || true
 
       - name: Build/Release Electron app
         env:
