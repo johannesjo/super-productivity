@@ -1,3 +1,9 @@
+## [15.2.4](https://github.com/johannesjo/super-productivity/compare/v15.2.3...v15.2.4) (2025-10-12)
+
+### Bug Fixes
+
+- attempt to fix snap once more 4 [#5252](https://github.com/johannesjo/super-productivity/issues/5252) ([b48b0b2](https://github.com/johannesjo/super-productivity/commit/b48b0b21690089a87dadb54dde87b6106d715a85))
+
 ## [15.2.3](https://github.com/johannesjo/super-productivity/compare/v15.2.2...v15.2.3) (2025-10-12)
 
 ### Bug Fixes
