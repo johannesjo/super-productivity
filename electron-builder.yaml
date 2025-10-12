@@ -64,18 +64,23 @@ snap:
   # Force software rendering to avoid GPU/Mesa driver issues in snap confinement
   # See: https://github.com/johannesjo/super-productivity/issues/5252
   environment:
-    LIBGL_ALWAYS_SOFTWARE: '1'
+    # Primary: Force llvmpipe software renderer (most explicit)
     MESA_LOADER_DRIVER_OVERRIDE: llvmpipe
+    # Secondary: Ensure software rendering fallback (defense-in-depth)
+    LIBGL_ALWAYS_SOFTWARE: '1'
+    # Configure driver search paths for snap confinement
     LIBGL_DRIVERS_PATH: !!str '$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/dri:$SNAP/gnome-platform/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/dri'
+    # Force Mesa on NVIDIA systems
     __GLX_VENDOR_LIBRARY_NAME: mesa
-    DISABLE_WAYLAND: '1'
   stagePackages:
     - default
     - libglu1-mesa
     - libosmesa6
     - libgl1-mesa-dri
+    - libtinfo5
   plugs:
     - default
+    - browser-support
     - password-manager-service
     - system-observe
     - login-session-observe
