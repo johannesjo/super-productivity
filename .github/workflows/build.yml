@@ -73,12 +73,23 @@ jobs:
       - name: Install Snapcraft
         uses: samuelmeuli/action-snapcraft@v3
 
+      - name: Ensure runner can access LXD
+        run: |
+          sudo snap install lxd --channel=5.0/stable || true
+          sudo usermod -aG lxd $USER
+
       - name: Build/Release Electron app
-        uses: johannesjo/action-electron-builder@v1
-        with:
-          build_script_name: empty
-          github_token: ${{ secrets.github_token }}
-          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+        env:
+          GH_TOKEN: ${{ secrets.github_token }}
+          IS_RELEASE: ${{ startsWith(github.ref, 'refs/tags/v') }}
+        run: |
+          set -euo pipefail
+          if [ "${IS_RELEASE}" = "true" ]; then
+            PUBLISH_ARG="--publish always"
+          else
+            PUBLISH_ARG="--publish never"
+          fi
+          sg lxd -c "npm run empty && npx --no-install electron-builder --linux ${PUBLISH_ARG}"
 
       # rename to possibly fix release issue
       - run: find ./.tmp/app-builds -type f -name '*.snap' -exec sh -c 'x="{}"; mv "$x" ".tmp/app-builds/sp.snap"' \;
