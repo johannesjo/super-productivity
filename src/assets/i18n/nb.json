@@ -1133,6 +1133,8 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Legg alt til i dag",
         "ADD_TO_TODAY": "Legg til i dag",
+        "COMPLETE": "Fullfør",
+        "COMPLETE_ALL": "Fullfør alle",
         "DONE": "Ferdig",
         "DUE_TASK": "Forfalt oppgave",
         "DUE_TASKS": "Forfalte oppgaver",

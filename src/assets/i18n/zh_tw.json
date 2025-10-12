@@ -733,6 +733,8 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "全部添加到今天",
         "ADD_TO_TODAY": "添加到今天",
+        "COMPLETE": "完成",
+        "COMPLETE_ALL": "全部完成",
         "DONE": "完成",
         "DUE_TASK": "到期任務",
         "DUE_TASKS": "到期任務",

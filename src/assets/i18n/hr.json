@@ -1133,6 +1133,8 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Dodaj sve u Danas",
         "ADD_TO_TODAY": "Dodaj u Danas",
+        "COMPLETE": "Završi",
+        "COMPLETE_ALL": "Završi sve",
         "DONE": "Obavljeno",
         "DUE_TASK": "Dospio zadatak",
         "DUE_TASKS": "Dospjeli zadaci",

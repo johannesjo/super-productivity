@@ -1263,6 +1263,8 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Lisää kaikki tänään",
         "ADD_TO_TODAY": "Lisää tänään",
+        "COMPLETE": "Valmis",
+        "COMPLETE_ALL": "Kaikki valmiit",
         "DONE": "Valmis",
         "DUE_TASK": "Muistutus suunnitellusta tehtävästä",
         "DUE_TASKS": "Muistutus suunnitelluista tehtävistä",

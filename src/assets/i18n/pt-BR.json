@@ -991,6 +991,8 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Adicione tudo para hoje",
         "ADD_TO_TODAY": "Adicione a hoje",
+        "COMPLETE": "Completar",
+        "COMPLETE_ALL": "Completar tudo",
         "DONE": "Feito",
         "DUE_TASK": "Tarefa atrasada",
         "DUE_TASKS": "Tarefas atrasadas",

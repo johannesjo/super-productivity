@@ -1133,6 +1133,8 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Tambahkan semua ke hari ini",
         "ADD_TO_TODAY": "Tambah ke hari ini",
+        "COMPLETE": "Selesai",
+        "COMPLETE_ALL": "Selesaikan semua",
         "DONE": "Selesai",
         "DUE_TASK": "Tugas yang harus diselesaikan",
         "DUE_TASKS": "Tugas-tugas yang harus diselesaikan",

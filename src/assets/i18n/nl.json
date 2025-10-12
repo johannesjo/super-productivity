@@ -1133,6 +1133,8 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Voeg alles toe aan vandaag",
         "ADD_TO_TODAY": "Voeg toe aan vandaag",
+        "COMPLETE": "Voltooien",
+        "COMPLETE_ALL": "Alles voltooien",
         "DONE": "Gedaan",
         "DUE_TASK": "Gepaste taak",
         "DUE_TASKS": "Geplande taken",
