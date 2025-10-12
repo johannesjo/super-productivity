@@ -77,6 +77,8 @@ snap:
     - libosmesa6
     - libgl1-mesa-dri
     - libtinfo5
+    - libnspr4
+    - libnss3
   plugs:
     - default
     - password-manager-service
