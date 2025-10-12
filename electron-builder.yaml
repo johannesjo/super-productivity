@@ -79,7 +79,6 @@ snap:
     - libtinfo5
   plugs:
     - default
-    - browser-support
     - password-manager-service
     - system-observe
     - login-session-observe
