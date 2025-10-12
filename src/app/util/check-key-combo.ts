@@ -101,11 +101,41 @@ export const checkKeyCombo = (
     (comboKey) => modifiersStatus[comboKey],
   );
 
+  // Check that NO additional modifiers are pressed beyond what's required
+  const requiredModifiers = new Set(comboKeys);
+  const hasUnwantedModifiers = Object.entries(modifiersStatus).some(
+    ([modifier, isPressed]) => isPressed && !requiredModifiers.has(modifier),
+  );
+
+  // Special case: if this is a plus key combination and the standardKey is a modifier,
+  // we need to handle it differently
+  if (
+    isPlusKey &&
+    standardKey &&
+    ['Ctrl', 'Alt', 'Meta', 'Shift'].includes(standardKey)
+  ) {
+    // For cases like "Ctrl++", the standardKey is "Ctrl", so we need to check if Ctrl is pressed
+    // and the pressed key is "+"
+    const isCorrectModifierPressedSpecial = modifiersStatus[standardKey];
+    const isCorrectKeyPressedSpecial = pressedKey === '+';
+
+    // Check that NO additional modifiers are pressed beyond what's required
+    const hasUnwantedModifiersSpecial = Object.entries(modifiersStatus).some(
+      ([modifier, isPressed]) => isPressed && modifier !== standardKey,
+    );
+
+    return (
+      isCorrectModifierPressedSpecial &&
+      isCorrectKeyPressedSpecial &&
+      !hasUnwantedModifiersSpecial
+    );
+  }
+
   // Check ...
   const isCorrectKeyPressed =
     // Convert keys to lowercase for more comatibility
     pressedKey.toLowerCase() === standardKey?.toLowerCase() ||
     (isPlusKey && pressedKey === '+');
 
-  return isCorrectModifierPressed && isCorrectKeyPressed;
+  return isCorrectModifierPressed && isCorrectKeyPressed && !hasUnwantedModifiers;
 };

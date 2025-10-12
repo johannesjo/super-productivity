@@ -32,20 +32,64 @@ describe('checkKeyCombo', () => {
   });
 
   it('should correctly identify the "+" key', () => {
-    const ev: Partial<KeyboardEvent> = { code: 'Equal' };
+    const ev: Partial<KeyboardEvent> = {
+      code: 'Equal',
+      ctrlKey: false,
+      altKey: false,
+      metaKey: false,
+      shiftKey: false,
+    };
     expect(checkKeyCombo(ev as any, '+')).toBe(true);
     expect(checkKeyCombo({ ...ev, ctrlKey: true } as any, 'Ctrl++')).toBe(true);
   });
 
   it('should correctly identify the "-" key', () => {
-    const ev: Partial<KeyboardEvent> = { code: 'Minus' };
+    const ev: Partial<KeyboardEvent> = {
+      code: 'Minus',
+      ctrlKey: false,
+      altKey: false,
+      metaKey: false,
+      shiftKey: false,
+    };
     expect(checkKeyCombo(ev as any, '-')).toBe(true);
     expect(checkKeyCombo({ ...ev, ctrlKey: true } as any, 'Ctrl+-')).toBe(true);
   });
 
   it('should correctly identify digit keys', () => {
-    const ev: Partial<KeyboardEvent> = { code: 'Digit0' };
+    const ev: Partial<KeyboardEvent> = {
+      code: 'Digit0',
+      ctrlKey: false,
+      altKey: false,
+      metaKey: false,
+      shiftKey: false,
+    };
     expect(checkKeyCombo(ev as any, '0')).toBe(true);
     expect(checkKeyCombo({ ...ev, ctrlKey: true } as any, 'Ctrl+0')).toBe(true);
+  });
+
+  it('should not match shortcuts with extra modifiers (bug fix)', () => {
+    // Test case for the original bug: Shift+F should NOT match "f"
+    const shiftFEvent: Partial<KeyboardEvent> = {
+      code: 'KeyF',
+      shiftKey: true,
+      ctrlKey: false,
+      altKey: false,
+      metaKey: false,
+    };
+
+    expect(checkKeyCombo(shiftFEvent as any, 'f')).toBe(false);
+    expect(checkKeyCombo(shiftFEvent as any, 'Shift+F')).toBe(true);
+
+    // Regular F should match "f" but NOT "Shift+F"
+    const fEvent: Partial<KeyboardEvent> = {
+      code: 'KeyF',
+      shiftKey: false,
+      ctrlKey: false,
+      altKey: false,
+      metaKey: false,
+    };
+
+    expect(checkKeyCombo(fEvent as any, 'f')).toBe(true);
+    expect(checkKeyCombo(fEvent as any, 'Shift+F')).toBe(false);
   });
 });
