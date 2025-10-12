@@ -74,6 +74,6 @@ jobs:
 #        env:
 #          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
 #
-#      - run: snapcraft push .tmp/app-builds/superProductivity*.snap --release stable
+#      - run: snapcraft upload .tmp/app-builds/superProductivity*.snap --release stable
 #        env:
 #          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}

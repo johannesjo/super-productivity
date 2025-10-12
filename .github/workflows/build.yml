@@ -100,8 +100,16 @@ jobs:
             "SNAPCRAFT_BUILD_ENVIRONMENT=$SNAPCRAFT_BUILD_ENVIRONMENT" \
             bash -c "set -euo pipefail; npm run empty; npx --no-install electron-builder --linux $PUBLISH_ARG"
 
+      # Debug: List build artifacts and fix permissions
+      - name: Fix snap file permissions and find snap
+        run: |
+          sudo chown -R $USER:$USER .tmp/app-builds || true
+          ls -la .tmp/app-builds/
+          find .tmp/app-builds -name '*.snap' -ls
+
       # rename to possibly fix release issue
       - run: find ./.tmp/app-builds -type f -name '*.snap' -exec sh -c 'x="{}"; mv "$x" ".tmp/app-builds/sp.snap"' \;
+
       # Release to edge if no tag and to candidate if tag
       - #otherwise it would be executed twice
         if: false == startsWith(github.ref, 'refs/tags/v')
@@ -109,8 +117,8 @@ jobs:
         with:
           max_attempts: 2
           timeout_minutes: 11
-          command: snapcraft push .tmp/app-builds/sp.snap --release edge
-      #      - run: snapcraft push .tmp/app-builds/sp.snap --release candidate
+          command: snapcraft upload .tmp/app-builds/sp.snap --release edge
+      #      - run: snapcraft upload .tmp/app-builds/sp.snap --release candidate
       #        if: startsWith(github.ref, 'refs/tags/v')
   #      - run: snapcraft promote superproductivity --from-channel latest/edge --to-channel latest/candidate --yes
   #        if: startsWith(github.ref, 'refs/tags/v')
