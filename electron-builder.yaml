@@ -80,7 +80,18 @@ snap:
     - libnspr4
     - libnss3
   plugs:
-    - default
+    - desktop
+    - desktop-legacy
+    - home
+    - x11
+    - wayland
+    - unity7
+    - browser-support
+    - network
+    - gsettings
+    - audio-playback
+    - pulseaudio
+    - opengl
     - password-manager-service
     - system-observe
     - login-session-observe
