@@ -89,12 +89,17 @@ jobs:
         run: |
           set -euo pipefail
           if [ "${IS_RELEASE}" = "true" ]; then
-            PUBLISH_ARG="--publish always"
+            export PUBLISH_ARG="--publish always"
           else
-            PUBLISH_ARG="--publish never"
+            export PUBLISH_ARG="--publish never"
           fi
-          npm run empty
-          npx --no-install electron-builder --linux ${PUBLISH_ARG}
+          sudo env \
+            "PATH=$PATH" \
+            "GH_TOKEN=$GH_TOKEN" \
+            "IS_RELEASE=$IS_RELEASE" \
+            "SNAPCRAFT_BUILD_ENVIRONMENT=$SNAPCRAFT_BUILD_ENVIRONMENT" \
+            "PUBLISH_ARG=$PUBLISH_ARG" \
+            bash -c 'set -euo pipefail; npm run empty; npx --no-install electron-builder --linux "$PUBLISH_ARG"'
 
       # rename to possibly fix release issue
       - run: find ./.tmp/app-builds -type f -name '*.snap' -exec sh -c 'x="{}"; mv "$x" ".tmp/app-builds/sp.snap"' \;
