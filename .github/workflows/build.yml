@@ -86,38 +86,70 @@ jobs:
           GH_TOKEN: ${{ secrets.github_token }}
           IS_RELEASE: ${{ startsWith(github.ref, 'refs/tags/v') }}
           SNAPCRAFT_BUILD_ENVIRONMENT: host
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
         run: |
           set -euo pipefail
           if [ "${IS_RELEASE}" = "true" ]; then
             export PUBLISH_ARG="--publish always"
+            export SNAP_TARGETS="AppImage deb rpm"
           else
             export PUBLISH_ARG="--publish never"
+            export SNAP_TARGETS="AppImage deb snap rpm"
           fi
           sudo env \
             "PATH=$PATH" \
             "GH_TOKEN=$GH_TOKEN" \
             "IS_RELEASE=$IS_RELEASE" \
             "SNAPCRAFT_BUILD_ENVIRONMENT=$SNAPCRAFT_BUILD_ENVIRONMENT" \
-            bash -c "set -euo pipefail; npm run empty; npx --no-install electron-builder --linux $PUBLISH_ARG"
+            "SNAPCRAFT_STORE_CREDENTIALS=$SNAPCRAFT_STORE_CREDENTIALS" \
+            bash -c "set -euo pipefail; npm run empty; npx --no-install electron-builder --linux $SNAP_TARGETS $PUBLISH_ARG"
 
       # Debug: List build artifacts and fix permissions
       - name: Fix snap file permissions and find snap
+        if: false == startsWith(github.ref, 'refs/tags/v')
         run: |
           sudo chown -R $USER:$USER .tmp/app-builds || true
           ls -la .tmp/app-builds/
           find .tmp/app-builds -name '*.snap' -ls
 
       # rename to possibly fix release issue
-      - run: find ./.tmp/app-builds -type f -name '*.snap' -exec sh -c 'x="{}"; mv "$x" ".tmp/app-builds/sp.snap"' \;
+      - name: Rename snap for edge release
+        if: false == startsWith(github.ref, 'refs/tags/v')
+        run: find ./.tmp/app-builds -type f -name '*.snap' -exec sh -c 'x="{}"; mv "$x" ".tmp/app-builds/sp.snap"' \;
 
-      # Release to edge if no tag and to candidate if tag
-      - #otherwise it would be executed twice
+      # Release to edge if no tag
+      - name: Upload snap to edge channel
         if: false == startsWith(github.ref, 'refs/tags/v')
         uses: nick-fields/retry@v3
         with:
           max_attempts: 2
           timeout_minutes: 11
           command: snapcraft upload .tmp/app-builds/sp.snap --release edge
+
+      # Build and release snap to candidate channel for releases
+      - name: Build snap for release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          SNAPCRAFT_BUILD_ENVIRONMENT: host
+        run: |
+          sudo env \
+            "PATH=$PATH" \
+            "SNAPCRAFT_BUILD_ENVIRONMENT=$SNAPCRAFT_BUILD_ENVIRONMENT" \
+            bash -c "npx --no-install electron-builder --linux snap --publish never"
+
+      - name: Fix snap permissions for release
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          sudo chown -R $USER:$USER .tmp/app-builds || true
+          find .tmp/app-builds -name '*.snap' -exec mv {} .tmp/app-builds/sp-release.snap \;
+
+      - name: Upload snap to candidate channel
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: nick-fields/retry@v3
+        with:
+          max_attempts: 2
+          timeout_minutes: 11
+          command: snapcraft upload .tmp/app-builds/sp-release.snap --release candidate
       #      - run: snapcraft upload .tmp/app-builds/sp.snap --release candidate
       #        if: startsWith(github.ref, 'refs/tags/v')
   #      - run: snapcraft promote superproductivity --from-channel latest/edge --to-channel latest/candidate --yes
