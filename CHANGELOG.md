@@ -1,3 +1,10 @@
+## [15.2.12](https://github.com/johannesjo/super-productivity/compare/v15.2.11...v15.2.12) (2025-10-13)
+
+### Bug Fixes
+
+- **sideNav:** show project and tag buttons always for touch devices [#5258](https://github.com/johannesjo/super-productivity/issues/5258) ([7124549](https://github.com/johannesjo/super-productivity/commit/712454944f0178f4f220baa79742c503c1230691))
+- update check-key-combo logic to correctly evaluate all pressed modifiers ([c2cb704](https://github.com/johannesjo/super-productivity/commit/c2cb704006be7fec3710ffc6c237ed456a78530a))
+
 ## [15.2.11](https://github.com/johannesjo/super-productivity/compare/v15.2.10...v15.2.11) (2025-10-12)
 
 ## [15.2.10](https://github.com/johannesjo/super-productivity/compare/v15.2.9...v15.2.10) (2025-10-12)
