@@ -1691,6 +1691,7 @@
     "KEYBOARD": {
       "ADD_NEW_NOTE": "Add new note",
       "ADD_NEW_TASK": "Add New Task",
+      "ADD_NEW_PROJECT": "Add new project",
       "APP_WIDE_SHORTCUTS": "Global Shortcuts (application wide)",
       "COLLAPSE_SUB_TASKS": "Collapse Sub Tasks",
       "EXPAND_SUB_TASKS": "Expand Sub Tasks",
