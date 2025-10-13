@@ -9,6 +9,7 @@ import {
   powerMonitor,
   protocol,
 } from 'electron';
+import { existsSync } from 'fs';
 import { join } from 'path';
 import { initDebug } from './debug';
 import electronDl from 'electron-dl';
@@ -55,11 +56,78 @@ let mainWin: BrowserWindow;
 let idleTimeHandler: IdleTimeHandler;
 
 export const startApp = (): void => {
+  const ensureSnapSoftwareRendering = (): boolean => {
+    const snapRoot = process.env.SNAP;
+    if (!snapRoot) {
+      return false;
+    }
+
+    const archTriplets: Record<string, string[]> = {
+      x64: ['x86_64-linux-gnu'],
+      arm64: ['aarch64-linux-gnu'],
+      arm: ['arm-linux-gnueabihf'],
+    };
+
+    const expandSnapVar = (value: string): string => value.replace(/\$SNAP/g, snapRoot);
+
+    const candidatePaths = new Set<string>();
+    const appendPath = (value?: string): void => {
+      if (!value) {
+        return;
+      }
+      const trimmed = value.trim();
+      if (!trimmed) {
+        return;
+      }
+      candidatePaths.add(expandSnapVar(trimmed));
+    };
+
+    const envPaths = process.env.LIBGL_DRIVERS_PATH?.split(':') ?? [];
+    envPaths.forEach(appendPath);
+
+    const triplets = archTriplets[process.arch] ?? [];
+    [...triplets, ''].forEach((triplet) => {
+      const suffix = triplet ? ['usr', 'lib', triplet, 'dri'] : ['usr', 'lib', 'dri'];
+      appendPath(join(snapRoot, ...suffix));
+      appendPath(join(snapRoot, 'gnome-platform', ...suffix));
+    });
+
+    const resolvedPaths = Array.from(candidatePaths).filter(Boolean);
+    const driverName = 'llvmpipe_dri.so';
+    const driverLocation = resolvedPaths.find((dir) => existsSync(join(dir, driverName)));
+
+    if (!driverLocation) {
+      log(
+        'Snap: llvmpipe software renderer not available – skipping software rendering override',
+      );
+      delete process.env.MESA_LOADER_DRIVER_OVERRIDE;
+      delete process.env.LIBGL_ALWAYS_SOFTWARE;
+      return false;
+    }
+
+    process.env.LIBGL_DRIVERS_PATH = resolvedPaths.join(':');
+    process.env.MESA_LOADER_DRIVER_OVERRIDE = 'llvmpipe';
+    process.env.LIBGL_ALWAYS_SOFTWARE = '1';
+    log('Snap: llvmpipe software renderer detected at', driverLocation);
+    return true;
+  };
+
   // Workaround for Electron 38+ snap package GPU issues (issue #5252)
   // Electron 38.1+ has GPU/Mesa driver access issues in snap confinement
   const isForceGpu = process.argv.some((val) => val.includes('--enable-gpu'));
   const isSnap = process.platform === 'linux' && !!process.env.SNAP;
-  if (isSnap && !isForceGpu) {
+  let canUseSnapSoftwareRenderer = false;
+  if (isSnap) {
+    if (isForceGpu) {
+      log('Snap: --enable-gpu detected, skipping software renderer override');
+      delete process.env.MESA_LOADER_DRIVER_OVERRIDE;
+      delete process.env.LIBGL_ALWAYS_SOFTWARE;
+    } else {
+      canUseSnapSoftwareRenderer = ensureSnapSoftwareRendering();
+    }
+  }
+
+  if (isSnap && !isForceGpu && canUseSnapSoftwareRenderer) {
     log(
       'Snap: Disabling hardware acceleration to avoid Mesa driver access issues (issue #5252)',
     );
@@ -78,6 +146,10 @@ export const startApp = (): void => {
     // This is the recommended approach per Snapcraft documentation for strict confinement
     // Chromium's sandbox conflicts with snap confinement causing launch failures
     app.commandLine.appendSwitch('no-sandbox');
+  } else if (isSnap && !isForceGpu) {
+    log(
+      'Snap: Falling back to hardware acceleration because llvmpipe renderer is unavailable',
+    );
   }
 
   // Initialize protocol handling

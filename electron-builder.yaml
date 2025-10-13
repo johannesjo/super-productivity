@@ -70,8 +70,9 @@ snap:
     MESA_LOADER_DRIVER_OVERRIDE: llvmpipe
     # Secondary: Ensure software rendering fallback (defense-in-depth)
     LIBGL_ALWAYS_SOFTWARE: '1'
-    # Configure driver search paths for snap confinement (list all targets explicitly)
-    LIBGL_DRIVERS_PATH: '$SNAP/usr/lib/x86_64-linux-gnu/dri:$SNAP/usr/lib/aarch64-linux-gnu/dri:$SNAP/usr/lib/arm-linux-gnueabihf/dri:$SNAP/usr/lib/dri:$SNAP/gnome-platform/usr/lib/x86_64-linux-gnu/dri:$SNAP/gnome-platform/usr/lib/aarch64-linux-gnu/dri:$SNAP/gnome-platform/usr/lib/arm-linux-gnueabihf/dri:$SNAP/gnome-platform/usr/lib/dri'
+    # Configure driver search paths - prioritize $SNAP staged drivers over gnome-platform
+    # This fixes "MESA-LOADER: failed to open llvmpipe" by ensuring staged drivers are found first
+    LIBGL_DRIVERS_PATH: '$SNAP/usr/lib/x86_64-linux-gnu/dri:$SNAP/usr/lib/aarch64-linux-gnu/dri:$SNAP/usr/lib/arm-linux-gnueabihf/dri:$SNAP/usr/lib/dri'
     # Force Mesa on NVIDIA systems
     __GLX_VENDOR_LIBRARY_NAME: mesa
   stagePackages:
