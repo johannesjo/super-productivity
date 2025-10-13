@@ -8,7 +8,7 @@
         [color]="sc.isOn ? 'accent' : ''"
         [class.isOn]="sc.isOn"
         class="main-btn stopwatch"
-        mat-mini-fab
+        mat-icon-button
       >
         <mat-icon>{{ sc.icon }}</mat-icon>
         @if (isSuccess()) {
@@ -27,7 +27,7 @@
         (longPress)="edit()"
         class="main-btn"
         color=""
-        mat-mini-fab
+        mat-icon-button
       >
         <mat-icon>{{ sc.icon }}</mat-icon>
         @if (isSuccess()) {
@@ -48,7 +48,7 @@
         [class.isOn]="sc.isOn && !isTimeUp()"
         [class.isTimeUp]="isTimeUp()"
         class="main-btn repeated-countdown"
-        mat-mini-fab
+        mat-icon-button
       >
         <mat-icon>{{ sc.icon }}</mat-icon>
         @if (isSuccess()) {

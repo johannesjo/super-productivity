@@ -50,6 +50,7 @@ import { PlannerActions } from '../../planner/store/planner.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
 import { TaskLog } from '../../../core/log';
+import { devError } from '../../../util/dev-error';
 
 export { taskAdapter };
 
@@ -384,7 +385,11 @@ export const taskReducer = createReducer<TaskState>(
   }),
 
   on(addSubTask, (state, { task, parentId }) => {
-    const parentTask = getTaskById(parentId, state);
+    const parentTask = state.entities[parentId];
+    if (!parentTask) {
+      devError(`Parent task ${parentId} not found when trying to add sub task`);
+      return state;
+    }
 
     // add item1
     const stateCopy = taskAdapter.addOne(

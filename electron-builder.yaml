@@ -37,6 +37,8 @@ appx:
   identityName: ___johannesjo.SuperProductivity
 
 linux:
+  # Fix for issue #5259: Set executable name without spaces for snap compatibility
+  executableName: superproductivity
   category: Office;ProjectManagement
   target:
     - AppImage
@@ -61,11 +63,52 @@ snap:
   autoStart: true
   base: core22
   confinement: strict
+  # Force software rendering to avoid GPU/Mesa driver issues in snap confinement
+  # See: https://github.com/johannesjo/super-productivity/issues/5252
+  environment:
+    # Primary: Force llvmpipe software renderer (most explicit)
+    MESA_LOADER_DRIVER_OVERRIDE: llvmpipe
+    # Secondary: Ensure software rendering fallback (defense-in-depth)
+    LIBGL_ALWAYS_SOFTWARE: '1'
+    # Configure driver search paths for snap confinement (list all targets explicitly)
+    LIBGL_DRIVERS_PATH: '$SNAP/usr/lib/x86_64-linux-gnu/dri:$SNAP/usr/lib/aarch64-linux-gnu/dri:$SNAP/usr/lib/arm-linux-gnueabihf/dri:$SNAP/usr/lib/dri:$SNAP/gnome-platform/usr/lib/x86_64-linux-gnu/dri:$SNAP/gnome-platform/usr/lib/aarch64-linux-gnu/dri:$SNAP/gnome-platform/usr/lib/arm-linux-gnueabihf/dri:$SNAP/gnome-platform/usr/lib/dri'
+    # Force Mesa on NVIDIA systems
+    __GLX_VENDOR_LIBRARY_NAME: mesa
+  stagePackages:
+    - libglu1-mesa
+    - libosmesa6
+    - libgl1-mesa-dri
+    - libtinfo6
+    - libnspr4
+    - libnss3
   plugs:
-    - default
+    - desktop
+    - desktop-legacy
+    - home
+    - x11
+    - wayland
+    - unity7
+    - browser-support
+    - network
+    - gsettings
+    - audio-playback
+    - pulseaudio
+    - opengl
     - password-manager-service
     - system-observe
     - login-session-observe
+
+flatpak:
+  runtimeVersion: '23.08'
+  finishArgs:
+    - --share=network
+    - --share=ipc
+    - --socket=x11
+    - --socket=wayland
+    - --socket=fallback-x11
+    - --socket=pulseaudio
+    - --device=dri
+    - --filesystem=home
 
 mac:
   appId: com.super-productivity.app

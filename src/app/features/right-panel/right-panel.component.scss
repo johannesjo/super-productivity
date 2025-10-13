@@ -34,6 +34,18 @@
   }
 }
 
+// Prevent double scrollbars during window resize
+:host(.windowResizing) {
+  .side {
+    transition: none !important;
+  }
+
+  .side-inner {
+    overflow: hidden !important;
+    overflow-y: hidden !important;
+  }
+}
+
 .content {
   flex-grow: 1;
   max-width: 100%;

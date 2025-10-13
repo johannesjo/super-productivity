@@ -41,6 +41,9 @@ import { PageTitleComponent } from './page-title/page-title.component';
 import { PlayButtonComponent } from './play-button/play-button.component';
 import { DesktopPanelButtonsComponent } from './desktop-panel-buttons/desktop-panel-buttons.component';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { MetricService } from '../../features/metric/metric.service';
+import { DateService } from '../../core/date/date.service';
+import { MsToMinuteClockStringPipe } from '../../ui/duration/ms-to-minute-clock-string.pipe';
 
 @Component({
   selector: 'main-header',
@@ -61,6 +64,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
     PageTitleComponent,
     PlayButtonComponent,
     DesktopPanelButtonsComponent,
+    MsToMinuteClockStringPipe,
   ],
 })
 export class MainHeaderComponent implements OnDestroy {
@@ -77,6 +81,8 @@ export class MainHeaderComponent implements OnDestroy {
   private readonly _router = inject(Router);
   private readonly _store = inject(Store);
   private readonly _configService = inject(GlobalConfigService);
+  private readonly _metricService = inject(MetricService);
+  private readonly _dateService = inject(DateService);
 
   T: typeof T = T;
   isShowSimpleCounterBtnsMobile = signal(false);
@@ -151,6 +157,9 @@ export class MainHeaderComponent implements OnDestroy {
     this.globalConfigService.cfg$.pipe(map((cfg) => cfg?.focusMode)),
   );
   isOnline = toSignal(isOnline$);
+  focusSummaryToday = computed(() =>
+    this._metricService.getFocusSummaryForDay(this._dateService.todayStr()),
+  );
 
   private _subs: Subscription = new Subscription();
 

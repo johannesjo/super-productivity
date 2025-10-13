@@ -1,3 +1,84 @@
+## [15.2.12](https://github.com/johannesjo/super-productivity/compare/v15.2.11...v15.2.12) (2025-10-13)
+
+### Bug Fixes
+
+- **sideNav:** show project and tag buttons always for touch devices [#5258](https://github.com/johannesjo/super-productivity/issues/5258) ([7124549](https://github.com/johannesjo/super-productivity/commit/712454944f0178f4f220baa79742c503c1230691))
+- update check-key-combo logic to correctly evaluate all pressed modifiers ([c2cb704](https://github.com/johannesjo/super-productivity/commit/c2cb704006be7fec3710ffc6c237ed456a78530a))
+
+## [15.2.11](https://github.com/johannesjo/super-productivity/compare/v15.2.10...v15.2.11) (2025-10-12)
+
+## [15.2.10](https://github.com/johannesjo/super-productivity/compare/v15.2.9...v15.2.10) (2025-10-12)
+
+## [15.2.9](https://github.com/johannesjo/super-productivity/compare/v15.2.8...v15.2.9) (2025-10-12)
+
+## [15.2.8](https://github.com/johannesjo/super-productivity/compare/v15.2.7...v15.2.8) (2025-10-12)
+
+## [15.2.7](https://github.com/johannesjo/super-productivity/compare/v15.2.6...v15.2.7) (2025-10-12)
+
+## [15.2.6](https://github.com/johannesjo/super-productivity/compare/v15.2.5...v15.2.6) (2025-10-12)
+
+## [15.2.5](https://github.com/johannesjo/super-productivity/compare/v15.2.4...v15.2.5) (2025-10-12)
+
+## [15.2.4](https://github.com/johannesjo/super-productivity/compare/v15.2.3...v15.2.4) (2025-10-12)
+
+### Bug Fixes
+
+- attempt to fix snap once more 4 [#5252](https://github.com/johannesjo/super-productivity/issues/5252) ([b48b0b2](https://github.com/johannesjo/super-productivity/commit/b48b0b21690089a87dadb54dde87b6106d715a85))
+
+## [15.2.3](https://github.com/johannesjo/super-productivity/compare/v15.2.2...v15.2.3) (2025-10-12)
+
+### Bug Fixes
+
+- attempt to fix snap once more [#5252](https://github.com/johannesjo/super-productivity/issues/5252) ([ac8ebf9](https://github.com/johannesjo/super-productivity/commit/ac8ebf93cf20f5fdf07e6ee59158d7639b9171c6))
+- attempt to fix snap once more 2 [#5252](https://github.com/johannesjo/super-productivity/issues/5252) ([53eaadd](https://github.com/johannesjo/super-productivity/commit/53eaaddea981f45497d24b6839a8d71431712ba2))
+- attempt to fix snap once more 3 [#5252](https://github.com/johannesjo/super-productivity/issues/5252) ([dfdbdc9](https://github.com/johannesjo/super-productivity/commit/dfdbdc9b53959782c9f5f9a262ec2c167335be34))
+
+## [15.2.2](https://github.com/johannesjo/super-productivity/compare/v15.2.1...v15.2.2) (2025-10-11)
+
+### Bug Fixes
+
+- css warning ([bebc212](https://github.com/johannesjo/super-productivity/commit/bebc2125228f51f52969314f0ca32ae053ac4fe4))
+
+## [15.2.1](https://github.com/johannesjo/super-productivity/compare/v15.2.0...v15.2.1) (2025-10-11)
+
+### Bug Fixes
+
+- correct GitHub Actions workflow parameter names ([a810ce7](https://github.com/johannesjo/super-productivity/commit/a810ce79cbcde8b283f50de4af5c5572a63f499a))
+- electron snap issue [#5252](https://github.com/johannesjo/super-productivity/issues/5252) ([e465712](https://github.com/johannesjo/super-productivity/commit/e465712029c87af4719e474530afa5fbdf90df3c))
+
+### Features
+
+- adjust tour text ([2b611b8](https://github.com/johannesjo/super-productivity/commit/2b611b8b1fcd03818f14a63f396cba3dfe2d56c3))
+- don't show productivity snack tip when tour dialog is shown ([60c668e](https://github.com/johannesjo/super-productivity/commit/60c668e240e73caf158ed197bc4dec11039556d5))
+
+# [15.2.0](https://github.com/johannesjo/super-productivity/compare/v15.1.3-rc.0...v15.2.0) (2025-10-10)
+
+### Bug Fixes
+
+- **addTaskBar:** search loading spinner always shown when no issueProviders ([eed1265](https://github.com/johannesjo/super-productivity/commit/eed12656f7fa9e49d2aace05dca669c2d9ab9376))
+- finish day button not always shown ([43dde45](https://github.com/johannesjo/super-productivity/commit/43dde45105d7dff594e1d484792140bf6d79f169))
+- handle error case more gracefully ([cd2624c](https://github.com/johannesjo/super-productivity/commit/cd2624ccb628dd12b40791b09678459e47386f65))
+- **projectFolders:** tree cleanup on delete missing ([705b793](https://github.com/johannesjo/super-productivity/commit/705b7939dcc916db8b80c13bed5a9461121c56c5))
+- resizing problems with right panel ([a3d6abd](https://github.com/johannesjo/super-productivity/commit/a3d6abdbd696ed3a9302c7ba5a6c4220c9296b8a)), closes [#5218](https://github.com/johannesjo/super-productivity/issues/5218)
+- **schedule:** repeat projection styling ([f027fdd](https://github.com/johannesjo/super-productivity/commit/f027fdd06db804267037ee62e43328463151af0d))
+- z-index ([c20a1a3](https://github.com/johannesjo/super-productivity/commit/c20a1a31db10988958177294619d97b4244320b3))
+
+### Features
+
+- **addTaskBar:** disable add task from search mode ([db1d11e](https://github.com/johannesjo/super-productivity/commit/db1d11e4514884962c379e3353ad80b5aa70cb8e))
+- change back task focus behavior ([c9a790f](https://github.com/johannesjo/super-productivity/commit/c9a790fb655683c23c83f0f63fef963267d42e89))
+- **focusMode:** add label of total session duration to focus button ([1ece9b6](https://github.com/johannesjo/super-productivity/commit/1ece9b67adf7a54b25ce073d90b9a759a54b1f2e))
+- **focusMode:** add little rocket for countdown first draft ([c0f3a46](https://github.com/johannesjo/super-productivity/commit/c0f3a46ef6b0db2a5bacfba506ba116bbe6adaa5))
+- **focusMode:** add little rocket for countdown second draft ([80fa2d6](https://github.com/johannesjo/super-productivity/commit/80fa2d6eb14b3023491dd80f40237c8f46635193))
+- **focusMode:** add little rocket for countdown third draft ([b48ecb2](https://github.com/johannesjo/super-productivity/commit/b48ecb2fbb1066437ab3b611908982536182ea39))
+- **focusMode:** polish little rocket ([9358abc](https://github.com/johannesjo/super-productivity/commit/9358abc5d4195d31ad3063469ee07c966a44084b))
+- **i18n:** add project and tag folder dialogs and related messages ([96a9937](https://github.com/johannesjo/super-productivity/commit/96a99373339e75d2d7c82652e470e0b539f42e9d))
+- improve sidenav styling for when there is a background ([2bffea0](https://github.com/johannesjo/super-productivity/commit/2bffea03b38786273f1ae5c84ae6825ed562f488))
+- **metric:** add focus session to worklog-week ([50cfc19](https://github.com/johannesjo/super-productivity/commit/50cfc19b57f60b798d293981326cb0d81e727c35))
+- **metric:** record and show focus sessions ([394efb5](https://github.com/johannesjo/super-productivity/commit/394efb55e9350b33dd2dc5e029dcfb5b55119ac9))
+- support multilanguage keyboard layouts in shortcut combinations ([737d8c3](https://github.com/johannesjo/super-productivity/commit/737d8c3d56b2ef876c58b67659ac9de1fcac29ec))
+- use standard icon buttons for simple counter buttons ([5f53fd2](https://github.com/johannesjo/super-productivity/commit/5f53fd2a542cecda4209664c66b5a99ca937ef79))
+
 ## [15.1.3-rc.0](https://github.com/johannesjo/super-productivity/compare/v15.1.2-rc.0...v15.1.3-rc.0) (2025-10-08)
 
 ### Bug Fixes

@@ -1,3 +1,7 @@
+// Just an alias for better readability
+const PLUS_KEY = '+';
+const MINUS_KEY = '-';
+
 /**
  * Prepares key code (`event.code` from the keyboard event) so that it can be recognized in `checkKeyCombo()` func
  *
@@ -27,8 +31,8 @@ export const prepareKeyCode = (code: string): string => {
   const rules: { codeMapping: Record<string, string>; replaces: Record<string, string> } =
     {
       codeMapping: {
-        Minus: '-',
-        Equal: '+',
+        Minus: MINUS_KEY,
+        Equal: PLUS_KEY,
       },
       replaces: {
         Key: '',
@@ -70,42 +74,51 @@ export const checkKeyCombo = (
   // NOTE: comboToTest can sometimes be undefined
   if (!comboToTest) return false;
 
-  const pressedKey = prepareKeyCode(ev.code);
+  // Convert to lowercase for better compatibility
+  comboToTest = comboToTest.toLowerCase();
+  const pressedKey = prepareKeyCode(ev.code).toLowerCase();
 
+  // Status of all modifiers that should be checked
   const modifiersStatus: Record<string, boolean> = {
-    Ctrl: ev.ctrlKey,
-    Alt: ev.altKey,
-    Meta: ev.metaKey,
-    Shift: ev.shiftKey,
+    ctrl: ev.ctrlKey,
+    alt: ev.altKey,
+    meta: ev.metaKey,
+    shift: ev.shiftKey,
   };
 
   // Corner case: only "+" key (without any modifiers)
   if (
-    comboToTest === '+' &&
-    pressedKey === '+' &&
-    Object.values(modifiersStatus).every((x) => !x)
+    comboToTest === PLUS_KEY &&
+    pressedKey === PLUS_KEY &&
+    Object.values(modifiersStatus).every((x) => !x) // No modifiers should be pressed
   ) {
     return true;
   }
 
-  // Corner case: combo includes "+" (e.g. "Ctrl++")
-  const isPlusKey = comboToTest.includes('++');
+  // Corner case: combo includes "+" key (e.g. "Ctrl++")
+  const isComboIncludesPlusKey = comboToTest.includes(PLUS_KEY + PLUS_KEY);
 
-  const comboKeys = isPlusKey
-    ? comboToTest.split('+').filter((x) => !!x) // to remove empty strings when combo includes "+" key
-    : comboToTest.split('+');
-  const standardKey = comboKeys.pop();
+  // Prepared combo object with separated modifiers list and one key
+  const splittedCombo = {
+    _splitted: comboToTest.split(PLUS_KEY).filter((x) => !!x), // Filter to remove empty strings (when combo includes "++", e.g. "Ctrl++")
+    get modifiers() {
+      return isComboIncludesPlusKey ? this._splitted : this._splitted.slice(0, -1);
+    },
+    get key() {
+      return isComboIncludesPlusKey ? PLUS_KEY : this._splitted.at(-1);
+    },
+  };
 
-  // Check all required modifiers in combo
-  const isCorrectModifierPressed = comboKeys.every(
-    (comboKey) => modifiersStatus[comboKey],
-  );
+  const isAllModifiersValid = Object.keys(modifiersStatus).every((modKey) => {
+    const isRequiredModifier = splittedCombo.modifiers.includes(modKey);
+    return isRequiredModifier
+      ? !!modifiersStatus[modKey] // Required modifiers should be pressed
+      : !modifiersStatus[modKey]; // Not required modifiers should not be pressed
+  });
 
-  // Check ...
-  const isCorrectKeyPressed =
-    // Convert keys to lowercase for more comatibility
-    pressedKey.toLowerCase() === standardKey?.toLowerCase() ||
-    (isPlusKey && pressedKey === '+');
+  const isCorrectKeyPressed = isComboIncludesPlusKey
+    ? pressedKey === PLUS_KEY
+    : pressedKey === splittedCombo.key;
 
-  return isCorrectModifierPressed && isCorrectKeyPressed;
+  return isAllModifiersValid && isCorrectKeyPressed;
 };

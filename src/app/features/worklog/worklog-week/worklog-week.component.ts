@@ -20,6 +20,7 @@ import { MomentFormatPipe } from '../../../ui/pipes/moment-format.pipe';
 import { MsToClockStringPipe } from '../../../ui/duration/ms-to-clock-string.pipe';
 import { MsToMinuteClockStringPipe } from '../../../ui/duration/ms-to-minute-clock-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
+import { MetricService } from '../../metric/metric.service';
 
 @Component({
   selector: 'worklog-week',
@@ -47,6 +48,7 @@ export class WorklogWeekComponent {
   private readonly _matDialog = inject(MatDialog);
   private readonly _taskService = inject(TaskService);
   private _dateAdapter = inject<DateAdapter<unknown>>(DateAdapter);
+  private readonly _metricService = inject(MetricService);
 
   visibility: boolean[] = [];
   T: typeof T = T;
@@ -94,5 +96,9 @@ export class WorklogWeekComponent {
 
   trackByLogEntry(i: number, logEntry: WorklogDataForDay): string {
     return logEntry.task.id;
+  }
+
+  focusSummaryFor(dateStr: string): { count: number; total: number } | undefined {
+    return this._metricService.getFocusSummaryForDay(dateStr);
   }
 }

@@ -1,3 +1,5 @@
+@use '../../../../styles/_globals.scss' as *;
+
 :host {
   display: contents;
 }
@@ -15,6 +17,10 @@
   // Hide additional buttons by default on desktop
   .additional-btns {
     display: none;
+
+    @include touchPrimaryDevice() {
+      display: flex;
+    }
   }
 
   // Show additional buttons on focus/hover (desktop)

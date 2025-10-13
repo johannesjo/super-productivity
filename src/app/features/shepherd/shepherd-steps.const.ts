@@ -77,8 +77,8 @@ export const SHEPHERD_STEPS = (
     // ------------------------------
     {
       id: TourId.Welcome,
-      title: 'Welcome to Super Productivity!!',
-      text: "<p>Super Productivity is a ToDo app that helps you to organize yourself and to improve your personal workflows.</p><p>Let's do a little tour! 🎉</p>",
+      title: 'Welcome to Super Productivity!',
+      text: '<p>Do you want a tour of the most important features?</p>',
       buttons: [
         CANCEL_BTN(shepherdService),
         {

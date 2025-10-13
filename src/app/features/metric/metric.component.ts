@@ -36,6 +36,8 @@ export class MetricComponent {
     this.metricService.getSimpleCounterStopwatchMetrics$(),
   );
 
+  focusSessionData = toSignal(this.metricService.getFocusSessionMetrics$());
+
   pieChartOptions: ChartConfiguration<'pie', number[], string>['options'] = {
     scales: {
       x: {

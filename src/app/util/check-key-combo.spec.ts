@@ -22,13 +22,19 @@ describe('checkKeyCombo', () => {
     expect(checkKeyCombo({ ...ev, code: 'KeyB' } as any, comboToCheck)).toBe(false);
   });
 
+  it('should return a false if any additional modifiers are pressed', () => {
+    const ev: Partial<KeyboardEvent> = { code: 'KeyF', shiftKey: true };
+    expect(checkKeyCombo({ ...ev } as any, 'F')).toBe(false);
+    expect(checkKeyCombo({ ...ev, ctrlKey: true } as any, 'Shift+F')).toBe(false);
+  });
+
   it('should not throw when the key combination is not provided (undefined)', () => {
     const ev: Partial<KeyboardEvent> = {
       code: 'KeyA',
       ctrlKey: true,
       shiftKey: true,
     };
-    expect((checkKeyCombo as any)(ev as any, undefined)).toBe(false);
+    expect(checkKeyCombo(ev as any, undefined)).toBe(false);
   });
 
   it('should correctly identify the "+" key', () => {

@@ -28,6 +28,7 @@ import { T } from '../../../t.const';
 import { showFocusOverlay } from './focus-mode.actions';
 import { cancelFocusSession } from './focus-mode.actions';
 import { combineLatest } from 'rxjs';
+import { MetricService } from '../../metric/metric.service';
 
 const SESSION_DONE_SOUND = 'positive.ogg';
 
@@ -39,6 +40,7 @@ export class FocusModeEffects {
   private globalConfigService = inject(GlobalConfigService);
   private taskService = inject(TaskService);
   private bannerService = inject(BannerService);
+  private metricService = inject(MetricService);
 
   // Auto-show overlay when task is selected (if always use focus mode is enabled)
   autoShowOverlay$ = createEffect(() =>
@@ -196,6 +198,20 @@ export class FocusModeEffects {
       ofType(openIdleDialog),
       map(() => actions.pauseFocusSession()),
     ),
+  );
+
+  logFocusSession$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(actions.completeFocusSession),
+        withLatestFrom(this.store.select(selectors.selectLastSessionDuration)),
+        tap(([, duration]) => {
+          if (duration > 0) {
+            this.metricService.logFocusSession(duration);
+          }
+        }),
+      ),
+    { dispatch: false },
   );
 
   // Persist mode to localStorage
