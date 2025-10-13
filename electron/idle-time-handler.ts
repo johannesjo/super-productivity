@@ -224,8 +224,15 @@ export class IdleTimeHandler {
 
   private async getGnomeIdleTime(): Promise<number | null> {
     try {
-      // Try gdbus first as it might work better in snap environments
       const isSnap = !!process.env.SNAP;
+      if (isSnap) {
+        log.warn(
+          'Skipping GNOME idle detection for snap environment (DBus not guaranteed)',
+        );
+        return null;
+      }
+
+      // Try gdbus first as it might work better in snap environments
       let command =
         'gdbus call --session --dest org.gnome.Mutter.IdleMonitor --object-path /org/gnome/Mutter/IdleMonitor/Core --method org.gnome.Mutter.IdleMonitor.GetIdletime';
 

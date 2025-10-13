@@ -112,8 +112,8 @@ export const startApp = (): void => {
     return true;
   };
 
-  const enableSwiftshaderFallback = (): void => {
-    log('Snap: Forcing Chromium SwiftShader software renderer fallback');
+  const enableSwiftshader = (): void => {
+    log('Snap: Enabling Chromium SwiftShader software renderer');
     process.env.ELECTRON_ENABLE_SWIFTSHADER = '1';
     app.commandLine.appendSwitch('use-angle', 'swiftshader');
     app.commandLine.appendSwitch('use-gl', 'angle');
@@ -122,19 +122,9 @@ export const startApp = (): void => {
     app.commandLine.appendSwitch('ignore-gpu-blocklist');
   };
 
-  // Workaround for Electron 38+ snap package GPU issues (issue #5252)
-  // Electron 38.1+ has GPU/Mesa driver access issues in snap confinement
-  const isForceGpu = process.argv.some((val) => val.includes('--enable-gpu'));
   const isSnap = process.platform === 'linux' && !!process.env.SNAP;
-  let canUseSnapSoftwareRenderer = false;
+  const isForceGpu = process.argv.some((val) => val.includes('--enable-gpu'));
   if (isSnap) {
-    if (isForceGpu) {
-      log('Snap: --enable-gpu detected, skipping software renderer override');
-      delete process.env.MESA_LOADER_DRIVER_OVERRIDE;
-      delete process.env.LIBGL_ALWAYS_SOFTWARE;
-    } else {
-      canUseSnapSoftwareRenderer = ensureSnapSoftwareRendering();
-    }
     app.on('gpu-process-crashed', () => {
       if (!app.commandLine.hasSwitch('disable-gpu')) {
         log('Snap: GPU process crashed, disabling GPU and relaunching');
@@ -143,30 +133,21 @@ export const startApp = (): void => {
         app.exit(0);
       }
     });
-  }
 
-  if (isSnap && !isForceGpu && canUseSnapSoftwareRenderer) {
-    log(
-      'Snap: Disabling hardware acceleration to avoid Mesa driver access issues (issue #5252)',
-    );
-    log(
-      'Snap: Using software rendering (llvmpipe) with snap strict confinement security',
-    );
-    log('Snap: Launch with --enable-gpu to attempt hardware rendering (may crash)');
-
-    // Disable hardware acceleration in Electron
-    app.disableHardwareAcceleration();
-
-    // Disable GPU completely to prevent GPU process spawn attempts
-    app.commandLine.appendSwitch('disable-gpu');
-
-    // Disable Chromium's internal sandbox - rely on snap's strict confinement instead
-    // This is the recommended approach per Snapcraft documentation for strict confinement
-    // Chromium's sandbox conflicts with snap confinement causing launch failures
-    app.commandLine.appendSwitch('no-sandbox');
-  } else if (isSnap && !isForceGpu) {
-    log('Snap: llvmpipe renderer unavailable, falling back to SwiftShader');
-    enableSwiftshaderFallback();
+    if (isForceGpu) {
+      log('Snap: --enable-gpu detected, leaving hardware acceleration enabled');
+      delete process.env.MESA_LOADER_DRIVER_OVERRIDE;
+      delete process.env.LIBGL_ALWAYS_SOFTWARE;
+    } else {
+      enableSwiftshader();
+      const hasLlvmPipe = ensureSnapSoftwareRendering();
+      if (hasLlvmPipe) {
+        log('Snap: llvmpipe renderer staged and ready for Mesa software rendering');
+      } else {
+        log('Snap: llvmpipe renderer unavailable, relying on SwiftShader only');
+      }
+      app.commandLine.appendSwitch('no-sandbox');
+    }
   }
 
   // Initialize protocol handling

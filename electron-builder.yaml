@@ -83,7 +83,20 @@ snap:
     - libglu1-mesa
     - libosmesa6
     - libgl1-mesa-dri
+    - libgl1
+    - libegl1
+    - libgles2
+    - libgbm1
+    - libdrm2
+    - libxcb1
+    - libxcb-dri3-0
+    - libxcb-present0
+    - libxcb-sync1
+    - libxdamage1
+    - libxext6
+    - libxxf86vm1
     - libvulkan1
+    - mesa-vulkan-drivers
     - libtinfo6
     - libnspr4
     - libnss3
