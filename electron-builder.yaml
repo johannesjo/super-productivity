@@ -74,9 +74,10 @@ snap:
     MESA_LOADER_DRIVER_OVERRIDE: llvmpipe
     # Secondary: Ensure software rendering fallback (defense-in-depth)
     LIBGL_ALWAYS_SOFTWARE: '1'
-    # Configure driver search paths - prioritize $SNAP staged drivers over gnome-platform
-    # This fixes "MESA-LOADER: failed to open llvmpipe" by ensuring staged drivers are found first
-    LIBGL_DRIVERS_PATH: '$SNAP/usr/lib/x86_64-linux-gnu/dri:$SNAP/usr/lib/aarch64-linux-gnu/dri:$SNAP/usr/lib/arm-linux-gnueabihf/dri:$SNAP/usr/lib/dri'
+    # Ensure our staged Mesa drivers are found before the platform snap fallback
+    LIBGL_DRIVERS_PATH: '$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/dri:$SNAP/usr/lib/dri:$SNAP/gnome-platform/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/dri:$SNAP/gnome-platform/usr/lib/dri'
+    # Make sure our staged libs come first on the linker path while preserving upstream defaults
+    LD_LIBRARY_PATH: '$SNAP/usr/lib:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET:$SNAP/lib:$SNAP/lib/$SNAPCRAFT_ARCH_TRIPLET:$LD_LIBRARY_PATH'
     # Force Mesa on NVIDIA systems
     __GLX_VENDOR_LIBRARY_NAME: mesa
   stagePackages:
@@ -88,6 +89,7 @@ snap:
     - libgles2
     - libgbm1
     - libdrm2
+    - libdrm-amdgpu1
     - libxcb1
     - libxcb-dri3-0
     - libxcb-present0
@@ -97,6 +99,7 @@ snap:
     - libxxf86vm1
     - libvulkan1
     - mesa-vulkan-drivers
+    - libtinfo5
     - libtinfo6
     - libnspr4
     - libnss3
