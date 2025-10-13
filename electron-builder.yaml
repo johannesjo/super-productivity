@@ -96,6 +96,18 @@ snap:
     - system-observe
     - login-session-observe
 
+flatpak:
+  runtimeVersion: '23.08'
+  finishArgs:
+    - --share=network
+    - --share=ipc
+    - --socket=x11
+    - --socket=wayland
+    - --socket=fallback-x11
+    - --socket=pulseaudio
+    - --device=dri
+    - --filesystem=home
+
 mac:
   appId: com.super-productivity.app
   type: distribution
