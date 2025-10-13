@@ -85,7 +85,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.github_token }}
           IS_RELEASE: ${{ startsWith(github.ref, 'refs/tags/v') }}
-          SNAPCRAFT_BUILD_ENVIRONMENT: host
+          # Fix for issue #5259: Use lxd to build in proper Ubuntu 22.04 container (GLIBC 2.35)
+          # instead of host (Ubuntu 24.04+ with GLIBC 2.39) to avoid "GLIBC_2.38 not found"
+          SNAPCRAFT_BUILD_ENVIRONMENT: lxd
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
         run: |
           set -euo pipefail
@@ -130,7 +132,8 @@ jobs:
       - name: Build snap for release
         if: startsWith(github.ref, 'refs/tags/v')
         env:
-          SNAPCRAFT_BUILD_ENVIRONMENT: host
+          # Fix for issue #5259: Use lxd for proper Ubuntu 22.04 container build
+          SNAPCRAFT_BUILD_ENVIRONMENT: lxd
         run: |
           sudo env \
             "PATH=$PATH" \
