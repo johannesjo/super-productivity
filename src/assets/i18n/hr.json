@@ -1178,7 +1178,7 @@
       "D_TIME_FOR_DAY": {
         "ADD_ENTRY_FOR": "Dodaj novi unos za {{date}}",
         "DATE": "Datum novog unosa",
-        "HELP": "Primjer:<br> 30 min => 30 minuta<br> 2 h => 2 sata<br> 2 h 30 min  => 2 sata i 30 minuta",
+        "HELP": "Primjer:<br> 30m => 30 minuta<br> 2h => 2 sata<br> 2h 30m => 2 sata i 30 minuta<br> 1.5h => 1 sat i 30 minuta<br> 03:15 => 3 sata i 15 minuta",
         "TINE_SPENT": "Utrošeno vrijeme",
         "TITLE": "Dodaj za dan"
       },

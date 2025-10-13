@@ -1329,7 +1329,7 @@
       "D_TIME_FOR_DAY": {
         "ADD_ENTRY_FOR": " {{date}} için yeni giriş ekle",
         "DATE": "Yeni giriş tarihi",
-        "HELP": "Örnekler:<br> 30m => 30 dakika<br> 2h => 2 saat<br> 2h 30m => 2 saat ve 30 dakika",
+        "HELP": "Örnekler:<br> 30m => 30 dakika<br> 2h => 2 saat<br> 2h 30m => 2 saat ve 30 dakika<br> 1.5h => 1 saat ve 30 dakika<br> 03:15 => 3 saat ve 15 dakika",
         "TINE_SPENT": "Harcanan zaman",
         "TITLE": "Güne Ekle"
       },
