@@ -7,7 +7,7 @@ on:
 
 jobs:
   linux-bin-and-snap-release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
       UNSPLASH_KEY: ${{ secrets.UNSPLASH_KEY }}
@@ -81,24 +81,12 @@ jobs:
           sudo snap install gnome-3-28-1804 --channel=latest/stable || true
           sudo snap refresh
 
-      - name: Setup LXD for snap builds
-        run: |
-          set -e
-          sudo snap install lxd --channel=latest/stable
-          sudo lxd init --auto
-          sudo usermod -a -G lxd $USER
-          sudo chown root:lxd /var/snap/lxd/common/lxd/unix.socket
-          sudo chmod 660 /var/snap/lxd/common/lxd/unix.socket
-          # Verify LXD is working
-          sg lxd -c 'lxc list'
-
       - name: Build/Release Electron app
         env:
           GH_TOKEN: ${{ secrets.github_token }}
           IS_RELEASE: ${{ startsWith(github.ref, 'refs/tags/v') }}
-          # Fix for issue #5259: Use lxd to build in proper Ubuntu 22.04 container (GLIBC 2.35)
-          # instead of host (Ubuntu 24.04+ with GLIBC 2.39) to avoid "GLIBC_2.38 not found"
-          SNAPCRAFT_BUILD_ENVIRONMENT: lxd
+          # Fix for issue #5259: Build on Ubuntu 22.04 host to match core22 (GLIBC 2.35)
+          SNAPCRAFT_BUILD_ENVIRONMENT: host
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
         run: |
           set -euo pipefail
@@ -143,8 +131,8 @@ jobs:
       - name: Build snap for release
         if: startsWith(github.ref, 'refs/tags/v')
         env:
-          # Fix for issue #5259: Use lxd for proper Ubuntu 22.04 container build
-          SNAPCRAFT_BUILD_ENVIRONMENT: lxd
+          # Fix for issue #5259: Build on Ubuntu 22.04 host to match core22 (GLIBC 2.35)
+          SNAPCRAFT_BUILD_ENVIRONMENT: host
         run: |
           sudo env \
             "PATH=$PATH" \
