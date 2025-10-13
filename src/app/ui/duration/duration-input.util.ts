@@ -12,11 +12,29 @@ export const processDurationInput = (
   previousMsValue?: number | null,
 ): ProcessDurationInputResult => {
   try {
-    // Allow any number with h, m units, or combinations like "2h 30m"
-    const digitWithTimeUnitRegex = /(^\d+h(?: \d+m)?$)|(^\d+m$)|(^\d+h$)/i;
+    const AllowedPatterns = [
+      // Allow any number with h, m units, or combinations like "2h 30m"
+      /(^\d+h(?:\s*\d+m)?$)|(^\d+m$)|(^\d+h$)/i,
 
-    // If input is without unit like 1h, 2m, 3h 30m, etc, return
-    if (!digitWithTimeUnitRegex.test(strVal.trim())) {
+      // Allow fractional hours with or without h specifier
+      /^\d*[.,]\d+h?$/i,
+
+      // Allow integer numbers without specifier (treated as hours if <= 8 or fractional, else as minutes)
+      /^\d+$/,
+
+      // Allow full duration as hh:mm or h:mm
+      /^(\d{1,2}):(\d{2})$/,
+    ];
+
+    if (isAllowSeconds) {
+      AllowedPatterns.push(
+        // Allow combinations like "2h 30m 45s"
+        /(^\d+h(?:\s*\d+m)?(?:\s*\d+s)?$)|(^\d+m(?:\s*\d+s)?$)|(^\d+s$)/i,
+      );
+    }
+
+    // If input is not a valid duration string
+    if (!AllowedPatterns.some((pattern) => pattern.test(strVal.trim()))) {
       return {
         isValid: false,
         milliseconds: null,
