@@ -1180,7 +1180,7 @@
       "D_TIME_FOR_DAY": {
         "ADD_ENTRY_FOR": "Ajouter une nouvelle entrée pour {{date}}",
         "DATE": "Date de la nouvelle entrée",
-        "HELP": "Exemples:<br> 30m => 30 minutes<br> 2h => 2 heures<br> 2h 30m => 2 heures et 30 minutes",
+        "HELP": "Exemples:<br> 30m => 30 minutes<br> 2h => 2 heures<br> 2h 30m => 2 heures et 30 minutes<br> 1.5h => 1 heure et 30 minutes<br> 03:15 => 3 heures et 15 minutes",
         "TINE_SPENT": "Temps passé",
         "TITLE": "Ajouter pour le jour"
       },
