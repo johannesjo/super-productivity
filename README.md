@@ -158,6 +158,7 @@ There is another older – the app looks and feels much better now ;) – [artic
 
 ### Keyboard shortcuts (most important)
 
+- `Shift`+`P`: Open create project dialog
 - `Shift`+`A`: Open add task bar
 - `Enter`: Edit currently focussed task title
 - `Arrow keys`: Navigate around task list
@@ -183,6 +184,14 @@ Can be used when adding a task. <strong>(Each of these can be disabled in settin
 - `+ <project-name>`: add the task to an existing project  
   (`"task-description +Important Project"`)
 - `Ctr + 2`: toggle between moving the new task to the bottom and top of the list
+
+</details>
+
+<details>
+<summary><b>Developer notes — keyboard shortcut testing</b></summary>
+
+- Unit: a focused unit test was added for the new `Shift+P` shortcut. It asserts that `ShortcutService` opens the Create Project dialog.
+- E2E / Integration: keyboard flows are covered in Playwright tests under `e2e/tests/`. Running Playwright locally requires browser binaries and OS libraries; use `npx playwright install` and `npx playwright install-deps` or run in CI / Playwright docker images where these are preinstalled.
 
 </details>
 
