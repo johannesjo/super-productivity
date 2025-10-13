@@ -81,6 +81,17 @@ jobs:
           sudo snap install gnome-3-28-1804 --channel=latest/stable || true
           sudo snap refresh
 
+      - name: Setup LXD for snap builds
+        run: |
+          set -e
+          sudo snap install lxd --channel=latest/stable
+          sudo lxd init --auto
+          sudo usermod -a -G lxd $USER
+          sudo chown root:lxd /var/snap/lxd/common/lxd/unix.socket
+          sudo chmod 660 /var/snap/lxd/common/lxd/unix.socket
+          # Verify LXD is working
+          sg lxd -c 'lxc list'
+
       - name: Build/Release Electron app
         env:
           GH_TOKEN: ${{ secrets.github_token }}
