@@ -37,6 +37,8 @@ appx:
   identityName: ___johannesjo.SuperProductivity
 
 linux:
+  # Fix for issue #5259: Set executable name without spaces for snap compatibility
+  executableName: superproductivity
   category: Office;ProjectManagement
   target:
     - AppImage
@@ -56,8 +58,6 @@ linux:
 #    GenericName: ToDo List and Time Tracker
 
 snap:
-  # Fix for issue #5259: Explicit snap name (no spaces allowed)
-  name: superproductivity
   grade: stable
   allowNativeWayland: true
   autoStart: true
