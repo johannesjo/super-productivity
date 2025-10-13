@@ -196,7 +196,7 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Workaround for nx issue and dmg licence issue
-        run: npm install @nx/nx-darwin-arm64 dmg-license
+        run: npm install @nx/nx-darwin-arm64 @nx/nx-darwin-x64 dmg-license
 
       - name: Install npm Packages
         #  if: steps.npm-cache.outputs.cache-hit != 'true'

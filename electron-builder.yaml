@@ -123,6 +123,11 @@ mac:
   provisioningProfile: embedded.provisionprofile
   darkModeSupport: true
   notarize: true
+  mergeASARs: true
+  x64ArchFiles:
+    - '**/@nx/nx-darwin-x64/**'
+  arm64ArchFiles:
+    - '**/@nx/nx-darwin-arm64/**'
   extendInfo:
     ITSAppUsesNonExemptEncryption: false
   publish:
