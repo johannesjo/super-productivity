@@ -133,6 +133,12 @@ mac:
         - arm64
         - x64
         - universal
+  universalApp:
+    mergeASARs: true
+    x64ArchFiles:
+      - '**/@nx/nx-darwin-x64/**'
+    arm64ArchFiles:
+      - '**/@nx/nx-darwin-arm64/**'
 
 dmg:
   sign: true
