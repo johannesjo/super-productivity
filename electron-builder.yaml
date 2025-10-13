@@ -67,55 +67,8 @@ snap:
   autoStart: true
   base: core22
   confinement: strict
-  # Force software rendering to avoid GPU/Mesa driver issues in snap confinement
-  # See: https://github.com/johannesjo/super-productivity/issues/5252
-  environment:
-    # Primary: Force llvmpipe software renderer (most explicit)
-    MESA_LOADER_DRIVER_OVERRIDE: llvmpipe
-    # Secondary: Ensure software rendering fallback (defense-in-depth)
-    LIBGL_ALWAYS_SOFTWARE: '1'
-    # Ensure our staged Mesa drivers are found before the platform snap fallback
-    LIBGL_DRIVERS_PATH: '$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/dri:$SNAP/usr/lib/dri:$SNAP/gnome-platform/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/dri:$SNAP/gnome-platform/usr/lib/dri'
-    # Make sure our staged libs come first on the linker path while preserving upstream defaults
-    LD_LIBRARY_PATH: '$SNAP/usr/lib:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET:$SNAP/lib:$SNAP/lib/$SNAPCRAFT_ARCH_TRIPLET:$LD_LIBRARY_PATH'
-    # Force Mesa on NVIDIA systems
-    __GLX_VENDOR_LIBRARY_NAME: mesa
-  stagePackages:
-    - libglu1-mesa
-    - libosmesa6
-    - libgl1-mesa-dri
-    - libgl1
-    - libegl1
-    - libgles2
-    - libgbm1
-    - libdrm2
-    - libdrm-amdgpu1
-    - libxcb1
-    - libxcb-dri3-0
-    - libxcb-present0
-    - libxcb-sync1
-    - libxdamage1
-    - libxext6
-    - libxxf86vm1
-    - libvulkan1
-    - mesa-vulkan-drivers
-    - libtinfo5
-    - libtinfo6
-    - libnspr4
-    - libnss3
   plugs:
-    - desktop
-    - desktop-legacy
-    - home
-    - x11
-    - wayland
-    - unity7
-    - browser-support
-    - network
-    - gsettings
-    - audio-playback
-    - pulseaudio
-    - opengl
+    - default
     - password-manager-service
     - system-observe
     - login-session-observe
