@@ -1310,7 +1310,7 @@
       "D_TIME_FOR_DAY": {
         "ADD_ENTRY_FOR": "Lisää uusi merkintä päivälle {{date}}",
         "DATE": "Päivämäärä uudelle merkinnälle",
-        "HELP": "Esimerkkejä:<br> 30min => 30 minuuttia<br> 2h => 2 tuntia<br> 2h 30min => 2 tuntia ja 30 minuuttia",
+        "HELP": "Esimerkkejä:<br> 30m => 30 minuuttia<br> 2h => 2 tuntia<br> 2h 30m => 2 tuntia ja 30 minuuttia<br> 1.5h => 1 tunti ja 30 minuuttia<br> 03:15 => 3 tuntia ja 15 minuuttia",
         "TINE_SPENT": "Käytetty aika",
         "TITLE": "Lisää päivälle"
       },
