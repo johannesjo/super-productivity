@@ -125,9 +125,9 @@ export const startApp = (): void => {
   const isSnap = process.platform === 'linux' && !!process.env.SNAP;
   const isForceGpu = process.argv.some((val) => val.includes('--enable-gpu'));
   if (isSnap) {
-    app.on('gpu-process-crashed', () => {
+    (app as any).on('gpu-process-crashed', (_event: any, killed: boolean) => {
       if (!app.commandLine.hasSwitch('disable-gpu')) {
-        log('Snap: GPU process crashed, disabling GPU and relaunching');
+        log('Snap: GPU process crashed, disabling GPU and relaunching', { killed });
         app.commandLine.appendSwitch('disable-gpu');
         app.relaunch();
         app.exit(0);
