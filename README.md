@@ -187,14 +187,6 @@ Can be used when adding a task. <strong>(Each of these can be disabled in settin
 
 </details>
 
-<details>
-<summary><b>Developer notes — keyboard shortcut testing</b></summary>
-
-- Unit: a focused unit test was added for the new `Shift+P` shortcut. It asserts that `ShortcutService` opens the Create Project dialog.
-- E2E / Integration: keyboard flows are covered in Playwright tests under `e2e/tests/`. Running Playwright locally requires browser binaries and OS libraries; use `npx playwright install` and `npx playwright install-deps` or run in CI / Playwright docker images where these are preinstalled.
-
-</details>
-
 ## :globe_with_meridians: Web Version
 
 Check out the web version even though it is a bit limited: Time tracking only works if the app is open and for idle time tracking to work, the chrome extension must be installed.
