@@ -1,3 +1,5 @@
+## [15.2.16](https://github.com/johannesjo/super-productivity/compare/v15.2.15...v15.2.16) (2025-10-13)
+
 ## [15.2.15](https://github.com/johannesjo/super-productivity/compare/v15.2.14...v15.2.15) (2025-10-13)
 
 ## [15.2.14](https://github.com/johannesjo/super-productivity/compare/v15.2.13...v15.2.14) (2025-10-13)
