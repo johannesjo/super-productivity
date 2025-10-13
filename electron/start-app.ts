@@ -114,8 +114,9 @@ export const startApp = (): void => {
 
   const enableSwiftshaderFallback = (): void => {
     log('Snap: Forcing Chromium SwiftShader software renderer fallback');
+    process.env.ELECTRON_ENABLE_SWIFTSHADER = '1';
     app.commandLine.appendSwitch('use-angle', 'swiftshader');
-    app.commandLine.appendSwitch('use-gl', 'swiftshader');
+    app.commandLine.appendSwitch('use-gl', 'angle');
     app.commandLine.appendSwitch('enable-webgl');
     app.commandLine.appendSwitch('ignore-gpu-blacklist');
     app.commandLine.appendSwitch('ignore-gpu-blocklist');
@@ -134,6 +135,14 @@ export const startApp = (): void => {
     } else {
       canUseSnapSoftwareRenderer = ensureSnapSoftwareRendering();
     }
+    app.on('gpu-process-crashed', () => {
+      if (!app.commandLine.hasSwitch('disable-gpu')) {
+        log('Snap: GPU process crashed, disabling GPU and relaunching');
+        app.commandLine.appendSwitch('disable-gpu');
+        app.relaunch();
+        app.exit(0);
+      }
+    });
   }
 
   if (isSnap && !isForceGpu && canUseSnapSoftwareRenderer) {
