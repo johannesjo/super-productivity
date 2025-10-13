@@ -1,3 +1,9 @@
+## [15.2.13](https://github.com/johannesjo/super-productivity/compare/v15.2.12...v15.2.13) (2025-10-13)
+
+### Bug Fixes
+
+- unify task context menu behavior ([83a69d9](https://github.com/johannesjo/super-productivity/commit/83a69d974963919c7972c5361c10d8ad8e839c0b))
+
 ## [15.2.12](https://github.com/johannesjo/super-productivity/compare/v15.2.11...v15.2.12) (2025-10-13)
 
 ### Bug Fixes
