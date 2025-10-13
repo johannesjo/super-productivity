@@ -79,6 +79,7 @@ snap:
     - libglu1-mesa
     - libosmesa6
     - libgl1-mesa-dri
+    - libvulkan1
     - libtinfo6
     - libnspr4
     - libnss3
@@ -123,11 +124,6 @@ mac:
   provisioningProfile: embedded.provisionprofile
   darkModeSupport: true
   notarize: true
-  mergeASARs: true
-  x64ArchFiles:
-    - '**/@nx/nx-darwin-x64/**'
-  arm64ArchFiles:
-    - '**/@nx/nx-darwin-arm64/**'
   extendInfo:
     ITSAppUsesNonExemptEncryption: false
   publish:
@@ -139,6 +135,12 @@ mac:
         - arm64
         - x64
         - universal
+  universalApp:
+    mergeASARs: true
+    x64ArchFiles:
+      - '**/@nx/nx-darwin-x64/**'
+    arm64ArchFiles:
+      - '**/@nx/nx-darwin-arm64/**'
 
 dmg:
   sign: true
