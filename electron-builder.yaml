@@ -8,6 +8,10 @@ files:
   - '!electron/**/*.js.map'
   - .tmp/angular-dist/**/*
   - 'embedded.provisionprofile'
+  # Exclude Nx binaries - they're build tools, not runtime dependencies
+  - '!**/@nx/nx-darwin-*/**'
+  - '!**/@nx/nx-linux-*/**'
+  - '!**/@nx/nx-win32-*/**'
 #afterSign: ./tools/notarizeMacApp.js
 
 directories:
