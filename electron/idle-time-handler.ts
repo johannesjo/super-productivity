@@ -227,12 +227,19 @@ export class IdleTimeHandler {
       // Try gdbus first as it might work better in snap environments
       let command =
         'gdbus call --session --dest org.gnome.Mutter.IdleMonitor --object-path /org/gnome/Mutter/IdleMonitor/Core --method org.gnome.Mutter.IdleMonitor.GetIdletime';
+      const isSnap = !!process.env.SNAP;
 
       // Check if gdbus is available
       try {
         await execAsync('which gdbus', { timeout: 1000 });
       } catch {
-        // Fall back to dbus-send if gdbus is not available
+        if (isSnap) {
+          log.warn(
+            'gdbus unavailable in snap environment, skipping dbus-send fallback to avoid libdbus mismatch',
+          );
+          return null;
+        }
+        // Fall back to dbus-send if gdbus is not available outside of snap
         command =
           'dbus-send --print-reply --dest=org.gnome.Mutter.IdleMonitor /org/gnome/Mutter/IdleMonitor/Core org.gnome.Mutter.IdleMonitor.GetIdletime';
       }

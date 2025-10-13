@@ -112,6 +112,15 @@ export const startApp = (): void => {
     return true;
   };
 
+  const enableSwiftshaderFallback = (): void => {
+    log('Snap: Forcing Chromium SwiftShader software renderer fallback');
+    app.commandLine.appendSwitch('use-angle', 'swiftshader');
+    app.commandLine.appendSwitch('use-gl', 'swiftshader');
+    app.commandLine.appendSwitch('enable-webgl');
+    app.commandLine.appendSwitch('ignore-gpu-blacklist');
+    app.commandLine.appendSwitch('ignore-gpu-blocklist');
+  };
+
   // Workaround for Electron 38+ snap package GPU issues (issue #5252)
   // Electron 38.1+ has GPU/Mesa driver access issues in snap confinement
   const isForceGpu = process.argv.some((val) => val.includes('--enable-gpu'));
@@ -147,9 +156,8 @@ export const startApp = (): void => {
     // Chromium's sandbox conflicts with snap confinement causing launch failures
     app.commandLine.appendSwitch('no-sandbox');
   } else if (isSnap && !isForceGpu) {
-    log(
-      'Snap: Falling back to hardware acceleration because llvmpipe renderer is unavailable',
-    );
+    log('Snap: llvmpipe renderer unavailable, falling back to SwiftShader');
+    enableSwiftshaderFallback();
   }
 
   // Initialize protocol handling
