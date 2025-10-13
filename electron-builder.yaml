@@ -56,6 +56,8 @@ linux:
 #    GenericName: ToDo List and Time Tracker
 
 snap:
+  # Fix for issue #5259: Explicit snap name (no spaces allowed)
+  name: superproductivity
   grade: stable
   allowNativeWayland: true
   autoStart: true
