@@ -62,6 +62,7 @@ import { isSingleEmoji } from '../../../util/extract-first-emoji';
 export class NavItemComponent {
   private readonly _globalThemeService = inject(GlobalThemeService);
   private readonly _store = inject(Store);
+  private static readonly _registeredIcons = new Set<string>();
 
   mode = input<'work' | 'folder' | 'row'>('work');
   variant = input<'default' | 'nav'>('default');
@@ -158,7 +159,10 @@ export class NavItemComponent {
       } else {
         iconName = svgUrl.replace(/\//g, '_').replace(/\.svg$/, '');
       }
-      this._globalThemeService.registerSvgIcon(iconName, svgUrl);
+      if (!NavItemComponent._registeredIcons.has(iconName)) {
+        this._globalThemeService.registerSvgIcon(iconName, svgUrl);
+        NavItemComponent._registeredIcons.add(iconName);
+      }
       return iconName;
     }
     return this.svgIcon();
