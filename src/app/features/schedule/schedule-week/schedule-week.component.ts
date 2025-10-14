@@ -93,7 +93,7 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
   );
 
   times = computed(() => {
-    const is12Hour = !this._dateTimeFormatService.is24HourFormat;
+    const is12Hour = !this._dateTimeFormatService.is24HourFormat();
     return this.rowsByNr.map((_, index) => {
       if (is12Hour) {
         if (index === 0) {
@@ -132,7 +132,7 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
   // Drag preview properties for time indicator
   dragPreviewTime = signal<string | null>(null);
   dragPreviewPosition = signal({ x: 0, y: 0 });
-  private lastCalculatedTimestamp: number | null = null;
+  private _lastCalculatedTimestamp: number | null = null;
 
   // Custom drag preview properties
   currentDragEvent = signal<ScheduleEvent | null>(null);
@@ -300,7 +300,7 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.isShiftNoScheduleMode()) {
       // Day-plan mode: keep preview visible but remove the time badge.
-      this.lastCalculatedTimestamp = null;
+      this._lastCalculatedTimestamp = null;
 
       if (isWithinGrid) {
         const timestamp = calculateTimeFromYPosition(pointer.y, gridRect, targetDay);
@@ -335,7 +335,7 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
         const timestamp = calculateTimeFromYPosition(pointer.y, gridRect, targetDay);
 
         // Store the calculated timestamp for use in dragReleased
-        this.lastCalculatedTimestamp = timestamp;
+        this._lastCalculatedTimestamp = timestamp;
 
         if (timestamp) {
           this.createDragPreview(timestamp, targetDay, pointer.y, gridRect);
@@ -343,7 +343,7 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
       } else {
         // Outside grid bounds - show unschedule indicator
         this.dragPreviewTime.set('UNSCHEDULE');
-        this.lastCalculatedTimestamp = null;
+        this._lastCalculatedTimestamp = null;
       }
     }
   }
@@ -480,8 +480,8 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
     this.currentDragEvent.set(null);
     this.dragPreviewGridPosition.set(null);
     this.dragPreviewStyle.set(null);
-    const savedTimestamp = this.lastCalculatedTimestamp;
-    this.lastCalculatedTimestamp = null;
+    const savedTimestamp = this._lastCalculatedTimestamp;
+    this._lastCalculatedTimestamp = null;
 
     setTimeout(() => {
       nativeEl.style.opacity = '';
