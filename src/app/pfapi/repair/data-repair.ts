@@ -287,9 +287,17 @@ const _removeMissingTasksFromListsOrRestoreFromArchive = (
 const _resetEntityIdsFromObjects = <T extends AppBaseDataEntityLikeStates>(
   data: T,
 ): T => {
+  if (!data?.entities) {
+    return {
+      ...data,
+      entities: {},
+      ids: [],
+    } as T;
+  }
+
   return {
     ...data,
-    entities: (data.entities as any) || {},
+    entities: data.entities || {},
     ids: data.entities
       ? Object.keys(data.entities).filter((id) => !!data.entities[id])
       : [],
