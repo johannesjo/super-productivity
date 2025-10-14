@@ -149,10 +149,10 @@
         }}
       </button>
       <button
-        (click)="completeAll()"
+        (click)="markAllAsDone()"
         [disabled]="isDisableControls"
+        mat-button
         color="primary"
-        mat-stroked-button
         type="button"
       >
         <mat-icon>check</mat-icon>
@@ -165,7 +165,7 @@
       </button>
       @if (!isMultiple && (isSingleOnToday$ | async)) {
         <button
-          (click)="markAsDone()"
+          (click)="markSingleAsDone()"
           [disabled]="isDisableControls"
           color="primary"
           mat-stroked-button

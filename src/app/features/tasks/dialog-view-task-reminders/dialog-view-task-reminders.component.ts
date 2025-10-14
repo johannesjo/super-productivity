@@ -230,7 +230,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     );
   }
 
-  markAsDone(): void {
+  markSingleAsDone(): void {
     this._subs.add(
       this.tasks$.pipe(first()).subscribe((tasks) => {
         if (tasks.length === 1) {
@@ -304,7 +304,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     }
   }
 
-  async completeAll(): Promise<void> {
+  async markAllAsDone(): Promise<void> {
     await this.markAllTasksAsDone();
   }
 
