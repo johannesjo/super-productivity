@@ -1,7 +1,24 @@
+<header
+  class="week-header"
+  [class.minimal]="isMinimalHeader()"
+>
+  <div class="days">
+    <div class="filler"><!--for time --></div>
+    @for (day of daysToShow(); track $index) {
+      <div class="day">
+        @if ($index === 0) {
+          <mat-icon>wb_sunny</mat-icon>
+        }
+        <div class="day-num">{{ day | localeDate: 'd' }}</div>
+        <div class="day-day">{{ day | localeDate: 'EEE' }}</div>
+      </div>
+    }
+  </div>
+</header>
+
 <div
   #gridContainer
-  class="week-grid-container {{ containerExtraClass() }}"
-  [class.isCtrlKeyPressed]="isCtrlPressed()"
+  class="grid-container"
   (click)="onGridClick($event)"
   (mousemove)="onMoveOverGrid($event)"
 >
@@ -32,7 +49,9 @@
         ($index === 0 ? currentTimeRow() : endOfDayColRowStart()) - 1
       }}"
     >
-      <div class="drop-label">{{ T.F.SCHEDULE.PLAN_START_DAY | translate }}</div>
+      @if (isDragging() && isShiftNoScheduleMode()) {
+        <div class="drop-label">{{ T.F.SCHEDULE.PLAN_START_DAY | translate }}</div>
+      }
     </div>
     <div
       class="col end-of-day"
@@ -43,7 +62,9 @@
         totalRows - ($index === 0 ? currentTimeRow() : endOfDayColRowStart())
       }}"
     >
-      <div class="drop-label">{{ T.F.SCHEDULE.PLAN_END_DAY | translate }}</div>
+      @if (isDragging() && isShiftNoScheduleMode()) {
+        <div class="drop-label">{{ T.F.SCHEDULE.PLAN_END_DAY | translate }}</div>
+      }
     </div>
   }
 
@@ -74,15 +95,9 @@
 
   <!-- Events -->
   @for (ev of safeEvents(); track ev.id) {
-    @if (
-      ev.type === SVEType.Task ||
-      ev.type === SVEType.SplitTask ||
-      ev.type === SVEType.TaskPlannedForDay ||
-      ev.type === SVEType.SplitTaskPlannedForDay
-    ) {
+    @if (isDraggableSE(ev)) {
       <schedule-event
         class="draggable"
-        cdkDrag
         [cdkDragData]="ev"
         (cdkDragMoved)="dragMoved($event)"
         (cdkDragStarted)="dragStarted($event)"
@@ -91,7 +106,10 @@
         [event]="ev"
       ></schedule-event>
     } @else {
-      <schedule-event [event]="ev"></schedule-event>
+      <schedule-event
+        [event]="ev"
+        [cdkDragDisabled]="true"
+      ></schedule-event>
     }
   }
 
@@ -113,29 +131,61 @@
           {{ beyondBudgetDay.length }}
         </div>
         @for (ev of beyondBudgetDay; track ev.id) {
-          <schedule-event
-            [event]="ev"
-            class="draggable"
-            cdkDrag
-            [cdkDragData]="ev"
-            (cdkDragMoved)="dragMoved($event)"
-            (cdkDragStarted)="dragStarted($event)"
-            (cdkDragReleased)="dragReleased($event)"
-            [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? DRAG_DELAY_FOR_TOUCH : 0"
-          ></schedule-event>
+          @if (isDraggableSE(ev)) {
+            <schedule-event
+              [event]="ev"
+              class="draggable"
+              [cdkDragData]="ev"
+              (cdkDragMoved)="dragMoved($event)"
+              (cdkDragStarted)="dragStarted($event)"
+              (cdkDragReleased)="dragReleased($event)"
+              [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? DRAG_DELAY_FOR_TOUCH : 0"
+            ></schedule-event>
+          } @else {
+            <schedule-event
+              [event]="ev"
+              [cdkDragDisabled]="true"
+            ></schedule-event>
+          }
         }
       </div>
     }
   }
 
-  @if (newTaskPlaceholder(); as newTaskPlaceholder) {
+  @if (
+    ((!isTaskDragActive() && !isAnyEventResizing()) || isCtrlPressed()) &&
+      newTaskPlaceholder();
+    as newTaskPlaceholder
+  ) {
     <create-task-placeholder
       [isEditMode]="isCreateTaskActive()"
       [time]="newTaskPlaceholder.time"
       [date]="newTaskPlaceholder.date"
       (editEnd)="isCreateTaskActive.set(false); this.newTaskPlaceholder.set(null)"
       [style]="newTaskPlaceholder.style"
+      [style.opacity]="isCtrlPressed() ? 1 : null"
     >
     </create-task-placeholder>
   }
+
+  @if (
+    isDragging() && !isShiftNoScheduleMode() && currentDragEvent() && dragPreviewStyle()
+  ) {
+    <schedule-event
+      class="custom-drag-preview"
+      [event]="currentDragEvent()!"
+      [style]="dragPreviewStyle()!"
+    >
+      <div class="drag-time-badge">{{ dragPreviewTime() }}</div>
+    </schedule-event>
+  }
 </div>
+
+@if (showShiftKeyInfo()) {
+  <div class="shift-key-info">
+    <div class="info-content">
+      <mat-icon>info</mat-icon>
+      <span>{{ T.F.SCHEDULE.SHIFT_KEY_INFO | translate }}</span>
+    </div>
+  </div>
+}

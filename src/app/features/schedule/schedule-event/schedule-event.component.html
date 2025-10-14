@@ -88,3 +88,13 @@
     [task]="task"
   ></task-context-menu>
 }
+
+@if (isResizable()) {
+  <div
+    class="resize-handle"
+    (mousedown)="onResizeStart($event)"
+    (touchstart)="onResizeStart($event)"
+  >
+    <div class="resize-grip"></div>
+  </div>
+}

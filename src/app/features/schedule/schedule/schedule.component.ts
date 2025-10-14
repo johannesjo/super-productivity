@@ -40,7 +40,7 @@ import { ScheduleService } from '../schedule.service';
   selector: 'schedule',
   imports: [LocaleDatePipe, ScheduleWeekComponent, ScheduleMonthComponent, MatIcon],
   templateUrl: './schedule.component.html',
-  styleUrl: './schedule.component.scss',
+  styleUrls: ['./schedule.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
 

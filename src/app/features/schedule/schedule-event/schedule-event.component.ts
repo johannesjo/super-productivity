@@ -11,6 +11,7 @@ import {
   OnInit,
   viewChild,
 } from '@angular/core';
+import { CdkDrag } from '@angular/cdk/drag-drop';
 import { ScheduleEvent, ScheduleFromCalendarEvent } from '../schedule.model';
 import { MatIcon } from '@angular/material/icon';
 import { delay, first, switchMap } from 'rxjs/operators';
@@ -39,6 +40,9 @@ import { TaskContextMenuComponent } from '../../tasks/task-context-menu/task-con
 import { BehaviorSubject, of } from 'rxjs';
 import { IssueService } from '../../issue/issue.service';
 import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
+import { FH } from '../schedule.const';
+
+const FIVE_MINUTES_IN_MS = 5 * 60 * 1000;
 
 @Component({
   selector: 'schedule-event',
@@ -46,6 +50,13 @@ import { DateTimeFormatService } from '../../../core/date-time-format/date-time-
   templateUrl: './schedule-event.component.html',
   styleUrl: './schedule-event.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  hostDirectives: [
+    {
+      directive: CdkDrag,
+      inputs: ['cdkDragData', 'cdkDragDisabled', 'cdkDragStartDelay'],
+      outputs: ['cdkDragStarted', 'cdkDragReleased', 'cdkDragEnded', 'cdkDragMoved'],
+    },
+  ],
 })
 export class ScheduleEventComponent implements OnInit {
   private _store = inject(Store);
@@ -78,8 +89,6 @@ export class ScheduleEventComponent implements OnInit {
     | 'CAL_PROJECTION'
     | 'SPLIT_CONTINUE'
     | 'LUNCH_BREAK' = 'SPLIT_CONTINUE';
-
-  contextMenuPosition: { x: string; y: string } = { x: '0px', y: '0px' };
 
   readonly taskContextMenu = viewChild('taskContextMenu', {
     read: TaskContextMenuComponent,
@@ -203,6 +212,11 @@ export class ScheduleEventComponent implements OnInit {
 
   @HostListener('click')
   async clickHandler(): Promise<void> {
+    // Prevent opening dialog when resizing or just finished resizing
+    if (this._isResizing || this._justFinishedResizing) {
+      return;
+    }
+
     if (this.task) {
       // Use bottom panel on mobile, sidebar on desktop
       this._taskService.setSelectedId(this.task.id);
@@ -235,7 +249,7 @@ export class ScheduleEventComponent implements OnInit {
   }
 
   @HostListener('contextmenu', ['$event'])
-  onContextMenu(ev): void {
+  onContextMenu(ev: MouseEvent | TouchEvent): void {
     if (this.task) {
       this.openContextMenu(ev);
     }
@@ -354,5 +368,144 @@ export class ScheduleEventComponent implements OnInit {
       }
     }
     return 'SPLIT_CONTINUE';
+  }
+
+  // Resize functionality
+  private _isResizing = false;
+  private _justFinishedResizing = false;
+  private _startY = 0;
+  private _startHeight = 0;
+
+  isResizable(): boolean {
+    // Only allow resizing for scheduled tasks that have a time estimate
+    return (
+      this.task &&
+      (this.se.type === SVEType.ScheduledTask ||
+        this.se.type === SVEType.Task ||
+        this.se.type === SVEType.SplitTask) &&
+      this.task.timeEstimate > 0
+    );
+  }
+
+  onResizeStart(event: MouseEvent | TouchEvent): void {
+    if (!this.isResizable()) return;
+
+    event.stopPropagation();
+    event.preventDefault();
+
+    this._isResizing = true;
+
+    const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
+    this._startY = clientY;
+    this._startHeight = this._elRef.nativeElement.offsetHeight;
+
+    // Add event listeners for mouse/touch move and end
+    const moveHandler = (e: MouseEvent | TouchEvent): void => this._onResizeMove(e);
+    const endHandler = (): void => this._onResizeEnd(moveHandler, endHandler);
+
+    document.addEventListener('mousemove', moveHandler);
+    document.addEventListener('mouseup', endHandler);
+    document.addEventListener('touchmove', moveHandler);
+    document.addEventListener('touchend', endHandler);
+
+    // Add visual feedback class
+    this._elRef.nativeElement.classList.add('is-resizing');
+  }
+
+  private _onResizeMove(event: MouseEvent | TouchEvent): void {
+    if (!this._isResizing) return;
+
+    event.preventDefault();
+    const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
+    const deltaY = clientY - this._startY;
+
+    // Calculate new height based on grid row height for snap-to-grid behavior
+    const gridContainer = this._elRef.nativeElement.closest(
+      '.grid-container',
+    ) as HTMLElement | null;
+    if (gridContainer) {
+      const gridHeight = gridContainer.getBoundingClientRect().height;
+      const rowHeight = gridHeight / (24 * FH);
+      const rowsChanged = Math.round(deltaY / rowHeight);
+      const snappedDelta = rowsChanged * rowHeight;
+      const newHeight = Math.max(rowHeight, this._startHeight + snappedDelta);
+
+      // Update the element height temporarily for visual feedback
+      this._elRef.nativeElement.style.height = newHeight + 'px';
+    } else {
+      // Fallback to original behavior
+      const newHeight = Math.max(20, this._startHeight + deltaY);
+      this._elRef.nativeElement.style.height = newHeight + 'px';
+    }
+  }
+
+  private _onResizeEnd(moveHandler: any, endHandler: any): void {
+    if (!this._isResizing) return;
+
+    this._isResizing = false;
+
+    // Set cooldown flag to prevent immediate click events
+    this._justFinishedResizing = true;
+    setTimeout(() => {
+      this._justFinishedResizing = false;
+    }, 200); // 200ms cooldown
+
+    // Remove event listeners
+    document.removeEventListener('mousemove', moveHandler);
+    document.removeEventListener('mouseup', endHandler);
+    document.removeEventListener('touchmove', moveHandler);
+    document.removeEventListener('touchend', endHandler);
+
+    // Remove visual feedback class
+    this._elRef.nativeElement.classList.remove('is-resizing');
+
+    // Calculate new duration based on height change
+    const currentHeight = this._elRef.nativeElement.offsetHeight;
+    const heightDelta = currentHeight - this._startHeight;
+
+    // Convert height change to time change (based on grid row height)
+    // Each row represents a time slice (FH rows per hour)
+    const timeChangeInMs = this._calculateTimeFromHeightDelta(heightDelta);
+
+    if (Math.abs(timeChangeInMs) > 30000) {
+      // Only update if change is more than 30 seconds (to be more responsive)
+      const rawEstimate = this.task.timeEstimate + timeChangeInMs;
+      const roundedEstimate = Math.max(
+        FIVE_MINUTES_IN_MS,
+        Math.round(rawEstimate / FIVE_MINUTES_IN_MS) * FIVE_MINUTES_IN_MS,
+      );
+
+      if (roundedEstimate !== this.task.timeEstimate) {
+        this._store.dispatch(
+          TaskSharedActions.updateTask({
+            task: {
+              id: this.task.id,
+              changes: {
+                timeEstimate: roundedEstimate,
+              },
+            },
+          }),
+        );
+      }
+    }
+
+    // Reset element height to let CSS handle it
+    this._elRef.nativeElement.style.height = '';
+  }
+
+  private _calculateTimeFromHeightDelta(heightDelta: number): number {
+    // Get the grid container to calculate row height
+    const gridContainer = this._elRef.nativeElement.closest(
+      '.grid-container',
+    ) as HTMLElement | null;
+    if (!gridContainer) return 0;
+
+    const gridHeight = gridContainer.getBoundingClientRect().height;
+    const rowHeight = gridHeight / (24 * FH); // Total rows = 24 hours * FH rows per hour
+    const rowsChanged = heightDelta / rowHeight;
+    const hoursChanged = rowsChanged / FH;
+
+    // Convert to milliseconds
+    return hoursChanged * 60 * 60 * 1000;
   }
 }
