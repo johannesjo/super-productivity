@@ -368,12 +368,14 @@ export class ScheduleEventComponent {
   isResizable(): boolean {
     const t = this.task();
     const evt = this.se();
-    // Only allow resizing for scheduled tasks that have a time estimate
+    // Allow resizing for all task types with a time estimate
     return (
       !!t &&
       (evt.type === SVEType.ScheduledTask ||
         evt.type === SVEType.Task ||
-        evt.type === SVEType.SplitTask) &&
+        evt.type === SVEType.SplitTaskContinuedLast ||
+        evt.type === SVEType.TaskPlannedForDay ||
+        evt.type === SVEType.SplitTaskPlannedForDay) &&
       t.timeEstimate > 0
     );
   }
