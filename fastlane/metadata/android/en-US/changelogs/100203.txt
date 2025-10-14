@@ -1,0 +1,4 @@
+
+### Reverts
+
+* Revert "build: try different workaround for npm install issue"

@@ -1,0 +1,62 @@
+
+### Bug Fixes
+
+* 12 am should be 12 pm (even though I think it is not logical :D) (5816456), closes #4741
+* add planner state to baseState in task-shared.reducer.spec.ts
+* **android:** improve WebDavHttpPlugin reliability and compatibility
+* auth token dialog not showing up when configuring sync from settings (6ed3419), closes #4659
+* auth token dialog not showing up when configuring sync from settings (be03674), closes #4659
+* disable more shortcuts for task description context (413a73e), closes #4779
+* disable more shortcuts for task description context (e01a0c9), closes #4779
+* emoji problem (6ff9afb), closes #4767
+* formly button error for undefined values
+* formly button error for undefined values
+* **issue-providers:** use date strings directly to avoid timezone conversion issues
+* **notes:** fix #4758 to allow scrolling in notes view drag/drop
+* **planner:** wrong day assigned #4714
+* **release:** update GitHub release notes configuration
+* **schedule:** mobile week planner
+* **schedule:** remove date string from schedule event
+* **sync:** enable HEAD fallback in WebDAV getFileMeta
+* **sync:** error in xml parser
+* **sync:** improve WebDAV conditional headers validation and error handling
+* **sync:** new kotlin plugin
+* timezone issues with task due date comparisons (5353e11), closes #4714
+* **webdav:** fix failing unit tests for improved error handling
+* **webdav:** prevent infinite loop in WebDAV 409 retry logic
+* worklog export in other timezones (f499802), closes #4763
+* wrong day comparison in other timezones #4714
+* wrong day comparison in other timezones 2 #4714
+### Features
+
+* add glass and colorful theme
+* cleanup all old migration functions from last year and remove MODEL_VERSION and MODEL_VERSION_KEY
+* **e2e:** add minimal WebDAV e2e testing setup
+* **electron:** add debug logging for suspend/resume idle detection #4734
+* migrate transferTask logic to planner-shared.reducer
+* **schedule:** make mobile month view slightly more useful
+* **schedule:** make mobile week headers also work
+* **sync:** add custom cap http plugin for webdav methods
+* **sync:** add logs
+* **sync:** also enable fallback for webdav
+* **sync:** extract webdav-capabilities-detector.ts
+* **sync:** extract webdav-xml-parser.ts
+* **sync:** extract xml parser
+* **sync:** half way remove lock stuff
+* **sync:** handle next cloud case for directory missing
+* **sync:** improve webdav provider
+* **sync:** make basic new sync work
+* **sync:** only try to create directory on error
+* **sync:** prevent concurrent write edge case better
+* **sync:** revert to older webdav-api.ts
+* **sync:** split up webdav model stuff into different files
+* **sync:** start fresh
+* **sync:** webdav new simpler approach first draft
+* **webdav:** add comprehensive Last-Modified fallback support
+* **webdav:** add server capability detection for non-ETag servers
+* **webdav:** enhance conditional headers method for Last-Modified support
+* **webdav:** implement _extractValidators method for ETag and Last-Modified support
+* **webdav:** implement core methods with Last-Modified fallback support
+* **webdav:** implement Phase 3.3 - core methods with Last-Modified fallback logic
+* **webdav:** implement Phase 4 - alternative safe creation methods
+* **webdav:** simplify webdav-api.ts

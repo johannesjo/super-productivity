@@ -1,0 +1,29 @@
+
+### Bug Fixes
+
+* **bottomPanel:** fix mobile keyboard open hides input problem
+* nav resizing not working anymore
+* prompt() is not supported (ff53beb), closes #5104
+* **rightPanel:** resize not working for plugin panels
+### Features
+
+* add missing Turkish translations
+* add script to update missing i18n keys from en.json
+* make sidenav persistence work
+* remove minimal nav setting
+* **rightPanel:** avoid problems with content and animation
+* **rightPanel:** hide handle when closed
+* **rightPanel:** improve ani behavior for task-view-customizer-panel
+* **rightPanel:** improve on animation
+* **rightPanel:** make it work for touch devices
+* **rightPanel:** make max-width of 50% work
+* **rightPanel:** re-restructure bottom panel right panel stuff
+* **rightPanel:** re-restructure bottom panel right panel stuff 2
+* **rightPanel:** use setPointerCapture to improve drag behavior
+* **schedule:** make initial scroll to work start work
+* **sideNav:** hide nav completely when not shown on mobile
+* **sideNav:** make mobile nav ani work
+* **sideNav:** only show count when there is one
+* **sideNav:** prepare mobile animation
+* **task:** use @container query instead of body class for small list styles
+* **task:** use @container query instead of body class for small list styles 2

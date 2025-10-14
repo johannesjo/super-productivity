@@ -1,0 +1,28 @@
+
+### Bug Fixes
+
+* "No encryption password provided" #4642
+* add missing translations
+* all console errors
+* animation not playing correctly on side panel close
+* **docker:** resolve build failures in multi-platform environments
+* error when moving sub tasks to archive (dcb471e), closes #4815
+* **recurring-tasks:** show overdue recurring tasks in Today view #4825
+* styling issue
+* wrong icon for kde title bar
+### Features
+
+* add back in different folder for DEV webdav sync
+* add better icon for issue integration panel
+* better inform about potential cors issues +#4834
+* enable domina mode for firefox #4808
+* improve dialog-incomplete sync content
+* **plugin:** wait with plugin init until initial sync is done to avoid initial db write conflicts
+* show next and last creation date for repeatable tasks in overview #4825
+* **sync-md:** add support for markdown content before tasks as needed for joplin #4751
+* translate stuff
+* translate stuff 2
+* update privacy policy link
+* **webdav:** add legacy support for webdav #4829
+* **webdav:** get rid of etag completely in favor of last-modified #4829
+* **webdav:** remove isLikelyTimestamp stuff

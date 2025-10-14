@@ -1,0 +1,5 @@
+
+### Bug Fixes
+
+* **sideNav:** show project and tag buttons always for touch devices #5258
+* update check-key-combo logic to correctly evaluate all pressed modifiers

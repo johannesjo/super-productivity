@@ -1,0 +1,26 @@
+
+### Bug Fixes
+
+* add proper fallback for missing locales #3842
+* also display value for RepeatedCountdownTimer on daily summary and quick history
+* autofix data for problem #3848
+* can't highlight text inside task textarea #3724
+* cdk-overlay-container on android
+* error for jira sub tasks and improve error handling #3836 #3829
+* prevent actual error when deleting project #3848
+* time position for repeatable on planner
+### Features
+
+* always use defaultProjectId when available even when on other project list #3850
+* better handle case when current task is due #3855
+* **i18n:** add chatgpt translations
+* **i18n:** add deepl translations
+* **i18n:** add google translate translations
+* **i18n:** add missing translations
+* **i18n:** remove all unused translations
+* **i18n:** sort all translations alphabetically
+* improve internationalization of dates
+* improve language error handling and adjust test
+* prevent not listed languages from being activated #3842
+* show done tasks always last for select task suggestions
+* update translation

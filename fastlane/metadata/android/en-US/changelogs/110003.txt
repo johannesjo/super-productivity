@@ -1,0 +1,16 @@
+
+### Bug Fixes
+
+* **android:** android file sync not working #3782
+* issue panel being opened on start
+* **issueProvider:** crash on task done and related #3779
+### Features
+
+* adjust locale to browser locale on app start #3676
+* also display am and pm for planner task badge #3676
+* also display am and pm for task time badge #3676
+* also localize schedule better #3676
+* **android:** formatting
+* **issueProvider:** remove jira pat and wonkyCookie modes #2528
+* move monday-friday setting up
+* use 12-hour format for schedule times #3676

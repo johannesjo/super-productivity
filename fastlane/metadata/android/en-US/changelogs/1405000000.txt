@@ -1,0 +1,66 @@
+
+### Bug Fixes
+
+* avoid a task having both dueWithTime and dueDay
+* avoid a task having both dueWithTime and dueDay
+* cannot read properties of null #5021
+* cannot read properties of null #5021
+* description edits are discarded when focus session ends #5059
+* **focusMode:** add missing banner translations for break states (2f304e2), closes #1 #1
+* **focusMode:** breathing dot not scaling properly
+* **focusMode:** complete session on pomodoro leads to break  screen
+* **focusMode:** correct timing calculation in unPauseFocusSession
+* **focusMode:** fix break component compilation errors
+* **focusMode:** persist timer during task selection in active session
+* **focusMode:** remove constructor subscription memory leak
+* **pomodoro:** fix options conflict
+* removing time for task scheduled for today not working
+* removing time for task scheduled for today not working
+* wrong date formatting #5033
+* wrong date formatting #5033
+### Features
+
+* add some defensive programming
+* add some defensive programming
+* **addTaskBar:** add safety check #5055
+* **addTaskBar:** improve on mention stuff
+* defensive programming #5028
+* defensive programming for #4969
+* **focusMode:** add a way to complete pomodoro
+* **focusMode:** add break banner text support
+* **focusMode:** add focusSessionDone action
+* **focusMode:** add info about the task we are currently tracking too
+* **focusMode:** add next task selection when done mid session
+* **focusMode:** add plus 5 minute button
+* **focusMode:** completely new simplified implementation
+* **focusMode:** consistent label
+* **focusMode:** extract translations
+* **focusMode:** extract translations
+* **focusMode:** focus window on break start and end as well
+* **focusMode:** further improve flows for countdown and flow
+* **focusMode:** improve
+* **focusMode:** improve banner text
+* **focusMode:** improve notifying the user
+* **focusMode:** improve session context detection and fix template errors
+* **focusMode:** improve time selection screen for pomodoro
+* **focusMode:** indicate pomodoro session differently
+* **focusMode:** integrate pomodoro into focus mode
+* **focusMode:** make closing and returning to overlay work
+* **focusMode:** make continuing session work
+* **focusMode:** make countdown selection work
+* **focusMode:** make done session timer work
+* **focusMode:** make done text show pomodoro if applicable
+* **focusMode:** make showing pomodoro break work
+* **focusMode:** prevent flowtime session from ever being completed
+* **focusMode:** rename old implementation to legacy
+* **focusMode:** rework approach again
+* **focusMode:** select task instead of auto starting one
+* **focusMode:** simplify and improve
+* **focusMode:** smoother clock updates
+* **focusMode:** wait for confirmation before returning to work on break
+* improve input handling for api adding task
+* improve input handling for api adding task
+* **issue:** improve legacy compatability #5056
+* **issue:** validate issue data before applying to task #5056
+* make board duplication work
+* various improvements

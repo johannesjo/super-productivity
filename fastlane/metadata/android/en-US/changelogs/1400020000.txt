@@ -1,0 +1,4 @@
+
+### Features
+
+* add error handling for repeatable tasks

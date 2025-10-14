@@ -1,0 +1,18 @@
+
+### Bug Fixes
+
+* account for cases that might cause "Error: No tag undefined" #4348
+* also cleanup today tag from all tasks #4348
+* avoid problem with hiddenImprovementBannerItems
+* object is not extensible error
+* project drag & drop broken #4342
+* tasks scheduled with time being gone #4347
+* typing issue
+* validity error for task by better data fix script #4346
+* validity error for task by better migration #4346
+* view task reminder dialog not working as intended
+### Features
+
+* add explanation for + archived done task number
+* outline new data repair stuff
+* **pfapi:** add autofixes for simple data inconsistencies #4343

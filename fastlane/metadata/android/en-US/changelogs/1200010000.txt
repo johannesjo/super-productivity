@@ -1,0 +1,173 @@
+
+### Bug Fixes
+
+* add button styling on schedule page
+* add button styling on schedule page
+* also fix moving calendar events when they already have been added #3933
+* asking at wrong point to delete dropbox token
+* avoid error due to get Voices
+* Cannot find focus el #4091
+* Cannot find focus el #4091
+* clickable area for task title
+* drop attachment on task not working anymore
+* drop attachment on task not working anymore
+* Eisenhauer
+* Eisenhauer
+* focus mode markdown height
+* focus mode task title styling
+* focus notes not being scrollable
+* **focusMode:** several quirks
+* handle github api case when issue body is null or undefined #4022
+* **idle:** not shown checkbox icon taking up space
+* inline-multiline-input.component
+* invalid str replacer id #4019
+* issues moved from backlog and other projects on auto-poll #3933
+* **jira:** no extension error showing critical error modal
+* **jira:** no extension error showing critical error modal
+* minor memory leak
+* minor timing issue for flowtime
+* not showing sync complete correctly
+* possibly improve svg icon situation
+* project id not found error
+* schedule dialog time removed for today task case #4059
+* side nav hidden forever #3204
+* side nav hidden forever #3204
+* **simpleCounter:** account for simple counter streak config not always being defined #4100
+* **simpleCounter:** account for simple counter streak config not always being defined #4100
+* turkish translation
+* turkish translation
+* various minor stuff
+* various minor stuff
+* wrong date issue #3934
+* wrong hint for reschedule button
+* wrong hint for reschedule button
+### Features
+
+* account for bookmark change in model version
+* account for bookmark change in model version
+* add animation for focus mode
+* add animation for stopwatch
+* add celebration ani for focus session done
+* add default sort order for banners
+* add default sort order for banners
+* add task menu to quickly toggle tags
+* add task menu to quickly toggle tags
+* allow adding new tags from context menu
+* allow adding new tags from context menu
+* allow adding new tags from quick menu
+* allow adding new tags from quick menu
+* allow for repeatable formly sections to be sorted
+* allow for repeatable formly sections to be sorted
+* beautify focus session done page
+* better info txt
+* **boards:** add formly dynamic tag edit
+* **boards:** add option to limit to parent tasks
+* **boards:** add option to limit to parent tasks
+* **boards:** also handle tags correctly when moving from list to list via add button
+* **boards:** also show scheduled with reminder case for tasks
+* **boards:** also show scheduled with reminder case for tasks
+* **boards:** also show total estimate for board
+* **boards:** also show total estimate for board
+* **boards:** always show today tag
+* **boards:** better eisenhower and kanban defaults
+* **boards:** better eisenhower and kanban defaults
+* **boards:** filter out already added tasks from add task inline btn
+* **boards:** handle tag selection edge case
+* **boards:** hide panel tags for panel
+* **boards:** improve missing tags message
+* **boards:** improve missing tags message
+* **boards:** improve on form
+* **boards:** improve panel dialog mobile styling
+* **boards:** improve panel dialog mobile styling
+* **boards:** improve responsive styles
+* **boards:** improve styling for header totals
+* **boards:** improve styling for header totals
+* **boards:** increase column min width
+* **boards:** increase column min width
+* **boards:** lazy load
+* **boards:** lazy load
+* **boards:** make add task button work
+* **boards:** make boards editable
+* **boards:** make drag & drop inserting at index work
+* **boards:** make droppable area full height
+* **boards:** make droppable area full height
+* **boards:** make everything translatable
+* **boards:** make grid at least full height
+* **boards:** make grid at least full height
+* **boards:** make most basic kanban work
+* **boards:** make much better negative handling work
+* **boards:** make problem case work
+* **boards:** make project and scheduled or not work
+* **boards:** make project and scheduled or not work
+* **boards:** make saving new boards work
+* **boards:** make super basic drag & drop work
+* **boards:** make super basic eisenhower matrix work
+* **boards:** navigate to newly added board after adding it
+* **boards:** only make number of columns configurable
+* **boards:** only update if necessary on drop
+* **boards:** outline boards feature
+* **boards:** outline component structure and model
+* **boards:** outline most basic form for adding boards
+* **boards:** persist last active board
+* **boards:** persist sorted panel task order
+* **boards:** prepare logic for persisting order
+* **boards:** prepare translatable content
+* **boards:** replace done state with radio to save space
+* **boards:** respect add to top or bottom for add task bar
+* **boards:** show scheduled button and badge
+* **boards:** show today tag for boards
+* **boards:** translate dynamic stuff
+* clean logging
+* cleanup
+* cleanup legacy bookmark feature
+* cleanup legacy bookmark feature
+* don't show done page again after hiding overlay
+* extract to component and allow space for toggle without closing for toggle task menu
+* extract to component and allow space for toggle without closing for toggle task menu
+* **focusMode:** better integrate idle case
+* **focusMode:** better integrate idle case 2
+* **focusMode:** better progress circle ani
+* **focusMode:** make translatable
+* **focusMode:** make translatable
+* get last focus mode mode from LS
+* hande edge case
+* handle file sync edge case
+* handle file sync edge case
+* handle session done case for focus mode from banner
+* **i18n:** add gtp translations
+* **i18n:** add gtp translations
+* **i18n:** add other machine translations
+* **i18n:** add other machine translations
+* **i18n:** improve translations
+* **i18n:** improve translations
+* implement banner first draft
+* improve auth token dialog behavior
+* improve focus mode responsive styles
+* improve focus mode styling
+* improve on progress circle
+* improve repeat section styling
+* improve repeat section styling
+* improve responsive styles for focus mode
+* improve sync form
+* increase model version
+* increase model version
+* make basic flowtime work
+* make in sync status show better and show icon if offline
+* make task data smaller
+* migrate progress circle to signals
+* only show banner if session is currently running
+* outline flowtime
+* polish notes panel for focus mode
+* preload all svg icons as inline icons to prevent errors when going offline
+* prevent removing reminder from no tag/no project task
+* prevent zooming in page involuntarily
+* remove super old legacy issueData
+* show checkmark for sync icon if in sync
+* **sync:** always show sync button and open cfg dialog if not configured already
+* tag toggle menu also to task context menu
+* tag toggle menu also to task context menu
+* update sync dialog text and add translations
+* use colored flame as daily summary streak ico
+* use colored flame as daily summary streak ico
+* use drag handle for notes to improve scrolling on mobile
+* use drag handle for notes to improve scrolling on mobile

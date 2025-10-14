@@ -1,0 +1,4 @@
+
+### Bug Fixes
+
+* **android:** status bar for all

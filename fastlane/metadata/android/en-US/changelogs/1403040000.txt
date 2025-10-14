@@ -1,0 +1,17 @@
+
+### Bug Fixes
+
+* avoid re-fetching issue data when tracking time
+* copy to clipboard (0a704fa), closes #4966
+* don't capitalize search results #4967
+* don't log credentials
+* don't log credentials
+* github url formatting (497cde5), closes #4913
+* improve requests #4967
+* jira failed to poll #4976
+* make schedule short syntax more reliable
+* make tracking reminder counter work again
+* pwa message overlaps popout nav (eef46f1), closes #4968
+
+
+
