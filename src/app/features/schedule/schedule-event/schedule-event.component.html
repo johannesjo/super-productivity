@@ -82,7 +82,7 @@
   }
 </div>
 
-@if (task) {
+@if (task()) {
   <task-context-menu
     #taskContextMenu
     [task]="task()"
