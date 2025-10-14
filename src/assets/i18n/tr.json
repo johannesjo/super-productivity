@@ -1282,6 +1282,8 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Tümünü bugüne ekle",
         "ADD_TO_TODAY": "Bugüne ekle",
+        "COMPLETE": "Tamamla",
+        "COMPLETE_ALL": "Tümünü tamamla",
         "DONE": "Bitti",
         "DUE_TASK": "Yapılacak görev",
         "DUE_TASKS": "Yapılacak görevler",

@@ -1283,6 +1283,8 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Add all to today",
         "ADD_TO_TODAY": "Add to today",
+        "COMPLETE": "Complete",
+        "COMPLETE_ALL": "Complete all",
         "DONE": "Done",
         "DUE_TASK": "Reminder for planned task",
         "DUE_TASKS": "Reminder for planned tasks",

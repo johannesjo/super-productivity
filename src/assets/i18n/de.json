@@ -1282,6 +1282,8 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Fügen Sie alles zu heute hinzu",
         "ADD_TO_TODAY": "Zu heute hinzufügen",
+        "COMPLETE": "Abschließen",
+        "COMPLETE_ALL": "Alle abschließen",
         "DONE": "Erledigt",
         "DUE_TASK": "Fällige Aufgabe",
         "DUE_TASKS": "Fällige Aufgaben",

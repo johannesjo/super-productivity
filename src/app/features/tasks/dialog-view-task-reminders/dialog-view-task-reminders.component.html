@@ -31,6 +31,15 @@
           @if (isMultiple) {
             <div class="actions">
               <button
+                (click)="markTaskAsDone(task)"
+                [title]="T.F.TASK.D_REMINDER_VIEW.COMPLETE | translate"
+                color=""
+                mat-icon-button
+                type="button"
+              >
+                <mat-icon>check</mat-icon>
+              </button>
+              <button
                 [disabled]="!(task.projectId || task.parentId || task.tagIds.length > 0)"
                 (click)="dismiss(task)"
                 [title]="T.F.TASK.D_REMINDER_VIEW.UNSCHEDULE | translate"
@@ -136,6 +145,21 @@
           (isMultiple
             ? T.F.TASK.D_REMINDER_VIEW.SNOOZE_ALL
             : T.F.TASK.D_REMINDER_VIEW.SNOOZE
+          ) | translate
+        }}
+      </button>
+      <button
+        (click)="completeAll()"
+        [disabled]="isDisableControls"
+        color="primary"
+        mat-stroked-button
+        type="button"
+      >
+        <mat-icon>check</mat-icon>
+        {{
+          (isMultiple
+            ? T.F.TASK.D_REMINDER_VIEW.COMPLETE_ALL
+            : T.F.TASK.D_REMINDER_VIEW.COMPLETE
           ) | translate
         }}
       </button>

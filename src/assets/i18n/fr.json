@@ -1133,6 +1133,8 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Ajouter tout à aujourd'hui",
         "ADD_TO_TODAY": "Ajouter à aujourd'hui",
+        "COMPLETE": "Terminer",
+        "COMPLETE_ALL": "Tout terminer",
         "DONE": "Terminé",
         "DUE_TASK": "Tâche due",
         "DUE_TASKS": "Tâches dues",

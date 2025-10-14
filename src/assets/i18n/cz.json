@@ -876,6 +876,8 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Přidat vše do dneška",
         "ADD_TO_TODAY": "Přidat do dneška",
+        "COMPLETE": "Dokončit",
+        "COMPLETE_ALL": "Dokončit vše",
         "DONE": "Hotovo",
         "DUE_TASK": "Úkol k dokončení",
         "DUE_TASKS": "Plánované úkoly",

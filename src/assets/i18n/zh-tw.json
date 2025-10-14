@@ -45,6 +45,17 @@
         "T_TITLE": "標題",
         "T_TO_BE_SUBMITTED": "待提交"
       },
+      "D_REMINDER_VIEW": {
+        "ADD_ALL_TO_TODAY": "全部添加到今天",
+        "ADD_TO_TODAY": "添加到今天",
+        "COMPLETE": "完成",
+        "COMPLETE_ALL": "全部完成",
+        "DONE": "完成",
+        "SOURCE": "來源",
+        "SOURCE_GLOBAL": "全部",
+        "SOURCE_GROUP": "組",
+        "SOURCE_PROJECT": "項目"
+      },
       "FORM": {
         "FILTER": "自訂過濾器",
         "SCOPE": "範圍",

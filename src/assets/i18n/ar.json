@@ -1133,6 +1133,8 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "أضف الكل إلى اليوم",
         "ADD_TO_TODAY": "أضف إلى اليوم",
+        "COMPLETE": "إكمال",
+        "COMPLETE_ALL": "إكمال الكل",
         "DONE": "فعله",
         "DUE_TASK": "المهمة المستحقة",
         "DUE_TASKS": "المهام المستحقة",

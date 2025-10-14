@@ -1133,6 +1133,8 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "오늘 모두 추가",
         "ADD_TO_TODAY": "오늘 추가",
+        "COMPLETE": "완료",
+        "COMPLETE_ALL": "모두 완료",
         "DONE": "끝난",
         "DUE_TASK": "마감일",
         "DUE_TASKS": "마감일",
