@@ -179,7 +179,10 @@ export class BoardPanelComponent {
     const merged = [...orderedTasks, ...nonOrderedTasks].filter((t) => !!t);
 
     // mode: 'off' | 'asc' (earliest first) | 'desc' (latest first)
-    const mode = panelCfg.sortByDue || 'off';
+    const mode =
+      (panelCfg.scheduledState === BoardPanelCfgScheduledState.Scheduled &&
+        panelCfg.sortByDue) ||
+      'off';
     if (mode !== 'off') {
       const getDueTs = (task: TaskCopy): number | null => {
         // prefer dueWithTime (timestamp), then dueDay (ISO-like date string)
