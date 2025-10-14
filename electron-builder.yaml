@@ -72,6 +72,10 @@ snap:
     - password-manager-service
     - system-observe
     - login-session-observe
+    - gnome-42-2204:
+        interface: content
+        target: $SNAP/gnome-platform
+        default-provider: gnome-42-2204
 
 flatpak:
   runtimeVersion: '23.08'
