@@ -7,6 +7,7 @@ import {
   ElementRef,
   inject,
   input,
+  HostListener,
   OnDestroy,
   OnInit,
   signal,
@@ -165,10 +166,6 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit(): void {
     const workStartEnd = this.workStartEnd();
     this.endOfDayColRowStart.set(workStartEnd?.workStartRow || D_HOURS * 0.5 * FH);
-
-    // Add keyboard event listeners for shift key
-    document.addEventListener('keydown', this._onKeyDown);
-    document.addEventListener('keyup', this._onKeyUp);
   }
 
   ngAfterViewInit(): void {
@@ -177,10 +174,6 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     window.clearTimeout(this._currentAniTimeout);
-    // Remove keyboard event listeners
-    document.removeEventListener('keydown', this._onKeyDown);
-    document.removeEventListener('keyup', this._onKeyUp);
-
     // Clean up resize observer
     if (this._resizeObserver) {
       this._resizeObserver.disconnect();
@@ -252,34 +245,8 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
 
     ev.source.element.nativeElement.style.pointerEvents = 'none';
     const pointer = { x: ev.pointerPosition.x, y: ev.pointerPosition.y };
-    // Track the last known pointer position so we can fall back to it when the
-    // release event doesn't expose a reliable target (common for touch).
-    this._lastPointerPosition = pointer;
-
-    // Collect all relevant elements at the pointer. This allows us to bypass
-    // the drag preview element and grab the underlying `.col` grid cell or the
-    // `schedule-event` when hovering other tasks.
-    const elementsAtPoint = document.elementsFromPoint(pointer.x, pointer.y);
-    const interactiveElements = elementsAtPoint.filter(
-      (el): el is HTMLElement =>
-        el instanceof HTMLElement &&
-        !el.classList.contains(DRAG_CLONE_CLASS) &&
-        !el.classList.contains('custom-drag-preview'),
-    );
-
-    if (interactiveElements.length) {
-      // Cache the most recent drop targets to reuse during dragReleased.
-      this._lastDropCol =
-        interactiveElements.find((el) => el.classList.contains('col')) || null;
-      this._lastDropScheduleEvent =
-        interactiveElements.find((el) => el.tagName.toLowerCase() === 'schedule-event') ||
-        null;
-    }
-
-    const targetEl =
-      interactiveElements[0] ||
-      (document.elementFromPoint(pointer.x, pointer.y) as HTMLElement | null);
-    if (!targetEl || targetEl.classList.contains(DRAG_CLONE_CLASS)) {
+    const targetEl = this._updatePointerCaches(pointer);
+    if (!targetEl) {
       return;
     }
 
@@ -291,60 +258,13 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     const gridRect = gridContainer.getBoundingClientRect();
-    const isWithinGrid =
-      pointer.y >= gridRect.top &&
-      pointer.y <= gridRect.bottom &&
-      pointer.x >= gridRect.left &&
-      pointer.x <= gridRect.right;
     const targetDay = this.getDayUnderPointer(pointer.x, pointer.y);
+    const isWithinGrid = this._isWithinGrid(pointer, gridRect);
 
     if (this.isShiftNoScheduleMode()) {
-      // Day-plan mode: keep preview visible but remove the time badge.
-      this._lastCalculatedTimestamp = null;
-
-      if (isWithinGrid) {
-        const timestamp = calculateTimeFromYPosition(pointer.y, gridRect, targetDay);
-        if (timestamp) {
-          this.createDragPreview(timestamp, targetDay, pointer.y, gridRect);
-          this.dragPreviewTime.set(null);
-        }
-      } else {
-        this.dragPreviewStyle.set(null);
-      }
-
-      const prevEl = this.prevDragOverEl();
-      if (targetEl !== prevEl) {
-        if (prevEl) {
-          prevEl.classList.remove(DRAG_OVER_CLASS);
-        }
-        this.prevDragOverEl.set(targetEl);
-
-        if (
-          targetEl.classList.contains(SVEType.Task) ||
-          targetEl.classList.contains(SVEType.SplitTask) ||
-          targetEl.classList.contains(SVEType.SplitTaskPlannedForDay) ||
-          targetEl.classList.contains(SVEType.TaskPlannedForDay)
-        ) {
-          targetEl.classList.add(DRAG_OVER_CLASS);
-        } else if (targetEl.classList.contains('col')) {
-          targetEl.classList.add(DRAG_OVER_CLASS);
-        }
-      }
+      this._handleShiftDragMove(targetEl, pointer, gridRect, targetDay, isWithinGrid);
     } else {
-      if (isWithinGrid) {
-        const timestamp = calculateTimeFromYPosition(pointer.y, gridRect, targetDay);
-
-        // Store the calculated timestamp for use in dragReleased
-        this._lastCalculatedTimestamp = timestamp;
-
-        if (timestamp) {
-          this.createDragPreview(timestamp, targetDay, pointer.y, gridRect);
-        }
-      } else {
-        // Outside grid bounds - show unschedule indicator
-        this.dragPreviewTime.set('UNSCHEDULE');
-        this._lastCalculatedTimestamp = null;
-      }
+      this._handleTimeDragMove(pointer, gridRect, targetDay, isWithinGrid);
     }
   }
 
@@ -362,7 +282,7 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.daysToShow()[0];
   }
 
-  private createDragPreview(
+  private _createDragPreview(
     timestamp: number,
     targetDay: string,
     pointerY: number,
@@ -385,20 +305,7 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
     const col = dayIndex + 2; // +2 because column 1 is time column
 
     // Calculate correct row span based on event duration
-    const draggedEvent = this.currentDragEvent();
-    let rowSpan = 6; // default fallback
-
-    if (draggedEvent) {
-      // For tasks, use the full timeEstimate instead of timeLeftInHours (which is split)
-      const task = draggedEvent.data as any;
-      if (task?.timeEstimate) {
-        const timeInHours = task.timeEstimate / (1000 * 60 * 60);
-        rowSpan = Math.max(Math.round(timeInHours * FH), 1);
-      } else {
-        // Fallback to timeLeftInHours for non-task events
-        rowSpan = Math.max(Math.round(draggedEvent.timeLeftInHours * FH), 1);
-      }
-    }
+    const rowSpan = this._calculateRowSpan(this.currentDragEvent());
 
     // Create grid style for preview
     const gridStyle = [
@@ -477,26 +384,13 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
       this.isDraggingDelayed.set(false);
     }, 100);
 
-    let colEl = this._lastDropCol;
-    let scheduleEventTarget = this._lastDropScheduleEvent;
-    if ((!colEl || !scheduleEventTarget) && ev.event.target instanceof HTMLElement) {
-      const fallbackTarget = ev.event.target as HTMLElement;
-      if (!colEl) {
-        colEl = fallbackTarget.closest('.col') as HTMLElement | null;
-      }
-      if (!scheduleEventTarget) {
-        scheduleEventTarget = fallbackTarget.closest(
-          'schedule-event',
-        ) as HTMLElement | null;
-      }
-    }
-
+    const { columnTarget, scheduleEventTarget } = this._resolveDropTargets(ev);
     const task = ev.source.data.data as any;
 
-    if (colEl && task) {
-      const isMoveToEndOfDay = colEl.classList.contains('end-of-day');
+    if (columnTarget && task) {
+      const isMoveToEndOfDay = columnTarget.classList.contains('end-of-day');
       const targetDay =
-        colEl.getAttribute('data-day') ||
+        columnTarget.getAttribute('data-day') ||
         (dropPoint ? this.getDayUnderPointer(dropPoint.x, dropPoint.y) : null);
 
       if (targetDay) {
@@ -509,53 +403,12 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
             }),
           );
         } else {
-          let scheduleTime = savedTimestamp;
-          if (scheduleTime == null && dropPoint) {
-            const gridContainer = this.gridContainer().nativeElement;
-            if (gridContainer) {
-              const gridRect = gridContainer.getBoundingClientRect();
-              scheduleTime = calculateTimeFromYPosition(dropPoint.y, gridRect, targetDay);
-            }
-          }
+          const scheduleTime =
+            savedTimestamp ??
+            (dropPoint ? this._calculateTimeFromDrop(dropPoint, targetDay) : null);
 
           if (scheduleTime != null) {
-            const hasExistingSchedule = !!task.dueWithTime;
-            const hasReminder = !!task.reminderId;
-            const remindAt =
-              !hasExistingSchedule && !hasReminder
-                ? remindOptionToMilliseconds(scheduleTime, TaskReminderOptionId.AtStart)
-                : hasReminder
-                  ? scheduleTime
-                  : undefined;
-
-            const schedulePayload = {
-              task,
-              dueWithTime: scheduleTime,
-              ...(typeof remindAt === 'number' ? { remindAt } : {}),
-              isMoveToBacklog: false,
-            };
-
-            this._store.dispatch(
-              hasExistingSchedule
-                ? TaskSharedActions.reScheduleTaskWithTime(schedulePayload)
-                : TaskSharedActions.scheduleTaskWithTime(schedulePayload),
-            );
-
-            if (!task.timeEstimate || task.timeEstimate <= 0) {
-              const DEFAULT_BLOCK_DURATION = 15 * 60 * 1000;
-              const fallbackDuration = Math.max(
-                SCHEDULE_TASK_MIN_DURATION_IN_MS,
-                DEFAULT_BLOCK_DURATION,
-              );
-              this._store.dispatch(
-                TaskSharedActions.updateTask({
-                  task: {
-                    id: task.id,
-                    changes: { timeEstimate: fallbackDuration },
-                  },
-                }),
-              );
-            }
+            this._scheduleTask(task, scheduleTime);
           } else {
             this._store.dispatch(
               PlannerActions.planTaskForDay({
@@ -584,49 +437,240 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
           }),
         );
       }
-    } else if (task && dropPoint) {
-      const gridContainer = this.gridContainer().nativeElement;
-      if (gridContainer) {
-        const gridRect = gridContainer.getBoundingClientRect();
-        const isOutsideGrid =
-          dropPoint.y < gridRect.top ||
-          dropPoint.y > gridRect.bottom ||
-          dropPoint.x < gridRect.left ||
-          dropPoint.x > gridRect.right;
-
-        if (isOutsideGrid) {
-          this._store.dispatch(
-            TaskSharedActions.planTasksForToday({ taskIds: [task.id] }),
-          );
-        }
-      }
+    } else if (task && dropPoint && this._isOutsideGrid(dropPoint)) {
+      this._store.dispatch(TaskSharedActions.planTasksForToday({ taskIds: [task.id] }));
     }
 
-    this._lastDropCol = null;
-    this._lastDropScheduleEvent = null;
-    this._lastPointerPosition = null;
-
+    this._resetDragCaches();
     nativeEl.style.transform = 'translate3d(0, 0, 0)';
     ev.source.reset();
   }
 
-  private _onKeyDown = (event: KeyboardEvent): void => {
+  private _resolveDropTargets(ev: CdkDragRelease): {
+    columnTarget: HTMLElement | null;
+    scheduleEventTarget: HTMLElement | null;
+  } {
+    let columnTarget = this._lastDropCol;
+    let scheduleEventTarget = this._lastDropScheduleEvent;
+
+    if (
+      (!columnTarget || !scheduleEventTarget) &&
+      ev.event.target instanceof HTMLElement
+    ) {
+      const fallback = ev.event.target as HTMLElement;
+      if (!columnTarget) {
+        columnTarget = fallback.closest('.col') as HTMLElement | null;
+      }
+      if (!scheduleEventTarget) {
+        scheduleEventTarget = fallback.closest('schedule-event') as HTMLElement | null;
+      }
+    }
+
+    return { columnTarget, scheduleEventTarget };
+  }
+
+  private _calculateTimeFromDrop(
+    dropPoint: { x: number; y: number },
+    targetDay: string,
+  ): number | null {
+    const gridContainer = this.gridContainer().nativeElement;
+    if (!gridContainer) {
+      return null;
+    }
+    const gridRect = gridContainer.getBoundingClientRect();
+    return calculateTimeFromYPosition(dropPoint.y, gridRect, targetDay);
+  }
+
+  private _isOutsideGrid(dropPoint: { x: number; y: number }): boolean {
+    const gridContainer = this.gridContainer().nativeElement;
+    if (!gridContainer) {
+      return false;
+    }
+    const gridRect = gridContainer.getBoundingClientRect();
+    return (
+      dropPoint.y < gridRect.top ||
+      dropPoint.y > gridRect.bottom ||
+      dropPoint.x < gridRect.left ||
+      dropPoint.x > gridRect.right
+    );
+  }
+
+  private _scheduleTask(task: any, scheduleTime: number): void {
+    const hasExistingSchedule = !!task?.dueWithTime;
+    const hasReminder = !!task?.reminderId;
+    const remindAt =
+      !hasExistingSchedule && !hasReminder
+        ? remindOptionToMilliseconds(scheduleTime, TaskReminderOptionId.AtStart)
+        : hasReminder
+          ? scheduleTime
+          : undefined;
+
+    const payload = {
+      task,
+      dueWithTime: scheduleTime,
+      ...(typeof remindAt === 'number' ? { remindAt } : {}),
+      isMoveToBacklog: false,
+    };
+
+    this._store.dispatch(
+      hasExistingSchedule
+        ? TaskSharedActions.reScheduleTaskWithTime(payload)
+        : TaskSharedActions.scheduleTaskWithTime(payload),
+    );
+
+    if (!task.timeEstimate || task.timeEstimate <= 0) {
+      const fallbackDuration = Math.max(SCHEDULE_TASK_MIN_DURATION_IN_MS, 15 * 60 * 1000);
+      this._store.dispatch(
+        TaskSharedActions.updateTask({
+          task: {
+            id: task.id,
+            changes: { timeEstimate: fallbackDuration },
+          },
+        }),
+      );
+    }
+  }
+
+  private _resetDragCaches(): void {
+    this._lastDropCol = null;
+    this._lastDropScheduleEvent = null;
+    this._lastPointerPosition = null;
+  }
+
+  private _updatePointerCaches(pointer: { x: number; y: number }): HTMLElement | null {
+    this._lastPointerPosition = pointer;
+    const elementsAtPoint = document.elementsFromPoint(pointer.x, pointer.y);
+    const interactiveElements = elementsAtPoint.filter(
+      (el): el is HTMLElement =>
+        el instanceof HTMLElement &&
+        !el.classList.contains(DRAG_CLONE_CLASS) &&
+        !el.classList.contains('custom-drag-preview'),
+    );
+
+    if (interactiveElements.length) {
+      this._lastDropCol =
+        interactiveElements.find((el) => el.classList.contains('col')) || null;
+      this._lastDropScheduleEvent =
+        interactiveElements.find((el) => el.tagName.toLowerCase() === 'schedule-event') ||
+        null;
+      const targetEl = interactiveElements[0];
+      return targetEl.classList.contains(DRAG_CLONE_CLASS) ? null : targetEl;
+    }
+
+    const fallback = document.elementFromPoint(
+      pointer.x,
+      pointer.y,
+    ) as HTMLElement | null;
+    if (fallback && !fallback.classList.contains(DRAG_CLONE_CLASS)) {
+      return fallback;
+    }
+    return null;
+  }
+
+  private _handleShiftDragMove(
+    targetEl: HTMLElement,
+    pointer: { x: number; y: number },
+    gridRect: DOMRect,
+    targetDay: string,
+    isWithinGrid: boolean,
+  ): void {
+    this._lastCalculatedTimestamp = null;
+
+    if (isWithinGrid) {
+      const timestamp = calculateTimeFromYPosition(pointer.y, gridRect, targetDay);
+      if (timestamp) {
+        this._createDragPreview(timestamp, targetDay, pointer.y, gridRect);
+        this.dragPreviewTime.set(null);
+      }
+    } else {
+      this.dragPreviewStyle.set(null);
+    }
+
+    const prevEl = this.prevDragOverEl();
+    if (prevEl && prevEl !== targetEl) {
+      prevEl.classList.remove(DRAG_OVER_CLASS);
+    }
+    if (prevEl !== targetEl) {
+      this.prevDragOverEl.set(targetEl);
+      if (
+        targetEl.classList.contains(SVEType.Task) ||
+        targetEl.classList.contains(SVEType.SplitTask) ||
+        targetEl.classList.contains(SVEType.SplitTaskPlannedForDay) ||
+        targetEl.classList.contains(SVEType.TaskPlannedForDay)
+      ) {
+        targetEl.classList.add(DRAG_OVER_CLASS);
+      } else if (targetEl.classList.contains('col')) {
+        targetEl.classList.add(DRAG_OVER_CLASS);
+      }
+    }
+  }
+
+  private _handleTimeDragMove(
+    pointer: { x: number; y: number },
+    gridRect: DOMRect,
+    targetDay: string,
+    isWithinGrid: boolean,
+  ): void {
+    const prevEl = this.prevDragOverEl();
+    if (prevEl) {
+      prevEl.classList.remove(DRAG_OVER_CLASS);
+      this.prevDragOverEl.set(null);
+    }
+
+    if (isWithinGrid) {
+      const timestamp = calculateTimeFromYPosition(pointer.y, gridRect, targetDay);
+
+      this._lastCalculatedTimestamp = timestamp;
+
+      if (timestamp) {
+        this._createDragPreview(timestamp, targetDay, pointer.y, gridRect);
+      }
+    } else {
+      this.dragPreviewTime.set('UNSCHEDULE');
+      this._lastCalculatedTimestamp = null;
+    }
+  }
+
+  private _isWithinGrid(pointer: { x: number; y: number }, gridRect: DOMRect): boolean {
+    return (
+      pointer.y >= gridRect.top &&
+      pointer.y <= gridRect.bottom &&
+      pointer.x >= gridRect.left &&
+      pointer.x <= gridRect.right
+    );
+  }
+
+  private _calculateRowSpan(event: ScheduleEvent | null): number {
+    if (!event) {
+      return 6;
+    }
+    const task = event.data as any;
+    if (task?.timeEstimate) {
+      const timeInHours = task.timeEstimate / (60 * 60 * 1000);
+      return Math.max(Math.round(timeInHours * FH), 1);
+    }
+    return Math.max(Math.round(event.timeLeftInHours * FH), 1);
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onDocumentKeyDown(event: KeyboardEvent): void {
     if (event.key === 'Shift') {
       this.isShiftNoScheduleMode.set(true);
     }
     if (event.key === 'Control' || event.ctrlKey) {
       this.isCtrlPressed.set(true);
     }
-  };
+  }
 
-  private _onKeyUp = (event: KeyboardEvent): void => {
+  @HostListener('document:keyup', ['$event'])
+  onDocumentKeyUp(event: KeyboardEvent): void {
     if (event.key === 'Shift') {
       this.isShiftNoScheduleMode.set(false);
     }
     if (event.key === 'Control' || !event.ctrlKey) {
       this.isCtrlPressed.set(false);
     }
-  };
+  }
 
   private _extractDropPoint(
     event: MouseEvent | TouchEvent | PointerEvent,
