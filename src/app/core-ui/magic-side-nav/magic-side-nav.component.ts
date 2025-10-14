@@ -27,6 +27,7 @@ import { magicSideNavAnimations } from './magic-side-nav.animations';
 
 const COLLAPSED_WIDTH = 64;
 const MOBILE_NAV_WIDTH = 300;
+const FOCUS_DELAY_MS = 10;
 
 @Component({
   selector: 'magic-side-nav',
@@ -122,7 +123,7 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
       if (trigger > 0) {
         // Small delay to ensure DOM is ready
         window.setTimeout(() => {
-          this.focusFirstNavEntry();
+          this.toggleNavFocus();
         });
       }
     });
@@ -425,20 +426,22 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
       event.preventDefault();
       event.stopPropagation();
 
-      // Unfocus the navigation element
-      if (activeElement && typeof activeElement.blur === 'function') {
-        activeElement.blur();
-      }
-
-      // Focus the first task if available
-      setTimeout(() => {
-        this._taskService.focusFirstTaskIfVisible();
-      }, 10);
+      this._unfocusNavAndFocusTask();
     }
   }
 
-  // Public method to focus the first nav entry (for keyboard shortcuts)
-  focusFirstNavEntry(): void {
+  private _unfocusNavAndFocusTask(): void {
+    const activeElement = document.activeElement as HTMLElement;
+    if (activeElement?.blur) {
+      activeElement.blur();
+    }
+    setTimeout(() => {
+      this._taskService.focusFirstTaskIfVisible();
+    }, FOCUS_DELAY_MS);
+  }
+
+  // Public method to toggle nav focus (for keyboard shortcuts)
+  toggleNavFocus(): void {
     // Check if any nav element is currently focused
     const activeElement = document.activeElement as HTMLElement;
     const navSidebar = document.querySelector('.nav-sidenav');
@@ -450,14 +453,7 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
         // If mobile overlay is open and nav is focused, close it
         if (isNavFocused) {
           this.showMobileMenuOverlay.set(false);
-          // Blur the active element
-          if (activeElement && typeof activeElement.blur === 'function') {
-            activeElement.blur();
-          }
-          // Focus the first task if available
-          setTimeout(() => {
-            this._taskService.focusFirstTaskIfVisible();
-          }, 10);
+          this._unfocusNavAndFocusTask();
         } else {
           // Mobile overlay is open but nav not focused, focus it
           this._focusFirstNavElement();
@@ -475,13 +471,7 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     // Desktop behavior: toggle focus
     if (isNavFocused) {
       // Nav is already focused, unfocus it
-      if (activeElement && typeof activeElement.blur === 'function') {
-        activeElement.blur();
-      }
-      // Focus the first task if available
-      setTimeout(() => {
-        this._taskService.focusFirstTaskIfVisible();
-      }, 10);
+      this._unfocusNavAndFocusTask();
     } else {
       // Nav is not focused, focus it
       this._focusFirstNavElement();
