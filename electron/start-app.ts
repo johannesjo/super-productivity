@@ -9,6 +9,7 @@ import {
   powerMonitor,
   protocol,
 } from 'electron';
+import { existsSync } from 'fs';
 import { join } from 'path';
 import { initDebug } from './debug';
 import electronDl from 'electron-dl';
@@ -55,29 +56,98 @@ let mainWin: BrowserWindow;
 let idleTimeHandler: IdleTimeHandler;
 
 export const startApp = (): void => {
-  // Workaround for Electron 38+ snap package GPU issues (issue #5252)
-  // Electron 38.1+ has GPU/Mesa driver access issues in snap confinement
-  const isForceGpu = process.argv.some((val) => val.includes('--enable-gpu'));
+  const ensureSnapSoftwareRendering = (): boolean => {
+    const snapRoot = process.env.SNAP;
+    if (!snapRoot) {
+      return false;
+    }
+
+    const archTriplets: Record<string, string[]> = {
+      x64: ['x86_64-linux-gnu'],
+      arm64: ['aarch64-linux-gnu'],
+      arm: ['arm-linux-gnueabihf'],
+    };
+
+    const expandSnapVar = (value: string): string => value.replace(/\$SNAP/g, snapRoot);
+
+    const candidatePaths = new Set<string>();
+    const appendPath = (value?: string): void => {
+      if (!value) {
+        return;
+      }
+      const trimmed = value.trim();
+      if (!trimmed) {
+        return;
+      }
+      candidatePaths.add(expandSnapVar(trimmed));
+    };
+
+    const envPaths = process.env.LIBGL_DRIVERS_PATH?.split(':') ?? [];
+    envPaths.forEach(appendPath);
+
+    const triplets = archTriplets[process.arch] ?? [];
+    [...triplets, ''].forEach((triplet) => {
+      const suffix = triplet ? ['usr', 'lib', triplet, 'dri'] : ['usr', 'lib', 'dri'];
+      appendPath(join(snapRoot, ...suffix));
+      appendPath(join(snapRoot, 'gnome-platform', ...suffix));
+    });
+
+    const resolvedPaths = Array.from(candidatePaths).filter(Boolean);
+    const driverName = 'llvmpipe_dri.so';
+    const driverLocation = resolvedPaths.find((dir) => existsSync(join(dir, driverName)));
+
+    if (!driverLocation) {
+      log(
+        'Snap: llvmpipe software renderer not available – skipping software rendering override',
+      );
+      delete process.env.MESA_LOADER_DRIVER_OVERRIDE;
+      delete process.env.LIBGL_ALWAYS_SOFTWARE;
+      return false;
+    }
+
+    process.env.LIBGL_DRIVERS_PATH = resolvedPaths.join(':');
+    process.env.MESA_LOADER_DRIVER_OVERRIDE = 'llvmpipe';
+    process.env.LIBGL_ALWAYS_SOFTWARE = '1';
+    log('Snap: llvmpipe software renderer detected at', driverLocation);
+    return true;
+  };
+
+  const enableSwiftshader = (): void => {
+    log('Snap: Enabling Chromium SwiftShader software renderer');
+    process.env.ELECTRON_ENABLE_SWIFTSHADER = '1';
+    app.commandLine.appendSwitch('use-angle', 'swiftshader');
+    app.commandLine.appendSwitch('use-gl', 'angle');
+    app.commandLine.appendSwitch('enable-webgl');
+    app.commandLine.appendSwitch('ignore-gpu-blacklist');
+    app.commandLine.appendSwitch('ignore-gpu-blocklist');
+  };
+
   const isSnap = process.platform === 'linux' && !!process.env.SNAP;
-  if (isSnap && !isForceGpu) {
-    log(
-      'Snap: Disabling hardware acceleration to avoid Mesa driver access issues (issue #5252)',
-    );
-    log(
-      'Snap: Using software rendering (llvmpipe) with snap strict confinement security',
-    );
-    log('Snap: Launch with --enable-gpu to attempt hardware rendering (may crash)');
+  const isForceGpu = process.argv.some((val) => val.includes('--enable-gpu'));
+  if (isSnap) {
+    (app as any).on('gpu-process-crashed', (_event: any, killed: boolean) => {
+      if (!app.commandLine.hasSwitch('disable-gpu')) {
+        log('Snap: GPU process crashed, disabling GPU and relaunching', { killed });
+        app.commandLine.appendSwitch('disable-gpu');
+        app.relaunch();
+        app.exit(0);
+      }
+    });
 
-    // Disable hardware acceleration in Electron
-    app.disableHardwareAcceleration();
-
-    // Disable GPU completely to prevent GPU process spawn attempts
-    app.commandLine.appendSwitch('disable-gpu');
-
-    // Disable Chromium's internal sandbox - rely on snap's strict confinement instead
-    // This is the recommended approach per Snapcraft documentation for strict confinement
-    // Chromium's sandbox conflicts with snap confinement causing launch failures
-    app.commandLine.appendSwitch('no-sandbox');
+    if (isForceGpu) {
+      log('Snap: --enable-gpu detected, leaving hardware acceleration enabled');
+      delete process.env.MESA_LOADER_DRIVER_OVERRIDE;
+      delete process.env.LIBGL_ALWAYS_SOFTWARE;
+    } else {
+      enableSwiftshader();
+      const hasLlvmPipe = ensureSnapSoftwareRendering();
+      if (hasLlvmPipe) {
+        log('Snap: llvmpipe renderer staged and ready for Mesa software rendering');
+      } else {
+        log('Snap: llvmpipe renderer unavailable, relying on SwiftShader only');
+      }
+      app.commandLine.appendSwitch('no-sandbox');
+    }
   }
 
   // Initialize protocol handling

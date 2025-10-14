@@ -914,7 +914,7 @@
       "D_TIME_FOR_DAY": {
         "ADD_ENTRY_FOR": "Přidat nový záznam pro {{date}}",
         "DATE": "Datum pro nový záznam",
-        "HELP": "Příklady:<br> 30m => 30 minut<br> 2h => 2 hodiny<br> 2h 30m => 2 hodiny a 30 minut",
+        "HELP": "Příklady:<br> 30m => 30 minut<br> 2h => 2 hodiny<br> 2h 30m => 2 hodiny a 30 minut<br> 1.5h => 1 hodina a 30 minut<br> 03:15 => 3 hodiny a 15 minut",
         "TINE_SPENT": "Strávený čas",
         "TITLE": "Přidat pro den"
       },

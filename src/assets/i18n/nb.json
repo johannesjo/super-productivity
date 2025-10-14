@@ -1178,7 +1178,7 @@
       "D_TIME_FOR_DAY": {
         "ADD_ENTRY_FOR": "Legg til ny oppføring for {{date}}",
         "DATE": "Dato for nyoppføring",
-        "HELP": "Eksempler:<br> 30m =&gt; 30 minutter<br> 2t =&gt; 2 timer<br> 2t 30m =&gt; 2 timer og 30 minutter",
+        "HELP": "Eksempler:<br> 30m => 30 minutter<br> 2h => 2 timer<br> 2h 30m => 2 timer og 30 minutter<br> 1.5h => 1 time og 30 minutter<br> 03:15 => 3 timer og 15 minutter",
         "TINE_SPENT": "Tid brukt",
         "TITLE": "Legg til for dagen"
       },

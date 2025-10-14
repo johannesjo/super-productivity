@@ -224,6 +224,14 @@ export class IdleTimeHandler {
 
   private async getGnomeIdleTime(): Promise<number | null> {
     try {
+      const isSnap = !!process.env.SNAP;
+      if (isSnap) {
+        log.warn(
+          'Skipping GNOME idle detection for snap environment (DBus not guaranteed)',
+        );
+        return null;
+      }
+
       // Try gdbus first as it might work better in snap environments
       let command =
         'gdbus call --session --dest org.gnome.Mutter.IdleMonitor --object-path /org/gnome/Mutter/IdleMonitor/Core --method org.gnome.Mutter.IdleMonitor.GetIdletime';
@@ -232,12 +240,28 @@ export class IdleTimeHandler {
       try {
         await execAsync('which gdbus', { timeout: 1000 });
       } catch {
-        // Fall back to dbus-send if gdbus is not available
+        if (isSnap) {
+          log.warn(
+            'gdbus unavailable in snap environment, skipping dbus-send fallback to avoid libdbus mismatch',
+          );
+          return null;
+        }
+        // Fall back to dbus-send if gdbus is not available outside of snap
         command =
           'dbus-send --print-reply --dest=org.gnome.Mutter.IdleMonitor /org/gnome/Mutter/IdleMonitor/Core org.gnome.Mutter.IdleMonitor.GetIdletime';
       }
 
-      const { stdout } = await execAsync(command, { timeout: 5000 });
+      let stdout: string;
+      try {
+        const result = await execAsync(command, { timeout: 5000 });
+        stdout = result.stdout;
+      } catch (error) {
+        if (isSnap) {
+          log.warn('gdbus idle monitor failed in snap environment', error);
+          return null;
+        }
+        throw error;
+      }
 
       // Parse the response - gdbus format: (uint64 1234567890,)
       // dbus-send format: uint64 1234567890

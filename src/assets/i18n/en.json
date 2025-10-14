@@ -1330,7 +1330,7 @@
       "D_TIME_FOR_DAY": {
         "ADD_ENTRY_FOR": "Add new entry for {{date}}",
         "DATE": "Date for new entry",
-        "HELP": "Examples:<br> 30m => 30 minutes<br> 2h => 2 hours<br> 2h 30m => 2 hours and 30 minutes",
+        "HELP": "Examples:<br> 30m => 30 minutes<br> 2h => 2 hours<br> 2h 30m => 2 hours and 30 minutes<br> 1.5h => 1 hour and 30 minutes<br> 03:15 => 3 hours and 15 minutes",
         "TINE_SPENT": "Time Spent",
         "TITLE": "Add for Day"
       },
@@ -1691,6 +1691,7 @@
     "KEYBOARD": {
       "ADD_NEW_NOTE": "Add new note",
       "ADD_NEW_TASK": "Add New Task",
+      "ADD_NEW_PROJECT": "Add new project",
       "APP_WIDE_SHORTCUTS": "Global Shortcuts (application wide)",
       "COLLAPSE_SUB_TASKS": "Collapse Sub Tasks",
       "EXPAND_SUB_TASKS": "Expand Sub Tasks",
