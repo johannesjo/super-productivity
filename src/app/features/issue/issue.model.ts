@@ -15,6 +15,7 @@ import { GiteaCfg } from './providers/gitea/gitea.model';
 import { GiteaIssue } from './providers/gitea/gitea-issue.model';
 import { RedmineCfg } from './providers/redmine/redmine.model';
 import { RedmineIssue } from './providers/redmine/redmine-issue.model';
+import { TrelloCfg } from './providers/trello/trello.model';
 import { EntityState } from '@ngrx/entity';
 import {
   CalendarProviderCfg,
@@ -26,6 +27,8 @@ export interface BaseIssueProviderCfg {
   isEnabled: boolean;
 }
 
+// TODO: trello is currently non-functional stub
+// qq feat(providerkey): add non-functional stub trello provider
 export type IssueProviderKey =
   | 'JIRA'
   | 'GITHUB'
@@ -34,6 +37,7 @@ export type IssueProviderKey =
   | 'ICAL'
   | 'OPEN_PROJECT'
   | 'GITEA'
+  | 'TRELLO'
   | 'REDMINE';
 
 export type IssueIntegrationCfg =
@@ -60,6 +64,7 @@ export interface IssueIntegrationCfgs {
   CALDAV?: CaldavCfg;
   CALENDAR?: CalendarProviderCfg;
   OPEN_PROJECT?: OpenProjectCfg;
+  TRELLO?: TrelloCfg;
   GITEA?: GiteaCfg;
   REDMINE?: RedmineCfg;
 }
@@ -172,6 +177,11 @@ export interface IssueProviderCalendar extends IssueProviderBase, CalendarProvid
   issueProviderKey: 'ICAL';
 }
 
+// trello is currently a non-functional stub
+export interface IssueProviderTrello extends IssueProviderBase, TrelloCfg {
+  issueProviderKey: 'TRELLO';
+}
+
 export type IssueProvider =
   | IssueProviderJira
   | IssueProviderGithub
@@ -198,4 +208,6 @@ export type IssueProviderTypeMap<T extends IssueProviderKey> = T extends 'JIRA'
               ? IssueProviderCaldav
               : T extends 'ICAL'
                 ? IssueProviderCalendar
-                : never;
+                : T extends 'TRELLO'
+                  ? IssueProviderTrello
+                  : never;
