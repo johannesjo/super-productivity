@@ -190,7 +190,8 @@ export type IssueProvider =
   | IssueProviderCalendar
   | IssueProviderOpenProject
   | IssueProviderGitea
-  | IssueProviderRedmine;
+  | IssueProviderRedmine
+  | IssueProviderTrello;
 
 export type IssueProviderTypeMap<T extends IssueProviderKey> = T extends 'JIRA'
   ? IssueProviderJira
