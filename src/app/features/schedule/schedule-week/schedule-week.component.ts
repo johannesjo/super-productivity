@@ -137,6 +137,12 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
   currentDragEvent = signal<ScheduleEvent | null>(null);
   dragPreviewGridPosition = signal<{ col: number; row: number } | null>(null);
   dragPreviewStyle = signal<string | null>(null);
+  // Remember the last column and schedule-event under the pointer during a drag.
+  // Touch interactions hide the underlying element with the drag preview, so we
+  // cache these references while the pointer is moving and reuse them on release.
+  private _lastDropCol: HTMLElement | null = null;
+  private _lastDropScheduleEvent: HTMLElement | null = null;
+  private _lastPointerPosition: { x: number; y: number } | null = null;
 
   // Track if any event is being resized
   isAnyEventResizing = signal(false);
@@ -243,14 +249,35 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
     }
 
     ev.source.element.nativeElement.style.pointerEvents = 'none';
-    const targetEl = document.elementFromPoint(
-      ev.pointerPosition.x,
-      ev.pointerPosition.y,
-    ) as HTMLElement;
-    if (!targetEl) {
-      return;
+    const pointer = { x: ev.pointerPosition.x, y: ev.pointerPosition.y };
+    // Track the last known pointer position so we can fall back to it when the
+    // release event doesn't expose a reliable target (common for touch).
+    this._lastPointerPosition = pointer;
+
+    // Collect all relevant elements at the pointer. This allows us to bypass
+    // the drag preview element and grab the underlying `.col` grid cell or the
+    // `schedule-event` when hovering other tasks.
+    const elementsAtPoint = document.elementsFromPoint(pointer.x, pointer.y);
+    const interactiveElements = elementsAtPoint.filter(
+      (el): el is HTMLElement =>
+        el instanceof HTMLElement &&
+        !el.classList.contains(DRAG_CLONE_CLASS) &&
+        !el.classList.contains('custom-drag-preview'),
+    );
+
+    if (interactiveElements.length) {
+      // Cache the most recent drop targets to reuse during dragReleased.
+      this._lastDropCol =
+        interactiveElements.find((el) => el.classList.contains('col')) || null;
+      this._lastDropScheduleEvent =
+        interactiveElements.find((el) => el.tagName.toLowerCase() === 'schedule-event') ||
+        null;
     }
-    if (targetEl.classList.contains(DRAG_CLONE_CLASS)) {
+
+    const targetEl =
+      interactiveElements[0] ||
+      (document.elementFromPoint(pointer.x, pointer.y) as HTMLElement | null);
+    if (!targetEl || targetEl.classList.contains(DRAG_CLONE_CLASS)) {
       return;
     }
 
@@ -384,6 +411,9 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
 
     // Set the current dragging event for custom preview
     this.currentDragEvent.set(ev.source.data);
+    this._lastDropCol = null;
+    this._lastDropScheduleEvent = null;
+    this._lastPointerPosition = null;
 
     // Show shift key info on non-touch devices
     if (!IS_TOUCH_PRIMARY) {
@@ -431,11 +461,15 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
   dragReleased(ev: CdkDragRelease): void {
     const prevEl = this.prevDragOverEl();
 
-    const potentialTarget = prevEl ?? (ev.event.target as EventTarget | null);
     if (prevEl) {
       prevEl.classList.remove(DRAG_OVER_CLASS);
       this.prevDragOverEl.set(null);
     }
+
+    const memoizedDropPoint = this._lastPointerPosition;
+    // Primary drop point comes from the last move event. If we never moved (rare)
+    // fall back to the coordinates provided by the release event.
+    const dropPoint = memoizedDropPoint ?? this._extractDropPoint(ev.event);
     const cloneEl = this.dragCloneEl();
     if (cloneEl) {
       cloneEl.remove();
@@ -462,17 +496,25 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
       this.isDraggingDelayed.set(false);
     }, 100);
 
-    if (!(potentialTarget instanceof HTMLElement)) {
-      ev.source.element.nativeElement.style.transform = 'translate3d(0, 0, 0)';
-      ev.source.reset();
-      return;
+    // Prefer the targets cached during dragMoved. They already ignore the drag
+    // preview and any overlays.
+    let colEl = this._lastDropCol;
+    let scheduleEventTarget = this._lastDropScheduleEvent;
+
+    if ((!colEl || !scheduleEventTarget) && ev.event.target instanceof HTMLElement) {
+      // As a fallback use the DOM hierarchy starting from the event target.
+      const fallbackTarget = ev.event.target as HTMLElement;
+      colEl = colEl ?? (fallbackTarget.closest('.col') as HTMLElement | null);
+      scheduleEventTarget =
+        scheduleEventTarget ??
+        (fallbackTarget.closest('schedule-event') as HTMLElement | null);
     }
 
-    const target = potentialTarget;
-
-    if (target.tagName.toLowerCase() === 'div' && target.classList.contains('col')) {
-      const isMoveToEndOfDay = target.classList.contains('end-of-day');
-      const targetDay = (target as any).day || target.getAttribute('data-day');
+    if (colEl) {
+      const isMoveToEndOfDay = colEl.classList.contains('end-of-day');
+      const targetDay =
+        colEl.getAttribute('data-day') ||
+        (dropPoint ? this.getDayUnderPointer(dropPoint.x, dropPoint.y) : null);
       if (targetDay) {
         if (this.isShiftNoScheduleMode()) {
           // Shift pressed: Plan for day (old behavior)
@@ -485,22 +527,28 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
           );
         } else {
           // No shift: Schedule at specific time (new default behavior)
-          // Use the saved timestamp from the drag operation
-          const newTime = savedTimestamp;
-          if (newTime) {
+          let scheduleTime = savedTimestamp;
+          if (scheduleTime == null && dropPoint) {
+            const gridContainer = this.gridContainer().nativeElement;
+            if (gridContainer) {
+              const gridRect = gridContainer.getBoundingClientRect();
+              scheduleTime = calculateTimeFromYPosition(dropPoint.y, gridRect, targetDay);
+            }
+          }
+          if (scheduleTime != null) {
             const droppedTask = ev.source.data.data;
             const hasExistingSchedule = !!droppedTask.dueWithTime;
             const hasReminder = !!droppedTask.reminderId;
             const remindAt =
               !hasExistingSchedule && !hasReminder
-                ? remindOptionToMilliseconds(newTime, TaskReminderOptionId.AtStart)
+                ? remindOptionToMilliseconds(scheduleTime, TaskReminderOptionId.AtStart)
                 : hasReminder
-                  ? newTime
+                  ? scheduleTime
                   : undefined;
 
             const schedulePayload = {
               task: droppedTask,
-              dueWithTime: newTime,
+              dueWithTime: scheduleTime,
               ...(typeof remindAt === 'number' ? { remindAt } : {}),
               isMoveToBacklog: false,
             };
@@ -538,9 +586,9 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
           }
         }
       }
-    } else if (target.tagName.toLowerCase() === 'schedule-event') {
+    } else if (scheduleEventTarget) {
       const sourceTaskId = ev.source.element.nativeElement.id.replace(T_ID_PREFIX, '');
-      const targetTaskId = target.id.replace(T_ID_PREFIX, '');
+      const targetTaskId = scheduleEventTarget.id.replace(T_ID_PREFIX, '');
 
       if (
         sourceTaskId &&
@@ -560,18 +608,8 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
       const task = ev.source.data.data;
       const gridContainer = this.gridContainer().nativeElement;
 
-      if (task && gridContainer) {
+      if (task && gridContainer && dropPoint) {
         const gridRect = gridContainer.getBoundingClientRect();
-        const dropPoint = {
-          x:
-            'clientX' in ev.event
-              ? ev.event.clientX
-              : (ev.event as TouchEvent).changedTouches?.[0]?.clientX || 0,
-          y:
-            'clientY' in ev.event
-              ? ev.event.clientY
-              : (ev.event as TouchEvent).changedTouches?.[0]?.clientY || 0,
-        };
 
         // Check if dropped outside the grid area
         const isOutsideGrid =
@@ -588,6 +626,11 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
         }
       }
     }
+
+    // Reset cached state to avoid leaking references between drags.
+    this._lastDropCol = null;
+    this._lastDropScheduleEvent = null;
+    this._lastPointerPosition = null;
 
     ev.source.element.nativeElement.style.transform = 'translate3d(0, 0, 0)';
     ev.source.reset();
@@ -610,6 +653,25 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
       this.isCtrlPressed.set(false);
     }
   };
+
+  private _extractDropPoint(
+    event: MouseEvent | TouchEvent | PointerEvent,
+  ): { x: number; y: number } | null {
+    // Mouse and pointer events expose client coordinates directly.
+    if ('clientX' in event && typeof event.clientX === 'number') {
+      return { x: event.clientX, y: event.clientY };
+    }
+    // Touchend exposes coordinates via changedTouches; touchmove via touches.
+    if ('changedTouches' in event && event.changedTouches?.length) {
+      const touch = event.changedTouches[0];
+      return { x: touch.clientX, y: touch.clientY };
+    }
+    if ('touches' in event && event.touches?.length) {
+      const touch = event.touches[0];
+      return { x: touch.clientX, y: touch.clientY };
+    }
+    return null;
+  }
 
   private setupResizeObserver(): void {
     // Observe for changes to is-resizing class on any schedule-event
