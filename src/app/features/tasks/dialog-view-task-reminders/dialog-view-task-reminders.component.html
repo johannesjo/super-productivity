@@ -148,21 +148,18 @@
           ) | translate
         }}
       </button>
-      <button
-        (click)="markAllAsDone()"
-        [disabled]="isDisableControls"
-        mat-button
-        color="primary"
-        type="button"
-      >
-        <mat-icon>check</mat-icon>
-        {{
-          (isMultiple
-            ? T.F.TASK.D_REMINDER_VIEW.COMPLETE_ALL
-            : T.F.TASK.D_REMINDER_VIEW.COMPLETE
-          ) | translate
-        }}
-      </button>
+      @if (isMultiple) {
+        <button
+          (click)="markAllAsDone()"
+          [disabled]="isDisableControls"
+          mat-button
+          color="primary"
+          type="button"
+        >
+          <mat-icon>check</mat-icon>
+          {{ T.F.TASK.D_REMINDER_VIEW.COMPLETE_ALL | translate }}
+        </button>
+      }
       @if (!isMultiple && (isSingleOnToday$ | async)) {
         <button
           (click)="markSingleAsDone()"
