@@ -169,6 +169,20 @@ export const BOARDS_FORM: LimitedFormlyFieldConfig<BoardCfg>[] = [
             defaultValue: false,
           },
         },
+        {
+          key: 'sortByDue',
+          type: 'radio',
+          props: {
+            label: 'Sort by due date',
+            required: true,
+            defaultValue: 'off',
+            options: [
+              { value: 'off', label: 'Off' },
+              { value: 'asc', label: 'Ascending (soonest first)' },
+              { value: 'desc', label: 'Descending (furthest first)' },
+            ],
+          },
+        },
       ],
     },
   },

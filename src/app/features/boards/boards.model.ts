@@ -24,6 +24,8 @@ export interface BoardSrcCfg {
   taskDoneState: BoardPanelCfgTaskDoneState;
   scheduledState: BoardPanelCfgScheduledState;
   isParentTasksOnly: boolean;
+  // 'off' - no auto-sort, 'asc' - earliest due first, 'desc' - latest/furthest due first
+  sortByDue?: 'off' | 'asc' | 'desc';
   // optional since newly added
   backlogState?: BoardPanelCfgTaskTypeFilter;
 }

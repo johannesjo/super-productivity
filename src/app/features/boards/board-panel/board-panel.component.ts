@@ -176,7 +176,47 @@ export class BoardPanelComponent {
         nonOrderedTasks.push(task);
       }
     });
-    return [...orderedTasks, ...nonOrderedTasks].filter((t) => !!t);
+    const merged = [...orderedTasks, ...nonOrderedTasks].filter((t) => !!t);
+
+    // mode: 'off' | 'asc' (earliest first) | 'desc' (latest first)
+    const mode = panelCfg.sortByDue || 'off';
+    if (mode !== 'off') {
+      const getDueTs = (task: TaskCopy): number | null => {
+        // prefer dueWithTime (timestamp), then dueDay (ISO-like date string)
+        if (task.dueWithTime) {
+          return new Date(task.dueWithTime).getTime();
+        }
+        if (task.dueDay) {
+          // interpret dueDay as local date (YYYY-MM-DD) -> parse
+          const d = new Date(task.dueDay);
+          if (!Number.isNaN(d.getTime())) {
+            return d.getTime();
+          }
+        }
+        return null;
+      };
+
+      merged.sort((a, b) => {
+        const aTs = getDueTs(a);
+        const bTs = getDueTs(b);
+        // both undated -> keep relative order
+        if (aTs === null && bTs === null) return 0;
+
+        // - asc: undated should come after dated items
+        // - desc: undated should come before dated items
+        if (aTs === null && bTs !== null) return mode === 'asc' ? 1 : -1;
+        if (aTs !== null && bTs === null) return mode === 'asc' ? -1 : 1;
+
+        // both dated -> compare timestamps
+        if (aTs !== null && bTs !== null) {
+          return mode === 'asc' ? aTs - bTs : bTs - aTs;
+        }
+
+        return 0;
+      });
+    }
+
+    return merged;
   });
 
   async drop(ev: CdkDragDrop<BoardPanelCfg, string, TaskCopy>): Promise<void> {
