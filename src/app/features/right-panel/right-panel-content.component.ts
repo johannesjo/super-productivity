@@ -21,6 +21,7 @@ import { TaskDetailPanelComponent } from '../tasks/task-detail-panel/task-detail
 import { TaskViewCustomizerPanelComponent } from '../task-view-customizer/task-view-customizer-panel/task-view-customizer-panel.component';
 import { PluginService } from '../../plugins/plugin.service';
 import { PluginPanelContainerComponent } from '../../plugins/ui/plugin-panel-container/plugin-panel-container.component';
+import { ScheduleDayPanelComponent } from '../schedule/schedule-day-panel/schedule-day-panel.component';
 import { Store } from '@ngrx/store';
 import {
   INITIAL_LAYOUT_STATE,
@@ -57,6 +58,7 @@ export type RightPanelContentPanelType = PanelContentType;
     TaskDetailPanelComponent,
     TaskViewCustomizerPanelComponent,
     PluginPanelContainerComponent,
+    ScheduleDayPanelComponent,
   ],
 })
 export class RightPanelContentComponent implements OnDestroy {
@@ -175,6 +177,7 @@ export class RightPanelContentComponent implements OnDestroy {
       isShowIssuePanel: isShowAddTaskPanel,
       isShowTaskViewCustomizerPanel,
       isShowPluginPanel,
+      isShowScheduleDayPanel,
     } = layoutState;
 
     const isWorkView = this._isWorkViewUrl(currentRoute);
@@ -192,7 +195,8 @@ export class RightPanelContentComponent implements OnDestroy {
         isShowNotes ||
         isShowAddTaskPanel ||
         isShowTaskViewCustomizerPanel ||
-        isShowPluginPanel
+        isShowPluginPanel ||
+        isShowScheduleDayPanel
       ) && targetPanel !== TaskDetailTargetPanel.DONT_OPEN_PANEL
     );
   });
@@ -303,6 +307,7 @@ export class RightPanelContentComponent implements OnDestroy {
     this.layoutService.hideNotes();
     this.layoutService.hideAddTaskPanel();
     this.layoutService.hideTaskViewCustomizerPanel();
+    this.layoutService.hideScheduleDayPanel();
     this.store.dispatch(hidePluginPanel());
     this.onClose();
   }

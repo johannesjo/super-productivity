@@ -8,6 +8,8 @@ import {
   toggleIssuePanel,
   toggleShowNotes,
   toggleTaskViewCustomizerPanel,
+  toggleScheduleDayPanel,
+  hideScheduleDayPanel,
 } from './store/layout.actions';
 import { Observable } from 'rxjs';
 import { select, Store } from '@ngrx/store';
@@ -17,6 +19,7 @@ import {
   selectIsShowIssuePanel,
   selectIsShowNotes,
   selectIsShowTaskViewCustomizerPanel,
+  selectIsShowScheduleDayPanel,
 } from './store/layout.reducer';
 import { map } from 'rxjs/operators';
 import { BreakpointObserver } from '@angular/cdk/layout';
@@ -85,6 +88,11 @@ export class LayoutService {
 
   readonly isShowIssuePanel = toSignal(this.isShowIssuePanel$, { initialValue: false });
 
+  readonly isShowScheduleDayPanel = toSignal(
+    this._store$.pipe(select(selectIsShowScheduleDayPanel)),
+    { initialValue: false },
+  );
+
   showAddTaskBar(): void {
     // Store currently focused element if it's a task
     const activeElement = document.activeElement as HTMLElement;
@@ -137,5 +145,14 @@ export class LayoutService {
   focusSideNav(): void {
     // Trigger the focus signal - components listening to this signal will handle the focus
     this._focusSideNavTrigger.update((value) => value + 1);
+  }
+
+  // Schedule Day Panel controls
+  toggleScheduleDayPanel(): void {
+    this._store$.dispatch(toggleScheduleDayPanel());
+  }
+
+  hideScheduleDayPanel(): void {
+    this._store$.dispatch(hideScheduleDayPanel());
   }
 }
