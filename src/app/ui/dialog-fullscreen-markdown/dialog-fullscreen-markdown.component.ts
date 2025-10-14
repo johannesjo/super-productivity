@@ -101,8 +101,6 @@ export class DialogFullscreenMarkdownComponent implements OnDestroy {
       $event?.target &&
       ($event.target as HTMLElement).classList.contains('checkbox')
     ) {
-      console.log('click');
-      console.log($event);
       this._handleCheckboxClick(
         ($event.target as HTMLElement).parentElement as HTMLElement,
       );
