@@ -1,5 +1,0 @@
-
-### Features
-
-* improve task context menu on mobile
-* **pfapi:** improve validation handling for getAllSyncModelData
