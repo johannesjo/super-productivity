@@ -318,6 +318,10 @@ body {
   --attachment-control-border: var(--c-light-50);
   --attachment-control-hover-bg: var(--c-light-90);
 
+  // Schedule Events
+  --schedule-event-bg: var(--card-bg);
+  --schedule-event-bg-in-side-panel: var(--schedule-event-bg);
+
   // Hover controls
   --hover-controls-border: 1px solid;
   --hover-controls-border-opacity: 0.5;
@@ -449,6 +453,10 @@ body.isDarkTheme {
   --attachment-control-bg: var(--c-dark-40);
   --attachment-control-border: var(--c-dark-50);
   --attachment-control-hover-bg: var(--c-dark-90);
+
+  // Schedule Events
+  --schedule-event-bg: var(--card-bg);
+  --schedule-event-bg-in-side-panel: var(--dark12);
 
   // Hover controls
   --hover-controls-border: none;

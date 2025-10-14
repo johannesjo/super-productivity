@@ -18,6 +18,20 @@ describe('DurationFromStringPipe', () => {
       expect(durationFromString('30m')!.asMilliseconds()).toBe(30 * 60 * 1000);
       expect(durationFromString('45s')!.asMilliseconds()).toBe(45 * 1000);
       expect(durationFromString('1.5h')!.asMilliseconds()).toBe(1.5 * 60 * 60 * 1000);
+      expect(durationFromString('1,5h')!.asMilliseconds()).toBe(1.5 * 60 * 60 * 1000);
+      expect(durationFromString('01:15')!.asMilliseconds()).toBe((60 + 15) * 60 * 1000);
+      expect(durationFromString('2:30')!.asMilliseconds()).toBe(
+        // eslint-disable-next-line no-mixed-operators
+        (2 * 60 + 30) * 60 * 1000,
+      );
+    });
+
+    it('should make smart guesses, if time is given without h, m, s specifier', () => {
+      expect(durationFromString('8')!.asMilliseconds()).toBe(8 * 60 * 60 * 1000);
+      expect(durationFromString('9')!.asMilliseconds()).toBe(9 * 60 * 1000);
+      expect(durationFromString('90')!.asMilliseconds()).toBe(90 * 60 * 1000);
+      expect(durationFromString('1.5')!.asMilliseconds()).toBe(1.5 * 60 * 60 * 1000);
+      expect(durationFromString('1,5')!.asMilliseconds()).toBe(1.5 * 60 * 60 * 1000);
     });
 
     it('should handle complex time strings', () => {

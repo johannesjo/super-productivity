@@ -5,8 +5,12 @@ export const stringToMs = (strValue: string, args?: unknown): number => {
     return 0;
   }
 
+  // Replace commas by dots to allow using them as float separator.
+  strValue = strValue.replace(',', '.');
+
   // First try to parse simple formats like "1.5h", "30m", etc.
-  const simpleFormatMatch = strValue.trim().match(/^([0-9]*\.?[0-9]+)([smhd])$/i);
+  // also accept (fractional) numbers without specifier
+  const simpleFormatMatch = strValue.trim().match(/^(\d*\.?\d+)([smhd]?)$/i);
   if (simpleFormatMatch) {
     const amount = parseFloat(simpleFormatMatch[1]);
     const unit = simpleFormatMatch[2].toLowerCase();
@@ -20,9 +24,27 @@ export const stringToMs = (strValue: string, args?: unknown): number => {
         return amount * 1000 * 60 * 60;
       case 'd':
         return amount * 1000 * 60 * 60 * 24;
+      case '':
+        if (simpleFormatMatch[1].includes('.') || amount <= 8) {
+          // treat all fractional values and integers <= 8 as hours
+          return amount * 1000 * 60 * 60;
+        } else {
+          // treat integers > 8 as minutes
+          return amount * 1000 * 60;
+        }
     }
   }
 
+  // Parse full time strings like "hh:mm" or "h:mm"
+  const fullStringMatch = strValue.trim().match(/^(\d{1,2}):(\d{2})$/);
+  if (fullStringMatch) {
+    const hours = parseFloat(fullStringMatch[1]);
+    const minutes = parseFloat(fullStringMatch[2]);
+    // eslint-disable-next-line no-mixed-operators
+    return hours * 60 * 60 * 1000 + minutes * 60 * 1000;
+  }
+
+  // complex patterns
   let d: number | undefined;
   let h: number | undefined;
   let m: number | undefined;
@@ -31,8 +53,6 @@ export const stringToMs = (strValue: string, args?: unknown): number => {
 
   // Add spaces after letters to ease further splitting.
   strValue = strValue.replace(/([a-zA-Z]+)\s*/g, '$1 ');
-  // Replace commas by dots to allow using them as float separator.
-  strValue = strValue.replace(',', '.');
 
   const arrValue = strValue.trim().split(' ');
 

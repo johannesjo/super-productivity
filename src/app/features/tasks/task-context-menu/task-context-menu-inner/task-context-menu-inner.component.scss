@@ -62,6 +62,8 @@
   }
 
   mat-icon {
+    pointer-events: none;
+
     @include mq(xs, max) {
       margin-right: 12px;
     }

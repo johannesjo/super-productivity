@@ -38,9 +38,9 @@ import { ScheduleService } from '../schedule.service';
 
 @Component({
   selector: 'schedule',
-  imports: [LocaleDatePipe, ScheduleWeekComponent, ScheduleMonthComponent, MatIcon],
+  imports: [ScheduleWeekComponent, ScheduleMonthComponent],
   templateUrl: './schedule.component.html',
-  styleUrl: './schedule.component.scss',
+  styleUrls: ['./schedule.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
 

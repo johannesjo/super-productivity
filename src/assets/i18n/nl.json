@@ -1133,6 +1133,8 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Voeg alles toe aan vandaag",
         "ADD_TO_TODAY": "Voeg toe aan vandaag",
+        "COMPLETE": "Voltooien",
+        "COMPLETE_ALL": "Alles voltooien",
         "DONE": "Gedaan",
         "DUE_TASK": "Gepaste taak",
         "DUE_TASKS": "Geplande taken",
@@ -1178,7 +1180,7 @@
       "D_TIME_FOR_DAY": {
         "ADD_ENTRY_FOR": "Nieuw item toevoegen voor {{date}}",
         "DATE": "Datum voor nieuwe invoer",
-        "HELP": "Voorbeelden:<br> 30 m => 30 minuten<br> 2h => 2 uren<br> 2h 30m => 2 uur en 30 minuten",
+        "HELP": "Voorbeelden:<br> 30m => 30 minuten<br> 2h => 2 uur<br> 2h 30m => 2 uur en 30 minuten<br> 1.5h => 1 uur en 30 minuten<br> 03:15 => 3 uur en 15 minuten",
         "TINE_SPENT": "Tijd besteed",
         "TITLE": "Toevoegen voor dag"
       },

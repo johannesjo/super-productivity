@@ -73,32 +73,12 @@ jobs:
       - name: Install Snapcraft
         uses: samuelmeuli/action-snapcraft@v3
 
-      - name: Pre-install required snaps
-        run: |
-          set -e
-          sudo snap install core18 --channel=latest/stable || true
-          sudo snap install core22 --channel=latest/stable || true
-          sudo snap install gnome-3-28-1804 --channel=latest/stable || true
-          sudo snap refresh
-
       - name: Build/Release Electron app
-        env:
-          GH_TOKEN: ${{ secrets.github_token }}
-          IS_RELEASE: ${{ startsWith(github.ref, 'refs/tags/v') }}
-          SNAPCRAFT_BUILD_ENVIRONMENT: host
-        run: |
-          set -euo pipefail
-          if [ "${IS_RELEASE}" = "true" ]; then
-            export PUBLISH_ARG="--publish always"
-          else
-            export PUBLISH_ARG="--publish never"
-          fi
-          sudo env \
-            "PATH=$PATH" \
-            "GH_TOKEN=$GH_TOKEN" \
-            "IS_RELEASE=$IS_RELEASE" \
-            "SNAPCRAFT_BUILD_ENVIRONMENT=$SNAPCRAFT_BUILD_ENVIRONMENT" \
-            bash -c "set -euo pipefail; npm run empty; npx --no-install electron-builder --linux $PUBLISH_ARG"
+        uses: johannesjo/action-electron-builder@v1
+        with:
+          build_script_name: empty
+          github_token: ${{ secrets.github_token }}
+          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
 
       # rename to possibly fix release issue
       - run: find ./.tmp/app-builds -type f -name '*.snap' -exec sh -c 'x="{}"; mv "$x" ".tmp/app-builds/sp.snap"' \;

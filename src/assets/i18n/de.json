@@ -1282,6 +1282,8 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Fügen Sie alles zu heute hinzu",
         "ADD_TO_TODAY": "Zu heute hinzufügen",
+        "COMPLETE": "Abschließen",
+        "COMPLETE_ALL": "Alle abschließen",
         "DONE": "Erledigt",
         "DUE_TASK": "Fällige Aufgabe",
         "DUE_TASKS": "Fällige Aufgaben",
@@ -1329,7 +1331,7 @@
       "D_TIME_FOR_DAY": {
         "ADD_ENTRY_FOR": "Neuen Eintrag für {{date}} hinzufügen",
         "DATE": "Datum für neuen Eintrag",
-        "HELP": "Beispiele:<br> 30 m => 30 Minuten<br> 2 h => 2 Stunden<br> 2 h 30 m => 2 Stunden und 30 Minuten",
+        "HELP": "Beispiele:<br> 30 m => 30 Minuten<br> 2 h => 2 Stunden<br> 2 h 30 m => 2 Stunden und 30 Minuten<br> 1.5h => 1 Stunde und 30 Minuten<br> 03:15 => 3 Stunden und 15 Minuten",
         "TINE_SPENT": "Zeitaufwand",
         "TITLE": "Für Tag hinzufügen"
       },

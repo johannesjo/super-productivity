@@ -1,3 +1,26 @@
+## [15.2.16](https://github.com/johannesjo/super-productivity/compare/v15.2.15...v15.2.16) (2025-10-13)
+
+## [15.2.15](https://github.com/johannesjo/super-productivity/compare/v15.2.14...v15.2.15) (2025-10-13)
+
+## [15.2.14](https://github.com/johannesjo/super-productivity/compare/v15.2.13...v15.2.14) (2025-10-13)
+
+## [15.2.13](https://github.com/johannesjo/super-productivity/compare/v15.2.12...v15.2.13) (2025-10-13)
+
+### Bug Fixes
+
+- unify task context menu behavior ([83a69d9](https://github.com/johannesjo/super-productivity/commit/83a69d974963919c7972c5361c10d8ad8e839c0b))
+
+## [15.2.12](https://github.com/johannesjo/super-productivity/compare/v15.2.11...v15.2.12) (2025-10-13)
+
+### Bug Fixes
+
+- **sideNav:** show project and tag buttons always for touch devices [#5258](https://github.com/johannesjo/super-productivity/issues/5258) ([7124549](https://github.com/johannesjo/super-productivity/commit/712454944f0178f4f220baa79742c503c1230691))
+- update check-key-combo logic to correctly evaluate all pressed modifiers ([c2cb704](https://github.com/johannesjo/super-productivity/commit/c2cb704006be7fec3710ffc6c237ed456a78530a))
+
+## [15.2.11](https://github.com/johannesjo/super-productivity/compare/v15.2.10...v15.2.11) (2025-10-12)
+
+## [15.2.10](https://github.com/johannesjo/super-productivity/compare/v15.2.9...v15.2.10) (2025-10-12)
+
 ## [15.2.9](https://github.com/johannesjo/super-productivity/compare/v15.2.8...v15.2.9) (2025-10-12)
 
 ## [15.2.8](https://github.com/johannesjo/super-productivity/compare/v15.2.7...v15.2.8) (2025-10-12)
