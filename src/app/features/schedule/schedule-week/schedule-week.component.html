@@ -168,15 +168,15 @@
     </create-task-placeholder>
   }
 
-  @if (
-    isDragging() && !isShiftNoScheduleMode() && currentDragEvent() && dragPreviewStyle()
-  ) {
+  @if (isDragging() && currentDragEvent() && dragPreviewStyle()) {
     <schedule-event
       class="custom-drag-preview"
       [event]="currentDragEvent()!"
       [style]="dragPreviewStyle()!"
     >
-      <div class="drag-time-badge">{{ dragPreviewTime() }}</div>
+      @if (!isShiftNoScheduleMode() && dragPreviewTime()) {
+        <div class="drag-time-badge">{{ dragPreviewTime() }}</div>
+      }
     </schedule-event>
   }
 </div>

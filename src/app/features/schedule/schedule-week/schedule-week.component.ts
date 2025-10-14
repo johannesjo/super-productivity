@@ -281,51 +281,34 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Update drag preview position for time indicator (always follow cursor)
-    this.dragPreviewPosition.set({ x: ev.pointerPosition.x, y: ev.pointerPosition.y });
+    // Update drag preview position for visual indicator (always follow pointer)
+    this.dragPreviewPosition.set({ x: pointer.x, y: pointer.y });
 
-    // Calculate and show time preview when not in shift mode
-    if (!this.isShiftNoScheduleMode()) {
-      const gridContainer = this.gridContainer().nativeElement;
-      if (gridContainer) {
-        const gridRect = gridContainer.getBoundingClientRect();
+    const gridContainer = this.gridContainer().nativeElement;
+    if (!gridContainer) {
+      return;
+    }
+    const gridRect = gridContainer.getBoundingClientRect();
+    const isWithinGrid =
+      pointer.y >= gridRect.top &&
+      pointer.y <= gridRect.bottom &&
+      pointer.x >= gridRect.left &&
+      pointer.x <= gridRect.right;
+    const targetDay = this.getDayUnderPointer(pointer.x, pointer.y);
 
-        // Check if we're still within the grid bounds
-        const isWithinGrid =
-          ev.pointerPosition.y >= gridRect.top &&
-          ev.pointerPosition.y <= gridRect.bottom &&
-          ev.pointerPosition.x >= gridRect.left &&
-          ev.pointerPosition.x <= gridRect.right;
-
-        if (isWithinGrid) {
-          // Determine the day under the pointer more reliably
-          const targetDay = this.getDayUnderPointer(
-            ev.pointerPosition.x,
-            ev.pointerPosition.y,
-          );
-          // Use the pointer Y position for time calculation
-          const timestamp = calculateTimeFromYPosition(
-            ev.pointerPosition.y,
-            gridRect,
-            targetDay,
-          );
-
-          // Store the calculated timestamp for use in dragReleased
-          this.lastCalculatedTimestamp = timestamp;
-
-          if (timestamp) {
-            this.createDragPreview(timestamp, targetDay, ev.pointerPosition.y, gridRect);
-          }
-        } else {
-          // Outside grid bounds - show unschedule indicator
-          this.dragPreviewTime.set('UNSCHEDULE');
-          this.lastCalculatedTimestamp = null;
-        }
-      }
-    } else {
-      // Clear time preview when in shift mode
-      this.dragPreviewTime.set(null);
+    if (this.isShiftNoScheduleMode()) {
+      // Day-plan mode: keep preview visible but remove the time badge.
       this.lastCalculatedTimestamp = null;
+
+      if (isWithinGrid) {
+        const timestamp = calculateTimeFromYPosition(pointer.y, gridRect, targetDay);
+        if (timestamp) {
+          this.createDragPreview(timestamp, targetDay, pointer.y, gridRect);
+          this.dragPreviewTime.set(null);
+        }
+      } else {
+        this.dragPreviewStyle.set(null);
+      }
 
       const prevEl = this.prevDragOverEl();
       if (targetEl !== prevEl) {
@@ -344,6 +327,21 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
         } else if (targetEl.classList.contains('col')) {
           targetEl.classList.add(DRAG_OVER_CLASS);
         }
+      }
+    } else {
+      if (isWithinGrid) {
+        const timestamp = calculateTimeFromYPosition(pointer.y, gridRect, targetDay);
+
+        // Store the calculated timestamp for use in dragReleased
+        this.lastCalculatedTimestamp = timestamp;
+
+        if (timestamp) {
+          this.createDragPreview(timestamp, targetDay, pointer.y, gridRect);
+        }
+      } else {
+        // Outside grid bounds - show unschedule indicator
+        this.dragPreviewTime.set('UNSCHEDULE');
+        this.lastCalculatedTimestamp = null;
       }
     }
   }
