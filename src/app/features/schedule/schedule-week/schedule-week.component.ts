@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -64,7 +65,7 @@ const DRAG_OVER_CLASS = 'drag-over';
     '[class]': 'dragEventTypeClass()',
   },
 })
-export class ScheduleWeekComponent implements OnInit, OnDestroy {
+export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
   private _store = inject(Store);
   private _dateTimeFormatService = inject(DateTimeFormatService);
 
@@ -166,18 +167,19 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
     this.endOfDayColRowStart.set(workStartEnd?.workStartRow || D_HOURS * 0.5 * FH);
 
     // Add keyboard event listeners for shift key
-    document.addEventListener('keydown', this.onKeyDown);
-    document.addEventListener('keyup', this.onKeyUp);
+    document.addEventListener('keydown', this._onKeyDown);
+    document.addEventListener('keyup', this._onKeyUp);
+  }
 
-    // Set up observer to detect resize operations
-    this.setupResizeObserver();
+  ngAfterViewInit(): void {
+    this._setupResizeObserver();
   }
 
   ngOnDestroy(): void {
     window.clearTimeout(this._currentAniTimeout);
     // Remove keyboard event listeners
-    document.removeEventListener('keydown', this.onKeyDown);
-    document.removeEventListener('keyup', this.onKeyUp);
+    document.removeEventListener('keydown', this._onKeyDown);
+    document.removeEventListener('keyup', this._onKeyUp);
 
     // Clean up resize observer
     if (this._resizeObserver) {
@@ -458,27 +460,22 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
 
   dragReleased(ev: CdkDragRelease): void {
     const prevEl = this.prevDragOverEl();
-
     if (prevEl) {
       prevEl.classList.remove(DRAG_OVER_CLASS);
       this.prevDragOverEl.set(null);
     }
 
-    const memoizedDropPoint = this._lastPointerPosition;
-    // Primary drop point comes from the last move event. If we never moved (rare)
-    // fall back to the coordinates provided by the release event.
-    const dropPoint = memoizedDropPoint ?? this._extractDropPoint(ev.event);
+    const dropPoint = this._lastPointerPosition ?? this._extractDropPoint(ev.event);
     const cloneEl = this.dragCloneEl();
     if (cloneEl) {
       cloneEl.remove();
     }
 
     this.isDragging.set(false);
-    ev.source.element.nativeElement.style.pointerEvents = '';
-    // Restore original element visibility
-    ev.source.element.nativeElement.style.opacity = '1';
+    const nativeEl = ev.source.element.nativeElement;
+    nativeEl.style.pointerEvents = '';
+    nativeEl.style.opacity = '1';
 
-    // Clear drag preview
     this.dragPreviewTime.set(null);
     this.currentDragEvent.set(null);
     this.dragPreviewGridPosition.set(null);
@@ -487,44 +484,43 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
     this.lastCalculatedTimestamp = null;
 
     setTimeout(() => {
-      if (ev.source.element?.nativeElement?.style) {
-        ev.source.element.nativeElement.style.opacity = '';
-        ev.source.element.nativeElement.style.pointerEvents = '';
-      }
+      nativeEl.style.opacity = '';
+      nativeEl.style.pointerEvents = '';
       this.isDraggingDelayed.set(false);
     }, 100);
 
-    // Prefer the targets cached during dragMoved. They already ignore the drag
-    // preview and any overlays.
     let colEl = this._lastDropCol;
     let scheduleEventTarget = this._lastDropScheduleEvent;
-
     if ((!colEl || !scheduleEventTarget) && ev.event.target instanceof HTMLElement) {
-      // As a fallback use the DOM hierarchy starting from the event target.
       const fallbackTarget = ev.event.target as HTMLElement;
-      colEl = colEl ?? (fallbackTarget.closest('.col') as HTMLElement | null);
-      scheduleEventTarget =
-        scheduleEventTarget ??
-        (fallbackTarget.closest('schedule-event') as HTMLElement | null);
+      if (!colEl) {
+        colEl = fallbackTarget.closest('.col') as HTMLElement | null;
+      }
+      if (!scheduleEventTarget) {
+        scheduleEventTarget = fallbackTarget.closest(
+          'schedule-event',
+        ) as HTMLElement | null;
+      }
     }
 
-    if (colEl) {
+    const task = ev.source.data.data as any;
+
+    if (colEl && task) {
       const isMoveToEndOfDay = colEl.classList.contains('end-of-day');
       const targetDay =
         colEl.getAttribute('data-day') ||
         (dropPoint ? this.getDayUnderPointer(dropPoint.x, dropPoint.y) : null);
+
       if (targetDay) {
         if (this.isShiftNoScheduleMode()) {
-          // Shift pressed: Plan for day (old behavior)
           this._store.dispatch(
             PlannerActions.planTaskForDay({
-              task: ev.source.data.data,
+              task,
               day: targetDay,
               isAddToTop: !isMoveToEndOfDay,
             }),
           );
         } else {
-          // No shift: Schedule at specific time (new default behavior)
           let scheduleTime = savedTimestamp;
           if (scheduleTime == null && dropPoint) {
             const gridContainer = this.gridContainer().nativeElement;
@@ -533,10 +529,10 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
               scheduleTime = calculateTimeFromYPosition(dropPoint.y, gridRect, targetDay);
             }
           }
+
           if (scheduleTime != null) {
-            const droppedTask = ev.source.data.data;
-            const hasExistingSchedule = !!droppedTask.dueWithTime;
-            const hasReminder = !!droppedTask.reminderId;
+            const hasExistingSchedule = !!task.dueWithTime;
+            const hasReminder = !!task.reminderId;
             const remindAt =
               !hasExistingSchedule && !hasReminder
                 ? remindOptionToMilliseconds(scheduleTime, TaskReminderOptionId.AtStart)
@@ -545,7 +541,7 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
                   : undefined;
 
             const schedulePayload = {
-              task: droppedTask,
+              task,
               dueWithTime: scheduleTime,
               ...(typeof remindAt === 'number' ? { remindAt } : {}),
               isMoveToBacklog: false,
@@ -556,8 +552,8 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
                 ? TaskSharedActions.reScheduleTaskWithTime(schedulePayload)
                 : TaskSharedActions.scheduleTaskWithTime(schedulePayload),
             );
-            // Auto-assign a default duration if none is set
-            if (!droppedTask.timeEstimate || droppedTask.timeEstimate <= 0) {
+
+            if (!task.timeEstimate || task.timeEstimate <= 0) {
               const DEFAULT_BLOCK_DURATION = 15 * 60 * 1000;
               const fallbackDuration = Math.max(
                 SCHEDULE_TASK_MIN_DURATION_IN_MS,
@@ -566,17 +562,16 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
               this._store.dispatch(
                 TaskSharedActions.updateTask({
                   task: {
-                    id: droppedTask.id,
+                    id: task.id,
                     changes: { timeEstimate: fallbackDuration },
                   },
                 }),
               );
             }
           } else {
-            // Fallback to day-level scheduling if time calculation fails
             this._store.dispatch(
               PlannerActions.planTaskForDay({
-                task: ev.source.data.data,
+                task,
                 day: targetDay,
                 isAddToTop: !isMoveToEndOfDay,
               }),
@@ -585,7 +580,7 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
         }
       }
     } else if (scheduleEventTarget) {
-      const sourceTaskId = ev.source.element.nativeElement.id.replace(T_ID_PREFIX, '');
+      const sourceTaskId = nativeEl.id.replace(T_ID_PREFIX, '');
       const targetTaskId = scheduleEventTarget.id.replace(T_ID_PREFIX, '');
 
       if (
@@ -601,15 +596,10 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
           }),
         );
       }
-    } else {
-      // Dropped outside schedule area - check if we should unschedule
-      const task = ev.source.data.data;
+    } else if (task && dropPoint) {
       const gridContainer = this.gridContainer().nativeElement;
-
-      if (task && gridContainer && dropPoint) {
+      if (gridContainer) {
         const gridRect = gridContainer.getBoundingClientRect();
-
-        // Check if dropped outside the grid area
         const isOutsideGrid =
           dropPoint.y < gridRect.top ||
           dropPoint.y > gridRect.bottom ||
@@ -617,7 +607,6 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
           dropPoint.x > gridRect.right;
 
         if (isOutsideGrid) {
-          // Reschedule for today (without time)
           this._store.dispatch(
             TaskSharedActions.planTasksForToday({ taskIds: [task.id] }),
           );
@@ -625,16 +614,15 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
       }
     }
 
-    // Reset cached state to avoid leaking references between drags.
     this._lastDropCol = null;
     this._lastDropScheduleEvent = null;
     this._lastPointerPosition = null;
 
-    ev.source.element.nativeElement.style.transform = 'translate3d(0, 0, 0)';
+    nativeEl.style.transform = 'translate3d(0, 0, 0)';
     ev.source.reset();
   }
 
-  private onKeyDown = (event: KeyboardEvent): void => {
+  private _onKeyDown = (event: KeyboardEvent): void => {
     if (event.key === 'Shift') {
       this.isShiftNoScheduleMode.set(true);
     }
@@ -643,7 +631,7 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
     }
   };
 
-  private onKeyUp = (event: KeyboardEvent): void => {
+  private _onKeyUp = (event: KeyboardEvent): void => {
     if (event.key === 'Shift') {
       this.isShiftNoScheduleMode.set(false);
     }
@@ -656,7 +644,7 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
     event: MouseEvent | TouchEvent | PointerEvent,
   ): { x: number; y: number } | null {
     // Mouse and pointer events expose client coordinates directly.
-    if ('clientX' in event && typeof event.clientX === 'number') {
+    if ('clientX' in event) {
       return { x: event.clientX, y: event.clientY };
     }
     // Touchend exposes coordinates via changedTouches; touchmove via touches.
@@ -671,16 +659,22 @@ export class ScheduleWeekComponent implements OnInit, OnDestroy {
     return null;
   }
 
-  private setupResizeObserver(): void {
-    // Observe for changes to is-resizing class on any schedule-event
+  private _setupResizeObserver(): void {
+    const gridContainer = this.gridContainer().nativeElement;
+    if (!gridContainer) {
+      return;
+    }
+
+    // Observe for changes to is-resizing class on schedule-event elements
     this._resizeObserver = new MutationObserver(() => {
-      // Check if any schedule-event has the is-resizing class
-      const resizingElements = document.querySelectorAll('schedule-event.is-resizing');
+      const resizingElements = gridContainer.querySelectorAll(
+        'schedule-event.is-resizing',
+      );
       this.isAnyEventResizing.set(resizingElements.length > 0);
     });
 
-    // Start observing the entire document for class changes
-    this._resizeObserver.observe(document.body, {
+    // Observe only the grid container instead of entire document for better performance
+    this._resizeObserver.observe(gridContainer, {
       subtree: true,
       attributes: true,
       attributeFilter: ['class'],
