@@ -172,9 +172,10 @@ export const BOARDS_FORM: LimitedFormlyFieldConfig<BoardCfg>[] = [
         {
           key: 'sortByDue',
           type: 'radio',
+          hideExpression: 'model.taskDoneState === 2 || model.scheduledState === 3',
           props: {
             label: 'Sort by due date',
-            required: true,
+            required: false,
             defaultValue: 'off',
             options: [
               { value: 'off', label: 'Off' },
