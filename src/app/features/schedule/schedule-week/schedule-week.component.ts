@@ -386,9 +386,19 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Calculate correct row span based on event duration
     const draggedEvent = this.currentDragEvent();
-    const rowSpan = draggedEvent
-      ? Math.max(Math.round(draggedEvent.timeLeftInHours * FH), 1)
-      : 6;
+    let rowSpan = 6; // default fallback
+
+    if (draggedEvent) {
+      // For tasks, use the full timeEstimate instead of timeLeftInHours (which is split)
+      const task = draggedEvent.data as any;
+      if (task?.timeEstimate) {
+        const timeInHours = task.timeEstimate / (1000 * 60 * 60);
+        rowSpan = Math.max(Math.round(timeInHours * FH), 1);
+      } else {
+        // Fallback to timeLeftInHours for non-task events
+        rowSpan = Math.max(Math.round(draggedEvent.timeLeftInHours * FH), 1);
+      }
+    }
 
     // Create grid style for preview
     const gridStyle = [
@@ -434,28 +444,6 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
     if (cloneEl) {
       cloneEl.remove();
     }
-
-    // Hide the CDK's default drag preview by setting it invisible
-    // We need to wait a bit for CDK to create its preview elements
-    // TODO find a better way
-    setTimeout(() => {
-      // Hide CDK drag preview
-      // const cdkDragPreview = document.querySelector('.cdk-drag-preview');
-      // if (cdkDragPreview) {
-      //   (cdkDragPreview as HTMLElement).style.display = 'none';
-      // }
-      // Hide CDK placeholder unless in shift mode (for task-to-task drop)
-      // const cdkDragPlaceholder = document.querySelector('.cdk-drag-placeholder');
-      // if (cdkDragPlaceholder) {
-      //   if (this.isShiftNoScheduleMode()) {
-      //     // Show placeholder in shift mode for task-to-task drops
-      //     (cdkDragPlaceholder as HTMLElement).style.opacity = '0.3';
-      //   } else {
-      //     // Hide placeholder in normal drag mode (time-based scheduling)
-      //     (cdkDragPlaceholder as HTMLElement).style.opacity = '0';
-      //   }
-      // }
-    }, 0);
   }
 
   dragReleased(ev: CdkDragRelease): void {
