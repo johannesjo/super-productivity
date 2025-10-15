@@ -205,7 +205,12 @@ export const startApp = (): void => {
       }
     };
 
-    const checkIdle = async (): Promise<void> => {
+    let consecutiveFailures = 0;
+    // init time tracking interval
+    log(
+      `🚀 Starting idle time tracking (interval: ${CONFIG.IDLE_PING_INTERVAL}ms, threshold: ${CONFIG.MIN_IDLE_TIME}ms)`,
+    );
+    const stopIdleChecks: () => void = lazySetInterval(async (): Promise<void> => {
       // Skip if a previous check is still in flight
       if (isCheckingIdle) {
         return;
@@ -219,22 +224,21 @@ export const startApp = (): void => {
         log(
           `🔍 Idle check completed in ${checkDuration}ms: ${idleTime}ms (method: ${idleTimeHandler.currentMethod})`,
         );
+        consecutiveFailures = 0;
         sendIdleMsgIfOverMin(idleTime);
       } catch (error) {
+        consecutiveFailures += 1;
         log('💥 Error getting idle time, falling back to powerMonitor:', error);
         const fallbackIdleTime = powerMonitor.getSystemIdleTime() * 1000;
         log(`🔄 Fallback powerMonitor idle time: ${fallbackIdleTime}ms`);
         sendIdleMsgIfOverMin(fallbackIdleTime);
+        if (consecutiveFailures >= 2) {
+          stopIdleChecks();
+        }
       } finally {
         isCheckingIdle = false;
       }
-    };
-
-    // init time tracking interval
-    log(
-      `🚀 Starting idle time tracking (interval: ${CONFIG.IDLE_PING_INTERVAL}ms, threshold: ${CONFIG.MIN_IDLE_TIME}ms)`,
-    );
-    lazySetInterval(checkIdle, CONFIG.IDLE_PING_INTERVAL);
+    }, CONFIG.IDLE_PING_INTERVAL);
 
     powerMonitor.on('suspend', () => {
       log('powerMonitor: System suspend detected');

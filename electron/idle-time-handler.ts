@@ -28,13 +28,10 @@ interface IdleMethodCandidate {
   readonly test: () => Promise<boolean>;
 }
 
-const ERROR_LOG_INTERVAL = 60000;
-
 export class IdleTimeHandler {
   private readonly _environment: EnvironmentInfo;
   private _methodDetectionPromise: Promise<IdleDetectionMethod> | null = null;
   private _workingMethod: IdleDetectionMethod = 'none';
-  private _lastErrorLog = 0;
 
   constructor() {
     this._environment = this._detectEnvironment();
@@ -324,10 +321,6 @@ export class IdleTimeHandler {
   }
 
   private _logError(context: string, error: unknown): void {
-    const now = Date.now();
-    if (now - this._lastErrorLog > ERROR_LOG_INTERVAL) {
-      log.debug(`${context} (falling back to 0):`, error);
-      this._lastErrorLog = now;
-    }
+    log.debug(`${context} (falling back to 0):`, error);
   }
 }
