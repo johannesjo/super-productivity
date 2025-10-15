@@ -205,6 +205,7 @@ export const startApp = (): void => {
       }
     };
 
+    // --------IDLE HANDLING---------
     let consecutiveFailures = 0;
     // init time tracking interval
     log(
@@ -229,16 +230,14 @@ export const startApp = (): void => {
       } catch (error) {
         consecutiveFailures += 1;
         log('💥 Error getting idle time, falling back to powerMonitor:', error);
-        const fallbackIdleTime = powerMonitor.getSystemIdleTime() * 1000;
-        log(`🔄 Fallback powerMonitor idle time: ${fallbackIdleTime}ms`);
-        sendIdleMsgIfOverMin(fallbackIdleTime);
-        if (consecutiveFailures >= 2) {
+        if (consecutiveFailures >= 3) {
           stopIdleChecks();
         }
       } finally {
         isCheckingIdle = false;
       }
     }, CONFIG.IDLE_PING_INTERVAL);
+    // --------END IDLE HANDLING---------
 
     powerMonitor.on('suspend', () => {
       log('powerMonitor: System suspend detected');

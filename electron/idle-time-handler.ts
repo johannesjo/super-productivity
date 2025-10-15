@@ -67,6 +67,85 @@ export class IdleTimeHandler {
     return environment;
   }
 
+  get currentMethod(): IdleDetectionMethod {
+    return this._workingMethod;
+  }
+
+  async getIdleTime(): Promise<number> {
+    const methodUsed = await this._ensureWorkingMethod();
+
+    let idleTime: number;
+
+    switch (methodUsed) {
+      case 'powerMonitor': {
+        try {
+          idleTime = powerMonitor.getSystemIdleTime() * 1000;
+          log.debug(`powerMonitor idle time: ${idleTime}ms`);
+        } catch (error) {
+          this._logError('powerMonitor failed', error);
+          throw error;
+        }
+        break;
+      }
+
+      case 'gnomeDBus': {
+        try {
+          const result = await this._getGnomeIdleTime();
+          if (result === null) {
+            throw new Error('gnomeDBus returned null');
+          }
+          idleTime = result;
+          log.debug(`gnomeDBus idle time: ${idleTime}ms`);
+        } catch (error) {
+          this._logError('GNOME DBus error', error);
+          throw error;
+        }
+        break;
+      }
+
+      case 'xprintidle': {
+        try {
+          const result = await this._getXprintidleTime();
+          if (result === null) {
+            throw new Error('xprintidle returned null');
+          }
+          idleTime = result;
+          log.debug(`xprintidle idle time: ${idleTime}ms`);
+        } catch (error) {
+          this._logError('xprintidle error', error);
+          throw error;
+        }
+        break;
+      }
+
+      case 'loginctl': {
+        try {
+          const result = await this._getLoginctlIdleTime();
+          if (result === null) {
+            throw new Error('loginctl returned null');
+          }
+          idleTime = result;
+          log.debug(`loginctl idle time: ${idleTime}ms`);
+        } catch (error) {
+          this._logError('loginctl error', error);
+          throw error;
+        }
+        break;
+      }
+
+      case 'none':
+      default: {
+        const error = new Error('No working idle detection method available');
+        this._logError('idle detection unavailable', error);
+        throw error;
+      }
+    }
+
+    log.info(`Idle detection result: ${idleTime}ms (method: ${methodUsed})`);
+
+    return idleTime;
+  }
+
   private async _initializeWorkingMethod(): Promise<IdleDetectionMethod> {
     try {
       const method = await this._determineWorkingMethod();
@@ -166,81 +245,6 @@ export class IdleTimeHandler {
     return candidates;
   }
 
-  async getIdleTime(): Promise<number> {
-    const methodUsed = await this._ensureWorkingMethod();
-    let idleTime = 0;
-    let error: unknown = null;
-
-    switch (methodUsed) {
-      case 'powerMonitor':
-        try {
-          idleTime = powerMonitor.getSystemIdleTime() * 1000;
-          log.debug(`powerMonitor idle time: ${idleTime}ms`);
-        } catch (err) {
-          error = err;
-          log.warn('powerMonitor failed:', err);
-        }
-        break;
-
-      case 'gnomeDBus':
-        try {
-          const result = await this._getGnomeIdleTime();
-          idleTime = result ?? 0;
-          log.debug(`gnomeDBus idle time: ${idleTime}ms`);
-          if (result === null) {
-            log.warn('gnomeDBus returned null');
-          }
-        } catch (err) {
-          error = err;
-          this._logError('GNOME DBus error', err);
-          idleTime = 0;
-        }
-        break;
-
-      case 'xprintidle':
-        try {
-          const result = await this._getXprintidleTime();
-          idleTime = result ?? 0;
-          log.debug(`xprintidle idle time: ${idleTime}ms`);
-          if (result === null) {
-            log.warn('xprintidle returned null');
-          }
-        } catch (err) {
-          error = err;
-          this._logError('xprintidle error', err);
-          idleTime = 0;
-        }
-        break;
-
-      case 'loginctl':
-        try {
-          const result = await this._getLoginctlIdleTime();
-          idleTime = result ?? 0;
-          log.debug(`loginctl idle time: ${idleTime}ms`);
-          if (result === null) {
-            log.warn('loginctl returned null');
-          }
-        } catch (err) {
-          error = err;
-          this._logError('loginctl error', err);
-          idleTime = 0;
-        }
-        break;
-
-      case 'none':
-      default:
-        log.warn('No working idle detection method available');
-        idleTime = 0;
-        break;
-    }
-
-    log.info(
-      `Idle detection result: ${idleTime}ms (method: ${methodUsed}, hasError: ${!!error})`,
-    );
-
-    return idleTime;
-  }
-
   private async _getGnomeIdleTime(): Promise<number | null> {
     const isSnap = this._environment.isSnap;
     if (isSnap) {
@@ -294,6 +298,9 @@ export class IdleTimeHandler {
     const match = stdout.match(/IdleSinceHint=(\d+)/);
     if (match && match[1]) {
       const idleSince = parseInt(match[1], 10);
+      if (idleSince === 0) {
+        return 0;
+      }
       if (idleSince > 0) {
         const nowMs = Date.now() * 1000;
         const idleMs = nowMs - idleSince;
@@ -314,10 +321,6 @@ export class IdleTimeHandler {
     }
 
     return null;
-  }
-
-  get currentMethod(): IdleDetectionMethod {
-    return this._workingMethod;
   }
 
   private _logError(context: string, error: unknown): void {
