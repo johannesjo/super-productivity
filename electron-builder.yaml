@@ -84,6 +84,8 @@ flatpak:
     - --socket=pulseaudio
     - --device=dri
     - --filesystem=home
+    - --talk-name=org.gnome.Mutter.IdleMonitor
+    - --system-talk-name=org.freedesktop.login1
 
 mac:
   appId: com.super-productivity.app
