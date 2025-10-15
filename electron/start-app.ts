@@ -182,27 +182,27 @@ export const startApp = (): void => {
     // causing timeouts and subsequent 0ms readings, which looks like “only one
     // idle event was ever sent”. This ensures at most one check runs at a time.
     let isCheckingIdle = false;
-    const sendIdleMsgIfOverMin = (idleTime: number): void => {
+    const sendIdleMsgIfOverMin = (
+      idleTime: number,
+    ): { sent: boolean; reason?: string } => {
       // sometimes when starting a second instance we get here although we don't want to
       if (!mainWin) {
         info(
           'special case occurred when trackTimeFn is called even though, this is a second instance of the app',
         );
-        return;
+        return { sent: false, reason: 'no-window' };
       }
 
-      // don't update if the user is about to close
-      if (!appIN.isQuiting && idleTime > CONFIG.MIN_IDLE_TIME) {
-        log(
-          `✅ Sending idle time to frontend: ${idleTime}ms (threshold: ${CONFIG.MIN_IDLE_TIME}ms, method: ${idleTimeHandler.currentMethod})`,
-        );
-        mainWin.webContents.send(IPC.IDLE_TIME, idleTime);
-      } else {
-        log(
-          // eslint-disable-next-line max-len
-          `❌ NOT sending idle time: ${idleTime}ms (threshold: ${CONFIG.MIN_IDLE_TIME}ms, isQuiting: ${appIN.isQuiting}, method: ${idleTimeHandler.currentMethod})`,
-        );
+      if (appIN.isQuiting) {
+        return { sent: false, reason: 'quitting' };
       }
+
+      if (idleTime <= CONFIG.MIN_IDLE_TIME) {
+        return { sent: false, reason: 'below-threshold' };
+      }
+
+      mainWin.webContents.send(IPC.IDLE_TIME, idleTime);
+      return { sent: true };
     };
 
     // --------IDLE HANDLING---------
@@ -217,16 +217,24 @@ export const startApp = (): void => {
         return;
       }
       isCheckingIdle = true;
+      const startTime = Date.now();
       try {
-        const startTime = Date.now();
         const idleTime = await idleTimeHandler.getIdleTime();
         const checkDuration = Date.now() - startTime;
 
-        log(
-          `🔍 Idle check completed in ${checkDuration}ms: ${idleTime}ms (method: ${idleTimeHandler.currentMethod})`,
-        );
         consecutiveFailures = 0;
-        sendIdleMsgIfOverMin(idleTime);
+        const sendResult = sendIdleMsgIfOverMin(idleTime);
+        const actionSummary = sendResult.sent
+          ? 'sent'
+          : `skipped:${sendResult.reason ?? 'unknown'}`;
+        const logParts = [
+          `idle=${idleTime}ms`,
+          `method=${idleTimeHandler.currentMethod}`,
+          `duration=${checkDuration}ms`,
+          `threshold=${CONFIG.MIN_IDLE_TIME}ms`,
+          `action=${actionSummary}`,
+        ];
+        log(`🕘 Idle check (${logParts.join(', ')})`);
       } catch (error) {
         consecutiveFailures += 1;
         log('💥 Error getting idle time, falling back to powerMonitor:', error);

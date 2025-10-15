@@ -74,76 +74,47 @@ export class IdleTimeHandler {
   async getIdleTime(): Promise<number> {
     const methodUsed = await this._ensureWorkingMethod();
 
-    let idleTime: number;
-
     switch (methodUsed) {
-      case 'powerMonitor': {
+      case 'powerMonitor':
         try {
-          idleTime = powerMonitor.getSystemIdleTime() * 1000;
-          log.debug(`powerMonitor idle time: ${idleTime}ms`);
+          return powerMonitor.getSystemIdleTime() * 1000;
         } catch (error) {
           this._logError('powerMonitor failed', error);
-          throw error;
+          return 0;
         }
-        break;
-      }
 
-      case 'gnomeDBus': {
+      case 'gnomeDBus':
         try {
           const result = await this._getGnomeIdleTime();
-          if (result === null) {
-            throw new Error('gnomeDBus returned null');
-          }
-          idleTime = result;
-          log.debug(`gnomeDBus idle time: ${idleTime}ms`);
+          return result ?? 0;
         } catch (error) {
           this._logError('GNOME DBus error', error);
-          throw error;
+          return 0;
         }
-        break;
-      }
 
-      case 'xprintidle': {
+      case 'xprintidle':
         try {
           const result = await this._getXprintidleTime();
-          if (result === null) {
-            throw new Error('xprintidle returned null');
-          }
-          idleTime = result;
-          log.debug(`xprintidle idle time: ${idleTime}ms`);
+          return result ?? 0;
         } catch (error) {
           this._logError('xprintidle error', error);
-          throw error;
+          return 0;
         }
-        break;
-      }
 
-      case 'loginctl': {
+      case 'loginctl':
         try {
           const result = await this._getLoginctlIdleTime();
-          if (result === null) {
-            throw new Error('loginctl returned null');
-          }
-          idleTime = result;
-          log.debug(`loginctl idle time: ${idleTime}ms`);
+          return result ?? 0;
         } catch (error) {
           this._logError('loginctl error', error);
-          throw error;
+          return 0;
         }
-        break;
-      }
 
       case 'none':
-      default: {
-        const error = new Error('No working idle detection method available');
-        this._logError('idle detection unavailable', error);
-        throw error;
-      }
+      default:
+        this._logError('No working idle detection method available', undefined);
+        return 0;
     }
-
-    log.info(`Idle detection result: ${idleTime}ms (method: ${methodUsed})`);
-
-    return idleTime;
   }
 
   private async _initializeWorkingMethod(): Promise<IdleDetectionMethod> {
