@@ -48,11 +48,7 @@
       style="grid-column: {{ $index + 2 }}; grid-row: 1 / span {{
         ($index === 0 ? currentTimeRow() : endOfDayColRowStart()) - 1
       }}"
-    >
-      @if (isDragging() && isShiftNoScheduleMode()) {
-        <div class="drop-label">{{ T.F.SCHEDULE.PLAN_START_DAY | translate }}</div>
-      }
-    </div>
+    ></div>
     <div
       class="col end-of-day"
       [attr.data-day]="day"
@@ -61,11 +57,7 @@
       }} / span {{
         totalRows - ($index === 0 ? currentTimeRow() : endOfDayColRowStart())
       }}"
-    >
-      @if (isDragging() && isShiftNoScheduleMode()) {
-        <div class="drop-label">{{ T.F.SCHEDULE.PLAN_END_DAY | translate }}</div>
-      }
-    </div>
+    ></div>
   }
 
   <!-- Work Start and End -->
@@ -174,7 +166,7 @@
       [event]="currentDragEvent()!"
       [style]="dragPreviewStyle()!"
     >
-      @if (!isShiftNoScheduleMode() && dragPreviewTime()) {
+      @if (dragPreviewTime()) {
         <div class="drag-preview-time-badge">{{ dragPreviewTime() }}</div>
       }
     </schedule-event>

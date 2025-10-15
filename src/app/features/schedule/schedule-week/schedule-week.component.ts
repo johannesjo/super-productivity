@@ -29,7 +29,7 @@ import { isDraggableSE } from '../map-schedule-data/is-schedule-types-type';
 import { throttle } from '../../../util/decorators';
 import { CreateTaskPlaceholderComponent } from '../create-task-placeholder/create-task-placeholder.component';
 import { ScheduleEventComponent } from '../schedule-event/schedule-event.component';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { T } from '../../../t.const';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
@@ -69,6 +69,7 @@ const DRAG_OVER_CLASS = 'drag-over';
 export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
   private _store = inject(Store);
   private _dateTimeFormatService = inject(DateTimeFormatService);
+  private _translateService = inject(TranslateService);
 
   isMinimalHeader = input<boolean>(false);
   events = input<ScheduleEvent[] | null>([]);
@@ -569,16 +570,23 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
     isWithinGrid: boolean,
   ): void {
     this._lastCalculatedTimestamp = null;
+    let badgeText: string | null = null;
 
     if (isWithinGrid) {
       const timestamp = calculateTimeFromYPosition(pointer.y, gridRect, targetDay);
       if (timestamp) {
         this._createDragPreview(timestamp, targetDay, pointer.y, gridRect);
-        this.dragPreviewTime.set(null);
+      }
+      if (targetEl.classList.contains('col')) {
+        badgeText = targetEl.classList.contains('end-of-day')
+          ? this._translateService.instant(T.F.SCHEDULE.PLAN_END_DAY)
+          : this._translateService.instant(T.F.SCHEDULE.PLAN_START_DAY);
       }
     } else {
       this.dragPreviewStyle.set(null);
+      badgeText = null;
     }
+    this.dragPreviewTime.set(badgeText);
 
     const prevEl = this.prevDragOverEl();
     if (prevEl && prevEl !== targetEl) {
