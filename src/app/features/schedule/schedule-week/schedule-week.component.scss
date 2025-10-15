@@ -27,7 +27,7 @@
     }
 
     schedule-event {
-      transform: none !important;
+      //transform: none !important;
     }
   }
 }
@@ -54,13 +54,14 @@
   }
 }
 
+// TODO fix that this currently only shows inside schedule-day-panel
 // Fix drag placeholder to stay in original position and make it subtle
 .cdk-drag-placeholder {
   opacity: 0.3 !important;
   transform: none !important;
   transition: none !important;
   position: static !important;
-  border: 1px solid orange !important;
+  border: 3px dashed greenyellow !important;
 
   // Prevent any visual changes during drag
   &.cdk-drop-list-dragging {
@@ -372,7 +373,7 @@ schedule-event.cdk-drag-dragging + schedule-event {
   z-index: 1000;
   box-shadow: var(--whiteframe-shadow-8dp);
   transform-origin: center top;
-  transform: scale(1.05) !important;
+  transform: scale(1.02) !important;
   border-radius: 0;
 
   &.isScheduleForDay {
