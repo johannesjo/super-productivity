@@ -476,5 +476,14 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
         }
       }
     }
+
+    // NOTE: this is mainly styled in schedule-week.component.scss via .cdk-drag-preview
+    if (previewEl.tagName.toLowerCase() === 'schedule-event') {
+      if (isEnable) {
+        previewEl.style.opacity = `0`;
+      } else {
+        previewEl.style.opacity = `1`;
+      }
+    }
   }
 }

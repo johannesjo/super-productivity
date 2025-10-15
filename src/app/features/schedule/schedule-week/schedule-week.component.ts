@@ -311,12 +311,6 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
     const gridStyle = [
       `grid-row: ${row} / span ${rowSpan}`,
       `grid-column: ${col} / span 1`,
-      'z-index: 1000',
-      'opacity: 0.8',
-      'transform: scale(0.95)',
-      'border: 3px solid #2196F3 !important',
-      'box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important',
-      'border-radius: 4px !important',
     ].join('; ');
 
     this.dragPreviewStyle.set(gridStyle);

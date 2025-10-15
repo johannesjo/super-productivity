@@ -198,21 +198,23 @@ mat-icon.mat-icon[svgicon] {
 
 // Schedule-style preview should always use accent border while dragging
 .cdk-drag-preview.as-schedule-event-preview {
-  .drag-preview-time-badge {
-    position: absolute;
-    right: 6px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 16px;
-    font-weight: bold;
-    line-height: 20px;
-    padding: 0 3px 2px;
-    border: 2px solid var(--c-primary);
-    border-radius: var(--card-border-radius);
-    background: var(--bg-lighter);
-    z-index: 10;
-    pointer-events: none;
-  }
+}
+.drag-preview-time-badge {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  font-weight: bold;
+  border: 2px solid var(--c-primary);
+  border-radius: var(--card-border-radius);
+  background: var(--bg-lighter);
+  background: inherit;
+  z-index: 100;
+  pointer-events: none;
+  padding: 2px 6px;
+  box-shadow: var(--whiteframe-shadow-3dp);
+  white-space: nowrap;
 }
 
 .cdk-drag-placeholder {

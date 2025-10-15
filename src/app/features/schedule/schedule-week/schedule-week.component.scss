@@ -32,11 +32,6 @@
   }
 }
 
-.cdk-drag-preview {
-  border: 2px solid red;
-  opacity: 0.1;
-}
-
 .grid-container {
   --schedule-row-height: 11px;
   --schedule-row-height-mobile: 7px;
@@ -373,28 +368,20 @@ schedule-event.cdk-drag-dragging + schedule-event {
 // Custom drag preview
 .custom-drag-preview {
   pointer-events: none;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-  border: 3px solid var(--accent) !important;
-  border-radius: 4px !important;
+  border: 1px solid var(--c-primary) !important;
+  z-index: 1000;
+  box-shadow: var(--whiteframe-shadow-8dp);
+  transform-origin: center top;
+  transform: scale(1.05) !important;
 
-  // Override any schedule-event specific styles
-  &.schedule-event,
-  schedule-event {
-    border: 3px solid var(--accent) !important;
-  }
-
-  .drag-time-badge {
-    position: absolute;
-    top: -8px;
+  // NOTE has global styles in _overwrite-material.scss
+  .drag-preview-time-badge {
+    top: 0 !important;
     right: -8px;
-    background: var(--accent);
-    color: var(--light-color);
-    padding: 2px 6px;
     border-radius: 12px;
-    font-size: 11px;
-    font-weight: bold;
-    line-height: 1;
-    white-space: nowrap;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
+}
+
+.cdk-drag-preview {
+  opacity: 0 !important;
 }
