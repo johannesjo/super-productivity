@@ -48,6 +48,7 @@ export type IssueIntegrationCfg =
   | CalendarProviderCfg
   | OpenProjectCfg
   | GiteaCfg
+  | TrelloCfg
   | RedmineCfg;
 
 export enum IssueLocalState {
@@ -108,6 +109,8 @@ export type IssueDataReducedMap = {
                   ? RedmineIssue
                   : never;
 };
+
+// TODO: add issue model to the IssueDataReducedMap
 
 export interface SearchResultItem<
   T extends keyof IssueDataReducedMap = keyof IssueDataReducedMap,

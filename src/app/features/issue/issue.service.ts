@@ -20,6 +20,7 @@ import {
   ISSUE_STR_MAP,
   JIRA_TYPE,
   OPEN_PROJECT_TYPE,
+  TRELLO_TYPE,
   REDMINE_TYPE,
 } from './issue.const';
 import { TaskService } from '../tasks/task.service';
@@ -56,6 +57,7 @@ import typia from 'typia';
 export class IssueService {
   private _taskService = inject(TaskService);
   private _jiraCommonInterfacesService = inject(JiraCommonInterfacesService);
+  private _trelloCommonInterfacesService = inject(TrelloCommonInterfacesService);
   private _githubCommonInterfacesService = inject(GithubCommonInterfacesService);
   private _gitlabCommonInterfacesService = inject(GitlabCommonInterfacesService);
   private _caldavCommonInterfaceService = inject(CaldavCommonInterfacesService);
@@ -80,6 +82,9 @@ export class IssueService {
     [GITEA_TYPE]: this._giteaInterfaceService,
     [REDMINE_TYPE]: this._redmineInterfaceService,
     [ICAL_TYPE]: this._calendarCommonInterfaceService,
+
+    // trello
+    [TRELLO_TYPE]: this._trelloCommonInterfacesService,
   };
 
   ISSUE_REFRESH_MAP: {
