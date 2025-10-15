@@ -1,3 +1,30 @@
+# [15.3.0](https://github.com/johannesjo/super-productivity/compare/v15.2.16...v15.3.0) (2025-10-15)
+
+### Bug Fixes
+
+- errors ([61d2290](https://github.com/johannesjo/super-productivity/commit/61d22909171212f059aabda173032e7e8b286b2e))
+- get rid of double done button ([67d7a9c](https://github.com/johannesjo/super-productivity/commit/67d7a9c96299f8ec5ac2d08e54fc1be1b242d97e))
+- **schedule:** labels ([c6b4f02](https://github.com/johannesjo/super-productivity/commit/c6b4f02a68e453df4f8b149675e32c544ded1b63))
+
+### Features
+
+- add complete button to reminder dialog modal ([ef493f6](https://github.com/johannesjo/super-productivity/commit/ef493f6e20eedef64ea8c12f3979969c6140fc31))
+- add complete button to reminder dialog modal ([6bd71a4](https://github.com/johannesjo/super-productivity/commit/6bd71a4b3b83785609f5aeb37b021c5f20891f51))
+- add translation keys for complete button in reminder dialog ([e29b684](https://github.com/johannesjo/super-productivity/commit/e29b684181a4a2bcffdde6a0793eeb2242fc221b))
+- add translation keys for complete button in reminder dialog ([69ff49a](https://github.com/johannesjo/super-productivity/commit/69ff49a2d5056f1e93a4ae1a422eb26dfef85a15))
+- add warning when simple counter buttons are active ([6aa44be](https://github.com/johannesjo/super-productivity/commit/6aa44be1c3f85b08d4b6465d8898e541398e63fa))
+- also fix missing new entities in data repair [#5234](https://github.com/johannesjo/super-productivity/issues/5234) ([9f00934](https://github.com/johannesjo/super-productivity/commit/9f00934e86f63280094864ffa7d28b4f31158550))
+- **boards:** limit new sort setting to columns that include due tasks specifically ([2e49ea5](https://github.com/johannesjo/super-productivity/commit/2e49ea5cefcdbcb992aa547d73c09e333e38b8ad))
+- **electron:** improve idle handling for snap ([08def80](https://github.com/johannesjo/super-productivity/commit/08def803e761963d63742263a059bbdb6002219e))
+- enable hardware acceleration again ([a2f723b](https://github.com/johannesjo/super-productivity/commit/a2f723beddd3b8866b51d82e78563e7f2ad48265))
+- polish ([930582d](https://github.com/johannesjo/super-productivity/commit/930582dc498b14f72f529a16d00bd60daef2c42e))
+- **schedule:** add drag and drop and resize to schedule ([f774c9f](https://github.com/johannesjo/super-productivity/commit/f774c9fc714a76a0a4ef40a6a447cac6858e3df3))
+- **schedule:** add missing translation ([f27d58b](https://github.com/johannesjo/super-productivity/commit/f27d58b2f66107a93a1b40332406a9b939f5a230))
+- **schedule:** allow resizing for normal tasks ([5bc5315](https://github.com/johannesjo/super-productivity/commit/5bc531511a330f7d746d049901a3f8385f2d6900))
+- **schedule:** better preview element height for split tasks ([835c60b](https://github.com/johannesjo/super-productivity/commit/835c60b7b165a22594cdc22ca46a23df8c125d60))
+- **schedule:** make drag to schedule work for touch devices ([f3b66b6](https://github.com/johannesjo/super-productivity/commit/f3b66b67d65857eedec24419432045c42140d662))
+- **schedule:** make preview work again for day planning mode ([80c52bc](https://github.com/johannesjo/super-productivity/commit/80c52bceaa327c587c2d51fa906a0e77ed770f49))
+
 ## [15.2.16](https://github.com/johannesjo/super-productivity/compare/v15.2.15...v15.2.16) (2025-10-13)
 
 ## [15.2.15](https://github.com/johannesjo/super-productivity/compare/v15.2.14...v15.2.15) (2025-10-13)
