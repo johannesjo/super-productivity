@@ -36,6 +36,8 @@ import { TaskWithSubTasks } from '../../tasks/task.model';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { Log } from '../../../core/log';
 
+const DEFAULT_MIN_DURATION = 15 * 60 * 1000;
+
 @Component({
   selector: 'schedule-day-panel',
   standalone: true,
@@ -58,7 +60,6 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
 
   // Drag preview properties
   dragPreviewTime = signal<string | null>(null);
-  dragPreviewPosition = signal<{ x: number; y: number }>({ x: 0, y: 0 });
   isDragging = signal(false);
   private lastCalculatedTimestamp: number | null = null;
 
@@ -183,11 +184,7 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
   }
 
   onDragEnter(event: CdkDragEnter<{ day: string }>): void {
-    // Only activate preview for allowed drags (tasks etc.).
-    const data: any = (event.item as any)?.data;
-    const title: string =
-      data && typeof data === 'object' && 'title' in data ? data.title : '';
-    this._startScheduleMode(title);
+    this._startScheduleMode();
   }
 
   onDragExit(): void {
@@ -206,11 +203,9 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     }
     if (!this.isDragging()) return;
 
-    const clientX = 'touches' in event ? event.touches[0].clientX : event.clientX;
     const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
 
     // Update position for the preview badge (still follow cursor for visibility)
-    this.dragPreviewPosition.set({ x: clientX, y: clientY });
 
     // Get the actual drag preview position to match what dropPoint will be
     let previewY = clientY;
@@ -229,6 +224,7 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
       const date = new Date(timestamp);
       const hours = date.getHours();
       const minutes = date.getMinutes();
+      // TODO internationalization
       const timeStr = `${hours.toString().padStart(2, '0')}:${minutes
         .toString()
         .padStart(2, '0')}`;
@@ -287,10 +283,9 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
         );
         // Auto-assign a default duration if none is set
         if (!task.timeEstimate || task.timeEstimate <= 0) {
-          const FIFTEEN_MIN = 15 * 60 * 1000;
           this._store.dispatch(
             TaskSharedActions.updateTask({
-              task: { id: task.id, changes: { timeEstimate: FIFTEEN_MIN } },
+              task: { id: task.id, changes: { timeEstimate: DEFAULT_MIN_DURATION } },
             }),
           );
         }
@@ -384,16 +379,18 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
   private _updatePreviewTimeBadge(timeStr: string): void {
     const preview = document.querySelector('.cdk-drag-preview') as HTMLElement | null;
     if (!preview) return;
-    const timeBadge = preview.querySelector('.time-badge') as HTMLElement | null;
+    const timeBadge = preview.querySelector(
+      '.drag-preview-time-badge',
+    ) as HTMLElement | null;
     if (timeBadge) {
       timeBadge.textContent = timeStr;
     }
   }
 
-  private _startScheduleMode(previewTitle?: string): void {
+  private _startScheduleMode(): void {
     if (this.isDragging()) return;
     this.isDragging.set(true);
-    this._applySchedulePreviewStyling(true, previewTitle);
+    this._applySchedulePreviewStyling(true);
     this._cdr.markForCheck();
     // Track pointer globally so we can leave schedule mode when not over panel
     document.addEventListener('mousemove', this._onGlobalPointerMove, {
@@ -435,56 +432,49 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     }
   };
 
-  private _applySchedulePreviewStyling(isEnable: boolean, previewTitle?: string): void {
-    const preview = document.querySelector('.cdk-drag-preview') as HTMLElement | null;
-    if (!preview) {
+  // we're mutating the dom directly here to add some styling to the drag preview, since it is the most efficient way to do it
+  private _applySchedulePreviewStyling(isEnable: boolean): void {
+    const previewEl = document.querySelector('.cdk-drag-preview') as HTMLElement | null;
+    if (!previewEl) {
       return;
     }
 
-    if (isEnable) {
-      preview.classList.add('as-schedule-event-preview');
-      // Try to match the width of the day column
-      const containerElement = this.scheduleWeekRef?.nativeElement as
-        | HTMLElement
-        | undefined;
-      const day = this.daysToShow()[0];
-      const colEl = containerElement?.querySelector(
-        `.grid-container .col[data-day="${day}"]`,
-      ) as HTMLElement | null;
-      if (colEl) {
-        const colRect = colEl.getBoundingClientRect();
-        preview.style.width = `${Math.max(40, colRect.width - 10)}px`;
+    if (previewEl.tagName.toLowerCase() === 'task') {
+      if (isEnable) {
+        previewEl.classList.add('as-schedule-event-preview');
+        // Try to match the width of the day column
+        const containerElement = this.scheduleWeekRef?.nativeElement as
+          | HTMLElement
+          | undefined;
+        const day = this.daysToShow()[0];
+        const colEl = containerElement?.querySelector(
+          `.grid-container .col[data-day="${day}"]`,
+        ) as HTMLElement | null;
+        if (colEl) {
+          const colRect = colEl.getBoundingClientRect();
+          previewEl.style.width = `${Math.max(40, colRect.width - 10)}px`;
+        }
+
+        // ensure time badge element exists
+        let timeBadge = previewEl.querySelector(
+          '.drag-preview-time-badge',
+        ) as HTMLElement | null;
+        if (!timeBadge) {
+          timeBadge = document.createElement('div');
+          timeBadge.className = 'drag-preview-time-badge';
+          previewEl.appendChild(timeBadge);
+        }
+        if (this.dragPreviewTime()) {
+          timeBadge.textContent = this.dragPreviewTime()!;
+        }
+      } else {
+        previewEl.classList.remove('as-schedule-event-preview');
+        previewEl.style.removeProperty('width');
+        const timeBadge = previewEl.querySelector('.drag-preview-time-badge');
+        if (timeBadge) {
+          timeBadge.remove();
+        }
       }
-      // Inject basic content to mimic schedule preview: title
-      let titleEl = preview.querySelector('.title') as HTMLElement | null;
-      if (!titleEl) {
-        titleEl = document.createElement('div');
-        titleEl.className = 'title';
-        preview.appendChild(titleEl);
-      }
-      if (previewTitle) {
-        titleEl.textContent = previewTitle;
-      }
-      // ensure time badge element exists
-      let timeBadge = preview.querySelector('.time-badge') as HTMLElement | null;
-      if (!timeBadge) {
-        timeBadge = document.createElement('div');
-        timeBadge.className = 'time-badge';
-        preview.appendChild(timeBadge);
-      }
-      if (this.dragPreviewTime()) {
-        timeBadge.textContent = this.dragPreviewTime()!;
-      }
-    } else {
-      preview.classList.remove('as-schedule-event-preview');
-      preview.style.removeProperty('width');
-      const timeBadge = preview.querySelector('.time-badge');
-      if (timeBadge) {
-        timeBadge.remove();
-      }
-      // remove injected title
-      const titleEl = preview.querySelector('.title');
-      if (titleEl) (titleEl as HTMLElement).remove();
     }
   }
 }

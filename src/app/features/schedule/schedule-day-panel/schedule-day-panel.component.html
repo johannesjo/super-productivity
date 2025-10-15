@@ -20,14 +20,4 @@
     [currentTimeRow]="currentTimeRow()"
     [isTaskDragActive]="isDragging()"
   ></schedule-week>
-
-  @if (isDragging() && dragPreviewTime()) {
-    <div
-      class="drag-time-preview"
-      [style.left.px]="dragPreviewPosition().x"
-      [style.top.px]="dragPreviewPosition().y"
-    >
-      <div class="time-badge">{{ dragPreviewTime() }}</div>
-    </div>
-  }
 </div>
