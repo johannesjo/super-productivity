@@ -368,7 +368,7 @@ schedule-event.cdk-drag-dragging + schedule-event {
 // Custom drag preview
 .custom-drag-preview {
   pointer-events: none;
-  border: 1px solid var(--c-primary) !important;
+  border: 2px solid var(--c-primary) !important;
   z-index: 1000;
   box-shadow: var(--whiteframe-shadow-8dp);
   transform-origin: center top;
@@ -381,7 +381,7 @@ schedule-event.cdk-drag-dragging + schedule-event {
     border-radius: 12px;
 
     &.smaller {
-      font-size: 12px;
+      font-size: 13px;
     }
   }
 }

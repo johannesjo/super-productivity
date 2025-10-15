@@ -42,6 +42,12 @@ import { remindOptionToMilliseconds } from '../../tasks/util/remind-option-to-mi
 import { TaskReminderOptionId } from '../../tasks/task.model';
 import { formatMonthDay } from '../../../util/format-month-day.util';
 
+type DragPreviewContext =
+  | { kind: 'time'; timestamp: number }
+  | { kind: 'shift'; day: string; isEndOfDay: boolean }
+  | { kind: 'override'; label: string }
+  | null;
+
 const D_HOURS = 24;
 const DRAG_CLONE_CLASS = 'drag-clone';
 const DRAG_OVER_CLASS = 'drag-over';
@@ -135,7 +141,24 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
   dragCloneEl = signal<HTMLElement | null>(null);
 
   // Drag preview properties for time indicator
-  dragPreviewLabel = signal<string | null>(null);
+  private _dragPreviewContext = signal<DragPreviewContext>(null);
+  dragPreviewLabel = computed(() => {
+    const ctx = this._dragPreviewContext();
+    if (!ctx) {
+      return null;
+    }
+    if (ctx.kind === 'time') {
+      return this._dateTimeFormatService.formatTime(ctx.timestamp);
+    }
+    if (ctx.kind === 'shift') {
+      const dateLabel = this._formatDateLabel(ctx.day);
+      return this._translateService.instant(
+        ctx.isEndOfDay ? T.F.SCHEDULE.PLAN_END_DAY : T.F.SCHEDULE.PLAN_START_DAY,
+        { date: dateLabel },
+      );
+    }
+    return ctx.label;
+  });
   dragPreviewPosition = signal({ x: 0, y: 0 });
   private _lastCalculatedTimestamp: number | null = null;
 
@@ -292,13 +315,6 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
     pointerY: number,
     gridRect: DOMRect,
   ): void {
-    // Set time preview
-    const date = new Date(timestamp);
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    const timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-    this.dragPreviewLabel.set(timeStr);
-
     // Calculate grid position
     const relativeY = pointerY - gridRect.top;
     const totalRows = 24 * FH; // Total rows = 24 hours * FH rows per hour
@@ -326,6 +342,7 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Set the current dragging event for custom preview
     this.currentDragEvent.set(ev.source.data);
+    this._dragPreviewContext.set(null);
     this._lastDropCol = null;
     this._lastDropScheduleEvent = null;
     this._lastPointerPosition = null;
@@ -369,7 +386,7 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
     nativeEl.style.pointerEvents = '';
     nativeEl.style.opacity = '1';
 
-    this.dragPreviewLabel.set(null);
+    this._dragPreviewContext.set(null);
     this.currentDragEvent.set(null);
     this.dragPreviewGridPosition.set(null);
     this.dragPreviewStyle.set(null);
@@ -573,7 +590,6 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
     isWithinGrid: boolean,
   ): void {
     this._lastCalculatedTimestamp = null;
-    let badgeText: string | null = null;
 
     if (isWithinGrid) {
       const timestamp = calculateTimeFromYPosition(pointer.y, gridRect, targetDay);
@@ -581,20 +597,18 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
         this._createDragPreview(timestamp, targetDay, pointer.y, gridRect);
       }
       if (targetEl.classList.contains('col')) {
-        const dateLabel = this._formatDateLabel(targetDay);
-        badgeText = targetEl.classList.contains('end-of-day')
-          ? this._translateService.instant(T.F.SCHEDULE.PLAN_END_DAY, {
-              date: dateLabel,
-            })
-          : this._translateService.instant(T.F.SCHEDULE.PLAN_START_DAY, {
-              date: dateLabel,
-            });
+        this._dragPreviewContext.set({
+          kind: 'shift',
+          day: targetDay,
+          isEndOfDay: targetEl.classList.contains('end-of-day'),
+        });
+      } else {
+        this._dragPreviewContext.set(null);
       }
     } else {
       this.dragPreviewStyle.set(null);
-      badgeText = null;
+      this._dragPreviewContext.set(null);
     }
-    this.dragPreviewLabel.set(badgeText);
 
     const prevEl = this.prevDragOverEl();
     if (prevEl && prevEl !== targetEl) {
@@ -634,9 +648,12 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
 
       if (timestamp) {
         this._createDragPreview(timestamp, targetDay, pointer.y, gridRect);
+        this._dragPreviewContext.set({ kind: 'time', timestamp });
+      } else {
+        this._dragPreviewContext.set(null);
       }
     } else {
-      this.dragPreviewLabel.set('UNSCHEDULE');
+      this._dragPreviewContext.set({ kind: 'override', label: 'UNSCHEDULE' });
       this._lastCalculatedTimestamp = null;
     }
   }
@@ -648,6 +665,37 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
       pointer.x >= gridRect.left &&
       pointer.x <= gridRect.right
     );
+  }
+
+  private _refreshPreviewForCurrentPointer(): void {
+    if (!this.isDragging()) {
+      return;
+    }
+    const pointer = this._lastPointerPosition;
+    if (!pointer) {
+      return;
+    }
+    const gridContainer = this.gridContainer().nativeElement;
+    if (!gridContainer) {
+      return;
+    }
+    const gridRect = gridContainer.getBoundingClientRect();
+    const targetDay = this.getDayUnderPointer(pointer.x, pointer.y);
+    const targetEl =
+      this._updatePointerCaches(pointer) ??
+      this._lastDropCol ??
+      this._lastDropScheduleEvent;
+    const isWithinGrid = this._isWithinGrid(pointer, gridRect);
+
+    if (this.isShiftNoScheduleMode()) {
+      if (targetEl) {
+        this._handleShiftDragMove(targetEl, pointer, gridRect, targetDay, isWithinGrid);
+      } else {
+        this._dragPreviewContext.set(null);
+      }
+    } else {
+      this._handleTimeDragMove(pointer, gridRect, targetDay, isWithinGrid);
+    }
   }
 
   private _calculateRowSpan(event: ScheduleEvent | null): number {
@@ -666,6 +714,7 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
   onDocumentKeyDown(event: KeyboardEvent): void {
     if (event.key === 'Shift') {
       this.isShiftNoScheduleMode.set(true);
+      this._refreshPreviewForCurrentPointer();
     }
     if (event.key === 'Control' || event.ctrlKey) {
       this.isCtrlPressed.set(true);
@@ -676,6 +725,7 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
   onDocumentKeyUp(event: KeyboardEvent): void {
     if (event.key === 'Shift') {
       this.isShiftNoScheduleMode.set(false);
+      this._refreshPreviewForCurrentPointer();
     }
     if (event.key === 'Control' || !event.ctrlKey) {
       this.isCtrlPressed.set(false);
