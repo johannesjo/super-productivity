@@ -124,7 +124,6 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
   });
 
   events = computed(() => this._eventsAndBeyondBudget().eventsFlat);
-  beyondBudget = computed(() => this._eventsAndBeyondBudget().beyondBudgetDays);
 
   private _workStartEndHours = toSignal(
     this._store.select(selectTimelineWorkStartEndHours),
@@ -158,7 +157,7 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
       this.currentTimeRow();
       // Delay the scroll to ensure the DOM is ready
       setTimeout(() => {
-        this.scrollToCurrentTime();
+        this._scrollToCurrentTime();
       }, 100);
     });
   }
@@ -169,7 +168,7 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
 
     // Initial scroll to current time after view initialization
     setTimeout(() => {
-      this.scrollToCurrentTime();
+      this._scrollToCurrentTime();
     }, 100);
   }
 
@@ -180,7 +179,7 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     }
 
     // Ensure preview styling is cleaned up
-    this.applySchedulePreviewStyling(false);
+    this._applySchedulePreviewStyling(false);
   }
 
   onDragEnter(event: CdkDragEnter<{ day: string }>): void {
@@ -188,11 +187,11 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     const data: any = (event.item as any)?.data;
     const title: string =
       data && typeof data === 'object' && 'title' in data ? data.title : '';
-    this.startScheduleMode(title);
+    this._startScheduleMode(title);
   }
 
   onDragExit(): void {
-    this.stopScheduleMode();
+    this._stopScheduleMode();
   }
 
   onDragMove(event: MouseEvent | TouchEvent): void {
@@ -202,7 +201,7 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     if (dragPreview) {
       const isScheduleEventDrag = !!dragPreview.querySelector('schedule-event');
       if (!this.isDragging() && !isScheduleEventDrag) {
-        this.startScheduleMode();
+        this._startScheduleMode();
       }
     }
     if (!this.isDragging()) return;
@@ -223,7 +222,7 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     }
 
     // Calculate time based on the drag preview position (matching dropPoint logic)
-    const timestamp = this.calculateTimeFromYPosition(previewY);
+    const timestamp = this._calculateTimeFromYPosition(previewY);
     this.lastCalculatedTimestamp = timestamp;
 
     if (timestamp) {
@@ -238,7 +237,7 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private calculateTimeFromYPosition(clientY: number): number | null {
+  private _calculateTimeFromYPosition(clientY: number): number | null {
     const containerElement = this.scheduleWeekRef?.nativeElement;
     const scheduleWeek = containerElement?.querySelector('.grid-container');
 
@@ -263,10 +262,10 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     }
 
     // Calculate drop time BEFORE clearing drag state (while preview element still exists)
-    const dropTime = this.calculateDropTime();
+    const dropTime = this._calculateDropTime();
 
     // Clear drag state after calculation
-    this.stopScheduleMode();
+    this._stopScheduleMode();
 
     // Don't handle internal moves within the schedule
     if (event.previousContainer === event.container) {
@@ -316,7 +315,7 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     return !isScheduleEvent;
   };
 
-  private calculateDropTime(): number | null {
+  private _calculateDropTime(): number | null {
     // Use the exact timestamp that was calculated during the last drag move
     // This ensures perfect consistency between preview and actual scheduling
     const timestamp = this.lastCalculatedTimestamp;
@@ -334,7 +333,7 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     return timestamp;
   }
 
-  private scrollToCurrentTime(): void {
+  private _scrollToCurrentTime(): void {
     if (!this.scheduleWeekRef?.nativeElement) {
       Log.warn('[ScheduleDayPanel] No scheduleWeekRef available');
       return;
@@ -382,7 +381,61 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  private applySchedulePreviewStyling(isEnable: boolean, previewTitle?: string): void {
+  private _updatePreviewTimeBadge(timeStr: string): void {
+    const preview = document.querySelector('.cdk-drag-preview') as HTMLElement | null;
+    if (!preview) return;
+    const timeBadge = preview.querySelector('.time-badge') as HTMLElement | null;
+    if (timeBadge) {
+      timeBadge.textContent = timeStr;
+    }
+  }
+
+  private _startScheduleMode(previewTitle?: string): void {
+    if (this.isDragging()) return;
+    this.isDragging.set(true);
+    this._applySchedulePreviewStyling(true, previewTitle);
+    this._cdr.markForCheck();
+    // Track pointer globally so we can leave schedule mode when not over panel
+    document.addEventListener('mousemove', this._onGlobalPointerMove, {
+      passive: true,
+    });
+    document.addEventListener('touchmove', this._onGlobalPointerMove, {
+      passive: true,
+    });
+  }
+
+  private _stopScheduleMode(): void {
+    if (!this.isDragging()) return;
+    this.isDragging.set(false);
+    this.dragPreviewTime.set(null);
+    this.lastCalculatedTimestamp = null;
+    this._applySchedulePreviewStyling(false);
+    this._cdr.markForCheck();
+    document.removeEventListener('mousemove', this._onGlobalPointerMove);
+    document.removeEventListener('touchmove', this._onGlobalPointerMove);
+  }
+
+  private _onGlobalPointerMove = (ev: MouseEvent | TouchEvent): void => {
+    // If pointer is not over the side panel/drop zone anymore, leave schedule mode
+    const clientX = 'touches' in ev ? ev.touches[0].clientX : ev.clientX;
+    const clientY = 'touches' in ev ? ev.touches[0].clientY : ev.clientY;
+    const dropZoneEl = this.dropList?.element?.nativeElement as HTMLElement | null;
+    if (!dropZoneEl) {
+      return;
+    }
+    const rect = dropZoneEl.getBoundingClientRect();
+    const isInside =
+      clientX >= rect.left &&
+      clientX <= rect.right &&
+      clientY >= rect.top &&
+      clientY <= rect.bottom;
+    if (!isInside) {
+      // Re-enter Angular zone to ensure CD runs for OnPush
+      this._ngZone.run(() => this._stopScheduleMode());
+    }
+  };
+
+  private _applySchedulePreviewStyling(isEnable: boolean, previewTitle?: string): void {
     const preview = document.querySelector('.cdk-drag-preview') as HTMLElement | null;
     if (!preview) {
       return;
@@ -434,58 +487,4 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
       if (titleEl) (titleEl as HTMLElement).remove();
     }
   }
-
-  private _updatePreviewTimeBadge(timeStr: string): void {
-    const preview = document.querySelector('.cdk-drag-preview') as HTMLElement | null;
-    if (!preview) return;
-    const timeBadge = preview.querySelector('.time-badge') as HTMLElement | null;
-    if (timeBadge) {
-      timeBadge.textContent = timeStr;
-    }
-  }
-
-  private startScheduleMode(previewTitle?: string): void {
-    if (this.isDragging()) return;
-    this.isDragging.set(true);
-    this.applySchedulePreviewStyling(true, previewTitle);
-    this._cdr.markForCheck();
-    // Track pointer globally so we can leave schedule mode when not over panel
-    document.addEventListener('mousemove', this.onGlobalPointerMove, {
-      passive: true,
-    });
-    document.addEventListener('touchmove', this.onGlobalPointerMove, {
-      passive: true,
-    });
-  }
-
-  private stopScheduleMode(): void {
-    if (!this.isDragging()) return;
-    this.isDragging.set(false);
-    this.dragPreviewTime.set(null);
-    this.lastCalculatedTimestamp = null;
-    this.applySchedulePreviewStyling(false);
-    this._cdr.markForCheck();
-    document.removeEventListener('mousemove', this.onGlobalPointerMove);
-    document.removeEventListener('touchmove', this.onGlobalPointerMove);
-  }
-
-  private onGlobalPointerMove = (ev: MouseEvent | TouchEvent): void => {
-    // If pointer is not over the side panel/drop zone anymore, leave schedule mode
-    const clientX = 'touches' in ev ? ev.touches[0].clientX : ev.clientX;
-    const clientY = 'touches' in ev ? ev.touches[0].clientY : ev.clientY;
-    const dropZoneEl = this.dropList?.element?.nativeElement as HTMLElement | null;
-    if (!dropZoneEl) {
-      return;
-    }
-    const rect = dropZoneEl.getBoundingClientRect();
-    const isInside =
-      clientX >= rect.left &&
-      clientX <= rect.right &&
-      clientY >= rect.top &&
-      clientY <= rect.bottom;
-    if (!isInside) {
-      // Re-enter Angular zone to ensure CD runs for OnPush
-      this._ngZone.run(() => this.stopScheduleMode());
-    }
-  };
 }

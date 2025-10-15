@@ -8,26 +8,26 @@
 .schedule-day-drop-zone {
 }
 
-.drag-time-preview {
-  position: fixed;
-  transform: translate(-50%, -100%);
-  z-index: 2000;
-  pointer-events: none;
-  margin-top: -44px;
-
-  .time-badge {
-    background: var(--c-accent);
-    color: var(--text-on-accent);
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 14px;
-    font-weight: 600;
-    box-shadow: var(--whiteframe-shadow-8dp);
-    white-space: nowrap;
-    border: 2px solid var(--c-primary);
-    max-width: 320px;
-  }
-}
+//.drag-time-preview {
+//  position: fixed;
+//  transform: translate(-50%, -100%);
+//  z-index: 2000;
+//  pointer-events: none;
+//  margin-top: -44px;
+//
+//  .time-badge {
+//    background: var(--c-accent);
+//    color: var(--text-on-accent);
+//    padding: 8px 16px;
+//    border-radius: 20px;
+//    font-size: 14px;
+//    font-weight: 600;
+//    box-shadow: var(--whiteframe-shadow-8dp);
+//    white-space: nowrap;
+//    border: 2px solid var(--c-primary);
+//    max-width: 320px;
+//  }
+//}
 
 :host ::ng-deep .grid-container {
   --schedule-time-width: 2em;
