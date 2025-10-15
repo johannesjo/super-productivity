@@ -1520,7 +1520,9 @@
         "SKIP": "Skip",
         "SPLIT_TIME": "Split time into multiples tasks and breaks",
         "TASK": "Task",
-        "TRACK_TO": "Track to"
+        "TRACK_TO": "Track to",
+        "WARN_SIMPLE_COUNTER": "Time will be counted towards the activated simple counter buttons.",
+        "WARN_SIMPLE_COUNTER_BREAK": "Time will STILL be counted on the activated simple counter buttons."
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Create</em> and track to",
