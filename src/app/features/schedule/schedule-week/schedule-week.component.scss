@@ -373,16 +373,21 @@ schedule-event.cdk-drag-dragging + schedule-event {
   box-shadow: var(--whiteframe-shadow-8dp);
   transform-origin: center top;
   transform: scale(1.05) !important;
+  border-radius: 0;
+
+  &.isScheduleForDay {
+    border-radius: var(--card-border-radius);
+
+    .drag-preview-time-badge {
+      font-size: 13px;
+    }
+  }
 
   // NOTE has global styles in _overwrite-material.scss
   .drag-preview-time-badge {
     top: 0 !important;
     right: -8px;
     border-radius: 12px;
-
-    &.smaller {
-      font-size: 13px;
-    }
   }
 }
 

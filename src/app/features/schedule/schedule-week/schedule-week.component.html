@@ -165,12 +165,10 @@
       class="custom-drag-preview"
       [event]="currentDragEvent()!"
       [style]="dragPreviewStyle()!"
+      [class.isScheduleForDay]="isShiftNoScheduleMode()"
     >
       @if (dragPreviewLabel()) {
-        <div
-          class="drag-preview-time-badge"
-          [class.smaller]="isShiftNoScheduleMode()"
-        >
+        <div class="drag-preview-time-badge">
           {{ dragPreviewLabel() }}
         </div>
       }
