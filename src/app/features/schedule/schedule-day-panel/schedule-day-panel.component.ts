@@ -62,12 +62,6 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
   isDragging = signal(false);
   private lastCalculatedTimestamp: number | null = null;
 
-  // Track shift key during drag operations
-  private _isShiftPressed = signal(false);
-
-  // Expose shift key state to template
-  isShiftPressed = this._isShiftPressed.asReadonly();
-
   private _todayDateStr = toSignal(this._globalTrackingIntervalService.todayDateStr$, {
     initialValue: this._dateService.todayStr(Date.now()),
   });
@@ -177,10 +171,6 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     setTimeout(() => {
       this.scrollToCurrentTime();
     }, 100);
-
-    // Add keyboard event listeners for shift key
-    document.addEventListener('keydown', this.onKeyDown);
-    document.addEventListener('keyup', this.onKeyUp);
   }
 
   ngOnDestroy(): void {
@@ -188,10 +178,6 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     if (this.dropList) {
       this._dropListService.unregisterDropList(this.dropList);
     }
-
-    // Remove keyboard event listeners
-    document.removeEventListener('keydown', this.onKeyDown);
-    document.removeEventListener('keyup', this.onKeyUp);
 
     // Ensure preview styling is cleaned up
     this.applySchedulePreviewStyling(false);
@@ -291,16 +277,7 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     const targetDay = this.daysToShow()[0];
 
     if (task && targetDay) {
-      if (this._isShiftPressed()) {
-        // Shift pressed: Plan for day (old behavior)
-        this._store.dispatch(
-          PlannerActions.planTaskForDay({
-            task: task,
-            day: targetDay,
-            isAddToTop: true,
-          }),
-        );
-      } else if (dropTime !== null) {
+      if (dropTime !== null) {
         // No shift: Schedule the task at the specific time (new default behavior)
         this._store.dispatch(
           TaskSharedActions.scheduleTaskWithTime({
@@ -356,18 +333,6 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
 
     return timestamp;
   }
-
-  private onKeyDown = (event: KeyboardEvent): void => {
-    if (event.key === 'Shift') {
-      this._isShiftPressed.set(true);
-    }
-  };
-
-  private onKeyUp = (event: KeyboardEvent): void => {
-    if (event.key === 'Shift') {
-      this._isShiftPressed.set(false);
-    }
-  };
 
   private scrollToCurrentTime(): void {
     if (!this.scheduleWeekRef?.nativeElement) {
