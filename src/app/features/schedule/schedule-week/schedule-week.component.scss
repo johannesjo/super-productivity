@@ -379,6 +379,10 @@ schedule-event.cdk-drag-dragging + schedule-event {
     top: 0 !important;
     right: -8px;
     border-radius: 12px;
+
+    &.smaller {
+      font-size: 12px;
+    }
   }
 }
 

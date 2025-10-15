@@ -8,6 +8,7 @@ import {
   inject,
   input,
   HostListener,
+  LOCALE_ID,
   OnDestroy,
   OnInit,
   signal,
@@ -39,6 +40,7 @@ import { DateTimeFormatService } from '../../../core/date-time-format/date-time-
 import { LocaleDatePipe } from '../../../ui/pipes/locale-date.pipe';
 import { remindOptionToMilliseconds } from '../../tasks/util/remind-option-to-milliseconds';
 import { TaskReminderOptionId } from '../../tasks/task.model';
+import { formatMonthDay } from '../../../util/format-month-day.util';
 
 const D_HOURS = 24;
 const DRAG_CLONE_CLASS = 'drag-clone';
@@ -70,6 +72,7 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
   private _store = inject(Store);
   private _dateTimeFormatService = inject(DateTimeFormatService);
   private _translateService = inject(TranslateService);
+  private _defaultLocale = inject(LOCALE_ID);
 
   isMinimalHeader = input<boolean>(false);
   events = input<ScheduleEvent[] | null>([]);
@@ -132,7 +135,7 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
   dragCloneEl = signal<HTMLElement | null>(null);
 
   // Drag preview properties for time indicator
-  dragPreviewTime = signal<string | null>(null);
+  dragPreviewLabel = signal<string | null>(null);
   dragPreviewPosition = signal({ x: 0, y: 0 });
   private _lastCalculatedTimestamp: number | null = null;
 
@@ -294,7 +297,7 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
     const hours = date.getHours();
     const minutes = date.getMinutes();
     const timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-    this.dragPreviewTime.set(timeStr);
+    this.dragPreviewLabel.set(timeStr);
 
     // Calculate grid position
     const relativeY = pointerY - gridRect.top;
@@ -366,7 +369,7 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
     nativeEl.style.pointerEvents = '';
     nativeEl.style.opacity = '1';
 
-    this.dragPreviewTime.set(null);
+    this.dragPreviewLabel.set(null);
     this.currentDragEvent.set(null);
     this.dragPreviewGridPosition.set(null);
     this.dragPreviewStyle.set(null);
@@ -578,15 +581,20 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
         this._createDragPreview(timestamp, targetDay, pointer.y, gridRect);
       }
       if (targetEl.classList.contains('col')) {
+        const dateLabel = this._formatDateLabel(targetDay);
         badgeText = targetEl.classList.contains('end-of-day')
-          ? this._translateService.instant(T.F.SCHEDULE.PLAN_END_DAY)
-          : this._translateService.instant(T.F.SCHEDULE.PLAN_START_DAY);
+          ? this._translateService.instant(T.F.SCHEDULE.PLAN_END_DAY, {
+              date: dateLabel,
+            })
+          : this._translateService.instant(T.F.SCHEDULE.PLAN_START_DAY, {
+              date: dateLabel,
+            });
       }
     } else {
       this.dragPreviewStyle.set(null);
       badgeText = null;
     }
-    this.dragPreviewTime.set(badgeText);
+    this.dragPreviewLabel.set(badgeText);
 
     const prevEl = this.prevDragOverEl();
     if (prevEl && prevEl !== targetEl) {
@@ -628,7 +636,7 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
         this._createDragPreview(timestamp, targetDay, pointer.y, gridRect);
       }
     } else {
-      this.dragPreviewTime.set('UNSCHEDULE');
+      this.dragPreviewLabel.set('UNSCHEDULE');
       this._lastCalculatedTimestamp = null;
     }
   }
@@ -672,6 +680,22 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
     if (event.key === 'Control' || !event.ctrlKey) {
       this.isCtrlPressed.set(false);
     }
+  }
+
+  private _formatDateLabel(dayStr: string): string {
+    if (!dayStr) {
+      return '';
+    }
+    const date = new Date(dayStr);
+    if (Number.isNaN(date.getTime())) {
+      return dayStr;
+    }
+    const locale =
+      this._dateTimeFormatService.currentLocale ||
+      this._translateService.currentLang ||
+      this._defaultLocale ||
+      'en-US';
+    return formatMonthDay(date, locale);
   }
 
   private _extractDropPoint(

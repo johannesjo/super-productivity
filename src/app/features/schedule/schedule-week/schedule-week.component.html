@@ -166,8 +166,13 @@
       [event]="currentDragEvent()!"
       [style]="dragPreviewStyle()!"
     >
-      @if (dragPreviewTime()) {
-        <div class="drag-preview-time-badge">{{ dragPreviewTime() }}</div>
+      @if (dragPreviewLabel()) {
+        <div
+          class="drag-preview-time-badge"
+          [class.smaller]="isShiftNoScheduleMode()"
+        >
+          {{ dragPreviewLabel() }}
+        </div>
       }
     </schedule-event>
   }
