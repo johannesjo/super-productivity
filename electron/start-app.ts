@@ -213,7 +213,7 @@ export const startApp = (): void => {
       isCheckingIdle = true;
       try {
         const startTime = Date.now();
-        const idleTime = await idleTimeHandler.getIdleTimeWithFallbacks();
+        const idleTime = await idleTimeHandler.getIdleTime();
         const checkDuration = Date.now() - startTime;
 
         log(

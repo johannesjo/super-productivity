@@ -70,21 +70,17 @@ export class IdleTimeHandler {
     return environment;
   }
 
-  private _initializeWorkingMethod(): Promise<IdleDetectionMethod> {
-    const detection = this._determineWorkingMethod()
-      .then((method) => {
-        this._workingMethod = method;
-        return method;
-      })
-      .catch((error) => {
-        log.warn('Idle detection initialization failed', error);
-        this._workingMethod = 'none';
-        return 'none';
-      });
-
-    detection.then((method) => log.info(`Idle detection method ready: ${method}`));
-
-    return detection;
+  private async _initializeWorkingMethod(): Promise<IdleDetectionMethod> {
+    try {
+      const method = await this._determineWorkingMethod();
+      this._workingMethod = method;
+      log.info(`Idle detection method ready: ${method}`);
+      return method;
+    } catch (error) {
+      log.warn('Idle detection initialization failed', error);
+      this._workingMethod = 'none';
+      return 'none';
+    }
   }
 
   private async _ensureWorkingMethod(): Promise<IdleDetectionMethod> {
@@ -249,94 +245,78 @@ export class IdleTimeHandler {
   }
 
   private async _getGnomeIdleTime(): Promise<number | null> {
+    const isSnap = this._environment.isSnap;
+    if (isSnap) {
+      log.debug('Attempting GNOME idle detection inside snap environment');
+    }
+
+    let command =
+      'gdbus call --session --dest org.gnome.Mutter.IdleMonitor --object-path /org/gnome/Mutter/IdleMonitor/Core --method org.gnome.Mutter.IdleMonitor.GetIdletime';
+
     try {
-      const isSnap = this._environment.isSnap;
+      await execAsync('which gdbus', { timeout: 1000 });
+    } catch {
       if (isSnap) {
-        log.debug('Attempting GNOME idle detection inside snap environment');
+        log.warn(
+          'gdbus unavailable in snap environment, skipping dbus-send fallback to avoid libdbus mismatch',
+        );
+        return null;
       }
+      command =
+        'dbus-send --print-reply --dest=org.gnome.Mutter.IdleMonitor /org/gnome/Mutter/IdleMonitor/Core org.gnome.Mutter.IdleMonitor.GetIdletime';
+    }
 
-      let command =
-        'gdbus call --session --dest org.gnome.Mutter.IdleMonitor --object-path /org/gnome/Mutter/IdleMonitor/Core --method org.gnome.Mutter.IdleMonitor.GetIdletime';
-
-      try {
-        await execAsync('which gdbus', { timeout: 1000 });
-      } catch {
-        if (isSnap) {
-          log.warn(
-            'gdbus unavailable in snap environment, skipping dbus-send fallback to avoid libdbus mismatch',
-          );
-          return null;
-        }
-        command =
-          'dbus-send --print-reply --dest=org.gnome.Mutter.IdleMonitor /org/gnome/Mutter/IdleMonitor/Core org.gnome.Mutter.IdleMonitor.GetIdletime';
-      }
-
-      let stdout: string;
-      try {
-        const result = await execAsync(command, { timeout: 5000 });
-        stdout = result.stdout;
-      } catch (error) {
-        if (isSnap) {
-          log.warn('gdbus idle monitor failed in snap environment', error);
-          return null;
-        }
-        throw error;
-      }
-
-      const match = stdout.match(/uint64\s+(\d+)|(?:\(uint64\s+)?(\d+)(?:,\))?/);
-      if (match) {
-        const idleMs = parseInt(match[1] || match[2], 10);
-        if (idleMs >= 0 && idleMs < Number.MAX_SAFE_INTEGER) {
-          return idleMs;
-        }
-      }
+    let stdout: string;
+    try {
+      const result = await execAsync(command, { timeout: 5000 });
+      stdout = result.stdout;
     } catch (error) {
+      if (isSnap) {
+        log.warn('gdbus idle monitor failed in snap environment', error);
+        return null;
+      }
       throw error;
+    }
+
+    const match = stdout.match(/uint64\s+(\d+)|(?:\(uint64\s+)?(\d+)(?:,\))?/);
+    if (match) {
+      const idleMs = parseInt(match[1] || match[2], 10);
+      if (idleMs >= 0 && idleMs < Number.MAX_SAFE_INTEGER) {
+        return idleMs;
+      }
     }
 
     return null;
   }
 
   private async _getLoginctlIdleTime(): Promise<number | null> {
-    try {
-      const { stdout } = await execAsync('loginctl show-session -p IdleSinceHint', {
-        timeout: 3000,
-      });
+    const { stdout } = await execAsync('loginctl show-session -p IdleSinceHint', {
+      timeout: 3000,
+    });
 
-      const match = stdout.match(/IdleSinceHint=(\d+)/);
-      if (match && match[1]) {
-        const idleSince = parseInt(match[1], 10);
-        if (idleSince > 0) {
-          const nowMs = Date.now() * 1000;
-          const idleMs = nowMs - idleSince;
-          if (idleMs >= 0 && idleMs < Number.MAX_SAFE_INTEGER) {
-            return Math.floor(idleMs / 1000);
-          }
+    const match = stdout.match(/IdleSinceHint=(\d+)/);
+    if (match && match[1]) {
+      const idleSince = parseInt(match[1], 10);
+      if (idleSince > 0) {
+        const nowMs = Date.now() * 1000;
+        const idleMs = nowMs - idleSince;
+        if (idleMs >= 0 && idleMs < Number.MAX_SAFE_INTEGER) {
+          return Math.floor(idleMs / 1000);
         }
       }
-    } catch (error) {
-      throw error;
     }
 
     return null;
   }
 
   private async _getXprintidleTime(): Promise<number | null> {
-    try {
-      const { stdout } = await execAsync('xprintidle', { timeout: 3000 });
-      const idleMs = parseInt(stdout.trim(), 10);
-      if (!isNaN(idleMs) && idleMs >= 0) {
-        return idleMs;
-      }
-    } catch (error) {
-      throw error;
+    const { stdout } = await execAsync('xprintidle', { timeout: 3000 });
+    const idleMs = parseInt(stdout.trim(), 10);
+    if (!isNaN(idleMs) && idleMs >= 0) {
+      return idleMs;
     }
 
     return null;
-  }
-
-  async getIdleTimeWithFallbacks(): Promise<number> {
-    return this.getIdleTime();
   }
 
   get currentMethod(): IdleDetectionMethod {
