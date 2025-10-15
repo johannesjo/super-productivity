@@ -401,14 +401,40 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const { columnTarget, scheduleEventTarget } = this._resolveDropTargets(ev);
     const task = ev.source.data.data as any;
+    const sourceTaskId = nativeEl.id.replace(T_ID_PREFIX, '');
+    const targetTaskId = scheduleEventTarget
+      ? scheduleEventTarget.id.replace(T_ID_PREFIX, '')
+      : '';
+    const canMoveBefore =
+      !!scheduleEventTarget &&
+      sourceTaskId.length > 0 &&
+      targetTaskId.length > 0 &&
+      sourceTaskId !== targetTaskId;
 
-    if (columnTarget && task) {
+    const dispatchMoveBefore = (): void => {
+      this._store.dispatch(
+        PlannerActions.moveBeforeTask({
+          fromTask: ev.source.data.data,
+          toTaskId: targetTaskId,
+        }),
+      );
+    };
+
+    let handled = false;
+
+    if (this.isShiftNoScheduleMode() && canMoveBefore) {
+      dispatchMoveBefore();
+      handled = true;
+    }
+
+    if (!handled && columnTarget && task) {
       const isMoveToEndOfDay = columnTarget.classList.contains('end-of-day');
       const targetDay =
         columnTarget.getAttribute('data-day') ||
         (dropPoint ? this.getDayUnderPointer(dropPoint.x, dropPoint.y) : null);
 
       if (targetDay) {
+        handled = true;
         if (this.isShiftNoScheduleMode()) {
           this._store.dispatch(
             PlannerActions.planTaskForDay({
@@ -435,25 +461,16 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
           }
         }
       }
-    } else if (scheduleEventTarget) {
-      const sourceTaskId = nativeEl.id.replace(T_ID_PREFIX, '');
-      const targetTaskId = scheduleEventTarget.id.replace(T_ID_PREFIX, '');
+    }
 
-      if (
-        sourceTaskId &&
-        sourceTaskId.length > 0 &&
-        targetTaskId &&
-        sourceTaskId !== targetTaskId
-      ) {
-        this._store.dispatch(
-          PlannerActions.moveBeforeTask({
-            fromTask: ev.source.data.data,
-            toTaskId: targetTaskId,
-          }),
-        );
-      }
-    } else if (task && dropPoint && this._isOutsideGrid(dropPoint)) {
+    if (!handled && canMoveBefore) {
+      dispatchMoveBefore();
+      handled = true;
+    }
+
+    if (!handled && task && dropPoint && this._isOutsideGrid(dropPoint)) {
       this._store.dispatch(TaskSharedActions.planTasksForToday({ taskIds: [task.id] }));
+      handled = true;
     }
 
     this._resetDragCaches();
@@ -480,6 +497,8 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
         scheduleEventTarget = fallback.closest('schedule-event') as HTMLElement | null;
       }
     }
+
+    scheduleEventTarget = this._sanitizeScheduleEventTarget(scheduleEventTarget);
 
     return { columnTarget, scheduleEventTarget };
   }
@@ -552,31 +571,50 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
     this._lastPointerPosition = null;
   }
 
+  private _isPreviewElement(element: Element | null): boolean {
+    if (!(element instanceof HTMLElement)) {
+      return false;
+    }
+    return (
+      element.classList.contains(DRAG_CLONE_CLASS) ||
+      element.classList.contains('custom-drag-preview') ||
+      element.classList.contains('cdk-drag-preview') ||
+      !!element.closest('.cdk-drag-preview')
+    );
+  }
+
+  private _sanitizeScheduleEventTarget(target: HTMLElement | null): HTMLElement | null {
+    if (!target || this._isPreviewElement(target)) {
+      return null;
+    }
+    return target;
+  }
+
   private _updatePointerCaches(pointer: { x: number; y: number }): HTMLElement | null {
     this._lastPointerPosition = pointer;
     const elementsAtPoint = document.elementsFromPoint(pointer.x, pointer.y);
     const interactiveElements = elementsAtPoint.filter(
-      (el): el is HTMLElement =>
-        el instanceof HTMLElement &&
-        !el.classList.contains(DRAG_CLONE_CLASS) &&
-        !el.classList.contains('custom-drag-preview'),
+      (el): el is HTMLElement => el instanceof HTMLElement && !this._isPreviewElement(el),
     );
 
     if (interactiveElements.length) {
       this._lastDropCol =
         interactiveElements.find((el) => el.classList.contains('col')) || null;
-      this._lastDropScheduleEvent =
+      const scheduleEventCandidate =
         interactiveElements.find((el) => el.tagName.toLowerCase() === 'schedule-event') ||
         null;
-      const targetEl = interactiveElements[0];
-      return targetEl.classList.contains(DRAG_CLONE_CLASS) ? null : targetEl;
+      const sanitizedScheduleEvent =
+        this._sanitizeScheduleEventTarget(scheduleEventCandidate);
+      this._lastDropScheduleEvent = sanitizedScheduleEvent;
+      const targetEl = sanitizedScheduleEvent ?? interactiveElements[0];
+      return this._isPreviewElement(targetEl) ? null : targetEl;
     }
 
     const fallback = document.elementFromPoint(
       pointer.x,
       pointer.y,
     ) as HTMLElement | null;
-    if (fallback && !fallback.classList.contains(DRAG_CLONE_CLASS)) {
+    if (fallback && !this._isPreviewElement(fallback)) {
       return fallback;
     }
     return null;
