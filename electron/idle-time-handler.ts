@@ -226,10 +226,7 @@ export class IdleTimeHandler {
     try {
       const isSnap = !!process.env.SNAP;
       if (isSnap) {
-        log.warn(
-          'Skipping GNOME idle detection for snap environment (DBus not guaranteed)',
-        );
-        return null;
+        log.debug('Attempting GNOME idle detection inside snap environment');
       }
 
       // Try gdbus first as it might work better in snap environments
