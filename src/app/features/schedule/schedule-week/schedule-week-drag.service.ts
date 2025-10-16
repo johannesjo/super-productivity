@@ -1,5 +1,5 @@
 import { CdkDragMove, CdkDragRelease, CdkDragStart } from '@angular/cdk/drag-drop';
-import { WritableSignal } from '@angular/core';
+import { inject, Injectable, Signal, signal } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
@@ -12,6 +12,7 @@ import {
 import { remindOptionToMilliseconds } from '../../tasks/util/remind-option-to-milliseconds';
 import { TaskReminderOptionId } from '../../tasks/task.model';
 import { calculateTimeFromYPosition } from '../schedule-utils';
+import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import type { DragPreviewContext } from './schedule-week-drag.types';
 import type { ScheduleEvent } from '../schedule.model';
 
@@ -20,41 +21,42 @@ interface PointerPosition {
   y: number;
 }
 
-export interface ScheduleWeekDragManagerDeps {
-  readonly isTouchPrimary: boolean;
-  readonly gridContainer: () => HTMLElement | null;
-  readonly daysToShow: () => readonly string[];
-  readonly isShiftMode: () => boolean;
-  readonly dragPreviewContext: WritableSignal<DragPreviewContext>;
-  readonly dragPreviewStyle: WritableSignal<string | null>;
-  readonly dragPreviewPosition: WritableSignal<PointerPosition>;
-  readonly currentDragEvent: WritableSignal<ScheduleEvent | null>;
-  readonly prevDragOverEl: WritableSignal<HTMLElement | null>;
-  readonly dragCloneEl: WritableSignal<HTMLElement | null>;
-  readonly isDragging: WritableSignal<boolean>;
-  readonly isDraggingDelayed: WritableSignal<boolean>;
-  readonly showShiftKeyInfo: WritableSignal<boolean>;
-  readonly store: Store;
-}
-
 const DRAG_CLONE_CLASS = 'drag-clone';
 const DRAG_OVER_CLASS = 'drag-over';
 
-export class ScheduleWeekDragManager {
-  private readonly _isTouchPrimary = this._deps.isTouchPrimary;
-  private readonly _gridContainerFn = this._deps.gridContainer;
-  private readonly _daysToShowFn = this._deps.daysToShow;
-  private readonly _isShiftModeFn = this._deps.isShiftMode;
-  private readonly _dragPreviewContext = this._deps.dragPreviewContext;
-  private readonly _dragPreviewStyle = this._deps.dragPreviewStyle;
-  private readonly _dragPreviewPosition = this._deps.dragPreviewPosition;
-  private readonly _currentDragEvent = this._deps.currentDragEvent;
-  private readonly _prevDragOverEl = this._deps.prevDragOverEl;
-  private readonly _dragCloneEl = this._deps.dragCloneEl;
-  private readonly _isDragging = this._deps.isDragging;
-  private readonly _isDraggingDelayed = this._deps.isDraggingDelayed;
-  private readonly _showShiftKeyInfo = this._deps.showShiftKeyInfo;
-  private readonly _store = this._deps.store;
+@Injectable()
+export class ScheduleWeekDragService {
+  // Central drag state handler so the component can remain mostly declarative.
+  private readonly _store = inject(Store);
+
+  // Accessors let us request fresh values when needed without holding stale references.
+  private _gridContainerAccessor: (() => HTMLElement | null) | null = null;
+  private _daysToShowAccessor: (() => readonly string[]) | null = null;
+  private readonly _isShiftMode = signal(false);
+  readonly isShiftMode: Signal<boolean> = this._isShiftMode.asReadonly();
+
+  private readonly _dragPreviewContext = signal<DragPreviewContext>(null);
+  readonly dragPreviewContext: Signal<DragPreviewContext> =
+    this._dragPreviewContext.asReadonly();
+
+  private readonly _dragPreviewStyle = signal<string | null>(null);
+  readonly dragPreviewStyle: Signal<string | null> = this._dragPreviewStyle.asReadonly();
+
+  private readonly _currentDragEvent = signal<ScheduleEvent | null>(null);
+  readonly currentDragEvent: Signal<ScheduleEvent | null> =
+    this._currentDragEvent.asReadonly();
+
+  private readonly _prevDragOverEl = signal<HTMLElement | null>(null);
+  private readonly _dragCloneEl = signal<HTMLElement | null>(null);
+
+  private readonly _isDragging = signal(false);
+  readonly isDragging: Signal<boolean> = this._isDragging.asReadonly();
+
+  private readonly _isDraggingDelayed = signal(false);
+  readonly isDraggingDelayed: Signal<boolean> = this._isDraggingDelayed.asReadonly();
+
+  private readonly _showShiftKeyInfo = signal(false);
+  readonly showShiftKeyInfo: Signal<boolean> = this._showShiftKeyInfo.asReadonly();
 
   private _lastDropCol: HTMLElement | null = null;
   private _lastDropScheduleEvent: HTMLElement | null = null;
@@ -62,12 +64,24 @@ export class ScheduleWeekDragManager {
   private _lastCalculatedTimestamp: number | null = null;
   private _shiftInfoTimeoutId: number | undefined;
 
-  constructor(private readonly _deps: ScheduleWeekDragManagerDeps) {}
-
   destroy(): void {
-    if (this._shiftInfoTimeoutId) {
-      window.clearTimeout(this._shiftInfoTimeoutId);
-      this._shiftInfoTimeoutId = undefined;
+    this._clearShiftInfoTimeout();
+    this._gridContainerAccessor = null;
+    this._daysToShowAccessor = null;
+  }
+
+  setGridContainer(accessor: () => HTMLElement | null): void {
+    // Resolve the container lazily so we don't hold on to stale DOM nodes between renders.
+    this._gridContainerAccessor = accessor;
+  }
+
+  setDaysToShowAccessor(accessor: () => readonly string[]): void {
+    this._daysToShowAccessor = accessor;
+  }
+
+  setShiftMode(isShiftMode: boolean): void {
+    if (this._isShiftMode() !== isShiftMode) {
+      this._isShiftMode.set(isShiftMode);
     }
   }
 
@@ -81,7 +95,7 @@ export class ScheduleWeekDragManager {
     this._lastPointerPosition = null;
     this._lastCalculatedTimestamp = null;
 
-    if (!this._isTouchPrimary) {
+    if (!IS_TOUCH_PRIMARY) {
       this._showShiftKeyInfo.set(true);
       this._shiftInfoTimeoutId = window.setTimeout(() => {
         this._showShiftKeyInfo.set(false);
@@ -105,18 +119,16 @@ export class ScheduleWeekDragManager {
     }
 
     ev.source.element.nativeElement.style.pointerEvents = 'none';
-    const pointer = {
+    const pointer: PointerPosition = {
       x: ev.pointerPosition.x,
       y: ev.pointerPosition.y,
-    } as PointerPosition;
+    };
     const targetEl = this._updatePointerCaches(pointer);
     if (!targetEl) {
       return;
     }
 
-    this._dragPreviewPosition.set(pointer);
-
-    const gridContainer = this._gridContainerFn();
+    const gridContainer = this._gridContainer();
     if (!gridContainer) {
       return;
     }
@@ -125,7 +137,7 @@ export class ScheduleWeekDragManager {
     const targetDay = this._getDayUnderPointer(pointer.x, pointer.y);
     const isWithinGrid = this._isWithinGrid(pointer, gridRect);
 
-    if (this._isShiftModeFn()) {
+    if (this.isShiftMode()) {
       this._handleShiftDragMove(targetEl, pointer, gridRect, targetDay, isWithinGrid);
     } else {
       this._handleTimeDragMove(pointer, gridRect, targetDay, isWithinGrid);
@@ -185,7 +197,7 @@ export class ScheduleWeekDragManager {
 
     let handled = false;
 
-    if (this._isShiftModeFn() && canMoveBefore) {
+    if (this.isShiftMode() && canMoveBefore) {
       dispatchMoveBefore();
       handled = true;
     }
@@ -198,7 +210,7 @@ export class ScheduleWeekDragManager {
 
       if (targetDay) {
         handled = true;
-        if (this._isShiftModeFn()) {
+        if (this.isShiftMode()) {
           this._store.dispatch(
             PlannerActions.planTaskForDay({
               task,
@@ -249,7 +261,7 @@ export class ScheduleWeekDragManager {
     if (!pointer) {
       return;
     }
-    const gridContainer = this._gridContainerFn();
+    const gridContainer = this._gridContainer();
     if (!gridContainer) {
       return;
     }
@@ -261,7 +273,7 @@ export class ScheduleWeekDragManager {
       this._lastDropScheduleEvent;
     const isWithinGrid = this._isWithinGrid(pointer, gridRect);
 
-    if (this._isShiftModeFn()) {
+    if (this.isShiftMode()) {
       if (targetEl) {
         this._handleShiftDragMove(targetEl, pointer, gridRect, targetDay, isWithinGrid);
       } else {
@@ -269,6 +281,36 @@ export class ScheduleWeekDragManager {
       }
     } else {
       this._handleTimeDragMove(pointer, gridRect, targetDay, isWithinGrid);
+    }
+  }
+
+  private _gridContainer(): HTMLElement | null {
+    if (!this._gridContainerAccessor) {
+      return null;
+    }
+    try {
+      return this._gridContainerAccessor();
+    } catch {
+      return null;
+    }
+  }
+
+  private _daysToShow(): readonly string[] {
+    if (!this._daysToShowAccessor) {
+      return [];
+    }
+    try {
+      // `daysToShow` is an Angular signal; invoking the accessor keeps us in sync.
+      return this._daysToShowAccessor() ?? [];
+    } catch {
+      return [];
+    }
+  }
+
+  private _clearShiftInfoTimeout(): void {
+    if (this._shiftInfoTimeoutId) {
+      window.clearTimeout(this._shiftInfoTimeoutId);
+      this._shiftInfoTimeoutId = undefined;
     }
   }
 
@@ -299,6 +341,7 @@ export class ScheduleWeekDragManager {
   }
 
   private _updatePointerCaches(pointer: PointerPosition): HTMLElement | null {
+    // Cache the latest DOM elements under the pointer for fast reuse during release.
     this._lastPointerPosition = pointer;
     const elementsAtPoint = document.elementsFromPoint(pointer.x, pointer.y);
     const interactiveElements = elementsAtPoint.filter(
@@ -423,7 +466,7 @@ export class ScheduleWeekDragManager {
     const rowHeight = gridRect.height / totalRows;
     const row = Math.round(relativeY / rowHeight) + 1;
 
-    const dayIndex = this._daysToShowFn().findIndex((day) => day === targetDay);
+    const dayIndex = this._daysToShow().findIndex((day) => day === targetDay);
     const col = dayIndex + 2;
 
     const rowSpan = this._calculateRowSpan(this._currentDragEvent());
@@ -454,13 +497,13 @@ export class ScheduleWeekDragManager {
       (el) => el?.classList?.contains('col') && el.hasAttribute('data-day'),
     ) as HTMLElement | undefined;
     if (colEl) {
-      const d = colEl.getAttribute('data-day');
-      if (d) {
-        return d;
+      const day = colEl.getAttribute('data-day');
+      if (day) {
+        return day;
       }
     }
 
-    const days = this._daysToShowFn();
+    const days = this._daysToShow();
     return days.length ? days[0] : '';
   }
 
@@ -493,7 +536,7 @@ export class ScheduleWeekDragManager {
     dropPoint: PointerPosition,
     targetDay: string,
   ): number | null {
-    const gridContainer = this._gridContainerFn();
+    const gridContainer = this._gridContainer();
     if (!gridContainer) {
       return null;
     }
@@ -502,7 +545,7 @@ export class ScheduleWeekDragManager {
   }
 
   private _isOutsideGrid(dropPoint: PointerPosition): boolean {
-    const gridContainer = this._gridContainerFn();
+    const gridContainer = this._gridContainer();
     if (!gridContainer) {
       return false;
     }
