@@ -67,6 +67,8 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
   private _ngZone = inject(NgZone);
   private _pointerUpSubscription: Subscription | null = null;
   private _activeExternalTask: TaskWithSubTasks | null = null;
+  private readonly _globalPointerEvents = ['mousemove', 'touchmove'] as const;
+  private readonly _globalPointerListenerOptions = { passive: true };
 
   // Drag preview properties
   dragPreviewTime = signal<string | null>(null);
@@ -205,26 +207,17 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     }
 
     // Always use the top of the task element for time calculation
-    const dragPreview = this._getDragPreview();
-    if (!dragPreview) {
-      return;
-    }
+    this._withDragPreview((previewEl) => {
+      const previewRect = previewEl.getBoundingClientRect();
+      const timestamp = this._calculateTimeFromYPosition(previewRect.top);
+      this.lastCalculatedTimestamp = timestamp;
+      this._updateDragPreviewTime(previewEl, timestamp);
+    });
+  }
 
-    const rect = dragPreview.getBoundingClientRect();
-    // Use the top of the drag preview for consistent time calculation
-    const previewY = rect.top;
-
-    const timestamp = this._calculateTimeFromYPosition(previewY);
-    this.lastCalculatedTimestamp = timestamp;
-
-    if (timestamp) {
-      const timeStr = this._formatPreviewTime(timestamp);
-      this.dragPreviewTime.set(timeStr);
-      this._updatePreviewTimeBadge(timeStr);
-    } else {
-      this.dragPreviewTime.set(null);
-      this._updatePreviewTimeBadge('');
-    }
+  private _targetDay(): string | undefined {
+    const [day] = this.daysToShow();
+    return day;
   }
 
   private _calculateTimeFromYPosition(clientY: number): number | null {
@@ -236,7 +229,12 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     }
 
     const gridRect = scheduleWeek.getBoundingClientRect();
-    const [targetDay] = this.daysToShow();
+    const targetDay = this._targetDay();
+
+    if (!targetDay) {
+      return null;
+    }
+
     return calculateTimeFromYPosition(clientY, gridRect, targetDay);
   }
 
@@ -267,7 +265,7 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     const pointer = this._getPointerPosition(event);
     const isInside = pointer ? this._isPointWithinDropZone(pointer.x, pointer.y) : false;
     const dropTime = isInside ? this._calculateDropTime() : null;
-    const [targetDay] = this.daysToShow();
+    const targetDay = this._targetDay();
 
     this._stopScheduleMode();
     this._externalDragService.setActiveTask(null);
@@ -320,6 +318,14 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     }
     const rect = dropZoneEl.getBoundingClientRect();
     return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+  }
+
+  private _withDragPreview<T>(handler: (preview: HTMLElement) => T): T | null {
+    const previewEl = this._getDragPreview();
+    if (!previewEl) {
+      return null;
+    }
+    return handler(previewEl);
   }
 
   private _getDragPreview(): HTMLElement | null {
@@ -388,15 +394,15 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  private _updatePreviewTimeBadge(timeStr: string): void {
-    const preview = this._getDragPreview();
-    if (!preview) return;
-    const timeBadge = preview.querySelector(
-      '.drag-preview-time-badge',
-    ) as HTMLElement | null;
-    if (timeBadge) {
-      timeBadge.textContent = timeStr;
+  private _updateDragPreviewTime(previewEl: HTMLElement, timestamp: number | null): void {
+    if (timestamp == null) {
+      this.dragPreviewTime.set(null);
+      this._clearTimeBadgeText(previewEl);
+      return;
     }
+    const timeStr = this._formatPreviewTime(timestamp);
+    this.dragPreviewTime.set(timeStr);
+    this._ensureTimeBadge(previewEl).textContent = timeStr;
   }
 
   private _startScheduleMode(): void {
@@ -404,13 +410,7 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     this.isDragging.set(true);
     this._applySchedulePreviewStyling(true);
     this._cdr.markForCheck();
-    // Track pointer globally so we can leave schedule mode when not over panel
-    document.addEventListener('mousemove', this._onGlobalPointerMove, {
-      passive: true,
-    });
-    document.addEventListener('touchmove', this._onGlobalPointerMove, {
-      passive: true,
-    });
+    this._toggleGlobalPointerListeners(true);
   }
 
   private _stopScheduleMode(): void {
@@ -421,8 +421,21 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     this._activeExternalTask = null;
     this._applySchedulePreviewStyling(false);
     this._cdr.markForCheck();
-    document.removeEventListener('mousemove', this._onGlobalPointerMove);
-    document.removeEventListener('touchmove', this._onGlobalPointerMove);
+    this._toggleGlobalPointerListeners(false);
+  }
+
+  private _toggleGlobalPointerListeners(isEnable: boolean): void {
+    for (const eventName of this._globalPointerEvents) {
+      if (isEnable) {
+        document.addEventListener(
+          eventName,
+          this._onGlobalPointerMove,
+          this._globalPointerListenerOptions,
+        );
+      } else {
+        document.removeEventListener(eventName, this._onGlobalPointerMove);
+      }
+    }
   }
 
   private _onGlobalPointerMove = (ev: MouseEvent | TouchEvent): void => {
@@ -439,24 +452,22 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
 
   // we're mutating the dom directly here to add some styling to the drag preview, since it is the most efficient way to do it
   private _applySchedulePreviewStyling(isEnable: boolean): void {
-    const previewEl = this._getDragPreview();
-    if (!previewEl) {
-      return;
-    }
-
-    const tagName = previewEl.tagName.toLowerCase();
-    if (tagName === 'task') {
-      this._applyTaskPreviewStyling(previewEl, isEnable);
-    } else if (tagName === 'schedule-event') {
-      this._applyScheduleEventPreviewStyling(previewEl, isEnable);
-    }
+    this._withDragPreview((previewEl) => {
+      const tagName = previewEl.tagName.toLowerCase();
+      if (tagName === 'task') {
+        this._applyTaskPreviewStyling(previewEl, isEnable);
+      } else if (tagName === 'schedule-event') {
+        this._applyScheduleEventPreviewStyling(previewEl, isEnable);
+      }
+    });
   }
 
   private _applyTaskPreviewStyling(previewEl: HTMLElement, isEnable: boolean): void {
     if (isEnable) {
       previewEl.classList.add('as-schedule-event-preview');
       this._setPreviewWidth(previewEl);
-      this._ensureTimeBadge(previewEl);
+      const timeBadge = this._ensureTimeBadge(previewEl);
+      timeBadge.textContent = this.dragPreviewTime() ?? '';
     } else {
       previewEl.classList.remove('as-schedule-event-preview');
       previewEl.style.removeProperty('width');
@@ -468,18 +479,25 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     const containerElement = this.scheduleWeekRef?.nativeElement as
       | HTMLElement
       | undefined;
-    const [day] = this.daysToShow();
-    const colEl = containerElement?.querySelector(
+    const day = this._targetDay();
+
+    if (!containerElement || !day) {
+      return;
+    }
+
+    const colEl = containerElement.querySelector(
       `.grid-container .col[data-day="${day}"]`,
     ) as HTMLElement | null;
 
-    if (colEl) {
-      const colRect = colEl.getBoundingClientRect();
-      previewEl.style.width = `${Math.max(MIN_PREVIEW_WIDTH_PX, colRect.width - PREVIEW_WIDTH_PADDING_PX)}px`;
+    if (!colEl) {
+      return;
     }
+
+    const colRect = colEl.getBoundingClientRect();
+    previewEl.style.width = `${Math.max(MIN_PREVIEW_WIDTH_PX, colRect.width - PREVIEW_WIDTH_PADDING_PX)}px`;
   }
 
-  private _ensureTimeBadge(previewEl: HTMLElement): void {
+  private _ensureTimeBadge(previewEl: HTMLElement): HTMLElement {
     let timeBadge = previewEl.querySelector(
       '.drag-preview-time-badge',
     ) as HTMLElement | null;
@@ -490,9 +508,15 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
       previewEl.appendChild(timeBadge);
     }
 
-    const currentTime = this.dragPreviewTime();
-    if (currentTime) {
-      timeBadge.textContent = currentTime;
+    return timeBadge;
+  }
+
+  private _clearTimeBadgeText(previewEl: HTMLElement): void {
+    const timeBadge = previewEl.querySelector(
+      '.drag-preview-time-badge',
+    ) as HTMLElement | null;
+    if (timeBadge) {
+      timeBadge.textContent = '';
     }
   }
 
