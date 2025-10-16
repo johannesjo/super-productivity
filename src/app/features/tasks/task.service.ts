@@ -310,6 +310,10 @@ export class TaskService {
     return id;
   }
 
+  addToToday(task: TaskWithSubTasks): void {
+    this._store.dispatch(TaskSharedActions.planTasksForToday({ taskIds: [task.id] }));
+  }
+
   remove(task: TaskWithSubTasks): void {
     this._store.dispatch(TaskSharedActions.deleteTask({ task }));
   }
