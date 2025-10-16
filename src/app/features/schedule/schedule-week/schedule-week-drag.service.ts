@@ -46,11 +46,6 @@ export class ScheduleWeekDragService {
   private readonly _isDragging = signal(false);
   readonly isDragging: Signal<boolean> = this._isDragging.asReadonly();
 
-  // Delayed flag stays true briefly after drag ends to prevent UI flicker
-  // during the reset animation (see handleDragReleased timeout).
-  private readonly _isDraggingDelayed = signal(false);
-  readonly isDraggingDelayed: Signal<boolean> = this._isDraggingDelayed.asReadonly();
-
   private readonly _showShiftKeyInfo = signal(false);
   readonly showShiftKeyInfo: Signal<boolean> = this._showShiftKeyInfo.asReadonly();
 
@@ -90,7 +85,6 @@ export class ScheduleWeekDragService {
 
   handleDragStarted(ev: CdkDragStart<ScheduleEvent>): void {
     this._isDragging.set(true);
-    this._isDraggingDelayed.set(true);
     this._currentDragEvent.set(ev.source.data);
     this._dragPreviewContext.set(null);
     this._lastDropCol = null;
@@ -169,21 +163,15 @@ export class ScheduleWeekDragService {
 
     this._isDragging.set(false);
     const nativeEl = ev.source.element.nativeElement;
-    nativeEl.style.pointerEvents = '';
-    nativeEl.style.opacity = '1';
 
     this._dragPreviewContext.set(null);
     this._currentDragEvent.set(null);
     this._dragPreviewStyle.set(null);
     this._lastCalculatedTimestamp = null;
 
-    // Delay resetting opacity and the dragging flag to allow smooth
-    // animation back to the final position without visual jumps.
-    window.setTimeout(() => {
-      nativeEl.style.opacity = '';
-      nativeEl.style.pointerEvents = '';
-      this._isDraggingDelayed.set(false);
-    }, 100);
+    // make original element visible again and re-enable pointer events
+    nativeEl.style.opacity = '';
+    nativeEl.style.pointerEvents = '';
 
     const { columnTarget, scheduleEventTarget } = this._resolveDropTargets(ev);
     const sourceEvent = ev.source.data;
@@ -238,6 +226,7 @@ export class ScheduleWeekDragService {
     }
 
     this._resetDragRelatedVars();
+    // reset to original (now new) position
     nativeEl.style.transform = 'translate3d(0, 0, 0)';
     ev.source.reset();
   }

@@ -115,7 +115,6 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
   } | null>(null);
 
   isDragging = this._service.isDragging;
-  isDraggingDelayed = this._service.isDraggingDelayed;
   isCreateTaskActive = signal(false);
   currentDragEvent = this._service.currentDragEvent;
   dragPreviewStyle = this._service.dragPreviewStyle;
@@ -200,7 +199,7 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
   onMoveOverGrid(ev: MouseEvent): void {
     // Prevent showing the "create task" placeholder during or right after a drag
     // to avoid confusing visual feedback during the reset animation.
-    if (this.isDragging() || this.isDraggingDelayed()) {
+    if (this.isDragging()) {
       return;
     }
     if (this.isCreateTaskActive()) {
