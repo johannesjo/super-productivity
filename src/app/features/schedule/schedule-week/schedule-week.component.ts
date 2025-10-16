@@ -88,21 +88,16 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
   );
 
   times = computed(() => {
-    const is12Hour = !this._dateTimeFormatService.is24HourFormat();
-    return this.rowsByNr.map((_, index) => {
-      if (is12Hour) {
-        if (index === 0) {
-          return '12:00 AM'; // Midnight
-        } else if (index === 12) {
-          return '12:00 PM'; // Noon
-        } else if (index < 12) {
-          return index.toString() + ':00 AM';
-        } else {
-          return (index - 12).toString() + ':00 PM';
-        }
-      } else {
-        return index.toString() + ':00';
-      }
+    const uses24Hour = this._dateTimeFormatService.is24HourFormat();
+    const formatter = new Intl.DateTimeFormat(this._dateTimeFormatService.currentLocale, {
+      hour: uses24Hour ? '2-digit' : 'numeric',
+      minute: '2-digit',
+      hour12: !uses24Hour,
+    });
+
+    return this.rowsByNr.map((_, hourIndex) => {
+      const date = new Date(2000, 0, 1, hourIndex, 0, 0);
+      return formatter.format(date);
     });
   });
 
