@@ -218,7 +218,6 @@
       },
       "BACK_TO_PLANNING": "Zurück zur Planung",
       "CONGRATS": "Herzlichen Glückwunsch zum Abschluss dieser Sitzung!",
-      "CONTINUE_FOCUS_SESSION": "Fokussitzung fortsetzen",
       "COUNTDOWN": "Countdown",
       "FINISH_TASK_AND_SELECT_NEXT": "Beenden Sie die Aufgabe und wählen Sie „Weiter“.",
       "FLOWTIME": "Flowtime",
@@ -229,6 +228,7 @@
       "NEXT": "Weiter",
       "ON": "An",
       "OPEN_ISSUE_IN_BROWSER": "Issue im Browser öffnen",
+      "POMODORO": "Pomodoro",
       "POMODORO_BACK": "Zurück",
       "POMODORO_DISABLE": "Pomodoro deaktivieren",
       "POMODORO_INFO": "Fokussitzungen können nicht zusammen mit aktiviertem Pomodoro-Timer verwendet werden.",
@@ -463,7 +463,7 @@
         "CHOOSE_STATUS": "Wählen Sie den zuzuweisenden Status",
         "CURRENT_ASSIGNEE": "Derzeitiger Beauftragter:",
         "CURRENT_STATUS": "Aktueller Status:",
-        "TASK_NAME": "Aufgabennname:",
+        "TASK_NAME": "Aufgabenname:",
         "TITLE": "Jira: Status aktualisieren",
         "UPDATE_STATUS": "Update Status"
       },
@@ -585,6 +585,7 @@
         "GLOBAL_METRICS": "Globale Metriken",
         "IMPROVEMENT_SELECTION_COUNT": "Häufigkeit, mit der ein Verbesserungsfaktor ausgewählt wurde",
         "MOOD_PRODUCTIVITY_OVER_TIME": "Stimmung und Produktivität im Laufe der Zeit",
+        "FOCUS_SESSION_TRENDS": "Fokussitzung im Laufe der Zeit",
         "NO_ADDITIONAL_DATA_YET": "Es wurden noch keine zusätzlichen Daten gesammelt. Verwenden Sie dazu das Formular in der täglichen Zusammenfassung \"Bewertung\".",
         "OBSTRUCTION_SELECTION_COUNT": "Häufigkeit, mit der ein Hindernisfaktor ausgewählt wurde",
         "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Klicken Sie auf die Zähler im Laufe der Zeit",
@@ -940,6 +941,7 @@
       "NOW": "Jetzt",
       "PLAN_END_DAY": "Plan am Ende des Tages",
       "PLAN_START_DAY": "Plan zu Beginn des Tages",
+      "SHIFT_KEY_INFO": "Halten Sie die Umschalttaste gedrückt, um in den Tagesplanungsmodus zu wechseln.",
       "START": "Arbeitsbeginn",
       "TASK_PROJECTION_INFO": "Zukunftsprojektion einer geplanten wiederkehrenden Aufgabe",
       "WEEK": "Woche"
@@ -999,7 +1001,7 @@
         "MIGRATE_LEGACY": "Beim Importieren wurden veraltete Daten erkannt. Möchten Sie versuchen, sie zu migrieren?",
         "NO_REMOTE_DATA": "Keine remote Daten gefunden. Lokal auf Remote hochladen?",
         "TRY_LOAD_REMOTE_AGAIN": "Erneut versuchen, Daten von Remote zu laden?",
-        "UNABLE_TO_LOAD_REMOTE_DATA": "Es können keine Remote-Daten von geladen werden. Möchten Sie versuchen, die Remote-Daten mit Ihren lokalen Daten zu überschreiben? Dabei gehen alle Remote-Daten verloren."
+        "UNABLE_TO_LOAD_REMOTE_DATA": "Es können keine Remote-Daten geladen werden. Möchten Sie versuchen, die Remote-Daten mit Ihren lokalen Daten zu überschreiben? Dabei gehen alle Remote-Daten verloren."
       },
       "D_AUTH_CODE": {
         "FOLLOW_LINK": "Bitte öffnen Sie den folgenden Link und kopieren Sie den dort angegebenen Authentifizierungscode in das unten stehende Eingabefeld.",
@@ -1518,7 +1520,9 @@
         "SKIP": "Überspringen",
         "SPLIT_TIME": "Zeit aufteilen in mehrere Aufgaben und Pausen",
         "TASK": "Aufgabe",
-        "TRACK_TO": "Erfassen als:"
+        "TRACK_TO": "Erfassen als:",
+        "WARN_SIMPLE_COUNTER": "Die Zeit wird auf die aktivierten einfachen Zählertasten angerechnet.",
+        "WARN_SIMPLE_COUNTER_BREAK": "Die Zeit wird weiterhin über die aktivierten einfachen Zählertasten gezählt."
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Erstelle</em> und erfasse zu",
@@ -1582,7 +1586,8 @@
       "WEEK": {
         "EXPORT": "Wochendaten exportieren",
         "NO_DATA": "Noch keine Aufgaben in dieser Woche.",
-        "TITLE": "Titel"
+        "TITLE": "Titel",
+        "FOCUS_SUMMARY": "Fokussitzung (Nr / Zeit)"
       }
     }
   },
@@ -1691,6 +1696,7 @@
     "KEYBOARD": {
       "ADD_NEW_NOTE": "Neue Notiz hinzufügen",
       "ADD_NEW_TASK": "Neue Aufgabe hinzufügen",
+      "ADD_NEW_PROJECT": "Neues Projekt hinzufügen",
       "APP_WIDE_SHORTCUTS": "Globale Verknüpfungen (anwendungsweit)",
       "COLLAPSE_SUB_TASKS": "Unteraufgaben reduzieren",
       "EXPAND_SUB_TASKS": "Erweitern der Unteraufgaben",
@@ -2006,6 +2012,7 @@
     "ADD_TASKS_FROM_TODAY": "Aufgaben von heute hinzufügen",
     "BACK": "Ich habe etwas vergessen!",
     "BREAK_LABEL": "Pausen (Anzahl / Zeit)",
+    "FOCUS_SUMMARY": "Fokussitzung (Nr / Zeit)",
     "CELEBRATE": "Nehmen Sie sich einen Moment Zeit, um <i>zu feiern!</i>",
     "CLEAR_ALL_CONTINUE": "Alles löschen und fortfahren",
     "D_CONFIRM_APP_CLOSE": {
