@@ -161,7 +161,6 @@
 }
 
 :host-context(.is-not-dragging) {
-  :host.ScheduledTask,
   :host.CalendarEvent,
   :host.RepeatProjection,
   :host.RepeatProjectionSplit,
@@ -211,11 +210,6 @@
 
   :host.very-short-event & {
     margin-top: -4px;
-  }
-
-  :host-context(.is-not-dragging):hover & {
-    border-color: var(--c-accent);
-    color: var(--c-accent);
   }
 }
 
@@ -355,7 +349,7 @@
 
 :host.drag-over {
   transform: translateY(var(--offset));
-  border: 3px solid yellow;
+  //border: 1px solid var(--c-accent);
   z-index: 3;
 
   &:after {

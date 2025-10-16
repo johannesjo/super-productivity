@@ -32,6 +32,7 @@ import { LocaleDatePipe } from '../../../ui/pipes/locale-date.pipe';
 import { formatMonthDay } from '../../../util/format-month-day.util';
 import { ScheduleWeekDragService } from './schedule-week-drag.service';
 import { calculatePlaceholderForGridMove } from './schedule-week-placeholder.util';
+import { truncate } from '../../../util/truncate';
 
 const D_HOURS = 24;
 
@@ -132,7 +133,31 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // Drag preview properties for time indicator
   private readonly _dragPreviewContext = this._service.dragPreviewContext;
+  private readonly _dragOverTaskId = this._service.dragOverTaskId;
+
   dragPreviewLabel = computed(() => {
+    // Check if we're hovering over a task for reordering (shift mode)
+    const dragOverTaskId = this._dragOverTaskId();
+    const currentDraggedEvent = this.currentDragEvent();
+
+    if (dragOverTaskId && currentDraggedEvent) {
+      // Find the hovered task from events to display its title
+      const allEvents = this.safeEvents();
+      const targetEvent = allEvents.find((ev) => {
+        const task = ev.data as any;
+        return task?.id === dragOverTaskId;
+      });
+
+      if (targetEvent && targetEvent.data) {
+        const targetTask = targetEvent.data as any;
+        const taskTitle = truncate(targetTask.title || 'task', 20);
+        const insertBeforeLabel = this._translateService.instant(
+          T.F.SCHEDULE.INSERT_BEFORE,
+        );
+        return `⤴ ${insertBeforeLabel}: ${taskTitle}`;
+      }
+    }
+
     const ctx = this._dragPreviewContext();
     if (!ctx) {
       return null;

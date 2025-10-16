@@ -49,6 +49,10 @@ export class ScheduleWeekDragService {
   private readonly _showShiftKeyInfo = signal(false);
   readonly showShiftKeyInfo: Signal<boolean> = this._showShiftKeyInfo.asReadonly();
 
+  // Track the task ID being hovered over for reorder preview
+  private readonly _dragOverTaskId = signal<string | null>(null);
+  readonly dragOverTaskId: Signal<string | null> = this._dragOverTaskId.asReadonly();
+
   private _prevDragOverEl: HTMLElement | null = null;
   private _dragCloneEl: HTMLElement | null = null;
   private _lastDropCol: HTMLElement | null = null;
@@ -87,6 +91,7 @@ export class ScheduleWeekDragService {
     this._isDragging.set(true);
     this._currentDragEvent.set(ev.source.data);
     this._dragPreviewContext.set(null);
+    this._dragOverTaskId.set(null);
     this._lastDropCol = null;
     this._lastDropScheduleEvent = null;
     this._lastPointerPosition = null;
@@ -167,6 +172,7 @@ export class ScheduleWeekDragService {
     this._dragPreviewContext.set(null);
     this._currentDragEvent.set(null);
     this._dragPreviewStyle.set(null);
+    this._dragOverTaskId.set(null);
     this._lastCalculatedTimestamp = null;
 
     // make original element visible again and re-enable pointer events
@@ -371,12 +377,27 @@ export class ScheduleWeekDragService {
           day: targetDay,
           isEndOfDay: targetEl.classList.contains('end-of-day'),
         });
+        this._dragOverTaskId.set(null);
       } else {
         this._dragPreviewContext.set(null);
+        // Extract task ID from hovered schedule event element
+        const isTaskElement =
+          targetEl.classList.contains(SVEType.Task) ||
+          targetEl.classList.contains(SVEType.SplitTask) ||
+          targetEl.classList.contains(SVEType.SplitTaskPlannedForDay) ||
+          targetEl.classList.contains(SVEType.TaskPlannedForDay);
+
+        if (isTaskElement && targetEl.id.startsWith(T_ID_PREFIX)) {
+          const taskId = targetEl.id.replace(T_ID_PREFIX, '');
+          this._dragOverTaskId.set(taskId);
+        } else {
+          this._dragOverTaskId.set(null);
+        }
       }
     } else {
       this._dragPreviewStyle.set(null);
       this._dragPreviewContext.set(null);
+      this._dragOverTaskId.set(null);
     }
 
     const prevEl = this._prevDragOverEl;
@@ -408,6 +429,9 @@ export class ScheduleWeekDragService {
       prevEl.classList.remove(DRAG_OVER_CLASS);
       this._prevDragOverEl = null;
     }
+
+    // Clear drag-over task ID in time mode
+    this._dragOverTaskId.set(null);
 
     if (isWithinGrid) {
       const timestamp = calculateTimeFromYPosition(pointer.y, gridRect, targetDay);
