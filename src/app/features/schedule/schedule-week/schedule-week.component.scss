@@ -379,9 +379,9 @@ schedule-event.cdk-drag-dragging + schedule-event {
   &.isScheduleForDay {
     border-radius: var(--card-border-radius);
 
-    .drag-preview-time-badge {
-      font-size: 13px;
-    }
+    //.drag-preview-time-badge {
+    //font-size: 13px;
+    //}
   }
 
   // NOTE has global styles in _overwrite-material.scss

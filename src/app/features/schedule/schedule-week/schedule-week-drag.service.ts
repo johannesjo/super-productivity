@@ -29,10 +29,6 @@ export class ScheduleWeekDragService {
   // Central drag state handler so the component can remain mostly declarative.
   private readonly _store = inject(Store);
 
-  // Use accessors instead of direct references to prevent holding stale DOM nodes
-  // between Angular re-renders. This ensures we always query the current DOM state.
-  private _gridContainerAccessor: (() => HTMLElement | null) | null = null;
-  private _daysToShowAccessor: (() => readonly string[]) | null = null;
   private readonly _isShiftMode = signal(false);
   readonly isShiftMode: Signal<boolean> = this._isShiftMode.asReadonly();
 
@@ -47,9 +43,6 @@ export class ScheduleWeekDragService {
   readonly currentDragEvent: Signal<ScheduleEvent | null> =
     this._currentDragEvent.asReadonly();
 
-  private _prevDragOverEl: HTMLElement | null = null;
-  private _dragCloneEl: HTMLElement | null = null;
-
   private readonly _isDragging = signal(false);
   readonly isDragging: Signal<boolean> = this._isDragging.asReadonly();
 
@@ -61,17 +54,23 @@ export class ScheduleWeekDragService {
   private readonly _showShiftKeyInfo = signal(false);
   readonly showShiftKeyInfo: Signal<boolean> = this._showShiftKeyInfo.asReadonly();
 
+  private _prevDragOverEl: HTMLElement | null = null;
+  private _dragCloneEl: HTMLElement | null = null;
   private _lastDropCol: HTMLElement | null = null;
   private _lastDropScheduleEvent: HTMLElement | null = null;
   private _lastPointerPosition: PointerPosition | null = null;
   private _lastCalculatedTimestamp: number | null = null;
   private _shiftInfoTimeoutId: number | undefined;
+  // Use accessors instead of direct references to prevent holding stale DOM nodes
+  // between Angular re-renders. This ensures we always query the current DOM state.
+  private _gridContainerAccessor: (() => HTMLElement | null) | null = null;
+  private _daysToShowAccessor: (() => readonly string[]) | null = null;
 
   destroy(): void {
     this._clearShiftInfoTimeout();
+    this._resetDragRelatedVars();
     this._gridContainerAccessor = null;
     this._daysToShowAccessor = null;
-    this._resetDragCaches();
   }
 
   setGridContainer(accessor: () => HTMLElement | null): void {
@@ -79,16 +78,8 @@ export class ScheduleWeekDragService {
     this._gridContainerAccessor = accessor;
   }
 
-  clearGridContainer(): void {
-    this._gridContainerAccessor = null;
-  }
-
   setDaysToShowAccessor(accessor: () => readonly string[]): void {
     this._daysToShowAccessor = accessor;
-  }
-
-  clearDaysToShowAccessor(): void {
-    this._daysToShowAccessor = null;
   }
 
   setShiftMode(isShiftMode: boolean): void {
@@ -119,7 +110,7 @@ export class ScheduleWeekDragService {
 
     const nativeEl = ev.source.element.nativeElement;
 
-    // Hide the original element during drag so only the CDK preview is visible.
+    // Hide the original drag-preview element so only our custom preview is visible
     nativeEl.style.opacity = '0';
 
     const cloneEl = this._dragCloneEl;
@@ -246,7 +237,7 @@ export class ScheduleWeekDragService {
       handled = true;
     }
 
-    this._resetDragCaches();
+    this._resetDragRelatedVars();
     nativeEl.style.transform = 'translate3d(0, 0, 0)';
     ev.source.reset();
   }
@@ -312,7 +303,7 @@ export class ScheduleWeekDragService {
     }
   }
 
-  private _resetDragCaches(): void {
+  private _resetDragRelatedVars(): void {
     this._lastDropCol = null;
     this._lastDropScheduleEvent = null;
     this._lastPointerPosition = null;
