@@ -1,12 +1,7 @@
 <div
-  cdkDropList
-  #dropList="cdkDropList"
-  [cdkDropListData]="{ day: daysToShow()[0] }"
-  [cdkDropListEnterPredicate]="dropListEnterPredicate"
-  (cdkDropListDropped)="onTaskDrop($event)"
-  (cdkDropListEntered)="onDragEnter($event)"
-  (cdkDropListExited)="onDragExit()"
+  #dropZone
   class="schedule-day-drop-zone"
+  (pointerenter)="onDragMove($event)"
   (mousemove)="onDragMove($event)"
   (touchmove)="onDragMove($event)"
 >
