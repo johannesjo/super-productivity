@@ -206,13 +206,28 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
       this._startScheduleMode();
     }
 
-    // Always use the top of the task element for time calculation
-    this._withDragPreview((previewEl) => {
+    // Try to use drag preview position, fallback to event coordinates for touch
+    const previewEl = this._getDragPreview();
+    if (previewEl) {
+      // Desktop: use drag preview top
       const previewRect = previewEl.getBoundingClientRect();
       const timestamp = this._calculateTimeFromYPosition(previewRect.top);
       this.lastCalculatedTimestamp = timestamp;
       this._updateDragPreviewTime(previewEl, timestamp);
-    });
+    } else {
+      // Touch devices: use touch coordinates directly
+      const pointer = this._getPointerPosition(event);
+      if (pointer) {
+        const timestamp = this._calculateTimeFromYPosition(pointer.y);
+        this.lastCalculatedTimestamp = timestamp;
+        // Update preview time without preview element for touch
+        if (timestamp != null) {
+          this.dragPreviewTime.set(this._formatPreviewTime(timestamp));
+        } else {
+          this.dragPreviewTime.set(null);
+        }
+      }
+    }
   }
 
   private _targetDay(): string | undefined {
@@ -439,15 +454,38 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
   }
 
   private _onGlobalPointerMove = (ev: MouseEvent | TouchEvent): void => {
-    // If pointer is not over the side panel/drop zone anymore, leave schedule mode
     const pointer = this._getPointerPosition(ev);
     if (!pointer) {
       return;
     }
-    if (!this._isPointWithinDropZone(pointer.x, pointer.y)) {
-      // Re-enter Angular zone to ensure CD runs for OnPush
+
+    const isInside = this._isPointWithinDropZone(pointer.x, pointer.y);
+
+    if (!isInside) {
+      // If pointer is not over the side panel/drop zone anymore, leave schedule mode
       this._ngZone.run(() => this._stopScheduleMode());
+      return;
     }
+
+    // Update time calculation continuously while dragging over the drop zone
+    // This is especially important for touch devices
+    this._ngZone.run(() => {
+      const timestamp = this._calculateTimeFromYPosition(pointer.y);
+      this.lastCalculatedTimestamp = timestamp;
+
+      if (timestamp != null) {
+        this.dragPreviewTime.set(this._formatPreviewTime(timestamp));
+        // Update badge on preview element if it exists (desktop)
+        const previewEl = this._getDragPreview();
+        if (previewEl) {
+          const timeBadge = this._ensureTimeBadge(previewEl);
+          timeBadge.textContent = this._formatPreviewTime(timestamp);
+        }
+      } else {
+        this.dragPreviewTime.set(null);
+      }
+      this._cdr.markForCheck();
+    });
   };
 
   // we're mutating the dom directly here to add some styling to the drag preview, since it is the most efficient way to do it
