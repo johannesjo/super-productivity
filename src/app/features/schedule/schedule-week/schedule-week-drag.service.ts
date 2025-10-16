@@ -29,7 +29,8 @@ export class ScheduleWeekDragService {
   // Central drag state handler so the component can remain mostly declarative.
   private readonly _store = inject(Store);
 
-  // Accessors let us request fresh values when needed without holding stale references.
+  // Use accessors instead of direct references to prevent holding stale DOM nodes
+  // between Angular re-renders. This ensures we always query the current DOM state.
   private _gridContainerAccessor: (() => HTMLElement | null) | null = null;
   private _daysToShowAccessor: (() => readonly string[]) | null = null;
   private readonly _isShiftMode = signal(false);
@@ -52,6 +53,8 @@ export class ScheduleWeekDragService {
   private readonly _isDragging = signal(false);
   readonly isDragging: Signal<boolean> = this._isDragging.asReadonly();
 
+  // Delayed flag stays true briefly after drag ends to prevent UI flicker
+  // during the reset animation (see handleDragReleased timeout).
   private readonly _isDraggingDelayed = signal(false);
   readonly isDraggingDelayed: Signal<boolean> = this._isDraggingDelayed.asReadonly();
 
@@ -104,6 +107,8 @@ export class ScheduleWeekDragService {
     this._lastPointerPosition = null;
     this._lastCalculatedTimestamp = null;
 
+    // Show shift key tooltip on non-touch devices to educate users about the feature,
+    // then auto-hide after 3 seconds to avoid cluttering the interface.
     if (!IS_TOUCH_PRIMARY) {
       this._showShiftKeyInfo.set(true);
       this._shiftInfoTimeoutId = window.setTimeout(() => {
@@ -114,6 +119,7 @@ export class ScheduleWeekDragService {
 
     const nativeEl = ev.source.element.nativeElement;
 
+    // Hide the original element during drag so only the CDK preview is visible.
     nativeEl.style.opacity = '0';
 
     const cloneEl = this._dragCloneEl;
@@ -128,6 +134,8 @@ export class ScheduleWeekDragService {
       return;
     }
 
+    // Disable pointer events on the dragged element so elementFromPoint
+    // can detect what's underneath it, not the drag preview itself.
     ev.source.element.nativeElement.style.pointerEvents = 'none';
     const pointer: PointerPosition = {
       x: ev.pointerPosition.x,
@@ -178,6 +186,8 @@ export class ScheduleWeekDragService {
     this._dragPreviewStyle.set(null);
     this._lastCalculatedTimestamp = null;
 
+    // Delay resetting opacity and the dragging flag to allow smooth
+    // animation back to the final position without visual jumps.
     window.setTimeout(() => {
       nativeEl.style.opacity = '';
       nativeEl.style.pointerEvents = '';
@@ -208,11 +218,14 @@ export class ScheduleWeekDragService {
 
     let handled = false;
 
+    // Handle drop scenarios in priority order:
+    // 1. Shift mode + hovering over another task → reorder
     if (task && this.isShiftMode() && canMoveBefore) {
       dispatchMoveBefore(task);
       handled = true;
     }
 
+    // 2. Dropped on a column → schedule or plan for day
     if (!handled && columnTarget && task) {
       handled = this._handleColumnDrop({
         task,
@@ -221,11 +234,13 @@ export class ScheduleWeekDragService {
       });
     }
 
+    // 3. No column but hovering over another task → reorder as fallback
     if (!handled && task && canMoveBefore) {
       dispatchMoveBefore(task);
       handled = true;
     }
 
+    // 4. Dropped outside grid → unschedule and plan for today
     if (!handled && task && dropPoint && this._isOutsideGrid(dropPoint)) {
       this._store.dispatch(TaskSharedActions.planTasksForToday({ taskIds: [task.id] }));
       handled = true;
@@ -306,6 +321,8 @@ export class ScheduleWeekDragService {
     this._dragCloneEl = null;
   }
 
+  // Prevent treating drag preview elements as valid drop targets,
+  // since they're just visual indicators and not actual schedule slots.
   private _isPreviewElement(element: Element | null): boolean {
     if (!(element instanceof HTMLElement)) {
       return false;
@@ -326,7 +343,8 @@ export class ScheduleWeekDragService {
   }
 
   private _updatePointerCaches(pointer: PointerPosition): HTMLElement | null {
-    // Cache the latest DOM elements under the pointer for fast reuse during release.
+    // Cache drop targets during drag moves so we can reuse them on release
+    // without expensive re-querying, especially when pointer hasn't moved.
     this._lastPointerPosition = pointer;
     const elementsAtPoint = document.elementsFromPoint(pointer.x, pointer.y);
     const interactiveElements = elementsAtPoint.filter(
@@ -417,6 +435,7 @@ export class ScheduleWeekDragService {
     if (isWithinGrid) {
       const timestamp = calculateTimeFromYPosition(pointer.y, gridRect, targetDay);
 
+      // Cache timestamp to avoid recalculating on drop if pointer didn't move.
       this._lastCalculatedTimestamp = timestamp;
 
       if (timestamp) {
@@ -464,6 +483,8 @@ export class ScheduleWeekDragService {
     this._dragPreviewStyle.set(gridStyle);
   }
 
+  // Calculate preview height based on task duration so users can see
+  // how much space the task will occupy before dropping it.
   private _calculateRowSpan(event: ScheduleEvent | null): number {
     if (!event) {
       return 6;
@@ -546,6 +567,8 @@ export class ScheduleWeekDragService {
   private _scheduleTask(task: TaskCopy, scheduleTime: number): void {
     const hasExistingSchedule = !!task?.dueWithTime;
     const hasReminder = !!task?.reminderId;
+    // Smart reminder logic: if task is brand new to scheduling, add a reminder at start.
+    // If it already has a reminder, update it. Otherwise, leave reminders unchanged.
     const remindAt =
       !hasExistingSchedule && !hasReminder
         ? remindOptionToMilliseconds(scheduleTime, TaskReminderOptionId.AtStart)
@@ -566,6 +589,8 @@ export class ScheduleWeekDragService {
         : TaskSharedActions.scheduleTaskWithTime(payload),
     );
 
+    // Ensure task has a minimum duration so it's visible on the schedule.
+    // Without this, zero-duration tasks would be invisible or hard to interact with.
     if (!task.timeEstimate || task.timeEstimate <= 0) {
       const fallbackDuration = Math.max(SCHEDULE_TASK_MIN_DURATION_IN_MS, 15 * 60 * 1000);
       this._store.dispatch(
@@ -642,6 +667,7 @@ export class ScheduleWeekDragService {
       return true;
     }
 
+    // Reuse cached timestamp if available to avoid recalculating from pointer position.
     const scheduleTime =
       this._lastCalculatedTimestamp ??
       (dropPoint ? this._calculateTimeFromDrop(dropPoint, targetDay) : null);

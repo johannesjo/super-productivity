@@ -145,8 +145,7 @@
   }
 
   @if (
-    ((!isTaskDragActive() && !isAnyEventResizing()) || isCtrlPressed()) &&
-      newTaskPlaceholder();
+    (!isTaskDragActive() || isCtrlPressed()) && newTaskPlaceholder();
     as newTaskPlaceholder
   ) {
     <create-task-placeholder

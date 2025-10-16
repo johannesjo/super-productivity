@@ -5,9 +5,9 @@ import {
   Component,
   computed,
   ElementRef,
+  HostListener,
   inject,
   input,
-  HostListener,
   LOCALE_ID,
   OnDestroy,
   OnInit,
@@ -73,7 +73,8 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
   isCtrlPressed = signal<boolean>(false);
   isTaskDragActive = input<boolean>(false);
 
-  // Track shift key during drag operations
+  // Shift mode changes drag behavior: instead of scheduling at a time,
+  // tasks are planned for the day or reordered relative to other tasks.
   readonly isShiftNoScheduleMode = this._service.isShiftMode;
 
   FH = FH;
@@ -116,6 +117,19 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
   isDragging = this._service.isDragging;
   isDraggingDelayed = this._service.isDraggingDelayed;
   isCreateTaskActive = signal(false);
+  currentDragEvent = this._service.currentDragEvent;
+  dragPreviewStyle = this._service.dragPreviewStyle;
+  // Show shift key info tooltip
+  showShiftKeyInfo = this._service.showShiftKeyInfo;
+
+  // Apply CSS class based on dragged event type to enable type-specific styling,
+  // such as different colors or visual treatments for tasks vs split tasks.
+  dragEventTypeClass = computed(() => {
+    const currentEvent = this.currentDragEvent();
+    return currentEvent ? currentEvent.type : '';
+  });
+
+  readonly gridContainer = viewChild.required<ElementRef>('gridContainer');
 
   // Drag preview properties for time indicator
   private readonly _dragPreviewContext = this._service.dragPreviewContext;
@@ -129,42 +143,32 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     if (ctx.kind === 'shift') {
       const dateLabel = this._formatDateLabel(ctx.day);
-      return this._translateService.instant(
-        ctx.isEndOfDay ? T.F.SCHEDULE.PLAN_END_DAY : T.F.SCHEDULE.PLAN_START_DAY,
-        { date: dateLabel },
+      return (
+        (ctx.isEndOfDay ? '⇩' : '⇧') +
+        this._translateService.instant(
+          ctx.isEndOfDay ? T.F.SCHEDULE.PLAN_END_DAY : T.F.SCHEDULE.PLAN_START_DAY,
+          { date: dateLabel },
+        )
       );
     }
     return ctx.label;
   });
-  currentDragEvent = this._service.currentDragEvent;
-  dragPreviewStyle = this._service.dragPreviewStyle;
-  // Show shift key info tooltip
-  showShiftKeyInfo = this._service.showShiftKeyInfo;
-
-  // Track if any event is being resized
-  isAnyEventResizing = signal(false);
-
-  // Computed class for drag event type
-  dragEventTypeClass = computed(() => {
-    const currentEvent = this.currentDragEvent();
-    return currentEvent ? currentEvent.type : '';
-  });
-
-  readonly gridContainer = viewChild.required<ElementRef>('gridContainer');
 
   private _currentAniTimeout: number | undefined;
   private _resizeObserver?: MutationObserver;
 
   ngOnInit(): void {
     const workStartEnd = this.workStartEnd();
+    // Position the "end of day" planning area based on work hours config,
+    // or default to noon if not specified.
     this.endOfDayColRowStart.set(workStartEnd?.workStartRow || D_HOURS * 0.5 * FH);
     // Provide the live days signal so the drag service can map drops to columns.
     this._service.setDaysToShowAccessor(() => this.daysToShow() || []);
   }
 
   ngAfterViewInit(): void {
-    this._setupResizeObserver();
-    // Hand over access to the rendered grid element for hit testing.
+    // Use an accessor function to safely provide grid access without holding
+    // a stale reference if the component re-renders or the grid is recreated.
     this._service.setGridContainer(() => {
       try {
         return this.gridContainer().nativeElement as HTMLElement;
@@ -191,8 +195,11 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  // Throttle to 30ms to reduce computational overhead during rapid mouse movements.
   @throttle(30)
   onMoveOverGrid(ev: MouseEvent): void {
+    // Prevent showing the "create task" placeholder during or right after a drag
+    // to avoid confusing visual feedback during the reset animation.
     if (this.isDragging() || this.isDraggingDelayed()) {
       return;
     }
@@ -217,6 +224,7 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
     this.newTaskPlaceholder.set(placeholder);
   }
 
+  // Throttle drag updates to avoid excessive re-renders and DOM queries.
   @throttle(30)
   dragMoved(ev: CdkDragMove<ScheduleEvent>): void {
     this._service.handleDragMoved(ev);
@@ -230,10 +238,13 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
     this._service.handleDragReleased(ev);
   }
 
+  // Listen for modifier keys globally so users can switch drag modes mid-drag.
+  // Document-level because key events must work even when focus is elsewhere.
   @HostListener('document:keydown', ['$event'])
   onDocumentKeyDown(event: KeyboardEvent): void {
     if (event.key === 'Shift') {
       this._service.setShiftMode(true);
+      // Update preview immediately to reflect the mode change.
       this._service.refreshPreviewForCurrentPointer();
     }
     if (event.key === 'Control' || event.ctrlKey) {
@@ -245,6 +256,7 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
   onDocumentKeyUp(event: KeyboardEvent): void {
     if (event.key === 'Shift') {
       this._service.setShiftMode(false);
+      // Update preview immediately to reflect the mode change.
       this._service.refreshPreviewForCurrentPointer();
     }
     if (event.key === 'Control' || !event.ctrlKey) {
@@ -266,27 +278,5 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
       this._defaultLocale ||
       'en-US';
     return formatMonthDay(date, locale);
-  }
-
-  private _setupResizeObserver(): void {
-    const gridContainer = this.gridContainer().nativeElement;
-    if (!gridContainer) {
-      return;
-    }
-
-    // Observe for changes to is-resizing class on schedule-event elements
-    this._resizeObserver = new MutationObserver(() => {
-      const resizingElements = gridContainer.querySelectorAll(
-        'schedule-event.is-resizing',
-      );
-      this.isAnyEventResizing.set(resizingElements.length > 0);
-    });
-
-    // Observe only the grid container instead of entire document for better performance
-    this._resizeObserver.observe(gridContainer, {
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['class'],
-    });
   }
 }
