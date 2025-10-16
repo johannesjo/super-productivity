@@ -16,6 +16,7 @@ import { GiteaIssue } from './providers/gitea/gitea-issue.model';
 import { RedmineCfg } from './providers/redmine/redmine.model';
 import { RedmineIssue } from './providers/redmine/redmine-issue.model';
 import { TrelloCfg } from './providers/trello/trello.model';
+import { TrelloIssue, TrelloIssueReduced } from './providers/trello/trello-issue.model';
 import { EntityState } from '@ngrx/entity';
 import {
   CalendarProviderCfg,
@@ -27,8 +28,7 @@ export interface BaseIssueProviderCfg {
   isEnabled: boolean;
 }
 
-// TODO: trello is currently non-functional stub
-// qq feat(providerkey): add non-functional stub trello provider
+// Trello integration is available alongside other providers
 export type IssueProviderKey =
   | 'JIRA'
   | 'GITHUB'
@@ -78,7 +78,8 @@ export type IssueData =
   | ICalIssue
   | OpenProjectWorkPackage
   | GiteaIssue
-  | RedmineIssue;
+  | RedmineIssue
+  | TrelloIssue;
 
 export type IssueDataReduced =
   | GithubIssueReduced
@@ -88,7 +89,8 @@ export type IssueDataReduced =
   | CaldavIssueReduced
   | ICalIssueReduced
   | GiteaIssue
-  | RedmineIssue;
+  | RedmineIssue
+  | TrelloIssueReduced;
 
 export type IssueDataReducedMap = {
   [K in IssueProviderKey]: K extends 'JIRA'
@@ -105,9 +107,11 @@ export type IssueDataReducedMap = {
               ? OpenProjectWorkPackageReduced
               : K extends 'GITEA'
                 ? GiteaIssue
-                : K extends 'REDMINE'
-                  ? RedmineIssue
-                  : never;
+                : K extends 'TRELLO'
+                  ? TrelloIssueReduced
+                  : K extends 'REDMINE'
+                    ? RedmineIssue
+                    : never;
 };
 
 // TODO: add issue model to the IssueDataReducedMap
@@ -180,7 +184,6 @@ export interface IssueProviderCalendar extends IssueProviderBase, CalendarProvid
   issueProviderKey: 'ICAL';
 }
 
-// trello is currently a non-functional stub
 export interface IssueProviderTrello extends IssueProviderBase, TrelloCfg {
   issueProviderKey: 'TRELLO';
 }

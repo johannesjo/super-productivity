@@ -1,26 +1,34 @@
+// Necessary fields for trello configuration. Used for building the form, alongside with several essential properties.
+
 import {
   ConfigFormSection,
   LimitedFormlyFieldConfig,
 } from '../../../config/global-config.model';
-import { ISSUE_PROVIDER_COMMON_FORM_FIELDS } from '../../common-issue-form-stuff.const';
+import {
+  CROSS_ORIGIN_WARNING,
+  ISSUE_PROVIDER_COMMON_FORM_FIELDS,
+} from '../../common-issue-form-stuff.const';
 import { IssueProviderTrello } from '../../issue.model';
 import { TrelloCfg } from './trello.model';
 
 export const DEFAULT_TRELLO_CFG: TrelloCfg = {
   isEnabled: false,
+  apiKey: null,
   token: null,
   boardId: null,
 };
 
 export const TRELLO_POLL_INTERVAL = 5 * 60 * 1000;
 export const TRELLO_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderTrello>[] = [
+  ...CROSS_ORIGIN_WARNING,
   {
-    key: 'boardId',
+    key: 'apiKey',
     type: 'input',
     props: {
-      label: 'Trello board ID',
-      description: 'Specify the board to sync when the integration becomes available.',
+      label: 'Trello API key',
+      description: 'Create or copy an API key from https://trello.com/app-key.',
       type: 'text',
+      required: true,
     },
   },
   {
@@ -29,8 +37,20 @@ export const TRELLO_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderTrello>[]
     props: {
       label: 'Trello API token',
       description:
-        'Generate a token via Trello developer tools. This stub does not use it yet.',
+        'Generate a token via the Trello developer tools after logging in with your account.',
       type: 'password',
+      required: true,
+    },
+  },
+  {
+    key: 'boardId',
+    type: 'input',
+    props: {
+      label: 'Trello board ID',
+      description:
+        'Paste the board ID (from the board URL) that should be used for search and auto-import.',
+      type: 'text',
+      required: true,
     },
   },
   {
@@ -44,5 +64,5 @@ export const TRELLO_CONFIG_FORM_SECTION: ConfigFormSection<IssueProviderTrello> 
   title: 'Trello',
   key: 'TRELLO',
   items: TRELLO_CONFIG_FORM,
-  help: 'Trello integration is currently a non-functional stub.',
+  help: 'Connect your Trello board to search for cards, open them from tasks, and keep card details in sync.',
 };

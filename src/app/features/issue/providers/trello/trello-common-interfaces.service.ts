@@ -5,13 +5,13 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { Task } from 'src/app/features/tasks/task.model';
-import { first, map, switchMap, tap } from 'rxjs/operators';
+import { first, switchMap, tap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { TrelloApiService } from './trello-api.service';
 import { IssueProviderTrello, SearchResultItem } from '../../issue.model';
 import { TrelloIssue, TrelloIssueReduced } from './trello-issue.model';
 import { TaskAttachment } from '../../../tasks/task-attachment/task-attachment.model';
-// import { mapJiraAttachmentToAttachment } from './jira-issue-map.util';
+import { mapTrelloAttachmentToAttachment } from './trello-issue-map.util';
 import { TrelloCfg } from './trello.model';
 import { isTrelloEnabled } from './is-trello-enabled.util';
 import { IssueProviderService } from '../../issue-provider.service';
@@ -33,13 +33,10 @@ export class TrelloCommonInterfacesService implements IssueServiceInterface {
     return isTrelloEnabled(cfg);
   }
 
-  testConnection(cfg: JiraCfg): Promise<boolean> {
+  testConnection(cfg: TrelloCfg): Promise<boolean> {
     return this._trelloApiService
-      .issuePicker$('', cfg)
-      .pipe(
-        map((res) => Array.isArray(res)),
-        first(),
-      )
+      .testConnection$(cfg)
+      .pipe(first())
       .toPromise()
       .then((result) => result ?? false);
   }
@@ -48,14 +45,17 @@ export class TrelloCommonInterfacesService implements IssueServiceInterface {
   getById(issueId: string | number, issueProviderId: string): Promise<TrelloIssue> {
     return this._getCfgOnce$(issueProviderId)
       .pipe(
-        switchMap((jiraCfg) =>
-          this._trelloApiService.getIssueById$(assertTruthy(issueId).toString(), jiraCfg),
+        switchMap((trelloCfg) =>
+          this._trelloApiService.getIssueById$(
+            assertTruthy(issueId).toString(),
+            trelloCfg,
+          ),
         ),
       )
       .toPromise()
       .then((result) => {
         if (!result) {
-          throw new Error('Failed to get Jira issue');
+          throw new Error('Failed to get Trello card');
         }
         return result;
       });
@@ -65,11 +65,11 @@ export class TrelloCommonInterfacesService implements IssueServiceInterface {
   searchIssues(searchTerm: string, issueProviderId: string): Promise<SearchResultItem[]> {
     return this._getCfgOnce$(issueProviderId)
       .pipe(
-        switchMap((jiraCfg) =>
-          this.isEnabled(jiraCfg)
+        switchMap((trelloCfg) =>
+          this.isEnabled(trelloCfg)
             ? this._trelloApiService
-                .issuePicker$(searchTerm, jiraCfg)
-                .pipe(tap((v) => IssueLog.log('jira.issuePicker$', v)))
+                .issuePicker$(searchTerm, trelloCfg)
+                .pipe(tap((v) => IssueLog.log('trello.issuePicker$', v)))
             : of([]),
         ),
       )
@@ -105,7 +105,7 @@ export class TrelloCommonInterfacesService implements IssueServiceInterface {
           issueWasUpdated: true,
         },
         issue,
-        issueTitle: issue.key,
+        issueTitle: issue.summary,
       };
     }
     return null;
@@ -140,8 +140,7 @@ export class TrelloCommonInterfacesService implements IssueServiceInterface {
   getAddTaskData(issue: TrelloIssueReduced): Partial<Task> & { title: string } {
     return {
       title: `${issue.key} ${issue.summary}`,
-      issuePoints: issue.storyPoints,
-      // circumvent errors for old jira versions #652
+      issuePoints: issue.storyPoints ?? undefined,
       issueAttachmentNr: issue.attachments ? issue.attachments.length : 0,
       issueWasUpdated: false,
       issueLastUpdated: new Date(issue.updated).getTime(),
@@ -156,7 +155,9 @@ export class TrelloCommonInterfacesService implements IssueServiceInterface {
     return this._getCfgOnce$(issueProviderId)
       .pipe(
         first(),
-        map((jiraCfg) => jiraCfg.host + '/browse/' + issueId),
+        switchMap((trelloCfg) =>
+          this._trelloApiService.getCardUrl$(issueId.toString(), trelloCfg),
+        ),
       )
       .toPromise()
       .then((result) => result ?? '');
@@ -172,11 +173,11 @@ export class TrelloCommonInterfacesService implements IssueServiceInterface {
 
   getMappedAttachments(issueData: TrelloIssue): TaskAttachment[] {
     return issueData?.attachments?.length
-      ? issueData.attachments.map(mapJiraAttachmentToAttachment)
+      ? issueData.attachments.map(mapTrelloAttachmentToAttachment)
       : [];
   }
 
   private _getCfgOnce$(issueProviderId: string): Observable<IssueProviderTrello> {
-    return this._issueProviderService.getCfgOnce$(issueProviderId, 'JIRA');
+    return this._issueProviderService.getCfgOnce$(issueProviderId, 'TRELLO');
   }
 }

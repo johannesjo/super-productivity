@@ -1,13 +1,11 @@
 /**
- * Trello is currently a non-functional stub
- * Configuration for setting up trello
+ * Configuration model for the Trello integration.
  */
 
 import { BaseIssueProviderCfg } from '../../issue.model';
-
-// TODO: currently setting this up for connecting trello first, then figure things out later
 export interface TrelloCfg extends BaseIssueProviderCfg {
   isEnabled: boolean;
+  apiKey: string | null;
   token: string | null;
   boardId: string | null;
 }
