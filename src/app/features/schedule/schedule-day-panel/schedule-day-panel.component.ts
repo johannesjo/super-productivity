@@ -45,6 +45,17 @@ const PREVIEW_WIDTH_PADDING_PX = 10;
 const OPACITY_HIDDEN = '0';
 const OPACITY_VISIBLE = '1';
 
+type DropTimeSource =
+  | 'preview-top-adjusted'
+  | 'pointer-top-adjusted'
+  | 'top-cache'
+  | 'cached';
+
+interface DropTimeCalculation {
+  timestamp: number | null;
+  source: DropTimeSource;
+}
+
 @Component({
   selector: 'schedule-day-panel',
   standalone: true,
@@ -260,31 +271,21 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
   private _calculateDropTime(
     previewRect: DOMRect | null,
     pointerY: number | null,
-  ): number | null {
+  ): DropTimeCalculation {
     const topY = this._resolveTopY(previewRect?.top ?? null, pointerY);
-    const timestamp =
-      (topY != null ? this._calculateTimeFromYPosition(topY) : null) ??
-      this.lastCalculatedTimestamp;
+    const timestampFromPosition =
+      topY != null ? this._calculateTimeFromYPosition(topY) : null;
+    const timestamp = timestampFromPosition ?? this.lastCalculatedTimestamp;
+    const source: DropTimeSource =
+      timestampFromPosition != null
+        ? previewRect
+          ? 'preview-top-adjusted'
+          : pointerY != null
+            ? 'pointer-top-adjusted'
+            : 'top-cache'
+        : 'cached';
 
-    if (timestamp != null) {
-      this.lastCalculatedTimestamp = timestamp;
-      const targetDate = new Date(timestamp);
-      Log.log('[ScheduleDayPanel] Drop calculation:', {
-        source:
-          topY != null
-            ? previewRect
-              ? 'preview-top-adjusted'
-              : pointerY != null
-                ? 'pointer-top-adjusted'
-                : 'top-cache'
-            : 'cached',
-        storedTimestamp: timestamp,
-        targetTime: targetDate,
-        formattedTime: this._formatTime(targetDate.getHours(), targetDate.getMinutes()),
-      });
-    }
-
-    return timestamp;
+    return { timestamp, source };
   }
 
   private _handlePointerUp(event: MouseEvent | TouchEvent): void {
@@ -297,9 +298,10 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     const previewRect = this._getDragPreviewRect();
     const pointer = this._getPointerPosition(event);
     const isInside = this._isEffectiveTopWithinDropZone(previewRect, pointer);
-    const dropTime = isInside
+    const dropCalculation = isInside
       ? this._calculateDropTime(previewRect, pointer?.y ?? null)
       : null;
+    const dropTime = dropCalculation?.timestamp ?? null;
     const targetDay = this._targetDay();
 
     this._stopScheduleMode();
@@ -310,6 +312,14 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     }
 
     if (dropTime !== null) {
+      this.lastCalculatedTimestamp = dropTime;
+      const targetDate = new Date(dropTime);
+      Log.log('[ScheduleDayPanel] Drop calculation:', {
+        source: dropCalculation?.source ?? 'cached',
+        storedTimestamp: dropTime,
+        targetTime: targetDate,
+        formattedTime: this._formatTime(targetDate.getHours(), targetDate.getMinutes()),
+      });
       this._store.dispatch(
         TaskSharedActions.scheduleTaskWithTime({
           task,
@@ -366,9 +376,9 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     }
 
     const horizontalOverlap = rect
-      ? rect.right >= dropZoneRect.left && rect.left <= dropZoneRect.right
+      ? this._isPreviewHorizontallyAligned(rect, dropZoneRect)
       : pointer
-        ? pointer.x >= dropZoneRect.left && pointer.x <= dropZoneRect.right
+        ? this._isPointerHorizontallyAligned(pointer, dropZoneRect)
         : false;
 
     return horizontalOverlap && topY >= dropZoneRect.top && topY <= dropZoneRect.bottom;
@@ -403,23 +413,33 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
       this._dragPointerOffsetY = pointerY - previewTop;
     }
 
-    let topY: number | null = null;
-
     if (pointerY != null && this._dragPointerOffsetY != null) {
-      topY = pointerY - this._dragPointerOffsetY;
-    } else if (previewTop != null) {
-      topY = previewTop;
-    } else if (pointerY != null) {
-      topY = pointerY;
-    } else {
-      topY = this._lastKnownTopY;
+      const adjustedTop = pointerY - this._dragPointerOffsetY;
+      this._lastKnownTopY = adjustedTop;
+      return adjustedTop;
     }
 
-    if (topY != null) {
-      this._lastKnownTopY = topY;
+    if (previewTop != null) {
+      this._lastKnownTopY = previewTop;
+      return previewTop;
     }
 
-    return topY;
+    if (pointerY != null) {
+      return pointerY;
+    }
+
+    return this._lastKnownTopY;
+  }
+
+  private _isPreviewHorizontallyAligned(rect: DOMRect, dropZoneRect: DOMRect): boolean {
+    return rect.right >= dropZoneRect.left && rect.left <= dropZoneRect.right;
+  }
+
+  private _isPointerHorizontallyAligned(
+    pointer: { x: number; y: number },
+    dropZoneRect: DOMRect,
+  ): boolean {
+    return pointer.x >= dropZoneRect.left && pointer.x <= dropZoneRect.right;
   }
 
   private _scheduleScrollToCurrentTime(): void {
