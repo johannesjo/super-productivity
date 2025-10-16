@@ -186,43 +186,40 @@ export class ScheduleWeekDragService {
       targetTaskId.length > 0 &&
       sourceTaskId !== targetTaskId;
 
-    const dispatchMoveBefore = (taskToMove: TaskCopy): void => {
+    // Guard: nothing to do without a task
+    if (!task) {
+      this._resetDragRelatedVars();
+      nativeEl.style.transform = 'translate3d(0, 0, 0)';
+      ev.source.reset();
+      return;
+    }
+
+    const dispatchMoveBefore = (): void => {
       this._store.dispatch(
         PlannerActions.moveBeforeTask({
-          fromTask: taskToMove,
+          fromTask: task,
           toTaskId: targetTaskId,
         }),
       );
     };
 
-    let handled = false;
-
-    // Handle drop scenarios in priority order:
-    // 1. Shift mode + hovering over another task → reorder
-    if (task && this.isShiftMode() && canMoveBefore) {
-      dispatchMoveBefore(task);
-      handled = true;
-    }
-
-    // 2. Dropped on a column → schedule or plan for day
-    if (!handled && columnTarget && task) {
-      handled = this._handleColumnDrop({
-        task,
-        columnTarget,
-        dropPoint,
-      });
-    }
-
-    // 3. No column but hovering over another task → reorder as fallback
-    if (!handled && task && canMoveBefore) {
-      dispatchMoveBefore(task);
-      handled = true;
-    }
-
-    // 4. Dropped outside grid → unschedule and plan for today
-    if (!handled && task && dropPoint && this._isOutsideGrid(dropPoint)) {
+    // Handle drop scenarios in priority order using if-else chain:
+    if (this.isShiftMode() && canMoveBefore) {
+      // 1. Shift mode + hovering over another task → reorder
+      dispatchMoveBefore();
+    } else if (columnTarget) {
+      // 2. Dropped on a column → schedule or plan for day
+      const wasHandled = this._handleColumnDrop({ task, columnTarget, dropPoint });
+      // 3. Column drop failed but hovering over task → reorder as fallback
+      if (!wasHandled && canMoveBefore) {
+        dispatchMoveBefore();
+      }
+    } else if (canMoveBefore) {
+      // 4. No column but hovering over another task → reorder
+      dispatchMoveBefore();
+    } else if (dropPoint && this._isOutsideGrid(dropPoint)) {
+      // 5. Dropped outside grid → unschedule and plan for today
       this._store.dispatch(TaskSharedActions.planTasksForToday({ taskIds: [task.id] }));
-      handled = true;
     }
 
     this._resetDragRelatedVars();
