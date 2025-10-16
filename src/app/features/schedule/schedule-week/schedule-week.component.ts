@@ -154,7 +154,7 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
         const insertBeforeLabel = this._translateService.instant(
           T.F.SCHEDULE.INSERT_BEFORE,
         );
-        return `⤴ ${insertBeforeLabel}: ${taskTitle}`;
+        return `⤷ ${insertBeforeLabel}: ${taskTitle}`;
       }
     }
 

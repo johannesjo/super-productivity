@@ -378,6 +378,7 @@ schedule-event.cdk-drag-dragging + schedule-event {
 
   &.isScheduleForDay {
     border-radius: var(--card-border-radius);
+    border-radius: 12px;
 
     //.drag-preview-time-badge {
     //font-size: 13px;
