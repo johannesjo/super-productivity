@@ -56,6 +56,7 @@ const D_HOURS = 24;
     '[class.isShiftKeyPressed]': 'isShiftNoScheduleMode()',
     '[class.is-dragging]': 'isDragging()',
     '[class.is-not-dragging]': '!isDragging()',
+    '[class.is-resizing-event]': 'isAnyEventResizing()',
     '[class]': 'dragEventTypeClass()',
   },
 })
@@ -116,6 +117,7 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
   } | null>(null);
 
   isDragging = this._service.isDragging;
+  isAnyEventResizing = signal(false);
   isCreateTaskActive = signal(false);
   currentDragEvent = this._service.currentDragEvent;
   dragPreviewStyle = this._service.dragPreviewStyle;
@@ -200,6 +202,7 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
         return null;
       }
     });
+    this._setupResizeObserver();
   }
 
   ngOnDestroy(): void {
@@ -207,11 +210,16 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
     // Clean up resize observer
     if (this._resizeObserver) {
       this._resizeObserver.disconnect();
+      this._resizeObserver = undefined;
     }
+    this.isAnyEventResizing.set(false);
     this._service.destroy();
   }
 
   onGridClick(ev: MouseEvent): void {
+    if (this.isAnyEventResizing()) {
+      return;
+    }
     if (ev.target instanceof HTMLElement) {
       if (ev.target.classList.contains('col')) {
         this.isCreateTaskActive.set(true);
@@ -225,6 +233,10 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
     // Prevent showing the "create task" placeholder during or right after a drag
     // to avoid confusing visual feedback during the reset animation.
     if (this.isDragging()) {
+      return;
+    }
+    if (this.isAnyEventResizing()) {
+      this.newTaskPlaceholder.set(null);
       return;
     }
     if (this.isCreateTaskActive()) {
@@ -286,6 +298,30 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
     if (event.key === 'Control' || !event.ctrlKey) {
       this.isCtrlPressed.set(false);
     }
+  }
+
+  private _setupResizeObserver(): void {
+    const gridRef = this.gridContainer();
+    const gridElement = gridRef?.nativeElement as HTMLElement | undefined;
+    if (!gridElement) {
+      this.isAnyEventResizing.set(false);
+      return;
+    }
+
+    if (this._resizeObserver) {
+      this._resizeObserver.disconnect();
+    }
+
+    this._resizeObserver = new MutationObserver(() => {
+      const resizingElements = gridElement.querySelectorAll('schedule-event.is-resizing');
+      this.isAnyEventResizing.set(resizingElements.length > 0);
+    });
+
+    this._resizeObserver.observe(gridElement, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class'],
+    });
   }
 
   private _formatDateLabel(dayStr: string): string {
