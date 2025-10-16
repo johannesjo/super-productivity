@@ -35,8 +35,10 @@
       pointer-events: none !important;
     }
 
+    // Prevent CDK drag-drop from animating items out of the way in time mode
     schedule-event {
-      //transform: none !important;
+      transform: none !important;
+      transition: none !important;
     }
   }
 }
@@ -66,16 +68,10 @@
 // TODO fix that this currently only shows inside schedule-day-panel
 // Fix drag placeholder to stay in original position and make it subtle
 .cdk-drag-placeholder {
-  opacity: 0.3 !important;
-  transform: none !important;
-  transition: none !important;
-  position: static !important;
-  border: 3px dashed greenyellow !important;
-
-  // Prevent any visual changes during drag
-  &.cdk-drop-list-dragging {
-    //transform: none !important;
-  }
+  opacity: 0.2 !important;
+  //transform: none !important;
+  //transition: none !important;
+  //position: static !important;
 }
 
 .week-header {
@@ -286,12 +282,28 @@
   }
 }
 
-// prevent moving out the way
-schedule-event.cdk-drag-dragging + schedule-event {
-  transform: translateY(0);
+// Prevent CDK from moving items out of the way when not in shift mode
+:host(:not(.isShiftKeyPressed)) {
+  schedule-event.cdk-drag {
+    transform: none !important;
+    transition: none !important;
+  }
 
-  &:after {
-    display: none;
+  schedule-event.cdk-drag-dragging + schedule-event {
+    transform: none !important;
+
+    &:after {
+      display: none;
+    }
+  }
+}
+
+// In shift mode, allow minimal movement but control it
+:host(.isShiftKeyPressed) {
+  schedule-event.cdk-drag-dragging + schedule-event {
+    &:after {
+      display: none;
+    }
   }
 }
 

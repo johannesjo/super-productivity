@@ -445,7 +445,8 @@ export class ScheduleWeekDragService {
         this._dragPreviewContext.set(null);
       }
     } else {
-      this._dragPreviewContext.set({ kind: 'override', label: 'UNSCHEDULE' });
+      // TODO use proper translation string
+      this._dragPreviewContext.set({ kind: 'override', label: '✖ UNSCHEDULE' });
       this._lastCalculatedTimestamp = null;
     }
   }
