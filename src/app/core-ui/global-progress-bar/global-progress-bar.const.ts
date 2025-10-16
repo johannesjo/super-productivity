@@ -11,6 +11,8 @@ export const PROGRESS_BAR_LABEL_MAP: { [key: string]: string } = {
   'https://content.dropboxapi.com/2/files/upload': T.GPB.DBX_UPLOAD,
   'https://api.dropboxapi.com/oauth2/token': T.GPB.DBX_GEN_TOKEN,
 
+  POLL: T.F.ISSUE.S.POLLING_CHANGES,
+
   '/issues/': T.GPB.GITHUB_LOAD_ISSUE,
   '/issue/': T.GPB.JIRA_LOAD_ISSUE,
 
