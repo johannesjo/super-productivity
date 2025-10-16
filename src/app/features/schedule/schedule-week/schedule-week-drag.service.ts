@@ -10,7 +10,7 @@ import {
   T_ID_PREFIX,
 } from '../schedule.const';
 import { remindOptionToMilliseconds } from '../../tasks/util/remind-option-to-milliseconds';
-import { TaskReminderOptionId } from '../../tasks/task.model';
+import { TaskCopy, TaskReminderOptionId } from '../../tasks/task.model';
 import { calculateTimeFromYPosition } from '../schedule-utils';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import type { DragPreviewContext } from './schedule-week-drag.types';
@@ -46,8 +46,8 @@ export class ScheduleWeekDragService {
   readonly currentDragEvent: Signal<ScheduleEvent | null> =
     this._currentDragEvent.asReadonly();
 
-  private readonly _prevDragOverEl = signal<HTMLElement | null>(null);
-  private readonly _dragCloneEl = signal<HTMLElement | null>(null);
+  private _prevDragOverEl: HTMLElement | null = null;
+  private _dragCloneEl: HTMLElement | null = null;
 
   private readonly _isDragging = signal(false);
   readonly isDragging: Signal<boolean> = this._isDragging.asReadonly();
@@ -68,6 +68,7 @@ export class ScheduleWeekDragService {
     this._clearShiftInfoTimeout();
     this._gridContainerAccessor = null;
     this._daysToShowAccessor = null;
+    this._resetDragCaches();
   }
 
   setGridContainer(accessor: () => HTMLElement | null): void {
@@ -75,8 +76,16 @@ export class ScheduleWeekDragService {
     this._gridContainerAccessor = accessor;
   }
 
+  clearGridContainer(): void {
+    this._gridContainerAccessor = null;
+  }
+
   setDaysToShowAccessor(accessor: () => readonly string[]): void {
     this._daysToShowAccessor = accessor;
+  }
+
+  clearDaysToShowAccessor(): void {
+    this._daysToShowAccessor = null;
   }
 
   setShiftMode(isShiftMode: boolean): void {
@@ -104,12 +113,13 @@ export class ScheduleWeekDragService {
     }
 
     const nativeEl = ev.source.element.nativeElement;
+
     nativeEl.style.opacity = '0';
 
-    const cloneEl = this._dragCloneEl();
+    const cloneEl = this._dragCloneEl;
     if (cloneEl) {
       cloneEl.remove();
-      this._dragCloneEl.set(null);
+      this._dragCloneEl = null;
     }
   }
 
@@ -145,17 +155,17 @@ export class ScheduleWeekDragService {
   }
 
   handleDragReleased(ev: CdkDragRelease): void {
-    const prevEl = this._prevDragOverEl();
+    const prevEl = this._prevDragOverEl;
     if (prevEl) {
       prevEl.classList.remove(DRAG_OVER_CLASS);
-      this._prevDragOverEl.set(null);
+      this._prevDragOverEl = null;
     }
 
     const dropPoint = this._lastPointerPosition ?? this._extractDropPoint(ev.event);
-    const cloneEl = this._dragCloneEl();
+    const cloneEl = this._dragCloneEl;
     if (cloneEl) {
       cloneEl.remove();
-      this._dragCloneEl.set(null);
+      this._dragCloneEl = null;
     }
 
     this._isDragging.set(false);
@@ -175,7 +185,8 @@ export class ScheduleWeekDragService {
     }, 100);
 
     const { columnTarget, scheduleEventTarget } = this._resolveDropTargets(ev);
-    const task = ev.source.data.data as any;
+    const sourceEvent = ev.source.data;
+    const task = this._pluckTaskFromEvent(sourceEvent);
     const sourceTaskId = nativeEl.id.replace(T_ID_PREFIX, '');
     const targetTaskId = scheduleEventTarget
       ? scheduleEventTarget.id.replace(T_ID_PREFIX, '')
@@ -186,10 +197,10 @@ export class ScheduleWeekDragService {
       targetTaskId.length > 0 &&
       sourceTaskId !== targetTaskId;
 
-    const dispatchMoveBefore = (): void => {
+    const dispatchMoveBefore = (taskToMove: TaskCopy): void => {
       this._store.dispatch(
         PlannerActions.moveBeforeTask({
-          fromTask: ev.source.data.data,
+          fromTask: taskToMove,
           toTaskId: targetTaskId,
         }),
       );
@@ -197,49 +208,21 @@ export class ScheduleWeekDragService {
 
     let handled = false;
 
-    if (this.isShiftMode() && canMoveBefore) {
-      dispatchMoveBefore();
+    if (task && this.isShiftMode() && canMoveBefore) {
+      dispatchMoveBefore(task);
       handled = true;
     }
 
     if (!handled && columnTarget && task) {
-      const isMoveToEndOfDay = columnTarget.classList.contains('end-of-day');
-      const targetDay =
-        columnTarget.getAttribute('data-day') ||
-        (dropPoint ? this._getDayUnderPointer(dropPoint.x, dropPoint.y) : null);
-
-      if (targetDay) {
-        handled = true;
-        if (this.isShiftMode()) {
-          this._store.dispatch(
-            PlannerActions.planTaskForDay({
-              task,
-              day: targetDay,
-              isAddToTop: !isMoveToEndOfDay,
-            }),
-          );
-        } else {
-          const scheduleTime =
-            this._lastCalculatedTimestamp ??
-            (dropPoint ? this._calculateTimeFromDrop(dropPoint, targetDay) : null);
-
-          if (scheduleTime != null) {
-            this._scheduleTask(task, scheduleTime);
-          } else {
-            this._store.dispatch(
-              PlannerActions.planTaskForDay({
-                task,
-                day: targetDay,
-                isAddToTop: !isMoveToEndOfDay,
-              }),
-            );
-          }
-        }
-      }
+      handled = this._handleColumnDrop({
+        task,
+        columnTarget,
+        dropPoint,
+      });
     }
 
-    if (!handled && canMoveBefore) {
-      dispatchMoveBefore();
+    if (!handled && task && canMoveBefore) {
+      dispatchMoveBefore(task);
       handled = true;
     }
 
@@ -319,6 +302,8 @@ export class ScheduleWeekDragService {
     this._lastDropScheduleEvent = null;
     this._lastPointerPosition = null;
     this._lastCalculatedTimestamp = null;
+    this._prevDragOverEl = null;
+    this._dragCloneEl = null;
   }
 
   private _isPreviewElement(element: Element | null): boolean {
@@ -399,12 +384,12 @@ export class ScheduleWeekDragService {
       this._dragPreviewContext.set(null);
     }
 
-    const prevEl = this._prevDragOverEl();
+    const prevEl = this._prevDragOverEl;
     if (prevEl && prevEl !== targetEl) {
       prevEl.classList.remove(DRAG_OVER_CLASS);
     }
     if (prevEl !== targetEl) {
-      this._prevDragOverEl.set(targetEl);
+      this._prevDragOverEl = targetEl;
       if (
         targetEl.classList.contains(SVEType.Task) ||
         targetEl.classList.contains(SVEType.SplitTask) ||
@@ -423,10 +408,10 @@ export class ScheduleWeekDragService {
     targetDay: string,
     isWithinGrid: boolean,
   ): void {
-    const prevEl = this._prevDragOverEl();
+    const prevEl = this._prevDragOverEl;
     if (prevEl) {
       prevEl.classList.remove(DRAG_OVER_CLASS);
-      this._prevDragOverEl.set(null);
+      this._prevDragOverEl = null;
     }
 
     if (isWithinGrid) {
@@ -483,7 +468,7 @@ export class ScheduleWeekDragService {
     if (!event) {
       return 6;
     }
-    const task = event.data as any;
+    const task = this._pluckTaskFromEvent(event);
     if (task?.timeEstimate) {
       const timeInHours = task.timeEstimate / (60 * 60 * 1000);
       return Math.max(Math.round(timeInHours * FH), 1);
@@ -558,7 +543,7 @@ export class ScheduleWeekDragService {
     );
   }
 
-  private _scheduleTask(task: any, scheduleTime: number): void {
+  private _scheduleTask(task: TaskCopy, scheduleTime: number): void {
     const hasExistingSchedule = !!task?.dueWithTime;
     const hasReminder = !!task?.reminderId;
     const remindAt =
@@ -609,5 +594,70 @@ export class ScheduleWeekDragService {
       return { x: touch.clientX, y: touch.clientY };
     }
     return null;
+  }
+
+  private _pluckTaskFromEvent(event: ScheduleEvent | null): TaskCopy | null {
+    if (!event || !event.data) {
+      return null;
+    }
+
+    switch (event.type) {
+      case SVEType.Task:
+      case SVEType.ScheduledTask:
+      case SVEType.SplitTask:
+      case SVEType.TaskPlannedForDay:
+      case SVEType.SplitTaskPlannedForDay:
+        return event.data as TaskCopy;
+      default:
+        return null;
+    }
+  }
+
+  private _handleColumnDrop({
+    task,
+    columnTarget,
+    dropPoint,
+  }: {
+    task: TaskCopy;
+    columnTarget: HTMLElement;
+    dropPoint: PointerPosition | null;
+  }): boolean {
+    const isMoveToEndOfDay = columnTarget.classList.contains('end-of-day');
+    const targetDay =
+      columnTarget.getAttribute('data-day') ||
+      (dropPoint ? this._getDayUnderPointer(dropPoint.x, dropPoint.y) : null);
+
+    if (!targetDay) {
+      return false;
+    }
+
+    if (this.isShiftMode()) {
+      this._store.dispatch(
+        PlannerActions.planTaskForDay({
+          task,
+          day: targetDay,
+          isAddToTop: !isMoveToEndOfDay,
+        }),
+      );
+      return true;
+    }
+
+    const scheduleTime =
+      this._lastCalculatedTimestamp ??
+      (dropPoint ? this._calculateTimeFromDrop(dropPoint, targetDay) : null);
+
+    if (scheduleTime != null) {
+      this._scheduleTask(task, scheduleTime);
+      return true;
+    }
+
+    this._store.dispatch(
+      PlannerActions.planTaskForDay({
+        task,
+        day: targetDay,
+        isAddToTop: !isMoveToEndOfDay,
+      }),
+    );
+    return true;
   }
 }
