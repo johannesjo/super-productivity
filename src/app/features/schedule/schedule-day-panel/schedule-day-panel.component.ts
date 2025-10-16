@@ -38,6 +38,12 @@ import { Subscription } from 'rxjs';
 import { ScheduleExternalDragService } from '../schedule-week/schedule-external-drag.service';
 
 const DEFAULT_MIN_DURATION = 15 * 60 * 1000;
+const SCROLL_DELAY_MS = 100;
+const SCROLL_TOP_OFFSET_PX = 50;
+const MIN_PREVIEW_WIDTH_PX = 40;
+const PREVIEW_WIDTH_PADDING_PX = 10;
+const OPACITY_HIDDEN = '0';
+const OPACITY_VISIBLE = '1';
 
 @Component({
   selector: 'schedule-day-panel',
@@ -160,10 +166,7 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     effect(() => {
       // Track current time row changes to trigger auto-scroll
       this.currentTimeRow();
-      // Delay the scroll to ensure the DOM is ready
-      setTimeout(() => {
-        this._scrollToCurrentTime();
-      }, 100);
+      this._scheduleScrollToCurrentTime();
     });
   }
 
@@ -174,9 +177,7 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     });
 
     // Initial scroll to current time after view initialization
-    setTimeout(() => {
-      this._scrollToCurrentTime();
-    }, 100);
+    this._scheduleScrollToCurrentTime();
   }
 
   ngOnDestroy(): void {
@@ -204,7 +205,7 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     }
 
     // Always use the top of the task element for time calculation
-    const dragPreview = document.querySelector('.cdk-drag-preview') as HTMLElement | null;
+    const dragPreview = this._getDragPreview();
     if (!dragPreview) {
       return;
     }
@@ -235,7 +236,7 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     }
 
     const gridRect = scheduleWeek.getBoundingClientRect();
-    const targetDay = this.daysToShow()[0]; // Get the current day being displayed
+    const [targetDay] = this.daysToShow();
     return calculateTimeFromYPosition(clientY, gridRect, targetDay);
   }
 
@@ -246,11 +247,10 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
 
     if (timestamp) {
       const targetDate = new Date(timestamp);
-      const formattedTime = `${targetDate.getHours().toString().padStart(2, '0')}:${targetDate.getMinutes().toString().padStart(2, '0')}`;
       Log.log('[ScheduleDayPanel] Drop calculation:', {
         storedTimestamp: timestamp,
         targetTime: targetDate,
-        formattedTime,
+        formattedTime: this._formatTime(targetDate.getHours(), targetDate.getMinutes()),
       });
     }
 
@@ -267,7 +267,7 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     const pointer = this._getPointerPosition(event);
     const isInside = pointer ? this._isPointWithinDropZone(pointer.x, pointer.y) : false;
     const dropTime = isInside ? this._calculateDropTime() : null;
-    const targetDay = this.daysToShow()[0];
+    const [targetDay] = this.daysToShow();
 
     this._stopScheduleMode();
     this._externalDragService.setActiveTask(null);
@@ -305,14 +305,12 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
   private _getPointerPosition(
     event: MouseEvent | TouchEvent,
   ): { x: number; y: number } | null {
-    if ('touches' in event) {
-      const touch = event.touches[0] ?? event.changedTouches?.[0];
-      if (!touch) {
-        return null;
-      }
-      return { x: touch.clientX, y: touch.clientY };
+    if (!('touches' in event)) {
+      return { x: event.clientX, y: event.clientY };
     }
-    return { x: event.clientX, y: event.clientY };
+
+    const touch = event.touches[0] ?? event.changedTouches?.[0];
+    return touch ? { x: touch.clientX, y: touch.clientY } : null;
   }
 
   private _isPointWithinDropZone(x: number, y: number): boolean {
@@ -324,11 +322,36 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
   }
 
+  private _getDragPreview(): HTMLElement | null {
+    return document.querySelector('.cdk-drag-preview') as HTMLElement | null;
+  }
+
+  private _formatTime(hours: number, minutes: number): string {
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  }
+
   private _formatPreviewTime(timestamp: number): string {
     const date = new Date(timestamp);
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    return this._formatTime(date.getHours(), date.getMinutes());
+  }
+
+  private _scheduleScrollToCurrentTime(): void {
+    setTimeout(() => {
+      this._scrollToCurrentTime();
+    }, SCROLL_DELAY_MS);
+  }
+
+  private _findScrollContainer(): Element | null {
+    const selectors = ['.side-inner', '.right-panel', '[class*="panel"]'];
+    const el = this.scheduleWeekRef.nativeElement;
+
+    for (const selector of selectors) {
+      const container = el.closest(selector);
+      if (container) {
+        return container;
+      }
+    }
+    return null;
   }
 
   private _scrollToCurrentTime(): void {
@@ -344,17 +367,7 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    // Find the scrollable container - it's the .side-inner in the better-drawer-container
-    let scrollContainer = this.scheduleWeekRef.nativeElement.closest('.side-inner');
-
-    // Fallback to other potential scrollable containers
-    if (!scrollContainer) {
-      scrollContainer = this.scheduleWeekRef.nativeElement.closest('.right-panel');
-    }
-    if (!scrollContainer) {
-      scrollContainer = this.scheduleWeekRef.nativeElement.closest('[class*="panel"]');
-    }
-
+    const scrollContainer = this._findScrollContainer();
     if (!scrollContainer) {
       Log.warn('[ScheduleDayPanel] No scrollable container found');
       return;
@@ -364,23 +377,19 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
 
     const containerRect = scrollContainer.getBoundingClientRect();
     const elementRect = currentTimeElement.getBoundingClientRect();
-
-    // Calculate the target scroll position to put current time indicator near the top
     const relativePosition = elementRect.top - containerRect.top;
-    const topOffset = 50; // Small offset from very top for better visibility
-    const targetScrollTop = scrollContainer.scrollTop + relativePosition - topOffset;
+    const targetScrollTop =
+      scrollContainer.scrollTop + relativePosition - SCROLL_TOP_OFFSET_PX;
 
     Log.log('[ScheduleDayPanel] Scrolling to position:', Math.max(0, targetScrollTop));
 
     scrollContainer.scrollTo({
       top: Math.max(0, targetScrollTop),
-      // behavior: 'smooth',
-      // behavior: 'smooth',
     });
   }
 
   private _updatePreviewTimeBadge(timeStr: string): void {
-    const preview = document.querySelector('.cdk-drag-preview') as HTMLElement | null;
+    const preview = this._getDragPreview();
     if (!preview) return;
     const timeBadge = preview.querySelector(
       '.drag-preview-time-badge',
@@ -430,56 +439,74 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
 
   // we're mutating the dom directly here to add some styling to the drag preview, since it is the most efficient way to do it
   private _applySchedulePreviewStyling(isEnable: boolean): void {
-    const previewEl = document.querySelector('.cdk-drag-preview') as HTMLElement | null;
+    const previewEl = this._getDragPreview();
     if (!previewEl) {
       return;
     }
 
-    if (previewEl.tagName.toLowerCase() === 'task') {
-      if (isEnable) {
-        previewEl.classList.add('as-schedule-event-preview');
-        // Try to match the width of the day column
-        const containerElement = this.scheduleWeekRef?.nativeElement as
-          | HTMLElement
-          | undefined;
-        const day = this.daysToShow()[0];
-        const colEl = containerElement?.querySelector(
-          `.grid-container .col[data-day="${day}"]`,
-        ) as HTMLElement | null;
-        if (colEl) {
-          const colRect = colEl.getBoundingClientRect();
-          previewEl.style.width = `${Math.max(40, colRect.width - 10)}px`;
-        }
+    const tagName = previewEl.tagName.toLowerCase();
+    if (tagName === 'task') {
+      this._applyTaskPreviewStyling(previewEl, isEnable);
+    } else if (tagName === 'schedule-event') {
+      this._applyScheduleEventPreviewStyling(previewEl, isEnable);
+    }
+  }
 
-        // ensure time badge element exists
-        let timeBadge = previewEl.querySelector(
-          '.drag-preview-time-badge',
-        ) as HTMLElement | null;
-        if (!timeBadge) {
-          timeBadge = document.createElement('div');
-          timeBadge.className = 'drag-preview-time-badge';
-          previewEl.appendChild(timeBadge);
-        }
-        if (this.dragPreviewTime()) {
-          timeBadge.textContent = this.dragPreviewTime()!;
-        }
-      } else {
-        previewEl.classList.remove('as-schedule-event-preview');
-        previewEl.style.removeProperty('width');
-        const timeBadge = previewEl.querySelector('.drag-preview-time-badge');
-        if (timeBadge) {
-          timeBadge.remove();
-        }
-      }
+  private _applyTaskPreviewStyling(previewEl: HTMLElement, isEnable: boolean): void {
+    if (isEnable) {
+      previewEl.classList.add('as-schedule-event-preview');
+      this._setPreviewWidth(previewEl);
+      this._ensureTimeBadge(previewEl);
+    } else {
+      previewEl.classList.remove('as-schedule-event-preview');
+      previewEl.style.removeProperty('width');
+      this._removeTimeBadge(previewEl);
+    }
+  }
+
+  private _setPreviewWidth(previewEl: HTMLElement): void {
+    const containerElement = this.scheduleWeekRef?.nativeElement as
+      | HTMLElement
+      | undefined;
+    const [day] = this.daysToShow();
+    const colEl = containerElement?.querySelector(
+      `.grid-container .col[data-day="${day}"]`,
+    ) as HTMLElement | null;
+
+    if (colEl) {
+      const colRect = colEl.getBoundingClientRect();
+      previewEl.style.width = `${Math.max(MIN_PREVIEW_WIDTH_PX, colRect.width - PREVIEW_WIDTH_PADDING_PX)}px`;
+    }
+  }
+
+  private _ensureTimeBadge(previewEl: HTMLElement): void {
+    let timeBadge = previewEl.querySelector(
+      '.drag-preview-time-badge',
+    ) as HTMLElement | null;
+
+    if (!timeBadge) {
+      timeBadge = document.createElement('div');
+      timeBadge.className = 'drag-preview-time-badge';
+      previewEl.appendChild(timeBadge);
     }
 
-    // NOTE: this is mainly styled in schedule-week.component.scss via .cdk-drag-preview
-    if (previewEl.tagName.toLowerCase() === 'schedule-event') {
-      if (isEnable) {
-        previewEl.style.opacity = `0`;
-      } else {
-        previewEl.style.opacity = `1`;
-      }
+    const currentTime = this.dragPreviewTime();
+    if (currentTime) {
+      timeBadge.textContent = currentTime;
     }
+  }
+
+  private _removeTimeBadge(previewEl: HTMLElement): void {
+    const timeBadge = previewEl.querySelector('.drag-preview-time-badge');
+    if (timeBadge) {
+      timeBadge.remove();
+    }
+  }
+
+  private _applyScheduleEventPreviewStyling(
+    previewEl: HTMLElement,
+    isEnable: boolean,
+  ): void {
+    previewEl.style.opacity = isEnable ? OPACITY_HIDDEN : OPACITY_VISIBLE;
   }
 }
