@@ -173,7 +173,6 @@ export class ScheduleWeekDragService {
     this._currentDragEvent.set(null);
     this._dragPreviewStyle.set(null);
     this._dragOverTaskId.set(null);
-    this._lastCalculatedTimestamp = null;
 
     // make original element visible again and re-enable pointer events
     nativeEl.style.opacity = '';
@@ -228,6 +227,7 @@ export class ScheduleWeekDragService {
       this._store.dispatch(TaskSharedActions.planTasksForToday({ taskIds: [task.id] }));
     }
 
+    // Clear timestamp and other drag-related vars AFTER drop is processed
     this._resetDragRelatedVars();
     // reset to original (now new) position
     nativeEl.style.transform = 'translate3d(0, 0, 0)';
@@ -367,10 +367,9 @@ export class ScheduleWeekDragService {
     this._lastCalculatedTimestamp = null;
 
     if (isWithinGrid) {
-      const timestamp = calculateTimeFromYPosition(pointer.y, gridRect, targetDay);
-      if (timestamp) {
-        this._createDragPreview(timestamp, targetDay, pointer.y, gridRect);
-      }
+      // Create preview (we don't use the timestamp in shift mode, but still create the visual)
+      this._createDragPreview(targetDay, pointer.y, gridRect);
+
       if (targetEl.classList.contains('col')) {
         this._dragPreviewContext.set({
           kind: 'shift',
@@ -434,14 +433,14 @@ export class ScheduleWeekDragService {
     this._dragOverTaskId.set(null);
 
     if (isWithinGrid) {
-      const timestamp = calculateTimeFromYPosition(pointer.y, gridRect, targetDay);
+      // Create preview and get the adjusted timestamp that accounts for cursor centering
+      const adjustedTimestamp = this._createDragPreview(targetDay, pointer.y, gridRect);
 
-      // Cache timestamp to avoid recalculating on drop if pointer didn't move.
-      this._lastCalculatedTimestamp = timestamp;
+      // Cache adjusted timestamp for drop operations
+      this._lastCalculatedTimestamp = adjustedTimestamp;
 
-      if (timestamp) {
-        this._createDragPreview(timestamp, targetDay, pointer.y, gridRect);
-        this._dragPreviewContext.set({ kind: 'time', timestamp });
+      if (adjustedTimestamp) {
+        this._dragPreviewContext.set({ kind: 'time', timestamp: adjustedTimestamp });
       } else {
         this._dragPreviewContext.set(null);
       }
@@ -461,20 +460,23 @@ export class ScheduleWeekDragService {
   }
 
   private _createDragPreview(
-    timestamp: number,
     targetDay: string,
     pointerY: number,
     gridRect: DOMRect,
-  ): void {
+  ): number | null {
     const relativeY = pointerY - gridRect.top;
     const totalRows = 24 * FH;
     const rowHeight = gridRect.height / totalRows;
-    const row = Math.round(relativeY / rowHeight) + 1;
+    const rowSpan = this._calculateRowSpan(this._currentDragEvent());
+
+    // Center the cursor on the preview by offsetting by half the rowSpan.
+    // This makes the cursor appear more centered on the preview element
+    // rather than at the very top edge.
+    const rowOffset = Math.floor(rowSpan / 2);
+    const row = Math.max(1, Math.round(relativeY / rowHeight) + 1 - rowOffset);
 
     const dayIndex = this._daysToShow().findIndex((day) => day === targetDay);
     const col = dayIndex + 2;
-
-    const rowSpan = this._calculateRowSpan(this._currentDragEvent());
 
     const gridStyle = [
       `grid-row: ${row} / span ${rowSpan}`,
@@ -482,6 +484,13 @@ export class ScheduleWeekDragService {
     ].join('; ');
 
     this._dragPreviewStyle.set(gridStyle);
+
+    // Calculate the adjusted timestamp based on where the preview's top edge is positioned,
+    // not where the cursor is. This ensures the time badge and drop time match the visual.
+    const offsetRows = row - 1;
+    const offsetY = offsetRows * rowHeight;
+    const adjustedY = gridRect.top + offsetY;
+    return calculateTimeFromYPosition(adjustedY, gridRect, targetDay);
   }
 
   // Calculate preview height based on task duration so users can see
@@ -548,7 +557,21 @@ export class ScheduleWeekDragService {
       return null;
     }
     const gridRect = gridContainer.getBoundingClientRect();
-    return calculateTimeFromYPosition(dropPoint.y, gridRect, targetDay);
+
+    // Apply the same offset adjustment as in _createDragPreview to ensure
+    // the drop time matches where the preview was visually positioned.
+    const relativeY = dropPoint.y - gridRect.top;
+    const totalRows = 24 * FH;
+    const rowHeight = gridRect.height / totalRows;
+    const rowSpan = this._calculateRowSpan(this._currentDragEvent());
+    const rowOffset = Math.floor(rowSpan / 2);
+    const row = Math.max(1, Math.round(relativeY / rowHeight) + 1 - rowOffset);
+
+    const offsetRows = row - 1;
+    const offsetY = offsetRows * rowHeight;
+    const adjustedY = gridRect.top + offsetY;
+
+    return calculateTimeFromYPosition(adjustedY, gridRect, targetDay);
   }
 
   private _isOutsideGrid(dropPoint: PointerPosition): boolean {
