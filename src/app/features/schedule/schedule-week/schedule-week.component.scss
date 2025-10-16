@@ -88,11 +88,17 @@
   color: var(--text-color);
   background: var(--bg-lighter);
 
-  &.minimal {
+  &.isInPanel {
     //border: 0;
     justify-content: center;
     border-top: 0;
     box-shadow: none;
+    background: transparent;
+    border: none;
+
+    * {
+      border: none !important;
+    }
 
     .filler {
       display: none;

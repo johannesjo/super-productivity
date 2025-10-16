@@ -66,7 +66,7 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
   private _translateService = inject(TranslateService);
   private _defaultLocale = inject(LOCALE_ID);
 
-  isMinimalHeader = input<boolean>(false);
+  isInPanel = input<boolean>(false);
   events = input<ScheduleEvent[] | null>([]);
   beyondBudget = input<ScheduleEvent[][] | null>([]);
   daysToShow = input<string[]>([]);
