@@ -15,6 +15,15 @@
     }
   }
 
+  // Show grabbing cursor during all drag operations
+  &.is-dragging {
+    cursor: grabbing !important;
+
+    .grid-container {
+      cursor: grabbing !important;
+    }
+  }
+
   // When dragging without shift key, disable pointer events on schedule-events
   // This prevents dropping tasks on other events (forces time-based scheduling)
   &.is-dragging:not(.isShiftKeyPressed) {

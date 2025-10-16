@@ -376,9 +376,18 @@
 :host.draggable {
   cursor: grab;
 
+  // Ensure the ::before pseudo-element also shows the cursor
+  &::before {
+    cursor: grab;
+  }
+
   &:active {
     cursor: grabbing;
     transition: none;
+
+    &::before {
+      cursor: grabbing;
+    }
   }
 }
 
