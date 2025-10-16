@@ -74,6 +74,8 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
   dragPreviewTime = signal<string | null>(null);
   isDragging = signal(false);
   private lastCalculatedTimestamp: number | null = null;
+  private _dragPointerOffsetY: number | null = null;
+  private _lastKnownTopY: number | null = null;
 
   private _todayDateStr = toSignal(this._globalTrackingIntervalService.todayDateStr$, {
     initialValue: this._dateService.todayStr(Date.now()),
@@ -208,17 +210,19 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
 
     // Try to use drag preview position, fallback to event coordinates for touch
     const previewEl = this._getDragPreview();
+    const pointer = this._getPointerPosition(event);
     if (previewEl) {
       // Desktop: use drag preview top
       const previewRect = previewEl.getBoundingClientRect();
-      const timestamp = this._calculateTimeFromYPosition(previewRect.top);
+      const topY = this._resolveTopY(previewRect.top, pointer?.y ?? null);
+      const timestamp = topY != null ? this._calculateTimeFromYPosition(topY) : null;
       this.lastCalculatedTimestamp = timestamp;
       this._updateDragPreviewTime(previewEl, timestamp);
     } else {
       // Touch devices: use touch coordinates directly
-      const pointer = this._getPointerPosition(event);
       if (pointer) {
-        const timestamp = this._calculateTimeFromYPosition(pointer.y);
+        const topY = this._resolveTopY(null, pointer.y);
+        const timestamp = topY != null ? this._calculateTimeFromYPosition(topY) : null;
         this.lastCalculatedTimestamp = timestamp;
         // Update preview time without preview element for touch
         if (timestamp != null) {
@@ -253,14 +257,27 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     return calculateTimeFromYPosition(clientY, gridRect, targetDay);
   }
 
-  private _calculateDropTime(): number | null {
-    // Use the exact timestamp that was calculated during the last drag move
-    // This ensures perfect consistency between preview and actual scheduling
-    const timestamp = this.lastCalculatedTimestamp;
+  private _calculateDropTime(
+    previewRect: DOMRect | null,
+    pointerY: number | null,
+  ): number | null {
+    const topY = this._resolveTopY(previewRect?.top ?? null, pointerY);
+    const timestamp =
+      (topY != null ? this._calculateTimeFromYPosition(topY) : null) ??
+      this.lastCalculatedTimestamp;
 
-    if (timestamp) {
+    if (timestamp != null) {
+      this.lastCalculatedTimestamp = timestamp;
       const targetDate = new Date(timestamp);
       Log.log('[ScheduleDayPanel] Drop calculation:', {
+        source:
+          topY != null
+            ? previewRect
+              ? 'preview-top-adjusted'
+              : pointerY != null
+                ? 'pointer-top-adjusted'
+                : 'top-cache'
+            : 'cached',
         storedTimestamp: timestamp,
         targetTime: targetDate,
         formattedTime: this._formatTime(targetDate.getHours(), targetDate.getMinutes()),
@@ -277,9 +294,12 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
 
     // Treat any pointer release while the preview is active as a potential drop on the panel.
     const task = this._activeExternalTask ?? this._externalDragService.activeTask();
+    const previewRect = this._getDragPreviewRect();
     const pointer = this._getPointerPosition(event);
-    const isInside = pointer ? this._isPointWithinDropZone(pointer.x, pointer.y) : false;
-    const dropTime = isInside ? this._calculateDropTime() : null;
+    const isInside = this._isEffectiveTopWithinDropZone(previewRect, pointer);
+    const dropTime = isInside
+      ? this._calculateDropTime(previewRect, pointer?.y ?? null)
+      : null;
     const targetDay = this._targetDay();
 
     this._stopScheduleMode();
@@ -326,13 +346,32 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     return touch ? { x: touch.clientX, y: touch.clientY } : null;
   }
 
-  private _isPointWithinDropZone(x: number, y: number): boolean {
+  private _getDragPreviewRect(): DOMRect | null {
+    return this._withDragPreview((preview) => preview.getBoundingClientRect());
+  }
+
+  private _isEffectiveTopWithinDropZone(
+    rect: DOMRect | null,
+    pointer: { x: number; y: number } | null,
+  ): boolean {
     const dropZoneEl = this.dropZoneRef?.nativeElement;
     if (!dropZoneEl) {
       return false;
     }
-    const rect = dropZoneEl.getBoundingClientRect();
-    return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+
+    const dropZoneRect = dropZoneEl.getBoundingClientRect();
+    const topY = this._resolveTopY(rect?.top ?? null, pointer?.y ?? null);
+    if (topY == null) {
+      return false;
+    }
+
+    const horizontalOverlap = rect
+      ? rect.right >= dropZoneRect.left && rect.left <= dropZoneRect.right
+      : pointer
+        ? pointer.x >= dropZoneRect.left && pointer.x <= dropZoneRect.right
+        : false;
+
+    return horizontalOverlap && topY >= dropZoneRect.top && topY <= dropZoneRect.bottom;
   }
 
   private _withDragPreview<T>(handler: (preview: HTMLElement) => T): T | null {
@@ -354,6 +393,33 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
   private _formatPreviewTime(timestamp: number): string {
     const date = new Date(timestamp);
     return this._formatTime(date.getHours(), date.getMinutes());
+  }
+
+  private _resolveTopY(
+    previewTop: number | null,
+    pointerY: number | null,
+  ): number | null {
+    if (pointerY != null && previewTop != null && this._dragPointerOffsetY == null) {
+      this._dragPointerOffsetY = pointerY - previewTop;
+    }
+
+    let topY: number | null = null;
+
+    if (pointerY != null && this._dragPointerOffsetY != null) {
+      topY = pointerY - this._dragPointerOffsetY;
+    } else if (previewTop != null) {
+      topY = previewTop;
+    } else if (pointerY != null) {
+      topY = pointerY;
+    } else {
+      topY = this._lastKnownTopY;
+    }
+
+    if (topY != null) {
+      this._lastKnownTopY = topY;
+    }
+
+    return topY;
   }
 
   private _scheduleScrollToCurrentTime(): void {
@@ -423,6 +489,8 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
   private _startScheduleMode(): void {
     if (this.isDragging()) return;
     this.isDragging.set(true);
+    this._dragPointerOffsetY = null;
+    this._lastKnownTopY = null;
     this._applySchedulePreviewStyling(true);
     this._cdr.markForCheck();
     this._toggleGlobalPointerListeners(true);
@@ -433,6 +501,8 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     this.isDragging.set(false);
     this.dragPreviewTime.set(null);
     this.lastCalculatedTimestamp = null;
+    this._dragPointerOffsetY = null;
+    this._lastKnownTopY = null;
     this._activeExternalTask = null;
     this._applySchedulePreviewStyling(false);
     this._cdr.markForCheck();
@@ -459,7 +529,8 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    const isInside = this._isPointWithinDropZone(pointer.x, pointer.y);
+    const previewRect = this._getDragPreviewRect();
+    const isInside = this._isEffectiveTopWithinDropZone(previewRect, pointer);
 
     if (!isInside) {
       // If pointer is not over the side panel/drop zone anymore, leave schedule mode
@@ -470,7 +541,8 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     // Update time calculation continuously while dragging over the drop zone
     // This is especially important for touch devices
     this._ngZone.run(() => {
-      const timestamp = this._calculateTimeFromYPosition(pointer.y);
+      const topY = this._resolveTopY(previewRect?.top ?? null, pointer.y);
+      const timestamp = topY != null ? this._calculateTimeFromYPosition(topY) : null;
       this.lastCalculatedTimestamp = timestamp;
 
       if (timestamp != null) {
