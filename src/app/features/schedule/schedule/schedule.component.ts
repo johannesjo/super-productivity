@@ -1,37 +1,27 @@
 /* eslint-disable */
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
-  inject,
   computed,
-  OnInit,
-  AfterViewInit,
+  inject,
 } from '@angular/core';
 import { fromEvent } from 'rxjs';
-import { ActivatedRoute, Router } from '@angular/router';
 import { select, Store } from '@ngrx/store';
-import { selectTimelineTasks } from '../../work-context/store/work-context.selectors';
-import { selectPlannerDayMap } from '../../planner/store/planner.selectors';
 import { debounceTime, map, startWith } from 'rxjs/operators';
 import { TaskService } from '../../tasks/task.service';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
 import { MatDialog } from '@angular/material/dialog';
-import { CalendarIntegrationService } from '../../calendar-integration/calendar-integration.service';
 import { LS } from '../../../core/persistence/storage-keys.const';
 import { DialogTimelineSetupComponent } from '../dialog-timeline-setup/dialog-timeline-setup.component';
-import { LocaleDatePipe } from '../../../ui/pipes/locale-date.pipe';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import {
-  selectTimelineConfig,
-  selectTimelineWorkStartEndHours,
   selectMiscConfig,
+  selectTimelineWorkStartEndHours,
 } from '../../config/store/global-config.reducer';
 import { FH } from '../schedule.const';
-import { mapToScheduleDays } from '../map-schedule-data/map-to-schedule-days';
 import { mapScheduleDaysToScheduleEvents } from '../map-schedule-data/map-schedule-days-to-schedule-events';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { MatIcon } from '@angular/material/icon';
-import { selectTaskRepeatCfgsWithAndWithoutStartTime } from '../../task-repeat-cfg/store/task-repeat-cfg.selectors';
 import { ScheduleWeekComponent } from '../schedule-week/schedule-week.component';
 import { ScheduleMonthComponent } from '../schedule-month/schedule-month.component';
 import { ScheduleService } from '../schedule.service';
@@ -53,10 +43,8 @@ export class ScheduleComponent implements AfterViewInit {
   layoutService = inject(LayoutService);
   scheduleService = inject(ScheduleService);
   private _matDialog = inject(MatDialog);
-  private _calendarIntegrationService = inject(CalendarIntegrationService);
   private _store = inject(Store);
   private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
-  private _route = inject(ActivatedRoute);
 
   private _currentTimeViewMode = computed(() => this.layoutService.selectedTimeView());
   isMonthView = computed(() => this._currentTimeViewMode() === 'month');
@@ -125,54 +113,11 @@ export class ScheduleComponent implements AfterViewInit {
     return miscConfig?.firstDayOfWeek ?? 1; // Default to Monday
   });
 
-  private _timelineTasks = toSignal(this._store.pipe(select(selectTimelineTasks)));
-  private _taskRepeatCfgs = toSignal(
-    this._store.pipe(select(selectTaskRepeatCfgsWithAndWithoutStartTime)),
-  );
-  private _timelineConfig = toSignal(this._store.pipe(select(selectTimelineConfig)));
   private _miscConfig = toSignal(this._store.pipe(select(selectMiscConfig)));
-  private _icalEvents = toSignal(this._calendarIntegrationService.icalEvents$, {
-    initialValue: [],
-  });
-  private _plannerDayMap = toSignal(this._store.pipe(select(selectPlannerDayMap)));
   private _currentTaskId = toSignal(this.taskService.currentTaskId$);
 
-  scheduleDays = computed(() => {
-    const timelineTasks = this._timelineTasks();
-    const taskRepeatCfgs = this._taskRepeatCfgs();
-    const timelineCfg = this._timelineConfig();
-    const icalEvents = this._icalEvents();
-    const plannerDayMap = this._plannerDayMap();
-    const currentId = this._currentTaskId();
-    const daysToShow = this.daysToShow();
-
-    if (!timelineTasks || !taskRepeatCfgs || !plannerDayMap) {
-      return [];
-    }
-
-    return mapToScheduleDays(
-      Date.now(),
-      daysToShow,
-      timelineTasks.unPlanned,
-      timelineTasks.planned,
-      taskRepeatCfgs.withStartTime,
-      taskRepeatCfgs.withoutStartTime,
-      icalEvents,
-      currentId || null,
-      plannerDayMap,
-      timelineCfg?.isWorkStartEndEnabled
-        ? {
-            startTime: timelineCfg.workStart,
-            endTime: timelineCfg.workEnd,
-          }
-        : undefined,
-      timelineCfg?.isLunchBreakEnabled
-        ? {
-            startTime: timelineCfg.lunchBreakStart,
-            endTime: timelineCfg.lunchBreakEnd,
-          }
-        : undefined,
-    );
+  scheduleDays = this.scheduleService.createScheduleDaysComputed(this.daysToShow, {
+    currentTaskId: this._currentTaskId,
   });
 
   private _eventsAndBeyondBudget = computed(() => {

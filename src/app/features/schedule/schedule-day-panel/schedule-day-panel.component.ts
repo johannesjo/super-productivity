@@ -16,16 +16,8 @@ import { Store } from '@ngrx/store';
 import { ScheduleWeekComponent } from '../schedule-week/schedule-week.component';
 import { DateService } from '../../../core/date/date.service';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { selectTimelineTasks } from '../../work-context/store/work-context.selectors';
-import { selectPlannerDayMap } from '../../planner/store/planner.selectors';
-import { selectTaskRepeatCfgsWithAndWithoutStartTime } from '../../task-repeat-cfg/store/task-repeat-cfg.selectors';
-import {
-  selectTimelineConfig,
-  selectTimelineWorkStartEndHours,
-} from '../../config/store/global-config.reducer';
-import { CalendarIntegrationService } from '../../calendar-integration/calendar-integration.service';
+import { selectTimelineWorkStartEndHours } from '../../config/store/global-config.reducer';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
-import { mapToScheduleDays } from '../map-schedule-data/map-to-schedule-days';
 import { mapScheduleDaysToScheduleEvents } from '../map-schedule-data/map-schedule-days-to-schedule-events';
 import { FH } from '../schedule.const';
 import { calculateTimeFromYPosition } from '../schedule-utils';
@@ -36,6 +28,7 @@ import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions'
 import { Log } from '../../../core/log';
 import { Subscription } from 'rxjs';
 import { ScheduleExternalDragService } from '../schedule-week/schedule-external-drag.service';
+import { ScheduleService } from '../schedule.service';
 
 const DEFAULT_MIN_DURATION = 15 * 60 * 1000;
 const SCROLL_DELAY_MS = 100;
@@ -70,12 +63,12 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
 
   private _store = inject(Store);
   private _dateService = inject(DateService);
-  private _calendarIntegrationService = inject(CalendarIntegrationService);
   private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
   private _dragDropRegistry = inject(DragDropRegistry);
   private _externalDragService = inject(ScheduleExternalDragService);
   private _cdr = inject(ChangeDetectorRef);
   private _ngZone = inject(NgZone);
+  private _scheduleService = inject(ScheduleService);
   private _pointerUpSubscription: Subscription | null = null;
   private _activeExternalTask: TaskWithSubTasks | null = null;
   private readonly _globalPointerEvents = ['mousemove', 'touchmove'] as const;
@@ -97,52 +90,7 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     return d ? [d] : [];
   });
 
-  private _timelineTasks = toSignal(this._store.select(selectTimelineTasks));
-  private _taskRepeatCfgs = toSignal(
-    this._store.select(selectTaskRepeatCfgsWithAndWithoutStartTime),
-  );
-  private _timelineConfig = toSignal(this._store.select(selectTimelineConfig));
-  private _icalEvents = toSignal(this._calendarIntegrationService.icalEvents$, {
-    initialValue: [],
-  });
-  private _plannerDayMap = toSignal(this._store.select(selectPlannerDayMap));
-
-  scheduleDays = computed(() => {
-    const timelineTasks = this._timelineTasks();
-    const taskRepeatCfgs = this._taskRepeatCfgs();
-    const timelineCfg = this._timelineConfig();
-    const icalEvents = this._icalEvents();
-    const plannerDayMap = this._plannerDayMap();
-    const daysToShow = this.daysToShow();
-
-    if (!timelineTasks || !taskRepeatCfgs || !plannerDayMap) {
-      return [];
-    }
-
-    return mapToScheduleDays(
-      Date.now(),
-      daysToShow,
-      timelineTasks.unPlanned,
-      timelineTasks.planned,
-      taskRepeatCfgs.withStartTime,
-      taskRepeatCfgs.withoutStartTime,
-      icalEvents,
-      null,
-      plannerDayMap,
-      timelineCfg?.isWorkStartEndEnabled
-        ? {
-            startTime: timelineCfg.workStart,
-            endTime: timelineCfg.workEnd,
-          }
-        : undefined,
-      timelineCfg?.isLunchBreakEnabled
-        ? {
-            startTime: timelineCfg.lunchBreakStart,
-            endTime: timelineCfg.lunchBreakEnd,
-          }
-        : undefined,
-    );
-  });
+  scheduleDays = this._scheduleService.createScheduleDaysComputed(this.daysToShow);
 
   private _eventsAndBeyondBudget = computed(() => {
     const days = this.scheduleDays();
