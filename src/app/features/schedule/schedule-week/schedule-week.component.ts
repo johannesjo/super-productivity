@@ -339,4 +339,17 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
       'en-US';
     return formatMonthDay(date, locale);
   }
+
+  // Public methods for external preview control (used by schedule-day-panel)
+  showExternalPreview(event: ScheduleEvent, style: string, timestamp: number): void {
+    this._service.showExternalPreview(event, style, timestamp);
+  }
+
+  updateExternalPreview(style: string, timestamp: number): void {
+    this._service.updateExternalPreview(style, timestamp);
+  }
+
+  hideExternalPreview(): void {
+    this._service.hideExternalPreview();
+  }
 }

@@ -72,6 +72,29 @@ export class ScheduleWeekDragService {
     this._daysToShowAccessor = null;
   }
 
+  // External preview control methods for schedule-day-panel integration
+  showExternalPreview(event: ScheduleEvent, style: string, timestamp: number): void {
+    this._isDragging.set(true);
+    this._currentDragEvent.set(event);
+    this._dragPreviewStyle.set(style);
+    this._dragPreviewContext.set({ kind: 'time', timestamp });
+  }
+
+  updateExternalPreview(style: string, timestamp: number): void {
+    if (!this._isDragging()) {
+      return;
+    }
+    this._dragPreviewStyle.set(style);
+    this._dragPreviewContext.set({ kind: 'time', timestamp });
+  }
+
+  hideExternalPreview(): void {
+    this._isDragging.set(false);
+    this._currentDragEvent.set(null);
+    this._dragPreviewStyle.set(null);
+    this._dragPreviewContext.set(null);
+  }
+
   setGridContainer(accessor: () => HTMLElement | null): void {
     // Resolve the container lazily so we don't hold on to stale DOM nodes between renders.
     this._gridContainerAccessor = accessor;

@@ -29,6 +29,8 @@ import { Log } from '../../../core/log';
 import { Subscription } from 'rxjs';
 import { ScheduleExternalDragService } from '../schedule-week/schedule-external-drag.service';
 import { ScheduleService } from '../schedule.service';
+import { ScheduleEvent } from '../schedule.model';
+import { SVEType } from '../schedule.const';
 
 const DEFAULT_MIN_DURATION = 15 * 60 * 1000;
 const SCROLL_DELAY_MS = 100;
@@ -59,6 +61,8 @@ interface DropTimeCalculation {
 })
 export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
   @ViewChild('scheduleWeek', { read: ElementRef }) scheduleWeekRef!: ElementRef;
+  @ViewChild('scheduleWeek', { read: ScheduleWeekComponent })
+  scheduleWeekComponent!: ScheduleWeekComponent;
   @ViewChild('dropZone', { read: ElementRef }) dropZoneRef!: ElementRef<HTMLElement>;
 
   private _store = inject(Store);
@@ -462,6 +466,15 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     this._applySchedulePreviewStyling(true);
     this._cdr.markForCheck();
     this._toggleGlobalPointerListeners(true);
+
+    // Show custom drag preview in schedule-week component
+    const task = this._activeExternalTask;
+    if (task && this.scheduleWeekComponent) {
+      const scheduleEvent = this._createScheduleEventFromTask(task);
+      const style = this._calculateInitialPreviewStyle();
+      const timestamp = this.lastCalculatedTimestamp || Date.now();
+      this.scheduleWeekComponent.showExternalPreview(scheduleEvent, style, timestamp);
+    }
   }
 
   private _stopScheduleMode(): void {
@@ -475,6 +488,11 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     this._applySchedulePreviewStyling(false);
     this._cdr.markForCheck();
     this._toggleGlobalPointerListeners(false);
+
+    // Hide custom drag preview in schedule-week component
+    if (this.scheduleWeekComponent) {
+      this.scheduleWeekComponent.hideExternalPreview();
+    }
   }
 
   private _toggleGlobalPointerListeners(isEnable: boolean): void {
@@ -521,6 +539,14 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
           const timeBadge = this._ensureTimeBadge(previewEl);
           timeBadge.textContent = this._formatPreviewTime(timestamp);
         }
+
+        // Update custom preview position in schedule-week component
+        if (this.scheduleWeekComponent) {
+          const style = this._calculatePreviewStyleFromTime(timestamp);
+          if (style) {
+            this.scheduleWeekComponent.updateExternalPreview(style, timestamp);
+          }
+        }
       } else {
         this.dragPreviewTime.set(null);
       }
@@ -543,11 +569,13 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
   private _applyTaskPreviewStyling(previewEl: HTMLElement, isEnable: boolean): void {
     if (isEnable) {
       previewEl.classList.add('as-schedule-event-preview');
+      previewEl.style.opacity = OPACITY_HIDDEN;
       this._setPreviewWidth(previewEl);
       const timeBadge = this._ensureTimeBadge(previewEl);
       timeBadge.textContent = this.dragPreviewTime() ?? '';
     } else {
       previewEl.classList.remove('as-schedule-event-preview');
+      previewEl.style.opacity = OPACITY_VISIBLE;
       previewEl.style.removeProperty('width');
       this._removeTimeBadge(previewEl);
     }
@@ -610,5 +638,61 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     isEnable: boolean,
   ): void {
     previewEl.style.opacity = isEnable ? OPACITY_HIDDEN : OPACITY_VISIBLE;
+  }
+
+  private _createScheduleEventFromTask(task: TaskWithSubTasks): ScheduleEvent {
+    const timeEstimate = task.timeEstimate || DEFAULT_MIN_DURATION;
+    const timeInHours = timeEstimate / (60 * 60 * 1000);
+
+    return {
+      id: task.id,
+      type: SVEType.Task,
+      style: '',
+      startHours: 0,
+      timeLeftInHours: timeInHours,
+      isCloseToOthersFirst: false,
+      isCloseToOthers: false,
+      data: task,
+    };
+  }
+
+  private _calculateInitialPreviewStyle(): string {
+    // Start with a default position (e.g., row 1, column 2)
+    const row = 1;
+    const col = 2;
+    const rowSpan = this._calculateRowSpanFromTask(this._activeExternalTask);
+    return `grid-row: ${row} / span ${rowSpan}; grid-column: ${col} / span 1`;
+  }
+
+  private _calculatePreviewStyleFromTime(timestamp: number): string | null {
+    const gridContainer = this.scheduleWeekRef?.nativeElement?.querySelector(
+      '.grid-container',
+    ) as HTMLElement | null;
+
+    if (!gridContainer) {
+      return null;
+    }
+
+    const date = new Date(timestamp);
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    // eslint-disable-next-line no-mixed-operators
+    const hoursDecimal = hours + minutes / 60;
+
+    // Calculate row based on time (FH rows per hour)
+    const row = Math.round(hoursDecimal * FH) + 1;
+    const col = 2; // First day column
+    const rowSpan = this._calculateRowSpanFromTask(this._activeExternalTask);
+
+    return `grid-row: ${row} / span ${rowSpan}; grid-column: ${col} / span 1`;
+  }
+
+  private _calculateRowSpanFromTask(task: TaskWithSubTasks | null): number {
+    if (!task) {
+      return 6; // Default fallback
+    }
+    const timeEstimate = task.timeEstimate || DEFAULT_MIN_DURATION;
+    const timeInHours = timeEstimate / (60 * 60 * 1000);
+    return Math.max(Math.round(timeInHours * FH), 1);
   }
 }
