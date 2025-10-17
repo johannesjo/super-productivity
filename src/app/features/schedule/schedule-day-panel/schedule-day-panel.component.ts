@@ -19,7 +19,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { selectTimelineWorkStartEndHours } from '../../config/store/global-config.reducer';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { mapScheduleDaysToScheduleEvents } from '../map-schedule-data/map-schedule-days-to-schedule-events';
-import { FH } from '../schedule.const';
+import { FH, SVEType } from '../schedule.const';
 import { calculateTimeFromYPosition } from '../schedule-utils';
 import { DragDropRegistry } from '@angular/cdk/drag-drop';
 import { PlannerActions } from '../../planner/store/planner.actions';
@@ -30,7 +30,6 @@ import { Subscription } from 'rxjs';
 import { ScheduleExternalDragService } from '../schedule-week/schedule-external-drag.service';
 import { ScheduleService } from '../schedule.service';
 import { ScheduleEvent } from '../schedule.model';
-import { SVEType } from '../schedule.const';
 
 const DEFAULT_MIN_DURATION = 15 * 60 * 1000;
 const SCROLL_DELAY_MS = 100;
@@ -102,6 +101,11 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
   });
 
   events = computed(() => this._eventsAndBeyondBudget().eventsFlat);
+
+  hasNoEvents = computed(() => {
+    const evs = this.events().filter((ev) => ev.type !== SVEType.LunchBreak);
+    return !evs || evs.length === 0;
+  });
 
   private _workStartEndHours = toSignal(
     this._store.select(selectTimelineWorkStartEndHours),

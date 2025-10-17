@@ -5,6 +5,11 @@
   (mousemove)="onDragMove($event)"
   (touchmove)="onDragMove($event)"
 >
+  @if (hasNoEvents()) {
+    <div class="empty-state">
+      <div class="empty-state-text">Drop tasks here to schedule them</div>
+    </div>
+  }
   <schedule-week
     #scheduleWeek
     [isInPanel]="true"

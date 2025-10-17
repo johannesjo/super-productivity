@@ -8,6 +8,29 @@
 }
 
 .schedule-day-drop-zone {
+  position: relative;
+  height: 100%;
+}
+
+.empty-state {
+  position: sticky;
+  top: 50%;
+  margin-left: 40px;
+  margin-right: 8px;
+  transform: translate(0, -50%);
+  text-align: center;
+  pointer-events: none;
+  z-index: 100;
+  border-radius: var(--card-border-radius);
+  border: 1px solid var(--separator-color);
+  background: var(--bg-lightest);
+}
+
+.empty-state-text {
+  padding: 16px;
+  font-size: 16px;
+  color: var(--color-fg-less-important);
+  font-weight: 500;
 }
 
 //.drag-time-preview {
