@@ -1,33 +1,37 @@
-.customizer-panel {
-  // Align layout with other right-panel contents (e.g. issue-panel)
-  // Fill the container and let the parent handle scrolling
-  position: absolute;
-  inset: 8px 16px;
-  padding: 8px 0;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+::ng-deep .customizer-menu {
+  .menu-content {
+    padding: 16px;
+    max-width: 400px;
+    min-width: 300px;
 
-  h3 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-
-  .form-group {
-    margin-bottom: 15px;
-    display: flex;
-    flex-direction: column;
-
-    label {
-      margin-bottom: 5px;
+    h3 {
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 20px;
     }
 
-    mat-form-field {
+    .form-group {
+      margin-bottom: 15px;
+      display: flex;
+      flex-direction: column;
+
+      label {
+        margin-bottom: 5px;
+        font-weight: 500;
+      }
+
+      mat-form-field {
+        width: 100%;
+      }
+
+      mat-slide-toggle {
+        align-self: flex-start;
+      }
+    }
+
+    button {
       width: 100%;
-    }
-
-    mat-slide-toggle {
-      align-self: flex-start;
+      margin-top: 8px;
     }
   }
 }

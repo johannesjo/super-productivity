@@ -5,20 +5,28 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
 import { LayoutService } from '../../layout/layout.service';
 import { TaskViewCustomizerService } from '../../../features/task-view-customizer/task-view-customizer.service';
+import { TaskViewCustomizerPanelComponent } from '../../../features/task-view-customizer/task-view-customizer-panel/task-view-customizer-panel.component';
 import { T } from '../../../t.const';
 import { KeyboardConfig } from '../../../features/config/keyboard-config.model';
+import { MatMenuTrigger } from '@angular/material/menu';
 
 @Component({
   selector: 'desktop-panel-buttons',
   standalone: true,
-  imports: [MatIconButton, MatIcon, MatTooltip, TranslatePipe],
+  imports: [
+    MatIconButton,
+    MatIcon,
+    MatTooltip,
+    TranslatePipe,
+    TaskViewCustomizerPanelComponent,
+    MatMenuTrigger,
+  ],
   template: `
     <button
       class="panel-btn"
       [disabled]="!isWorkViewPage()"
-      [class.isActive]="isShowTaskViewCustomizerPanel()"
       [class.isCustomized]="taskViewCustomizerService.isCustomized()"
-      (click)="layoutService.toggleTaskViewCustomizerPanel()"
+      [matMenuTriggerFor]="customizerPanel.menu"
       mat-icon-button
       matTooltip="{{ T.GCF.KEYBOARD.TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL | translate }} {{
         kb()?.toggleTaskViewCustomizerPanel
@@ -28,6 +36,8 @@ import { KeyboardConfig } from '../../../features/config/keyboard-config.model';
     >
       <mat-icon>filter_list</mat-icon>
     </button>
+
+    <task-view-customizer-panel #customizerPanel></task-view-customizer-panel>
 
     <button
       class="panel-btn e2e-toggle-issue-provider-panel"

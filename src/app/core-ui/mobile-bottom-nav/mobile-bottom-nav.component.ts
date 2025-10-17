@@ -11,6 +11,7 @@ import { filter, map, startWith } from 'rxjs/operators';
 
 import { LayoutService } from '../layout/layout.service';
 import { TaskViewCustomizerService } from '../../features/task-view-customizer/task-view-customizer.service';
+import { TaskViewCustomizerPanelComponent } from '../../features/task-view-customizer/task-view-customizer-panel/task-view-customizer-panel.component';
 import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
 import { PluginIconComponent } from '../../plugins/ui/plugin-icon/plugin-icon.component';
 import { Store } from '@ngrx/store';
@@ -35,6 +36,7 @@ import { WorkContextService } from '../../features/work-context/work-context.ser
     MatMenuModule,
     TranslateModule,
     PluginIconComponent,
+    TaskViewCustomizerPanelComponent,
   ],
   templateUrl: './mobile-bottom-nav.component.html',
   styleUrls: ['./mobile-bottom-nav.component.scss'],
@@ -124,10 +126,6 @@ export class MobileBottomNavComponent {
     if (button.onClick) {
       button.onClick();
     }
-  }
-
-  toggleTaskViewCustomizer(): void {
-    this._layoutService.toggleTaskViewCustomizerPanel();
   }
 
   toggleIssuePanel(): void {

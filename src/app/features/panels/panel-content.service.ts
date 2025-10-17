@@ -13,7 +13,6 @@ export type PanelContentType =
   | 'TASK'
   | 'ADD_TASK_PANEL'
   | 'ISSUE_PANEL'
-  | 'TASK_VIEW_CUSTOMIZER_PANEL'
   | 'PLUGIN';
 
 @Injectable({ providedIn: 'root' })
@@ -42,16 +41,10 @@ export class PanelContentService {
     const selectedTask = this._selectedTask();
     if (!layoutState) return null;
 
-    const {
-      isShowNotes,
-      isShowIssuePanel,
-      isShowTaskViewCustomizerPanel,
-      isShowPluginPanel,
-    } = layoutState;
+    const { isShowNotes, isShowIssuePanel, isShowPluginPanel } = layoutState;
 
     if (isShowNotes) return 'NOTES';
     if (isShowIssuePanel) return 'ISSUE_PANEL';
-    if (isShowTaskViewCustomizerPanel) return 'TASK_VIEW_CUSTOMIZER_PANEL';
     if (isShowPluginPanel) return 'PLUGIN';
     if (selectedTask) return 'TASK';
     return null;
@@ -61,19 +54,8 @@ export class PanelContentService {
     const layoutState = this._layoutFeatureState();
     const selectedTask = this._selectedTask();
     if (!layoutState) return false;
-    const {
-      isShowNotes,
-      isShowIssuePanel,
-      isShowTaskViewCustomizerPanel,
-      isShowPluginPanel,
-    } = layoutState;
-    return !!(
-      selectedTask ||
-      isShowNotes ||
-      isShowIssuePanel ||
-      isShowTaskViewCustomizerPanel ||
-      isShowPluginPanel
-    );
+    const { isShowNotes, isShowIssuePanel, isShowPluginPanel } = layoutState;
+    return !!(selectedTask || isShowNotes || isShowIssuePanel || isShowPluginPanel);
   });
 
   readonly canOpen = computed<boolean>(() => {

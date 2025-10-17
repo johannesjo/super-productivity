@@ -65,13 +65,14 @@
   <button
     mat-menu-item
     [disabled]="!isWorkViewPage()"
-    [class.active]="isShowTaskViewCustomizerPanel()"
     [class.isCustomized]="taskViewCustomizerService.isCustomized()"
-    (click)="toggleTaskViewCustomizer()"
+    [matMenuTriggerFor]="customizerPanel.menu"
   >
     <mat-icon>filter_list</mat-icon>
     <span>{{ T.BN.SHOW_TASK_VIEW_CUSTOMIZER_PANEL | translate }}</span>
   </button>
+
+  <task-view-customizer-panel #customizerPanel></task-view-customizer-panel>
 
   <button
     mat-menu-item

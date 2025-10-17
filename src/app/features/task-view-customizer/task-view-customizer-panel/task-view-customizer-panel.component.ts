@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, ViewChild } from '@angular/core';
 import { OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -7,6 +7,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatMenuModule, MatMenu } from '@angular/material/menu';
 import { TaskViewCustomizerService } from '../task-view-customizer.service';
 import { TranslatePipe } from '@ngx-translate/core';
 import { T } from 'src/app/t.const';
@@ -17,6 +18,7 @@ import { T } from 'src/app/t.const';
   styleUrls: ['./task-view-customizer-panel.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
+  exportAs: 'customizerMenu',
   imports: [
     CommonModule,
     FormsModule,
@@ -25,11 +27,15 @@ import { T } from 'src/app/t.const';
     MatInputModule,
     MatButtonModule,
     MatSlideToggleModule,
+    MatMenuModule,
     TranslatePipe,
   ],
 })
 export class TaskViewCustomizerPanelComponent implements OnInit {
   customizerService = inject(TaskViewCustomizerService);
+
+  @ViewChild('customizerMenu', { static: false })
+  menu!: MatMenu;
 
   T = T;
   selectedSort: string = 'default';

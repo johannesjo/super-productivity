@@ -2,14 +2,6 @@
   <issue-panel [@slideInFromRight]></issue-panel>
 } @else if (panelContent() === 'NOTES') {
   <notes [@slideInFromRight]></notes>
-} @else if (panelContent() === 'TASK_VIEW_CUSTOMIZER_PANEL') {
-  <!-- Wrap TVC to stabilize layout during panel width transitions -->
-  <div
-    class="panel-wrapper"
-    [@slideInFromRight]
-  >
-    <task-view-customizer-panel></task-view-customizer-panel>
-  </div>
 } @else if (panelContent() === 'PLUGIN') {
   @for (key of pluginPanelKeys(); track key) {
     <plugin-panel-container [@slideInFromRight]></plugin-panel-container>
