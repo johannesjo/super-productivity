@@ -15,6 +15,17 @@ import { KeyboardConfig } from '../../../features/config/keyboard-config.model';
   template: `
     <button
       class="panel-btn"
+      [disabled]="!isRouteWithSidePanel()"
+      [class.isActive]="isShowScheduleDayPanel()"
+      (click)="layoutService.toggleScheduleDayPanel()"
+      mat-icon-button
+      matTooltip="{{ T.MH.SCHEDULE | translate }}"
+    >
+      <mat-icon svgIcon="early_on"></mat-icon>
+    </button>
+
+    <button
+      class="panel-btn"
       [disabled]="!isWorkViewPage()"
       [class.isActive]="isShowTaskViewCustomizerPanel()"
       [class.isCustomized]="taskViewCustomizerService.isCustomized()"
@@ -118,6 +129,7 @@ export class DesktopPanelButtonsComponent {
   readonly kb = input<KeyboardConfig | null>();
   readonly isRouteWithSidePanel = input.required<boolean>();
   readonly isWorkViewPage = input.required<boolean>();
+  readonly isShowScheduleDayPanel = input.required<boolean>();
   readonly isShowTaskViewCustomizerPanel = input.required<boolean>();
   readonly isShowIssuePanel = input.required<boolean>();
   readonly isShowNotes = input.required<boolean>();

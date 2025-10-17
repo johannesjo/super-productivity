@@ -15,6 +15,15 @@
     }
   }
 
+  // Show grabbing cursor during all drag operations
+  &.is-dragging {
+    cursor: grabbing !important;
+
+    .grid-container {
+      cursor: grabbing !important;
+    }
+  }
+
   // When dragging without shift key, disable pointer events on schedule-events
   // This prevents dropping tasks on other events (forces time-based scheduling)
   &.is-dragging:not(.isShiftKeyPressed) {
@@ -26,19 +35,17 @@
       pointer-events: none !important;
     }
 
-    schedule-event {
+    // Prevent CDK drag-drop from animating items out of the way in time mode.
+    // Keep the custom drag preview exempt so its scale transform remains applied.
+    schedule-event:not(.custom-drag-preview) {
       transform: none !important;
+      transition: none !important;
     }
   }
 }
 
-.cdk-drag-preview {
-  border: 2px solid red;
-  opacity: 0.1;
-}
-
 .grid-container {
-  --schedule-row-height: 11px;
+  --schedule-row-height: 9px;
   --schedule-row-height-mobile: 7px;
   --schedule-fr: 12;
   --schedule-total-rows: calc(24 * var(--schedule-fr));
@@ -59,18 +66,13 @@
   }
 }
 
+// TODO fix that this currently only shows inside schedule-day-panel
 // Fix drag placeholder to stay in original position and make it subtle
 .cdk-drag-placeholder {
-  opacity: 0.3 !important;
-  transform: none !important;
-  transition: none !important;
-  position: static !important;
-  border: 1px solid orange !important;
-
-  // Prevent any visual changes during drag
-  &.cdk-drop-list-dragging {
-    //transform: none !important;
-  }
+  opacity: 0.2 !important;
+  //transform: none !important;
+  //transition: none !important;
+  //position: static !important;
 }
 
 .week-header {
@@ -87,11 +89,17 @@
   color: var(--text-color);
   background: var(--bg-lighter);
 
-  &.minimal {
+  &.isInPanel {
     //border: 0;
     justify-content: center;
     border-top: 0;
     box-shadow: none;
+    background: transparent;
+    border: none;
+
+    * {
+      border: none !important;
+    }
 
     .filler {
       display: none;
@@ -281,12 +289,28 @@
   }
 }
 
-// prevent moving out the way
-schedule-event.cdk-drag-dragging + schedule-event {
-  transform: translateY(0);
+// Prevent CDK from moving items out of the way when not in shift mode
+:host(:not(.isShiftKeyPressed)) {
+  schedule-event.cdk-drag:not(.custom-drag-preview) {
+    transform: none !important;
+    transition: none !important;
+  }
 
-  &:after {
-    display: none;
+  schedule-event.cdk-drag-dragging + schedule-event:not(.custom-drag-preview) {
+    transform: none !important;
+
+    &:after {
+      display: none;
+    }
+  }
+}
+
+// In shift mode, allow minimal movement but control it
+:host(.isShiftKeyPressed) {
+  schedule-event.cdk-drag-dragging + schedule-event {
+    &:after {
+      display: none;
+    }
   }
 }
 
@@ -372,29 +396,41 @@ schedule-event.cdk-drag-dragging + schedule-event {
 
 // Custom drag preview
 .custom-drag-preview {
+  --scale: 1.02;
   pointer-events: none;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-  border: 3px solid var(--accent) !important;
-  border-radius: 4px !important;
+  border: 2px solid var(--c-primary) !important;
+  z-index: 1000;
+  box-shadow: var(--whiteframe-shadow-8dp);
+  transform-origin: center top;
+  border-radius: 0;
+  transform: scale(var(--scale)) !important;
 
-  // Override any schedule-event specific styles
-  &.schedule-event,
-  schedule-event {
-    border: 3px solid var(--accent) !important;
+  :host.is-dragging:not(.isShiftKeyPressed) & {
+    transform-origin: center top;
+    transform: scale(var(--scale)) !important;
   }
 
-  .drag-time-badge {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: var(--accent);
-    color: var(--light-color);
-    padding: 2px 6px;
+  &.isScheduleForDay {
+    border-radius: var(--card-border-radius);
     border-radius: 12px;
-    font-size: 11px;
-    font-weight: bold;
-    line-height: 1;
-    white-space: nowrap;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+    //.drag-preview-time-badge {
+    //font-size: 13px;
+    //}
   }
+
+  // NOTE has global styles in _overwrite-material.scss
+  .drag-preview-time-badge {
+    top: 0 !important;
+    right: -8px;
+    border-radius: 12px;
+  }
+
+  &.isShiftInsertPreview {
+    transform: translate(-16px, -50%) scale(var(--scale)) !important;
+  }
+}
+
+.cdk-drag-preview {
+  opacity: 0 !important;
 }

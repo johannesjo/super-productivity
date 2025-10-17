@@ -121,21 +121,24 @@ export const tagReducer = createReducer<TagState>(
     const todayStr = getDbDateStr();
     const todayTag = state.entities[TODAY_TAG.id] as Tag;
 
-    if (day === todayStr && !todayTag.taskIds.includes(task.id)) {
+    if (day === todayStr) {
+      // Always remove first, then add in correct position (handles reordering)
+      const taskIdsWithoutCurrent = todayTag.taskIds.filter((id) => id !== task.id);
       return tagAdapter.updateOne(
         {
           id: todayTag.id,
           changes: {
             taskIds: unique(
               isAddToTop
-                ? [task.id, ...todayTag.taskIds]
-                : [...todayTag.taskIds.filter((tid) => tid !== task.id), task.id],
+                ? [task.id, ...taskIdsWithoutCurrent]
+                : [...taskIdsWithoutCurrent, task.id],
             ),
           },
         },
         state,
       );
-    } else if (day !== todayStr && todayTag.taskIds.includes(task.id)) {
+    } else if (todayTag.taskIds.includes(task.id)) {
+      // Moving away from today, remove from today's list
       return tagAdapter.updateOne(
         {
           id: todayTag.id,

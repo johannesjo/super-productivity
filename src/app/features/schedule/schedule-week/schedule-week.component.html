@@ -1,6 +1,6 @@
 <header
   class="week-header"
-  [class.minimal]="isMinimalHeader()"
+  [class.isInPanel]="isInPanel()"
 >
   <div class="days">
     <div class="filler"><!--for time --></div>
@@ -48,11 +48,7 @@
       style="grid-column: {{ $index + 2 }}; grid-row: 1 / span {{
         ($index === 0 ? currentTimeRow() : endOfDayColRowStart()) - 1
       }}"
-    >
-      @if (isDragging() && isShiftNoScheduleMode()) {
-        <div class="drop-label">{{ T.F.SCHEDULE.PLAN_START_DAY | translate }}</div>
-      }
-    </div>
+    ></div>
     <div
       class="col end-of-day"
       [attr.data-day]="day"
@@ -61,11 +57,7 @@
       }} / span {{
         totalRows - ($index === 0 ? currentTimeRow() : endOfDayColRowStart())
       }}"
-    >
-      @if (isDragging() && isShiftNoScheduleMode()) {
-        <div class="drop-label">{{ T.F.SCHEDULE.PLAN_END_DAY | translate }}</div>
-      }
-    </div>
+    ></div>
   }
 
   <!-- Work Start and End -->
@@ -153,8 +145,7 @@
   }
 
   @if (
-    ((!isTaskDragActive() && !isAnyEventResizing()) || isCtrlPressed()) &&
-      newTaskPlaceholder();
+    (!isTaskDragActive() || isCtrlPressed()) && newTaskPlaceholder();
     as newTaskPlaceholder
   ) {
     <create-task-placeholder
@@ -173,9 +164,13 @@
       class="custom-drag-preview"
       [event]="currentDragEvent()!"
       [style]="dragPreviewStyle()!"
+      [class.isShiftInsertPreview]="dragPreviewContext()?.kind === 'shift-task'"
+      [class.isScheduleForDay]="isShiftNoScheduleMode()"
     >
-      @if (!isShiftNoScheduleMode() && dragPreviewTime()) {
-        <div class="drag-time-badge">{{ dragPreviewTime() }}</div>
+      @if (dragPreviewLabel()) {
+        <div class="drag-preview-time-badge">
+          {{ dragPreviewLabel() }}
+        </div>
       }
     </schedule-event>
   }

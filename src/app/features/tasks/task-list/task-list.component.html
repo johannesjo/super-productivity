@@ -41,6 +41,8 @@
       cdkDrag
       [cdkDragDisabled]="listModelId() === 'LATER_TODAY'"
       [cdkDragData]="task"
+      (cdkDragStarted)="onDragStarted(task)"
+      (cdkDragEnded)="onDragEnded()"
     >
     </task>
   }

@@ -150,6 +150,7 @@ export class MainHeaderComponent implements OnDestroy {
   );
   isShowIssuePanel = computed(() => this.layoutService.isShowIssuePanel());
   isShowNotes = computed(() => this.layoutService.isShowNotes());
+  isShowScheduleDayPanel = computed(() => this.layoutService.isShowScheduleDayPanel());
   syncIsEnabledAndReady = toSignal(this.syncWrapperService.isEnabledAndReady$);
   syncState = toSignal(this.syncWrapperService.syncState$);
   isSyncInProgress = toSignal(this.syncWrapperService.isSyncInProgress$);

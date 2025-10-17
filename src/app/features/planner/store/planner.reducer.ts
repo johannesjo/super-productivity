@@ -154,15 +154,19 @@ export const plannerReducer = createReducer(
 
   on(PlannerActions.planTaskForDay, (state, { task, day, isAddToTop }) => {
     const daysCopy = { ...state.days };
-    // filter out from other days
+    // filter out from other days (including the target day to handle reordering)
     Object.keys(daysCopy).forEach((dayI) => {
       daysCopy[dayI] = daysCopy[dayI].filter((id) => id !== task.id);
     });
-    const isPlannedForToday = day === getDbDateStr();
+
+    const todayStr = getDbDateStr();
+    const isPlannedForToday = day === todayStr;
+
     return {
       ...state,
       days: {
         ...daysCopy,
+        // Only add to planner days if NOT today (today is managed by today tag)
         ...(isPlannedForToday
           ? {}
           : {

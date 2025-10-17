@@ -6,10 +6,11 @@
   --split-extra-border-radius: 20px;
   --margin-bottom: 6px;
   --margin-right: 10px;
-  --offset: 40px;
+  --offset: 20px;
   --offset-short-event: 15px;
+  --standard-border-radius: 6px;
 
-  border-radius: 3px;
+  border-radius: var(--standard-border-radius);
   margin: 0 var(--margin-right) var(--margin-bottom) 0;
   scroll-margin-top: 120px;
   scroll-padding-top: 120px;
@@ -161,7 +162,6 @@
 }
 
 :host-context(.is-not-dragging) {
-  :host.ScheduledTask,
   :host.CalendarEvent,
   :host.RepeatProjection,
   :host.RepeatProjectionSplit,
@@ -211,11 +211,6 @@
 
   :host.very-short-event & {
     margin-top: -4px;
-  }
-
-  :host-context(.is-not-dragging):hover & {
-    border-color: var(--c-accent);
-    color: var(--c-accent);
   }
 }
 
@@ -335,7 +330,7 @@
   }
 }
 
-:host-context(.is-dragging) {
+:host-context(.is-dragging.isShiftKeyPressed) {
   :host.TaskPlannedForDay,
   :host.SplitTaskPlannedForDay,
   :host.Task,
@@ -344,7 +339,7 @@
   }
 }
 
-:host-context(.isDarkTheme.is-dragging) {
+:host-context(.isDarkTheme.is-dragging.isShiftKeyPressed) {
   :host.TaskPlannedForDay,
   :host.SplitTaskPlannedForDay,
   :host.Task,
@@ -354,37 +349,46 @@
 }
 
 :host.drag-over {
-  transform: translateY(var(--offset));
-  border: 3px solid yellow;
   z-index: 3;
-
-  &:after {
-    content: '';
-    position: absolute;
-    transform: translateY(calc(-1 * var(--offset)));
-    top: calc(-1 * var(--margin-bottom));
-    height: calc(var(--offset) + var(--margin-bottom));
-    left: 0;
-    right: calc(-1 * (var(--margin-right) + 4px));
-    z-index: 3;
-  }
-
-  &.very-short-event {
-    transform: translateY(var(--offset-short-event));
-
-    &:after {
-      transform: translateY(calc(-1 * var(--offset-short-event)));
-      height: calc(var(--offset-short-event) + var(--margin-bottom));
-    }
-  }
+  transform: translateX(16px);
+  //transform: translateY(var(--offset));
+  //
+  //&:after {
+  //  content: '';
+  //  position: absolute;
+  //  transform: translateY(calc(-1 * var(--offset)));
+  //  top: calc(-1 * var(--margin-bottom));
+  //  height: calc(var(--offset) + var(--margin-bottom));
+  //  left: 0;
+  //  right: calc(-1 * (var(--margin-right) + 4px));
+  //  z-index: 3;
+  //}
+  //
+  //&.very-short-event {
+  //  transform: translateY(var(--offset-short-event));
+  //
+  //  &:after {
+  //    transform: translateY(calc(-1 * var(--offset-short-event)));
+  //    height: calc(var(--offset-short-event) + var(--margin-bottom));
+  //  }
+  //}
 }
 
 :host.draggable {
   cursor: grab;
 
+  // Ensure the ::before pseudo-element also shows the cursor
+  &::before {
+    cursor: grab;
+  }
+
   &:active {
     cursor: grabbing;
     transition: none;
+
+    &::before {
+      cursor: grabbing;
+    }
   }
 }
 
