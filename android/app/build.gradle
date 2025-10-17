@@ -105,6 +105,16 @@ dependencies {
 
     implementation project(':capacitor-android')
 
+    // Force androidx.webkit to 1.11.0 for better API 28 compatibility
+    // This avoids NoClassDefFoundError for WebViewRenderProcessClient on Android 9
+    // while retaining audio controls and URL utils added in 1.11.0
+    // See: https://github.com/johannesjo/super-productivity/issues/5285
+    configurations.all {
+        resolutionStrategy {
+            force "androidx.webkit:webkit:1.11.0"
+        }
+    }
+
     testImplementation "junit:junit:4.13.2"
 
     androidTestImplementation "androidx.test:rules:1.6.1"
