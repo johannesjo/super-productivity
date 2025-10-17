@@ -44,6 +44,9 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { MetricService } from '../../features/metric/metric.service';
 import { DateService } from '../../core/date/date.service';
 import { MsToMinuteClockStringPipe } from '../../ui/duration/ms-to-minute-clock-string.pipe';
+import { TaskViewCustomizerService } from '../../features/task-view-customizer/task-view-customizer.service';
+import { TaskViewCustomizerPanelComponent } from '../../features/task-view-customizer/task-view-customizer-panel/task-view-customizer-panel.component';
+import { MatMenuTrigger } from '@angular/material/menu';
 
 @Component({
   selector: 'main-header',
@@ -64,6 +67,8 @@ import { MsToMinuteClockStringPipe } from '../../ui/duration/ms-to-minute-clock-
     PageTitleComponent,
     PlayButtonComponent,
     DesktopPanelButtonsComponent,
+    TaskViewCustomizerPanelComponent,
+    MatMenuTrigger,
     MsToMinuteClockStringPipe,
   ],
 })
@@ -83,6 +88,7 @@ export class MainHeaderComponent implements OnDestroy {
   private readonly _configService = inject(GlobalConfigService);
   private readonly _metricService = inject(MetricService);
   private readonly _dateService = inject(DateService);
+  readonly taskViewCustomizerService = inject(TaskViewCustomizerService);
 
   T: typeof T = T;
   isShowSimpleCounterBtnsMobile = signal(false);
@@ -145,9 +151,6 @@ export class MainHeaderComponent implements OnDestroy {
   enabledSimpleCounters = toSignal(this.simpleCounterService.enabledSimpleCounters$, {
     initialValue: [],
   });
-  isShowTaskViewCustomizerPanel = computed(() =>
-    this.layoutService.isShowTaskViewCustomizerPanel(),
-  );
   isShowIssuePanel = computed(() => this.layoutService.isShowIssuePanel());
   isShowNotes = computed(() => this.layoutService.isShowNotes());
   syncIsEnabledAndReady = toSignal(this.syncWrapperService.isEnabledAndReady$);

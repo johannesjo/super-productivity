@@ -85,6 +85,25 @@
 
     <plugin-header-btns></plugin-header-btns>
 
+    @if (showDesktopButtons()) {
+      <button
+        class="panel-btn task-filter-btn"
+        [disabled]="!isWorkViewPage()"
+        [class.isCustomized]="taskViewCustomizerService.isCustomized()"
+        [matMenuTriggerFor]="customizerPanel.menu"
+        mat-icon-button
+        matTooltip="{{ T.GCF.KEYBOARD.TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL | translate }} {{
+          kb.toggleTaskViewCustomizerPanel
+            ? '[' + kb.toggleTaskViewCustomizerPanel + ']'
+            : ''
+        }}"
+      >
+        <mat-icon>filter_list</mat-icon>
+      </button>
+
+      <task-view-customizer-panel #customizerPanel></task-view-customizer-panel>
+    }
+
     <play-button
       [currentTask]="currentTask()"
       [currentTaskId]="currentTaskId()"
@@ -112,8 +131,6 @@
       <desktop-panel-buttons
         [kb]="kb"
         [isRouteWithSidePanel]="isRouteWithSidePanel()"
-        [isWorkViewPage]="isWorkViewPage()"
-        [isShowTaskViewCustomizerPanel]="isShowTaskViewCustomizerPanel()"
         [isShowIssuePanel]="isShowIssuePanel()"
         [isShowNotes]="isShowNotes()"
       ></desktop-panel-buttons>
