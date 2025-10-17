@@ -329,7 +329,7 @@
   }
 }
 
-:host-context(.is-dragging) {
+:host-context(.is-dragging.isShiftKeyPressed) {
   :host.TaskPlannedForDay,
   :host.SplitTaskPlannedForDay,
   :host.Task,
@@ -338,7 +338,7 @@
   }
 }
 
-:host-context(.isDarkTheme.is-dragging) {
+:host-context(.isDarkTheme.is-dragging.isShiftKeyPressed) {
   :host.TaskPlannedForDay,
   :host.SplitTaskPlannedForDay,
   :host.Task,

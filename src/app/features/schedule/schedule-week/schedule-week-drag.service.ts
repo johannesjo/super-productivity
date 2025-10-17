@@ -473,7 +473,7 @@ export class ScheduleWeekDragService {
       // Show different label based on whether task has scheduled time
       const task = this._pluckTaskFromEvent(this._currentDragEvent());
       const label = task?.dueWithTime ? '✖ Unschedule Time' : '✖ Unschedule from Today';
-      this._dragPreviewContext.set({ kind: 'override', label });
+      this._dragPreviewContext.set({ kind: 'unschedule', label });
       this._lastCalculatedTimestamp = null;
     }
   }

@@ -1,5 +1,5 @@
 export type DragPreviewContext =
   | { kind: 'time'; timestamp: number }
   | { kind: 'shift'; day: string; isEndOfDay: boolean }
-  | { kind: 'override'; label: string }
+  | { kind: 'unschedule'; label: string }
   | null;
