@@ -163,6 +163,13 @@ mat-icon.mat-icon[svgicon] {
   justify-content: center;
 }
 
+// Ensure icon flex behaviour stays consistent even before Angular Material
+// injects the MatButton styles (which set min-height: fit-content lazily).
+body .mat-mdc-button-base .mat-icon {
+  //flex-shrink: 1 !important;
+  min-height: auto !important;
+}
+
 // AUTOCOMPLETE
 // -----------------
 .mdc-list-item__primary-text {
@@ -199,6 +206,7 @@ mat-icon.mat-icon[svgicon] {
 // Schedule-style preview should always use accent border while dragging
 .cdk-drag-preview.as-schedule-event-preview {
 }
+
 .drag-preview-time-badge {
   position: absolute;
   right: 6px;
