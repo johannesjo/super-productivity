@@ -263,6 +263,8 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
+    let wasDroppedSuccessfully = false;
+
     if (dropTime !== null) {
       this.lastCalculatedTimestamp = dropTime;
       const targetDate = new Date(dropTime);
@@ -286,7 +288,8 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
           }),
         );
       }
-    } else {
+      wasDroppedSuccessfully = true;
+    } else if (isInside) {
       this._store.dispatch(
         PlannerActions.planTaskForDay({
           task,
@@ -294,6 +297,12 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
           isAddToTop: true,
         }),
       );
+      wasDroppedSuccessfully = true;
+    }
+
+    // Disable snap-back animation when successfully dropped on panel
+    if (wasDroppedSuccessfully) {
+      this._disableSnapBackAnimation();
     }
   }
 
@@ -310,6 +319,21 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
 
   private _getDragPreviewRect(): DOMRect | null {
     return this._withDragPreview((preview) => preview.getBoundingClientRect());
+  }
+
+  private _isPointerWithinDropZone(pointer: { x: number; y: number }): boolean {
+    const dropZoneEl = this.dropZoneRef?.nativeElement;
+    if (!dropZoneEl) {
+      return false;
+    }
+
+    const dropZoneRect = dropZoneEl.getBoundingClientRect();
+    return (
+      pointer.x >= dropZoneRect.left &&
+      pointer.x <= dropZoneRect.right &&
+      pointer.y >= dropZoneRect.top &&
+      pointer.y <= dropZoneRect.bottom
+    );
   }
 
   private _isEffectiveTopWithinDropZone(
@@ -516,9 +540,9 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     }
 
     const previewRect = this._getDragPreviewRect();
-    const isInside = this._isEffectiveTopWithinDropZone(previewRect, pointer);
+    const isPointerInsideDropZone = this._isPointerWithinDropZone(pointer);
 
-    if (!isInside) {
+    if (!isPointerInsideDropZone) {
       // If pointer is not over the side panel/drop zone anymore, leave schedule mode
       this._ngZone.run(() => this._stopScheduleMode());
       return;
@@ -694,5 +718,13 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     const timeEstimate = task.timeEstimate || DEFAULT_MIN_DURATION;
     const timeInHours = timeEstimate / (60 * 60 * 1000);
     return Math.max(Math.round(timeInHours * FH), 1);
+  }
+
+  private _disableSnapBackAnimation(): void {
+    // Immediately hide the drag preview to prevent snap-back animation
+    const previewEl = this._getDragPreview();
+    if (previewEl) {
+      previewEl.remove();
+    }
   }
 }
