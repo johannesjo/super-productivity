@@ -8,6 +8,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatMenuModule, MatMenu } from '@angular/material/menu';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDividerModule } from '@angular/material/divider';
 import { TaskViewCustomizerService } from '../task-view-customizer.service';
 import { TranslatePipe } from '@ngx-translate/core';
 import { T } from 'src/app/t.const';
@@ -28,6 +30,8 @@ import { T } from 'src/app/t.const';
     MatButtonModule,
     MatSlideToggleModule,
     MatMenuModule,
+    MatIconModule,
+    MatDividerModule,
     TranslatePipe,
   ],
 })
@@ -93,6 +97,37 @@ export class TaskViewCustomizerPanelComponent implements OnInit {
     this.selectedGroup = this.customizerService.selectedGroup();
     this.selectedFilter = this.customizerService.selectedFilter();
     this.filterInputValue = this.customizerService.filterInputValue();
+  }
+
+  getSortLabel(value: string): string {
+    const option = this.sortOptions.find((opt) => opt.value === value);
+    return option ? option.label : '';
+  }
+
+  getGroupLabel(value: string): string {
+    const option = this.groupOptions.find((opt) => opt.value === value);
+    return option ? option.label : '';
+  }
+
+  getFilterLabel(value: string): string {
+    const option = this.filterOptions.find((opt) => opt.value === value);
+    return option ? option.label : '';
+  }
+
+  onFilterSelect(filterType: string): void {
+    this.customizerService.setFilter(filterType);
+  }
+
+  onFilterInputChange(filterType: string, value: string): void {
+    if (this.customizerService.selectedFilter() !== filterType) {
+      this.customizerService.setFilter(filterType);
+    }
+    this.customizerService.setFilterInputValue(value);
+  }
+
+  onFilterWithValue(filterType: string, value: string): void {
+    this.customizerService.setFilter(filterType);
+    this.customizerService.setFilterInputValue(value);
   }
 
   onResetAll(): void {
