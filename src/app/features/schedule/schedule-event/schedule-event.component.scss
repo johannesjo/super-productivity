@@ -8,8 +8,9 @@
   --margin-right: 10px;
   --offset: 20px;
   --offset-short-event: 15px;
+  --standard-border-radius: 6px;
 
-  border-radius: 3px;
+  border-radius: var(--standard-border-radius);
   margin: 0 var(--margin-right) var(--margin-bottom) 0;
   scroll-margin-top: 120px;
   scroll-padding-top: 120px;
