@@ -103,39 +103,33 @@ export class RightPanelContentComponent implements OnDestroy {
   // Effect to handle delayed task clearing
   private _selectedTaskDelayTimer: ReturnType<typeof setTimeout> | null = null;
   private _panelTypeDelayTimer: ReturnType<typeof setTimeout> | null = null;
-  private _selectedTaskDelayEffect = effect(
-    () => {
-      const task = this._selectedTask();
+  private _selectedTaskDelayEffect = effect(() => {
+    const task = this._selectedTask();
 
-      // Clear any existing timer
-      if (this._selectedTaskDelayTimer) {
-        clearTimeout(this._selectedTaskDelayTimer);
-        this._selectedTaskDelayTimer = null;
-      }
+    // Clear any existing timer
+    if (this._selectedTaskDelayTimer) {
+      clearTimeout(this._selectedTaskDelayTimer);
+      this._selectedTaskDelayTimer = null;
+    }
 
-      if (task) {
-        this._selectedTaskDelayedSignal.set(task);
-      } else {
-        // Delay clearing the task to allow animations
-        this._selectedTaskDelayTimer = setTimeout(() => {
-          this._selectedTaskDelayedSignal.set(null);
-        }, 200);
-      }
-    },
-    { allowSignalWrites: true },
-  );
+    if (task) {
+      this._selectedTaskDelayedSignal.set(task);
+    } else {
+      // Delay clearing the task to allow animations
+      this._selectedTaskDelayTimer = setTimeout(() => {
+        this._selectedTaskDelayedSignal.set(null);
+      }, 200);
+    }
+  });
 
   readonly selectedTaskWithDelayForNone = computed(() =>
     this._selectedTaskDelayedSignal(),
   );
 
   // Effect to handle delayed panel type clearing
-  private _panelTypeDelayEffect = effect(
-    () => {
-      this._updatePanelTypeWithDelay();
-    },
-    { allowSignalWrites: true },
-  );
+  private _panelTypeDelayEffect = effect(() => {
+    this._updatePanelTypeWithDelay();
+  });
 
   // Computed signal for panel content using delayed panel type exclusively
   readonly panelContent = computed<RightPanelContentPanelType | undefined>(
@@ -204,79 +198,70 @@ export class RightPanelContentComponent implements OnDestroy {
   private _previousIsOpen = signal<boolean | null>(null);
 
   // Effect to handle panel close
-  private _isOpenEffect = effect(
-    () => {
-      const isOpen = this.isOpen();
-      const previousIsOpen = this._previousIsOpen();
+  private _isOpenEffect = effect(() => {
+    const isOpen = this.isOpen();
+    const previousIsOpen = this._previousIsOpen();
 
-      // Only trigger onClose when transitioning from open to closed
-      if (previousIsOpen === true && isOpen === false) {
-        // Use setTimeout to avoid triggering state changes during effect execution
-        setTimeout(() => this.onClose(), 0);
-      }
+    // Only trigger onClose when transitioning from open to closed
+    if (previousIsOpen === true && isOpen === false) {
+      // Use setTimeout to avoid triggering state changes during effect execution
+      setTimeout(() => this.onClose(), 0);
+    }
 
-      this._previousIsOpen.set(isOpen);
-    },
-    { allowSignalWrites: true },
-  );
+    this._previousIsOpen.set(isOpen);
+  });
 
   // Effect to handle animation state with delay
   private _animationTimer: ReturnType<typeof setTimeout> | null = null;
-  private _animationEffect = effect(
-    () => {
-      const isOpen = this.isOpen();
+  private _animationEffect = effect(() => {
+    const isOpen = this.isOpen();
 
-      // Clear any existing timer
-      if (this._animationTimer) {
-        clearTimeout(this._animationTimer);
-        this._animationTimer = null;
-      }
+    // Clear any existing timer
+    if (this._animationTimer) {
+      clearTimeout(this._animationTimer);
+      this._animationTimer = null;
+    }
 
-      // Delay is needed for timing
-      this._animationTimer = setTimeout(() => {
-        this.isDisableTaskPanelAni.set(!isOpen);
-      }, 500);
-    },
-    { allowSignalWrites: true },
-  );
+    // Delay is needed for timing
+    this._animationTimer = setTimeout(() => {
+      this.isDisableTaskPanelAni.set(!isOpen);
+    }, 500);
+  });
 
   // Signal to track previous route for navigation handling
   private _previousRoute = signal<{ url: string; isWorkView: boolean } | null>(null);
 
   // Effect for navigation handling
-  private _navigationEffect = effect(
-    () => {
-      const currentRoute = this._currentRoute();
-      const isCurrentWorkView = this._isWorkViewUrl(currentRoute);
+  private _navigationEffect = effect(() => {
+    const currentRoute = this._currentRoute();
+    const isCurrentWorkView = this._isWorkViewUrl(currentRoute);
 
-      untracked(() => {
-        const prev = this._previousRoute();
+    untracked(() => {
+      const prev = this._previousRoute();
 
-        if (prev) {
-          // Only close panel when navigating FROM work-view TO non-work-view
-          // Never close when navigating between work-views or to a work-view
-          const shouldClose = prev.isWorkView && !isCurrentWorkView;
+      if (prev) {
+        // Only close panel when navigating FROM work-view TO non-work-view
+        // Never close when navigating between work-views or to a work-view
+        const shouldClose = prev.isWorkView && !isCurrentWorkView;
 
-          // Debug logging
-          if (shouldClose) {
-            Log.log('RightPanel: Closing panel on navigation', {
-              from: prev.url,
-              to: currentRoute,
-              fromIsWorkView: prev.isWorkView,
-              toIsWorkView: isCurrentWorkView,
-            });
-            // Close all panels immediately when navigating away from work views
-            // to prevent the overlay mode from briefly showing
-            this.close();
-          }
+        // Debug logging
+        if (shouldClose) {
+          Log.log('RightPanel: Closing panel on navigation', {
+            from: prev.url,
+            to: currentRoute,
+            fromIsWorkView: prev.isWorkView,
+            toIsWorkView: isCurrentWorkView,
+          });
+          // Close all panels immediately when navigating away from work views
+          // to prevent the overlay mode from briefly showing
+          this.close();
         }
+      }
 
-        // Update previous route
-        this._previousRoute.set({ url: currentRoute, isWorkView: isCurrentWorkView });
-      });
-    },
-    { allowSignalWrites: true },
-  );
+      // Update previous route
+      this._previousRoute.set({ url: currentRoute, isWorkView: isCurrentWorkView });
+    });
+  });
 
   ngOnDestroy(): void {
     // Clean up timers to prevent memory leaks
