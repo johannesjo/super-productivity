@@ -1452,6 +1452,8 @@
         "WEDNESDAY": "Wednesday",
         "INHERIT_SUBTASKS": "Inherit subtasks",
         "INHERIT_SUBTASKS_DESCRIPTION": "When enabled, subtasks from the most recent task instance will be recreated with the repeating task",
+        "REPEAT_FROM_COMPLETION_DATE": "Repeat from completion",
+        "REPEAT_FROM_COMPLETION_DATE_DESCRIPTION": "When enabled, the next task will be created based on when you complete the current one. The start date will be updated to the completion date, rather than using the original fixed start date.",
         "REMOVE_INSTANCE": "Remove today",
         "REMOVE_FOR_DATE": "Remove for {{date}}",
         "DISABLE_AUTO_UPDATE_SUBTASKS": "Disable auto-updating subtasks",

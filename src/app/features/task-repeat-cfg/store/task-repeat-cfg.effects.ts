@@ -26,6 +26,7 @@ import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confir
 import { T } from '../../../t.const';
 import { Update } from '@ngrx/entity';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import { isToday } from '../../../util/is-today.util';
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 import { Log } from '../../../core/log';
@@ -302,6 +303,39 @@ export class TaskRepeatCfgEffects {
           }),
         ),
       ),
+    ),
+  );
+
+  // Update startDate when a task with repeatOnComplete is marked as done
+  updateStartDateOnComplete$ = createEffect(() =>
+    this._actions$.pipe(
+      ofType(TaskSharedActions.updateTask),
+      filter((a) => a.task.changes.isDone === true),
+      switchMap(({ task }) =>
+        this._taskService
+          .getByIdOnce$(task.id as string)
+          .pipe(map((fullTask) => fullTask)),
+      ),
+      filter((task) => !!task.repeatCfgId),
+      switchMap((task) =>
+        this._taskRepeatCfgService.getTaskRepeatCfgById$(task.repeatCfgId as string).pipe(
+          take(1),
+          map((cfg) => ({ task, cfg })),
+        ),
+      ),
+      filter(({ cfg }) => !!cfg && cfg.repeatFromCompletionDate === true),
+      map(({ cfg }) => {
+        const today = getDbDateStr();
+        return updateTaskRepeatCfg({
+          taskRepeatCfg: {
+            id: cfg.id as string,
+            changes: {
+              startDate: today,
+              lastTaskCreationDay: today,
+            },
+          },
+        });
+      }),
     ),
   );
 

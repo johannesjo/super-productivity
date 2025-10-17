@@ -5,6 +5,7 @@ import { getDiffInYears } from '../../../util/get-diff-in-years';
 import { getDiffInWeeks } from '../../../util/get-diff-in-weeks';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 import { getEffectiveLastTaskCreationDay } from './get-effective-last-task-creation-day.util';
+import { getEffectiveRepeatStartDate } from './get-effective-repeat-start-date.util';
 
 export const getNextRepeatOccurrence = (
   taskRepeatCfg: TaskRepeatCfg,
@@ -18,7 +19,9 @@ export const getNextRepeatOccurrence = (
   }
 
   const checkDate = new Date(fromDate);
-  const startDateDate = dateStrToUtcDate(taskRepeatCfg.startDate);
+  // Get the effective last task creation day with fallback logic
+  const startDateStr = getEffectiveRepeatStartDate(taskRepeatCfg);
+  const startDateDate = dateStrToUtcDate(startDateStr);
 
   // Get the effective last task creation day with fallback logic
   const lastTaskCreationDateStr =
