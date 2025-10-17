@@ -470,9 +470,10 @@ export class ScheduleWeekDragService {
         this._dragPreviewContext.set(null);
       }
     } else {
-      // TODO use proper translation string
-      this._dragPreviewContext.set({ kind: 'override', label: '✖ Unschedule Time' });
-      // this._dragPreviewContext.set({ kind: 'override', label: '✖ Unschedule' });
+      // Show different label based on whether task has scheduled time
+      const task = this._pluckTaskFromEvent(this._currentDragEvent());
+      const label = task?.dueWithTime ? '✖ Unschedule Time' : '✖ Unschedule from Today';
+      this._dragPreviewContext.set({ kind: 'override', label });
       this._lastCalculatedTimestamp = null;
     }
   }
@@ -747,6 +748,15 @@ export class ScheduleWeekDragService {
           id: task.id,
           reminderId: task.reminderId,
           isLeaveInToday: true,
+        }),
+      );
+    }
+    // apparently our today list is put together by tasks with a dueDay and by tasks inside TODAY_TAG.taskIds
+    else if (task.dueDay) {
+      this._store.dispatch(
+        TaskSharedActions.unscheduleTask({
+          id: task.id,
+          reminderId: task.reminderId,
         }),
       );
     } else {
