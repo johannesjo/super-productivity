@@ -349,29 +349,29 @@
 }
 
 :host.drag-over {
-  transform: translateY(var(--offset));
-  //border: 1px solid var(--c-accent);
   z-index: 3;
-
-  &:after {
-    content: '';
-    position: absolute;
-    transform: translateY(calc(-1 * var(--offset)));
-    top: calc(-1 * var(--margin-bottom));
-    height: calc(var(--offset) + var(--margin-bottom));
-    left: 0;
-    right: calc(-1 * (var(--margin-right) + 4px));
-    z-index: 3;
-  }
-
-  &.very-short-event {
-    transform: translateY(var(--offset-short-event));
-
-    &:after {
-      transform: translateY(calc(-1 * var(--offset-short-event)));
-      height: calc(var(--offset-short-event) + var(--margin-bottom));
-    }
-  }
+  transform: translateX(16px);
+  //transform: translateY(var(--offset));
+  //
+  //&:after {
+  //  content: '';
+  //  position: absolute;
+  //  transform: translateY(calc(-1 * var(--offset)));
+  //  top: calc(-1 * var(--margin-bottom));
+  //  height: calc(var(--offset) + var(--margin-bottom));
+  //  left: 0;
+  //  right: calc(-1 * (var(--margin-right) + 4px));
+  //  z-index: 3;
+  //}
+  //
+  //&.very-short-event {
+  //  transform: translateY(var(--offset-short-event));
+  //
+  //  &:after {
+  //    transform: translateY(calc(-1 * var(--offset-short-event)));
+  //    height: calc(var(--offset-short-event) + var(--margin-bottom));
+  //  }
+  //}
 }
 
 :host.draggable {

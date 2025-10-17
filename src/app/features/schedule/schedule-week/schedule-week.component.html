@@ -164,6 +164,7 @@
       class="custom-drag-preview"
       [event]="currentDragEvent()!"
       [style]="dragPreviewStyle()!"
+      [class.isShiftInsertPreview]="dragPreviewContext()?.kind === 'shift-task'"
       [class.isScheduleForDay]="isShiftNoScheduleMode()"
     >
       @if (dragPreviewLabel()) {

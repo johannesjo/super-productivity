@@ -396,17 +396,18 @@
 
 // Custom drag preview
 .custom-drag-preview {
+  --scale: 1.02;
   pointer-events: none;
   border: 2px solid var(--c-primary) !important;
   z-index: 1000;
   box-shadow: var(--whiteframe-shadow-8dp);
   transform-origin: center top;
   border-radius: 0;
-  transform: scale(1.02) !important;
+  transform: scale(var(--scale)) !important;
 
   :host.is-dragging:not(.isShiftKeyPressed) & {
     transform-origin: center top;
-    transform: scale(1.02) !important;
+    transform: scale(var(--scale)) !important;
   }
 
   &.isScheduleForDay {
@@ -423,6 +424,10 @@
     top: 0 !important;
     right: -8px;
     border-radius: 12px;
+  }
+
+  &.isShiftInsertPreview {
+    transform: translate(-16px, -50%) scale(var(--scale)) !important;
   }
 }
 

@@ -397,7 +397,7 @@ export class ScheduleWeekDragService {
 
       if (targetEl.classList.contains('col')) {
         this._dragPreviewContext.set({
-          kind: 'shift',
+          kind: 'shift-column',
           day: targetDay,
           isEndOfDay: targetEl.classList.contains('end-of-day'),
         });
@@ -414,6 +414,7 @@ export class ScheduleWeekDragService {
         if (isTaskElement && targetEl.id.startsWith(T_ID_PREFIX)) {
           const taskId = targetEl.id.replace(T_ID_PREFIX, '');
           this._dragOverTaskId.set(taskId);
+          this._dragPreviewContext.set({ kind: 'shift-task', taskId });
         } else {
           this._dragOverTaskId.set(null);
         }

@@ -135,6 +135,7 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // Drag preview properties for time indicator
   private readonly _dragPreviewContext = this._service.dragPreviewContext;
+  readonly dragPreviewContext = this._service.dragPreviewContext;
   private readonly _dragOverTaskId = this._service.dragOverTaskId;
 
   dragPreviewLabel = computed(() => {
@@ -167,7 +168,7 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
     if (ctx.kind === 'time') {
       return this._dateTimeFormatService.formatTime(ctx.timestamp);
     }
-    if (ctx.kind === 'shift') {
+    if (ctx.kind === 'shift-column') {
       const dateLabel = this._formatDateLabel(ctx.day);
       return (
         (ctx.isEndOfDay ? '⇩' : '⇧') +
@@ -176,6 +177,9 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
           { date: dateLabel },
         )
       );
+    }
+    if (ctx.kind === 'shift-task') {
+      return null;
     }
     return ctx.label;
   });
