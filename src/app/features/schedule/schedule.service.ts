@@ -1,5 +1,6 @@
 import { computed, inject, Injectable, Signal } from '@angular/core';
 import { DateService } from '../../core/date/date.service';
+import { interval } from 'rxjs';
 import {
   ScheduleCalendarMapEntry,
   ScheduleDay,
@@ -21,6 +22,7 @@ import { selectTimelineConfig } from '../config/store/global-config.reducer';
 import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TaskService } from '../tasks/task.service';
+import { startWith } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -40,9 +42,13 @@ export class ScheduleService {
   private _icalEvents = toSignal(this._calendarIntegrationService.icalEvents$, {
     initialValue: [],
   });
+  private _scheduleRefreshTick = toSignal(interval(2 * 60 * 1000).pipe(startWith(0)), {
+    initialValue: 0,
+  });
 
   createScheduleDaysComputed(daysToShow: Signal<string[]>): Signal<ScheduleDay[]> {
     return computed(() => {
+      this._scheduleRefreshTick();
       const timelineTasks = this._timelineTasks();
       const taskRepeatCfgs = this._taskRepeatCfgs();
       const timelineCfg = this._timelineConfig();
