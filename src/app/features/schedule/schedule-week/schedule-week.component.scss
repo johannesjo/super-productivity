@@ -35,8 +35,9 @@
       pointer-events: none !important;
     }
 
-    // Prevent CDK drag-drop from animating items out of the way in time mode
-    schedule-event {
+    // Prevent CDK drag-drop from animating items out of the way in time mode.
+    // Keep the custom drag preview exempt so its scale transform remains applied.
+    schedule-event:not(.custom-drag-preview) {
       transform: none !important;
       transition: none !important;
     }
@@ -290,12 +291,12 @@
 
 // Prevent CDK from moving items out of the way when not in shift mode
 :host(:not(.isShiftKeyPressed)) {
-  schedule-event.cdk-drag {
+  schedule-event.cdk-drag:not(.custom-drag-preview) {
     transform: none !important;
     transition: none !important;
   }
 
-  schedule-event.cdk-drag-dragging + schedule-event {
+  schedule-event.cdk-drag-dragging + schedule-event:not(.custom-drag-preview) {
     transform: none !important;
 
     &:after {
@@ -400,8 +401,13 @@
   z-index: 1000;
   box-shadow: var(--whiteframe-shadow-8dp);
   transform-origin: center top;
-  transform: scale(1.02) !important;
   border-radius: 0;
+  transform: scale(1.02) !important;
+
+  :host.is-dragging:not(.isShiftKeyPressed) & {
+    transform-origin: center top;
+    transform: scale(1.02) !important;
+  }
 
   &.isScheduleForDay {
     border-radius: var(--card-border-radius);
