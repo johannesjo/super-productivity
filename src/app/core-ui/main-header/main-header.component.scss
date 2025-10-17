@@ -98,32 +98,6 @@ button.isActive2 {
       margin-left: var(--s);
     }
   }
-
-  .task-filter-btn {
-    position: relative;
-    transition: all 0.2s ease;
-    overflow: visible !important;
-
-    .mat-icon {
-      transition: transform 0.2s ease;
-      display: block;
-    }
-
-    &.isCustomized {
-      box-shadow: 0px -2px 3px 0px var(--separator-alpha);
-      background: var(--c-accent);
-    }
-
-    &:hover:not(.isCustomized):not(:disabled) {
-      background-color: var(--hover-color, rgba(0, 0, 0, 0.04));
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      background: transparent !important;
-    }
-  }
 }
 
 @keyframes pulse {
