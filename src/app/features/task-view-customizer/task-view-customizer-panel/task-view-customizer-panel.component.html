@@ -64,10 +64,12 @@
       (click)="customizerService.setSort(opt.value)"
       [class.active]="customizerService.selectedSort() === opt.value"
     >
-      @if (customizerService.selectedSort() === opt.value) {
-        <mat-icon>check</mat-icon>
-      }
-      <span>{{ opt.label | translate }}</span>
+      <span class="menu-item-content">
+        <span>{{ opt.label | translate }}</span>
+        @if (customizerService.selectedSort() === opt.value) {
+          <mat-icon class="check-icon">check</mat-icon>
+        }
+      </span>
     </button>
   }
 </mat-menu>
@@ -80,10 +82,12 @@
       (click)="customizerService.setGroup(opt.value)"
       [class.active]="customizerService.selectedGroup() === opt.value"
     >
-      @if (customizerService.selectedGroup() === opt.value) {
-        <mat-icon>check</mat-icon>
-      }
-      <span>{{ opt.label | translate }}</span>
+      <span class="menu-item-content">
+        <span>{{ opt.label | translate }}</span>
+        @if (customizerService.selectedGroup() === opt.value) {
+          <mat-icon class="check-icon">check</mat-icon>
+        }
+      </span>
     </button>
   }
 </mat-menu>
@@ -95,10 +99,12 @@
     (click)="onFilterSelect('default')"
     [class.active]="customizerService.selectedFilter() === 'default'"
   >
-    @if (customizerService.selectedFilter() === 'default') {
-      <mat-icon>check</mat-icon>
-    }
-    <span>{{ T.F.TASK_VIEW.CUSTOMIZER.FILTER_DEFAULT | translate }}</span>
+    <span class="menu-item-content">
+      <span>{{ T.F.TASK_VIEW.CUSTOMIZER.FILTER_DEFAULT | translate }}</span>
+      @if (customizerService.selectedFilter() === 'default') {
+        <mat-icon class="check-icon">check</mat-icon>
+      }
+    </span>
   </button>
 
   <button
@@ -106,10 +112,12 @@
     [matMenuTriggerFor]="filterTagMenu"
     [class.active]="customizerService.selectedFilter() === 'tag'"
   >
-    @if (customizerService.selectedFilter() === 'tag') {
-      <mat-icon>check</mat-icon>
-    }
-    <span>{{ T.F.TASK_VIEW.CUSTOMIZER.FILTER_TAG | translate }}</span>
+    <span class="menu-item-content">
+      <span>{{ T.F.TASK_VIEW.CUSTOMIZER.FILTER_TAG | translate }}</span>
+      @if (customizerService.selectedFilter() === 'tag') {
+        <mat-icon class="check-icon">check</mat-icon>
+      }
+    </span>
   </button>
 
   <button
@@ -117,10 +125,12 @@
     [matMenuTriggerFor]="filterProjectMenu"
     [class.active]="customizerService.selectedFilter() === 'project'"
   >
-    @if (customizerService.selectedFilter() === 'project') {
-      <mat-icon>check</mat-icon>
-    }
-    <span>{{ T.F.TASK_VIEW.CUSTOMIZER.FILTER_PROJECT | translate }}</span>
+    <span class="menu-item-content">
+      <span>{{ T.F.TASK_VIEW.CUSTOMIZER.FILTER_PROJECT | translate }}</span>
+      @if (customizerService.selectedFilter() === 'project') {
+        <mat-icon class="check-icon">check</mat-icon>
+      }
+    </span>
   </button>
 
   <button
@@ -128,10 +138,12 @@
     [matMenuTriggerFor]="filterScheduledDateMenu"
     [class.active]="customizerService.selectedFilter() === 'scheduledDate'"
   >
-    @if (customizerService.selectedFilter() === 'scheduledDate') {
-      <mat-icon>check</mat-icon>
-    }
-    <span>{{ T.F.TASK_VIEW.CUSTOMIZER.FILTER_SCHEDULED_DATE | translate }}</span>
+    <span class="menu-item-content">
+      <span>{{ T.F.TASK_VIEW.CUSTOMIZER.FILTER_SCHEDULED_DATE | translate }}</span>
+      @if (customizerService.selectedFilter() === 'scheduledDate') {
+        <mat-icon class="check-icon">check</mat-icon>
+      }
+    </span>
   </button>
 
   <button
@@ -139,10 +151,12 @@
     [matMenuTriggerFor]="filterEstimatedTimeMenu"
     [class.active]="customizerService.selectedFilter() === 'estimatedTime'"
   >
-    @if (customizerService.selectedFilter() === 'estimatedTime') {
-      <mat-icon>check</mat-icon>
-    }
-    <span>{{ T.F.TASK_VIEW.CUSTOMIZER.FILTER_ESTIMATED_TIME | translate }}</span>
+    <span class="menu-item-content">
+      <span>{{ T.F.TASK_VIEW.CUSTOMIZER.FILTER_ESTIMATED_TIME | translate }}</span>
+      @if (customizerService.selectedFilter() === 'estimatedTime') {
+        <mat-icon class="check-icon">check</mat-icon>
+      }
+    </span>
   </button>
 
   <button
@@ -150,10 +164,12 @@
     [matMenuTriggerFor]="filterTimeSpentMenu"
     [class.active]="customizerService.selectedFilter() === 'timeSpent'"
   >
-    @if (customizerService.selectedFilter() === 'timeSpent') {
-      <mat-icon>check</mat-icon>
-    }
-    <span>{{ T.F.TASK_VIEW.CUSTOMIZER.FILTER_TIME_SPENT | translate }}</span>
+    <span class="menu-item-content">
+      <span>{{ T.F.TASK_VIEW.CUSTOMIZER.FILTER_TIME_SPENT | translate }}</span>
+      @if (customizerService.selectedFilter() === 'timeSpent') {
+        <mat-icon class="check-icon">check</mat-icon>
+      }
+    </span>
   </button>
 </mat-menu>
 
@@ -210,13 +226,15 @@
         customizerService.filterInputValue() === option.value
       "
     >
-      @if (
-        customizerService.selectedFilter() === 'scheduledDate' &&
-        customizerService.filterInputValue() === option.value
-      ) {
-        <mat-icon>check</mat-icon>
-      }
-      <span>{{ option.label | translate }}</span>
+      <span class="menu-item-content">
+        <span>{{ option.label | translate }}</span>
+        @if (
+          customizerService.selectedFilter() === 'scheduledDate' &&
+          customizerService.filterInputValue() === option.value
+        ) {
+          <mat-icon class="check-icon">check</mat-icon>
+        }
+      </span>
     </button>
   }
 </mat-menu>
@@ -232,13 +250,15 @@
         customizerService.filterInputValue() === option.value
       "
     >
-      @if (
-        customizerService.selectedFilter() === 'estimatedTime' &&
-        customizerService.filterInputValue() === option.value
-      ) {
-        <mat-icon>check</mat-icon>
-      }
-      <span>{{ option.label | translate }}</span>
+      <span class="menu-item-content">
+        <span>{{ option.label | translate }}</span>
+        @if (
+          customizerService.selectedFilter() === 'estimatedTime' &&
+          customizerService.filterInputValue() === option.value
+        ) {
+          <mat-icon class="check-icon">check</mat-icon>
+        }
+      </span>
     </button>
   }
 </mat-menu>
@@ -254,13 +274,15 @@
         customizerService.filterInputValue() === option.value
       "
     >
-      @if (
-        customizerService.selectedFilter() === 'timeSpent' &&
-        customizerService.filterInputValue() === option.value
-      ) {
-        <mat-icon>check</mat-icon>
-      }
-      <span>{{ option.label | translate }}</span>
+      <span class="menu-item-content">
+        <span>{{ option.label | translate }}</span>
+        @if (
+          customizerService.selectedFilter() === 'timeSpent' &&
+          customizerService.filterInputValue() === option.value
+        ) {
+          <mat-icon class="check-icon">check</mat-icon>
+        }
+      </span>
     </button>
   }
 </mat-menu>
