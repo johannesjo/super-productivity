@@ -144,8 +144,8 @@ import { KeyboardConfig } from '../../../features/config/keyboard-config.model';
         }
 
         &.isCustomized {
-          box-shadow: 0px -2px 3px 0px var(--separator-alpha);
-          background: var(--c-accent);
+          color: var(--c-accent);
+          box-shadow: none;
         }
 
         &:hover:not(.isCustomized):not(:disabled) {
