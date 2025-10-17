@@ -146,6 +146,31 @@ export const updateDoneOnForTask = (upd: Update<Task>, state: TaskState): TaskSt
   }
 };
 
+export const updateStartDateForRepeatableTask = (
+  upd: Update<Task>,
+  state: TaskState,
+): TaskState => {
+  const task = state.entities[upd.id] as Task;
+  const isToDone = upd.changes.isDone === true;
+  const isToUnDone = upd.changes.isDone === false;
+
+  if (isToDone || isToUnDone) {
+    const changes = {
+      ...(isToDone ? { doneOn: Date.now(), dueDay: undefined } : {}),
+      ...(isToUnDone ? { doneOn: undefined } : {}),
+    };
+    return taskAdapter.updateOne(
+      {
+        id: task.id,
+        changes,
+      },
+      state,
+    );
+  } else {
+    return state;
+  }
+};
+
 export const updateTimeSpentForTask = (
   id: string,
   newTimeSpentOnDay: TimeSpentOnDay,

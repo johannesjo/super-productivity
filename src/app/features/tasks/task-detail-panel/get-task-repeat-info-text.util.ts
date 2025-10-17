@@ -7,6 +7,7 @@ import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clo
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 import { getWeekdaysMin } from '../../../util/get-weekdays-min';
 import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
+import { getEffectiveRepeatStartDate } from '../../task-repeat-cfg/store/get-effective-repeat-start-date.util';
 
 export const getTaskRepeatInfoText = (
   repeatCfg: TaskRepeatCfg,
@@ -129,7 +130,7 @@ export const getTaskRepeatInfoText = (
 
     case 'MONTHLY':
       const dateDayStr = dateStrToUtcDate(
-        repeatCfg.startDate as string,
+        getEffectiveRepeatStartDate(repeatCfg),
       ).toLocaleDateString(locale, {
         day: 'numeric',
       });
@@ -146,7 +147,7 @@ export const getTaskRepeatInfoText = (
 
     case 'YEARLY':
       const dayAndMonthStr = dateStrToUtcDate(
-        repeatCfg.startDate as string,
+        getEffectiveRepeatStartDate(repeatCfg),
       ).toLocaleDateString(locale, {
         day: 'numeric',
         month: 'numeric',
