@@ -114,11 +114,8 @@ export class ScheduleComponent implements AfterViewInit {
   });
 
   private _miscConfig = toSignal(this._store.pipe(select(selectMiscConfig)));
-  private _currentTaskId = toSignal(this.taskService.currentTaskId$);
 
-  scheduleDays = this.scheduleService.createScheduleDaysComputed(this.daysToShow, {
-    currentTaskId: this._currentTaskId,
-  });
+  scheduleDays = this.scheduleService.createScheduleDaysComputed(this.daysToShow);
 
   private _eventsAndBeyondBudget = computed(() => {
     const days = this.scheduleDays();

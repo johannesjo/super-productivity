@@ -9,7 +9,7 @@ import {
 } from './schedule.model';
 import { SVEType } from './schedule.const';
 import { PlannerDayMap } from '../planner/planner.model';
-import { TaskWithSubTasks, TaskWithDueTime } from '../tasks/task.model';
+import { TaskWithDueTime, TaskWithSubTasks } from '../tasks/task.model';
 import { TaskRepeatCfg } from '../task-repeat-cfg/task-repeat-cfg.model';
 import { ScheduleConfig } from '../config/global-config.model';
 import { mapToScheduleDays } from './map-schedule-data/map-to-schedule-days';
@@ -20,6 +20,7 @@ import { selectTaskRepeatCfgsWithAndWithoutStartTime } from '../task-repeat-cfg/
 import { selectTimelineConfig } from '../config/store/global-config.reducer';
 import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { TaskService } from '../tasks/task.service';
 
 @Injectable({
   providedIn: 'root',
@@ -28,6 +29,7 @@ export class ScheduleService {
   private _dateService = inject(DateService);
   private _store = inject(Store);
   private _calendarIntegrationService = inject(CalendarIntegrationService);
+  private _taskService = inject(TaskService);
 
   private _timelineTasks = toSignal(this._store.select(selectTimelineTasks));
   private _taskRepeatCfgs = toSignal(
@@ -39,17 +41,14 @@ export class ScheduleService {
     initialValue: [],
   });
 
-  createScheduleDaysComputed(
-    daysToShow: Signal<string[]>,
-    opts: { currentTaskId?: Signal<string | null | undefined> } = {},
-  ): Signal<ScheduleDay[]> {
+  createScheduleDaysComputed(daysToShow: Signal<string[]>): Signal<ScheduleDay[]> {
     return computed(() => {
       const timelineTasks = this._timelineTasks();
       const taskRepeatCfgs = this._taskRepeatCfgs();
       const timelineCfg = this._timelineConfig();
       const plannerDayMap = this._plannerDayMap();
       const icalEvents = this._icalEvents();
-      const currentTaskId = opts.currentTaskId ? (opts.currentTaskId() ?? null) : null;
+      const currentTaskId = this._taskService.currentTaskId() ?? null;
 
       return this.buildScheduleDays({
         daysToShow: daysToShow(),
