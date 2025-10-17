@@ -939,7 +939,7 @@
       "MONTH": "Month",
       "NO_TASKS": "Currently there are no tasks. Please add some tasks via the + Button in the top bar.",
       "NOW": "Now",
-      "INSERT_BEFORE": "Insert before",
+      "INSERT_BEFORE": "Before",
       "PLAN_END_DAY": "End of {{date}}",
       "PLAN_START_DAY": "Start of {{date}}",
       "SHIFT_KEY_INFO": "Hold Shift to toggle day planning mode",

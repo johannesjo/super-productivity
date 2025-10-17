@@ -15,6 +15,8 @@ import { calculateTimeFromYPosition } from '../schedule-utils';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import type { DragPreviewContext } from './schedule-week-drag.types';
 import type { ScheduleEvent } from '../schedule.model';
+import { selectTodayTagTaskIds } from '../../tag/store/tag.reducer';
+import { first } from 'rxjs/operators';
 
 interface PointerPosition {
   x: number;
@@ -246,8 +248,8 @@ export class ScheduleWeekDragService {
       // 4. No column but hovering over another task → reorder
       dispatchMoveBefore();
     } else if (dropPoint && this._isOutsideGrid(dropPoint)) {
-      // 5. Dropped outside grid → unschedule and plan for today
-      this._store.dispatch(TaskSharedActions.planTasksForToday({ taskIds: [task.id] }));
+      // 5. Dropped outside grid → unschedule and remove from today
+      this._handleUnschedule(task, sourceEvent);
     }
 
     // Clear timestamp and other drag-related vars AFTER drop is processed
@@ -469,7 +471,8 @@ export class ScheduleWeekDragService {
       }
     } else {
       // TODO use proper translation string
-      this._dragPreviewContext.set({ kind: 'override', label: '✖ Unschedule' });
+      this._dragPreviewContext.set({ kind: 'override', label: '✖ Unschedule Time' });
+      // this._dragPreviewContext.set({ kind: 'override', label: '✖ Unschedule' });
       this._lastCalculatedTimestamp = null;
     }
   }
@@ -733,5 +736,32 @@ export class ScheduleWeekDragService {
       }),
     );
     return true;
+  }
+
+  private _handleUnschedule(task: TaskCopy, sourceEvent: ScheduleEvent): void {
+    // Check if task has scheduled time - unschedule it
+    // This also removes from planner days (but not from today tag)
+    if (task.dueWithTime) {
+      this._store.dispatch(
+        TaskSharedActions.unscheduleTask({
+          id: task.id,
+          reminderId: task.reminderId,
+          isLeaveInToday: true,
+        }),
+      );
+    } else {
+      this._store
+        .select(selectTodayTagTaskIds)
+        .pipe(first())
+        .subscribe((todayTagTaskIds) => {
+          if (todayTagTaskIds.includes(task.id)) {
+            this._store.dispatch(
+              TaskSharedActions.removeTasksFromTodayTag({
+                taskIds: [task.id],
+              }),
+            );
+          }
+        });
+    }
   }
 }
