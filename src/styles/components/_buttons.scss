@@ -1,0 +1,26 @@
+﻿// Button animations for better user experience
+.mdc-button {
+  transition: var(--transition-standard);
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    transform: translateY(0);
+    transition-duration: var(--transition-duration-xs);
+  }
+
+  // Specific styles for shepherd tour buttons
+  &.shepherd-button {
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}

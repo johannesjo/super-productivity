@@ -1,4 +1,4 @@
-@use './emoji';
+﻿@use './emoji';
 @use './scrollbars';
 @use './table';
 @use './markdown';
@@ -16,5 +16,6 @@
 @use './planner-shared';
 @use './mentions';
 @use './bottom-panel';
+@use './buttons';
 
 //@import '../../app/ui/custom-datetime-picker/sass/picker';
