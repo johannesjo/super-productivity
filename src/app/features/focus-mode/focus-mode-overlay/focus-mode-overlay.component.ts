@@ -32,9 +32,12 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { BannerService } from '../../../core/banner/banner.service';
 import { BannerId } from '../../../core/banner/banner.model';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { FocusModeService } from '../focus-mode.service';
 import { FocusModeMode, FocusScreen } from '../focus-mode.model';
+import {
+  SegmentedButtonGroupComponent,
+  SegmentedButtonOption,
+} from '../../../ui/segmented-button-group/segmented-button-group.component';
 
 @Component({
   selector: 'focus-mode-overlay',
@@ -54,8 +57,7 @@ import { FocusModeMode, FocusScreen } from '../focus-mode.model';
     FocusModeBreakComponent,
     MatButton,
     TranslatePipe,
-    MatButtonToggleGroup,
-    MatButtonToggle,
+    SegmentedButtonGroupComponent,
     NgTemplateOutlet,
   ],
 })
@@ -69,6 +71,27 @@ export class FocusModeOverlayComponent implements OnDestroy {
 
   FocusScreen: typeof FocusScreen = FocusScreen;
   FocusModeMode: typeof FocusModeMode = FocusModeMode;
+
+  readonly modeOptions: ReadonlyArray<SegmentedButtonOption> = [
+    {
+      id: FocusModeMode.Flowtime,
+      icon: 'auto_awesome',
+      labelKey: T.F.FOCUS_MODE.FLOWTIME,
+      hintKey: T.F.FOCUS_MODE.FLOWTIME_HINT,
+    },
+    {
+      id: FocusModeMode.Pomodoro,
+      icon: 'timer',
+      labelKey: T.F.FOCUS_MODE.POMODORO,
+      hintKey: T.F.FOCUS_MODE.POMODORO_HINT,
+    },
+    {
+      id: FocusModeMode.Countdown,
+      icon: 'hourglass_bottom',
+      labelKey: T.F.FOCUS_MODE.COUNTDOWN,
+      hintKey: T.F.FOCUS_MODE.COUNTDOWN_HINT,
+    },
+  ];
 
   selectedMode = this.focusModeService.mode;
   activePage = this.focusModeService.currentScreen;
@@ -195,8 +218,11 @@ export class FocusModeOverlayComponent implements OnDestroy {
     this._store.dispatch(cancelFocusSession());
   }
 
-  selectMode(mode: FocusModeMode): void {
-    this._store.dispatch(setFocusModeMode({ mode }));
+  selectMode(mode: FocusModeMode | string): void {
+    if (!Object.values(FocusModeMode).includes(mode as FocusModeMode)) {
+      return;
+    }
+    this._store.dispatch(setFocusModeMode({ mode: mode as FocusModeMode }));
   }
 
   deactivatePomodoro(): void {
