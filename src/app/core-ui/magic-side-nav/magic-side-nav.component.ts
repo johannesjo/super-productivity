@@ -4,6 +4,7 @@ import {
   computed,
   DestroyRef,
   effect,
+  HostListener,
   inject,
   input,
   OnDestroy,
@@ -25,6 +26,7 @@ import { TaskService } from '../../features/tasks/task.service';
 import { LayoutService } from '../layout/layout.service';
 import { magicSideNavAnimations } from './magic-side-nav.animations';
 
+const MOBILE_HISTORY_STATE = 'isMobileMenuOpen';
 const COLLAPSED_WIDTH = 64;
 const MOBILE_NAV_WIDTH = 300;
 const FOCUS_DELAY_MS = 10;
@@ -191,6 +193,26 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
 
   toggleMobileNav(): void {
     this.showMobileMenuOverlay.update((show) => !show);
+    this.syncMobileNavHistory();
+  }
+
+  /** Handle "back" button to hide mobile menu overlay */
+  @HostListener('window:popstate') onBack(): void {
+    if (this.showMobileMenuOverlay()) this.toggleMobileNav();
+  }
+
+  /** Synchronize browser history state with the visibility of the mobile menu overlay */
+  syncMobileNavHistory(): void {
+    const isVisible = this.showMobileMenuOverlay();
+    const hasState = window.history.state[MOBILE_HISTORY_STATE] !== undefined;
+    if (!isVisible && !hasState) return;
+
+    if (isVisible) {
+      if (!hasState) window.history.pushState({ [MOBILE_HISTORY_STATE]: true }, '');
+      else window.history.replaceState({ [MOBILE_HISTORY_STATE]: true }, '');
+    } else {
+      window.history.back();
+    }
   }
 
   toggleSideNavMode(): void {
