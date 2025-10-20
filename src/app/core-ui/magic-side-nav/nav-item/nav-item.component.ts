@@ -165,6 +165,6 @@ export class NavItemComponent {
       }
       return iconName;
     }
-    return this.svgIcon();
+    return undefined;
   });
 }
