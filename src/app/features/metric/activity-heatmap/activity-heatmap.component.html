@@ -3,14 +3,9 @@
 
   @if (heatmapData(); as data) {
     <div class="heatmap-container">
-      <div class="heatmap-months">
-        @for (month of data.monthLabels; track $index) {
-          <div class="month-label">{{ month }}</div>
-        }
-      </div>
-
       <div class="heatmap-grid">
         <div class="day-labels">
+          <div class="month-spacer"></div>
           <div class="day-label">Sun</div>
           <div class="day-label">Mon</div>
           <div class="day-label">Tue</div>
@@ -20,17 +15,25 @@
           <div class="day-label">Sat</div>
         </div>
 
-        <div class="weeks">
-          @for (week of data.weeks; track $index) {
-            <div class="week">
-              @for (day of week.days; track $index) {
-                <div
-                  [class]="getDayClass(day)"
-                  [title]="getDayTitle(day)"
-                ></div>
-              }
-            </div>
-          }
+        <div class="scrollable-content">
+          <div class="heatmap-months">
+            @for (month of data.monthLabels; track $index) {
+              <div class="month-label">{{ month }}</div>
+            }
+          </div>
+
+          <div class="weeks">
+            @for (week of data.weeks; track $index) {
+              <div class="week">
+                @for (day of week.days; track $index) {
+                  <div
+                    [class]="getDayClass(day)"
+                    [title]="getDayTitle(day)"
+                  ></div>
+                }
+              </div>
+            }
+          </div>
         </div>
       </div>
 

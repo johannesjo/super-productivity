@@ -15,46 +15,18 @@
   border-radius: 4px;
 }
 
-.heatmap-months {
-  display: flex;
-  gap: 2px;
-  padding-left: 48px;
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.6);
-
-  .month-label {
-    flex: 0 0 auto;
-    width: calc(4 * 12px + 4 * 2px); // 4 weeks * (cell width + gap)
-  }
-}
-
 .heatmap-grid {
   display: flex;
   gap: 8px;
+  align-items: flex-start;
 }
 
-.day-labels {
+.scrollable-content {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  font-size: 10px;
-  color: rgba(0, 0, 0, 0.6);
-  padding-right: 4px;
-  width: 40px;
-  text-align: right;
-
-  .day-label {
-    height: 12px;
-    line-height: 12px;
-  }
-}
-
-.weeks {
-  display: flex;
-  gap: 2px;
-  flex-wrap: nowrap;
+  gap: 8px;
   overflow-x: auto;
-  padding-bottom: 8px;
+  overflow-y: hidden;
 
   // Smooth scrolling
   scroll-behavior: smooth;
@@ -79,10 +51,56 @@
   }
 }
 
+.heatmap-months {
+  display: flex;
+  gap: 2px;
+  font-size: 12px;
+  line-height: 12px;
+  height: 12px;
+  color: rgba(0, 0, 0, 0.6);
+  flex-shrink: 0;
+
+  .month-label {
+    flex: 0 0 auto;
+    width: calc(4 * 12px + 4 * 2px); // 4 weeks * (cell width + gap)
+  }
+}
+
+.day-labels {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 10px;
+  color: rgba(0, 0, 0, 0.6);
+  padding-right: 4px;
+  width: 40px;
+  text-align: right;
+  flex-shrink: 0;
+
+  .month-spacer {
+    height: 17px; // 12px (heatmap-months height) + 8px (gap in scrollable-content)
+    flex-shrink: 0;
+  }
+
+  .day-label {
+    height: 12px;
+    line-height: 12px;
+    flex-shrink: 0;
+  }
+}
+
+.weeks {
+  display: flex;
+  gap: 2px;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+}
+
 .week {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  flex-shrink: 0;
 }
 
 .day {
@@ -91,6 +109,7 @@
   border-radius: 2px;
   cursor: pointer;
   transition: all 0.1s ease;
+  flex-shrink: 0;
 
   &.empty {
     background: transparent;
@@ -176,7 +195,7 @@
     color: rgba(255, 255, 255, 0.6);
   }
 
-  .weeks {
+  .scrollable-content {
     &::-webkit-scrollbar-track {
       background: rgba(255, 255, 255, 0.05);
     }
