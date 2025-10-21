@@ -36,11 +36,12 @@
 .day-labels {
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
+  gap: 2px;
   font-size: 10px;
   color: rgba(0, 0, 0, 0.6);
   padding-right: 4px;
   width: 40px;
+  text-align: right;
 
   .day-label {
     height: 12px;
@@ -101,19 +102,19 @@
   }
 
   &.level-1 {
-    background: #b2ebf2;
+    background: color-mix(in srgb, var(--c-primary) 20%, transparent);
   }
 
   &.level-2 {
-    background: #4dd0e1;
+    background: color-mix(in srgb, var(--c-primary) 40%, transparent);
   }
 
   &.level-3 {
-    background: #00bcd4;
+    background: color-mix(in srgb, var(--c-primary) 60%, transparent);
   }
 
   &.level-4 {
-    background: #0097a7;
+    background: var(--c-primary);
   }
 
   &:not(.empty):hover {
@@ -146,19 +147,19 @@
     }
 
     &.level-1 {
-      background: #b2ebf2;
+      background: color-mix(in srgb, var(--c-primary) 20%, transparent);
     }
 
     &.level-2 {
-      background: #4dd0e1;
+      background: color-mix(in srgb, var(--c-primary) 40%, transparent);
     }
 
     &.level-3 {
-      background: #00bcd4;
+      background: color-mix(in srgb, var(--c-primary) 60%, transparent);
     }
 
     &.level-4 {
-      background: #0097a7;
+      background: var(--c-primary);
     }
   }
 }

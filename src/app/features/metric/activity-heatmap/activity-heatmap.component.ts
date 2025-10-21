@@ -3,7 +3,9 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { WorklogService } from '../../worklog/worklog.service';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { TaskService } from '../../tasks/task.service';
-import { map, switchMap } from 'rxjs/operators';
+import { TaskArchiveService } from '../../time-tracking/task-archive.service';
+import { from } from 'rxjs';
+import { first, map, switchMap } from 'rxjs/operators';
 import { DatePipe } from '@angular/common';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -34,6 +36,7 @@ export class ActivityHeatmapComponent {
   private readonly _worklogService = inject(WorklogService);
   private readonly _workContextService = inject(WorkContextService);
   private readonly _taskService = inject(TaskService);
+  private readonly _taskArchiveService = inject(TaskArchiveService);
 
   T: typeof T = T;
   monthLabels: string[] = [];
@@ -41,14 +44,14 @@ export class ActivityHeatmapComponent {
 
   // Compute heatmap data
   // NOTE: Reacts to work context changes
-  // - For TODAY tag: shows ALL tasks from all projects/tags
+  // - For TODAY tag: shows ALL tasks from all projects/tags (current + archived)
   // - For other tags/projects: shows only tasks from that context
   heatmapData = toSignal(
     this._workContextService.activeWorkContext$.pipe(
       switchMap((context) => {
         // Special case: TODAY tag shows ALL data
         if (context.id === TODAY_TAG.id) {
-          return this._taskService.allTasks$.pipe(
+          return from(this._loadAllTasks()).pipe(
             map((tasks) => this._buildHeatmapDataFromTasks(tasks)),
           );
         }
@@ -61,6 +64,32 @@ export class ActivityHeatmapComponent {
     ),
     { initialValue: null },
   );
+
+  private async _loadAllTasks(): Promise<Task[]> {
+    // Load both current tasks and archived tasks
+    const [archive, currentTasks] = await Promise.all([
+      this._taskArchiveService.load(),
+      this._taskService.allTasks$.pipe(first()).toPromise(),
+    ]);
+
+    const allTasks: Task[] = [...(currentTasks || [])];
+
+    // Add archived tasks from all projects
+    if (archive) {
+      Object.values(archive).forEach((projectArchive) => {
+        if (projectArchive?.ids) {
+          projectArchive.ids.forEach((taskId) => {
+            const archivedTask = projectArchive.entities[taskId];
+            if (archivedTask) {
+              allTasks.push(archivedTask);
+            }
+          });
+        }
+      });
+    }
+
+    return allTasks;
+  }
 
   private _buildHeatmapDataFromTasks(tasks: Task[]): {
     weeks: WeekData[];
@@ -120,13 +149,15 @@ export class ActivityHeatmapComponent {
     });
 
     // Calculate levels (0-4) based on activity
+    // Prioritize time spent (80%) over task count (20%)
     dayMap.forEach((day) => {
       if (day.taskCount === 0 && day.timeSpent === 0) {
         day.level = 0;
       } else {
         const taskRatio = maxTasks > 0 ? day.taskCount / maxTasks : 0;
         const timeRatio = maxTime > 0 ? day.timeSpent / maxTime : 0;
-        const combinedRatio = (taskRatio + timeRatio) / 2;
+        // eslint-disable-next-line no-mixed-operators
+        const combinedRatio = timeRatio * 0.8 + taskRatio * 0.2;
 
         if (combinedRatio > 0.75) {
           day.level = 4;
@@ -210,17 +241,16 @@ export class ActivityHeatmapComponent {
     });
 
     // Calculate levels (0-4) based on activity
-    // Use a combined metric of tasks and time
+    // Prioritize time spent (80%) over task count (20%)
     dayMap.forEach((day) => {
       if (day.taskCount === 0 && day.timeSpent === 0) {
         day.level = 0;
       } else {
-        // Normalize based on both tasks and time
         const taskRatio = maxTasks > 0 ? day.taskCount / maxTasks : 0;
         const timeRatio = maxTime > 0 ? day.timeSpent / maxTime : 0;
-        const combinedRatio = (taskRatio + timeRatio) / 2;
+        // eslint-disable-next-line no-mixed-operators
+        const combinedRatio = timeRatio * 0.8 + taskRatio * 0.2;
 
-        // Map to levels 1-4
         if (combinedRatio > 0.75) {
           day.level = 4;
         } else if (combinedRatio > 0.5) {
