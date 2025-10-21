@@ -1,0 +1,201 @@
+.activity-heatmap {
+  margin: 24px 0;
+
+  h3 {
+    margin-bottom: 16px;
+  }
+}
+
+.heatmap-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 4px;
+}
+
+.heatmap-months {
+  display: flex;
+  gap: 2px;
+  padding-left: 48px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.6);
+
+  .month-label {
+    flex: 0 0 auto;
+    width: calc(4 * 12px + 4 * 2px); // 4 weeks * (cell width + gap)
+  }
+}
+
+.heatmap-grid {
+  display: flex;
+  gap: 8px;
+}
+
+.day-labels {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  font-size: 10px;
+  color: rgba(0, 0, 0, 0.6);
+  padding-right: 4px;
+  width: 40px;
+
+  .day-label {
+    height: 12px;
+    line-height: 12px;
+  }
+}
+
+.weeks {
+  display: flex;
+  gap: 2px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 8px;
+
+  // Smooth scrolling
+  scroll-behavior: smooth;
+
+  // Better scrollbar styling
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.3);
+    }
+  }
+}
+
+.week {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.day {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.1s ease;
+
+  &.empty {
+    background: transparent;
+    cursor: default;
+  }
+
+  &.level-0 {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  &.level-1 {
+    background: #b2ebf2;
+  }
+
+  &.level-2 {
+    background: #4dd0e1;
+  }
+
+  &.level-3 {
+    background: #00bcd4;
+  }
+
+  &.level-4 {
+    background: #0097a7;
+  }
+
+  &:not(.empty):hover {
+    transform: scale(1.3);
+    outline: 1px solid rgba(0, 0, 0, 0.2);
+    z-index: 1;
+  }
+}
+
+.heatmap-legend {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.6);
+  padding-right: 4px;
+
+  span {
+    margin: 0 4px;
+  }
+
+  .legend-item {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+
+    &.level-0 {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    &.level-1 {
+      background: #b2ebf2;
+    }
+
+    &.level-2 {
+      background: #4dd0e1;
+    }
+
+    &.level-3 {
+      background: #00bcd4;
+    }
+
+    &.level-4 {
+      background: #0097a7;
+    }
+  }
+}
+
+// Dark theme support
+@media (prefers-color-scheme: dark) {
+  .heatmap-container {
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .heatmap-months,
+  .day-labels,
+  .heatmap-legend {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .weeks {
+    &::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+    }
+  }
+
+  .day {
+    &.level-0 {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    &:not(.empty):hover {
+      outline-color: rgba(255, 255, 255, 0.2);
+    }
+  }
+}

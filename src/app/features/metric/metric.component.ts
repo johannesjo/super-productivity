@@ -10,6 +10,7 @@ import { LazyChartComponent } from './lazy-chart/lazy-chart.component';
 import { DecimalPipe } from '@angular/common';
 import { MsToStringPipe } from '../../ui/duration/ms-to-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
+import { ActivityHeatmapComponent } from './activity-heatmap/activity-heatmap.component';
 
 @Component({
   selector: 'metric',
@@ -17,7 +18,13 @@ import { TranslatePipe } from '@ngx-translate/core';
   styleUrls: ['./metric.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeAnimation],
-  imports: [LazyChartComponent, DecimalPipe, MsToStringPipe, TranslatePipe],
+  imports: [
+    LazyChartComponent,
+    DecimalPipe,
+    MsToStringPipe,
+    TranslatePipe,
+    ActivityHeatmapComponent,
+  ],
 })
 export class MetricComponent {
   workContextService = inject(WorkContextService);

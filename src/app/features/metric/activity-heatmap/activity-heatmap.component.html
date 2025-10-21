@@ -1,0 +1,46 @@
+<section class="activity-heatmap">
+  <h3>{{ T.F.METRIC.CMP.ACTIVITY_HEATMAP | translate }}</h3>
+
+  @if (heatmapData(); as data) {
+    <div class="heatmap-container">
+      <div class="heatmap-months">
+        @for (month of data.monthLabels; track $index) {
+          <div class="month-label">{{ month }}</div>
+        }
+      </div>
+
+      <div class="heatmap-grid">
+        <div class="day-labels">
+          <div class="day-label">Mon</div>
+          <div class="day-label">Wed</div>
+          <div class="day-label">Fri</div>
+        </div>
+
+        <div class="weeks">
+          @for (week of data.weeks; track $index) {
+            <div class="week">
+              @for (day of week.days; track $index) {
+                <div
+                  [class]="getDayClass(day)"
+                  [title]="getDayTitle(day)"
+                ></div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="heatmap-legend">
+        <span>Less</span>
+        <div class="legend-item level-0"></div>
+        <div class="legend-item level-1"></div>
+        <div class="legend-item level-2"></div>
+        <div class="legend-item level-3"></div>
+        <div class="legend-item level-4"></div>
+        <span>More</span>
+      </div>
+    </div>
+  } @else {
+    <p>{{ T.F.METRIC.CMP.NO_ADDITIONAL_DATA_YET | translate }}</p>
+  }
+</section>
