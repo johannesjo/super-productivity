@@ -128,13 +128,6 @@ export class MainHeaderComponent implements OnDestroy {
   );
   isScheduleSection = toSignal(this._isScheduleSection$, { initialValue: false });
 
-  private _isWorkViewPage$ = this._router.events.pipe(
-    filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-    map((event) => !!event.urlAfterRedirects.match(/tasks$/)),
-    startWith(!!this._router.url.match(/tasks$/)),
-  );
-  isWorkViewPage = toSignal(this._isWorkViewPage$, { initialValue: false });
-
   // Convert more observables to signals
 
   currentTask = toSignal(this.taskService.currentTask$);
@@ -148,9 +141,6 @@ export class MainHeaderComponent implements OnDestroy {
   isShowIssuePanel = computed(() => this.layoutService.isShowIssuePanel());
   isShowNotes = computed(() => this.layoutService.isShowNotes());
   isShowScheduleDayPanel = computed(() => this.layoutService.isShowScheduleDayPanel());
-  isShowTaskViewCustomizerPanel = computed(() =>
-    this.layoutService.isShowTaskViewCustomizerPanel(),
-  );
   syncIsEnabledAndReady = toSignal(this.syncWrapperService.isEnabledAndReady$);
   syncState = toSignal(this.syncWrapperService.syncState$);
   isSyncInProgress = toSignal(this.syncWrapperService.isSyncInProgress$);

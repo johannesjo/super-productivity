@@ -6,7 +6,6 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { LayoutService } from '../../layout/layout.service';
 import { T } from '../../../t.const';
 import { KeyboardConfig } from '../../../features/config/keyboard-config.model';
-import { TaskViewCustomizerService } from '../../../features/task-view-customizer/task-view-customizer.service';
 
 @Component({
   selector: 'desktop-panel-buttons',
@@ -22,22 +21,6 @@ import { TaskViewCustomizerService } from '../../../features/task-view-customize
       matTooltip="{{ T.MH.SCHEDULE | translate }}"
     >
       <mat-icon svgIcon="early_on"></mat-icon>
-    </button>
-
-    <button
-      class="panel-btn"
-      [disabled]="!isWorkViewPage()"
-      [class.isActive]="isShowTaskViewCustomizerPanel()"
-      [class.isCustomized]="taskViewCustomizerService.isCustomized()"
-      (click)="layoutService.toggleTaskViewCustomizerPanel()"
-      mat-icon-button
-      matTooltip="{{ T.GCF.KEYBOARD.TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL | translate }} {{
-        kb()?.toggleTaskViewCustomizerPanel
-          ? '[' + kb()?.toggleTaskViewCustomizerPanel + ']'
-          : ''
-      }}"
-    >
-      <mat-icon>filter_list</mat-icon>
     </button>
 
     <button
@@ -82,12 +65,8 @@ import { TaskViewCustomizerService } from '../../../features/task-view-customize
           display: block;
         }
 
-        &.isActive,
-        &.isCustomized {
-          box-shadow: 0px -2px 3px 0px var(--separator-alpha);
-        }
-
         &.isActive {
+          box-shadow: 0px -2px 3px 0px var(--separator-alpha);
           background-color: transparent;
 
           &::after {
@@ -99,11 +78,7 @@ import { TaskViewCustomizerService } from '../../../features/task-view-customize
           }
         }
 
-        &.isCustomized {
-          background: var(--c-accent);
-        }
-
-        &:hover:not(.isActive):not(.isCustomized):not(:disabled) {
+        &:hover:not(.isActive):not(:disabled) {
           background-color: var(--hover-color, rgba(0, 0, 0, 0.04));
         }
 
@@ -124,13 +99,10 @@ import { TaskViewCustomizerService } from '../../../features/task-view-customize
 export class DesktopPanelButtonsComponent {
   readonly T = T;
   readonly layoutService = inject(LayoutService);
-  readonly taskViewCustomizerService = inject(TaskViewCustomizerService);
 
   readonly kb = input<KeyboardConfig | null>();
   readonly isRouteWithSidePanel = input.required<boolean>();
-  readonly isWorkViewPage = input.required<boolean>();
   readonly isShowScheduleDayPanel = input.required<boolean>();
-  readonly isShowTaskViewCustomizerPanel = input.required<boolean>();
   readonly isShowIssuePanel = input.required<boolean>();
   readonly isShowNotes = input.required<boolean>();
 }
