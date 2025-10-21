@@ -53,23 +53,25 @@ import { KeyboardConfig } from '../../../features/config/keyboard-config.model';
           >
             <mat-icon>more_vert</mat-icon>
           </button>
-          <button
-            class="task-filter-btn"
-            [disabled]="!isWorkViewPage()"
-            [class.isCustomized]="taskViewCustomizerService.isCustomized()"
-            [matMenuTriggerFor]="customizerPanel.menu"
-            mat-icon-button
-            matTooltip="{{
-              T.GCF.KEYBOARD.TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL | translate
-            }} {{
-              kb.toggleTaskViewCustomizerPanel
-                ? '[' + kb.toggleTaskViewCustomizerPanel + ']'
-                : ''
-            }}"
-          >
-            <mat-icon>filter_list</mat-icon>
-          </button>
-          <task-view-customizer-panel #customizerPanel></task-view-customizer-panel>
+          @if (isWorkViewPage()) {
+            <button
+              class="task-filter-btn"
+              [class.isCustomized]="taskViewCustomizerService.isCustomized()"
+              [matMenuTriggerFor]="customizerPanel.menu"
+              mat-icon-button
+              matTooltip="{{
+                T.GCF.KEYBOARD.TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL | translate
+              }} {{
+                kb.toggleTaskViewCustomizerPanel
+                  ? '[' + kb.toggleTaskViewCustomizerPanel + ']'
+                  : ''
+              }}"
+            >
+              <mat-icon>filter_list</mat-icon>
+            </button>
+
+            <task-view-customizer-panel #customizerPanel></task-view-customizer-panel>
+          }
         </div>
       }
       <mat-menu #activeWorkContextMenu="matMenu">
