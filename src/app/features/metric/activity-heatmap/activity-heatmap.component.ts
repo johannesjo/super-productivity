@@ -4,7 +4,7 @@ import { WorklogService } from '../../worklog/worklog.service';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { TaskService } from '../../tasks/task.service';
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
-import { from } from 'rxjs';
+import { defer, from } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
 import { DatePipe } from '@angular/common';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
@@ -49,9 +49,10 @@ export class ActivityHeatmapComponent {
   heatmapData = toSignal(
     this._workContextService.activeWorkContext$.pipe(
       switchMap((context) => {
-        // Special case: TODAY tag shows ALL data
+        // Special case: TODAY tag shows ALL data from all tasks
         if (context.id === TODAY_TAG.id) {
-          return from(this._loadAllTasks()).pipe(
+          // Use defer to ensure the Promise is created fresh each time
+          return defer(() => from(this._loadAllTasks())).pipe(
             map((tasks) => this._buildHeatmapDataFromTasks(tasks)),
           );
         }
@@ -74,16 +75,12 @@ export class ActivityHeatmapComponent {
 
     const allTasks: Task[] = [...(currentTasks || [])];
 
-    // Add archived tasks from all projects
-    if (archive) {
-      Object.values(archive).forEach((projectArchive) => {
-        if (projectArchive?.ids) {
-          projectArchive.ids.forEach((taskId) => {
-            const archivedTask = projectArchive.entities[taskId];
-            if (archivedTask) {
-              allTasks.push(archivedTask);
-            }
-          });
+    // Add archived tasks (archive is a single TaskArchive object with all tasks)
+    if (archive && archive.ids) {
+      archive.ids.forEach((taskId) => {
+        const archivedTask = archive.entities[taskId];
+        if (archivedTask) {
+          allTasks.push(archivedTask as Task);
         }
       });
     }
