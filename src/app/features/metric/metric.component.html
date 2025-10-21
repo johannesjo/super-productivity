@@ -87,6 +87,7 @@
               [legend]="true"
               [options]="lineChartOptions"
               height="400px"
+              [shareFileName]="'mood-productivity-over-time.png'"
             ></lazy-chart>
           </section>
         }
@@ -101,6 +102,7 @@
                 [legend]="true"
                 [options]="lineChartOptions"
                 height="400px"
+                [shareFileName]="'focus-session-trends.png'"
               ></lazy-chart>
             </section>
           }
@@ -118,6 +120,7 @@
               [legend]="improvementCounts?.datasets[0].data.length < 12"
               [options]="pieChartOptions"
               height="300px"
+              [shareFileName]="'improvement-selection-count.png'"
             >
             </lazy-chart>
           </section>
@@ -132,6 +135,7 @@
               [legend]="obstructionCounts?.datasets[0].data.length < 12"
               [options]="pieChartOptions"
               height="300px"
+              [shareFileName]="'obstruction-selection-count.png'"
             >
             </lazy-chart>
           </section>
@@ -153,6 +157,7 @@
               [options]="lineChartOptions"
               [legend]="true"
               height="400px"
+              [shareFileName]="'simple-click-counters-over-time.png'"
             >
             </lazy-chart>
           </section>
@@ -167,6 +172,7 @@
               [options]="lineChartOptions"
               [legend]="true"
               height="400px"
+              [shareFileName]="'simple-stopwatch-counters-over-time.png'"
             >
             </lazy-chart>
           </section>
