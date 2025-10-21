@@ -44,6 +44,10 @@ export class ActivityHeatmapComponent {
   T: typeof T = T;
   weeks: WeekData[] = [];
   isSharing = signal(false);
+  private readonly _activeWorkContextTitle = toSignal(
+    this._workContextService.activeWorkContextTitle$,
+    { initialValue: '' },
+  );
 
   // Compute heatmap data
   // NOTE: Reacts to work context changes
@@ -395,7 +399,8 @@ export class ActivityHeatmapComponent {
 
     try {
       // Render heatmap to canvas
-      const canvas = this._renderToCanvas(data);
+      const contextTitle = this._activeWorkContextTitle();
+      const canvas = this._renderToCanvas(data, contextTitle);
 
       // Convert to blob
       const blob: Blob | null = await new Promise((resolve) => {
@@ -437,22 +442,29 @@ export class ActivityHeatmapComponent {
     }
   }
 
-  private _renderToCanvas(data: {
-    weeks: WeekData[];
-    monthLabels: string[];
-  }): HTMLCanvasElement {
+  private _renderToCanvas(
+    data: {
+      weeks: WeekData[];
+      monthLabels: string[];
+    },
+    contextTitle: string,
+  ): HTMLCanvasElement {
     const cellSize = 12;
     const gap = 2;
     const dayLabelWidth = 40;
     const monthLabelHeight = 20;
     const padding = 16;
+    const weekHeight = 7 * (cellSize + gap);
+    const doublePadding = padding * 2;
+    const heatmapHeight = monthLabelHeight + weekHeight;
+    const baseCanvasHeight = heatmapHeight + doublePadding;
+    const taglineHeight = 32;
 
     // Calculate dimensions
     const numWeeks = data.weeks.length;
-    // eslint-disable-next-line no-mixed-operators
-    const canvasWidth = dayLabelWidth + numWeeks * (cellSize + gap) + padding * 2;
-    // eslint-disable-next-line no-mixed-operators
-    const canvasHeight = monthLabelHeight + 7 * (cellSize + gap) + padding * 2;
+    const weeksWidth = numWeeks * (cellSize + gap);
+    const canvasWidth = dayLabelWidth + weeksWidth + doublePadding;
+    const canvasHeight = baseCanvasHeight + taglineHeight;
 
     // Create canvas
     const canvas = document.createElement('canvas');
@@ -515,6 +527,19 @@ export class ActivityHeatmapComponent {
         }
       });
     });
+
+    const normalizedTitle = contextTitle?.trim().length
+      ? contextTitle.trim()
+      : 'Super Productivity';
+    const shareLabel = `${normalizedTitle} – With the Super Productivity App`;
+
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+    ctx.font = '14px system-ui, -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const taglineOffset = taglineHeight / 2;
+    const taglineY = baseCanvasHeight + taglineOffset;
+    ctx.fillText(shareLabel, canvasWidth / 2, taglineY);
 
     return canvas;
   }
