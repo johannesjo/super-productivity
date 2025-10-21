@@ -360,6 +360,11 @@
         mat-menu-item
         menuTouchFix
       >
+        <mat-icon
+          [style.color]="project.theme.primary"
+          class="tag-ico"
+          >{{ project.icon || 'list' }}</mat-icon
+        >
         {{ project.title }}
       </button>
     }
