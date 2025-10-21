@@ -892,6 +892,25 @@ describe('shortSyntax', () => {
       const r = shortSyntax(t, CONFIG, [], projects);
       expect(r).toEqual(undefined);
     });
+
+    it('should prefer shortest prefix full project title match', () => {
+      const t = {
+        ...TASK,
+        title: 'Task +print',
+      };
+      projects = ['printer', 'imprints', 'print', 'printable'].map(
+        (title) => ({ id: title, title }) as Project,
+      );
+      const r = shortSyntax(t, CONFIG, [], projects);
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        projectId: 'print',
+        taskChanges: {
+          title: 'Task',
+        },
+      });
+    });
   });
 
   describe('combined', () => {
