@@ -1,46 +1,5 @@
-::ng-deep .customizer-menu {
-  .mat-mdc-menu-item {
-    position: relative;
-    display: flex !important;
-    align-items: center;
-
-    &.active {
-      background-color: rgba(0, 0, 0, 0.04);
-    }
-  }
-
-  .current-value {
-    padding-left: 16px;
-    font-size: 0.875em;
-    opacity: 0.7;
-    font-style: italic;
-  }
-
-  mat-icon:first-child:not(.check-icon) {
-    margin-right: 8px;
-  }
-
-  .menu-item-content {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    flex: 1;
-    flex-grow: 1;
-    margin-right: 0 !important;
-    border: 1px solid red !important;
-
-    > span:first-child {
-      flex: 1;
-    }
-
-    .check-icon {
-      border: 1px solid deeppink !important;
-      margin-left: auto !important;
-      flex-shrink: 0;
-      margin-right: 0 !important;
-    }
-  }
-}
+// Menu styles are in global styles: src/styles/components/_customizer-menu.scss
+// This is necessary because mat-menu renders in a global overlay container
 
 .menu-input-wrapper {
   padding: 8px 16px;

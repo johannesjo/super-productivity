@@ -117,20 +117,22 @@ import { KeyboardConfig } from '../../../features/config/keyboard-config.model';
       }
 
       .project-settings-btn {
-        display: none;
-        @media (min-width: 600px) {
-          display: block;
-          transition: var(--transition-standard);
-          opacity: 0;
-          position: relative;
-          z-index: 1;
-        }
+        opacity: 1;
 
-        &:hover,
-        .page-title:hover + .page-title-actions &,
-        .page-title-actions:hover & {
-          opacity: 1;
-        }
+        /*display: none;*/
+        /*@media (min-width: 600px) {*/
+        /*  display: block;*/
+        /*  transition: var(--transition-standard);*/
+        /*  opacity: 0;*/
+        /*  position: relative;*/
+        /*  z-index: 1;*/
+        /*}*/
+
+        /*&:hover,*/
+        /*.page-title:hover + .page-title-actions &,*/
+        /*.page-title-actions:hover & {*/
+        /*  opacity: 1;*/
+        /*}*/
       }
 
       .task-filter-btn {
