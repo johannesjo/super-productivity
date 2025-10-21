@@ -22,6 +22,12 @@ test.describe('Drag Task to change project and labels', () => {
     await page.waitForSelector('task', { state: 'visible' });
 
     const projectNameInput = page.locator('dialog-create-project input').first();
+    const project1NavItem = page
+      .getByRole('menuitem')
+      .filter({ hasText: `${testPrefix}-TestProject 1` });
+    const project2NavItem = page
+      .getByRole('menuitem')
+      .filter({ hasText: `${testPrefix}-TestProject 2` });
 
     // Add first project
     await page.keyboard.press('Shift+P');
@@ -30,7 +36,9 @@ test.describe('Drag Task to change project and labels', () => {
     await projectNameInput.waitFor({ state: 'visible', timeout: 15000 });
     await projectNameInput.fill(`${testPrefix}-TestProject 1`);
     await page.keyboard.press('Enter');
-    await page.waitForSelector('dialog-create-project', { state: 'detached' });
+    // wait for dialog to close
+    await page.waitForTimeout(50);
+    await expect(project1NavItem).toBeVisible();
 
     // Add another project
     await page.keyboard.press('Shift+P');
@@ -39,16 +47,8 @@ test.describe('Drag Task to change project and labels', () => {
     await projectNameInput.waitFor({ state: 'visible', timeout: 15000 });
     await projectNameInput.fill(`${testPrefix}-TestProject 2`);
     await page.keyboard.press('Enter');
-    await page.waitForSelector('dialog-create-project', { state: 'detached' });
-
-    // ensure projects are in the nav
-    const project1NavItem = page
-      .getByRole('menuitem')
-      .filter({ hasText: `${testPrefix}-TestProject 1` });
-    const project2NavItem = page
-      .getByRole('menuitem')
-      .filter({ hasText: `${testPrefix}-TestProject 2` });
-    await expect(project1NavItem).toBeVisible();
+    // wait for dialog to close
+    await page.waitForTimeout(50);
     await expect(project2NavItem).toBeVisible();
 
     // find drag handle of task
@@ -113,6 +113,8 @@ test.describe('Drag Task to change project and labels', () => {
     await tagNameInput.waitFor({ state: 'visible', timeout: 3000 });
     await tagNameInput.fill(`${testPrefix}-Tag1`);
     await page.keyboard.press('Enter');
+    // wait for dialog to close
+    await page.waitForTimeout(50);
     await tag1NavItem.waitFor({ state: 'visible', timeout: 3000 });
 
     await tagMenu.hover();
@@ -121,6 +123,8 @@ test.describe('Drag Task to change project and labels', () => {
     await tagNameInput.waitFor({ state: 'visible', timeout: 3000 });
     await tagNameInput.fill(`${testPrefix}-Tag2`);
     await page.keyboard.press('Enter');
+    // wait for dialog to close
+    await page.waitForTimeout(50);
     await tag2NavItem.waitFor({ state: 'visible', timeout: 3000 });
 
     // find drag handle of task
