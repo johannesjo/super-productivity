@@ -4,9 +4,9 @@ import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
 import { LayoutService } from '../../layout/layout.service';
-import { TaskViewCustomizerService } from '../../../features/task-view-customizer/task-view-customizer.service';
 import { T } from '../../../t.const';
 import { KeyboardConfig } from '../../../features/config/keyboard-config.model';
+import { TaskViewCustomizerService } from '../../../features/task-view-customizer/task-view-customizer.service';
 
 @Component({
   selector: 'desktop-panel-buttons',

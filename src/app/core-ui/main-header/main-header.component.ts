@@ -145,12 +145,12 @@ export class MainHeaderComponent implements OnDestroy {
   enabledSimpleCounters = toSignal(this.simpleCounterService.enabledSimpleCounters$, {
     initialValue: [],
   });
-  isShowTaskViewCustomizerPanel = computed(() =>
-    this.layoutService.isShowTaskViewCustomizerPanel(),
-  );
   isShowIssuePanel = computed(() => this.layoutService.isShowIssuePanel());
   isShowNotes = computed(() => this.layoutService.isShowNotes());
   isShowScheduleDayPanel = computed(() => this.layoutService.isShowScheduleDayPanel());
+  isShowTaskViewCustomizerPanel = computed(() =>
+    this.layoutService.isShowTaskViewCustomizerPanel(),
+  );
   syncIsEnabledAndReady = toSignal(this.syncWrapperService.isEnabledAndReady$);
   syncState = toSignal(this.syncWrapperService.syncState$);
   isSyncInProgress = toSignal(this.syncWrapperService.isSyncInProgress$);
