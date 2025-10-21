@@ -1,5 +1,23 @@
 <section class="activity-heatmap">
-  <h3>{{ T.F.METRIC.CMP.ACTIVITY_HEATMAP | translate }}</h3>
+  <div class="heatmap-header">
+    <h1 class="heatmap-title">{{ T.F.METRIC.CMP.ACTIVITY_HEATMAP | translate }}</h1>
+    <div class="heatmap-header__actions">
+      @if (heatmapData()) {
+        <button
+          mat-icon-button
+          (click)="shareHeatmap()"
+          [disabled]="isSharing()"
+          [matTooltip]="'Share Heatmap' | translate"
+        >
+          @if (isSharing()) {
+            <mat-icon>hourglass_empty</mat-icon>
+          } @else {
+            <mat-icon>share</mat-icon>
+          }
+        </button>
+      }
+    </div>
+  </div>
 
   @if (heatmapData(); as data) {
     <div class="heatmap-container">

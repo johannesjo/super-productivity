@@ -1,8 +1,38 @@
 .activity-heatmap {
   margin: 24px 0;
 
-  h3 {
+  .heatmap-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     margin-bottom: 16px;
+
+    .heatmap-title {
+      margin: 0;
+      flex: 0 0 auto;
+      width: auto;
+      display: inline-block;
+    }
+
+    .heatmap-header__actions {
+      display: flex;
+      align-items: center;
+    }
+
+    button {
+      opacity: 0.7;
+      transition: opacity 0.2s;
+      flex: 0 0 auto;
+
+      &:hover:not(:disabled) {
+        opacity: 1;
+      }
+
+      &:disabled {
+        opacity: 0.3;
+      }
+    }
   }
 }
 

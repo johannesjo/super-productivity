@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { WorklogService } from '../../worklog/worklog.service';
 import { WorkContextService } from '../../work-context/work-context.service';
@@ -6,12 +6,14 @@ import { TaskService } from '../../tasks/task.service';
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 import { defer, from } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
-import { DatePipe } from '@angular/common';
-import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 import { T } from '../../../t.const';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { Task } from '../../tasks/task.model';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { SnackService } from '../../../core/snack/snack.service';
 
 interface DayData {
   date: Date;
@@ -30,17 +32,18 @@ interface WeekData {
   templateUrl: './activity-heatmap.component.html',
   styleUrls: ['./activity-heatmap.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, MsToStringPipe, TranslatePipe],
+  imports: [TranslatePipe, MatIconButton, MatTooltip, MatIcon],
 })
 export class ActivityHeatmapComponent {
   private readonly _worklogService = inject(WorklogService);
   private readonly _workContextService = inject(WorkContextService);
   private readonly _taskService = inject(TaskService);
   private readonly _taskArchiveService = inject(TaskArchiveService);
+  private readonly _snackService = inject(SnackService);
 
   T: typeof T = T;
-  monthLabels: string[] = [];
   weeks: WeekData[] = [];
+  isSharing = signal(false);
 
   // Compute heatmap data
   // NOTE: Reacts to work context changes
@@ -380,5 +383,188 @@ export class ActivityHeatmapComponent {
       return `${hours}h ${minutes}m`;
     }
     return `${minutes}m`;
+  }
+
+  async shareHeatmap(): Promise<void> {
+    const data = this.heatmapData();
+    if (!data) {
+      return;
+    }
+
+    this.isSharing.set(true);
+
+    try {
+      // Render heatmap to canvas
+      const canvas = this._renderToCanvas(data);
+
+      // Convert to blob
+      const blob: Blob | null = await new Promise((resolve) => {
+        canvas.toBlob((b) => resolve(b), 'image/png', 1.0);
+      });
+
+      if (!blob) {
+        throw new Error('Failed to generate image');
+      }
+
+      const file = new File([blob], 'activity-heatmap.png', { type: 'image/png' });
+
+      // Try native share API first
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: 'Activity Heatmap',
+        });
+      } else {
+        // Fallback: Download the file
+        this._downloadFile(blob, 'activity-heatmap.png');
+      }
+
+      this._snackService.open({
+        type: 'SUCCESS',
+        msg: 'Heatmap shared successfully',
+      });
+    } catch (error: any) {
+      // User cancelled or error occurred
+      if (error?.name !== 'AbortError') {
+        console.error('Share failed:', error);
+        this._snackService.open({
+          type: 'ERROR',
+          msg: 'Failed to share heatmap',
+        });
+      }
+    } finally {
+      this.isSharing.set(false);
+    }
+  }
+
+  private _renderToCanvas(data: {
+    weeks: WeekData[];
+    monthLabels: string[];
+  }): HTMLCanvasElement {
+    const cellSize = 12;
+    const gap = 2;
+    const dayLabelWidth = 40;
+    const monthLabelHeight = 20;
+    const padding = 16;
+
+    // Calculate dimensions
+    const numWeeks = data.weeks.length;
+    // eslint-disable-next-line no-mixed-operators
+    const canvasWidth = dayLabelWidth + numWeeks * (cellSize + gap) + padding * 2;
+    // eslint-disable-next-line no-mixed-operators
+    const canvasHeight = monthLabelHeight + 7 * (cellSize + gap) + padding * 2;
+
+    // Create canvas
+    const canvas = document.createElement('canvas');
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+    const ctx = canvas.getContext('2d')!;
+
+    // Background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+    // Day labels (Sun, Mon, etc.)
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+    ctx.font = '10px system-ui, -apple-system, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    dayNames.forEach((day, i) => {
+      // eslint-disable-next-line no-mixed-operators
+      const y = padding + monthLabelHeight + i * (cellSize + gap) + cellSize / 2;
+      ctx.fillText(day, padding + dayLabelWidth - 4, y);
+    });
+
+    // Month labels
+    ctx.font = '12px system-ui, -apple-system, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    data.monthLabels.forEach((month, i) => {
+      // eslint-disable-next-line no-mixed-operators
+      const x = padding + dayLabelWidth + i * 4 * (cellSize + gap);
+      ctx.fillText(month, x, padding);
+    });
+
+    // Get primary color from CSS variable or use default
+    const primaryColor =
+      getComputedStyle(document.documentElement).getPropertyValue('--c-primary').trim() ||
+      '#3f51b5';
+
+    // Draw heatmap cells
+    data.weeks.forEach((week, weekIndex) => {
+      week.days.forEach((day, dayIndex) => {
+        if (day) {
+          // eslint-disable-next-line no-mixed-operators
+          const x = padding + dayLabelWidth + weekIndex * (cellSize + gap);
+          // eslint-disable-next-line no-mixed-operators
+          const y = padding + monthLabelHeight + dayIndex * (cellSize + gap);
+
+          // Set color based on level
+          if (day.level === 0) {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+          } else {
+            // Mix primary color with transparency
+            const opacity = day.level * 0.2; // 0.2, 0.4, 0.6, 0.8, 1.0
+            ctx.fillStyle = this._mixColor(primaryColor, opacity);
+          }
+
+          // Draw rounded rectangle
+          this._roundRect(ctx, x, y, cellSize, cellSize, 2);
+        }
+      });
+    });
+
+    return canvas;
+  }
+
+  private _mixColor(color: string, opacity: number): string {
+    // Simple color mixing - assumes hex or rgb color
+    if (color.startsWith('#')) {
+      // Convert hex to rgb
+      const r = parseInt(color.slice(1, 3), 16);
+      const g = parseInt(color.slice(3, 5), 16);
+      const b = parseInt(color.slice(5, 7), 16);
+      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    }
+    // Assume it's already in rgb/rgba format
+    return color.replace(
+      /rgba?\([^)]+\)/,
+      `rgba(${color.match(/\d+/g)?.slice(0, 3).join(',')}, ${opacity})`,
+    );
+  }
+
+  private _roundRect(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    radius: number,
+  ): void {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  private _downloadFile(blob: Blob, filename: string): void {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 }
