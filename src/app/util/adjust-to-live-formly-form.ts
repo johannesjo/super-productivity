@@ -15,7 +15,8 @@ export const adjustToLiveFormlyForm = (
       item.type === 'input' ||
       item.type === 'textarea' ||
       item.type === 'duration' ||
-      item.type === 'icon'
+      item.type === 'icon' ||
+      item.type === 'color'
     ) {
       return {
         ...item,
