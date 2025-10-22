@@ -5,6 +5,8 @@ import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { SnackService } from '../snack/snack.service';
 import { SharePayload, ShareResult, ShareTarget, ShareTargetConfig } from './share.model';
 
+const FALLBACK_SHARE_URL = 'https://super-productivity.com';
+
 export type ShareOutcome = 'shared' | 'cancelled' | 'unavailable' | 'failed';
 export type ShareSupport = 'native' | 'web' | 'none';
 
@@ -68,6 +70,8 @@ export class ShareService {
    * Main share method - automatically detects platform and uses best method.
    */
   async share(payload: SharePayload, target?: ShareTarget): Promise<ShareResult> {
+    const normalizedPayload = this._ensureShareText(payload);
+
     if (!payload.text && !payload.url) {
       return {
         success: false,
@@ -79,26 +83,28 @@ export class ShareService {
       return this.shareToTarget(payload, target);
     }
 
-    const nativeResult = await this.tryNativeShare(payload);
+    const nativeResult = await this.tryNativeShare(normalizedPayload);
     if (nativeResult.success) {
       return nativeResult;
     }
 
-    return this._showShareDialog(payload);
+    return this._showShareDialog(normalizedPayload);
   }
 
   /**
    * Share to a specific target (public API for dialog component).
    */
   async shareToTarget(payload: SharePayload, target: ShareTarget): Promise<ShareResult> {
+    const normalized = this._ensureShareText(payload);
+
     try {
       switch (target) {
         case 'native':
-          return this.tryNativeShare(payload);
+          return this.tryNativeShare(normalized);
         case 'clipboard-text':
           return this.copyToClipboard(this.formatTextForClipboard(payload), 'Text');
         default:
-          return this._openShareUrl(payload, target);
+          return this._openShareUrl(normalized, target);
       }
     } catch (error) {
       return {
@@ -114,14 +120,16 @@ export class ShareService {
    * Public API for dialog component.
    */
   async tryNativeShare(payload: SharePayload): Promise<ShareResult> {
+    const normalized = this._ensureShareText(payload);
+
     const capacitorShare = await this._getCapacitorSharePlugin();
     if (capacitorShare) {
       try {
         await capacitorShare.share({
-          title: payload.title,
-          text: payload.text,
-          url: payload.url,
-          files: payload.files,
+          title: normalized.title,
+          text: normalized.text,
+          url: normalized.url,
+          files: normalized.files,
           dialogTitle: 'Share via',
         });
         this._snackService.open('Shared successfully!');
@@ -146,9 +154,9 @@ export class ShareService {
         const win = window as any;
         if (win.Capacitor?.Plugins?.Share) {
           await win.Capacitor.Plugins.Share.share({
-            title: payload.title,
-            text: payload.text,
-            url: payload.url,
+            title: normalized.title,
+            text: normalized.text,
+            url: normalized.url,
             dialogTitle: 'Share via',
           });
           this._snackService.open('Shared successfully!');
@@ -166,9 +174,9 @@ export class ShareService {
     if (typeof navigator !== 'undefined' && 'share' in navigator) {
       try {
         await navigator.share({
-          title: payload.title,
-          text: payload.text,
-          url: payload.url,
+          title: normalized.title,
+          text: normalized.text,
+          url: normalized.url,
         });
         this._snackService.open('Shared successfully!');
         return {
@@ -233,7 +241,8 @@ export class ShareService {
     payload: SharePayload,
     target: ShareTarget,
   ): Promise<ShareResult> {
-    const url = this._buildShareUrl(payload, target);
+    const normalized = this._ensureShareText(payload);
+    const url = this._buildShareUrl(normalized, target);
 
     window.open(url, '_blank', 'noopener,noreferrer');
 
@@ -250,33 +259,45 @@ export class ShareService {
    */
   private _buildShareUrl(payload: SharePayload, target: ShareTarget): string {
     const enc = encodeURIComponent;
-    const textAndUrl = [payload.text, payload.url].filter(Boolean).join(' ');
+    const shareUrl = payload.url?.trim() || FALLBACK_SHARE_URL;
+    const baseTitle = this._getShareTitle(payload);
 
-    const urlBuilders: Record<string, () => string> = {
-      twitter: () => `https://twitter.com/intent/tweet?text=${enc(textAndUrl)}`,
-      linkedin: () =>
-        `https://www.linkedin.com/sharing/share-offsite/?url=${enc(payload.url || '')}`,
-      reddit: () =>
-        `https://www.reddit.com/submit?url=${enc(payload.url || '')}&title=${enc(payload.title || payload.text || '')}`,
-      facebook: () =>
-        `https://www.facebook.com/sharer/sharer.php?u=${enc(payload.url || '')}`,
-      whatsapp: () => `https://wa.me/?text=${enc(textAndUrl)}`,
-      telegram: () =>
-        `https://t.me/share/url?url=${enc(payload.url || '')}&text=${enc(payload.text || '')}`,
-      email: () =>
-        `mailto:?subject=${enc(payload.title || 'Check this out')}&body=${enc(textAndUrl)}`,
-      mastodon: () => {
+    const providerText = this._buildProviderText(payload, target);
+    const providerTitle = this._buildProviderTitle(baseTitle, target);
+    const inlineText = this._inlineShareText(providerText || providerTitle);
+
+    const encodedUrl = enc(shareUrl);
+    const encodedText = enc(providerText || providerTitle || shareUrl);
+    const encodedInline = enc(inlineText || providerTitle || shareUrl);
+    const encodedTitle = enc(providerTitle || 'Check this out');
+
+    switch (target) {
+      case 'twitter':
+        return `https://twitter.com/intent/tweet?text=${encodedInline}`;
+      case 'linkedin':
+        // LinkedIn ignores summary/message params in the modern share dialog (policy
+        // to prevent prefilled spam). We still pass summary for legacy/preview rendering.
+        return `https://www.linkedin.com/shareArticle?mini=true&url=${encodedUrl}&title=${encodedTitle}&summary=${encodedText}`;
+      case 'reddit':
+        // New reddit drops text params. The legacy reddit (old.reddit.com) still honors
+        // them so we point there for best-effort prefill.
+        return `https://old.reddit.com/submit?title=${encodedTitle}&kind=self&text=${encodedText}`;
+      case 'facebook':
+        // Facebook ignores prefilled body text since 2018. quote= is preserved as a caption.
+        return `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedText}`;
+      case 'whatsapp':
+        return `https://wa.me/?text=${this._encodeForWhatsApp(providerText || providerTitle || shareUrl)}`;
+      case 'telegram':
+        return `https://t.me/share/url?url=${encodedUrl}&text=${enc(providerText || providerTitle || shareUrl)}`;
+      case 'email':
+        return `mailto:?subject=${encodedTitle}&body=${encodedText}`;
+      case 'mastodon': {
         const instance = 'mastodon.social';
-        return `https://${instance}/share?text=${enc(textAndUrl)}`;
-      },
-    };
-
-    const builder = urlBuilders[target];
-    if (!builder) {
-      throw new Error(`Unknown share target: ${target}`);
+        return `https://${instance}/share?text=${enc(providerText || shareUrl)}`;
+      }
+      default:
+        throw new Error(`Unknown share target: ${target}`);
     }
-
-    return builder();
   }
 
   /**
@@ -413,6 +434,187 @@ export class ShareService {
         color: '#6364FF',
       },
     ];
+  }
+
+  private _ensureShareText(payload: SharePayload): SharePayload {
+    const existingText = typeof payload.text === 'string' ? payload.text.trim() : '';
+    if (existingText.length > 0) {
+      if (payload.text === existingText) {
+        return payload;
+      }
+      return {
+        ...payload,
+        text: existingText,
+      };
+    }
+
+    const fallbackParts: string[] = [];
+    const title = payload.title?.trim();
+    if (title) {
+      fallbackParts.push(title);
+    }
+
+    const url = payload.url?.trim();
+    if (url) {
+      fallbackParts.push(url);
+    }
+
+    const fallbackText = fallbackParts.join('\n\n').trim();
+    if (!fallbackText) {
+      return payload;
+    }
+
+    return {
+      ...payload,
+      text: fallbackText,
+    };
+  }
+
+  private _buildShareText(payload: SharePayload): string {
+    const text = payload.text?.trim() ?? '';
+    const url = payload.url?.trim() ?? '';
+
+    if (!text && !url) {
+      return '';
+    }
+
+    if (!url) {
+      return text;
+    }
+
+    if (!text) {
+      return url;
+    }
+
+    if (text.includes(url)) {
+      return text;
+    }
+
+    return `${text}\n\n${url}`;
+  }
+
+  private _cleanupText(text: string): string {
+    if (!text) {
+      return '';
+    }
+
+    const lines = text.split(/\r?\n/);
+    const cleaned: string[] = [];
+    let pendingBlank = false;
+
+    for (const rawLine of lines) {
+      const normalizedLine = rawLine.replace(/\s{2,}/g, ' ').trim();
+      if (!normalizedLine) {
+        if (cleaned.length > 0) {
+          pendingBlank = true;
+        }
+        continue;
+      }
+      if (pendingBlank) {
+        cleaned.push('');
+        pendingBlank = false;
+      }
+      cleaned.push(normalizedLine);
+    }
+
+    return cleaned.join('\n').trim();
+  }
+
+  private _inlineShareText(text: string): string {
+    const normalized = this._cleanupText(text);
+    if (!normalized) {
+      return '';
+    }
+
+    return normalized
+      .split(/\r?\n+/)
+      .map((segment) => segment.trim())
+      .filter(Boolean)
+      .join(' ')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+  }
+
+  private _getShareTitle(payload: SharePayload): string {
+    const title = payload.title?.trim();
+    if (title) {
+      return title.slice(0, 300);
+    }
+
+    const text = payload.text?.trim();
+    if (text) {
+      const firstNonEmptyLine = text
+        .split(/\r?\n+/)
+        .map((line) => line.trim())
+        .find((line) => line.length > 0);
+      if (firstNonEmptyLine) {
+        return firstNonEmptyLine.slice(0, 300);
+      }
+    }
+
+    const url = payload.url?.trim();
+    if (url) {
+      return url;
+    }
+
+    return 'Check this out';
+  }
+
+  private _buildProviderText(payload: SharePayload, provider: ShareTarget): string {
+    let text = this._cleanupText(this._buildShareText(payload));
+
+    if (!text) {
+      return payload.url?.trim() || '';
+    }
+
+    if (provider !== 'twitter' && provider !== 'mastodon') {
+      text = this._cleanupText(this._stripHashtags(text));
+    }
+
+    if (provider === 'whatsapp') {
+      text = this._cleanupText(this._stripEmojis(text));
+    }
+
+    return text || payload.url?.trim() || '';
+  }
+
+  private _buildProviderTitle(baseTitle: string, provider: ShareTarget): string {
+    let title = baseTitle?.trim() || '';
+
+    if (!title) {
+      return title;
+    }
+
+    if (provider !== 'twitter' && provider !== 'mastodon') {
+      title = this._stripHashtags(title);
+    }
+
+    if (provider === 'whatsapp') {
+      title = this._stripEmojis(title);
+    }
+
+    return title.replace(/\s{2,}/g, ' ').trim();
+  }
+
+  private _encodeForWhatsApp(text: string): string {
+    const cleaned = this._cleanupText(text);
+    return encodeURIComponent(cleaned || FALLBACK_SHARE_URL);
+  }
+
+  private _stripHashtags(text: string): string {
+    if (!text) {
+      return '';
+    }
+
+    return text.replace(/(^|[\s])#[\p{L}\p{N}_-]+/gu, (match, prefix) => prefix);
+  }
+
+  private _stripEmojis(text: string): string {
+    if (!text) {
+      return '';
+    }
+
+    return text.replace(/\p{Extended_Pictographic}|\uFE0F|\uFE0E|\u200D/gu, '');
   }
 
   private async _detectShareSupport(): Promise<ShareSupport> {
