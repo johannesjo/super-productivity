@@ -165,7 +165,7 @@ export class ShareFormatter {
     if (data.detailedMetrics) {
       const dm = data.detailedMetrics;
 
-      parts.push(`⏱️  Time Spent: ${msToString(data.totalTimeSpent)}`);
+      parts.push(`⏱️ Time Spent: ${msToString(data.totalTimeSpent)}`);
       if (dm.timeEstimate) {
         parts.push(`📋 Time Estimated: ${msToString(dm.timeEstimate)}`);
       }

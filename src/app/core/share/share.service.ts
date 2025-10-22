@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Capacitor } from '@capacitor/core';
-import { Share as CapacitorShare } from '@capacitor/share';
 import { IS_ELECTRON } from '../../app.constants';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { SnackService } from '../snack/snack.service';
@@ -136,9 +135,10 @@ export class ShareService {
       }
     }
 
-    if (await this._isCapacitorShareAvailable()) {
+    const capacitorShare = await this._getCapacitorSharePlugin();
+    if (capacitorShare) {
       try {
-        await CapacitorShare.share({
+        await capacitorShare.share({
           title: payload.title,
           text: payload.text,
           url: payload.url,
@@ -216,6 +216,7 @@ export class ShareService {
    */
   private async _showShareDialog(payload: SharePayload): Promise<ShareResult> {
     try {
+      // Import dialog component dynamically to avoid circular dependencies
       const { DialogShareComponent } = await import(
         './dialog-share/dialog-share.component'
       );
@@ -467,16 +468,22 @@ export class ShareService {
   }
 
   private async _isCapacitorShareAvailable(): Promise<boolean> {
-    if (!Capacitor.isNativePlatform()) {
-      return false;
+    const sharePlugin = await this._getCapacitorSharePlugin();
+    return !!sharePlugin;
+  }
+
+  private async _getCapacitorSharePlugin(): Promise<any | null> {
+    if (!Capacitor.isNativePlatform() || typeof window === 'undefined') {
+      return null;
     }
 
-    try {
-      const canShare = await CapacitorShare.canShare();
-      return !!canShare?.value;
-    } catch (error) {
-      console.warn('Capacitor Share.canShare failed:', error);
-      return false;
+    const win = window as any;
+    const sharePlugin = win.Capacitor?.Plugins?.Share;
+
+    if (sharePlugin && typeof sharePlugin.share === 'function') {
+      return sharePlugin;
     }
+
+    return null;
   }
 }

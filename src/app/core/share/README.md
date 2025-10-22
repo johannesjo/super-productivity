@@ -156,10 +156,10 @@ src/app/core/share/
 ├── share-formatter.spec.ts        # Formatter tests
 ├── share.service.ts               # Main share service
 ├── share.service.spec.ts          # Service tests
-├── share-dialog/                  # Material dialog component
-│   ├── share-dialog.component.ts
-│   ├── share-dialog.component.html
-│   └── share-dialog.component.scss
+├── dialog-share/                  # Material dialog component
+│   ├── dialog-share.component.ts
+│   ├── dialog-share.component.html
+│   └── dialog-share.component.scss
 └── share-button/                  # Reusable button component
     └── share-button.component.ts
 ```
@@ -241,7 +241,7 @@ When adding new share targets:
 
 1. Add target to `ShareTarget` type in `share.model.ts`
 2. Add URL builder to `_buildShareUrl()` in `share.service.ts`
-3. Add button config to `shareTargets` array in `share-dialog.component.ts`
+3. Add button config to `shareTargets` array in `dialog-share.component.ts`
 4. Add tests in `share.service.spec.ts`
 
 ## License

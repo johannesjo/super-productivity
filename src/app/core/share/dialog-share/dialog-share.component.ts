@@ -18,9 +18,9 @@ interface ShareTargetButton {
 }
 
 @Component({
-  selector: 'share-dialog',
-  templateUrl: './share-dialog.component.html',
-  styleUrls: ['./share-dialog.component.scss'],
+  selector: 'dialog-share',
+  templateUrl: './dialog-share.component.html',
+  styleUrls: ['./dialog-share.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
@@ -32,8 +32,8 @@ interface ShareTargetButton {
     FormsModule,
   ],
 })
-export class ShareDialogComponent {
-  private _dialogRef = inject(MatDialogRef<ShareDialogComponent>);
+export class DialogShareComponent {
+  private _dialogRef = inject(MatDialogRef<DialogShareComponent>);
   private _shareService = inject(ShareService);
   readonly data = inject<ShareDialogOptions>(MAT_DIALOG_DATA);
 
@@ -71,17 +71,6 @@ export class ShareDialogComponent {
   async shareNative(): Promise<void> {
     const result: ShareResult = await this._shareService['_tryNativeShare'](
       this.data.payload,
-    );
-
-    if (result.success) {
-      this._dialogRef.close(result);
-    }
-  }
-
-  async copyLink(): Promise<void> {
-    const result: ShareResult = await this._shareService['_copyToClipboard'](
-      this.data.payload.url || '',
-      'Link',
     );
 
     if (result.success) {

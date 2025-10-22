@@ -21,6 +21,24 @@ import { SharePayload } from '../share.model';
       <mat-icon>share</mat-icon>
     </button>
   `,
+  styles: [
+    `
+      :host {
+        display: inline-flex;
+      }
+
+      button {
+        opacity: 0.7;
+        transition: opacity 120ms ease-in-out;
+      }
+
+      button:hover,
+      button:focus-visible,
+      button:active {
+        opacity: 1;
+      }
+    `,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MatButtonModule, MatIconModule, MatTooltipModule],
 })
