@@ -24,7 +24,6 @@ export type ShareTarget =
   | 'telegram'
   | 'email'
   | 'mastodon'
-  | 'clipboard-link'
   | 'clipboard-text'
   | 'native';
 

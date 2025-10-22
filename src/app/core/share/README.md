@@ -122,7 +122,6 @@ Supported share targets:
 - `telegram` - Telegram
 - `email` - Email
 - `mastodon` - Mastodon (with custom instance support)
-- `clipboard-link` - Copy link to clipboard
 - `clipboard-text` - Copy formatted text to clipboard
 - `native` - Use native OS share sheet
 

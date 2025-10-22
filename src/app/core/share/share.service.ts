@@ -95,8 +95,6 @@ export class ShareService {
       switch (target) {
         case 'native':
           return this.tryNativeShare(payload);
-        case 'clipboard-link':
-          return this.copyToClipboard(payload.url || '', 'Link');
         case 'clipboard-text':
           return this.copyToClipboard(this.formatTextForClipboard(payload), 'Text');
         default:
@@ -290,7 +288,7 @@ export class ShareService {
       this._snackService.open(`${label} copied to clipboard!`);
       return {
         success: true,
-        target: label === 'Link' ? 'clipboard-link' : 'clipboard-text',
+        target: 'clipboard-text',
       };
     } catch (error) {
       try {
@@ -306,7 +304,7 @@ export class ShareService {
         this._snackService.open(`${label} copied to clipboard!`);
         return {
           success: true,
-          target: label === 'Link' ? 'clipboard-link' : 'clipboard-text',
+          target: 'clipboard-text',
         };
       } catch (fallbackError) {
         return {
