@@ -25,6 +25,14 @@
 }
 
 <button
+  (click)="copyTasksAsMarkdown()"
+  mat-menu-item
+>
+  <mat-icon>content_copy</mat-icon>
+  <span class="text">{{ T.MH.COPY_TASK_LIST_MARKDOWN | translate }}</span>
+</button>
+
+<button
   [routerLink]="[base, contextId, 'settings']"
   mat-menu-item
 >

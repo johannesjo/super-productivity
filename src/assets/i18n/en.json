@@ -1937,6 +1937,7 @@
   },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Copied to clipboard",
+    "NO_TASKS_TO_COPY": "No tasks to copy",
     "ERR_COMPRESSION": "Error for compression interface",
     "FILE_DOWNLOADED": "{{fileName}} downloaded",
     "FILE_DOWNLOADED_BTN": "Open folder",
@@ -2003,6 +2004,7 @@
     "TOGGLE_SHOW_NOTES": "Show/Hide Project Notes",
     "TOGGLE_TRACK_TIME": "Start/Stop tracking time",
     "TRIGGER_SYNC": "Sync!",
+    "COPY_TASK_LIST_MARKDOWN": "Copy to Clipboard",
     "WORKLOG": "Worklog",
     "SIDE_PANEL_MENU": "Side Panel Menu"
   },

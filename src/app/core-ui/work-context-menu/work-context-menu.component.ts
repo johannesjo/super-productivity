@@ -14,6 +14,8 @@ import { MatMenuItem } from '@angular/material/menu';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { INBOX_PROJECT } from '../../features/project/project.const';
+import { SnackService } from '../../core/snack/snack.service';
+import { WorkContextMarkdownService } from '../../features/work-context/work-context-markdown.service';
 
 @Component({
   selector: 'work-context-menu',
@@ -29,6 +31,8 @@ export class WorkContextMenuComponent {
   private _projectService = inject(ProjectService);
   private _workContextService = inject(WorkContextService);
   private _router = inject(Router);
+  private _snackService = inject(SnackService);
+  private _markdownService = inject(WorkContextMarkdownService);
 
   // TODO: Skipped for migration because:
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
@@ -94,4 +98,26 @@ export class WorkContextMenuComponent {
   }
 
   protected readonly INBOX_PROJECT = INBOX_PROJECT;
+
+  async copyTasksAsMarkdown(): Promise<void> {
+    const result = await this._markdownService.copyTasksAsMarkdown(
+      this.contextId,
+      this.isForProject,
+    );
+
+    if (result === 'copied') {
+      this._snackService.open(T.GLOBAL_SNACK.COPY_TO_CLIPPBOARD);
+      return;
+    }
+
+    if (result === 'empty') {
+      this._snackService.open(T.GLOBAL_SNACK.NO_TASKS_TO_COPY);
+      return;
+    }
+
+    this._snackService.open({
+      msg: 'Failed to copy to clipboard. Please copy manually.',
+      type: 'ERROR',
+    });
+  }
 }
