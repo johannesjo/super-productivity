@@ -22,6 +22,7 @@ import { FormlyMatSliderModule } from '@ngx-formly/material/slider';
 import { FormlyTagSelectionComponent } from './formly-tag-selection/formly-tag-selection.component';
 import { FormlyBtnComponent } from './formly-button/formly-btn.component';
 import { FormlyImageInputComponent } from './formly-image-input/formly-image-input.component';
+import { ColorInputComponent } from '../features/config/color-input/color-input.component';
 
 @NgModule({
   imports: [
@@ -63,6 +64,10 @@ import { FormlyImageInputComponent } from './formly-image-input/formly-image-inp
           component: IconInputComponent,
           extends: 'input',
           wrappers: ['form-field'],
+        },
+        {
+          name: 'color',
+          component: ColorInputComponent,
         },
         {
           name: 'project-select',
