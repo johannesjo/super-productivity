@@ -19,6 +19,18 @@ export interface WorkSummaryData {
   topTasks?: Array<{ title: string; timeSpent: number }>;
   /** Optional: Project name */
   projectName?: string;
+  /** Optional: Detailed metrics table data */
+  detailedMetrics?: {
+    timeEstimate?: number;
+    totalTasks?: number;
+    daysWorked?: number;
+    avgTasksPerDay?: number;
+    avgBreakNr?: number;
+    avgTimeSpentOnDay?: number;
+    avgTimeSpentOnTask?: number;
+    avgTimeSpentOnTaskIncludingSubTasks?: number;
+    avgBreakTime?: number;
+  };
 }
 
 /**
@@ -136,24 +148,61 @@ export class ShareFormatter {
   ): string {
     const parts: string[] = [];
 
-    // Header
-    if (data.dateRange) {
-      parts.push(
-        `📊 My productivity from ${data.dateRange.start} to ${data.dateRange.end}:`,
-      );
-    } else {
-      parts.push('📊 My productivity summary:');
+    // Header with project name
+    let header = '📊 ';
+    if (data.projectName) {
+      header += `${data.projectName} - `;
     }
+    if (data.dateRange) {
+      header += `${data.dateRange.start} to ${data.dateRange.end}`;
+    } else {
+      header += 'My productivity summary';
+    }
+    parts.push(header);
+    parts.push('');
 
-    // Main stats
-    const timeStr = msToString(data.totalTimeSpent);
-    const clockStr = msToClockString(data.totalTimeSpent);
-    parts.push(`⏱️ ${timeStr} (${clockStr}) of focused work`);
-    parts.push(`✅ ${data.tasksCompleted} tasks completed`);
+    // Detailed metrics table
+    if (data.detailedMetrics) {
+      const dm = data.detailedMetrics;
+
+      parts.push(`⏱️  Time Spent: ${msToString(data.totalTimeSpent)}`);
+      if (dm.timeEstimate) {
+        parts.push(`📋 Time Estimated: ${msToString(dm.timeEstimate)}`);
+      }
+      parts.push(
+        `✅ Tasks Done: ${data.tasksCompleted}${dm.totalTasks ? ` / ${dm.totalTasks}` : ''}`,
+      );
+
+      if (dm.daysWorked) {
+        parts.push(`📅 Days Worked: ${dm.daysWorked}`);
+      }
+      if (dm.avgTasksPerDay) {
+        parts.push(`📊 Avg Tasks/Day: ${dm.avgTasksPerDay.toFixed(1)}`);
+      }
+      if (dm.avgBreakNr !== undefined) {
+        parts.push(`☕ Avg Breaks/Day: ${dm.avgBreakNr.toFixed(1)}`);
+      }
+      if (dm.avgTimeSpentOnDay) {
+        parts.push(`⏳ Avg Time/Day: ${msToString(dm.avgTimeSpentOnDay)}`);
+      }
+      if (dm.avgTimeSpentOnTask) {
+        parts.push(`⚡ Avg Time/Task: ${msToString(dm.avgTimeSpentOnTask)}`);
+      }
+      if (dm.avgBreakTime) {
+        parts.push(`🧘 Avg Break Time: ${msToString(dm.avgBreakTime)}`);
+      }
+    } else {
+      // Simple summary if no detailed metrics
+      const timeStr = msToString(data.totalTimeSpent);
+      const clockStr = msToClockString(data.totalTimeSpent);
+      parts.push(`⏱️ ${timeStr} (${clockStr}) of focused work`);
+      parts.push(`✅ ${data.tasksCompleted} tasks completed`);
+    }
 
     // Top tasks (if provided and not too long)
     if (data.topTasks && data.topTasks.length > 0 && !options.maxLength) {
-      parts.push('\nTop tasks:');
+      parts.push('');
+      parts.push('Top tasks:');
       data.topTasks.slice(0, 3).forEach((task) => {
         const taskTime = msToString(task.timeSpent);
         parts.push(`• ${task.title} (${taskTime})`);

@@ -15,6 +15,18 @@ h3 {
   text-align: center;
 }
 
+.metrics-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+
+  h1 {
+    margin: 0;
+  }
+}
+
 table {
   tr {
     th {

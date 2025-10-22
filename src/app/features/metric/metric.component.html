@@ -4,12 +4,15 @@
       class="basic-stats"
       [@fade]
     >
-      <h1
-        class="mat-h1"
-        style="text-align: center"
-      >
-        {{ T.PM.TITLE | translate }}
-      </h1>
+      <div class="metrics-header">
+        <h1 class="mat-h1">
+          {{ T.PM.TITLE | translate }}
+        </h1>
+        <share-button
+          [payload]="sharePayload()"
+          [tooltip]="'Share your productivity stats'"
+        />
+      </div>
       <!--  <h2>Basic Metrics</h2>-->
       <p>
         <i>{{ sm.start }} – {{ sm.end }}</i>
