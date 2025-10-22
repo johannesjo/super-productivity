@@ -24,13 +24,9 @@
       <div class="heatmap-grid">
         <div class="day-labels">
           <div class="month-spacer"></div>
-          <div class="day-label">Sun</div>
-          <div class="day-label">Mon</div>
-          <div class="day-label">Tue</div>
-          <div class="day-label">Wed</div>
-          <div class="day-label">Thu</div>
-          <div class="day-label">Fri</div>
-          <div class="day-label">Sat</div>
+          @for (label of dayLabels(); track $index) {
+            <div class="day-label">{{ label }}</div>
+          }
         </div>
 
         <div class="scrollable-content">

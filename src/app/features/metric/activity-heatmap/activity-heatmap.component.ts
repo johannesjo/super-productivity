@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { WorklogService } from '../../worklog/worklog.service';
 import { WorkContextService } from '../../work-context/work-context.service';
@@ -14,6 +20,7 @@ import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { SnackService } from '../../../core/snack/snack.service';
+import { GlobalConfigService } from '../../config/global-config.service';
 
 interface DayData {
   date: Date;
@@ -40,6 +47,7 @@ export class ActivityHeatmapComponent {
   private readonly _taskService = inject(TaskService);
   private readonly _taskArchiveService = inject(TaskArchiveService);
   private readonly _snackService = inject(SnackService);
+  private readonly _globalConfigService = inject(GlobalConfigService);
 
   T: typeof T = T;
   weeks: WeekData[] = [];
@@ -49,11 +57,20 @@ export class ActivityHeatmapComponent {
     { initialValue: '' },
   );
 
-  // Compute heatmap data
-  // NOTE: Reacts to work context changes
-  // - For TODAY tag: shows ALL tasks from all projects/tags (current + archived)
-  // - For other tags/projects: shows only tasks from that context
-  heatmapData = toSignal(
+  // Get first day of week setting (0 = Sunday, 1 = Monday, etc.)
+  private readonly _firstDayOfWeek = computed(() => {
+    return this._globalConfigService.misc()?.firstDayOfWeek ?? 1;
+  });
+
+  // Day labels adjusted for first day of week
+  readonly dayLabels = computed(() => {
+    const allDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const firstDay = this._firstDayOfWeek();
+    return [...allDays.slice(firstDay), ...allDays.slice(0, firstDay)];
+  });
+
+  // Raw data signals
+  private readonly _rawHeatmapData = toSignal(
     this._workContextService.activeWorkContext$.pipe(
       switchMap((context) => {
         // Special case: TODAY tag shows ALL data from all tasks
@@ -72,6 +89,24 @@ export class ActivityHeatmapComponent {
     ),
     { initialValue: null },
   );
+
+  // Compute heatmap data - reacts to both data changes AND firstDayOfWeek setting changes
+  heatmapData = computed(() => {
+    const rawData = this._rawHeatmapData();
+    const firstDay = this._firstDayOfWeek();
+
+    if (!rawData || !rawData.dayMap) {
+      return null;
+    }
+
+    // Rebuild the weeks grid with the current firstDayOfWeek setting
+    return this._buildWeeksGrid(
+      rawData.dayMap,
+      rawData.startDate,
+      rawData.endDate,
+      firstDay,
+    );
+  });
 
   private async _loadAllTasks(): Promise<Task[]> {
     // Load both current tasks and archived tasks
@@ -96,8 +131,9 @@ export class ActivityHeatmapComponent {
   }
 
   private _buildHeatmapDataFromTasks(tasks: Task[]): {
-    weeks: WeekData[];
-    monthLabels: string[];
+    dayMap: Map<string, DayData>;
+    startDate: Date;
+    endDate: Date;
   } | null {
     const dayMap = new Map<string, DayData>();
     const now = new Date();
@@ -175,12 +211,17 @@ export class ActivityHeatmapComponent {
       }
     });
 
-    return this._buildWeeksGrid(dayMap, oneYearAgo, now);
+    return {
+      dayMap,
+      startDate: oneYearAgo,
+      endDate: now,
+    };
   }
 
   private _buildHeatmapData(worklog: any): {
-    weeks: WeekData[];
-    monthLabels: string[];
+    dayMap: Map<string, DayData>;
+    startDate: Date;
+    endDate: Date;
   } | null {
     if (!worklog) {
       return null;
@@ -267,7 +308,11 @@ export class ActivityHeatmapComponent {
       }
     });
 
-    return this._buildWeeksGrid(dayMap, oneYearAgo, now);
+    return {
+      dayMap,
+      startDate: oneYearAgo,
+      endDate: now,
+    };
   }
 
   private _getDateStr(date: Date): string {
@@ -281,15 +326,18 @@ export class ActivityHeatmapComponent {
     dayMap: Map<string, DayData>,
     startDate: Date,
     endDate: Date,
+    firstDayOfWeek: number = 0,
   ): { weeks: WeekData[]; monthLabels: string[] } {
     const weeks: WeekData[] = [];
     const monthLabels: string[] = [];
     let currentMonth = -1;
 
-    // Find the first Sunday before or on the start date
+    // Find the first day (based on firstDayOfWeek setting) before or on the start date
     const firstDay = new Date(startDate);
     const dayOfWeek = firstDay.getDay();
-    firstDay.setDate(firstDay.getDate() - dayOfWeek);
+    // Calculate days to go back to reach the first day of the week
+    const daysToGoBack = (dayOfWeek - firstDayOfWeek + 7) % 7;
+    firstDay.setDate(firstDay.getDate() - daysToGoBack);
 
     // Build weeks
     const currentDate = new Date(firstDay);
@@ -482,7 +530,7 @@ export class ActivityHeatmapComponent {
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
 
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dayNames = this.dayLabels();
     dayNames.forEach((day, i) => {
       // eslint-disable-next-line no-mixed-operators
       const y = padding + monthLabelHeight + i * (cellSize + gap) + cellSize / 2;
