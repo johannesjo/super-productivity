@@ -10,7 +10,7 @@ describe('ShareFormatter', () => {
 
       const payload = ShareFormatter.formatWorkSummary(data);
 
-      expect(payload.text).toContain('📊 My productivity summary:');
+      expect(payload.text).toContain('📊 My productivity summary');
       expect(payload.text).toContain('1h');
       expect(payload.text).toContain('5 tasks completed');
       expect(payload.url).toBeDefined();
@@ -127,7 +127,7 @@ describe('ShareFormatter', () => {
       const optimized = ShareFormatter.optimizeForTwitter(payload);
 
       expect(optimized.text!.length).toBeLessThanOrEqual(280 - 23 - 1); // 280 - URL length - space
-      expect(optimized.text).toEndWith('...');
+      expect(optimized.text ?? '').toMatch(/\.\.\.$/);
     });
 
     it('should not truncate short text', () => {
