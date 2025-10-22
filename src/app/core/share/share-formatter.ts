@@ -209,7 +209,6 @@ export class ShareFormatter {
       });
     }
 
-
     // Hashtags
     if (options.includeHashtags) {
       parts.push('\n#productivity #timetracking #SuperProductivity');

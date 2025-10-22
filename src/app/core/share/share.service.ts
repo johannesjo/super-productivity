@@ -33,7 +33,7 @@ export class ShareService {
       return 'failed';
     }
 
-    const result = await this._tryNativeShare({
+    const result = await this.tryNativeShare({
       title: title ?? undefined,
       text,
     });
@@ -77,10 +77,10 @@ export class ShareService {
     }
 
     if (target) {
-      return this._shareToTarget(payload, target);
+      return this.shareToTarget(payload, target);
     }
 
-    const nativeResult = await this._tryNativeShare(payload);
+    const nativeResult = await this.tryNativeShare(payload);
     if (nativeResult.success) {
       return nativeResult;
     }
@@ -89,20 +89,17 @@ export class ShareService {
   }
 
   /**
-   * Share to a specific target.
+   * Share to a specific target (public API for dialog component).
    */
-  private async _shareToTarget(
-    payload: SharePayload,
-    target: ShareTarget,
-  ): Promise<ShareResult> {
+  async shareToTarget(payload: SharePayload, target: ShareTarget): Promise<ShareResult> {
     try {
       switch (target) {
         case 'native':
-          return this._tryNativeShare(payload);
+          return this.tryNativeShare(payload);
         case 'clipboard-link':
-          return this._copyToClipboard(payload.url || '', 'Link');
+          return this.copyToClipboard(payload.url || '', 'Link');
         case 'clipboard-text':
-          return this._copyToClipboard(this._formatTextForClipboard(payload), 'Text');
+          return this.copyToClipboard(this.formatTextForClipboard(payload), 'Text');
         default:
           return this._openShareUrl(payload, target);
       }
@@ -117,8 +114,9 @@ export class ShareService {
 
   /**
    * Try to use native share (Electron, Android, Web Share API).
+   * Public API for dialog component.
    */
-  private async _tryNativeShare(payload: SharePayload): Promise<ShareResult> {
+  async tryNativeShare(payload: SharePayload): Promise<ShareResult> {
     if (IS_ELECTRON && typeof window.ea?.shareNative === 'function') {
       try {
         const result = await window.ea.shareNative(payload);
@@ -305,9 +303,9 @@ export class ShareService {
   }
 
   /**
-   * Copy text to clipboard.
+   * Copy text to clipboard (public API for dialog component).
    */
-  private async _copyToClipboard(text: string, label: string): Promise<ShareResult> {
+  async copyToClipboard(text: string, label: string): Promise<ShareResult> {
     try {
       await navigator.clipboard.writeText(text);
       this._snackService.open(`${label} copied to clipboard!`);
@@ -341,9 +339,9 @@ export class ShareService {
   }
 
   /**
-   * Format payload as plain text for clipboard.
+   * Format payload as plain text for clipboard (public API for dialog component).
    */
-  private _formatTextForClipboard(payload: SharePayload): string {
+  formatTextForClipboard(payload: SharePayload): string {
     const parts: string[] = [];
 
     if (payload.title) {

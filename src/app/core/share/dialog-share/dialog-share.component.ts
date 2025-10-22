@@ -58,10 +58,7 @@ export class DialogShareComponent {
       payload = ShareFormatter.optimizeForTwitter(payload);
     }
 
-    const result: ShareResult = await this._shareService['_shareToTarget'](
-      payload,
-      target,
-    );
+    const result: ShareResult = await this._shareService.shareToTarget(payload, target);
 
     if (result.success) {
       this._dialogRef.close(result);
@@ -69,7 +66,7 @@ export class DialogShareComponent {
   }
 
   async shareNative(): Promise<void> {
-    const result: ShareResult = await this._shareService['_tryNativeShare'](
+    const result: ShareResult = await this._shareService.tryNativeShare(
       this.data.payload,
     );
 
@@ -79,11 +76,8 @@ export class DialogShareComponent {
   }
 
   async copyText(): Promise<void> {
-    const text = this._shareService['_formatTextForClipboard'](this.data.payload);
-    const result: ShareResult = await this._shareService['_copyToClipboard'](
-      text,
-      'Text',
-    );
+    const text = this._shareService.formatTextForClipboard(this.data.payload);
+    const result: ShareResult = await this._shareService.copyToClipboard(text, 'Text');
 
     if (result.success) {
       this._dialogRef.close(result);

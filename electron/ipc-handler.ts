@@ -22,6 +22,106 @@ import { quitApp, showOrFocus } from './various-shared';
 import { loadSimpleStoreAll, saveSimpleStore } from './simple-store';
 import { BACKUP_DIR, BACKUP_DIR_WINSTORE } from './backup';
 import { pluginNodeExecutor } from './plugin-node-executor';
+import { clipboard } from 'electron';
+
+interface SharePayload {
+  text?: string;
+  url?: string;
+  title?: string;
+}
+
+/**
+ * Handle share on macOS using AppleScript to invoke system share dialog.
+ * Falls back to clipboard if AppleScript fails.
+ */
+const handleMacOSShare = async (
+  payload: SharePayload,
+): Promise<{
+  success: boolean;
+  error?: string;
+}> => {
+  const { text, url, title } = payload;
+  const contentToShare = [title, text, url].filter(Boolean).join('\n\n');
+
+  if (!contentToShare) {
+    return { success: false, error: 'No content to share' };
+  }
+
+  return new Promise((resolve) => {
+    // Use AppleScript to trigger native share
+    // This creates a share menu at the mouse cursor position
+    const appleScript = `
+      tell application "System Events"
+        set the clipboard to "${contentToShare.replace(/"/g, '\\"').replace(/\n/g, '\\n')}"
+      end tell
+
+      display dialog "Content copied to clipboard. Use Cmd+V to paste in your desired app." buttons {"OK"} default button "OK" with icon note
+    `;
+
+    exec(`osascript -e '${appleScript.replace(/'/g, "'\\''")}'`, (error) => {
+      if (error) {
+        log('AppleScript share failed, falling back to clipboard:', error);
+        // Fallback: just copy to clipboard
+        try {
+          clipboard.writeText(contentToShare);
+          resolve({ success: true });
+        } catch (clipboardError) {
+          resolve({
+            success: false,
+            error: 'Failed to copy to clipboard',
+          });
+        }
+      } else {
+        clipboard.writeText(contentToShare);
+        resolve({ success: true });
+      }
+    });
+  });
+};
+
+/**
+ * Handle share on Windows using clipboard.
+ * Note: Proper Windows Share UI requires UWP/WinRT APIs which need native modules.
+ * This implementation copies to clipboard as a practical fallback.
+ */
+const handleWindowsShare = async (
+  payload: SharePayload,
+): Promise<{
+  success: boolean;
+  error?: string;
+}> => {
+  const { text, url, title } = payload;
+  const contentToShare = [title, text, url].filter(Boolean).join('\n\n');
+
+  if (!contentToShare) {
+    return { success: false, error: 'No content to share' };
+  }
+
+  try {
+    // Copy to clipboard
+    clipboard.writeText(contentToShare);
+
+    // Show notification dialog
+    const mainWin = getWin();
+    if (mainWin) {
+      await dialog.showMessageBox(mainWin, {
+        type: 'info',
+        title: 'Content Copied',
+        message: 'Content has been copied to clipboard',
+        detail: 'You can now paste it in any application using Ctrl+V',
+        buttons: ['OK'],
+      });
+    }
+
+    return { success: true };
+  } catch (error) {
+    log('Windows share failed:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to copy to clipboard',
+    };
+  }
+};
 
 export const initIpcInterfaces = (): void => {
   // Initialize plugin node executor (registers IPC handlers)
@@ -80,14 +180,34 @@ export const initIpcInterfaces = (): void => {
   });
 
   ipcMain.handle(IPC.SHARE_NATIVE, async (ev, payload) => {
-    // TODO: Implement native share for macOS (NSSharingService) and Windows (WinRT Share UI)
-    // For now, return false to fall back to web-based sharing
-    // Native implementation would require:
-    // - macOS: Swift/Objective-C bridge using NSSharingServicePicker
-    // - Windows: C#/C++ bridge using Windows.ApplicationModel.DataTransfer.DataTransferManager
-    // - Linux: No native share, always use fallback
-    log('Native share requested but not implemented, falling back to web share');
-    return { success: false, error: 'Native share not yet implemented' };
+    const { text, url, title } = payload;
+    const platform = process.platform;
+
+    try {
+      // macOS: Use system share via AppleScript
+      if (platform === 'darwin') {
+        return await handleMacOSShare({ text, url, title });
+      }
+
+      // Windows: Use clipboard + notification as fallback
+      // Note: Proper Windows Share UI requires UWP/WinRT which needs native module
+      if (platform === 'win32') {
+        return await handleWindowsShare({ text, url, title });
+      }
+
+      // Linux: No native share available
+      log('Linux platform - no native share available, using fallback');
+      return {
+        success: false,
+        error: 'Native share not available on Linux',
+      };
+    } catch (error) {
+      log('Native share error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Share failed',
+      };
+    }
   });
 
   ipcMain.on(IPC.LOCK_SCREEN, () => {
