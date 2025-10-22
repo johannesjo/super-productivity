@@ -40,6 +40,10 @@ export class IconInputComponent extends FieldType<FormlyFieldConfig> {
     return this.to.type || 'text';
   }
 
+  ngOnInit() {
+    this.isEmoji.set(containsEmoji(this.formControl.value))
+  }
+
   trackByIndex(i: number, p: any): number {
     return i;
   }
