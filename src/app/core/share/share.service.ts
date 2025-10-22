@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Capacitor } from '@capacitor/core';
-import { IS_ELECTRON } from '../../app.constants';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { SnackService } from '../snack/snack.service';
 import { SharePayload, ShareResult, ShareTarget, ShareTargetConfig } from './share.model';
@@ -113,26 +112,10 @@ export class ShareService {
   }
 
   /**
-   * Try to use native share (Electron, Android, Web Share API).
+   * Try to use native share (Android, Web Share API).
    * Public API for dialog component.
    */
   async tryNativeShare(payload: SharePayload): Promise<ShareResult> {
-    if (IS_ELECTRON && typeof window.ea?.shareNative === 'function') {
-      try {
-        const result = await window.ea.shareNative(payload);
-        if (result.success) {
-          this._snackService.open('Shared successfully!');
-          return {
-            success: true,
-            usedNative: true,
-            target: 'native',
-          };
-        }
-      } catch (error) {
-        console.warn('Electron native share failed:', error);
-      }
-    }
-
     const capacitorShare = await this._getCapacitorSharePlugin();
     if (capacitorShare) {
       try {
@@ -254,11 +237,7 @@ export class ShareService {
   ): Promise<ShareResult> {
     const url = this._buildShareUrl(payload, target);
 
-    if (IS_ELECTRON && window.ea?.openExternalUrl) {
-      window.ea.openExternalUrl(url);
-    } else {
-      window.open(url, '_blank', 'noopener,noreferrer');
-    }
+    window.open(url, '_blank', 'noopener,noreferrer');
 
     this._snackService.open('Opening share window...');
 
@@ -367,10 +346,6 @@ export class ShareService {
    * Check if native/system share is available on current platform.
    */
   private async _isSystemShareAvailable(): Promise<boolean> {
-    if (IS_ELECTRON && typeof window.ea?.shareNative === 'function') {
-      return true;
-    }
-
     if (await this._isCapacitorShareAvailable()) {
       return true;
     }
@@ -443,10 +418,6 @@ export class ShareService {
   }
 
   private async _detectShareSupport(): Promise<ShareSupport> {
-    if (IS_ELECTRON && typeof window.ea?.shareNative === 'function') {
-      return 'native';
-    }
-
     if (await this._isCapacitorShareAvailable()) {
       return 'native';
     }
