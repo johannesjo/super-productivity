@@ -1,6 +1,11 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { Capacitor } from '@capacitor/core';
-import { Share } from '@capacitor/share';
+import { Share as CapacitorShare } from '@capacitor/share';
+import { IS_ELECTRON } from '../../app.constants';
+import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
+import { SnackService } from '../snack/snack.service';
+import { SharePayload, ShareResult, ShareTarget, ShareTargetConfig } from './share.model';
 
 export type ShareOutcome = 'shared' | 'cancelled' | 'unavailable' | 'failed';
 export type ShareSupport = 'native' | 'web' | 'none';
@@ -10,56 +15,43 @@ interface ShareParams {
   text: string;
 }
 
+/**
+ * Share service for multi-platform content sharing.
+ * Supports Electron (Desktop), Capacitor (Android), and Web (PWA/Browser).
+ * Provides a legacy shareText API that only triggers native/web share without UI fallbacks.
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class ShareService {
   private _shareSupportPromise?: Promise<ShareSupport>;
 
+  private _snackService = inject(SnackService);
+  private _matDialog = inject(MatDialog);
+
   async shareText({ title, text }: ShareParams): Promise<ShareOutcome> {
-    if (!text) {
+    if (!text || typeof window === 'undefined') {
       return 'failed';
     }
 
-    if (typeof window === 'undefined') {
+    const result = await this._tryNativeShare({
+      title: title ?? undefined,
+      text,
+    });
+
+    if (result.success) {
+      return 'shared';
+    }
+
+    if (result.error === 'Share cancelled') {
+      return 'cancelled';
+    }
+
+    if (result.error === 'Native share not available') {
       return 'unavailable';
     }
 
-    const support = await this.getShareSupport();
-
-    if (support === 'native') {
-      try {
-        await Share.share({
-          title: title ?? undefined,
-          text,
-        });
-        return 'shared';
-      } catch (err) {
-        if (this._isCancelled(err)) {
-          return 'cancelled';
-        }
-        console.error('Native share failed:', err);
-        return 'failed';
-      }
-    }
-
-    if (support === 'web' && typeof navigator.share === 'function') {
-      try {
-        await navigator.share({
-          title: title ?? undefined,
-          text,
-        });
-        return 'shared';
-      } catch (err) {
-        if (this._isCancelled(err)) {
-          return 'cancelled';
-        }
-        console.error('Web share failed:', err);
-        return 'failed';
-      }
-    }
-
-    return 'unavailable';
+    return 'failed';
   }
 
   async getShareSupport(): Promise<ShareSupport> {
@@ -74,32 +66,397 @@ export class ShareService {
     return this._shareSupportPromise;
   }
 
-  private _isCancelled(err: unknown): boolean {
-    if (!err) {
-      return false;
+  /**
+   * Main share method - automatically detects platform and uses best method.
+   */
+  async share(payload: SharePayload, target?: ShareTarget): Promise<ShareResult> {
+    if (!payload.text && !payload.url) {
+      return {
+        success: false,
+        error: 'No content to share',
+      };
     }
-    const message = (err as Error)?.message ?? '';
-    const name = (err as Error)?.name ?? '';
 
-    return (
-      name === 'AbortError' ||
-      name === 'NotAllowedError' ||
-      message.toLowerCase().includes('cancel') ||
-      message.toLowerCase().includes('abort')
-    );
+    if (target) {
+      return this._shareToTarget(payload, target);
+    }
+
+    const nativeResult = await this._tryNativeShare(payload);
+    if (nativeResult.success) {
+      return nativeResult;
+    }
+
+    return this._showShareDialog(payload);
+  }
+
+  /**
+   * Share to a specific target.
+   */
+  private async _shareToTarget(
+    payload: SharePayload,
+    target: ShareTarget,
+  ): Promise<ShareResult> {
+    try {
+      switch (target) {
+        case 'native':
+          return this._tryNativeShare(payload);
+        case 'clipboard-link':
+          return this._copyToClipboard(payload.url || '', 'Link');
+        case 'clipboard-text':
+          return this._copyToClipboard(this._formatTextForClipboard(payload), 'Text');
+        default:
+          return this._openShareUrl(payload, target);
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        target,
+      };
+    }
+  }
+
+  /**
+   * Try to use native share (Electron, Android, Web Share API).
+   */
+  private async _tryNativeShare(payload: SharePayload): Promise<ShareResult> {
+    if (IS_ELECTRON && typeof window.ea?.shareNative === 'function') {
+      try {
+        const result = await window.ea.shareNative(payload);
+        if (result.success) {
+          this._snackService.open('Shared successfully!');
+          return {
+            success: true,
+            usedNative: true,
+            target: 'native',
+          };
+        }
+      } catch (error) {
+        console.warn('Electron native share failed:', error);
+      }
+    }
+
+    if (await this._isCapacitorShareAvailable()) {
+      try {
+        await CapacitorShare.share({
+          title: payload.title,
+          text: payload.text,
+          url: payload.url,
+          files: payload.files,
+          dialogTitle: 'Share via',
+        });
+        this._snackService.open('Shared successfully!');
+        return {
+          success: true,
+          usedNative: true,
+          target: 'native',
+        };
+      } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') {
+          return {
+            success: false,
+            error: 'Share cancelled',
+          };
+        }
+        console.warn('Capacitor share failed:', error);
+      }
+    }
+
+    if (IS_ANDROID_WEB_VIEW) {
+      try {
+        const win = window as any;
+        if (win.Capacitor?.Plugins?.Share) {
+          await win.Capacitor.Plugins.Share.share({
+            title: payload.title,
+            text: payload.text,
+            url: payload.url,
+            dialogTitle: 'Share via',
+          });
+          this._snackService.open('Shared successfully!');
+          return {
+            success: true,
+            usedNative: true,
+            target: 'native',
+          };
+        }
+      } catch (error) {
+        console.warn('Capacitor share via window failed:', error);
+      }
+    }
+
+    if (typeof navigator !== 'undefined' && 'share' in navigator) {
+      try {
+        await navigator.share({
+          title: payload.title,
+          text: payload.text,
+          url: payload.url,
+        });
+        this._snackService.open('Shared successfully!');
+        return {
+          success: true,
+          usedNative: true,
+          target: 'native',
+        };
+      } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') {
+          return { success: false, error: 'Share cancelled' };
+        }
+        console.warn('Web Share API failed:', error);
+      }
+    }
+
+    return {
+      success: false,
+      error: 'Native share not available',
+    };
+  }
+
+  /**
+   * Open share dialog with all available targets.
+   */
+  private async _showShareDialog(payload: SharePayload): Promise<ShareResult> {
+    try {
+      const { DialogShareComponent } = await import(
+        './dialog-share/dialog-share.component'
+      );
+
+      const dialogRef = this._matDialog.open(DialogShareComponent, {
+        width: '500px',
+        data: {
+          payload,
+          showNative: await this._isSystemShareAvailable(),
+        },
+      });
+
+      const result = await dialogRef.afterClosed().toPromise();
+
+      if (result) {
+        return result;
+      }
+
+      return {
+        success: false,
+        error: 'Share cancelled',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to open share dialog',
+      };
+    }
+  }
+
+  /**
+   * Open a share URL in the default browser.
+   */
+  private async _openShareUrl(
+    payload: SharePayload,
+    target: ShareTarget,
+  ): Promise<ShareResult> {
+    const url = this._buildShareUrl(payload, target);
+
+    if (IS_ELECTRON && window.ea?.openExternalUrl) {
+      window.ea.openExternalUrl(url);
+    } else {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+
+    this._snackService.open('Opening share window...');
+
+    return {
+      success: true,
+      target,
+    };
+  }
+
+  /**
+   * Build share URL for a specific target.
+   */
+  private _buildShareUrl(payload: SharePayload, target: ShareTarget): string {
+    const enc = encodeURIComponent;
+    const textAndUrl = [payload.text, payload.url].filter(Boolean).join(' ');
+
+    const urlBuilders: Record<string, () => string> = {
+      twitter: () => `https://twitter.com/intent/tweet?text=${enc(textAndUrl)}`,
+      linkedin: () =>
+        `https://www.linkedin.com/sharing/share-offsite/?url=${enc(payload.url || '')}`,
+      reddit: () =>
+        `https://www.reddit.com/submit?url=${enc(payload.url || '')}&title=${enc(payload.title || payload.text || '')}`,
+      facebook: () =>
+        `https://www.facebook.com/sharer/sharer.php?u=${enc(payload.url || '')}`,
+      whatsapp: () => `https://wa.me/?text=${enc(textAndUrl)}`,
+      telegram: () =>
+        `https://t.me/share/url?url=${enc(payload.url || '')}&text=${enc(payload.text || '')}`,
+      email: () =>
+        `mailto:?subject=${enc(payload.title || 'Check this out')}&body=${enc(textAndUrl)}`,
+      mastodon: () => {
+        const instance = 'mastodon.social';
+        return `https://${instance}/share?text=${enc(textAndUrl)}`;
+      },
+    };
+
+    const builder = urlBuilders[target];
+    if (!builder) {
+      throw new Error(`Unknown share target: ${target}`);
+    }
+
+    return builder();
+  }
+
+  /**
+   * Copy text to clipboard.
+   */
+  private async _copyToClipboard(text: string, label: string): Promise<ShareResult> {
+    try {
+      await navigator.clipboard.writeText(text);
+      this._snackService.open(`${label} copied to clipboard!`);
+      return {
+        success: true,
+        target: label === 'Link' ? 'clipboard-link' : 'clipboard-text',
+      };
+    } catch (error) {
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+
+        this._snackService.open(`${label} copied to clipboard!`);
+        return {
+          success: true,
+          target: label === 'Link' ? 'clipboard-link' : 'clipboard-text',
+        };
+      } catch (fallbackError) {
+        return {
+          success: false,
+          error: 'Failed to copy to clipboard',
+        };
+      }
+    }
+  }
+
+  /**
+   * Format payload as plain text for clipboard.
+   */
+  private _formatTextForClipboard(payload: SharePayload): string {
+    const parts: string[] = [];
+
+    if (payload.title) {
+      parts.push(payload.title);
+      parts.push('');
+    }
+
+    if (payload.text) {
+      parts.push(payload.text);
+    }
+
+    if (payload.url) {
+      if (payload.text) {
+        parts.push('');
+      }
+      parts.push(payload.url);
+    }
+
+    return parts.join('\n');
+  }
+
+  /**
+   * Check if native/system share is available on current platform.
+   */
+  private async _isSystemShareAvailable(): Promise<boolean> {
+    if (IS_ELECTRON && typeof window.ea?.shareNative === 'function') {
+      return true;
+    }
+
+    if (await this._isCapacitorShareAvailable()) {
+      return true;
+    }
+
+    if (IS_ANDROID_WEB_VIEW) {
+      const win = window as any;
+      return !!win.Capacitor?.Plugins?.Share;
+    }
+
+    if (typeof navigator !== 'undefined' && 'share' in navigator) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Get available share targets with their configurations.
+   */
+  getShareTargets(): ShareTargetConfig[] {
+    return [
+      {
+        label: 'Twitter',
+        icon: 'link',
+        available: true,
+        color: '#1DA1F2',
+      },
+      {
+        label: 'LinkedIn',
+        icon: 'link',
+        available: true,
+        color: '#0A66C2',
+      },
+      {
+        label: 'Reddit',
+        icon: 'link',
+        available: true,
+        color: '#FF4500',
+      },
+      {
+        label: 'Facebook',
+        icon: 'link',
+        available: true,
+        color: '#1877F2',
+      },
+      {
+        label: 'WhatsApp',
+        icon: 'chat',
+        available: true,
+        color: '#25D366',
+      },
+      {
+        label: 'Telegram',
+        icon: 'send',
+        available: true,
+        color: '#0088CC',
+      },
+      {
+        label: 'Email',
+        icon: 'email',
+        available: true,
+      },
+      {
+        label: 'Mastodon',
+        icon: 'link',
+        available: true,
+        color: '#6364FF',
+      },
+    ];
   }
 
   private async _detectShareSupport(): Promise<ShareSupport> {
-    if (Capacitor.isNativePlatform()) {
-      try {
-        const canShare = await Share.canShare();
-        if (canShare.value) {
-          return 'native';
-        }
-      } catch (err) {
-        console.warn('Share.canShare failed:', err);
+    if (IS_ELECTRON && typeof window.ea?.shareNative === 'function') {
+      return 'native';
+    }
+
+    if (await this._isCapacitorShareAvailable()) {
+      return 'native';
+    }
+
+    if (IS_ANDROID_WEB_VIEW) {
+      const win = window as any;
+      if (win.Capacitor?.Plugins?.Share) {
+        return 'native';
       }
-      return 'none';
     }
 
     if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
@@ -107,5 +464,19 @@ export class ShareService {
     }
 
     return 'none';
+  }
+
+  private async _isCapacitorShareAvailable(): Promise<boolean> {
+    if (!Capacitor.isNativePlatform()) {
+      return false;
+    }
+
+    try {
+      const canShare = await CapacitorShare.canShare();
+      return !!canShare?.value;
+    } catch (error) {
+      console.warn('Capacitor Share.canShare failed:', error);
+      return false;
+    }
   }
 }

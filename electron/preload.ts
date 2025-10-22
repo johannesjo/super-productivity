@@ -80,6 +80,16 @@ const ea: ElectronAPI = {
       success: boolean;
       path?: string;
     }>,
+  shareNative: (payload: {
+    text?: string;
+    url?: string;
+    title?: string;
+    files?: string[];
+  }) =>
+    _invoke('SHARE_NATIVE', payload) as Promise<{
+      success: boolean;
+      error?: string;
+    }>,
   scheduleRegisterBeforeClose: (id) => _send('REGISTER_BEFORE_CLOSE', { id }),
   unscheduleRegisterBeforeClose: (id) => _send('UNREGISTER_BEFORE_CLOSE', { id }),
   setDoneRegisterBeforeClose: (id) => _send('BEFORE_CLOSE_DONE', { id }),

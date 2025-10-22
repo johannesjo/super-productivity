@@ -79,6 +79,17 @@ export const initIpcInterfaces = (): void => {
     return { success: false };
   });
 
+  ipcMain.handle(IPC.SHARE_NATIVE, async (ev, payload) => {
+    // TODO: Implement native share for macOS (NSSharingService) and Windows (WinRT Share UI)
+    // For now, return false to fall back to web-based sharing
+    // Native implementation would require:
+    // - macOS: Swift/Objective-C bridge using NSSharingServicePicker
+    // - Windows: C#/C++ bridge using Windows.ApplicationModel.DataTransfer.DataTransferManager
+    // - Linux: No native share, always use fallback
+    log('Native share requested but not implemented, falling back to web share');
+    return { success: false, error: 'Native share not yet implemented' };
+  });
+
   ipcMain.on(IPC.LOCK_SCREEN, () => {
     if ((app as any).isLocked) {
       return;

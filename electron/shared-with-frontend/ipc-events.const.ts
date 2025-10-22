@@ -63,6 +63,8 @@ export enum IPC {
 
   SAVE_FILE_DIALOG = 'SAVE_FILE_DIALOG',
 
+  SHARE_NATIVE = 'SHARE_NATIVE',
+
   // Plugin Node Execution
   PLUGIN_EXEC_NODE_SCRIPT = 'PLUGIN_EXEC_NODE_SCRIPT',
 
