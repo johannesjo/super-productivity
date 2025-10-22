@@ -18,26 +18,55 @@ export class WorkContextMarkdownService {
     contextId: string,
     isProjectContext: boolean,
   ): Promise<'copied' | 'empty' | 'failed'> {
-    const tasks = await this._loadTasks(contextId, isProjectContext);
+    const { status, markdown } = await this.getMarkdownForContext(
+      contextId,
+      isProjectContext,
+    );
 
-    if (!tasks.length) {
+    if (status === 'empty' || !markdown) {
       return 'empty';
     }
 
-    const markdown = this._buildMarkdownChecklist(tasks);
-    const isSuccess = await this._copyToClipboard(markdown);
-
+    const isSuccess = await this.copyMarkdownText(markdown);
     return isSuccess ? 'copied' : 'failed';
+  }
+
+  async getMarkdownForContext(
+    contextId: string,
+    isProjectContext: boolean,
+  ): Promise<{
+    status: 'empty' | 'ok';
+    markdown?: string;
+    contextTitle?: string | null;
+  }> {
+    const { tasks, contextTitle } = await this._loadTasks(contextId, isProjectContext);
+
+    if (!tasks.length) {
+      return { status: 'empty', contextTitle };
+    }
+
+    return {
+      status: 'ok',
+      markdown: this._buildMarkdownChecklist(tasks),
+      contextTitle,
+    };
+  }
+
+  async copyMarkdownText(markdown: string): Promise<boolean> {
+    if (!markdown) {
+      return false;
+    }
+    return this._copyToClipboard(markdown);
   }
 
   private async _loadTasks(
     contextId: string,
     isProjectContext: boolean,
-  ): Promise<TaskWithSubTasks[]> {
-    const ids = await this._getTaskIds(contextId, isProjectContext);
+  ): Promise<{ tasks: TaskWithSubTasks[]; contextTitle: string | null }> {
+    const { ids, contextTitle } = await this._getTaskIds(contextId, isProjectContext);
 
     if (!ids.length) {
-      return [];
+      return { tasks: [], contextTitle };
     }
 
     const tasks =
@@ -46,31 +75,37 @@ export class WorkContextMarkdownService {
         .pipe(first())
         .toPromise()) || [];
 
-    return tasks.filter((task): task is TaskWithSubTasks => !!task);
+    return {
+      tasks: tasks.filter((task): task is TaskWithSubTasks => !!task),
+      contextTitle,
+    };
   }
 
   private async _getTaskIds(
     contextId: string,
     isProjectContext: boolean,
-  ): Promise<string[]> {
+  ): Promise<{ ids: string[]; contextTitle: string | null }> {
     if (isProjectContext) {
       const project = await this._projectService.getByIdOnce$(contextId).toPromise();
       if (!project) {
-        return [];
+        return { ids: [], contextTitle: null };
       }
-      return this._uniqueIds([
-        ...(project.taskIds || []),
-        ...(project.backlogTaskIds || []),
-      ]);
+      return {
+        ids: this._uniqueIds([
+          ...(project.taskIds || []),
+          ...(project.backlogTaskIds || []),
+        ]),
+        contextTitle: project.title,
+      };
     }
 
     const tag = await this._tagService.getTagById$(contextId).pipe(first()).toPromise();
 
     if (!tag) {
-      return [];
+      return { ids: [], contextTitle: null };
     }
 
-    return this._uniqueIds(tag.taskIds || []);
+    return { ids: this._uniqueIds(tag.taskIds || []), contextTitle: tag.title };
   }
 
   private _uniqueIds(ids: (string | null | undefined)[]): string[] {

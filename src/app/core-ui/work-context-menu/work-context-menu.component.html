@@ -25,11 +25,18 @@
 }
 
 <button
-  (click)="copyTasksAsMarkdown()"
+  (click)="shareTasksAsMarkdown()"
   mat-menu-item
 >
-  <mat-icon>content_copy</mat-icon>
-  <span class="text">{{ T.MH.COPY_TASK_LIST_MARKDOWN | translate }}</span>
+  <mat-icon>{{ shareSupport === 'none' ? 'content_copy' : 'ios_share' }}</mat-icon>
+  <span class="text">
+    {{
+      (shareSupport === 'none'
+        ? T.MH.COPY_TASK_LIST_MARKDOWN
+        : T.MH.SHARE_TASK_LIST_MARKDOWN
+      ) | translate
+    }}
+  </span>
 </button>
 
 <button
