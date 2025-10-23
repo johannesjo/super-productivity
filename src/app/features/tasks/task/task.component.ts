@@ -14,7 +14,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { TaskService } from '../task.service';
-import { EMPTY, forkJoin, of } from 'rxjs';
+import { EMPTY, Subscription, forkJoin, of } from 'rxjs';
 import {
   HideSubTasksMode,
   TaskCopy,
@@ -28,14 +28,7 @@ import {
   expandInOnlyAnimation,
 } from '../../../ui/animations/expand.ani';
 import { GlobalConfigService } from '../../config/global-config.service';
-import {
-  concatMap,
-  distinctUntilChanged,
-  first,
-  map,
-  switchMap,
-  tap,
-} from 'rxjs/operators';
+import { concatMap, first, switchMap, tap } from 'rxjs/operators';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { PanDirective, PanEvent } from '../../../ui/swipe-gesture/pan.directive';
 import { TaskAttachmentService } from '../task-attachment/task-attachment.service';
@@ -81,7 +74,6 @@ import { TagListComponent } from '../../tag/tag-list/tag-list.component';
 import { ShortDate2Pipe } from '../../../ui/pipes/short-date2.pipe';
 import { TagToggleMenuListComponent } from '../../tag/tag-toggle-menu-list/tag-toggle-menu-list.component';
 import { Store } from '@ngrx/store';
-import { selectTodayTagTaskIds } from '../../tag/store/tag.reducer';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { environment } from '../../../../environments/environment';
 import { TODAY_TAG } from '../../tag/tag.const';
@@ -150,15 +142,12 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   isBacklog = input<boolean>(false);
   isInSubTaskList = input<boolean>(false);
 
-  // computed
-  currentId = toSignal(this._taskService.currentTaskId$);
-  isCurrent = computed(() => this.currentId() === this.task().id);
-  selectedId = this._taskService.selectedTaskId;
-  isSelected = computed(() => this.selectedId() === this.task().id);
-  todayStr = toSignal(this._globalTrackingIntervalService.todayDateStr$);
-
-  todayList = toSignal(this._store.select(selectTodayTagTaskIds), { initialValue: [] });
-  isTaskOnTodayList = computed(() => this.todayList().includes(this.task().id));
+  // Use shared signals from services to avoid creating 600+ subscriptions on initial render
+  isCurrent = computed(() => this._taskService.currentTaskId() === this.task().id);
+  isSelected = computed(() => this._taskService.selectedTaskId() === this.task().id);
+  isTaskOnTodayList = computed(() =>
+    this._taskService.todayList().includes(this.task().id),
+  );
   isTodayListActive = computed(() => this.workContextService.isToday);
   taskIdWithPrefix = computed(() => 't-' + this.task().id);
   isRepeatTaskCreatedToday = computed(
@@ -179,7 +168,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     const t = this.task();
     return (
       (t.dueWithTime && isToday(t.dueWithTime)) ||
-      (t.dueDay && t.dueDay === this.todayStr())
+      (t.dueDay && t.dueDay === this._globalTrackingIntervalService.todayDateStr())
     );
   });
 
@@ -188,7 +177,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
       this.task().dueDay &&
       (!this.isTodayListActive() ||
         this.isOverdue() ||
-        this.task().dueDay !== this.todayStr())
+        this.task().dueDay !== this._globalTrackingIntervalService.todayDateStr())
     );
   });
 
@@ -201,17 +190,18 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     return (
       !this.isTodayListActive() &&
       !this.task().isDone &&
-      this.task().dueDay === this.todayStr()
+      this.task().dueDay === this._globalTrackingIntervalService.todayDateStr()
     );
   });
 
   isShowAddToToday = computed(() => {
     const task = this.task();
+    const todayStr = this._globalTrackingIntervalService.todayDateStr();
     return this.isTodayListActive()
       ? (task.dueWithTime && !isToday(task.dueWithTime)) ||
-          (task.dueDay && task.dueDay !== this.todayStr())
+          (task.dueDay && task.dueDay !== todayStr)
       : !this.isShowRemoveFromToday() &&
-          task.dueDay !== this.todayStr() &&
+          task.dueDay !== todayStr &&
           (!task.dueWithTime || !isToday(task.dueWithTime));
   });
 
@@ -242,13 +232,10 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   private _task$ = toObservable(this.task);
 
-  moveToProjectList = toSignal(
-    this._task$.pipe(
-      map((t) => t.projectId),
-      distinctUntilChanged(),
-      switchMap((pid) => this._projectService.getProjectsWithoutId$(pid || null)),
-    ),
-  );
+  // Lazy-loaded project list - only fetched when project menu opens
+  moveToProjectList = signal<Project[] | undefined>(undefined);
+  private _loadedProjectListForProjectId: string | null | undefined;
+  private _moveToProjectListSub?: Subscription;
 
   parentTask = toSignal(
     this._task$.pipe(
@@ -263,6 +250,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   private _currentPanTimeout?: number;
   private _doubleClickTimeout?: number;
   private _isTaskDeleteTriggered = false;
+  isContextMenuLoaded = signal(false);
 
   // methods come last
 
@@ -336,6 +324,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     window.clearTimeout(this._currentPanTimeout);
     window.clearTimeout(this._doubleClickTimeout);
+    this._moveToProjectListSub?.unsubscribe();
   }
 
   scheduleTask(): void {
@@ -470,11 +459,35 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   openProjectMenu(): void {
     const t = this.task();
     if (!t.parentId) {
+      // Lazy load project list when menu opens
+      this._loadProjectListIfNeeded();
       const projectMenuTrigger = this.projectMenuTrigger();
       if (projectMenuTrigger) {
         projectMenuTrigger.openMenu();
       }
     }
+  }
+
+  _loadProjectListIfNeeded(): void {
+    // Only load if not already loaded
+    const currentProjectId = this.task().projectId || null;
+    const isLoadedForCurrentProject =
+      this._loadedProjectListForProjectId === currentProjectId &&
+      this._moveToProjectListSub &&
+      !this._moveToProjectListSub.closed;
+
+    if (isLoadedForCurrentProject) {
+      return;
+    }
+
+    this._moveToProjectListSub?.unsubscribe();
+    this._loadedProjectListForProjectId = currentProjectId;
+
+    this._moveToProjectListSub = this._projectService
+      .getProjectsWithoutId$(currentProjectId)
+      .subscribe((projects) => {
+        this.moveToProjectList.set(projects);
+      });
   }
 
   updateTaskTitleIfChanged({
@@ -732,6 +745,20 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   openContextMenu(event: TouchEvent | MouseEvent): void {
     this.taskTitleEditEl()?.textarea().nativeElement?.blur();
+    event.preventDefault();
+    event.stopPropagation();
+    if ('stopImmediatePropagation' in event) {
+      event.stopImmediatePropagation();
+    }
+
+    if (!this.isContextMenuLoaded()) {
+      this.isContextMenuLoaded.set(true);
+      setTimeout(() => {
+        this.taskContextMenu()?.open(event);
+      });
+      return;
+    }
+
     this.taskContextMenu()?.open(event);
   }
 

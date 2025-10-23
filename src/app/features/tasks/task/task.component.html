@@ -77,8 +77,6 @@
     >
       <div
         (click)="focusSelf()"
-        [class.handle-par]="!isInSubTaskList()"
-        [class.handle-sub]="isInSubTaskList()"
         class="drag-handle"
       >
         <mat-icon
@@ -248,7 +246,9 @@
             } @else {
               <mat-icon>today</mat-icon>
             }
-            <div class="time-badge">{{ t.dueDay | localDateStr: todayStr() }}</div>
+            <div class="time-badge">
+              {{ t.dueDay | localDateStr: _globalTrackingIntervalService.todayDateStr() }}
+            </div>
           </button>
         }
 
@@ -336,24 +336,29 @@
 
 <!--*ngIf="isShowContextMenu"-->
 
-<task-context-menu
-  #taskContextMenu
-  [isAdvancedControls]="true"
-  [task]="t"
-></task-context-menu>
+@if (isContextMenuLoaded()) {
+  <task-context-menu
+    #taskContextMenu
+    [isAdvancedControls]="true"
+    [task]="t"
+  ></task-context-menu>
+}
 
 <mat-menu
   #projectMenu="matMenu"
   (closed)="focusSelf()"
+  (menuOpened)="_loadProjectListIfNeeded()"
 >
   <ng-template matMenuContent>
-    @for (project of moveToProjectList(); track trackByProjectId($index, project)) {
-      <button
-        (click)="moveTaskToProject(project.id)"
-        mat-menu-item
-      >
-        {{ project.title }}
-      </button>
+    @if (moveToProjectList()) {
+      @for (project of moveToProjectList(); track trackByProjectId($index, project)) {
+        <button
+          (click)="moveTaskToProject(project.id)"
+          mat-menu-item
+        >
+          {{ project.title }}
+        </button>
+      }
     }
   </ng-template>
 </mat-menu>
