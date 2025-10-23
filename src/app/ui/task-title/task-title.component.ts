@@ -7,7 +7,6 @@ import {
   viewChild,
   output,
 } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { T } from 'src/app/t.const';
 import { TranslateModule } from '@ngx-translate/core';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
@@ -15,7 +14,7 @@ import { Log } from '../../core/log';
 
 @Component({
   selector: 'task-title',
-  imports: [ReactiveFormsModule, FormsModule, TranslateModule],
+  imports: [TranslateModule],
   templateUrl: './task-title.component.html',
   styleUrl: './task-title.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -32,7 +31,6 @@ export class TaskTitleComponent {
     if (!this.isFocused && this.tmpValue !== this.lastExternalValue) {
       // NOTE: this works because set value is called after this, for non-short syntax only changes
       this.tmpValue = this.lastExternalValue;
-      Log.log('new tmp', this.tmpValue);
     }
   }
 
@@ -99,8 +97,20 @@ export class TaskTitleComponent {
     }
   }
 
-  updateTmpValue(value: string): void {
-    this.tmpValue = this._cleanValue(value);
+  updateTmpValue(value: string, target?: HTMLTextAreaElement | null): void {
+    const cleanValue = this._cleanValue(value);
+    this.tmpValue = cleanValue;
+    if (target && target.value !== cleanValue) {
+      target.value = cleanValue;
+    }
+  }
+
+  onInput(event: Event): void {
+    const target = event.target as HTMLTextAreaElement | null;
+    if (!target) {
+      return;
+    }
+    this.updateTmpValue(target.value, target);
   }
 
   handlePaste(event: ClipboardEvent): void {
@@ -115,15 +125,13 @@ export class TaskTitleComponent {
 
     const currentVal = textarea.value;
     const newVal = currentVal.slice(0, start) + cleaned + currentVal.slice(end);
-
-    // Update both textarea and tmpValue
-    textarea.value = newVal;
-    this.tmpValue = newVal;
-    this.updateTmpValue(newVal);
+    this.updateTmpValue(newVal, textarea);
 
     // Reset cursor position
     requestAnimationFrame(() => {
-      textarea.selectionStart = textarea.selectionEnd = start + cleaned.length;
+      const finalValue = this.tmpValue ?? '';
+      const caretPosition = Math.min(start + cleaned.length, finalValue.length);
+      textarea.selectionStart = textarea.selectionEnd = caretPosition;
     });
   }
 
