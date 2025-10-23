@@ -175,7 +175,12 @@ export class NavItemComponent implements AfterViewInit, OnDestroy {
   private _handlePointerUp(event: MouseEvent | TouchEvent): void {
     const draggedTask = this._externalDragService.activeTask();
 
-    if (draggedTask && this._isEventInsideElement(event)) {
+    // exclude subtasks and recurring tasks
+    if (!draggedTask || draggedTask.parentId || draggedTask.repeatCfgId) {
+      return;
+    }
+
+    if (this._isEventInsideElement(event)) {
       if (this.type() === WorkContextType.PROJECT) {
         // Task is dropped in a project
         const projectId = this.workContext()?.id;
