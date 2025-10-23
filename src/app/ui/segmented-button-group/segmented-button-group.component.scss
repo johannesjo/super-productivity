@@ -49,15 +49,9 @@
   &.is-active {
     border-color: var(--c-primary);
     border-width: 3px;
-    color: var(--c-contrast);
     box-shadow: 0 12px 32px var(--c-dark-30);
     transform: scale(1.1);
   }
-}
-
-.segment.is-active .segment-icon,
-.segment.is-active .segment-hint {
-  color: var(--c-contrast);
 }
 
 .segment-icon {
