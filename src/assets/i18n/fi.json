@@ -1801,7 +1801,6 @@
       "IS_HIDE_NAV": "Piilota navigointi, kunnes päänimikettä hoveroidaan (vain työpöytä)",
       "IS_MINIMIZE_TO_TRAY": "Pienennä tehtäväpalkkiin (vain työpöytä)",
       "IS_SHOW_TIP_LONGER": "Näytä tuottavuusvinkki sovelluksen käynnistyksessä hieman pidempään",
-      "IS_DISABLE_PRODUCTIVITY_TIPS": "Poista tuottavuusvinkit käytöstä sovelluksen käynnistyksessä",
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Näytä nykyinen laskuri tehtäväpalkissa / tilavalikossa (vain työpöytä mac)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Näytä nykyinen tehtävä tehtäväpalkissa / tilavalikossa (vain työpöytä mac/windows)",
       "IS_OVERLAY_INDICATOR_ENABLED": "Ota päällekkäisyysindikaattori-ikkuna käyttöön (työpöytä linux/gnome)",

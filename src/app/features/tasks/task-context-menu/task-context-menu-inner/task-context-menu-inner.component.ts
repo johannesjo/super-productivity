@@ -149,8 +149,15 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     map((t) => t.projectId),
     distinctUntilChanged(),
     switchMap((pid) => this._projectService.getProjectsWithoutId$(pid || null)),
+    map((projects) => projects.slice().sort((a, b) => a.title.localeCompare(b.title))),
   );
-  toggleTagList = toSignal(this._tagService.tagsNoMyDayAndNoList$, { initialValue: [] });
+  private readonly _toggleTagListUnsorted = toSignal(
+    this._tagService.tagsNoMyDayAndNoList$,
+    { initialValue: [] },
+  );
+  toggleTagList = computed(() =>
+    [...this._toggleTagListUnsorted()].sort((a, b) => a.title.localeCompare(b.title)),
+  );
 
   // isShowMoveFromAndToBacklogBtns$: Observable<boolean> = this._task$.pipe(
   //   take(1),

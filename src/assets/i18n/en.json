@@ -219,8 +219,10 @@
       "BACK_TO_PLANNING": "Back to Planning",
       "CONGRATS": "Congrats for completing this session!",
       "COUNTDOWN": "Countdown",
+      "COUNTDOWN_HINT": "Focus until the clock hits zero",
       "FINISH_TASK_AND_SELECT_NEXT": "Finish task and select next",
       "FLOWTIME": "Flowtime",
+      "FLOWTIME_HINT": "Flexible pacing without strict timers",
       "FOR_TASK": "for task",
       "GET_READY": "Get ready for your focus session!",
       "GO_TO_PROCRASTINATION": "Get help, when procrastinating",
@@ -229,6 +231,7 @@
       "ON": "on",
       "OPEN_ISSUE_IN_BROWSER": "Open issue in Browser",
       "POMODORO": "Pomodoro",
+      "POMODORO_HINT": "Structured sprints with planned breaks",
       "POMODORO_BACK": "Back",
       "POMODORO_DISABLE": "Disable Pomodoro",
       "POMODORO_INFO": "Focus sessions cannot be used together with the pomodoro timer enabled.",
@@ -237,6 +240,7 @@
       "PREP_STRETCH": "Do some mild stretching",
       "SELECT_ANOTHER_TASK": "Select another Task",
       "SELECT_TASK": "Select Task to focus on",
+      "SELECT_MODE": "Choose your focus mode",
       "SESSION_COMPLETED": "Focus Session Completed!",
       "POMODORO_SESSION_COMPLETED": "Pomodoro Session Completed!",
       "SET_FOCUS_SESSION_DURATION": "Set Focus Session Duration",
@@ -575,6 +579,7 @@
         "CHECK": "I did it!"
       },
       "CMP": {
+        "ACTIVITY_HEATMAP": "Activity Heatmap",
         "AVG_BREAKS_PER_DAY": "Avg. breaks per day",
         "AVG_TASKS_PER_DAY_WORKED": "Avg. tasks per day worked",
         "AVG_TIME_SPENT_ON_BREAKS": "Avg. time spent on breaks",
@@ -1462,8 +1467,8 @@
     },
     "TASK_VIEW": {
       "CUSTOMIZER": {
-        "ENTER_PROJECT": "Enter project",
-        "ENTER_TAG": "Enter tag",
+        "ENTER_PROJECT": "Filter Projects",
+        "ENTER_TAG": "Filter Tag",
         "ESTIMATED_TIME": "Estimated Time",
         "FILTER_BY": "Filter By",
         "FILTER_DEFAULT": "No Filter",
@@ -1807,7 +1812,6 @@
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_MINIMIZE_TO_TRAY": "Minimize to tray (desktop only)",
       "IS_SHOW_TIP_LONGER": "Show productivity tip on app start a little longer",
-      "IS_DISABLE_PRODUCTIVITY_TIPS": "Disable productivity tips on app start",
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Show current countdown in the tray / status menu (desktop mac only)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop mac/windows only)",
       "IS_OVERLAY_INDICATOR_ENABLED": "Enable overlay indicator window (desktop linux/gnome)",
@@ -1935,6 +1939,10 @@
   },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Copied to clipboard",
+    "NO_TASKS_TO_COPY": "No tasks to copy",
+    "SHARE_UNAVAILABLE_FALLBACK": "Copied to clipboard.",
+    "SHARE_FAILED_FALLBACK": "Sharing failed. Copied to clipboard instead.",
+    "SHARE_FAILED": "Sharing failed. Please copy manually.",
     "ERR_COMPRESSION": "Error for compression interface",
     "FILE_DOWNLOADED": "{{fileName}} downloaded",
     "FILE_DOWNLOADED_BTN": "Open folder",
@@ -2001,6 +2009,8 @@
     "TOGGLE_SHOW_NOTES": "Show/Hide Project Notes",
     "TOGGLE_TRACK_TIME": "Start/Stop tracking time",
     "TRIGGER_SYNC": "Sync!",
+    "SHARE_TASK_LIST_MARKDOWN": "Share Task List",
+    "COPY_TASK_LIST_MARKDOWN": "Copy to Clipboard",
     "WORKLOG": "Worklog",
     "SIDE_PANEL_MENU": "Side Panel Menu"
   },

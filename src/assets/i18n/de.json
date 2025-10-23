@@ -1804,7 +1804,6 @@
       "IS_HIDE_NAV": "Navigation verbergen, bis die Hauptüberschrift angezeigt wird (nur Desktop)",
       "IS_MINIMIZE_TO_TRAY": "Anwendung als Trayicon minimieren (nur Deskop)",
       "IS_SHOW_TIP_LONGER": "Zeige den Produktivitätstipp beim Start der App etwas länger an",
-      "IS_DISABLE_PRODUCTIVITY_TIPS": "Produktivitätstipps beim Start der Anwendung deaktivieren",
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Aktuellen Countdown im Tray / Statusmenü anzeigen (nur Desktop Mac)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Aktuelle Aufgabe im Tray / Status-Menu zeigen (nur Desktop)",
       "IS_OVERLAY_INDICATOR_ENABLED": "Enable overlay indicator window (desktop linux/gnome)",

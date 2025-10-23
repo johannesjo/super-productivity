@@ -1798,7 +1798,6 @@
       "IS_HIDE_NAV": "Ana başlık yönlendirilene kadar gezinmeyi gizle (yalnızca masaüstü)",
       "IS_MINIMIZE_TO_TRAY": "Tepsiye küçült (yalnızca masaüstü)",
       "IS_SHOW_TIP_LONGER": "Uygulamada üretkenlik ipucunu biraz daha uzun süre başlatın",
-      "IS_DISABLE_PRODUCTIVITY_TIPS": "Üretkenlik ipuçlarını uygulama başlangıcında devre dışı bırak",
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Mevcut geri sayımı tepsi / durum menüsünde göster (sadece masaüstü mac için)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Mevcut görevi tepsi / Durum menüsünde göster (yalnızca masaüstü)",
       "IS_OVERLAY_INDICATOR_ENABLED": "Panel gösterge penceresini etkinleştir (masaüstü linux/gnome)",

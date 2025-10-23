@@ -187,7 +187,7 @@ const parseProjectChanges = (
 
   if (rr && rr[0]) {
     const projectTitle: string = rr[0].trim().replace(CH_PRO, '');
-    const projectTitleToMatch = projectTitle.replace(' ', '').toLowerCase();
+    const projectTitleToMatch = projectTitle.replaceAll(' ', '').toLowerCase();
     const indexBeforePlus =
       task.title.toLowerCase().lastIndexOf(CH_PRO + projectTitleToMatch) - 1;
     const charBeforePlus = task.title.charAt(indexBeforePlus);
@@ -197,9 +197,15 @@ const parseProjectChanges = (
       return {};
     }
 
-    const existingProject = allProjects.find(
+    // Prefer shortest prefix-based project title match
+    const sortedAllProjects = allProjects
+      .slice()
+      .sort((p1, p2) => p1.title.length - p2.title.length);
+
+    const existingProject = sortedAllProjects.find(
       (project) =>
-        project.title.replace(' ', '').toLowerCase().indexOf(projectTitleToMatch) === 0,
+        project.title.replaceAll(' ', '').toLowerCase().indexOf(projectTitleToMatch) ===
+        0,
     );
 
     if (existingProject) {
@@ -215,9 +221,10 @@ const parseProjectChanges = (
     // also try only first word after special char
     const projectTitleFirstWordOnly = projectTitle.split(' ')[0];
     const projectTitleToMatch2 = projectTitleFirstWordOnly.replace(' ', '').toLowerCase();
-    const existingProjectForFirstWordOnly = allProjects.find(
+    const existingProjectForFirstWordOnly = sortedAllProjects.find(
       (project) =>
-        project.title.replace(' ', '').toLowerCase().indexOf(projectTitleToMatch2) === 0,
+        project.title.replaceAll(' ', '').toLowerCase().indexOf(projectTitleToMatch2) ===
+        0,
     );
 
     if (existingProjectForFirstWordOnly) {

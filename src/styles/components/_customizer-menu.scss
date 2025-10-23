@@ -1,0 +1,41 @@
+// TASK VIEW CUSTOMIZER MENU
+// Styles for the task view customizer menu component
+// Menu renders in global overlay, so styles must be global
+
+.menu-item-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 16px;
+
+  > span:first-child {
+    flex: 1;
+  }
+
+  .check-icon {
+    flex-shrink: 0;
+    margin-left: auto;
+    margin-right: 0 !important;
+  }
+}
+
+.customizer-menu {
+  .mat-mdc-menu-item {
+    &.active {
+      background-color: rgba(0, 0, 0, 0.08);
+      font-weight: 500;
+    }
+  }
+
+  .current-value {
+    padding-left: 16px;
+    font-size: 0.875em;
+    opacity: 0.7;
+    font-style: italic;
+  }
+
+  mat-icon:first-child:not(.check-icon) {
+    margin-right: 8px;
+  }
+}

@@ -93,6 +93,9 @@ export const createWindow = ({
       contextIsolation: true,
       // Additional settings for better Linux/Wayland compatibility
       enableBlinkFeatures: 'OverlayScrollbar',
+      // Disable spell checker to prevent connections to Google services (#5314)
+      // This maintains our "offline-first with zero data collection" promise
+      spellcheck: false,
     },
     icon: ICONS_FOLDER + '/icon_256x256.png',
     // Wayland compatibility: disable transparent/frameless features that can cause issues

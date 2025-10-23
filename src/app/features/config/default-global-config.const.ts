@@ -24,7 +24,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     firstDayOfWeek: 1,
     startOfNextDay: 0,
     isDisableAnimations: false,
-    isDisableProductivityTips: false,
+    isShowProductivityTipLonger: false,
     taskNotesTpl: `**How can I best achieve it now?**
 
 **What do I want?**
