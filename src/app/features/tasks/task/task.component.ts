@@ -656,10 +656,13 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   }
 
   titleBarClick(event: MouseEvent): void {
-    console.log(event.target);
+    const targetEl = event.target as HTMLElement;
+    if (targetEl.closest('task-title')) {
+      return;
+    }
     if (IS_TOUCH_PRIMARY && this.task().title.length) {
       this.toggleShowDetailPanel(event);
-    } else if ((event.target as HTMLElement).tagName.toUpperCase() !== 'TEXTAREA') {
+    } else {
       this.focusSelf();
     }
   }
@@ -744,15 +747,15 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   focusTitleForEdit(): void {
     const taskTitleEditEl = this.taskTitleEditEl();
-    if (!taskTitleEditEl || !taskTitleEditEl.textarea().nativeElement) {
+    if (!taskTitleEditEl) {
       TaskLog.log(taskTitleEditEl);
       throw new Error('No el');
     }
-    taskTitleEditEl.textarea().nativeElement.focus();
+    taskTitleEditEl.focusInput();
   }
 
   openContextMenu(event: TouchEvent | MouseEvent): void {
-    this.taskTitleEditEl()?.textarea().nativeElement?.blur();
+    this.taskTitleEditEl()?.cancelEditing();
     event.preventDefault();
     event.stopPropagation();
     if ('stopImmediatePropagation' in event) {
@@ -788,7 +791,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     if (
       (targetEl.className.indexOf && targetEl.className.indexOf('drag-handle') > -1) ||
       Math.abs(ev.deltaY) > Math.abs(ev.deltaX) ||
-      document.activeElement === taskTitleEditEl.textarea().nativeElement ||
+      taskTitleEditEl.isEditing() ||
       ev.isFinal
     ) {
       this._hidePanHelper();

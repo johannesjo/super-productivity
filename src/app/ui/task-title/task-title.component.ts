@@ -2,10 +2,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  HostBinding,
+  HostListener,
   Input,
-  viewChild,
+  OnDestroy,
   output,
+  signal,
+  viewChild,
 } from '@angular/core';
 import { T } from 'src/app/t.const';
 import { TranslateModule } from '@ngx-translate/core';
@@ -18,24 +20,20 @@ import { Log } from '../../core/log';
   templateUrl: './task-title.component.html',
   styleUrl: './task-title.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    ['[class.is-focused]']: 'isFocused()',
+    ['[class.is-editing]']: 'isEditing()',
+  },
 })
-export class TaskTitleComponent {
+export class TaskTitleComponent implements OnDestroy {
   T: typeof T = T;
-  @HostBinding('class.is-focused') isFocused = false;
 
-  // NOTE: we only need this for tasks since, sometimes with the short syntax there are no changes to the title as they are stripped away
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set resetToLastExternalValueTrigger(value: unknown) {
-    // never update while editing
-    if (!this.isFocused && this.tmpValue !== this.lastExternalValue) {
-      // NOTE: this works because set value is called after this, for non-short syntax only changes
+    if (!this._isFocused() && this.tmpValue !== this.lastExternalValue) {
       this.tmpValue = this.lastExternalValue;
     }
   }
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set value(value: string) {
     this.tmpValue = value;
     this.lastExternalValue = value;
@@ -44,8 +42,7 @@ export class TaskTitleComponent {
   lastExternalValue?: string;
   tmpValue?: string;
 
-  readonly textarea =
-    viewChild.required<ElementRef<HTMLTextAreaElement>>('textAreaElement');
+  readonly textarea = viewChild<ElementRef<HTMLTextAreaElement>>('textAreaElement');
 
   readonly valueEdited = output<{
     newVal: string;
@@ -53,15 +50,62 @@ export class TaskTitleComponent {
     blurEvent?: FocusEvent;
   }>();
 
+  private readonly _isFocused = signal(false);
+  private readonly _isEditing = signal(false);
+  private _focusTimeoutId: number | undefined;
+
   constructor() {}
 
+  @HostListener('mousedown', ['$event'])
+  onMouseDown(event: MouseEvent): void {
+    event.stopPropagation();
+    const target = event.target as HTMLElement | null;
+    if (event.button !== 0 || target?.tagName === 'TEXTAREA') {
+      return;
+    }
+    this.focusInput();
+  }
+
+  focusInput(): void {
+    this._isEditing.set(true);
+    if (this._focusTimeoutId) {
+      window.clearTimeout(this._focusTimeoutId);
+    }
+    this._focusTimeoutId = window.setTimeout(() => {
+      const textarea = this.textarea()?.nativeElement;
+      textarea?.focus();
+    });
+  }
+
+  cancelEditing(): void {
+    const textarea = this.textarea()?.nativeElement;
+    if (textarea) {
+      textarea.blur();
+    } else {
+      this._endEditing();
+    }
+  }
+
+  isEditing(): boolean {
+    return this._isEditing();
+  }
+
+  isFocused(): boolean {
+    return this._isFocused();
+  }
+
   focused(): void {
-    this.isFocused = true;
+    this._isFocused.set(true);
+    this._isEditing.set(true);
     try {
       window.setTimeout(() => {
-        const el = this.textarea().nativeElement;
-        el.setSelectionRange(el.value.length, el.value.length);
-        el.selectionStart = el.selectionEnd = el.value.length;
+        const textarea = this.textarea()?.nativeElement;
+        if (!textarea) {
+          return;
+        }
+        const len = textarea.value.length;
+        textarea.setSelectionRange(len, len);
+        textarea.selectionStart = textarea.selectionEnd = len;
       });
     } catch (e) {
       Log.err(e);
@@ -69,13 +113,12 @@ export class TaskTitleComponent {
   }
 
   blurred(event?: FocusEvent): void {
-    this.isFocused = false;
-    // this.isEditMode = false;
+    this._isFocused.set(false);
     this._submit(event);
+    this._endEditing();
   }
 
   handleKeyDown(ev: KeyboardEvent): void {
-    // prevent keyboard shortcuts from firing
     ev.stopPropagation();
     if (ev.key === 'Escape') {
       this._forceBlur();
@@ -86,7 +129,6 @@ export class TaskTitleComponent {
   }
 
   onTextInput(ev: Event): void {
-    // TODO not really clear if this is needed. was apparently added to prevent the android web view enter key from submitting
     if (IS_ANDROID_WEB_VIEW && (ev as InputEvent)?.data?.slice(-1) === '\n') {
       Log.log('android enter key press');
       this._forceBlur();
@@ -119,7 +161,10 @@ export class TaskTitleComponent {
     const pastedText = event.clipboardData?.getData('text/plain') || '';
     const cleaned = this._cleanValue(pastedText);
 
-    const textarea = this.textarea().nativeElement;
+    const textarea = this.textarea()?.nativeElement;
+    if (!textarea) {
+      return;
+    }
     const start = textarea.selectionStart || 0;
     const end = textarea.selectionEnd || 0;
 
@@ -127,7 +172,6 @@ export class TaskTitleComponent {
     const newVal = currentVal.slice(0, start) + cleaned + currentVal.slice(end);
     this.updateTmpValue(newVal, textarea);
 
-    // Reset cursor position
     requestAnimationFrame(() => {
       const finalValue = this.tmpValue ?? '';
       const caretPosition = Math.min(start + cleaned.length, finalValue.length);
@@ -136,7 +180,7 @@ export class TaskTitleComponent {
   }
 
   private _forceBlur(): void {
-    this.textarea().nativeElement.blur();
+    this.textarea()?.nativeElement.blur();
   }
 
   private _submit(blurEvent?: FocusEvent): void {
@@ -150,5 +194,19 @@ export class TaskTitleComponent {
 
   private _cleanValue(value: string = ''): string {
     return value?.replace(/\n|\r/g, '').trim();
+  }
+
+  private _endEditing(): void {
+    this._isEditing.set(false);
+    if (this._focusTimeoutId) {
+      window.clearTimeout(this._focusTimeoutId);
+      this._focusTimeoutId = undefined;
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this._focusTimeoutId) {
+      window.clearTimeout(this._focusTimeoutId);
+    }
   }
 }

@@ -1,18 +1,37 @@
-<div>
-  <span>{{ tmpValue || '_' }}</span
-  ><textarea
-    #textAreaElement
-    class="edit-panel"
-    spellcheck="false"
-    rows="1"
-    tabindex="-1"
-    placeholder="{{ T.F.TASK.ADDITIONAL_INFO.TITLE_PLACEHOLDER | translate }}"
-    [value]="tmpValue ?? ''"
-    (blur)="blurred($event)"
-    (focus)="focused()"
-    (input)="onInput($event)"
-    (mousedown)="$event.stopPropagation()"
-    (textInput)="onTextInput($event)"
-    (keydown)="handleKeyDown($event)"
-  ></textarea>
+@let currentValue = tmpValue ?? '';
+@let displayText =
+  currentValue.length
+    ? currentValue
+    : (T.F.TASK.ADDITIONAL_INFO.TITLE_PLACEHOLDER | translate);
+@let placeholder = T.F.TASK.ADDITIONAL_INFO.TITLE_PLACEHOLDER | translate;
+<div class="wrapper">
+  @if (!isEditing()) {
+    <span
+      class="display-value"
+      [class.is-placeholder]="!currentValue.length"
+      >{{ displayText }}</span
+    >
+  }
+  <span
+    class="height-measure"
+    aria-hidden="true"
+    >{{ displayText }}</span
+  >
+  @if (isEditing()) {
+    <textarea
+      #textAreaElement
+      class="edit-panel"
+      spellcheck="false"
+      rows="1"
+      tabindex="-1"
+      placeholder="{{ placeholder }}"
+      [value]="currentValue"
+      (blur)="blurred($event)"
+      (focus)="focused()"
+      (input)="onInput($event)"
+      (mousedown)="$event.stopPropagation()"
+      (textInput)="onTextInput($event)"
+      (keydown)="handleKeyDown($event)"
+    ></textarea>
+  }
 </div>
