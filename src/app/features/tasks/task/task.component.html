@@ -1,5 +1,5 @@
 @let t = task();
-@if (IS_TOUCH_PRIMARY) {
+@if (IS_TOUCH_PRIMARY && isPanHelperVisible()) {
   <div
     #blockLeftEl
     class="block-left bg-400"

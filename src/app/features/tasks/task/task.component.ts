@@ -206,6 +206,8 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
           (!task.dueWithTime || !isToday(task.dueWithTime));
   });
 
+  isPanHelperVisible = signal(false);
+
   T: typeof T = T;
   IS_TOUCH_PRIMARY: boolean = IS_TOUCH_PRIMARY;
   isDragOver: boolean = false;
@@ -251,6 +253,8 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   private _currentPanTimeout?: number;
   private _doubleClickTimeout?: number;
   private _isTaskDeleteTriggered = false;
+  private _panHelperVisibilityTimeout?: number;
+  private readonly _snapBackHideDelayMs = 200;
   isContextMenuLoaded = signal(false);
 
   // methods come last
@@ -326,6 +330,9 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     window.clearTimeout(this._currentPanTimeout);
     window.clearTimeout(this._doubleClickTimeout);
     this._moveToProjectListSub?.unsubscribe();
+    if (this._panHelperVisibilityTimeout) {
+      window.clearTimeout(this._panHelperVisibilityTimeout);
+    }
   }
 
   scheduleTask(): void {
@@ -784,8 +791,10 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
       document.activeElement === taskTitleEditEl.textarea().nativeElement ||
       ev.isFinal
     ) {
+      this._hidePanHelper();
       return;
     }
+    this._showPanHelper();
     this.isPreventPointerEventsWhilePanning = true;
   }
 
@@ -795,13 +804,15 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     }
     const blockLeftElRef = this.blockLeftElRef();
     const blockRightElRef = this.blockRightElRef();
-    if (!blockLeftElRef || !blockRightElRef) {
-      throw new Error('No el');
-    }
+    const hideDelay = this._snapBackHideDelayMs;
 
     this.isPreventPointerEventsWhilePanning = false;
-    this._renderer.removeStyle(blockLeftElRef.nativeElement, 'transition');
-    this._renderer.removeStyle(blockRightElRef.nativeElement, 'transition');
+    if (blockLeftElRef) {
+      this._renderer.removeStyle(blockLeftElRef.nativeElement, 'transition');
+    }
+    if (blockRightElRef) {
+      this._renderer.removeStyle(blockRightElRef.nativeElement, 'transition');
+    }
 
     if (this._currentPanTimeout) {
       window.clearTimeout(this._currentPanTimeout);
@@ -809,7 +820,13 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
     if (this.isActionTriggered) {
       if (this.isLockPanLeft) {
-        this._renderer.setStyle(blockRightElRef.nativeElement, 'transform', `scaleX(1)`);
+        if (blockRightElRef) {
+          this._renderer.setStyle(
+            blockRightElRef.nativeElement,
+            'transform',
+            `scaleX(1)`,
+          );
+        }
         this._currentPanTimeout = window.setTimeout(() => {
           if (this.task().repeatCfgId) {
             this.editTaskRepeatCfg();
@@ -817,17 +834,19 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
             this.scheduleTask();
           }
 
-          this._resetAfterPan();
+          this._resetAfterPan(hideDelay);
         }, 100);
       } else if (this.isLockPanRight) {
-        this._renderer.setStyle(blockLeftElRef.nativeElement, 'transform', `scaleX(1)`);
+        if (blockLeftElRef) {
+          this._renderer.setStyle(blockLeftElRef.nativeElement, 'transform', `scaleX(1)`);
+        }
         this._currentPanTimeout = window.setTimeout(() => {
           this.toggleTaskDone();
-          this._resetAfterPan();
+          this._resetAfterPan(hideDelay);
         }, 100);
       }
     } else {
-      this._resetAfterPan();
+      this._resetAfterPan(hideDelay);
     }
   }
 
@@ -988,7 +1007,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     const blockLeftElRef = this.blockLeftElRef();
     const blockRightElRef = this.blockRightElRef();
     if (!innerWrapperElRef || !blockLeftElRef || !blockRightElRef) {
-      throw new Error('No el');
+      return;
     }
 
     // Dynamically determine direction based on current pan position
@@ -1034,29 +1053,53 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     }
   }
 
-  private _resetAfterPan(): void {
+  private _showPanHelper(): void {
+    if (this._panHelperVisibilityTimeout) {
+      window.clearTimeout(this._panHelperVisibilityTimeout);
+      this._panHelperVisibilityTimeout = undefined;
+    }
+    this.isPanHelperVisible.set(true);
+  }
+
+  private _hidePanHelper(delayMs: number = 0): void {
+    if (this._panHelperVisibilityTimeout) {
+      window.clearTimeout(this._panHelperVisibilityTimeout);
+    }
+    if (delayMs > 0) {
+      this._panHelperVisibilityTimeout = window.setTimeout(() => {
+        this.isPanHelperVisible.set(false);
+        this._panHelperVisibilityTimeout = undefined;
+      }, delayMs);
+    } else {
+      this.isPanHelperVisible.set(false);
+      this._panHelperVisibilityTimeout = undefined;
+    }
+  }
+
+  private _resetAfterPan(hideDelay: number = 0): void {
     const blockLeftElRef = this.blockLeftElRef();
     const blockRightElRef = this.blockRightElRef();
     const innerWrapperElRef = this.innerWrapperElRef();
-    if (
-      !this.taskTitleEditEl() ||
-      !blockLeftElRef ||
-      !blockRightElRef ||
-      !innerWrapperElRef
-    ) {
-      throw new Error('No el');
-    }
-
     this.isPreventPointerEventsWhilePanning = false;
     this.isActionTriggered = false;
     this.isLockPanLeft = false;
     this.isLockPanRight = false;
-    // const scale = 0;
-    // this._renderer.setStyle(this.blockLeftEl.nativeElement, 'transform', `scaleX(${scale})`);
-    // this._renderer.setStyle(this.blockRightEl.nativeElement, 'transform', `scaleX(${scale})`);
-    this._renderer.removeClass(blockLeftElRef.nativeElement, 'isActive');
-    this._renderer.removeClass(blockRightElRef.nativeElement, 'isActive');
-    this._renderer.setStyle(innerWrapperElRef.nativeElement, 'transform', ``);
+    if (blockLeftElRef) {
+      this._renderer.removeClass(blockLeftElRef.nativeElement, 'isActive');
+      this._renderer.setStyle(blockLeftElRef.nativeElement, 'width', '0');
+      this._renderer.removeStyle(blockLeftElRef.nativeElement, 'transition');
+      this._renderer.removeStyle(blockLeftElRef.nativeElement, 'transform');
+    }
+    if (blockRightElRef) {
+      this._renderer.removeClass(blockRightElRef.nativeElement, 'isActive');
+      this._renderer.setStyle(blockRightElRef.nativeElement, 'width', '0');
+      this._renderer.removeStyle(blockRightElRef.nativeElement, 'transition');
+      this._renderer.removeStyle(blockRightElRef.nativeElement, 'transform');
+    }
+    if (innerWrapperElRef) {
+      this._renderer.setStyle(innerWrapperElRef.nativeElement, 'transform', ``);
+    }
+    this._hidePanHelper(hideDelay);
   }
 
   get kb(): KeyboardConfig {
