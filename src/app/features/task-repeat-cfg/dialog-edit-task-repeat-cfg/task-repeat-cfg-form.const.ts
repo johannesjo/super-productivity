@@ -87,6 +87,17 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
       },
     ],
   },
+  // Repeat from completion date instead of start date
+  {
+    key: 'repeatFromCompletionDate',
+    type: 'checkbox',
+    defaultValue: false,
+    hideExpression: (model: any) => model.quickSetting !== 'CUSTOM',
+    templateOptions: {
+      label: T.F.TASK_REPEAT.F.REPEAT_FROM_COMPLETION_DATE,
+      description: T.F.TASK_REPEAT.F.REPEAT_FROM_COMPLETION_DATE_DESCRIPTION,
+    },
+  },
   {
     key: 'startDate',
     type: 'input',
@@ -240,16 +251,5 @@ export const TASK_REPEAT_CFG_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
       description: T.F.TASK_REPEAT.F.DISABLE_AUTO_UPDATE_SUBTASKS_DESCRIPTION,
     },
     className: 'sp-formly-child-option',
-  },
-  // Repeat from completion date instead of start date
-  {
-    key: 'repeatFromCompletionDate',
-    type: 'checkbox',
-    defaultValue: false,
-    hideExpression: (model: any) => model.quickSetting !== 'CUSTOM',
-    templateOptions: {
-      label: T.F.TASK_REPEAT.F.REPEAT_FROM_COMPLETION_DATE,
-      description: T.F.TASK_REPEAT.F.REPEAT_FROM_COMPLETION_DATE_DESCRIPTION,
-    },
   },
 ];
