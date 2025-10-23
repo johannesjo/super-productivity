@@ -140,10 +140,10 @@ export class TaskTitleComponent implements OnDestroy {
   }
 
   updateTmpValue(value: string, target?: HTMLTextAreaElement | null): void {
-    const cleanValue = this._cleanValue(value);
-    this.tmpValue = cleanValue;
-    if (target && target.value !== cleanValue) {
-      target.value = cleanValue;
+    const sanitizedValue = this._sanitizeForEditing(value);
+    this.tmpValue = sanitizedValue;
+    if (target && target.value !== sanitizedValue) {
+      target.value = sanitizedValue;
     }
   }
 
@@ -159,7 +159,7 @@ export class TaskTitleComponent implements OnDestroy {
     event.preventDefault();
 
     const pastedText = event.clipboardData?.getData('text/plain') || '';
-    const cleaned = this._cleanValue(pastedText);
+    const cleaned = this._sanitizeForEditing(pastedText);
 
     const textarea = this.textarea()?.nativeElement;
     if (!textarea) {
@@ -184,16 +184,23 @@ export class TaskTitleComponent implements OnDestroy {
   }
 
   private _submit(blurEvent?: FocusEvent): void {
+    const previousValue = this.lastExternalValue;
     const cleanVal = this._cleanValue(this.tmpValue);
+    this.tmpValue = cleanVal;
+    this.lastExternalValue = cleanVal;
     this.valueEdited.emit({
       newVal: cleanVal,
-      wasChanged: cleanVal !== this.lastExternalValue,
+      wasChanged: cleanVal !== previousValue,
       blurEvent,
     });
   }
 
   private _cleanValue(value: string = ''): string {
-    return value?.replace(/\n|\r/g, '').trim();
+    return this._sanitizeForEditing(value).trim();
+  }
+
+  private _sanitizeForEditing(value: string = ''): string {
+    return value?.replace(/\r/g, '').replace(/\n/g, '');
   }
 
   private _endEditing(): void {

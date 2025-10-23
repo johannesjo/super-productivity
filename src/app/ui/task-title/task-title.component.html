@@ -1,14 +1,14 @@
 @let currentValue = tmpValue ?? '';
+@let trimmedValue = currentValue.trim();
+@let hasContent = trimmedValue.length > 0;
 @let displayText =
-  currentValue.length
-    ? currentValue
-    : (T.F.TASK.ADDITIONAL_INFO.TITLE_PLACEHOLDER | translate);
+  hasContent ? currentValue : (T.F.TASK.ADDITIONAL_INFO.TITLE_PLACEHOLDER | translate);
 @let placeholder = T.F.TASK.ADDITIONAL_INFO.TITLE_PLACEHOLDER | translate;
 <div class="wrapper">
   @if (!isEditing()) {
     <span
       class="display-value"
-      [class.is-placeholder]="!currentValue.length"
+      [class.is-placeholder]="!hasContent"
       >{{ displayText }}</span
     >
   }
