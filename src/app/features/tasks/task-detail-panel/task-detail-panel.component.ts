@@ -45,7 +45,7 @@ import { DialogEditTaskAttachmentComponent } from '../task-attachment/dialog-edi
 import { TaskDetailItemComponent } from './task-additional-info-item/task-detail-item.component';
 import { IssueData, IssueProviderJira } from '../../issue/issue.model';
 import { ICAL_TYPE, JIRA_TYPE } from '../../issue/issue.const';
-import { IS_ELECTRON } from '../../../app.constants';
+import { HISTORY_STATE, IS_ELECTRON } from '../../../app.constants';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
 import { devError } from '../../../util/dev-error';
 import { IS_MOBILE } from '../../../util/is-mobile';
@@ -397,7 +397,7 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   ngOnInit(): void {
-    window.history.pushState({ taskDetailPanel: true }, '');
+    window.history.pushState({ [HISTORY_STATE.TASK_DETAIL_PANEL]: true }, '');
   }
 
   ngAfterViewInit(): void {
@@ -422,7 +422,7 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   ngOnDestroy(): void {
-    if (window.history.state.taskDetailPanel) {
+    if (window.history.state[HISTORY_STATE.TASK_DETAIL_PANEL]) {
       window.history.back();
     }
     window.clearTimeout(this._focusTimeout);
