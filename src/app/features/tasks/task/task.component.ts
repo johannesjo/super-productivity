@@ -14,7 +14,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { TaskService } from '../task.service';
-import { EMPTY, Subscription, forkJoin, of } from 'rxjs';
+import { EMPTY, forkJoin, of, Subscription } from 'rxjs';
 import {
   HideSubTasksMode,
   TaskCopy,
@@ -133,10 +133,11 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   private readonly _renderer = inject(Renderer2);
   private readonly _store = inject(Store);
   private readonly _projectService = inject(ProjectService);
-  private readonly _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
   private readonly _taskFocusService = inject(TaskFocusService);
+
   readonly workContextService = inject(WorkContextService);
   readonly layoutService = inject(LayoutService);
+  readonly globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
 
   task = input.required<TaskWithSubTasks>();
   isBacklog = input<boolean>(false);
@@ -168,7 +169,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     const t = this.task();
     return (
       (t.dueWithTime && isToday(t.dueWithTime)) ||
-      (t.dueDay && t.dueDay === this._globalTrackingIntervalService.todayDateStr())
+      (t.dueDay && t.dueDay === this.globalTrackingIntervalService.todayDateStr())
     );
   });
 
@@ -177,7 +178,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
       this.task().dueDay &&
       (!this.isTodayListActive() ||
         this.isOverdue() ||
-        this.task().dueDay !== this._globalTrackingIntervalService.todayDateStr())
+        this.task().dueDay !== this.globalTrackingIntervalService.todayDateStr())
     );
   });
 
@@ -190,13 +191,13 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     return (
       !this.isTodayListActive() &&
       !this.task().isDone &&
-      this.task().dueDay === this._globalTrackingIntervalService.todayDateStr()
+      this.task().dueDay === this.globalTrackingIntervalService.todayDateStr()
     );
   });
 
   isShowAddToToday = computed(() => {
     const task = this.task();
-    const todayStr = this._globalTrackingIntervalService.todayDateStr();
+    const todayStr = this.globalTrackingIntervalService.todayDateStr();
     return this.isTodayListActive()
       ? (task.dueWithTime && !isToday(task.dueWithTime)) ||
           (task.dueDay && task.dueDay !== todayStr)
