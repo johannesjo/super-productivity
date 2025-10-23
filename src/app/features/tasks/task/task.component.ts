@@ -81,7 +81,6 @@ import { TagListComponent } from '../../tag/tag-list/tag-list.component';
 import { ShortDate2Pipe } from '../../../ui/pipes/short-date2.pipe';
 import { TagToggleMenuListComponent } from '../../tag/tag-toggle-menu-list/tag-toggle-menu-list.component';
 import { Store } from '@ngrx/store';
-import { selectTodayTagTaskIds } from '../../tag/store/tag.reducer';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { environment } from '../../../../environments/environment';
 import { TODAY_TAG } from '../../tag/tag.const';
@@ -150,15 +149,12 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   isBacklog = input<boolean>(false);
   isInSubTaskList = input<boolean>(false);
 
-  // computed
-  currentId = toSignal(this._taskService.currentTaskId$);
-  isCurrent = computed(() => this.currentId() === this.task().id);
-  selectedId = this._taskService.selectedTaskId;
-  isSelected = computed(() => this.selectedId() === this.task().id);
-  todayStr = toSignal(this._globalTrackingIntervalService.todayDateStr$);
-
-  todayList = toSignal(this._store.select(selectTodayTagTaskIds), { initialValue: [] });
-  isTaskOnTodayList = computed(() => this.todayList().includes(this.task().id));
+  // Use shared signals from services to avoid creating 600+ subscriptions on initial render
+  isCurrent = computed(() => this._taskService.currentTaskId() === this.task().id);
+  isSelected = computed(() => this._taskService.selectedTaskId() === this.task().id);
+  isTaskOnTodayList = computed(() =>
+    this._taskService.todayList().includes(this.task().id),
+  );
   isTodayListActive = computed(() => this.workContextService.isToday);
   taskIdWithPrefix = computed(() => 't-' + this.task().id);
   isRepeatTaskCreatedToday = computed(
@@ -179,7 +175,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     const t = this.task();
     return (
       (t.dueWithTime && isToday(t.dueWithTime)) ||
-      (t.dueDay && t.dueDay === this.todayStr())
+      (t.dueDay && t.dueDay === this._globalTrackingIntervalService.todayDateStr())
     );
   });
 
@@ -188,7 +184,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
       this.task().dueDay &&
       (!this.isTodayListActive() ||
         this.isOverdue() ||
-        this.task().dueDay !== this.todayStr())
+        this.task().dueDay !== this._globalTrackingIntervalService.todayDateStr())
     );
   });
 
@@ -201,17 +197,18 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     return (
       !this.isTodayListActive() &&
       !this.task().isDone &&
-      this.task().dueDay === this.todayStr()
+      this.task().dueDay === this._globalTrackingIntervalService.todayDateStr()
     );
   });
 
   isShowAddToToday = computed(() => {
     const task = this.task();
+    const todayStr = this._globalTrackingIntervalService.todayDateStr();
     return this.isTodayListActive()
       ? (task.dueWithTime && !isToday(task.dueWithTime)) ||
-          (task.dueDay && task.dueDay !== this.todayStr())
+          (task.dueDay && task.dueDay !== todayStr)
       : !this.isShowRemoveFromToday() &&
-          task.dueDay !== this.todayStr() &&
+          task.dueDay !== todayStr &&
           (!task.dueWithTime || !isToday(task.dueWithTime));
   });
 

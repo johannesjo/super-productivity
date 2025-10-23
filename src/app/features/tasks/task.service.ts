@@ -2,6 +2,7 @@ import { nanoid } from 'nanoid';
 import typia from 'typia';
 import { first, map, take, withLatestFrom } from 'rxjs/operators';
 import { computed, inject, Injectable } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 import {
   ArchiveTask,
@@ -54,6 +55,7 @@ import {
   selectTasksByTag,
   selectTaskWithSubTasksByRepeatConfigId,
 } from './store/task.selectors';
+import { selectTodayTagTaskIds } from '../tag/store/tag.reducer';
 import { RoundTimeOption } from '../project/project.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import { WorkContextType } from '../work-context/work-context.model';
@@ -90,7 +92,6 @@ import { INBOX_PROJECT } from '../project/project.const';
 import { GlobalConfigService } from '../config/global-config.service';
 import { TaskLog } from '../../core/log';
 import { devError } from '../../util/dev-error';
-import { toSignal } from '@angular/core/rxjs-interop';
 
 @Injectable({
   providedIn: 'root',
@@ -129,6 +130,11 @@ export class TaskService {
     ),
     { initialValue: null },
   );
+
+  // Shared signal to avoid creating 200+ subscriptions in task components
+  todayList = toSignal(this._store.pipe(select(selectTodayTagTaskIds)), {
+    initialValue: [] as string[],
+  });
 
   selectedTask$: Observable<TaskWithSubTasks | null> = this._store.pipe(
     select(selectSelectedTask),

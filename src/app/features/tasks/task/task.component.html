@@ -248,7 +248,9 @@
             } @else {
               <mat-icon>today</mat-icon>
             }
-            <div class="time-badge">{{ t.dueDay | localDateStr: todayStr() }}</div>
+            <div class="time-badge">
+              {{ t.dueDay | localDateStr: _globalTrackingIntervalService.todayDateStr() }}
+            </div>
           </button>
         }
 
