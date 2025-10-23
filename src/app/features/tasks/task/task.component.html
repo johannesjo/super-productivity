@@ -347,15 +347,18 @@
 <mat-menu
   #projectMenu="matMenu"
   (closed)="focusSelf()"
+  (menuOpened)="_loadProjectListIfNeeded()"
 >
   <ng-template matMenuContent>
-    @for (project of moveToProjectList(); track trackByProjectId($index, project)) {
-      <button
-        (click)="moveTaskToProject(project.id)"
-        mat-menu-item
-      >
-        {{ project.title }}
-      </button>
+    @if (moveToProjectList()) {
+      @for (project of moveToProjectList(); track trackByProjectId($index, project)) {
+        <button
+          (click)="moveTaskToProject(project.id)"
+          mat-menu-item
+        >
+          {{ project.title }}
+        </button>
+      }
     }
   </ng-template>
 </mat-menu>

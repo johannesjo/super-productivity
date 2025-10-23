@@ -28,14 +28,7 @@ import {
   expandInOnlyAnimation,
 } from '../../../ui/animations/expand.ani';
 import { GlobalConfigService } from '../../config/global-config.service';
-import {
-  concatMap,
-  distinctUntilChanged,
-  first,
-  map,
-  switchMap,
-  tap,
-} from 'rxjs/operators';
+import { concatMap, first, switchMap, tap } from 'rxjs/operators';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { PanDirective, PanEvent } from '../../../ui/swipe-gesture/pan.directive';
 import { TaskAttachmentService } from '../task-attachment/task-attachment.service';
@@ -239,13 +232,8 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   private _task$ = toObservable(this.task);
 
-  moveToProjectList = toSignal(
-    this._task$.pipe(
-      map((t) => t.projectId),
-      distinctUntilChanged(),
-      switchMap((pid) => this._projectService.getProjectsWithoutId$(pid || null)),
-    ),
-  );
+  // Lazy-loaded project list - only fetched when project menu opens
+  moveToProjectList = signal<Project[] | undefined>(undefined);
 
   parentTask = toSignal(
     this._task$.pipe(
@@ -467,10 +455,25 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   openProjectMenu(): void {
     const t = this.task();
     if (!t.parentId) {
+      // Lazy load project list when menu opens
+      this._loadProjectListIfNeeded();
       const projectMenuTrigger = this.projectMenuTrigger();
       if (projectMenuTrigger) {
         projectMenuTrigger.openMenu();
       }
+    }
+  }
+
+  _loadProjectListIfNeeded(): void {
+    // Only load if not already loaded
+    if (this.moveToProjectList() === undefined) {
+      const t = this.task();
+      this._projectService
+        .getProjectsWithoutId$(t.projectId || null)
+        .pipe(first())
+        .subscribe((projects) => {
+          this.moveToProjectList.set(projects);
+        });
     }
   }
 
